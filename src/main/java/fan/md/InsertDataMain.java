@@ -1,8 +1,8 @@
 package fan.md;
 
 import fan.md.model.Language;
-import fan.md.service.DependsCodeInsertService;
-import fan.md.service.InsertDependsCodeToNeo4j;
+import fan.md.service.extract.DependsCodeInsertService;
+import fan.md.service.extract.InsertDependsCodeToNeo4j;
 import fan.md.utils.YamlUtils;
 
 public class InsertDataMain {

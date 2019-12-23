@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import fan.md.model.node.code.CodeFile;
 import fan.md.model.node.code.Function;
 import fan.md.model.node.code.Type;
-import fan.md.model.relation.code.FileContainType;
+import fan.md.model.relation.code.FileContainsType;
 import fan.md.model.relation.code.TypeExtendsType;
 import fan.md.neo4j.repository.FileContainTypeRepository;
 import fan.md.neo4j.repository.FileRepository;
@@ -76,7 +76,7 @@ public class StaticCodeServiceImpl implements StaticCodeService {
 	@Override
 	public List<Type> findTypesInFile(CodeFile codeFile) {
 		System.out.println(findAllTypes().size());
-		Iterable<FileContainType> temp = fileContainTypeRepository.findAll();
+		Iterable<FileContainsType> temp = fileContainTypeRepository.findAll();
 		temp.forEach(t -> {
 			System.out.println(t.getFile().getFileName());
 			System.out.println(t.getType().getTypeName());

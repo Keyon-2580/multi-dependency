@@ -14,8 +14,8 @@ import fan.md.model.node.code.Package;
 import fan.md.model.relation.Relation;
 import fan.md.model.relation.RelationType;
 
-@RelationshipEntity("PACKAGE_CONTAIN_FILE")
-public class PackageContainFile implements Relation {
+@RelationshipEntity("PACKAGE_CONTAINS_FILE")
+public class PackageContainsFile implements Relation {
 	
 	private static final long serialVersionUID = 6671650000417159863L;
 
@@ -23,6 +23,16 @@ public class PackageContainFile implements Relation {
     @GeneratedValue
     private Long id;
     
+	public PackageContainsFile() {
+		super();
+	}
+
+	public PackageContainsFile(Package pck, CodeFile file) {
+		super();
+		this.pck = pck;
+		this.file = file;
+	}
+
 	@StartNode
 	private Package pck;
 	
@@ -57,7 +67,7 @@ public class PackageContainFile implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.PACKAGE_CONTAIN_FILE;
+		return RelationType.PACKAGE_CONTAINS_FILE;
 	}
 
 	@Override

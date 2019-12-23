@@ -10,14 +10,24 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import fan.md.model.node.code.CodeFile;
-import fan.md.model.node.code.Type;
+import fan.md.model.node.code.Function;
 import fan.md.model.relation.Relation;
 import fan.md.model.relation.RelationType;
 
-@RelationshipEntity("FILE_CONTAIN_TYPE")
-public class FileContainType implements Relation {
+@RelationshipEntity("FILE_CONTAINS_FUNCTION")
+public class FileContainsFunction implements Relation {
 
-	private static final long serialVersionUID = 1653809506761293660L;
+	private static final long serialVersionUID = -6154270226333353997L;
+
+	public FileContainsFunction() {
+		super();
+	}
+
+	public FileContainsFunction(CodeFile file, Function function) {
+		super();
+		this.file = file;
+		this.function = function;
+	}
 
 	@Id
     @GeneratedValue
@@ -27,7 +37,7 @@ public class FileContainType implements Relation {
 	private CodeFile file;
 	
 	@EndNode
-	private Type type;
+	private Function function;
 
 	public CodeFile getFile() {
 		return file;
@@ -37,12 +47,12 @@ public class FileContainType implements Relation {
 		this.file = file;
 	}
 
-	public Type getType() {
-		return type;
+	public Function getFunction() {
+		return function;
 	}
 
-	public void setType(Type type) {
-		this.type = type;
+	public void setFunction(Function function) {
+		this.function = function;
 	}
 
 	@Override
@@ -52,12 +62,12 @@ public class FileContainType implements Relation {
 
 	@Override
 	public Long getEndNodeGraphId() {
-		return type.getId();
+		return function.getId();
 	}
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.FILE_CONTAIN_TYPE;
+		return RelationType.FILE_CONTAINS_FUNCTION;
 	}
 
 	@Override
@@ -74,4 +84,5 @@ public class FileContainType implements Relation {
 	public Map<String, Object> getProperties() {
 		return new HashMap<>();
 	}
+	
 }

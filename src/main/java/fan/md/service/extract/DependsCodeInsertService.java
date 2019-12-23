@@ -1,4 +1,4 @@
-package fan.md.service;
+package fan.md.service.extract;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,11 +36,13 @@ import depends.util.TemporaryFile;
 import fan.md.model.Language;
 import fan.md.model.node.code.CodeFile;
 import fan.md.model.node.code.Function;
-import fan.md.model.node.code.Type;
 import fan.md.model.node.code.Package;
-import fan.md.model.relation.code.FileContainType;
+import fan.md.model.node.code.Type;
+import fan.md.model.relation.code.FileContainsFunction;
+import fan.md.model.relation.code.FileContainsType;
 import fan.md.model.relation.code.FunctionCallFunction;
-import fan.md.model.relation.code.PackageContainFile;
+import fan.md.model.relation.code.FunctionReturnType;
+import fan.md.model.relation.code.PackageContainsFile;
 import fan.md.model.relation.code.TypeContainsFunction;
 import fan.md.model.relation.code.TypeExtendsType;
 import fan.md.model.relation.code.TypeImplementsType;
@@ -48,11 +50,8 @@ import fan.md.neo4j.service.BatchInserterService;
 
 public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 	
-	private DependsCodeInsertService() {
-		
-	}
+	private DependsCodeInsertService() {}
 	private static DependsCodeInsertService instance = new DependsCodeInsertService();
-	
 	public static DependsCodeInsertService getInstance() {
 		return instance;
 	}
@@ -144,16 +143,14 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 	}
 	
 	Map<Integer, Package> pcks = new HashMap<>();
-	Map<Integer, Long> pcksId = new HashMap<>();
 	
 	Map<Integer, CodeFile> files = new HashMap<>();
-	Map<Integer, Long> filesId = new HashMap<>();
 	
 	Map<Integer, Type> types = new HashMap<>();
-	Map<Integer, Long> typesId = new HashMap<>();
 	
 	Map<Integer, Function> functions = new HashMap<>();
-	Map<Integer, Long> functionsId = new HashMap<>();
+	
+//	Map<Integer, Node> nodes = new HashMap<>();
 	
 	
 	@Override
@@ -166,7 +163,6 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 			myBatchInserter.init(databasePath, delete);
 			entityRepo.getEntities().forEach(entity -> {
 				if(language == Language.cpp && entity instanceof FileEntity) {
-					System.out.println(entity.getQualifiedName() + " " + entity.getDisplayName());
 					String fileName = entity.getQualifiedName();
 					String packageName = null;
 					if(fileName.contains("\\")) {
@@ -185,13 +181,20 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 					file.setPath(entity.getQualifiedName());
 					file.setEntityId(entity.getId());
 					myBatchInserter.insertNode(file);
-					PackageContainFile packageContainFile = new PackageContainFile();
-					packageContainFile.setPck(pck);
-					packageContainFile.setFile(file);
+					PackageContainsFile packageContainFile = new PackageContainsFile(pck, file);
 					myBatchInserter.insertRelation(packageContainFile);
 					entity.getChildren().forEach(fileEntityChild -> {
 						if(fileEntityChild instanceof PackageEntity) {
 							// 命名空间
+						} else if(fileEntityChild instanceof FunctionEntity) {
+							// 文件内的函数
+							Function function = new Function();
+							function.setFunctionName(fileEntityChild.getRawName().getName());
+							function.setEntityId(fileEntityChild.getId());
+							functions.put(fileEntityChild.getId(), function);
+							myBatchInserter.insertNode(function);
+							FileContainsFunction containFunction = new FileContainsFunction(file, function);
+							myBatchInserter.insertRelation(containFunction);
 						}
 					});
 					List<TypeEntity> typeEntities = ((FileEntity) entity).getDeclaredTypes();
@@ -202,20 +205,16 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 						type.setEntityId(typeEntity.getId());
 						types.put(typeEntity.getId(), type);
 						myBatchInserter.insertNode(type);
-						FileContainType fileContainType = new FileContainType();
-						fileContainType.setFile(file);
-						fileContainType.setType(type);
+						FileContainsType fileContainType = new FileContainsType(file, type);
 						myBatchInserter.insertRelation(fileContainType);
 						typeEntity.getChildren().forEach(typeEntityChild -> {
-							if(typeEntityChild.getClass() == FunctionEntity.class) {
+							if(typeEntityChild instanceof FunctionEntity) {
 								Function function = new Function();
 								function.setFunctionName(typeEntityChild.getRawName().getName());
 								function.setEntityId(typeEntityChild.getId());
 								functions.put(typeEntityChild.getId(), function);
 								myBatchInserter.insertNode(function);
-								TypeContainsFunction containFunction = new TypeContainsFunction();
-								containFunction.setType(type);
-								containFunction.setFunction(function);
+								TypeContainsFunction containFunction = new TypeContainsFunction(type, function);
 								myBatchInserter.insertRelation(containFunction);
 							}
 						});
@@ -235,9 +234,7 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 							file.setPath(fileEntity.getQualifiedName());
 							file.setEntityId(fileEntity.getId());
 							myBatchInserter.insertNode(file);
-							PackageContainFile packageContainFile = new PackageContainFile();
-							packageContainFile.setPck(pck);
-							packageContainFile.setFile(file);
+							PackageContainsFile packageContainFile = new PackageContainsFile(pck, file);
 							myBatchInserter.insertRelation(packageContainFile);
 							List<TypeEntity> typeEntities = ((FileEntity) fileEntity).getDeclaredTypes();
 							typeEntities.forEach(typeEntity -> {
@@ -247,20 +244,16 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 								type.setEntityId(typeEntity.getId());
 								types.put(typeEntity.getId(), type);
 								myBatchInserter.insertNode(type);
-								FileContainType fileContainType = new FileContainType();
-								fileContainType.setFile(file);
-								fileContainType.setType(type);
+								FileContainsType fileContainType = new FileContainsType(file, type);
 								myBatchInserter.insertRelation(fileContainType);
 								typeEntity.getChildren().forEach(typeEntityChild -> {
-									if(typeEntityChild.getClass() == FunctionEntity.class) {
+									if(typeEntityChild instanceof FunctionEntity) {
 										Function function = new Function();
 										function.setFunctionName(typeEntityChild.getRawName().getName());
 										function.setEntityId(typeEntityChild.getId());
 										functions.put(typeEntityChild.getId(), function);
 										myBatchInserter.insertNode(function);
-										TypeContainsFunction containFunction = new TypeContainsFunction();
-										containFunction.setType(type);
-										containFunction.setFunction(function);
+										TypeContainsFunction containFunction = new TypeContainsFunction(type, function);
 										myBatchInserter.insertRelation(containFunction);
 									}
 								});
@@ -269,6 +262,10 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 					});
 				}
 			});
+			entityRepo.getEntities().forEach(entity -> {
+				entity.getRelations().forEach(relation -> {
+				});
+			});
 			types.forEach((id, type) -> {
 				// 继承与实现
 				TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(id);
@@ -276,9 +273,7 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 				inherits.forEach(inherit -> {
 					Type other = types.get(inherit.getId());
 					if(other != null) {
-						TypeExtendsType typeExtends = new TypeExtendsType();
-						typeExtends.setStart(type);
-						typeExtends.setEnd(other);
+						TypeExtendsType typeExtends = new TypeExtendsType(type, other);
 						myBatchInserter.insertRelation(typeExtends);
 					}
 				});
@@ -286,9 +281,7 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 				imps.forEach(imp -> {
 					Type other = types.get(imp.getId());
 					if(other != null) {
-						TypeImplementsType typeImplements = new TypeImplementsType();
-						typeImplements.setStart(type);
-						typeImplements.setEnd(other);
+						TypeImplementsType typeImplements = new TypeImplementsType(type, other);
 						myBatchInserter.insertRelation(typeImplements);
 					}
 				});
@@ -298,20 +291,24 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 				FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(id);
 				functionEntity.getRelations().forEach(relation -> {
 					if(DependencyType.CALL.equals(relation.getType())) {
-						if(relation.getEntity().getClass() == FunctionEntity.class) {
+						if(relation.getEntity() instanceof FunctionEntity) {
 							Function other = functions.get(relation.getEntity().getId());
 							if(other != null) {
-								FunctionCallFunction call = new FunctionCallFunction();
-								call.setFunction(function);
-								call.setCallFunction(other);
+								FunctionCallFunction call = new FunctionCallFunction(function, other);
 								myBatchInserter.insertRelation(call);
 							}
-	//					} else {
-	//						System.out.println(relation.getEntity().getClass() + " " + relation.getEntity());
+						} else {
 						}
 					}
 					if(DependencyType.RETURN.equals(relation.getType())) {
-						
+						System.out.println(functionEntity + "\n " + relation.getEntity().getClass() +  " " + relation.getEntity());
+						if(relation.getEntity() instanceof TypeEntity) {
+							Type returnType = types.get(relation.getEntity().getId());
+							if(returnType != null) {
+								FunctionReturnType functionReturnType = new FunctionReturnType(function, returnType);
+								myBatchInserter.insertRelation(functionReturnType);
+							}
+						}
 					}
 				});
 			});

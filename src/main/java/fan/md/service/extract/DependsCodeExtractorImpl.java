@@ -1,4 +1,4 @@
-package fan.md.service;
+package fan.md.service.extract;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -22,9 +22,9 @@ import fan.md.model.node.code.CodeFile;
 import fan.md.model.node.code.Function;
 import fan.md.model.node.code.Type;
 import fan.md.model.node.code.Package;
-import fan.md.model.relation.code.FileContainType;
+import fan.md.model.relation.code.FileContainsType;
 import fan.md.model.relation.code.FunctionCallFunction;
-import fan.md.model.relation.code.PackageContainFile;
+import fan.md.model.relation.code.PackageContainsFile;
 import fan.md.model.relation.code.TypeContainsFunction;
 import fan.md.model.relation.code.TypeExtendsType;
 import fan.md.model.relation.code.TypeImplementsType;
@@ -42,9 +42,9 @@ import fan.md.neo4j.repository.TypeRepository;
 
 @Service
 @Deprecated
-public class DependsCodeExtractorImpl implements DependsCodeExtractor {
+public class DependsCodeExtractorImpl implements DependsEntityRepoExtractor {
 	
-    private DependsCodeExtractor dependsCodeInsertService = DependsCodeInsertService.getInstance();
+    private DependsEntityRepoExtractor dependsCodeInsertService = DependsCodeInsertService.getInstance();
 
 	@Override
 	public EntityRepo extractEntityRepo(String src, Language language) throws Exception {
@@ -109,9 +109,7 @@ public class DependsCodeExtractorImpl implements DependsCodeExtractor {
 						file.setFileName(fileEntity.getQualifiedName());
 						fileRepository.save(file);
 						
-						PackageContainFile containFile = new PackageContainFile();
-						containFile.setPck(pck);
-						containFile.setFile(file);
+						PackageContainsFile containFile = new PackageContainsFile(pck, file);
 						packageContainFileRepository.save(containFile);
 						
 						List<TypeEntity> typeEntities = ((FileEntity) fileEntity).getDeclaredTypes();
@@ -122,9 +120,7 @@ public class DependsCodeExtractorImpl implements DependsCodeExtractor {
 							types.put(typeEntity.getId(), type);
 							typeRepository.save(type);
 							
-							FileContainType fileContainType = new FileContainType();
-							fileContainType.setFile(file);
-							fileContainType.setType(type);
+							FileContainsType fileContainType = new FileContainsType(file, type);
 							fileContainTypeRepository.save(fileContainType);
 							
 							typeEntity.getChildren().forEach(typeEntityChild -> {
@@ -134,9 +130,7 @@ public class DependsCodeExtractorImpl implements DependsCodeExtractor {
 									functionRepository.save(function);
 									functions.put(typeEntityChild.getId(), function);
 									
-									TypeContainsFunction containFunction = new TypeContainsFunction();
-									containFunction.setType(type);
-									containFunction.setFunction(function);
+									TypeContainsFunction containFunction = new TypeContainsFunction(type, function);
 									typeContainsFunctionRepository.save(containFunction);
 									
 								}
@@ -152,9 +146,7 @@ public class DependsCodeExtractorImpl implements DependsCodeExtractor {
 			inherits.forEach(inherit -> {
 				Type other = types.get(inherit.getId());
 				if(other != null) {
-					TypeExtendsType typeExtends = new TypeExtendsType();
-					typeExtends.setStart(type);
-					typeExtends.setEnd(other);
+					TypeExtendsType typeExtends = new TypeExtendsType(type, other);
 					typeExtendsTypeRepository.save(typeExtends);
 				}
 			});
@@ -162,9 +154,7 @@ public class DependsCodeExtractorImpl implements DependsCodeExtractor {
 			imps.forEach(imp -> {
 				Type other = types.get(imp.getId());
 				if(other != null) {
-					TypeImplementsType typeImplements = new TypeImplementsType();
-					typeImplements.setStart(type);
-					typeImplements.setEnd(other);
+					TypeImplementsType typeImplements = new TypeImplementsType(type, other);
 					typeImplementsTypeRepository.save(typeImplements);
 				}
 			});
@@ -176,9 +166,7 @@ public class DependsCodeExtractorImpl implements DependsCodeExtractor {
 					if(relation.getEntity().getClass() == FunctionEntity.class) {
 						Function other = functions.get(relation.getEntity().getId());
 						if(other != null) {
-							FunctionCallFunction call = new FunctionCallFunction();
-							call.setFunction(function);
-							call.setCallFunction(other);
+							FunctionCallFunction call = new FunctionCallFunction(function, other);
 							functionCallFunctionRepository.save(call);
 						}
 //					} else {

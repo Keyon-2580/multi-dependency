@@ -22,6 +22,16 @@ public class TypeExtendsType implements Relation {
     @GeneratedValue
     private Long id;
 	
+	public TypeExtendsType() {
+		super();
+	}
+
+	public TypeExtendsType(Type start, Type end) {
+		super();
+		this.start = start;
+		this.end = end;
+	}
+
 	@StartNode
 	private Type start;
 	

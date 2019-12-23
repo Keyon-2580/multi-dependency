@@ -22,6 +22,17 @@ public class TypeImplementsType implements Relation {
     @GeneratedValue
     private Long id;
 	
+	public TypeImplementsType() {
+		super();
+	}
+
+	public TypeImplementsType(Type start, Type end) {
+		super();
+		this.start = start;
+		this.end = end;
+	}
+
+
 	@StartNode
 	private Type start;
 	

@@ -18,12 +18,22 @@ public class FunctionCallFunction implements Relation {
 	
 	private static final long serialVersionUID = 5982413005555063698L;
 
+	public FunctionCallFunction() {
+		super();
+	}
+
 	@StartNode
 	private Function function;
 	
 	@EndNode
 	private Function callFunction;
 	
+	public FunctionCallFunction(Function function, Function callFunction) {
+		super();
+		this.function = function;
+		this.callFunction = callFunction;
+	}
+
 	@Id
     @GeneratedValue
     private Long id;

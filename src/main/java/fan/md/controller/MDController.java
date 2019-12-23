@@ -10,14 +10,14 @@ import depends.entity.repo.EntityRepo;
 import fan.md.config.PropertyConfig;
 import fan.md.model.Language;
 import fan.md.model.node.code.CodeFile;
-import fan.md.service.DependsCodeExtractor;
 import fan.md.service.StaticCodeService;
+import fan.md.service.extract.DependsEntityRepoExtractor;
 
 @Controller
 public class MDController {
 	
 	@Autowired
-	private DependsCodeExtractor codeExtractor;
+	private DependsEntityRepoExtractor codeExtractor;
 	
 	@Autowired
 	private StaticCodeService staticCodeService;

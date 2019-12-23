@@ -1,9 +1,9 @@
-package fan.md.service;
+package fan.md.service.extract;
 
 import depends.entity.repo.EntityRepo;
 import fan.md.model.Language;
 
-public interface DependsCodeExtractor {
+public interface DependsEntityRepoExtractor {
 	
 	EntityRepo extractEntityRepo(String src, Language language) throws Exception;
 	

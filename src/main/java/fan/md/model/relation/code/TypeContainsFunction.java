@@ -23,6 +23,16 @@ public class TypeContainsFunction implements Relation {
     @GeneratedValue
     private Long id;
 	
+	public TypeContainsFunction() {
+		super();
+	}
+
+	public TypeContainsFunction(Type type, Function function) {
+		super();
+		this.type = type;
+		this.function = function;
+	}
+
 	@StartNode
 	private Type type;
 	
