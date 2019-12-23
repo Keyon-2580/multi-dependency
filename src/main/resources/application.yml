@@ -12,10 +12,10 @@ server:
    
 data:
    code:
-#      path: D:\git\halo-1.1.3-beta.1
-#      language: java
-      path: D:\git\bash-4.4-backup
-      language: cpp
+      path: D:\git\halo-1.1.3-beta.1
+      language: java
+#      path: D:\git\redis-5.0.5
+#      language: cpp
    neo4j:
       # batchInserter要插入的数据库
       path: D:\fan\Users\Thinkpad\neo4j-community-3.5.3-windows\neo4j-community-3.5.3\data\databases\multiple.dependency.db

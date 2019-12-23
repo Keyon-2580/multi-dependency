@@ -1,7 +1,5 @@
 package fan.md.model.relation.code;
 
-import java.io.Serializable;
-
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
@@ -10,9 +8,11 @@ import org.neo4j.ogm.annotation.StartNode;
 
 import fan.md.model.entity.code.CodeFile;
 import fan.md.model.entity.code.Package;
+import fan.md.model.relation.Relation;
+import fan.md.model.relation.RelationType;
 
 @RelationshipEntity("PACKAGE_CONTAIN_FILE")
-public class PackageContainFile implements Serializable {
+public class PackageContainFile implements Relation {
 	
 	private static final long serialVersionUID = 6671650000417159863L;
 
@@ -41,6 +41,30 @@ public class PackageContainFile implements Serializable {
 	public void setFile(CodeFile file) {
 		this.file = file;
 	}
-	
+
+	@Override
+	public Long getStartNodeGraphId() {
+		return pck.getId();
+	}
+
+	@Override
+	public Long getEndNodeGraphId() {
+		return file.getId();
+	}
+
+	@Override
+	public RelationType getRelationType() {
+		return RelationType.PACKAGE_CONTAIN_FILE;
+	}
+
+	@Override
+	public Long getId() {
+		return id;
+	}
+
+	@Override
+	public void setId(Long id) {
+		this.id = id;
+	}
 	
 }

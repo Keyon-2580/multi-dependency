@@ -54,6 +54,7 @@ public class MDController {
 		CodeFile file = new CodeFile();
 		file.setId(1270L);
 		staticCodeService.findTypesInFile(file);
+		staticCodeService.findAllExtends();
 		return "";
 	}
 	

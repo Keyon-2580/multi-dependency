@@ -62,8 +62,6 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
     private FileTraversal fileTransversal;
 	private MacroRepo macroRepo;
 
-	private BatchInserterService myBatchInserter = BatchInserterService.getInstance();
-	
 	private void initJavaExtractor() {
 		entityRepo = new InMemoryEntityRepo();
 		inferer = new Inferer(entityRepo,new JavaImportLookupStrategy(),new JavaBuiltInType(),false);
@@ -159,100 +157,101 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 		DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
 		System.out.println("开始时间：" + sdf.format(currentTime));
-		myBatchInserter.init(databasePath, delete);
-		entityRepo.getEntities().forEach(entity -> {
-			if(entity instanceof PackageEntity) {
-				Package pck = new Package();
-				pck.setPackageName(entity.getQualifiedName());
-				pck.setEntityId(entity.getId());
-				pcks.put(entity.getId(), pck);
-				myBatchInserter.insertPackage(pck);
-				entity.getChildren().forEach(fileEntity -> {
-					if(fileEntity instanceof FileEntity) {
-						CodeFile file = new CodeFile();
-						file.setFileName(fileEntity.getRawName().getName());
-						file.setPath(fileEntity.getQualifiedName());
-						file.setEntityId(fileEntity.getId());
-						myBatchInserter.insertCodeFile(file);
-						PackageContainFile packageContainFile = new PackageContainFile();
-						packageContainFile.setPck(pck);
-						packageContainFile.setFile(file);
-						myBatchInserter.insertRelationPackageContainFile(packageContainFile);
-						List<TypeEntity> typeEntities = ((FileEntity) fileEntity).getDeclaredTypes();
-						typeEntities.forEach(typeEntity -> {
-							Type type = new Type();
-							type.setTypeName(typeEntity.getQualifiedName());
-							type.setPackageName(pck.getPackageName());
-							type.setEntityId(typeEntity.getId());
-							types.put(typeEntity.getId(), type);
-							myBatchInserter.insertType(type);
-							FileContainType fileContainType = new FileContainType();
-							fileContainType.setFile(file);
-							fileContainType.setType(type);
-							myBatchInserter.insertRelationFileContainType(fileContainType);
-							typeEntity.getChildren().forEach(typeEntityChild -> {
-								if(typeEntityChild.getClass() == FunctionEntity.class) {
-									Function function = new Function();
-									function.setFunctionName(typeEntityChild.getRawName().getName());
-									function.setEntityId(typeEntityChild.getId());
-									functions.put(typeEntityChild.getId(), function);
-									myBatchInserter.insertFunction(function);
-									TypeContainsFunction containFunction = new TypeContainsFunction();
-									containFunction.setType(type);
-									containFunction.setFunction(function);
-									myBatchInserter.insertRelationTypeContainsFunction(containFunction);
-								}
+		try(BatchInserterService myBatchInserter = BatchInserterService.getInstance()) {
+			myBatchInserter.init(databasePath, delete);
+			entityRepo.getEntities().forEach(entity -> {
+				if(entity instanceof PackageEntity) {
+					Package pck = new Package();
+					pck.setPackageName(entity.getQualifiedName());
+					pck.setEntityId(entity.getId());
+					pcks.put(entity.getId(), pck);
+					myBatchInserter.insertPackageForJava(pck);
+					entity.getChildren().forEach(fileEntity -> {
+						if(fileEntity instanceof FileEntity) {
+							CodeFile file = new CodeFile();
+							file.setFileName(fileEntity.getRawName().getName());
+							file.setPath(fileEntity.getQualifiedName());
+							file.setEntityId(fileEntity.getId());
+							myBatchInserter.insertCodeFile(file);
+							PackageContainFile packageContainFile = new PackageContainFile();
+							packageContainFile.setPck(pck);
+							packageContainFile.setFile(file);
+							myBatchInserter.insertRelation(packageContainFile);
+							List<TypeEntity> typeEntities = ((FileEntity) fileEntity).getDeclaredTypes();
+							typeEntities.forEach(typeEntity -> {
+								Type type = new Type();
+								type.setTypeName(typeEntity.getQualifiedName());
+								type.setPackageName(pck.getPackageName());
+								type.setEntityId(typeEntity.getId());
+								types.put(typeEntity.getId(), type);
+								myBatchInserter.insertType(type);
+								FileContainType fileContainType = new FileContainType();
+								fileContainType.setFile(file);
+								fileContainType.setType(type);
+								myBatchInserter.insertRelation(fileContainType);
+								typeEntity.getChildren().forEach(typeEntityChild -> {
+									if(typeEntityChild.getClass() == FunctionEntity.class) {
+										Function function = new Function();
+										function.setFunctionName(typeEntityChild.getRawName().getName());
+										function.setEntityId(typeEntityChild.getId());
+										functions.put(typeEntityChild.getId(), function);
+										myBatchInserter.insertFunction(function);
+										TypeContainsFunction containFunction = new TypeContainsFunction();
+										containFunction.setType(type);
+										containFunction.setFunction(function);
+										myBatchInserter.insertRelation(containFunction);
+									}
+								});
 							});
-						});
+						}
+					});
+				}
+			});
+			types.forEach((id, type) -> {
+				TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(id);
+				Collection<TypeEntity> inherits = typeEntity.getInheritedTypes();
+				inherits.forEach(inherit -> {
+					Type other = types.get(inherit.getId());
+					if(other != null) {
+						TypeExtendsType typeExtends = new TypeExtendsType();
+						typeExtends.setStart(type);
+						typeExtends.setEnd(other);
+						myBatchInserter.insertRelation(typeExtends);
 					}
 				});
-			}
-		});
-		types.forEach((id, type) -> {
-			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(id);
-			Collection<TypeEntity> inherits = typeEntity.getInheritedTypes();
-			inherits.forEach(inherit -> {
-				Type other = types.get(inherit.getId());
-				if(other != null) {
-					TypeExtendsType typeExtends = new TypeExtendsType();
-					typeExtends.setStart(type);
-					typeExtends.setEnd(other);
-					myBatchInserter.insertRelationTypeExtendsType(typeExtends);
-				}
+				Collection<TypeEntity> imps = typeEntity.getImplementedTypes();
+				imps.forEach(imp -> {
+					Type other = types.get(imp.getId());
+					if(other != null) {
+						TypeImplementsType typeImplements = new TypeImplementsType();
+						typeImplements.setStart(type);
+						typeImplements.setEnd(other);
+						myBatchInserter.insertRelation(typeImplements);
+					}
+				});
 			});
-			Collection<TypeEntity> imps = typeEntity.getImplementedTypes();
-			imps.forEach(imp -> {
-				Type other = types.get(imp.getId());
-				if(other != null) {
-					TypeImplementsType typeImplements = new TypeImplementsType();
-					typeImplements.setStart(type);
-					typeImplements.setEnd(other);
-					myBatchInserter.insertRelationTypeImplementsFunction(typeImplements);
-				}
-			});
-		});
-		functions.forEach((id, function) -> {
-			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(id);
-			functionEntity.getRelations().forEach(relation -> {
-				if(DependencyType.CALL.equals(relation.getType())) {
-					if(relation.getEntity().getClass() == FunctionEntity.class) {
-						Function other = functions.get(relation.getEntity().getId());
-						if(other != null) {
-							FunctionCallFunction call = new FunctionCallFunction();
-							call.setFunction(function);
-							call.setCallFunction(other);
-							myBatchInserter.insertRelationFunctionCallFunction(call);
-						}
+			functions.forEach((id, function) -> {
+				FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(id);
+				functionEntity.getRelations().forEach(relation -> {
+					if(DependencyType.CALL.equals(relation.getType())) {
+						if(relation.getEntity().getClass() == FunctionEntity.class) {
+							Function other = functions.get(relation.getEntity().getId());
+							if(other != null) {
+								FunctionCallFunction call = new FunctionCallFunction();
+								call.setFunction(function);
+								call.setCallFunction(other);
+								myBatchInserter.insertRelation(call);
+							}
 //					} else {
 //						System.out.println(relation.getEntity().getClass() + " " + relation.getEntity());
+						}
 					}
-				}
-				if(DependencyType.RETURN.equals(relation.getType())) {
-					
-				}
+					if(DependencyType.RETURN.equals(relation.getType())) {
+						
+					}
+				});
 			});
-		});
-		myBatchInserter.close();
+		}
 		currentTime = new Timestamp(System.currentTimeMillis());
 		System.out.println("结束时间：" + sdf.format(currentTime));
 	}

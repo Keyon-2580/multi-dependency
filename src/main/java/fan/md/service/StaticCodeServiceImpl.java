@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import fan.md.model.entity.code.CodeFile;
+import fan.md.model.entity.code.Function;
 import fan.md.model.entity.code.Type;
 import fan.md.model.relation.code.FileContainType;
+import fan.md.model.relation.code.TypeExtendsType;
 import fan.md.neo4j.repository.FileContainTypeRepository;
 import fan.md.neo4j.repository.FileRepository;
 import fan.md.neo4j.repository.FunctionCallFunctionRepository;
@@ -65,6 +67,15 @@ public class StaticCodeServiceImpl implements StaticCodeService {
 		});
 		return types;
 	}
+	
+	@Override
+	public List<Type> findExtendsType(Type type) {
+		List<Type> fathers = new ArrayList<>();
+		typeExtendsTypeRepository.findExtendsTypesByTypeId(type.getId()).forEach(father -> {
+			fathers.add(father);
+		});
+		return fathers;
+	}
 
 	@Override
 	public List<Type> findTypesInFile(CodeFile codeFile) {
@@ -75,5 +86,25 @@ public class StaticCodeServiceImpl implements StaticCodeService {
 			System.out.println(t.getType().getTypeName());
 		});
 		return null;
+	}
+
+	@Override
+	public List<TypeExtendsType> findAllExtends() {
+		List<TypeExtendsType> allExtends = new ArrayList<>();
+		typeExtendsTypeRepository.findAll().forEach(e -> {
+			allExtends.add(e);
+			System.out.println(e.getStart().getTypeName() + " " + e.getEnd().getTypeName());
+			
+		});
+		return allExtends;
+	}
+
+	@Override
+	public List<Function> findAllFunctions() {
+		List<Function> functions = new ArrayList<>();
+		functionRepository.findAll().forEach(function -> {
+			functions.add(function);
+		});
+		return functions;
 	}
 }
