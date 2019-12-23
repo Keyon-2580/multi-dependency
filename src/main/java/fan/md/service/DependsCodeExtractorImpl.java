@@ -3,7 +3,6 @@ package fan.md.service;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -41,29 +40,10 @@ import fan.md.neo4j.repository.TypeImplementsTypeRepository;
 import fan.md.neo4j.repository.TypeRepository;
 
 @Service
-public class DependsCodeExtractorImpl implements DependsCodeExtractor, StaticCodeService {
+@Deprecated
+public class DependsCodeExtractorImpl implements DependsCodeExtractor {
 	
     private DependsCodeExtractor dependsCodeInsertService = DependsCodeInsertService.getInstance();
-
-	@Override
-	public List<Type> findAllTypes() {
-		List<Type> types = new ArrayList<>();
-		typeRepository.findAll().forEach(type -> {
-			types.add(type);
-		});
-		return types;
-	}
-
-	@Override
-	public List<Type> findTypesInFile(CodeFile codeFile) {
-		System.out.println(findAllTypes().size());
-		Iterable<FileContainType> temp = fileContainTypeRepository.findAll();
-		temp.forEach(t -> {
-			System.out.println(t.getFile().getFileName());
-			System.out.println(t.getType().getTypeName());
-		});
-		return null;
-	}
 
 	@Override
 	public EntityRepo extractEntityRepo(String src, String language) throws Exception {
@@ -211,14 +191,18 @@ public class DependsCodeExtractorImpl implements DependsCodeExtractor, StaticCod
 	}
 
 	Map<Integer, Package> pcks = new HashMap<>();
+
 	Map<Integer, Long> pcksId = new HashMap<>();
-	
+
 	Map<Integer, CodeFile> files = new HashMap<>();
+
 	Map<Integer, Long> filesId = new HashMap<>();
-	
+
 	Map<Integer, Type> types = new HashMap<>();
+
 	Map<Integer, Long> typesId = new HashMap<>();
-	
+
 	Map<Integer, Function> functions = new HashMap<>();
+
 	Map<Integer, Long> functionsId = new HashMap<>();
 }
