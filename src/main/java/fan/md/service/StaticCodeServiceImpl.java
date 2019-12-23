@@ -70,11 +70,7 @@ public class StaticCodeServiceImpl implements StaticCodeService {
 	
 	@Override
 	public List<Type> findExtendsType(Type type) {
-		List<Type> fathers = new ArrayList<>();
-		typeExtendsTypeRepository.findExtendsTypesByTypeId(type.getId()).forEach(father -> {
-			fathers.add(father);
-		});
-		return fathers;
+		return typeExtendsTypeRepository.findExtendsTypesByTypeId(type.getId());
 	}
 
 	@Override

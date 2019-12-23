@@ -1,4 +1,7 @@
-package fan.md.model.relation.code;
+package fan.md.model.relation.dynamic;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
@@ -10,11 +13,11 @@ import fan.md.model.entity.code.Function;
 import fan.md.model.relation.Relation;
 import fan.md.model.relation.RelationType;
 
-@RelationshipEntity("FUNCTION_CALL_FUNCTION")
-public class FunctionCallFunction implements Relation {
-	
-	private static final long serialVersionUID = 5982413005555063698L;
+@RelationshipEntity("DYNAMIC_FUNCTION_CALL_FUNCTION")
+public class FunctionDynamicCallFunction implements Relation {
 
+	private static final long serialVersionUID = -7640490954063715746L;
+	
 	@StartNode
 	private Function function;
 	
@@ -25,21 +28,20 @@ public class FunctionCallFunction implements Relation {
     @GeneratedValue
     private Long id;
 	
-
-	public Function getFunction() {
-		return function;
+	private Map<String, Object> properties = new HashMap<>();
+	
+	public void setCallOrder(String order) {
+		properties.put("order", order);
+	}
+	
+	@Override
+	public Long getId() {
+		return id;
 	}
 
-	public void setFunction(Function function) {
-		this.function = function;
-	}
-
-	public Function getCallFunction() {
-		return callFunction;
-	}
-
-	public void setCallFunction(Function callFunction) {
-		this.callFunction = callFunction;
+	@Override
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	@Override
@@ -54,17 +56,12 @@ public class FunctionCallFunction implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.FUNCTION_CALL_FUNCTION;
+		return RelationType.DYNAMIC_FUNCTION_CALL_FUNCTION;
 	}
 
 	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	public void setId(Long id) {
-		this.id = id;
+	public Map<String, Object> getProperties() {
+		return properties;
 	}
 	
 }

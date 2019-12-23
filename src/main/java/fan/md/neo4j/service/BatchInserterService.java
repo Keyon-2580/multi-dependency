@@ -19,33 +19,22 @@ import fan.md.model.relation.RelationType;
 import fan.md.utils.FileUtils;
 
 public class BatchInserterService implements Closeable {
-	
-	private BatchInserterService() {
-		
-	}
-	
+	private BatchInserterService() {}
 	private static BatchInserterService instance = new BatchInserterService();
-	
 	public static BatchInserterService getInstance() {
 		return instance;
 	}
 	
 	private BatchInserter inserter = null;
-    Label fileLabel = Label.label("File");
-    Label functionLabel = Label.label("Function");
-    Label packageLabel = Label.label("Package");
-    Label typeLabel = Label.label("Type");
+	
+    private Label fileLabel = Label.label("File");
+    private Label functionLabel = Label.label("Function");
+    private Label packageLabel = Label.label("Package");
+    private Label typeLabel = Label.label("Type");
     
-    Map<String, Object> properties = new HashMap<>();
+    private Map<String, Object> properties = new HashMap<>();
     
-    RelationshipType fileContainType 		= RelationshipType.withName(RelationType.FILE_CONTAIN_TYPE.toString());
-    RelationshipType packageContainFile 	= RelationshipType.withName( "PACKAGE_CONTAIN_FILE" );
-    RelationshipType typeContainsFunction 	= RelationshipType.withName( "TYPE_CONTAINS_FUNCTION" );
-    RelationshipType functionCallFunction 	= RelationshipType.withName( "FUNCTION_CALL_FUNCTION" );
-    RelationshipType typeExtendsType 		= RelationshipType.withName( "TYPE_EXTENDS_TYPE" );
-    RelationshipType typeImplementsType 	= RelationshipType.withName( "TYPE_IMPLEMENTS_TYPE" );
-    RelationshipType fileContainFunction 	= RelationshipType.withName( "FILE_CONTAIN_FUNCTION" );
-    Map<RelationType, RelationshipType> mapRelations = new HashMap<>();
+    private Map<RelationType, RelationshipType> mapRelations = new HashMap<>();
     
 	public void init(String databasePath, boolean initDatabase) throws Exception {
 		File directory = new File(databasePath);

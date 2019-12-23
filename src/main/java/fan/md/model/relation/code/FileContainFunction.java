@@ -14,7 +14,6 @@ import fan.md.model.relation.RelationType;
 @RelationshipEntity("FILE_CONTAIN_FUNCTION")
 public class FileContainFunction implements Relation {
 
-
 	private static final long serialVersionUID = -6154270226333353997L;
 
 	@Id
