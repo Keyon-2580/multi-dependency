@@ -9,7 +9,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-import fan.md.model.entity.code.Function;
+import fan.md.model.node.code.Function;
 import fan.md.model.relation.Relation;
 import fan.md.model.relation.RelationType;
 

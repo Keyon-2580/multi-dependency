@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import depends.entity.repo.EntityRepo;
 import fan.md.config.PropertyConfig;
-import fan.md.model.entity.code.CodeFile;
+import fan.md.model.Language;
+import fan.md.model.node.code.CodeFile;
 import fan.md.service.DependsCodeExtractor;
 import fan.md.service.StaticCodeService;
 
@@ -28,7 +29,7 @@ public class MDController {
 //	@Bean
 	public EntityRepo getRepo() {
 		try {
-			return codeExtractor.extractEntityRepo(conf.getCodePath(), conf.getLanguage());
+			return codeExtractor.extractEntityRepo(conf.getCodePath(), Language.valueOf(conf.getLanguage()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

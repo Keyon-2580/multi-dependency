@@ -17,10 +17,11 @@ import depends.entity.FunctionEntity;
 import depends.entity.PackageEntity;
 import depends.entity.TypeEntity;
 import depends.entity.repo.EntityRepo;
-import fan.md.model.entity.code.CodeFile;
-import fan.md.model.entity.code.Function;
-import fan.md.model.entity.code.Package;
-import fan.md.model.entity.code.Type;
+import fan.md.model.Language;
+import fan.md.model.node.code.CodeFile;
+import fan.md.model.node.code.Function;
+import fan.md.model.node.code.Type;
+import fan.md.model.node.code.Package;
 import fan.md.model.relation.code.FileContainType;
 import fan.md.model.relation.code.FunctionCallFunction;
 import fan.md.model.relation.code.PackageContainFile;
@@ -46,7 +47,7 @@ public class DependsCodeExtractorImpl implements DependsCodeExtractor {
     private DependsCodeExtractor dependsCodeInsertService = DependsCodeInsertService.getInstance();
 
 	@Override
-	public EntityRepo extractEntityRepo(String src, String language) throws Exception {
+	public EntityRepo extractEntityRepo(String src, Language language) throws Exception {
 		entityRepo = dependsCodeInsertService.extractEntityRepo(src, language);
 		return entityRepo;
 	}
@@ -87,7 +88,7 @@ public class DependsCodeExtractorImpl implements DependsCodeExtractor {
     ProjectRepository projectRepository;
 
 	@Deprecated
-	public void insertDependsCodeBySpring(String src, String language) throws Exception {
+	public void insertDependsCodeBySpring(String src, Language language) throws Exception {
 		extractEntityRepo(src, language);
 		System.out.println("start to store datas to database");
 		DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");

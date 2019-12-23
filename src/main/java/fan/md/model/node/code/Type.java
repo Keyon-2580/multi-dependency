@@ -1,13 +1,17 @@
-package fan.md.model.entity.code;
+package fan.md.model.node.code;
 
-import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
+import fan.md.model.node.Node;
+import fan.md.model.node.NodeType;
+
 @NodeEntity
-public class Type implements Serializable {
+public class Type implements Node {
     @Id
     @GeneratedValue
     private Long id;
@@ -42,6 +46,20 @@ public class Type implements Serializable {
 	}
 	public void setEntityId(int entityId) {
 		this.entityId = entityId;
+	}
+	
+	@Override
+	public Map<String, Object> getProperties() {
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("typeName", getTypeName());
+		properties.put("entityId", getEntityId());
+		properties.put("packageName", getPackageName());
+		return properties;
+	}
+	
+	@Override
+	public NodeType getNodeType() {
+		return NodeType.Type;
 	}
 
 

@@ -1,10 +1,10 @@
-package fan.md.model.entity.dynamic;
+package fan.md.model.node.dynamic;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import fan.md.model.entity.code.Function;
+import fan.md.model.node.code.Function;
 
 public class CallNode implements Serializable {
 	

@@ -6,9 +6,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import fan.md.model.entity.code.CodeFile;
-import fan.md.model.entity.code.Function;
-import fan.md.model.entity.code.Type;
+import fan.md.model.node.code.CodeFile;
+import fan.md.model.node.code.Function;
+import fan.md.model.node.code.Type;
 import fan.md.model.relation.code.FileContainType;
 import fan.md.model.relation.code.TypeExtendsType;
 import fan.md.neo4j.repository.FileContainTypeRepository;

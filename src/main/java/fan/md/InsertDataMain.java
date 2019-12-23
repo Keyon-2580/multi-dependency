@@ -1,5 +1,6 @@
 package fan.md;
 
+import fan.md.model.Language;
 import fan.md.service.DependsCodeInsertService;
 import fan.md.service.InsertDependsCodeToNeo4j;
 import fan.md.utils.YamlUtils;
@@ -18,7 +19,7 @@ public class InsertDataMain {
 			String language = yaml.getCodeLanguage();
 			
 			InsertDependsCodeToNeo4j codeExtractor = DependsCodeInsertService.getInstance();
-			codeExtractor.extractEntityRepo(projectPath, language);
+			codeExtractor.extractEntityRepo(projectPath, Language.valueOf(language));
 			codeExtractor.insertCodeToNeo4jDataBase(databasePath, true);
 		} catch (Exception e) {
 			e.printStackTrace();

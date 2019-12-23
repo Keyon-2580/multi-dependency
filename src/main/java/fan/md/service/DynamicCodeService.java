@@ -1,7 +1,7 @@
 package fan.md.service;
 
-import fan.md.model.entity.code.Function;
-import fan.md.model.entity.dynamic.CallNode;
+import fan.md.model.node.code.Function;
+import fan.md.model.node.dynamic.CallNode;
 
 public interface DynamicCodeService {
 	

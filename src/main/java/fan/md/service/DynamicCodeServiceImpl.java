@@ -3,8 +3,8 @@ package fan.md.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import fan.md.model.entity.code.Function;
-import fan.md.model.entity.dynamic.CallNode;
+import fan.md.model.node.code.Function;
+import fan.md.model.node.dynamic.CallNode;
 import fan.md.neo4j.repository.FunctionDynamicCallFunctionRepository;
 
 @Service

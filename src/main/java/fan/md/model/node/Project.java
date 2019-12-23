@@ -1,10 +1,12 @@
-package fan.md.model.entity;
+package fan.md.model.node;
 
 import java.io.Serializable;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
+
+import fan.md.model.Language;
 
 @NodeEntity
 public class Project implements Serializable {
@@ -18,7 +20,7 @@ public class Project implements Serializable {
 	
 	private String projectPath;
 	
-	private String language;
+	private Language language;
 
 	public String getProjectName() {
 		return projectName;
@@ -36,11 +38,11 @@ public class Project implements Serializable {
 		this.projectPath = projectPath;
 	}
 
-	public String getLanguage() {
+	public Language getLanguage() {
 		return language;
 	}
 
-	public void setLanguage(String language) {
+	public void setLanguage(Language language) {
 		this.language = language;
 	}
 	

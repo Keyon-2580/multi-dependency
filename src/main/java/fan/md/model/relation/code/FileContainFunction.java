@@ -1,13 +1,16 @@
 package fan.md.model.relation.code;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-import fan.md.model.entity.code.CodeFile;
-import fan.md.model.entity.code.Function;
+import fan.md.model.node.code.CodeFile;
+import fan.md.model.node.code.Function;
 import fan.md.model.relation.Relation;
 import fan.md.model.relation.RelationType;
 
@@ -65,6 +68,11 @@ public class FileContainFunction implements Relation {
 	@Override
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	@Override
+	public Map<String, Object> getProperties() {
+		return new HashMap<>();
 	}
 	
 }

@@ -6,7 +6,7 @@ import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.stereotype.Repository;
 
-import fan.md.model.entity.code.Function;
+import fan.md.model.node.code.Function;
 import fan.md.model.relation.dynamic.FunctionDynamicCallFunction;
 
 @Repository
