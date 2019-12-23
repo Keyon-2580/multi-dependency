@@ -19,3 +19,6 @@ data:
    neo4j:
       # batchInserter要插入的数据库
       path: D:\fan\Users\Thinkpad\neo4j-community-3.5.3-windows\neo4j-community-3.5.3\data\databases\multiple.dependency.db
+   
+   test: this property is for YamlUtilsTest
+      
