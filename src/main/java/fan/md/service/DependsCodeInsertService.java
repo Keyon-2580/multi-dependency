@@ -22,6 +22,8 @@ import depends.extractor.FileParser;
 import depends.extractor.cpp.CppBuiltInType;
 import depends.extractor.cpp.CppImportLookupStrategy;
 import depends.extractor.cpp.CppProcessor;
+import depends.extractor.cpp.MacroFileRepo;
+import depends.extractor.cpp.MacroRepo;
 import depends.extractor.cpp.cdt.CdtCppFileParser;
 import depends.extractor.cpp.cdt.PreprocessorHandler;
 import depends.extractor.java.JavaBuiltInType;
@@ -58,6 +60,7 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 	private Inferer inferer;
     private PreprocessorHandler preprocessorHandler;
     private FileTraversal fileTransversal;
+	private MacroRepo macroRepo;
 
 	private BatchInserterService myBatchInserter = BatchInserterService.getInstance();
 	
@@ -67,11 +70,12 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
     	TemporaryFile.reset();
 	}
 	
-	private void initCppExtractor() {
+	private void initCppExtractor(String src) {
 		entityRepo = new InMemoryEntityRepo();
     	inferer = new Inferer(entityRepo,new CppImportLookupStrategy(),new CppBuiltInType(),false);
-    	preprocessorHandler = new PreprocessorHandler(new ArrayList<>());
+    	preprocessorHandler = new PreprocessorHandler(src, new ArrayList<>());
     	TemporaryFile.reset();
+    	macroRepo = new MacroFileRepo(entityRepo);
 	}
 	
 	private EntityRepo extractJava(String directory) throws Exception {
@@ -109,10 +113,10 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 				if (!fileFullPath.startsWith(directory)) {
 					return;
 				}
-	            FileParser fileParser = new CdtCppFileParser(fileFullPath,entityRepo,preprocessorHandler,inferer, null);
+	            FileParser fileParser = new CdtCppFileParser(fileFullPath,entityRepo,preprocessorHandler,inferer, macroRepo);
 	            try {
 	                System.out.println("parsing " + fileFullPath 
-	                		+ "...");		
+	                		+ "...");
 	                fileParser.parse();
 	            } catch (IOException e) {
 	                e.printStackTrace();
@@ -132,7 +136,7 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 			initJavaExtractor();
 			return extractJava(src);
 		} else {
-			initCppExtractor();
+			initCppExtractor(src);
 			return extractCpp(src);
 		}
 	}
