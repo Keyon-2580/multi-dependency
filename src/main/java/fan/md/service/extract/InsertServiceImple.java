@@ -1,11 +1,8 @@
 package fan.md.service.extract;
 
-import java.io.File;
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -17,22 +14,6 @@ import depends.entity.FunctionEntity;
 import depends.entity.PackageEntity;
 import depends.entity.TypeEntity;
 import depends.entity.repo.EntityRepo;
-import depends.entity.repo.InMemoryEntityRepo;
-import depends.extractor.FileParser;
-import depends.extractor.cpp.CppBuiltInType;
-import depends.extractor.cpp.CppImportLookupStrategy;
-import depends.extractor.cpp.CppProcessor;
-import depends.extractor.cpp.MacroFileRepo;
-import depends.extractor.cpp.MacroRepo;
-import depends.extractor.cpp.cdt.CdtCppFileParser;
-import depends.extractor.cpp.cdt.PreprocessorHandler;
-import depends.extractor.java.JavaBuiltInType;
-import depends.extractor.java.JavaFileParser;
-import depends.extractor.java.JavaImportLookupStrategy;
-import depends.relations.Inferer;
-import depends.util.FileTraversal;
-import depends.util.FileUtil;
-import depends.util.TemporaryFile;
 import fan.md.model.Language;
 import fan.md.model.node.code.CodeFile;
 import fan.md.model.node.code.Function;
@@ -48,113 +29,28 @@ import fan.md.model.relation.code.TypeExtendsType;
 import fan.md.model.relation.code.TypeImplementsType;
 import fan.md.neo4j.service.BatchInserterService;
 
-public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
-	
-	private DependsCodeInsertService() {}
-	private static DependsCodeInsertService instance = new DependsCodeInsertService();
-	public static DependsCodeInsertService getInstance() {
-		return instance;
-	}
-	
-	private EntityRepo entityRepo ;
-	private Inferer inferer;
-    private PreprocessorHandler preprocessorHandler;
-    private FileTraversal fileTransversal;
-	private MacroRepo macroRepo;
-	
-	private Language language;
+public class InsertServiceImple implements InsertDependsCodeToNeo4j {
 
-	private void initJavaExtractor() {
-		entityRepo = new InMemoryEntityRepo();
-		inferer = new Inferer(entityRepo,new JavaImportLookupStrategy(),new JavaBuiltInType(),false);
-    	TemporaryFile.reset();
-	}
-	
-	private void initCppExtractor(String src) {
-		entityRepo = new InMemoryEntityRepo();
-    	inferer = new Inferer(entityRepo,new CppImportLookupStrategy(),new CppBuiltInType(),false);
-    	preprocessorHandler = new PreprocessorHandler(src, new ArrayList<>());
-    	TemporaryFile.reset();
-    	macroRepo = new MacroFileRepo(entityRepo);
-	}
-	
-	private EntityRepo extractJava(String directory) throws Exception {
-	    fileTransversal = new FileTraversal(new FileTraversal.IFileVisitor(){
-			@Override
-			public void visit(File file) {
-				String fileFullPath = file.getAbsolutePath();
-				fileFullPath = FileUtil.uniqFilePath(fileFullPath);
-				if (!fileFullPath.startsWith(directory)) {
-					return;
-				}
-	            FileParser fileParser = new JavaFileParser(fileFullPath, entityRepo, inferer);
-	            try {
-	                System.out.println("parsing " + fileFullPath 
-	                		+ "...");		
-	                fileParser.parse();
-	            } catch (IOException e) {
-	                e.printStackTrace();
-	            }	
-			}
-    		
-    	});
-    	fileTransversal.extensionFilter(new String[] {".java"});
-		fileTransversal.travers(directory);
-	    inferer.resolveAllBindings();
-		return entityRepo;
-	}
-
-	private EntityRepo extractCpp(String directory) throws Exception {
-		FileTraversal fileTransversal = new FileTraversal(new FileTraversal.IFileVisitor(){
-			@Override
-			public void visit(File file) {
-				String fileFullPath = file.getAbsolutePath();
-				fileFullPath = FileUtil.uniqFilePath(fileFullPath);
-				if (!fileFullPath.startsWith(directory)) {
-					return;
-				}
-	            FileParser fileParser = new CdtCppFileParser(fileFullPath,entityRepo,preprocessorHandler,inferer, macroRepo);
-	            try {
-	                System.out.println("parsing " + fileFullPath 
-	                		+ "...");
-	                fileParser.parse();
-	            } catch (IOException e) {
-	                e.printStackTrace();
-	            }	
-			}
-    		
-    	});
-    	fileTransversal.extensionFilter(new CppProcessor().fileSuffixes());
-		fileTransversal.travers(directory);
-		inferer.resolveAllBindings();
-		return entityRepo;
-	}
-	
-	@Override
-	public EntityRepo extractEntityRepo(String src, Language language) throws Exception {
+	public InsertServiceImple(EntityRepo entityRepo, String databasePath, boolean delete, Language language) {
+		super();
+		this.entityRepo = entityRepo;
+		this.databasePath = databasePath;
+		this.delete = delete;
 		this.language = language;
-		if(Language.java == language) {
-			initJavaExtractor();
-			return extractJava(src);
-		} else {
-			initCppExtractor(src);
-			return extractCpp(src);
-		}
 	}
+
+	protected EntityRepo entityRepo;
+	protected String databasePath;
+	protected boolean delete;
+	protected Language language;
 	
-	Map<Integer, Package> pcks = new HashMap<>();
-	
-	Map<Integer, CodeFile> files = new HashMap<>();
-	
-	Map<Integer, Type> types = new HashMap<>();
-	
-	Map<Integer, Function> functions = new HashMap<>();
-	
-//	Map<Integer, Node> nodes = new HashMap<>();
-	
+	protected Map<Integer, Package> pcks = new HashMap<>();
+	protected Map<Integer, CodeFile> files = new HashMap<>();
+	protected Map<Integer, Type> types = new HashMap<>();
+	protected Map<Integer, Function> functions = new HashMap<>();
 	
 	@Override
-	public void insertCodeToNeo4jDataBase(String databasePath, boolean delete) throws Exception {
+	public void insertCodeToNeo4jDataBase() throws Exception {
 		System.out.println("start to store datas to database");
 		DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
@@ -301,7 +197,7 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 						}
 					}
 					if(DependencyType.RETURN.equals(relation.getType())) {
-						System.out.println(functionEntity + "\n " + relation.getEntity().getClass() +  " " + relation.getEntity());
+//						System.out.println(functionEntity + "\n " + relation.getEntity().getClass() +  " " + relation.getEntity());
 						if(relation.getEntity() instanceof TypeEntity) {
 							Type returnType = types.get(relation.getEntity().getId());
 							if(returnType != null) {
@@ -316,6 +212,31 @@ public class DependsCodeInsertService implements InsertDependsCodeToNeo4j {
 		currentTime = new Timestamp(System.currentTimeMillis());
 		System.out.println("结束时间：" + sdf.format(currentTime));
 	}
-	
+
+	@Override
+	public EntityRepo getEntityRepo() {
+		return entityRepo;
+	}
+
+	@Override
+	public void setEntityRepo(EntityRepo entityRepo) {
+		this.entityRepo = entityRepo;
+	}
+
+	@Override
+	public void setDatabasePath(String databasePath) {
+		this.databasePath = databasePath;
+	}
+
+	@Override
+	public void setDelete(boolean delete) {
+		this.delete = delete;
+	}
+
+	@Override
+	public void setLanguage(Language language) {
+		this.language = language;
+	}
+
 
 }

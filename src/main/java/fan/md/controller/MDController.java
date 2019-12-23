@@ -6,36 +6,25 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import depends.entity.repo.EntityRepo;
-import fan.md.config.PropertyConfig;
-import fan.md.model.Language;
 import fan.md.model.node.code.CodeFile;
 import fan.md.service.StaticCodeService;
-import fan.md.service.extract.DependsEntityRepoExtractor;
 
 @Controller
 public class MDController {
 	
-	@Autowired
-	private DependsEntityRepoExtractor codeExtractor;
 	
 	@Autowired
 	private StaticCodeService staticCodeService;
 	
-	
-	@Autowired
-	private PropertyConfig conf;
-
 //	@Bean
-	public EntityRepo getRepo() {
-		try {
-			return codeExtractor.extractEntityRepo(conf.getCodePath(), Language.valueOf(conf.getLanguage()));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+//	private DependsEntityRepoExtractor getEntityRepoExtractor() {
+//		
+//		return null;
+//	}
 	
+//	@Autowired
+//	private PropertyConfig conf;
+
 	@RequestMapping("/")
 	@ResponseBody
 	public String index() {

@@ -1,7 +1,20 @@
 package fan.md.service.extract;
 
-public interface InsertDependsCodeToNeo4j extends DependsEntityRepoExtractor {
+import depends.entity.repo.EntityRepo;
+import fan.md.model.Language;
+
+public interface InsertDependsCodeToNeo4j {
 	
-	public void insertCodeToNeo4jDataBase(String databasePath, boolean delete) throws Exception ;
+	public void insertCodeToNeo4jDataBase() throws Exception ;
+	
+	public EntityRepo getEntityRepo();
+	
+	public void setEntityRepo(EntityRepo entityRepo);
+	
+	public void setDatabasePath(String databasePath);
+	
+	public void setDelete(boolean delete);
+	
+	public void setLanguage(Language language);
 	
 }
