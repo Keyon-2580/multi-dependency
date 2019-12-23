@@ -106,7 +106,7 @@ public class DependsCodeExtractorImpl implements DependsCodeExtractor, StaticCod
     @Autowired
     ProjectRepository projectRepository;
 
-	
+	@Deprecated
 	public void insertDependsCodeBySpring(String src, String language) throws Exception {
 		extractEntityRepo(src, language);
 		System.out.println("start to store datas to database");
