@@ -59,7 +59,7 @@ public class CppInsertServiceImpl extends InsertServiceImpl {
 						Function function = new Function();
 						function.setFunctionName(fileEntityChild.getRawName().getName());
 						function.setEntityId(fileEntityChild.getId());
-						functions.put(fileEntityChild.getId(), function);
+						insertNode(function, fileEntityChild.getId());
 						batchInserterService.insertNode(function);
 						FileContainsFunction containFunction = new FileContainsFunction(file, function);
 						batchInserterService.insertRelation(containFunction);
@@ -71,7 +71,7 @@ public class CppInsertServiceImpl extends InsertServiceImpl {
 					type.setTypeName(typeEntity.getQualifiedName());
 					type.setPackageName(pck.getPackageName());
 					type.setEntityId(typeEntity.getId());
-					types.put(typeEntity.getId(), type);
+					insertNode(type, typeEntity.getId());
 					batchInserterService.insertNode(type);
 					FileContainsType fileContainType = new FileContainsType(file, type);
 					batchInserterService.insertRelation(fileContainType);
@@ -80,7 +80,7 @@ public class CppInsertServiceImpl extends InsertServiceImpl {
 							Function function = new Function();
 							function.setFunctionName(typeEntityChild.getRawName().getName());
 							function.setEntityId(typeEntityChild.getId());
-							functions.put(typeEntityChild.getId(), function);
+							insertNode(function, typeEntityChild.getId());
 							batchInserterService.insertNode(function);
 							TypeContainsFunction containFunction = new TypeContainsFunction(type, function);
 							batchInserterService.insertRelation(containFunction);

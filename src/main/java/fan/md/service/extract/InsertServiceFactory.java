@@ -18,6 +18,7 @@ public class InsertServiceFactory {
 		switch(language) {
 		case java:
 			return new JavaInsertServiceImpl(projectPath, entityRepo, databasePath, delete, language);
+//			return new TestJavaInsertServiceImpl(projectPath, entityRepo, databasePath, delete, language);
 		case cpp:
 			return new CppInsertServiceImpl(projectPath, entityRepo, databasePath, delete, language);
 		}

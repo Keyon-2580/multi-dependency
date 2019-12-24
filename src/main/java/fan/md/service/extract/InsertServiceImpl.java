@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 import depends.deptypes.DependencyType;
@@ -13,10 +12,10 @@ import depends.entity.TypeEntity;
 import depends.entity.repo.EntityRepo;
 import fan.md.exception.LanguageErrorException;
 import fan.md.model.Language;
+import fan.md.model.node.Node;
 import fan.md.model.node.Project;
-import fan.md.model.node.code.CodeFile;
 import fan.md.model.node.code.Function;
-import fan.md.model.node.code.Package;
+import fan.md.model.node.code.StaticCodeNodes;
 import fan.md.model.node.code.Type;
 import fan.md.model.relation.code.FunctionCallFunction;
 import fan.md.model.relation.code.FunctionParameterType;
@@ -27,14 +26,15 @@ import fan.md.neo4j.service.BatchInserterService;
 
 public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 
-	public InsertServiceImpl(String projectpath, EntityRepo entityRepo, String databasePath, boolean delete, Language language) {
+	public InsertServiceImpl(String projectPath, EntityRepo entityRepo, String databasePath, boolean delete, Language language) {
 		super();
 		this.entityRepo = entityRepo;
 		this.databasePath = databasePath;
 		this.delete = delete;
 		this.language = language;
 		this.batchInserterService = BatchInserterService.getInstance();
-		this.project = new Project(databasePath, databasePath, language);
+		this.nodes = new StaticCodeNodes();
+		this.nodes.setProject(new Project(projectPath, projectPath, language));
 	}
 
 	protected EntityRepo entityRepo;
@@ -42,18 +42,17 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 	protected boolean delete;
 	protected Language language;
 	
-	protected Map<Integer, Package> pcks = new HashMap<>();
-	protected Map<Integer, CodeFile> files = new HashMap<>();
-	protected Map<Integer, Type> types = new HashMap<>();
-	protected Map<Integer, Function> functions = new HashMap<>();
+	protected StaticCodeNodes nodes;
 	
 	protected BatchInserterService batchInserterService;
-	
-	protected Project project;
 	
 	protected abstract void insertNodesWithContainRelations() throws LanguageErrorException;
 	
 	protected abstract void insertRelations() throws LanguageErrorException;
+	
+	protected void insertNode(Node node, Integer entityId) {
+		this.nodes.insertNode(node, entityId);
+	}
 	
 	@Override
 	public void insertCodeToNeo4jDataBase() throws Exception {
@@ -62,7 +61,7 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
 		System.out.println("开始时间：" + sdf.format(currentTime));
 		batchInserterService.init(databasePath, delete);
-		batchInserterService.insertNode(project);
+		batchInserterService.insertNode(this.nodes.getProject());
 		
 		insertNodesWithContainRelations();
 		insertRelations();
@@ -73,6 +72,7 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 	}
 	
 	protected void extractRelationsFromTypes() {
+		Map<Integer, Type> types = this.nodes.findTypes();
 		types.forEach((id, type) -> {
 			// 继承与实现
 			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(id);
@@ -96,6 +96,8 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 	}
 	
 	protected void extractRelationsFromFunctions() {
+		Map<Integer, Function> functions = this.nodes.findFunctions();
+		Map<Integer, Type> types = this.nodes.findTypes();
 		functions.forEach((id, function) -> {
 			// 函数调用
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(id);

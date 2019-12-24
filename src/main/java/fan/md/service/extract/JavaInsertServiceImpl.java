@@ -34,7 +34,7 @@ public class JavaInsertServiceImpl extends InsertServiceImpl {
 				Package pck = new Package();
 				pck.setPackageName(entity.getQualifiedName());
 				pck.setEntityId(entity.getId());
-				pcks.put(entity.getId(), pck);
+				insertNode(pck, entity.getId());
 				batchInserterService.insertNode(pck);
 				entity.getChildren().forEach(fileEntity -> {
 					if(fileEntity instanceof FileEntity) {
@@ -51,7 +51,7 @@ public class JavaInsertServiceImpl extends InsertServiceImpl {
 							type.setTypeName(typeEntity.getQualifiedName());
 							type.setPackageName(pck.getPackageName());
 							type.setEntityId(typeEntity.getId());
-							types.put(typeEntity.getId(), type);
+							insertNode(type, typeEntity.getId());
 							batchInserterService.insertNode(type);
 							FileContainsType fileContainType = new FileContainsType(file, type);
 							batchInserterService.insertRelation(fileContainType);
@@ -60,7 +60,7 @@ public class JavaInsertServiceImpl extends InsertServiceImpl {
 									Function function = new Function();
 									function.setFunctionName(typeEntityChild.getRawName().getName());
 									function.setEntityId(typeEntityChild.getId());
-									functions.put(typeEntityChild.getId(), function);
+									insertNode(function, typeEntityChild.getId());
 									batchInserterService.insertNode(function);
 									TypeContainsFunction containFunction = new TypeContainsFunction(type, function);
 									batchInserterService.insertRelation(containFunction);
