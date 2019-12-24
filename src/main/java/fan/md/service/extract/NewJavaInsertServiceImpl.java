@@ -21,9 +21,9 @@ import fan.md.model.relation.code.TypeContainsFunction;
 import fan.md.model.relation.code.TypeContainsVariable;
 import fan.md.utils.FileUtils;
 
-public class TestJavaInsertServiceImpl extends InsertServiceImpl {
+public class NewJavaInsertServiceImpl extends InsertServiceImpl {
 
-	public TestJavaInsertServiceImpl(String projectPath, EntityRepo entityRepo, String databasePath, boolean delete,
+	public NewJavaInsertServiceImpl(String projectPath, EntityRepo entityRepo, String databasePath, boolean delete,
 			Language language) {
 		super(projectPath, entityRepo, databasePath, delete, language);
 	}

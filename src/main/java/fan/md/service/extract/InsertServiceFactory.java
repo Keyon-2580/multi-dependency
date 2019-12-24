@@ -18,9 +18,10 @@ public class InsertServiceFactory {
 		switch(language) {
 		case java:
 //			return new JavaInsertServiceImpl(projectPath, entityRepo, databasePath, delete, language);
-			return new TestJavaInsertServiceImpl(projectPath, entityRepo, databasePath, delete, language);
+			return new NewJavaInsertServiceImpl(projectPath, entityRepo, databasePath, delete, language);
 		case cpp:
-			return new CppInsertServiceImpl(projectPath, entityRepo, databasePath, delete, language);
+//			return new CppInsertServiceImpl(projectPath, entityRepo, databasePath, delete, language);
+			return new NewCppInsertServiceImpl(projectPath, entityRepo, databasePath, delete, language);
 		}
 		throw new Exception("程序语言不为java或c/c++，提取失败");
 	}

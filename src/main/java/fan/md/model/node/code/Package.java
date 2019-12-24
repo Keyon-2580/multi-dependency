@@ -16,6 +16,7 @@ public class Package implements Node {
     @Id
     @GeneratedValue
     private Long id;
+    
 	private String packageName;
 	
 	private boolean isDirectory;
