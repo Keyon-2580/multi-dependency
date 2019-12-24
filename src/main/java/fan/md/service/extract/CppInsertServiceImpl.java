@@ -1,0 +1,100 @@
+package fan.md.service.extract;
+
+import java.util.List;
+
+import depends.entity.FileEntity;
+import depends.entity.FunctionEntity;
+import depends.entity.PackageEntity;
+import depends.entity.TypeEntity;
+import depends.entity.repo.EntityRepo;
+import fan.md.exception.LanguageErrorException;
+import fan.md.model.Language;
+import fan.md.model.node.code.CodeFile;
+import fan.md.model.node.code.Function;
+import fan.md.model.node.code.Package;
+import fan.md.model.node.code.Type;
+import fan.md.model.relation.code.FileContainsFunction;
+import fan.md.model.relation.code.FileContainsType;
+import fan.md.model.relation.code.PackageContainsFile;
+import fan.md.model.relation.code.TypeContainsFunction;
+
+public class CppInsertServiceImpl extends InsertServiceImpl {
+
+	public CppInsertServiceImpl(String projectPath, EntityRepo entityRepo, String databasePath, boolean delete, Language language) {
+		super(projectPath, entityRepo, databasePath, delete, language);
+	}
+
+	@Override
+	protected void insertNodesWithContainRelations() throws LanguageErrorException {
+		if(language != Language.cpp) {
+			throw new LanguageErrorException();
+		}
+		entityRepo.getEntities().forEach(entity -> {
+			if(entity instanceof FileEntity) {
+				String fileName = entity.getQualifiedName();
+				String packageName = null;
+				if(fileName.contains("\\")) {
+					packageName = fileName.substring(0, fileName.lastIndexOf("\\"));
+				} else if(fileName.contains("/")) {
+					packageName = fileName.substring(0, fileName.lastIndexOf("/"));
+				} else {
+					packageName = "default";
+				}
+				// cpp项目的Package是文件所在的路径
+				Package pck = new Package();
+				pck.setPackageName(packageName);
+				batchInserterService.insertNode(pck);
+				CodeFile file = new CodeFile();
+				file.setFileName(entity.getRawName().getName());
+				file.setPath(entity.getQualifiedName());
+				file.setEntityId(entity.getId());
+				batchInserterService.insertNode(file);
+				PackageContainsFile packageContainFile = new PackageContainsFile(pck, file);
+				batchInserterService.insertRelation(packageContainFile);
+				entity.getChildren().forEach(fileEntityChild -> {
+					if(fileEntityChild instanceof PackageEntity) {
+						// 命名空间
+					} else if(fileEntityChild instanceof FunctionEntity) {
+						// 文件内的函数
+						Function function = new Function();
+						function.setFunctionName(fileEntityChild.getRawName().getName());
+						function.setEntityId(fileEntityChild.getId());
+						functions.put(fileEntityChild.getId(), function);
+						batchInserterService.insertNode(function);
+						FileContainsFunction containFunction = new FileContainsFunction(file, function);
+						batchInserterService.insertRelation(containFunction);
+					}
+				});
+				List<TypeEntity> typeEntities = ((FileEntity) entity).getDeclaredTypes();
+				typeEntities.forEach(typeEntity -> {
+					Type type = new Type();
+					type.setTypeName(typeEntity.getQualifiedName());
+					type.setPackageName(pck.getPackageName());
+					type.setEntityId(typeEntity.getId());
+					types.put(typeEntity.getId(), type);
+					batchInserterService.insertNode(type);
+					FileContainsType fileContainType = new FileContainsType(file, type);
+					batchInserterService.insertRelation(fileContainType);
+					typeEntity.getChildren().forEach(typeEntityChild -> {
+						if(typeEntityChild instanceof FunctionEntity) {
+							Function function = new Function();
+							function.setFunctionName(typeEntityChild.getRawName().getName());
+							function.setEntityId(typeEntityChild.getId());
+							functions.put(typeEntityChild.getId(), function);
+							batchInserterService.insertNode(function);
+							TypeContainsFunction containFunction = new TypeContainsFunction(type, function);
+							batchInserterService.insertRelation(containFunction);
+						}
+					});
+				});
+			}
+		});
+	}
+
+	@Override
+	protected void insertRelations() throws LanguageErrorException {
+		extractRelationsFromTypes();
+		extractRelationsFromFunctions();
+	}
+
+}

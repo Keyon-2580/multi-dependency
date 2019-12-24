@@ -22,6 +22,8 @@ public class Package implements Node {
 
     private int entityId;
 
+	private Long parentId;
+	
 	private static final long serialVersionUID = -4892461872164624064L;
 
 	public String getPackageName() {
@@ -70,5 +72,13 @@ public class Package implements Node {
 		this.isDirectory = isDirectory;
 	}
 
+	@Override
+	public Long getParentId() {
+		return parentId == null ? -1L : parentId;
+	}
+	
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
 
 }

@@ -20,6 +20,8 @@ public class Function implements Node {
     private Long id;
 	
     private int entityId;
+
+	private Long parentId;
 	
 	private String functionName;
 	
@@ -60,5 +62,13 @@ public class Function implements Node {
 		return NodeType.Function;
 	}
 
+
+	@Override
+	public Long getParentId() {
+		return parentId == null ? -1L : parentId;
+	}
 	
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
 }

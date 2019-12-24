@@ -24,6 +24,8 @@ public class CodeFile implements Node {
 	private String fileName;
 	
 	private String path;
+	
+	private Long parentId;
 
 	public String getFileName() {
 		return fileName;
@@ -63,6 +65,7 @@ public class CodeFile implements Node {
 		properties.put("fileName", getFileName());
 		properties.put("entityId", getEntityId());
 		properties.put("path", getPath());
+		properties.put("parentId", getParentId());
 		return properties;
 	}
 
@@ -70,5 +73,14 @@ public class CodeFile implements Node {
 	public NodeType getNodeType() {
 		return NodeType.File;
 	}
+
+	@Override
+	public Long getParentId() {
+		return parentId == null ? -1L : parentId;
+	}
 	
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
+
 }

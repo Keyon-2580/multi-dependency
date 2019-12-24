@@ -12,4 +12,6 @@ public interface Node extends Serializable {
 	Map<String, Object> getProperties();
 	
 	NodeType getNodeType();
+	
+	Long getParentId();
 }

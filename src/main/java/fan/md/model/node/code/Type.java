@@ -20,6 +20,8 @@ public class Type implements Node {
 	
 	private String packageName;
 
+	private Long parentId;
+	
     private int entityId;
 	private static final long serialVersionUID = 6805501035295416590L;
 	
@@ -62,5 +64,13 @@ public class Type implements Node {
 		return NodeType.Type;
 	}
 
+	@Override
+	public Long getParentId() {
+		return parentId == null ? -1L : parentId;
+	}
+	
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
 
 }

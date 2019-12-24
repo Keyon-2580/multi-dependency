@@ -1,6 +1,7 @@
 package fan.md.model.node;
 
-import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
@@ -8,8 +9,8 @@ import org.neo4j.ogm.annotation.NodeEntity;
 
 import fan.md.model.Language;
 
-@NodeEntity
-public class Project implements Serializable {
+@NodeEntity("Project")
+public class Project implements Node {
 	private static final long serialVersionUID = 4058945695982024026L;
 	
 	@Id
@@ -20,7 +21,18 @@ public class Project implements Serializable {
 	
 	private String projectPath;
 	
-	private Language language;
+	private String language;
+	
+	public Project(String projectName, String projectPath, Language language) {
+		super();
+		this.projectName = projectName;
+		this.projectPath = projectPath;
+		this.language = language.toString();
+	}
+	
+	public Project() {
+		super();
+	}
 
 	public String getProjectName() {
 		return projectName;
@@ -38,12 +50,42 @@ public class Project implements Serializable {
 		this.projectPath = projectPath;
 	}
 
-	public Language getLanguage() {
+	public String getLanguage() {
 		return language;
 	}
 
 	public void setLanguage(Language language) {
-		this.language = language;
+		this.language = language.toString();
+	}
+
+	@Override
+	public Long getId() {
+		return id;
+	}
+
+	@Override
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	@Override
+	public Map<String, Object> getProperties() {
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("language", language.toString());
+		properties.put("projectName", projectName);
+		properties.put("projectPath", projectPath);
+		properties.put("parentId", getParentId());
+		return properties;
+	}
+
+	@Override
+	public NodeType getNodeType() {
+		return NodeType.Project;
+	}
+
+	@Override
+	public Long getParentId() {
+		return -1L;
 	}
 	
 }
