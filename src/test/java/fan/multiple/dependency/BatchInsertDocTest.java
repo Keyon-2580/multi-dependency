@@ -26,7 +26,7 @@ public class BatchInsertDocTest {
         }
         return file.delete();
     }
-	@Test
+//	@Test
 	public void insert() throws Exception {
 		BatchInserter inserter = null;
 		try

@@ -13,5 +13,4 @@ public interface Node extends Serializable {
 	
 	NodeType getNodeType();
 	
-	Long getParentId();
 }

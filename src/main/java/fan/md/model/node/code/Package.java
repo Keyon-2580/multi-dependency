@@ -20,10 +20,8 @@ public class Package implements Node {
 	
 	private boolean isDirectory;
 
-    private int entityId;
+    private Integer entityId;
 
-	private Long parentId;
-	
 	private static final long serialVersionUID = -4892461872164624064L;
 
 	public String getPackageName() {
@@ -42,19 +40,19 @@ public class Package implements Node {
 		this.id = id;
 	}
 
-	public int getEntityId() {
+	public Integer getEntityId() {
 		return entityId;
 	}
 
-	public void setEntityId(int entityId) {
+	public void setEntityId(Integer entityId) {
 		this.entityId = entityId;
 	}
 
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("packageName", getPackageName());
-		properties.put("entityId", getEntityId());
+		properties.put("packageName", getPackageName() == null ? "" : getPackageName());
+		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("isDirectory", isDirectory());
 		return properties;
 	}
@@ -70,15 +68,6 @@ public class Package implements Node {
 
 	public void setDirectory(boolean isDirectory) {
 		this.isDirectory = isDirectory;
-	}
-
-	@Override
-	public Long getParentId() {
-		return parentId == null ? -1L : parentId;
-	}
-	
-	public void setParentId(Long parentId) {
-		this.parentId = parentId;
 	}
 
 }

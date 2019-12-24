@@ -9,6 +9,7 @@ import java.util.Map;
 import depends.deptypes.DependencyType;
 import depends.entity.FunctionEntity;
 import depends.entity.TypeEntity;
+import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
 import fan.md.exception.LanguageErrorException;
 import fan.md.model.Language;
@@ -17,11 +18,13 @@ import fan.md.model.node.Project;
 import fan.md.model.node.code.Function;
 import fan.md.model.node.code.StaticCodeNodes;
 import fan.md.model.node.code.Type;
+import fan.md.model.node.code.Variable;
 import fan.md.model.relation.code.FunctionCallFunction;
 import fan.md.model.relation.code.FunctionParameterType;
 import fan.md.model.relation.code.FunctionReturnType;
 import fan.md.model.relation.code.TypeExtendsType;
 import fan.md.model.relation.code.TypeImplementsType;
+import fan.md.model.relation.code.VariableIsType;
 import fan.md.neo4j.service.BatchInserterService;
 
 public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
@@ -95,6 +98,28 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 		});
 	}
 	
+	protected void extractRelationsFromVariables() {
+		Map<Integer, Variable> variables = this.nodes.findVariables();
+		
+		variables.forEach((entityId, variable) -> {
+			VarEntity varEntity = (VarEntity) entityRepo.getEntity(entityId);
+			TypeEntity typeEntity = varEntity.getType();
+			if(typeEntity == null) {
+				System.out.println(varEntity);
+			} else {
+				if(typeEntity.getClass() == TypeEntity.class) {
+					Type type = this.nodes.findType(typeEntity.getId());
+					if(type != null) {
+						VariableIsType variableIsType = new VariableIsType(variable, type);
+						batchInserterService.insertRelation(variableIsType);
+					}
+				} else {
+					System.out.println(typeEntity.getClass());
+				}
+			}
+		});
+	}
+	
 	protected void extractRelationsFromFunctions() {
 		Map<Integer, Function> functions = this.nodes.findFunctions();
 		Map<Integer, Type> types = this.nodes.findTypes();
@@ -104,12 +129,14 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 			functionEntity.getRelations().forEach(relation -> {
 				if(DependencyType.CALL.equals(relation.getType())) {
 					if(relation.getEntity() instanceof FunctionEntity) {
+						// call其它方法
 						Function other = functions.get(relation.getEntity().getId());
 						if(other != null) {
 							FunctionCallFunction call = new FunctionCallFunction(function, other);
 							batchInserterService.insertRelation(call);
 						}
 					} else {
+						///FIXME
 					}
 				}
 				if(DependencyType.RETURN.equals(relation.getType())) {

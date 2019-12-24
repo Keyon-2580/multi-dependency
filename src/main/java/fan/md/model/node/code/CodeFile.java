@@ -19,14 +19,12 @@ public class CodeFile implements Node {
     @GeneratedValue
     private Long id;
     
-    private int entityId;
+    private Integer entityId;
     
 	private String fileName;
 	
 	private String path;
 	
-	private Long parentId;
-
 	public String getFileName() {
 		return fileName;
 	}
@@ -51,36 +49,26 @@ public class CodeFile implements Node {
 		this.id = id;
 	}
 
-	public int getEntityId() {
+	public Integer getEntityId() {
 		return entityId;
 	}
 
-	public void setEntityId(int entityId) {
+	public void setEntityId(Integer entityId) {
 		this.entityId = entityId;
 	}
 
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("fileName", getFileName());
-		properties.put("entityId", getEntityId());
-		properties.put("path", getPath());
-		properties.put("parentId", getParentId());
+		properties.put("fileName", getFileName() == null ? "" : getFileName());
+		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
+		properties.put("path", getPath() == null ? "" : getPath());
 		return properties;
 	}
 
 	@Override
 	public NodeType getNodeType() {
 		return NodeType.File;
-	}
-
-	@Override
-	public Long getParentId() {
-		return parentId == null ? -1L : parentId;
-	}
-	
-	public void setParentId(Long parentId) {
-		this.parentId = parentId;
 	}
 
 }

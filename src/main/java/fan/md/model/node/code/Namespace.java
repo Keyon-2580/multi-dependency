@@ -9,8 +9,6 @@ public class Namespace implements Node {
 	
 	private static final long serialVersionUID = 7914006834768560932L;
 
-	private Long parentId;
-	
 	@Override
 	public Long getId() {
 		return null;
@@ -31,12 +29,4 @@ public class Namespace implements Node {
 		return null;
 	}
 
-	@Override
-	public Long getParentId() {
-		return parentId == null ? -1L : parentId;
-	}
-	
-	public void setParentId(Long parentId) {
-		this.parentId = parentId;
-	}
 }

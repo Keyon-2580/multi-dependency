@@ -19,10 +19,8 @@ public class Function implements Node {
     @GeneratedValue
     private Long id;
 	
-    private int entityId;
+    private Integer entityId;
 
-	private Long parentId;
-	
 	private String functionName;
 	
 	public String getFunctionName() {
@@ -41,19 +39,19 @@ public class Function implements Node {
 		this.id = id;
 	}
 
-	public int getEntityId() {
+	public Integer getEntityId() {
 		return entityId;
 	}
 
-	public void setEntityId(int entityId) {
+	public void setEntityId(Integer entityId) {
 		this.entityId = entityId;
 	}
 
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("functionName", getFunctionName());
-		properties.put("entityId", getEntityId());
+		properties.put("functionName", getFunctionName() == null ? "" : getFunctionName());
+		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		return properties;
 	}
 
@@ -62,13 +60,4 @@ public class Function implements Node {
 		return NodeType.Function;
 	}
 
-
-	@Override
-	public Long getParentId() {
-		return parentId == null ? -1L : parentId;
-	}
-	
-	public void setParentId(Long parentId) {
-		this.parentId = parentId;
-	}
 }

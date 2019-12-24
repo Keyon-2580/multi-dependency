@@ -15,11 +15,9 @@ public class Variable implements Node {
 
 	private static final long serialVersionUID = 7656480620809763012L;
 
-	private Long parentId;
-	
 	private String variableName;
 
-	private int entityId;
+	private Integer entityId;
     @Id
     @GeneratedValue
     private Long id;
@@ -37,24 +35,14 @@ public class Variable implements Node {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("variableName", getVariableName());
-		properties.put("parentId", getParentId());
-		properties.put("entityId", entityId);
+		properties.put("variableName", getVariableName() == null ? "" : getVariableName());
+		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		return properties;
 	}
 
 	@Override
 	public NodeType getNodeType() {
 		return NodeType.Variable;
-	}
-
-	@Override
-	public Long getParentId() {
-		return parentId == null ? -1 : parentId;
-	}
-	
-	public void setParentId(Long parentId) {
-		this.parentId = parentId;
 	}
 
 	public String getVariableName() {
@@ -65,11 +53,11 @@ public class Variable implements Node {
 		this.variableName = variableName;
 	}
 
-	public int getEntityId() {
+	public Integer getEntityId() {
 		return entityId;
 	}
 
-	public void setEntityId(int entityId) {
+	public void setEntityId(Integer entityId) {
 		this.entityId = entityId;
 	}
 }

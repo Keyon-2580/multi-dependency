@@ -6,6 +6,7 @@ import depends.entity.FileEntity;
 import depends.entity.FunctionEntity;
 import depends.entity.PackageEntity;
 import depends.entity.TypeEntity;
+import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
 import fan.md.exception.LanguageErrorException;
 import fan.md.model.Language;
@@ -13,8 +14,10 @@ import fan.md.model.node.code.CodeFile;
 import fan.md.model.node.code.Function;
 import fan.md.model.node.code.Package;
 import fan.md.model.node.code.Type;
+import fan.md.model.node.code.Variable;
 import fan.md.model.relation.code.FileContainsFunction;
 import fan.md.model.relation.code.FileContainsType;
+import fan.md.model.relation.code.FileContainsVariable;
 import fan.md.model.relation.code.PackageContainsFile;
 import fan.md.model.relation.code.TypeContainsFunction;
 
@@ -63,6 +66,14 @@ public class CppInsertServiceImpl extends InsertServiceImpl {
 						batchInserterService.insertNode(function);
 						FileContainsFunction containFunction = new FileContainsFunction(file, function);
 						batchInserterService.insertRelation(containFunction);
+					} else if(fileEntityChild instanceof VarEntity) {
+						Variable variable = new Variable();
+						variable.setEntityId(fileEntityChild.getId());
+						variable.setVariableName(fileEntityChild.getQualifiedName());
+						insertNode(variable, fileEntityChild.getId());
+						batchInserterService.insertNode(variable);
+						FileContainsVariable containVariable = new FileContainsVariable(file, variable);
+						batchInserterService.insertRelation(containVariable);
 					}
 				});
 				List<TypeEntity> typeEntities = ((FileEntity) entity).getDeclaredTypes();

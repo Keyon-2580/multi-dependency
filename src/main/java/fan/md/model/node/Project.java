@@ -72,9 +72,8 @@ public class Project implements Node {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("language", language.toString());
-		properties.put("projectName", projectName);
-		properties.put("projectPath", projectPath);
-		properties.put("parentId", getParentId());
+		properties.put("projectName", getProjectName() == null ? "" : getProjectName());
+		properties.put("projectPath", getProjectPath() == null ? "" : getProjectPath());
 		return properties;
 	}
 
@@ -83,9 +82,4 @@ public class Project implements Node {
 		return NodeType.Project;
 	}
 
-	@Override
-	public Long getParentId() {
-		return -1L;
-	}
-	
 }

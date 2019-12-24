@@ -20,9 +20,7 @@ public class Type implements Node {
 	
 	private String packageName;
 
-	private Long parentId;
-	
-    private int entityId;
+    private Integer entityId;
 	private static final long serialVersionUID = 6805501035295416590L;
 	
 	public String getTypeName() {
@@ -43,34 +41,25 @@ public class Type implements Node {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public int getEntityId() {
+	public Integer getEntityId() {
 		return entityId;
 	}
-	public void setEntityId(int entityId) {
+	public void setEntityId(Integer entityId) {
 		this.entityId = entityId;
 	}
 	
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("typeName", getTypeName());
-		properties.put("entityId", getEntityId());
-		properties.put("packageName", getPackageName());
+		properties.put("typeName", getTypeName() == null ? "" : getTypeName());
+		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
+		properties.put("packageName", getPackageName() == null ? "" : getPackageName());
 		return properties;
 	}
 	
 	@Override
 	public NodeType getNodeType() {
 		return NodeType.Type;
-	}
-
-	@Override
-	public Long getParentId() {
-		return parentId == null ? -1L : parentId;
-	}
-	
-	public void setParentId(Long parentId) {
-		this.parentId = parentId;
 	}
 
 }

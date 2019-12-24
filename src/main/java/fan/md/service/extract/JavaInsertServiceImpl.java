@@ -6,6 +6,7 @@ import depends.entity.FileEntity;
 import depends.entity.FunctionEntity;
 import depends.entity.PackageEntity;
 import depends.entity.TypeEntity;
+import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
 import fan.md.exception.LanguageErrorException;
 import fan.md.model.Language;
@@ -13,9 +14,11 @@ import fan.md.model.node.code.CodeFile;
 import fan.md.model.node.code.Function;
 import fan.md.model.node.code.Package;
 import fan.md.model.node.code.Type;
+import fan.md.model.node.code.Variable;
 import fan.md.model.relation.code.FileContainsType;
 import fan.md.model.relation.code.PackageContainsFile;
 import fan.md.model.relation.code.TypeContainsFunction;
+import fan.md.model.relation.code.TypeContainsVariable;
 
 public class JavaInsertServiceImpl extends InsertServiceImpl {
 
@@ -64,6 +67,14 @@ public class JavaInsertServiceImpl extends InsertServiceImpl {
 									batchInserterService.insertNode(function);
 									TypeContainsFunction containFunction = new TypeContainsFunction(type, function);
 									batchInserterService.insertRelation(containFunction);
+								} else if(typeEntityChild instanceof VarEntity) {
+									Variable variable = new Variable();
+									variable.setEntityId(typeEntityChild.getId());
+									variable.setVariableName(typeEntityChild.getQualifiedName());
+									insertNode(variable, typeEntityChild.getId());
+									batchInserterService.insertNode(variable);
+									TypeContainsVariable containVariable = new TypeContainsVariable(type, variable);
+									batchInserterService.insertRelation(containVariable);
 								}
 							});
 						});

@@ -16,6 +16,16 @@ public class StaticCodeNodes extends Nodes {
 		return node == null ? null : (Package) node;
 	}
 	
+	public Package findPackageByPackageName(String packageName) {
+		Map<Integer, Package> packages = findPackages();
+		for(Package pck : packages.values()) {
+			if(packageName.equals(pck.getPackageName())) {
+				return pck;
+			}
+		}
+		return null;
+	}
+	
 	public Type findType(Integer entityId) {
 		Node node = findNode(entityId, NodeType.Type);
 		return node == null ? null : (Type) node;
@@ -34,6 +44,16 @@ public class StaticCodeNodes extends Nodes {
 	public Map<Integer, Function> findFunctions() {
 		Map<Integer, Function> functions = (Map<Integer, Function>) findNodesMap(NodeType.Function);
 		return functions;
+	}
+	
+	public Map<Integer, CodeFile> findFiles() {
+		Map<Integer, CodeFile> files = (Map<Integer, CodeFile>) findNodesMap(NodeType.File);
+		return files;
+	}
+	
+	public Map<Integer, Variable> findVariables() {
+		Map<Integer, Variable> variables = (Map<Integer, Variable>) findNodesMap(NodeType.Variable);
+		return variables;
 	}
 	
 	public Function findFunction(Integer entityId) {

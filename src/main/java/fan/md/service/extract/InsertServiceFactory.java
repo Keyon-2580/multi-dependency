@@ -17,8 +17,8 @@ public class InsertServiceFactory {
 	public InsertDependsCodeToNeo4j createInsertService(String projectPath, EntityRepo entityRepo, String databasePath, boolean delete, Language language) throws Exception {
 		switch(language) {
 		case java:
-			return new JavaInsertServiceImpl(projectPath, entityRepo, databasePath, delete, language);
-//			return new TestJavaInsertServiceImpl(projectPath, entityRepo, databasePath, delete, language);
+//			return new JavaInsertServiceImpl(projectPath, entityRepo, databasePath, delete, language);
+			return new TestJavaInsertServiceImpl(projectPath, entityRepo, databasePath, delete, language);
 		case cpp:
 			return new CppInsertServiceImpl(projectPath, entityRepo, databasePath, delete, language);
 		}
