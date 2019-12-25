@@ -12,6 +12,11 @@ import cn.edu.fudan.se.multidependency.model.node.code.Type;
 @Repository
 public interface TypeExtendsTypeRepository extends Neo4jRepository<TypeExtendsType, Long> {
 	
+	/**
+	 * 找出继承给定id的Type的Type
+	 * @param id
+	 * @return
+	 */
 	@Query("match (a:Type)-[r:TYPE_EXTENDS_TYPE]-(b:Type) where id(a) = {0} return b")
     List<Type> findExtendsTypesByTypeId(Long id);
 	
