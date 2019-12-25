@@ -18,4 +18,6 @@ public interface StaticCodeService {
 	List<TypeExtendsType> findAllExtends();
 	
 	List<Function> findAllFunctions();
+	
+	Package findTypeInPackage(Type type);
 }
