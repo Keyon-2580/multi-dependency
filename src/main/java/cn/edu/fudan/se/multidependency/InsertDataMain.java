@@ -1,11 +1,13 @@
 package cn.edu.fudan.se.multidependency;
 
 import cn.edu.fudan.se.multidependency.model.Language;
+import cn.edu.fudan.se.multidependency.model.node.code.StaticCodeNodes;
 import cn.edu.fudan.se.multidependency.service.extract.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.extract.DependsEntityRepoExtractorImpl;
+import cn.edu.fudan.se.multidependency.service.extract.InsertDependsCodeToNeo4j;
 import cn.edu.fudan.se.multidependency.service.extract.InsertServiceFactory;
-import depends.entity.repo.EntityRepo;
 import cn.edu.fudan.se.multidependency.utils.YamlUtils;
+import depends.entity.repo.EntityRepo;
 
 public class InsertDataMain {
 
@@ -16,17 +18,30 @@ public class InsertDataMain {
     public static void insert() {
 		try {
 			YamlUtils.YamlObject yaml = YamlUtils.getDataBasePath("src/main/resources/application.yml");
-			String projectPath = yaml.getCodeProjectPath();
-			Language language = Language.valueOf(yaml.getCodeLanguage());
+
+			/**
+			 * 静态分析
+			 */
+			StaticCodeNodes staticCodeNodes = insertStaticCode(yaml);
+			System.out.println("节点数：" + staticCodeNodes.size());
 			
-			DependsEntityRepoExtractor extractor = DependsEntityRepoExtractorImpl.getInstance();
-			extractor.setLanguage(language);
-			extractor.setProjectPath(projectPath);
-			EntityRepo entityRepo = extractor.extractEntityRepo();
-			
-			InsertServiceFactory.getInstance().createInsertService(yaml, entityRepo, true).insertCodeToNeo4jDataBase();
+			///FIXME
+			//其它
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+    }
+    
+    public static StaticCodeNodes insertStaticCode(YamlUtils.YamlObject yaml) throws Exception {
+		String projectPath = yaml.getCodeProjectPath();
+		Language language = Language.valueOf(yaml.getCodeLanguage());
+    	DependsEntityRepoExtractor extractor = DependsEntityRepoExtractorImpl.getInstance();
+		extractor.setLanguage(language);
+		extractor.setProjectPath(projectPath);
+		EntityRepo entityRepo = extractor.extractEntityRepo();
+		
+		InsertDependsCodeToNeo4j dependsInserter = InsertServiceFactory.getInstance().createInsertService(yaml, entityRepo, true);
+		dependsInserter.insertCodeToNeo4jDataBase();
+		return dependsInserter.getStaticCodeNodes();
     }
 }

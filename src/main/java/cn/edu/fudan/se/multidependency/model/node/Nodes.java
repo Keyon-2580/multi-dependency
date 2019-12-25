@@ -13,6 +13,14 @@ public class Nodes {
 		allNodes.clear();
 	}
 	
+	public int size() {
+		int size = 0;
+		for(Map<Integer, Node> nodes : allNodes.values()) {
+			size += nodes.size();
+		}
+		return size;
+	}
+	
 	public void clear(NodeType nodeType) {
 		Map<Integer, Node> nodes = allNodes.get(nodeType);
 		if(nodes != null) {

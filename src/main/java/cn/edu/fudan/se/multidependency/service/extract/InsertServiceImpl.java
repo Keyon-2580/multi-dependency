@@ -105,7 +105,7 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 			VarEntity varEntity = (VarEntity) entityRepo.getEntity(entityId);
 			TypeEntity typeEntity = varEntity.getType();
 			if(typeEntity == null) {
-				System.out.println(varEntity);
+//				System.out.println(varEntity);
 			} else {
 				if(typeEntity.getClass() == TypeEntity.class) {
 					Type type = this.nodes.findType(typeEntity.getId());
@@ -114,7 +114,7 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 						batchInserterService.insertRelation(variableIsType);
 					}
 				} else {
-					System.out.println(typeEntity.getClass());
+//					System.out.println(typeEntity.getClass());
 				}
 			}
 		});
@@ -186,6 +186,11 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 		if(this.batchInserterService != null) {
 			this.batchInserterService.close();
 		}
+	}
+
+	@Override
+	public StaticCodeNodes getStaticCodeNodes() {
+		return nodes;
 	}
 	
 }
