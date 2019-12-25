@@ -2,10 +2,10 @@ package cn.edu.fudan.se.multidependency;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.code.StaticCodeNodes;
-import cn.edu.fudan.se.multidependency.service.extract.DependsEntityRepoExtractor;
-import cn.edu.fudan.se.multidependency.service.extract.DependsEntityRepoExtractorImpl;
-import cn.edu.fudan.se.multidependency.service.extract.InsertDependsCodeToNeo4j;
-import cn.edu.fudan.se.multidependency.service.extract.InsertServiceFactory;
+import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractor;
+import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractorImpl;
+import cn.edu.fudan.se.multidependency.service.code.InsertDependsCodeToNeo4j;
+import cn.edu.fudan.se.multidependency.service.code.InsertServiceFactory;
 import cn.edu.fudan.se.multidependency.utils.YamlUtils;
 import depends.entity.repo.EntityRepo;
 

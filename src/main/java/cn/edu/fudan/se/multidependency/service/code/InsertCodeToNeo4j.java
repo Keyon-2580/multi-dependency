@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.service.extract;
+package cn.edu.fudan.se.multidependency.service.code;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.code.StaticCodeNodes;

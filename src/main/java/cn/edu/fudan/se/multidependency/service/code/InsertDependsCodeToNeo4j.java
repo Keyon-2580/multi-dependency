@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.service.extract;
+package cn.edu.fudan.se.multidependency.service.code;
 
 import depends.entity.repo.EntityRepo;
 
