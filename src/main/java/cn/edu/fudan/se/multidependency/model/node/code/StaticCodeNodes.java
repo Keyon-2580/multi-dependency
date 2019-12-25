@@ -1,0 +1,81 @@
+package cn.edu.fudan.se.multidependency.model.node.code;
+
+import java.util.Map;
+
+import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.Nodes;
+import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.Project;
+
+public class StaticCodeNodes extends Nodes {
+	
+	private Project project;
+	
+	public Package findPackage(Integer entityId) {
+		Node node = findNode(entityId, NodeType.Package);
+		return node == null ? null : (Package) node;
+	}
+	
+	public Package findPackageByPackageName(String packageName) {
+		Map<Integer, Package> packages = findPackages();
+		for(Package pck : packages.values()) {
+			if(packageName.equals(pck.getPackageName())) {
+				return pck;
+			}
+		}
+		return null;
+	}
+	
+	public Type findType(Integer entityId) {
+		Node node = findNode(entityId, NodeType.Type);
+		return node == null ? null : (Type) node;
+	}
+	
+	public Map<Integer, Type> findTypes() {
+		Map<Integer, Type> types = (Map<Integer, Type>) findNodesMap(NodeType.Type);
+		return types;
+	}
+	
+	public Map<Integer, Package> findPackages() {
+		Map<Integer, Package> packages = (Map<Integer, Package>) findNodesMap(NodeType.Package);
+		return packages;
+	}
+	
+	public Map<Integer, Function> findFunctions() {
+		Map<Integer, Function> functions = (Map<Integer, Function>) findNodesMap(NodeType.Function);
+		return functions;
+	}
+	
+	public Map<Integer, CodeFile> findFiles() {
+		Map<Integer, CodeFile> files = (Map<Integer, CodeFile>) findNodesMap(NodeType.File);
+		return files;
+	}
+	
+	public Map<Integer, Variable> findVariables() {
+		Map<Integer, Variable> variables = (Map<Integer, Variable>) findNodesMap(NodeType.Variable);
+		return variables;
+	}
+	
+	public Function findFunction(Integer entityId) {
+		Node node = findNode(entityId, NodeType.Function);
+		return node == null ? null : (Function) node;
+	}
+	
+	public CodeFile findCodeFile(Integer entityId) {
+		Node node = findNode(entityId, NodeType.File);
+		return node == null ? null : (CodeFile) node;
+	}
+	
+	public Variable findVariable(Integer entityId) {
+		Node node = findNode(entityId, NodeType.Variable);
+		return node == null ? null : (Variable) node;
+	}
+
+	public Project getProject() {
+		return project;
+	}
+
+	public void setProject(Project project) {
+		this.project = project;
+	}
+}

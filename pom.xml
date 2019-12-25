@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>fan</groupId>
-	<artifactId>multiple.dependency</artifactId>
+	<artifactId>multi-dependency</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<parent>
@@ -12,7 +12,7 @@
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.1.4.RELEASE</version>
 	</parent>
-	<name>multiple.dependency</name>
+	<name>multi-dependency</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
