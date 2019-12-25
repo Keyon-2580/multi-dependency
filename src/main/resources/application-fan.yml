@@ -12,10 +12,10 @@ server:
    
 data:
    code:
-#      path: D:\git\halo-1.1.3-beta.1
+      path: D:\git\halo-1.1.3-beta.1
 #      path: D:\git\eclipse-workspace\test
 #      path: D:\git\eclipse-workspace\multiple.dependency
-      path: C:\Users\Thinkpad\Desktop\0416\all\cassandra-3.0.0\cassandra-cassandra-3.0.0
+#      path: C:\Users\Thinkpad\Desktop\0416\all\cassandra-3.0.0\cassandra-cassandra-3.0.0
       language: java
 #      path: D:\git\bcrypt-1.1
 #      language: cpp

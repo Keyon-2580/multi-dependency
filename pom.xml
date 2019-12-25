@@ -19,7 +19,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<neo4j-ogm.version>3.2.4</neo4j-ogm.version>
 		<neo4j.version>3.5.14</neo4j.version>
-		<maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
+		<maven-jar-plugin.version>3.0.0</maven-jar-plugin.version>
 	</properties>
 
 	<dependencies>
