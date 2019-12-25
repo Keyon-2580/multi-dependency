@@ -1,21 +1,28 @@
 package cn.edu.fudan.se.multidependency.service.extract;
 
+import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.code.CodeFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Package;
+import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsFunction;
+import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsType;
+import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsVariable;
+import cn.edu.fudan.se.multidependency.model.relation.code.FunctionContainsVariable;
+import cn.edu.fudan.se.multidependency.model.relation.code.PackageContainsFile;
+import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsFunction;
+import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsVariable;
+import cn.edu.fudan.se.multidependency.utils.FileUtils;
+import depends.entity.Entity;
 import depends.entity.FileEntity;
 import depends.entity.FunctionEntity;
 import depends.entity.PackageEntity;
 import depends.entity.TypeEntity;
 import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
-import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
-import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
-import cn.edu.fudan.se.multidependency.model.node.code.Type;
-import cn.edu.fudan.se.multidependency.model.relation.code.PackageContainsFile;
-import cn.edu.fudan.se.multidependency.utils.FileUtils;
 
 public class NewCppInsertServiceImpl extends InsertServiceImpl {
 
@@ -73,6 +80,70 @@ public class NewCppInsertServiceImpl extends InsertServiceImpl {
 				type.setTypeName(entity.getQualifiedName());
 				insertNode(type, entity.getId());
 				batchInserterService.insertNode(type);
+			}
+		});
+		this.nodes.findTypes().forEach((entityId, type) -> {
+			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(entityId);
+			Entity parentEntity = typeEntity.getParent();
+			if(parentEntity == null) {
+				System.out.println("typeEntity's parent is null");
+			} else {
+				if(parentEntity instanceof FileEntity) {
+					CodeFile file = this.nodes.findCodeFile(parentEntity.getId());
+					if(file != null) {
+						FileContainsType fileContainType = new FileContainsType(file, type);
+						batchInserterService.insertRelation(fileContainType);
+					}
+				} else {
+					System.out.println("typeEntity's parent is other Entity " + parentEntity.getClass());
+				}
+			}
+		});
+		this.nodes.findFunctions().forEach((entityId, function) -> {
+			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(entityId);
+			Entity parentEntity = functionEntity.getParent();
+			if(parentEntity == null) {
+				System.out.println("functionEntity's parent is null");
+			} else {
+				if(parentEntity instanceof FileEntity) {
+//					System.out.println("functionEntity's parent is FileEntity");
+					CodeFile file = this.nodes.findCodeFile(parentEntity.getId());
+					FileContainsFunction fileContainsFunction = new FileContainsFunction(file, function);
+					batchInserterService.insertRelation(fileContainsFunction);
+				} else if(parentEntity.getClass() == TypeEntity.class) {
+//					System.out.println("functionEntity's parent is TypeEntity");
+					Type type = this.nodes.findType(parentEntity.getId());
+					TypeContainsFunction typeContainsFunction = new TypeContainsFunction(type, function);
+					batchInserterService.insertRelation(typeContainsFunction);
+				} else {
+					System.out.println("functionEntity's parent is other Entity " + parentEntity.getClass());
+				}
+			}
+		});
+		this.nodes.findVariables().forEach((entityId, variable) -> {
+			VarEntity varEntity = (VarEntity) entityRepo.getEntity(entityId);
+			Entity parentEntity = varEntity.getParent();
+			if(parentEntity == null) {
+				System.out.println("varEntity's parent is null");
+			} else {
+				if(parentEntity instanceof FileEntity) {
+//					System.out.println("varEntity's parent is FileEntity");
+					CodeFile file = this.nodes.findCodeFile(parentEntity.getId());
+					FileContainsVariable fileContainsVariable = new FileContainsVariable(file, variable);
+					batchInserterService.insertRelation(fileContainsVariable);
+				} else if(parentEntity.getClass() == TypeEntity.class) {
+//					System.out.println("varEntity's parent is TypeEntity");
+					Type type = this.nodes.findType(parentEntity.getId());
+					TypeContainsVariable typeContainsVariable = new TypeContainsVariable(type, variable);
+					batchInserterService.insertRelation(typeContainsVariable);
+				} else if(parentEntity instanceof FunctionEntity) {
+//					System.out.println("varEntity's parent is FunctionEntity");
+					Function function = this.nodes.findFunction(parentEntity.getId());
+					FunctionContainsVariable functionContainsVariable = new FunctionContainsVariable(function, variable);
+					batchInserterService.insertRelation(functionContainsVariable);
+				} else {
+					System.out.println("varEntity's parent is other Entity " + parentEntity.getClass());
+				}
 			}
 		});
 	}

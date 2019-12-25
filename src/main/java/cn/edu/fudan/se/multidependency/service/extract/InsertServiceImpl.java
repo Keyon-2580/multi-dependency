@@ -114,7 +114,7 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 						batchInserterService.insertRelation(variableIsType);
 					}
 				} else {
-//					System.out.println(typeEntity.getClass());
+					System.out.println(typeEntity.getClass());
 				}
 			}
 		});
