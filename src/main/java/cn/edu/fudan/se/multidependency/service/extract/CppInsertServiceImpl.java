@@ -21,6 +21,7 @@ import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsVariable;
 import cn.edu.fudan.se.multidependency.model.relation.code.PackageContainsFile;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsFunction;
 
+@Deprecated
 public class CppInsertServiceImpl extends InsertServiceImpl {
 
 	public CppInsertServiceImpl(String projectPath, EntityRepo entityRepo, String databasePath, boolean delete, Language language) {

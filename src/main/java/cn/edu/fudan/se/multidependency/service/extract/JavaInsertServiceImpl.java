@@ -20,6 +20,7 @@ import cn.edu.fudan.se.multidependency.model.relation.code.PackageContainsFile;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsFunction;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsVariable;
 
+@Deprecated
 public class JavaInsertServiceImpl extends InsertServiceImpl {
 
 	public JavaInsertServiceImpl(String projectPath, EntityRepo entityRepo, String databasePath, boolean delete, Language language) {
