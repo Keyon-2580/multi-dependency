@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.neo4j.repository;
+package cn.edu.fudan.se.multidependency.neo4j.repository.relation.dynamic;
 
 import java.util.List;
 

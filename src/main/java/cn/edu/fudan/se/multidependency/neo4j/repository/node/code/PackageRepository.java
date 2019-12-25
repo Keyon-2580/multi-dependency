@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.neo4j.repository;
+package cn.edu.fudan.se.multidependency.neo4j.repository.node.code;
 
 import java.util.List;
 

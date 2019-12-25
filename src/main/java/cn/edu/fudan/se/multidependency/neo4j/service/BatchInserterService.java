@@ -2,16 +2,18 @@ package cn.edu.fudan.se.multidependency.neo4j.service;
 
 import java.io.Closeable;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.utils.FileUtils;
@@ -57,6 +59,38 @@ public class BatchInserterService implements Closeable {
 		relation.setId(inserter.createRelationship(relation.getStartNodeGraphId(), 
 				relation.getEndNodeGraphId(), mapRelations.get(relation.getRelationType()), relation.getProperties()));
 		return relation.getId();
+	}
+
+	/**
+	 * 获取节点属性
+	 * @param id
+	 * @return
+	 */
+	public Map<String, Object> getNodeProperties(Long id) {
+		return inserter.getNodeProperties(id);
+	}
+	
+	/**
+	 * 获取关系属性
+	 * @param id
+	 * @return
+	 */
+	public Map<String, Object> getRelationshipProperties(Long id) {
+		return inserter.getRelationshipProperties(id);
+	}
+	
+	/**
+	 * 获取某个节点的所有关系的id
+	 * @param nodeId
+	 * @return
+	 */
+	public List<Long> getRelationshipIds(Long nodeId) {
+		List<Long> result = new ArrayList<>();
+		for(Long id : inserter.getRelationshipIds(nodeId)) {
+			result.add(id);
+		}
+		return result;
+		
 	}
 	
 	@Override

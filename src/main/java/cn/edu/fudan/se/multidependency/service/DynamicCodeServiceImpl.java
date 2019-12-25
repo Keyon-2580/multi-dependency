@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.dynamic.CallNode;
-import cn.edu.fudan.se.multidependency.neo4j.repository.FunctionDynamicCallFunctionRepository;
+import cn.edu.fudan.se.multidependency.neo4j.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
 
 @Service
 public class DynamicCodeServiceImpl implements DynamicCodeService {

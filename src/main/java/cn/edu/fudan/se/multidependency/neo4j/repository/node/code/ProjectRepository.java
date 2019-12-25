@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.neo4j.repository;
+package cn.edu.fudan.se.multidependency.neo4j.repository.node.code;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import org.springframework.data.neo4j.annotation.Query;

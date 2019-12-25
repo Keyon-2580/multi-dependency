@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.neo4j.repository;
+package cn.edu.fudan.se.multidependency.neo4j.repository.relation.code;
 
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsVariable;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
