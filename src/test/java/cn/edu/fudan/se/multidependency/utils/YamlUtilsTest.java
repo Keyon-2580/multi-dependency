@@ -11,7 +11,7 @@ public class YamlUtilsTest {
 		YamlUtils.YamlObject yaml;
 		try {
 			yaml = YamlUtils.getDataBasePath("src/main/resources/application.yml");
-			String test = yaml.forTest;
+			String test = yaml.getForTest();
 			assertTrue("this property is for YamlUtilsTest".equals(test));
 		} catch (Exception e) {
 			e.printStackTrace();

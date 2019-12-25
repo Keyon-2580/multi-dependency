@@ -1,27 +1,3 @@
 spring:
-  data:
-    neo4j:
-      username: neo4j
-      password: neo4j
-#      uri: bolt://localhost:7687
-#      uri: http://localhost:7474
-      # embedded
-      uri: file:///fan/Users/Thinkpad/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
-server:
-   port: 8080
-   
-data:
-   code:
-#      path: D:\git\halo-1.1.3-beta.1
-#      path: D:\git\eclipse-workspace\test
-      path: D:\git\eclipse-workspace\multiple.dependency
-      language: java
-#      path: D:\git\bcrypt-1.1
-#      language: cpp
-      platform: windows
-   neo4j:
-      # batchInserter要插入的数据库
-      path: D:\fan\Users\Thinkpad\neo4j-community-3.5.3-windows\neo4j-community-3.5.3\data\databases\multiple.dependency.db
-   
-   test: this property is for YamlUtilsTest
-      
+   profiles:
+      active: example
