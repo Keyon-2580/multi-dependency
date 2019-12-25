@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>fan</groupId>
+	<groupId>cn.edu.fudan.se</groupId>
 	<artifactId>multi-dependency</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
@@ -17,6 +17,9 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<neo4j-ogm.version>3.2.4</neo4j-ogm.version>
+		<neo4j.version>3.5.14</neo4j.version>
+		<maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -42,10 +45,12 @@
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-ogm-http-driver</artifactId>
+			<version>${neo4j-ogm.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-ogm-embedded-driver</artifactId>
+			<version>${neo4j-ogm.version}</version>
 		</dependency>
 	    <!-- <dependency>
 		    <groupId>org.springframework.data</groupId>
@@ -69,12 +74,12 @@
 		<dependency>
 		    <groupId>org.neo4j</groupId>
 		    <artifactId>neo4j-kernel</artifactId>
-		    <version>3.5.13</version>
+			<version>${neo4j.version}</version>
 		</dependency>
 		<dependency>
 		    <groupId>org.neo4j</groupId>
 		    <artifactId>neo4j</artifactId>
-		    <version>3.5.13</version>
+			<version>${neo4j.version}</version>
 		</dependency>
 		
 		<dependency>
