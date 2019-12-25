@@ -151,4 +151,9 @@ public class StaticCodeServiceImpl implements StaticCodeService {
 		});
 		return functions;
 	}
+
+	@Override
+	public Package findTypeInPackage(Type type) {
+		return null;
+	}
 }
