@@ -37,33 +37,29 @@ public class NewJavaInsertServiceImpl extends InsertServiceImpl {
 				pck.setPackageName(entity.getQualifiedName());
 				pck.setEntityId(entity.getId());
 				pck.setDirectory(false);
-				insertNode(pck, entity.getId());
-				batchInserterService.insertNode(pck);
+				insertNodeToNodes(pck, entity.getId());
 			} else if(entity instanceof FileEntity) {
 				CodeFile file = new CodeFile();
 				file.setEntityId(entity.getId());
 				file.setFileName(entity.getQualifiedName());
 				file.setPath(entity.getQualifiedName());
-				insertNode(file, entity.getId());
-				batchInserterService.insertNode(file);
+				insertNodeToNodes(file, entity.getId());
 			} else if(entity instanceof FunctionEntity) {
 				Function function = new Function();
 				function.setFunctionName(entity.getQualifiedName());
 				function.setEntityId(entity.getId());
-				insertNode(function, entity.getId());
-				batchInserterService.insertNode(function);
+				insertNodeToNodes(function, entity.getId());
 			} else if(entity instanceof VarEntity) {
 				Variable variable = new Variable();
 				variable.setEntityId(entity.getId());
+				variable.setTypeIdentify(((VarEntity) entity).getRawType().getName());
 				variable.setVariableName(entity.getQualifiedName());
-				insertNode(variable, entity.getId());
-				batchInserterService.insertNode(variable);
+				insertNodeToNodes(variable, entity.getId());
 			} else if(entity.getClass() == TypeEntity.class) {
 				Type type = new Type();
 				type.setEntityId(entity.getId());
 				type.setTypeName(entity.getQualifiedName());
-				insertNode(type, entity.getId());
-				batchInserterService.insertNode(type);
+				insertNodeToNodes(type, entity.getId());
 			}
 		});
 		this.nodes.findFiles().forEach((entityId, codeFile) -> {
@@ -82,14 +78,13 @@ public class NewJavaInsertServiceImpl extends InsertServiceImpl {
 					pck.setEntityId(entityRepo.generateId());
 					pck.setPackageName(packageName);
 					pck.setDirectory(true);
-					insertNode(pck, pck.getEntityId());
-					batchInserterService.insertNode(pck);
+					insertNodeToNodes(pck, pck.getEntityId());
 				}
 			} else {
 				pck = this.nodes.findPackage(parentEntity.getId());
 			}
 			containFile.setPck(pck);
-			batchInserterService.insertRelation(containFile);
+			insertRelationToRelations(containFile);
 		});
 		this.nodes.findTypes().forEach((entityId, type) -> {
 			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(entityId);
@@ -108,7 +103,8 @@ public class NewJavaInsertServiceImpl extends InsertServiceImpl {
 			}
 			CodeFile file = this.nodes.findCodeFile(parentEntity.getId());
 			FileContainsType fileContainsType = new FileContainsType(file, type);
-			batchInserterService.insertRelation(fileContainsType);
+//			batchInserterService.insertRelation(fileContainsType);
+			insertRelationToRelations(fileContainsType);
 		});
 		this.nodes.findFunctions().forEach((entityId, function) -> {
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(entityId);
@@ -120,7 +116,7 @@ public class NewJavaInsertServiceImpl extends InsertServiceImpl {
 			}
 			Type type = this.nodes.findType(parentEntity.getId());
 			TypeContainsFunction typeContainsFunction = new TypeContainsFunction(type, function);
-			batchInserterService.insertRelation(typeContainsFunction);
+			insertRelationToRelations(typeContainsFunction);
 		});
 		this.nodes.findVariables().forEach((entityId, variable) -> {
 			VarEntity varEntity = (VarEntity) entityRepo.getEntity(entityId);
@@ -128,11 +124,11 @@ public class NewJavaInsertServiceImpl extends InsertServiceImpl {
 			if(parentEntity instanceof FunctionEntity) {
 				Function function = this.nodes.findFunction(parentEntity.getId());
 				FunctionContainsVariable functionContainsVariable = new FunctionContainsVariable(function, variable);
-				batchInserterService.insertRelation(functionContainsVariable);
+				insertRelationToRelations(functionContainsVariable);
 			} else if(parentEntity.getClass() == TypeEntity.class) {
 				Type type = this.nodes.findType(parentEntity.getId());
 				TypeContainsVariable typeContainsVariable = new TypeContainsVariable(type, variable);
-				batchInserterService.insertRelation(typeContainsVariable);
+				insertRelationToRelations(typeContainsVariable);
 			} else {
 //				System.out.println(varEntity);
 //				System.out.println(parentEntity.getClass() + " " + parentEntity);

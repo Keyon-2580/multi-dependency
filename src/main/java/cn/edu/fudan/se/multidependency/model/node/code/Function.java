@@ -23,6 +23,8 @@ public class Function implements Node {
 
 	private String functionName;
 	
+	private String returnTypeIdentify;
+	
 	public String getFunctionName() {
 		return functionName;
 	}
@@ -52,12 +54,21 @@ public class Function implements Node {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("functionName", getFunctionName() == null ? "" : getFunctionName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
+		properties.put("returnTypeIdentify", getReturnTypeIdentify() == null ? "" : getReturnTypeIdentify());
 		return properties;
 	}
 
 	@Override
 	public NodeType getNodeType() {
 		return NodeType.Function;
+	}
+
+	public String getReturnTypeIdentify() {
+		return returnTypeIdentify;
+	}
+
+	public void setReturnTypeIdentify(String returnTypeIdentify) {
+		this.returnTypeIdentify = returnTypeIdentify;
 	}
 
 }

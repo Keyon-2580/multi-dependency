@@ -18,6 +18,9 @@ public class Variable implements Node {
 	private String variableName;
 
 	private Integer entityId;
+	
+	private String typeIdentify;
+	
     @Id
     @GeneratedValue
     private Long id;
@@ -37,6 +40,7 @@ public class Variable implements Node {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("variableName", getVariableName() == null ? "" : getVariableName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
+		properties.put("typeIdentify", getTypeIdentify() == null ? "" : getTypeIdentify());
 		return properties;
 	}
 
@@ -59,5 +63,13 @@ public class Variable implements Node {
 
 	public void setEntityId(Integer entityId) {
 		this.entityId = entityId;
+	}
+
+	public String getTypeIdentify() {
+		return typeIdentify;
+	}
+
+	public void setTypeIdentify(String typeIdentify) {
+		this.typeIdentify = typeIdentify;
 	}
 }

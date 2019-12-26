@@ -14,8 +14,10 @@ import org.neo4j.unsafe.batchinsert.BatchInserters;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.Nodes;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.model.relation.Relations;
 import cn.edu.fudan.se.multidependency.utils.FileUtils;
 
 public class BatchInserterService implements Closeable {
@@ -98,6 +100,32 @@ public class BatchInserterService implements Closeable {
 		if(inserter != null) {
 			inserter.shutdown();
 		}
+	}
+	
+	public boolean nodeExists(Long id) {
+		return id == null ? false : inserter.nodeExists(id);
+	}
+	
+	public boolean relationExists(Long id) {
+		return id == null ? false : (inserter.getRelationshipById(id) != null);
+	}
+	
+	public void insertNodes(Nodes allNodes) {
+		allNodes.getAllNodes().forEach((nodeType, nodes) -> {
+			nodes.forEach((otherId, node) -> {
+				if(!nodeExists(node.getId())) {
+					insertNode(node);
+				}
+			});
+		});
+	}
+	
+	public void insertRelations(Relations allRelations) {
+		allRelations.getAllRelations().forEach((relationType, relations) -> {
+			relations.forEach(relation -> {
+				insertRelation(relation);
+			});
+		});
 	}
 	
 }

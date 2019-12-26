@@ -13,6 +13,10 @@ public class Nodes {
 		allNodes.clear();
 	}
 	
+	public Map<NodeType, Map<Integer, Node>> getAllNodes() {
+		return new HashMap<>(allNodes);
+	}
+	
 	public int size() {
 		int size = 0;
 		for(Map<Integer, Node> nodes : allNodes.values()) {

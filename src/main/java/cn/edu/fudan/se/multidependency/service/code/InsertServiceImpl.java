@@ -6,26 +6,29 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.StaticCodeNodes;
+import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.relation.Relation;
+import cn.edu.fudan.se.multidependency.model.relation.Relations;
+import cn.edu.fudan.se.multidependency.model.relation.code.FunctionCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.code.FunctionParameterType;
+import cn.edu.fudan.se.multidependency.model.relation.code.FunctionReturnType;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeExtendsType;
+import cn.edu.fudan.se.multidependency.model.relation.code.TypeImplementsType;
+import cn.edu.fudan.se.multidependency.model.relation.code.VariableIsType;
 import cn.edu.fudan.se.multidependency.neo4j.service.BatchInserterService;
 import depends.deptypes.DependencyType;
+import depends.entity.EmptyTypeEntity;
 import depends.entity.FunctionEntity;
 import depends.entity.TypeEntity;
 import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
-import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
-import cn.edu.fudan.se.multidependency.model.node.code.Type;
-import cn.edu.fudan.se.multidependency.model.relation.code.FunctionCallFunction;
-import cn.edu.fudan.se.multidependency.model.relation.code.FunctionParameterType;
-import cn.edu.fudan.se.multidependency.model.relation.code.FunctionReturnType;
-import cn.edu.fudan.se.multidependency.model.relation.code.TypeImplementsType;
-import cn.edu.fudan.se.multidependency.model.relation.code.VariableIsType;
 
 public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 
@@ -38,6 +41,7 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 		this.batchInserterService = BatchInserterService.getInstance();
 		this.nodes = new StaticCodeNodes();
 		this.nodes.setProject(new Project(projectPath, projectPath, language));
+		this.relations = new Relations();
 	}
 
 	protected EntityRepo entityRepo;
@@ -47,14 +51,20 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 	
 	protected StaticCodeNodes nodes;
 	
+	protected Relations relations;
+	
 	protected BatchInserterService batchInserterService;
 	
 	protected abstract void insertNodesWithContainRelations() throws LanguageErrorException;
 	
 	protected abstract void insertRelations() throws LanguageErrorException;
 	
-	protected void insertNode(Node node, Integer entityId) {
+	protected void insertNodeToNodes(Node node, Integer entityId) {
 		this.nodes.insertNode(node, entityId);
+	}
+	
+	protected void insertRelationToRelations(Relation relation) {
+		this.relations.insertRelation(relation);
 	}
 	
 	@Override
@@ -69,11 +79,19 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 		insertNodesWithContainRelations();
 		insertRelations();
 		
+		// 将节点和关系放入nodes和relations后，统一插入neo4j
+		insertToNeo4j();
+		
 		closeBatchInserter();
 		currentTime = new Timestamp(System.currentTimeMillis());
 		System.out.println("结束时间：" + sdf.format(currentTime));
 	}
 	
+	private void insertToNeo4j() {
+		this.batchInserterService.insertNodes(nodes);
+		this.batchInserterService.insertRelations(relations);
+	}
+
 	protected void extractRelationsFromTypes() {
 		Map<Integer, Type> types = this.nodes.findTypes();
 		types.forEach((id, type) -> {
@@ -84,7 +102,7 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 				Type other = types.get(inherit.getId());
 				if(other != null) {
 					TypeExtendsType typeExtends = new TypeExtendsType(type, other);
-					batchInserterService.insertRelation(typeExtends);
+					insertRelationToRelations(typeExtends);
 				}
 			});
 			Collection<TypeEntity> imps = typeEntity.getImplementedTypes();
@@ -92,7 +110,7 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 				Type other = types.get(imp.getId());
 				if(other != null) {
 					TypeImplementsType typeImplements = new TypeImplementsType(type, other);
-					batchInserterService.insertRelation(typeImplements);
+					insertRelationToRelations(typeImplements);
 				}
 			});
 		});
@@ -111,10 +129,14 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 					Type type = this.nodes.findType(typeEntity.getId());
 					if(type != null) {
 						VariableIsType variableIsType = new VariableIsType(variable, type);
-						batchInserterService.insertRelation(variableIsType);
+						insertRelationToRelations(variableIsType);
 					}
 				} else {
-					System.out.println(typeEntity.getClass());
+					if(typeEntity.getClass() == EmptyTypeEntity.class) {
+//						System.out.println(typeEntity);
+					} else {
+						System.out.println("extractRelationsFromVariables " + typeEntity.getClass());
+					}
 				}
 			}
 		});
@@ -133,7 +155,7 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 						Function other = functions.get(relation.getEntity().getId());
 						if(other != null) {
 							FunctionCallFunction call = new FunctionCallFunction(function, other);
-							batchInserterService.insertRelation(call);
+							insertRelationToRelations(call);
 						}
 					} else {
 						///FIXME
@@ -143,14 +165,14 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 					Type returnType = types.get(relation.getEntity().getId());
 					if(returnType != null) {
 						FunctionReturnType functionReturnType = new FunctionReturnType(function, returnType);
-						batchInserterService.insertRelation(functionReturnType);
+						insertRelationToRelations(functionReturnType);
 					}
 				}
 				if(DependencyType.PARAMETER.equals(relation.getType())) {
 					Type parameterType = types.get(relation.getEntity().getId());
 					if(parameterType != null) {
 						FunctionParameterType functionParameterType = new FunctionParameterType(function, parameterType);
-						batchInserterService.insertRelation(functionParameterType);
+						insertRelationToRelations(functionParameterType);
 					}
 				}
 			});

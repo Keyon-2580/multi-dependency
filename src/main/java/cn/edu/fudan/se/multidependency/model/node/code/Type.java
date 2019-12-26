@@ -18,6 +18,8 @@ public class Type implements Node {
 	private String typeName;
 	
 	private String packageName;
+	
+	private String aliasName;
 
     private Integer entityId;
 	private static final long serialVersionUID = 6805501035295416590L;
@@ -53,12 +55,19 @@ public class Type implements Node {
 		properties.put("typeName", getTypeName() == null ? "" : getTypeName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("packageName", getPackageName() == null ? "" : getPackageName());
+		properties.put("aliasName", getAliasName() == null ? (getTypeName() == null ? "" : getTypeName()) : getAliasName());
 		return properties;
 	}
 	
 	@Override
 	public NodeType getNodeType() {
 		return NodeType.Type;
+	}
+	public String getAliasName() {
+		return aliasName;
+	}
+	public void setAliasName(String aliasName) {
+		this.aliasName = aliasName;
 	}
 
 }
