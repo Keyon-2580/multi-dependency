@@ -107,7 +107,6 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			}
 			ProjectFile file = this.nodes.findCodeFile(parentEntity.getId());
 			FileContainsType fileContainsType = new FileContainsType(file, type);
-//			batchInserterService.insertRelation(fileContainsType);
 			insertRelationToRelations(fileContainsType);
 		});
 		this.nodes.findFunctions().forEach((entityId, function) -> {
@@ -146,6 +145,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 		extractRelationsFromFunctions();
 		extractRelationsFromVariables();		
 		extractRelationsFromFiles();
+//		extractRelationsFromDependsType();
 	}
 	
 	protected void extractRelationsFromFiles() {

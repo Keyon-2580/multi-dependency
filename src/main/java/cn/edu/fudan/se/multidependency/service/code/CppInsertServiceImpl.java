@@ -103,9 +103,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 		this.nodes.findTypes().forEach((entityId, type) -> {
 			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(entityId);
 			Entity parentEntity = typeEntity.getParent();
-			if(parentEntity == null) {
-//				System.out.println("typeEntity's parent is null");
-			} else {
+			if(parentEntity != null) {
 				if(parentEntity instanceof FileEntity) {
 					ProjectFile file = this.nodes.findCodeFile(parentEntity.getId());
 					if(file != null) {
@@ -131,47 +129,44 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 		this.nodes.findFunctions().forEach((entityId, function) -> {
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(entityId);
 			Entity parentEntity = functionEntity.getParent();
-			if(parentEntity == null) {
-//				System.out.println("functionEntity's parent is null");
-			} else {
+			if(parentEntity != null) {
+				while(parentEntity.getClass() != TypeEntity.class && !(parentEntity instanceof FileEntity)) {
+					parentEntity = parentEntity.getParent();
+					if(parentEntity == null) {
+						break;
+					}
+				}
+				if(parentEntity == null) {
+					return;
+				}
 				if(parentEntity instanceof FileEntity) {
-//					System.out.println("functionEntity's parent is FileEntity");
 					ProjectFile file = this.nodes.findCodeFile(parentEntity.getId());
 					FileContainsFunction fileContainsFunction = new FileContainsFunction(file, function);
 					insertRelationToRelations(fileContainsFunction);
 				} else if(parentEntity.getClass() == TypeEntity.class) {
-//					System.out.println("functionEntity's parent is TypeEntity");
 					Type type = this.nodes.findType(parentEntity.getId());
 					TypeContainsFunction typeContainsFunction = new TypeContainsFunction(type, function);
 					insertRelationToRelations(typeContainsFunction);
-				} else {
-//					System.out.println("functionEntity's parent is other Entity " + parentEntity.getClass());
 				}
 			}
 		});
 		this.nodes.findVariables().forEach((entityId, variable) -> {
 			VarEntity varEntity = (VarEntity) entityRepo.getEntity(entityId);
 			Entity parentEntity = varEntity.getParent();
-			if(parentEntity == null) {
-//				System.out.println("varEntity's parent is null");
-			} else {
+			if(parentEntity != null) {
 				if(parentEntity instanceof FileEntity) {
-//					System.out.println("varEntity's parent is FileEntity");
 					ProjectFile file = this.nodes.findCodeFile(parentEntity.getId());
 					FileContainsVariable fileContainsVariable = new FileContainsVariable(file, variable);
 					insertRelationToRelations(fileContainsVariable);
 				} else if(parentEntity.getClass() == TypeEntity.class) {
-//					System.out.println("varEntity's parent is TypeEntity");
 					Type type = this.nodes.findType(parentEntity.getId());
 					TypeContainsVariable typeContainsVariable = new TypeContainsVariable(type, variable);
 					insertRelationToRelations(typeContainsVariable);
 				} else if(parentEntity instanceof FunctionEntity) {
-//					System.out.println("varEntity's parent is FunctionEntity");
 					Function function = this.nodes.findFunction(parentEntity.getId());
 					FunctionContainsVariable functionContainsVariable = new FunctionContainsVariable(function, variable);
 					insertRelationToRelations(functionContainsVariable);
 				} else {
-//					System.out.println("varEntity's parent is other Entity " + parentEntity.getClass());
 				}
 			}
 		});
@@ -183,6 +178,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 		extractRelationsFromFunctions();
 		extractRelationsFromVariables();		
 		extractRelationsFromFiles();
+//		extractRelationsFromDependsType();
 	}
 	
 	protected void extractRelationsFromFiles() {

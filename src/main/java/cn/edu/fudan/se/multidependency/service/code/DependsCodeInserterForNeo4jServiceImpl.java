@@ -1,98 +1,47 @@
 package cn.edu.fudan.se.multidependency.service.code;
 
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.Nodes;
-import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.node.code.StaticCodeNodes;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
-import cn.edu.fudan.se.multidependency.model.node.code.Variable;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
-import cn.edu.fudan.se.multidependency.model.relation.Relations;
 import cn.edu.fudan.se.multidependency.model.relation.code.FunctionCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.code.FunctionParameterType;
 import cn.edu.fudan.se.multidependency.model.relation.code.FunctionReturnType;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeExtendsType;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeImplementsType;
 import cn.edu.fudan.se.multidependency.model.relation.code.VariableIsType;
-import cn.edu.fudan.se.multidependency.service.BatchInserterService;
-import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
 import depends.deptypes.DependencyType;
-import depends.entity.EmptyTypeEntity;
 import depends.entity.FunctionEntity;
 import depends.entity.TypeEntity;
 import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
 
-public abstract class DependsCodeInserterForNeo4jServiceImpl implements InserterForNeo4j {
+public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeInserterForNeo4jServiceImpl {
 
 	public DependsCodeInserterForNeo4jServiceImpl(String projectPath, EntityRepo entityRepo, String databasePath, boolean delete, Language language) {
-		super();
+		super(projectPath, databasePath, delete, language);
 		this.entityRepo = entityRepo;
-		this.databasePath = databasePath;
-		this.delete = delete;
-		this.language = language;
-		this.batchInserterService = BatchInserterService.getInstance();
-		this.nodes = new StaticCodeNodes();
-		this.nodes.setProject(new Project(projectPath, projectPath, language));
-		this.relations = new Relations();
 	}
 
 	protected EntityRepo entityRepo;
-	protected String databasePath;
-	protected boolean delete;
-	protected Language language;
-	
-	protected StaticCodeNodes nodes;
-	protected Relations relations;
-	
-	protected BatchInserterService batchInserterService;
 	
 	protected abstract void insertNodesWithContainRelations() throws LanguageErrorException;
 	
 	protected abstract void insertRelations() throws LanguageErrorException;
 	
-	protected void insertNodeToNodes(Node node, Integer entityId) {
-		this.nodes.insertNode(node, entityId);
-	}
-	
-	protected void insertRelationToRelations(Relation relation) {
-		this.relations.insertRelation(relation);
-	}
-	
 	@Override
-	public void insertToNeo4jDataBase() throws Exception {
-		System.out.println("start to store datas to database");
-		DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
-		System.out.println("开始时间：" + sdf.format(currentTime));
-		batchInserterService.init(databasePath, delete);
-		batchInserterService.insertNode(this.nodes.getProject());
-		
-		insertNodesWithContainRelations();
-		insertRelations();
-		
-		// 将节点和关系放入nodes和relations后，统一插入neo4j
-		insertToNeo4j();
-		
-		closeBatchInserter();
-		currentTime = new Timestamp(System.currentTimeMillis());
-		System.out.println("结束时间：" + sdf.format(currentTime));
+	protected void insertNodesAndRelations() {
+		try {
+			insertNodesWithContainRelations();
+			insertRelations();
+		} catch (LanguageErrorException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	private void insertToNeo4j() {
-		this.batchInserterService.insertNodes(nodes);
-		this.batchInserterService.insertRelations(relations);
-	}
-
 	protected void extractRelationsFromTypes() {
 		Map<Integer, Type> types = this.nodes.findTypes();
 		types.forEach((id, type) -> {
@@ -118,27 +67,16 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl implements Inserter
 	}
 	
 	protected void extractRelationsFromVariables() {
-		Map<Integer, Variable> variables = this.nodes.findVariables();
-		
-		variables.forEach((entityId, variable) -> {
+		this.nodes.findVariables().forEach((entityId, variable) -> {
 			VarEntity varEntity = (VarEntity) entityRepo.getEntity(entityId);
 			TypeEntity typeEntity = varEntity.getType();
-			if(typeEntity == null) {
-//				System.out.println(varEntity);
-			} else {
-				if(typeEntity.getClass() == TypeEntity.class) {
-					Type type = this.nodes.findType(typeEntity.getId());
-					if(type != null) {
-						VariableIsType variableIsType = new VariableIsType(variable, type);
-						insertRelationToRelations(variableIsType);
-					}
-				} else {
-					if(typeEntity.getClass() == EmptyTypeEntity.class) {
-//						System.out.println(typeEntity);
-					} else {
-//						System.out.println("extractRelationsFromVariables " + typeEntity.getClass());
-					}
+			if(typeEntity != null && typeEntity.getClass() == TypeEntity.class) {
+				Type type = this.nodes.findType(typeEntity.getId());
+				if(type != null) {
+					VariableIsType variableIsType = new VariableIsType(variable, type);
+					insertRelationToRelations(variableIsType);
 				}
+			} else {
 			}
 		});
 	}
@@ -176,19 +114,48 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl implements Inserter
 						insertRelationToRelations(functionParameterType);
 					}
 				}
+				if(DependencyType.THROW.equals(relation.getType())) {
+					
+				}
 			});
 		});
 	}
-
-	protected void extractRelationsFromFiles() {
-//		System.out.println(fileEntity.getQualifiedName());
-//		System.out.println("getImportedFiles " + fileEntity.getImportedFiles().size());
-//		System.out.println("getImportedFileInAllLevel " + fileEntity.getImportedFilesInAllLevel().size());
-//		System.out.println("getImportedNames " + fileEntity.getImportedNames().size());
-//		System.out.println("getImportedRelationEntities" + fileEntity.getImportedRelationEntities().size());
-//		System.out.println("getImportedTypes " + fileEntity.getImportedTypes().size());
-	}
 	
+	/*protected void extractRelationsFromDependsType() {
+		entityRepo.getEntities().forEach(entity -> {
+			entity.getRelations().forEach(relation -> {
+				switch(relation.getType()) {
+				case DependencyType.PARAMETER:
+					break;
+				case DependencyType.CALL:
+					break;
+				case DependencyType.CAST:
+					break;
+				case DependencyType.INHERIT:
+					break;
+				case DependencyType.CREATE:
+					break;
+				case DependencyType.IMPLEMENT:
+					break;
+				case DependencyType.MIXIN:
+					break;
+				case DependencyType.ANNOTATION:
+					break;
+				case DependencyType.CONTAIN:
+					break;
+				case DependencyType.RETURN:
+					break;
+				case DependencyType.SET:
+					break;
+				case DependencyType.THROW:
+					break;
+				case DependencyType.USE:
+					break;
+				}
+			});
+		});
+	}*/
+
 	public EntityRepo getEntityRepo() {
 		return entityRepo;
 	}
@@ -196,37 +163,5 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl implements Inserter
 	public void setEntityRepo(EntityRepo entityRepo) {
 		this.entityRepo = entityRepo;
 	}
-
-	@Override
-	public void setDatabasePath(String databasePath) {
-		this.databasePath = databasePath;
-	}
-
-	@Override
-	public void setDelete(boolean delete) {
-		this.delete = delete;
-	}
-
-	@Override
-	public void setLanguage(Language language) {
-		this.language = language;
-	}
-
-	protected void closeBatchInserter() {
-		if(this.batchInserterService != null) {
-			this.batchInserterService.close();
-		}
-	}
-
-	@Override
-	public Nodes getNodes() {
-		return nodes;
-	}
-
-	@Override
-	public Relations getRelations() {
-		return relations;
-	}
-	
 
 }
