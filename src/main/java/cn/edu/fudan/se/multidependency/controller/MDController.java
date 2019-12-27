@@ -6,15 +6,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import cn.edu.fudan.se.multidependency.model.node.code.CodeFile;
-import cn.edu.fudan.se.multidependency.service.StaticCodeService;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 
 @Controller
 public class MDController {
 	
 	
 	@Autowired
-	private StaticCodeService staticCodeService;
+	private StaticAnalyseService staticCodeService;
 	
 //	@Bean
 //	private DependsEntityRepoExtractor getEntityRepoExtractor() {
@@ -34,14 +34,14 @@ public class MDController {
 	@RequestMapping("/test")
 	@ResponseBody
 	public void test() {
-		CodeFile file = new CodeFile();
+		ProjectFile file = new ProjectFile();
 		file.setId(1270L);
 		staticCodeService.findTypesInFile(file);
 	}
 	
 	@Bean
 	public String testBean() {
-		CodeFile file = new CodeFile();
+		ProjectFile file = new ProjectFile();
 		file.setId(1270L);
 		staticCodeService.findTypesInFile(file);
 		staticCodeService.findAllExtends();

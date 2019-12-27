@@ -3,7 +3,7 @@ package cn.edu.fudan.se.multidependency.model.relation.code;
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.node.code.CodeFile;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
@@ -34,13 +34,13 @@ public class FileContainsVariable implements Relation {
 		super();
 	}
 
-	public FileContainsVariable(CodeFile file, Variable variable) {
+	public FileContainsVariable(ProjectFile file, Variable variable) {
 		super();
 		this.file = file;
 		this.variable = variable;
 	}
 
-	private CodeFile file;
+	private ProjectFile file;
 	private Variable variable;
 
 	@Override
@@ -63,11 +63,11 @@ public class FileContainsVariable implements Relation {
 		return new HashMap<>();
 	}
 
-	public CodeFile getFile() {
+	public ProjectFile getFile() {
 		return file;
 	}
 
-	public void setFile(CodeFile file) {
+	public void setFile(ProjectFile file) {
 		this.file = file;
 	}
 

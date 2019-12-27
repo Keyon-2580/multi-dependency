@@ -27,6 +27,11 @@ import depends.util.FileUtil;
 import depends.util.TemporaryFile;
 import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 
+/**
+ * 调用depends的API提取代码entity
+ * @author fan
+ *
+ */
 public class DependsEntityRepoExtractorImpl implements DependsEntityRepoExtractor {
 	private DependsEntityRepoExtractorImpl() {}
 	private static DependsEntityRepoExtractorImpl instance = new DependsEntityRepoExtractorImpl();

@@ -1,10 +1,18 @@
 package cn.edu.fudan.se.multidependency.service.code;
 
+import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.model.node.code.CodeFile;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Package;
+import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsType;
+import cn.edu.fudan.se.multidependency.model.relation.code.FunctionContainsVariable;
+import cn.edu.fudan.se.multidependency.model.relation.code.PackageContainsFile;
+import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsFunction;
+import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsVariable;
+import cn.edu.fudan.se.multidependency.utils.FileUtils;
 import depends.entity.Entity;
 import depends.entity.FileEntity;
 import depends.entity.FunctionEntity;
@@ -12,18 +20,10 @@ import depends.entity.PackageEntity;
 import depends.entity.TypeEntity;
 import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
-import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
-import cn.edu.fudan.se.multidependency.model.node.code.Type;
-import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsType;
-import cn.edu.fudan.se.multidependency.model.relation.code.FunctionContainsVariable;
-import cn.edu.fudan.se.multidependency.model.relation.code.PackageContainsFile;
-import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsFunction;
-import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsVariable;
-import cn.edu.fudan.se.multidependency.utils.FileUtils;
 
-public class NewJavaInsertServiceImpl extends InsertServiceImpl {
+public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl {
 
-	public NewJavaInsertServiceImpl(String projectPath, EntityRepo entityRepo, String databasePath, boolean delete,
+	public JavaInsertServiceImpl(String projectPath, EntityRepo entityRepo, String databasePath, boolean delete,
 			Language language) {
 		super(projectPath, entityRepo, databasePath, delete, language);
 	}
@@ -39,10 +39,11 @@ public class NewJavaInsertServiceImpl extends InsertServiceImpl {
 				pck.setDirectory(false);
 				insertNodeToNodes(pck, entity.getId());
 			} else if(entity instanceof FileEntity) {
-				CodeFile file = new CodeFile();
+				ProjectFile file = new ProjectFile();
 				file.setEntityId(entity.getId());
 				file.setFileName(entity.getQualifiedName());
 				file.setPath(entity.getQualifiedName());
+				file.setSuffix(FileUtils.extractSuffix(entity.getQualifiedName()));
 				insertNodeToNodes(file, entity.getId());
 			} else if(entity instanceof FunctionEntity) {
 				Function function = new Function();
@@ -101,7 +102,7 @@ public class NewJavaInsertServiceImpl extends InsertServiceImpl {
 					}*/
 				parentEntity = parentEntity.getParent();
 			}
-			CodeFile file = this.nodes.findCodeFile(parentEntity.getId());
+			ProjectFile file = this.nodes.findCodeFile(parentEntity.getId());
 			FileContainsType fileContainsType = new FileContainsType(file, type);
 //			batchInserterService.insertRelation(fileContainsType);
 			insertRelationToRelations(fileContainsType);

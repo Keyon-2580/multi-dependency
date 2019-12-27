@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.service;
+package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,12 +6,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import cn.edu.fudan.se.multidependency.model.node.code.CodeFile;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsType;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeExtendsType;
-import cn.edu.fudan.se.multidependency.neo4j.repository.node.code.FileRepository;
+import cn.edu.fudan.se.multidependency.neo4j.repository.node.FileRepository;
 import cn.edu.fudan.se.multidependency.neo4j.repository.node.code.FunctionRepository;
 import cn.edu.fudan.se.multidependency.neo4j.repository.node.code.NamespaceRepository;
 import cn.edu.fudan.se.multidependency.neo4j.repository.node.code.PackageRepository;
@@ -21,6 +21,8 @@ import cn.edu.fudan.se.multidependency.neo4j.repository.node.code.VariableReposi
 import cn.edu.fudan.se.multidependency.neo4j.repository.relation.code.FileContainFunctionRepository;
 import cn.edu.fudan.se.multidependency.neo4j.repository.relation.code.FileContainTypeRepository;
 import cn.edu.fudan.se.multidependency.neo4j.repository.relation.code.FileContainsVariableRepository;
+import cn.edu.fudan.se.multidependency.neo4j.repository.relation.code.FileImportTypeRepository;
+import cn.edu.fudan.se.multidependency.neo4j.repository.relation.code.FileIncludeFileRepository;
 import cn.edu.fudan.se.multidependency.neo4j.repository.relation.code.FunctionCallFunctionRepository;
 import cn.edu.fudan.se.multidependency.neo4j.repository.relation.code.FunctionContainsTypeRepository;
 import cn.edu.fudan.se.multidependency.neo4j.repository.relation.code.FunctionContainsVariableRepository;
@@ -36,7 +38,7 @@ import cn.edu.fudan.se.multidependency.neo4j.repository.relation.code.VariableIs
 import cn.edu.fudan.se.multidependency.neo4j.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
 
 @Service
-public class StaticCodeServiceImpl implements StaticCodeService {
+public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	
 	@Autowired
 	FileContainTypeRepository fileContainTypeRepository;
@@ -48,7 +50,13 @@ public class StaticCodeServiceImpl implements StaticCodeService {
 	FileContainFunctionRepository fileContainFunctionRepository;
 	
 	@Autowired
-	FileContainsVariableRepository fileContainsVariable;
+	FileContainsVariableRepository fileContainsVariableRepository;
+	
+	@Autowired
+	FileIncludeFileRepository fileIncludeFileRepository;
+	
+	@Autowired
+	FileImportTypeRepository fileImportTypeRepository;
 	
 	@Autowired
 	FunctionCallFunctionRepository functionCallFunctionRepository;
@@ -122,7 +130,7 @@ public class StaticCodeServiceImpl implements StaticCodeService {
 	}
 
 	@Override
-	public List<Type> findTypesInFile(CodeFile codeFile) {
+	public List<Type> findTypesInFile(ProjectFile codeFile) {
 		System.out.println(findAllTypes().size());
 		Iterable<FileContainsType> temp = fileContainTypeRepository.findAll();
 		temp.forEach(t -> {

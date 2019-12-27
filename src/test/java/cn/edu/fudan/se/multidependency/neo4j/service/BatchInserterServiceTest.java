@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import cn.edu.fudan.se.multidependency.model.node.code.CodeFile;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Package;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
@@ -39,7 +39,7 @@ public class BatchInserterServiceTest {
 			pck.setPackageName("test");
 			inserter.insertNode(pck);
 			
-			CodeFile file = new CodeFile();
+			ProjectFile file = new ProjectFile();
 			file.setFileName("src/test/Test.java");
 			file.setPath("src/test/Test.java");
 			inserter.insertNode(file);

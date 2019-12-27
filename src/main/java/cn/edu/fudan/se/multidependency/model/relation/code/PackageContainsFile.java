@@ -3,7 +3,7 @@ package cn.edu.fudan.se.multidependency.model.relation.code;
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.node.code.CodeFile;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Package;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
@@ -26,7 +26,7 @@ public class PackageContainsFile implements Relation {
 		super();
 	}
 
-	public PackageContainsFile(Package pck, CodeFile file) {
+	public PackageContainsFile(Package pck, ProjectFile file) {
 		super();
 		this.pck = pck;
 		this.file = file;
@@ -36,7 +36,7 @@ public class PackageContainsFile implements Relation {
 	private Package pck;
 	
 	@EndNode
-	private CodeFile file;
+	private ProjectFile file;
 
 	public Package getPck() {
 		return pck;
@@ -46,11 +46,11 @@ public class PackageContainsFile implements Relation {
 		this.pck = pck;
 	}
 
-	public CodeFile getFile() {
+	public ProjectFile getFile() {
 		return file;
 	}
 
-	public void setFile(CodeFile file) {
+	public void setFile(ProjectFile file) {
 		this.file = file;
 	}
 

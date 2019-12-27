@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.service;
+package cn.edu.fudan.se.multidependency.service.spring;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +8,7 @@ import cn.edu.fudan.se.multidependency.model.node.dynamic.CallNode;
 import cn.edu.fudan.se.multidependency.neo4j.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
 
 @Service
-public class DynamicCodeServiceImpl implements DynamicCodeService {
+public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 
 	@Autowired
 	FunctionDynamicCallFunctionRepository functionDynamicCallFunctionRepository;

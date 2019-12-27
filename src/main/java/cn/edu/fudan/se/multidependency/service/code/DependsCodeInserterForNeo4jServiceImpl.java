@@ -9,6 +9,7 @@ import java.util.Map;
 import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.Nodes;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.StaticCodeNodes;
@@ -23,6 +24,7 @@ import cn.edu.fudan.se.multidependency.model.relation.code.TypeExtendsType;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeImplementsType;
 import cn.edu.fudan.se.multidependency.model.relation.code.VariableIsType;
 import cn.edu.fudan.se.multidependency.neo4j.service.BatchInserterService;
+import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
 import depends.deptypes.DependencyType;
 import depends.entity.EmptyTypeEntity;
 import depends.entity.FunctionEntity;
@@ -30,9 +32,9 @@ import depends.entity.TypeEntity;
 import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
 
-public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
+public abstract class DependsCodeInserterForNeo4jServiceImpl implements InserterForNeo4j {
 
-	public InsertServiceImpl(String projectPath, EntityRepo entityRepo, String databasePath, boolean delete, Language language) {
+	public DependsCodeInserterForNeo4jServiceImpl(String projectPath, EntityRepo entityRepo, String databasePath, boolean delete, Language language) {
 		super();
 		this.entityRepo = entityRepo;
 		this.databasePath = databasePath;
@@ -50,7 +52,6 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 	protected Language language;
 	
 	protected StaticCodeNodes nodes;
-	
 	protected Relations relations;
 	
 	protected BatchInserterService batchInserterService;
@@ -68,7 +69,7 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 	}
 	
 	@Override
-	public void insertCodeToNeo4jDataBase() throws Exception {
+	public void insertToNeo4jDataBase() throws Exception {
 		System.out.println("start to store datas to database");
 		DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
@@ -179,12 +180,10 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 		});
 	}
 	
-	@Override
 	public EntityRepo getEntityRepo() {
 		return entityRepo;
 	}
 
-	@Override
 	public void setEntityRepo(EntityRepo entityRepo) {
 		this.entityRepo = entityRepo;
 	}
@@ -211,8 +210,12 @@ public abstract class InsertServiceImpl implements InsertDependsCodeToNeo4j {
 	}
 
 	@Override
-	public StaticCodeNodes getStaticCodeNodes() {
+	public Nodes getNodes() {
 		return nodes;
 	}
-	
+
+	@Override
+	public Relations getRelations() {
+		return relations;
+	}
 }

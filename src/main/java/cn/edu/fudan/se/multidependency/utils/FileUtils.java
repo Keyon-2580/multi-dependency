@@ -15,6 +15,10 @@ public class FileUtils {
 		}
 		return packageName;
 	}
+	
+	public static String extractSuffix(String filePath) {
+		return "";
+	}
 
 	public static boolean delFile(File file) {
         if (!file.exists()) {

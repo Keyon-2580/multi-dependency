@@ -2,7 +2,7 @@ package cn.edu.fudan.se.multidependency.service.code;
 
 import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.model.node.code.CodeFile;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Package;
@@ -25,9 +25,9 @@ import depends.entity.TypeEntity;
 import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
 
-public class NewCppInsertServiceImpl extends InsertServiceImpl {
+public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl {
 
-	public NewCppInsertServiceImpl(String projectPath, EntityRepo entityRepo, String databasePath, boolean delete,
+	public CppInsertServiceImpl(String projectPath, EntityRepo entityRepo, String databasePath, boolean delete,
 			Language language) {
 		super(projectPath, entityRepo, databasePath, delete, language);
 	}
@@ -44,11 +44,12 @@ public class NewCppInsertServiceImpl extends InsertServiceImpl {
 				namespace.setEntityId(entity.getId());
 				insertNodeToNodes(namespace, entity.getId());
 			} else if(entity instanceof FileEntity) {
-				CodeFile file = new CodeFile();
+				ProjectFile file = new ProjectFile();
 				String fileName = entity.getQualifiedName();
 				file.setEntityId(entity.getId());
 				file.setFileName(fileName);
 				file.setPath(entity.getQualifiedName());
+				file.setSuffix(FileUtils.extractSuffix(entity.getQualifiedName()));
 				insertNodeToNodes(file, entity.getId());
 				// 文件所在目录
 				String packageName = FileUtils.findDirectoryFromFile(fileName);
@@ -105,7 +106,7 @@ public class NewCppInsertServiceImpl extends InsertServiceImpl {
 				System.out.println("typeEntity's parent is null");
 			} else {
 				if(parentEntity instanceof FileEntity) {
-					CodeFile file = this.nodes.findCodeFile(parentEntity.getId());
+					ProjectFile file = this.nodes.findCodeFile(parentEntity.getId());
 					if(file != null) {
 						FileContainsType fileContainType = new FileContainsType(file, type);
 						insertRelationToRelations(fileContainType);
@@ -134,7 +135,7 @@ public class NewCppInsertServiceImpl extends InsertServiceImpl {
 			} else {
 				if(parentEntity instanceof FileEntity) {
 //					System.out.println("functionEntity's parent is FileEntity");
-					CodeFile file = this.nodes.findCodeFile(parentEntity.getId());
+					ProjectFile file = this.nodes.findCodeFile(parentEntity.getId());
 					FileContainsFunction fileContainsFunction = new FileContainsFunction(file, function);
 					insertRelationToRelations(fileContainsFunction);
 				} else if(parentEntity.getClass() == TypeEntity.class) {
@@ -155,7 +156,7 @@ public class NewCppInsertServiceImpl extends InsertServiceImpl {
 			} else {
 				if(parentEntity instanceof FileEntity) {
 //					System.out.println("varEntity's parent is FileEntity");
-					CodeFile file = this.nodes.findCodeFile(parentEntity.getId());
+					ProjectFile file = this.nodes.findCodeFile(parentEntity.getId());
 					FileContainsVariable fileContainsVariable = new FileContainsVariable(file, variable);
 					insertRelationToRelations(fileContainsVariable);
 				} else if(parentEntity.getClass() == TypeEntity.class) {

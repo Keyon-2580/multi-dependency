@@ -4,6 +4,7 @@ import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import cn.edu.fudan.se.multidependency.model.node.Nodes;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 
@@ -46,8 +47,8 @@ public class StaticCodeNodes extends Nodes {
 		return functions;
 	}
 	
-	public Map<Integer, CodeFile> findFiles() {
-		Map<Integer, CodeFile> files = (Map<Integer, CodeFile>) findNodesMap(NodeType.File);
+	public Map<Integer, ProjectFile> findFiles() {
+		Map<Integer, ProjectFile> files = (Map<Integer, ProjectFile>) findNodesMap(NodeType.File);
 		return files;
 	}
 	
@@ -61,9 +62,9 @@ public class StaticCodeNodes extends Nodes {
 		return node == null ? null : (Function) node;
 	}
 	
-	public CodeFile findCodeFile(Integer entityId) {
+	public ProjectFile findCodeFile(Integer entityId) {
 		Node node = findNode(entityId, NodeType.File);
-		return node == null ? null : (CodeFile) node;
+		return node == null ? null : (ProjectFile) node;
 	}
 	
 	public Variable findVariable(Integer entityId) {

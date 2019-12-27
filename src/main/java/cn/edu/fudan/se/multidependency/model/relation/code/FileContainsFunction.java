@@ -3,7 +3,7 @@ package cn.edu.fudan.se.multidependency.model.relation.code;
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.node.code.CodeFile;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import org.neo4j.ogm.annotation.EndNode;
@@ -23,7 +23,7 @@ public class FileContainsFunction implements Relation {
 		super();
 	}
 
-	public FileContainsFunction(CodeFile file, Function function) {
+	public FileContainsFunction(ProjectFile file, Function function) {
 		super();
 		this.file = file;
 		this.function = function;
@@ -34,16 +34,16 @@ public class FileContainsFunction implements Relation {
     private Long id;
 	
 	@StartNode
-	private CodeFile file;
+	private ProjectFile file;
 	
 	@EndNode
 	private Function function;
 
-	public CodeFile getFile() {
+	public ProjectFile getFile() {
 		return file;
 	}
 
-	public void setFile(CodeFile file) {
+	public void setFile(ProjectFile file) {
 		this.file = file;
 	}
 
