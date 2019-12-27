@@ -90,7 +90,7 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl implements InserterFo
 		this.language = language;
 	}
 
-	protected void closeBatchInserter() {
+	private void closeBatchInserter() {
 		if(this.batchInserterService != null) {
 			this.batchInserterService.close();
 		}
