@@ -1,11 +1,11 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.dynamic.CallNode;
-import cn.edu.fudan.se.multidependency.neo4j.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
 
 @Service
 public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {

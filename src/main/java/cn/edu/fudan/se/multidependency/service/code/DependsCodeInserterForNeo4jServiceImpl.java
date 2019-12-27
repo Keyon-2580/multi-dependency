@@ -23,7 +23,7 @@ import cn.edu.fudan.se.multidependency.model.relation.code.FunctionReturnType;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeExtendsType;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeImplementsType;
 import cn.edu.fudan.se.multidependency.model.relation.code.VariableIsType;
-import cn.edu.fudan.se.multidependency.neo4j.service.BatchInserterService;
+import cn.edu.fudan.se.multidependency.service.BatchInserterService;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
 import depends.deptypes.DependencyType;
 import depends.entity.EmptyTypeEntity;

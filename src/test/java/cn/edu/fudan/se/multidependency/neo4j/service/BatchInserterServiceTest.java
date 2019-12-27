@@ -18,6 +18,7 @@ import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsType;
 import cn.edu.fudan.se.multidependency.model.relation.code.PackageContainsFile;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsFunction;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsVariable;
+import cn.edu.fudan.se.multidependency.service.BatchInserterService;
 import cn.edu.fudan.se.multidependency.utils.YamlUtils;
 
 public class BatchInserterServiceTest {
