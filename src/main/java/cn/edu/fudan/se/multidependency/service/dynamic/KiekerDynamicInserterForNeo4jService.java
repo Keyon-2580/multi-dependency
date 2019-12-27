@@ -10,7 +10,7 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 
 	public KiekerDynamicInserterForNeo4jService(StaticCodeNodes staticCodeNodes, String projectPath,
 			String databasePath, Language language) {
-		super(staticCodeNodes, projectPath, databasePath, language);
+		super(staticCodeNodes, databasePath);
 	}
 	
 	protected void insertToNeo4jDataBase(String scenarioName, List<String> featureName, String testcaseName,

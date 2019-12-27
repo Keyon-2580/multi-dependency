@@ -17,7 +17,8 @@ public class FileUtils {
 	}
 	
 	public static String extractSuffix(String filePath) {
-		return "";
+		int lastIndex = filePath.lastIndexOf(".");
+		return lastIndex >= 0 ? filePath.substring(lastIndex) : "";
 	}
 
 	public static boolean delFile(File file) {

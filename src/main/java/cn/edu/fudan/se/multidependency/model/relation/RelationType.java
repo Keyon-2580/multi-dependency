@@ -1,6 +1,8 @@
 package cn.edu.fudan.se.multidependency.model.relation;
 
 public enum RelationType {
+	PROJECT_CONTAINS_PACKAGE,
+	
 	PACKAGE_CONTAINS_FILE, 
 	
 	FILE_CONTAINS_TYPE, 

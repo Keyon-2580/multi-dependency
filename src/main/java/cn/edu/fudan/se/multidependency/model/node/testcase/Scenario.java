@@ -33,4 +33,16 @@ public class Scenario implements Node {
 		return null;
 	}
 
+	@Override
+	public Integer getEntityId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setEntityId(Integer entityId) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

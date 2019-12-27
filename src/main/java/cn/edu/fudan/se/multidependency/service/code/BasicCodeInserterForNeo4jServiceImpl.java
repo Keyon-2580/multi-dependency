@@ -28,10 +28,13 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl implements InserterFo
 		this.language = language;
 		this.batchInserterService = BatchInserterService.getInstance();
 		this.nodes = new StaticCodeNodes();
-		this.nodes.setProject(new Project(projectPath, projectPath, language));
+		project = new Project(projectPath, projectPath, language);
+		this.nodes.setProject(project);
 		this.relations = new Relations();
 	}
 
+	protected Project project;
+	
 	protected String databasePath;
 	protected boolean delete;
 	protected Language language;
@@ -42,7 +45,14 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl implements InserterFo
 	protected BatchInserterService batchInserterService;
 	
 	protected void insertNodeToNodes(Node node, Integer entityId) {
-		this.nodes.insertNode(node, entityId);
+		if(!node.getEntityId().equals(entityId)) {
+			try {
+				throw new Exception("节点id没有对应");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		this.nodes.insertNode(node);
 	}
 	
 	protected void insertRelationToRelations(Relation relation) {
@@ -56,7 +66,6 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl implements InserterFo
 		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
 		System.out.println("开始时间：" + sdf.format(currentTime));
 		batchInserterService.init(databasePath, delete);
-		batchInserterService.insertNode(this.nodes.getProject());
 		
 		insertNodesAndRelations();
 		

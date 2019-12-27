@@ -35,15 +35,20 @@ public class Nodes {
 	/**
 	 * 
 	 * @param node
-	 * @param id 不一定是节点的Id
+	 * @param entityId
 	 */
-	public void insertNode(Node node, Integer id) {
+	public void insertNode(Node node) {
 		Map<Integer, Node> nodes = allNodes.get(node.getNodeType());
 		nodes = nodes == null ? new HashMap<>() : nodes;
-		nodes.put(id, node);
+		nodes.put(node.getEntityId(), node);
 		allNodes.put(node.getNodeType(), nodes);
 	}
 	
+	/**
+	 * 根据entityId查找node
+	 * @param entityId
+	 * @return
+	 */
 	public Node findNode(Integer entityId) {
 		for(Map<Integer, Node> nodes : allNodes.values()) {
 			Node node = nodes.get(entityId);

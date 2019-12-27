@@ -13,6 +13,7 @@ import cn.edu.fudan.se.multidependency.model.relation.code.FileImportType;
 import cn.edu.fudan.se.multidependency.model.relation.code.FileImportVariable;
 import cn.edu.fudan.se.multidependency.model.relation.code.FunctionContainsVariable;
 import cn.edu.fudan.se.multidependency.model.relation.code.PackageContainsFile;
+import cn.edu.fudan.se.multidependency.model.relation.code.ProjectContainsPackage;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsFunction;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsVariable;
 import cn.edu.fudan.se.multidependency.utils.FileUtils;
@@ -41,6 +42,8 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				pck.setEntityId(entity.getId());
 				pck.setDirectory(false);
 				insertNodeToNodes(pck, entity.getId());
+				ProjectContainsPackage projectContainsPackage = new ProjectContainsPackage(project, pck);
+				insertRelationToRelations(projectContainsPackage);
 			} else if(entity instanceof FileEntity) {
 				ProjectFile file = new ProjectFile();
 				file.setEntityId(entity.getId());
@@ -83,6 +86,8 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 					pck.setPackageName(packageName);
 					pck.setDirectory(true);
 					insertNodeToNodes(pck, pck.getEntityId());
+					ProjectContainsPackage projectContainsPackage = new ProjectContainsPackage(project, pck);
+					insertRelationToRelations(projectContainsPackage);
 				}
 			} else {
 				pck = this.nodes.findPackage(parentEntity.getId());

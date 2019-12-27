@@ -1,11 +1,8 @@
-package cn.edu.fudan.se.multidependency.service.dynamic;
+package cn.edu.fudan.se.multidependency.service.build;
 
-import java.io.File;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Nodes;
@@ -14,30 +11,25 @@ import cn.edu.fudan.se.multidependency.model.relation.Relations;
 import cn.edu.fudan.se.multidependency.service.BatchInserterService;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
 
-public abstract class DynamicInserterForNeo4jService implements InserterForNeo4j {
-
-	public DynamicInserterForNeo4jService(StaticCodeNodes staticCodeNodes, String databasePath) {
+public class BuildInserterForNeo4jService implements InserterForNeo4j {
+	
+	public BuildInserterForNeo4jService(StaticCodeNodes staticCodeNodes, String databasePath) {
 		super();
-		this.staticCodeNodes = staticCodeNodes;
+//		this.staticCodeNodes = staticCodeNodes;
 		this.databasePath = databasePath;
 		this.nodes = new Nodes();
 		this.relations = new Relations();
 		this.batchInserterService = BatchInserterService.getInstance();
 	}
-
+	
 	protected String databasePath;
+	private Nodes nodes;
+	private Relations relations;
 	
-	protected StaticCodeNodes staticCodeNodes;
-	protected Nodes nodes;
-	protected Relations relations;
+//	private StaticCodeNodes staticCodeNodes;
 	
-	protected String scenarioName;
-	protected List<String> featureName = new ArrayList<>();
-	protected String testcaseName;
-	protected File executeFile;
-
 	protected BatchInserterService batchInserterService;
-	
+
 	@Override
 	public void insertToNeo4jDataBase() throws Exception {
 		System.out.println("start to store datas to database");
@@ -46,8 +38,9 @@ public abstract class DynamicInserterForNeo4jService implements InserterForNeo4j
 		System.out.println("开始时间：" + sdf.format(currentTime));
 		batchInserterService.init(databasePath, false);
 		
-		insertToNeo4jDataBase(scenarioName, featureName, testcaseName, executeFile);
-
+		//操作
+		//inserter
+		
 		insertToNeo4j();
 		
 		closeBatchInserter();
@@ -55,18 +48,17 @@ public abstract class DynamicInserterForNeo4jService implements InserterForNeo4j
 		System.out.println("结束时间：" + sdf.format(currentTime));
 	}
 	
-	protected abstract void insertToNeo4jDataBase(String scenarioName, List<String> featureName, String testcaseName,
-			File executeFile) throws Exception;
-	
 	private void insertToNeo4j() {
 		batchInserterService.insertNodes(nodes);
 		batchInserterService.insertRelations(relations);
 	}
-
+	
+	@Override
 	public Nodes getNodes() {
 		return nodes;
 	}
 
+	@Override
 	public Relations getRelations() {
 		return relations;
 	}
@@ -75,49 +67,16 @@ public abstract class DynamicInserterForNeo4jService implements InserterForNeo4j
 	public void setDatabasePath(String databasePath) {
 		this.databasePath = databasePath;
 	}
-	
-	public String getScenarioName() {
-		return scenarioName;
-	}
-
-	public void setScenarioName(String scenarioName) {
-		this.scenarioName = scenarioName;
-	}
-
-	public List<String> getFeatureName() {
-		return featureName;
-	}
-
-	public void setFeatureName(List<String> featureName) {
-		this.featureName = featureName;
-	}
-
-	public String getTestcaseName() {
-		return testcaseName;
-	}
-
-	public void setTestcaseName(String testcaseName) {
-		this.testcaseName = testcaseName;
-	}
-
-	public File getExecuteFile() {
-		return executeFile;
-	}
-
-	public void setExecuteFile(File executeFile) {
-		this.executeFile = executeFile;
-	}
 
 	@Override
 	public void setDelete(boolean delete) {}
 
 	@Override
 	public void setLanguage(Language language) {}
-	
+
 	private void closeBatchInserter() {
 		if(this.batchInserterService != null) {
 			this.batchInserterService.close();
 		}
 	}
-
 }

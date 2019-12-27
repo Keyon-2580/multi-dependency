@@ -10,6 +10,12 @@ import org.neo4j.ogm.annotation.NodeEntity;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 
+/**
+ * java：包
+ * c/c++：目录
+ * @author fan
+ *
+ */
 @NodeEntity
 public class Package implements Node {
 

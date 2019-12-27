@@ -22,6 +22,8 @@ public class Project implements Node {
 	
 	private String language;
 	
+	private Integer entityId;
+	
 	public Project(String projectName, String projectPath, Language language) {
 		super();
 		this.projectName = projectName;
@@ -79,6 +81,16 @@ public class Project implements Node {
 	@Override
 	public NodeType getNodeType() {
 		return NodeType.Project;
+	}
+
+	@Override
+	public Integer getEntityId() {
+		return this.entityId;
+	}
+
+	@Override
+	public void setEntityId(Integer entityId) {
+		this.entityId = entityId;
 	}
 
 }

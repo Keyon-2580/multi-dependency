@@ -14,6 +14,7 @@ import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsVariable;
 import cn.edu.fudan.se.multidependency.model.relation.code.FileIncludeFile;
 import cn.edu.fudan.se.multidependency.model.relation.code.FunctionContainsVariable;
 import cn.edu.fudan.se.multidependency.model.relation.code.PackageContainsFile;
+import cn.edu.fudan.se.multidependency.model.relation.code.ProjectContainsPackage;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsFunction;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsVariable;
 import cn.edu.fudan.se.multidependency.utils.FileUtils;
@@ -61,6 +62,8 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 					pck.setPackageName(packageName);
 					pck.setDirectory(true);
 					insertNodeToNodes(pck, pck.getEntityId());
+					ProjectContainsPackage projectContainsPackage = new ProjectContainsPackage(project, pck);
+					insertRelationToRelations(projectContainsPackage);
 				}
 				PackageContainsFile containFile = new PackageContainsFile(pck, file);
 				insertRelationToRelations(containFile);
