@@ -8,33 +8,19 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 
-@RelationshipEntity("DEPENDENCY_FILE_IMPORT_TYPE")
-public class FileImportType implements Relation {
+@RelationshipEntity("DEPENDENCY_FILE_IMPORT_VARIABLE")
+public class FileImportVariable implements Relation {
 
-	private static final long serialVersionUID = -7729084310920483342L;
-	
+	private static final long serialVersionUID = -7712370556388767903L;
+
 	@Id
     @GeneratedValue
     private Long id;
 	
-	private ProjectFile file;
-	
-	private Type type;
-
-	public FileImportType() {
-		super();
-	}
-
-	public FileImportType(ProjectFile file, Type type) {
-		super();
-		this.file = file;
-		this.type = type;
-	}
-
 	@Override
 	public Long getId() {
 		return id;
@@ -44,6 +30,20 @@ public class FileImportType implements Relation {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
+	public FileImportVariable(ProjectFile file, Variable variable) {
+		super();
+		this.file = file;
+		this.variable = variable;
+	}
+
+	public FileImportVariable() {
+		super();
+	}
+
+	private ProjectFile file;
+	
+	private Variable variable;
 
 	@Override
 	public Long getStartNodeGraphId() {
@@ -52,12 +52,12 @@ public class FileImportType implements Relation {
 
 	@Override
 	public Long getEndNodeGraphId() {
-		return type.getId();
+		return variable.getId();
 	}
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.DEPENDENCY_FILE_IMPORT_TYPE;
+		return RelationType.DEPENDENCY_FILE_IMPORT_VARIABLE;
 	}
 
 	@Override
@@ -73,12 +73,12 @@ public class FileImportType implements Relation {
 		this.file = file;
 	}
 
-	public Type getType() {
-		return type;
+	public Variable getVariable() {
+		return variable;
 	}
 
-	public void setType(Type type) {
-		this.type = type;
+	public void setVariable(Variable variable) {
+		this.variable = variable;
 	}
 
 }

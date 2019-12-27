@@ -12,7 +12,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-@RelationshipEntity("FUNCTION_CALL_FUNCTION")
+@RelationshipEntity("DEPENDENCY_FUNCTION_CALL_FUNCTION")
 public class FunctionCallFunction implements Relation {
 	
 	private static final long serialVersionUID = 5982413005555063698L;
@@ -66,7 +66,7 @@ public class FunctionCallFunction implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.FUNCTION_CALL_FUNCTION;
+		return RelationType.DEPENDENCY_FUNCTION_CALL_FUNCTION;
 	}
 
 	@Override

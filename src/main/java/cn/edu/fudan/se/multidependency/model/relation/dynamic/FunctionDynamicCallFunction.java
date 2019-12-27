@@ -27,11 +27,7 @@ public class FunctionDynamicCallFunction implements Relation {
     @GeneratedValue
     private Long id;
 	
-	private Map<String, Object> properties = new HashMap<>();
-	
-	public void setCallOrder(String order) {
-		properties.put("order", order);
-	}
+	private String order;
 	
 	@Override
 	public Long getId() {
@@ -60,7 +56,17 @@ public class FunctionDynamicCallFunction implements Relation {
 
 	@Override
 	public Map<String, Object> getProperties() {
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("order", getOrder() == null ? "" : getOrder());
 		return properties;
+	}
+
+	public String getOrder() {
+		return order;
+	}
+
+	public void setOrder(String order) {
+		this.order = order;
 	}
 	
 }

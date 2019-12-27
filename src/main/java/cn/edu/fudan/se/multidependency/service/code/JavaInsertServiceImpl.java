@@ -8,6 +8,9 @@ import cn.edu.fudan.se.multidependency.model.node.code.Package;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsType;
+import cn.edu.fudan.se.multidependency.model.relation.code.FileImportFunction;
+import cn.edu.fudan.se.multidependency.model.relation.code.FileImportType;
+import cn.edu.fudan.se.multidependency.model.relation.code.FileImportVariable;
 import cn.edu.fudan.se.multidependency.model.relation.code.FunctionContainsVariable;
 import cn.edu.fudan.se.multidependency.model.relation.code.PackageContainsFile;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsFunction;
@@ -141,7 +144,37 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 	protected void insertRelations() throws LanguageErrorException {
 		extractRelationsFromTypes();
 		extractRelationsFromFunctions();
-		extractRelationsFromVariables();
+		extractRelationsFromVariables();		
+		extractRelationsFromFiles();
 	}
-
+	
+	protected void extractRelationsFromFiles() {
+		nodes.findFiles().forEach((entityId, file) -> {
+			FileEntity fileEntity = (FileEntity) entityRepo.getEntity(entityId);
+			fileEntity.getImportedTypes().forEach(entity -> {
+				if(entity instanceof FunctionEntity) {
+					Function function = nodes.findFunction(entity.getId());
+					if(function != null) {
+						FileImportFunction fileImportFunction = new FileImportFunction(file, function);
+						insertRelationToRelations(fileImportFunction);
+					}
+				} else if(entity instanceof VarEntity) {
+					Variable variable = nodes.findVariable(entity.getId());
+					if(variable != null) {
+						FileImportVariable fileImportVariable = new FileImportVariable(file, variable);
+						insertRelationToRelations(fileImportVariable);
+					}
+				} else if(entity.getClass() == TypeEntity.class) {
+					Type type = nodes.findType(entity.getId());
+					if(type != null) {
+						FileImportType fileImportType = new FileImportType(file, type);
+						insertRelationToRelations(fileImportType);
+					}
+				} else {
+					// MultiDeclareEntities
+					System.out.println(entity.getClass());
+				}
+			});
+		});
+	}
 }

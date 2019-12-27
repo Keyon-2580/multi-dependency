@@ -27,6 +27,7 @@ import cn.edu.fudan.se.multidependency.service.BatchInserterService;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
 import depends.deptypes.DependencyType;
 import depends.entity.EmptyTypeEntity;
+import depends.entity.FileEntity;
 import depends.entity.FunctionEntity;
 import depends.entity.TypeEntity;
 import depends.entity.VarEntity;
@@ -136,7 +137,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl implements Inserter
 					if(typeEntity.getClass() == EmptyTypeEntity.class) {
 //						System.out.println(typeEntity);
 					} else {
-						System.out.println("extractRelationsFromVariables " + typeEntity.getClass());
+//						System.out.println("extractRelationsFromVariables " + typeEntity.getClass());
 					}
 				}
 			}
@@ -179,6 +180,8 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl implements Inserter
 			});
 		});
 	}
+
+	protected abstract void extractRelationsFromFiles();
 	
 	public EntityRepo getEntityRepo() {
 		return entityRepo;
@@ -218,4 +221,6 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl implements Inserter
 	public Relations getRelations() {
 		return relations;
 	}
+	
+
 }

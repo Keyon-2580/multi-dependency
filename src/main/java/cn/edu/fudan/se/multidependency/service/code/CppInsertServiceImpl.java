@@ -37,8 +37,8 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 		entityRepo.getEntities().forEach(entity -> {
 			// 每个entity对应相应的node
 			if(entity instanceof PackageEntity) {
-				System.out.println("----------------------------------------------------");
-				System.out.println("cpp insertNodesWithContainRelations packageEntity");
+//				System.out.println("----------------------------------------------------");
+//				System.out.println("cpp insertNodesWithContainRelations packageEntity");
 				Namespace namespace = new Namespace();
 				namespace.setNamespaceName(entity.getQualifiedName());
 				namespace.setEntityId(entity.getId());
@@ -96,14 +96,14 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				}
 			}
 			else {
-				System.out.println("insertNodesWithContainRelations " + entity.getClass() + " " + entity.toString());
+//				System.out.println("insertNodesWithContainRelations " + entity.getClass() + " " + entity.toString());
 			}
 		});
 		this.nodes.findTypes().forEach((entityId, type) -> {
 			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(entityId);
 			Entity parentEntity = typeEntity.getParent();
 			if(parentEntity == null) {
-				System.out.println("typeEntity's parent is null");
+//				System.out.println("typeEntity's parent is null");
 			} else {
 				if(parentEntity instanceof FileEntity) {
 					ProjectFile file = this.nodes.findCodeFile(parentEntity.getId());
@@ -122,8 +122,8 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 						}
 						parentEntity = parentEntity.getParent();
 					}*/
-					System.out.println("typeEntity's parent is other Entity " + parentEntity.getClass());
-					System.out.println(typeEntity);
+//					System.out.println("typeEntity's parent is other Entity " + parentEntity.getClass());
+//					System.out.println(typeEntity);
 				}
 			}
 		});
@@ -131,7 +131,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(entityId);
 			Entity parentEntity = functionEntity.getParent();
 			if(parentEntity == null) {
-				System.out.println("functionEntity's parent is null");
+//				System.out.println("functionEntity's parent is null");
 			} else {
 				if(parentEntity instanceof FileEntity) {
 //					System.out.println("functionEntity's parent is FileEntity");
@@ -144,7 +144,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 					TypeContainsFunction typeContainsFunction = new TypeContainsFunction(type, function);
 					insertRelationToRelations(typeContainsFunction);
 				} else {
-					System.out.println("functionEntity's parent is other Entity " + parentEntity.getClass());
+//					System.out.println("functionEntity's parent is other Entity " + parentEntity.getClass());
 				}
 			}
 		});
@@ -152,7 +152,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			VarEntity varEntity = (VarEntity) entityRepo.getEntity(entityId);
 			Entity parentEntity = varEntity.getParent();
 			if(parentEntity == null) {
-				System.out.println("varEntity's parent is null");
+//				System.out.println("varEntity's parent is null");
 			} else {
 				if(parentEntity instanceof FileEntity) {
 //					System.out.println("varEntity's parent is FileEntity");
@@ -170,7 +170,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 					FunctionContainsVariable functionContainsVariable = new FunctionContainsVariable(function, variable);
 					insertRelationToRelations(functionContainsVariable);
 				} else {
-					System.out.println("varEntity's parent is other Entity " + parentEntity.getClass());
+//					System.out.println("varEntity's parent is other Entity " + parentEntity.getClass());
 				}
 			}
 		});
@@ -181,6 +181,18 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 		extractRelationsFromTypes();
 		extractRelationsFromFunctions();
 		extractRelationsFromVariables();		
+		extractRelationsFromFiles();
 	}
-
+	
+	protected void extractRelationsFromFiles() {
+		nodes.findFiles().forEach((entityId, file) -> {
+			FileEntity fileEntity = (FileEntity) entityRepo.getEntity(entityId);
+			System.out.println(fileEntity.getQualifiedName());
+			System.out.println("getImportedFiles " + fileEntity.getImportedFiles().size());
+			System.out.println("getImportedFileInAllLevel " + fileEntity.getImportedFilesInAllLevel().size());
+			System.out.println("getImportedNames " + fileEntity.getImportedNames().size());
+			System.out.println("getImportedRelationEntities" + fileEntity.getImportedRelationEntities().size());
+			System.out.println("getImportedTypes " + fileEntity.getImportedTypes().size());
+		});
+	}
 }
