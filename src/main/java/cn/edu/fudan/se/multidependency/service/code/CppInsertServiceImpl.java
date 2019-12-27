@@ -11,6 +11,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsFunction;
 import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsType;
 import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsVariable;
+import cn.edu.fudan.se.multidependency.model.relation.code.FileIncludeFile;
 import cn.edu.fudan.se.multidependency.model.relation.code.FunctionContainsVariable;
 import cn.edu.fudan.se.multidependency.model.relation.code.PackageContainsFile;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsFunction;
@@ -187,12 +188,21 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 	protected void extractRelationsFromFiles() {
 		nodes.findFiles().forEach((entityId, file) -> {
 			FileEntity fileEntity = (FileEntity) entityRepo.getEntity(entityId);
-			System.out.println(fileEntity.getQualifiedName());
-			System.out.println("getImportedFiles " + fileEntity.getImportedFiles().size());
-			System.out.println("getImportedFileInAllLevel " + fileEntity.getImportedFilesInAllLevel().size());
-			System.out.println("getImportedNames " + fileEntity.getImportedNames().size());
-			System.out.println("getImportedRelationEntities" + fileEntity.getImportedRelationEntities().size());
-			System.out.println("getImportedTypes " + fileEntity.getImportedTypes().size());
+			fileEntity.getImportedFiles().forEach(entity -> {
+				if(entity instanceof FileEntity) {
+					ProjectFile includeFile = nodes.findCodeFile(entity.getId());
+					if(includeFile != null) {
+						FileIncludeFile fileIncludeFile = new FileIncludeFile(file, includeFile);
+						insertRelationToRelations(fileIncludeFile);
+					}
+				} else {
+					System.out.println("getImprotedFiles: " + entity.getClass());
+				}
+			});
+			fileEntity.getImportedTypes().forEach(entity -> {
+				System.out.println("getImportedTypes: " + entity.getClass());
+			});
+			
 		});
 	}
 }
