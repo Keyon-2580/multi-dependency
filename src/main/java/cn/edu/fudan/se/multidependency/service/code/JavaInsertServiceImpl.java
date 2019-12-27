@@ -31,7 +31,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			Language language) {
 		super(projectPath, entityRepo, databasePath, delete, language);
 	}
-
+	
 	@Override
 	protected void insertNodesWithContainRelations() throws LanguageErrorException {
 		entityRepo.getEntities().forEach(entity -> {
@@ -125,6 +125,16 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			Type type = this.nodes.findType(parentEntity.getId());
 			TypeContainsFunction typeContainsFunction = new TypeContainsFunction(type, function);
 			insertRelationToRelations(typeContainsFunction);
+			for(VarEntity varEntity : functionEntity.getParameters()) {
+				String parameterName = varEntity.getRawType().getName();
+				TypeEntity typeEntity = varEntity.getType();
+				if(typeEntity != null && nodes.findType(typeEntity.getId()) != null) {
+					function.addParameterIdentifies(typeEntity.getQualifiedName());
+				} else {
+					function.addParameterIdentifies(parameterName);
+				}
+			}
+
 		});
 		this.nodes.findVariables().forEach((entityId, variable) -> {
 			VarEntity varEntity = (VarEntity) entityRepo.getEntity(entityId);

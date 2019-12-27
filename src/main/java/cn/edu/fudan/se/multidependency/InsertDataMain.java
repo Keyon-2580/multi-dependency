@@ -40,7 +40,7 @@ public class InsertDataMain {
 		extractor.setProjectPath(projectPath);
 		EntityRepo entityRepo = extractor.extractEntityRepo();
 		
-		InserterForNeo4j dependsInserter = InserterForNeo4jServiceFactory.getInstance().createCodeInserterService(yaml, entityRepo, false);
+		InserterForNeo4j dependsInserter = InserterForNeo4jServiceFactory.getInstance().createCodeInserterService(yaml, entityRepo, true);
 		dependsInserter.insertToNeo4jDataBase();
 		return dependsInserter.getNodes();
     }

@@ -151,6 +151,15 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 					TypeContainsFunction typeContainsFunction = new TypeContainsFunction(type, function);
 					insertRelationToRelations(typeContainsFunction);
 				}
+				for(VarEntity varEntity : functionEntity.getParameters()) {
+					String parameterName = varEntity.getRawType().getName();
+					TypeEntity typeEntity = varEntity.getType();
+					if(typeEntity != null && nodes.findType(typeEntity.getId()) != null) {
+						function.addParameterIdentifies(typeEntity.getQualifiedName());
+					} else {
+						function.addParameterIdentifies(parameterName);
+					}
+				}
 			}
 		});
 		this.nodes.findVariables().forEach((entityId, variable) -> {
