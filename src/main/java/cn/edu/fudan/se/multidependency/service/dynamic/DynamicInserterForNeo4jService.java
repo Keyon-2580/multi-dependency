@@ -46,7 +46,7 @@ public abstract class DynamicInserterForNeo4jService implements InserterForNeo4j
 		System.out.println("开始时间：" + sdf.format(currentTime));
 		batchInserterService.init(databasePath, false);
 		
-		insertToNeo4jDataBase(scenarioName, featureName, testcaseName, executeFile);
+		addNodesAndRelations(scenarioName, featureName, testcaseName, executeFile);
 
 		insertToNeo4j();
 		
@@ -55,7 +55,7 @@ public abstract class DynamicInserterForNeo4jService implements InserterForNeo4j
 		System.out.println("结束时间：" + sdf.format(currentTime));
 	}
 	
-	protected abstract void insertToNeo4jDataBase(String scenarioName, List<String> featureName, String testcaseName,
+	protected abstract void addNodesAndRelations(String scenarioName, List<String> featureName, String testcaseName,
 			File executeFile) throws Exception;
 	
 	private void insertToNeo4j() {

@@ -13,7 +13,7 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 		super(staticCodeNodes, databasePath);
 	}
 	
-	protected void insertToNeo4jDataBase(String scenarioName, List<String> featureName, String testcaseName,
+	protected void addNodesAndRelations(String scenarioName, List<String> featureName, String testcaseName,
 			File executeFile) throws Exception {
 		extractFunctionNodes(executeFile);
 	}

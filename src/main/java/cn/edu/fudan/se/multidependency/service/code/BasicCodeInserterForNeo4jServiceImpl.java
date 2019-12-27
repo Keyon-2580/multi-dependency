@@ -67,7 +67,7 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl implements InserterFo
 		System.out.println("开始时间：" + sdf.format(currentTime));
 		batchInserterService.init(databasePath, delete);
 		
-		insertNodesAndRelations();
+		addNodesAndRelations();
 		
 		// 将节点和关系放入nodes和relations后，统一插入neo4j
 		insertToNeo4j();
@@ -77,7 +77,7 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl implements InserterFo
 		System.out.println("结束时间：" + sdf.format(currentTime));
 	}
 	
-	protected abstract void insertNodesAndRelations();
+	protected abstract void addNodesAndRelations();
 
 	private void insertToNeo4j() {
 		this.batchInserterService.insertNodes(nodes);
