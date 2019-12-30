@@ -10,7 +10,7 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 
-@RelationshipEntity("TYPE_CONTAINS_TYPE")
+@RelationshipEntity(RelationType.str_CONTAIN)
 public class TypeContainsType implements Relation {
 
 	private static final long serialVersionUID = 2879742104230385194L;
@@ -44,7 +44,7 @@ public class TypeContainsType implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.TYPE_CONTAINS_TYPE;
+		return RelationType.CONTAIN;
 	}
 
 	@Override

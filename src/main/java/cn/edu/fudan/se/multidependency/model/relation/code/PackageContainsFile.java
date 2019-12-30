@@ -13,7 +13,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-@RelationshipEntity("PACKAGE_CONTAINS_FILE")
+@RelationshipEntity(RelationType.str_CONTAIN)
 public class PackageContainsFile implements Relation {
 	
 	private static final long serialVersionUID = 6671650000417159863L;
@@ -66,7 +66,7 @@ public class PackageContainsFile implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.PACKAGE_CONTAINS_FILE;
+		return RelationType.CONTAIN;
 	}
 
 	@Override

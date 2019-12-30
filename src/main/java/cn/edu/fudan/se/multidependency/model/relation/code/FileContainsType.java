@@ -14,7 +14,7 @@ import org.neo4j.ogm.annotation.StartNode;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 
-@RelationshipEntity("FILE_CONTAINS_TYPE")
+@RelationshipEntity(RelationType.str_CONTAIN)
 public class FileContainsType implements Relation {
 
 	private static final long serialVersionUID = 1653809506761293660L;
@@ -67,7 +67,7 @@ public class FileContainsType implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.FILE_CONTAINS_TYPE;
+		return RelationType.CONTAIN;
 	}
 
 	@Override

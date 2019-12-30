@@ -1,25 +1,23 @@
-package cn.edu.fudan.se.multidependency.model.relation.code;
+package cn.edu.fudan.se.multidependency.model.relation;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.node.code.Type;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
-import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 
-@RelationshipEntity(RelationType.str_CONTAIN)
-public class FunctionContainsType implements Relation {
+import cn.edu.fudan.se.multidependency.model.node.Node;
 
-	private static final long serialVersionUID = 4645473697153791270L;
+@RelationshipEntity(RelationType.str_CONTAIN)
+public class Contain implements Relation {
+
+	private static final long serialVersionUID = 6713953591550916427L;
 
 	@Id
     @GeneratedValue
     private Long id;
-	
+
 	@Override
 	public Long getId() {
 		return id;
@@ -30,17 +28,18 @@ public class FunctionContainsType implements Relation {
 		this.id = id;
 	}
 	
-	private Function function;
-	private Type containType;
+	private Node start;
+	
+	private Node end;
 
 	@Override
 	public Long getStartNodeGraphId() {
-		return function.getId();
+		return start.getId();
 	}
 
 	@Override
 	public Long getEndNodeGraphId() {
-		return containType.getId();
+		return end.getId();
 	}
 
 	@Override
@@ -52,5 +51,5 @@ public class FunctionContainsType implements Relation {
 	public Map<String, Object> getProperties() {
 		return new HashMap<>();
 	}
-
+	
 }

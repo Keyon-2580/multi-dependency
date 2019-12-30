@@ -12,7 +12,7 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 
-@RelationshipEntity("DEPENDENCY_FUNCTION_RETURN_TYPE")
+@RelationshipEntity(RelationType.str_DEPENDENCY_FUNCTION_RETURN_TYPE)
 public class FunctionReturnType implements Relation {
 
 	private static final long serialVersionUID = -3315100529955945595L;

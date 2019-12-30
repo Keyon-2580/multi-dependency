@@ -11,7 +11,7 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 
-@RelationshipEntity("FILE_CONTAINS_VARIABLE")
+@RelationshipEntity(RelationType.str_CONTAIN)
 public class FileContainsVariable implements Relation {
 
 	private static final long serialVersionUID = 7741798151262442615L;
@@ -55,7 +55,7 @@ public class FileContainsVariable implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.FILE_CONTAINS_VARIABLE;
+		return RelationType.CONTAIN;
 	}
 
 	@Override

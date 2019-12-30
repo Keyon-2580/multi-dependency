@@ -12,7 +12,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 
-@RelationshipEntity("DEPENDENCY_FILE_IMPORT_VARIABLE")
+@RelationshipEntity(RelationType.str_DEPENDENCY_FILE_IMPORT_VARIABLE)
 public class FileImportVariable implements Relation {
 
 	private static final long serialVersionUID = -7712370556388767903L;

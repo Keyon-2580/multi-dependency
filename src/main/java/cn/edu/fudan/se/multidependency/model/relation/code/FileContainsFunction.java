@@ -14,7 +14,7 @@ import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 
-@RelationshipEntity("FILE_CONTAINS_FUNCTION")
+@RelationshipEntity(RelationType.str_CONTAIN)
 public class FileContainsFunction implements Relation {
 
 	private static final long serialVersionUID = -6154270226333353997L;
@@ -67,7 +67,7 @@ public class FileContainsFunction implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.FILE_CONTAINS_FUNCTION;
+		return RelationType.CONTAIN;
 	}
 
 	@Override

@@ -12,7 +12,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-@RelationshipEntity("DEPENDENCY_TYPE_IMPLEMENTS_TYPE")
+@RelationshipEntity(RelationType.str_DEPENDENCY_TYPE_IMPLEMENTS_TYPE)
 public class TypeImplementsType implements Relation {
 	
 	private static final long serialVersionUID = 3740594031088738257L;

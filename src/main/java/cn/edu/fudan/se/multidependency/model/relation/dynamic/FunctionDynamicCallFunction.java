@@ -51,7 +51,7 @@ public class FunctionDynamicCallFunction implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.DYNAMIC_FUNCTION_CALL_FUNCTION;
+		return RelationType.DEPENDENCY_DYNAMIC_FUNCTION_CALL_FUNCTION;
 	}
 
 	@Override

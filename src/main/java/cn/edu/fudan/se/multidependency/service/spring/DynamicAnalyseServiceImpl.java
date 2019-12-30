@@ -37,7 +37,7 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	private void insertRelations() {
 		relations.getAllRelations().forEach((relationType, rs) -> {
 			rs.forEach(relation -> {
-				if(relation.getRelationType() == RelationType.DYNAMIC_FUNCTION_CALL_FUNCTION) {
+				if(relation.getRelationType() == RelationType.DEPENDENCY_DYNAMIC_FUNCTION_CALL_FUNCTION) {
 					functionDynamicCallFunctionRepository.save((FunctionDynamicCallFunction) relation);
 				}
 			});

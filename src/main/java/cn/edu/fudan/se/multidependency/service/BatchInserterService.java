@@ -48,7 +48,8 @@ public class BatchInserterService implements Closeable {
 	    	mapLabels.put(nodeType, Label.label(nodeType.toString()));
 	    }
     	for(RelationType relationType : RelationType.values()) {
-    		mapRelations.put(relationType, RelationshipType.withName(relationType.toString()));
+//    		mapRelations.put(relationType, RelationshipType.withName(relationType.toString()));
+    		mapRelations.put(relationType, relationType);
     	}
 	}
 	
