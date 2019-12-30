@@ -12,7 +12,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Package;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 
-@RelationshipEntity(RelationType.str_CONTAIN)
+@RelationshipEntity(RelationType.str_PROJECT_CONTAINS_PACKAGE)
 public class ProjectContainsPackage implements Relation {
 
 	private static final long serialVersionUID = 5380708098150213268L;

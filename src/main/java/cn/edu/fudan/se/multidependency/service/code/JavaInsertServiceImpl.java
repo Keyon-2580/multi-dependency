@@ -71,6 +71,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 		});
 		this.nodes.findFiles().forEach((entityId, codeFile) -> {
 			PackageContainsFile containFile = new PackageContainsFile();
+//			containFile.setEnd(codeFile);
 			containFile.setFile(codeFile);
 			// 在java中，文件上面是包，若包不存在，则将该文件的包设为当前目录
 			Entity fileEntity = entityRepo.getEntity(entityId);
@@ -93,6 +94,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				pck = this.nodes.findPackage(parentEntity.getId());
 			}
 			containFile.setPck(pck);
+//			containFile.setStart(pck);
 			insertRelationToRelations(containFile);
 		});
 		this.nodes.findTypes().forEach((entityId, type) -> {

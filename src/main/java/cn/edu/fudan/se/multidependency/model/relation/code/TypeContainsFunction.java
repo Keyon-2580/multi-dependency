@@ -14,7 +14,7 @@ import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 
-@RelationshipEntity(RelationType.str_CONTAIN)
+@RelationshipEntity(RelationType.str_TYPE_CONTAINS_FUNCTION)
 public class TypeContainsFunction implements Relation {
 	
 	private static final long serialVersionUID = -7683024111434170111L;

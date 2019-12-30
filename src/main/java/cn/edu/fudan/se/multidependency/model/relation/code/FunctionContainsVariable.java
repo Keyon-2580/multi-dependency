@@ -11,7 +11,7 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 
-@RelationshipEntity(RelationType.str_CONTAIN)
+@RelationshipEntity(RelationType.str_FUNCTION_CONTAINS_VARIABLE)
 public class FunctionContainsVariable implements Relation {
 
 	private static final long serialVersionUID = -9177342333868580563L;

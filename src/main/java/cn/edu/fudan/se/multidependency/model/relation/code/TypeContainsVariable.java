@@ -12,7 +12,7 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 
-@RelationshipEntity(RelationType.str_CONTAIN)
+@RelationshipEntity(RelationType.str_TYPE_CONTAINS_VARIABLE)
 public class TypeContainsVariable implements Relation {
 	private static final long serialVersionUID = 3063739285255815579L;
 	@Id
