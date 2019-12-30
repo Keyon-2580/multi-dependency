@@ -10,6 +10,7 @@ import java.util.List;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Nodes;
 import cn.edu.fudan.se.multidependency.model.node.code.StaticCodeNodes;
+import cn.edu.fudan.se.multidependency.model.node.testcase.DynamicNodes;
 import cn.edu.fudan.se.multidependency.model.relation.Relations;
 import cn.edu.fudan.se.multidependency.service.BatchInserterService;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
@@ -27,7 +28,7 @@ public abstract class DynamicInserterForNeo4jService implements InserterForNeo4j
 		super();
 		this.staticCodeNodes = staticCodeNodes;
 		this.databasePath = databasePath;
-		this.nodes = new Nodes();
+		this.dynamicNodes = new DynamicNodes();
 		this.relations = new Relations();
 		this.batchInserterService = BatchInserterService.getInstance();
 	}
@@ -35,7 +36,7 @@ public abstract class DynamicInserterForNeo4jService implements InserterForNeo4j
 	protected String databasePath;
 	
 	protected StaticCodeNodes staticCodeNodes;
-	protected Nodes nodes;
+	protected DynamicNodes dynamicNodes;
 	protected Relations relations;
 	
 	protected String scenarioName;
@@ -52,6 +53,7 @@ public abstract class DynamicInserterForNeo4jService implements InserterForNeo4j
 		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
 		System.out.println("开始时间：" + sdf.format(currentTime));
 		batchInserterService.init(databasePath, false);
+		extractScenarioAndTestCaseAndFeatures();
 		
 		addNodesAndRelations(scenarioName, featureName, testcaseName, executeFile);
 
@@ -63,16 +65,18 @@ public abstract class DynamicInserterForNeo4jService implements InserterForNeo4j
 		System.out.println("结束时间：" + sdf.format(currentTime));
 	}
 	
+	protected abstract void extractScenarioAndTestCaseAndFeatures();
+
 	protected abstract void addNodesAndRelations(String scenarioName, List<String> featureName, String testcaseName,
 			File executeFile) throws Exception;
 	
 	private void insertToNeo4j() {
-		batchInserterService.insertNodes(nodes);
+		batchInserterService.insertNodes(dynamicNodes);
 		batchInserterService.insertRelations(relations);
 	}
 
 	public Nodes getNodes() {
-		return nodes;
+		return dynamicNodes;
 	}
 
 	public Relations getRelations() {

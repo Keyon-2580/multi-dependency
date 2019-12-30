@@ -37,7 +37,7 @@ public class Nodes {
 	 * @param node
 	 * @param entityId
 	 */
-	public void insertNode(Node node) {
+	public void addNode(Node node) {
 		Map<Integer, Node> nodes = allNodes.get(node.getNodeType());
 		nodes = nodes == null ? new HashMap<>() : nodes;
 		nodes.put(node.getEntityId(), node);

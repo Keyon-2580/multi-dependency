@@ -8,28 +8,87 @@ import java.util.Map;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.StaticCodeNodes;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
+import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
+import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.utils.DynamicUtil;
 import cn.edu.fudan.se.multidependency.utils.DynamicUtil.DynamicFunctionFromKieker;
 
 public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4jService {
 
+	@Override
+	protected void extractScenarioAndTestCaseAndFeatures() {
+		String fileName = executeFile.getName();
+		System.out.println(fileName);
+		String[] splits = fileName.split(",");
+		scenarioName = splits[0];
+		testcaseName = splits[1];
+		for(int i = 2; i < splits.length; i++) {
+			featureName.add(splits[i]);
+		}
+	}
+	
 	public KiekerDynamicInserterForNeo4jService(StaticCodeNodes staticCodeNodes, String projectPath,
 			String databasePath, Language language) {
 		super(staticCodeNodes, databasePath);
 	}
 	
-	protected void addNodesAndRelations(String scenarioName, List<String> featureName, String testcaseName,
+	protected void addNodesAndRelations(String scenarioName, List<String> featureNames, String testCaseName,
 			File executeFile) throws Exception {
-		extractFunctionNodes(executeFile);
+		Scenario scenario = this.dynamicNodes.findScenarioByName(scenarioName);
+		if(scenario == null) {
+			scenario = new Scenario();
+			scenario.setScenarioName(scenarioName);
+			scenario.setEntityId(generateId());
+			this.dynamicNodes.addNode(scenario);
+		}
+		TestCase testCase = new TestCase();
+		testCase.setEntityId(generateId());
+		testCase.setTestCaseName(testCaseName);
+		this.dynamicNodes.addNode(testCase);
+		Contain contain = new Contain();
+		contain.setStart(scenario);
+		contain.setEnd(testCase);
+		this.relations.addRelation(contain);
+		for(String featureName : featureNames) {
+			Feature feature = this.dynamicNodes.findFeatureByFeature(featureName);
+			if(feature == null) {
+				feature = new Feature();
+				feature.setEntityId(generateId());
+				feature.setFeatureName(featureName);
+				this.dynamicNodes.addNode(feature);
+				contain = new Contain();
+				contain.setStart(testCase);
+				contain.setEnd(feature);
+				this.relations.addRelation(contain);
+			}
+		}
+		extractFunctionNodes(executeFile, testCase);
 	}
 	
-	protected void extractFunctionNodes(File executeFile) {
+	private void extractFunctionNodes(File executeFile, TestCase testCase) {
 		Map<String, List<Function>> functions = staticCodeNodes.allFunctionsByFunctionName();
 		Map<String, Map<Integer, List<DynamicFunctionFromKieker>>> allDynamicFunctionFromKiekers = DynamicUtil.readKiekerFile(executeFile);
 		for(Map<Integer, List<DynamicFunctionFromKieker>> groups : allDynamicFunctionFromKiekers.values()) {
 			for(List<DynamicFunctionFromKieker> group : groups.values()) {
 				for(DynamicFunctionFromKieker calledDynamicFunction : group) {
+					if(calledDynamicFunction.getDepth() == 0 && calledDynamicFunction.getBreadth() == 0) {
+						List<Function> calledFunctions = functions.get(calledDynamicFunction.getFunctionName());
+						if(calledFunctions == null) {
+							continue;
+						}
+						Function calledFunction = findFunctionWithDynamic(calledDynamicFunction, calledFunctions);
+						if(calledFunction == null) {
+							continue;
+						}
+						Contain contain = new Contain();
+						contain.setStart(testCase);
+						contain.setEnd(calledFunction);
+						this.relations.addRelation(contain);
+						continue;
+					}
 					if(calledDynamicFunction.getDepth() < 1) {
 						continue;
 					}

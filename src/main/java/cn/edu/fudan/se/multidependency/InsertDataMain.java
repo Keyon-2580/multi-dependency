@@ -34,7 +34,8 @@ public class InsertDataMain {
 			 */
 			Nodes staticCodeNodes = insertStaticCode(yaml, entityRepo);
 			System.out.println("节点数：" + staticCodeNodes.size());
-			insertDynamicCall(yaml, (StaticCodeNodes) staticCodeNodes);
+			File directory = new File("D:\\fan\\analysis\\depends-0.9.5c\\kieker-JavaFileImportTest");
+			insertDynamicCall(yaml, (StaticCodeNodes) staticCodeNodes, directory.listFiles());
 			///FIXME
 			//其它
 		} catch (Exception e) {
@@ -51,9 +52,9 @@ public class InsertDataMain {
     public static void insertDynamicCall(YamlUtils.YamlObject yaml, StaticCodeNodes staticCodeNodes, File... files) throws Exception {
     	DynamicInserterForNeo4jService kiekerInserter = new KiekerDynamicInserterForNeo4jService(staticCodeNodes, yaml.getCodeProjectPath(), yaml.getNeo4jDatabasePath(), Language.valueOf(yaml.getCodeLanguage()));
     	kiekerInserter.setDelete(false);
-    	String testFile = new String("src/test/resources/kieker/kieker-test.dat");
-    	testFile = "D:\\fan\\analysis\\depends-0.9.5c\\kieker-JavaFileImportTest\\kieker-20191230-080951606-UTC-001.dat";
-    	kiekerInserter.setExecuteFile(new File(testFile));
-    	kiekerInserter.insertToNeo4jDataBase();
+    	for(File file : files) {
+    		kiekerInserter.setExecuteFile(file);
+    		kiekerInserter.insertToNeo4jDataBase();
+    	}
     }
 }

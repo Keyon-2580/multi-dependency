@@ -59,7 +59,7 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl implements InserterFo
 				e.printStackTrace();
 			}
 		}
-		this.nodes.insertNode(node);
+		this.nodes.addNode(node);
 	}
 	
 	protected void insertRelationToRelations(Relation relation) {
