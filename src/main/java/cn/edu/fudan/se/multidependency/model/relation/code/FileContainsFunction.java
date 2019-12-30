@@ -67,7 +67,7 @@ public class FileContainsFunction implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.CONTAIN;
+		return RelationType.FILE_CONTAINS_FUNCTION;
 	}
 
 	@Override

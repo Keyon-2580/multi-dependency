@@ -61,6 +61,9 @@ public class BatchInserterService implements Closeable {
 	public Long insertRelation(Relation relation) {
 		relation.setId(inserter.createRelationship(relation.getStartNodeGraphId(), 
 				relation.getEndNodeGraphId(), mapRelations.get(relation.getRelationType()), relation.getProperties()));
+//		relation.setId(inserter.createRelationship(relation.getStartNodeGraphId(), 
+//				relation.getEndNodeGraphId(), relation.getRelationType(), relation.getProperties()));
+
 		return relation.getId();
 	}
 

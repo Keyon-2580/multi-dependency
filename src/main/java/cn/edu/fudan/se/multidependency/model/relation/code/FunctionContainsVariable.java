@@ -55,7 +55,7 @@ public class FunctionContainsVariable implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.CONTAIN;
+		return RelationType.FUNCTION_CONTAINS_VARIABLE;
 	}
 
 	@Override

@@ -67,7 +67,7 @@ public class TypeContainsFunction implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.CONTAIN;
+		return RelationType.TYPE_CONTAINS_FUNCTION;
 	}
 
 	@Override

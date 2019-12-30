@@ -57,7 +57,7 @@ public class ProjectContainsPackage implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.CONTAIN;
+		return RelationType.PROJECT_CONTAINS_PACKAGE;
 	}
 
 	@Override

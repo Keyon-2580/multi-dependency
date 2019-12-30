@@ -66,7 +66,7 @@ public class PackageContainsFile implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.CONTAIN;
+		return RelationType.PACKAGE_CONTAINS_FILE;
 	}
 
 	@Override

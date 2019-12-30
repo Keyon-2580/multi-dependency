@@ -29,7 +29,7 @@ public enum RelationType implements RelationshipType {
 	/**
 	 * 结构关系
 	 */
-	public static final String str_CONTAIN = "CONTAIN";
+	public static final String str_CONTAIN = CONTAIN.toString();
 	public static final String str_FILE_CONTAINS_FUNCTION = "FILE_CONTAINS_FUNCTION";
 	public static final String str_FILE_CONTAINS_TYPE = "FILE_CONTAINS_TYPE";
 	public static final String str_FILE_CONTAINS_VARIABLE = "FILE_CONTAINS_VARIABLE";
