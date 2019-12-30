@@ -20,7 +20,14 @@ import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
  *
  */
 public abstract class BasicCodeInserterForNeo4jServiceImpl implements InserterForNeo4j {
+	
+	private Integer currentEntityId = 0;
 
+	@Override
+	public Integer generateId() {
+		return currentEntityId++;
+	}
+	
 	public BasicCodeInserterForNeo4jServiceImpl(String projectPath, String databasePath, boolean delete, Language language) {
 		super();
 		this.databasePath = databasePath;
@@ -56,7 +63,7 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl implements InserterFo
 	}
 	
 	protected void insertRelationToRelations(Relation relation) {
-		this.relations.insertRelation(relation);
+		this.relations.addRelation(relation);
 	}
 	
 	@Override

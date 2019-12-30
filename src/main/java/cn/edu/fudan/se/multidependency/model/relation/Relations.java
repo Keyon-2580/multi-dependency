@@ -32,7 +32,7 @@ public class Relations {
 		}
 	}
 	
-	public void insertRelation(Relation relation) {
+	public void addRelation(Relation relation) {
 		List<Relation> nodes = allRelations.get(relation.getRelationType());
 		nodes = nodes == null ? new ArrayList<>() : nodes;
 		nodes.add(relation);

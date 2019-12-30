@@ -15,7 +15,14 @@ import cn.edu.fudan.se.multidependency.service.BatchInserterService;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
 
 public abstract class DynamicInserterForNeo4jService implements InserterForNeo4j {
+	
+	private Integer currentEntityId = 0;
 
+	@Override
+	public Integer generateId() {
+		return currentEntityId++;
+	}
+	
 	public DynamicInserterForNeo4jService(StaticCodeNodes staticCodeNodes, String databasePath) {
 		super();
 		this.staticCodeNodes = staticCodeNodes;
@@ -49,6 +56,7 @@ public abstract class DynamicInserterForNeo4jService implements InserterForNeo4j
 		addNodesAndRelations(scenarioName, featureName, testcaseName, executeFile);
 
 		insertToNeo4j();
+		System.out.println(relations.size());
 		
 		closeBatchInserter();
 		currentTime = new Timestamp(System.currentTimeMillis());

@@ -13,6 +13,13 @@ import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
 
 public class BuildInserterForNeo4jService implements InserterForNeo4j {
 	
+	private Integer currentEntityId = 0;
+
+	@Override
+	public Integer generateId() {
+		return currentEntityId++;
+	}
+	
 	public BuildInserterForNeo4jService(StaticCodeNodes staticCodeNodes, String databasePath) {
 		super();
 //		this.staticCodeNodes = staticCodeNodes;

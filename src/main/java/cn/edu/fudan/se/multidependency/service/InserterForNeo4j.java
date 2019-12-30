@@ -5,6 +5,7 @@ import cn.edu.fudan.se.multidependency.model.node.Nodes;
 import cn.edu.fudan.se.multidependency.model.relation.Relations;
 
 public interface InserterForNeo4j {
+	public Integer generateId();
 	
 	public void insertToNeo4jDataBase() throws Exception ;
 	

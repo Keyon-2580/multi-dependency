@@ -6,7 +6,14 @@ import cn.edu.fudan.se.multidependency.model.relation.Relations;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
 
 public class DeployInserterForNeo4j implements InserterForNeo4j{
+	
+	private Integer currentEntityId = 0;
 
+	@Override
+	public Integer generateId() {
+		return currentEntityId++;
+	}
+	
 	@Override
 	public void insertToNeo4jDataBase() throws Exception {
 		

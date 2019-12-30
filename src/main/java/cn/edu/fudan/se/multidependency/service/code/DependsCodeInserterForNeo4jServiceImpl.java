@@ -20,7 +20,12 @@ import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
 
 public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeInserterForNeo4jServiceImpl {
-
+	
+	@Override
+	public Integer generateId() {
+		return this.entityRepo.generateId();
+	}
+	
 	public DependsCodeInserterForNeo4jServiceImpl(String projectPath, EntityRepo entityRepo, String databasePath, boolean delete, Language language) {
 		super(projectPath, databasePath, delete, language);
 		this.entityRepo = entityRepo;

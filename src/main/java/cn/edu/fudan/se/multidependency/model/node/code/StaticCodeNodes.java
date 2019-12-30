@@ -1,12 +1,15 @@
 package cn.edu.fudan.se.multidependency.model.node.code;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import cn.edu.fudan.se.multidependency.model.node.Nodes;
-import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 
 public class StaticCodeNodes extends Nodes {
 	
@@ -45,6 +48,18 @@ public class StaticCodeNodes extends Nodes {
 	public Map<Integer, Function> findFunctions() {
 		Map<Integer, Function> functions = (Map<Integer, Function>) findNodesMap(NodeType.Function);
 		return functions;
+	}
+	
+	public Map<String, List<Function>> allFunctionsByFunctionName() {
+		Map<String, List<Function>> result = new HashMap<>();
+		for(Function function : findFunctions().values()) {
+			String functionName = function.getFunctionName();
+			List<Function> functions = result.get(functionName);
+			functions = functions == null ? new ArrayList<>() : functions;
+			functions.add(function);
+			result.put(functionName, functions);
+		}
+		return result;
 	}
 	
 	public Map<Integer, ProjectFile> findFiles() {
