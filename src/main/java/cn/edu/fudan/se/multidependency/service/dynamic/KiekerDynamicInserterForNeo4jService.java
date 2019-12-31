@@ -18,21 +18,24 @@ import cn.edu.fudan.se.multidependency.utils.DynamicUtil.DynamicFunctionFromKiek
 
 public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4jService {
 
+	public KiekerDynamicInserterForNeo4jService(StaticCodeNodes staticCodeNodes, String projectPath,
+			String databasePath, Language language) {
+		super(staticCodeNodes, databasePath);
+	}
+	
+	/**
+	 * 从文件名中提取出场景、特性、测试用例名称
+	 */
 	@Override
 	protected void extractScenarioAndTestCaseAndFeatures() {
+		featureName.clear();
 		String fileName = executeFile.getName();
-		System.out.println(fileName);
 		String[] splits = fileName.split(",");
 		scenarioName = splits[0];
 		testcaseName = splits[1];
 		for(int i = 2; i < splits.length; i++) {
 			featureName.add(splits[i]);
 		}
-	}
-	
-	public KiekerDynamicInserterForNeo4jService(StaticCodeNodes staticCodeNodes, String projectPath,
-			String databasePath, Language language) {
-		super(staticCodeNodes, databasePath);
 	}
 	
 	protected void addNodesAndRelations(String scenarioName, List<String> featureNames, String testCaseName,
@@ -59,11 +62,11 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 				feature.setEntityId(generateId());
 				feature.setFeatureName(featureName);
 				this.dynamicNodes.addNode(feature);
-				contain = new Contain();
-				contain.setStart(testCase);
-				contain.setEnd(feature);
-				this.relations.addRelation(contain);
 			}
+			contain = new Contain();
+			contain.setStart(testCase);
+			contain.setEnd(feature);
+			this.relations.addRelation(contain);
 		}
 		extractFunctionNodes(executeFile, testCase);
 	}
@@ -126,7 +129,6 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 					FunctionDynamicCallFunction relation = new FunctionDynamicCallFunction(callerFunction, calledFunction);
 					relation.setOrder(callerDynamicFunction.getBreadth() + ":" + callerDynamicFunction.getDepth() + " -> " + calledDynamicFunction.getBreadth() + ":" + calledDynamicFunction.getDepth());
 					this.relations.addRelation(relation);
-					System.out.println("------------------------------------------");
 				}
 			}
 		}

@@ -33,7 +33,6 @@ public class InsertDataMain {
 			 * 静态分析
 			 */
 			Nodes staticCodeNodes = insertStaticCode(yaml, entityRepo);
-			System.out.println("节点数：" + staticCodeNodes.size());
 			File directory = new File("D:\\fan\\analysis\\depends-0.9.5c\\kieker-JavaFileImportTest");
 			insertDynamicCall(yaml, (StaticCodeNodes) staticCodeNodes, directory.listFiles());
 			///FIXME
@@ -45,6 +44,7 @@ public class InsertDataMain {
     
     public static Nodes insertStaticCode(YamlUtils.YamlObject yaml, EntityRepo entityRepo) throws Exception {
 		InserterForNeo4j dependsInserter = InserterForNeo4jServiceFactory.getInstance().createCodeInserterService(yaml, entityRepo, true);
+		dependsInserter.addNodesAndRelations();
 		dependsInserter.insertToNeo4jDataBase();
 		return dependsInserter.getNodes();
     }
@@ -54,7 +54,8 @@ public class InsertDataMain {
     	kiekerInserter.setDelete(false);
     	for(File file : files) {
     		kiekerInserter.setExecuteFile(file);
-    		kiekerInserter.insertToNeo4jDataBase();
+    		kiekerInserter.addNodesAndRelations();
     	}
+    	kiekerInserter.insertToNeo4jDataBase();
     }
 }

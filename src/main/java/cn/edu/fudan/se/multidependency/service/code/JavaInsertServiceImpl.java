@@ -33,7 +33,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 	}
 	
 	@Override
-	protected void insertNodesWithContainRelations() throws LanguageErrorException {
+	protected void addNodesWithContainRelations() throws LanguageErrorException {
 		entityRepo.getEntities().forEach(entity -> {
 			// 每个entity对应相应的node
 			if(entity instanceof PackageEntity) {
@@ -41,7 +41,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				pck.setPackageName(entity.getQualifiedName());
 				pck.setEntityId(entity.getId());
 				pck.setDirectory(false);
-				insertNodeToNodes(pck, entity.getId());
+				addNodeToNodes(pck, entity.getId());
 				ProjectContainsPackage projectContainsPackage = new ProjectContainsPackage(project, pck);
 				insertRelationToRelations(projectContainsPackage);
 			} else if(entity instanceof FileEntity) {
@@ -50,23 +50,23 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				file.setFileName(entity.getQualifiedName());
 				file.setPath(entity.getQualifiedName());
 				file.setSuffix(FileUtils.extractSuffix(entity.getQualifiedName()));
-				insertNodeToNodes(file, entity.getId());
+				addNodeToNodes(file, entity.getId());
 			} else if(entity instanceof FunctionEntity) {
 				Function function = new Function();
 				function.setFunctionName(entity.getQualifiedName());
 				function.setEntityId(entity.getId());
-				insertNodeToNodes(function, entity.getId());
+				addNodeToNodes(function, entity.getId());
 			} else if(entity instanceof VarEntity) {
 				Variable variable = new Variable();
 				variable.setEntityId(entity.getId());
 				variable.setTypeIdentify(((VarEntity) entity).getRawType().getName());
 				variable.setVariableName(entity.getQualifiedName());
-				insertNodeToNodes(variable, entity.getId());
+				addNodeToNodes(variable, entity.getId());
 			} else if(entity.getClass() == TypeEntity.class) {
 				Type type = new Type();
 				type.setEntityId(entity.getId());
 				type.setTypeName(entity.getQualifiedName());
-				insertNodeToNodes(type, entity.getId());
+				addNodeToNodes(type, entity.getId());
 			}
 		});
 		this.nodes.findFiles().forEach((entityId, codeFile) -> {
@@ -86,7 +86,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 					pck.setEntityId(entityRepo.generateId());
 					pck.setPackageName(packageName);
 					pck.setDirectory(true);
-					insertNodeToNodes(pck, pck.getEntityId());
+					addNodeToNodes(pck, pck.getEntityId());
 					ProjectContainsPackage projectContainsPackage = new ProjectContainsPackage(project, pck);
 					insertRelationToRelations(projectContainsPackage);
 				}
@@ -157,7 +157,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 	}
 	
 	@Override
-	protected void insertRelations() throws LanguageErrorException {
+	protected void addRelations() throws LanguageErrorException {
 		extractRelationsFromTypes();
 		extractRelationsFromFunctions();
 		extractRelationsFromVariables();		

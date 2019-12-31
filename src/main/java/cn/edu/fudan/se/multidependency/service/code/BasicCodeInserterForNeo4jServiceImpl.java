@@ -51,7 +51,7 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl implements InserterFo
 	
 	protected BatchInserterService batchInserterService;
 	
-	protected void insertNodeToNodes(Node node, Integer entityId) {
+	protected void addNodeToNodes(Node node, Integer entityId) {
 		if(!node.getEntityId().equals(entityId)) {
 			try {
 				throw new Exception("节点id没有对应");
@@ -73,24 +73,15 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl implements InserterFo
 		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
 		System.out.println("开始时间：" + sdf.format(currentTime));
 		batchInserterService.init(databasePath, delete);
-		
-		addNodesAndRelations();
-		
-		// 将节点和关系放入nodes和relations后，统一插入neo4j
-		insertToNeo4j();
-		
+		batchInserterService.insertNodes(nodes);
+		batchInserterService.insertRelations(relations);
 		closeBatchInserter();
 		currentTime = new Timestamp(System.currentTimeMillis());
 		System.out.println("结束时间：" + sdf.format(currentTime));
 	}
 	
-	protected abstract void addNodesAndRelations();
-
-	private void insertToNeo4j() {
-		this.batchInserterService.insertNodes(nodes);
-		this.batchInserterService.insertRelations(relations);
-	}
-
+	public abstract void addNodesAndRelations() throws Exception;
+	
 	@Override
 	public void setDatabasePath(String databasePath) {
 		this.databasePath = databasePath;

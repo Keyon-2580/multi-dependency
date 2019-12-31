@@ -38,6 +38,12 @@ public class BuildInserterForNeo4jService implements InserterForNeo4j {
 	protected BatchInserterService batchInserterService;
 
 	@Override
+	public void addNodesAndRelations() throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
 	public void insertToNeo4jDataBase() throws Exception {
 		System.out.println("start to store datas to database");
 		DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -47,17 +53,12 @@ public class BuildInserterForNeo4jService implements InserterForNeo4j {
 		
 		//操作
 		//inserter
-		
-		insertToNeo4j();
+		batchInserterService.insertNodes(nodes);
+		batchInserterService.insertRelations(relations);
 		
 		closeBatchInserter();
 		currentTime = new Timestamp(System.currentTimeMillis());
 		System.out.println("结束时间：" + sdf.format(currentTime));
-	}
-	
-	private void insertToNeo4j() {
-		batchInserterService.insertNodes(nodes);
-		batchInserterService.insertRelations(relations);
 	}
 	
 	@Override
@@ -86,4 +87,5 @@ public class BuildInserterForNeo4jService implements InserterForNeo4j {
 			this.batchInserterService.close();
 		}
 	}
+
 }

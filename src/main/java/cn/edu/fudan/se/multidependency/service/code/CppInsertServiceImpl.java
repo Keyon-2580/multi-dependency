@@ -35,7 +35,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 	}
 
 	@Override
-	protected void insertNodesWithContainRelations() throws LanguageErrorException {
+	protected void addNodesWithContainRelations() throws LanguageErrorException {
 		entityRepo.getEntities().forEach(entity -> {
 			// 每个entity对应相应的node
 			if(entity instanceof PackageEntity) {
@@ -44,7 +44,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				Namespace namespace = new Namespace();
 				namespace.setNamespaceName(entity.getQualifiedName());
 				namespace.setEntityId(entity.getId());
-				insertNodeToNodes(namespace, entity.getId());
+				addNodeToNodes(namespace, entity.getId());
 			} else if(entity instanceof FileEntity) {
 				ProjectFile file = new ProjectFile();
 				String fileName = entity.getQualifiedName();
@@ -52,7 +52,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				file.setFileName(fileName);
 				file.setPath(entity.getQualifiedName());
 				file.setSuffix(FileUtils.extractSuffix(entity.getQualifiedName()));
-				insertNodeToNodes(file, entity.getId());
+				addNodeToNodes(file, entity.getId());
 				// 文件所在目录
 				String packageName = FileUtils.findDirectoryFromFile(fileName);
 				Package pck = this.nodes.findPackageByPackageName(packageName);
@@ -61,7 +61,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 					pck.setEntityId(entityRepo.generateId());
 					pck.setPackageName(packageName);
 					pck.setDirectory(true);
-					insertNodeToNodes(pck, pck.getEntityId());
+					addNodeToNodes(pck, pck.getEntityId());
 					ProjectContainsPackage projectContainsPackage = new ProjectContainsPackage(project, pck);
 					insertRelationToRelations(projectContainsPackage);
 				}
@@ -71,19 +71,19 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				Function function = new Function();
 				function.setFunctionName(entity.getQualifiedName());
 				function.setEntityId(entity.getId());
-				insertNodeToNodes(function, entity.getId());
+				addNodeToNodes(function, entity.getId());
 			} else if(entity instanceof VarEntity) {
 				Variable variable = new Variable();
 				variable.setEntityId(entity.getId());
 				variable.setVariableName(entity.getQualifiedName());
 				variable.setTypeIdentify(((VarEntity) entity).getRawType().getName());
-				insertNodeToNodes(variable, entity.getId());
+				addNodeToNodes(variable, entity.getId());
 			} else if(entity.getClass() == TypeEntity.class) {
 				if(nodes.findType(entity.getId()) == null) {
 					Type type = new Type();
 					type.setEntityId(entity.getId());
 					type.setTypeName(entity.getQualifiedName());
-					insertNodeToNodes(type, entity.getId());
+					addNodeToNodes(type, entity.getId());
 				}
 			} else if(entity.getClass() == AliasEntity.class) {
 				AliasEntity aliasEntity = (AliasEntity) entity;
@@ -94,7 +94,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 						type = new Type();
 						type.setEntityId(typeEntity.getId());
 						type.setTypeName(typeEntity.getQualifiedName());
-						insertNodeToNodes(type, typeEntity.getId());
+						addNodeToNodes(type, typeEntity.getId());
 					}
 					type.setAliasName(entity.getQualifiedName());
 				}
@@ -185,7 +185,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 	}
 
 	@Override
-	protected void insertRelations() throws LanguageErrorException {
+	protected void addRelations() throws LanguageErrorException {
 		extractRelationsFromTypes();
 		extractRelationsFromFunctions();
 		extractRelationsFromVariables();		

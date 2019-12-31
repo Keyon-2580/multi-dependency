@@ -53,16 +53,17 @@ public abstract class DynamicInserterForNeo4jService implements InserterForNeo4j
 		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
 		System.out.println("开始时间：" + sdf.format(currentTime));
 		batchInserterService.init(databasePath, false);
-		extractScenarioAndTestCaseAndFeatures();
-		
-		addNodesAndRelations(scenarioName, featureName, testcaseName, executeFile);
-
-		insertToNeo4j();
-		System.out.println(relations.size());
-		
+		batchInserterService.insertNodes(dynamicNodes);
+		batchInserterService.insertRelations(relations);
 		closeBatchInserter();
 		currentTime = new Timestamp(System.currentTimeMillis());
 		System.out.println("结束时间：" + sdf.format(currentTime));
+	}
+	
+	@Override
+	public void addNodesAndRelations() throws Exception {
+		extractScenarioAndTestCaseAndFeatures();
+		addNodesAndRelations(scenarioName, featureName, testcaseName, executeFile);
 	}
 	
 	protected abstract void extractScenarioAndTestCaseAndFeatures();
@@ -70,11 +71,6 @@ public abstract class DynamicInserterForNeo4jService implements InserterForNeo4j
 	protected abstract void addNodesAndRelations(String scenarioName, List<String> featureName, String testcaseName,
 			File executeFile) throws Exception;
 	
-	private void insertToNeo4j() {
-		batchInserterService.insertNodes(dynamicNodes);
-		batchInserterService.insertRelations(relations);
-	}
-
 	public Nodes getNodes() {
 		return dynamicNodes;
 	}
