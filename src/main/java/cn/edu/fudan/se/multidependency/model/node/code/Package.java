@@ -27,7 +27,7 @@ public class Package implements Node {
 	
 	private boolean isDirectory;
 
-    private Integer entityId;
+    private Long entityId;
 
 	private static final long serialVersionUID = -4892461872164624064L;
 
@@ -47,11 +47,11 @@ public class Package implements Node {
 		this.id = id;
 	}
 
-	public Integer getEntityId() {
+	public Long getEntityId() {
 		return entityId;
 	}
 
-	public void setEntityId(Integer entityId) {
+	public void setEntityId(Long entityId) {
 		this.entityId = entityId;
 	}
 

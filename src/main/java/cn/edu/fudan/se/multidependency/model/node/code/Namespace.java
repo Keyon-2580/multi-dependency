@@ -20,7 +20,7 @@ public class Namespace implements Node {
     
     private String namespaceName;
     
-    private Integer entityId;
+    private Long entityId;
     
 	@Override
 	public Long getId() {
@@ -50,11 +50,11 @@ public class Namespace implements Node {
 		this.namespaceName = namespaceName;
 	}
 
-	public Integer getEntityId() {
+	public Long getEntityId() {
 		return entityId;
 	}
 
-	public void setEntityId(Integer entityId) {
+	public void setEntityId(Long entityId) {
 		this.entityId = entityId;
 	}
 

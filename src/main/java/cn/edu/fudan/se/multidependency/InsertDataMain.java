@@ -4,8 +4,9 @@ import java.io.File;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Nodes;
-import cn.edu.fudan.se.multidependency.model.node.code.StaticCodeNodes;
+import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelations;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
+import cn.edu.fudan.se.multidependency.service.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractorImpl;
 import cn.edu.fudan.se.multidependency.service.code.InserterForNeo4jServiceFactory;
@@ -29,33 +30,41 @@ public class InsertDataMain {
 			extractor.setLanguage(language);
 			extractor.setProjectPath(projectPath);
 			EntityRepo entityRepo = extractor.extractEntityRepo();
+			
+			InserterForNeo4j repository = RepositoryService.getInstance();
+			repository.setDatabasePath(yaml.getNeo4jDatabasePath());
+			repository.setDelete(true);
 			/**
 			 * 静态分析
 			 */
-			Nodes staticCodeNodes = insertStaticCode(yaml, entityRepo);
+			insertStaticCode(yaml, entityRepo);
+			/**
+			 * 动态分析
+			 */
 			File directory = new File("D:\\fan\\analysis\\depends-0.9.5c\\kieker-JavaFileImportTest");
-			insertDynamicCall(yaml, (StaticCodeNodes) staticCodeNodes, directory.listFiles());
+			insertDynamicCall(directory.listFiles());
 			///FIXME
 			//其它
+			
+			
+			//最后统一插入数据库
+			repository.insertToNeo4jDataBase();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
     }
     
     public static Nodes insertStaticCode(YamlUtils.YamlObject yaml, EntityRepo entityRepo) throws Exception {
-		InserterForNeo4j dependsInserter = InserterForNeo4jServiceFactory.getInstance().createCodeInserterService(yaml, entityRepo, true);
+		ExtractorForNodesAndRelations dependsInserter = InserterForNeo4jServiceFactory.getInstance().createCodeInserterService(yaml, entityRepo);
 		dependsInserter.addNodesAndRelations();
-		dependsInserter.insertToNeo4jDataBase();
 		return dependsInserter.getNodes();
     }
     
-    public static void insertDynamicCall(YamlUtils.YamlObject yaml, StaticCodeNodes staticCodeNodes, File... files) throws Exception {
-    	DynamicInserterForNeo4jService kiekerInserter = new KiekerDynamicInserterForNeo4jService(staticCodeNodes, yaml.getCodeProjectPath(), yaml.getNeo4jDatabasePath(), Language.valueOf(yaml.getCodeLanguage()));
-    	kiekerInserter.setDelete(false);
+    public static void insertDynamicCall(File... files) throws Exception {
+    	DynamicInserterForNeo4jService kiekerInserter = new KiekerDynamicInserterForNeo4jService();
     	for(File file : files) {
     		kiekerInserter.setExecuteFile(file);
     		kiekerInserter.addNodesAndRelations();
     	}
-    	kiekerInserter.insertToNeo4jDataBase();
     }
 }

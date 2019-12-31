@@ -17,7 +17,7 @@ public class Variable implements Node {
 
 	private String variableName;
 
-	private Integer entityId;
+	private Long entityId;
 	
 	private String typeIdentify;
 	
@@ -57,11 +57,11 @@ public class Variable implements Node {
 		this.variableName = variableName;
 	}
 
-	public Integer getEntityId() {
+	public Long getEntityId() {
 		return entityId;
 	}
 
-	public void setEntityId(Integer entityId) {
+	public void setEntityId(Long entityId) {
 		this.entityId = entityId;
 	}
 

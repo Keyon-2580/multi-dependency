@@ -21,7 +21,7 @@ public class Feature implements Node {
     @GeneratedValue
     private Long id;
     
-    private Integer entityId;
+    private Long entityId;
     
 	@Override
 	public Long getId() {
@@ -34,12 +34,12 @@ public class Feature implements Node {
 	}
 
 	@Override
-	public Integer getEntityId() {
+	public Long getEntityId() {
 		return entityId;
 	}
 
 	@Override
-	public void setEntityId(Integer entityId) {
+	public void setEntityId(Long entityId) {
 		this.entityId = entityId;
 	}
 

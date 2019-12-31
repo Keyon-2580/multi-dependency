@@ -9,9 +9,9 @@ public interface Node extends Serializable {
 	
 	void setId(Long id);
 	
-	Integer getEntityId();
+	Long getEntityId();
 	
-	void setEntityId(Integer entityId);
+	void setEntityId(Long entityId);
 
 	Map<String, Object> getProperties();
 	

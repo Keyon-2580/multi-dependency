@@ -21,14 +21,10 @@ import depends.entity.repo.EntityRepo;
 
 public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeInserterForNeo4jServiceImpl {
 	
-	@Override
-	public Integer generateId() {
-		return this.entityRepo.generateId();
-	}
-	
-	public DependsCodeInserterForNeo4jServiceImpl(String projectPath, EntityRepo entityRepo, String databasePath, boolean delete, Language language) {
-		super(projectPath, databasePath, delete, language);
+	public DependsCodeInserterForNeo4jServiceImpl(String projectPath, EntityRepo entityRepo, Language language) {
+		super(projectPath, language);
 		this.entityRepo = entityRepo;
+		setCurrentEntityId(entityRepo.generateId().longValue());
 	}
 
 	protected EntityRepo entityRepo;
@@ -40,7 +36,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 	@Override
 	public void addNodesAndRelations() {
 		try {
-			project.setEntityId(entityRepo.generateId());
+			project.setEntityId(entityRepo.generateId().longValue());
 			addNodeToNodes(project, project.getEntityId());
 			addNodesWithContainRelations();
 			addRelations();
@@ -50,38 +46,38 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 	}
 	
 	protected void extractRelationsFromTypes() {
-		Map<Integer, Type> types = this.nodes.findTypes();
+		Map<Long, Type> types = this.getNodes().findTypes();
 		types.forEach((id, type) -> {
 			// 继承与实现
-			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(id);
+			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(id.intValue());
 			Collection<TypeEntity> inherits = typeEntity.getInheritedTypes();
 			inherits.forEach(inherit -> {
-				Type other = types.get(inherit.getId());
+				Type other = types.get(inherit.getId().longValue());
 				if(other != null) {
 					TypeExtendsType typeExtends = new TypeExtendsType(type, other);
-					insertRelationToRelations(typeExtends);
+					addRelation(typeExtends);
 				}
 			});
 			Collection<TypeEntity> imps = typeEntity.getImplementedTypes();
 			imps.forEach(imp -> {
-				Type other = types.get(imp.getId());
+				Type other = types.get(imp.getId().longValue());
 				if(other != null) {
 					TypeImplementsType typeImplements = new TypeImplementsType(type, other);
-					insertRelationToRelations(typeImplements);
+					addRelation(typeImplements);
 				}
 			});
 		});
 	}
 	
 	protected void extractRelationsFromVariables() {
-		this.nodes.findVariables().forEach((entityId, variable) -> {
-			VarEntity varEntity = (VarEntity) entityRepo.getEntity(entityId);
+		this.getNodes().findVariables().forEach((entityId, variable) -> {
+			VarEntity varEntity = (VarEntity) entityRepo.getEntity(entityId.intValue());
 			TypeEntity typeEntity = varEntity.getType();
 			if(typeEntity != null && typeEntity.getClass() == TypeEntity.class) {
-				Type type = this.nodes.findType(typeEntity.getId());
+				Type type = this.getNodes().findType(typeEntity.getId().longValue());
 				if(type != null) {
 					VariableIsType variableIsType = new VariableIsType(variable, type);
-					insertRelationToRelations(variableIsType);
+					addRelation(variableIsType);
 				}
 			} else {
 			}
@@ -89,36 +85,36 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 	}
 	
 	protected void extractRelationsFromFunctions() {
-		Map<Integer, Function> functions = this.nodes.findFunctions();
-		Map<Integer, Type> types = this.nodes.findTypes();
+		Map<Long, Function> functions = this.getNodes().findFunctions();
+		Map<Long, Type> types = this.getNodes().findTypes();
 		functions.forEach((id, function) -> {
 			// 函数调用
-			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(id);
+			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(id.intValue());
 			functionEntity.getRelations().forEach(relation -> {
 				if(DependencyType.CALL.equals(relation.getType())) {
 					if(relation.getEntity() instanceof FunctionEntity) {
 						// call其它方法
-						Function other = functions.get(relation.getEntity().getId());
+						Function other = functions.get(relation.getEntity().getId().longValue());
 						if(other != null) {
 							FunctionCallFunction call = new FunctionCallFunction(function, other);
-							insertRelationToRelations(call);
+							addRelation(call);
 						}
 					} else {
 						///FIXME
 					}
 				}
 				if(DependencyType.RETURN.equals(relation.getType())) {
-					Type returnType = types.get(relation.getEntity().getId());
+					Type returnType = types.get(relation.getEntity().getId().longValue());
 					if(returnType != null) {
 						FunctionReturnType functionReturnType = new FunctionReturnType(function, returnType);
-						insertRelationToRelations(functionReturnType);
+						addRelation(functionReturnType);
 					}
 				}
 				if(DependencyType.PARAMETER.equals(relation.getType())) {
-					Type parameterType = types.get(relation.getEntity().getId());
+					Type parameterType = types.get(relation.getEntity().getId().longValue());
 					if(parameterType != null) {
 						FunctionParameterType functionParameterType = new FunctionParameterType(function, parameterType);
-						insertRelationToRelations(functionParameterType);
+						addRelation(functionParameterType);
 					}
 				}
 				if(DependencyType.THROW.equals(relation.getType())) {

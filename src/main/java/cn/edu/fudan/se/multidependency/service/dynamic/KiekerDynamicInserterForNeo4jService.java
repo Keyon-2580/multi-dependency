@@ -5,9 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.node.code.StaticCodeNodes;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
@@ -18,11 +16,6 @@ import cn.edu.fudan.se.multidependency.utils.DynamicUtil.DynamicFunctionFromKiek
 
 public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4jService {
 
-	public KiekerDynamicInserterForNeo4jService(StaticCodeNodes staticCodeNodes, String projectPath,
-			String databasePath, Language language) {
-		super(staticCodeNodes, databasePath);
-	}
-	
 	/**
 	 * 从文件名中提取出场景、特性、测试用例名称
 	 */
@@ -40,39 +33,39 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 	
 	protected void addNodesAndRelations(String scenarioName, List<String> featureNames, String testCaseName,
 			File executeFile) throws Exception {
-		Scenario scenario = this.dynamicNodes.findScenarioByName(scenarioName);
+		Scenario scenario = this.getNodes().findScenarioByName(scenarioName);
 		if(scenario == null) {
 			scenario = new Scenario();
 			scenario.setScenarioName(scenarioName);
-			scenario.setEntityId(generateId());
-			this.dynamicNodes.addNode(scenario);
+			scenario.setEntityId(generateEntityId());
+			addNode(scenario);
 		}
 		TestCase testCase = new TestCase();
-		testCase.setEntityId(generateId());
+		testCase.setEntityId(generateEntityId());
 		testCase.setTestCaseName(testCaseName);
-		this.dynamicNodes.addNode(testCase);
+		addNode(testCase);
 		Contain contain = new Contain();
 		contain.setStart(scenario);
 		contain.setEnd(testCase);
-		this.relations.addRelation(contain);
+		addRelation(contain);
 		for(String featureName : featureNames) {
-			Feature feature = this.dynamicNodes.findFeatureByFeature(featureName);
+			Feature feature = this.getNodes().findFeatureByFeature(featureName);
 			if(feature == null) {
 				feature = new Feature();
-				feature.setEntityId(generateId());
+				feature.setEntityId(generateEntityId());
 				feature.setFeatureName(featureName);
-				this.dynamicNodes.addNode(feature);
+				addNode(feature);
 			}
 			contain = new Contain();
 			contain.setStart(testCase);
 			contain.setEnd(feature);
-			this.relations.addRelation(contain);
+			addRelation(contain);
 		}
 		extractFunctionNodes(executeFile, testCase);
 	}
 	
 	private void extractFunctionNodes(File executeFile, TestCase testCase) {
-		Map<String, List<Function>> functions = staticCodeNodes.allFunctionsByFunctionName();
+		Map<String, List<Function>> functions = this.getNodes().allFunctionsByFunctionName();
 		Map<String, Map<Integer, List<DynamicFunctionFromKieker>>> allDynamicFunctionFromKiekers = DynamicUtil.readKiekerFile(executeFile);
 		for(Map<Integer, List<DynamicFunctionFromKieker>> groups : allDynamicFunctionFromKiekers.values()) {
 			for(List<DynamicFunctionFromKieker> group : groups.values()) {
@@ -89,7 +82,7 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 						Contain contain = new Contain();
 						contain.setStart(testCase);
 						contain.setEnd(calledFunction);
-						this.relations.addRelation(contain);
+						addRelation(contain);
 						continue;
 					}
 					if(calledDynamicFunction.getDepth() < 1) {
@@ -128,11 +121,11 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 					}
 					FunctionDynamicCallFunction relation = new FunctionDynamicCallFunction(callerFunction, calledFunction);
 					relation.setOrder(callerDynamicFunction.getBreadth() + ":" + callerDynamicFunction.getDepth() + " -> " + calledDynamicFunction.getBreadth() + ":" + calledDynamicFunction.getDepth());
-					this.relations.addRelation(relation);
+					addRelation(relation);
 				}
 			}
 		}
-		System.out.println(staticCodeNodes.size());
+		System.out.println(this.getNodes().size());
 	}
 	
 	private Function findFunctionWithDynamic(DynamicFunctionFromKieker dynamicFunction, List<Function> functions) {

@@ -6,23 +6,17 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import cn.edu.fudan.se.multidependency.model.node.Nodes;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.node.code.StaticCodeNodes;
 import cn.edu.fudan.se.multidependency.model.node.dynamic.CallNode;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.model.relation.Relations;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
+import cn.edu.fudan.se.multidependency.service.RepositoryService;
 
 @Service
 public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	
-	protected StaticCodeNodes codeNodes;
-
-	protected Nodes nodes = new Nodes();
-
-	protected Relations relations = new Relations();
+	RepositoryService repository = RepositoryService.getInstance();
 	
 	@Autowired
 	private FunctionDynamicCallFunctionRepository functionDynamicCallFunctionRepository;
@@ -35,7 +29,7 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	}
 	
 	private void insertRelations() {
-		relations.getAllRelations().forEach((relationType, rs) -> {
+		repository.getRelations().getAllRelations().forEach((relationType, rs) -> {
 			rs.forEach(relation -> {
 				if(relation.getRelationType() == RelationType.DEPENDENCY_DYNAMIC_FUNCTION_CALL_FUNCTION) {
 					functionDynamicCallFunctionRepository.save((FunctionDynamicCallFunction) relation);
@@ -56,12 +50,4 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		return root;
 	}
 
-	public StaticCodeNodes getCodeNodes() {
-		return codeNodes;
-	}
-
-	public void setCodeNodes(StaticCodeNodes codeNodes) {
-		this.codeNodes = codeNodes;
-	}
-	
 }
