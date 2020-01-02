@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Properties;
 import org.neo4j.ogm.annotation.Transient;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
@@ -22,13 +23,13 @@ public class Function implements Node {
 	@Id
     @GeneratedValue
     private Long id;
-	
+
     private Long entityId;
 
 	private String functionName;
-	
+
 	private String returnTypeIdentify;
-	
+
 	private boolean fromDynamic = false;
 
 	/**

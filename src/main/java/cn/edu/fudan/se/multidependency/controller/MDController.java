@@ -69,7 +69,8 @@ public class MDController {
 	
 	@Bean
 	public String testBean() {
-		System.out.println(functionRepository.findAll());
+		System.out.println("eeeeeeeeeeeeeeeeeeeee");
+		System.out.println(functionRepository.findAllFunctionsList().size());
 		ProjectFile file = new ProjectFile();
 		file.setId(1270L);
 		staticCodeService.findTypesInFile(file);

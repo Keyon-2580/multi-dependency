@@ -1,6 +1,5 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +14,6 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.DynamicTestCaseToFunc
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
-import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.repository.node.testcase.FeatureRepository;
 import cn.edu.fudan.se.multidependency.repository.node.testcase.ScenarioRepository;

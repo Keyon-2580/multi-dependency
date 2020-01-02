@@ -1,5 +1,7 @@
 package cn.edu.fudan.se.multidependency.repository.node.code;
 
+import java.util.List;
+
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -15,4 +17,7 @@ public interface FunctionRepository extends Neo4jRepository<Function, Long> {
 
 	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..]->(b:Function) where id(b)={functionId} return a")
 	public ProjectFile findFunctionBelongToFileByFunctionId(@Param("functionId") Long functionId);
+	
+	@Query("match (a:Function) return a")
+	public List<Function> findAllFunctionsList();
 }

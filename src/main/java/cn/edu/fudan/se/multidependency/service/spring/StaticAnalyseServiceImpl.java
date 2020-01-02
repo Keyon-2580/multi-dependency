@@ -97,7 +97,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 
 	@Override
 	public List<Type> findTypesInFile(ProjectFile codeFile) {
-		return null;
+		return new ArrayList<>();
 	}
 
 	@Override

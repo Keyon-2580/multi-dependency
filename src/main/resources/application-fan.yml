@@ -2,11 +2,11 @@ spring:
   data:
     neo4j:
       username: neo4j
-      password: neo4j
+      password: 19970129Fan
 #      uri: bolt://localhost:7687
-#      uri: http://localhost:7474
+      uri: http://localhost:7474
       # embedded
-      uri: file:///D:/fan/Users/Thinkpad/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
+#      uri: file:///D:/fan/Users/Thinkpad/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
 server:
    port: 8080
    
