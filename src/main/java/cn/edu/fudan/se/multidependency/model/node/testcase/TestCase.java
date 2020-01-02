@@ -75,4 +75,10 @@ public class TestCase implements Node {
 		this.success = success;
 	}
 
+	@Override
+	public String toString() {
+		return "TestCase [testCaseName=" + testCaseName + ", success=" + success + ", id=" + id + ", entityId="
+				+ entityId + "]";
+	}
+
 }

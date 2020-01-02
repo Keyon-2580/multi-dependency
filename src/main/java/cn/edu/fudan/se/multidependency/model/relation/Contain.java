@@ -28,6 +28,16 @@ public class Contain implements Relation {
 		this.id = id;
 	}
 	
+	public Contain(Node start, Node end) {
+		super();
+		this.start = start;
+		this.end = end;
+	}
+
+	public Contain() {
+		super();
+	}
+
 	private Node start;
 	
 	private Node end;

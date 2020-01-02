@@ -4,16 +4,6 @@ import org.neo4j.graphdb.RelationshipType;
 
 public enum RelationType implements RelationshipType {
 	CONTAIN(RelationType.str_CONTAIN),
-	FILE_CONTAINS_FUNCTION(RelationType.str_FILE_CONTAINS_FUNCTION),
-	FILE_CONTAINS_TYPE(RelationType.str_FILE_CONTAINS_TYPE),
-	FILE_CONTAINS_VARIABLE(RelationType.str_FILE_CONTAINS_VARIABLE),
-	FUNCTION_CONTAINS_TYPE(RelationType.str_FUNCTION_CONTAINS_TYPE),
-	FUNCTION_CONTAINS_VARIABLE(RelationType.str_FUNCTION_CONTAINS_VARIABLE),
-	PACKAGE_CONTAINS_FILE(RelationType.str_PACKAGE_CONTAINS_FILE),
-	PROJECT_CONTAINS_PACKAGE(RelationType.str_PROJECT_CONTAINS_PACKAGE),
-	TYPE_CONTAINS_FUNCTION(RelationType.str_TYPE_CONTAINS_FUNCTION),
-	TYPE_CONTAINS_TYPE(RelationType.str_TYPE_CONTAINS_TYPE),
-	TYPE_CONTAINS_VARIABLE(RelationType.str_TYPE_CONTAINS_VARIABLE),
 	DEPENDENCY_TYPE_IMPLEMENTS_TYPE(RelationType.str_DEPENDENCY_TYPE_IMPLEMENTS_TYPE),
 	DEPENDENCY_TYPE_EXTENDS_TYPE(RelationType.str_DEPENDENCY_TYPE_EXTENDS_TYPE),
 	DEPENDENCY_FILE_IMPORT_FUNCTION(RelationType.str_DEPENDENCY_FILE_IMPORT_FUNCTION),
@@ -32,17 +22,7 @@ public enum RelationType implements RelationshipType {
 	/**
 	 * 结构关系
 	 */
-	public static final String str_CONTAIN = "CONTAINS";
-	public static final String str_FILE_CONTAINS_FUNCTION = "FILE_CONTAINS_FUNCTION";
-	public static final String str_FILE_CONTAINS_TYPE = "FILE_CONTAINS_TYPE";
-	public static final String str_FILE_CONTAINS_VARIABLE = "FILE_CONTAINS_VARIABLE";
-	public static final String str_FUNCTION_CONTAINS_TYPE = "FUNCTION_CONTAINS_TYPE";
-	public static final String str_FUNCTION_CONTAINS_VARIABLE = "FUNCTION_CONTAINS_VARIABLE";
-	public static final String str_PACKAGE_CONTAINS_FILE = "PACKAGE_CONTAINS_FILE";
-	public static final String str_PROJECT_CONTAINS_PACKAGE = "PROJECT_CONTAINS_PACKAGE";
-	public static final String str_TYPE_CONTAINS_FUNCTION = "TYPE_CONTAINS_FUNCTION";
-	public static final String str_TYPE_CONTAINS_TYPE = "TYPE_CONTAINS_TYPE";
-	public static final String str_TYPE_CONTAINS_VARIABLE = "TYPE_CONTAINS_VARIABLE";
+	public static final String str_CONTAIN = "CONTAIN";
 
 	/**
 	 * 依赖关系
@@ -57,7 +37,7 @@ public enum RelationType implements RelationshipType {
 	public static final String str_DEPENDENCY_FUNCTION_PARAMETER_TYPE = "DEPENDENCY_FUNCTION_PARAMETER_TYPE";
 	public static final String str_DEPENDENCY_FUNCTION_RETURN_TYPE = "DEPENDENCY_FUNCTION_RETURN_TYPE";
 	public static final String str_VARIABLE_IS_TYPE = "VARIABLE_IS_TYPE";
-	public static final String str_DEPENDENCY_DYNAMIC_FUNCTION_CALL_FUNCTION = "DYNAMIC_FUNCTION_CALL_FUNCTION";
+	public static final String str_DEPENDENCY_DYNAMIC_FUNCTION_CALL_FUNCTION = "DEPENDENCY_DYNAMIC_FUNCTION_CALL_FUNCTION";
 	
 	public static final String str_TESTCASE_EXECUTE_FEATURE = "TESTCASE_EXECUTE_FEATURE";
 	public static final String str_SCENARIO_DEFINE_TESTCASE = "SCENARIO_DEFINE_TESTCASE";
@@ -70,5 +50,9 @@ public enum RelationType implements RelationshipType {
 
 	public String getName() {
 		return name;
+	}
+	
+	public String toString() {
+		return getName();
 	}
 }

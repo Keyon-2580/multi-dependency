@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 
@@ -16,7 +15,6 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import cn.edu.fudan.se.multidependency.model.node.Nodes;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
-import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.Relations;
 import cn.edu.fudan.se.multidependency.utils.FileUtils;
 
@@ -29,7 +27,6 @@ public class BatchInserterService implements Closeable {
 	
 	private BatchInserter inserter = null;
 	
-    private Map<RelationType, RelationshipType> mapRelations = new HashMap<>();
     private Map<NodeType, Label> mapLabels = new HashMap<>();
     
 	public void init(String databasePath, boolean initDatabase) throws Exception {
@@ -47,10 +44,6 @@ public class BatchInserterService implements Closeable {
 	    for(NodeType nodeType : NodeType.values()) {
 	    	mapLabels.put(nodeType, Label.label(nodeType.toString()));
 	    }
-    	for(RelationType relationType : RelationType.values()) {
-//    		mapRelations.put(relationType, RelationshipType.withName(relationType.toString()));
-    		mapRelations.put(relationType, relationType);
-    	}
 	}
 	
 	public Long insertNode(Node node) {
@@ -59,11 +52,7 @@ public class BatchInserterService implements Closeable {
 	}
 	
 	public Long insertRelation(Relation relation) {
-		relation.setId(inserter.createRelationship(relation.getStartNodeGraphId(), 
-				relation.getEndNodeGraphId(), mapRelations.get(relation.getRelationType()), relation.getProperties()));
-//		relation.setId(inserter.createRelationship(relation.getStartNodeGraphId(), 
-//				relation.getEndNodeGraphId(), relation.getRelationType(), relation.getProperties()));
-
+		relation.setId(inserter.createRelationship(relation.getStartNodeGraphId(), relation.getEndNodeGraphId(), relation.getRelationType(), relation.getProperties()));
 		return relation.getId();
 	}
 

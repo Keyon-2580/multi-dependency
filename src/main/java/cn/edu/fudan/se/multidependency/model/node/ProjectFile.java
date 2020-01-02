@@ -79,4 +79,10 @@ public class ProjectFile implements Node {
 		this.suffix = suffix;
 	}
 
+	@Override
+	public String toString() {
+		return "ProjectFile [id=" + id + ", entityId=" + entityId + ", fileName=" + fileName + ", path=" + path
+				+ ", suffix=" + suffix + "]";
+	}
+
 }

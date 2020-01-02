@@ -14,10 +14,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
-import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsType;
-import cn.edu.fudan.se.multidependency.model.relation.code.PackageContainsFile;
-import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsFunction;
-import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsVariable;
+import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.service.BatchInserterService;
 import cn.edu.fudan.se.multidependency.utils.YamlUtils;
 
@@ -57,16 +54,16 @@ public class BatchInserterServiceTest {
 			variable.setVariableName("test.Test.vtest");
 			inserter.insertNode(variable);
 			
-			PackageContainsFile packageContainsFile = new PackageContainsFile(pck, file);
+			Contain packageContainsFile = new Contain(pck, file);
 			inserter.insertRelation(packageContainsFile);
 			
-			FileContainsType fileContainsType = new FileContainsType(file, type);
+			Contain fileContainsType = new Contain(file, type);
 			inserter.insertRelation(fileContainsType);
 			
-			TypeContainsFunction typeContainsFunction = new TypeContainsFunction(type, function);
+			Contain typeContainsFunction = new Contain(type, function);
 			inserter.insertRelation(typeContainsFunction);
 			
-			TypeContainsVariable typeContainsVariable = new TypeContainsVariable(type, variable);
+			Contain typeContainsVariable = new Contain(type, variable);
 			inserter.insertRelation(typeContainsVariable);
 			
 			List<Long> ids = inserter.getRelationshipIds(type.getId());

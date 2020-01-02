@@ -8,15 +8,8 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
-import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsFunction;
-import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsType;
-import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsVariable;
+import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.code.FileIncludeFile;
-import cn.edu.fudan.se.multidependency.model.relation.code.FunctionContainsVariable;
-import cn.edu.fudan.se.multidependency.model.relation.code.PackageContainsFile;
-import cn.edu.fudan.se.multidependency.model.relation.code.ProjectContainsPackage;
-import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsFunction;
-import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsVariable;
 import cn.edu.fudan.se.multidependency.utils.FileUtils;
 import depends.entity.AliasEntity;
 import depends.entity.Entity;
@@ -61,10 +54,10 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 					pck.setPackageName(packageName);
 					pck.setDirectory(true);
 					addNodeToNodes(pck, pck.getEntityId().longValue());
-					ProjectContainsPackage projectContainsPackage = new ProjectContainsPackage(project, pck);
+					Contain projectContainsPackage = new Contain(project, pck);
 					addRelation(projectContainsPackage);
 				}
-				PackageContainsFile containFile = new PackageContainsFile(pck, file);
+				Contain containFile = new Contain(pck, file);
 				addRelation(containFile);
 			} else if(entity instanceof FunctionEntity) {
 				Function function = new Function();
@@ -109,7 +102,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				if(parentEntity instanceof FileEntity) {
 					ProjectFile file = this.getNodes().findCodeFile(parentEntity.getId().longValue());
 					if(file != null) {
-						FileContainsType fileContainType = new FileContainsType(file, type);
+						Contain fileContainType = new Contain(file, type);
 						addRelation(fileContainType);
 					}
 				} else {
@@ -143,11 +136,11 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				}
 				if(parentEntity instanceof FileEntity) {
 					ProjectFile file = this.getNodes().findCodeFile(parentEntity.getId().longValue());
-					FileContainsFunction fileContainsFunction = new FileContainsFunction(file, function);
+					Contain fileContainsFunction = new Contain(file, function);
 					addRelation(fileContainsFunction);
 				} else if(parentEntity.getClass() == TypeEntity.class) {
 					Type type = this.getNodes().findType(parentEntity.getId().longValue());
-					TypeContainsFunction typeContainsFunction = new TypeContainsFunction(type, function);
+					Contain typeContainsFunction = new Contain(type, function);
 					addRelation(typeContainsFunction);
 				}
 				for(VarEntity varEntity : functionEntity.getParameters()) {
@@ -167,15 +160,15 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			if(parentEntity != null) {
 				if(parentEntity instanceof FileEntity) {
 					ProjectFile file = this.getNodes().findCodeFile(parentEntity.getId().longValue());
-					FileContainsVariable fileContainsVariable = new FileContainsVariable(file, variable);
+					Contain fileContainsVariable = new Contain(file, variable);
 					addRelation(fileContainsVariable);
 				} else if(parentEntity.getClass() == TypeEntity.class) {
 					Type type = this.getNodes().findType(parentEntity.getId().longValue());
-					TypeContainsVariable typeContainsVariable = new TypeContainsVariable(type, variable);
+					Contain typeContainsVariable = new Contain(type, variable);
 					addRelation(typeContainsVariable);
 				} else if(parentEntity instanceof FunctionEntity) {
 					Function function = this.getNodes().findFunction(parentEntity.getId().longValue());
-					FunctionContainsVariable functionContainsVariable = new FunctionContainsVariable(function, variable);
+					Contain functionContainsVariable = new Contain(function, variable);
 					addRelation(functionContainsVariable);
 				} else {
 				}

@@ -96,11 +96,14 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		/**
 		 * 该特性对应的测试用例
 		 */
+		System.out.println(featureName);
 		List<TestCase> testCases = testCaseExecuteFeatureRepository.findTestCasesExecuteFeatureByFeatureName(featureName);
+		System.out.println(testCases);
 		for(TestCase testCase : testCases) {
 			DynamicTestCaseToFileDependency dependencies = new DynamicTestCaseToFileDependency();
 			dependencies.setTestCase(testCase);
 			List<FunctionDynamicCallFunction> calls = functionDynamicCallFunctionRepository.findDynamicCallsByTestCaseName(testCase.getTestCaseName());
+			System.out.println("calls " + calls.size() + " " + calls);
 			for(FunctionDynamicCallFunction call : calls) {
 				Function startFunction = call.getFunction();
 				Function endFunction = call.getCallFunction();

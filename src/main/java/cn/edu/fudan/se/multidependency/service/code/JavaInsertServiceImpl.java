@@ -7,15 +7,10 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
-import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsType;
+import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.code.FileImportFunction;
 import cn.edu.fudan.se.multidependency.model.relation.code.FileImportType;
 import cn.edu.fudan.se.multidependency.model.relation.code.FileImportVariable;
-import cn.edu.fudan.se.multidependency.model.relation.code.FunctionContainsVariable;
-import cn.edu.fudan.se.multidependency.model.relation.code.PackageContainsFile;
-import cn.edu.fudan.se.multidependency.model.relation.code.ProjectContainsPackage;
-import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsFunction;
-import cn.edu.fudan.se.multidependency.model.relation.code.TypeContainsVariable;
 import cn.edu.fudan.se.multidependency.utils.FileUtils;
 import depends.entity.Entity;
 import depends.entity.FileEntity;
@@ -41,7 +36,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				pck.setEntityId(entity.getId().longValue());
 				pck.setDirectory(false);
 				addNodeToNodes(pck, entity.getId().longValue());
-				ProjectContainsPackage projectContainsPackage = new ProjectContainsPackage(project, pck);
+				Contain projectContainsPackage = new Contain(project, pck);
 				addRelation(projectContainsPackage);
 			} else if(entity instanceof FileEntity) {
 				ProjectFile file = new ProjectFile();
@@ -69,9 +64,8 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			}
 		});
 		this.getNodes().findFiles().forEach((entityId, codeFile) -> {
-			PackageContainsFile containFile = new PackageContainsFile();
-//			containFile.setEnd(codeFile);
-			containFile.setFile(codeFile);
+			Contain containFile = new Contain();
+			containFile.setEnd(codeFile);
 			// 在java中，文件上面是包，若包不存在，则将该文件的包设为当前目录
 			Entity fileEntity = entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = fileEntity.getParent();
@@ -86,14 +80,13 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 					pck.setPackageName(packageName);
 					pck.setDirectory(true);
 					addNodeToNodes(pck, pck.getEntityId());
-					ProjectContainsPackage projectContainsPackage = new ProjectContainsPackage(project, pck);
+					Contain projectContainsPackage = new Contain(project, pck);
 					addRelation(projectContainsPackage);
 				}
 			} else {
 				pck = this.getNodes().findPackage(parentEntity.getId().longValue());
 			}
-			containFile.setPck(pck);
-//			containFile.setStart(pck);
+			containFile.setStart(pck);
 			addRelation(containFile);
 		});
 		this.getNodes().findTypes().forEach((entityId, type) -> {
@@ -112,7 +105,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				parentEntity = parentEntity.getParent();
 			}
 			ProjectFile file = this.getNodes().findCodeFile(parentEntity.getId().longValue());
-			FileContainsType fileContainsType = new FileContainsType(file, type);
+			Contain fileContainsType = new Contain(file, type);
 			addRelation(fileContainsType);
 		});
 		this.getNodes().findFunctions().forEach((entityId, function) -> {
@@ -124,7 +117,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				parentEntity = parentEntity.getParent();
 			}
 			Type type = this.getNodes().findType(parentEntity.getId().longValue());
-			TypeContainsFunction typeContainsFunction = new TypeContainsFunction(type, function);
+			Contain typeContainsFunction = new Contain(type, function);
 			addRelation(typeContainsFunction);
 			for(VarEntity varEntity : functionEntity.getParameters()) {
 				String parameterName = varEntity.getRawType().getName();
@@ -142,11 +135,11 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			Entity parentEntity = varEntity.getParent();
 			if(parentEntity instanceof FunctionEntity) {
 				Function function = this.getNodes().findFunction(parentEntity.getId().longValue());
-				FunctionContainsVariable functionContainsVariable = new FunctionContainsVariable(function, variable);
+				Contain functionContainsVariable = new Contain(function, variable);
 				addRelation(functionContainsVariable);
 			} else if(parentEntity.getClass() == TypeEntity.class) {
 				Type type = this.getNodes().findType(parentEntity.getId().longValue());
-				TypeContainsVariable typeContainsVariable = new TypeContainsVariable(type, variable);
+				Contain typeContainsVariable = new Contain(type, variable);
 				addRelation(typeContainsVariable);
 			} else {
 //				System.out.println(varEntity);

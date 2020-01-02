@@ -52,6 +52,9 @@ public class MDController {
 		System.out.println(result.size());
 		for(DynamicTestCaseToFileDependency r : result) {
 			System.out.println(r.getTestCase().getTestCaseName() + " " + r.getProjectFiles().size());
+			r.getProjectFiles().forEach((id, file) -> {
+				System.out.println(file.getFileName());
+			});
 		}
 	}
 	

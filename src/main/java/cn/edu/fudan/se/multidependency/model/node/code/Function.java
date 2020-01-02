@@ -134,4 +134,11 @@ public class Function implements Node {
 		this.fromDynamic = fromDynamic;
 	}
 
+	@Override
+	public String toString() {
+		return "Function [id=" + id + ", entityId=" + entityId + ", functionName=" + functionName
+				+ ", returnTypeIdentify=" + returnTypeIdentify + ", fromDynamic=" + fromDynamic + ", parameters="
+				+ parameters + ", parametersIdentifies=" + parametersIdentifies + "]";
+	}
+
 }
