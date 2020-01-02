@@ -1,23 +1,40 @@
 package cn.edu.fudan.se.multidependency.utils;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 public class FileUtils {
 	
-	public static String findDirectoryFromFile(String fileName) {
-		String packageName = null;
-		if(fileName.contains("\\")) {
-			packageName = fileName.substring(0, fileName.lastIndexOf("\\"));
-		} else if(fileName.contains("/")) {
-			packageName = fileName.substring(0, fileName.lastIndexOf("/"));
+	/**
+	 * 文件所在目录
+	 * @param filePath
+	 * @return
+	 */
+	public static String extractDirectoryFromFile(String filePath) {
+		if(filePath.contains("\\")) {
+			return filePath.substring(0, filePath.lastIndexOf("\\"));
+		} else if(filePath.contains("/")) {
+			return filePath.substring(0, filePath.lastIndexOf("/"));
 		} else {
-			packageName = "default";
+			return "/";
 		}
-		return packageName;
 	}
 	
+	public static String extractFileName(String filePath) {
+		if(filePath.contains("\\")) {
+			return filePath.substring(filePath.lastIndexOf("\\") + 1);
+		} else if(filePath.contains("/")) {
+			return filePath.substring(filePath.lastIndexOf("/") + 1);
+		} else {
+			return filePath;
+		}
+	}
+	
+	/**
+	 * 提取文件名后缀
+	 * @param filePath
+	 * @return
+	 */
 	public static String extractSuffix(String filePath) {
 		int lastIndex = filePath.lastIndexOf(".");
 		return lastIndex >= 0 ? filePath.substring(lastIndex) : "";
@@ -47,9 +64,4 @@ public class FileUtils {
 		}
 	}
 	
-	public static void main(String[] args) {
-		List<File> files = new ArrayList<>();
-		File directory = new File("src/main/resources");
-		listFiles(directory, files);
-	}
 }

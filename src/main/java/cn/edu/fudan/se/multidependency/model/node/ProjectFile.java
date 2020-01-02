@@ -24,6 +24,10 @@ public class ProjectFile implements Node {
 	
 	private String suffix;
 	
+	public ProjectFile() {
+		super();
+	}
+
 	public String getFileName() {
 		return fileName;
 	}

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.testcase.DynamicTestCaseToFileDependency;
+import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.repository.node.code.FunctionRepository;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
@@ -47,38 +48,22 @@ public class MDController {
 	@RequestMapping("/dynamic/{featureName}")
 	@ResponseBody
 	public void dynamic(@PathVariable("featureName") String featureName) {
-		System.out.println(featureName);
-		List<DynamicTestCaseToFileDependency> result = dynamicAnalyseService.findDependencyFiles(featureName);
-		System.out.println(result.size());
-		for(DynamicTestCaseToFileDependency r : result) {
-			System.out.println(r.getTestCase().getTestCaseName() + " " + r.getProjectFiles().size());
-			r.getProjectFiles().forEach((id, file) -> {
-				System.out.println(file.getFileName());
-			});
+		System.out.println("featureName " + featureName);
+		List<TestCase> testCases = dynamicAnalyseService.findTestCasesByFeatureName(featureName);
+		System.out.println(testCases.size());
+		
+		List<DynamicTestCaseToFileDependency> allDependencies = dynamicAnalyseService.findDependencyFilesByFeatureName(featureName);
+		System.out.println(featureName + " " + allDependencies.size());
+		for(DynamicTestCaseToFileDependency dependencies : allDependencies) {
+			System.out.println("测试用例名：" + dependencies.getTestCase().getTestCaseName());
 		}
-	}
-	
-	
-	@RequestMapping("/test")
-	@ResponseBody
-	public void test() {
-		ProjectFile file = new ProjectFile();
-		file.setId(1270L);
-		staticCodeService.findTypesInFile(file);
-	}
-	
-	@Bean
-	public String testBean() {
-		System.out.println("eeeeeeeeeeeeeeeeeeeee");
-		System.out.println(functionRepository.findAllFunctionsList().size());
-		ProjectFile file = new ProjectFile();
-		file.setId(1270L);
-		staticCodeService.findTypesInFile(file);
-		staticCodeService.findAllExtends();
-		for(Function function : functionRepository.findAll()) {
-			System.out.println(function.getParametersIdentifies());
+		
+		int fileSize = 0;
+		for(ProjectFile file : dynamicAnalyseService.findAllDependencyFilesByFeatureName(featureName)) {
+			System.out.println(file.getPath());
+			fileSize++;
 		}
-		return "";
+		System.out.println("总数：" + fileSize);
 	}
 	
 	

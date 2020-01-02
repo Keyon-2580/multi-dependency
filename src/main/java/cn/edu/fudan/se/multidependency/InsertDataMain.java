@@ -41,7 +41,6 @@ public class InsertDataMain {
 			/**
 			 * 动态分析
 			 */
-//			File directory = new File("D:\\fan\\analysis\\depends-0.9.5c\\kieker-JavaFileImportTest");
 			File directory = new File("src/main/resources/dynamic/kieker");
 			insertDynamicCall(directory.listFiles());
 			///FIXME

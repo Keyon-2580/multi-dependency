@@ -39,14 +39,14 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				addNodeToNodes(namespace, entity.getId().longValue());
 			} else if(entity instanceof FileEntity) {
 				ProjectFile file = new ProjectFile();
-				String fileName = entity.getQualifiedName();
+				String filePath = entity.getQualifiedName();
 				file.setEntityId(entity.getId().longValue());
-				file.setFileName(fileName);
+				file.setFileName(FileUtils.extractFileName(filePath));
 				file.setPath(entity.getQualifiedName());
 				file.setSuffix(FileUtils.extractSuffix(entity.getQualifiedName()));
 				addNodeToNodes(file, entity.getId().longValue());
 				// 文件所在目录
-				String packageName = FileUtils.findDirectoryFromFile(fileName);
+				String packageName = FileUtils.extractDirectoryFromFile(filePath);
 				Package pck = this.getNodes().findPackageByPackageName(packageName);
 				if(pck == null) {
 					pck = new Package();

@@ -105,7 +105,6 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		List<TypeExtendsType> allExtends = new ArrayList<>();
 		typeExtendsTypeRepository.findAll().forEach(e -> {
 			allExtends.add(e);
-			System.out.println(e.getStart().getTypeName() + " " + e.getEnd().getTypeName());
 			
 		});
 		return allExtends;
@@ -138,8 +137,12 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			return result;
 		}
 		result = functionRepository.findFunctionBelongToFileByFunctionId(function.getId());
-		System.out.println("function " + function + " " + result);
 		cacheFunction.put(function.getId(), result);
 		return result;
+	}
+
+	@Override
+	public List<ProjectFile> findAllProjectFile() {
+		return fileRepository.findAllProjectFiles();
 	}
 }

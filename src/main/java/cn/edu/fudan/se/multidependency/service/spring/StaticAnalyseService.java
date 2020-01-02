@@ -9,18 +9,20 @@ import cn.edu.fudan.se.multidependency.model.relation.code.TypeExtendsType;
 
 public interface StaticAnalyseService {
 	
-	List<Type> findAllTypes();
+	public List<Type> findAllTypes();
 	
-	List<Type> findTypesInFile(ProjectFile codeFile);
+	public List<Type> findTypesInFile(ProjectFile codeFile);
 	
-	List<Type> findExtendsType(Type type);
+	public List<Type> findExtendsType(Type type);
 	
-	List<TypeExtendsType> findAllExtends();
+	public List<TypeExtendsType> findAllExtends();
 	
-	List<Function> findAllFunctions();
+	public List<Function> findAllFunctions();
 	
-	Package findTypeInPackage(Type type);
+	public Package findTypeInPackage(Type type);
 	
-	ProjectFile findFunctionBelongToCodeFile(Function function);
+	public ProjectFile findFunctionBelongToCodeFile(Function function);
+	
+	public List<ProjectFile> findAllProjectFile();
 	
 }

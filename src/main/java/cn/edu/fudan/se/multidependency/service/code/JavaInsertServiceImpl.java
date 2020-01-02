@@ -41,7 +41,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			} else if(entity instanceof FileEntity) {
 				ProjectFile file = new ProjectFile();
 				file.setEntityId(entity.getId().longValue());
-				file.setFileName(entity.getQualifiedName());
+				file.setFileName(FileUtils.extractFileName(entity.getQualifiedName()));
 				file.setPath(entity.getQualifiedName());
 				file.setSuffix(FileUtils.extractSuffix(entity.getQualifiedName()));
 				addNodeToNodes(file, entity.getId().longValue());
@@ -71,8 +71,8 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			Entity parentEntity = fileEntity.getParent();
 			Package pck = null;
 			if(parentEntity == null) {
-				String fileName = codeFile.getFileName();
-				String packageName = FileUtils.findDirectoryFromFile(fileName);
+				String filePath = codeFile.getPath();
+				String packageName = FileUtils.extractDirectoryFromFile(filePath);
 				pck = this.getNodes().findPackageByPackageName(packageName);
 				if(pck == null) {
 					pck = new Package();
