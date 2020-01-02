@@ -16,6 +16,8 @@ public class TestCase implements Node {
 	private static final long serialVersionUID = 7817933207475762644L;
 	
 	private String testCaseName;
+	
+	private boolean success;
 
     @Id
     @GeneratedValue
@@ -48,6 +50,7 @@ public class TestCase implements Node {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("testCaseName", getTestCaseName() == null ? "" : getTestCaseName());
+		properties.put("success", isSuccess());
 		return properties;
 	}
 
@@ -62,6 +65,14 @@ public class TestCase implements Node {
 
 	public void setTestCaseName(String testCaseName) {
 		this.testCaseName = testCaseName;
+	}
+
+	public boolean isSuccess() {
+		return success;
+	}
+
+	public void setSuccess(boolean success) {
+		this.success = success;
 	}
 
 }

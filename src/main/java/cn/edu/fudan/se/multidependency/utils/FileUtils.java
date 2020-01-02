@@ -1,6 +1,8 @@
 package cn.edu.fudan.se.multidependency.utils;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FileUtils {
 	
@@ -34,4 +36,20 @@ public class FileUtils {
         }
         return file.delete();
     }
+	
+	public static void listFiles(File directory, List<File> files) {
+		if(directory.isFile()) {
+			files.add(directory);
+			return;
+		}
+		for(File file : directory.listFiles()) {
+			listFiles(file, files);
+		}
+	}
+	
+	public static void main(String[] args) {
+		List<File> files = new ArrayList<>();
+		File directory = new File("src/main/resources");
+		listFiles(directory, files);
+	}
 }

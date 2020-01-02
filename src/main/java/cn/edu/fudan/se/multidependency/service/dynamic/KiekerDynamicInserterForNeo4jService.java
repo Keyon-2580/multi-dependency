@@ -11,6 +11,8 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.ScenarioDefineTestCase;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.utils.DynamicUtil;
 import cn.edu.fudan.se.multidependency.utils.DynamicUtil.DynamicFunctionFromKieker;
 
@@ -44,10 +46,10 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 		testCase.setEntityId(generateEntityId());
 		testCase.setTestCaseName(testCaseName);
 		addNode(testCase);
-		Contain contain = new Contain();
-		contain.setStart(scenario);
-		contain.setEnd(testCase);
-		addRelation(contain);
+		ScenarioDefineTestCase define = new ScenarioDefineTestCase();
+		define.setScenario(scenario);
+		define.setTestCase(testCase);
+		addRelation(define);
 		for(String featureName : featureNames) {
 			Feature feature = this.getNodes().findFeatureByFeature(featureName);
 			if(feature == null) {
@@ -56,10 +58,10 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 				feature.setFeatureName(featureName);
 				addNode(feature);
 			}
-			contain = new Contain();
-			contain.setStart(testCase);
-			contain.setEnd(feature);
-			addRelation(contain);
+			TestCaseExecuteFeature execute = new TestCaseExecuteFeature();
+			execute.setTestCase(testCase);
+			execute.setFeature(feature);
+			addRelation(execute);
 		}
 		extractFunctionNodes(executeFile, testCase);
 	}
@@ -121,6 +123,7 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 					}
 					FunctionDynamicCallFunction relation = new FunctionDynamicCallFunction(callerFunction, calledFunction);
 					relation.setOrder(callerDynamicFunction.getBreadth() + ":" + callerDynamicFunction.getDepth() + " -> " + calledDynamicFunction.getBreadth() + ":" + calledDynamicFunction.getDepth());
+					relation.setTestCaseName(testCase.getTestCaseName());
 					addRelation(relation);
 				}
 			}

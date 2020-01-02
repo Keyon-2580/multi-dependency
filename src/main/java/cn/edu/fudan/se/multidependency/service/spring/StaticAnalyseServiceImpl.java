@@ -11,7 +11,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.code.FileContainsType;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeExtendsType;
-import cn.edu.fudan.se.multidependency.repository.node.FileRepository;
+import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.FunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.NamespaceRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.PackageRepository;
@@ -44,7 +44,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	FileContainTypeRepository fileContainTypeRepository;
 	
 	@Autowired
-	FileRepository fileRepository;
+	ProjectFileRepository fileRepository;
 	
 	@Autowired
 	FileContainFunctionRepository fileContainFunctionRepository;
@@ -162,6 +162,15 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 
 	@Override
 	public Package findTypeInPackage(Type type) {
+		return null;
+	}
+	
+
+	/**
+	 * 找出某函数所在的文件
+	 */
+	@Override
+	public ProjectFile findFunctionBelongToCodeFile(Function function) {
 		return null;
 	}
 }

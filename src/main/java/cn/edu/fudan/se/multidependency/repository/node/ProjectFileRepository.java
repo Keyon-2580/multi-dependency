@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 
 @Repository
-public interface FileRepository extends Neo4jRepository<ProjectFile, Long> {
+public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long> {
 
 
 }

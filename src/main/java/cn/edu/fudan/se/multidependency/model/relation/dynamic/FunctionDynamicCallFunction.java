@@ -39,6 +39,8 @@ public class FunctionDynamicCallFunction implements Relation {
 	
 	private String order;
 	
+	private String testCaseName;
+	
 	@Override
 	public Long getId() {
 		return id;
@@ -68,6 +70,7 @@ public class FunctionDynamicCallFunction implements Relation {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("order", getOrder() == null ? "" : getOrder());
+		properties.put("testCaseName", getTestCaseName() == null ? "" : getTestCaseName());
 		return properties;
 	}
 
@@ -77,6 +80,30 @@ public class FunctionDynamicCallFunction implements Relation {
 
 	public void setOrder(String order) {
 		this.order = order;
+	}
+
+	public Function getFunction() {
+		return function;
+	}
+
+	public void setFunction(Function function) {
+		this.function = function;
+	}
+
+	public Function getCallFunction() {
+		return callFunction;
+	}
+
+	public void setCallFunction(Function callFunction) {
+		this.callFunction = callFunction;
+	}
+
+	public String getTestCaseName() {
+		return testCaseName;
+	}
+
+	public void setTestCaseName(String testCaseName) {
+		this.testCaseName = testCaseName;
 	}
 	
 }

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.node.code.Package;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
@@ -136,7 +135,7 @@ private Project project;
 	}
 	
 	public Map<Long, ProjectFile> findFiles() {
-		Map<Long, ProjectFile> files = (Map<Long, ProjectFile>) findNodesMap(NodeType.File);
+		Map<Long, ProjectFile> files = (Map<Long, ProjectFile>) findNodesMap(NodeType.ProjectFile);
 		return files;
 	}
 	
@@ -151,7 +150,7 @@ private Project project;
 	}
 	
 	public ProjectFile findCodeFile(Long entityId) {
-		Node node = findNode(entityId, NodeType.File);
+		Node node = findNode(entityId, NodeType.ProjectFile);
 		return node == null ? null : (ProjectFile) node;
 	}
 	

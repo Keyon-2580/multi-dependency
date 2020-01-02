@@ -7,7 +7,7 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
-@NodeEntity("File")
+@NodeEntity
 public class ProjectFile implements Node {
 	
 	private static final long serialVersionUID = -8736926263545574636L;
@@ -68,7 +68,7 @@ public class ProjectFile implements Node {
 
 	@Override
 	public NodeType getNodeType() {
-		return NodeType.File;
+		return NodeType.ProjectFile;
 	}
 
 	public String getSuffix() {

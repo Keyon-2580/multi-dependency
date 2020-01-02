@@ -1,16 +1,14 @@
-package cn.edu.fudan.se.multidependency.model.node.code;
+package cn.edu.fudan.se.multidependency.model.node;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
-
 /**
+ * 文件：目录
  * java：包
  * c/c++：目录
  * @author fan
