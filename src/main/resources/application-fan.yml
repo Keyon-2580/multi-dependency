@@ -1,13 +1,12 @@
 spring:
   data:
     neo4j:
-      username: neo4j
-      password: 19970129Fan
+#      username: neo4j
+#      password: 19970129Fan
 #      uri: bolt://localhost:7687
-      uri: http://localhost:7474
+#      uri: http://localhost:7474
       # embedded
-#      uri: file:///D:/fan/Users/Thinkpad/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
-      uri: file:///D:/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
+      uri: file:///D:/fan/Users/Thinkpad/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
 server:
    port: 8080
    
@@ -18,6 +17,7 @@ data:
 #      path: D:\git\multi-dependency
 #      path: C:\Users\Thinkpad\Desktop\0416\all\cassandra-3.0.0\cassandra-cassandra-3.0.0
       path: D:\multiple-dependency-project\depends-0.9.5c
+#      path: C:\Users\fan\Downloads\hadoop-trunk
 #      path: C:\Users\fan\Downloads\cassandra-trunk\cassandra-trunk
       language: java
 #      path: D:\git\bcrypt-1.1

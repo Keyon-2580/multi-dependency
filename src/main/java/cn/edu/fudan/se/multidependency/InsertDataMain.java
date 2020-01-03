@@ -13,7 +13,6 @@ import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractorImpl;
 import cn.edu.fudan.se.multidependency.service.code.InserterForNeo4jServiceFactory;
 import cn.edu.fudan.se.multidependency.service.dynamic.DynamicInserterForNeo4jService;
-import cn.edu.fudan.se.multidependency.service.dynamic.KiekerDynamicInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.utils.FileUtils;
 import cn.edu.fudan.se.multidependency.utils.YamlUtils;
 import depends.entity.repo.EntityRepo;
@@ -21,12 +20,17 @@ import depends.entity.repo.EntityRepo;
 public class InsertDataMain {
 
     public static void main(String[] args) throws Exception {
-    	insert();
+    	insert(args);
 	}
     
-    public static void insert() {
+    public static void insert(String[] args) {
 		try {
-			YamlUtils.YamlObject yaml = YamlUtils.getDataBasePath("src/main/resources/application.yml");
+			YamlUtils.YamlObject yaml = null;
+			if(args == null || args.length == 0) {
+				yaml = YamlUtils.getDataBasePathDefault("src/main/resources/application.yml");
+			} else {
+				yaml = YamlUtils.getDataBasePath(args[0]);
+			}
 			String projectPath = yaml.getCodeProjectPath();
 			Language language = Language.valueOf(yaml.getCodeLanguage());
 	    	DependsEntityRepoExtractor extractor = DependsEntityRepoExtractorImpl.getInstance();
@@ -44,11 +48,11 @@ public class InsertDataMain {
 			/**
 			 * 动态分析
 			 */
-			File directory = new File("src/main/resources/dynamic/kieker");
+			/*File directory = new File("src/main/resources/dynamic/kieker");
 			File mark = new File("src/main/resources/dynamic/dynamic.mark");
 			List<File> kiekerFiles = new ArrayList<>();
 			FileUtils.listFiles(directory, kiekerFiles, ".dat");
-			insertDynamicCall(mark, kiekerFiles, language);
+			insertDynamicCall(mark, kiekerFiles, language);*/
 			///FIXME
 			//其它
 			

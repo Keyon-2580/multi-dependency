@@ -10,7 +10,7 @@ public class YamlUtilsTest {
 	public void test() {
 		YamlUtils.YamlObject yaml;
 		try {
-			yaml = YamlUtils.getDataBasePath("src/main/resources/application.yml");
+			yaml = YamlUtils.getDataBasePathDefault("src/main/resources/application.yml");
 			String test = yaml.getForTest();
 			assertTrue("this property is for YamlUtilsTest".equals(test));
 		} catch (Exception e) {

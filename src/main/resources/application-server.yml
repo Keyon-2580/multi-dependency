@@ -1,0 +1,23 @@
+spring:
+  data:
+    neo4j:
+#      username: neo4j
+#      password: 123456
+#      uri: bolt://localhost:7687
+#      uri: http://localhost:7474
+      # embedded
+      uri: file:////var/lib/neo4j/data/databases/multiple.dependency.db
+server:
+   port: 8080
+   
+data:
+   code:
+      path: /home/fdse/zdh/download/hadoop-trunk
+      language: java
+      platform: linux
+   neo4j:
+      # batchInserter要插入的数据库
+      path: /var/lib/neo4j/data/databases/multiple.dependency.db
+   
+   test: this property is for YamlUtilsTest
+      

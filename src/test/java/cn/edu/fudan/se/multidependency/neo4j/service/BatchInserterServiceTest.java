@@ -24,7 +24,7 @@ public class BatchInserterServiceTest {
 	public void test() {
 		YamlUtils.YamlObject yaml = null;
 		try {
-			yaml = YamlUtils.getDataBasePath("src/main/resources/application.yml");
+			yaml = YamlUtils.getDataBasePathDefault("src/main/resources/application.yml");
 			String test = yaml.getForTest();
 			assertTrue("this property is for YamlUtilsTest".equals(test));
 		} catch (Exception e) {

@@ -7,7 +7,7 @@ import org.ho.yaml.Yaml;
 
 public class YamlUtils {
 
-	public static YamlObject getDataBasePath(String yamlPath) throws Exception {
+	public static YamlObject getDataBasePathDefault(String yamlPath) throws Exception {
 		File file = new File(yamlPath);
 		YamlObject result = new YamlObject();
 		Map<?, ?> yaml = (Map<?, ?>) Yaml.load(file);
@@ -29,6 +29,21 @@ public class YamlUtils {
 		return result;
 	}
 	
+	public static YamlObject getDataBasePath(String yamlPath) throws Exception {
+		File file = new File(yamlPath);
+		YamlObject result = new YamlObject();
+		Map<?, ?> yaml = (Map<?, ?>) Yaml.load(file);
+		yaml = (Map<?, ?>) Yaml.load(file);
+		String databasePath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("neo4j")).get("path");
+		String projectPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("code")).get("path");
+		String language = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("code")).get("language");
+		String forTest = (String) ((Map<?, ?>) yaml.get("data")).get("test");
+		result.setNeo4jDatabasePath(databasePath);
+		result.setCodeLanguage(language);
+		result.setCodeProjectPath(projectPath);
+		result.setForTest(forTest);
+		return result;
+	}
 	
 	public static class YamlObject {
 		private String applicationUser;
