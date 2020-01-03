@@ -11,8 +11,10 @@ public abstract class DynamicInserterForNeo4jService extends ExtractorForNodesAn
 	protected String scenarioName;
 	protected List<String> featureName = new ArrayList<>();
 	protected String testcaseName;
+	
 	protected File executeFile;
-
+	protected File markFile;
+	
 	protected abstract void extractScenarioAndTestCaseAndFeatures();
 
 	protected abstract void addNodesAndRelations(String scenarioName, List<String> featureName, String testcaseName,
@@ -58,6 +60,14 @@ public abstract class DynamicInserterForNeo4jService extends ExtractorForNodesAn
 
 	public void setExecuteFile(File executeFile) {
 		this.executeFile = executeFile;
+	}
+
+	public File getMarkFile() {
+		return markFile;
+	}
+
+	public void setMarkFile(File markFile) {
+		this.markFile = markFile;
 	}
 
 }

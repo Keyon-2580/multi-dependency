@@ -1,35 +1,131 @@
 package cn.edu.fudan.se.multidependency.service.dynamic;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.NodeIsFeature;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.NodeIsScenario;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.NodeIsTestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.ScenarioDefineTestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.utils.DynamicUtil;
 import cn.edu.fudan.se.multidependency.utils.DynamicUtil.DynamicFunctionFromKieker;
 
 public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4jService {
-
+	
 	/**
 	 * 从文件名中提取出场景、特性、测试用例名称
 	 */
 	@Override
 	protected void extractScenarioAndTestCaseAndFeatures() {
-		featureName.clear();
+		/*featureName.clear();
 		String fileName = executeFile.getName();
 		String[] splits = fileName.split(",");
 		scenarioName = splits[0];
 		testcaseName = splits[1];
 		for(int i = 2; i < splits.length; i++) {
 			featureName.add(splits[i]);
+		}*/
+		try(BufferedReader reader = new BufferedReader(new FileReader(markFile))) {
+			String line = null;
+			Node defineNode = null;
+			while((line = reader.readLine()) != null) {
+				if(line.startsWith(NodeType.Scenario.name())) {
+					String scenarioNamesLine = line.substring(NodeType.Scenario.name().length() + 1);
+					System.out.println(scenarioNamesLine);
+					String[] names = scenarioNamesLine.split(",");
+					for(String name : names) {
+						Scenario scenario = this.getNodes().findScenarioByName(name);
+						if(scenario == null) {
+							scenario = new Scenario();
+							scenario.setScenarioName(name);
+							scenario.setEntityId(generateEntityId());
+							addNode(scenario);
+						}
+						NodeIsScenario isScenario = new NodeIsScenario();
+						if(defineNode != null) {
+							isScenario.setStartNode(defineNode);
+							isScenario.setScenario(scenario);
+							addRelation(isScenario);
+						}
+					}
+				} else if(line.startsWith(NodeType.TestCase.name())) {
+					String testCaseNamesLine = line.substring(NodeType.TestCase.name().length() + 1);
+					String[] names = testCaseNamesLine.split(",");
+					for(String name : names) {
+						TestCase testCase = this.getNodes().findTestCaseByName(name);
+						if(testCase == null) {
+							testCase = new TestCase();
+							testCase.setTestCaseName(name);
+							testCase.setEntityId(generateEntityId());
+							addNode(testCase);
+						}
+						NodeIsTestCase isScenario = new NodeIsTestCase();
+						if(defineNode != null) {
+							isScenario.setNode(defineNode);
+							isScenario.setTestCase(testCase);;
+							addRelation(isScenario);
+						}
+					}
+				} else if(line.startsWith(NodeType.Feature.name())) {
+					String featureNamesLine = line.substring(NodeType.Feature.name().length() + 1);
+					String[] names = featureNamesLine.split(",");
+					for(String name : names) {
+						Feature feature = this.getNodes().findFeatureByFeature(name);
+						if(feature == null) {
+							feature = new Feature();
+							feature.setFeatureName(name);
+							feature.setEntityId(generateEntityId());
+							addNode(feature);
+						}
+						NodeIsFeature isFeature = new NodeIsFeature();
+						if(defineNode != null) {
+							isFeature.setStartNode(defineNode);
+							isFeature.setFeature(feature);
+							addRelation(isFeature);
+						}
+					}
+				} else {
+					for(Type type : getNodes().findTypes().values()) {
+						if(line.equals(type.getTypeName())) {
+							defineNode = type;
+							break;
+						}
+					}
+					if(defineNode != null) {
+						continue;
+					}
+					if(line.contains("(") && line.contains(")")) {
+						String lineFunctionName = line.substring(0, line.indexOf("("));
+						List<Function> functions = getNodes().allFunctionsByFunctionName().get(lineFunctionName);
+						for(Function function : getNodes().findFunctions().values()) {
+							String functionName = function.getFunctionName();
+							String[] lineParameters = line.substring(line.indexOf("("), line.lastIndexOf(")")).split(",");
+							
+						}
+					}
+					
+				}
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	

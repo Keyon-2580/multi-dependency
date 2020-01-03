@@ -110,13 +110,6 @@
 		    <version>4.0.0</version>
 		</dependency> -->
 		<!-- <dependency>
-			<groupId>org.neo4j</groupId>
-			<artifactId>batch-import</artifactId>
-			<version>3.0.4</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/batch-import-3.0.4.jar</systemPath>
-		</dependency> -->
-		<!-- <dependency>
 		    <groupId>org.neo4j</groupId>
 		    <artifactId>neo4j-graphdb-api</artifactId>
 		    <version>4.0.0</version>

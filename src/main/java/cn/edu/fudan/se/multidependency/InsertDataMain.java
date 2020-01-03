@@ -42,7 +42,8 @@ public class InsertDataMain {
 			 * 动态分析
 			 */
 			File directory = new File("src/main/resources/dynamic/kieker");
-			insertDynamicCall(directory.listFiles());
+			File mark = new File("src/main/resources/dynamic/dynamic.mark");
+			insertDynamicCall(mark, directory.listFiles());
 			///FIXME
 			//其它
 			
@@ -60,10 +61,11 @@ public class InsertDataMain {
 		return dependsInserter.getNodes();
     }
     
-    public static void insertDynamicCall(File... files) throws Exception {
+    public static void insertDynamicCall(File markFile, File... files) throws Exception {
     	DynamicInserterForNeo4jService kiekerInserter = new KiekerDynamicInserterForNeo4jService();
     	for(File file : files) {
     		kiekerInserter.setExecuteFile(file);
+    		kiekerInserter.setMarkFile(markFile);
     		kiekerInserter.addNodesAndRelations();
     	}
     }

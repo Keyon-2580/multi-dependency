@@ -200,6 +200,15 @@ private Project project;
 		Map<Long, TestCase> testCases = (Map<Long, TestCase>) findNodesMap(NodeType.TestCase);
 		return testCases;
 	}
+
+	public TestCase findTestCaseByName(String name) {
+		for(TestCase testCase : findTestCases().values()) {
+			if(testCase.getTestCaseName().equals(name)) {
+				return testCase;
+			}
+		}
+		return null;
+	}
 	
 	
 }

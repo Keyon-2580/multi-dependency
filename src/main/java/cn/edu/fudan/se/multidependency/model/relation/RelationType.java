@@ -17,7 +17,10 @@ public enum RelationType implements RelationshipType {
 	DEPENDENCY_DYNAMIC_FUNCTION_CALL_FUNCTION(RelationType.str_DEPENDENCY_DYNAMIC_FUNCTION_CALL_FUNCTION),
 	
 	TESTCASE_EXECUTE_FEATURE(RelationType.str_TESTCASE_EXECUTE_FEATURE),
-	SCENARIO_DEFINE_TESTCASE(RelationType.str_SCENARIO_DEFINE_TESTCASE);
+	SCENARIO_DEFINE_TESTCASE(RelationType.str_SCENARIO_DEFINE_TESTCASE),
+	NODE_IS_SCENARIO(RelationType.str_NODE_IS_SCENARIO),
+	NODE_IS_FEATURE(RelationType.str_NODE_IS_FEATURE),
+	NODE_IS_TESTCASE(RelationType.str_NODE_IS_TESTCASE);
 
 	/**
 	 * 结构关系
@@ -41,6 +44,10 @@ public enum RelationType implements RelationshipType {
 	
 	public static final String str_TESTCASE_EXECUTE_FEATURE = "TESTCASE_EXECUTE_FEATURE";
 	public static final String str_SCENARIO_DEFINE_TESTCASE = "SCENARIO_DEFINE_TESTCASE";
+	
+	public static final String str_NODE_IS_SCENARIO = "NODE_IS_SCENARIO";
+	public static final String str_NODE_IS_FEATURE = "NODE_IS_FEATURE";
+	public static final String str_NODE_IS_TESTCASE = "NODE_IS_TESTCASE";
 
 	private String name;
 
