@@ -11,10 +11,11 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 
-@RelationshipEntity(RelationType.str_DEPENDENCY_FILE_INCLUDE_FILE)
+@RelationshipEntity(RelationType.str_FILE_INCLUDE_FILE)
 public class FileIncludeFile implements Relation {
 
 	private static final long serialVersionUID = 364395424089272866L;
+	
 	@Id
     @GeneratedValue
     private Long id;
@@ -55,7 +56,7 @@ public class FileIncludeFile implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.DEPENDENCY_FILE_INCLUDE_FILE;
+		return RelationType.FILE_INCLUDE_FILE;
 	}
 
 	@Override

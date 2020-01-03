@@ -12,7 +12,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-@RelationshipEntity(RelationType.str_DEPENDENCY_DYNAMIC_FUNCTION_CALL_FUNCTION)
+@RelationshipEntity(RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION)
 public class FunctionDynamicCallFunction implements Relation {
 
 	private static final long serialVersionUID = -7640490954063715746L;
@@ -39,7 +39,7 @@ public class FunctionDynamicCallFunction implements Relation {
 	
 	private String order;
 	
-	private String testCaseName;
+//	private String testCaseName;
 	
 	@Override
 	public Long getId() {
@@ -63,14 +63,14 @@ public class FunctionDynamicCallFunction implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.DEPENDENCY_DYNAMIC_FUNCTION_CALL_FUNCTION;
+		return RelationType.DYNAMIC_FUNCTION_CALL_FUNCTION;
 	}
 
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("order", getOrder() == null ? "" : getOrder());
-		properties.put("testCaseName", getTestCaseName() == null ? "" : getTestCaseName());
+//		properties.put("testCaseName", getTestCaseName() == null ? "" : getTestCaseName());
 		return properties;
 	}
 
@@ -98,12 +98,12 @@ public class FunctionDynamicCallFunction implements Relation {
 		this.callFunction = callFunction;
 	}
 
-	public String getTestCaseName() {
-		return testCaseName;
-	}
-
-	public void setTestCaseName(String testCaseName) {
-		this.testCaseName = testCaseName;
-	}
+//	public String getTestCaseName() {
+//		return testCaseName;
+//	}
+//
+//	public void setTestCaseName(String testCaseName) {
+//		this.testCaseName = testCaseName;
+//	}
 	
 }

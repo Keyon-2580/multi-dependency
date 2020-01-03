@@ -12,7 +12,7 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 
-@RelationshipEntity(RelationType.str_DEPENDENCY_FUNCTION_PARAMETER_TYPE)
+@RelationshipEntity(RelationType.str_FUNCTION_PARAMETER_TYPE)
 public class FunctionParameterType implements Relation {
 
 	private static final long serialVersionUID = -8796616144049338126L;
@@ -57,7 +57,7 @@ public class FunctionParameterType implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.DEPENDENCY_FUNCTION_PARAMETER_TYPE;
+		return RelationType.FUNCTION_PARAMETER_TYPE;
 	}
 
 	@Override

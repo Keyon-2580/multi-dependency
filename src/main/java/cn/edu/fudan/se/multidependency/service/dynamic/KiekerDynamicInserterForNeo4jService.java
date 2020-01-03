@@ -45,6 +45,7 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 			String line = null;
 			Node defineNode = null;
 			while((line = reader.readLine()) != null) {
+				System.out.println(line);
 				if(line.startsWith(NodeType.Scenario.name())) {
 					String scenarioNamesLine = line.substring(NodeType.Scenario.name().length() + 1);
 					System.out.println(scenarioNamesLine);
@@ -78,7 +79,7 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 						NodeIsTestCase isScenario = new NodeIsTestCase();
 						if(defineNode != null) {
 							isScenario.setNode(defineNode);
-							isScenario.setTestCase(testCase);;
+							isScenario.setTestCase(testCase);
 							addRelation(isScenario);
 						}
 					}
@@ -129,40 +130,7 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 		}
 	}
 	
-	protected void addNodesAndRelations(String scenarioName, List<String> featureNames, String testCaseName,
-			File executeFile) throws Exception {
-		Scenario scenario = this.getNodes().findScenarioByName(scenarioName);
-		if(scenario == null) {
-			scenario = new Scenario();
-			scenario.setScenarioName(scenarioName);
-			scenario.setEntityId(generateEntityId());
-			addNode(scenario);
-		}
-		TestCase testCase = new TestCase();
-		testCase.setEntityId(generateEntityId());
-		testCase.setTestCaseName(testCaseName);
-		addNode(testCase);
-		ScenarioDefineTestCase define = new ScenarioDefineTestCase();
-		define.setScenario(scenario);
-		define.setTestCase(testCase);
-		addRelation(define);
-		for(String featureName : featureNames) {
-			Feature feature = this.getNodes().findFeatureByFeature(featureName);
-			if(feature == null) {
-				feature = new Feature();
-				feature.setEntityId(generateEntityId());
-				feature.setFeatureName(featureName);
-				addNode(feature);
-			}
-			TestCaseExecuteFeature execute = new TestCaseExecuteFeature();
-			execute.setTestCase(testCase);
-			execute.setFeature(feature);
-			addRelation(execute);
-		}
-		extractFunctionNodes(executeFile, testCase);
-	}
-	
-	private void extractFunctionNodes(File executeFile, TestCase testCase) {
+	protected void extractNodesAndRelations() throws Exception {
 		Map<String, List<Function>> functions = this.getNodes().allFunctionsByFunctionName();
 		Map<String, Map<Integer, List<DynamicFunctionFromKieker>>> allDynamicFunctionFromKiekers = DynamicUtil.readKiekerFile(executeFile);
 		for(Map<Integer, List<DynamicFunctionFromKieker>> groups : allDynamicFunctionFromKiekers.values()) {
@@ -177,10 +145,6 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 						if(calledFunction == null) {
 							continue;
 						}
-						Contain contain = new Contain();
-						contain.setStart(testCase);
-						contain.setEnd(calledFunction);
-						addRelation(contain);
 						continue;
 					}
 					if(calledDynamicFunction.getDepth() < 1) {
@@ -219,13 +183,14 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 					}
 					FunctionDynamicCallFunction relation = new FunctionDynamicCallFunction(callerFunction, calledFunction);
 					relation.setOrder(callerDynamicFunction.getBreadth() + ":" + callerDynamicFunction.getDepth() + " -> " + calledDynamicFunction.getBreadth() + ":" + calledDynamicFunction.getDepth());
-					relation.setTestCaseName(testCase.getTestCaseName());
+//					relation.setTestCaseName(testCase.getTestCaseName());
 					addRelation(relation);
 				}
 			}
 		}
 		System.out.println(this.getNodes().size());
 	}
+	
 	
 	private Function findFunctionWithDynamic(DynamicFunctionFromKieker dynamicFunction, List<Function> functions) {
 		for(Function function : functions) {

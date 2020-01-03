@@ -7,9 +7,11 @@ import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.model.relation.code.FunctionAnnotationType;
 import cn.edu.fudan.se.multidependency.model.relation.code.FunctionCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.code.FunctionParameterType;
 import cn.edu.fudan.se.multidependency.model.relation.code.FunctionReturnType;
+import cn.edu.fudan.se.multidependency.model.relation.code.FunctionThrowType;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeExtendsType;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeImplementsType;
 import cn.edu.fudan.se.multidependency.model.relation.code.VariableIsType;
@@ -118,7 +120,18 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					}
 				}
 				if(DependencyType.THROW.equals(relation.getType())) {
-					
+					Type throwType = types.get(relation.getEntity().getId().longValue());
+					if(throwType != null) {
+						FunctionThrowType functionThrowType = new FunctionThrowType(function, throwType);
+						addRelation(functionThrowType);
+					}
+				}
+				if(DependencyType.ANNOTATION.equals(relation.getType())) {
+					Type annotationType = types.get(relation.getEntity().getId().longValue());
+					if(annotationType != null) {
+						FunctionAnnotationType functionAnnotationType = new FunctionAnnotationType(function, annotationType);
+						addRelation(functionAnnotationType);
+					}
 				}
 			});
 		});

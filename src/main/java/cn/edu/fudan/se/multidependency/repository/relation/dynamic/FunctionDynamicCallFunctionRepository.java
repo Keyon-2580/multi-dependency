@@ -17,7 +17,7 @@ public interface FunctionDynamicCallFunctionRepository extends Neo4jRepository<F
 	 * @param id
 	 * @return
 	 */
-	@Query("match (a:Function)-[r:" + RelationType.str_DEPENDENCY_DYNAMIC_FUNCTION_CALL_FUNCTION + "]-(b:Function) where id(a) = {0} return b")
+	@Query("match (a:Function)-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]-(b:Function) where id(a) = {0} return b")
     List<Function> findCallFunctions(Long id);
 
 	/**
@@ -25,7 +25,7 @@ public interface FunctionDynamicCallFunctionRepository extends Neo4jRepository<F
 	 * @param testCaseName
 	 * @return
 	 */
-	@Query("MATCH p=()-[r:" + RelationType.str_DEPENDENCY_DYNAMIC_FUNCTION_CALL_FUNCTION + "{testCaseName:{0}}]->() RETURN p")
+	@Query("MATCH p=()-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "{testCaseName:{0}}]->() RETURN p")
 	List<FunctionDynamicCallFunction> findDynamicCallsByTestCaseName(String testCaseName);
 	
 }

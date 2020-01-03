@@ -12,7 +12,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 
-@RelationshipEntity(RelationType.str_DEPENDENCY_FILE_IMPORT_FUNCTION)
+@RelationshipEntity(RelationType.str_FILE_IMPORT_FUNCTION)
 public class FileImportFunction implements Relation {
 
 	private static final long serialVersionUID = -4053558454010028825L;
@@ -57,7 +57,7 @@ public class FileImportFunction implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.DEPENDENCY_FILE_IMPORT_FUNCTION;
+		return RelationType.FILE_IMPORT_FUNCTION;
 	}
 
 	@Override

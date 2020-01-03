@@ -13,7 +13,7 @@ import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 
-@RelationshipEntity(RelationType.str_DEPENDENCY_TYPE_EXTENDS_TYPE)
+@RelationshipEntity(RelationType.str_TYPE_EXTENDS_TYPE)
 public class TypeExtendsType implements Relation {
 	
 	private static final long serialVersionUID = 3740594031088738257L;
@@ -66,7 +66,7 @@ public class TypeExtendsType implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.DEPENDENCY_TYPE_EXTENDS_TYPE;
+		return RelationType.TYPE_EXTENDS_TYPE;
 	}
 
 	@Override

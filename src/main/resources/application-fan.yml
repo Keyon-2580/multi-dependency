@@ -7,6 +7,7 @@ spring:
       uri: http://localhost:7474
       # embedded
 #      uri: file:///D:/fan/Users/Thinkpad/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
+      uri: file:///D:/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
 server:
    port: 8080
    
@@ -16,7 +17,7 @@ data:
 #      path: D:\git\eclipse-workspace\test
 #      path: D:\git\multi-dependency
 #      path: C:\Users\Thinkpad\Desktop\0416\all\cassandra-3.0.0\cassandra-cassandra-3.0.0
-      path: C:\Users\Thinkpad\Downloads\depends-0.9.5c
+      path: D:\multiple-dependency-project\depends-0.9.5c
       language: java
 #      path: D:\git\bcrypt-1.1
 #      path: D:\git\Sockets-2.3.9.9
@@ -25,7 +26,7 @@ data:
       platform: windows
    neo4j:
       # batchInserter要插入的数据库
-      path: D:\fan\Users\Thinkpad\neo4j-community-3.5.3-windows\neo4j-community-3.5.3\data\databases\multiple.dependency.db
+      path: D:/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
    
    test: this property is for YamlUtilsTest
       
