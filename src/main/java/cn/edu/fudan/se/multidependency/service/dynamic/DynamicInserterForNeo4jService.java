@@ -5,14 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
+import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelationsImpl;
 
 public abstract class DynamicInserterForNeo4jService extends ExtractorForNodesAndRelationsImpl {
 	
-	protected Map<String, List<Function>> nameToFunctions = new HashMap<>();
-	protected Map<String, List<Type>> nameToTypes = new HashMap<>();
+	protected Map<Long, List<Scenario>> nodeEntityIdToScenarios = new HashMap<>();
+	protected Map<Long, List<Feature>> nodeEntityIdToFeatures = new HashMap<>();
+	protected Map<Long, TestCase> nodeEntityIdToTestCase = new HashMap<>();
 	
 	protected File executeFile;
 	protected File markFile;

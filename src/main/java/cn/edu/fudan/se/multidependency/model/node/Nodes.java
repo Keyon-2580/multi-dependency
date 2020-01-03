@@ -107,6 +107,10 @@ private Project project;
 		return node == null ? null : (Type) node;
 	}
 	
+	public Map<Long, Node> findNodes(Class<? extends Node> cls) {
+		return null;
+	}
+	
 	public Map<Long, Type> findTypes() {
 		Map<Long, Type> types = (Map<Long, Type>) findNodesMap(NodeType.Type);
 		return types;

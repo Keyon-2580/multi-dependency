@@ -1,6 +1,8 @@
 package cn.edu.fudan.se.multidependency;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Nodes;
@@ -12,6 +14,7 @@ import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractorIm
 import cn.edu.fudan.se.multidependency.service.code.InserterForNeo4jServiceFactory;
 import cn.edu.fudan.se.multidependency.service.dynamic.DynamicInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.service.dynamic.KiekerDynamicInserterForNeo4jService;
+import cn.edu.fudan.se.multidependency.utils.FileUtils;
 import cn.edu.fudan.se.multidependency.utils.YamlUtils;
 import depends.entity.repo.EntityRepo;
 
@@ -43,7 +46,9 @@ public class InsertDataMain {
 			 */
 			File directory = new File("src/main/resources/dynamic/kieker");
 			File mark = new File("src/main/resources/dynamic/dynamic.mark");
-			insertDynamicCall(mark, directory.listFiles());
+			List<File> kiekerFiles = new ArrayList<>();
+			FileUtils.listFiles(directory, kiekerFiles, ".dat");
+			insertDynamicCall(mark, kiekerFiles, language);
 			///FIXME
 			//其它
 			
@@ -61,11 +66,11 @@ public class InsertDataMain {
 		return dependsInserter.getNodes();
     }
     
-    public static void insertDynamicCall(File markFile, File... files) throws Exception {
-    	DynamicInserterForNeo4jService kiekerInserter = new KiekerDynamicInserterForNeo4jService();
+    public static void insertDynamicCall(File markFile, List<File> files, Language language) throws Exception {
+    	DynamicInserterForNeo4jService kiekerInserter = InserterForNeo4jServiceFactory.getInstance().createDynamicInserterService(language);
+    	kiekerInserter.setMarkFile(markFile);
     	for(File file : files) {
     		kiekerInserter.setExecuteFile(file);
-    		kiekerInserter.setMarkFile(markFile);
     		kiekerInserter.addNodesAndRelations();
     	}
     }

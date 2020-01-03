@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.utils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class FileUtils {
@@ -61,6 +62,25 @@ public class FileUtils {
 		}
 		for(File file : directory.listFiles()) {
 			listFiles(file, files);
+		}
+	}
+	
+	public static void main(String[] args) {
+		File directory = new File("src/main/resources/dynamic/kieker");
+		List<File> files = new ArrayList<>();
+		listFiles(directory, files, ".dat");
+		System.out.println(files.size());
+	}
+	
+	public static void listFiles(File directory, List<File> files, String suffix) {
+		if(directory.isFile()) {
+			if(suffix.equals(extractSuffix(directory.getPath()))) {
+				files.add(directory);
+			}
+			return;
+		}
+		for(File file : directory.listFiles()) {
+			listFiles(file, files, suffix);
 		}
 	}
 	

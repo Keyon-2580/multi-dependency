@@ -18,6 +18,7 @@ data:
 #      path: D:\git\multi-dependency
 #      path: C:\Users\Thinkpad\Desktop\0416\all\cassandra-3.0.0\cassandra-cassandra-3.0.0
       path: D:\multiple-dependency-project\depends-0.9.5c
+#      path: C:\Users\fan\Downloads\cassandra-trunk\cassandra-trunk
       language: java
 #      path: D:\git\bcrypt-1.1
 #      path: D:\git\Sockets-2.3.9.9

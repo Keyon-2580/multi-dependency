@@ -10,12 +10,84 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
+import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
+import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 
 public class DynamicUtil {
+	
+	public static final String testCaseRegex = "^TestCase\\s([^\\s])*\\s[success|fail]";
+	public static final Pattern patternTestCase = Pattern.compile(testCaseRegex);
+
+	public static void extract(String line) {
+		Matcher matcher = patternTestCase.matcher(line);
+		if(matcher.find()) {
+			System.out.println(matcher.group(1));
+		}
+	}
+	
+	public static TestCase extractTestCaseFromMarkLine(String line) {
+		if(!line.startsWith(NodeType.TestCase.name())) {
+			return null;
+		}
+		try {
+			String[] strs = line.split(" ");
+			TestCase testCase = new TestCase();
+			testCase.setSuccess(Boolean.valueOf(strs[1]));
+			return testCase;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static Scenario extractScenarioFromMarkLine(String line) {
+		if(!line.startsWith(NodeType.Scenario.name())) {
+			return null;
+		}
+		try {
+			String[] strs = line.split(" ");
+			Scenario scenario = new Scenario();
+			scenario.setScenarioName(strs[1]);
+			return scenario;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static Feature extractFeatureFromMarkLine(String line) {
+		if(!line.startsWith(NodeType.Feature.name())) {
+			return null;
+		}
+		try {
+			String[] strs = line.split(" ");
+			Feature feature = new Feature();
+			feature.setFeatureName(strs[1]);
+			return feature;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static void main(String[] args) {
+//		Map m = readKiekerFile(new File("D:\\fan\\analysis\\depends-commits\\kieker\\kieker-before-change-PackageEntity-26501da0b6cc85630c535fa5b756b0d8e60975b6\\kieker-20191127-071809170-UTC-001.dat"));
+//		System.out.println(m.size());
+//		System.out.println(split("$1;1577693392065836654;public depends.relations.Inferer.<init>(depends.entity.repo.EntityRepo, depends.relations.ImportLookupStrategy, depends.entity.repo.BuiltInType, boolean);<no-session-id>;3771483212946079748;1577693392065199674;1577693392065832878;DESKTOP-2SU7U6M;47;2"));
+//		System.out.println(find(11, Arrays.asList(new Integer[]{1,2,4,5,10,12,14,15})));;
+		
+		String test = "TestCase test_could_detect_annotation_in_class_level success";
+		TestCase testCase = extractTestCaseFromMarkLine(test);
+		System.out.println(testCase);
+		
+	}
 	
 	public static DynamicFunctionFromKieker findCallerFunction(DynamicFunctionFromKieker called, List<DynamicFunctionFromKieker> sortedFunctions) {
 		int midIndex = sortedFunctions.size() / 2;
@@ -59,13 +131,14 @@ public class DynamicUtil {
 		return midIndex;
 	}
 
-	public static void main(String[] args) {
-//		Map m = readKiekerFile(new File("D:\\fan\\analysis\\depends-commits\\kieker\\kieker-before-change-PackageEntity-26501da0b6cc85630c535fa5b756b0d8e60975b6\\kieker-20191127-071809170-UTC-001.dat"));
-//		System.out.println(m.size());
-		System.out.println(split("$1;1577693392065836654;public depends.relations.Inferer.<init>(depends.entity.repo.EntityRepo, depends.relations.ImportLookupStrategy, depends.entity.repo.BuiltInType, boolean);<no-session-id>;3771483212946079748;1577693392065199674;1577693392065832878;DESKTOP-2SU7U6M;47;2"));
-//		System.out.println(find(11, Arrays.asList(new Integer[]{1,2,4,5,10,12,14,15})));;
-	}
 	
+	/**
+	 * callId
+	 * depth
+	 * DynamicFunctionFromKieker
+	 * @param file
+	 * @return
+	 */
 	public static Map<String, Map<Integer, List<DynamicFunctionFromKieker>>> readKiekerFile(File file) {
 		Map<String, Map<Integer, List<DynamicFunctionFromKieker>>> result = new HashMap<>();
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
@@ -145,6 +218,11 @@ public class DynamicUtil {
 		}
 	}
 
+	/**
+	 * 从kieker文件每一行读到的方法，包括该方法在调用链的顺序和层级
+	 * @author fan
+	 *
+	 */
 	public static class DynamicFunctionFromKieker {
 		String sentence;
 		String callId;

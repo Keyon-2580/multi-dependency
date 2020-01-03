@@ -69,5 +69,10 @@ public class Type implements Node {
 	public void setAliasName(String aliasName) {
 		this.aliasName = aliasName;
 	}
+	@Override
+	public String toString() {
+		return "Type [id=" + id + ", typeName=" + typeName + ", packageName=" + packageName + ", aliasName=" + aliasName
+				+ ", entityId=" + entityId + "]";
+	}
 
 }
