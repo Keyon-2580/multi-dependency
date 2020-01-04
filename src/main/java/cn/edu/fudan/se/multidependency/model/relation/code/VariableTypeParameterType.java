@@ -7,16 +7,16 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 
-@RelationshipEntity(RelationType.str_FUNCTION_ANNOTATION_TYPE)
-public class FunctionAnnotationType implements Relation {
+@RelationshipEntity(RelationType.str_VARIABLE_TYPE_PARAMETER_TYPE)
+public class VariableTypeParameterType implements Relation {
 
-	private static final long serialVersionUID = 8248026322068428052L;
-	
+	private static final long serialVersionUID = 2157443508230175654L;
+
 	@Id
     @GeneratedValue
     private Long id;
@@ -26,27 +26,18 @@ public class FunctionAnnotationType implements Relation {
 		return id;
 	}
 
-	public FunctionAnnotationType() {
-		super();
-	}
-
-	public FunctionAnnotationType(Function function, Type type) {
-		super();
-		this.function = function;
-		this.type = type;
-	}
-
 	@Override
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
-	private Function function;
-	private Type type;
 
+	private Variable variable;
+	
+	private Type type;
+	
 	@Override
 	public Long getStartNodeGraphId() {
-		return function.getId();
+		return variable.getId();
 	}
 
 	@Override
@@ -56,7 +47,7 @@ public class FunctionAnnotationType implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.FUNCTION_ANNOTATION_TYPE;
+		return RelationType.VARIABLE_TYPE_PARAMETER_TYPE;
 	}
 
 	@Override
@@ -64,12 +55,12 @@ public class FunctionAnnotationType implements Relation {
 		return new HashMap<>();
 	}
 
-	public Function getFunction() {
-		return function;
+	public Variable getVariable() {
+		return variable;
 	}
 
-	public void setFunction(Function function) {
-		this.function = function;
+	public void setVariable(Variable variable) {
+		this.variable = variable;
 	}
 
 	public Type getType() {

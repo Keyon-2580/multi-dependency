@@ -34,7 +34,6 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				Package pck = new Package();
 				pck.setPackageName(entity.getQualifiedName());
 				pck.setEntityId(entity.getId().longValue());
-				pck.setDirectory(false);
 				addNodeToNodes(pck, entity.getId().longValue());
 				Contain projectContainsPackage = new Contain(project, pck);
 				addRelation(projectContainsPackage);
@@ -64,8 +63,8 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			}
 		});
 		this.getNodes().findFiles().forEach((entityId, codeFile) -> {
-			Contain containFile = new Contain();
-			containFile.setEnd(codeFile);
+			Contain packageContainFile = new Contain();
+			packageContainFile.setEnd(codeFile);
 			// 在java中，文件上面是包，若包不存在，则将该文件的包设为当前目录
 			Entity fileEntity = entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = fileEntity.getParent();
@@ -78,16 +77,17 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 					pck = new Package();
 					pck.setEntityId(entityRepo.generateId().longValue());
 					pck.setPackageName(packageName);
-					pck.setDirectory(true);
+					pck.setDirectoryPath(packageName);
 					addNodeToNodes(pck, pck.getEntityId());
 					Contain projectContainsPackage = new Contain(project, pck);
 					addRelation(projectContainsPackage);
 				}
 			} else {
 				pck = this.getNodes().findPackage(parentEntity.getId().longValue());
+				pck.setDirectoryPath(FileUtils.extractDirectoryFromFile(fileEntity.getQualifiedName()));
 			}
-			containFile.setStart(pck);
-			addRelation(containFile);
+			packageContainFile.setStart(pck);
+			addRelation(packageContainFile);
 		});
 		this.getNodes().findTypes().forEach((entityId, type) -> {
 			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(entityId.intValue());
@@ -95,7 +95,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			/*Entity currentEntity = typeEntity;
 				Node currentNode = type;*/
 			while(!(parentEntity instanceof FileEntity)) {
-				///FIXME 内部类的情况
+				///FIXME 内部类的情况暂不考虑
 				/*if(parentEntity instanceof FunctionEntity) {
 						Function function = this.nodes.findFunction(parentEntity.getId());
 						
@@ -122,6 +122,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			for(VarEntity varEntity : functionEntity.getParameters()) {
 				String parameterName = varEntity.getRawType().getName();
 				TypeEntity typeEntity = varEntity.getType();
+				// 方法的参数
 				if(typeEntity != null && this.getNodes().findType(typeEntity.getId().longValue()) != null) {
 					function.addParameterIdentifies(typeEntity.getQualifiedName());
 				} else {
@@ -157,6 +158,9 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 //		extractRelationsFromDependsType();
 	}
 	
+	/**
+	 * java中文件的import关系
+	 */
 	protected void extractRelationsFromFiles() {
 		this.getNodes().findFiles().forEach((entityId, file) -> {
 			FileEntity fileEntity = (FileEntity) entityRepo.getEntity(entityId.intValue());
@@ -181,7 +185,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 					}
 				} else {
 					// MultiDeclareEntities
-					System.out.println(entity.getClass());
+					System.out.println("extractRelationsFromFiles() " + fileEntity + " " + entity.getClass() + " " + entity.toString());
 				}
 			});
 		});

@@ -19,6 +19,7 @@ data:
       path: D:\multiple-dependency-project\depends-0.9.5c
 #      path: C:\Users\fan\Downloads\hadoop-trunk
 #      path: C:\Users\fan\Downloads\cassandra-trunk\cassandra-trunk
+#      path: C:\Users\fan\Downloads\Compressed\kafka-2.4.0
       language: java
 #      path: D:\git\bcrypt-1.1
 #      path: D:\git\Sockets-2.3.9.9
@@ -30,4 +31,4 @@ data:
       path: D:/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
    
    test: this property is for YamlUtilsTest
-      
+     

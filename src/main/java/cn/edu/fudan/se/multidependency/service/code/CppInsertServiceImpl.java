@@ -31,8 +31,8 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 		entityRepo.getEntities().forEach(entity -> {
 			// 每个entity对应相应的node
 			if(entity instanceof PackageEntity) {
-//				System.out.println("----------------------------------------------------");
-//				System.out.println("cpp insertNodesWithContainRelations packageEntity");
+				System.out.println("----------------------------------------------------");
+				System.out.println("cpp insertNodesWithContainRelations packageEntity");
 				Namespace namespace = new Namespace();
 				namespace.setNamespaceName(entity.getQualifiedName());
 				namespace.setEntityId(entity.getId().longValue());
@@ -46,13 +46,13 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				file.setSuffix(FileUtils.extractSuffix(entity.getQualifiedName()));
 				addNodeToNodes(file, entity.getId().longValue());
 				// 文件所在目录
-				String packageName = FileUtils.extractDirectoryFromFile(filePath);
-				Package pck = this.getNodes().findPackageByPackageName(packageName);
+				String directoryPath = FileUtils.extractDirectoryFromFile(filePath);
+				Package pck = this.getNodes().findPackageByPackageName(directoryPath);
 				if(pck == null) {
 					pck = new Package();
 					pck.setEntityId(entityRepo.generateId().longValue());
-					pck.setPackageName(packageName);
-					pck.setDirectory(true);
+					pck.setPackageName(directoryPath);
+					pck.setDirectoryPath(directoryPath);
 					addNodeToNodes(pck, pck.getEntityId().longValue());
 					Contain projectContainsPackage = new Contain(project, pck);
 					addRelation(projectContainsPackage);
@@ -134,6 +134,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				if(parentEntity == null) {
 					return;
 				}
+				// 方法在文件内还是在类内
 				if(parentEntity instanceof FileEntity) {
 					ProjectFile file = this.getNodes().findCodeFile(parentEntity.getId().longValue());
 					Contain fileContainsFunction = new Contain(file, function);
@@ -143,6 +144,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 					Contain typeContainsFunction = new Contain(type, function);
 					addRelation(typeContainsFunction);
 				}
+				// 方法的参数
 				for(VarEntity varEntity : functionEntity.getParameters()) {
 					String parameterName = varEntity.getRawType().getName();
 					TypeEntity typeEntity = varEntity.getType();
@@ -185,6 +187,9 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 //		extractRelationsFromDependsType();
 	}
 	
+	/**
+	 * c中文件的include关系
+	 */
 	protected void extractRelationsFromFiles() {
 		this.getNodes().findFiles().forEach((entityId, file) -> {
 			FileEntity fileEntity = (FileEntity) entityRepo.getEntity(entityId.intValue());

@@ -23,7 +23,7 @@ public class Package implements Node {
     
 	private String packageName;
 	
-	private boolean isDirectory;
+	private String directoryPath;
 
     private Long entityId;
 
@@ -58,7 +58,7 @@ public class Package implements Node {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("packageName", getPackageName() == null ? "" : getPackageName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
-		properties.put("isDirectory", isDirectory());
+		properties.put("directoryPath", getDirectoryPath() == null ? "" : getDirectoryPath());
 		return properties;
 	}
 
@@ -67,12 +67,12 @@ public class Package implements Node {
 		return NodeType.Package;
 	}
 
-	public boolean isDirectory() {
-		return isDirectory;
+	public String getDirectoryPath() {
+		return directoryPath;
 	}
 
-	public void setDirectory(boolean isDirectory) {
-		this.isDirectory = isDirectory;
+	public void setDirectoryPath(String directoryPath) {
+		this.directoryPath = directoryPath;
 	}
 
 }
