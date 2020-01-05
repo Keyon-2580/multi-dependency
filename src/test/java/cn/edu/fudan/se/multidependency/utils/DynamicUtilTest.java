@@ -13,10 +13,19 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.utils.DynamicUtil.DynamicFunctionExecutionFromKieker;
 
 public class DynamicUtilTest {
+	@Test
+	public void testSplitFunctionCall() {
+		String sentence = "$2;1578203476880044200;1578203476880043000;-2810437662891048949;5;private void depends.entity.Entity.deduceQualifiedName();depends.entity.TypeEntity;public boolean depends.entity.GenericName.startsWith(java.lang.String);depends.entity.GenericName";
+		DynamicUtil.splitFunctionCall(sentence);
+		sentence = "$1;1578203476879979400;-2810437662891048949;1;<no-session-id>;DESKTOP-4RF3KHM;-2810437662891048949;-1";
+		DynamicUtil.splitFunctionCall(sentence);
+		sentence = "$2;1578203476880273900;1578203476880271900;-2810437662891048947;0;static depends.relations.Inferer.<clinit>;depends.relations.Inferer;public static java.lang.Integer java.lang.Integer.valueOf(int);java.lang.Integer";
+		DynamicUtil.splitFunctionCall(sentence);
+	}
 
 	@Test
 	public void test() {
-		Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> result = DynamicUtil.readKiekerFile(new File("src/test/resources/kieker/kieker-test.dat"));
+		Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> result = DynamicUtil.readKiekerExecutionFile(new File("src/test/resources/kieker/kieker-test.dat"));
 		assertEquals(result.size(), 1);
 		int size = 0;
 		for(Map<Integer, List<DynamicFunctionExecutionFromKieker>> groups : result.values()) {

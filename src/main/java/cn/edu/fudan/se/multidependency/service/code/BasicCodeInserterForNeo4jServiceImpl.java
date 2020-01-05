@@ -16,8 +16,8 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForN
 	public BasicCodeInserterForNeo4jServiceImpl(String projectPath, Language language) {
 		super();
 		this.language = language;
-		String projectName = "/" + FileUtils.extractFileName(projectPath);
-		project = new Project(projectName, projectPath, language);
+		String projectName = FileUtils.extractFileName(projectPath);
+		project = new Project(projectName, "/" + projectName, language);
 		getNodes().setProject(project);
 		addNode(project);
 	}

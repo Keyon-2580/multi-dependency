@@ -10,8 +10,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -120,13 +118,13 @@ public class DynamicUtil {
 	 * @param file
 	 * @return
 	 */
-	public static Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> readKiekerFile(File... files) {
+	public static Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> readKiekerExecutionFile(File... files) {
 		Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> result = new HashMap<>();
 		for(File file : files) {
 			try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 				String line = null;
 				while ((line = reader.readLine()) != null) {
-					DynamicFunctionExecutionFromKieker dynamicFunction = split(line);
+					DynamicFunctionExecutionFromKieker dynamicFunction = splitFunctionExecution(line);
 					if (dynamicFunction == null) {
 						continue;
 					}
@@ -159,8 +157,102 @@ public class DynamicUtil {
 		return result;
 	}
 
-	public static DynamicFunctionExecutionFromKieker split(String callSentence) {
-
+	public static Map<String, List<DynamicFunctionCallFromKieker>> readKiekerCallFile(File... files) {
+		Map<String, List<DynamicFunctionCallFromKieker>> result = new HashMap<>();
+		for(File file : files) {
+			try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+				String line = null;
+				while ((line = reader.readLine()) != null) {
+					DynamicFunctionCallFromKieker call = splitFunctionCall(line);
+					if(call == null) {
+						continue;
+					}
+					String callId = call.getCallId();
+					List<DynamicFunctionCallFromKieker> groups = result.get(callId);
+					groups = groups == null ? new ArrayList<>() : groups;
+					groups.add(call);
+				}
+				for(List<DynamicFunctionCallFromKieker> groups : result.values()) {
+					groups.sort(new Comparator<DynamicFunctionCallFromKieker>() {
+						@Override
+						public int compare(DynamicFunctionCallFromKieker o1, DynamicFunctionCallFromKieker o2) {
+							return o1.getOrderId().compareTo(o2.getOrderId());
+						}
+					});
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return result;
+	}
+	
+	public static DynamicFunctionCallFromKieker splitFunctionCall(String callSentence) {
+		try {
+			String[] splits = callSentence.split(";");
+			System.out.println(splits.length);
+			if(splits.length != 9) {
+				return null;
+			}
+			if(callSentence.contains(DynamicFunctionCallFromKieker.CLINIT)) {
+				return null;
+			}
+			DynamicFunctionCallFromKieker functionCall = new DynamicFunctionCallFromKieker();
+			String callerMethodStr = splits[5];
+			String callerParametersStr = callerMethodStr.substring(
+					callerMethodStr.lastIndexOf("(") + 1, callerMethodStr.length() - 1);
+			if (!StringUtils.isBlank(callerParametersStr)) {
+				String[] parameters = callerParametersStr.split(",");
+				for (String parameter : parameters) {
+					functionCall.addCallerParameter(parameter.trim());
+				}
+			}
+			callerMethodStr = callerMethodStr.substring(0, callerMethodStr.lastIndexOf("("));
+			String[] callerMethodsStr = callerMethodStr.split(" ");
+			String callerFunctionName = callerMethodsStr[callerMethodsStr.length - 1];
+			if (callerFunctionName.contains(DynamicFunctionCallFromKieker.INIT)) {
+				callerFunctionName = callerFunctionName.replace("." + DynamicFunctionCallFromKieker.INIT, "");
+				String[] temp = callerFunctionName.split("\\.");
+				callerFunctionName = callerFunctionName + "." + temp[temp.length - 1];
+				functionCall.setCallerFunctionName(callerFunctionName);
+				functionCall.setCallerIsConstructor(true);
+			} else {
+				functionCall.setCallerFunctionName(callerFunctionName);
+				functionCall.setCallerIsConstructor(false);
+			}
+			String calledMethodStr = splits[7];
+			String calledParametersStr = calledMethodStr.substring(
+					calledMethodStr.lastIndexOf("(") + 1, calledMethodStr.length() - 1);
+			if (!StringUtils.isBlank(calledParametersStr)) {
+				String[] parameters = calledParametersStr.split(",");
+				for (String parameter : parameters) {
+					functionCall.addCalledParameter(parameter.trim());
+				}
+			}
+			calledMethodStr = calledMethodStr.substring(0, calledMethodStr.lastIndexOf("("));
+			String[] calledMethodsStr = calledMethodStr.split(" ");
+			String calledFunctionName = calledMethodsStr[calledMethodsStr.length - 1];
+			if (calledFunctionName.contains(DynamicFunctionCallFromKieker.INIT)) {
+				calledFunctionName = calledFunctionName.replace("." + DynamicFunctionCallFromKieker.INIT, "");
+				String[] temp = calledFunctionName.split("\\.");
+				calledFunctionName = calledFunctionName + "." + temp[temp.length - 1];
+				functionCall.setCalledFunctionName(calledFunctionName);
+				functionCall.setCalledIsConstructor(true);
+			} else {
+				functionCall.setCalledFunctionName(calledFunctionName);
+				functionCall.setCalledIsConstructor(false);
+			}
+			functionCall.setCallId(splits[3]);
+			functionCall.setOrderId(Integer.valueOf(splits[4]));
+			return functionCall;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	public static DynamicFunctionExecutionFromKieker splitFunctionExecution(String callSentence) {
 		try {
 			String[] splits = callSentence.split(";");
 			if (splits.length < 10) {
@@ -199,6 +291,81 @@ public class DynamicUtil {
 //			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public static class DynamicFunctionCallFromKieker {
+		public static final String INIT = DynamicFunctionExecutionFromKieker.INIT;
+		public static final String CLINIT = "<clinit>";
+		String sentence;
+		String callId;
+		Integer orderId;
+		String callerFunctionName;
+		List<String> callerParametersType = new ArrayList<>();
+		boolean callerIsConstructor;
+		String calledFunctionName;
+		List<String> calledParametersType = new ArrayList<>();
+		boolean calledIsConstructor;
+		public void addCallerParameter(String str) {
+			this.callerParametersType.add(str);
+		}
+		public void addCalledParameter(String str) {
+			this.calledParametersType.add(str);
+		}
+		public String getSentence() {
+			return sentence;
+		}
+		public void setSentence(String sentence) {
+			this.sentence = sentence;
+		}
+		public String getCallId() {
+			return callId;
+		}
+		public void setCallId(String callId) {
+			this.callId = callId;
+		}
+		public Integer getOrderId() {
+			return orderId;
+		}
+		public void setOrderId(Integer orderId) {
+			this.orderId = orderId;
+		}
+		public String getCallerFunctionName() {
+			return callerFunctionName;
+		}
+		public void setCallerFunctionName(String callerFunctionName) {
+			this.callerFunctionName = callerFunctionName;
+		}
+		public List<String> getCallerParametersType() {
+			return callerParametersType;
+		}
+		public void setCallerParametersType(List<String> callerParametersType) {
+			this.callerParametersType = callerParametersType;
+		}
+		public boolean isCallerIsConstructor() {
+			return callerIsConstructor;
+		}
+		public void setCallerIsConstructor(boolean callerIsConstructor) {
+			this.callerIsConstructor = callerIsConstructor;
+		}
+		public String getCalledFunctionName() {
+			return calledFunctionName;
+		}
+		public void setCalledFunctionName(String calledFunctionName) {
+			this.calledFunctionName = calledFunctionName;
+		}
+		public List<String> getCalledParametersType() {
+			return calledParametersType;
+		}
+		public void setCalledParametersType(List<String> calledParametersType) {
+			this.calledParametersType = calledParametersType;
+		}
+		public boolean isCalledIsConstructor() {
+			return calledIsConstructor;
+		}
+		public void setCalledIsConstructor(boolean calledIsConstructor) {
+			this.calledIsConstructor = calledIsConstructor;
+		}
+		
 	}
 
 	/**

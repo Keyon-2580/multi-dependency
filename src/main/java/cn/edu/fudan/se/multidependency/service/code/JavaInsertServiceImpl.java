@@ -28,6 +28,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 	
 	@Override
 	protected void addNodesWithContainRelations() throws LanguageErrorException {
+		final String projectPath = project.getProjectPath();
 		entityRepo.getEntities().forEach(entity -> {
 			// 每个entity对应相应的node
 			if(entity instanceof PackageEntity) {
@@ -40,8 +41,12 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			} else if(entity instanceof FileEntity) {
 				ProjectFile file = new ProjectFile();
 				file.setEntityId(entity.getId().longValue());
-				file.setFileName(FileUtils.extractFileName(entity.getQualifiedName()));
-				file.setPath(entity.getQualifiedName());
+				String filePath = entity.getQualifiedName();
+				file.setFileName(FileUtils.extractFileName(filePath));
+				filePath = filePath.replace("\\", "/");
+				filePath = filePath.substring(filePath.indexOf(projectPath + "/"));
+				file.setPath(filePath);
+				file.setSuffix(FileUtils.extractSuffix(entity.getQualifiedName()));
 				file.setSuffix(FileUtils.extractSuffix(entity.getQualifiedName()));
 				addNodeToNodes(file, entity.getId().longValue());
 			} else if(entity instanceof FunctionEntity) {
@@ -78,20 +83,25 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			Package pck = null;
 			if(parentEntity == null) {
 				String filePath = codeFile.getPath();
-				String packageName = FileUtils.extractDirectoryFromFile(filePath);
-				pck = this.getNodes().findPackageByPackageName(packageName);
+				String packagePath = FileUtils.extractDirectoryFromFile(filePath) + "/";
+				packagePath = packagePath.replace("\\", "/");
+				packagePath = packagePath.substring(packagePath.indexOf(projectPath + "/"));
+				pck = this.getNodes().findPackageByPackageName(packagePath);
 				if(pck == null) {
 					pck = new Package();
 					pck.setEntityId(entityRepo.generateId().longValue());
-					pck.setPackageName(packageName);
-					pck.setDirectoryPath(packageName);
+					pck.setPackageName(packagePath);
+					pck.setDirectoryPath(packagePath);
 					addNodeToNodes(pck, pck.getEntityId());
 					Contain projectContainsPackage = new Contain(project, pck);
 					addRelation(projectContainsPackage);
 				}
 			} else {
 				pck = this.getNodes().findPackage(parentEntity.getId().longValue());
-				pck.setDirectoryPath(FileUtils.extractDirectoryFromFile(fileEntity.getQualifiedName()));
+				String packagePath = FileUtils.extractDirectoryFromFile(fileEntity.getQualifiedName());
+				packagePath = packagePath.replace("\\", "/");
+				packagePath = packagePath.substring(packagePath.indexOf(projectPath + "/"));
+				pck.setDirectoryPath(packagePath);
 			}
 			packageContainFile.setStart(pck);
 			addRelation(packageContainFile);

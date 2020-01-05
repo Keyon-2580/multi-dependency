@@ -28,6 +28,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 
 	@Override
 	protected void addNodesWithContainRelations() throws LanguageErrorException {
+		final String projectPath = project.getProjectPath();
 		entityRepo.getEntities().forEach(entity -> {
 			// 每个entity对应相应的node
 			if(entity instanceof PackageEntity) {
@@ -39,16 +40,18 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				addNodeToNodes(namespace, entity.getId().longValue());
 			} else if(entity instanceof FileEntity) {
 				ProjectFile file = new ProjectFile();
-				String filePath = entity.getQualifiedName();
 				file.setEntityId(entity.getId().longValue());
+				String filePath = entity.getQualifiedName();
 				file.setFileName(FileUtils.extractFileName(filePath));
-				file.setPath(entity.getQualifiedName());
-//				String fullFilePath = entity.getQualifiedName().replace("\\", "/");
-//				file.setPath(fullFilPath.substring(beginIndex, endIndex));
+				filePath = filePath.replace("\\", "/");
+				filePath = filePath.substring(filePath.indexOf(projectPath + "/"));
+				file.setPath(filePath);
 				file.setSuffix(FileUtils.extractSuffix(entity.getQualifiedName()));
 				addNodeToNodes(file, entity.getId().longValue());
 				// 文件所在目录
-				String directoryPath = FileUtils.extractDirectoryFromFile(filePath);
+				String directoryPath = FileUtils.extractDirectoryFromFile(entity.getQualifiedName()) + "/";
+				directoryPath = directoryPath.replace("\\", "/");
+				directoryPath = directoryPath.substring(directoryPath.indexOf(projectPath + "/"));
 				Package pck = this.getNodes().findPackageByPackageName(directoryPath);
 				if(pck == null) {
 					pck = new Package();

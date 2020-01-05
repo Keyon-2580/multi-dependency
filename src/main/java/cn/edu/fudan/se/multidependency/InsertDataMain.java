@@ -48,7 +48,7 @@ public class InsertDataMain {
 			/**
 			 * 动态分析
 			 */
-			File directory = new File("src/main/resources/dynamic/kieker/kieker-JavaAnnotationParserTest");
+			/*File directory = new File("src/main/resources/dynamic/kieker/kieker-JavaAnnotationParserTest");
 			File mark = new File("src/main/resources/dynamic/kieker/kieker-JavaAnnotationParserTest/dynamic.mark");
 			List<File> kiekerFiles = new ArrayList<>();
 			FileUtils.listFiles(directory, kiekerFiles, ".dat");
@@ -56,7 +56,7 @@ public class InsertDataMain {
 			for(int i = 0; i < kiekerFiles.size(); i++) {
 				files[i] = kiekerFiles.get(i);
 			}
-			insertDynamicCall(mark, language, files);
+			insertDynamicCall(mark, language, files);*/
 			///FIXME
 			//其它
 			
