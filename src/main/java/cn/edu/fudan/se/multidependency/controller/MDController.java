@@ -1,16 +1,15 @@
 package cn.edu.fudan.se.multidependency.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.testcase.DynamicTestCaseToFileDependency;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.repository.node.code.FunctionRepository;
@@ -43,6 +42,17 @@ public class MDController {
 	@ResponseBody
 	public String index() {
 		return "hello";
+	}
+	
+	@RequestMapping("/testcase")
+	@ResponseBody
+	public void testcaseDependency() {
+		List<List<ProjectFile>> dependencyFiles = new ArrayList<>();
+		dynamicAnalyseService.findAllTestCases().forEach(testCase -> {
+			System.out.println("测试用例 " + testCase + " 依赖的文件：");
+			DynamicTestCaseToFileDependency dependencies = dynamicAnalyseService.findDependencyFilesByTestCaseName(testCase);
+			System.out.println(dependencies.getProjectFiles().values());
+		});
 	}
 	
 	@RequestMapping("/dynamic/{featureName}")

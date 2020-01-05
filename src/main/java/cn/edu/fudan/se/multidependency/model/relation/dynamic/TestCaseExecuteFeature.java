@@ -15,6 +15,7 @@ import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 
 @RelationshipEntity(RelationType.str_TESTCASE_EXECUTE_FEATURE)
+@Deprecated
 public class TestCaseExecuteFeature implements Relation {
 
 	private static final long serialVersionUID = 3879809639261277046L;

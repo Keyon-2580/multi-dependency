@@ -24,5 +24,7 @@ public interface DynamicAnalyseService {
 	
 	public Iterable<Scenario> findAllScenarios();
 	
+	public DynamicTestCaseToFunctionDependency findDependencyFunctionsByTestCaseName(TestCase testCase);
 	
+	public DynamicTestCaseToFileDependency findDependencyFilesByTestCaseName(TestCase testCase);
 }

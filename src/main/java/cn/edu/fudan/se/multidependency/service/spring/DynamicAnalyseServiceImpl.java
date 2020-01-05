@@ -37,9 +37,6 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	@Autowired
 	private TestCaseRepository testCaseRepository;
 	
-//	@Autowired
-//	private ScenarioDefineTestCaseRepository scenarioDefineTestCaseRepository;
-	
 	@Autowired
 	private TestCaseExecuteFeatureRepository testCaseExecuteFeatureRepository;
 
@@ -55,6 +52,7 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	 * @return
 	 */
 	@Override
+	@Deprecated
 	public List<DynamicTestCaseToFunctionDependency> findDependencyFunctionsByFeatureName(String featureName) {
 		List<DynamicTestCaseToFunctionDependency> result = new ArrayList<>();
 		Feature feature = featureRepository.findByFeatureName(featureName);
@@ -78,6 +76,7 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	 * @return
 	 */
 	@Override
+	@Deprecated
 	public List<DynamicTestCaseToFileDependency> findDependencyFilesByFeatureName(String featureName) {
 		List<DynamicTestCaseToFileDependency> result = new ArrayList<>();
 		Feature feature = featureRepository.findByFeatureName(featureName);
@@ -101,6 +100,7 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	 * @return
 	 */
 	@Override
+	@Deprecated
 	public List<ProjectFile> findAllDependencyFilesByFeatureName(String featureName) {
 		List<ProjectFile> files = new ArrayList<>();
 		List<DynamicTestCaseToFileDependency> allDependencies = findDependencyFilesByFeatureName(featureName);
@@ -120,6 +120,12 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		return files;
 	}
 
+	/**
+	 * 某个测试用例依赖的所有方法
+	 * @param testCase
+	 * @return
+	 */
+	@Override
 	public DynamicTestCaseToFunctionDependency findDependencyFunctionsByTestCaseName(TestCase testCase) {
 		DynamicTestCaseToFunctionDependency dependencies = new DynamicTestCaseToFunctionDependency();
 		dependencies.setTestCase(testCase);
@@ -130,6 +136,12 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		return dependencies;
 	}
 
+	/**
+	 * 某个测试用例依赖的所有文件
+	 * @param testCase
+	 * @return
+	 */
+	@Override
 	public DynamicTestCaseToFileDependency findDependencyFilesByTestCaseName(TestCase testCase) {
 		DynamicTestCaseToFileDependency dependencies = new DynamicTestCaseToFileDependency();
 		dependencies.setTestCase(testCase);
