@@ -1,0 +1,10 @@
+depends.extractor.java.JavaParameterParserTest
+Feature 能够解析方法与参数的Parameter关系
+
+
+depends.extractor.java.JavaParameterParserTest.test_parameter()
+TestCase success
+Scenario 使用depends解析一个文件内的函数是否有指定数量的Parameter的关系
+Feature 能够解析java代码
+Feature 能够正确解析出方法与参数的Parameter关系的个数
+
