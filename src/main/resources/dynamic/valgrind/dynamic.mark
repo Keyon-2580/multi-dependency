@@ -1,0 +1,23 @@
+depends.extractor.java.JavaAnnotationParserTest
+Feature depends解析注解
+
+
+depends.extractor.java.JavaAnnotationParserTest.test_could_parse_annotationType()
+
+TestCase success
+Scenario 使用depends解析注解
+Feature 能够解析java代码
+Feature 能够正确识别注解
+
+depends.extractor.java.JavaAnnotationParserTest.test_could_detect_annotation_in_class_level()
+TestCase success
+Scenario 使用depends解析检测在类级别上使用注解
+Feature 能够解析java代码
+Feature 能够检测出在类级别上使用了注解
+
+depends.extractor.java.JavaAnnotationParserTest.test_could_detect_annotation_in_function_level()
+TestCase success
+Scenario 使用depends解析检测在方法级别上使用注解
+Feature 能够解析java代码
+Feature 能够检测出在方法级别上使用了注解
+

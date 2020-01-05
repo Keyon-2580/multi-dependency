@@ -7,14 +7,14 @@ import java.util.Map;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
-import cn.edu.fudan.se.multidependency.utils.DynamicUtil;
-import cn.edu.fudan.se.multidependency.utils.DynamicUtil.DynamicFunctionExecutionFromKieker;
+import cn.edu.fudan.se.multidependency.utils.JavaDynamicUtil;
+import cn.edu.fudan.se.multidependency.utils.JavaDynamicUtil.DynamicFunctionExecutionFromKieker;
 
 public class KiekerDynamicExecutionInserterForNeo4jService extends KiekerDynamicInserterForNeo4jService {
 	
 	protected void extractNodesAndRelations() throws Exception {
 		Map<String, List<Function>> functions = this.getNodes().allFunctionsByFunctionName();
-		Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> allDynamicFunctionFromKiekers = DynamicUtil.readKiekerExecutionFile(executeFiles);
+		Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> allDynamicFunctionFromKiekers = JavaDynamicUtil.readKiekerExecutionFile(executeFiles);
 		TestCase currentTestCase = null;
 		for(Map<Integer, List<DynamicFunctionExecutionFromKieker>> groups : allDynamicFunctionFromKiekers.values()) {
 			for(List<DynamicFunctionExecutionFromKieker> group : groups.values()) {
@@ -25,7 +25,7 @@ public class KiekerDynamicExecutionInserterForNeo4jService extends KiekerDynamic
 						if(calledFunctions == null) {
 							continue;
 						}
-						Function calledFunction = DynamicUtil.findFunctionWithDynamic(calledDynamicFunction, calledFunctions);
+						Function calledFunction = JavaDynamicUtil.findFunctionWithDynamic(calledDynamicFunction, calledFunctions);
 						if(calledFunction == null) {
 							continue;
 						}
@@ -39,8 +39,8 @@ public class KiekerDynamicExecutionInserterForNeo4jService extends KiekerDynamic
 					}
 //					DynamicFunctionFromKieker callerDynamicFunction = DynamicUtil.findCallerFunction(calledDynamicFunction, groups.get(calledDynamicFunction.getDepth() - 1));
 					DynamicFunctionExecutionFromKieker callerDynamicFunction = null;
-					if(DynamicUtil.find(calledDynamicFunction.getBreadth(), list) != -1) {
-						callerDynamicFunction = groups.get(calledDynamicFunction.getDepth() - 1).get(DynamicUtil.find(calledDynamicFunction.getBreadth(), list));
+					if(JavaDynamicUtil.find(calledDynamicFunction.getBreadth(), list) != -1) {
+						callerDynamicFunction = groups.get(calledDynamicFunction.getDepth() - 1).get(JavaDynamicUtil.find(calledDynamicFunction.getBreadth(), list));
 					}
 					if(callerDynamicFunction == null) {
 						continue;
@@ -55,8 +55,8 @@ public class KiekerDynamicExecutionInserterForNeo4jService extends KiekerDynamic
 //						System.out.println("callerDynamicFunction: " + callerDynamicFunction);
 						continue;
 					}
-					Function calledFunction = DynamicUtil.findFunctionWithDynamic(calledDynamicFunction, calledFunctions);
-					Function callerFunction = DynamicUtil.findFunctionWithDynamic(callerDynamicFunction, callerFunctions);
+					Function calledFunction = JavaDynamicUtil.findFunctionWithDynamic(calledDynamicFunction, calledFunctions);
+					Function callerFunction = JavaDynamicUtil.findFunctionWithDynamic(callerDynamicFunction, callerFunctions);
 					if(calledFunction == null || callerFunction == null) {
 //						System.out.println("list is not null");
 //						System.out.println("calledDynamicFunction: " + calledDynamicFunction);

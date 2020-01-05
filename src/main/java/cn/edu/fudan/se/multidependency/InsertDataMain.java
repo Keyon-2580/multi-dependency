@@ -40,7 +40,7 @@ public class InsertDataMain {
 			
 			InserterForNeo4j repository = RepositoryService.getInstance();
 			repository.setDatabasePath(yaml.getNeo4jDatabasePath());
-			repository.setDelete(true);
+			repository.setDelete(false);
 			/**
 			 * 静态分析
 			 */
@@ -48,15 +48,16 @@ public class InsertDataMain {
 			/**
 			 * 动态分析
 			 */
-			/*File directory = new File("src/main/resources/dynamic/kieker/kieker-JavaAnnotationParserTest");
+			File directory = new File("src/main/resources/dynamic/kieker/kieker-JavaAnnotationParserTest");
 			File mark = new File("src/main/resources/dynamic/kieker/kieker-JavaAnnotationParserTest/dynamic.mark");
+			directory = new File("src/main/resources/dynamic/valgrind");
 			List<File> kiekerFiles = new ArrayList<>();
-			FileUtils.listFiles(directory, kiekerFiles, ".dat");
+			FileUtils.listFiles(directory, kiekerFiles, ".dot");
 			File[] files = new File[kiekerFiles.size()];
 			for(int i = 0; i < kiekerFiles.size(); i++) {
 				files[i] = kiekerFiles.get(i);
 			}
-			insertDynamicCall(mark, language, files);*/
+			insertDynamicCall(mark, language, files);
 			///FIXME
 			//其它
 			

@@ -19,7 +19,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 
-public class DynamicUtil {
+public class JavaDynamicUtil {
 	
 	public static TestCase extractTestCaseFromMarkLine(String line) {
 		if(!line.startsWith(NodeType.TestCase.name())) {

@@ -19,7 +19,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.NodeIsFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.NodeIsScenario;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.NodeIsTestCase;
-import cn.edu.fudan.se.multidependency.utils.DynamicUtil;
+import cn.edu.fudan.se.multidependency.utils.JavaDynamicUtil;
 
 public abstract class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4jService {
 
@@ -36,7 +36,7 @@ public abstract class KiekerDynamicInserterForNeo4jService extends DynamicInsert
 					continue;
 				}
 				if(line.startsWith(NodeType.Scenario.name())) {
-					Scenario extractScenario = DynamicUtil.extractScenarioFromMarkLine(line);
+					Scenario extractScenario = JavaDynamicUtil.extractScenarioFromMarkLine(line);
 					if(extractScenario == null) {
 						continue;
 					}
@@ -57,7 +57,7 @@ public abstract class KiekerDynamicInserterForNeo4jService extends DynamicInsert
 						this.nodeEntityIdToScenarios.put(defineNode.getEntityId(), scenarios);
 					}
 				} else if(line.startsWith(NodeType.TestCase.name())) {
-					TestCase extractTestCase = DynamicUtil.extractTestCaseFromMarkLine(line);
+					TestCase extractTestCase = JavaDynamicUtil.extractTestCaseFromMarkLine(line);
 					if(extractTestCase == null) {
 						continue;
 					}
@@ -78,7 +78,7 @@ public abstract class KiekerDynamicInserterForNeo4jService extends DynamicInsert
 						addRelation(isTestCase);
 					}
 				} else if(line.startsWith(NodeType.Feature.name())) {
-					Feature extractFeature = DynamicUtil.extractFeatureFromMarkLine(line);
+					Feature extractFeature = JavaDynamicUtil.extractFeatureFromMarkLine(line);
 					if(extractFeature == null) {
 						continue;
 					}
