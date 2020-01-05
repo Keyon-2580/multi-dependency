@@ -23,16 +23,6 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 
 public class DynamicUtil {
 	
-	public static final String testCaseRegex = "^TestCase\\s([^\\s])*\\s[success|fail]";
-	public static final Pattern patternTestCase = Pattern.compile(testCaseRegex);
-
-	public static void extract(String line) {
-		Matcher matcher = patternTestCase.matcher(line);
-		if(matcher.find()) {
-			System.out.println(matcher.group(1));
-		}
-	}
-	
 	public static TestCase extractTestCaseFromMarkLine(String line) {
 		if(!line.startsWith(NodeType.TestCase.name())) {
 			return null;
@@ -40,7 +30,9 @@ public class DynamicUtil {
 		try {
 			String[] strs = line.split(" ");
 			TestCase testCase = new TestCase();
-			testCase.setSuccess(Boolean.valueOf(strs[1]));
+			if(strs.length > 1) {
+				testCase.setSuccess("success".equals(strs[1]));
+			}
 			return testCase;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -78,18 +70,6 @@ public class DynamicUtil {
 		}
 	}
 
-	public static void main(String[] args) {
-//		Map m = readKiekerFile(new File("D:\\fan\\analysis\\depends-commits\\kieker\\kieker-before-change-PackageEntity-26501da0b6cc85630c535fa5b756b0d8e60975b6\\kieker-20191127-071809170-UTC-001.dat"));
-//		System.out.println(m.size());
-//		System.out.println(split("$1;1577693392065836654;public depends.relations.Inferer.<init>(depends.entity.repo.EntityRepo, depends.relations.ImportLookupStrategy, depends.entity.repo.BuiltInType, boolean);<no-session-id>;3771483212946079748;1577693392065199674;1577693392065832878;DESKTOP-2SU7U6M;47;2"));
-//		System.out.println(find(11, Arrays.asList(new Integer[]{1,2,4,5,10,12,14,15})));;
-		
-		String test = "TestCase test_could_detect_annotation_in_class_level success";
-		TestCase testCase = extractTestCaseFromMarkLine(test);
-		System.out.println(testCase);
-		
-	}
-	
 	public static DynamicFunctionExecutionFromKieker findCallerFunction(DynamicFunctionExecutionFromKieker called, List<DynamicFunctionExecutionFromKieker> sortedFunctions) {
 		int midIndex = sortedFunctions.size() / 2;
 		if(called.getBreadth() <= sortedFunctions.get(0).getBreadth()) {
@@ -140,39 +120,41 @@ public class DynamicUtil {
 	 * @param file
 	 * @return
 	 */
-	public static Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> readKiekerFile(File file) {
+	public static Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> readKiekerFile(File... files) {
 		Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> result = new HashMap<>();
-		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				DynamicFunctionExecutionFromKieker dynamicFunction = split(line);
-				if (dynamicFunction == null) {
-					continue;
+		for(File file : files) {
+			try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+				String line = null;
+				while ((line = reader.readLine()) != null) {
+					DynamicFunctionExecutionFromKieker dynamicFunction = split(line);
+					if (dynamicFunction == null) {
+						continue;
+					}
+					String callId = dynamicFunction.getCallId();
+					Map<Integer, List<DynamicFunctionExecutionFromKieker>> groups = result.get(callId);
+					groups = groups == null ? new HashMap<>() : groups;
+					Integer depth = dynamicFunction.getDepth();
+					List<DynamicFunctionExecutionFromKieker> functions = groups.get(depth);
+					functions = functions == null ? new ArrayList<>() : functions;
+					functions.add(dynamicFunction);
+					groups.put(depth, functions);
+					result.put(callId, groups);
 				}
-				String callId = dynamicFunction.getCallId();
-				Map<Integer, List<DynamicFunctionExecutionFromKieker>> groups = result.get(callId);
-				groups = groups == null ? new HashMap<>() : groups;
-				Integer depth = dynamicFunction.getDepth();
-				List<DynamicFunctionExecutionFromKieker> functions = groups.get(depth);
-				functions = functions == null ? new ArrayList<>() : functions;
-				functions.add(dynamicFunction);
-				groups.put(depth, functions);
-				result.put(callId, groups);
-			}
-			for(Map<Integer, List<DynamicFunctionExecutionFromKieker>> groups : result.values()) {
-				for(List<DynamicFunctionExecutionFromKieker> functions : groups.values()) {
-					functions.sort(new Comparator<DynamicFunctionExecutionFromKieker>() {
-						@Override
-						public int compare(DynamicFunctionExecutionFromKieker o1, DynamicFunctionExecutionFromKieker o2) {
-							return o1.getBreadth() - o2.getBreadth();
-						}
-					});
+				for(Map<Integer, List<DynamicFunctionExecutionFromKieker>> groups : result.values()) {
+					for(List<DynamicFunctionExecutionFromKieker> functions : groups.values()) {
+						functions.sort(new Comparator<DynamicFunctionExecutionFromKieker>() {
+							@Override
+							public int compare(DynamicFunctionExecutionFromKieker o1, DynamicFunctionExecutionFromKieker o2) {
+								return o1.getBreadth() - o2.getBreadth();
+							}
+						});
+					}
 				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		return result;
 	}

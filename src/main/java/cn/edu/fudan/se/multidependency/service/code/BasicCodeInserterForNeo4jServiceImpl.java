@@ -4,6 +4,7 @@ import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelationsImpl;
+import cn.edu.fudan.se.multidependency.utils.FileUtils;
 
 /**
  * @author fan
@@ -15,7 +16,8 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForN
 	public BasicCodeInserterForNeo4jServiceImpl(String projectPath, Language language) {
 		super();
 		this.language = language;
-		project = new Project(projectPath, projectPath, language);
+		String projectName = "/" + FileUtils.extractFileName(projectPath);
+		project = new Project(projectName, projectPath, language);
 		getNodes().setProject(project);
 		addNode(project);
 	}

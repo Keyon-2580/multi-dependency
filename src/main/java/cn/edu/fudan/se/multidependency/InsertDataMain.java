@@ -48,11 +48,15 @@ public class InsertDataMain {
 			/**
 			 * 动态分析
 			 */
-			File directory = new File("src/main/resources/dynamic/kieker");
-			File mark = new File("src/main/resources/dynamic/dynamic.mark");
+			File directory = new File("src/main/resources/dynamic/kieker/kieker-JavaAnnotationParserTest");
+			File mark = new File("src/main/resources/dynamic/kieker/kieker-JavaAnnotationParserTest/dynamic.mark");
 			List<File> kiekerFiles = new ArrayList<>();
 			FileUtils.listFiles(directory, kiekerFiles, ".dat");
-			insertDynamicCall(mark, kiekerFiles, language);
+			File[] files = new File[kiekerFiles.size()];
+			for(int i = 0; i < kiekerFiles.size(); i++) {
+				files[i] = kiekerFiles.get(i);
+			}
+			insertDynamicCall(mark, language, files);
 			///FIXME
 			//其它
 			
@@ -70,12 +74,17 @@ public class InsertDataMain {
 		return dependsInserter.getNodes();
     }
     
-    public static void insertDynamicCall(File markFile, List<File> files, Language language) throws Exception {
+    /**
+     * 添加一个测试用例类的动态分析
+     * @param markFile
+     * @param files
+     * @param language
+     * @throws Exception
+     */
+    public static void insertDynamicCall(File markFile, Language language, File... files) throws Exception {
     	DynamicInserterForNeo4jService kiekerInserter = InserterForNeo4jServiceFactory.getInstance().createDynamicInserterService(language);
     	kiekerInserter.setMarkFile(markFile);
-    	for(File file : files) {
-    		kiekerInserter.setExecuteFile(file);
-    		kiekerInserter.addNodesAndRelations();
-    	}
+    	kiekerInserter.setExecuteFile(files);
+    	kiekerInserter.addNodesAndRelations();
     }
 }

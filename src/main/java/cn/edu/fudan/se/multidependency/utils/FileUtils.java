@@ -7,7 +7,7 @@ import java.util.List;
 public class FileUtils {
 	
 	/**
-	 * 文件所在目录
+	 * 提取文件所在目录
 	 * @param filePath
 	 * @return
 	 */
@@ -21,6 +21,11 @@ public class FileUtils {
 		}
 	}
 	
+	/**
+	 * 提取路径最后一个名字
+	 * @param filePath
+	 * @return
+	 */
 	public static String extractFileName(String filePath) {
 		if(filePath.contains("\\")) {
 			return filePath.substring(filePath.lastIndexOf("\\") + 1);

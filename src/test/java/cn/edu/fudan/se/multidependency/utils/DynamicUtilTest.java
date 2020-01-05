@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.utils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.utils.DynamicUtil.DynamicFunctionExecutionFromKieker;
 
 public class DynamicUtilTest {
@@ -23,6 +25,13 @@ public class DynamicUtilTest {
 			}
 		}
 		assertEquals(19, size);
+	}
+	
+	@Test
+	public void testTestCase() {
+		String test = "TestCase success";
+		TestCase testCase = DynamicUtil.extractTestCaseFromMarkLine(test);
+		assertTrue(testCase.isSuccess());
 	}
 
 }

@@ -16,7 +16,7 @@ public abstract class DynamicInserterForNeo4jService extends ExtractorForNodesAn
 	protected Map<Long, List<Feature>> nodeEntityIdToFeatures = new HashMap<>();
 	protected Map<Long, TestCase> nodeEntityIdToTestCase = new HashMap<>();
 	
-	protected File executeFile;
+	protected File[] executeFiles;
 	protected File markFile;
 	
 	protected abstract void extractScenarioAndTestCaseAndFeatures();
@@ -33,12 +33,12 @@ public abstract class DynamicInserterForNeo4jService extends ExtractorForNodesAn
 		}
 	}
 
-	public File getExecuteFile() {
-		return executeFile;
+	public File[] getExecuteFile() {
+		return executeFiles;
 	}
 
-	public void setExecuteFile(File executeFile) {
-		this.executeFile = executeFile;
+	public void setExecuteFile(File... executeFiles) {
+		this.executeFiles = executeFiles;
 	}
 
 	public File getMarkFile() {

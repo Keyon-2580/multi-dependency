@@ -43,6 +43,8 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				file.setEntityId(entity.getId().longValue());
 				file.setFileName(FileUtils.extractFileName(filePath));
 				file.setPath(entity.getQualifiedName());
+//				String fullFilePath = entity.getQualifiedName().replace("\\", "/");
+//				file.setPath(fullFilPath.substring(beginIndex, endIndex));
 				file.setSuffix(FileUtils.extractSuffix(entity.getQualifiedName()));
 				addNodeToNodes(file, entity.getId().longValue());
 				// 文件所在目录
