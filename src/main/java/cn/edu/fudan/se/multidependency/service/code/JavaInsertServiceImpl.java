@@ -46,7 +46,14 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				addNodeToNodes(file, entity.getId().longValue());
 			} else if(entity instanceof FunctionEntity) {
 				Function function = new Function();
-				function.setFunctionName(entity.getQualifiedName());
+				String functionName = entity.getQualifiedName();
+				if(functionName.contains(".")) {
+					String[] functionNameSplit = functionName.split("\\.");
+					if(functionNameSplit.length >= 2) {
+						function.setContrustor(functionNameSplit[functionNameSplit.length - 1].equals(functionNameSplit[functionNameSplit.length - 2]));
+					}
+				}
+				function.setFunctionName(functionName);
 				function.setEntityId(entity.getId().longValue());
 				addNodeToNodes(function, entity.getId().longValue());
 			} else if(entity instanceof VarEntity) {

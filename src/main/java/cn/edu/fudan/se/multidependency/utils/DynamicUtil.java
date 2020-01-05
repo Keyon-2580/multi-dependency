@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
@@ -89,7 +90,7 @@ public class DynamicUtil {
 		
 	}
 	
-	public static DynamicFunctionFromKieker findCallerFunction(DynamicFunctionFromKieker called, List<DynamicFunctionFromKieker> sortedFunctions) {
+	public static DynamicFunctionExecutionFromKieker findCallerFunction(DynamicFunctionExecutionFromKieker called, List<DynamicFunctionExecutionFromKieker> sortedFunctions) {
 		int midIndex = sortedFunctions.size() / 2;
 		if(called.getBreadth() <= sortedFunctions.get(0).getBreadth()) {
 			return null;
@@ -139,30 +140,30 @@ public class DynamicUtil {
 	 * @param file
 	 * @return
 	 */
-	public static Map<String, Map<Integer, List<DynamicFunctionFromKieker>>> readKiekerFile(File file) {
-		Map<String, Map<Integer, List<DynamicFunctionFromKieker>>> result = new HashMap<>();
+	public static Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> readKiekerFile(File file) {
+		Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> result = new HashMap<>();
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
-				DynamicFunctionFromKieker dynamicFunction = split(line);
+				DynamicFunctionExecutionFromKieker dynamicFunction = split(line);
 				if (dynamicFunction == null) {
 					continue;
 				}
 				String callId = dynamicFunction.getCallId();
-				Map<Integer, List<DynamicFunctionFromKieker>> groups = result.get(callId);
+				Map<Integer, List<DynamicFunctionExecutionFromKieker>> groups = result.get(callId);
 				groups = groups == null ? new HashMap<>() : groups;
 				Integer depth = dynamicFunction.getDepth();
-				List<DynamicFunctionFromKieker> functions = groups.get(depth);
+				List<DynamicFunctionExecutionFromKieker> functions = groups.get(depth);
 				functions = functions == null ? new ArrayList<>() : functions;
 				functions.add(dynamicFunction);
 				groups.put(depth, functions);
 				result.put(callId, groups);
 			}
-			for(Map<Integer, List<DynamicFunctionFromKieker>> groups : result.values()) {
-				for(List<DynamicFunctionFromKieker> functions : groups.values()) {
-					functions.sort(new Comparator<DynamicFunctionFromKieker>() {
+			for(Map<Integer, List<DynamicFunctionExecutionFromKieker>> groups : result.values()) {
+				for(List<DynamicFunctionExecutionFromKieker> functions : groups.values()) {
+					functions.sort(new Comparator<DynamicFunctionExecutionFromKieker>() {
 						@Override
-						public int compare(DynamicFunctionFromKieker o1, DynamicFunctionFromKieker o2) {
+						public int compare(DynamicFunctionExecutionFromKieker o1, DynamicFunctionExecutionFromKieker o2) {
 							return o1.getBreadth() - o2.getBreadth();
 						}
 					});
@@ -176,14 +177,14 @@ public class DynamicUtil {
 		return result;
 	}
 
-	public static DynamicFunctionFromKieker split(String callSentence) {
+	public static DynamicFunctionExecutionFromKieker split(String callSentence) {
 
 		try {
 			String[] splits = callSentence.split(";");
 			if (splits.length < 10) {
 				return null;
 			}
-			DynamicFunctionFromKieker dynamicFunction = new DynamicFunctionFromKieker();
+			DynamicFunctionExecutionFromKieker dynamicFunction = new DynamicFunctionExecutionFromKieker();
 			dynamicFunction.setSentence(callSentence);
 			dynamicFunction.setCallId(splits[4]);
 			dynamicFunction.setDepth(Integer.valueOf(splits[9]));
@@ -199,9 +200,9 @@ public class DynamicUtil {
 			methodStr = methodStr.substring(0, methodStr.lastIndexOf("("));
 			String[] methodsStr = methodStr.split(" ");
 			String functionName = methodsStr[methodsStr.length - 1];
-			if (functionName.contains(DynamicFunctionFromKieker.INIT)) {
-				dynamicFunction.setReturnType(DynamicFunctionFromKieker.INIT);
-				functionName = functionName.replace("." + DynamicFunctionFromKieker.INIT, "");
+			if (functionName.contains(DynamicFunctionExecutionFromKieker.INIT)) {
+				dynamicFunction.setReturnType(DynamicFunctionExecutionFromKieker.INIT);
+				functionName = functionName.replace("." + DynamicFunctionExecutionFromKieker.INIT, "");
 				String[] temp = functionName.split("\\.");
 				functionName = functionName + "." + temp[temp.length - 1];
 				dynamicFunction.setFunctionName(functionName);
@@ -219,11 +220,11 @@ public class DynamicUtil {
 	}
 
 	/**
-	 * 从kieker文件每一行读到的方法，包括该方法在调用链的顺序和层级
+	 * 从kieker文件执行每一行读到的方法，包括该方法在调用链的顺序和层级
 	 * @author fan
 	 *
 	 */
-	public static class DynamicFunctionFromKieker {
+	public static class DynamicFunctionExecutionFromKieker {
 		String sentence;
 		String callId;
 		Integer depth;
@@ -310,4 +311,33 @@ public class DynamicUtil {
 		}
 
 	}
+	
+	/**
+	 * 对应dynamicFunction与Function
+	 * @param dynamicFunction
+	 * @param functions
+	 * @return
+	 */
+	public static Function findFunctionWithDynamic(DynamicFunctionExecutionFromKieker dynamicFunction, List<Function> functions) {
+		for(Function function : functions) {
+			if(!dynamicFunction.getFunctionName().equals(function.getFunctionName())) {
+				return null;
+			}
+			if(function.getParameters().size() != dynamicFunction.getParametersType().size()) {
+				continue;
+			}
+			boolean flag = false;
+			for(int i = 0; i < function.getParameters().size(); i++) {
+				if(dynamicFunction.getParametersType().get(i).indexOf(function.getParameters().get(i)) < 0) {
+					flag = true;
+				}
+			}
+			if(flag) {
+				continue;
+			}
+			return function;
+		}
+		return null;
+	}
+
 }

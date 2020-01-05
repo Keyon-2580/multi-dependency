@@ -148,6 +148,13 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 				case DependencyType.CALL:
 //					System.out.println("function call" + relation.getEntity().getClass() + " " + relation.getEntity());
 					if(relation.getEntity() instanceof FunctionEntity) {
+						/*if(functionEntity.getQualifiedName().contains("JavaListener.enterConstructorDeclaration")) {
+							System.out.println(functionEntity);
+							System.out.println(relation.getEntity().getQualifiedName() + " " + ((FunctionEntity) relation.getEntity()).getParameters());
+							for(VarEntity varEntity : ((FunctionEntity) relation.getEntity()).getParameters()) {
+								System.out.println(varEntity.getType());
+							}
+						}*/
 						// call其它方法
 						Function other = functions.get(relation.getEntity().getId().longValue());
 						if(other != null) {

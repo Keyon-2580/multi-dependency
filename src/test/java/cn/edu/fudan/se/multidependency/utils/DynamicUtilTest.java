@@ -8,17 +8,17 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import cn.edu.fudan.se.multidependency.utils.DynamicUtil.DynamicFunctionFromKieker;
+import cn.edu.fudan.se.multidependency.utils.DynamicUtil.DynamicFunctionExecutionFromKieker;
 
 public class DynamicUtilTest {
 
 	@Test
 	public void test() {
-		Map<String, Map<Integer, List<DynamicFunctionFromKieker>>> result = DynamicUtil.readKiekerFile(new File("src/test/resources/kieker/kieker-test.dat"));
+		Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> result = DynamicUtil.readKiekerFile(new File("src/test/resources/kieker/kieker-test.dat"));
 		assertEquals(result.size(), 1);
 		int size = 0;
-		for(Map<Integer, List<DynamicFunctionFromKieker>> groups : result.values()) {
-			for(List<DynamicFunctionFromKieker> group : groups.values()) {
+		for(Map<Integer, List<DynamicFunctionExecutionFromKieker>> groups : result.values()) {
+			for(List<DynamicFunctionExecutionFromKieker> group : groups.values()) {
 				size += group.size();
 			}
 		}

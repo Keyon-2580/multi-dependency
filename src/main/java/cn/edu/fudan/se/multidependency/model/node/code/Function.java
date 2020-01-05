@@ -30,6 +30,8 @@ public class Function implements Node {
 	private String returnTypeIdentify;
 
 	private boolean fromDynamic = false;
+	
+	private boolean contrustor;
 
 	/**
 	 * 插入时使用这个，因为用BatchInserter的时候插入这个会转成字符串插入，用SDN读取时对应不到这个List
@@ -74,6 +76,7 @@ public class Function implements Node {
 		properties.put("returnTypeIdentify", getReturnTypeIdentify() == null ? "" : getReturnTypeIdentify());
 		properties.put("parametersIdentifies", getParameters().toString().replace('[', '(').replace(']', ')'));
 		properties.put("fromDynamic", isFromDynamic());
+		properties.put("constructor", isContrustor());
 		return properties;
 	}
 	
@@ -139,6 +142,14 @@ public class Function implements Node {
 		return "Function [id=" + id + ", entityId=" + entityId + ", functionName=" + functionName
 				+ ", returnTypeIdentify=" + returnTypeIdentify + ", fromDynamic=" + fromDynamic + ", parameters="
 				+ parameters + ", parametersIdentifies=" + parametersIdentifies + "]";
+	}
+
+	public boolean isContrustor() {
+		return contrustor;
+	}
+
+	public void setContrustor(boolean contrustor) {
+		this.contrustor = contrustor;
 	}
 
 }

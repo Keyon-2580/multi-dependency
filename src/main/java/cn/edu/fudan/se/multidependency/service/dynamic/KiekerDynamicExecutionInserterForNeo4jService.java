@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,9 +22,9 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.NodeIsFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.NodeIsScenario;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.NodeIsTestCase;
 import cn.edu.fudan.se.multidependency.utils.DynamicUtil;
-import cn.edu.fudan.se.multidependency.utils.DynamicUtil.DynamicFunctionFromKieker;
+import cn.edu.fudan.se.multidependency.utils.DynamicUtil.DynamicFunctionExecutionFromKieker;
 
-public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4jService {
+public class KiekerDynamicExecutionInserterForNeo4jService extends DynamicInserterForNeo4jService {
 	
 	/**
 	 * 从文件名中提取出场景、特性、测试用例名称
@@ -65,22 +64,21 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 					if(extractTestCase == null) {
 						continue;
 					}
-					TestCase testCase = this.getNodes().findTestCaseByName(extractTestCase.getTestCaseName());
-					if(testCase == null) {
-						testCase = extractTestCase;
-						testCase.setEntityId(generateEntityId());
-						addNode(testCase);
-					}
-					if(defineNode != null) {
-						if(defineNode.getClass() == Function.class) {
-							Function function = (Function) defineNode;
-							testCase.setTestCaseName(function.getFunctionName() + function.getParameters().toString().replace('[', '(').replace(']', ')'));
-							this.nodeEntityIdToTestCase.put(defineNode.getEntityId(), testCase);
+					if(defineNode != null && defineNode.getClass() == Function.class) {
+						Function function = (Function) defineNode;
+						String testCaseName = function.getFunctionName() + function.getParameters().toString().replace('[', '(').replace(']', ')');
+						TestCase testCase = getNodes().findTestCaseByName(testCaseName);
+						if(testCase == null) {
+							testCase = extractTestCase;
+							testCase.setEntityId(generateEntityId());
+							testCase.setTestCaseName(testCaseName);
+							addNode(testCase);
 						}
-						NodeIsTestCase isScenario = new NodeIsTestCase();
-						isScenario.setNode(defineNode);
-						isScenario.setTestCase(testCase);
-						addRelation(isScenario);
+						this.nodeEntityIdToTestCase.put(defineNode.getEntityId(), testCase);
+						NodeIsTestCase isTestCase = new NodeIsTestCase();
+						isTestCase.setNode(defineNode);
+						isTestCase.setTestCase(testCase);
+						addRelation(isTestCase);
 					}
 				} else if(line.startsWith(NodeType.Feature.name())) {
 					Feature extractFeature = DynamicUtil.extractFeatureFromMarkLine(line);
@@ -109,6 +107,10 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 						String lineFunctionName = line.substring(0, line.indexOf("("));
 						String lineParameter = line.substring(line.indexOf("(") + 1, line.lastIndexOf(")"));
 						List<Function> functions = getNodes().allFunctionsByFunctionName().get(lineFunctionName);
+						if(functions == null) {
+							System.out.println(lineFunctionName);
+						}
+						functions = functions == null ? new ArrayList<>() : functions;
 						for(Function function : functions) {
 							if(StringUtils.isBlank(lineParameter)) {
 								if(function.getParameters().size() == 0) {
@@ -146,18 +148,18 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 	
 	protected void extractNodesAndRelations() throws Exception {
 		Map<String, List<Function>> functions = this.getNodes().allFunctionsByFunctionName();
-		Map<String, Map<Integer, List<DynamicFunctionFromKieker>>> allDynamicFunctionFromKiekers = DynamicUtil.readKiekerFile(executeFile);
+		Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> allDynamicFunctionFromKiekers = DynamicUtil.readKiekerFile(executeFile);
 		TestCase currentTestCase = null;
-		for(Map<Integer, List<DynamicFunctionFromKieker>> groups : allDynamicFunctionFromKiekers.values()) {
-			for(List<DynamicFunctionFromKieker> group : groups.values()) {
-				for(DynamicFunctionFromKieker calledDynamicFunction : group) {
+		for(Map<Integer, List<DynamicFunctionExecutionFromKieker>> groups : allDynamicFunctionFromKiekers.values()) {
+			for(List<DynamicFunctionExecutionFromKieker> group : groups.values()) {
+				for(DynamicFunctionExecutionFromKieker calledDynamicFunction : group) {
 					if(calledDynamicFunction.getDepth() == 0 && calledDynamicFunction.getBreadth() == 0) {
 						// 是某段程序入口
 						List<Function> calledFunctions = functions.get(calledDynamicFunction.getFunctionName());
 						if(calledFunctions == null) {
 							continue;
 						}
-						Function calledFunction = findFunctionWithDynamic(calledDynamicFunction, calledFunctions);
+						Function calledFunction = DynamicUtil.findFunctionWithDynamic(calledDynamicFunction, calledFunctions);
 						if(calledFunction == null) {
 							continue;
 						}
@@ -166,11 +168,11 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 					}
 					// 找出Kieker中调用calledDynamicFunction的方法callerDynamicFunction
 					List<Integer> list = new ArrayList<>();
-					for(DynamicFunctionFromKieker test : groups.get(calledDynamicFunction.getDepth() - 1)) {
+					for(DynamicFunctionExecutionFromKieker test : groups.get(calledDynamicFunction.getDepth() - 1)) {
 						list.add(test.getBreadth());
 					}
 //					DynamicFunctionFromKieker callerDynamicFunction = DynamicUtil.findCallerFunction(calledDynamicFunction, groups.get(calledDynamicFunction.getDepth() - 1));
-					DynamicFunctionFromKieker callerDynamicFunction = null;
+					DynamicFunctionExecutionFromKieker callerDynamicFunction = null;
 					if(DynamicUtil.find(calledDynamicFunction.getBreadth(), list) != -1) {
 						callerDynamicFunction = groups.get(calledDynamicFunction.getDepth() - 1).get(DynamicUtil.find(calledDynamicFunction.getBreadth(), list));
 					}
@@ -187,8 +189,8 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 //						System.out.println("callerDynamicFunction: " + callerDynamicFunction);
 						continue;
 					}
-					Function calledFunction = findFunctionWithDynamic(calledDynamicFunction, calledFunctions);
-					Function callerFunction = findFunctionWithDynamic(callerDynamicFunction, callerFunctions);
+					Function calledFunction = DynamicUtil.findFunctionWithDynamic(calledDynamicFunction, calledFunctions);
+					Function callerFunction = DynamicUtil.findFunctionWithDynamic(callerDynamicFunction, callerFunctions);
 					if(calledFunction == null || callerFunction == null) {
 //						System.out.println("list is not null");
 //						System.out.println("calledDynamicFunction: " + calledDynamicFunction);
@@ -207,32 +209,5 @@ public class KiekerDynamicInserterForNeo4jService extends DynamicInserterForNeo4
 		System.out.println(this.getNodes().size());
 	}
 	
-	/**
-	 * 对应dynamicFunction与Function
-	 * @param dynamicFunction
-	 * @param functions
-	 * @return
-	 */
-	private Function findFunctionWithDynamic(DynamicFunctionFromKieker dynamicFunction, List<Function> functions) {
-		for(Function function : functions) {
-			if(!dynamicFunction.getFunctionName().equals(function.getFunctionName())) {
-				return null;
-			}
-			if(function.getParameters().size() != dynamicFunction.getParametersType().size()) {
-				continue;
-			}
-			boolean flag = false;
-			for(int i = 0; i < function.getParameters().size(); i++) {
-				if(dynamicFunction.getParametersType().get(i).indexOf(function.getParameters().get(i)) < 0) {
-					flag = true;
-				}
-			}
-			if(flag) {
-				continue;
-			}
-			return function;
-		}
-		return null;
-	}
-
+	
 }

@@ -48,11 +48,11 @@ public class InsertDataMain {
 			/**
 			 * 动态分析
 			 */
-			/*File directory = new File("src/main/resources/dynamic/kieker");
+			File directory = new File("src/main/resources/dynamic/kieker");
 			File mark = new File("src/main/resources/dynamic/dynamic.mark");
 			List<File> kiekerFiles = new ArrayList<>();
 			FileUtils.listFiles(directory, kiekerFiles, ".dat");
-			insertDynamicCall(mark, kiekerFiles, language);*/
+			insertDynamicCall(mark, kiekerFiles, language);
 			///FIXME
 			//其它
 			
