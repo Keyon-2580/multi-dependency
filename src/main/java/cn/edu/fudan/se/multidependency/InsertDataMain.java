@@ -44,40 +44,35 @@ public class InsertDataMain {
 			/**
 			 * 静态分析
 			 */
+			System.out.println("静态分析");
 			insertStaticCode(yaml, entityRepo);
 			/**
 			 * 动态分析
 			 */
+			System.out.println("动态分析");
+			String[] dynamicFileSuffixes = null;
 			if(language == Language.java) {
-				File javaDynamicDirectory = new File("src/main/resources/dynamic/kieker");
-				for(File javaData : javaDynamicDirectory.listFiles()) {
-					if(javaData.isFile()) {
-						continue;
-					}
-					List<File> kiekerFiles = new ArrayList<>();
-					FileUtils.listFiles(javaData, kiekerFiles, ".dat");
-					File[] files = new File[kiekerFiles.size()];
-					for(int i = 0; i < kiekerFiles.size(); i++) {
-						files[i] = kiekerFiles.get(i);
-					}
-					List<File> markFiles = new ArrayList<>();
-					FileUtils.listFiles(javaData, markFiles, ".mark");
-					File markFile = markFiles.get(0);
-					insertDynamicCall(markFile, language, files);
-				}
+				dynamicFileSuffixes = new String[yaml.getDynamicJavaFileSuffix().size()];
+				yaml.getDynamicJavaFileSuffix().toArray(dynamicFileSuffixes);
 			} else {
-				File directory = new File("src/main/resources/dynamic/valgrind");
-				// 暂时无mark file
-				File mark = new File("src/main/resources/dynamic/kieker/kieker-JavaAnnotationParserTest/dynamic.mark");
-				List<File> kiekerFiles = new ArrayList<>();
-				FileUtils.listFiles(directory, kiekerFiles, ".dot");
-				File[] files = new File[kiekerFiles.size()];
-				for(int i = 0; i < kiekerFiles.size(); i++) {
-					files[i] = kiekerFiles.get(i);
-				}
-				insertDynamicCall(mark, language, files);
+				dynamicFileSuffixes = new String[yaml.getDynamicCppFileSuffix().size()];
+				yaml.getDynamicCppFileSuffix().toArray(dynamicFileSuffixes);
 			}
 			
+			File dynamicDirectory = new File(yaml.getDirectoryRootPath());
+			for(File javaData : dynamicDirectory.listFiles()) {
+				if(javaData.isFile()) {
+					continue;
+				}
+				List<File> dynamicFiles = new ArrayList<>();
+				FileUtils.listFiles(javaData, dynamicFiles, dynamicFileSuffixes);
+				File[] files = new File[dynamicFiles.size()];
+				dynamicFiles.toArray(files);
+				List<File> markFiles = new ArrayList<>();
+				FileUtils.listFiles(javaData, markFiles, yaml.getDynamicMarkSuffix());
+				File markFile = markFiles.get(0);
+				insertDynamicCall(markFile, language, files);
+			}
 			///FIXME
 			//其它
 			
@@ -105,7 +100,7 @@ public class InsertDataMain {
     public static void insertDynamicCall(File markFile, Language language, File... files) throws Exception {
     	DynamicInserterForNeo4jService kiekerInserter = InserterForNeo4jServiceFactory.getInstance().createDynamicInserterService(language);
     	kiekerInserter.setMarkFile(markFile);
-    	kiekerInserter.setExecuteFile(files);
+    	kiekerInserter.setDynamicFunctionCallFiles(files);
     	kiekerInserter.addNodesAndRelations();
     }
 }

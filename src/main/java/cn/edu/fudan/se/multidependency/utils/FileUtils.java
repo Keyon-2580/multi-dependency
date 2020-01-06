@@ -77,15 +77,17 @@ public class FileUtils {
 		System.out.println(files.size());
 	}
 	
-	public static void listFiles(File directory, List<File> files, String suffix) {
+	public static void listFiles(File directory, List<File> files, String... suffixes) {
 		if(directory.isFile()) {
-			if(suffix.equals(extractSuffix(directory.getPath()))) {
-				files.add(directory);
+			for(String suffix : suffixes) {
+				if(suffix.equals(extractSuffix(directory.getPath()))) {
+					files.add(directory);
+				}
 			}
 			return;
 		}
 		for(File file : directory.listFiles()) {
-			listFiles(file, files, suffix);
+			listFiles(file, files, suffixes);
 		}
 	}
 	

@@ -14,7 +14,7 @@ public class KiekerDynamicExecutionInserterForNeo4jService extends KiekerDynamic
 	
 	protected void extractNodesAndRelations() throws Exception {
 		Map<String, List<Function>> functions = this.getNodes().allFunctionsByFunctionName();
-		Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> allDynamicFunctionFromKiekers = JavaDynamicUtil.readKiekerExecutionFile(executeFiles);
+		Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> allDynamicFunctionFromKiekers = JavaDynamicUtil.readKiekerExecutionFile(dynamicFunctionCallFiles);
 		TestCase currentTestCase = null;
 		for(Map<Integer, List<DynamicFunctionExecutionFromKieker>> groups : allDynamicFunctionFromKiekers.values()) {
 			for(List<DynamicFunctionExecutionFromKieker> group : groups.values()) {
@@ -72,7 +72,6 @@ public class KiekerDynamicExecutionInserterForNeo4jService extends KiekerDynamic
 				}
 			}
 		}
-		System.out.println(this.getNodes().size());
 	}
 	
 	

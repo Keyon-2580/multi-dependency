@@ -105,7 +105,7 @@ public abstract class KiekerDynamicInserterForNeo4jService extends DynamicInsert
 						String lineParameter = line.substring(line.indexOf("(") + 1, line.lastIndexOf(")"));
 						List<Function> functions = getNodes().allFunctionsByFunctionName().get(lineFunctionName);
 						if(functions == null) {
-							System.out.println(lineFunctionName);
+							System.out.println("名为 " + lineFunctionName + " 的方法在图中没有找到！");
 						}
 						functions = functions == null ? new ArrayList<>() : functions;
 						for(Function function : functions) {

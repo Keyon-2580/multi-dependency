@@ -19,7 +19,7 @@ public class CppDynamicInserterForNeo4jService extends DynamicInserterForNeo4jSe
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
 		Map<String, List<Function>> functions = this.getNodes().allFunctionsByFunctionName();
-		for(File file : executeFiles) {
+		for(File file : dynamicFunctionCallFiles) {
 			Map<String, List<String>> result = CppDynamicUtil.extract(file);
 			for(String start : result.keySet()) {
 				List<String> ends = result.get(start);

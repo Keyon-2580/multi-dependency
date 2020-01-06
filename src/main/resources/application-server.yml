@@ -15,6 +15,12 @@ data:
       path: /home/fdse/zdh/download/hadoop-trunk
       language: java
       platform: linux
+   dynamic:
+      directory_root_path: src/main/resources/dynamic/kieker
+#      directory_root_path: src/main/resources/dynamic/valgrind
+      dynamic_java_file_suffix: [.dat]
+      dynamic_cpp_file_suffix: [.dot]
+      dynamic_mark_suffix: .mark
    neo4j:
       # batchInserter要插入的数据库
       path: /var/lib/neo4j/data/databases/multiple.dependency.db
