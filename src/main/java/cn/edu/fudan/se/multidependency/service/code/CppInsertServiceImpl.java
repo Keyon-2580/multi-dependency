@@ -103,28 +103,24 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 		this.getNodes().findTypes().forEach((entityId, type) -> {
 			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = typeEntity.getParent();
-			if(parentEntity != null) {
-				if(parentEntity instanceof FileEntity) {
-					ProjectFile file = this.getNodes().findCodeFile(parentEntity.getId().longValue());
-					if(file != null) {
-						Contain fileContainType = new Contain(file, type);
-						addRelation(fileContainType);
-					}
-				} else {
-					/*while(!(parentEntity instanceof FileEntity)) {
-						///FIXME 内部类的情况
-						if(parentEntity instanceof FunctionEntity) {
-							Function function = this.nodes.findFunction(parentEntity.getId());
-							
-						} else if(parentEntity.getClass() == TypeEntity.class) {
-							
-						}
-						parentEntity = parentEntity.getParent();
+			while(!(parentEntity instanceof FileEntity)) {
+				///FIXME 内部类的情况暂不考虑
+				/*if(parentEntity instanceof FunctionEntity) {
+						Function function = this.nodes.findFunction(parentEntity.getId());
+						
+					} else if(parentEntity.getClass() == TypeEntity.class) {
+						
 					}*/
-//					System.out.println("typeEntity's parent is other Entity " + parentEntity.getClass());
-//					System.out.println(typeEntity);
+				parentEntity = parentEntity.getParent();
+				if(parentEntity == null) {
+					System.out.println("parentEntity is null");
+					return;
 				}
 			}
+			ProjectFile file = this.getNodes().findCodeFile(parentEntity.getId().longValue());
+			type.setInFilePath(file.getPath());
+			Contain fileContainsType = new Contain(file, type);
+			addRelation(fileContainsType);
 		});
 		this.getNodes().findFunctions().forEach((entityId, function) -> {
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(entityId.intValue());
@@ -142,10 +138,12 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				// 方法在文件内还是在类内
 				if(parentEntity instanceof FileEntity) {
 					ProjectFile file = this.getNodes().findCodeFile(parentEntity.getId().longValue());
+					function.setInFilePath(file.getPath());
 					Contain fileContainsFunction = new Contain(file, function);
 					addRelation(fileContainsFunction);
 				} else if(parentEntity.getClass() == TypeEntity.class) {
 					Type type = this.getNodes().findType(parentEntity.getId().longValue());
+					function.setInFilePath(type.getInFilePath());
 					Contain typeContainsFunction = new Contain(type, function);
 					addRelation(typeContainsFunction);
 				}
@@ -167,17 +165,19 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			if(parentEntity != null) {
 				if(parentEntity instanceof FileEntity) {
 					ProjectFile file = this.getNodes().findCodeFile(parentEntity.getId().longValue());
+					variable.setInFilePath(file.getPath());
 					Contain fileContainsVariable = new Contain(file, variable);
 					addRelation(fileContainsVariable);
 				} else if(parentEntity.getClass() == TypeEntity.class) {
 					Type type = this.getNodes().findType(parentEntity.getId().longValue());
+					variable.setInFilePath(type.getInFilePath());
 					Contain typeContainsVariable = new Contain(type, variable);
 					addRelation(typeContainsVariable);
 				} else if(parentEntity instanceof FunctionEntity) {
 					Function function = this.getNodes().findFunction(parentEntity.getId().longValue());
+					variable.setInFilePath(function.getInFilePath());
 					Contain functionContainsVariable = new Contain(function, variable);
 					addRelation(functionContainsVariable);
-				} else {
 				}
 			}
 		});

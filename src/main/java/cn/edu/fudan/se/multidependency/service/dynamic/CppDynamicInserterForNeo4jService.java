@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.utils.CppDynamicUtil;
 
@@ -19,8 +18,8 @@ public class CppDynamicInserterForNeo4jService extends DynamicInserterForNeo4jSe
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
 		Map<String, List<Function>> functions = this.getNodes().allFunctionsByFunctionName();
-		for(File file : dynamicFunctionCallFiles) {
-			Map<String, List<String>> result = CppDynamicUtil.extract(file);
+		for(File dynamicFile : dynamicFunctionCallFiles) {
+			Map<String, List<String>> result = CppDynamicUtil.extractFunctionCall(dynamicFile);
 			for(String start : result.keySet()) {
 				List<String> ends = result.get(start);
 				List<Function> startFunctions = functions.get(start);
@@ -28,6 +27,11 @@ public class CppDynamicInserterForNeo4jService extends DynamicInserterForNeo4jSe
 				if(startFunctions != null && startFunctions.size() != 0) {
 					if(startFunctions.size() == 1) {
 						startFunction = startFunctions.get(0);
+					} else {
+						System.out.println("名为 " + start + " 的函数有 " + startFunctions.size() + " 个 " + startFunctions);
+						for(Function f : startFunctions) {
+							System.out.println(f.getInFilePath());
+						}
 					}
 				}
 				if(startFunction == null) {
@@ -42,6 +46,11 @@ public class CppDynamicInserterForNeo4jService extends DynamicInserterForNeo4jSe
 							dynamicCall.setFunction(startFunction);
 							dynamicCall.setCallFunction(endFunction);
 							addRelation(dynamicCall);
+						} else {
+							System.out.println("名为 " + end + " 的函数有 " + endFunctions.size() + " 个 " + endFunctions);
+							for(Function f : endFunctions) {
+								System.out.println(f.getInFilePath());
+							}
 						}
 					} else {
 						continue;

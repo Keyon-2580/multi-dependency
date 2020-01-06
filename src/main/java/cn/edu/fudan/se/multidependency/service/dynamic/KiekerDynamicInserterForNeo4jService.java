@@ -32,7 +32,7 @@ public abstract class KiekerDynamicInserterForNeo4jService extends DynamicInsert
 			String line = null;
 			Node defineNode = null;
 			while((line = reader.readLine()) != null) {
-				if("".equals(line.trim())) {
+				if(StringUtils.isBlank(line)) {
 					continue;
 				}
 				if(line.startsWith(NodeType.Scenario.name())) {

@@ -20,6 +20,8 @@ public class Type implements Node {
 	private String packageName;
 	
 	private String aliasName;
+	
+	private String inFilePath;
 
     private Long entityId;
 	private static final long serialVersionUID = 6805501035295416590L;
@@ -56,6 +58,7 @@ public class Type implements Node {
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("packageName", getPackageName() == null ? "" : getPackageName());
 		properties.put("aliasName", getAliasName() == null ? (getTypeName() == null ? "" : getTypeName()) : getAliasName());
+		properties.put("inFilePath", getInFilePath() == null ? "" : getInFilePath());
 		return properties;
 	}
 	
@@ -73,6 +76,12 @@ public class Type implements Node {
 	public String toString() {
 		return "Type [id=" + id + ", typeName=" + typeName + ", packageName=" + packageName + ", aliasName=" + aliasName
 				+ ", entityId=" + entityId + "]";
+	}
+	public String getInFilePath() {
+		return inFilePath;
+	}
+	public void setInFilePath(String inFilePath) {
+		this.inFilePath = inFilePath;
 	}
 
 }

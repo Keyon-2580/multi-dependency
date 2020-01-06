@@ -12,7 +12,6 @@ import cn.edu.fudan.se.multidependency.utils.FileUtils;
  */
 public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForNodesAndRelationsImpl {
 	
-	
 	public BasicCodeInserterForNeo4jServiceImpl(String projectPath, Language language) {
 		super();
 		this.language = language;
