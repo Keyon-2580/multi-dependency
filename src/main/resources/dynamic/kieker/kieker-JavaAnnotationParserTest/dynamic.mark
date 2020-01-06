@@ -33,9 +33,7 @@ Feature 能够检测出在方法上没有使用注解
 
 depends.extractor.java.JavaAnnotationParserTest.test_could_detect_annotation_in_miscs()
 TestCase success
-Scenario 使用depends解析检测在类上使用注解
-Scenario 使用depends解析检测在方法上使用注解
-Scenario 使用depends解析检测在属性上使用注解
+Scenario 使用depends解析检测混合场景下使用注解
 Feature 能够解析java代码
 Feature 能够正确识别注解
 Feature 能够检测出在类上使用了注解
