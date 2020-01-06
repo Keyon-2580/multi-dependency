@@ -16,17 +16,17 @@ data:
 #      path: D:\git\eclipse-workspace\test
 #      path: D:\git\multi-dependency
 #      path: C:\Users\Thinkpad\Desktop\0416\all\cassandra-3.0.0\cassandra-cassandra-3.0.0
-      path: D:\multiple-dependency-project\depends-0.9.5c
+#      path: D:\multiple-dependency-project\depends-0.9.5c
 #      path: D:\multiple-dependency-project\apache-openoffice-4.1.7-46059c9192-src
 #      path: C:\Users\fan\Downloads\hadoop-trunk
 #      path: C:\Users\fan\Downloads\cassandra-trunk\cassandra-trunk
 #      path: C:\Users\fan\Downloads\Compressed\kafka-2.4.0
-      language: java
+#      language: java
 #      path: D:\git\bcrypt-1.1
 #      path: D:\git\Sockets-2.3.9.9
 #      path: D:\git\redis-5.0.5
-#      path: D:\multiple-dependency-project\bash-5.0
-#      language: cpp
+      path: D:\multiple-dependency-project\bash-5.0
+      language: cpp
       platform: windows
    neo4j:
       # batchInserter要插入的数据库

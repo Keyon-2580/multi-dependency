@@ -29,7 +29,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 	@Override
 	protected void addNodesWithContainRelations() throws LanguageErrorException {
 		final String projectPath = project.getProjectPath();
-		entityRepo.getEntities().forEach(entity -> {
+		entityRepo.entityIterator().forEachRemaining(entity -> {
 			// 每个entity对应相应的node
 			if(entity instanceof PackageEntity) {
 				Package pck = new Package();
