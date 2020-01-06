@@ -30,6 +30,9 @@ public class JavaDynamicUtil {
 			TestCase testCase = new TestCase();
 			if(strs.length > 1) {
 				testCase.setSuccess("success".equals(strs[1]));
+				if(strs.length > 2) {
+					testCase.setInputContent(strs[2]);
+				}
 			}
 			return testCase;
 		} catch (Exception e) {
