@@ -41,7 +41,7 @@ public class InsertDataMain {
 			
 			InserterForNeo4j repository = RepositoryService.getInstance();
 			repository.setDatabasePath(yaml.getNeo4jDatabasePath());
-			repository.setDelete(true);
+			repository.setDelete(yaml.isDeleteDatabase());
 			/**
 			 * 静态分析
 			 */

@@ -49,10 +49,13 @@ public class YamlUtils {
 		boolean analyseDynamic = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("analyse");
 		result.setAnalyseBuild(analyseBuild);
 		result.setAnalyseDynamic(analyseDynamic);
+		boolean delete = (boolean) ((Map<?, ?>) yaml.get("data")).get("delete");
+		result.setDeleteDatabase(delete);
 		return result;
 	}
 	
 	public static class YamlObject {
+		private boolean deleteDatabase;
 		private String neo4jDatabasePath;
 		private String codeProjectPath;
 		private String codeLanguage;
@@ -136,6 +139,12 @@ public class YamlUtils {
 		}
 		public void setAnalyseBuild(boolean analyseBuild) {
 			this.analyseBuild = analyseBuild;
+		}
+		public boolean isDeleteDatabase() {
+			return deleteDatabase;
+		}
+		public void setDeleteDatabase(boolean deleteDatabase) {
+			this.deleteDatabase = deleteDatabase;
 		}
 		
 	}
