@@ -11,12 +11,12 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
 
 @NodeEntity
-public class Scenario implements Node {
+public class Issue implements Node {
 
-	private static final long serialVersionUID = 2260001955112320935L;
+	private static final long serialVersionUID = 4701956188777508218L;
 
-	private String scenarioName;
-	
+	private String content;
+
     @Id
     @GeneratedValue
     private Long id;
@@ -46,22 +46,21 @@ public class Scenario implements Node {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
-		properties.put("scenarioName", getScenarioName() == null ? "" : getScenarioName());
+		properties.put("content", getContent() == null ? "" : getContent());
 		return properties;
 	}
 
 	@Override
 	public NodeType getNodeType() {
-		return NodeType.Scenario;
+		return NodeType.Issue;
 	}
 
-	public String getScenarioName() {
-		return scenarioName;
+	public String getContent() {
+		return content;
 	}
 
-	public void setScenarioName(String scenarioName) {
-		this.scenarioName = scenarioName;
+	public void setContent(String content) {
+		this.content = content;
 	}
 
 }

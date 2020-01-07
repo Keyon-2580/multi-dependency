@@ -11,11 +11,16 @@ import org.apache.commons.lang3.StringUtils;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Commit;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Issue;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.CommitAddressIssue;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.CommitUpdateFile;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.NodeIsFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.NodeIsScenario;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.NodeIsTestCase;
@@ -31,8 +36,10 @@ public abstract class KiekerDynamicInserterForNeo4jService extends DynamicInsert
 		try(BufferedReader reader = new BufferedReader(new FileReader(markFile))) {
 			String line = null;
 			Node defineNode = null;
+			Issue currentIssue = null;
+			Commit currentCommit = null;
 			while((line = reader.readLine()) != null) {
-				if(StringUtils.isBlank(line)) {
+				if(StringUtils.isBlank(line) || line.startsWith("#")) {
 					continue;
 				}
 				if(line.startsWith(NodeType.Scenario.name())) {
@@ -98,6 +105,47 @@ public abstract class KiekerDynamicInserterForNeo4jService extends DynamicInsert
 						features.add(feature);
 						this.nodeEntityIdToFeatures.put(defineNode.getEntityId(), features);
 					}
+				} else if(line.startsWith(NodeType.Issue.name())) {
+					currentIssue = null;
+					Issue issue = JavaDynamicUtil.extractIssueFromMarkLine(line);
+					if(issue == null) {
+						continue;
+					}
+					issue.setEntityId(generateEntityId());
+					addNode(issue);
+					currentIssue = issue;
+				} else if(line.startsWith(NodeType.Commit.name())) {
+					currentCommit = null;
+					Commit commit = JavaDynamicUtil.extractCommitFromMarkLine(line);
+					if(commit == null) {
+						continue;
+					}
+					Commit commitInRepository = getNodes().findCommitByCommitId(commit.getCommitId());
+					if(commitInRepository == null) {
+						commitInRepository = commit;
+						commitInRepository.setEntityId(generateEntityId());
+						addNode(commitInRepository);
+					}
+					currentCommit = commitInRepository;
+					if(currentIssue != null) {
+						CommitAddressIssue commitAddressIssue = new CommitAddressIssue();
+						commitAddressIssue.setCommit(commitInRepository);
+						commitAddressIssue.setIssue(currentIssue);
+						addRelation(commitAddressIssue);
+					}
+				} else if(line.startsWith("File")) {
+					if(currentCommit == null) {
+						continue;
+					}
+					ProjectFile projectFile = JavaDynamicUtil.extractProjectFileFromMarkLine(line);
+					ProjectFile fileInRepository = this.getNodes().findCodeFileByPath(projectFile.getPath());
+					if(fileInRepository == null) {
+						continue;
+					}
+					CommitUpdateFile commitUpdateFile = new CommitUpdateFile();
+					commitUpdateFile.setCommit(currentCommit);
+					commitUpdateFile.setFile(fileInRepository);
+					addRelation(commitUpdateFile);
 				} else {
 					defineNode = null;
 					if(line.contains("(") && line.contains(")")) {

@@ -40,3 +40,13 @@ Feature 能够检测出在类上使用了注解
 Feature 能够检测出在方法上使用了注解
 Feature 能够检测出在属性上使用了注解
 
+# Issue content timestamp
+Issue bug:检测在类上使用注解出错 2020-01-06 22:03:32
+# Commit commitId timestamp message
+Commit aca8f2058d177aaa9d96aee21b4de44b3f26bbb8 2020-01-07 08:00:23 分析不同输入的输出 
+File /depends-0.9.5c/src/test/java/depends/extractor/java/JavaAnnotationParserTest.java
+Commit 1a95aef84dab5c1a7d11f28e29de6344c36cfaed 2020-01-07 08:11:32 修复解析检测在类上使用注解出错的bug
+File /depends-0.9.5c/src/main/java/depends/entity/FunctionEntity.java
+File /depends-0.9.5c/src/main/java/depends/relations/Inferer.java
+
+

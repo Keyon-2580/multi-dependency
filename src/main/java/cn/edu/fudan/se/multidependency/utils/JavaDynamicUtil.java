@@ -14,12 +14,62 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Commit;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Issue;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 
 public class JavaDynamicUtil {
+	
+	public static Issue extractIssueFromMarkLine(String line) {
+		if(!line.startsWith(NodeType.Issue.name())) {
+			return null;
+		}
+		try {
+			String[] strs = line.split(" ");
+			Issue issue = new Issue();
+			issue.setContent(strs[1]);
+			return issue;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static Commit extractCommitFromMarkLine(String line) {
+		if(!line.startsWith(NodeType.Commit.name())) {
+			return null;
+		}
+		try {
+			String[] strs = line.split(" ");
+			Commit commit = new Commit();
+			commit.setCommitId(strs[1]);
+//			String timeStr = strs[2] + " " + strs[3];
+			commit.setMessage(strs[4]);
+			return commit;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static ProjectFile extractProjectFileFromMarkLine(String line) {
+		if(!line.startsWith("File")) {
+			return null;
+		}
+		try {
+			String[] strs = line.split(" ");
+			ProjectFile file = new ProjectFile();
+			file.setPath(strs[1]);
+			return file;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 	
 	public static TestCase extractTestCaseFromMarkLine(String line) {
 		if(!line.startsWith(NodeType.TestCase.name())) {

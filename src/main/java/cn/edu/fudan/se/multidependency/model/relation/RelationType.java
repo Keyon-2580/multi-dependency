@@ -20,15 +20,18 @@ public enum RelationType implements RelationshipType {
 	VARIABLE_TYPE_PARAMETER_TYPE(RelationType.str_VARIABLE_TYPE_PARAMETER_TYPE),
 	DYNAMIC_FUNCTION_CALL_FUNCTION(RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION),
 	NODE_ANNOTATION_TYPE(RelationType.str_NODE_ANNOTATION_TYPE),
-	
+	@Deprecated
 	TESTCASE_EXECUTE_FEATURE(RelationType.str_TESTCASE_EXECUTE_FEATURE),
+	@Deprecated
 	SCENARIO_DEFINE_TESTCASE(RelationType.str_SCENARIO_DEFINE_TESTCASE),
 	NODE_IS_SCENARIO(RelationType.str_NODE_IS_SCENARIO),
 	NODE_IS_FEATURE(RelationType.str_NODE_IS_FEATURE),
 	NODE_IS_TESTCASE(RelationType.str_NODE_IS_TESTCASE),
+	COMMIT_UPDATE_FILE(RelationType.str_COMMIT_UPDATE_FILE),
+	COMMIT_ADDRESS_ISSUE(RelationType.str_COMMIT_ADDRESS_ISSUE),
 	
 	FILE_BUILD_DEPENDS_FILE(RelationType.str_FILE_BUILD_DEPENDS_FILE);
-
+	
 	/**
 	 * 结构关系
 	 */
@@ -53,13 +56,15 @@ public enum RelationType implements RelationshipType {
 	public static final String str_FUNCTION_THORW_TYPE = "FUNCTION_THORW_TYPE";
 	public static final String str_NODE_ANNOTATION_TYPE = "NODE_ANNOTATION_TYPE";
 	public static final String str_VARIABLE_TYPE_PARAMETER_TYPE = "VARIABLE_TYPE_PARAMETER_TYPE";
-	
+	@Deprecated
 	public static final String str_TESTCASE_EXECUTE_FEATURE = "TESTCASE_EXECUTE_FEATURE";
+	@Deprecated
 	public static final String str_SCENARIO_DEFINE_TESTCASE = "SCENARIO_DEFINE_TESTCASE";
-	
 	public static final String str_NODE_IS_SCENARIO = "NODE_IS_SCENARIO";
 	public static final String str_NODE_IS_FEATURE = "NODE_IS_FEATURE";
 	public static final String str_NODE_IS_TESTCASE = "NODE_IS_TESTCASE";
+	public static final String str_COMMIT_UPDATE_FILE = "COMMIT_UPDATE_FILE";
+	public static final String str_COMMIT_ADDRESS_ISSUE = "COMMIT_ADDRESS_ISSUE";
 	
 	public static final String str_FILE_BUILD_DEPENDS_FILE = "FILE_BUILD_DEPENDS_FILE";
 

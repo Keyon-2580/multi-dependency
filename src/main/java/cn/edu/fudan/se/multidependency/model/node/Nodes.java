@@ -9,6 +9,7 @@ import java.util.Map;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Commit;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
@@ -214,10 +215,25 @@ private Project project;
 		return null;
 	}
 	
-	public ProjectFile findCodeFileByPath(String projectPath) {
+	public ProjectFile findCodeFileByPath(String filePath) {
+		if(filePath == null) {
+			return null;
+		}
 		for(ProjectFile file : findFiles().values()) {
-			if(file.getPath().equals(projectPath)) {
+			if(file.getPath().equals(filePath)) {
 				return file;
+			}
+		}
+		return null;
+	}
+
+	public Commit findCommitByCommitId(String commitId) {
+		if(commitId == null) {
+			return null;
+		}
+		for(Node commit : findNodesCollection(NodeType.Commit)) {
+			if(commitId.equals(((Commit) commit).getCommitId())) {
+				return (Commit) commit;
 			}
 		}
 		return null;
