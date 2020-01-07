@@ -41,6 +41,14 @@ public class YamlUtils {
 		result.setDynamicCppFileSuffix(dynamicCppFileSuffix);
 		result.setDynamicJavaFileSuffix(dynamicJavaFileSuffix);
 		result.setDynamicMarkSuffix(dynamicMarkSuffix);
+		String buildDirectoryRootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("build")).get("directory_root_path");
+		String buildFilePath = buildDirectoryRootPath+"/"+FileUtils.extractFileName(projectPath)+".txt";
+		result.setBuildDirectoryRootPath(buildDirectoryRootPath);
+		result.setBuildFilePath(buildFilePath);
+		boolean analyseBuild = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("build")).get("analyse");
+		boolean analyseDynamic = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("analyse");
+		result.setAnalyseBuild(analyseBuild);
+		result.setAnalyseDynamic(analyseDynamic);
 		return result;
 	}
 	
@@ -53,6 +61,10 @@ public class YamlUtils {
 		private List<String> dynamicJavaFileSuffix;
 		private List<String> dynamicCppFileSuffix;
 		private String dynamicMarkSuffix;
+		private String buildDirectoryRootPath;
+		private String buildFilePath;
+		private boolean analyseDynamic;
+		private boolean analyseBuild;
 		public String getNeo4jDatabasePath() {
 			return neo4jDatabasePath;
 		}
@@ -100,6 +112,30 @@ public class YamlUtils {
 		}
 		public void setDynamicMarkSuffix(String dynamic_mark_suffix) {
 			this.dynamicMarkSuffix = dynamic_mark_suffix;
+		}
+		public String getBuildDirectoryRootPath() {
+			return buildDirectoryRootPath;
+		}
+		public void setBuildDirectoryRootPath(String buildDirectoryRootPath) {
+			this.buildDirectoryRootPath = buildDirectoryRootPath;
+		}
+		public String getBuildFilePath() {
+			return buildFilePath;
+		}
+		public void setBuildFilePath(String buildFilePath) {
+			this.buildFilePath = buildFilePath;
+		}
+		public boolean isAnalyseDynamic() {
+			return analyseDynamic;
+		}
+		public void setAnalyseDynamic(boolean analyseDynamic) {
+			this.analyseDynamic = analyseDynamic;
+		}
+		public boolean isAnalyseBuild() {
+			return analyseBuild;
+		}
+		public void setAnalyseBuild(boolean analyseBuild) {
+			this.analyseBuild = analyseBuild;
 		}
 		
 	}

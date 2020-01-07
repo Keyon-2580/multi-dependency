@@ -376,7 +376,7 @@ public class JavaDynamicUtil {
 	 * @author fan
 	 *
 	 */
-	public static class DynamicFunctionExecutionFromKieker {
+	public static class DynamicFunctionExecutionFromKieker { //读取到的方法，所具有的属性
 		String sentence;
 		String callId;
 		Integer depth;
