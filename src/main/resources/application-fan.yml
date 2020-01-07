@@ -25,15 +25,15 @@ data:
 #      path: D:\git\bcrypt-1.1
 #      path: D:\git\Sockets-2.3.9.9
 #      path: D:\git\redis-5.0.5
-      path: D:\multiple-dependency-project\Sockets-2.3.9.9
-#      path: D:\multiple-dependency-project\bash-5.0
+#      path: D:\multiple-dependency-project\Sockets-2.3.9.9
+      path: D:\multiple-dependency-project\bash-5.0
       language: cpp
       platform: windows
    dynamic:
 #      directory_root_path: src/main/resources/dynamic/kieker
       directory_root_path: src/main/resources/dynamic/valgrind
       dynamic_java_file_suffix: [.dat]
-      dynamic_cpp_file_suffix: [.dot]
+      dynamic_cpp_file_suffix: [.dot, .out]
       dynamic_mark_suffix: .mark
    neo4j:
       # batchInserter要插入的数据库

@@ -50,6 +50,30 @@ public class CppDynamicUtil {
 		extractFunctionCall(new File("D:\\multiple-dependency-project\\bash-w.dot"));
 	}
 	
+	public static List<String> extractFile(File callgrindFile, String projectPath) {
+		List<String> result = new ArrayList<>();
+		try(BufferedReader reader = new BufferedReader(new FileReader(callgrindFile))) {
+			String line = null;
+			while((line = reader.readLine()) != null) {
+				if(line.startsWith(CallGrindIdentify.fi.name()) || line.startsWith(CallGrindIdentify.cfi.name()) || line.startsWith(CallGrindIdentify.fl.name())) {
+					String[] splits = line.split(" ");
+					if(splits.length < 2) {
+						continue;
+					}
+					String filePath = splits[1];
+					if(filePath.lastIndexOf(projectPath + "/") >= 0) {
+						result.add(filePath);
+					}
+				}
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 	public static void test(File callgrindFile) {
 		Map<Integer, CallGrind> idToCallGrind = new HashMap<>();
 		Map<Integer, List<CallGrind>> fileHasFn = new HashMap<>();
