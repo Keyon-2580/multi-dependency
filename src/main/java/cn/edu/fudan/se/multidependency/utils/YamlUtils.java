@@ -45,6 +45,10 @@ public class YamlUtils {
 		String buildFilePath = buildDirectoryRootPath+"/"+FileUtils.extractFileName(projectPath)+".txt";
 		result.setBuildDirectoryRootPath(buildDirectoryRootPath);
 		result.setBuildFilePath(buildFilePath);
+		boolean analyseBuild = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("build")).get("analyse");
+		boolean analyseDynamic = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("analyse");
+		result.setAnalyseBuild(analyseBuild);
+		result.setAnalyseDynamic(analyseDynamic);
 		return result;
 	}
 	
@@ -59,6 +63,8 @@ public class YamlUtils {
 		private String dynamicMarkSuffix;
 		private String buildDirectoryRootPath;
 		private String buildFilePath;
+		private boolean analyseDynamic;
+		private boolean analyseBuild;
 		public String getNeo4jDatabasePath() {
 			return neo4jDatabasePath;
 		}
@@ -118,6 +124,18 @@ public class YamlUtils {
 		}
 		public void setBuildFilePath(String buildFilePath) {
 			this.buildFilePath = buildFilePath;
+		}
+		public boolean isAnalyseDynamic() {
+			return analyseDynamic;
+		}
+		public void setAnalyseDynamic(boolean analyseDynamic) {
+			this.analyseDynamic = analyseDynamic;
+		}
+		public boolean isAnalyseBuild() {
+			return analyseBuild;
+		}
+		public void setAnalyseBuild(boolean analyseBuild) {
+			this.analyseBuild = analyseBuild;
 		}
 		
 	}

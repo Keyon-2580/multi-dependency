@@ -50,37 +50,18 @@ public class InsertDataMain {
 			/**
 			 * 动态分析
 			 */
-			System.out.println("动态分析");
-			String[] dynamicFileSuffixes = null;
-			if(language == Language.java) {
-				dynamicFileSuffixes = new String[yaml.getDynamicJavaFileSuffix().size()];
-				yaml.getDynamicJavaFileSuffix().toArray(dynamicFileSuffixes); //后缀为.dat
-			} else {
-				dynamicFileSuffixes = new String[yaml.getDynamicCppFileSuffix().size()];
-				yaml.getDynamicCppFileSuffix().toArray(dynamicFileSuffixes);
-			}
-			
-			File dynamicDirectory = new File(yaml.getDirectoryRootPath());
-			for(File javaData : dynamicDirectory.listFiles()) {
-				//并非批量插入动态分析的数据，而是挨个测试用例插入的
-				if(javaData.isFile()) {
-					continue;
-				}
-				List<File> dynamicFiles = new ArrayList<>();
-				FileUtils.listFiles(javaData, dynamicFiles, dynamicFileSuffixes);
-				File[] files = new File[dynamicFiles.size()];
-				dynamicFiles.toArray(files);
-				List<File> markFiles = new ArrayList<>();
-				FileUtils.listFiles(javaData, markFiles, yaml.getDynamicMarkSuffix());
-				File markFile = markFiles.get(0);
-				insertDynamicCall(markFile, language, files); //markFile表示后缀名为.mark的，files表示后缀名为.dat的，一个.mark可能对应多个.dat文件
+			if(yaml.isAnalyseDynamic()) {
+				System.out.println("动态分析");
+				insertDynamic(yaml);
 			}
 			/**
 			 * 构建分析
 			 */
-			System.out.println("构建分析");
-			if(language == Language.cpp) {
-				insertBuildInfo(yaml);
+			if(yaml.isAnalyseBuild()) {
+				System.out.println("构建分析");
+				if(language == Language.cpp) {
+					insertBuildInfo(yaml);
+				}
 			}
 			
 			///FIXME
@@ -112,6 +93,34 @@ public class InsertDataMain {
     	kiekerInserter.setMarkFile(markFile);
     	kiekerInserter.setDynamicFunctionCallFiles(files);
     	kiekerInserter.addNodesAndRelations();
+    }
+    
+    public static void insertDynamic(YamlUtils.YamlObject yaml) throws Exception {
+    	String[] dynamicFileSuffixes = null;
+    	Language language = Language.valueOf(yaml.getCodeLanguage());
+		if(language == Language.java) {
+			dynamicFileSuffixes = new String[yaml.getDynamicJavaFileSuffix().size()];
+			yaml.getDynamicJavaFileSuffix().toArray(dynamicFileSuffixes); //后缀为.dat
+		} else {
+			dynamicFileSuffixes = new String[yaml.getDynamicCppFileSuffix().size()];
+			yaml.getDynamicCppFileSuffix().toArray(dynamicFileSuffixes);
+		}
+		
+		File dynamicDirectory = new File(yaml.getDirectoryRootPath());
+		for(File javaData : dynamicDirectory.listFiles()) {
+			//并非批量插入动态分析的数据，而是挨个测试用例插入的
+			if(javaData.isFile()) {
+				continue;
+			}
+			List<File> dynamicFiles = new ArrayList<>();
+			FileUtils.listFiles(javaData, dynamicFiles, dynamicFileSuffixes);
+			File[] files = new File[dynamicFiles.size()];
+			dynamicFiles.toArray(files);
+			List<File> markFiles = new ArrayList<>();
+			FileUtils.listFiles(javaData, markFiles, yaml.getDynamicMarkSuffix());
+			File markFile = markFiles.get(0);
+			insertDynamicCall(markFile, language, files); //markFile表示后缀名为.mark的，files表示后缀名为.dat的，一个.mark可能对应多个.dat文件
+		}
     }
     
     public static void insertBuildInfo(YamlUtils.YamlObject yaml) throws Exception {
