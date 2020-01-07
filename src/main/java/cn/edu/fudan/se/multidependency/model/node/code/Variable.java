@@ -21,6 +21,8 @@ public class Variable implements Node {
 	
 	private String typeIdentify;
 	
+	private String inFilePath;
+	
     @Id
     @GeneratedValue
     private Long id;
@@ -41,6 +43,7 @@ public class Variable implements Node {
 		properties.put("variableName", getVariableName() == null ? "" : getVariableName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("typeIdentify", getTypeIdentify() == null ? "" : getTypeIdentify());
+		properties.put("inFilePath", getInFilePath() == null ? "" : getInFilePath());
 		return properties;
 	}
 
@@ -71,5 +74,13 @@ public class Variable implements Node {
 
 	public void setTypeIdentify(String typeIdentify) {
 		this.typeIdentify = typeIdentify;
+	}
+
+	public String getInFilePath() {
+		return inFilePath;
+	}
+
+	public void setInFilePath(String inFilePath) {
+		this.inFilePath = inFilePath;
 	}
 }

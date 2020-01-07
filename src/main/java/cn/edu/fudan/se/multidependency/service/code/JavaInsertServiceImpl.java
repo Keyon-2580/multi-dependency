@@ -122,6 +122,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				parentEntity = parentEntity.getParent();
 			}
 			ProjectFile file = this.getNodes().findCodeFile(parentEntity.getId().longValue());
+			type.setInFilePath(file.getPath());
 			Contain fileContainsType = new Contain(file, type);
 			addRelation(fileContainsType);
 		});
@@ -134,6 +135,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				parentEntity = parentEntity.getParent();
 			}
 			Type type = this.getNodes().findType(parentEntity.getId().longValue());
+			function.setInFilePath(type.getInFilePath());
 			Contain typeContainsFunction = new Contain(type, function);
 			addRelation(typeContainsFunction);
 			for(VarEntity varEntity : functionEntity.getParameters()) {
@@ -153,10 +155,12 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			Entity parentEntity = varEntity.getParent();
 			if(parentEntity instanceof FunctionEntity) {
 				Function function = this.getNodes().findFunction(parentEntity.getId().longValue());
+				variable.setInFilePath(function.getInFilePath());
 				Contain functionContainsVariable = new Contain(function, variable);
 				addRelation(functionContainsVariable);
 			} else if(parentEntity.getClass() == TypeEntity.class) {
 				Type type = this.getNodes().findType(parentEntity.getId().longValue());
+				variable.setInFilePath(type.getInFilePath());
 				Contain typeContainsVariable = new Contain(type, variable);
 				addRelation(typeContainsVariable);
 			} else {

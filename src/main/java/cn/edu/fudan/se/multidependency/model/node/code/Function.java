@@ -32,6 +32,8 @@ public class Function implements Node {
 	private boolean fromDynamic = false;
 	
 	private boolean contrustor;
+	
+	private String inFilePath;
 
 	/**
 	 * 插入时使用这个，因为用BatchInserter的时候插入这个会转成字符串插入，用SDN读取时对应不到这个List
@@ -77,6 +79,7 @@ public class Function implements Node {
 		properties.put("parametersIdentifies", getParameters().toString().replace('[', '(').replace(']', ')'));
 		properties.put("fromDynamic", isFromDynamic());
 		properties.put("constructor", isContrustor());
+		properties.put("inFilePath", getInFilePath() == null ? "" : getInFilePath());
 		return properties;
 	}
 	
@@ -137,19 +140,28 @@ public class Function implements Node {
 		this.fromDynamic = fromDynamic;
 	}
 
-	@Override
-	public String toString() {
-		return "Function [id=" + id + ", entityId=" + entityId + ", functionName=" + functionName
-				+ ", returnTypeIdentify=" + returnTypeIdentify + ", fromDynamic=" + fromDynamic + ", parameters="
-				+ parameters + ", parametersIdentifies=" + parametersIdentifies + "]";
-	}
-
 	public boolean isContrustor() {
 		return contrustor;
 	}
 
 	public void setContrustor(boolean contrustor) {
 		this.contrustor = contrustor;
+	}
+
+	public String getInFilePath() {
+		return inFilePath;
+	}
+
+	public void setInFilePath(String inFilePath) {
+		this.inFilePath = inFilePath;
+	}
+
+	@Override
+	public String toString() {
+		return "Function [id=" + id + ", entityId=" + entityId + ", functionName=" + functionName
+				+ ", returnTypeIdentify=" + returnTypeIdentify + ", fromDynamic=" + fromDynamic + ", contrustor="
+				+ contrustor + ", inFilePath=" + inFilePath + ", parameters=" + parameters + ", parametersIdentifies="
+				+ parametersIdentifies + "]";
 	}
 
 }

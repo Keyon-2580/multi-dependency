@@ -15,10 +15,10 @@ import java.util.regex.Pattern;
 
 public class CppDynamicUtil {
 	
-	static final String regex = "([^-]+)->([^\\[]+).*";
-	static final Pattern pattern = Pattern.compile(regex);
+	public static final String REGEX_DOT = "([^-]+)->([^\\[]+).*";
+	public static final Pattern PATTERN_DOT = Pattern.compile(REGEX_DOT);
 	
-	public static Map<String, List<String>> extract(File dotFile) {
+	public static Map<String, List<String>> extractFunctionCall(File dotFile) {
 		Map<String, List<String>> functionCallFunctions = new HashMap<>();
 		try(BufferedReader reader = new BufferedReader(new FileReader(dotFile))) {
 			String line = null;
@@ -26,7 +26,7 @@ public class CppDynamicUtil {
 				if(!line.contains("->")) {
 					continue;
 				}
-				Matcher matcher = pattern.matcher(line);
+				Matcher matcher = PATTERN_DOT.matcher(line);
 				if(matcher.find()) {
 					String start = matcher.group(1).trim().replace("\"", "");
 					String end = matcher.group(2).trim().replace("\"", "");
@@ -47,7 +47,31 @@ public class CppDynamicUtil {
 	
 	public static void main(String[] args) {
 //		test(new File("D:\\multiple-dependency-project\\callgrind.out.bash"));
-		extract(new File("D:\\multiple-dependency-project\\bash-w.dot"));
+		extractFunctionCall(new File("D:\\multiple-dependency-project\\bash-w.dot"));
+	}
+	
+	public static List<String> extractFile(File callgrindFile, String projectPath) {
+		List<String> result = new ArrayList<>();
+		try(BufferedReader reader = new BufferedReader(new FileReader(callgrindFile))) {
+			String line = null;
+			while((line = reader.readLine()) != null) {
+				if(line.startsWith(CallGrindIdentify.fi.name()) || line.startsWith(CallGrindIdentify.cfi.name()) || line.startsWith(CallGrindIdentify.fl.name())) {
+					String[] splits = line.split(" ");
+					if(splits.length < 2) {
+						continue;
+					}
+					String filePath = splits[1];
+					if(filePath.lastIndexOf(projectPath + "/") >= 0) {
+						result.add(filePath);
+					}
+				}
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 	
 	public static void test(File callgrindFile) {

@@ -17,6 +17,8 @@ public class TestCase implements Node {
 	
 	private String testCaseName;
 	
+	private String inputContent;
+	
 	private boolean success;
 
     @Id
@@ -51,6 +53,7 @@ public class TestCase implements Node {
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("testCaseName", getTestCaseName() == null ? "" : getTestCaseName());
 		properties.put("success", isSuccess());
+		properties.put("inputContent", getInputContent() == null ? "" : getInputContent());
 		return properties;
 	}
 
@@ -79,6 +82,14 @@ public class TestCase implements Node {
 	public String toString() {
 		return "TestCase [testCaseName=" + testCaseName + ", success=" + success + ", id=" + id + ", entityId="
 				+ entityId + "]";
+	}
+
+	public String getInputContent() {
+		return inputContent;
+	}
+
+	public void setInputContent(String inputContent) {
+		this.inputContent = inputContent;
 	}
 
 }
