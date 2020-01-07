@@ -30,7 +30,7 @@ public class BatchInserterServiceTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		try(BatchInserterService inserter = BatchInserterService.getInstance();){
+		/*try(BatchInserterService inserter = BatchInserterService.getInstance();){
 			inserter.init(yaml.getNeo4jDatabasePath(), true);
 			
 			Package pck = new Package();
@@ -75,7 +75,7 @@ public class BatchInserterServiceTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
-		}
+		}*/
 		
 	}
 

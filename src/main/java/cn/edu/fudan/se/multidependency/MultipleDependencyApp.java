@@ -9,7 +9,7 @@ import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 public class MultipleDependencyApp {
 	
 	public static void main(String[] args) {
-//		InsertDataMain.insert(args);
+		InsertDataMain.insert(args);
 		SpringApplication.run(MultipleDependencyApp.class, args);
 	}
 	
