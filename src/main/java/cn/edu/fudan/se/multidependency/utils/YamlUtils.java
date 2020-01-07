@@ -41,6 +41,10 @@ public class YamlUtils {
 		result.setDynamicCppFileSuffix(dynamicCppFileSuffix);
 		result.setDynamicJavaFileSuffix(dynamicJavaFileSuffix);
 		result.setDynamicMarkSuffix(dynamicMarkSuffix);
+		String buildDirectoryRootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("build")).get("directory_root_path");
+		String buildFilePath = buildDirectoryRootPath+"/"+FileUtils.extractFileName(projectPath)+".txt";
+		result.setBuildDirectoryRootPath(buildDirectoryRootPath);
+		result.setBuildFilePath(buildFilePath);
 		return result;
 	}
 	
@@ -53,6 +57,8 @@ public class YamlUtils {
 		private List<String> dynamicJavaFileSuffix;
 		private List<String> dynamicCppFileSuffix;
 		private String dynamicMarkSuffix;
+		private String buildDirectoryRootPath;
+		private String buildFilePath;
 		public String getNeo4jDatabasePath() {
 			return neo4jDatabasePath;
 		}
@@ -100,6 +106,18 @@ public class YamlUtils {
 		}
 		public void setDynamicMarkSuffix(String dynamic_mark_suffix) {
 			this.dynamicMarkSuffix = dynamic_mark_suffix;
+		}
+		public String getBuildDirectoryRootPath() {
+			return buildDirectoryRootPath;
+		}
+		public void setBuildDirectoryRootPath(String buildDirectoryRootPath) {
+			this.buildDirectoryRootPath = buildDirectoryRootPath;
+		}
+		public String getBuildFilePath() {
+			return buildFilePath;
+		}
+		public void setBuildFilePath(String buildFilePath) {
+			this.buildFilePath = buildFilePath;
 		}
 		
 	}

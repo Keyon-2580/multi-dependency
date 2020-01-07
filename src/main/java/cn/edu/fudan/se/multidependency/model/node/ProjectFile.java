@@ -27,7 +27,14 @@ public class ProjectFile implements Node {
 	public ProjectFile() {
 		super();
 	}
-
+	
+	public ProjectFile(String fileName, String path, String suffix) {
+		super();
+		this.fileName = fileName;
+		this.path = path;
+		this.suffix = suffix;
+	}
+	
 	public String getFileName() {
 		return fileName;
 	}

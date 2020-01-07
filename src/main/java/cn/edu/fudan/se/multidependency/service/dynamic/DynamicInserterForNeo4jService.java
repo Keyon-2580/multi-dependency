@@ -26,8 +26,8 @@ public abstract class DynamicInserterForNeo4jService extends ExtractorForNodesAn
 	@Override
 	public void addNodesAndRelations() {
 		try {
-			extractScenarioAndTestCaseAndFeatures();
-			extractNodesAndRelations();
+			extractScenarioAndTestCaseAndFeatures(); //分析.mark文件
+			extractNodesAndRelations(); //分析.dat文件或
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

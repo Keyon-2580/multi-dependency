@@ -7,7 +7,7 @@ import cn.edu.fudan.se.multidependency.model.relation.Relations;
 
 public abstract class ExtractorForNodesAndRelationsImpl implements ExtractorForNodesAndRelations {
 	
-	protected InserterForNeo4j repository = RepositoryService.getInstance();
+	protected InserterForNeo4j repository = RepositoryService.getInstance(); //都会存在这里面
 	
 	protected Long generateEntityId() {
 		return repository.generateEntityId();
@@ -30,7 +30,7 @@ public abstract class ExtractorForNodesAndRelationsImpl implements ExtractorForN
 	
 	@Override
 	public Nodes getNodes() {
-		return repository.getNodes();
+		return repository.getNodes(); //通过这个，获取所有节点
 	}
 
 	@Override
