@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.service.code;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelations;
+import cn.edu.fudan.se.multidependency.service.build.BuildInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.service.dynamic.CppDynamicInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.service.dynamic.DynamicInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.service.dynamic.KiekerDynamicExecutionInserterForNeo4jService;
@@ -40,5 +41,9 @@ public class InserterForNeo4jServiceFactory {
 			return new CppDynamicInserterForNeo4jService();
 		}
 		throw new Exception("程序语言不为java或c/c++，提取失败");
+	}
+	
+	public BuildInserterForNeo4jService createBuildInserterService(Language language) {
+		return new BuildInserterForNeo4jService();
 	}
 }

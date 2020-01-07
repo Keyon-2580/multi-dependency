@@ -214,5 +214,13 @@ private Project project;
 		return null;
 	}
 	
-	
+	public ProjectFile findCodeFileByPath(String projectPath) {
+		for(ProjectFile file : findFiles().values()) {
+			if(file.getPath().equals(projectPath)) {
+				return file;
+			}
+		}
+		return null;
+	}
+
 }

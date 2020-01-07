@@ -25,7 +25,9 @@ public enum RelationType implements RelationshipType {
 	SCENARIO_DEFINE_TESTCASE(RelationType.str_SCENARIO_DEFINE_TESTCASE),
 	NODE_IS_SCENARIO(RelationType.str_NODE_IS_SCENARIO),
 	NODE_IS_FEATURE(RelationType.str_NODE_IS_FEATURE),
-	NODE_IS_TESTCASE(RelationType.str_NODE_IS_TESTCASE);
+	NODE_IS_TESTCASE(RelationType.str_NODE_IS_TESTCASE),
+	
+	FILE_BUILD_DEPENDS_FILE(RelationType.str_FILE_BUILD_DEPENDS_FILE);
 
 	/**
 	 * 结构关系
@@ -58,6 +60,8 @@ public enum RelationType implements RelationshipType {
 	public static final String str_NODE_IS_SCENARIO = "NODE_IS_SCENARIO";
 	public static final String str_NODE_IS_FEATURE = "NODE_IS_FEATURE";
 	public static final String str_NODE_IS_TESTCASE = "NODE_IS_TESTCASE";
+	
+	public static final String str_FILE_BUILD_DEPENDS_FILE = "FILE_BUILD_DEPENDS_FILE";
 
 	private String name;
 

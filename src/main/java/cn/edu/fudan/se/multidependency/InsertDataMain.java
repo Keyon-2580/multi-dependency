@@ -9,6 +9,7 @@ import cn.edu.fudan.se.multidependency.model.node.Nodes;
 import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelations;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
 import cn.edu.fudan.se.multidependency.service.RepositoryService;
+import cn.edu.fudan.se.multidependency.service.build.BuildInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractorImpl;
 import cn.edu.fudan.se.multidependency.service.code.InserterForNeo4jServiceFactory;
@@ -53,7 +54,7 @@ public class InsertDataMain {
 			String[] dynamicFileSuffixes = null;
 			if(language == Language.java) {
 				dynamicFileSuffixes = new String[yaml.getDynamicJavaFileSuffix().size()];
-				yaml.getDynamicJavaFileSuffix().toArray(dynamicFileSuffixes);
+				yaml.getDynamicJavaFileSuffix().toArray(dynamicFileSuffixes); //后缀为.dat
 			} else {
 				dynamicFileSuffixes = new String[yaml.getDynamicCppFileSuffix().size()];
 				yaml.getDynamicCppFileSuffix().toArray(dynamicFileSuffixes);
@@ -61,6 +62,7 @@ public class InsertDataMain {
 			
 			File dynamicDirectory = new File(yaml.getDirectoryRootPath());
 			for(File javaData : dynamicDirectory.listFiles()) {
+				//并非批量插入动态分析的数据，而是挨个测试用例插入的
 				if(javaData.isFile()) {
 					continue;
 				}
@@ -71,8 +73,16 @@ public class InsertDataMain {
 				List<File> markFiles = new ArrayList<>();
 				FileUtils.listFiles(javaData, markFiles, yaml.getDynamicMarkSuffix());
 				File markFile = markFiles.get(0);
-				insertDynamicCall(markFile, language, files);
+				insertDynamicCall(markFile, language, files); //markFile表示后缀名为.mark的，files表示后缀名为.dat的，一个.mark可能对应多个.dat文件
 			}
+			/**
+			 * 构建分析
+			 */
+			System.out.println("构建分析");
+			if(language == Language.cpp) {
+				insertBuildInfo(yaml);
+			}
+			
 			///FIXME
 			//其它
 			
@@ -98,9 +108,16 @@ public class InsertDataMain {
      * @throws Exception
      */
     public static void insertDynamicCall(File markFile, Language language, File... files) throws Exception {
-    	DynamicInserterForNeo4jService kiekerInserter = InserterForNeo4jServiceFactory.getInstance().createDynamicInserterService(language);
+    	DynamicInserterForNeo4jService kiekerInserter = InserterForNeo4jServiceFactory.getInstance().createDynamicInserterService(language);//根据语言确定服务
     	kiekerInserter.setMarkFile(markFile);
     	kiekerInserter.setDynamicFunctionCallFiles(files);
     	kiekerInserter.addNodesAndRelations();
+    }
+    
+    public static void insertBuildInfo(YamlUtils.YamlObject yaml) throws Exception {
+    	BuildInserterForNeo4jService buildInserter = InserterForNeo4jServiceFactory.getInstance().createBuildInserterService(Language.valueOf(yaml.getCodeLanguage()) );
+    	File buildInfoFile = new File(yaml.getBuildFilePath());
+    	buildInserter.setBuildInfoFile(buildInfoFile);
+    	buildInserter.addNodesAndRelations();
     }
 }
