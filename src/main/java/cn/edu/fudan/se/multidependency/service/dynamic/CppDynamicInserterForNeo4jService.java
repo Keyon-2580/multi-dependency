@@ -13,8 +13,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
@@ -102,40 +102,29 @@ public class CppDynamicInserterForNeo4jService extends DynamicInserterForNeo4jSe
 					}
 				} else {
 					defineNode = null;
-					if(line.contains("(") && line.contains(")")) {
-						String lineFunctionName = line.substring(0, line.indexOf("("));
-						String lineParameter = line.substring(line.indexOf("(") + 1, line.lastIndexOf(")"));
+					String[] splits = line.split(" ");
+					if(splits.length == 1) {
+						for(ProjectFile file : getNodes().findFiles().values()) {
+							if(line.equals(file.getPath())) {
+								defineNode = file;
+								break;
+							}
+						}
+					} else if(splits.length == 2) {
+						String lineFunctionName = splits[0];
+						String projectFile = splits[1];
 						List<Function> functions = getNodes().allFunctionsByFunctionName().get(lineFunctionName);
 						if(functions == null) {
 							System.out.println("名为 " + lineFunctionName + " 的方法在图中没有找到！");
 						}
 						functions = functions == null ? new ArrayList<>() : functions;
 						for(Function function : functions) {
-							if(StringUtils.isBlank(lineParameter)) {
-								if(function.getParameters().size() == 0) {
-									defineNode = function;
-								}
-							} else {
-								String[] lineParameters = line.substring(line.indexOf("("), line.lastIndexOf(")")).split(",");
-								if(lineParameters.length != function.getParameters().size()) {
-									continue;
-								}
-								for(int i = 0; i < lineParameters.length; i++) {
-									if(function.getParameters().get(i).lastIndexOf(lineParameters[i]) < 0) {
-										continue;
-									}
-								}
+							if(function.getInFilePath().equals(projectFile)) {
 								defineNode = function;
-							}
-						}
-					} else {
-						for(Type type : getNodes().findTypes().values()) {
-							if(line.equals(type.getTypeName())) {
-								defineNode = type;
 								break;
 							}
 						}
-					}
+					} 
 				}
 			}
 		} catch (FileNotFoundException e) {
