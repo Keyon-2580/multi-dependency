@@ -33,7 +33,7 @@ public abstract class KiekerDynamicInserterForNeo4jService extends DynamicInsert
 	 */
 	@Override
 	protected void extractScenarioAndTestCaseAndFeatures() {
-		try(BufferedReader reader = new BufferedReader(new FileReader(markFile))) {
+		/*try(BufferedReader reader = new BufferedReader(new FileReader(markFile))) {
 			String line = null;
 			Node defineNode = null;
 			Issue currentIssue = null;
@@ -188,7 +188,7 @@ public abstract class KiekerDynamicInserterForNeo4jService extends DynamicInsert
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	@Override

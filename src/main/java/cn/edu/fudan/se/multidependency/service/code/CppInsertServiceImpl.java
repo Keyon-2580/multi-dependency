@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.service.code;
 
 import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
+import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
@@ -28,17 +29,17 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 
 	@Override
 	protected void addNodesWithContainRelations() throws LanguageErrorException {
-		final String projectPath = project.getProjectPath();
+		final String projectPath = currentProject.getProjectPath();
 		entityRepo.entityIterator().forEachRemaining(entity -> {
 			// 每个entity对应相应的node
-			if(entity instanceof PackageEntity) {
+			if (entity instanceof PackageEntity) {
 				System.out.println("----------------------------------------------------");
 				System.out.println("cpp insertNodesWithContainRelations packageEntity");
 				Namespace namespace = new Namespace();
 				namespace.setNamespaceName(entity.getQualifiedName());
 				namespace.setEntityId(entity.getId().longValue());
-				addNodeToNodes(namespace, entity.getId().longValue());
-			} else if(entity instanceof FileEntity) {
+				addNodeToNodes(namespace, entity.getId().longValue(), currentProject);
+			} else if (entity instanceof FileEntity) {
 				ProjectFile file = new ProjectFile();
 				file.setEntityId(entity.getId().longValue());
 				String filePath = entity.getQualifiedName();
@@ -47,111 +48,120 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				filePath = filePath.substring(filePath.indexOf(projectPath + "/"));
 				file.setPath(filePath);
 				file.setSuffix(FileUtils.extractSuffix(entity.getQualifiedName()));
-				addNodeToNodes(file, entity.getId().longValue());
+				addNodeToNodes(file, entity.getId().longValue(), currentProject);
 				// 文件所在目录
 				String directoryPath = FileUtils.extractDirectoryFromFile(entity.getQualifiedName()) + "/";
 				directoryPath = directoryPath.replace("\\", "/");
 				directoryPath = directoryPath.substring(directoryPath.indexOf(projectPath + "/"));
-				Package pck = this.getNodes().findPackageByPackageName(directoryPath);
-				if(pck == null) {
+				Package pck = this.getNodes().findPackageByPackageName(directoryPath, currentProject);
+				if (pck == null) {
 					pck = new Package();
 					pck.setEntityId(entityRepo.generateId().longValue());
 					pck.setPackageName(directoryPath);
 					pck.setDirectoryPath(directoryPath);
-					addNodeToNodes(pck, pck.getEntityId().longValue());
-					Contain projectContainsPackage = new Contain(project, pck);
+					addNodeToNodes(pck, pck.getEntityId().longValue(), currentProject);
+					Contain projectContainsPackage = new Contain(currentProject, pck);
 					addRelation(projectContainsPackage);
 				}
 				Contain containFile = new Contain(pck, file);
 				addRelation(containFile);
-			} else if(entity instanceof FunctionEntity) {
+			} else if (entity instanceof FunctionEntity) {
 				Function function = new Function();
 				function.setFunctionName(entity.getQualifiedName());
 				function.setEntityId(entity.getId().longValue());
-				addNodeToNodes(function, entity.getId().longValue());
-			} else if(entity instanceof VarEntity) {
+				addNodeToNodes(function, entity.getId().longValue(), currentProject);
+			} else if (entity instanceof VarEntity) {
 				Variable variable = new Variable();
 				variable.setEntityId(entity.getId().longValue());
 				variable.setVariableName(entity.getQualifiedName());
 				variable.setTypeIdentify(((VarEntity) entity).getRawType().getName());
-				addNodeToNodes(variable, entity.getId().longValue());
-			} else if(entity.getClass() == TypeEntity.class) {
-				if(this.getNodes().findType(entity.getId().longValue()) == null) {
+				addNodeToNodes(variable, entity.getId().longValue(), currentProject);
+			} else if (entity.getClass() == TypeEntity.class) {
+				if (this.getNodes().findNodeByEntityIdInProject(entity.getId().longValue(), currentProject) == null) {
 					Type type = new Type();
 					type.setEntityId(entity.getId().longValue());
 					type.setTypeName(entity.getQualifiedName());
-					addNodeToNodes(type, entity.getId().longValue());
+					addNodeToNodes(type, entity.getId().longValue(), currentProject);
 				}
-			} else if(entity.getClass() == AliasEntity.class) {
+			} else if (entity.getClass() == AliasEntity.class) {
 				AliasEntity aliasEntity = (AliasEntity) entity;
 				TypeEntity typeEntity = aliasEntity.getType();
-				if(typeEntity != null && typeEntity.getParent() != null) {
-					Type type = this.getNodes().findType(typeEntity.getId().longValue());
-					if(type == null) {
+				if (typeEntity != null && typeEntity.getParent() != null) {
+					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeType.Type,
+							typeEntity.getId().longValue(), currentProject);
+					if (type == null) {
 						type = new Type();
 						type.setEntityId(typeEntity.getId().longValue());
 						type.setTypeName(typeEntity.getQualifiedName());
-						addNodeToNodes(type, typeEntity.getId().longValue());
+						addNodeToNodes(type, typeEntity.getId().longValue(), currentProject);
 					}
 					type.setAliasName(entity.getQualifiedName());
 				}
-			}
-			else {
-//				System.out.println("insertNodesWithContainRelations " + entity.getClass() + " " + entity.toString());
+			} else {
+				// System.out.println("insertNodesWithContainRelations " + entity.getClass() + "
+				// " + entity.toString());
 			}
 		});
-		this.getNodes().findTypes().forEach((entityId, type) -> {
+		this.getNodes().findNodesByNodeTypeInProject(NodeType.Type, currentProject).forEach((entityId, node) -> {
+			Type type = (Type) node;
 			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = typeEntity.getParent();
-			while(!(parentEntity instanceof FileEntity)) {
-				///FIXME 内部类的情况暂不考虑
-				/*if(parentEntity instanceof FunctionEntity) {
-						Function function = this.nodes.findFunction(parentEntity.getId());
-						
-					} else if(parentEntity.getClass() == TypeEntity.class) {
-						
-					}*/
+			while (!(parentEntity instanceof FileEntity)) {
+				/// FIXME 内部类的情况暂不考虑
+				/*
+				 * if(parentEntity instanceof FunctionEntity) { Function function =
+				 * this.nodes.findFunction(parentEntity.getId());
+				 * 
+				 * } else if(parentEntity.getClass() == TypeEntity.class) {
+				 * 
+				 * }
+				 */
 				parentEntity = parentEntity.getParent();
-				if(parentEntity == null) {
+				if (parentEntity == null) {
 					System.out.println("parentEntity is null");
 					return;
 				}
 			}
-			ProjectFile file = this.getNodes().findCodeFile(parentEntity.getId().longValue());
+			ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeType.ProjectFile,
+					parentEntity.getId().longValue(), currentProject);
 			type.setInFilePath(file.getPath());
 			Contain fileContainsType = new Contain(file, type);
 			addRelation(fileContainsType);
 		});
-		this.getNodes().findFunctions().forEach((entityId, function) -> {
+		this.getNodes().findNodesByNodeTypeInProject(NodeType.Function, currentProject).forEach((entityId, node) -> {
+			Function function = (Function) node;
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = functionEntity.getParent();
-			if(parentEntity != null) {
-				while(parentEntity.getClass() != TypeEntity.class && !(parentEntity instanceof FileEntity)) {
+			if (parentEntity != null) {
+				while (parentEntity.getClass() != TypeEntity.class && !(parentEntity instanceof FileEntity)) {
 					parentEntity = parentEntity.getParent();
-					if(parentEntity == null) {
+					if (parentEntity == null) {
 						break;
 					}
 				}
-				if(parentEntity == null) {
+				if (parentEntity == null) {
 					return;
 				}
 				// 方法在文件内还是在类内
-				if(parentEntity instanceof FileEntity) {
-					ProjectFile file = this.getNodes().findCodeFile(parentEntity.getId().longValue());
+				if (parentEntity instanceof FileEntity) {
+					ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeType.ProjectFile,
+							parentEntity.getId().longValue(), currentProject);
 					function.setInFilePath(file.getPath());
 					Contain fileContainsFunction = new Contain(file, function);
 					addRelation(fileContainsFunction);
-				} else if(parentEntity.getClass() == TypeEntity.class) {
-					Type type = this.getNodes().findType(parentEntity.getId().longValue());
+				} else if (parentEntity.getClass() == TypeEntity.class) {
+					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeType.Type,
+							parentEntity.getId().longValue(), currentProject);
 					function.setInFilePath(type.getInFilePath());
 					Contain typeContainsFunction = new Contain(type, function);
 					addRelation(typeContainsFunction);
 				}
 				// 方法的参数
-				for(VarEntity varEntity : functionEntity.getParameters()) {
+				for (VarEntity varEntity : functionEntity.getParameters()) {
 					String parameterName = varEntity.getRawType().getName();
 					TypeEntity typeEntity = varEntity.getType();
-					if(typeEntity != null && this.getNodes().findType(typeEntity.getId().longValue()) != null) {
+					if (typeEntity != null && this.getNodes().findNodeByEntityIdInProject(NodeType.Type,
+							typeEntity.getId().longValue(), currentProject) != null) {
 						function.addParameterIdentifies(typeEntity.getQualifiedName());
 					} else {
 						function.addParameterIdentifies(parameterName);
@@ -159,22 +169,23 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				}
 			}
 		});
-		this.getNodes().findVariables().forEach((entityId, variable) -> {
+		this.getNodes().findNodesByNodeTypeInProject(NodeType.Variable, currentProject).forEach((entityId, node) -> {
+			Variable variable = (Variable) node;
 			VarEntity varEntity = (VarEntity) entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = varEntity.getParent();
-			if(parentEntity != null) {
-				if(parentEntity instanceof FileEntity) {
-					ProjectFile file = this.getNodes().findCodeFile(parentEntity.getId().longValue());
+			if (parentEntity != null) {
+				if (parentEntity instanceof FileEntity) {
+					ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeType.ProjectFile, parentEntity.getId().longValue(), currentProject);
 					variable.setInFilePath(file.getPath());
 					Contain fileContainsVariable = new Contain(file, variable);
 					addRelation(fileContainsVariable);
-				} else if(parentEntity.getClass() == TypeEntity.class) {
-					Type type = this.getNodes().findType(parentEntity.getId().longValue());
+				} else if (parentEntity.getClass() == TypeEntity.class) {
+					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeType.Type, parentEntity.getId().longValue(), currentProject);
 					variable.setInFilePath(type.getInFilePath());
 					Contain typeContainsVariable = new Contain(type, variable);
 					addRelation(typeContainsVariable);
-				} else if(parentEntity instanceof FunctionEntity) {
-					Function function = this.getNodes().findFunction(parentEntity.getId().longValue());
+				} else if (parentEntity instanceof FunctionEntity) {
+					Function function = (Function) this.getNodes().findNodeByEntityIdInProject(NodeType.Function, parentEntity.getId().longValue(), currentProject);
 					variable.setInFilePath(function.getInFilePath());
 					Contain functionContainsVariable = new Contain(function, variable);
 					addRelation(functionContainsVariable);
@@ -187,21 +198,22 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 	protected void addRelations() throws LanguageErrorException {
 		extractRelationsFromTypes();
 		extractRelationsFromFunctions();
-		extractRelationsFromVariables();		
+		extractRelationsFromVariables();
 		extractRelationsFromFiles();
-//		extractRelationsFromDependsType();
+		// extractRelationsFromDependsType();
 	}
-	
+
 	/**
 	 * c中文件的include关系
 	 */
 	protected void extractRelationsFromFiles() {
-		this.getNodes().findFiles().forEach((entityId, file) -> {
+		this.getNodes().findNodesByNodeTypeInProject(NodeType.ProjectFile, currentProject).forEach((entityId, node) -> {
+			ProjectFile file = (ProjectFile) node;
 			FileEntity fileEntity = (FileEntity) entityRepo.getEntity(entityId.intValue());
 			fileEntity.getImportedFiles().forEach(entity -> {
-				if(entity instanceof FileEntity) {
-					ProjectFile includeFile = this.getNodes().findCodeFile(entity.getId().longValue());
-					if(includeFile != null) {
+				if (entity instanceof FileEntity) {
+					ProjectFile includeFile = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeType.ProjectFile, entity.getId().longValue(), currentProject);
+					if (includeFile != null) {
 						FileIncludeFile fileIncludeFile = new FileIncludeFile(file, includeFile);
 						addRelation(fileIncludeFile);
 					}
@@ -212,7 +224,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			fileEntity.getImportedTypes().forEach(entity -> {
 				System.out.println("getImportedTypes: " + entity.getClass());
 			});
-			
+
 		});
 	}
 }

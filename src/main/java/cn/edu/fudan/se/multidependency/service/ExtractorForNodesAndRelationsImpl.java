@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.service;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Nodes;
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.Relations;
 
@@ -20,8 +21,8 @@ public abstract class ExtractorForNodesAndRelationsImpl implements ExtractorForN
 	@Override
 	public abstract void addNodesAndRelations();
 	
-	protected boolean addNode(Node node) {
-		return this.repository.addNode(node);
+	protected boolean addNode(Node node, Project inProject) {
+		return this.repository.addNode(node, inProject);
 	}
 
 	protected boolean addRelation(Relation relation) {

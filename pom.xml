@@ -196,6 +196,13 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/lib/org.eclipse.core.resources_3.13.500.v20190819-0800.jar</systemPath>
 		</dependency>
+		<dependency>
+		    <groupId>org.projectlombok</groupId>
+		    <artifactId>lombok</artifactId>
+		    <version>1.18.10</version>
+		    <scope>provided</scope>
+		</dependency>
+		
 	</dependencies>
 
 	<build>

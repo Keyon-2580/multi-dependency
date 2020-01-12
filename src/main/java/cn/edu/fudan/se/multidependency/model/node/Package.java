@@ -7,6 +7,9 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /**
  * 文件：目录
  * java：包
@@ -15,6 +18,8 @@ import org.neo4j.ogm.annotation.NodeEntity;
  *
  */
 @NodeEntity
+@Data
+@NoArgsConstructor
 public class Package implements Node {
 
     @Id
@@ -29,30 +34,6 @@ public class Package implements Node {
 
 	private static final long serialVersionUID = -4892461872164624064L;
 
-	public String getPackageName() {
-		return packageName;
-	}
-
-	public void setPackageName(String packageName) {
-		this.packageName = packageName;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Long getEntityId() {
-		return entityId;
-	}
-
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
-	}
-
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
@@ -65,14 +46,6 @@ public class Package implements Node {
 	@Override
 	public NodeType getNodeType() {
 		return NodeType.Package;
-	}
-
-	public String getDirectoryPath() {
-		return directoryPath;
-	}
-
-	public void setDirectoryPath(String directoryPath) {
-		this.directoryPath = directoryPath;
 	}
 
 }

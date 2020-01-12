@@ -9,8 +9,12 @@ import org.neo4j.ogm.annotation.NodeEntity;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @NodeEntity
+@Data
+@NoArgsConstructor
 public class TestCase implements Node {
 
 	private static final long serialVersionUID = 7817933207475762644L;
@@ -28,26 +32,6 @@ public class TestCase implements Node {
     private Long entityId;
     
 	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	@Override
-	public Long getEntityId() {
-		return entityId;
-	}
-
-	@Override
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
-	}
-
-	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
@@ -60,36 +44,6 @@ public class TestCase implements Node {
 	@Override
 	public NodeType getNodeType() {
 		return NodeType.TestCase;
-	}
-
-	public String getTestCaseName() {
-		return testCaseName;
-	}
-
-	public void setTestCaseName(String testCaseName) {
-		this.testCaseName = testCaseName;
-	}
-
-	public boolean isSuccess() {
-		return success;
-	}
-
-	public void setSuccess(boolean success) {
-		this.success = success;
-	}
-
-	@Override
-	public String toString() {
-		return "TestCase [testCaseName=" + testCaseName + ", success=" + success + ", id=" + id + ", entityId="
-				+ entityId + "]";
-	}
-
-	public String getInputContent() {
-		return inputContent;
-	}
-
-	public void setInputContent(String inputContent) {
-		this.inputContent = inputContent;
 	}
 
 }

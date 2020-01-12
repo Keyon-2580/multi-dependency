@@ -30,7 +30,7 @@ public class CppDynamicInserterForNeo4jService extends DynamicInserterForNeo4jSe
 
 	@Override
 	protected void extractScenarioAndTestCaseAndFeatures() {
-		try(BufferedReader reader = new BufferedReader(new FileReader(markFile))) {
+		/*try(BufferedReader reader = new BufferedReader(new FileReader(markFile))) {
 			String line = null;
 			Node defineNode = null;
 			while((line = reader.readLine()) != null) {
@@ -131,12 +131,12 @@ public class CppDynamicInserterForNeo4jService extends DynamicInserterForNeo4jSe
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
-		Map<String, List<Function>> functions = this.getNodes().allFunctionsByFunctionName();
+		/*Map<String, List<Function>> functions = this.getNodes().allFunctionsByFunctionName();
 		List<String> cppFiles = new ArrayList<>();
 		List<File> functionCallFiles = new ArrayList<>();
 		List<File> callgrindFiles = new ArrayList<>();
@@ -149,7 +149,8 @@ public class CppDynamicInserterForNeo4jService extends DynamicInserterForNeo4jSe
 			}
 		}
 		for(File cppFile : callgrindFiles) {
-			cppFiles.addAll(CppDynamicUtil.extractFile(cppFile, getNodes().getProject().getProjectPath()));
+			///FIXME
+//			cppFiles.addAll(CppDynamicUtil.extractFile(cppFile, getNodes().getProject().getProjectPath()));
 		}
 		for(File dynamicFile : functionCallFiles) {
 			Map<String, List<String>> result = CppDynamicUtil.extractFunctionCall(dynamicFile);
@@ -171,12 +172,12 @@ public class CppDynamicInserterForNeo4jService extends DynamicInserterForNeo4jSe
 					}
 				}
 				if(startFunction == null) {
-					/*if(startFunctions != null) {
+					if(startFunctions != null) {
 						System.out.println("名为 " + start + " 的函数有 " + startFunctions.size() + " 个 " + startFunctions);
 						for(Function f : startFunctions) {
 							System.out.println(f.getInFilePath());
 						}
-					}*/
+					}
 					continue;
 				}
 				for(String end : ends) {
@@ -196,12 +197,12 @@ public class CppDynamicInserterForNeo4jService extends DynamicInserterForNeo4jSe
 						}
 					}
 					if(endFunction == null) {
-						/*if(endFunctions != null) {
+						if(endFunctions != null) {
 							System.out.println("名为 " + end + " 的函数有 " + endFunctions.size() + " 个 " + endFunctions);
 							for(Function f : endFunctions) {
 								System.out.println(f.getInFilePath());
 							}
-						}*/
+						}
 						continue;
 					} else {
 						FunctionDynamicCallFunction dynamicCall = new FunctionDynamicCallFunction();
@@ -211,7 +212,7 @@ public class CppDynamicInserterForNeo4jService extends DynamicInserterForNeo4jSe
 					}
 				}
 			}
-		}
+		}*/
 	}
 
 }

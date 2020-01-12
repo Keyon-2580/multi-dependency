@@ -16,16 +16,14 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForN
 		super();
 		this.language = language;
 		String projectName = FileUtils.extractFileName(projectPath);
-		project = new Project(projectName, "/" + projectName, language);
-		getNodes().setProject(project);
-		addNode(project);
+		currentProject = new Project(projectName, "/" + projectName, language);
 	}
 
-	protected Project project;
+	protected Project currentProject;
 	
 	protected Language language;
 	
-	protected void addNodeToNodes(Node node, Long entityId) {
+	protected void addNodeToNodes(Node node, Long entityId, Project inProject) {
 		if(node.getEntityId().longValue() != entityId.longValue()) {
 			try {
 				throw new Exception("节点id没有对应");
@@ -33,7 +31,7 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForN
 				e.printStackTrace();
 			}
 		}
-		addNode(node);
+		addNode(node, inProject);
 	}
 	
 	public abstract void addNodesAndRelations();

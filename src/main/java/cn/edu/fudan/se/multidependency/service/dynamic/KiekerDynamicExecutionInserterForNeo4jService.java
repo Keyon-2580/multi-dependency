@@ -13,7 +13,7 @@ import cn.edu.fudan.se.multidependency.utils.JavaDynamicUtil.DynamicFunctionExec
 public class KiekerDynamicExecutionInserterForNeo4jService extends KiekerDynamicInserterForNeo4jService {
 	
 	protected void extractNodesAndRelations() throws Exception {
-		Map<String, List<Function>> functions = this.getNodes().allFunctionsByFunctionName();//获取到所分析项目的所有方法，由于涉及到方法重载，所以一个方法名，可能对应几个方法
+		/*Map<String, List<Function>> functions = this.getNodes().allFunctionsByFunctionName();//获取到所分析项目的所有方法，由于涉及到方法重载，所以一个方法名，可能对应几个方法
 		Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> allDynamicFunctionFromKiekers = JavaDynamicUtil.readKiekerExecutionFile(dynamicFunctionCallFiles);
 		TestCase currentTestCase = null;
 		for(Map<Integer, List<DynamicFunctionExecutionFromKieker>> groups : allDynamicFunctionFromKiekers.values()) {
@@ -71,7 +71,7 @@ public class KiekerDynamicExecutionInserterForNeo4jService extends KiekerDynamic
 					addRelation(relation);
 				}
 			}
-		}
+		}*/
 	}
 	
 	

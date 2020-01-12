@@ -105,7 +105,7 @@ public class BatchInserterService implements Closeable {
 	
 	public void insertNodes(Nodes allNodes) {
 		allNodes.getAllNodes().forEach((nodeType, nodes) -> {
-			nodes.forEach((otherId, node) -> {
+			nodes.forEach(node -> {
 				if(!nodeExists(node.getId())) {
 					insertNode(node);
 				}

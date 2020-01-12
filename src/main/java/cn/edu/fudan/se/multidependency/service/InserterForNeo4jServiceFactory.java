@@ -1,8 +1,9 @@
-package cn.edu.fudan.se.multidependency.service.code;
+package cn.edu.fudan.se.multidependency.service;
 
 import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelations;
 import cn.edu.fudan.se.multidependency.service.build.BuildInserterForNeo4jService;
+import cn.edu.fudan.se.multidependency.service.code.CppInsertServiceImpl;
+import cn.edu.fudan.se.multidependency.service.code.JavaInsertServiceImpl;
 import cn.edu.fudan.se.multidependency.service.dynamic.CppDynamicInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.service.dynamic.DynamicInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.service.dynamic.KiekerDynamicExecutionInserterForNeo4jService;
@@ -27,10 +28,6 @@ public class InserterForNeo4jServiceFactory {
 			return new CppInsertServiceImpl(projectPath, entityRepo, language);
 		}
 		throw new Exception("程序语言不为java或c/c++，提取失败");
-	}
-	
-	public ExtractorForNodesAndRelations createCodeInserterService(YamlUtils.YamlObject yaml, EntityRepo entityRepo) throws Exception {
-		return createCodeInserterService(yaml.getCodeProjectPath(), entityRepo, Language.valueOf(yaml.getCodeLanguage()));
 	}
 	
 	public DynamicInserterForNeo4jService createDynamicInserterService(Language language) throws Exception {

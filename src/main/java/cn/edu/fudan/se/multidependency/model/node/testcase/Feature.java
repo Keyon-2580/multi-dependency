@@ -9,8 +9,12 @@ import org.neo4j.ogm.annotation.NodeEntity;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @NodeEntity
+@Data
+@NoArgsConstructor
 public class Feature implements Node {
 
 	private static final long serialVersionUID = -2410710967921462154L;
@@ -24,26 +28,6 @@ public class Feature implements Node {
     private Long entityId;
     
 	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	@Override
-	public Long getEntityId() {
-		return entityId;
-	}
-
-	@Override
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
-	}
-
-	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
@@ -54,14 +38,6 @@ public class Feature implements Node {
 	@Override
 	public NodeType getNodeType() {
 		return NodeType.Feature;
-	}
-
-	public String getFeatureName() {
-		return featureName;
-	}
-
-	public void setFeatureName(String featureName) {
-		this.featureName = featureName;
 	}
 
 }

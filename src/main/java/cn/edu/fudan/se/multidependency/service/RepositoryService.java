@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Nodes;
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.Relations;
 
@@ -80,12 +81,6 @@ public final class RepositoryService implements InserterForNeo4j {
 	}
 
 	@Override
-	public boolean addNode(Node node) {
-		this.nodes.addNode(node);
-		return true;
-	}
-
-	@Override
 	public boolean addRelation(Relation relation) {
 		this.relations.addRelation(relation);
 		return true;
@@ -95,5 +90,11 @@ public final class RepositoryService implements InserterForNeo4j {
 		if(this.batchInserterService != null) {
 			this.batchInserterService.close();
 		}
+	}
+
+	@Override
+	public boolean addNode(Node node, Project inProject) {
+		this.nodes.addNode(node, inProject);
+		return true;
 	}
 }

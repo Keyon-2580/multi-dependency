@@ -3,12 +3,17 @@ package cn.edu.fudan.se.multidependency.model.node;
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.Language;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
+import cn.edu.fudan.se.multidependency.model.Language;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 @NodeEntity("Project")
+@Data
+@NoArgsConstructor
 public class Project implements Node {
 	private static final long serialVersionUID = 4058945695982024026L;
 	
@@ -17,11 +22,11 @@ public class Project implements Node {
     private Long id;
 	
 	private String projectName;
-	
+
 	private String projectPath;
-	
+
 	private String language;
-	
+
 	private Long entityId;
 	
 	public Project(String projectName, String projectPath, Language language) {
@@ -31,44 +36,6 @@ public class Project implements Node {
 		this.language = language.toString();
 	}
 	
-	public Project() {
-		super();
-	}
-
-	public String getProjectName() {
-		return projectName;
-	}
-
-	public void setProjectName(String projectName) {
-		this.projectName = projectName;
-	}
-
-	public String getProjectPath() {
-		return projectPath;
-	}
-
-	public void setProjectPath(String projectPath) {
-		this.projectPath = projectPath;
-	}
-
-	public String getLanguage() {
-		return language;
-	}
-
-	public void setLanguage(Language language) {
-		this.language = language.toString();
-	}
-
-	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
@@ -81,16 +48,6 @@ public class Project implements Node {
 	@Override
 	public NodeType getNodeType() {
 		return NodeType.Project;
-	}
-
-	@Override
-	public Long getEntityId() {
-		return this.entityId;
-	}
-
-	@Override
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
 	}
 
 }

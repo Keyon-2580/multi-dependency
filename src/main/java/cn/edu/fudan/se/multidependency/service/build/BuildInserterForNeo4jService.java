@@ -24,7 +24,7 @@ public class BuildInserterForNeo4jService extends ExtractorForNodesAndRelationsI
 	}
 
 	public void addNodesAndRelations() {
-		try(BufferedReader reader = new BufferedReader(new FileReader(buildInfoFile))) {
+		/*try(BufferedReader reader = new BufferedReader(new FileReader(buildInfoFile))) {
 			String line = null;
 			//可以检查下，关系是否存在
 			while((line = reader.readLine()) != null) {
@@ -52,7 +52,7 @@ public class BuildInserterForNeo4jService extends ExtractorForNodesAndRelationsI
 			e.printStackTrace();
 		}catch (IOException e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 	
 

@@ -12,7 +12,7 @@ public class KiekerDynamicCallInserterForNeo4jService extends KiekerDynamicInser
 
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
-		Map<String, List<Function>> functions = this.getNodes().allFunctionsByFunctionName();
+		/*Map<String, List<Function>> functions = this.getNodes().allFunctionsByFunctionName();
 		Map<String, List<DynamicFunctionCallFromKieker>> allDynamicFunctionFromKiekers = JavaDynamicUtil.readKiekerCallFile(dynamicFunctionCallFiles);
 		TestCase currentTestCase = null;
 		for(String callId : allDynamicFunctionFromKiekers.keySet()) {
@@ -20,7 +20,7 @@ public class KiekerDynamicCallInserterForNeo4jService extends KiekerDynamicInser
 			for(DynamicFunctionCallFromKieker call : calls) {
 				
 			}
-		}
+		}*/
 	}
 
 }

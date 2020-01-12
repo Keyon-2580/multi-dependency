@@ -13,8 +13,12 @@ import org.neo4j.ogm.annotation.Transient;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @NodeEntity
+@Data
+@NoArgsConstructor
 public class Function implements Node {
 
 	private static final long serialVersionUID = 6993550414163132668L;
@@ -46,30 +50,6 @@ public class Function implements Node {
 	 */
 	private String parametersIdentifies;
 	
-	public String getFunctionName() {
-		return functionName;
-	}
-	
-	public void setFunctionName(String functionName) {
-		this.functionName = functionName;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Long getEntityId() {
-		return entityId;
-	}
-
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
-	}
-
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
@@ -88,14 +68,6 @@ public class Function implements Node {
 		return NodeType.Function;
 	}
 
-	public String getReturnTypeIdentify() {
-		return returnTypeIdentify;
-	}
-
-	public void setReturnTypeIdentify(String returnTypeIdentify) {
-		this.returnTypeIdentify = returnTypeIdentify;
-	}
-	
 	public List<String> getParameters() {
 		if(parameters == null || parameters.size() == 0) {
 			if(getParametersIdentifies() != null) {
@@ -130,38 +102,6 @@ public class Function implements Node {
 	 */
 	public String getParametersIdentifies() {
 		return parametersIdentifies;
-	}
-
-	public boolean isFromDynamic() {
-		return fromDynamic;
-	}
-
-	public void setFromDynamic(boolean fromDynamic) {
-		this.fromDynamic = fromDynamic;
-	}
-
-	public boolean isContrustor() {
-		return contrustor;
-	}
-
-	public void setContrustor(boolean contrustor) {
-		this.contrustor = contrustor;
-	}
-
-	public String getInFilePath() {
-		return inFilePath;
-	}
-
-	public void setInFilePath(String inFilePath) {
-		this.inFilePath = inFilePath;
-	}
-
-	@Override
-	public String toString() {
-		return "Function [id=" + id + ", entityId=" + entityId + ", functionName=" + functionName
-				+ ", returnTypeIdentify=" + returnTypeIdentify + ", fromDynamic=" + fromDynamic + ", contrustor="
-				+ contrustor + ", inFilePath=" + inFilePath + ", parameters=" + parameters + ", parametersIdentifies="
-				+ parametersIdentifies + "]";
 	}
 
 }

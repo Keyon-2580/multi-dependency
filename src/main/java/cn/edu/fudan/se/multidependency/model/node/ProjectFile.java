@@ -7,7 +7,12 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 @NodeEntity
+@Data
+@NoArgsConstructor
 public class ProjectFile implements Node {
 	
 	private static final long serialVersionUID = -8736926263545574636L;
@@ -24,10 +29,6 @@ public class ProjectFile implements Node {
 	
 	private String suffix;
 	
-	public ProjectFile() {
-		super();
-	}
-	
 	public ProjectFile(String fileName, String path, String suffix) {
 		super();
 		this.fileName = fileName;
@@ -35,38 +36,6 @@ public class ProjectFile implements Node {
 		this.suffix = suffix;
 	}
 	
-	public String getFileName() {
-		return fileName;
-	}
-
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
-	}
-
-	public String getPath() {
-		return path;
-	}
-
-	public void setPath(String path) {
-		this.path = path;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Long getEntityId() {
-		return entityId;
-	}
-
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
-	}
-
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
@@ -80,20 +49,6 @@ public class ProjectFile implements Node {
 	@Override
 	public NodeType getNodeType() {
 		return NodeType.ProjectFile;
-	}
-
-	public String getSuffix() {
-		return suffix;
-	}
-
-	public void setSuffix(String suffix) {
-		this.suffix = suffix;
-	}
-
-	@Override
-	public String toString() {
-		return "ProjectFile [id=" + id + ", entityId=" + entityId + ", fileName=" + fileName + ", path=" + path
-				+ ", suffix=" + suffix + "]";
 	}
 
 }

@@ -5,11 +5,16 @@ import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 @NodeEntity
+@Data
+@NoArgsConstructor
 public class Type implements Node {
     @Id
     @GeneratedValue
@@ -26,31 +31,6 @@ public class Type implements Node {
     private Long entityId;
 	private static final long serialVersionUID = 6805501035295416590L;
 	
-	public String getTypeName() {
-		return typeName;
-	}
-	public void setTypeName(String typeName) {
-		this.typeName = typeName;
-	}
-	public String getPackageName() {
-		return packageName;
-	}
-	public void setPackageName(String packageName) {
-		this.packageName = packageName;
-	}
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	public Long getEntityId() {
-		return entityId;
-	}
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
-	}
-	
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
@@ -65,23 +45,6 @@ public class Type implements Node {
 	@Override
 	public NodeType getNodeType() {
 		return NodeType.Type;
-	}
-	public String getAliasName() {
-		return aliasName;
-	}
-	public void setAliasName(String aliasName) {
-		this.aliasName = aliasName;
-	}
-	@Override
-	public String toString() {
-		return "Type [id=" + id + ", typeName=" + typeName + ", packageName=" + packageName + ", aliasName=" + aliasName
-				+ ", entityId=" + entityId + "]";
-	}
-	public String getInFilePath() {
-		return inFilePath;
-	}
-	public void setInFilePath(String inFilePath) {
-		this.inFilePath = inFilePath;
 	}
 
 }

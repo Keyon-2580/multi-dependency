@@ -1,180 +1,117 @@
 package cn.edu.fudan.se.multidependency.model.node;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.node.code.Type;
-import cn.edu.fudan.se.multidependency.model.node.code.Variable;
-import cn.edu.fudan.se.multidependency.model.node.testcase.Commit;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
-import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 
 public class Nodes {
+	
+	private List<Node> allNodes = new ArrayList<>();
 
-	private Map<NodeType, Map<Long, Node>> allNodes = new HashMap<>();
+	private Map<NodeType, List<Node>> nodeTypeToNodes = new HashMap<>();
+	
+	/**
+	 * 每个项目内的节点的entityId是唯一的
+	 */
+	private Map<Project, Map<NodeType, Map<Long, Node>>> projectToNodes = new HashMap<>();
+	
+	private List<Project> projects = new ArrayList<>();
 	
 	public void clear() {
 		allNodes.clear();
+		nodeTypeToNodes.clear();
+		projectToNodes.clear();
+		projects.clear();
 	}
 	
-	public Map<NodeType, Map<Long, Node>> getAllNodes() {
-		return new HashMap<>(allNodes);
+	public Map<NodeType, List<Node>> getAllNodes() {
+		return new HashMap<>(nodeTypeToNodes);
 	}
 	
 	public int size() {
-		int size = 0;
-		for(Map<Long, Node> nodes : allNodes.values()) {
-			size += nodes.size();
-		}
-		return size;
+		return allNodes.size();
 	}
-	
-	public void clear(NodeType nodeType) {
-		Map<Long, Node> nodes = allNodes.get(nodeType);
-		if(nodes != null) {
-			nodes.clear();
-		}
-	}
-	
+
 	/**
 	 * 
 	 * @param node
-	 * @param entityId
+	 * @param inProject
 	 */
-	public void addNode(Node node) {
-		Map<Long, Node> nodes = allNodes.get(node.getNodeType());
-		nodes = nodes == null ? new HashMap<>() : nodes;
-		nodes.put(node.getEntityId(), node);
-		allNodes.put(node.getNodeType(), nodes);
+	public void addNode(Node node, Project inProject) {
+		allNodes.add(node);
+		if(node instanceof Project) {
+			projects.add((Project) node);
+		}
+		List<Node> nodes = nodeTypeToNodes.get(node.getNodeType());
+		nodes = nodes == null ? new ArrayList<>() : nodes;
+		nodes.add(node);
+		nodeTypeToNodes.put(node.getNodeType(), nodes);
+		
+		if(inProject != null && projects.contains(inProject)) {
+			Map<NodeType, Map<Long, Node>> projectHasNodes = projectToNodes.get(inProject);
+			projectHasNodes = projectHasNodes == null ? new HashMap<>() : projectHasNodes;
+			Map<Long, Node> entityIdToNode = projectHasNodes.get(node.getNodeType());
+			entityIdToNode = entityIdToNode == null ? new HashMap<>() : entityIdToNode;
+			entityIdToNode.put(node.getEntityId(), node);
+			projectHasNodes.put(node.getNodeType(), entityIdToNode);
+			projectToNodes.put(inProject, projectHasNodes);
+		}
 	}
 	
-	/**
-	 * 根据entityId查找node
-	 * @param entityId
-	 * @return
-	 */
-	public Node findNode(Long entityId) {
-		for(Map<Long, Node> nodes : allNodes.values()) {
-			Node node = nodes.get(entityId);
-			if(nodes.get(entityId) != null) {
-				return node;
+	public List<? extends Node> findNodesByNodeType(NodeType nodeType) {
+		List<? extends Node> result = nodeTypeToNodes.get(nodeType);
+		return result == null ? new ArrayList<>() : result;
+	}
+	
+	public Node findNodeByEntityIdInProject(NodeType nodeType, Long entityId, Project inProject) {
+		Map<Long, ? extends Node> nodes = findNodesByNodeTypeInProject(nodeType, inProject);
+		if(nodes.get(entityId) != null) {
+			return nodes.get(entityId).getNodeType() == nodeType ? nodes.get(entityId) : null;
+		}
+		return null;
+	}
+
+	public Node findNodeByEntityIdInProject(Long entityId, Project inProject) {
+		Map<NodeType, Map<Long, Node>> typeToNodes = projectToNodes.get(inProject);
+		if(typeToNodes == null) {
+			return null;
+		}
+		for(Map<Long, Node> entityIdToNode : typeToNodes.values()) {
+			if(entityIdToNode.get(entityId) != null) {
+				return entityIdToNode.get(entityId);
 			}
 		}
 		return null;
 	}
 	
-	public Node findNode(Long entityId, NodeType nodeType) {
-		Map<Long, Node> nodes = allNodes.get(nodeType);
-		if(nodes == null) {
-			return null;
+	public Map<Long, ? extends Node> findNodesByNodeTypeInProject(NodeType nodeType, Project inProject) {
+		Map<NodeType, Map<Long, Node>> projectHasNodes = projectToNodes.get(inProject);
+		if(projectHasNodes == null) {
+			return new HashMap<>();
 		}
-		return nodes.get(entityId);
+		Map<Long, ? extends Node> result = projectHasNodes.get(nodeType);
+		return result == null ? new HashMap<>() : result;
 	}
 	
-	public Collection<? extends Node> findNodesCollection(NodeType nodeType) {
-		Map<Long, Node> nodes = allNodes.get(nodeType);
-		return nodes == null ? new ArrayList<>() : nodes.values();
-	}
-	
-	public Map<Long, ? extends Node> findNodesMap(NodeType nodeType) {
-		Map<Long, ? extends Node> nodes = allNodes.get(nodeType);
-		return nodes == null ? new HashMap<>() : nodes;
-	}
-	
-private Project project;
-	
-	public Package findPackage(Long entityId) {
-		Node node = findNode(entityId, NodeType.Package);
-		return node == null ? null : (Package) node;
-	}
-	
-	public Package findPackageByPackageName(String packageName) {
-		Map<Long, Package> packages = findPackages();
+	public Package findPackageByPackageName(String packageName, Project project) {
+		Map<Long, Package> packages = (Map<Long, Package>) findNodesByNodeTypeInProject(NodeType.Package, project);
 		for(Package pck : packages.values()) {
-			if(packageName.equals(pck.getPackageName())) {
+			if(pck.getPackageName().equals(packageName)) {
 				return pck;
 			}
 		}
 		return null;
 	}
-	
-	public Type findType(Long entityId) {
-		Node node = findNode(entityId, NodeType.Type);
-		return node == null ? null : (Type) node;
-	}
-	
-	public Map<Long, Node> findNodes(Class<? extends Node> cls) {
-		return null;
-	}
-	
-	public Map<Long, Type> findTypes() {
-		Map<Long, Type> types = (Map<Long, Type>) findNodesMap(NodeType.Type);
-		return types;
-	}
-	
-	public Map<Long, Package> findPackages() {
-		Map<Long, Package> packages = (Map<Long, Package>) findNodesMap(NodeType.Package);
-		return packages;
-	}
-	
-	public Map<Long, Function> findFunctions() {
-		Map<Long, Function> functions = (Map<Long, Function>) findNodesMap(NodeType.Function);
-		return functions;
-	}
-	
-	public Map<String, List<Function>> allFunctionsByFunctionName() {
-		Map<String, List<Function>> result = new HashMap<>();
-		for(Function function : findFunctions().values()) {
-			String functionName = function.getFunctionName();
-			List<Function> functions = result.get(functionName);
-			functions = functions == null ? new ArrayList<>() : functions;
-			functions.add(function);
-			result.put(functionName, functions);
-		}
-		return result;
-	}
-	
-	public Map<Long, ProjectFile> findFiles() {
-		Map<Long, ProjectFile> files = (Map<Long, ProjectFile>) findNodesMap(NodeType.ProjectFile);
-		return files;
-	}
-	
-	public Map<Long, Variable> findVariables() {
-		Map<Long, Variable> variables = (Map<Long, Variable>) findNodesMap(NodeType.Variable);
-		return variables;
-	}
-	
-	public Function findFunction(Long entityId) {
-		Node node = findNode(entityId, NodeType.Function);
-		return node == null ? null : (Function) node;
-	}
-	
-	public ProjectFile findCodeFile(Long entityId) {
-		Node node = findNode(entityId, NodeType.ProjectFile);
-		return node == null ? null : (ProjectFile) node;
-	}
-	
-	public Variable findVariable(Long entityId) {
-		Node node = findNode(entityId, NodeType.Variable);
-		return node == null ? null : (Variable) node;
-	}
-
-	public Project getProject() {
-		return project;
-	}
-
-	public void setProject(Project project) {
-		this.project = project;
-	}
-	
 
 	public Map<Long, Scenario> findScenarios() {
-		Map<Long, Scenario> scenarios = (Map<Long, Scenario>) findNodesMap(NodeType.Scenario);
+		Map<Long, Scenario> scenarios = new HashMap<>();
+		this.nodeTypeToNodes.get(NodeType.Scenario).forEach(node -> {
+			scenarios.put(node.getId(), (Scenario) node);
+		});
 		return scenarios;
 	}
 	
@@ -188,55 +125,11 @@ private Project project;
 	}
 	
 	public Map<Long, Feature> findFeatures() {
-		Map<Long, Feature> features = (Map<Long, Feature>) findNodesMap(NodeType.Feature);
+		Map<Long, Feature> features = new HashMap<>();
+		this.nodeTypeToNodes.get(NodeType.Feature).forEach(node -> {
+			features.put(node.getId(), (Feature) node);
+		});
 		return features;
 	}
 	
-	public Feature findFeatureByFeature(String featureName) {
-		for(Feature f : findFeatures().values()) {
-			if(f.getFeatureName().equals(featureName)) {
-				return f;
-			}
-		}
-		return null;
-	}
-	
-	public Map<Long, TestCase> findTestCases() {
-		Map<Long, TestCase> testCases = (Map<Long, TestCase>) findNodesMap(NodeType.TestCase);
-		return testCases;
-	}
-
-	public TestCase findTestCaseByName(String name) {
-		for(TestCase testCase : findTestCases().values()) {
-			if(testCase.getTestCaseName().equals(name)) {
-				return testCase;
-			}
-		}
-		return null;
-	}
-	
-	public ProjectFile findCodeFileByPath(String filePath) {
-		if(filePath == null) {
-			return null;
-		}
-		for(ProjectFile file : findFiles().values()) {
-			if(file.getPath().equals(filePath)) {
-				return file;
-			}
-		}
-		return null;
-	}
-
-	public Commit findCommitByCommitId(String commitId) {
-		if(commitId == null) {
-			return null;
-		}
-		for(Node commit : findNodesCollection(NodeType.Commit)) {
-			if(commitId.equals(((Commit) commit).getCommitId())) {
-				return (Commit) commit;
-			}
-		}
-		return null;
-	}
-
 }

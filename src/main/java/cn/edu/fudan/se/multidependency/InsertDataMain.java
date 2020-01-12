@@ -5,14 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.model.node.Nodes;
-import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelations;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
+import cn.edu.fudan.se.multidependency.service.InserterForNeo4jServiceFactory;
 import cn.edu.fudan.se.multidependency.service.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.build.BuildInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractorImpl;
-import cn.edu.fudan.se.multidependency.service.code.InserterForNeo4jServiceFactory;
 import cn.edu.fudan.se.multidependency.service.dynamic.DynamicInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.utils.FileUtils;
 import cn.edu.fudan.se.multidependency.utils.YamlUtils;
@@ -32,21 +30,30 @@ public class InsertDataMain {
 			} else {
 				yaml = YamlUtils.getDataBasePath(args[0]);
 			}
-			String projectPath = yaml.getCodeProjectPath();
+//			String projectPath = yaml.getCodeProjectPath();
 			Language language = Language.valueOf(yaml.getCodeLanguage());
-	    	DependsEntityRepoExtractor extractor = DependsEntityRepoExtractorImpl.getInstance();
-			extractor.setLanguage(language);
-			extractor.setProjectPath(projectPath);
-			EntityRepo entityRepo = extractor.extractEntityRepo();
-			
 			InserterForNeo4j repository = RepositoryService.getInstance();
 			repository.setDatabasePath(yaml.getNeo4jDatabasePath());
 			repository.setDelete(yaml.isDeleteDatabase());
+			String rootDirectoryPath = yaml.getRootPath();
+			File rootDirectory = new File(rootDirectoryPath);
+			List<File> projectDirectories = new ArrayList<>();
+			FileUtils.listDirectories(rootDirectory, 1, projectDirectories);
+			
 			/**
 			 * 静态分析
 			 */
-			System.out.println("静态分析");
-			insertStaticCode(yaml, entityRepo);
+			for(File projectDirectory : projectDirectories) {
+				
+				DependsEntityRepoExtractor extractor = DependsEntityRepoExtractorImpl.getInstance();
+				extractor.setLanguage(language);
+				extractor.setProjectPath(projectDirectory.getAbsolutePath());
+				EntityRepo entityRepo = extractor.extractEntityRepo();
+				
+				System.out.println("静态分析");
+				InserterForNeo4jServiceFactory.getInstance().createCodeInserterService(projectDirectory.getAbsolutePath(), entityRepo, Language.valueOf(yaml.getCodeLanguage())).addNodesAndRelations();
+				
+			}
 			/**
 			 * 动态分析
 			 */
@@ -73,12 +80,6 @@ public class InsertDataMain {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-    }
-    
-    public static Nodes insertStaticCode(YamlUtils.YamlObject yaml, EntityRepo entityRepo) throws Exception {
-		ExtractorForNodesAndRelations dependsInserter = InserterForNeo4jServiceFactory.getInstance().createCodeInserterService(yaml, entityRepo);
-		dependsInserter.addNodesAndRelations();
-		return dependsInserter.getNodes();
     }
     
     /**

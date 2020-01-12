@@ -6,6 +6,10 @@ import java.util.Map;
 
 import org.ho.yaml.Yaml;
 
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 public class YamlUtils {
 
 	public static YamlObject getDataBasePathDefault(String yamlPath) throws Exception {
@@ -51,9 +55,14 @@ public class YamlUtils {
 		result.setAnalyseDynamic(analyseDynamic);
 		boolean delete = (boolean) ((Map<?, ?>) yaml.get("data")).get("delete");
 		result.setDeleteDatabase(delete);
+		int depth = (int) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("code")).get("depth");
+		result.setDepth(depth);
+		String rootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("code")).get("rootPath");
+		result.setRootPath(rootPath);
 		return result;
 	}
 	
+	@Data
 	public static class YamlObject {
 		private boolean deleteDatabase;
 		private String neo4jDatabasePath;
@@ -68,84 +77,7 @@ public class YamlUtils {
 		private String buildFilePath;
 		private boolean analyseDynamic;
 		private boolean analyseBuild;
-		public String getNeo4jDatabasePath() {
-			return neo4jDatabasePath;
-		}
-		public void setNeo4jDatabasePath(String neo4jDatabasePath) {
-			this.neo4jDatabasePath = neo4jDatabasePath;
-		}
-		public String getCodeProjectPath() {
-			return codeProjectPath;
-		}
-		public void setCodeProjectPath(String codeProjectPath) {
-			this.codeProjectPath = codeProjectPath;
-		}
-		public String getCodeLanguage() {
-			return codeLanguage;
-		}
-		public void setCodeLanguage(String codeLanguage) {
-			this.codeLanguage = codeLanguage;
-		}
-		public String getForTest() {
-			return forTest;
-		}
-		public void setForTest(String forTest) {
-			this.forTest = forTest;
-		}
-		public String getDirectoryRootPath() {
-			return directoryRootPath;
-		}
-		public void setDirectoryRootPath(String directoryRootPath) {
-			this.directoryRootPath = directoryRootPath;
-		}
-		public List<String> getDynamicJavaFileSuffix() {
-			return dynamicJavaFileSuffix;
-		}
-		public void setDynamicJavaFileSuffix(List<String> dynamic_java_file_suffix) {
-			this.dynamicJavaFileSuffix = dynamic_java_file_suffix;
-		}
-		public List<String> getDynamicCppFileSuffix() {
-			return dynamicCppFileSuffix;
-		}
-		public void setDynamicCppFileSuffix(List<String> dynamic_cpp_file_suffix) {
-			this.dynamicCppFileSuffix = dynamic_cpp_file_suffix;
-		}
-		public String getDynamicMarkSuffix() {
-			return dynamicMarkSuffix;
-		}
-		public void setDynamicMarkSuffix(String dynamic_mark_suffix) {
-			this.dynamicMarkSuffix = dynamic_mark_suffix;
-		}
-		public String getBuildDirectoryRootPath() {
-			return buildDirectoryRootPath;
-		}
-		public void setBuildDirectoryRootPath(String buildDirectoryRootPath) {
-			this.buildDirectoryRootPath = buildDirectoryRootPath;
-		}
-		public String getBuildFilePath() {
-			return buildFilePath;
-		}
-		public void setBuildFilePath(String buildFilePath) {
-			this.buildFilePath = buildFilePath;
-		}
-		public boolean isAnalyseDynamic() {
-			return analyseDynamic;
-		}
-		public void setAnalyseDynamic(boolean analyseDynamic) {
-			this.analyseDynamic = analyseDynamic;
-		}
-		public boolean isAnalyseBuild() {
-			return analyseBuild;
-		}
-		public void setAnalyseBuild(boolean analyseBuild) {
-			this.analyseBuild = analyseBuild;
-		}
-		public boolean isDeleteDatabase() {
-			return deleteDatabase;
-		}
-		public void setDeleteDatabase(boolean deleteDatabase) {
-			this.deleteDatabase = deleteDatabase;
-		}
-		
+		private String rootPath;
+		private int depth;
 	}
 }
