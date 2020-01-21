@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.stub;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -16,6 +17,8 @@ import org.antlr.v4.runtime.atn.LexerATNSimulator;
 import org.antlr.v4.runtime.atn.ParserATNSimulator;
 import org.antlr.v4.runtime.atn.PredictionContextCache;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+
+import com.google.common.io.Files;
 
 import cn.edu.fudan.se.multidependency.utils.FileUtils;
 import depends.extractor.java.JavaLexer;
@@ -41,7 +44,7 @@ public class StubMain {
 		JavaParser parser = new JavaParser(tokens);
 		ParserATNSimulator interpreter = new ParserATNSimulator(parser, parser.getATN(), parser.getInterpreter().decisionToDFA, new PredictionContextCache());
 		parser.setInterpreter(interpreter);
-		JavaRewriterListener bridge = new JavaRewriterListener(tokens, listenFile);
+		JavaStubListener bridge = new JavaStubListener(tokens, listenFile);
 		ParseTreeWalker walker = new ParseTreeWalker();
 		walker.walk(bridge, parser.compilationUnit());
 		File outputFile = new File(outputFilePath);
@@ -71,18 +74,36 @@ public class StubMain {
 			outputDirectory.mkdirs();
 		}
 		String projectName = FileUtils.extractFileName(directoryPath);
-		System.out.println(projectName);
-		System.out.println(outputDirectoryPath);
 		result.forEach(file -> {
 			String outputFilePath = file.getAbsolutePath().replace(directory.getAbsolutePath(), outputDirectory.getAbsolutePath() + "\\" + projectName);
 			if(".java".equals(FileUtils.extractSuffix(file.getAbsolutePath()))) {
 				try {
 					stubSingleFile(file.getAbsolutePath(), outputFilePath);
 				} catch (Exception e) {
+					System.err.println(file.getAbsolutePath());
 					e.printStackTrace();
+					try {
+						File outputFile = new File(outputFilePath);
+						if(!outputFile.exists()) {
+							String temp = FileUtils.extractDirectoryFromFile(outputFilePath);
+							new File(temp).mkdirs();
+						}
+						Files.copy(file, outputFile);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
 				}
 			} else {
-				
+				try {
+					File outputFile = new File(outputFilePath);
+					if(!outputFile.exists()) {
+						String temp = FileUtils.extractDirectoryFromFile(outputFilePath);
+						new File(temp).mkdirs();
+					}
+					Files.copy(file, outputFile);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		});
 		
@@ -94,6 +115,7 @@ public class StubMain {
 		String filePath = "D:\\git\\multi-dependency\\src\\main\\java\\cn\\edu\\fudan\\se\\multidependency\\stub\\Main.java";
 //		stubSingleFile(filePath, "D:\\test\\test.java");
 		stubDirectory("D:\\git\\multi-dependency", "D:\\projectPath");
+		stubDirectory("D:\\multiple-dependency-project\\depends", "D:\\projectPath");
 	}
 	
 }
