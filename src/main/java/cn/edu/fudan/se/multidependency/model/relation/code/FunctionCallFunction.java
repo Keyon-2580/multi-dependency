@@ -3,23 +3,24 @@ package cn.edu.fudan.se.multidependency.model.relation.code;
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
-import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.relation.Relation;
+import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 @RelationshipEntity(RelationType.str_FUNCTION_CALL_FUNCTION)
+@Data
+@NoArgsConstructor
 public class FunctionCallFunction implements Relation {
 	
 	private static final long serialVersionUID = 5982413005555063698L;
-
-	public FunctionCallFunction() {
-		super();
-	}
 
 	@StartNode
 	private Function function;
@@ -37,23 +38,6 @@ public class FunctionCallFunction implements Relation {
     @GeneratedValue
     private Long id;
 	
-
-	public Function getFunction() {
-		return function;
-	}
-
-	public void setFunction(Function function) {
-		this.function = function;
-	}
-
-	public Function getCallFunction() {
-		return callFunction;
-	}
-
-	public void setCallFunction(Function callFunction) {
-		this.callFunction = callFunction;
-	}
-
 	@Override
 	public Long getStartNodeGraphId() {
 		return function.getId();
@@ -67,16 +51,6 @@ public class FunctionCallFunction implements Relation {
 	@Override
 	public RelationType getRelationType() {
 		return RelationType.FUNCTION_CALL_FUNCTION;
-	}
-
-	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	@Override

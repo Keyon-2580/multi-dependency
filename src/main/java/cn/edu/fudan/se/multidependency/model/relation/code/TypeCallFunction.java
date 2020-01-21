@@ -13,15 +13,15 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @RelationshipEntity(RelationType.str_TYPE_CALL_FUNCTION)
+@Data
+@NoArgsConstructor
 public class TypeCallFunction implements Relation {
 	
 	private static final long serialVersionUID = 5982413005555063698L;
-
-	public TypeCallFunction() {
-		super();
-	}
 
 	@StartNode
 	private Type type;
@@ -39,23 +39,6 @@ public class TypeCallFunction implements Relation {
     @GeneratedValue
     private Long id;
 	
-
-	public Type getType() {
-		return type;
-	}
-
-	public void setType(Type type) {
-		this.type = type;
-	}
-
-	public Function getCallFunction() {
-		return callFunction;
-	}
-
-	public void setCallFunction(Function callFunction) {
-		this.callFunction = callFunction;
-	}
-
 	@Override
 	public Long getStartNodeGraphId() {
 		return type.getId();
@@ -69,16 +52,6 @@ public class TypeCallFunction implements Relation {
 	@Override
 	public RelationType getRelationType() {
 		return RelationType.TYPE_CALL_FUNCTION;
-	}
-
-	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	@Override

@@ -19,4 +19,6 @@ public interface DependsEntityRepoExtractor {
 	void setLanguage(Language language);
 	
 	void setProjectPath(String projectPath);
+
+	int getEntityCount();
 }

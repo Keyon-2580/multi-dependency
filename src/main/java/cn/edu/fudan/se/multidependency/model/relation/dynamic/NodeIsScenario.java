@@ -11,8 +11,12 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @RelationshipEntity(RelationType.str_NODE_IS_SCENARIO)
+@Data
+@NoArgsConstructor
 public class NodeIsScenario implements Relation {
 
 	private static final long serialVersionUID = 2374756803673911821L;
@@ -20,16 +24,6 @@ public class NodeIsScenario implements Relation {
 	@Id
     @GeneratedValue
     private Long id;
-	
-	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	public void setId(Long id) {
-		this.id = id;
-	}
 	
 	private Node startNode;
 	
@@ -53,22 +47,6 @@ public class NodeIsScenario implements Relation {
 	@Override
 	public Map<String, Object> getProperties() {
 		return new HashMap<>();
-	}
-
-	public Node getStartNode() {
-		return startNode;
-	}
-
-	public void setStartNode(Node startNode) {
-		this.startNode = startNode;
-	}
-
-	public Scenario getScenario() {
-		return scenario;
-	}
-
-	public void setScenario(Scenario scenario) {
-		this.scenario = scenario;
 	}
 
 }

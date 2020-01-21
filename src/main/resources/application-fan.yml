@@ -29,7 +29,7 @@ data:
 #      path: D:\multiple-dependency-project\Sockets-2.3.9.9
       path: D:\multiple-dependency-project\bash-5.0
 #      path: D:\multiple-dependency-project\tabix     
-      language: java
+      languages: [java, cpp]
       platform: windows
    dynamic:
       analyse: false

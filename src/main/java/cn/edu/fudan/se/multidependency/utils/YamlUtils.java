@@ -7,8 +7,6 @@ import java.util.Map;
 import org.ho.yaml.Yaml;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 public class YamlUtils {
 
@@ -31,10 +29,12 @@ public class YamlUtils {
 		yaml = (Map<?, ?>) Yaml.load(file);
 		String databasePath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("neo4j")).get("path");
 		String projectPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("code")).get("path");
-		String language = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("code")).get("language");
+		
+		List<String> languages = (List<String>) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("code")).get("languages");
+		
 		String forTest = (String) ((Map<?, ?>) yaml.get("data")).get("test");
 		result.setNeo4jDatabasePath(databasePath);
-		result.setCodeLanguage(language);
+		result.setAnalyseLanguages(languages);
 		result.setCodeProjectPath(projectPath);
 		result.setForTest(forTest);
 		String directoryRootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("directory_root_path");
@@ -67,7 +67,7 @@ public class YamlUtils {
 		private boolean deleteDatabase;
 		private String neo4jDatabasePath;
 		private String codeProjectPath;
-		private String codeLanguage;
+		private List<String> analyseLanguages;
 		private String forTest;
 		private String directoryRootPath;
 		private List<String> dynamicJavaFileSuffix;

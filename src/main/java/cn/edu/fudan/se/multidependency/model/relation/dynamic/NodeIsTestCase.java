@@ -11,8 +11,12 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @RelationshipEntity(RelationType.str_NODE_IS_TESTCASE)
+@Data
+@NoArgsConstructor
 public class NodeIsTestCase implements Relation {
 
 	private static final long serialVersionUID = 7393884849758562237L;
@@ -20,16 +24,6 @@ public class NodeIsTestCase implements Relation {
 	@Id
     @GeneratedValue
     private Long id;
-	
-	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	public void setId(Long id) {
-		this.id = id;
-	}
 	
 	private Node node;
 	
@@ -53,22 +47,6 @@ public class NodeIsTestCase implements Relation {
 	@Override
 	public Map<String, Object> getProperties() {
 		return new HashMap<>();
-	}
-
-	public Node getNode() {
-		return node;
-	}
-
-	public void setNode(Node node) {
-		this.node = node;
-	}
-
-	public TestCase getTestCase() {
-		return testCase;
-	}
-
-	public void setTestCase(TestCase testCase) {
-		this.testCase = testCase;
 	}
 
 }

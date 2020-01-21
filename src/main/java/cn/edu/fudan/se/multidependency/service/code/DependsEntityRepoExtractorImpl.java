@@ -4,9 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
+import depends.entity.Entity;
 import depends.entity.repo.EntityRepo;
 import depends.entity.repo.InMemoryEntityRepo;
 import depends.extractor.FileParser;
@@ -25,7 +29,6 @@ import depends.relations.Inferer;
 import depends.util.FileTraversal;
 import depends.util.FileUtil;
 import depends.util.TemporaryFile;
-import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 
 /**
  * 调用depends的API提取代码entity
@@ -78,6 +81,19 @@ public class DependsEntityRepoExtractorImpl implements DependsEntityRepoExtracto
 		fileTransversal.travers(this.projectPath);
 		inferer.resolveAllBindings();
 		return entityRepo;
+	}
+
+	@Override
+	public int getEntityCount() {
+		if(entityRepo == null) {
+			return 0;
+		}
+		List<Entity> entities = new ArrayList<>();
+		Iterator<Entity> iterator = entityRepo.entityIterator();
+		iterator.forEachRemaining(entity -> {
+			entities.add(entity);
+		});
+		return entities.size();
 	}
 
 	private Map<Language, String[]> fileSuffixes = new HashMap<>();

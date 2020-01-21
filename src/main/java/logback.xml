@@ -16,10 +16,11 @@
 			</pattern>
 		</encoder>
 	</appender>
-<!-- 	<root level="error">
+ 	<!-- <root level="error">
 		<appender-ref ref="STDOUT" />
 	</root>
- -->	<root level="debug">
+
+ 	<root level="debug">
 		<appender-ref ref="FILE" />
-	</root>
+	</root> -->
 </configuration>

@@ -11,8 +11,12 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @RelationshipEntity(RelationType.str_FILE_IMPORT_VARIABLE)
+@Data
+@NoArgsConstructor
 public class FileImportVariable implements Relation {
 
 	private static final long serialVersionUID = -7712370556388767903L;
@@ -21,24 +25,10 @@ public class FileImportVariable implements Relation {
     @GeneratedValue
     private Long id;
 	
-	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	public void setId(Long id) {
-		this.id = id;
-	}
-	
 	public FileImportVariable(ProjectFile file, Variable variable) {
 		super();
 		this.file = file;
 		this.variable = variable;
-	}
-
-	public FileImportVariable() {
-		super();
 	}
 
 	private ProjectFile file;
@@ -63,22 +53,6 @@ public class FileImportVariable implements Relation {
 	@Override
 	public Map<String, Object> getProperties() {
 		return new HashMap<>();
-	}
-
-	public ProjectFile getFile() {
-		return file;
-	}
-
-	public void setFile(ProjectFile file) {
-		this.file = file;
-	}
-
-	public Variable getVariable() {
-		return variable;
-	}
-
-	public void setVariable(Variable variable) {
-		this.variable = variable;
 	}
 
 }

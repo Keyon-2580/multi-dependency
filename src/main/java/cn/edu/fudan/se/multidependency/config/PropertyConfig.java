@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class PropertyConfig {
-	@Value("${data.code.path}")
+	/*@Value("${data.code.path}")
 	private String codePath;
 	
 	public String getCodePath() {
@@ -17,5 +17,5 @@ public class PropertyConfig {
 	
 	public String getLanguage() {
 		return language;
-	}
+	}*/
 }
