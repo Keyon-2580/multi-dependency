@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.TokenStreamRewriter;
 import org.antlr.v4.runtime.misc.Interval;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import depends.extractor.java.JavaParser.AnnotationTypeDeclarationContext;
 import depends.extractor.java.JavaParser.BlockContext;
@@ -136,10 +137,16 @@ public class JavaStubListener extends JavaParserBaseListener {
 			}
 			if(methodCall.SUPER() != null || methodCall.THIS() != null) {
 				rewriter.insertAfter(statement.stop, getRewriteStr(methodName, parameterNames));
+				rewriter.insertBefore(block.getStop(), endMethod());
 				return ;
 			}
 		}
 		rewriter.insertAfter(block.getStart(), getRewriteStr(methodName, parameterNames));
+		rewriter.insertBefore(block.getStop(), endMethod());
+	}
+	
+	private String endMethod() {
+		return "\n" + MULTIPLE_STUB_VARIABLE_BREADTH + "--;\n";
 	}
 	
 	private void addBlockForConditionStatement(StatementContext mainStatement) {
@@ -158,12 +165,12 @@ public class JavaStubListener extends JavaParserBaseListener {
 				if(childStatement.RETURN() != null) {
 					List<ExpressionContext> expressions = childStatement.expression();
 					if(expressions.size() == 0) {
-						rewriter.replace(childStatement.start, "{// aaa;\n" + childStatement.start.getText());
+						rewriter.replace(childStatement.start, "{\n" + endMethod() + childStatement.start.getText());
 					} else if(expressions.size() == 1) {
 						ExpressionContext expression = expressions.get(0);
 						if(childStatement.RETURN() != null) {
 							rewriter.replace(childStatement.start, 
-									"{" + currentReturnType + " MULTIPLE_STUB_RETURN = " + getText(expression) + ";\n" + childStatement.start.getText());
+									"{" + currentReturnType + " MULTIPLE_STUB_RETURN = " + getText(expression) + ";\n" + endMethod() + childStatement.start.getText());
 						} else if(childStatement.THROW() != null) {
 							rewriter.replace(childStatement.start, 
 									"{ Exception MULTIPLE_STUB_RETURN = " + getText(expression) + ";\n" + childStatement.start.getText());
@@ -197,11 +204,11 @@ public class JavaStubListener extends JavaParserBaseListener {
 				List<ExpressionContext> expressions = statement.expression();
 				if(expressions.size() == 0) {
 					// return ;
-					rewriter.replace(statement.start, "// aaa;\n" + statement.start.getText());
+					rewriter.replace(statement.start, "\n" + endMethod() + statement.start.getText());
 				} else if(expressions.size() == 1) {
 					ExpressionContext expression = expressions.get(0);
 					if(statement.RETURN() != null) {
-						rewriter.replace(statement.start, currentReturnType + " MULTIPLE_STUB_RETURN = " + getText(expression) + ";\n" + statement.start.getText());
+						rewriter.replace(statement.start, currentReturnType + " MULTIPLE_STUB_RETURN = " + getText(expression) + ";\n" + endMethod() + statement.start.getText());
 					} else if(statement.THROW() != null) {
 						rewriter.replace(statement.start, "Exception MULTIPLE_STUB_RETURN = " + getText(expression) + ";\n" + statement.start.getText());
 					}
@@ -241,6 +248,22 @@ public class JavaStubListener extends JavaParserBaseListener {
 		String returnType = ctx.typeTypeOrVoid().getText();
 		currentReturnType = returnType;
 		addBlockForBlockStatement(block);
+		if("void".equals(currentReturnType)) {
+			if(block.blockStatement().size() == 0) {
+				rewriter.insertBefore(block.stop, endMethod());
+			} else {
+				BlockStatementContext lastBlockStatement = block.blockStatement(block.blockStatement().size() - 1);
+				if(lastBlockStatement.statement() != null && lastBlockStatement.statement().RETURN() == null) {
+//					System.out.println(methodName + " " + lastBlockStatement.getText());
+					rewriter.insertBefore(block.stop, endMethod());
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void exitMethodDeclaration(MethodDeclarationContext ctx) {
+		currentReturnType = null;
 	}
 	
 	private String getRewriteStr(String methodName, List<String> parameterNames) {

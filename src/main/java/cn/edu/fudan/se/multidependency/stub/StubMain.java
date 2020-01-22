@@ -182,11 +182,24 @@ public class StubMain {
 	}
 
 	public static void main(String[] args) throws Exception {
-//		 String filePath =
-//		 "D:\\git\\multi-dependency\\src\\main\\java\\cn\\edu\\fudan\\se\\multidependency\\stub\\StubMain.java";
-//		 stubSingleFile(filePath, "D:\\test\\test.java");
+		 String filePath =
+		 "D:\\git\\multi-dependency\\src\\main\\java\\cn\\edu\\fudan\\se\\multidependency\\stub\\StubMain.java";
+		 stubSingleFile(filePath, "D:\\test\\test.java", "cn.edu.fudan.se.multidependency.stub.StubMain");
 		stubDirectory("D:\\git\\multi-dependency", "D:\\projectPath", "cn.edu.fudan.se.multidependency.stub.StubMain");
 		stubDirectory("D:\\multiple-dependency-project\\depends", "D:\\projectPath", "depends.entity.FileEntity");
+	}
+	public static void main1() {
+		return ;
+	}
+	public static void main2() {
+		if(2 > 1) {
+			return ;
+		}
+		
+	}
+	
+	public void main3() {
+		
 	}
 
 }
