@@ -19,6 +19,7 @@ import depends.extractor.java.JavaParser.MethodDeclarationContext;
 import depends.extractor.java.JavaParser.StatementContext;
 import depends.extractor.java.JavaParser.TypeDeclarationContext;
 
+@Deprecated
 public class JavaStubListenerIamStupid extends JavaStubListener {
 	
 	protected static final String MULTIPLE_STUB_VARIABLE_BREADTH_TEMP = "MULTIPLE_STUB_VARIABLE_BREADTH_TEMP";

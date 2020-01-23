@@ -59,7 +59,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 		builder.append("\n")
 			.append(MULTIPLE_STUB_VARIABLE_BREADTH)
 			.append("--;\n");
-		builder.append("System.out.println(" + MULTIPLE_STUB_VARIABLE_BREADTH + ");");
+//		builder.append("System.out.println(" + MULTIPLE_STUB_VARIABLE_BREADTH + ");");
 		return builder.toString();
 	}
 	
@@ -206,10 +206,10 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 		builder.append(ctx.start.getText())
 			.append(" public static long ")
 			.append(MULTIPLE_STUB_VARIABLE_BREADTH)
-			.append(" = 1L;")
+			.append(" = 0L;")
 			.append(" public static long ")
 			.append(MULTIPLE_STUB_VARIABLE_ORDER)
-			.append(" = 1L;")
+			.append(" = 0L;")
 			;
 		rewriter.replace(ctx.start, builder.toString());
 	}
