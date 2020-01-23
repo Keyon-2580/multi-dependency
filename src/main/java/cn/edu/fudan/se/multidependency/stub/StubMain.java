@@ -24,6 +24,19 @@ import depends.extractor.java.JavaLexer;
 import depends.extractor.java.JavaParser;
 
 public class StubMain {
+	
+	public StubMain() {
+		super();
+		try {
+			
+		} finally {
+			
+		}
+	}
+	
+	public StubMain(int a) {
+		
+	}
 
 	class Test {
 		public Test testTest() {
@@ -113,7 +126,7 @@ public class StubMain {
 		ParserATNSimulator interpreter = new ParserATNSimulator(parser, parser.getATN(),
 				parser.getInterpreter().decisionToDFA, new PredictionContextCache());
 		parser.setInterpreter(interpreter);
-		JavaStubListener stubListener = new JavaStubListener(tokens, listenFile, input, className);
+		JavaStubListener stubListener = new JavaStubListenerUsingTryFinally(tokens, listenFile, input, className);
 		ParseTreeWalker walker = new ParseTreeWalker();
 		walker.walk(stubListener, parser.compilationUnit());
 		File outputFile = new File(outputFilePath);
