@@ -25,11 +25,18 @@ public class JavaStubListenerIamStupid extends JavaStubListener {
 	protected static final String MULTIPLE_STUB_VARIABLE_BREADTH_TEMP = "MULTIPLE_STUB_VARIABLE_BREADTH_TEMP";
 
 	protected static final String MULTIPLE_STUB_RETURN = "MULTIPLE_STUB_RETURN";
+	protected String currentReturnType;
+
+	@Override
+	public void exitMethodDeclaration(MethodDeclarationContext ctx) {
+		currentReturnType = null;
+	}
+	
 	public JavaStubListenerIamStupid(TokenStream tokens, File listenFile, CharStream input, String className) {
 		super(tokens, listenFile, input, className);
 	}
 	
-	protected String getRewriteStr(String methodName, List<String> parameterNames) {
+	protected String startMethod(String methodName, List<String> parameterNames) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("\n\t\t")
 			.append("System.out.println(\"")
@@ -73,7 +80,7 @@ public class JavaStubListenerIamStupid extends JavaStubListener {
 	
 	@Override
 	public void enterClassBody(ClassBodyContext ctx) {
-		if(!getCurrentFullClassNameWithPackageName().equals(globalClass)) {
+		if(!getMethodContainerName().equals(globalClass)) {
 			return ;
 		}
 		StringBuilder builder = new StringBuilder();
@@ -117,12 +124,12 @@ public class JavaStubListenerIamStupid extends JavaStubListener {
 			}
 			// 构造方法中如果有super()或this()，必须放在第一行
 			if(methodCall.SUPER() != null || methodCall.THIS() != null) {
-				rewriter.insertAfter(statement.stop, getRewriteStr(methodName, parameterNames));
+				rewriter.insertAfter(statement.stop, startMethod(methodName, parameterNames));
 				rewriter.insertBefore(block.getStop(), endMethod());
 				return ;
 			}
 		}
-		rewriter.insertAfter(block.getStart(), getRewriteStr(methodName, parameterNames));
+		rewriter.insertAfter(block.getStart(), startMethod(methodName, parameterNames));
 		rewriter.insertBefore(block.getStop(), endMethod());
 	}
 
@@ -136,7 +143,7 @@ public class JavaStubListenerIamStupid extends JavaStubListener {
 		FormalParameterListContext parameterList = ctx.formalParameters().formalParameterList();
 		List<String> parameterNames = extractParameterNames(parameterList);
 		// 开头
-		rewriter.insertAfter(block.getStart(), getRewriteStr(methodName, parameterNames));
+		rewriter.insertAfter(block.getStart(), startMethod(methodName, parameterNames));
 
 		// 末尾&异常
 		String returnType = ctx.typeTypeOrVoid().getText();

@@ -25,6 +25,7 @@ public class JavaStubListenerUsingTryFinally extends JavaStubListener {
 	@Override
 	public void enterConstructorDeclaration(ConstructorDeclarationContext ctx) {
 		String methodName = ctx.IDENTIFIER().getText();
+		methodContainer.push(methodName);
 		
 		BlockContext block = ctx.constructorBody;
 		FormalParameterListContext parameterList = ctx.formalParameters().formalParameterList();
@@ -48,12 +49,12 @@ public class JavaStubListenerUsingTryFinally extends JavaStubListener {
 			}
 			if(methodCall.SUPER() != null || methodCall.THIS() != null) {
 				// 添加try-finally
-				rewriter.insertAfter(statement.stop, getRewriteStr(methodName, parameterNames) + "\ntry {");
+				rewriter.insertAfter(statement.stop, startMethod(methodName, parameterNames) + "\ntry {");
 				rewriter.insertBefore(block.stop, "\n} finally{\n" + endMethod() + "\n}");
 				return ;
 			}
 		}
-		rewriter.insertAfter(block.getStart(), getRewriteStr(methodName, parameterNames));
+		rewriter.insertAfter(block.getStart(), startMethod(methodName, parameterNames));
 		// 添加try-finally
 		rewriter.insertAfter(block.start, "\ntry {");
 		rewriter.insertBefore(block.stop, "\n} finally{\n" + endMethod() + "\n}");
@@ -66,14 +67,29 @@ public class JavaStubListenerUsingTryFinally extends JavaStubListener {
 			return ;
 		}
 		String methodName = ctx.IDENTIFIER().getText();
+		methodContainer.push(methodName);
 		FormalParameterListContext parameterList = ctx.formalParameters().formalParameterList();
 		List<String> parameterNames = extractParameterNames(parameterList);
 		// 开头
-		rewriter.insertAfter(block.getStart(), getRewriteStr(methodName, parameterNames));
+		rewriter.insertAfter(block.getStart(), startMethod(methodName, parameterNames));
 		
 		// 添加try-finally
 		rewriter.insertAfter(block.start, "\ntry {");
 		rewriter.insertBefore(block.stop, "\n} finally{\n" + endMethod() + "\n}");
 	}
 	
+	@Override
+	public void exitMethodDeclaration(MethodDeclarationContext ctx) {
+		BlockContext block = ctx.methodBody().block();
+		if(block == null) {
+			return ;
+		}
+		methodContainer.pop();
+	}
+	
+	@Override
+	public void exitConstructorDeclaration(ConstructorDeclarationContext ctx) {
+		methodContainer.pop();
+	}
+
 }

@@ -15,9 +15,11 @@ import depends.extractor.java.JavaParser.AnnotationTypeDeclarationContext;
 import depends.extractor.java.JavaParser.ClassBodyContext;
 import depends.extractor.java.JavaParser.ClassDeclarationContext;
 import depends.extractor.java.JavaParser.ConstructorDeclarationContext;
+import depends.extractor.java.JavaParser.CreatorContext;
 import depends.extractor.java.JavaParser.EnumDeclarationContext;
 import depends.extractor.java.JavaParser.FormalParameterContext;
 import depends.extractor.java.JavaParser.FormalParameterListContext;
+import depends.extractor.java.JavaParser.InnerCreatorContext;
 import depends.extractor.java.JavaParser.InterfaceDeclarationContext;
 import depends.extractor.java.JavaParser.MethodDeclarationContext;
 import depends.extractor.java.JavaParser.PackageDeclarationContext;
@@ -43,8 +45,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 	protected boolean importBreadth = false;
 	
 	protected String currentPackageName;
-	protected Stack<String> currentClassNames = new Stack<>();
-	protected String currentReturnType;
+	protected Stack<String> methodContainer = new Stack<>();
 	
 	public File getListenFile() {
 		return this.listenFile;
@@ -63,7 +64,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 		return builder.toString();
 	}
 	
-	protected String getRewriteStr(String methodName, List<String> parameterNames) {
+	protected String startMethod(String methodName, List<String> parameterNames) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("\n\t\t")
 			.append("System.out.println(\"")
@@ -80,9 +81,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 
 	protected String getMethodFullName(String methodName, List<String> parameters) {
 		StringBuilder builder = new StringBuilder();
-		builder.append(getCurrentFullClassNameWithPackageName());
-		builder.append(".");
-		builder.append(methodName);
+		builder.append(getMethodContainerName());
 		builder.append("(");
 		for(int i = 0; i < parameters.size(); i++) {
 			String parameter = parameters.get(i);
@@ -97,22 +96,18 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 		return builder.toString();
 	}
 
-	@Override
-	public void exitMethodDeclaration(MethodDeclarationContext ctx) {
-		currentReturnType = null;
-	}
-	
-	protected String getCurrentFullClassNameWithPackageName() {
+	protected String getMethodContainerName() {
 		StringBuilder builder = new StringBuilder();
 		if(currentPackageName != null) {
 			builder.append(currentPackageName);
-			currentClassNames.forEach(name -> {
+			builder.append(".");
+		}
+		for(int i = 0; i < methodContainer.size(); i++) {
+			String name = methodContainer.get(i);
+			builder.append(name);
+			if(i != methodContainer.size() - 1) {
 				builder.append(".");
-				builder.append(name);
-			});
-		} else {
-			///FIXME
-			// 没有包名
+			}
 		}
 		return builder.toString();
 	}
@@ -158,37 +153,65 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 	
 	@Override
 	public void enterClassDeclaration(ClassDeclarationContext ctx) {
-		currentClassNames.push(ctx.IDENTIFIER().getText());
+		methodContainer.push(ctx.IDENTIFIER().getText());
 	}
 	@Override
 	public void exitClassDeclaration(ClassDeclarationContext ctx) {
-		currentClassNames.pop();
+		methodContainer.pop();
 	}
 	@Override
 	public void enterEnumDeclaration(EnumDeclarationContext ctx) {
-		currentClassNames.push(ctx.IDENTIFIER().getText());
+		methodContainer.push(ctx.IDENTIFIER().getText());
 	}
 	@Override
 	public void exitEnumDeclaration(EnumDeclarationContext ctx) {
-		currentClassNames.pop();
+		methodContainer.pop();
 	}
 	@Override
 	public void enterInterfaceDeclaration(InterfaceDeclarationContext ctx) {
-		currentClassNames.push(ctx.IDENTIFIER().getText());
+		methodContainer.push(ctx.IDENTIFIER().getText());
 	}
 	@Override
 	public void exitInterfaceDeclaration(InterfaceDeclarationContext ctx) {
-		currentClassNames.pop();
+		methodContainer.pop();
 	}
 	@Override
 	public void enterAnnotationTypeDeclaration(AnnotationTypeDeclarationContext ctx) {
-		currentClassNames.push(ctx.IDENTIFIER().getText());
+		methodContainer.push(ctx.IDENTIFIER().getText());
 	}
 	@Override
 	public void exitAnnotationTypeDeclaration(AnnotationTypeDeclarationContext ctx) {
-		currentClassNames.pop();
+		methodContainer.pop();
+	}
+	///FIXME
+	// 匿名类
+	private boolean hasCreatorClassBody(CreatorContext ctx) {
+		return false;
+	}
+	private boolean hasCreatorClassBody(InnerCreatorContext ctx) {
+		return false;
+	}
+	@Override
+	public void enterCreator(CreatorContext ctx) {
+		
 	}
 
+	@Override
+	public void exitCreator(CreatorContext ctx) {
+		
+	}
+	
+	@Override
+	public void enterInnerCreator(InnerCreatorContext ctx) {
+		
+	}
+	
+	@Override
+	public void exitInnerCreator(InnerCreatorContext ctx) {
+		
+	}
+	
+	
 	protected String getText(ParserRuleContext ruleContext) {
 		int start = ruleContext.start.getStartIndex();
 		int stop = ruleContext.stop.getStopIndex();
@@ -199,7 +222,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 
 	@Override
 	public void enterClassBody(ClassBodyContext ctx) {
-		if(!getCurrentFullClassNameWithPackageName().equals(globalClass)) {
+		if(!getMethodContainerName().equals(globalClass)) {
 			return ;
 		}
 		StringBuilder builder = new StringBuilder();
@@ -219,4 +242,5 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 
 	@Override
 	public abstract void enterMethodDeclaration(MethodDeclarationContext ctx);
+	
 }
