@@ -67,14 +67,16 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 	protected String startMethod(String methodName, List<String> parameterNames) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("\n\t\t")
-			.append("System.out.println(\"")
+			.append("System.out.println(")
+			.append("\"")
 			.append(this.listenFile.getAbsolutePath().replace("\\", "\\\\"))
 			.append("-")
 			.append(getMethodFullName(methodName, parameterNames))
 			.append("-\" + ")
 			.append(MULTIPLE_STUB_VARIABLE_ORDER).append("++")
 			.append(" + \"-\" + ")
-			.append(MULTIPLE_STUB_VARIABLE_BREADTH).append("++);");
+			.append(MULTIPLE_STUB_VARIABLE_BREADTH).append("++")
+			.append(");");
 		
 		return builder.toString();
 	}
@@ -85,10 +87,8 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 		builder.append("(");
 		for(int i = 0; i < parameters.size(); i++) {
 			String parameter = parameters.get(i);
-			if(i == parameters.size() - 1) {
-				builder.append(parameter);
-			} else {
-				builder.append(parameter);
+			builder.append(parameter);
+			if(i != parameters.size() - 1) {
 				builder.append(", ");
 			}
 		}
