@@ -4,7 +4,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class FileUtils {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
 	
 	/**
 	 * 提取文件所在目录
@@ -12,6 +17,7 @@ public class FileUtils {
 	 * @return
 	 */
 	public static String extractDirectoryFromFile(String filePath) {
+		LOGGER.info("extractDirectoryFromFile " + filePath);
 		if(filePath.contains("\\")) {
 			return filePath.substring(0, filePath.lastIndexOf("\\"));
 		} else if(filePath.contains("/")) {
@@ -27,6 +33,7 @@ public class FileUtils {
 	 * @return
 	 */
 	public static String extractFileName(String filePath) {
+		LOGGER.info("extractFileName " + filePath);
 		if(filePath.contains("\\")) {
 			return filePath.substring(filePath.lastIndexOf("\\") + 1);
 		} else if(filePath.contains("/")) {
@@ -78,16 +85,6 @@ public class FileUtils {
 		for(File file : directory.listFiles()) {
 			listFiles(file, result);
 		}
-	}
-	
-	public static void main(String[] args) {
-		File directory = new File("src/main/resources/dynamic/kieker");
-		directory = new File("src/main/resources/dynamic");
-		List<File> files = new ArrayList<>();
-//		listFiles(directory, files, ".dat");
-//		System.out.println(files.size());
-		listDirectories(directory, 2, files);
-		System.out.println(files.size());
 	}
 	
 	public static void listDirectories(File rootDirectory, int depth, List<File> result) {

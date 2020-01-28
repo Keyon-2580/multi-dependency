@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4jServiceFactory;
@@ -17,7 +20,9 @@ import cn.edu.fudan.se.multidependency.utils.YamlUtils;
 import depends.entity.repo.EntityRepo;
 
 public class InsertDataMain {
-
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(InsertDataMain.class);
+	
     public static void main(String[] args) throws Exception {
     	insert(args);
 	}
@@ -30,24 +35,22 @@ public class InsertDataMain {
 			} else {
 				yaml = YamlUtils.getDataBasePath(args[0]);
 			}
-//			String projectPath = yaml.getCodeProjectPath();
-//			Language language = Language.valueOf(yaml.getCodeLanguage());
 			InserterForNeo4j repository = RepositoryService.getInstance();
 			repository.setDatabasePath(yaml.getNeo4jDatabasePath());
 			repository.setDelete(yaml.isDeleteDatabase());
 			String rootDirectoryPath = yaml.getRootPath();
 			File rootDirectory = new File(rootDirectoryPath);
 			List<File> projectDirectories = new ArrayList<>();
-			FileUtils.listDirectories(rootDirectory, 1, projectDirectories);
+			FileUtils.listDirectories(rootDirectory, yaml.getDepth(), projectDirectories);
 			
 			/**
 			 * 静态分析
 			 */
 			for(File projectDirectory : projectDirectories) {
-				System.out.println(yaml.getAnalyseLanguages());
 				for(String l : yaml.getAnalyseLanguages()) {
 					Language language = Language.valueOf(l);
 					System.out.println("静态分析，项目：" + projectDirectory.getName() + "，语言：" + language);
+					LOGGER.info("静态分析，项目：" + projectDirectory.getName() + "，语言：" + language);
 					DependsEntityRepoExtractor extractor = DependsEntityRepoExtractorImpl.getInstance();
 					extractor.setLanguage(language);
 					extractor.setProjectPath(projectDirectory.getAbsolutePath());
@@ -109,7 +112,7 @@ public class InsertDataMain {
     			yaml.getDynamicCppFileSuffix().toArray(dynamicFileSuffixes);
     		}
     		
-    		File dynamicDirectory = new File(yaml.getDirectoryRootPath());
+    		File dynamicDirectory = new File(yaml.getDynamicDirectoryRootPath());
     		for(File javaData : dynamicDirectory.listFiles()) {
     			//并非批量插入动态分析的数据，而是挨个测试用例插入的
     			if(javaData.isFile()) {

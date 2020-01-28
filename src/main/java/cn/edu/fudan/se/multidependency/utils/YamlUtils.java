@@ -37,18 +37,18 @@ public class YamlUtils {
 		result.setAnalyseLanguages(languages);
 		result.setCodeProjectPath(projectPath);
 		result.setForTest(forTest);
-		String directoryRootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("directory_root_path");
+		String dynamicDirectoryRootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("directory_root_path");
 		String dynamicMarkSuffix = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("dynamic_mark_suffix");
 		List<String> dynamicJavaFileSuffix = (List<String>) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("dynamic_java_file_suffix");
 		List<String> dynamicCppFileSuffix = (List<String>) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("dynamic_cpp_file_suffix");
-		result.setDirectoryRootPath(directoryRootPath);
+		result.setDynamicDirectoryRootPath(dynamicDirectoryRootPath);
 		result.setDynamicCppFileSuffix(dynamicCppFileSuffix);
 		result.setDynamicJavaFileSuffix(dynamicJavaFileSuffix);
 		result.setDynamicMarkSuffix(dynamicMarkSuffix);
-		String buildDirectoryRootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("build")).get("directory_root_path");
-		String buildFilePath = buildDirectoryRootPath+"/"+FileUtils.extractFileName(projectPath)+".txt";
-		result.setBuildDirectoryRootPath(buildDirectoryRootPath);
-		result.setBuildFilePath(buildFilePath);
+//		String buildDirectoryRootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("build")).get("directory_root_path");
+//		String buildFilePath = buildDirectoryRootPath+"/"+FileUtils.extractFileName(projectPath)+".txt";
+//		result.setBuildDirectoryRootPath(buildDirectoryRootPath);
+//		result.setBuildFilePath(buildFilePath);
 		boolean analyseBuild = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("build")).get("analyse");
 		boolean analyseDynamic = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("analyse");
 		result.setAnalyseBuild(analyseBuild);
@@ -64,12 +64,14 @@ public class YamlUtils {
 	
 	@Data
 	public static class YamlObject {
+		private String rootPath;
+		private int depth;
 		private boolean deleteDatabase;
 		private String neo4jDatabasePath;
 		private String codeProjectPath;
 		private List<String> analyseLanguages;
 		private String forTest;
-		private String directoryRootPath;
+		private String dynamicDirectoryRootPath;
 		private List<String> dynamicJavaFileSuffix;
 		private List<String> dynamicCppFileSuffix;
 		private String dynamicMarkSuffix;
@@ -77,7 +79,5 @@ public class YamlUtils {
 		private String buildFilePath;
 		private boolean analyseDynamic;
 		private boolean analyseBuild;
-		private String rootPath;
-		private int depth;
 	}
 }

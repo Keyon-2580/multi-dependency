@@ -1,8 +1,10 @@
 package cn.edu.fudan.se.multidependency.utils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FileUtilsTest {
 
@@ -18,5 +20,20 @@ public class FileUtilsTest {
 		assertEquals(filePath, "/bash-5.0/lib/malloc/malloc.c");
 		assertEquals(directoryPath, "/bash-5.0/lib/malloc");
 	}
-
+	
+//	@Test
+	public void testListDirectory() {
+		File directory = new File("src/main/resources/dynamic");
+		List<File> files = new ArrayList<>();
+		FileUtils.listDirectories(directory, 0, files);
+		System.out.println(files.size());
+		assertEquals(1, files.size());
+		files.clear();
+		System.out.println(files.size());
+		FileUtils.listDirectories(directory, 1, files);
+		System.out.println(files.size());
+		assertEquals(2, files.size());
+		
+	}
+	
 }
