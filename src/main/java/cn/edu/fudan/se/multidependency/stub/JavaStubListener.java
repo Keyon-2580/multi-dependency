@@ -70,7 +70,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			.append("System.out.println(")
 			.append("\"")
 			.append(this.listenFile.getAbsolutePath().replace("\\", "\\\\"))
-			.append("-")
+			.append("|")
 			.append(getMethodFullName(methodName, parameterNames))
 			.append("-\" + ")
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER).append("++")
@@ -85,7 +85,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 		StringBuilder builder = new StringBuilder();
 		builder.append(getMethodContainerName());
 		// 参数
-		builder.append("(");
+		builder.append("-(");
 		for(int i = 0; i < parameters.size(); i++) {
 			String parameter = parameters.get(i);
 			builder.append(parameter);

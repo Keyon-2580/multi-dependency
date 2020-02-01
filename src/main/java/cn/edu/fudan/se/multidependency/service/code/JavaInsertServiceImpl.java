@@ -48,7 +48,6 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				filePath = filePath.substring(filePath.indexOf(projectPath + "/"));
 				file.setPath(filePath);
 				file.setSuffix(FileUtils.extractSuffix(entity.getQualifiedName()));
-				file.setSuffix(FileUtils.extractSuffix(entity.getQualifiedName()));
 				addNodeToNodes(file, entity.getId().longValue(), currentProject);
 			} else if(entity instanceof FunctionEntity) {
 				Function function = new Function();
