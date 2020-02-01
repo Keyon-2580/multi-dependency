@@ -39,7 +39,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 	protected TokenStreamRewriter rewriter;
 	protected CharStream input;
 	protected String globalClass;
-	protected static final String MULTIPLE_STUB_VARIABLE_BREADTH = "MULTIPLE_STUB_VARIABLE_BREADTH";
+	protected static final String MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER = "MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER";
 	protected static final String MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER = "MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER";
 	
 	protected boolean importGlobalVariable = false;
@@ -58,7 +58,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 	protected String endMethod() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("\n")
-			.append(MULTIPLE_STUB_VARIABLE_BREADTH)
+			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER)
 			.append("--;\n");
 //		builder.append("System.out.println(" + MULTIPLE_STUB_VARIABLE_BREADTH + ");");
 		return builder.toString();
@@ -75,7 +75,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			.append("-\" + ")
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER).append("++")
 			.append(" + \"-\" + ")
-			.append(MULTIPLE_STUB_VARIABLE_BREADTH).append("++")
+			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER).append("++")
 			.append(");");
 		
 		return builder.toString();
@@ -139,7 +139,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			StringBuilder builder = new StringBuilder();
 			builder.append("import static ")
 				.append(globalClass).append(".")
-				.append(MULTIPLE_STUB_VARIABLE_BREADTH)
+				.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER)
 				.append(";\n")
 				.append("import static ")
 				.append(globalClass).append(".")
@@ -229,7 +229,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 		StringBuilder builder = new StringBuilder();
 		builder.append(ctx.start.getText())
 			.append(" public static long ")
-			.append(MULTIPLE_STUB_VARIABLE_BREADTH)
+			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER)
 			.append(" = 0L;")
 			.append(" public static long ")
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER)
