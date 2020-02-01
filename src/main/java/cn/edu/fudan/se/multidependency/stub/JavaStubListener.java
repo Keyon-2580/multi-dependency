@@ -40,7 +40,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 	protected CharStream input;
 	protected String globalClass;
 	protected static final String MULTIPLE_STUB_VARIABLE_BREADTH = "MULTIPLE_STUB_VARIABLE_BREADTH";
-	protected static final String MULTIPLE_STUB_VARIABLE_ORDER = "MULTIPLE_STUB_VARIABLE_ORDER";
+	protected static final String MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER = "MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER";
 	
 	protected boolean importGlobalVariable = false;
 	
@@ -73,7 +73,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			.append("-")
 			.append(getMethodFullName(methodName, parameterNames))
 			.append("-\" + ")
-			.append(MULTIPLE_STUB_VARIABLE_ORDER).append("++")
+			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER).append("++")
 			.append(" + \"-\" + ")
 			.append(MULTIPLE_STUB_VARIABLE_BREADTH).append("++")
 			.append(");");
@@ -143,7 +143,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 				.append(";\n")
 				.append("import static ")
 				.append(globalClass).append(".")
-				.append(MULTIPLE_STUB_VARIABLE_ORDER)
+				.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER)
 				.append(";\n")
 				.append(ctx.start.getText());
 			rewriter.replace(ctx.start, 
@@ -232,7 +232,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			.append(MULTIPLE_STUB_VARIABLE_BREADTH)
 			.append(" = 0L;")
 			.append(" public static long ")
-			.append(MULTIPLE_STUB_VARIABLE_ORDER)
+			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER)
 			.append(" = 0L;")
 			;
 		rewriter.replace(ctx.start, builder.toString());
