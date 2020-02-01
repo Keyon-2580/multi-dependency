@@ -28,19 +28,24 @@ import depends.extractor.java.JavaParserBaseListener;
 
 public abstract class JavaStubListener extends JavaParserBaseListener {
 	
-	public JavaStubListener(TokenStream tokens, File listenFile, CharStream input, String className) {
+	public JavaStubListener(TokenStream tokens, File listenFile, CharStream input, String className, String outputFilePath) {
 		this.rewriter = new TokenStreamRewriter(tokens);
-		this.listenFile = listenFile;
-		this.input = input;
+		this.listenJavaFile = listenFile;
+		this.inputCharStream = input;
 		this.globalClass = className;
+		this.outputFilePath = outputFilePath;
 	}
 
-	protected File listenFile;
+	protected File listenJavaFile;
 	protected TokenStreamRewriter rewriter;
-	protected CharStream input;
+	protected CharStream inputCharStream;
 	protected String globalClass;
+	protected String outputFilePath;
 	protected static final String MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER = "MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER";
 	protected static final String MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER = "MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER";
+	protected static final String MULTIPLE_STRING_BUILDER = "MULTIPLE_STRING_BUILDER";
+	protected static final String MULTIPLE_PRINT_TO_FILE = "MULTIPLE_PRINT";
+	protected static final String MULTIPLE_OUTPUT_FILE = "MULTIPLE_OUTPUT_FILE";
 	
 	protected boolean importGlobalVariable = false;
 	
@@ -48,7 +53,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 	protected Stack<String> methodContainer = new Stack<>();
 	
 	public File getListenFile() {
-		return this.listenFile;
+		return this.listenJavaFile;
 	}
 	
 	public TokenStreamRewriter getRewriter() {
@@ -60,23 +65,35 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 		builder.append("\n")
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER)
 			.append("--;\n");
-//		builder.append("System.out.println(" + MULTIPLE_STUB_VARIABLE_BREADTH + ");");
+		builder.append(MULTIPLE_PRINT_TO_FILE).append("();");
+		builder.append("System.out.println(" + MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER + ");");
 		return builder.toString();
 	}
 	
 	protected String startMethod(String methodName, List<String> parameterNames) {
 		StringBuilder builder = new StringBuilder();
-		builder.append("\n\t\t")
+		/*builder.append("\n\t\t")
 			.append("System.out.println(")
 			.append("\"")
-			.append(this.listenFile.getAbsolutePath().replace("\\", "\\\\"))
+			.append(this.listenJavaFile.getAbsolutePath().replace("\\", "\\\\"))
 			.append("|")
 			.append(getMethodFullName(methodName, parameterNames))
 			.append("-\" + ")
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER).append("++")
 			.append(" + \"-\" + ")
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER).append("++")
-			.append(");");
+			.append(");");*/
+		builder.append(MULTIPLE_STRING_BUILDER)
+			.append(".append(")
+			.append("\"")
+			.append(this.listenJavaFile.getAbsolutePath().replace("\\", "\\\\"))
+			.append("|")
+			.append(getMethodFullName(methodName, parameterNames))
+			.append("-\" + ")
+			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER).append("++")
+			.append(" + \"-\" + ")
+			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER).append("++")
+			.append(" + \"\\n\");");
 		
 		return builder.toString();
 	}
@@ -144,6 +161,14 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 				.append("import static ")
 				.append(globalClass).append(".")
 				.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER)
+				.append(";\n")
+				.append("import static ")
+				.append(globalClass).append(".")
+				.append(MULTIPLE_STRING_BUILDER)
+				.append(";\n")
+				.append("import static ")
+				.append(globalClass).append(".")
+				.append(MULTIPLE_PRINT_TO_FILE)
 				.append(";\n")
 				.append(ctx.start.getText());
 			rewriter.replace(ctx.start, 
@@ -217,7 +242,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 		int start = ruleContext.start.getStartIndex();
 		int stop = ruleContext.stop.getStopIndex();
 		Interval interval = new Interval(start, stop);
-		return input.getText(interval);
+		return inputCharStream.getText(interval);
 	}
 	
 
@@ -234,10 +259,23 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			.append(" public static long ")
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER)
 			.append(" = 0L;")
+			.append(" public static final java.lang.StringBuffer ")
+			.append(MULTIPLE_STRING_BUILDER)
+			.append(" = new java.lang.StringBuffer();")
+			.append(" public static final java.lang.String ")
+			.append(MULTIPLE_OUTPUT_FILE)
+			.append(" = \"").append(outputFilePath.replace("\\", "\\\\")).append("\";")
+			.append("public static void ").append(MULTIPLE_PRINT_TO_FILE).append("() {")
+			.append("if(").append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER).append(" != 0L) {")
+			.append("return;}")
+			.append("try(java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.File(").append(MULTIPLE_OUTPUT_FILE).append("))) {")
+			.append("writer.append(").append(MULTIPLE_STRING_BUILDER).append(".toString());")
+			.append(MULTIPLE_STRING_BUILDER).append(".delete(0,").append(MULTIPLE_STRING_BUILDER).append(".length());")
+			.append("} catch (java.lang.Exception e) {e.printStackTrace();}")
+			.append("}")
 			;
 		rewriter.replace(ctx.start, builder.toString());
 	}
-	
 	@Override
 	public abstract void enterConstructorDeclaration(ConstructorDeclarationContext ctx);
 

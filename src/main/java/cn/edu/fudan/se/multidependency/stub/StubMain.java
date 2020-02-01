@@ -25,7 +25,7 @@ import depends.extractor.java.JavaParser;
 
 public class StubMain {
 	
-	public static void stubSingleFileForJava(String filePath, String outputFilePath, String className) throws Exception {
+	public static void stubSingleFileForJava(String filePath, String outputFilePath, String className, String outputStubLogFilePath) throws Exception {
 		File listenFile = new File(filePath);
 		CharStream input = CharStreams.fromFileName(filePath);
 		Lexer lexer = new JavaLexer(input);
@@ -36,7 +36,7 @@ public class StubMain {
 		ParserATNSimulator interpreter = new ParserATNSimulator(parser, parser.getATN(),
 				parser.getInterpreter().decisionToDFA, new PredictionContextCache());
 		parser.setInterpreter(interpreter);
-		JavaStubListener stubListener = new JavaStubListenerUsingTryFinally(tokens, listenFile, input, className);
+		JavaStubListener stubListener = new JavaStubListenerUsingTryFinally(tokens, listenFile, input, className, outputStubLogFilePath);
 		ParseTreeWalker walker = new ParseTreeWalker();
 		walker.walk(stubListener, parser.compilationUnit());
 		File outputFile = new File(outputFilePath);
@@ -49,7 +49,7 @@ public class StubMain {
 		writer.close();
 	}
 
-	public static void stubDirectoryForJava(String directoryPath, String outputDirectoryPath, String className) throws Exception {
+	public static void stubDirectoryForJava(String directoryPath, String outputDirectoryPath, String className, String outputStubLogFilePath) throws Exception {
 		if (directoryPath.equals(outputDirectoryPath)) {
 			return;
 		}
@@ -71,7 +71,7 @@ public class StubMain {
 					outputDirectory.getAbsolutePath() + "\\" + projectName);
 			if (".java".equals(FileUtils.extractSuffix(file.getAbsolutePath()))) {
 				try {
-					stubSingleFileForJava(file.getAbsolutePath(), outputFilePath, className);
+					stubSingleFileForJava(file.getAbsolutePath(), outputFilePath, className, outputStubLogFilePath);
 				} catch (Exception e) {
 					System.err.println(file.getAbsolutePath());
 					e.printStackTrace();
@@ -105,13 +105,13 @@ public class StubMain {
 	}
 
 	public static void main(String[] args) throws Exception {
-//		 String filePath =
-//		 "D:\\git\\multi-dependency\\src\\main\\java\\cn\\edu\\fudan\\se\\multidependency\\stub\\StubMain.java";
-//		 stubSingleFile(filePath, "D:\\test\\test.java", "cn.edu.fudan.se.multidependency.stub.StubMain");
-		 stubSingleFileForJava("D:\\git\\SimpleTest\\src\\main\\java\\fan\\SimpleTest\\App2.java", 
-				 "D:\\test\\test.java", "fan.SimpleTest.App2");
-		stubDirectoryForJava("D:\\git\\multi-dependency", "D:\\projectPath", "cn.edu.fudan.se.multidependency.stub.StubMain");
-		stubDirectoryForJava("D:\\multiple-dependency-project\\depends", "D:\\projectPath", "depends.entity.FileEntity");
+		String filePath =
+				"D:\\git\\multi-dependency\\src\\main\\java\\cn\\edu\\fudan\\se\\multidependency\\stub\\StubMain.java";
+		stubSingleFileForJava(filePath, "D:\\test\\test.java", "cn.edu.fudan.se.multidependency.stub.StubMain", "D:\\stub.log");
+//		 stubSingleFileForJava("D:\\git\\SimpleTest\\src\\main\\java\\fan\\SimpleTest\\App2.java", 
+//				 "D:\\test\\test.java", "fan.SimpleTest.App2", "D:\\stub.log");
+//		stubDirectoryForJava("D:\\git\\multi-dependency", "D:\\projectPath", "cn.edu.fudan.se.multidependency.stub.StubMain", "D:\\stub.log");
+		stubDirectoryForJava("D:\\multiple-dependency-project\\depends", "D:\\projectPath", "depends.entity.FileEntity", "D:\\stub.log");
 	}
 
 }

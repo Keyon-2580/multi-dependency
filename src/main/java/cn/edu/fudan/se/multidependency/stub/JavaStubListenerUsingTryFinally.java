@@ -18,8 +18,8 @@ import depends.extractor.java.JavaParser.StatementContext;
 
 public class JavaStubListenerUsingTryFinally extends JavaStubListener {
 
-	public JavaStubListenerUsingTryFinally(TokenStream tokens, File listenFile, CharStream input, String className) {
-		super(tokens, listenFile, input, className);
+	public JavaStubListenerUsingTryFinally(TokenStream tokens, File listenFile, CharStream input, String className, String outputFilePath) {
+		super(tokens, listenFile, input, className, outputFilePath);
 	}
 	
 	@Override
@@ -59,7 +59,7 @@ public class JavaStubListenerUsingTryFinally extends JavaStubListener {
 		rewriter.insertAfter(block.start, "\ntry {");
 		rewriter.insertBefore(block.stop, "\n} finally{\n" + endMethod() + "\n}");
 	}
-
+	
 	@Override
 	public void enterMethodDeclaration(MethodDeclarationContext ctx) {
 		BlockContext block = ctx.methodBody().block();
