@@ -80,11 +80,9 @@ public class JavaStubListenerUsingTryFinally extends JavaStubListener {
 	
 	@Override
 	public void exitMethodDeclaration(MethodDeclarationContext ctx) {
-		BlockContext block = ctx.methodBody().block();
-		if(block == null) {
-			return ;
+		if(ctx.methodBody().block() != null) {
+			methodContainer.pop();
 		}
-		methodContainer.pop();
 	}
 	
 	@Override

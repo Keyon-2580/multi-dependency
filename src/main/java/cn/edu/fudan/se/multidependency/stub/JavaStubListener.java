@@ -42,7 +42,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 	protected static final String MULTIPLE_STUB_VARIABLE_BREADTH = "MULTIPLE_STUB_VARIABLE_BREADTH";
 	protected static final String MULTIPLE_STUB_VARIABLE_ORDER = "MULTIPLE_STUB_VARIABLE_ORDER";
 	
-	protected boolean importBreadth = false;
+	protected boolean importGlobalVariable = false;
 	
 	protected String currentPackageName;
 	protected Stack<String> methodContainer = new Stack<>();
@@ -84,6 +84,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 	protected String getMethodFullName(String methodName, List<String> parameters) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(getMethodContainerName());
+		// 参数
 		builder.append("(");
 		for(int i = 0; i < parameters.size(); i++) {
 			String parameter = parameters.get(i);
@@ -134,7 +135,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 	
 	@Override
 	public void enterTypeDeclaration(TypeDeclarationContext ctx) {
-		if(this.importBreadth == false) {
+		if(this.importGlobalVariable == false) {
 			StringBuilder builder = new StringBuilder();
 			builder.append("import static ")
 				.append(globalClass).append(".")
@@ -148,7 +149,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			rewriter.replace(ctx.start, 
 					builder.toString());
 		}
-		this.importBreadth = true;
+		this.importGlobalVariable = true;
 	}
 	
 	@Override

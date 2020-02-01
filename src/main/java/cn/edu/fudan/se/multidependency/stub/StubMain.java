@@ -25,97 +25,7 @@ import depends.extractor.java.JavaParser;
 
 public class StubMain {
 	
-	public StubMain() {
-		super();
-		try {
-			
-		} finally {
-			
-		}
-	}
-	
-	public StubMain(int a) {
-		
-	}
-
-	class Test {
-		public Test testTest() {
-			return new Test();
-		}
-		public Test testTest1() throws Exception {
-			throw new Exception();
-		}
-		public Test testTest2() throws Exception {
-			try {
-				throw new Exception();
-			} catch (NullPointerException e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
-		public void mind(String s, Integer r, int a, Integer... integers) {
-			new Thread(new Runnable() {
-				
-				@Override
-				public void run() {
-					int a  =4;
-					if(a < 3)
-						return ;
-				}
-			}).start();
-			new Thread(() -> {
-				int a1  =4;
-				if(a1 < 3)
-					return ;
-			}).start();
-		}
-		public int test() {
-			return 1;
-		}
-		public int test2() {
-			int a = 2;
-			{
-				{
-					if( a>5) 
-						return a < 3 ?  Math.min(2, 4) : test();
-					if(a < 5) 
-						return test();
-					
-				}
-				if(a < 2)
-					return 4;
-			}
-			if(a > 3) {
-				return 1;
-			}
-			if(a < 2) 
-				return 2;
-			return 4;
-		}
-		public void test1() {
-			if (3 > 2)
-				if (5 > 4) {
-					if (2 < 3)
-						System.out.println("eee");
-					if (3 < 6) 
-						System.out.println("eeeeee");
-					
-				}
-			if (3 > 2)
-				if (5 > 4) 
-					if (2 < 3)
-						System.out.println("eee");
-		}
-		public String test3() {
-			if (3 > 2)
-				if (5 > 4) 
-					if (2 < 3)
-						return "eee";
-			return "eeeee";
-		}
-	}
-
-	public static void stubSingleFile(String filePath, String outputFilePath, String className) throws Exception {
+	public static void stubSingleFileForJava(String filePath, String outputFilePath, String className) throws Exception {
 		File listenFile = new File(filePath);
 		CharStream input = CharStreams.fromFileName(filePath);
 		Lexer lexer = new JavaLexer(input);
@@ -139,7 +49,7 @@ public class StubMain {
 		writer.close();
 	}
 
-	public static void stubDirectory(String directoryPath, String outputDirectoryPath, String className) throws Exception {
+	public static void stubDirectoryForJava(String directoryPath, String outputDirectoryPath, String className) throws Exception {
 		if (directoryPath.equals(outputDirectoryPath)) {
 			return;
 		}
@@ -161,7 +71,7 @@ public class StubMain {
 					outputDirectory.getAbsolutePath() + "\\" + projectName);
 			if (".java".equals(FileUtils.extractSuffix(file.getAbsolutePath()))) {
 				try {
-					stubSingleFile(file.getAbsolutePath(), outputFilePath, className);
+					stubSingleFileForJava(file.getAbsolutePath(), outputFilePath, className);
 				} catch (Exception e) {
 					System.err.println(file.getAbsolutePath());
 					e.printStackTrace();
@@ -198,23 +108,10 @@ public class StubMain {
 //		 String filePath =
 //		 "D:\\git\\multi-dependency\\src\\main\\java\\cn\\edu\\fudan\\se\\multidependency\\stub\\StubMain.java";
 //		 stubSingleFile(filePath, "D:\\test\\test.java", "cn.edu.fudan.se.multidependency.stub.StubMain");
-		 stubSingleFile("D:\\git\\SimpleTest\\src\\main\\java\\fan\\SimpleTest\\App2.java", 
+		 stubSingleFileForJava("D:\\git\\SimpleTest\\src\\main\\java\\fan\\SimpleTest\\App2.java", 
 				 "D:\\test\\test.java", "fan.SimpleTest.App2");
-		stubDirectory("D:\\git\\multi-dependency", "D:\\projectPath", "cn.edu.fudan.se.multidependency.stub.StubMain");
-		stubDirectory("D:\\multiple-dependency-project\\depends", "D:\\projectPath", "depends.entity.FileEntity");
-	}
-	public static void main1() {
-		return ;
-	}
-	public static void main2() {
-		if(2 > 1) {
-			return ;
-		}
-		
-	}
-	
-	public void main3() {
-		
+		stubDirectoryForJava("D:\\git\\multi-dependency", "D:\\projectPath", "cn.edu.fudan.se.multidependency.stub.StubMain");
+		stubDirectoryForJava("D:\\multiple-dependency-project\\depends", "D:\\projectPath", "depends.entity.FileEntity");
 	}
 
 }
