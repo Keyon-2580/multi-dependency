@@ -1,0 +1,22 @@
+/*{
+	"a" : "A"
+}*/
+{
+	"projects" : [
+		{
+			"projectPath" : "D:\\multiple-dependency-project\\depends",
+			"outputProjectPath" : "D:\\projectPath",
+			"language" : "java",
+			"globalVariableLocation" : "depends.entity.FileEntity",
+			"outputStubLogFilePath" : "D:\\stub.log"
+		},
+		{
+			"projectPath" : "D:\\multiple-dependency-project\\depends",
+			"outputProjectPath" : "D:\\projectPath1",
+			"language" : "java",
+			"globalVariableLocation" : "depends.entity.FileEntity",
+			"outputStubLogFilePath" : "D:\\stub1.log"
+		}
+	]
+
+}

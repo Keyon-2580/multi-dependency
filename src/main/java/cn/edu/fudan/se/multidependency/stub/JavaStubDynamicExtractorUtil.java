@@ -46,6 +46,8 @@ public class JavaStubDynamicExtractorUtil {
 		Long layer;
 		String functionName;
 		List<String> parameterTypes = new ArrayList<>();
+		String time;
+		String projectName;
 		public void addParameterType(String parameterType) {
 			this.parameterTypes.add(parameterType);
 		}
