@@ -1,0 +1,163 @@
+{
+	"ts-admin-basic-info-service" : [
+		"ts-station-service",
+		"ts-train-service",
+		"ts-config-service",
+		"ts-price-service",
+		"ts-contacts-service"
+	],
+	"ts-admin-order-service" : [
+		"ts-order-service",
+		"ts-order-other-service"
+	],
+	"ts-admin-route-service" : [
+		"ts-route-service"
+	],
+	"ts-admin-travel-service" : [
+		"ts-travel-service",
+		"ts-travel2-service"
+	],
+	"ts-admin-user-service" : [
+		"ts-user-service"
+	],
+	"ts-assurance-service" : [],
+	"ts-auth-service" : [
+		"ts-verification-code-service"
+	],
+	"ts-basic-service" : [
+		"ts-station-service",
+		"ts-train-service",
+		"ts-price-service",
+		"ts-route-service"
+	],
+	"ts-cancel-service" : [
+		"ts-order-service",
+		"ts-order-other-service",
+		"ts-inside-payment-service",
+		"ts-notification-service",
+		"ts-user-service"
+	],
+	"ts-common" : [],
+	"ts-config-service" : [],
+	"ts-consign-price-service" : [],
+	"ts-consign-service" : [
+		"ts-consign-price-service"
+	],
+	"ts-contacts-service" : [],
+	"ts-execute-service" : [
+		"ts-order-service",
+		"ts-order-other-service"
+	],
+	"ts-food-map-service" : [],
+	"ts-food-service" : [
+		"ts-food-map-service",
+		"ts-travel-service",
+		"ts-station-service"
+	],
+	"ts-inside-payment-service" : [
+		"ts-order-service",
+		"ts-order-other-service",
+		"ts-payment-service"
+	],
+	"ts-notification-service" : [],
+	"ts-order-other-service" : [
+		"ts-station-service"
+	],
+	"ts-order-service" : [
+		"ts-station-service"
+	],
+	"ts-payment-service" : [],
+	"ts-preserve-other-service" : [
+		"ts-ticketinfo-service",
+		"ts-seat-service",
+		"ts-notification-service",
+		"ts-user-service",
+		"ts-assurance-service",
+		"ts-station-service",
+		"ts-security-service",
+		"ts-travel2-service",
+		"ts-contacts-service"
+		"ts-order-other-service",
+		"ts-food-service",
+		"ts-consign-service"
+	],
+	"ts-preserve-service" : [
+		"ts-ticketinfo-service",
+		"ts-seat-service",
+		"ts-notification-service",
+		"ts-user-service",
+		"ts-assurance-service",
+		"ts-station-service",
+		"ts-security-service",
+		"ts-travel-service",
+		"ts-contacts-service",
+		"ts-order-service",
+		"ts-food-service",
+		"ts-consign-service"
+	],
+	"ts-price-service" : [],
+	"ts-rebook-service" : [
+		"ts-seat-service",
+		"ts-travel-service",
+		"ts-travel2-service",
+		"ts-order-service",
+		"ts-order-other-service",
+		"ts-station-service",
+		"ts-inside-payment-service"
+	],
+	"ts-route-plan-service" : [
+		"ts-route-service",
+		"ts-travel-service",
+		"ts-travel2-service",
+		"ts-station-service"
+	],
+	"ts-route-service" : [],
+	"ts-seat-service" : [
+		"ts-travel-service",
+		"ts-order-service",
+		"ts-travel2-service",
+		"ts-order-other-service",
+		"ts-config-service"
+	],
+	"ts-security-service" : [
+		"ts-order-service",
+		"ts-order-other-service"
+	],
+	"ts-station-service" : [],
+	"ts-ticketinfo-service" : [
+		"ts-basic-service"
+	],
+	"ts-train-service" : [],
+	"ts-travel2-service" : [
+		"ts-ticketinfo-service",
+		"ts-order-other-service",
+		"ts-train-service",
+		"ts-route-service",
+		"ts-seat-service"
+	],
+	"ts-travel-plan-service" : [
+		"ts-seat-service",
+		"ts-route-plan-service",
+		"ts-travel-service",
+		"ts-travel2-service",
+		"ts-ticketinfo-service",
+		"ts-station-service"
+	],
+	"ts-travel-service" : [
+		"ts-ticketinfo-service",
+		"ts-order-service",
+		"ts-train-service",
+		"ts-route-service",
+		"ts-seat-service"
+	],
+	"ts-user-service" : [
+		"ts-auth-service"
+	],
+	"ts-verification-code-service" : [],
+	"ts-news-service" : [],
+	"ts-ticket-office-service" : [],
+	"ts-voucher-service" : [
+		"ts-order-other-service",
+		"ts-order-service"
+	]
+}
