@@ -28,7 +28,8 @@ import depends.extractor.java.JavaParserBaseListener;
 
 public abstract class JavaStubListener extends JavaParserBaseListener {
 	
-	public JavaStubListener(TokenStream tokens, File listenFile, CharStream input, String className, String outputFilePath) {
+	public JavaStubListener(TokenStream tokens, String projectName, File listenFile, 
+			CharStream input, String className, String outputFilePath) {
 		this.rewriter = new TokenStreamRewriter(tokens);
 		this.listenJavaFile = listenFile;
 		this.inputCharStream = input;
@@ -36,6 +37,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 		this.outputFilePath = outputFilePath;
 	}
 
+	protected String projectName;
 	protected File listenJavaFile;
 	protected TokenStreamRewriter rewriter;
 	protected CharStream inputCharStream;

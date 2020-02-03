@@ -1,7 +1,6 @@
 package cn.edu.fudan.se.multidependency.utils;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -17,7 +16,7 @@ public class FileUtils {
 	 * @return
 	 */
 	public static String extractDirectoryFromFile(String filePath) {
-		LOGGER.info("extractDirectoryFromFile " + filePath);
+//		LOGGER.info("extractDirectoryFromFile " + filePath);
 		if(filePath.contains("\\")) {
 			return filePath.substring(0, filePath.lastIndexOf("\\"));
 		} else if(filePath.contains("/")) {

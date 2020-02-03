@@ -39,7 +39,7 @@ public class StubUtil {
 		return result;
 	}
 	
-	public static void stubSingleFileForJava(String filePath, String outputFilePath, String className,
+	public static void stubSingleFileForJava(String projectName, String filePath, String outputFilePath, String className,
 			String outputStubLogFilePath) throws Exception {
 		File listenFile = new File(filePath);
 		CharStream input = CharStreams.fromFileName(filePath);
@@ -51,7 +51,7 @@ public class StubUtil {
 		ParserATNSimulator interpreter = new ParserATNSimulator(parser, parser.getATN(),
 				parser.getInterpreter().decisionToDFA, new PredictionContextCache());
 		parser.setInterpreter(interpreter);
-		JavaStubListener stubListener = new JavaStubListenerUsingTryFinally(tokens, listenFile, input, className,
+		JavaStubListener stubListener = new JavaStubListenerUsingTryFinally(tokens, projectName, listenFile, input, className,
 				outputStubLogFilePath);
 		ParseTreeWalker walker = new ParseTreeWalker();
 		walker.walk(stubListener, parser.compilationUnit());
@@ -65,7 +65,7 @@ public class StubUtil {
 		writer.close();
 	}
 
-	public static void stubDirectoryForJava(String directoryPath, String outputDirectoryPath, String className,
+	public static void stubDirectoryForJava(String projectName, String directoryPath, String outputDirectoryPath, String className,
 			String outputStubLogFilePath) throws Exception {
 		if (directoryPath.equals(outputDirectoryPath)) {
 			return;
@@ -82,13 +82,13 @@ public class StubUtil {
 		if (!outputDirectory.exists()) {
 			outputDirectory.mkdirs();
 		}
-		String projectName = FileUtils.extractFileName(directoryPath);
+		String directoryName = FileUtils.extractFileName(directoryPath);
 		result.forEach(file -> {
 			String outputFilePath = file.getAbsolutePath().replace(directory.getAbsolutePath(),
-					outputDirectory.getAbsolutePath() + "\\" + projectName);
+					outputDirectory.getAbsolutePath() + "\\" + directoryName);
 			if (".java".equals(FileUtils.extractSuffix(file.getAbsolutePath()))) {
 				try {
-					stubSingleFileForJava(file.getAbsolutePath(), outputFilePath, className, outputStubLogFilePath);
+					stubSingleFileForJava(projectName, file.getAbsolutePath(), outputFilePath, className, outputStubLogFilePath);
 				} catch (Exception e) {
 					System.err.println(file.getAbsolutePath());
 					e.printStackTrace();

@@ -18,14 +18,15 @@ public class StubMain {
 		JSONObject result = StubUtil.extractConfig("src/main/resources/dynamic/stub/train-ticket/config.json");
 		JSONArray projects = result.getJSONArray("projects");
 		projects.forEach(project -> {
-			String projectPath = ((JSONObject) project).getString("projectPath");
-			String outputProjectPath = ((JSONObject) project).getString("outputProjectPath");
+			String name = ((JSONObject) project).getString("name");
+			String path = ((JSONObject) project).getString("path");
+			String outputPath = ((JSONObject) project).getString("outputPath");
 			String language = ((JSONObject) project).getString("language");
 			String globalVariableLocation = ((JSONObject) project).getString("globalVariableLocation");
-			String outputStubLogFilePath = ((JSONObject) project).getString("outputStubLogFilePath");
+			String logPath = ((JSONObject) project).getString("logPath");
 			if("java".equals(language)) {
 				try {
-					StubUtil.stubDirectoryForJava(projectPath, outputProjectPath, globalVariableLocation, outputStubLogFilePath);
+					StubUtil.stubDirectoryForJava(name, path, outputPath, globalVariableLocation, logPath);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

@@ -18,8 +18,8 @@ import depends.extractor.java.JavaParser.StatementContext;
 
 public class JavaStubListenerUsingTryFinally extends JavaStubListener {
 
-	public JavaStubListenerUsingTryFinally(TokenStream tokens, File listenFile, CharStream input, String className, String outputFilePath) {
-		super(tokens, listenFile, input, className, outputFilePath);
+	public JavaStubListenerUsingTryFinally(TokenStream tokens, String projectName, File listenFile, CharStream input, String className, String outputFilePath) {
+		super(tokens, projectName, listenFile, input, className, outputFilePath);
 	}
 	
 	@Override
