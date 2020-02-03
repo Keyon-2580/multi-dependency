@@ -19,6 +19,7 @@ import org.antlr.v4.runtime.atn.ParserATNSimulator;
 import org.antlr.v4.runtime.atn.PredictionContextCache;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONReader;
 import com.google.common.io.Files;
@@ -28,8 +29,28 @@ import depends.extractor.java.JavaLexer;
 import depends.extractor.java.JavaParser;
 
 public class StubUtil {
+
+	public static void stubByConfig(String configPath) {
+		JSONObject result = StubUtil.extractConfig(configPath);
+		JSONArray projects = result.getJSONArray("projects");
+		projects.forEach(project -> {
+			String name = ((JSONObject) project).getString("name");
+			String path = ((JSONObject) project).getString("path");
+			String outputPath = ((JSONObject) project).getString("outputPath");
+			String language = ((JSONObject) project).getString("language");
+			String globalVariableLocation = ((JSONObject) project).getString("globalVariableLocation");
+			String logPath = ((JSONObject) project).getString("logPath");
+			if("java".equals(language)) {
+				try {
+					StubUtil.stubDirectoryForJava(name, path, outputPath, globalVariableLocation, logPath);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
 	
-	public static JSONObject extractConfig(String configPath) {
+	private static JSONObject extractConfig(String configPath) {
 		JSONObject result = new JSONObject();
 		try(JSONReader reader = new JSONReader(new FileReader(new File(configPath)));){
 			result = (JSONObject) reader.readObject();

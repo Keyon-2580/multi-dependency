@@ -35,6 +35,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 		this.inputCharStream = input;
 		this.globalClass = className;
 		this.outputFilePath = outputFilePath;
+		this.projectName = projectName;
 	}
 
 	protected String projectName;
@@ -68,7 +69,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER)
 			.append("--;\n");
 		builder.append(MULTIPLE_PRINT_TO_FILE).append("();");
-		builder.append("System.out.println(" + MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER + ");");
+//		builder.append("System.out.println(" + MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER + ");");
 		return builder.toString();
 	}
 	
@@ -85,9 +86,13 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			.append(" + \"-\" + ")
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER).append("++")
 			.append(");");*/
+//		new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new java.sql.Timestamp(java.lang.System.currentTimeMillis()));
 		builder.append(MULTIPLE_STRING_BUILDER)
 			.append(".append(")
+			.append("new java.text.SimpleDateFormat(\"yyyy/MM/dd-HH:mm:ss\").format(new java.sql.Timestamp(java.lang.System.currentTimeMillis()))")
+			.append(" + \"|\" + ")
 			.append("\"")
+			.append(projectName).append("|")
 			.append(this.listenJavaFile.getAbsolutePath().replace("\\", "\\\\"))
 			.append("|")
 			.append(getMethodFullName(methodName, parameterNames))
@@ -268,10 +273,12 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			.append(MULTIPLE_OUTPUT_FILE)
 			.append(" = \"").append(outputFilePath.replace("\\", "\\\\")).append("\";")
 			.append("public static void ").append(MULTIPLE_PRINT_TO_FILE).append("() {")
-			.append("if(").append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER).append(" != 0L) {")
-			.append("return;}")
-			.append("try(java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.File(").append(MULTIPLE_OUTPUT_FILE).append("))) {")
-			.append("writer.append(").append(MULTIPLE_STRING_BUILDER).append(".toString());")
+//			.append("if(").append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER).append(" != 0L) {")
+//			.append("return;}")
+//			.append("try(java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.File(").append(MULTIPLE_OUTPUT_FILE).append("))) {")
+			.append("try(java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileOutputStream(").append(MULTIPLE_OUTPUT_FILE).append(", true), true)) {")
+			.append("writer.print(").append(MULTIPLE_STRING_BUILDER).append(".toString());")
+			.append("writer.flush();")
 			.append(MULTIPLE_STRING_BUILDER).append(".delete(0,").append(MULTIPLE_STRING_BUILDER).append(".length());")
 			.append("} catch (java.lang.Exception e) {e.printStackTrace();}")
 			.append("}")

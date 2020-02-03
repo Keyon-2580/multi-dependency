@@ -8,14 +8,14 @@
 }*/
 {
 	"projects" : [
-		/*{
+		{
 			"name" : "depends",
 			"path" : "D:\\multiple-dependency-project\\depends",
 			"outputPath" : "D:\\projectPath",
 			"language" : "java",
 			"globalVariableLocation" : "depends.entity.FileEntity",
 			"logPath" : "D:\\stub.log"
-		},*/
+		},
 		{
 			"name" : "ts-admin-basic-info-service",
 			"path" : "D:\\multiple-dependency-project\\train-ticket\\ts-admin-basic-info-service",
