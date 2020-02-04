@@ -87,7 +87,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER).append("++")
 			.append(");");*/
 //		new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new java.sql.Timestamp(java.lang.System.currentTimeMillis()));
-		builder.append(MULTIPLE_STRING_BUILDER)
+		/*builder.append(MULTIPLE_STRING_BUILDER)
 			.append(".append(")
 			.append("new java.text.SimpleDateFormat(\"yyyy/MM/dd-HH:mm:ss\").format(new java.sql.Timestamp(java.lang.System.currentTimeMillis()))")
 			.append(" + \"|\" + ")
@@ -100,8 +100,41 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER).append("++")
 			.append(" + \"-\" + ")
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER).append("++")
-			.append(" + \"\\n\");");
-		
+			.append(" + \"\\n\");");*/
+		builder.append(MULTIPLE_STRING_BUILDER)
+		.append(".append(")
+		.append("new java.text.SimpleDateFormat(\"yyyy/MM/dd-HH:mm:ss\").format(new java.sql.Timestamp(java.lang.System.currentTimeMillis()))")
+		.append(")")
+		.append(".append(\"|\")")
+		.append(".append(")
+		.append("\"")
+		.append(projectName)
+		.append("\"")
+		.append(")")
+		.append(".append(\"|\")")
+		.append(".append(")
+		.append("\"")
+		.append(this.listenJavaFile.getAbsolutePath().replace("\\", "\\\\"))
+		.append("\"")
+		.append(")")
+		.append(".append(\"|\")")
+		.append(".append(")
+		.append("\"")
+		.append(getMethodFullName(methodName, parameterNames))
+		.append("\"")
+		.append(")")
+		.append(".append(\"-\")")
+		.append(".append(")
+		.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER)
+		.append("++")
+		.append(")")
+		.append(".append(\"-\")")
+		.append(".append(")
+		.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER)
+		.append("++")
+		.append(")")
+		.append(".append(\"\\n\");")
+		;
 		return builder.toString();
 	}
 

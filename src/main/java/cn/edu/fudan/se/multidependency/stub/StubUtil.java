@@ -29,7 +29,11 @@ import depends.extractor.java.JavaLexer;
 import depends.extractor.java.JavaParser;
 
 public class StubUtil {
-
+	
+	/**
+	 * 通過配置文件解析多個項目
+	 * @param configPath
+	 */
 	public static void stubByConfig(String configPath) {
 		JSONObject result = StubUtil.extractConfig(configPath);
 		JSONArray projects = result.getJSONArray("projects");
@@ -60,6 +64,15 @@ public class StubUtil {
 		return result;
 	}
 	
+	/**
+	 * 解析單個java文件
+	 * @param projectName
+	 * @param filePath
+	 * @param outputFilePath
+	 * @param className
+	 * @param outputStubLogFilePath
+	 * @throws Exception
+	 */
 	public static void stubSingleFileForJava(String projectName, String filePath, String outputFilePath, String className,
 			String outputStubLogFilePath) throws Exception {
 		File listenFile = new File(filePath);
@@ -86,6 +99,15 @@ public class StubUtil {
 		writer.close();
 	}
 
+	/**
+	 * 解析java語言的單個項目
+	 * @param projectName
+	 * @param directoryPath
+	 * @param outputDirectoryPath
+	 * @param className
+	 * @param outputStubLogFilePath
+	 * @throws Exception
+	 */
 	public static void stubDirectoryForJava(String projectName, String directoryPath, String outputDirectoryPath, String className,
 			String outputStubLogFilePath) throws Exception {
 		if (directoryPath.equals(outputDirectoryPath)) {
