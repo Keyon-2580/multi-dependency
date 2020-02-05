@@ -1,8 +1,5 @@
 package cn.edu.fudan.se.multidependency.stub;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.alibaba.fastjson.JSONObject;
 
 import lombok.Data;
@@ -14,7 +11,14 @@ public class JavaStubDynamicExtractorUtil {
 			DynamicFunctionExecutionFromStub functionExecution = new DynamicFunctionExecutionFromStub();
 			functionExecution.setSentence(sentence);
 			JSONObject json = JSONObject.parseObject(sentence);
-			System.out.println(json);
+			functionExecution.setLanguage(json.getString("language"));
+			functionExecution.setTime(json.getString("time"));
+			functionExecution.setProject(json.getString("project"));
+			functionExecution.setInFile(json.getString("inFile"));
+			functionExecution.setFunction(json.getString("function"));
+			functionExecution.setOrder(Long.parseLong(json.getString("order")));
+			functionExecution.setLayer(Long.parseLong(json.getString("layer")));
+			functionExecution.setRemarks(json.getJSONObject("remarks"));
 			return functionExecution;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -31,15 +35,12 @@ public class JavaStubDynamicExtractorUtil {
 	public static class DynamicFunctionExecutionFromStub { //读取到的方法，所具有的属性
 		String language;
 		String time;
-		String projectName;
-		String filePath;
+		String project;
+		String inFile;
 		Long order;
 		Long layer;
-		String functionName;
-		List<String> parameterTypes = new ArrayList<>();
+		String function;
+		JSONObject remarks;
 		String sentence;
-		public void addParameterType(String parameterType) {
-			this.parameterTypes.add(parameterType);
-		}
 	}
 }
