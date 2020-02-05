@@ -75,6 +75,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 	
 	protected String startMethod(String methodName, List<String> parameterNames) {
 		StringBuilder builder = new StringBuilder();
+		// 字符串控制台输出
 		/*builder.append("\n\t\t")
 			.append("System.out.println(")
 			.append("\"")
@@ -86,7 +87,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			.append(" + \"-\" + ")
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER).append("++")
 			.append(");");*/
-//		new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new java.sql.Timestamp(java.lang.System.currentTimeMillis()));
+		// 字符串保存到StringBuffer，输出到文件
 		/*builder.append(MULTIPLE_STRING_BUILDER)
 			.append(".append(")
 			.append("new java.text.SimpleDateFormat(\"yyyy/MM/dd-HH:mm:ss\").format(new java.sql.Timestamp(java.lang.System.currentTimeMillis()))")
@@ -102,8 +103,9 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER).append("++")
 			.append(" + \"\\n\");");*/
 		builder.append(MULTIPLE_STRING_BUILDER)
+		.append(".append(\"java|\")")
 		.append(".append(")
-		.append("new java.text.SimpleDateFormat(\"yyyy/MM/dd-HH:mm:ss\").format(new java.sql.Timestamp(java.lang.System.currentTimeMillis()))")
+		.append("new java.text.SimpleDateFormat(\"yyyy-MM-dd HH:mm:ss,SSS\").format(new java.sql.Timestamp(java.lang.System.currentTimeMillis()))")
 		.append(")")
 		.append(".append(\"|\")")
 		.append(".append(")
