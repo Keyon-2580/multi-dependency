@@ -5,6 +5,7 @@
  * language：项目语言，目前仅支持java
  * globalVariableLocation：全局变量位置，目前仅支持java，java是具体的类名
  * logPath：打印log的路径
+ * remarks：可选的备注，要不去掉，要不值为json格式，内容随意
 }*/
 {
 	"projects" : [
@@ -14,7 +15,11 @@
 			"outputPath" : "D:\\projectPath",
 			"language" : "java",
 			"globalVariableLocation" : "depends.entity.FileEntity",
-			"logPath" : "D:\\stub.log"
+			"logPath" : "D:\\stub.log"/*,
+			"remarks" : {
+				"featureId" : "123", 
+				"scenario" : "eew"
+			}*/
 		},
 		{
 			"name" : "ts-admin-basic-info-service",

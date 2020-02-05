@@ -18,40 +18,42 @@ import depends.extractor.java.JavaParser.StatementContext;
 
 public class JavaStubListenerUsingTryFinally extends JavaStubListener {
 
-	public JavaStubListenerUsingTryFinally(TokenStream tokens, String projectName, File listenFile, CharStream input, String className, String outputFilePath) {
-		super(tokens, projectName, listenFile, input, className, outputFilePath);
+	public JavaStubListenerUsingTryFinally(TokenStream tokens, String projectName, File listenFile, CharStream input,
+			String className, String outputFilePath,
+			String remarks) {
+		super(tokens, projectName, listenFile, input, className, outputFilePath, remarks);
 	}
-	
+
 	@Override
 	public void enterConstructorDeclaration(ConstructorDeclarationContext ctx) {
 		String methodName = ctx.IDENTIFIER().getText();
 		methodContainer.push(methodName);
-		
+
 		BlockContext block = ctx.constructorBody;
 		FormalParameterListContext parameterList = ctx.formalParameters().formalParameterList();
 		List<String> parameterNames = new ArrayList<>();
-		if(parameterList != null) {
+		if (parameterList != null) {
 			parameterNames = extractParameterNames(parameterList);
 		}
 		List<BlockStatementContext> blockStatements = block.blockStatement();
-		for(BlockStatementContext blockStatement : blockStatements) {
+		for (BlockStatementContext blockStatement : blockStatements) {
 			StatementContext statement = blockStatement.statement();
-			if(statement == null) {
+			if (statement == null) {
 				continue;
 			}
 			ExpressionContext expression = statement.statementExpression;
-			if(expression == null) {
+			if (expression == null) {
 				continue;
 			}
 			MethodCallContext methodCall = expression.methodCall();
-			if(methodCall == null) {
+			if (methodCall == null) {
 				continue;
 			}
-			if(methodCall.SUPER() != null || methodCall.THIS() != null) {
+			if (methodCall.SUPER() != null || methodCall.THIS() != null) {
 				// 添加try-finally
 				rewriter.insertAfter(statement.stop, startMethod(methodName, parameterNames) + "\ntry {");
 				rewriter.insertBefore(block.stop, "\n} finally{\n" + endMethod() + "\n}");
-				return ;
+				return;
 			}
 		}
 		rewriter.insertAfter(block.getStart(), startMethod(methodName, parameterNames));
@@ -59,12 +61,12 @@ public class JavaStubListenerUsingTryFinally extends JavaStubListener {
 		rewriter.insertAfter(block.start, "\ntry {");
 		rewriter.insertBefore(block.stop, "\n} finally{\n" + endMethod() + "\n}");
 	}
-	
+
 	@Override
 	public void enterMethodDeclaration(MethodDeclarationContext ctx) {
 		BlockContext block = ctx.methodBody().block();
-		if(block == null) {
-			return ;
+		if (block == null) {
+			return;
 		}
 		String methodName = ctx.IDENTIFIER().getText();
 		methodContainer.push(methodName);
@@ -72,19 +74,19 @@ public class JavaStubListenerUsingTryFinally extends JavaStubListener {
 		List<String> parameterNames = extractParameterNames(parameterList);
 		// 开头
 		rewriter.insertAfter(block.getStart(), startMethod(methodName, parameterNames));
-		
+
 		// 添加try-finally
 		rewriter.insertAfter(block.start, "\ntry {");
 		rewriter.insertBefore(block.stop, "\n} finally{\n" + endMethod() + "\n}");
 	}
-	
+
 	@Override
 	public void exitMethodDeclaration(MethodDeclarationContext ctx) {
-		if(ctx.methodBody().block() != null) {
+		if (ctx.methodBody().block() != null) {
 			methodContainer.pop();
 		}
 	}
-	
+
 	@Override
 	public void exitConstructorDeclaration(ConstructorDeclarationContext ctx) {
 		methodContainer.pop();

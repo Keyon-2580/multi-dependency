@@ -3,32 +3,18 @@ package cn.edu.fudan.se.multidependency.stub;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alibaba.fastjson.JSONObject;
+
 import lombok.Data;
 
 public class JavaStubDynamicExtractorUtil {
 	
-	
-	public static DynamicFunctionExecutionFromStub extract(String sentence) {
+	public static DynamicFunctionExecutionFromStub extractByJson(String sentence) {
 		try {
 			DynamicFunctionExecutionFromStub functionExecution = new DynamicFunctionExecutionFromStub();
 			functionExecution.setSentence(sentence);
-			String[] splitFilePath = sentence.split("\\|");
-			String time = splitFilePath[0];
-			functionExecution.setTime(time);
-			String projectName = splitFilePath[1];
-			functionExecution.setProjectName(projectName);
-			String filePath = splitFilePath[2];
-			functionExecution.setFilePath(filePath);
-			String executionInfo = splitFilePath[3];
-			String[] splitExecutionInfos = executionInfo.split("-");
-			functionExecution.setLayer(Long.parseLong(splitExecutionInfos[3]));
-			functionExecution.setOrder(Long.parseLong(splitExecutionInfos[2]));
-			functionExecution.setFunctionName(splitExecutionInfos[0]);
-			String parameterTypesStr = splitExecutionInfos[1].replace("(", "").replace(")", "");
-			String[] parameterTypes = parameterTypesStr.split(",");
-			for(String parameterType : parameterTypes) {
-				functionExecution.addParameterType(parameterType.trim());
-			}
+			JSONObject json = JSONObject.parseObject(sentence);
+			System.out.println(json);
 			return functionExecution;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -37,12 +23,13 @@ public class JavaStubDynamicExtractorUtil {
 	}
 	
 	public static void main(String[] args) {
-		String str = "2020/02/03-14:33:41|depends|D:\\multiple-dependency-project\\depends\\target\\generated-sources\\antlr4\\depends\\extractor\\java\\JavaParserBaseListener.java|depends.extractor.java.JavaParserBaseListener.exitEveryRule-(ParserRuleContext)-251-2";
-		System.out.println(extract(str));
+		String str = "{\"language\" : \"java\", \"time\" : \"2020-02-05 14:34:06,450\", \"project\" : \"depends\", \"inFile\" : \"D:\\\\multiple-dependency-project\\\\depends\\\\src\\\\main\\\\java\\\\depends\\\\entity\\\\GenericName.java\", \"function\" : \"depends.entity.GenericName.getArguments()\", \"order\" : \"11\", \"layer\" : \"5\", \"remarks\" : {\"scenario\":\"eew\",\"featureId\":\"123\"}}";
+		System.out.println(extractByJson(str));
 	}
 	
 	@Data
 	public static class DynamicFunctionExecutionFromStub { //读取到的方法，所具有的属性
+		String language;
 		String time;
 		String projectName;
 		String filePath;

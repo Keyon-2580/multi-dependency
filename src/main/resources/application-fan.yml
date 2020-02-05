@@ -37,8 +37,10 @@ data:
    dynamic:
       analyse: false
 #      directory_root_path: src/main/resources/dynamic/kieker
-      directory_root_path: src/main/resources/dynamic/valgrind
-      dynamic_java_file_suffix: [.dat]
+#      directory_root_path: src/main/resources/dynamic/valgrind
+      directory_root_path: src/main/resources/dynamic/stub/logs
+#      dynamic_java_file_suffix: [.dat]
+      dynamic_java_file_suffix: [.log]
       dynamic_cpp_file_suffix: [.dot, .out]
       dynamic_mark_suffix: .mark
    build:   

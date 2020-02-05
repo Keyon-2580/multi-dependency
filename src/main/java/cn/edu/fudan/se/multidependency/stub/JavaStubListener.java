@@ -29,22 +29,26 @@ import depends.extractor.java.JavaParserBaseListener;
 public abstract class JavaStubListener extends JavaParserBaseListener {
 	
 	public JavaStubListener(TokenStream tokens, String projectName, File listenFile, 
-			CharStream input, String className, String outputFilePath) {
+			CharStream input, String className, String outputFilePath,
+			String remarks) {
 		this.rewriter = new TokenStreamRewriter(tokens);
 		this.listenJavaFile = listenFile;
 		this.inputCharStream = input;
 		this.globalClass = className;
 		this.outputFilePath = outputFilePath;
 		this.projectName = projectName;
+		this.remarks = remarks;
 	}
 
+	protected String remarks;
 	protected String projectName;
 	protected File listenJavaFile;
 	protected TokenStreamRewriter rewriter;
 	protected CharStream inputCharStream;
 	protected String globalClass;
 	protected String outputFilePath;
-	protected static final String MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER = "MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER";
+	protected static final String MULTIPLE_STUB_REMARKS = "MUKTIPLE_STUB_REMARKS";
+	protected static final String MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH = "MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH";
 	protected static final String MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER = "MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER";
 	protected static final String MULTIPLE_STRING_BUILDER = "MULTIPLE_STRING_BUILDER";
 	protected static final String MULTIPLE_PRINT_TO_FILE = "MULTIPLE_PRINT";
@@ -66,7 +70,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 	protected String endMethod() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("\n")
-			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER)
+			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH)
 			.append("--;\n");
 		builder.append(MULTIPLE_PRINT_TO_FILE).append("();");
 //		builder.append("System.out.println(" + MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER + ");");
@@ -102,7 +106,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			.append(" + \"-\" + ")
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER).append("++")
 			.append(" + \"\\n\");");*/
-		builder.append(MULTIPLE_STRING_BUILDER)
+		/*builder.append(MULTIPLE_STRING_BUILDER)
 		.append(".append(\"java|\")")
 		.append(".append(")
 		.append("new java.text.SimpleDateFormat(\"yyyy-MM-dd HH:mm:ss,SSS\").format(new java.sql.Timestamp(java.lang.System.currentTimeMillis()))")
@@ -136,7 +140,50 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 		.append("++")
 		.append(")")
 		.append(".append(\"\\n\");")
-		;
+		;*/
+		builder.append(MULTIPLE_STRING_BUILDER)
+		.append(".append(\"{\\\"language\\\" : \\\"java\\\", \")")
+		.append(".append(\"\\\"time\\\" : \\\"")
+		.append("\")")
+		.append(".append(")
+		.append("new java.text.SimpleDateFormat(\"yyyy-MM-dd HH:mm:ss,SSS\").format(new java.sql.Timestamp(java.lang.System.currentTimeMillis()))")
+		.append(")")
+		.append(".append(\"\\\"\")")
+		.append(".append(\", \\\"project\\\" : \\\"\")")
+		.append(".append(\"")
+		.append(projectName)
+		.append("\")")
+		.append(".append(\"\\\", \\\"inFile\\\" : \\\"\")")
+		.append(".append(\"")
+		.append(this.listenJavaFile.getAbsolutePath().replace("\\", "\\\\\\\\"))
+		.append("\")")
+		.append(".append(\"\\\", \\\"function\\\" : \\\"\")")
+		.append(".append(\"")
+		.append(getMethodFullName(methodName, parameterNames))
+		.append("\")")
+		.append(".append(\"\\\", \\\"order\\\" : \\\"\")")
+		.append(".append(")
+		.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER)
+		.append("++")
+		.append(")")
+		.append(".append(\"\\\", \\\"depth\\\" : \\\"\")")
+		.append(".append(")
+		.append(MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH)
+		.append("++")
+		.append(")");
+		if(remarks == null) {
+			builder.append(".append(\"\\\", \\\"remarks\\\" : {}}\")")
+			.append(".append(\"\\n\");");
+		} else {
+			builder.append(".append(\"\\\", \\\"remarks\\\" : \")")
+			.append(".append(")
+			.append("\"")
+			.append(remarks.replace("\"", "\\\""))
+			.append("\"")
+			.append(")")
+			.append(".append(\"}\")")
+			.append(".append(\"\\n\");");
+		}
 		return builder.toString();
 	}
 
@@ -144,7 +191,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 		StringBuilder builder = new StringBuilder();
 		builder.append(getMethodContainerName());
 		// 参数
-		builder.append("-(");
+		builder.append("(");
 		for(int i = 0; i < parameters.size(); i++) {
 			String parameter = parameters.get(i);
 			builder.append(parameter);
@@ -198,7 +245,7 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			StringBuilder builder = new StringBuilder();
 			builder.append("import static ")
 				.append(globalClass).append(".")
-				.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER)
+				.append(MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH)
 				.append(";\n")
 				.append("import static ")
 				.append(globalClass).append(".")
@@ -211,6 +258,10 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 				.append("import static ")
 				.append(globalClass).append(".")
 				.append(MULTIPLE_PRINT_TO_FILE)
+				.append(";\n")
+				.append("import static ")
+				.append(globalClass).append(".")
+				.append(MULTIPLE_STUB_REMARKS)
 				.append(";\n")
 				.append(ctx.start.getText());
 			rewriter.replace(ctx.start, 
@@ -296,11 +347,16 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 		StringBuilder builder = new StringBuilder();
 		builder.append(ctx.start.getText())
 			.append(" public static long ")
-			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER)
+			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH)
 			.append(" = 0L;")
 			.append(" public static long ")
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER)
 			.append(" = 0L;")
+			.append(" public static java.lang.String ")
+			.append(MULTIPLE_STUB_REMARKS)
+			.append(" = ")
+			.append(remarks == null ? null : ("\"" + remarks.replace("\"", "\\\"") + "\""))
+			.append(";")
 			.append(" public static final java.lang.StringBuffer ")
 			.append(MULTIPLE_STRING_BUILDER)
 			.append(" = new java.lang.StringBuffer();")

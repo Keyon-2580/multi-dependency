@@ -29,9 +29,10 @@ import depends.extractor.java.JavaLexer;
 import depends.extractor.java.JavaParser;
 
 public class StubUtil {
-	
+
 	/**
 	 * 通過配置文件解析多個項目
+	 * 
 	 * @param configPath
 	 */
 	public static void stubByConfig(String configPath) {
@@ -44,28 +45,34 @@ public class StubUtil {
 			String language = ((JSONObject) project).getString("language");
 			String globalVariableLocation = ((JSONObject) project).getString("globalVariableLocation");
 			String logPath = ((JSONObject) project).getString("logPath");
-			if("java".equals(language)) {
+			JSONObject remarks = ((JSONObject) project).getJSONObject("remarks");
+			if ("java".equals(language)) {
 				try {
-					StubUtil.stubDirectoryForJava(name, path, outputPath, globalVariableLocation, logPath);
+					if(remarks == null) {
+						StubUtil.stubDirectoryForJava(name, path, outputPath, globalVariableLocation, logPath, null);
+					} else {
+						StubUtil.stubDirectoryForJava(name, path, outputPath, globalVariableLocation, logPath, remarks.toString());
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
 	}
-	
+
 	private static JSONObject extractConfig(String configPath) {
 		JSONObject result = new JSONObject();
-		try(JSONReader reader = new JSONReader(new FileReader(new File(configPath)));){
+		try (JSONReader reader = new JSONReader(new FileReader(new File(configPath)));) {
 			result = (JSONObject) reader.readObject();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 解析單個java文件
+	 * 
 	 * @param projectName
 	 * @param filePath
 	 * @param outputFilePath
@@ -73,8 +80,8 @@ public class StubUtil {
 	 * @param outputStubLogFilePath
 	 * @throws Exception
 	 */
-	public static void stubSingleFileForJava(String projectName, String filePath, String outputFilePath, String className,
-			String outputStubLogFilePath) throws Exception {
+	public static void stubSingleFileForJava(String projectName, String filePath, String outputFilePath,
+			String className, String outputStubLogFilePath, String remarks) throws Exception {
 		File listenFile = new File(filePath);
 		CharStream input = CharStreams.fromFileName(filePath);
 		Lexer lexer = new JavaLexer(input);
@@ -85,8 +92,8 @@ public class StubUtil {
 		ParserATNSimulator interpreter = new ParserATNSimulator(parser, parser.getATN(),
 				parser.getInterpreter().decisionToDFA, new PredictionContextCache());
 		parser.setInterpreter(interpreter);
-		JavaStubListener stubListener = new JavaStubListenerUsingTryFinally(tokens, projectName, listenFile, input, className,
-				outputStubLogFilePath);
+		JavaStubListener stubListener = new JavaStubListenerUsingTryFinally(tokens, projectName, listenFile, input,
+				className, outputStubLogFilePath, remarks);
 		ParseTreeWalker walker = new ParseTreeWalker();
 		walker.walk(stubListener, parser.compilationUnit());
 		File outputFile = new File(outputFilePath);
@@ -101,6 +108,7 @@ public class StubUtil {
 
 	/**
 	 * 解析java語言的單個項目
+	 * 
 	 * @param projectName
 	 * @param directoryPath
 	 * @param outputDirectoryPath
@@ -108,8 +116,8 @@ public class StubUtil {
 	 * @param outputStubLogFilePath
 	 * @throws Exception
 	 */
-	public static void stubDirectoryForJava(String projectName, String directoryPath, String outputDirectoryPath, String className,
-			String outputStubLogFilePath) throws Exception {
+	public static void stubDirectoryForJava(String projectName, String directoryPath, String outputDirectoryPath,
+			String className, String outputStubLogFilePath, String remarks) throws Exception {
 		if (directoryPath.equals(outputDirectoryPath)) {
 			return;
 		}
@@ -131,7 +139,8 @@ public class StubUtil {
 					outputDirectory.getAbsolutePath() + "\\" + directoryName);
 			if (".java".equals(FileUtils.extractSuffix(file.getAbsolutePath()))) {
 				try {
-					stubSingleFileForJava(projectName, file.getAbsolutePath(), outputFilePath, className, outputStubLogFilePath);
+					stubSingleFileForJava(projectName, file.getAbsolutePath(), outputFilePath, className,
+							outputStubLogFilePath, remarks);
 				} catch (Exception e) {
 					System.err.println(file.getAbsolutePath());
 					e.printStackTrace();
