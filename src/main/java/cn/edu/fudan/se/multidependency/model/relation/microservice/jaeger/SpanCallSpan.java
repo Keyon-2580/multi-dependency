@@ -33,8 +33,6 @@ public class SpanCallSpan implements Relation {
 	
 	private Span callSpan;
 	
-	private String time;
-	
 	private String httpRequestMethod;
 	
 	@Override
@@ -57,7 +55,6 @@ public class SpanCallSpan implements Relation {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("startServiceName", span.getServiceName());
 		properties.put("endServiceName", callSpan.getServiceName());
-		properties.put("time", getTime() == null ? "" : getTime());
 		properties.put("httpRequestMethod", getHttpRequestMethod() == null ? "" : getHttpRequestMethod());
 		return properties;
 	}

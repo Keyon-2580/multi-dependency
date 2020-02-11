@@ -1,6 +1,9 @@
 package cn.edu.fudan.se.multidependency.service.microservice.jaeger;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +33,14 @@ public abstract class JaegerTraceInserter extends ExtractorForNodesAndRelationsI
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static void main(String[] args) {
+		System.out.println((1581398121138914L - 1581398120651000L));
+		Timestamp timestamp = new Timestamp(0L);
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
+		String time = format.format(timestamp);
+		System.out.println(time);
 	}
 	
 	protected abstract JSONObject extractTraceJSON() throws Exception;
@@ -65,6 +76,7 @@ public abstract class JaegerTraceInserter extends ExtractorForNodesAndRelationsI
 				span.setOperationName(operationName);
 				span.setServiceName(serviceName);
 				span.setEntityId(generateEntityId());
+				span.setTime(spanJson.getLong("startTime"));
 				spans.put(span.getSpanId(), span);
 				JSONArray references = spanJson.getJSONArray("references");
 				if(references.size() > 1) {
@@ -103,12 +115,21 @@ public abstract class JaegerTraceInserter extends ExtractorForNodesAndRelationsI
 				addRelation(callSpan);
 			}
 		}
-		//
-		for(String id : httpRequestMethodSpanId) {
-			spans.remove(id);
-		}
+		List<Span> sortedSpans = new ArrayList<>();
 		for(String spanId : spans.keySet()) {
-			Span span = spans.get(spanId);
+			if(!httpRequestMethodSpanId.contains(spanId)) {
+				sortedSpans.add(spans.get(spanId));
+			}
+		}
+		sortedSpans.sort(new Comparator<Span>() {
+			@Override
+			public int compare(Span o1, Span o2) {
+				return o1.getTime().compareTo(o2.getTime());
+			}
+		});
+		for(int i = 0; i < sortedSpans.size(); i++) {
+			Span span = sortedSpans.get(i);
+			span.setOrder(i);
 			String serviceName = span.getServiceName();
 			Project project = this.getNodes().findProjectByNameAndLanguage(serviceName, "java");
 			if(project == null) {

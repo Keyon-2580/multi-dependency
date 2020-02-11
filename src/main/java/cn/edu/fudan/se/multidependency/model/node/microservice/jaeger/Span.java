@@ -31,6 +31,10 @@ public class Span implements Node {
     
     private String operationName;
     
+	private Long time;
+	
+	private Integer order;
+    
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
@@ -38,7 +42,9 @@ public class Span implements Node {
 		properties.put("spanId", getSpanId() == null ? "" : getSpanId());
 		properties.put("traceId", getTraceId() == null ? "" : getTraceId());
 		properties.put("serviceName", getServiceName() == null ? "" : getServiceName());
+		properties.put("time", getTime() == null ? -1L : getTime());
 		properties.put("operationName", getOperationName() == null ? "" : getOperationName());
+		properties.put("order", getOrder() == null ? -1 : getOrder());
 		return properties;
 	}
 
