@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 
@@ -150,7 +151,7 @@ public class Nodes {
 
 	public Map<Long, Scenario> findScenarios() {
 		Map<Long, Scenario> scenarios = new HashMap<>();
-		this.nodeTypeToNodes.get(NodeType.Scenario).forEach(node -> {
+		findNodesByNodeType(NodeType.Scenario).forEach(node -> {
 			scenarios.put(node.getId(), (Scenario) node);
 		});
 		return scenarios;
@@ -165,12 +166,27 @@ public class Nodes {
 		return null;
 	}
 	
-	public Map<Long, Feature> findFeatures() {
-		Map<Long, Feature> features = new HashMap<>();
-		this.nodeTypeToNodes.get(NodeType.Feature).forEach(node -> {
-			features.put(node.getId(), (Feature) node);
+	/**
+	 * featureId to feature
+	 * @return
+	 */
+	public Map<Integer, Feature> findFeatures() {
+		Map<Integer, Feature> features = new HashMap<>();
+		findNodesByNodeType(NodeType.Feature).forEach(node -> {
+			Feature feature = (Feature) node;
+			features.put(feature.getFeatureId(), (Feature) node);
 		});
 		return features;
 	}
+	
+	public Map<String, Trace> findTraces() {
+		Map<String, Trace> traces = new HashMap<>();
+		findNodesByNodeType(NodeType.Trace).forEach(node -> {
+			Trace trace = (Trace) node;
+			traces.put(trace.getTraceId(), trace);
+		});
+		return traces;
+	}
+	
 	
 }

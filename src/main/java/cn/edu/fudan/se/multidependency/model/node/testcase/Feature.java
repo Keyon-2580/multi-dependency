@@ -27,11 +27,20 @@ public class Feature implements Node {
     
     private Long entityId;
     
+    private Integer featureId;
+    
+    private String description;
+    
+    private String traceId;
+    
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("featureName", getFeatureName() == null ? "" : getFeatureName());
+		properties.put("featureId", getFeatureId() == null ? -1 : getFeatureId());
+		properties.put("description", getDescription() == null ? "" : getDescription());
+		properties.put("traceId", getTraceId() == null ? "" : getTraceId());
 		return properties;
 	}
 

@@ -8,7 +8,7 @@
 		}, 
 		{
 			"id" : 1,
-			"name" : "查询车票"
+			"name" : "查询车票",
 			"description" : "在订票页面，输入起地、终点、日期和火车类型，点击“search”按钮查询。",
 			"traceId" : "cb45b915f66af9da"
 		}

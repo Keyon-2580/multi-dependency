@@ -8,7 +8,6 @@ import java.util.Map;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import cn.edu.fudan.se.multidependency.microservice.jaeger.JaegerUtil;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
@@ -17,36 +16,25 @@ import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.Projec
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
 import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelationsImpl;
 
-public class JaegerTraceInserter extends ExtractorForNodesAndRelationsImpl {
+public abstract class JaegerTraceInserter extends ExtractorForNodesAndRelationsImpl {
 	
-	public JaegerTraceInserter(String traceId) {
-		super();
-		this.traceId = traceId;
-		currentTrace = new Trace();
-		currentTrace.setEntityId(repository.generateEntityId());
-		currentTrace.setTraceId(traceId);
-		addNode(currentTrace, null);
-	}
-	
-	private String traceId;
-	
-	private Trace currentTrace;
+	protected Trace currentTrace;
 	
 	private Map<String, Span> spans = new HashMap<>();
-	
-	private Map<String, String> isChildOf = new HashMap<>();
 	
 	@Override
 	public void addNodesAndRelations() {
 		try {
-			extract();
+			JSONObject json = extractTraceJSON();
+			extract(json);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	protected void extract() throws Exception {
-		JSONObject json = JaegerUtil.readJSON(traceId);
+	protected abstract JSONObject extractTraceJSON() throws Exception;
+	
+	private void extract(JSONObject json) throws Exception {
 		JSONArray array = json.getJSONArray("data");
 		if(array.isEmpty()) {
 			return ;
@@ -56,15 +44,18 @@ public class JaegerTraceInserter extends ExtractorForNodesAndRelationsImpl {
 		
 		for(int i = 0; i < array.size(); i++) {
 			JSONObject data = array.getJSONObject(i);
-			if(!traceId.equals(data.getString("traceID"))) {
-				continue;
-			}
+			String traceId = data.getString("traceID");
+			
+			currentTrace = new Trace();
+			currentTrace.setEntityId(repository.generateEntityId());
+			currentTrace.setTraceId(traceId);
+			addNode(currentTrace, null);
+
 			JSONObject processes = data.getJSONObject("processes");
 			JSONArray spansArray = data.getJSONArray("spans");
 			for(int j = 0; j < spansArray.size(); j++) {
 				Span span = new Span();
 				JSONObject spanJson = spansArray.getJSONObject(j);
-				String traceId = spanJson.getString("traceID");
 				String spanId = spanJson.getString("spanID");
 				String operationName = spanJson.getString("operationName");
 				String processId = spanJson.getString("processID");
