@@ -22,9 +22,23 @@ public class Nodes {
 	
 	private List<Project> projects = new ArrayList<>();
 	
-	public Project findProjectByName(String name) {
+	public List<Project> findAllProjects() {
+		return new ArrayList<>(projects);
+	}
+	
+	public List<Project> findProjectByName(String name) {
+		List<Project> result = new ArrayList<>();
 		for(Project project : projects) {
 			if(project.getProjectName().equals(name)) {
+				result.add(project);
+			}
+		}
+		return result;
+	}
+	
+	public Project findProjectByNameAndLanguage(String name, String language) {
+		for(Project project : projects) {
+			if(project.getProjectName().equals(name) && project.getLanguage().equals(language)) {
 				return project;
 			}
 		}

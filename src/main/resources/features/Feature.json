@@ -1,0 +1,16 @@
+{
+	"features" : [
+		{
+			"id" : 0,
+			"name" : "登录",
+			"description" : "在登录页面输入用户名、密码和验证码后，点击登录。",
+			"traceId" : "b33eae86cdfa1de0"
+		}, 
+		{
+			"id" : 1,
+			"name" : "查询车票"
+			"description" : "在订票页面，输入起地、终点、日期和火车类型，点击“search”按钮查询。",
+			"traceId" : "cb45b915f66af9da"
+		}
+	]
+}

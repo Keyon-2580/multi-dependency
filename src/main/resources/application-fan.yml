@@ -13,11 +13,11 @@ server:
 data:
    delete: true
    code:
-#      rootPath: D:\multiple-dependency-project\train-ticket
+      rootPath: D:\multiple-dependency-project\train-ticket
 #      rootPath: D:\git\SimpleTest
-      rootPath: D:\multiple-dependency-project\depends
+#      rootPath: D:\multiple-dependency-project\depends
       # 0为当前目录为一个项目   
-      depth: 0
+      depth: 1
       excludes: []
       cppIncludes: []
 #      path: D:\git\halo-1.1.3-beta.1
@@ -37,7 +37,7 @@ data:
       #, cpp]
       platform: windows
    dynamic:
-      analyse: true
+      analyse: false
 #      directory_root_path: src/main/resources/dynamic/kieker
 #      directory_root_path: src/main/resources/dynamic/valgrind
       directory_root_path: src/main/resources/dynamic/stub/logs

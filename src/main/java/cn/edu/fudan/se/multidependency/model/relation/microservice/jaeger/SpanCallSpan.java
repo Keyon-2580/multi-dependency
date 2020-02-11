@@ -11,15 +11,19 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @RelationshipEntity(RelationType.str_SPAN_CALL_SPAN)
 public class SpanCallSpan implements Relation {
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -24758961478391792L;
+	
+	public SpanCallSpan(Span span, Span callSpan) {
+		this.span = span;
+		this.callSpan = callSpan;
+	}
 
 	@Id
     @GeneratedValue
@@ -30,6 +34,8 @@ public class SpanCallSpan implements Relation {
 	private Span callSpan;
 	
 	private String time;
+	
+	private String httpRequestMethod;
 	
 	@Override
 	public Long getStartNodeGraphId() {
@@ -52,6 +58,7 @@ public class SpanCallSpan implements Relation {
 		properties.put("startServiceName", span.getServiceName());
 		properties.put("endServiceName", callSpan.getServiceName());
 		properties.put("time", getTime() == null ? "" : getTime());
+		properties.put("httpRequestMethod", getHttpRequestMethod() == null ? "" : getHttpRequestMethod());
 		return properties;
 	}
 

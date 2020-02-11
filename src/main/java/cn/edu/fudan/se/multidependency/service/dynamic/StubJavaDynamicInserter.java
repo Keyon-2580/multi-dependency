@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.stub.JavaStubDynamicExtractorUtil;
@@ -26,7 +27,7 @@ public class StubJavaDynamicInserter extends DynamicInserterForNeo4jService {
 				for (DynamicFunctionExecutionFromStub calledDynamicFunction : group) {
 					System.out.println("calledDynamicFunction " + calledDynamicFunction);
 					if(functions == null) {
-						functions = this.getNodes().findFunctionsInProject(this.getNodes().findProjectByName(calledDynamicFunction.getProject()));
+						functions = this.getNodes().findFunctionsInProject(this.getNodes().findProjectByNameAndLanguage(calledDynamicFunction.getProject(), Language.java.toString()));
 					}
 					if (calledDynamicFunction.getDepth() == 0 && calledDynamicFunction.getOrder() == 0) {
 						// 是某段程序入口

@@ -28,7 +28,9 @@ public class Span implements Node {
     private String spanId;
     
     private String serviceName;
-
+    
+    private String operationName;
+    
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
@@ -36,6 +38,7 @@ public class Span implements Node {
 		properties.put("spanId", getSpanId() == null ? "" : getSpanId());
 		properties.put("traceId", getTraceId() == null ? "" : getTraceId());
 		properties.put("serviceName", getServiceName() == null ? "" : getServiceName());
+		properties.put("operationName", getOperationName() == null ? "" : getOperationName());
 		return properties;
 	}
 

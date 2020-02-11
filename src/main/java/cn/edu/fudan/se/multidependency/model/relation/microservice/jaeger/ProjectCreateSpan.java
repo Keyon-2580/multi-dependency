@@ -12,12 +12,19 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @RelationshipEntity(RelationType.str_PROJECT_CREATE_SPAN)
 public class ProjectCreateSpan implements Relation {
 
 	private static final long serialVersionUID = -7559932764276563718L;
+	
+	public ProjectCreateSpan(Project project, Span span) {
+		this.project = project;
+		this.span = span;
+	}
 
 	@Id
     @GeneratedValue

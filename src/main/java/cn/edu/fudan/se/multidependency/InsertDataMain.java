@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.edu.fudan.se.multidependency.model.Language;
+import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelationsImpl;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4jServiceFactory;
 import cn.edu.fudan.se.multidependency.service.RepositoryService;
@@ -17,6 +18,7 @@ import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractorIm
 import cn.edu.fudan.se.multidependency.service.dynamic.DynamicInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.service.dynamic.KiekerDynamicExecutionInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.service.dynamic.StubJavaDynamicInserter;
+import cn.edu.fudan.se.multidependency.service.microservice.jaeger.JaegerTraceInserter;
 import cn.edu.fudan.se.multidependency.utils.FileUtils;
 import cn.edu.fudan.se.multidependency.utils.YamlUtils;
 import depends.entity.repo.EntityRepo;
@@ -79,6 +81,11 @@ public class InsertDataMain {
 				System.out.println("构建分析");
 				insertBuildInfo(yaml);
 			}
+			
+			ExtractorForNodesAndRelationsImpl jaegerExtractor = new JaegerTraceInserter("cb45b915f66af9da");
+			jaegerExtractor.addNodesAndRelations();
+			jaegerExtractor = new JaegerTraceInserter("b33eae86cdfa1de0");
+			jaegerExtractor.addNodesAndRelations();
 
 			/// FIXME
 			// 其它
