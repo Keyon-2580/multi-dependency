@@ -10,12 +10,24 @@
 {
 	"projects" : [
 		{
+			"name" : "depends",
+			"path" : "D:\\multiple-dependency-project\\depends",
+			"outputPath" : "D:\\projectPath",
+			"language" : "java",
+			"globalVariableLocation" : "depends.entity.FileEntity",
+			"logPath" : "D:\\stub.log",
+			"remarks" : {
+				"featureId" : "depends-0.1", 
+				"featureName" : "JavaFileImport"
+			}
+		},
+		{
 			"name" : "ts-admin-basic-info-service",
 			"path" : "D:\\multiple-dependency-project\\train-ticket\\ts-admin-basic-info-service",
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "adminbasic.AdminBasicInfoApplication",
-			"logPath" : "/home/ts-admin-basic-info-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-admin-basic-info-service.log"
 		},
 		{
 			"name" : "ts-admin-order-service",
@@ -23,7 +35,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "adminorder.AdminOrderApplication",
-			"logPath" : "/home/ts-admin-order-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-admin-order-service.log"
 		},
 		{
 			"name" : "ts-admin-route-service",
@@ -31,7 +43,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "adminroute.AdminRouteApplication",
-			"logPath" : "/home/ts-admin-route-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-admin-route-service.log"
 		},
 		{
 			"name" : "ts-admin-travel-service",
@@ -39,7 +51,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "admintravel.AdminTravelApplication",
-			"logPath" : "/home/ts-admin-travel-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-admin-travel-service.log"
 		},
 		{
 			"name" : "ts-admin-user-service",
@@ -47,7 +59,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "adminuser.AdminUserApplication",
-			"logPath" : "/home/ts-admin-user-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-admin-user-service.log"
 		},
 		{
 			"name" : "ts-assurance-service",
@@ -55,7 +67,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "assurance.AssuranceApplication",
-			"logPath" : "/home/ts-assurance-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-assurance-service.log"
 		},
 		{
 			"name" : "ts-auth-service",
@@ -63,7 +75,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "auth.AuthApplication",
-			"logPath" : "/home/ts-auth-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-auth-service.log"
 		},
 		{
 			"name" : "ts-basic-service",
@@ -71,7 +83,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "fdse.microservice.BasicApplication",
-			"logPath" : "/home/ts-basic-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-basic-service.log"
 		},
 		{
 			"name" : "ts-cancel-service",
@@ -79,7 +91,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "cancel.CancelApplication",
-			"logPath" : "/home/ts-cancel-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-cancel-service.log"
 		},
 		{
 			"name" : "ts-common",
@@ -87,7 +99,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "edu.fudan.common.config.SwaggerConfig",
-			"logPath" : "/home/ts-common.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-common.log"
 		},
 		{
 			"name" : "ts-config-service",
@@ -95,7 +107,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "config.ConfigApplication",
-			"logPath" : "/home/ts-config-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-config-service.log"
 		},
 		{
 			"name" : "ts-consign-price-service",
@@ -103,7 +115,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "consignprice.ConsignPriceApplication",
-			"logPath" : "/home/ts-consign-price-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-consign-price-service.log"
 		},
 		{
 			"name" : "ts-consign-service",
@@ -111,7 +123,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "consign.ConsignApplication",
-			"logPath" : "/home/ts-consign-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-consign-service.log"
 		},
 		{
 			"name" : "ts-contacts-service",
@@ -119,7 +131,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "contacts.ContactsApplication",
-			"logPath" : "/home/ts-contacts-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-contacts-service.log"
 		},
 		{
 			"name" : "ts-execute-service",
@@ -127,7 +139,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "execute.ExecuteApplication",
-			"logPath" : "/home/ts-execute-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-execute-service.log"
 		},
 		{
 			"name" : "ts-food-map-service",
@@ -135,7 +147,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "food.FoodMapApplication",
-			"logPath" : "/home/ts-food-map-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-food-map-service.log"
 		},
 		{
 			"name" : "ts-food-service",
@@ -143,7 +155,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "foodsearch.FoodApplication",
-			"logPath" : "/home/ts-food-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-food-service.log"
 		},
 		{
 			"name" : "ts-inside-payment-service",
@@ -151,7 +163,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "inside_payment.InsidePaymentApplication",
-			"logPath" : "/home/ts-inside-payment-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-inside-payment-service.log"
 		},
 		// go语言写的服务
 		/*{
@@ -160,7 +172,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "go",
 			"globalVariableLocation" : "",
-			"logPath" : "/home/ts-news-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-news-service.log"
 		},*/
 		{
 			"name" : "ts-notification-service",
@@ -168,7 +180,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "notification.NotificationApplication",
-			"logPath" : "/home/ts-notification-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-notification-service.log"
 		},
 		{
 			"name" : "ts-order-other-service",
@@ -176,7 +188,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "other.OrderOtherApplication",
-			"logPath" : "/home/ts-order-other-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-order-other-service.log"
 		},
 		{
 			"name" : "ts-order-service",
@@ -184,7 +196,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "order.OrderApplication",
-			"logPath" : "/home/ts-order-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-order-service.log"
 		},
 		{
 			"name" : "ts-payment-service",
@@ -192,7 +204,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "com.trainticket.PaymentApplication",
-			"logPath" : "/home/ts-payment-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-payment-service.log"
 		},
 		{
 			"name" : "ts-preserve-other-service",
@@ -200,7 +212,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "preserveOther.PreserveOtherApplication",
-			"logPath" : "/home/ts-preserve-other-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-preserve-other-service.log"
 		},
 		{
 			"name" : "ts-preserve-service",
@@ -208,7 +220,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "preserve.PreserveApplication",
-			"logPath" : "/home/ts-preserve-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-preserve-service.log"
 		},
 		{
 			"name" : "ts-price-service",
@@ -216,7 +228,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "price.PriceApplication",
-			"logPath" : "/home/ts-price-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-price-service.log"
 		},
 		{
 			"name" : "ts-rebook-service",
@@ -224,7 +236,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "rebook.RebookApplication",
-			"logPath" : "/home/ts-rebook-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-rebook-service.log"
 		},
 		{
 			"name" : "ts-route-plan-service",
@@ -232,7 +244,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "plan.RoutePlanApplication",
-			"logPath" : "/home/ts-route-plan-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-route-plan-service.log"
 		},
 		{
 			"name" : "ts-route-service",
@@ -240,7 +252,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "route.RouteApplication",
-			"logPath" : "/home/ts-route-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-route-service.log"
 		},
 		{
 			"name" : "ts-seat-service",
@@ -248,7 +260,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "seat.SeatApplication",
-			"logPath" : "/home/ts-seat-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-seat-service.log"
 		},
 		{
 			"name" : "ts-security-service",
@@ -256,7 +268,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "security.SecurityApplication",
-			"logPath" : "/home/ts-security-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-security-service.log"
 		},
 		{
 			"name" : "ts-station-service",
@@ -264,7 +276,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "fdse.microservice.StationApplication",
-			"logPath" : "/home/ts-station-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-station-service.log"
 		},
 		{
 			"name" : "ts-ticketinfo-service",
@@ -272,7 +284,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "ticketinfo.TicketInfoApplication",
-			"logPath" : "/home/ts-ticketinfo-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-ticketinfo-service.log"
 		},
 		// nodejs写的微服务
 		/*{
@@ -281,7 +293,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "nodejs",
 			"globalVariableLocation" : "",
-			"logPath" : "/home/ts-ticket-office-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-ticket-office-service.log"
 		},*/
 		{
 			"name" : "ts-train-service",
@@ -289,7 +301,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "train.TrainApplication",
-			"logPath" : "/home/ts-train-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-train-service.log"
 		},
 		{
 			"name" : "ts-travel2-service",
@@ -297,7 +309,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "travel2.Travel2Application",
-			"logPath" : "/home/ts-travel2-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-travel2-service.log"
 		},
 		{
 			"name" : "ts-travel-plan-service",
@@ -305,7 +317,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "travelplan.TravelPlanApplication",
-			"logPath" : "/home/ts-travel-plan-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-travel-plan-service.log"
 		},
 		{
 			"name" : "ts-travel-service",
@@ -313,7 +325,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "travel.TravelApplication",
-			"logPath" : "/home/ts-travel-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-travel-service.log"
 		},
 		{
 			"name" : "ts-user-service",
@@ -321,7 +333,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "user.UserApplication",
-			"logPath" : "/home/ts-user-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-user-service.log"
 		},
 		{
 			"name" : "ts-verification-code-service",
@@ -329,7 +341,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "verifycode.VerifyCodeApplication",
-			"logPath" : "/home/ts-verification-code-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-verification-code-service.log"
 		}
 		// python写的微服务
 		/*,
@@ -339,7 +351,7 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "python",
 			"globalVariableLocation" : "",
-			"logPath" : "/home/ts-voucher-service.log"
+			"logPath" : "D:\\train-ticket-logs\\ts-voucher-service.log"
 		}*/
 	]
 

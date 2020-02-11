@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 
@@ -20,6 +21,15 @@ public class Nodes {
 	private Map<Project, Map<NodeType, Map<Long, Node>>> projectToNodes = new HashMap<>();
 	
 	private List<Project> projects = new ArrayList<>();
+	
+	public Project findProjectByName(String name) {
+		for(Project project : projects) {
+			if(project.getProjectName().equals(name)) {
+				return project;
+			}
+		}
+		return null;
+	}
 	
 	public void clear() {
 		allNodes.clear();
@@ -95,6 +105,23 @@ public class Nodes {
 		}
 		Map<Long, ? extends Node> result = projectHasNodes.get(nodeType);
 		return result == null ? new HashMap<>() : result;
+	}
+	
+	public Map<String, List<Function>> findFunctionsInProject(Project project) {
+		Map<String, List<Function>> result = new HashMap<>();
+		if(project == null) {
+			return result;
+		}
+		Map<Long, Function> functions = (Map<Long, Function>) findNodesByNodeTypeInProject(NodeType.Function, project);
+		functions.values().forEach(function -> {
+			String functionName = function.getFunctionName();
+			List<Function> fs = result.get(functionName);
+			fs = fs == null ? new ArrayList<>() : fs;
+			fs.add(function);
+			result.put(functionName, fs);
+		});
+		
+		return result;
 	}
 	
 	public Package findPackageByPackageName(String packageName, Project project) {

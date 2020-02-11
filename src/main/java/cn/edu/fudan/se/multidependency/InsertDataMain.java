@@ -15,6 +15,8 @@ import cn.edu.fudan.se.multidependency.service.build.BuildInserterForNeo4jServic
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractorImpl;
 import cn.edu.fudan.se.multidependency.service.dynamic.DynamicInserterForNeo4jService;
+import cn.edu.fudan.se.multidependency.service.dynamic.KiekerDynamicExecutionInserterForNeo4jService;
+import cn.edu.fudan.se.multidependency.service.dynamic.StubJavaDynamicInserter;
 import cn.edu.fudan.se.multidependency.utils.FileUtils;
 import cn.edu.fudan.se.multidependency.utils.YamlUtils;
 import depends.entity.repo.EntityRepo;
@@ -67,7 +69,8 @@ public class InsertDataMain {
 			 */
 			if (yaml.isAnalyseDynamic()) {
 				System.out.println("动态分析");
-				insertDynamic(yaml);
+//				insertDynamic(yaml);
+				insertDynamicFromStub(yaml);
 			}
 			/**
 			 * 构建分析
@@ -132,7 +135,28 @@ public class InsertDataMain {
 			}
 		}
 	}
-
+	public static void insertDynamicFromStub(YamlUtils.YamlObject yaml) throws Exception {
+		String[] dynamicFileSuffixes = null;
+		for (String l : yaml.getAnalyseLanguages()) {
+			Language language = Language.valueOf(l);
+			if (language == Language.java) {
+				dynamicFileSuffixes = new String[yaml.getDynamicJavaFileSuffix().size()];
+				yaml.getDynamicJavaFileSuffix().toArray(dynamicFileSuffixes); // 后缀为.log
+				File dynamicDirectory = new File(yaml.getDynamicDirectoryRootPath());
+				List<File> result = new ArrayList<>();
+				FileUtils.listFiles(dynamicDirectory, result, dynamicFileSuffixes);
+				File[] files = new File[result.size()];
+				result.toArray(files);
+				DynamicInserterForNeo4jService stubJavaInserter = new StubJavaDynamicInserter();
+//				kiekerInserter.setMarkFile(markFile);
+				stubJavaInserter.setDynamicFunctionCallFiles(files);
+				stubJavaInserter.addNodesAndRelations();
+			} else {
+				///FIXME
+			}
+		}
+	}
+	
 	public static void insertBuildInfo(YamlUtils.YamlObject yaml) throws Exception {
 		for (String l : yaml.getAnalyseLanguages()) {
 			Language language = Language.valueOf(l);
