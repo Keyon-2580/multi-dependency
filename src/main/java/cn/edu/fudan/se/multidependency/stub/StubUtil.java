@@ -45,14 +45,14 @@ public class StubUtil {
 			String language = ((JSONObject) project).getString("language");
 			String globalVariableLocation = ((JSONObject) project).getString("globalVariableLocation");
 			String logPath = ((JSONObject) project).getString("logPath");
-			JSONObject remarks = ((JSONObject) project).getJSONObject("remarks");
+			Boolean usingJaegerWithSpring = ((JSONObject) project).getBoolean("jaeger.spring");
+			usingJaegerWithSpring = usingJaegerWithSpring == null ? false : usingJaegerWithSpring;
+			JSONObject remarksConfig = ((JSONObject) project).getJSONObject("remarks");
 			if ("java".equals(language)) {
 				try {
-					if(remarks == null) {
-						StubUtil.stubDirectoryForJava(name, path, outputPath, globalVariableLocation, logPath, null);
-					} else {
-						StubUtil.stubDirectoryForJava(name, path, outputPath, globalVariableLocation, logPath, remarks.toString());
-					}
+					String remarks = remarksConfig == null ? null : remarksConfig.toString();
+					StubUtil.stubDirectoryForJava(name, path, outputPath, globalVariableLocation, logPath, remarks,
+							usingJaegerWithSpring);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -81,7 +81,8 @@ public class StubUtil {
 	 * @throws Exception
 	 */
 	public static void stubSingleFileForJava(String projectName, String filePath, String outputFilePath,
-			String className, String outputStubLogFilePath, String remarks) throws Exception {
+			String className, String outputStubLogFilePath, String remarks, boolean usingJaegerWithSpring)
+			throws Exception {
 		File listenFile = new File(filePath);
 		CharStream input = CharStreams.fromFileName(filePath);
 		Lexer lexer = new JavaLexer(input);
@@ -92,8 +93,16 @@ public class StubUtil {
 		ParserATNSimulator interpreter = new ParserATNSimulator(parser, parser.getATN(),
 				parser.getInterpreter().decisionToDFA, new PredictionContextCache());
 		parser.setInterpreter(interpreter);
-		JavaStubListener stubListener = new JavaStubListenerUsingTryFinally(tokens, projectName, listenFile, input,
-				className, outputStubLogFilePath, remarks);
+		JavaStubListener stubListener = null;
+		if (usingJaegerWithSpring) {
+			stubListener = new JavaStubListenerUsingTryFinallyForJaegerWithSpring(tokens, projectName, listenFile,
+					input, className, outputStubLogFilePath, remarks);
+		} else {
+			stubListener = new JavaStubListenerUsingTryFinally(tokens, projectName, listenFile, input, className,
+					outputStubLogFilePath, remarks);
+		}
+//		stubListener = new JavaStubListenerUsingTryFinally(tokens, projectName, listenFile, input, className,
+//				outputStubLogFilePath, remarks);
 		ParseTreeWalker walker = new ParseTreeWalker();
 		walker.walk(stubListener, parser.compilationUnit());
 		File outputFile = new File(outputFilePath);
@@ -117,7 +126,8 @@ public class StubUtil {
 	 * @throws Exception
 	 */
 	public static void stubDirectoryForJava(String projectName, String directoryPath, String outputDirectoryPath,
-			String className, String outputStubLogFilePath, String remarks) throws Exception {
+			String className, String outputStubLogFilePath, String remarks, boolean usingJaegerWithSpring)
+			throws Exception {
 		if (directoryPath.equals(outputDirectoryPath)) {
 			return;
 		}
@@ -140,7 +150,7 @@ public class StubUtil {
 			if (".java".equals(FileUtils.extractSuffix(file.getAbsolutePath()))) {
 				try {
 					stubSingleFileForJava(projectName, file.getAbsolutePath(), outputFilePath, className,
-							outputStubLogFilePath, remarks);
+							outputStubLogFilePath, remarks, usingJaegerWithSpring);
 				} catch (Exception e) {
 					System.err.println(file.getAbsolutePath());
 					e.printStackTrace();

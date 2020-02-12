@@ -27,7 +27,6 @@ import depends.extractor.java.JavaParser.TypeDeclarationContext;
 import depends.extractor.java.JavaParserBaseListener;
 
 public abstract class JavaStubListener extends JavaParserBaseListener {
-	
 	public JavaStubListener(TokenStream tokens, String projectName, File listenFile, 
 			CharStream input, String className, String outputFilePath,
 			String remarks) {
@@ -73,74 +72,11 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH)
 			.append("--;\n");
 		builder.append(MULTIPLE_PRINT_TO_FILE).append("();");
-//		builder.append("System.out.println(" + MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER + ");");
 		return builder.toString();
 	}
 	
 	protected String startMethod(String methodName, List<String> parameterNames) {
 		StringBuilder builder = new StringBuilder();
-		// 字符串控制台输出
-		/*builder.append("\n\t\t")
-			.append("System.out.println(")
-			.append("\"")
-			.append(this.listenJavaFile.getAbsolutePath().replace("\\", "\\\\"))
-			.append("|")
-			.append(getMethodFullName(methodName, parameterNames))
-			.append("-\" + ")
-			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER).append("++")
-			.append(" + \"-\" + ")
-			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER).append("++")
-			.append(");");*/
-		// 字符串保存到StringBuffer，输出到文件
-		/*builder.append(MULTIPLE_STRING_BUILDER)
-			.append(".append(")
-			.append("new java.text.SimpleDateFormat(\"yyyy/MM/dd-HH:mm:ss\").format(new java.sql.Timestamp(java.lang.System.currentTimeMillis()))")
-			.append(" + \"|\" + ")
-			.append("\"")
-			.append(projectName).append("|")
-			.append(this.listenJavaFile.getAbsolutePath().replace("\\", "\\\\"))
-			.append("|")
-			.append(getMethodFullName(methodName, parameterNames))
-			.append("-\" + ")
-			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER).append("++")
-			.append(" + \"-\" + ")
-			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER).append("++")
-			.append(" + \"\\n\");");*/
-		/*builder.append(MULTIPLE_STRING_BUILDER)
-		.append(".append(\"java|\")")
-		.append(".append(")
-		.append("new java.text.SimpleDateFormat(\"yyyy-MM-dd HH:mm:ss,SSS\").format(new java.sql.Timestamp(java.lang.System.currentTimeMillis()))")
-		.append(")")
-		.append(".append(\"|\")")
-		.append(".append(")
-		.append("\"")
-		.append(projectName)
-		.append("\"")
-		.append(")")
-		.append(".append(\"|\")")
-		.append(".append(")
-		.append("\"")
-		.append(this.listenJavaFile.getAbsolutePath().replace("\\", "\\\\"))
-		.append("\"")
-		.append(")")
-		.append(".append(\"|\")")
-		.append(".append(")
-		.append("\"")
-		.append(getMethodFullName(methodName, parameterNames))
-		.append("\"")
-		.append(")")
-		.append(".append(\"-\")")
-		.append(".append(")
-		.append(MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER)
-		.append("++")
-		.append(")")
-		.append(".append(\"-\")")
-		.append(".append(")
-		.append(MULTIPLE_STUB_VARIABLE_EXECUTION_LAYER)
-		.append("++")
-		.append(")")
-		.append(".append(\"\\n\");")
-		;*/
 		builder.append(MULTIPLE_STRING_BUILDER)
 		.append(".append(\"{\\\"language\\\" : \\\"java\\\", \")")
 		.append(".append(\"\\\"time\\\" : \\\"")

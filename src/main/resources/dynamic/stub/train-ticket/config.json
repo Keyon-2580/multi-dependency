@@ -15,7 +15,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "adminbasic.AdminBasicInfoApplication",
-			"logPath" : "/home/ts-admin-basic-info-service.log"
+			"logPath" : "/home/ts-admin-basic-info-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-admin-order-service",
@@ -23,7 +24,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "adminorder.AdminOrderApplication",
-			"logPath" : "/home/ts-admin-order-service.log"
+			"logPath" : "/home/ts-admin-order-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-admin-route-service",
@@ -31,7 +33,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "adminroute.AdminRouteApplication",
-			"logPath" : "/home/ts-admin-route-service.log"
+			"logPath" : "/home/ts-admin-route-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-admin-travel-service",
@@ -39,7 +42,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "admintravel.AdminTravelApplication",
-			"logPath" : "/home/ts-admin-travel-service.log"
+			"logPath" : "/home/ts-admin-travel-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-admin-user-service",
@@ -47,7 +51,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "adminuser.AdminUserApplication",
-			"logPath" : "/home/ts-admin-user-service.log"
+			"logPath" : "/home/ts-admin-user-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-assurance-service",
@@ -55,7 +60,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "assurance.AssuranceApplication",
-			"logPath" : "/home/ts-assurance-service.log"
+			"logPath" : "/home/ts-assurance-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-auth-service",
@@ -63,7 +69,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "auth.AuthApplication",
-			"logPath" : "/home/ts-auth-service.log"
+			"logPath" : "/home/ts-auth-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-basic-service",
@@ -71,7 +78,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "fdse.microservice.BasicApplication",
-			"logPath" : "/home/ts-basic-service.log"
+			"logPath" : "/home/ts-basic-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-cancel-service",
@@ -79,7 +87,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "cancel.CancelApplication",
-			"logPath" : "/home/ts-cancel-service.log"
+			"logPath" : "/home/ts-cancel-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-common",
@@ -87,7 +96,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "edu.fudan.common.config.SwaggerConfig",
-			"logPath" : "/home/ts-common.log"
+			"logPath" : "/home/ts-common.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-config-service",
@@ -95,7 +105,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "config.ConfigApplication",
-			"logPath" : "/home/ts-config-service.log"
+			"logPath" : "/home/ts-config-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-consign-price-service",
@@ -103,7 +114,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "consignprice.ConsignPriceApplication",
-			"logPath" : "/home/ts-consign-price-service.log"
+			"logPath" : "/home/ts-consign-price-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-consign-service",
@@ -111,7 +123,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "consign.ConsignApplication",
-			"logPath" : "/home/ts-consign-service.log"
+			"logPath" : "/home/ts-consign-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-contacts-service",
@@ -119,7 +132,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "contacts.ContactsApplication",
-			"logPath" : "/home/ts-contacts-service.log"
+			"logPath" : "/home/ts-contacts-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-execute-service",
@@ -127,7 +141,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "execute.ExecuteApplication",
-			"logPath" : "/home/ts-execute-service.log"
+			"logPath" : "/home/ts-execute-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-food-map-service",
@@ -135,7 +150,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "food.FoodMapApplication",
-			"logPath" : "/home/ts-food-map-service.log"
+			"logPath" : "/home/ts-food-map-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-food-service",
@@ -143,7 +159,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "foodsearch.FoodApplication",
-			"logPath" : "/home/ts-food-service.log"
+			"logPath" : "/home/ts-food-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-inside-payment-service",
@@ -151,7 +168,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "inside_payment.InsidePaymentApplication",
-			"logPath" : "/home/ts-inside-payment-service.log"
+			"logPath" : "/home/ts-inside-payment-service.log",
+			"jaeger.spring" : true
 		},
 		// go语言写的服务
 		/*{
@@ -168,7 +186,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "notification.NotificationApplication",
-			"logPath" : "/home/ts-notification-service.log"
+			"logPath" : "/home/ts-notification-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-order-other-service",
@@ -176,7 +195,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "other.OrderOtherApplication",
-			"logPath" : "/home/ts-order-other-service.log"
+			"logPath" : "/home/ts-order-other-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-order-service",
@@ -184,7 +204,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "order.OrderApplication",
-			"logPath" : "/home/ts-order-service.log"
+			"logPath" : "/home/ts-order-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-payment-service",
@@ -192,7 +213,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "com.trainticket.PaymentApplication",
-			"logPath" : "/home/ts-payment-service.log"
+			"logPath" : "/home/ts-payment-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-preserve-other-service",
@@ -200,7 +222,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "preserveOther.PreserveOtherApplication",
-			"logPath" : "/home/ts-preserve-other-service.log"
+			"logPath" : "/home/ts-preserve-other-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-preserve-service",
@@ -208,7 +231,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "preserve.PreserveApplication",
-			"logPath" : "/home/ts-preserve-service.log"
+			"logPath" : "/home/ts-preserve-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-price-service",
@@ -216,7 +240,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "price.PriceApplication",
-			"logPath" : "/home/ts-price-service.log"
+			"logPath" : "/home/ts-price-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-rebook-service",
@@ -224,7 +249,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "rebook.RebookApplication",
-			"logPath" : "/home/ts-rebook-service.log"
+			"logPath" : "/home/ts-rebook-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-route-plan-service",
@@ -232,7 +258,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "plan.RoutePlanApplication",
-			"logPath" : "/home/ts-route-plan-service.log"
+			"logPath" : "/home/ts-route-plan-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-route-service",
@@ -240,7 +267,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "route.RouteApplication",
-			"logPath" : "/home/ts-route-service.log"
+			"logPath" : "/home/ts-route-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-seat-service",
@@ -248,7 +276,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "seat.SeatApplication",
-			"logPath" : "/home/ts-seat-service.log"
+			"logPath" : "/home/ts-seat-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-security-service",
@@ -256,7 +285,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "security.SecurityApplication",
-			"logPath" : "/home/ts-security-service.log"
+			"logPath" : "/home/ts-security-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-station-service",
@@ -264,7 +294,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "fdse.microservice.StationApplication",
-			"logPath" : "/home/ts-station-service.log"
+			"logPath" : "/home/ts-station-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-ticketinfo-service",
@@ -272,7 +303,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "ticketinfo.TicketInfoApplication",
-			"logPath" : "/home/ts-ticketinfo-service.log"
+			"logPath" : "/home/ts-ticketinfo-service.log",
+			"jaeger.spring" : true
 		},
 		// nodejs写的微服务
 		/*{
@@ -289,7 +321,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "train.TrainApplication",
-			"logPath" : "/home/ts-train-service.log"
+			"logPath" : "/home/ts-train-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-travel2-service",
@@ -297,7 +330,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "travel2.Travel2Application",
-			"logPath" : "/home/ts-travel2-service.log"
+			"logPath" : "/home/ts-travel2-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-travel-plan-service",
@@ -305,7 +339,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "travelplan.TravelPlanApplication",
-			"logPath" : "/home/ts-travel-plan-service.log"
+			"logPath" : "/home/ts-travel-plan-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-travel-service",
@@ -313,7 +348,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "travel.TravelApplication",
-			"logPath" : "/home/ts-travel-service.log"
+			"logPath" : "/home/ts-travel-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-user-service",
@@ -321,7 +357,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "user.UserApplication",
-			"logPath" : "/home/ts-user-service.log"
+			"logPath" : "/home/ts-user-service.log",
+			"jaeger.spring" : true
 		},
 		{
 			"name" : "ts-verification-code-service",
@@ -329,7 +366,8 @@
 			"outputPath" : "D:\\projectPath1\\train-ticket",
 			"language" : "java",
 			"globalVariableLocation" : "verifycode.VerifyCodeApplication",
-			"logPath" : "/home/ts-verification-code-service.log"
+			"logPath" : "/home/ts-verification-code-service.log",
+			"jaeger.spring" : true
 		}
 		// python写的微服务
 		/*,
