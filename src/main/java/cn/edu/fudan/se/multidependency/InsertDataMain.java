@@ -90,9 +90,18 @@ public class InsertDataMain {
 //			jaegerExtractor.addNodesAndRelations();
 
 			// 从下载下来的json文件提取
-			ExtractorForNodesAndRelationsImpl jaegerExtractor = new JaegerTraceInserterFromJSONFile("src/main/resources/train-ticket/cb45b915f66af9da.json");
+			ExtractorForNodesAndRelationsImpl jaegerExtractor = null;
+			jaegerExtractor = new JaegerTraceInserterFromJSONFile("src/main/resources/train-ticket/c2deeee31a300b18.json");
 			jaegerExtractor.addNodesAndRelations();
-			jaegerExtractor = new JaegerTraceInserterFromJSONFile("src/main/resources/train-ticket/b33eae86cdfa1de0.json");
+			jaegerExtractor = new JaegerTraceInserterFromJSONFile("src/main/resources/train-ticket/6d3ce83000119b86.json");
+			jaegerExtractor.addNodesAndRelations();
+			jaegerExtractor = new JaegerTraceInserterFromJSONFile("src/main/resources/train-ticket/3bd898628edbaf29.json");
+			jaegerExtractor.addNodesAndRelations();
+			jaegerExtractor = new JaegerTraceInserterFromJSONFile("src/main/resources/train-ticket/b59ab2c49e460477.json");
+			jaegerExtractor.addNodesAndRelations();
+			jaegerExtractor = new JaegerTraceInserterFromJSONFile("src/main/resources/train-ticket/3ddd3a149193779f.json");
+			jaegerExtractor.addNodesAndRelations();
+			jaegerExtractor = new JaegerTraceInserterFromJSONFile("src/main/resources/train-ticket/286708b1b7769683.json");
 			jaegerExtractor.addNodesAndRelations();
 			
 			ExtractorForNodesAndRelationsImpl featureExtractor = new FeatureInserter("src/main/resources/features/Feature.json");
