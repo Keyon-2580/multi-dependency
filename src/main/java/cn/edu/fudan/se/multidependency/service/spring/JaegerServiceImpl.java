@@ -62,15 +62,7 @@ public class JaegerServiceImpl implements JaegerService {
 
 	@Override
 	public List<FeatureExecuteTrace> findAllFeatureExecuteTraces() {
-		List<FeatureExecuteTrace> executes = new ArrayList<>();
-		System.out.println("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
-		System.out.println(featureExecuteTraceRepository.findAllFeatureExecuteTrace());
-		System.out.println(featureExecuteTraceRepository.findAllExecuteTraces());
-		featureExecuteTraceRepository.findAll().forEach(e -> {
-			System.out.println(e);
-			executes.add(e);
-		});
-		return executes;
+		return featureExecuteTraceRepository.findAllFeatureExecuteTrace();
 	}
 
 	@Override

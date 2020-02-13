@@ -13,6 +13,6 @@ import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCa
 @Repository
 public interface SpanCallSpanRepository extends Neo4jRepository<SpanCallSpan, Long>{
 
-	@Query("MATCH (s1:Span{spanId:{spanId}})-[r:" + RelationType.str_SPAN_CALL_SPAN + "]->(s2:Span) return r;")
+	@Query("MATCH n = (s1:Span{spanId:{spanId}})-[r:" + RelationType.str_SPAN_CALL_SPAN + "]->(s2:Span) return n;")
 	public List<SpanCallSpan> findSpanCallSpansBySpanId(@Param("spanId") String spanId);
 }

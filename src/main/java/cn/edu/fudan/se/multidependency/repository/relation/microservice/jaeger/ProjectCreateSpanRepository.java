@@ -11,7 +11,7 @@ import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroS
 @Repository
 public interface ProjectCreateSpanRepository extends Neo4jRepository<MicroServiceCreateSpan, Long>{
 	
-	@Query("MATCH (p:Project)-[r:" + RelationType.str_MICRO_SERVICE_CREATE_SPAN + "]->(s:Span{spanId:{spanId}}) return r")
+	@Query("MATCH n = (m:MicroService)-[r:" + RelationType.str_MICRO_SERVICE_CREATE_SPAN + "]->(s:Span{spanId:{spanId}}) return n")
 	public MicroServiceCreateSpan findProjectCreateSpan(@Param("spanId") String spanId);
 
 }

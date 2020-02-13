@@ -1,6 +1,5 @@
 package cn.edu.fudan.se.multidependency.controller;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,39 +44,32 @@ public class FeatureController {
 	
 	@Bean
 	public void organize() {
-		System.out.println(jaegerService.findAllFeatureExecuteTraces());
-		/*System.out.println(dynamicAnalyseService.findAllFeatures());
+		System.out.println("organize");
 		List<Feature> features = dynamicAnalyseService.findFeaturesByFeatureId(1, 2);
-		System.out.println(features);
 		// 找出feature执行的trace
 		Map<Feature, FeatureExecuteTrace> featureToTrace = new HashMap<>();
 		for(Feature feature : features) {
 			FeatureExecuteTrace execute = jaegerService.findFeatureExecuteTraceByFeature(feature);
-			System.out.println(execute);
 			featureToTrace.put(feature, execute);
 		}
-		System.out.println(featureToTrace);
 		// 找出trace对应的spans
 		Map<Trace, List<Span>> traceToSpans = new HashMap<>();
 		// 找出span调用哪些span
 		Map<Span, List<SpanCallSpan>> spanCallSpans = new HashMap<>();
 		// 找出span属于哪个project
-		Map<Span, MicroServiceCreateSpan> spanToProject = new HashMap<>();*/
+		Map<Span, MicroServiceCreateSpan> spanBelongToMicroService = new HashMap<>();
 		
-//		for(FeatureExecuteTrace featureExecuteTrace : featureToTrace.values()) {
-//			Trace trace = featureExecuteTrace.getTrace();
-//			System.out.println(trace.getTraceId());
-//			List<Span> spans = jaegerService.findSpansByTrace(trace);
-//			System.out.println(spans);
-//			traceToSpans.put(trace, spans);
-			/*for(Span span : spans) {
+		for(FeatureExecuteTrace featureExecuteTrace : featureToTrace.values()) {
+			Trace trace = featureExecuteTrace.getTrace();
+			List<Span> spans = jaegerService.findSpansByTrace(trace);
+			traceToSpans.put(trace, spans);
+			for(Span span : spans) {
 				List<SpanCallSpan> callSpans = jaegerService.findSpanCallSpans(span);
-				System.out.println(callSpans);
 				spanCallSpans.put(span, callSpans);
-				ProjectCreateSpan project = jaegerService.findProjectCreateSpan(span);
-				spanToProject.put(span, project);
-			}*/
-//		}
-//		System.exit(0);
+				MicroServiceCreateSpan microServiceCreateSpan = jaegerService.findProjectCreateSpan(span);
+				spanBelongToMicroService.put(span, microServiceCreateSpan);
+			}
+		}
+		System.exit(0);
 	}
 }
