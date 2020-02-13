@@ -12,32 +12,32 @@ import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Data
 @NodeEntity
 @EqualsAndHashCode
-public class Trace implements Node {
-	
-	private static final long serialVersionUID = 3264084230399475587L;
+@Data
+public class MicroService implements Node {
 
+	private static final long serialVersionUID = 8307013466383536758L;
+	
 	@Id
     @GeneratedValue
     private Long id;
 
     private Long entityId;
     
-    private String traceId;
+    private String name;
     
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
-		properties.put("traceId", getTraceId() == null ? "" : getTraceId());
+		properties.put("entityId", getEntityId() == null ? "" : getEntityId());
+		properties.put("name", getName() == null ? "" : getName());
 		return properties;
 	}
 
 	@Override
 	public NodeType getNodeType() {
-		return NodeType.Trace;
+		return NodeType.MicroService;
 	}
 
 }

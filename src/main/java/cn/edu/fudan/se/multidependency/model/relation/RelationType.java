@@ -32,7 +32,7 @@ public enum RelationType implements RelationshipType {
 	
 	FILE_BUILD_DEPENDS_FILE(RelationType.str_FILE_BUILD_DEPENDS_FILE),
 	
-	PROJECT_CREATE_SPAN(RelationType.str_PROJECT_CREATE_SPAN),
+	MICRO_SERVICE_CREATE_SPAN(RelationType.str_MICRO_SERVICE_CREATE_SPAN),
 	SPAN_CALL_SPAN(RelationType.str_SPAN_CALL_SPAN),
 	
 	FEATURE_EXECUTE_TRACE(RelationType.str_FEATURE_EXECUTE_TRACE);
@@ -74,7 +74,7 @@ public enum RelationType implements RelationshipType {
 	public static final String str_FILE_BUILD_DEPENDS_FILE = "FILE_BUILD_DEPENDS_FILE";
 	
 	public static final String str_SPAN_CALL_SPAN = "SPAN_CALL_SPAN";
-	public static final String str_PROJECT_CREATE_SPAN = "PROJECT_CREATE_SPAN";
+	public static final String str_MICRO_SERVICE_CREATE_SPAN = "MICRO_SERVICE_CREATE_SPAN";
 	public static final String str_FEATURE_EXECUTE_TRACE = "FEATURE_EXECUTE_TRACE";
 
 	private String name;

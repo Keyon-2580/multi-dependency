@@ -3,9 +3,11 @@ package cn.edu.fudan.se.multidependency.model.relation.dynamic;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
+import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Commit;
@@ -31,7 +33,10 @@ public class CommitUpdateFile implements Relation {
 		this.id = id;
 	}
 	
+	@StartNode
 	private Commit commit;
+	
+	@EndNode
 	private ProjectFile file;
 
 	@Override

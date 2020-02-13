@@ -3,9 +3,11 @@ package cn.edu.fudan.se.multidependency.model.relation.code;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
+import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
@@ -31,8 +33,10 @@ public class FileImportVariable implements Relation {
 		this.variable = variable;
 	}
 
+	@StartNode
 	private ProjectFile file;
 	
+	@EndNode
 	private Variable variable;
 
 	@Override

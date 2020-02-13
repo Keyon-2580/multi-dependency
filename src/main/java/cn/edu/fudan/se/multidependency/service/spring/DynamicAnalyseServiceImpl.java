@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -172,8 +173,8 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	 * 找出所有特性
 	 */
 	@Override
-	public Iterable<Feature> findAllFeatures() {
-		return featureRepository.findAll();
+	public List<Feature> findAllFeatures() {
+		return featureRepository.findAllFeatures();
 	}
 
 	/**
@@ -198,6 +199,18 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	@Override
 	public List<TestCase> findTestCasesByFeatureName(String featureName) {
 		return testCaseRepository.findTestCasesByFeatureName(featureName);
+	}
+
+	@Override
+	public List<Feature> findFeaturesByFeatureId(Integer... featureIds) {
+		List<Integer> idList = Arrays.asList(featureIds);
+		List<Feature> result = new ArrayList<>();
+		for(Feature feature : findAllFeatures()) {
+			if(idList.contains(feature.getFeatureId())) {
+				result.add(feature);
+			}
+		}
+		return result;
 	}
 
 }

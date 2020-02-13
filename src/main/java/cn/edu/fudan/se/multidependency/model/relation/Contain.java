@@ -3,9 +3,11 @@ package cn.edu.fudan.se.multidependency.model.relation;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
+import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import lombok.Data;
@@ -28,8 +30,10 @@ public class Contain implements Relation {
 		this.end = end;
 	}
 
+	@StartNode
 	private Node start;
 	
+	@EndNode
 	private Node end;
 
 	@Override

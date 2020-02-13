@@ -3,11 +3,14 @@ package cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
+import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
@@ -16,21 +19,24 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_PROJECT_CREATE_SPAN)
-public class ProjectCreateSpan implements Relation {
+@RelationshipEntity(RelationType.str_MICRO_SERVICE_CREATE_SPAN)
+public class MicroServiceCreateSpan implements Relation {
 
 	private static final long serialVersionUID = -7559932764276563718L;
 	
-	public ProjectCreateSpan(Project project, Span span) {
-		this.project = project;
+	public MicroServiceCreateSpan(MicroService microService, Span span) {
+		this.project = microService;
 		this.span = span;
 	}
 
 	@Id
     @GeneratedValue
     private Long id;
-		
-	private Project project;
+	
+	@StartNode
+	private MicroService project;
+	
+	@EndNode
 	private Span span;
 
 	@Override
@@ -45,7 +51,7 @@ public class ProjectCreateSpan implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.PROJECT_CREATE_SPAN;
+		return RelationType.MICRO_SERVICE_CREATE_SPAN;
 	}
 
 	@Override

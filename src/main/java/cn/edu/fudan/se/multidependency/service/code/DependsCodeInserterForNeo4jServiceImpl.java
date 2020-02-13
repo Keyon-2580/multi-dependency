@@ -10,6 +10,8 @@ import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
+import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.code.FunctionCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.code.FunctionCastType;
 import cn.edu.fudan.se.multidependency.model.relation.code.FunctionParameterType;
@@ -45,7 +47,15 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 	public void addNodesAndRelations() {
 		try {
 			currentProject.setEntityId(entityRepo.generateId().longValue());
+			/// FIXME
+			// 暂定每个project是一个微服务
+			MicroService microService = new MicroService();
+			microService.setEntityId(entityRepo.generateId().longValue());
+			microService.setName(currentProject.getProjectName());
 			addNodeToNodes(currentProject, currentProject.getEntityId(), currentProject);
+			addNodeToNodes(microService, microService.getEntityId(), null);
+			Contain contain = new Contain(microService, currentProject);
+			addRelation(contain);
 			addNodesWithContainRelations();
 			addRelations();
 		} catch (LanguageErrorException e) {

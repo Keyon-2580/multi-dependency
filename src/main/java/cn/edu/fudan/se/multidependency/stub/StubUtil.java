@@ -56,7 +56,15 @@ public class StubUtil {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			}
+			} /*else if("c".equals(language)) {
+				try {
+					String remarks = remarksConfig == null ? null : remarksConfig.toString();
+					StubUtil.stubDirectoryForC(name, path, outputPath, globalVariableLocation, logPath, remarks,
+							usingJaegerWithSpring);
+				} catch (Exception e) {
+					
+				}
+			}*/
 		});
 	}
 
@@ -101,8 +109,6 @@ public class StubUtil {
 			stubListener = new JavaStubListenerUsingTryFinally(tokens, projectName, listenFile, input, className,
 					outputStubLogFilePath, remarks);
 		}
-//		stubListener = new JavaStubListenerUsingTryFinally(tokens, projectName, listenFile, input, className,
-//				outputStubLogFilePath, remarks);
 		ParseTreeWalker walker = new ParseTreeWalker();
 		walker.walk(stubListener, parser.compilationUnit());
 		File outputFile = new File(outputFilePath);
@@ -181,5 +187,96 @@ public class StubUtil {
 
 		currentTime = new Timestamp(System.currentTimeMillis());
 		System.out.println("结束时间：" + sdf.format(currentTime));
+	}
+	
+	public static void stubDirectoryForC(String projectName, String directoryPath, String outputDirectoryPath,
+			String className, String outputStubLogFilePath, String remarks, boolean usingJaegerWithSpring)
+			throws Exception {
+		if (directoryPath.equals(outputDirectoryPath)) {
+			return;
+		}
+		System.out.println("start to stub java project");
+		DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+		System.out.println("开始时间：" + sdf.format(currentTime));
+
+		File directory = new File(directoryPath);
+		List<File> result = new ArrayList<>();
+		FileUtils.listFiles(directory, result);
+		File outputDirectory = new File(outputDirectoryPath);
+		if (!outputDirectory.exists()) {
+			outputDirectory.mkdirs();
+		}
+		String directoryName = FileUtils.extractFileName(directoryPath);
+		result.forEach(file -> {
+			String outputFilePath = file.getAbsolutePath().replace(directory.getAbsolutePath(),
+					outputDirectory.getAbsolutePath() + "\\" + directoryName);
+			if (".java".equals(FileUtils.extractSuffix(file.getAbsolutePath()))) {
+				try {
+					stubSingleFileForC(projectName, file.getAbsolutePath(), outputFilePath, className,
+							outputStubLogFilePath, remarks, usingJaegerWithSpring);
+				} catch (Exception e) {
+					System.err.println(file.getAbsolutePath());
+					e.printStackTrace();
+					try {
+						File outputFile = new File(outputFilePath);
+						if (!outputFile.exists()) {
+							String temp = FileUtils.extractDirectoryFromFile(outputFilePath);
+							new File(temp).mkdirs();
+						}
+						Files.copy(file, outputFile);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+			} else {
+				try {
+					File outputFile = new File(outputFilePath);
+					if (!outputFile.exists()) {
+						String temp = FileUtils.extractDirectoryFromFile(outputFilePath);
+						new File(temp).mkdirs();
+					}
+					Files.copy(file, outputFile);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+		currentTime = new Timestamp(System.currentTimeMillis());
+		System.out.println("结束时间：" + sdf.format(currentTime));
+	}
+	
+	public static void stubSingleFileForC(String projectName, String filePath, String outputFilePath,
+			String className, String outputStubLogFilePath, String remarks, boolean usingJaegerWithSpring)
+			throws Exception {
+		File listenFile = new File(filePath);
+		CharStream input = CharStreams.fromFileName(filePath);
+		Lexer lexer = new JavaLexer(input);
+		lexer.setInterpreter(new LexerATNSimulator(lexer, lexer.getATN(), lexer.getInterpreter().decisionToDFA,
+				new PredictionContextCache()));
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		JavaParser parser = new JavaParser(tokens);
+		ParserATNSimulator interpreter = new ParserATNSimulator(parser, parser.getATN(),
+				parser.getInterpreter().decisionToDFA, new PredictionContextCache());
+		parser.setInterpreter(interpreter);
+		JavaStubListener stubListener = null;
+		if (usingJaegerWithSpring) {
+			stubListener = new JavaStubListenerUsingTryFinallyForJaegerWithSpring(tokens, projectName, listenFile,
+					input, className, outputStubLogFilePath, remarks);
+		} else {
+			stubListener = new JavaStubListenerUsingTryFinally(tokens, projectName, listenFile, input, className,
+					outputStubLogFilePath, remarks);
+		}
+		ParseTreeWalker walker = new ParseTreeWalker();
+		walker.walk(stubListener, parser.compilationUnit());
+		File outputFile = new File(outputFilePath);
+		if (!outputFile.exists()) {
+			String directory = FileUtils.extractDirectoryFromFile(outputFilePath);
+			new File(directory).mkdirs();
+		}
+		PrintWriter writer = new PrintWriter(outputFile);
+		writer.append(stubListener.getRewriter().getText());
+		writer.close();
 	}
 }

@@ -10,11 +10,11 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 @NodeEntity
 @Data
-@NoArgsConstructor
+@EqualsAndHashCode
 public class Feature implements Node {
 
 	private static final long serialVersionUID = -2410710967921462154L;

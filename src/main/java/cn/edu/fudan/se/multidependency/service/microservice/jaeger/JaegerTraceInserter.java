@@ -1,7 +1,5 @@
 package cn.edu.fudan.se.multidependency.service.microservice.jaeger;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -12,10 +10,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
-import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.ProjectCreateSpan;
+import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
 import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelationsImpl;
 
@@ -33,14 +32,6 @@ public abstract class JaegerTraceInserter extends ExtractorForNodesAndRelationsI
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-	
-	public static void main(String[] args) {
-		System.out.println((1581398121138914L - 1581398120651000L));
-		Timestamp timestamp = new Timestamp(0L);
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
-		String time = format.format(timestamp);
-		System.out.println(time);
 	}
 	
 	protected abstract JSONObject extractTraceJSON() throws Exception;
@@ -132,13 +123,14 @@ public abstract class JaegerTraceInserter extends ExtractorForNodesAndRelationsI
 			span.setOrder(i);
 			String serviceName = span.getServiceName();
 			Project project = this.getNodes().findProjectByNameAndLanguage(serviceName, "java");
-			if(project == null) {
+			MicroService microService = getNodes().findMicroServiceByName(serviceName);
+			if(project == null || microService == null) {
 				throw new Exception("error: span的serviceName不是一个项目 " + serviceName);
 			}
 			addNode(span, project);
 			Contain traceContainSpan = new Contain(currentTrace, span);
 			addRelation(traceContainSpan);
-			ProjectCreateSpan projectCreateSpan = new ProjectCreateSpan(project, span);
+			MicroServiceCreateSpan projectCreateSpan = new MicroServiceCreateSpan(microService, span);
 			addRelation(projectCreateSpan);
 		}
 		

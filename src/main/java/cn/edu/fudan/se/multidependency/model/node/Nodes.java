@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
@@ -188,5 +189,14 @@ public class Nodes {
 		return traces;
 	}
 	
+	public MicroService findMicroServiceByName(String name) {
+		for(Node node : findNodesByNodeType(NodeType.MicroService)) {
+			MicroService temp = (MicroService) node;
+			if(name.equals(temp.getName())) {
+				return temp;
+			}
+		}
+		return null;
+	}
 	
 }

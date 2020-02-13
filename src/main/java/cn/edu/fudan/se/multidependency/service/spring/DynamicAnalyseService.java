@@ -18,7 +18,7 @@ public interface DynamicAnalyseService {
 	
 	public List<TestCase> findTestCasesByFeatureName(String featureName);
 	
-	public Iterable<Feature> findAllFeatures();
+	public List<Feature> findAllFeatures();
 	
 	public Iterable<TestCase> findAllTestCases();
 	
@@ -27,4 +27,6 @@ public interface DynamicAnalyseService {
 	public DynamicTestCaseToFunctionDependency findDependencyFunctionsByTestCaseName(TestCase testCase);
 	
 	public DynamicTestCaseToFileDependency findDependencyFilesByTestCaseName(TestCase testCase);
+
+	public List<Feature> findFeaturesByFeatureId(Integer... featureIds);
 }

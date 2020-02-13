@@ -3,9 +3,11 @@ package cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
+import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
@@ -29,8 +31,10 @@ public class SpanCallSpan implements Relation {
     @GeneratedValue
     private Long id;
 	
+	@StartNode
 	private Span span;
 	
+	@EndNode
 	private Span callSpan;
 	
 	private String httpRequestMethod;

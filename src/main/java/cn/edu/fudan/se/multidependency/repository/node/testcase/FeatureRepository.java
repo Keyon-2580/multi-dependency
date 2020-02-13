@@ -1,5 +1,7 @@
 package cn.edu.fudan.se.multidependency.repository.node.testcase;
 
+import java.util.List;
+
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -10,7 +12,10 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 @Repository
 public interface FeatureRepository extends Neo4jRepository<Feature, Long> {
 	
-	@Query("MATCH (n:Feature{featureName:{featureName}}) RETURN n")
+	@Query("MATCH (f:Feature{featureName:{featureName}}) RETURN f")
 	public Feature findByFeatureName(@Param("featureName") String featureName);
+	
+	@Query("match (f:Feature) return f")
+	public List<Feature> findAllFeatures();
 
 }

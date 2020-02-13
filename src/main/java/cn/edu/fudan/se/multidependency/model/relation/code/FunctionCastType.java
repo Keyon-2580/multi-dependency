@@ -3,9 +3,11 @@ package cn.edu.fudan.se.multidependency.model.relation.code;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
+import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
@@ -19,14 +21,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FunctionCastType implements Relation {
 
-	private static final long serialVersionUID = -7384669294027502528L;
+	private static final long serialVersionUID = 5982413005555063698L;
 
 	@Id
     @GeneratedValue
     private Long id;
-	
+
+	@StartNode
 	private Function function;
 	
+	@EndNode
 	private Type castType;
 
 	public FunctionCastType(Function function, Type castType) {

@@ -10,9 +10,11 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
 @NodeEntity
+@EqualsAndHashCode
 public class Span implements Node {
 
 	private static final long serialVersionUID = 1083944968038564253L;
