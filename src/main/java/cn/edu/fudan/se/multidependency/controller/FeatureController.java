@@ -1,19 +1,22 @@
 package cn.edu.fudan.se.multidependency.controller;
 
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.neo4j.cypher.internal.compiler.v2_3.ast.conditions.orderByOnlyOnIdentifiers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
@@ -24,7 +27,7 @@ import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroS
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.JaegerService;
-import cn.edu.fudan.se.multidependency.service.spring.Organization;
+import cn.edu.fudan.se.multidependency.service.spring.OrganizationService;
 
 @Controller
 @RequestMapping("/feature")
@@ -56,11 +59,29 @@ public class FeatureController {
 		return "feature/index";
 	}
 	
+	@GetMapping("/svg/{featureId}")
+	@ResponseBody
+	public JSONObject renderSVG(@PathVariable("featureId") Integer featureId) {
+		System.out.println(featureId);
+		JSONObject result = new JSONObject();
+		try {
+			Feature feature = organization.findFeatureById(featureId);
+			String svg = organization.featureToSVG(feature);
+			result.put("result", "success");
+			result.put("svg", svg);
+			System.out.println(svg);
+		} catch (Exception e) {
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
+		return result;
+	}
+	
 	@Autowired
-	private Organization organization;
+	private OrganizationService organization;
 	
 	@Bean
-	public Organization organize() {
+	public OrganizationService organize() {
 		System.out.println("organize");
 //		List<Feature> features = dynamicAnalyseService.findFeaturesByFeatureId(1, 2);
 		List<Feature> features = dynamicAnalyseService.findAllFeatures();
@@ -89,12 +110,11 @@ public class FeatureController {
 			}
 		}
 		Map<String, MicroService> allMicroService = jaegerService.findAllMicroService();
-		Organization organization = new Organization(allMicroService , featureExecuteTraces, traceToSpans, spanCallSpans, spanBelongToMicroService);
-		System.out.println(organization.allMicroServices().size());
-		System.out.println(organization.allFeatures().size());
-		Map<Feature, Set<MicroService>> featureToMSs = organization.findAllRelatedMicroServiceSplitByFeature();
-		for(Feature feature : featureToMSs.keySet()) {
-			System.out.println(featureToMSs.get(feature).size());
+		OrganizationService organization = new OrganizationService(allMicroService , featureExecuteTraces, traceToSpans, spanCallSpans, spanBelongToMicroService);
+		System.out.println(organization.featureToSVG(organization.findFeatureById(2)));
+		try(PrintWriter writer = new PrintWriter(new File("D:\\p.txt"));){
+			writer.print(organization.featureToSVG(organization.findFeatureById(2)));
+		} catch (Exception e) {
 		}
 		return organization;
 	}

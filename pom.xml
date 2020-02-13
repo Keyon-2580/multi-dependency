@@ -115,6 +115,11 @@
 		    <version>4.0.0</version>
 		</dependency>-->
 		<dependency>
+		    <groupId>guru.nidi</groupId>
+		    <artifactId>graphviz-java</artifactId>
+		    <version>0.14.1</version>
+		</dependency>
+		<dependency>
 		    <groupId>org.neo4j</groupId>
 		    <artifactId>neo4j-batch-insert</artifactId>
 		    <version>4.0.0</version>
