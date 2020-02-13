@@ -25,7 +25,7 @@ public class MicroServiceCreateSpan implements Relation {
 	private static final long serialVersionUID = -7559932764276563718L;
 	
 	public MicroServiceCreateSpan(MicroService microService, Span span) {
-		this.project = microService;
+		this.microservice = microService;
 		this.span = span;
 	}
 
@@ -34,14 +34,14 @@ public class MicroServiceCreateSpan implements Relation {
     private Long id;
 	
 	@StartNode
-	private MicroService project;
+	private MicroService microservice;
 	
 	@EndNode
 	private Span span;
 
 	@Override
 	public Long getStartNodeGraphId() {
-		return project.getId();
+		return microservice.getId();
 	}
 
 	@Override

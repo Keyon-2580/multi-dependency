@@ -1,18 +1,21 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FeatureExecuteTrace;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
+import cn.edu.fudan.se.multidependency.repository.node.microservice.jaeger.MicroServiceRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FeatureExecuteTraceRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.jaeger.ProjectCreateSpanRepository;
@@ -32,6 +35,9 @@ public class JaegerServiceImpl implements JaegerService {
 	
 	@Autowired
 	private ProjectCreateSpanRepository projectCreateSpanRepository;
+	
+	@Autowired
+	private MicroServiceRepository microServiceRepository;
 	
 	@Override
 	public Trace findTraceByFeature(Feature feature) {
@@ -56,7 +62,7 @@ public class JaegerServiceImpl implements JaegerService {
 	}
 
 	@Override
-	public MicroServiceCreateSpan findProjectCreateSpan(Span span) {
+	public MicroServiceCreateSpan findMicroServiceCreateSpan(Span span) {
 		return projectCreateSpanRepository.findProjectCreateSpan(span.getSpanId());
 	}
 
@@ -68,6 +74,15 @@ public class JaegerServiceImpl implements JaegerService {
 	@Override
 	public FeatureExecuteTrace findFeatureExecuteTraceByFeature(Feature feature) {
 		return featureExecuteTraceRepository.findExecuteTraceByFeatureId(feature.getFeatureId());
+	}
+
+	@Override
+	public Map<String, MicroService> findAllMicroService() {
+		Map<String, MicroService> result = new HashMap<>();
+		microServiceRepository.findAll().forEach(ms -> {
+			result.put(ms.getName(), ms);
+		});
+		return result;
 	}
 
 }
