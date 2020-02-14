@@ -62,6 +62,15 @@ public abstract class JaegerTraceInserter extends ExtractorForNodesAndRelationsI
 				String operationName = spanJson.getString("operationName");
 				String processId = spanJson.getString("processID");
 				String serviceName = processes.getJSONObject(processId).getString("serviceName");
+				JSONArray logs = spanJson.getJSONArray("logs");
+				if(logs != null && logs.size() > 1) {
+					JSONObject log = logs.getJSONObject(0);
+					JSONArray fields = log.getJSONArray("fields");
+					if(fields.size() > 2) {
+						JSONObject field = fields.getJSONObject(1);
+						span.setApiFunctionName(field.getString("value"));
+					}
+				}
 				span.setTraceId(traceId);
 				span.setSpanId(spanId);
 				span.setOperationName(operationName);

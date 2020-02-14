@@ -36,6 +36,8 @@ public class Span implements Node {
 	private Long time;
 	
 	private Integer order;
+	
+	private String apiFunctionName;
     
 	@Override
 	public Map<String, Object> getProperties() {
@@ -47,6 +49,7 @@ public class Span implements Node {
 		properties.put("time", getTime() == null ? -1L : getTime());
 		properties.put("operationName", getOperationName() == null ? "" : getOperationName());
 		properties.put("order", getOrder() == null ? -1 : getOrder());
+		properties.put("apiFunctionName", getApiFunctionName() == null ? "" : getApiFunctionName());
 		return properties;
 	}
 
