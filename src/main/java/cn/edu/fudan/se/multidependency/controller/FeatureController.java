@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,25 @@ public class FeatureController {
 		request.setAttribute("microservices", organizationService.allMicroServices());
 		return "feature/index";
 	}
+	
+	@GetMapping("/show/microservice/unfold")
+	@ResponseBody
+	public JSONObject toCatoscape() {
+		JSONObject result = new JSONObject();
+		try {
+			List<MicroService> unfoldMSs = new ArrayList<>();
+			Feature feature = organizationService.findFeatureById(2);
+			result.put("result", "success");
+			result.put("removeUnuseMicroService", "true");
+			result.put("value",
+					organizationService.unfoldMicroServiceToCatoscape(feature, unfoldMSs));
+		} catch (Exception e) {
+			result.put("result", "fail");
+			result.put("value", e.getMessage());
+		}
+		
+		return result;
+	}
 
 	@GetMapping("/show/microservice/{featureId}")
 	@ResponseBody
@@ -68,7 +88,7 @@ public class FeatureController {
 		try {
 			result.put("result", "success");
 			if("all".equals(featureId)) {
-				result.put("value", organizationService.allMicroServiceToCatoscape(true, organizationService.allFeatures()));
+				result.put("value", organizationService.microServiceToCatoscape(true, organizationService.allFeatures()));
 			} else {
 				Integer temp = Integer.valueOf(featureId);
 				if(temp == null) {
@@ -78,8 +98,9 @@ public class FeatureController {
 				if(feature == null) {
 					throw new Exception("没有featureId为 " + featureId + " 的Feature");
 				}
+				result.put("removeUnuseMicroService", removeUnuseMicroService);
 				result.put("value",
-						organizationService.allMicroServiceToCatoscape(true, feature));
+						organizationService.microServiceToCatoscape(true, feature));
 			}
 		} catch (Exception e) {
 			result.put("result", "fail");

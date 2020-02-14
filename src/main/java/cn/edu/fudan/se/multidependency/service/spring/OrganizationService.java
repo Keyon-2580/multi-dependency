@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.neo4j.cypher.internal.compiler.v3_4.planner.logical.idp.extractPredicates;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -40,13 +42,79 @@ public class OrganizationService {
 	private Map<Span, List<SpanCallSpan>> spanCallSpans;
 	private Map<Span, MicroServiceCreateSpan> spanBelongToMicroService;
 	
-	public JSONObject allMicroServiceToCatoscape(boolean removeUnuseMS, List<Feature> features) {
-		Feature[] featureArray = new Feature[features.size()];
-		features.toArray(featureArray);
-		return allMicroServiceToCatoscape(removeUnuseMS, featureArray);
+	public JSONObject unfoldMicroServiceToCatoscape(Feature feature, List<MicroService> unfoldMSs) throws Exception {
+		MicroService[] mss = new MicroService[unfoldMSs.size()];
+		unfoldMSs.toArray(mss);
+		return unfoldMicroServiceToCatoscape(feature, mss);
 	}
 	
-	public JSONObject allMicroServiceToCatoscape(boolean removeUnuseMS, Feature... features) {
+	public JSONObject unfoldMicroServiceToCatoscape(Feature feature, MicroService... unfoldMSs) throws Exception {
+		JSONObject result = new JSONObject();
+		JSONArray nodes = new JSONArray();
+		JSONArray edges = new JSONArray();
+		
+		List<MicroService> relatedMSs = findRelatedMicroServiceForFeatures(feature);
+		Map<MicroService, List<Span>> msContainSpans = new HashMap<>();
+		Map<MicroService, Map<MicroService, Integer>> msCalls = msCalls(feature);
+		Map<Span, Map<MicroService, Integer>> spanCallMSs = new HashMap<>();
+		Map<Span, Map<Span, MicroServiceCreateSpan>> spanCallSpans = new HashMap<>();
+		FeatureExecuteTrace executeTrace = featureExecuteTraces.get(feature);
+		if(executeTrace == null) {
+			throw new Exception("该Feature: " + feature.getFeatureName() + " 没有执行trace");
+		}
+		for(MicroService ms : unfoldMSs) {
+			Trace trace = executeTrace.getTrace();
+			List<Span> containSpans = findMicroServiceCreateSpansInTraces(ms, trace);
+			msContainSpans.put(ms, containSpans);
+		}
+		
+		for(MicroService ms : relatedMSs) {
+			JSONObject msJson = new JSONObject();
+			JSONObject msDataValue = new JSONObject();
+			msDataValue.put("id", ms.getId());
+			msDataValue.put("name", ms.getName());
+			msJson.put("data", msDataValue);
+			nodes.add(msJson);
+			
+			List<Span> containSpans = msContainSpans.get(ms);
+			if(containSpans == null || containSpans.size() == 0) {
+				continue;
+			}
+			for(Span span : containSpans) {
+				msJson = new JSONObject();
+				msDataValue = new JSONObject();
+				msDataValue.put("id", span.getId());
+				msDataValue.put("name", span.getOperationName());
+				msDataValue.put("order", span.getOrder());
+				msDataValue.put("function", span.getApiFunctionName());
+				msDataValue.put("parent", ms.getId());
+				msJson.put("data", msDataValue);
+				nodes.add(msJson);
+			}
+		}
+		result.put("nodes", nodes);
+		result.put("edges", edges);
+		
+		return result;
+	}
+	
+	private List<Span> findMicroServiceCreateSpansInTraces(MicroService ms, Trace trace) throws Exception {
+		List<Span> spans = new ArrayList<>();
+		for(Span span : traceToSpans.get(trace)) {
+			if(spanBelongToMicroService.get(span).getMicroservice().equals(ms)) {
+				spans.add(span);
+			}
+		}
+		return spans;
+	}
+	
+	public JSONObject microServiceToCatoscape(boolean removeUnuseMS, List<Feature> features) {
+		Feature[] featureArray = new Feature[features.size()];
+		features.toArray(featureArray);
+		return microServiceToCatoscape(removeUnuseMS, featureArray);
+	}
+	
+	public JSONObject microServiceToCatoscape(boolean removeUnuseMS, Feature... features) {
 		JSONObject result = new JSONObject();
 		JSONArray nodes = new JSONArray();
 		JSONArray edges = new JSONArray();

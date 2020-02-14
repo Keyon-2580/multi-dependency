@@ -68,12 +68,15 @@ $(document).ready(function() {
     	}
     });
     var showMicroService = function(featureId, container) {
-	    $.getJSON("/feature/show/microservice/" + featureId + "?removeUnuseMicroService=true",
-	    	function(result){
-	    	console.log(result);
-	    	if(result.result == "success") {
-	    		var elements = result.value;
-	    		showMicroServiceInCatoscape(elements, container);
+	    $.ajax({
+	    	type: 'GET',
+	    	url: "/feature/show/microservice/" + featureId + "?removeUnuseMicroService=true",
+	    	success: function(result) {
+	    		console.log(result);
+		    	if(result.result == "success") {
+		    		var elements = result.value;
+		    		showMicroServiceInCatoscape(elements, container);
+		    	}	
 	    	}
 	    });
     }
@@ -88,28 +91,18 @@ $(document).ready(function() {
         	},
         	style: [
         		{
-                    selector: 'node[name]',
-                    style: {
-                      'content': 'data(name)'
-                    }
-                },
-        		{
         			selector: 'node',
         			style: {
         				'height': 20,
         				'width': 20,
-        				'background-color': 'green'
-        			}
-        		},
-        		{
-        			selector: 'edge[value]',
-        			style: {
-        				'content': 'data(value)'
+        				'background-color': 'green',
+						'content': 'data(name)'
         			}
         		},
     			{
         			selector: 'edge',
         			style: {
+        				'content': 'data(value)',
         				'curve-style': 'bezier',
         				'width': 3,
         				'line-color': 'green',
@@ -121,6 +114,7 @@ $(document).ready(function() {
         	elements: elements
         });
     }
+    
     
 });
 // ]]>
