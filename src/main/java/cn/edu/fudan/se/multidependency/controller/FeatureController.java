@@ -1,12 +1,11 @@
 package cn.edu.fudan.se.multidependency.controller;
 
-import java.io.File;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.websocket.server.PathParam;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -32,10 +31,10 @@ import cn.edu.fudan.se.multidependency.service.spring.OrganizationService;
 @Controller
 @RequestMapping("/feature")
 public class FeatureController {
-	
+
 	@Autowired
 	private DynamicAnalyseService dynamicAnalyseService;
-	
+
 	@Autowired
 	private JaegerService jaegerService;
 
@@ -44,29 +43,59 @@ public class FeatureController {
 	public List<Feature> findAllFeatures() {
 		return dynamicAnalyseService.findAllFeatures();
 	}
-	
+
 	@GetMapping("/test")
 	@ResponseBody
 	public void test() {
 		organize();
 	}
-	
+
 	@GetMapping("/index")
 	public String index(HttpServletRequest request) {
-		System.out.println(organization.getClass());
-		request.setAttribute("features", organization.allFeatures());
-		request.setAttribute("microservices", organization.allMicroServices());
+		System.out.println(organizationService.getClass());
+		request.setAttribute("features", organizationService.allFeatures());
+		request.setAttribute("microservices", organizationService.allMicroServices());
 		return "feature/index";
 	}
-	
+
+	@GetMapping("/show/microservice/{featureId}")
+	@ResponseBody
+	public JSONObject toCatoscape(
+			@PathVariable(name = "featureId", required = true) String featureId,
+			@PathParam(value = "removeUnuseMicroService") Boolean removeUnuseMicroService) {
+		System.out.println(featureId + " " + removeUnuseMicroService);
+		JSONObject result = new JSONObject();
+		try {
+			result.put("result", "success");
+			if("all".equals(featureId)) {
+				result.put("value", organizationService.allMicroServiceToCatoscape(true, organizationService.allFeatures()));
+			} else {
+				Integer temp = Integer.valueOf(featureId);
+				if(temp == null) {
+					throw new Exception("请输入正确的featureId");
+				}
+				Feature feature = organizationService.findFeatureById(temp);
+				if(feature == null) {
+					throw new Exception("没有featureId为 " + featureId + " 的Feature");
+				}
+				result.put("value",
+						organizationService.allMicroServiceToCatoscape(true, feature));
+			}
+		} catch (Exception e) {
+			result.put("result", "fail");
+			result.put("value", e.getMessage());
+		}
+		return result;
+	}
+
 	@GetMapping("/svg/{featureId}")
 	@ResponseBody
 	public JSONObject renderSVG(@PathVariable("featureId") Integer featureId) {
 		System.out.println(featureId);
 		JSONObject result = new JSONObject();
 		try {
-			Feature feature = organization.findFeatureById(featureId);
-			String svg = organization.featureToSVG(feature);
+			Feature feature = organizationService.findFeatureById(featureId);
+			String svg = organizationService.featureToSVG(feature);
 			result.put("result", "success");
 			result.put("svg", svg);
 			System.out.println(svg);
@@ -76,18 +105,18 @@ public class FeatureController {
 		}
 		return result;
 	}
-	
+
 	@Autowired
-	private OrganizationService organization;
-	
+	private OrganizationService organizationService;
+
 	@Bean
 	public OrganizationService organize() {
 		System.out.println("organize");
-//		List<Feature> features = dynamicAnalyseService.findFeaturesByFeatureId(1, 2);
+		// List<Feature> features = dynamicAnalyseService.findFeaturesByFeatureId(1, 2);
 		List<Feature> features = dynamicAnalyseService.findAllFeatures();
 		// 找出feature执行的trace
 		Map<Feature, FeatureExecuteTrace> featureExecuteTraces = new HashMap<>();
-		for(Feature feature : features) {
+		for (Feature feature : features) {
 			FeatureExecuteTrace execute = jaegerService.findFeatureExecuteTraceByFeature(feature);
 			featureExecuteTraces.put(feature, execute);
 		}
@@ -97,12 +126,12 @@ public class FeatureController {
 		Map<Span, List<SpanCallSpan>> spanCallSpans = new HashMap<>();
 		// 找出span属于哪个project
 		Map<Span, MicroServiceCreateSpan> spanBelongToMicroService = new HashMap<>();
-		
-		for(FeatureExecuteTrace featureExecuteTrace : featureExecuteTraces.values()) {
+
+		for (FeatureExecuteTrace featureExecuteTrace : featureExecuteTraces.values()) {
 			Trace trace = featureExecuteTrace.getTrace();
 			List<Span> spans = jaegerService.findSpansByTrace(trace);
 			traceToSpans.put(trace, spans);
-			for(Span span : spans) {
+			for (Span span : spans) {
 				List<SpanCallSpan> callSpans = jaegerService.findSpanCallSpans(span);
 				spanCallSpans.put(span, callSpans);
 				MicroServiceCreateSpan microServiceCreateSpan = jaegerService.findMicroServiceCreateSpan(span);
@@ -110,12 +139,9 @@ public class FeatureController {
 			}
 		}
 		Map<String, MicroService> allMicroService = jaegerService.findAllMicroService();
-		OrganizationService organization = new OrganizationService(allMicroService , featureExecuteTraces, traceToSpans, spanCallSpans, spanBelongToMicroService);
-		System.out.println(organization.featureToSVG(organization.findFeatureById(2)));
-		try(PrintWriter writer = new PrintWriter(new File("D:\\p.txt"));){
-			writer.print(organization.featureToSVG(organization.findFeatureById(2)));
-		} catch (Exception e) {
-		}
+		OrganizationService organization = new OrganizationService(allMicroService, featureExecuteTraces, traceToSpans,
+				spanCallSpans, spanBelongToMicroService);
+
 		return organization;
 	}
 }

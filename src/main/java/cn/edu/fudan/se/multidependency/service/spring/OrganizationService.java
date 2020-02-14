@@ -4,8 +4,6 @@ import static guru.nidi.graphviz.model.Factory.graph;
 import static guru.nidi.graphviz.model.Factory.node;
 import static guru.nidi.graphviz.model.Factory.to;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -14,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
@@ -21,11 +22,9 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FeatureExecuteTrace;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
-import guru.nidi.graphviz.attribute.Color;
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.attribute.Rank;
 import guru.nidi.graphviz.attribute.Rank.RankDir;
-import guru.nidi.graphviz.attribute.Style;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Graph;
@@ -40,6 +39,72 @@ public class OrganizationService {
 	private Map<Trace, List<Span>> traceToSpans;
 	private Map<Span, List<SpanCallSpan>> spanCallSpans;
 	private Map<Span, MicroServiceCreateSpan> spanBelongToMicroService;
+	
+	public JSONObject allMicroServiceToCatoscape(boolean removeUnuseMS, List<Feature> features) {
+		Feature[] featureArray = new Feature[features.size()];
+		features.toArray(featureArray);
+		return allMicroServiceToCatoscape(removeUnuseMS, featureArray);
+	}
+	
+	public JSONObject allMicroServiceToCatoscape(boolean removeUnuseMS, Feature... features) {
+		JSONObject result = new JSONObject();
+		JSONArray nodes = new JSONArray();
+		JSONArray edges = new JSONArray();
+		Map<MicroService, Map<MicroService, Integer>> msCalls = msCalls(features);
+		for(MicroService ms : msCalls.keySet()) {
+			for(MicroService callMs : msCalls.get(ms).keySet()) {
+				Integer times = msCalls.get(ms).get(callMs);
+				JSONObject edge = new JSONObject();
+				JSONObject value = new JSONObject();
+				value.put("id", ms.getId() + "_" + callMs.getId());
+				value.put("value", times);
+				value.put("source", ms.getId());
+				value.put("target", callMs.getId());
+				edge.put("data", value);
+				edges.add(edge);
+			}
+		}
+		List<MicroService> relatedMSs = removeUnuseMS ? findRelatedMicroServiceForFeatures(features) : allMicroServices();
+		for(MicroService ms : relatedMSs) {
+			JSONObject msJson = new JSONObject();
+			JSONObject msDataValue = new JSONObject();
+			msDataValue.put("id", ms.getId());
+			msDataValue.put("name", ms.getName());
+			msJson.put("data", msDataValue);
+			nodes.add(msJson);
+		}
+		result.put("nodes", nodes);
+		result.put("edges", edges);
+		return result;
+	}
+	
+	public Map<MicroService, Map<MicroService, Integer>> msCalls(Feature... features) {
+		Map<MicroService, Map<MicroService, Integer>> result = new HashMap<>();
+		for(Feature feature : features) {
+			try {
+				Trace trace = this.featureExecuteTraces.get(feature).getTrace();
+				List<Span> spans = traceToSpans.get(trace);
+				for(Span span : spans) {
+					List<SpanCallSpan> callSpans = spanCallSpans.get(span);
+					callSpans = callSpans == null ? new ArrayList<>() : callSpans;
+					MicroService ms = spanBelongToMicroService.get(span).getMicroservice();
+					Map<MicroService, Integer> msCallMsTimes = result.get(ms);
+					msCallMsTimes = msCallMsTimes == null ? new HashMap<>() : msCallMsTimes;
+					for(SpanCallSpan callSpan : callSpans) {
+						MicroService callMs = spanBelongToMicroService.get(callSpan.getCallSpan()).getMicroservice();
+						Integer callTimes = msCallMsTimes.get(callMs);
+						callTimes = callTimes == null ? 0 : callTimes;
+						callTimes++;
+						msCallMsTimes.put(callMs, callTimes);
+					}
+					result.put(ms, msCallMsTimes);
+				}
+			} catch (Exception e) {
+				continue;
+			}
+		}
+		return result;
+	}
 	
 	public MicroService findMicroServiceByName(String name) {
 		try {
@@ -63,7 +128,7 @@ public class OrganizationService {
 	}
 	
 	/**
-	 * 找出指定feature相关的微服务
+	 * 找出organization当前所有的feature相关的微服务
 	 * @return
 	 */
 	public Map<Feature, Set<MicroService>> findAllRelatedMicroServiceSplitByFeature() {
@@ -75,6 +140,10 @@ public class OrganizationService {
 		return result;
 	}
 	
+	/**
+	 * 找到当前类内的所有Feature相关的微服务
+	 * @return
+	 */
 	public Set<MicroService> findAllRelatedMicroService() {
 		Set<MicroService> result = new HashSet<>();
 		for(Set<MicroService> temp : findAllRelatedMicroServiceSplitByFeature().values()) {
@@ -99,12 +168,33 @@ public class OrganizationService {
 		return result;
 	}
 	
+	/**
+	 * 某个Feature相关的微服务
+	 * @param feature
+	 * @return
+	 */
 	private Set<MicroService> findRelatedMicroServiceForFeature(Feature feature) {
 		Trace trace = featureExecuteTraces.get(feature).getTrace();
 		return findRelatedMicroServiceForTrace(trace);
 	}
 	
-
+	public List<MicroService> findRelatedMicroServiceForFeatures(Feature... features) {
+		List<MicroService> result = new ArrayList<>();
+		for(Feature feature : features) {
+			Set<MicroService> mss = findRelatedMicroServiceForFeature(feature);
+			for(MicroService ms : mss) {
+				if(!result.contains(ms)) {
+					result.add(ms);
+				}
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * 所有微服务
+	 * @return
+	 */
 	public List<MicroService> allMicroServices() {
 		List<MicroService> result = new ArrayList<>();
 		for(MicroService ms : allMicroService.values()) {
@@ -113,6 +203,10 @@ public class OrganizationService {
 		return result;
 	}
 	
+	/**
+	 * 所有Feature
+	 * @return
+	 */
 	public List<Feature> allFeatures() {
 		List<Feature> result = new ArrayList<>();
 		for(Feature feature : featureExecuteTraces.keySet()) {
@@ -168,22 +262,6 @@ public class OrganizationService {
 	}
 	private static String getSpanLabel(Span span) {
 		return "(" + span.getOrder() + ")\n" + span.getServiceName() + "\n" + span.getOperationName();
-	}
-	
-	public static void mai1n(String[] args) {
-		Graph g = graph("example1").directed()
-		        .graphAttr().with(Rank.dir(RankDir.LEFT_TO_RIGHT))
-		        .with(
-		                node("a").with(Color.RED).link(node("b")),
-		                node("b").link(to(node("c")).with(Style.DASHED))
-		        );
-		try {
-			Graphviz.fromGraph(g).height(100).render(Format.PNG).toFile(new File("D:\\ex1.png"));
-			Graphviz.fromGraph(g).render(Format.SVG).toFile(new File("D:\\ex1.svg"));
-			System.out.println(Graphviz.fromGraph(g).render(Format.SVG));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 	
 }
