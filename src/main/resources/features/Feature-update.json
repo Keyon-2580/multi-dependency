@@ -1,0 +1,82 @@
+{
+	/*"featureExecuteTrace" : [
+		{
+			"id" : 0,
+			"traceId" : "c2deeee31a300b18"
+		}
+	]*/
+	"features" : [
+		{
+			"id" : 0,
+			"name" : "登录",
+			"description" : "在登录页面输入用户名、密码和验证码后，点击登录。",
+			"traceId" : "c2deeee31a300b18"
+		}, 
+		{
+			"id" : 1,
+			"name" : "查询车票",
+			"description" : "在订票页面，输入起地、终点、日期和火车类型，点击“search”按钮查询。",
+			"traceId" : "6d3ce83000119b86"
+		},
+		{
+			"id" : 2,
+			"name" : "订票",
+			"description" : "",
+			"traceId" : "3bd898628edbaf29"
+		},
+		{
+			"id" : 3,
+			"name" : "查询所有保险",
+			"description" : "",
+			"traceId" : "b59ab2c49e460477"
+		},
+		{
+			"id" : 4,
+			"name" : "查询所有食物",
+			"description" : "",
+			"traceId" : "3ddd3a149193779f"
+		},
+		{
+			"id" : 5,
+			"name" : "查询账户所有联系方式",
+			"description" : "",
+			"traceId" : "286708b1b7769683"
+		},
+		{
+			"id" : 6,
+			"name" : "登录-0214",
+			"description" : "在登录页面输入用户名、密码和验证码后，点击登录。",
+			"traceId" : "1be6855d1ea30b6b"
+		}, 
+		{
+			"id" : 7,
+			"name" : "查询车票-0214",
+			"description" : "在订票页面，输入起地、终点、日期和火车类型，点击“search”按钮查询。",
+			"traceId" : "3f6995f31103cb2b"
+		},
+		{
+			"id" : 8,
+			"name" : "订票-0214",
+			"description" : "'Select Contacts'选择第一个，No Assurance，不勾选Need Food，不勾选Consign，点击submit",
+			"traceId" : "5b6b5a0f3f8b1ab"
+		},
+		{
+			"id" : 9,
+			"name" : "查询所有保险-0214",
+			"description" : "查询所有保险",
+			"traceId" : "173b2e159a93f6ae"
+		},
+		{
+			"id" : 10,
+			"name" : "查询所有食物-0214",
+			"description" : "查询所有食物",
+			"traceId" : "2505e32eae3e88a3"
+		},
+		{
+			"id" : 11,
+			"name" : "查询账户所有联系方式-0214",
+			"description" : "查询账户所有联系方式",
+			"traceId" : "73fe3428efc29655"
+		}
+	]
+}

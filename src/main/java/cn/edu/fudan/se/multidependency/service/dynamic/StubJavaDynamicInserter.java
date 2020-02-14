@@ -14,7 +14,7 @@ public class StubJavaDynamicInserter extends DynamicInserterForNeo4jService {
 
 	@Override
 	protected void extractScenarioAndTestCaseAndFeatures() {
-
+		// do nothing
 	}
 
 	@Override

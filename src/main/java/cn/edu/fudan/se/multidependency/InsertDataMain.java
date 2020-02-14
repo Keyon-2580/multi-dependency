@@ -7,6 +7,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelationsImpl;
 import cn.edu.fudan.se.multidependency.service.FeatureInserter;
@@ -18,9 +21,9 @@ import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractorImpl;
 import cn.edu.fudan.se.multidependency.service.dynamic.DynamicInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.service.dynamic.StubJavaDynamicInserter;
-import cn.edu.fudan.se.multidependency.service.microservice.jaeger.JaegerTraceInserterFromHttp;
 import cn.edu.fudan.se.multidependency.service.microservice.jaeger.JaegerTraceInserterFromJSONFile;
 import cn.edu.fudan.se.multidependency.utils.FileUtils;
+import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 import cn.edu.fudan.se.multidependency.utils.YamlUtils;
 import depends.entity.repo.EntityRepo;
 
@@ -73,7 +76,7 @@ public class InsertDataMain {
 			if (yaml.isAnalyseDynamic()) {
 				System.out.println("动态分析");
 //				insertDynamic(yaml);
-				insertDynamicFromStub(yaml);
+				insertDynamicFromStub(yaml, "src/main/resources/dynamic/stub/train-ticket/logs");
 			}
 			/**
 			 * 构建分析
@@ -90,19 +93,14 @@ public class InsertDataMain {
 //			jaegerExtractor.addNodesAndRelations();
 
 			// 从下载下来的json文件提取
+			JSONObject featureJson = JSONUtil.extractJson(new File("src/main/resources/features/Feature.json"));
+			JSONArray jsonArray = featureJson.getJSONArray("features");
 			ExtractorForNodesAndRelationsImpl jaegerExtractor = null;
-			jaegerExtractor = new JaegerTraceInserterFromJSONFile("src/main/resources/train-ticket/c2deeee31a300b18.json");
-			jaegerExtractor.addNodesAndRelations();
-			jaegerExtractor = new JaegerTraceInserterFromJSONFile("src/main/resources/train-ticket/6d3ce83000119b86.json");
-			jaegerExtractor.addNodesAndRelations();
-			jaegerExtractor = new JaegerTraceInserterFromJSONFile("src/main/resources/train-ticket/3bd898628edbaf29.json");
-			jaegerExtractor.addNodesAndRelations();
-			jaegerExtractor = new JaegerTraceInserterFromJSONFile("src/main/resources/train-ticket/b59ab2c49e460477.json");
-			jaegerExtractor.addNodesAndRelations();
-			jaegerExtractor = new JaegerTraceInserterFromJSONFile("src/main/resources/train-ticket/3ddd3a149193779f.json");
-			jaegerExtractor.addNodesAndRelations();
-			jaegerExtractor = new JaegerTraceInserterFromJSONFile("src/main/resources/train-ticket/286708b1b7769683.json");
-			jaegerExtractor.addNodesAndRelations();
+			for(int i = 0; i < jsonArray.size(); i++) {
+				String traceId = jsonArray.getJSONObject(i).getString("traceId");
+				jaegerExtractor = new JaegerTraceInserterFromJSONFile("src/main/resources/train-ticket/" + traceId + ".json");
+				jaegerExtractor.addNodesAndRelations();
+			}
 			
 			ExtractorForNodesAndRelationsImpl featureExtractor = new FeatureInserter("src/main/resources/features/Feature.json");
 			featureExtractor.addNodesAndRelations();
@@ -162,20 +160,20 @@ public class InsertDataMain {
 			}
 		}
 	}
-	public static void insertDynamicFromStub(YamlUtils.YamlObject yaml) throws Exception {
+	public static void insertDynamicFromStub(YamlUtils.YamlObject yaml, String logDirectory) throws Exception {
 		String[] dynamicFileSuffixes = null;
 		for (String l : yaml.getAnalyseLanguages()) {
 			Language language = Language.valueOf(l);
 			if (language == Language.java) {
 				dynamicFileSuffixes = new String[yaml.getDynamicJavaFileSuffix().size()];
 				yaml.getDynamicJavaFileSuffix().toArray(dynamicFileSuffixes); // 后缀为.log
-				File dynamicDirectory = new File(yaml.getDynamicDirectoryRootPath());
+//				File dynamicDirectory = new File(yaml.getDynamicDirectoryRootPath());
+				File dynamicDirectory = new File(logDirectory);
 				List<File> result = new ArrayList<>();
 				FileUtils.listFiles(dynamicDirectory, result, dynamicFileSuffixes);
 				File[] files = new File[result.size()];
 				result.toArray(files);
 				DynamicInserterForNeo4jService stubJavaInserter = new StubJavaDynamicInserter();
-//				kiekerInserter.setMarkFile(markFile);
 				stubJavaInserter.setDynamicFunctionCallFiles(files);
 				stubJavaInserter.addNodesAndRelations();
 			} else {
