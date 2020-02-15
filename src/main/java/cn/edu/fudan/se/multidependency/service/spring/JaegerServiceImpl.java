@@ -85,4 +85,9 @@ public class JaegerServiceImpl implements JaegerService {
 		return result;
 	}
 
+	@Override
+	public MicroService findMicroServiceById(Long id) {
+		return microServiceRepository.findById(id).get();
+	}
+
 }

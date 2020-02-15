@@ -13,6 +13,8 @@ import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCa
 
 public interface JaegerService {
 	
+	MicroService findMicroServiceById(Long id);
+	
 	Map<String, MicroService> findAllMicroService();
 	
 	Trace findTraceByFeature(Feature feature);

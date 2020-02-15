@@ -39,6 +39,8 @@ public class SpanCallSpan implements Relation {
 	
 	private String httpRequestMethod;
 	
+	private String requestSpanId;
+	
 	@Override
 	public Long getStartNodeGraphId() {
 		return span.getId();
@@ -60,6 +62,7 @@ public class SpanCallSpan implements Relation {
 		properties.put("startServiceName", span.getServiceName());
 		properties.put("endServiceName", callSpan.getServiceName());
 		properties.put("httpRequestMethod", getHttpRequestMethod() == null ? "" : getHttpRequestMethod());
+		properties.put("requestSpanId", getRequestSpanId() == null ? "" : getRequestSpanId());
 		return properties;
 	}
 

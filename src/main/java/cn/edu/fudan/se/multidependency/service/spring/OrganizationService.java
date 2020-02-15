@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.neo4j.cypher.internal.compiler.v3_4.planner.logical.idp.extractPredicates;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -42,63 +40,7 @@ public class OrganizationService {
 	private Map<Span, List<SpanCallSpan>> spanCallSpans;
 	private Map<Span, MicroServiceCreateSpan> spanBelongToMicroService;
 	
-	public JSONObject unfoldMicroServiceToCatoscape(Feature feature, List<MicroService> unfoldMSs) throws Exception {
-		MicroService[] mss = new MicroService[unfoldMSs.size()];
-		unfoldMSs.toArray(mss);
-		return unfoldMicroServiceToCatoscape(feature, mss);
-	}
-	
-	public JSONObject unfoldMicroServiceToCatoscape(Feature feature, MicroService... unfoldMSs) throws Exception {
-		JSONObject result = new JSONObject();
-		JSONArray nodes = new JSONArray();
-		JSONArray edges = new JSONArray();
-		
-		List<MicroService> relatedMSs = findRelatedMicroServiceForFeatures(feature);
-		Map<MicroService, List<Span>> msContainSpans = new HashMap<>();
-		Map<MicroService, Map<MicroService, Integer>> msCalls = msCalls(feature);
-		Map<Span, Map<MicroService, Integer>> spanCallMSs = new HashMap<>();
-		Map<Span, Map<Span, MicroServiceCreateSpan>> spanCallSpans = new HashMap<>();
-		FeatureExecuteTrace executeTrace = featureExecuteTraces.get(feature);
-		if(executeTrace == null) {
-			throw new Exception("该Feature: " + feature.getFeatureName() + " 没有执行trace");
-		}
-		for(MicroService ms : unfoldMSs) {
-			Trace trace = executeTrace.getTrace();
-			List<Span> containSpans = findMicroServiceCreateSpansInTraces(ms, trace);
-			msContainSpans.put(ms, containSpans);
-		}
-		
-		for(MicroService ms : relatedMSs) {
-			JSONObject msJson = new JSONObject();
-			JSONObject msDataValue = new JSONObject();
-			msDataValue.put("id", ms.getId());
-			msDataValue.put("name", ms.getName());
-			msJson.put("data", msDataValue);
-			nodes.add(msJson);
-			
-			List<Span> containSpans = msContainSpans.get(ms);
-			if(containSpans == null || containSpans.size() == 0) {
-				continue;
-			}
-			for(Span span : containSpans) {
-				msJson = new JSONObject();
-				msDataValue = new JSONObject();
-				msDataValue.put("id", span.getId());
-				msDataValue.put("name", span.getOperationName());
-				msDataValue.put("order", span.getOrder());
-				msDataValue.put("function", span.getApiFunctionName());
-				msDataValue.put("parent", ms.getId());
-				msJson.put("data", msDataValue);
-				nodes.add(msJson);
-			}
-		}
-		result.put("nodes", nodes);
-		result.put("edges", edges);
-		
-		return result;
-	}
-	
-	private List<Span> findMicroServiceCreateSpansInTraces(MicroService ms, Trace trace) throws Exception {
+	public List<Span> findMicroServiceCreateSpansInTraces(MicroService ms, Trace trace) throws Exception {
 		List<Span> spans = new ArrayList<>();
 		for(Span span : traceToSpans.get(trace)) {
 			if(spanBelongToMicroService.get(span).getMicroservice().equals(ms)) {
@@ -118,14 +60,35 @@ public class OrganizationService {
 		JSONObject result = new JSONObject();
 		JSONArray nodes = new JSONArray();
 		JSONArray edges = new JSONArray();
-		Map<MicroService, Map<MicroService, Integer>> msCalls = msCalls(features);
+		// 服务调用服务
+		Map<MicroService, Map<MicroService, MSCallMS>> msCalls = msCalls(features);
+		if(features.length == 1) {
+			JSONObject msCallMsDetail = new JSONObject();
+			for(MicroService ms : msCalls.keySet()) {
+				JSONObject info = new JSONObject();
+				info.put("from", ms);
+				Map<MicroService, MSCallMS> calls = msCalls.get(ms);
+				JSONObject toArray = new JSONObject();
+				for(MicroService callMs : calls.keySet()) {
+					JSONObject to = new JSONObject();
+					to.put("to", callMs);
+					MSCallMS mcm = calls.get(callMs);
+					to.put("times", mcm.getTimes());
+					to.put("call", mcm.getSpanCallSpans());
+					toArray.put(callMs.getId().toString(), to);
+				}
+				info.put("tos", toArray);
+				msCallMsDetail.put(ms.getId().toString(), info);
+			}
+			result.put("detail", msCallMsDetail);
+		}
 		for(MicroService ms : msCalls.keySet()) {
 			for(MicroService callMs : msCalls.get(ms).keySet()) {
-				Integer times = msCalls.get(ms).get(callMs);
+				MSCallMS msCallMs = msCalls.get(ms).get(callMs);
 				JSONObject edge = new JSONObject();
 				JSONObject value = new JSONObject();
 				value.put("id", ms.getId() + "_" + callMs.getId());
-				value.put("value", times);
+				value.put("value", msCallMs.getTimes());
 				value.put("source", ms.getId());
 				value.put("target", callMs.getId());
 				edge.put("data", value);
@@ -141,13 +104,16 @@ public class OrganizationService {
 			msJson.put("data", msDataValue);
 			nodes.add(msJson);
 		}
-		result.put("nodes", nodes);
-		result.put("edges", edges);
+		JSONObject value = new JSONObject();
+		value.put("nodes", nodes);
+		value.put("edges", edges);
+		result.put("value", value);
+		result.put("microservice", relatedMSs);
 		return result;
 	}
 	
-	public Map<MicroService, Map<MicroService, Integer>> msCalls(Feature... features) {
-		Map<MicroService, Map<MicroService, Integer>> result = new HashMap<>();
+	public Map<MicroService, Map<MicroService, MSCallMS>> msCalls(Feature... features) {
+		Map<MicroService, Map<MicroService, MSCallMS>> result = new HashMap<>();
 		for(Feature feature : features) {
 			try {
 				Trace trace = this.featureExecuteTraces.get(feature).getTrace();
@@ -156,14 +122,15 @@ public class OrganizationService {
 					List<SpanCallSpan> callSpans = spanCallSpans.get(span);
 					callSpans = callSpans == null ? new ArrayList<>() : callSpans;
 					MicroService ms = spanBelongToMicroService.get(span).getMicroservice();
-					Map<MicroService, Integer> msCallMsTimes = result.get(ms);
+					Map<MicroService, MSCallMS> msCallMsTimes = result.get(ms);
 					msCallMsTimes = msCallMsTimes == null ? new HashMap<>() : msCallMsTimes;
-					for(SpanCallSpan callSpan : callSpans) {
-						MicroService callMs = spanBelongToMicroService.get(callSpan.getCallSpan()).getMicroservice();
-						Integer callTimes = msCallMsTimes.get(callMs);
-						callTimes = callTimes == null ? 0 : callTimes;
-						callTimes++;
-						msCallMsTimes.put(callMs, callTimes);
+					for(SpanCallSpan spanCallSpan : callSpans) {
+						MicroService callMs = spanBelongToMicroService.get(spanCallSpan.getCallSpan()).getMicroservice();
+						MSCallMS msCallMs = msCallMsTimes.get(callMs);
+						msCallMs = msCallMs == null ? new MSCallMS(ms, callMs) : msCallMs;
+						msCallMs.addTimes(1);
+						msCallMs.addSpanCallSpan(spanCallSpan);
+						msCallMsTimes.put(callMs, msCallMs);
 					}
 					result.put(ms, msCallMsTimes);
 				}
