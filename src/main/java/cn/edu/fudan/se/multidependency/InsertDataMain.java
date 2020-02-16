@@ -93,7 +93,7 @@ public class InsertDataMain {
 //			jaegerExtractor.addNodesAndRelations();
 
 			// 从下载下来的json文件提取
-			JSONObject featureJson = JSONUtil.extractJson(new File("src/main/resources/features/Feature2.json"));
+			JSONObject featureJson = JSONUtil.extractJson(new File("src/main/resources/features/Feature3.json"));
 			JSONArray jsonArray = featureJson.getJSONArray("features");
 			ExtractorForNodesAndRelationsImpl jaegerExtractor = null;
 			for(int i = 0; i < jsonArray.size(); i++) {
@@ -102,7 +102,7 @@ public class InsertDataMain {
 				jaegerExtractor.addNodesAndRelations();
 			}
 			
-			ExtractorForNodesAndRelationsImpl featureExtractor = new FeatureInserter("src/main/resources/features/Feature2.json");
+			ExtractorForNodesAndRelationsImpl featureExtractor = new FeatureInserter("src/main/resources/features/Feature3.json");
 			featureExtractor.addNodesAndRelations();
 
 			/// FIXME
