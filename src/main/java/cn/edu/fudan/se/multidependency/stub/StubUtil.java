@@ -103,7 +103,7 @@ public class StubUtil {
 		parser.setInterpreter(interpreter);
 		JavaStubListener stubListener = null;
 		if (usingJaegerWithSpring) {
-			stubListener = new JavaStubListenerUsingTryFinallyForJaegerWithSpring(tokens, projectName, listenFile,
+			stubListener = new JavaStubListenerUsingTryFinallyForJaegerWithSpringMultiThread(tokens, projectName, listenFile,
 					input, className, outputStubLogFilePath, remarks);
 		} else {
 			stubListener = new JavaStubListenerUsingTryFinally(tokens, projectName, listenFile, input, className,

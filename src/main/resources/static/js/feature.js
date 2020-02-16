@@ -130,11 +130,9 @@ var index = function(features) {
     			cy.remove('edge');
     			var result = featureIdToResult.get(featureId);
     			var detail = result.detail;
-    			console.log(detail);
     			var datas = new Array();
     			for(var sourceId in detail){
     				var tos = detail[sourceId]["tos"];
-    				console.log(tos);
     				for(var targetId in tos) {
     					var calls = tos[targetId]["call"];
     					for(var i = 0; i < calls.length; i++) {
@@ -181,9 +179,9 @@ var index = function(features) {
     			return ;
     		}
     		var edge = evt.target;
-    		console.log(edge.data());
     		if(edge.data().type == "order") {
     			// 弹出详细调用
+    			console.log(edge.data());
     			return;
     		}
     		var sourceId = edge.source().id();
