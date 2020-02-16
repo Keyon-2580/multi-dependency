@@ -20,7 +20,7 @@ import cn.edu.fudan.se.multidependency.service.build.BuildInserterForNeo4jServic
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractorImpl;
 import cn.edu.fudan.se.multidependency.service.dynamic.DynamicInserterForNeo4jService;
-import cn.edu.fudan.se.multidependency.service.dynamic.StubJavaDynamicInserter;
+import cn.edu.fudan.se.multidependency.service.dynamic.StubJavaForJaegerDynamicInserter;
 import cn.edu.fudan.se.multidependency.service.microservice.jaeger.JaegerTraceInserterFromJSONFile;
 import cn.edu.fudan.se.multidependency.utils.FileUtils;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
@@ -71,14 +71,6 @@ public class InsertDataMain {
 				}
 			}
 			/**
-			 * 动态分析
-			 */
-			if (yaml.isAnalyseDynamic()) {
-				System.out.println("动态分析");
-//				insertDynamic(yaml);
-				insertDynamicFromStub(yaml, "src/main/resources/dynamic/stub/train-ticket/logs");
-			}
-			/**
 			 * 构建分析
 			 */
 			if (yaml.isAnalyseBuild()) {
@@ -105,6 +97,14 @@ public class InsertDataMain {
 			ExtractorForNodesAndRelationsImpl featureExtractor = new FeatureInserter("src/main/resources/features/Feature3.json");
 			featureExtractor.addNodesAndRelations();
 
+			/**
+			 * 动态分析
+			 */
+			if (yaml.isAnalyseDynamic()) {
+				System.out.println("动态分析");
+//				insertDynamic(yaml);
+				insertDynamicFromStub(yaml);
+			}
 			/// FIXME
 			// 其它
 
@@ -160,20 +160,19 @@ public class InsertDataMain {
 			}
 		}
 	}
-	public static void insertDynamicFromStub(YamlUtils.YamlObject yaml, String logDirectory) throws Exception {
+	public static void insertDynamicFromStub(YamlUtils.YamlObject yaml) throws Exception {
 		String[] dynamicFileSuffixes = null;
 		for (String l : yaml.getAnalyseLanguages()) {
 			Language language = Language.valueOf(l);
 			if (language == Language.java) {
 				dynamicFileSuffixes = new String[yaml.getDynamicJavaFileSuffix().size()];
 				yaml.getDynamicJavaFileSuffix().toArray(dynamicFileSuffixes); // 后缀为.log
-//				File dynamicDirectory = new File(yaml.getDynamicDirectoryRootPath());
-				File dynamicDirectory = new File(logDirectory);
+				File dynamicDirectory = new File(yaml.getDynamicDirectoryRootPath());
 				List<File> result = new ArrayList<>();
 				FileUtils.listFiles(dynamicDirectory, result, dynamicFileSuffixes);
 				File[] files = new File[result.size()];
 				result.toArray(files);
-				DynamicInserterForNeo4jService stubJavaInserter = new StubJavaDynamicInserter();
+				DynamicInserterForNeo4jService stubJavaInserter = new StubJavaForJaegerDynamicInserter();
 				stubJavaInserter.setDynamicFunctionCallFiles(files);
 				stubJavaInserter.addNodesAndRelations();
 			} else {

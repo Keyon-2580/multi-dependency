@@ -16,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import lombok.Data;
 
 public class JavaStubDynamicExtractorUtil {
 	
@@ -68,6 +67,96 @@ public class JavaStubDynamicExtractorUtil {
 		}
 		return result;
 	}
+	
+	private static void addDynamicFunctionExecutionForJaegerFromStub(
+			Map<String, Map<String, Map<Long, List<DynamicFunctionExecutionForJaegerFromStub>>>> result, 
+			DynamicFunctionExecutionForJaegerFromStub execution) {
+		String traceId = execution.getTraceId();
+		String spanId = execution.getSpanId();
+		// 去掉没有traceId或没有spanId的函数执行
+		if(StringUtils.isBlank(traceId) || StringUtils.isBlank(spanId)) {
+			return;
+		}
+		Long depth = execution.getDepth();
+		Map<String, Map<Long, List<DynamicFunctionExecutionForJaegerFromStub>>> spanResult = result.get(traceId);
+		spanResult = spanResult == null ? new HashMap<>() : spanResult;
+		Map<Long, List<DynamicFunctionExecutionForJaegerFromStub>> depthResult = spanResult.get(spanId);
+		depthResult = depthResult == null ? new HashMap<>() : depthResult;
+		List<DynamicFunctionExecutionForJaegerFromStub> executions = depthResult.get(depth);
+		executions = executions == null ? new ArrayList<>() : executions;
+		executions.add(execution);
+		depthResult.put(depth, executions);
+		spanResult.put(spanId, depthResult);
+		result.put(traceId, spanResult);
+	}
+
+	
+	public static Map<String, Map<String, Map<Long, List<DynamicFunctionExecutionForJaegerFromStub>>>> readStubJaegerLogs(File... files) {
+		Map<String, Map<String, Map<Long, List<DynamicFunctionExecutionForJaegerFromStub>>>> result = new HashMap<>();
+		for(File file : files) {
+//			System.out.println("read log file: " + file.getAbsolutePath());
+			try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+				String line = null;
+				while ((line = reader.readLine()) != null) {
+					DynamicFunctionExecutionForJaegerFromStub dynamicFunction = extractByJaegerJson(line);
+					if (dynamicFunction == null) {
+						continue;
+					}
+					addDynamicFunctionExecutionForJaegerFromStub(result, dynamicFunction);
+				}
+				for(Map<String, Map<Long, List<DynamicFunctionExecutionForJaegerFromStub>>> spansResult : result.values()) {
+					for(Map<Long, List<DynamicFunctionExecutionForJaegerFromStub>> groups : spansResult.values()) {
+						for(List<DynamicFunctionExecutionForJaegerFromStub> functions : groups.values()) {
+							functions.sort(new Comparator<DynamicFunctionExecutionForJaegerFromStub>() {
+								@Override
+								public int compare(DynamicFunctionExecutionForJaegerFromStub o1, DynamicFunctionExecutionForJaegerFromStub o2) {
+									return (int) (o1.getOrder() - o2.getOrder());
+								}
+							});
+						}
+					}
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return result;
+	}
+	
+	public static DynamicFunctionExecutionForJaegerFromStub extractByJaegerJson(String sentence) {
+		try {
+			DynamicFunctionExecutionForJaegerFromStub functionExecution = new DynamicFunctionExecutionForJaegerFromStub();
+			sentence = sentence.replace("\\", "\\\\");
+			functionExecution.setSentence(sentence);
+			JSONObject json = JSONObject.parseObject(sentence);
+			functionExecution.setLanguage(json.getString("language"));
+			functionExecution.setTime(json.getString("time"));
+			functionExecution.setProject(json.getString("project"));
+			functionExecution.setInFile(json.getString("inFile"));
+			String function = json.getString("function");
+			String functionName = function.substring(0, function.indexOf("("));
+			functionExecution.setFunctionName(functionName);
+			String parametersStr = function.substring(function.indexOf("(") + 1, function.length() - 1);
+			if(!StringUtils.isBlank(parametersStr)) {
+				String[] parameters = parametersStr.split(",");
+				for(String parameter : parameters) {
+					functionExecution.addParameter(parameter.trim());
+				}
+			}
+			functionExecution.setOrder(Long.parseLong(json.getString("order")));
+			functionExecution.setDepth(Long.parseLong(json.getString("depth")));
+			functionExecution.setRemarks(json.getJSONObject("remarks"));
+			functionExecution.setTraceId(json.getString("traceId"));
+			functionExecution.setSpanId(json.getString("spanId"));
+			return functionExecution;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	public static DynamicFunctionExecutionFromStub extractByJson(String sentence) {
 		try {
 			DynamicFunctionExecutionFromStub functionExecution = new DynamicFunctionExecutionFromStub();
@@ -100,35 +189,37 @@ public class JavaStubDynamicExtractorUtil {
 	public static void main(String[] args) {
 		String str = "{\"language\" : \"java\", \"time\" : \"2020-02-05 14:34:06,450\", \"project\" : \"depends\", \"inFile\" : \"D:\\\\multiple-dependency-project\\\\depends\\\\src\\\\main\\\\java\\\\depends\\\\entity\\\\GenericName.java\", \"function\" : \"depends.entity.GenericName.getArguments()\", \"order\" : \"11\", \"depth\" : \"5\", \"remarks\" : {\"scenario\":\"eew\",\"featureId\":\"123\"}}";
 		System.out.println(extractByJson(str));
+		str = "{\"language\" : \"java\", \"time\" : \"2020-02-16 17:08:05,324\", \"project\" : \"ts-travel-service\", \"inFile\" : \"D:\\multiple-dependency-project\\train-ticket\\ts-travel-service\\src\\main\\java\\travel\\service\\TravelServiceImpl.java\", \"function\" : \"travel.service.TravelServiceImpl.getTripAllDetailInfo(TripAllDetailInfo, HttpHeaders)\", \"order\" : \"6\", \"depth\" : \"1\", \"traceId\" : \"af68737835b755c0\", \"spanId\" : \"c3de0841842f60ff\", \"remarks\" : {}}";
+		str = str.replace("\\", "\\\\");
+		System.out.println(str);
+		System.out.println(extractByJaegerJson(str));
 	}
 	
-	@Data
-	public static class DynamicFunctionExecutionFromStub { //读取到的方法，所具有的属性
-		String language;
-		String time;
-		String project;
-		String inFile;
-		Long order;
-		Long depth;
-		String functionName;
-		List<String> parameters = new ArrayList<>();
-		public void addParameter(String parameter) {
-			this.parameters.add(parameter);
-		}
-		JSONObject remarks;
-		String sentence;
-	}
-	
+	/**
+	 * 从同名的Function中找到dynamicFunction对应参数的Function
+	 * @param dynamicFunction
+	 * @param functions
+	 * @return
+	 */
 	public static Function findFunctionWithDynamic(DynamicFunctionExecutionFromStub dynamicFunction, List<Function> functions) {
-		System.out.println("findFunction " + functions.size() + " " + dynamicFunction.getFunctionName());
-		for(Function function : functions) {
-			System.out.println("findFunction " + function.getFunctionName());
-			if(!dynamicFunction.getFunctionName().equals(function.getFunctionName())) {
-				return null;
+		functions.sort(new Comparator<Function>() {
+			@Override
+			public int compare(Function o1, Function o2) {
+				if(o1.getParameters() == null || o2.getParameters() == null) {
+					return -1;
+				}
+				return o1.getParameters().size() - o2.getParameters().size();
 			}
-			System.out.println(function.getParameters().size() + " " + dynamicFunction.getParameters().size());
+		});
+		for(Function function : functions) {
+			if(!dynamicFunction.getFunctionName().equals(function.getFunctionName())) {
+				continue;
+			}
 			if(function.getParameters().size() != dynamicFunction.getParameters().size()) {
 				continue;
+			}
+			if(functions.size() == 1) {
+				return function;
 			}
 			boolean flag = false;
 			for(int i = 0; i < function.getParameters().size(); i++) {
@@ -136,7 +227,6 @@ public class JavaStubDynamicExtractorUtil {
 					flag = true;
 				}
 			}
-			System.out.println(flag);
 			if(flag) {
 				continue;
 			}

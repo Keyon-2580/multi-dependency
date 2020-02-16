@@ -20,6 +20,7 @@ import depends.entity.PackageEntity;
 import depends.entity.TypeEntity;
 import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
+import depends.relations.Inferer;
 
 public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl {
 
@@ -145,7 +146,11 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				String parameterName = varEntity.getRawType().getName();
 				TypeEntity typeEntity = varEntity.getType();
 				// 方法的参数
-				if(typeEntity != null && this.getNodes().findNodeByEntityIdInProject(NodeType.Type, parentEntity.getId().longValue(), currentProject) != null) {
+				if(typeEntity != null 
+						&& Inferer.externalType != typeEntity
+						&& Inferer.buildInType != typeEntity
+						&& Inferer.genericParameterType != typeEntity
+						&& this.getNodes().findNodeByEntityIdInProject(NodeType.Type, parentEntity.getId().longValue(), currentProject) != null) {
 					function.addParameterIdentifies(typeEntity.getQualifiedName());
 				} else {
 					function.addParameterIdentifies(parameterName);

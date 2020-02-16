@@ -207,7 +207,7 @@ public class JavaStubListenerUsingTryFinallyForJaegerWithSpringMultiThread exten
 		// peoject
 		.append("\"").append(projectName).append("\", ")
 		// inFile
-		.append("\"").append(this.listenJavaFile.getAbsolutePath().replace("\\", "\\\\")).append("\", ")
+		.append("\"").append(this.listenJavaFile.getAbsolutePath().replace("\\\\", "\\\\\\\\")).append("\", ")
 		// function
 		.append("\"").append(getMethodFullName(methodName, parameterNames)).append("\"")
 		.append(");");

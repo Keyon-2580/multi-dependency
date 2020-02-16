@@ -7,8 +7,8 @@ import java.util.Map;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
+import cn.edu.fudan.se.multidependency.stub.DynamicFunctionExecutionFromStub;
 import cn.edu.fudan.se.multidependency.stub.JavaStubDynamicExtractorUtil;
-import cn.edu.fudan.se.multidependency.stub.JavaStubDynamicExtractorUtil.DynamicFunctionExecutionFromStub;
 
 public class StubJavaDynamicInserter extends DynamicInserterForNeo4jService {
 

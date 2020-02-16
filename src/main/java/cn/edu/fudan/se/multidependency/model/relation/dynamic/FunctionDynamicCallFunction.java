@@ -40,7 +40,9 @@ public class FunctionDynamicCallFunction implements Relation {
 	
 	private String order;
 	
-	private String testCaseName;
+	private String traceId;
+	
+	private String spanId;
 	
 	@Override
 	public Long getStartNodeGraphId() {
@@ -61,7 +63,6 @@ public class FunctionDynamicCallFunction implements Relation {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("order", getOrder() == null ? "" : getOrder());
-		properties.put("testCaseName", getTestCaseName() == null ? "" : getTestCaseName());
 		return properties;
 	}
 
