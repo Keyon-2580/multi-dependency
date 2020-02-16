@@ -55,18 +55,6 @@ public class JavaStubListenerUsingTryFinallyForJaegerWithSpringMultiThread exten
 		if(this.importGlobalVariable == false) {
 			StringBuilder builder = new StringBuilder();
 			builder
-				/*.append("import static ")
-				.append(globalClass).append(".")
-				.append(MULTIPLE_STUB_VARIABLE_MAP_EXECUTION_DEPTH)
-				.append(";\n")
-				.append("import static ")
-				.append(globalClass).append(".")
-				.append(MULTIPLE_STUB_VARIABLE_MAP_EXECUTION_ORDER)
-				.append(";\n")
-				.append("import static ")
-				.append(globalClass).append(".")
-				.append(MULTIPLE_STRING_BUILDER)
-				.append(";\n")*/
 				.append("import static ")
 				.append(globalClass).append(".")
 				.append(MULTIPLE_PRINT_TO_FILE)
@@ -83,10 +71,6 @@ public class JavaStubListenerUsingTryFinallyForJaegerWithSpringMultiThread exten
 				.append(globalClass).append(".")
 				.append(MULTIPLE_STUB_VARIABLE_MAP_SPAN_ID)
 				.append(";\n")				
-				/*.append("import static ")
-				.append(globalClass).append(".")
-				.append(MULTIPLE_STUB_REMARKS)
-				.append(";\n")*/
 				.append(ctx.start.getText());
 			rewriter.replace(ctx.start, 
 					builder.toString());
@@ -163,7 +147,8 @@ public class JavaStubListenerUsingTryFinallyForJaegerWithSpringMultiThread exten
 			.append("java.lang.Long currentThreadId = java.lang.Thread.currentThread().getId();")
 			.append("java.lang.Long MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH = ").append(MULTIPLE_STUB_VARIABLE_MAP_EXECUTION_DEPTH).append(".get(currentThreadId);")
 			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH).append(" = ").append(MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH).append(" == null ? 0L : ").append(MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH).append(";")
-			.append(MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH).append("--;")
+			.append("if(MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH > 0) { MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH--; }")
+			.append(MULTIPLE_STUB_VARIABLE_MAP_EXECUTION_DEPTH).append(".put(currentThreadId, MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH);")
 			.append("if(\"\".equals(").append(MULTIPLE_STRING_BUILDER).append(".toString())) { return; }")
 			.append("try(java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileOutputStream(").append(MULTIPLE_OUTPUT_FILE).append(", true), true)) {")
 			.append("writer.print(").append(MULTIPLE_STRING_BUILDER).append(".toString());")
