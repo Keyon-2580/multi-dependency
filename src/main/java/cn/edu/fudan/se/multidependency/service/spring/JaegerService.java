@@ -10,6 +10,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FeatureExecuteTrace;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
+import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanStartWithFunction;
 
 public interface JaegerService {
 	
@@ -28,4 +29,12 @@ public interface JaegerService {
 	List<SpanCallSpan> findSpanCallSpans(Span span);
 	
 	MicroServiceCreateSpan findMicroServiceCreateSpan(Span span);
+	
+	SpanCallSpan findSpanCallSpanById(Long id);
+
+	SpanStartWithFunction findSpanStartWithFunctionByTraceIdAndSpanId(String requestTraceId, String requestSpanId);
+	
+	Span findSpanById(Long id);
+
+	List<Span> findSpansByMicroserviceIdAndTraceId(Long id, String traceId);
 }

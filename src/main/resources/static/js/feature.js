@@ -8,7 +8,18 @@ var index = function(features) {
     });
     $("#featuresSelectedConfirm").click(function(e){
     	var featureIds = $("#features-select").val();
+    	console.log(featureIds);
+    	if(featureIds.length == 0) {
+    		return;
+    	}
     	var html = "";
+    	var featureNames = features[featureIds[0]].featureName;
+    	for(var i = 1; i < featureIds.length; i++) {
+    		featureNames += ", " + features[featureIds[1]].featureName;
+    	}
+    	if(featureIds.length > 1) {
+    		html += "<div class='col-sm-12'><hr/><h3>Feature: " + featureNames + "</h3></div><div class='col-sm-10 div_content' id='div_content'></div>";
+    	}
     	for(var i = 0; i < featureIds.length; i++) {
     		html += "<div class='col-sm-12'><hr/><h3>Feature: " + features[featureIds[i]].featureName + "</h3>" +
     				"</div>" +
@@ -20,6 +31,9 @@ var index = function(features) {
     				"</div>";
     	}
     	$("#catoscape").html(html);
+    	if(featureIds.length > 1) {
+    		showMicroService(featureIds, $("#div_content"));
+    	}
     	for(var i = 0; i < featureIds.length; i++) {
     		showMicroService(featureIds[i], $("#div_content_" + i), $("#btn_init_" + i), $("#btn_back_" + i), $("#btn_animate_" + i));
     	}
@@ -54,7 +68,7 @@ var index = function(features) {
     	var cy = cytoscape({
         	container: container,
         	layout: {
-        		name: "circle"
+        		name: "breadthfirst"
         	},
         	style: [
         		{
@@ -147,6 +161,7 @@ var index = function(features) {
     		    							id: fromSpan.id + "_" + toSpan.id,
     		    							source: sourceId,
     		    							target: targetId,
+//    		    							value: "( " + toSpan.order + ", " + call.httpRequestMethod + " )",
     		    							value: "( " + toSpan.order + " )",
     		    							detail: call
     		    						}
@@ -172,6 +187,16 @@ var index = function(features) {
     			cy.add(last);
     		});
     	}
+    	cy.on('tap', 'node', function(evt){
+    		var result = featureIdToResult.get(featureId);
+    		if(result == null || result.detail == null){
+    			alert("featureId错误");
+    			return ;
+    		}
+    		var node = evt.target;
+    		console.log(node);
+    		console.log(node.data());
+    	});
     	cy.on('tap', 'edge', function(evt){
     		var result = featureIdToResult.get(featureId);
     		if(result == null || result.detail == null){
@@ -182,6 +207,16 @@ var index = function(features) {
     		if(edge.data().type == "order") {
     			// 弹出详细调用
     			console.log(edge.data());
+    			$.ajax({
+    		    	type: 'GET',
+    		    	url: "/feature/show/function/" + edge.data().detail.id,
+    		    	success: function(result) {
+    		    		console.log(result);
+    			    	if(result.result == "success") {
+    			    		
+    			    	}
+    		    	}
+    		    });
     			return;
     		}
     		var sourceId = edge.source().id();
@@ -202,6 +237,7 @@ var index = function(features) {
     					id: fromSpan.id + "_" + toSpan.id,
     					source: sourceId,
     					target: targetId,
+//    					value: "( " + toSpan.order + ", " + call.httpRequestMethod + " )",
     					value: "( " + toSpan.order + " )",
     					detail: call
     				}

@@ -8,8 +8,11 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.DynamicTestCaseToFunc
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 
 public interface DynamicAnalyseService {
+	
+	public List<FunctionDynamicCallFunction> findFunctionCallsByTraceIdAndSpanId(String traceId, String spanId);
 	
 	public List<ProjectFile> findAllDependencyFilesByFeatureName(String featureName);
 	

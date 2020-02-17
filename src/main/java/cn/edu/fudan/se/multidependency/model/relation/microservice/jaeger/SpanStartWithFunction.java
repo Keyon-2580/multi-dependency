@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_SPAN_STAR_WITH_FUNCTION)
+@RelationshipEntity(RelationType.str_SPAN_START_WITH_FUNCTION)
 public class SpanStartWithFunction implements Relation {
 
 	private static final long serialVersionUID = 7462518725070039162L;

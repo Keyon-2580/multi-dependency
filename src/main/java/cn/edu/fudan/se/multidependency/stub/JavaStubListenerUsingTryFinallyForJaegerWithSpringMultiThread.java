@@ -55,22 +55,12 @@ public class JavaStubListenerUsingTryFinallyForJaegerWithSpringMultiThread exten
 		if(this.importGlobalVariable == false) {
 			StringBuilder builder = new StringBuilder();
 			builder
-				.append("import static ")
-				.append(globalClass).append(".")
-				.append(MULTIPLE_PRINT_TO_FILE)
-				.append(";\n")
-				.append("import static ")
-				.append(globalClass).append(".")
-				.append(MULTIPLE_CALL)
-				.append(";\n")
-				.append("import static ")
-				.append(globalClass).append(".")
-				.append(MULTIPLE_STUB_VARIABLE_MAP_TRACE_ID)
-				.append(";\n")
-				.append("import static ")
-				.append(globalClass).append(".")
-				.append(MULTIPLE_STUB_VARIABLE_MAP_SPAN_ID)
-				.append(";\n")				
+				.append("import static ").append(globalClass).append(".").append(MULTIPLE_PRINT_TO_FILE).append(";\n")
+				.append("import static ").append(globalClass).append(".").append(MULTIPLE_CALL).append(";\n")
+				.append("import static ").append(globalClass).append(".").append(MULTIPLE_STUB_VARIABLE_MAP_TRACE_ID).append(";\n")
+				.append("import static ").append(globalClass).append(".").append(MULTIPLE_STUB_VARIABLE_MAP_SPAN_ID).append(";\n")	
+				.append("import static ").append(globalClass).append(".").append(MULTIPLE_STUB_VARIABLE_MAP_EXECUTION_DEPTH).append(";\n")
+				.append("import static ").append(globalClass).append(".").append(MULTIPLE_STUB_VARIABLE_MAP_EXECUTION_ORDER).append(";\n")					
 				.append(ctx.start.getText());
 			rewriter.replace(ctx.start, 
 					builder.toString());
@@ -180,6 +170,8 @@ public class JavaStubListenerUsingTryFinallyForJaegerWithSpringMultiThread exten
 					"				.append(\"\\\", \\\"depth\\\" : \\\"\").append(MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH++)\r\n" + 
 					"				.append(\"\\\", \\\"traceId\\\" : \\\"\").append(MULTIPLE_STUB_TRACE_ID)\r\n" + 
 					"				.append(\"\\\", \\\"spanId\\\" : \\\"\").append(MULTIPLE_STUB_SPAN_ID)\r\n" + 
+					"				.append(\"\\\", \\\"currentThreadId\\\" : \\\"\").append(java.lang.Thread.currentThread().getId())\r\n" + 
+					"				.append(\"\\\", \\\"currentThreadName\\\" : \\\"\").append(java.lang.Thread.currentThread().getName())\r\n" + 
 					"				.append(\"\\\", \\\"remarks\\\" : \").append(v_MUKTIPLE_STUB_REMARKS).append(\"}\").append(\"\\n\");")
 			.append(MULTIPLE_STUB_VARIABLE_MAP_EXECUTION_DEPTH).append(".put(currentThreadId, MULTIPLE_STUB_VARIABLE_EXECUTION_DEPTH);")
 			.append(MULTIPLE_STUB_VARIABLE_MAP_EXECUTION_ORDER).append(".put(currentThreadId, MULTIPLE_STUB_VARIABLE_EXECUTION_ORDER);")
@@ -194,12 +186,15 @@ public class JavaStubListenerUsingTryFinallyForJaegerWithSpringMultiThread exten
 		StringBuilder builder = new StringBuilder();
 		if(isMethodRequestMapping) {
 			builder
-			.append("java.lang.String MULTIPLE_STUB_TRACE_ID = ").append(MULTIPLE_STUB_VARIABLE_MAP_TRACE_ID).append(".get(java.lang.Thread.currentThread().getId());")
-			.append("java.lang.String MULTIPLE_STUB_SPAN_ID = ").append(MULTIPLE_STUB_VARIABLE_MAP_SPAN_ID).append(".get(java.lang.Thread.currentThread().getId());")
-			.append("MULTIPLE_STUB_TRACE_ID = MULTIPLE_STUB_TRACE_ID == null ? java.lang.Long.toHexString(((io.jaegertracing.internal.JaegerSpan) ").append(MULTIPLE_STUB_JAEGER_AUTOWIRED).append(".activeSpan()).context().getTraceId()) : MULTIPLE_STUB_TRACE_ID;")
-			.append("MULTIPLE_STUB_SPAN_ID = MULTIPLE_STUB_SPAN_ID == null ? java.lang.Long.toHexString(((io.jaegertracing.internal.JaegerSpan) ").append(MULTIPLE_STUB_JAEGER_AUTOWIRED).append(".activeSpan()).context().getSpanId()) : MULTIPLE_STUB_SPAN_ID;")
-			.append(MULTIPLE_STUB_VARIABLE_MAP_TRACE_ID).append(".put(java.lang.Thread.currentThread().getId(), MULTIPLE_STUB_TRACE_ID);")
-			.append(MULTIPLE_STUB_VARIABLE_MAP_SPAN_ID).append(".put(java.lang.Thread.currentThread().getId(), MULTIPLE_STUB_SPAN_ID);");
+//			.append("java.lang.String MULTIPLE_STUB_TRACE_ID = ").append(MULTIPLE_STUB_VARIABLE_MAP_TRACE_ID).append(".get(java.lang.Thread.currentThread().getId());")
+//			.append("java.lang.String MULTIPLE_STUB_SPAN_ID = ").append(MULTIPLE_STUB_VARIABLE_MAP_SPAN_ID).append(".get(java.lang.Thread.currentThread().getId());")
+//			.append("MULTIPLE_STUB_TRACE_ID = MULTIPLE_STUB_TRACE_ID == null ? java.lang.Long.toHexString(((io.jaegertracing.internal.JaegerSpan) ").append(MULTIPLE_STUB_JAEGER_AUTOWIRED).append(".activeSpan()).context().getTraceId()) : MULTIPLE_STUB_TRACE_ID;")
+//			.append("MULTIPLE_STUB_SPAN_ID = MULTIPLE_STUB_SPAN_ID == null ? java.lang.Long.toHexString(((io.jaegertracing.internal.JaegerSpan) ").append(MULTIPLE_STUB_JAEGER_AUTOWIRED).append(".activeSpan()).context().getSpanId()) : MULTIPLE_STUB_SPAN_ID;")
+			.append(MULTIPLE_STUB_VARIABLE_MAP_TRACE_ID).append(".put(java.lang.Thread.currentThread().getId(), java.lang.Long.toHexString(((io.jaegertracing.internal.JaegerSpan) MULTIPLE_STUB_JAEGER_AUTOWIRED.activeSpan()).context().getTraceId()));")
+			.append(MULTIPLE_STUB_VARIABLE_MAP_SPAN_ID).append(".put(java.lang.Thread.currentThread().getId(), java.lang.Long.toHexString(((io.jaegertracing.internal.JaegerSpan) MULTIPLE_STUB_JAEGER_AUTOWIRED.activeSpan()).context().getSpanId()));")
+			.append(MULTIPLE_STUB_VARIABLE_MAP_EXECUTION_DEPTH).append(".put(java.lang.Thread.currentThread().getId(), 0L);")
+			.append(MULTIPLE_STUB_VARIABLE_MAP_EXECUTION_ORDER).append(".put(java.lang.Thread.currentThread().getId(), 0L);")
+			;
 			isMethodRequestMapping = false;
 		}
 		builder.append(MULTIPLE_CALL)
@@ -207,7 +202,7 @@ public class JavaStubListenerUsingTryFinallyForJaegerWithSpringMultiThread exten
 		// peoject
 		.append("\"").append(projectName).append("\", ")
 		// inFile
-		.append("\"").append(this.listenJavaFile.getAbsolutePath().replace("\\\\", "\\\\\\\\")).append("\", ")
+		.append("\"").append(this.listenJavaFile.getAbsolutePath().replace("\\", "\\\\\\\\")).append("\", ")
 		// function
 		.append("\"").append(getMethodFullName(methodName, parameterNames)).append("\"")
 		.append(");");

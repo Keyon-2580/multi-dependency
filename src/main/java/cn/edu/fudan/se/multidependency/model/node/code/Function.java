@@ -14,11 +14,13 @@ import org.neo4j.ogm.annotation.Transient;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @NodeEntity
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode
 public class Function implements Node {
 
 	private static final long serialVersionUID = 6993550414163132668L;

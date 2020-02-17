@@ -15,11 +15,14 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FeatureExecuteTrace;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
+import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanStartWithFunction;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.jaeger.MicroServiceRepository;
+import cn.edu.fudan.se.multidependency.repository.node.microservice.jaeger.SpanRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FeatureExecuteTraceRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.microservice.jaeger.ProjectCreateSpanRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.microservice.jaeger.MicroServiceCreateSpanRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.jaeger.SpanCallSpanRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.microservice.jaeger.SpanStartWithFunctionRepository;
 
 @Service
 public class JaegerServiceImpl implements JaegerService {
@@ -34,10 +37,16 @@ public class JaegerServiceImpl implements JaegerService {
 	private ContainRepository containRepository;
 	
 	@Autowired
-	private ProjectCreateSpanRepository projectCreateSpanRepository;
+	private MicroServiceCreateSpanRepository projectCreateSpanRepository;
 	
 	@Autowired
 	private MicroServiceRepository microServiceRepository;
+	
+	@Autowired
+	private SpanStartWithFunctionRepository spanStartWithFunctionRepository;
+	
+	@Autowired
+	private SpanRepository spanRepository;
 	
 	@Override
 	public Trace findTraceByFeature(Feature feature) {
@@ -88,6 +97,28 @@ public class JaegerServiceImpl implements JaegerService {
 	@Override
 	public MicroService findMicroServiceById(Long id) {
 		return microServiceRepository.findById(id).get();
+	}
+
+	@Override
+	public SpanCallSpan findSpanCallSpanById(Long id) {
+		return spanCallSpanRepository.findById(id).get();
+	}
+
+	@Override
+	public SpanStartWithFunction findSpanStartWithFunctionByTraceIdAndSpanId(String requestTraceId,
+			String requestSpanId) {
+		System.out.println(requestTraceId + " " + requestSpanId);
+		return spanStartWithFunctionRepository.findSpanStartWIthFunctionByTraceIdAndSpanId(requestTraceId, requestSpanId);
+	}
+
+	@Override
+	public Span findSpanById(Long id) {
+		return spanRepository.findById(id).get();
+	}
+
+	@Override
+	public List<Span> findSpansByMicroserviceIdAndTraceId(Long id, String traceId) {
+		return null;
 	}
 
 }

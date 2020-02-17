@@ -109,6 +109,7 @@ public abstract class JaegerTraceInserter extends ExtractorForNodesAndRelationsI
 				SpanCallSpan callSpan = new SpanCallSpan(callerSpan, realChild);
 				callSpan.setHttpRequestMethod(calledSpanOperationName);
 				callSpan.setRequestSpanId(calledSpan.getSpanId());
+				callSpan.setRequestTraceId(calledSpan.getTraceId());
 				addRelation(callSpan);
 			} else if(!HttpRequestMethod.contains(calledSpanOperationName)
 					&& !HttpRequestMethod.contains(callerSpanOperationName)) {

@@ -128,7 +128,6 @@ public class JavaStubDynamicExtractorUtil {
 	public static DynamicFunctionExecutionForJaegerFromStub extractByJaegerJson(String sentence) {
 		try {
 			DynamicFunctionExecutionForJaegerFromStub functionExecution = new DynamicFunctionExecutionForJaegerFromStub();
-			sentence = sentence.replace("\\", "\\\\");
 			functionExecution.setSentence(sentence);
 			JSONObject json = JSONObject.parseObject(sentence);
 			functionExecution.setLanguage(json.getString("language"));

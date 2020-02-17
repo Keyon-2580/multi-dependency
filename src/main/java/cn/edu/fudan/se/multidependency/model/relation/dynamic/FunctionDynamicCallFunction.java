@@ -63,6 +63,8 @@ public class FunctionDynamicCallFunction implements Relation {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("order", getOrder() == null ? "" : getOrder());
+		properties.put("traceId", getTraceId() == null ? "" : getTraceId());
+		properties.put("spanId", getSpanId() == null ? "" : getSpanId());
 		return properties;
 	}
 

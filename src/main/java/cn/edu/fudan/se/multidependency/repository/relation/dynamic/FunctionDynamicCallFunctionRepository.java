@@ -2,12 +2,14 @@ package cn.edu.fudan.se.multidependency.repository.relation.dynamic;
 
 import java.util.List;
 
+import org.springframework.data.neo4j.annotation.Query;
+import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
-import org.springframework.data.neo4j.annotation.Query;
-import org.springframework.data.neo4j.repository.Neo4jRepository;
-import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FunctionDynamicCallFunctionRepository extends Neo4jRepository<FunctionDynamicCallFunction, Long> {
@@ -27,5 +29,8 @@ public interface FunctionDynamicCallFunctionRepository extends Neo4jRepository<F
 	 */
 	@Query("MATCH p=()-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "{testCaseName:{0}}]->() RETURN p")
 	List<FunctionDynamicCallFunction> findDynamicCallsByTestCaseName(String testCaseName);
+
+	@Query("match p = ()-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->() where r.traceId={traceId} and r.spanId={spanId} return p")
+	List<FunctionDynamicCallFunction> findFunctionCallsByTraceIdAndSpanId(@Param("traceId") String traceId, @Param("spanId") String spanId);
 	
 }

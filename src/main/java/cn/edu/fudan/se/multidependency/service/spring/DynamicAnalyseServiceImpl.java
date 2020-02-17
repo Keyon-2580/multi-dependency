@@ -213,4 +213,9 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		return result;
 	}
 
+	@Override
+	public List<FunctionDynamicCallFunction> findFunctionCallsByTraceIdAndSpanId(String traceId, String spanId) {
+		return functionDynamicCallFunctionRepository.findFunctionCallsByTraceIdAndSpanId(traceId, spanId);
+	}
+
 }

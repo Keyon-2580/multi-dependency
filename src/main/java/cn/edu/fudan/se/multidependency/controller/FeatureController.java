@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,11 +23,14 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FeatureExecuteTrace;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
+import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanStartWithFunction;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.JaegerService;
 import cn.edu.fudan.se.multidependency.service.spring.OrganizationService;
+import cn.edu.fudan.se.multidependency.service.spring.SpanWithFunctions;
 
 @Controller
 @RequestMapping("/feature")
@@ -52,7 +56,7 @@ public class FeatureController {
 
 	@GetMapping("/index")
 	public String index(HttpServletRequest request) {
-		System.out.println(organizationService.getClass());
+		System.out.println(Thread.currentThread().getId());
 		request.setAttribute("features", organizationService.allFeatures());
 		request.setAttribute("microservices", organizationService.allMicroServices());
 		return "feature/index";
@@ -69,15 +73,20 @@ public class FeatureController {
 			if("all".equals(featureId)) {
 				value = organizationService.microServiceToCatoscape(true, organizationService.allFeatures());
 			} else {
-				Integer temp = Integer.valueOf(featureId);
-				if(temp == null) {
-					throw new Exception("请输入正确的featureId");
+				List<Feature> features = new ArrayList<>();
+				String[] featureIds = featureId.split(",");
+				for(String fid : featureIds) {
+					Integer temp = Integer.valueOf(fid);
+					if(temp == null) {
+						throw new Exception("请输入正确的featureId");
+					}
+					Feature feature = organizationService.findFeatureById(temp);
+					if(feature == null) {
+						throw new Exception("没有featureId为 " + featureId + " 的Feature");
+					}
+					features.add(feature);
 				}
-				Feature feature = organizationService.findFeatureById(temp);
-				if(feature == null) {
-					throw new Exception("没有featureId为 " + featureId + " 的Feature");
-				}
-				value = organizationService.microServiceToCatoscape(true, feature);
+				value = organizationService.microServiceToCatoscape(true, features);
 				result.put("detail", value.getJSONObject("detail"));
 			}
 			result.put("result", "success");
@@ -115,7 +124,7 @@ public class FeatureController {
 
 	@Bean
 	public OrganizationService organize() {
-		System.out.println("organize");
+		System.out.println("organize " + Thread.currentThread().getId());
 		// List<Feature> features = dynamicAnalyseService.findFeaturesByFeatureId(1, 2);
 		List<Feature> features = dynamicAnalyseService.findAllFeatures();
 		// 找出feature执行的trace
@@ -147,5 +156,56 @@ public class FeatureController {
 				spanCallSpans, spanBelongToMicroService);
 
 		return organization;
+	}
+	
+	@GetMapping("/show/function/microservice")
+	@ResponseBody
+	public JSONObject findFunctionsForMicroservice(@PathParam("microserviceId") Long id, @PathParam("traceId") String traceId) {
+		System.out.println(id + " " + traceId);
+		JSONObject result = new JSONObject();
+//		MicroService ms = jaegerService.findMicroServiceById(id);
+//		List<Span> spans = jaegerService.findSpansByMicroserviceIdAndTraceId(id, traceId);
+//		System.out.println(ms);
+//		SpanStartWithFunction spanStartWithFunction = jaegerService.findSpanStartWithFunctionByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
+//		System.out.println(spanStartWithFunction);
+//		System.out.println(spanStartWithFunction.getFunction());
+//		List<FunctionDynamicCallFunction> spanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
+//		SpanWithFunctions spanWithFunctions = new SpanWithFunctions(spanStartWithFunction, spanFunctionCalls);
+//		result.put(span.getSpanId(), spanWithFunctions);
+		return result;
+	}
+	
+	@GetMapping("/show/function/span/{id}")
+	@ResponseBody
+	public JSONObject findFunctionsForSpan(@PathVariable("id") Long id) {
+		System.out.println(id);
+		JSONObject result = new JSONObject();
+		Span span = jaegerService.findSpanById(id);
+		System.out.println(span);
+		SpanStartWithFunction spanStartWithFunction = jaegerService.findSpanStartWithFunctionByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
+		System.out.println(spanStartWithFunction);
+		System.out.println(spanStartWithFunction.getFunction());
+		List<FunctionDynamicCallFunction> spanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
+		SpanWithFunctions spanWithFunctions = new SpanWithFunctions(spanStartWithFunction, spanFunctionCalls);
+		result.put(span.getSpanId(), spanWithFunctions);
+		return result;
+	}
+
+	@GetMapping("/show/function/{spanCallSpanId}")
+	@ResponseBody
+	public JSONObject findFunctionsForSpanCallSpan(@PathVariable("spanCallSpanId") Long spanCallSpanId) {
+		System.out.println(spanCallSpanId);
+		JSONObject result = new JSONObject();
+		SpanCallSpan spanCallSpan = jaegerService.findSpanCallSpanById(spanCallSpanId);
+		System.out.println(spanCallSpan);
+		SpanStartWithFunction spanStartWithFunction = jaegerService.findSpanStartWithFunctionByTraceIdAndSpanId(spanCallSpan.getSpan().getTraceId(), spanCallSpan.getSpan().getSpanId());
+		System.out.println(spanStartWithFunction);
+		System.out.println(spanStartWithFunction.getFunction());
+		List<FunctionDynamicCallFunction> spanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(spanCallSpan.getSpan().getTraceId(), spanCallSpan.getSpan().getSpanId());
+		SpanWithFunctions spanWithFunctions = new SpanWithFunctions(spanStartWithFunction, spanFunctionCalls);
+		SpanStartWithFunction callSpanStartWithFunction = jaegerService.findSpanStartWithFunctionByTraceIdAndSpanId(spanCallSpan.getCallSpan().getTraceId(), spanCallSpan.getCallSpan().getSpanId());
+		List<FunctionDynamicCallFunction> callSpanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(spanCallSpan.getCallSpan().getTraceId(), spanCallSpan.getCallSpan().getSpanId());
+		SpanWithFunctions callSpanWithFunctions = new SpanWithFunctions(callSpanStartWithFunction, callSpanFunctionCalls);
+		return result;
 	}
 }
