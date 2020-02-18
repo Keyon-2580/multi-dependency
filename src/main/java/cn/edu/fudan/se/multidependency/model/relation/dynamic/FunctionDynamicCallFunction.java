@@ -40,6 +40,14 @@ public class FunctionDynamicCallFunction implements Relation {
 	
 	private String order;
 	
+	private Long fromOrder;
+	
+	private Long toOrder;
+	
+	private Long fromDepth;
+	
+	private Long toDepth;
+	
 	private String traceId;
 	
 	private String spanId;
@@ -65,6 +73,10 @@ public class FunctionDynamicCallFunction implements Relation {
 		properties.put("order", getOrder() == null ? "" : getOrder());
 		properties.put("traceId", getTraceId() == null ? "" : getTraceId());
 		properties.put("spanId", getSpanId() == null ? "" : getSpanId());
+		properties.put("fromOrder", getFromOrder() == null ? -1 : getFromOrder());
+		properties.put("toOrder", getToOrder() == null ? -1 : getToOrder());
+		properties.put("fromDepth", getFromDepth() == null ? -1 : getFromDepth());
+		properties.put("toDepth", getToDepth() == null ? -1 : getToDepth());
 		return properties;
 	}
 

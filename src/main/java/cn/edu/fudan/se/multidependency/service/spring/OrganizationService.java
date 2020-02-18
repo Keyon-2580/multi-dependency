@@ -41,6 +41,10 @@ public class OrganizationService {
 	private final Map<Span, List<SpanCallSpan>> spanCallSpans;
 	private final Map<Span, MicroServiceCreateSpan> spanBelongToMicroService;
 	
+	public List<Span> findMicroServiceCreateSpansInTraces(MicroService ms, Feature feature) throws Exception {
+		return findMicroServiceCreateSpansInTraces(ms, featureExecuteTraces.get(feature).getTrace());
+	}
+	
 	public List<Span> findMicroServiceCreateSpansInTraces(MicroService ms, Trace trace) throws Exception {
 		List<Span> spans = new ArrayList<>();
 		for(Span span : traceToSpans.get(trace)) {

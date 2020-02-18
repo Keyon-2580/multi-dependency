@@ -14,11 +14,19 @@
 	th:src="@{/js/import/bootstrap/bootstrap-multiselect-0.9.15.js}"></script>
 <script type="text/javascript"
 	th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape.min.js}"></script>
-<script type="text/javascript" th:src="@{/js/feature.js}"></script>
+<script type="text/javascript" th:src="@{/js/function.js}"></script>
+<script type="text/javascript"
+	th:src="@{/js/import/bootstrap/bootstrap-treeview.min.js}"></script>
+<script type="text/javascript"
+	th:src="@{/js/feature.js}"></script>
+<script type="text/javascript"
+	th:src="@{/js/function.js}"></script>
 <link rel="stylesheet"
 	th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
 <link rel="stylesheet"
 	th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
+<link rel="stylesheet"
+	th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
 <style type="text/css">
 .div_cytoscape_content {
 	height: 600px;
@@ -28,33 +36,22 @@
 </style>
 </head>
 <body>
-	<div class="container-lg col-sm-12", style="margin-top: 15px; margin-bottom: 15px;">
-		<div th:if="${features}">
-			<div>
-				<h3>Features</h3>
-			</div>
-			<form role="form">
-				<div class="form-group">
-					<label for="features-select">选择Feature：</label> <select
-						id="features-select" multiple="multiple">
-						<option th:each="feature:${features}"
-							th:value="${feature.featureId}" th:text="${feature.featureName}"></option>
-					</select>
-					<button type="button" id="featuresSelectedConfirm"
-						class="btn btn-default">确定</button>
-				</div>
-			</form>
-			<div id="catoscape">
+	<div class="container-lg col-sm-12 row" style="margin-bottom: 15px;">
+		<div class="col-sm-3" style="margin-top: 15px; ">
+			<div id="tree"></div>
+		</div>
+		<div class="col-sm-9">
+			<div id="graph">
 			</div>
 		</div>
 	</div>
 	<script type="text/javascript" th:inline="javascript">
-	//<![CDATA[
-	$(document).ready(function() {
-		var features = [[${features}]];
-		featureIndex(features, $("#catoscape"));
-	});
-	// ]]>
+		//<![CDATA[
+		$(document).ready(function() {
+			var features = [[${features}]];
+			functionIndex(features, $("#graph"));
+		});
+		// ]]>
 	</script>
 </body>
 </html>

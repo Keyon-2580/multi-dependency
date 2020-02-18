@@ -91,6 +91,10 @@ public class StubJavaForJaegerDynamicInserter extends DynamicInserterForNeo4jSer
 						relation.setSpanId(callerDynamicFunction.getSpanId());
 						relation.setOrder(callerDynamicFunction.getOrder() + ":" + callerDynamicFunction.getDepth()
 								+ " -> " + calledDynamicFunction.getOrder() + ":" + calledDynamicFunction.getDepth());
+						relation.setFromOrder(callerDynamicFunction.getOrder());
+						relation.setToOrder(calledDynamicFunction.getOrder());
+						relation.setFromDepth(callerDynamicFunction.getDepth());
+						relation.setToDepth(calledDynamicFunction.getDepth());
 						addRelation(relation);
 					}
 				}

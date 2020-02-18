@@ -95,7 +95,6 @@ public class FeatureController {
 
 	@GetMapping("/index")
 	public String index(HttpServletRequest request) {
-		System.out.println(Thread.currentThread().getId());
 		request.setAttribute("features", organizationService.allFeatures());
 		request.setAttribute("microservices", organizationService.allMicroServices());
 		return "feature/index";
@@ -185,16 +184,21 @@ public class FeatureController {
 	@GetMapping("/show/function/span/{id}")
 	@ResponseBody
 	public JSONObject findFunctionsForSpan(@PathVariable("id") Long id) {
-		System.out.println(id);
-		JSONObject result = new JSONObject();
-		Span span = jaegerService.findSpanById(id);
-		System.out.println(span);
-		SpanStartWithFunction spanStartWithFunction = jaegerService.findSpanStartWithFunctionByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
-		System.out.println(spanStartWithFunction);
-		System.out.println(spanStartWithFunction.getFunction());
-		List<FunctionDynamicCallFunction> spanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
-		SpanWithFunctions spanWithFunctions = new SpanWithFunctions(spanStartWithFunction, spanFunctionCalls);
-		result.put(span.getSpanId(), spanWithFunctions);
+		try {
+			
+			System.out.println(id);
+			JSONObject result = new JSONObject();
+			Span span = jaegerService.findSpanById(id);
+			System.out.println(span);
+			SpanStartWithFunction spanStartWithFunction = jaegerService.findSpanStartWithFunctionByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
+			System.out.println(spanStartWithFunction);
+			System.out.println(spanStartWithFunction.getFunction());
+			List<FunctionDynamicCallFunction> spanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
+			SpanWithFunctions spanWithFunctions = new SpanWithFunctions(spanStartWithFunction, spanFunctionCalls);
+			result.put(span.getSpanId(), spanWithFunctions);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return result;
 	}
 
@@ -235,5 +239,5 @@ public class FeatureController {
 		}
 		return result;
 	}
-
+	
 }
