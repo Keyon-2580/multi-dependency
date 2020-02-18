@@ -19,7 +19,7 @@ public class StubJavaDynamicInserter extends DynamicInserterForNeo4jService {
 
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
-		Map<String, Map<Long, List<DynamicFunctionExecutionFromStub>>> allDynamicFunctionFromKiekers = JavaStubDynamicExtractorUtil
+		/*Map<String, Map<Long, List<DynamicFunctionExecutionFromStub>>> allDynamicFunctionFromKiekers = JavaStubDynamicExtractorUtil
 				.readStubLogs(dynamicFunctionCallFiles);
 		Map<String, List<Function>> functions = null;// 获取到所分析项目的所有方法，由于涉及到方法重载，所以一个方法名，可能对应几个方法
 		for (Map<Long, List<DynamicFunctionExecutionFromStub>> groups : allDynamicFunctionFromKiekers.values()) {
@@ -80,7 +80,7 @@ public class StubJavaDynamicInserter extends DynamicInserterForNeo4jService {
 					addRelation(relation);
 				}
 			}
-		}
+		}*/
 	}
 
 }

@@ -106,7 +106,7 @@ public class StubUtil {
 			stubListener = new JavaStubListenerUsingTryFinallyForJaegerWithSpringMultiThread(tokens, projectName, listenFile,
 					input, className, outputStubLogFilePath, remarks);
 		} else {
-			stubListener = new JavaStubListenerUsingTryFinally(tokens, projectName, listenFile, input, className,
+			stubListener = new JavaStubListenerUsingTryFinallyForJar(tokens, projectName, listenFile, input, className,
 					outputStubLogFilePath, remarks);
 		}
 		ParseTreeWalker walker = new ParseTreeWalker();
@@ -262,10 +262,10 @@ public class StubUtil {
 		parser.setInterpreter(interpreter);
 		JavaStubListener stubListener = null;
 		if (usingJaegerWithSpring) {
-			stubListener = new JavaStubListenerUsingTryFinallyForJaegerWithSpring(tokens, projectName, listenFile,
+			stubListener = new JavaStubListenerUsingTryFinallyForJaegerWithSpringMultiThread(tokens, projectName, listenFile,
 					input, className, outputStubLogFilePath, remarks);
 		} else {
-			stubListener = new JavaStubListenerUsingTryFinally(tokens, projectName, listenFile, input, className,
+			stubListener = new JavaStubListenerUsingTryFinallyForJar(tokens, projectName, listenFile, input, className,
 					outputStubLogFilePath, remarks);
 		}
 		ParseTreeWalker walker = new ParseTreeWalker();

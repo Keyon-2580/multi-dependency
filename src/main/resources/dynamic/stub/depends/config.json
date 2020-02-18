@@ -1,0 +1,26 @@
+/*{
+ * name：项目名
+ * path：项目路径
+ * outputPath：插桩后项目保存目录
+ * language：项目语言，目前仅支持java
+ * globalVariableLocation：全局变量位置，目前仅支持java，java是具体的类名
+ * logPath：打印log的路径
+ * remarks：可选的备注，要不去掉，要不值为json格式，内容随意
+}*/
+{
+	"projects" : [
+		{
+			"name" : "depends",
+			"path" : "D:\\multiple-dependency-project\\depends",
+			"outputPath" : "D:\\projectPath",
+			"language" : "java",
+			"globalVariableLocation" : "depends.Main",
+			"logPath" : "D:\\stub.log",
+			"remarks" : {
+				"TestCase" : "", 
+			},
+			"jaeger.spring" : false
+		}
+	]
+
+}

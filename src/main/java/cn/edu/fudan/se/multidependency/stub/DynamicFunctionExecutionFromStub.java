@@ -9,7 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
-@EqualsAndHashCode
+@EqualsAndHashCode()
 public class DynamicFunctionExecutionFromStub {
 	protected String language;
 	protected String time;
@@ -24,4 +24,6 @@ public class DynamicFunctionExecutionFromStub {
 	}
 	protected JSONObject remarks;
 	protected String sentence;
+	protected String traceId;
+	protected String spanId;
 }

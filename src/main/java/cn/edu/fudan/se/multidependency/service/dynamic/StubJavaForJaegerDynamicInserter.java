@@ -9,7 +9,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanStartWithFunction;
-import cn.edu.fudan.se.multidependency.stub.DynamicFunctionExecutionForJaegerFromStub;
+import cn.edu.fudan.se.multidependency.stub.DynamicFunctionExecutionFromStub;
 import cn.edu.fudan.se.multidependency.stub.JavaStubDynamicExtractorUtil;
 
 public class StubJavaForJaegerDynamicInserter extends DynamicInserterForNeo4jService {
@@ -21,16 +21,16 @@ public class StubJavaForJaegerDynamicInserter extends DynamicInserterForNeo4jSer
 
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
-		Map<String, Map<String, Map<Long, List<DynamicFunctionExecutionForJaegerFromStub>>>> allDynamicFunctionFromJaegerStub = JavaStubDynamicExtractorUtil
+		Map<String, Map<String, Map<Long, List<DynamicFunctionExecutionFromStub>>>> allDynamicFunctionFromJaegerStub = JavaStubDynamicExtractorUtil
 				.readStubJaegerLogs(dynamicFunctionCallFiles);
 		Map<String, List<Function>> functions = null;// 获取到所分析项目的所有方法，由于涉及到方法重载，所以一个方法名，可能对应几个方法
 		for (String traceId : allDynamicFunctionFromJaegerStub.keySet()) {
-			Map<String, Map<Long, List<DynamicFunctionExecutionForJaegerFromStub>>> spansResult = allDynamicFunctionFromJaegerStub.get(traceId);
+			Map<String, Map<Long, List<DynamicFunctionExecutionFromStub>>> spansResult = allDynamicFunctionFromJaegerStub.get(traceId);
 			for (String spanId : spansResult.keySet()) {
-				Map<Long, List<DynamicFunctionExecutionForJaegerFromStub>> depthResult = spansResult.get(spanId);
+				Map<Long, List<DynamicFunctionExecutionFromStub>> depthResult = spansResult.get(spanId);
 				for (Long depth : depthResult.keySet()) {
-					List<DynamicFunctionExecutionForJaegerFromStub> executions = depthResult.get(depth);
-					for (DynamicFunctionExecutionForJaegerFromStub calledDynamicFunction : executions) {
+					List<DynamicFunctionExecutionFromStub> executions = depthResult.get(depth);
+					for (DynamicFunctionExecutionFromStub calledDynamicFunction : executions) {
 						functions = this.getNodes().findFunctionsInProject(
 								this.getNodes().findProjectByNameAndLanguage(calledDynamicFunction.getProject(),
 										Language.java.toString()));
@@ -53,11 +53,11 @@ public class StubJavaForJaegerDynamicInserter extends DynamicInserterForNeo4jSer
 							continue;
 						}
 						List<Long> list = new ArrayList<>();
-						for (DynamicFunctionExecutionForJaegerFromStub test : depthResult
+						for (DynamicFunctionExecutionFromStub test : depthResult
 								.get(calledDynamicFunction.getDepth() - 1)) {
 							list.add(test.getOrder());
 						}
-						DynamicFunctionExecutionForJaegerFromStub callerDynamicFunction = null;
+						DynamicFunctionExecutionFromStub callerDynamicFunction = null;
 						if (JavaStubDynamicExtractorUtil.find(calledDynamicFunction.getOrder(), list) != -1) {
 							callerDynamicFunction = depthResult.get(calledDynamicFunction.getDepth() - 1)
 									.get(JavaStubDynamicExtractorUtil.find(calledDynamicFunction.getOrder(), list));

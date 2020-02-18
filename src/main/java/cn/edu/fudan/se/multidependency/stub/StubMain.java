@@ -14,6 +14,7 @@ public class StubMain {
 //				"D:\\stub.log");
 		if(args.length == 0) {
 			StubUtil.stubByConfig("src/main/resources/dynamic/stub/train-ticket/config.json");
+			StubUtil.stubByConfig("src/main/resources/dynamic/stub/depends/config.json");
 		} else {
 			StubUtil.stubByConfig(args[0]);
 		}
