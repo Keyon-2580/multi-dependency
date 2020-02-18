@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +38,7 @@ public class JaegerServiceImpl implements JaegerService {
 	private ContainRepository containRepository;
 	
 	@Autowired
-	private MicroServiceCreateSpanRepository projectCreateSpanRepository;
+	private MicroServiceCreateSpanRepository microserviceCreateSpanRepository;
 	
 	@Autowired
 	private MicroServiceRepository microServiceRepository;
@@ -72,7 +73,7 @@ public class JaegerServiceImpl implements JaegerService {
 
 	@Override
 	public MicroServiceCreateSpan findMicroServiceCreateSpan(Span span) {
-		return projectCreateSpanRepository.findProjectCreateSpan(span.getSpanId());
+		return microserviceCreateSpanRepository.findMicroServiceCreateSpan(span.getSpanId());
 	}
 
 	@Override
@@ -107,7 +108,6 @@ public class JaegerServiceImpl implements JaegerService {
 	@Override
 	public SpanStartWithFunction findSpanStartWithFunctionByTraceIdAndSpanId(String requestTraceId,
 			String requestSpanId) {
-		System.out.println(requestTraceId + " " + requestSpanId);
 		return spanStartWithFunctionRepository.findSpanStartWIthFunctionByTraceIdAndSpanId(requestTraceId, requestSpanId);
 	}
 
@@ -117,8 +117,13 @@ public class JaegerServiceImpl implements JaegerService {
 	}
 
 	@Override
-	public List<Span> findSpansByMicroserviceIdAndTraceId(Long id, String traceId) {
-		return null;
+	public List<Span> findSpansByMicroserviceIdAndTraceId(Long microserviceId, String traceId) {
+		List<MicroServiceCreateSpan> createSpans = microserviceCreateSpanRepository.findMicroServiceCreateSpansInTrace(microserviceId, traceId);
+		List<Span> result = new ArrayList<>();
+		for(MicroServiceCreateSpan createSpan : createSpans) {
+			result.add(createSpan.getSpan());
+		}
+		return result;
 	}
 
 }

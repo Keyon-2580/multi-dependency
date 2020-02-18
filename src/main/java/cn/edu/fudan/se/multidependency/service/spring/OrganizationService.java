@@ -34,11 +34,12 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class OrganizationService {
-	private Map<String, MicroService> allMicroService;
-	private Map<Feature, FeatureExecuteTrace> featureExecuteTraces;
-	private Map<Trace, List<Span>> traceToSpans;
-	private Map<Span, List<SpanCallSpan>> spanCallSpans;
-	private Map<Span, MicroServiceCreateSpan> spanBelongToMicroService;
+	
+	private final Map<String, MicroService> allMicroService;
+	private final Map<Feature, FeatureExecuteTrace> featureExecuteTraces;
+	private final Map<Trace, List<Span>> traceToSpans;
+	private final Map<Span, List<SpanCallSpan>> spanCallSpans;
+	private final Map<Span, MicroServiceCreateSpan> spanBelongToMicroService;
 	
 	public List<Span> findMicroServiceCreateSpansInTraces(MicroService ms, Trace trace) throws Exception {
 		List<Span> spans = new ArrayList<>();
@@ -81,6 +82,8 @@ public class OrganizationService {
 				msCallMsDetail.put(ms.getId().toString(), info);
 			}
 			result.put("detail", msCallMsDetail);
+			FeatureExecuteTrace featureExecuteTrace = featureExecuteTraces.get(features[0]);
+			result.put("traceId", featureExecuteTrace.getTrace().getTraceId());
 		}
 		for(MicroService ms : msCalls.keySet()) {
 			for(MicroService callMs : msCalls.get(ms).keySet()) {
@@ -255,7 +258,8 @@ public class OrganizationService {
 		});
 		return result;
 	}	
-	
+
+	@Deprecated
 	public String featureToSVG(Feature feature) {
 		if(feature == null || featureExecuteTraces.get(feature) == null) {
 			return null;
@@ -264,7 +268,8 @@ public class OrganizationService {
 		String svg = renderSVGForTrace(trace, feature.getFeatureName() + " " + trace.getTraceId());
 		return svg;
 	}
-	
+
+	@Deprecated
 	public Map<Feature, String> featureToSVG() {
 		Map<Feature, String> result = new HashMap<>();
 		for(Feature feature : allFeatures()) {
@@ -272,7 +277,7 @@ public class OrganizationService {
 		}
 		return result;
 	}
-	
+	@Deprecated
 	public String renderSVGForTrace(Trace trace, String graphName) {
 		List<LinkSource> linkSources = new ArrayList<>();
 		List<Span> spans = traceToSpans.get(trace);
@@ -292,9 +297,11 @@ public class OrganizationService {
 		Graph g = graph(graphName).directed().graphAttr().with(Rank.dir(RankDir.LEFT_TO_RIGHT)).with(linkSources);
 		return Graphviz.fromGraph(g).render(Format.SVG).toString();
 	}
+	@Deprecated
 	private static String getSpanName(Span span) {
 		return "(" + span.getOrder() + ")\n" + span.getSpanId() + "\n" + span.getServiceName() + "\n" + span.getOperationName();
 	}
+	@Deprecated
 	private static String getSpanLabel(Span span) {
 		return "(" + span.getOrder() + ")\n" + span.getServiceName() + "\n" + span.getOperationName();
 	}

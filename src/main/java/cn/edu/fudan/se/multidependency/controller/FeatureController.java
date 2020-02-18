@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
@@ -42,10 +43,48 @@ public class FeatureController {
 	@Autowired
 	private JaegerService jaegerService;
 
+	@Autowired
+	private OrganizationService organizationService;
+
+	@Bean
+	public OrganizationService organize() {
+		// List<Feature> features = dynamicAnalyseService.findFeaturesByFeatureId(1, 2);
+		List<Feature> features = dynamicAnalyseService.findAllFeatures();
+		// 找出feature执行的trace
+		Map<Feature, FeatureExecuteTrace> featureExecuteTraces = new HashMap<>();
+		for (Feature feature : features) {
+			FeatureExecuteTrace execute = jaegerService.findFeatureExecuteTraceByFeature(feature);
+			featureExecuteTraces.put(feature, execute);
+		}
+		// 找出trace对应的spans
+		Map<Trace, List<Span>> traceToSpans = new HashMap<>();
+		// 找出span调用哪些span
+		Map<Span, List<SpanCallSpan>> spanCallSpans = new HashMap<>();
+		// 找出span属于哪个project
+		Map<Span, MicroServiceCreateSpan> spanBelongToMicroService = new HashMap<>();
+
+		for (FeatureExecuteTrace featureExecuteTrace : featureExecuteTraces.values()) {
+			Trace trace = featureExecuteTrace.getTrace();
+			List<Span> spans = jaegerService.findSpansByTrace(trace);
+			traceToSpans.put(trace, spans);
+			for (Span span : spans) {
+				List<SpanCallSpan> callSpans = jaegerService.findSpanCallSpans(span);
+				spanCallSpans.put(span, callSpans);
+				MicroServiceCreateSpan microServiceCreateSpan = jaegerService.findMicroServiceCreateSpan(span);
+				spanBelongToMicroService.put(span, microServiceCreateSpan);
+			}
+		}
+		Map<String, MicroService> allMicroService = jaegerService.findAllMicroService();
+		OrganizationService organization = new OrganizationService(allMicroService, featureExecuteTraces, traceToSpans,
+				spanCallSpans, spanBelongToMicroService);
+
+		return organization;
+	}
+
 	@GetMapping("/all")
 	@ResponseBody
 	public List<Feature> findAllFeatures() {
-		return dynamicAnalyseService.findAllFeatures();
+		return organizationService.allFeatures();
 	}
 
 	@GetMapping("/test")
@@ -88,6 +127,9 @@ public class FeatureController {
 				}
 				value = organizationService.microServiceToCatoscape(true, features);
 				result.put("detail", value.getJSONObject("detail"));
+				if(features.size() == 1) {
+					result.put("traceId", value.getString("traceId"));
+				}
 			}
 			result.put("result", "success");
 			result.put("removeUnuseMicroService", removeUnuseMicroService);
@@ -96,75 +138,40 @@ public class FeatureController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			result.put("result", "fail");
-			result.put("value", e.getMessage());
-		}
-		return result;
-	}
-
-	@GetMapping("/svg/{featureId}")
-	@ResponseBody
-	public JSONObject renderSVG(@PathVariable("featureId") Integer featureId) {
-		System.out.println(featureId);
-		JSONObject result = new JSONObject();
-		try {
-			Feature feature = organizationService.findFeatureById(featureId);
-			String svg = organizationService.featureToSVG(feature);
-			result.put("result", "success");
-			result.put("svg", svg);
-			System.out.println(svg);
-		} catch (Exception e) {
-			result.put("result", "fail");
 			result.put("msg", e.getMessage());
 		}
 		return result;
 	}
-
-	@Autowired
-	private OrganizationService organizationService;
-
-	@Bean
-	public OrganizationService organize() {
-		System.out.println("organize " + Thread.currentThread().getId());
-		// List<Feature> features = dynamicAnalyseService.findFeaturesByFeatureId(1, 2);
-		List<Feature> features = dynamicAnalyseService.findAllFeatures();
-		// 找出feature执行的trace
-		Map<Feature, FeatureExecuteTrace> featureExecuteTraces = new HashMap<>();
-		for (Feature feature : features) {
-			FeatureExecuteTrace execute = jaegerService.findFeatureExecuteTraceByFeature(feature);
-			featureExecuteTraces.put(feature, execute);
-		}
-		// 找出trace对应的spans
-		Map<Trace, List<Span>> traceToSpans = new HashMap<>();
-		// 找出span调用哪些span
-		Map<Span, List<SpanCallSpan>> spanCallSpans = new HashMap<>();
-		// 找出span属于哪个project
-		Map<Span, MicroServiceCreateSpan> spanBelongToMicroService = new HashMap<>();
-
-		for (FeatureExecuteTrace featureExecuteTrace : featureExecuteTraces.values()) {
-			Trace trace = featureExecuteTrace.getTrace();
-			List<Span> spans = jaegerService.findSpansByTrace(trace);
-			traceToSpans.put(trace, spans);
-			for (Span span : spans) {
-				List<SpanCallSpan> callSpans = jaegerService.findSpanCallSpans(span);
-				spanCallSpans.put(span, callSpans);
-				MicroServiceCreateSpan microServiceCreateSpan = jaegerService.findMicroServiceCreateSpan(span);
-				spanBelongToMicroService.put(span, microServiceCreateSpan);
-			}
-		}
-		Map<String, MicroService> allMicroService = jaegerService.findAllMicroService();
-		OrganizationService organization = new OrganizationService(allMicroService, featureExecuteTraces, traceToSpans,
-				spanCallSpans, spanBelongToMicroService);
-
-		return organization;
-	}
 	
 	@GetMapping("/show/function/microservice")
 	@ResponseBody
-	public JSONObject findFunctionsForMicroservice(@PathParam("microserviceId") Long id, @PathParam("traceId") String traceId) {
-		System.out.println(id + " " + traceId);
+	public JSONObject findFunctionsForMicroservice(@RequestParam("microserviceId") Long id, @RequestParam("traceId") String traceId) {
 		JSONObject result = new JSONObject();
-//		MicroService ms = jaegerService.findMicroServiceById(id);
-//		List<Span> spans = jaegerService.findSpansByMicroserviceIdAndTraceId(id, traceId);
+		try {
+			System.out.println(id + " " + traceId);
+			MicroService ms = jaegerService.findMicroServiceById(id);
+			if(ms == null) {
+				throw new Exception("没有id为 " + id + " 的MicroService");
+			}
+			List<Span> spans = jaegerService.findSpansByMicroserviceIdAndTraceId(id, traceId);
+			System.out.println(spans.size());
+			for(Span span : spans) {
+				SpanStartWithFunction spanStartWithFunction = jaegerService.findSpanStartWithFunctionByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
+				if(spanStartWithFunction == null) {
+					System.out.println(span.getTraceId() + " " + span.getSpanId() + " " + ms.getName() + " " + " null");
+				} else {
+					System.out.println(spanStartWithFunction.getFunction());
+				}
+			}
+			Map<String, List<SpanWithFunctions>> spanIdToSpanWithFunctions = new HashMap<>();
+			
+			
+			result.put("result", "success");
+			result.put("spans", spans);
+		} catch (Exception e) {
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
 //		System.out.println(ms);
 //		SpanStartWithFunction spanStartWithFunction = jaegerService.findSpanStartWithFunctionByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
 //		System.out.println(spanStartWithFunction);
@@ -208,4 +215,25 @@ public class FeatureController {
 		SpanWithFunctions callSpanWithFunctions = new SpanWithFunctions(callSpanStartWithFunction, callSpanFunctionCalls);
 		return result;
 	}
+	
+
+	@Deprecated
+	@GetMapping("/svg/{featureId}")
+	@ResponseBody
+	public JSONObject renderSVG(@PathVariable("featureId") Integer featureId) {
+		System.out.println(featureId);
+		JSONObject result = new JSONObject();
+		try {
+			Feature feature = organizationService.findFeatureById(featureId);
+			String svg = organizationService.featureToSVG(feature);
+			result.put("result", "success");
+			result.put("svg", svg);
+			System.out.println(svg);
+		} catch (Exception e) {
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
+		return result;
+	}
+
 }

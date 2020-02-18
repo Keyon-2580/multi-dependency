@@ -15,7 +15,7 @@ var index = function(features) {
     	var html = "";
     	var featureNames = features[featureIds[0]].featureName;
     	for(var i = 1; i < featureIds.length; i++) {
-    		featureNames += ", " + features[featureIds[1]].featureName;
+    		featureNames += ", " + features[featureIds[i]].featureName;
     	}
     	if(featureIds.length > 1) {
     		html += "<div class='col-sm-12'><hr/><h3>Feature: " + featureNames + "</h3></div><div class='col-sm-10 div_content' id='div_content'></div>";
@@ -189,13 +189,24 @@ var index = function(features) {
     	}
     	cy.on('tap', 'node', function(evt){
     		var result = featureIdToResult.get(featureId);
-    		if(result == null || result.detail == null){
+    		if(result == null || result.detail == null || result.traceId == null){
     			alert("featureId错误");
     			return ;
     		}
     		var node = evt.target;
+    		console.log(result);
     		console.log(node);
     		console.log(node.data());
+    		$.ajax({
+		    	type: 'GET',
+		    	url: "/feature/show/function/microservice?microserviceId=" + node.data().id + "&traceId=" + result.traceId,
+		    	success: function(result) {
+		    		console.log(result);
+			    	if(result.result == "success") {
+			    		
+			    	}
+		    	}
+		    });
     	});
     	cy.on('tap', 'edge', function(evt){
     		var result = featureIdToResult.get(featureId);
@@ -207,16 +218,7 @@ var index = function(features) {
     		if(edge.data().type == "order") {
     			// 弹出详细调用
     			console.log(edge.data());
-    			$.ajax({
-    		    	type: 'GET',
-    		    	url: "/feature/show/function/" + edge.data().detail.id,
-    		    	success: function(result) {
-    		    		console.log(result);
-    			    	if(result.result == "success") {
-    			    		
-    			    	}
-    		    	}
-    		    });
+    			
     			return;
     		}
     		var sourceId = edge.source().id();
