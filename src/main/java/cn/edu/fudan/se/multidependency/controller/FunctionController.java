@@ -47,7 +47,7 @@ public class FunctionController {
 	private StaticAnalyseService staticAnalyseService;
 	
 	@Autowired
-	private DependencyOrganizationService staticCallOrganizationService;
+	private DependencyOrganizationService dependencyOrganizationService;
 	
 	@GetMapping("/index")
 	public String index(HttpServletRequest request) {		
@@ -114,14 +114,16 @@ public class FunctionController {
 				Trace trace = jaegerService.findTraceByTraceId(traceId);
 				calls = dynamicAnalyseService.findFunctionDynamicCallsByTraceAndMicroService(trace, ms);
 			}
-			staticCallOrganizationService.dynamicCallDependency(calls);
+			dependencyOrganizationService.dynamicCallDependency(calls);
 			result.put("result", "success");
 			if(type == null || "file".equals(type)) {
-				result.put("value", staticCallOrganizationService.fileCallToCatoscape());
+				result.put("value", dependencyOrganizationService.fileCallToCytoscape());
 			} else if("package".equals(type)) {
-				result.put("value", staticCallOrganizationService.packageCallToCatoscape());
+				result.put("value", dependencyOrganizationService.packageCallToCytoscape());
 			} else if("function".equals(type)) {
-				result.put("value", staticCallOrganizationService.functionCallToCatoscape());
+				result.put("value", dependencyOrganizationService.functionCallToCytoscape());
+			} else if("fileAndPackage".equals(type)) {
+				result.put("value", dependencyOrganizationService.packageAndFileToCytoscape());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
