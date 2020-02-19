@@ -3,10 +3,12 @@ spring:
     neo4j:
       username: neo4j
       password: admin
-#      uri: bolt://localhost:7687
+      uri: bolt://localhost:7687
 #      uri: http://localhost:7474
       # embedded
-      uri: file:///C:/ProgramLocal/neo4j/neo4j-community-3.5.14/data/databases/multi-dependency.db
+#      uri: file:///C:/ProgramLocal/neo4j/neo4j-community-3.5.14/data/databases/multi-dependency.db
+  thymeleaf:
+     cache: false
 server:
    port: 8080
    
@@ -15,24 +17,29 @@ data:
    code:
 #      path: D:\git\halo-1.1.3-beta.1
 #      path: D:\git\eclipse-workspace\test
-      path: D:\Workspace\Architecture\multi-dependency
-      language: java
+      rootPath: D:\multiple-dependency-project\train-ticket
+      depth: 1
+      excludes: []
+      cppIncludes: []
+      languages: [java]
 #      path: D:\git\bcrypt-1.1
 #      language: cpp
       platform: windows
    dynamic:
-      analyse: true
-      directory_root_path: src/main/resources/dynamic/kieker
-#      directory_root_path: src/main/resources/dynamic/valgrind
-      dynamic_java_file_suffix: [.dat]
-      dynamic_cpp_file_suffix: [.dot, .out]
-      dynamic_mark_suffix: .mark
-   build:   
-      analyse: true
-      directory_root_path: src/main/resources/build
+     analyse: true
+     #      directory_root_path: src/main/resources/dynamic/kieker
+     #      directory_root_path: src/main/resources/dynamic/valgrind
+     directory_root_path: src/main/resources/dynamic/stub/train-ticket/logs
+     #      dynamic_java_file_suffix: [.dat]
+     dynamic_java_file_suffix: [.log]
+     dynamic_cpp_file_suffix: [.dot, .out]
+     dynamic_mark_suffix: .mark
+   build:
+     analyse: false
+     directory_root_path: src/main/resources/build
    neo4j:
       # batchInserter要插入的数据库
-      path: C:/ProgramLocal/neo4j/neo4j-community-3.5.14/data/databases/multi-dependency.db
+      path: C:/ProgramLocal/neo4j/neo4j-community-3.5.14/data/databases/multi-dependency1.db
    
    test: this property is for YamlUtilsTest
       
