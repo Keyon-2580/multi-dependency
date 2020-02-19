@@ -184,10 +184,9 @@ public class FeatureController {
 	@GetMapping("/show/function/span/{id}")
 	@ResponseBody
 	public JSONObject findFunctionsForSpan(@PathVariable("id") Long id) {
+		JSONObject result = new JSONObject();
 		try {
-			
 			System.out.println(id);
-			JSONObject result = new JSONObject();
 			Span span = jaegerService.findSpanById(id);
 			System.out.println(span);
 			SpanStartWithFunction spanStartWithFunction = jaegerService.findSpanStartWithFunctionByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
@@ -198,6 +197,8 @@ public class FeatureController {
 			result.put(span.getSpanId(), spanWithFunctions);
 		} catch (Exception e) {
 			e.printStackTrace();
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
 		}
 		return result;
 	}
