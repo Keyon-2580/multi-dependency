@@ -1,13 +1,12 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
@@ -19,6 +18,7 @@ import cn.edu.fudan.se.multidependency.repository.node.code.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.TypeRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.VariableRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FileIncludeFileRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionCallFunctionRepository;
@@ -81,6 +81,9 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     @Autowired
     VariableRepository variableRepository;
     
+    @Autowired
+    ContainRepository containRepository;
+    
 	@Override
 	public List<Type> findAllTypes() {
 		List<Type> types = new ArrayList<>();
@@ -125,24 +128,21 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 	
 
-	private Map<Long, ProjectFile> cacheFunction = new HashMap<>();
-	
 	/**
 	 * 找出某函数所在的文件
 	 */
 	@Override
 	public ProjectFile findFunctionBelongToCodeFile(Function function) {
-		ProjectFile result = cacheFunction.get(function.getId());
-		if(result != null) {
-			return result;
-		}
-		result = functionRepository.findFunctionBelongToFileByFunctionId(function.getId());
-		cacheFunction.put(function.getId(), result);
-		return result;
+		return functionRepository.findFunctionBelongToFileByFunctionId(function.getId());
 	}
 
 	@Override
 	public List<ProjectFile> findAllProjectFile() {
 		return fileRepository.findAllProjectFiles();
+	}
+
+	@Override
+	public Package findFileInPackage(ProjectFile file) {
+		return containRepository.findFileInPackageByFileId(file.getId());
 	}
 }

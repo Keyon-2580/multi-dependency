@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
@@ -152,7 +153,7 @@ public class FeatureController {
 			if(ms == null) {
 				throw new Exception("没有id为 " + id + " 的MicroService");
 			}
-			List<Span> spans = jaegerService.findSpansByMicroserviceIdAndTraceId(id, traceId);
+			List<Span> spans = jaegerService.findSpansByMicroserviceAndTraceId(ms, traceId);
 			System.out.println(spans.size());
 			for(Span span : spans) {
 				SpanStartWithFunction spanStartWithFunction = jaegerService.findSpanStartWithFunctionByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
@@ -194,7 +195,8 @@ public class FeatureController {
 			System.out.println(spanStartWithFunction.getFunction());
 			List<FunctionDynamicCallFunction> spanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
 			SpanWithFunctions spanWithFunctions = new SpanWithFunctions(spanStartWithFunction, spanFunctionCalls);
-			result.put(span.getSpanId(), spanWithFunctions);
+//			result.put(span.getSpanId(), spanWithFunctions);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			result.put("result", "fail");

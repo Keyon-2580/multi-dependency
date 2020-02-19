@@ -6,6 +6,7 @@ import java.util.Map;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
@@ -15,6 +16,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
 @NodeEntity
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode
 public class Type implements Node {
     @Id
     @GeneratedValue

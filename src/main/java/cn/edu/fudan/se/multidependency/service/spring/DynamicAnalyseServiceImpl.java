@@ -8,9 +8,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.dynamic.CallNode;
+import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
+import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
+import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
 import cn.edu.fudan.se.multidependency.model.node.testcase.DynamicTestCaseToFileDependency;
 import cn.edu.fudan.se.multidependency.model.node.testcase.DynamicTestCaseToFunctionDependency;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
@@ -20,6 +24,7 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCal
 import cn.edu.fudan.se.multidependency.repository.node.testcase.FeatureRepository;
 import cn.edu.fudan.se.multidependency.repository.node.testcase.ScenarioRepository;
 import cn.edu.fudan.se.multidependency.repository.node.testcase.TestCaseRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.TestCaseExecuteFeatureRepository;
 import cn.edu.fudan.se.multidependency.service.RepositoryService;
@@ -46,6 +51,9 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	
 	@Autowired
 	private StaticAnalyseService staticAnalyseService;
+	
+	@Autowired
+	private ContainRepository containRepository;
 	
 	/**
 	 * 找某个特性对应的所有测试用例依赖了哪些方法及其细节调用
@@ -216,6 +224,54 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	@Override
 	public List<FunctionDynamicCallFunction> findFunctionCallsByTraceIdAndSpanId(String traceId, String spanId) {
 		return functionDynamicCallFunctionRepository.findFunctionCallsByTraceIdAndSpanId(traceId, spanId);
+	}
+
+	@Override
+	public List<FunctionDynamicCallFunction> findFunctionDynamicCallsByTrace(Trace trace) {
+		return functionDynamicCallFunctionRepository.findFunctionCallsByTraceId(trace.getTraceId());
+	}
+
+	@Override
+	public List<FunctionDynamicCallFunction> findFunctionDynamicCallsByTraceAndSpan(Trace trace, Span span) {
+		return functionDynamicCallFunctionRepository.findFunctionCallsByTraceIdAndSpanId(trace.getTraceId(), span.getSpanId());
+	}
+
+	@Override
+	public List<FunctionDynamicCallFunction> findFunctionDynamicCallsByTraceAndMicroService(Trace trace,
+			MicroService ms) {
+		List<FunctionDynamicCallFunction> result = new ArrayList<>();
+		List<FunctionDynamicCallFunction> calls = findFunctionDynamicCallsByTrace(trace);
+		List<Project> projects = containRepository.findMicroServiceContainProject(ms.getId());
+		Project project = null;
+		if(projects.size() > 0) {
+			project = projects.get(0);
+		} else {
+			return result;
+		}
+		for(FunctionDynamicCallFunction call : calls) {
+			if(project.getProjectName().equals(call.getProjectName())) {
+				result.add(call);
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public List<FunctionDynamicCallFunction> findFunctionDynamicCallsByMicroService(MicroService ms) {
+		List<FunctionDynamicCallFunction> result = new ArrayList<>();
+		List<Project> projects = containRepository.findMicroServiceContainProject(ms.getId());
+		Project project = null;
+		if(projects.size() > 0) {
+			project = projects.get(0);
+			return findFunctionDynamicCallsByProject(project);
+		} else {
+			return result;
+		}
+	}
+
+	@Override
+	public List<FunctionDynamicCallFunction> findFunctionDynamicCallsByProject(Project project) {
+		return functionDynamicCallFunctionRepository.findFunctionCallsByProjectName(project.getProjectName());
 	}
 
 }

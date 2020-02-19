@@ -19,6 +19,7 @@ import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCa
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanStartWithFunction;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.jaeger.MicroServiceRepository;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.jaeger.SpanRepository;
+import cn.edu.fudan.se.multidependency.repository.node.microservice.jaeger.TraceRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FeatureExecuteTraceRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.jaeger.MicroServiceCreateSpanRepository;
@@ -48,6 +49,9 @@ public class JaegerServiceImpl implements JaegerService {
 	
 	@Autowired
 	private SpanRepository spanRepository;
+	
+	@Autowired
+	private TraceRepository traceRepository;
 	
 	@Override
 	public Trace findTraceByFeature(Feature feature) {
@@ -117,13 +121,18 @@ public class JaegerServiceImpl implements JaegerService {
 	}
 
 	@Override
-	public List<Span> findSpansByMicroserviceIdAndTraceId(Long microserviceId, String traceId) {
-		List<MicroServiceCreateSpan> createSpans = microserviceCreateSpanRepository.findMicroServiceCreateSpansInTrace(microserviceId, traceId);
+	public List<Span> findSpansByMicroserviceAndTraceId(MicroService ms, String traceId) {
+		List<MicroServiceCreateSpan> createSpans = microserviceCreateSpanRepository.findMicroServiceCreateSpansInTrace(ms.getId(), traceId);
 		List<Span> result = new ArrayList<>();
 		for(MicroServiceCreateSpan createSpan : createSpans) {
 			result.add(createSpan.getSpan());
 		}
 		return result;
+	}
+
+	@Override
+	public Trace findTraceByTraceId(String traceId) {
+		return traceRepository.findTraceByTraceId(traceId);
 	}
 
 }
