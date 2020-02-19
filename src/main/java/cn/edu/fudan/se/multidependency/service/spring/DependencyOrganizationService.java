@@ -27,8 +27,79 @@ public class DependencyOrganizationService {
 	private Map<Function, Map<Function, Integer>> countOfFunctionCall = new HashMap<>();
 	private Map<ProjectFile, Map<ProjectFile, Integer>> countOfFileCall = new HashMap<>();
 	private Map<Package, Map<Package, Integer>> countOfPackageCall = new HashMap<>();
+	private Map<Function, ProjectFile> functionBelongToFile = new HashMap<>();
+	private Map<ProjectFile, Package> fileBelongToPackage = new HashMap<>();
 	
-	public JSONObject fileCallToCatoscape() {
+	public JSONObject packageAndFileToCytoscape() {
+		JSONObject result = new JSONObject();
+		JSONArray nodes = new JSONArray();
+		JSONArray edges = new JSONArray();
+		
+		for(Package pck : packages.values()) {
+			JSONObject packageJson = new JSONObject();
+			JSONObject packageDataValue = new JSONObject();
+			packageDataValue.put("id", pck.getId());
+			packageDataValue.put("name", pck.getPackageName());
+			packageDataValue.put("type", "package");
+			packageJson.put("data", packageDataValue);
+			nodes.add(packageJson);
+		}
+		
+		for(ProjectFile file : files.values()) {
+			JSONObject fileJson = new JSONObject();
+			JSONObject fileDataValue = new JSONObject();
+			fileDataValue.put("id", file.getId());
+			fileDataValue.put("name", file.getFileName());
+			fileDataValue.put("type", "file");
+			fileJson.put("data", fileDataValue);
+			nodes.add(fileJson);
+			
+			Package pck = fileBelongToPackage.get(file);
+			JSONObject edge = new JSONObject();
+			JSONObject value = new JSONObject();
+			value.put("id", pck.getId() + "_" + file.getId());
+			value.put("value", "contain");
+			value.put("source", pck.getId());
+			value.put("target", file.getId());
+			value.put("type", "contain");
+			edge.put("data", value);
+			edges.add(edge);	
+		}
+		
+		for(Package callerPackage : countOfPackageCall.keySet()) {
+			for(Package calledPackage : countOfPackageCall.get(callerPackage).keySet()) {
+				Integer count = countOfPackageCall.get(callerPackage).get(calledPackage);
+				JSONObject edge = new JSONObject();
+				JSONObject value = new JSONObject();
+				value.put("id", callerPackage.getId() + "_" + calledPackage.getId());
+				value.put("value", count);
+				value.put("source", callerPackage.getId());
+				value.put("target", calledPackage.getId());
+				edge.put("data", value);
+				edges.add(edge);
+			}
+		}
+		
+		for(ProjectFile callerFile : countOfFileCall.keySet()) {
+			for(ProjectFile calledFile : countOfFileCall.get(callerFile).keySet()) {
+				Integer count = countOfFileCall.get(callerFile).get(calledFile);
+				JSONObject edge = new JSONObject();
+				JSONObject value = new JSONObject();
+				value.put("id", callerFile.getId() + "_" + calledFile.getId());
+				value.put("value", count);
+				value.put("source", callerFile.getId());
+				value.put("target", calledFile.getId());
+				edge.put("data", value);
+				edges.add(edge);
+			}
+		}
+		
+		result.put("nodes", nodes);
+		result.put("edges", edges);
+		return result;
+	}
+	
+	public JSONObject fileCallToCytoscape() {
 		JSONObject result = new JSONObject();
 		JSONArray nodes = new JSONArray();
 		JSONArray edges = new JSONArray();
@@ -61,7 +132,7 @@ public class DependencyOrganizationService {
 		return result;
 	}
 	
-	public JSONObject functionCallToCatoscape() {
+	public JSONObject functionCallToCytoscape() {
 		JSONObject result = new JSONObject();
 		JSONArray nodes = new JSONArray();
 		JSONArray edges = new JSONArray();
@@ -94,7 +165,7 @@ public class DependencyOrganizationService {
 		return result;
 	}
 	
-	public JSONObject packageCallToCatoscape() {
+	public JSONObject packageCallToCytoscape() {
 		JSONObject result = new JSONObject();
 		JSONArray nodes = new JSONArray();
 		JSONArray edges = new JSONArray();
@@ -135,7 +206,9 @@ public class DependencyOrganizationService {
 		functions = new HashMap<>();
 		files = new HashMap<>();
 		packages = new HashMap<>();
-		
+		functionBelongToFile = new HashMap<>();
+		fileBelongToPackage = new HashMap<>();
+
 		for(FunctionDynamicCallFunction dynamicCall : dynamicCalls) {
 			Function callerFunction = dynamicCall.getFunction();
 			Function calledFunction = dynamicCall.getCallFunction();
@@ -157,6 +230,8 @@ public class DependencyOrganizationService {
 			if(callerFile.getId().equals(calledFile.getId())) {
 				continue;
 			}
+			functionBelongToFile.put(callerFunction, callerFile);
+			functionBelongToFile.put(calledFunction, calledFile);
 			files.put(callerFile.getId(), callerFile);
 			files.put(calledFile.getId(), calledFile);
 			Map<ProjectFile, Integer> tempFile = countOfFileCall.get(callerFile);
@@ -172,6 +247,8 @@ public class DependencyOrganizationService {
 			if(callerPackage.getId().equals(calledPackage.getId())) {
 				continue;
 			}
+			fileBelongToPackage.put(callerFile, callerPackage);
+			fileBelongToPackage.put(calledFile, calledPackage);
 			packages.put(callerPackage.getId(), callerPackage);
 			packages.put(calledPackage.getId(), calledPackage);
 			Map<Package, Integer> tempPackage = countOfPackageCall.get(callerPackage);

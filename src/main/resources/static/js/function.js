@@ -36,6 +36,24 @@ var showDataInCatoscape = function(elements, container){
 					'content': 'data(name)'
     			}
     		},
+    		{
+    			selector: 'node[type="file"]',
+    			style: {
+    				'height': 30,
+    				'width': 30,
+    				'background-color': 'green',
+					'content': 'data(name)'
+    			}
+    		},
+    		{
+    			selector: 'node[type="package"]',
+    			style: {
+    				'height': 30,
+    				'width': 30,
+    				'background-color': 'red',
+					'content': 'data(name)'
+    			}
+    		},
 			{
     			selector: 'edge',
     			style: {
@@ -48,9 +66,9 @@ var showDataInCatoscape = function(elements, container){
     			}
     		},
 			{
-    			selector: 'edge[type="order"]',
+    			selector: 'edge[type="contain"]',
     			style: {
-    				'content': 'data(value)',
+//    				'content': 'data(value)',
     				'curve-style': 'bezier',
     				'width': 1,
     				'line-color': 'red',
