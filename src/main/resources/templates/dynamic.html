@@ -14,34 +14,43 @@
 	th:src="@{/js/import/bootstrap/bootstrap-multiselect-0.9.15.js}"></script>
 <script type="text/javascript"
 	th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape.min.js}"></script>
-<script type="text/javascript" th:src="@{/js/feature.js}"></script>
 <script type="text/javascript" th:src="@{/js/function.js}"></script>
 <script type="text/javascript"
 	th:src="@{/js/import/bootstrap/bootstrap-treeview.min.js}"></script>
-
+<script type="text/javascript" th:src="@{/js/feature.js}"></script>
+<script type="text/javascript" th:src="@{/js/function.js}"></script>
 <link rel="stylesheet"
 	th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
 <link rel="stylesheet"
 	th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
 <link rel="stylesheet"
 	th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
+<style type="text/css">
+.div_cytoscape_content {
+	height: 600px;
+	border: 1px solid #000;
+	margin-bottom: 5px;
+}
+</style>
 </head>
 <body>
 	<div th:include="nav.html::nav"></div>
-	<div class="col-sm-12" style="margin-bottom: 15px;">
-		<table class="table table-bordered">
-			<tr>
-				<th>项目名</th>
-				<th>语言</th>
-				<th>路径</th>
-			</tr>
-			<tr th:each="project : ${projects}">
-				<td><span th:text="${project.projectName}"></span></td>
-				<td><span th:text="${project.language}"></span></td>
-				<td><span th:text="${project.projectPath}"></span></td>
-			</tr>
-		</table>
-	
+
+	<div class="container-lg col-sm-12 row" style="margin-bottom: 15px;">
+		<div class="col-sm-3">
+			<div id="tree"></div>
+		</div>
+		<div class="col-sm-9">
+			<div id="graph"></div>
+		</div>
 	</div>
+	<script type="text/javascript" th:inline="javascript">
+		//<![CDATA[
+		$(document).ready(function() {
+			var features = [[${features}]];
+			functionIndex(features, $("#graph"));
+		});
+		// ]]>
+	</script>
 </body>
 </html>

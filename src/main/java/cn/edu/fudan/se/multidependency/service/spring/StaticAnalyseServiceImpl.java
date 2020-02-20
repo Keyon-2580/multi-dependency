@@ -1,12 +1,14 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
@@ -144,5 +146,23 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	@Override
 	public Package findFileInPackage(ProjectFile file) {
 		return containRepository.findFileInPackageByFileId(file.getId());
+	}
+
+	@Override
+	public List<Project> findAllProjects() {
+		Iterable<Project> projects = projectRepository.findAll();
+		List<Project> result = new ArrayList<>();
+		for(Project p : projects) {
+			result.add(p);
+		}
+		result.sort(new Comparator<Project>() {
+
+			@Override
+			public int compare(Project o1, Project o2) {
+				return o1.getProjectName().compareTo(o2.getProjectName());
+			}
+			
+		});
+		return result;
 	}
 }

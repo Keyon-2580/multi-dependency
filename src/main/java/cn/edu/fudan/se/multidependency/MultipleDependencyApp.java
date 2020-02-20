@@ -1,8 +1,26 @@
 package cn.edu.fudan.se.multidependency;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
+
+import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
+import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
+import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
+import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
+import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroServiceCreateSpan;
+import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
+import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
+import cn.edu.fudan.se.multidependency.service.spring.JaegerService;
+import cn.edu.fudan.se.multidependency.service.spring.OrganizationService;
 
 @SpringBootApplication
 @EnableNeo4jRepositories(basePackages = {"cn.edu.fudan.se.multidependency.repository"})
@@ -12,5 +30,34 @@ public class MultipleDependencyApp {
 //		InsertDataMain.insert(args);
 		SpringApplication.run(MultipleDependencyApp.class, args);
 	}
-	
+
+	@Bean
+	public OrganizationService organize(JaegerService jaegerService, DynamicAnalyseService dynamicAnalyseService) {
+		Map<TestCase, List<TestCaseExecuteFeature>> testCaseExecuteFeatures = dynamicAnalyseService.findAllTestCaseExecuteFeatures();
+		Map<Feature, List<TestCaseExecuteFeature>> featureExecutedByTestCases = dynamicAnalyseService.findAllFeatureExecutedByTestCases();
+		Map<TestCase, List<TestCaseRunTrace>> testCaseRunTraces = dynamicAnalyseService.findAllTestCaseRunTraces();
+		Map<Trace, List<Span>> traceToSpans = new HashMap<>();
+		Map<Span, List<SpanCallSpan>> spanCallSpans = new HashMap<>();
+		Map<Span, MicroServiceCreateSpan> spanBelongToMicroService = new HashMap<>();
+		Map<String, MicroService> allMicroService = jaegerService.findAllMicroService();
+
+		for (List<TestCaseRunTrace> runs : testCaseRunTraces.values()) {
+			for(TestCaseRunTrace run : runs) {
+				Trace trace = run.getTrace();
+				List<Span> spans = jaegerService.findSpansByTrace(trace);
+				traceToSpans.put(trace, spans);
+				for (Span span : spans) {
+					List<SpanCallSpan> callSpans = jaegerService.findSpanCallSpans(span);
+					spanCallSpans.put(span, callSpans);
+					MicroServiceCreateSpan microServiceCreateSpan = jaegerService.findMicroServiceCreateSpan(span);
+					spanBelongToMicroService.put(span, microServiceCreateSpan);
+				}
+			}
+		}
+		OrganizationService organization = new OrganizationService(
+				allMicroService, testCaseExecuteFeatures, featureExecutedByTestCases, 
+				testCaseRunTraces, traceToSpans, spanCallSpans, spanBelongToMicroService);
+
+		return organization;
+	}	
 }

@@ -5,6 +5,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/static")
-public class StaticContaoller {
+public class StaticController {
 
 }

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style type="text/css">
+.div_cytoscape_content {
+	height: 600px;
+	border: 1px solid #000;
+	margin-bottom: 5px;
+}
+</style>
+</head>
+<body>
+	<div th:fragment = "nav">
+		<nav class="navbar navbar-default" role="navigation">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<a class="navbar-brand" href="/">多维度依赖</a>
+				</div>
+				<div>
+					<ul class="nav navbar-nav">
+						<li><a href="/project/index"> Project </a></li>
+					</ul>
+					<ul class="nav navbar-nav">
+						<li><a href="/feature/index"> Feature </a></li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</div>
+</body>
+</html>

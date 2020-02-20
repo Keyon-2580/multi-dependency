@@ -33,6 +33,110 @@ public class OrganizationService {
 	private final Map<Span, List<SpanCallSpan>> spanCallSpans;
 	private final Map<Span, MicroServiceCreateSpan> spanBelongToMicroService;
 	
+	public JSONObject featureExecuteTestCasesToCytoscape() {
+		JSONObject result = new JSONObject();
+		JSONArray nodes = new JSONArray();
+		JSONArray edges = new JSONArray();
+		
+		for(Feature feature : allFeatures()) {
+			JSONObject featureData = new JSONObject();
+			featureData.put("id", feature.getId());
+			featureData.put("name", feature.getFeatureName());
+			featureData.put("type", "feature");
+			JSONObject featureNode = new JSONObject();
+			featureNode.put("data", featureData);
+			nodes.add(featureNode);
+			
+			List<TestCaseExecuteFeature> executes = featureExecutedByTestCases.get(feature);
+			for(TestCaseExecuteFeature execute : executes) {
+				TestCase testcase = execute.getTestCase();
+				JSONObject testcaseData = new JSONObject();
+				testcaseData.put("id", testcase.getId());
+				testcaseData.put("name", testcase.getTestCaseName());
+				testcaseData.put("type", "testcase");
+				JSONObject testcaseNode = new JSONObject();
+				testcaseNode.put("data", testcaseData);
+				nodes.add(testcaseNode);
+				
+				JSONObject executeData = new JSONObject();
+				executeData.put("id", feature.getId() + "_" + testcase.getId());
+				executeData.put("source", feature.getId());
+				executeData.put("target", testcase.getId());
+				JSONObject executeEdge = new JSONObject();
+				executeEdge.put("data", executeData);
+				edges.add(executeEdge);
+			}
+		}
+		
+		result.put("nodes", nodes);
+		result.put("edges", edges);
+		return result;
+	}
+	
+	public JSONArray featureExecutedByTestCasesToTreeView() {
+		JSONArray result = new JSONArray();
+		List<Feature> features = allFeatures();
+		for(Feature feature : features) {
+			List<TestCaseExecuteFeature> executes = featureExecutedByTestCases.get(feature);
+			JSONObject featureJson = new JSONObject();
+			featureJson.put("text", feature.getFeatureId() + ":" + feature.getFeatureName());
+			JSONArray tags = new JSONArray();
+			tags.add("feature");
+			featureJson.put("tags", tags);
+			
+			JSONArray testCases = new JSONArray();
+			for(TestCaseExecuteFeature execute : executes) {
+				JSONObject testCaseJson = new JSONObject();
+				testCaseJson.put("text", execute.getTestCase().getTestCaseId() + ":" + execute.getTestCase().getTestCaseName());
+				tags = new JSONArray();
+				tags.add("testcase");
+				testCaseJson.put("tags", tags);
+				
+				List<TestCaseRunTrace> runs = testCaseRunTraces.get(execute.getTestCase());
+				JSONArray traces = new JSONArray();
+				for(TestCaseRunTrace run : runs) {
+					JSONObject traceJson = new JSONObject();
+					Trace trace = run.getTrace();
+					traceJson.put("text", trace.getTraceId());
+					tags = new JSONArray();
+					tags.add("trace");
+					traceJson.put("tags", tags);
+					
+					JSONArray microservices = new JSONArray();
+					for(MicroService ms : findRelatedMicroServiceForTraces(trace)) {
+						JSONObject msJson = new JSONObject();
+						msJson.put("text", ms.getName());
+						tags = new JSONArray();
+						tags.add("microservice");
+						msJson.put("tags", tags);
+						JSONArray spansArray = new JSONArray();
+						for(Span span : findMicroServiceCreateSpansInTraces(ms, trace)) {
+							JSONObject spanJson = new JSONObject();
+							spanJson.put("text", span.getOperationName());
+							tags = new JSONArray();
+							tags.add("span");
+							spanJson.put("tags", tags);
+							spansArray.add(spanJson);
+						}
+						msJson.put("nodes", spansArray);
+						
+						microservices.add(msJson);
+					}
+					traceJson.put("nodes", microservices);
+					
+					traces.add(traceJson);
+				}
+				testCaseJson.put("nodes", traces);
+				testCases.add(testCaseJson);
+			}
+			featureJson.put("nodes", testCases);
+			result.add(featureJson);
+		}
+		
+		
+		return result;
+	}
+	
 	/**
 	 * feature相关的trace
 	 * @param features
@@ -69,7 +173,7 @@ public class OrganizationService {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Span> findMicroServiceCreateSpansInTraces(MicroService ms, Trace trace) throws Exception {
+	public List<Span> findMicroServiceCreateSpansInTraces(MicroService ms, Trace trace) {
 		List<Span> spans = new ArrayList<>();
 		for(Span span : traceToSpans.get(trace)) {
 			if(spanBelongToMicroService.get(span).getMicroservice().equals(ms)) {

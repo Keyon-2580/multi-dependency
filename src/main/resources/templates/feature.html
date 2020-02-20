@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>首页</title>
+<script type="text/javascript"
+	th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
+<script type="text/javascript"
+	th:src="@{/js/import/popper-1.14.7.min.js}"></script>
+<script type="text/javascript"
+	th:src="@{/js/import/bootstrap/bootstrap-3.3.2.min.js}"></script>
+<script type="text/javascript"
+	th:src="@{/js/import/bootstrap/bootstrap-multiselect-0.9.15.js}"></script>
+<script type="text/javascript"
+	th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/newfeature.js}"></script>
+<script type="text/javascript"
+	th:src="@{/js/import/bootstrap/bootstrap-treeview.min.js}"></script>
+  <script src="https://cdn.bootcss.com/jsPlumb/2.6.8/js/jsplumb.min.js"></script>
+<link rel="stylesheet"
+	th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
+<link rel="stylesheet"
+	th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
+<link rel="stylesheet"
+	th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
+<style type="text/css">
+.div_cytoscape_content {
+	height: 600px;
+	border: 1px solid #000;
+	margin-bottom: 5px;
+}
+</style>
+</head>
+<body>
+	<div th:include="nav.html::nav"></div>
+
+	<div class="container-lg col-sm-12 row" style="margin-bottom: 15px;">
+		<div class="col-sm-3">
+			<div id="tree"></div>
+		</div>
+		<div class="col-sm-9">
+			<div>
+				<h3>features</h3>
+				<div>
+					<table class="table table-bordered">
+						<tr>
+							<th>featureId</th>
+							<th>featureName</th>
+							<th>description</th>
+						</tr>
+						<tr th:each="feature : ${features}">
+							<td><span th:text="${feature.featureId}"></span></td>
+							<td><span th:text="${feature.featureName}"></span></td>
+							<td><span th:text="${feature.description}"></span></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div>
+				<h3>testcases</h3>
+				<div>
+					<table class="table table-bordered">
+						<tr>
+							<th>testcaseId</th>
+							<th>testcaseName</th>
+							<th>success</th>
+							<th>inputContent</th>
+						</tr>
+						<tr th:each="testcase : ${testcases}">
+							<td><span th:text="${testcase.testCaseId}"></span></td>
+							<td><span th:text="${testcase.testCaseName}"></span></td>
+							<td><span th:text="${testcase.success}"></span></td>
+							<td><span th:text="${testcase.inputContent}"></span></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div id="content">
+				<div id="title"></div>			
+				<div id="graph" class="div_cytoscape_content"></div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" th:inline="javascript">
+	//<![CDATA[
+		$(document).ready(function() {
+			console.log([[${features}]]);
+			console.log([[${testcases}]])
+			featureInit();
+		});
+	// ]]>
+	</script>
+</body>
+</html>
