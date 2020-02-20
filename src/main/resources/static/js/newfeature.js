@@ -40,6 +40,24 @@ var showDataInCatoscape = function(container, elements, layout="breadthfirst"){
 					'content': 'data(name)'
     			}
     		},
+    		{
+    			selector: 'node[type="feature"]',
+    			style: {
+    				'height': 30,
+    				'width': 30,
+    				'background-color': 'red',
+					'content': 'data(value)'
+    			}
+    		},
+    		{
+    			selector: 'node[type="testcase"]',
+    			style: {
+    				'height': 30,
+    				'width': 30,
+    				'background-color': 'green',
+					'content': 'data(value)'
+    			}
+    		},
 			{
     			selector: 'edge',
     			style: {

@@ -40,7 +40,7 @@ public class FeatureAndTestCaseInserter extends ExtractorForNodesAndRelationsImp
 			TestCase testcase = new TestCase();
 			testcase.setEntityId(generateEntityId());
 			testcase.setTestCaseId(testcaseTemp.getLong("id"));
-			testcase.setInputContent(testcaseTemp.getString("input"));
+			testcase.setInputContent(testcaseTemp.get("input").toString());
 			testcase.setSuccess(testcaseTemp.getBooleanValue("success"));
 			testcase.setTestCaseName(testcaseTemp.getString("name"));
 			addNode(testcase, null);

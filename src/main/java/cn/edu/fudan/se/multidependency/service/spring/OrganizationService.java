@@ -43,6 +43,7 @@ public class OrganizationService {
 			featureData.put("id", feature.getId());
 			featureData.put("name", feature.getFeatureName());
 			featureData.put("type", "feature");
+			featureData.put("value", feature.getFeatureId() + ":" + feature.getFeatureName());
 			JSONObject featureNode = new JSONObject();
 			featureNode.put("data", featureData);
 			nodes.add(featureNode);
@@ -54,6 +55,7 @@ public class OrganizationService {
 				testcaseData.put("id", testcase.getId());
 				testcaseData.put("name", testcase.getTestCaseName());
 				testcaseData.put("type", "testcase");
+				testcaseData.put("value", testcase.getTestCaseId() + ":" + testcase.getTestCaseName());
 				JSONObject testcaseNode = new JSONObject();
 				testcaseNode.put("data", testcaseData);
 				nodes.add(testcaseNode);
