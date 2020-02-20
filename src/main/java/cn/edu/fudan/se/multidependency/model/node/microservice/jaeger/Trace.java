@@ -11,9 +11,11 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
 @NodeEntity
+@NoArgsConstructor
 @EqualsAndHashCode
 public class Trace implements Node {
 	
@@ -24,7 +26,8 @@ public class Trace implements Node {
     private Long id;
 
     private Long entityId;
-    
+
+    // traceId在数据库中是唯一的
     private String traceId;
     
 	@Override

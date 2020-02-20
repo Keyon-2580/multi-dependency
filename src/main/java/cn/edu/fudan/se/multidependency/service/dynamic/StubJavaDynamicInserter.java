@@ -1,21 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.dynamic;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
-import cn.edu.fudan.se.multidependency.stub.DynamicFunctionExecutionFromStub;
-import cn.edu.fudan.se.multidependency.stub.JavaStubDynamicExtractorUtil;
-
 public class StubJavaDynamicInserter extends DynamicInserterForNeo4jService {
-
-	@Override
-	protected void extractScenarioAndTestCaseAndFeatures() {
-		// do nothing
-	}
 
 	@Override
 	protected void extractNodesAndRelations() throws Exception {

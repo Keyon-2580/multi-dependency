@@ -15,9 +15,9 @@ import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@RelationshipEntity(RelationType.str_TYPE_EXTENDS_TYPE)
 @Data
 @NoArgsConstructor
+@RelationshipEntity(RelationType.str_TYPE_EXTENDS_TYPE)
 public class TypeExtendsType implements Relation {
 	
 	private static final long serialVersionUID = 3740594031088738257L;

@@ -9,14 +9,6 @@ import com.alibaba.fastjson.JSONObject;
 
 public class JaegerUtil {
 	
-	public static void main(String[] args) {
-		try {
-			JSONObject json = readJSON("cb45b915f66af9da");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
 	public static JSONObject readJSON(String traceId) throws Exception {
 		JSONObject result = new JSONObject();
 		URL url = new URL("http://10.141.221.74:16686/api/traces/" + traceId);

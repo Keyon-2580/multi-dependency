@@ -15,11 +15,6 @@ import cn.edu.fudan.se.multidependency.stub.JavaStubDynamicExtractorUtil;
 public class StubJavaForJaegerDynamicInserter extends DynamicInserterForNeo4jService {
 
 	@Override
-	protected void extractScenarioAndTestCaseAndFeatures() {
-		// do nothing
-	}
-
-	@Override
 	protected void extractNodesAndRelations() throws Exception {
 		Map<String, Map<String, Map<Long, List<DynamicFunctionExecutionFromStub>>>> allDynamicFunctionFromJaegerStub = JavaStubDynamicExtractorUtil
 				.readStubJaegerLogs(dynamicFunctionCallFiles);

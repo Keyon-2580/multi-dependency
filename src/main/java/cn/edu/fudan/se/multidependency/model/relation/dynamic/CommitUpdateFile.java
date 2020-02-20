@@ -13,7 +13,11 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Commit;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
 @RelationshipEntity(RelationType.str_COMMIT_UPDATE_FILE)
 public class CommitUpdateFile implements Relation {
 
@@ -23,16 +27,6 @@ public class CommitUpdateFile implements Relation {
     @GeneratedValue
     private Long id;
     
-	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	public void setId(Long id) {
-		this.id = id;
-	}
-	
 	@StartNode
 	private Commit commit;
 	
@@ -57,22 +51,6 @@ public class CommitUpdateFile implements Relation {
 	@Override
 	public Map<String, Object> getProperties() {
 		return new HashMap<>();
-	}
-
-	public Commit getCommit() {
-		return commit;
-	}
-
-	public void setCommit(Commit commit) {
-		this.commit = commit;
-	}
-
-	public ProjectFile getFile() {
-		return file;
-	}
-
-	public void setFile(ProjectFile file) {
-		this.file = file;
 	}
 
 }

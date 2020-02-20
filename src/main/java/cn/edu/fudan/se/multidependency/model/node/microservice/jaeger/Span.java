@@ -11,9 +11,11 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
 @NodeEntity
+@NoArgsConstructor
 @EqualsAndHashCode
 public class Span implements Node {
 

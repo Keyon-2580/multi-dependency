@@ -10,11 +10,13 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@NodeEntity
 @Data
+@NodeEntity
 @NoArgsConstructor
+@EqualsAndHashCode
 public class Scenario implements Node {
 
 	private static final long serialVersionUID = 2260001955112320935L;

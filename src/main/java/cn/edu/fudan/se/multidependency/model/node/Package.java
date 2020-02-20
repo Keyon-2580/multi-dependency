@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
  * @author fan
  *
  */
-@NodeEntity
 @Data
+@NodeEntity
 @NoArgsConstructor
 @EqualsAndHashCode
 public class Package implements Node {

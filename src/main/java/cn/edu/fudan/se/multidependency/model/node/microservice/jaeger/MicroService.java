@@ -11,10 +11,12 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
-@NodeEntity
-@EqualsAndHashCode
 @Data
+@NodeEntity
+@NoArgsConstructor
+@EqualsAndHashCode
 public class MicroService implements Node {
 
 	private static final long serialVersionUID = 8307013466383536758L;
@@ -25,6 +27,9 @@ public class MicroService implements Node {
 
     private Long entityId;
     
+    /**
+     * 名字在数据库中唯一
+     */
     private String name;
     
 	@Override

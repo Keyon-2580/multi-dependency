@@ -9,8 +9,14 @@ import org.neo4j.ogm.annotation.NodeEntity;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
+@Data
 @NodeEntity
+@NoArgsConstructor
+@EqualsAndHashCode
 public class Issue implements Node {
 
 	private static final long serialVersionUID = 4701956188777508218L;
@@ -24,26 +30,6 @@ public class Issue implements Node {
     private Long entityId;
     
 	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	@Override
-	public Long getEntityId() {
-		return entityId;
-	}
-
-	@Override
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
-	}
-
-	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("content", getContent() == null ? "" : getContent());
@@ -53,14 +39,6 @@ public class Issue implements Node {
 	@Override
 	public NodeType getNodeType() {
 		return NodeType.Issue;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
 	}
 
 }

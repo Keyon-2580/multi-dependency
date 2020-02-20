@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.controller;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -182,7 +183,7 @@ public class FunctionController {
 				featureJson.put("tags", featureTags);
 				featureJson.put("href", feature.getFeatureId());
 				
-				List<MicroService> relatedMicroServices = organizationService.findRelatedMicroServiceForFeatures(feature);
+				Set<MicroService> relatedMicroServices = organizationService.findRelatedMicroServiceForFeatures(feature);
 				JSONArray msArray = new JSONArray();
 				for(MicroService ms : relatedMicroServices) {
 					JSONObject microservice = new JSONObject();
@@ -192,16 +193,17 @@ public class FunctionController {
 					microservice.put("tags", microserviceTags);
 					microservice.put("href", ms.getId());
 					JSONArray spanArray = new JSONArray();
-					List<Span> spans = organizationService.findMicroServiceCreateSpansInTraces(ms, feature);
-					for(Span span : spans) {
-						JSONObject spanJson = new JSONObject();
-						spanJson.put("text", span.getOperationName());
-						JSONArray spanTags = new JSONArray();
-						spanTags.add("span");
-						spanJson.put("tags", spanTags);
-						spanJson.put("href", span.getId());
-						spanArray.add(spanJson);
-					}
+					Set<Trace> traces = organizationService.findRelatedTracesForFeature(features);
+//					List<Span> spans = organizationService.findMicroServiceCreateSpansInTraces(ms, feature);
+//					for(Span span : spans) {
+//						JSONObject spanJson = new JSONObject();
+//						spanJson.put("text", span.getOperationName());
+//						JSONArray spanTags = new JSONArray();
+//						spanTags.add("span");
+//						spanJson.put("tags", spanTags);
+//						spanJson.put("href", span.getId());
+//						spanArray.add(spanJson);
+//					}
 					microservice.put("nodes", spanArray);
 					msArray.add(microservice);
 				}

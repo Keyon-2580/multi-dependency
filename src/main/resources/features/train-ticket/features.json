@@ -1,0 +1,109 @@
+{
+	"features" : [
+		{
+			"id" : 0,
+			"name" : "登录",
+			"description" : "能够登录train-ticket系统"
+		}, 
+		{
+			"id" : 1,
+			"name" : "查询车票",
+			"description" : "能够根据输入查询所需车票"
+		},
+		{
+			"id" : 2,
+			"name" : "订票",
+			"description" : "能够订购查询的车票"
+		},
+		{
+			"id" : 3,
+			"name" : "查询所有保险",
+			"description" : "能够查询所有保险"
+		},
+		{
+			"id" : 4,
+			"name" : "查询所有食物",
+			"description" : "能够查询所有食物"
+		},
+		{
+			"id" : 5,
+			"name" : "查询账户所有联系方式",
+			"description" : "能够查询当前登录账户的所有联系方式"
+		}
+	],
+	"testcases" : [
+		{
+			"id" : 0,
+			"name" : "登录1",
+			"input" : "username : , password: ",
+			"success" : true,
+			"features" : [
+				0
+			],
+			"traces" : [
+				"28ece15c6ee0e54b"
+			]
+		},
+		{
+			"id" : 1,
+			"name" : "查询车票1",
+			"input" : "blablablablah",
+			"success" : true,
+			"features" : [
+				1
+			],
+			"traces" : [
+				"462edfd28ebc7c71"
+			]
+		},
+		{
+			"id" : 2,
+			"name" : "订票1",
+			"input" : "blablablablah",
+			"success" : true,
+			"features" : [
+				2
+			],
+			"traces" : [
+				"9570f54e9b944996"
+			]
+		},
+		{
+			"id" : 3,
+			"name" : "查询所有保险1",
+			"input" : "blablablablah",
+			"success" : true,
+			"features" : [
+				3
+			],
+			"traces" : [
+				"cd274830f8d6e735"
+			]
+		},
+		{
+			"id" : 4,
+			"name" : "查询所有食物1",
+			"input" : "blablablablah",
+			"success" : true,
+			"features" : [
+				4
+			],
+			"traces" : [
+				"d236ffc9f02fe3a3"
+			]
+		},
+		{
+			"id" : 5,
+			"name" : "查询账户所有联系方式1",
+			"input" : "blablablablah",
+			"success" : true,
+			"features" : [
+				5
+			],
+			"traces" : [
+				"9bbec201dee042f"
+			]
+		}
+		
+	]
+}

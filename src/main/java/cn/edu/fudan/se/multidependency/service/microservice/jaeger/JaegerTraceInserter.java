@@ -18,6 +18,11 @@ import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroS
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
 import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelationsImpl;
 
+/**
+ * 输入traceId.json，构建Trace、Span节点
+ * @author fan
+ *
+ */
 public abstract class JaegerTraceInserter extends ExtractorForNodesAndRelationsImpl {
 	
 	protected Trace currentTrace;

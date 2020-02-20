@@ -1,0 +1,5 @@
+### 待修改：
+
+- 静态分析输入项目源代码改用json格式文件读取，不再直接通过application.properties读入路径
+- Package直接改为目录，之前在java是包
+- depends修改

@@ -20,8 +20,8 @@ public enum RelationType implements RelationshipType {
 	VARIABLE_TYPE_PARAMETER_TYPE(RelationType.str_VARIABLE_TYPE_PARAMETER_TYPE),
 	DYNAMIC_FUNCTION_CALL_FUNCTION(RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION),
 	NODE_ANNOTATION_TYPE(RelationType.str_NODE_ANNOTATION_TYPE),
-	@Deprecated
 	TESTCASE_EXECUTE_FEATURE(RelationType.str_TESTCASE_EXECUTE_FEATURE),
+	TESTCASE_RUN_TRACE(RelationType.str_TESTCASE_RUN_TRACE),
 	@Deprecated
 	SCENARIO_DEFINE_TESTCASE(RelationType.str_SCENARIO_DEFINE_TESTCASE),
 	NODE_IS_SCENARIO(RelationType.str_NODE_IS_SCENARIO),
@@ -34,8 +34,6 @@ public enum RelationType implements RelationshipType {
 	
 	MICRO_SERVICE_CREATE_SPAN(RelationType.str_MICRO_SERVICE_CREATE_SPAN),
 	SPAN_CALL_SPAN(RelationType.str_SPAN_CALL_SPAN),
-	
-	FEATURE_EXECUTE_TRACE(RelationType.str_FEATURE_EXECUTE_TRACE),
 	
 	SPAN_START_WITH_FUNCTION(RelationType.str_SPAN_START_WITH_FUNCTION);
 	
@@ -63,7 +61,6 @@ public enum RelationType implements RelationshipType {
 	public static final String str_FUNCTION_THORW_TYPE = "FUNCTION_THORW_TYPE";
 	public static final String str_NODE_ANNOTATION_TYPE = "NODE_ANNOTATION_TYPE";
 	public static final String str_VARIABLE_TYPE_PARAMETER_TYPE = "VARIABLE_TYPE_PARAMETER_TYPE";
-	@Deprecated
 	public static final String str_TESTCASE_EXECUTE_FEATURE = "TESTCASE_EXECUTE_FEATURE";
 	@Deprecated
 	public static final String str_SCENARIO_DEFINE_TESTCASE = "SCENARIO_DEFINE_TESTCASE";
@@ -77,8 +74,9 @@ public enum RelationType implements RelationshipType {
 	
 	public static final String str_SPAN_CALL_SPAN = "SPAN_CALL_SPAN";
 	public static final String str_MICRO_SERVICE_CREATE_SPAN = "MICRO_SERVICE_CREATE_SPAN";
-	public static final String str_FEATURE_EXECUTE_TRACE = "FEATURE_EXECUTE_TRACE";
 	public static final String str_SPAN_START_WITH_FUNCTION = "SPAN_START_WITH_FUNCTION";
+	
+	public static final String str_TESTCASE_RUN_TRACE = "TESTCASE_RUN_TRACE";
 
 	private String name;
 

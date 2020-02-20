@@ -16,9 +16,9 @@ import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@RelationshipEntity(RelationType.str_FUNCTION_RETURN_TYPE)
 @Data
 @NoArgsConstructor
+@RelationshipEntity(RelationType.str_FUNCTION_RETURN_TYPE)
 public class FunctionReturnType implements Relation {
 
 	private static final long serialVersionUID = -3315100529955945595L;

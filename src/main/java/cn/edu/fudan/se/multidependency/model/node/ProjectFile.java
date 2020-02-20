@@ -7,12 +7,15 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
+import cn.edu.fudan.se.multidependency.model.node.testcase.Bug;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@NodeEntity
 @Data
+@NodeEntity
 @NoArgsConstructor
+@EqualsAndHashCode
 public class ProjectFile implements Node {
 	
 	private static final long serialVersionUID = -8736926263545574636L;

@@ -16,9 +16,9 @@ import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@RelationshipEntity(RelationType.str_NODE_ANNOTATION_TYPE)
 @Data
 @NoArgsConstructor
+@RelationshipEntity(RelationType.str_NODE_ANNOTATION_TYPE)
 public class NodeAnnotationType implements Relation {
 
 	private static final long serialVersionUID = 8248026322068428052L;

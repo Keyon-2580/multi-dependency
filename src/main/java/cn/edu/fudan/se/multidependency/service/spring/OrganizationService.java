@@ -1,9 +1,5 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
-import static guru.nidi.graphviz.model.Factory.graph;
-import static guru.nidi.graphviz.model.Factory.node;
-import static guru.nidi.graphviz.model.Factory.to;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,32 +15,60 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroServi
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
-import cn.edu.fudan.se.multidependency.model.relation.dynamic.FeatureExecuteTrace;
+import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
-import guru.nidi.graphviz.attribute.Label;
-import guru.nidi.graphviz.attribute.Rank;
-import guru.nidi.graphviz.attribute.Rank.RankDir;
-import guru.nidi.graphviz.engine.Format;
-import guru.nidi.graphviz.engine.Graphviz;
-import guru.nidi.graphviz.model.Graph;
-import guru.nidi.graphviz.model.LinkSource;
-import guru.nidi.graphviz.model.Node;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class OrganizationService {
 	
 	private final Map<String, MicroService> allMicroService;
-	private final Map<Feature, FeatureExecuteTrace> featureExecuteTraces;
+	private final Map<TestCase, List<TestCaseExecuteFeature>> testCaseExecuteFeatures;
+	private final Map<Feature, List<TestCaseExecuteFeature>> featureExecutedByTestCases;
+	private final Map<TestCase, List<TestCaseRunTrace>> testCaseRunTraces;
 	private final Map<Trace, List<Span>> traceToSpans;
 	private final Map<Span, List<SpanCallSpan>> spanCallSpans;
 	private final Map<Span, MicroServiceCreateSpan> spanBelongToMicroService;
 	
-	public List<Span> findMicroServiceCreateSpansInTraces(MicroService ms, Feature feature) throws Exception {
-		return findMicroServiceCreateSpansInTraces(ms, featureExecuteTraces.get(feature).getTrace());
+	/**
+	 * feature相关的trace
+	 * @param features
+	 * @return
+	 */
+	public Set<Trace> findRelatedTracesForFeature(Feature... features) {
+		Set<Trace> result = new HashSet<>();
+		Set<TestCase> testcases = new HashSet<>();
+		for(Feature feature : features) {
+			List<TestCaseExecuteFeature> tcs = featureExecutedByTestCases.get(feature);
+			for(TestCaseExecuteFeature tc : tcs) {
+				testcases.add(tc.getTestCase());
+			}
+		}
+		for(TestCase testcase : testcases) {
+			List<TestCaseRunTrace> traces = testCaseRunTraces.get(testcase);
+			for(TestCaseRunTrace trace : traces) {
+				result.add(trace.getTrace());
+			}
+		}
+		return result;
 	}
 	
+	public Set<Trace> findRelatedTracesForFeature(List<Feature> features) {
+		Feature[] array = new Feature[features.size()];
+		features.toArray(array);
+		return findRelatedTracesForFeature(array);
+	}
+	
+	/**
+	 * 找出某个微服务在某次Trace中创建的Span
+	 * @param ms
+	 * @param trace
+	 * @return
+	 * @throws Exception
+	 */
 	public List<Span> findMicroServiceCreateSpansInTraces(MicroService ms, Trace trace) throws Exception {
 		List<Span> spans = new ArrayList<>();
 		for(Span span : traceToSpans.get(trace)) {
@@ -67,7 +91,7 @@ public class OrganizationService {
 		JSONArray edges = new JSONArray();
 		// 服务调用服务
 		Map<MicroService, Map<MicroService, MSCallMS>> msCalls = msCalls(features);
-		if(features.length == 1) {
+		/*if(features.length == 1) {
 			JSONObject msCallMsDetail = new JSONObject();
 			for(MicroService ms : msCalls.keySet()) {
 				JSONObject info = new JSONObject();
@@ -88,7 +112,9 @@ public class OrganizationService {
 			result.put("detail", msCallMsDetail);
 			FeatureExecuteTrace featureExecuteTrace = featureExecuteTraces.get(features[0]);
 			result.put("traceId", featureExecuteTrace.getTrace().getTraceId());
-		}
+		}*/
+		
+		// 显示哪些服务
 		for(MicroService ms : msCalls.keySet()) {
 			for(MicroService callMs : msCalls.get(ms).keySet()) {
 				MSCallMS msCallMs = msCalls.get(ms).get(callMs);
@@ -102,7 +128,7 @@ public class OrganizationService {
 				edges.add(edge);
 			}
 		}
-		List<MicroService> relatedMSs = removeUnuseMS ? findRelatedMicroServiceForFeatures(features) : allMicroServices();
+		List<MicroService> relatedMSs = removeUnuseMS ? new ArrayList<>(findRelatedMicroServiceForFeatures(features)) : allMicroServices();
 		for(MicroService ms : relatedMSs) {
 			JSONObject msJson = new JSONObject();
 			JSONObject msDataValue = new JSONObject();
@@ -121,30 +147,30 @@ public class OrganizationService {
 	
 	public Map<MicroService, Map<MicroService, MSCallMS>> msCalls(Feature... features) {
 		Map<MicroService, Map<MicroService, MSCallMS>> result = new HashMap<>();
-		for(Feature feature : features) {
-			try {
-				Trace trace = this.featureExecuteTraces.get(feature).getTrace();
-				List<Span> spans = traceToSpans.get(trace);
-				for(Span span : spans) {
-					List<SpanCallSpan> callSpans = spanCallSpans.get(span);
-					callSpans = callSpans == null ? new ArrayList<>() : callSpans;
-					MicroService ms = spanBelongToMicroService.get(span).getMicroservice();
-					Map<MicroService, MSCallMS> msCallMsTimes = result.get(ms);
-					msCallMsTimes = msCallMsTimes == null ? new HashMap<>() : msCallMsTimes;
-					for(SpanCallSpan spanCallSpan : callSpans) {
-						MicroService callMs = spanBelongToMicroService.get(spanCallSpan.getCallSpan()).getMicroservice();
-						MSCallMS msCallMs = msCallMsTimes.get(callMs);
-						msCallMs = msCallMs == null ? new MSCallMS(ms, callMs) : msCallMs;
-						msCallMs.addTimes(1);
-						msCallMs.addSpanCallSpan(spanCallSpan);
-						msCallMsTimes.put(callMs, msCallMs);
+		Set<Trace> traces = findRelatedTracesForFeature(features);
+			for(Trace trace : traces) {
+				try {
+					List<Span> spans = traceToSpans.get(trace);
+					for(Span span : spans) {
+						List<SpanCallSpan> callSpans = spanCallSpans.get(span);
+						callSpans = callSpans == null ? new ArrayList<>() : callSpans;
+						MicroService ms = spanBelongToMicroService.get(span).getMicroservice();
+						Map<MicroService, MSCallMS> msCallMsTimes = result.get(ms);
+						msCallMsTimes = msCallMsTimes == null ? new HashMap<>() : msCallMsTimes;
+						for(SpanCallSpan spanCallSpan : callSpans) {
+							MicroService callMs = spanBelongToMicroService.get(spanCallSpan.getCallSpan()).getMicroservice();
+							MSCallMS msCallMs = msCallMsTimes.get(callMs);
+							msCallMs = msCallMs == null ? new MSCallMS(ms, callMs) : msCallMs;
+							msCallMs.addTimes(1);
+							msCallMs.addSpanCallSpan(spanCallSpan);
+							msCallMsTimes.put(callMs, msCallMs);
+						}
+						result.put(ms, msCallMsTimes);
 					}
-					result.put(ms, msCallMsTimes);
+				} catch (Exception e) {
+					continue;
 				}
-			} catch (Exception e) {
-				continue;
 			}
-		}
 		return result;
 	}
 	
@@ -176,7 +202,7 @@ public class OrganizationService {
 	public Map<Feature, Set<MicroService>> findAllRelatedMicroServiceSplitByFeature() {
 		Map<Feature, Set<MicroService>> result = new HashMap<>();
 		for(Feature feature : allFeatures()) {
-			Set<MicroService> mss = findRelatedMicroServiceForFeature(feature);
+			Set<MicroService> mss = findRelatedMicroServiceForFeatures(feature);
 			result.put(feature, mss);
 		}
 		return result;
@@ -194,43 +220,33 @@ public class OrganizationService {
 		return result;
 	}
 	
-	
 	/**
-	 * 一条trace调用到的所有微服务
-	 * @param trace
+	 * trace相关的微服务
+	 * @param traces
 	 * @return
 	 */
-	private Set<MicroService> findRelatedMicroServiceForTrace(Trace trace) {
+	private Set<MicroService> findRelatedMicroServiceForTraces(Trace... traces) {
 		Set<MicroService> result = new HashSet<>();
-		List<Span> containSpans = traceToSpans.get(trace);
-		for(Span span : containSpans) {
-			MicroServiceCreateSpan create = spanBelongToMicroService.get(span);
-			result.add(create.getMicroservice());
-		}
-		return result;
-	}
-	
-	/**
-	 * 某个Feature相关的微服务
-	 * @param feature
-	 * @return
-	 */
-	private Set<MicroService> findRelatedMicroServiceForFeature(Feature feature) {
-		Trace trace = featureExecuteTraces.get(feature).getTrace();
-		return findRelatedMicroServiceForTrace(trace);
-	}
-	
-	public List<MicroService> findRelatedMicroServiceForFeatures(Feature... features) {
-		List<MicroService> result = new ArrayList<>();
-		for(Feature feature : features) {
-			Set<MicroService> mss = findRelatedMicroServiceForFeature(feature);
-			for(MicroService ms : mss) {
-				if(!result.contains(ms)) {
-					result.add(ms);
-				}
+		for(Trace trace : traces) {
+			List<Span> containSpans = traceToSpans.get(trace);
+			for(Span span : containSpans) {
+				MicroServiceCreateSpan create = spanBelongToMicroService.get(span);
+				result.add(create.getMicroservice());
 			}
 		}
 		return result;
+	}
+	
+	/**
+	 * feature相关的微服务
+	 * @param features
+	 * @return
+	 */
+	public Set<MicroService> findRelatedMicroServiceForFeatures(Feature... features) {
+		Set<Trace> relatedTraces = findRelatedTracesForFeature(features);
+		Trace[] traces = new Trace[relatedTraces.size()];
+		relatedTraces.toArray(traces);
+		return findRelatedMicroServiceForTraces(traces);
 	}
 	
 	/**
@@ -251,7 +267,7 @@ public class OrganizationService {
 	 */
 	public List<Feature> allFeatures() {
 		List<Feature> result = new ArrayList<>();
-		for(Feature feature : featureExecuteTraces.keySet()) {
+		for(Feature feature : featureExecutedByTestCases.keySet()) {
 			result.add(feature);
 		}
 		result.sort(new Comparator<Feature>() {
@@ -262,52 +278,19 @@ public class OrganizationService {
 		});
 		return result;
 	}	
-
-	@Deprecated
-	public String featureToSVG(Feature feature) {
-		if(feature == null || featureExecuteTraces.get(feature) == null) {
-			return null;
+	
+	public List<TestCase> allTestCases() {
+		List<TestCase> result = new ArrayList<>();
+		for(TestCase feature : testCaseExecuteFeatures.keySet()) {
+			result.add(feature);
 		}
-		Trace trace = featureExecuteTraces.get(feature).getTrace();
-		String svg = renderSVGForTrace(trace, feature.getFeatureName() + " " + trace.getTraceId());
-		return svg;
-	}
-
-	@Deprecated
-	public Map<Feature, String> featureToSVG() {
-		Map<Feature, String> result = new HashMap<>();
-		for(Feature feature : allFeatures()) {
-			result.put(feature, featureToSVG(feature));
-		}
+		result.sort(new Comparator<TestCase>() {
+			@Override
+			public int compare(TestCase o1, TestCase o2) {
+				return o1.getTestCaseId().compareTo(o2.getTestCaseId());
+			}
+		});
 		return result;
 	}
-	@Deprecated
-	public String renderSVGForTrace(Trace trace, String graphName) {
-		List<LinkSource> linkSources = new ArrayList<>();
-		List<Span> spans = traceToSpans.get(trace);
-		spans = spans == null ? new ArrayList<>() : spans;
-		for(Span span : spans) {
-			Node source = node(getSpanName(span)).with(Label.of(getSpanLabel(span)));
-			List<SpanCallSpan> callSpans = spanCallSpans.get(span);
-			callSpans = callSpans == null ? new ArrayList<>() : callSpans;
-			for(SpanCallSpan spanCallSpan : callSpans) {
-				Span callSpan = spanCallSpan.getCallSpan();
-				Node linkNode = node(getSpanName(callSpan)).with(Label.of(getSpanLabel(callSpan)));
-				source = source.link(to(linkNode).with(Label.of(spanCallSpan.getHttpRequestMethod())));
-			}
-			linkSources.add(source);
-		}
-		System.out.println(linkSources.size());
-		Graph g = graph(graphName).directed().graphAttr().with(Rank.dir(RankDir.LEFT_TO_RIGHT)).with(linkSources);
-		return Graphviz.fromGraph(g).render(Format.SVG).toString();
-	}
-	@Deprecated
-	private static String getSpanName(Span span) {
-		return "(" + span.getOrder() + ")\n" + span.getSpanId() + "\n" + span.getServiceName() + "\n" + span.getOperationName();
-	}
-	@Deprecated
-	private static String getSpanLabel(Span span) {
-		return "(" + span.getOrder() + ")\n" + span.getServiceName() + "\n" + span.getOperationName();
-	}
-	
+
 }

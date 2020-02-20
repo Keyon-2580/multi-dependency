@@ -13,9 +13,9 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@RelationshipEntity(RelationType.str_CONTAIN)
 @Data
 @NoArgsConstructor
+@RelationshipEntity(RelationType.str_CONTAIN)
 public class Contain implements Relation {
 
 	private static final long serialVersionUID = 6713953591550916427L;

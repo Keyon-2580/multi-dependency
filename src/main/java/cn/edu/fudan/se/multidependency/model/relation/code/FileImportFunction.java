@@ -16,9 +16,9 @@ import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@RelationshipEntity(RelationType.str_FILE_IMPORT_FUNCTION)
 @Data
 @NoArgsConstructor
+@RelationshipEntity(RelationType.str_FILE_IMPORT_FUNCTION)
 public class FileImportFunction implements Relation {
 
 	private static final long serialVersionUID = -4053558454010028825L;

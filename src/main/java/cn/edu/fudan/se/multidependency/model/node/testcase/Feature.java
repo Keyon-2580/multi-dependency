@@ -11,16 +11,16 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
-@NodeEntity
 @Data
+@NodeEntity
+@NoArgsConstructor
 @EqualsAndHashCode
 public class Feature implements Node {
 
 	private static final long serialVersionUID = -2410710967921462154L;
 
-	private String featureName;
-	
     @Id
     @GeneratedValue
     private Long id;
@@ -29,9 +29,9 @@ public class Feature implements Node {
     
     private Integer featureId;
     
-    private String description;
+    private String featureName;
     
-    private String traceId;
+    private String description;
     
 	@Override
 	public Map<String, Object> getProperties() {
@@ -40,7 +40,6 @@ public class Feature implements Node {
 		properties.put("featureName", getFeatureName() == null ? "" : getFeatureName());
 		properties.put("featureId", getFeatureId() == null ? -1 : getFeatureId());
 		properties.put("description", getDescription() == null ? "" : getDescription());
-		properties.put("traceId", getTraceId() == null ? "" : getTraceId());
 		return properties;
 	}
 

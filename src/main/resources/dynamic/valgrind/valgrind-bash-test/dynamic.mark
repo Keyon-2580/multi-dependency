@@ -1,8 +1,0 @@
-/bash-5.0/copy_cmd.c
-Feature feature1
-
-copy_function_def_contents /bash-5.0/copy_cmd.c
-TestCase success
-Scenario scenario1
-Feature feature2
-Feature feature3

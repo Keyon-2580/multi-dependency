@@ -13,7 +13,11 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Commit;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Issue;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
 @RelationshipEntity(RelationType.str_COMMIT_ADDRESS_ISSUE)
 public class CommitAddressIssue implements Relation {
 
@@ -23,16 +27,6 @@ public class CommitAddressIssue implements Relation {
     @GeneratedValue
     private Long id;
     
-	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	public void setId(Long id) {
-		this.id = id;
-	}
-	
 	@StartNode
 	private Commit commit;
 	
@@ -57,22 +51,6 @@ public class CommitAddressIssue implements Relation {
 	@Override
 	public RelationType getRelationType() {
 		return RelationType.COMMIT_ADDRESS_ISSUE;
-	}
-
-	public Commit getCommit() {
-		return commit;
-	}
-
-	public void setCommit(Commit commit) {
-		this.commit = commit;
-	}
-
-	public Issue getIssue() {
-		return issue;
-	}
-
-	public void setIssue(Issue issue) {
-		this.issue = issue;
 	}
 
 }

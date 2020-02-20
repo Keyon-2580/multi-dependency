@@ -10,10 +10,12 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@NodeEntity
 @Data
+@NodeEntity
+@EqualsAndHashCode
 @NoArgsConstructor
 public class TestCase implements Node {
 
@@ -31,6 +33,8 @@ public class TestCase implements Node {
     
     private Long entityId;
     
+    private Long testCaseId;
+    
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
@@ -38,6 +42,7 @@ public class TestCase implements Node {
 		properties.put("testCaseName", getTestCaseName() == null ? "" : getTestCaseName());
 		properties.put("success", isSuccess());
 		properties.put("inputContent", getInputContent() == null ? "" : getInputContent());
+		properties.put("testCaseId", getTestCaseId() == null ? -1 : getTestCaseId());
 		return properties;
 	}
 

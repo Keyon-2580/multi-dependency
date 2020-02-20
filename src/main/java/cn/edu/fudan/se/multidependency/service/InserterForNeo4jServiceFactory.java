@@ -6,8 +6,7 @@ import cn.edu.fudan.se.multidependency.service.code.CppInsertServiceImpl;
 import cn.edu.fudan.se.multidependency.service.code.JavaInsertServiceImpl;
 import cn.edu.fudan.se.multidependency.service.dynamic.CppDynamicInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.service.dynamic.DynamicInserterForNeo4jService;
-import cn.edu.fudan.se.multidependency.service.dynamic.KiekerDynamicExecutionInserterForNeo4jService;
-import cn.edu.fudan.se.multidependency.utils.YamlUtils;
+import cn.edu.fudan.se.multidependency.service.dynamic.StubJavaForJaegerDynamicInserter;
 import depends.entity.repo.EntityRepo;
 
 public class InserterForNeo4jServiceFactory {
@@ -33,7 +32,7 @@ public class InserterForNeo4jServiceFactory {
 	public DynamicInserterForNeo4jService createDynamicInserterService(Language language) throws Exception {
 		switch(language) {
 		case java:
-			return new KiekerDynamicExecutionInserterForNeo4jService();
+			return new StubJavaForJaegerDynamicInserter();
 		case cpp:
 			return new CppDynamicInserterForNeo4jService();
 		}

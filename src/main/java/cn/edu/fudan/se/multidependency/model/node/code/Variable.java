@@ -5,6 +5,7 @@ import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
@@ -13,8 +14,9 @@ import org.neo4j.ogm.annotation.NodeEntity;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 
-@NodeEntity("Variable")
 @Data
+@NodeEntity
+@EqualsAndHashCode
 @NoArgsConstructor
 public class Variable implements Node {
 

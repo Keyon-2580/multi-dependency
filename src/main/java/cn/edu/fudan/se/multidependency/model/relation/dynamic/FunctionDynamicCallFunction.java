@@ -15,9 +15,9 @@ import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@RelationshipEntity(RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION)
 @Data
 @NoArgsConstructor
+@RelationshipEntity(RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION)
 public class FunctionDynamicCallFunction implements Relation {
 
 	private static final long serialVersionUID = -7640490954063715746L;

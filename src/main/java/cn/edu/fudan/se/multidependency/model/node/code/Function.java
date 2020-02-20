@@ -17,8 +17,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@NodeEntity
 @Data
+@NodeEntity
 @NoArgsConstructor
 @EqualsAndHashCode
 public class Function implements Node {

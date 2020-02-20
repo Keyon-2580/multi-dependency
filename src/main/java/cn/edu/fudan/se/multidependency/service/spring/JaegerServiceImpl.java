@@ -13,7 +13,6 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroServi
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
-import cn.edu.fudan.se.multidependency.model.relation.dynamic.FeatureExecuteTrace;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanStartWithFunction;
@@ -21,7 +20,6 @@ import cn.edu.fudan.se.multidependency.repository.node.microservice.jaeger.Micro
 import cn.edu.fudan.se.multidependency.repository.node.microservice.jaeger.SpanRepository;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.jaeger.TraceRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FeatureExecuteTraceRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.jaeger.MicroServiceCreateSpanRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.jaeger.SpanCallSpanRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.jaeger.SpanStartWithFunctionRepository;
@@ -29,8 +27,6 @@ import cn.edu.fudan.se.multidependency.repository.relation.microservice.jaeger.S
 @Service
 public class JaegerServiceImpl implements JaegerService {
 
-	@Autowired
-	private FeatureExecuteTraceRepository featureExecuteTraceRepository;
 	
 	@Autowired
 	private SpanCallSpanRepository spanCallSpanRepository;
@@ -54,11 +50,6 @@ public class JaegerServiceImpl implements JaegerService {
 	private TraceRepository traceRepository;
 	
 	@Override
-	public Trace findTraceByFeature(Feature feature) {
-		return featureExecuteTraceRepository.findTraceByFeatureId(feature.getFeatureId());
-	}
-
-	@Override
 	public List<Span> findSpansByTrace(Trace trace) {
 		List<Span> spans = containRepository.findSpansByTraceId(trace.getTraceId());
 		spans.sort(new Comparator<Span>() {
@@ -78,16 +69,6 @@ public class JaegerServiceImpl implements JaegerService {
 	@Override
 	public MicroServiceCreateSpan findMicroServiceCreateSpan(Span span) {
 		return microserviceCreateSpanRepository.findMicroServiceCreateSpan(span.getSpanId());
-	}
-
-	@Override
-	public List<FeatureExecuteTrace> findAllFeatureExecuteTraces() {
-		return featureExecuteTraceRepository.findAllFeatureExecuteTrace();
-	}
-
-	@Override
-	public FeatureExecuteTrace findFeatureExecuteTraceByFeature(Feature feature) {
-		return featureExecuteTraceRepository.findExecuteTraceByFeatureId(feature.getFeatureId());
 	}
 
 	@Override
@@ -133,6 +114,11 @@ public class JaegerServiceImpl implements JaegerService {
 	@Override
 	public Trace findTraceByTraceId(String traceId) {
 		return traceRepository.findTraceByTraceId(traceId);
+	}
+
+	@Override
+	public Trace findTraceByFeature(Feature feature) {
+		return null;
 	}
 
 }

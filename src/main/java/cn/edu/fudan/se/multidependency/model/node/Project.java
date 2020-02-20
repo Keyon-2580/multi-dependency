@@ -8,12 +8,15 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 import cn.edu.fudan.se.multidependency.model.Language;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Bug;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@NodeEntity("Project")
 @Data
+@NodeEntity
 @NoArgsConstructor
+@EqualsAndHashCode
 public class Project implements Node {
 	private static final long serialVersionUID = 4058945695982024026L;
 	

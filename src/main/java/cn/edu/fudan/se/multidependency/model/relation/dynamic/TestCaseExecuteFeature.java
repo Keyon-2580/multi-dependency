@@ -13,9 +13,12 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
 @RelationshipEntity(RelationType.str_TESTCASE_EXECUTE_FEATURE)
-@Deprecated
 public class TestCaseExecuteFeature implements Relation {
 
 	private static final long serialVersionUID = 3879809639261277046L;
@@ -24,21 +27,16 @@ public class TestCaseExecuteFeature implements Relation {
     @GeneratedValue
     private Long id;
 	
-	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	public void setId(Long id) {
-		this.id = id;
-	}
-	
 	@StartNode
 	private TestCase testCase;
 	
 	@EndNode
 	private Feature feature;
+	
+	public TestCaseExecuteFeature(TestCase testCase, Feature feature) {
+		this.testCase = testCase;
+		this.feature = feature;
+	}
 
 	@Override
 	public Long getStartNodeGraphId() {
@@ -58,22 +56,6 @@ public class TestCaseExecuteFeature implements Relation {
 	@Override
 	public Map<String, Object> getProperties() {
 		return new HashMap<>();
-	}
-
-	public TestCase getTestCase() {
-		return testCase;
-	}
-
-	public void setTestCase(TestCase testCase) {
-		this.testCase = testCase;
-	}
-
-	public Feature getFeature() {
-		return feature;
-	}
-
-	public void setFeature(Feature feature) {
-		this.feature = feature;
 	}
 
 }

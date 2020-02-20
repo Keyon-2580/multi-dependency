@@ -13,9 +13,13 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@RelationshipEntity(RelationType.str_SCENARIO_DEFINE_TESTCASE)
 @Deprecated
+@Data
+@NoArgsConstructor
+@RelationshipEntity(RelationType.str_SCENARIO_DEFINE_TESTCASE)
 public class ScenarioDefineTestCase implements Relation {
 
 	private static final long serialVersionUID = -3711251531514529174L;
@@ -23,16 +27,6 @@ public class ScenarioDefineTestCase implements Relation {
 	@Id
     @GeneratedValue
     private Long id;
-	
-	@Override
-	public Long getId() {
-		return id;
-	}
-
-	@Override
-	public void setId(Long id) {
-		this.id = id;
-	}
 	
 	@StartNode
 	private Scenario scenario;
@@ -58,22 +52,6 @@ public class ScenarioDefineTestCase implements Relation {
 	@Override
 	public Map<String, Object> getProperties() {
 		return new HashMap<>();
-	}
-
-	public Scenario getScenario() {
-		return scenario;
-	}
-
-	public void setScenario(Scenario scenario) {
-		this.scenario = scenario;
-	}
-
-	public TestCase getTestCase() {
-		return testCase;
-	}
-
-	public void setTestCase(TestCase testCase) {
-		this.testCase = testCase;
 	}
 
 }

@@ -186,10 +186,6 @@ public class JavaStubListenerUsingTryFinallyForJaegerWithSpringMultiThread exten
 		StringBuilder builder = new StringBuilder();
 		if(isMethodRequestMapping) {
 			builder
-//			.append("java.lang.String MULTIPLE_STUB_TRACE_ID = ").append(MULTIPLE_STUB_VARIABLE_MAP_TRACE_ID).append(".get(java.lang.Thread.currentThread().getId());")
-//			.append("java.lang.String MULTIPLE_STUB_SPAN_ID = ").append(MULTIPLE_STUB_VARIABLE_MAP_SPAN_ID).append(".get(java.lang.Thread.currentThread().getId());")
-//			.append("MULTIPLE_STUB_TRACE_ID = MULTIPLE_STUB_TRACE_ID == null ? java.lang.Long.toHexString(((io.jaegertracing.internal.JaegerSpan) ").append(MULTIPLE_STUB_JAEGER_AUTOWIRED).append(".activeSpan()).context().getTraceId()) : MULTIPLE_STUB_TRACE_ID;")
-//			.append("MULTIPLE_STUB_SPAN_ID = MULTIPLE_STUB_SPAN_ID == null ? java.lang.Long.toHexString(((io.jaegertracing.internal.JaegerSpan) ").append(MULTIPLE_STUB_JAEGER_AUTOWIRED).append(".activeSpan()).context().getSpanId()) : MULTIPLE_STUB_SPAN_ID;")
 			.append(MULTIPLE_STUB_VARIABLE_MAP_TRACE_ID).append(".put(java.lang.Thread.currentThread().getId(), java.lang.Long.toHexString(((io.jaegertracing.internal.JaegerSpan) MULTIPLE_STUB_JAEGER_AUTOWIRED.activeSpan()).context().getTraceId()));")
 			.append(MULTIPLE_STUB_VARIABLE_MAP_SPAN_ID).append(".put(java.lang.Thread.currentThread().getId(), java.lang.Long.toHexString(((io.jaegertracing.internal.JaegerSpan) MULTIPLE_STUB_JAEGER_AUTOWIRED.activeSpan()).context().getSpanId()));")
 			.append(MULTIPLE_STUB_VARIABLE_MAP_EXECUTION_DEPTH).append(".put(java.lang.Thread.currentThread().getId(), 0L);")

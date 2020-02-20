@@ -13,10 +13,10 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
-@NodeEntity
 @Data
-@NoArgsConstructor
+@NodeEntity
 @EqualsAndHashCode
+@NoArgsConstructor
 public class Type implements Node {
     @Id
     @GeneratedValue
