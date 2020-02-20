@@ -85,6 +85,7 @@ public class OrganizationService {
 			JSONArray tags = new JSONArray();
 			tags.add("feature");
 			featureJson.put("tags", tags);
+			featureJson.put("href", feature.getId());
 			
 			JSONArray testCases = new JSONArray();
 			for(TestCaseExecuteFeature execute : executes) {
@@ -93,6 +94,7 @@ public class OrganizationService {
 				tags = new JSONArray();
 				tags.add("testcase");
 				testCaseJson.put("tags", tags);
+				testCaseJson.put("href", execute.getTestCase().getId());
 				
 				List<TestCaseRunTrace> runs = testCaseRunTraces.get(execute.getTestCase());
 				JSONArray traces = new JSONArray();
@@ -103,6 +105,7 @@ public class OrganizationService {
 					tags = new JSONArray();
 					tags.add("trace");
 					traceJson.put("tags", tags);
+					traceJson.put("href", trace.getId());
 					
 					JSONArray microservices = new JSONArray();
 					for(MicroService ms : findRelatedMicroServiceForTraces(trace)) {
@@ -111,6 +114,7 @@ public class OrganizationService {
 						tags = new JSONArray();
 						tags.add("microservice");
 						msJson.put("tags", tags);
+						msJson.put("href", ms.getId());
 						JSONArray spansArray = new JSONArray();
 						for(Span span : findMicroServiceCreateSpansInTraces(ms, trace)) {
 							JSONObject spanJson = new JSONObject();
@@ -118,6 +122,7 @@ public class OrganizationService {
 							tags = new JSONArray();
 							tags.add("span");
 							spanJson.put("tags", tags);
+							spanJson.put("href", span.getId());
 							spansArray.add(spanJson);
 						}
 						msJson.put("nodes", spansArray);
@@ -136,6 +141,17 @@ public class OrganizationService {
 		}
 		
 		
+		return result;
+	}
+	
+	public Set<Trace> findRelatedTracesForTestCases(TestCase... testcases) {
+		Set<Trace> result = new HashSet<>();
+		for(TestCase testcase : testcases) {
+			List<TestCaseRunTrace> runs = testCaseRunTraces.get(testcase);
+			for(TestCaseRunTrace run : runs) {
+				result.add(run.getTrace());
+			}
+		}
 		return result;
 	}
 	
@@ -161,7 +177,6 @@ public class OrganizationService {
 		}
 		return result;
 	}
-	
 	public Set<Trace> findRelatedTracesForFeature(List<Feature> features) {
 		Feature[] array = new Feature[features.size()];
 		features.toArray(array);
@@ -185,19 +200,19 @@ public class OrganizationService {
 		return spans;
 	}
 	
-	public JSONObject microServiceToCatoscape(boolean removeUnuseMS, List<Feature> features) {
-		Feature[] featureArray = new Feature[features.size()];
-		features.toArray(featureArray);
-		return microServiceToCatoscape(removeUnuseMS, featureArray);
+	public JSONObject microServiceToCytoscape(boolean removeUnuseMS, List<Trace> traces) {
+		Trace[] traceArray = new Trace[traces.size()];
+		traces.toArray(traceArray);
+		return microServiceToCytoscape(removeUnuseMS, traceArray);
 	}
 	
-	public JSONObject microServiceToCatoscape(boolean removeUnuseMS, Feature... features) {
+	public JSONObject microServiceToCytoscape(boolean removeUnuseMS, Trace... traces) {
 		JSONObject result = new JSONObject();
 		JSONArray nodes = new JSONArray();
 		JSONArray edges = new JSONArray();
 		// 服务调用服务
-		Map<MicroService, Map<MicroService, MSCallMS>> msCalls = msCalls(features);
-		/*if(features.length == 1) {
+		Map<MicroService, Map<MicroService, MSCallMS>> msCalls = findMsCallMsByTraces(traces);
+		if(traces.length == 1) {
 			JSONObject msCallMsDetail = new JSONObject();
 			for(MicroService ms : msCalls.keySet()) {
 				JSONObject info = new JSONObject();
@@ -216,9 +231,8 @@ public class OrganizationService {
 				msCallMsDetail.put(ms.getId().toString(), info);
 			}
 			result.put("detail", msCallMsDetail);
-			FeatureExecuteTrace featureExecuteTrace = featureExecuteTraces.get(features[0]);
-			result.put("traceId", featureExecuteTrace.getTrace().getTraceId());
-		}*/
+			result.put("traceId", traces[0].getTraceId());
+		}
 		
 		// 显示哪些服务
 		for(MicroService ms : msCalls.keySet()) {
@@ -234,7 +248,7 @@ public class OrganizationService {
 				edges.add(edge);
 			}
 		}
-		List<MicroService> relatedMSs = removeUnuseMS ? new ArrayList<>(findRelatedMicroServiceForFeatures(features)) : allMicroServices();
+		List<MicroService> relatedMSs = removeUnuseMS ? new ArrayList<>(findRelatedMicroServiceForTraces(traces)) : allMicroServices();
 		for(MicroService ms : relatedMSs) {
 			JSONObject msJson = new JSONObject();
 			JSONObject msDataValue = new JSONObject();
@@ -251,32 +265,36 @@ public class OrganizationService {
 		return result;
 	}
 	
-	public Map<MicroService, Map<MicroService, MSCallMS>> msCalls(Feature... features) {
+	/**
+	 * 获取与trace相关的微服务调用
+	 * @param traces
+	 * @return
+	 */
+	public Map<MicroService, Map<MicroService, MSCallMS>> findMsCallMsByTraces(Trace... traces) {
 		Map<MicroService, Map<MicroService, MSCallMS>> result = new HashMap<>();
-		Set<Trace> traces = findRelatedTracesForFeature(features);
-			for(Trace trace : traces) {
-				try {
-					List<Span> spans = traceToSpans.get(trace);
-					for(Span span : spans) {
-						List<SpanCallSpan> callSpans = spanCallSpans.get(span);
-						callSpans = callSpans == null ? new ArrayList<>() : callSpans;
-						MicroService ms = spanBelongToMicroService.get(span).getMicroservice();
-						Map<MicroService, MSCallMS> msCallMsTimes = result.get(ms);
-						msCallMsTimes = msCallMsTimes == null ? new HashMap<>() : msCallMsTimes;
-						for(SpanCallSpan spanCallSpan : callSpans) {
-							MicroService callMs = spanBelongToMicroService.get(spanCallSpan.getCallSpan()).getMicroservice();
-							MSCallMS msCallMs = msCallMsTimes.get(callMs);
-							msCallMs = msCallMs == null ? new MSCallMS(ms, callMs) : msCallMs;
-							msCallMs.addTimes(1);
-							msCallMs.addSpanCallSpan(spanCallSpan);
-							msCallMsTimes.put(callMs, msCallMs);
-						}
-						result.put(ms, msCallMsTimes);
+		for(Trace trace : traces) {
+			try {
+				List<Span> spans = traceToSpans.get(trace);
+				for(Span span : spans) {
+					List<SpanCallSpan> callSpans = spanCallSpans.get(span);
+					callSpans = callSpans == null ? new ArrayList<>() : callSpans;
+					MicroService ms = spanBelongToMicroService.get(span).getMicroservice();
+					Map<MicroService, MSCallMS> msCallMsTimes = result.get(ms);
+					msCallMsTimes = msCallMsTimes == null ? new HashMap<>() : msCallMsTimes;
+					for(SpanCallSpan spanCallSpan : callSpans) {
+						MicroService callMs = spanBelongToMicroService.get(spanCallSpan.getCallSpan()).getMicroservice();
+						MSCallMS msCallMs = msCallMsTimes.get(callMs);
+						msCallMs = msCallMs == null ? new MSCallMS(ms, callMs) : msCallMs;
+						msCallMs.addTimes(1);
+						msCallMs.addSpanCallSpan(spanCallSpan);
+						msCallMsTimes.put(callMs, msCallMs);
 					}
-				} catch (Exception e) {
-					continue;
+					result.put(ms, msCallMsTimes);
 				}
+			} catch (Exception e) {
+				continue;
 			}
+		}
 		return result;
 	}
 	
@@ -327,23 +345,6 @@ public class OrganizationService {
 	}
 	
 	/**
-	 * trace相关的微服务
-	 * @param traces
-	 * @return
-	 */
-	private Set<MicroService> findRelatedMicroServiceForTraces(Trace... traces) {
-		Set<MicroService> result = new HashSet<>();
-		for(Trace trace : traces) {
-			List<Span> containSpans = traceToSpans.get(trace);
-			for(Span span : containSpans) {
-				MicroServiceCreateSpan create = spanBelongToMicroService.get(span);
-				result.add(create.getMicroservice());
-			}
-		}
-		return result;
-	}
-	
-	/**
 	 * feature相关的微服务
 	 * @param features
 	 * @return
@@ -353,6 +354,39 @@ public class OrganizationService {
 		Trace[] traces = new Trace[relatedTraces.size()];
 		relatedTraces.toArray(traces);
 		return findRelatedMicroServiceForTraces(traces);
+	}
+	
+	/**
+	 * 测试用例相关的微服务
+	 * @param testcases
+	 * @return
+	 */
+	public Set<MicroService> findRelatedMicroServiceForTestCases(TestCase... testcases) { 
+		Set<MicroService> result = new HashSet<>();
+		for(TestCase testcase : testcases) {
+			List<TestCaseRunTrace> runs = testCaseRunTraces.get(testcase);
+			for(TestCaseRunTrace run : runs) {
+				result.addAll(findRelatedMicroServiceForTraces(run.getTrace()));
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * trace相关的微服务
+	 * @param traces
+	 * @return
+	 */
+	public Set<MicroService> findRelatedMicroServiceForTraces(Trace... traces) {
+		Set<MicroService> result = new HashSet<>();
+		for(Trace trace : traces) {
+			List<Span> containSpans = traceToSpans.get(trace);
+			for(Span span : containSpans) {
+				MicroServiceCreateSpan create = spanBelongToMicroService.get(span);
+				result.add(create.getMicroservice());
+			}
+		}
+		return result;
 	}
 	
 	/**
@@ -385,6 +419,10 @@ public class OrganizationService {
 		return result;
 	}	
 	
+	/**
+	 * 所有测试用例
+	 * @return
+	 */
 	public List<TestCase> allTestCases() {
 		List<TestCase> result = new ArrayList<>();
 		for(TestCase feature : testCaseExecuteFeatures.keySet()) {

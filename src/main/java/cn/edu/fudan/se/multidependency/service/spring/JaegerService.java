@@ -34,4 +34,6 @@ public interface JaegerService {
 	List<Span> findSpansByMicroserviceAndTraceId(MicroService ms, String traceId);
 
 	Trace findTraceByTraceId(String traceId);
+
+	Trace findTraceById(Long id);
 }

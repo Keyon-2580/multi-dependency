@@ -196,4 +196,14 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		return result;
 	}
 
+	@Override
+	public TestCase findTestCaseById(Long id) {
+		return testCaseRepository.findById(id).get();
+	}
+
+	@Override
+	public Feature findFeatureById(Long id) {
+		return featureRepository.findById(id).get();
+	}
+
 }

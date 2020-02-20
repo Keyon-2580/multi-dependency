@@ -44,4 +44,8 @@ public interface DynamicAnalyseService {
 	List<FunctionDynamicCallFunction> findFunctionDynamicCallsByMicroService(MicroService ms);
 	
 	List<FunctionDynamicCallFunction> findFunctionDynamicCallsByProject(Project project);
+
+	TestCase findTestCaseById(Long id);
+
+	Feature findFeatureById(Long id);
 }

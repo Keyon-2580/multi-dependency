@@ -17,7 +17,7 @@
 <script type="text/javascript" th:src="@{/js/newfeature.js}"></script>
 <script type="text/javascript"
 	th:src="@{/js/import/bootstrap/bootstrap-treeview.min.js}"></script>
-  <script src="https://cdn.bootcss.com/jsPlumb/2.6.8/js/jsplumb.min.js"></script>
+<script src="https://cdn.bootcss.com/jsPlumb/2.6.8/js/jsplumb.min.js"></script>
 <link rel="stylesheet"
 	th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
 <link rel="stylesheet"
@@ -40,56 +40,61 @@
 			<div id="tree"></div>
 		</div>
 		<div class="col-sm-9">
-			<div>
-				<h3>features</h3>
+			<div id="table">
 				<div>
-					<table class="table table-bordered">
-						<tr>
-							<th>featureId</th>
-							<th>featureName</th>
-							<th>description</th>
-						</tr>
-						<tr th:each="feature : ${features}">
-							<td><span th:text="${feature.featureId}"></span></td>
-							<td><span th:text="${feature.featureName}"></span></td>
-							<td><span th:text="${feature.description}"></span></td>
-						</tr>
-					</table>
+					<div id="feature_table">
+						<h3>features</h3>
+						<table class="table table-bordered">
+							<tr>
+								<th>featureId</th>
+								<th>featureName</th>
+								<th>description</th>
+							</tr>
+							<tr th:each="feature : ${features}">
+								<td><span th:text="${feature.featureId}"></span></td>
+								<td><span th:text="${feature.featureName}"></span></td>
+								<td><span th:text="${feature.description}"></span></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				<div>
+					<div id="testcase_table">
+						<h3>testcases</h3>
+						<table class="table table-bordered">
+							<tr>
+								<th>testcaseId</th>
+								<th>testcaseName</th>
+								<th>success</th>
+								<th>inputContent</th>
+							</tr>
+							<tr th:each="testcase : ${testcases}">
+								<td><span th:text="${testcase.testCaseId}"></span></td>
+								<td><span th:text="${testcase.testCaseName}"></span></td>
+								<td><span th:text="${testcase.success}"></span></td>
+								<td><span th:text="${testcase.inputContent}"></span></td>
+							</tr>
+						</table>
+					</div>
 				</div>
 			</div>
-			<div>
-				<h3>testcases</h3>
-				<div>
-					<table class="table table-bordered">
-						<tr>
-							<th>testcaseId</th>
-							<th>testcaseName</th>
-							<th>success</th>
-							<th>inputContent</th>
-						</tr>
-						<tr th:each="testcase : ${testcases}">
-							<td><span th:text="${testcase.testCaseId}"></span></td>
-							<td><span th:text="${testcase.testCaseName}"></span></td>
-							<td><span th:text="${testcase.success}"></span></td>
-							<td><span th:text="${testcase.inputContent}"></span></td>
-						</tr>
-					</table>
-				</div>
-			</div>
+
 			<div id="content">
-				<div id="title"></div>			
+				<div>
+					<h3 id="title">feature executes testcases</h3>
+				</div>
 				<div id="graph" class="div_cytoscape_content"></div>
+				<div id="all" class="div_cytoscape_content"></div>
 			</div>
 		</div>
 	</div>
 	<script type="text/javascript" th:inline="javascript">
-	//<![CDATA[
+		//<![CDATA[
 		$(document).ready(function() {
-			console.log([[${features}]]);
-			console.log([[${testcases}]])
 			featureInit();
+			toHTML("all", -1, $("#all"));
 		});
-	// ]]>
+		// ]]>
 	</script>
 </body>
 </html>

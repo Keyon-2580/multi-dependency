@@ -121,4 +121,9 @@ public class JaegerServiceImpl implements JaegerService {
 		return null;
 	}
 
+	@Override
+	public Trace findTraceById(Long id) {
+		return traceRepository.findById(id).get();
+	}
+
 }

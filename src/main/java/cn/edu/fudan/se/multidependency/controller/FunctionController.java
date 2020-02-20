@@ -150,12 +150,6 @@ public class FunctionController {
 			List<FunctionDynamicCallFunction> spanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
 			System.out.println(spanFunctionCalls.size());
 			SpanWithFunctions spanWithFunctions = new SpanWithFunctions(spanStartWithFunction, spanFunctionCalls);
-//			JSONObject startFunction = new JSONObject();
-//			startFunction.put("text", spanStartWithFunction.getFunction().getFunctionName() + spanStartWithFunction.getFunction().getParametersIdentifies());
-//			
-//			
-//			
-//			functionArray.add(startFunction);
 			functionArray.add(test1(spanStartWithFunction.getFunction(), spanFunctionCalls, 0L));
 			result.put("result", "success");
 			result.put("value", functionArray);
