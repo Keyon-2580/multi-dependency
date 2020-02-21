@@ -33,6 +33,8 @@ public class Feature implements Node {
     
     private String description;
     
+    private Integer parentFeatureId;
+    
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
@@ -40,6 +42,7 @@ public class Feature implements Node {
 		properties.put("featureName", getFeatureName() == null ? "" : getFeatureName());
 		properties.put("featureId", getFeatureId() == null ? -1 : getFeatureId());
 		properties.put("description", getDescription() == null ? "" : getDescription());
+		properties.put("parentFeatureId", getParentFeatureId() == null ? -1 : getParentFeatureId());
 		return properties;
 	}
 

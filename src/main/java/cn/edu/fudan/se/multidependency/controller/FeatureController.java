@@ -40,11 +40,6 @@ public class FeatureController {
 		return featureOrganizationService.allFeatures();
 	}
 
-	@GetMapping("/index1")
-	public String index1(HttpServletRequest request) {
-		return "feature/index";
-	}
-	
 	@GetMapping(value = {"/", "/index"})
 	public String index(HttpServletRequest request) {
 		return "feature";
@@ -56,8 +51,9 @@ public class FeatureController {
 		JSONObject result = new JSONObject();
 		try {
 			result.put("result", "success");
-			System.out.println(featureOrganizationService.featureExecuteTestCasesToCytoscape());
-			result.put("value", featureOrganizationService.featureExecuteTestCasesToCytoscape());
+			JSONObject value = featureOrganizationService.featureExecuteTestCasesToCytoscape();
+			System.out.println(value);
+			result.put("value", value);
 		} catch (Exception e) {
 			result.put("result", "fail");
 			result.put("msg", e.getMessage());

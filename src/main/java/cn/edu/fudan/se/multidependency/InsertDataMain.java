@@ -80,8 +80,10 @@ public class InsertDataMain {
 			ExtractorForNodesAndRelationsImpl jaegerExtractor = null;
 			File betweenServiceDirectory = new File("src/main/resources/train-ticket");
 			for(File f : betweenServiceDirectory.listFiles()) {
-				jaegerExtractor = new JaegerTraceInserterFromJSONFile(f.getAbsolutePath());
-				jaegerExtractor.addNodesAndRelations();
+				if(f.isFile()) {
+					jaegerExtractor = new JaegerTraceInserterFromJSONFile(f.getAbsolutePath());
+					jaegerExtractor.addNodesAndRelations();
+				}
 			}
 			
 			ExtractorForNodesAndRelationsImpl featureExtractor = new FeatureAndTestCaseInserter(featuresJsonPath);

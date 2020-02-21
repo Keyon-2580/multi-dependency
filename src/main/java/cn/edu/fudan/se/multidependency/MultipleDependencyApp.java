@@ -56,7 +56,8 @@ public class MultipleDependencyApp {
 		Map<Span, List<SpanCallSpan>> spanCallSpans = new HashMap<>();
 		Map<Span, MicroServiceCreateSpan> spanBelongToMicroService = new HashMap<>();
 		Map<String, MicroService> allMicroService = jaegerService.findAllMicroService();
-
+		Map<Feature, Feature> featureToParentFeature = dynamicAnalyseService.findAllFeatureToParentFeature();
+		
 		for (List<TestCaseRunTrace> runs : testCaseRunTraces.values()) {
 			for(TestCaseRunTrace run : runs) {
 				Trace trace = run.getTrace();
@@ -72,7 +73,7 @@ public class MultipleDependencyApp {
 		}
 		FeatureOrganizationService organization = new FeatureOrganizationService(
 				allMicroService, testCaseExecuteFeatures, featureExecutedByTestCases, 
-				testCaseRunTraces, traceToSpans, spanCallSpans, spanBelongToMicroService);
+				featureToParentFeature, testCaseRunTraces, traceToSpans, spanCallSpans, spanBelongToMicroService);
 
 		return organization;
 	}	

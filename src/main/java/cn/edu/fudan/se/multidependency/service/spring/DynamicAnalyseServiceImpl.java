@@ -16,6 +16,7 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
+import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
@@ -201,6 +202,18 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	@Override
 	public Feature findFeatureById(Long id) {
 		return featureRepository.findById(id).get();
+	}
+
+	@Override
+	public Map<Feature, Feature> findAllFeatureToParentFeature() {
+		Map<Feature, Feature> result = new HashMap<>();
+		List<Contain> featureContainFeatures = containRepository.findAllFeatureContainFeatures();
+		for(Contain fcf : featureContainFeatures) {
+			Feature parentFeature = (Feature) fcf.getStart();
+			Feature feature = (Feature) fcf.getEnd();
+			result.put(feature, parentFeature);
+		}
+		return result;
 	}
 
 }

@@ -1,6 +1,8 @@
 package cn.edu.fudan.se.multidependency.service;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -8,11 +10,14 @@ import com.alibaba.fastjson.JSONObject;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
+import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 
 public class FeatureAndTestCaseInserter extends ExtractorForNodesAndRelationsImpl {
+	
+	private Map<Integer, Feature> features = new HashMap<>();
 	
 	public FeatureAndTestCaseInserter(String featureConfigPath) {
 		this.featureConfigPath = featureConfigPath;
@@ -22,17 +27,39 @@ public class FeatureAndTestCaseInserter extends ExtractorForNodesAndRelationsImp
 	
 	private void extract() throws Exception {
 		JSONObject featureJsonFile = JSONUtil.extractJson(new File(featureConfigPath));
-		System.out.println(featureJsonFile);
 		JSONArray featuresArray = featureJsonFile.getJSONArray("features");
 		JSONArray testcasesArray = featureJsonFile.getJSONArray("testcases");
 		for(int i = 0; i < featuresArray.size(); i++) {
 			JSONObject featureTemp = featuresArray.getJSONObject(i);
 			Feature feature = new Feature();
 			feature.setEntityId(generateEntityId());
-			feature.setFeatureId(featureTemp.getInteger("id"));
+			Integer featureId = featureTemp.getInteger("id");
+			if(featureId == null || featureId < 0) {
+				throw new Exception("featureId错误");
+			}
+			feature.setFeatureId(featureId);
 			feature.setFeatureName(featureTemp.getString("name"));
 			feature.setDescription(featureTemp.getString("description"));
+			Integer parentFeatureId = featureTemp.getInteger("parentId");
+			if(parentFeatureId == null) {
+				feature.setParentFeatureId(-1);
+			} else {
+				feature.setParentFeatureId(parentFeatureId);
+			}
+			features.put(featureId, feature);
 			addNode(feature, null);
+		}
+		
+		for(Feature feature : features.values()) {
+			if(feature.getParentFeatureId() == null || feature.getParentFeatureId() < 0) {
+				continue;
+			}
+			Feature parentFeature = features.get(feature.getParentFeatureId());
+			if(parentFeature == null) {
+				throw new Exception("feature的parentId错误，没有找到id为 " + feature.getParentFeatureId() + " 的Feature");
+			}
+			Contain featureContainFeature = new Contain(parentFeature, feature);
+			addRelation(featureContainFeature);
 		}
 		
 		for(int i = 0; i < testcasesArray.size(); i++) {

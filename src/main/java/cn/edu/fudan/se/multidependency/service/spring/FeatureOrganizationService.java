@@ -28,6 +28,7 @@ public class FeatureOrganizationService {
 	private final Map<String, MicroService> allMicroService;
 	private final Map<TestCase, List<TestCaseExecuteFeature>> testCaseExecuteFeatures;
 	private final Map<Feature, List<TestCaseExecuteFeature>> featureExecutedByTestCases;
+	private final Map<Feature, Feature> featureToParentFeature;
 	private final Map<TestCase, List<TestCaseRunTrace>> testCaseRunTraces;
 	private final Map<Trace, List<Span>> traceToSpans;
 	private final Map<Span, List<SpanCallSpan>> spanCallSpans;
@@ -68,6 +69,18 @@ public class FeatureOrganizationService {
 				executeEdge.put("data", executeData);
 				edges.add(executeEdge);
 			}
+		}
+		
+		for(Feature feature : featureToParentFeature.keySet()) {
+			Feature parentFeature = featureToParentFeature.get(feature);
+			JSONObject containFeature = new JSONObject();
+			containFeature.put("id", parentFeature.getId() + "_" + feature.getId());
+			containFeature.put("source", parentFeature.getId());
+			containFeature.put("target", feature.getId());
+			containFeature.put("value", "contain");
+			JSONObject containEdge = new JSONObject();
+			containEdge.put("data", containFeature);
+			edges.add(containEdge);
 		}
 		
 		result.put("nodes", nodes);

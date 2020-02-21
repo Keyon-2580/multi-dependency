@@ -24,4 +24,7 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	
 	@Query("match (m:MicroService)-[r:" + RelationType.str_CONTAIN + "]->(p:Project) where id(m)={msId} return p")
 	public List<Project> findMicroServiceContainProject(@Param("msId") Long microserviceId);
+	
+	@Query("match p = (f1:Feature)-[r:" + RelationType.str_CONTAIN + "]->(f2:Feature) return p")
+	public List<Contain> findAllFeatureContainFeatures();
 }

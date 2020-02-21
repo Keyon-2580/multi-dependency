@@ -38,6 +38,7 @@ public interface DynamicAnalyseService {
 	
 	Map<TestCase, List<TestCaseRunTrace>> findAllTestCaseRunTraces();
 
+	Map<Feature, Feature> findAllFeatureToParentFeature();
 	
 	List<Feature> findFeaturesByFeatureId(Integer... featureIds);
 

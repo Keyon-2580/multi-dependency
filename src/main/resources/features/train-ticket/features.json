@@ -8,7 +8,8 @@
 		{
 			"id" : 1,
 			"name" : "查询车票",
-			"description" : "能够根据输入查询所需车票"
+			"description" : "能够根据输入查询所需车票",
+			"parentId" : 2
 		},
 		{
 			"id" : 2,

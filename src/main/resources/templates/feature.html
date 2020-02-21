@@ -40,11 +40,13 @@
 								<th>featureId</th>
 								<th>featureName</th>
 								<th>description</th>
+								<th>parentFeatureId</th>
 							</tr>
 							<tr th:each="feature : ${features}">
 								<td><span th:text="${feature.featureId}"></span></td>
 								<td><span th:text="${feature.featureName}"></span></td>
 								<td><span th:text="${feature.description}"></span></td>
+								<td><span th:text="${feature.parentFeatureId}"></span></td>
 							</tr>
 						</table>
 					</div>
