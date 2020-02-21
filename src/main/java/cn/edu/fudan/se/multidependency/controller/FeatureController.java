@@ -27,7 +27,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanStartWithFunction;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.JaegerService;
-import cn.edu.fudan.se.multidependency.service.spring.OrganizationService;
+import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.SpanWithFunctions;
 
 @Controller
@@ -41,12 +41,12 @@ public class FeatureController {
 	private JaegerService jaegerService;
 
 	@Autowired
-	private OrganizationService organizationService;
+	private FeatureOrganizationService featureOrganizationService;
 
 	@GetMapping("/all")
 	@ResponseBody
 	public List<Feature> findAllFeatures() {
-		return organizationService.allFeatures();
+		return featureOrganizationService.allFeatures();
 	}
 
 	@GetMapping("/index1")
@@ -62,12 +62,11 @@ public class FeatureController {
 	@GetMapping("/testcase/cytoscape")
 	@ResponseBody
 	public JSONObject executedByTestCasesToCytoscape() {
-		System.out.println("/feature/testcase/cytoscape");
 		JSONObject result = new JSONObject();
 		try {
 			result.put("result", "success");
-			System.out.println(organizationService.featureExecuteTestCasesToCytoscape());
-			result.put("value", organizationService.featureExecuteTestCasesToCytoscape());
+			System.out.println(featureOrganizationService.featureExecuteTestCasesToCytoscape());
+			result.put("value", featureOrganizationService.featureExecuteTestCasesToCytoscape());
 		} catch (Exception e) {
 			result.put("result", "fail");
 			result.put("msg", e.getMessage());
@@ -78,11 +77,10 @@ public class FeatureController {
 	@GetMapping("/testcase/treeview")
 	@ResponseBody
 	public JSONObject executedByTestCasesToTreeView() {
-		System.out.println("/feature/testcase/treeview");
 		JSONObject result = new JSONObject();
 		try {
 			result.put("result", "success");
-			result.put("value", organizationService.featureExecutedByTestCasesToTreeView());
+			result.put("value", featureOrganizationService.featureExecutedByTestCasesToTreeView());
 		} catch (Exception e) {
 			result.put("result", "fail");
 			result.put("msg", e.getMessage());
@@ -95,10 +93,10 @@ public class FeatureController {
 	public JSONObject toCytoscapeAll() {
 		JSONObject result = new JSONObject();
 		try {
-			Set<Trace> traces = organizationService.findRelatedTracesForFeature(organizationService.allFeatures());
+			Set<Trace> traces = featureOrganizationService.findRelatedTracesForFeature(featureOrganizationService.allFeatures());
 			Trace[] traceArray = new Trace[traces.size()];
 			traces.toArray(traceArray);
-			JSONObject value = organizationService.microServiceToCytoscape(true, traceArray);
+			JSONObject value = featureOrganizationService.microServiceToCytoscape(true, traceArray);
 			result.put("result", "success");
 			result.put("removeUnuseMicroService", true);
 			result.put("value", value.getJSONObject("value"));
@@ -117,10 +115,10 @@ public class FeatureController {
 		JSONObject result = new JSONObject();
 		try {
 			Feature feature = dynamicAnalyseService.findFeatureById(id);
-			Set<Trace> traces = organizationService.findRelatedTracesForFeature(feature);
+			Set<Trace> traces = featureOrganizationService.findRelatedTracesForFeature(feature);
 			Trace[] traceArray = new Trace[traces.size()];
 			traces.toArray(traceArray);
-			JSONObject value = organizationService.microServiceToCytoscape(true, traceArray);
+			JSONObject value = featureOrganizationService.microServiceToCytoscape(true, traceArray);
 			result.put("result", "success");
 			result.put("removeUnuseMicroService", true);
 			result.put("value", value.getJSONObject("value"));
@@ -139,10 +137,10 @@ public class FeatureController {
 		JSONObject result = new JSONObject();
 		try {
 			TestCase testcase = dynamicAnalyseService.findTestCaseById(id);
-			Set<Trace> traces = organizationService.findRelatedTracesForTestCases(testcase);
+			Set<Trace> traces = featureOrganizationService.findRelatedTracesForTestCases(testcase);
 			Trace[] traceArray = new Trace[traces.size()];
 			traces.toArray(traceArray);
-			JSONObject value = organizationService.microServiceToCytoscape(true, traceArray);
+			JSONObject value = featureOrganizationService.microServiceToCytoscape(true, traceArray);
 			result.put("result", "success");
 			result.put("removeUnuseMicroService", true);
 			result.put("value", value.getJSONObject("value"));
@@ -161,7 +159,7 @@ public class FeatureController {
 		JSONObject result = new JSONObject();
 		try {
 			Trace trace = jaegerService.findTraceById(id);
-			JSONObject value = organizationService.microServiceToCytoscape(true, trace);
+			JSONObject value = featureOrganizationService.microServiceToCytoscape(true, trace);
 			result.put("detail", value.getJSONObject("detail"));
 			result.put("result", "success");
 			result.put("removeUnuseMicroService", true);
@@ -193,7 +191,7 @@ public class FeatureController {
 					if(temp == null) {
 						throw new Exception("请输入正确的featureId");
 					}
-					Feature feature = organizationService.findFeatureById(temp);
+					Feature feature = featureOrganizationService.findFeatureById(temp);
 					if(feature == null) {
 						throw new Exception("没有featureId为 " + featureId + " 的Feature");
 					}

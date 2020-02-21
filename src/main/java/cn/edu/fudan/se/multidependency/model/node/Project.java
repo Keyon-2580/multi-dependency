@@ -8,7 +8,6 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.model.node.testcase.Bug;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -42,7 +41,7 @@ public class Project implements Node {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("language", language.toString());
+		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		properties.put("projectName", getProjectName() == null ? "" : getProjectName());
 		properties.put("projectPath", getProjectPath() == null ? "" : getProjectPath());
 		return properties;

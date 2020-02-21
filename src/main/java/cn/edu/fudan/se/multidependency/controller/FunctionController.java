@@ -27,7 +27,7 @@ import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanSt
 import cn.edu.fudan.se.multidependency.service.spring.DependencyOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.JaegerService;
-import cn.edu.fudan.se.multidependency.service.spring.OrganizationService;
+import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.SpanWithFunctions;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 
@@ -42,7 +42,7 @@ public class FunctionController {
 	private JaegerService jaegerService;
 
 	@Autowired
-	private OrganizationService organizationService;
+	private FeatureOrganizationService organizationService;
 	
 	@Autowired
 	private StaticAnalyseService staticAnalyseService;

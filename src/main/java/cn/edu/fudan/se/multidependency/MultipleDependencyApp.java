@@ -9,18 +9,22 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
+import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.JaegerService;
-import cn.edu.fudan.se.multidependency.service.spring.OrganizationService;
+import cn.edu.fudan.se.multidependency.service.spring.ProjectOrganizationService;
+import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 
 @SpringBootApplication
 @EnableNeo4jRepositories(basePackages = {"cn.edu.fudan.se.multidependency.repository"})
@@ -30,9 +34,21 @@ public class MultipleDependencyApp {
 //		InsertDataMain.insert(args);
 		SpringApplication.run(MultipleDependencyApp.class, args);
 	}
+	
+	@Bean 
+	public ProjectOrganizationService organizeProject(StaticAnalyseService staticAnalyseService, DynamicAnalyseService dynamicAnalyseService) {
+		List<Project> projects = staticAnalyseService.findAllProjects();
+		Map<Project, List<FunctionDynamicCallFunction>> dynamicCalls = new HashMap<>();
+		for(Project project : projects) {
+			List<FunctionDynamicCallFunction> calls = dynamicAnalyseService.findFunctionDynamicCallsByProject(project);
+			dynamicCalls.put(project, calls);
+		}
+		ProjectOrganizationService organization = new ProjectOrganizationService(projects, dynamicCalls);
+		return organization;
+	}
 
 	@Bean
-	public OrganizationService organize(JaegerService jaegerService, DynamicAnalyseService dynamicAnalyseService) {
+	public FeatureOrganizationService organize(JaegerService jaegerService, DynamicAnalyseService dynamicAnalyseService) {
 		Map<TestCase, List<TestCaseExecuteFeature>> testCaseExecuteFeatures = dynamicAnalyseService.findAllTestCaseExecuteFeatures();
 		Map<Feature, List<TestCaseExecuteFeature>> featureExecutedByTestCases = dynamicAnalyseService.findAllFeatureExecutedByTestCases();
 		Map<TestCase, List<TestCaseRunTrace>> testCaseRunTraces = dynamicAnalyseService.findAllTestCaseRunTraces();
@@ -54,7 +70,7 @@ public class MultipleDependencyApp {
 				}
 			}
 		}
-		OrganizationService organization = new OrganizationService(
+		FeatureOrganizationService organization = new FeatureOrganizationService(
 				allMicroService, testCaseExecuteFeatures, featureExecutedByTestCases, 
 				testCaseRunTraces, traceToSpans, spanCallSpans, spanBelongToMicroService);
 

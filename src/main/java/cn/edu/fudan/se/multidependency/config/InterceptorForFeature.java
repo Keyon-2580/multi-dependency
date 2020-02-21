@@ -7,13 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import cn.edu.fudan.se.multidependency.service.spring.OrganizationService;
+import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 
 @Configuration
 public class InterceptorForFeature implements HandlerInterceptor {
 
 	@Autowired
-	private OrganizationService organizationService;
+	private FeatureOrganizationService organizationService;
 	
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)

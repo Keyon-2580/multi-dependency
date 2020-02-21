@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.JaegerService;
-import cn.edu.fudan.se.multidependency.service.spring.OrganizationService;
+import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 
 @Controller
@@ -23,7 +23,7 @@ public class DynamicController {
 	private JaegerService jaegerService;
 
 	@Autowired
-	private OrganizationService organizationService;
+	private FeatureOrganizationService organizationService;
 	
 	@Autowired
 	private StaticAnalyseService staticAnalyseService;

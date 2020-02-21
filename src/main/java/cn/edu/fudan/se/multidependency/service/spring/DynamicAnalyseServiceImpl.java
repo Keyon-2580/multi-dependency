@@ -140,18 +140,15 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	public List<FunctionDynamicCallFunction> findFunctionDynamicCallsByMicroService(MicroService ms) {
 		List<FunctionDynamicCallFunction> result = new ArrayList<>();
 		List<Project> projects = containRepository.findMicroServiceContainProject(ms.getId());
-		Project project = null;
-		if(projects.size() > 0) {
-			project = projects.get(0);
-			return findFunctionDynamicCallsByProject(project);
-		} else {
-			return result;
+		for(Project project : projects) {
+			result.addAll(findFunctionDynamicCallsByProject(project));
 		}
+		return result;
 	}
 
 	@Override
 	public List<FunctionDynamicCallFunction> findFunctionDynamicCallsByProject(Project project) {
-		return functionDynamicCallFunctionRepository.findFunctionCallsByProjectName(project.getProjectName());
+		return functionDynamicCallFunctionRepository.findFunctionCallsByProjectNameAndLanguage(project.getProjectName(), project.getLanguage());
 	}
 
 	@Override

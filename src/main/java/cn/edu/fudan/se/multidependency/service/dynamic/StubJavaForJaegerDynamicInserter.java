@@ -81,7 +81,7 @@ public class StubJavaForJaegerDynamicInserter extends DynamicInserterForNeo4jSer
 							continue;
 						}
 						FunctionDynamicCallFunction relation = new FunctionDynamicCallFunction(callerFunction,
-								calledFunction, calledDynamicFunction.getProject());
+								calledFunction, calledDynamicFunction.getProject(), calledDynamicFunction.getLanguage());
 						relation.setTraceId(callerDynamicFunction.getTraceId());
 						relation.setSpanId(callerDynamicFunction.getSpanId());
 						relation.setOrder(callerDynamicFunction.getOrder() + ":" + callerDynamicFunction.getDepth()

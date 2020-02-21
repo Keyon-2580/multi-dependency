@@ -1,91 +1,5 @@
 var graphIdToResult = new Map();
-var showTreeView = function(containerDivId, data) {
-	containerDivId.treeview({
-		data : data,
-		showTags : true,
-		levels: 1
-	});
-};
-var showDataInCatoscape = function(container, elements, layout="breadthfirst"){
-	var cy = cytoscape({
-    	container: container,
-    	layout: {
-    		name: layout
-    	},
-    	style: [
-    		{
-    			selector: 'node',
-    			style: {
-    				'height': 30,
-    				'width': 30,
-    				'background-color': 'green',
-					'content': 'data(name)'
-    			}
-    		},
-    		{
-    			selector: 'node[type="file"]',
-    			style: {
-    				'height': 30,
-    				'width': 30,
-    				'background-color': 'green',
-					'content': 'data(name)'
-    			}
-    		},
-    		{
-    			selector: 'node[type="package"]',
-    			style: {
-    				'height': 30,
-    				'width': 30,
-    				'background-color': 'red',
-					'content': 'data(name)'
-    			}
-    		},
-    		{
-    			selector: 'node[type="feature"]',
-    			style: {
-    				'height': 15,
-    				'width': 15,
-    				'background-color': 'red',
-					'content': 'data(value)'
-    			}
-    		},
-    		{
-    			selector: 'node[type="testcase"]',
-    			style: {
-    				'height': 15,
-    				'width': 15,
-    				'background-color': 'green',
-					'content': 'data(value)'
-    			}
-    		},
-			{
-    			selector: 'edge',
-    			style: {
-//    				'content': 'data(value)',
-    				'curve-style': 'bezier',
-    				'width': 1,
-    				'line-color': 'green',
-                    'target-arrow-shape': 'triangle',
-                    'target-arrow-color': 'green'
-    			}
-    		},
-			{
-    			selector: 'edge[type="contain"]',
-    			style: {
-//    				'content': 'data(value)',
-    				'curve-style': 'bezier',
-    				'width': 1,
-    				'line-color': 'red',
-                    'target-arrow-shape': 'triangle',
-                    'target-arrow-color': 'red',
-                    'color': 'red'
-    			}
-    		}
-    	],
-    	elements: elements
-    });
-	
-};
+
 var showMicroServiceInCatoscape = function(elements, container, nodeGraphId, btnInit = null, btnBack = null, btnAnimate = null){
 	var cy = cytoscape({
     	container: container,
@@ -249,6 +163,7 @@ var showMicroServiceInCatoscape = function(elements, container, nodeGraphId, btn
 	})
 	
 };
+
 var showMicroServiceForFeature = function(id, container) {
     $.ajax({
     	type: 'GET',
@@ -263,6 +178,7 @@ var showMicroServiceForFeature = function(id, container) {
     	}
     });
 }
+
 var showMicroServiceForTestCase = function(id, container) {
     $.ajax({
     	type: 'GET',
@@ -277,6 +193,7 @@ var showMicroServiceForTestCase = function(id, container) {
     	}
     });
 }
+
 var showMicroServiceForTrace = function(id, container, btnInit, btnBack, btnAnimate) {
     $.ajax({
     	type: 'GET',
@@ -292,6 +209,7 @@ var showMicroServiceForTrace = function(id, container, btnInit, btnBack, btnAnim
     	}
     });
 }
+
 var showMicroServiceAll = function(id, container) {
     $.ajax({
     	type: 'GET',
@@ -367,6 +285,7 @@ var toHTML = function(nodeType, nodeGraphId, cytoscapeDiv) {
 		showMicroServiceAll(nodeGraphId, $("#div_cytoscape_content"))
 	}
 }
+
 var itemOnclick = function (target){
 	if(null != target.innerText && "" != target.innerText){
 //		console.log($(target));

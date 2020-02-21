@@ -47,7 +47,7 @@
 		{
 			"id" : 1,
 			"name" : "查票-00",
-			"input" : "blablablablah",
+			"input" : "",
 			"success" : true,
 			"features" : [
 				1
@@ -59,7 +59,7 @@
 		{
 			"id" : 2,
 			"name" : "订票1",
-			"input" : "blablablablah",
+			"input" : "",
 			"success" : true,
 			"features" : [
 				2
@@ -71,7 +71,7 @@
 		{
 			"id" : 3,
 			"name" : "查询所有保险1",
-			"input" : "blablablablah",
+			"input" : "",
 			"success" : true,
 			"features" : [
 				3
@@ -83,7 +83,7 @@
 		{
 			"id" : 4,
 			"name" : "查询所有食物1",
-			"input" : "blablablablah",
+			"input" : "",
 			"success" : true,
 			"features" : [
 				4
@@ -95,7 +95,7 @@
 		{
 			"id" : 5,
 			"name" : "查询账户所有联系方式1",
-			"input" : "blablablablah",
+			"input" : "",
 			"success" : true,
 			"features" : [
 				5

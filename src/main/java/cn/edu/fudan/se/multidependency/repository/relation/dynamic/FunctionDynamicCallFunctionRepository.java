@@ -36,7 +36,7 @@ public interface FunctionDynamicCallFunctionRepository extends Neo4jRepository<F
 	@Query("match p = ()-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->() where r.traceId={traceId} return p")
 	List<FunctionDynamicCallFunction> findFunctionCallsByTraceId(@Param("traceId") String traceId);
 
-	@Query("match p = ()-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->() where r.projectName={projectName} return p")
-	List<FunctionDynamicCallFunction> findFunctionCallsByProjectName(@Param("projectName") String projectName);
+	@Query("match p = ()-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->() where r.projectName={projectName} and r.language={language} return p")
+	List<FunctionDynamicCallFunction> findFunctionCallsByProjectNameAndLanguage(@Param("projectName") String projectName, @Param("language") String language);
 	
 }

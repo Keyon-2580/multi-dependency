@@ -28,11 +28,12 @@ public class FunctionDynamicCallFunction implements Relation {
 	@EndNode
 	private Function callFunction;
 	
-	public FunctionDynamicCallFunction(Function function, Function callFunction, String projectName) {
+	public FunctionDynamicCallFunction(Function function, Function callFunction, String projectName, String language) {
 		super();
 		this.function = function;
 		this.callFunction = callFunction;
 		this.projectName = projectName;
+		this.language = language;
 	}
 
 	@Id
@@ -40,6 +41,8 @@ public class FunctionDynamicCallFunction implements Relation {
     private Long id;
 	
 	private String projectName;
+	
+	private String language;
 	
 	private String order;
 	
@@ -74,6 +77,7 @@ public class FunctionDynamicCallFunction implements Relation {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("projectName", getProjectName() == null ? "" : getProjectName());
+		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		properties.put("order", getOrder() == null ? "" : getOrder());
 		properties.put("traceId", getTraceId() == null ? "" : getTraceId());
 		properties.put("spanId", getSpanId() == null ? "" : getSpanId());

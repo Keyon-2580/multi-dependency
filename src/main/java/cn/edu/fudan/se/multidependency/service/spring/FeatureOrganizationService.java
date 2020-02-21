@@ -23,7 +23,7 @@ import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCa
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class OrganizationService {
+public class FeatureOrganizationService {
 	
 	private final Map<String, MicroService> allMicroService;
 	private final Map<TestCase, List<TestCaseExecuteFeature>> testCaseExecuteFeatures;

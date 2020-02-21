@@ -4,26 +4,17 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>首页</title>
-<script type="text/javascript"
-	th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
-<script type="text/javascript"
-	th:src="@{/js/import/popper-1.14.7.min.js}"></script>
-<script type="text/javascript"
-	th:src="@{/js/import/bootstrap/bootstrap-3.3.2.min.js}"></script>
-<script type="text/javascript"
-	th:src="@{/js/import/bootstrap/bootstrap-multiselect-0.9.15.js}"></script>
-<script type="text/javascript"
-	th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/popper-1.14.7.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-3.3.2.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-multiselect-0.9.15.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/util.js}"></script>
 <script type="text/javascript" th:src="@{/js/newfeature.js}"></script>
-<script type="text/javascript"
-	th:src="@{/js/import/bootstrap/bootstrap-treeview.min.js}"></script>
-<script src="https://cdn.bootcss.com/jsPlumb/2.6.8/js/jsplumb.min.js"></script>
-<link rel="stylesheet"
-	th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
-<link rel="stylesheet"
-	th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
-<link rel="stylesheet"
-	th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
+<script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-treeview.min.js}"></script>
+<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
+<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
+<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
 <style type="text/css">
 .div_cytoscape_content {
 	height: 600px;
@@ -84,7 +75,10 @@
 					<h3 id="title">feature executes testcases</h3>
 				</div>
 				<div id="graph" class="div_cytoscape_content"></div>
-				<div id="all" class="div_cytoscape_content"></div>
+				<div>
+					<h3 id="title">所有Feature相关的微服务</h3>
+				</div>
+				<div id="all"></div>
 			</div>
 		</div>
 	</div>
