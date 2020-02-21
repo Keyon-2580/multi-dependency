@@ -1,8 +1,6 @@
-//<![CDATA[
-var featureIdToMicroService = new Map();
-var featureIdToResult = new Map();
-var features = null;
-var showMicroServiceInCatoscape = function(elements, container, featureId, btnInit = null, btnBack = null, btnAnimate = null){
+var graphIdToResult = new Map();
+
+var showMicroServiceInCytoscape = function(elements, container, nodeGraphId, btnInit = null, btnBack = null, btnAnimate = null){
 	var cy = cytoscape({
     	container: container,
     	layout: {
@@ -80,7 +78,7 @@ var showMicroServiceInCatoscape = function(elements, container, featureId, btnIn
 		btnAnimate.click(function(){
 			var count = 0;
 			cy.remove('edge');
-			var result = featureIdToResult.get(featureId);
+			var result = graphIdToResult.get(nodeGraphId);
 			var detail = result.detail;
 			var datas = new Array();
 			for(var sourceId in detail){
@@ -125,38 +123,13 @@ var showMicroServiceInCatoscape = function(elements, container, featureId, btnIn
 			cy.add(last);
 		});
 	}
-	cy.on('tap', 'node', function(evt){
-		var result = featureIdToResult.get(featureId);
-		if(result == null || result.detail == null || result.traceId == null){
-			alert("featureId错误");
-			return ;
-		}
-		var node = evt.target;
-		console.log(result);
-		console.log(node);
-		console.log(node.data());
-		$.ajax({
-	    	type: 'GET',
-	    	url: "/feature/show/function/microservice?microserviceId=" + node.data().id + "&traceId=" + result.traceId,
-	    	success: function(result) {
-	    		console.log(result);
-		    	if(result.result == "success") {
-		    		
-		    	}
-	    	}
-	    });
-	});
 	cy.on('tap', 'edge', function(evt){
-		var result = featureIdToResult.get(featureId);
-		if(result == null || result.detail == null){
-			alert("featureId错误");
+		if(btnBack == null){
 			return ;
 		}
+		var result = graphIdToResult.get(nodeGraphId);
 		var edge = evt.target;
 		if(edge.data().type == "order") {
-			// 弹出详细调用
-			console.log(edge.data());
-			
 			return;
 		}
 		var sourceId = edge.source().id();
@@ -190,74 +163,180 @@ var showMicroServiceInCatoscape = function(elements, container, featureId, btnIn
 	})
 	
 };
-var showMicroService = function(featureId, container, btnInit, btnBack, btnAnimate) {
+
+var showMicroServiceForFeature = function(id, container) {
     $.ajax({
     	type: 'GET',
-    	url: "/feature/show/microservice/" + featureId + "?removeUnuseMicroService=true",
+    	url: "/feature/microservicecall/feature?featureGraphId=" + id,
     	success: function(result) {
     		console.log(result);
 	    	if(result.result == "success") {
-	    		featureIdToResult.set(featureId, result);
+	    		graphIdToResult.set(id, result);
 	    		var elements = result.value;
-	    		var microservices = new Map();
-	    		for(var i = 0; i < result.microservice.length; i++) {
-	    			microservices.set(result.microservice[i].id, {
-	    				id : result.microservice[i].id,
-	    				name : result.microservice[i].name,
-	    				folder : true
-	    			});
-	    		}
-	    		featureIdToMicroService.set(featureId, microservices);
-	    		console.log(featureIdToMicroService);
-	    		showMicroServiceInCatoscape(elements, container, featureId, btnInit, btnBack, btnAnimate);
+	    		showMicroServiceInCytoscape(elements, container, id);
 	    	}
     	}
     });
 }
-var featureToHTML = function(featureIds, cytoscapeDiv) {
-	var html = "";
-	console.log(featureIds);
-	console.log(features);
-	var featureNames = features[featureIds[0]].featureName;
-	for(var i = 1; i < featureIds.length; i++) {
-		featureNames += ", " + features[featureIds[i]].featureName;
-	}
-	if(featureIds.length > 1) {
-		html += "<div class='col-sm-12'><h3>Feature: " + featureNames + "</h3></div><div class='col-sm-12 div_cytoscape_content' id='div_cytoscape_content'></div>";
-	}
-	for(var i = 0; i < featureIds.length; i++) {
-		html += "<div class='col-sm-12'><h3>Feature: " + features[featureIds[i]].featureName + "</h3>" +
-				"</div>" +
-				"<div class='col-sm-12' style='margin-bottom:10px;'>" +
-				"<div class='col-sm-1'><button class='btn btn-default' id='btn_animate_" + i + "'>流程</button></div>" +
-				"<div class='col-sm-1'><button class='btn btn-default' id='btn_init_" + i + "'>初始</button></div>" +
-				"<div class='col-sm-1'><button class='btn btn-default' id='btn_back_" + i + "'>返回上一歩</button></div>" +
-				"</div>" +
-				"<div class='col-sm-12 div_cytoscape_content' id='div_cytoscape_content_" + i + "'></div>";
-	}
-	cytoscapeDiv.html(html);
-	if(featureIds.length > 1) {
-		showMicroService(featureIds, $("#div_cytoscape_content"));
-	}
-	for(var i = 0; i < featureIds.length; i++) {
-		showMicroService(featureIds[i], $("#div_cytoscape_content_" + i), $("#btn_init_" + i), $("#btn_back_" + i), $("#btn_animate_" + i));
-	}
-}
-var featureIndex = function(featuresFromServer, cytoscapeDiv) {
-	features = featuresFromServer;
-    $('#features-select').multiselect({
-    	includeSelectAllOption: true
-    });
-    $("#featuresSelectedConfirm").click(function(e){
-    	var featureIds = $("#features-select").val();
-    	console.log(featureIds);
-    	if(featureIds.length == 0) {
-    		return;
+
+var showMicroServiceForTestCase = function(id, container) {
+    $.ajax({
+    	type: 'GET',
+    	url: "/feature/microservicecall/testcase?testcaseGraphId=" + id,
+    	success: function(result) {
+    		console.log(result);
+	    	if(result.result == "success") {
+	    		graphIdToResult.set(id, result);
+	    		var elements = result.value;
+	    		showMicroServiceInCytoscape(elements, container, id);
+	    	}
     	}
-    	featureToHTML(featureIds, cytoscapeDiv);
     });
-    cytoscapeDiv.html("<div class='col-sm-12'><h3>All Feature</h3></div><div class='col-sm-12 div_cytoscape_content' id='div_cytoscape_content'></div>");
-    showMicroService("all", $("#div_cytoscape_content"));
-    
 }
-// ]]>
+
+var showMicroServiceForTrace = function(id, container, btnInit, btnBack, btnAnimate) {
+    $.ajax({
+    	type: 'GET',
+    	url: "/feature/microservicecall/trace?traceGraphId=" + id,
+    	success: function(result) {
+    		console.log(result);
+	    	if(result.result == "success") {
+	    		console.log(result);
+	    		graphIdToResult.set(id, result);
+	    		var elements = result.value;
+	    		showMicroServiceInCytoscape(elements, container, id, btnInit, btnBack, btnAnimate);
+	    	}
+    	}
+    });
+}
+
+var showMicroServiceAll = function(id, container) {
+    $.ajax({
+    	type: 'GET',
+    	url: "/feature/microservicecall/all",
+    	success: function(result) {
+    		console.log(result);
+	    	if(result.result == "success") {
+	    		console.log(result);
+	    		graphIdToResult.set(id, result);
+	    		console.log(graphIdToResult)
+	    		var elements = result.value;
+	    		showMicroServiceInCytoscape(elements, container, id);
+	    	}
+    	}
+    });
+}
+
+var featureInit = function() {
+	showFeatureToTestCasesTreeView($("#tree"));
+	showFeatureToTestCasesCytoscape($("#graph"));
+};
+
+var showFeatureToTestCasesTreeView = function(containerDivId) {
+	$.ajax({
+    	type: 'GET',
+    	url: "/feature/testcase/treeview",
+    	success: function(result) {
+    		console.log(result);
+	    	if(result.result == "success") {
+	    		console.log(result.value)
+	    		showTreeView(containerDivId, result.value);
+	    	}
+    	}
+    });
+};
+
+var showFeatureToTestCasesCytoscape = function(containerDivId) {
+	$.ajax({
+    	type: 'GET',
+    	url: "/feature/testcase/cytoscape",
+    	success: function(result) {
+    		console.log(result);
+	    	if(result.result == "success") {
+	    		console.log(result.value)
+	    		showDataInCytoscape(containerDivId, result.value, "grid")
+	    	}
+    	}
+    });
+}
+var toHTML = function(nodeType, nodeGraphId, cytoscapeDiv) {
+	var html = "";
+	if(nodeType == "trace") {
+		html += 
+			"<div class='col-sm-12' style='margin-bottom:10px;'>" +
+			"<div class='col-sm-1'><button class='btn btn-default' id='btn_animate'>流程</button></div>" +
+			"<div class='col-sm-1'><button class='btn btn-default' id='btn_init'>初始</button></div>" +
+			"<div class='col-sm-1'><button class='btn btn-default' id='btn_back'>返回上一歩</button></div>" +
+			"</div>" +
+			"<div class='col-sm-12 div_cytoscape_content' id='div_cytoscape_content'></div>";
+		cytoscapeDiv.html(html);
+		showMicroServiceForTrace(nodeGraphId, $("#div_cytoscape_content"), $("#btn_init"), $("#btn_back"), $("#btn_animate"))
+	} else if(nodeType == "testcase") {
+		html = "<div class='col-sm-12 div_cytoscape_content' id='div_cytoscape_content'></div>";
+		cytoscapeDiv.html(html);
+		showMicroServiceForTestCase(nodeGraphId, $("#div_cytoscape_content"))
+	} else if(nodeType == "feature") {
+		html = "<div class='col-sm-12 div_cytoscape_content' id='div_cytoscape_content'></div>";
+		cytoscapeDiv.html(html);
+		showMicroServiceForFeature(nodeGraphId, $("#div_cytoscape_content"))
+	} else if(nodeType == "all") {
+		html = "<div class='col-sm-12 div_cytoscape_content' id='div_cytoscape_content'></div>";
+		cytoscapeDiv.html(html);
+		showMicroServiceAll(nodeGraphId, $("#div_cytoscape_content"))
+	}
+}
+
+var itemOnclick = function (target){
+	if(null != target.innerText && "" != target.innerText){
+//		console.log($(target));
+//		console.log($($(target).parent().parent()[0]).attr("id"));
+		var targetDivId = $($(target).parent().parent()[0]).attr("id");
+//		console.log(targetDivId);
+		var nodeId = $(target).attr("data-nodeid");
+		var node = $("#" + targetDivId).treeview('getNode', $(target).attr("data-nodeid"));
+		var nodeType = node.tags[0];
+		var tagId = node.href;
+		if(nodeType == "trace") {
+    		$("#graph").html("");
+    		$("#graph").attr("class", "");
+    		$("#table").hide();
+    		$("#title").text("微服务调用")
+			toHTML("trace", tagId, $("#graph"));
+		}
+		if(nodeType == "testcase") {
+    		$("#graph").html("");
+    		$("#graph").attr("class", "");
+    		$("#table").hide();
+    		$("#title").text("微服务调用")
+			toHTML("testcase", tagId, $("#graph"));
+		}
+		if(nodeType == "feature") {
+    		$("#graph").html("");
+    		$("#graph").attr("class", "");
+    		$("#table").hide();
+    		$("#title").text("微服务调用")
+			toHTML("feature", tagId, $("#graph"));
+		}
+		if(nodeType == "span") {
+			var spanId = tagId;
+			$.ajax({
+		    	type: 'GET',
+		    	url: "/function/treeview/span?spanGraphId=" + tagId,
+		    	success: function(result) {
+		    		console.log(result);
+			    	if(result.result == "success") {
+			    		$("#graph").html("");
+			    		$("#graph").attr("class", "");
+			    		$("#table").hide();
+			    		$("#title").text("内部函数调用")
+			    		$("#graph").treeview({
+			    			data : result.value,
+			    			showTags : true,
+			    			levels: 1
+			    		});
+			    	}
+		    	}
+		    });
+		}
+	}
+}

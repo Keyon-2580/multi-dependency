@@ -20,7 +20,7 @@ var project = function(graph) {
 	    	success: function(result) {
 	    		console.log(result);
 		    	if(result.result == "success") {
-		    		showDataInCatoscape($("#graph"), result.value);
+		    		showDataInCytoscape($("#graph"), result.value);
 		    	} else {
 		    		alert(result.msg);
 		    	}

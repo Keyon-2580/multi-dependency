@@ -25,8 +25,8 @@ public class InsertController {
 	@Autowired
 	private YamlConfig yaml;
 	
-	@Autowired
-	private InserterForNeo4j repositorySerivce;
+//	@Autowired
+//	private InserterForNeo4j repositorySerivce;
 	
 	@Bean
 	private InserterForNeo4j getRepository(YamlConfig yaml) throws Exception {

@@ -5,8 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,10 +24,8 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCal
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanStartWithFunction;
 import cn.edu.fudan.se.multidependency.service.spring.DependencyOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
-import cn.edu.fudan.se.multidependency.service.spring.JaegerService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
-import cn.edu.fudan.se.multidependency.service.spring.SpanWithFunctions;
-import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
+import cn.edu.fudan.se.multidependency.service.spring.JaegerService;
 
 @Controller
 @RequestMapping("/function")
@@ -45,16 +41,7 @@ public class FunctionController {
 	private FeatureOrganizationService organizationService;
 	
 	@Autowired
-	private StaticAnalyseService staticAnalyseService;
-	
-	@Autowired
 	private DependencyOrganizationService dependencyOrganizationService;
-	
-	@GetMapping("/index")
-	public String index(HttpServletRequest request) {		
-		request.setAttribute("features", organizationService.allFeatures());
-		return "function";
-	}
 	
 	private List<Function> test(Function startFunction, List<FunctionDynamicCallFunction> calls, Long depth) {
 		List<Function> result = new ArrayList<>();
@@ -95,8 +82,34 @@ public class FunctionController {
 		return result;
 	}
 	
+	@GetMapping("/treeview/span")
+	@ResponseBody
+	public JSONObject dynamicFunctionToTreeView(@RequestParam("spanGraphId") Long spanGraphId) {
+		JSONObject result = new JSONObject();
+		try {
+			JSONArray functionArray = new JSONArray();
+			
+			Span span = jaegerService.findSpanById(spanGraphId);
+			System.out.println(span);
+			SpanStartWithFunction spanStartWithFunction = jaegerService.findSpanStartWithFunctionByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
+			System.out.println(spanStartWithFunction);
+			System.out.println(spanStartWithFunction.getFunction());
+			List<FunctionDynamicCallFunction> spanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
+			System.out.println(spanFunctionCalls.size());
+			functionArray.add(test1(spanStartWithFunction.getFunction(), spanFunctionCalls, 0L));
+			result.put("result", "success");
+			result.put("value", functionArray);
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
+		return result;
+	}
+	
 	@GetMapping("/cytoscape/file")
 	@ResponseBody
+	@Deprecated
 	public JSONObject dynamicFileCallFromMicroServiceInOneTraceToCatoscape(
 			@RequestParam("microserviceGraphId") Long microserviceGraphId, 
 			@RequestParam(required=false, name="traceId") String traceId,
@@ -135,35 +148,9 @@ public class FunctionController {
 		return result;
 	}
 	
-	@GetMapping("/treeview/span")
-	@ResponseBody
-	public JSONObject dynamicFunctionToTreeView(@RequestParam("spanGraphId") Long spanGraphId) {
-		JSONObject result = new JSONObject();
-		try {
-			JSONArray functionArray = new JSONArray();
-			
-			Span span = jaegerService.findSpanById(spanGraphId);
-			System.out.println(span);
-			SpanStartWithFunction spanStartWithFunction = jaegerService.findSpanStartWithFunctionByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
-			System.out.println(spanStartWithFunction);
-			System.out.println(spanStartWithFunction.getFunction());
-			List<FunctionDynamicCallFunction> spanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
-			System.out.println(spanFunctionCalls.size());
-			SpanWithFunctions spanWithFunctions = new SpanWithFunctions(spanStartWithFunction, spanFunctionCalls);
-			functionArray.add(test1(spanStartWithFunction.getFunction(), spanFunctionCalls, 0L));
-			result.put("result", "success");
-			result.put("value", functionArray);
-		} catch (Exception e) {
-			e.printStackTrace();
-			result.put("result", "fail");
-			result.put("msg", e.getMessage());
-		}
-		return result;
-	}
-	
-	
 	@GetMapping("/treeview")
 	@ResponseBody
+	@Deprecated
 	public JSONObject toTreeView() {
 		JSONObject result = new JSONObject();
 		try {

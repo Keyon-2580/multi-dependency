@@ -62,6 +62,7 @@ public class ProjectController {
 			@RequestParam("projectId") Long projectId,
 			@RequestParam("dependency") String dependency,
 			@RequestParam("level") String level) {
+		System.out.println("/project/cytoscape");
 		JSONObject result = new JSONObject();
 		try {
 			Project project = projectOrganizationService.findProjectById(projectId);
@@ -77,6 +78,7 @@ public class ProjectController {
 					result.put("value", dependencyOrganizationService.directoryCallToCytoscape());
 				}
 			}
+			System.out.println(result.get("value"));
 			if(result.get("value") == null) {
 				throw new Exception("结果暂无");
 			}
