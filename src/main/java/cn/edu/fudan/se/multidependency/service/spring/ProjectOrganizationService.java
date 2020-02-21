@@ -1,5 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -7,19 +9,13 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
-import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
-import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
-import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
-import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
-import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class ProjectOrganizationService {
 	
-	private List<Project> projects;
+	private Map<Long, Project> projects;
 	
 	private Map<Project, List<FunctionDynamicCallFunction>> dynamicCalls;
 
@@ -38,7 +34,7 @@ public class ProjectOrganizationService {
 	public JSONArray projectsToTreeView() {
 		JSONArray result = new JSONArray();
 		
-		for(Project project : projects) {
+		for(Project project : allProjects()) {
 //			List<TestCaseExecuteFeature> executes = featureExecutedByTestCases.get(feature);
 //			JSONObject featureJson = new JSONObject();
 //			featureJson.put("text", feature.getFeatureId() + ":" + feature.getFeatureName());
@@ -62,6 +58,21 @@ public class ProjectOrganizationService {
 		}
 		
 		
+		return result;
+	}
+	
+	public Project findProjectById(Long id) {
+		return projects.get(id);
+	}
+	
+	public List<Project> allProjects() {
+		List<Project> result = new ArrayList<>(projects.values());
+		result.sort(new Comparator<Project>() {
+			@Override
+			public int compare(Project o1, Project o2) {
+				return o1.getProjectName().compareTo(o2.getProjectName());
+			}
+		});
 		return result;
 	}
 	

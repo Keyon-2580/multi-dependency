@@ -120,7 +120,7 @@ public class FunctionController {
 			if(type == null || "file".equals(type)) {
 				result.put("value", dependencyOrganizationService.fileCallToCytoscape());
 			} else if("package".equals(type)) {
-				result.put("value", dependencyOrganizationService.packageCallToCytoscape());
+				result.put("value", dependencyOrganizationService.directoryCallToCytoscape());
 			} else if("function".equals(type)) {
 				result.put("value", dependencyOrganizationService.functionCallToCytoscape());
 			} else if("fileAndPackage".equals(type)) {

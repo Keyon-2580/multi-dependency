@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.List;
+import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
@@ -11,7 +12,7 @@ import cn.edu.fudan.se.multidependency.model.relation.code.TypeExtendsType;
 
 public interface StaticAnalyseService {
 	
-	public List<Project> findAllProjects();
+	public Map<Long, Project> findAllProjects();
 	
 	public List<Type> findAllTypes();
 	

@@ -7,6 +7,7 @@ var showTreeView = function(containerDivId, data) {
 };
 
 var showDataInCatoscape = function(container, elements, layout="breadthfirst"){
+	console.log(elements);
 	var cy = cytoscape({
     	container: container,
     	layout: {

@@ -1,8 +1,9 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -149,20 +150,12 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
-	public List<Project> findAllProjects() {
+	public Map<Long, Project> findAllProjects() {
 		Iterable<Project> projects = projectRepository.findAll();
-		List<Project> result = new ArrayList<>();
-		for(Project p : projects) {
-			result.add(p);
+		Map<Long, Project> result = new HashMap<>();
+		for(Project project : projects) {
+			result.put(project.getId(), project);
 		}
-		result.sort(new Comparator<Project>() {
-
-			@Override
-			public int compare(Project o1, Project o2) {
-				return o1.getProjectName().compareTo(o2.getProjectName());
-			}
-			
-		});
 		return result;
 	}
 }

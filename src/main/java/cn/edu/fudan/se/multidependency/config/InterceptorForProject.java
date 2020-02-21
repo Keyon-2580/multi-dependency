@@ -18,7 +18,7 @@ public class InterceptorForProject implements HandlerInterceptor {
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-		request.setAttribute("projects", staticAnalyseService.findAllProjects());
+		request.setAttribute("projects", staticAnalyseService.findAllProjects().values());
 		return HandlerInterceptor.super.preHandle(request, response, handler);
 	}
 

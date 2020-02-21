@@ -32,14 +32,74 @@
 		</div>
 		<div class="col-sm-9">
 			<div id="content">
-				<div id="title"></div>			
-				<div id="graph" class="div_cytoscape_content"></div>
+				<div class="form-group col-sm-12 row">
+					<div class="col-sm-6 row">
+						<div class="col-sm-3">
+							<label>项目选择：</label>
+						</div>
+						<div class="col-sm-9">
+							<select id="project_select" >
+								<option th:each="project:${projects}" th:value="${project.id}" 
+									th:text="${project.projectName + ' ( ' + project.language + ' ) '}"> </option>
+							</select>
+						</div>
+					</div>
+				</div>			
+				<div class="form-group col-sm-12 row">
+					<div class="col-sm-6 row">
+						<div class="col-sm-3">
+							<label>依赖类型：</label>
+						</div>
+						<div class="col-sm-3">
+							<label><input type="radio" name="dependency" value="static" />&nbsp;&nbsp;静态</label>
+						</div>
+						<div class="col-sm-3">
+							<label><input type="radio" name="dependency" value="dynamic" />&nbsp;&nbsp;动态</label>
+						</div>
+						<div class="col-sm-3">
+							<label><input type="radio" name="dependency" value="all" />&nbsp;&nbsp;all</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group col-sm-12 row">
+					<div class="col-sm-6 row">
+						<div class="col-sm-3">
+							<label>级别：</label>
+						</div>
+						<div class="col-sm-3">
+							<label><input type="radio" name="level" value="directory" />&nbsp;&nbsp;目录</label>
+						</div>
+						<div class="col-sm-3">
+							<label><input type="radio" name="level" value="file" />&nbsp;&nbsp;文件</label>
+						</div>
+						<div class="col-sm-3">
+							<label><input type="radio" name="level" value="all" />&nbsp;&nbsp;all</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-7 row">
+						<div class="col-sm-4">
+							<button class="btn btn-default" id="search">查询</button>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-12 row" style="margin-top:15px;">
+					<div>
+						<div id="graph" class="div_cytoscape_content"></div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
 	<script type="text/javascript" th:inline="javascript">
 	//<![CDATA[
 		$(document).ready(function() {
+			console.log([[${projects}]]);
+			$('#project_select').multiselect({
+		    	includeSelectAllOption: true
+		    });
+			
 			project();
 		});
 	// ]]>

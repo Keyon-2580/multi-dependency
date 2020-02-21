@@ -37,9 +37,9 @@ public class MultipleDependencyApp {
 	
 	@Bean 
 	public ProjectOrganizationService organizeProject(StaticAnalyseService staticAnalyseService, DynamicAnalyseService dynamicAnalyseService) {
-		List<Project> projects = staticAnalyseService.findAllProjects();
+		Map<Long, Project> projects = staticAnalyseService.findAllProjects();
 		Map<Project, List<FunctionDynamicCallFunction>> dynamicCalls = new HashMap<>();
-		for(Project project : projects) {
+		for(Project project : projects.values()) {
 			List<FunctionDynamicCallFunction> calls = dynamicAnalyseService.findFunctionDynamicCallsByProject(project);
 			dynamicCalls.put(project, calls);
 		}

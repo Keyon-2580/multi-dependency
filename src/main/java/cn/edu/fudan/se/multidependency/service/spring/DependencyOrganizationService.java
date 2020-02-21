@@ -165,7 +165,7 @@ public class DependencyOrganizationService {
 		return result;
 	}
 	
-	public JSONObject packageCallToCytoscape() {
+	public JSONObject directoryCallToCytoscape() {
 		JSONObject result = new JSONObject();
 		JSONArray nodes = new JSONArray();
 		JSONArray edges = new JSONArray();
