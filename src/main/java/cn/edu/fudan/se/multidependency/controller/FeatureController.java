@@ -61,6 +61,20 @@ public class FeatureController {
 		return result;
 	}
 	
+	@GetMapping("/testcaseToFeature/treeview")
+	@ResponseBody
+	public JSONObject executeFeaturesToTreeView() {
+		JSONObject result = new JSONObject();
+		try {
+			result.put("result", "success");
+			result.put("value", featureOrganizationService.testcaseExecuteFeaturesToTreeView());
+		} catch (Exception e) {
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
+		return result;
+	}
+	
 	@GetMapping("/testcase/treeview")
 	@ResponseBody
 	public JSONObject executedByTestCasesToTreeView() {

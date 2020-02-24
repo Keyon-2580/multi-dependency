@@ -88,6 +88,34 @@ public class FeatureOrganizationService {
 		return result;
 	}
 	
+	public JSONArray testcaseExecuteFeaturesToTreeView() {
+		JSONArray result = new JSONArray();
+		List<TestCase> testcases = allTestCases();
+		for(TestCase testcase : testcases) {
+			List<TestCaseExecuteFeature> executes = testCaseExecuteFeatures.get(testcase);
+			JSONObject testcaseJson = new JSONObject();
+			testcaseJson.put("text", testcase.getTestCaseId() + ":" + testcase.getTestCaseName());
+			JSONArray tags = new JSONArray();
+			tags.add("testcase");
+			testcaseJson.put("tags", tags);
+			testcaseJson.put("href", testcase.getId());
+			
+			JSONArray features = new JSONArray();
+			for(TestCaseExecuteFeature execute : executes) {
+				JSONObject featureJson = new JSONObject();
+				featureJson.put("text", execute.getFeature().getFeatureId() + ":" + execute.getFeature().getFeatureName());
+				tags = new JSONArray();
+				tags.add("feature");
+				featureJson.put("tags", tags);
+				featureJson.put("href", execute.getFeature().getId());
+				features.add(featureJson);
+			}
+			testcaseJson.put("nodes", features);
+			result.add(testcaseJson);
+		}
+		return result;
+	}
+	
 	public JSONArray featureExecutedByTestCasesToTreeView() {
 		JSONArray result = new JSONArray();
 		List<Feature> features = allFeatures();

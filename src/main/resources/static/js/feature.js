@@ -228,8 +228,23 @@ var showMicroServiceAll = function(id, container) {
 }
 
 var featureInit = function() {
-	showFeatureToTestCasesTreeView($("#tree"));
+	showFeatureToTestCasesTreeView($("#treeForFeature"));
+	showTestCaseToFeaturesTreeView($("#treeForTestCase"));
 	showFeatureToTestCasesCytoscape($("#graph"));
+};
+
+var showTestCaseToFeaturesTreeView = function(containerDivId) {
+	$.ajax({
+    	type: 'GET',
+    	url: "/feature/testcaseToFeature/treeview",
+    	success: function(result) {
+    		console.log(result);
+	    	if(result.result == "success") {
+	    		console.log(result.value)
+	    		showTreeView(containerDivId, result.value);
+	    	}
+    	}
+    });
 };
 
 var showFeatureToTestCasesTreeView = function(containerDivId) {
@@ -310,13 +325,13 @@ var itemOnclick = function (target){
     		$("#title").text("微服务调用")
 			toHTML("testcase", tagId, $("#graph"));
 		}
-		if(nodeType == "feature") {
+		/*if(nodeType == "feature") {
     		$("#graph").html("");
     		$("#graph").attr("class", "");
     		$("#table").hide();
     		$("#title").text("微服务调用")
 			toHTML("feature", tagId, $("#graph"));
-		}
+		}*/
 		if(nodeType == "span") {
 			var spanId = tagId;
 			$.ajax({
