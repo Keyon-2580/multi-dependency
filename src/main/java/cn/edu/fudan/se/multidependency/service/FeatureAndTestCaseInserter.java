@@ -70,6 +70,7 @@ public class FeatureAndTestCaseInserter extends ExtractorForNodesAndRelationsImp
 			testcase.setInputContent(testcaseTemp.get("input").toString());
 			testcase.setSuccess(testcaseTemp.getBooleanValue("success"));
 			testcase.setTestCaseName(testcaseTemp.getString("name"));
+			testcase.setDescription(testcaseTemp.getString("description"));
 			addNode(testcase, null);
 			
 			JSONArray featureIds = testcaseTemp.getJSONArray("features");

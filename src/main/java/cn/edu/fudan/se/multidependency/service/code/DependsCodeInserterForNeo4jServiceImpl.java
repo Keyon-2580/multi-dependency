@@ -10,8 +10,6 @@ import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
-import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
-import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.code.FunctionCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.code.FunctionCastType;
 import cn.edu.fudan.se.multidependency.model.relation.code.FunctionParameterType;
@@ -31,8 +29,10 @@ import depends.entity.repo.EntityRepo;
 
 public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeInserterForNeo4jServiceImpl {
 	
-	public DependsCodeInserterForNeo4jServiceImpl(String projectPath, EntityRepo entityRepo, Language language) {
-		super(projectPath, language);
+	public DependsCodeInserterForNeo4jServiceImpl(
+			String projectPath, String projectName, EntityRepo entityRepo, 
+			Language language, boolean isMicroservice, String serviceGroupName) {
+		super(projectPath, projectName, language, isMicroservice, serviceGroupName);
 		this.entityRepo = entityRepo;
 		setCurrentEntityId(entityRepo.generateId().longValue());
 	}
@@ -46,16 +46,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 	@Override
 	public void addNodesAndRelations() {
 		try {
-			currentProject.setEntityId(entityRepo.generateId().longValue());
-			/// FIXME
-			// 暂定每个project是一个微服务
-			MicroService microService = new MicroService();
-			microService.setEntityId(entityRepo.generateId().longValue());
-			microService.setName(currentProject.getProjectName());
-			addNodeToNodes(currentProject, currentProject.getEntityId(), currentProject);
-			addNodeToNodes(microService, microService.getEntityId(), null);
-			Contain contain = new Contain(microService, currentProject);
-			addRelation(contain);
+			super.addNodesAndRelations();
 			addNodesWithContainRelations();
 			addRelations();
 		} catch (LanguageErrorException e) {

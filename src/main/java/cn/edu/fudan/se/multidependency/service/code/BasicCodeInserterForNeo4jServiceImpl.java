@@ -3,8 +3,9 @@ package cn.edu.fudan.se.multidependency.service.code;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
+import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelationsImpl;
-import cn.edu.fudan.se.multidependency.utils.FileUtils;
 
 /**
  * @author fan
@@ -12,16 +13,18 @@ import cn.edu.fudan.se.multidependency.utils.FileUtils;
  */
 public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForNodesAndRelationsImpl {
 	
-	public BasicCodeInserterForNeo4jServiceImpl(String projectPath, Language language) {
+	public BasicCodeInserterForNeo4jServiceImpl(String projectPath, String projectName, Language language, boolean isMicroservice, String serviceGroupName) {
 		super();
-		this.language = language;
-		String projectName = FileUtils.extractFileName(projectPath);
-		currentProject = new Project(projectName, "/" + projectName, language);
+		this.isMicroservice = isMicroservice;
+		this.serviceGroupName = serviceGroupName;
+		this.currentProject = new Project(projectName, "/" + projectName, language);
 	}
 
 	protected Project currentProject;
 	
-	protected Language language;
+	protected boolean isMicroservice;
+	
+	protected String serviceGroupName;
 	
 	protected void addNodeToNodes(Node node, Long entityId, Project inProject) {
 		if(node.getEntityId().longValue() != entityId.longValue()) {
@@ -34,10 +37,19 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForN
 		addNode(node, inProject);
 	}
 	
-	public abstract void addNodesAndRelations();
-	
-	public void setLanguage(Language language) {
-		this.language = language;
+	@Override
+	public void addNodesAndRelations() {
+		currentProject.setEntityId(generateEntityId().longValue());
+		addNodeToNodes(currentProject, currentProject.getEntityId(), currentProject);
+		if(isMicroservice) {
+			MicroService microService = new MicroService();
+			microService.setEntityId(generateEntityId().longValue());
+			microService.setName(currentProject.getProjectName());
+			microService.setServiceGroupName(serviceGroupName);
+			addNodeToNodes(microService, microService.getEntityId(), null);
+			Contain contain = new Contain(microService, currentProject);
+			addRelation(contain);
+		}
 	}
-
+	
 }

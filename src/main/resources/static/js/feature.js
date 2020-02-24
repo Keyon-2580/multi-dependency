@@ -254,7 +254,7 @@ var showFeatureToTestCasesCytoscape = function(containerDivId) {
     		console.log(result);
 	    	if(result.result == "success") {
 	    		console.log(result.value)
-	    		showDataInCytoscape(containerDivId, result.value, "grid")
+	    		showDataInCytoscape(containerDivId, result.value, "breadthfirst")
 	    	}
     	}
     });

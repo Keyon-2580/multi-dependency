@@ -62,9 +62,9 @@ public class FeatureOrganizationService {
 				nodes.add(testcaseNode);
 				
 				JSONObject executeData = new JSONObject();
-				executeData.put("id", feature.getId() + "_" + testcase.getId());
-				executeData.put("source", feature.getId());
-				executeData.put("target", testcase.getId());
+				executeData.put("id", testcase.getId() + "_" + feature.getId());
+				executeData.put("source", testcase.getId());
+				executeData.put("target", feature.getId());
 				JSONObject executeEdge = new JSONObject();
 				executeEdge.put("data", executeData);
 				edges.add(executeEdge);
@@ -134,6 +134,7 @@ public class FeatureOrganizationService {
 							spanJson.put("text", span.getOperationName());
 							tags = new JSONArray();
 							tags.add("span");
+							tags.add(span.getOrder());
 							spanJson.put("tags", tags);
 							spanJson.put("href", span.getId());
 							spansArray.add(spanJson);

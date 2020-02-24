@@ -24,10 +24,11 @@ import depends.relations.Inferer;
 
 public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl {
 
-	public JavaInsertServiceImpl(String projectPath, EntityRepo entityRepo, Language language) {
-		super(projectPath, entityRepo, language);
+	public JavaInsertServiceImpl(String projectPath, String projectName, EntityRepo entityRepo, Language language,
+			boolean isMicroservice, String serviceGroupName) {
+		super(projectPath, projectName, entityRepo, language, isMicroservice, serviceGroupName);
 	}
-	
+
 	@Override
 	protected void addNodesWithContainRelations() throws LanguageErrorException {
 		final String projectPath = currentProject.getProjectPath();

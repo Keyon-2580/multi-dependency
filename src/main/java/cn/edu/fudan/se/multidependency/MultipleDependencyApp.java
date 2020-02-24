@@ -49,13 +49,13 @@ public class MultipleDependencyApp {
 
 	@Bean
 	public FeatureOrganizationService organize(JaegerService jaegerService, DynamicAnalyseService dynamicAnalyseService) {
-		Map<TestCase, List<TestCaseExecuteFeature>> testCaseExecuteFeatures = dynamicAnalyseService.findAllTestCaseExecuteFeatures();
+		Map<String, MicroService> allMicroService = jaegerService.findAllMicroService();
 		Map<Feature, List<TestCaseExecuteFeature>> featureExecutedByTestCases = dynamicAnalyseService.findAllFeatureExecutedByTestCases();
+		Map<TestCase, List<TestCaseExecuteFeature>> testCaseExecuteFeatures = dynamicAnalyseService.findAllTestCaseExecuteFeatures();
 		Map<TestCase, List<TestCaseRunTrace>> testCaseRunTraces = dynamicAnalyseService.findAllTestCaseRunTraces();
 		Map<Trace, List<Span>> traceToSpans = new HashMap<>();
 		Map<Span, List<SpanCallSpan>> spanCallSpans = new HashMap<>();
 		Map<Span, MicroServiceCreateSpan> spanBelongToMicroService = new HashMap<>();
-		Map<String, MicroService> allMicroService = jaegerService.findAllMicroService();
 		Map<Feature, Feature> featureToParentFeature = dynamicAnalyseService.findAllFeatureToParentFeature();
 		
 		for (List<TestCaseRunTrace> runs : testCaseRunTraces.values()) {

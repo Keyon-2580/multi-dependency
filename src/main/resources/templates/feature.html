@@ -60,12 +60,14 @@
 								<th>testcaseName</th>
 								<th>success</th>
 								<th>inputContent</th>
+								<th>description</th>
 							</tr>
 							<tr th:each="testcase : ${testcases}">
 								<td><span th:text="${testcase.testCaseId}"></span></td>
 								<td><span th:text="${testcase.testCaseName}"></span></td>
 								<td><span th:text="${testcase.success}"></span></td>
 								<td><span th:text="${testcase.inputContent}"></span></td>
+								<td><span th:text="${testcase.description}"></span></td>
 							</tr>
 						</table>
 					</div>
@@ -74,7 +76,7 @@
 
 			<div id="content">
 				<div>
-					<h3 id="title">feature executes testcases</h3>
+					<h3 id="title">TestCase executes Features</h3>
 				</div>
 				<div id="graph" class="div_cytoscape_content"></div>
 				<div>

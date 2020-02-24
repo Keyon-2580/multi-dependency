@@ -155,11 +155,14 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	@Override
 	public Map<TestCase, List<TestCaseExecuteFeature>> findAllTestCaseExecuteFeatures() {
 		Map<TestCase, List<TestCaseExecuteFeature>> result = new HashMap<>();
+		Iterable<TestCase> testcases = testCaseRepository.findAll();
+		for(TestCase t : testcases) {
+			result.put(t, new ArrayList<>());
+		}
 		Iterable<TestCaseExecuteFeature> testCaseExecuteFeatures = testCaseExecuteFeatureRepository.findAll();
 		for(TestCaseExecuteFeature testCaseExecuteFeature : testCaseExecuteFeatures) {
 			TestCase testcase = testCaseExecuteFeature.getTestCase();
 			List<TestCaseExecuteFeature> executes = result.get(testcase);
-			executes = executes == null ? new ArrayList<>() : executes;
 			executes.add(testCaseExecuteFeature);
 			result.put(testcase, executes);
 		}
@@ -169,11 +172,14 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	@Override
 	public Map<Feature, List<TestCaseExecuteFeature>> findAllFeatureExecutedByTestCases() {
 		Map<Feature, List<TestCaseExecuteFeature>> result = new HashMap<>();
+		Iterable<Feature> features = featureRepository.findAll();
+		for(Feature feature : features) {
+			result.put(feature, new ArrayList<>());
+		}
 		Iterable<TestCaseExecuteFeature> testCaseExecuteFeatures = testCaseExecuteFeatureRepository.findAll();
 		for(TestCaseExecuteFeature testCaseExecuteFeature : testCaseExecuteFeatures) {
 			Feature feature = testCaseExecuteFeature.getFeature();
 			List<TestCaseExecuteFeature> executes = result.get(feature);
-			executes = executes == null ? new ArrayList<>() : executes;
 			executes.add(testCaseExecuteFeature);
 			result.put(feature, executes);
 		}
@@ -183,11 +189,14 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	@Override
 	public Map<TestCase, List<TestCaseRunTrace>> findAllTestCaseRunTraces() {
 		Map<TestCase, List<TestCaseRunTrace>> result = new HashMap<>();
+		Iterable<TestCase> testcases = testCaseRepository.findAll();
+		for(TestCase t : testcases) {
+			result.put(t, new ArrayList<>());
+		}
 		Iterable<TestCaseRunTrace> testCaseRunTraces = testCaseRunTraceRepository.findAll();
 		for(TestCaseRunTrace tt : testCaseRunTraces) {
 			TestCase t = tt.getTestCase();
 			List<TestCaseRunTrace> runs = result.get(t);
-			runs = runs == null ? new ArrayList<>() : runs;
 			runs.add(tt);
 			result.put(t, runs);
 		}

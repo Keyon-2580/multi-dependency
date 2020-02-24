@@ -1,11 +1,16 @@
 package cn.edu.fudan.se.multidependency;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelationsImpl;
@@ -13,7 +18,6 @@ import cn.edu.fudan.se.multidependency.service.FeatureAndTestCaseInserter;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4jServiceFactory;
 import cn.edu.fudan.se.multidependency.service.RepositoryService;
-import cn.edu.fudan.se.multidependency.service.build.BuildInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractorImpl;
 import cn.edu.fudan.se.multidependency.service.dynamic.DynamicInserterForNeo4jService;
@@ -30,7 +34,7 @@ public class InsertDataMain {
 	public static void main(String[] args) throws Exception {
 		insert(args);
 	}
-
+	
 	public static void insert(String[] args) {
 		try {
 			YamlUtils.YamlObject yaml = null;
@@ -42,52 +46,67 @@ public class InsertDataMain {
 			InserterForNeo4j repository = RepositoryService.getInstance();
 			repository.setDatabasePath(yaml.getNeo4jDatabasePath());
 			repository.setDelete(yaml.isDeleteDatabase());
-			String rootDirectoryPath = yaml.getRootPath();
-			File rootDirectory = new File(rootDirectoryPath);
-			List<File> projectDirectories = new ArrayList<>();
-			FileUtils.listDirectories(rootDirectory, yaml.getDepth(), projectDirectories);
-
+			
 			/**
 			 * 静态分析
 			 */
-			for (File projectDirectory : projectDirectories) {
-				for (String l : yaml.getAnalyseLanguages()) {
-					Language language = Language.valueOf(l);
-					System.out.println("静态分析，项目：" + projectDirectory.getName() + "，语言：" + language);
-					LOGGER.info("静态分析，项目：" + projectDirectory.getName() + "，语言：" + language);
-					DependsEntityRepoExtractor extractor = DependsEntityRepoExtractorImpl.getInstance();
-					extractor.setLanguage(language);
-					extractor.setProjectPath(projectDirectory.getAbsolutePath());
-					EntityRepo entityRepo = extractor.extractEntityRepo();
-					if (extractor.getEntityCount() > 0) {
-						InserterForNeo4jServiceFactory.getInstance()
-								.createCodeInserterService(projectDirectory.getAbsolutePath(), entityRepo, language)
-								.addNodesAndRelations();
-					}
+			String projectsConfig = yaml.getProjectsConfig();
+			StringBuilder projectsJson = new StringBuilder();
+			try(BufferedReader reader = new BufferedReader(new FileReader(new File(projectsConfig)))) {
+				String line = "";
+				while((line = reader.readLine()) != null) {
+					projectsJson.append(line);
 				}
 			}
+			JSONArray projectsArray = JSONObject.parseArray(projectsJson.toString());
+			
+			for(int i = 0; i < projectsArray.size(); i++) {
+				JSONObject projectJson = projectsArray.getJSONObject(i);
+				Language language = Language.valueOf(projectJson.getString("language"));
+				String projectPath = projectJson.getString("path");
+				boolean isMicroservice = projectJson.getBooleanValue("isMicroservice");
+				String serviceGroupName = projectJson.getString("serviceGroupName");
+				serviceGroupName = serviceGroupName == null ? "" : serviceGroupName;
+				String projectName = projectJson.getString("project");
+				
+				System.out.println("静态分析，项目：" + projectName + "，语言：" + language);
+				LOGGER.info("静态分析，项目：" + projectName + "，语言：" + language);
+				
+				DependsEntityRepoExtractor extractor = DependsEntityRepoExtractorImpl.getInstance();
+				extractor.setLanguage(language);
+				extractor.setProjectPath(projectPath);
+				EntityRepo entityRepo = extractor.extractEntityRepo();
+				if (extractor.getEntityCount() > 0) {
+					InserterForNeo4jServiceFactory.getInstance()
+							.createCodeInserterService(projectPath, projectName, entityRepo, language, isMicroservice, serviceGroupName)
+							.addNodesAndRelations();
+				}
+			}
+			
 			/**
 			 * 构建分析
 			 */
-			if (yaml.isAnalyseBuild()) {
+			/*if (yaml.isAnalyseBuild()) {
 				System.out.println("构建分析");
 				insertBuildInfo(yaml);
-			}
-			
-			// 从下载下来的json文件提取
-//			JSONObject featureJson = JSONUtil.extractJson(new File("src/main/resources/features/Feature3.json"));
-			String featuresJsonPath = "src/main/resources/features/train-ticket/features.json";
-			ExtractorForNodesAndRelationsImpl jaegerExtractor = null;
-			File betweenServiceDirectory = new File("src/main/resources/train-ticket");
-			for(File f : betweenServiceDirectory.listFiles()) {
-				if(f.isFile()) {
-					jaegerExtractor = new JaegerTraceInserterFromJSONFile(f.getAbsolutePath());
-					jaegerExtractor.addNodesAndRelations();
+			}*/
+
+			boolean extractFromMicroService = true;
+			if(extractFromMicroService) {
+				ExtractorForNodesAndRelationsImpl jaegerExtractor = null;
+				File callBetweenServiceDirectory = new File("src/main/resources/dynamic/microservice/train-ticket");
+				if(callBetweenServiceDirectory.exists() && callBetweenServiceDirectory.isDirectory()) {
+					for(File f : callBetweenServiceDirectory.listFiles()) {
+						if(f.isFile()) {
+							jaegerExtractor = new JaegerTraceInserterFromJSONFile(f.getAbsolutePath());
+							jaegerExtractor.addNodesAndRelations();
+						}
+					}
 				}
+				String featuresJsonPath = "src/main/resources/features/train-ticket/features.json";
+				ExtractorForNodesAndRelationsImpl featureExtractor = new FeatureAndTestCaseInserter(featuresJsonPath);
+				featureExtractor.addNodesAndRelations();
 			}
-			
-			ExtractorForNodesAndRelationsImpl featureExtractor = new FeatureAndTestCaseInserter(featuresJsonPath);
-			featureExtractor.addNodesAndRelations();
 
 			/**
 			 * 动态分析
@@ -108,8 +127,7 @@ public class InsertDataMain {
 
 	public static void insertDynamicFromStub(YamlUtils.YamlObject yaml) throws Exception {
 		String[] dynamicFileSuffixes = null;
-		for (String l : yaml.getAnalyseLanguages()) {
-			Language language = Language.valueOf(l);
+		for (Language language : Language.values()) {
 			if (language == Language.java) {
 				dynamicFileSuffixes = new String[yaml.getDynamicJavaFileSuffix().size()];
 				yaml.getDynamicJavaFileSuffix().toArray(dynamicFileSuffixes); // 后缀为.log
@@ -127,7 +145,7 @@ public class InsertDataMain {
 		}
 	}
 	
-	public static void insertBuildInfo(YamlUtils.YamlObject yaml) throws Exception {
+	/*public static void insertBuildInfo(YamlUtils.YamlObject yaml) throws Exception {
 		for (String l : yaml.getAnalyseLanguages()) {
 			Language language = Language.valueOf(l);
 			if (language != Language.cpp) {
@@ -139,5 +157,5 @@ public class InsertDataMain {
 			buildInserter.setBuildInfoFile(buildInfoFile);
 			buildInserter.addNodesAndRelations();
 		}
-	}
+	}*/
 }

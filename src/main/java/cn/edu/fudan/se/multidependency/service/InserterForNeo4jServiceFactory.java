@@ -19,12 +19,13 @@ public class InserterForNeo4jServiceFactory {
 		return instance;
 	}
 	
-	public ExtractorForNodesAndRelations createCodeInserterService(String projectPath, EntityRepo entityRepo, Language language) throws Exception {
+	public ExtractorForNodesAndRelations createCodeInserterService(String projectPath, String projectName, 
+			EntityRepo entityRepo, Language language, boolean isMicroservice, String serviceGroupName) throws Exception {
 		switch(language) {
 		case java:
-			return new JavaInsertServiceImpl(projectPath, entityRepo, language);
+			return new JavaInsertServiceImpl(projectPath, projectName, entityRepo, language, isMicroservice, serviceGroupName);
 		case cpp:
-			return new CppInsertServiceImpl(projectPath, entityRepo, language);
+			return new CppInsertServiceImpl(projectPath, projectName, entityRepo, language, isMicroservice, serviceGroupName);
 		}
 		throw new Exception("程序语言不为java或c/c++，提取失败");
 	}

@@ -23,8 +23,9 @@ import depends.entity.repo.EntityRepo;
 
 public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl {
 
-	public CppInsertServiceImpl(String projectPath, EntityRepo entityRepo, Language language) {
-		super(projectPath, entityRepo, language);
+	public CppInsertServiceImpl(String projectPath, String projectName, EntityRepo entityRepo, Language language,
+			boolean isMicroservice, String serviceGroupName) {
+		super(projectPath, projectName, entityRepo, language, isMicroservice, serviceGroupName);
 	}
 
 	@Override

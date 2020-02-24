@@ -35,16 +35,6 @@ public class ProjectOrganizationService {
 		JSONArray result = new JSONArray();
 		
 		for(Project project : allProjects()) {
-//			List<TestCaseExecuteFeature> executes = featureExecutedByTestCases.get(feature);
-//			JSONObject featureJson = new JSONObject();
-//			featureJson.put("text", feature.getFeatureId() + ":" + feature.getFeatureName());
-//			JSONArray tags = new JSONArray();
-//			tags.add("feature");
-//			featureJson.put("tags", tags);
-//			featureJson.put("href", feature.getId());
-//			
-//			featureJson.put("nodes", testCases);
-//			result.add(featureJson);
 			JSONObject projectJson = new JSONObject();
 			JSONArray tags = new JSONArray();
 			tags.add("project");

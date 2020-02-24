@@ -27,6 +27,8 @@ public class MicroService implements Node {
 
     private Long entityId;
     
+    private String serviceGroupName;
+    
     /**
      * 名字在数据库中唯一
      */
@@ -37,6 +39,7 @@ public class MicroService implements Node {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? "" : getEntityId());
 		properties.put("name", getName() == null ? "" : getName());
+		properties.put("serviceGroupName", getServiceGroupName() == null ? "" : getServiceGroupName());
 		return properties;
 	}
 

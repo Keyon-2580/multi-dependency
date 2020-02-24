@@ -28,14 +28,8 @@ public class YamlUtils {
 		Map<?, ?> yaml = (Map<?, ?>) Yaml.load(file);
 		yaml = (Map<?, ?>) Yaml.load(file);
 		String databasePath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("neo4j")).get("path");
-		String projectPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("code")).get("path");
-		
-		List<String> languages = (List<String>) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("code")).get("languages");
-		
 		String forTest = (String) ((Map<?, ?>) yaml.get("data")).get("test");
 		result.setNeo4jDatabasePath(databasePath);
-		result.setAnalyseLanguages(languages);
-		result.setCodeProjectPath(projectPath);
 		result.setForTest(forTest);
 		String dynamicDirectoryRootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("directory_root_path");
 		String dynamicMarkSuffix = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("dynamic_mark_suffix");
@@ -55,21 +49,16 @@ public class YamlUtils {
 		result.setAnalyseDynamic(analyseDynamic);
 		boolean delete = (boolean) ((Map<?, ?>) yaml.get("data")).get("delete");
 		result.setDeleteDatabase(delete);
-		int depth = (int) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("code")).get("depth");
-		result.setDepth(depth);
-		String rootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("code")).get("rootPath");
-		result.setRootPath(rootPath);
+		String rootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("projects")).get("config");
+		result.setProjectsConfig(rootPath);
 		return result;
 	}
 	
 	@Data
 	public static class YamlObject {
-		private String rootPath;
-		private int depth;
+		private String projectsConfig;
 		private boolean deleteDatabase;
 		private String neo4jDatabasePath;
-		private String codeProjectPath;
-		private List<String> analyseLanguages;
 		private String forTest;
 		private String dynamicDirectoryRootPath;
 		private List<String> dynamicJavaFileSuffix;

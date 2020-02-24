@@ -1,0 +1,259 @@
+[{
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-admin-basic-info-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-admin-basic-info-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-admin-order-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-admin-order-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-admin-route-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-admin-route-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-admin-travel-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-admin-travel-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-admin-user-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-admin-user-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-assurance-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-assurance-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-auth-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-auth-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-basic-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-basic-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-cancel-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-cancel-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-common",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-common",
+	"language": "java",
+	"isMicroservice": false
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-config-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-config-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-consign-price-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-consign-price-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-consign-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-consign-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-contacts-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-contacts-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-execute-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-execute-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-food-map-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-food-map-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-food-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-food-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-inside-payment-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-inside-payment-service",
+	"language": "java",
+	"isMicroservice": true
+}, /*{
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-news-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-news-service",
+	"language": "go",
+	"isMicroservice": true
+},*/ {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-notification-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-notification-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-order-other-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-order-other-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-order-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-order-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-payment-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-payment-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-preserve-other-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-preserve-other-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-preserve-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-preserve-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-price-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-price-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-rebook-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-rebook-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-route-plan-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-route-plan-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-route-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-route-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-seat-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-seat-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-security-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-security-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-station-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-station-service",
+	"language": "java",
+	"isMicroservice": true
+}, /*{
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-ticket-office-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-ticket-office-service",
+	"language": "java",
+	"isMicroservice": true
+},*/ {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-ticketinfo-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-ticketinfo-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-train-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-train-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-travel-plan-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-travel-plan-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-travel-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-travel-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-travel2-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-travel2-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-ui-dashboard",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-ui-dashboard",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-ui-test",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-ui-test",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-user-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-user-service",
+	"language": "java",
+	"isMicroservice": true
+}, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-verification-code-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-verification-code-service",
+	"language": "java",
+	"isMicroservice": true
+}/*, {
+	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-voucher-service",
+	"serviceGroupName": "train-ticket",
+	"project": "ts-voucher-service",
+	"language": "java",
+	"isMicroservice": true
+}*/]

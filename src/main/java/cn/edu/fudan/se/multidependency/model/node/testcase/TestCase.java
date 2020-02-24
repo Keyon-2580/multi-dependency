@@ -35,6 +35,8 @@ public class TestCase implements Node {
     
     private Long testCaseId;
     
+    private String description;
+    
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
@@ -43,6 +45,7 @@ public class TestCase implements Node {
 		properties.put("success", isSuccess());
 		properties.put("inputContent", getInputContent() == null ? "" : getInputContent());
 		properties.put("testCaseId", getTestCaseId() == null ? -1 : getTestCaseId());
+		properties.put("description", getDescription() == null ? "" : getDescription());
 		return properties;
 	}
 

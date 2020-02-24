@@ -107,6 +107,7 @@ public class JavaStubDynamicExtractorUtil {
 			return functionExecution;
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.err.println(sentence);
 			return null;
 		}
 	}

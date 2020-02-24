@@ -1,0 +1,9 @@
+[
+	{
+		"path": "D:\\multiple-dependency-project\\depends",
+		"project": "depends",
+		"language": "java",
+		"isMicroservice": false
+	}
+	
+]

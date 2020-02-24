@@ -1,12 +1,45 @@
 package cn.edu.fudan.se.multidependency.utils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 public class FileUtils {
+	
+	public static void main(String[] args) {
+		JSONArray array = readDirectoryToGenerateProjectJSONFile(
+				new File("D:\\multiple-dependency-project\\train-ticket"), 1, "java", true, "train-ticket");
+		System.out.println(array);
+	}
+	
+	public static JSONArray readDirectoryToGenerateProjectJSONFile(
+			File rootDirectory, int depth, String defaultLanguage, 
+			boolean isAllMicroservice, String serviceGroupName) {
+		JSONArray result = new JSONArray();
+		List<File> projectDirectories = new ArrayList<>();
+		FileUtils.listDirectories(rootDirectory, depth, projectDirectories);
+		
+		for(File projectDirectory : projectDirectories) {
+			JSONObject projectJson = new JSONObject();
+			
+			projectJson.put("project", projectDirectory.getName());
+			projectJson.put("path", projectDirectory.getAbsolutePath());
+			projectJson.put("language", defaultLanguage == null ? "" : defaultLanguage);
+			projectJson.put("isMicroservice", isAllMicroservice);
+			if(isAllMicroservice && serviceGroupName != null) {
+				projectJson.put("serviceGroupName", serviceGroupName);
+			}
+			result.add(projectJson);
+		}
+		
+		return result;
+	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
 	
