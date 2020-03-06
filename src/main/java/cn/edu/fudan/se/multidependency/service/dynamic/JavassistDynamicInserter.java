@@ -2,11 +2,7 @@ package cn.edu.fudan.se.multidependency.service.dynamic;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -24,8 +20,9 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
+import cn.edu.fudan.se.multidependency.utils.TimeUtil;
 
-public class JavassistDynamicInserter extends StubJavaForJaegerDynamicInserter {
+public class JavassistDynamicInserter extends JavaDynamicInserter {
 
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
@@ -49,17 +46,6 @@ public class JavassistDynamicInserter extends StubJavaForJaegerDynamicInserter {
 	private Map<Span, String> spanToCallMethod = new HashMap<>();
 	
 	private Map<String, String> spanIdToParentSpanId = new HashMap<>();
-	
-	public static Long changeTimeStrToLong(String time) {
-		SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
-		Long result = -1L;
-		try {
-			result = sim.parse(time).getTime();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}		
-		return result;
-	}
 	
 	private void extractMicroServiceCall() throws Exception {
 		for(File file : dynamicFunctionCallFiles) {
@@ -92,7 +78,7 @@ public class JavassistDynamicInserter extends StubJavaForJaegerDynamicInserter {
 						span.setApiFunctionName(json.getString("function"));
 						String serviceName = json.getString("project");
 						span.setServiceName(serviceName);
-						span.setTime(changeTimeStrToLong(json.getString("time")));
+						span.setTime(TimeUtil.changeTimeStrToLong(json.getString("time")));
 						spanToCallMethod.put(span, json.getString("callMethod"));
 						
 						Project project = this.getNodes().findProjectByNameAndLanguage(serviceName, "java");

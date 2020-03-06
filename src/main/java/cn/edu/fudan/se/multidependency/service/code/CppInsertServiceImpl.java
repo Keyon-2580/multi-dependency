@@ -11,7 +11,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.code.FileIncludeFile;
-import cn.edu.fudan.se.multidependency.utils.FileUtils;
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import depends.entity.AliasEntity;
 import depends.entity.Entity;
 import depends.entity.FileEntity;
@@ -39,19 +39,19 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				Namespace namespace = new Namespace();
 				namespace.setNamespaceName(entity.getQualifiedName());
 				namespace.setEntityId(entity.getId().longValue());
-				addNodeToNodes(namespace, entity.getId().longValue(), currentProject);
+				addNode(namespace, currentProject);
 			} else if (entity instanceof FileEntity) {
 				ProjectFile file = new ProjectFile();
 				file.setEntityId(entity.getId().longValue());
 				String filePath = entity.getQualifiedName();
-				file.setFileName(FileUtils.extractFileName(filePath));
+				file.setFileName(FileUtil.extractFileName(filePath));
 				filePath = filePath.replace("\\", "/");
 				filePath = filePath.substring(filePath.indexOf(projectPath + "/"));
 				file.setPath(filePath);
-				file.setSuffix(FileUtils.extractSuffix(entity.getQualifiedName()));
-				addNodeToNodes(file, entity.getId().longValue(), currentProject);
+				file.setSuffix(FileUtil.extractSuffix(entity.getQualifiedName()));
+				addNode(file, currentProject);
 				// 文件所在目录
-				String directoryPath = FileUtils.extractDirectoryFromFile(entity.getQualifiedName()) + "/";
+				String directoryPath = FileUtil.extractDirectoryFromFile(entity.getQualifiedName()) + "/";
 				directoryPath = directoryPath.replace("\\", "/");
 				directoryPath = directoryPath.substring(directoryPath.indexOf(projectPath + "/"));
 				Package pck = this.getNodes().findPackageByPackageName(directoryPath, currentProject);
@@ -60,7 +60,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 					pck.setEntityId(entityRepo.generateId().longValue());
 					pck.setPackageName(directoryPath);
 					pck.setDirectoryPath(directoryPath);
-					addNodeToNodes(pck, pck.getEntityId().longValue(), currentProject);
+					addNode(pck, currentProject);
 					Contain projectContainsPackage = new Contain(currentProject, pck);
 					addRelation(projectContainsPackage);
 				}
@@ -70,19 +70,19 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				Function function = new Function();
 				function.setFunctionName(entity.getQualifiedName());
 				function.setEntityId(entity.getId().longValue());
-				addNodeToNodes(function, entity.getId().longValue(), currentProject);
+				addNode(function, currentProject);
 			} else if (entity instanceof VarEntity) {
 				Variable variable = new Variable();
 				variable.setEntityId(entity.getId().longValue());
 				variable.setVariableName(entity.getQualifiedName());
 				variable.setTypeIdentify(((VarEntity) entity).getRawType().getName());
-				addNodeToNodes(variable, entity.getId().longValue(), currentProject);
+				addNode(variable, currentProject);
 			} else if (entity.getClass() == TypeEntity.class) {
 				if (this.getNodes().findNodeByEntityIdInProject(entity.getId().longValue(), currentProject) == null) {
 					Type type = new Type();
 					type.setEntityId(entity.getId().longValue());
 					type.setTypeName(entity.getQualifiedName());
-					addNodeToNodes(type, entity.getId().longValue(), currentProject);
+					addNode(type, currentProject);
 				}
 			} else if (entity.getClass() == AliasEntity.class) {
 				AliasEntity aliasEntity = (AliasEntity) entity;
@@ -94,7 +94,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 						type = new Type();
 						type.setEntityId(typeEntity.getId().longValue());
 						type.setTypeName(typeEntity.getQualifiedName());
-						addNodeToNodes(type, typeEntity.getId().longValue(), currentProject);
+						addNode(type, currentProject);
 					}
 					type.setAliasName(entity.getQualifiedName());
 				}

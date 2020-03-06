@@ -1,6 +1,5 @@
 package cn.edu.fudan.se.multidependency.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration

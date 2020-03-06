@@ -1,7 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.code;
 
 import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
@@ -13,7 +12,8 @@ import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelationsImpl
  */
 public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForNodesAndRelationsImpl {
 	
-	public BasicCodeInserterForNeo4jServiceImpl(String projectPath, String projectName, Language language, boolean isMicroservice, String serviceGroupName) {
+	public BasicCodeInserterForNeo4jServiceImpl(String projectPath, String projectName, 
+			Language language, boolean isMicroservice, String serviceGroupName) {
 		super();
 		this.isMicroservice = isMicroservice;
 		this.serviceGroupName = serviceGroupName;
@@ -26,27 +26,17 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForN
 	
 	protected String serviceGroupName;
 	
-	protected void addNodeToNodes(Node node, Long entityId, Project inProject) {
-		if(node.getEntityId().longValue() != entityId.longValue()) {
-			try {
-				throw new Exception("节点id没有对应");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		addNode(node, inProject);
-	}
-	
 	@Override
-	public void addNodesAndRelations() {
+	public void addNodesAndRelations() throws Exception {
 		currentProject.setEntityId(generateEntityId().longValue());
-		addNodeToNodes(currentProject, currentProject.getEntityId(), currentProject);
+		addNode(currentProject, currentProject);
 		if(isMicroservice) {
+			// 被分析的项目是微服务项目，生成一个MicroService节点
 			MicroService microService = new MicroService();
 			microService.setEntityId(generateEntityId().longValue());
 			microService.setName(currentProject.getProjectName());
 			microService.setServiceGroupName(serviceGroupName);
-			addNodeToNodes(microService, microService.getEntityId(), null);
+			addNode(microService, null);
 			Contain contain = new Contain(microService, currentProject);
 			addRelation(contain);
 		}

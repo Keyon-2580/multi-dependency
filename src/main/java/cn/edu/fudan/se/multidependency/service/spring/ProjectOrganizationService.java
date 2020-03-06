@@ -9,7 +9,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -17,7 +16,7 @@ public class ProjectOrganizationService {
 	
 	private Map<Long, Project> projects;
 	
-	private Map<Project, List<FunctionDynamicCallFunction>> dynamicCalls;
+//	private Map<Project, List<FunctionDynamicCallFunction>> dynamicCalls;
 
 	/*private Map<Project, List<Package>> packages;
 	

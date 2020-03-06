@@ -4,9 +4,9 @@ import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.service.build.BuildInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.service.code.CppInsertServiceImpl;
 import cn.edu.fudan.se.multidependency.service.code.JavaInsertServiceImpl;
-import cn.edu.fudan.se.multidependency.service.dynamic.CppDynamicInserterForNeo4jService;
+import cn.edu.fudan.se.multidependency.service.dynamic.CppDynamicInserter;
 import cn.edu.fudan.se.multidependency.service.dynamic.DynamicInserterForNeo4jService;
-import cn.edu.fudan.se.multidependency.service.dynamic.StubJavaForJaegerDynamicInserter;
+import cn.edu.fudan.se.multidependency.service.dynamic.JavassistDynamicInserter;
 import depends.entity.repo.EntityRepo;
 
 public class InserterForNeo4jServiceFactory {
@@ -33,9 +33,9 @@ public class InserterForNeo4jServiceFactory {
 	public DynamicInserterForNeo4jService createDynamicInserterService(Language language) throws Exception {
 		switch(language) {
 		case java:
-			return new StubJavaForJaegerDynamicInserter();
+			return new JavassistDynamicInserter();
 		case cpp:
-			return new CppDynamicInserterForNeo4jService();
+			return new CppDynamicInserter();
 		}
 		throw new Exception("程序语言不为java或c/c++，提取失败");
 	}

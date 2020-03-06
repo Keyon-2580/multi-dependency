@@ -16,15 +16,15 @@ import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.service.BatchInserterService;
-import cn.edu.fudan.se.multidependency.utils.YamlUtils;
+import cn.edu.fudan.se.multidependency.utils.YamlUtil;
 
 public class BatchInserterServiceTest {
 
 	@Test
 	public void test() {
-		YamlUtils.YamlObject yaml = null;
+		YamlUtil.YamlObject yaml = null;
 		try {
-			yaml = YamlUtils.getDataBasePathDefault("src/main/resources/application.yml");
+			yaml = YamlUtil.getDataBasePathDefault("src/main/resources/application.yml");
 			String test = yaml.getForTest();
 			assertTrue("this property is for YamlUtilsTest".equals(test));
 		} catch (Exception e) {

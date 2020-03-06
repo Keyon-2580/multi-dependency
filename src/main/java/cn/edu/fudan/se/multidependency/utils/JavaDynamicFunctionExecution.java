@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.stub;
+package cn.edu.fudan.se.multidependency.utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode()
-public class DynamicFunctionExecutionFromStub {
+public class JavaDynamicFunctionExecution {
 	protected String language;
 	protected String time;
 	protected String project;

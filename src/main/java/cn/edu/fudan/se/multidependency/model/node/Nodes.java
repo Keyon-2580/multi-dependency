@@ -130,6 +130,7 @@ public class Nodes {
 		if(project == null) {
 			return result;
 		}
+		@SuppressWarnings("unchecked")
 		Map<Long, Function> functions = (Map<Long, Function>) findNodesByNodeTypeInProject(NodeType.Function, project);
 		functions.values().forEach(function -> {
 			String functionName = function.getFunctionName();
@@ -143,6 +144,7 @@ public class Nodes {
 	}
 	
 	public Package findPackageByPackageName(String packageName, Project project) {
+		@SuppressWarnings("unchecked")
 		Map<Long, Package> packages = (Map<Long, Package>) findNodesByNodeTypeInProject(NodeType.Package, project);
 		for(Package pck : packages.values()) {
 			if(pck.getPackageName().equals(packageName)) {

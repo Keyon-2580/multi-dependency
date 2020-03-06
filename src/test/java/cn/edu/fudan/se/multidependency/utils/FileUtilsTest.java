@@ -25,12 +25,12 @@ public class FileUtilsTest {
 	public void testListDirectory() {
 		File directory = new File("src/main/resources/dynamic");
 		List<File> files = new ArrayList<>();
-		FileUtils.listDirectories(directory, 0, files);
+		FileUtil.listDirectories(directory, 0, files);
 		System.out.println(files.size());
 		assertEquals(1, files.size());
 		files.clear();
 		System.out.println(files.size());
-		FileUtils.listDirectories(directory, 1, files);
+		FileUtil.listDirectories(directory, 1, files);
 		System.out.println(files.size());
 		assertEquals(2, files.size());
 		

@@ -8,9 +8,9 @@ public class YamlUtilsTest {
 
 	@Test
 	public void test() {
-		YamlUtils.YamlObject yaml;
+		YamlUtil.YamlObject yaml;
 		try {
-			yaml = YamlUtils.getDataBasePathDefault("src/main/resources/application.yml");
+			yaml = YamlUtil.getDataBasePathDefault("src/main/resources/application.yml");
 			String test = yaml.getForTest();
 			assertTrue("this property is for YamlUtilsTest".equals(test));
 		} catch (Exception e) {

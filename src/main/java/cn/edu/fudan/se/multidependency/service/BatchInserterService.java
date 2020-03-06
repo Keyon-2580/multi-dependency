@@ -16,7 +16,7 @@ import cn.edu.fudan.se.multidependency.model.node.NodeType;
 import cn.edu.fudan.se.multidependency.model.node.Nodes;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.Relations;
-import cn.edu.fudan.se.multidependency.utils.FileUtils;
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
 public class BatchInserterService implements Closeable {
 	private BatchInserterService() {}
@@ -32,7 +32,7 @@ public class BatchInserterService implements Closeable {
 	public void init(String databasePath, boolean initDatabase) throws Exception {
 		File directory = new File(databasePath);
 		if(initDatabase) {
-			FileUtils.delFile(directory);
+			FileUtil.delFile(directory);
 		}
 		inserter = BatchInserters.inserter(directory);
 	    /*inserter.createDeferredSchemaIndex( fileLabel ).on( "fileName" ).create();

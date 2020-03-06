@@ -19,10 +19,11 @@ public abstract class ExtractorForNodesAndRelationsImpl implements ExtractorForN
 	}
 	
 	@Override
-	public abstract void addNodesAndRelations();
+	public abstract void addNodesAndRelations() throws Exception;
 	
 	/**
-	 * 表示该节点属于哪个Project，Project可以为null
+	 * 表示该节点属于哪个Project，inProject可以为null
+	 * 若inProject为null，则表示该节点不属于任何一个项目
 	 * @param node
 	 * @param inProject 
 	 * @return

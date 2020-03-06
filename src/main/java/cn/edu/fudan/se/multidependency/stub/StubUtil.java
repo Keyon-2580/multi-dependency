@@ -24,7 +24,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONReader;
 import com.google.common.io.Files;
 
-import cn.edu.fudan.se.multidependency.utils.FileUtils;
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import depends.extractor.java.JavaLexer;
 import depends.extractor.java.JavaParser;
 
@@ -113,7 +113,7 @@ public class StubUtil {
 		walker.walk(stubListener, parser.compilationUnit());
 		File outputFile = new File(outputFilePath);
 		if (!outputFile.exists()) {
-			String directory = FileUtils.extractDirectoryFromFile(outputFilePath);
+			String directory = FileUtil.extractDirectoryFromFile(outputFilePath);
 			new File(directory).mkdirs();
 		}
 		PrintWriter writer = new PrintWriter(outputFile);
@@ -144,16 +144,16 @@ public class StubUtil {
 
 		File directory = new File(directoryPath);
 		List<File> result = new ArrayList<>();
-		FileUtils.listFiles(directory, result);
+		FileUtil.listFiles(directory, result);
 		File outputDirectory = new File(outputDirectoryPath);
 		if (!outputDirectory.exists()) {
 			outputDirectory.mkdirs();
 		}
-		String directoryName = FileUtils.extractFileName(directoryPath);
+		String directoryName = FileUtil.extractFileName(directoryPath);
 		result.forEach(file -> {
 			String outputFilePath = file.getAbsolutePath().replace(directory.getAbsolutePath(),
 					outputDirectory.getAbsolutePath() + "\\" + directoryName);
-			if (".java".equals(FileUtils.extractSuffix(file.getAbsolutePath()))) {
+			if (".java".equals(FileUtil.extractSuffix(file.getAbsolutePath()))) {
 				try {
 					stubSingleFileForJava(projectName, file.getAbsolutePath(), outputFilePath, className,
 							outputStubLogFilePath, remarks, usingJaegerWithSpring);
@@ -163,7 +163,7 @@ public class StubUtil {
 					try {
 						File outputFile = new File(outputFilePath);
 						if (!outputFile.exists()) {
-							String temp = FileUtils.extractDirectoryFromFile(outputFilePath);
+							String temp = FileUtil.extractDirectoryFromFile(outputFilePath);
 							new File(temp).mkdirs();
 						}
 						Files.copy(file, outputFile);
@@ -175,7 +175,7 @@ public class StubUtil {
 				try {
 					File outputFile = new File(outputFilePath);
 					if (!outputFile.exists()) {
-						String temp = FileUtils.extractDirectoryFromFile(outputFilePath);
+						String temp = FileUtil.extractDirectoryFromFile(outputFilePath);
 						new File(temp).mkdirs();
 					}
 					Files.copy(file, outputFile);
@@ -202,16 +202,16 @@ public class StubUtil {
 
 		File directory = new File(directoryPath);
 		List<File> result = new ArrayList<>();
-		FileUtils.listFiles(directory, result);
+		FileUtil.listFiles(directory, result);
 		File outputDirectory = new File(outputDirectoryPath);
 		if (!outputDirectory.exists()) {
 			outputDirectory.mkdirs();
 		}
-		String directoryName = FileUtils.extractFileName(directoryPath);
+		String directoryName = FileUtil.extractFileName(directoryPath);
 		result.forEach(file -> {
 			String outputFilePath = file.getAbsolutePath().replace(directory.getAbsolutePath(),
 					outputDirectory.getAbsolutePath() + "\\" + directoryName);
-			if (".java".equals(FileUtils.extractSuffix(file.getAbsolutePath()))) {
+			if (".java".equals(FileUtil.extractSuffix(file.getAbsolutePath()))) {
 				try {
 					stubSingleFileForC(projectName, file.getAbsolutePath(), outputFilePath, className,
 							outputStubLogFilePath, remarks, usingJaegerWithSpring);
@@ -221,7 +221,7 @@ public class StubUtil {
 					try {
 						File outputFile = new File(outputFilePath);
 						if (!outputFile.exists()) {
-							String temp = FileUtils.extractDirectoryFromFile(outputFilePath);
+							String temp = FileUtil.extractDirectoryFromFile(outputFilePath);
 							new File(temp).mkdirs();
 						}
 						Files.copy(file, outputFile);
@@ -233,7 +233,7 @@ public class StubUtil {
 				try {
 					File outputFile = new File(outputFilePath);
 					if (!outputFile.exists()) {
-						String temp = FileUtils.extractDirectoryFromFile(outputFilePath);
+						String temp = FileUtil.extractDirectoryFromFile(outputFilePath);
 						new File(temp).mkdirs();
 					}
 					Files.copy(file, outputFile);
@@ -272,7 +272,7 @@ public class StubUtil {
 		walker.walk(stubListener, parser.compilationUnit());
 		File outputFile = new File(outputFilePath);
 		if (!outputFile.exists()) {
-			String directory = FileUtils.extractDirectoryFromFile(outputFilePath);
+			String directory = FileUtil.extractDirectoryFromFile(outputFilePath);
 			new File(directory).mkdirs();
 		}
 		PrintWriter writer = new PrintWriter(outputFile);

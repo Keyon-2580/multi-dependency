@@ -13,136 +13,163 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import cn.edu.fudan.se.multidependency.model.node.NodeType;
-import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import com.alibaba.fastjson.JSONObject;
+
+import cn.edu.fudan.se.multidependency.exception.DynamicLogSentenceErrorException;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.node.testcase.Commit;
-import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
-import cn.edu.fudan.se.multidependency.model.node.testcase.Issue;
-import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
-import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 
 public class JavaDynamicUtil {
 	
-	public static Issue extractIssueFromMarkLine(String line) {
-		if(!line.startsWith(NodeType.Issue.name())) {
-			return null;
+	/**
+	 * traceId spanId depth 
+	 * @param files
+	 * @return
+	 */
+	private static void addDynamicFunctionExecution(
+			Map<String, Map<String, Map<Long, List<JavaDynamicFunctionExecution>>>> result, 
+			JavaDynamicFunctionExecution execution) {
+		String traceId = execution.getTraceId();
+		String spanId = execution.getSpanId();
+		// 去掉没有traceId或没有spanId的函数执行
+		if(StringUtils.isBlank(traceId) || StringUtils.isBlank(spanId)) {
+			return;
 		}
-		try {
-			String[] strs = line.split(" ");
-			Issue issue = new Issue();
-			issue.setContent(strs[1]);
-			return issue;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+		Long depth = execution.getDepth();
+		Map<String, Map<Long, List<JavaDynamicFunctionExecution>>> spanResult = result.get(traceId);
+		spanResult = spanResult == null ? new HashMap<>() : spanResult;
+		Map<Long, List<JavaDynamicFunctionExecution>> depthResult = spanResult.get(spanId);
+		depthResult = depthResult == null ? new HashMap<>() : depthResult;
+		List<JavaDynamicFunctionExecution> executions = depthResult.get(depth);
+		executions = executions == null ? new ArrayList<>() : executions;
+		executions.add(execution);
+		depthResult.put(depth, executions);
+		spanResult.put(spanId, depthResult);
+		result.put(traceId, spanResult);
 	}
 	
-	public static Commit extractCommitFromMarkLine(String line) {
-		if(!line.startsWith(NodeType.Commit.name())) {
-			return null;
+	public static Map<String, Map<String, Map<Long, List<JavaDynamicFunctionExecution>>>> readJavaDynamicLogs(File... files) {
+		Map<String, Map<String, Map<Long, List<JavaDynamicFunctionExecution>>>> result = new HashMap<>();
+		for(File file : files) {
+			try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+				String line = null;
+				while ((line = reader.readLine()) != null) {
+					JavaDynamicFunctionExecution dynamicFunction = null;
+					try {
+						dynamicFunction = extractByJaegerJson(line);
+					} catch (DynamicLogSentenceErrorException e) {
+						e.printStackTrace();
+						continue;
+					}
+					addDynamicFunctionExecution(result, dynamicFunction);
+				}
+				for(Map<String, Map<Long, List<JavaDynamicFunctionExecution>>> spansResult : result.values()) {
+					for(Map<Long, List<JavaDynamicFunctionExecution>> groups : spansResult.values()) {
+						for(List<JavaDynamicFunctionExecution> functions : groups.values()) {
+							functions.sort(new Comparator<JavaDynamicFunctionExecution>() {
+								@Override
+								public int compare(JavaDynamicFunctionExecution o1, JavaDynamicFunctionExecution o2) {
+									return (int) (o1.getOrder() - o2.getOrder());
+								}
+							});
+						}
+					}
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
-		try {
-			String[] strs = line.split(" ");
-			Commit commit = new Commit();
-			commit.setCommitId(strs[1]);
-//			String timeStr = strs[2] + " " + strs[3];
-			commit.setMessage(strs[4]);
-			return commit;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+		return result;
 	}
 	
-	public static ProjectFile extractProjectFileFromMarkLine(String line) {
-		if(!line.startsWith("File")) {
-			return null;
-		}
+	public static JavaDynamicFunctionExecution extractByJaegerJson(String sentence) throws DynamicLogSentenceErrorException {
 		try {
-			String[] strs = line.split(" ");
-			ProjectFile file = new ProjectFile();
-			file.setPath(strs[1]);
-			return file;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	public static TestCase extractTestCaseFromMarkLine(String line) {
-		if(!line.startsWith(NodeType.TestCase.name())) {
-			return null;
-		}
-		try {
-			String[] strs = line.split(" ");
-			TestCase testCase = new TestCase();
-			if(strs.length > 1) {
-				testCase.setSuccess("success".equals(strs[1]));
-				if(strs.length > 2) {
-					testCase.setInputContent(strs[2]);
+			JavaDynamicFunctionExecution functionExecution = new JavaDynamicFunctionExecution();
+			functionExecution.setSentence(sentence);
+			JSONObject json = JSONObject.parseObject(sentence);
+			functionExecution.setLanguage(json.getString("language"));
+			functionExecution.setTime(json.getString("time"));
+			functionExecution.setProject(json.getString("project"));
+			String file = json.getString("inFile");
+			file = file == null ? json.getString("file") : file;
+			functionExecution.setInFile(file);
+			String function = json.getString("function");
+			String functionName = function.substring(0, function.indexOf("("));
+			functionExecution.setFunctionName(functionName);
+			String parametersStr = function.substring(function.indexOf("(") + 1, function.length() - 1);
+			if(!StringUtils.isBlank(parametersStr)) {
+				String[] parameters = parametersStr.split(",");
+				for(String parameter : parameters) {
+					functionExecution.addParameter(parameter.trim());
 				}
 			}
-			return testCase;
+			functionExecution.setOrder(Long.parseLong(json.getString("order")));
+			functionExecution.setDepth(Long.parseLong(json.getString("depth")));
+			functionExecution.setRemarks(json.getJSONObject("remarks"));
+			functionExecution.setTraceId(json.getString("traceId"));
+			functionExecution.setSpanId(json.getString("spanId"));
+			return functionExecution;
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			throw new DynamicLogSentenceErrorException(sentence);
 		}
 	}
 	
-	public static Scenario extractScenarioFromMarkLine(String line) {
-		if(!line.startsWith(NodeType.Scenario.name())) {
-			return null;
-		}
-		try {
-			String[] strs = line.split(" ");
-			Scenario scenario = new Scenario();
-			scenario.setScenarioName(strs[1]);
-			return scenario;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	public static Feature extractFeatureFromMarkLine(String line) {
-		if(!line.startsWith(NodeType.Feature.name())) {
-			return null;
-		}
-		try {
-			String[] strs = line.split(" ");
-			Feature feature = new Feature();
-			feature.setFeatureName(strs[1]);
-			return feature;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	public static DynamicFunctionExecutionFromKieker findCallerFunction(DynamicFunctionExecutionFromKieker called, List<DynamicFunctionExecutionFromKieker> sortedFunctions) {
-		int midIndex = sortedFunctions.size() / 2;
-		if(called.getBreadth() <= sortedFunctions.get(0).getBreadth()) {
-			return null;
-		}
-		if(called.getBreadth() > sortedFunctions.get(sortedFunctions.size() - 1).getBreadth()) {
-			return sortedFunctions.get(sortedFunctions.size() - 1);
-		}
-		int lessIndex = 0;
-		int moreIndex = sortedFunctions.size() - 1;
-		while(midIndex > lessIndex && midIndex < moreIndex) {
-			if(sortedFunctions.get(midIndex).getBreadth() < called.getBreadth()) {
-				lessIndex = midIndex;
-			} else if(sortedFunctions.get(midIndex).getBreadth() > called.getBreadth()) {
-				moreIndex = midIndex;
+	/**
+	 * 从同名的Function中找到与dynamicFunction的参数对应的Function
+	 * @param dynamicFunction
+	 * @param functions
+	 * @return
+	 */
+	public static Function findFunctionWithDynamic(JavaDynamicFunctionExecution dynamicFunction, List<Function> functions) {
+		// Function根据参数排序
+		functions.sort(new Comparator<Function>() {
+			@Override
+			public int compare(Function o1, Function o2) {
+				if(o1.getParameters() == null || o2.getParameters() == null) {
+					return -1;
+				}
+				return o1.getParameters().size() - o2.getParameters().size();
 			}
-			midIndex = (moreIndex + lessIndex) / 2;
+		});
+		for(Function function : functions) {
+			// 方法名是否相同
+			if(!dynamicFunction.getFunctionName().equals(function.getFunctionName())) {
+				continue;
+			}
+			// 方法参数数量是否相同
+			if(function.getParameters().size() != dynamicFunction.getParameters().size()) {
+				continue;
+			}
+			// 方法名相同且只有一个参数，直接返回此Function
+			if(functions.size() == 1) {
+				return function;
+			}
+			// 参数一一对应
+			boolean flag = false;
+			for(int i = 0; i < function.getParameters().size(); i++) {
+				// 动态分析得到的参数的类型是完整的
+				if(dynamicFunction.getParameters().get(i).indexOf(function.getParameters().get(i)) < 0) {
+					// 参数没有对应
+					flag = true;
+					break;
+				}
+			}
+			if(flag) {
+				continue;
+			}
+			return function;
 		}
 		return null;
 	}
 	
-	public static int find(int num, List<Integer> list) {
+	/**
+	 * 从一组数据中找出最大的小于num的数，并返回下标
+	 * @param num
+	 * @param list
+	 * @return
+	 */
+	public static int find(Long num, List<Long> list) {
 		int midIndex = list.size() / 2;
 		if(num <= list.get(0)) {
 			return -1;
@@ -162,384 +189,5 @@ public class JavaDynamicUtil {
 		}
 		return midIndex;
 	}
-
 	
-	/**
-	 * callId
-	 * depth
-	 * DynamicFunctionFromKieker
-	 * @param file
-	 * @return
-	 */
-	public static Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> readKiekerExecutionFile(File... files) {
-		Map<String, Map<Integer, List<DynamicFunctionExecutionFromKieker>>> result = new HashMap<>();
-		for(File file : files) {
-			try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-				String line = null;
-				while ((line = reader.readLine()) != null) {
-					DynamicFunctionExecutionFromKieker dynamicFunction = splitFunctionExecution(line);
-					if (dynamicFunction == null) {
-						continue;
-					}
-					String callId = dynamicFunction.getCallId();
-					Map<Integer, List<DynamicFunctionExecutionFromKieker>> groups = result.get(callId);
-					groups = groups == null ? new HashMap<>() : groups;
-					Integer depth = dynamicFunction.getDepth();
-					List<DynamicFunctionExecutionFromKieker> functions = groups.get(depth);
-					functions = functions == null ? new ArrayList<>() : functions;
-					functions.add(dynamicFunction);
-					groups.put(depth, functions);
-					result.put(callId, groups);
-				}
-				for(Map<Integer, List<DynamicFunctionExecutionFromKieker>> groups : result.values()) {
-					for(List<DynamicFunctionExecutionFromKieker> functions : groups.values()) {
-						functions.sort(new Comparator<DynamicFunctionExecutionFromKieker>() {
-							@Override
-							public int compare(DynamicFunctionExecutionFromKieker o1, DynamicFunctionExecutionFromKieker o2) {
-								return o1.getBreadth() - o2.getBreadth();
-							}
-						});
-					}
-				}
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return result;
-	}
-
-	public static Map<String, List<DynamicFunctionCallFromKieker>> readKiekerCallFile(File... files) {
-		Map<String, List<DynamicFunctionCallFromKieker>> result = new HashMap<>();
-		for(File file : files) {
-			try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-				String line = null;
-				while ((line = reader.readLine()) != null) {
-					DynamicFunctionCallFromKieker call = splitFunctionCall(line);
-					if(call == null) {
-						continue;
-					}
-					String callId = call.getCallId();
-					List<DynamicFunctionCallFromKieker> groups = result.get(callId);
-					groups = groups == null ? new ArrayList<>() : groups;
-					groups.add(call);
-				}
-				for(List<DynamicFunctionCallFromKieker> groups : result.values()) {
-					groups.sort(new Comparator<DynamicFunctionCallFromKieker>() {
-						@Override
-						public int compare(DynamicFunctionCallFromKieker o1, DynamicFunctionCallFromKieker o2) {
-							return o1.getOrderId().compareTo(o2.getOrderId());
-						}
-					});
-				}
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return result;
-	}
-	
-	public static DynamicFunctionCallFromKieker splitFunctionCall(String callSentence) {
-		try {
-			String[] splits = callSentence.split(";");
-			System.out.println(splits.length);
-			if(splits.length != 9) {
-				return null;
-			}
-			if(callSentence.contains(DynamicFunctionCallFromKieker.CLINIT)) {
-				return null;
-			}
-			DynamicFunctionCallFromKieker functionCall = new DynamicFunctionCallFromKieker();
-			String callerMethodStr = splits[5];
-			String callerParametersStr = callerMethodStr.substring(
-					callerMethodStr.lastIndexOf("(") + 1, callerMethodStr.length() - 1);
-			if (!StringUtils.isBlank(callerParametersStr)) {
-				String[] parameters = callerParametersStr.split(",");
-				for (String parameter : parameters) {
-					functionCall.addCallerParameter(parameter.trim());
-				}
-			}
-			callerMethodStr = callerMethodStr.substring(0, callerMethodStr.lastIndexOf("("));
-			String[] callerMethodsStr = callerMethodStr.split(" ");
-			String callerFunctionName = callerMethodsStr[callerMethodsStr.length - 1];
-			if (callerFunctionName.contains(DynamicFunctionCallFromKieker.INIT)) {
-				callerFunctionName = callerFunctionName.replace("." + DynamicFunctionCallFromKieker.INIT, "");
-				String[] temp = callerFunctionName.split("\\.");
-				callerFunctionName = callerFunctionName + "." + temp[temp.length - 1];
-				functionCall.setCallerFunctionName(callerFunctionName);
-				functionCall.setCallerIsConstructor(true);
-			} else {
-				functionCall.setCallerFunctionName(callerFunctionName);
-				functionCall.setCallerIsConstructor(false);
-			}
-			String calledMethodStr = splits[7];
-			String calledParametersStr = calledMethodStr.substring(
-					calledMethodStr.lastIndexOf("(") + 1, calledMethodStr.length() - 1);
-			if (!StringUtils.isBlank(calledParametersStr)) {
-				String[] parameters = calledParametersStr.split(",");
-				for (String parameter : parameters) {
-					functionCall.addCalledParameter(parameter.trim());
-				}
-			}
-			calledMethodStr = calledMethodStr.substring(0, calledMethodStr.lastIndexOf("("));
-			String[] calledMethodsStr = calledMethodStr.split(" ");
-			String calledFunctionName = calledMethodsStr[calledMethodsStr.length - 1];
-			if (calledFunctionName.contains(DynamicFunctionCallFromKieker.INIT)) {
-				calledFunctionName = calledFunctionName.replace("." + DynamicFunctionCallFromKieker.INIT, "");
-				String[] temp = calledFunctionName.split("\\.");
-				calledFunctionName = calledFunctionName + "." + temp[temp.length - 1];
-				functionCall.setCalledFunctionName(calledFunctionName);
-				functionCall.setCalledIsConstructor(true);
-			} else {
-				functionCall.setCalledFunctionName(calledFunctionName);
-				functionCall.setCalledIsConstructor(false);
-			}
-			functionCall.setCallId(splits[3]);
-			functionCall.setOrderId(Integer.valueOf(splits[4]));
-			return functionCall;
-		} catch (Exception e) {
-			return null;
-		}
-	}
-	
-	public static DynamicFunctionExecutionFromKieker splitFunctionExecution(String callSentence) {
-		try {
-			String[] splits = callSentence.split(";");
-			if (splits.length < 10) {
-				return null;
-			}
-			DynamicFunctionExecutionFromKieker dynamicFunction = new DynamicFunctionExecutionFromKieker();
-			dynamicFunction.setSentence(callSentence);
-			dynamicFunction.setCallId(splits[4]);
-			dynamicFunction.setDepth(Integer.valueOf(splits[9]));
-			dynamicFunction.setBreadth(Integer.valueOf(splits[8]));
-			String methodStr = splits[2];
-			String parametersStr = methodStr.substring(methodStr.lastIndexOf("(") + 1, methodStr.length() - 1);
-			if (!StringUtils.isBlank(parametersStr)) {
-				String[] parameters = parametersStr.split(",");
-				for (String parameter : parameters) {
-					dynamicFunction.addParametersType(parameter.trim());
-				}
-			}
-			methodStr = methodStr.substring(0, methodStr.lastIndexOf("("));
-			String[] methodsStr = methodStr.split(" ");
-			String functionName = methodsStr[methodsStr.length - 1];
-			if (functionName.contains(DynamicFunctionExecutionFromKieker.INIT)) {
-				dynamicFunction.setReturnType(DynamicFunctionExecutionFromKieker.INIT);
-				functionName = functionName.replace("." + DynamicFunctionExecutionFromKieker.INIT, "");
-				String[] temp = functionName.split("\\.");
-				functionName = functionName + "." + temp[temp.length - 1];
-				dynamicFunction.setFunctionName(functionName);
-				dynamicFunction.setConstructor(true);
-			} else {
-				dynamicFunction.setReturnType(methodsStr[methodsStr.length - 2]);
-				dynamicFunction.setFunctionName(functionName);
-				dynamicFunction.setConstructor(false);
-			}
-			return dynamicFunction;
-		} catch (Exception e) {
-//			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	public static class DynamicFunctionCallFromKieker {
-		public static final String INIT = DynamicFunctionExecutionFromKieker.INIT;
-		public static final String CLINIT = "<clinit>";
-		String sentence;
-		String callId;
-		Integer orderId;
-		String callerFunctionName;
-		List<String> callerParametersType = new ArrayList<>();
-		boolean callerIsConstructor;
-		String calledFunctionName;
-		List<String> calledParametersType = new ArrayList<>();
-		boolean calledIsConstructor;
-		public void addCallerParameter(String str) {
-			this.callerParametersType.add(str);
-		}
-		public void addCalledParameter(String str) {
-			this.calledParametersType.add(str);
-		}
-		public String getSentence() {
-			return sentence;
-		}
-		public void setSentence(String sentence) {
-			this.sentence = sentence;
-		}
-		public String getCallId() {
-			return callId;
-		}
-		public void setCallId(String callId) {
-			this.callId = callId;
-		}
-		public Integer getOrderId() {
-			return orderId;
-		}
-		public void setOrderId(Integer orderId) {
-			this.orderId = orderId;
-		}
-		public String getCallerFunctionName() {
-			return callerFunctionName;
-		}
-		public void setCallerFunctionName(String callerFunctionName) {
-			this.callerFunctionName = callerFunctionName;
-		}
-		public List<String> getCallerParametersType() {
-			return callerParametersType;
-		}
-		public void setCallerParametersType(List<String> callerParametersType) {
-			this.callerParametersType = callerParametersType;
-		}
-		public boolean isCallerIsConstructor() {
-			return callerIsConstructor;
-		}
-		public void setCallerIsConstructor(boolean callerIsConstructor) {
-			this.callerIsConstructor = callerIsConstructor;
-		}
-		public String getCalledFunctionName() {
-			return calledFunctionName;
-		}
-		public void setCalledFunctionName(String calledFunctionName) {
-			this.calledFunctionName = calledFunctionName;
-		}
-		public List<String> getCalledParametersType() {
-			return calledParametersType;
-		}
-		public void setCalledParametersType(List<String> calledParametersType) {
-			this.calledParametersType = calledParametersType;
-		}
-		public boolean isCalledIsConstructor() {
-			return calledIsConstructor;
-		}
-		public void setCalledIsConstructor(boolean calledIsConstructor) {
-			this.calledIsConstructor = calledIsConstructor;
-		}
-		
-	}
-
-	/**
-	 * 从kieker文件执行每一行读到的方法，包括该方法在调用链的顺序和层级
-	 * @author fan
-	 *
-	 */
-	public static class DynamicFunctionExecutionFromKieker { //读取到的方法，所具有的属性
-		String sentence;
-		String callId;
-		Integer depth;
-		Integer breadth;
-		String returnType;
-		String functionName;
-		boolean isConstructor;
-		List<String> parametersType = new ArrayList<>();
-		public static final String INIT = "<init>";
-
-		public String getSentence() {
-			return sentence;
-		}
-
-		public void setSentence(String sentence) {
-			this.sentence = sentence;
-		}
-
-		public String getCallId() {
-			return callId;
-		}
-
-		public void setCallId(String callId) {
-			this.callId = callId;
-		}
-
-		public Integer getDepth() {
-			return depth;
-		}
-
-		public void setDepth(Integer depth) {
-			this.depth = depth;
-		}
-
-		public Integer getBreadth() {
-			return breadth;
-		}
-
-		public void setBreadth(Integer breadth) {
-			this.breadth = breadth;
-		}
-
-		public String getReturnType() {
-			return returnType;
-		}
-
-		public void setReturnType(String returnType) {
-			this.returnType = returnType;
-		}
-
-		public String getFunctionName() {
-			return functionName;
-		}
-
-		public void setFunctionName(String functionName) {
-			this.functionName = functionName;
-		}
-
-		public List<String> getParametersType() {
-			return parametersType;
-		}
-
-		public void setParametersType(List<String> parametersType) {
-			this.parametersType = parametersType;
-		}
-
-		public void addParametersType(String parameterType) {
-			this.parametersType.add(parameterType);
-		}
-
-		public boolean isConstructor() {
-			return isConstructor;
-		}
-
-		public void setConstructor(boolean isConstructor) {
-			this.isConstructor = isConstructor;
-		}
-
-		@Override
-		public String toString() {
-			return "DynamicFunctionFromKieker [sentence=" + sentence + ", callId=" + callId + ", depth=" + depth
-					+ ", breadth=" + breadth + ", returnType=" + returnType + ", functionName=" + functionName
-					+ ", isConstructor=" + isConstructor + ", parametersType=" + parametersType + "]";
-		}
-
-	}
-	
-	/**
-	 * 对应dynamicFunction与Function
-	 * @param dynamicFunction
-	 * @param functions
-	 * @return
-	 */
-	public static Function findFunctionWithDynamic(DynamicFunctionExecutionFromKieker dynamicFunction, List<Function> functions) {
-		for(Function function : functions) {
-			if(!dynamicFunction.getFunctionName().equals(function.getFunctionName())) {
-				return null;
-			}
-			if(function.getParameters().size() != dynamicFunction.getParametersType().size()) {
-				continue;
-			}
-			boolean flag = false;
-			for(int i = 0; i < function.getParameters().size(); i++) {
-				if(dynamicFunction.getParametersType().get(i).indexOf(function.getParameters().get(i)) < 0) {
-					flag = true;
-				}
-			}
-			if(flag) {
-				continue;
-			}
-			return function;
-		}
-		return null;
-	}
-
 }

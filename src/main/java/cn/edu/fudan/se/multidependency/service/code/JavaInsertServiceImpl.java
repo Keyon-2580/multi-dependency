@@ -12,7 +12,7 @@ import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.code.FileImportFunction;
 import cn.edu.fudan.se.multidependency.model.relation.code.FileImportType;
 import cn.edu.fudan.se.multidependency.model.relation.code.FileImportVariable;
-import cn.edu.fudan.se.multidependency.utils.FileUtils;
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import depends.entity.Entity;
 import depends.entity.FileEntity;
 import depends.entity.FunctionEntity;
@@ -38,19 +38,19 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				Package pck = new Package();
 				pck.setPackageName(entity.getQualifiedName());
 				pck.setEntityId(entity.getId().longValue());
-				addNodeToNodes(pck, entity.getId().longValue(), currentProject);
+				addNode(pck, currentProject);
 				Contain projectContainsPackage = new Contain(currentProject, pck);
 				addRelation(projectContainsPackage);
 			} else if(entity instanceof FileEntity) {
 				ProjectFile file = new ProjectFile();
 				file.setEntityId(entity.getId().longValue());
 				String filePath = entity.getQualifiedName();
-				file.setFileName(FileUtils.extractFileName(filePath));
+				file.setFileName(FileUtil.extractFileName(filePath));
 				filePath = filePath.replace("\\", "/");
 				filePath = filePath.substring(filePath.indexOf(projectPath + "/"));
 				file.setPath(filePath);
-				file.setSuffix(FileUtils.extractSuffix(entity.getQualifiedName()));
-				addNodeToNodes(file, entity.getId().longValue(), currentProject);
+				file.setSuffix(FileUtil.extractSuffix(entity.getQualifiedName()));
+				addNode(file, currentProject);
 			} else if(entity instanceof FunctionEntity) {
 				Function function = new Function();
 				String functionName = entity.getQualifiedName();
@@ -62,18 +62,18 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				}
 				function.setFunctionName(functionName);
 				function.setEntityId(entity.getId().longValue());
-				addNodeToNodes(function, entity.getId().longValue(), currentProject);
+				addNode(function, currentProject);
 			} else if(entity instanceof VarEntity) {
 				Variable variable = new Variable();
 				variable.setEntityId(entity.getId().longValue());
 				variable.setTypeIdentify(((VarEntity) entity).getRawType().getName());
 				variable.setVariableName(entity.getQualifiedName());
-				addNodeToNodes(variable, entity.getId().longValue(), currentProject);
+				addNode(variable, currentProject);
 			} else if(entity.getClass() == TypeEntity.class) {
 				Type type = new Type();
 				type.setEntityId(entity.getId().longValue());
 				type.setTypeName(entity.getQualifiedName());
-				addNodeToNodes(type, entity.getId().longValue(), currentProject);
+				addNode(type, currentProject);
 			}
 		});
 		this.getNodes().findNodesByNodeTypeInProject(NodeType.ProjectFile, currentProject).forEach((entityId, node) -> {
@@ -86,7 +86,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			Package pck = null;
 			if(parentEntity == null) {
 				String filePath = codeFile.getPath();
-				String packagePath = FileUtils.extractDirectoryFromFile(filePath) + "/";
+				String packagePath = FileUtil.extractDirectoryFromFile(filePath) + "/";
 				packagePath = packagePath.replace("\\", "/");
 				packagePath = packagePath.substring(packagePath.indexOf(projectPath + "/"));
 				pck = this.getNodes().findPackageByPackageName(packagePath, currentProject);
@@ -95,13 +95,13 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 					pck.setEntityId(entityRepo.generateId().longValue());
 					pck.setPackageName(packagePath);
 					pck.setDirectoryPath(packagePath);
-					addNodeToNodes(pck, pck.getEntityId(), currentProject);
+					addNode(pck, currentProject);
 					Contain projectContainsPackage = new Contain(currentProject, pck);
 					addRelation(projectContainsPackage);
 				}
 			} else {
 				pck = (Package) this.getNodes().findNodeByEntityIdInProject(NodeType.Package, parentEntity.getId().longValue(), currentProject);
-				String packagePath = FileUtils.extractDirectoryFromFile(fileEntity.getQualifiedName());
+				String packagePath = FileUtil.extractDirectoryFromFile(fileEntity.getQualifiedName());
 				packagePath = packagePath.replace("\\", "/");
 				packagePath = packagePath.substring(packagePath.indexOf(projectPath + "/"));
 				pck.setDirectoryPath(packagePath);

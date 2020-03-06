@@ -44,14 +44,10 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 	protected abstract void addRelations() throws LanguageErrorException;
 	
 	@Override
-	public void addNodesAndRelations() {
-		try {
-			super.addNodesAndRelations();
-			addNodesWithContainRelations();
-			addRelations();
-		} catch (LanguageErrorException e) {
-			e.printStackTrace();
-		}
+	public void addNodesAndRelations() throws Exception {
+		super.addNodesAndRelations();
+		addNodesWithContainRelations();
+		addRelations();
 	}
 	
 	protected void extractRelationsFromTypes() {

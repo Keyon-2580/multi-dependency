@@ -238,14 +238,14 @@ public abstract class JavaStubListener extends JavaParserBaseListener {
 	public void exitAnnotationTypeDeclaration(AnnotationTypeDeclarationContext ctx) {
 		methodContainer.pop();
 	}
-	///FIXME
+	/*///FIXME
 	// 匿名类
 	private boolean hasCreatorClassBody(CreatorContext ctx) {
 		return false;
 	}
 	private boolean hasCreatorClassBody(InnerCreatorContext ctx) {
 		return false;
-	}
+	}*/
 	@Override
 	public void enterCreator(CreatorContext ctx) {
 		

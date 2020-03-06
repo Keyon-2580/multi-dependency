@@ -8,7 +8,7 @@ import org.ho.yaml.Yaml;
 
 import lombok.Data;
 
-public class YamlUtils {
+public class YamlUtil {
 
 	public static YamlObject getDataBasePathDefault(String yamlPath) throws Exception {
 		File file = new File(yamlPath);

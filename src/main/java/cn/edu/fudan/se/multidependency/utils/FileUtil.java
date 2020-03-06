@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-public class FileUtils {
+public class FileUtil {
 	
 	public static void main(String[] args) {
 		JSONArray array = readDirectoryToGenerateProjectJSONFile(
@@ -23,7 +23,7 @@ public class FileUtils {
 			boolean isAllMicroservice, String serviceGroupName) {
 		JSONArray result = new JSONArray();
 		List<File> projectDirectories = new ArrayList<>();
-		FileUtils.listDirectories(rootDirectory, depth, projectDirectories);
+		FileUtil.listDirectories(rootDirectory, depth, projectDirectories);
 		
 		for(File projectDirectory : projectDirectories) {
 			JSONObject projectJson = new JSONObject();
@@ -41,7 +41,7 @@ public class FileUtils {
 		return result;
 	}
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
 	
 	/**
 	 * 提取文件所在目录

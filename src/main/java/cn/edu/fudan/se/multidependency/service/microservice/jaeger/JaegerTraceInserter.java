@@ -23,6 +23,7 @@ import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelationsImpl
  * @author fan
  *
  */
+@Deprecated
 public abstract class JaegerTraceInserter extends ExtractorForNodesAndRelationsImpl {
 	
 	protected Trace currentTrace;
@@ -30,13 +31,8 @@ public abstract class JaegerTraceInserter extends ExtractorForNodesAndRelationsI
 	private Map<String, Span> spans = new HashMap<>();
 	
 	@Override
-	public void addNodesAndRelations() {
-		try {
-			JSONObject json = extractTraceJSON();
-			extract(json);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public void addNodesAndRelations() throws Exception {
+		extract(extractTraceJSON());
 	}
 	
 	protected abstract JSONObject extractTraceJSON() throws Exception;

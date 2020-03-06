@@ -52,8 +52,8 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	@Autowired
 	private FunctionDynamicCallFunctionRepository functionDynamicCallFunctionRepository;
 	
-	@Autowired
-	private StaticAnalyseService staticAnalyseService;
+//	@Autowired
+//	private StaticAnalyseService staticAnalyseService;
 	
 	@Autowired
 	private ContainRepository containRepository;

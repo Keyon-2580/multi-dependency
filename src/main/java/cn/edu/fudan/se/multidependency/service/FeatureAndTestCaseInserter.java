@@ -25,7 +25,8 @@ public class FeatureAndTestCaseInserter extends ExtractorForNodesAndRelationsImp
 	
 	private String featureConfigPath;
 	
-	private void extract() throws Exception {
+	@Override
+	public void addNodesAndRelations() throws Exception {
 		JSONObject featureJsonFile = JSONUtil.extractJson(new File(featureConfigPath));
 		JSONArray featuresArray = featureJsonFile.getJSONArray("features");
 		JSONArray testcasesArray = featureJsonFile.getJSONArray("testcases");
@@ -95,16 +96,6 @@ public class FeatureAndTestCaseInserter extends ExtractorForNodesAndRelationsImp
 				
 			}
 			
-		}
-	}
-	
-	@Override
-	public void addNodesAndRelations() {
-		try {
-			extract();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 

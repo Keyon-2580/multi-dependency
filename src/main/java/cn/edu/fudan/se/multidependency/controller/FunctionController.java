@@ -174,7 +174,7 @@ public class FunctionController {
 					microservice.put("tags", microserviceTags);
 					microservice.put("href", ms.getId());
 					JSONArray spanArray = new JSONArray();
-					Set<Trace> traces = organizationService.findRelatedTracesForFeature(features);
+//					Set<Trace> traces = organizationService.findRelatedTracesForFeature(features);
 //					List<Span> spans = organizationService.findMicroServiceCreateSpansInTraces(ms, feature);
 //					for(Span span : spans) {
 //						JSONObject spanJson = new JSONObject();

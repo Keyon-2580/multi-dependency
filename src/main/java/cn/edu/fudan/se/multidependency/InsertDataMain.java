@@ -22,10 +22,8 @@ import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractorImpl;
 import cn.edu.fudan.se.multidependency.service.dynamic.DynamicInserterForNeo4jService;
 import cn.edu.fudan.se.multidependency.service.dynamic.JavassistDynamicInserter;
-import cn.edu.fudan.se.multidependency.service.dynamic.StubJavaForJaegerDynamicInserter;
-import cn.edu.fudan.se.multidependency.service.microservice.jaeger.JaegerTraceInserterFromJSONFile;
-import cn.edu.fudan.se.multidependency.utils.FileUtils;
-import cn.edu.fudan.se.multidependency.utils.YamlUtils;
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
+import cn.edu.fudan.se.multidependency.utils.YamlUtil;
 import depends.entity.repo.EntityRepo;
 
 public class InsertDataMain {
@@ -38,11 +36,11 @@ public class InsertDataMain {
 	
 	public static void insert(String[] args) {
 		try {
-			YamlUtils.YamlObject yaml = null;
+			YamlUtil.YamlObject yaml = null;
 			if (args == null || args.length == 0) {
-				yaml = YamlUtils.getDataBasePathDefault("src/main/resources/application.yml");
+				yaml = YamlUtil.getDataBasePathDefault("src/main/resources/application.yml");
 			} else {
-				yaml = YamlUtils.getDataBasePath(args[0]);
+				yaml = YamlUtil.getDataBasePath(args[0]);
 			}
 			InserterForNeo4j repository = RepositoryService.getInstance();
 			repository.setDatabasePath(yaml.getNeo4jDatabasePath());
@@ -59,8 +57,8 @@ public class InsertDataMain {
 					projectsJson.append(line);
 				}
 			}
-			JSONArray projectsArray = JSONObject.parseArray(projectsJson.toString());
 			
+			JSONArray projectsArray = JSONObject.parseArray(projectsJson.toString());
 			for(int i = 0; i < projectsArray.size(); i++) {
 				JSONObject projectJson = projectsArray.getJSONObject(i);
 				Language language = Language.valueOf(projectJson.getString("language"));
@@ -70,9 +68,9 @@ public class InsertDataMain {
 				serviceGroupName = serviceGroupName == null ? "" : serviceGroupName;
 				String projectName = projectJson.getString("project");
 				
-				System.out.println("静态分析，项目：" + projectName + "，语言：" + language);
 				LOGGER.info("静态分析，项目：" + projectName + "，语言：" + language);
 				
+				LOGGER.info("使用depends解析项目，项目路径：" + projectPath);
 				DependsEntityRepoExtractor extractor = DependsEntityRepoExtractorImpl.getInstance();
 				extractor.setLanguage(language);
 				extractor.setProjectPath(projectPath);
@@ -92,33 +90,18 @@ public class InsertDataMain {
 				insertBuildInfo(yaml);
 			}*/
 
-			/*boolean extractFromMicroService = true;
-			if(extractFromMicroService) {
-				ExtractorForNodesAndRelationsImpl jaegerExtractor = null;
-				File callBetweenServiceDirectory = new File("src/main/resources/dynamic/microservice/train-ticket");
-				if(callBetweenServiceDirectory.exists() && callBetweenServiceDirectory.isDirectory()) {
-					for(File f : callBetweenServiceDirectory.listFiles()) {
-						if(f.isFile()) {
-							jaegerExtractor = new JaegerTraceInserterFromJSONFile(f.getAbsolutePath());
-							jaegerExtractor.addNodesAndRelations();
-						}
-					}
-				}
-				String featuresJsonPath = "src/main/resources/features/train-ticket/features.json";
-				ExtractorForNodesAndRelationsImpl featureExtractor = new FeatureAndTestCaseInserter(featuresJsonPath);
-				featureExtractor.addNodesAndRelations();
-			}*/
-
 			/**
 			 * 动态分析
 			 */
 			if (yaml.isAnalyseDynamic()) {
-				System.out.println("动态分析");
-				insertDynamicFromJavassist(yaml);
+				LOGGER.info("动态运行分析");
+				insertDynamic(yaml);
+				
+				LOGGER.info("引入特性与测试用例");
+				String featuresJsonPath = "src/main/resources/features/train-ticket/features-javassist.json";
+				ExtractorForNodesAndRelationsImpl featureExtractor = new FeatureAndTestCaseInserter(featuresJsonPath);
+				featureExtractor.addNodesAndRelations();
 			}
-			String featuresJsonPath = "src/main/resources/features/train-ticket/features-javassist.json";
-			ExtractorForNodesAndRelationsImpl featureExtractor = new FeatureAndTestCaseInserter(featuresJsonPath);
-			featureExtractor.addNodesAndRelations();
 			/// FIXME
 			// 其它
 
@@ -129,46 +112,28 @@ public class InsertDataMain {
 		}
 	}
 	
-	public static void insertDynamicFromJavassist(YamlUtils.YamlObject yaml) throws Exception {
+	public static void insertDynamic(YamlUtil.YamlObject yaml) throws Exception {
 		String[] dynamicFileSuffixes = null;
 		for (Language language : Language.values()) {
-			if (language == Language.java) {
+			switch(language) {
+			case java:
 				dynamicFileSuffixes = new String[yaml.getDynamicJavaFileSuffix().size()];
 				yaml.getDynamicJavaFileSuffix().toArray(dynamicFileSuffixes); // 后缀为.log
 				File dynamicDirectory = new File(yaml.getDynamicDirectoryRootPath());
 				List<File> result = new ArrayList<>();
-				FileUtils.listFiles(dynamicDirectory, result, dynamicFileSuffixes);
+				FileUtil.listFiles(dynamicDirectory, result, dynamicFileSuffixes);
 				File[] files = new File[result.size()];
 				result.toArray(files);
 				DynamicInserterForNeo4jService stubJavaInserter = new JavassistDynamicInserter();
 				stubJavaInserter.setDynamicFunctionCallFiles(files);
 				stubJavaInserter.addNodesAndRelations();
-			} else {
-				///FIXME
+				break;
+			case cpp:
+				/// FIXME
 			}
 		}
 	}
 
-	public static void insertDynamicFromStub(YamlUtils.YamlObject yaml) throws Exception {
-		String[] dynamicFileSuffixes = null;
-		for (Language language : Language.values()) {
-			if (language == Language.java) {
-				dynamicFileSuffixes = new String[yaml.getDynamicJavaFileSuffix().size()];
-				yaml.getDynamicJavaFileSuffix().toArray(dynamicFileSuffixes); // 后缀为.log
-				File dynamicDirectory = new File(yaml.getDynamicDirectoryRootPath());
-				List<File> result = new ArrayList<>();
-				FileUtils.listFiles(dynamicDirectory, result, dynamicFileSuffixes);
-				File[] files = new File[result.size()];
-				result.toArray(files);
-				DynamicInserterForNeo4jService stubJavaInserter = new StubJavaForJaegerDynamicInserter();
-				stubJavaInserter.setDynamicFunctionCallFiles(files);
-				stubJavaInserter.addNodesAndRelations();
-			} else {
-				///FIXME
-			}
-		}
-	}
-	
 	/*public static void insertBuildInfo(YamlUtils.YamlObject yaml) throws Exception {
 		for (String l : yaml.getAnalyseLanguages()) {
 			Language language = Language.valueOf(l);

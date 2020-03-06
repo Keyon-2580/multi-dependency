@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 
+@Deprecated
 public class JaegerTraceInserterFromJSONFile extends JaegerTraceInserter {
 	
 	private String jsonFilePath;

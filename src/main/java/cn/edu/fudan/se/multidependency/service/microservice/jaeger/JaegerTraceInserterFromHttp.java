@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.microservice.jaeger.JaegerUtil;
 
+@Deprecated
 public class JaegerTraceInserterFromHttp extends JaegerTraceInserter {
 
 	public JaegerTraceInserterFromHttp(String traceId) {

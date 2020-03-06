@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.ScenarioDefineTestCase;
 
 @Repository
+@Deprecated
 public interface ScenarioDefineTestCaseRepository extends Neo4jRepository<ScenarioDefineTestCase, Long> {
 
 }

@@ -31,7 +31,6 @@ import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 public class MultipleDependencyApp {
 	
 	public static void main(String[] args) {
-//		InsertDataMain.insert(args);
 		SpringApplication.run(MultipleDependencyApp.class, args);
 	}
 	
@@ -43,7 +42,8 @@ public class MultipleDependencyApp {
 			List<FunctionDynamicCallFunction> calls = dynamicAnalyseService.findFunctionDynamicCallsByProject(project);
 			dynamicCalls.put(project, calls);
 		}
-		ProjectOrganizationService organization = new ProjectOrganizationService(projects, dynamicCalls);
+//		ProjectOrganizationService organization = new ProjectOrganizationService(projects, dynamicCalls);
+		ProjectOrganizationService organization = new ProjectOrganizationService(projects);
 		return organization;
 	}
 
