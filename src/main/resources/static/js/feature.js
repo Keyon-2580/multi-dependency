@@ -13,7 +13,8 @@ var showMicroServiceInCytoscape = function(elements, container, nodeGraphId, btn
     				'height': 30,
     				'width': 30,
     				'background-color': 'green',
-					'content': 'data(name)'
+					'content': 'data(name)',
+					'font-size' : 25
     			}
     		},
 			{
@@ -269,7 +270,10 @@ var showFeatureToTestCasesCytoscape = function(containerDivId) {
     		console.log(result);
 	    	if(result.result == "success") {
 	    		console.log(result.value)
-	    		showDataInCytoscape(containerDivId, result.value, "breadthfirst")
+	    		var cy = showDataInCytoscape(containerDivId, result.value, "breadthfirst")
+	    		$("#test").click(function(){
+	    		    $('#png-eg').attr('src', cy.png());
+	    		});
 	    	}
     	}
     });
@@ -278,12 +282,13 @@ var toHTML = function(nodeType, nodeGraphId, cytoscapeDiv) {
 	var html = "";
 	if(nodeType == "trace") {
 		html += 
+			"<div class='col-sm-12 div_cytoscape_content' id='div_cytoscape_content'></div>"+
 			"<div class='col-sm-12' style='margin-bottom:10px;'>" +
 			"<div class='col-sm-1'><button class='btn btn-default' id='btn_animate'>流程</button></div>" +
 			"<div class='col-sm-1'><button class='btn btn-default' id='btn_init'>初始</button></div>" +
 			"<div class='col-sm-1'><button class='btn btn-default' id='btn_back'>返回上一歩</button></div>" +
-			"</div>" +
-			"<div class='col-sm-12 div_cytoscape_content' id='div_cytoscape_content'></div>";
+			"</div>" 
+			;
 		cytoscapeDiv.html(html);
 		showMicroServiceForTrace(nodeGraphId, $("#div_cytoscape_content"), $("#btn_init"), $("#btn_back"), $("#btn_animate"))
 	} else if(nodeType == "testcase") {

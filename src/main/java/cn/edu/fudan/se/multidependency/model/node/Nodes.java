@@ -64,9 +64,10 @@ public class Nodes {
 	}
 
 	/**
-	 * 
+	 * 表示该节点属于哪个Project，Project可以为null
 	 * @param node
-	 * @param inProject
+	 * @param inProject 
+	 * @return
 	 */
 	public void addNode(Node node, Project inProject) {
 		allNodes.add(node);

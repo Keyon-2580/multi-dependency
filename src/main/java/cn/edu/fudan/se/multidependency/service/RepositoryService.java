@@ -92,6 +92,12 @@ public final class RepositoryService implements InserterForNeo4j {
 		}
 	}
 
+	/**
+	 * 表示该节点属于哪个Project，Project可以为null
+	 * @param node
+	 * @param inProject 
+	 * @return
+	 */
 	@Override
 	public boolean addNode(Node node, Project inProject) {
 		this.nodes.addNode(node, inProject);

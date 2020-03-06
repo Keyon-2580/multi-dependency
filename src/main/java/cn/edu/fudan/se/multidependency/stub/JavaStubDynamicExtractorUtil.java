@@ -88,7 +88,9 @@ public class JavaStubDynamicExtractorUtil {
 			functionExecution.setLanguage(json.getString("language"));
 			functionExecution.setTime(json.getString("time"));
 			functionExecution.setProject(json.getString("project"));
-			functionExecution.setInFile(json.getString("inFile"));
+			String file = json.getString("inFile");
+			file = file == null ? json.getString("file") : file;
+			functionExecution.setInFile(file);
 			String function = json.getString("function");
 			String functionName = function.substring(0, function.indexOf("("));
 			functionExecution.setFunctionName(functionName);

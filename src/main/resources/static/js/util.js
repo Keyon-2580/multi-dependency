@@ -13,6 +13,7 @@ var showDataInCytoscape = function(container, elements, layout="breadthfirst"){
     	layout: {
     		name: layout
     	},
+//    	boxSelectionEnabled: true,
     	style: [
     		{
     			selector: 'node',
@@ -44,19 +45,21 @@ var showDataInCytoscape = function(container, elements, layout="breadthfirst"){
     		{
     			selector: 'node[type="feature"]',
     			style: {
-    				'height': 15,
-    				'width': 15,
+    				'height': 35,
+    				'width': 35,
     				'background-color': 'red',
-					'content': 'data(value)'
+					'content': 'data(value)',
+					'font-size' : 25
     			}
     		},
     		{
     			selector: 'node[type="testcase"]',
     			style: {
-    				'height': 15,
-    				'width': 15,
+    				'height': 35,
+    				'width': 35,
     				'background-color': 'green',
-					'content': 'data(value)'
+					'content': 'data(value)',
+					'font-size' : 25
     			}
     		},
 			{
@@ -85,7 +88,7 @@ var showDataInCytoscape = function(container, elements, layout="breadthfirst"){
     	],
     	elements: elements
     });
-	
+	return cy;
 };
 
 

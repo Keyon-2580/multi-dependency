@@ -1,0 +1,81 @@
+{
+	"features" : [
+		{
+			"id" : 0,
+			"name" : "查询车票",
+			"description" : "能够根据输入查询所需车票"
+		},
+		{
+			"id" : 1,
+			"name" : "订票",
+			"description" : "能够订购查询的车票"
+		},
+		{
+			"id" : 2,
+			"name" : "查询所有保险",
+			"description" : "能够查询所有保险"
+		},
+		{
+			"id" : 3,
+			"name" : "查询所有餐品",
+			"description" : "能够查询所有餐品"
+		},
+		{
+			"id" : 4,
+			"name" : "查询账户所有联系方式",
+			"description" : "能够查询当前登录账户的所有联系方式"
+		},
+		{
+			"id" : 5,
+			"name" : "创建新联系方式",
+			"description" : "在订票页面填写新的账户联系方式"
+		}
+	],
+	"testcases" : [
+		{
+			"id" : 0,
+			"name" : "查票-00",
+			"input" : {
+				"Starting" : "Shang Hai",
+				"Terminal" : "Su Zhou",
+				"Date" : "0305",
+				"Type" : "GaoTie Dongche"
+			},
+			"success" : true,
+			"features" : [
+				0
+			],
+			"traces" : [
+				"0ec6ca77-9daf-4d0a-9170-4e7bf3a5738c"
+			]
+		}
+		{
+			"id" : 1,
+			"name" : "订票-00",
+			"description" : "查完票（查票-00）后，点击Booking订票",
+			"input" : {
+				"Starting" : "ShangHai",
+				"Terminal" : "SuZhou",
+				"Date" : "0305",
+				"Type" : "GaoTie Dongche",
+				"Trip Id" : "D1345",
+				"Train Type Id" : "DongCheOne",
+				"Select Seat" : "1st - 50.0",
+				"Select Contacts" : "No. 0",
+				"Assurance" : "No Assurance",
+				"Need Food" : false,
+				"Consign" : false
+			},
+			"success" : true,
+			"features" : [
+				1, 2, 3, 4
+			],
+			"traces" : [
+				"13b3055f-baf9-4b2e-a97e-e20514291265",
+				"61bcd225-b6c0-4be9-afb8-819ae179e35e",
+				"e64f2424-ee64-490b-981f-a27a9247d4be",
+				"2294567a-6acd-4248-9a08-827dc012b991"
+			]
+		}
+	]
+}

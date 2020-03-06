@@ -21,6 +21,12 @@ public abstract class ExtractorForNodesAndRelationsImpl implements ExtractorForN
 	@Override
 	public abstract void addNodesAndRelations();
 	
+	/**
+	 * 表示该节点属于哪个Project，Project可以为null
+	 * @param node
+	 * @param inProject 
+	 * @return
+	 */
 	protected boolean addNode(Node node, Project inProject) {
 		return this.repository.addNode(node, inProject);
 	}

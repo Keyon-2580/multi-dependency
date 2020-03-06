@@ -100,7 +100,7 @@ public class FeatureOrganizationService {
 			testcaseJson.put("tags", tags);
 			testcaseJson.put("href", testcase.getId());
 			
-			JSONArray features = new JSONArray();
+			JSONArray testcaseNodes = new JSONArray();
 			for(TestCaseExecuteFeature execute : executes) {
 				JSONObject featureJson = new JSONObject();
 				featureJson.put("text", execute.getFeature().getFeatureId() + ":" + execute.getFeature().getFeatureName());
@@ -108,9 +108,48 @@ public class FeatureOrganizationService {
 				tags.add("feature");
 				featureJson.put("tags", tags);
 				featureJson.put("href", execute.getFeature().getId());
-				features.add(featureJson);
+				testcaseNodes.add(featureJson);
 			}
-			testcaseJson.put("nodes", features);
+			
+			List<TestCaseRunTrace> runs = testCaseRunTraces.get(testcase);
+			for(TestCaseRunTrace run : runs) {
+				JSONObject traceJson = new JSONObject();
+				Trace trace = run.getTrace();
+				traceJson.put("text", trace.getTraceId());
+				tags = new JSONArray();
+				tags.add("trace");
+				traceJson.put("tags", tags);
+				traceJson.put("href", trace.getId());
+				
+				JSONArray microservices = new JSONArray();
+				for(MicroService ms : findRelatedMicroServiceForTraces(trace)) {
+					JSONObject msJson = new JSONObject();
+					msJson.put("text", ms.getName());
+					tags = new JSONArray();
+					tags.add("microservice");
+					msJson.put("tags", tags);
+					msJson.put("href", ms.getId());
+					JSONArray spansArray = new JSONArray();
+					for(Span span : findMicroServiceCreateSpansInTraces(ms, trace)) {
+						JSONObject spanJson = new JSONObject();
+						spanJson.put("text", span.getOperationName());
+						tags = new JSONArray();
+						tags.add("span");
+						tags.add(span.getOrder());
+						spanJson.put("tags", tags);
+						spanJson.put("href", span.getId());
+						spansArray.add(spanJson);
+					}
+					msJson.put("nodes", spansArray);
+					
+					microservices.add(msJson);
+				}
+				traceJson.put("nodes", microservices);
+				
+				testcaseNodes.add(traceJson);
+			}
+			
+			testcaseJson.put("nodes", testcaseNodes);
 			result.add(testcaseJson);
 		}
 		return result;

@@ -21,7 +21,8 @@ data:
       analyse: true
 #      directory_root_path: src/main/resources/dynamic/kieker
 #      directory_root_path: src/main/resources/dynamic/valgrind
-      directory_root_path: src/main/resources/dynamic/stub/train-ticket/logs
+#      directory_root_path: src/main/resources/dynamic/stub/train-ticket/logs
+      directory_root_path: src/main/resources/dynamic/javassist/train-ticket/logs
 #      dynamic_java_file_suffix: [.dat]
       dynamic_java_file_suffix: [.log]
       dynamic_cpp_file_suffix: [.dot, .out]

@@ -21,6 +21,7 @@ import cn.edu.fudan.se.multidependency.service.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractorImpl;
 import cn.edu.fudan.se.multidependency.service.dynamic.DynamicInserterForNeo4jService;
+import cn.edu.fudan.se.multidependency.service.dynamic.JavassistDynamicInserter;
 import cn.edu.fudan.se.multidependency.service.dynamic.StubJavaForJaegerDynamicInserter;
 import cn.edu.fudan.se.multidependency.service.microservice.jaeger.JaegerTraceInserterFromJSONFile;
 import cn.edu.fudan.se.multidependency.utils.FileUtils;
@@ -91,7 +92,7 @@ public class InsertDataMain {
 				insertBuildInfo(yaml);
 			}*/
 
-			boolean extractFromMicroService = true;
+			/*boolean extractFromMicroService = true;
 			if(extractFromMicroService) {
 				ExtractorForNodesAndRelationsImpl jaegerExtractor = null;
 				File callBetweenServiceDirectory = new File("src/main/resources/dynamic/microservice/train-ticket");
@@ -106,15 +107,18 @@ public class InsertDataMain {
 				String featuresJsonPath = "src/main/resources/features/train-ticket/features.json";
 				ExtractorForNodesAndRelationsImpl featureExtractor = new FeatureAndTestCaseInserter(featuresJsonPath);
 				featureExtractor.addNodesAndRelations();
-			}
+			}*/
 
 			/**
 			 * 动态分析
 			 */
 			if (yaml.isAnalyseDynamic()) {
 				System.out.println("动态分析");
-				insertDynamicFromStub(yaml);
+				insertDynamicFromJavassist(yaml);
 			}
+			String featuresJsonPath = "src/main/resources/features/train-ticket/features-javassist.json";
+			ExtractorForNodesAndRelationsImpl featureExtractor = new FeatureAndTestCaseInserter(featuresJsonPath);
+			featureExtractor.addNodesAndRelations();
 			/// FIXME
 			// 其它
 
@@ -122,6 +126,26 @@ public class InsertDataMain {
 			repository.insertToNeo4jDataBase();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public static void insertDynamicFromJavassist(YamlUtils.YamlObject yaml) throws Exception {
+		String[] dynamicFileSuffixes = null;
+		for (Language language : Language.values()) {
+			if (language == Language.java) {
+				dynamicFileSuffixes = new String[yaml.getDynamicJavaFileSuffix().size()];
+				yaml.getDynamicJavaFileSuffix().toArray(dynamicFileSuffixes); // 后缀为.log
+				File dynamicDirectory = new File(yaml.getDynamicDirectoryRootPath());
+				List<File> result = new ArrayList<>();
+				FileUtils.listFiles(dynamicDirectory, result, dynamicFileSuffixes);
+				File[] files = new File[result.size()];
+				result.toArray(files);
+				DynamicInserterForNeo4jService stubJavaInserter = new JavassistDynamicInserter();
+				stubJavaInserter.setDynamicFunctionCallFiles(files);
+				stubJavaInserter.addNodesAndRelations();
+			} else {
+				///FIXME
+			}
 		}
 	}
 
