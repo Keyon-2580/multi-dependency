@@ -9,6 +9,7 @@ import java.util.Map;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
@@ -134,7 +135,7 @@ public abstract class JaegerTraceInserter extends ExtractorForNodesAndRelationsI
 			Span span = sortedSpans.get(i);
 			span.setOrder(i);
 			String serviceName = span.getServiceName();
-			Project project = this.getNodes().findProjectByNameAndLanguage(serviceName, "java");
+			Project project = this.getNodes().findProject(serviceName, Language.java);
 			MicroService microService = getNodes().findMicroServiceByName(serviceName);
 			if(project == null || microService == null) {
 				throw new Exception("error: span的serviceName不是一个项目 " + serviceName);

@@ -43,4 +43,13 @@ public class Relations {
 		List<? extends Relation> relations = allRelations.get(relationType);
 		return relations == null ? new ArrayList<>() : relations;
 	}
+	
+	public boolean existRelation(Relation relation) {
+		List<Relation> relations = this.allRelations.get(relation.getRelationType());
+		if(relations == null) {
+			return false;
+		}
+		return relations.contains(relation);
+	}
+	
 }

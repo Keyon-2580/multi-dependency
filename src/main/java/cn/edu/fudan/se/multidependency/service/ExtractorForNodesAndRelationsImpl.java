@@ -46,4 +46,14 @@ public abstract class ExtractorForNodesAndRelationsImpl implements ExtractorForN
 		return repository.getRelations();
 	}
 
+	@Override
+	public boolean existNode(Node node) {
+		return repository.existNode(node);
+	}
+	
+	@Override
+	public boolean existRelation(Relation relation) {
+		return repository.existRelation(relation);
+	}
+
 }

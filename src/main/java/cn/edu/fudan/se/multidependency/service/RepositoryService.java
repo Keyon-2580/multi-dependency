@@ -84,4 +84,14 @@ public final class RepositoryService implements InserterForNeo4j {
 		this.nodes.addNode(node, inProject);
 		return true;
 	}
+
+	@Override
+	public boolean existNode(Node node) {
+		return this.nodes.existNode(node);
+	}
+
+	@Override
+	public boolean existRelation(Relation relation) {
+		return this.relations.existRelation(relation);
+	}
 }

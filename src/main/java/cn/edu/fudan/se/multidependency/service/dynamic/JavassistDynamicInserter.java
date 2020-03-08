@@ -10,9 +10,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
@@ -23,12 +26,13 @@ import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCa
 import cn.edu.fudan.se.multidependency.utils.TimeUtil;
 
 public class JavassistDynamicInserter extends JavaDynamicInserter {
+	private static final Logger LOGGER = LoggerFactory.getLogger(JavassistDynamicInserter.class);
 
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
-		
+		LOGGER.info("提取trace");
 		extractMicroServiceCall();
-		
+		LOGGER.info("提取函数调用");
 		super.extractNodesAndRelations();
 	}
 	
@@ -81,7 +85,7 @@ public class JavassistDynamicInserter extends JavaDynamicInserter {
 						span.setTime(TimeUtil.changeTimeStrToLong(json.getString("time")));
 						spanToCallMethod.put(span, json.getString("callMethod"));
 						
-						Project project = this.getNodes().findProjectByNameAndLanguage(serviceName, "java");
+						Project project = this.getNodes().findProject(serviceName, Language.java);
 						MicroService microService = getNodes().findMicroServiceByName(serviceName);
 						if(project == null || microService == null) {
 							throw new Exception("error: span的serviceName不是一个项目 " + serviceName);
@@ -99,6 +103,7 @@ public class JavassistDynamicInserter extends JavaDynamicInserter {
 				}
 			}
 		}
+		
 		for(String spanId : spanIdToParentSpanId.keySet()) {
 			String parentSpanId = spanIdToParentSpanId.get(spanId);
 			if("-1".equals(parentSpanId)) {

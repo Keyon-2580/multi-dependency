@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
@@ -29,19 +30,12 @@ public class Nodes {
 		return new ArrayList<>(projects);
 	}
 	
-	public List<Project> findProjectByName(String name) {
-		List<Project> result = new ArrayList<>();
-		for(Project project : projects) {
-			if(project.getProjectName().equals(name)) {
-				result.add(project);
-			}
+	public Project findProject(String name, Language language) {
+		if(language == null) {
+			return null;
 		}
-		return result;
-	}
-	
-	public Project findProjectByNameAndLanguage(String name, String language) {
 		for(Project project : projects) {
-			if(project.getProjectName().equals(name) && project.getLanguage().equals(language)) {
+			if(project.getProjectName().equals(name) && project.getLanguage().equals(language.toString())) {
 				return project;
 			}
 		}
@@ -125,6 +119,15 @@ public class Nodes {
 		return result == null ? new HashMap<>() : result;
 	}
 	
+	/**
+	 * 某节点是否存在
+	 * @param node
+	 * @return
+	 */
+	public boolean existNode(Node node) {
+		return allNodes.contains(node);
+	}
+	
 	public Map<String, List<Function>> findFunctionsInProject(Project project) {
 		Map<String, List<Function>> result = new HashMap<>();
 		if(project == null) {
@@ -184,6 +187,10 @@ public class Nodes {
 		return features;
 	}
 	
+	/**
+	 * traceId to trace
+	 * @return
+	 */
 	public Map<String, Trace> findTraces() {
 		Map<String, Trace> traces = new HashMap<>();
 		findNodesByNodeType(NodeType.Trace).forEach(node -> {

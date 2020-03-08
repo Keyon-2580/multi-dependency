@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.service;
+package cn.edu.fudan.se.multidependency.service.dynamic;
 
 import java.io.File;
 import java.util.HashMap;
@@ -13,13 +13,14 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
+import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelationsImpl;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 
-public class FeatureAndTestCaseInserter extends ExtractorForNodesAndRelationsImpl {
+public class FeatureAndTestCaseFromJSONFileForMicroserviceInserter extends ExtractorForNodesAndRelationsImpl {
 	
 	private Map<Integer, Feature> features = new HashMap<>();
 	
-	public FeatureAndTestCaseInserter(String featureConfigPath) {
+	public FeatureAndTestCaseFromJSONFileForMicroserviceInserter(String featureConfigPath) {
 		this.featureConfigPath = featureConfigPath;
 	}
 	
@@ -67,7 +68,7 @@ public class FeatureAndTestCaseInserter extends ExtractorForNodesAndRelationsImp
 			JSONObject testcaseTemp = testcasesArray.getJSONObject(i);
 			TestCase testcase = new TestCase();
 			testcase.setEntityId(generateEntityId());
-			testcase.setTestCaseId(testcaseTemp.getLong("id"));
+			testcase.setTestCaseId(testcaseTemp.getInteger("id"));
 			testcase.setInputContent(testcaseTemp.get("input").toString());
 			testcase.setSuccess(testcaseTemp.getBooleanValue("success"));
 			testcase.setTestCaseName(testcaseTemp.getString("name"));

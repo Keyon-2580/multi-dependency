@@ -12,13 +12,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.exception.DynamicLogSentenceErrorException;
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 public class JavaDynamicUtil {
+	private static final Logger LOGGER = LoggerFactory.getLogger(JavaDynamicUtil.class);
 	
 	/**
 	 * traceId spanId depth 
@@ -30,9 +34,10 @@ public class JavaDynamicUtil {
 			JavaDynamicFunctionExecution execution) {
 		String traceId = execution.getTraceId();
 		String spanId = execution.getSpanId();
-		// 去掉没有traceId或没有spanId的函数执行
 		if(StringUtils.isBlank(traceId) || StringUtils.isBlank(spanId)) {
 			return;
+//			traceId = execution.getThreadId() + "_" + execution.getThreadName();
+//			spanId = traceId;
 		}
 		Long depth = execution.getDepth();
 		Map<String, Map<Long, List<JavaDynamicFunctionExecution>>> spanResult = result.get(traceId);
@@ -85,6 +90,7 @@ public class JavaDynamicUtil {
 	
 	public static JavaDynamicFunctionExecution extractByJaegerJson(String sentence) throws DynamicLogSentenceErrorException {
 		try {
+			LOGGER.info(sentence);
 			JavaDynamicFunctionExecution functionExecution = new JavaDynamicFunctionExecution();
 			functionExecution.setSentence(sentence);
 			JSONObject json = JSONObject.parseObject(sentence);
@@ -109,58 +115,12 @@ public class JavaDynamicUtil {
 			functionExecution.setRemarks(json.getJSONObject("remarks"));
 			functionExecution.setTraceId(json.getString("traceId"));
 			functionExecution.setSpanId(json.getString("spanId"));
+			functionExecution.setThreadId(json.getLong("currentThreadId"));
+			functionExecution.setThreadName(json.getString("currentThreadName"));
 			return functionExecution;
 		} catch (Exception e) {
 			throw new DynamicLogSentenceErrorException(sentence);
 		}
-	}
-	
-	/**
-	 * 从同名的Function中找到与dynamicFunction的参数对应的Function
-	 * @param dynamicFunction
-	 * @param functions
-	 * @return
-	 */
-	public static Function findFunctionWithDynamic(JavaDynamicFunctionExecution dynamicFunction, List<Function> functions) {
-		// Function根据参数排序
-		functions.sort(new Comparator<Function>() {
-			@Override
-			public int compare(Function o1, Function o2) {
-				if(o1.getParameters() == null || o2.getParameters() == null) {
-					return -1;
-				}
-				return o1.getParameters().size() - o2.getParameters().size();
-			}
-		});
-		for(Function function : functions) {
-			// 方法名是否相同
-			if(!dynamicFunction.getFunctionName().equals(function.getFunctionName())) {
-				continue;
-			}
-			// 方法参数数量是否相同
-			if(function.getParameters().size() != dynamicFunction.getParameters().size()) {
-				continue;
-			}
-			// 方法名相同且只有一个参数，直接返回此Function
-			if(functions.size() == 1) {
-				return function;
-			}
-			// 参数一一对应
-			boolean flag = false;
-			for(int i = 0; i < function.getParameters().size(); i++) {
-				// 动态分析得到的参数的类型是完整的
-				if(dynamicFunction.getParameters().get(i).indexOf(function.getParameters().get(i)) < 0) {
-					// 参数没有对应
-					flag = true;
-					break;
-				}
-			}
-			if(flag) {
-				continue;
-			}
-			return function;
-		}
-		return null;
 	}
 	
 	/**
@@ -190,4 +150,25 @@ public class JavaDynamicUtil {
 		return midIndex;
 	}
 	
+	@Data
+	@EqualsAndHashCode()
+	public static class JavaDynamicFunctionExecution {
+		protected String language;
+		protected String time;
+		protected String project;
+		protected String inFile;
+		protected Long order;
+		protected Long depth;
+		protected String functionName;
+		protected List<String> parameters = new ArrayList<>();
+		public void addParameter(String parameter) {
+			this.parameters.add(parameter);
+		}
+		protected JSONObject remarks;
+		protected String sentence;
+		protected String traceId;
+		protected String spanId;
+		protected Long threadId;
+		protected String threadName;
+	}
 }

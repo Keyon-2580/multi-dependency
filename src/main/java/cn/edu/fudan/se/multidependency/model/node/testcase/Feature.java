@@ -35,6 +35,12 @@ public class Feature implements Node {
     
     private Integer parentFeatureId;
     
+    public Feature(Integer featureId, String featureName, String description) {
+    	this.featureId = featureId;
+    	this.featureName = featureName;
+    	this.description = description;
+    }
+    
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();

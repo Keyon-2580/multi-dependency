@@ -26,4 +26,8 @@ public interface InserterForNeo4j {
 	
 	public Relations getRelations();
 	
+	public boolean existNode(Node node);
+	
+	public boolean existRelation(Relation relation);
+	
 }

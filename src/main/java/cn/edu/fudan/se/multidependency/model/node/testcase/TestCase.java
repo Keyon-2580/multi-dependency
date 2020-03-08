@@ -33,10 +33,18 @@ public class TestCase implements Node {
     
     private Long entityId;
     
-    private Long testCaseId;
+    private Integer testCaseId;
     
     private String description;
     
+	public TestCase(Integer testCaseId, String testCaseName, String inputContent, boolean success, String description) {
+		this.testCaseId = testCaseId;
+		this.testCaseName = testCaseName;
+		this.inputContent = inputContent;
+		this.success = success;
+		this.description = description;
+	}
+	
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
