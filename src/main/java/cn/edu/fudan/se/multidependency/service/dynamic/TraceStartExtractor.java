@@ -1,8 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.dynamic;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -13,7 +11,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.edu.fudan.se.multidependency.utils.JavaDynamicUtil;
 import cn.edu.fudan.se.multidependency.utils.JavaDynamicUtil.JavaDynamicFunctionExecution;
 import cn.edu.fudan.se.multidependency.utils.TimeUtil;
 import lombok.Data;
@@ -71,17 +68,14 @@ public class TraceStartExtractor extends DynamicInserterForNeo4jService {
 
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
-		for(File file : dynamicFunctionCallFiles) {
-			try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-				String line = null;
-				while ((line = reader.readLine()) != null) {
-					JavaDynamicFunctionExecution execution = JavaDynamicUtil.extractJavaDynamicFunctionExecution(line);
-					if(JavaDynamicFunctionExecution.TRACE_START_PARENT_SPAN_ID.equals(execution.getParentSpanId())) {
-						String traceId = execution.getTraceId();
-						if(traceStartProjects.get(traceId) == null) {
-							TraceStartProject project = new TraceStartProject(execution);
-							traceStartProjects.put(traceId, project);
-						}
+		for(String projectName : this.javaExecutionsGroupByProject.keySet()) {
+			List<JavaDynamicFunctionExecution> executions = this.javaExecutionsGroupByProject.get(projectName);
+			for(JavaDynamicFunctionExecution execution : executions) {
+				if(JavaDynamicFunctionExecution.TRACE_START_PARENT_SPAN_ID.equals(execution.getParentSpanId())) {
+					String traceId = execution.getTraceId();
+					if(traceStartProjects.get(traceId) == null) {
+						TraceStartProject project = new TraceStartProject(execution);
+						traceStartProjects.put(traceId, project);
 					}
 				}
 			}

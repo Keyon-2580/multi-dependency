@@ -1,8 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.dynamic;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -13,109 +11,270 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSONObject;
-
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
+import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanStartWithFunction;
+import cn.edu.fudan.se.multidependency.utils.JavaDynamicUtil;
+import cn.edu.fudan.se.multidependency.utils.JavaDynamicUtil.JavaDynamicFunctionExecution;
 import cn.edu.fudan.se.multidependency.utils.TimeUtil;
 
-public class JavassistDynamicInserter extends JavaDynamicInserter {
+public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(JavassistDynamicInserter.class);
+
+	protected Map<Project, Map<String, List<Function>>> projectToFunctions;
+	
+	/*protected Map<String, List<JavaDynamicFunctionExecution>> javaExecutionsGroupByProject;*/
 	
 	public JavassistDynamicInserter(File[] dynamicFunctionCallFiles) {
 		super(dynamicFunctionCallFiles);
+		projectToFunctions = new HashMap<>();
 	}
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(JavassistDynamicInserter.class);
 
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
 		LOGGER.info("提取trace");
 		extractMicroServiceCall();
 		LOGGER.info("提取函数调用");
-		super.extractNodesAndRelations();
+		extractDynamicFunctionCalls();
+	}
+	
+	private void extractDynamicFunctionCalls() {
+		for(String projectName : javaExecutionsGroupByProject.keySet()) {
+			// 分项目
+			Project project = this.getNodes().findProject(projectName, Language.java);
+			List<JavaDynamicFunctionExecution> executions = javaExecutionsGroupByProject.get(projectName);
+			Map<String, Map<String, Map<Long, List<JavaDynamicFunctionExecution>>>> executionsGroupByTrace = new HashMap<>();
+			for(JavaDynamicFunctionExecution execution : executions) {
+				String traceId = execution.getTraceId();
+				String spanId = execution.getSpanId();
+				if(StringUtils.isBlank(traceId) || StringUtils.isBlank(spanId)) {
+//					continue;
+					traceId = projectName;
+					spanId = traceId;
+					execution.setTraceId(traceId);
+					execution.setSpanId(spanId);
+				}
+				Long depth = execution.getDepth();
+				Map<String, Map<Long, List<JavaDynamicFunctionExecution>>> executionsGroupBySpan = executionsGroupByTrace.get(traceId);
+				executionsGroupBySpan = executionsGroupBySpan == null ? new HashMap<>() : executionsGroupBySpan;
+				Map<Long, List<JavaDynamicFunctionExecution>> depthResult = executionsGroupBySpan.get(spanId);
+				depthResult = depthResult == null ? new HashMap<>() : depthResult;
+				List<JavaDynamicFunctionExecution> executionsGroupByDepth = depthResult.get(depth);
+				executionsGroupByDepth = executionsGroupByDepth == null ? new ArrayList<>() : executionsGroupByDepth;
+				executionsGroupByDepth.add(execution);
+				depthResult.put(depth, executionsGroupByDepth);
+				executionsGroupBySpan.put(spanId, depthResult);
+				executionsGroupByTrace.put(traceId, executionsGroupBySpan);
+			}
+			extractDynamicFunctionCalls(executionsGroupByTrace, project);
+		}
+	}
+
+	private void extractDynamicFunctionCalls(
+			Map<String, Map<String, Map<Long, List<JavaDynamicFunctionExecution>>>> allDynamicFunctionGroupByTrace, Project project) {
+		for (String traceId : allDynamicFunctionGroupByTrace.keySet()) {
+			Map<String, Map<Long, List<JavaDynamicFunctionExecution>>> spansResult = allDynamicFunctionGroupByTrace.get(traceId);
+			for (String spanId : spansResult.keySet()) {
+				Map<Long, List<JavaDynamicFunctionExecution>> depthResult = spansResult.get(spanId);
+				for (Long depth : depthResult.keySet()) {
+					List<JavaDynamicFunctionExecution> executions = depthResult.get(depth);
+					for (JavaDynamicFunctionExecution execution : executions) {
+						Map<String, List<Function>> functionsWithSameFunctionName = projectToFunctions.get(project);
+						if (functionsWithSameFunctionName == null) {
+							functionsWithSameFunctionName = this.getNodes().findFunctionsInProject(project);
+							projectToFunctions.put(project, functionsWithSameFunctionName);
+						}
+						if (execution.getDepth() == 0) {
+							if (execution.getOrder() == 0) {
+								// 是某段程序入口
+								List<Function> calledFunctions = functionsWithSameFunctionName.get(execution.getFunctionName());
+								if (calledFunctions == null) {
+									continue;
+								}
+								Function calledFunction = findFunctionWithDynamic(execution, calledFunctions);
+								Span span = this.getNodes().findSpanBySpanId(execution.getSpanId());
+								if (span != null && calledFunction != null) {
+									SpanStartWithFunction spanStartWithFunction = new SpanStartWithFunction(span, calledFunction);
+									addRelation(spanStartWithFunction);
+								}
+							}
+							continue;
+						}
+						// 根据order和depth找到调用calledDynamicFunction的函数
+						List<Long> list = new ArrayList<>();
+						for (JavaDynamicFunctionExecution temp : depthResult.get(execution.getDepth() - 1)) {
+							list.add(temp.getOrder());
+						}
+						JavaDynamicFunctionExecution callerDynamicFunction = null;
+						int callerIndex = JavaDynamicUtil.find(execution.getOrder(), list);
+						if (callerIndex != -1) {
+							callerDynamicFunction = depthResult.get(execution.getDepth() - 1).get(callerIndex);
+						} else {
+							continue;
+						}
+						// 找出在静态分析中对应的calledFunction和callerFunction
+						// 可能存在方法名相同，通过参数精确判断出哪个方法
+						List<Function> calledFunctions = functionsWithSameFunctionName.get(execution.getFunctionName());
+						List<Function> callerFunctions = functionsWithSameFunctionName.get(callerDynamicFunction.getFunctionName());
+						if (calledFunctions == null || callerFunctions == null) {
+							continue;
+						}
+						Function calledFunction = findFunctionWithDynamic(execution, calledFunctions);
+						Function callerFunction = findFunctionWithDynamic(callerDynamicFunction, callerFunctions);
+						if (calledFunction == null || callerFunction == null) {
+							continue;
+						}
+						addRelation(generateFunctionDynamicCall(callerFunction, calledFunction, callerDynamicFunction,execution));
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * 从同名的Function中找到与dynamicFunction的参数对应的Function
+	 * 
+	 * @param dynamicFunction
+	 * @param functions
+	 * @return
+	 */
+	private Function findFunctionWithDynamic(JavaDynamicFunctionExecution dynamicFunction, List<Function> functions) {
+		// Function根据参数排序
+		functions.sort(new Comparator<Function>() {
+			@Override
+			public int compare(Function o1, Function o2) {
+				if (o1.getParameters() == null || o2.getParameters() == null) {
+					return -1;
+				}
+				return o1.getParameters().size() - o2.getParameters().size();
+			}
+		});
+		for (Function function : functions) {
+			// 方法名是否相同
+			if (!dynamicFunction.getFunctionName().equals(function.getFunctionName())) {
+				continue;
+			}
+			// 方法参数数量是否相同
+			if (function.getParameters().size() != dynamicFunction.getParameters().size()) {
+				continue;
+			}
+			// 方法名相同且只有一个参数，直接返回此Function
+			if (functions.size() == 1) {
+				return function;
+			}
+			// 参数一一对应
+			boolean flag = false;
+			for (int i = 0; i < function.getParameters().size(); i++) {
+				// 动态分析得到的参数的类型是完整的
+				if (dynamicFunction.getParameters().get(i).indexOf(function.getParameters().get(i)) < 0) {
+					// 参数没有对应
+					flag = true;
+					break;
+				}
+			}
+			if (flag) {
+				continue;
+			}
+			return function;
+		}
+		return null;
+	}
+
+	private FunctionDynamicCallFunction generateFunctionDynamicCall(Function callerFunction, Function calledFunction,
+			JavaDynamicFunctionExecution callerDynamicFunction, JavaDynamicFunctionExecution calledDynamicFunction) {
+		FunctionDynamicCallFunction relation = new FunctionDynamicCallFunction(callerFunction, calledFunction,
+				calledDynamicFunction.getProject(), calledDynamicFunction.getLanguage());
+		relation.setTraceId(callerDynamicFunction.getTraceId());
+		relation.setSpanId(callerDynamicFunction.getSpanId());
+		relation.setOrder(callerDynamicFunction.getOrder() + ":" + callerDynamicFunction.getDepth() + " -> "
+				+ calledDynamicFunction.getOrder() + ":" + calledDynamicFunction.getDepth());
+		relation.setFromOrder(callerDynamicFunction.getOrder());
+		relation.setToOrder(calledDynamicFunction.getOrder());
+		relation.setFromDepth(callerDynamicFunction.getDepth());
+		relation.setToDepth(calledDynamicFunction.getDepth());
+		return relation;
 	}
 	
 	private Map<Trace, List<Span>> traceToSpans = new HashMap<>();
-	
+
 	private void addSpanToTrace(Trace trace, Span span) {
 		List<Span> spans = traceToSpans.get(trace);
 		spans = spans == null ? new ArrayList<>() : spans;
-		if(!spans.contains(span)) {
+		if (!spans.contains(span)) {
 			spans.add(span);
 		}
 		traceToSpans.put(trace, spans);
 	}
-	
+
 	private Map<Span, String> spanToCallMethod = new HashMap<>();
-	
+
 	private Map<String, String> spanIdToParentSpanId = new HashMap<>();
-	
+
 	private void extractMicroServiceCall() throws Exception {
-		for(File file : dynamicFunctionCallFiles) {
-			try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-				String line = null;
-				while ((line = reader.readLine()) != null) {
-					JSONObject json = JSONObject.parseObject(line);
-					String traceId = json.getString("traceId");
-					String spanId = json.getString("spanId");
-					String parentSpanId = json.getString("parentSpanId");
-					Integer order = json.getInteger("order");
-					Integer depth = json.getInteger("depth");
-					if(StringUtils.isBlank(traceId) || StringUtils.isBlank(spanId) || StringUtils.isBlank(parentSpanId) || order != 0 || depth != 0) {
-						continue;
-					}
-					Trace trace = this.getNodes().findTraces().get(traceId);
-					if(trace == null) {
-						trace = new Trace();
-						trace.setEntityId(generateEntityId());
-						trace.setTraceId(traceId);
-						addNode(trace, null);
-					}
-					Span span = this.getNodes().findSpanBySpanId(spanId);
-					if(span == null) {
-						span = new Span();
-						span.setSpanId(spanId);
-						span.setTraceId(traceId);
-						span.setEntityId(generateEntityId());
-						span.setOperationName(json.getString("function"));
-						span.setApiFunctionName(json.getString("function"));
-						String serviceName = json.getString("project");
-						span.setServiceName(serviceName);
-						span.setTime(TimeUtil.changeTimeStrToLong(json.getString("time")));
-						spanToCallMethod.put(span, json.getString("callMethod"));
-						
-						Project project = this.getNodes().findProject(serviceName, Language.java);
-						MicroService microService = getNodes().findMicroServiceByName(serviceName);
-						if(project == null || microService == null) {
-							throw new Exception("error: span的serviceName不是一个项目 " + serviceName);
-						}
-						addNode(span, project);
-						
-						Contain contain = new Contain(trace, span);
-						addRelation(contain);
-						addSpanToTrace(trace, span);
-						
-						MicroServiceCreateSpan projectCreateSpan = new MicroServiceCreateSpan(microService, span);
-						addRelation(projectCreateSpan);
-					}
-					spanIdToParentSpanId.put(spanId, parentSpanId);
+		for(String projectName : this.javaExecutionsGroupByProject.keySet()) {
+			for(JavaDynamicFunctionExecution execution : javaExecutionsGroupByProject.get(projectName)) {
+				String traceId = execution.getTraceId();
+				String spanId = execution.getSpanId();
+				String parentSpanId = execution.getParentSpanId();
+				Long order = execution.getOrder();
+				Long depth = execution.getDepth();
+				if (StringUtils.isBlank(traceId) || StringUtils.isBlank(spanId) || StringUtils.isBlank(parentSpanId)
+						|| order != 0 || depth != 0) {
+					continue;
 				}
+				Trace trace = this.getNodes().findTraces().get(traceId);
+				if (trace == null) {
+					trace = new Trace();
+					trace.setEntityId(generateEntityId());
+					trace.setTraceId(traceId);
+					addNode(trace, null);
+				}
+				Span span = this.getNodes().findSpanBySpanId(spanId);
+				if (span == null) {
+					span = new Span();
+					span.setSpanId(spanId);
+					span.setTraceId(traceId);
+					span.setEntityId(generateEntityId());
+					span.setOperationName(execution.getFunctionName());
+					span.setApiFunctionName(execution.getFunctionName());
+					String serviceName = projectName;
+					span.setServiceName(serviceName);
+					span.setTime(TimeUtil.changeTimeStrToLong(execution.getTime()));
+					spanToCallMethod.put(span, execution.getCallMethod());
+					
+					Project project = this.getNodes().findProject(serviceName, Language.java);
+					MicroService microService = getNodes().findMicroServiceByName(serviceName);
+					if (project == null || microService == null) {
+						throw new Exception("error: span的serviceName不是一个项目 " + serviceName);
+					}
+					addNode(span, project);
+
+					Contain contain = new Contain(trace, span);
+					addRelation(contain);
+					addSpanToTrace(trace, span);
+
+					MicroServiceCreateSpan projectCreateSpan = new MicroServiceCreateSpan(microService, span);
+					addRelation(projectCreateSpan);
+				}
+				spanIdToParentSpanId.put(spanId, parentSpanId);
 			}
 		}
-		
-		for(String spanId : spanIdToParentSpanId.keySet()) {
+
+		for (String spanId : spanIdToParentSpanId.keySet()) {
 			String parentSpanId = spanIdToParentSpanId.get(spanId);
-			if("-1".equals(parentSpanId)) {
+			if ("-1".equals(parentSpanId)) {
 				continue;
 			}
 			Span parentSpan = this.getNodes().findSpanBySpanId(parentSpanId);
-			if(parentSpan == null) {
+			if (parentSpan == null) {
 				throw new Exception("SpanId为 " + parentSpanId + " 的span不存在");
 			}
 			Span span = this.getNodes().findSpanBySpanId(spanId);
@@ -123,8 +282,8 @@ public class JavassistDynamicInserter extends JavaDynamicInserter {
 			spanCallSpan.setHttpRequestMethod(spanToCallMethod.get(span));
 			addRelation(spanCallSpan);
 		}
-		
-		for(Trace trace : traceToSpans.keySet()) {
+
+		for (Trace trace : traceToSpans.keySet()) {
 			List<Span> sortedSpans = traceToSpans.get(trace);
 			sortedSpans.sort(new Comparator<Span>() {
 				@Override
@@ -132,7 +291,7 @@ public class JavassistDynamicInserter extends JavaDynamicInserter {
 					return o1.getTime().compareTo(o2.getTime());
 				}
 			});
-			for(int i = 0; i < sortedSpans.size(); i++) {
+			for (int i = 0; i < sortedSpans.size(); i++) {
 				Span span = sortedSpans.get(i);
 				span.setOrder(i);
 			}

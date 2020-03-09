@@ -13,15 +13,12 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
-import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelations;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4jServiceFactory;
 import cn.edu.fudan.se.multidependency.service.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractorImpl;
-import cn.edu.fudan.se.multidependency.service.dynamic.FeatureAndTestCaseFromCodeForMicroserviceInserter;
 import cn.edu.fudan.se.multidependency.service.dynamic.FeatureAndTestCaseFromJSONFileForMicroserviceInserter;
 import cn.edu.fudan.se.multidependency.service.dynamic.JavassistDynamicInserter;
 import cn.edu.fudan.se.multidependency.service.dynamic.TraceStartExtractor;
@@ -35,6 +32,7 @@ public class InsertDataMain {
 
 	public static void main(String[] args) throws Exception {
 		insert(args);
+//		checkMicroserviceTrace(args);
 	}
 	
 	public static YamlUtil.YamlObject getYaml(String[] args) throws Exception {
@@ -124,7 +122,7 @@ public class InsertDataMain {
 				}
 				
 				LOGGER.info("引入特性与测试用例，对应到trace");
-				inserter = insertFeatureAndTestCaseByJSONFile("src/main/resources/features/train-ticket/features-javassist.json");
+				inserter = insertFeatureAndTestCaseByJSONFile(yaml.getFeaturesPath());
 				inserter.addNodesAndRelations();
 			}
 			/// FIXME

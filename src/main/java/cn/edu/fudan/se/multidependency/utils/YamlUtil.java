@@ -39,6 +39,8 @@ public class YamlUtil {
 		List<String> dynamicFileSuffix = (List<String>) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("dynamic_file_suffix");
 		result.setDynamicDirectoryRootPath(dynamicDirectoryRootPath);
 		result.setDynamicFileSuffix(dynamicFileSuffix);
+		String featuresPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("features_path");
+		result.setFeaturesPath(featuresPath);
 //		String buildDirectoryRootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("build")).get("directory_root_path");
 //		String buildFilePath = buildDirectoryRootPath+"/"+FileUtil.extractFileName(projectPath)+".txt";
 //		result.setBuildDirectoryRootPath(buildDirectoryRootPath);
@@ -60,6 +62,7 @@ public class YamlUtil {
 		private boolean analyseDynamic;
 		private String dynamicDirectoryRootPath;
 		private List<String> dynamicFileSuffix;
+		private String featuresPath;
 		
 		private boolean analyseBuild;
 		private String buildDirectoryRootPath;

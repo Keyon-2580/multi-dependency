@@ -6,14 +6,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -22,38 +19,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 public class JavaDynamicUtil {
-	private static final Logger LOGGER = LoggerFactory.getLogger(JavaDynamicUtil.class);
 	
-	/**
-	 * traceId spanId depth 
-	 * @param files
-	 * @return
-	 */
-	private static void addDynamicFunctionExecution(
-			Map<String, Map<String, Map<Long, List<JavaDynamicFunctionExecution>>>> result, 
-			JavaDynamicFunctionExecution execution) {
-		String traceId = execution.getTraceId();
-		String spanId = execution.getSpanId();
-		if(StringUtils.isBlank(traceId) || StringUtils.isBlank(spanId)) {
-			return;
-//			traceId = execution.getThreadId() + "_" + execution.getThreadName();
-//			spanId = traceId;
-		}
-		Long depth = execution.getDepth();
-		Map<String, Map<Long, List<JavaDynamicFunctionExecution>>> spanResult = result.get(traceId);
-		spanResult = spanResult == null ? new HashMap<>() : spanResult;
-		Map<Long, List<JavaDynamicFunctionExecution>> depthResult = spanResult.get(spanId);
-		depthResult = depthResult == null ? new HashMap<>() : depthResult;
-		List<JavaDynamicFunctionExecution> executions = depthResult.get(depth);
-		executions = executions == null ? new ArrayList<>() : executions;
-		executions.add(execution);
-		depthResult.put(depth, executions);
-		spanResult.put(spanId, depthResult);
-		result.put(traceId, spanResult);
-	}
-	
-	public static Map<String, Map<String, Map<Long, List<JavaDynamicFunctionExecution>>>> readJavaDynamicLogs(File... files) {
-		Map<String, Map<String, Map<Long, List<JavaDynamicFunctionExecution>>>> result = new HashMap<>();
+	public static Map<String, List<JavaDynamicFunctionExecution>> readDynamicLogs(File... files) {
+		Map<String, List<JavaDynamicFunctionExecution>> result = new HashMap<>();
 		for(File file : files) {
 			try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 				String line = null;
@@ -65,19 +33,11 @@ public class JavaDynamicUtil {
 						e.printStackTrace();
 						continue;
 					}
-					addDynamicFunctionExecution(result, dynamicFunction);
-				}
-				for(Map<String, Map<Long, List<JavaDynamicFunctionExecution>>> spansResult : result.values()) {
-					for(Map<Long, List<JavaDynamicFunctionExecution>> groups : spansResult.values()) {
-						for(List<JavaDynamicFunctionExecution> functions : groups.values()) {
-							functions.sort(new Comparator<JavaDynamicFunctionExecution>() {
-								@Override
-								public int compare(JavaDynamicFunctionExecution o1, JavaDynamicFunctionExecution o2) {
-									return (int) (o1.getOrder() - o2.getOrder());
-								}
-							});
-						}
-					}
+					String project = dynamicFunction.getProject();
+					List<JavaDynamicFunctionExecution> executions = result.get(project);
+					executions = executions == null ? new ArrayList<>() : executions;
+					executions.add(dynamicFunction);
+					result.put(project, executions);
 				}
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -118,6 +78,7 @@ public class JavaDynamicUtil {
 			functionExecution.setParentSpanId(json.getString("parentSpanId"));
 			functionExecution.setThreadId(json.getLong("currentThreadId"));
 			functionExecution.setThreadName(json.getString("currentThreadName"));
+			functionExecution.setCallMethod(json.getString("callMethod"));
 			return functionExecution;
 		} catch (Exception e) {
 			throw new DynamicLogSentenceErrorException(sentence);
@@ -126,13 +87,14 @@ public class JavaDynamicUtil {
 	
 	/**
 	 * 从一组数据中找出最大的小于num的数，并返回下标
+	 * list为排序数组，否则后果自负
+	 * num不在list中，否则返回-1
 	 * @param num
 	 * @param list
 	 * @return
 	 */
 	public static int find(Long num, List<Long> list) {
-		int midIndex = list.size() / 2;
-		if(num <= list.get(0)) {
+		if(list == null || list.size() == 0 || list.contains(num) || num < list.get(0)) {
 			return -1;
 		}
 		if(num > list.get(list.size() - 1)) {
@@ -140,19 +102,22 @@ public class JavaDynamicUtil {
 		}
 		int lessIndex = 0;
 		int moreIndex = list.size() - 1;
-		while(midIndex > lessIndex && midIndex < moreIndex) {
-			if(list.get(midIndex) < num) {
-				lessIndex = midIndex;
-			} else if(list.get(midIndex) > num) {
+		while(lessIndex < moreIndex) {
+			int midIndex = (moreIndex + lessIndex) / 2;
+			if(list.get(midIndex) > num) {
 				moreIndex = midIndex;
+			} else {
+				lessIndex = midIndex;
 			}
-			midIndex = (moreIndex + lessIndex) / 2;
+			if(moreIndex - lessIndex == 1) {
+				break;
+			}
 		}
-		return midIndex;
+		return lessIndex;
 	}
 	
 	@Data
-	@EqualsAndHashCode()
+	@EqualsAndHashCode
 	public static class JavaDynamicFunctionExecution {
 		protected String language;
 		protected String time;
@@ -172,6 +137,7 @@ public class JavaDynamicUtil {
 		protected String parentSpanId;
 		protected Long threadId;
 		protected String threadName;
+		protected String callMethod;
 		
 		public static final String TRACE_START_PARENT_SPAN_ID = "-1";
 	}
