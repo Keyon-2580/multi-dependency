@@ -26,6 +26,11 @@ import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCa
 import cn.edu.fudan.se.multidependency.utils.TimeUtil;
 
 public class JavassistDynamicInserter extends JavaDynamicInserter {
+	
+	public JavassistDynamicInserter(File[] dynamicFunctionCallFiles) {
+		super(dynamicFunctionCallFiles);
+	}
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(JavassistDynamicInserter.class);
 
 	@Override

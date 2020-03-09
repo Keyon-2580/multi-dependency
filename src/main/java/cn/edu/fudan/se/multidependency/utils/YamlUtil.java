@@ -27,46 +27,43 @@ public class YamlUtil {
 		YamlObject result = new YamlObject();
 		Map<?, ?> yaml = (Map<?, ?>) Yaml.load(file);
 		yaml = (Map<?, ?>) Yaml.load(file);
-		String databasePath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("neo4j")).get("path");
 		String forTest = (String) ((Map<?, ?>) yaml.get("data")).get("test");
-		result.setNeo4jDatabasePath(databasePath);
 		result.setForTest(forTest);
+		String databasePath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("neo4j")).get("path");
+		result.setNeo4jDatabasePath(databasePath);
+		boolean delete = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("neo4j")).get("delete");
+		result.setDeleteDatabase(delete);
+		String projectsConfig = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("projects")).get("config");
+		result.setProjectsConfig(projectsConfig);
 		String dynamicDirectoryRootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("directory_root_path");
-		String dynamicMarkSuffix = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("dynamic_mark_suffix");
-		List<String> dynamicJavaFileSuffix = (List<String>) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("dynamic_java_file_suffix");
-		List<String> dynamicCppFileSuffix = (List<String>) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("dynamic_cpp_file_suffix");
+		List<String> dynamicFileSuffix = (List<String>) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("dynamic_file_suffix");
 		result.setDynamicDirectoryRootPath(dynamicDirectoryRootPath);
-		result.setDynamicCppFileSuffix(dynamicCppFileSuffix);
-		result.setDynamicJavaFileSuffix(dynamicJavaFileSuffix);
-		result.setDynamicMarkSuffix(dynamicMarkSuffix);
+		result.setDynamicFileSuffix(dynamicFileSuffix);
 //		String buildDirectoryRootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("build")).get("directory_root_path");
-//		String buildFilePath = buildDirectoryRootPath+"/"+FileUtils.extractFileName(projectPath)+".txt";
+//		String buildFilePath = buildDirectoryRootPath+"/"+FileUtil.extractFileName(projectPath)+".txt";
 //		result.setBuildDirectoryRootPath(buildDirectoryRootPath);
 //		result.setBuildFilePath(buildFilePath);
 		boolean analyseBuild = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("build")).get("analyse");
 		boolean analyseDynamic = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("analyse");
 		result.setAnalyseBuild(analyseBuild);
 		result.setAnalyseDynamic(analyseDynamic);
-		boolean delete = (boolean) ((Map<?, ?>) yaml.get("data")).get("delete");
-		result.setDeleteDatabase(delete);
-		String rootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("projects")).get("config");
-		result.setProjectsConfig(rootPath);
 		return result;
 	}
 	
 	@Data
 	public static class YamlObject {
 		private String projectsConfig;
+		
 		private boolean deleteDatabase;
 		private String neo4jDatabasePath;
-		private String forTest;
+		
+		private boolean analyseDynamic;
 		private String dynamicDirectoryRootPath;
-		private List<String> dynamicJavaFileSuffix;
-		private List<String> dynamicCppFileSuffix;
-		private String dynamicMarkSuffix;
+		private List<String> dynamicFileSuffix;
+		
+		private boolean analyseBuild;
 		private String buildDirectoryRootPath;
 		private String buildFilePath;
-		private boolean analyseDynamic;
-		private boolean analyseBuild;
+		private String forTest;
 	}
 }

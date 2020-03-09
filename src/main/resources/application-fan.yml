@@ -13,26 +13,18 @@ server:
    port: 8080
 
 data:
-   delete: true
    projects:
       config: D:\git\multi-dependency\src\main\resources\project\train-ticket.json
-      platform: windows
    dynamic:
       analyse: true
-#      directory_root_path: src/main/resources/dynamic/kieker
-#      directory_root_path: src/main/resources/dynamic/valgrind
-#      directory_root_path: src/main/resources/dynamic/stub/train-ticket/logs
       directory_root_path: src/main/resources/dynamic/javassist/train-ticket/logs
-#      dynamic_java_file_suffix: [.dat]
-      dynamic_java_file_suffix: [.log]
-      dynamic_cpp_file_suffix: [.dot, .out]
-      dynamic_mark_suffix: .mark
+      dynamic_file_suffix: [.log]
    build:   
       analyse: false
       directory_root_path: src/main/resources/build
    neo4j:
+      delete: true
       # batchInserter要插入的数据库
       path: D:/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
    
    test: this property is for YamlUtilsTest
-     

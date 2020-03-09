@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.dynamic;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -17,6 +18,11 @@ import cn.edu.fudan.se.multidependency.utils.JavaDynamicUtil.JavaDynamicFunction
 
 public class JavaDynamicInserter extends DynamicInserterForNeo4jService {
 	
+	public JavaDynamicInserter(File[] dynamicFunctionCallFiles) {
+		super(dynamicFunctionCallFiles);
+		projectToFunctions = new HashMap<>();
+	}
+
 	protected Map<Project, Map<String, List<Function>>> projectToFunctions = new HashMap<>();
 	
 	@Override

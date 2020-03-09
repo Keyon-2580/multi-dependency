@@ -60,7 +60,7 @@ public class JavaDynamicUtil {
 				while ((line = reader.readLine()) != null) {
 					JavaDynamicFunctionExecution dynamicFunction = null;
 					try {
-						dynamicFunction = extractByJaegerJson(line);
+						dynamicFunction = extractJavaDynamicFunctionExecution(line);
 					} catch (DynamicLogSentenceErrorException e) {
 						e.printStackTrace();
 						continue;
@@ -88,9 +88,9 @@ public class JavaDynamicUtil {
 		return result;
 	}
 	
-	public static JavaDynamicFunctionExecution extractByJaegerJson(String sentence) throws DynamicLogSentenceErrorException {
+	public static JavaDynamicFunctionExecution extractJavaDynamicFunctionExecution(String sentence) throws DynamicLogSentenceErrorException {
 		try {
-			LOGGER.info(sentence);
+//			LOGGER.info(sentence);
 			JavaDynamicFunctionExecution functionExecution = new JavaDynamicFunctionExecution();
 			functionExecution.setSentence(sentence);
 			JSONObject json = JSONObject.parseObject(sentence);
@@ -115,6 +115,7 @@ public class JavaDynamicUtil {
 			functionExecution.setRemarks(json.getJSONObject("remarks"));
 			functionExecution.setTraceId(json.getString("traceId"));
 			functionExecution.setSpanId(json.getString("spanId"));
+			functionExecution.setParentSpanId(json.getString("parentSpanId"));
 			functionExecution.setThreadId(json.getLong("currentThreadId"));
 			functionExecution.setThreadName(json.getString("currentThreadName"));
 			return functionExecution;
@@ -168,7 +169,10 @@ public class JavaDynamicUtil {
 		protected String sentence;
 		protected String traceId;
 		protected String spanId;
+		protected String parentSpanId;
 		protected Long threadId;
 		protected String threadName;
+		
+		public static final String TRACE_START_PARENT_SPAN_ID = "-1";
 	}
 }

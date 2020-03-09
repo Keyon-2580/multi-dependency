@@ -10,6 +10,10 @@ public abstract class DynamicInserterForNeo4jService extends ExtractorForNodesAn
 	
 	protected abstract void extractNodesAndRelations() throws Exception;
 	
+	public DynamicInserterForNeo4jService(File[] dynamicFunctionCallFiles) {
+		this.dynamicFunctionCallFiles = dynamicFunctionCallFiles;
+	}
+	
 	@Override
 	public void addNodesAndRelations() throws Exception {
 		if(dynamicFunctionCallFiles == null) {

@@ -30,16 +30,6 @@ public class InserterForNeo4jServiceFactory {
 		throw new Exception("程序语言不为java或c/c++，提取失败");
 	}
 	
-	public DynamicInserterForNeo4jService createDynamicInserterService(Language language) throws Exception {
-		switch(language) {
-		case java:
-			return new JavassistDynamicInserter();
-		case cpp:
-			return new CppDynamicInserter();
-		}
-		throw new Exception("程序语言不为java或c/c++，提取失败");
-	}
-	
 	public BuildInserterForNeo4jService createBuildInserterService(Language language) {
 		return new BuildInserterForNeo4jService();
 	}
