@@ -33,5 +33,5 @@ public abstract class DynamicInserterForNeo4jService extends ExtractorForNodesAn
 	public void setDynamicFunctionCallFiles(File... dynamicFunctionCallFiles) {
 		this.dynamicFunctionCallFiles = dynamicFunctionCallFiles;
 	}
-
+	
 }

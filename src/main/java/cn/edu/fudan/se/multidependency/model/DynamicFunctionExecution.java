@@ -1,5 +1,7 @@
 package cn.edu.fudan.se.multidependency.model;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.alibaba.fastjson.JSONObject;
 
 import lombok.Data;
@@ -22,4 +24,22 @@ public abstract class DynamicFunctionExecution {
 	public static final String TRACE_START_PARENT_SPAN_ID = "-1";
 	
 	public abstract Language getLanguage();
+
+	/**
+	 * 三者都不空的情况下为微服务间的调用引起的函数调用
+	 * @return
+	 */
+	public boolean isCallBetweenMicroService() {
+		return StringUtils.isNoneBlank(traceId, spanId, parentSpanId);
+	}
+	
+	public boolean isTraceIdBlank() {
+		return StringUtils.isBlank(traceId);
+	}
+	
+	public boolean isCallBetweenSingleSystem() {
+		return !isCallBetweenMicroService() && !isTraceIdBlank();
+	}
+	
+	
 }

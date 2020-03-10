@@ -33,14 +33,14 @@ public class TraceStartExtractor extends DynamicInserterForNeo4jService {
 
 	@Data
 	@ToString
-	public static class TraceStartProject {
+	public static class TraceStartWithProject {
 		String project;
 		Language language;
 		String traceId;
 		String time;
 		String functionName;
 		
-		public TraceStartProject(DynamicFunctionExecution execution) {
+		public TraceStartWithProject(DynamicFunctionExecution execution) {
 			this.project = execution.getProject();
 			this.language = execution.getLanguage();
 			this.traceId = execution.getTraceId();
@@ -49,16 +49,16 @@ public class TraceStartExtractor extends DynamicInserterForNeo4jService {
 		}
 	}
 	
-	private Map<String, TraceStartProject> traceStartProjects = new HashMap<>();	
+	private Map<String, TraceStartWithProject> traceStartProjects = new HashMap<>();	
 	
-	public List<TraceStartProject> getTraceStartProjects() {
-		List<TraceStartProject> result = new ArrayList<>();
+	public List<TraceStartWithProject> getTraceStartProjects() {
+		List<TraceStartWithProject> result = new ArrayList<>();
 		for(String traceId : traceStartProjects.keySet()) {
 			result.add(traceStartProjects.get(traceId));
 		}
-		result.sort(new Comparator<TraceStartProject>() {
+		result.sort(new Comparator<TraceStartWithProject>() {
 			@Override
-			public int compare(TraceStartProject o1, TraceStartProject o2) {
+			public int compare(TraceStartWithProject o1, TraceStartWithProject o2) {
 				Timestamp o1time = new Timestamp(TimeUtil.changeTimeStrToLong(o1.getTime()));
 				Timestamp o2time = new Timestamp(TimeUtil.changeTimeStrToLong(o2.getTime()));
 				
@@ -75,18 +75,22 @@ public class TraceStartExtractor extends DynamicInserterForNeo4jService {
 			for(String projectName : this.executionsGroupByLanguageAndProject.get(language).keySet()) {
 				List<DynamicFunctionExecution> executions = this.executionsGroupByLanguageAndProject.get(language).get(projectName);
 				for(DynamicFunctionExecution execution : executions) {
-					if(JavaDynamicFunctionExecution.TRACE_START_PARENT_SPAN_ID.equals(execution.getParentSpanId())) {
-						String traceId = execution.getTraceId();
-						if(traceStartProjects.get(traceId) == null) {
-							TraceStartProject project = new TraceStartProject(execution);
-							traceStartProjects.put(traceId, project);
-						}
+					if((execution.isCallBetweenMicroService() 
+							&& JavaDynamicFunctionExecution.TRACE_START_PARENT_SPAN_ID.equals(execution.getParentSpanId())) || execution.isCallBetweenSingleSystem()) {
+						addTraceStartProjects(execution);
 					}
 				}
 			}
 		}
-		for(TraceStartProject project : getTraceStartProjects()) {
+		for(TraceStartWithProject project : getTraceStartProjects()) {
 			LOGGER.info(project.toString());
+		}
+	}
+	private void addTraceStartProjects(DynamicFunctionExecution execution) {
+		String traceId = execution.getTraceId();
+		if(traceStartProjects.get(traceId) == null) {
+			TraceStartWithProject project = new TraceStartWithProject(execution);
+			traceStartProjects.put(traceId, project);
 		}
 	}
 

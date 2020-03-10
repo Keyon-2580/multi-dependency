@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,9 +17,10 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
-import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Trace;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.TraceRunWithFunction;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanStartWithFunction;
@@ -42,29 +42,130 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
 		javaExecutionsGroupByProject = executionsGroupByLanguageAndProject.get(Language.java);
-		LOGGER.info("提取trace");
+		LOGGER.info("提取微服务间的调用");
 		extractMicroServiceCall();
 		LOGGER.info("提取函数调用");
 		extractDynamicFunctionCalls();
 	}
 	
+	private Map<Trace, List<Span>> traceToSpans = new HashMap<>();
+
+	private void addSpanToTrace(Trace trace, Span span) {
+		List<Span> spans = traceToSpans.get(trace);
+		spans = spans == null ? new ArrayList<>() : spans;
+		if (!spans.contains(span)) {
+			spans.add(span);
+		}
+		traceToSpans.put(trace, spans);
+	}
+
+	private Map<Span, String> spanToCallMethod = new HashMap<>();
+
+	private Map<String, String> spanIdToParentSpanId = new HashMap<>();
+
+	private void extractMicroServiceCall() throws Exception {
+		// 单体应用执行该函数不会有操作，因为没有微服务间的调用，没有Span的概念
+		for(String projectName : this.javaExecutionsGroupByProject.keySet()) {
+			for(DynamicFunctionExecution execution : javaExecutionsGroupByProject.get(projectName)) {
+				JavaDynamicFunctionExecution javaExecution = (JavaDynamicFunctionExecution) execution;
+				Trace trace = null;
+				String traceId = execution.getTraceId();
+				if(!execution.isTraceIdBlank()) {
+					trace = this.getNodes().findTraces().get(traceId);
+					if (trace == null) {
+						trace = new Trace();
+						trace.setEntityId(generateEntityId());
+						trace.setTraceId(traceId);
+						trace.setMicroServiceTrace(execution.isCallBetweenMicroService());
+						addNode(trace, null);
+					}
+				}
+				String spanId = execution.getSpanId();
+				String parentSpanId = execution.getParentSpanId();
+				Long order = javaExecution.getOrder();
+				Long depth = javaExecution.getDepth();
+				if(!execution.isCallBetweenMicroService() || order != 0 || depth != 0) {
+					continue;
+				}
+				Span span = this.getNodes().findSpanBySpanId(spanId);
+				if (span == null) {
+					span = new Span();
+					span.setSpanId(spanId);
+					span.setTraceId(traceId);
+					span.setEntityId(generateEntityId());
+					span.setOperationName(execution.getFunctionName());
+					span.setApiFunctionName(execution.getFunctionName());
+					String serviceName = projectName;
+					span.setServiceName(serviceName);
+					span.setTime(TimeUtil.changeTimeStrToLong(execution.getTime()));
+					spanToCallMethod.put(span, execution.getCallMethod());
+					
+					Project project = this.getNodes().findProject(serviceName, Language.java);
+					MicroService microService = getNodes().findMicroServiceByName(serviceName);
+					if (project == null || microService == null) {
+						throw new Exception("error: span的serviceName不是一个项目 " + serviceName);
+					}
+					addNode(span, project);
+
+					Contain contain = new Contain(trace, span);
+					addRelation(contain);
+					addSpanToTrace(trace, span);
+
+					MicroServiceCreateSpan projectCreateSpan = new MicroServiceCreateSpan(microService, span);
+					addRelation(projectCreateSpan);
+				}
+				spanIdToParentSpanId.put(spanId, parentSpanId);
+			}
+		}
+
+		for (String spanId : spanIdToParentSpanId.keySet()) {
+			String parentSpanId = spanIdToParentSpanId.get(spanId);
+			if ("-1".equals(parentSpanId)) {
+				continue;
+			}
+			Span parentSpan = this.getNodes().findSpanBySpanId(parentSpanId);
+			if (parentSpan == null) {
+				throw new Exception("SpanId为 " + parentSpanId + " 的span不存在");
+			}
+			Span span = this.getNodes().findSpanBySpanId(spanId);
+			SpanCallSpan spanCallSpan = new SpanCallSpan(parentSpan, span);
+			spanCallSpan.setHttpRequestMethod(spanToCallMethod.get(span));
+			addRelation(spanCallSpan);
+		}
+
+		for (Trace trace : traceToSpans.keySet()) {
+			List<Span> sortedSpans = traceToSpans.get(trace);
+			sortedSpans.sort(new Comparator<Span>() {
+				@Override
+				public int compare(Span o1, Span o2) {
+					return o1.getTime().compareTo(o2.getTime());
+				}
+			});
+			for (int i = 0; i < sortedSpans.size(); i++) {
+				Span span = sortedSpans.get(i);
+				span.setOrder(i);
+			}
+		}
+	}
+
 	private void extractDynamicFunctionCalls() {
 		for(String projectName : javaExecutionsGroupByProject.keySet()) {
 			// 分项目
 			Project project = this.getNodes().findProject(projectName, Language.java);
 			List<DynamicFunctionExecution> executions = javaExecutionsGroupByProject.get(projectName);
+			// traceId, spanId, depth
 			Map<String, Map<String, Map<Long, List<JavaDynamicFunctionExecution>>>> executionsGroupByTrace = new HashMap<>();
 			for(DynamicFunctionExecution execution : executions) {
 				assert(execution.getClass() == JavaDynamicFunctionExecution.class);
 				JavaDynamicFunctionExecution javaExecution = (JavaDynamicFunctionExecution) execution;
+				if(execution.isTraceIdBlank()) {
+					// traceId若为空，则不记录
+					continue;
+				}
 				String traceId = execution.getTraceId();
 				String spanId = execution.getSpanId();
-				if(StringUtils.isBlank(traceId) || StringUtils.isBlank(spanId)) {
-//					continue;
-					traceId = projectName;
+				if(execution.isCallBetweenSingleSystem()) {
 					spanId = traceId;
-					execution.setTraceId(traceId);
-					execution.setSpanId(spanId);
 				}
 				Long depth = javaExecution.getDepth();
 				Map<String, Map<Long, List<JavaDynamicFunctionExecution>>> executionsGroupBySpan = executionsGroupByTrace.get(traceId);
@@ -85,9 +186,8 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 	private void extractDynamicFunctionCalls(
 			Map<String, Map<String, Map<Long, List<JavaDynamicFunctionExecution>>>> allDynamicFunctionGroupByTrace, Project project) {
 		for (String traceId : allDynamicFunctionGroupByTrace.keySet()) {
-			Map<String, Map<Long, List<JavaDynamicFunctionExecution>>> spansResult = allDynamicFunctionGroupByTrace.get(traceId);
-			for (String spanId : spansResult.keySet()) {
-				Map<Long, List<JavaDynamicFunctionExecution>> depthResult = spansResult.get(spanId);
+			for (String spanId : allDynamicFunctionGroupByTrace.get(traceId).keySet()) {
+				Map<Long, List<JavaDynamicFunctionExecution>> depthResult = allDynamicFunctionGroupByTrace.get(traceId).get(spanId);
 				for (Long depth : depthResult.keySet()) {
 					List<JavaDynamicFunctionExecution> executions = depthResult.get(depth);
 					for (JavaDynamicFunctionExecution execution : executions) {
@@ -97,17 +197,28 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 							projectToFunctions.put(project, functionsWithSameFunctionName);
 						}
 						if (execution.getDepth() == 0) {
+							List<Function> calledFunctions = functionsWithSameFunctionName.get(execution.getFunctionName());
+							if (calledFunctions == null) {
+								continue;
+							}
+							if(execution.isCallBetweenSingleSystem()) {
+								Function calledFunction = findFunctionWithDynamic(execution, calledFunctions);
+								Trace trace = this.getNodes().findTraces().get(execution.getTraceId());
+								if(trace != null && calledFunction != null) {
+									TraceRunWithFunction traceRunWithFunction = new TraceRunWithFunction(trace, calledFunction);
+									traceRunWithFunction.setOrder(execution.getOrder() + "");
+									addRelation(traceRunWithFunction);
+								}
+							}
 							if (execution.getOrder() == 0) {
 								// 是某段程序入口
-								List<Function> calledFunctions = functionsWithSameFunctionName.get(execution.getFunctionName());
-								if (calledFunctions == null) {
-									continue;
-								}
-								Function calledFunction = findFunctionWithDynamic(execution, calledFunctions);
-								Span span = this.getNodes().findSpanBySpanId(execution.getSpanId());
-								if (span != null && calledFunction != null) {
-									SpanStartWithFunction spanStartWithFunction = new SpanStartWithFunction(span, calledFunction);
-									addRelation(spanStartWithFunction);
+								if(execution.isCallBetweenMicroService()) {
+									Function calledFunction = findFunctionWithDynamic(execution, calledFunctions);
+									Span span = this.getNodes().findSpanBySpanId(execution.getSpanId());
+									if (span != null && calledFunction != null) {
+										SpanStartWithFunction spanStartWithFunction = new SpanStartWithFunction(span, calledFunction);
+										addRelation(spanStartWithFunction);
+									}
 								}
 							}
 							continue;
@@ -207,100 +318,4 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 		return relation;
 	}
 	
-	private Map<Trace, List<Span>> traceToSpans = new HashMap<>();
-
-	private void addSpanToTrace(Trace trace, Span span) {
-		List<Span> spans = traceToSpans.get(trace);
-		spans = spans == null ? new ArrayList<>() : spans;
-		if (!spans.contains(span)) {
-			spans.add(span);
-		}
-		traceToSpans.put(trace, spans);
-	}
-
-	private Map<Span, String> spanToCallMethod = new HashMap<>();
-
-	private Map<String, String> spanIdToParentSpanId = new HashMap<>();
-
-	private void extractMicroServiceCall() throws Exception {
-		for(String projectName : this.javaExecutionsGroupByProject.keySet()) {
-			for(DynamicFunctionExecution execution : javaExecutionsGroupByProject.get(projectName)) {
-				JavaDynamicFunctionExecution javaExecution = (JavaDynamicFunctionExecution) execution;
-				String traceId = execution.getTraceId();
-				String spanId = execution.getSpanId();
-				String parentSpanId = execution.getParentSpanId();
-				Long order = javaExecution.getOrder();
-				Long depth = javaExecution.getDepth();
-				if (StringUtils.isBlank(traceId) || StringUtils.isBlank(spanId) || StringUtils.isBlank(parentSpanId)
-						|| order != 0 || depth != 0) {
-					continue;
-				}
-				Trace trace = this.getNodes().findTraces().get(traceId);
-				if (trace == null) {
-					trace = new Trace();
-					trace.setEntityId(generateEntityId());
-					trace.setTraceId(traceId);
-					addNode(trace, null);
-				}
-				Span span = this.getNodes().findSpanBySpanId(spanId);
-				if (span == null) {
-					span = new Span();
-					span.setSpanId(spanId);
-					span.setTraceId(traceId);
-					span.setEntityId(generateEntityId());
-					span.setOperationName(execution.getFunctionName());
-					span.setApiFunctionName(execution.getFunctionName());
-					String serviceName = projectName;
-					span.setServiceName(serviceName);
-					span.setTime(TimeUtil.changeTimeStrToLong(execution.getTime()));
-					spanToCallMethod.put(span, execution.getCallMethod());
-					
-					Project project = this.getNodes().findProject(serviceName, Language.java);
-					MicroService microService = getNodes().findMicroServiceByName(serviceName);
-					if (project == null || microService == null) {
-						throw new Exception("error: span的serviceName不是一个项目 " + serviceName);
-					}
-					addNode(span, project);
-
-					Contain contain = new Contain(trace, span);
-					addRelation(contain);
-					addSpanToTrace(trace, span);
-
-					MicroServiceCreateSpan projectCreateSpan = new MicroServiceCreateSpan(microService, span);
-					addRelation(projectCreateSpan);
-				}
-				spanIdToParentSpanId.put(spanId, parentSpanId);
-			}
-		}
-
-		for (String spanId : spanIdToParentSpanId.keySet()) {
-			String parentSpanId = spanIdToParentSpanId.get(spanId);
-			if ("-1".equals(parentSpanId)) {
-				continue;
-			}
-			Span parentSpan = this.getNodes().findSpanBySpanId(parentSpanId);
-			if (parentSpan == null) {
-				throw new Exception("SpanId为 " + parentSpanId + " 的span不存在");
-			}
-			Span span = this.getNodes().findSpanBySpanId(spanId);
-			SpanCallSpan spanCallSpan = new SpanCallSpan(parentSpan, span);
-			spanCallSpan.setHttpRequestMethod(spanToCallMethod.get(span));
-			addRelation(spanCallSpan);
-		}
-
-		for (Trace trace : traceToSpans.keySet()) {
-			List<Span> sortedSpans = traceToSpans.get(trace);
-			sortedSpans.sort(new Comparator<Span>() {
-				@Override
-				public int compare(Span o1, Span o2) {
-					return o1.getTime().compareTo(o2.getTime());
-				}
-			});
-			for (int i = 0; i < sortedSpans.size(); i++) {
-				Span span = sortedSpans.get(i);
-				span.setOrder(i);
-			}
-		}
-	}
-
 }
