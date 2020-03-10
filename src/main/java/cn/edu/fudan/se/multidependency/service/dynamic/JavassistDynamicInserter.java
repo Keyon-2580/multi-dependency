@@ -11,6 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.edu.fudan.se.multidependency.model.DynamicFunctionExecution;
+import cn.edu.fudan.se.multidependency.model.JavaDynamicFunctionExecution;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
@@ -22,8 +24,7 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCal
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanStartWithFunction;
-import cn.edu.fudan.se.multidependency.utils.JavaDynamicUtil;
-import cn.edu.fudan.se.multidependency.utils.JavaDynamicUtil.JavaDynamicFunctionExecution;
+import cn.edu.fudan.se.multidependency.utils.DynamicUtil;
 import cn.edu.fudan.se.multidependency.utils.TimeUtil;
 
 public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
@@ -31,7 +32,7 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 
 	protected Map<Project, Map<String, List<Function>>> projectToFunctions;
 	
-	/*protected Map<String, List<JavaDynamicFunctionExecution>> javaExecutionsGroupByProject;*/
+	protected Map<String, List<DynamicFunctionExecution>> javaExecutionsGroupByProject;
 	
 	public JavassistDynamicInserter(File[] dynamicFunctionCallFiles) {
 		super(dynamicFunctionCallFiles);
@@ -40,6 +41,7 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
+		javaExecutionsGroupByProject = executionsGroupByLanguageAndProject.get(Language.java);
 		LOGGER.info("提取trace");
 		extractMicroServiceCall();
 		LOGGER.info("提取函数调用");
@@ -50,9 +52,11 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 		for(String projectName : javaExecutionsGroupByProject.keySet()) {
 			// 分项目
 			Project project = this.getNodes().findProject(projectName, Language.java);
-			List<JavaDynamicFunctionExecution> executions = javaExecutionsGroupByProject.get(projectName);
+			List<DynamicFunctionExecution> executions = javaExecutionsGroupByProject.get(projectName);
 			Map<String, Map<String, Map<Long, List<JavaDynamicFunctionExecution>>>> executionsGroupByTrace = new HashMap<>();
-			for(JavaDynamicFunctionExecution execution : executions) {
+			for(DynamicFunctionExecution execution : executions) {
+				assert(execution.getClass() == JavaDynamicFunctionExecution.class);
+				JavaDynamicFunctionExecution javaExecution = (JavaDynamicFunctionExecution) execution;
 				String traceId = execution.getTraceId();
 				String spanId = execution.getSpanId();
 				if(StringUtils.isBlank(traceId) || StringUtils.isBlank(spanId)) {
@@ -62,14 +66,14 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 					execution.setTraceId(traceId);
 					execution.setSpanId(spanId);
 				}
-				Long depth = execution.getDepth();
+				Long depth = javaExecution.getDepth();
 				Map<String, Map<Long, List<JavaDynamicFunctionExecution>>> executionsGroupBySpan = executionsGroupByTrace.get(traceId);
 				executionsGroupBySpan = executionsGroupBySpan == null ? new HashMap<>() : executionsGroupBySpan;
 				Map<Long, List<JavaDynamicFunctionExecution>> depthResult = executionsGroupBySpan.get(spanId);
 				depthResult = depthResult == null ? new HashMap<>() : depthResult;
 				List<JavaDynamicFunctionExecution> executionsGroupByDepth = depthResult.get(depth);
 				executionsGroupByDepth = executionsGroupByDepth == null ? new ArrayList<>() : executionsGroupByDepth;
-				executionsGroupByDepth.add(execution);
+				executionsGroupByDepth.add(javaExecution);
 				depthResult.put(depth, executionsGroupByDepth);
 				executionsGroupBySpan.put(spanId, depthResult);
 				executionsGroupByTrace.put(traceId, executionsGroupBySpan);
@@ -114,7 +118,7 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 							list.add(temp.getOrder());
 						}
 						JavaDynamicFunctionExecution callerDynamicFunction = null;
-						int callerIndex = JavaDynamicUtil.find(execution.getOrder(), list);
+						int callerIndex = DynamicUtil.find(execution.getOrder(), list);
 						if (callerIndex != -1) {
 							callerDynamicFunction = depthResult.get(execution.getDepth() - 1).get(callerIndex);
 						} else {
@@ -191,7 +195,7 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 	private FunctionDynamicCallFunction generateFunctionDynamicCall(Function callerFunction, Function calledFunction,
 			JavaDynamicFunctionExecution callerDynamicFunction, JavaDynamicFunctionExecution calledDynamicFunction) {
 		FunctionDynamicCallFunction relation = new FunctionDynamicCallFunction(callerFunction, calledFunction,
-				calledDynamicFunction.getProject(), calledDynamicFunction.getLanguage());
+				calledDynamicFunction.getProject(), calledDynamicFunction.getLanguage().toString());
 		relation.setTraceId(callerDynamicFunction.getTraceId());
 		relation.setSpanId(callerDynamicFunction.getSpanId());
 		relation.setOrder(callerDynamicFunction.getOrder() + ":" + callerDynamicFunction.getDepth() + " -> "
@@ -220,12 +224,13 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 
 	private void extractMicroServiceCall() throws Exception {
 		for(String projectName : this.javaExecutionsGroupByProject.keySet()) {
-			for(JavaDynamicFunctionExecution execution : javaExecutionsGroupByProject.get(projectName)) {
+			for(DynamicFunctionExecution execution : javaExecutionsGroupByProject.get(projectName)) {
+				JavaDynamicFunctionExecution javaExecution = (JavaDynamicFunctionExecution) execution;
 				String traceId = execution.getTraceId();
 				String spanId = execution.getSpanId();
 				String parentSpanId = execution.getParentSpanId();
-				Long order = execution.getOrder();
-				Long depth = execution.getDepth();
+				Long order = javaExecution.getOrder();
+				Long depth = javaExecution.getDepth();
 				if (StringUtils.isBlank(traceId) || StringUtils.isBlank(spanId) || StringUtils.isBlank(parentSpanId)
 						|| order != 0 || depth != 0) {
 					continue;

@@ -13,7 +13,7 @@ public class JavaDynamicUtilTest {
 		datas.add(1L);
 		datas.add(3L);
 //		datas.add(4L);
-		System.out.println(JavaDynamicUtil.find(2L, datas));
+		System.out.println(DynamicUtil.find(2L, datas));
 	}
 
 }

@@ -120,7 +120,7 @@ public class DependsEntityRepoExtractorImpl implements DependsEntityRepoExtracto
             		fileParser = new CdtCppFileParser(fileFullPath,entityRepo,preprocessorHandler,inferer, macroRepo);
             		break;
             	default:
-            		throw new LanguageErrorException();
+            		throw new LanguageErrorException(language.toString());
             	}
                 System.out.println("parsing " + fileFullPath 
                 		+ "...");

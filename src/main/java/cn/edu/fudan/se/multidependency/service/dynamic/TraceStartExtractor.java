@@ -11,13 +11,16 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.edu.fudan.se.multidependency.utils.JavaDynamicUtil.JavaDynamicFunctionExecution;
+import cn.edu.fudan.se.multidependency.model.DynamicFunctionExecution;
+import cn.edu.fudan.se.multidependency.model.JavaDynamicFunctionExecution;
+import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.utils.TimeUtil;
 import lombok.Data;
 import lombok.ToString;
 
 /**
  * 不做插入数据库操作，只从日志文件中找出parentSpanId为-1的trace
+ * 与语言无关
  * @author fan
  *
  */
@@ -32,12 +35,12 @@ public class TraceStartExtractor extends DynamicInserterForNeo4jService {
 	@ToString
 	public static class TraceStartProject {
 		String project;
-		String language;
+		Language language;
 		String traceId;
 		String time;
 		String functionName;
 		
-		public TraceStartProject(JavaDynamicFunctionExecution execution) {
+		public TraceStartProject(DynamicFunctionExecution execution) {
 			this.project = execution.getProject();
 			this.language = execution.getLanguage();
 			this.traceId = execution.getTraceId();
@@ -68,14 +71,16 @@ public class TraceStartExtractor extends DynamicInserterForNeo4jService {
 
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
-		for(String projectName : this.javaExecutionsGroupByProject.keySet()) {
-			List<JavaDynamicFunctionExecution> executions = this.javaExecutionsGroupByProject.get(projectName);
-			for(JavaDynamicFunctionExecution execution : executions) {
-				if(JavaDynamicFunctionExecution.TRACE_START_PARENT_SPAN_ID.equals(execution.getParentSpanId())) {
-					String traceId = execution.getTraceId();
-					if(traceStartProjects.get(traceId) == null) {
-						TraceStartProject project = new TraceStartProject(execution);
-						traceStartProjects.put(traceId, project);
+		for(Language language : this.executionsGroupByLanguageAndProject.keySet()) {
+			for(String projectName : this.executionsGroupByLanguageAndProject.get(language).keySet()) {
+				List<DynamicFunctionExecution> executions = this.executionsGroupByLanguageAndProject.get(language).get(projectName);
+				for(DynamicFunctionExecution execution : executions) {
+					if(JavaDynamicFunctionExecution.TRACE_START_PARENT_SPAN_ID.equals(execution.getParentSpanId())) {
+						String traceId = execution.getTraceId();
+						if(traceStartProjects.get(traceId) == null) {
+							TraceStartProject project = new TraceStartProject(execution);
+							traceStartProjects.put(traceId, project);
+						}
 					}
 				}
 			}

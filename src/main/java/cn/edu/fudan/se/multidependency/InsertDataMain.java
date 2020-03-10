@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelations;
 import cn.edu.fudan.se.multidependency.service.InserterForNeo4j;
@@ -19,6 +20,7 @@ import cn.edu.fudan.se.multidependency.service.InserterForNeo4jServiceFactory;
 import cn.edu.fudan.se.multidependency.service.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.code.DependsEntityRepoExtractorImpl;
+import cn.edu.fudan.se.multidependency.service.dynamic.CppDynamicInserter;
 import cn.edu.fudan.se.multidependency.service.dynamic.FeatureAndTestCaseFromJSONFileForMicroserviceInserter;
 import cn.edu.fudan.se.multidependency.service.dynamic.JavassistDynamicInserter;
 import cn.edu.fudan.se.multidependency.service.dynamic.TraceStartExtractor;
@@ -95,14 +97,6 @@ public class InsertDataMain {
 					inserter.addNodesAndRelations();
 				}
 			}
-			
-			/**
-			 * 构建分析
-			 */
-			/*if (yaml.isAnalyseBuild()) {
-				System.out.println("构建分析");
-				insertBuildInfo(yaml);
-			}*/
 
 			/**
 			 * 动态分析
@@ -111,20 +105,27 @@ public class InsertDataMain {
 				LOGGER.info("动态运行分析");
 				File[] dynamicLogs = analyseDynamicLogs(yaml);
 				
-				LOGGER.info("输出trace");
+				LOGGER.info("输出trace，只输出日志中记录的trace，不做数据库操作");
 				new TraceStartExtractor(dynamicLogs).addNodesAndRelations();
 
 				for (Language language : Language.values()) {
 					inserter = insertDynamic(language, dynamicLogs);
-					if(inserter != null) {
-						inserter.addNodesAndRelations();
-					}
+					inserter.addNodesAndRelations();
 				}
 				
 				LOGGER.info("引入特性与测试用例，对应到trace");
 				inserter = insertFeatureAndTestCaseByJSONFile(yaml.getFeaturesPath());
 				inserter.addNodesAndRelations();
 			}
+			
+			/**
+			 * 构建分析
+			 */
+			/*if (yaml.isAnalyseBuild()) {
+				System.out.println("构建分析");
+				insertBuildInfo(yaml);
+			}*/
+			
 			/// FIXME
 			// 其它
 
@@ -145,14 +146,14 @@ public class InsertDataMain {
 		return new FeatureAndTestCaseFromJSONFileForMicroserviceInserter(featuresJsonPath);
 	}
 	
-	public static ExtractorForNodesAndRelations insertDynamic(Language language, File[] dyanmicLogFiles) throws Exception {
+	public static ExtractorForNodesAndRelations insertDynamic(Language language, File[] dynamicLogFiles) throws Exception {
 		switch(language) {
 		case java:
-			return new JavassistDynamicInserter(dyanmicLogFiles);
+			return new JavassistDynamicInserter(dynamicLogFiles);
 		case cpp:
-			/// FIXME
+			return new CppDynamicInserter(dynamicLogFiles);
 		}
-		return null;
+		throw new LanguageErrorException(language.toString());
 	}
 	
 	private static File[] analyseDynamicLogs(YamlUtil.YamlObject yaml) {

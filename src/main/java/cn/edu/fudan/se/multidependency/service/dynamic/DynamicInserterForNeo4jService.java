@@ -4,9 +4,10 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.DynamicFunctionExecution;
+import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.service.ExtractorForNodesAndRelationsImpl;
-import cn.edu.fudan.se.multidependency.utils.JavaDynamicUtil;
-import cn.edu.fudan.se.multidependency.utils.JavaDynamicUtil.JavaDynamicFunctionExecution;
+import cn.edu.fudan.se.multidependency.utils.DynamicUtil;
 
 public abstract class DynamicInserterForNeo4jService extends ExtractorForNodesAndRelationsImpl {
 	
@@ -14,7 +15,7 @@ public abstract class DynamicInserterForNeo4jService extends ExtractorForNodesAn
 	
 	protected abstract void extractNodesAndRelations() throws Exception;
 	
-	protected Map<String, List<JavaDynamicFunctionExecution>> javaExecutionsGroupByProject;
+	protected Map<Language, Map<String, List<DynamicFunctionExecution>>> executionsGroupByLanguageAndProject;
 	
 	public DynamicInserterForNeo4jService(File[] dynamicFunctionCallFiles) {
 		this.dynamicFunctionCallFiles = dynamicFunctionCallFiles;
@@ -25,7 +26,7 @@ public abstract class DynamicInserterForNeo4jService extends ExtractorForNodesAn
 		if(dynamicFunctionCallFiles == null) {
 			throw new Exception("动态运行日志dynamicFunctionCallFiles不能为null！");
 		}
-		javaExecutionsGroupByProject = JavaDynamicUtil.readDynamicLogs(dynamicFunctionCallFiles);
+		executionsGroupByLanguageAndProject = DynamicUtil.readDynamicLogs(dynamicFunctionCallFiles);
 		extractNodesAndRelations();
 	}
 
