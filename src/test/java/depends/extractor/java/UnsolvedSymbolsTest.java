@@ -1,13 +1,14 @@
 package depends.extractor.java;
 
-import depends.extractor.UnsolvedBindings;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
+
+import depends.extractor.UnsolvedBindings;
 
 public class UnsolvedSymbolsTest extends JavaParserTest {
 	@Before

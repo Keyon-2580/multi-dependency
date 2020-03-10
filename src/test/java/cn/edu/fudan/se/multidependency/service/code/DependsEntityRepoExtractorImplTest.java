@@ -1,7 +1,5 @@
 package cn.edu.fudan.se.multidependency.service.code;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 import cn.edu.fudan.se.multidependency.model.Language;
