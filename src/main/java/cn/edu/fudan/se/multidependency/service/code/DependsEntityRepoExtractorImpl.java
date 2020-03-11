@@ -29,6 +29,7 @@ import depends.relations.Inferer;
 import depends.util.FileTraversal;
 import depends.util.FileUtil;
 import depends.util.TemporaryFile;
+import lombok.Setter;
 
 /**
  * 调用depends的API提取代码entity
@@ -47,12 +48,41 @@ public class DependsEntityRepoExtractorImpl implements DependsEntityRepoExtracto
     private PreprocessorHandler preprocessorHandler;
     private FileTraversal fileTransversal;
 	private MacroRepo macroRepo;
-	
+	@Setter
 	private Language language;
+	@Setter
 	private String projectPath;
+	@Setter
+	private String[] excludes;
+	
+	private String slash;
+
+	private boolean isExclude(String filePath) {
+		for(String exclude : excludes) {
+			if(isExcludeDirectory(exclude)) {
+				exclude = exclude.replace("**", "");
+				if(filePath.startsWith(exclude)) {
+					return true;
+				}
+			} else {
+				if(exclude.equals(filePath)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private boolean isExcludeDirectory(String exclude) {
+		return exclude.endsWith(slash + "**");
+	}
 	
 	@Override
 	public EntityRepo extractEntityRepo() throws Exception {
+		slash = projectPath.contains("\\") ? "\\" : "/";
+		for(int i = 0; i < excludes.length; i++) {
+			excludes[i] = projectPath.concat(excludes[i].replace("/", slash));
+		}
 		if(Language.java == language) {
 			initJavaExtractor();
 		} else {
@@ -107,7 +137,7 @@ public class DependsEntityRepoExtractorImpl implements DependsEntityRepoExtracto
 		public void visit(File file) {
 			String fileFullPath = file.getAbsolutePath();
 			fileFullPath = FileUtil.uniqFilePath(fileFullPath);
-			if (!fileFullPath.startsWith(projectPath)) {
+			if (!fileFullPath.startsWith(projectPath) || isExclude(fileFullPath)) {
 				return;
 			}
             try {
@@ -132,26 +162,6 @@ public class DependsEntityRepoExtractorImpl implements DependsEntityRepoExtracto
 			}	
 		}
 		
-	}
-
-	@Override
-	public String getProjectPath() {
-		return this.projectPath;
-	}
-
-	@Override
-	public Language getLanguage() {
-		return language;
-	}
-
-	@Override
-	public void setLanguage(Language language) {
-		this.language = language;
-	}
-
-	@Override
-	public void setProjectPath(String projectPath) {
-		this.projectPath = projectPath;
 	}
 
 }

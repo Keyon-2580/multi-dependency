@@ -12,13 +12,11 @@ public interface DependsEntityRepoExtractor {
 	
 	EntityRepo extractEntityRepo() throws Exception;
 	
-	String getProjectPath();
-	
-	Language getLanguage();
-	
 	void setLanguage(Language language);
 	
 	void setProjectPath(String projectPath);
+	
+	void setExcludes(String[] excludes);
 
 	int getEntityCount();
 }

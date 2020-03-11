@@ -83,11 +83,18 @@ public class InsertDataMain {
 				String serviceGroupName = projectJson.getString("serviceGroupName");
 				serviceGroupName = serviceGroupName == null ? "" : serviceGroupName;
 				String projectName = projectJson.getString("project");
+				JSONArray excludesArray = projectJson.getJSONArray("excludes");
+				int excludesSize = excludesArray == null ? 0 : excludesArray.size();
+				String[] excludes = new String[excludesSize];
+				for(int j = 0; j < excludesSize; j++) {
+					excludes[j] = excludesArray.getString(j);
+				}
 				
 				LOGGER.info("静态分析，项目：" + projectName + "，语言：" + language);
 				
 				LOGGER.info("使用depends解析项目，项目路径：" + projectPath);
 				DependsEntityRepoExtractor extractor = DependsEntityRepoExtractorImpl.getInstance();
+				extractor.setExcludes(excludes);
 				extractor.setLanguage(language);
 				extractor.setProjectPath(projectPath);
 				EntityRepo entityRepo = extractor.extractEntityRepo();

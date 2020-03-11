@@ -71,6 +71,7 @@ public class ProjectController {
 			}
 			if("dynamic".equals(dependency)) {
 				List<FunctionDynamicCallFunction> calls = dynamicAnalyseService.findFunctionDynamicCallsByProject(project);
+				System.out.println(calls.size());
 				dependencyOrganizationService.dynamicCallDependency(calls);
 				if("file".equals(level)) {
 					result.put("value", dependencyOrganizationService.fileCallToCytoscape());

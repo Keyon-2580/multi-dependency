@@ -3,7 +3,11 @@
 		"path": "D:\\multiple-dependency-project\\depends",
 		"project": "depends",
 		"language": "java",
-		"isMicroservice": false
+		"isMicroservice": false,
+		"excludes" : [
+			"/src/test/resources/java-code-examples/EclipseTestBase_No_ResponseDuirngTypeResolve.java",
+			"/src/test/resources/**"
+		]
 	}
 	
 ]
