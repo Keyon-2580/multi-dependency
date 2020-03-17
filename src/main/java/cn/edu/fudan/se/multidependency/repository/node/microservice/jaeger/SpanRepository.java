@@ -7,7 +7,7 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
+import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 
 @Repository
 public interface SpanRepository extends Neo4jRepository<Span, Long>  {

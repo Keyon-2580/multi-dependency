@@ -1,28 +1,45 @@
-package cn.edu.fudan.se.multidependency.service.spring;
+package cn.edu.fudan.se.multidependency.model.relation.microservice;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
-import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
-import lombok.Getter;
+import org.neo4j.ogm.annotation.EndNode;
+import org.neo4j.ogm.annotation.GeneratedValue;
+import org.neo4j.ogm.annotation.Id;
+import org.neo4j.ogm.annotation.RelationshipEntity;
+import org.neo4j.ogm.annotation.StartNode;
+import org.neo4j.ogm.annotation.Transient;
 
-public class MSCallMS implements Serializable {
+import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
+import cn.edu.fudan.se.multidependency.model.relation.Relation;
+import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@RelationshipEntity(RelationType.str_MICROSERVICE_CALL_MICROSERVICE)
+public class MicroServiceCallMicroService implements Relation {
 	private static final long serialVersionUID = -2020305373964102611L;
+
+	@Id
+    @GeneratedValue
+    private Long id;
 	
-	@Getter
+	@StartNode
 	private MicroService ms;
 	
-	@Getter
+	@EndNode
 	private MicroService callMs;
 	
-	@Getter
 	private Integer times;
 	
+	@Transient
 	private List<SpanCallSpan> spanCallSpans = new ArrayList<>();
 	
-	public MSCallMS(MicroService ms, MicroService callMs) {
+	public MicroServiceCallMicroService(MicroService ms, MicroService callMs) {
 		this.ms = ms;
 		this.callMs = callMs;
 		this.times = 0;
@@ -38,5 +55,27 @@ public class MSCallMS implements Serializable {
 	
 	public List<SpanCallSpan> getSpanCallSpans() {
 		return new ArrayList<>(this.spanCallSpans);
+	}
+
+	@Override
+	public Long getStartNodeGraphId() {
+		return ms.getId();
+	}
+
+	@Override
+	public Long getEndNodeGraphId() {
+		return callMs.getId();
+	}
+
+	@Override
+	public RelationType getRelationType() {
+		return RelationType.MICROSERVICE_CALL_MICROSERVICE;
+	}
+
+	@Override
+	public Map<String, Object> getProperties() {
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("times", getTimes() == null ? 0 : getTimes());
+		return properties;
 	}
 }

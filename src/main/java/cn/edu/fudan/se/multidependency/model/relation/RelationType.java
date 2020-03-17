@@ -34,6 +34,7 @@ public enum RelationType implements RelationshipType {
 	
 	MICRO_SERVICE_CREATE_SPAN(RelationType.str_MICRO_SERVICE_CREATE_SPAN),
 	SPAN_CALL_SPAN(RelationType.str_SPAN_CALL_SPAN),
+	MICROSERVICE_CALL_MICROSERVICE(RelationType.str_MICROSERVICE_CALL_MICROSERVICE),
 	
 	SPAN_START_WITH_FUNCTION(RelationType.str_SPAN_START_WITH_FUNCTION),
 	
@@ -75,6 +76,7 @@ public enum RelationType implements RelationshipType {
 	public static final String str_FILE_BUILD_DEPENDS_FILE = "FILE_BUILD_DEPENDS_FILE";
 	
 	public static final String str_SPAN_CALL_SPAN = "SPAN_CALL_SPAN";
+	public static final String str_MICROSERVICE_CALL_MICROSERVICE = "MICROSERVICE_CALL_MICROSERVICE";
 	public static final String str_MICRO_SERVICE_CREATE_SPAN = "MICRO_SERVICE_CREATE_SPAN";
 	public static final String str_SPAN_START_WITH_FUNCTION = "SPAN_START_WITH_FUNCTION";
 	

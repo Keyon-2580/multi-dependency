@@ -6,7 +6,7 @@ spring:
       uri: bolt://localhost:7687
 #      uri: http://localhost:7474
       # embedded
-#      uri: file:///D:/fan/Users/Thinkpad/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
+#      uri: file:///D:/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
   thymeleaf:
     cache: false 
 server:
@@ -14,21 +14,22 @@ server:
 
 data:
    projects:
-#      config: src/main/resources/project/train-ticket.json
-      config: src/main/resources/project/depends.json
+      config: src/main/resources/project/train-ticket.json
+#      config: src/main/resources/project/depends.json
    dynamic:
       analyse: true
       dynamic_file_suffix: [.log]
-#      directory_root_path: src/main/resources/dynamic/javassist/train-ticket/logs
-      directory_root_path: src/main/resources/dynamic/javassist/depends/logs
-#      features_path: src/main/resources/features/train-ticket/features-javassist.json
-      features_path: src/main/resources/features/depends/features-javassist.json
+      directory_root_path: src/main/resources/dynamic/javassist/train-ticket/logs
+#      directory_root_path: src/main/resources/dynamic/javassist/depends/logs
+      features_path: src/main/resources/features/train-ticket/features-javassist.json
+#      features_path: src/main/resources/features/depends/features-javassist.json
    build:   
       analyse: false
       directory_root_path: src/main/resources/build
    neo4j:
       delete: true
       # batchInserter要插入的数据库
-      path: D:/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
+#      path: D:/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
+      path: D:/neo4j-community-3.5.16/data/databases/multiple.dependency.db
    
    test: this property is for YamlUtilsTest

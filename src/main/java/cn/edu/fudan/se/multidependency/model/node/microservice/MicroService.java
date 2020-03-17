@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.model.node.microservice.jaeger;
+package cn.edu.fudan.se.multidependency.model.node.microservice;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.repository.relation.dynamic;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -22,14 +23,6 @@ public interface FunctionDynamicCallFunctionRepository extends Neo4jRepository<F
 	@Query("match (a:Function)-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]-(b:Function) where id(a) = {0} return b")
     List<Function> findCallFunctions(Long id);
 
-	/**
-	 * 给定测试用例名称，找出该次测试用例中有哪些动态调用的关系
-	 * @param testCaseName
-	 * @return
-	 */
-	@Query("MATCH p=()-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "{testCaseName:{0}}]->() RETURN p")
-	List<FunctionDynamicCallFunction> findDynamicCallsByTestCaseName(String testCaseName);
-
 	@Query("match p = ()-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->() where r.traceId={traceId} and r.spanId={spanId} return p")
 	List<FunctionDynamicCallFunction> findFunctionCallsByTraceIdAndSpanId(@Param("traceId") String traceId, @Param("spanId") String spanId);
 
@@ -39,4 +32,6 @@ public interface FunctionDynamicCallFunctionRepository extends Neo4jRepository<F
 	@Query("match p = ()-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->() where r.projectName={projectName} and r.language={language} return p")
 	List<FunctionDynamicCallFunction> findFunctionCallsByProjectNameAndLanguage(@Param("projectName") String projectName, @Param("language") String language);
 	
+	@Query("match p = (a:Function)-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->(b:Function)  return a,b,r")
+	Map<Function, Map<Function, List<FunctionDynamicCallFunction>>> test();
 }

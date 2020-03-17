@@ -9,20 +9,20 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
-import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
+import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
+import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
-import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroServiceCreateSpan;
-import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
-import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanStartWithFunction;
+import cn.edu.fudan.se.multidependency.model.relation.microservice.MicroServiceCreateSpan;
+import cn.edu.fudan.se.multidependency.model.relation.microservice.SpanCallSpan;
+import cn.edu.fudan.se.multidependency.model.relation.microservice.SpanStartWithFunction;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.jaeger.MicroServiceRepository;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.jaeger.SpanRepository;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.jaeger.TraceRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.microservice.jaeger.MicroServiceCreateSpanRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.microservice.jaeger.SpanCallSpanRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.microservice.jaeger.SpanStartWithFunctionRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroServiceCreateSpanRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanCallSpanRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanStartWithFunctionRepository;
 
 @Service
 public class JaegerServiceImpl implements JaegerService {

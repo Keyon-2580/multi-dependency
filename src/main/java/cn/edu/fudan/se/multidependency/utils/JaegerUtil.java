@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.microservice.jaeger;
+package cn.edu.fudan.se.multidependency.utils;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

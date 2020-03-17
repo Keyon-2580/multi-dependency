@@ -11,15 +11,16 @@ import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.MicroService;
-import cn.edu.fudan.se.multidependency.model.node.microservice.jaeger.Span;
+import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
+import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
-import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.MicroServiceCreateSpan;
-import cn.edu.fudan.se.multidependency.model.relation.microservice.jaeger.SpanCallSpan;
+import cn.edu.fudan.se.multidependency.model.relation.microservice.MicroServiceCallMicroService;
+import cn.edu.fudan.se.multidependency.model.relation.microservice.MicroServiceCreateSpan;
+import cn.edu.fudan.se.multidependency.model.relation.microservice.SpanCallSpan;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -292,18 +293,18 @@ public class FeatureOrganizationService {
 		JSONArray nodes = new JSONArray();
 		JSONArray edges = new JSONArray();
 		// 服务调用服务
-		Map<MicroService, Map<MicroService, MSCallMS>> msCalls = findMsCallMsByTraces(traces);
+		Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> msCalls = findMsCallMsByTraces(traces);
 		if(traces.length == 1) {
 			JSONObject msCallMsDetail = new JSONObject();
 			for(MicroService ms : msCalls.keySet()) {
 				JSONObject info = new JSONObject();
 				info.put("from", ms);
-				Map<MicroService, MSCallMS> calls = msCalls.get(ms);
+				Map<MicroService, MicroServiceCallMicroService> calls = msCalls.get(ms);
 				JSONObject toArray = new JSONObject();
 				for(MicroService callMs : calls.keySet()) {
 					JSONObject to = new JSONObject();
 					to.put("to", callMs);
-					MSCallMS mcm = calls.get(callMs);
+					MicroServiceCallMicroService mcm = calls.get(callMs);
 					to.put("times", mcm.getTimes());
 					to.put("call", mcm.getSpanCallSpans());
 					toArray.put(callMs.getId().toString(), to);
@@ -318,7 +319,7 @@ public class FeatureOrganizationService {
 		// 显示哪些服务
 		for(MicroService ms : msCalls.keySet()) {
 			for(MicroService callMs : msCalls.get(ms).keySet()) {
-				MSCallMS msCallMs = msCalls.get(ms).get(callMs);
+				MicroServiceCallMicroService msCallMs = msCalls.get(ms).get(callMs);
 				JSONObject edge = new JSONObject();
 				JSONObject value = new JSONObject();
 				value.put("id", ms.getId() + "_" + callMs.getId());
@@ -351,8 +352,8 @@ public class FeatureOrganizationService {
 	 * @param traces
 	 * @return
 	 */
-	public Map<MicroService, Map<MicroService, MSCallMS>> findMsCallMsByTraces(Trace... traces) {
-		Map<MicroService, Map<MicroService, MSCallMS>> result = new HashMap<>();
+	public Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> findMsCallMsByTraces(Trace... traces) {
+		Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> result = new HashMap<>();
 		for(Trace trace : traces) {
 			try {
 				List<Span> spans = traceToSpans.get(trace);
@@ -360,12 +361,12 @@ public class FeatureOrganizationService {
 					List<SpanCallSpan> callSpans = spanCallSpans.get(span);
 					callSpans = callSpans == null ? new ArrayList<>() : callSpans;
 					MicroService ms = spanBelongToMicroService.get(span).getMicroservice();
-					Map<MicroService, MSCallMS> msCallMsTimes = result.get(ms);
+					Map<MicroService, MicroServiceCallMicroService> msCallMsTimes = result.get(ms);
 					msCallMsTimes = msCallMsTimes == null ? new HashMap<>() : msCallMsTimes;
 					for(SpanCallSpan spanCallSpan : callSpans) {
 						MicroService callMs = spanBelongToMicroService.get(spanCallSpan.getCallSpan()).getMicroservice();
-						MSCallMS msCallMs = msCallMsTimes.get(callMs);
-						msCallMs = msCallMs == null ? new MSCallMS(ms, callMs) : msCallMs;
+						MicroServiceCallMicroService msCallMs = msCallMsTimes.get(callMs);
+						msCallMs = msCallMs == null ? new MicroServiceCallMicroService(ms, callMs) : msCallMs;
 						msCallMs.addTimes(1);
 						msCallMs.addSpanCallSpan(spanCallSpan);
 						msCallMsTimes.put(callMs, msCallMs);

@@ -6,7 +6,7 @@ spring:
 #      uri: bolt://localhost:7687
 #      uri: http://localhost:7474
       # embedded
-      uri: file:///fan/Users/Thinkpad/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
+      uri: file:///D:/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
 server:
    port: 8080
    
