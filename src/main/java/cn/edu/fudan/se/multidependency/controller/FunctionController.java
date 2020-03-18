@@ -25,7 +25,7 @@ import cn.edu.fudan.se.multidependency.model.relation.microservice.SpanStartWith
 import cn.edu.fudan.se.multidependency.service.spring.DependencyOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
-import cn.edu.fudan.se.multidependency.service.spring.JaegerService;
+import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 
 @Controller
 @RequestMapping("/function")
@@ -35,7 +35,7 @@ public class FunctionController {
 	private DynamicAnalyseService dynamicAnalyseService;
 
 	@Autowired
-	private JaegerService jaegerService;
+	private MicroserviceService jaegerService;
 
 	@Autowired
 	private FeatureOrganizationService organizationService;

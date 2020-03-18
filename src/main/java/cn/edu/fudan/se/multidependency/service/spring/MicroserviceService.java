@@ -11,7 +11,7 @@ import cn.edu.fudan.se.multidependency.model.relation.microservice.MicroServiceC
 import cn.edu.fudan.se.multidependency.model.relation.microservice.SpanCallSpan;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.SpanStartWithFunction;
 
-public interface JaegerService {
+public interface MicroserviceService {
 	
 	MicroService findMicroServiceById(Long id);
 	

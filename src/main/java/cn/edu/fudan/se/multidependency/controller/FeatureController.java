@@ -19,7 +19,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
-import cn.edu.fudan.se.multidependency.service.spring.JaegerService;
+import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 
 @Controller
 @RequestMapping("/feature")
@@ -29,7 +29,7 @@ public class FeatureController {
 	private DynamicAnalyseService dynamicAnalyseService;
 
 	@Autowired
-	private JaegerService jaegerService;
+	private MicroserviceService jaegerService;
 
 	@Autowired
 	private FeatureOrganizationService featureOrganizationService;

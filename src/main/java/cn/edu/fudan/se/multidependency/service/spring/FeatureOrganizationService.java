@@ -347,6 +347,16 @@ public class FeatureOrganizationService {
 		return result;
 	}
 	
+	public Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> findMsCallMsByTraces(List<Trace> traces) {
+		try {
+			Trace[] tracesArray = new Trace[traces.size()];
+			traces.toArray(tracesArray);
+			return findMsCallMsByTraces(tracesArray);
+		} catch (Exception e) {
+			return new HashMap<>();
+		}
+	}
+	
 	/**
 	 * 获取与trace相关的微服务调用
 	 * @param traces
@@ -507,8 +517,8 @@ public class FeatureOrganizationService {
 	 */
 	public List<TestCase> allTestCases() {
 		List<TestCase> result = new ArrayList<>();
-		for(TestCase feature : testCaseExecuteFeatures.keySet()) {
-			result.add(feature);
+		for(TestCase testcase : testCaseExecuteFeatures.keySet()) {
+			result.add(testcase);
 		}
 		result.sort(new Comparator<TestCase>() {
 			@Override
@@ -516,6 +526,18 @@ public class FeatureOrganizationService {
 				return o1.getTestCaseId().compareTo(o2.getTestCaseId());
 			}
 		});
+		return result;
+	}
+	
+	public List<Trace> allTraces() {
+		List<Trace> result = new ArrayList<>();
+		for(TestCase testCase : testCaseRunTraces.keySet()) {
+			for(TestCaseRunTrace trace : testCaseRunTraces.get(testCase)) {
+				if(!result.contains(trace.getTrace())) {
+					result.add(trace.getTrace());
+				}
+			}
+		}
 		return result;
 	}
 

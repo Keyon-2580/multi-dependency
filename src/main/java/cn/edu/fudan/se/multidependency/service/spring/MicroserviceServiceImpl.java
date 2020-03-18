@@ -25,7 +25,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanCall
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanStartWithFunctionRepository;
 
 @Service
-public class JaegerServiceImpl implements JaegerService {
+public class MicroserviceServiceImpl implements MicroserviceService {
 
 	
 	@Autowired

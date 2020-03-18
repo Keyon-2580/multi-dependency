@@ -22,7 +22,7 @@ import cn.edu.fudan.se.multidependency.model.relation.microservice.MicroServiceC
 import cn.edu.fudan.se.multidependency.model.relation.microservice.SpanCallSpan;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
-import cn.edu.fudan.se.multidependency.service.spring.JaegerService;
+import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.ProjectOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 
@@ -48,7 +48,7 @@ public class MultipleDependencyApp {
 	}
 
 	@Bean
-	public FeatureOrganizationService organize(JaegerService jaegerService, DynamicAnalyseService dynamicAnalyseService) {
+	public FeatureOrganizationService organize(MicroserviceService jaegerService, DynamicAnalyseService dynamicAnalyseService) {
 		Map<String, MicroService> allMicroService = jaegerService.findAllMicroService();
 		Map<Feature, List<TestCaseExecuteFeature>> featureExecutedByTestCases = dynamicAnalyseService.findAllFeatureExecutedByTestCases();
 		Map<TestCase, List<TestCaseExecuteFeature>> testCaseExecuteFeatures = dynamicAnalyseService.findAllTestCaseExecuteFeatures();
