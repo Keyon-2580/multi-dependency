@@ -330,16 +330,15 @@ public class FileDependOnFileExtractServiceImpl implements FileDependOnFileExtra
 
 	@Override
 	public void save() {
-		System.out.println("saveStart");
-		System.out.println(relations.size());
+		System.out.println("saveStart " + relations.size());
 		for(ProjectFile start : relations.keySet()) {
 			Map<ProjectFile, FileDependOnFile> temp = relations.get(start);
 			if(temp == null) {
-				System.out.println(start.getFileName());
+				System.err.println(start.getFileName());
+				continue;
 			}
 			for(ProjectFile end : temp.keySet()) {
 				FileDependOnFile dependRelation = temp.get(end);
-				System.out.println(project.getProjectName() + " " + dependRelation.getStart().getFileName() + " " + dependRelation.getEnd().getFileName() + " " + dependRelation.getDependOnTimes());
 				fileDependOnFileRepository.save(dependRelation);
 			}
 		}
