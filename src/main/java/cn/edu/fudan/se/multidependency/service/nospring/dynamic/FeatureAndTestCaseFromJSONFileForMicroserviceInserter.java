@@ -2,15 +2,18 @@ package cn.edu.fudan.se.multidependency.service.nospring.dynamic;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.exception.TestCaseIdErrorException;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
@@ -68,7 +71,11 @@ public class FeatureAndTestCaseFromJSONFileForMicroserviceInserter extends Extra
 			JSONObject testcaseTemp = testcasesArray.getJSONObject(i);
 			TestCase testcase = new TestCase();
 			testcase.setEntityId(generateEntityId());
-			testcase.setTestCaseId(testcaseTemp.getInteger("id"));
+			Integer testcaseId = testcaseTemp.getInteger("id");
+			if(testcaseId == null || testcaseId < 0) {
+				throw new TestCaseIdErrorException(testcaseId);
+			}
+			testcase.setTestCaseId(testcaseId);
 			testcase.setInputContent(testcaseTemp.get("input").toString());
 			testcase.setSuccess(testcaseTemp.getBooleanValue("success"));
 			testcase.setTestCaseName(testcaseTemp.getString("name"));
@@ -95,6 +102,10 @@ public class FeatureAndTestCaseFromJSONFileForMicroserviceInserter extends Extra
 				TestCaseRunTrace testcaseRunTrace = new TestCaseRunTrace(testcase, trace);
 				addRelation(testcaseRunTrace);
 				
+				List<DynamicCallFunction> calls = this.getRelations().findDynamicCallFunctionsByTraceId(traceId);
+				calls.forEach(call -> {
+					call.setTestcaseId(testcaseId);
+				});
 			}
 			
 		}

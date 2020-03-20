@@ -11,7 +11,6 @@ import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_TRACE_RUN_WITH_FUNCTION)
-public class TraceRunWithFunction implements Relation {
+public class TraceRunWithFunction implements DynamicCallFunction {
 
 	private static final long serialVersionUID = 1477035391487647267L;
 
@@ -39,9 +38,14 @@ public class TraceRunWithFunction implements Relation {
 	@EndNode
 	private Function function;
 	
+	private Integer testcaseId;
+	
+	private String traceId;
+	
 	public TraceRunWithFunction(Trace trace, Function function) {
 		this.trace = trace;
 		this.function = function;
+		this.traceId = trace.getTraceId();
 	}
 	
 	private String order;
@@ -65,6 +69,8 @@ public class TraceRunWithFunction implements Relation {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("order", getOrder() == null ? "" : order);
+		properties.put("traceId", getTraceId() == null ? "" : getTraceId());
+		properties.put("testcaseId", getTestcaseId() == null ? -1 : getTestcaseId());
 		return properties;
 	}
 

@@ -10,7 +10,6 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION)
-public class FunctionDynamicCallFunction implements Relation {
+public class FunctionDynamicCallFunction implements DynamicCallFunction {
 
 	private static final long serialVersionUID = -7640490954063715746L;
 	
@@ -58,6 +57,8 @@ public class FunctionDynamicCallFunction implements Relation {
 	
 	private String spanId;
 	
+	private Integer testcaseId;
+	
 	@Override
 	public Long getStartNodeGraphId() {
 		return function.getId();
@@ -85,6 +86,7 @@ public class FunctionDynamicCallFunction implements Relation {
 		properties.put("toOrder", getToOrder() == null ? -1 : getToOrder());
 		properties.put("fromDepth", getFromDepth() == null ? -1 : getFromDepth());
 		properties.put("toDepth", getToDepth() == null ? -1 : getToDepth());
+		properties.put("testcaseId", getTestcaseId() == null ? -1 : getTestcaseId());
 		return properties;
 	}
 

@@ -11,6 +11,7 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFea
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
 
+@Deprecated
 public class FeatureAndTestCaseFromCodeForMicroserviceInserter extends ExtractorForNodesAndRelationsImpl {
 	
 	private List<Feature> features = new ArrayList<>();

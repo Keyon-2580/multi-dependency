@@ -11,15 +11,15 @@ import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCallFunction;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_SPAN_START_WITH_FUNCTION)
-public class SpanStartWithFunction implements Relation {
+public class SpanStartWithFunction implements DynamicCallFunction {
 
 	private static final long serialVersionUID = 7462518725070039162L;
 	
@@ -33,9 +33,14 @@ public class SpanStartWithFunction implements Relation {
 	@EndNode
 	private Function function;
 	
+	private String traceId;
+	
+	private Integer testcaseId;
+	
 	public SpanStartWithFunction(Span span, Function function) {
 		this.span = span;
 		this.function = function;
+		this.traceId = span.getTraceId();
 	}
 	
 	@Override
@@ -55,7 +60,10 @@ public class SpanStartWithFunction implements Relation {
 
 	@Override
 	public Map<String, Object> getProperties() {
-		return new HashMap<>();
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("traceId", getTraceId() == null ? "" : getTraceId());
+		properties.put("testcaseId", getTestcaseId() == null ? -1 : getTestcaseId());
+		return properties;
 	}
 
 }

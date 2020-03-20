@@ -15,6 +15,8 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFea
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
 
 public interface DynamicAnalyseService {
+	
+//	List<FunctionCallFunction> findFunctionCallFunctionNotDynamicCalled(TestCase... testcases);
 
 	List<FunctionDynamicCallFunction> findFunctionDynamicCallsByTraceAndMicroService(Trace trace, MicroService ms);
 	

@@ -5,12 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCallFunction;
+
 public class Relations {
 
 	private Map<RelationType, List<Relation>> allRelations = new HashMap<>();
 	
+	private Map<String, List<DynamicCallFunction>> traceIdToDynamicCallFunctions = new HashMap<>();
+	
 	public void clear() {
 		allRelations.clear();
+		traceIdToDynamicCallFunctions.clear();
 	}
 	
 	public Map<RelationType, List<Relation>> getAllRelations() {
@@ -25,18 +30,31 @@ public class Relations {
 		return size;
 	}
 	
-	public void clear(RelationType relationType) {
-		List<Relation> nodes = allRelations.get(relationType);
-		if(nodes != null) {
-			nodes.clear();
-		}
-	}
-	
 	public void addRelation(Relation relation) {
 		List<Relation> nodes = allRelations.get(relation.getRelationType());
 		nodes = nodes == null ? new ArrayList<>() : nodes;
 		nodes.add(relation);
 		allRelations.put(relation.getRelationType(), nodes);
+		
+		if(relation instanceof DynamicCallFunction) {
+			DynamicCallFunction call = (DynamicCallFunction) relation;
+			if(call.getTraceId() == null) {
+				return;
+			}
+			List<DynamicCallFunction> calls = traceIdToDynamicCallFunctions.get(call.getTraceId());
+			calls = calls == null ? new ArrayList<>() : calls;
+			calls.add(call);
+			traceIdToDynamicCallFunctions.put(call.getTraceId(), calls);
+		}
+	}
+	
+	public List<DynamicCallFunction> findDynamicCallFunctionsByTraceId(String traceId) {
+		try {
+			List<DynamicCallFunction> calls = traceIdToDynamicCallFunctions.get(traceId);
+			return calls == null ? new ArrayList<>() : calls;
+		} catch (Exception e) {
+		}
+		return new ArrayList<>();
 	}
 	
 	public List<? extends Relation> findRelationsMap(RelationType relationType) {
