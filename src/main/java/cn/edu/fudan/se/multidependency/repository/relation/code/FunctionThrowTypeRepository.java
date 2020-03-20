@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.model.relation.code.FunctionThrowType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionThrowType;
 
 @Repository
 public interface FunctionThrowTypeRepository extends Neo4jRepository<FunctionThrowType, Long> {

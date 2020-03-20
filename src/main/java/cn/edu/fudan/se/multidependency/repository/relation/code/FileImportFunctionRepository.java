@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.model.relation.code.FileImportFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
 
 @Repository
 public interface FileImportFunctionRepository extends Neo4jRepository<FileImportFunction, Long> {

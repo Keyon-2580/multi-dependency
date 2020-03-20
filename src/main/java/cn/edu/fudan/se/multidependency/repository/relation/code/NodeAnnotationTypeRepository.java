@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.model.relation.code.NodeAnnotationType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.NodeAnnotationType;
 
 @Repository
 public interface NodeAnnotationTypeRepository extends Neo4jRepository<NodeAnnotationType, Long> {

@@ -4,7 +4,7 @@ import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.relation.FileDependOnFile;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.FileDependOnFile;
 
 public interface FileDependOnFileExtractService {
 

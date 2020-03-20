@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.model.relation.code.VariableIsType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
 
 @Repository
 public interface VariableIsTypeRepository extends Neo4jRepository<VariableIsType, Long>{

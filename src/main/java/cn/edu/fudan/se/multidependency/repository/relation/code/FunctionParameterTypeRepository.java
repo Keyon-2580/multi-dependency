@@ -1,7 +1,7 @@
 package cn.edu.fudan.se.multidependency.repository.relation.code;
 
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.model.relation.code.FunctionParameterType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionParameterType;
 
 import java.util.List;
 

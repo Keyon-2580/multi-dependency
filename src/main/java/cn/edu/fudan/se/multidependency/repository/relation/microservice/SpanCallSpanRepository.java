@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.model.relation.microservice.SpanCallSpan;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanCallSpan;
 
 @Repository
 public interface SpanCallSpanRepository extends Neo4jRepository<SpanCallSpan, Long>{

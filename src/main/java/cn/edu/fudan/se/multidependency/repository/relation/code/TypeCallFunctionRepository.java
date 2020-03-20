@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.model.relation.code.TypeCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction;
 
 @Repository
 public interface TypeCallFunctionRepository extends Neo4jRepository<TypeCallFunction, Long> {

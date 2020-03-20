@@ -18,9 +18,9 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
-import cn.edu.fudan.se.multidependency.model.relation.microservice.MicroServiceCallMicroService;
-import cn.edu.fudan.se.multidependency.model.relation.microservice.MicroServiceCreateSpan;
-import cn.edu.fudan.se.multidependency.model.relation.microservice.SpanCallSpan;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanCallSpan;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor

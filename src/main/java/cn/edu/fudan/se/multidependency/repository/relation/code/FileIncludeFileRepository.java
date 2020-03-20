@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.model.relation.code.FileIncludeFile;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FileIncludeFile;
 
 @Repository
 public interface FileIncludeFileRepository extends Neo4jRepository<FileIncludeFile, Long> {

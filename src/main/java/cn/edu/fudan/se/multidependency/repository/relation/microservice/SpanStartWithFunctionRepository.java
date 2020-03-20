@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.model.relation.microservice.SpanStartWithFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanStartWithFunction;
 
 @Repository
 public interface SpanStartWithFunctionRepository extends Neo4jRepository<SpanStartWithFunction, Long> {

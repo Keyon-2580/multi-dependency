@@ -27,7 +27,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.TestCaseExecuteFeatureRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.TestCaseRunTraceRepository;
-import cn.edu.fudan.se.multidependency.service.RepositoryService;
+import cn.edu.fudan.se.multidependency.service.nospring.RepositoryService;
 
 @Service
 public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {

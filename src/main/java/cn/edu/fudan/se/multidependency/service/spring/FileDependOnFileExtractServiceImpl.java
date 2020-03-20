@@ -14,24 +14,24 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.DependOnType;
-import cn.edu.fudan.se.multidependency.model.relation.FileDependOnFile;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
-import cn.edu.fudan.se.multidependency.model.relation.code.FileImportFunction;
-import cn.edu.fudan.se.multidependency.model.relation.code.FileImportType;
-import cn.edu.fudan.se.multidependency.model.relation.code.FileImportVariable;
-import cn.edu.fudan.se.multidependency.model.relation.code.FileIncludeFile;
-import cn.edu.fudan.se.multidependency.model.relation.code.FunctionCallFunction;
-import cn.edu.fudan.se.multidependency.model.relation.code.FunctionCastType;
-import cn.edu.fudan.se.multidependency.model.relation.code.FunctionParameterType;
-import cn.edu.fudan.se.multidependency.model.relation.code.FunctionReturnType;
-import cn.edu.fudan.se.multidependency.model.relation.code.FunctionThrowType;
-import cn.edu.fudan.se.multidependency.model.relation.code.NodeAnnotationType;
-import cn.edu.fudan.se.multidependency.model.relation.code.TypeCallFunction;
-import cn.edu.fudan.se.multidependency.model.relation.code.TypeExtendsType;
-import cn.edu.fudan.se.multidependency.model.relation.code.TypeImplementsType;
-import cn.edu.fudan.se.multidependency.model.relation.code.VariableIsType;
-import cn.edu.fudan.se.multidependency.model.relation.code.VariableTypeParameterType;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.FileDependOnFile;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportVariable;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FileIncludeFile;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCastType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionParameterType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionReturnType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionThrowType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.NodeAnnotationType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.TypeExtendsType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.TypeImplementsType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypeParameterType;
 import cn.edu.fudan.se.multidependency.repository.relation.FileDependOnFileRepository;
 
 @Service
@@ -111,11 +111,11 @@ public class FileDependOnFileExtractServiceImpl implements FileDependOnFileExtra
 	
 	@Override
 	public Map<ProjectFile, Map<ProjectFile, FileDependOnFile>> extractFileDependOnFiles() throws Exception {
-//		if(this.project == null) {
+		if(this.project == null) {
 			extractAllProject();
-//		} else {
-//			extractSpecifiedProject();
-//		}
+		} else {
+			extractSpecifiedProject();
+		}
 		process();
 		return relations;
 	}
@@ -158,7 +158,7 @@ public class FileDependOnFileExtractServiceImpl implements FileDependOnFileExtra
 		functionDynamicCallFunctions = dynamicAnalyseService.findAllFunctionDynamicCallFunctionRelations(true);
 	}
 	
-	/*private void extractSpecifiedProject() throws Exception {
+	private void extractSpecifiedProject() throws Exception {
 		int i = 0;
 		relations = new HashMap<>();
 		System.out.println("extract " + i++);
@@ -194,7 +194,7 @@ public class FileDependOnFileExtractServiceImpl implements FileDependOnFileExtra
 		
 		System.out.println("extract " + i++);
 		functionDynamicCallFunctions = dynamicAnalyseService.findFunctionDynamicCallFunctionRelations(project, true);
-	}*/
+	}
 	
 	private void process() throws Exception {
 		int i = 0;
