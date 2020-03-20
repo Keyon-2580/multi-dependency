@@ -46,8 +46,14 @@ public class Package implements Node {
 	}
 
 	@Override
-	public NodeType getNodeType() {
-		return NodeType.Package;
+	public NodeLabelType getNodeType() {
+		return NodeLabelType.Package;
+	}
+	
+	public static final String LABEL_INDEX = "packageName";
+	@Override
+	public String indexName() {
+		return LABEL_INDEX;
 	}
 
 }

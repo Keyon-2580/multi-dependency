@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroServiceCallMicroServiceRepository;
@@ -19,6 +20,12 @@ public class RelationInserterService {
 	@Autowired
 	private MicroServiceCallMicroServiceRepository msCallMsRepository;
 	
+	@Autowired
+	private FileDependOnFileExtractService fileDependOnFileExtractor;
+	
+	@Autowired
+	private StaticAnalyseService staticAnalyseService;
+	
 	@Bean
 	public void addMsCallMsRelation() {
 		Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> calls = featureOrganizationService.findMsCallMsByTraces(featureOrganizationService.allTraces());
@@ -26,6 +33,21 @@ public class RelationInserterService {
 			for(MicroService callMs : calls.get(ms).keySet()) {
 				MicroServiceCallMicroService call = calls.get(ms).get(callMs);
 				msCallMsRepository.save(call);
+			}
+		}
+	}
+	
+	@Bean
+	public void testFileDependOnFileExtractService() {
+		Map<Long, Project> allProjects = staticAnalyseService.allProjects();
+		for(Long id : allProjects.keySet()) {
+			try {
+				fileDependOnFileExtractor.setProject(id);
+				System.out.println("extractFileDependOnFiles");
+				fileDependOnFileExtractor.extractFileDependOnFiles();
+				fileDependOnFileExtractor.save();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}

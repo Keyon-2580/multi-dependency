@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -45,8 +45,14 @@ public class Type implements Node {
 	}
 	
 	@Override
-	public NodeType getNodeType() {
-		return NodeType.Type;
+	public NodeLabelType getNodeType() {
+		return NodeLabelType.Type;
 	}
 
+	
+	public static final String LABEL_INDEX = "typeName";
+	@Override
+	public String indexName() {
+		return LABEL_INDEX;
+	}
 }

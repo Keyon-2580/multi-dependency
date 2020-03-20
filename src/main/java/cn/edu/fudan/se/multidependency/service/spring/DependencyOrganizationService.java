@@ -225,8 +225,8 @@ public class DependencyOrganizationService {
 			tempFunction.put(calledFunction, size);
 			countOfFunctionCall.put(callerFunction, tempFunction);
 			
-			ProjectFile callerFile = staticAnalyseService.findFunctionBelongToCodeFile(callerFunction);
-			ProjectFile calledFile = staticAnalyseService.findFunctionBelongToCodeFile(calledFunction);
+			ProjectFile callerFile = staticAnalyseService.findFunctionBelongToFile(callerFunction);
+			ProjectFile calledFile = staticAnalyseService.findFunctionBelongToFile(calledFunction);
 			if(callerFile.getId().equals(calledFile.getId())) {
 				continue;
 			}
@@ -242,8 +242,8 @@ public class DependencyOrganizationService {
 			tempFile.put(calledFile, size);
 			countOfFileCall.put(callerFile, tempFile);
 			
-			Package callerPackage = staticAnalyseService.findFileInPackage(callerFile);
-			Package calledPackage = staticAnalyseService.findFileInPackage(calledFile);
+			Package callerPackage = staticAnalyseService.findFileBelongToPackage(callerFile);
+			Package calledPackage = staticAnalyseService.findFileBelongToPackage(calledFile);
 			if(callerPackage.getId().equals(calledPackage.getId())) {
 				continue;
 			}

@@ -8,7 +8,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -53,8 +53,15 @@ public class Feature implements Node {
 	}
 
 	@Override
-	public NodeType getNodeType() {
-		return NodeType.Feature;
+	public NodeLabelType getNodeType() {
+		return NodeLabelType.Feature;
 	}
+	
+	public static final String LABEL_INDEX = "featureName";
+	@Override
+	public String indexName() {
+		return LABEL_INDEX;
+	}
+
 
 }

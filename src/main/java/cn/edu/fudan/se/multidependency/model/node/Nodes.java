@@ -17,12 +17,12 @@ public class Nodes {
 	
 	private List<Node> allNodes = new ArrayList<>();
 
-	private Map<NodeType, List<Node>> nodeTypeToNodes = new HashMap<>();
+	private Map<NodeLabelType, List<Node>> nodeTypeToNodes = new HashMap<>();
 	
 	/**
 	 * 每个项目内的节点的entityId是唯一的
 	 */
-	private Map<Project, Map<NodeType, Map<Long, Node>>> projectToNodes = new HashMap<>();
+	private Map<Project, Map<NodeLabelType, Map<Long, Node>>> projectToNodes = new HashMap<>();
 	
 	private List<Project> projects = new ArrayList<>();
 	
@@ -49,7 +49,7 @@ public class Nodes {
 		projects.clear();
 	}
 	
-	public Map<NodeType, List<Node>> getAllNodes() {
+	public Map<NodeLabelType, List<Node>> getAllNodes() {
 		return new HashMap<>(nodeTypeToNodes);
 	}
 	
@@ -74,7 +74,7 @@ public class Nodes {
 		nodeTypeToNodes.put(node.getNodeType(), nodes);
 		
 		if(inProject != null && projects.contains(inProject)) {
-			Map<NodeType, Map<Long, Node>> projectHasNodes = projectToNodes.get(inProject);
+			Map<NodeLabelType, Map<Long, Node>> projectHasNodes = projectToNodes.get(inProject);
 			projectHasNodes = projectHasNodes == null ? new HashMap<>() : projectHasNodes;
 			Map<Long, Node> entityIdToNode = projectHasNodes.get(node.getNodeType());
 			entityIdToNode = entityIdToNode == null ? new HashMap<>() : entityIdToNode;
@@ -84,12 +84,12 @@ public class Nodes {
 		}
 	}
 	
-	public List<? extends Node> findNodesByNodeType(NodeType nodeType) {
+	public List<? extends Node> findNodesByNodeType(NodeLabelType nodeType) {
 		List<? extends Node> result = nodeTypeToNodes.get(nodeType);
 		return result == null ? new ArrayList<>() : result;
 	}
 	
-	public Node findNodeByEntityIdInProject(NodeType nodeType, Long entityId, Project inProject) {
+	public Node findNodeByEntityIdInProject(NodeLabelType nodeType, Long entityId, Project inProject) {
 		Map<Long, ? extends Node> nodes = findNodesByNodeTypeInProject(nodeType, inProject);
 		if(nodes.get(entityId) != null) {
 			return nodes.get(entityId).getNodeType() == nodeType ? nodes.get(entityId) : null;
@@ -98,7 +98,7 @@ public class Nodes {
 	}
 
 	public Node findNodeByEntityIdInProject(Long entityId, Project inProject) {
-		Map<NodeType, Map<Long, Node>> typeToNodes = projectToNodes.get(inProject);
+		Map<NodeLabelType, Map<Long, Node>> typeToNodes = projectToNodes.get(inProject);
 		if(typeToNodes == null) {
 			return null;
 		}
@@ -110,8 +110,8 @@ public class Nodes {
 		return null;
 	}
 	
-	public Map<Long, ? extends Node> findNodesByNodeTypeInProject(NodeType nodeType, Project inProject) {
-		Map<NodeType, Map<Long, Node>> projectHasNodes = projectToNodes.get(inProject);
+	public Map<Long, ? extends Node> findNodesByNodeTypeInProject(NodeLabelType nodeType, Project inProject) {
+		Map<NodeLabelType, Map<Long, Node>> projectHasNodes = projectToNodes.get(inProject);
 		if(projectHasNodes == null) {
 			return new HashMap<>();
 		}
@@ -134,7 +134,7 @@ public class Nodes {
 			return result;
 		}
 		@SuppressWarnings("unchecked")
-		Map<Long, Function> functions = (Map<Long, Function>) findNodesByNodeTypeInProject(NodeType.Function, project);
+		Map<Long, Function> functions = (Map<Long, Function>) findNodesByNodeTypeInProject(NodeLabelType.Function, project);
 		functions.values().forEach(function -> {
 			String functionName = function.getFunctionName();
 			List<Function> fs = result.get(functionName);
@@ -148,7 +148,7 @@ public class Nodes {
 	
 	public Package findPackageByPackageName(String packageName, Project project) {
 		@SuppressWarnings("unchecked")
-		Map<Long, Package> packages = (Map<Long, Package>) findNodesByNodeTypeInProject(NodeType.Package, project);
+		Map<Long, Package> packages = (Map<Long, Package>) findNodesByNodeTypeInProject(NodeLabelType.Package, project);
 		for(Package pck : packages.values()) {
 			if(pck.getPackageName().equals(packageName)) {
 				return pck;
@@ -159,7 +159,7 @@ public class Nodes {
 
 	public Map<Long, Scenario> findScenarios() {
 		Map<Long, Scenario> scenarios = new HashMap<>();
-		findNodesByNodeType(NodeType.Scenario).forEach(node -> {
+		findNodesByNodeType(NodeLabelType.Scenario).forEach(node -> {
 			scenarios.put(node.getId(), (Scenario) node);
 		});
 		return scenarios;
@@ -180,7 +180,7 @@ public class Nodes {
 	 */
 	public Map<Integer, Feature> findFeatures() {
 		Map<Integer, Feature> features = new HashMap<>();
-		findNodesByNodeType(NodeType.Feature).forEach(node -> {
+		findNodesByNodeType(NodeLabelType.Feature).forEach(node -> {
 			Feature feature = (Feature) node;
 			features.put(feature.getFeatureId(), (Feature) node);
 		});
@@ -193,7 +193,7 @@ public class Nodes {
 	 */
 	public Map<String, Trace> findTraces() {
 		Map<String, Trace> traces = new HashMap<>();
-		findNodesByNodeType(NodeType.Trace).forEach(node -> {
+		findNodesByNodeType(NodeLabelType.Trace).forEach(node -> {
 			Trace trace = (Trace) node;
 			traces.put(trace.getTraceId(), trace);
 		});
@@ -201,7 +201,7 @@ public class Nodes {
 	}
 	
 	public MicroService findMicroServiceByName(String name) {
-		for(Node node : findNodesByNodeType(NodeType.MicroService)) {
+		for(Node node : findNodesByNodeType(NodeLabelType.MicroService)) {
 			MicroService temp = (MicroService) node;
 			if(name.equals(temp.getName())) {
 				return temp;
@@ -211,7 +211,7 @@ public class Nodes {
 	}
 
 	public Span findSpanBySpanId(String spanId) {
-		for(Node node : findNodesByNodeType(NodeType.Span)) {
+		for(Node node : findNodesByNodeType(NodeLabelType.Span)) {
 			Span span = (Span) node;
 			if(spanId.equals(span.getSpanId())) {
 				return span;

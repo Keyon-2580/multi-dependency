@@ -8,7 +8,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -42,8 +42,15 @@ public class Trace implements Node {
 	}
 
 	@Override
-	public NodeType getNodeType() {
-		return NodeType.Trace;
+	public NodeLabelType getNodeType() {
+		return NodeLabelType.Trace;
 	}
+	
+	public static final String LABEL_INDEX = "traceId";
+	@Override
+	public String indexName() {
+		return LABEL_INDEX;
+	}
+
 
 }

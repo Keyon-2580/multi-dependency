@@ -27,7 +27,13 @@
   - ProjectFile -> Variable
   - Type -> Function
   - Type -> Variable
+  - Function -> Variable
   - ...
+  - * Project *1-> Package
+  - * Project *2-> ProjectFile
+  - * Project *3-> Type
+  - * Project *3..4-> Function
+  - * Project *3..5-> Variable
 - FileImportFunction
 - FileImportType
 - FileImportVariable

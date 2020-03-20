@@ -36,7 +36,8 @@ public class MultipleDependencyApp {
 	
 	@Bean 
 	public ProjectOrganizationService organizeProject(StaticAnalyseService staticAnalyseService, DynamicAnalyseService dynamicAnalyseService) {
-		Map<Long, Project> projects = staticAnalyseService.findAllProjects();
+		System.out.println("organizaProject");
+		Map<Long, Project> projects = staticAnalyseService.allProjects();
 		Map<Project, List<FunctionDynamicCallFunction>> dynamicCalls = new HashMap<>();
 		for(Project project : projects.values()) {
 			List<FunctionDynamicCallFunction> calls = dynamicAnalyseService.findFunctionDynamicCallsByProject(project);
@@ -49,6 +50,7 @@ public class MultipleDependencyApp {
 
 	@Bean
 	public FeatureOrganizationService organize(MicroserviceService jaegerService, DynamicAnalyseService dynamicAnalyseService) {
+		System.out.println("organizeFeature");
 		Map<String, MicroService> allMicroService = jaegerService.findAllMicroService();
 		Map<Feature, List<TestCaseExecuteFeature>> featureExecutedByTestCases = dynamicAnalyseService.findAllFeatureExecutedByTestCases();
 		Map<TestCase, List<TestCaseExecuteFeature>> testCaseExecuteFeatures = dynamicAnalyseService.findAllTestCaseExecuteFeatures();

@@ -22,7 +22,6 @@ public enum RelationType implements RelationshipType {
 	NODE_ANNOTATION_TYPE(RelationType.str_NODE_ANNOTATION_TYPE),
 	TESTCASE_EXECUTE_FEATURE(RelationType.str_TESTCASE_EXECUTE_FEATURE),
 	TESTCASE_RUN_TRACE(RelationType.str_TESTCASE_RUN_TRACE),
-	@Deprecated
 	SCENARIO_DEFINE_TESTCASE(RelationType.str_SCENARIO_DEFINE_TESTCASE),
 	NODE_IS_SCENARIO(RelationType.str_NODE_IS_SCENARIO),
 	NODE_IS_FEATURE(RelationType.str_NODE_IS_FEATURE),
@@ -38,7 +37,9 @@ public enum RelationType implements RelationshipType {
 	
 	SPAN_START_WITH_FUNCTION(RelationType.str_SPAN_START_WITH_FUNCTION),
 	
-	TRACE_RUN_WITH_FUNCTION(RelationType.str_TRACE_RUN_WITH_FUNCTION);
+	TRACE_RUN_WITH_FUNCTION(RelationType.str_TRACE_RUN_WITH_FUNCTION),
+	
+	FILE_DEPEND_ON_FILE(RelationType.str_FILE_DEPEND_ON_FILE);
 	
 	/**
 	 * 结构关系
@@ -65,7 +66,6 @@ public enum RelationType implements RelationshipType {
 	public static final String str_NODE_ANNOTATION_TYPE = "NODE_ANNOTATION_TYPE";
 	public static final String str_VARIABLE_TYPE_PARAMETER_TYPE = "VARIABLE_TYPE_PARAMETER_TYPE";
 	public static final String str_TESTCASE_EXECUTE_FEATURE = "TESTCASE_EXECUTE_FEATURE";
-	@Deprecated
 	public static final String str_SCENARIO_DEFINE_TESTCASE = "SCENARIO_DEFINE_TESTCASE";
 	public static final String str_NODE_IS_SCENARIO = "NODE_IS_SCENARIO";
 	public static final String str_NODE_IS_FEATURE = "NODE_IS_FEATURE";
@@ -76,13 +76,15 @@ public enum RelationType implements RelationshipType {
 	public static final String str_FILE_BUILD_DEPENDS_FILE = "FILE_BUILD_DEPENDS_FILE";
 	
 	public static final String str_SPAN_CALL_SPAN = "SPAN_CALL_SPAN";
-	public static final String str_MICROSERVICE_CALL_MICROSERVICE = "MICROSERVICE_CALL_MICROSERVICE";
 	public static final String str_MICRO_SERVICE_CREATE_SPAN = "MICRO_SERVICE_CREATE_SPAN";
 	public static final String str_SPAN_START_WITH_FUNCTION = "SPAN_START_WITH_FUNCTION";
 	
 	public static final String str_TESTCASE_RUN_TRACE = "TESTCASE_RUN_TRACE";
 	
 	public static final String str_TRACE_RUN_WITH_FUNCTION = "TRACE_RUN_WITH_FUNCTION";
+	
+	public static final String str_MICROSERVICE_CALL_MICROSERVICE = "MICROSERVICE_CALL_MICROSERVICE";
+	public static final String str_FILE_DEPEND_ON_FILE = "FILE_DEPEND_ON_FILE";
 
 	private String name;
 

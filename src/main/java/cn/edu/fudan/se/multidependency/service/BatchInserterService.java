@@ -7,12 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.Label;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Nodes;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.Relations;
@@ -27,7 +28,7 @@ public class BatchInserterService implements Closeable {
 	
 	private BatchInserter inserter = null;
 	
-    private Map<NodeType, Label> mapLabels = new HashMap<>();
+    private Map<NodeLabelType, Label> mapLabels = new HashMap<>();
     
 	public void init(String databasePath, boolean initDatabase) throws Exception {
 		File directory = new File(databasePath);
@@ -35,14 +36,14 @@ public class BatchInserterService implements Closeable {
 			FileUtil.delFile(directory);
 		}
 		inserter = BatchInserters.inserter(directory);
-	    /*inserter.createDeferredSchemaIndex( fileLabel ).on( "fileName" ).create();
-	    inserter.createDeferredSchemaIndex( fileLabel ).on( "path" ).create();
-	    inserter.createDeferredSchemaIndex( functionLabel ).on( "functionName" ).create();
-	    inserter.createDeferredSchemaIndex( packageLabel ).on( "packageName" ).create();
-	    inserter.createDeferredSchemaIndex( typeLabel ).on( "typeName" ).create();
-	    inserter.createDeferredSchemaIndex( typeLabel ).on( "packageName" ).create();*/
-	    for(NodeType nodeType : NodeType.values()) {
-	    	mapLabels.put(nodeType, Label.label(nodeType.toString()));
+	    for(NodeLabelType nodeType : NodeLabelType.values()) {
+	    	Label label = Label.label(nodeType.toString());
+	    	mapLabels.put(nodeType, label);
+	    	String index = nodeType.indexName();
+	    	if(!StringUtils.isBlank(index)) {
+	    		// 创建索引
+	    		inserter.createDeferredSchemaIndex(label).on(index).create();
+	    	}
 	    }
 	}
 	

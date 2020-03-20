@@ -13,7 +13,22 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.relation.code.FileImportFunction;
+import cn.edu.fudan.se.multidependency.model.relation.code.FileImportType;
+import cn.edu.fudan.se.multidependency.model.relation.code.FileImportVariable;
+import cn.edu.fudan.se.multidependency.model.relation.code.FileIncludeFile;
+import cn.edu.fudan.se.multidependency.model.relation.code.FunctionCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.code.FunctionCastType;
+import cn.edu.fudan.se.multidependency.model.relation.code.FunctionParameterType;
+import cn.edu.fudan.se.multidependency.model.relation.code.FunctionReturnType;
+import cn.edu.fudan.se.multidependency.model.relation.code.FunctionThrowType;
+import cn.edu.fudan.se.multidependency.model.relation.code.NodeAnnotationType;
+import cn.edu.fudan.se.multidependency.model.relation.code.TypeCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.code.TypeExtendsType;
+import cn.edu.fudan.se.multidependency.model.relation.code.TypeImplementsType;
+import cn.edu.fudan.se.multidependency.model.relation.code.VariableIsType;
+import cn.edu.fudan.se.multidependency.model.relation.code.VariableTypeParameterType;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.FunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.NamespaceRepository;
@@ -22,14 +37,21 @@ import cn.edu.fudan.se.multidependency.repository.node.code.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.TypeRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.VariableRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportTypeRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportVariableRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FileIncludeFileRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionCallFunctionRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionCastTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionParameterTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionReturnTypeRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionThrowTypeRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.NodeAnnotationTypeRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.TypeCallFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.TypeExtendsTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.TypeImplementsTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.VariableIsTypeRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.VariableTypeParameterTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
 
 @Service
@@ -44,9 +66,16 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	
 	@Autowired
 	FileImportTypeRepository fileImportTypeRepository;
+	@Autowired
+	FileImportFunctionRepository fileImportFunctionRepository;
+	@Autowired
+	FileImportVariableRepository fileImportVariableRepository;
 	
 	@Autowired
 	FunctionCallFunctionRepository functionCallFunctionRepository;
+	
+	@Autowired
+	TypeCallFunctionRepository typeCallFunctionRepository;
 	
 	@Autowired
 	FunctionRepository functionRepository;
@@ -87,8 +116,20 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     @Autowired
     ContainRepository containRepository;
     
+    @Autowired
+    FunctionCastTypeRepository functionCastTypeRepository;
+    
+    @Autowired
+    FunctionThrowTypeRepository functionThrowTypeRepository;
+    
+    @Autowired
+    NodeAnnotationTypeRepository nodeAnnotationTypeRepository;
+    
+    @Autowired
+    VariableTypeParameterTypeRepository variableTypeParameterTypeRepository;
+    
 	@Override
-	public List<Type> findAllTypes() {
+	public List<Type> findTypes() {
 		List<Type> types = new ArrayList<>();
 		typeRepository.findAll().forEach(type -> {
 			types.add(type);
@@ -102,7 +143,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
-	public List<Type> findTypesInFile(ProjectFile codeFile) {
+	public List<Type> findTypes(ProjectFile codeFile) {
 		return new ArrayList<>();
 	}
 
@@ -117,7 +158,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
-	public List<Function> findAllFunctions() {
+	public List<Function> allFunctions() {
 		List<Function> functions = new ArrayList<>();
 		functionRepository.findAll().forEach(function -> {
 			functions.add(function);
@@ -126,31 +167,37 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
-	public Package findTypeInPackage(Type type) {
+	public Package findTypeBelongToPackage(Type type) {
 		return null;
 	}
 	
-
-	/**
-	 * 找出某函数所在的文件
-	 */
 	@Override
-	public ProjectFile findFunctionBelongToCodeFile(Function function) {
-		return functionRepository.findFunctionBelongToFileByFunctionId(function.getId());
+	public ProjectFile findFunctionBelongToFile(Function function) {
+		return containRepository.findFunctionBelongToFileByFunctionId(function.getId());
 	}
 
 	@Override
-	public List<ProjectFile> findAllProjectFile() {
+	public ProjectFile findTypeBelongToFile(Type type) {
+		return containRepository.findTypeBelongToFileByTypeId(type.getId());
+	}
+
+	@Override
+	public ProjectFile findVariableBelongToFile(Variable variable) {
+		return containRepository.findVariableBelongToFileByVariableId(variable.getId());
+	}
+
+	@Override
+	public List<ProjectFile> allFiles() {
 		return fileRepository.findAllProjectFiles();
 	}
 
 	@Override
-	public Package findFileInPackage(ProjectFile file) {
-		return containRepository.findFileInPackageByFileId(file.getId());
+	public Package findFileBelongToPackage(ProjectFile file) {
+		return containRepository.findFileBelongToPackageByFileId(file.getId());
 	}
 
 	@Override
-	public Map<Long, Project> findAllProjects() {
+	public Map<Long, Project> allProjects() {
 		Iterable<Project> projects = projectRepository.findAll();
 		Map<Long, Project> result = new HashMap<>();
 		for(Project project : projects) {
@@ -158,4 +205,160 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		}
 		return result;
 	}
+
+	@Override
+	public Project findProject(Long id) {
+		return projectRepository.findById(id).get();
+	}
+
+	@Override
+	public List<FileImportType> findProjectContainFileImportTypeRelations(Project project) {
+		return fileImportTypeRepository.findProjectContainFileImportTypeRelations(project.getId());
+	}
+
+	@Override
+	public List<FileImportFunction> findProjectContainFileImportFunctionRelations(Project project) {
+		return fileImportFunctionRepository.findProjectContainFileImportFunctionRelations(project.getId());
+	}
+
+	@Override
+	public List<FileImportVariable> findProjectContainFileImportVariableRelations(Project project) {
+		return fileImportVariableRepository.findProjectContainFileImportVariableRelations(project.getId());
+	}
+
+	@Override
+	public List<FunctionCallFunction> findFunctionCallFunctionRelations(Project project) {
+		return functionCallFunctionRepository.findProjectContainFunctionCallFunctionRelations(project.getId());
+	}
+
+	@Override
+	public List<TypeExtendsType> findProjectContainExtendsRelations(Project project) {
+		return typeExtendsTypeRepository.findProjectContainTypeExtendsTypeRelations(project.getId());
+	}
+
+	@Override
+	public List<TypeImplementsType> findProjectContainImplementsRelations(Project project) {
+		return typeImplementsTypeRepository.findProjectContainTypeImplementsTypeRelations(project.getId());
+	}
+
+	@Override
+	public List<TypeCallFunction> findProjectContainTypeCallFunctions(Project project) {
+		return typeCallFunctionRepository.findProjectContainTypeCallFunctionRelations(project.getId());
+	}
+
+	@Override
+	public List<FunctionCastType> findProjectContainFunctionCastTypeRelations(Project project) {
+		return functionCastTypeRepository.findProjectContainFunctionCastTypeRelations(project.getId());
+	}
+
+	@Override
+	public List<FunctionParameterType> findProjectContainFunctionParameterTypeRelations(Project project) {
+		return functionParameterTypeRepository.findProjectContainFunctionParameterTypeRelations(project.getId());
+	}
+
+	@Override
+	public List<FunctionReturnType> findProjectContainFunctionReturnTypeRelations(Project project) {
+		return functionReturnTypeRepository.findProjectContainFunctionReturnTypeRelations(project.getId());
+	}
+
+	@Override
+	public List<FunctionThrowType> findProjectContainFunctionThrowTypeRelations(Project project) {
+		return functionThrowTypeRepository.findProjectContainFunctionThrowTypeRelations(project.getId());
+	}
+
+	@Override
+	public List<NodeAnnotationType> findProjectContainNodeAnnotationTypeRelations(Project project) {
+		return nodeAnnotationTypeRepository.findProjectContainNodeAnnotationTypeRelations(project.getId());
+	}
+
+	@Override
+	public List<VariableIsType> findProjectContainVariableIsTypeRelations(Project project) {
+		return variableIsTypeRepository.findProjectContainVariableIsTypeRelations(project.getId());
+	}
+
+	@Override
+	public List<VariableTypeParameterType> findProjectContainVariableTypeParameterTypeRelations(Project project) {
+		return variableTypeParameterTypeRepository.findProjectContainVariableTypeParameterTypeRelations(project.getId());
+	}
+
+	@Override
+	public List<FileIncludeFile> findProjectContainFileIncludeFileRelations(Project project) {
+		return fileIncludeFileRepository.findProjectContainFileIncludeFileRelations(project.getId());
+	}
+
+	@Override
+	public Iterable<TypeExtendsType> findAllExtendsRelations() {
+		return typeExtendsTypeRepository.findAll();
+	}
+
+	@Override
+	public Iterable<TypeImplementsType> findAllImplementsRelations() {
+		return typeImplementsTypeRepository.findAll();
+	}
+
+	@Override
+	public Iterable<FileIncludeFile> findAllFileIncludeFileRelations() {
+		return fileIncludeFileRepository.findAll();
+	}
+
+	@Override
+	public Iterable<FileImportType> findAllFileImportTypeRelations() {
+		return fileImportTypeRepository.findAll();
+	}
+
+	@Override
+	public Iterable<FileImportFunction> findAllFileImportFunctionRelations() {
+		return fileImportFunctionRepository.findAll();
+	}
+
+	@Override
+	public Iterable<FileImportVariable> findAllFileImportVariableRelations() {
+		return fileImportVariableRepository.findAll();
+	}
+
+	@Override
+	public Iterable<FunctionCallFunction> findAllFunctionCallFunctionRelations() {
+		return functionCallFunctionRepository.findAll();
+	}
+
+	@Override
+	public Iterable<TypeCallFunction> findAllTypeCallFunctions() {
+		return typeCallFunctionRepository.findAll();
+	}
+
+	@Override
+	public Iterable<FunctionCastType> findAllFunctionCastTypeRelations() {
+		return functionCastTypeRepository.findAll();
+	}
+
+	@Override
+	public Iterable<FunctionParameterType> findAllFunctionParameterTypeRelations() {
+		return functionParameterTypeRepository.findAll();
+	}
+
+	@Override
+	public Iterable<FunctionReturnType> findAllFunctionReturnTypeRelations() {
+		return functionReturnTypeRepository.findAll();
+	}
+
+	@Override
+	public Iterable<FunctionThrowType> findAllFunctionThrowTypeRelations() {
+		return functionThrowTypeRepository.findAll();
+	}
+
+	@Override
+	public Iterable<NodeAnnotationType> findAllNodeAnnotationTypeRelations() {
+		return nodeAnnotationTypeRepository.findAll();
+	}
+
+	@Override
+	public Iterable<VariableIsType> findAllVariableIsTypeRelations() {
+		return variableIsTypeRepository.findAll();
+	}
+
+	@Override
+	public Iterable<VariableTypeParameterType> findAllVariableTypeParameterTypeRelations() {
+		return variableTypeParameterTypeRepository.findAll();
+	}
+	
 }

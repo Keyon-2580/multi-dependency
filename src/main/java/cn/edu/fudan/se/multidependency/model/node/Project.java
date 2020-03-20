@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode
 public class Project implements Node {
+	
 	private static final long serialVersionUID = 4058945695982024026L;
 	
 	@Id
@@ -48,8 +49,15 @@ public class Project implements Node {
 	}
 
 	@Override
-	public NodeType getNodeType() {
-		return NodeType.Project;
+	public NodeLabelType getNodeType() {
+		return NodeLabelType.Project;
+	}
+
+	
+	public static final String LABEL_INDEX = "projectName";
+	@Override
+	public String indexName() {
+		return LABEL_INDEX;
 	}
 
 }

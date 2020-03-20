@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.model.node.testcase;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
@@ -7,7 +8,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -26,14 +27,25 @@ public class Bug implements Node {
     
     private Long entityId;
     
+    private String name;
+    
 	@Override
 	public Map<String, Object> getProperties() {
-		return null;
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("entityId", getEntityId() == null ? -1L : getEntityId());
+		properties.put("name", getName() == null ? "" : getName());
+		return properties;
 	}
 
 	@Override
-	public NodeType getNodeType() {
-		return null;
+	public NodeLabelType getNodeType() {
+		return NodeLabelType.Bug;
+	}
+	
+	public static final String LABEL_INDEX = "name";
+	@Override
+	public String indexName() {
+		return LABEL_INDEX;
 	}
 
 }

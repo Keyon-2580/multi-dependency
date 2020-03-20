@@ -51,7 +51,7 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	
 	@Override
 	public List<Span> findSpansByTrace(Trace trace) {
-		List<Span> spans = containRepository.findSpansByTraceId(trace.getTraceId());
+		List<Span> spans = containRepository.findTraceContainSpansByTraceId(trace.getTraceId());
 		spans.sort(new Comparator<Span>() {
 			@Override
 			public int compare(Span o1, Span o2) {

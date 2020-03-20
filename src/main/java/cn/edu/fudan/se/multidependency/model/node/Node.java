@@ -15,6 +15,12 @@ public interface Node extends Serializable {
 
 	Map<String, Object> getProperties();
 	
-	NodeType getNodeType();
+	/**
+	 * 为简单起见，一个节点只有一个neo4j节点标签
+	 * @return
+	 */
+	NodeLabelType getNodeType();
+	
+	String indexName();
 	
 }

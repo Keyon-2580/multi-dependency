@@ -3,7 +3,7 @@ package cn.edu.fudan.se.multidependency.model.node.code;
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -45,7 +45,13 @@ public class Variable implements Node {
 	}
 
 	@Override
-	public NodeType getNodeType() {
-		return NodeType.Variable;
+	public NodeLabelType getNodeType() {
+		return NodeLabelType.Variable;
+	}
+	
+	public static final String LABEL_INDEX = "variableName";
+	@Override
+	public String indexName() {
+		return LABEL_INDEX;
 	}
 }

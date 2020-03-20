@@ -8,7 +8,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -22,6 +22,10 @@ public class Issue implements Node {
 	private static final long serialVersionUID = 4701956188777508218L;
 
 	private String content;
+	
+	private String person;
+	
+	private String issueId;
 
     @Id
     @GeneratedValue
@@ -33,12 +37,21 @@ public class Issue implements Node {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("content", getContent() == null ? "" : getContent());
+		properties.put("issueId", getIssueId() == null ? "" : getIssueId());
+		properties.put("person", getPerson() == null ? "" : getPerson());
 		return properties;
 	}
 
 	@Override
-	public NodeType getNodeType() {
-		return NodeType.Issue;
+	public NodeLabelType getNodeType() {
+		return NodeLabelType.Issue;
 	}
+	
+	public static final String LABEL_INDEX = "issueId";
+	@Override
+	public String indexName() {
+		return LABEL_INDEX;
+	}
+
 
 }

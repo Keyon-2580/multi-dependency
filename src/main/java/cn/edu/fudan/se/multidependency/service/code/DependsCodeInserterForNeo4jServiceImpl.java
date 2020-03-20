@@ -6,7 +6,7 @@ import java.util.Map;
 import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
@@ -51,7 +51,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 	}
 	
 	protected void extractRelationsFromTypes() {
-		Map<Long, ? extends Node> types = this.getNodes().findNodesByNodeTypeInProject(NodeType.Type, currentProject);
+		Map<Long, ? extends Node> types = this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject);
 		types.forEach((id, node) -> {
 			Type type = (Type) node;
 			// 继承与实现
@@ -85,7 +85,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 //					System.out.println("type call" + typeEntity + " " + relation.getEntity().getClass() + " " + relation.getEntity());
 					if(relation.getEntity() instanceof FunctionEntity) {
 						// call其它方法
-						Function other = (Function) getNodes().findNodeByEntityIdInProject(NodeType.Function, relation.getEntity().getId().longValue(), currentProject);
+						Function other = (Function) getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, relation.getEntity().getId().longValue(), currentProject);
 						if(other != null) {
 							TypeCallFunction call = new TypeCallFunction(type, other);
 							addRelation(call);
@@ -101,12 +101,12 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 	}
 	
 	protected void extractRelationsFromVariables() {
-		this.getNodes().findNodesByNodeTypeInProject(NodeType.Variable, currentProject).forEach((entityId, node) -> {
+		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Variable, currentProject).forEach((entityId, node) -> {
 			Variable variable = (Variable) node;
 			VarEntity varEntity = (VarEntity) entityRepo.getEntity(entityId.intValue());
 			TypeEntity typeEntity = varEntity.getType();
 			if(typeEntity != null && typeEntity.getClass() == TypeEntity.class) {
-				Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeType.Type, typeEntity.getId().longValue(), currentProject);
+				Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, typeEntity.getId().longValue(), currentProject);
 				if(type != null) {
 					VariableIsType variableIsType = new VariableIsType(variable, type);
 					addRelation(variableIsType);
@@ -116,7 +116,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 			for(depends.relations.Relation relation : varEntity.getRelations()) {
 				switch(relation.getType()) {
 				case DependencyType.PARAMETER:
-					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeType.Type, relation.getEntity().getId().longValue(), currentProject);
+					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, relation.getEntity().getId().longValue(), currentProject);
 					if(type != null && typeParameter != type) {
 						VariableTypeParameterType variableTypeParameterType = new VariableTypeParameterType();
 						variableTypeParameterType.setVariable(variable);
@@ -126,7 +126,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					}
 					break;
 				case DependencyType.ANNOTATION:
-					Type annotationType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeType.Type, relation.getEntity().getId().longValue(), currentProject);
+					Type annotationType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, relation.getEntity().getId().longValue(), currentProject);
 					if(annotationType != null) {
 						NodeAnnotationType typeAnnotationType = new NodeAnnotationType(variable, annotationType);
 						addRelation(typeAnnotationType);
@@ -139,8 +139,8 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 	}
 	
 	protected void extractRelationsFromFunctions() {
-		Map<Long, ? extends Node> functions = this.getNodes().findNodesByNodeTypeInProject(NodeType.Function, currentProject);
-		Map<Long, ? extends Node> types = this.getNodes().findNodesByNodeTypeInProject(NodeType.Type, currentProject);
+		Map<Long, ? extends Node> functions = this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Function, currentProject);
+		Map<Long, ? extends Node> types = this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject);
 		functions.forEach((id, node) -> {
 			Function function = (Function) node;
 			// 函数调用

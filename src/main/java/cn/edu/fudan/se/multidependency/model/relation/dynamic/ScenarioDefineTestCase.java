@@ -16,7 +16,6 @@ import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Deprecated
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_SCENARIO_DEFINE_TESTCASE)

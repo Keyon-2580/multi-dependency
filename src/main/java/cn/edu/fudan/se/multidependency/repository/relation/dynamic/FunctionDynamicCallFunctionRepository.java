@@ -34,4 +34,8 @@ public interface FunctionDynamicCallFunctionRepository extends Neo4jRepository<F
 	
 	@Query("match p = (a:Function)-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->(b:Function)  return a,b,r")
 	Map<Function, Map<Function, List<FunctionDynamicCallFunction>>> test();
+
+	@Query("MATCH result=(function1:Function)-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->(function2:Function) with function1,function2,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(function1) where id(project)={projectId} RETURN result")
+	public List<FunctionDynamicCallFunction> findProjectContainFunctionDynamicCallFunctionRelations(@Param("projectId") Long projectId);
+
 }

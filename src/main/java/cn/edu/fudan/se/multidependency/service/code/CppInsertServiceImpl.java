@@ -2,7 +2,7 @@ package cn.edu.fudan.se.multidependency.service.code;
 
 import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
@@ -88,7 +88,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				AliasEntity aliasEntity = (AliasEntity) entity;
 				TypeEntity typeEntity = aliasEntity.getType();
 				if (typeEntity != null && typeEntity.getParent() != null) {
-					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeType.Type,
+					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type,
 							typeEntity.getId().longValue(), currentProject);
 					if (type == null) {
 						type = new Type();
@@ -103,7 +103,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				// " + entity.toString());
 			}
 		});
-		this.getNodes().findNodesByNodeTypeInProject(NodeType.Type, currentProject).forEach((entityId, node) -> {
+		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject).forEach((entityId, node) -> {
 			Type type = (Type) node;
 			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = typeEntity.getParent();
@@ -123,13 +123,13 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 					return;
 				}
 			}
-			ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeType.ProjectFile,
+			ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.ProjectFile,
 					parentEntity.getId().longValue(), currentProject);
 			type.setInFilePath(file.getPath());
 			Contain fileContainsType = new Contain(file, type);
 			addRelation(fileContainsType);
 		});
-		this.getNodes().findNodesByNodeTypeInProject(NodeType.Function, currentProject).forEach((entityId, node) -> {
+		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Function, currentProject).forEach((entityId, node) -> {
 			Function function = (Function) node;
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = functionEntity.getParent();
@@ -145,13 +145,13 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				}
 				// 方法在文件内还是在类内
 				if (parentEntity instanceof FileEntity) {
-					ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeType.ProjectFile,
+					ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.ProjectFile,
 							parentEntity.getId().longValue(), currentProject);
 					function.setInFilePath(file.getPath());
 					Contain fileContainsFunction = new Contain(file, function);
 					addRelation(fileContainsFunction);
 				} else if (parentEntity.getClass() == TypeEntity.class) {
-					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeType.Type,
+					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type,
 							parentEntity.getId().longValue(), currentProject);
 					function.setInFilePath(type.getInFilePath());
 					Contain typeContainsFunction = new Contain(type, function);
@@ -161,7 +161,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				for (VarEntity varEntity : functionEntity.getParameters()) {
 					String parameterName = varEntity.getRawType().getName();
 					TypeEntity typeEntity = varEntity.getType();
-					if (typeEntity != null && this.getNodes().findNodeByEntityIdInProject(NodeType.Type,
+					if (typeEntity != null && this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type,
 							typeEntity.getId().longValue(), currentProject) != null) {
 						function.addParameterIdentifies(typeEntity.getQualifiedName());
 					} else {
@@ -170,23 +170,23 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				}
 			}
 		});
-		this.getNodes().findNodesByNodeTypeInProject(NodeType.Variable, currentProject).forEach((entityId, node) -> {
+		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Variable, currentProject).forEach((entityId, node) -> {
 			Variable variable = (Variable) node;
 			VarEntity varEntity = (VarEntity) entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = varEntity.getParent();
 			if (parentEntity != null) {
 				if (parentEntity instanceof FileEntity) {
-					ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeType.ProjectFile, parentEntity.getId().longValue(), currentProject);
+					ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.ProjectFile, parentEntity.getId().longValue(), currentProject);
 					variable.setInFilePath(file.getPath());
 					Contain fileContainsVariable = new Contain(file, variable);
 					addRelation(fileContainsVariable);
 				} else if (parentEntity.getClass() == TypeEntity.class) {
-					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeType.Type, parentEntity.getId().longValue(), currentProject);
+					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentEntity.getId().longValue(), currentProject);
 					variable.setInFilePath(type.getInFilePath());
 					Contain typeContainsVariable = new Contain(type, variable);
 					addRelation(typeContainsVariable);
 				} else if (parentEntity instanceof FunctionEntity) {
-					Function function = (Function) this.getNodes().findNodeByEntityIdInProject(NodeType.Function, parentEntity.getId().longValue(), currentProject);
+					Function function = (Function) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, parentEntity.getId().longValue(), currentProject);
 					variable.setInFilePath(function.getInFilePath());
 					Contain functionContainsVariable = new Contain(function, variable);
 					addRelation(functionContainsVariable);
@@ -208,12 +208,12 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 	 * c中文件的include关系
 	 */
 	protected void extractRelationsFromFiles() {
-		this.getNodes().findNodesByNodeTypeInProject(NodeType.ProjectFile, currentProject).forEach((entityId, node) -> {
+		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.ProjectFile, currentProject).forEach((entityId, node) -> {
 			ProjectFile file = (ProjectFile) node;
 			FileEntity fileEntity = (FileEntity) entityRepo.getEntity(entityId.intValue());
 			fileEntity.getImportedFiles().forEach(entity -> {
 				if (entity instanceof FileEntity) {
-					ProjectFile includeFile = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeType.ProjectFile, entity.getId().longValue(), currentProject);
+					ProjectFile includeFile = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.ProjectFile, entity.getId().longValue(), currentProject);
 					if (includeFile != null) {
 						FileIncludeFile fileIncludeFile = new FileIncludeFile(file, includeFile);
 						addRelation(fileIncludeFile);

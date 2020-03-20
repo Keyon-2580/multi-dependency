@@ -12,7 +12,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Transient;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -66,8 +66,8 @@ public class Function implements Node {
 	}
 	
 	@Override
-	public NodeType getNodeType() {
-		return NodeType.Function;
+	public NodeLabelType getNodeType() {
+		return NodeLabelType.Function;
 	}
 
 	public List<String> getParameters() {
@@ -105,5 +105,10 @@ public class Function implements Node {
 	public String getParametersIdentifies() {
 		return parametersIdentifies;
 	}
-
+	
+	public static final String LABEL_INDEX = "functionName";
+	@Override
+	public String indexName() {
+		return LABEL_INDEX;
+	}
 }

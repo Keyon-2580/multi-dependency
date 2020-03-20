@@ -49,4 +49,8 @@ public interface DynamicAnalyseService {
 	TestCase findTestCaseById(Long id);
 
 	Feature findFeatureById(Long id);
+
+	List<FunctionDynamicCallFunction> findFunctionDynamicCallFunctionRelations(Project project, boolean isTraceRunForTestCase);
+
+	Iterable<FunctionDynamicCallFunction> findAllFunctionDynamicCallFunctionRelations(boolean b);
 }

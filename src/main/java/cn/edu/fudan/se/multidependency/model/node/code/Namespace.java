@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -33,8 +33,14 @@ public class Namespace implements Node {
 	}
 
 	@Override
-	public NodeType getNodeType() {
-		return NodeType.Namespace;
+	public NodeLabelType getNodeType() {
+		return NodeLabelType.Namespace;
+	}
+	
+	public static final String LABEL_INDEX = "namespaceName";
+	@Override
+	public String indexName() {
+		return LABEL_INDEX;
 	}
 
 }

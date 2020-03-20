@@ -49,8 +49,14 @@ public class ProjectFile implements Node {
 	}
 
 	@Override
-	public NodeType getNodeType() {
-		return NodeType.ProjectFile;
+	public NodeLabelType getNodeType() {
+		return NodeLabelType.ProjectFile;
+	}
+
+	public static final String LABEL_INDEX = "path";
+	@Override
+	public String indexName() {
+		return LABEL_INDEX;
 	}
 
 }

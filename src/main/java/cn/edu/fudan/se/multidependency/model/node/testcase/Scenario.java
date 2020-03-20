@@ -8,7 +8,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.NodeType;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -38,8 +38,15 @@ public class Scenario implements Node {
 	}
 
 	@Override
-	public NodeType getNodeType() {
-		return NodeType.Scenario;
+	public NodeLabelType getNodeType() {
+		return NodeLabelType.Scenario;
 	}
+	
+	public static final String LABEL_INDEX = "scenarioName";
+	@Override
+	public String indexName() {
+		return LABEL_INDEX;
+	}
+
 
 }
