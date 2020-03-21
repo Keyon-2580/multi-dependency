@@ -17,8 +17,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionReturnTy
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionThrowType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.NodeAnnotationType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction;
-import cn.edu.fudan.se.multidependency.model.relation.structure.TypeExtendsType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.TypeImplementsType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypeParameterType;
 import depends.deptypes.DependencyType;
@@ -60,7 +59,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 			inherits.forEach(inherit -> {
 				Type other = (Type) types.get(inherit.getId().longValue());
 				if(other != null) {
-					TypeExtendsType typeExtends = new TypeExtendsType(type, other);
+					TypeInheritsType typeExtends = new TypeInheritsType(type, other, TypeInheritsType.INHERIT_TYPE_EXTENDS);
 					addRelation(typeExtends);
 				}
 			});
@@ -68,7 +67,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 			imps.forEach(imp -> {
 				Type other = (Type) types.get(imp.getId().longValue());
 				if(other != null) {
-					TypeImplementsType typeImplements = new TypeImplementsType(type, other);
+					TypeInheritsType typeImplements = new TypeInheritsType(type, other, TypeInheritsType.INHERIT_TYPE_IMPLEMENTS);
 					addRelation(typeImplements);
 				}
 			});

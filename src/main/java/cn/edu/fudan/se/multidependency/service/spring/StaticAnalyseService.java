@@ -20,8 +20,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionReturnTy
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionThrowType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.NodeAnnotationType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction;
-import cn.edu.fudan.se.multidependency.model.relation.structure.TypeExtendsType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.TypeImplementsType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypeParameterType;
 
@@ -73,9 +72,7 @@ public interface StaticAnalyseService {
 	
 	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller();
 	
-	public Iterable<TypeExtendsType> findAllExtends();
-	public Iterable<TypeExtendsType> findAllExtendsRelations();
-	public Iterable<TypeImplementsType> findAllImplementsRelations();
+	public Iterable<TypeInheritsType> findAllInheritsRelations();
 	public Iterable<FileIncludeFile> findAllFileIncludeFileRelations();
 	public Iterable<FileImportType> findAllFileImportTypeRelations();
 	public Iterable<FileImportFunction> findAllFileImportFunctionRelations();
@@ -90,8 +87,7 @@ public interface StaticAnalyseService {
 	public Iterable<VariableIsType> findAllVariableIsTypeRelations();
 	public Iterable<VariableTypeParameterType> findAllVariableTypeParameterTypeRelations();
 
-	public List<TypeExtendsType> findProjectContainExtendsRelations(Project project);
-	public List<TypeImplementsType> findProjectContainImplementsRelations(Project project);
+	public List<TypeInheritsType> findProjectContainInheritsRelations(Project project);
 	public List<FileIncludeFile> findProjectContainFileIncludeFileRelations(Project project);
 	public List<FileImportType> findProjectContainFileImportTypeRelations(Project project);
 	public List<FileImportFunction> findProjectContainFileImportFunctionRelations(Project project);

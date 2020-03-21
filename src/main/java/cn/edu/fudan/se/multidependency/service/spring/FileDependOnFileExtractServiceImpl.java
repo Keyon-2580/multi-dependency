@@ -28,8 +28,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionReturnTy
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionThrowType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.NodeAnnotationType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction;
-import cn.edu.fudan.se.multidependency.model.relation.structure.TypeExtendsType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.TypeImplementsType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypeParameterType;
 import cn.edu.fudan.se.multidependency.repository.relation.FileDependOnFileRepository;
@@ -53,8 +52,7 @@ public class FileDependOnFileExtractServiceImpl implements FileDependOnFileExtra
 	private Iterable<FileImportVariable> fileImportVariables = new ArrayList<>();
 	private Iterable<FileIncludeFile> fileIncludeFiles = new ArrayList<>();
 	
-	private Iterable<TypeExtendsType> typeExtendsTypes = new ArrayList<>();
-	private Iterable<TypeImplementsType> typeImplementsTypes = new ArrayList<>();
+	private Iterable<TypeInheritsType> typeInheritsTypes = new ArrayList<>();
 	
 	private Iterable<TypeCallFunction> typeCallFunctions = new ArrayList<>();
 	private Iterable<FunctionCallFunction> functionCallFunctions = new ArrayList<>();
@@ -132,9 +130,7 @@ public class FileDependOnFileExtractServiceImpl implements FileDependOnFileExtra
 		System.out.println("extract " + i++);
 		fileImportVariables = staticAnalyseService.findAllFileImportVariableRelations();
 		System.out.println("extract " + i++);
-		typeImplementsTypes = staticAnalyseService.findAllImplementsRelations();
-		System.out.println("extract " + i++);
-		typeExtendsTypes = staticAnalyseService.findAllExtendsRelations();
+		typeInheritsTypes = staticAnalyseService.findAllInheritsRelations();
 		System.out.println("extract " + i++);
 		typeCallFunctions = staticAnalyseService.findAllTypeCallFunctions();
 		System.out.println("extract " + i++);
@@ -170,9 +166,7 @@ public class FileDependOnFileExtractServiceImpl implements FileDependOnFileExtra
 		System.out.println("extract " + i++);
 		fileImportVariables = staticAnalyseService.findProjectContainFileImportVariableRelations(project);
 		System.out.println("extract " + i++);
-		typeImplementsTypes = staticAnalyseService.findProjectContainImplementsRelations(project);
-		System.out.println("extract " + i++);
-		typeExtendsTypes = staticAnalyseService.findProjectContainExtendsRelations(project);
+		typeInheritsTypes = staticAnalyseService.findProjectContainInheritsRelations(project);
 		System.out.println("extract " + i++);
 		typeCallFunctions = staticAnalyseService.findProjectContainTypeCallFunctions(project);
 		System.out.println("extract " + i++);
@@ -207,9 +201,7 @@ public class FileDependOnFileExtractServiceImpl implements FileDependOnFileExtra
 		System.out.println("process " + i++);
 		processFileImportVariables();
 		System.out.println("process " + i++);
-		processTypeExtendsTypes();
-		System.out.println("process " + i++);
-		processTypeImplementsTypes();
+		processTypeInheritsTypes();
 		System.out.println("process " + i++);
 		processTypeCallFunctions();
 		System.out.println("process " + i++);
@@ -288,16 +280,8 @@ public class FileDependOnFileExtractServiceImpl implements FileDependOnFileExtra
 		}
 	}
 
-	private void processTypeImplementsTypes() throws Exception {
-		for(TypeImplementsType relation : typeImplementsTypes) {
-			ProjectFile fileStart = findNodeBelongToFile(relation.getStart());
-			ProjectFile fileEnd = findNodeBelongToFile(relation.getEnd());
-			addDependTimes(fileStart, fileEnd, DependOnType.EXTENDS_OR_IMPLEMENTS, relation);
-		}
-	}
-
-	private void processTypeExtendsTypes() throws Exception {
-		for(TypeExtendsType relation : typeExtendsTypes) {
+	private void processTypeInheritsTypes() throws Exception {
+		for(TypeInheritsType relation : typeInheritsTypes) {
 			ProjectFile fileStart = findNodeBelongToFile(relation.getStart());
 			ProjectFile fileEnd = findNodeBelongToFile(relation.getEnd());
 			addDependTimes(fileStart, fileEnd, DependOnType.EXTENDS_OR_IMPLEMENTS, relation);

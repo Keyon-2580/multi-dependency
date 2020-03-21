@@ -25,8 +25,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionReturnTy
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionThrowType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.NodeAnnotationType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction;
-import cn.edu.fudan.se.multidependency.model.relation.structure.TypeExtendsType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.TypeImplementsType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypeParameterType;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
@@ -48,8 +47,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionReturnTy
 import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionThrowTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.NodeAnnotationTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.TypeCallFunctionRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.TypeExtendsTypeRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.TypeImplementsTypeRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.TypeInheritsTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.VariableIsTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.VariableTypeParameterTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
@@ -102,11 +100,8 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     TypeRepository typeRepository;
     
     @Autowired
-    TypeExtendsTypeRepository typeExtendsTypeRepository;
+    TypeInheritsTypeRepository typeInheritsTypeRepository;
 
-    @Autowired
-    TypeImplementsTypeRepository typeImplementsTypeRepository;
-    
     @Autowired
     VariableIsTypeRepository variableIsTypeRepository;
     
@@ -139,22 +134,12 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	
 	@Override
 	public List<Type> findExtendsType(Type type) {
-		return typeExtendsTypeRepository.findExtendsTypesByTypeId(type.getId());
+		return typeInheritsTypeRepository.findExtendsTypesByTypeId(type.getId());
 	}
 
 	@Override
 	public List<Type> findTypes(ProjectFile codeFile) {
 		return new ArrayList<>();
-	}
-
-	@Override
-	public List<TypeExtendsType> findAllExtends() {
-		List<TypeExtendsType> allExtends = new ArrayList<>();
-		typeExtendsTypeRepository.findAll().forEach(e -> {
-			allExtends.add(e);
-			
-		});
-		return allExtends;
 	}
 
 	@Override
@@ -232,13 +217,8 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
-	public List<TypeExtendsType> findProjectContainExtendsRelations(Project project) {
-		return typeExtendsTypeRepository.findProjectContainTypeExtendsTypeRelations(project.getId());
-	}
-
-	@Override
-	public List<TypeImplementsType> findProjectContainImplementsRelations(Project project) {
-		return typeImplementsTypeRepository.findProjectContainTypeImplementsTypeRelations(project.getId());
+	public List<TypeInheritsType> findProjectContainInheritsRelations(Project project) {
+		return typeInheritsTypeRepository.findProjectContainTypeInheritsTypeRelations(project.getId());
 	}
 
 	@Override
@@ -287,13 +267,8 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
-	public Iterable<TypeExtendsType> findAllExtendsRelations() {
-		return typeExtendsTypeRepository.findAll();
-	}
-
-	@Override
-	public Iterable<TypeImplementsType> findAllImplementsRelations() {
-		return typeImplementsTypeRepository.findAll();
+	public Iterable<TypeInheritsType> findAllInheritsRelations() {
+		return typeInheritsTypeRepository.findAll();
 	}
 
 	@Override

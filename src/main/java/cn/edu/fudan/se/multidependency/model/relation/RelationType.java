@@ -4,8 +4,7 @@ import org.neo4j.graphdb.RelationshipType;
 
 public enum RelationType implements RelationshipType {
 	CONTAIN(RelationType.str_CONTAIN),
-	TYPE_IMPLEMENTS_TYPE(RelationType.str_TYPE_IMPLEMENTS_TYPE),
-	TYPE_EXTENDS_TYPE(RelationType.str_TYPE_EXTENDS_TYPE),
+	TYPE_INHERITS_TYPE(RelationType.str_TYPE_INHERITS_TYPE),
 	TYPE_CALL_FUNCTION(RelationType.str_TYPE_CALL_FUNCTION),
 	FILE_IMPORT_FUNCTION(RelationType.str_FILE_IMPORT_FUNCTION),
 	FILE_IMPORT_TYPE(RelationType.str_FILE_IMPORT_TYPE),
@@ -49,8 +48,7 @@ public enum RelationType implements RelationshipType {
 	/**
 	 * 依赖关系
 	 */
-	public static final String str_TYPE_EXTENDS_TYPE = "TYPE_EXTENDS_TYPE";
-	public static final String str_TYPE_IMPLEMENTS_TYPE = "TYPE_IMPLEMENTS_TYPE";
+	public static final String str_TYPE_INHERITS_TYPE = "TYPE_TYPE_INHERITS_TYPE";
 	public static final String str_TYPE_CALL_FUNCTION = "TYPE_CALL_FUNCTION";
 	public static final String str_FILE_IMPORT_FUNCTION = "FILE_IMPORT_FUNCTION";
 	public static final String str_FILE_IMPORT_TYPE = "FILE_IMPORT_TYPE";
