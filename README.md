@@ -49,8 +49,7 @@
   - Function -> Type
   - Variable -> Type
 - TypeCallFunction
-- TypeExtendsType
-- TypeImplementsType
+- TypeInheritsType
 - VariableIsType
 - VariableTypeParameterType（类型参数，如List<Type>）
 

@@ -73,12 +73,32 @@ public class RelationInserterService {
 		Map<Function, List<FunctionCallFunction>> notDynamicCalls 
 			= dynamicAnalyseService.findFunctionCallFunctionNotDynamicCalled(true, null);
 		
-		for(Function caller : staticCalls.keySet()) {
-			List<FunctionCallFunction> staticCall = staticCalls.get(caller);
-			List<FunctionCallFunction> notDynamicCall = notDynamicCalls.get(caller);
-//			System.out.println(caller.getFunctionName() + " " + notDynamicCall);
+//		for(Function caller : staticCalls.keySet()) {
+//			List<FunctionCallFunction> staticCall = staticCalls.get(caller);
+//			List<FunctionCallFunction> notDynamicCall = notDynamicCalls.get(caller);
+////			System.out.println(caller.getFunctionName() + " " + notDynamicCall);
+//		}
+		
+		for(Function caller : notDynamicCalls.keySet()) {
+			List<FunctionCallFunction> calls = notDynamicCalls.get(caller);
+			for(FunctionCallFunction call : calls) {
+				System.out.println(call.getFunction().getFunctionName() + " " + call.getCallFunction().getFunctionName());
+			}
 		}
 		
+		int staticCallsSize = sizeOfFunctionCallFunction(staticCalls);
+		int notDynamicCallsSize = sizeOfFunctionCallFunction(notDynamicCalls);
+		System.out.println(staticCallsSize + " " + notDynamicCallsSize);
+		
+	}
+	
+	private int sizeOfFunctionCallFunction(Map<Function, List<FunctionCallFunction>> calls) {
+		int count = 0;
+		for(List<FunctionCallFunction> call : calls.values()) {
+			count += call.size();
+		}
+		
+		return count;
 	}
 	
 }
