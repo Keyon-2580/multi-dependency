@@ -68,16 +68,13 @@ public class Nodes {
 		if(node instanceof Project) {
 			projects.add((Project) node);
 		}
-		List<Node> nodes = nodeTypeToNodes.get(node.getNodeType());
-		nodes = nodes == null ? new ArrayList<>() : nodes;
+		List<Node> nodes = nodeTypeToNodes.getOrDefault(node.getNodeType(), new ArrayList<>());
 		nodes.add(node);
 		nodeTypeToNodes.put(node.getNodeType(), nodes);
 		
 		if(inProject != null && projects.contains(inProject)) {
-			Map<NodeLabelType, Map<Long, Node>> projectHasNodes = projectToNodes.get(inProject);
-			projectHasNodes = projectHasNodes == null ? new HashMap<>() : projectHasNodes;
-			Map<Long, Node> entityIdToNode = projectHasNodes.get(node.getNodeType());
-			entityIdToNode = entityIdToNode == null ? new HashMap<>() : entityIdToNode;
+			Map<NodeLabelType, Map<Long, Node>> projectHasNodes = projectToNodes.getOrDefault(inProject, new HashMap<>());
+			Map<Long, Node> entityIdToNode = projectHasNodes.getOrDefault(node.getNodeType(), new HashMap<>());
 			entityIdToNode.put(node.getEntityId(), node);
 			projectHasNodes.put(node.getNodeType(), entityIdToNode);
 			projectToNodes.put(inProject, projectHasNodes);
@@ -85,8 +82,7 @@ public class Nodes {
 	}
 	
 	public List<? extends Node> findNodesByNodeType(NodeLabelType nodeType) {
-		List<? extends Node> result = nodeTypeToNodes.get(nodeType);
-		return result == null ? new ArrayList<>() : result;
+		return nodeTypeToNodes.getOrDefault(nodeType, new ArrayList<>());
 	}
 	
 	public Node findNodeByEntityIdInProject(NodeLabelType nodeType, Long entityId, Project inProject) {
@@ -111,12 +107,8 @@ public class Nodes {
 	}
 	
 	public Map<Long, ? extends Node> findNodesByNodeTypeInProject(NodeLabelType nodeType, Project inProject) {
-		Map<NodeLabelType, Map<Long, Node>> projectHasNodes = projectToNodes.get(inProject);
-		if(projectHasNodes == null) {
-			return new HashMap<>();
-		}
-		Map<Long, ? extends Node> result = projectHasNodes.get(nodeType);
-		return result == null ? new HashMap<>() : result;
+		Map<NodeLabelType, Map<Long, Node>> projectHasNodes = projectToNodes.getOrDefault(inProject, new HashMap<>());
+		return projectHasNodes.getOrDefault(nodeType, new HashMap<>());
 	}
 	
 	/**
@@ -137,8 +129,7 @@ public class Nodes {
 		Map<Long, Function> functions = (Map<Long, Function>) findNodesByNodeTypeInProject(NodeLabelType.Function, project);
 		functions.values().forEach(function -> {
 			String functionName = function.getFunctionName();
-			List<Function> fs = result.get(functionName);
-			fs = fs == null ? new ArrayList<>() : fs;
+			List<Function> fs = result.getOrDefault(functionName, new ArrayList<>());
 			fs.add(function);
 			result.put(functionName, fs);
 		});

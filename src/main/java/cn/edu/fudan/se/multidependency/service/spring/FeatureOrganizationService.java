@@ -368,15 +368,13 @@ public class FeatureOrganizationService {
 			try {
 				List<Span> spans = traceToSpans.get(trace);
 				for(Span span : spans) {
-					List<SpanCallSpan> callSpans = spanCallSpans.get(span);
-					callSpans = callSpans == null ? new ArrayList<>() : callSpans;
+					List<SpanCallSpan> callSpans = spanCallSpans.getOrDefault(span, new ArrayList<>());
 					MicroService ms = spanBelongToMicroService.get(span).getMicroservice();
-					Map<MicroService, MicroServiceCallMicroService> msCallMsTimes = result.get(ms);
-					msCallMsTimes = msCallMsTimes == null ? new HashMap<>() : msCallMsTimes;
+					Map<MicroService, MicroServiceCallMicroService> msCallMsTimes = result.getOrDefault(ms, new HashMap<>());
 					for(SpanCallSpan spanCallSpan : callSpans) {
 						MicroService callMs = spanBelongToMicroService.get(spanCallSpan.getCallSpan()).getMicroservice();
-						MicroServiceCallMicroService msCallMs = msCallMsTimes.get(callMs);
-						msCallMs = msCallMs == null ? new MicroServiceCallMicroService(ms, callMs) : msCallMs;
+						MicroServiceCallMicroService msCallMs = msCallMsTimes.getOrDefault(callMs, new MicroServiceCallMicroService(ms, callMs));
+						
 						msCallMs.addTimes(1);
 						msCallMs.addSpanCallSpan(spanCallSpan);
 						msCallMsTimes.put(callMs, msCallMs);

@@ -51,8 +51,7 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 	private Map<Trace, List<Span>> traceToSpans = new HashMap<>();
 
 	private void addSpanToTrace(Trace trace, Span span) {
-		List<Span> spans = traceToSpans.get(trace);
-		spans = spans == null ? new ArrayList<>() : spans;
+		List<Span> spans = traceToSpans.getOrDefault(trace, new ArrayList<>());
 		if (!spans.contains(span)) {
 			spans.add(span);
 		}
@@ -168,12 +167,9 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 					spanId = traceId;
 				}
 				Long depth = javaExecution.getDepth();
-				Map<String, Map<Long, List<JavaDynamicFunctionExecution>>> executionsGroupBySpan = executionsGroupByTrace.get(traceId);
-				executionsGroupBySpan = executionsGroupBySpan == null ? new HashMap<>() : executionsGroupBySpan;
-				Map<Long, List<JavaDynamicFunctionExecution>> depthResult = executionsGroupBySpan.get(spanId);
-				depthResult = depthResult == null ? new HashMap<>() : depthResult;
-				List<JavaDynamicFunctionExecution> executionsGroupByDepth = depthResult.get(depth);
-				executionsGroupByDepth = executionsGroupByDepth == null ? new ArrayList<>() : executionsGroupByDepth;
+				Map<String, Map<Long, List<JavaDynamicFunctionExecution>>> executionsGroupBySpan = executionsGroupByTrace.getOrDefault(traceId, new HashMap<>());
+				Map<Long, List<JavaDynamicFunctionExecution>> depthResult = executionsGroupBySpan.getOrDefault(spanId, new HashMap<>());
+				List<JavaDynamicFunctionExecution> executionsGroupByDepth = depthResult.getOrDefault(depth, new ArrayList<>());
 				executionsGroupByDepth.add(javaExecution);
 				depthResult.put(depth, executionsGroupByDepth);
 				executionsGroupBySpan.put(spanId, depthResult);

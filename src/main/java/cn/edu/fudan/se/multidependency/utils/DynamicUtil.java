@@ -42,11 +42,9 @@ public class DynamicUtil {
 						continue;
 					}
 					Language language = dynamicFunction.getLanguage();
-					Map<String, List<DynamicFunctionExecution>> projectExecutions = result.get(language);
-					projectExecutions = projectExecutions == null ? new HashMap<>() : projectExecutions;
+					Map<String, List<DynamicFunctionExecution>> projectExecutions = result.getOrDefault(language, new HashMap<>());
 					String project = dynamicFunction.getProject();
-					List<DynamicFunctionExecution> executions = projectExecutions.get(project);
-					executions = executions == null ? new ArrayList<>() : executions;
+					List<DynamicFunctionExecution> executions = projectExecutions.getOrDefault(project, new ArrayList<>());
 					executions.add(dynamicFunction);
 					projectExecutions.put(project, executions);
 					result.put(language, projectExecutions);

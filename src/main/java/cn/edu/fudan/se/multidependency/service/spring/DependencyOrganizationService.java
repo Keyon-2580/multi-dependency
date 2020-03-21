@@ -217,10 +217,8 @@ public class DependencyOrganizationService {
 			}
 			functions.put(callerFunction.getId(), callerFunction);
 			functions.put(calledFunction.getId(), calledFunction);
-			Map<Function, Integer> tempFunction = countOfFunctionCall.get(callerFunction);
-			tempFunction = tempFunction == null ? new HashMap<>() : tempFunction;
-			Integer size = tempFunction.get(calledFunction);
-			size = size == null ? 0 : size;
+			Map<Function, Integer> tempFunction = countOfFunctionCall.getOrDefault(callerFunction, new HashMap<>());
+			Integer size = tempFunction.getOrDefault(calledFunction, 0);
 			size++;
 			tempFunction.put(calledFunction, size);
 			countOfFunctionCall.put(callerFunction, tempFunction);
@@ -234,10 +232,8 @@ public class DependencyOrganizationService {
 			functionBelongToFile.put(calledFunction, calledFile);
 			files.put(callerFile.getId(), callerFile);
 			files.put(calledFile.getId(), calledFile);
-			Map<ProjectFile, Integer> tempFile = countOfFileCall.get(callerFile);
-			tempFile = tempFile == null ? new HashMap<>() : tempFile;
-			size = tempFile.get(calledFile);
-			size = size == null ? 0 : size;
+			Map<ProjectFile, Integer> tempFile = countOfFileCall.getOrDefault(callerFile, new HashMap<>());
+			size = tempFile.getOrDefault(calledFile, 0);
 			size++;
 			tempFile.put(calledFile, size);
 			countOfFileCall.put(callerFile, tempFile);
@@ -251,10 +247,8 @@ public class DependencyOrganizationService {
 			fileBelongToPackage.put(calledFile, calledPackage);
 			packages.put(callerPackage.getId(), callerPackage);
 			packages.put(calledPackage.getId(), calledPackage);
-			Map<Package, Integer> tempPackage = countOfPackageCall.get(callerPackage);
-			tempPackage = tempPackage == null ? new HashMap<>() : tempPackage;
-			size = tempPackage.get(calledPackage);
-			size = size == null ? 0 : size;
+			Map<Package, Integer> tempPackage = countOfPackageCall.getOrDefault(callerPackage, new HashMap<>());
+			size = tempPackage.getOrDefault(calledPackage, 0);
 			size++;
 			tempPackage.put(calledPackage, size);
 			countOfPackageCall.put(callerPackage, tempPackage);

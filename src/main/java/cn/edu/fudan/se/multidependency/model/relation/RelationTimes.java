@@ -18,8 +18,7 @@ public class RelationTimes {
 	
 	
 	public void addRelation(Relation relation) {
-		List<Relation> relations = this.relations.get(relation.getRelationType());
-		relations = relations == null ? new ArrayList<>() : relations;
+		List<Relation> relations = this.relations.getOrDefault(relation.getRelationType(), new ArrayList<>());
 		relations.add(relation);
 		this.relations.put(relation.getRelationType(), relations);
 	}

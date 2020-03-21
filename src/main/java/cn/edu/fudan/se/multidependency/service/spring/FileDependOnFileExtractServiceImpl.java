@@ -334,10 +334,8 @@ public class FileDependOnFileExtractServiceImpl implements FileDependOnFileExtra
 			// 去掉自身调用
 			return;
 		}
-		Map<ProjectFile, FileDependOnFile> temp = relations.get(startFile);
-		temp = temp == null ? new HashMap<>() : temp;
-		FileDependOnFile depend = temp.get(endFile);
-		depend = depend == null ? new FileDependOnFile(startFile, endFile) : depend;
+		Map<ProjectFile, FileDependOnFile> temp = relations.getOrDefault(startFile, new HashMap<>());
+		FileDependOnFile depend = temp.getOrDefault(endFile, new FileDependOnFile(startFile, endFile));
 		switch(type) {
 		case IMPORT_OR_INCLUDE:
 			depend.addTimes(DependOnType.IMPORT_OR_INCLUDE, !depend.hasDependOnType(DependOnType.IMPORT_OR_INCLUDE), relation);

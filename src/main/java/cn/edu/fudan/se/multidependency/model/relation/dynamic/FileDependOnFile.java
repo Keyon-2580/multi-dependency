@@ -50,8 +50,7 @@ public class FileDependOnFile implements Relation {
 	private Map<DependOnType, RelationTimes> dependOnTimes = new HashMap<>();
 	
 	public void addTimes(DependOnType type, boolean addTimes, Relation relation) {
-		RelationTimes times = dependOnTimes.get(type);
-		times = times == null ? new RelationTimes() : times;
+		RelationTimes times = dependOnTimes.getOrDefault(type, new RelationTimes());
 		times.addRelation(relation);
 		dependOnTimes.put(type, times);
 		if(addTimes) {
