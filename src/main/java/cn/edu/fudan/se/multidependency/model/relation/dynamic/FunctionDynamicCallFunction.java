@@ -57,7 +57,7 @@ public class FunctionDynamicCallFunction implements DynamicCallFunction {
 	
 	private String spanId;
 	
-	private Integer testcaseId;
+	private Integer testCaseId;
 	
 	@Override
 	public Long getStartNodeGraphId() {
@@ -86,7 +86,7 @@ public class FunctionDynamicCallFunction implements DynamicCallFunction {
 		properties.put("toOrder", getToOrder() == null ? -1 : getToOrder());
 		properties.put("fromDepth", getFromDepth() == null ? -1 : getFromDepth());
 		properties.put("toDepth", getToDepth() == null ? -1 : getToDepth());
-		properties.put("testcaseId", getTestcaseId() == null ? -1 : getTestcaseId());
+		properties.put("testCaseId", getTestCaseId() == null ? -1 : getTestCaseId());
 		return properties;
 	}
 

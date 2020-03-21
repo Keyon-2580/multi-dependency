@@ -68,8 +68,19 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				addRelation(containFile);
 			} else if (entity instanceof FunctionEntity) {
 				Function function = new Function();
-				function.setFunctionName(entity.getQualifiedName());
+				String functionName = entity.getQualifiedName();
+				function.setFunctionName(functionName);
 				function.setEntityId(entity.getId().longValue());
+				/*if(functionName.contains(".")) {
+					String[] functionNameSplit = functionName.split("\\.");
+					if(functionNameSplit.length >= 2) {
+						function.setContrustor(functionNameSplit[functionNameSplit.length - 1].equals(functionNameSplit[functionNameSplit.length - 2]));
+					}
+					function.setSimpleName(functionName.substring(functionName.lastIndexOf(".")));
+				} else {
+					function.setSimpleName(functionName);
+				}*/
+				function.setSimpleName(functionName);
 				addNode(function, currentProject);
 			} else if (entity instanceof VarEntity) {
 				Variable variable = new Variable();

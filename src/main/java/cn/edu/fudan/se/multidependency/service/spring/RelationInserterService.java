@@ -1,13 +1,16 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroServiceCallMicroServiceRepository;
 
 @Service
@@ -22,10 +25,13 @@ public class RelationInserterService {
 	@Autowired
 	private FileDependOnFileExtractService fileDependOnFileExtractor;
 	
-//	@Autowired
-//	private StaticAnalyseService staticAnalyseService;
+	@Autowired
+	private StaticAnalyseService staticAnalyseService;
 	
-	@Bean
+	@Autowired
+	private DynamicAnalyseService dynamicAnalyseService;
+	
+//	@Bean
 	public void addMsCallMsRelation() {
 		Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> calls = featureOrganizationService.findMsCallMsByTraces(featureOrganizationService.allTraces());
 		for(MicroService ms : calls.keySet()) {
@@ -36,7 +42,7 @@ public class RelationInserterService {
 		}
 	}
 	
-	@Bean
+//	@Bean
 	public void testFileDependOnFileExtractService() {
 		try {
 			fileDependOnFileExtractor.extractFileDependOnFiles();
@@ -55,6 +61,22 @@ public class RelationInserterService {
 				e.printStackTrace();
 			}
 		}*/
+	}
+
+	@Bean
+	public void findFunctionCallFunctionNotDynamicCalled() {
+		System.out.println("findFunctionCallFunctionNotDynamicCalled");
+		Map<Function, List<FunctionCallFunction>> staticCalls = staticAnalyseService.findAllFunctionCallRelationsGroupByCaller();
+		
+		Map<Function, List<FunctionCallFunction>> notDynamicCalls 
+			= dynamicAnalyseService.findFunctionCallFunctionNotDynamicCalled(true, null);
+		
+		for(Function caller : staticCalls.keySet()) {
+			List<FunctionCallFunction> staticCall = staticCalls.get(caller);
+			List<FunctionCallFunction> notDynamicCall = notDynamicCalls.get(caller);
+//			System.out.println(caller.getFunctionName() + " " + notDynamicCall);
+		}
+		
 	}
 	
 }

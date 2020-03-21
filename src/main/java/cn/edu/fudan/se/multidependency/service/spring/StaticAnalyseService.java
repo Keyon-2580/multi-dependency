@@ -63,12 +63,15 @@ public interface StaticAnalyseService {
 	
 	public Package findFileBelongToPackage(ProjectFile file);
 	
+	public Type findFunctionBelongToType(Function function);
+	
 	public ProjectFile findFunctionBelongToFile(Function function);
 	
 	public ProjectFile findTypeBelongToFile(Type type);
 	
 	public ProjectFile findVariableBelongToFile(Variable variable);
 	
+	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller();
 	
 	public Iterable<TypeExtendsType> findAllExtends();
 	public Iterable<TypeExtendsType> findAllExtendsRelations();
@@ -102,4 +105,6 @@ public interface StaticAnalyseService {
 	public List<NodeAnnotationType> findProjectContainNodeAnnotationTypeRelations(Project project);
 	public List<VariableIsType> findProjectContainVariableIsTypeRelations(Project project);
 	public List<VariableTypeParameterType> findProjectContainVariableTypeParameterTypeRelations(Project project);
+
+	public boolean isSubType(Type superType, Type subType);
 }

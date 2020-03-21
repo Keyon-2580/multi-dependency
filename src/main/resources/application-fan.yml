@@ -14,15 +14,15 @@ server:
 
 data:
    projects:
-      config: src/main/resources/project/train-ticket.json
-#      config: src/main/resources/project/depends.json
+#      config: src/main/resources/project/train-ticket.json
+      config: src/main/resources/project/depends.json
    dynamic:
       analyse: true
       dynamic_file_suffix: [.log]
-      directory_root_path: src/main/resources/dynamic/javassist/train-ticket/logs
-#      directory_root_path: src/main/resources/dynamic/javassist/depends/logs
-      features_path: src/main/resources/features/train-ticket/features-javassist.json
-#      features_path: src/main/resources/features/depends/features-javassist.json
+#      directory_root_path: src/main/resources/dynamic/javassist/train-ticket/logs
+      directory_root_path: src/main/resources/dynamic/javassist/depends/logs
+#      features_path: src/main/resources/features/train-ticket/features-javassist.json
+      features_path: src/main/resources/features/depends/features-javassist.json
    build:   
       analyse: false
       directory_root_path: src/main/resources/build

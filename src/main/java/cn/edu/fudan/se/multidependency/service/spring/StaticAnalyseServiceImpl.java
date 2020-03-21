@@ -360,5 +360,29 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	public Iterable<VariableTypeParameterType> findAllVariableTypeParameterTypeRelations() {
 		return variableTypeParameterTypeRepository.findAll();
 	}
+
+	@Override
+	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller() {
+		Iterable<FunctionCallFunction> allCalls = findAllFunctionCallFunctionRelations();
+		Map<Function, List<FunctionCallFunction>> result = new HashMap<>();
+		for(FunctionCallFunction call : allCalls) {
+			Function caller = call.getFunction();
+			List<FunctionCallFunction> group = result.getOrDefault(caller, new ArrayList<>());
+			group.add(call);
+			result.put(caller, group);
+		}
+		return result;
+	}
+
+	@Override
+	public Type findFunctionBelongToType(Function function) {
+		return containRepository.findFunctionBelongToTypeByFunctionId(function.getId());
+	}
+
+	@Override
+	public boolean isSubType(Type superType, Type subType) {
+		
+		return false;
+	}
 	
 }

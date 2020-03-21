@@ -35,7 +35,7 @@ public class SpanStartWithFunction implements DynamicCallFunction {
 	
 	private String traceId;
 	
-	private Integer testcaseId;
+	private Integer testCaseId;
 	
 	public SpanStartWithFunction(Span span, Function function) {
 		this.span = span;
@@ -62,7 +62,7 @@ public class SpanStartWithFunction implements DynamicCallFunction {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("traceId", getTraceId() == null ? "" : getTraceId());
-		properties.put("testcaseId", getTestcaseId() == null ? -1 : getTestcaseId());
+		properties.put("testCaseId", getTestCaseId() == null ? -1 : getTestCaseId());
 		return properties;
 	}
 

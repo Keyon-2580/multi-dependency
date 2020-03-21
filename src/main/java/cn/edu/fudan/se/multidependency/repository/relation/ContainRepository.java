@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
@@ -29,12 +30,15 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	@Query("match p = (f1:Feature)-[r:" + RelationType.str_CONTAIN + "]->(f2:Feature) return p")
 	public List<Contain> findAllFeatureContainFeatures();
 	
-	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..]->(b:Function) where id(b)={functionId} return a")
+	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..2]->(b:Function) where id(b)={functionId} return a")
 	public ProjectFile findFunctionBelongToFileByFunctionId(@Param("functionId") Long functionId);
 	
-	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..]->(b:Type) where id(b)={typeId} return a")
+	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "]->(b:Type) where id(b)={typeId} return a")
 	public ProjectFile findTypeBelongToFileByTypeId(@Param("typeId") Long typeId);
 	
-	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..]->(b:Variable) where id(b)={variableId} return a")
+	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..3]->(b:Variable) where id(b)={variableId} return a")
 	public ProjectFile findVariableBelongToFileByVariableId(@Param("variableId") Long variableId);
+	
+	@Query("match (a:Type)-[r:" + RelationType.str_CONTAIN + "]->(b:Function) where id(b)={functionId} return a")
+	public Type findFunctionBelongToTypeByFunctionId(@Param("functionId") Long functionId);
 }

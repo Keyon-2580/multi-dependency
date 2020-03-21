@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
@@ -20,6 +22,7 @@ import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
 import cn.edu.fudan.se.multidependency.repository.node.testcase.FeatureRepository;
 import cn.edu.fudan.se.multidependency.repository.node.testcase.ScenarioRepository;
 import cn.edu.fudan.se.multidependency.repository.node.testcase.TestCaseRepository;
@@ -54,6 +57,9 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	
 	@Autowired
 	private ContainRepository containRepository;
+	
+	@Autowired
+	private StaticAnalyseService staticAnalyseService;
 	
 	/**
 	 * 找出所有特性
@@ -237,5 +243,68 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		}
 		return functionDynamicCallFunctionRepository.findAll();
 	}
+
+	@Override
+	public Map<Function, List<FunctionCallFunction>> findFunctionCallFunctionNotDynamicCalled(boolean removeCallSubClass,
+			List<TestCase> testcases) {
+		Map<Function, List<FunctionCallFunction>> result = new HashMap<>();
+		if(testcases == null) {
+			// 静态调用了而动态没有调用
+			List<FunctionCallFunction> all = functionDynamicCallFunctionRepository.findFunctionCallFunctionNotDynamicCalled();
+			List<FunctionCallFunction> removeCallSubClassAll = new ArrayList<>();
+			if(removeCallSubClass) {
+				System.out.println("加上调用子类的重写方法");
+				// 添加动态调用子类的重写方法
+				for(FunctionCallFunction call : all) {
+					Function caller = call.getFunction();
+					Function called = call.getCallFunction();
+					List<FunctionDynamicCallFunction> dynamicCalls = functionDynamicCallFunctionRepository.findDynamicCalls(caller.getId());
+					boolean callSubTypeFunction = false;
+					for(FunctionDynamicCallFunction dynamicCall : dynamicCalls) {
+						Function dynamicCaller = dynamicCall.getFunction();
+						Function dynamicCalled = dynamicCall.getCallFunction();
+						if(!caller.equals(dynamicCaller) || !called.getSimpleName().equals(dynamicCalled.getSimpleName())
+								|| called.getParameters().size() != dynamicCalled.getParameters().size()) {
+							///FIXME
+							// 暂时只通过方法名simpleName和方法参数数量判断是否可能为重写方法
+							continue;
+						}
+						Type calledType = staticAnalyseService.findFunctionBelongToType(called);
+						if(calledType == null) {
+							System.out.println(called.getFunctionName() + " 没有Type");
+							continue;
+						}
+						Type dynamicCalledType = staticAnalyseService.findFunctionBelongToType(dynamicCalled);
+						if(dynamicCalledType == null) {
+							System.out.println(dynamicCalled.getFunctionName() + " 没有Type");
+							continue;
+						}
+						
+						if(staticAnalyseService.isSubType(calledType, dynamicCalledType)) {
+							callSubTypeFunction = true;
+							break;
+						}
+					}
+					if(!callSubTypeFunction) {
+						List<FunctionCallFunction> group = result.getOrDefault(caller, new ArrayList<>());
+						group.add(call);
+						result.put(caller, group);	
+					}
+				}
+			} else {
+				// 不添加动态调用子类的重写方法
+				for(FunctionCallFunction call : all) {
+					Function caller = call.getFunction();
+					List<FunctionCallFunction> group = result.getOrDefault(caller, new ArrayList<>());
+					group.add(call);
+					result.put(caller, group);
+				}
+			}
+		} else {
+		}
+		
+		return result;
+	}
+
 
 }

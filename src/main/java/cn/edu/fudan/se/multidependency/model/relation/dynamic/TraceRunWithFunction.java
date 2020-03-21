@@ -38,7 +38,7 @@ public class TraceRunWithFunction implements DynamicCallFunction {
 	@EndNode
 	private Function function;
 	
-	private Integer testcaseId;
+	private Integer testCaseId;
 	
 	private String traceId;
 	
@@ -70,7 +70,7 @@ public class TraceRunWithFunction implements DynamicCallFunction {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("order", getOrder() == null ? "" : order);
 		properties.put("traceId", getTraceId() == null ? "" : getTraceId());
-		properties.put("testcaseId", getTestcaseId() == null ? -1 : getTestcaseId());
+		properties.put("testCaseId", getTestCaseId() == null ? -1 : getTestCaseId());
 		return properties;
 	}
 

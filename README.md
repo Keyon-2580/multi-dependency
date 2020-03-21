@@ -34,6 +34,7 @@
   - * Project *3-> Type
   - * Project *3..4-> Function
   - * Project *3..5-> Variable
+  - * ProjectFile *1..2-> Function
 - FileImportFunction
 - FileImportType
 - FileImportVariable

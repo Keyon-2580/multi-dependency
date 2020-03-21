@@ -104,7 +104,7 @@ public class FeatureAndTestCaseFromJSONFileForMicroserviceInserter extends Extra
 				
 				List<DynamicCallFunction> calls = this.getRelations().findDynamicCallFunctionsByTraceId(traceId);
 				calls.forEach(call -> {
-					call.setTestcaseId(testcaseId);
+					call.setTestCaseId(testcaseId);
 				});
 			}
 			

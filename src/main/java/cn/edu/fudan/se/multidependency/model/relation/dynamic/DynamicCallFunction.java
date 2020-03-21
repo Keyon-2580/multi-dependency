@@ -6,8 +6,8 @@ public interface DynamicCallFunction extends Relation {
 	
 	String getTraceId();
 	
-	Integer getTestcaseId();
+	Integer getTestCaseId();
 	
-	void setTestcaseId(Integer testcaseId);
+	void setTestCaseId(Integer testcaseId);
 	
 }

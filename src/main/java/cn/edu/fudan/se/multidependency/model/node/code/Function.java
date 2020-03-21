@@ -32,6 +32,8 @@ public class Function implements Node {
     private Long entityId;
 
 	private String functionName;
+	
+	private String simpleName;
 
 	private String returnTypeIdentify;
 
@@ -62,6 +64,7 @@ public class Function implements Node {
 		properties.put("fromDynamic", isFromDynamic());
 		properties.put("constructor", isContrustor());
 		properties.put("inFilePath", getInFilePath() == null ? "" : getInFilePath());
+		properties.put("simpleName", getSimpleName() == null ? "" : getSimpleName());
 		return properties;
 	}
 	

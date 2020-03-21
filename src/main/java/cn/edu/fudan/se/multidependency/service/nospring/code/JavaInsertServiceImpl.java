@@ -59,6 +59,9 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 					if(functionNameSplit.length >= 2) {
 						function.setContrustor(functionNameSplit[functionNameSplit.length - 1].equals(functionNameSplit[functionNameSplit.length - 2]));
 					}
+					function.setSimpleName(functionName.substring(functionName.lastIndexOf(".") + 1));
+				} else {
+					function.setSimpleName(functionName);
 				}
 				function.setFunctionName(functionName);
 				function.setEntityId(entity.getId().longValue());
