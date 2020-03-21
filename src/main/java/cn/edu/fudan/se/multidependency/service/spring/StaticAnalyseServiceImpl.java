@@ -355,9 +355,9 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
-	public boolean isSubType(Type superType, Type subType) {
-		
-		return false;
+	public boolean isSubType(Type subType, Type superType) {
+		Type queryType = typeInheritsTypeRepository.findIsTypeInheritsType(subType.getId(), superType.getId());
+		return queryType != null;
 	}
 	
 }

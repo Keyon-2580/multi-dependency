@@ -251,9 +251,8 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		if(testcases == null) {
 			// 静态调用了而动态没有调用
 			List<FunctionCallFunction> all = functionDynamicCallFunctionRepository.findFunctionCallFunctionNotDynamicCalled();
-			List<FunctionCallFunction> removeCallSubClassAll = new ArrayList<>();
 			if(removeCallSubClass) {
-				System.out.println("加上调用子类的重写方法");
+				System.out.println("去掉调用子类的重写方法");
 				// 添加动态调用子类的重写方法
 				for(FunctionCallFunction call : all) {
 					Function caller = call.getFunction();
@@ -271,16 +270,13 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 						}
 						Type calledType = staticAnalyseService.findFunctionBelongToType(called);
 						if(calledType == null) {
-							System.out.println(called.getFunctionName() + " 没有Type");
 							continue;
 						}
 						Type dynamicCalledType = staticAnalyseService.findFunctionBelongToType(dynamicCalled);
 						if(dynamicCalledType == null) {
-							System.out.println(dynamicCalled.getFunctionName() + " 没有Type");
 							continue;
 						}
-						
-						if(staticAnalyseService.isSubType(calledType, dynamicCalledType)) {
+						if(staticAnalyseService.isSubType(dynamicCalledType, calledType)) {
 							callSubTypeFunction = true;
 							break;
 						}

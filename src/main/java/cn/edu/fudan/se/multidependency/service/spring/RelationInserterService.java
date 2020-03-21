@@ -66,8 +66,10 @@ public class RelationInserterService {
 	@Bean
 	public void findFunctionCallFunctionNotDynamicCalled() {
 		System.out.println("findFunctionCallFunctionNotDynamicCalled");
+		// 所有静态调用
 		Map<Function, List<FunctionCallFunction>> staticCalls = staticAnalyseService.findAllFunctionCallRelationsGroupByCaller();
 		
+		// 没有被动态调用的静态调用
 		Map<Function, List<FunctionCallFunction>> notDynamicCalls 
 			= dynamicAnalyseService.findFunctionCallFunctionNotDynamicCalled(true, null);
 		

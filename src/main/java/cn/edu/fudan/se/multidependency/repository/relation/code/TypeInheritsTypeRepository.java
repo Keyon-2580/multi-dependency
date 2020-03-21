@@ -24,5 +24,7 @@ public interface TypeInheritsTypeRepository extends Neo4jRepository<TypeInherits
 	
 	@Query("MATCH result=(type1:Type)-[r:" + RelationType.str_TYPE_INHERITS_TYPE + "]->(type2:Type) with type1,type2,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3]->(type1) where id(project)={projectId} RETURN result")
 	List<TypeInheritsType> findProjectContainTypeInheritsTypeRelations(@Param("projectId") Long projectId);
-	
+
+	@Query("match p=(a:Type)-[r:TYPE_INHERITS_TYPE*1..]->(b:Type) where id(a)={subTypeId} and id(b)={superTypeId} return b;")
+	Type findIsTypeInheritsType(@Param("subTypeId") Long subTypeId, @Param("superTypeId") Long superTypeId);
 }

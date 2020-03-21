@@ -102,5 +102,5 @@ public interface StaticAnalyseService {
 	public List<VariableIsType> findProjectContainVariableIsTypeRelations(Project project);
 	public List<VariableTypeParameterType> findProjectContainVariableTypeParameterTypeRelations(Project project);
 
-	public boolean isSubType(Type superType, Type subType);
+	public boolean isSubType(Type subType, Type superType);
 }
