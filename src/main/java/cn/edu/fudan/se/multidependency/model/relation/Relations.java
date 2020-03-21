@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
 
 public class Relations {
 
@@ -13,9 +15,12 @@ public class Relations {
 	
 	private Map<String, List<DynamicCallFunction>> traceIdToDynamicCallFunctions = new HashMap<>();
 	
+	private Map<Function, Map<Function, FunctionCallFunction>> functionCallFunctions = new HashMap<>();
+	
 	public void clear() {
 		allRelations.clear();
 		traceIdToDynamicCallFunctions.clear();
+		functionCallFunctions.clear();
 	}
 	
 	public Map<RelationType, List<Relation>> getAllRelations() {
@@ -31,43 +36,53 @@ public class Relations {
 	}
 	
 	public void addRelation(Relation relation) {
-		List<Relation> nodes = allRelations.get(relation.getRelationType());
-		nodes = nodes == null ? new ArrayList<>() : nodes;
-		nodes.add(relation);
-		allRelations.put(relation.getRelationType(), nodes);
 		
 		if(relation instanceof DynamicCallFunction) {
 			DynamicCallFunction call = (DynamicCallFunction) relation;
 			if(call.getTraceId() == null) {
 				return;
 			}
-			List<DynamicCallFunction> calls = traceIdToDynamicCallFunctions.get(call.getTraceId());
-			calls = calls == null ? new ArrayList<>() : calls;
+			List<DynamicCallFunction> calls = traceIdToDynamicCallFunctions.getOrDefault(call.getTraceId(), new ArrayList<>());
 			calls.add(call);
 			traceIdToDynamicCallFunctions.put(call.getTraceId(), calls);
 		}
+		
+		if(relation instanceof FunctionCallFunction) {
+			FunctionCallFunction temp = (FunctionCallFunction) relation;
+			Function caller = temp.getFunction();
+			Function called = temp.getCallFunction();
+			FunctionCallFunction hasCall = hasFunctionCallFunction(caller, called);
+			if(hasCall != null) {
+				hasCall.addTimes();
+				return;
+			} else {
+				Map<Function, FunctionCallFunction> tempCall = this.functionCallFunctions.getOrDefault(caller, new HashMap<>());
+				tempCall.put(called, temp);
+				this.functionCallFunctions.put(caller, tempCall);
+			}
+		}
+		
+		List<Relation> nodes = allRelations.getOrDefault(relation.getRelationType(), new ArrayList<>());
+		nodes.add(relation);
+		allRelations.put(relation.getRelationType(), nodes);
+	}
+	
+	public FunctionCallFunction hasFunctionCallFunction(Function caller, Function called) {
+		Map<Function, FunctionCallFunction> calls = this.functionCallFunctions.get(caller);
+		return calls == null ? null : calls.get(called);
 	}
 	
 	public List<DynamicCallFunction> findDynamicCallFunctionsByTraceId(String traceId) {
-		try {
-			List<DynamicCallFunction> calls = traceIdToDynamicCallFunctions.get(traceId);
-			return calls == null ? new ArrayList<>() : calls;
-		} catch (Exception e) {
-		}
-		return new ArrayList<>();
+		return traceIdToDynamicCallFunctions.getOrDefault(traceId, new ArrayList<>());
 	}
 	
 	public List<? extends Relation> findRelationsMap(RelationType relationType) {
-		List<? extends Relation> relations = allRelations.get(relationType);
-		return relations == null ? new ArrayList<>() : relations;
+		return allRelations.getOrDefault(relationType, new ArrayList<>());
 	}
 	
 	public boolean existRelation(Relation relation) {
 		List<Relation> relations = this.allRelations.get(relation.getRelationType());
-		if(relations == null) {
-			return false;
-		}
-		return relations.contains(relation);
+		return relations == null ? false : relations.contains(relation);
 	}
 	
 }

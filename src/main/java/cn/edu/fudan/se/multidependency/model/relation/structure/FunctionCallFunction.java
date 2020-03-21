@@ -28,10 +28,13 @@ public class FunctionCallFunction implements Relation {
 	@EndNode
 	private Function callFunction;
 	
+	private Integer times;
+	
 	public FunctionCallFunction(Function function, Function callFunction) {
 		super();
 		this.function = function;
 		this.callFunction = callFunction;
+		this.times = 1;
 	}
 
 	@Id
@@ -47,6 +50,10 @@ public class FunctionCallFunction implements Relation {
 	public Long getEndNodeGraphId() {
 		return callFunction.getId();
 	}
+	
+	public void addTimes() {
+		this.times++;
+	}
 
 	@Override
 	public RelationType getRelationType() {
@@ -55,6 +62,8 @@ public class FunctionCallFunction implements Relation {
 
 	@Override
 	public Map<String, Object> getProperties() {
-		return new HashMap<>();
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("times", getTimes() == null ? 1 : getTimes());
+		return properties;
 	}
 }
