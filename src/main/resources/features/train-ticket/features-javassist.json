@@ -95,6 +95,7 @@
 		{
 			"id" : 0,
 			"name" : "查票-00",
+			"group" : "查票",
 			"input" : {
 				"Starting" : "Nan Jing",
 				"Terminal" : "Shang Hai",
@@ -112,6 +113,7 @@
 		},
 		{
 			"id" : 1,
+			"group" : "查票",
 			"name" : "查票-01",
 			"input" : {
 				"Starting" : "Nan Jing",
@@ -131,6 +133,7 @@
 		{
 			"id" : 2,
 			"name" : "查票-02",
+			"group" : "查票",
 			"input" : {
 				"Starting" : "Nan Jing",
 				"Terminal" : "Shang Hai",
@@ -150,6 +153,7 @@
 		{
 			"id" : 3,
 			"name" : "查票-03",
+			"group" : "查票",
 			"input" : {
 				"Starting" : "Zhen Jiang",
 				"Terminal" : "Xu Zhou",
@@ -168,6 +172,7 @@
 		{
 			"id" : 4,
 			"name" : "查票-04",
+			"group" : "查票",
 			"input" : {
 				"Starting" : "Zhen Jiang",
 				"Terminal" : "Xu Zhou",
@@ -186,6 +191,7 @@
 		{
 			"id" : 5,
 			"name" : "查票-05",
+			"group" : "查票",
 			"input" : {
 				"Starting" : "Zhen Jiang",
 				"Terminal" : "Xu Zhou",
@@ -205,6 +211,7 @@
 		{
 			"id" : 6,
 			"name" : "订票-00",
+			"group" : "订票",
 			"description" : "运行查票-00后，点击Booking订票，默认联系方式，不需要保险、餐品和托运",
 			"input" : {
 				"Trip Id" : "G1234",
@@ -228,6 +235,7 @@
 		{
 			"id" : 7,
 			"name" : "订票-01",
+			"group" : "订票",
 			"description" : "运行查票-00后，点击Booking订票，添加联系方式，需要餐品，需要托运。",
 			"input" : {
 				"Trip Id" : "G1234",
@@ -296,6 +304,7 @@
 		{
 			"id" : 9,
 			"name" : "查票-06",
+			"group" : "查票",
 			"input" : {
 				"Starting" : "Nan Jing",
 				"Terminal" : "Shang Hai",
@@ -314,6 +323,7 @@
 		{
 			"id" : 10,
 			"name" : "查票-07",
+			"group" : "查票",
 			"input" : {
 				"Starting" : "Nan Jing",
 				"Terminal" : "Shang Hai",
@@ -331,6 +341,7 @@
 		},
 		{
 			"id" : 11,
+			"group" : "查票",
 			"name" : "查票-08",
 			"input" : {
 				"Starting" : "Nan Jing",
@@ -350,6 +361,7 @@
 		{
 			"id" : 12,
 			"name" : "登录-00",
+			"group" : "登录",
 			"input" : {
 				"UserName" : "fdse_microservice",
 				"Password" : "",
@@ -368,6 +380,7 @@
 		{
 			"id" : 13,
 			"name" : "登录-01",
+			"group" : "登录",
 			"input" : {
 				"" : "admin",
 				"" : ""

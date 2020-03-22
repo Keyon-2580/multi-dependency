@@ -26,7 +26,7 @@ public interface DynamicAnalyseService {
 	 * @param testcases can be null
 	 * @return
 	 */
-	Map<Function, List<FunctionCallFunction>> findFunctionCallFunctionNotDynamicCalled(boolean removeCallSubClass, Iterable<TestCase> testcases);
+	Map<Function, List<FunctionCallFunction>> findFunctionCallFunctionNotDynamicCalled(Iterable<TestCase> testcases);
 
 	List<FunctionDynamicCallFunction> findFunctionDynamicCallsByTraceAndMicroService(Trace trace, MicroService ms);
 	

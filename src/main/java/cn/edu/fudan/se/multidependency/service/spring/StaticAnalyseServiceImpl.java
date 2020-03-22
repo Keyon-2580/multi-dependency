@@ -291,9 +291,13 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return fileImportVariableRepository.findAll();
 	}
 
+	Iterable<FunctionCallFunction> functionCallFunctionCache = null;
 	@Override
 	public Iterable<FunctionCallFunction> findAllFunctionCallFunctionRelations() {
-		return functionCallFunctionRepository.findAll();
+		if(functionCallFunctionCache == null) {
+			functionCallFunctionCache = functionCallFunctionRepository.findAll();
+		}
+		return functionCallFunctionCache;
 	}
 
 	@Override
@@ -349,15 +353,29 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return result;
 	}
 
+	private Map<Function, Type> functionBelongToTypeCache = new HashMap<>();
 	@Override
 	public Type findFunctionBelongToType(Function function) {
-		return containRepository.findFunctionBelongToTypeByFunctionId(function.getId());
+		Type type = functionBelongToTypeCache.get(function);
+		if(type == null) {
+			type = containRepository.findFunctionBelongToTypeByFunctionId(function.getId());
+			functionBelongToTypeCache.put(function, type);
+		}
+		return type;
 	}
 
+	private Map<Type, Map<Type, Boolean>> subTypeCache = new HashMap<>();
 	@Override
 	public boolean isSubType(Type subType, Type superType) {
-		Type queryType = typeInheritsTypeRepository.findIsTypeInheritsType(subType.getId(), superType.getId());
-		return queryType != null;
+		Map<Type, Boolean> superTypeMap = subTypeCache.getOrDefault(subType, new HashMap<>());
+		Boolean is = superTypeMap.get(superType);
+		if(is == null) {
+			Type queryType = typeInheritsTypeRepository.findIsTypeInheritsType(subType.getId(), superType.getId());
+			is = queryType != null;
+			superTypeMap.put(superType, is);
+		}
+		subTypeCache.put(subType, superTypeMap);
+		return is;
 	}
 	
 }

@@ -37,13 +37,11 @@ public class TestCase implements Node {
     
     private String description;
     
-	public TestCase(Integer testCaseId, String testCaseName, String inputContent, boolean success, String description) {
-		this.testCaseId = testCaseId;
-		this.testCaseName = testCaseName;
-		this.inputContent = inputContent;
-		this.success = success;
-		this.description = description;
-	}
+    /**
+     * 测试用例分组
+     */
+    private String group;
+    public static final String DEFAULT_GROUP = "default";
 	
 	@Override
 	public Map<String, Object> getProperties() {
@@ -54,6 +52,7 @@ public class TestCase implements Node {
 		properties.put("inputContent", getInputContent() == null ? "" : getInputContent());
 		properties.put("testCaseId", getTestCaseId() == null ? -1 : getTestCaseId());
 		properties.put("description", getDescription() == null ? "" : getDescription());
+		properties.put("group", getGroup() == null ? DEFAULT_GROUP : getGroup());
 		return properties;
 	}
 

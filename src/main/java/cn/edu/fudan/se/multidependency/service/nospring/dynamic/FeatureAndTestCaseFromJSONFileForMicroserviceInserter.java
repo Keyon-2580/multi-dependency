@@ -80,6 +80,8 @@ public class FeatureAndTestCaseFromJSONFileForMicroserviceInserter extends Extra
 			testcase.setSuccess(testcaseTemp.getBooleanValue("success"));
 			testcase.setTestCaseName(testcaseTemp.getString("name"));
 			testcase.setDescription(testcaseTemp.getString("description"));
+			String group = testcaseTemp.getString("group") == null ? TestCase.DEFAULT_GROUP : testcaseTemp.getString("group");
+			testcase.setGroup(group);
 			addNode(testcase, null);
 			
 			JSONArray featureIds = testcaseTemp.getJSONArray("features");

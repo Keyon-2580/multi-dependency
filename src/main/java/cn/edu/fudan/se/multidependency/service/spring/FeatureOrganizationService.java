@@ -35,6 +35,14 @@ public class FeatureOrganizationService {
 	private final Map<Span, List<SpanCallSpan>> spanCallSpans;
 	private final Map<Span, MicroServiceCreateSpan> spanBelongToMicroService;
 	
+	public List<Feature> findTestCaseExecutionFeatures(TestCase testCase) {
+		List<Feature> result = new ArrayList<>();
+		for(TestCaseExecuteFeature execute : testCaseExecuteFeatures.getOrDefault(testCase, new ArrayList<>())) {
+			result.add(execute.getFeature());
+		}
+		return result;
+	}
+	
 	public JSONObject featureExecuteTestCasesToCytoscape() {
 		JSONObject result = new JSONObject();
 		JSONArray nodes = new JSONArray();
@@ -525,6 +533,17 @@ public class FeatureOrganizationService {
 			}
 		});
 		return result;
+	}
+	
+	public Map<String, List<TestCase>> allTestCasesGroupByTestCaseGroup() {
+		Iterable<TestCase> testCases = allTestCases();
+		Map<String, List<TestCase>> groupToTestCases = new HashMap<>();
+		for(TestCase testCase : testCases) {
+			List<TestCase> group = groupToTestCases.getOrDefault(testCase.getGroup(), new ArrayList<>());
+			group.add(testCase);
+			groupToTestCases.put(testCase.getGroup(), group);
+		}
+		return groupToTestCases;
 	}
 	
 	public List<Trace> allTraces() {

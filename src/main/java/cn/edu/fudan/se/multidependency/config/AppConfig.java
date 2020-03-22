@@ -15,13 +15,18 @@ public class AppConfig implements WebMvcConfigurer {
 	@Autowired
 	private InterceptorForFeature interceptorForFeature;
 	
+	@Autowired
+	private InterceptorForTestCase interceptorForTestCase;
+	
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		InterceptorRegistration registrationForProject = registry.addInterceptor(interceptorForProject);
 		InterceptorRegistration registrationForFeature = registry.addInterceptor(interceptorForFeature);
+		InterceptorRegistration registrationForTestCase = registry.addInterceptor(interceptorForTestCase);
 		
         registrationForProject.addPathPatterns("/**");
         registrationForFeature.addPathPatterns("/feature/**");
+        registrationForTestCase.addPathPatterns("/testcase/**");
 	}
 	
 }
