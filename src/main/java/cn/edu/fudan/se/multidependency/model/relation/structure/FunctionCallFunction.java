@@ -13,11 +13,13 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_FUNCTION_CALL_FUNCTION)
+@EqualsAndHashCode
 public class FunctionCallFunction implements Relation {
 	
 	private static final long serialVersionUID = 5982413005555063698L;

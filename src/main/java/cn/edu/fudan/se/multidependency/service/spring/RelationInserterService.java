@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
+import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroServiceCallMicroServiceRepository;
@@ -72,7 +73,12 @@ public class RelationInserterService {
 		// 没有被动态调用的静态调用
 		Map<Function, List<FunctionCallFunction>> notDynamicCalls 
 			= dynamicAnalyseService.findFunctionCallFunctionNotDynamicCalled(true, null);
-		
+		Iterable<TestCase> testcases = dynamicAnalyseService.findAllTestCases();
+//		Map<Function, List<FunctionCallFunction>> notDynamicCalls 
+//		= dynamicAnalyseService.findFunctionCallFunctionNotDynamicCalled(true, testcases);
+	
+//		0.8917326149183364
+//		0.6334459459459459
 //		for(Function caller : staticCalls.keySet()) {
 //			List<FunctionCallFunction> staticCall = staticCalls.get(caller);
 //			List<FunctionCallFunction> notDynamicCall = notDynamicCalls.get(caller);
@@ -82,23 +88,15 @@ public class RelationInserterService {
 		for(Function caller : notDynamicCalls.keySet()) {
 			List<FunctionCallFunction> calls = notDynamicCalls.get(caller);
 			for(FunctionCallFunction call : calls) {
-				System.out.println(call.getFunction().getFunctionName() + " " + call.getCallFunction().getFunctionName());
+//				System.out.println(call.getFunction().getFunctionName() + " " + call.getCallFunction().getFunctionName());
 			}
 		}
 		
-		int staticCallsSize = sizeOfFunctionCallFunction(staticCalls);
-		int notDynamicCallsSize = sizeOfFunctionCallFunction(notDynamicCalls);
-		System.out.println(staticCallsSize + " " + notDynamicCallsSize);
+		FunctionCallPropertion propertion = new FunctionCallPropertion(staticCalls, notDynamicCalls);
+		
+		System.out.println(propertion.propertionOfNotDynamicCalls());
 		
 	}
 	
-	private int sizeOfFunctionCallFunction(Map<Function, List<FunctionCallFunction>> calls) {
-		int count = 0;
-		for(List<FunctionCallFunction> call : calls.values()) {
-			count += call.size();
-		}
-		
-		return count;
-	}
 	
 }
