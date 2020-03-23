@@ -155,6 +155,30 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	public Package findTypeBelongToPackage(Type type) {
 		return null;
 	}
+
+	@Override
+	public Project findFunctionBelongToProject(Function function) {
+		for(Project project : projectContainFunctionsCache.keySet()) {
+			List<Function> functions = projectContainFunctionsCache.get(project);
+			if(functions.contains(function)) {
+				return project;
+			}
+		}
+		Project project = containRepository.findFunctionBelongToProjectByFunctionId(function.getId());
+		assert(project != null);
+		findProjectContainFunctions(project);
+		return project;
+	}
+	private Map<Project, List<Function>> projectContainFunctionsCache = new HashMap<>();
+	@Override
+	public List<Function> findProjectContainFunctions(Project project) {
+		List<Function> functions = projectContainFunctionsCache.get(project);
+		if(functions == null) {
+			functions = containRepository.findProjectContainFunctionsByProjectId(project.getId());
+			projectContainFunctionsCache.put(project, functions);
+		}
+		return functions;
+	}
 	
 	@Override
 	public ProjectFile findFunctionBelongToFile(Function function) {

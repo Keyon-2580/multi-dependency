@@ -62,7 +62,7 @@
 					</td>
 				</tr>
 			</table>
-			<h3>方法覆盖</h3>
+			<h3>方法调用覆盖</h3>
 			<table class="table table-bordered">
 				<tr>
 					<th></th>
@@ -76,7 +76,8 @@
 				</tr>
 				<tr th:each="testCase, coverageList : ${testCaseToCoverages}">
 					<td th:text="${testCase.key.testCaseName}" />
-					<td th:each="coverageList : ${testCase.value}" th:text="${coverageList}">
+					<td th:each="coverageList : ${testCase.value}"  th:text="${coverageList}">
+						<!-- <a></a> -->
 					</td>
 				</tr>
 			</table>

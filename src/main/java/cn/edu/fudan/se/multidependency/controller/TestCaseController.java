@@ -81,18 +81,17 @@ public class TestCaseController {
 		Map<TestCase, List<Double>> testCaseToPercent = new LinkedHashMap<>();
 		for(TestCase testCase : testCasesSortByGroup) {
 			List<Double> percents = new ArrayList<>();
-			System.out.println(testCase.getTestCaseName());
-			percents.add(testCaseCoverageService.findFunctionCallFunctionNotDynamicCalled(testCase).propertionOfNotDynamicCalls());
+			percents.add(1 - testCaseCoverageService.findFunctionCallFunctionNotDynamicCalled(testCase).propertionOfNotDynamicCalls());
 			for(Project project : projects) {
-				percents.add(1.1);
+				percents.add(1 - testCaseCoverageService.findFunctionCallFunctionNotDynamicCalled(testCase, project).propertionOfNotDynamicCalls());
 			}
 			testCaseToPercent.put(testCase, percents);
 		}
 		List<Double> mergeCoverages = new ArrayList<>();
 		System.out.println("merge");
-		mergeCoverages.add(testCaseCoverageService.findFunctionCallFunctionNotDynamicCalled(testCasesSortByGroup).propertionOfNotDynamicCalls());
+		mergeCoverages.add(1 - testCaseCoverageService.findFunctionCallFunctionNotDynamicCalled(testCasesSortByGroup).propertionOfNotDynamicCalls());
 		for(Project project : projects) {
-			mergeCoverages.add(1.1);
+			mergeCoverages.add(1 - testCaseCoverageService.findFunctionCallFunctionNotDynamicCalled(testCasesSortByGroup, project).propertionOfNotDynamicCalls());
 		}
 		
 		request.setAttribute("projects", projects);

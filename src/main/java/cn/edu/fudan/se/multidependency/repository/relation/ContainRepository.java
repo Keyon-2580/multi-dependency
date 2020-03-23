@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
@@ -29,6 +30,12 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	
 	@Query("match p = (f1:Feature)-[r:" + RelationType.str_CONTAIN + "]->(f2:Feature) return p")
 	public List<Contain> findAllFeatureContainFeatures();
+	
+	@Query("match (a:Project)-[r:" + RelationType.str_CONTAIN + "*3..4]->(b:Function) where id(b)={functionId} return a")
+	public Project findFunctionBelongToProjectByFunctionId(@Param("functionId") Long functionId);
+	
+	@Query("match (a:Project)-[r:" + RelationType.str_CONTAIN + "*3..4]->(b:Function) where id(a)={projectId} return b")
+	public List<Function> findProjectContainFunctionsByProjectId(@Param("projectId") Long projectId);
 	
 	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..2]->(b:Function) where id(b)={functionId} return a")
 	public ProjectFile findFunctionBelongToFileByFunctionId(@Param("functionId") Long functionId);

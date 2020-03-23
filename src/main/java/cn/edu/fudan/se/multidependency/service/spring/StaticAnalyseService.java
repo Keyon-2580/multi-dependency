@@ -70,6 +70,10 @@ public interface StaticAnalyseService {
 	
 	public ProjectFile findVariableBelongToFile(Variable variable);
 	
+	public Project findFunctionBelongToProject(Function function);
+	
+	public List<Function> findProjectContainFunctions(Project project);
+	
 	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller();
 	
 	public Iterable<TypeInheritsType> findAllInheritsRelations();
