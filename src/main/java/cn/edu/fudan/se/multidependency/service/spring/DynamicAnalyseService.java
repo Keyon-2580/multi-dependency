@@ -14,19 +14,10 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
 
 public interface DynamicAnalyseService {
 	
-	/**
-	 * 在给定测试用例下，找出静态调用了而动态没有调用的FunctionCallFunction
-	 * 可选择是否去掉静态调用了，而动态没有调用，但是动态调用了子类重写的方法
-	 * 
-	 * @param removeCallSubCall
-	 * @param testcases can be null
-	 * @return
-	 */
-	Map<Function, List<FunctionCallFunction>> findFunctionCallFunctionNotDynamicCalled(Iterable<TestCase> testcases);
+	Map<Function, Map<Function, FunctionCallPropertionDetail>> findFunctionCallFunctionDynamicCalled(Iterable<TestCase> testcases);
 
 	List<FunctionDynamicCallFunction> findFunctionDynamicCallsByTraceAndMicroService(Trace trace, MicroService ms);
 	

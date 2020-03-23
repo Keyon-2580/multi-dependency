@@ -3,10 +3,8 @@ package cn.edu.fudan.se.multidependency.service.spring;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -246,75 +244,115 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		return functionDynamicCallFunctionRepository.findAll();
 	}
 
-	private Map<TestCase, List<FunctionCallFunction>> testCaseCalledFunctionCallFunctionsCache = new HashMap<>();
-	private Map<Function, List<FunctionDynamicCallFunction>> functionDynamicCallsCache = new HashMap<>();
-	@Override
-	public Map<Function, List<FunctionCallFunction>> findFunctionCallFunctionNotDynamicCalled(Iterable<TestCase> testCases) {
-		Map<Function, List<FunctionCallFunction>> result = new HashMap<>();
-		// 指定的所有测试用例下，静态调用了而动态没有调用
-		List<FunctionCallFunction> allNotDynamicCalles = null;
-		List<Integer> testCaseIds = new ArrayList<>();
-		if(testCases == null) {
-			allNotDynamicCalles = functionDynamicCallFunctionRepository.findFunctionCallFunctionNotDynamicCalled();
-		} else {
-			allNotDynamicCalles = new ArrayList<>();
-			Iterable<FunctionCallFunction> allStaticFunctionCalls = staticAnalyseService.findAllFunctionCallFunctionRelations();
-			Set<FunctionCallFunction> dynamicCalls = new HashSet<>();
-			for(TestCase testCase : testCases) {
-				// 测试用例调用的静态调用
-				List<FunctionCallFunction> testCaseCalls = testCaseCalledFunctionCallFunctionsCache.get(testCase);
-				if(testCaseCalls == null) {
-					testCaseCalls = functionDynamicCallFunctionRepository.findFunctionCallFunctionDynamicCalled(testCase.getTestCaseId());
-					testCaseCalledFunctionCallFunctionsCache.put(testCase, testCaseCalls);
-				}
-				dynamicCalls.addAll(testCaseCalls);
-				testCaseIds.add(testCase.getTestCaseId());
-			}
-			for(FunctionCallFunction call : allStaticFunctionCalls) {
-				if(!dynamicCalls.contains(call)) {
-					allNotDynamicCalles.add(call);
-				}
+	private Map<TestCase, List<FunctionCallFunction>> functionCallFunctionDynamicCalledCache = new HashMap<>();
+	public List<FunctionCallFunction> findFunctionCallFunctionDynamicCalled(TestCase testCase) {
+		List<FunctionCallFunction> result = functionCallFunctionDynamicCalledCache.get(testCase);
+		if(result == null) {
+			result = functionDynamicCallFunctionRepository.findFunctionCallFunctionDynamicCalled(testCase.getTestCaseId());
+			functionCallFunctionDynamicCalledCache.put(testCase, result);
+		}
+		return result;
+	}
+	
+	private Map<TestCase, List<FunctionCallFunction>> functionCallFunctionNotDynamicCalledCache = new HashMap<>();
+	public List<FunctionCallFunction> findFunctionCallFunctionNotDynamicCalled(TestCase testCase) {
+		List<FunctionCallFunction> result = functionCallFunctionNotDynamicCalledCache.get(testCase);
+		if(result == null) {
+			result = functionDynamicCallFunctionRepository.findFunctionCallFunctionNotDynamicCalled(testCase.getTestCaseId());
+			functionCallFunctionNotDynamicCalledCache.put(testCase, result);
+		}
+		return result;
+	}
+	
+	public List<FunctionDynamicCallFunction> findDynamicCallsByCallerIdAndCalledIdAndTestCaseId(Function caller, Function called, TestCase testCase) {
+		List<FunctionDynamicCallFunction> result = new ArrayList<>();
+//		return functionDynamicCallFunctionRepository.findDynamicCallsByCallerIdAndCalledIdAndTestCaseId(caller.getId(), called.getId(), testCase.getTestCaseId());
+		List<FunctionDynamicCallFunction> calls = findDynamicCallsByCallerIdAndTestCaseId(caller, testCase);
+		for(FunctionDynamicCallFunction call : calls) {
+			if(call.getCallFunction().equals(called)) {
+				result.add(call);
 			}
 		}
-		// 添加动态调用子类的重写方法
-		for(FunctionCallFunction call : allNotDynamicCalles) {
-			Function caller = call.getFunction();
-			Function called = call.getCallFunction();
-			List<FunctionDynamicCallFunction> dynamicCalls = functionDynamicCallsCache.get(caller);
-			if(dynamicCalls == null) {
-				dynamicCalls = functionDynamicCallFunctionRepository.findDynamicCalls(caller.getId());
-				functionDynamicCallsCache.put(caller, dynamicCalls);
+		return result;
+	}
+	
+	private Map<TestCase, Map<Function, List<FunctionDynamicCallFunction>>> testCaseAndCallerToDynamicCallsCache = new HashMap<>();
+	public List<FunctionDynamicCallFunction> findDynamicCallsByCallerIdAndTestCaseId(Function caller, TestCase testCase) {
+		List<FunctionDynamicCallFunction> result = new ArrayList<>();
+		Map<Function, List<FunctionDynamicCallFunction>> calls = testCaseAndCallerToDynamicCallsCache.getOrDefault(testCase, new HashMap<>());
+		result = calls.get(caller);
+		if(result == null) {
+			result = functionDynamicCallFunctionRepository.findDynamicCallsByCallerIdAndTestCaseId(caller.getId(), testCase.getTestCaseId());
+			calls.put(caller, result);
+			testCaseAndCallerToDynamicCallsCache.put(testCase, calls);
+		}
+		return result;
+	}
+
+	
+	/**
+	 * 指定测试用例下动态调用了的静态调用，并返回次数
+	 * @param testCases
+	 * @return
+	 */
+	@Override
+	public Map<Function, Map<Function, FunctionCallPropertionDetail>> findFunctionCallFunctionDynamicCalled(Iterable<TestCase> testCases) {
+		if(testCases == null) {
+			return new HashMap<>();
+		}
+		Map<Function, Map<Function, FunctionCallPropertionDetail>> result = new HashMap<>();
+		for(TestCase testCase : testCases) {
+			// 动态直接调用了的静态调用
+			List<FunctionCallFunction> dynamicCallStaticCalls = findFunctionCallFunctionDynamicCalled(testCase);
+			for(FunctionCallFunction dynamicCall : dynamicCallStaticCalls) {
+				Function caller = dynamicCall.getFunction();
+				Function called = dynamicCall.getCallFunction();
+				Map<Function, FunctionCallPropertionDetail> calledFunctionToDetail = result.getOrDefault(caller, new HashMap<>());
+				FunctionCallPropertionDetail detail = calledFunctionToDetail.getOrDefault(called, new FunctionCallPropertionDetail());
+				List<FunctionDynamicCallFunction> dynamic = findDynamicCallsByCallerIdAndCalledIdAndTestCaseId(caller, called, testCase);
+				detail.addTestCaseCall(testCase, dynamic.size());
+				calledFunctionToDetail.put(called, detail);
+				result.put(caller, calledFunctionToDetail);
 			}
-			boolean callSubTypeFunction = false;
-			for(FunctionDynamicCallFunction dynamicCall : dynamicCalls) {
-				if(!testCaseIds.contains(dynamicCall.getTestCaseId())) {
-					continue;
+			
+			// 从动态没有直接调用的静态调用里
+			// 找到可能存在调用子类的调用
+			List<FunctionCallFunction> dynamicNotCalls = findFunctionCallFunctionNotDynamicCalled(testCase);
+			for(FunctionCallFunction call : dynamicNotCalls) {
+				Function caller = call.getFunction();
+				Function called = call.getCallFunction();
+				List<FunctionDynamicCallFunction> dynamicCalls = findDynamicCallsByCallerIdAndTestCaseId(caller, testCase);
+				boolean callSubTypeFunction = false;
+				for(FunctionDynamicCallFunction dynamicCall : dynamicCalls) {
+					Function dynamicCaller = dynamicCall.getFunction();
+					Function dynamicCalled = dynamicCall.getCallFunction();
+					if(!caller.equals(dynamicCaller) || !called.getSimpleName().equals(dynamicCalled.getSimpleName())
+							|| called.getParameters().size() != dynamicCalled.getParameters().size()) {
+						///FIXME
+						// 暂时只通过方法名simpleName和方法参数数量判断是否可能为重写方法
+						continue;
+					}
+					Type calledType = staticAnalyseService.findFunctionBelongToType(called);
+					if(calledType == null) {
+						continue;
+					}
+					Type dynamicCalledType = staticAnalyseService.findFunctionBelongToType(dynamicCalled);
+					if(dynamicCalledType == null) {
+						continue;
+					}
+					if(staticAnalyseService.isSubType(dynamicCalledType, calledType)) {
+						callSubTypeFunction = true;
+						break;
+					}
 				}
-				Function dynamicCaller = dynamicCall.getFunction();
-				Function dynamicCalled = dynamicCall.getCallFunction();
-				if(!caller.equals(dynamicCaller) || !called.getSimpleName().equals(dynamicCalled.getSimpleName())
-						|| called.getParameters().size() != dynamicCalled.getParameters().size()) {
-					///FIXME
-					// 暂时只通过方法名simpleName和方法参数数量判断是否可能为重写方法
-					continue;
+				if(callSubTypeFunction) {
+					Map<Function, FunctionCallPropertionDetail> group = result.getOrDefault(caller, new HashMap<>());
+					FunctionCallPropertionDetail detail = group.getOrDefault(called, new FunctionCallPropertionDetail());
+					List<FunctionDynamicCallFunction> dynamic = findDynamicCallsByCallerIdAndCalledIdAndTestCaseId(caller, called, testCase);
+					detail.addTestCaseCall(testCase, dynamic.size());
+					group.put(called, detail);
+					result.put(caller, group);	
 				}
-				Type calledType = staticAnalyseService.findFunctionBelongToType(called);
-				if(calledType == null) {
-					continue;
-				}
-				Type dynamicCalledType = staticAnalyseService.findFunctionBelongToType(dynamicCalled);
-				if(dynamicCalledType == null) {
-					continue;
-				}
-				if(staticAnalyseService.isSubType(dynamicCalledType, calledType)) {
-					callSubTypeFunction = true;
-					break;
-				}
-			}
-			if(!callSubTypeFunction) {
-				List<FunctionCallFunction> group = result.getOrDefault(caller, new ArrayList<>());
-				group.add(call);
-				result.put(caller, group);	
 			}
 		}
 		return result;

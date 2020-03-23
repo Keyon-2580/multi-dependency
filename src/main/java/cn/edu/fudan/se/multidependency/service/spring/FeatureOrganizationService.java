@@ -99,7 +99,7 @@ public class FeatureOrganizationService {
 	
 	public JSONArray testcaseExecuteFeaturesToTreeView() {
 		JSONArray result = new JSONArray();
-		List<TestCase> testcases = allTestCases();
+		Iterable<TestCase> testcases = allTestCases();
 		for(TestCase testcase : testcases) {
 			List<TestCaseExecuteFeature> executes = testCaseExecuteFeatures.get(testcase);
 			JSONObject testcaseJson = new JSONObject();
@@ -521,7 +521,7 @@ public class FeatureOrganizationService {
 	 * 所有测试用例
 	 * @return
 	 */
-	public List<TestCase> allTestCases() {
+	public Iterable<TestCase> allTestCases() {
 		List<TestCase> result = new ArrayList<>();
 		for(TestCase testcase : testCaseExecuteFeatures.keySet()) {
 			result.add(testcase);
@@ -533,6 +533,15 @@ public class FeatureOrganizationService {
 			}
 		});
 		return result;
+	}
+	
+	public TestCase findTestCase(Integer testCaseId) {
+		for(TestCase testCase : allTestCases()) {
+			if(testCase.getTestCaseId().equals(testCaseId)) {
+				return testCase;
+			}
+		}
+		return null;
 	}
 	
 	public Map<String, List<TestCase>> allTestCasesGroupByTestCaseGroup() {

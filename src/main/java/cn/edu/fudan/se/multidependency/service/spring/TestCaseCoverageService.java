@@ -23,40 +23,39 @@ public class TestCaseCoverageService {
 	@Autowired
 	private DynamicAnalyseService dynamicAnalyseService;
 	
-	public FunctionCallPropertion findFunctionCallFunctionNotDynamicCalled(TestCase testCase) {
-		return findFunctionCallFunctionNotDynamicCalled(testCase, null);
+	public FunctionCallPropertion findFunctionCallFunctionDynamicCalled(TestCase testCase) {
+		return findFunctionCallFunctionDynamicCalled(testCase, null);
 	}
 	
-	public FunctionCallPropertion findFunctionCallFunctionNotDynamicCalled(TestCase testCase, Project project) {
+	public FunctionCallPropertion findFunctionCallFunctionDynamicCalled(TestCase testCase, Project project) {
 		List<TestCase> list = new ArrayList<>();
 		list.add(testCase);
-		return findFunctionCallFunctionNotDynamicCalled(list, project);
+		return findFunctionCallFunctionDynamicCalled(list, project);
 	}
 	
-	public FunctionCallPropertion findFunctionCallFunctionNotDynamicCalled(List<TestCase> testCases) {
-		return findFunctionCallFunctionNotDynamicCalled(testCases, null);
+	public FunctionCallPropertion findFunctionCallFunctionDynamicCalled(List<TestCase> testCases) {
+		return findFunctionCallFunctionDynamicCalled(testCases, null);
 	}
 
-	public FunctionCallPropertion findFunctionCallFunctionNotDynamicCalled(List<TestCase> testCases, Project project) {
-		System.out.println("findFunctionCallFunctionNotDynamicCalled");
+	public FunctionCallPropertion findFunctionCallFunctionDynamicCalled(List<TestCase> testCases, Project project) {
+		System.out.println("findFunctionCallFunctionNotDynamicCalled " + testCases.size());
 		// 所有静态调用
 		Map<Function, List<FunctionCallFunction>> staticCalls = staticAnalyseService.findAllFunctionCallRelationsGroupByCaller();
-		// 没有被动态调用的静态调用
-		Map<Function, List<FunctionCallFunction>> notDynamicCalls = dynamicAnalyseService.findFunctionCallFunctionNotDynamicCalled(testCases);
-
+		// 被动态调用的静态调用
+		Map<Function, Map<Function, FunctionCallPropertionDetail>> dynamicCalls = dynamicAnalyseService.findFunctionCallFunctionDynamicCalled(testCases);
 		if(project != null) {
 			Set<Function> key = new HashSet<>(staticCalls.keySet());
 			for(Function f : key) {
 				Project fBelongToProject = staticAnalyseService.findFunctionBelongToProject(f);
 				if(!fBelongToProject.equals(project)) {
 					staticCalls.remove(f);
-					notDynamicCalls.remove(f);
+					dynamicCalls.remove(f);
 				}
 			}
 		}
 		
-		FunctionCallPropertion propertion = new FunctionCallPropertion(staticCalls, notDynamicCalls);
-		System.out.println(propertion.propertionOfNotDynamicCalls());
+		FunctionCallPropertion propertion = new FunctionCallPropertion(staticCalls, dynamicCalls);
+		System.out.println(propertion.coverageOfDynamicCalls());
 		return propertion;
 	}
 }

@@ -29,16 +29,16 @@
 	<div th:include="nav.html::nav"></div>
 	<div class="col-sm-12" style="margin-bottom: 15px;">
 		<div>
-			<form role="form">
+			<form role="form" action="/testcase/index" method="get">
 				<div class="form-group">
-					<select id="testcaseList" multiple="multiple">
+					<select id="testCaseList" multiple="multiple" name="testCaseList">
 						<optgroup th:each="group, testCasesList : ${testCases}"
 							th:label="${group.key}">
 							<option th:each="testCase : ${group.value}"
-								th:text="${testCase.testCaseName}" th:value="${testCase.id}"></option>
+								th:text="${testCase.testCaseName}" th:value="${testCase.testCaseId}"></option>
 						</optgroup>
 					</select>
-					<button id="submit" type="button" class="btn btn-default">提交</button>
+					<button id="submit" type="submit" class="btn btn-default">提交</button>
 				</div>
 			</form>
 		</div>
@@ -69,15 +69,12 @@
 					<th>合计</th>
 					<th th:each="project : ${projects}" th:text="${project.projectName + '(' + project.language + ')'}"/>
 				</tr>
-				<tr>
-					<td>合计</td>
-					<td th:each="projectCoverage : ${mergeCoverages}" th:text="${projectCoverage}">
-					</td>
-				</tr>
 				<tr th:each="testCase, coverageList : ${testCaseToCoverages}">
-					<td th:text="${testCase.key.testCaseName}" />
-					<td th:each="coverageList : ${testCase.value}"  th:text="${coverageList}">
-						<!-- <a></a> -->
+					<td th:text="${testCase.key}" />
+					
+					<td th:each="coverageList : ${testCase.value}">
+						<a th:unless="${coverageList.project eq null}" target="_blank" th:text="${coverageList.coverage}" th:href="${'/testcase/detail?testcases=' + coverageList.testCaseIds + '&project=' + coverageList.project.id }"></a>
+						<span th:if="${coverageList.project eq null}" th:text="${coverageList.coverage}" ></span>
 					</td>
 				</tr>
 			</table>
@@ -87,7 +84,7 @@
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		$(document).ready(function() {
-			$("#testcaseList").multiselect({
+			$("#testCaseList").multiselect({
 				enableClickableOptGroups: true,
 				enableCollapsibleOptGroups: true,
 	            enableFiltering: true,
@@ -99,9 +96,6 @@
 			var features = [[${features}]];
 			var testCaseToFeatures = [[${testCaseToFeatures}]];
 			var executeFeatures = [[${executeFeatures}]]
-			console.log(executeFeatures);
-			console.log(features);
-			console.log(projects);
 			$("#submit").click(function(){
 				console.log($("#testcaseList").val());
 			});

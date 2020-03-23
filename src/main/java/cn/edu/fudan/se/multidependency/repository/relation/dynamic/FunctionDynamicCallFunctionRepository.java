@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
@@ -46,8 +45,15 @@ public interface FunctionDynamicCallFunctionRepository extends Neo4jRepository<F
 	public List<FunctionCallFunction> findFunctionCallFunctionNotDynamicCalled();
 	
 	@Query("MATCH result=(function1:Function)-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->(function2:Function) where id(function1)={functionId} return result")
-	public List<FunctionDynamicCallFunction> findDynamicCalls(@Param("functionId") Long callerFunctionId);
+	public List<FunctionDynamicCallFunction> findDynamicCallsByCallerId(@Param("functionId") Long callerFunctionId);
 	
-//	@Query("MATCH result=(function1:Function)-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->(function2:Function) where function1.functionName={caller.functionName} and r.testCaseId={testcase.testCaseId} return result")
-//	public List<FunctionDynamicCallFunction> findDynamicCalls(@Param("caller") Function caller, @Param("testcase") TestCase testcase);
+	@Query("MATCH result=(function1:Function)-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->(function2:Function) where id(function1)={functionId} and r.testCaseId={testCaseId} return result")
+	public List<FunctionDynamicCallFunction> findDynamicCallsByCallerIdAndTestCaseId(@Param("functionId") Long callerFunctionId, @Param("testCaseId") Integer testCaseId);
+	
+	@Query("MATCH result=(function1:Function)-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->(function2:Function) where id(function1)={callerId1} and id(function2)={calledId} return result")
+	public List<FunctionDynamicCallFunction> findDynamicCallsByCallerIdAndCalledId(@Param("callerId") Long functionCallerId, @Param("calledId") Long functionCalledId);
+	
+	@Query("MATCH result=(function1:Function)-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->(function2:Function) where id(function1)={callerId1} and id(function2)={calledId} and r.testCaseId={testCaseId} return result")
+	public List<FunctionDynamicCallFunction> findDynamicCallsByCallerIdAndCalledIdAndTestCaseId(@Param("callerId") Long functionCallerId, @Param("calledId") Long functionCalledId, @Param("testCaseId") Integer testCaseId);
+	
 }

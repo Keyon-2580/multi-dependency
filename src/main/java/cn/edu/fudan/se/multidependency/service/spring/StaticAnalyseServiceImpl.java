@@ -205,19 +205,20 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return containRepository.findFileBelongToPackageByFileId(file.getId());
 	}
 
+	private Map<Long, Project> projectsCache = new HashMap<>();
 	@Override
 	public Map<Long, Project> allProjects() {
-		Iterable<Project> projects = projectRepository.findAll();
-		Map<Long, Project> result = new HashMap<>();
-		for(Project project : projects) {
-			result.put(project.getId(), project);
+		if(projectsCache.size() == 0) {
+			for(Project project : projectRepository.findAll()) {
+				projectsCache.put(project.getId(), project);
+			}
 		}
-		return result;
+		return projectsCache;
 	}
 
 	@Override
 	public Project findProject(Long id) {
-		return projectRepository.findById(id).get();
+		return allProjects().get(id);
 	}
 
 	@Override
