@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
@@ -123,13 +124,21 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     @Autowired
     VariableTypeParameterTypeRepository variableTypeParameterTypeRepository;
     
+    public void clearCache() {
+    	this.functionBelongToTypeCache.clear();
+    }
+    
+    private Map<Long, Type> typesCache = new HashMap<>();
 	@Override
-	public List<Type> findTypes() {
-		List<Type> types = new ArrayList<>();
-		typeRepository.findAll().forEach(type -> {
-			types.add(type);
-		});
-		return types;
+	public Map<Long, Type> findTypes() {
+		if(typesCache == null || typesCache.isEmpty()) {
+			typesCache = new HashMap<>();
+			Iterable<Type> allTypes = typeRepository.findAll();
+			for(Type type : allTypes) {
+				typesCache.put(type.getId(), type);
+			}
+		}
+		return typesCache;
 	}
 	
 	@Override
@@ -169,6 +178,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		findProjectContainFunctions(project);
 		return project;
 	}
+	
 	private Map<Project, List<Function>> projectContainFunctionsCache = new HashMap<>();
 	@Override
 	public List<Function> findProjectContainFunctions(Project project) {
@@ -180,24 +190,46 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return functions;
 	}
 	
+	private Map<Node, ProjectFile> nodeBelongToFileCache = new HashMap<>();
 	@Override
 	public ProjectFile findFunctionBelongToFile(Function function) {
-		return containRepository.findFunctionBelongToFileByFunctionId(function.getId());
+		ProjectFile file = nodeBelongToFileCache.get(function);
+		if(file == null) {
+			file = containRepository.findFunctionBelongToFileByFunctionId(function.getId());
+			nodeBelongToFileCache.put(function, file);
+		}
+		return file;
 	}
-
 	@Override
 	public ProjectFile findTypeBelongToFile(Type type) {
-		return containRepository.findTypeBelongToFileByTypeId(type.getId());
+		ProjectFile file = nodeBelongToFileCache.get(type);
+		if(file == null) {
+			file = containRepository.findTypeBelongToFileByTypeId(type.getId());
+			nodeBelongToFileCache.put(type, file);
+		}
+		return file;
 	}
-
 	@Override
 	public ProjectFile findVariableBelongToFile(Variable variable) {
-		return containRepository.findVariableBelongToFileByVariableId(variable.getId());
+		ProjectFile file = nodeBelongToFileCache.get(variable);
+		if(file == null) {
+			file = containRepository.findVariableBelongToFileByVariableId(variable.getId());
+			nodeBelongToFileCache.put(variable, file);
+		}
+		return file;
 	}
 
+	private Map<Long, ProjectFile> allFilesCache = new HashMap<>();
 	@Override
-	public List<ProjectFile> allFiles() {
-		return fileRepository.findAllProjectFiles();
+	public Map<Long, ProjectFile> allFiles() {
+		if(allFilesCache == null || allFilesCache.isEmpty()) {
+			allFilesCache = new HashMap<>();
+			Iterable<ProjectFile> files = fileRepository.findAll();
+			for(ProjectFile file : files) {
+				allFilesCache.put(file.getId(), file);
+			}
+		}
+		return allFilesCache;
 	}
 
 	@Override
@@ -316,7 +348,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return fileImportVariableRepository.findAll();
 	}
 
-	Iterable<FunctionCallFunction> functionCallFunctionCache = null;
+	private Iterable<FunctionCallFunction> functionCallFunctionCache = null;
 	@Override
 	public Iterable<FunctionCallFunction> findAllFunctionCallFunctionRelations() {
 		if(functionCallFunctionCache == null) {

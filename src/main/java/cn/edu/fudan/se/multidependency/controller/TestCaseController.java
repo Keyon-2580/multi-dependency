@@ -116,7 +116,6 @@ public class TestCaseController {
 		request.setAttribute("testCaseToFeatures", testCaseToFeatures);
 		request.setAttribute("executeFeatures", executeFeatures);
 		request.setAttribute("testCases", allTestCases);
-//		request.setAttribute("testCaseNoGroup", featureOrganizationService.allTestCases());
 
 		Iterable<Project> projects = staticAnalyseService.allProjects().values();
 		

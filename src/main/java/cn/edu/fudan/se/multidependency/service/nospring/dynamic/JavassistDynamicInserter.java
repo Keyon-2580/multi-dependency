@@ -92,8 +92,15 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 					span.setSpanId(spanId);
 					span.setTraceId(traceId);
 					span.setEntityId(generateEntityId());
-					span.setOperationName(execution.getFunctionName());
-					span.setApiFunctionName(execution.getFunctionName());
+					String functionName = execution.getFunctionName();
+					span.setApiFunctionName(functionName);
+					String operationName = "";
+					if(functionName.contains(".")) {
+						operationName = functionName.substring(functionName.lastIndexOf(".") + 1);
+					} else {
+						operationName = functionName;
+					}
+					span.setOperationName(operationName);
 					String serviceName = projectName;
 					span.setServiceName(serviceName);
 					span.setTime(TimeUtil.changeTimeStrToLong(execution.getTime()));

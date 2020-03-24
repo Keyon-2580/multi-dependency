@@ -48,7 +48,7 @@ public enum RelationType implements RelationshipType {
 	/**
 	 * 依赖关系
 	 */
-	public static final String str_TYPE_INHERITS_TYPE = "TYPE_TYPE_INHERITS_TYPE";
+	public static final String str_TYPE_INHERITS_TYPE = "TYPE_INHERITS_TYPE";
 	public static final String str_TYPE_CALL_FUNCTION = "TYPE_CALL_FUNCTION";
 	public static final String str_FILE_IMPORT_FUNCTION = "FILE_IMPORT_FUNCTION";
 	public static final String str_FILE_IMPORT_TYPE = "FILE_IMPORT_TYPE";

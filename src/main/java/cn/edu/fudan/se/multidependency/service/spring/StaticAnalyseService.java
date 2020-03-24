@@ -43,7 +43,7 @@ public interface StaticAnalyseService {
 	 * all types
 	 * @return
 	 */
-	public List<Type> findTypes();
+	public Map<Long, Type> findTypes();
 	
 	/**
 	 * find Types in File
@@ -54,20 +54,45 @@ public interface StaticAnalyseService {
 	
 	public List<Type> findExtendsType(Type type);
 	
-	public List<ProjectFile> allFiles();
+	public Map<Long, ProjectFile> allFiles();
 	
 	public List<Function> allFunctions();
 	
+	/**
+	 * Type属于哪个Package
+	 * @param type
+	 * @return
+	 */
 	public Package findTypeBelongToPackage(Type type);
 	
+	/**
+	 * 文件属于哪个Package
+	 * @param file
+	 * @return
+	 */
 	public Package findFileBelongToPackage(ProjectFile file);
 	
+	/**
+	 * Function属于哪个Type
+	 * @param function
+	 * @return
+	 */
 	public Type findFunctionBelongToType(Function function);
 	
 	public ProjectFile findFunctionBelongToFile(Function function);
 	
+	/**
+	 * Type属于哪个文件
+	 * @param type
+	 * @return
+	 */
 	public ProjectFile findTypeBelongToFile(Type type);
 	
+	/**
+	 * 变量属于哪个文件
+	 * @param variable
+	 * @return
+	 */
 	public ProjectFile findVariableBelongToFile(Variable variable);
 	
 	public Project findFunctionBelongToProject(Function function);
