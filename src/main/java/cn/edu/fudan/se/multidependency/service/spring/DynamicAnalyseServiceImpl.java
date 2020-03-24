@@ -322,7 +322,7 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 				Function caller = call.getFunction();
 				Function called = call.getCallFunction();
 				List<FunctionDynamicCallFunction> dynamicCalls = findDynamicCallsByCallerIdAndTestCaseId(caller, testCase);
-				boolean callSubTypeFunction = false;
+				Function callSubTypeFunction = null;
 				for(FunctionDynamicCallFunction dynamicCall : dynamicCalls) {
 					Function dynamicCaller = dynamicCall.getFunction();
 					Function dynamicCalled = dynamicCall.getCallFunction();
@@ -341,14 +341,14 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 						continue;
 					}
 					if(staticAnalyseService.isSubType(dynamicCalledType, calledType)) {
-						callSubTypeFunction = true;
+						callSubTypeFunction = dynamicCalled;
 						break;
 					}
 				}
-				if(callSubTypeFunction) {
+				if(callSubTypeFunction != null) {
 					Map<Function, FunctionCallPropertionDetail> group = result.getOrDefault(caller, new HashMap<>());
 					FunctionCallPropertionDetail detail = group.getOrDefault(called, new FunctionCallPropertionDetail());
-					List<FunctionDynamicCallFunction> dynamic = findDynamicCallsByCallerIdAndCalledIdAndTestCaseId(caller, called, testCase);
+					List<FunctionDynamicCallFunction> dynamic = findDynamicCallsByCallerIdAndCalledIdAndTestCaseId(caller, callSubTypeFunction, testCase);
 					detail.addTestCaseCall(testCase, dynamic.size());
 					group.put(called, detail);
 					result.put(caller, group);	
