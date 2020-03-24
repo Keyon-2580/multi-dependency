@@ -38,7 +38,7 @@ public class TestCaseCoverageService {
 	}
 
 	public FunctionCallPropertion findFunctionCallFunctionDynamicCalled(List<TestCase> testCases, Project project) {
-		System.out.println("findFunctionCallFunctionNotDynamicCalled " + testCases.size());
+		System.out.println("findFunctionCallFunctionDynamicCalled " + testCases.size());
 		// 所有静态调用
 		Map<Function, List<FunctionCallFunction>> staticCalls = staticAnalyseService.findAllFunctionCallRelationsGroupByCaller();
 		// 被动态调用的静态调用

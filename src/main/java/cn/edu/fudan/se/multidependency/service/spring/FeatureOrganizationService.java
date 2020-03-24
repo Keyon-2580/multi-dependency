@@ -35,14 +35,6 @@ public class FeatureOrganizationService {
 	private final Map<Span, List<SpanCallSpan>> spanCallSpans;
 	private final Map<Span, MicroServiceCreateSpan> spanBelongToMicroService;
 	
-	public List<Feature> findTestCaseExecutionFeatures(TestCase testCase) {
-		List<Feature> result = new ArrayList<>();
-		for(TestCaseExecuteFeature execute : testCaseExecuteFeatures.getOrDefault(testCase, new ArrayList<>())) {
-			result.add(execute.getFeature());
-		}
-		return result;
-	}
-	
 	public JSONObject featureExecuteTestCasesToCytoscape() {
 		JSONObject result = new JSONObject();
 		JSONArray nodes = new JSONArray();
@@ -234,62 +226,6 @@ public class FeatureOrganizationService {
 		return result;
 	}
 	
-	public Set<Trace> findRelatedTracesForTestCases(TestCase... testcases) {
-		Set<Trace> result = new HashSet<>();
-		for(TestCase testcase : testcases) {
-			List<TestCaseRunTrace> runs = testCaseRunTraces.get(testcase);
-			for(TestCaseRunTrace run : runs) {
-				result.add(run.getTrace());
-			}
-		}
-		return result;
-	}
-	
-	/**
-	 * feature相关的trace
-	 * @param features
-	 * @return
-	 */
-	public Set<Trace> findRelatedTracesForFeature(Feature... features) {
-		Set<Trace> result = new HashSet<>();
-		Set<TestCase> testcases = new HashSet<>();
-		for(Feature feature : features) {
-			List<TestCaseExecuteFeature> tcs = featureExecutedByTestCases.get(feature);
-			for(TestCaseExecuteFeature tc : tcs) {
-				testcases.add(tc.getTestCase());
-			}
-		}
-		for(TestCase testcase : testcases) {
-			List<TestCaseRunTrace> traces = testCaseRunTraces.get(testcase);
-			for(TestCaseRunTrace trace : traces) {
-				result.add(trace.getTrace());
-			}
-		}
-		return result;
-	}
-	public Set<Trace> findRelatedTracesForFeature(List<Feature> features) {
-		Feature[] array = new Feature[features.size()];
-		features.toArray(array);
-		return findRelatedTracesForFeature(array);
-	}
-	
-	/**
-	 * 找出某个微服务在某次Trace中创建的Span
-	 * @param ms
-	 * @param trace
-	 * @return
-	 * @throws Exception
-	 */
-	public List<Span> findMicroServiceCreateSpansInTraces(MicroService ms, Trace trace) {
-		List<Span> spans = new ArrayList<>();
-		for(Span span : traceToSpans.get(trace)) {
-			if(spanBelongToMicroService.get(span).getMicroservice().equals(ms)) {
-				spans.add(span);
-			}
-		}
-		return spans;
-	}
-	
 	public JSONObject microServiceToCytoscape(boolean removeUnuseMS, List<Trace> traces) {
 		Trace[] traceArray = new Trace[traces.size()];
 		traces.toArray(traceArray);
@@ -355,6 +291,102 @@ public class FeatureOrganizationService {
 		return result;
 	}
 	
+	/**
+	 * 指定TestCase执行的Feature
+	 * @param testCase
+	 * @return
+	 */
+	public List<Feature> findTestCaseExecutionFeatures(TestCase testCase) {
+		List<Feature> result = new ArrayList<>();
+		for(TestCaseExecuteFeature execute : testCaseExecuteFeatures.getOrDefault(testCase, new ArrayList<>())) {
+			result.add(execute.getFeature());
+		}
+		return result;
+	}
+	
+	/**
+	 * 指定TestCase相关的Trace
+	 * @param testcases
+	 * @return
+	 */
+	public Set<Trace> findRelatedTracesForTestCases(List<TestCase> testCases) {
+		TestCase[] testCaseArray = new TestCase[testCases.size()];
+		testCases.toArray(testCaseArray);
+		return findRelatedTracesForTestCases(testCaseArray);
+	}
+	
+	/**
+	 * 指定TestCase相关的Trace
+	 * @param testcases
+	 * @return
+	 */
+	public Set<Trace> findRelatedTracesForTestCases(TestCase... testcases) {
+		Set<Trace> result = new HashSet<>();
+		for(TestCase testcase : testcases) {
+			List<TestCaseRunTrace> runs = testCaseRunTraces.get(testcase);
+			for(TestCaseRunTrace run : runs) {
+				result.add(run.getTrace());
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * 指定feature相关的trace
+	 * @param features
+	 * @return
+	 */
+	public Set<Trace> findRelatedTracesForFeature(Feature... features) {
+		Set<Trace> result = new HashSet<>();
+		Set<TestCase> testcases = new HashSet<>();
+		for(Feature feature : features) {
+			List<TestCaseExecuteFeature> tcs = featureExecutedByTestCases.get(feature);
+			for(TestCaseExecuteFeature tc : tcs) {
+				testcases.add(tc.getTestCase());
+			}
+		}
+		for(TestCase testcase : testcases) {
+			List<TestCaseRunTrace> traces = testCaseRunTraces.get(testcase);
+			for(TestCaseRunTrace trace : traces) {
+				result.add(trace.getTrace());
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * 指定feature相关的trace
+	 * @param features
+	 * @return
+	 */
+	public Set<Trace> findRelatedTracesForFeature(List<Feature> features) {
+		Feature[] array = new Feature[features.size()];
+		features.toArray(array);
+		return findRelatedTracesForFeature(array);
+	}
+	
+	/**
+	 * 找出某个微服务在某次Trace中创建的Span
+	 * @param ms
+	 * @param trace
+	 * @return
+	 * @throws Exception
+	 */
+	public List<Span> findMicroServiceCreateSpansInTraces(MicroService ms, Trace trace) {
+		List<Span> spans = new ArrayList<>();
+		for(Span span : traceToSpans.get(trace)) {
+			if(spanBelongToMicroService.get(span).getMicroservice().equals(ms)) {
+				spans.add(span);
+			}
+		}
+		return spans;
+	}
+	
+	/**
+	 * 指定trace相关的微服务调用
+	 * @param traces
+	 * @return
+	 */
 	public Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> findMsCallMsByTraces(List<Trace> traces) {
 		try {
 			Trace[] tracesArray = new Trace[traces.size()];
@@ -366,7 +398,7 @@ public class FeatureOrganizationService {
 	}
 	
 	/**
-	 * 获取与trace相关的微服务调用
+	 * 指定trace相关的微服务调用
 	 * @param traces
 	 * @return
 	 */
@@ -374,6 +406,9 @@ public class FeatureOrganizationService {
 		Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> result = new HashMap<>();
 		for(Trace trace : traces) {
 			try {
+				if(!trace.isMicroServiceTrace()) {
+					continue;
+				}
 				List<Span> spans = traceToSpans.get(trace);
 				for(Span span : spans) {
 					List<SpanCallSpan> callSpans = spanCallSpans.getOrDefault(span, new ArrayList<>());
@@ -396,29 +431,8 @@ public class FeatureOrganizationService {
 		return result;
 	}
 	
-	public MicroService findMicroServiceByName(String name) {
-		try {
-			return allMicroService.get(name);
-		} catch (Exception e) {
-			return null;
-		}
-	}
-	
-	public Feature findFeatureById(Integer featureId) {
-		try {
-			for(Feature feature : allFeatures()) {
-				if(feature.getFeatureId().equals(featureId)) {
-					return feature;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
 	/**
-	 * 找出organization当前所有的feature相关的微服务
+	 * 所有feature所对应的相关的微服务
 	 * @return
 	 */
 	public Map<Feature, Set<MicroService>> findAllRelatedMicroServiceSplitByFeature() {
@@ -431,7 +445,7 @@ public class FeatureOrganizationService {
 	}
 	
 	/**
-	 * 找到当前类内的所有Feature相关的微服务
+	 * 所有Feature相关的微服务
 	 * @return
 	 */
 	public Set<MicroService> findAllRelatedMicroService() {
@@ -443,7 +457,7 @@ public class FeatureOrganizationService {
 	}
 	
 	/**
-	 * feature相关的微服务
+	 * 指定feature相关的微服务
 	 * @param features
 	 * @return
 	 */
@@ -455,7 +469,7 @@ public class FeatureOrganizationService {
 	}
 	
 	/**
-	 * 测试用例相关的微服务
+	 * 指定测试用例相关的微服务
 	 * @param testcases
 	 * @return
 	 */
@@ -471,7 +485,7 @@ public class FeatureOrganizationService {
 	}
 	
 	/**
-	 * trace相关的微服务
+	 * 指定trace相关的微服务
 	 * @param traces
 	 * @return
 	 */
@@ -497,6 +511,37 @@ public class FeatureOrganizationService {
 			result.add(ms);
 		}
 		return result;
+	}
+	
+	/**
+	 * 根据微服务名查找微服务
+	 * @param name
+	 * @return
+	 */
+	public MicroService findMicroServiceByName(String name) {
+		try {
+			return allMicroService.get(name);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * 根据featureId（不是graphId）查找Feature
+	 * @param featureId
+	 * @return
+	 */
+	public Feature findFeatureById(Integer featureId) {
+		try {
+			for(Feature feature : allFeatures()) {
+				if(feature.getFeatureId().equals(featureId)) {
+					return feature;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	/**
@@ -535,6 +580,11 @@ public class FeatureOrganizationService {
 		return result;
 	}
 	
+	/**
+	 * 根据testCaseId（不是graphId）查找TestCase，
+	 * @param testCaseId
+	 * @return
+	 */
 	public TestCase findTestCase(Integer testCaseId) {
 		for(TestCase testCase : allTestCases()) {
 			if(testCase.getTestCaseId().equals(testCaseId)) {
@@ -544,6 +594,10 @@ public class FeatureOrganizationService {
 		return null;
 	}
 	
+	/**
+	 * 所有测试用例，根据测试用例group进行分组
+	 * @return
+	 */
 	public Map<String, List<TestCase>> allTestCasesGroupByTestCaseGroup() {
 		Iterable<TestCase> testCases = allTestCases();
 		Map<String, List<TestCase>> groupToTestCases = new HashMap<>();
@@ -555,6 +609,10 @@ public class FeatureOrganizationService {
 		return groupToTestCases;
 	}
 	
+	/**
+	 * 所有Trace
+	 * @return
+	 */
 	public List<Trace> allTraces() {
 		List<Trace> result = new ArrayList<>();
 		for(TestCase testCase : testCaseRunTraces.keySet()) {

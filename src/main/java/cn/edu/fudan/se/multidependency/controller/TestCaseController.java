@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -14,9 +15,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.alibaba.fastjson.JSONObject;
+
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.FunctionCallPropertion;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
@@ -40,7 +44,6 @@ public class TestCaseController {
 	
 	@GetMapping("/detail")
 	public String detail(HttpServletRequest request, @RequestParam("testcases") String testCaseIds, @RequestParam("project") Long projectId) {
-		System.out.println(testCaseIds + " " + projectId);
 		String[] testCasesIdsArray = testCaseIds.split(",");
 		List<TestCase> testCases = new ArrayList<>();
 		for(String testCaseId : testCasesIdsArray) {
@@ -53,9 +56,7 @@ public class TestCaseController {
 			} catch (Exception e) {
 			}
 		}
-		System.out.println(testCases.size());
 		Project project = staticAnalyseService.findProject(projectId);
-		System.out.println(project);
 		if(testCases.size() == 0 || project == null) {
 			request.setAttribute("error", "ERROR!");
 			return "error";
@@ -138,6 +139,11 @@ public class TestCaseController {
 		
 		request.setAttribute("projects", projects);
 		request.setAttribute("testCaseToCoverages", testCaseToPercent);
+		
+		/*Set<Trace> traces = featureOrganizationService.findRelatedTracesForTestCases(testCasesSortByGroup);
+		Trace[] traceArray = new Trace[traces.size()];
+		traces.toArray(traceArray);
+		JSONObject value = featureOrganizationService.microServiceToCytoscape(true, traceArray);*/
 		
 		return "testcase";
 	}

@@ -49,9 +49,9 @@ public class MultipleDependencyApp {
 	}
 
 	@Bean
-	public FeatureOrganizationService organize(MicroserviceService jaegerService, DynamicAnalyseService dynamicAnalyseService) {
+	public FeatureOrganizationService organize(MicroserviceService microserviceService, DynamicAnalyseService dynamicAnalyseService) {
 		System.out.println("organizeFeature");
-		Map<String, MicroService> allMicroService = jaegerService.findAllMicroService();
+		Map<String, MicroService> allMicroService = microserviceService.findAllMicroService();
 		Map<Feature, List<TestCaseExecuteFeature>> featureExecutedByTestCases = dynamicAnalyseService.findAllFeatureExecutedByTestCases();
 		Map<TestCase, List<TestCaseExecuteFeature>> testCaseExecuteFeatures = dynamicAnalyseService.findAllTestCaseExecuteFeatures();
 		Map<TestCase, List<TestCaseRunTrace>> testCaseRunTraces = dynamicAnalyseService.findAllTestCaseRunTraces();
@@ -63,12 +63,12 @@ public class MultipleDependencyApp {
 		for (List<TestCaseRunTrace> runs : testCaseRunTraces.values()) {
 			for(TestCaseRunTrace run : runs) {
 				Trace trace = run.getTrace();
-				List<Span> spans = jaegerService.findSpansByTrace(trace);
+				List<Span> spans = microserviceService.findSpansByTrace(trace);
 				traceToSpans.put(trace, spans);
 				for (Span span : spans) {
-					List<SpanCallSpan> callSpans = jaegerService.findSpanCallSpans(span);
+					List<SpanCallSpan> callSpans = microserviceService.findSpanCallSpans(span);
 					spanCallSpans.put(span, callSpans);
-					MicroServiceCreateSpan microServiceCreateSpan = jaegerService.findMicroServiceCreateSpan(span);
+					MicroServiceCreateSpan microServiceCreateSpan = microserviceService.findMicroServiceCreateSpan(span);
 					spanBelongToMicroService.put(span, microServiceCreateSpan);
 				}
 			}
