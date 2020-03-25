@@ -4,39 +4,15 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>测试用例</title>
-<script type="text/javascript"
-	th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
-<!-- <script type="text/javascript"
-	th:src="@{/js/import/require.js}"></script> -->
-<script type="text/javascript"
-	th:src="@{/js/import/popper-1.14.7.min.js}"></script>
-<script type="text/javascript"
-	th:src="@{/js/import/bootstrap/bootstrap-3.3.2.min.js}"></script>
-<script type="text/javascript"
-	th:src="@{/js/import/bootstrap/bootstrap-multiselect-0.9.15.js}"></script>
-<script type="text/javascript"
-	th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape-dagre.js}"></script>
-<script type="text/javascript"
-	th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape.min.js}"></script>
-<script type="text/javascript"
-	th:src="@{/js/import/jqplot/jquery.jqplot.min.js}"></script>
-<script type="text/javascript"
-	th:src="@{/js/import/jqplot/jqplot.donutRenderer.min.js}"></script>
-<script type="text/javascript"
-	th:src="@{/js/import/jqplot/jqplot.pieRenderer.min.js}"></script>
-<script type="text/javascript" th:src="@{/js/util.js}"></script>
-<script type="text/javascript" th:src="@{/js/feature.js}"></script>
-<script type="text/javascript" th:src="@{/js/testcase.js}"></script>
-<script type="text/javascript"
-	th:src="@{/js/import/bootstrap/bootstrap-treeview.min.js}"></script>
-<link rel="stylesheet"
-	th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
-<link rel="stylesheet"
-	th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
-<link rel="stylesheet"
-	th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
-<link rel="stylesheet"
-	th:href="@{/css/import/jquery.jqplot.css}"></link>
+<script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-3.3.2.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-multiselect-0.9.15.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/require.js}"></script>
+<script type="text/javascript" th:src="@{/js/main.js}"></script>
+<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
+<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
+<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
+<link rel="stylesheet" th:href="@{/css/import/jquery.jqplot.css}"></link>
 <style type="text/css">
 .div_cytoscape_content {
 	height: 800px;
@@ -62,9 +38,6 @@
 				</div>
 			</form>
 		</div>
-		<!-- <div>
-			<div id="chart" style="width:500px;height:300px;" ></div>
-		</div> -->
 		<div>
 			<h3 id="testCaseTitle"></h3>
 		</div>
@@ -75,16 +48,16 @@
 	</div>
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
-		$(document).ready(function() {
 			$("#testCaseList").multiselect({
-				enableClickableOptGroups: true,
-				enableCollapsibleOptGroups: true,
-	            enableFiltering: true,
-				collapseOptGroupsByDefault: true,
-	            enableCollapsibleOptGroups: true
-			});
-			init();
+			enableClickableOptGroups: true,
+			enableCollapsibleOptGroups: true,
+	        enableFiltering: true,
+			collapseOptGroupsByDefault: true,
+	        enableCollapsibleOptGroups: true
 		});
+			require([ "jquery", "testcase"], function($, testcase) {
+				testcase.init();
+			});
 		// ]]>
 	</script>
 </body>

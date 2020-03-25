@@ -1,13 +1,11 @@
 var graphIdToResult = new Map();
 
 var showMicroServiceInCytoscape = function(elements, container, nodeGraphId, btnInit = null, btnBack = null, btnAnimate = null){
-//	let cytoscape = require('cytoscape');
-//	let dagre = require('cytoscape-dagre');
-//	dagre(cytoscape)
 	var cy = cytoscape({
     	container: container,
     	layout: {
-    		name: "breadthfirst"
+//    		name: "breadthfirst"
+    		name: "dagre"
     	},
     	style: [
     		{
