@@ -1,6 +1,9 @@
 var graphIdToResult = new Map();
 
 var showMicroServiceInCytoscape = function(elements, container, nodeGraphId, btnInit = null, btnBack = null, btnAnimate = null){
+//	let cytoscape = require('cytoscape');
+//	let dagre = require('cytoscape-dagre');
+//	dagre(cytoscape)
 	var cy = cytoscape({
     	container: container,
     	layout: {
@@ -13,6 +16,36 @@ var showMicroServiceInCytoscape = function(elements, container, nodeGraphId, btn
     				'height': 30,
     				'width': 30,
     				'background-color': 'green',
+					'content': 'data(name)',
+					'font-size' : 25
+    			}
+    		},
+    		{
+    			selector: 'node[type="noMicroService"]',
+    			style: {
+    				'height': 30,
+    				'width': 30,
+    				'background-color': 'black',
+					'content': 'data(name)',
+					'font-size' : 25
+    			}
+    		},
+    		{
+    			selector: 'node[type="allMicroService"]',
+    			style: {
+    				'height': 30,
+    				'width': 30,
+    				'background-color': 'green',
+					'content': 'data(name)',
+					'font-size' : 25
+    			}
+    		},
+    		{
+    			selector: 'node[type="selectMicroService"]',
+    			style: {
+    				'height': 30,
+    				'width': 30,
+    				'background-color': 'red',
 					'content': 'data(name)',
 					'font-size' : 25
     			}
@@ -34,6 +67,30 @@ var showMicroServiceInCytoscape = function(elements, container, nodeGraphId, btn
     				'content': 'data(value)',
     				'curve-style': 'bezier',
     				'width': 1,
+    				'line-color': 'red',
+                    'target-arrow-shape': 'triangle',
+                    'target-arrow-color': 'red',
+                    'color': 'red'
+    			}
+    		},
+			{
+    			selector: 'edge[type="allTestCase"]',
+    			style: {
+    				'content': 'data(value)',
+    				'curve-style': 'bezier',
+    				'width': 2,
+    				'line-color': 'green',
+                    'target-arrow-shape': 'triangle',
+                    'target-arrow-color': 'green',
+                    'color': 'green'
+    			}
+    		},
+			{
+    			selector: 'edge[type="selectTestCase"]',
+    			style: {
+    				'content': 'data(value)',
+    				'curve-style': 'bezier',
+    				'width': 2,
     				'line-color': 'red',
                     'target-arrow-shape': 'triangle',
                     'target-arrow-color': 'red',

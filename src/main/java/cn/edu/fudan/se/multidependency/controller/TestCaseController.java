@@ -12,8 +12,11 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -140,12 +143,58 @@ public class TestCaseController {
 		request.setAttribute("projects", projects);
 		request.setAttribute("testCaseToCoverages", testCaseToPercent);
 		
-		/*Set<Trace> traces = featureOrganizationService.findRelatedTracesForTestCases(testCasesSortByGroup);
+		Map<String, JSONObject> testCaseToMicroserviceCytoscape = new LinkedHashMap<>();
+		Set<Trace> traces = featureOrganizationService.findRelatedTracesForTestCases(testCasesSortByGroup);
 		Trace[] traceArray = new Trace[traces.size()];
 		traces.toArray(traceArray);
-		JSONObject value = featureOrganizationService.microServiceToCytoscape(true, traceArray);*/
-		
+		JSONObject value = featureOrganizationService.microServiceToCytoscape(true, traceArray);
+		testCaseToMicroserviceCytoscape.put("all", value);
+		for(TestCase testCase : testCasesSortByGroup) {
+			traces = featureOrganizationService.findRelatedTracesForTestCases(testCase);
+			traceArray = new Trace[traces.size()];
+			traces.toArray(traceArray);
+			value = featureOrganizationService.microServiceToCytoscape(true, traceArray);
+			testCaseToMicroserviceCytoscape.put(testCase.getTestCaseId() + ":" + testCase.getTestCaseName(), value);
+		}
+		request.setAttribute("testCaseToMicroserviceCytoscape", testCaseToMicroserviceCytoscape);
 		return "testcase";
+	}
+	
+	@GetMapping(value = "/microservice")
+	public String microservice(HttpServletRequest request) {
+		Map<String, List<TestCase>> allTestCases = featureOrganizationService.allTestCasesGroupByTestCaseGroup();
+		request.setAttribute("testCases", allTestCases);
+		return "testcase/microservice";
+	}
+	
+	@PostMapping(value = "/microservice/query")
+	@ResponseBody
+	public JSONObject getMicroservice(@RequestBody Map<String, Object> params) {
+		JSONObject result = new JSONObject();
+		List<String> idsStr = (List<String>) params.get("ids");
+		List<Integer> ids = new ArrayList<>();
+		for(String idStr : idsStr) {
+			ids.add(Integer.parseInt(idStr));
+		}
+		System.out.println(ids);
+		Iterable<TestCase> allTestCases = featureOrganizationService.allTestCases();
+		List<TestCase> selectTestCases = new ArrayList<>();
+		for(TestCase testCase :allTestCases) {
+			int id = testCase.getTestCaseId();
+			if(ids.contains(id)) {
+				selectTestCases.add(testCase);
+			}
+		}
+		System.out.println(selectTestCases.size());
+		try {
+			result.put("result", "success");
+			result.put("testCases", selectTestCases);
+			result.put("value", featureOrganizationService.microServiceToCytoscape(selectTestCases, allTestCases));
+		} catch (Exception e) {
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
+		return result;
 	}
 	
 	@Data

@@ -9,6 +9,8 @@ spring:
 #      uri: file:///D:/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
   thymeleaf:
     cache: false 
+    prefix: classpath:/templates/
+    suffix: .html
 server:
    port: 8080
 

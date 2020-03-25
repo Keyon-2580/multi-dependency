@@ -226,6 +226,76 @@ public class FeatureOrganizationService {
 		return result;
 	}
 	
+	public JSONObject microServiceToCytoscape(List<TestCase> selectTestCases, Iterable<TestCase> allTestCases) {
+		JSONObject result = new JSONObject();
+		JSONArray nodes = new JSONArray();
+		JSONArray edges = new JSONArray();
+		List<Trace> selectTraces = new ArrayList<>();
+		selectTraces.addAll(findRelatedTracesForTestCases(selectTestCases));
+		List<Trace> allTraces = new ArrayList<>();
+		List<TestCase> allTestCasesList = new ArrayList<>();
+		for(TestCase t : allTestCases) {
+			allTestCasesList.add(t);
+		}
+		allTraces.addAll(findRelatedTracesForTestCases(allTestCasesList));
+		// 服务调用服务
+		Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> selectMsCalls = findMsCallMsByTraces(selectTraces);
+		Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> allMsCalls = findMsCallMsByTraces(allTraces);
+		// 显示哪些服务
+		for(MicroService ms : selectMsCalls.keySet()) {
+			for(MicroService callMs : selectMsCalls.get(ms).keySet()) {
+				MicroServiceCallMicroService msCallMs = selectMsCalls.get(ms).get(callMs);
+				JSONObject edge = new JSONObject();
+				JSONObject value = new JSONObject();
+				value.put("id", ms.getId() + "_" + callMs.getId());
+				value.put("value", msCallMs.getTimes());
+				value.put("source", ms.getId());
+				value.put("target", callMs.getId());
+				value.put("type", "selectTestCase");
+				edge.put("data", value);
+				edges.add(edge);
+			}
+		}
+		for(MicroService ms : allMsCalls.keySet()) {
+			for(MicroService callMs : allMsCalls.get(ms).keySet()) {
+				MicroServiceCallMicroService msCallMs = allMsCalls.get(ms).get(callMs);
+				JSONObject edge = new JSONObject();
+				JSONObject value = new JSONObject();
+				value.put("id", ms.getId() + "_" + callMs.getId());
+				value.put("value", msCallMs.getTimes());
+				value.put("source", ms.getId());
+				value.put("target", callMs.getId());
+				value.put("type", "allTestCase");
+				edge.put("data", value);
+				edges.add(edge);
+			}
+		}
+		List<MicroService> allMicroServices = allMicroServices();
+		Set<MicroService> relatedAllMicroServices = findRelatedMicroServiceForTestCases(allTestCasesList);
+		Set<MicroService> relatedSelectMicroServices = findRelatedMicroServiceForTestCases(selectTestCases);
+		for(MicroService ms : allMicroServices) {
+			JSONObject msJson = new JSONObject();
+			JSONObject msDataValue = new JSONObject();
+			if(relatedSelectMicroServices.contains(ms)) {
+				msDataValue.put("type", "selectMicroService");
+			} else if(relatedAllMicroServices.contains(ms)) {
+				msDataValue.put("type", "allMicroService");
+			} else {
+				msDataValue.put("type", "noMicroService");
+			}
+			msDataValue.put("id", ms.getId());
+			msDataValue.put("name", ms.getName());
+			msJson.put("data", msDataValue);
+			nodes.add(msJson);
+		}
+		JSONObject value = new JSONObject();
+		value.put("nodes", nodes);
+		value.put("edges", edges);
+		result.put("value", value);
+		result.put("microservice", allMicroServices);
+		return result;	
+	}
+	
 	public JSONObject microServiceToCytoscape(boolean removeUnuseMS, List<Trace> traces) {
 		Trace[] traceArray = new Trace[traces.size()];
 		traces.toArray(traceArray);
@@ -473,7 +543,7 @@ public class FeatureOrganizationService {
 	 * @param testcases
 	 * @return
 	 */
-	public Set<MicroService> findRelatedMicroServiceForTestCases(TestCase... testcases) { 
+	public Set<MicroService> findRelatedMicroServiceForTestCases(List<TestCase> testcases) { 
 		Set<MicroService> result = new HashSet<>();
 		for(TestCase testcase : testcases) {
 			List<TestCaseRunTrace> runs = testCaseRunTraces.get(testcase);
