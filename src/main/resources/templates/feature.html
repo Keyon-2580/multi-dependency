@@ -4,7 +4,10 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>首页</title>
-<script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/require.js}"></script>
+<script type="text/javascript" th:src="@{/js/main.js}"></script>
+<script type="text/javascript" th:src="@{/js/itemOnclick.js}"></script>
+<!-- <script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/popper-1.14.7.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-3.3.2.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-multiselect-0.9.15.js}"></script>
@@ -12,7 +15,7 @@
 <script type="text/javascript" th:src="@{/js/util.js}"></script>
 <script type="text/javascript" th:src="@{/js/feature.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-treeview.min.js}"></script>
-<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
+ --><link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
 <style type="text/css">
@@ -94,9 +97,9 @@
 	</div>
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
-		$(document).ready(function() {
-			featureInit();
-			toHTML("all", -1, $("#all"));
+		require([ "jquery", "feature"], function($, feature) {
+			feature.featureInit();
+			feature.toHTML("all", -1, $("#all"));
 		});
 		// ]]>
 	</script>

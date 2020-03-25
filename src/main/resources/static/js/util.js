@@ -1,4 +1,8 @@
-define(['jquery', 'cytoscape'], function ($, cytoscape){
+define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
+	'jqplot', 'utils', 'cytoscape', 'cytoscape-dagre', 'dagre']
+	, function ($, bootstrap, bootstrap_multiselect, bootstrap_treeview,
+	jqplot, utils, cytoscape, cytoscape_dagre, dagre) {
+	
 	var _showTreeView = function(containerDivId, data) {
 		containerDivId.treeview({
 			data : data,
@@ -8,11 +12,12 @@ define(['jquery', 'cytoscape'], function ($, cytoscape){
 	};
 
 	var _showDataInCytoscape = function(container, elements, layout="breadthfirst") {
-		console.log(elements);
+		cytoscape_dagre(cytoscape);
+		var nodeSize = 15;
 		var cy = cytoscape({
 	    	container: container,
 	    	layout: {
-	    		name: layout
+	    		name: "dagre"
 	    	},
 	    	style: [
 	    		{
@@ -53,36 +58,6 @@ define(['jquery', 'cytoscape'], function ($, cytoscape){
 	    			}
 	    		},
 	    		{
-	    			selector: 'node[type="noMicroService"]',
-	    			style: {
-	    				'height': 30,
-	    				'width': 30,
-	    				'background-color': 'black',
-						'content': 'data(name)',
-						'font-size' : 25
-	    			}
-	    		},
-	    		{
-	    			selector: 'node[type="allMicroService"]',
-	    			style: {
-	    				'height': 30,
-	    				'width': 30,
-	    				'background-color': 'green',
-						'content': 'data(name)',
-						'font-size' : 25
-	    			}
-	    		},
-	    		{
-	    			selector: 'node[type="selectMicroService"]',
-	    			style: {
-	    				'height': 30,
-	    				'width': 30,
-	    				'background-color': 'red',
-						'content': 'data(name)',
-						'font-size' : 25
-	    			}
-	    		},
-	    		{
 	    			selector: 'node[type="testcase"]',
 	    			style: {
 	    				'height': 35,
@@ -90,6 +65,36 @@ define(['jquery', 'cytoscape'], function ($, cytoscape){
 	    				'background-color': 'green',
 						'content': 'data(value)',
 						'font-size' : 25
+	    			}
+	    		},
+	    		{
+	    			selector: 'node[type="noMicroService"]',
+	    			style: {
+	    				'height': nodeSize,
+	    				'width': nodeSize,
+	    				'background-color': 'black',
+						'content': 'data(name)',
+						'font-size' : 15
+	    			}
+	    		},
+	    		{
+	    			selector: 'node[type="allMicroService"]',
+	    			style: {
+	    				'height': nodeSize,
+	    				'width': nodeSize,
+	    				'background-color': 'green',
+						'content': 'data(name)',
+						'font-size' : 15
+	    			}
+	    		},
+	    		{
+	    			selector: 'node[type="selectMicroService"]',
+	    			style: {
+	    				'height': nodeSize,
+	    				'width': nodeSize,
+	    				'background-color': 'red',
+						'content': 'data(name)',
+						'font-size' : 15
 	    			}
 	    		},
 				{
@@ -113,6 +118,34 @@ define(['jquery', 'cytoscape'], function ($, cytoscape){
 	                    'target-arrow-shape': 'triangle',
 	                    'target-arrow-color': 'red',
 	                    'color': 'red'
+	    			}
+	    		},
+				{
+	    			selector: 'edge[type="allTestCase"]',
+	    			style: {
+	    				'content': 'data(value)',
+	    				'curve-style': 'bezier',
+	    				'width': 1,
+	    				'line-color': 'green',
+	                    'target-arrow-shape': 'triangle',
+	                    'target-arrow-color': 'green',
+	                    'color': 'green',
+						'font-size' : 10,
+						'color':"black"
+	    			}
+	    		},
+				{
+	    			selector: 'edge[type="selectTestCase"]',
+	    			style: {
+	    				'content': 'data(value)',
+	    				'curve-style': 'bezier',
+	    				'width': 1,
+	    				'line-color': 'red',
+	                    'target-arrow-shape': 'triangle',
+	                    'target-arrow-color': 'red',
+	                    'color': 'red',
+						'font-size' : 10,
+						'color':"black"
 	    			}
 	    		}
 	    	],

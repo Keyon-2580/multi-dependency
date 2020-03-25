@@ -4,9 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>测试用例</title>
-<script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
-<script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-3.3.2.min.js}"></script>
-<script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-multiselect-0.9.15.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/require.js}"></script>
 <script type="text/javascript" th:src="@{/js/main.js}"></script>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
@@ -48,16 +45,11 @@
 	</div>
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
-			$("#testCaseList").multiselect({
-			enableClickableOptGroups: true,
-			enableCollapsibleOptGroups: true,
-	        enableFiltering: true,
-			collapseOptGroupsByDefault: true,
-	        enableCollapsibleOptGroups: true
+		require([ "jquery", "testcase"], function($, testcase) {
+
+			console.log([[${testCases}]]);
+			testcase.init();
 		});
-			require([ "jquery", "testcase"], function($, testcase) {
-				testcase.init();
-			});
 		// ]]>
 	</script>
 </body>
