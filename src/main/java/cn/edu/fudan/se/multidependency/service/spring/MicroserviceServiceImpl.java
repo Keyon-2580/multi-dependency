@@ -71,18 +71,27 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 		return microserviceCreateSpanRepository.findMicroServiceCreateSpan(span.getSpanId());
 	}
 
+	private Map<String, MicroService> allMicroServicesGroupByServiceNameCache = new HashMap<>();
+	private Map<Long, MicroService> allMicroServicesGroupByServiceIdCache = new HashMap<>();
 	@Override
 	public Map<String, MicroService> findAllMicroService() {
-		Map<String, MicroService> result = new HashMap<>();
-		microServiceRepository.findAll().forEach(ms -> {
-			result.put(ms.getName(), ms);
-		});
-		return result;
+		if(allMicroServicesGroupByServiceNameCache.size() == 0) {
+			microServiceRepository.findAll().forEach(ms -> {
+				allMicroServicesGroupByServiceNameCache.put(ms.getName(), ms);
+				allMicroServicesGroupByServiceIdCache.put(ms.getId(), ms);
+			});
+		}
+		return allMicroServicesGroupByServiceNameCache;
 	}
 
 	@Override
 	public MicroService findMicroServiceById(Long id) {
-		return microServiceRepository.findById(id).get();
+		MicroService result = allMicroServicesGroupByServiceIdCache.get(id);
+		if(result == null) {
+			result = microServiceRepository.findById(id).get();
+			allMicroServicesGroupByServiceIdCache.put(id, result);
+		}
+		return result;
 	}
 
 	@Override

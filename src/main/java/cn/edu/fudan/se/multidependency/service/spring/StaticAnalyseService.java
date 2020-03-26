@@ -52,6 +52,11 @@ public interface StaticAnalyseService {
 	 */
 	public List<Type> findTypes(ProjectFile codeFile);
 	
+	/**
+	 * 找出Type继承哪些Type
+	 * @param type
+	 * @return
+	 */
 	public List<Type> findExtendsType(Type type);
 	
 	public Map<Long, ProjectFile> allFiles();

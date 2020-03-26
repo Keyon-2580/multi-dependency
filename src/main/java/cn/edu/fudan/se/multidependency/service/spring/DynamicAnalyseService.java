@@ -29,7 +29,7 @@ public interface DynamicAnalyseService {
 	
 	List<TestCase> findTestCasesByFeatureName(String featureName);
 	
-	List<Feature> findAllFeatures();
+	Iterable<Feature> findAllFeatures();
 	
 	Iterable<TestCase> findAllTestCases();
 	
@@ -49,6 +49,10 @@ public interface DynamicAnalyseService {
 	
 	List<FunctionDynamicCallFunction> findFunctionDynamicCallsByProject(Project project);
 
+	TestCase findTestCaseByTestCaseId(Integer testCaseId);
+
+	Feature findFeatureByFeatureId(Integer featureId);
+	
 	TestCase findTestCaseById(Long id);
 
 	Feature findFeatureById(Long id);

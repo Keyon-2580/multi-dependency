@@ -61,20 +61,28 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	@Autowired
 	private StaticAnalyseService staticAnalyseService;
 	
+	private Iterable<Feature> allFeatures = null;
 	/**
 	 * 找出所有特性
 	 */
 	@Override
-	public List<Feature> findAllFeatures() {
-		return featureRepository.findAllFeatures();
+	public Iterable<Feature> findAllFeatures() {
+		if(allFeatures == null) {
+			allFeatures = featureRepository.findAll();
+		}
+		return allFeatures;
 	}
 
+	private Iterable<TestCase> allTestCasesCache = null;
 	/**
 	 * 找出所有测试用例
 	 */
 	@Override
 	public Iterable<TestCase> findAllTestCases() {
-		return testCaseRepository.findAll();
+		if(allTestCasesCache == null) {
+			allTestCasesCache = testCaseRepository.findAll();
+		}
+		return allTestCasesCache;
 	}
 
 	/**
@@ -155,15 +163,27 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		return functionDynamicCallFunctionRepository.findFunctionCallsByProjectNameAndLanguage(project.getProjectName(), project.getLanguage());
 	}
 
+	private Iterable<TestCaseExecuteFeature> allTestCaseExecuteFeaturesCache = null;
+	private Iterable<TestCaseExecuteFeature> findAllTestCaseExecuteFeaturesCache() {
+		if(allTestCaseExecuteFeaturesCache == null) {
+			allTestCaseExecuteFeaturesCache = testCaseExecuteFeatureRepository.findAll();
+		}
+		return allTestCaseExecuteFeaturesCache;
+	}
+	private Iterable<TestCaseRunTrace> allTestCaseRunTraceCache = null;
+	private Iterable<TestCaseRunTrace> findAllTestCaseRunTraceCache() {
+		if(allTestCaseRunTraceCache == null) {
+			allTestCaseRunTraceCache = testCaseRunTraceRepository.findAll();
+		}
+		return allTestCaseRunTraceCache;
+	}
 	@Override
 	public Map<TestCase, List<TestCaseExecuteFeature>> findAllTestCaseExecuteFeatures() {
 		Map<TestCase, List<TestCaseExecuteFeature>> result = new HashMap<>();
-		Iterable<TestCase> testcases = testCaseRepository.findAll();
-		for(TestCase t : testcases) {
+		for(TestCase t : findAllTestCases()) {
 			result.put(t, new ArrayList<>());
 		}
-		Iterable<TestCaseExecuteFeature> testCaseExecuteFeatures = testCaseExecuteFeatureRepository.findAll();
-		for(TestCaseExecuteFeature testCaseExecuteFeature : testCaseExecuteFeatures) {
+		for(TestCaseExecuteFeature testCaseExecuteFeature : findAllTestCaseExecuteFeaturesCache()) {
 			TestCase testcase = testCaseExecuteFeature.getTestCase();
 			List<TestCaseExecuteFeature> executes = result.get(testcase);
 			executes.add(testCaseExecuteFeature);
@@ -175,12 +195,10 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	@Override
 	public Map<Feature, List<TestCaseExecuteFeature>> findAllFeatureExecutedByTestCases() {
 		Map<Feature, List<TestCaseExecuteFeature>> result = new HashMap<>();
-		Iterable<Feature> features = featureRepository.findAll();
-		for(Feature feature : features) {
+		for(Feature feature : findAllFeatures()) {
 			result.put(feature, new ArrayList<>());
 		}
-		Iterable<TestCaseExecuteFeature> testCaseExecuteFeatures = testCaseExecuteFeatureRepository.findAll();
-		for(TestCaseExecuteFeature testCaseExecuteFeature : testCaseExecuteFeatures) {
+		for(TestCaseExecuteFeature testCaseExecuteFeature : findAllTestCaseExecuteFeaturesCache()) {
 			Feature feature = testCaseExecuteFeature.getFeature();
 			List<TestCaseExecuteFeature> executes = result.get(feature);
 			executes.add(testCaseExecuteFeature);
@@ -192,12 +210,10 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	@Override
 	public Map<TestCase, List<TestCaseRunTrace>> findAllTestCaseRunTraces() {
 		Map<TestCase, List<TestCaseRunTrace>> result = new HashMap<>();
-		Iterable<TestCase> testcases = testCaseRepository.findAll();
-		for(TestCase t : testcases) {
+		for(TestCase t : findAllTestCases()) {
 			result.put(t, new ArrayList<>());
 		}
-		Iterable<TestCaseRunTrace> testCaseRunTraces = testCaseRunTraceRepository.findAll();
-		for(TestCaseRunTrace tt : testCaseRunTraces) {
+		for(TestCaseRunTrace tt : findAllTestCaseRunTraceCache()) {
 			TestCase t = tt.getTestCase();
 			List<TestCaseRunTrace> runs = result.get(t);
 			runs.add(tt);
@@ -214,6 +230,16 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	@Override
 	public Feature findFeatureById(Long id) {
 		return featureRepository.findById(id).get();
+	}
+	
+	@Override
+	public TestCase findTestCaseByTestCaseId(Integer id) {
+		return null;
+	}
+
+	@Override
+	public Feature findFeatureByFeatureId(Integer id) {
+		return null;
 	}
 
 	@Override
@@ -266,7 +292,6 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	
 	public List<FunctionDynamicCallFunction> findDynamicCallsByCallerIdAndCalledIdAndTestCaseId(Function caller, Function called, TestCase testCase) {
 		List<FunctionDynamicCallFunction> result = new ArrayList<>();
-//		return functionDynamicCallFunctionRepository.findDynamicCallsByCallerIdAndCalledIdAndTestCaseId(caller.getId(), called.getId(), testCase.getTestCaseId());
 		List<FunctionDynamicCallFunction> calls = findDynamicCallsByCallerIdAndTestCaseId(caller, testCase);
 		for(FunctionDynamicCallFunction call : calls) {
 			if(call.getCallFunction().equals(called)) {

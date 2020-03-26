@@ -126,6 +126,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     
     public void clearCache() {
     	this.functionBelongToTypeCache.clear();
+    	this.typesCache.clear();
     }
     
     private Map<Long, Type> typesCache = new HashMap<>();
