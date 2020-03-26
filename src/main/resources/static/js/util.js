@@ -123,7 +123,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 				{
 	    			selector: 'edge[type="allTestCase"]',
 	    			style: {
-	    				'content': 'data(value)',
+//	    				'content': 'data(value)',
 	    				'curve-style': 'bezier',
 	    				'width': 1,
 	    				'line-color': 'green',
@@ -137,7 +137,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 				{
 	    			selector: 'edge[type="selectTestCase"]',
 	    			style: {
-	    				'content': 'data(value)',
+//	    				'content': 'data(value)',
 	    				'curve-style': 'bezier',
 	    				'width': 1,
 	    				'line-color': 'red',
@@ -154,14 +154,13 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 		return cy;
 	};
 	return {
-		test:function() {
-			alert("ee")
-		},
 		showTreeView: function(containerDivId, data) {
 			_showTreeView(containerDivId, data)
 		},
 		showDataInCytoscape: function(container, elements, layout) {
-			_showDataInCytoscape(container, elements, layout);
+			var cy = _showDataInCytoscape(container, elements, layout);
+			
+			return cy;
 		}
 	}
 });

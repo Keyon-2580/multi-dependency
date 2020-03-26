@@ -11,8 +11,7 @@ require.config({
 		"dagre": "import/cytoscape.js-3.13.1/dagre.min",
 		"testcase": "testcase",
 		"utils": "util",
-		"project": "project",
-		"feature": "feature"
+		"project": "project"
 	},
 	shim:{
 		"bootstrap":['jquery'],

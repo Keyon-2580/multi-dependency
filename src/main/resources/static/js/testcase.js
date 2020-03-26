@@ -1,5 +1,5 @@
-define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'utils']
-	, function ($, bootstrap, bootstrap_multiselect, jqplot, utils) {
+define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'utils', 'cytoscape']
+	, function ($, bootstrap, bootstrap_multiselect, jqplot, utils, cytoscape) {
 	var _init = function(){
 		$("#testCaseList").multiselect({
 			enableClickableOptGroups: true,
@@ -23,17 +23,18 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'utils']
 				success : function(result) {
 					console.log(result);
 					if (result.result == "success") {
-//						utils.showMicroServiceInCytoscape(result.value.value, $("#all"), null);
-//						utils.test();
-						utils.showDataInCytoscape($("#all"), result.value.value, "breadthfirst");
-//						_showDataInCytoscape($("#all"), result.value.value, "breadthfirst")
+						var cy = utils.showDataInCytoscape($("#all"), result.value.value, "dagre");
 						var title = "";
+						$("#showImg").click(function() {
+							$('#png-eg').attr('src', cy.png());
+						})
 						for(var i = 0; i < result.testCases.length; i++) {
 							title += result.testCases[i].testCaseName;
 							if(i != result.testCases.length - 1) {
 								title += ", ";
 							}
 						}
+						console.log(title)
 						$("#testCaseTitle").text(title)
 					}
 				}

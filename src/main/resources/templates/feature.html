@@ -4,23 +4,23 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>首页</title>
-<script type="text/javascript" th:src="@{/js/import/require.js}"></script>
-<script type="text/javascript" th:src="@{/js/main.js}"></script>
-<script type="text/javascript" th:src="@{/js/itemOnclick.js}"></script>
-<!-- <script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/popper-1.14.7.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-3.3.2.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-multiselect-0.9.15.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape.min.js}"></script>
-<script type="text/javascript" th:src="@{/js/util.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/dagre.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape-dagre.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/klay.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape-klay.js}"></script>
 <script type="text/javascript" th:src="@{/js/feature.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-treeview.min.js}"></script>
- --><link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
+<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
 <style type="text/css">
 .div_cytoscape_content {
-	height: 600px;
+	height: 1000px;
 	border: 1px solid #000;
 	margin-bottom: 5px;
 }
@@ -77,15 +77,15 @@
 					</div>
 				</div>
 			</div>
-
-			<div id="content">
-				<div>
-					<!-- <h3 id="title">TestCase executes Features</h3> -->
-					<!-- <button id="test">test</button> -->
+				<div id="content" class="col-sm-12">
+					<div>
+						<!-- <h3 id="title">TestCase executes Features</h3> -->
+						<!-- <button id="test">test</button> -->
+					</div>
+					<div id="graph" class="div_cytoscape_content"></div>
+					
 				</div>
-				<div id="graph" class="div_cytoscape_content"></div>
-				
-			</div>
+
 		</div>
 		<div class="col-sm-12">
 			<div>
@@ -97,9 +97,9 @@
 	</div>
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
-		require([ "jquery", "feature"], function($, feature) {
-			feature.featureInit();
-			feature.toHTML("all", -1, $("#all"));
+		$(document).ready(function() {
+			featureInit();
+			toHTML("all", -1, $("#all"));
 		});
 		// ]]>
 	</script>
