@@ -10,7 +10,10 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 			levels: 1
 		});
 	};
-
+	var colors = {
+		"0" : "blue",
+		"1" : "yellow"
+	};
 	var _showDataInCytoscape = function(container, elements, layout="breadthfirst") {
 		cytoscape_dagre(cytoscape);
 		var nodeSize = 15;
@@ -65,6 +68,16 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    				'background-color': 'green',
 						'content': 'data(value)',
 						'font-size' : 25
+	    			}
+	    		},
+	    		{
+	    			selector: 'node[type="TestCase"]',
+	    			style: {
+	    				'height': nodeSize,
+	    				'width': nodeSize,
+	    				'background-color': 'blue',
+						'content': 'data(name)',
+						'font-size' : 15
 	    			}
 	    		},
 	    		{
@@ -147,13 +160,49 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 						'font-size' : 10,
 						'color':"black"
 	    			}
+	    		},
+				{
+	    			selector: 'edge[type="TestCase_Call"]',
+	    			style: {
+//	    				'content': 'data(value)',
+	    				'curve-style': 'bezier',
+	    				'width': 1,
+	    				'line-color': 'blue',
+	                    'target-arrow-shape': 'triangle',
+	                    'target-arrow-color': 'blue',
+						'font-size' : 10,
+//						'color':"blue"
+						'color': colors['data(index)']
+	    			}
 	    		}
 	    	],
 	    	elements: elements
 	    });
 		return cy;
 	};
+	var _addNodes = function(cy, nodes) {
+		console.log(nodes);
+		console.log(cy);
+		console.log(cy.elements());
+		for(var i = 0; i < nodes.length; i++) {
+			console.log(nodes[i]);
+			cy.add({group: 'nodes', data: nodes[i].data})
+		}
+	};
+	var _addEdges = function(cy, edges) {
+		console.log(edges);
+		for(var i = 0; i < edges.length; i++) {
+			console.log(edges[i])
+			var data = edges[i].data;
+			data["line-color"] = 'yellow';
+			cy.add({group: 'edges', data: data})
+		}
+
+	};
 	return {
+		test: function(){
+			console.log('rrr')
+		},
 		showTreeView: function(containerDivId, data) {
 			_showTreeView(containerDivId, data)
 		},
@@ -161,6 +210,12 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 			var cy = _showDataInCytoscape(container, elements, layout);
 			
 			return cy;
+		},
+		addNodes: function(cytoscape, nodes) {
+			_addNodes(cytoscape, nodes);
+		},
+		addEdges: function(cytoscape, edges) {
+			_addEdges(cytoscape, edges);
 		}
 	}
 });

@@ -155,7 +155,7 @@ public class FunctionController {
 		JSONObject result = new JSONObject();
 		try {
 			JSONArray featureArray = new JSONArray();
-			List<Feature> features = organizationService.allFeatures();
+			Iterable<Feature> features = organizationService.allFeatures();
 			for(Feature feature : features) {
 				JSONArray featureTags = new JSONArray();
 				featureTags.add("feature");

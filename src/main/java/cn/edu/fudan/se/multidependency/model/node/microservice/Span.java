@@ -40,6 +40,10 @@ public class Span implements Node {
 	private Integer order;
 	
 	private String apiFunctionName;
+	
+	public boolean isStartSpan() {
+		return order == 0;
+	}
     
 	@Override
 	public Map<String, Object> getProperties() {

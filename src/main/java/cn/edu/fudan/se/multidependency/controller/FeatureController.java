@@ -36,7 +36,7 @@ public class FeatureController {
 
 	@GetMapping("/all")
 	@ResponseBody
-	public List<Feature> findAllFeatures() {
+	public Iterable<Feature> findAllFeatures() {
 		return featureOrganizationService.allFeatures();
 	}
 

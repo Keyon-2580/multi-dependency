@@ -20,12 +20,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.model.Graph;
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.FunctionCallPropertion;
+import cn.edu.fudan.se.multidependency.service.spring.MicroServiceCallWithEntry;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.TestCaseCoverageService;
 import lombok.Data;
@@ -167,7 +170,29 @@ public class TestCaseController {
 		return "testcase/microservice";
 	}
 	
-	@PostMapping(value = "/microservice/query")
+	@PostMapping(value = "/microservice/entry")
+	@ResponseBody
+	public JSONObject getMicroServiceEntry(@RequestBody Map<String, Object> params) {
+		JSONObject result = new JSONObject();
+		try {
+			String idStr = params.get("testCaseId").toString();
+			String type = params.get("type").toString();
+			System.out.println(idStr);
+			TestCase testCase = featureOrganizationService.findTestCase(Integer.parseInt(idStr));
+			System.out.println(testCase);
+			MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(testCase);
+			result.put("result", "success");
+			result.put("testCase", testCase);
+			result.put("value", callsWithEntry.toCytoscape(type));
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
+		return result;
+	}
+	
+	@PostMapping(value = "/microservice/query/union")
 	@ResponseBody
 	public JSONObject getMicroservice(@RequestBody Map<String, Object> params) {
 		JSONObject result = new JSONObject();
@@ -176,7 +201,6 @@ public class TestCaseController {
 		for(String idStr : idsStr) {
 			ids.add(Integer.parseInt(idStr));
 		}
-		System.out.println(ids);
 		Iterable<TestCase> allTestCases = featureOrganizationService.allTestCases();
 		List<TestCase> selectTestCases = new ArrayList<>();
 		for(TestCase testCase :allTestCases) {
@@ -185,14 +209,65 @@ public class TestCaseController {
 				selectTestCases.add(testCase);
 			}
 		}
-		System.out.println(selectTestCases.size());
+		
 		try {
 			result.put("result", "success");
 			result.put("testCases", selectTestCases);
-			result.put("value", featureOrganizationService.microServiceToCytoscape(selectTestCases, allTestCases));
+			result.put("coverageValue", featureOrganizationService.microServiceToCytoscapeUnion(selectTestCases, allTestCases));
 		} catch (Exception e) {
+			e.printStackTrace();
 			result.put("result", "fail");
 			result.put("msg", e.getMessage());
+		}
+		try {
+			if(selectTestCases.size() >= 2) {
+				TestCase testCase0 = selectTestCases.get(0);
+				TestCase testCase1 = selectTestCases.get(1);
+				Graph same = testCaseCoverageService.extractSameGraphForMicroServiceCall(testCase0, testCase1);
+				result.put("test", same.toCytoscape());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	@PostMapping(value = "/microservice/query/intersection")
+	@ResponseBody
+	public JSONObject getMicroserviceIntersection(@RequestBody Map<String, Object> params) {
+		JSONObject result = new JSONObject();
+		List<String> idsStr = (List<String>) params.get("ids");
+		List<Integer> ids = new ArrayList<>();
+		for(String idStr : idsStr) {
+			ids.add(Integer.parseInt(idStr));
+		}
+		Iterable<TestCase> allTestCases = featureOrganizationService.allTestCases();
+		List<TestCase> selectTestCases = new ArrayList<>();
+		for(TestCase testCase :allTestCases) {
+			int id = testCase.getTestCaseId();
+			if(ids.contains(id)) {
+				selectTestCases.add(testCase);
+			}
+		}
+		
+		try {
+			result.put("result", "success");
+			result.put("testCases", selectTestCases);
+			result.put("coverageValue", featureOrganizationService.microServiceToCytoscapeIntersection(selectTestCases, allTestCases));
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
+		try {
+			if(selectTestCases.size() >= 2) {
+				TestCase testCase0 = selectTestCases.get(0);
+				TestCase testCase1 = selectTestCases.get(1);
+				Graph same = testCaseCoverageService.extractSameGraphForMicroServiceCall(testCase0, testCase1);
+				result.put("test", same.toCytoscape());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return result;
 	}

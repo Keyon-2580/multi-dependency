@@ -29,7 +29,8 @@ public class RelationInserterService {
 	
 //	@Bean
 	public void addMsCallMsRelation() {
-		Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> calls = featureOrganizationService.findMsCallMsByTraces(featureOrganizationService.allTraces());
+		Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> calls 
+			= featureOrganizationService.findMsCallMsByTraces(featureOrganizationService.allTraces()).getCalls();
 		for(MicroService ms : calls.keySet()) {
 			for(MicroService callMs : calls.get(ms).keySet()) {
 				MicroServiceCallMicroService call = calls.get(ms).get(callMs);
