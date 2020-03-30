@@ -3,7 +3,7 @@ package cn.edu.fudan.se.multidependency.model.node;
 public enum NodeLabelType {
 	ProjectFile, Function, Package, Type, Project, Variable, Namespace,
 	Scenario, TestCase, Feature, Commit, Issue,
-	Trace, Span, MicroService, Bug, License;
+	Trace, Span, MicroService, Bug, License, MicroServiceAPI;
 	
 	public String indexName() {
 		switch(this) {
@@ -49,6 +49,8 @@ public enum NodeLabelType {
 		case License:
 //			return cn.edu.fudan.se.multidependency.model.node.lib.License.LABEL_INDEX;
 			return "";
+		case MicroServiceAPI:
+			return cn.edu.fudan.se.multidependency.model.node.microservice.MicroServiceAPI.LABEL_INDEX;
 		default:
 			return null;
 		}
