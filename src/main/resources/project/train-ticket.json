@@ -3,55 +3,168 @@
 	"serviceGroupName": "train-ticket",
 	"project": "ts-admin-basic-info-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" : {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-admin-basic-info-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-admin-order-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-admin-order-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" : {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-admin-order-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-admin-route-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-admin-route-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" : {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-admin-route-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-admin-travel-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-admin-travel-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" : {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-admin-travel-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-admin-user-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-admin-user-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" : {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-admin-user-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-assurance-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-assurance-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" : {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-assurance-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-auth-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-auth-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true/*,
+	"restfulAPIs" : "src/main/resources/project/microservice_apis/train-ticket/ts-auth-service-api-docs.json"12340*/
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-basic-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-basic-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" : {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-basic-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-cancel-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-cancel-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" : {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-cancel-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-common",
 	"serviceGroupName": "train-ticket",
@@ -63,49 +176,161 @@
 	"serviceGroupName": "train-ticket",
 	"project": "ts-config-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" : {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-config-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-consign-price-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-consign-price-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" : {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-consign-price-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-consign-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-consign-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-consign-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-contacts-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-contacts-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-contacts-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-execute-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-execute-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-execute-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-food-map-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-food-map-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-food-map-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-food-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-food-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-food-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-inside-payment-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-inside-payment-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-inside-payment-service-api-docs.json"
+	}
 }, /*{
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-news-service",
 	"serviceGroupName": "train-ticket",
@@ -117,79 +342,261 @@
 	"serviceGroupName": "train-ticket",
 	"project": "ts-notification-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-notification-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-order-other-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-order-other-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-order-other-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-order-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-order-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-order-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-payment-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-payment-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-payment-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-preserve-other-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-preserve-other-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-preserve-other-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-preserve-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-preserve-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-preserve-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-price-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-price-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-price-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-rebook-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-rebook-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-rebook-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-route-plan-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-route-plan-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-route-plan-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-route-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-route-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-route-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-seat-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-seat-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-seat-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-security-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-security-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-security-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-station-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-station-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-station-service-api-docs.json"
+	}
 }, /*{
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-ticket-office-service",
 	"serviceGroupName": "train-ticket",
@@ -201,32 +608,102 @@
 	"serviceGroupName": "train-ticket",
 	"project": "ts-ticketinfo-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-ticketinfo-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-train-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-train-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" : {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-train-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-travel-plan-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-travel-plan-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" : {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-travel-plan-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-travel-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-travel-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-travel-service-api-docs.json"
+	}
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-travel2-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-travel2-service",
 	"language": "java",
-	"isMicroservice": true
-}, {
+	"isMicroservice": true,
+	"restfulAPIs" :  {
+		"framework" : "swagger",
+		"excludeTags" : [
+			"loggers-mvc-endpoint",
+			"endpoint-mvc-adapter",
+			"metrics-mvc-endpoint",
+			"environment-mvc-endpoint",
+			"heapdump-mvc-endpoint",
+			"audit-events-mvc-endpoint",
+			"health-mvc-endpoint",
+			"basic-error-controller"
+		],
+		"path" : "src/main/resources/project/microservice_apis/train-ticket/ts-travel2-service-api-docs.json"
+	}
+}, /*{
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-ui-dashboard",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-ui-dashboard",
@@ -238,18 +715,20 @@
 	"project": "ts-ui-test",
 	"language": "java",
 	"isMicroservice": true
-}, {
+},*/ {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-user-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-user-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true/*,
+	"restfulAPIs" : "src/main/resources/project/microservice_apis/train-ticket/ts-user-service-api-docs.json"12342*/
 }, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-verification-code-service",
 	"serviceGroupName": "train-ticket",
 	"project": "ts-verification-code-service",
 	"language": "java",
-	"isMicroservice": true
+	"isMicroservice": true/*,
+	"restfulAPIs" : "src/main/resources/project/microservice_apis/train-ticket/ts-verification-code-service-api-docs.json"15678*/
 }/*, {
 	"path": "D:\\multiple-dependency-project\\train-ticket\\ts-voucher-service",
 	"serviceGroupName": "train-ticket",

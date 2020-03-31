@@ -8,6 +8,7 @@ import java.util.Map;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
+import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
@@ -106,6 +107,13 @@ public class Nodes {
 		return null;
 	}
 	
+	/**
+	 * 在给定project中查找指定节点类型的所有节点
+	 * entity : node
+	 * @param nodeType
+	 * @param inProject
+	 * @return
+	 */
 	public Map<Long, ? extends Node> findNodesByNodeTypeInProject(NodeLabelType nodeType, Project inProject) {
 		Map<NodeLabelType, Map<Long, Node>> projectHasNodes = projectToNodes.getOrDefault(inProject, new HashMap<>());
 		return projectHasNodes.getOrDefault(nodeType, new HashMap<>());
@@ -196,6 +204,27 @@ public class Nodes {
 			MicroService temp = (MicroService) node;
 			if(name.equals(temp.getName())) {
 				return temp;
+			}
+		}
+		return null;
+	}
+	
+	public RestfulAPI findRestfulAPIByProjectAndSimpleFunctionName(Project project, String simpleFunctionName) {
+		Map<Long, ? extends Node> nodes = findNodesByNodeTypeInProject(NodeLabelType.RestfulAPI, project);
+		for(Node node : nodes.values()) {
+			RestfulAPI api = (RestfulAPI) node;
+			if(simpleFunctionName.equals(api.getApiFunctionSimpleName())) {
+				return api;
+			}
+		}
+		return null;
+	}
+	
+	public RestfulAPI findMicroServiceAPIByAPIFunction(String apiFunctionName) {
+		for(Node node :findNodesByNodeType(NodeLabelType.RestfulAPI)) {
+			RestfulAPI api = (RestfulAPI) node;
+			if(apiFunctionName.equals(api.getApiFunctionName())) {
+				return api;
 			}
 		}
 		return null;

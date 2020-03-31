@@ -18,7 +18,7 @@ public abstract class DynamicFunctionExecution {
 	protected String traceId;
 	protected String spanId;
 	protected String parentSpanId;
-	protected String callMethod;
+	protected String callForm;
 	protected JSONObject remarks;
 	
 	public static final String TRACE_START_PARENT_SPAN_ID = "-1";

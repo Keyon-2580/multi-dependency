@@ -17,7 +17,6 @@ public class JavaDynamicFunctionExecution extends DynamicFunctionExecution {
 	}
 	protected Long threadId;
 	protected String threadName;
-	protected String callMethod;
 	
 	public Language getLanguage() {
 		return Language.java;

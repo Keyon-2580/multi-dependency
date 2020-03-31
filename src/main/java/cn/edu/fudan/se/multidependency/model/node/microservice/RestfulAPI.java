@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NodeEntity
 @NoArgsConstructor
 @EqualsAndHashCode
-public class MicroServiceAPI implements Node {
+public class RestfulAPI implements Node {
 	
 	private static final long serialVersionUID = -404310425549237045L;
 
@@ -27,19 +27,29 @@ public class MicroServiceAPI implements Node {
 
 	private Long entityId;
 	
-	private String apiName;
+	// 应是唯一的
+	private String apiFunctionName;
+	
+	private String apiFunctionSimpleName;
+	
+	private String endPoint;
+	
+	private String form;
 
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entity", getEntityId() == null ? -1 : getEntityId());
-		properties.put("apiName", getApiName() == null ? "" : getApiName());
+		properties.put("apiFunctionName", getApiFunctionName() == null ? "" : getApiFunctionName());
+		properties.put("apiFunctionSimpleName", getApiFunctionSimpleName() == null ? "" : getApiFunctionSimpleName());
+		properties.put("endPoint", getEndPoint() == null ? "" : getEndPoint());
+		properties.put("form", getForm() == null ? "" : getForm());
 		return properties;
 	}
 
 	@Override
 	public NodeLabelType getNodeType() {
-		return NodeLabelType.MicroServiceAPI;
+		return NodeLabelType.RestfulAPI;
 	}
 
 	public static final String LABEL_INDEX = "apiName";

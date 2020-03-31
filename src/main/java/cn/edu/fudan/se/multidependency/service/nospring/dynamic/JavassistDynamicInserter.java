@@ -16,6 +16,7 @@ import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
+import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
@@ -23,6 +24,7 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCal
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TraceRunWithFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanCallSpan;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanStartWithFunction;
 import cn.edu.fudan.se.multidependency.utils.DynamicUtil;
 import cn.edu.fudan.se.multidependency.utils.TimeUtil;
@@ -104,7 +106,7 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 					String serviceName = projectName;
 					span.setServiceName(serviceName);
 					span.setTime(TimeUtil.changeTimeStrToLong(execution.getTime()));
-					spanToCallMethod.put(span, execution.getCallMethod());
+					spanToCallMethod.put(span, execution.getCallForm());
 					
 					Project project = this.getNodes().findProject(serviceName, Language.java);
 					MicroService microService = getNodes().findMicroServiceByName(serviceName);
@@ -119,6 +121,26 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 
 					MicroServiceCreateSpan projectCreateSpan = new MicroServiceCreateSpan(microService, span);
 					addRelation(projectCreateSpan);
+					
+					RestfulAPI api = this.getNodes().findRestfulAPIByProjectAndSimpleFunctionName(project, operationName);
+					if(api == null) {
+//						System.out.println(project.getProjectName() + " " + operationName);
+						api = new RestfulAPI();
+						api.setEntityId(this.generateEntityId());
+						api.setApiFunctionSimpleName(operationName);
+						addNode(api, project);
+						Contain projectContainAPI = new Contain(project, api);
+						addRelation(projectContainAPI);
+						Contain microServiceContainAPI = new Contain(microService, api);
+						addRelation(microServiceContainAPI);
+					} 
+					api.setApiFunctionName(functionName);
+					
+					SpanInstanceOfRestfulAPI spanInstanceOfMicroServiceAPI = new SpanInstanceOfRestfulAPI();
+					spanInstanceOfMicroServiceAPI.setSpan(span);
+					spanInstanceOfMicroServiceAPI.setApi(api);
+//					spanInstanceOfMicroServiceAPI.setTestCaseId(testCaseId);
+					addRelation(spanInstanceOfMicroServiceAPI);
 				}
 				spanIdToParentSpanId.put(spanId, parentSpanId);
 			}

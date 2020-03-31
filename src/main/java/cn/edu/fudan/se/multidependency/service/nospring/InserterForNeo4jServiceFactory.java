@@ -2,11 +2,9 @@ package cn.edu.fudan.se.multidependency.service.nospring;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.service.nospring.build.BuildInserterForNeo4jService;
+import cn.edu.fudan.se.multidependency.service.nospring.code.BasicCodeInserterForNeo4jServiceImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.code.CppInsertServiceImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.code.JavaInsertServiceImpl;
-import cn.edu.fudan.se.multidependency.service.nospring.dynamic.CppDynamicInserter;
-import cn.edu.fudan.se.multidependency.service.nospring.dynamic.DynamicInserterForNeo4jService;
-import cn.edu.fudan.se.multidependency.service.nospring.dynamic.JavassistDynamicInserter;
 import depends.entity.repo.EntityRepo;
 
 public class InserterForNeo4jServiceFactory {
@@ -19,7 +17,7 @@ public class InserterForNeo4jServiceFactory {
 		return instance;
 	}
 	
-	public ExtractorForNodesAndRelations createCodeInserterService(String projectPath, String projectName, 
+	public BasicCodeInserterForNeo4jServiceImpl createCodeInserterService(String projectPath, String projectName, 
 			EntityRepo entityRepo, Language language, boolean isMicroservice, String serviceGroupName) throws Exception {
 		switch(language) {
 		case java:

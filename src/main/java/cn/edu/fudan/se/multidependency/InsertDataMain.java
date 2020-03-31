@@ -18,8 +18,12 @@ import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRela
 import cn.edu.fudan.se.multidependency.service.nospring.InserterForNeo4j;
 import cn.edu.fudan.se.multidependency.service.nospring.InserterForNeo4jServiceFactory;
 import cn.edu.fudan.se.multidependency.service.nospring.RepositoryService;
+import cn.edu.fudan.se.multidependency.service.nospring.code.BasicCodeInserterForNeo4jServiceImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.nospring.code.DependsEntityRepoExtractorImpl;
+import cn.edu.fudan.se.multidependency.service.nospring.code.RestfulAPIFileExtractor;
+import cn.edu.fudan.se.multidependency.service.nospring.code.RestfulAPIFileExtractorImpl;
+import cn.edu.fudan.se.multidependency.service.nospring.code.SwaggerJSON;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.CppDynamicInserter;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.FeatureAndTestCaseFromJSONFileForMicroserviceInserter;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.JavassistDynamicInserter;
@@ -60,7 +64,6 @@ public class InsertDataMain {
 			repository.setDatabasePath(yaml.getNeo4jDatabasePath());
 			repository.setDelete(yaml.isDeleteDatabase());
 			
-			ExtractorForNodesAndRelations inserter = null;
 			/**
 			 * 静态分析
 			 */
@@ -76,6 +79,7 @@ public class InsertDataMain {
 			
 			JSONArray projectsArray = JSONObject.parseArray(projectsJson.toString());
 			for(int i = 0; i < projectsArray.size(); i++) {
+				// 对每一个项目静态分析
 				JSONObject projectJson = projectsArray.getJSONObject(i);
 				Language language = Language.valueOf(projectJson.getString("language"));
 				String projectPath = projectJson.getString("path");
@@ -89,6 +93,7 @@ public class InsertDataMain {
 				for(int j = 0; j < excludesSize; j++) {
 					excludes[j] = excludesArray.getString(j);
 				}
+				JSONObject restfulAPIs = projectJson.getJSONObject("restfulAPIs");
 				
 				LOGGER.info("静态分析，项目：" + projectName + "，语言：" + language);
 				
@@ -99,12 +104,25 @@ public class InsertDataMain {
 				extractor.setProjectPath(projectPath);
 				EntityRepo entityRepo = extractor.extractEntityRepo();
 				if (extractor.getEntityCount() > 0) {
-					inserter = InserterForNeo4jServiceFactory.getInstance()
+					BasicCodeInserterForNeo4jServiceImpl inserter = InserterForNeo4jServiceFactory.getInstance()
 							.createCodeInserterService(projectPath, projectName, entityRepo, language, isMicroservice, serviceGroupName);
+					if(restfulAPIs != null) {
+						if("swagger".equals(restfulAPIs.getString("framework"))) {
+							SwaggerJSON swagger = new SwaggerJSON();
+							swagger.setPath(restfulAPIs.getString("path"));
+							JSONArray excludeTags = restfulAPIs.getJSONArray("excludeTags");
+							for(int j = 0; j < excludeTags.size(); j++) {
+								swagger.addExcludeTag(excludeTags.getString(j));
+							}
+							RestfulAPIFileExtractor restfulAPIFileExtractorImpl = new RestfulAPIFileExtractorImpl(swagger);
+							inserter.setRestfulAPIFileExtractor(restfulAPIFileExtractorImpl);
+						}
+					}
 					inserter.addNodesAndRelations();
 				}
 			}
-
+			
+			ExtractorForNodesAndRelations inserter = null;
 			/**
 			 * 动态分析
 			 */
