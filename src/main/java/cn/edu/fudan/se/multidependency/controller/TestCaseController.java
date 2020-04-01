@@ -22,10 +22,10 @@ import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.Graph;
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
+import cn.edu.fudan.se.multidependency.service.spring.APICoverageService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.FunctionCallPropertion;
 import cn.edu.fudan.se.multidependency.service.spring.MicroServiceCallWithEntry;
@@ -47,6 +47,9 @@ public class TestCaseController {
 	
 	@Autowired
 	private TestCaseCoverageService testCaseCoverageService ;
+	
+	@Autowired
+	private APICoverageService apiCoverageService;
 	
 	@GetMapping("/detail")
 	public String detail(HttpServletRequest request, @RequestParam("testcases") String testCaseIds, @RequestParam("project") Long projectId) {
@@ -228,6 +231,36 @@ public class TestCaseController {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	@GetMapping(value = "/microservice/api")
+	@ResponseBody
+	public JSONObject getTestCasesCallAPIs(HttpServletRequest request, @RequestParam(value="testCaseList", required=false) int[] testCaseList) {
+		JSONObject result = new JSONObject();
+		List<Integer> testCaseIds = new ArrayList<>();
+		if(testCaseList != null) {
+			for(Integer testCaseId : testCaseList) {
+				testCaseIds.add(testCaseId);
+			}
+		}
+		Collection<TestCase> allTestCases = featureOrganizationService.allTestCases();
+		List<TestCase> selectTestCases = new ArrayList<>();
+		for(TestCase testCase :allTestCases) {
+			int id = testCase.getTestCaseId();
+			if(testCaseIds.contains(id)) {
+				selectTestCases.add(testCase);
+			}
+		}
+		try {
+			result.put("result", "success");
+			result.put("testCases", allTestCases);
+			result.put("value", apiCoverageService.apiCoverage(allTestCases));
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
 		}
 		return result;
 	}

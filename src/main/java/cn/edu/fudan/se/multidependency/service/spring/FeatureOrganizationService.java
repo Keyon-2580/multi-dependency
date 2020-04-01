@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,6 +36,26 @@ public class FeatureOrganizationService {
 	private final Map<Trace, List<Span>> traceToSpans;
 	private final Map<Span, List<SpanCallSpan>> spanCallSpans;
 	private final Map<Span, MicroServiceCreateSpan> spanBelongToMicroService;
+	
+	public List<Span> relatedSpan(Iterable<TestCase> testCases) {
+		List<Span> result = new ArrayList<>();
+		for(TestCase testCase : testCases) {
+			List<TestCaseRunTrace> runs = testCaseRunTraces.getOrDefault(testCase, new ArrayList<>());
+			for(TestCaseRunTrace run : runs) {
+				List<Span> spans = traceToSpans.getOrDefault(run.getTrace(), new ArrayList<>());
+				result.addAll(spans);
+			}
+		}
+		return result;
+	}
+	
+	public MicroService spanBelongToMicroservice(Span span) {
+		try {
+			return spanBelongToMicroService.get(span).getMicroservice();
+		} catch (Exception e) {
+		}
+		return null;
+	}
 	
 	public JSONObject featureExecuteTestCasesToCytoscape() {
 		JSONObject result = new JSONObject();
@@ -753,7 +774,7 @@ public class FeatureOrganizationService {
 	 * 所有测试用例
 	 * @return
 	 */
-	public Iterable<TestCase> allTestCases() {
+	public Collection<TestCase> allTestCases() {
 		List<TestCase> result = new ArrayList<>();
 		for(TestCase testcase : testCaseExecuteFeatures.keySet()) {
 			result.add(testcase);

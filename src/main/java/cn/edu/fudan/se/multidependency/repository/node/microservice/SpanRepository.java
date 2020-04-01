@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.repository.node.microservice.jaeger;
+package cn.edu.fudan.se.multidependency.repository.node.microservice;
 
 import java.util.List;
 

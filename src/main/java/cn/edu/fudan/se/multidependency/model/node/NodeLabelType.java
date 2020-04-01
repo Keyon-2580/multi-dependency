@@ -50,7 +50,7 @@ public enum NodeLabelType {
 //			return cn.edu.fudan.se.multidependency.model.node.lib.License.LABEL_INDEX;
 			return "";
 		case RestfulAPI:
-			return cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI.LABEL_INDEX;
+			return cn.edu.fudan.se.multidependency.model.node.RestfulAPI.LABEL_INDEX;
 		default:
 			return null;
 		}

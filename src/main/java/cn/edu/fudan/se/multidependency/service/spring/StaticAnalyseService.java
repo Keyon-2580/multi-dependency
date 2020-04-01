@@ -6,9 +6,11 @@ import java.util.Map;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportVariable;
@@ -92,6 +94,8 @@ public interface StaticAnalyseService {
 	 * @return
 	 */
 	public ProjectFile findTypeBelongToFile(Type type);
+	
+	public List<RestfulAPI> findMicroServiceContainRestfulAPI(MicroService microService);
 	
 	/**
 	 * 变量属于哪个文件

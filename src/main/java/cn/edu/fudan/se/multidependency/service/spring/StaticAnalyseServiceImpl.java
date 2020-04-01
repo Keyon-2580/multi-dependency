@@ -12,9 +12,11 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportVariable;
@@ -434,6 +436,11 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		}
 		subTypeCache.put(subType, superTypeMap);
 		return is;
+	}
+
+	@Override
+	public List<RestfulAPI> findMicroServiceContainRestfulAPI(MicroService microService) {
+		return containRepository.findMicroServiceContainRestfulAPI(microService.getId());
 	}
 	
 }

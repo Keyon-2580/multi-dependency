@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
@@ -21,6 +22,9 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 
 	@Query("MATCH (t:Trace{traceId:{traceId}})-[r:" + RelationType.str_CONTAIN + "]->(s:Span) RETURN s")
 	public List<Span> findTraceContainSpansByTraceId(@Param("traceId") String traceId);
+	
+	@Query("MATCH (ms:MicroService)-[r:" + RelationType.str_CONTAIN + "]->(api:RestfulAPI) where id(ms)={id} RETURN api")
+	public List<RestfulAPI> findMicroServiceContainRestfulAPI(@Param("id") Long id);
 	
 	@Query("match (p:Package)-[r" + RelationType.str_CONTAIN + "]->(f:ProjectFile) where id(f)={fileId} return p")
 	public Package findFileBelongToPackageByFileId(@Param("fileId") Long id);

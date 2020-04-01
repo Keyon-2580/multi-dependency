@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.model.node.microservice;
+package cn.edu.fudan.se.multidependency.model.node;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,8 +7,6 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

@@ -1,6 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.nospring.code;
 
-import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
+import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
 
 public interface RestfulAPIFileExtractor {
 	

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
@@ -22,6 +23,7 @@ import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
 import cn.edu.fudan.se.multidependency.repository.node.testcase.FeatureRepository;
 import cn.edu.fudan.se.multidependency.repository.node.testcase.ScenarioRepository;
@@ -30,6 +32,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.TestCaseExecuteFeatureRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.TestCaseRunTraceRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanInstanceOfRestfulAPIRepository;
 import cn.edu.fudan.se.multidependency.service.nospring.RepositoryService;
 
 @Service
@@ -62,6 +65,9 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	private StaticAnalyseService staticAnalyseService;
 	
 	private Iterable<Feature> allFeatures = null;
+	
+	@Autowired
+	private SpanInstanceOfRestfulAPIRepository spanInstanceOfRestfulAPIRepository;
 	/**
 	 * 找出所有特性
 	 */
@@ -381,6 +387,11 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 			}
 		}
 		return result;
+	}
+
+	@Override
+	public SpanInstanceOfRestfulAPI findSpanBelongToAPI(Span span) {
+		return spanInstanceOfRestfulAPIRepository.findSpanBelongToAPI(span.getSpanId());
 	}
 
 

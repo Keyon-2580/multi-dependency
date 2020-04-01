@@ -14,6 +14,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
 
 public interface DynamicAnalyseService {
 	
@@ -60,4 +61,6 @@ public interface DynamicAnalyseService {
 	List<FunctionDynamicCallFunction> findFunctionDynamicCallFunctionRelations(Project project, boolean isTraceRunForTestCase);
 
 	Iterable<FunctionDynamicCallFunction> findAllFunctionDynamicCallFunctionRelations(boolean b);
+	
+	SpanInstanceOfRestfulAPI findSpanBelongToAPI(Span span);
 }
