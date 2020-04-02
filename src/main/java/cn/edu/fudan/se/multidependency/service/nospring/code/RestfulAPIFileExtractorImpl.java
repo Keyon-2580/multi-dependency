@@ -61,7 +61,7 @@ public class RestfulAPIFileExtractorImpl implements RestfulAPIFileExtractor {
 	}
 	
 	private JSONObject extractSwagger() throws Exception {
-		return JSONUtil.extractJson(new File(filePath));
+		return JSONUtil.extractJSONObject(new File(filePath));
 	}
 
 }

@@ -57,7 +57,6 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForN
 			Iterable<RestfulAPI> apis = restfulAPIFileExtractor.extract();
 			for(RestfulAPI api : apis) {
 				api.setEntityId(generateEntityId());
-				System.out.println(generateEntityId());
 				addNode(api, currentProject);
 				
 				Contain projectContainAPI = new Contain(currentProject, api);

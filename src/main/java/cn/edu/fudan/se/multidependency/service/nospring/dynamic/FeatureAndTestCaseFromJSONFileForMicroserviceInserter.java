@@ -31,7 +31,7 @@ public class FeatureAndTestCaseFromJSONFileForMicroserviceInserter extends Extra
 	
 	@Override
 	public void addNodesAndRelations() throws Exception {
-		JSONObject featureJsonFile = JSONUtil.extractJson(new File(featureConfigPath));
+		JSONObject featureJsonFile = JSONUtil.extractJSONObject(new File(featureConfigPath));
 		JSONArray featuresArray = featureJsonFile.getJSONArray("features");
 		JSONArray testcasesArray = featureJsonFile.getJSONArray("testcases");
 		for(int i = 0; i < featuresArray.size(); i++) {

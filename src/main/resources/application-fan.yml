@@ -16,10 +16,11 @@ server:
 
 data:
    projects:
-      config: src/main/resources/project/train-ticket.json
+#      config: src/main/resources/project/train-ticket.json
 #      config: src/main/resources/project/depends.json
+      config: src/main/resources/project/leveldb.json
    dynamic:
-      analyse: true
+      analyse: false
       dynamic_file_suffix: [.log]
       directory_root_path: src/main/resources/dynamic/javassist/train-ticket/logs
 #      directory_root_path: src/main/resources/dynamic/javassist/depends/logs

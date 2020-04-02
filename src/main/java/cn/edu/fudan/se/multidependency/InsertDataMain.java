@@ -1,8 +1,6 @@
 package cn.edu.fudan.se.multidependency;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -10,7 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONArray;
 
 import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
@@ -29,6 +27,7 @@ import cn.edu.fudan.se.multidependency.service.nospring.dynamic.FeatureAndTestCa
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.JavassistDynamicInserter;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.TraceStartExtractor;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
+import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
 import cn.edu.fudan.se.multidependency.utils.ProjectUtil.ProjectConfig;
 import cn.edu.fudan.se.multidependency.utils.ProjectUtil.RestfulAPIConfig;
@@ -70,16 +69,8 @@ public class InsertDataMain {
 			/**
 			 * 静态分析
 			 */
-			String projectsConfig = yaml.getProjectsConfig();
-			StringBuilder projectsJson = new StringBuilder();
-			try(BufferedReader reader = new BufferedReader(new FileReader(new File(projectsConfig)))) {
-				LOGGER.info("读入项目配置：" + projectsConfig);
-				String line = "";
-				while((line = reader.readLine()) != null) {
-					projectsJson.append(line);
-				}
-			}
-			Collection<ProjectConfig> projectConfig = ProjectUtil.extract(JSONObject.parseArray(projectsJson.toString()));
+			JSONArray projectsConfigArray = JSONUtil.extractJSONArray(new File(yaml.getProjectsConfig()));
+			Collection<ProjectConfig> projectConfig = ProjectUtil.extract(projectsConfigArray);
 			for(ProjectConfig config : projectConfig) {
 				DependsEntityRepoExtractor extractor = DependsEntityRepoExtractorImpl.getInstance();
 				extractor.setExcludes(config.getExcludes());
