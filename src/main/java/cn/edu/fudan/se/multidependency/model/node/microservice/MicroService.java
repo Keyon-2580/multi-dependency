@@ -37,7 +37,7 @@ public class MicroService implements Node {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("entityId", getEntityId() == null ? "" : getEntityId());
+		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("name", getName() == null ? "" : getName());
 		properties.put("serviceGroupName", getServiceGroupName() == null ? "" : getServiceGroupName());
 		return properties;

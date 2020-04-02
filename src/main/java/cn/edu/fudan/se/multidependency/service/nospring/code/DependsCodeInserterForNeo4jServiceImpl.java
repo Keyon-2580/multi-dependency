@@ -36,6 +36,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 		setCurrentEntityId(entityRepo.generateId().longValue());
 	}
 	
+	
 	protected EntityRepo entityRepo;
 	
 	protected abstract void addNodesWithContainRelations() throws LanguageErrorException;

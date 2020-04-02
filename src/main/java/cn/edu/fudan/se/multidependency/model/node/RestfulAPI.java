@@ -37,7 +37,7 @@ public class RestfulAPI implements Node {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("entity", getEntityId() == null ? -1 : getEntityId());
+		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("apiFunctionName", getApiFunctionName() == null ? "" : getApiFunctionName());
 		properties.put("apiFunctionSimpleName", getApiFunctionSimpleName() == null ? "" : getApiFunctionSimpleName());
 		properties.put("endPoint", getEndPoint() == null ? "" : getEndPoint());

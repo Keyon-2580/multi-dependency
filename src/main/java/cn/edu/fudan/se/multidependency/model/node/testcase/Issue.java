@@ -36,6 +36,7 @@ public class Issue implements Node {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
+		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("content", getContent() == null ? "" : getContent());
 		properties.put("issueId", getIssueId() == null ? "" : getIssueId());
 		properties.put("person", getPerson() == null ? "" : getPerson());

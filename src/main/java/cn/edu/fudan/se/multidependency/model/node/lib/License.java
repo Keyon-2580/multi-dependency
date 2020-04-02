@@ -34,7 +34,7 @@ public class License implements Node {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("entityId", getEntityId() == null ? -1L : getEntityId());
+		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("name", getName() == null ? "" : getName());
 		properties.put("version", getVersion() == null ? "" : getVersion());
 		return properties;

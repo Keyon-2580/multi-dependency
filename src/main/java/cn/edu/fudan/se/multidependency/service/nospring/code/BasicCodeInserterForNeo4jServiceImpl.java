@@ -50,13 +50,14 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForN
 		}
 		
 		if(restfulAPIFileExtractor != null) {
-			Iterable<RestfulAPI> apis = restfulAPIFileExtractor.extract();
 			MicroService currentProjectBelongToMicroService = null;
 			if(isMicroservice) {
 				currentProjectBelongToMicroService = this.getNodes().findMicroServiceByName(currentProject.getProjectName());
 			}
+			Iterable<RestfulAPI> apis = restfulAPIFileExtractor.extract();
 			for(RestfulAPI api : apis) {
 				api.setEntityId(generateEntityId());
+				System.out.println(generateEntityId());
 				addNode(api, currentProject);
 				
 				Contain projectContainAPI = new Contain(currentProject, api);

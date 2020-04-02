@@ -5,6 +5,7 @@ import cn.edu.fudan.se.multidependency.service.nospring.build.BuildInserterForNe
 import cn.edu.fudan.se.multidependency.service.nospring.code.BasicCodeInserterForNeo4jServiceImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.code.CppInsertServiceImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.code.JavaInsertServiceImpl;
+import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
 import depends.entity.repo.EntityRepo;
 
 public class InserterForNeo4jServiceFactory {
@@ -17,13 +18,13 @@ public class InserterForNeo4jServiceFactory {
 		return instance;
 	}
 	
-	public BasicCodeInserterForNeo4jServiceImpl createCodeInserterService(String projectPath, String projectName, 
-			EntityRepo entityRepo, Language language, boolean isMicroservice, String serviceGroupName) throws Exception {
-		switch(language) {
+	public BasicCodeInserterForNeo4jServiceImpl createCodeInserterService(EntityRepo entityRepo, ProjectUtil.ProjectConfig config) throws Exception {
+		switch(config.getLanguage()) {
 		case java:
-			return new JavaInsertServiceImpl(projectPath, projectName, entityRepo, language, isMicroservice, serviceGroupName);
+			return new JavaInsertServiceImpl(config.getPath(), config.getProject(), entityRepo, config.getLanguage(), config.isMicroService(), config.getServiceGroupName());
 		case cpp:
-			return new CppInsertServiceImpl(projectPath, projectName, entityRepo, language, isMicroservice, serviceGroupName);
+			return new CppInsertServiceImpl(config.getPath(), config.getProject(), entityRepo, config.getLanguage(), config.isMicroService(), config.getServiceGroupName());
+
 		}
 		throw new Exception("程序语言不为java或c/c++，提取失败");
 	}

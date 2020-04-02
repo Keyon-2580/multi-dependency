@@ -42,6 +42,7 @@ public class Project implements Node {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
+		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		properties.put("projectName", getProjectName() == null ? "" : getProjectName());
 		properties.put("projectPath", getProjectPath() == null ? "" : getProjectPath());

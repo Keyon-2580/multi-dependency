@@ -4,12 +4,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
@@ -29,6 +29,9 @@ import cn.edu.fudan.se.multidependency.service.nospring.dynamic.FeatureAndTestCa
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.JavassistDynamicInserter;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.TraceStartExtractor;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
+import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
+import cn.edu.fudan.se.multidependency.utils.ProjectUtil.ProjectConfig;
+import cn.edu.fudan.se.multidependency.utils.ProjectUtil.RestfulAPIConfig;
 import cn.edu.fudan.se.multidependency.utils.YamlUtil;
 import depends.entity.repo.EntityRepo;
 
@@ -76,47 +79,24 @@ public class InsertDataMain {
 					projectsJson.append(line);
 				}
 			}
-			
-			JSONArray projectsArray = JSONObject.parseArray(projectsJson.toString());
-			for(int i = 0; i < projectsArray.size(); i++) {
-				// 对每一个项目静态分析
-				JSONObject projectJson = projectsArray.getJSONObject(i);
-				Language language = Language.valueOf(projectJson.getString("language"));
-				String projectPath = projectJson.getString("path");
-				boolean isMicroservice = projectJson.getBooleanValue("isMicroservice");
-				String serviceGroupName = projectJson.getString("serviceGroupName");
-				serviceGroupName = serviceGroupName == null ? "" : serviceGroupName;
-				String projectName = projectJson.getString("project");
-				JSONArray excludesArray = projectJson.getJSONArray("excludes");
-				int excludesSize = excludesArray == null ? 0 : excludesArray.size();
-				String[] excludes = new String[excludesSize];
-				for(int j = 0; j < excludesSize; j++) {
-					excludes[j] = excludesArray.getString(j);
-				}
-				JSONObject restfulAPIs = projectJson.getJSONObject("restfulAPIs");
-				
-				LOGGER.info("静态分析，项目：" + projectName + "，语言：" + language);
-				
-				LOGGER.info("使用depends解析项目，项目路径：" + projectPath);
+			Collection<ProjectConfig> projectConfig = ProjectUtil.extract(JSONObject.parseArray(projectsJson.toString()));
+			for(ProjectConfig config : projectConfig) {
 				DependsEntityRepoExtractor extractor = DependsEntityRepoExtractorImpl.getInstance();
-				extractor.setExcludes(excludes);
-				extractor.setLanguage(language);
-				extractor.setProjectPath(projectPath);
+				extractor.setExcludes(config.getExcludes());
+				extractor.setLanguage(config.getLanguage());
+				extractor.setProjectPath(config.getPath());
+				extractor.setAutoInclude(config.isAutoInclude());
 				EntityRepo entityRepo = extractor.extractEntityRepo();
 				if (extractor.getEntityCount() > 0) {
 					BasicCodeInserterForNeo4jServiceImpl inserter = InserterForNeo4jServiceFactory.getInstance()
-							.createCodeInserterService(projectPath, projectName, entityRepo, language, isMicroservice, serviceGroupName);
-					if(restfulAPIs != null) {
-						if("swagger".equals(restfulAPIs.getString("framework"))) {
-							SwaggerJSON swagger = new SwaggerJSON();
-							swagger.setPath(restfulAPIs.getString("path"));
-							JSONArray excludeTags = restfulAPIs.getJSONArray("excludeTags");
-							for(int j = 0; j < excludeTags.size(); j++) {
-								swagger.addExcludeTag(excludeTags.getString(j));
-							}
-							RestfulAPIFileExtractor restfulAPIFileExtractorImpl = new RestfulAPIFileExtractorImpl(swagger);
-							inserter.setRestfulAPIFileExtractor(restfulAPIFileExtractorImpl);
-						}
+							.createCodeInserterService(entityRepo, config);
+					RestfulAPIConfig apiConfig = config.getApiConfig();
+					if(apiConfig != null && RestfulAPIConfig.FRAMEWORK_SWAGGER.equals(config.getApiConfig().getFramework())) {
+						SwaggerJSON swagger = new SwaggerJSON();
+						swagger.setPath(apiConfig.getPath());
+						swagger.setExcludeTags(apiConfig.getExcludeTags());
+						RestfulAPIFileExtractor restfulAPIFileExtractorImpl = new RestfulAPIFileExtractorImpl(swagger);
+						inserter.setRestfulAPIFileExtractor(restfulAPIFileExtractorImpl);
 					}
 					inserter.addNodesAndRelations();
 				}

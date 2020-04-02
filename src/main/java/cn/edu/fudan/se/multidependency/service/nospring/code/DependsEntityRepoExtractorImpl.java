@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.service.nospring.code;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +44,9 @@ public class DependsEntityRepoExtractorImpl implements DependsEntityRepoExtracto
 		return instance;
 	}
 	
+	@Setter
+	private boolean autoInclude;
+	
 	private EntityRepo entityRepo ;
 	private Inferer inferer;
     private PreprocessorHandler preprocessorHandler;
@@ -53,7 +57,7 @@ public class DependsEntityRepoExtractorImpl implements DependsEntityRepoExtracto
 	@Setter
 	private String projectPath;
 	@Setter
-	private String[] excludes;
+	private Collection<String> excludes;
 	
 	private String slash;
 
@@ -80,9 +84,11 @@ public class DependsEntityRepoExtractorImpl implements DependsEntityRepoExtracto
 	@Override
 	public EntityRepo extractEntityRepo() throws Exception {
 		slash = projectPath.contains("\\") ? "\\" : "/";
-		for(int i = 0; i < excludes.length; i++) {
-			excludes[i] = projectPath.concat(excludes[i].replace("/", slash));
+		List<String> newExcludes = new ArrayList<>();
+		for(String exclude : excludes) {
+			newExcludes.add(projectPath.concat(exclude.replace("/", slash)));
 		}
+		this.excludes = newExcludes;
 		if(Language.java == language) {
 			initJavaExtractor();
 		} else {
@@ -147,7 +153,7 @@ public class DependsEntityRepoExtractorImpl implements DependsEntityRepoExtracto
     	            fileParser = new JavaFileParser(fileFullPath, entityRepo, inferer);
     	            break;
             	case cpp:
-            		fileParser = new CdtCppFileParser(fileFullPath,entityRepo,preprocessorHandler,inferer, macroRepo);
+            		fileParser = new CdtCppFileParser(fileFullPath, entityRepo, preprocessorHandler, inferer, macroRepo);
             		break;
             	default:
             		throw new LanguageErrorException(language.toString());
