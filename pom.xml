@@ -91,7 +91,7 @@
 			<artifactId>depends</artifactId>
 			<version>0.9.6</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/depends-0.9.6.jar</systemPath>
+			<systemPath>${project.basedir}/lib/depends-0.9.6-jar-with-dependencies.jar</systemPath>
 			<!-- <systemPath>${project.basedir}/lib/depends.jar</systemPath> -->
 			<!-- <exclusions>
 				<exclusion>
@@ -134,7 +134,7 @@
 			<artifactId>fastjson</artifactId>
 			<version>1.2.62</version>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 		    <groupId>org.antlr</groupId>
 		    <artifactId>antlr4-runtime</artifactId>
 		    <version>4.7.2</version>
@@ -154,7 +154,7 @@
 		    <artifactId>plexus-utils</artifactId>
 		    <version>3.0</version>
 		</dependency>
-		  <dependency>
+		<dependency>
 			<groupId>org.eclipse.cdt</groupId>
 			<artifactId>org.eclipse.cdt.core</artifactId>
 			<version>6.9.0.201909091953</version>
@@ -209,7 +209,7 @@
 			<version>3.13.500.v20190819-0800</version>
 			<scope>system</scope>
 			<systemPath>${project.basedir}/lib/org.eclipse.core.resources_3.13.500.v20190819-0800.jar</systemPath>
-		</dependency>
+		</dependency> -->
 		<dependency>
 		    <groupId>org.projectlombok</groupId>
 		    <artifactId>lombok</artifactId>

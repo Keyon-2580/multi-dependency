@@ -1,10 +1,12 @@
 [
 	{
 		"path": "D:\\multiple-dependency-project\\leveldb-1.22",
-		"project": "leveldb",
+		"project": "leveldb-1.22",
 		"language": "cpp",
 		"isMicroservice": false,
 		"excludes" : [
+		],
+		"includeDirs" : [
 		],
 		"autoInclude" : true
 	}

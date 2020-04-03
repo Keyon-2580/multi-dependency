@@ -1,5 +1,9 @@
 package cn.edu.fudan.se.multidependency.service.nospring.code;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import cn.edu.fudan.se.multidependency.InsertDataMain;
 import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
@@ -23,6 +27,8 @@ import depends.entity.repo.EntityRepo;
 
 public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CppInsertServiceImpl.class);
+	
 	public CppInsertServiceImpl(String projectPath, String projectName, EntityRepo entityRepo, Language language,
 			boolean isMicroservice, String serviceGroupName) {
 		super(projectPath, projectName, entityRepo, language, isMicroservice, serviceGroupName);
@@ -67,6 +73,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				Contain containFile = new Contain(pck, file);
 				addRelation(containFile);
 			} else if (entity instanceof FunctionEntity) {
+				LOGGER.info(entity.getClass().toString() + " " + entity.getQualifiedName());
 				Function function = new Function();
 				String functionName = entity.getQualifiedName();
 				function.setFunctionName(functionName);

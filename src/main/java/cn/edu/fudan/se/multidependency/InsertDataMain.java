@@ -22,6 +22,7 @@ import cn.edu.fudan.se.multidependency.service.nospring.code.DependsEntityRepoEx
 import cn.edu.fudan.se.multidependency.service.nospring.code.RestfulAPIFileExtractor;
 import cn.edu.fudan.se.multidependency.service.nospring.code.RestfulAPIFileExtractorImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.code.SwaggerJSON;
+import cn.edu.fudan.se.multidependency.service.nospring.code.TestDepends;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.CppDynamicInserter;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.FeatureAndTestCaseFromJSONFileForMicroserviceInserter;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.JavassistDynamicInserter;
@@ -72,12 +73,27 @@ public class InsertDataMain {
 			JSONArray projectsConfigArray = JSONUtil.extractJSONArray(new File(yaml.getProjectsConfig()));
 			Collection<ProjectConfig> projectConfig = ProjectUtil.extract(projectsConfigArray);
 			for(ProjectConfig config : projectConfig) {
-				DependsEntityRepoExtractor extractor = DependsEntityRepoExtractorImpl.getInstance();
+				Language language = config.getLanguage();
+				DependsEntityRepoExtractor extractor = null;
+				switch(language) {
+				case cpp:
+//					extractor = DependsEntityRepoExtractorImpl.getInstance();
+					extractor = TestDepends.getInstance();
+					break;
+				case java:
+					extractor = TestDepends.getInstance();
+//					extractor = DependsEntityRepoExtractorImpl.getInstance();
+					break;
+				default:
+					throw new Exception();
+				}
+				extractor.setIncludeDirs(config.includeDirsArray());
 				extractor.setExcludes(config.getExcludes());
 				extractor.setLanguage(config.getLanguage());
 				extractor.setProjectPath(config.getPath());
 				extractor.setAutoInclude(config.isAutoInclude());
 				EntityRepo entityRepo = extractor.extractEntityRepo();
+				System.out.println(extractor.getEntityCount());
 				if (extractor.getEntityCount() > 0) {
 					BasicCodeInserterForNeo4jServiceImpl inserter = InserterForNeo4jServiceFactory.getInstance()
 							.createCodeInserterService(entityRepo, config);
@@ -131,6 +147,7 @@ public class InsertDataMain {
 			// 所有步骤中有一个出错，都会终止执行
 			e.printStackTrace();
 		}
+		System.exit(0);
 	}
 	
 	/**

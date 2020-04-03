@@ -23,4 +23,6 @@ public interface DependsEntityRepoExtractor {
 	int getEntityCount();
 	
 	void setAutoInclude(boolean autoInclude);
+	
+	void setIncludeDirs(String[] includeDirs);
 }

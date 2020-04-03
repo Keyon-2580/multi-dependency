@@ -46,7 +46,9 @@ public class DependsEntityRepoExtractorImpl implements DependsEntityRepoExtracto
 	
 	@Setter
 	private boolean autoInclude;
-	
+
+	@Setter
+	private String[] includeDirs;
 	private EntityRepo entityRepo ;
 	private Inferer inferer;
     private PreprocessorHandler preprocessorHandler;
