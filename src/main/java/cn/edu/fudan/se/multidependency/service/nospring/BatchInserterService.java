@@ -11,6 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.Label;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
@@ -20,6 +22,9 @@ import cn.edu.fudan.se.multidependency.model.relation.Relations;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
 public class BatchInserterService implements Closeable {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(BatchInserterService.class);
+	
 	private BatchInserterService() {}
 	private static BatchInserterService instance = new BatchInserterService();
 	public static BatchInserterService getInstance() {
@@ -53,7 +58,12 @@ public class BatchInserterService implements Closeable {
 	}
 	
 	public Long insertRelation(Relation relation) {
-		relation.setId(inserter.createRelationship(relation.getStartNodeGraphId(), relation.getEndNodeGraphId(), relation.getRelationType(), relation.getProperties()));
+		try {
+			relation.setId(inserter.createRelationship(relation.getStartNodeGraphId(), relation.getEndNodeGraphId(), relation.getRelationType(), relation.getProperties()));
+		} catch (NullPointerException e) {
+			LOGGER.error(relation.getStartNodeGraphId() + " " + relation.getRelationType() + " " + relation.getEndNodeGraphId());
+			throw e;
+		}
 		return relation.getId();
 	}
 

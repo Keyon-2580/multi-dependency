@@ -1,6 +1,5 @@
 package cn.edu.fudan.se.multidependency.service.nospring.code;
 
-import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Package;
@@ -30,7 +29,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 	}
 
 	@Override
-	protected void addNodesWithContainRelations() throws LanguageErrorException {
+	protected void addNodesWithContainRelations() {
 		final String projectPath = currentProject.getProjectPath();
 		entityRepo.entityIterator().forEachRemaining(entity -> {
 			// 每个entity对应相应的node
@@ -53,6 +52,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				addNode(file, currentProject);
 			} else if(entity instanceof FunctionEntity) {
 				Function function = new Function();
+//				function.setImpl(true);
 				String functionName = entity.getQualifiedName();
 				if(functionName.contains(".")) {
 					String[] functionNameSplit = functionName.split("\\.");
@@ -129,7 +129,6 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				parentEntity = parentEntity.getParent();
 			}
 			ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.ProjectFile, parentEntity.getId().longValue(), currentProject);
-			type.setInFilePath(file.getPath());
 			Contain fileContainsType = new Contain(file, type);
 			addRelation(fileContainsType);
 		});
@@ -143,7 +142,6 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				parentEntity = parentEntity.getParent();
 			}
 			Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentEntity.getId().longValue(), currentProject);
-			function.setInFilePath(type.getInFilePath());
 			Contain typeContainsFunction = new Contain(type, function);
 			addRelation(typeContainsFunction);
 			for(VarEntity varEntity : functionEntity.getParameters()) {
@@ -168,12 +166,10 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			Entity parentEntity = varEntity.getParent();
 			if(parentEntity instanceof FunctionEntity) {
 				Function function = (Function) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, parentEntity.getId().longValue(), currentProject);
-				variable.setInFilePath(function.getInFilePath());
 				Contain functionContainsVariable = new Contain(function, variable);
 				addRelation(functionContainsVariable);
 			} else if(parentEntity.getClass() == TypeEntity.class) {
 				Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentEntity.getId().longValue(), currentProject);
-				variable.setInFilePath(type.getInFilePath());
 				Contain typeContainsVariable = new Contain(type, variable);
 				addRelation(typeContainsVariable);
 			} else {
@@ -184,7 +180,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 	}
 	
 	@Override
-	protected void addRelations() throws LanguageErrorException {
+	protected void addRelations() {
 		extractRelationsFromTypes();
 		extractRelationsFromFunctions();
 		extractRelationsFromVariables();		

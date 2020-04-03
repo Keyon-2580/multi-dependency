@@ -3,14 +3,14 @@ package cn.edu.fudan.se.multidependency.model.node.code;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.neo4j.ogm.annotation.GeneratedValue;
+import org.neo4j.ogm.annotation.Id;
+import org.neo4j.ogm.annotation.NodeEntity;
+
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.NodeEntity;
 
 @NodeEntity
 @Data
@@ -26,10 +26,13 @@ public class Namespace implements Node {
     private String namespaceName;
     
     private Long entityId;
-    
+
 	@Override
 	public Map<String, Object> getProperties() {
-		return new HashMap<>();
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
+		properties.put("namespaceName", getNamespaceName() == null ? "" : getNamespaceName());
+		return properties;
 	}
 
 	@Override

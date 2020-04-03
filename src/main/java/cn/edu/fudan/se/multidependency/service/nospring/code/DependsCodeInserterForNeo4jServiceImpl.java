@@ -3,7 +3,6 @@ package cn.edu.fudan.se.multidependency.service.nospring.code;
 import java.util.Collection;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
@@ -12,6 +11,8 @@ import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCastType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionImplLinkFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionImplementFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionParameterType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionReturnType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionThrowType;
@@ -36,12 +37,11 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 		setCurrentEntityId(entityRepo.generateId().longValue());
 	}
 	
-	
 	protected EntityRepo entityRepo;
 	
-	protected abstract void addNodesWithContainRelations() throws LanguageErrorException;
+	protected abstract void addNodesWithContainRelations();
 	
-	protected abstract void addRelations() throws LanguageErrorException;
+	protected abstract void addRelations();
 	
 	@Override
 	public void addNodesAndRelations() throws Exception {
@@ -147,17 +147,11 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(id.intValue());
 //			System.out.println("------------------");
 			functionEntity.getRelations().forEach(relation -> {
+//				System.out.println(functionEntity.getQualifiedName() + " " + relation.getType() + " " + relation.getEntity().getQualifiedName());
 				switch(relation.getType()) {
 				case DependencyType.CALL:
-//					System.out.println("function call" + relation.getEntity().getClass() + " " + relation.getEntity());
+//					System.out.println(functionEntity.getQualifiedName() + " " + relation.getType() + " " + relation.getEntity().getQualifiedName());
 					if(relation.getEntity() instanceof FunctionEntity) {
-						/*if(functionEntity.getQualifiedName().contains("JavaListener.enterConstructorDeclaration")) {
-							System.out.println(functionEntity);
-							System.out.println(relation.getEntity().getQualifiedName() + " " + ((FunctionEntity) relation.getEntity()).getParameters());
-							for(VarEntity varEntity : ((FunctionEntity) relation.getEntity()).getParameters()) {
-								System.out.println(varEntity.getType());
-							}
-						}*/
 						// call其它方法
 						Function other = (Function) functions.get(relation.getEntity().getId().longValue());
 						if(other != null) {
@@ -207,7 +201,29 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 						addRelation(functionCastType);
 					}
 					break;
+				case DependencyType.IMPLEMENT:
+					Node implementNode = this.getNodes().findNodeByEntityIdInProject(relation.getEntity().getId().longValue(), currentProject);
+					if(implementNode != null && implementNode instanceof Function) {
+						Function implementFunction = (Function) implementNode;
+						FunctionImplementFunction functionImplementFunction = new FunctionImplementFunction(function, implementFunction);
+						addRelation(functionImplementFunction);
+					}
+					break;
+				case DependencyType.IMPLLINK:
+					Node impllinkNode = this.getNodes().findNodeByEntityIdInProject(relation.getEntity().getId().longValue(), currentProject);
+					if(impllinkNode != null) {
+						System.out.println(impllinkNode.getClass());
+					} else {
+						System.out.println(relation.getEntity().getClass());
+					}
+					if(impllinkNode != null && impllinkNode instanceof Function) {
+						Function implLinkFunction = (Function) impllinkNode;
+						FunctionImplLinkFunction functionImplLinkFunction = new FunctionImplLinkFunction(function, implLinkFunction);
+						addRelation(functionImplLinkFunction);
+					}
+					break;
 				default:
+//					System.out.println(functionEntity.getQualifiedName() + " " + relation.getType() + " " + relation.getEntity().getQualifiedName());
 					break;
 				}
 			});

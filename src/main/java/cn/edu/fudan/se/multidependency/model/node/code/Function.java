@@ -42,6 +42,8 @@ public class Function implements Node {
 	private boolean contrustor;
 	
 	private String inFilePath;
+	
+	private boolean impl;
 
 	/**
 	 * 插入时使用这个，因为用BatchInserter的时候插入这个会转成字符串插入，用SDN读取时对应不到这个List
@@ -65,6 +67,7 @@ public class Function implements Node {
 		properties.put("constructor", isContrustor());
 		properties.put("inFilePath", getInFilePath() == null ? "" : getInFilePath());
 		properties.put("simpleName", getSimpleName() == null ? "" : getSimpleName());
+		properties.put("impl", isImpl());
 		return properties;
 	}
 	

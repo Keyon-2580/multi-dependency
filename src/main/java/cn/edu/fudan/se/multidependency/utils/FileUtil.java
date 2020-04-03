@@ -65,7 +65,7 @@ public class FileUtil {
 	 * @return
 	 */
 	public static String extractFileName(String filePath) {
-		LOGGER.info("extractFileName " + filePath);
+//		LOGGER.info("extractFileName " + filePath);
 		if(filePath.contains("\\")) {
 			return filePath.substring(filePath.lastIndexOf("\\") + 1);
 		} else if(filePath.contains("/")) {
