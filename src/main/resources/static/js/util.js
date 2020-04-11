@@ -87,7 +87,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    		{
 	    			selector: 'node[type="TestCase"]',
 	    			style: {
-	    				'shape' : 'rectangle',
+	    				'shape' : 'hexagon',
 	    				'width': 'data(length)',
 	    				'height': 30,
 	    				'text-valign': 'center',
