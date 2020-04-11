@@ -1,9 +1,5 @@
 package cn.edu.fudan.se.multidependency.service.nospring.code;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Package;
@@ -15,6 +11,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileIncludeFile;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
+import cn.edu.fudan.se.multidependency.utils.ProjectUtil.ProjectConfig;
 import depends.entity.AliasEntity;
 import depends.entity.Entity;
 import depends.entity.FileEntity;
@@ -34,11 +31,10 @@ import depends.entity.repo.EntityRepo;
  */
 public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CppInsertServiceImpl.class);
+//	private static final Logger LOGGER = LoggerFactory.getLogger(CppInsertServiceImpl.class);
 	
-	public CppInsertServiceImpl(String projectPath, String projectName, EntityRepo entityRepo, Language language,
-			boolean isMicroservice, String serviceGroupName) {
-		super(projectPath, projectName, entityRepo, language, isMicroservice, serviceGroupName);
+	public CppInsertServiceImpl(EntityRepo entityRepo, ProjectConfig projectConfig) {
+		super(entityRepo, projectConfig);
 	}
 	
 	@Override
@@ -66,7 +62,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				String directoryPath = FileUtil.extractDirectoryFromFile(entity.getQualifiedName()) + "/";
 				directoryPath = directoryPath.replace("\\", "/");
 				directoryPath = directoryPath.substring(directoryPath.indexOf(projectPath + "/"));
-				Package pck = this.getNodes().findPackageByPackageName(directoryPath, currentProject);
+				Package pck = this.getNodes().findPackageByDirectoryPath(directoryPath, currentProject);
 				if (pck == null) {
 					pck = new Package();
 					pck.setEntityId(entityRepo.generateId().longValue());
@@ -80,26 +76,17 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				addRelation(containFile);
 			} else if (entity instanceof FunctionEntity) {
 				Function function = new Function();
-				String functionName = entity.getQualifiedName();
-				function.setFunctionName(functionName);
+				function.setFunctionName(entity.getDisplayName());
 				function.setEntityId(entity.getId().longValue());
 				function.setImpl(entity.getClass() == FunctionEntityImpl.class);
-				/*if(functionName.contains(".")) {
-					String[] functionNameSplit = functionName.split("\\.");
-					if(functionNameSplit.length >= 2) {
-						function.setContrustor(functionNameSplit[functionNameSplit.length - 1].equals(functionNameSplit[functionNameSplit.length - 2]));
-					}
-					function.setSimpleName(functionName.substring(functionName.lastIndexOf(".")));
-				} else {
-					function.setSimpleName(functionName);
-				}*/
-				function.setSimpleName(functionName);
+				function.setSimpleName(entity.getRawName().getName());
 				addNode(function, currentProject);
 			} else if (entity instanceof VarEntity) {
 				Variable variable = new Variable();
 				variable.setEntityId(entity.getId().longValue());
 				variable.setVariableName(entity.getQualifiedName());
 				variable.setTypeIdentify(((VarEntity) entity).getRawType().getName());
+				variable.setSimpleName(entity.getRawName().getName());
 				addNode(variable, currentProject);
 			} else if (entity.getClass() == TypeEntity.class) {
 				if (this.getNodes().findNodeByEntityIdInProject(entity.getId().longValue(), currentProject) == null) {
@@ -131,19 +118,12 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			Namespace namespace = (Namespace) node;
 			PackageEntity packageEntity = (PackageEntity) entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = packageEntity.getParent();
-			if(parentEntity != null) {
-				while (!(parentEntity instanceof FileEntity)) {
-					parentEntity = parentEntity.getParent();
-					if (parentEntity == null) {
-						LOGGER.error("namespace's parentEntity is null " + namespace.toString());
-						return;
-					}
-				}
-				Node parentNode = this.getNodes().findNodeByEntityIdInProject(parentEntity.getId().longValue(), currentProject);
-				Contain contain = new Contain(parentNode, namespace);
-				addRelation(contain);
-			} else {
+			while (parentEntity != null && !(parentEntity instanceof FileEntity)) {
+				parentEntity = parentEntity.getParent();
 			}
+			Node parentNode = findNodeByEntityIdInProject(parentEntity);
+			Contain contain = new Contain(parentNode, namespace);
+			addRelation(contain);
 		});
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject).forEach((entityId, node) -> {
 			Type type = (Type) node;
@@ -152,23 +132,20 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			while (parentEntity != null && !(parentEntity instanceof FileEntity || parentEntity instanceof PackageEntity)) {
 				/// FIXME 内部类的情况暂不考虑
 				parentEntity = parentEntity.getParent();
-				if (parentEntity == null) {
-					System.out.println("parentEntity is null");
-					return;
-				}
 			}
-			Node parentNode = this.getNodes().findNodeByEntityIdInProject(parentEntity.getId().longValue(), currentProject);
+			Node parentNode = findNodeByEntityIdInProject(parentEntity);
 			Contain contain = new Contain(parentNode, type);
 			addRelation(contain);
 		});
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Function, currentProject).forEach((entityId, node) -> {
 			Function function = (Function) node;
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(entityId.intValue());
+//			System.out.println(functionEntity.getQualifiedName() + " " + functionEntity.getDisplayName() + " " + functionEntity.getRawName().getName());
 			Entity parentEntity = functionEntity.getParent();
 			while(parentEntity != null && !(parentEntity.getClass() == TypeEntity.class || parentEntity instanceof FileEntity || parentEntity instanceof PackageEntity)) {
 				parentEntity = parentEntity.getParent();
 			}
-			Node parentNode = this.getNodes().findNodeByEntityIdInProject(parentEntity.getId().longValue(), currentProject);
+			Node parentNode = findNodeByEntityIdInProject(parentEntity);
 			Contain contain = new Contain(parentNode, function);
 			addRelation(contain);
 			// 方法的参数
@@ -192,7 +169,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 						|| parentEntity instanceof PackageEntity || parentEntity instanceof FunctionEntity)) {
 				parentEntity = parentEntity.getParent();
 			}
-			Node parentNode = this.getNodes().findNodeByEntityIdInProject(parentEntity.getId().longValue(), currentProject);
+			Node parentNode = findNodeByEntityIdInProject(parentEntity);
 			Contain contain = new Contain(parentNode, variable);
 			addRelation(contain);
 		});

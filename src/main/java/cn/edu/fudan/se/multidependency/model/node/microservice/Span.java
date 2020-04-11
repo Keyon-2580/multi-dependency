@@ -31,8 +31,6 @@ public class Span implements Node {
     
     private String spanId;
     
-    private String serviceName;
-    
     private String operationName;
     
 	private Long time;
@@ -51,7 +49,7 @@ public class Span implements Node {
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("spanId", getSpanId() == null ? "" : getSpanId());
 		properties.put("traceId", getTraceId() == null ? "" : getTraceId());
-		properties.put("serviceName", getServiceName() == null ? "" : getServiceName());
+//		properties.put("serviceName", getServiceName() == null ? "" : getServiceName());
 		properties.put("time", getTime() == null ? -1L : getTime());
 		properties.put("operationName", getOperationName() == null ? "" : getOperationName());
 		properties.put("order", getOrder() == null ? -1 : getOrder());

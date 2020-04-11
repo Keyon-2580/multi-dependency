@@ -144,11 +144,11 @@ public class Nodes {
 		return result;
 	}
 	
-	public Package findPackageByPackageName(String packageName, Project project) {
+	public Package findPackageByDirectoryPath(String directoryPath, Project project) {
 		@SuppressWarnings("unchecked")
 		Map<Long, Package> packages = (Map<Long, Package>) findNodesByNodeTypeInProject(NodeLabelType.Package, project);
 		for(Package pck : packages.values()) {
-			if(pck.getPackageName().equals(packageName)) {
+			if(pck.getDirectoryPath().equals(directoryPath)) {
 				return pck;
 			}
 		}

@@ -41,7 +41,9 @@ public enum RelationType implements RelationshipType {
 	TRACE_RUN_WITH_FUNCTION(RelationType.str_TRACE_RUN_WITH_FUNCTION),
 	
 	FILE_DEPEND_ON_FILE(RelationType.str_FILE_DEPEND_ON_FILE),
-	SPAN_INSTANCE_OF_RESTFUL_API(RelationType.str_SPAN_INSTANCE_OF_RESTFUL_API);
+	SPAN_INSTANCE_OF_RESTFUL_API(RelationType.str_SPAN_INSTANCE_OF_RESTFUL_API),
+	
+	MICROSERVICE_DEPEND_ON_MICROSERVICE(RelationType.str_MICROSERVICE_DEPEND_ON_MICROSERVICE);
 	
 	/**
 	 * 结构关系
@@ -88,6 +90,7 @@ public enum RelationType implements RelationshipType {
 	public static final String str_TRACE_RUN_WITH_FUNCTION = "TRACE_RUN_WITH_FUNCTION";
 	
 	public static final String str_MICROSERVICE_CALL_MICROSERVICE = "MICROSERVICE_CALL_MICROSERVICE";
+	public static final String str_MICROSERVICE_DEPEND_ON_MICROSERVICE = "MICROSERVICE_DEPEND_ON_MICROSERVICE";
 	public static final String str_FILE_DEPEND_ON_FILE = "FILE_DEPEND_ON_FILE";
 
 	private String name;

@@ -12,6 +12,7 @@ public class JavaDynamicFunctionExecution extends DynamicFunctionExecution {
 	protected Long order;
 	protected Long depth;
 	protected List<String> parameters = new ArrayList<>();
+	protected boolean constructor;
 	public void addParameter(String parameter) {
 		this.parameters.add(parameter);
 	}

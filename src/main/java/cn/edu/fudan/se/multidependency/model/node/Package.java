@@ -28,20 +28,22 @@ public class Package implements Node {
     @GeneratedValue
     private Long id;
     
-	private String packageName;
+    private String directoryPath;
 	
-	private String directoryPath;
+    private String packageName;
 
     private Long entityId;
 
 	private static final long serialVersionUID = -4892461872164624064L;
+	
+	public static final String JAVA_PACKAGE_DEFAULT = "default";
 
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("packageName", getPackageName() == null ? "" : getPackageName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("directoryPath", getDirectoryPath() == null ? "" : getDirectoryPath());
+		properties.put("packageName", getPackageName() == null ? "" : getPackageName());
 		return properties;
 	}
 

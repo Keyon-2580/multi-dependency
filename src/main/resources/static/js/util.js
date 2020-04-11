@@ -83,6 +83,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    		{
 	    			selector: 'node[type="noMicroService"]',
 	    			style: {
+	    			    'shape': 'triangle',
 	    				'height': nodeSize,
 	    				'width': nodeSize,
 	    				'background-color': 'black',

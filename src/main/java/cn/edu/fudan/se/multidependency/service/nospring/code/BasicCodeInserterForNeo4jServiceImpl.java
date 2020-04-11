@@ -1,11 +1,15 @@
 package cn.edu.fudan.se.multidependency.service.nospring.code;
 
-import cn.edu.fudan.se.multidependency.model.Language;
+import org.apache.commons.lang3.StringUtils;
+
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
+import cn.edu.fudan.se.multidependency.utils.ProjectUtil.ProjectConfig;
+import depends.entity.Entity;
 import lombok.Setter;
 
 /**
@@ -14,15 +18,21 @@ import lombok.Setter;
  */
 public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForNodesAndRelationsImpl {
 	
-	public BasicCodeInserterForNeo4jServiceImpl(String projectPath, String projectName, 
-			Language language, boolean isMicroservice, String serviceGroupName) {
+	public BasicCodeInserterForNeo4jServiceImpl(ProjectConfig projectConfig) {
 		super();
-		this.isMicroservice = isMicroservice;
-		this.serviceGroupName = serviceGroupName;
-		this.currentProject = new Project(projectName, "/" + projectName, language);
+		this.isMicroservice = projectConfig.isMicroService();
+		this.serviceGroupName = projectConfig.getServiceGroupName();
+		this.currentProject = new Project(projectConfig.getProject(), "/" + projectConfig.getProject(), projectConfig.getLanguage());
+		this.microserviceName = projectConfig.getMicroserviceName();
+		if(StringUtils.isBlank(microserviceName)) {
+			this.microserviceName = projectConfig.getProject();
+		}
+		this.currentProject.setMicroserviceName(microserviceName);
 	}
 
 	protected Project currentProject;
+	
+	protected String microserviceName;
 	
 	protected boolean isMicroservice;
 	
@@ -37,11 +47,11 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForN
 		addNode(currentProject, currentProject);
 		if(isMicroservice) {
 			// 被分析的项目是微服务项目，生成一个MicroService节点
-			MicroService microService = this.getNodes().findMicroServiceByName(currentProject.getProjectName());
+			MicroService microService = this.getNodes().findMicroServiceByName(microserviceName);
 			if(microService == null) {
 				microService = new MicroService();
 				microService.setEntityId(generateEntityId().longValue());
-				microService.setName(currentProject.getProjectName());
+				microService.setName(microserviceName);
 				microService.setServiceGroupName(serviceGroupName);
 				addNode(microService, null);
 			}
@@ -52,16 +62,14 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForN
 		if(restfulAPIFileExtractor != null) {
 			MicroService currentProjectBelongToMicroService = null;
 			if(isMicroservice) {
-				currentProjectBelongToMicroService = this.getNodes().findMicroServiceByName(currentProject.getProjectName());
+				currentProjectBelongToMicroService = this.getNodes().findMicroServiceByName(microserviceName);
 			}
 			Iterable<RestfulAPI> apis = restfulAPIFileExtractor.extract();
 			for(RestfulAPI api : apis) {
 				api.setEntityId(generateEntityId());
 				addNode(api, currentProject);
-				
 				Contain projectContainAPI = new Contain(currentProject, api);
 				addRelation(projectContainAPI);
-				
 				if(currentProjectBelongToMicroService != null) {
 					Contain microServiceContainAPI = new Contain(currentProjectBelongToMicroService, api);
 					addRelation(microServiceContainAPI);
@@ -70,5 +78,10 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForN
 			
 		}
 	}
-	
+	protected Node findNodeByEntityIdInProject(Entity entity) {
+		if(entity == null) {
+			return null;
+		}
+		return this.getNodes().findNodeByEntityIdInProject(entity.getId().longValue(), currentProject);
+	}
 }

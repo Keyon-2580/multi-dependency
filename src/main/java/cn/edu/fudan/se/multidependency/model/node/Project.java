@@ -6,6 +6,7 @@ import java.util.Map;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Transient;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import lombok.Data;
@@ -29,6 +30,9 @@ public class Project implements Node {
 	private String projectPath;
 
 	private String language;
+	
+	@Transient
+	private String microserviceName;
 
 	private Long entityId;
 	

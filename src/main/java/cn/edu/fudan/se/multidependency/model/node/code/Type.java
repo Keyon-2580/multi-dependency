@@ -24,8 +24,6 @@ public class Type implements Node {
 
 	private String typeName;
 	
-	private String packageName;
-	
 	private String aliasName;
 	
     private Long entityId;
@@ -36,7 +34,6 @@ public class Type implements Node {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("typeName", getTypeName() == null ? "" : getTypeName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
-		properties.put("packageName", getPackageName() == null ? "" : getPackageName());
 		properties.put("aliasName", getAliasName() == null ? (getTypeName() == null ? "" : getTypeName()) : getAliasName());
 		return properties;
 	}

@@ -1,6 +1,9 @@
 package cn.edu.fudan.se.multidependency.service.nospring.code;
 
-import cn.edu.fudan.se.multidependency.model.Language;
+import java.util.HashMap;
+import java.util.Map;
+
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
@@ -12,6 +15,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFuncti
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportVariable;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
+import cn.edu.fudan.se.multidependency.utils.ProjectUtil.ProjectConfig;
 import depends.entity.Entity;
 import depends.entity.FileEntity;
 import depends.entity.FunctionEntity;
@@ -23,9 +27,8 @@ import depends.relations.Inferer;
 
 public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl {
 
-	public JavaInsertServiceImpl(String projectPath, String projectName, EntityRepo entityRepo, Language language,
-			boolean isMicroservice, String serviceGroupName) {
-		super(projectPath, projectName, entityRepo, language, isMicroservice, serviceGroupName);
+	public JavaInsertServiceImpl(EntityRepo entityRepo, ProjectConfig projectConfig) {
+		super(entityRepo, projectConfig);
 	}
 
 	@Override
@@ -34,12 +37,6 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 		entityRepo.entityIterator().forEachRemaining(entity -> {
 			// 每个entity对应相应的node
 			if(entity instanceof PackageEntity) {
-				Package pck = new Package();
-				pck.setPackageName(entity.getQualifiedName());
-				pck.setEntityId(entity.getId().longValue());
-				addNode(pck, currentProject);
-				Contain projectContainsPackage = new Contain(currentProject, pck);
-				addRelation(projectContainsPackage);
 			} else if(entity instanceof FileEntity) {
 				ProjectFile file = new ProjectFile();
 				file.setEntityId(entity.getId().longValue());
@@ -52,17 +49,15 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				addNode(file, currentProject);
 			} else if(entity instanceof FunctionEntity) {
 				Function function = new Function();
-//				function.setImpl(true);
+				function.setImpl(true);
 				String functionName = entity.getQualifiedName();
 				if(functionName.contains(".")) {
 					String[] functionNameSplit = functionName.split("\\.");
 					if(functionNameSplit.length >= 2) {
 						function.setContrustor(functionNameSplit[functionNameSplit.length - 1].equals(functionNameSplit[functionNameSplit.length - 2]));
 					}
-					function.setSimpleName(functionName.substring(functionName.lastIndexOf(".") + 1));
-				} else {
-					function.setSimpleName(functionName);
 				}
+				function.setSimpleName(entity.getRawName().getName());
 				function.setFunctionName(functionName);
 				function.setEntityId(entity.getId().longValue());
 				addNode(function, currentProject);
@@ -71,6 +66,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				variable.setEntityId(entity.getId().longValue());
 				variable.setTypeIdentify(((VarEntity) entity).getRawType().getName());
 				variable.setVariableName(entity.getQualifiedName());
+				variable.setSimpleName(entity.getRawName().getName());
 				addNode(variable, currentProject);
 			} else if(entity.getClass() == TypeEntity.class) {
 				Type type = new Type();
@@ -79,70 +75,63 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				addNode(type, currentProject);
 			}
 		});
+		// Package到File的包含关系
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.ProjectFile, currentProject).forEach((entityId, node) -> {
+			// 目录
 			ProjectFile codeFile = (ProjectFile) node;
-			Contain packageContainFile = new Contain();
-			packageContainFile.setEnd(codeFile);
-			// 在java中，文件上面是包，若包不存在，则将该文件的包设为当前目录
-			Entity fileEntity = entityRepo.getEntity(entityId.intValue());
-			Entity parentEntity = fileEntity.getParent();
-			Package pck = null;
-			if(parentEntity == null) {
-				String filePath = codeFile.getPath();
-				String packagePath = FileUtil.extractDirectoryFromFile(filePath) + "/";
-				packagePath = packagePath.replace("\\", "/");
-				packagePath = packagePath.substring(packagePath.indexOf(projectPath + "/"));
-				pck = this.getNodes().findPackageByPackageName(packagePath, currentProject);
-				if(pck == null) {
-					pck = new Package();
-					pck.setEntityId(entityRepo.generateId().longValue());
-					pck.setPackageName(packagePath);
-					pck.setDirectoryPath(packagePath);
-					addNode(pck, currentProject);
-					Contain projectContainsPackage = new Contain(currentProject, pck);
-					addRelation(projectContainsPackage);
-				}
-			} else {
-				pck = (Package) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Package, parentEntity.getId().longValue(), currentProject);
-				String packagePath = FileUtil.extractDirectoryFromFile(fileEntity.getQualifiedName());
-				packagePath = packagePath.replace("\\", "/");
-				packagePath = packagePath.substring(packagePath.indexOf(projectPath + "/"));
-				pck.setDirectoryPath(packagePath);
+			FileEntity fileEntity = (FileEntity) entityRepo.getEntity(entityId.intValue());
+			// 文件所在目录
+			String directoryPath = FileUtil.extractDirectoryFromFile(fileEntity.getQualifiedName()) + "/";
+			directoryPath = directoryPath.replace("\\", "/");
+			directoryPath = directoryPath.substring(directoryPath.indexOf(projectPath + "/"));
+			Package pck = this.getNodes().findPackageByDirectoryPath(directoryPath, currentProject);
+			if (pck == null) {
+				pck = new Package();
+				pck.setDirectoryPath(directoryPath);
+				addNode(pck, currentProject);
+				Contain projectContainsPackage = new Contain(currentProject, pck);
+				addRelation(projectContainsPackage);
 			}
-			packageContainFile.setStart(pck);
+			
+			Entity parentEntity = fileEntity.getParent();
+			if(parentEntity == null) {
+				// 该java文件没有显式声明packge，为default包
+				pck.setEntityId(entityRepo.generateId().longValue());
+				pck.setPackageName(Package.JAVA_PACKAGE_DEFAULT);
+			} else {
+				pck.setEntityId(parentEntity.getId().longValue());
+				pck.setPackageName(parentEntity.getQualifiedName());
+			}
+			Contain packageContainFile = new Contain(pck, codeFile);
 			addRelation(packageContainFile);
+			
+			setTypeByteCodeName(fileEntity);
 		});
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject).forEach((entityId, node) -> {
 			Type type = (Type) node;
-			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(entityId.intValue());
+			Entity typeEntity = entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = typeEntity.getParent();
-			/*Entity currentEntity = typeEntity;
-				Node currentNode = type;*/
 			while(!(parentEntity instanceof FileEntity)) {
-				///FIXME 内部类的情况暂不考虑
-				/*if(parentEntity instanceof FunctionEntity) {
-						Function function = this.nodes.findFunction(parentEntity.getId());
-						
-					} else if(parentEntity.getClass() == TypeEntity.class) {
-						
-					}*/
 				parentEntity = parentEntity.getParent();
 			}
-			ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.ProjectFile, parentEntity.getId().longValue(), currentProject);
-			Contain fileContainsType = new Contain(file, type);
+			Node parentNode = findNodeByEntityIdInProject(parentEntity);
+			Contain fileContainsType = new Contain(parentNode, node);
 			addRelation(fileContainsType);
+//			System.out.println(type.getTypeName() + " " + typeEntityName.get(entityId.intValue()));
+			type.setTypeName(typeEntityName.get(entityId.intValue()));
+			type.setAliasName(typeEntityName.get(entityId.intValue()));
 		});
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Function, currentProject).forEach((entityId, node) -> {
 			Function function = (Function) node;
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = functionEntity.getParent();
-			
 			while(parentEntity.getClass() != TypeEntity.class) {
 				// 方法内的匿名类的方法的parentEntity是该方法
+//				System.out.println(parentEntity.getClass() + " " + parentEntity.getQualifiedName());
 				parentEntity = parentEntity.getParent();
 			}
-			Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentEntity.getId().longValue(), currentProject);
-			Contain typeContainsFunction = new Contain(type, function);
+			Node parentNode = findNodeByEntityIdInProject(parentEntity);
+			Contain typeContainsFunction = new Contain(parentNode, function);
 			addRelation(typeContainsFunction);
 			for(VarEntity varEntity : functionEntity.getParameters()) {
 				String parameterName = varEntity.getRawType().getName();
@@ -159,24 +148,71 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				}
 			}
 
+//			System.out.println(functionEntity.getQualifiedName() + " " + parentEntity.getClass());
+			Type type = (Type) findNodeByEntityIdInProject(parentEntity);
+//			System.out.println(type.getTypeName());
+			String newFunctionName = null;
+			if(function.isContrustor()) {
+				newFunctionName = type.getTypeName();
+			} else {
+				newFunctionName = type.getTypeName() + "." + function.getSimpleName();
+			}
+			function.setFunctionName(newFunctionName);
+//			System.out.println("new-Function-Name: " + newFunctionName);
 		});
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Variable, currentProject).forEach((entityId, node) -> {
-			Variable variable = (Variable) node;
 			VarEntity varEntity = (VarEntity) entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = varEntity.getParent();
-			if(parentEntity instanceof FunctionEntity) {
-				Function function = (Function) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, parentEntity.getId().longValue(), currentProject);
-				Contain functionContainsVariable = new Contain(function, variable);
-				addRelation(functionContainsVariable);
-			} else if(parentEntity.getClass() == TypeEntity.class) {
-				Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentEntity.getId().longValue(), currentProject);
-				Contain typeContainsVariable = new Contain(type, variable);
-				addRelation(typeContainsVariable);
-			} else {
-//				System.out.println(varEntity);
-//				System.out.println(parentEntity.getClass() + " " + parentEntity);
+			while (parentEntity != null && !(parentEntity instanceof FunctionEntity || parentEntity.getClass() == TypeEntity.class)) {
+				/// FIXME 内部类的情况暂不考虑
+				parentEntity = parentEntity.getParent();
 			}
+			Node parentNode = findNodeByEntityIdInProject(parentEntity);
+			Contain contain = new Contain(parentNode, node);
+			addRelation(contain);
 		});
+	}
+	
+	private Map<Integer, String> typeEntityName = new HashMap<>();
+	
+	private void setTypeByteCodeName(FileEntity fileEntity) {
+		for(TypeEntity e : fileEntity.getDeclaredTypes()) {
+			String name = test(e, fileEntity);
+			if(name != null) {
+				typeEntityName.put(e.getId(), name);
+			} else {
+				typeEntityName.put(e.getId(), e.getQualifiedName());
+			}
+		}
+	}
+	
+	private int countIndex(FileEntity fileEntity, TypeEntity type) {
+		int index = 0;
+		for(TypeEntity e : fileEntity.getDeclaredTypes()) {
+			if(e.getQualifiedName().equals(type.getQualifiedName())) {
+				index++;
+			}
+			if(e.getId().equals(type.getId())) {
+				break;
+			}
+		}
+		return index;
+	}
+	
+	private String test(TypeEntity typeEntity, FileEntity fileEntity) {
+		Entity parent = typeEntity.getParent();
+		if(parent instanceof FileEntity) {
+			return typeEntity.getQualifiedName();
+		}
+		if(parent.getClass() == TypeEntity.class) {
+			int index = countIndex(fileEntity, typeEntity);
+			return test((TypeEntity) parent, fileEntity) + "$" + index + typeEntity.getRawName().getName();
+		}
+		if(parent instanceof FunctionEntity) {
+			parent = parent.getParent();
+			return test((TypeEntity) parent, fileEntity) + "$" + countIndex(fileEntity, (TypeEntity) parent) + typeEntity.getRawName().getName();
+		}
+		return null;
 	}
 	
 	@Override

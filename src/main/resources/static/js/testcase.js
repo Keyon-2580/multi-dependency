@@ -74,7 +74,11 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'utils', 'cyto
 		
 		$("#showImg").click(function() {
 			if(cy != null) {
-				$('#png-eg').attr('src', cy.png());
+				$('#png-eg').attr('src', cy.png({
+					bg: "#ffffff",
+					full : true
+				}));
+				$('#png-eg').css("background-color", "#ffffff");
 			}
 		})
 

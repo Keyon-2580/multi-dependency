@@ -21,9 +21,9 @@ public class InserterForNeo4jServiceFactory {
 	public BasicCodeInserterForNeo4jServiceImpl createCodeInserterService(EntityRepo entityRepo, ProjectUtil.ProjectConfig config) throws Exception {
 		switch(config.getLanguage()) {
 		case java:
-			return new JavaInsertServiceImpl(config.getPath(), config.getProject(), entityRepo, config.getLanguage(), config.isMicroService(), config.getServiceGroupName());
+			return new JavaInsertServiceImpl(entityRepo, config);
 		case cpp:
-			return new CppInsertServiceImpl(config.getPath(), config.getProject(), entityRepo, config.getLanguage(), config.isMicroService(), config.getServiceGroupName());
+			return new CppInsertServiceImpl(entityRepo, config);
 
 		}
 		throw new Exception("程序语言不为java或c/c++，提取失败");

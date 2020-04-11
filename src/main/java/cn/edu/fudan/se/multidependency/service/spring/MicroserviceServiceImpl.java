@@ -13,14 +13,18 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanCallSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanStartWithFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.MicroServiceRepository;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.SpanRepository;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.TraceRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroServiceCallMicroServiceRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroServiceCreateSpanRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroServiceDependOnMicroServiceRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanCallSpanRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanStartWithFunctionRepository;
 
@@ -48,6 +52,12 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	
 	@Autowired
 	private TraceRepository traceRepository;
+	
+	@Autowired
+	private MicroServiceCallMicroServiceRepository microServiceCallMicroServiceRepository;
+	
+	@Autowired
+	private MicroServiceDependOnMicroServiceRepository microServiceDependOnMicroServiceRepository;	
 	
 	@Override
 	public List<Span> findSpansByTrace(Trace trace) {
@@ -133,6 +143,42 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	@Override
 	public Trace findTraceById(Long id) {
 		return traceRepository.findById(id).get();
+	}
+
+	@Override
+	public Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> msCalls() {
+		Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> result = new HashMap<>();
+		Iterable<MicroServiceCallMicroService> list = microServiceCallMicroServiceRepository.findAll();
+		for(MicroServiceCallMicroService call : list) {
+			MicroService start = call.getMs();
+			Map<MicroService, MicroServiceCallMicroService> temp = result.getOrDefault(start, new HashMap<>());
+			temp.put(call.getCallMs(), call);
+			result.put(start, temp);
+		}
+		return result;
+	}
+
+	@Override
+	public Map<MicroService, Map<MicroService, MicroServiceDependOnMicroService>> msDependOns() {
+		Map<MicroService, Map<MicroService, MicroServiceDependOnMicroService>> result = new HashMap<>();
+		Iterable<MicroServiceDependOnMicroService> list = microServiceDependOnMicroServiceRepository.findAll();
+		for(MicroServiceDependOnMicroService call : list) {
+			MicroService start = call.getStart();
+			Map<MicroService, MicroServiceDependOnMicroService> temp = result.getOrDefault(start, new HashMap<>());
+			temp.put(call.getEnd(), call);
+			result.put(start, temp);
+		}
+		return result;
+	}
+
+	@Override
+	public boolean isMicroServiceCall(MicroService start, MicroService end) {
+		return msCalls().getOrDefault(start, new HashMap<>()).get(end) != null;
+	}
+
+	@Override
+	public boolean isMicroServiceDependOn(MicroService start, MicroService end) {
+		return msDependOns().getOrDefault(start, new HashMap<>()).get(end) != null;
 	}
 
 }

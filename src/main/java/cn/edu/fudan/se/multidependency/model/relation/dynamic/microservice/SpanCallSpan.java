@@ -61,8 +61,8 @@ public class SpanCallSpan implements Relation {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("startServiceName", span.getServiceName());
-		properties.put("endServiceName", callSpan.getServiceName());
+//		properties.put("startServiceName", span.getServiceName());
+//		properties.put("endServiceName", callSpan.getServiceName());
 		properties.put("httpRequestMethod", getHttpRequestMethod() == null ? "" : getHttpRequestMethod());
 		properties.put("requestSpanId", getRequestSpanId() == null ? "" : getRequestSpanId());
 		properties.put("requestTraceId", getRequestTraceId() == null ? "" : getRequestTraceId());

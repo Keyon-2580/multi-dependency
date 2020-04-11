@@ -3,7 +3,6 @@ package cn.edu.fudan.se.multidependency.service.nospring.code;
 import java.util.Collection;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
@@ -21,6 +20,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction
 import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypeParameterType;
+import cn.edu.fudan.se.multidependency.utils.ProjectUtil.ProjectConfig;
 import depends.deptypes.DependencyType;
 import depends.entity.FunctionEntity;
 import depends.entity.TypeEntity;
@@ -29,10 +29,8 @@ import depends.entity.repo.EntityRepo;
 
 public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeInserterForNeo4jServiceImpl {
 	
-	public DependsCodeInserterForNeo4jServiceImpl(
-			String projectPath, String projectName, EntityRepo entityRepo, 
-			Language language, boolean isMicroservice, String serviceGroupName) {
-		super(projectPath, projectName, language, isMicroservice, serviceGroupName);
+	public DependsCodeInserterForNeo4jServiceImpl(EntityRepo entityRepo, ProjectConfig projectConfig) {
+		super(projectConfig);
 		this.entityRepo = entityRepo;
 		setCurrentEntityId(entityRepo.generateId().longValue());
 	}
@@ -150,7 +148,6 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 //				System.out.println(functionEntity.getQualifiedName() + " " + relation.getType() + " " + relation.getEntity().getQualifiedName());
 				switch(relation.getType()) {
 				case DependencyType.CALL:
-//					System.out.println(functionEntity.getQualifiedName() + " " + relation.getType() + " " + relation.getEntity().getQualifiedName());
 					if(relation.getEntity() instanceof FunctionEntity) {
 						// call其它方法
 						Function other = (Function) functions.get(relation.getEntity().getId().longValue());
@@ -160,11 +157,11 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 						}
 					} else {
 						///FIXME
-//						System.out.println("function call" + relation.getEntity().getClass() + " " + relation.getEntity());
+//						System.out.println("function call " + relation.getEntity().getClass() + " " + relation.getEntity());
 					}
 					break;
 				case DependencyType.CREATE:
-//					System.out.println("function create" + relation.getEntity().getClass() + " " + relation.getEntity());
+//					System.out.println("function create " + relation.getEntity().getClass() + " " + relation.getEntity());
 					break;
 				case DependencyType.RETURN:
 					Type returnType = (Type) types.get(relation.getEntity().getId().longValue());
@@ -211,11 +208,11 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					break;
 				case DependencyType.IMPLLINK:
 					Node impllinkNode = this.getNodes().findNodeByEntityIdInProject(relation.getEntity().getId().longValue(), currentProject);
-					if(impllinkNode != null) {
+					/*if(impllinkNode != null) {
 						System.out.println(impllinkNode.getClass());
 					} else {
 						System.out.println(relation.getEntity().getClass());
-					}
+					}*/
 					if(impllinkNode != null && impllinkNode instanceof Function) {
 						Function implLinkFunction = (Function) impllinkNode;
 						FunctionImplLinkFunction functionImplLinkFunction = new FunctionImplLinkFunction(function, implLinkFunction);
@@ -223,7 +220,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					}
 					break;
 				default:
-//					System.out.println(functionEntity.getQualifiedName() + " " + relation.getType() + " " + relation.getEntity().getQualifiedName());
+//					System.out.println("other " + functionEntity.getQualifiedName() + " " + relation.getType() + " " + relation.getEntity().getQualifiedName());
 					break;
 				}
 			});

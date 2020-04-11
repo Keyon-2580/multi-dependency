@@ -103,15 +103,18 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 						operationName = functionName;
 					}
 					span.setOperationName(operationName);
-					String serviceName = projectName;
-					span.setServiceName(serviceName);
+//					span.setServiceName(serviceName);
 					span.setTime(TimeUtil.changeTimeStrToLong(execution.getTime()));
 					spanToCallMethod.put(span, execution.getCallForm());
 					
-					Project project = this.getNodes().findProject(serviceName, Language.java);
-					MicroService microService = getNodes().findMicroServiceByName(serviceName);
-					if (project == null || microService == null) {
-						throw new Exception("error: span的serviceName不是一个项目 " + serviceName);
+					Project project = this.getNodes().findProject(projectName, Language.java);
+					System.out.println(this.getNodes().findAllProjects());
+					if(project == null) {
+						throw new Exception("error: span的serviceName不是一个项目 " + projectName);
+					}
+					MicroService microService = getNodes().findMicroServiceByName(project.getMicroserviceName());
+					if(microService == null) {
+						throw new Exception("error: span的serviceName不是一个项目 " + projectName);
 					}
 					addNode(span, project);
 

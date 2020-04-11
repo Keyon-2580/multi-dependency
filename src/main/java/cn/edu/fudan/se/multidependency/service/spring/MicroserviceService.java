@@ -7,9 +7,11 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanCallSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanStartWithFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
 
 public interface MicroserviceService {
 	
@@ -36,4 +38,13 @@ public interface MicroserviceService {
 	Trace findTraceByTraceId(String traceId);
 
 	Trace findTraceById(Long id);
+	
+	Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> msCalls();
+	
+	Map<MicroService, Map<MicroService, MicroServiceDependOnMicroService>> msDependOns();
+	
+	boolean isMicroServiceCall(MicroService start, MicroService end);
+	
+	boolean isMicroServiceDependOn(MicroService start, MicroService end);
+	
 }

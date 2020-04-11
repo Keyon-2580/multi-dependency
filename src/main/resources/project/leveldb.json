@@ -1,5 +1,6 @@
-[
-	{
+{
+	"projects" : [
+		/*{
 		"path": "D:\\multiple-dependency-project\\leveldb-1.22",
 		"project": "leveldb-1.22",
 		"language": "cpp",
@@ -10,5 +11,21 @@
 		],
 		"autoInclude" : true
 	}
-	
-]
+	,{
+		"path": "D:\\multiple-dependency-project\\depends-removetestcode",
+		"project": "depends-removetestcode",
+		"language": "java",
+		"isMicroservice": false,
+		"excludes" : [
+			"/src/test/resources/**",
+			"/target/classes/**",
+			"/target/test-classes/**"
+		]
+	},*/{
+		"path": "D:\\git\\SimpleTest",
+		"project": "SimpleTest",
+		"language": "java",
+		"isMicroservice": false
+	}
+	]
+}

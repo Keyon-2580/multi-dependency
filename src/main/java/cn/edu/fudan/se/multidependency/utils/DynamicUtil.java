@@ -90,6 +90,9 @@ public class DynamicUtil {
 				functionExecution.setThreadId(json.getLong("currentThreadId"));
 				functionExecution.setThreadName(json.getString("currentThreadName"));
 				functionExecution.setCallForm(json.getString("callMethod"));
+				/// FIXME
+//				functionExecution.setCallForm(json.getString("callForm"));
+//				functionExecution.setConstructor(json.getBooleanValue("isConstrcutor"));
 				return functionExecution;
 			case cpp:
 				return new CppDynamicFunctionExecution();

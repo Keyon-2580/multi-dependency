@@ -12,21 +12,59 @@ import lombok.Data;
 
 public class ProjectUtil {
 	
-	public static Collection<ProjectConfig> extract(JSONArray array) throws Exception {
-		List<ProjectConfig> configs = new ArrayList<>();
-		for(int i = 0; i < array.size(); i++) {
-			JSONObject json = array.getJSONObject(i);
-			ProjectConfig config = extract(json);
-			configs.add(config);
+	public static JSONConfigFile extract(JSONObject obj) throws Exception {
+		JSONConfigFile result = new JSONConfigFile();
+		JSONArray projectsConfigArray = obj.getJSONArray("projects");
+		if(projectsConfigArray != null) {
+			result.setProjectConfigs(extractProjectsConfig(projectsConfigArray));
 		}
-		return configs;
+		JSONObject dependenciesObj = obj.getJSONObject("architectures");
+		if(dependenciesObj != null) {
+			JSONArray microServiceDependenciesArray = dependenciesObj.getJSONArray("microservices");
+			if(microServiceDependenciesArray != null) {
+				result.setMicroServiceDependencies(extractMicroServiceDependencies(microServiceDependenciesArray));
+			}
+		}
+		
+		return result;
 	}
 	
-	public static ProjectConfig extract(JSONObject projectJson) throws Exception {
-		ProjectConfig config = new ProjectConfig();
+	private static Collection<MicroServiceDependency> extractMicroServiceDependencies(JSONArray array) throws Exception {
+		List<MicroServiceDependency> result = new ArrayList<>();
+		for(int i = 0; i < array.size(); i++) {
+			MicroServiceDependency dependency = new MicroServiceDependency();
+			JSONObject json = array.getJSONObject(i);
+			String name = json.getString("microservice");
+			dependency.setMicroService(name);
+			JSONArray dependenciesArray = json.getJSONArray("dependencies");
+			for(int j = 0; j < dependenciesArray.size(); j++) {
+				String dependencyMicroService = dependenciesArray.getString(j);
+				dependency.addDependency(dependencyMicroService);
+			}
+			result.add(dependency);
+		}
+		return result;
+	}
+	
+	private static Collection<ProjectConfig> extractProjectsConfig(JSONArray array) throws Exception {
+		List<ProjectConfig> result = new ArrayList<>();
+		for(int i = 0; i < array.size(); i++) {
+			JSONObject json = array.getJSONObject(i);
+			ProjectConfig config = extractProjectsConfig(json);
+			result.add(config);
+		}
+		return result;
+	}
+	
+	private static ProjectConfig extractProjectsConfig(JSONObject projectJson) throws Exception {
+		ProjectConfig result = new ProjectConfig();
 		Language language = Language.valueOf(projectJson.getString("language"));
 		String projectPath = projectJson.getString("path");
 		boolean isMicroservice = projectJson.getBooleanValue("isMicroservice");
+		String microserviceName = projectJson.getString("microserviceName");
+		if(microserviceName == null) {
+			microserviceName = "";
+		}
 		String serviceGroupName = projectJson.getString("serviceGroupName");
 		serviceGroupName = serviceGroupName == null ? "" : serviceGroupName;
 		String projectName = projectJson.getString("project");
@@ -34,27 +72,28 @@ public class ProjectUtil {
 		JSONArray excludesArray = projectJson.getJSONArray("excludes");
 		if(excludesArray != null) {
 			for(int i = 0; i < excludesArray.size(); i++) {
-				config.addExclude(excludesArray.getString(i));
+				result.addExclude(excludesArray.getString(i));
 			}
 		}
 		JSONArray includeDirsArray = projectJson.getJSONArray("includeDirs");
 		if(includeDirsArray != null) {
 			for(int i = 0; i < includeDirsArray.size(); i++) {
-				config.addIncludeDir(includeDirsArray.getString(i));
+				result.addIncludeDir(includeDirsArray.getString(i));
 			}
 		}
-		config.setLanguage(language);
-		config.setPath(projectPath);
-		config.setProject(projectName);
-		config.setServiceGroupName(serviceGroupName);
-		config.setMicroService(isMicroservice);
-		config.setAutoInclude(autoInclude);
+		result.setMicroserviceName(microserviceName);
+		result.setLanguage(language);
+		result.setPath(projectPath);
+		result.setProject(projectName);
+		result.setServiceGroupName(serviceGroupName);
+		result.setMicroService(isMicroservice);
+		result.setAutoInclude(autoInclude);
 		RestfulAPIConfig apiConfig = extractAPIConfig(projectJson.getJSONObject("restfulAPIs"));
-		config.setApiConfig(apiConfig);
-		return config;
+		result.setApiConfig(apiConfig);
+		return result;
 	}
 	
-	public static RestfulAPIConfig extractAPIConfig(JSONObject json) throws Exception {
+	private static RestfulAPIConfig extractAPIConfig(JSONObject json) throws Exception {
 		if(json == null) {
 			return null;
 		}
@@ -73,11 +112,30 @@ public class ProjectUtil {
 	}
 	
 	@Data
+	public static class JSONConfigFile {
+		private Iterable<ProjectConfig> projectConfigs = new ArrayList<>();
+		private Iterable<MicroServiceDependency> microServiceDependencies = new ArrayList<>();
+	}
+	
+	@Data
+	public static class MicroServiceDependency {
+		
+		private String microService;
+		
+		private List<String> dependencies = new ArrayList<>();
+		
+		public void addDependency(String dependency) {
+			this.dependencies.add(dependency);
+		}
+	}
+	
+	@Data
 	public static class ProjectConfig {
 		private String path;
 		private String project;
 		private Language language;
 		private boolean isMicroService;
+		private String microserviceName;
 		private String serviceGroupName;
 		private List<String> excludes = new ArrayList<>();
 		private List<String> includeDirs = new ArrayList<>();
