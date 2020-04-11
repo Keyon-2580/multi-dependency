@@ -1,24 +1,19 @@
 define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'utils', 'cytoscape']
 	, function ($, bootstrap, bootstrap_multiselect, jqplot, utils, cytoscape) {
 	var cy = null;
-	var queryEntry = function(testCaseId) {
-		if(cy == null) {
-			return;
-		}
+	var cyEntry = null;
+	var queryEntry = function(testCaseIds) {
 		console.log("queryEntry")
 		$.ajax({
 			type : "POST",
-			// 请求的媒体类型
 			contentType : "application/json",
 			dataType : "json",
-			url : "/testcase/microservice/entry",
-			data : JSON.stringify(testCaseId),
+			url : "/testcase/microservice/query/entry",
+			data : JSON.stringify(testCaseIds),
 			success : function(result) {
 				console.log(result);
-				utils.test();
 				if (result.result == "success") {
-					utils.addNodes(cy, result.value.value.nodes);
-					utils.addEdges(cy, result.value.value.edges);
+					cyEntry = utils.showDataInCytoscape($("#entry"), result.value.value, "dagre");
 				}
 			}
 		});
@@ -26,7 +21,6 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'utils', 'cyto
 	var queryTestCase = function(testCaseIds) {
 		$.ajax({
 			type : "POST",
-			// 请求的媒体类型
 			contentType : "application/json",
 			dataType : "json",
 			url : "/testcase/microservice/query/union",
@@ -43,14 +37,6 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'utils', 'cyto
 						}
 					}
 					$("#testCaseTitle").html(html);
-					/*$(".query_entry").click(function(){
-						var id = {
-							"testCaseId" : $(this).attr("name"),
-							"type" : $(this).attr("value")
-						};
-						queryEntry(id);
-					});*/
-					
 				}
 			}
 		});
@@ -69,7 +55,10 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'utils', 'cyto
 			var ids = {
 				"ids" : $("#testCaseList").val()
 			};
+			console.log(ids);
 			queryTestCase(ids);
+			console.log(ids);
+			queryEntry(ids);
 		});
 		
 		$("#showImg").click(function() {
@@ -79,6 +68,13 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'utils', 'cyto
 					full : true
 				}));
 				$('#png-eg').css("background-color", "#ffffff");
+			}
+			if(cyEntry != null) {
+				$('#entry-png-eg').attr('src', cyEntry.png({
+					bg: "#ffffff",
+					full : true
+				}));
+				$('#entry-png-eg').css("background-color", "#ffffff");
 			}
 		})
 

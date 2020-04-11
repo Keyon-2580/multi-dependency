@@ -61,6 +61,20 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			}
 	    		},
 	    		{
+	    			selector: 'node[type="Feature"]',
+	    			style: {
+	    				'shape' : 'ellipse',
+	    				'width': 'data(length)',
+	    				'height': 30,
+	    				'text-valign': 'center',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': '#f6f6f6',
+						'content': 'data(name)'
+	    			}
+	    		},
+	    		{
 	    			selector: 'node[type="testcase"]',
 	    			style: {
 	    				'height': 35,
@@ -73,42 +87,71 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    		{
 	    			selector: 'node[type="TestCase"]',
 	    			style: {
-	    				'height': nodeSize,
-	    				'width': nodeSize,
-	    				'background-color': 'blue',
-						'content': 'data(name)',
-						'font-size' : 15
+	    				'shape' : 'rectangle',
+	    				'width': 'data(length)',
+	    				'height': 30,
+	    				'text-valign': 'center',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': '#f6f6f6',
+						'content': 'data(name)'
+	    			}
+	    		},
+	    		{
+	    			selector: 'node[type="MicroService"]',
+	    			style: {
+	    				'shape' : 'rectangle',
+	    				'width': 'data(length)',
+	    				'height': 30,
+	    				'text-valign': 'center',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': '#f6f6f6',
+						'content': 'data(name)'
 	    			}
 	    		},
 	    		{
 	    			selector: 'node[type="noMicroService"]',
 	    			style: {
-	    			    'shape': 'triangle',
-	    				'height': nodeSize,
-	    				'width': nodeSize,
-	    				'background-color': 'black',
-						'content': 'data(name)',
-						'font-size' : 15
+	    				'shape' : 'rectangle',
+	    				'width': 'data(length)',
+	    				'height': 30,
+	    				'text-valign': 'center',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': '#f6f6f6',
+						'content': 'data(name)'
 	    			}
 	    		},
 	    		{
 	    			selector: 'node[type="allMicroService"]',
 	    			style: {
-	    				'height': nodeSize,
-	    				'width': nodeSize,
-	    				'background-color': 'green',
-						'content': 'data(name)',
-						'font-size' : 15
+	    				'shape' : 'rectangle',
+	    				'width': 'data(length)',
+	    				'height': 30,
+	    				'text-valign': 'center',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': '#f6f6f6',
+						'content': 'data(name)'
 	    			}
 	    		},
 	    		{
 	    			selector: 'node[type="selectMicroService"]',
 	    			style: {
-	    				'height': nodeSize,
-	    				'width': nodeSize,
-	    				'background-color': 'red',
-						'content': 'data(name)',
-						'font-size' : 15
+	    				'shape' : 'rectangle',
+	    				'width': 'data(length)',
+	    				'height': 30,
+	    				'text-valign': 'center',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': '#f6f6f6',
+						'content': 'data(name)'
 	    			}
 	    		},
 				{
@@ -117,9 +160,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 //	    				'content': 'data(value)',
 	    				'curve-style': 'bezier',
 	    				'width': 1,
-	    				'line-color': 'green',
+	    				'line-color': 'black',
 	                    'target-arrow-shape': 'triangle',
-	                    'target-arrow-color': 'green'
+	                    'target-arrow-color': 'black'
 	    			}
 	    		},
 				{
@@ -130,8 +173,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    				'width': 1,
 	    				'line-color': 'red',
 	                    'target-arrow-shape': 'triangle',
-	                    'target-arrow-color': 'red',
-	                    'color': 'red'
+	                    'target-arrow-color': 'red'
 	    			}
 	    		},
 				{
@@ -140,12 +182,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 //	    				'content': 'data(value)',
 	    				'curve-style': 'bezier',
 	    				'width': 1,
-	    				'line-color': 'green',
+	    				'line-color': 'black',
 	                    'target-arrow-shape': 'triangle',
-	                    'target-arrow-color': 'green',
-	                    'color': 'green',
-						'font-size' : 10,
-						'color':"black"
+	                    'target-arrow-color': 'black'
 	    			}
 	    		},
 				{
@@ -154,9 +193,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 //	    				'content': 'data(value)',
 	    				'curve-style': 'bezier',
 	    				'width': 1,
-	    				'line-color': 'red',
+	    				'line-color': 'green',
 	                    'target-arrow-shape': 'triangle',
-	                    'target-arrow-color': 'red',
+	                    'target-arrow-color': 'green',
 	                    'color': 'red',
 						'font-size' : 10,
 						'color':"black"
@@ -202,7 +241,6 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	};
 	return {
 		test: function(){
-			console.log('rrr')
 		},
 		showTreeView: function(containerDivId, data) {
 			_showTreeView(containerDivId, data)

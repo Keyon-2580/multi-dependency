@@ -10,11 +10,15 @@ var showMicroServiceInCytoscape = function(elements, container, nodeGraphId, btn
 			{
 				selector: 'node',
 				style: {
-					'height': 7,
-					'width': 7,
-					'background-color': 'green',
-					'content': 'data(name)',
-					'font-size' : 7
+					'shape' : 'rectangle',
+    				'width': 'data(length)',
+    				'height': 25,
+    				'text-valign': 'center',
+    				'text-halign': 'center',
+    				'border-width': 1.5,
+    				'border-color': '#555',
+    				'background-color': '#f6f6f6',
+					'content': 'data(name)'
 				}
 			},
 			{
@@ -22,12 +26,11 @@ var showMicroServiceInCytoscape = function(elements, container, nodeGraphId, btn
 				style: {
 					'content': 'data(value)',
 					'curve-style': 'bezier',
-					'width': 0.4,
-					'line-color': 'green',
-					'target-arrow-shape': 'triangle',
-					'target-arrow-color': 'green',
-					'target-arrow-size': 1,
-					'font-size': 7
+    				'width': 1,
+    				'line-color': '#555',
+                    'target-arrow-shape': 'triangle',
+                    'target-arrow-color': '#555',
+                    'font-color' : '#555'
 				}
 			},
 			{
@@ -35,12 +38,11 @@ var showMicroServiceInCytoscape = function(elements, container, nodeGraphId, btn
 				style: {
 					'content': 'data(value)',
 					'curve-style': 'bezier',
-					'width': 1,
-					'line-color': 'red',
-					'target-arrow-shape': 'triangle',
-					'target-arrow-color': 'red',
-					'color': 'red',
-					'font-size': 10
+    				'width': 1,
+    				'line-color': 'green',
+                    'target-arrow-shape': 'triangle',
+                    'target-arrow-color': 'green',
+                    'font-color' : '#555'
 				}
 			}
 			],
@@ -374,7 +376,6 @@ var showTreeView = function(containerDivId, data) {
 };
 
 var showDataInCytoscape = function(container, elements, layout="breadthfirst") {
-	var nodeSize = 15;
 	var cy = cytoscape({
     	container: container,
     	layout: {
@@ -384,48 +385,71 @@ var showDataInCytoscape = function(container, elements, layout="breadthfirst") {
     		{
     			selector: 'node',
     			style: {
-    				'height': nodeSize,
-    				'width': nodeSize,
-    				'background-color': 'green',
+    				'shape' : 'rectangle',
+    				'width': 'data(length)',
+    				'height': 25,
+    				'text-valign': 'center',
+    				'text-halign': 'center',
+    				'border-width': 1.5,
+    				'border-color': '#555',
+    				'background-color': '#f6f6f6',
 					'content': 'data(name)'
     			}
     		},
     		{
     			selector: 'node[type="file"]',
     			style: {
-    				'height': nodeSize,
-    				'width': nodeSize,
-    				'background-color': 'green',
+    				'shape' : 'rectangle',
+    				'width': 'data(length)',
+    				'height': 25,
+    				'text-valign': 'center',
+    				'text-halign': 'center',
+    				'border-width': 1.5,
+    				'border-color': '#555',
+    				'background-color': '#f6f6f6',
 					'content': 'data(name)'
     			}
     		},
     		{
     			selector: 'node[type="package"]',
     			style: {
-    				'height': nodeSize,
-    				'width': nodeSize,
-    				'background-color': 'red',
+    				'shape' : 'rectangle',
+    				'width': 'data(length)',
+    				'height': 25,
+    				'text-valign': 'center',
+    				'text-halign': 'center',
+    				'border-width': 1.5,
+    				'border-color': '#555',
+    				'background-color': '#f6f6f6',
 					'content': 'data(name)'
     			}
     		},
     		{
     			selector: 'node[type="feature"]',
     			style: {
-    				'height': 7,
-    				'width': 7,
-    				'background-color': 'red',
-					'content': 'data(value)',
-					'font-size' : 7
+    				'shape' : 'rectangle',
+    				'width': 'data(length)',
+    				'height': 25,
+    				'text-valign': 'center',
+    				'text-halign': 'center',
+    				'border-width': 1.5,
+    				'border-color': '#555',
+    				'background-color': '#f6f6f6',
+					'content': 'data(name)'
     			}
     		},
     		{
     			selector: 'node[type="testcase"]',
     			style: {
-    				'height': 7,
-    				'width': 7,
-    				'background-color': 'green',
-					'content': 'data(value)',
-					'font-size' : 7
+    				'shape' : 'rectangle',
+    				'width': 'data(length)',
+    				'height': 25,
+    				'text-valign': 'center',
+    				'text-halign': 'center',
+    				'border-width': 1.5,
+    				'border-color': '#555',
+    				'background-color': '#f6f6f6',
+					'content': 'data(name)'
     			}
     		},
 			{
@@ -447,8 +471,7 @@ var showDataInCytoscape = function(container, elements, layout="breadthfirst") {
     				'width': 1,
     				'line-color': 'red',
                     'target-arrow-shape': 'triangle',
-                    'target-arrow-color': 'red',
-                    'color': 'red'
+                    'target-arrow-color': 'red'
     			}
     		}
     	],

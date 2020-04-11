@@ -173,20 +173,29 @@ public class TestCaseController {
 		return "testcase/microservice";
 	}
 	
-	@PostMapping(value = "/microservice/entry")
+	@PostMapping(value = "/microservice/query/entry")
 	@ResponseBody
 	public JSONObject getMicroServiceEntry(@RequestBody Map<String, Object> params) {
 		JSONObject result = new JSONObject();
 		try {
-			String idStr = params.get("testCaseId").toString();
-			String type = params.get("type").toString();
-			System.out.println(idStr);
-			TestCase testCase = featureOrganizationService.findTestCase(Integer.parseInt(idStr));
-			System.out.println(testCase);
-			MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(testCase);
+			List<String> idsStr = (List<String>) params.get("ids");
+			System.out.println(idsStr);
+			List<Integer> ids = new ArrayList<>();
+			for(String idStr : idsStr) {
+				ids.add(Integer.parseInt(idStr));
+			}
+			Iterable<TestCase> allTestCases = featureOrganizationService.allTestCases();
+			List<TestCase> selectTestCases = new ArrayList<>();
+			for(TestCase testCase :allTestCases) {
+				int id = testCase.getTestCaseId();
+				if(ids.contains(id)) {
+					selectTestCases.add(testCase);
+				}
+			}
+			MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(selectTestCases);
+			System.out.println(callsWithEntry.toCytoscape());
 			result.put("result", "success");
-			result.put("testCase", testCase);
-			result.put("value", callsWithEntry.toCytoscape(type));
+			result.put("value", callsWithEntry.toCytoscape());
 		} catch (Exception e) {
 			e.printStackTrace();
 			result.put("result", "fail");

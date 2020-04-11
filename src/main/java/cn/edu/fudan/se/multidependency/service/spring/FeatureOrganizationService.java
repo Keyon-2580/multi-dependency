@@ -68,6 +68,13 @@ public class FeatureOrganizationService {
 			featureData.put("name", feature.getFeatureName());
 			featureData.put("type", "feature");
 			featureData.put("value", feature.getFeatureId() + ":" + feature.getFeatureName());
+			int length = 0;
+			if(feature.getFeatureName().matches(".*[0-9].*")) {
+				length = feature.getFeatureName().length() * 20;
+			} else {
+				length = feature.getFeatureName().length() * 15;
+			}
+			featureData.put("length", length);
 			JSONObject featureNode = new JSONObject();
 			featureNode.put("data", featureData);
 			nodes.add(featureNode);
@@ -80,6 +87,7 @@ public class FeatureOrganizationService {
 				testcaseData.put("name", testcase.getTestCaseName());
 				testcaseData.put("type", "testcase");
 				testcaseData.put("value", testcase.getTestCaseId() + ":" + testcase.getTestCaseName());
+				testcaseData.put("length", testcase.getTestCaseName().length() * 10);
 				JSONObject testcaseNode = new JSONObject();
 				testcaseNode.put("data", testcaseData);
 				nodes.add(testcaseNode);
@@ -299,6 +307,7 @@ public class FeatureOrganizationService {
 			}
 			msDataValue.put("id", ms.getId());
 			msDataValue.put("name", ms.getName());
+			msDataValue.put("length", ms.getName().length() * 10);
 			msJson.put("data", msDataValue);
 			nodes.add(msJson);
 		}
@@ -375,6 +384,7 @@ public class FeatureOrganizationService {
 			}
 			msDataValue.put("id", ms.getId());
 			msDataValue.put("name", ms.getName());
+			msDataValue.put("length", ms.getName().length() * 10);
 			msJson.put("data", msDataValue);
 			nodes.add(msJson);
 		}
@@ -442,6 +452,7 @@ public class FeatureOrganizationService {
 			JSONObject msDataValue = new JSONObject();
 			msDataValue.put("id", ms.getId());
 			msDataValue.put("name", ms.getName());
+			msDataValue.put("length", ms.getName().length() * 10);
 			msJson.put("data", msDataValue);
 			nodes.add(msJson);
 		}
@@ -568,6 +579,7 @@ public class FeatureOrganizationService {
 			}
 		}
 		Map<TestCase, List<MicroService>> testCaseToEntries = new HashMap<>();
+		Map<TestCase, List<Feature>> testCaseExecuteFeatures = new HashMap<>();
 		MicroServiceCallWithEntry result = findMsCallMsByTraces(traces);
 		for(Trace trace : result.getTraceToEntry().keySet()) {
 			MicroService entry = result.getTraceToEntry().get(trace);
@@ -575,8 +587,14 @@ public class FeatureOrganizationService {
 			List<MicroService> mss = testCaseToEntries.getOrDefault(testCase, new ArrayList<>());
 			mss.add(entry);
 			testCaseToEntries.put(testCase, mss);
+			List<Feature> features = new ArrayList<>();
+			for(TestCaseExecuteFeature execute : this.testCaseExecuteFeatures.get(testCase)) {
+				features.add(execute.getFeature());
+			}
+			testCaseExecuteFeatures.put(testCase, features);
 		}
 		result.setTestCaseToEntries(testCaseToEntries);
+		result.setTestCaseExecuteFeatures(testCaseExecuteFeatures);
 		return result;
 	}
 	
