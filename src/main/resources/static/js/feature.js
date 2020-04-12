@@ -427,9 +427,9 @@ var showDataInCytoscape = function(container, elements, layout="breadthfirst") {
     		{
     			selector: 'node[type="feature"]',
     			style: {
-    				'shape' : 'rectangle',
+    				'shape' : 'ellipse',
     				'width': 'data(length)',
-    				'height': 25,
+    				'height': 30,
     				'text-valign': 'center',
     				'text-halign': 'center',
     				'border-width': 1.5,
@@ -458,9 +458,10 @@ var showDataInCytoscape = function(container, elements, layout="breadthfirst") {
 //    				'content': 'data(value)',
     				'curve-style': 'bezier',
     				'width': 1,
-    				'line-color': 'green',
+    				'line-color': '#555',
                     'target-arrow-shape': 'triangle',
-                    'target-arrow-color': 'green'
+                    'target-arrow-color': '#555',
+                    'font-color' : '#555'
     			}
     		},
 			{

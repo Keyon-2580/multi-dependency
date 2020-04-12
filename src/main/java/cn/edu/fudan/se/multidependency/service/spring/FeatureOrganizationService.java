@@ -70,9 +70,9 @@ public class FeatureOrganizationService {
 			featureData.put("value", feature.getFeatureId() + ":" + feature.getFeatureName());
 			int length = 0;
 			if(feature.getFeatureName().matches(".*[0-9].*")) {
-				length = feature.getFeatureName().length() * 20;
+				length = feature.getFeatureName().getBytes().length * 8;
 			} else {
-				length = feature.getFeatureName().length() * 15;
+				length = feature.getFeatureName().length() * 23;
 			}
 			featureData.put("length", length);
 			JSONObject featureNode = new JSONObject();
@@ -87,7 +87,12 @@ public class FeatureOrganizationService {
 				testcaseData.put("name", testcase.getTestCaseName());
 				testcaseData.put("type", "testcase");
 				testcaseData.put("value", testcase.getTestCaseId() + ":" + testcase.getTestCaseName());
-				testcaseData.put("length", testcase.getTestCaseName().length() * 10);
+				if(testcase.getTestCaseName().matches(".*[0-9].*")) {
+					length = testcase.getTestCaseName().getBytes().length * 8;
+				} else {
+					length = testcase.getTestCaseName().length() * 23;
+				}
+				testcaseData.put("length", length);
 				JSONObject testcaseNode = new JSONObject();
 				testcaseNode.put("data", testcaseData);
 				nodes.add(testcaseNode);

@@ -74,14 +74,25 @@ public class MicroServiceController {
 		for(MicroService start : msDependOns.keySet()) {
 			for(MicroService end : msDependOns.get(start).keySet()) {
 				MicroServiceDependOnMicroService depend = msDependOns.get(start).get(end);
-				JSONObject edge = new JSONObject();
-				edge.put("id", depend.getId());
-				edge.put("source", start.getId());
-				edge.put("target", end.getId());
-				edge.put("type", "dependon");
-				JSONObject temp = new JSONObject();
-				temp.put("data", edge);
-				edges.add(temp);
+				if(msService.isMicroServiceCall(start, end)) {
+					JSONObject edge = new JSONObject();
+					edge.put("id", depend.getId());
+					edge.put("source", start.getId());
+					edge.put("target", end.getId());
+					edge.put("type", "dependon-call");
+					JSONObject temp = new JSONObject();
+					temp.put("data", edge);
+					edges.add(temp);
+				} else {
+					JSONObject edge = new JSONObject();
+					edge.put("id", depend.getId());
+					edge.put("source", start.getId());
+					edge.put("target", end.getId());
+					edge.put("type", "dependon");
+					JSONObject temp = new JSONObject();
+					temp.put("data", edge);
+					edges.add(temp);
+				}
 			}
 		}
 		for(MicroService start : msCalls.keySet()) {
