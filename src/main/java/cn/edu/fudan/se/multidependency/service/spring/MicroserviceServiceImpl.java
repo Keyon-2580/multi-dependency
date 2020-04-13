@@ -27,6 +27,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroSer
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroServiceDependOnMicroServiceRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanCallSpanRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanStartWithFunctionRepository;
+import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
 
 @Service
 public class MicroserviceServiceImpl implements MicroserviceService {
@@ -173,12 +174,14 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 
 	@Override
 	public boolean isMicroServiceCall(MicroService start, MicroService end) {
-		return msCalls().getOrDefault(start, new HashMap<>()).get(end) != null;
+//		return msCalls().getOrDefault(start, new HashMap<>()).get(end) != null;
+		return ProjectUtil.isMicroServiceCall(start, end, msCalls());
 	}
 
 	@Override
 	public boolean isMicroServiceDependOn(MicroService start, MicroService end) {
-		return msDependOns().getOrDefault(start, new HashMap<>()).get(end) != null;
+//		return msDependOns().getOrDefault(start, new HashMap<>()).get(end) != null;
+		return ProjectUtil.isMicroServiceDependOn(start, end, msDependOns());
 	}
 
 }

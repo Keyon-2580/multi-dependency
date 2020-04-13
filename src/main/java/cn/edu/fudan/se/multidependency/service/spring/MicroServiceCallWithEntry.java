@@ -13,12 +13,12 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
-import lombok.AllArgsConstructor;
+import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
+import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
-@AllArgsConstructor
 @Data
 public class MicroServiceCallWithEntry {
 	
@@ -36,12 +36,49 @@ public class MicroServiceCallWithEntry {
 	
 	private Iterable<MicroService> allMicroServices = new ArrayList<>();
 	
+	private Map<MicroService, Map<MicroService, MicroServiceDependOnMicroService>> msDependOns = new HashMap<>();
+	
 	public boolean containCall(MicroService caller, MicroService called) {
 		return this.calls.getOrDefault(caller, new HashMap<>()) != null;
 	}
 	
 	private boolean showAllFeatures = true;
-	private boolean showAllMicroService = true;
+	private boolean showAllMicroServices = true;
+	private boolean showStructure = true;
+	
+	public JSONArray relatedTracesIds(boolean callChain) {
+		JSONArray result = new JSONArray();
+		
+		return result;
+	}
+	
+	public JSONArray relatedEdgeIds(boolean callChain) {
+		JSONArray result = new JSONArray();
+		
+		if(callChain) {
+			return result;
+		} else {
+			return relatedEdgeIds();
+		}
+		/*JSONObject msCallMsDetail = new JSONObject();
+		for(MicroService ms : calls.keySet()) {
+//			JSONObject info = new JSONObject();
+//			info.put("from", ms);
+			Map<MicroService, MicroServiceCallMicroService> callMss = calls.get(ms);
+//			JSONObject toArray = new JSONObject();
+			for(MicroService callMs : calls.keySet()) {
+//				JSONObject to = new JSONObject();
+//				to.put("to", callMs);
+				MicroServiceCallMicroService mcm = callMss.get(callMs);
+//				to.put("times", mcm.getTimes());
+//				to.put("call", mcm.getSpanCallSpans());
+//				toArray.put(callMs.getId().toString(), to);
+				System.out.println(mcm.getSpanCallSpans().size());
+			}
+//			info.put("tos", toArray);
+//			msCallMsDetail.put(ms.getId().toString(), info);
+		}*/
+	}
 	
 	public JSONArray relatedEdgeIds() {
 		JSONArray result = new JSONArray();
@@ -53,6 +90,7 @@ public class MicroServiceCallWithEntry {
 				obj.put("id", testCase.getId() + "_" + entry.getId());
 				obj.put("source", testCase.getId());
 				obj.put("target", entry.getId());
+				obj.put("value", "");
 				result.add(obj);
 			}
 		}
@@ -62,6 +100,7 @@ public class MicroServiceCallWithEntry {
 				obj.put("id", ms.getId() + "_" + callMs.getId());
 				obj.put("source", ms.getId());
 				obj.put("target", callMs.getId());
+				obj.put("value", calls.get(ms).get(callMs).getTimes());
 				result.add(obj);
 			}
 		}
@@ -103,7 +142,8 @@ public class MicroServiceCallWithEntry {
 		return result;
 	}
 	
-	public JSONObject toCytoscape() {
+	public JSONObject toCytoscapeWithStructure() {
+		System.out.println(showAllFeatures + " " + showAllMicroServices + " " + showStructure);
 		JSONObject result = new JSONObject();
 		JSONArray nodes = new JSONArray();
 		JSONArray edges = new JSONArray();
@@ -111,17 +151,10 @@ public class MicroServiceCallWithEntry {
 		Map<Feature, Boolean> isFeatureNodeAdd = new HashMap<>();
 		Map<Feature, Boolean> isFeatureNodeParent = new HashMap<>();
 		
-		if(showAllMicroService) {
+		if(showAllMicroServices) {
 			for(MicroService ms : allMicroServices) {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false)) {
-					JSONObject microServiceJson = new JSONObject();
-					JSONObject microServiceDataValue = new JSONObject();
-					microServiceDataValue.put("type", "MicroService");
-					microServiceDataValue.put("id", ms.getId());
-					microServiceDataValue.put("name", ms.getName());
-					microServiceDataValue.put("length", ms.getName().length() * 10);
-					microServiceJson.put("data", microServiceDataValue);
-					nodes.add(microServiceJson);
+					nodes.add(ProjectUtil.microserviceToNode(ms, "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
 				}
 			}
@@ -129,134 +162,189 @@ public class MicroServiceCallWithEntry {
 		if(showAllFeatures) {
 			for(Feature feature : allFeatures) {
 				if(!isFeatureNodeAdd.getOrDefault(feature, false)) {
-					JSONObject featureJson = new JSONObject();
-					JSONObject featureDataValue = new JSONObject();
-					featureDataValue.put("type", "Feature");
-					featureDataValue.put("id", feature.getId());
-					featureDataValue.put("name", feature.getFeatureName());
-					featureDataValue.put("length", feature.getFeatureName().length() * 20);
-					featureJson.put("data", featureDataValue);
-					nodes.add(featureJson);
-					isFeatureNodeAdd.put(feature, true);
-				}
-			}
-		}
-		
-		for(TestCase testCase : testCaseToEntries.keySet()) {
-			JSONObject testCaseJson = new JSONObject();
-			JSONObject testCaseDataValue = new JSONObject();
-			testCaseDataValue.put("type", "TestCase_" + (testCase.isSuccess() ? "success" : "fail"));
-			testCaseDataValue.put("id", testCase.getId());
-			testCaseDataValue.put("name", testCase.getTestCaseName());
-			testCaseDataValue.put("length", testCase.getTestCaseName().length() * 20);
-			testCaseJson.put("data", testCaseDataValue);
-			nodes.add(testCaseJson);
-			List<MicroService> entries = testCaseToEntries.getOrDefault(testCase, new ArrayList<>());
-			for(MicroService entry : entries) {
-				if(!isMicroServiceNodeAdd.getOrDefault(entry, false)) {
-					JSONObject microServiceJson = new JSONObject();
-					JSONObject microServiceDataValue = new JSONObject();
-					microServiceDataValue.put("type", "MicroService");
-					microServiceDataValue.put("id", entry.getId());
-					microServiceDataValue.put("name", entry.getName());
-					microServiceDataValue.put("length", entry.getName().length() * 10);
-					microServiceJson.put("data", microServiceDataValue);
-					nodes.add(microServiceJson);
-					isMicroServiceNodeAdd.put(entry, true);
-				}
-				JSONObject edge = new JSONObject();
-				JSONObject value = new JSONObject();
-				value.put("id", testCase.getId() + "_" + entry.getId());
-				value.put("source", testCase.getId());
-				value.put("target", entry.getId());
-				edge.put("data", value);
-				edges.add(edge);
-			}
-			List<Feature> features = testCaseExecuteFeatures.getOrDefault(testCase, new ArrayList<>());
-			for(Feature feature : features) {
-				if(!isFeatureNodeAdd.getOrDefault(feature, false)) {
-					JSONObject featureJson = new JSONObject();
-					JSONObject featureDataValue = new JSONObject();
-					featureDataValue.put("type", "Feature");
-					featureDataValue.put("id", feature.getId());
-					featureDataValue.put("name", feature.getFeatureName());
-					featureDataValue.put("length", feature.getFeatureName().length() * 20);
-					featureJson.put("data", featureDataValue);
-					nodes.add(featureJson);
+					nodes.add(ProjectUtil.featureToNode(feature, "Feature"));
 					isFeatureNodeAdd.put(feature, true);
 				}
 				Feature parentFeature = featureToParentFeature.get(feature);
 				if(parentFeature != null && !isFeatureNodeParent.getOrDefault(feature, false)) {
 					if(!isFeatureNodeAdd.getOrDefault(parentFeature, false)) {
-						JSONObject featureJson = new JSONObject();
-						JSONObject featureDataValue = new JSONObject();
-						featureDataValue.put("type", "Feature");
-						featureDataValue.put("id", parentFeature.getId());
-						featureDataValue.put("name", parentFeature.getFeatureName());
-						featureDataValue.put("length", parentFeature.getFeatureName().length() * 20);
-						featureJson.put("data", featureDataValue);
-						nodes.add(featureJson);
+						nodes.add(ProjectUtil.featureToNode(parentFeature, "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
 					}
-					JSONObject edge = new JSONObject();
-					JSONObject value = new JSONObject();
-					value.put("id", feature.getId() + "_" + parentFeature.getId());
-//					value.put("source", feature.getId());
-//					value.put("target", parentFeature.getId());
-					value.put("source", parentFeature.getId());
-					value.put("target", feature.getId());
-					value.put("value", "is child of");
-					edge.put("data", value);
-					edges.add(edge);
+					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, null));
 					isFeatureNodeParent.put(feature, true);
 				}
-				JSONObject edge = new JSONObject();
-				JSONObject value = new JSONObject();
-//				value.put("source", testCase.getId());
-//				value.put("target", feature.getId());
-				value.put("source", feature.getId());
-				value.put("target", testCase.getId());
-				edge.put("data", value);
-				edges.add(edge);
+			}
+		}
+		
+		for(TestCase testCase : testCaseToEntries.keySet()) {
+			nodes.add(ProjectUtil.testCaseToNode(testCase, "TestCase_" + (testCase.isSuccess() ? "success" : "fail")));
+			List<MicroService> entries = testCaseToEntries.getOrDefault(testCase, new ArrayList<>());
+			for(MicroService entry : entries) {
+				if(!isMicroServiceNodeAdd.getOrDefault(entry, false)) {
+					nodes.add(ProjectUtil.microserviceToNode(entry, "MicroService"));
+					isMicroServiceNodeAdd.put(entry, true);
+				}
+				edges.add(ProjectUtil.relationToEdge(testCase, entry, "TestCaseExecuteMicroService", null));
+			}
+			List<Feature> features = testCaseExecuteFeatures.getOrDefault(testCase, new ArrayList<>());
+			for(Feature feature : features) {
+				if(!isFeatureNodeAdd.getOrDefault(feature, false)) {
+					nodes.add(ProjectUtil.featureToNode(feature, "Feature"));
+					isFeatureNodeAdd.put(feature, true);
+				}
+				Feature parentFeature = featureToParentFeature.get(feature);
+				if(parentFeature != null && !isFeatureNodeParent.getOrDefault(feature, false)) {
+					if(!isFeatureNodeAdd.getOrDefault(parentFeature, false)) {
+						nodes.add(ProjectUtil.featureToNode(parentFeature, "Feature"));
+						isFeatureNodeAdd.put(parentFeature, true);
+					}
+					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, null));
+					isFeatureNodeParent.put(feature, true);
+				}
+				edges.add(ProjectUtil.relationToEdge(feature, testCase, "TestCaseExecuteFeature", null));
+			}
+		}
+		
+		if(showStructure) {
+			for(MicroService ms : msDependOns.keySet()) {
+				if(!isMicroServiceNodeAdd.getOrDefault(ms, false) && !msDependOns.get(ms).isEmpty()) {
+					nodes.add(ProjectUtil.microserviceToNode(ms, "MicroService"));
+					isMicroServiceNodeAdd.put(ms, true);
+				}
+				for(MicroService callMs : msDependOns.get(ms).keySet()) {
+					if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
+						nodes.add(ProjectUtil.microserviceToNode(callMs, "MicroService"));
+						isMicroServiceNodeAdd.put(callMs, true);
+					}
+					if(ProjectUtil.isMicroServiceCall(ms, callMs, calls)) {
+						edges.add(ProjectUtil.relationToEdge(ms, callMs, "ShowStructureDependOnCall", null));
+					} else {
+						edges.add(ProjectUtil.relationToEdge(ms, callMs, "ShowStructureDependOn", null));
+					}
+				}
+			}
+			
+			for(MicroService ms : calls.keySet()) {
+				if(!isMicroServiceNodeAdd.getOrDefault(ms, false) && !calls.get(ms).isEmpty()) {
+					nodes.add(ProjectUtil.microserviceToNode(ms, "MicroService"));
+					isMicroServiceNodeAdd.put(ms, true);
+				}
+				for(MicroService callMs : calls.get(ms).keySet()) {
+					if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
+						nodes.add(ProjectUtil.microserviceToNode(callMs, "MicroService"));
+						isMicroServiceNodeAdd.put(callMs, true);
+					}
+					if(!ProjectUtil.isMicroServiceDependOn(ms, callMs, msDependOns)) {
+						edges.add(ProjectUtil.relationToEdge(ms, callMs, "ShowStructureCall", null));
+					}
+				}
+			}
+		} else {
+			for(MicroService ms : calls.keySet()) {
+				if(!isMicroServiceNodeAdd.getOrDefault(ms, false) && !calls.get(ms).isEmpty()) {
+					nodes.add(ProjectUtil.microserviceToNode(ms, "MicroService"));
+					isMicroServiceNodeAdd.put(ms, true);
+				}
+				for(MicroService callMs : calls.get(ms).keySet()) {
+					if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
+						nodes.add(ProjectUtil.microserviceToNode(callMs, "MicroService"));
+						isMicroServiceNodeAdd.put(callMs, true);
+					}
+					edges.add(ProjectUtil.relationToEdge(ms, callMs, "NoStructureCall", null));
+				}
+			}
+		}
+		
+		
+		JSONObject data = new JSONObject();
+		data.put("nodes", nodes);
+		data.put("edges", edges);
+		result.put("data", data);
+		return result;	
+	}
+	
+	public JSONObject toCytoscapeWithOutStructure() {
+		JSONObject result = new JSONObject();
+		JSONArray nodes = new JSONArray();
+		JSONArray edges = new JSONArray();
+		Map<MicroService, Boolean> isMicroServiceNodeAdd = new HashMap<>();
+		Map<Feature, Boolean> isFeatureNodeAdd = new HashMap<>();
+		Map<Feature, Boolean> isFeatureNodeParent = new HashMap<>();
+		
+		if(showAllMicroServices) {
+			for(MicroService ms : allMicroServices) {
+				if(!isMicroServiceNodeAdd.getOrDefault(ms, false)) {
+					nodes.add(ProjectUtil.microserviceToNode(ms, "MicroService"));
+					isMicroServiceNodeAdd.put(ms, true);
+				}
+			}
+		}
+		if(showAllFeatures) {
+			for(Feature feature : allFeatures) {
+				if(!isFeatureNodeAdd.getOrDefault(feature, false)) {
+					nodes.add(ProjectUtil.featureToNode(feature, "Feature"));
+					isFeatureNodeAdd.put(feature, true);
+				}
+				Feature parentFeature = featureToParentFeature.get(feature);
+				if(parentFeature != null && !isFeatureNodeParent.getOrDefault(feature, false)) {
+					if(!isFeatureNodeAdd.getOrDefault(parentFeature, false)) {
+						nodes.add(ProjectUtil.featureToNode(parentFeature, "Feature"));
+						isFeatureNodeAdd.put(parentFeature, true);
+					}
+					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, null));
+					isFeatureNodeParent.put(feature, true);
+				}
+			}
+		}
+		
+		for(TestCase testCase : testCaseToEntries.keySet()) {
+			nodes.add(ProjectUtil.testCaseToNode(testCase, "TestCase_" + (testCase.isSuccess() ? "success" : "fail")));
+			List<MicroService> entries = testCaseToEntries.getOrDefault(testCase, new ArrayList<>());
+			for(MicroService entry : entries) {
+				if(!isMicroServiceNodeAdd.getOrDefault(entry, false)) {
+					nodes.add(ProjectUtil.microserviceToNode(entry, "MicroService"));
+					isMicroServiceNodeAdd.put(entry, true);
+				}
+				edges.add(ProjectUtil.relationToEdge(testCase, entry, null, null));
+			}
+			List<Feature> features = testCaseExecuteFeatures.getOrDefault(testCase, new ArrayList<>());
+			for(Feature feature : features) {
+				if(!isFeatureNodeAdd.getOrDefault(feature, false)) {
+					nodes.add(ProjectUtil.featureToNode(feature, "Feature"));
+					isFeatureNodeAdd.put(feature, true);
+				}
+				Feature parentFeature = featureToParentFeature.get(feature);
+				if(parentFeature != null && !isFeatureNodeParent.getOrDefault(feature, false)) {
+					if(!isFeatureNodeAdd.getOrDefault(parentFeature, false)) {
+						nodes.add(ProjectUtil.featureToNode(parentFeature, "Feature"));
+						isFeatureNodeAdd.put(parentFeature, true);
+					}
+					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, "is child of"));
+					isFeatureNodeParent.put(feature, true);
+				}
+				edges.add(ProjectUtil.relationToEdge(feature, testCase, null, null));
 			}
 		}
 		for(MicroService ms : calls.keySet()) {
 			if(!isMicroServiceNodeAdd.getOrDefault(ms, false)) {
-				JSONObject microServiceJson = new JSONObject();
-				JSONObject microServiceDataValue = new JSONObject();
-				microServiceDataValue.put("type", "MicroService");
-				microServiceDataValue.put("id", ms.getId());
-				microServiceDataValue.put("name", ms.getName());
-				microServiceDataValue.put("length", ms.getName().length() * 10);
-				microServiceJson.put("data", microServiceDataValue);
-				nodes.add(microServiceJson);
+				nodes.add(ProjectUtil.microserviceToNode(ms, "MicroService"));
 				isMicroServiceNodeAdd.put(ms, true);
 			}
 			for(MicroService callMs : calls.get(ms).keySet()) {
 				if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
-					JSONObject microServiceJson = new JSONObject();
-					JSONObject microServiceDataValue = new JSONObject();
-					microServiceDataValue.put("type", "MicroService");
-					microServiceDataValue.put("id", callMs.getId());
-					microServiceDataValue.put("name", callMs.getName());
-					microServiceDataValue.put("length", callMs.getName().length() * 10);
-					microServiceJson.put("data", microServiceDataValue);
-					nodes.add(microServiceJson);
+					nodes.add(ProjectUtil.microserviceToNode(callMs, "MicroService"));
 					isMicroServiceNodeAdd.put(callMs, true);
 				}
-				JSONObject edge = new JSONObject();	
-				JSONObject value = new JSONObject();
-				value.put("id", ms.getId() + "_" + callMs.getId());
-				value.put("source", ms.getId());
-				value.put("target", callMs.getId());
-				edge.put("data", value);
-				edges.add(edge);
+				edges.add(ProjectUtil.relationToEdge(ms, callMs, null, null));
 			}
 		}
+		
 		JSONObject data = new JSONObject();
 		data.put("nodes", nodes);
 		data.put("edges", edges);
 		result.put("value", data);
 		return result;
 	}
+	
 }

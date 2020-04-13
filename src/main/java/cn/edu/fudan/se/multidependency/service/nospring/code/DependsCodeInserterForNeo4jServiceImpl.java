@@ -20,7 +20,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction
 import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypeParameterType;
-import cn.edu.fudan.se.multidependency.utils.ProjectUtil.ProjectConfig;
+import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.ProjectConfig;
 import depends.deptypes.DependencyType;
 import depends.entity.FunctionEntity;
 import depends.entity.TypeEntity;

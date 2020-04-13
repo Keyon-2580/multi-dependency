@@ -1,173 +1,82 @@
 package cn.edu.fudan.se.multidependency.utils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.alibaba.fastjson.JSONArray;
+import org.apache.commons.lang3.StringUtils;
+
 import com.alibaba.fastjson.JSONObject;
 
-import cn.edu.fudan.se.multidependency.model.Language;
-import lombok.Data;
+import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
+import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
+import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
 
 public class ProjectUtil {
 	
-	public static JSONConfigFile extract(JSONObject obj) throws Exception {
-		JSONConfigFile result = new JSONConfigFile();
-		JSONArray projectsConfigArray = obj.getJSONArray("projects");
-		if(projectsConfigArray != null) {
-			result.setProjectConfigs(extractProjectsConfig(projectsConfigArray));
-		}
-		JSONObject dependenciesObj = obj.getJSONObject("architectures");
-		if(dependenciesObj != null) {
-			JSONArray microServiceDependenciesArray = dependenciesObj.getJSONArray("microservices");
-			if(microServiceDependenciesArray != null) {
-				result.setMicroServiceDependencies(extractMicroServiceDependencies(microServiceDependenciesArray));
-			}
-		}
-		
+
+	public static JSONObject microserviceToNode(MicroService ms, String type) {
+		JSONObject result = new JSONObject();
+		JSONObject microServiceDataValue = new JSONObject();
+		microServiceDataValue.put("type", type);
+		microServiceDataValue.put("id", ms.getId());
+		microServiceDataValue.put("name", ms.getName());
+		microServiceDataValue.put("length", ms.getName().length() * 10);
+		result.put("data", microServiceDataValue);
 		return result;
 	}
 	
-	private static Collection<MicroServiceDependency> extractMicroServiceDependencies(JSONArray array) throws Exception {
-		List<MicroServiceDependency> result = new ArrayList<>();
-		for(int i = 0; i < array.size(); i++) {
-			MicroServiceDependency dependency = new MicroServiceDependency();
-			JSONObject json = array.getJSONObject(i);
-			String name = json.getString("microservice");
-			dependency.setMicroService(name);
-			JSONArray dependenciesArray = json.getJSONArray("dependencies");
-			for(int j = 0; j < dependenciesArray.size(); j++) {
-				String dependencyMicroService = dependenciesArray.getString(j);
-				dependency.addDependency(dependencyMicroService);
-			}
-			result.add(dependency);
-		}
+	public static JSONObject featureToNode(Feature feature, String type) {
+		JSONObject result = new JSONObject();
+		JSONObject featureDataValue = new JSONObject();
+		featureDataValue.put("type", type);
+		featureDataValue.put("id", feature.getId());
+		featureDataValue.put("name", feature.getFeatureName());
+		int length = feature.getFeatureName().length() * 20;
+		
+		featureDataValue.put("length", length);
+		result.put("data", featureDataValue);
 		return result;
 	}
 	
-	private static Collection<ProjectConfig> extractProjectsConfig(JSONArray array) throws Exception {
-		List<ProjectConfig> result = new ArrayList<>();
-		for(int i = 0; i < array.size(); i++) {
-			JSONObject json = array.getJSONObject(i);
-			ProjectConfig config = extractProjectsConfig(json);
-			result.add(config);
-		}
+	public static JSONObject testCaseToNode(TestCase testCase, String type) {
+		JSONObject result = new JSONObject();
+		JSONObject testCaseDataValue = new JSONObject();
+		testCaseDataValue.put("type", type);
+		testCaseDataValue.put("id", testCase.getId());
+		testCaseDataValue.put("name", testCase.getTestCaseName());
+		testCaseDataValue.put("length", testCase.getTestCaseName().length() * 20);
+		result.put("data", testCaseDataValue);
 		return result;
 	}
 	
-	private static ProjectConfig extractProjectsConfig(JSONObject projectJson) throws Exception {
-		ProjectConfig result = new ProjectConfig();
-		Language language = Language.valueOf(projectJson.getString("language"));
-		String projectPath = projectJson.getString("path");
-		boolean isMicroservice = projectJson.getBooleanValue("isMicroservice");
-		String microserviceName = projectJson.getString("microserviceName");
-		if(microserviceName == null) {
-			microserviceName = "";
+	public static JSONObject relationToEdge(Node start, Node end, String type, String value) {
+		JSONObject edge = new JSONObject();
+		JSONObject data = new JSONObject();
+		data.put("id", start.getId() + "_" + end.getId());
+		data.put("source", start.getId());
+		data.put("target", end.getId());
+		if(!StringUtils.isBlank(type)) {
+			data.put("type", type);
 		}
-		String serviceGroupName = projectJson.getString("serviceGroupName");
-		serviceGroupName = serviceGroupName == null ? "" : serviceGroupName;
-		String projectName = projectJson.getString("project");
-		boolean autoInclude = projectJson.getBooleanValue("autoInclude");
-		JSONArray excludesArray = projectJson.getJSONArray("excludes");
-		if(excludesArray != null) {
-			for(int i = 0; i < excludesArray.size(); i++) {
-				result.addExclude(excludesArray.getString(i));
-			}
-		}
-		JSONArray includeDirsArray = projectJson.getJSONArray("includeDirs");
-		if(includeDirsArray != null) {
-			for(int i = 0; i < includeDirsArray.size(); i++) {
-				result.addIncludeDir(includeDirsArray.getString(i));
-			}
-		}
-		result.setMicroserviceName(microserviceName);
-		result.setLanguage(language);
-		result.setPath(projectPath);
-		result.setProject(projectName);
-		result.setServiceGroupName(serviceGroupName);
-		result.setMicroService(isMicroservice);
-		result.setAutoInclude(autoInclude);
-		RestfulAPIConfig apiConfig = extractAPIConfig(projectJson.getJSONObject("restfulAPIs"));
-		result.setApiConfig(apiConfig);
-		return result;
+		data.put("value", StringUtils.isBlank(value) ? "" : value);
+		edge.put("data", data);
+		return edge;
 	}
 	
-	private static RestfulAPIConfig extractAPIConfig(JSONObject json) throws Exception {
-		if(json == null) {
-			return null;
+	public static boolean isMicroServiceCall(MicroService start, MicroService end, Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> msCalls) {
+		if(msCalls == null) {
+			return false;
 		}
-		RestfulAPIConfig config = new RestfulAPIConfig();
-		String path = json.getString("path");
-		String framework = json.getString("framework");
-		config.setPath(path);
-		config.setFramework(framework);
-		JSONArray excludeTagsArray = json.getJSONArray("excludeTags");
-		if(excludeTagsArray != null) {
-			for(int i = 0; i < excludeTagsArray.size(); i++) {
-				config.addExcludeTag(excludeTagsArray.getString(i));
-			}
-		}
-		return config;
+		return msCalls.getOrDefault(start, new HashMap<>()).get(end) != null;
 	}
-	
-	@Data
-	public static class JSONConfigFile {
-		private Iterable<ProjectConfig> projectConfigs = new ArrayList<>();
-		private Iterable<MicroServiceDependency> microServiceDependencies = new ArrayList<>();
-	}
-	
-	@Data
-	public static class MicroServiceDependency {
-		
-		private String microService;
-		
-		private List<String> dependencies = new ArrayList<>();
-		
-		public void addDependency(String dependency) {
-			this.dependencies.add(dependency);
+
+	public static boolean isMicroServiceDependOn(MicroService start, MicroService end, Map<MicroService, Map<MicroService, MicroServiceDependOnMicroService>> msDependOns) {
+		if(msDependOns == null) {
+			return false;
 		}
-	}
-	
-	@Data
-	public static class ProjectConfig {
-		private String path;
-		private String project;
-		private Language language;
-		private boolean isMicroService;
-		private String microserviceName;
-		private String serviceGroupName;
-		private List<String> excludes = new ArrayList<>();
-		private List<String> includeDirs = new ArrayList<>();
-		private boolean autoInclude;
-		private RestfulAPIConfig apiConfig;
-		
-		public void addExclude(String exclude) {
-			this.excludes.add(exclude);
-		}
-		
-		public void addIncludeDir(String includeDir) {
-			this.includeDirs.add(includeDir);
-		}
-		
-		public String[] includeDirsArray() {
-			String[] result = new String[includeDirs.size()];
-			for(int i = 0; i < result.length; i++) {
-				result[i] = includeDirs.get(i);
-			}
-			return result;
-		}
-	}
-	
-	@Data
-	public static class RestfulAPIConfig {
-		private String framework;
-		private List<String> excludeTags = new ArrayList<>();
-		private String path;
-		public static final String FRAMEWORK_SWAGGER = "swagger";
-		
-		public void addExcludeTag(String excludeTag) {
-			this.excludeTags.add(excludeTag);
-		}
+		return msDependOns.getOrDefault(start, new HashMap<>()).get(end) != null;
 	}
 }

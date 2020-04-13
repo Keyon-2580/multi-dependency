@@ -179,7 +179,6 @@ public class TestCaseController {
 		JSONObject result = new JSONObject();
 		try {
 			List<String> idsStr = (List<String>) params.get("ids");
-			System.out.println(idsStr);
 			List<Long> ids = new ArrayList<>();
 			for(String idStr : idsStr) {
 				ids.add(Long.parseLong(idStr));
@@ -224,9 +223,8 @@ public class TestCaseController {
 				}
 			}
 			MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(selectTestCases);
-			System.out.println(callsWithEntry.toCytoscape());
 			result.put("result", "success");
-			result.put("value", callsWithEntry.toCytoscape());
+			result.put("value", callsWithEntry.toCytoscapeWithOutStructure());
 		} catch (Exception e) {
 			e.printStackTrace();
 			result.put("result", "fail");

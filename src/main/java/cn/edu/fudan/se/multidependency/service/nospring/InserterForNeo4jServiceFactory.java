@@ -5,7 +5,7 @@ import cn.edu.fudan.se.multidependency.service.nospring.build.BuildInserterForNe
 import cn.edu.fudan.se.multidependency.service.nospring.code.BasicCodeInserterForNeo4jServiceImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.code.CppInsertServiceImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.code.JavaInsertServiceImpl;
-import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
+import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil;
 import depends.entity.repo.EntityRepo;
 
 public class InserterForNeo4jServiceFactory {
@@ -18,7 +18,7 @@ public class InserterForNeo4jServiceFactory {
 		return instance;
 	}
 	
-	public BasicCodeInserterForNeo4jServiceImpl createCodeInserterService(EntityRepo entityRepo, ProjectUtil.ProjectConfig config) throws Exception {
+	public BasicCodeInserterForNeo4jServiceImpl createCodeInserterService(EntityRepo entityRepo, ProjectConfigUtil.ProjectConfig config) throws Exception {
 		switch(config.getLanguage()) {
 		case java:
 			return new JavaInsertServiceImpl(entityRepo, config);

@@ -26,10 +26,10 @@ import cn.edu.fudan.se.multidependency.service.nospring.dynamic.TraceStartExtrac
 import cn.edu.fudan.se.multidependency.service.nospring.structure.MicroServiceArchitectureInserter;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
-import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
-import cn.edu.fudan.se.multidependency.utils.ProjectUtil.JSONConfigFile;
-import cn.edu.fudan.se.multidependency.utils.ProjectUtil.ProjectConfig;
-import cn.edu.fudan.se.multidependency.utils.ProjectUtil.RestfulAPIConfig;
+import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil;
+import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.JSONConfigFile;
+import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.ProjectConfig;
+import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.RestfulAPIConfig;
 import cn.edu.fudan.se.multidependency.utils.YamlUtil;
 import depends.entity.repo.EntityRepo;
 
@@ -68,7 +68,7 @@ public class InsertDataMain {
 			/**
 			 * 静态分析
 			 */
-			JSONConfigFile config = ProjectUtil.extract(JSONUtil.extractJSONObject(new File(yaml.getProjectsConfig())));
+			JSONConfigFile config = ProjectConfigUtil.extract(JSONUtil.extractJSONObject(new File(yaml.getProjectsConfig())));
 			Iterable<ProjectConfig> projectConfig = config.getProjectConfigs();
 			for(ProjectConfig proejctConfig : projectConfig) {
 				Language language = proejctConfig.getLanguage();

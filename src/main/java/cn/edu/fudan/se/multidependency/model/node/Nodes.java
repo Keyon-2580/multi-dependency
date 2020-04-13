@@ -147,7 +147,9 @@ public class Nodes {
 	public Package findPackageByDirectoryPath(String directoryPath, Project project) {
 		@SuppressWarnings("unchecked")
 		Map<Long, Package> packages = (Map<Long, Package>) findNodesByNodeTypeInProject(NodeLabelType.Package, project);
+		System.out.println(packages.size() + " " + packages + " " + directoryPath);
 		for(Package pck : packages.values()) {
+//			System.out.println(pck.getDirectoryPath() + " " + directoryPath);
 			if(pck.getDirectoryPath().equals(directoryPath)) {
 				return pck;
 			}
@@ -161,15 +163,6 @@ public class Nodes {
 			scenarios.put(node.getId(), (Scenario) node);
 		});
 		return scenarios;
-	}
-	
-	public Scenario findScenarioByName(String scenarioName) {
-		for(Scenario s : findScenarios().values()) {
-			if(s.getScenarioName().equals(scenarioName)) {
-				return s;
-			}
-		}
-		return null;
 	}
 	
 	/**

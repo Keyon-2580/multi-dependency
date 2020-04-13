@@ -1,188 +1,123 @@
 {
-	"scenarios" : [
-		{
-			"id" : 0,
-			"name" : "登录",
-			"description" : "输入用户名、密码等，无误后能够使用系统",
-			"testcases" : [
-				12, 13
-			]
-		},
-		{
-			"id" : 1,
-			"name" : "查票",
-			"description" : "根据输入查询所需车票",
-			"testcases" : [
-
-			]
-		},
-		{
-			"id" : 2,
-			"name" : "订票",
-			"description" : "用户订购查询到的车票",
-			"testcases" : [
-
-			]
-		},
-		{
-			"id" : 3,
-			"name" : "付款",
-			"description" : "支付所订票的款项"
-		},
-		{
-			"id" : 4,
-			"name" : "查看订单列表",
-			"description" : "查看所有订单列表"
-		},
-		{
-			"id" : 5,
-			"name" : "取消订单",
-			"description" : "取消订单"
-		},
-		{
-			"id" : 6,
-			"name" : "修改订单",
-			"description" : "修改订单"
-		},
-		{
-			"id" : 7,
-			"name" : "托运",
-			"description" : "托运行李"
-		},
-		{
-			"id" : 8,
-			"name" : "检票",
-			"description" : "对已支付的订单，进行检票"
-		},
-		{
-			"id" : 9,
-			"name" : "进站",
-			"description" : "对已检票的车票，完成进站"
-		},
-		{
-			"id" : 10,
-			"name" : "打印车票凭证",
-			"description" : "对已完成的车票，打印凭证"
-		}
-	],
 	"features" : [
 		{
 			"id" : 0,
-			"name" : "校验账号密码",
+			"name" : "登录",
 			"description" : "输入用户名、密码等，无误后能够使用系统"
 		},
 		{
 			"id" : 1,
 			"name" : "获取验证码",
-			"description" : "在登录时，能够获取到验证码"
+			"description" : "获取验证码"
 		},
 		{
 			"id" : 2,
-			"name" : "查票",
+			"name" : "用户查询车票",
 			"description" : "能够根据输入查询所需车票"
 		},
 		{
 			"id" : 3,
 			"name" : "根据TrainType-GaoTie DongChe查票",
-			"description" : "能够根据TrainType-GaoTie DongChe查票",
+			"description" : "根据TrainType-GaoTie DongChe查票",
 			"parentId" : 2
 		},
 		{
 			"id" : 4,
 			"name" : "根据TrainType-Other查票",
-			"description" : "能够根据TrainType-Other查票",
+			"description" : "根据TrainType-Other查票",
 			"parentId" : 2
 		},
 		{
 			"id" : 5,
 			"name" : "根据SearchType-Minimum Station Number查票",
-			"description" : "能够根据SearchType-Minimum Station Number查票",
+			"description" : "根据SearchType-Minimum Station Number查票",
 			"parentId" : 2
 		},
 		{
 			"id" : 6,
 			"name" : "根据SearchType-Cheapest查票",
-			"description" : "能够根据SearchType-Cheapest查票",
+			"description" : "SearchType-Cheapest查票",
 			"parentId" : 2
 		},
 		{
 			"id" : 7,
 			"name" : "根据SearchType-Quickest查票",
-			"description" : "能够根据SearchType-Quickest查票",
+			"description" : "根据SearchType-Quickest查票",
 			"parentId" : 2
 		},
 		{
 			"id" : 8,
-			"name" : "订票",
-			"description" : "能够订购查询的车票"
+			"name" : "用户订票操作",
+			"description" : "用户对订票进行增删改查"
 		},
 		{
 			"id" : 9,
-			"name" : "选择座位类型",
-			"description" : "能够选择座位类型"
+			"name" : "用户新增订票",
+			"description" : "用户能够订购查询的车票",
+			"parentId" : 8
 		},
 		{
 			"id" : 10,
+			"name" : "选择座位类型",
+			"description" : "用户订票时，对座位类型进行选择"
+		},
+		{
+			"id" : 11,
 			"name" : "查询所有保险",
 			"description" : "能够查询所有保险"
 		},
 		{
-			"id" : 11,
+			"id" : 12,
 			"name" : "查询所有餐品",
 			"description" : "能够查询所有餐品"
 		},
 		{
-			"id" : 12,
-			"name" : "查询账户所有联系方式",
-			"description" : "能够查询账户下所有联系方式"
-		},
-		{
 			"id" : 13,
-			"name" : "添加联系方式",
-			"description" : "能够添加账户联系方式"
+			"name" : "查询账户所有联系方式",
+			"description" : "用户能够查询联系方式"
 		},
 		{
 			"id" : 14,
-			"name" : "添加托运",
-			"description" : "能够添加托运"
+			"name" : "添加联系方式",
+			"description" : "添加账户联系方式"
 		},
 		{
 			"id" : 15,
-			"name" : "付款",
-			"description" : "能够支付所订票的款项"
+			"name" : "添加Consign",
+			"description" : "Consign"
 		},
 		{
 			"id" : 16,
-			"name" : "查看订票列表",
-			"description" : "能够查看订票列表",
-			"parentId" : 8
+			"name" : "付款",
+			"description" : "支付所订票的款项"
 		},
 		{
 			"id" : 17,
-			"name" : "取消订单",
-			"description" : "能够取消订单",
+			"name" : "用户查看订票列表",
+			"description" : "用户查看订票列表",
 			"parentId" : 8
 		},
 		{
 			"id" : 18,
-			"name" : "修改订单",
-			"description" : "能够修改订单",
+			"name" : "用户取消订票",
+			"description" : "用户取消订票",
 			"parentId" : 8
 		},
 		{
 			"id" : 19,
-			"name" : "检票",
-			"description" : "对已支付的订单，能够进行检票"
+			"name" : "用户修改订票",
+			"description" : "用户修改订票",
+			"parentId" : 8
 		},
 		{
 			"id" : 20,
-			"name" : "进站",
-			"description" : "对已检票的车票，用户能够进站"
+			"name" : "用户检票",
+			"description" : "用户检票"
 		},
 		{
 			"id" : 21,
-			"name" : "打印车票凭证",
-			"description" : "对已完成的车票，能够打印凭证"
+			"name" : "用户进站",
+			"description" : "用户进站"
 		},
 		{
 			"id" : 22,
@@ -198,20 +133,17 @@
 		{
 			"id" : 24,
 			"name" : "管理员添加订票",
-			"description" : "管理员添加订票",
-			"parentId" : 22
+			"description" : "管理员添加订票"
 		},
 		{
 			"id" : 25,
 			"name" : "管理员修改订票",
-			"description" : "管理员修改订票",
-			"parentId" : 22
+			"description" : "管理员修改订票"
 		},
 		{
 			"id" : 26,
 			"name" : "管理员删除订票",
-			"description" : "管理员删除订票",
-			"parentId" : 22
+			"description" : "管理员删除订票"
 		},
 		{
 			"id" : 27,
@@ -415,12 +347,17 @@
 			"name" : "管理员删除线路基本价格",
 			"description" : "管理员删除线路基本价格",
 			"parentId" : 57
+		},
+		{
+			"id" : 62,
+			"name" : "退出登录",
+			"description" : "退出登录"
 		}
 	],
 	"testcases" : [
 		{
 			"id" : 0,
-			"name" : "查票-GaoTie Dongche",
+			"name" : "查票-00",
 			"group" : "查票",
 			"input" : {
 				"Starting" : "Nan Jing",
@@ -439,8 +376,8 @@
 		},
 		{
 			"id" : 1,
-			"name" : "查票-Other",
 			"group" : "查票",
+			"name" : "查票-01",
 			"input" : {
 				"Starting" : "Nan Jing",
 				"Terminal" : "Shang Hai",
@@ -458,7 +395,7 @@
 		},
 		{
 			"id" : 2,
-			"name" : "查票-All",
+			"name" : "查票-02",
 			"group" : "查票",
 			"input" : {
 				"Starting" : "Nan Jing",
@@ -478,7 +415,7 @@
 		},
 		{
 			"id" : 3,
-			"name" : "查票-GaoTie Dongche",
+			"name" : "查票-03",
 			"group" : "查票",
 			"input" : {
 				"Starting" : "Zhen Jiang",
@@ -497,7 +434,7 @@
 		},
 		{
 			"id" : 4,
-			"name" : "查票-Other",
+			"name" : "查票-04",
 			"group" : "查票",
 			"input" : {
 				"Starting" : "Zhen Jiang",
@@ -516,7 +453,7 @@
 		},
 		{
 			"id" : 5,
-			"name" : "查票-All",
+			"name" : "查票-05",
 			"group" : "查票",
 			"input" : {
 				"Starting" : "Zhen Jiang",
@@ -536,9 +473,9 @@
 		},
 		{
 			"id" : 6,
-			"name" : "订票-默认乘客，无需保险、餐品和托运",
+			"name" : "订票-00",
 			"group" : "订票",
-			"description" : "运行查票-GaoTie Dongche成功后，点击Booking订票，默认乘客，不需要保险、餐品和托运",
+			"description" : "运行查票-00后，点击Booking订票，默认联系方式，不需要保险、餐品和托运",
 			"input" : {
 				"Trip Id" : "G1234",
 				"Select Seat" : "1st - 250.0",
@@ -549,7 +486,7 @@
 			},
 			"success" : true,
 			"features" : [
-				8, 10, 11, 12
+				9, 11, 12, 13
 			],
 			"traces" : [
 				"8705abb6-ff9d-4e06-b676-0891644f4bd7",
@@ -560,9 +497,9 @@
 		},
 		{
 			"id" : 7,
-			"name" : "订票-添加乘客，需要保险、餐品和托运",
+			"name" : "订票-01",
 			"group" : "订票",
-			"description" : "运行查票-GaoTie Dongche成功后，点击Booking订票，添加联系方式，需要保险、餐品和托运",
+			"description" : "运行查票-00后，点击Booking订票，添加联系方式，需要保险、餐品和托运。",
 			"input" : {
 				"Trip Id" : "G1234",
 				"Select Seat" : "1st - 250.0",
@@ -585,7 +522,7 @@
 			},
 			"success" : true,
 			"features" : [
-				8, 10, 11, 12, 13, 14
+				9, 11, 12, 13, 14, 15
 			],
 			"traces" : [
 				"5abbfe4d-ddb8-4f64-a6e0-f21128911e75",
@@ -598,8 +535,8 @@
 		},
 		{
 			"id" : 8,
-			"name" : "付款",
-			"description" : "运行订票-添加乘客，需要保险、餐品和托运后，在查看订票页面，点击“pay”支付票钱",
+			"name" : "付款-00",
+			"description" : "运行订票-01后，在查看订票页面，点击“pay”支付票钱",
 			"input" : {
 				"Select Seat" : "1st - 50.0",
 				"Select Contacts" : {
@@ -621,7 +558,7 @@
 			},
 			"success" : true,
 			"features" : [
-				15
+				16, 17
 			],
 			"traces" : [
 				"47842509-158c-47e5-b865-250a50b17624"
@@ -629,7 +566,7 @@
 		},
 		{
 			"id" : 9,
-			"name" : "查票-根据Minimum Station Number",
+			"name" : "查票-06",
 			"group" : "查票",
 			"input" : {
 				"Starting" : "Nan Jing",
@@ -648,7 +585,7 @@
 		},
 		{
 			"id" : 10,
-			"name" : "查票-根据Cheapest",
+			"name" : "查票-07",
 			"group" : "查票",
 			"input" : {
 				"Starting" : "Nan Jing",
@@ -667,8 +604,8 @@
 		},
 		{
 			"id" : 11,
-			"name" : "查票-根据Quickest",
 			"group" : "查票",
+			"name" : "查票-08",
 			"input" : {
 				"Starting" : "Nan Jing",
 				"Terminal" : "Shang Hai",
@@ -686,7 +623,7 @@
 		},
 		{
 			"id" : 12,
-			"name" : "用户登录",
+			"name" : "登录-00",
 			"group" : "登录",
 			"input" : {
 				"UserName" : "fdse_microservice",
@@ -705,7 +642,7 @@
 		},
 		{
 			"id" : 13,
-			"name" : "管理员登录",
+			"name" : "登录-01",
 			"group" : "登录",
 			"input" : {
 				"" : "admin",
@@ -722,7 +659,7 @@
 		},
 		{
 			"id" : 14,
-			"name" : "管理员查看订票列表",
+			"name" : "查看订票列表-00",
 			"input" : "进入Order页面",
 			"success" : true,
 			"features" : [
@@ -731,11 +668,11 @@
 			"traces" : [
 				"49987761-2488-4a8c-90e5-2780627ea4a5"
 			],
-			"description" : "管理员查看订票列表"
+			"description" : ""
 		},
 		{
 			"id" : 15,
-			"name" : "管理员添加订单",
+			"name" : "添加订票-00",
 			"input" : {
 				"Bought Date":"1583678462998",
 				"Travel Date":"1501257600000",
@@ -760,11 +697,11 @@
 			"traces" : [
 				"d79074f9-2884-40f8-8f60-61abd70206d9"
 			],
-			"description" : "管理员添加订单"
+			"description" : ""
 		},
 		{
 			"id" : 16,
-			"name" : "管理员修改订单",
+			"name" : "修改订票-00",
 			"input" : {
 				"Order Id" : "ce3431d9-925c-4945-aae5-53a0a1392d78",
 				"Passenger":"Contacts_Three",
@@ -780,11 +717,11 @@
 			"traces" : [
 				"b23e1f1a-7099-4ee3-a7ce-c7afcef1330f"
 			],
-			"description" : "管理员修改订单"
+			"description" : ""
 		},
 		{
 			"id" : 17,
-			"name" : "管理员删除订单",
+			"name" : "删除订票-00",
 			"input" : {
 				"Order Id" : "ce3431d9-925c-4945-aae5-53a0a1392d78"
 			},
@@ -795,11 +732,11 @@
 			"traces" : [
 				"20ef105b-53db-4331-bf48-65cfc404cf0e"
 			],
-			"description" : "管理员删除订单"
+			"description" : ""
 		},
 		{
 			"id" : 18,
-			"name" : "管理员查看路线列表",
+			"name" : "查看路线列表-00",
 			"input" : "进入路线列表页面",
 			"success" : true,
 			"features" : [
@@ -812,7 +749,7 @@
 		},
 		{
 			"id" : 19,
-			"name" : "管理员添加路线",
+			"name" : "添加路线-00",
 			"input" : {
 				"Stations":"[\"yingtan\",\"shanghai\",\"nanjing\",\"shijiazhuang\",\"taiyuan\"]",
 				"Distances":"[0,400,350,1000,1300]",
@@ -830,7 +767,7 @@
 		},
 		{
 			"id" : 20,
-			"name" : "管理员添加路线",
+			"name" : "添加路线-01",
 			"input" : {
 				"Stations":"[\"yingtan\",\"shanghai\",\"nanjing\",\"shijiazhuang\",\"taiyuan\"]",
 				"Distances":"[0,200,350,1000,1300]",

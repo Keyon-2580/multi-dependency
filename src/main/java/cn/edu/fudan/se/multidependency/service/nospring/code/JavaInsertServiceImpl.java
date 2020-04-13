@@ -15,7 +15,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFuncti
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportVariable;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
-import cn.edu.fudan.se.multidependency.utils.ProjectUtil.ProjectConfig;
+import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.ProjectConfig;
 import depends.entity.Entity;
 import depends.entity.FileEntity;
 import depends.entity.FunctionEntity;
@@ -88,6 +88,16 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			if (pck == null) {
 				pck = new Package();
 				pck.setDirectoryPath(directoryPath);
+				Entity parentEntity = fileEntity.getParent();
+				if(parentEntity == null) {
+					// 该java文件没有显式声明packge，为default包
+					pck.setEntityId(entityRepo.generateId().longValue());
+					pck.setPackageName(Package.JAVA_PACKAGE_DEFAULT);
+				} else {
+					pck.setEntityId(parentEntity.getId().longValue());
+					pck.setPackageName(parentEntity.getQualifiedName());
+				}
+				System.out.println(directoryPath);
 				addNode(pck, currentProject);
 				Contain projectContainsPackage = new Contain(currentProject, pck);
 				addRelation(projectContainsPackage);

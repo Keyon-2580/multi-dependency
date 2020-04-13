@@ -8,7 +8,7 @@ import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
-import cn.edu.fudan.se.multidependency.utils.ProjectUtil.ProjectConfig;
+import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.ProjectConfig;
 import depends.entity.Entity;
 import lombok.Setter;
 

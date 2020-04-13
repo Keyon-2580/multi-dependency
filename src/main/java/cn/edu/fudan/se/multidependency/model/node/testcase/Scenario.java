@@ -21,7 +21,7 @@ public class Scenario implements Node {
 
 	private static final long serialVersionUID = 2260001955112320935L;
 
-	private String scenarioName;
+	private String name;
 	
     @Id
     @GeneratedValue
@@ -29,11 +29,17 @@ public class Scenario implements Node {
     
     private Long entityId;
     
+    private Integer scenarioId;
+    
+    private String description;
+    
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
-		properties.put("scenarioName", getScenarioName() == null ? "" : getScenarioName());
+		properties.put("name", getName() == null ? "" : getName());
+		properties.put("description", getDescription() == null ? "" : getDescription());
+		properties.put("scenarioId", getScenarioId() == null ? -1 : getScenarioId());
 		return properties;
 	}
 

@@ -6,7 +6,7 @@ import java.util.List;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
-import cn.edu.fudan.se.multidependency.utils.ProjectUtil.MicroServiceDependency;
+import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.MicroServiceDependency;
 
 public class MicroServiceArchitectureInserter extends ExtractorForNodesAndRelationsImpl {
 	
