@@ -652,8 +652,11 @@ public class FeatureOrganizationService {
 			}
 		}
 		MicroServiceCallWithEntry result = new MicroServiceCallWithEntry();
+		result.setAllFeatures(allFeatures());
+		result.setAllMicroServices(allMicroServices());
 		result.setCalls(calls);
 		result.setTraceToEntry(traceToEntry);
+		result.setFeatureToParentFeature(featureToParentFeature);
 		return result;
 	}
 	

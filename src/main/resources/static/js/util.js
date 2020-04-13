@@ -99,6 +99,34 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			}
 	    		},
 	    		{
+	    			selector: 'node[type="TestCase_success"]',
+	    			style: {
+	    				'shape' : 'rectangle',
+	    				'width': 'data(length)',
+	    				'height': 30,
+	    				'text-valign': 'center',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': 'green',
+						'content': 'data(name)'
+	    			}
+	    		},
+	    		{
+	    			selector: 'node[type="TestCase_fail"]',
+	    			style: {
+	    				'shape' : 'rectangle',
+	    				'width': 'data(length)',
+	    				'height': 30,
+	    				'text-valign': 'center',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': 'red',
+						'content': 'data(name)'
+	    			}
+	    		},
+	    		{
 	    			selector: 'node[type="MicroService"]',
 	    			style: {
 	    				'shape' : 'hexagon',
@@ -109,6 +137,20 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    				'border-width': 1.5,
 	    				'border-color': '#555',
 	    				'background-color': '#f6f6f6',
+						'content': 'data(name)'
+	    			}
+	    		},
+	    		{
+	    			selector: 'node[type="MicroService_related"]',
+	    			style: {
+	    				'shape' : 'hexagon',
+	    				'width': 'data(length)',
+	    				'height': 30,
+	    				'text-valign': 'center',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': 'green',
 						'content': 'data(name)'
 	    			}
 	    		},
@@ -210,9 +252,19 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    				'line-color': 'blue',
 	                    'target-arrow-shape': 'triangle',
 	                    'target-arrow-color': 'blue',
-						'font-size' : 10,
-//						'color':"blue"
-						'color': colors['data(index)']
+						'font-size' : 10
+	    			}
+	    		},
+				{
+	    			selector: 'edge[type="GREEN"]',
+	    			style: {
+//	    				'content': 'data(value)',
+	    				'curve-style': 'bezier',
+	    				'width': 1,
+	    				'line-color': 'green',
+	                    'target-arrow-shape': 'triangle',
+	                    'target-arrow-color': 'green',
+						'font-size' : 10
 	    			}
 	    		}
 	    	],
@@ -240,7 +292,11 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 
 	};
 	return {
+		test2: function() {
+			
+		},
 		test: function(){
+			console.log("eeeeeeeeeeeee");
 		},
 		showTreeView: function(containerDivId, data) {
 			_showTreeView(containerDivId, data)

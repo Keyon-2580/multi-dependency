@@ -2,8 +2,86 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'utils', 'cyto
 	, function ($, bootstrap, bootstrap_multiselect, jqplot, utils, cytoscape) {
 	var cy = null;
 	var cyEntry = null;
+	var cyEntryInitElement = null;
+	
+	var queryEntryEdge = function(testCaseId) {
+		var testCaseIds = [];
+		testCaseIds[testCaseIds.length] = testCaseId;
+		var ids = {
+			"ids" : testCaseIds
+		};
+		$.ajax({
+			type : "POST",
+			contentType : "application/json",
+			dataType : "json",
+			url : "/testcase/microservice/query/entry/edges",
+			data : JSON.stringify(ids),
+			success : function(result) {
+				if (result.result == "success") {
+					console.log(result);
+					cyEntry.remove('node');
+					cyEntry.remove('edge');
+					cyEntry.add(cyEntryInitElement);
+					var relatedEdges = result.edges;
+					console.log(relatedEdges);
+					var datas = new Array();
+					for(var i = 0; i < relatedEdges.length; i++) {
+						cyEntry.remove(cyEntry.$("#" + relatedEdges[i].id));
+						var data = {
+								group: 'edges',
+								data: {
+									type: "GREEN",
+									id: relatedEdges[i].id,
+									source: relatedEdges[i].source,
+									target: relatedEdges[i].target
+								}
+						}
+						datas.push(data);
+					}
+					cyEntry.add(datas);
+					var relatedNodes = result.nodes;
+					console.log(relatedNodes);
+					for(var i = 0; i < cyEntry.nodes().length; i++) {
+						if(cyEntry.nodes()[i].data().type == "Feature" || cyEntry.nodes()[i].data().type == "TestCase_success"
+							 || cyEntry.nodes()[i].data().type == "TestCase_fail") {
+							continue;
+						}
+						var temp = cyEntry.$("#" + cyEntry.nodes()[i].data().id).data();
+						temp.type = "MicroService";
+						cyEntry.$("#" + cyEntry.nodes()[i].data().id).data(temp);
+					}
+					for(var j = 0; j < relatedNodes.length; j++) {
+						var temp = cyEntry.$("#" + relatedNodes[j].id).data();
+						temp.type = "MicroService_related";
+						cyEntry.$("#" + relatedNodes[j].id).data(temp);
+					}
+					/*for(var i = 0; i < cyEntry.nodes().length; i++) {
+						if(cyEntry.nodes()[i].data().type == "Feature" || cyEntry.nodes()[i].data().type == "TestCase_success"
+							 || cyEntry.nodes()[i].data().type == "TestCase_fail") {
+							continue;
+						}
+						for(var j = 0; j < relatedNodes.length; j++) {
+							if(cyEntry.nodes()[i].data().id == relatedNodes[j].id) {
+								console.log(cyEntry.nodes()[i].data().id + " " + relatedNodes[j].id);
+								var temp = cyEntry.$("#" + relatedNodes[j].id).data();
+								temp.type = "MicroService_related";
+								cyEntry.$("#" + cyEntry.nodes()[i].data().id).data(temp);
+							} else {
+								var temp = cyEntry.$("#" + cyEntry.nodes()[i].data().id).data();
+								temp.type = "MicroService";
+								cyEntry.$("#" + cyEntry.nodes()[i].data().id).data(temp);
+							}
+						}
+					}*/
+					
+					
+				}
+			}
+		});
+	}
 	var queryEntry = function(testCaseIds) {
-		console.log("queryEntry")
+		cyEntry = null;
+		cyEntryInitElement = null;
 		$.ajax({
 			type : "POST",
 			contentType : "application/json",
@@ -11,9 +89,22 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'utils', 'cyto
 			url : "/testcase/microservice/query/entry",
 			data : JSON.stringify(testCaseIds),
 			success : function(result) {
-				console.log(result);
 				if (result.result == "success") {
 					cyEntry = utils.showDataInCytoscape($("#entry"), result.value.value, "dagre");
+					utils.test();
+					console.log(cyEntry.elements());
+					if(cyEntryInitElement == null) {
+						cyEntryInitElement = cyEntry.elements();
+					}
+					cyEntry.on('tap', 'node', function(evt){
+						var node = evt.target;
+						console.log(node);
+						console.log(node.data());
+						if(node.data().type != "TestCase_success" && node.data().type != "TestCase_fail") {
+							return ;
+						}
+						queryEntryEdge(node.data().id);
+					})
 				}
 			}
 		});
