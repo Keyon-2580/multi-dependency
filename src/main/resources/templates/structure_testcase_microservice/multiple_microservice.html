@@ -22,23 +22,63 @@
 <body>
 	<div th:include="nav.html::nav"></div>
 	<div class="col-sm-12" style="margin-bottom: 15px;">
-		<div>
+		<div class="col-sm-12 row" >
 			<form role="form" >
-				<div class="form-group">
-					<select id="testCaseList" multiple="multiple" name="testCaseList">
-						<optgroup th:each="group, testCasesList : ${testCases}"
-							th:label="${group.key}">
-							<option th:each="testCase : ${group.value}"
-								th:text="${testCase.testCaseName}" th:value="${testCase.testCaseId}"></option>
-						</optgroup>
-					</select>
-					<button id="submit" type="button" class="btn btn-default">提交</button>
-					<button id="showImg" type="button" class="btn btn-default">保存图片</button>
+				<div class="form-group row col-sm-4">
+					<div class="col-sm-3">
+						<label>场景：</label>
+					</div>
+					<div class="col-sm-9">
+						<select id="scenarioList" multiple="multiple" name="scenarioList">
+							<option th:each="scenario : ${scenarios}"
+									th:text="${scenario.name}" th:value="${scenario.scenarioId}"></option>
+						</select>
+						<button id="submitScenario" type="button" class="btn btn-default">提交</button>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="col-sm-12 row">
+			<form role="form" >
+				<div class="form-group row col-sm-4">
+					<div class="col-sm-3">
+						<label>测试用例：</label>
+					</div>
+					<div class="col-sm-9">
+						<select id="testCaseList" multiple="multiple" name="testCaseList">
+							<optgroup th:each="group, testCasesList : ${testCases}"
+								th:label="${group.key}">
+								<option th:each="testCase : ${group.value}"
+									th:text="${testCase.testCaseName}" th:value="${testCase.testCaseId}"></option>
+							</optgroup>
+						</select>
+						<button id="submitTestCase" type="button" class="btn btn-default">提交</button>
+					</div>						
+				</div>
+			</form>
+		</div>
+		<div class="col-sm-12 row">
+			<form role="form" >
+				<div class="form-group row col-sm-4">
+					<div class="col-sm-3">
+						<label>特性：</label>
+					</div>
+					<div class="col-sm-9">
+						<select id="featureList" multiple="multiple" name="featureList">
+							<option th:each="feature : ${features}"
+									th:text="${feature.featureName}" th:value="${feature.featureId}"></option>
+						</select>
+						<button id="submitFeature" type="button" class="btn btn-default">提交</button>
+					</div>
 				</div>
 			</form>
 		</div>
 		<div id="testCaseTitle">
 		</div>
+		<div>
+			<button id="showImg" type="button" class="btn btn-default">保存图片</button>
+		</div>
+		<hr/>
 		<div>
 			<div id="entry" class="div_cytoscape_content"></div>
 		</div>

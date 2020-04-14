@@ -15,8 +15,10 @@ import com.alibaba.fastjson.JSONObject;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.ScenarioDefineTestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
@@ -36,6 +38,7 @@ public class FeatureOrganizationService {
 	private final Map<Trace, List<Span>> traceToSpans;
 	private final Map<Span, List<SpanCallSpan>> spanCallSpans;
 	private final Map<Span, MicroServiceCreateSpan> spanBelongToMicroService;
+	private final Map<Scenario, List<ScenarioDefineTestCase>> scenarioDefineTestCases;
 	
 	public List<Span> relatedSpan(Iterable<TestCase> testCases) {
 		List<Span> result = new ArrayList<>();
@@ -583,6 +586,22 @@ public class FeatureOrganizationService {
 				traceBelongToTestCase.put(run.getTrace(), testCase);
 			}
 		}
+		Map<TestCase, Scenario> scenarioDefineTestCases = new HashMap<>();
+		for(TestCase testCase : testCases) {
+			for(Scenario scenario : this.scenarioDefineTestCases.keySet()) {
+				boolean contain = false;
+				Iterable<ScenarioDefineTestCase> defines = this.scenarioDefineTestCases.get(scenario);
+				for(ScenarioDefineTestCase define : defines) {
+					if(define.getTestCase().equals(testCase)) {
+						contain = true;
+						break;
+					}
+				}
+				if(contain) {
+					scenarioDefineTestCases.put(testCase, scenario);
+				}
+			}
+		}
 		Map<TestCase, List<MicroService>> testCaseToEntries = new HashMap<>();
 		Map<TestCase, List<Feature>> testCaseExecuteFeatures = new HashMap<>();
 		MicroServiceCallWithEntry result = findMsCallMsByTraces(traces);
@@ -600,6 +619,7 @@ public class FeatureOrganizationService {
 		}
 		result.setTestCaseToEntries(testCaseToEntries);
 		result.setTestCaseExecuteFeatures(testCaseExecuteFeatures);
+		result.setScenarioDefineTestCases(scenarioDefineTestCases);
 		return result;
 	}
 	
@@ -654,6 +674,7 @@ public class FeatureOrganizationService {
 		MicroServiceCallWithEntry result = new MicroServiceCallWithEntry();
 		result.setAllFeatures(allFeatures());
 		result.setAllMicroServices(allMicroServices());
+		result.setAllScenarios(allScenarios());
 		result.setCalls(calls);
 		result.setTraceToEntry(traceToEntry);
 		result.setFeatureToParentFeature(featureToParentFeature);
@@ -791,6 +812,20 @@ public class FeatureOrganizationService {
 			@Override
 			public int compare(Feature o1, Feature o2) {
 				return o1.getFeatureId().compareTo(o2.getFeatureId());
+			}
+		});
+		return result;
+	}	
+	
+	public Iterable<Scenario> allScenarios() {
+		List<Scenario> result = new ArrayList<>();
+		for(Scenario scenario : scenarioDefineTestCases.keySet()) {
+			result.add(scenario);
+		}
+		result.sort(new Comparator<Scenario>() {
+			@Override
+			public int compare(Scenario o1, Scenario o2) {
+				return o1.getScenarioId().compareTo(o2.getScenarioId());
 			}
 		});
 		return result;

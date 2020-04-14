@@ -73,6 +73,20 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			}
 	    		},
 	    		{
+	    			selector: 'node[type="Scenario"]',
+	    			style: {
+	    				'shape' : 'rectangle',
+	    				'width': 'data(length)',
+	    				'height': 30,
+	    				'text-valign': 'center',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': '#f6f6f6',
+						'content': 'data(name)'
+	    			}
+	    		},
+	    		{
 	    			selector: 'node[type="TestCase"]',
 	    			style: {
 	    				'shape' : 'rectangle',

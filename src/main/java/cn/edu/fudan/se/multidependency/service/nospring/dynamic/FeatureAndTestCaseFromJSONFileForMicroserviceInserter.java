@@ -8,12 +8,15 @@ import java.util.Map;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.exception.ScenarioIdErrorException;
 import cn.edu.fudan.se.multidependency.exception.TestCaseIdErrorException;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.ScenarioDefineTestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
@@ -34,6 +37,7 @@ public class FeatureAndTestCaseFromJSONFileForMicroserviceInserter extends Extra
 		JSONObject featureJsonFile = JSONUtil.extractJSONObject(new File(featureConfigPath));
 		JSONArray featuresArray = featureJsonFile.getJSONArray("features");
 		JSONArray testcasesArray = featureJsonFile.getJSONArray("testcases");
+		JSONArray scenariosArray = featureJsonFile.getJSONArray("scenarios");
 		for(int i = 0; i < featuresArray.size(); i++) {
 			JSONObject featureTemp = featuresArray.getJSONObject(i);
 			Feature feature = new Feature();
@@ -110,6 +114,34 @@ public class FeatureAndTestCaseFromJSONFileForMicroserviceInserter extends Extra
 				});
 			}
 			
+		}
+		
+		for(int i = 0; i < scenariosArray.size(); i++) {
+			JSONObject scenarioTemp = scenariosArray.getJSONObject(i);
+			Scenario scenario = new Scenario();
+			scenario.setEntityId(generateEntityId());
+			Integer scenarioId = scenarioTemp.getInteger("id");
+			if(scenarioId == null || scenarioId < 0) {
+				throw new ScenarioIdErrorException(scenarioId);
+			}
+			scenario.setScenarioId(scenarioId);
+			scenario.setName(scenarioTemp.getString("name"));
+			scenario.setDescription(scenarioTemp.getString("description"));
+			addNode(scenario, null);
+			
+			JSONArray testcaseIds = scenarioTemp.getJSONArray("testcases");
+			if(testcaseIds == null) {
+				continue;
+			}
+			for(int j = 0; j < testcaseIds.size(); j++) {
+				Integer testcaseId = testcaseIds.getInteger(j);
+				TestCase testCase = this.getNodes().findTestCases().get(testcaseId);
+				if(testCase == null) {
+					throw new Exception("TestCaseId " + testcaseId + " 不存在");
+				}
+				ScenarioDefineTestCase relation = new ScenarioDefineTestCase(scenario, testCase);
+				addRelation(relation);
+			}
 		}
 	}
 

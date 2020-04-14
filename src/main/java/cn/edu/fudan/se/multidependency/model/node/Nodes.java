@@ -11,6 +11,7 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
+import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 
 public class Nodes {
@@ -157,12 +158,22 @@ public class Nodes {
 		return null;
 	}
 
-	public Map<Long, Scenario> findScenarios() {
-		Map<Long, Scenario> scenarios = new HashMap<>();
+	public Map<Integer, Scenario> findScenarios() {
+		Map<Integer, Scenario> scenarios = new HashMap<>();
 		findNodesByNodeType(NodeLabelType.Scenario).forEach(node -> {
-			scenarios.put(node.getId(), (Scenario) node);
+			Scenario scenario = (Scenario) node;
+			scenarios.put(scenario.getScenarioId(), scenario);
 		});
 		return scenarios;
+	}
+	
+	public Map<Integer, TestCase> findTestCases() {
+		Map<Integer, TestCase> features = new HashMap<>();
+		findNodesByNodeType(NodeLabelType.TestCase).forEach(node -> {
+			TestCase testcase = (TestCase) node;
+			features.put(testcase.getTestCaseId(), testcase);
+		});
+		return features;
 	}
 	
 	/**
@@ -173,7 +184,7 @@ public class Nodes {
 		Map<Integer, Feature> features = new HashMap<>();
 		findNodesByNodeType(NodeLabelType.Feature).forEach(node -> {
 			Feature feature = (Feature) node;
-			features.put(feature.getFeatureId(), (Feature) node);
+			features.put(feature.getFeatureId(), feature);
 		});
 		return features;
 	}

@@ -27,6 +27,11 @@ public class ScenarioDefineTestCase implements Relation {
     @GeneratedValue
     private Long id;
 	
+	public ScenarioDefineTestCase(Scenario scenario, TestCase testCase) {
+		this.scenario = scenario;
+		this.testCase = testCase;
+	}
+	
 	@StartNode
 	private Scenario scenario;
 	
@@ -50,7 +55,8 @@ public class ScenarioDefineTestCase implements Relation {
 
 	@Override
 	public Map<String, Object> getProperties() {
-		return new HashMap<>();
+		Map<String, Object> properties = new HashMap<>();
+		return properties;
 	}
 
 }

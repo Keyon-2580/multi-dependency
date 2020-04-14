@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroServiceCallWithEntry;
@@ -41,6 +43,10 @@ public class MDController {
 	public String multipleMicroService(HttpServletRequest request) {
 		Map<String, List<TestCase>> allTestCases = featureOrganizationService.allTestCasesGroupByTestCaseGroup();
 		request.setAttribute("testCases", allTestCases);
+		Iterable<Scenario> allScenarios = featureOrganizationService.allScenarios();
+		request.setAttribute("scenarios", allScenarios);
+		Iterable<Feature> allFeatures = featureOrganizationService.allFeatures();
+		request.setAttribute("features", allFeatures);
 		return "structure_testcase_microservice/multiple_microservice";
 	}
 	
@@ -78,7 +84,8 @@ public class MDController {
 		return result;
 	}
 	
-	@PostMapping(value = "/multiple/microservice/query")
+	
+	@PostMapping(value = "/multiple/microservice/query/testcase")
 	@ResponseBody
 	public JSONObject getMicroServiceEntry(@RequestBody Map<String, Object> params) {
 		JSONObject result = new JSONObject();
@@ -89,6 +96,7 @@ public class MDController {
 			boolean showAllFeatures = (boolean) params.getOrDefault("showAllFeatures", true);
 			boolean showAllMicroServices = (boolean) params.getOrDefault("showAllMicroServices", true);
 			boolean showStructure = (boolean) params.getOrDefault("showStructure", true);
+//			boolean showAllScenarios = (boolean) params.getOrDefault("showAll", true);
 			List<Integer> ids = new ArrayList<>();
 			for(String idStr : idsStr) {
 				ids.add(Integer.parseInt(idStr));
@@ -106,6 +114,7 @@ public class MDController {
 			callsWithEntry.setShowAllFeatures(showAllFeatures);
 			callsWithEntry.setShowAllMicroServices(showAllMicroServices);
 			callsWithEntry.setShowStructure(showStructure);
+//			callsWithEntry.setShowAllScenarios(showAllScenarios);
 			result.put("result", "success");
 			result.put("value", callsWithEntry.toCytoscapeWithStructure());
 		} catch (Exception e) {

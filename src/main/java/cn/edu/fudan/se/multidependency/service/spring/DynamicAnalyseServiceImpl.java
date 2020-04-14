@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
@@ -21,6 +20,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.ScenarioDefineTestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
@@ -30,6 +30,7 @@ import cn.edu.fudan.se.multidependency.repository.node.testcase.ScenarioReposito
 import cn.edu.fudan.se.multidependency.repository.node.testcase.TestCaseRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.dynamic.ScenarioDefineTestCaseRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.TestCaseExecuteFeatureRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.TestCaseRunTraceRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanInstanceOfRestfulAPIRepository;
@@ -54,6 +55,9 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	
 	@Autowired
 	private TestCaseRunTraceRepository testCaseRunTraceRepository;
+	
+	@Autowired
+	private ScenarioDefineTestCaseRepository scenarioDefineTestCaseRepository;
 
 	@Autowired
 	private FunctionDynamicCallFunctionRepository functionDynamicCallFunctionRepository;
@@ -392,6 +396,21 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	@Override
 	public SpanInstanceOfRestfulAPI findSpanBelongToAPI(Span span) {
 		return spanInstanceOfRestfulAPIRepository.findSpanBelongToAPI(span.getSpanId());
+	}
+
+	@Override
+	public Map<Scenario, List<ScenarioDefineTestCase>> findAllScenarioDefineTestCases() {
+		Map<Scenario, List<ScenarioDefineTestCase>> result = new HashMap<>();
+		for(Scenario s : findAllScenarios()) {
+			result.put(s, new ArrayList<>());
+		}
+		for(ScenarioDefineTestCase st : scenarioDefineTestCaseRepository.findAll()) {
+			Scenario s = st.getScenario();
+			List<ScenarioDefineTestCase> defines = result.get(s);
+			defines.add(st);
+			result.put(s, defines);
+		}
+		return result;
 	}
 
 

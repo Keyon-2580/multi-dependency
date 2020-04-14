@@ -44,7 +44,7 @@ public class RelationInserterService {
 	@Autowired
 	private DynamicAnalyseService dynamicAnalyseService;*/
 	
-//	@Bean
+	@Bean
 	public void addMsCallMsRelation() {
 		Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> calls 
 			= featureOrganizationService.findMsCallMsByTraces(featureOrganizationService.allTraces()).getCalls();

@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
@@ -30,6 +31,8 @@ public class MicroServiceCallWithEntry {
 	
 	private Map<TestCase, List<Feature>> testCaseExecuteFeatures = new HashMap<>();
 	
+	private Map<TestCase, Scenario> scenarioDefineTestCases = new HashMap<>();
+	
 	private Map<Feature, Feature> featureToParentFeature = new HashMap<>();
 	
 	private Iterable<Feature> allFeatures = new ArrayList<>();
@@ -38,10 +41,13 @@ public class MicroServiceCallWithEntry {
 	
 	private Map<MicroService, Map<MicroService, MicroServiceDependOnMicroService>> msDependOns = new HashMap<>();
 	
+	private Iterable<Scenario> allScenarios = new ArrayList<>();
+	
 	public boolean containCall(MicroService caller, MicroService called) {
 		return this.calls.getOrDefault(caller, new HashMap<>()) != null;
 	}
 	
+	private boolean showAllScenarios = true;
 	private boolean showAllFeatures = true;
 	private boolean showAllMicroServices = true;
 	private boolean showStructure = true;
@@ -148,9 +154,18 @@ public class MicroServiceCallWithEntry {
 		JSONArray nodes = new JSONArray();
 		JSONArray edges = new JSONArray();
 		Map<MicroService, Boolean> isMicroServiceNodeAdd = new HashMap<>();
+		Map<Scenario, Boolean> isScenarioNodeAdd = new HashMap<>();
 		Map<Feature, Boolean> isFeatureNodeAdd = new HashMap<>();
 		Map<Feature, Boolean> isFeatureNodeParent = new HashMap<>();
 		
+		if(showAllScenarios) {
+			for(Scenario scenario : allScenarios) {
+				if(!isScenarioNodeAdd.getOrDefault(scenario, false)) {
+					nodes.add(ProjectUtil.scenarioToNode(scenario, "Scenario"));
+					isScenarioNodeAdd.put(scenario, true);
+				}
+			}
+		}
 		if(showAllMicroServices) {
 			for(MicroService ms : allMicroServices) {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false)) {
@@ -179,6 +194,14 @@ public class MicroServiceCallWithEntry {
 		
 		for(TestCase testCase : testCaseToEntries.keySet()) {
 			nodes.add(ProjectUtil.testCaseToNode(testCase, "TestCase_" + (testCase.isSuccess() ? "success" : "fail")));
+			Scenario scenario = this.scenarioDefineTestCases.get(testCase);
+			if(scenario != null) {
+				if(!isScenarioNodeAdd.getOrDefault(scenario, false)) {
+					nodes.add(ProjectUtil.scenarioToNode(scenario, "Scenario"));
+					isScenarioNodeAdd.put(scenario, true);
+				}
+				edges.add(ProjectUtil.relationToEdge(scenario, testCase, "ScenarioDefineTestCase", null));
+			}
 			List<MicroService> entries = testCaseToEntries.getOrDefault(testCase, new ArrayList<>());
 			for(MicroService entry : entries) {
 				if(!isMicroServiceNodeAdd.getOrDefault(entry, false)) {

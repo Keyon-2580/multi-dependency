@@ -12,6 +12,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.ScenarioDefineTestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
@@ -41,6 +42,8 @@ public interface DynamicAnalyseService {
 	Map<Feature, List<TestCaseExecuteFeature>> findAllFeatureExecutedByTestCases();
 	
 	Map<TestCase, List<TestCaseRunTrace>> findAllTestCaseRunTraces();
+	
+	Map<Scenario, List<ScenarioDefineTestCase>> findAllScenarioDefineTestCases();
 
 	Map<Feature, Feature> findAllFeatureToParentFeature();
 	

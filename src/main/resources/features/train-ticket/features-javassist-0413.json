@@ -13,7 +13,7 @@
 			"name" : "查票",
 			"description" : "根据输入查询所需车票",
 			"testcases" : [
-				0, 1, 2, 3, 4, 5, 9, 10, 11
+
 			]
 		},
 		{
@@ -21,138 +21,48 @@
 			"name" : "订票",
 			"description" : "用户订购查询到的车票",
 			"testcases" : [
-				6, 7
+
 			]
 		},
 		{
 			"id" : 3,
 			"name" : "付款",
-			"description" : "支付所订票的款项",
-			"testcases" : [
-				8
-			]
+			"description" : "支付所订票的款项"
 		},
 		{
 			"id" : 4,
-			"name" : "用户查看订单列表",
-			"description" : "用户查看所有订单列表",
-			"testcases" : [
-			]
+			"name" : "查看订单列表",
+			"description" : "查看所有订单列表"
 		},
 		{
 			"id" : 5,
-			"name" : "用户取消订单",
-			"description" : "用户取消订单",
-			"testcases" : [
-			]
+			"name" : "取消订单",
+			"description" : "取消订单"
 		},
 		{
 			"id" : 6,
-			"name" : "用户修改订单",
-			"description" : "用户修改订单",
-			"testcases" : [
-			]
+			"name" : "修改订单",
+			"description" : "修改订单"
 		},
 		{
 			"id" : 7,
 			"name" : "托运",
-			"description" : "托运行李",
-			"testcases" : [
-				7
-			]
+			"description" : "托运行李"
 		},
 		{
 			"id" : 8,
 			"name" : "检票",
-			"description" : "对已支付的订单，进行检票",
-			"testcases" : [
-			]
+			"description" : "对已支付的订单，进行检票"
 		},
 		{
 			"id" : 9,
 			"name" : "进站",
-			"description" : "对已检票的车票，完成进站",
-			"testcases" : [
-			]
+			"description" : "对已检票的车票，完成进站"
 		},
 		{
 			"id" : 10,
 			"name" : "打印车票凭证",
-			"description" : "对已完成的车票，打印凭证",
-			"testcases" : [
-			]
-		},
-		{
-			"id" : 11,
-			"name" : "管理员查看订票列表",
-			"description" : "管理员查看订票列表",
-			"testcases" : [
-				14
-			]
-		},
-		{
-			"id" : 12,
-			"name" : "管理员添加订单",
-			"description" : "管理员添加订单",
-			"testcases" : [
-				15
-			]
-		},
-		{
-			"id" : 13,
-			"name" : "管理员修改订单",
-			"description" : "管理员修改订单",
-			"testcases" : [
-				16
-			]
-		},
-		{
-			"id" : 14,
-			"name" : "管理员删除订单",
-			"description" : "管理员删除订单",
-			"testcases" : [
-				17
-			]
-		},
-		{
-			"id" : 15,
-			"name" : "查看路线列表",
-			"description" : "管理员查看路线列表",
-			"testcases" : [
-				18
-			]
-		},
-		{
-			"id" : 16,
-			"name" : "添加路线",
-			"description" : "管理员添加路线",
-			"testcases" : [
-				19, 20, 21
-			]
-		},
-		{
-			"id" : 17,
-			"name" : "修改路线",
-			"description" : "管理员修改路线",
-			"testcases" : [
-				22, 23
-			]
-		},
-		{
-			"id" : 18,
-			"name" : "删除路线",
-			"description" : "管理员删除路线",
-			"testcases" : [
-				24
-			]
-		},
-		{
-			"id" : 19,
-			"name" : "管理员查看用户联系人信息",
-			"description" : "管理员查看用户联系人信息",
-			"testcases" : [
-				25
-			]
+			"description" : "对已完成的车票，打印凭证"
 		}
 	],
 	"features" : [
@@ -889,7 +799,7 @@
 		},
 		{
 			"id" : 18,
-			"name" : "查看路线列表",
+			"name" : "管理员查看路线列表",
 			"input" : "进入路线列表页面",
 			"success" : true,
 			"features" : [
@@ -902,7 +812,7 @@
 		},
 		{
 			"id" : 19,
-			"name" : "添加路线",
+			"name" : "管理员添加路线",
 			"input" : {
 				"Stations":"[\"yingtan\",\"shanghai\",\"nanjing\",\"shijiazhuang\",\"taiyuan\"]",
 				"Distances":"[0,400,350,1000,1300]",
@@ -920,7 +830,7 @@
 		},
 		{
 			"id" : 20,
-			"name" : "添加路线",
+			"name" : "管理员添加路线",
 			"input" : {
 				"Stations":"[\"yingtan\",\"shanghai\",\"nanjing\",\"shijiazhuang\",\"taiyuan\"]",
 				"Distances":"[0,200,350,1000,1300]",
@@ -938,7 +848,7 @@
 		},
 		{
 			"id" : 21,
-			"name" : "添加路线",
+			"name" : "添加路线-02",
 			"input" : {
 				"Stations":"yingtan,shanghai,nanjing,shijiazhuang,taiyuan",
 				"Distances":"0,200,350,1000,1300",
@@ -956,7 +866,7 @@
 		},
 		{
 			"id" : 22,
-			"name" : "修改路线",
+			"name" : "修改路线-00",
 			"input" : {
 				"Route Id" : "0b23bd3e-876a-4af3-b920-c50a90c90b04",
 				"Stations":"shanghai,nanjing,shijiazhuang,taiyuan->nanjing,shijiazhuang,taiyuan,yingtan",
@@ -975,7 +885,7 @@
 		},
 		{
 			"id" : 23,
-			"name" : "修改路线",
+			"name" : "修改路线-01",
 			"input" : {
 				"Route Id" : "0b23bd3e-876a-4af3-b920-c50a90c90b04",
 				"Stations":"shanghai,nanjing,shijiazhuang,taiyuan->nanjing,shijiazhuang,taiyuan,yingtan",
@@ -994,7 +904,7 @@
 		},
 		{
 			"id" : 24,
-			"name" : "删除路线",
+			"name" : "删除路线-00",
 			"input" : {
 				"Route Id" : "0b23bd3e-876a-4af3-b920-c50a90c90b04"
 			},
@@ -1009,7 +919,7 @@
 		},
 		{
 			"id" : 25,
-			"name" : "管理员查看用户联系人信息",
+			"name" : "查看联系方式-00",
 			"input" : "页面查看",
 			"success" : true,
 			"features" : [

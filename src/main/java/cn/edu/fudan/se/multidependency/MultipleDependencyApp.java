@@ -13,9 +13,11 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.ScenarioDefineTestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
@@ -59,6 +61,7 @@ public class MultipleDependencyApp {
 		Map<Span, List<SpanCallSpan>> spanCallSpans = new HashMap<>();
 		Map<Span, MicroServiceCreateSpan> spanBelongToMicroService = new HashMap<>();
 		Map<Feature, Feature> featureToParentFeature = dynamicAnalyseService.findAllFeatureToParentFeature();
+		Map<Scenario, List<ScenarioDefineTestCase>> scenarioDefineTestCases = dynamicAnalyseService.findAllScenarioDefineTestCases();
 		
 		for (List<TestCaseRunTrace> runs : testCaseRunTraces.values()) {
 			for(TestCaseRunTrace run : runs) {
@@ -75,7 +78,7 @@ public class MultipleDependencyApp {
 		}
 		FeatureOrganizationService organization = new FeatureOrganizationService(
 				allMicroService, testCaseExecuteFeatures, featureExecutedByTestCases, 
-				featureToParentFeature, testCaseRunTraces, traceToSpans, spanCallSpans, spanBelongToMicroService);
+				featureToParentFeature, testCaseRunTraces, traceToSpans, spanCallSpans, spanBelongToMicroService, scenarioDefineTestCases);
 
 		return organization;
 	}	
