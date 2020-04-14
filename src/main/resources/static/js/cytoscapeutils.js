@@ -16,6 +16,15 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	};
 	var _showDataInCytoscape = function(container, elements, layout="breadthfirst") {
 		cytoscape_dagre(cytoscape);
+		var styleEdgeBlue = {
+				'content': 'data(value)',
+				'curve-style': 'bezier',
+				'width': 1,
+				'line-color': 'blue',
+				'target-arrow-shape': 'triangle',
+				'target-arrow-color': 'blue',
+				'font-size' : 20
+		};
 		var styleEdgeBlack = {
 				'content': 'data(value)',
 				'curve-style': 'bezier',
@@ -183,6 +192,18 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 				{
 	    			selector: 'edge[type="NewEdges"]',
 	    			style: styleEdgeBlack
+	    		},
+				{
+	    			selector: 'edge[type="NewEdges_Edge1_Edge2"]',
+	    			style: styleEdgeGreen
+	    		},
+				{
+	    			selector: 'edge[type="NewEdges_Edge1"]',
+	    			style: styleEdgeBlack
+	    		},
+				{
+	    			selector: 'edge[type="NewEdges_Edge2"]',
+	    			style: styleEdgeRed
 	    		}
 	    	],
 	    	elements: elements

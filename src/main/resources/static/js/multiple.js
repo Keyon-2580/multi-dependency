@@ -2,13 +2,27 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 	, function ($, bootstrap, bootstrap_multiselect, jqplot, utils, cytoscape) {
 	var cyEntry = null;
 	
+	var firstTestCaseId = null;
+	var secondTestCaseId = null;
+	
 	var queryEntryEdge = function(testCaseId, callChain = false) {
+		
 		var testCaseIds = [];
-		testCaseIds[testCaseIds.length] = testCaseId;
+		
+		if(firstTestCaseId == null) {
+			firstTestCaseId = testCaseId;
+			testCaseIds[testCaseIds.length] = firstTestCaseId;
+		} else {
+			secondTestCaseId = testCaseId;
+			testCaseIds[testCaseIds.length] = firstTestCaseId;
+			testCaseIds[testCaseIds.length] = secondTestCaseId;
+		}
+		
 		var ids = {
 			"ids" : testCaseIds,
 			"callChain" : false
 		};
+		console.log(ids);
 		$.ajax({
 			type : "POST",
 			contentType : "application/json",
@@ -25,6 +39,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 					cyEntry.remove('edge[type="NoStructureCall"]');
 					cyEntry.remove('edge[type="TestCaseExecuteMicroService"]');
 					cyEntry.remove('edge[type="NewEdges"]');
+					cyEntry.remove('edge[type="NewEdges_Edge1_Edge2"]');
+					cyEntry.remove('edge[type="NewEdges_Edge1"]');
+					cyEntry.remove('edge[type="NewEdges_Edge2"]');
 					var relatedNodes = result.nodes;
 					var relatedEdges = result.edges;
 					var datas = new Array();
@@ -33,8 +50,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 						var data = {
 								group: 'edges',
 								data: {
-									type: "NewEdges",
+//									type: "NewEdges",
 //									id: relatedEdges[i].id,
+									type: relatedEdges[i].type == null ? "NewEdges" : relatedEdges[i].type,
 									source: relatedEdges[i].source,
 									target: relatedEdges[i].target,
 									value: relatedEdges[i].value
@@ -43,6 +61,10 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 						datas.push(data);
 					}
 					cyEntry.add(datas);
+					if(firstTestCaseId != null && secondTestCaseId != null) {
+						firstTestCaseId = null;
+						secondTestCaseId = null;
+					}
 				}
 			}
 		});

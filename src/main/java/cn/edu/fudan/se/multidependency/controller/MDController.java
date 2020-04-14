@@ -24,6 +24,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroServiceCallWithEntry;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
+import cn.edu.fudan.se.multidependency.service.spring.MicroServiceCallWithEntry.CytoscapeEdge;
 
 @Controller
 public class MDController {
@@ -55,24 +56,51 @@ public class MDController {
 	public JSONObject getMicroServiceCallChainWithTestCaseId(@RequestBody Map<String, Object> params) {
 		JSONObject result = new JSONObject();
 		try {
+			@SuppressWarnings("unchecked")
 			List<String> idsStr = (List<String>) params.get("ids");
-			boolean callChain = (boolean) params.getOrDefault("callChain", false);
 			List<Long> ids = new ArrayList<>();
 			for(String idStr : idsStr) {
 				ids.add(Long.parseLong(idStr));
 			}
 			Iterable<TestCase> allTestCases = featureOrganizationService.allTestCases();
 			List<TestCase> selectTestCases = new ArrayList<>();
-			for(TestCase testCase :allTestCases) {
-				Long id = testCase.getId();
-				if(ids.contains(id)) {
-					selectTestCases.add(testCase);
+			for(Long selectId : ids) {
+				for(TestCase testCase :allTestCases) {
+					Long id = testCase.getId();
+					if(selectId.equals(id)) {
+						selectTestCases.add(testCase);
+						break;
+					}
 				}
 			}
-			MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(selectTestCases);
-			JSONArray nodes = callsWithEntry.relatedMicroServiceIds();
-			JSONArray edges = callsWithEntry.relatedEdgeIds(callChain);
-			
+			assert(selectTestCases.size() <= 2);
+			JSONArray nodes = null;
+			JSONArray edges = null;
+			if(selectTestCases.size() < 2) {
+				MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(selectTestCases);
+				nodes = callsWithEntry.relatedMicroServiceIds();
+				edges = callsWithEntry.relatedEdgeIds();
+			} else {
+				System.out.println("有两个测试用例");
+				MicroServiceCallWithEntry callsWithEntry1 = featureOrganizationService.findMsCallMsByTestCases(selectTestCases.get(0));
+				MicroServiceCallWithEntry callsWithEntry2 = featureOrganizationService.findMsCallMsByTestCases(selectTestCases.get(1));
+				List<CytoscapeEdge> edges1 = callsWithEntry1.relatedEdgeObjs();
+				List<CytoscapeEdge> edges2 = callsWithEntry2.relatedEdgeObjs();
+				nodes = new JSONArray();
+				edges = new JSONArray();
+				for(CytoscapeEdge edge1 : edges1) {
+					if(edges2.contains(edge1)) {
+						edges.add(edge1.toJson("", "NewEdges_Edge1_Edge2"));
+					} else {
+						edges.add(edge1.toJson("", "NewEdges_Edge1"));
+					}
+				}
+				for(CytoscapeEdge edge2 : edges2) {
+					if(!edges1.contains(edge2)) {
+						edges.add(edge2.toJson("", "NewEdges_Edge2"));
+					}
+				}
+			}
 			result.put("result", "success");
 			result.put("edges", edges);
 			result.put("nodes", nodes);

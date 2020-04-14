@@ -16,7 +16,9 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
 import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
@@ -58,32 +60,45 @@ public class MicroServiceCallWithEntry {
 		return result;
 	}
 	
-	public JSONArray relatedEdgeIds(boolean callChain) {
-		JSONArray result = new JSONArray();
-		
-		if(callChain) {
-			return result;
-		} else {
-			return relatedEdgeIds();
-		}
-		/*JSONObject msCallMsDetail = new JSONObject();
-		for(MicroService ms : calls.keySet()) {
-//			JSONObject info = new JSONObject();
-//			info.put("from", ms);
-			Map<MicroService, MicroServiceCallMicroService> callMss = calls.get(ms);
-//			JSONObject toArray = new JSONObject();
-			for(MicroService callMs : calls.keySet()) {
-//				JSONObject to = new JSONObject();
-//				to.put("to", callMs);
-				MicroServiceCallMicroService mcm = callMss.get(callMs);
-//				to.put("times", mcm.getTimes());
-//				to.put("call", mcm.getSpanCallSpans());
-//				toArray.put(callMs.getId().toString(), to);
-				System.out.println(mcm.getSpanCallSpans().size());
+	public List<CytoscapeEdge> relatedEdgeObjs() {
+		List<CytoscapeEdge> result = new ArrayList<>();
+		for(TestCase testCase : testCaseToEntries.keySet()) {
+			List<MicroService> entries = testCaseToEntries.getOrDefault(testCase, new ArrayList<>());
+			for(MicroService entry : entries) {
+				result.add(new CytoscapeEdge(testCase.getId() + "_" + entry.getId(), testCase.getId(), entry.getId()));
 			}
-//			info.put("tos", toArray);
-//			msCallMsDetail.put(ms.getId().toString(), info);
-		}*/
+		}
+		for(MicroService ms : calls.keySet()) {
+			for(MicroService callMs : calls.get(ms).keySet()) {
+				JSONObject obj = new JSONObject();
+				obj.put("id", ms.getId() + "_" + callMs.getId());
+				obj.put("source", ms.getId());
+				obj.put("target", callMs.getId());
+				obj.put("value", calls.get(ms).get(callMs).getTimes());
+				result.add(new CytoscapeEdge(ms.getId() + "_" + callMs.getId(), ms.getId(), callMs.getId()));
+			}
+		}
+		return result;
+	}
+	
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@EqualsAndHashCode
+	public static class CytoscapeEdge {
+		private String id;
+		private Long source;
+		private Long target;
+		
+		public JSONObject toJson(String value, String type) {
+			JSONObject obj = new JSONObject();
+			obj.put("id", id);
+			obj.put("source", source);
+			obj.put("target", target);
+			obj.put("value", value == null ? "" : value);
+			obj.put("type", type == null ? "" : type);
+			return obj;
+		}
 	}
 	
 	public JSONArray relatedEdgeIds() {
