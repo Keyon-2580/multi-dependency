@@ -201,7 +201,7 @@ public class MicroServiceCallWithEntry {
 						nodes.add(ProjectUtil.featureToNode(parentFeature, "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
 					}
-					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, null));
+					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, null, true));
 					isFeatureNodeParent.put(feature, true);
 				}
 			}
@@ -215,7 +215,7 @@ public class MicroServiceCallWithEntry {
 					nodes.add(ProjectUtil.scenarioToNode(scenario, "Scenario"));
 					isScenarioNodeAdd.put(scenario, true);
 				}
-				edges.add(ProjectUtil.relationToEdge(scenario, testCase, "ScenarioDefineTestCase", null));
+				edges.add(ProjectUtil.relationToEdge(scenario, testCase, "ScenarioDefineTestCase", null, true));
 			}
 			List<MicroService> entries = testCaseToEntries.getOrDefault(testCase, new ArrayList<>());
 			for(MicroService entry : entries) {
@@ -223,7 +223,7 @@ public class MicroServiceCallWithEntry {
 					nodes.add(ProjectUtil.microserviceToNode(entry, "MicroService"));
 					isMicroServiceNodeAdd.put(entry, true);
 				}
-				edges.add(ProjectUtil.relationToEdge(testCase, entry, "TestCaseExecuteMicroService", null));
+				edges.add(ProjectUtil.relationToEdge(testCase, entry, "TestCaseExecuteMicroService", null, true));
 			}
 			List<Feature> features = testCaseExecuteFeatures.getOrDefault(testCase, new ArrayList<>());
 			for(Feature feature : features) {
@@ -237,10 +237,10 @@ public class MicroServiceCallWithEntry {
 						nodes.add(ProjectUtil.featureToNode(parentFeature, "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
 					}
-					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, null));
+					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, null, true));
 					isFeatureNodeParent.put(feature, true);
 				}
-				edges.add(ProjectUtil.relationToEdge(feature, testCase, "TestCaseExecuteFeature", null));
+				edges.add(ProjectUtil.relationToEdge(feature, testCase, "TestCaseExecuteFeature", null, true));
 			}
 		}
 		
@@ -256,9 +256,9 @@ public class MicroServiceCallWithEntry {
 						isMicroServiceNodeAdd.put(callMs, true);
 					}
 					if(ProjectUtil.isMicroServiceCall(ms, callMs, calls)) {
-						edges.add(ProjectUtil.relationToEdge(ms, callMs, "ShowStructureDependOnCall", null));
+						edges.add(ProjectUtil.relationToEdge(ms, callMs, "ShowStructureDependOnCall", null, true));
 					} else {
-						edges.add(ProjectUtil.relationToEdge(ms, callMs, "ShowStructureDependOn", null));
+						edges.add(ProjectUtil.relationToEdge(ms, callMs, "ShowStructureDependOn", null, true));
 					}
 				}
 			}
@@ -274,7 +274,7 @@ public class MicroServiceCallWithEntry {
 						isMicroServiceNodeAdd.put(callMs, true);
 					}
 					if(!ProjectUtil.isMicroServiceDependOn(ms, callMs, msDependOns)) {
-						edges.add(ProjectUtil.relationToEdge(ms, callMs, "ShowStructureCall", null));
+						edges.add(ProjectUtil.relationToEdge(ms, callMs, "ShowStructureCall", null, true));
 					}
 				}
 			}
@@ -289,7 +289,7 @@ public class MicroServiceCallWithEntry {
 						nodes.add(ProjectUtil.microserviceToNode(callMs, "MicroService"));
 						isMicroServiceNodeAdd.put(callMs, true);
 					}
-					edges.add(ProjectUtil.relationToEdge(ms, callMs, "NoStructureCall", null));
+					edges.add(ProjectUtil.relationToEdge(ms, callMs, "NoStructureCall", null, true));
 				}
 			}
 		}
@@ -330,7 +330,7 @@ public class MicroServiceCallWithEntry {
 						nodes.add(ProjectUtil.featureToNode(parentFeature, "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
 					}
-					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, null));
+					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, null, true));
 					isFeatureNodeParent.put(feature, true);
 				}
 			}
@@ -344,7 +344,7 @@ public class MicroServiceCallWithEntry {
 					nodes.add(ProjectUtil.microserviceToNode(entry, "MicroService"));
 					isMicroServiceNodeAdd.put(entry, true);
 				}
-				edges.add(ProjectUtil.relationToEdge(testCase, entry, null, null));
+				edges.add(ProjectUtil.relationToEdge(testCase, entry, null, null, true));
 			}
 			List<Feature> features = testCaseExecuteFeatures.getOrDefault(testCase, new ArrayList<>());
 			for(Feature feature : features) {
@@ -358,10 +358,10 @@ public class MicroServiceCallWithEntry {
 						nodes.add(ProjectUtil.featureToNode(parentFeature, "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
 					}
-					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, "is child of"));
+					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, "is child of", true));
 					isFeatureNodeParent.put(feature, true);
 				}
-				edges.add(ProjectUtil.relationToEdge(feature, testCase, null, null));
+				edges.add(ProjectUtil.relationToEdge(feature, testCase, null, null, true));
 			}
 		}
 		for(MicroService ms : calls.keySet()) {
@@ -374,7 +374,7 @@ public class MicroServiceCallWithEntry {
 					nodes.add(ProjectUtil.microserviceToNode(callMs, "MicroService"));
 					isMicroServiceNodeAdd.put(callMs, true);
 				}
-				edges.add(ProjectUtil.relationToEdge(ms, callMs, null, null));
+				edges.add(ProjectUtil.relationToEdge(ms, callMs, null, null, true));
 			}
 		}
 		

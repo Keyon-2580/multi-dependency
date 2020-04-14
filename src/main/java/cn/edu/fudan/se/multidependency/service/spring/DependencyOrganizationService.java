@@ -11,9 +11,21 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCastType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionParameterType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionReturnType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionThrowType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
+import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
 
 @Service
 public class DependencyOrganizationService {
@@ -29,6 +41,95 @@ public class DependencyOrganizationService {
 	private Map<Package, Map<Package, Integer>> countOfPackageCall = new HashMap<>();
 	private Map<Function, ProjectFile> functionBelongToFile = new HashMap<>();
 	private Map<ProjectFile, Package> fileBelongToPackage = new HashMap<>();
+	
+	public JSONObject projectToCytoscape(Project project) {
+		JSONObject result = new JSONObject();
+		JSONArray nodes = new JSONArray();
+		JSONArray edges = new JSONArray();
+		
+		Iterable<Package> packages = staticAnalyseService.allPackagesInProject(project);
+		
+		for(Package pck : packages) {
+			nodes.add(ProjectUtil.packageToNode(pck, "Package"));
+			Iterable<ProjectFile> files = staticAnalyseService.allFilesInPackage(pck);
+			for(ProjectFile file : files) {
+				JSONObject fileJson = ProjectUtil.fileToNode(file, "File");
+				fileJson.getJSONObject("data").put("parent", pck.getId());
+				nodes.add(fileJson);
+				
+				Iterable<Type> types = staticAnalyseService.allTypesInFile(file);
+				for(Type type : types) {
+					JSONObject typeJson = ProjectUtil.typeToNode(type, "Type");
+					typeJson.getJSONObject("data").put("parent", file.getId());
+					nodes.add(typeJson);
+					
+					Iterable<Function> functions = staticAnalyseService.allFunctionsInType(type);
+					for(Function function : functions) {
+						JSONObject functionJson = ProjectUtil.functionToNode(function, "Function");
+						functionJson.getJSONObject("data").put("parent", type.getId());
+						nodes.add(functionJson);
+					}
+				}
+				
+				Iterable<Function> functions = staticAnalyseService.allFunctionsInFile(file);
+				for(Function function : functions) {
+					JSONObject functionJson = ProjectUtil.functionToNode(function, "Function");
+					functionJson.getJSONObject("data").put("parent", file.getId());
+					nodes.add(functionJson);
+				}
+			}
+		}
+		
+		List<FunctionCallFunction> functionCallFunctions = staticAnalyseService.findFunctionCallFunctionRelations(project);
+		for(FunctionCallFunction call : functionCallFunctions) {
+			edges.add(ProjectUtil.relationToEdge(call.getFunction(), call.getCallFunction(), "FunctionCallFunction", "call", true));
+		}
+		
+		List<TypeInheritsType> typeInheritsType = staticAnalyseService.findProjectContainInheritsRelations(project);
+		for(TypeInheritsType inherit : typeInheritsType) {
+			if(inherit.isExtends()) {
+				edges.add(ProjectUtil.relationToEdge(inherit.getStart(), inherit.getEnd(), "TypeExtendsType", "extends", true));
+			}
+			if(inherit.isImplements()) {
+				edges.add(ProjectUtil.relationToEdge(inherit.getStart(), inherit.getEnd(), "TypeImplementsType", "implements", true));
+			}
+		}
+		
+		List<TypeCallFunction> typeCallFunctions = staticAnalyseService.findProjectContainTypeCallFunctions(project);
+		for(TypeCallFunction call : typeCallFunctions) {
+			edges.add(ProjectUtil.relationToEdge(call.getType(), call.getCallFunction(), "TypeCallFunction", "call", true));
+		}
+		
+		List<FunctionCastType> functionCastTypes = staticAnalyseService.findProjectContainFunctionCastTypeRelations(project);
+		for(FunctionCastType relation : functionCastTypes) {
+			edges.add(ProjectUtil.relationToEdge(relation.getFunction(), relation.getCastType(), "FunctionCastType", "cast", true));
+		}
+		List<FunctionParameterType> functionParameterTypes = staticAnalyseService.findProjectContainFunctionParameterTypeRelations(project);
+		for(FunctionParameterType relation : functionParameterTypes) {
+			edges.add(ProjectUtil.relationToEdge(relation.getFunction(), relation.getParameterType(), "FunctionParameterType", "parameter", true));
+		}
+		List<FunctionReturnType> functionReturnTypes = staticAnalyseService.findProjectContainFunctionReturnTypeRelations(project);
+		for(FunctionReturnType relation : functionReturnTypes) {
+			edges.add(ProjectUtil.relationToEdge(relation.getFunction(), relation.getReturnType(), "FunctionReturnType", "return", true));
+		}
+		List<FunctionThrowType> functionThrowTypes = staticAnalyseService.findProjectContainFunctionThrowTypeRelations(project);
+		for(FunctionThrowType relation : functionThrowTypes) {
+			edges.add(ProjectUtil.relationToEdge(relation.getFunction(), relation.getType(), "FunctionThrowType", "throw", true));
+		}
+		List<FileImportType> fileImportTypes = staticAnalyseService.findProjectContainFileImportTypeRelations(project);
+		for(FileImportType relation : fileImportTypes) {
+			edges.add(ProjectUtil.relationToEdge(relation.getFile(), relation.getType(), "FileImportType", "import", true));
+		}
+		List<FileImportFunction> fileImportFunctions = staticAnalyseService.findProjectContainFileImportFunctionRelations(project);
+		for(FileImportFunction relation : fileImportFunctions) {
+			edges.add(ProjectUtil.relationToEdge(relation.getFile(), relation.getFunction(), "FileImportFunction", "import", true));
+		}
+		
+		
+		result.put("nodes", nodes);
+		result.put("edges", edges);
+		return result;
+	}
 	
 	public JSONObject packageAndFileToCytoscape() {
 		JSONObject result = new JSONObject();

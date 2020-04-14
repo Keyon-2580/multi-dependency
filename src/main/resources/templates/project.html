@@ -11,7 +11,8 @@
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
 <style type="text/css">
 .div_cytoscape_content {
-	height: 600px;
+	height: 800px;
+	width: 1500px;
 	border: 1px solid #000;
 	margin-bottom: 5px;
 }
@@ -75,6 +76,7 @@
 					<div class="col-sm-7 row">
 						<div class="col-sm-4">
 							<button class="btn btn-default" id="search">查询</button>
+							<button id="showImg" type="button" class="btn btn-default">保存图片</button>
 						</div>
 					</div>
 				</div>
@@ -83,6 +85,7 @@
 						<div id="graph" class="div_cytoscape_content"></div>
 					</div>
 				</div>
+				<div><img id="png-eg" /></div>
 			</div>
 		</div>
 	</div>

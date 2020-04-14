@@ -413,5 +413,15 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		return result;
 	}
 
+	@Override
+	public Map<Span, SpanInstanceOfRestfulAPI> findAllSpanInstanceOfRestfulAPIs() {
+		Map<Span, SpanInstanceOfRestfulAPI> result = new HashMap<>();
+		Iterable<SpanInstanceOfRestfulAPI> instanceOfs = spanInstanceOfRestfulAPIRepository.findAll();
+		for(SpanInstanceOfRestfulAPI instanceOf : instanceOfs) {
+			result.put(instanceOf.getSpan(), instanceOf);
+		}
+		return result;
+	}
+
 
 }

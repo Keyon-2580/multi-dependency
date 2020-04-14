@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
@@ -22,6 +23,7 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFea
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanCallSpan;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
@@ -76,9 +78,12 @@ public class MultipleDependencyApp {
 				}
 			}
 		}
+		Map<MicroService, List<RestfulAPI>> microServiceContainAPIs = microserviceService.microServiceContainsAPIs();
+		Map<Span, SpanInstanceOfRestfulAPI> spanInstanceOfRestfulAPIs = dynamicAnalyseService.findAllSpanInstanceOfRestfulAPIs();
 		FeatureOrganizationService organization = new FeatureOrganizationService(
 				allMicroService, testCaseExecuteFeatures, featureExecutedByTestCases, 
-				featureToParentFeature, testCaseRunTraces, traceToSpans, spanCallSpans, spanBelongToMicroService, scenarioDefineTestCases);
+				featureToParentFeature, testCaseRunTraces, traceToSpans, spanCallSpans, spanBelongToMicroService, scenarioDefineTestCases,
+				microServiceContainAPIs, spanInstanceOfRestfulAPIs);
 
 		return organization;
 	}	

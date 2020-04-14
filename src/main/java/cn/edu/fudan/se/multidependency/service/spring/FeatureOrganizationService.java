@@ -9,9 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
@@ -24,6 +27,8 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanCallSpan;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
+import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import lombok.AllArgsConstructor;
 
@@ -39,6 +44,8 @@ public class FeatureOrganizationService {
 	private final Map<Span, List<SpanCallSpan>> spanCallSpans;
 	private final Map<Span, MicroServiceCreateSpan> spanBelongToMicroService;
 	private final Map<Scenario, List<ScenarioDefineTestCase>> scenarioDefineTestCases;
+	private final Map<MicroService, List<RestfulAPI>> microServiceContainAPIs;
+	private final Map<Span, SpanInstanceOfRestfulAPI> spanInstanceOfRestfulAPIs;
 	
 	public List<Span> relatedSpan(Iterable<TestCase> testCases) {
 		List<Span> result = new ArrayList<>();
@@ -402,6 +409,66 @@ public class FeatureOrganizationService {
 		result.put("value", value);
 		result.put("microservice", allMicroServices);
 		return result;	
+	}
+	
+	public JSONObject restfulAPIToCytoscape(Trace trace, boolean showAllAPIs) {
+		JSONObject result = new JSONObject();
+		JSONArray nodes = new JSONArray();
+		JSONArray edges = new JSONArray();
+		
+		JSONObject entry = new JSONObject();
+		JSONObject entryData = new JSONObject();
+		entryData.put("id", "-1");
+		entryData.put("name", "Entry");
+		entryData.put("type", "Entry");
+		entry.put("data", entryData);
+		nodes.add(entry);
+		Set<MicroService> relatedMicroServices = findRelatedMicroServiceForTraces(trace);
+		for(MicroService ms : relatedMicroServices) {
+			nodes.add(ProjectUtil.microserviceToNode(ms, "MicroService"));
+		}
+		
+		Map<RestfulAPI, Boolean> isAPINodeAdd = new HashMap<>();
+		
+		List<Span> containSpans = traceToSpans.get(trace);
+		for(Span span : containSpans) {
+			MicroService ms = spanBelongToMicroservice(span);
+			RestfulAPI api = spanInstanceOfRestfulAPIs.get(span).getApi();
+			if(!isAPINodeAdd.getOrDefault(api, false)) {
+				JSONObject apiData = ProjectUtil.restfulAPIToNode(api, "API");
+				apiData.getJSONObject("data").put("parent", ms.getId());
+				nodes.add(apiData);
+				isAPINodeAdd.put(api, true);
+			}
+			if(span.getOrder() == 0) {
+				// 入口
+				JSONObject edge = new JSONObject();
+				JSONObject data = new JSONObject();
+				data.put("source", "-1");
+				data.put("target", api.getId());
+				data.put("type", "APICall");
+				data.put("value", "(0)");
+				edge.put("data", data);
+				edges.add(edge);
+			}
+			Iterable<SpanCallSpan> calls = spanCallSpans.getOrDefault(span, new ArrayList<>());
+			for(SpanCallSpan call : calls) {
+				Span callSpan = call.getCallSpan();
+				MicroService callMs = spanBelongToMicroservice(callSpan);
+				RestfulAPI callApi = spanInstanceOfRestfulAPIs.get(callSpan).getApi();
+				if(!isAPINodeAdd.getOrDefault(callApi, false)) {
+					JSONObject callApiData = ProjectUtil.restfulAPIToNode(callApi, "API");
+					callApiData.getJSONObject("data").put("parent", callMs.getId());
+					nodes.add(callApiData);
+					isAPINodeAdd.put(callApi, true);
+				}
+				edges.add(ProjectUtil.relationToEdge(api, callApi, "APICall", "(" + callSpan.getOrder() + ")", false));
+			}
+		}
+		
+		result.put("nodes", nodes);
+		result.put("edges", edges);
+		return result;
 	}
 	
 	public JSONObject microServiceToCytoscape(boolean removeUnuseMS, Iterable<Trace> traces) {

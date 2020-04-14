@@ -1,5 +1,8 @@
 package cn.edu.fudan.se.multidependency.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -7,6 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -43,6 +48,43 @@ public class FeatureController {
 	public String index(HttpServletRequest request) {
 		return "feature";
 	}
+	
+	@PostMapping("/trace/cytoscape")
+	@ResponseBody
+	public JSONObject traceToCytoscape(@RequestBody Map<String, Object> params) {
+		JSONObject result = new JSONObject();
+		try {
+			System.out.println("/trace/cytoscape");
+			System.out.println(params);
+			List<String> idsStr = (List<String>) params.get("ids");
+			List<Long> ids = new ArrayList<>();
+			for(String idStr : idsStr) {
+				ids.add(Long.parseLong(idStr));
+			}
+			if(ids.size() != 1) {
+				throw new Exception("只能选一条trace");
+			}
+			Iterable<Trace> allTraces = featureOrganizationService.allTraces();
+			Trace selectTrace = null;
+			for(Trace trace : allTraces) {
+				if(trace.getId().equals(ids.get(0))) {
+					selectTrace = trace;
+					break;
+				}
+			}
+			System.out.println(selectTrace.getTraceId());
+			JSONObject data = featureOrganizationService.restfulAPIToCytoscape(selectTrace, false);
+			
+			result.put("result", "success");
+			result.put("value", data);
+		} catch (Exception e) {
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
+		
+		return result;
+	}
+	
 	
 	@GetMapping("/testcase/cytoscape")
 	@ResponseBody

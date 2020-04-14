@@ -28,6 +28,16 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypePara
 
 public interface StaticAnalyseService {
 	
+	public Iterable<Package> allPackagesInProject(Project project);
+	
+	public Iterable<ProjectFile> allFilesInPackage(Package pck);
+	
+	public Iterable<Type> allTypesInFile(ProjectFile codeFile);
+	
+	public Iterable<Function> allFunctionsInFile(ProjectFile codeFile);
+	
+	public Iterable<Function> allFunctionsInType(Type type);
+	
 	/**
 	 * all projects
 	 * @return
@@ -47,12 +57,6 @@ public interface StaticAnalyseService {
 	 */
 	public Map<Long, Type> findTypes();
 	
-	/**
-	 * find Types in File
-	 * @param codeFile
-	 * @return
-	 */
-	public List<Type> findTypes(ProjectFile codeFile);
 	
 	/**
 	 * 找出Type继承哪些Type

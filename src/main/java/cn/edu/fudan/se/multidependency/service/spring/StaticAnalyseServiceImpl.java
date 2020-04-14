@@ -150,11 +150,6 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
-	public List<Type> findTypes(ProjectFile codeFile) {
-		return new ArrayList<>();
-	}
-
-	@Override
 	public List<Function> allFunctions() {
 		List<Function> functions = new ArrayList<>();
 		functionRepository.findAll().forEach(function -> {
@@ -441,6 +436,46 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	@Override
 	public List<RestfulAPI> findMicroServiceContainRestfulAPI(MicroService microService) {
 		return containRepository.findMicroServiceContainRestfulAPI(microService.getId());
+	}
+
+	Map<Project, Iterable<Package>> projectContainPakcagesCache = new HashMap<>();
+	@Override
+	public Iterable<Package> allPackagesInProject(Project project) {
+		Iterable<Package> result = projectContainPakcagesCache.getOrDefault(project, containRepository.findProjectContainPackages(project.getId()));
+		projectContainPakcagesCache.put(project, result);
+		return result;
+	}
+
+	Map<Package, Iterable<ProjectFile>> packageContainFilesCache = new HashMap<>();
+	@Override
+	public Iterable<ProjectFile> allFilesInPackage(Package pck) {
+		Iterable<ProjectFile> result = packageContainFilesCache.getOrDefault(pck, containRepository.findPackageContainFiles(pck.getId()));
+		packageContainFilesCache.put(pck, result);
+		return result;
+	}
+
+	Map<ProjectFile, Iterable<Type>> fileContainTypesCache = new HashMap<>();
+	@Override
+	public Iterable<Type> allTypesInFile(ProjectFile codeFile) {
+		Iterable<Type> result = fileContainTypesCache.getOrDefault(codeFile, containRepository.findFileContainTypes(codeFile.getId()));
+		fileContainTypesCache.put(codeFile, result);
+		return result;
+	}
+
+	Map<ProjectFile, Iterable<Function>> fileContainFunctionsCache = new HashMap<>();
+	@Override
+	public Iterable<Function> allFunctionsInFile(ProjectFile codeFile) {
+		Iterable<Function> result = fileContainFunctionsCache.getOrDefault(codeFile, containRepository.findFileContainFunctions(codeFile.getId()));
+		fileContainFunctionsCache.put(codeFile, result);
+		return result;
+	}
+
+	Map<Type, Iterable<Function>> typeContainFunctionsCache = new HashMap<>();
+	@Override
+	public Iterable<Function> allFunctionsInType(Type type) {
+		Iterable<Function> result = typeContainFunctionsCache.getOrDefault(type, containRepository.findTypeContainFunctions(type.getId()));
+		typeContainFunctionsCache.put(type, result);
+		return result;
 	}
 	
 }

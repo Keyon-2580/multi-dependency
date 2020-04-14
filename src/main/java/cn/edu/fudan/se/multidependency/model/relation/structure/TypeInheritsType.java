@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.model.relation.structure;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.attoparser.dom.INestableNode;
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
@@ -30,6 +31,14 @@ public class TypeInheritsType implements Relation {
 	
 	public static final String INHERIT_TYPE_EXTENDS = "extends";
 	public static final String INHERIT_TYPE_IMPLEMENTS = "implements";
+	
+	public boolean isExtends() {
+		return INHERIT_TYPE_EXTENDS.equals(inheritType);
+	}
+	
+	public boolean isImplements() {
+		return INHERIT_TYPE_IMPLEMENTS.equals(inheritType);
+	}
 	
 	public TypeInheritsType(Type start, Type end, String inheritType) {
 		super();

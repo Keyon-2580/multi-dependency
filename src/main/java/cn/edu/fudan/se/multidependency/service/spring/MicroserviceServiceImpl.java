@@ -9,6 +9,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
@@ -182,6 +183,16 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	public boolean isMicroServiceDependOn(MicroService start, MicroService end) {
 //		return msDependOns().getOrDefault(start, new HashMap<>()).get(end) != null;
 		return ProjectUtil.isMicroServiceDependOn(start, end, msDependOns());
+	}
+
+	@Override
+	public Map<MicroService, List<RestfulAPI>> microServiceContainsAPIs() {
+		Map<MicroService, List<RestfulAPI>> result = new HashMap<>();
+		for(MicroService ms : findAllMicroService().values()) {
+			List<RestfulAPI> apis = containRepository.findMicroServiceContainRestfulAPI(ms.getId());
+			result.put(ms, apis);
+		}
+		return result;
 	}
 
 }

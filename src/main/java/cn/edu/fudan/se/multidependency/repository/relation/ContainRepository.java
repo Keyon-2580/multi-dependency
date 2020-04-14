@@ -41,6 +41,21 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	@Query("match (a:Project)-[r:" + RelationType.str_CONTAIN + "*3..4]->(b:Function) where id(a)={projectId} return b")
 	public List<Function> findProjectContainFunctionsByProjectId(@Param("projectId") Long projectId);
 	
+	@Query("match (a:Project)-[r:" + RelationType.str_CONTAIN + "]->(b:Package) where id(a)={projectId} return b")
+	public List<Package> findProjectContainPackages(@Param("projectId") Long projectId);
+	
+	@Query("match (a:Package)-[r:" + RelationType.str_CONTAIN + "]->(b:ProjectFile) where id(a)={packageId} return b")
+	public List<ProjectFile> findPackageContainFiles(@Param("packageId") Long packageId);
+	
+	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "]->(b:Type) where id(a)={fileId} return b")
+	public List<Type> findFileContainTypes(@Param("fileId") Long fileId);
+	
+	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "]->(b:Function) where id(a)={fileId} return b")
+	public List<Function> findFileContainFunctions(@Param("fileId") Long fileId);
+	
+	@Query("match (a:Type)-[r:" + RelationType.str_CONTAIN + "]->(b:Function) where id(a)={typeId} return b")
+	public List<Function> findTypeContainFunctions(@Param("typeId") Long fileId);
+
 	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..2]->(b:Function) where id(b)={functionId} return a")
 	public ProjectFile findFunctionBelongToFileByFunctionId(@Param("functionId") Long functionId);
 	

@@ -1,7 +1,8 @@
-define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'utils']
+define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'cytoscapeUtils']
 	, function ($, bootstrap, bootstrap_multiselect, utils) {
 	
 	var _project = function() {
+		var cy = null;
 		$('#project_select').multiselect({
 	    	includeSelectAllOption: true
 	    });
@@ -25,14 +26,27 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'utils']
 		    	url: "/project/cytoscape?projectId=" + projectId + "&dependency=" + dependency + "&level=" + level,
 		    	success: function(result) {
 		    		console.log(result);
+		    		console.log(result);
 			    	if(result.result == "success") {
-			    		utils.showDataInCytoscape($("#graph"), result.value);
+			    		console.log("success");
+			    		cy = utils.showDataInCytoscape($("#graph"), result.value, "dagre");
+//			    		utils.showDataInCytoscape($("#entry"), result.value.data, "dagre");
 			    	} else {
 			    		alert(result.msg);
 			    	}
 		    	}
 		    });
 		});
+		$("#showImg").click(function() {
+			console.log("rrr");
+			if(cy != null) {
+				$('#png-eg').attr('src', cy.png({
+					bg: "#ffffff",
+					full : true
+				}));
+				$('#png-eg').css("background-color", "#ffffff");
+			}
+		})
 	};
 
 	return {

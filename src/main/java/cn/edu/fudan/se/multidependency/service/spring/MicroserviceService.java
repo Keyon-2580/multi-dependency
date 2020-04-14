@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.service.spring;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
@@ -46,5 +47,7 @@ public interface MicroserviceService {
 	boolean isMicroServiceCall(MicroService start, MicroService end);
 	
 	boolean isMicroServiceDependOn(MicroService start, MicroService end);
+	
+	Map<MicroService, List<RestfulAPI>> microServiceContainsAPIs();
 	
 }

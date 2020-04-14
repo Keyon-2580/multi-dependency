@@ -79,6 +79,9 @@ public class ProjectController {
 					result.put("value", dependencyOrganizationService.directoryCallToCytoscape());
 				}
 			}
+			if("static".equals(dependency)) {
+				result.put("value", dependencyOrganizationService.projectToCytoscape(project));
+			}
 			System.out.println(result.get("value"));
 			if(result.get("value") == null) {
 				throw new Exception("结果暂无");

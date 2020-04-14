@@ -170,6 +170,29 @@ var showMicroServiceInCytoscape = function(elements, container, nodeGraphId, btn
 	
 };
 
+var showAPICall = function(traceId, container) {
+	var traceIds = [];
+	traceIds[traceIds.length] = traceId + "";
+	var ids = {
+		"ids" : traceIds
+	};
+	console.log(ids);
+	$.ajax({
+		type : "POST",
+		contentType : "application/json",
+		dataType : "json",
+		url : "/feature/trace/cytoscape",
+		data : JSON.stringify(ids),
+		success : function(result) {
+			console.log(result);
+			if (result.result == "success") {
+				console.log(result.value);
+				showDataInCytoscape(container, result.value, layout="dagre");
+			}
+		}
+	});
+}
+
 var showMicroServiceForFeature = function(id, container) {
 	$.ajax({
 		type: 'GET',
@@ -328,6 +351,7 @@ var itemOnclick = function (target){
 			$("#table").hide();
 			$("#title").text("微服务调用")
 			toHTML("trace", tagId, $("#graph"));
+			showAPICall(tagId, $("#graphTestAPI"));
 		}
 		if(nodeType == "testcase") {
 			$("#graph").html("");
@@ -374,7 +398,42 @@ var showTreeView = function(containerDivId, data) {
 		levels: 1
 	});
 };
-
+var styleEdgeBlue = {
+		'content': 'data(value)',
+		'curve-style': 'bezier',
+		'width': 1,
+		'line-color': 'blue',
+		'target-arrow-shape': 'triangle',
+		'target-arrow-color': 'blue',
+		'font-size' : 20
+};
+var styleEdgeBlack = {
+		'content': 'data(value)',
+		'curve-style': 'bezier',
+		'width': 1,
+		'line-color': 'black',
+		'target-arrow-shape': 'triangle',
+		'target-arrow-color': 'black',
+		'font-size' : 20
+};
+var styleEdgeGreen = {
+		'content': 'data(value)',
+		'curve-style': 'bezier',
+		'width': 1,
+		'line-color': 'green',
+		'target-arrow-shape': 'triangle',
+		'target-arrow-color': 'green',
+		'font-size' : 20
+};
+var styleEdgeRed = {
+		'content': 'data(value)',
+		'curve-style': 'bezier',
+		'width': 1,
+		'line-color': 'red',
+		'target-arrow-shape': 'triangle',
+		'target-arrow-color': 'red',
+		'font-size' : 20
+};
 var showDataInCytoscape = function(container, elements, layout="breadthfirst") {
 	var cy = cytoscape({
     	container: container,
@@ -452,6 +511,48 @@ var showDataInCytoscape = function(container, elements, layout="breadthfirst") {
 					'content': 'data(name)'
     			}
     		},
+    		{
+    			selector: 'node[type="Entry"]',
+    			style: {
+    				'shape' : 'ellipse',
+    				'width': 50,
+    				'height': 25,
+    				'text-valign': 'center',
+    				'text-halign': 'center',
+    				'border-width': 1.5,
+    				'border-color': '#555',
+    				'background-color': '#f6f6f6',
+					'content': 'data(name)'
+    			}
+    		},
+    		{
+    			selector: 'node[type="MicroService"]',
+    			style: {
+    				'shape' : 'rectangle',
+    				'width': 'data(length)',
+    				'height': 25,
+    				'text-valign': 'top',
+    				'text-halign': 'center',
+    				'border-width': 1.5,
+    				'border-color': '#555',
+    				'background-color': '#f6f6f6',
+					'content': 'data(name)'
+    			}
+    		},
+    		{
+    			selector: 'node[type="API"]',
+    			style: {
+    				'shape' : 'ellipse',
+    				'width': 'data(length)',
+    				'height': 25,
+    				'text-valign': 'center',
+    				'text-halign': 'center',
+    				'border-width': 1.5,
+    				'border-color': '#555',
+    				'background-color': '#f6f6f6',
+					'content': 'data(name)'
+    			}
+    		},
 			{
     			selector: 'edge',
     			style: {
@@ -463,6 +564,10 @@ var showDataInCytoscape = function(container, elements, layout="breadthfirst") {
                     'target-arrow-color': '#555',
                     'font-color' : '#555'
     			}
+    		},
+			{
+    			selector: 'edge[type="APICall"]',
+    			style: styleEdgeBlack
     		},
 			{
     			selector: 'edge[type="contain"]',

@@ -15,7 +15,10 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 		"1" : "yellow"
 	};
 	var _showDataInCytoscape = function(container, elements, layout="breadthfirst") {
-		cytoscape_dagre(cytoscape);
+		console.log("_showDataInCytoscape");
+		if(layout == "dagre") {
+			cytoscape_dagre(cytoscape);
+		}
 		var styleEdgeBlue = {
 				'content': 'data(value)',
 				'curve-style': 'bezier',
@@ -68,10 +71,71 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			}
 	    		},
 	    		{
+	    			selector: 'node[type="Package"]',
+	    			style: {
+	    				'shape' : 'rectangle',
+	    				'width': 'data(length)',
+//	    				'width' : "label",
+	    				'height': 30,
+	    				'text-valign': 'top',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': '#f6f6f6',
+						'content': 'data(name)'
+	    			}
+	    		},
+	    		{
+	    			selector: 'node[type="File"]',
+	    			style: {
+	    				'shape' : 'rectangle',
+	    				'width': 'data(length)',
+//	    				'width' : "label",
+	    				'height': 30,
+	    				'text-valign': 'top',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': '#f6f6f6',
+						'content': 'data(name)'
+	    			}
+	    		},
+	    		{
+	    			selector: 'node[type="Type"]',
+	    			style: {
+	    				'shape' : 'rectangle',
+	    				'width': 'data(length)',
+//	    				'width' : "label",
+	    				'height': 30,
+	    				'text-valign': 'top',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': '#f6f6f6',
+						'content': 'data(name)'
+	    			}
+	    		},
+	    		{
+	    			selector: 'node[type="Function"]',
+	    			style: {
+	    				'shape' : 'rectangle',
+	    				'width': 'data(length)',
+//	    				'width' : "label",
+	    				'height': 30,
+	    				'text-valign': 'center',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': '#f6f6f6',
+						'content': 'data(name)'
+	    			}
+	    		},
+	    		{
 	    			selector: 'node[type="Feature"]',
 	    			style: {
 	    				'shape' : 'ellipse',
 	    				'width': 'data(length)',
+//	    				'width' : "label",
 	    				'height': 30,
 	    				'text-valign': 'center',
 	    				'text-halign': 'center',
@@ -113,14 +177,19 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			selector: 'node[type="TestCase_success"]',
 	    			style: {
 	    				'shape' : 'rectangle',
-	    				'width': 'data(length)',
+//	    				'width': 'data(length)',
+	    				'width' : "label",
 	    				'height': 30,
 	    				'text-valign': 'center',
 	    				'text-halign': 'center',
 	    				'border-width': 1.5,
 	    				'border-color': '#555',
 	    				'background-color': '#9EEA6A',
-						'content': 'data(name)'
+						'content': function(obj) {
+							console.log(obj.data().name);
+							return " " + obj.data().name + " ";
+//							return "eee"commit issue
+						}
 	    			}
 	    		},
 	    		{
