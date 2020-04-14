@@ -151,34 +151,47 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 			enableCollapsibleOptGroups: true
 		});
 		$("#submitScenario").click(function() {
+			var showAllScenarios = $("#showAllScenarios").prop('checked');
+			var showAllFeatures = $("#showAllFeatures").prop('checked');
+			var showAllMicroServices = $("#showAllMicroServices").prop('checked');
+			var showStructure = $("#showStructure").prop('checked');
+			console.log(showAllScenarios);
 			var ids = {
 				"ids" : $("#scenarioList").val(),
-				"showAllScenarios" : false,
-				"showAllFeatures" : false,
-				"showAllMicroServices" : false,
-				"showStructure" : false
+				"showAllScenarios" : showAllScenarios,
+				"showAllFeatures" : showAllFeatures,
+				"showAllMicroServices" : showAllMicroServices,
+				"showStructure" : showStructure
 			};
 			console.log(ids);
 			queryMultipleByScenario(ids);
 		});
 		$("#submitTestCase").click(function() {
+			var showAllScenarios = $("#showAllScenarios").prop('checked');
+			var showAllFeatures = $("#showAllFeatures").prop('checked');
+			var showAllMicroServices = $("#showAllMicroServices").prop('checked');
+			var showStructure = $("#showStructure").prop('checked');
 			var ids = {
 				"ids" : $("#testCaseList").val(),
-				"showAllScenarios" : false,
-				"showAllFeatures" : false,
-				"showAllMicroServices" : false,
-				"showStructure" : false
+				"showAllScenarios" : showAllScenarios,
+				"showAllFeatures" : showAllFeatures,
+				"showAllMicroServices" : showAllMicroServices,
+				"showStructure" : showStructure
 			};
 			console.log(ids);
 			queryMultipleByTestCase(ids);
 		});
 		$("#submitFeature").click(function() {
+			var showAllScenarios = $("#showAllScenarios").prop('checked');
+			var showAllFeatures = $("#showAllFeatures").prop('checked');
+			var showAllMicroServices = $("#showAllMicroServices").prop('checked');
+			var showStructure = $("#showStructure").prop('checked');
 			var ids = {
 				"ids" : $("#featureList").val(),
-				"showAllScenarios" : false,
-				"showAllFeatures" : false,
-				"showAllMicroServices" : false,
-				"showStructure" : false
+				"showAllScenarios" : showAllScenarios,
+				"showAllFeatures" : showAllFeatures,
+				"showAllMicroServices" : showAllMicroServices,
+				"showStructure" : showStructure
 			};
 			console.log(ids);
 			queryMultipleByFeature(ids);
