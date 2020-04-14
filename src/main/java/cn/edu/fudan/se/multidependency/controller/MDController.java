@@ -170,7 +170,7 @@ public class MDController {
 			boolean showAllFeatures = (boolean) params.getOrDefault("showAllFeatures", true);
 			boolean showAllMicroServices = (boolean) params.getOrDefault("showAllMicroServices", true);
 			boolean showStructure = (boolean) params.getOrDefault("showStructure", true);
-			boolean showAllScenarios = (boolean) params.getOrDefault("showAll", true);
+			boolean showAllScenarios = (boolean) params.getOrDefault("showAllScenarios", true);
 			List<Integer> ids = new ArrayList<>();
 			for(String idStr : idsStr) {
 				ids.add(Integer.parseInt(idStr));

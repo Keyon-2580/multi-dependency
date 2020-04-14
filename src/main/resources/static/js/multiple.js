@@ -164,10 +164,10 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 		$("#submitTestCase").click(function() {
 			var ids = {
 				"ids" : $("#testCaseList").val(),
-				"showAllScenarios" : true,
-				"showAllFeatures" : true,
-				"showAllMicroServices" : true,
-				"showStructure" : true
+				"showAllScenarios" : false,
+				"showAllFeatures" : false,
+				"showAllMicroServices" : false,
+				"showStructure" : false
 			};
 			console.log(ids);
 			queryMultipleByTestCase(ids);
