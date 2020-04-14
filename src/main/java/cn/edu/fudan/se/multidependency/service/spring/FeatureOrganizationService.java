@@ -650,7 +650,18 @@ public class FeatureOrganizationService {
 		return result;
 	}
 	
-	public Iterable<TestCase> relatedTestCase(Iterable<Feature> features) {
+	public Iterable<TestCase> relatedTestCaseWithScenarios(Iterable<Scenario> scenarios) {
+		Set<TestCase> result = new HashSet<>();
+		for(Scenario scenario : scenarios) {
+			List<ScenarioDefineTestCase> testCases = this.scenarioDefineTestCases.getOrDefault(scenario, new ArrayList<>());
+			for(ScenarioDefineTestCase define : testCases) {
+				result.add(define.getTestCase());
+			}
+		}
+		return result;
+	}
+	
+	public Iterable<TestCase> relatedTestCaseWithFeatures(Iterable<Feature> features) {
 		List<TestCase> result = new ArrayList<>();
 		Set<Feature> allFeaturesContainChildren = new HashSet<>();
 		Map<Feature, List<Feature>> featureToChildren = featureToChildren();

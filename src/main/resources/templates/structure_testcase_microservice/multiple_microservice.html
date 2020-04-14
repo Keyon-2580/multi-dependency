@@ -31,7 +31,7 @@
 					<div class="col-sm-9">
 						<select id="scenarioList" multiple="multiple" name="scenarioList">
 							<option th:each="scenario : ${scenarios}"
-									th:text="${scenario.name}" th:value="${scenario.scenarioId}"></option>
+									th:text="${scenario.scenarioId + ' : ' + scenario.name}" th:value="${scenario.scenarioId}"></option>
 						</select>
 						<button id="submitScenario" type="button" class="btn btn-default">提交</button>
 					</div>
@@ -66,7 +66,7 @@
 					<div class="col-sm-9">
 						<select id="featureList" multiple="multiple" name="featureList">
 							<option th:each="feature : ${features}"
-									th:text="${feature.featureName}" th:value="${feature.featureId}"></option>
+									th:text="${feature.featureId + ' : ' + feature.featureName}" th:value="${feature.featureId}"></option>
 						</select>
 						<button id="submitFeature" type="button" class="btn btn-default">提交</button>
 					</div>

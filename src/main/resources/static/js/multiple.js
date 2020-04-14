@@ -76,7 +76,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 			queryEntryEdge(node.data().id, true);
 		})
 	};
-	var queryMultiple = function(testCaseIds) {
+	var queryMultipleByTestCase = function(testCaseIds) {
 		cyEntry = null;
 		$.ajax({
 			type : "POST",
@@ -84,6 +84,40 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 			dataType : "json",
 			url : "/multiple/microservice/query/testcase",
 			data : JSON.stringify(testCaseIds),
+			success : function(result) {
+				if (result.result == "success") {
+					console.log(result.value);
+					cyEntry = utils.showDataInCytoscape($("#entry"), result.value.data, "dagre");
+					processCytoscape(cyEntry);
+				}
+			}
+		});
+	}
+	var queryMultipleByScenario = function(scenarioIds) {
+		cyEntry = null;
+		$.ajax({
+			type : "POST",
+			contentType : "application/json",
+			dataType : "json",
+			url : "/multiple/microservice/query/scenario",
+			data : JSON.stringify(scenarioIds),
+			success : function(result) {
+				if (result.result == "success") {
+					console.log(result.value);
+					cyEntry = utils.showDataInCytoscape($("#entry"), result.value.data, "dagre");
+					processCytoscape(cyEntry);
+				}
+			}
+		});
+	}
+	var queryMultipleByFeature = function(featureIds) {
+		cyEntry = null;
+		$.ajax({
+			type : "POST",
+			contentType : "application/json",
+			dataType : "json",
+			url : "/multiple/microservice/query/feature",
+			data : JSON.stringify(featureIds),
 			success : function(result) {
 				if (result.result == "success") {
 					console.log(result.value);
@@ -118,33 +152,36 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 		});
 		$("#submitScenario").click(function() {
 			var ids = {
-				"ids" : $("#testCaseList").val(),
+				"ids" : $("#scenarioList").val(),
+				"showAllScenarios" : false,
 				"showAllFeatures" : false,
-				"showAllMicroServices" : true,
-				"showStructure" : true
+				"showAllMicroServices" : false,
+				"showStructure" : false
 			};
 			console.log(ids);
-			queryMultiple(ids);
+			queryMultipleByScenario(ids);
 		});
 		$("#submitTestCase").click(function() {
 			var ids = {
 				"ids" : $("#testCaseList").val(),
-				"showAllFeatures" : false,
+				"showAllScenarios" : true,
+				"showAllFeatures" : true,
 				"showAllMicroServices" : true,
 				"showStructure" : true
 			};
 			console.log(ids);
-			queryMultiple(ids);
+			queryMultipleByTestCase(ids);
 		});
 		$("#submitFeature").click(function() {
 			var ids = {
-				"ids" : $("#testCaseList").val(),
+				"ids" : $("#featureList").val(),
+				"showAllScenarios" : false,
 				"showAllFeatures" : false,
-				"showAllMicroServices" : true,
-				"showStructure" : true
+				"showAllMicroServices" : false,
+				"showStructure" : false
 			};
 			console.log(ids);
-			queryMultiple(ids);
+			queryMultipleByFeature(ids);
 		});
 		
 		$("#showImg").click(function() {
