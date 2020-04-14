@@ -636,6 +636,39 @@ public class FeatureOrganizationService {
 		}
 	}
 	
+	public Map<Feature, List<Feature>> featureToChildren() {
+		Map<Feature, List<Feature>> result = new HashMap<>();
+		for(Feature feature : allFeatures()) {
+			result.put(feature, new ArrayList<>());
+		}
+		for(Feature child : this.featureToParentFeature.keySet()) {
+			Feature parent = this.featureToParentFeature.get(child);
+			if(parent != null) {
+				result.get(parent).add(child);
+			}
+		}
+		return result;
+	}
+	
+	public Iterable<TestCase> relatedTestCase(Iterable<Feature> features) {
+		List<TestCase> result = new ArrayList<>();
+		Set<Feature> allFeaturesContainChildren = new HashSet<>();
+		Map<Feature, List<Feature>> featureToChildren = featureToChildren();
+		for(Feature feature : features) {
+			allFeaturesContainChildren.add(feature);
+			for(Feature child : featureToChildren.get(feature)) {
+				allFeaturesContainChildren.add(child);
+			}
+		}
+		for(Feature feature : allFeaturesContainChildren) {
+			List<TestCaseExecuteFeature> executes = this.featureExecutedByTestCases.getOrDefault(feature, new ArrayList<>());
+			for(TestCaseExecuteFeature execute : executes) {
+				result.add(execute.getTestCase());
+			}
+		}
+		return result;
+	}
+	
 	/**
 	 * 指定trace相关的微服务调用
 	 * @param traces

@@ -22,8 +22,9 @@ public class ProjectUtil {
 		JSONObject scenarioDataValue = new JSONObject();
 		scenarioDataValue.put("type", type);
 		scenarioDataValue.put("id", scenario.getId());
-		scenarioDataValue.put("name", scenario.getName());
-		scenarioDataValue.put("length", scenario.getName().length() * 20);
+		String name = scenario.getScenarioId() + " : " + scenario.getName();
+		scenarioDataValue.put("name", name);
+		scenarioDataValue.put("length", name.length() * 20);
 		result.put("data", scenarioDataValue);
 		return result;
 	}
@@ -44,8 +45,9 @@ public class ProjectUtil {
 		JSONObject featureDataValue = new JSONObject();
 		featureDataValue.put("type", type);
 		featureDataValue.put("id", feature.getId());
-		featureDataValue.put("name", feature.getFeatureName());
-		int length = feature.getFeatureName().length() * 20;
+		String name = feature.getFeatureId() + " : " + feature.getFeatureName();
+		featureDataValue.put("name", name);
+		int length = name.length() * 20;
 		if(feature.getFeatureName().matches(".*[a-zA-Z].*")) {
 			length = (int) (length / 1.5);
 		}
@@ -59,8 +61,9 @@ public class ProjectUtil {
 		JSONObject testCaseDataValue = new JSONObject();
 		testCaseDataValue.put("type", type);
 		testCaseDataValue.put("id", testCase.getId());
-		testCaseDataValue.put("name", testCase.getTestCaseName());
-		testCaseDataValue.put("length", testCase.getTestCaseName().length() * 20);
+		String name = testCase.getTestCaseId() + " : " + testCase.getTestCaseName();
+		testCaseDataValue.put("name", name);
+		testCaseDataValue.put("length", name.length() * 20);
 		result.put("data", testCaseDataValue);
 		return result;
 	}

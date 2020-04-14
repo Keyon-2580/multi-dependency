@@ -84,6 +84,43 @@ public class MDController {
 		return result;
 	}
 	
+	@PostMapping(value = "/multiple/microservice/query/feature")
+	@ResponseBody
+	public JSONObject getMicroServiceFeature(@RequestBody Map<String, Object> params) {
+		JSONObject result = new JSONObject();
+		try {
+			@SuppressWarnings("unchecked")
+			List<String> idsStr = (List<String>) params.getOrDefault("ids", new ArrayList<>());
+			boolean showAllFeatures = (boolean) params.getOrDefault("showAllFeatures", true);
+			boolean showAllMicroServices = (boolean) params.getOrDefault("showAllMicroServices", true);
+			boolean showAllScenarios = (boolean) params.getOrDefault("showAllScenario", true);
+			boolean showStructure = (boolean) params.getOrDefault("showStructure", true);
+			List<Integer> ids = new ArrayList<>();
+			for(String idStr : idsStr) {
+				ids.add(Integer.parseInt(idStr));
+			}
+			List<Feature> features = new ArrayList<>();
+			for(Feature feature : featureOrganizationService.allFeatures()) {
+				if(ids.contains(feature.getFeatureId())) {
+					features.add(feature);
+				}
+			}
+			Iterable<TestCase> selectTestCases = featureOrganizationService.relatedTestCase(features);
+			MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(selectTestCases);
+			callsWithEntry.setMsDependOns(msService.msDependOns());
+			callsWithEntry.setShowAllFeatures(showAllFeatures);
+			callsWithEntry.setShowAllMicroServices(showAllMicroServices);
+			callsWithEntry.setShowStructure(showStructure);
+			callsWithEntry.setShowAllScenarios(showAllScenarios);
+			result.put("result", "success");
+			result.put("value", callsWithEntry.toCytoscapeWithStructure());
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
+		return result;
+	}
 	
 	@PostMapping(value = "/multiple/microservice/query/testcase")
 	@ResponseBody
@@ -92,11 +129,10 @@ public class MDController {
 		try {
 			@SuppressWarnings("unchecked")
 			List<String> idsStr = (List<String>) params.getOrDefault("ids", new ArrayList<>());
-//			List<String> idsStr = (List<String>) params.get("ids");
 			boolean showAllFeatures = (boolean) params.getOrDefault("showAllFeatures", true);
 			boolean showAllMicroServices = (boolean) params.getOrDefault("showAllMicroServices", true);
 			boolean showStructure = (boolean) params.getOrDefault("showStructure", true);
-//			boolean showAllScenarios = (boolean) params.getOrDefault("showAll", true);
+			boolean showAllScenarios = (boolean) params.getOrDefault("showAll", true);
 			List<Integer> ids = new ArrayList<>();
 			for(String idStr : idsStr) {
 				ids.add(Integer.parseInt(idStr));
@@ -114,7 +150,7 @@ public class MDController {
 			callsWithEntry.setShowAllFeatures(showAllFeatures);
 			callsWithEntry.setShowAllMicroServices(showAllMicroServices);
 			callsWithEntry.setShowStructure(showStructure);
-//			callsWithEntry.setShowAllScenarios(showAllScenarios);
+			callsWithEntry.setShowAllScenarios(showAllScenarios);
 			result.put("result", "success");
 			result.put("value", callsWithEntry.toCytoscapeWithStructure());
 		} catch (Exception e) {

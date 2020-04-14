@@ -54,7 +54,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			style: {
 	    				'height': 30,
 	    				'width': 30,
-	    				'background-color': 'green',
+	    				'background-color': '#00FF66',
 						'content': 'data(name)'
 	    			}
 	    		},
@@ -110,7 +110,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    				'text-halign': 'center',
 	    				'border-width': 1.5,
 	    				'border-color': '#555',
-	    				'background-color': 'green',
+	    				'background-color': '#9EEA6A',
 						'content': 'data(name)'
 	    			}
 	    		},
@@ -152,7 +152,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    				'text-halign': 'center',
 	    				'border-width': 1.5,
 	    				'border-color': '#555',
-	    				'background-color': 'green',
+	    				'background-color': '#00FF66',
 						'content': 'data(name)'
 	    			}
 	    		},
