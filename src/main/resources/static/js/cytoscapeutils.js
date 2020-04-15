@@ -1,7 +1,7 @@
 define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
-	'jqplot', 'utils', 'cytoscape', 'cytoscape-dagre', 'dagre']
+	'jqplot', 'utils', 'cytoscape', 'cytoscape-dagre', 'dagre', 'cytoscape-klay']
 	, function ($, bootstrap, bootstrap_multiselect, bootstrap_treeview,
-	jqplot, utils, cytoscape, cytoscape_dagre, dagre) {
+	jqplot, utils, cytoscape, cytoscape_dagre, dagre, klay) {
 	
 	var _showTreeView = function(containerDivId, data) {
 		containerDivId.treeview({
@@ -10,56 +10,54 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 			levels: 1
 		});
 	};
-	var colors = {
-		"0" : "blue",
-		"1" : "yellow"
+	var styleEdgeBlue = {
+			'content': 'data(value)',
+			'curve-style': 'bezier',
+			'width': 1,
+			'line-color': 'blue',
+			'target-arrow-shape': 'triangle',
+			'target-arrow-color': 'blue',
+			'font-size' : 20
 	};
-	var _showDataInCytoscape = function(container, elements, layout="breadthfirst") {
-		console.log("_showDataInCytoscape");
-		if(layout == "dagre") {
-			cytoscape_dagre(cytoscape);
-		}
-		var styleEdgeBlue = {
-				'content': 'data(value)',
-				'curve-style': 'bezier',
-				'width': 1,
-				'line-color': 'blue',
-				'target-arrow-shape': 'triangle',
-				'target-arrow-color': 'blue',
-				'font-size' : 20
-		};
-		var styleEdgeBlack = {
-				'content': 'data(value)',
-				'curve-style': 'bezier',
-				'width': 1,
-				'line-color': 'black',
-				'target-arrow-shape': 'triangle',
-				'target-arrow-color': 'black',
-				'font-size' : 20
-		};
-		var styleEdgeGreen = {
-				'content': 'data(value)',
-				'curve-style': 'bezier',
-				'width': 1,
-				'line-color': 'green',
-				'target-arrow-shape': 'triangle',
-				'target-arrow-color': 'green',
-				'font-size' : 20
-		};
-		var styleEdgeRed = {
-				'content': 'data(value)',
-				'curve-style': 'bezier',
-				'width': 1,
-				'line-color': 'red',
-				'target-arrow-shape': 'triangle',
-				'target-arrow-color': 'red',
-				'font-size' : 20
-		};
+	var styleEdgeBlack = {
+			'content': 'data(value)',
+			'curve-style': 'bezier',
+			'width': 1,
+			'line-color': 'black',
+			'target-arrow-shape': 'triangle',
+			'target-arrow-color': 'black',
+			'font-size' : 20
+	};
+	var styleEdgeGreen = {
+			'content': 'data(value)',
+			'curve-style': 'bezier',
+			'width': 1,
+			'line-color': 'green',
+			'target-arrow-shape': 'triangle',
+			'target-arrow-color': 'green',
+			'font-size' : 20
+	};
+	var styleEdgeRed = {
+			'content': 'data(value)',
+			'curve-style': 'bezier',
+			'width': 1,
+			'line-color': 'red',
+			'target-arrow-shape': 'triangle',
+			'target-arrow-color': 'red',
+			'font-size' : 20
+	};
+	var _showDataInCytoscape = function(container, elements, layout="dagre") {
+		console.log("_showDataInCytoscape: " + layout);
+		cytoscape_dagre(cytoscape);
+//		cytoscape_klay(cytoscape);
+		klay(cytoscape);
 		var cy = cytoscape({
 	    	container: container,
 	    	layout: {
-	    		name: "dagre"
+	    		name: layout
 	    	},
+	    	hideEdgesOnViewport: true,
+//	    	pixelRatio: 1,
 	    	style: [
 	    		{
 	    			selector: 'node',

@@ -300,7 +300,11 @@ var showFeatureToTestCasesCytoscape = function(containerDivId) {
 				console.log(result.value)
 				var cy = showDataInCytoscape(containerDivId, result.value, "klay")
 				$("#test").click(function(){
-					$('#png-eg').attr('src', cy.png());
+					$('#png-eg').attr('src', cy.png({
+						bg: "#ffffff",
+						full : true
+					}));
+					$('#png-eg').css("background-color", "#ffffff");
 				});
 			}
 		}
@@ -487,7 +491,8 @@ var showDataInCytoscape = function(container, elements, layout="breadthfirst") {
     			selector: 'node[type="feature"]',
     			style: {
     				'shape' : 'ellipse',
-    				'width': 'data(length)',
+//    				'width': 'data(length)',
+    				'width' : 'label',
     				'height': 30,
     				'text-valign': 'center',
     				'text-halign': 'center',
@@ -501,7 +506,8 @@ var showDataInCytoscape = function(container, elements, layout="breadthfirst") {
     			selector: 'node[type="testcase"]',
     			style: {
     				'shape' : 'rectangle',
-    				'width': 'data(length)',
+//    				'width': 'data(length)',
+    				'width' : 'label',
     				'height': 25,
     				'text-valign': 'center',
     				'text-halign': 'center',

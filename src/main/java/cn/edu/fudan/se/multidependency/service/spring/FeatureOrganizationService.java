@@ -75,7 +75,7 @@ public class FeatureOrganizationService {
 		for(Feature feature : allFeatures()) {
 			JSONObject featureData = new JSONObject();
 			featureData.put("id", feature.getId());
-			featureData.put("name", feature.getFeatureName());
+			featureData.put("name", feature.getFeatureId() + " : " + feature.getFeatureName());
 			featureData.put("type", "feature");
 			featureData.put("value", feature.getFeatureId() + ":" + feature.getFeatureName());
 			int length = 0;
@@ -94,7 +94,7 @@ public class FeatureOrganizationService {
 				TestCase testcase = execute.getTestCase();
 				JSONObject testcaseData = new JSONObject();
 				testcaseData.put("id", testcase.getId());
-				testcaseData.put("name", testcase.getTestCaseName());
+				testcaseData.put("name", testcase.getTestCaseId() + ":" + testcase.getTestCaseName());
 				testcaseData.put("type", "testcase");
 				testcaseData.put("value", testcase.getTestCaseId() + ":" + testcase.getTestCaseName());
 				if(testcase.getTestCaseName().matches(".*[0-9].*")) {

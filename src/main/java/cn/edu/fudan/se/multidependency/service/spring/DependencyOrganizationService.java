@@ -42,7 +42,31 @@ public class DependencyOrganizationService {
 	private Map<Function, ProjectFile> functionBelongToFile = new HashMap<>();
 	private Map<ProjectFile, Package> fileBelongToPackage = new HashMap<>();
 	
-	public JSONObject projectToCytoscape(Project project) {
+	public JSONObject projectStaticAndDynamicToCytoscape(Project project, Iterable<FunctionDynamicCallFunction> dynamicCalls) {
+		JSONObject result = new JSONObject();
+		JSONObject staticResult = projectStaticStructureToCytoscape(project);
+		JSONArray nodes = staticResult.getJSONArray("nodes");
+		JSONArray edges = staticResult.getJSONArray("edges");
+		
+		Map<Function, Map<Function, Boolean>> hasFunctionCallFunction = new HashMap<>();
+		for(FunctionDynamicCallFunction call : dynamicCalls) {
+			Function start = call.getFunction();
+			Function end = call.getCallFunction();
+			if(!hasFunctionCallFunction.getOrDefault(start, new HashMap<>()).getOrDefault(end, false)) {
+				edges.add(ProjectUtil.relationToEdge(start, end, "FunctionDynamicCallFunction", "FunctionDynamicCallFunction", false));
+				Map<Function, Boolean> temp = hasFunctionCallFunction.getOrDefault(start, new HashMap<>());
+				temp.put(end, true);
+				hasFunctionCallFunction.put(start, temp);
+			}
+		}
+
+		
+		result.put("nodes", nodes);
+		result.put("edges", edges);
+		return result;
+	}
+	
+	public JSONObject projectStaticStructureToCytoscape(Project project) {
 		JSONObject result = new JSONObject();
 		JSONArray nodes = new JSONArray();
 		JSONArray edges = new JSONArray();

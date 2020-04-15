@@ -240,7 +240,8 @@ public class MicroServiceCallWithEntry {
 					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, null, true));
 					isFeatureNodeParent.put(feature, true);
 				}
-				edges.add(ProjectUtil.relationToEdge(feature, testCase, "TestCaseExecuteFeature", null, true));
+				System.out.println(testCase.getTestCaseName() + " " + feature.getFeatureName());
+				edges.add(ProjectUtil.relationToEdge(feature, testCase, "FeatureExecutedByTestCase", null, true));
 			}
 		}
 		

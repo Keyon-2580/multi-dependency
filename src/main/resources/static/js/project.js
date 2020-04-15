@@ -30,7 +30,6 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'cytoscapeUtils']
 			    	if(result.result == "success") {
 			    		console.log("success");
 			    		cy = utils.showDataInCytoscape($("#graph"), result.value, "dagre");
-//			    		utils.showDataInCytoscape($("#entry"), result.value.data, "dagre");
 			    	} else {
 			    		alert(result.msg);
 			    	}

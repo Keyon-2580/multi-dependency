@@ -80,7 +80,11 @@ public class ProjectController {
 				}
 			}
 			if("static".equals(dependency)) {
-				result.put("value", dependencyOrganizationService.projectToCytoscape(project));
+				result.put("value", dependencyOrganizationService.projectStaticStructureToCytoscape(project));
+			}
+			if("all".equals(dependency)) {
+				List<FunctionDynamicCallFunction> calls = dynamicAnalyseService.findFunctionDynamicCallsByProject(project);
+				result.put("value", dependencyOrganizationService.projectStaticAndDynamicToCytoscape(project, calls));
 			}
 			System.out.println(result.get("value"));
 			if(result.get("value") == null) {

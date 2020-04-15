@@ -7,8 +7,10 @@ require.config({
 		"bootstrap-treeview": "import/bootstrap/bootstrap-treeview.min",
 		"jqplot": "import/jqplot/jquery.jqplot.min",
 		"cytoscape": "import/cytoscape.js-3.13.1/cytoscape.min",
-		"cytoscape-dagre": "import/cytoscape.js-3.13.1/cytoscape-dagre",
 		"dagre": "import/cytoscape.js-3.13.1/dagre.min",
+		"cytoscape-dagre": "import/cytoscape.js-3.13.1/cytoscape-dagre",
+		"klayjs": "import/cytoscape.js-3.13.1/klay",
+		"cytoscape-klay": "import/cytoscape.js-3.13.1/cytoscape-klay",
 		"testcase": "testcase",
 		"utils": "util",
 		"project": "project",
@@ -20,8 +22,8 @@ require.config({
 		"bootstrap-multiselect":['jquery'],
 		"bootstrap-treeview":['jquery'],
 		"jqplot":['jquery'],
-		"cytoscape-dagre":['cytoscape']
-		
+		"cytoscape-dagre":['cytoscape'],
+		"cytoscape-klay": ['klayjs', 'cytoscape']
 	}
 
 });
