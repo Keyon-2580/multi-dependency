@@ -122,7 +122,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'utils', 'cyto
 					cy = utils.showDataInCytoscape($("#all"), result.coverageValue.value, "dagre");
 					var html = "";
 					for(var i = 0; i < result.testCases.length; i++) {
-						html += "<a href='#' value='" + i + "' class='query_entry' name='" + result.testCases[i].testCaseId + "'>" + result.testCases[i].testCaseName + "</a>"
+						html += "<a href='#' value='" + i + "' class='query_entry' name='" + result.testCases[i].testCaseId + "'>" + result.testCases[i].name + "</a>"
 						if(i != result.testCases.length - 1) {
 							html += "<span>、</span>";
 						}

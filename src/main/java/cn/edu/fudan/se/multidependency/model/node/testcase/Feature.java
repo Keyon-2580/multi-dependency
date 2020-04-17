@@ -29,15 +29,15 @@ public class Feature implements Node {
     
     private Integer featureId;
     
-    private String featureName;
+    private String name;
     
     private String description;
     
     private Integer parentFeatureId;
     
-    public Feature(Integer featureId, String featureName, String description) {
+    public Feature(Integer featureId, String name, String description) {
     	this.featureId = featureId;
-    	this.featureName = featureName;
+    	this.name = name;
     	this.description = description;
     }
     
@@ -45,7 +45,7 @@ public class Feature implements Node {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
-		properties.put("featureName", getFeatureName() == null ? "" : getFeatureName());
+		properties.put("name", getName() == null ? "" : getName());
 		properties.put("featureId", getFeatureId() == null ? -1 : getFeatureId());
 		properties.put("description", getDescription() == null ? "" : getDescription());
 		properties.put("parentFeatureId", getParentFeatureId() == null ? -1 : getParentFeatureId());

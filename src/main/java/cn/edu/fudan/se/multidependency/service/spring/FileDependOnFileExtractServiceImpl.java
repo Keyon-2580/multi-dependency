@@ -318,7 +318,7 @@ public class FileDependOnFileExtractServiceImpl implements FileDependOnFileExtra
 		for(ProjectFile start : relations.keySet()) {
 			Map<ProjectFile, FileDependOnFile> temp = relations.get(start);
 			if(temp == null) {
-				System.err.println(start.getFileName());
+				System.err.println(start.getName());
 				continue;
 			}
 			for(ProjectFile end : temp.keySet()) {

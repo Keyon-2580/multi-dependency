@@ -27,6 +27,8 @@ public class Commit implements Node {
     
     private Long entityId;
     
+    private String name;
+    
     private String commitId;
     
     private String message;
@@ -38,6 +40,7 @@ public class Commit implements Node {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
+		properties.put("name", getName() == null ? "" : getName());
 	    properties.put("commitId", getCommitId() == null ? "" : getCommitId());
 	    properties.put("message", getMessage() == null ? "" : getMessage());
 	    properties.put("person", getPerson() == null ? "" : getPerson());

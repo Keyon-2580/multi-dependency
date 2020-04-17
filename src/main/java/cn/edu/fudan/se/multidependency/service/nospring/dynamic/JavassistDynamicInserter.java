@@ -103,12 +103,10 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 						operationName = functionName;
 					}
 					span.setOperationName(operationName);
-//					span.setServiceName(serviceName);
 					span.setTime(TimeUtil.changeTimeStrToLong(execution.getTime()));
 					spanToCallMethod.put(span, execution.getCallForm());
 					
 					Project project = this.getNodes().findProject(projectName, Language.java);
-					System.out.println(this.getNodes().findAllProjects());
 					if(project == null) {
 						throw new Exception("error: span的serviceName不是一个项目 " + projectName);
 					}
@@ -127,7 +125,6 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 					
 					RestfulAPI api = this.getNodes().findRestfulAPIByProjectAndSimpleFunctionName(project, operationName);
 					if(api == null) {
-//						System.out.println(project.getProjectName() + " " + operationName);
 						api = new RestfulAPI();
 						api.setEntityId(this.generateEntityId());
 						api.setApiFunctionSimpleName(operationName);
@@ -142,7 +139,6 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 					SpanInstanceOfRestfulAPI spanInstanceOfMicroServiceAPI = new SpanInstanceOfRestfulAPI();
 					spanInstanceOfMicroServiceAPI.setSpan(span);
 					spanInstanceOfMicroServiceAPI.setApi(api);
-//					spanInstanceOfMicroServiceAPI.setTestCaseId(testCaseId);
 					addRelation(spanInstanceOfMicroServiceAPI);
 				}
 				spanIdToParentSpanId.put(spanId, parentSpanId);
@@ -302,7 +298,7 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 		});
 		for (Function function : functions) {
 			// 方法名是否相同
-			if (!dynamicFunction.getFunctionName().equals(function.getFunctionName())) {
+			if (!dynamicFunction.getFunctionName().equals(function.getName())) {
 				continue;
 			}
 			// 方法参数数量是否相同

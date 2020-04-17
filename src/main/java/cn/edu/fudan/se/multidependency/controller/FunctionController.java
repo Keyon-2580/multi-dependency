@@ -66,7 +66,7 @@ public class FunctionController {
 	
 	private JSONObject test1(Function f, List<FunctionDynamicCallFunction> calls, Long depth) {
 		JSONObject result = new JSONObject();
-		result.put("text", f.getFunctionName() + " " + f.getParametersIdentifies());
+		result.put("text", f.getName() + " " + f.getParametersIdentifies());
 		JSONArray tagsArray = new JSONArray();
 		tagsArray.add("function");
 		result.put("tags", tagsArray);
@@ -160,7 +160,7 @@ public class FunctionController {
 				JSONArray featureTags = new JSONArray();
 				featureTags.add("feature");
 				JSONObject featureJson = new JSONObject();
-				featureJson.put("text", feature.getFeatureName());
+				featureJson.put("text", feature.getName());
 				featureJson.put("tags", featureTags);
 				featureJson.put("href", feature.getFeatureId());
 				

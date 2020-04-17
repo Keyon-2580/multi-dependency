@@ -25,15 +25,15 @@ public class ProjectFile implements Node {
     
     private Long entityId;
     
-	private String fileName;
+	private String name;
 	
 	private String path;
 	
 	private String suffix;
 	
-	public ProjectFile(String fileName, String path, String suffix) {
+	public ProjectFile(String name, String path, String suffix) {
 		super();
-		this.fileName = fileName;
+		this.name = name;
 		this.path = path;
 		this.suffix = suffix;
 	}
@@ -41,7 +41,7 @@ public class ProjectFile implements Node {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("fileName", getFileName() == null ? "" : getFileName());
+		properties.put("name", getName() == null ? "" : getName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("path", getPath() == null ? "" : getPath());
 		properties.put("suffix", getSuffix() == null ? "" : getSuffix());

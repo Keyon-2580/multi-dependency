@@ -36,7 +36,7 @@ public class Nodes {
 			return null;
 		}
 		for(Project project : projects) {
-			if(project.getProjectName().equals(name) && project.getLanguage().equals(language.toString())) {
+			if(project.getName().equals(name) && project.getLanguage().equals(language.toString())) {
 				return project;
 			}
 		}
@@ -136,7 +136,7 @@ public class Nodes {
 		@SuppressWarnings("unchecked")
 		Map<Long, Function> functions = (Map<Long, Function>) findNodesByNodeTypeInProject(NodeLabelType.Function, project);
 		functions.values().forEach(function -> {
-			String functionName = function.getFunctionName();
+			String functionName = function.getName();
 			List<Function> fs = result.getOrDefault(functionName, new ArrayList<>());
 			fs.add(function);
 			result.put(functionName, fs);

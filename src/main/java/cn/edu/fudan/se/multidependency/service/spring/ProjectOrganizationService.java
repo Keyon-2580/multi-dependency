@@ -39,7 +39,7 @@ public class ProjectOrganizationService {
 			tags.add("project");
 			tags.add(project.getLanguage());
 			projectJson.put("tags", tags);
-			projectJson.put("text", project.getProjectName());
+			projectJson.put("text", project.getName());
 			
 			// Package
 			
@@ -59,7 +59,7 @@ public class ProjectOrganizationService {
 		result.sort(new Comparator<Project>() {
 			@Override
 			public int compare(Project o1, Project o2) {
-				return o1.getProjectName().compareTo(o2.getProjectName());
+				return o1.getName().compareTo(o2.getName());
 			}
 		});
 		return result;

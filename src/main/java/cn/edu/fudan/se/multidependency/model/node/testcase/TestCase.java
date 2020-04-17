@@ -21,7 +21,7 @@ public class TestCase implements Node {
 
 	private static final long serialVersionUID = 7817933207475762644L;
 	
-	private String testCaseName;
+	private String name;
 	
 	private String inputContent;
 	
@@ -47,7 +47,7 @@ public class TestCase implements Node {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
-		properties.put("testCaseName", getTestCaseName() == null ? "" : getTestCaseName());
+		properties.put("name", getName() == null ? "" : getName());
 		properties.put("success", isSuccess());
 		properties.put("inputContent", getInputContent() == null ? "" : getInputContent());
 		properties.put("testCaseId", getTestCaseId() == null ? -1 : getTestCaseId());

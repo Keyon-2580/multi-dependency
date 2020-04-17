@@ -143,7 +143,7 @@ public class TestCaseController {
 			for(Project project : projects) {
 				percents.add(new CoverageData(testCaseCoverageService.findFunctionCallFunctionDynamicCalled(testCase, project).coverageOfDynamicCalls(), project, testCase));
 			}
-			testCaseToPercent.put(testCase.getTestCaseId() + ":" + testCase.getTestCaseName(), percents);
+			testCaseToPercent.put(testCase.getTestCaseId() + ":" + testCase.getName(), percents);
 		}
 		
 		request.setAttribute("projects", projects);
@@ -160,7 +160,7 @@ public class TestCaseController {
 			traceArray = new Trace[traces.size()];
 			traces.toArray(traceArray);
 			value = featureOrganizationService.microServiceToCytoscape(true, traceArray);
-			testCaseToMicroserviceCytoscape.put(testCase.getTestCaseId() + ":" + testCase.getTestCaseName(), value);
+			testCaseToMicroserviceCytoscape.put(testCase.getTestCaseId() + ":" + testCase.getName(), value);
 		}
 		request.setAttribute("testCaseToMicroserviceCytoscape", testCaseToMicroserviceCytoscape);
 		return "testcase";

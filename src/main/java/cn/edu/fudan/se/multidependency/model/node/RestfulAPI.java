@@ -56,4 +56,9 @@ public class RestfulAPI implements Node {
 		return LABEL_INDEX;
 	}
 
+	@Override
+	public String getName() {
+		return getApiFunctionSimpleName();
+	}
+
 }

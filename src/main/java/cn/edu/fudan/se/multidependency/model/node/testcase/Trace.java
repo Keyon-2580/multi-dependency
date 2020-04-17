@@ -52,5 +52,10 @@ public class Trace implements Node {
 		return LABEL_INDEX;
 	}
 
+	@Override
+	public String getName() {
+		return getTraceId();
+	}
+
 
 }

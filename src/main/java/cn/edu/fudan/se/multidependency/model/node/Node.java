@@ -23,4 +23,6 @@ public interface Node extends Serializable {
 	
 	String indexName();
 	
+	String getName();
+	
 }

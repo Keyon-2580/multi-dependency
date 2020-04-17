@@ -33,7 +33,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 
 	@Override
 	protected void addNodesWithContainRelations() {
-		final String projectPath = currentProject.getProjectPath();
+		final String projectPath = currentProject.getPath();
 		entityRepo.entityIterator().forEachRemaining(entity -> {
 			// 每个entity对应相应的node
 			if(entity instanceof PackageEntity) {
@@ -41,7 +41,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				ProjectFile file = new ProjectFile();
 				file.setEntityId(entity.getId().longValue());
 				String filePath = entity.getQualifiedName();
-				file.setFileName(FileUtil.extractFileName(filePath));
+				file.setName(FileUtil.extractFileName(filePath));
 				filePath = filePath.replace("\\", "/");
 				filePath = filePath.substring(filePath.indexOf(projectPath + "/"));
 				file.setPath(filePath);
@@ -58,20 +58,20 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 					}
 				}
 				function.setSimpleName(entity.getRawName().getName());
-				function.setFunctionName(functionName);
+				function.setName(functionName);
 				function.setEntityId(entity.getId().longValue());
 				addNode(function, currentProject);
 			} else if(entity instanceof VarEntity) {
 				Variable variable = new Variable();
 				variable.setEntityId(entity.getId().longValue());
 				variable.setTypeIdentify(((VarEntity) entity).getRawType().getName());
-				variable.setVariableName(entity.getQualifiedName());
+				variable.setName(entity.getQualifiedName());
 				variable.setSimpleName(entity.getRawName().getName());
 				addNode(variable, currentProject);
 			} else if(entity.getClass() == TypeEntity.class) {
 				Type type = new Type();
 				type.setEntityId(entity.getId().longValue());
-				type.setTypeName(entity.getQualifiedName());
+				type.setName(entity.getQualifiedName());
 				addNode(type, currentProject);
 			}
 		});
@@ -92,10 +92,10 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				if(parentEntity == null) {
 					// 该java文件没有显式声明packge，为default包
 					pck.setEntityId(entityRepo.generateId().longValue());
-					pck.setPackageName(Package.JAVA_PACKAGE_DEFAULT);
+					pck.setName(Package.JAVA_PACKAGE_DEFAULT);
 				} else {
 					pck.setEntityId(parentEntity.getId().longValue());
-					pck.setPackageName(parentEntity.getQualifiedName());
+					pck.setName(parentEntity.getQualifiedName());
 				}
 				System.out.println(directoryPath);
 				addNode(pck, currentProject);
@@ -107,10 +107,10 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			if(parentEntity == null) {
 				// 该java文件没有显式声明packge，为default包
 				pck.setEntityId(entityRepo.generateId().longValue());
-				pck.setPackageName(Package.JAVA_PACKAGE_DEFAULT);
+				pck.setName(Package.JAVA_PACKAGE_DEFAULT);
 			} else {
 				pck.setEntityId(parentEntity.getId().longValue());
-				pck.setPackageName(parentEntity.getQualifiedName());
+				pck.setName(parentEntity.getQualifiedName());
 			}
 			Contain packageContainFile = new Contain(pck, codeFile);
 			addRelation(packageContainFile);
@@ -128,7 +128,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			Contain fileContainsType = new Contain(parentNode, node);
 			addRelation(fileContainsType);
 //			System.out.println(type.getTypeName() + " " + typeEntityName.get(entityId.intValue()));
-			type.setTypeName(typeEntityName.get(entityId.intValue()));
+			type.setName(typeEntityName.get(entityId.intValue()));
 			type.setAliasName(typeEntityName.get(entityId.intValue()));
 		});
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Function, currentProject).forEach((entityId, node) -> {
@@ -163,11 +163,11 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 //			System.out.println(type.getTypeName());
 			String newFunctionName = null;
 			if(function.isContrustor()) {
-				newFunctionName = type.getTypeName();
+				newFunctionName = type.getName();
 			} else {
-				newFunctionName = type.getTypeName() + "." + function.getSimpleName();
+				newFunctionName = type.getName() + "." + function.getSimpleName();
 			}
-			function.setFunctionName(newFunctionName);
+			function.setName(newFunctionName);
 //			System.out.println("new-Function-Name: " + newFunctionName);
 		});
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Variable, currentProject).forEach((entityId, node) -> {

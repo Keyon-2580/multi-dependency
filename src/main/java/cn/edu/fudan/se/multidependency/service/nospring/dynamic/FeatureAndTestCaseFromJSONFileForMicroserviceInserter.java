@@ -47,7 +47,7 @@ public class FeatureAndTestCaseFromJSONFileForMicroserviceInserter extends Extra
 				throw new Exception("featureId错误");
 			}
 			feature.setFeatureId(featureId);
-			feature.setFeatureName(featureTemp.getString("name"));
+			feature.setName(featureTemp.getString("name"));
 			feature.setDescription(featureTemp.getString("description"));
 			Integer parentFeatureId = featureTemp.getInteger("parentId");
 			if(parentFeatureId == null) {
@@ -82,7 +82,7 @@ public class FeatureAndTestCaseFromJSONFileForMicroserviceInserter extends Extra
 			testcase.setTestCaseId(testcaseId);
 			testcase.setInputContent(testcaseTemp.get("input").toString());
 			testcase.setSuccess(testcaseTemp.getBooleanValue("success"));
-			testcase.setTestCaseName(testcaseTemp.getString("name"));
+			testcase.setName(testcaseTemp.getString("name"));
 			testcase.setDescription(testcaseTemp.getString("description"));
 			String group = testcaseTemp.getString("group") == null ? TestCase.DEFAULT_GROUP : testcaseTemp.getString("group");
 			testcase.setGroup(group);

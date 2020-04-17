@@ -48,7 +48,7 @@
 							</tr>
 							<tr th:each="feature : ${features}">
 								<td><span th:text="${feature.featureId}"></span></td>
-								<td><span th:text="${feature.featureName}"></span></td>
+								<td><span th:text="${feature.name}"></span></td>
 								<td><span th:text="${feature.description}"></span></td>
 								<td><span th:text="${feature.parentFeatureId}"></span></td>
 							</tr>
@@ -68,7 +68,7 @@
 							</tr>
 							<tr th:each="testcase : ${testcases}">
 								<td><span th:text="${testcase.testCaseId}"></span></td>
-								<td><span th:text="${testcase.testCaseName}"></span></td>
+								<td><span th:text="${testcase.name}"></span></td>
 								<td><span th:text="${testcase.success}"></span></td>
 								<td><span th:text="${testcase.inputContent}"></span></td>
 								<!-- <td><span th:text="${testcase.description}"></span></td> -->

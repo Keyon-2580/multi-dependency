@@ -25,9 +25,9 @@ public class Project implements Node {
     @GeneratedValue
     private Long id;
 	
-	private String projectName;
+	private String name;
 
-	private String projectPath;
+	private String path;
 
 	private String language;
 	
@@ -36,10 +36,10 @@ public class Project implements Node {
 
 	private Long entityId;
 	
-	public Project(String projectName, String projectPath, Language language) {
+	public Project(String name, String path, Language language) {
 		super();
-		this.projectName = projectName;
-		this.projectPath = projectPath;
+		this.name = name;
+		this.path = path;
 		this.language = language.toString();
 	}
 	
@@ -48,8 +48,8 @@ public class Project implements Node {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("language", getLanguage() == null ? "" : getLanguage());
-		properties.put("projectName", getProjectName() == null ? "" : getProjectName());
-		properties.put("projectPath", getProjectPath() == null ? "" : getProjectPath());
+		properties.put("name", getName() == null ? "" : getName());
+		properties.put("path", getPath() == null ? "" : getPath());
 		return properties;
 	}
 

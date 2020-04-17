@@ -23,8 +23,6 @@ public class Issue implements Node {
 
 	private String content;
 	
-	private String person;
-	
 	private String issueId;
 	
 	private String name;
@@ -42,7 +40,6 @@ public class Issue implements Node {
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("content", getContent() == null ? "" : getContent());
 		properties.put("issueId", getIssueId() == null ? "" : getIssueId());
-		properties.put("person", getPerson() == null ? "" : getPerson());
 		return properties;
 	}
 

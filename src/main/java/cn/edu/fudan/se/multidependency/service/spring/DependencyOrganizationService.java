@@ -27,9 +27,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionThrowTyp
 import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypeParameterType;
 import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
-import lombok.experimental.var;
 
 @Service
 public class DependencyOrganizationService {
@@ -78,27 +76,27 @@ public class DependencyOrganizationService {
 		Iterable<Package> packages = staticAnalyseService.allPackagesInProject(project);
 		
 		for(Package pck : packages) {
-			nodes.add(ProjectUtil.packageToNode(pck, "Package"));
+			nodes.add(ProjectUtil.toCytoscapeNode(pck, "Package: " + pck.getName(), "Package"));
 			Iterable<ProjectFile> files = staticAnalyseService.allFilesInPackage(pck);
 			for(ProjectFile file : files) {
-				JSONObject fileJson = ProjectUtil.fileToNode(file, "File");
+				JSONObject fileJson = ProjectUtil.toCytoscapeNode(file, "File: " + file.getName(), "File");
 				fileJson.getJSONObject("data").put("parent", pck.getId());
 				nodes.add(fileJson);
 				
 				Iterable<Type> types = staticAnalyseService.allTypesInFile(file);
 				for(Type type : types) {
-					JSONObject typeJson = ProjectUtil.typeToNode(type, "Type");
+					JSONObject typeJson = ProjectUtil.toCytoscapeNode(type, "Type: " + type.getName(), "Type");
 					typeJson.getJSONObject("data").put("parent", file.getId());
 					nodes.add(typeJson);
 					
 					Iterable<Function> functions = staticAnalyseService.allFunctionsInType(type);
 					for(Function function : functions) {
-						JSONObject functionJson = ProjectUtil.functionToNode(function, "Function");
+						JSONObject functionJson = ProjectUtil.toCytoscapeNode(function, "Function: " + function.getName(), "Function");
 						functionJson.getJSONObject("data").put("parent", type.getId());
 						nodes.add(functionJson);
 						Iterable<Variable> variables = staticAnalyseService.allVariablesInFunction(function);
 						for(Variable variable : variables) {
-							JSONObject variableJson = ProjectUtil.variableToNode(variable, "Variable");
+							JSONObject variableJson = ProjectUtil.toCytoscapeNode(variable, "Variable: " + variable.getName(), "Variable");
 							variableJson.getJSONObject("data").put("parent", function.getId());
 							nodes.add(variableJson);
 						}
@@ -107,7 +105,7 @@ public class DependencyOrganizationService {
 					
 					Iterable<Variable> variables = staticAnalyseService.allVariablesInType(type);
 					for(Variable variable : variables) {
-						JSONObject variableJson = ProjectUtil.variableToNode(variable, "Variable");
+						JSONObject variableJson = ProjectUtil.toCytoscapeNode(variable, "Variable: " + variable.getName(), "Variable");
 						variableJson.getJSONObject("data").put("parent", type.getId());
 						nodes.add(variableJson);
 					}
@@ -115,7 +113,7 @@ public class DependencyOrganizationService {
 				
 				Iterable<Function> functions = staticAnalyseService.allFunctionsInFile(file);
 				for(Function function : functions) {
-					JSONObject functionJson = ProjectUtil.functionToNode(function, "Function");
+					JSONObject functionJson = ProjectUtil.toCytoscapeNode(function, "Function: " + function.getName(), "Function");
 					functionJson.getJSONObject("data").put("parent", file.getId());
 					nodes.add(functionJson);
 				}
@@ -190,7 +188,7 @@ public class DependencyOrganizationService {
 			JSONObject packageJson = new JSONObject();
 			JSONObject packageDataValue = new JSONObject();
 			packageDataValue.put("id", pck.getId());
-			packageDataValue.put("name", pck.getPackageName());
+			packageDataValue.put("name", pck.getName());
 			packageDataValue.put("type", "package");
 			packageJson.put("data", packageDataValue);
 			nodes.add(packageJson);
@@ -200,7 +198,7 @@ public class DependencyOrganizationService {
 			JSONObject fileJson = new JSONObject();
 			JSONObject fileDataValue = new JSONObject();
 			fileDataValue.put("id", file.getId());
-			fileDataValue.put("name", file.getFileName());
+			fileDataValue.put("name", file.getName());
 			fileDataValue.put("type", "file");
 			fileJson.put("data", fileDataValue);
 			nodes.add(fileJson);
@@ -259,7 +257,7 @@ public class DependencyOrganizationService {
 			JSONObject fileJson = new JSONObject();
 			JSONObject fileDataValue = new JSONObject();
 			fileDataValue.put("id", file.getId());
-			fileDataValue.put("name", file.getFileName());
+			fileDataValue.put("name", file.getName());
 			fileJson.put("data", fileDataValue);
 			nodes.add(fileJson);
 		}
@@ -292,7 +290,7 @@ public class DependencyOrganizationService {
 			JSONObject functionJson = new JSONObject();
 			JSONObject functionDataValue = new JSONObject();
 			functionDataValue.put("id", function.getId());
-			functionDataValue.put("name", function.getFunctionName());
+			functionDataValue.put("name", function.getName());
 			functionJson.put("data", functionDataValue);
 			nodes.add(functionJson);
 		}
@@ -325,7 +323,7 @@ public class DependencyOrganizationService {
 			JSONObject packageJson = new JSONObject();
 			JSONObject packageDataValue = new JSONObject();
 			packageDataValue.put("id", pck.getId());
-			packageDataValue.put("name", pck.getPackageName());
+			packageDataValue.put("name", pck.getName());
 			packageJson.put("data", packageDataValue);
 			nodes.add(packageJson);
 		}

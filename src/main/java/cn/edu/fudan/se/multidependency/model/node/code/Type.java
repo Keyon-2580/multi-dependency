@@ -22,7 +22,7 @@ public class Type implements Node {
     @GeneratedValue
     private Long id;
 
-	private String typeName;
+	private String name;
 	
 	private String aliasName;
 	
@@ -32,9 +32,9 @@ public class Type implements Node {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("typeName", getTypeName() == null ? "" : getTypeName());
+		properties.put("name", getName() == null ? "" : getName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
-		properties.put("aliasName", getAliasName() == null ? (getTypeName() == null ? "" : getTypeName()) : getAliasName());
+		properties.put("aliasName", getAliasName() == null ? (getName() == null ? "" : getName()) : getAliasName());
 		return properties;
 	}
 	

@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -75,14 +73,14 @@ public class FeatureOrganizationService {
 		for(Feature feature : allFeatures()) {
 			JSONObject featureData = new JSONObject();
 			featureData.put("id", feature.getId());
-			featureData.put("name", feature.getFeatureId() + " : " + feature.getFeatureName());
+			featureData.put("name", feature.getFeatureId() + " : " + feature.getName());
 			featureData.put("type", "feature");
-			featureData.put("value", feature.getFeatureId() + ":" + feature.getFeatureName());
+			featureData.put("value", feature.getFeatureId() + ":" + feature.getName());
 			int length = 0;
-			if(feature.getFeatureName().matches(".*[0-9].*")) {
-				length = feature.getFeatureName().getBytes().length * 8;
+			if(feature.getName().matches(".*[0-9].*")) {
+				length = feature.getName().getBytes().length * 8;
 			} else {
-				length = feature.getFeatureName().length() * 23;
+				length = feature.getName().length() * 23;
 			}
 			featureData.put("length", length);
 			JSONObject featureNode = new JSONObject();
@@ -94,13 +92,13 @@ public class FeatureOrganizationService {
 				TestCase testcase = execute.getTestCase();
 				JSONObject testcaseData = new JSONObject();
 				testcaseData.put("id", testcase.getId());
-				testcaseData.put("name", testcase.getTestCaseId() + ":" + testcase.getTestCaseName());
+				testcaseData.put("name", testcase.getTestCaseId() + ":" + testcase.getName());
 				testcaseData.put("type", "testcase");
-				testcaseData.put("value", testcase.getTestCaseId() + ":" + testcase.getTestCaseName());
-				if(testcase.getTestCaseName().matches(".*[0-9].*")) {
-					length = testcase.getTestCaseName().getBytes().length * 8;
+				testcaseData.put("value", testcase.getTestCaseId() + ":" + testcase.getName());
+				if(testcase.getName().matches(".*[0-9].*")) {
+					length = testcase.getName().getBytes().length * 8;
 				} else {
-					length = testcase.getTestCaseName().length() * 23;
+					length = testcase.getName().length() * 23;
 				}
 				testcaseData.put("length", length);
 				JSONObject testcaseNode = new JSONObject();
@@ -140,7 +138,7 @@ public class FeatureOrganizationService {
 		for(TestCase testcase : testcases) {
 			List<TestCaseExecuteFeature> executes = testCaseExecuteFeatures.get(testcase);
 			JSONObject testcaseJson = new JSONObject();
-			testcaseJson.put("text", testcase.getTestCaseId() + ":" + testcase.getTestCaseName());
+			testcaseJson.put("text", testcase.getTestCaseId() + ":" + testcase.getName());
 			JSONArray tags = new JSONArray();
 			tags.add("testcase");
 			testcaseJson.put("tags", tags);
@@ -149,7 +147,7 @@ public class FeatureOrganizationService {
 			JSONArray testcaseNodes = new JSONArray();
 			for(TestCaseExecuteFeature execute : executes) {
 				JSONObject featureJson = new JSONObject();
-				featureJson.put("text", execute.getFeature().getFeatureId() + ":" + execute.getFeature().getFeatureName());
+				featureJson.put("text", execute.getFeature().getFeatureId() + ":" + execute.getFeature().getName());
 				tags = new JSONArray();
 				tags.add("feature");
 				featureJson.put("tags", tags);
@@ -207,7 +205,7 @@ public class FeatureOrganizationService {
 		for(Feature feature : features) {
 			List<TestCaseExecuteFeature> executes = featureExecutedByTestCases.get(feature);
 			JSONObject featureJson = new JSONObject();
-			featureJson.put("text", feature.getFeatureId() + ":" + feature.getFeatureName());
+			featureJson.put("text", feature.getFeatureId() + ":" + feature.getName());
 			JSONArray tags = new JSONArray();
 			tags.add("feature");
 			featureJson.put("tags", tags);
@@ -216,7 +214,7 @@ public class FeatureOrganizationService {
 			JSONArray testCases = new JSONArray();
 			for(TestCaseExecuteFeature execute : executes) {
 				JSONObject testCaseJson = new JSONObject();
-				testCaseJson.put("text", execute.getTestCase().getTestCaseId() + ":" + execute.getTestCase().getTestCaseName());
+				testCaseJson.put("text", execute.getTestCase().getTestCaseId() + ":" + execute.getTestCase().getName());
 				tags = new JSONArray();
 				tags.add("testcase");
 				testCaseJson.put("tags", tags);
@@ -425,7 +423,7 @@ public class FeatureOrganizationService {
 		nodes.add(entry);
 		Set<MicroService> relatedMicroServices = findRelatedMicroServiceForTraces(trace);
 		for(MicroService ms : relatedMicroServices) {
-			nodes.add(ProjectUtil.microserviceToNode(ms, "MicroService"));
+			nodes.add(ProjectUtil.toCytoscapeNode(ms, "MicroService"));
 		}
 		
 		Map<RestfulAPI, Boolean> isAPINodeAdd = new HashMap<>();
@@ -435,7 +433,7 @@ public class FeatureOrganizationService {
 			MicroService ms = spanBelongToMicroservice(span);
 			RestfulAPI api = spanInstanceOfRestfulAPIs.get(span).getApi();
 			if(!isAPINodeAdd.getOrDefault(api, false)) {
-				JSONObject apiData = ProjectUtil.restfulAPIToNode(api, "API");
+				JSONObject apiData = ProjectUtil.toCytoscapeNode(api, "API");
 				apiData.getJSONObject("data").put("parent", ms.getId());
 				nodes.add(apiData);
 				isAPINodeAdd.put(api, true);
@@ -457,7 +455,7 @@ public class FeatureOrganizationService {
 				MicroService callMs = spanBelongToMicroservice(callSpan);
 				RestfulAPI callApi = spanInstanceOfRestfulAPIs.get(callSpan).getApi();
 				if(!isAPINodeAdd.getOrDefault(callApi, false)) {
-					JSONObject callApiData = ProjectUtil.restfulAPIToNode(callApi, "API");
+					JSONObject callApiData = ProjectUtil.toCytoscapeNode(callApi, "API");
 					callApiData.getJSONObject("data").put("parent", callMs.getId());
 					nodes.add(callApiData);
 					isAPINodeAdd.put(callApi, true);

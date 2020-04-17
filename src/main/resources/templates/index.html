@@ -16,9 +16,9 @@
 				<th>路径</th>
 			</tr>
 			<tr th:each="project : ${projects}">
-				<td><span th:text="${project.projectName}"></span></td>
+				<td><span th:text="${project.name}"></span></td>
 				<td><span th:text="${project.language}"></span></td>
-				<td><span th:text="${project.projectPath}"></span></td>
+				<td><span th:text="${project.path}"></span></td>
 			</tr>
 		</table>
 	

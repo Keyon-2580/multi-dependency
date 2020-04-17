@@ -151,7 +151,7 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 			return result;
 		}
 		for(FunctionDynamicCallFunction call : calls) {
-			if(project.getProjectName().equals(call.getProjectName())) {
+			if(project.getName().equals(call.getProjectName())) {
 				result.add(call);
 			}
 		}
@@ -170,7 +170,7 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 
 	@Override
 	public List<FunctionDynamicCallFunction> findFunctionDynamicCallsByProject(Project project) {
-		return functionDynamicCallFunctionRepository.findFunctionCallsByProjectNameAndLanguage(project.getProjectName(), project.getLanguage());
+		return functionDynamicCallFunctionRepository.findFunctionCallsByProjectNameAndLanguage(project.getName(), project.getLanguage());
 	}
 
 	private Iterable<TestCaseExecuteFeature> allTestCaseExecuteFeaturesCache = null;

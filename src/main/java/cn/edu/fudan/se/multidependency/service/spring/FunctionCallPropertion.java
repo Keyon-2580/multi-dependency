@@ -49,14 +49,14 @@ public class FunctionCallPropertion {
 			Map<Function, FunctionCallPropertionDetail> details = dynamicCalls.getOrDefault(caller, new HashMap<>());
 			JSONArray callFunctionArray = new JSONArray();
 			List<FunctionCallFunction> callFunctions = staticCalls.get(caller);
-			functionJson.put("text", caller.getFunctionName() + caller.getParametersIdentifies() + " (" + details.size() + " / " + callFunctions.size() + ") ");
+			functionJson.put("text", caller.getName() + caller.getParametersIdentifies() + " (" + details.size() + " / " + callFunctions.size() + ") ");
 			for(FunctionCallFunction callFunction : callFunctions) {
 				JSONObject callFunctionJson = new JSONObject();
 				callFunctionJson.put("tags", callTags);
 				callFunctionArray.add(callFunctionJson);
 				FunctionCallPropertionDetail detail = details.get(callFunction.getCallFunction());
 				StringBuilder builder = new StringBuilder();
-				builder.append(callFunction.getCallFunction().getFunctionName())
+				builder.append(callFunction.getCallFunction().getName())
 					.append(callFunction.getCallFunction().getParametersIdentifies())
 					.append(" (")
 					.append(callFunction.getTimes())
@@ -65,7 +65,7 @@ public class FunctionCallPropertion {
 					callFunctionJson.put("backColor", "#00FF00");
 					for(TestCase testCase : detail.getTestCaseCallTimes().keySet()) {
 						builder.append(" (")
-							.append(testCase.getTestCaseName())
+							.append(testCase.getName())
 							.append(" : ")
 							.append(detail.getTestCaseCallTimes().get(testCase))
 							.append(")");

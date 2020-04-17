@@ -176,7 +176,7 @@ public class MicroServiceCallWithEntry {
 		if(showAllScenarios) {
 			for(Scenario scenario : allScenarios) {
 				if(!isScenarioNodeAdd.getOrDefault(scenario, false)) {
-					nodes.add(ProjectUtil.scenarioToNode(scenario, "Scenario"));
+					nodes.add(ProjectUtil.toCytoscapeNode(scenario, scenario.getScenarioId() + " : " + scenario.getName(),  "Scenario"));
 					isScenarioNodeAdd.put(scenario, true);
 				}
 			}
@@ -184,7 +184,7 @@ public class MicroServiceCallWithEntry {
 		if(showAllMicroServices) {
 			for(MicroService ms : allMicroServices) {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false)) {
-					nodes.add(ProjectUtil.microserviceToNode(ms, "MicroService"));
+					nodes.add(ProjectUtil.toCytoscapeNode(ms, "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
 				}
 			}
@@ -192,13 +192,13 @@ public class MicroServiceCallWithEntry {
 		if(showAllFeatures) {
 			for(Feature feature : allFeatures) {
 				if(!isFeatureNodeAdd.getOrDefault(feature, false)) {
-					nodes.add(ProjectUtil.featureToNode(feature, "Feature"));
+					nodes.add(ProjectUtil.toCytoscapeNode(feature, feature.getFeatureId() + " : " + feature.getName(), "Feature"));
 					isFeatureNodeAdd.put(feature, true);
 				}
 				Feature parentFeature = featureToParentFeature.get(feature);
 				if(parentFeature != null && !isFeatureNodeParent.getOrDefault(feature, false)) {
 					if(!isFeatureNodeAdd.getOrDefault(parentFeature, false)) {
-						nodes.add(ProjectUtil.featureToNode(parentFeature, "Feature"));
+						nodes.add(ProjectUtil.toCytoscapeNode(parentFeature, parentFeature.getFeatureId() + " : " + parentFeature.getName(), "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
 					}
 					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, null, true));
@@ -208,11 +208,11 @@ public class MicroServiceCallWithEntry {
 		}
 		
 		for(TestCase testCase : testCaseToEntries.keySet()) {
-			nodes.add(ProjectUtil.testCaseToNode(testCase, "TestCase_" + (testCase.isSuccess() ? "success" : "fail")));
+			nodes.add(ProjectUtil.toCytoscapeNode(testCase, String.join(" : ", " " + testCase.getTestCaseId(), testCase.getName() + " "), "TestCase_" + (testCase.isSuccess() ? "success" : "fail")));
 			Scenario scenario = this.scenarioDefineTestCases.get(testCase);
 			if(scenario != null) {
 				if(!isScenarioNodeAdd.getOrDefault(scenario, false)) {
-					nodes.add(ProjectUtil.scenarioToNode(scenario, "Scenario"));
+					nodes.add(ProjectUtil.toCytoscapeNode(scenario, scenario.getScenarioId() + " : " + scenario.getName(),  "Scenario"));
 					isScenarioNodeAdd.put(scenario, true);
 				}
 				edges.add(ProjectUtil.relationToEdge(scenario, testCase, "ScenarioDefineTestCase", null, true));
@@ -220,7 +220,7 @@ public class MicroServiceCallWithEntry {
 			List<MicroService> entries = testCaseToEntries.getOrDefault(testCase, new ArrayList<>());
 			for(MicroService entry : entries) {
 				if(!isMicroServiceNodeAdd.getOrDefault(entry, false)) {
-					nodes.add(ProjectUtil.microserviceToNode(entry, "MicroService"));
+					nodes.add(ProjectUtil.toCytoscapeNode(entry, "MicroService"));
 					isMicroServiceNodeAdd.put(entry, true);
 				}
 				edges.add(ProjectUtil.relationToEdge(testCase, entry, "TestCaseExecuteMicroService", null, true));
@@ -228,19 +228,19 @@ public class MicroServiceCallWithEntry {
 			List<Feature> features = testCaseExecuteFeatures.getOrDefault(testCase, new ArrayList<>());
 			for(Feature feature : features) {
 				if(!isFeatureNodeAdd.getOrDefault(feature, false)) {
-					nodes.add(ProjectUtil.featureToNode(feature, "Feature"));
+					nodes.add(ProjectUtil.toCytoscapeNode(feature, feature.getFeatureId() + " : " + feature.getName(), "Feature"));
 					isFeatureNodeAdd.put(feature, true);
 				}
 				Feature parentFeature = featureToParentFeature.get(feature);
 				if(parentFeature != null && !isFeatureNodeParent.getOrDefault(feature, false)) {
 					if(!isFeatureNodeAdd.getOrDefault(parentFeature, false)) {
-						nodes.add(ProjectUtil.featureToNode(parentFeature, "Feature"));
+						nodes.add(ProjectUtil.toCytoscapeNode(parentFeature, parentFeature.getFeatureId() + " : " + parentFeature.getName(), "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
 					}
 					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, null, true));
 					isFeatureNodeParent.put(feature, true);
 				}
-				System.out.println(testCase.getTestCaseName() + " " + feature.getFeatureName());
+				System.out.println(testCase.getName() + " " + feature.getName());
 				edges.add(ProjectUtil.relationToEdge(feature, testCase, "FeatureExecutedByTestCase", null, true));
 			}
 		}
@@ -248,12 +248,12 @@ public class MicroServiceCallWithEntry {
 		if(showStructure) {
 			for(MicroService ms : msDependOns.keySet()) {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false) && !msDependOns.get(ms).isEmpty()) {
-					nodes.add(ProjectUtil.microserviceToNode(ms, "MicroService"));
+					nodes.add(ProjectUtil.toCytoscapeNode(ms, "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
 				}
 				for(MicroService callMs : msDependOns.get(ms).keySet()) {
 					if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
-						nodes.add(ProjectUtil.microserviceToNode(callMs, "MicroService"));
+						nodes.add(ProjectUtil.toCytoscapeNode(callMs, "MicroService"));
 						isMicroServiceNodeAdd.put(callMs, true);
 					}
 					if(ProjectUtil.isMicroServiceCall(ms, callMs, calls)) {
@@ -266,12 +266,12 @@ public class MicroServiceCallWithEntry {
 			
 			for(MicroService ms : calls.keySet()) {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false) && !calls.get(ms).isEmpty()) {
-					nodes.add(ProjectUtil.microserviceToNode(ms, "MicroService"));
+					nodes.add(ProjectUtil.toCytoscapeNode(ms, "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
 				}
 				for(MicroService callMs : calls.get(ms).keySet()) {
 					if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
-						nodes.add(ProjectUtil.microserviceToNode(callMs, "MicroService"));
+						nodes.add(ProjectUtil.toCytoscapeNode(callMs, "MicroService"));
 						isMicroServiceNodeAdd.put(callMs, true);
 					}
 					if(!ProjectUtil.isMicroServiceDependOn(ms, callMs, msDependOns)) {
@@ -282,12 +282,12 @@ public class MicroServiceCallWithEntry {
 		} else {
 			for(MicroService ms : calls.keySet()) {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false) && !calls.get(ms).isEmpty()) {
-					nodes.add(ProjectUtil.microserviceToNode(ms, "MicroService"));
+					nodes.add(ProjectUtil.toCytoscapeNode(ms, "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
 				}
 				for(MicroService callMs : calls.get(ms).keySet()) {
 					if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
-						nodes.add(ProjectUtil.microserviceToNode(callMs, "MicroService"));
+						nodes.add(ProjectUtil.toCytoscapeNode(callMs, "MicroService"));
 						isMicroServiceNodeAdd.put(callMs, true);
 					}
 					edges.add(ProjectUtil.relationToEdge(ms, callMs, "NoStructureCall", null, true));
@@ -314,7 +314,7 @@ public class MicroServiceCallWithEntry {
 		if(showAllMicroServices) {
 			for(MicroService ms : allMicroServices) {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false)) {
-					nodes.add(ProjectUtil.microserviceToNode(ms, "MicroService"));
+					nodes.add(ProjectUtil.toCytoscapeNode(ms, "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
 				}
 			}
@@ -322,13 +322,13 @@ public class MicroServiceCallWithEntry {
 		if(showAllFeatures) {
 			for(Feature feature : allFeatures) {
 				if(!isFeatureNodeAdd.getOrDefault(feature, false)) {
-					nodes.add(ProjectUtil.featureToNode(feature, "Feature"));
+					nodes.add(ProjectUtil.toCytoscapeNode(feature, feature.getFeatureId() + " : " + feature.getName(), "Feature"));
 					isFeatureNodeAdd.put(feature, true);
 				}
 				Feature parentFeature = featureToParentFeature.get(feature);
 				if(parentFeature != null && !isFeatureNodeParent.getOrDefault(feature, false)) {
 					if(!isFeatureNodeAdd.getOrDefault(parentFeature, false)) {
-						nodes.add(ProjectUtil.featureToNode(parentFeature, "Feature"));
+						nodes.add(ProjectUtil.toCytoscapeNode(parentFeature, parentFeature.getFeatureId() + " : " + parentFeature.getName(), "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
 					}
 					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, null, true));
@@ -338,11 +338,11 @@ public class MicroServiceCallWithEntry {
 		}
 		
 		for(TestCase testCase : testCaseToEntries.keySet()) {
-			nodes.add(ProjectUtil.testCaseToNode(testCase, "TestCase_" + (testCase.isSuccess() ? "success" : "fail")));
+			nodes.add(ProjectUtil.toCytoscapeNode(testCase, String.join(" : ", " " + testCase.getTestCaseId(), testCase.getName() + " "), "TestCase_" + (testCase.isSuccess() ? "success" : "fail")));
 			List<MicroService> entries = testCaseToEntries.getOrDefault(testCase, new ArrayList<>());
 			for(MicroService entry : entries) {
 				if(!isMicroServiceNodeAdd.getOrDefault(entry, false)) {
-					nodes.add(ProjectUtil.microserviceToNode(entry, "MicroService"));
+					nodes.add(ProjectUtil.toCytoscapeNode(entry, "MicroService"));
 					isMicroServiceNodeAdd.put(entry, true);
 				}
 				edges.add(ProjectUtil.relationToEdge(testCase, entry, null, null, true));
@@ -350,13 +350,13 @@ public class MicroServiceCallWithEntry {
 			List<Feature> features = testCaseExecuteFeatures.getOrDefault(testCase, new ArrayList<>());
 			for(Feature feature : features) {
 				if(!isFeatureNodeAdd.getOrDefault(feature, false)) {
-					nodes.add(ProjectUtil.featureToNode(feature, "Feature"));
+					nodes.add(ProjectUtil.toCytoscapeNode(feature, feature.getFeatureId() + " : " + feature.getName(), "Feature"));
 					isFeatureNodeAdd.put(feature, true);
 				}
 				Feature parentFeature = featureToParentFeature.get(feature);
 				if(parentFeature != null && !isFeatureNodeParent.getOrDefault(feature, false)) {
 					if(!isFeatureNodeAdd.getOrDefault(parentFeature, false)) {
-						nodes.add(ProjectUtil.featureToNode(parentFeature, "Feature"));
+						nodes.add(ProjectUtil.toCytoscapeNode(parentFeature, parentFeature.getFeatureId() + " : " + parentFeature.getName(), "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
 					}
 					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, "is child of", true));
@@ -367,12 +367,12 @@ public class MicroServiceCallWithEntry {
 		}
 		for(MicroService ms : calls.keySet()) {
 			if(!isMicroServiceNodeAdd.getOrDefault(ms, false)) {
-				nodes.add(ProjectUtil.microserviceToNode(ms, "MicroService"));
+				nodes.add(ProjectUtil.toCytoscapeNode(ms, "MicroService"));
 				isMicroServiceNodeAdd.put(ms, true);
 			}
 			for(MicroService callMs : calls.get(ms).keySet()) {
 				if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
-					nodes.add(ProjectUtil.microserviceToNode(callMs, "MicroService"));
+					nodes.add(ProjectUtil.toCytoscapeNode(callMs, "MicroService"));
 					isMicroServiceNodeAdd.put(callMs, true);
 				}
 				edges.add(ProjectUtil.relationToEdge(ms, callMs, null, null, true));

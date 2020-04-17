@@ -22,7 +22,7 @@ public class Variable implements Node {
 
 	private static final long serialVersionUID = 7656480620809763012L;
 
-	private String variableName;
+	private String name;
 	
 	private String simpleName;
 
@@ -37,7 +37,7 @@ public class Variable implements Node {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("variableName", getVariableName() == null ? "" : getVariableName());
+		properties.put("name", getName() == null ? "" : getName());
 		properties.put("simpleName", getSimpleName() == null ? "" : getSimpleName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("typeIdentify", getTypeIdentify() == null ? "" : getTypeIdentify());

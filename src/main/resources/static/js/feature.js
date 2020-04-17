@@ -11,7 +11,8 @@ var showMicroServiceInCytoscape = function(elements, container, nodeGraphId, btn
 				selector: 'node',
 				style: {
 					'shape' : 'rectangle',
-    				'width': 'data(length)',
+//    				'width': 'data(length)',
+    				'width': 'label',
     				'height': 25,
     				'text-valign': 'center',
     				'text-halign': 'center',
@@ -449,7 +450,8 @@ var showDataInCytoscape = function(container, elements, layout="breadthfirst") {
     			selector: 'node',
     			style: {
     				'shape' : 'rectangle',
-    				'width': 'data(length)',
+//    				'width': 'data(length)',
+    				'width': 'label',
     				'height': 25,
     				'text-valign': 'center',
     				'text-halign': 'center',
@@ -463,7 +465,8 @@ var showDataInCytoscape = function(container, elements, layout="breadthfirst") {
     			selector: 'node[type="file"]',
     			style: {
     				'shape' : 'rectangle',
-    				'width': 'data(length)',
+//    				'width': 'data(length)',
+    				'width': 'label',
     				'height': 25,
     				'text-valign': 'center',
     				'text-halign': 'center',
@@ -477,7 +480,8 @@ var showDataInCytoscape = function(container, elements, layout="breadthfirst") {
     			selector: 'node[type="package"]',
     			style: {
     				'shape' : 'rectangle',
-    				'width': 'data(length)',
+//    				'width': 'data(length)',
+    				'width': 'label',
     				'height': 25,
     				'text-valign': 'center',
     				'text-halign': 'center',
@@ -535,7 +539,8 @@ var showDataInCytoscape = function(container, elements, layout="breadthfirst") {
     			selector: 'node[type="MicroService"]',
     			style: {
     				'shape' : 'rectangle',
-    				'width': 'data(length)',
+//    				'width': 'data(length)',
+    				'width': 'label',
     				'height': 25,
     				'text-valign': 'top',
     				'text-halign': 'center',
@@ -549,7 +554,8 @@ var showDataInCytoscape = function(container, elements, layout="breadthfirst") {
     			selector: 'node[type="API"]',
     			style: {
     				'shape' : 'ellipse',
-    				'width': 'data(length)',
+//    				'width': 'data(length)',
+    				'width': 'label',
     				'height': 25,
     				'text-valign': 'center',
     				'text-halign': 'center',

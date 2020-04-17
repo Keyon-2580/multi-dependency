@@ -31,7 +31,7 @@ public class Function implements Node {
 
     private Long entityId;
 
-	private String functionName;
+	private String name;
 	
 	private String simpleName;
 
@@ -59,7 +59,7 @@ public class Function implements Node {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("functionName", getFunctionName() == null ? "" : getFunctionName());
+		properties.put("name", getName() == null ? "" : getName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("returnTypeIdentify", getReturnTypeIdentify() == null ? "" : getReturnTypeIdentify());
 		properties.put("parametersIdentifies", getParameters().toString().replace('[', '(').replace(']', ')'));

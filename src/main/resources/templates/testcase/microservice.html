@@ -28,7 +28,7 @@
 						<optgroup th:each="group, testCasesList : ${testCases}"
 							th:label="${group.key}">
 							<option th:each="testCase : ${group.value}"
-								th:text="${testCase.testCaseName}" th:value="${testCase.testCaseId}"></option>
+								th:text="${testCase.name}" th:value="${testCase.testCaseId}"></option>
 						</optgroup>
 					</select>
 					<button id="submit" type="button" class="btn btn-default">提交</button>

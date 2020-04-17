@@ -30,7 +30,7 @@ public class Package implements Node {
     
     private String directoryPath;
 	
-    private String packageName;
+    private String name;
 
     private Long entityId;
 
@@ -43,7 +43,7 @@ public class Package implements Node {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("directoryPath", getDirectoryPath() == null ? "" : getDirectoryPath());
-		properties.put("packageName", getPackageName() == null ? "" : getPackageName());
+		properties.put("name", getName() == null ? "" : getName());
 		return properties;
 	}
 

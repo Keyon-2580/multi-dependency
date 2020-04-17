@@ -23,7 +23,7 @@ public class Namespace implements Node {
     @GeneratedValue
     private Long id;
     
-    private String namespaceName;
+    private String name;
     
     private Long entityId;
 
@@ -31,7 +31,7 @@ public class Namespace implements Node {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
-		properties.put("namespaceName", getNamespaceName() == null ? "" : getNamespaceName());
+		properties.put("name", getName() == null ? "" : getName());
 		return properties;
 	}
 
