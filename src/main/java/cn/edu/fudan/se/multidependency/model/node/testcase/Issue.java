@@ -26,6 +26,8 @@ public class Issue implements Node {
 	private String person;
 	
 	private String issueId;
+	
+	private String name;
 
     @Id
     @GeneratedValue
@@ -36,6 +38,7 @@ public class Issue implements Node {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
+		properties.put("name", getName() == null ? "" : getName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("content", getContent() == null ? "" : getContent());
 		properties.put("issueId", getIssueId() == null ? "" : getIssueId());

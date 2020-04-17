@@ -15,6 +15,7 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
@@ -25,7 +26,10 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionReturnTy
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionThrowType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypeParameterType;
 import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
+import lombok.experimental.var;
 
 @Service
 public class DependencyOrganizationService {
@@ -92,6 +96,20 @@ public class DependencyOrganizationService {
 						JSONObject functionJson = ProjectUtil.functionToNode(function, "Function");
 						functionJson.getJSONObject("data").put("parent", type.getId());
 						nodes.add(functionJson);
+						Iterable<Variable> variables = staticAnalyseService.allVariablesInFunction(function);
+						for(Variable variable : variables) {
+							JSONObject variableJson = ProjectUtil.variableToNode(variable, "Variable");
+							variableJson.getJSONObject("data").put("parent", function.getId());
+							nodes.add(variableJson);
+						}
+
+					}
+					
+					Iterable<Variable> variables = staticAnalyseService.allVariablesInType(type);
+					for(Variable variable : variables) {
+						JSONObject variableJson = ProjectUtil.variableToNode(variable, "Variable");
+						variableJson.getJSONObject("data").put("parent", type.getId());
+						nodes.add(variableJson);
 					}
 				}
 				
@@ -148,6 +166,14 @@ public class DependencyOrganizationService {
 		for(FileImportFunction relation : fileImportFunctions) {
 			edges.add(ProjectUtil.relationToEdge(relation.getFile(), relation.getFunction(), "FileImportFunction", "import", true));
 		}
+		List<VariableIsType> variableIsType = staticAnalyseService.findProjectContainVariableIsTypeRelations(project);
+		for(VariableIsType relation : variableIsType) {
+			edges.add(ProjectUtil.relationToEdge(relation.getVariable(), relation.getType(), "VariableIsType", "VariableIsType", false));
+		}
+		/*List<VariableTypeParameterType> variableTypeParameterTypes = staticAnalyseService.findProjectContainVariableTypeParameterTypeRelations(project);
+		for(VariableTypeParameterType relation : variableTypeParameterTypes) {
+			edges.add(ProjectUtil.relationToEdge(relation.getVariable(), relation.getType(), "VariableParameterType", "use", false));
+		}*/
 		
 		
 		result.put("nodes", nodes);

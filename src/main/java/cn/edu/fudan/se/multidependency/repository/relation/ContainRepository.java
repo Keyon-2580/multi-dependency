@@ -13,6 +13,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
@@ -54,7 +55,13 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	public List<Function> findFileContainFunctions(@Param("fileId") Long fileId);
 	
 	@Query("match (a:Type)-[r:" + RelationType.str_CONTAIN + "]->(b:Function) where id(a)={typeId} return b")
-	public List<Function> findTypeContainFunctions(@Param("typeId") Long fileId);
+	public List<Function> findTypeContainFunctions(@Param("typeId") Long typeId);
+	
+	@Query("match (a:Type)-[r:" + RelationType.str_CONTAIN + "]->(b:Variable) where id(a)={typeId} return b")
+	public List<Variable> findTypeContainVariables(@Param("typeId") Long typeId);
+	
+	@Query("match (a:Function)-[r:" + RelationType.str_CONTAIN + "]->(b:Variable) where id(a)={functionId} return b")
+	public List<Variable> findFunctionContainVariables(@Param("functionId") Long functionId);
 
 	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..2]->(b:Function) where id(b)={functionId} return a")
 	public ProjectFile findFunctionBelongToFileByFunctionId(@Param("functionId") Long functionId);

@@ -129,6 +129,21 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			}
 	    		},
 	    		{
+	    			selector: 'node[type="Variable"]',
+	    			style: {
+	    				'shape' : 'ellipse',
+	    				'width': 'data(length)',
+//	    				'width' : "label",
+	    				'height': 30,
+	    				'text-valign': 'center',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': '#f6f6f6',
+						'content': 'data(name)'
+	    			}
+	    		},
+	    		{
 	    			selector: 'node[type="Feature"]',
 	    			style: {
 	    				'shape' : 'ellipse',

@@ -14,8 +14,10 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
+import cn.edu.fudan.se.multidependency.model.node.testcase.Issue;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
@@ -71,6 +73,18 @@ public class ProjectUtil {
 		return result;
 	}
 	
+	public static JSONObject variableToNode(Variable variable, String type) {
+		JSONObject result = new JSONObject();
+		JSONObject data = new JSONObject();
+		data.put("type", type);
+		data.put("id", variable.getId());
+		String name = "Variable: " + variable.getVariableName();
+		data.put("name", name);
+		data.put("length", name.length() * 10);
+		result.put("data", data);
+		return result;
+	}
+	
 	public static JSONObject functionToNode(Function function, String type) {
 		JSONObject result = new JSONObject();
 		JSONObject data = new JSONObject();
@@ -114,6 +128,19 @@ public class ProjectUtil {
 		microServiceDataValue.put("name", api.getApiFunctionSimpleName());
 		microServiceDataValue.put("length", api.getApiFunctionSimpleName().length() * 10);
 		result.put("data", microServiceDataValue);
+		return result;
+	}
+	
+	public static JSONObject issueToNode(Issue issue, String type) {
+		JSONObject result = new JSONObject();
+		JSONObject data = new JSONObject();
+		data.put("type", type);
+		data.put("id", issue.getId());
+		String name = issue.getName();
+		data.put("name", name);
+		int length = name.length() * 10;
+		data.put("length", length);
+		result.put("data", data);
 		return result;
 	}
 	

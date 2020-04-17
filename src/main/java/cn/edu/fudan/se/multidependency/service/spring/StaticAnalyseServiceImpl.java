@@ -477,5 +477,21 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		typeContainFunctionsCache.put(type, result);
 		return result;
 	}
+
+	Map<Type, Iterable<Variable>> typeContainVariablesCache = new HashMap<>();
+	@Override
+	public Iterable<Variable> allVariablesInType(Type type) {
+		Iterable<Variable> result = typeContainVariablesCache.getOrDefault(type, containRepository.findTypeContainVariables(type.getId()));
+		typeContainVariablesCache.put(type, result);
+		return result;
+	}
+
+	Map<Function, Iterable<Variable>> functionContainVariablesCache = new HashMap<>();
+	@Override
+	public Iterable<Variable> allVariablesInFunction(Function function) {
+		Iterable<Variable> result = functionContainVariablesCache.getOrDefault(function, containRepository.findFunctionContainVariables(function.getId()));
+		functionContainVariablesCache.put(function, result);
+		return result;
+	}
 	
 }

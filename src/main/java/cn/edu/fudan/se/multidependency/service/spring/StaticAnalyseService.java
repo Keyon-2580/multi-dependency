@@ -34,6 +34,10 @@ public interface StaticAnalyseService {
 	
 	public Iterable<Type> allTypesInFile(ProjectFile codeFile);
 	
+	public Iterable<Variable> allVariablesInType(Type type);
+	
+	public Iterable<Variable> allVariablesInFunction(Function function);
+	
 	public Iterable<Function> allFunctionsInFile(ProjectFile codeFile);
 	
 	public Iterable<Function> allFunctionsInType(Type type);
