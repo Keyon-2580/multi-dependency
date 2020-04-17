@@ -1,7 +1,5 @@
 package cn.edu.fudan.se.multidependency.model.node.testcase;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,9 +60,23 @@ public class Issue implements Node {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("name", getName() == null ? "" : getName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
+		properties.put("url", getUrl() == null ? "" : getUrl());
+		properties.put("repositoryUrl", getRepositoryUrl() == null ? "" : getRepositoryUrl());
+		properties.put("labelsUrl", getLabelsUrl() == null ? "" : getLabelsUrl());
+		properties.put("commentsUrl", getCommentsUrl() == null ? "" : getCommentsUrl());
+		properties.put("eventsUrl", getEventsUrl() == null ? "" : getEventsUrl());
+		properties.put("htmlUrl", getHtmlUrl() == null ? "" : getHtmlUrl());
 		properties.put("issueId", getIssueId());
+		properties.put("issueNodeId", getIssueNodeId() == null ? "" : getIssueNodeId());
+		properties.put("number", getNumber());
+		properties.put("title", getTitle() == null ? "" : getTitle());
+		properties.put("state", getState() == null ? "" : getState());
+		properties.put("createTime", getCreateTime() == null ? "" : getCreateTime());
+		properties.put("updateTime", getUpdateTime() == null ? "" : getUpdateTime());
+		properties.put("closeTime", getCloseTime() == null ? "" : getCloseTime());
+		properties.put("body", getBody() == null ? "" : getBody());
+		
 		return properties;
 	}
 
