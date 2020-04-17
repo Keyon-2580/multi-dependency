@@ -1,9 +1,11 @@
 package cn.edu.fudan.se.multidependency.model.node;
 
 public enum NodeLabelType {
-	ProjectFile, Function, Package, Type, Project, Variable, Namespace,
-	Scenario, TestCase, Feature, Commit, Issue,
-	Trace, Span, MicroService, Bug, License, RestfulAPI;
+	Project, Package, ProjectFile,
+	Namespace, Type, Function, Variable,
+	Library, LibraryAPI, License,
+	MicroService, RestfulAPI, Span,
+	Scenario, TestCase, Feature, Trace, Bug, Issue, Label, Commit, Developer;
 	
 	public String indexName() {
 		switch(this) {
@@ -50,7 +52,8 @@ public enum NodeLabelType {
 //			return cn.edu.fudan.se.multidependency.model.node.lib.License.LABEL_INDEX;
 			return "";
 		case RestfulAPI:
-			return cn.edu.fudan.se.multidependency.model.node.RestfulAPI.LABEL_INDEX;
+			return cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI.LABEL_INDEX;
+		case Developer:
 		default:
 			return null;
 		}

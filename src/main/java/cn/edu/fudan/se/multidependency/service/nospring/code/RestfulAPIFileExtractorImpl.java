@@ -9,7 +9,7 @@ import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
+import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 
 public class RestfulAPIFileExtractorImpl implements RestfulAPIFileExtractor {

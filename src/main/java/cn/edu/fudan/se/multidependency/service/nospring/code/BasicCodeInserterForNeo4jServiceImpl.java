@@ -4,8 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
+import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
 import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.ProjectConfig;

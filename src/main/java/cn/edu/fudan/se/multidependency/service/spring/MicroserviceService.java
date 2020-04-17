@@ -3,8 +3,8 @@ package cn.edu.fudan.se.multidependency.service.spring;
 import java.util.List;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.node.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
+import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;

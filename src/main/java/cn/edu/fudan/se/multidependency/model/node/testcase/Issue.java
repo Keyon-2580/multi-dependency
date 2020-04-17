@@ -1,5 +1,7 @@
 package cn.edu.fudan.se.multidependency.model.node.testcase;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,11 +23,35 @@ public class Issue implements Node {
 
 	private static final long serialVersionUID = 4701956188777508218L;
 
-	private String content;
+	private String url;
 	
-	private String issueId;
+	private String repositoryUrl;
 	
-	private String name;
+	private String labelsUrl;
+	
+	private String commentsUrl;
+	
+	private String eventsUrl;
+	
+	private String htmlUrl;
+	
+	private long issueId;
+	
+	private String issueNodeId;
+	
+	private int number;
+	
+	private String title;
+	
+	private String state;
+	
+	private String createTime;
+	
+	private String updateTime;
+	
+	private String closeTime;
+	
+	private String body;
 
     @Id
     @GeneratedValue
@@ -38,8 +64,7 @@ public class Issue implements Node {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("name", getName() == null ? "" : getName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
-		properties.put("content", getContent() == null ? "" : getContent());
-		properties.put("issueId", getIssueId() == null ? "" : getIssueId());
+		properties.put("issueId", getIssueId());
 		return properties;
 	}
 
@@ -52,6 +77,11 @@ public class Issue implements Node {
 	@Override
 	public String indexName() {
 		return LABEL_INDEX;
+	}
+
+	@Override
+	public String getName() {
+		return title;
 	}
 
 
