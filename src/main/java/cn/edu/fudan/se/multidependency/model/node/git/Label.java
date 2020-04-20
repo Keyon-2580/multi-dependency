@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.model.node.testcase;
+package cn.edu.fudan.se.multidependency.model.node.git;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,11 +17,11 @@ import lombok.NoArgsConstructor;
 @NodeEntity
 @NoArgsConstructor
 @EqualsAndHashCode
-public class Commit implements Node {
+public class Label implements Node {
+	
+	private static final long serialVersionUID = -1209356159180851026L;
 
-	private static final long serialVersionUID = 2244271646952758656L;
-
-    @Id
+	@Id
     @GeneratedValue
     private Long id;
     
@@ -29,32 +29,22 @@ public class Commit implements Node {
     
     private String name;
     
-    private String commitId;
-    
-    private String message;
-    
-    private String time;
-    
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
+		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("name", getName() == null ? "" : getName());
-	    properties.put("commitId", getCommitId() == null ? "" : getCommitId());
-	    properties.put("message", getMessage() == null ? "" : getMessage());
-	    properties.put("time", getTime() == null ? "" : getTime());
 		return properties;
 	}
 
 	@Override
 	public NodeLabelType getNodeType() {
-		return NodeLabelType.Commit;
-	}
-	
-	public static final String LABEL_INDEX = "commitTime";
-	@Override
-	public String indexName() {
-		return LABEL_INDEX;
+		return NodeLabelType.Label;
 	}
 
+	@Override
+	public String indexName() {
+		return null;
+	}
 
 }

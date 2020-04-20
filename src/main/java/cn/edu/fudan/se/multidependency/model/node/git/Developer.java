@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.model.node.testcase;
+package cn.edu.fudan.se.multidependency.model.node.git;
 
 import java.util.HashMap;
 import java.util.Map;

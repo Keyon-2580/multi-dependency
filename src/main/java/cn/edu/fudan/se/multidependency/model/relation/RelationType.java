@@ -27,9 +27,7 @@ public enum RelationType implements RelationshipType {
 	NODE_IS_SCENARIO(RelationType.str_NODE_IS_SCENARIO),
 	NODE_IS_FEATURE(RelationType.str_NODE_IS_FEATURE),
 	NODE_IS_TESTCASE(RelationType.str_NODE_IS_TESTCASE),
-	COMMIT_UPDATE_FILE(RelationType.str_COMMIT_UPDATE_FILE),
-	COMMIT_ADDRESS_ISSUE(RelationType.str_COMMIT_ADDRESS_ISSUE),
-	
+
 	FILE_BUILD_DEPENDS_FILE(RelationType.str_FILE_BUILD_DEPENDS_FILE),
 	
 	MICRO_SERVICE_CREATE_SPAN(RelationType.str_MICRO_SERVICE_CREATE_SPAN),
@@ -43,8 +41,14 @@ public enum RelationType implements RelationshipType {
 	FILE_DEPEND_ON_FILE(RelationType.str_FILE_DEPEND_ON_FILE),
 	SPAN_INSTANCE_OF_RESTFUL_API(RelationType.str_SPAN_INSTANCE_OF_RESTFUL_API),
 	
-	MICROSERVICE_DEPEND_ON_MICROSERVICE(RelationType.str_MICROSERVICE_DEPEND_ON_MICROSERVICE);
-	
+	MICROSERVICE_DEPEND_ON_MICROSERVICE(RelationType.str_MICROSERVICE_DEPEND_ON_MICROSERVICE),
+
+	COMMIT_UPDATE_FILE(RelationType.str_COMMIT_UPDATE_FILE),
+	COMMIT_ADDRESS_ISSUE(RelationType.str_COMMIT_ADDRESS_ISSUE),
+	DEVELOPER_REPORT_ISSUE(RelationType.str_DEVELOPER_REPORT_ISSUE),
+	DEVELOPER_SUBMIT_COMMIT(RelationType.str_DEVELOPER_SUBMIT_COMMIT),
+	COMMIT_INHERIT_COMMIT(RelationType.str_COMMIT_INHERIT_COMMIT);
+
 	/**
 	 * 结构关系
 	 */
@@ -75,9 +79,7 @@ public enum RelationType implements RelationshipType {
 	public static final String str_NODE_IS_SCENARIO = "NODE_IS_SCENARIO";
 	public static final String str_NODE_IS_FEATURE = "NODE_IS_FEATURE";
 	public static final String str_NODE_IS_TESTCASE = "NODE_IS_TESTCASE";
-	public static final String str_COMMIT_UPDATE_FILE = "COMMIT_UPDATE_FILE";
-	public static final String str_COMMIT_ADDRESS_ISSUE = "COMMIT_ADDRESS_ISSUE";
-	
+
 	public static final String str_FILE_BUILD_DEPENDS_FILE = "FILE_BUILD_DEPENDS_FILE";
 	
 	public static final String str_SPAN_CALL_SPAN = "SPAN_CALL_SPAN";
@@ -92,6 +94,12 @@ public enum RelationType implements RelationshipType {
 	public static final String str_MICROSERVICE_CALL_MICROSERVICE = "MICROSERVICE_CALL_MICROSERVICE";
 	public static final String str_MICROSERVICE_DEPEND_ON_MICROSERVICE = "MICROSERVICE_DEPEND_ON_MICROSERVICE";
 	public static final String str_FILE_DEPEND_ON_FILE = "FILE_DEPEND_ON_FILE";
+
+	public static final String str_COMMIT_UPDATE_FILE = "COMMIT_UPDATE_FILE";
+	public static final String str_COMMIT_ADDRESS_ISSUE = "COMMIT_ADDRESS_ISSUE";
+	public static final String str_DEVELOPER_REPORT_ISSUE = "DEVELOPER_REPORT_ISSUE";
+	public static final String str_DEVELOPER_SUBMIT_COMMIT = "DEVELOPER_SUBMIT_COMMIT";
+	public static final String str_COMMIT_INHERIT_COMMIT = "COMMIT_INHERIT_COMMIT";
 
 	private String name;
 

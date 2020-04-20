@@ -1,0 +1,70 @@
+package cn.edu.fudan.se.multidependency.model.node.git;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.neo4j.ogm.annotation.GeneratedValue;
+import org.neo4j.ogm.annotation.Id;
+import org.neo4j.ogm.annotation.NodeEntity;
+
+import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
+@Data
+@NodeEntity
+@NoArgsConstructor
+@EqualsAndHashCode
+public class Commit implements Node {
+
+	private static final long serialVersionUID = 2244271646952758656L;
+
+    @Id
+    @GeneratedValue
+    private Long id;
+    
+    private Long entityId;
+    
+    private String commitId;
+
+    private String shortMessage;
+
+    private String fullMessage;
+
+    private String authorName;//可以省略
+
+	private String authoredDate;
+
+	@Override
+	public Map<String, Object> getProperties() {
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("entityId", getEntityId() == null ? "" : getEntityId());
+	    properties.put("commitId", getCommitId() == null ? "" : getCommitId());
+	    properties.put("shortMessage", getShortMessage() == null ? "" : getShortMessage());
+		properties.put("fullMessage", getFullMessage() == null ? "" : getFullMessage());
+		properties.put("authorName", getAuthorName() == null ? "" : getAuthorName());
+		properties.put("authoredDate", getAuthoredDate() == null ? "" : getAuthoredDate());
+		return properties;
+	}
+
+	@Override
+	public NodeLabelType getNodeType() {
+		return NodeLabelType.Commit;
+	}
+	
+	public static final String LABEL_INDEX = "commitTime";
+	@Override
+	public String indexName() {
+		return LABEL_INDEX;
+	}
+
+	@Override
+	public String getName() {
+		return commitId;
+	}
+
+
+}

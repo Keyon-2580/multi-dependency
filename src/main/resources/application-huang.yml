@@ -3,36 +3,42 @@ spring:
     neo4j:
       username: neo4j
       password: 123456
-#      uri: bolt://localhost:7687
-#      uri: http://localhost:7474
+      uri: bolt://localhost:7687
+      #      uri: http://localhost:7474
       # embedded
-      uri: file:///software/neo4j-community-3.5.3/data/databases/multiple.dependency.db
+  #      uri: file:///D:/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
 server:
-   port: 8080
-   
+  port: 8080
+
 data:
-   delete: true
-   code:
-#      path: D:\git\halo-1.1.3-beta.1
-#      path: D:\my_data\SDTeam\depends\depends
-      path: D:\my_data\c_demo\tabix
-#      language: java
-#      path: D:\git\bcrypt-1.1
-      language: cpp
-      platform: windows
-   dynamic:
-      analyse: true
-      directory_root_path: src/main/resources/dynamic/kieker
-#      directory_root_path: src/main/resources/dynamic/valgrind
-      dynamic_java_file_suffix: [.dat]
-      dynamic_cpp_file_suffix: [.dot, .out]
-      dynamic_mark_suffix: .mark
-   build:   
-      analyse: true
-      directory_root_path: src/main/resources/build
-   neo4j:
-      # batchInserter要插入的数据库
-      path: D:\software\neo4j-community-3.5.3\data\databases\multiple.dependency.db
-   
-   test: this property is for YamlUtilsTest
-      
+  projects:
+#    config: src/main/resources/project/train-ticket-huang.json
+    config: src/main/resources/project/depends-huang.json
+  #      config: src/main/resources/project/leveldb.json
+  dynamic:
+    analyse: true
+    dynamic_file_suffix: [.log]
+#    directory_root_path: src/main/resources/dynamic/javassist/train-ticket/logs
+    directory_root_path: src/main/resources/dynamic/javassist/depends/logs
+#    features_path: src/main/resources/features/train-ticket/features-javassist.json
+    features_path: src/main/resources/features/depends/features-javassist.json
+  git:
+    analyse: true
+#    directory_root_path: D:/my_data/SDTeam/train-ticket
+    directory_root_path: D:/my_data/SDTeam/depends_/unedited/depends
+#    issues_path: src/main/resources/git/train-ticket-issues.json
+    issues_path: src/main/resources/git/depends-issues.json
+  build:
+    analyse: false
+    directory_root_path: src/main/resources/build
+  neo4j:
+    delete: true
+    # batchInserter要插入的数据库
+    #      path: D:/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
+    path: D:/software/neo4j-community-3.5.3/data/databases/multiple.dependency.db
+
+  test: this property is for YamlUtilsTest

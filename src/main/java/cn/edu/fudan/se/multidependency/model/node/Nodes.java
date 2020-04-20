@@ -7,6 +7,9 @@ import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.git.Branch;
+import cn.edu.fudan.se.multidependency.model.node.git.Commit;
+import cn.edu.fudan.se.multidependency.model.node.git.Developer;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
@@ -30,7 +33,7 @@ public class Nodes {
 	
 	public List<Project> findAllProjects() {
 		return new ArrayList<>(projects);
-	}
+	}//为什么要new一个，不直接return projects
 	
 	public Project findProject(String name, Language language) {
 		if(language == null) {
@@ -239,6 +242,46 @@ public class Nodes {
 			Span span = (Span) node;
 			if(spanId.equals(span.getSpanId())) {
 				return span;
+			}
+		}
+		return null;
+	}
+
+	public Commit findCommitByCommitId(String commitId){
+		for(Node node : findNodesByNodeType(NodeLabelType.Commit)) {
+			Commit commit = (Commit) node;
+			if(commitId.equals(commit.getCommitId())) {
+				return commit;
+			}
+		}
+		return null;
+	}
+
+	public Branch findBranchByName(String name){
+		for(Node node : findNodesByNodeType(NodeLabelType.Branch)){
+			Branch branch = (Branch) node;
+			if(name.equals(branch.getName())) {
+				return branch;
+			}
+		}
+		return null;
+	}
+
+	public Developer findDeveloperByName(String name){
+		for(Node node : findNodesByNodeType(NodeLabelType.Developer)){
+			Developer developer = (Developer) node;
+			if(name.equals(developer.getName())) {
+				return developer;
+			}
+		}
+		return null;
+	}
+
+	public ProjectFile findFileByPath(String path){
+		for(Node node : findNodesByNodeType(NodeLabelType.ProjectFile)){
+			ProjectFile file = (ProjectFile) node;
+			if(file.getPath().endsWith(path)) {
+				return file;
 			}
 		}
 		return null;

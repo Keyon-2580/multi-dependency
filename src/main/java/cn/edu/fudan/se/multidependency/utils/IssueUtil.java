@@ -9,8 +9,8 @@ import java.util.Map;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import cn.edu.fudan.se.multidependency.model.node.testcase.Developer;
-import cn.edu.fudan.se.multidependency.model.node.testcase.Issue;
+import cn.edu.fudan.se.multidependency.model.node.git.Developer;
+import cn.edu.fudan.se.multidependency.model.node.git.Issue;
 import lombok.Data;
 
 public class IssueUtil {

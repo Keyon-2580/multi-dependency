@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.service.nospring.git.GitInserter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,7 +133,15 @@ public class InsertDataMain {
 				inserter = insertFeatureAndTestCaseByJSONFile(yaml.getFeaturesPath());
 				inserter.addNodesAndRelations();
 			}
-			
+
+			/**
+			 * Git分析
+			 */
+			if(yaml.isAnalyseGit()){
+				LOGGER.info("Git库分析");
+				new GitInserter(yaml.getGitDirectoryRootPath()).addNodesAndRelations();
+			}
+
 			/**
 			 * 构建分析
 			 */

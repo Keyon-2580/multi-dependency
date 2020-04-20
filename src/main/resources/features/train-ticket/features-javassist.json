@@ -243,8 +243,8 @@
 		},
 		{
 			"id" : 16,
-			"name" : "查看订票列表",
-			"description" : "能够查看订票列表",
+			"name" : "查看订单列表",
+			"description" : "能够查看订单列表",
 			"parentId" : 8
 		},
 		{
@@ -276,31 +276,31 @@
 		},
 		{
 			"id" : 22,
-			"name" : "管理订票信息",
+			"name" : "管理订单信息",
 			"description" : "管理员对订票列表进行增删改查"
 		},
 		{
 			"id" : 23,
-			"name" : "管理员查看订票列表",
-			"description" : "管理员查看订票列表",
+			"name" : "管理员查看订单列表",
+			"description" : "管理员查看订单列表",
 			"parentId" : 22
 		},
 		{
 			"id" : 24,
-			"name" : "管理员添加订票",
-			"description" : "管理员添加订票",
+			"name" : "管理员添加订单",
+			"description" : "管理员添加订单",
 			"parentId" : 22
 		},
 		{
 			"id" : 25,
-			"name" : "管理员修改订票",
-			"description" : "管理员修改订票",
+			"name" : "管理员修改订单",
+			"description" : "管理员修改订单",
 			"parentId" : 22
 		},
 		{
 			"id" : 26,
-			"name" : "管理员删除订票",
-			"description" : "管理员删除订票",
+			"name" : "管理员删除订单",
+			"description" : "管理员删除订单",
 			"parentId" : 22
 		},
 		{
@@ -510,7 +510,7 @@
 	"testcases" : [
 		{
 			"id" : 0,
-			"name" : "查票-GaoTie Dongche",
+			"name" : "查票-GaoTie Dongche-有票",
 			"group" : "查票",
 			"input" : {
 				"Starting" : "Nan Jing",
@@ -529,7 +529,7 @@
 		},
 		{
 			"id" : 1,
-			"name" : "查票-Other",
+			"name" : "查票-Other-有票",
 			"group" : "查票",
 			"input" : {
 				"Starting" : "Nan Jing",
@@ -548,7 +548,7 @@
 		},
 		{
 			"id" : 2,
-			"name" : "查票-All",
+			"name" : "查票-All-有票",
 			"group" : "查票",
 			"input" : {
 				"Starting" : "Nan Jing",
@@ -568,7 +568,7 @@
 		},
 		{
 			"id" : 3,
-			"name" : "查票-GaoTie Dongche",
+			"name" : "查票-GaoTie Dongche-无票",
 			"group" : "查票",
 			"input" : {
 				"Starting" : "Zhen Jiang",
@@ -587,7 +587,7 @@
 		},
 		{
 			"id" : 4,
-			"name" : "查票-Other",
+			"name" : "查票-Other-无票",
 			"group" : "查票",
 			"input" : {
 				"Starting" : "Zhen Jiang",
@@ -606,7 +606,7 @@
 		},
 		{
 			"id" : 5,
-			"name" : "查票-All",
+			"name" : "查票-All-无票",
 			"group" : "查票",
 			"input" : {
 				"Starting" : "Zhen Jiang",

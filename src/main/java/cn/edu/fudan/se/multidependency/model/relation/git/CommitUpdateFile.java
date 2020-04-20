@@ -10,7 +10,7 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.node.testcase.Commit;
+import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
@@ -33,6 +33,18 @@ public class CommitUpdateFile implements Relation {
 	@EndNode
 	private ProjectFile file;
 
+	private UpdateType updateType;
+
+	public static enum UpdateType {
+		ADD, MODIFY, DELETE
+	}
+
+	public CommitUpdateFile(Commit commit, ProjectFile file, UpdateType updateType){
+		this.commit = commit;
+		this.file = file;
+		this.updateType = updateType;
+	}
+
 	@Override
 	public Long getStartNodeGraphId() {
 		return commit.getId();
@@ -50,7 +62,10 @@ public class CommitUpdateFile implements Relation {
 
 	@Override
 	public Map<String, Object> getProperties() {
-		return new HashMap<>();
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("updateType", getUpdateType().toString() == null ? "" : getUpdateType().toString() );
+		return properties;
 	}
+
 
 }

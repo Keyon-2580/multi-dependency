@@ -5,19 +5,20 @@ public enum NodeLabelType {
 	Namespace, Type, Function, Variable,
 	Library, LibraryAPI, License,
 	MicroService, RestfulAPI, Span,
-	Scenario, TestCase, Feature, Trace, Bug, Issue, Label, Commit, Developer;
+	Scenario, TestCase, Feature, Trace, Bug,
+	GitRepository, Branch, Commit, Issue, Label, Developer;
 	
 	public String indexName() {
 		switch(this) {
 		case Commit:
-//			return cn.edu.fudan.se.multidependency.model.node.testcase.Commit.LABEL_INDEX;
+//			return cn.edu.fudan.se.multidependency.model.node.git.Commit.LABEL_INDEX;
 			return "";
 		case Feature:
 			return cn.edu.fudan.se.multidependency.model.node.testcase.Feature.LABEL_INDEX;
 		case Function:
 			return cn.edu.fudan.se.multidependency.model.node.code.Function.LABEL_INDEX;
 		case Issue:
-//			return cn.edu.fudan.se.multidependency.model.node.testcase.Issue.LABEL_INDEX;
+//			return cn.edu.fudan.se.multidependency.model.node.git.Issue.LABEL_INDEX;
 			return "";
 		case MicroService:
 			return cn.edu.fudan.se.multidependency.model.node.microservice.MicroService.LABEL_INDEX;
@@ -54,6 +55,14 @@ public enum NodeLabelType {
 		case RestfulAPI:
 			return cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI.LABEL_INDEX;
 		case Developer:
+//			return cn.edu.fudan.se.multidependency.model.node.git.Developer.LABEL_INDEX;
+			return "";
+		case GitRepository:
+//			return cn.edu.fudan.se.multidependency.model.node.git.GitRepository.LABEL_INDEX;
+			return "";
+		case Branch:
+//			return cn.edu.fudan.se.multidependency.model.node.git.Branch.LABEL_INDEX;
+			return "";
 		default:
 			return null;
 		}

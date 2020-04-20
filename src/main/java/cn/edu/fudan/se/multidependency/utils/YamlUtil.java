@@ -45,10 +45,16 @@ public class YamlUtil {
 //		String buildFilePath = buildDirectoryRootPath+"/"+FileUtil.extractFileName(projectPath)+".txt";
 //		result.setBuildDirectoryRootPath(buildDirectoryRootPath);
 //		result.setBuildFilePath(buildFilePath);
-		boolean analyseBuild = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("build")).get("analyse");
+		String gitDirectoryRootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("directory_root_path");
+		String issuesPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("issues_path");
+		result.setGitDirectoryRootPath(gitDirectoryRootPath);
+		result.setIssuesPath(issuesPath);
 		boolean analyseDynamic = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("analyse");
-		result.setAnalyseBuild(analyseBuild);
+		boolean analyseGit = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("analyse");
+		boolean analyseBuild = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("build")).get("analyse");
 		result.setAnalyseDynamic(analyseDynamic);
+		result.setAnalyseGit(analyseGit);
+		result.setAnalyseBuild(analyseBuild);
 		return result;
 	}
 	
@@ -68,5 +74,9 @@ public class YamlUtil {
 		private String buildDirectoryRootPath;
 		private String buildFilePath;
 		private String forTest;
+
+		private boolean analyseGit;
+		private String gitDirectoryRootPath;
+		private String issuesPath;
 	}
 }
