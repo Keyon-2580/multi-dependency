@@ -33,7 +33,7 @@ public class Nodes {
 	
 	public List<Project> findAllProjects() {
 		return new ArrayList<>(projects);
-	}//为什么要new一个，不直接return projects
+	}
 	
 	public Project findProject(String name, Language language) {
 		if(language == null) {
@@ -152,7 +152,7 @@ public class Nodes {
 	public Package findPackageByDirectoryPath(String directoryPath, Project project) {
 		@SuppressWarnings("unchecked")
 		Map<Long, Package> packages = (Map<Long, Package>) findNodesByNodeTypeInProject(NodeLabelType.Package, project);
-		System.out.println(packages.size() + " " + packages + " " + directoryPath);
+//		System.out.println(packages.size() + " " + packages + " " + directoryPath);
 		for(Package pck : packages.values()) {
 //			System.out.println(pck.getDirectoryPath() + " " + directoryPath);
 			if(pck.getDirectoryPath().equals(directoryPath)) {

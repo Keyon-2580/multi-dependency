@@ -130,7 +130,8 @@ public class InsertDataMain {
 				}
 				
 				LOGGER.info("引入特性与测试用例，对应到trace");
-				inserter = insertFeatureAndTestCaseByJSONFile(yaml.getFeaturesPath());
+				inserter = new FeatureAndTestCaseFromJSONFileForMicroserviceInserter(yaml.getFeaturesPath());
+//				inserter = insertFeatureAndTestCaseByJSONFile(yaml.getFeaturesPath());
 				inserter.addNodesAndRelations();
 			}
 

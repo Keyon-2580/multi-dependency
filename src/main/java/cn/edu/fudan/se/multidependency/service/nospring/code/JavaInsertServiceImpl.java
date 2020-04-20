@@ -97,7 +97,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 					pck.setEntityId(parentEntity.getId().longValue());
 					pck.setName(parentEntity.getQualifiedName());
 				}
-				System.out.println(directoryPath);
+//				System.out.println(directoryPath);
 				addNode(pck, currentProject);
 				Contain projectContainsPackage = new Contain(currentProject, pck);
 				addRelation(projectContainsPackage);
@@ -262,7 +262,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 					}
 				} else {
 					// MultiDeclareEntities
-					System.out.println("extractRelationsFromFiles() " + fileEntity + " " + entity.getClass() + " " + entity.toString());
+//					System.out.println("extractRelationsFromFiles() " + fileEntity + " " + entity.getClass() + " " + entity.toString());
 				}
 			});
 		});
