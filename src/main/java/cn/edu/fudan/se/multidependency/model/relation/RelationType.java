@@ -49,7 +49,9 @@ public enum RelationType implements RelationshipType {
 	DEVELOPER_SUBMIT_COMMIT(RelationType.str_DEVELOPER_SUBMIT_COMMIT),
 	COMMIT_INHERIT_COMMIT(RelationType.str_COMMIT_INHERIT_COMMIT),
 	
-	FUNCTION_CALL_LIBRARY_API(RelationType.str_FUNCTION_CALL_LIBRARY_API);
+	FUNCTION_CALL_LIBRARY_API(RelationType.str_FUNCTION_CALL_LIBRARY_API),
+	
+	FUNCTION_CLONE_FUNCTION(RelationType.str_FUNCTION_CLONE_FUNCTION);
 
 	/**
 	 * 结构关系
@@ -103,6 +105,8 @@ public enum RelationType implements RelationshipType {
 	public static final String str_DEVELOPER_SUBMIT_COMMIT = "DEVELOPER_SUBMIT_COMMIT";
 	public static final String str_COMMIT_INHERIT_COMMIT = "COMMIT_INHERIT_COMMIT";
 	public static final String str_FUNCTION_CALL_LIBRARY_API = "FUNCTION_CALL_LIBRARY_API";
+	
+	public static final String str_FUNCTION_CLONE_FUNCTION = "FUNCTION_CLONE_FUNCTION";
 	
 	private String name;
 
