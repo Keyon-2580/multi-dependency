@@ -28,7 +28,12 @@ public class Developer implements Node {
     private Long entityId;
     
     private String name;
-    
+
+	public Developer(Long entityId, String name){
+		this.entityId = entityId;
+		this.name = name;
+	}
+
     @Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();

@@ -1,8 +1,8 @@
 {
 	"projects" : [
 		{
-			"path": "D:\\my_data\\SDTeam\\depends_\\unedited\\depends",
-			"project": "depends",
+			"path": "D:\\my_data\\SDTeam\\SmellPattern",
+			"project": "SmellPattern",
 			"language": "java",
 			"isMicroservice": false,
 			"excludes" : [

@@ -28,6 +28,11 @@ public class GitRepository implements Node {
 
     private String name;
 
+    public GitRepository(Long entityId, String name){
+        this.entityId = entityId;
+        this.name = name;
+    }
+
     @Override
     public Map<String, Object> getProperties() {
         Map<String, Object> properties = new HashMap<>();

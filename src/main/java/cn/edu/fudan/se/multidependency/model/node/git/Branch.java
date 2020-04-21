@@ -28,6 +28,11 @@ public class Branch implements Node {
 
     private String name;
 
+    public Branch(Long entityId, String name){
+        this.entityId = entityId;
+        this.name = name;
+    }
+
     @Override
     public Map<String, Object> getProperties() {
         Map<String, Object> properties = new HashMap<>();

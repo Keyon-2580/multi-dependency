@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.nospring.git;
 
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -19,13 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GitExtractor {
+
     private String gitProjectPath;
 
     private Repository repository;
 
     private Git git;
-
-    private RevWalk revWalk;
 
     public GitExtractor(String gitProjectPath){
         this.gitProjectPath = gitProjectPath;
@@ -36,13 +36,11 @@ public class GitExtractor {
             return;
         }
         git = new Git(repository);
-        revWalk = new RevWalk(repository);
     }
 
     public List<Ref> getBranches(){
         try {
             return git.branchList().call();
-//            return git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
         } catch (GitAPIException e) {
             e.printStackTrace();
         }
@@ -50,21 +48,9 @@ public class GitExtractor {
     }
 
     //应该改为通过API来获取
-    public String getRepositoryName(){
-        return gitProjectPath;
+    public String getRepositoryName() {
+        return FileUtil.extractFileName(gitProjectPath);
     }
-
-//    public List<RevCommit> getBranchCommits(Ref branch){
-//        String branchName = branch.getName();
-//        Iterable<RevCommit> commits;
-//        try {
-//            commits = git.log().add(repository.resolve(branchName)).call();
-//            return Lists.newArrayList(commits.iterator());
-//        } catch (GitAPIException | IOException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
 
     public List<RevCommit> getAllCommits() {
         try{
@@ -79,8 +65,7 @@ public class GitExtractor {
     public List<Ref> getBranchesByCommitId(RevCommit revCommit){
         List<Ref> refs = null;
         try{
-            refs = git.branchList().setContains(revCommit.getName()).call();//只会在本地分支找
-//            List<Ref> refs = git.branchList().setContains(commitId).setListMode(ListBranchCommand.ListMode.ALL).call();
+            refs = git.branchList().setContains(revCommit.getName()).call();
         }catch (GitAPIException e){
             e.printStackTrace();
         }
@@ -101,7 +86,7 @@ public class GitExtractor {
 
     private CanonicalTreeParser prepareTreeParser(String objectId) {
         CanonicalTreeParser treeParser = new CanonicalTreeParser();
-        try {
+        try (RevWalk revWalk = new RevWalk(repository)) {
             RevCommit commit = revWalk.parseCommit(ObjectId.fromString(objectId));
             RevTree tree = revWalk.parseTree(commit.getTree().getId());
             ObjectReader oldReader = repository.newObjectReader();
@@ -113,21 +98,24 @@ public class GitExtractor {
         return treeParser;
     }
 
-    //应该可以改为RevTree
     public List<String> getCommitFilesPath(RevCommit commit) {
-        try{
-            TreeWalk treeWalk = new TreeWalk(repository);
+        try (TreeWalk treeWalk = new TreeWalk(repository)) {
             treeWalk.addTree(commit.getTree());
             treeWalk.setRecursive(true);
             List<String> result = new ArrayList<>();
-            while(treeWalk.next()) {
+            while (treeWalk.next()) {
                 String path = treeWalk.getPathString();
                 result.add(path);
             }
             return result;
-        }catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void close(){
+        git.close();
+        repository.close();
     }
 }

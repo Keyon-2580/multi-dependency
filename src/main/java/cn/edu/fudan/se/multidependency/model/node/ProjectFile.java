@@ -31,8 +31,8 @@ public class ProjectFile implements Node {
 	
 	private String suffix;
 	
-	public ProjectFile(String name, String path, String suffix) {
-		super();
+	public ProjectFile(Long entityId, String name, String path, String suffix) {
+		this.entityId = entityId;
 		this.name = name;
 		this.path = path;
 		this.suffix = suffix;

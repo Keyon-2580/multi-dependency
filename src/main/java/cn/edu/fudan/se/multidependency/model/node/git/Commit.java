@@ -34,9 +34,15 @@ public class Commit implements Node {
 
     private String fullMessage;
 
-    private String authorName;//可以省略
-
 	private String authoredDate;
+
+	public Commit(Long entityId, String commitId, String shortMessage, String fullMessage, String authoredDate){
+		this.entityId = entityId;
+		this.commitId = commitId;
+		this.shortMessage = shortMessage;
+		this.fullMessage = fullMessage;
+		this.authoredDate = authoredDate;
+	}
 
 	@Override
 	public Map<String, Object> getProperties() {
@@ -45,7 +51,6 @@ public class Commit implements Node {
 	    properties.put("commitId", getCommitId() == null ? "" : getCommitId());
 	    properties.put("shortMessage", getShortMessage() == null ? "" : getShortMessage());
 		properties.put("fullMessage", getFullMessage() == null ? "" : getFullMessage());
-		properties.put("authorName", getAuthorName() == null ? "" : getAuthorName());
 		properties.put("authoredDate", getAuthoredDate() == null ? "" : getAuthoredDate());
 		return properties;
 	}

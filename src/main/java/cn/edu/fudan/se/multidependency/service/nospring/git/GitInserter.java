@@ -22,18 +22,18 @@ import java.util.List;
 public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
     private GitExtractor gitExtractor;
+    private IssueExtractor issueExtractor;
 
-    public GitInserter(String gitProjectPath){
+    public GitInserter(String gitProjectPath, String issueFilePath){
         gitExtractor = new GitExtractor(gitProjectPath);
+        issueExtractor = new IssueExtractor(issueFilePath);
     }
 
 
     @Override
     public void addNodesAndRelations() throws Exception {
         //添加gitRepository节点和gitRepository到project的包含关系
-        GitRepository gitRepository = new GitRepository();
-        gitRepository.setEntityId(generateEntityId());
-        gitRepository.setName(gitExtractor.getRepositoryName());
+        GitRepository gitRepository = new GitRepository(generateEntityId(),gitExtractor.getRepositoryName());
         addNode(gitRepository,null);
         for(Project project : this.getNodes().findAllProjects()){
             addRelation(new Contain(gitRepository,project));
@@ -42,9 +42,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         //添加branch节点和gitRepository到branches的包含关系
         List<Ref> branches = gitExtractor.getBranches();
         for(Ref branch : branches){
-            Branch branchNode = new Branch();
-            branchNode.setEntityId(generateEntityId());
-            branchNode.setName(branch.getName());
+            Branch branchNode = new Branch(generateEntityId(),branch.getName());
             addNode(branchNode,null);
             addRelation(new Contain(gitRepository,branchNode));
         }
@@ -53,21 +51,14 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         Collections.reverse(commits);
         for(RevCommit revCommit : commits){
             //添加commit节点
-            Commit commit = new Commit();
-            commit.setEntityId(generateEntityId());
-            commit.setCommitId(revCommit.getName());
-            commit.setShortMessage(revCommit.getShortMessage());
-            commit.setFullMessage(revCommit.getFullMessage());
-            commit.setAuthorName(revCommit.getAuthorIdent().getName());
-            commit.setAuthoredDate(revCommit.getAuthorIdent().getWhen().toString());
+            Commit commit = new Commit(generateEntityId(),revCommit.getName(),revCommit.getShortMessage(),
+                    revCommit.getFullMessage(),revCommit.getAuthorIdent().getWhen().toString());
             addNode(commit,null);
 
             //添加developer节点和developer到commit的关系
             Developer developer = this.getNodes().findDeveloperByName(revCommit.getAuthorIdent().getName());
             if(developer == null){
-                developer = new Developer();
-                developer.setEntityId(generateEntityId());
-                developer.setName(revCommit.getAuthorIdent().getName());
+                developer = new Developer(generateEntityId(),revCommit.getAuthorIdent().getName());
                 addNode(developer,null);
             }
             addRelation(new DeveloperSubmitCommit(developer,commit));
@@ -95,28 +86,23 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
                     //添加commit到file的更新关系
                     List<DiffEntry> diffs = gitExtractor.getDiffBetweenCommits(revCommit,parentRevCommit);
-                    if(diffs != null){
-                        for(DiffEntry diff : diffs){
-                            String newPath = diff.getNewPath();
-                            String oldPath = diff.getOldPath();
-                            String changeType = diff.getChangeType().name();
-                            String path = DiffEntry.ChangeType.DELETE.name().equals(changeType) ? oldPath : newPath;
-                            ProjectFile file = this.getNodes().findFileByPath(path);
-                            if(file == null){
-                                //与静态插入的file节点，命名有差异
-                                file = new ProjectFile();
-                                file.setEntityId(generateEntityId());
-                                file.setName(FileUtil.extractFileName(path));
-                                file.setPath(path);
-                                file.setSuffix(FileUtil.extractSuffix(path));
-                                addNode(file,null);
-                            }
-                            CommitUpdateFile.UpdateType updateType;
-                            if(DiffEntry.ChangeType.ADD.name().equals(changeType)) updateType = CommitUpdateFile.UpdateType.ADD;
-                            else if(DiffEntry.ChangeType.MODIFY.name().equals(changeType)) updateType = CommitUpdateFile.UpdateType.MODIFY;
-                            else updateType = CommitUpdateFile.UpdateType.DELETE;
-                            addRelation(new CommitUpdateFile(commit,file,updateType));
+                    if(diffs == null) continue;
+                    for(DiffEntry diff : diffs){
+                        String newPath = diff.getNewPath();
+                        String oldPath = diff.getOldPath();
+                        String changeType = diff.getChangeType().name();
+                        String path = DiffEntry.ChangeType.DELETE.name().equals(changeType) ? oldPath : newPath;
+                        ProjectFile file = this.getNodes().findFileByPath(path);
+                        if(file == null){
+                            //与静态插入的file节点，命名有差异
+                            file = new ProjectFile(generateEntityId(),FileUtil.extractFileName(path),path,FileUtil.extractSuffix(path));
+                            addNode(file,null);
                         }
+                        CommitUpdateFile.UpdateType updateType;
+                        if(DiffEntry.ChangeType.ADD.name().equals(changeType)) updateType = CommitUpdateFile.UpdateType.ADD;
+                        else if(DiffEntry.ChangeType.MODIFY.name().equals(changeType)) updateType = CommitUpdateFile.UpdateType.MODIFY;
+                        else updateType = CommitUpdateFile.UpdateType.DELETE;
+                        addRelation(new CommitUpdateFile(commit,file,updateType));
                     }
                 }
             }else{
@@ -124,12 +110,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
                 for(String path : filesPath){
                     ProjectFile file = this.getNodes().findFileByPath(path);
                     if(file == null){
-                        //与静态插入的file节点，命名有差异
-                        file = new ProjectFile();
-                        file.setEntityId(generateEntityId());
-                        file.setName(FileUtil.extractFileName(path));
-                        file.setPath(path);
-                        file.setSuffix(FileUtil.extractSuffix(path));
+                        file = new ProjectFile(generateEntityId(),FileUtil.extractFileName(path),path,FileUtil.extractSuffix(path));
                         addNode(file,null);
                     }
                     CommitUpdateFile.UpdateType updateType = CommitUpdateFile.UpdateType.ADD;

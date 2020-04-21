@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.edu.fudan.se.multidependency.service.nospring.git.GitInserter;
+import org.eclipse.jgit.api.Git;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,7 +141,8 @@ public class InsertDataMain {
 			 */
 			if(yaml.isAnalyseGit()){
 				LOGGER.info("Git库分析");
-				new GitInserter(yaml.getGitDirectoryRootPath()).addNodesAndRelations();
+				inserter = new GitInserter(yaml.getGitDirectoryRootPath(), yaml.getIssuesPath());
+				inserter.addNodesAndRelations();
 			}
 
 			/**
