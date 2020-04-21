@@ -47,7 +47,9 @@ public enum RelationType implements RelationshipType {
 	COMMIT_ADDRESS_ISSUE(RelationType.str_COMMIT_ADDRESS_ISSUE),
 	DEVELOPER_REPORT_ISSUE(RelationType.str_DEVELOPER_REPORT_ISSUE),
 	DEVELOPER_SUBMIT_COMMIT(RelationType.str_DEVELOPER_SUBMIT_COMMIT),
-	COMMIT_INHERIT_COMMIT(RelationType.str_COMMIT_INHERIT_COMMIT);
+	COMMIT_INHERIT_COMMIT(RelationType.str_COMMIT_INHERIT_COMMIT),
+	
+	FUNCTION_CALL_LIBRARY_API(RelationType.str_FUNCTION_CALL_LIBRARY_API);
 
 	/**
 	 * 结构关系
@@ -100,7 +102,8 @@ public enum RelationType implements RelationshipType {
 	public static final String str_DEVELOPER_REPORT_ISSUE = "DEVELOPER_REPORT_ISSUE";
 	public static final String str_DEVELOPER_SUBMIT_COMMIT = "DEVELOPER_SUBMIT_COMMIT";
 	public static final String str_COMMIT_INHERIT_COMMIT = "COMMIT_INHERIT_COMMIT";
-
+	public static final String str_FUNCTION_CALL_LIBRARY_API = "FUNCTION_CALL_LIBRARY_API";
+	
 	private String name;
 
 	RelationType(String name) {

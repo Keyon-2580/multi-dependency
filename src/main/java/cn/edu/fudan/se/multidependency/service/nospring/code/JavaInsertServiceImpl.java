@@ -158,9 +158,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				}
 			}
 
-//			System.out.println(functionEntity.getQualifiedName() + " " + parentEntity.getClass());
 			Type type = (Type) findNodeByEntityIdInProject(parentEntity);
-//			System.out.println(type.getTypeName());
 			String newFunctionName = null;
 			if(function.isContrustor()) {
 				newFunctionName = type.getName();
@@ -168,7 +166,6 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				newFunctionName = type.getName() + "." + function.getSimpleName();
 			}
 			function.setName(newFunctionName);
-//			System.out.println("new-Function-Name: " + newFunctionName);
 		});
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Variable, currentProject).forEach((entityId, node) -> {
 			VarEntity varEntity = (VarEntity) entityRepo.getEntity(entityId.intValue());
