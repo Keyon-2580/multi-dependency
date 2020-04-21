@@ -1,14 +1,21 @@
 package cn.edu.fudan.se.multidependency.utils;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+
+import lombok.Getter;
+import lombok.Setter;
 
 public class FileUtil {
 	
@@ -150,6 +157,35 @@ public class FileUtil {
 		for(File file : directory.listFiles()) {
 			listFiles(file, result, suffixes);
 		}
+	}
+	
+	public static class CloneCsv {
+		@Getter
+		@Setter
+		private String projectName;
+		private Map<Integer, Map<Integer, Double>> values = new HashMap<>();
+		
+		public void addValue(int start, int end, double value) {
+			Map<Integer, Double> temp = values.getOrDefault(start, new HashMap<>());
+			temp.put(end, value);
+			values.put(start, temp);
+		}
+	}
+	
+	
+	public static Map<Integer, Map<Integer, Double>> redCloneCsv(String filePath) throws Exception {
+		Map<Integer, Map<Integer, Double>> result = new HashMap<>();
+		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
+			String line = null;
+			while((line = reader.readLine()) != null) {
+				String[] values = line.split(",");
+				if(values.length < 3) {
+					continue;
+				}
+				
+			}
+		}
+		return result;
 	}
 	
 }

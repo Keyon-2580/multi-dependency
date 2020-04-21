@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.git.Branch;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
+import cn.edu.fudan.se.multidependency.model.node.lib.Library;
+import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
@@ -47,11 +50,16 @@ public class Nodes {
 		return null;
 	}
 	
+	private void clearCache() {
+		this.allLibrariesCache.clear();
+	}
+	
 	public void clear() {
 		allNodes.clear();
 		nodeTypeToNodes.clear();
 		projectToNodes.clear();
 		projects.clear();
+		librariesWithAPI.clear();
 	}
 	
 	public Map<NodeLabelType, List<Node>> getAllNodes() {
@@ -69,6 +77,8 @@ public class Nodes {
 	 * @return
 	 */
 	public void addNode(Node node, Project inProject) {
+		clearCache();
+		
 		allNodes.add(node);
 		if(node instanceof Project) {
 			projects.add((Project) node);
@@ -285,6 +295,46 @@ public class Nodes {
 			}
 		}
 		return null;
+	}
+	
+	private Map<String, List<Library>> allLibrariesCache = new ConcurrentHashMap<>();
+	public Map<String, List<Library>> findAllLibraries() {
+		if(allLibrariesCache.isEmpty()) {
+			for(Node node : findNodesByNodeType(NodeLabelType.Library)) {
+				Library library = (Library) node;
+				List<Library> libraries = allLibrariesCache.getOrDefault(library.getGroupId(), new ArrayList<>());
+				libraries.add(library);
+				allLibrariesCache.put(library.getGroupId(), libraries);
+			}
+		}
+		return new HashMap<>(allLibrariesCache);
+	}
+	
+	public Library findLibrary(String group, String name, String version) {
+		Iterable<Library> libraries = findAllLibraries().getOrDefault(group, new ArrayList<>());
+		for(Library library : libraries) {
+			if(library.getName().equals(name) && library.getVersion().equals(version)) {
+				return library;
+			}
+		}
+		return null;
+	}
+	
+	private Map<Library, Map<String, LibraryAPI>> librariesWithAPI = new HashMap<>();
+	
+	public void addLibraryAPINode(LibraryAPI api, Library belongToLibrary) {
+		Library lib = findLibrary(belongToLibrary.getGroupId(), belongToLibrary.getName(), belongToLibrary.getVersion());
+		if(lib == null) {
+			return ;
+		}
+		Map<String, LibraryAPI> apis = librariesWithAPI.getOrDefault(lib, new HashMap<>());
+		apis.put(api.getName(), api);
+		librariesWithAPI.put(lib, apis);
+		this.addNode(api, null);
+	}
+	
+	public LibraryAPI findLibraryAPIInLibraryByAPIName(String apiName, Library belongToLibrary) {
+		return librariesWithAPI.getOrDefault(belongToLibrary, new HashMap<>()).get(apiName);
 	}
 	
 }

@@ -49,11 +49,15 @@ public class YamlUtil {
 		String issuesPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("issues_path");
 		result.setGitDirectoryRootPath(gitDirectoryRootPath);
 		result.setIssuesPath(issuesPath);
+		String libsPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("lib")).get("libs_path");
+		result.setLibsPath(libsPath);
 		boolean analyseDynamic = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("analyse");
 		boolean analyseGit = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("analyse");
+		boolean analyseLib = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("lib")).get("analyse");
 		boolean analyseBuild = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("build")).get("analyse");
 		result.setAnalyseDynamic(analyseDynamic);
 		result.setAnalyseGit(analyseGit);
+		result.setAnalyseLib(analyseLib);
 		result.setAnalyseBuild(analyseBuild);
 		return result;
 	}
@@ -78,5 +82,8 @@ public class YamlUtil {
 		private boolean analyseGit;
 		private String gitDirectoryRootPath;
 		private String issuesPath;
+		
+		private boolean analyseLib;
+		private String libsPath;
 	}
 }

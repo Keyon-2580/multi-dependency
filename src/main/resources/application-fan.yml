@@ -28,10 +28,14 @@ data:
 #      features_path: src/main/resources/features/depends/features-javassist.json
    git:
       analyse: false
-#    directory_root_path: D:/my_data/SDTeam/train-ticket
-      directory_root_path: D:/multiple-dependency-project/depends
-#    issues_path: src/main/resources/git/train-ticket-issues.json
-      issues_path: src/main/resources/git/depends-issues.json
+      directory_root_path: D:/my_data/SDTeam/train-ticket
+#      directory_root_path: D:/multiple-dependency-project/depends
+      issues_path: src/main/resources/git/train-ticket-issues.json
+#      issues_path: src/main/resources/git/depends-issues.json
+   lib:
+      analyse: true
+#      libs_path: src/main/resources/lib/depends_2020-04-19.json
+      libs_path: src/main/resources/lib/train-ticket_2020-04-18.json
    build:   
       analyse: false
       directory_root_path: src/main/resources/build

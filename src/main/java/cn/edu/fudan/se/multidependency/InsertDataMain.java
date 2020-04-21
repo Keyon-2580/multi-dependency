@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.edu.fudan.se.multidependency.service.nospring.git.GitInserter;
-import org.eclipse.jgit.api.Git;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +24,8 @@ import cn.edu.fudan.se.multidependency.service.nospring.dynamic.CppDynamicInsert
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.FeatureAndTestCaseFromJSONFileForMicroserviceInserter;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.JavassistDynamicInserter;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.TraceStartExtractor;
+import cn.edu.fudan.se.multidependency.service.nospring.git.GitInserter;
+import cn.edu.fudan.se.multidependency.service.nospring.lib.LibraryInserter;
 import cn.edu.fudan.se.multidependency.service.nospring.structure.MicroServiceArchitectureInserter;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
@@ -143,6 +144,11 @@ public class InsertDataMain {
 				LOGGER.info("Git库分析");
 				inserter = new GitInserter(yaml.getGitDirectoryRootPath(), yaml.getIssuesPath());
 				inserter.addNodesAndRelations();
+			}
+			
+			if(yaml.isAnalyseLib()) {
+				LOGGER.info("三方依赖分析");
+				new LibraryInserter(yaml.getLibsPath()).addNodesAndRelations();
 			}
 
 			/**
