@@ -20,7 +20,7 @@ data:
 #      config: src/main/resources/project/depends.json
 #      config: src/main/resources/project/leveldb.json
    dynamic:
-      analyse: false
+      analyse: true
       dynamic_file_suffix: [.log]
       directory_root_path: src/main/resources/dynamic/javassist/train-ticket/logs
 #      directory_root_path: src/main/resources/dynamic/javassist/depends/logs
