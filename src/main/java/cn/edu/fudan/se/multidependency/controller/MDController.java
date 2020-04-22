@@ -51,6 +51,17 @@ public class MDController {
 		return "structure_testcase_microservice/multiple_microservice";
 	}
 	
+	@GetMapping("/multiple/microservice/all")
+	public String multipleMicroServiceAll(HttpServletRequest request) {
+		Map<String, List<TestCase>> allTestCases = featureOrganizationService.allTestCasesGroupByTestCaseGroup();
+		request.setAttribute("testCases", allTestCases);
+		Iterable<Scenario> allScenarios = featureOrganizationService.allScenarios();
+		request.setAttribute("scenarios", allScenarios);
+		Iterable<Feature> allFeatures = featureOrganizationService.allFeatures();
+		request.setAttribute("features", allFeatures);
+		return "structure_testcase_microservice/multiple_microservice_all";
+	}
+	
 	@PostMapping(value = "/multiple/microservice/query/edges")
 	@ResponseBody
 	public JSONObject getMicroServiceCallChainWithTestCaseId(@RequestBody Map<String, Object> params) {

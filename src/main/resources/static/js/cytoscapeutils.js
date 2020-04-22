@@ -17,6 +17,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 			'line-color': 'blue',
 			'target-arrow-shape': 'triangle',
 			'target-arrow-color': 'blue',
+			'line-style': 'solid',
 			'font-size' : 20
 	};
 	var styleEdgeBlack = {
@@ -26,6 +27,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 			'line-color': 'black',
 			'target-arrow-shape': 'triangle',
 			'target-arrow-color': 'black',
+			'line-style': 'solid',
 			'font-size' : 20
 	};
 	var styleEdgeGreen = {
@@ -35,6 +37,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 			'line-color': 'green',
 			'target-arrow-shape': 'triangle',
 			'target-arrow-color': 'green',
+			'line-style': 'solid',
 			'font-size' : 20
 	};
 	var styleEdgeRed = {
@@ -44,8 +47,19 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 			'line-color': 'red',
 			'target-arrow-shape': 'triangle',
 			'target-arrow-color': 'red',
+			'line-style': 'solid',
 			'font-size' : 20
 	};
+	var styleEdgeDashed = {
+			'content': 'data(value)',
+			'curve-style': 'bezier',
+			'width': 1,
+			'line-color': 'black',
+			'target-arrow-shape': 'triangle',
+			'target-arrow-color': 'black',
+			'line-style': 'dashed',
+			'font-size' : 20
+	}
 	var _showDataInCytoscape = function(container, elements, layout="dagre") {
 		console.log("_showDataInCytoscape: " + layout);
 		cytoscape_dagre(cytoscape);
@@ -62,8 +76,12 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    		{
 	    			selector: 'node',
 	    			style: {
+	    				'shape' : 'rectangle',
+//	    				'width': 'data(length)',
+	    				'width': function(content) {
+	    					return content.data().name.length * 13;
+	    				},
 	    				'height': 30,
-	    				'width': 30,
 	    				'background-color': '#00FF66',
 						'content': 'data(name)'
 	    			}
@@ -73,7 +91,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			style: {
 	    				'shape' : 'rectangle',
 //	    				'width': 'data(length)',
-	    				'width' : "label",
+	    				'width': function(content) {
+	    					return content.data().name.length * 13;
+	    				},
 	    				'height': 30,
 	    				'text-valign': 'top',
 	    				'text-halign': 'center',
@@ -88,7 +108,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			style: {
 	    				'shape' : 'rectangle',
 //	    				'width': 'data(length)',
-	    				'width' : "label",
+	    				'width': function(content) {
+	    					return content.data().name.length * 13;
+	    				},
 	    				'height': 30,
 	    				'text-valign': 'top',
 	    				'text-halign': 'center',
@@ -103,7 +125,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			style: {
 	    				'shape' : 'rectangle',
 //	    				'width': 'data(length)',
-	    				'width' : "label",
+	    				'width': function(content) {
+	    					return content.data().name.length * 13;
+	    				},
 	    				'height': 30,
 	    				'text-valign': 'top',
 	    				'text-halign': 'center',
@@ -118,7 +142,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			style: {
 	    				'shape' : 'rectangle',
 //	    				'width': 'data(length)',
-	    				'width' : "label",
+	    				'width': function(content) {
+	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 8;
+	    				},
 	    				'height': 30,
 	    				'text-valign': 'center',
 	    				'text-halign': 'center',
@@ -133,7 +159,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			style: {
 	    				'shape' : 'ellipse',
 //	    				'width': 'data(length)',
-	    				'width' : "label",
+	    				'width': function(content) {
+	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 9;
+	    				},
 	    				'height': 30,
 	    				'text-valign': 'center',
 	    				'text-halign': 'center',
@@ -148,7 +176,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			style: {
 	    				'shape' : 'ellipse',
 //	    				'width': 'data(length)',
-	    				'width' : "label",
+	    				'width' :  function(content) {
+	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 9;
+	    				},
 	    				'height': 30,
 	    				'text-valign': 'center',
 	    				'text-halign': 'center',
@@ -163,7 +193,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			style: {
 	    				'shape' : 'rectangle',
 //	    				'width': 'data(length)',
-	    				'width': 'label',
+	    				'width':  function(content) {
+	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 8;
+	    				},
 	    				'height': 30,
 	    				'text-valign': 'center',
 	    				'text-halign': 'center',
@@ -178,7 +210,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			style: {
 	    				'shape' : 'rectangle',
 //	    				'width': 'data(length)',
-	    				'width': 'label',
+	    				'width': function(content) {
+	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 8;
+	    				},
 	    				'height': 30,
 	    				'text-valign': 'center',
 	    				'text-halign': 'center',
@@ -193,7 +227,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			style: {
 	    				'shape' : 'rectangle',
 //	    				'width': 'data(length)',
-	    				'width' : "label",
+	    				'width' : function(content) {
+	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 8;
+	    				},
 	    				'height': 30,
 	    				'text-valign': 'center',
 	    				'text-halign': 'center',
@@ -212,7 +248,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			style: {
 	    				'shape' : 'rectangle',
 //	    				'width': 'data(length)',
-	    				'width': 'label',
+	    				'width': function(content) {
+	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 8;
+	    				},
 	    				'height': 30,
 	    				'text-valign': 'center',
 	    				'text-halign': 'center',
@@ -227,7 +265,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			style: {
 	    				'shape' : 'hexagon',
 //	    				'width': 'data(length)',
-	    				'width': 'label',
+	    				'width': function(content) {
+	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
+	    				},
 	    				'height': 30,
 	    				'text-valign': 'center',
 	    				'text-halign': 'center',
@@ -242,7 +282,9 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			style: {
 	    				'shape' : 'hexagon',
 //	    				'width': 'data(length)',
-	    				'width': 'label',
+	    				'width': function(content) {
+	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
+	    				},
 	    				'height': 30,
 	    				'text-valign': 'center',
 	    				'text-halign': 'center',

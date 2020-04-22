@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>架构-测试用例-微服务</title>
+<script type="text/javascript" th:src="@{/js/import/require.js}"></script>
+<script type="text/javascript" th:src="@{/js/main.js}"></script>
+<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
+<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
+<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
+<link rel="stylesheet" th:href="@{/css/import/jquery.jqplot.css}"></link>
+<style type="text/css">
+.div_cytoscape_content {
+	width: 3000px;
+	height: 800px;
+	border: 1px solid #000;
+	margin-bottom: 5px;
+}
+</style>	
+</head>
+<body>
+	<div th:include="nav.html::nav"></div>
+	<div class="col-sm-12" style="margin-bottom: 15px;">
+		<div class="col-sm-12 row">
+			<div class="col-sm-5">
+				<div class="col-sm-12 row" >
+					<form role="form" >
+						<div class="form-group row col-sm-7">
+							<div class="col-sm-3">
+								<label>场景：</label>
+							</div>
+							<div class="col-sm-9">
+								<select id="scenarioList" multiple="multiple" name="scenarioList">
+									<option th:each="scenario : ${scenarios}"
+											th:text="${scenario.scenarioId + ' : ' + scenario.name}" th:value="${scenario.scenarioId}"></option>
+								</select>
+								<button id="submitScenario" type="button" class="btn btn-default">提交</button>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="col-sm-12 row">
+					<form role="form" >
+						<div class="form-group row col-sm-7">
+							<div class="col-sm-3">
+								<label>测试用例：</label>
+							</div>
+							<div class="col-sm-9">
+								<select id="testCaseList" multiple="multiple" name="testCaseList">
+									<optgroup th:each="group, testCasesList : ${testCases}"
+										th:label="${group.key}">
+										<option th:each="testCase : ${group.value}"
+											th:text="${testCase.testCaseId + ' : ' + testCase.name}" th:value="${testCase.testCaseId}"></option>
+									</optgroup>
+								</select>
+								<button id="submitTestCase" type="button" class="btn btn-default">提交</button>
+							</div>						
+						</div>
+					</form>
+				</div>
+				<div class="col-sm-12 row">
+					<form role="form" >
+						<div class="form-group row col-sm-7">
+							<div class="col-sm-3">
+								<label>特性：</label>
+							</div>
+							<div class="col-sm-9">
+								<select id="featureList" multiple="multiple" name="featureList">
+									<option th:each="feature : ${features}"
+											th:text="${feature.featureId + ' : ' + feature.name}" th:value="${feature.featureId}"></option>
+								</select>
+								<button id="submitFeature" type="button" class="btn btn-default">提交</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+			<div class="col-sm-5">
+				<div class="col-sm-12 row">
+					<div class="checkbox">
+				  		<label>
+							<input type="checkbox" id="showStructure" />显示高层架构
+				        </label>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-12">
+			<div id="testCaseTitle">
+			</div>
+		</div>
+		<div class="col-sm-12">
+			<button id="showImg" type="button" class="btn btn-default">保存图片</button>
+			<hr/>
+		</div>
+		<div class="col-sm-12">
+			<div id="entry" class="div_cytoscape_content"></div>
+		</div>
+		<div><img id="entry-png-eg" /></div>
+	</div>
+	<script type="text/javascript" th:inline="javascript">
+		//<![CDATA[
+		require([ "jquery", "multipleall"], function($, multipleall) {
+			console.log([[${testCases}]]);
+			multipleall.init();
+		});
+		// ]]>
+	</script>
+</body>
+</html>

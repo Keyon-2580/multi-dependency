@@ -15,6 +15,7 @@ require.config({
 		"utils": "util",
 		"project": "project",
 		"multiple": "multiple",
+		"multipleall": "multipleall",
 		"cytoscapeUtils" : "cytoscapeutils"
 	},
 	shim:{
