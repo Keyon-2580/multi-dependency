@@ -23,8 +23,8 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroServiceCallWithEntry;
-import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroServiceCallWithEntry.CytoscapeEdge;
+import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 
 @Controller
 public class MDController {
@@ -49,17 +49,6 @@ public class MDController {
 		Iterable<Feature> allFeatures = featureOrganizationService.allFeatures();
 		request.setAttribute("features", allFeatures);
 		return "structure_testcase_microservice/multiple_microservice";
-	}
-	
-	@GetMapping("/multiple/microservice/all")
-	public String multipleMicroServiceAll(HttpServletRequest request) {
-		Map<String, List<TestCase>> allTestCases = featureOrganizationService.allTestCasesGroupByTestCaseGroup();
-		request.setAttribute("testCases", allTestCases);
-		Iterable<Scenario> allScenarios = featureOrganizationService.allScenarios();
-		request.setAttribute("scenarios", allScenarios);
-		Iterable<Feature> allFeatures = featureOrganizationService.allFeatures();
-		request.setAttribute("features", allFeatures);
-		return "structure_testcase_microservice/multiple_microservice_all";
 	}
 	
 	@PostMapping(value = "/multiple/microservice/query/edges")

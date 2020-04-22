@@ -9,6 +9,9 @@ import com.alibaba.fastjson.JSONObject;
 
 public class JSONUtil {
 	
+	public static final String SUCCESS = "success";
+	public static final String FAIL = "fail";
+	
 	public static JSONObject extractJSONObject(File file) throws Exception {
 		return JSONObject.parseObject(extractJsonString(file));
 	}

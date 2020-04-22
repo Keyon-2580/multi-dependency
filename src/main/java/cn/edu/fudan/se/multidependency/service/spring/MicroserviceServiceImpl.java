@@ -164,7 +164,13 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	public Map<MicroService, Map<MicroService, MicroServiceDependOnMicroService>> msDependOns() {
 		Map<MicroService, Map<MicroService, MicroServiceDependOnMicroService>> result = new HashMap<>();
 		Iterable<MicroServiceDependOnMicroService> list = microServiceDependOnMicroServiceRepository.findAll();
+		int count = 0;
 		for(MicroServiceDependOnMicroService call : list) {
+			count ++;
+		}
+		System.out.println(count);
+		for(MicroServiceDependOnMicroService call : list) {
+			System.out.println(call);
 			MicroService start = call.getStart();
 			Map<MicroService, MicroServiceDependOnMicroService> temp = result.getOrDefault(start, new HashMap<>());
 			temp.put(call.getEnd(), call);
@@ -175,13 +181,11 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 
 	@Override
 	public boolean isMicroServiceCall(MicroService start, MicroService end) {
-//		return msCalls().getOrDefault(start, new HashMap<>()).get(end) != null;
 		return ProjectUtil.isMicroServiceCall(start, end, msCalls());
 	}
 
 	@Override
 	public boolean isMicroServiceDependOn(MicroService start, MicroService end) {
-//		return msDependOns().getOrDefault(start, new HashMap<>()).get(end) != null;
 		return ProjectUtil.isMicroServiceDependOn(start, end, msDependOns());
 	}
 

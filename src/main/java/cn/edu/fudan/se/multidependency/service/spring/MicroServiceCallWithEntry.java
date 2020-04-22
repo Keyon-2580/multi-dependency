@@ -386,4 +386,72 @@ public class MicroServiceCallWithEntry {
 		return result;
 	}
 	
+	public JSONArray structureEdges(String type) {
+		JSONArray edges = new JSONArray();
+		for(MicroService ms : msDependOns.keySet()) {
+			for(MicroService callMs : msDependOns.get(ms).keySet()) {
+				System.out.println("all_MicroService_DependOn_MicroService");
+				edges.add(ProjectUtil.relationToEdge(ms, callMs, type, null, false));
+			}
+		}
+		return edges;
+	}
+	
+	public JSONArray parentFeatureEdges(String type) {
+		JSONArray edges = new JSONArray();
+		for(Feature feature : allFeatures) {
+			Feature parentFeature = featureToParentFeature.get(feature);
+			if(parentFeature != null) {
+				edges.add(ProjectUtil.relationToEdge(parentFeature, feature, type, null, true));
+			}
+		}
+		return edges;
+	}
+
+	public JSONObject testCaseEdges() {
+		System.out.println("testCaseEdges");
+		JSONObject result = new JSONObject();
+		JSONArray edges = new JSONArray();
+		
+		if(showStructure) {
+			System.out.println("showStructure " + msDependOns.size());
+			JSONArray structureEdges = structureEdges("all_MicroService_DependOn_MicroService");
+			for(int i = 0; i < structureEdges.size(); i++) {
+				edges.add(structureEdges.get(i));
+			}
+		}
+		
+		JSONArray parentFeatureEdges = parentFeatureEdges("all_Feature_Contain_Feature");
+		for(int i = 0; i < parentFeatureEdges.size(); i++) {
+			edges.add(parentFeatureEdges.get(i));
+		}
+		
+		
+		for(TestCase testCase : testCaseToEntries.keySet()) {
+			Scenario scenario = this.scenarioDefineTestCases.get(testCase);
+			if(scenario != null) {
+				edges.add(ProjectUtil.relationToEdge(scenario, testCase, "all_ScenarioDefineTestCase", null, true));
+			}
+			List<MicroService> entries = testCaseToEntries.getOrDefault(testCase, new ArrayList<>());
+			for(MicroService entry : entries) {
+				edges.add(ProjectUtil.relationToEdge(testCase, entry, "all_TestCaseExecuteMicroService", null, true));
+			}
+			List<Feature> features = testCaseExecuteFeatures.getOrDefault(testCase, new ArrayList<>());
+			for(Feature feature : features) {
+				edges.add(ProjectUtil.relationToEdge(testCase, feature, "all_FeatureExecutedByTestCase", null, true));
+			}
+		}
+		
+		for(MicroService ms : calls.keySet()) {
+			for(MicroService callMs : calls.get(ms).keySet()) {
+				edges.add(ProjectUtil.relationToEdge(ms, callMs, "all_MicroService_call_MicroService", null, true));
+			}
+		}
+		
+		JSONObject data = new JSONObject();
+		data.put("edges", edges);
+		result.put("value", data);
+		return result;
+	}
+	
 }
