@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION)
+@RelationshipEntity(RelationType.str_FUNCTION_CALL_LIBRARY_API)
 public class FunctionCallLibraryAPI implements Relation {
 
 	private static final long serialVersionUID = 284658643353415139L;
