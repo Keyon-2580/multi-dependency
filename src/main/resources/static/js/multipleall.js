@@ -50,11 +50,10 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 				if (result.result == "success") {
 					console.log(result);
 //					cyEntry.remove('node');
-					cyEntry.remove('edge[type="ShowStructureDependOnCall"]');
-					cyEntry.remove('edge[type="ShowStructureDependOn"]');
-					cyEntry.remove('edge[type="ShowStructureCall"]');
-					cyEntry.remove('edge[type="NoStructureCall"]');
-					cyEntry.remove('edge[type="TestCaseExecuteMicroService"]');
+					cyEntry.remove('edge[type="all_MicroService_DependOn_MicroService"]');
+					cyEntry.remove('edge[type="all_MicroService_call_MicroService"]');
+					cyEntry.remove('edge[type="all_FeatureExecutedByTestCase"]');
+					cyEntry.remove('edge[type="all_TestCaseExecuteMicroService"]');
 					cyEntry.remove('edge[type="NewEdges"]');
 					cyEntry.remove('edge[type="NewEdges_Edge1_Edge2"]');
 					cyEntry.remove('edge[type="NewEdges_Edge1"]');
@@ -115,22 +114,16 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 		cyEntry.on('tap', 'node', function(evt){
 			var nodes = new Array();
 			var node = evt.target;
-			console.log(node);
-			console.log(node.data());
-			console.log(cyEntry.elements());
 			for(var i = 0; i < cyEntry.elements().length; i++) {
 				nodes.push({data: cyEntry.elements()[i].data()});
 			}
 			console.log(nodes);
-//			cyEntry.destroy();
-//			cyEntry = utils.showDataInCytoscape($("#entry"), nodes, "dagre");
-//			processCytoscape(cyEntry);
 			cyEntry.removeData();
 			cyEntry.add(nodes);
 			if(node.data().type != "TestCase_success" && node.data().type != "TestCase_fail") {
 				return ;
 			}
-//			queryEntryEdge(node.data().id, true);
+			queryEntryEdge(node.data().id, true);
 		})
 	};
 	var queryMultipleByTestCase = function(testCaseIds) {
@@ -145,54 +138,41 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 					console.log(result.value);
 					cyEntry.remove('edge');
 					var relatedEdges = result.value.value.edges;
-					/*for(var i = 0; i < relatedEdges.length; i++) {
-						var data = {
-								group: 'edges',
-								data: {
-									type: relatedEdges[i].type == null ? "TEST" : relatedEdges[i].type,
-									source: relatedEdges[i].source,
-									target: relatedEdges[i].target,
-									value: relatedEdges[i].value
-								}
-						}
-						datas.push(data);
-					}
-					cyEntry.add(datas);*/
 					cyEntry.add(relatedEdges)
 				}
 			}
 		});
 	}
 	var queryMultipleByScenario = function(scenarioIds) {
-		cyEntry = null;
 		$.ajax({
 			type : "POST",
 			contentType : "application/json",
 			dataType : "json",
-			url : "/multiple/microservice/query/scenario",
+			url : "/multiple/all/scenario",
 			data : JSON.stringify(scenarioIds),
 			success : function(result) {
 				if (result.result == "success") {
 					console.log(result.value);
-					cyEntry = utils.showDataInCytoscape($("#entry"), result.value.data, "dagre");
-					processCytoscape(cyEntry);
+					cyEntry.remove('edge');
+					var relatedEdges = result.value.value.edges;
+					cyEntry.add(relatedEdges)
 				}
 			}
 		});
 	}
 	var queryMultipleByFeature = function(featureIds) {
-		cyEntry = null;
 		$.ajax({
 			type : "POST",
 			contentType : "application/json",
 			dataType : "json",
-			url : "/multiple/microservice/query/feature",
+			url : "/multiple/all/feature",
 			data : JSON.stringify(featureIds),
 			success : function(result) {
 				if (result.result == "success") {
 					console.log(result.value);
-					cyEntry = utils.showDataInCytoscape($("#entry"), result.value.data, "dagre");
-					processCytoscape(cyEntry);
+					cyEntry.remove('edge');
+					var relatedEdges = result.value.value.edges;
+					cyEntry.add(relatedEdges)
 				}
 			}
 		});
@@ -222,12 +202,8 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 		});
 		$("#submitScenario").click(function() {
 			var showStructure = $("#showStructure").prop('checked');
-			console.log(showAllScenarios);
 			var ids = {
 				"ids" : $("#scenarioList").val(),
-				"showAllScenarios" : true,
-				"showAllFeatures" : true,
-				"showAllMicroServices" : true,
 				"showStructure" : showStructure
 			};
 			console.log(ids);
@@ -246,9 +222,6 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 			var showStructure = $("#showStructure").prop('checked');
 			var ids = {
 				"ids" : $("#featureList").val(),
-				"showAllScenarios" : true,
-				"showAllFeatures" : true,
-				"showAllMicroServices" : true,
 				"showStructure" : showStructure
 			};
 			console.log(ids);

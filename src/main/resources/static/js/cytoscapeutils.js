@@ -335,28 +335,28 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			style: styleEdgeRed
 	    		},
 	    		{
-	    			selector: 'edge[type="all_MicroService_DependOn_MicroService"',
+	    			selector: 'edge[type="all_Feature_Contain_Feature"]',
+	    			style: styleEdgeBlack
+	    		},
+	    		{
+	    			selector: 'edge[type="all_ScenarioDefineTestCase"]',
+	    			style: styleEdgeBlack
+	    		},
+	    		{
+	    			selector: 'edge[type="all_TestCaseExecuteMicroService"]',
+	    			style: styleEdgeBlack
+	    		},
+	    		{
+	    			selector: 'edge[type="all_FeatureExecutedByTestCase]"]',
+	    			style: styleEdgeBlack
+	    		},
+	    		{
+	    			selector: 'edge[type="all_MicroService_call_MicroService"]',
+	    			style: styleEdgeBlack
+	    		},
+	    		{
+	    			selector: 'edge[type="all_MicroService_DependOn_MicroService"]',
 	    			style: styleEdgeDashed
-	    		},
-	    		{
-	    			selector: 'edge[type="all_Feature_Contain_Feature"',
-	    			style: styleEdgeBlack
-	    		},
-	    		{
-	    			selector: 'edge[type="all_ScenarioDefineTestCase"',
-	    			style: styleEdgeBlack
-	    		},
-	    		{
-	    			selector: 'edge[type="all_TestCaseExecuteMicroService"',
-	    			style: styleEdgeBlack
-	    		},
-	    		{
-	    			selector: 'edge[type="all_FeatureExecutedByTestCase"',
-	    			style: styleEdgeBlack
-	    		},
-	    		{
-	    			selector: 'edge[type="all_MicroService_call_MicroService"',
-	    			style: styleEdgeBlack
 	    		}
 	    	],
 	    	elements: elements

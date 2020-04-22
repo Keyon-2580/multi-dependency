@@ -96,4 +96,68 @@ public class MDAllController {
 		}
 		return result;
 	}
+	
+	@PostMapping(value = "/scenario")
+	@ResponseBody
+	public JSONObject getMicroServiceScenario(@RequestBody Map<String, Object> params) {
+		JSONObject result = new JSONObject();
+		try {
+			@SuppressWarnings("unchecked")
+			List<String> idsStr = (List<String>) params.getOrDefault("ids", new ArrayList<>());
+			boolean showStructure = (boolean) params.getOrDefault("showStructure", true);
+			List<Integer> ids = new ArrayList<>();
+			for(String idStr : idsStr) {
+				ids.add(Integer.parseInt(idStr));
+			}
+			List<Scenario> scenarios = new ArrayList<>();
+			for(Scenario scenario : featureOrganizationService.allScenarios()) {
+				if(ids.contains(scenario.getScenarioId())) {
+					scenarios.add(scenario);
+				}
+			}
+			Iterable<TestCase> selectTestCases = featureOrganizationService.relatedTestCaseWithScenarios(scenarios);
+			MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(selectTestCases);
+			callsWithEntry.setMsDependOns(msService.msDependOns());
+			callsWithEntry.setShowStructure(showStructure);
+			result.put("result", "success");
+			result.put("value", callsWithEntry.testCaseEdges());
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
+		return result;
+	}
+	
+	@PostMapping(value = "/feature")
+	@ResponseBody
+	public JSONObject getMicroServiceFeature(@RequestBody Map<String, Object> params) {
+		JSONObject result = new JSONObject();
+		try {
+			@SuppressWarnings("unchecked")
+			List<String> idsStr = (List<String>) params.getOrDefault("ids", new ArrayList<>());
+			boolean showStructure = (boolean) params.getOrDefault("showStructure", true);
+			List<Integer> ids = new ArrayList<>();
+			for(String idStr : idsStr) {
+				ids.add(Integer.parseInt(idStr));
+			}
+			List<Feature> features = new ArrayList<>();
+			for(Feature feature : featureOrganizationService.allFeatures()) {
+				if(ids.contains(feature.getFeatureId())) {
+					features.add(feature);
+				}
+			}
+			Iterable<TestCase> selectTestCases = featureOrganizationService.relatedTestCaseWithFeatures(features);
+			MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(selectTestCases);
+			callsWithEntry.setMsDependOns(msService.msDependOns());
+			callsWithEntry.setShowStructure(showStructure);
+			result.put("result", "success");
+			result.put("value", callsWithEntry.testCaseEdges());
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
+		return result;
+	}
 }
