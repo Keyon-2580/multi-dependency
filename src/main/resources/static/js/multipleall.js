@@ -90,16 +90,15 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 	var processCytoscape = function(cyEntry) {
 		var edges = new Array();
 		var removeIds = new Array();
-		for(var i = 0; i < cyEntry.edges().length; i++) {
-			console.log(cyEntry.edges()[i].data());
-		}
+//		for(var i = 0; i < cyEntry.edges().length; i++) {
+//			console.log(cyEntry.edges()[i].data());
+//		}
 		for(var i = 0; i < cyEntry.edges().length; i++) {
 			var type = cyEntry.edges()[i].data().type;
 			if(type == "FeatureExecutedByTestCase") {
 				var source = cyEntry.edges()[i].data().source;
 				var target = cyEntry.edges()[i].data().target;
 				removeIds.push(cyEntry.edges()[i].data().id);
-//				utils.removeEdge(cyEntry, cyEntry.edges()[i].data().id);
 				var edge = {
 						type: "TestCaseExecuteFeature",
 						source: target,
@@ -114,18 +113,17 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 		}
 		utils.addEdges(cyEntry, edges);
 		cyEntry.on('tap', 'node', function(evt){
-			var nodes = new Array();
 			var node = evt.target;
+			/*var nodes = new Array();
 			for(var i = 0; i < cyEntry.elements().length; i++) {
 				nodes.push({data: cyEntry.elements()[i].data()});
 			}
 			console.log(nodes);
 			cyEntry.removeData();
-			cyEntry.add(nodes);
-			if(node.data().type != "TestCase_success" && node.data().type != "TestCase_fail") {
-				return ;
+			cyEntry.add(nodes);*/
+			if(node.data().type == "TestCase_success" || node.data().type == "TestCase_fail") {
+				queryEntryEdge(node.data().id, true);
 			}
-			queryEntryEdge(node.data().id, true);
 		})
 	};
 	var queryMultipleByTestCase = function(testCaseIds) {
@@ -376,11 +374,42 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 		})
 
 	};
+	var clearMemo = function() {
+		$("#clearMemo").click(function() {
+			if(cyEntry == null) {
+				return ;
+			}
+			console.log(cyEntry.nodes());
+			console.log(cyEntry.elements());
+			var cyNodes = cyEntry.nodes();
+			var cyEdges = cyEntry.edges();
+			var newNodes = [];
+			var newEdges = [];
+			var value = {};
+			for(var i = 0; i < cyNodes.length; i++) {
+				console.log(cyNodes[i].data());
+				console.log(cyNodes[i].position());
+				newNodes[i] = {};
+				newNodes[i].data = cyNodes[i].data();
+				newNodes[i].position = cyNodes[i].position();
+			}
+			for(var i = 0; i < cyEdges.length; i++) {
+				console.log(cyEdges[i].data());
+				newEdges[i] = {};
+				newEdges[i].data = cyEdges[i].data();
+			}
+			value.nodes = newNodes;
+			value.edges = newEdges;
+			cyEntry = utils.showDataInCytoscape($("#entry"), value, "preset");
+			processCytoscape(cyEntry);
+		});
+	};
 	return {
 		init : function(){
 			_init();
 			console.log("finish _init");
 			queryAll();
+			clearMemo();
 		}
 	}
 });

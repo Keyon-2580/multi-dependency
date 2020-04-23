@@ -70,7 +70,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    	layout: {
 	    		name: layout
 	    	},
-	    	textureOnViewport: true,
+	    	textureOnViewport: false,
 	    	hideEdgesOnViewport: true,
 	    	motionBlurOpacity: true,
 	    	boxSelectionEnabled: true,
@@ -144,7 +144,6 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			selector: 'node[type="Function"]',
 	    			style: {
 	    				'shape' : 'rectangle',
-//	    				'width': 'data(length)',
 	    				'width': function(content) {
 	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 8;
 	    				},
@@ -161,7 +160,6 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			selector: 'node[type="Variable"]',
 	    			style: {
 	    				'shape' : 'ellipse',
-//	    				'width': 'data(length)',
 	    				'width': function(content) {
 	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 9;
 	    				},
@@ -178,7 +176,6 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			selector: 'node[type="Feature"]',
 	    			style: {
 	    				'shape' : 'ellipse',
-//	    				'width': 'data(length)',
 	    				'width' :  function(content) {
 	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 9;
 	    				},
@@ -195,7 +192,6 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			selector: 'node[type="Scenario"]',
 	    			style: {
 	    				'shape' : 'rectangle',
-//	    				'width': 'data(length)',
 	    				'width':  function(content) {
 	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 8;
 	    				},
@@ -212,7 +208,6 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			selector: 'node[type="TestCase"]',
 	    			style: {
 	    				'shape' : 'rectangle',
-//	    				'width': 'data(length)',
 	    				'width': function(content) {
 	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 8;
 	    				},
@@ -229,7 +224,6 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    			selector: 'node[type="TestCase_success"]',
 	    			style: {
 	    				'shape' : 'rectangle',
-//	    				'width': 'data(length)',
 	    				'width' : function(content) {
 	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 8;
 	    				},
@@ -239,18 +233,13 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    				'border-width': 1.5,
 	    				'border-color': '#555',
 	    				'background-color': '#9EEA6A',
-						'content': function(obj) {
-							console.log(obj.data().name);
-							return " " + obj.data().name + " ";
-//							return "eee"commit issue
-						}
+	    				'content': 'data(name)'
 	    			}
 	    		},
 	    		{
 	    			selector: 'node[type="TestCase_fail"]',
 	    			style: {
 	    				'shape' : 'rectangle',
-//	    				'width': 'data(length)',
 	    				'width': function(content) {
 	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 8;
 	    				},
