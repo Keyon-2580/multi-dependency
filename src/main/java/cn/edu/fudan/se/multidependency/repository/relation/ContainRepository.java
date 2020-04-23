@@ -13,6 +13,9 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.node.lib.Library;
+import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
+import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
@@ -74,4 +77,13 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	
 	@Query("match (a:Type)-[r:" + RelationType.str_CONTAIN + "]->(b:Function) where id(b)={functionId} return a")
 	public Type findFunctionBelongToTypeByFunctionId(@Param("functionId") Long functionId);
+	
+	@Query("match (m:MicroService)-[r:" + RelationType.str_CONTAIN + "]->(p:Project) where id(p)={projectId} return m")
+	public MicroService findProjectBelongToMicroService(@Param("projectId") Long projectId);
+	
+	@Query("match (lib:Library)-[r:" + RelationType.str_CONTAIN + "]->(api:LibraryAPI) where id(api)={libraryAPIId) return lib")
+	public Library findLibraryAPIBelongToLibrary(@Param("libraryAPIId") Long libraryAPIId);
+	
+	@Query("match (lib:Library)-[r:" + RelationType.str_CONTAIN + "]->(api:LibraryAPI) where id(lib)={libraryId) return api")
+	public List<LibraryAPI> findLibraryContainLibraryAPIs(@Param("libraryId") Long libraryId);
 }
