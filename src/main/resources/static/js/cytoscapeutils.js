@@ -377,6 +377,30 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 		cy.remove(cy.$("#" + nodeId));
 	};
 	
+	var _refresh = function(cy) {
+		var cyNodes = cy.nodes();
+		var cyEdges = cy.edges();
+		var newNodes = [];
+		var newEdges = [];
+		var value = {};
+		for(var i = 0; i < cyNodes.length; i++) {
+			console.log(cyNodes[i].data());
+			console.log(cyNodes[i].position());
+			newNodes[i] = {};
+			newNodes[i].data = cyNodes[i].data();
+			newNodes[i].position = cyNodes[i].position();
+		}
+		for(var i = 0; i < cyEdges.length; i++) {
+			console.log(cyEdges[i].data());
+			newEdges[i] = {};
+			newEdges[i].data = cyEdges[i].data();
+		}
+		value.nodes = newNodes;
+		value.edges = newEdges;
+		cy = _showDataInCytoscape($("#" + cy.container().id), value, "preset");
+		return cy;
+	};
+	
 	return {
 		removeEdge: function(cy, edgeId) {
 			_removeEdge(cy, edgeId);
@@ -391,15 +415,16 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 			_showTreeView(containerDivId, data)
 		},
 		showDataInCytoscape: function(container, elements, layout) {
-			var cy = _showDataInCytoscape(container, elements, layout);
-			
-			return cy;
+			return _showDataInCytoscape(container, elements, layout);
 		},
 		addNodes: function(cytoscape, nodes) {
 			_addNodes(cytoscape, nodes);
 		},
 		addEdges: function(cytoscape, edges) {
 			_addEdges(cytoscape, edges);
+		},
+		refreshCy: function(cy) {
+			return _refresh(cy);
 		}
 	}
 });
