@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.ho.yaml.Yaml;
 
+import cn.edu.fudan.se.multidependency.model.Language;
 import lombok.Data;
 
 public class YamlUtil {
@@ -59,6 +60,15 @@ public class YamlUtil {
 		result.setAnalyseGit(analyseGit);
 		result.setAnalyseLib(analyseLib);
 		result.setAnalyseBuild(analyseBuild);
+		
+		boolean analyseClone = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("analyse");
+		Language cloneLanguage = Language.valueOf((String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("language"));
+		String methodNameTablePath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("method_name_table_path");
+		String methodResultPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("method_result_path");
+		result.setAnalyseClone(analyseClone);
+		result.setCloneLanguage(cloneLanguage);
+		result.setMethodNameTablePath(methodNameTablePath);
+		result.setMethodResultPath(methodResultPath);
 		return result;
 	}
 	
@@ -85,5 +95,10 @@ public class YamlUtil {
 		
 		private boolean analyseLib;
 		private String libsPath;
+		
+		private boolean analyseClone;
+		private Language cloneLanguage;
+		private String methodNameTablePath;
+		private String methodResultPath;
 	}
 }

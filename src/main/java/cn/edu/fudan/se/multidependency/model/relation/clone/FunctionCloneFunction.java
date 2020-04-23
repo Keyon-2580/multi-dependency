@@ -37,6 +37,11 @@ public class FunctionCloneFunction implements Relation {
 	@EndNode
 	private Function function2;
 	
+	public FunctionCloneFunction(Function function1, Function function2) {
+		this.function1 = function1;
+		this.function2 = function2;
+	}
+	
 	@Override
 	public Long getStartNodeGraphId() {
 		return function1.getId();

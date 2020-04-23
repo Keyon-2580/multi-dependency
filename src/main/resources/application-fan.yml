@@ -38,6 +38,7 @@ data:
       libs_path: src/main/resources/lib/train-ticket_2020-04-18.json
    clone: 
       analyse: true
+      language: java
       method_name_table_path: src/main/resources/clone/MethodNameTable.csv
       method_result_path: src/main/resources/clone/type123_method_result.csv
    build:   

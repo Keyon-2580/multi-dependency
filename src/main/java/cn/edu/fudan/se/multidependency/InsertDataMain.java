@@ -151,6 +151,11 @@ public class InsertDataMain {
 				new LibraryInserter(yaml.getLibsPath()).addNodesAndRelations();
 			}
 
+			if(yaml.isAnalyseClone()) {
+				LOGGER.info("克隆依赖分析");
+				
+			}
+			
 			/**
 			 * 构建分析
 			 */
