@@ -33,6 +33,11 @@ public class CommitAddressIssue implements Relation {
 	@EndNode
 	private Issue issue;
 
+	public CommitAddressIssue(Commit commit, Issue issue) {
+		this.commit = commit;
+		this.issue = issue;
+	}
+
 	@Override
 	public Long getStartNodeGraphId() {
 		return commit.getId();

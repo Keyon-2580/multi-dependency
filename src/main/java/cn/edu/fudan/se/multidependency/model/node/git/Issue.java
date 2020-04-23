@@ -12,6 +12,7 @@ import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.neo4j.ogm.annotation.Transient;
 
 @Data
 @NodeEntity
@@ -21,62 +22,55 @@ public class Issue implements Node {
 
 	private static final long serialVersionUID = 4701956188777508218L;
 
-	private String url;
-	
-	private String repositoryUrl;
-	
-	private String labelsUrl;
-	
-	private String commentsUrl;
-	
-	private String eventsUrl;
-	
-	private String htmlUrl;
-	
-	private long issueId;
-	
-	private String issueNodeId;
-	
+	@Id
+	@GeneratedValue
+	private Long id;
+
+	private Long entityId;
+
 	private int number;
 	
 	private String title;
 	
 	private String state;
-	
+
+	private String htmlUrl;
+
 	private String createTime;
 	
 	private String updateTime;
 	
 	private String closeTime;
-	
+
+	@Transient
 	private String body;
 
-    @Id
-    @GeneratedValue
-    private Long id;
-    
-    private Long entityId;
-    
+	@Transient
+	private String developerName;
+
+	public Issue(int number, String title, String state, String htmlUrl,
+				 String createTime, String updateTime, String closeTime, String body) {
+		this.number = number;
+		this.title = title;
+		this.state = state;
+		this.htmlUrl = htmlUrl;
+		this.createTime = createTime;
+		this.updateTime = updateTime;
+		this.closeTime = closeTime;
+		this.body = body;
+	}
+
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
-		properties.put("url", getUrl() == null ? "" : getUrl());
-		properties.put("repositoryUrl", getRepositoryUrl() == null ? "" : getRepositoryUrl());
-		properties.put("labelsUrl", getLabelsUrl() == null ? "" : getLabelsUrl());
-		properties.put("commentsUrl", getCommentsUrl() == null ? "" : getCommentsUrl());
-		properties.put("eventsUrl", getEventsUrl() == null ? "" : getEventsUrl());
-		properties.put("htmlUrl", getHtmlUrl() == null ? "" : getHtmlUrl());
-		properties.put("issueId", getIssueId());
-		properties.put("issueNodeId", getIssueNodeId() == null ? "" : getIssueNodeId());
 		properties.put("number", getNumber());
 		properties.put("title", getTitle() == null ? "" : getTitle());
 		properties.put("state", getState() == null ? "" : getState());
+		properties.put("htmlUrl", getHtmlUrl() == null ? "" : getHtmlUrl());
 		properties.put("createTime", getCreateTime() == null ? "" : getCreateTime());
 		properties.put("updateTime", getUpdateTime() == null ? "" : getUpdateTime());
 		properties.put("closeTime", getCloseTime() == null ? "" : getCloseTime());
-		properties.put("body", getBody() == null ? "" : getBody());
-		
 		return properties;
 	}
 

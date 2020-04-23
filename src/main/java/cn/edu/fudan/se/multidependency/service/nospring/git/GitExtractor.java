@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GitExtractor {
 
@@ -27,7 +29,7 @@ public class GitExtractor {
 
     private Git git;
 
-    public GitExtractor(String gitProjectPath){
+    public GitExtractor(String gitProjectPath) {
         this.gitProjectPath = gitProjectPath;
         try {
             repository = FileRepositoryBuilder.create(new File(gitProjectPath, ".git"));
@@ -38,7 +40,7 @@ public class GitExtractor {
         git = new Git(repository);
     }
 
-    public List<Ref> getBranches(){
+    public List<Ref> getBranches() {
         try {
             return git.branchList().call();
         } catch (GitAPIException e) {
@@ -47,7 +49,6 @@ public class GitExtractor {
         return null;
     }
 
-    //应该改为通过API来获取
     public String getRepositoryName() {
         return FileUtil.extractFileName(gitProjectPath);
     }
@@ -62,7 +63,7 @@ public class GitExtractor {
         return null;
     }
 
-    public List<Ref> getBranchesByCommitId(RevCommit revCommit){
+    public List<Ref> getBranchesByCommitId(RevCommit revCommit) {
         List<Ref> refs = null;
         try{
             refs = git.branchList().setContains(revCommit.getName()).call();
@@ -72,7 +73,7 @@ public class GitExtractor {
         return refs;
     }
 
-    public List<DiffEntry> getDiffBetweenCommits(RevCommit revCommit, RevCommit parentRevCommit){
+    public List<DiffEntry> getDiffBetweenCommits(RevCommit revCommit, RevCommit parentRevCommit) {
         AbstractTreeIterator currentTreeParser = prepareTreeParser(revCommit.getName());
         AbstractTreeIterator prevTreeParser = prepareTreeParser(parentRevCommit.getName());
         List<DiffEntry> diffs = null;
@@ -114,7 +115,25 @@ public class GitExtractor {
         return null;
     }
 
-    public void close(){
+    public List<Integer> getRelationBtwCommitAndIssue(RevCommit commit) {
+        String issueNumRegex = "#[1-9][0-9]*";
+        List<Integer> issueNumFromShort = getMatcher(issueNumRegex, commit.getShortMessage());
+        List<Integer> issueNumFromFull = getMatcher(issueNumRegex, commit.getFullMessage());
+        issueNumFromShort.addAll(issueNumFromFull);
+        return issueNumFromShort;
+    }
+
+    public List<Integer> getMatcher(String regex, String source) {
+        List<Integer> result = new ArrayList<>();
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(source);
+        while (matcher.find()) {
+            result.add(Integer.parseInt(matcher.group().substring(1)));
+        }
+        return result;
+    }
+
+    public void close() {
         git.close();
         repository.close();
     }
