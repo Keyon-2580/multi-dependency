@@ -73,6 +73,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    	textureOnViewport: true,
 	    	hideEdgesOnViewport: true,
 	    	motionBlurOpacity: true,
+	    	boxSelectionEnabled: true,
 //	    	pixelRatio: 1,
 	    	style: [
 	    		{
