@@ -5,6 +5,8 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 	var firstTestCaseId = null;
 	var secondTestCaseId = null;
 	
+	var nodeToPosition = new Map();
+	
 	var queryAll = function() {
 		console.log("queryAll")
 		$.ajax({
@@ -127,7 +129,52 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 		})
 	};
 	var queryMultipleByTestCase = function(testCaseIds) {
+		var nodes = cyEntry.nodes();
+		for(var i = 0; i < nodes.length; i++) {
+			console.log(nodes[i].data());
+			console.log(nodes[i].position());
+			var nodeId = nodes[i].data().id;
+			var position = nodes[i].position();
+			nodeToPosition.set(nodeId, position);
+		}
 		$.ajax({
+			type : "POST",
+			contentType : "application/json",
+			dataType : "json",
+			url : "/multiple/all",
+			success : function(result) {
+				if (result.result == "success") {
+					console.log(result);
+					cyEntry.destroy();
+					var nodes = result.value.data.nodes;
+					for(var i = 0; i < nodes.length; i++) {
+						var nodeId = nodes[i].data.id;
+						var position = nodeToPosition.get(nodeId);
+						nodes[i].position = position;
+					}
+					console.log(result.value.data);
+					cyEntry = utils.showDataInCytoscape($("#entry"), result.value.data, "preset");
+					processCytoscape(cyEntry);
+					
+					$.ajax({
+						type : "POST",
+						contentType : "application/json",
+						dataType : "json",
+						url : "/multiple/all/testcase",
+						data : JSON.stringify(testCaseIds),
+						success : function(result) {
+							if (result.result == "success") {
+								console.log(result.value);
+								cyEntry.remove('edge');
+								var relatedEdges = result.value.value.edges;
+								cyEntry.add(relatedEdges)
+							}
+						}
+					});
+				}
+			}
+		});
+		/*$.ajax({
 			type : "POST",
 			contentType : "application/json",
 			dataType : "json",
@@ -141,10 +188,55 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 					cyEntry.add(relatedEdges)
 				}
 			}
-		});
+		});*/
 	}
 	var queryMultipleByScenario = function(scenarioIds) {
+		var nodes = cyEntry.nodes();
+		for(var i = 0; i < nodes.length; i++) {
+			console.log(nodes[i].data());
+			console.log(nodes[i].position());
+			var nodeId = nodes[i].data().id;
+			var position = nodes[i].position();
+			nodeToPosition.set(nodeId, position);
+		}
 		$.ajax({
+			type : "POST",
+			contentType : "application/json",
+			dataType : "json",
+			url : "/multiple/all",
+			success : function(result) {
+				if (result.result == "success") {
+					console.log(result);
+					cyEntry.destroy();
+					var nodes = result.value.data.nodes;
+					for(var i = 0; i < nodes.length; i++) {
+						var nodeId = nodes[i].data.id;
+						var position = nodeToPosition.get(nodeId);
+						nodes[i].position = position;
+					}
+					console.log(result.value.data);
+					cyEntry = utils.showDataInCytoscape($("#entry"), result.value.data, "preset");
+					processCytoscape(cyEntry);
+					
+					$.ajax({
+						type : "POST",
+						contentType : "application/json",
+						dataType : "json",
+						url : "/multiple/all/scenario",
+						data : JSON.stringify(scenarioIds),
+						success : function(result) {
+							if (result.result == "success") {
+								console.log(result.value);
+								cyEntry.remove('edge');
+								var relatedEdges = result.value.value.edges;
+								cyEntry.add(relatedEdges)
+							}
+						}
+					});
+				}
+			}
+		});
+		/*$.ajax({
 			type : "POST",
 			contentType : "application/json",
 			dataType : "json",
@@ -158,10 +250,55 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 					cyEntry.add(relatedEdges)
 				}
 			}
-		});
+		});*/
 	}
 	var queryMultipleByFeature = function(featureIds) {
+		var nodes = cyEntry.nodes();
+		for(var i = 0; i < nodes.length; i++) {
+			console.log(nodes[i].data());
+			console.log(nodes[i].position());
+			var nodeId = nodes[i].data().id;
+			var position = nodes[i].position();
+			nodeToPosition.set(nodeId, position);
+		}
 		$.ajax({
+			type : "POST",
+			contentType : "application/json",
+			dataType : "json",
+			url : "/multiple/all",
+			success : function(result) {
+				if (result.result == "success") {
+					console.log(result);
+					cyEntry.destroy();
+					var nodes = result.value.data.nodes;
+					for(var i = 0; i < nodes.length; i++) {
+						var nodeId = nodes[i].data.id;
+						var position = nodeToPosition.get(nodeId);
+						nodes[i].position = position;
+					}
+					console.log(result.value.data);
+					cyEntry = utils.showDataInCytoscape($("#entry"), result.value.data, "preset");
+					processCytoscape(cyEntry);
+					
+					$.ajax({
+						type : "POST",
+						contentType : "application/json",
+						dataType : "json",
+						url : "/multiple/all/feature",
+						data : JSON.stringify(featureIds),
+						success : function(result) {
+							if (result.result == "success") {
+								console.log(result.value);
+								cyEntry.remove('edge');
+								var relatedEdges = result.value.value.edges;
+								cyEntry.add(relatedEdges)
+							}
+						}
+					});
+				}
+			}
+		});
+		/*$.ajax({
 			type : "POST",
 			contentType : "application/json",
 			dataType : "json",
@@ -175,7 +312,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 					cyEntry.add(relatedEdges)
 				}
 			}
-		});
+		});*/
 	}
 	
 	var _init = function(){
