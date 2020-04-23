@@ -324,11 +324,11 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    		},
 				{
 	    			selector: 'edge[type="NewEdges_Edge1_Edge2"]',
-	    			style: styleEdgeGreen
+	    			style: styleEdgeBlue
 	    		},
 				{
 	    			selector: 'edge[type="NewEdges_Edge1"]',
-	    			style: styleEdgeBlack
+	    			style: styleEdgeGreen
 	    		},
 				{
 	    			selector: 'edge[type="NewEdges_Edge2"]',
