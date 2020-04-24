@@ -14,6 +14,7 @@ import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRela
 import cn.edu.fudan.se.multidependency.service.nospring.InserterForNeo4j;
 import cn.edu.fudan.se.multidependency.service.nospring.InserterForNeo4jServiceFactory;
 import cn.edu.fudan.se.multidependency.service.nospring.RepositoryService;
+import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserter;
 import cn.edu.fudan.se.multidependency.service.nospring.code.BasicCodeInserterForNeo4jServiceImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.nospring.code.RestfulAPIFileExtractor;
@@ -146,14 +147,15 @@ public class InsertDataMain {
 				inserter.addNodesAndRelations();
 			}
 			
+			if(yaml.isAnalyseClone()) {
+				LOGGER.info("克隆依赖分析");
+				inserter = new CloneInserter(yaml.getCloneLanguage(), yaml.getMethodNameTablePath(), yaml.getMethodResultPath());
+				inserter.addNodesAndRelations();
+			}
+			
 			if(yaml.isAnalyseLib()) {
 				LOGGER.info("三方依赖分析");
 				new LibraryInserter(yaml.getLibsPath()).addNodesAndRelations();
-			}
-
-			if(yaml.isAnalyseClone()) {
-				LOGGER.info("克隆依赖分析");
-				
 			}
 			
 			/**

@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
+
 public class FunctionUtil {
 	
 	public static void main(String[] args) throws Exception {
@@ -15,6 +17,26 @@ public class FunctionUtil {
 			functionFullName = functionFullName.replaceAll("<[^<>]*>", "");
 		}
 		System.out.println(extractFunctionNameAndParameters(functionFullName));
+	}
+	
+	/**
+	 * 
+	 * @param function
+	 * @param functionFullName packageName + className + functionName + parameters
+	 * @return
+	 * @throws Exception
+	 */
+	public static boolean isSameJavaFunction(Function function, String functionFullName) throws Exception {
+		List<String> functionNameAndParameters = extractFunctionNameAndParameters(functionFullName);
+		String functionName = functionNameAndParameters.get(0);
+		if(!function.getName().equals(functionName)) {
+			return false;
+		}
+		if(function.getParameters().size() != (functionNameAndParameters.size() - 1)) {
+			return false;
+		}
+		/// FIXME
+		return true;
 	}
 	
 	public static List<String> extractFunctionNameAndParameters(String functionFullName) throws Exception {

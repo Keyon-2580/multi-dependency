@@ -37,6 +37,8 @@ public class FunctionCloneFunction implements Relation {
 	@EndNode
 	private Function function2;
 	
+	private double value;
+	
 	public FunctionCloneFunction(Function function1, Function function2) {
 		this.function1 = function1;
 		this.function2 = function2;
@@ -60,6 +62,7 @@ public class FunctionCloneFunction implements Relation {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
+		properties.put("value", getValue());
 		return properties;
 	}
 	
