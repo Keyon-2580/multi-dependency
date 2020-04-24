@@ -20,20 +20,21 @@ data:
 #      config: src/main/resources/project/depends.json
 #      config: src/main/resources/project/leveldb.json
    dynamic:
-      analyse: false
+      analyse: true
       dynamic_file_suffix: [.log]
       directory_root_path: src/main/resources/dynamic/javassist/train-ticket/logs
 #      directory_root_path: src/main/resources/dynamic/javassist/depends/logs
-      features_path: src/main/resources/features/train-ticket/features-javassist.json
+#      features_path: src/main/resources/features/train-ticket/features-javassist.json
+      features_path: src/main/resources/features/train-ticket/features-javassist-v1.json
 #      features_path: src/main/resources/features/depends/features-javassist.json
    git:
-      analyse: false
-      directory_root_path: D:/my_data/SDTeam/train-ticket
+      analyse: true
+      directory_root_path: D:/multiple-dependency-project/train-ticket
 #      directory_root_path: D:/multiple-dependency-project/depends
       issues_path: src/main/resources/git/train-ticket-issues.json
 #      issues_path: src/main/resources/git/depends-issues.json
    lib:
-      analyse: false
+      analyse: true
 #      libs_path: src/main/resources/lib/depends_2020-04-19.json
       libs_path: src/main/resources/lib/train-ticket_2020-04-18.json
    clone: 
