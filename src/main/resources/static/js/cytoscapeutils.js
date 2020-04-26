@@ -59,6 +59,15 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 			'target-arrow-color': 'black',
 			'line-style': 'dashed',
 			'font-size' : 20
+	};
+	var styleEdgeClone = {
+			'content': 'data(value)',
+			'curve-style': 'bezier',
+			'width': 1,
+			'line-color': 'green',
+			'line-style': 'dashed',
+			'target-arrow-shape' : 'none',
+			'font-size' : 20
 	}
 	var _showDataInCytoscape = function(container, elements, layout="dagre") {
 		console.log("_showDataInCytoscape: " + layout);
@@ -349,6 +358,10 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    		{
 	    			selector: 'edge[type="all_MicroService_DependOn_MicroService"]',
 	    			style: styleEdgeDashed
+	    		},
+	    		{
+	    			selector: 'edge[type="all_MicroService_clone_MicroService"]',
+	    			style: styleEdgeClone
 	    		}
 	    	],
 	    	elements: elements

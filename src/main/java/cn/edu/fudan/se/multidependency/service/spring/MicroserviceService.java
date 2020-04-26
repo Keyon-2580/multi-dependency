@@ -1,9 +1,11 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
@@ -62,7 +64,9 @@ public interface MicroserviceService {
 	 * @param ms
 	 * @return
 	 */
-	Iterable<Project> microServiceContainProjects(MicroService ms);
+	Collection<Project> microServiceContainProjects(MicroService ms);
+	
+	MicroService findProjectBelongToMicroService(Project project);
 	
 	/**
 	 * 微服务调用了哪些三方库
@@ -72,18 +76,27 @@ public interface MicroserviceService {
 	CallLibrary microServiceCallLibraries(MicroService microService);
 	
 	
-	public List<RestfulAPI> findMicroServiceContainRestfulAPI(MicroService microService);
+	List<RestfulAPI> findMicroServiceContainRestfulAPI(MicroService microService);
 	
 
 	SpanInstanceOfRestfulAPI findSpanBelongToAPI(Span span);
 	
 	Map<Span, SpanInstanceOfRestfulAPI> findAllSpanInstanceOfRestfulAPIs();
 	
-//	/**
-//	 * 根据函数间的克隆找出项目间的克隆
-//	 * @param functionClones
-//	 * @return
-//	 */
-//	public Iterable<Clone> findMicroClone(Iterable<FunctionCloneFunction> functionClones);
+	/**
+	 * 根据函数间的克隆找出项目间的克隆
+	 * @param functionClones
+	 * @return
+	 */
+	Iterable<Clone> findMicroServiceClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode);
+	
+	
+	/**
+	 * 微服务拥有的方法
+	 * @param ms
+	 * @return
+	 */
+	Collection<Function> findMicroServiceContainFunctions(MicroService ms);
+	
 
 }

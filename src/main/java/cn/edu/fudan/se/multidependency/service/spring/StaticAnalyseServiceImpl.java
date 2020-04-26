@@ -40,6 +40,7 @@ import cn.edu.fudan.se.multidependency.repository.node.code.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.TypeRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.VariableRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.clone.FunctionCloneFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportVariableRepository;
@@ -136,6 +137,9 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     
     @Autowired
     FunctionCallLibraryAPIRepository functionCallLibraryAPIRepository;
+    
+    @Autowired
+    FunctionCloneFunctionRepository functionCloneFunctionRepository;
     
     public void clearCache() {
     	this.functionBelongToTypeCache.clear();
@@ -508,11 +512,53 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		}
 		return allFunctionCallLibraryAPIsCache;
 	}
+	
+	private Clone hasClone(Map<Project, Map<Project, Clone>> projectToProjectClones, Project project1, Project project2) {
+		Map<Project, Clone> project1ToClones = projectToProjectClones.getOrDefault(project1, new HashMap<>());
+		Clone clone = project1ToClones.get(project2);
+		if(clone != null) {
+			return clone;
+		}
+		Map<Project, Clone> project2ToClones = projectToProjectClones.getOrDefault(project2, new HashMap<>());
+		clone = project2ToClones.get(project1);
+		return clone;
+	}
 
 	@Override
-	public Iterable<Clone> findProjectClone(Iterable<FunctionCloneFunction> functionClones) {
+	public Iterable<Clone> findProjectClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode) {
 		List<Clone> result = new ArrayList<>();
+		Map<Project, Map<Project, Clone>> projectToProjectClones = new HashMap<>();
+		for(FunctionCloneFunction functionCloneFunction : functionClones) {
+			Function function1 = functionCloneFunction.getFunction1();
+			Function function2 = functionCloneFunction.getFunction2();
+			if(function1.equals(function2)) {
+				continue;
+			}
+			Project project1 = findFunctionBelongToProject(function1);
+			Project project2 = findFunctionBelongToProject(function2);
+			if(removeSameNode && project1.equals(project2)) {
+				continue;
+			}
+			Clone clone = hasClone(projectToProjectClones, project1, project2);
+			if(clone == null) {
+				clone = new Clone();
+				clone.setNode1(project1);
+				clone.setNode2(project2);
+				result.add(clone);
+			}
+			Clone functionClone = Clone.changeFunctionCloneToClone(functionCloneFunction);
+			clone.addChild(functionClone);
+			
+			Map<Project, Clone> project1ToClones = projectToProjectClones.getOrDefault(project1, new HashMap<>());
+			project1ToClones.put(project2, clone);
+			projectToProjectClones.put(project1, project1ToClones);
+		}
 		return result;
+	}
+
+	@Override
+	public Iterable<FunctionCloneFunction> findAllFunctionCloneFunctions() {
+		return functionCloneFunctionRepository.findAll();
 	}
 	
 }

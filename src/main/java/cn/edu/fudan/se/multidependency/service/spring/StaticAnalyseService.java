@@ -170,10 +170,12 @@ public interface StaticAnalyseService {
 	 */
 	public Iterable<FunctionCallLibraryAPI> findAllFunctionCallLibraryAPIs();
 	
+	public Iterable<FunctionCloneFunction> findAllFunctionCloneFunctions();
+	
 	/**
 	 * 根据函数间的克隆找出项目间的克隆
 	 * @param functionClones
 	 * @return
 	 */
-	public Iterable<Clone> findProjectClone(Iterable<FunctionCloneFunction> functionClones);
+	public Iterable<Clone> findProjectClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode);
 }

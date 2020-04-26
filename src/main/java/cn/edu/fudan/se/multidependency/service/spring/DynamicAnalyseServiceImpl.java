@@ -33,7 +33,6 @@ import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynam
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.ScenarioDefineTestCaseRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.TestCaseExecuteFeatureRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.TestCaseRunTraceRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanInstanceOfRestfulAPIRepository;
 import cn.edu.fudan.se.multidependency.service.nospring.RepositoryService;
 
 @Service
@@ -154,7 +153,7 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 			MicroService ms) {
 		List<FunctionDynamicCallFunction> result = new ArrayList<>();
 		List<FunctionDynamicCallFunction> calls = findFunctionDynamicCallsByTrace(trace);
-		List<Project> projects = containRepository.findMicroServiceContainProject(ms.getId());
+		List<Project> projects = containRepository.findMicroServiceContainProjects(ms.getId());
 		Project project = null;
 		if(projects.size() > 0) {
 			project = projects.get(0);
@@ -172,7 +171,7 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	@Override
 	public List<FunctionDynamicCallFunction> findFunctionDynamicCallsByMicroService(MicroService ms) {
 		List<FunctionDynamicCallFunction> result = new ArrayList<>();
-		List<Project> projects = containRepository.findMicroServiceContainProject(ms.getId());
+		List<Project> projects = containRepository.findMicroServiceContainProjects(ms.getId());
 		for(Project project : projects) {
 			result.addAll(findFunctionDynamicCallsByProject(project));
 		}

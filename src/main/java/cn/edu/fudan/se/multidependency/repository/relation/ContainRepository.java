@@ -33,8 +33,8 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	@Query("match (p:Package)-[r" + RelationType.str_CONTAIN + "]->(f:ProjectFile) where id(f)={fileId} return p")
 	public Package findFileBelongToPackageByFileId(@Param("fileId") Long id);
 	
-	@Query("match (m:MicroService)-[r:" + RelationType.str_CONTAIN + "]->(p:Project) where id(m)={msId} return p")
-	public List<Project> findMicroServiceContainProject(@Param("msId") Long microserviceId);
+	@Query("match (ms:MicroService)-[r:" + RelationType.str_CONTAIN + "]->(p:Project) where id(ms)={msId} return p")
+	public List<Project> findMicroServiceContainProjects(@Param("msId") Long msId);
 	
 	@Query("match p = (f1:Feature)-[r:" + RelationType.str_CONTAIN + "]->(f2:Feature) return p")
 	public List<Contain> findAllFeatureContainFeatures();
@@ -80,9 +80,6 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	
 	@Query("match (m:MicroService)-[r:" + RelationType.str_CONTAIN + "]->(p:Project) where id(p)={projectId} return m")
 	public MicroService findProjectBelongToMicroService(@Param("projectId") Long projectId);
-	
-	@Query("match (ms:MicroService)-[r:" + RelationType.str_CONTAIN + "]->(p:Project) where id(ms)={msId} return p")
-	public List<Project> findMicroServiceContainProjects(@Param("msId") Long msId);
 	
 	@Query("match (lib:Library)-[r:" + RelationType.str_CONTAIN + "]->(api:LibraryAPI) where id(api)={libraryAPIId) return lib")
 	public Library findLibraryAPIBelongToLibrary(@Param("libraryAPIId") Long libraryAPIId);

@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -11,12 +12,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
+import cn.edu.fudan.se.multidependency.model.relation.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanCallSpan;
@@ -216,7 +222,7 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	public CallLibrary microServiceCallLibraries(MicroService microService) {
 		CallLibrary result = new CallLibrary();
 		result.setCaller(microService);
-	
+		/// FIXME
 		Iterable<FunctionCallLibraryAPI> allCalls = staticAnalyseService.findAllFunctionCallLibraryAPIs();
 		
 		
@@ -229,8 +235,14 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	}
 
 	@Override
-	public Iterable<Project> microServiceContainProjects(MicroService ms) {
-		return null;
+	public Collection<Project> microServiceContainProjects(MicroService ms) {
+		List<Project> result = containRepository.findMicroServiceContainProjects(ms.getId());
+		return result;
+	}
+
+	@Override
+	public MicroService findProjectBelongToMicroService(Project project) {
+		return containRepository.findProjectBelongToMicroService(project.getId());
 	}
 	
 	@Override
@@ -244,6 +256,68 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 		Iterable<SpanInstanceOfRestfulAPI> instanceOfs = spanInstanceOfRestfulAPIRepository.findAll();
 		for(SpanInstanceOfRestfulAPI instanceOf : instanceOfs) {
 			result.put(instanceOf.getSpan(), instanceOf);
+		}
+		return result;
+	}
+	
+	private Clone hasClone(Map<MicroService, Map<MicroService, Clone>> msToMsClones, MicroService ms1, MicroService ms2) {
+		Map<MicroService, Clone> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
+		Clone clone = ms1ToClones.get(ms2);
+		if(clone != null) {
+			return clone;
+		}
+		Map<MicroService, Clone> ms2ToClones = msToMsClones.getOrDefault(ms2, new HashMap<>());
+		clone = ms2ToClones.get(ms1);
+		return clone;
+	}
+
+	@Override
+	public Iterable<Clone> findMicroServiceClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode) {
+		Iterable<Clone> projectClones = staticAnalyseService.findProjectClone(functionClones, removeSameNode);
+		List<Clone> result = new ArrayList<>();
+		Map<MicroService, Map<MicroService, Clone>> msToMsClones = new HashMap<>();
+		for(Clone projectClone : projectClones) {
+			Node node1 = projectClone.getNode1();
+			Node node2 = projectClone.getNode2();
+			if(node1.getNodeType() != NodeLabelType.Project || node2.getNodeType() != NodeLabelType.Project) {
+				LOGGER.warn("克隆的类型不为Project");
+				continue;
+			}
+			Project project1 = (Project) node1;
+			Project project2 = (Project) node2;
+			if(removeSameNode && project1.equals(project2)) {
+				continue;
+			}
+			MicroService ms1 = findProjectBelongToMicroService(project1);
+			MicroService ms2 = findProjectBelongToMicroService(project2);
+			if(ms1 == null || ms2 == null) {
+				continue;
+			}
+			if(removeSameNode && ms1.equals(ms2)) {
+				continue;
+			}
+			Clone clone = hasClone(msToMsClones, ms1, ms2);
+			if(clone == null) {
+				clone = new Clone();
+				clone.setNode1(ms1);
+				clone.setNode2(ms2);
+				result.add(clone);
+			}
+			clone.addChild(projectClone);
+			Map<MicroService, Clone> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
+			ms1ToClones.put(ms2, clone);
+			msToMsClones.put(ms1, ms1ToClones);
+			
+		}
+		return result;
+	}
+
+	@Override
+	public Collection<Function> findMicroServiceContainFunctions(MicroService ms) {
+		Collection<Project> projects = microServiceContainProjects(ms);
+		List<Function> result = new ArrayList<>();
+		for(Project project : projects) {
+			result.addAll(staticAnalyseService.findProjectContainFunctions(project));
 		}
 		return result;
 	}

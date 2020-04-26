@@ -13,6 +13,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
+import cn.edu.fudan.se.multidependency.model.relation.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
 import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
@@ -45,6 +46,8 @@ public class MicroServiceCallWithEntry {
 	
 	private Iterable<Scenario> allScenarios = new ArrayList<>();
 	
+	private Iterable<Clone> clonesInMicroService = new ArrayList<>();
+	
 	public boolean containCall(MicroService caller, MicroService called) {
 		return this.calls.getOrDefault(caller, new HashMap<>()) != null;
 	}
@@ -53,6 +56,7 @@ public class MicroServiceCallWithEntry {
 	private boolean showAllFeatures = true;
 	private boolean showAllMicroServices = true;
 	private boolean showStructure = true;
+	private boolean showClonesInMicroService = true;
 	
 	public JSONArray relatedTracesIds(boolean callChain) {
 		JSONArray result = new JSONArray();
@@ -445,6 +449,13 @@ public class MicroServiceCallWithEntry {
 		for(MicroService ms : calls.keySet()) {
 			for(MicroService callMs : calls.get(ms).keySet()) {
 				edges.add(ProjectUtil.relationToEdge(ms, callMs, "all_MicroService_call_MicroService", null, true));
+			}
+		}
+		
+		if(showClonesInMicroService) {
+			System.out.println("clone展示");
+			for(Clone clone : clonesInMicroService) {
+				edges.add(ProjectUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", "clone: " + clone.getValue(), false));
 			}
 		}
 		
