@@ -9,6 +9,8 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.relation.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
@@ -167,4 +169,11 @@ public interface StaticAnalyseService {
 	 * @return
 	 */
 	public Iterable<FunctionCallLibraryAPI> findAllFunctionCallLibraryAPIs();
+	
+	/**
+	 * 根据函数间的克隆找出项目间的克隆
+	 * @param functionClones
+	 * @return
+	 */
+	public Iterable<Clone> findProjectClone(Iterable<FunctionCloneFunction> functionClones);
 }

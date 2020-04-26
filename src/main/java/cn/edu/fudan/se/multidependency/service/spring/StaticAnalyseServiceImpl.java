@@ -15,6 +15,8 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.relation.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
@@ -505,6 +507,12 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			allFunctionCallLibraryAPIsCache = functionCallLibraryAPIRepository.findAll();
 		}
 		return allFunctionCallLibraryAPIsCache;
+	}
+
+	@Override
+	public Iterable<Clone> findProjectClone(Iterable<FunctionCloneFunction> functionClones) {
+		List<Clone> result = new ArrayList<>();
+		return result;
 	}
 	
 }
