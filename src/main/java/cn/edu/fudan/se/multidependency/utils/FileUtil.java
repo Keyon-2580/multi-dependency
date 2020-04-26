@@ -151,5 +151,22 @@ public class FileUtil {
 			listFiles(file, result, suffixes);
 		}
 	}
+
+	/**
+	 * 提取文件所属项目名
+	 * @param filePath
+	 * @return
+	 */
+	public static String extractProjectNameFromFile(String filePath) {
+		int idx1 = -1, idx2 = -1;
+		if(filePath.contains("\\")) {
+			idx1 = filePath.indexOf("\\");
+			idx2 = filePath.indexOf("\\",1);
+		} else if(filePath.contains("/")) {
+			idx1 = filePath.indexOf("/");
+			idx2 = filePath.indexOf("/",1);
+		}
+		return idx1 >= 0 && idx2 >= 0 ? filePath.substring(idx1+1, idx2) : "";
+	}
 	
 }

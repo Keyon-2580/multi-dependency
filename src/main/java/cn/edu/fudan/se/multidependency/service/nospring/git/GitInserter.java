@@ -12,18 +12,21 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
     private GitExtractor gitExtractor;
+
     private IssueExtractor issueExtractor;
+
+    private List<Project> projects;
 
     public GitInserter(String gitProjectPath, String issueFilePath){
         gitExtractor = new GitExtractor(gitProjectPath);
         issueExtractor = new IssueExtractor(issueFilePath);
+        projects = this.getNodes().findAllProjects();
     }
 
     @Override
@@ -38,7 +41,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         //添加gitRepository节点和gitRepository到project的包含关系
         GitRepository gitRepository = new GitRepository(generateEntityId(),gitExtractor.getRepositoryName());
         addNode(gitRepository,null);
-        for(Project project : this.getNodes().findAllProjects()){
+        for(Project project : projects){
             addRelation(new Contain(gitRepository,project));
         }
 
@@ -111,31 +114,19 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
                         String oldPath = diff.getOldPath();
                         String changeType = diff.getChangeType().name();
                         String path = DiffEntry.ChangeType.DELETE.name().equals(changeType) ? oldPath : newPath;
-                        ProjectFile file = this.getNodes().findFileByPath(path);
-                        if (file == null) {
-                            //与静态插入的file节点，命名有差异
-                            file = new ProjectFile(generateEntityId(), FileUtil.extractFileName(path), path, FileUtil.extractSuffix(path));
-                            addNode(file, null);
-                        }
                         CommitUpdateFile.UpdateType updateType;
                         if (DiffEntry.ChangeType.ADD.name().equals(changeType))
                             updateType = CommitUpdateFile.UpdateType.ADD;
                         else if (DiffEntry.ChangeType.MODIFY.name().equals(changeType))
                             updateType = CommitUpdateFile.UpdateType.MODIFY;
                         else updateType = CommitUpdateFile.UpdateType.DELETE;
-                        addRelation(new CommitUpdateFile(commit, file, updateType));
+                        addCommitUpdateFileRelation(path, commit, updateType);
                     }
                 }
             } else {
                 List<String> filesPath = gitExtractor.getCommitFilesPath(revCommit);
                 for (String path : filesPath) {
-                    ProjectFile file = this.getNodes().findFileByPath(path);
-                    if (file == null) {
-                        file = new ProjectFile(generateEntityId(), FileUtil.extractFileName(path), path, FileUtil.extractSuffix(path));
-                        addNode(file, null);
-                    }
-                    CommitUpdateFile.UpdateType updateType = CommitUpdateFile.UpdateType.ADD;
-                    addRelation(new CommitUpdateFile(commit, file, updateType));
+                    addCommitUpdateFileRelation(path, commit, CommitUpdateFile.UpdateType.ADD);
                 }
             }
             //添加Commit到Issue的关系
@@ -146,5 +137,15 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
                 }
             }
         }
+    }
+
+    public void addCommitUpdateFileRelation(String filePath, Commit commit, CommitUpdateFile.UpdateType updateType) {
+        ProjectFile file = this.getNodes().findFileByPath(filePath);
+        if (file == null) {
+            String prefix = projects.size() > 1 ? "/" : "/" + projects.get(0).getName() + "/";
+            file = new ProjectFile(generateEntityId(), FileUtil.extractFileName(filePath), prefix + filePath, FileUtil.extractSuffix(filePath));
+            addNode(file, null);
+        }
+        addRelation(new CommitUpdateFile(commit, file, updateType));
     }
 }
