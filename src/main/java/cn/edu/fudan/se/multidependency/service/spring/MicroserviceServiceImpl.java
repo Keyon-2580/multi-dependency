@@ -223,7 +223,6 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 		CallLibrary result = new CallLibrary();
 		result.setCaller(microService);
 		/// FIXME
-		Iterable<FunctionCallLibraryAPI> allCalls = staticAnalyseService.findAllFunctionCallLibraryAPIs();
 		
 		
 		return result;
@@ -299,6 +298,7 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 			Clone clone = hasClone(msToMsClones, ms1, ms2);
 			if(clone == null) {
 				clone = new Clone();
+				clone.setLevel(NodeLabelType.MicroService);
 				clone.setNode1(ms1);
 				clone.setNode2(ms2);
 				result.add(clone);

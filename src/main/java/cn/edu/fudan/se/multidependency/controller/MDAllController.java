@@ -16,11 +16,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
+import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroServiceCallWithEntry;
@@ -52,6 +54,22 @@ public class MDAllController {
 		Iterable<Feature> allFeatures = featureOrganizationService.allFeatures();
 		request.setAttribute("features", allFeatures);
 		return "structure_testcase_microservice/multiple_microservice_all";
+	}
+	
+	@GetMapping("/apis")
+	@ResponseBody
+	public JSONObject findProjectCallAPIs() {
+		JSONObject result = new JSONObject();
+		Iterable<Project> projects = staticAnalyseService.allProjects().values();
+		JSONObject values = new JSONObject();
+		for(Project project : projects) {
+			CallLibrary call = staticAnalyseService.findProjectCallLibraries(project);
+			System.out.println(call.getCallAPITimes());
+			values.put(project.getName(), call);
+		}
+		result.put("result", "success");
+		result.put("projectValues", values);
+		return result;
 	}
 	
 	@GetMapping("/clones")
@@ -108,11 +126,7 @@ public class MDAllController {
 					selectTestCases.add(testCase);
 				}
 			}
-//			MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(selectTestCases);
-//			callsWithEntry.setMsDependOns(msService.msDependOns());
-//			callsWithEntry.setShowStructure(showStructure);
 			result.put("result", "success");
-//			result.put("value", callsWithEntry.testCaseEdges());
 			result.put("value", testCaseEdges(showStructure, showClonesInMicroService, selectTestCases));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -142,11 +156,7 @@ public class MDAllController {
 				}
 			}
 			Iterable<TestCase> selectTestCases = featureOrganizationService.relatedTestCaseWithScenarios(scenarios);
-//			MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(selectTestCases);
-//			callsWithEntry.setMsDependOns(msService.msDependOns());
-//			callsWithEntry.setShowStructure(showStructure);
 			result.put("result", "success");
-//			result.put("value", callsWithEntry.testCaseEdges());
 			result.put("value", testCaseEdges(showStructure, showClonesInMicroService, selectTestCases));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -176,19 +186,7 @@ public class MDAllController {
 				}
 			}
 			Iterable<TestCase> selectTestCases = featureOrganizationService.relatedTestCaseWithFeatures(features);
-			/*MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(selectTestCases);
-			callsWithEntry.setMsDependOns(msService.msDependOns());
-			callsWithEntry.setShowStructure(showStructure);
-			
-			if(showClonesInMicroService) {
-				Iterable<FunctionCloneFunction> allClones = staticAnalyseService.findAllFunctionCloneFunctions();
-				Iterable<Clone> clones = staticAnalyseService.findProjectClone(allClones, true);
-				clones = msService.findMicroClone(allClones, true);
-				callsWithEntry.setClonesInMicroService(clones);
-				callsWithEntry.setShowClonesInMicroService(showClonesInMicroService);
-			}*/
 			result.put("result", "success");
-//			result.put("value", callsWithEntry.testCaseEdges());
 			result.put("value", testCaseEdges(showStructure, showClonesInMicroService, selectTestCases));
 		} catch (Exception e) {
 			e.printStackTrace();

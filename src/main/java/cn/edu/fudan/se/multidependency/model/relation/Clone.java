@@ -5,29 +5,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * 节点node1和node2不分顺序
  * @author fan
  *
  */
+@Data
 public class Clone implements Serializable {
 	
 	private static final long serialVersionUID = -2262794801616872866L;
+	
+	private NodeLabelType level;
 
-	@Getter
-	@Setter
 	private Node node1;
 	
-	@Getter
-	@Setter
 	private Node node2;
 	
-	@Getter
-	@Setter
 	private double value = 0;
 	
 	private List<Clone> children = new ArrayList<>();
@@ -45,6 +42,7 @@ public class Clone implements Serializable {
 		result.setNode1(functionCloneFunction.getFunction1());
 		result.setNode2(functionCloneFunction.getFunction2());
 		result.setValue(functionCloneFunction.getValue());
+		result.setLevel(NodeLabelType.Function);
 		return result;
 	}
 	

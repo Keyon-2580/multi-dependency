@@ -4,19 +4,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.node.lib.Library;
+import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
+import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
@@ -504,11 +509,17 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return result;
 	}
 
-	Iterable<FunctionCallLibraryAPI> allFunctionCallLibraryAPIsCache = null;
+	Map<Function, List<FunctionCallLibraryAPI>> allFunctionCallLibraryAPIsCache = new ConcurrentHashMap<>();
 	@Override
-	public Iterable<FunctionCallLibraryAPI> findAllFunctionCallLibraryAPIs() {
-		if(allFunctionCallLibraryAPIsCache == null) {
-			allFunctionCallLibraryAPIsCache = functionCallLibraryAPIRepository.findAll();
+	public Map<Function, List<FunctionCallLibraryAPI>> findAllFunctionCallLibraryAPIs() {
+		if(allFunctionCallLibraryAPIsCache.isEmpty()) {
+			Iterable<FunctionCallLibraryAPI> calls = functionCallLibraryAPIRepository.findAll();
+			for(FunctionCallLibraryAPI call : calls) {
+				Function function = call.getFunction();
+				List<FunctionCallLibraryAPI> temp = allFunctionCallLibraryAPIsCache.getOrDefault(function, new ArrayList<>());
+				temp.add(call);
+				allFunctionCallLibraryAPIsCache.put(function, temp);
+			}
 		}
 		return allFunctionCallLibraryAPIsCache;
 	}
@@ -542,6 +553,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			Clone clone = hasClone(projectToProjectClones, project1, project2);
 			if(clone == null) {
 				clone = new Clone();
+				clone.setLevel(NodeLabelType.Project);
 				clone.setNode1(project1);
 				clone.setNode2(project2);
 				result.add(clone);
@@ -559,6 +571,28 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	@Override
 	public Iterable<FunctionCloneFunction> findAllFunctionCloneFunctions() {
 		return functionCloneFunctionRepository.findAll();
+	}
+
+	@Override
+	public CallLibrary findProjectCallLibraries(Project project) {
+		CallLibrary result = new CallLibrary();
+		result.setCaller(project);
+		Map<Function, List<FunctionCallLibraryAPI>> functionCallLibAPIs = findAllFunctionCallLibraryAPIs();
+		Iterable<Function> functions = findProjectContainFunctions(project);
+		for(Function function : functions) {
+			List<FunctionCallLibraryAPI> calls = functionCallLibAPIs.getOrDefault(function, new ArrayList<>());
+			for(FunctionCallLibraryAPI call : calls) {
+				LibraryAPI api = call.getApi();
+				Library lib = findAPIBelongToLibrary(api);
+				result.addLibraryAPI(api, lib, call.getTimes());
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public Library findAPIBelongToLibrary(LibraryAPI api) {
+		return containRepository.findLibraryAPIBelongToLibrary(api.getId());
 	}
 	
 }
