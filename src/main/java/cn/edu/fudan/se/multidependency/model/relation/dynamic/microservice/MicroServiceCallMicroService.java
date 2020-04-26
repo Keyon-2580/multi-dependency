@@ -34,7 +34,7 @@ public class MicroServiceCallMicroService implements Relation {
 	@EndNode
 	private MicroService callMs;
 	
-	private Integer times;
+	private int times;
 	
 	@Transient
 	private List<SpanCallSpan> spanCallSpans = new ArrayList<>();
@@ -75,7 +75,7 @@ public class MicroServiceCallMicroService implements Relation {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("times", getTimes() == null ? 0 : getTimes());
+		properties.put("times", getTimes());
 		return properties;
 	}
 }

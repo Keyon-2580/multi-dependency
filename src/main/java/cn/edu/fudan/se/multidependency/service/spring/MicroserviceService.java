@@ -50,4 +50,10 @@ public interface MicroserviceService {
 	
 	Map<MicroService, List<RestfulAPI>> microServiceContainsAPIs();
 	
+	Iterable<MicroServiceCallMicroService> findAllMicroServiceCallMicroServices();
+	
+	void deleteAllMicroServiceCallMicroService();
+	
+	void saveMicroServiceCallMicroService(MicroServiceCallMicroService call);
+	
 }

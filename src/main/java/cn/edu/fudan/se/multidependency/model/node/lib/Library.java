@@ -34,6 +34,15 @@ public class Library implements Node {
 	private String name;
 	
 	private String fullName;
+	
+	public boolean isSameLibDifferentVersion(Library other) {
+		if(other == null) {
+			return false;
+		}
+		return this.getGroupId().equals(other.getGroupId()) 
+				&& this.getName().equals(other.getName())
+				&& !this.getVersion().equals(other.getVersion());
+	}
 
 	@Override
 	public Map<String, Object> getProperties() {

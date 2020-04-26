@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +34,7 @@ import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
 
 @Service
 public class MicroserviceServiceImpl implements MicroserviceService {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(MicroserviceServiceImpl.class);
 	
 	@Autowired
 	private SpanCallSpanRepository spanCallSpanRepository;
@@ -164,13 +166,7 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	public Map<MicroService, Map<MicroService, MicroServiceDependOnMicroService>> msDependOns() {
 		Map<MicroService, Map<MicroService, MicroServiceDependOnMicroService>> result = new HashMap<>();
 		Iterable<MicroServiceDependOnMicroService> list = microServiceDependOnMicroServiceRepository.findAll();
-		int count = 0;
 		for(MicroServiceDependOnMicroService call : list) {
-			count ++;
-		}
-		System.out.println(count);
-		for(MicroServiceDependOnMicroService call : list) {
-			System.out.println(call);
 			MicroService start = call.getStart();
 			Map<MicroService, MicroServiceDependOnMicroService> temp = result.getOrDefault(start, new HashMap<>());
 			temp.put(call.getEnd(), call);
@@ -197,6 +193,26 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 			result.put(ms, apis);
 		}
 		return result;
+	}
+
+	
+	
+	@Override
+	public Iterable<MicroServiceCallMicroService> findAllMicroServiceCallMicroServices() {
+		LOGGER.info("findAllMicroServiceCallMicroServices");
+		return microServiceCallMicroServiceRepository.findAll();
+	}
+
+	@Override
+	public void deleteAllMicroServiceCallMicroService() {
+		LOGGER.info("deleteAllMicroServiceCallMicroService");
+		microServiceCallMicroServiceRepository.deleteAll();
+	}
+
+	@Override
+	public void saveMicroServiceCallMicroService(MicroServiceCallMicroService call) {
+		LOGGER.info("saveMicroServiceCallMicroServic");
+		microServiceCallMicroServiceRepository.save(call);
 	}
 
 }

@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,6 @@ import org.springframework.stereotype.Service;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
-import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroServiceCallMicroServiceRepository;
 import guru.nidi.graphviz.attribute.Color;
 import guru.nidi.graphviz.attribute.Shape;
 import guru.nidi.graphviz.engine.Format;
@@ -25,12 +26,10 @@ import guru.nidi.graphviz.model.MutableNode;
 
 @Service
 public class RelationInserterService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(RelationInserterService.class);
 
 	@Autowired
 	private FeatureOrganizationService featureOrganizationService;
-	
-	@Autowired
-	private MicroServiceCallMicroServiceRepository msCallMsRepository;
 	
 	@Autowired
 	private FileDependOnFileExtractService fileDependOnFileExtractor;
@@ -44,14 +43,17 @@ public class RelationInserterService {
 	@Autowired
 	private DynamicAnalyseService dynamicAnalyseService;*/
 	
-//	@Bean
+	@Bean
 	public void addMsCallMsRelation() {
+		LOGGER.info("添加微服务之间调用的关系");
+		// 删除所有微服务间的调用，并重新计算
+		microserviceService.deleteAllMicroServiceCallMicroService();
 		Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> calls 
 			= featureOrganizationService.findMsCallMsByTraces(featureOrganizationService.allTraces()).getCalls();
 		for(MicroService ms : calls.keySet()) {
 			for(MicroService callMs : calls.get(ms).keySet()) {
 				MicroServiceCallMicroService call = calls.get(ms).get(callMs);
-				msCallMsRepository.save(call);
+				microserviceService.saveMicroServiceCallMicroService(call);
 			}
 		}
 	}
