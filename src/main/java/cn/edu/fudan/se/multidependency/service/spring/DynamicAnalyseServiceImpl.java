@@ -23,8 +23,8 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCal
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.ScenarioDefineTestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
-import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
+import cn.edu.fudan.se.multidependency.repository.node.microservice.TraceRepository;
 import cn.edu.fudan.se.multidependency.repository.node.testcase.FeatureRepository;
 import cn.edu.fudan.se.multidependency.repository.node.testcase.ScenarioRepository;
 import cn.edu.fudan.se.multidependency.repository.node.testcase.TestCaseRepository;
@@ -71,7 +71,18 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	private Iterable<Feature> allFeatures = null;
 	
 	@Autowired
-	private SpanInstanceOfRestfulAPIRepository spanInstanceOfRestfulAPIRepository;
+	private TraceRepository traceRepository;	
+	
+	@Override
+	public Trace findTraceByTraceId(String traceId) {
+		return traceRepository.findTraceByTraceId(traceId);
+	}
+	
+	@Override
+	public Trace findTraceById(Long id) {
+		return traceRepository.findById(id).get();
+	}
+
 	/**
 	 * 找出所有特性
 	 */
@@ -394,11 +405,6 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	}
 
 	@Override
-	public SpanInstanceOfRestfulAPI findSpanBelongToAPI(Span span) {
-		return spanInstanceOfRestfulAPIRepository.findSpanBelongToAPI(span.getSpanId());
-	}
-
-	@Override
 	public Map<Scenario, List<ScenarioDefineTestCase>> findAllScenarioDefineTestCases() {
 		Map<Scenario, List<ScenarioDefineTestCase>> result = new HashMap<>();
 		for(Scenario s : findAllScenarios()) {
@@ -412,16 +418,5 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		}
 		return result;
 	}
-
-	@Override
-	public Map<Span, SpanInstanceOfRestfulAPI> findAllSpanInstanceOfRestfulAPIs() {
-		Map<Span, SpanInstanceOfRestfulAPI> result = new HashMap<>();
-		Iterable<SpanInstanceOfRestfulAPI> instanceOfs = spanInstanceOfRestfulAPIRepository.findAll();
-		for(SpanInstanceOfRestfulAPI instanceOf : instanceOfs) {
-			result.put(instanceOf.getSpan(), instanceOf);
-		}
-		return result;
-	}
-
 
 }

@@ -9,8 +9,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
-import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
-import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
+import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportVariable;
@@ -94,6 +93,11 @@ public interface StaticAnalyseService {
 	 */
 	public Type findFunctionBelongToType(Function function);
 	
+	/**
+	 * Function属于哪个File
+	 * @param function
+	 * @return
+	 */
 	public ProjectFile findFunctionBelongToFile(Function function);
 	
 	/**
@@ -103,17 +107,25 @@ public interface StaticAnalyseService {
 	 */
 	public ProjectFile findTypeBelongToFile(Type type);
 	
-	public List<RestfulAPI> findMicroServiceContainRestfulAPI(MicroService microService);
-	
 	/**
-	 * 变量属于哪个文件
+	 * Variable属于哪个文件
 	 * @param variable
 	 * @return
 	 */
 	public ProjectFile findVariableBelongToFile(Variable variable);
 	
+	/**
+	 * Function属于哪个Project
+	 * @param function
+	 * @return
+	 */
 	public Project findFunctionBelongToProject(Function function);
 	
+	/**
+	 * Project包含的Function
+	 * @param project
+	 * @return
+	 */
 	public List<Function> findProjectContainFunctions(Project project);
 	
 	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller();
@@ -149,4 +161,10 @@ public interface StaticAnalyseService {
 	public List<VariableTypeParameterType> findProjectContainVariableTypeParameterTypeRelations(Project project);
 
 	public boolean isSubType(Type subType, Type superType);
+	
+	/**
+	 * 找出所有函数调用第三方库数据
+	 * @return
+	 */
+	public Iterable<FunctionCallLibraryAPI> findAllFunctionCallLibraryAPIs();
 }

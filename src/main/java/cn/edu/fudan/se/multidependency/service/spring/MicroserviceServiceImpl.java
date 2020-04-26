@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
@@ -19,16 +20,19 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanCallSpan;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanStartWithFunction;
+import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
+import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.MicroServiceRepository;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.SpanRepository;
-import cn.edu.fudan.se.multidependency.repository.node.microservice.TraceRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroServiceCallMicroServiceRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroServiceCreateSpanRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroServiceDependOnMicroServiceRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanCallSpanRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanInstanceOfRestfulAPIRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanStartWithFunctionRepository;
 import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
 
@@ -55,13 +59,16 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	private SpanRepository spanRepository;
 	
 	@Autowired
-	private TraceRepository traceRepository;
-	
-	@Autowired
 	private MicroServiceCallMicroServiceRepository microServiceCallMicroServiceRepository;
 	
 	@Autowired
 	private MicroServiceDependOnMicroServiceRepository microServiceDependOnMicroServiceRepository;	
+	
+	@Autowired
+	private StaticAnalyseService staticAnalyseService;
+
+	@Autowired
+	private SpanInstanceOfRestfulAPIRepository spanInstanceOfRestfulAPIRepository;
 	
 	@Override
 	public List<Span> findSpansByTrace(Trace trace) {
@@ -133,20 +140,10 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 		}
 		return result;
 	}
-
-	@Override
-	public Trace findTraceByTraceId(String traceId) {
-		return traceRepository.findTraceByTraceId(traceId);
-	}
-
+	
 	@Override
 	public Trace findTraceByFeature(Feature feature) {
 		return null;
-	}
-
-	@Override
-	public Trace findTraceById(Long id) {
-		return traceRepository.findById(id).get();
 	}
 
 	@Override
@@ -213,6 +210,42 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	public void saveMicroServiceCallMicroService(MicroServiceCallMicroService call) {
 		LOGGER.info("saveMicroServiceCallMicroServic");
 		microServiceCallMicroServiceRepository.save(call);
+	}
+
+	@Override
+	public CallLibrary microServiceCallLibraries(MicroService microService) {
+		CallLibrary result = new CallLibrary();
+		result.setCaller(microService);
+	
+		Iterable<FunctionCallLibraryAPI> allCalls = staticAnalyseService.findAllFunctionCallLibraryAPIs();
+		
+		
+		return result;
+	}
+
+	@Override
+	public List<RestfulAPI> findMicroServiceContainRestfulAPI(MicroService microService) {
+		return containRepository.findMicroServiceContainRestfulAPI(microService.getId());
+	}
+
+	@Override
+	public Iterable<Project> microServiceContainProjects(MicroService ms) {
+		return null;
+	}
+	
+	@Override
+	public SpanInstanceOfRestfulAPI findSpanBelongToAPI(Span span) {
+		return spanInstanceOfRestfulAPIRepository.findSpanBelongToAPI(span.getSpanId());
+	}
+
+	@Override
+	public Map<Span, SpanInstanceOfRestfulAPI> findAllSpanInstanceOfRestfulAPIs() {
+		Map<Span, SpanInstanceOfRestfulAPI> result = new HashMap<>();
+		Iterable<SpanInstanceOfRestfulAPI> instanceOfs = spanInstanceOfRestfulAPIRepository.findAll();
+		for(SpanInstanceOfRestfulAPI instanceOf : instanceOfs) {
+			result.put(instanceOf.getSpan(), instanceOf);
+		}
+		return result;
 	}
 
 }

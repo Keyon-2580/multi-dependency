@@ -23,7 +23,6 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
-import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 
 @Controller
 @RequestMapping("/feature")
@@ -32,8 +31,8 @@ public class FeatureController {
 	@Autowired
 	private DynamicAnalyseService dynamicAnalyseService;
 
-	@Autowired
-	private MicroserviceService jaegerService;
+//	@Autowired
+//	private MicroserviceService msService;
 
 	@Autowired
 	private FeatureOrganizationService featureOrganizationService;
@@ -200,7 +199,7 @@ public class FeatureController {
 	public JSONObject toCytoscapeForTrace(@RequestParam("traceGraphId") Long id) {
 		JSONObject result = new JSONObject();
 		try {
-			Trace trace = jaegerService.findTraceById(id);
+			Trace trace = dynamicAnalyseService.findTraceById(id);
 			JSONObject value = featureOrganizationService.microServiceToCytoscape(true, trace);
 			result.put("detail", value.getJSONObject("detail"));
 			result.put("result", "success");

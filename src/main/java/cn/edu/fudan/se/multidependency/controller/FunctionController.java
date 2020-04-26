@@ -35,7 +35,7 @@ public class FunctionController {
 	private DynamicAnalyseService dynamicAnalyseService;
 
 	@Autowired
-	private MicroserviceService jaegerService;
+	private MicroserviceService msService;
 
 	@Autowired
 	private FeatureOrganizationService organizationService;
@@ -89,9 +89,9 @@ public class FunctionController {
 		try {
 			JSONArray functionArray = new JSONArray();
 			
-			Span span = jaegerService.findSpanById(spanGraphId);
+			Span span = msService.findSpanById(spanGraphId);
 			System.out.println(span);
-			SpanStartWithFunction spanStartWithFunction = jaegerService.findSpanStartWithFunctionByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
+			SpanStartWithFunction spanStartWithFunction = msService.findSpanStartWithFunctionByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
 			System.out.println(spanStartWithFunction);
 			System.out.println(spanStartWithFunction.getFunction());
 			List<FunctionDynamicCallFunction> spanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
@@ -117,7 +117,7 @@ public class FunctionController {
 		JSONObject result = new JSONObject();
 		try {
 			System.out.println(microserviceGraphId);
-			MicroService ms = jaegerService.findMicroServiceById(microserviceGraphId);
+			MicroService ms = msService.findMicroServiceById(microserviceGraphId);
 			if(ms == null) {
 				throw new Exception("没有id为 " + microserviceGraphId + " 的MicroService");
 			}
@@ -125,7 +125,7 @@ public class FunctionController {
 			if(traceId == null) {
 				calls = dynamicAnalyseService.findFunctionDynamicCallsByMicroService(ms);
 			} else {
-				Trace trace = jaegerService.findTraceByTraceId(traceId);
+				Trace trace = dynamicAnalyseService.findTraceByTraceId(traceId);
 				calls = dynamicAnalyseService.findFunctionDynamicCallsByTraceAndMicroService(trace, ms);
 			}
 			dependencyOrganizationService.dynamicCallDependency(calls);

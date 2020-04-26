@@ -15,8 +15,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
-import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
-import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
+import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportVariable;
@@ -54,7 +53,14 @@ import cn.edu.fudan.se.multidependency.repository.relation.code.TypeInheritsType
 import cn.edu.fudan.se.multidependency.repository.relation.code.VariableIsTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.VariableTypeParameterTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.lib.FunctionCallLibraryAPIRepository;
 
+/**
+ * 
+ * @author fan
+ *
+ * 结构、三方、克隆，应只从数据库查找，内部不应与其它Service有关系
+ */
 @Service
 public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	
@@ -125,6 +131,9 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     
     @Autowired
     VariableTypeParameterTypeRepository variableTypeParameterTypeRepository;
+    
+    @Autowired
+    FunctionCallLibraryAPIRepository functionCallLibraryAPIRepository;
     
     public void clearCache() {
     	this.functionBelongToTypeCache.clear();
@@ -433,11 +442,6 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return is;
 	}
 
-	@Override
-	public List<RestfulAPI> findMicroServiceContainRestfulAPI(MicroService microService) {
-		return containRepository.findMicroServiceContainRestfulAPI(microService.getId());
-	}
-
 	Map<Project, Iterable<Package>> projectContainPakcagesCache = new HashMap<>();
 	@Override
 	public Iterable<Package> allPackagesInProject(Project project) {
@@ -492,6 +496,15 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		Iterable<Variable> result = functionContainVariablesCache.getOrDefault(function, containRepository.findFunctionContainVariables(function.getId()));
 		functionContainVariablesCache.put(function, result);
 		return result;
+	}
+
+	Iterable<FunctionCallLibraryAPI> allFunctionCallLibraryAPIsCache = null;
+	@Override
+	public Iterable<FunctionCallLibraryAPI> findAllFunctionCallLibraryAPIs() {
+		if(allFunctionCallLibraryAPIsCache == null) {
+			allFunctionCallLibraryAPIsCache = functionCallLibraryAPIRepository.findAll();
+		}
+		return allFunctionCallLibraryAPIsCache;
 	}
 	
 }

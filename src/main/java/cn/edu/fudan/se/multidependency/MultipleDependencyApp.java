@@ -79,7 +79,7 @@ public class MultipleDependencyApp {
 			}
 		}
 		Map<MicroService, List<RestfulAPI>> microServiceContainAPIs = microserviceService.microServiceContainsAPIs();
-		Map<Span, SpanInstanceOfRestfulAPI> spanInstanceOfRestfulAPIs = dynamicAnalyseService.findAllSpanInstanceOfRestfulAPIs();
+		Map<Span, SpanInstanceOfRestfulAPI> spanInstanceOfRestfulAPIs = microserviceService.findAllSpanInstanceOfRestfulAPIs();
 		FeatureOrganizationService organization = new FeatureOrganizationService(
 				allMicroService, testCaseExecuteFeatures, featureExecutedByTestCases, 
 				featureToParentFeature, testCaseRunTraces, traceToSpans, spanCallSpans, spanBelongToMicroService, scenarioDefineTestCases,

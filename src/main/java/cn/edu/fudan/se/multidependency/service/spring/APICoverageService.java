@@ -20,11 +20,14 @@ public class APICoverageService {
 	@Autowired
 	private FeatureOrganizationService featureOrganizationService;
 	
-	@Autowired
-	private StaticAnalyseService staticAnalyseService;
+//	@Autowired
+//	private StaticAnalyseService staticAnalyseService;
 	
 	@Autowired
 	private DynamicAnalyseService dynamicAnalyseService;
+	
+	@Autowired
+	private MicroserviceService msService;
 	
 	public Map<MicroService, TestCaseCoverageMicroServiceAPIs> apiCoverage(Collection<TestCase> testCases) {
 		Map<MicroService, TestCaseCoverageMicroServiceAPIs> result = new HashMap<>();
@@ -33,7 +36,7 @@ public class APICoverageService {
 			TestCaseCoverageMicroServiceAPIs coverage = new TestCaseCoverageMicroServiceAPIs();
 			coverage.addTestCases(testCases);
 			coverage.setMicroService(ms);
-			List<RestfulAPI> apis = staticAnalyseService.findMicroServiceContainRestfulAPI(ms);
+			List<RestfulAPI> apis = msService.findMicroServiceContainRestfulAPI(ms);
 			for(RestfulAPI api : apis) {
 				coverage.addCallRestfulAPITimes(api, 0);
 			}
@@ -49,7 +52,7 @@ public class APICoverageService {
 			TestCaseCoverageMicroServiceAPIs coverage = result.get(microService);
 			assert(coverage != null);
 			
-			SpanInstanceOfRestfulAPI instanceOf = dynamicAnalyseService.findSpanBelongToAPI(span);
+			SpanInstanceOfRestfulAPI instanceOf = msService.findSpanBelongToAPI(span);
 			if(instanceOf == null) {
 				System.out.println("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee " + span.getApiFunctionName() + " " + span.getSpanId());
 				continue;

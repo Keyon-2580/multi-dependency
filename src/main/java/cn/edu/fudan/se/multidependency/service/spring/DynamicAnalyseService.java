@@ -65,7 +65,7 @@ public interface DynamicAnalyseService {
 
 	Iterable<FunctionDynamicCallFunction> findAllFunctionDynamicCallFunctionRelations(boolean b);
 	
-	SpanInstanceOfRestfulAPI findSpanBelongToAPI(Span span);
-	
-	Map<Span, SpanInstanceOfRestfulAPI> findAllSpanInstanceOfRestfulAPIs();
+	Trace findTraceByTraceId(String traceId);
+
+	Trace findTraceById(Long id);
 }

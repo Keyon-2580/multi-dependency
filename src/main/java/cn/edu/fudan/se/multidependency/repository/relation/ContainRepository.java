@@ -81,6 +81,9 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	@Query("match (m:MicroService)-[r:" + RelationType.str_CONTAIN + "]->(p:Project) where id(p)={projectId} return m")
 	public MicroService findProjectBelongToMicroService(@Param("projectId") Long projectId);
 	
+	@Query("match (ms:MicroService)-[r:" + RelationType.str_CONTAIN + "]->(p:Project) where id(ms)={msId} return p")
+	public List<Project> findMicroServiceContainProjects(@Param("msId") Long msId);
+	
 	@Query("match (lib:Library)-[r:" + RelationType.str_CONTAIN + "]->(api:LibraryAPI) where id(api)={libraryAPIId) return lib")
 	public Library findLibraryAPIBelongToLibrary(@Param("libraryAPIId") Long libraryAPIId);
 	
