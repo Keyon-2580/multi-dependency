@@ -281,27 +281,39 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 		});
 		$("#submitScenario").click(function() {
 			var showStructure = $("#showStructure").prop('checked');
+			var showMicroServiceCallLibs = $("#showMicroServiceCallLibs").prop('checked');
+			var showClonesInMicroService = $("#showClonesInMicroService").prop('checked');
 			var ids = {
 				"ids" : $("#scenarioList").val(),
-				"showStructure" : showStructure
+				"showStructure" : showStructure,
+				"showMicroServiceCallLibs" : showMicroServiceCallLibs,
+				"showClonesInMicroService" : showClonesInMicroService
 			};
 			console.log(ids);
 			queryMultipleByScenario(ids);
 		});
 		$("#submitTestCase").click(function() {
 			var showStructure = $("#showStructure").prop('checked');
+			var showMicroServiceCallLibs = $("#showMicroServiceCallLibs").prop('checked');
+			var showClonesInMicroService = $("#showClonesInMicroService").prop('checked');
 			var ids = {
 				"ids" : $("#testCaseList").val(),
-				"showStructure" : showStructure
+				"showStructure" : showStructure,
+				"showMicroServiceCallLibs" : showMicroServiceCallLibs,
+				"showClonesInMicroService" : showClonesInMicroService
 			};
 			console.log(ids);
 			queryMultipleByTestCase(ids);
 		});
 		$("#submitFeature").click(function() {
 			var showStructure = $("#showStructure").prop('checked');
+			var showMicroServiceCallLibs = $("#showMicroServiceCallLibs").prop('checked');
+			var showClonesInMicroService = $("#showClonesInMicroService").prop('checked');
 			var ids = {
 				"ids" : $("#featureList").val(),
-				"showStructure" : showStructure
+				"showStructure" : showStructure,
+				"showMicroServiceCallLibs" : showMicroServiceCallLibs,
+				"showClonesInMicroService" : showClonesInMicroService
 			};
 			console.log(ids);
 			queryMultipleByFeature(ids);

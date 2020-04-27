@@ -8,6 +8,8 @@ import java.util.Map;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
+import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
@@ -15,6 +17,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
+import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
 import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
 import lombok.AllArgsConstructor;
@@ -48,6 +51,8 @@ public class MicroServiceCallWithEntry {
 	
 	private Iterable<Clone> clonesInMicroService = new ArrayList<>();
 	
+	private Iterable<CallLibrary> microServiceCallLibraries = new ArrayList<>();
+	
 	public boolean containCall(MicroService caller, MicroService called) {
 		return this.calls.getOrDefault(caller, new HashMap<>()) != null;
 	}
@@ -57,6 +62,7 @@ public class MicroServiceCallWithEntry {
 	private boolean showAllMicroServices = true;
 	private boolean showStructure = true;
 	private boolean showClonesInMicroService = true;
+	private boolean showMicroServiceCallLibs = true;
 	
 	public JSONArray relatedTracesIds(boolean callChain) {
 		JSONArray result = new JSONArray();
@@ -168,7 +174,6 @@ public class MicroServiceCallWithEntry {
 	}
 	
 	public JSONObject toCytoscapeWithStructure() {
-		System.out.println(showAllFeatures + " " + showAllMicroServices + " " + showStructure);
 		JSONObject result = new JSONObject();
 		JSONArray nodes = new JSONArray();
 		JSONArray edges = new JSONArray();
@@ -176,6 +181,7 @@ public class MicroServiceCallWithEntry {
 		Map<Scenario, Boolean> isScenarioNodeAdd = new HashMap<>();
 		Map<Feature, Boolean> isFeatureNodeAdd = new HashMap<>();
 		Map<Feature, Boolean> isFeatureNodeParent = new HashMap<>();
+		Map<Library, Boolean> isLibraryNodeAdd = new HashMap<>();
 		
 		if(showAllScenarios) {
 			for(Scenario scenario : allScenarios) {
@@ -207,6 +213,27 @@ public class MicroServiceCallWithEntry {
 					}
 					edges.add(ProjectUtil.relationToEdge(parentFeature, feature, null, null, true));
 					isFeatureNodeParent.put(feature, true);
+				}
+			}
+		}
+		
+		if(showClonesInMicroService) {
+			for(Clone clone : clonesInMicroService) {
+				edges.add(ProjectUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", "clone: " + clone.getValue(), false));
+			}
+		}
+		
+		if(showMicroServiceCallLibs) {
+			for(CallLibrary call : microServiceCallLibraries) {
+				if(call.getCallerType() != NodeLabelType.MicroService) {
+					continue;
+				}
+				for(Library lib : call.getCallLibraries()) {
+					if(!isLibraryNodeAdd.getOrDefault(lib, false)) {
+						nodes.add(ProjectUtil.toCytoscapeNode(lib, lib.getFullName(), "Library"));
+						isLibraryNodeAdd.put(lib, true);
+					}
+					edges.add(ProjectUtil.relationToEdge(call.getCaller(), lib, "MicroServiceCallLibrary", call.timesOfCallLib(lib) + "", false));
 				}
 			}
 		}
@@ -456,6 +483,18 @@ public class MicroServiceCallWithEntry {
 			System.out.println("clone展示");
 			for(Clone clone : clonesInMicroService) {
 				edges.add(ProjectUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", "clone: " + clone.getValue(), false));
+			}
+		}
+		
+		if(showMicroServiceCallLibs) {
+			System.out.println("展示调用三方库");
+			for(CallLibrary call : microServiceCallLibraries) {
+				if(call.getCallerType() != NodeLabelType.MicroService) {
+					continue;
+				}
+				for(Library lib : call.getCallLibraries()) {
+					edges.add(ProjectUtil.relationToEdge(call.getCaller(), lib, "MicroServiceCallLibrary", call.timesOfCallLib(lib) + "", false));
+				}
 			}
 		}
 		

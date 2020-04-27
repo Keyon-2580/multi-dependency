@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,8 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.lib.Library;
+import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
@@ -29,7 +33,6 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanC
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanStartWithFunction;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
-import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.MicroServiceRepository;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.SpanRepository;
@@ -318,6 +321,33 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 		List<Function> result = new ArrayList<>();
 		for(Project project : projects) {
 			result.addAll(staticAnalyseService.findProjectContainFunctions(project));
+		}
+		return result;
+	}
+
+	@Override
+	public CallLibrary findMicroServiceCallLibraries(MicroService ms) {
+		CallLibrary result = new CallLibrary();
+		result.setCaller(ms);
+		Iterable<Project> projects = microServiceContainProjects(ms);
+		for(Project project : projects) {
+			CallLibrary projectCallLibrary = staticAnalyseService.findProjectCallLibraries(project);
+			Map<Library, Set<LibraryAPI>> callLibraryToAPIs = projectCallLibrary.getCallLibraryToAPIs();
+			for(Library lib : callLibraryToAPIs.keySet()) {
+				Set<LibraryAPI> apis = callLibraryToAPIs.getOrDefault(lib, new HashSet<>());
+				for(LibraryAPI api : apis) {
+					result.addLibraryAPI(api, lib, projectCallLibrary.timesOfCallAPI(api));
+				}
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public Iterable<CallLibrary> findAllMicroServiceCallLibraries() {
+		List<CallLibrary> result = new ArrayList<>();
+		for(MicroService ms : findAllMicroService().values()) {
+			result.add(findMicroServiceCallLibraries(ms));
 		}
 		return result;
 	}

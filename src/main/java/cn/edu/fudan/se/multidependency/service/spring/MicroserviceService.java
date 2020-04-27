@@ -97,6 +97,14 @@ public interface MicroserviceService {
 	 * @return
 	 */
 	Collection<Function> findMicroServiceContainFunctions(MicroService ms);
+
+	/**
+	 * 找出Project调用了哪些三方
+	 * @param project
+	 * @return
+	 */
+	CallLibrary findMicroServiceCallLibraries(MicroService ms);
 	
+	Iterable<CallLibrary> findAllMicroServiceCallLibraries();
 
 }

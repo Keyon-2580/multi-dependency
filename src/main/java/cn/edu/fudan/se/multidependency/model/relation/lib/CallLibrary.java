@@ -30,8 +30,20 @@ public class CallLibrary implements Serializable {
 
 	private Map<LibraryAPI, Integer> callAPITimes = new HashMap<>();
 	
+	public int timesOfCallAPI(LibraryAPI api) {
+		return callAPITimes.getOrDefault(api, 0);
+	}
+	
+	public int timesOfCallLib(Library lib) {
+		int result = 0;
+		Set<LibraryAPI> apis = callLibraryToAPIs.getOrDefault(lib, new HashSet<>());
+		for(LibraryAPI api : apis) {
+			result += timesOfCallAPI(api);
+		}
+		return result;
+	}
+	
 	public void addLibraryAPI(LibraryAPI api, Library belongToLibrary, int times) {
-		System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 		callLibraries.add(belongToLibrary);
 		
 		Set<LibraryAPI> apis = callLibraryToAPIs.getOrDefault(api, new HashSet<>());

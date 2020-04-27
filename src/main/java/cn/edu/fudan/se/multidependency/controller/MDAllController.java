@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
-import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroServiceCallWithEntry;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
@@ -39,8 +39,8 @@ public class MDAllController {
 	@Autowired
 	private MicroserviceService msService;
 	
-	@Autowired
-	private DynamicAnalyseService dynamicAnalyseService;
+//	@Autowired
+//	private DynamicAnalyseService dynamicAnalyseService;
 	
 	@Autowired
 	private StaticAnalyseService staticAnalyseService;
@@ -69,6 +69,14 @@ public class MDAllController {
 		}
 		result.put("result", "success");
 		result.put("projectValues", values);
+		
+		values = new JSONObject();
+		Iterable<MicroService> mss = msService.findAllMicroService().values();
+		for(MicroService ms : mss) {
+			CallLibrary call = msService.findMicroServiceCallLibraries(ms);
+			values.put(ms.getName(), call);
+		}
+		result.put("msValues", values);
 		return result;
 	}
 	
@@ -95,6 +103,13 @@ public class MDAllController {
 			callsWithEntry.setShowAllMicroServices(true);
 			callsWithEntry.setShowStructure(true);
 			callsWithEntry.setShowAllScenarios(true);
+			callsWithEntry.setShowClonesInMicroService(true);
+			callsWithEntry.setShowMicroServiceCallLibs(true);
+			
+			callsWithEntry.setClonesInMicroService(msService.findMicroServiceClone(staticAnalyseService.findAllFunctionCloneFunctions(), true));
+			callsWithEntry.setMicroServiceCallLibraries(msService.findAllMicroServiceCallLibraries());
+
+			
 			result.put("result", "success");
 			result.put("value", callsWithEntry.toCytoscapeWithStructure());
 		} catch (Exception e) {
@@ -113,7 +128,8 @@ public class MDAllController {
 			@SuppressWarnings("unchecked")
 			List<String> idsStr = (List<String>) params.getOrDefault("ids", new ArrayList<>());
 			boolean showStructure = (boolean) params.getOrDefault("showStructure", true);
-			boolean showClonesInMicroService = (boolean) params.getOrDefault("showCloneInMicroService", true);
+			boolean showClonesInMicroService = (boolean) params.getOrDefault("showClonesInMicroService", true);
+			boolean showMicroServiceCallLibs = (boolean) params.getOrDefault("showMicroServiceCallLibs", true);
 			List<Integer> ids = new ArrayList<>();
 			for(String idStr : idsStr) {
 				ids.add(Integer.parseInt(idStr));
@@ -127,7 +143,7 @@ public class MDAllController {
 				}
 			}
 			result.put("result", "success");
-			result.put("value", testCaseEdges(showStructure, showClonesInMicroService, selectTestCases));
+			result.put("value", testCaseEdges(showStructure, showClonesInMicroService, showMicroServiceCallLibs, selectTestCases));
 		} catch (Exception e) {
 			e.printStackTrace();
 			result.put("result", "fail");
@@ -144,7 +160,8 @@ public class MDAllController {
 			@SuppressWarnings("unchecked")
 			List<String> idsStr = (List<String>) params.getOrDefault("ids", new ArrayList<>());
 			boolean showStructure = (boolean) params.getOrDefault("showStructure", true);
-			boolean showClonesInMicroService = (boolean) params.getOrDefault("showCloneInMicroService", true);
+			boolean showClonesInMicroService = (boolean) params.getOrDefault("showClonesInMicroService", true);
+			boolean showMicroServiceCallLibs = (boolean) params.getOrDefault("showMicroServiceCallLibs", true);
 			List<Integer> ids = new ArrayList<>();
 			for(String idStr : idsStr) {
 				ids.add(Integer.parseInt(idStr));
@@ -157,7 +174,7 @@ public class MDAllController {
 			}
 			Iterable<TestCase> selectTestCases = featureOrganizationService.relatedTestCaseWithScenarios(scenarios);
 			result.put("result", "success");
-			result.put("value", testCaseEdges(showStructure, showClonesInMicroService, selectTestCases));
+			result.put("value", testCaseEdges(showStructure, showClonesInMicroService, showMicroServiceCallLibs, selectTestCases));
 		} catch (Exception e) {
 			e.printStackTrace();
 			result.put("result", "fail");
@@ -174,7 +191,8 @@ public class MDAllController {
 			@SuppressWarnings("unchecked")
 			List<String> idsStr = (List<String>) params.getOrDefault("ids", new ArrayList<>());
 			boolean showStructure = (boolean) params.getOrDefault("showStructure", true);
-			boolean showClonesInMicroService = (boolean) params.getOrDefault("showCloneInMicroService", true);
+			boolean showClonesInMicroService = (boolean) params.getOrDefault("showClonesInMicroService", true);
+			boolean showMicroServiceCallLibs = (boolean) params.getOrDefault("showMicroServiceCallLibs", true);
 			List<Integer> ids = new ArrayList<>();
 			for(String idStr : idsStr) {
 				ids.add(Integer.parseInt(idStr));
@@ -187,7 +205,7 @@ public class MDAllController {
 			}
 			Iterable<TestCase> selectTestCases = featureOrganizationService.relatedTestCaseWithFeatures(features);
 			result.put("result", "success");
-			result.put("value", testCaseEdges(showStructure, showClonesInMicroService, selectTestCases));
+			result.put("value", testCaseEdges(showStructure, showClonesInMicroService, showMicroServiceCallLibs, selectTestCases));
 		} catch (Exception e) {
 			e.printStackTrace();
 			result.put("result", "fail");
@@ -196,17 +214,20 @@ public class MDAllController {
 		return result;
 	}
 	
-	private JSONObject testCaseEdges(boolean showStructure, boolean showClonesInMicroService, Iterable<TestCase> selectTestCases) {
+	private JSONObject testCaseEdges(boolean showStructure, boolean showClonesInMicroService, 
+			boolean showMicroServiceCallLibs, 
+			Iterable<TestCase> selectTestCases) {
 		MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(selectTestCases);
 		callsWithEntry.setMsDependOns(msService.msDependOns());
 		callsWithEntry.setShowStructure(showStructure);
+		callsWithEntry.setShowMicroServiceCallLibs(showMicroServiceCallLibs);
+		callsWithEntry.setShowClonesInMicroService(showClonesInMicroService);
 		
 		if(showClonesInMicroService) {
-			Iterable<FunctionCloneFunction> allClones = staticAnalyseService.findAllFunctionCloneFunctions();
-			Iterable<Clone> clones = staticAnalyseService.findProjectClone(allClones, true);
-			clones = msService.findMicroServiceClone(allClones, true);
-			callsWithEntry.setClonesInMicroService(clones);
-			callsWithEntry.setShowClonesInMicroService(showClonesInMicroService);
+			callsWithEntry.setClonesInMicroService(msService.findMicroServiceClone(staticAnalyseService.findAllFunctionCloneFunctions(), true));
+		}
+		if(showMicroServiceCallLibs) {
+			callsWithEntry.setMicroServiceCallLibraries(msService.findAllMicroServiceCallLibraries());
 		}
 		return callsWithEntry.testCaseEdges();
 	}
