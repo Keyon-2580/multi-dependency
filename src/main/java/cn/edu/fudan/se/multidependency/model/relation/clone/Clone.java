@@ -31,7 +31,7 @@ public class Clone<T extends Node> implements Serializable {
 		String calculate(Clone<? extends Node> clone);
 	}
 	
-	private CloneValueCalculator calculator;
+	private transient CloneValueCalculator calculator;
 	
 	public String calculateValue() {
 		if(calculator != null) {

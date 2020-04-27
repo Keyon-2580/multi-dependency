@@ -6,12 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ibm.icu.text.DecimalFormat;
+
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
-import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone.CloneValueCalculator;
+import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 
 public class CloneValueCalculatorForMicroService implements CloneValueCalculator {
 	
@@ -32,15 +34,16 @@ public class CloneValueCalculatorForMicroService implements CloneValueCalculator
 		StringBuilder builder = new StringBuilder();
 		builder.append("(");
 		List<FunctionCloneFunction> functionClones = clone.getChildren();
-		MicroService ms1 = (MicroService) clone.getNode1();
-		MicroService ms2 = (MicroService) clone.getNode2();
-		int functionSizeOfMs1 = msToFunctions.get(ms1).size();
-		int functionSizeOfMs2 = msToFunctions.get(ms2).size();
-		double a = functionClones.size() / (functionSizeOfMs1 + functionSizeOfMs2 + 0.0);
-		builder.append(a);
+//		MicroService ms1 = (MicroService) clone.getNode1();
+//		MicroService ms2 = (MicroService) clone.getNode2();
+//		int functionSizeOfMs1 = msToFunctions.get(ms1).size();
+//		int functionSizeOfMs2 = msToFunctions.get(ms2).size();
+//		double a = functionClones.size() / (functionSizeOfMs1 + functionSizeOfMs2 + 0.0);
+//		builder.append(a);
+		builder.append(functionClones.size());
 		builder.append(", ");
 		double b = clone.getValue() / (functionClones.size() + 0.0);
-		builder.append(b);
+		builder.append(String.format("%.2f", b));
 		builder.append(")");
 		return builder.toString();
 	}
