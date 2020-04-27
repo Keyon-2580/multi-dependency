@@ -559,6 +559,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 				result.add(clone);
 			}
 			Clone functionClone = Clone.changeFunctionCloneToClone(functionCloneFunction);
+			// 函数间的克隆作为Children
 			clone.addChild(functionClone);
 			
 			Map<Project, Clone> project1ToClones = projectToProjectClones.getOrDefault(project1, new HashMap<>());

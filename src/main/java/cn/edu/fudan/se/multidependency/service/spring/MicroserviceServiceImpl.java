@@ -306,7 +306,9 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 				clone.setNode2(ms2);
 				result.add(clone);
 			}
-			clone.addChild(projectClone);
+//			clone.addChild(projectClone);
+			// 将ProjectClone的children（FunctionClone）作为Children
+			clone.addChildren(projectClone.getChildren());
 			Map<MicroService, Clone> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
 			ms1ToClones.put(ms2, clone);
 			msToMsClones.put(ms1, ms1ToClones);

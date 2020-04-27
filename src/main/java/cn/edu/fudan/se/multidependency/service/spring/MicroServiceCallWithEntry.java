@@ -482,7 +482,7 @@ public class MicroServiceCallWithEntry {
 		if(showClonesInMicroService) {
 			System.out.println("clone展示");
 			for(Clone clone : clonesInMicroService) {
-				edges.add(ProjectUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", "clone: " + clone.getValue(), false));
+				edges.add(ProjectUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", clone.calculateValue(), false));
 			}
 		}
 		
