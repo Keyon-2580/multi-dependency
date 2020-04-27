@@ -14,8 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
@@ -25,7 +23,7 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
-import cn.edu.fudan.se.multidependency.model.relation.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
@@ -220,17 +218,7 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 		LOGGER.info("saveMicroServiceCallMicroServic");
 		microServiceCallMicroServiceRepository.save(call);
 	}
-
-	@Override
-	public CallLibrary microServiceCallLibraries(MicroService microService) {
-		CallLibrary result = new CallLibrary();
-		result.setCaller(microService);
-		/// FIXME
-		
-		
-		return result;
-	}
-
+	
 	@Override
 	public List<RestfulAPI> findMicroServiceContainRestfulAPI(MicroService microService) {
 		return containRepository.findMicroServiceContainRestfulAPI(microService.getId());
@@ -262,31 +250,25 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 		return result;
 	}
 	
-	private Clone hasClone(Map<MicroService, Map<MicroService, Clone>> msToMsClones, MicroService ms1, MicroService ms2) {
-		Map<MicroService, Clone> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
-		Clone clone = ms1ToClones.get(ms2);
+	private Clone<MicroService> hasClone(Map<MicroService, Map<MicroService, Clone<MicroService>>> msToMsClones, MicroService ms1, MicroService ms2) {
+		Map<MicroService, Clone<MicroService>> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
+		Clone<MicroService> clone = ms1ToClones.get(ms2);
 		if(clone != null) {
 			return clone;
 		}
-		Map<MicroService, Clone> ms2ToClones = msToMsClones.getOrDefault(ms2, new HashMap<>());
+		Map<MicroService, Clone<MicroService>> ms2ToClones = msToMsClones.getOrDefault(ms2, new HashMap<>());
 		clone = ms2ToClones.get(ms1);
 		return clone;
 	}
 
 	@Override
-	public Iterable<Clone> findMicroServiceClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode) {
-		Iterable<Clone> projectClones = staticAnalyseService.findProjectClone(functionClones, removeSameNode);
-		List<Clone> result = new ArrayList<>();
-		Map<MicroService, Map<MicroService, Clone>> msToMsClones = new HashMap<>();
-		for(Clone projectClone : projectClones) {
-			Node node1 = projectClone.getNode1();
-			Node node2 = projectClone.getNode2();
-			if(node1.getNodeType() != NodeLabelType.Project || node2.getNodeType() != NodeLabelType.Project) {
-				LOGGER.warn("克隆的类型不为Project");
-				continue;
-			}
-			Project project1 = (Project) node1;
-			Project project2 = (Project) node2;
+	public Iterable<Clone<MicroService>> findMicroServiceClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode) {
+		Iterable<Clone<Project>> projectClones = staticAnalyseService.findProjectClone(functionClones, removeSameNode);
+		List<Clone<MicroService>> result = new ArrayList<>();
+		Map<MicroService, Map<MicroService, Clone<MicroService>>> msToMsClones = new HashMap<>();
+		for(Clone<Project> projectClone : projectClones) {
+			Project project1 = projectClone.getNode1();
+			Project project2 = projectClone.getNode2();
 			if(removeSameNode && project1.equals(project2)) {
 				continue;
 			}
@@ -298,18 +280,16 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 			if(removeSameNode && ms1.equals(ms2)) {
 				continue;
 			}
-			Clone clone = hasClone(msToMsClones, ms1, ms2);
+			Clone<MicroService> clone = hasClone(msToMsClones, ms1, ms2);
 			if(clone == null) {
-				clone = new Clone();
-				clone.setLevel(NodeLabelType.MicroService);
+				clone = new Clone<MicroService>();
 				clone.setNode1(ms1);
 				clone.setNode2(ms2);
 				result.add(clone);
 			}
-//			clone.addChild(projectClone);
 			// 将ProjectClone的children（FunctionClone）作为Children
 			clone.addChildren(projectClone.getChildren());
-			Map<MicroService, Clone> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
+			Map<MicroService, Clone<MicroService>> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
 			ms1ToClones.put(ms2, clone);
 			msToMsClones.put(ms1, ms1ToClones);
 			
@@ -328,12 +308,12 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	}
 
 	@Override
-	public CallLibrary findMicroServiceCallLibraries(MicroService ms) {
-		CallLibrary result = new CallLibrary();
+	public CallLibrary<MicroService> findMicroServiceCallLibraries(MicroService ms) {
+		CallLibrary<MicroService> result = new CallLibrary<MicroService>();
 		result.setCaller(ms);
 		Iterable<Project> projects = microServiceContainProjects(ms);
 		for(Project project : projects) {
-			CallLibrary projectCallLibrary = staticAnalyseService.findProjectCallLibraries(project);
+			CallLibrary<Project> projectCallLibrary = staticAnalyseService.findProjectCallLibraries(project);
 			Map<Library, Set<LibraryAPI>> callLibraryToAPIs = projectCallLibrary.getCallLibraryToAPIs();
 			for(Library lib : callLibraryToAPIs.keySet()) {
 				Set<LibraryAPI> apis = callLibraryToAPIs.getOrDefault(lib, new HashSet<>());
@@ -346,8 +326,8 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	}
 
 	@Override
-	public Iterable<CallLibrary> findAllMicroServiceCallLibraries() {
-		List<CallLibrary> result = new ArrayList<>();
+	public Iterable<CallLibrary<MicroService>> findAllMicroServiceCallLibraries() {
+		List<CallLibrary<MicroService>> result = new ArrayList<>();
 		for(MicroService ms : findAllMicroService().values()) {
 			result.add(findMicroServiceCallLibraries(ms));
 		}

@@ -11,7 +11,7 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
-import cn.edu.fudan.se.multidependency.model.relation.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
@@ -68,16 +68,7 @@ public interface MicroserviceService {
 	
 	MicroService findProjectBelongToMicroService(Project project);
 	
-	/**
-	 * 微服务调用了哪些三方库
-	 * @param microService
-	 * @return
-	 */
-	CallLibrary microServiceCallLibraries(MicroService microService);
-	
-	
 	List<RestfulAPI> findMicroServiceContainRestfulAPI(MicroService microService);
-	
 
 	SpanInstanceOfRestfulAPI findSpanBelongToAPI(Span span);
 	
@@ -88,7 +79,7 @@ public interface MicroserviceService {
 	 * @param functionClones
 	 * @return
 	 */
-	Iterable<Clone> findMicroServiceClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode);
+	Iterable<Clone<MicroService>> findMicroServiceClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode);
 	
 	
 	/**
@@ -98,13 +89,14 @@ public interface MicroserviceService {
 	 */
 	Collection<Function> findMicroServiceContainFunctions(MicroService ms);
 
+	
 	/**
 	 * 找出Project调用了哪些三方
 	 * @param project
 	 * @return
 	 */
-	CallLibrary findMicroServiceCallLibraries(MicroService ms);
+	CallLibrary<MicroService> findMicroServiceCallLibraries(MicroService ms);
 	
-	Iterable<CallLibrary> findAllMicroServiceCallLibraries();
+	Iterable<CallLibrary<MicroService>> findAllMicroServiceCallLibraries();
 
 }

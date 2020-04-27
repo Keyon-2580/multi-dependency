@@ -21,7 +21,7 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
-import cn.edu.fudan.se.multidependency.model.relation.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
@@ -63,7 +63,7 @@ public class MDAllController {
 		Iterable<Project> projects = staticAnalyseService.allProjects().values();
 		JSONObject values = new JSONObject();
 		for(Project project : projects) {
-			CallLibrary call = staticAnalyseService.findProjectCallLibraries(project);
+			CallLibrary<Project> call = staticAnalyseService.findProjectCallLibraries(project);
 			System.out.println(call.getCallAPITimes());
 			values.put(project.getName(), call);
 		}
@@ -73,7 +73,7 @@ public class MDAllController {
 		values = new JSONObject();
 		Iterable<MicroService> mss = msService.findAllMicroService().values();
 		for(MicroService ms : mss) {
-			CallLibrary call = msService.findMicroServiceCallLibraries(ms);
+			CallLibrary<MicroService> call = msService.findMicroServiceCallLibraries(ms);
 			values.put(ms.getName(), call);
 		}
 		result.put("msValues", values);
@@ -85,11 +85,11 @@ public class MDAllController {
 	public JSONObject findProjectClones() {
 		JSONObject result = new JSONObject();
 		Iterable<FunctionCloneFunction> allClones = staticAnalyseService.findAllFunctionCloneFunctions();
-		Iterable<Clone> clones = staticAnalyseService.findProjectClone(allClones, true);
+		Iterable<Clone<Project>> clones = staticAnalyseService.findProjectClone(allClones, true);
 		result.put("result", "success");
 		result.put("projectValues", clones);
-		clones = msService.findMicroServiceClone(allClones, true);
-		result.put("msValues", clones);
+		Iterable<Clone<MicroService>> msClones = msService.findMicroServiceClone(allClones, true);
+		result.put("msValues", msClones);
 		return result;
 	}
 	

@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
@@ -19,7 +18,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
-import cn.edu.fudan.se.multidependency.model.relation.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
@@ -524,21 +523,21 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return allFunctionCallLibraryAPIsCache;
 	}
 	
-	private Clone hasClone(Map<Project, Map<Project, Clone>> projectToProjectClones, Project project1, Project project2) {
-		Map<Project, Clone> project1ToClones = projectToProjectClones.getOrDefault(project1, new HashMap<>());
-		Clone clone = project1ToClones.get(project2);
+	private Clone<Project> hasClone(Map<Project, Map<Project, Clone<Project>>> projectToProjectClones, Project project1, Project project2) {
+		Map<Project, Clone<Project>> project1ToClones = projectToProjectClones.getOrDefault(project1, new HashMap<>());
+		Clone<Project> clone = project1ToClones.get(project2);
 		if(clone != null) {
 			return clone;
 		}
-		Map<Project, Clone> project2ToClones = projectToProjectClones.getOrDefault(project2, new HashMap<>());
+		Map<Project, Clone<Project>> project2ToClones = projectToProjectClones.getOrDefault(project2, new HashMap<>());
 		clone = project2ToClones.get(project1);
 		return clone;
 	}
 
 	@Override
-	public Iterable<Clone> findProjectClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode) {
-		List<Clone> result = new ArrayList<>();
-		Map<Project, Map<Project, Clone>> projectToProjectClones = new HashMap<>();
+	public Iterable<Clone<Project>> findProjectClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode) {
+		List<Clone<Project>> result = new ArrayList<>();
+		Map<Project, Map<Project, Clone<Project>>> projectToProjectClones = new HashMap<>();
 		for(FunctionCloneFunction functionCloneFunction : functionClones) {
 			Function function1 = functionCloneFunction.getFunction1();
 			Function function2 = functionCloneFunction.getFunction2();
@@ -550,19 +549,17 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			if(removeSameNode && project1.equals(project2)) {
 				continue;
 			}
-			Clone clone = hasClone(projectToProjectClones, project1, project2);
+			Clone<Project> clone = hasClone(projectToProjectClones, project1, project2);
 			if(clone == null) {
-				clone = new Clone();
-				clone.setLevel(NodeLabelType.Project);
+				clone = new Clone<Project>();
 				clone.setNode1(project1);
 				clone.setNode2(project2);
 				result.add(clone);
 			}
-			Clone functionClone = Clone.changeFunctionCloneToClone(functionCloneFunction);
 			// 函数间的克隆作为Children
-			clone.addChild(functionClone);
+			clone.addChild(functionCloneFunction);
 			
-			Map<Project, Clone> project1ToClones = projectToProjectClones.getOrDefault(project1, new HashMap<>());
+			Map<Project, Clone<Project>> project1ToClones = projectToProjectClones.getOrDefault(project1, new HashMap<>());
 			project1ToClones.put(project2, clone);
 			projectToProjectClones.put(project1, project1ToClones);
 		}
@@ -575,8 +572,8 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
-	public CallLibrary findProjectCallLibraries(Project project) {
-		CallLibrary result = new CallLibrary();
+	public CallLibrary<Project> findProjectCallLibraries(Project project) {
+		CallLibrary<Project> result = new CallLibrary<Project>();
 		result.setCaller(project);
 		Map<Function, List<FunctionCallLibraryAPI>> functionCallLibAPIs = findAllFunctionCallLibraryAPIs();
 		Iterable<Function> functions = findProjectContainFunctions(project);

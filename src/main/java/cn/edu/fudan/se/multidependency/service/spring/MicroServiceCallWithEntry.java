@@ -15,7 +15,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
-import cn.edu.fudan.se.multidependency.model.relation.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
@@ -49,9 +49,9 @@ public class MicroServiceCallWithEntry {
 	
 	private Iterable<Scenario> allScenarios = new ArrayList<>();
 	
-	private Iterable<Clone> clonesInMicroService = new ArrayList<>();
+	private Iterable<Clone<MicroService>> clonesInMicroService = new ArrayList<>();
 	
-	private Iterable<CallLibrary> microServiceCallLibraries = new ArrayList<>();
+	private Iterable<CallLibrary<MicroService>> microServiceCallLibraries = new ArrayList<>();
 	
 	public boolean containCall(MicroService caller, MicroService called) {
 		return this.calls.getOrDefault(caller, new HashMap<>()) != null;
@@ -218,13 +218,13 @@ public class MicroServiceCallWithEntry {
 		}
 		
 		if(showClonesInMicroService) {
-			for(Clone clone : clonesInMicroService) {
+			for(Clone<MicroService> clone : clonesInMicroService) {
 				edges.add(ProjectUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", "clone: " + clone.getValue(), false));
 			}
 		}
 		
 		if(showMicroServiceCallLibs) {
-			for(CallLibrary call : microServiceCallLibraries) {
+			for(CallLibrary<MicroService> call : microServiceCallLibraries) {
 				if(call.getCallerType() != NodeLabelType.MicroService) {
 					continue;
 				}
@@ -481,14 +481,14 @@ public class MicroServiceCallWithEntry {
 		
 		if(showClonesInMicroService) {
 			System.out.println("clone展示");
-			for(Clone clone : clonesInMicroService) {
+			for(Clone<MicroService> clone : clonesInMicroService) {
 				edges.add(ProjectUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", clone.calculateValue(), false));
 			}
 		}
 		
 		if(showMicroServiceCallLibs) {
 			System.out.println("展示调用三方库");
-			for(CallLibrary call : microServiceCallLibraries) {
+			for(CallLibrary<MicroService> call : microServiceCallLibraries) {
 				if(call.getCallerType() != NodeLabelType.MicroService) {
 					continue;
 				}

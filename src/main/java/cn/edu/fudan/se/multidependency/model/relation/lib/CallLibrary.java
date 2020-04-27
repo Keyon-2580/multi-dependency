@@ -18,11 +18,11 @@ import lombok.Data;
  * 一个节点调用了哪些三方库，分别调用了三方库的什么API
  */
 @Data
-public class CallLibrary implements Serializable {
+public class CallLibrary<T extends Node> implements Serializable {
 
 	private static final long serialVersionUID = -8204021236638982630L;
 
-	private Node caller;
+	private T caller;
 	
 	private Set<Library> callLibraries = new HashSet<>();
 	

@@ -11,7 +11,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
-import cn.edu.fudan.se.multidependency.model.relation.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
@@ -180,14 +180,14 @@ public interface StaticAnalyseService {
 	 * @param functionClones
 	 * @return
 	 */
-	public Iterable<Clone> findProjectClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode);
+	public Iterable<Clone<Project>> findProjectClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode);
 	
 	/**
 	 * 找出Project调用了哪些三方
 	 * @param project
 	 * @return
 	 */
-	public CallLibrary findProjectCallLibraries(Project project);
+	public CallLibrary<Project> findProjectCallLibraries(Project project);
 	
 	public Library findAPIBelongToLibrary(LibraryAPI api);
 	
