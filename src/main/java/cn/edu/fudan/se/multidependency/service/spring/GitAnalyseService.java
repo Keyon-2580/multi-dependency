@@ -4,8 +4,10 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
+import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.repository.node.code.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.DeveloperSubmitCommitRepository;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
@@ -35,38 +37,42 @@ public class GitAnalyseService {
     @Autowired
     private DeveloperSubmitCommitRepository developerSubmitCommitRepository;
 
-    public Map<String, Map<String, Integer>> calCntOfDevUpdPro() {
-        Map<String, Map<String, Integer>> cntOfDevUpdPro = new HashMap<>();
+    @Autowired
+    private MicroserviceService microserviceService;
 
-        for(Project project : projectRepository.findAll()) {
-            cntOfDevUpdPro.put(project.getName(),new HashMap<>());
-        }
+    public Map<Project, Map<Developer, Integer>> calCntOfDevUpdPro() {
+        Map<Project, Map<Developer, Integer>> cntOfDevUpdPro = new HashMap<>();
+
         for(Commit commit : commitRepository.findAll()) {
             List<ProjectFile> files = commitUpdateFileRepository.findUpdatedFilesByCommitId(commit.getId());
             Developer developer = developerSubmitCommitRepository.findDeveloperByCommitId(commit.getId());
-            Set<String> updProjectNames = new HashSet<>();
+            Set<Project> updProjects = new HashSet<>();
             for(ProjectFile file : files) {
                 String projectName = FileUtil.extractProjectNameFromFile(file.getPath());
-                if(cntOfDevUpdPro.containsKey(projectName)) {
-                    updProjectNames.add(projectName);
+                Project project = projectRepository.findProjectByProjectName(projectName);
+                if(project != null) {
+                    updProjects.add(project);
+                    if(!cntOfDevUpdPro.containsKey(project)) {
+                        cntOfDevUpdPro.put(project,new HashMap<>());
+                    }
                 }
             }
-            for(String projectName : updProjectNames) {
-                Map<String, Integer> map = cntOfDevUpdPro.get(projectName);
-                map.put(developer.getName(), map.getOrDefault(developer.getName(),0)+1);
+            for(Project project : updProjects) {
+                Map<Developer, Integer> map = cntOfDevUpdPro.get(project);
+                map.put(developer, map.getOrDefault(developer,0)+1);
             }
         }
         return cntOfDevUpdPro;
     }
 
-    public JSONArray cntOfDevUpdProToTreeView() {
+    public JSONArray cntOfDevUpdPro() {
         JSONArray result = new JSONArray();
-        for(Map.Entry<String, Map<String, Integer>> project : calCntOfDevUpdPro().entrySet()){
+        for(Map.Entry<Project, Map<Developer, Integer>> project : calCntOfDevUpdPro().entrySet()){
             JSONObject projectJson = new JSONObject();
             projectJson.put("project", project.getKey());
 
             JSONArray developers = new JSONArray();
-            for(Map.Entry<String, Integer> developer : project.getValue().entrySet()) {
+            for(Map.Entry<Developer, Integer> developer : project.getValue().entrySet()) {
                 JSONObject developerJson = new JSONObject();
                 developerJson.put("update_count", developer.getValue());
                 developerJson.put("name", developer.getKey());
@@ -74,6 +80,26 @@ public class GitAnalyseService {
             }
             projectJson.put("developer", developers);
             result.add(projectJson);
+        }
+        return result;
+    }
+
+    public JSONArray cntOfDevUpdMs() {
+        JSONArray result = new JSONArray();
+        for(Map.Entry<Project, Map<Developer, Integer>> project : calCntOfDevUpdPro().entrySet()){
+            MicroService microService = microserviceService.findProjectBelongToMicroService(project.getKey());
+            JSONObject microServiceJson = new JSONObject();
+            microServiceJson.put("micro_service", microService);
+
+            JSONArray developers = new JSONArray();
+            for(Map.Entry<Developer, Integer> developer : project.getValue().entrySet()) {
+                JSONObject developerJson = new JSONObject();
+                developerJson.put("update_count", developer.getValue());
+                developerJson.put("name", developer.getKey());
+                developers.add(developerJson);
+            }
+            microServiceJson.put("developer", developers);
+            result.add(microServiceJson);
         }
         return result;
     }

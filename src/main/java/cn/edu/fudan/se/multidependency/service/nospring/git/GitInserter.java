@@ -23,7 +23,9 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
     private List<Project> projects;
 
-    public GitInserter(String gitProjectPath, String issueFilePath){
+    private static final String[] SUFFIX = new String[] {".java", ".c", ".cpp"};
+
+    public GitInserter(String gitProjectPath, String issueFilePath) {
         gitExtractor = new GitExtractor(gitProjectPath);
         issueExtractor = new IssueExtractor(issueFilePath);
         projects = this.getNodes().findAllProjects();
@@ -39,25 +41,25 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
     public void addBranchesAndIssues(Map<Integer, Issue> issues) {
         //添加gitRepository节点和gitRepository到project的包含关系
-        GitRepository gitRepository = new GitRepository(generateEntityId(),gitExtractor.getRepositoryName());
-        addNode(gitRepository,null);
-        for(Project project : projects){
-            addRelation(new Contain(gitRepository,project));
+        GitRepository gitRepository = new GitRepository(generateEntityId(), gitExtractor.getRepositoryName());
+        addNode(gitRepository, null);
+        for (Project project : projects) {
+            addRelation(new Contain(gitRepository, project));
         }
 
         //添加branch节点和gitRepository到branch的包含关系
         List<Ref> branches = gitExtractor.getBranches();
-        for(Ref branch : branches){
-            Branch branchNode = new Branch(generateEntityId(),branch.getName());
-            addNode(branchNode,null);
-            addRelation(new Contain(gitRepository,branchNode));
+        for (Ref branch : branches) {
+            Branch branchNode = new Branch(generateEntityId(), branch.getName());
+            addNode(branchNode, null);
+            addRelation(new Contain(gitRepository, branchNode));
         }
 
         //添加issue节点和gitRepository到issue的包含关系
-        for(Issue issue : issues.values()){
+        for (Issue issue : issues.values()) {
             issue.setEntityId(generateEntityId());
             addNode(issue, null);
-            addRelation(new Contain(gitRepository,issue));
+            addRelation(new Contain(gitRepository, issue));
 
             //添加developer节点和developer到issue的关系
             Developer developer = this.getNodes().findDeveloperByName(issue.getDeveloperName());
@@ -114,6 +116,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
                         String oldPath = diff.getOldPath();
                         String changeType = diff.getChangeType().name();
                         String path = DiffEntry.ChangeType.DELETE.name().equals(changeType) ? oldPath : newPath;
+                        if(FileUtil.isFiltered(path, SUFFIX)) continue;
                         CommitUpdateFile.UpdateType updateType;
                         if (DiffEntry.ChangeType.ADD.name().equals(changeType))
                             updateType = CommitUpdateFile.UpdateType.ADD;
@@ -126,13 +129,14 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
             } else {
                 List<String> filesPath = gitExtractor.getCommitFilesPath(revCommit);
                 for (String path : filesPath) {
+                    if(FileUtil.isFiltered(path, SUFFIX)) continue;
                     addCommitUpdateFileRelation(path, commit, CommitUpdateFile.UpdateType.ADD);
                 }
             }
             //添加Commit到Issue的关系
             List<Integer> issuesNum = gitExtractor.getRelationBtwCommitAndIssue(revCommit);
-            for(Integer issueNum : issuesNum){
-                if(issues.containsKey(issueNum)) {
+            for (Integer issueNum : issuesNum) {
+                if (issues.containsKey(issueNum)) {
                     addRelation(new CommitAddressIssue(commit, issues.get(issueNum)));
                 }
             }
