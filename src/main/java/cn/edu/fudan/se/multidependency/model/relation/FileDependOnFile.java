@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.model.relation.dynamic;
+package cn.edu.fudan.se.multidependency.model.relation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,10 +13,6 @@ import org.neo4j.ogm.annotation.Transient;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.relation.DependOnType;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
-import cn.edu.fudan.se.multidependency.model.relation.RelationTimes;
-import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

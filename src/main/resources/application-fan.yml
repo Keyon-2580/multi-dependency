@@ -36,7 +36,8 @@ data:
    lib:
       analyse: true
 #      libs_path: src/main/resources/lib/depends_2020-04-19.json
-      libs_path: src/main/resources/lib/train-ticket_2020-04-18.json
+#      libs_path: src/main/resources/lib/train-ticket_2020-04-18.json
+      libs_path: src/main/resources/lib/train-ticket_2020-04-27.json
    clone: 
       analyse: true
       language: java

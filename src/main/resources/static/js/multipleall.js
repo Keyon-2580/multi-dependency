@@ -19,6 +19,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 					console.log(result);
 					cyEntry = utils.showDataInCytoscape($("#entry"), result.value.data, "dagre");
 					processCytoscape(cyEntry);
+					setTapNode(cyEntry);
 				}
 			}
 		});
@@ -103,18 +104,32 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 				};
 				edges.push({data: edge});
 			}
+			if(type == "LibraryVersionIsFromLibrary") {
+				var source = cyEntry.edges()[i].data().source;
+				var target = cyEntry.edges()[i].data().target;
+				removeIds.push(cyEntry.edges()[i].data().id);
+				var edge = {
+						type: "LibraryGroupAndNameContainVersion",
+						source: target,
+						target: source,
+						value: ""
+				};
+				edges.push({data: edge});
+			}
 		}
 		for(var i = 0; i < removeIds.length; i++){
 			utils.removeEdge(cyEntry, removeIds[i]);
 		}
 		utils.addEdges(cyEntry, edges);
+	};
+	var setTapNode = function(cyEntry) {
 		cyEntry.on('tap', 'node', function(evt){
 			var node = evt.target;
 			if(node.data().type == "TestCase_success" || node.data().type == "TestCase_fail") {
 				queryEntryEdge(node.data().id, true);
 			}
-		})
-	};
+		})		
+	}
 	var queryMultipleByTestCase = function(testCaseIds) {
 		var nodes = cyEntry.nodes();
 		for(var i = 0; i < nodes.length; i++) {
@@ -142,6 +157,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 					console.log(result.value.data);
 					cyEntry = utils.showDataInCytoscape($("#entry"), result.value.data, "preset");
 					processCytoscape(cyEntry);
+					setTapNode(cyEntry);
 					
 					$.ajax({
 						type : "POST",
@@ -154,7 +170,8 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 								console.log(result.value);
 								cyEntry.remove('edge');
 								var relatedEdges = result.value.value.edges;
-								cyEntry.add(relatedEdges)
+								cyEntry.add(relatedEdges);
+								processCytoscape(cyEntry);
 							}
 						}
 					});
@@ -189,6 +206,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 					console.log(result.value.data);
 					cyEntry = utils.showDataInCytoscape($("#entry"), result.value.data, "preset");
 					processCytoscape(cyEntry);
+					setTapNode(cyEntry);
 					
 					$.ajax({
 						type : "POST",
@@ -202,6 +220,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 								cyEntry.remove('edge');
 								var relatedEdges = result.value.value.edges;
 								cyEntry.add(relatedEdges)
+								processCytoscape(cyEntry);
 							}
 						}
 					});
@@ -236,6 +255,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 					console.log(result.value.data);
 					cyEntry = utils.showDataInCytoscape($("#entry"), result.value.data, "preset");
 					processCytoscape(cyEntry);
+					setTapNode(cyEntry);
 					
 					$.ajax({
 						type : "POST",
@@ -249,6 +269,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 								cyEntry.remove('edge');
 								var relatedEdges = result.value.value.edges;
 								cyEntry.add(relatedEdges)
+								processCytoscape(cyEntry);
 							}
 						}
 					});
@@ -337,6 +358,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 			}
 			cyEntry = utils.refreshCy(cyEntry);
 			processCytoscape(cyEntry);
+			setTapNode(cyEntry);
 		});
 	};
 	return {

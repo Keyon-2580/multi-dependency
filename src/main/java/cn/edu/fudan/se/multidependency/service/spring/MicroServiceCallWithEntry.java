@@ -173,6 +173,21 @@ public class MicroServiceCallWithEntry {
 		return result;
 	}
 	
+	private void showAllScenarios(JSONArray nodes, JSONArray edges, Map<Scenario, Boolean> isScenarioNodeAdd) {
+		for(Scenario scenario : allScenarios) {
+			if(!isScenarioNodeAdd.getOrDefault(scenario, false)) {
+				nodes.add(ProjectUtil.toCytoscapeNode(scenario, scenario.getScenarioId() + " : " + scenario.getName(),  "Scenario"));
+				isScenarioNodeAdd.put(scenario, true);
+			}
+		}
+	}
+	
+	private void showClonesInMicroService(JSONArray edges) {
+		for(Clone<MicroService> clone : clonesInMicroService) {
+			edges.add(ProjectUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", clone.calculateValue(), false));
+		}
+	}
+	
 	public JSONObject toCytoscapeWithStructure() {
 		JSONObject result = new JSONObject();
 		JSONArray nodes = new JSONArray();
@@ -182,14 +197,10 @@ public class MicroServiceCallWithEntry {
 		Map<Feature, Boolean> isFeatureNodeAdd = new HashMap<>();
 		Map<Feature, Boolean> isFeatureNodeParent = new HashMap<>();
 		Map<Library, Boolean> isLibraryNodeAdd = new HashMap<>();
+		Map<String, Boolean> isLibraryWithoutVersionNodeAdd = new HashMap<>();
 		
 		if(showAllScenarios) {
-			for(Scenario scenario : allScenarios) {
-				if(!isScenarioNodeAdd.getOrDefault(scenario, false)) {
-					nodes.add(ProjectUtil.toCytoscapeNode(scenario, scenario.getScenarioId() + " : " + scenario.getName(),  "Scenario"));
-					isScenarioNodeAdd.put(scenario, true);
-				}
-			}
+			showAllScenarios(nodes, edges, isScenarioNodeAdd);
 		}
 		if(showAllMicroServices) {
 			for(MicroService ms : allMicroServices) {
@@ -218,20 +229,29 @@ public class MicroServiceCallWithEntry {
 		}
 		
 		if(showClonesInMicroService) {
-			for(Clone<MicroService> clone : clonesInMicroService) {
-				edges.add(ProjectUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", clone.calculateValue(), false));
-			}
+			showClonesInMicroService(edges);
 		}
 		
 		if(showMicroServiceCallLibs) {
+			Map<Long, Map<String, JSONObject>> hasLibraryToVersionEdge = new HashMap<>();
 			for(CallLibrary<MicroService> call : microServiceCallLibraries) {
-				if(call.getCallerType() != NodeLabelType.MicroService) {
-					continue;
-				}
 				for(Library lib : call.getCallLibraries()) {
 					if(!isLibraryNodeAdd.getOrDefault(lib, false)) {
 						nodes.add(ProjectUtil.toCytoscapeNode(lib, lib.getFullName(), "Library"));
 						isLibraryNodeAdd.put(lib, true);
+					}
+					String libraryGroupAndName = lib.groupIdAndName();
+					if(!isLibraryWithoutVersionNodeAdd.getOrDefault(libraryGroupAndName, false)) {
+						nodes.add(ProjectUtil.toCytoscapeNode(libraryGroupAndName, libraryGroupAndName, "Library"));
+						isLibraryWithoutVersionNodeAdd.put(libraryGroupAndName, true);
+					}
+					Map<String, JSONObject> temp = hasLibraryToVersionEdge.getOrDefault(lib.getId(), new HashMap<>());
+					JSONObject edge = temp.get(libraryGroupAndName);
+					if(edge == null) {
+						edge = ProjectUtil.relationToEdge(lib.getId(), libraryGroupAndName, "LibraryVersionIsFromLibrary", "", false);
+						edges.add(edge);
+						temp.put(libraryGroupAndName, edge);
+						hasLibraryToVersionEdge.put(lib.getId(), temp);
 					}
 					edges.add(ProjectUtil.relationToEdge(call.getCaller(), lib, "MicroServiceCallLibrary", call.timesOfCallLib(lib) + "", false));
 				}
@@ -480,17 +500,22 @@ public class MicroServiceCallWithEntry {
 		}
 		
 		if(showClonesInMicroService) {
-			for(Clone<MicroService> clone : clonesInMicroService) {
-				edges.add(ProjectUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", clone.calculateValue(), false));
-			}
+			showClonesInMicroService(edges);
 		}
 		
 		if(showMicroServiceCallLibs) {
+			Map<Long, Map<String, JSONObject>> hasLibraryToVersionEdge = new HashMap<>();
 			for(CallLibrary<MicroService> call : microServiceCallLibraries) {
-				if(call.getCallerType() != NodeLabelType.MicroService) {
-					continue;
-				}
 				for(Library lib : call.getCallLibraries()) {
+					String libraryGroupAndName = lib.groupIdAndName();
+					Map<String, JSONObject> temp = hasLibraryToVersionEdge.getOrDefault(lib.getId(), new HashMap<>());
+					JSONObject edge = temp.get(libraryGroupAndName);
+					if(edge == null) {
+						edge = ProjectUtil.relationToEdge(lib.getId(), libraryGroupAndName, "LibraryVersionIsFromLibrary", "", false);
+						edges.add(edge);
+						temp.put(libraryGroupAndName, edge);
+						hasLibraryToVersionEdge.put(lib.getId(), temp);
+					}
 					edges.add(ProjectUtil.relationToEdge(call.getCaller(), lib, "MicroServiceCallLibrary", call.timesOfCallLib(lib) + "", false));
 				}
 			}

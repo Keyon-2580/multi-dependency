@@ -36,14 +36,14 @@ public class ProjectUtil {
 		return result;
 	}
 	
-	public static JSONObject relationToEdge(Node start, Node end, String type, String value, boolean autoId) {
+	public static JSONObject relationToEdge(Object startId, Object endId, String type, String value, boolean autoId) {
 		JSONObject edge = new JSONObject();
 		JSONObject data = new JSONObject();
 		if(autoId) {
-			data.put("id", start.getId() + "_" + end.getId());
+			data.put("id", startId + "_" + endId);
 		}
-		data.put("source", start.getId());
-		data.put("target", end.getId());
+		data.put("source", startId);
+		data.put("target", endId);
 		if(!StringUtils.isBlank(type)) {
 			data.put("type", type);
 		}
@@ -52,17 +52,15 @@ public class ProjectUtil {
 		return edge;
 	}
 	
+	public static JSONObject relationToEdge(Node start, Node end, String type, String value, boolean autoId) {
+		return relationToEdge(start.getId(), end.getId(), type, value, autoId);
+	}
+	
 	public static boolean isMicroServiceCall(MicroService start, MicroService end, Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> msCalls) {
-		if(msCalls == null) {
-			return false;
-		}
-		return msCalls.getOrDefault(start, new HashMap<>()).get(end) != null;
+		return msCalls == null ? false : msCalls.getOrDefault(start, new HashMap<>()).get(end) != null;
 	}
 
 	public static boolean isMicroServiceDependOn(MicroService start, MicroService end, Map<MicroService, Map<MicroService, MicroServiceDependOnMicroService>> msDependOns) {
-		if(msDependOns == null) {
-			return false;
-		}
-		return msDependOns.getOrDefault(start, new HashMap<>()).get(end) != null;
+		return msDependOns == null ? false : msDependOns.getOrDefault(start, new HashMap<>()).get(end) != null;
 	}
 }

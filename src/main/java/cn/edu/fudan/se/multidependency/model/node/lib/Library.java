@@ -43,6 +43,10 @@ public class Library implements Node {
 				&& this.getName().equals(other.getName())
 				&& !this.getVersion().equals(other.getVersion());
 	}
+	
+	public String groupIdAndName() {
+		return groupId + "." + name;
+	}
 
 	@Override
 	public Map<String, Object> getProperties() {
