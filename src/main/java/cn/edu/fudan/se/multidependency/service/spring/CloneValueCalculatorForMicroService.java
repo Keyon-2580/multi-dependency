@@ -15,6 +15,9 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.Clone.CloneValueCalc
 
 public class CloneValueCalculatorForMicroService implements CloneValueCalculator {
 	
+	/**
+	 * 微服务内的方法数
+	 */
 	private Map<MicroService, Collection<Function>> msToFunctions = new HashMap<>();
 	
 	public void addFunctions(Collection<Function> functions, MicroService ms) {

@@ -286,8 +286,13 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 				clone.setNode1(ms1);
 				clone.setNode2(ms2);
 				result.add(clone);
+				CloneValueCalculatorForMicroService calculator = new CloneValueCalculatorForMicroService();
+				Collection<Function> functions1 = findMicroServiceContainFunctions(ms1);
+				Collection<Function> functions2 = findMicroServiceContainFunctions(ms2);
+				calculator.addFunctions(functions1, ms1);
+				calculator.addFunctions(functions2, ms2);
+				clone.setCalculator(calculator);
 			}
-			// 将ProjectClone的children（FunctionClone）作为Children
 			clone.addChildren(projectClone.getChildren());
 			Map<MicroService, Clone<MicroService>> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
 			ms1ToClones.put(ms2, clone);

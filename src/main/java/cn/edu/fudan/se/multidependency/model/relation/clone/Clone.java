@@ -24,6 +24,7 @@ public class Clone<T extends Node> implements Serializable {
 	
 	private double value = 0;
 	
+	// 两个克隆节点内部的方法克隆对
 	private List<FunctionCloneFunction> children = new ArrayList<>();
 	
 	public static interface CloneValueCalculator {
@@ -49,6 +50,5 @@ public class Clone<T extends Node> implements Serializable {
 			addChild(clone);
 		}
 	}
-	
 	
 }
