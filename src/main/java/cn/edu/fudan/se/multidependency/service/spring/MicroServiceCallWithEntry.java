@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
+import cn.edu.fudan.se.multidependency.model.node.git.Developer;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
@@ -53,6 +54,8 @@ public class MicroServiceCallWithEntry {
 	
 	private Iterable<CallLibrary<MicroService>> microServiceCallLibraries = new ArrayList<>();
 	
+	private JSONArray cntOfDevUpdMs = new JSONArray();
+	
 	public boolean containCall(MicroService caller, MicroService called) {
 		return this.calls.getOrDefault(caller, new HashMap<>()) != null;
 	}
@@ -63,6 +66,7 @@ public class MicroServiceCallWithEntry {
 	private boolean showStructure = true;
 	private boolean showClonesInMicroService = true;
 	private boolean showMicroServiceCallLibs = true;
+	private boolean showCntOfDevUpdMs = true;
 	
 	public JSONArray relatedTracesIds(boolean callChain) {
 		JSONArray result = new JSONArray();
@@ -198,6 +202,7 @@ public class MicroServiceCallWithEntry {
 		Map<Feature, Boolean> isFeatureNodeParent = new HashMap<>();
 		Map<Library, Boolean> isLibraryNodeAdd = new HashMap<>();
 		Map<String, Boolean> isLibraryWithoutVersionNodeAdd = new HashMap<>();
+		Map<Developer, Boolean> isDeveloperNodeAdd = new HashMap<>();
 		
 		if(showAllScenarios) {
 			showAllScenarios(nodes, edges, isScenarioNodeAdd);
@@ -207,6 +212,23 @@ public class MicroServiceCallWithEntry {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false)) {
 					nodes.add(ProjectUtil.toCytoscapeNode(ms, "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
+				}
+			}
+		}
+		if(showCntOfDevUpdMs) {
+			for(int i = 0; i < cntOfDevUpdMs.size(); i++) {
+				JSONObject obj = cntOfDevUpdMs.getJSONObject(i);
+				MicroService ms = obj.getObject("micro_service", MicroService.class);
+				JSONArray developers = obj.getJSONArray("developer");
+				for(int j = 0; j < developers.size(); j++) {
+					JSONObject developerJson = developers.getJSONObject(j);
+					Developer developer = developerJson.getObject("name", Developer.class);
+					if(!isDeveloperNodeAdd.getOrDefault(developer, false)) {
+						nodes.add(ProjectUtil.toCytoscapeNode(developer, "Developer"));
+						isDeveloperNodeAdd.put(developer, true);
+					}
+					int times = developerJson.getIntValue("update_count");
+					edges.add(ProjectUtil.relationToEdge(ms, developer, "MicroServiceUpdatedByDeveloper", times + "", false));
 				}
 			}
 		}

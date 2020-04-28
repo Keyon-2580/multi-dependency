@@ -25,6 +25,7 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
+import cn.edu.fudan.se.multidependency.service.spring.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroServiceCallWithEntry;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
@@ -32,6 +33,9 @@ import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 @Controller
 @RequestMapping("/multiple/all")
 public class MDAllController {
+
+    @Autowired
+    private GitAnalyseService gitAnalyseService;
 
 	@Autowired
 	private FeatureOrganizationService featureOrganizationService;
@@ -105,10 +109,11 @@ public class MDAllController {
 			callsWithEntry.setShowAllScenarios(true);
 			callsWithEntry.setShowClonesInMicroService(true);
 			callsWithEntry.setShowMicroServiceCallLibs(true);
+			callsWithEntry.setShowCntOfDevUpdMs(true);
 			
 			callsWithEntry.setClonesInMicroService(msService.findMicroServiceClone(staticAnalyseService.findAllFunctionCloneFunctions(), true));
 			callsWithEntry.setMicroServiceCallLibraries(msService.findAllMicroServiceCallLibraries());
-
+			callsWithEntry.setCntOfDevUpdMs(gitAnalyseService.cntOfDevUpdMs());
 			
 			result.put("result", "success");
 			result.put("value", callsWithEntry.toCytoscapeWithStructure());
