@@ -116,6 +116,18 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 				};
 				edges.push({data: edge});
 			}
+			if(type == "MicroServiceUpdatedByDeveloper") {
+				var source = cyEntry.edges()[i].data().source;
+				var target = cyEntry.edges()[i].data().target;
+				removeIds.push(cyEntry.edges()[i].data().id);
+				var edge = {
+						type: "DeveloperUpdateMicroService",
+						source: target,
+						target: source,
+						value: cyEntry.edges()[i].data().value
+				};
+				edges.push({data: edge});
+			}
 		}
 		for(var i = 0; i < removeIds.length; i++){
 			utils.removeEdge(cyEntry, removeIds[i]);
@@ -304,11 +316,13 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 			var showStructure = $("#showStructure").prop('checked');
 			var showMicroServiceCallLibs = $("#showMicroServiceCallLibs").prop('checked');
 			var showClonesInMicroService = $("#showClonesInMicroService").prop('checked');
+			var showCntOfDevUpdMs = $("#showCntOfDevUpdMs").prop('checked');
 			var ids = {
 				"ids" : $("#scenarioList").val(),
 				"showStructure" : showStructure,
 				"showMicroServiceCallLibs" : showMicroServiceCallLibs,
-				"showClonesInMicroService" : showClonesInMicroService
+				"showClonesInMicroService" : showClonesInMicroService,
+				"showCntOfDevUpdMs" : showCntOfDevUpdMs
 			};
 			console.log(ids);
 			queryMultipleByScenario(ids);
@@ -317,11 +331,13 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 			var showStructure = $("#showStructure").prop('checked');
 			var showMicroServiceCallLibs = $("#showMicroServiceCallLibs").prop('checked');
 			var showClonesInMicroService = $("#showClonesInMicroService").prop('checked');
+			var showCntOfDevUpdMs = $("#showCntOfDevUpdMs").prop('checked');
 			var ids = {
 				"ids" : $("#testCaseList").val(),
 				"showStructure" : showStructure,
 				"showMicroServiceCallLibs" : showMicroServiceCallLibs,
-				"showClonesInMicroService" : showClonesInMicroService
+				"showClonesInMicroService" : showClonesInMicroService,
+				"showCntOfDevUpdMs" : showCntOfDevUpdMs
 			};
 			console.log(ids);
 			queryMultipleByTestCase(ids);
@@ -330,11 +346,13 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 			var showStructure = $("#showStructure").prop('checked');
 			var showMicroServiceCallLibs = $("#showMicroServiceCallLibs").prop('checked');
 			var showClonesInMicroService = $("#showClonesInMicroService").prop('checked');
+			var showCntOfDevUpdMs = $("#showCntOfDevUpdMs").prop('checked');
 			var ids = {
 				"ids" : $("#featureList").val(),
 				"showStructure" : showStructure,
 				"showMicroServiceCallLibs" : showMicroServiceCallLibs,
-				"showClonesInMicroService" : showClonesInMicroService
+				"showClonesInMicroService" : showClonesInMicroService,
+				"showCntOfDevUpdMs" : showCntOfDevUpdMs
 			};
 			console.log(ids);
 			queryMultipleByFeature(ids);

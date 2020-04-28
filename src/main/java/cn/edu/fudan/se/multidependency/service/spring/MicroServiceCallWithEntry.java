@@ -18,6 +18,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
+import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
 import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
@@ -54,7 +55,8 @@ public class MicroServiceCallWithEntry {
 	
 	private Iterable<CallLibrary<MicroService>> microServiceCallLibraries = new ArrayList<>();
 	
-	private JSONArray cntOfDevUpdMs = new JSONArray();
+//	private JSONArray cntOfDevUpdMs;
+	private Iterable<DeveloperUpdateNode<MicroService>> cntOfDevUpdMs;
 	
 	public boolean containCall(MicroService caller, MicroService called) {
 		return this.calls.getOrDefault(caller, new HashMap<>()) != null;
@@ -216,20 +218,18 @@ public class MicroServiceCallWithEntry {
 			}
 		}
 		if(showCntOfDevUpdMs) {
-			for(int i = 0; i < cntOfDevUpdMs.size(); i++) {
-				JSONObject obj = cntOfDevUpdMs.getJSONObject(i);
-				MicroService ms = obj.getObject("micro_service", MicroService.class);
-				JSONArray developers = obj.getJSONArray("developer");
-				for(int j = 0; j < developers.size(); j++) {
-					JSONObject developerJson = developers.getJSONObject(j);
-					Developer developer = developerJson.getObject("name", Developer.class);
-					if(!isDeveloperNodeAdd.getOrDefault(developer, false)) {
-						nodes.add(ProjectUtil.toCytoscapeNode(developer, "Developer"));
-						isDeveloperNodeAdd.put(developer, true);
-					}
-					int times = developerJson.getIntValue("update_count");
-					edges.add(ProjectUtil.relationToEdge(ms, developer, "MicroServiceUpdatedByDeveloper", times + "", false));
+			for(DeveloperUpdateNode<MicroService> update : cntOfDevUpdMs) {
+				MicroService ms = update.getNode();
+				Developer developer = update.getDeveloper();
+				if(ms == null || developer == null) {
+					continue;
 				}
+				int times = update.getTimes();
+				if(!isDeveloperNodeAdd.getOrDefault(developer, false)) {
+					nodes.add(ProjectUtil.toCytoscapeNode(developer, "Developer"));
+					isDeveloperNodeAdd.put(developer, true);
+				}
+				edges.add(ProjectUtil.relationToEdge(ms, developer, "MicroServiceUpdatedByDeveloper", times + "", false));
 			}
 		}
 		if(showAllFeatures) {
@@ -542,7 +542,17 @@ public class MicroServiceCallWithEntry {
 				}
 			}
 		}
-		
+		if(showCntOfDevUpdMs) {
+			for(DeveloperUpdateNode<MicroService> update : cntOfDevUpdMs) {
+				MicroService ms = update.getNode();
+				Developer developer = update.getDeveloper();
+				if(ms == null || developer == null) {
+					continue;
+				}
+				int times = update.getTimes();
+				edges.add(ProjectUtil.relationToEdge(ms, developer, "MicroServiceUpdatedByDeveloper", times + "", false));
+			}
+		}
 		JSONObject data = new JSONObject();
 		data.put("edges", edges);
 		result.put("value", data);

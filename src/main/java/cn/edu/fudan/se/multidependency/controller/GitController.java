@@ -35,7 +35,7 @@ public class GitController {
         JSONObject result = new JSONObject();
         try {
             result.put("result", "success");
-            result.put("value", gitAnalyseService.cntOfDevUpdMs());
+            result.put("value", gitAnalyseService.cntOfDevUpdMsList());
         } catch (Exception e) {
             result.put("result", "fail");
             result.put("msg", e.getMessage());

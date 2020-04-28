@@ -311,6 +311,22 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 						'content': 'data(name)'
 	    			}
 	    		},
+	    		{
+	    			selector: 'node[type="Developer"]',
+	    			style: {
+	    				'shape' : 'ellipse',
+	    				'width': function(content) {
+	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
+	    				},
+	    				'height': 30,
+	    				'text-valign': 'center',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': '#FFFFFF',
+						'content': 'data(name)'
+	    			}
+	    		},
 				{
 	    			selector: 'edge',
 	    			style: styleEdgeBlack
@@ -378,6 +394,10 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	    		{
 	    			selector: 'edge[type="all_MicroService_clone_MicroService"]',
 	    			style: styleEdgeClone
+	    		},
+	    		{
+	    			selector: 'edge[type="DeveloperUpdateMicroService"]',
+	    			style: styleEdgeBlack
 	    		}
 	    	],
 	    	elements: elements
