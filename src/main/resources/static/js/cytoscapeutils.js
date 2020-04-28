@@ -1,8 +1,3 @@
-define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
-	'jqplot', 'utils', 'cytoscape', 'cytoscape-dagre', 'dagre', 'cytoscape-klay', 'klayjs']
-	, function ($, bootstrap, bootstrap_multiselect, bootstrap_treeview,
-	jqplot, utils, cytoscape, cytoscape_dagre, dagre, cytoscape_klay, klayjs) {
-	
 	var _showTreeView = function(containerDivId, data) {
 		containerDivId.treeview({
 			data : data,
@@ -71,8 +66,6 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	}
 	var _showDataInCytoscape = function(container, elements, layout="dagre") {
 		console.log("_showDataInCytoscape: " + layout);
-		cytoscape_klay(cytoscape);
-		cytoscape_dagre(cytoscape);
 		var cy = cytoscape({
 	    	container: container,
 	    	layout: {
@@ -450,33 +443,30 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 		return cy;
 	};
 	
-	return {
-		removeEdge: function(cy, edgeId) {
-			_removeEdge(cy, edgeId);
-		},
-		showTreeView: function(containerDivId, data) {
-			_showTreeView(containerDivId, data)
-		},
-		showDataInCytoscape: function(container, elements, layout) {
-			return _showDataInCytoscape(container, elements, layout);
-		},
-		addNodes: function(cytoscape, nodes) {
-			_addNodes(cytoscape, nodes);
-		},
-		addEdges: function(cytoscape, edges) {
-			_addEdges(cytoscape, edges);
-		},
-		refreshCy: function(cy) {
-			return _refresh(cy);
-		},
-		showImg: function(cy, imgContainerId){
-			if(cy != null) {
-				$("#" + imgContainerId).attr('src', cy.png({
-					bg: "#ffffff",
-					full : true
-				}));
-				$("#" + imgContainerId).css("background-color", "#ffffff");
-			}
+	var removeEdge = function(cy, edgeId) {
+		_removeEdge(cy, edgeId);
+	};
+	var showTreeView = function(containerDivId, data) {
+		_showTreeView(containerDivId, data)
+	};
+	var showDataInCytoscape = function(container, elements, layout) {
+		return _showDataInCytoscape(container, elements, layout);
+	};
+	var addNodes = function(cytoscape, nodes) {
+		_addNodes(cytoscape, nodes);
+	};
+	var addEdges = function(cytoscape, edges) {
+		_addEdges(cytoscape, edges);
+	};
+	var refreshCy = function(cy) {
+		return _refresh(cy);
+	};
+	var showImg = function(cy, imgContainerId){
+		if(cy != null) {
+			$("#" + imgContainerId).attr('src', cy.png({
+				bg: "#ffffff",
+				full : true
+			}));
+			$("#" + imgContainerId).css("background-color", "#ffffff");
 		}
 	}
-});
