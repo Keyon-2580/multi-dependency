@@ -105,7 +105,7 @@ public class MDAllController {
 			boolean showStructure = (boolean) params.getOrDefault("showStructure", true);
 			boolean showClonesInMicroService = (boolean) params.getOrDefault("showClonesInMicroService", true);
 			boolean showMicroServiceCallLibs = (boolean) params.getOrDefault("showMicroServiceCallLibs", true);
-			boolean showCntOfDevUpdMs = (boolean) params.getOrDefault("showCntOfDevUpdMs", true);
+			boolean showCntOfDevUpdMs = (boolean) params.getOrDefault("showCntOfDevUpdMs", false);
 			System.out.println(testCaseOrFeatureOrScenario + " " + showStructure + " " + showClonesInMicroService + " " + showMicroServiceCallLibs + " " + showCntOfDevUpdMs);
 			List<Integer> ids = new ArrayList<>();
 			for(String idStr : idsStr) {

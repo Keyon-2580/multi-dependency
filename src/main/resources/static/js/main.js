@@ -14,7 +14,6 @@ require.config({
 		"testcase": "testcase",
 		"utils": "util",
 		"project": "project",
-		"multiple": "multiple",
 		"multipleall": "multipleall",
 		"cytoscapeUtils" : "cytoscapeutils"
 	},

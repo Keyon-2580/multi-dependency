@@ -423,24 +423,8 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 		});
 		
 		$("#showImg").click(function() {
-			/*if(cyEntry != null) {
-				$('#entry-png-eg').attr('src', cyEntry.png({
-					bg: "#ffffff",
-					full : true
-				}));
-				$('#entry-png-eg').css("background-color", "#ffffff");
-			}*/
-			showImg(cyEntry, "entry-png-eg");
+			utils.showImg(cyEntry, "entry-png-eg");
 		})
-		var showImg = function(cy, imgContainerId){
-			if(cy != null) {
-				$("#" + imgContainerId).attr('src', cy.png({
-					bg: "#ffffff",
-					full : true
-				}));
-				$("#" + imgContainerId).css("background-color", "#ffffff");
-			}
-		}
 	};
 	var clearMemo = function() {
 		$("#clearMemo").click(function() {

@@ -454,12 +454,6 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 		removeEdge: function(cy, edgeId) {
 			_removeEdge(cy, edgeId);
 		},
-		test2: function() {
-			
-		},
-		test: function(){
-			console.log("eeeeeeeeeeeee");
-		},
 		showTreeView: function(containerDivId, data) {
 			_showTreeView(containerDivId, data)
 		},
@@ -474,6 +468,15 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 		},
 		refreshCy: function(cy) {
 			return _refresh(cy);
+		},
+		showImg: function(cy, imgContainerId){
+			if(cy != null) {
+				$("#" + imgContainerId).attr('src', cy.png({
+					bg: "#ffffff",
+					full : true
+				}));
+				$("#" + imgContainerId).css("background-color", "#ffffff");
+			}
 		}
 	}
 });
