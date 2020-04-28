@@ -189,7 +189,9 @@ public class MicroServiceCallWithEntry {
 	
 	private void showClonesInMicroService(JSONArray edges) {
 		for(Clone<MicroService> clone : clonesInMicroService) {
-			edges.add(ProjectUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", clone.calculateValue(), false));
+			if(clone.sizeOfChildren() >= 3) {
+				edges.add(ProjectUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", clone.calculateValue(), false));
+			}
 		}
 	}
 	

@@ -27,6 +27,10 @@ public class Clone<T extends Node> implements Serializable {
 	// 两个克隆节点内部的方法克隆对
 	private List<FunctionCloneFunction> children = new ArrayList<>();
 	
+	public int sizeOfChildren() {
+		return children.size();
+	}
+	
 	public static interface CloneValueCalculator {
 		String calculate(Clone<? extends Node> clone);
 	}
