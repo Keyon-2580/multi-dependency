@@ -30,6 +30,7 @@
 	<div th:include="nav.html::nav"></div>
 
 	<div class="container-lg col-sm-12 row" style="margin-bottom: 15px;">
+	
 		<div class="col-sm-3">
 			<div id="treeForTestCase"></div> 
 			<!-- <div id="treeForFeature"></div> -->
@@ -101,10 +102,10 @@
 	</div>
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
-		$(document).ready(function() {
+		 $(document).ready(function() {
 			featureInit();
 			toHTML("all", -1, $("#all"));
-		});
+		}); 
 		// ]]>
 	</script>
 </body>
