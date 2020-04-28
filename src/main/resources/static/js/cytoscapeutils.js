@@ -1,7 +1,7 @@
 define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
-	'jqplot', 'utils', 'cytoscape', 'cytoscape-dagre', 'dagre', 'cytoscape-klay']
+	'jqplot', 'utils', 'cytoscape', 'cytoscape-dagre', 'dagre', 'cytoscape-klay', 'klayjs']
 	, function ($, bootstrap, bootstrap_multiselect, bootstrap_treeview,
-	jqplot, utils, cytoscape, cytoscape_dagre, dagre, klay) {
+	jqplot, utils, cytoscape, cytoscape_dagre, dagre, cytoscape_klay, klayjs) {
 	
 	var _showTreeView = function(containerDivId, data) {
 		containerDivId.treeview({
@@ -71,9 +71,8 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'bootstrap-treeview',
 	}
 	var _showDataInCytoscape = function(container, elements, layout="dagre") {
 		console.log("_showDataInCytoscape: " + layout);
+		cytoscape_klay(cytoscape);
 		cytoscape_dagre(cytoscape);
-//		cytoscape_klay(cytoscape);
-		klay(cytoscape);
 		var cy = cytoscape({
 	    	container: container,
 	    	layout: {

@@ -1,9 +1,9 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory(require("klayjs"));
-	else if(typeof define === 'function' && define.amd)
+	else if(typeof define === 'function' && define.amd) 
 		define(["klayjs"], factory);
-	else if(typeof exports === 'object')
+	else if(typeof exports === 'object') 
 		exports["cytoscapeKlay"] = factory(require("klayjs"));
 	else
 		root["cytoscapeKlay"] = factory(root["$klay"]);
@@ -14,7 +14,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-/******/
+/******/		
 /******/ 		// Check if module is in cache
 /******/ 		if(installedModules[moduleId]) {
 /******/ 			return installedModules[moduleId].exports;
@@ -25,7 +25,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 			l: false,
 /******/ 			exports: {}
 /******/ 		};
-/******/
+/******/		console.log(module);
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
 /******/

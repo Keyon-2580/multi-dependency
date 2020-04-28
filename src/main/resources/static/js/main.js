@@ -23,8 +23,8 @@ require.config({
 		"bootstrap-multiselect":['jquery'],
 		"bootstrap-treeview":['jquery'],
 		"jqplot":['jquery'],
-		"cytoscape-dagre":['cytoscape'],
-		"cytoscape-klay": ['klayjs', 'cytoscape']
+		"cytoscape-klay": ['cytoscape'],
+		"cytoscape-dagre":['cytoscape']
 	}
 
 });
