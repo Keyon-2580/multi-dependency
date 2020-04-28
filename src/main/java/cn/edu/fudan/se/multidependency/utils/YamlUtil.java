@@ -48,19 +48,26 @@ public class YamlUtil {
 //		result.setBuildFilePath(buildFilePath);
 		String gitDirectoryRootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("directory_root_path");
 		String issuesPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("issues_path");
+		String commitIdFrom = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("commit_id_from");
+		String commitIdTo = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("commit_id_to");
 		result.setGitDirectoryRootPath(gitDirectoryRootPath);
 		result.setIssuesPath(issuesPath);
+		result.setCommitIdFrom(commitIdFrom);
+		result.setCommitIdTo(commitIdTo);
 		String libsPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("lib")).get("libs_path");
 		result.setLibsPath(libsPath);
 		boolean analyseDynamic = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("analyse");
 		boolean analyseGit = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("analyse");
+		boolean gitSelectRange = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("select_range");
 		boolean analyseLib = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("lib")).get("analyse");
 		boolean analyseBuild = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("build")).get("analyse");
 		result.setAnalyseDynamic(analyseDynamic);
 		result.setAnalyseGit(analyseGit);
+		result.setGitSelectRange(gitSelectRange);
 		result.setAnalyseLib(analyseLib);
 		result.setAnalyseBuild(analyseBuild);
-		
+
+
 		boolean analyseClone = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("analyse");
 		Language cloneLanguage = Language.valueOf((String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("language"));
 		String methodNameTablePath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("method_name_table_path");
@@ -92,6 +99,9 @@ public class YamlUtil {
 		private boolean analyseGit;
 		private String gitDirectoryRootPath;
 		private String issuesPath;
+		private boolean gitSelectRange;
+		private String commitIdFrom;
+		private String commitIdTo;
 		
 		private boolean analyseLib;
 		private String libsPath;

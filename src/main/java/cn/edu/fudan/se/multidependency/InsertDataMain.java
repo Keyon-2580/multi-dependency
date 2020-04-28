@@ -143,7 +143,8 @@ public class InsertDataMain {
 			 */
 			if(yaml.isAnalyseGit()){
 				LOGGER.info("Git库分析");
-				inserter = new GitInserter(yaml.getGitDirectoryRootPath(), yaml.getIssuesPath());
+				inserter = new GitInserter(yaml.getGitDirectoryRootPath(), yaml.getIssuesPath(),
+						yaml.isGitSelectRange(), yaml.getCommitIdFrom(), yaml.getCommitIdTo());
 				inserter.addNodesAndRelations();
 			}
 			

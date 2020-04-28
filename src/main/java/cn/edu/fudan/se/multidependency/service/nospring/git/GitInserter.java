@@ -25,10 +25,19 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
     private static final String[] SUFFIX = new String[] {".java", ".c", ".cpp"};
 
-    public GitInserter(String gitProjectPath, String issueFilePath) {
+    private boolean isSelectRange;
+
+    private String commitIdFrom;
+
+    private String commitIdTo;
+
+    public GitInserter(String gitProjectPath, String issueFilePath, boolean isSelectRange, String commitIdFrom, String commitIdTo) {
         gitExtractor = new GitExtractor(gitProjectPath);
         issueExtractor = new IssueExtractor(issueFilePath);
         projects = this.getNodes().findAllProjects();
+        this.isSelectRange = isSelectRange;
+        this.commitIdFrom = commitIdFrom;
+        this.commitIdTo = commitIdTo;
     }
 
     @Override
@@ -72,7 +81,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
     }
 
     public void addCommitsAndRelations(Map<Integer, Issue> issues) throws Exception {
-        List<RevCommit> commits = gitExtractor.getAllCommits();
+        List<RevCommit> commits = isSelectRange ? gitExtractor.getARangeCommits(commitIdFrom, commitIdTo) : gitExtractor.getAllCommits();
         Collections.reverse(commits);
         for (RevCommit revCommit : commits) {
             //添加commit节点

@@ -63,6 +63,25 @@ public class GitExtractor {
         return null;
     }
 
+    public List<RevCommit> getARangeCommits(String from, String to) {
+        List<RevCommit> commits = new ArrayList<>();
+        try (RevWalk walk = new RevWalk(repository)) {
+            RevCommit commit = walk.parseCommit(repository.resolve(to));
+            walk.markStart(commit);
+            for (RevCommit rev : walk) {
+                commits.add(rev);
+                if(rev.getId().getName().equals(from)) {
+                    break;
+                }
+            }
+            walk.dispose();
+            return commits;
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public List<Ref> getBranchesByCommitId(RevCommit revCommit) {
         List<Ref> refs = null;
         try{

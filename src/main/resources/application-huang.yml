@@ -32,6 +32,9 @@ data:
 #    directory_root_path: D:/my_data/SDTeam/depends_/unedited/depends
     issues_path: src/main/resources/git/train-ticket-issues.json
 #    issues_path: src/main/resources/git/depends-issues.json
+    select_range: true
+    commit_id_from: 3ea128078eb0ec45f110a77ed151933339d0f626
+    commit_id_to: 15ae5c4102caccc6e6f84bce647cce1dcf4ad77a
   lib:
     analyse: true
 #    libs_path: src/main/resources/lib/depends_2020-04-19.json

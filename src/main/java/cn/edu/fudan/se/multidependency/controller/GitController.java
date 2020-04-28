@@ -15,20 +15,6 @@ public class GitController {
     @Autowired
     private GitAnalyseService gitAnalyseService;
 
-    @GetMapping("/developerToProject")
-    @ResponseBody
-    public JSONObject cntOfDevUpdPro() {
-        JSONObject result = new JSONObject();
-        try {
-            result.put("result", "success");
-            result.put("value", gitAnalyseService.cntOfDevUpdPro());
-        } catch (Exception e) {
-            result.put("result", "fail");
-            result.put("msg", e.getMessage());
-        }
-        return result;
-    }
-
     @GetMapping("/developerToMicroservice")
     @ResponseBody
     public JSONObject cntOfDevUpdMs() {
