@@ -14,6 +14,12 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 			contentType : "application/json",
 			dataType : "json",
 			url : "/multiple/all",
+			data : JSON.stringify({
+				"showStructure" : $("#showStructure").prop('checked'),
+				"showMicroServiceCallLibs" : $("#showMicroServiceCallLibs").prop('checked'),
+				"showClonesInMicroService" : $("#showClonesInMicroService").prop('checked'),
+				"showCntOfDevUpdMs" : $("#showCntOfDevUpdMs").prop('checked')
+			}),
 			success : function(result) {
 				if (result.result == "success") {
 					console.log(result);
@@ -87,6 +93,7 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 			}
 		});
 	}
+	
 	var processCytoscape = function(cyEntry) {
 		var edges = new Array();
 		var removeIds = new Array();
@@ -142,6 +149,69 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 			}
 		})		
 	}
+	var queryMultipleByTestCaseOrFeatureOrScenario = function(params, queryType) {
+		var url = null;
+		if(queryType == "TestCase") {
+			url = "/multiple/all/testcase";
+		} else if(queryType == "Feature") {
+			url = "/multiple/all/feature";
+		} else if(queryType == "Scenario") {
+			url = "/multiple/all/scenario"; 
+		}
+		var nodes = cyEntry.nodes();
+		for(var i = 0; i < nodes.length; i++) {
+			console.log(nodes[i].data());
+			console.log(nodes[i].position());
+			var nodeId = nodes[i].data().id;
+			var position = nodes[i].position();
+			nodeToPosition.set(nodeId, position);
+		}
+		$.ajax({
+			type : "POST",
+			contentType : "application/json",
+			dataType : "json",
+			url : "/multiple/all",
+			data : JSON.stringify({
+				"showStructure" : $("#showStructure").prop('checked'),
+				"showMicroServiceCallLibs" : $("#showMicroServiceCallLibs").prop('checked'),
+				"showClonesInMicroService" : $("#showClonesInMicroService").prop('checked'),
+				"showCntOfDevUpdMs" : $("#showCntOfDevUpdMs").prop('checked')
+			}),
+			success : function(result) {
+				if (result.result == "success") {
+					console.log(result);
+					cyEntry.destroy();
+					var nodes = result.value.data.nodes;
+					for(var i = 0; i < nodes.length; i++) {
+						var nodeId = nodes[i].data.id;
+						var position = nodeToPosition.get(nodeId);
+						nodes[i].position = position;
+					}
+					console.log(result.value.data);
+					cyEntry = utils.showDataInCytoscape($("#entry"), result.value.data, "preset");
+					processCytoscape(cyEntry);
+					setTapNode(cyEntry);
+					
+					$.ajax({
+						type : "POST",
+						contentType : "application/json",
+						dataType : "json",
+						url : url,
+						data : JSON.stringify(params),
+						success : function(result) {
+							if (result.result == "success") {
+								console.log(result.value);
+								cyEntry.remove('edge');
+								var relatedEdges = result.value.value.edges;
+								cyEntry.add(relatedEdges);
+								processCytoscape(cyEntry);
+							}
+						}
+					});
+				}
+			}
+		});
+	}
 	var queryMultipleByTestCase = function(testCaseIds) {
 		var nodes = cyEntry.nodes();
 		for(var i = 0; i < nodes.length; i++) {
@@ -156,6 +226,12 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 			contentType : "application/json",
 			dataType : "json",
 			url : "/multiple/all",
+			data : JSON.stringify({
+				"showStructure" : $("#showStructure").prop('checked'),
+				"showMicroServiceCallLibs" : $("#showMicroServiceCallLibs").prop('checked'),
+				"showClonesInMicroService" : $("#showClonesInMicroService").prop('checked'),
+				"showCntOfDevUpdMs" : $("#showCntOfDevUpdMs").prop('checked')
+			}),
 			success : function(result) {
 				if (result.result == "success") {
 					console.log(result);
@@ -313,61 +389,58 @@ define(['jquery', 'bootstrap', 'bootstrap-multiselect', 'jqplot', 'cytoscapeUtil
 			enableCollapsibleOptGroups: true
 		});
 		$("#submitScenario").click(function() {
-			var showStructure = $("#showStructure").prop('checked');
-			var showMicroServiceCallLibs = $("#showMicroServiceCallLibs").prop('checked');
-			var showClonesInMicroService = $("#showClonesInMicroService").prop('checked');
-			var showCntOfDevUpdMs = $("#showCntOfDevUpdMs").prop('checked');
 			var ids = {
 				"ids" : $("#scenarioList").val(),
-				"showStructure" : showStructure,
-				"showMicroServiceCallLibs" : showMicroServiceCallLibs,
-				"showClonesInMicroService" : showClonesInMicroService,
-				"showCntOfDevUpdMs" : showCntOfDevUpdMs
+				"showStructure" : $("#showStructure").prop('checked'),
+				"showMicroServiceCallLibs" : $("#showMicroServiceCallLibs").prop('checked'),
+				"showClonesInMicroService" : $("#showClonesInMicroService").prop('checked'),
+				"showCntOfDevUpdMs" : $("#showCntOfDevUpdMs").prop('checked')
 			};
 			console.log(ids);
-			queryMultipleByScenario(ids);
+			queryMultipleByTestCaseOrFeatureOrScenario(ids, "Scenario");
 		});
 		$("#submitTestCase").click(function() {
-			var showStructure = $("#showStructure").prop('checked');
-			var showMicroServiceCallLibs = $("#showMicroServiceCallLibs").prop('checked');
-			var showClonesInMicroService = $("#showClonesInMicroService").prop('checked');
-			var showCntOfDevUpdMs = $("#showCntOfDevUpdMs").prop('checked');
 			var ids = {
 				"ids" : $("#testCaseList").val(),
-				"showStructure" : showStructure,
-				"showMicroServiceCallLibs" : showMicroServiceCallLibs,
-				"showClonesInMicroService" : showClonesInMicroService,
-				"showCntOfDevUpdMs" : showCntOfDevUpdMs
+				"showStructure" : $("#showStructure").prop('checked'),
+				"showMicroServiceCallLibs" : $("#showMicroServiceCallLibs").prop('checked'),
+				"showClonesInMicroService" : $("#showClonesInMicroService").prop('checked'),
+				"showCntOfDevUpdMs" : $("#showCntOfDevUpdMs").prop('checked')
 			};
 			console.log(ids);
-			queryMultipleByTestCase(ids);
+			queryMultipleByTestCaseOrFeatureOrScenario(ids, "TestCase");
 		});
 		$("#submitFeature").click(function() {
-			var showStructure = $("#showStructure").prop('checked');
-			var showMicroServiceCallLibs = $("#showMicroServiceCallLibs").prop('checked');
-			var showClonesInMicroService = $("#showClonesInMicroService").prop('checked');
-			var showCntOfDevUpdMs = $("#showCntOfDevUpdMs").prop('checked');
 			var ids = {
 				"ids" : $("#featureList").val(),
-				"showStructure" : showStructure,
-				"showMicroServiceCallLibs" : showMicroServiceCallLibs,
-				"showClonesInMicroService" : showClonesInMicroService,
-				"showCntOfDevUpdMs" : showCntOfDevUpdMs
+				"showStructure" : $("#showStructure").prop('checked'),
+				"showMicroServiceCallLibs" : $("#showMicroServiceCallLibs").prop('checked'),
+				"showClonesInMicroService" : $("#showClonesInMicroService").prop('checked'),
+				"showCntOfDevUpdMs" : $("#showCntOfDevUpdMs").prop('checked')
 			};
 			console.log(ids);
-			queryMultipleByFeature(ids);
+			queryMultipleByTestCaseOrFeatureOrScenario(ids, "Feature");
 		});
 		
 		$("#showImg").click(function() {
-			if(cyEntry != null) {
+			/*if(cyEntry != null) {
 				$('#entry-png-eg').attr('src', cyEntry.png({
 					bg: "#ffffff",
 					full : true
 				}));
 				$('#entry-png-eg').css("background-color", "#ffffff");
-			}
+			}*/
+			showImg(cyEntry, "entry-png-eg");
 		})
-
+		var showImg = function(cy, imgContainerId){
+			if(cy != null) {
+				$("#" + imgContainerId).attr('src', cy.png({
+					bg: "#ffffff",
+					full : true
+				}));
+				$("#" + imgContainerId).css("background-color", "#ffffff");
+			}
+		}
 	};
 	var clearMemo = function() {
 		$("#clearMemo").click(function() {
