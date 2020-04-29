@@ -13,7 +13,7 @@
 
 因此若要得到五项依赖数据叠加的结果，暂时仅支持我们测试使用的这两个开源项目。即需要在运行前，将depends或train-ticket的代码克隆到本地。
 
-1，在`src/main/resources`中，复制一份`application-example.yml`，并改名，如：`application-zhou.yml`，然后修改里面的配置。
+**1. 在`src/main/resources`中，复制一份`application-example.yml`，并改名，如：`application-zhou.yml`，然后修改里面的配置。**
 
 下面以分析train-ticket项目为例。
 
@@ -35,11 +35,12 @@
 
 - `data.neo4j`：`delete`为`true`表示会对指定的数据库先做删除操作，再插入数据；`path`为本地数据库路径。
 
-2，修改`application.yml`，将`active`的值改为对应的名字，如`active: zhou`。
+**2. 修改`application.yml`，将`active`的值改为对应的名字，如`active: zhou`。**
 
-3，关闭neo4j数据库，运行`src/main/java/cn.edu.fudan.se.multidependency/InsertDataMain`。
+**3. 关闭neo4j数据库，运行`src/main/java/cn.edu.fudan.se.multidependency/InsertDataMain`。**
 
-插入数据完成后，可开启neo4j数据库，使用浏览器打开网址http://localhost:7474/，检查数据是否插入成功。
+​	插入数据完成后，可开启neo4j数据库，使用浏览器打开网址http://localhost:7474，检查数据是否插入成功。
 
-4，打开neo4j数据库，运行`src/main/java/cn.edu.fudan.se.multidependency/MultipleDependencyApp`，springboot启动成功后，使用浏览器打开网址http://127.0.0.1:8080/，查看视图。
+**4. 打开neo4j数据库，运行`src/main/java/cn.edu.fudan.se.multidependency/MultipleDependencyApp`。**
 
+​	springboot启动成功后，使用浏览器打开网址http://127.0.0.1:8080，查看视图。
