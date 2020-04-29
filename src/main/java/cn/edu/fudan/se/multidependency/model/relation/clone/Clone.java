@@ -24,6 +24,10 @@ public class Clone<T extends Node> implements Serializable {
 	
 	private double value = 0;
 	
+	public String getId() {
+		return node1.getId() + "_" + node2.getId();
+	}
+	
 	// 两个克隆节点内部的方法克隆对
 	private List<FunctionCloneFunction> children = new ArrayList<>();
 	

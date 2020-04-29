@@ -71,60 +71,26 @@ public class FeatureOrganizationService {
 		JSONArray edges = new JSONArray();
 		
 		for(Feature feature : allFeatures()) {
-			JSONObject featureData = new JSONObject();
-			featureData.put("id", feature.getId());
-			featureData.put("name", feature.getFeatureId() + " : " + feature.getName());
-			featureData.put("type", "feature");
-			featureData.put("value", feature.getFeatureId() + ":" + feature.getName());
-			int length = 0;
-			if(feature.getName().matches(".*[0-9].*")) {
-				length = feature.getName().getBytes().length * 8;
-			} else {
-				length = feature.getName().length() * 23;
-			}
-			featureData.put("length", length);
-			JSONObject featureNode = new JSONObject();
-			featureNode.put("data", featureData);
+			JSONObject featureNode = ProjectUtil.toCytoscapeNode(feature, feature.getFeatureId() + " : " + feature.getName(), "Feature");
+			featureNode.getJSONObject("data").put("value", feature.getFeatureId() + ":" + feature.getName());
 			nodes.add(featureNode);
 			
 			List<TestCaseExecuteFeature> executes = featureExecutedByTestCases.get(feature);
 			for(TestCaseExecuteFeature execute : executes) {
 				TestCase testcase = execute.getTestCase();
-				JSONObject testcaseData = new JSONObject();
-				testcaseData.put("id", testcase.getId());
-				testcaseData.put("name", testcase.getTestCaseId() + ":" + testcase.getName());
-				testcaseData.put("type", "testcase");
-				testcaseData.put("value", testcase.getTestCaseId() + ":" + testcase.getName());
-				if(testcase.getName().matches(".*[0-9].*")) {
-					length = testcase.getName().getBytes().length * 8;
-				} else {
-					length = testcase.getName().length() * 23;
-				}
-				testcaseData.put("length", length);
-				JSONObject testcaseNode = new JSONObject();
-				testcaseNode.put("data", testcaseData);
-				nodes.add(testcaseNode);
 				
-				JSONObject executeData = new JSONObject();
-				executeData.put("id", testcase.getId() + "_" + feature.getId());
-				executeData.put("source", testcase.getId());
-				executeData.put("target", feature.getId());
-				JSONObject executeEdge = new JSONObject();
-				executeEdge.put("data", executeData);
-				edges.add(executeEdge);
+
+				JSONObject testcaseData = ProjectUtil.toCytoscapeNode(testcase, String.join(" : ", " " + testcase.getTestCaseId(), testcase.getName() + " "), "TestCase_" + (testcase.isSuccess() ? "success" : "fail"));
+				testcaseData.getJSONObject("data").put("value", testcase.getTestCaseId() + " : " + testcase.getName());
+				nodes.add(testcaseData);
+				
+				edges.add(ProjectUtil.relationToEdge(testcase, feature, "TestCaseExecuteFeature", "", false));
 			}
 		}
 		
 		for(Feature feature : featureToParentFeature.keySet()) {
 			Feature parentFeature = featureToParentFeature.get(feature);
-			JSONObject containFeature = new JSONObject();
-			containFeature.put("id", parentFeature.getId() + "_" + feature.getId());
-			containFeature.put("source", parentFeature.getId());
-			containFeature.put("target", feature.getId());
-			containFeature.put("value", "contain");
-			JSONObject containEdge = new JSONObject();
-			containEdge.put("data", containFeature);
-			edges.add(containEdge);
+			edges.add(ProjectUtil.relationToEdge(parentFeature, feature, "FeatureContainFeature", "", false));
 		}
 		
 		result.put("nodes", nodes);
@@ -269,7 +235,6 @@ public class FeatureOrganizationService {
 		return result;
 	}
 	
-	
 	public JSONObject microServiceToCytoscapeUnion(Iterable<TestCase> selectTestCases, Iterable<TestCase> scaleTestCases) {
 		JSONObject result = new JSONObject();
 		JSONArray nodes = new JSONArray();
@@ -280,49 +245,28 @@ public class FeatureOrganizationService {
  		for(MicroService ms : selectMsCalls.keySet()) {
 			for(MicroService callMs : selectMsCalls.get(ms).keySet()) {
 				MicroServiceCallMicroService msCallMs = selectMsCalls.get(ms).get(callMs);
-				JSONObject edge = new JSONObject();
-				JSONObject value = new JSONObject();
-				value.put("id", ms.getId() + "_" + callMs.getId());
-				value.put("value", msCallMs.getTimes());
-				value.put("source", ms.getId());
-				value.put("target", callMs.getId());
-				value.put("type", "selectTestCase");
-				edge.put("data", value);
-				edges.add(edge);
+				edges.add(ProjectUtil.relationToEdge(ms, callMs, "selectTestCase", msCallMs.getTimes() + "", false));
 			}
 		}
 		for(MicroService ms : scaleMsCalls.keySet()) {
 			for(MicroService callMs : scaleMsCalls.get(ms).keySet()) {
 				MicroServiceCallMicroService msCallMs = scaleMsCalls.get(ms).get(callMs);
-				JSONObject edge = new JSONObject();
-				JSONObject value = new JSONObject();
-				value.put("id", ms.getId() + "_" + callMs.getId());
-				value.put("value", msCallMs.getTimes());
-				value.put("source", ms.getId());
-				value.put("target", callMs.getId());
-				value.put("type", "allTestCase");
-				edge.put("data", value);
-				edges.add(edge);
+				edges.add(ProjectUtil.relationToEdge(ms, callMs, "allTestCase", msCallMs.getTimes() + "", false));
 			}
 		}
 		List<MicroService> allMicroServices = allMicroServices();
 		Set<MicroService> relatedAllMicroServices = findRelatedMicroServiceForTestCases(scaleTestCases);
 		Set<MicroService> relatedSelectMicroServices = findRelatedMicroServiceForTestCases(selectTestCases);
 		for(MicroService ms : allMicroServices) {
-			JSONObject msJson = new JSONObject();
-			JSONObject msDataValue = new JSONObject();
+			String type = null;
 			if(relatedSelectMicroServices.contains(ms)) {
-				msDataValue.put("type", "selectMicroService");
+				type = "selectMicroService";
 			} else if(relatedAllMicroServices.contains(ms)) {
-				msDataValue.put("type", "allMicroService");
+				type = "allMicroService";
 			} else {
-				msDataValue.put("type", "noMicroService");
+				type = "noMicroService";
 			}
-			msDataValue.put("id", ms.getId());
-			msDataValue.put("name", ms.getName());
-			msDataValue.put("length", ms.getName().length() * 10);
-			msJson.put("data", msDataValue);
-			nodes.add(msJson);
+			nodes.add(ProjectUtil.toCytoscapeNode(ms, ms.getName(), type));
 		}
 		JSONObject value = new JSONObject();
 		value.put("nodes", nodes);
@@ -346,7 +290,6 @@ public class FeatureOrganizationService {
 		MicroServiceCallWithEntry callWithEntry0 = selectMsCallsList.get(0);
 		for(MicroService caller : callWithEntry0.getCalls().keySet()) {
 			for(MicroService called : callWithEntry0.getCalls().get(caller).keySet()) {
-				MicroServiceCallMicroService call = callWithEntry0.getCalls().get(caller).get(called);
 				boolean flag = true;
 				for(int i = 1; i < selectMsCallsList.size(); i++) {
 					MicroServiceCallWithEntry callWithEntry = selectMsCallsList.get(i);
@@ -356,14 +299,7 @@ public class FeatureOrganizationService {
 					}
 				}
 				if(flag) {
-					JSONObject edge = new JSONObject();
-					JSONObject value = new JSONObject();
-					value.put("id", caller.getId() + "_" + called.getId());
-					value.put("source", caller.getId());
-					value.put("target", called.getId());
-					value.put("type", "selectTestCase");
-					edge.put("data", value);
-					edges.add(edge);
+					edges.add(ProjectUtil.relationToEdge(caller, called, "selectTestCase", null, false));
 				}
 			}
 		}
@@ -371,35 +307,23 @@ public class FeatureOrganizationService {
 		for(MicroService ms : scaleMsCalls.keySet()) {
 			for(MicroService callMs : scaleMsCalls.get(ms).keySet()) {
 				MicroServiceCallMicroService msCallMs = scaleMsCalls.get(ms).get(callMs);
-				JSONObject edge = new JSONObject();
-				JSONObject value = new JSONObject();
-				value.put("id", ms.getId() + "_" + callMs.getId());
-				value.put("value", msCallMs.getTimes());
-				value.put("source", ms.getId());
-				value.put("target", callMs.getId());
-				value.put("type", "allTestCase");
-				edge.put("data", value);
-				edges.add(edge);
+				edges.add(ProjectUtil.relationToEdge(ms, callMs, "allTestCase", msCallMs.getTimes() + "", false));
 			}
 		}
 		List<MicroService> allMicroServices = allMicroServices();
 		Set<MicroService> relatedAllMicroServices = findRelatedMicroServiceForTestCases(scaleTestCases);
 		Set<MicroService> relatedSelectMicroServices = findRelatedMicroServiceForTestCases(selectTestCases);
 		for(MicroService ms : allMicroServices) {
-			JSONObject msJson = new JSONObject();
-			JSONObject msDataValue = new JSONObject();
+			
+			String type = null;
 			if(relatedSelectMicroServices.contains(ms)) {
-				msDataValue.put("type", "selectMicroService");
+				type = "selectMicroService";
 			} else if(relatedAllMicroServices.contains(ms)) {
-				msDataValue.put("type", "allMicroService");
+				type = "allMicroService";
 			} else {
-				msDataValue.put("type", "noMicroService");
+				type = "noMicroService";
 			}
-			msDataValue.put("id", ms.getId());
-			msDataValue.put("name", ms.getName());
-			msDataValue.put("length", ms.getName().length() * 10);
-			msJson.put("data", msDataValue);
-			nodes.add(msJson);
+			nodes.add(ProjectUtil.toCytoscapeNode(ms, ms.getName(), type));
 		}
 		JSONObject value = new JSONObject();
 		value.put("nodes", nodes);
@@ -414,16 +338,11 @@ public class FeatureOrganizationService {
 		JSONArray nodes = new JSONArray();
 		JSONArray edges = new JSONArray();
 		
-		JSONObject entry = new JSONObject();
-		JSONObject entryData = new JSONObject();
-		entryData.put("id", "-1");
-		entryData.put("name", "Entry");
-		entryData.put("type", "Entry");
-		entry.put("data", entryData);
-		nodes.add(entry);
+		nodes.add(ProjectUtil.toCytoscapeNode("-1", "Entry", "Entry"));
+		
 		Set<MicroService> relatedMicroServices = findRelatedMicroServiceForTraces(trace);
 		for(MicroService ms : relatedMicroServices) {
-			nodes.add(ProjectUtil.toCytoscapeNode(ms, "MicroService"));
+			nodes.add(ProjectUtil.toCytoscapeNode(ms, "MicroServiceWithRestfulAPI"));
 		}
 		
 		Map<RestfulAPI, Boolean> isAPINodeAdd = new HashMap<>();
@@ -440,14 +359,8 @@ public class FeatureOrganizationService {
 			}
 			if(span.getOrder() == 0) {
 				// 入口
-				JSONObject edge = new JSONObject();
-				JSONObject data = new JSONObject();
-				data.put("source", "-1");
-				data.put("target", api.getId());
-				data.put("type", "APICall");
-				data.put("value", "(0)");
-				edge.put("data", data);
-				edges.add(edge);
+				
+				edges.add(ProjectUtil.relationToEdge("-1", api.getId(), "APICall", "(0)", false));
 			}
 			Iterable<SpanCallSpan> calls = spanCallSpans.getOrDefault(span, new ArrayList<>());
 			for(SpanCallSpan call : calls) {
@@ -509,25 +422,12 @@ public class FeatureOrganizationService {
 		for(MicroService ms : msCalls.keySet()) {
 			for(MicroService callMs : msCalls.get(ms).keySet()) {
 				MicroServiceCallMicroService msCallMs = msCalls.get(ms).get(callMs);
-				JSONObject edge = new JSONObject();
-				JSONObject value = new JSONObject();
-				value.put("id", ms.getId() + "_" + callMs.getId());
-				value.put("value", msCallMs.getTimes());
-				value.put("source", ms.getId());
-				value.put("target", callMs.getId());
-				edge.put("data", value);
-				edges.add(edge);
+				edges.add(ProjectUtil.relationToEdge(ms, callMs, "", msCallMs.getTimes() + "", false));
 			}
 		}
 		List<MicroService> relatedMSs = removeUnuseMS ? new ArrayList<>(findRelatedMicroServiceForTraces(traces)) : allMicroServices();
 		for(MicroService ms : relatedMSs) {
-			JSONObject msJson = new JSONObject();
-			JSONObject msDataValue = new JSONObject();
-			msDataValue.put("id", ms.getId());
-			msDataValue.put("name", ms.getName());
-			msDataValue.put("length", ms.getName().length() * 10);
-			msJson.put("data", msDataValue);
-			nodes.add(msJson);
+			nodes.add(ProjectUtil.toCytoscapeNode(ms, "MicroService"));
 		}
 		JSONObject value = new JSONObject();
 		value.put("nodes", nodes);
@@ -537,6 +437,7 @@ public class FeatureOrganizationService {
 		return result;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public JSONObject microServiceToCytoscape(boolean removeUnuseMS, Trace... traces) {
 		return microServiceToCytoscape(removeUnuseMS, Arrays.asList(traces));
 	}
@@ -559,6 +460,7 @@ public class FeatureOrganizationService {
 	 * @param testcases
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public Set<Trace> findRelatedTracesForTestCases(TestCase... testCases) {
 		return findRelatedTracesForTestCases(Arrays.asList(testCases));
 	}
@@ -607,6 +509,7 @@ public class FeatureOrganizationService {
 	 * @param features
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public Set<Trace> findRelatedTracesForFeature(Feature... features) {
 		return findRelatedTracesForFeature(Arrays.asList(features));
 	}

@@ -64,6 +64,7 @@
 			'target-arrow-shape' : 'none',
 			'font-size' : 20
 	}
+	// $("#containerId")
 	var _showDataInCytoscape = function(container, elements, layout="dagre") {
 		console.log("_showDataInCytoscape: " + layout);
 		var cy = cytoscape({
@@ -257,12 +258,27 @@
 	    			selector: 'node[type="MicroService"]',
 	    			style: {
 	    				'shape' : 'hexagon',
-//	    				'width': 'data(length)',
 	    				'width': function(content) {
 	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
 	    				},
 	    				'height': 30,
 	    				'text-valign': 'center',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': '#f6f6f6',
+						'content': 'data(name)'
+	    			}
+	    		},
+	    		{
+	    			selector: 'node[type="MicroServiceWithRestfulAPI"]',
+	    			style: {
+	    				'shape' : 'hexagon',
+	    				'width': function(content) {
+	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
+	    				},
+	    				'height': 30,
+	    				'text-valign': 'top',
 	    				'text-halign': 'center',
 	    				'border-width': 1.5,
 	    				'border-color': '#555',
@@ -317,6 +333,36 @@
 	    				'border-width': 1.5,
 	    				'border-color': '#555',
 	    				'background-color': '#FFFFFF',
+						'content': 'data(name)'
+	    			}
+	    		},
+	    		{
+	    			selector: 'node[type="Entry"]',
+	    			style: {
+	    				'shape' : 'ellipse',
+	    				'width': 50,
+	    				'height': 25,
+	    				'text-valign': 'center',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': '#f6f6f6',
+						'content': 'data(name)'
+	    			}
+	    		},
+	    		{
+	    			selector: 'node[type="API"]',
+	    			style: {
+	    				'shape' : 'ellipse',
+	    				'width': function(content) {
+	    					return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
+	    				},
+	    				'height': 25,
+	    				'text-valign': 'center',
+	    				'text-halign': 'center',
+	    				'border-width': 1.5,
+	    				'border-color': '#555',
+	    				'background-color': '#f6f6f6',
 						'content': 'data(name)'
 	    			}
 	    		},
@@ -391,6 +437,25 @@
 	    		{
 	    			selector: 'edge[type="DeveloperUpdateMicroService"]',
 	    			style: styleEdgeBlack
+	    		},
+				{
+	    			selector: 'edge[type="APICall"]',
+	    			style: styleEdgeBlack
+	    		},
+	    		{
+	    			selector: 'edge[type="order"]',
+	    			style: styleEdgeRed
+	    		},
+				{
+	    			selector: 'edge[type="contain"]',
+	    			style: {
+	    				'content': 'data(value)',
+	    				'curve-style': 'bezier',
+	    				'width': 1,
+	    				'line-color': 'red',
+	                    'target-arrow-shape': 'triangle',
+	                    'target-arrow-color': 'red'
+	    			}
 	    		}
 	    	],
 	    	elements: elements

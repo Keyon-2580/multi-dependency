@@ -16,6 +16,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
@@ -54,7 +55,6 @@ public class MicroServiceCallWithEntry {
 	
 	private Iterable<CallLibrary<MicroService>> microServiceCallLibraries = new ArrayList<>();
 	
-//	private JSONArray cntOfDevUpdMs;
 	private Iterable<DeveloperUpdateNode<MicroService>> cntOfDevUpdMs;
 	
 	public boolean containCall(MicroService caller, MicroService called) {
@@ -152,7 +152,6 @@ public class MicroServiceCallWithEntry {
 			List<MicroService> entries = testCaseToEntries.getOrDefault(testCase, new ArrayList<>());
 			for(MicroService entry : entries) {
 				if(!isMicroServiceNodeAdd.getOrDefault(entry, false)) {
-					System.out.println(entry.getId());
 					JSONObject obj = new JSONObject();
 					obj.put("id", entry.getId());
 					result.add(obj);
@@ -190,7 +189,10 @@ public class MicroServiceCallWithEntry {
 	private void showClonesInMicroService(JSONArray edges) {
 		for(Clone<MicroService> clone : clonesInMicroService) {
 			if(clone.sizeOfChildren() >= 3) {
-				edges.add(ProjectUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", clone.calculateValue(), false));
+				JSONObject edge = ProjectUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", clone.calculateValue(), false);
+				edges.add(edge);
+				edge.getJSONObject("data").put("id", clone.getId());
+				
 			}
 		}
 	}
@@ -560,4 +562,11 @@ public class MicroServiceCallWithEntry {
 		return result;
 	}
 	
+	public Map<String, List<FunctionCloneFunction>> cloneDetails() {
+		Map<String, List<FunctionCloneFunction>> result = new HashMap<>();
+		for(Clone<MicroService> clone : getClonesInMicroService()) {
+			result.put(clone.getId(), clone.getChildren());
+		}
+		return result;
+	}
 }

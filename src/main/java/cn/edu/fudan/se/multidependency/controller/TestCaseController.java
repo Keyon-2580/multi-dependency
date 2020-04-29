@@ -260,16 +260,6 @@ public class TestCaseController {
 			result.put("result", "fail");
 			result.put("msg", e.getMessage());
 		}
-		try {
-			if(selectTestCases.size() >= 2) {
-				TestCase testCase0 = selectTestCases.get(0);
-				TestCase testCase1 = selectTestCases.get(1);
-				Graph same = testCaseCoverageService.extractSameGraphForMicroServiceCall(testCase0, testCase1);
-				result.put("test", same.toCytoscape());
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 		return result;
 	}
 	
@@ -329,16 +319,6 @@ public class TestCaseController {
 			e.printStackTrace();
 			result.put("result", "fail");
 			result.put("msg", e.getMessage());
-		}
-		try {
-			if(selectTestCases.size() >= 2) {
-				TestCase testCase0 = selectTestCases.get(0);
-				TestCase testCase1 = selectTestCases.get(1);
-				Graph same = testCaseCoverageService.extractSameGraphForMicroServiceCall(testCase0, testCase1);
-				result.put("test", same.toCytoscape());
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		return result;
 	}
