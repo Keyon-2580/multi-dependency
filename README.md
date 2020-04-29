@@ -39,8 +39,8 @@
 
 **3. 关闭neo4j数据库，运行`src/main/java/cn.edu.fudan.se.multidependency/InsertDataMain`。**
 
-​	插入数据完成后，可开启neo4j数据库，使用浏览器打开网址http://localhost:7474，检查数据是否插入成功。
+插入数据完成后，可开启neo4j数据库，使用浏览器打开网址[http://localhost:7474](http://localhost:7474)，检查数据是否插入成功。
 
 **4. 打开neo4j数据库，运行`src/main/java/cn.edu.fudan.se.multidependency/MultipleDependencyApp`。**
 
-​	springboot启动成功后，使用浏览器打开网址http://127.0.0.1:8080，查看视图。
+springboot启动成功后，使用浏览器打开网址[http://127.0.0.1:8080](http://127.0.0.1:8080)，查看视图。
