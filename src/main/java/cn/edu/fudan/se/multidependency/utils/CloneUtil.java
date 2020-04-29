@@ -104,19 +104,6 @@ public class CloneUtil {
 		private double value;
 	}
 	
-	static int count = 0;
-	public static void main(String[] args) throws Exception {
-		Iterable<CloneResultFromCsv> result = readCloneResultCsv("src/main/resources/clone/type123_method_result.csv");
-		Map<Integer, MethodNameForJavaFromCsv> names = readJavaCloneCsvForMethodName("src/main/resources/clone/MethodNameTable.csv");
-		result.forEach(clone -> {
-			count++;
-			System.out.println(clone);
-			System.out.println(names.get(clone.getStart()));
-			System.out.println(names.get(clone.end));
-		});
-		System.out.println(count);
-	}
-	
 	public static Iterable<CloneResultFromCsv> readCloneResultCsv(String filePath) throws Exception {
 		List<CloneResultFromCsv> result = new ArrayList<>();
 		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {

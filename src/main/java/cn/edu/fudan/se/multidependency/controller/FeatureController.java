@@ -31,9 +31,6 @@ public class FeatureController {
 	@Autowired
 	private DynamicAnalyseService dynamicAnalyseService;
 
-//	@Autowired
-//	private MicroserviceService msService;
-
 	@Autowired
 	private FeatureOrganizationService featureOrganizationService;
 

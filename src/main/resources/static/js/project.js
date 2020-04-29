@@ -26,7 +26,7 @@ var _project = function() {
 				console.log(result);
 				if(result.result == "success") {
 					console.log("success");
-					cy = showDataInCytoscape($("#graph"), result.value, "klay");
+					cy = showDataInCytoscape($("#graph"), result.value, "dagre");
 				} else {
 					alert(result.msg);
 				}

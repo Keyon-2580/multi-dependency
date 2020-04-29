@@ -24,7 +24,6 @@ public class InserterForNeo4jServiceFactory {
 			return new JavaInsertServiceImpl(entityRepo, config);
 		case cpp:
 			return new CppInsertServiceImpl(entityRepo, config);
-
 		}
 		throw new Exception("程序语言不为java或c/c++，提取失败");
 	}

@@ -26,7 +26,7 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.Micro
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanCallSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
-import cn.edu.fudan.se.multidependency.utils.ProjectUtil;
+import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import lombok.AllArgsConstructor;
 
@@ -71,7 +71,7 @@ public class FeatureOrganizationService {
 		JSONArray edges = new JSONArray();
 		
 		for(Feature feature : allFeatures()) {
-			JSONObject featureNode = ProjectUtil.toCytoscapeNode(feature, feature.getFeatureId() + " : " + feature.getName(), "Feature");
+			JSONObject featureNode = CytoscapeUtil.toCytoscapeNode(feature, feature.getFeatureId() + " : " + feature.getName(), "Feature");
 			featureNode.getJSONObject("data").put("value", feature.getFeatureId() + ":" + feature.getName());
 			nodes.add(featureNode);
 			
@@ -80,17 +80,17 @@ public class FeatureOrganizationService {
 				TestCase testcase = execute.getTestCase();
 				
 
-				JSONObject testcaseData = ProjectUtil.toCytoscapeNode(testcase, String.join(" : ", " " + testcase.getTestCaseId(), testcase.getName() + " "), "TestCase_" + (testcase.isSuccess() ? "success" : "fail"));
+				JSONObject testcaseData = CytoscapeUtil.toCytoscapeNode(testcase, String.join(" : ", " " + testcase.getTestCaseId(), testcase.getName() + " "), "TestCase_" + (testcase.isSuccess() ? "success" : "fail"));
 				testcaseData.getJSONObject("data").put("value", testcase.getTestCaseId() + " : " + testcase.getName());
 				nodes.add(testcaseData);
 				
-				edges.add(ProjectUtil.relationToEdge(testcase, feature, "TestCaseExecuteFeature", "", false));
+				edges.add(CytoscapeUtil.relationToEdge(testcase, feature, "TestCaseExecuteFeature", "", false));
 			}
 		}
 		
 		for(Feature feature : featureToParentFeature.keySet()) {
 			Feature parentFeature = featureToParentFeature.get(feature);
-			edges.add(ProjectUtil.relationToEdge(parentFeature, feature, "FeatureContainFeature", "", false));
+			edges.add(CytoscapeUtil.relationToEdge(parentFeature, feature, "FeatureContainFeature", "", false));
 		}
 		
 		result.put("nodes", nodes);
@@ -245,13 +245,13 @@ public class FeatureOrganizationService {
  		for(MicroService ms : selectMsCalls.keySet()) {
 			for(MicroService callMs : selectMsCalls.get(ms).keySet()) {
 				MicroServiceCallMicroService msCallMs = selectMsCalls.get(ms).get(callMs);
-				edges.add(ProjectUtil.relationToEdge(ms, callMs, "selectTestCase", msCallMs.getTimes() + "", false));
+				edges.add(CytoscapeUtil.relationToEdge(ms, callMs, "selectTestCase", msCallMs.getTimes() + "", false));
 			}
 		}
 		for(MicroService ms : scaleMsCalls.keySet()) {
 			for(MicroService callMs : scaleMsCalls.get(ms).keySet()) {
 				MicroServiceCallMicroService msCallMs = scaleMsCalls.get(ms).get(callMs);
-				edges.add(ProjectUtil.relationToEdge(ms, callMs, "allTestCase", msCallMs.getTimes() + "", false));
+				edges.add(CytoscapeUtil.relationToEdge(ms, callMs, "allTestCase", msCallMs.getTimes() + "", false));
 			}
 		}
 		List<MicroService> allMicroServices = allMicroServices();
@@ -266,7 +266,7 @@ public class FeatureOrganizationService {
 			} else {
 				type = "noMicroService";
 			}
-			nodes.add(ProjectUtil.toCytoscapeNode(ms, ms.getName(), type));
+			nodes.add(CytoscapeUtil.toCytoscapeNode(ms, ms.getName(), type));
 		}
 		JSONObject value = new JSONObject();
 		value.put("nodes", nodes);
@@ -299,7 +299,7 @@ public class FeatureOrganizationService {
 					}
 				}
 				if(flag) {
-					edges.add(ProjectUtil.relationToEdge(caller, called, "selectTestCase", null, false));
+					edges.add(CytoscapeUtil.relationToEdge(caller, called, "selectTestCase", null, false));
 				}
 			}
 		}
@@ -307,7 +307,7 @@ public class FeatureOrganizationService {
 		for(MicroService ms : scaleMsCalls.keySet()) {
 			for(MicroService callMs : scaleMsCalls.get(ms).keySet()) {
 				MicroServiceCallMicroService msCallMs = scaleMsCalls.get(ms).get(callMs);
-				edges.add(ProjectUtil.relationToEdge(ms, callMs, "allTestCase", msCallMs.getTimes() + "", false));
+				edges.add(CytoscapeUtil.relationToEdge(ms, callMs, "allTestCase", msCallMs.getTimes() + "", false));
 			}
 		}
 		List<MicroService> allMicroServices = allMicroServices();
@@ -323,7 +323,7 @@ public class FeatureOrganizationService {
 			} else {
 				type = "noMicroService";
 			}
-			nodes.add(ProjectUtil.toCytoscapeNode(ms, ms.getName(), type));
+			nodes.add(CytoscapeUtil.toCytoscapeNode(ms, ms.getName(), type));
 		}
 		JSONObject value = new JSONObject();
 		value.put("nodes", nodes);
@@ -338,11 +338,11 @@ public class FeatureOrganizationService {
 		JSONArray nodes = new JSONArray();
 		JSONArray edges = new JSONArray();
 		
-		nodes.add(ProjectUtil.toCytoscapeNode("-1", "Entry", "Entry"));
+		nodes.add(CytoscapeUtil.toCytoscapeNode("-1", "Entry", "Entry"));
 		
 		Set<MicroService> relatedMicroServices = findRelatedMicroServiceForTraces(trace);
 		for(MicroService ms : relatedMicroServices) {
-			nodes.add(ProjectUtil.toCytoscapeNode(ms, "MicroServiceWithRestfulAPI"));
+			nodes.add(CytoscapeUtil.toCytoscapeNode(ms, "MicroServiceWithRestfulAPI"));
 		}
 		
 		Map<RestfulAPI, Boolean> isAPINodeAdd = new HashMap<>();
@@ -352,7 +352,7 @@ public class FeatureOrganizationService {
 			MicroService ms = spanBelongToMicroservice(span);
 			RestfulAPI api = spanInstanceOfRestfulAPIs.get(span).getApi();
 			if(!isAPINodeAdd.getOrDefault(api, false)) {
-				JSONObject apiData = ProjectUtil.toCytoscapeNode(api, "API");
+				JSONObject apiData = CytoscapeUtil.toCytoscapeNode(api, "API");
 				apiData.getJSONObject("data").put("parent", ms.getId());
 				nodes.add(apiData);
 				isAPINodeAdd.put(api, true);
@@ -360,7 +360,7 @@ public class FeatureOrganizationService {
 			if(span.getOrder() == 0) {
 				// 入口
 				
-				edges.add(ProjectUtil.relationToEdge("-1", api.getId(), "APICall", "(0)", false));
+				edges.add(CytoscapeUtil.relationToEdge("-1", api.getId(), "APICall", "(0)", false));
 			}
 			Iterable<SpanCallSpan> calls = spanCallSpans.getOrDefault(span, new ArrayList<>());
 			for(SpanCallSpan call : calls) {
@@ -368,12 +368,12 @@ public class FeatureOrganizationService {
 				MicroService callMs = spanBelongToMicroservice(callSpan);
 				RestfulAPI callApi = spanInstanceOfRestfulAPIs.get(callSpan).getApi();
 				if(!isAPINodeAdd.getOrDefault(callApi, false)) {
-					JSONObject callApiData = ProjectUtil.toCytoscapeNode(callApi, "API");
+					JSONObject callApiData = CytoscapeUtil.toCytoscapeNode(callApi, "API");
 					callApiData.getJSONObject("data").put("parent", callMs.getId());
 					nodes.add(callApiData);
 					isAPINodeAdd.put(callApi, true);
 				}
-				edges.add(ProjectUtil.relationToEdge(api, callApi, "APICall", "(" + callSpan.getOrder() + ")", false));
+				edges.add(CytoscapeUtil.relationToEdge(api, callApi, "APICall", "(" + callSpan.getOrder() + ")", false));
 			}
 		}
 		
@@ -422,12 +422,12 @@ public class FeatureOrganizationService {
 		for(MicroService ms : msCalls.keySet()) {
 			for(MicroService callMs : msCalls.get(ms).keySet()) {
 				MicroServiceCallMicroService msCallMs = msCalls.get(ms).get(callMs);
-				edges.add(ProjectUtil.relationToEdge(ms, callMs, "", msCallMs.getTimes() + "", false));
+				edges.add(CytoscapeUtil.relationToEdge(ms, callMs, "", msCallMs.getTimes() + "", false));
 			}
 		}
 		List<MicroService> relatedMSs = removeUnuseMS ? new ArrayList<>(findRelatedMicroServiceForTraces(traces)) : allMicroServices();
 		for(MicroService ms : relatedMSs) {
-			nodes.add(ProjectUtil.toCytoscapeNode(ms, "MicroService"));
+			nodes.add(CytoscapeUtil.toCytoscapeNode(ms, "MicroService"));
 		}
 		JSONObject value = new JSONObject();
 		value.put("nodes", nodes);

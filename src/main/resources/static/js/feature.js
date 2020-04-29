@@ -216,7 +216,7 @@ var featureInit = function() {
 	showFeatureToTestCasesCytoscape($("#graph"));
 };
 
-var showTestCaseToFeaturesTreeView = function(containerDivId) {
+var showTestCaseToFeaturesTreeView = function(containerDiv) {
 	$.ajax({
 		type: 'GET',
 		url: "/feature/testcaseToFeature/treeview",
@@ -224,13 +224,13 @@ var showTestCaseToFeaturesTreeView = function(containerDivId) {
 			console.log(result);
 			if(result.result == "success") {
 				console.log(result.value)
-				showTreeView(containerDivId, result.value);
+				showTreeView(containerDiv, result.value);
 			}
 		}
 	});
 };
 
-var showFeatureToTestCasesTreeView = function(containerDivId) {
+var showFeatureToTestCasesTreeView = function(containerDiv) {
 	$.ajax({
 		type: 'GET',
 		url: "/feature/testcase/treeview",
@@ -238,13 +238,13 @@ var showFeatureToTestCasesTreeView = function(containerDivId) {
 			console.log(result);
 			if(result.result == "success") {
 				console.log(result.value)
-				showTreeView(containerDivId, result.value);
+				showTreeView(containerDiv, result.value);
 			}
 		}
 	});
 };
 
-var showFeatureToTestCasesCytoscape = function(containerDivId) {
+var showFeatureToTestCasesCytoscape = function(containerDiv) {
 	$.ajax({
 		type: 'GET',
 		url: "/feature/testcase/cytoscape",
@@ -252,7 +252,7 @@ var showFeatureToTestCasesCytoscape = function(containerDivId) {
 			console.log(result);
 			if(result.result == "success") {
 				console.log(result.value)
-				var cy = showDataInCytoscape(containerDivId, result.value, "klay")
+				var cy = showDataInCytoscape(containerDiv, result.value, "klay")
 				$("#test").click(function(){
 					showImg(cy, "png-eg");
 				});

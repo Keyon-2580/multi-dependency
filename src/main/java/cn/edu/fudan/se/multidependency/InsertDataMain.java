@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.edu.fudan.se.multidependency.service.nospring.git.GitInserter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

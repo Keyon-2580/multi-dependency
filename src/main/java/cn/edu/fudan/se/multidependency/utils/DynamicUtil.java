@@ -89,10 +89,15 @@ public class DynamicUtil {
 				functionExecution.setParentSpanId(json.getString("parentSpanId"));
 				functionExecution.setThreadId(json.getLong("currentThreadId"));
 				functionExecution.setThreadName(json.getString("currentThreadName"));
-				functionExecution.setCallForm(json.getString("callMethod"));
-				/// FIXME
-//				functionExecution.setCallForm(json.getString("callForm"));
-//				functionExecution.setConstructor(json.getBooleanValue("isConstrcutor"));
+				String callForm = json.getString("callMethod");
+				if(callForm == null) {
+					callForm = json.getString("callForm");
+				}
+				functionExecution.setCallForm(callForm);
+				Boolean isConstructor = json.getBoolean("isConstructor");
+				if(isConstructor != null) {
+					functionExecution.setConstructor(isConstructor);
+				}
 				return functionExecution;
 			case cpp:
 				return new CppDynamicFunctionExecution();
