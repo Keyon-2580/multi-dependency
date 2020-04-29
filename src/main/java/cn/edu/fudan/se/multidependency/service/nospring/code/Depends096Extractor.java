@@ -15,10 +15,10 @@ import depends.util.FolderCollector;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import lombok.Setter;
 
-public class TestDepends implements DependsEntityRepoExtractor {
-	private TestDepends() {}
-	private static TestDepends instance = new TestDepends();
-	public static TestDepends getInstance() {
+public class Depends096Extractor implements DependsEntityRepoExtractor {
+	private Depends096Extractor() {}
+	private static Depends096Extractor instance = new Depends096Extractor();
+	public static Depends096Extractor getInstance() {
 		return instance;
 	}
 	

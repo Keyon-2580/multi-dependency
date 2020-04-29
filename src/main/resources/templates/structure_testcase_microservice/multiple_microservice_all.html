@@ -117,6 +117,9 @@
 				  		<label>
 							<input type="checkbox" id="showClonesInMicroService" />显示克隆依赖
 				        </label>
+				        <label>
+							克隆对数 &gt;= <input type="number" id="showClonesMinPair" />
+				        </label>
 					</div>
 				</div>
 				<div class="col-sm-12 row">
@@ -145,41 +148,6 @@
 			<hr/>
 		</div>
 		<div class="col-sm-12 div_cytoscape_div">
-			<div class="div_cytoscape_treeview">
-				<ul id="browser" class="filetree treeview-famfamfam">
-				    <li><span class="folder">Folder 1</span>
-				        <ul>
-				            <li><span class="folder">Item 1.1</span>
-				                <ul>
-				                    <li><span class="file">Item 1.1.1</span></li>
-				                </ul>
-				            </li>
-				            <li><span class="folder">Folder 2</span>
-				                <ul>
-				                    <li><span class="folder">Subfolder 2.1</span>
-				                        <ul id="folder21">
-				                            <li><span class="file">File 2.1.1</span></li>
-				                            <li><span class="file">File 2.1.2</span></li>
-				                        </ul>
-				                    </li>
-				                    <li><span class="folder">Subfolder 2.2</span>
-				                        <ul>
-				                            <li><span class="file">File 2.2.1</span></li>
-				                            <li><span class="file">File 2.2.2</span></li>
-				                        </ul>
-				                    </li>
-				                </ul>
-				            </li>
-				            <li class="closed"><span class="folder">Folder 3 (closed at start)</span>
-				                <ul>
-				                    <li><span class="file">File 3.1</span></li>
-				                </ul>
-				            </li>
-				            <li><span class="file">File 4</span></li>
-				        </ul>
-				    </li>
-				</ul>
-			</div>
 			<div class="div_cytoscape" style="float: left; display: inline;">
 				<div id="entry" class="div_cytoscape_content"></div>
 			</div>

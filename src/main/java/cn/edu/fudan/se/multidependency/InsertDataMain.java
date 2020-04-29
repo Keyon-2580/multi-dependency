@@ -19,7 +19,7 @@ import cn.edu.fudan.se.multidependency.service.nospring.code.DependsEntityRepoEx
 import cn.edu.fudan.se.multidependency.service.nospring.code.RestfulAPIFileExtractor;
 import cn.edu.fudan.se.multidependency.service.nospring.code.RestfulAPIFileExtractorImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.code.SwaggerJSON;
-import cn.edu.fudan.se.multidependency.service.nospring.code.TestDepends;
+import cn.edu.fudan.se.multidependency.service.nospring.code.Depends096Extractor;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.CppDynamicInserter;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.FeatureAndTestCaseFromJSONFileForMicroserviceInserter;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.JavassistDynamicInserter;
@@ -78,11 +78,11 @@ public class InsertDataMain {
 				DependsEntityRepoExtractor extractor = null;
 				switch(language) {
 				case cpp:
+					extractor = Depends096Extractor.getInstance();
 //					extractor = DependsEntityRepoExtractorImpl.getInstance();
-					extractor = TestDepends.getInstance();
 					break;
 				case java:
-					extractor = TestDepends.getInstance();
+					extractor = Depends096Extractor.getInstance();
 //					extractor = DependsEntityRepoExtractorImpl.getInstance();
 					break;
 				default:
@@ -109,12 +109,9 @@ public class InsertDataMain {
 				}
 			}
 			
-			ExtractorForNodesAndRelations inserter = null;
-			
 			if(config.getMicroServiceDependencies() != null) {
 				LOGGER.info("微服务依赖存储");
-				inserter = new MicroServiceArchitectureInserter(config.getMicroServiceDependencies());
-				inserter.addNodesAndRelations();
+				new MicroServiceArchitectureInserter(config.getMicroServiceDependencies()).addNodesAndRelations();
 			}
 			/**
 			 * 动态分析
@@ -127,14 +124,11 @@ public class InsertDataMain {
 				new TraceStartExtractor(dynamicLogs).addNodesAndRelations();
 
 				for (Language language : Language.values()) {
-					inserter = insertDynamic(language, dynamicLogs);
-					inserter.addNodesAndRelations();
+					insertDynamic(language, dynamicLogs).addNodesAndRelations();
 				}
 				
 				LOGGER.info("引入特性与测试用例，对应到trace");
-				inserter = new FeatureAndTestCaseFromJSONFileForMicroserviceInserter(yaml.getFeaturesPath());
-//				inserter = insertFeatureAndTestCaseByJSONFile(yaml.getFeaturesPath());
-				inserter.addNodesAndRelations();
+				new FeatureAndTestCaseFromJSONFileForMicroserviceInserter(yaml.getFeaturesPath()).addNodesAndRelations();
 			}
 
 			/**
@@ -142,15 +136,14 @@ public class InsertDataMain {
 			 */
 			if(yaml.isAnalyseGit()){
 				LOGGER.info("Git库分析");
-				inserter = new GitInserter(yaml.getGitDirectoryRootPath(), yaml.getIssuesPath(),
-						yaml.isGitSelectRange(), yaml.getCommitIdFrom(), yaml.getCommitIdTo());
-				inserter.addNodesAndRelations();
+				new GitInserter(yaml.getGitDirectoryRootPath(), yaml.getIssuesPath(),
+						yaml.isGitSelectRange(), yaml.getCommitIdFrom(), yaml.getCommitIdTo()).addNodesAndRelations();
 			}
 			
 			if(yaml.isAnalyseClone()) {
 				LOGGER.info("克隆依赖分析");
-				inserter = new CloneInserter(yaml.getCloneLanguage(), yaml.getMethodNameTablePath(), yaml.getMethodResultPath());
-				inserter.addNodesAndRelations();
+				new CloneInserter(yaml.getCloneLanguage(), yaml.getMethodNameTablePath(), yaml.getMethodResultPath()).addNodesAndRelations();
+				
 			}
 			
 			if(yaml.isAnalyseLib()) {

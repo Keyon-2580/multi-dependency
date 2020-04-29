@@ -77,8 +77,14 @@ public class GitAnalyseService {
         }
         return cntOfDevUpdProCache;
     }
+    
+    Iterable<DeveloperUpdateNode<MicroService>> cntOfDevUpdMsListCache = null;
 
     public Iterable<DeveloperUpdateNode<MicroService>> cntOfDevUpdMsList() {
+    	if(cntOfDevUpdMsListCache != null) {
+    		return cntOfDevUpdMsListCache;
+    	}
+    	
     	List<DeveloperUpdateNode<MicroService>> result = new ArrayList<>();
     	
     	for(Map.Entry<Developer, Map<Project, Integer>> developer : calCntOfDevUpdPro().entrySet()){
@@ -103,6 +109,8 @@ public class GitAnalyseService {
             	result.add(temp);
             }
         }
+    	
+    	cntOfDevUpdMsListCache = result;
     	return result;
     }
 }

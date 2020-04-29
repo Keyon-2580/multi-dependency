@@ -67,6 +67,7 @@ public class MDAllController {
 			boolean showClonesInMicroService = (boolean) params.getOrDefault("showClonesInMicroService", true);
 			boolean showMicroServiceCallLibs = (boolean) params.getOrDefault("showMicroServiceCallLibs", true);
 			boolean showCntOfDevUpdMs = (boolean) params.getOrDefault("showCntOfDevUpdMs", true);
+			int showClonesMinPair = Integer.parseInt((String) params.getOrDefault("showClonesMinPair", "3"));
 			System.out.println(showStructure + " " + showClonesInMicroService + " " + showMicroServiceCallLibs + " " + showCntOfDevUpdMs);
 			MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(featureOrganizationService.allTestCases());
 			callsWithEntry.setShowAllFeatures(true);
@@ -76,6 +77,7 @@ public class MDAllController {
 			callsWithEntry.setShowClonesInMicroService(showClonesInMicroService);
 			callsWithEntry.setShowMicroServiceCallLibs(showMicroServiceCallLibs);
 			callsWithEntry.setShowCntOfDevUpdMs(showCntOfDevUpdMs);
+			callsWithEntry.setShowClonesMinPair(showClonesMinPair);
 			if(showClonesInMicroService) {
 				callsWithEntry.setClonesInMicroService(msService.findMicroServiceClone(staticAnalyseService.findAllFunctionCloneFunctions(), true));
 			}
@@ -108,6 +110,7 @@ public class MDAllController {
 			boolean showClonesInMicroService = (boolean) params.getOrDefault("showClonesInMicroService", true);
 			boolean showMicroServiceCallLibs = (boolean) params.getOrDefault("showMicroServiceCallLibs", true);
 			boolean showCntOfDevUpdMs = (boolean) params.getOrDefault("showCntOfDevUpdMs", false);
+			int showClonesMinPair = Integer.parseInt((String) params.getOrDefault("showClonesMinPair", "3"));
 			System.out.println(testCaseOrFeatureOrScenario + " " + showStructure + " " + showClonesInMicroService + " " + showMicroServiceCallLibs + " " + showCntOfDevUpdMs);
 			List<Integer> ids = new ArrayList<>();
 			for(String idStr : idsStr) {
@@ -146,7 +149,7 @@ public class MDAllController {
 				selectTestCases = featureOrganizationService.relatedTestCaseWithScenarios(scenarios);
 				break;
 			}
-			MicroServiceCallWithEntry temp = testCaseEdges(showStructure, showClonesInMicroService, showMicroServiceCallLibs, showCntOfDevUpdMs, selectTestCases);
+			MicroServiceCallWithEntry temp = testCaseEdges(showStructure, showClonesInMicroService, showMicroServiceCallLibs, showCntOfDevUpdMs, showClonesMinPair, selectTestCases);
 			result.put("result", "success");
 			result.put("value", temp.testCaseEdges());
 			result.put("cloneDetail", temp.cloneDetails());
@@ -159,7 +162,7 @@ public class MDAllController {
 	}
 	
 	private MicroServiceCallWithEntry testCaseEdges(boolean showStructure, boolean showClonesInMicroService, 
-			boolean showMicroServiceCallLibs, boolean showCntOfDevUpdMs,
+			boolean showMicroServiceCallLibs, boolean showCntOfDevUpdMs, int showClonesMinPair,
 			Iterable<TestCase> selectTestCases) {
 		MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(selectTestCases);
 		callsWithEntry.setMsDependOns(msService.msDependOns());
@@ -170,6 +173,7 @@ public class MDAllController {
 		
 		if(showClonesInMicroService) {
 			callsWithEntry.setClonesInMicroService(msService.findMicroServiceClone(staticAnalyseService.findAllFunctionCloneFunctions(), true));
+			callsWithEntry.setShowClonesMinPair(showClonesMinPair);
 		}
 		if(showMicroServiceCallLibs) {
 			callsWithEntry.setMicroServiceCallLibraries(msService.findAllMicroServiceCallLibraries());

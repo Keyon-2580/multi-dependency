@@ -67,6 +67,7 @@ public class MicroServiceCallWithEntry {
 	private boolean showAllMicroServices = true;
 	private boolean showStructure = true;
 	private boolean showClonesInMicroService = true;
+	private int showClonesMinPair = 3;
 	private boolean showMicroServiceCallLibs = true;
 	private boolean showCntOfDevUpdMs = true;
 	
@@ -189,7 +190,7 @@ public class MicroServiceCallWithEntry {
 	
 	private void showClonesInMicroService(JSONArray edges) {
 		for(Clone<MicroService> clone : clonesInMicroService) {
-			if(clone.sizeOfChildren() >= 3) {
+			if(clone.sizeOfChildren() >= showClonesMinPair) {
 				JSONObject edge = CytoscapeUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", clone.calculateValue(), false);
 				edges.add(edge);
 				edge.getJSONObject("data").put("id", clone.getId());

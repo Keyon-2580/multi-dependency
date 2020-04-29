@@ -262,34 +262,49 @@ var multiple_microservice_all = function(){
 			enableCollapsibleOptGroups: true
 		});
 		$("#submitScenario").click(function() {
+			if(isNaN($("#showClonesMinPair").val())){
+				alert($("#showClonesMinPair").val() + " 不是数字");
+				return ;
+			}
 			var ids = {
 					"ids" : $("#scenarioList").val(),
 					"showStructure" : $("#showStructure").prop('checked'),
 					"showMicroServiceCallLibs" : $("#showMicroServiceCallLibs").prop('checked'),
 					"showClonesInMicroService" : $("#showClonesInMicroService").prop('checked'),
-					"showCntOfDevUpdMs" : $("#showCntOfDevUpdMs").prop('checked')
+					"showCntOfDevUpdMs" : $("#showCntOfDevUpdMs").prop('checked'),
+					"showClonesMinPair" : $("#showClonesMinPair").val()
 			};
 			console.log(ids);
 			queryMultipleByTestCaseOrFeatureOrScenario(ids, "Scenario");
 		});
 		$("#submitTestCase").click(function() {
+			if(isNaN($("#showClonesMinPair").val())){
+				alert($("#showClonesMinPair").val() + " 不是数字");
+				return ;
+			}
 			var ids = {
 					"ids" : $("#testCaseList").val(),
 					"showStructure" : $("#showStructure").prop('checked'),
 					"showMicroServiceCallLibs" : $("#showMicroServiceCallLibs").prop('checked'),
 					"showClonesInMicroService" : $("#showClonesInMicroService").prop('checked'),
-					"showCntOfDevUpdMs" : $("#showCntOfDevUpdMs").prop('checked')
+					"showCntOfDevUpdMs" : $("#showCntOfDevUpdMs").prop('checked'),
+					"showClonesMinPair" : $("#showClonesMinPair").val()
 			};
 			console.log(ids);
 			queryMultipleByTestCaseOrFeatureOrScenario(ids, "TestCase");
 		});
 		$("#submitFeature").click(function() {
+			if(isNaN($("#showClonesMinPair").val())){
+				alert($("#showClonesMinPair").val() + " 不是数字");
+				return ;
+			}
 			var ids = {
 					"ids" : $("#featureList").val(),
 					"showStructure" : $("#showStructure").prop('checked'),
 					"showMicroServiceCallLibs" : $("#showMicroServiceCallLibs").prop('checked'),
 					"showClonesInMicroService" : $("#showClonesInMicroService").prop('checked'),
-					"showCntOfDevUpdMs" : $("#showCntOfDevUpdMs").prop('checked')
+					"showCntOfDevUpdMs" : $("#showCntOfDevUpdMs").prop('checked'),
+					"showClonesMinPair" : $("#showClonesMinPair").val()
 			};
 			console.log(ids);
 			queryMultipleByTestCaseOrFeatureOrScenario(ids, "Feature");
