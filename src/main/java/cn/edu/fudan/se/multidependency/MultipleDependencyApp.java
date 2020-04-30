@@ -26,6 +26,7 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanC
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
+import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.ProjectOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
@@ -53,7 +54,7 @@ public class MultipleDependencyApp {
 	}
 
 	@Bean
-	public FeatureOrganizationService organize(MicroserviceService microserviceService, DynamicAnalyseService dynamicAnalyseService) {
+	public FeatureOrganizationService organize(MicroserviceService microserviceService, DynamicAnalyseService dynamicAnalyseService, ContainRelationService containRelationService) {
 		System.out.println("organizeFeature");
 		Map<String, MicroService> allMicroService = microserviceService.findAllMicroService();
 		Map<Feature, List<TestCaseExecuteFeature>> featureExecutedByTestCases = dynamicAnalyseService.findAllFeatureExecutedByTestCases();
@@ -68,7 +69,7 @@ public class MultipleDependencyApp {
 		for (List<TestCaseRunTrace> runs : testCaseRunTraces.values()) {
 			for(TestCaseRunTrace run : runs) {
 				Trace trace = run.getTrace();
-				List<Span> spans = microserviceService.findSpansByTrace(trace);
+				List<Span> spans = containRelationService.findTraceContainSpans(trace);
 				traceToSpans.put(trace, spans);
 				for (Span span : spans) {
 					List<SpanCallSpan> callSpans = microserviceService.findSpanCallSpans(span);

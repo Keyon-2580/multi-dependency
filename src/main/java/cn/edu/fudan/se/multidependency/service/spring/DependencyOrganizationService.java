@@ -34,6 +34,9 @@ public class DependencyOrganizationService {
 
 	@Autowired
 	private StaticAnalyseService staticAnalyseService;
+    
+    @Autowired
+    ContainRelationService containRelationService;
 	
 	private Map<Long, Function> functions = new HashMap<>();
 	private Map<Long, ProjectFile> files = new HashMap<>();
@@ -73,28 +76,28 @@ public class DependencyOrganizationService {
 		JSONArray nodes = new JSONArray();
 		JSONArray edges = new JSONArray();
 		
-		Iterable<Package> packages = staticAnalyseService.allPackagesInProject(project);
+		Iterable<Package> packages = containRelationService.findProjectContainPackages(project);
 		
 		for(Package pck : packages) {
 			nodes.add(CytoscapeUtil.toCytoscapeNode(pck, "Package: " + pck.getName(), "Package"));
-			Iterable<ProjectFile> files = staticAnalyseService.allFilesInPackage(pck);
+			Iterable<ProjectFile> files = containRelationService.findPackageContainFiles(pck);
 			for(ProjectFile file : files) {
 				JSONObject fileJson = CytoscapeUtil.toCytoscapeNode(file, "File: " + file.getName(), "File");
 				fileJson.getJSONObject("data").put("parent", pck.getId());
 				nodes.add(fileJson);
 				
-				Iterable<Type> types = staticAnalyseService.allTypesInFile(file);
+				Iterable<Type> types = containRelationService.findFileContainTypes(file);
 				for(Type type : types) {
 					JSONObject typeJson = CytoscapeUtil.toCytoscapeNode(type, "Type: " + type.getName(), "Type");
 					typeJson.getJSONObject("data").put("parent", file.getId());
 					nodes.add(typeJson);
 					
-					Iterable<Function> functions = staticAnalyseService.allFunctionsInType(type);
+					Iterable<Function> functions = containRelationService.findTypeContainFunctions(type);
 					for(Function function : functions) {
 						JSONObject functionJson = CytoscapeUtil.toCytoscapeNode(function, "Function: " + function.getName(), "Function");
 						functionJson.getJSONObject("data").put("parent", type.getId());
 						nodes.add(functionJson);
-						Iterable<Variable> variables = staticAnalyseService.allVariablesInFunction(function);
+						Iterable<Variable> variables = containRelationService.findFunctionContainVariables(function);
 						for(Variable variable : variables) {
 							JSONObject variableJson = CytoscapeUtil.toCytoscapeNode(variable, "Variable: " + variable.getName(), "Variable");
 							variableJson.getJSONObject("data").put("parent", function.getId());
@@ -103,7 +106,7 @@ public class DependencyOrganizationService {
 
 					}
 					
-					Iterable<Variable> variables = staticAnalyseService.allVariablesInType(type);
+					Iterable<Variable> variables = containRelationService.findTypeContainVariables(type);
 					for(Variable variable : variables) {
 						JSONObject variableJson = CytoscapeUtil.toCytoscapeNode(variable, "Variable: " + variable.getName(), "Variable");
 						variableJson.getJSONObject("data").put("parent", type.getId());
@@ -111,7 +114,7 @@ public class DependencyOrganizationService {
 					}
 				}
 				
-				Iterable<Function> functions = staticAnalyseService.allFunctionsInFile(file);
+				Iterable<Function> functions = containRelationService.findFileContainFunctions(file);
 				for(Function function : functions) {
 					JSONObject functionJson = CytoscapeUtil.toCytoscapeNode(function, "Function: " + function.getName(), "Function");
 					functionJson.getJSONObject("data").put("parent", file.getId());
@@ -372,8 +375,8 @@ public class DependencyOrganizationService {
 			tempFunction.put(calledFunction, size);
 			countOfFunctionCall.put(callerFunction, tempFunction);
 			
-			ProjectFile callerFile = staticAnalyseService.findFunctionBelongToFile(callerFunction);
-			ProjectFile calledFile = staticAnalyseService.findFunctionBelongToFile(calledFunction);
+			ProjectFile callerFile = containRelationService.findFunctionBelongToFile(callerFunction);
+			ProjectFile calledFile = containRelationService.findFunctionBelongToFile(calledFunction);
 			if(callerFile.getId().equals(calledFile.getId())) {
 				continue;
 			}
@@ -387,8 +390,8 @@ public class DependencyOrganizationService {
 			tempFile.put(calledFile, size);
 			countOfFileCall.put(callerFile, tempFile);
 			
-			Package callerPackage = staticAnalyseService.findFileBelongToPackage(callerFile);
-			Package calledPackage = staticAnalyseService.findFileBelongToPackage(calledFile);
+			Package callerPackage = containRelationService.findFileBelongToPackage(callerFile);
+			Package calledPackage = containRelationService.findFileBelongToPackage(calledFile);
 			if(callerPackage.getId().equals(calledPackage.getId())) {
 				continue;
 			}

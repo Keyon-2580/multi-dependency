@@ -1,8 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +32,6 @@ import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.MicroServiceRepository;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.SpanRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroServiceCallMicroServiceRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroServiceCreateSpanRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroServiceDependOnMicroServiceRepository;
@@ -49,9 +46,6 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	
 	@Autowired
 	private SpanCallSpanRepository spanCallSpanRepository;
-	
-	@Autowired
-	private ContainRepository containRepository;
 	
 	@Autowired
 	private MicroServiceCreateSpanRepository microserviceCreateSpanRepository;
@@ -76,19 +70,10 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 
 	@Autowired
 	private SpanInstanceOfRestfulAPIRepository spanInstanceOfRestfulAPIRepository;
+    
+    @Autowired
+    private ContainRelationService containRelationService;
 	
-	@Override
-	public List<Span> findSpansByTrace(Trace trace) {
-		List<Span> spans = containRepository.findTraceContainSpansByTraceId(trace.getTraceId());
-		spans.sort(new Comparator<Span>() {
-			@Override
-			public int compare(Span o1, Span o2) {
-				return o1.getOrder().compareTo(o2.getOrder());
-			}
-		});
-		return spans;
-	}
-
 	@Override
 	public List<SpanCallSpan> findSpanCallSpans(Span span) {
 		return spanCallSpanRepository.findSpanCallSpansBySpanId(span.getSpanId());
@@ -193,8 +178,12 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	public Map<MicroService, List<RestfulAPI>> microServiceContainsAPIs() {
 		Map<MicroService, List<RestfulAPI>> result = new HashMap<>();
 		for(MicroService ms : findAllMicroService().values()) {
-			List<RestfulAPI> apis = containRepository.findMicroServiceContainRestfulAPI(ms.getId());
-			result.put(ms, apis);
+			List<RestfulAPI> temp = new ArrayList<>();
+			Iterable<RestfulAPI> apis = containRelationService.findMicroServiceContainRestfulAPI(ms);
+			for(RestfulAPI api : apis) {
+				temp.add(api);
+			}
+			result.put(ms, temp);
 		}
 		return result;
 	}
@@ -217,22 +206,6 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	public void saveMicroServiceCallMicroService(MicroServiceCallMicroService call) {
 		LOGGER.info("saveMicroServiceCallMicroServic");
 		microServiceCallMicroServiceRepository.save(call);
-	}
-	
-	@Override
-	public List<RestfulAPI> findMicroServiceContainRestfulAPI(MicroService microService) {
-		return containRepository.findMicroServiceContainRestfulAPI(microService.getId());
-	}
-
-	@Override
-	public Collection<Project> microServiceContainProjects(MicroService ms) {
-		List<Project> result = containRepository.findMicroServiceContainProjects(ms.getId());
-		return result;
-	}
-
-	@Override
-	public MicroService findProjectBelongToMicroService(Project project) {
-		return containRepository.findProjectBelongToMicroService(project.getId());
 	}
 	
 	@Override
@@ -272,8 +245,8 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 			if(removeSameNode && project1.equals(project2)) {
 				continue;
 			}
-			MicroService ms1 = findProjectBelongToMicroService(project1);
-			MicroService ms2 = findProjectBelongToMicroService(project2);
+			MicroService ms1 = containRelationService.findProjectBelongToMicroService(project1);
+			MicroService ms2 = containRelationService.findProjectBelongToMicroService(project2);
 			if(ms1 == null || ms2 == null) {
 				continue;
 			}
@@ -287,8 +260,8 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 				clone.setNode2(ms2);
 				result.add(clone);
 				CloneValueCalculatorForMicroService calculator = new CloneValueCalculatorForMicroService();
-				Collection<Function> functions1 = findMicroServiceContainFunctions(ms1);
-				Collection<Function> functions2 = findMicroServiceContainFunctions(ms2);
+				Iterable<Function> functions1 = containRelationService.findMicroServiceContainFunctions(ms1);
+				Iterable<Function> functions2 = containRelationService.findMicroServiceContainFunctions(ms2);
 				calculator.addFunctions(functions1, ms1);
 				calculator.addFunctions(functions2, ms2);
 				clone.setCalculator(calculator);
@@ -303,20 +276,10 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	}
 
 	@Override
-	public Collection<Function> findMicroServiceContainFunctions(MicroService ms) {
-		Collection<Project> projects = microServiceContainProjects(ms);
-		List<Function> result = new ArrayList<>();
-		for(Project project : projects) {
-			result.addAll(staticAnalyseService.findProjectContainFunctions(project));
-		}
-		return result;
-	}
-
-	@Override
 	public CallLibrary<MicroService> findMicroServiceCallLibraries(MicroService ms) {
 		CallLibrary<MicroService> result = new CallLibrary<MicroService>();
 		result.setCaller(ms);
-		Iterable<Project> projects = microServiceContainProjects(ms);
+		Iterable<Project> projects = containRelationService.findMicroServiceContainProjects(ms);
 		for(Project project : projects) {
 			CallLibrary<Project> projectCallLibrary = staticAnalyseService.findProjectCallLibraries(project);
 			Map<Library, Set<LibraryAPI>> callLibraryToAPIs = projectCallLibrary.getCallLibraryToAPIs();

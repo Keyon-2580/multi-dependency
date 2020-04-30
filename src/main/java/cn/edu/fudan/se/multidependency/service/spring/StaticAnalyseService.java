@@ -3,14 +3,10 @@ package cn.edu.fudan.se.multidependency.service.spring;
 import java.util.List;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
-import cn.edu.fudan.se.multidependency.model.node.code.Variable;
-import cn.edu.fudan.se.multidependency.model.node.lib.Library;
-import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
@@ -32,106 +28,18 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypePara
 
 public interface StaticAnalyseService {
 	
-	public Iterable<Package> allPackagesInProject(Project project);
-	
-	public Iterable<ProjectFile> allFilesInPackage(Package pck);
-	
-	public Iterable<Type> allTypesInFile(ProjectFile codeFile);
-	
-	public Iterable<Variable> allVariablesInType(Type type);
-	
-	public Iterable<Variable> allVariablesInFunction(Function function);
-	
-	public Iterable<Function> allFunctionsInFile(ProjectFile codeFile);
-	
-	public Iterable<Function> allFunctionsInType(Type type);
-	
-	/**
-	 * all projects
-	 * @return
-	 */
 	public Map<Long, Project> allProjects();
 	
-	/**
-	 * find project using id
-	 * @param id
-	 * @return
-	 */
 	public Project findProject(Long id);
 	
-	/**
-	 * all types
-	 * @return
-	 */
 	public Map<Long, Type> findTypes();
 	
 	
-	/**
-	 * 找出Type继承哪些Type
-	 * @param type
-	 * @return
-	 */
 	public List<Type> findExtendsType(Type type);
 	
 	public Map<Long, ProjectFile> allFiles();
 	
 	public List<Function> allFunctions();
-	
-	/**
-	 * Type属于哪个Package
-	 * @param type
-	 * @return
-	 */
-	public Package findTypeBelongToPackage(Type type);
-	
-	/**
-	 * 文件属于哪个Package
-	 * @param file
-	 * @return
-	 */
-	public Package findFileBelongToPackage(ProjectFile file);
-	
-	/**
-	 * Function属于哪个Type
-	 * @param function
-	 * @return
-	 */
-	public Type findFunctionBelongToType(Function function);
-	
-	/**
-	 * Function属于哪个File
-	 * @param function
-	 * @return
-	 */
-	public ProjectFile findFunctionBelongToFile(Function function);
-	
-	/**
-	 * Type属于哪个文件
-	 * @param type
-	 * @return
-	 */
-	public ProjectFile findTypeBelongToFile(Type type);
-	
-	/**
-	 * Variable属于哪个文件
-	 * @param variable
-	 * @return
-	 */
-	public ProjectFile findVariableBelongToFile(Variable variable);
-	
-	/**
-	 * Function属于哪个Project
-	 * @param function
-	 * @return
-	 */
-	public Project findFunctionBelongToProject(Function function);
-	
-	/**
-	 * Project包含的Function
-	 * @param project
-	 * @return
-	 */
-	public List<Function> findProjectContainFunctions(Project project);
 	
 	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller();
 	
@@ -188,7 +96,5 @@ public interface StaticAnalyseService {
 	 * @return
 	 */
 	public CallLibrary<Project> findProjectCallLibraries(Project project);
-	
-	public Library findAPIBelongToLibrary(LibraryAPI api);
 	
 }

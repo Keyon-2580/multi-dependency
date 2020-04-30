@@ -1,11 +1,8 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
@@ -28,8 +25,6 @@ public interface MicroserviceService {
 	Map<String, MicroService> findAllMicroService();
 	
 	Trace findTraceByFeature(Feature feature);
-	
-	List<Span> findSpansByTrace(Trace trace);
 	
 	List<SpanCallSpan> findSpanCallSpans(Span span);
 	
@@ -58,17 +53,6 @@ public interface MicroserviceService {
 	void deleteAllMicroServiceCallMicroService();
 	
 	void saveMicroServiceCallMicroService(MicroServiceCallMicroService call);
-	
-	/**
-	 * 微服务包含哪些项目
-	 * @param ms
-	 * @return
-	 */
-	Collection<Project> microServiceContainProjects(MicroService ms);
-	
-	MicroService findProjectBelongToMicroService(Project project);
-	
-	List<RestfulAPI> findMicroServiceContainRestfulAPI(MicroService microService);
 
 	SpanInstanceOfRestfulAPI findSpanBelongToAPI(Span span);
 	
@@ -81,14 +65,6 @@ public interface MicroserviceService {
 	 */
 	Iterable<Clone<MicroService>> findMicroServiceClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode);
 	
-	
-	/**
-	 * 微服务拥有的方法
-	 * @param ms
-	 * @return
-	 */
-	Collection<Function> findMicroServiceContainFunctions(MicroService ms);
-
 	
 	/**
 	 * 找出Project调用了哪些三方

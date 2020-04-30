@@ -20,14 +20,11 @@ public class APICoverageService {
 	@Autowired
 	private FeatureOrganizationService featureOrganizationService;
 	
-//	@Autowired
-//	private StaticAnalyseService staticAnalyseService;
-	
-	@Autowired
-	private DynamicAnalyseService dynamicAnalyseService;
-	
 	@Autowired
 	private MicroserviceService msService;
+	
+	@Autowired
+	private ContainRelationService containRelationService;
 	
 	public Map<MicroService, TestCaseCoverageMicroServiceAPIs> apiCoverage(Collection<TestCase> testCases) {
 		Map<MicroService, TestCaseCoverageMicroServiceAPIs> result = new HashMap<>();
@@ -36,7 +33,7 @@ public class APICoverageService {
 			TestCaseCoverageMicroServiceAPIs coverage = new TestCaseCoverageMicroServiceAPIs();
 			coverage.addTestCases(testCases);
 			coverage.setMicroService(ms);
-			List<RestfulAPI> apis = msService.findMicroServiceContainRestfulAPI(ms);
+			List<RestfulAPI> apis = containRelationService.findMicroServiceContainRestfulAPI(ms);
 			for(RestfulAPI api : apis) {
 				coverage.addCallRestfulAPITimes(api, 0);
 			}
