@@ -28,7 +28,6 @@ import cn.edu.fudan.se.multidependency.repository.node.microservice.TraceReposit
 import cn.edu.fudan.se.multidependency.repository.node.testcase.FeatureRepository;
 import cn.edu.fudan.se.multidependency.repository.node.testcase.ScenarioRepository;
 import cn.edu.fudan.se.multidependency.repository.node.testcase.TestCaseRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.ScenarioDefineTestCaseRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.TestCaseExecuteFeatureRepository;
@@ -62,15 +61,13 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	private FunctionDynamicCallFunctionRepository functionDynamicCallFunctionRepository;
 	
 	@Autowired
-	private ContainRepository containRepository;
-	
-	@Autowired
 	private StaticAnalyseService staticAnalyseService;
-	
-	private Iterable<Feature> allFeatures = null;
 	
 	@Autowired
 	private TraceRepository traceRepository;	
+    
+    @Autowired
+    ContainRelationService containRelationService;
 	
 	@Override
 	public Trace findTraceByTraceId(String traceId) {
@@ -82,9 +79,7 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		return traceRepository.findById(id).get();
 	}
 
-	/**
-	 * 找出所有特性
-	 */
+	private Iterable<Feature> allFeatures = null;
 	@Override
 	public Iterable<Feature> findAllFeatures() {
 		if(allFeatures == null) {
@@ -94,9 +89,6 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	}
 
 	private Iterable<TestCase> allTestCasesCache = null;
-	/**
-	 * 找出所有测试用例
-	 */
 	@Override
 	public Iterable<TestCase> findAllTestCases() {
 		if(allTestCasesCache == null) {
@@ -105,9 +97,6 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		return allTestCasesCache;
 	}
 
-	/**
-	 * 找出所有场景
-	 */
 	@Override
 	public Iterable<Scenario> findAllScenarios() {
 		return scenarioRepository.findAll();
@@ -153,16 +142,13 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 			MicroService ms) {
 		List<FunctionDynamicCallFunction> result = new ArrayList<>();
 		List<FunctionDynamicCallFunction> calls = findFunctionDynamicCallsByTrace(trace);
-		List<Project> projects = containRepository.findMicroServiceContainProjects(ms.getId());
-		Project project = null;
-		if(projects.size() > 0) {
-			project = projects.get(0);
-		} else {
-			return result;
-		}
+		Iterable<Project> projects = containRelationService.findMicroServiceContainProjects(ms);
 		for(FunctionDynamicCallFunction call : calls) {
-			if(project.getName().equals(call.getProjectName())) {
-				result.add(call);
+			for(Project project : projects) {
+				if(project.getName().equals(call.getProjectName())) {
+					result.add(call);
+					break;
+				}
 			}
 		}
 		return result;
@@ -171,7 +157,7 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	@Override
 	public List<FunctionDynamicCallFunction> findFunctionDynamicCallsByMicroService(MicroService ms) {
 		List<FunctionDynamicCallFunction> result = new ArrayList<>();
-		List<Project> projects = containRepository.findMicroServiceContainProjects(ms.getId());
+		Iterable<Project> projects = containRelationService.findMicroServiceContainProjects(ms);
 		for(Project project : projects) {
 			result.addAll(findFunctionDynamicCallsByProject(project));
 		}
@@ -254,18 +240,20 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	
 	@Override
 	public TestCase findTestCaseByTestCaseId(Integer id) {
+		/// FIXME
 		return null;
 	}
 
 	@Override
 	public Feature findFeatureByFeatureId(Integer id) {
+		/// FIXME
 		return null;
 	}
 
 	@Override
 	public Map<Feature, Feature> findAllFeatureToParentFeature() {
 		Map<Feature, Feature> result = new HashMap<>();
-		List<Contain> featureContainFeatures = containRepository.findAllFeatureContainFeatures();
+		List<Contain> featureContainFeatures = containRelationService.findAllFeatureContainFeatures();
 		for(Contain fcf : featureContainFeatures) {
 			Feature parentFeature = (Feature) fcf.getStart();
 			Feature feature = (Feature) fcf.getEnd();
@@ -377,11 +365,11 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 						// 暂时只通过方法名simpleName和方法参数数量判断是否可能为重写方法
 						continue;
 					}
-					Type calledType = staticAnalyseService.findFunctionBelongToType(called);
+					Type calledType = containRelationService.findFunctionBelongToType(called);
 					if(calledType == null) {
 						continue;
 					}
-					Type dynamicCalledType = staticAnalyseService.findFunctionBelongToType(dynamicCalled);
+					Type dynamicCalledType = containRelationService.findFunctionBelongToType(dynamicCalled);
 					if(dynamicCalledType == null) {
 						continue;
 					}

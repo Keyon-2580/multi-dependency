@@ -9,13 +9,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
-import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
@@ -43,7 +40,6 @@ import cn.edu.fudan.se.multidependency.repository.node.code.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.TypeRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.VariableRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.FunctionCloneFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportTypeRepository;
@@ -66,7 +62,6 @@ import cn.edu.fudan.se.multidependency.repository.relation.lib.FunctionCallLibra
  * 
  * @author fan
  *
- * 结构、三方、克隆，应只从数据库查找，内部不应与其它Service有关系
  */
 @Service
 public class StaticAnalyseServiceImpl implements StaticAnalyseService {
@@ -125,9 +120,6 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     VariableRepository variableRepository;
     
     @Autowired
-    ContainRepository containRepository;
-    
-    @Autowired
     FunctionCastTypeRepository functionCastTypeRepository;
     
     @Autowired
@@ -145,10 +137,25 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     @Autowired
     FunctionCloneFunctionRepository functionCloneFunctionRepository;
     
-    public void clearCache() {
-    	this.functionBelongToTypeCache.clear();
-    	this.typesCache.clear();
-    }
+    @Autowired
+    ContainRelationService containRelationService;
+
+	@Override
+	public CallLibrary<Project> findProjectCallLibraries(Project project) {
+		CallLibrary<Project> result = new CallLibrary<Project>();
+		result.setCaller(project);
+		Map<Function, List<FunctionCallLibraryAPI>> functionCallLibAPIs = findAllFunctionCallLibraryAPIs();
+		Iterable<Function> functions = containRelationService.findProjectContainFunctions(project);
+		for(Function function : functions) {
+			List<FunctionCallLibraryAPI> calls = functionCallLibAPIs.getOrDefault(function, new ArrayList<>());
+			for(FunctionCallLibraryAPI call : calls) {
+				LibraryAPI api = call.getApi();
+				Library lib = containRelationService.findAPIBelongToLibrary(api);
+				result.addLibraryAPI(api, lib, call.getTimes());
+			}
+		}
+		return result;
+	}
     
     private Map<Long, Type> typesCache = new HashMap<>();
 	@Override
@@ -177,65 +184,6 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return functions;
 	}
 
-	@Override
-	public Package findTypeBelongToPackage(Type type) {
-		return null;
-	}
-
-	@Override
-	public Project findFunctionBelongToProject(Function function) {
-		for(Project project : projectContainFunctionsCache.keySet()) {
-			List<Function> functions = projectContainFunctionsCache.get(project);
-			if(functions.contains(function)) {
-				return project;
-			}
-		}
-		Project project = containRepository.findFunctionBelongToProjectByFunctionId(function.getId());
-		assert(project != null);
-		findProjectContainFunctions(project);
-		return project;
-	}
-	
-	private Map<Project, List<Function>> projectContainFunctionsCache = new HashMap<>();
-	@Override
-	public List<Function> findProjectContainFunctions(Project project) {
-		List<Function> functions = projectContainFunctionsCache.get(project);
-		if(functions == null) {
-			functions = containRepository.findProjectContainFunctionsByProjectId(project.getId());
-			projectContainFunctionsCache.put(project, functions);
-		}
-		return functions;
-	}
-	
-	private Map<Node, ProjectFile> nodeBelongToFileCache = new HashMap<>();
-	@Override
-	public ProjectFile findFunctionBelongToFile(Function function) {
-		ProjectFile file = nodeBelongToFileCache.get(function);
-		if(file == null) {
-			file = containRepository.findFunctionBelongToFileByFunctionId(function.getId());
-			nodeBelongToFileCache.put(function, file);
-		}
-		return file;
-	}
-	@Override
-	public ProjectFile findTypeBelongToFile(Type type) {
-		ProjectFile file = nodeBelongToFileCache.get(type);
-		if(file == null) {
-			file = containRepository.findTypeBelongToFileByTypeId(type.getId());
-			nodeBelongToFileCache.put(type, file);
-		}
-		return file;
-	}
-	@Override
-	public ProjectFile findVariableBelongToFile(Variable variable) {
-		ProjectFile file = nodeBelongToFileCache.get(variable);
-		if(file == null) {
-			file = containRepository.findVariableBelongToFileByVariableId(variable.getId());
-			nodeBelongToFileCache.put(variable, file);
-		}
-		return file;
-	}
-
 	private Map<Long, ProjectFile> allFilesCache = new HashMap<>();
 	@Override
 	public Map<Long, ProjectFile> allFiles() {
@@ -247,11 +195,6 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			}
 		}
 		return allFilesCache;
-	}
-
-	@Override
-	public Package findFileBelongToPackage(ProjectFile file) {
-		return containRepository.findFileBelongToPackageByFileId(file.getId());
 	}
 
 	private Map<Long, Project> projectsCache = new HashMap<>();
@@ -427,17 +370,6 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return result;
 	}
 
-	private Map<Function, Type> functionBelongToTypeCache = new HashMap<>();
-	@Override
-	public Type findFunctionBelongToType(Function function) {
-		Type type = functionBelongToTypeCache.get(function);
-		if(type == null) {
-			type = containRepository.findFunctionBelongToTypeByFunctionId(function.getId());
-			functionBelongToTypeCache.put(function, type);
-		}
-		return type;
-	}
-
 	private Map<Type, Map<Type, Boolean>> subTypeCache = new HashMap<>();
 	@Override
 	public boolean isSubType(Type subType, Type superType) {
@@ -452,61 +384,6 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return is;
 	}
 
-	Map<Project, Iterable<Package>> projectContainPakcagesCache = new HashMap<>();
-	@Override
-	public Iterable<Package> allPackagesInProject(Project project) {
-		Iterable<Package> result = projectContainPakcagesCache.getOrDefault(project, containRepository.findProjectContainPackages(project.getId()));
-		projectContainPakcagesCache.put(project, result);
-		return result;
-	}
-
-	Map<Package, Iterable<ProjectFile>> packageContainFilesCache = new HashMap<>();
-	@Override
-	public Iterable<ProjectFile> allFilesInPackage(Package pck) {
-		Iterable<ProjectFile> result = packageContainFilesCache.getOrDefault(pck, containRepository.findPackageContainFiles(pck.getId()));
-		packageContainFilesCache.put(pck, result);
-		return result;
-	}
-
-	Map<ProjectFile, Iterable<Type>> fileContainTypesCache = new HashMap<>();
-	@Override
-	public Iterable<Type> allTypesInFile(ProjectFile codeFile) {
-		Iterable<Type> result = fileContainTypesCache.getOrDefault(codeFile, containRepository.findFileContainTypes(codeFile.getId()));
-		fileContainTypesCache.put(codeFile, result);
-		return result;
-	}
-
-	Map<ProjectFile, Iterable<Function>> fileContainFunctionsCache = new HashMap<>();
-	@Override
-	public Iterable<Function> allFunctionsInFile(ProjectFile codeFile) {
-		Iterable<Function> result = fileContainFunctionsCache.getOrDefault(codeFile, containRepository.findFileContainFunctions(codeFile.getId()));
-		fileContainFunctionsCache.put(codeFile, result);
-		return result;
-	}
-
-	Map<Type, Iterable<Function>> typeContainFunctionsCache = new HashMap<>();
-	@Override
-	public Iterable<Function> allFunctionsInType(Type type) {
-		Iterable<Function> result = typeContainFunctionsCache.getOrDefault(type, containRepository.findTypeContainFunctions(type.getId()));
-		typeContainFunctionsCache.put(type, result);
-		return result;
-	}
-
-	Map<Type, Iterable<Variable>> typeContainVariablesCache = new HashMap<>();
-	@Override
-	public Iterable<Variable> allVariablesInType(Type type) {
-		Iterable<Variable> result = typeContainVariablesCache.getOrDefault(type, containRepository.findTypeContainVariables(type.getId()));
-		typeContainVariablesCache.put(type, result);
-		return result;
-	}
-
-	Map<Function, Iterable<Variable>> functionContainVariablesCache = new HashMap<>();
-	@Override
-	public Iterable<Variable> allVariablesInFunction(Function function) {
-		Iterable<Variable> result = functionContainVariablesCache.getOrDefault(function, containRepository.findFunctionContainVariables(function.getId()));
-		functionContainVariablesCache.put(function, result);
-		return result;
-	}
 
 	Map<Function, List<FunctionCallLibraryAPI>> allFunctionCallLibraryAPIsCache = new ConcurrentHashMap<>();
 	@Override
@@ -544,8 +421,8 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			if(function1.equals(function2)) {
 				continue;
 			}
-			Project project1 = findFunctionBelongToProject(function1);
-			Project project2 = findFunctionBelongToProject(function2);
+			Project project1 = containRelationService.findFunctionBelongToProject(function1);
+			Project project2 = containRelationService.findFunctionBelongToProject(function2);
 			if(removeSameNode && project1.equals(project2)) {
 				continue;
 			}
@@ -569,28 +446,6 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	@Override
 	public Iterable<FunctionCloneFunction> findAllFunctionCloneFunctions() {
 		return functionCloneFunctionRepository.findAll();
-	}
-
-	@Override
-	public CallLibrary<Project> findProjectCallLibraries(Project project) {
-		CallLibrary<Project> result = new CallLibrary<Project>();
-		result.setCaller(project);
-		Map<Function, List<FunctionCallLibraryAPI>> functionCallLibAPIs = findAllFunctionCallLibraryAPIs();
-		Iterable<Function> functions = findProjectContainFunctions(project);
-		for(Function function : functions) {
-			List<FunctionCallLibraryAPI> calls = functionCallLibAPIs.getOrDefault(function, new ArrayList<>());
-			for(FunctionCallLibraryAPI call : calls) {
-				LibraryAPI api = call.getApi();
-				Library lib = findAPIBelongToLibrary(api);
-				result.addLibraryAPI(api, lib, call.getTimes());
-			}
-		}
-		return result;
-	}
-
-	@Override
-	public Library findAPIBelongToLibrary(LibraryAPI api) {
-		return containRepository.findLibraryAPIBelongToLibrary(api.getId());
 	}
 	
 }

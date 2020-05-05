@@ -1,7 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,11 +17,13 @@ public class CloneValueCalculatorForMicroService implements CloneValueCalculator
 	/**
 	 * 微服务内的方法数
 	 */
-	private Map<MicroService, Collection<Function>> msToFunctions = new HashMap<>();
+	private Map<MicroService, List<Function>> msToFunctions = new HashMap<>();
 	
-	public void addFunctions(Collection<Function> functions, MicroService ms) {
-		Collection<Function> temp = msToFunctions.getOrDefault(ms, new ArrayList<>());
-		temp.addAll(functions);
+	public void addFunctions(Iterable<Function> functions, MicroService ms) {
+		List<Function> temp = msToFunctions.getOrDefault(ms, new ArrayList<>());
+		for(Function function : functions) {
+			temp.add(function);
+		}
 		msToFunctions.put(ms, temp);
 	}
 

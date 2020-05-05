@@ -1,12 +1,14 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
@@ -36,7 +38,7 @@ public class GitAnalyseService {
     private DeveloperSubmitCommitRepository developerSubmitCommitRepository;
 
     @Autowired
-    private MicroserviceService microserviceService;
+    private ContainRelationService containRelationService;
     
     
     Iterable<Commit> allCommitsCache = null;
@@ -101,7 +103,7 @@ public class GitAnalyseService {
                 if(cnt++ == k) break;
             	Developer d = developer.getKey();
             	int times = project.getValue();
-                MicroService microService = microserviceService.findProjectBelongToMicroService(project.getKey());
+                MicroService microService = containRelationService.findProjectBelongToMicroService(project.getKey());
             	DeveloperUpdateNode<MicroService> temp = new DeveloperUpdateNode<>();
             	temp.setDeveloper(d);
             	temp.setNode(microService);

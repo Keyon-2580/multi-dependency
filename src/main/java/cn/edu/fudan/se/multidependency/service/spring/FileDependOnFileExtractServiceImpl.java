@@ -46,6 +46,9 @@ public class FileDependOnFileExtractServiceImpl implements FileDependOnFileExtra
 	
 	@Autowired
 	private FileDependOnFileRepository fileDependOnFileRepository;
+    
+    @Autowired
+    ContainRelationService containRelationService;
 	
 	private Iterable<FileImportType> fileImportTypes = new ArrayList<>();
 	private Iterable<FileImportFunction> fileImportFunctions = new ArrayList<>();
@@ -94,11 +97,11 @@ public class FileDependOnFileExtractServiceImpl implements FileDependOnFileExtra
 		ProjectFile file = cache.get(node);
 		if(file == null) {
 			if(node instanceof Type) {
-				file = staticAnalyseService.findTypeBelongToFile((Type) node);
+				file = containRelationService.findTypeBelongToFile((Type) node);
 			} else if(node instanceof Function) {
-				file = staticAnalyseService.findFunctionBelongToFile((Function) node);
+				file = containRelationService.findFunctionBelongToFile((Function) node);
 			} else if(node instanceof Variable) {
-				file = staticAnalyseService.findVariableBelongToFile((Variable) node);
+				file = containRelationService.findVariableBelongToFile((Variable) node);
 			} else {
 				throw new Exception("error node type : " + node.getClass());
 			}

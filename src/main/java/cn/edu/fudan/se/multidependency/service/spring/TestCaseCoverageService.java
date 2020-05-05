@@ -22,6 +22,9 @@ public class TestCaseCoverageService {
 	
 	@Autowired
 	private DynamicAnalyseService dynamicAnalyseService;
+    
+    @Autowired
+    ContainRelationService containRelationService;
 	
 	public FunctionCallPropertion findFunctionCallFunctionDynamicCalled(TestCase testCase) {
 		return findFunctionCallFunctionDynamicCalled(testCase, null);
@@ -46,7 +49,7 @@ public class TestCaseCoverageService {
 		if(project != null) {
 			Set<Function> key = new HashSet<>(staticCalls.keySet());
 			for(Function f : key) {
-				Project fBelongToProject = staticAnalyseService.findFunctionBelongToProject(f);
+				Project fBelongToProject = containRelationService.findFunctionBelongToProject(f);
 				if(!fBelongToProject.equals(project)) {
 					staticCalls.remove(f);
 					dynamicCalls.remove(f);
