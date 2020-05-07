@@ -41,6 +41,7 @@ public class InsertDataMain {
 	private static final Logger LOGGER = LoggerFactory.getLogger(InsertDataMain.class);
 
 	public static void main(String[] args) throws Exception {
+		LOGGER.info("InsertDataMain");
 		insert(args);
 //		checkMicroserviceTrace(args);
 	}

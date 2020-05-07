@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.utils;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,15 +14,63 @@ import com.alibaba.fastjson.JSONObject;
 public class FileUtil {
 
 	public static void main(String[] args) {
-		JSONArray array = readDirectoryToGenerateProjectJSONFile(
+		JSONObject array = readDirectoryToGenerateProjectJSONFile(
 				new File("D:\\multiple-dependency-project\\train-ticket"), 1, "java", true, "train-ticket");
 		System.out.println(array);
+		try {
+			writeToFileForProjectJSONFile("D:\\testtesttest.log", array);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * D:\\testtesttest.log
+	 * D:\\multiple-dependency-project\\train-ticket
+	 * 1
+	 * java
+	 * true
+	 * train-ticket
+	 * @param args
+	 * @throws Exception
+	 */
+	public static void writeToFileForProjectJSONFile(String[] args) throws Exception {
+		String outputPath = args[0];
+		String projectDirectoryPath = args[1];
+		int depth = Integer.parseInt(args[2]);
+		String language = args[3];
+		boolean isAllMicroService = Boolean.parseBoolean(args[4]);
+		String microserviceGroupName = null;
+		if(args.length == 6) {
+			microserviceGroupName = args[5];
+		}
+		JSONObject array = readDirectoryToGenerateProjectJSONFile(
+				new File(projectDirectoryPath), depth, language, isAllMicroService, microserviceGroupName);
+		try {
+			writeToFileForProjectJSONFile(outputPath, array);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void writeToFileForProjectJSONFile(String outputPath, JSONObject content) throws Exception {
+		try(PrintWriter writer = new PrintWriter(new File(outputPath))) {
+			writer.println(content.toJSONString());
+		}
+	}
+	
+	public static JSONObject readDirectoryToGenerateProjectJSONFile(
+			String rootDirectoryPath, int depth, String defaultLanguage,
+			boolean isAllMicroservice, String serviceGroupName) {
+		return readDirectoryToGenerateProjectJSONFile(new File(rootDirectoryPath), 
+				depth, defaultLanguage, isAllMicroservice, serviceGroupName);
 	}
 
-	public static JSONArray readDirectoryToGenerateProjectJSONFile(
+	public static JSONObject readDirectoryToGenerateProjectJSONFile(
 			File rootDirectory, int depth, String defaultLanguage,
 			boolean isAllMicroservice, String serviceGroupName) {
-		JSONArray result = new JSONArray();
+		JSONObject result = new JSONObject();
+		JSONArray projects = new JSONArray();
 		List<File> projectDirectories = new ArrayList<>();
 		FileUtil.listDirectories(rootDirectory, depth, projectDirectories);
 
@@ -34,10 +83,12 @@ public class FileUtil {
 			projectJson.put("isMicroservice", isAllMicroservice);
 			if(isAllMicroservice && serviceGroupName != null) {
 				projectJson.put("serviceGroupName", serviceGroupName);
+				projectJson.put("microserviceName", projectDirectory.getName());
 			}
-			result.add(projectJson);
+			projects.add(projectJson);
 		}
-
+		result.put("projects", projects);
+		result.put("architectures", new JSONObject());
 		return result;
 	}
 

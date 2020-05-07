@@ -9,7 +9,7 @@ import depends.entity.repo.EntityRepo;
 
 public class DependsEntityRepoExtractorImplTest {
 
-	@Test
+//	@Test
 	public void test() {
 		DependsEntityRepoExtractor extractor = DependsEntityRepoExtractorImpl.getInstance();
 		extractor.setLanguage(Language.java);

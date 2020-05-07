@@ -27,6 +27,9 @@ var _project = function() {
 				if(result.result == "success") {
 					console.log("success");
 					cy = showDataInCytoscape($("#graph"), result.value, "dagre");
+					cy.expandCollapse();
+					var api = cy.expandCollapse('get');
+					api.collapseAll();
 				} else {
 					alert(result.msg);
 				}

@@ -58,14 +58,16 @@ var multiple_microservice_all = function(){
 			success : function(result) {
 				if (result.result == "success") {
 					console.log(result);
-					cyEntry.remove('edge[type="all_MicroService_DependOn_MicroService"]');
-					cyEntry.remove('edge[type="all_MicroService_call_MicroService"]');
-					cyEntry.remove('edge[type="all_FeatureExecutedByTestCase"]');
-					cyEntry.remove('edge[type="all_TestCaseExecuteMicroService"]');
-					cyEntry.remove('edge[type="NewEdges"]');
-					cyEntry.remove('edge[type="NewEdges_Edge1_Edge2"]');
-					cyEntry.remove('edge[type="NewEdges_Edge1"]');
-					cyEntry.remove('edge[type="NewEdges_Edge2"]');
+					cyEntry.batch(function(){
+						cyEntry.remove('edge[type="all_MicroService_DependOn_MicroService"]');
+						cyEntry.remove('edge[type="all_MicroService_call_MicroService"]');
+						cyEntry.remove('edge[type="all_FeatureExecutedByTestCase"]');
+						cyEntry.remove('edge[type="all_TestCaseExecuteMicroService"]');
+						cyEntry.remove('edge[type="NewEdges"]');
+						cyEntry.remove('edge[type="NewEdges_Edge1_Edge2"]');
+						cyEntry.remove('edge[type="NewEdges_Edge1"]');
+						cyEntry.remove('edge[type="NewEdges_Edge2"]');
+					});
 					var relatedNodes = result.nodes;
 					var relatedEdges = result.edges;
 					var datas = new Array();
@@ -136,10 +138,12 @@ var multiple_microservice_all = function(){
 				edges.push({data: edge});
 			}
 		}
-		for(var i = 0; i < removeIds.length; i++){
-			removeEdge(cyEntry, removeIds[i]);
-		}
-		addEdges(cyEntry, edges);
+		cyEntry.batch(function(){
+			for(var i = 0; i < removeIds.length; i++){
+				removeEdge(cyEntry, removeIds[i]);
+			}
+			addEdges(cyEntry, edges);
+		});
 	};
 	
 	var setTapNode = function(cyEntry, result) {
@@ -152,11 +156,8 @@ var multiple_microservice_all = function(){
 		cyEntry.on('tap', 'edge', function(evt){
 			var edge = evt.target;
 			if(edge.data().type == "all_MicroService_clone_MicroService") {
-				console.log(edge.data().id);
-				console.log(result);
 				var id = edge.data().id;
 				var functions = result.cloneDetail[id];
-				console.log(functions);
 				if(functions != null) {
 					$("#table_clone").html("");
 					var html = "";
@@ -214,8 +215,6 @@ var multiple_microservice_all = function(){
 					console.log(result.value.data);
 					cyEntry = showDataInCytoscape($("#entry"), result.value.data, "preset");
 					queryResult = result;
-//					processCytoscape(cyEntry);
-//					setTapNode(cyEntry);
 					
 					$.ajax({
 						type : "POST",
@@ -239,7 +238,7 @@ var multiple_microservice_all = function(){
 		});
 	}
 	
-	var _init = function(){
+	var _multiselect = function() {
 		$("#testCaseList").multiselect({
 			enableClickableOptGroups: true,
 			enableCollapsibleOptGroups: true,
@@ -261,6 +260,10 @@ var multiple_microservice_all = function(){
 			collapseOptGroupsByDefault: true,
 			enableCollapsibleOptGroups: true
 		});
+	};
+	
+	var _init = function(){
+		_multiselect();
 		$("#submitScenario").click(function() {
 			if(isNaN($("#showClonesMinPair").val())){
 				alert($("#showClonesMinPair").val() + " 不是数字");

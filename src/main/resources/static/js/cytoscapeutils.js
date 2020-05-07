@@ -460,8 +460,10 @@
 	    	],
 	    	elements: elements
 	    });
+		cy.panzoom();
 		return cy;
 	};
+	
 	var _addNodes = function(cy, nodes) {
 		for(var i = 0; i < nodes.length; i++) {
 			console.log(nodes[i]);

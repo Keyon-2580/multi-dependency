@@ -5,11 +5,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.ho.yaml.Yaml;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import lombok.Data;
 
 public class YamlUtil {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(YamlUtil.class);
 
 	public static YamlObject getDataBasePathDefault(String yamlPath) throws Exception {
 		File file = new File(yamlPath);
@@ -24,6 +28,7 @@ public class YamlUtil {
 	
 	@SuppressWarnings("unchecked")
 	public static YamlObject getDataBasePath(String yamlPath) throws Exception {
+		LOGGER.info(yamlPath);
 		File file = new File(yamlPath);
 		YamlObject result = new YamlObject();
 		Map<?, ?> yaml = (Map<?, ?>) Yaml.load(file);

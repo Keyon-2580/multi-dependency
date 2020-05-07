@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -24,9 +26,9 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanCallSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
+import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
-import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.ProjectOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
@@ -34,9 +36,34 @@ import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 @SpringBootApplication
 @EnableNeo4jRepositories(basePackages = {"cn.edu.fudan.se.multidependency.repository"})
 public class MultipleDependencyApp {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(MultipleDependencyApp.class);
 	
 	public static void main(String[] args) {
-		SpringApplication.run(MultipleDependencyApp.class, args);
+		LOGGER.info("MultipleDependencyApp");
+		if(args == null || args.length == 0) {
+			SpringApplication.run(MultipleDependencyApp.class, args);
+		}
+		String operation = args[0];
+		String[] parameters = new String[args.length - 1];
+		for(int i = 0; i < parameters.length; i++) {
+			parameters[i] = args[i + 1];
+		}
+		switch(operation) {
+		case "-i":
+			InsertDataMain.insert(parameters);
+			break;
+		case "-m":
+			SpringApplication.run(MultipleDependencyApp.class, args);
+			break;
+		case "-p":
+			try {
+				cn.edu.fudan.se.multidependency.utils.FileUtil.writeToFileForProjectJSONFile(parameters);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			break;
+		}
 	}
 	
 	@Bean 
