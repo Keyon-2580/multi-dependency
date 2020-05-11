@@ -16,6 +16,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
@@ -46,6 +47,30 @@ public class DependencyOrganizationService {
 	private Map<Package, Map<Package, Integer>> countOfPackageCall = new HashMap<>();
 	private Map<Function, ProjectFile> functionBelongToFile = new HashMap<>();
 	private Map<ProjectFile, Package> fileBelongToPackage = new HashMap<>();
+	
+	public JSONObject projectToCytoscape(Project project, Iterable<FunctionDynamicCallFunction> dynamicCalls,
+			Iterable<FunctionCloneFunction> clones) {
+		JSONObject result = new JSONObject();
+		JSONObject staticAndDynamicResult = projectStaticAndDynamicToCytoscape(project, dynamicCalls);
+		JSONArray nodes = staticAndDynamicResult.getJSONArray("nodes");
+		JSONArray edges = staticAndDynamicResult.getJSONArray("edges");
+		
+		Map<Function, Map<Function, Boolean>> hasFunctionCallFunction = new HashMap<>();
+		for(FunctionCloneFunction clone : clones) {
+			Function function1 = clone.getFunction1();
+			Function function2 = clone.getFunction2();
+			if(!hasFunctionCallFunction.getOrDefault(function1, new HashMap<>()).getOrDefault(function2, false)) {
+				edges.add(CytoscapeUtil.relationToEdge(function1, function2, "Function_clone_Function", "Function_clone_Function", false));
+				Map<Function, Boolean> temp = hasFunctionCallFunction.getOrDefault(function1, new HashMap<>());
+				temp.put(function2, true);
+				hasFunctionCallFunction.put(function1, temp);
+			}
+		}
+		
+		result.put("nodes", nodes);
+		result.put("edges", edges);
+		return result;
+	}
 	
 	public JSONObject projectStaticAndDynamicToCytoscape(Project project, Iterable<FunctionDynamicCallFunction> dynamicCalls) {
 		JSONObject result = new JSONObject();

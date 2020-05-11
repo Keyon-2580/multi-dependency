@@ -25,8 +25,8 @@ public class FileUtil {
 	}
 	
 	/**
-	 * D:\\testtesttest.log
-	 * D:\\multiple-dependency-project\\train-ticket
+	 * D:\testtesttest.log
+	 * D:\multiple-dependency-project\train-ticket
 	 * 1
 	 * java
 	 * true

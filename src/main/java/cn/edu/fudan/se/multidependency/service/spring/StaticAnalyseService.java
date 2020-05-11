@@ -83,6 +83,8 @@ public interface StaticAnalyseService {
 	
 	public Iterable<FunctionCloneFunction> findAllFunctionCloneFunctions();
 	
+	public Iterable<FunctionCloneFunction> findProjectContainFunctionCloneFunctions(Project project);
+	
 	/**
 	 * 根据函数间的克隆找出项目间的克隆
 	 * @param functionClones

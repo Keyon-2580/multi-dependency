@@ -443,9 +443,15 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return result;
 	}
 
+	
 	@Override
 	public Iterable<FunctionCloneFunction> findAllFunctionCloneFunctions() {
 		return functionCloneFunctionRepository.findAll();
+	}
+
+	@Override
+	public Iterable<FunctionCloneFunction> findProjectContainFunctionCloneFunctions(Project project) {
+		return functionCloneFunctionRepository.findProjectContainFunctionCloneFunctionRelations(project.getId());
 	}
 	
 }

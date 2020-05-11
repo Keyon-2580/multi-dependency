@@ -1,5 +1,5 @@
+var cy = null;
 var _project = function() {
-	var cy = null;
 	$('#project_select').multiselect({
 		includeSelectAllOption: true
 	});
@@ -37,6 +37,10 @@ var _project = function() {
 		});
 	});
 	$("#showImg").click(function() {
+		console.log("showImg");
+		showImg(cy, "entry-png-eg");
+	})
+	/*$("#showImg").click(function() {
 		console.log("rrr");
 		if(cy != null) {
 			$('#png-eg').attr('src', cy.png({
@@ -45,7 +49,20 @@ var _project = function() {
 			}));
 			$('#png-eg').css("background-color", "#ffffff");
 		}
-	})
+	})*/
+	clearMemo();
+};
+var clearMemo = function() {
+	$("#clearMemo").click(function() {
+		console.log("clearMemo");
+		if(cy == null) {
+			return ;
+		}
+		cy = refreshCy(cy);
+		cy.expandCollapse();
+		var api = cy.expandCollapse('get');
+		api.collapseAll();
+	});
 };
 
 var init = function() {

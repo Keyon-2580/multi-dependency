@@ -456,6 +456,10 @@
 	                    'target-arrow-shape': 'triangle',
 	                    'target-arrow-color': 'red'
 	    			}
+	    		},
+	    		{
+	    			selector: 'edge[type="Function_clone_Function"]',
+	    			style: styleEdgeClone
 	    		}
 	    	],
 	    	elements: elements
@@ -530,6 +534,7 @@
 	};
 	var showImg = function(cy, imgContainerId){
 		if(cy != null) {
+			console.log("showImg");
 			$("#" + imgContainerId).attr('src', cy.png({
 				bg: "#ffffff",
 				full : true

@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.service.spring.DependencyOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.ProjectOrganizationService;
+import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 
 @Controller
 @RequestMapping("/project")
@@ -29,6 +31,9 @@ public class ProjectController {
 
 	@Autowired
 	private DependencyOrganizationService dependencyOrganizationService;
+	
+	@Autowired
+	private StaticAnalyseService staticAnalyseService;
 
 	@GetMapping(value = {"/", "/index"})
 	public String index() {
@@ -84,7 +89,9 @@ public class ProjectController {
 			}
 			if("all".equals(dependency)) {
 				List<FunctionDynamicCallFunction> calls = dynamicAnalyseService.findFunctionDynamicCallsByProject(project);
-				result.put("value", dependencyOrganizationService.projectStaticAndDynamicToCytoscape(project, calls));
+				Iterable<FunctionCloneFunction> clones = staticAnalyseService.findProjectContainFunctionCloneFunctions(project);
+//				result.put("value", dependencyOrganizationService.projectStaticAndDynamicToCytoscape(project, calls));
+				result.put("value", dependencyOrganizationService.projectToCytoscape(project, calls, clones));
 			}
 			System.out.println(result.get("value"));
 			if(result.get("value") == null) {
