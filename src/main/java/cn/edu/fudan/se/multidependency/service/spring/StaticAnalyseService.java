@@ -7,6 +7,7 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
@@ -98,5 +99,7 @@ public interface StaticAnalyseService {
 	 * @return
 	 */
 	public CallLibrary<Project> findProjectCallLibraries(Project project);
+	
+	public Iterable<Library> findAllLibraries();
 	
 }

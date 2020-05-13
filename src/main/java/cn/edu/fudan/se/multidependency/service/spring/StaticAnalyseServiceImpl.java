@@ -40,6 +40,7 @@ import cn.edu.fudan.se.multidependency.repository.node.code.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.TypeRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.VariableRepository;
+import cn.edu.fudan.se.multidependency.repository.node.lib.LibraryRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.FunctionCloneFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportTypeRepository;
@@ -136,6 +137,9 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     
     @Autowired
     FunctionCloneFunctionRepository functionCloneFunctionRepository;
+    
+    @Autowired
+    LibraryRepository libraryRepository;
     
     @Autowired
     ContainRelationService containRelationService;
@@ -444,14 +448,37 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	
+	private Iterable<FunctionCloneFunction> allClonesCache = null;
 	@Override
 	public Iterable<FunctionCloneFunction> findAllFunctionCloneFunctions() {
-		return functionCloneFunctionRepository.findAll();
+		if(allClonesCache == null) {
+			allClonesCache = functionCloneFunctionRepository.findAll();
+		}
+		return allClonesCache;
 	}
 
 	@Override
 	public Iterable<FunctionCloneFunction> findProjectContainFunctionCloneFunctions(Project project) {
-		return functionCloneFunctionRepository.findProjectContainFunctionCloneFunctionRelations(project.getId());
+//		List<FunctionCloneFunction> result = functionCloneFunctionRepository.findProjectContainFunctionCloneFunctionRelations(project.getId());
+		Iterable<FunctionCloneFunction> allClones = findAllFunctionCloneFunctions();
+		List<FunctionCloneFunction> result = new ArrayList<>();
+		for(FunctionCloneFunction clone : allClones) {
+			if(containRelationService.findFunctionBelongToProject(clone.getFunction1()).equals(project)
+					&& containRelationService.findFunctionBelongToProject(clone.getFunction2()).equals(project)) {
+				result.add(clone);
+			}
+		}
+		
+		return result;
+	}
+	
+	private Iterable<Library> cacheForAllLibraries = null;
+	@Override
+	public Iterable<Library> findAllLibraries() {
+		if(cacheForAllLibraries == null) {
+			cacheForAllLibraries = libraryRepository.findAll();
+		}
+		return cacheForAllLibraries;
 	}
 	
 }

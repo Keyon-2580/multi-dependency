@@ -1,4 +1,4 @@
-var multiple_microservice_all = function(){
+var multiple_microservice_all = function(cytoscapeutil) {
 	var cyEntry = null;
 	
 	var firstTestCaseId = null;
@@ -22,7 +22,7 @@ var multiple_microservice_all = function(){
 			success : function(result) {
 				if (result.result == "success") {
 					console.log(result);
-					cyEntry = showDataInCytoscape($("#entry"), result.value.data, "dagre");
+					cyEntry = cytoscapeutil.showDataInCytoscape($("#entry"), result.value.data, "dagre");
 					queryResult = result;
 					processCytoscape(cyEntry);
 					setTapNode(cyEntry, result);
@@ -140,9 +140,9 @@ var multiple_microservice_all = function(){
 		}
 		cyEntry.batch(function(){
 			for(var i = 0; i < removeIds.length; i++){
-				removeEdge(cyEntry, removeIds[i]);
+				cytoscapeutil.removeEdge(cyEntry, removeIds[i]);
 			}
-			addEdges(cyEntry, edges);
+			cytoscapeutil.addEdges(cyEntry, edges);
 		});
 	};
 	
@@ -213,7 +213,7 @@ var multiple_microservice_all = function(){
 						nodes[i].position = position;
 					}
 					console.log(result.value.data);
-					cyEntry = showDataInCytoscape($("#entry"), result.value.data, "preset");
+					cyEntry = cytoscapeutil.showDataInCytoscape($("#entry"), result.value.data, "preset");
 					queryResult = result;
 					
 					$.ajax({
@@ -314,7 +314,7 @@ var multiple_microservice_all = function(){
 		});
 		
 		$("#showImg").click(function() {
-			showImg(cyEntry, "entry-png-eg");
+			cytoscapeutil.showImg(cyEntry, "entry-png-eg");
 		})
 	};
 	var clearMemo = function() {
@@ -322,7 +322,7 @@ var multiple_microservice_all = function(){
 			if(cyEntry == null) {
 				return ;
 			}
-			cyEntry = refreshCy(cyEntry);
+			cyEntry = cytoscapeutil.refreshCy(cyEntry);
 			processCytoscape(cyEntry);
 			setTapNode(cyEntry, null);
 		});

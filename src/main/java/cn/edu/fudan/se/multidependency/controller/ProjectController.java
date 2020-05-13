@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
@@ -61,6 +62,39 @@ public class ProjectController {
 		return result;
 	}
 	
+	@GetMapping("/cytoscapenew")
+	@ResponseBody
+	public JSONObject cytoscapenew(
+			@RequestParam("projectId") Long projectId) {
+		System.out.println("/project/cytoscape");
+		JSONObject result = new JSONObject();
+		try {
+			Project project = projectOrganizationService.findProjectById(projectId);
+			if(project == null) {
+				throw new Exception("没有找到id为 " + projectId + " 的项目");
+			}
+//			List<FunctionDynamicCallFunction> calls = dynamicAnalyseService.findFunctionDynamicCallsByProject(project);
+//			System.out.println(calls.size());
+//			Iterable<FunctionCloneFunction> clones = staticAnalyseService.findProjectContainFunctionCloneFunctions(project);
+//			System.out.println("end finding clones");
+			JSONArray nodes = dependencyOrganizationService.projectNodeToCytoscape(project, DependencyOrganizationService.LEVEL_FILE);
+			JSONObject elements = new JSONObject();
+			elements.put("nodes", nodes);
+			elements.put("edges", new JSONArray());
+			result.put("value", elements);
+			System.out.println(result.get("value"));
+			if(result.get("value") == null) {
+				throw new Exception("结果暂无");
+			}
+			result.put("result", "success");
+		} catch (Exception e) {
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
+		
+		return result;
+	}
+	
 	@GetMapping("/cytoscape")
 	@ResponseBody
 	public JSONObject cytoscape(
@@ -85,12 +119,15 @@ public class ProjectController {
 				}
 			}
 			if("static".equals(dependency)) {
-				result.put("value", dependencyOrganizationService.projectStaticStructureToCytoscape(project));
+				result.put("value", dependencyOrganizationService.projectToCytoscape(project));
 			}
 			if("all".equals(dependency)) {
 				List<FunctionDynamicCallFunction> calls = dynamicAnalyseService.findFunctionDynamicCallsByProject(project);
+				System.out.println(calls.size());
+				System.out.println("start to find clones");
 				Iterable<FunctionCloneFunction> clones = staticAnalyseService.findProjectContainFunctionCloneFunctions(project);
 //				result.put("value", dependencyOrganizationService.projectStaticAndDynamicToCytoscape(project, calls));
+				System.out.println("end finding clones");
 				result.put("value", dependencyOrganizationService.projectToCytoscape(project, calls, clones));
 			}
 			System.out.println(result.get("value"));

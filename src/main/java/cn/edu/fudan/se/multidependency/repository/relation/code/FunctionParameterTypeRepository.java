@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FunctionParameterTypeRepository extends Neo4jRepository<FunctionParameterType, Long>{
 
-	@Query("MATCH result=(function:Function)-[r:" + RelationType.str_FUNCTION_PARAMETER_TYPE + "]->(type:Type) with function,type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3]->(type) where id(project)={projectId} RETURN result")
+	@Query("MATCH result=(function:Function)-[r:" + RelationType.str_FUNCTION_PARAMETER_TYPE + "]->(type:Type) with function,type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)={projectId} RETURN result")
 	List<FunctionParameterType> findProjectContainFunctionParameterTypeRelations(@Param("projectId") Long projectId);
 
 }

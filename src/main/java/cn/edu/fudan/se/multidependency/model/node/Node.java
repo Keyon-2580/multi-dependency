@@ -1,7 +1,6 @@
 package cn.edu.fudan.se.multidependency.model.node;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
 public interface Node extends Serializable {

@@ -16,17 +16,12 @@ import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
-import cn.edu.fudan.se.multidependency.repository.node.code.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.DeveloperSubmitCommitRepository;
-import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
 @Service
 public class GitAnalyseService {
-
-    @Autowired
-    private ProjectRepository projectRepository;
 
     @Autowired
     private CommitRepository commitRepository;
@@ -66,8 +61,9 @@ public class GitAnalyseService {
             }
             Set<Project> updProjects = new HashSet<>();
             for(ProjectFile file : files) {
-                String projectName = FileUtil.extractProjectNameFromFile(file.getPath());
-                Project project = projectRepository.findProjectByProjectName(projectName);
+//                String projectName = FileUtil.extractProjectNameFromFile(file.getPath());
+//                Project project = projectRepository.findProjectByProjectName(projectName);
+            	Project project = containRelationService.findFileBelongToProject(file);
                 if(project != null) {
                     updProjects.add(project);
                 }

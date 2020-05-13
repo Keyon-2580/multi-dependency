@@ -29,6 +29,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction
 import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil;
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
 @Service
 public class DependencyOrganizationService {
@@ -37,7 +38,7 @@ public class DependencyOrganizationService {
 	private StaticAnalyseService staticAnalyseService;
     
     @Autowired
-    ContainRelationService containRelationService;
+    private ContainRelationService containRelationService;
 	
 	private Map<Long, Function> functions = new HashMap<>();
 	private Map<Long, ProjectFile> files = new HashMap<>();
@@ -51,7 +52,7 @@ public class DependencyOrganizationService {
 	public JSONObject projectToCytoscape(Project project, Iterable<FunctionDynamicCallFunction> dynamicCalls,
 			Iterable<FunctionCloneFunction> clones) {
 		JSONObject result = new JSONObject();
-		JSONObject staticAndDynamicResult = projectStaticAndDynamicToCytoscape(project, dynamicCalls);
+		JSONObject staticAndDynamicResult = projectToCytoscape(project, dynamicCalls);
 		JSONArray nodes = staticAndDynamicResult.getJSONArray("nodes");
 		JSONArray edges = staticAndDynamicResult.getJSONArray("edges");
 		
@@ -72,9 +73,9 @@ public class DependencyOrganizationService {
 		return result;
 	}
 	
-	public JSONObject projectStaticAndDynamicToCytoscape(Project project, Iterable<FunctionDynamicCallFunction> dynamicCalls) {
+	public JSONObject projectToCytoscape(Project project, Iterable<FunctionDynamicCallFunction> dynamicCalls) {
 		JSONObject result = new JSONObject();
-		JSONObject staticResult = projectStaticStructureToCytoscape(project);
+		JSONObject staticResult = projectToCytoscape(project);
 		JSONArray nodes = staticResult.getJSONArray("nodes");
 		JSONArray edges = staticResult.getJSONArray("edges");
 		
@@ -96,53 +97,169 @@ public class DependencyOrganizationService {
 		return result;
 	}
 	
-	public JSONObject projectStaticStructureToCytoscape(Project project) {
-		JSONObject result = new JSONObject();
+	public static final byte LEVEL_PACKAGE = 0;
+	public static final byte LEVEL_FILE = 1;
+	public static final byte LEVEL_TYPE = 2;
+	public static final byte LEVEL_FUNCTION = 3;
+	public static final byte LEVEL_VARIABLE = 4;
+	
+	public JSONArray projectNodeToCytoscape(Project project, byte level) {
 		JSONArray nodes = new JSONArray();
-		JSONArray edges = new JSONArray();
+		
+		if(level < LEVEL_PACKAGE || level > LEVEL_VARIABLE) {
+			System.out.println("error level");
+			return nodes;
+		}
 		
 		Iterable<Package> packages = containRelationService.findProjectContainPackages(project);
+		Map<String, Package> pathToPackages = new HashMap<>();
+		for(Package pck : packages) {
+			pathToPackages.put(pck.getDirectoryPath(), pck);
+		}
 		
 		for(Package pck : packages) {
-			nodes.add(CytoscapeUtil.toCytoscapeNode(pck, "Package: " + pck.getName(), "Package"));
+			JSONObject pckNode = CytoscapeUtil.toCytoscapeNode(pck, "Package: " + pck.getName(), "Package");
+			String parentPckPath = FileUtil.extractDirectoryFromFile(pck.getDirectoryPath().substring(0, pck.getDirectoryPath().length() - 1));
+			Package parentPck = pathToPackages.get(parentPckPath + "/");
+			if(parentPck != null) {
+				System.out.println("not null");
+				pckNode.getJSONObject("data").put("parent", String.valueOf(parentPck.getId()));
+			}
+			nodes.add(pckNode);
+			
+			if(level < LEVEL_FILE) {
+				continue;
+			}
 			Iterable<ProjectFile> files = containRelationService.findPackageContainFiles(pck);
 			for(ProjectFile file : files) {
 				JSONObject fileJson = CytoscapeUtil.toCytoscapeNode(file, "File: " + file.getName(), "File");
-				fileJson.getJSONObject("data").put("parent", pck.getId());
+				fileJson.getJSONObject("data").put("parent", pck.getId() + "");
 				nodes.add(fileJson);
 				
+				if(level < LEVEL_TYPE) {
+					continue;
+				}
 				Iterable<Type> types = containRelationService.findFileContainTypes(file);
 				for(Type type : types) {
 					JSONObject typeJson = CytoscapeUtil.toCytoscapeNode(type, "Type: " + type.getName(), "Type");
-					typeJson.getJSONObject("data").put("parent", file.getId());
+					typeJson.getJSONObject("data").put("parent", file.getId() + "");
 					nodes.add(typeJson);
 					
-					Iterable<Function> functions = containRelationService.findTypeContainFunctions(type);
+					if(level < LEVEL_FUNCTION) {
+						continue;
+					}
+					Iterable<Function> functions = containRelationService.findTypeDirectlyContainFunctions(type);
 					for(Function function : functions) {
 						JSONObject functionJson = CytoscapeUtil.toCytoscapeNode(function, "Function: " + function.getName(), "Function");
-						functionJson.getJSONObject("data").put("parent", type.getId());
+						functionJson.getJSONObject("data").put("parent", type.getId() + "");
 						nodes.add(functionJson);
-						Iterable<Variable> variables = containRelationService.findFunctionContainVariables(function);
+						
+						if(level < LEVEL_VARIABLE) {
+							continue;
+						}
+						Iterable<Variable> variables = containRelationService.findFunctionDirectlyContainVariables(function);
 						for(Variable variable : variables) {
 							JSONObject variableJson = CytoscapeUtil.toCytoscapeNode(variable, "Variable: " + variable.getName(), "Variable");
-							variableJson.getJSONObject("data").put("parent", function.getId());
+							variableJson.getJSONObject("data").put("parent", function.getId() + "");
 							nodes.add(variableJson);
 						}
 
 					}
 					
-					Iterable<Variable> variables = containRelationService.findTypeContainVariables(type);
+					if(level < LEVEL_VARIABLE) {
+						continue;
+					}
+					Iterable<Variable> variables = containRelationService.findTypeDirectlyContainFields(type);
 					for(Variable variable : variables) {
 						JSONObject variableJson = CytoscapeUtil.toCytoscapeNode(variable, "Variable: " + variable.getName(), "Variable");
-						variableJson.getJSONObject("data").put("parent", type.getId());
+						variableJson.getJSONObject("data").put("parent", type.getId() + "");
 						nodes.add(variableJson);
 					}
 				}
 				
-				Iterable<Function> functions = containRelationService.findFileContainFunctions(file);
+				if(level < LEVEL_FUNCTION) {
+					continue;
+				}
+				Iterable<Function> functions = containRelationService.findFileDirectlyContainFunctions(file);
 				for(Function function : functions) {
 					JSONObject functionJson = CytoscapeUtil.toCytoscapeNode(function, "Function: " + function.getName(), "Function");
-					functionJson.getJSONObject("data").put("parent", file.getId());
+					functionJson.getJSONObject("data").put("parent", file.getId() + "");
+					nodes.add(functionJson);
+					
+					if(level < LEVEL_VARIABLE) {
+						continue;
+					}
+					Iterable<Variable> variables = containRelationService.findFunctionDirectlyContainVariables(function);
+					for(Variable variable : variables) {
+						JSONObject variableJson = CytoscapeUtil.toCytoscapeNode(variable, "Variable: " + variable.getName(), "Variable");
+						variableJson.getJSONObject("data").put("parent", function.getId() + "");
+						nodes.add(variableJson);
+					}
+				}
+			}
+		}
+		
+		return nodes;
+	}
+	
+	public JSONObject projectToCytoscape(Project project) {
+		JSONObject result = new JSONObject();
+		JSONArray nodes = new JSONArray();
+		JSONArray edges = new JSONArray();
+		
+		Iterable<Package> packages = containRelationService.findProjectContainPackages(project);
+		Map<String, Package> pathToPackages = new HashMap<>();
+		for(Package pck : packages) {
+			pathToPackages.put(pck.getDirectoryPath(), pck);
+		}
+		
+		for(Package pck : packages) {
+			JSONObject pckNode = CytoscapeUtil.toCytoscapeNode(pck, "Package: " + pck.getName(), "Package");
+			String parentPckPath = FileUtil.extractDirectoryFromFile(pck.getDirectoryPath().substring(0, pck.getDirectoryPath().length() - 1));
+			Package parentPck = pathToPackages.get(parentPckPath + "/");
+			if(parentPck != null) {
+				pckNode.getJSONObject("data").put("parent", String.valueOf(parentPck.getId()));
+			}
+			nodes.add(pckNode);
+			
+			Iterable<ProjectFile> files = containRelationService.findPackageContainFiles(pck);
+			for(ProjectFile file : files) {
+				JSONObject fileJson = CytoscapeUtil.toCytoscapeNode(file, "File: " + file.getName(), "File");
+				fileJson.getJSONObject("data").put("parent", pck.getId() + "");
+				nodes.add(fileJson);
+				
+				Iterable<Type> types = containRelationService.findFileContainTypes(file);
+				for(Type type : types) {
+					JSONObject typeJson = CytoscapeUtil.toCytoscapeNode(type, "Type: " + type.getName(), "Type");
+					typeJson.getJSONObject("data").put("parent", file.getId() + "");
+					nodes.add(typeJson);
+					
+					Iterable<Function> functions = containRelationService.findTypeDirectlyContainFunctions(type);
+					for(Function function : functions) {
+						JSONObject functionJson = CytoscapeUtil.toCytoscapeNode(function, "Function: " + function.getName(), "Function");
+						functionJson.getJSONObject("data").put("parent", type.getId() + "");
+						nodes.add(functionJson);
+						Iterable<Variable> variables = containRelationService.findFunctionDirectlyContainVariables(function);
+						for(Variable variable : variables) {
+							JSONObject variableJson = CytoscapeUtil.toCytoscapeNode(variable, "Variable: " + variable.getName(), "Variable");
+							variableJson.getJSONObject("data").put("parent", function.getId() + "");
+							nodes.add(variableJson);
+						}
+
+					}
+					
+					Iterable<Variable> variables = containRelationService.findTypeDirectlyContainFields(type);
+					for(Variable variable : variables) {
+						JSONObject variableJson = CytoscapeUtil.toCytoscapeNode(variable, "Variable: " + variable.getName(), "Variable");
+						variableJson.getJSONObject("data").put("parent", type.getId() + "");
+						nodes.add(variableJson);
+					}
+				}
+				
+				Iterable<Function> functions = containRelationService.findFileDirectlyContainFunctions(file);
+				for(Function function : functions) {
+					JSONObject functionJson = CytoscapeUtil.toCytoscapeNode(function, "Function: " + function.getName(), "Function");
+					functionJson.getJSONObject("data").put("parent", file.getId() + "");
 					nodes.add(functionJson);
 				}
 			}

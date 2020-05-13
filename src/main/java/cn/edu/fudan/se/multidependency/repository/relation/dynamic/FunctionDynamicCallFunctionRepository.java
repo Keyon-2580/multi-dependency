@@ -32,7 +32,7 @@ public interface FunctionDynamicCallFunctionRepository extends Neo4jRepository<F
 	@Query("match p = ()-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->() where r.projectName={projectName} and r.language={language} return p")
 	List<FunctionDynamicCallFunction> findFunctionCallsByProjectNameAndLanguage(@Param("projectName") String projectName, @Param("language") String language);
 	
-	@Query("MATCH result=(function1:Function)-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->(function2:Function) with function1,function2,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(function1) where id(project)={projectId} RETURN result")
+	@Query("MATCH result=(function1:Function)-[r:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "]->(function2:Function) with function1,function2,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..5]->(function1) where id(project)={projectId} RETURN result")
 	public List<FunctionDynamicCallFunction> findProjectContainFunctionDynamicCallFunctionRelations(@Param("projectId") Long projectId);
 
 	@Query("match result = (f1:Function)-[r1:" + RelationType.str_FUNCTION_CALL_FUNCTION + "]->(f2:Function) where not (f1)-[:" + RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION + "{testCaseId:{testcaseId}}]->(f2) return result")

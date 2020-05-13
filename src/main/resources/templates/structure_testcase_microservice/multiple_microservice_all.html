@@ -5,12 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>架构-测试用例-微服务</title>
 <script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/dtree.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/jquery.treeview.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/popper-1.14.7.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape-panzoom.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape-navigator.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape-hierarchical.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/expand-collapse/layout-base-1.0.2.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/expand-collapse/cose-base-1.0.2.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/expand-collapse/cytoscape-cose-bilkent-4.1.0.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/expand-collapse/cytoscape-undo-red-1.3.3.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/expand-collapse/cytoscape-expand-collapse.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/dagre.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape-dagre.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/klay.js}"></script>
@@ -24,6 +30,7 @@
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/cytoscape.js-panzoom.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/cytoscape.js-navigator.css}"></link>
+<link rel="stylesheet" th:href="@{/css/import/dtree.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/jquery.jqplot.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/jquery.treeview.css}"></link>
 <style type="text/css">
@@ -153,6 +160,45 @@
 			<hr/>
 		</div>
 		<div class="col-sm-12 div_cytoscape_div">
+			<!-- <div class="div_cytoscape_treeview">
+				<ul id="browser" class="filetree treeview-famfamfam">
+				    <li><span class="folder">Folder 1</span>
+				        <ul>
+				            <li><span class="folder">Item 1.1</span>
+				                <ul>
+				                    <li><span class="file">Item 1.1.1</span></li>
+				                </ul>
+				            </li>
+				            <li><span class="folder">Folder 2</span>
+				                <ul>
+				                    <li><span class="folder">Subfolder 2.1</span>
+				                        <ul id="folder21">
+				                            <li><span class="file">File 2.1.1</span></li>
+				                            <li><span class="file">File 2.1.2</span></li>
+				                        </ul>
+				                    </li>
+				                    <li><span class="folder">Subfolder 2.2</span>
+				                        <ul>
+				                            <li><span class="file">File 2.2.1</span></li>
+				                            <li><span class="file">File 2.2.2</span></li>
+				                        </ul>
+				                    </li>
+				                </ul>
+				            </li>
+				            <li class="closed"><span class="folder">Folder 3 (closed at start)</span>
+				                <ul>
+				                    <li><span class="file">File 3.1</span></li>
+				                </ul>
+				            </li>
+				            <li><span class="file">File 4</span></li>
+				        </ul>
+				    </li>
+				</ul>
+			</div> -->
+			<!-- <iframe class="div_cytoscape_treeview" id="iframeTree"></iframe> -->
+			<div class="div_cytoscape_treeview">
+				<ul id="demoTree" class="dtree" data-id="0"></ul>
+			</div>
 			<div class="div_cytoscape" style="float: left; display: inline;">
 				<div id="entry" class="div_cytoscape_content cy"></div>
 			</div>
@@ -166,7 +212,8 @@
 		//<![CDATA[
 		 $(document).ready(function() {
 			console.log([[${testCases}]]);
-			multiple_microservice_all().init();		
+//			var cytoscapeutil = cytoscapeutil();
+			multiple_microservice_all(cytoscapeutil()).init();		
 		});
 		// ]]>
 	</script>

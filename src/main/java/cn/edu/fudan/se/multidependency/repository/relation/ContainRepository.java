@@ -23,15 +23,43 @@ import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 
 @Repository
 public interface ContainRepository extends Neo4jRepository<Contain, Long> {
+	
+	// belongto
+	
+	@Query("match (m:MicroService)-[r:" + RelationType.str_CONTAIN + "]->(p:Project) where id(p)={projectId} return m")
+	public MicroService findProjectBelongToMicroService(@Param("projectId") Long projectId);
+	
+	@Query("match (p:Project)-[r" + RelationType.str_CONTAIN + "*2]->(f:ProjectFile) where id(f)={fileId} return p")
+	public Project findFileBelongToProject(@Param("fileId") Long fileId);
+	
+	@Query("match (a:Project)-[r:" + RelationType.str_CONTAIN + "*3..5]->(b:Function) where id(b)={functionId} return a")
+	public Project findFunctionBelongToProject(@Param("functionId") Long functionId);
 
+	@Query("match (p:Package)-[r" + RelationType.str_CONTAIN + "]->(f:ProjectFile) where id(f)={fileId} return p")
+	public Package findFileBelongToPackage(@Param("fileId") Long fileId);
+	
+	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..2]->(b:Type) where id(b)={typeId} return a")
+	public ProjectFile findTypeBelongToFile(@Param("typeId") Long typeId);
+	
+	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..3]->(b:Function) where id(b)={functionId} return a")
+	public ProjectFile findFunctionBelongToFile(@Param("functionId") Long functionId);
+	
+	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..4]->(b:Variable) where id(b)={variableId} return a")
+	public ProjectFile findVariableBelongToFile(@Param("variableId") Long variableId);
+	
+	@Query("match (a:Type)-[r:" + RelationType.str_CONTAIN + "]->(b:Function) where id(b)={functionId} return a")
+	public Type findFunctionBelongToType(@Param("functionId") Long functionId);
+	
+	@Query("match (lib:Library)-[r:" + RelationType.str_CONTAIN + "]->(api:LibraryAPI) where id(api)={libraryAPIId} return lib")
+	public Library findLibraryAPIBelongToLibrary(@Param("libraryAPIId") Long libraryAPIId);
+
+	// contain
+	
 	@Query("MATCH (t:Trace{traceId:{traceId}})-[r:" + RelationType.str_CONTAIN + "]->(s:Span) RETURN s")
 	public List<Span> findTraceContainSpansByTraceId(@Param("traceId") String traceId);
 	
 	@Query("MATCH (ms:MicroService)-[r:" + RelationType.str_CONTAIN + "]->(api:RestfulAPI) where id(ms)={id} RETURN api")
 	public List<RestfulAPI> findMicroServiceContainRestfulAPI(@Param("id") Long id);
-	
-	@Query("match (p:Package)-[r" + RelationType.str_CONTAIN + "]->(f:ProjectFile) where id(f)={fileId} return p")
-	public Package findFileBelongToPackageByFileId(@Param("fileId") Long id);
 	
 	@Query("match (ms:MicroService)-[r:" + RelationType.str_CONTAIN + "]->(p:Project) where id(ms)={msId} return p")
 	public List<Project> findMicroServiceContainProjects(@Param("msId") Long msId);
@@ -39,51 +67,30 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	@Query("match p = (f1:Feature)-[r:" + RelationType.str_CONTAIN + "]->(f2:Feature) return p")
 	public List<Contain> findAllFeatureContainFeatures();
 	
-	@Query("match (a:Project)-[r:" + RelationType.str_CONTAIN + "*3..4]->(b:Function) where id(b)={functionId} return a")
-	public Project findFunctionBelongToProjectByFunctionId(@Param("functionId") Long functionId);
-	
-	@Query("match (a:Project)-[r:" + RelationType.str_CONTAIN + "*3..4]->(b:Function) where id(a)={projectId} return b")
-	public List<Function> findProjectContainFunctionsByProjectId(@Param("projectId") Long projectId);
-	
 	@Query("match (a:Project)-[r:" + RelationType.str_CONTAIN + "]->(b:Package) where id(a)={projectId} return b")
 	public List<Package> findProjectContainPackages(@Param("projectId") Long projectId);
 	
 	@Query("match (a:Package)-[r:" + RelationType.str_CONTAIN + "]->(b:ProjectFile) where id(a)={packageId} return b")
 	public List<ProjectFile> findPackageContainFiles(@Param("packageId") Long packageId);
 	
-	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "]->(b:Type) where id(a)={fileId} return b")
+	@Query("match (a:Project)-[r:" + RelationType.str_CONTAIN + "*3..5]->(b:Function) where id(a)={projectId} return b")
+	public List<Function> findProjectContainFunctions(@Param("projectId") Long projectId);
+	
+	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..2]->(b:Type) where id(a)={fileId} return b")
 	public List<Type> findFileContainTypes(@Param("fileId") Long fileId);
 	
 	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "]->(b:Function) where id(a)={fileId} return b")
-	public List<Function> findFileContainFunctions(@Param("fileId") Long fileId);
+	public List<Function> findFileDirectlyContainFunctions(@Param("fileId") Long fileId);
 	
 	@Query("match (a:Type)-[r:" + RelationType.str_CONTAIN + "]->(b:Function) where id(a)={typeId} return b")
-	public List<Function> findTypeContainFunctions(@Param("typeId") Long typeId);
+	public List<Function> findTypeDirectlyContainFunctions(@Param("typeId") Long typeId);
 	
 	@Query("match (a:Type)-[r:" + RelationType.str_CONTAIN + "]->(b:Variable) where id(a)={typeId} return b")
-	public List<Variable> findTypeContainVariables(@Param("typeId") Long typeId);
+	public List<Variable> findTypeDirectlyContainFields(@Param("typeId") Long typeId);
 	
 	@Query("match (a:Function)-[r:" + RelationType.str_CONTAIN + "]->(b:Variable) where id(a)={functionId} return b")
-	public List<Variable> findFunctionContainVariables(@Param("functionId") Long functionId);
+	public List<Variable> findFunctionDirectlyContainVariables(@Param("functionId") Long functionId);
 
-	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..2]->(b:Function) where id(b)={functionId} return a")
-	public ProjectFile findFunctionBelongToFileByFunctionId(@Param("functionId") Long functionId);
-	
-	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "]->(b:Type) where id(b)={typeId} return a")
-	public ProjectFile findTypeBelongToFileByTypeId(@Param("typeId") Long typeId);
-	
-	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..3]->(b:Variable) where id(b)={variableId} return a")
-	public ProjectFile findVariableBelongToFileByVariableId(@Param("variableId") Long variableId);
-	
-	@Query("match (a:Type)-[r:" + RelationType.str_CONTAIN + "]->(b:Function) where id(b)={functionId} return a")
-	public Type findFunctionBelongToTypeByFunctionId(@Param("functionId") Long functionId);
-	
-	@Query("match (m:MicroService)-[r:" + RelationType.str_CONTAIN + "]->(p:Project) where id(p)={projectId} return m")
-	public MicroService findProjectBelongToMicroService(@Param("projectId") Long projectId);
-	
-	@Query("match (lib:Library)-[r:" + RelationType.str_CONTAIN + "]->(api:LibraryAPI) where id(api)={libraryAPIId} return lib")
-	public Library findLibraryAPIBelongToLibrary(@Param("libraryAPIId") Long libraryAPIId);
-	
 	@Query("match (lib:Library)-[r:" + RelationType.str_CONTAIN + "]->(api:LibraryAPI) where id(lib)={libraryId} return api")
 	public List<LibraryAPI> findLibraryContainLibraryAPIs(@Param("libraryId") Long libraryId);
 }

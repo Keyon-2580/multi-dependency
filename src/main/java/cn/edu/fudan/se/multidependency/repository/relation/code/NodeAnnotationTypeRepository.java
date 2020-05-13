@@ -13,6 +13,6 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.NodeAnnotationTy
 @Repository
 public interface NodeAnnotationTypeRepository extends Neo4jRepository<NodeAnnotationType, Long> {
 
-	@Query("MATCH result=()-[r:" + RelationType.str_NODE_ANNOTATION_TYPE + "]->(type:Type) with type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3]->(type) where id(project)={projectId} RETURN result")
+	@Query("MATCH result=()-[r:" + RelationType.str_NODE_ANNOTATION_TYPE + "]->(type:Type) with type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)={projectId} RETURN result")
 	List<NodeAnnotationType> findProjectContainNodeAnnotationTypeRelations(@Param("projectId") Long projectId);
 }

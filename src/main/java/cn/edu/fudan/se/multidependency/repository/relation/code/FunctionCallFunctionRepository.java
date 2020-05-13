@@ -12,6 +12,6 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunc
 
 @Repository
 public interface FunctionCallFunctionRepository extends Neo4jRepository<FunctionCallFunction, Long> {
-	@Query("MATCH result=(function1:Function)-[r:" + RelationType.str_FUNCTION_CALL_FUNCTION + "]->(function2:Function) with function1,function2,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(function1) where id(project)={projectId} RETURN result")
+	@Query("MATCH result=(function1:Function)-[r:" + RelationType.str_FUNCTION_CALL_FUNCTION + "]->(function2:Function) with function1,function2,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..5]->(function1) where id(project)={projectId} RETURN result")
 	public List<FunctionCallFunction> findProjectContainFunctionCallFunctionRelations(@Param("projectId") Long projectId);
 }

@@ -12,16 +12,41 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 public class FileUtil {
+	
+	
+	public static final String SLASH_WINDOWS = "\\";
+	public static final String SLASH_LINUX = "/";
+	/**
+	 * 判断文件或目录是否在某个目录下
+	 * 路径最后不加slash
+	 * @param fileOrSubDirectoryPath
+	 * @param parentDirectoryPath
+	 * @param slash
+	 * @return
+	 */
+	public static boolean isFileOrSubDirectoryOfDirectory(String fileOrSubDirectoryPath, String parentDirectoryPath, String slash) {
+		if(!SLASH_LINUX.equals(slash) && !SLASH_WINDOWS.equals(slash)) {
+			return false;
+		}
+		if(fileOrSubDirectoryPath.equals(parentDirectoryPath)) {
+			return false;
+		}
+		if(fileOrSubDirectoryPath.indexOf(parentDirectoryPath + slash) != 0) {
+			return false;
+		}
+		return !(fileOrSubDirectoryPath.substring(parentDirectoryPath.length() + 1)).contains(slash);
+	}
 
 	public static void main(String[] args) {
-		JSONObject array = readDirectoryToGenerateProjectJSONFile(
+		/*JSONObject array = readDirectoryToGenerateProjectJSONFile(
 				new File("D:\\multiple-dependency-project\\train-ticket"), 1, "java", true, "train-ticket");
 		System.out.println(array);
 		try {
 			writeToFileForProjectJSONFile("D:\\testtesttest.log", array);
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
+		}*/
+		System.out.println(isFileOrSubDirectoryOfDirectory("/test/test2", "/test", "/"));
 	}
 	
 	/**

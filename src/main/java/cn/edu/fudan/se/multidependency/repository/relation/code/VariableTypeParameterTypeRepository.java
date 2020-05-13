@@ -13,7 +13,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypePara
 @Repository
 public interface VariableTypeParameterTypeRepository extends Neo4jRepository<VariableTypeParameterType, Long>{
 
-	@Query("MATCH result=(variable:Variable)-[r:" + RelationType.str_VARIABLE_TYPE_PARAMETER_TYPE + "]->(type:Type) with variable,type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3]->(type) where id(project)={projectId} RETURN result")
+	@Query("MATCH result=(variable:Variable)-[r:" + RelationType.str_VARIABLE_TYPE_PARAMETER_TYPE + "]->(type:Type) with variable,type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)={projectId} RETURN result")
 	List<VariableTypeParameterType> findProjectContainVariableTypeParameterTypeRelations(@Param("projectId") Long projectId);
 
 }

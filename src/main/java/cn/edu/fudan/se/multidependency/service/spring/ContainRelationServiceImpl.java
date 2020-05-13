@@ -57,40 +57,39 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
 	Map<ProjectFile, Iterable<Function>> fileContainFunctionsCache = new HashMap<>();
 	@Override
-	public Iterable<Function> findFileContainFunctions(ProjectFile codeFile) {
-		Iterable<Function> result = fileContainFunctionsCache.getOrDefault(codeFile, containRepository.findFileContainFunctions(codeFile.getId()));
+	public Iterable<Function> findFileDirectlyContainFunctions(ProjectFile codeFile) {
+		Iterable<Function> result = fileContainFunctionsCache.getOrDefault(codeFile, containRepository.findFileDirectlyContainFunctions(codeFile.getId()));
 		fileContainFunctionsCache.put(codeFile, result);
 		return result;
 	}
 
 	Map<Type, Iterable<Function>> typeContainFunctionsCache = new HashMap<>();
 	@Override
-	public Iterable<Function> findTypeContainFunctions(Type type) {
-		Iterable<Function> result = typeContainFunctionsCache.getOrDefault(type, containRepository.findTypeContainFunctions(type.getId()));
+	public Iterable<Function> findTypeDirectlyContainFunctions(Type type) {
+		Iterable<Function> result = typeContainFunctionsCache.getOrDefault(type, containRepository.findTypeDirectlyContainFunctions(type.getId()));
 		typeContainFunctionsCache.put(type, result);
 		return result;
 	}
 
 	Map<Type, Iterable<Variable>> typeContainVariablesCache = new HashMap<>();
 	@Override
-	public Iterable<Variable> findTypeContainVariables(Type type) {
-		Iterable<Variable> result = typeContainVariablesCache.getOrDefault(type, containRepository.findTypeContainVariables(type.getId()));
+	public Iterable<Variable> findTypeDirectlyContainFields(Type type) {
+		Iterable<Variable> result = typeContainVariablesCache.getOrDefault(type, containRepository.findTypeDirectlyContainFields(type.getId()));
 		typeContainVariablesCache.put(type, result);
 		return result;
 	}
 
 	Map<Function, Iterable<Variable>> functionContainVariablesCache = new HashMap<>();
 	@Override
-	public Iterable<Variable> findFunctionContainVariables(Function function) {
-		Iterable<Variable> result = functionContainVariablesCache.getOrDefault(function, containRepository.findFunctionContainVariables(function.getId()));
+	public Iterable<Variable> findFunctionDirectlyContainVariables(Function function) {
+		Iterable<Variable> result = functionContainVariablesCache.getOrDefault(function, containRepository.findFunctionDirectlyContainVariables(function.getId()));
 		functionContainVariablesCache.put(function, result);
 		return result;
 	}
 	
-
-
 	@Override
 	public Package findTypeBelongToPackage(Type type) {
+		///FIXME
 		return null;
 	}
 
@@ -102,7 +101,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 				return project;
 			}
 		}
-		Project project = containRepository.findFunctionBelongToProjectByFunctionId(function.getId());
+		Project project = containRepository.findFunctionBelongToProject(function.getId());
 		assert(project != null);
 		findProjectContainFunctions(project);
 		return project;
@@ -113,7 +112,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	public Iterable<Function> findProjectContainFunctions(Project project) {
 		List<Function> functions = projectContainFunctionsCache.get(project);
 		if(functions == null) {
-			functions = containRepository.findProjectContainFunctionsByProjectId(project.getId());
+			functions = containRepository.findProjectContainFunctions(project.getId());
 			projectContainFunctionsCache.put(project, functions);
 		}
 		return functions;
@@ -124,7 +123,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	public ProjectFile findFunctionBelongToFile(Function function) {
 		ProjectFile file = nodeBelongToFileCache.get(function);
 		if(file == null) {
-			file = containRepository.findFunctionBelongToFileByFunctionId(function.getId());
+			file = containRepository.findFunctionBelongToFile(function.getId());
 			nodeBelongToFileCache.put(function, file);
 		}
 		return file;
@@ -133,7 +132,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	public ProjectFile findTypeBelongToFile(Type type) {
 		ProjectFile file = nodeBelongToFileCache.get(type);
 		if(file == null) {
-			file = containRepository.findTypeBelongToFileByTypeId(type.getId());
+			file = containRepository.findTypeBelongToFile(type.getId());
 			nodeBelongToFileCache.put(type, file);
 		}
 		return file;
@@ -142,7 +141,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	public ProjectFile findVariableBelongToFile(Variable variable) {
 		ProjectFile file = nodeBelongToFileCache.get(variable);
 		if(file == null) {
-			file = containRepository.findVariableBelongToFileByVariableId(variable.getId());
+			file = containRepository.findVariableBelongToFile(variable.getId());
 			nodeBelongToFileCache.put(variable, file);
 		}
 		return file;
@@ -150,7 +149,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
 	@Override
 	public Package findFileBelongToPackage(ProjectFile file) {
-		return containRepository.findFileBelongToPackageByFileId(file.getId());
+		return containRepository.findFileBelongToPackage(file.getId());
 	}
 
 	private Map<Function, Type> functionBelongToTypeCache = new HashMap<>();
@@ -158,7 +157,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	public Type findFunctionBelongToType(Function function) {
 		Type type = functionBelongToTypeCache.get(function);
 		if(type == null) {
-			type = containRepository.findFunctionBelongToTypeByFunctionId(function.getId());
+			type = containRepository.findFunctionBelongToType(function.getId());
 			functionBelongToTypeCache.put(function, type);
 		}
 		return type;
@@ -212,5 +211,18 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	public List<Contain> findAllFeatureContainFeatures() {
 		List<Contain> featureContainFeatures = containRepository.findAllFeatureContainFeatures();
 		return featureContainFeatures;
+	}
+
+
+
+	@Override
+	public Iterable<LibraryAPI> findLibraryContainAPIs(Library lib) {
+		return containRepository.findLibraryContainLibraryAPIs(lib.getId());
+	}
+
+
+	@Override
+	public Project findFileBelongToProject(ProjectFile file) {
+		return containRepository.findFileBelongToProject(file.getId());
 	}
 }

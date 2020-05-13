@@ -26,17 +26,19 @@ public interface ContainRelationService {
 	
 	Iterable<Type> findFileContainTypes(ProjectFile codeFile);
 	
-	Iterable<Variable> findTypeContainVariables(Type type);
+	Iterable<Variable> findTypeDirectlyContainFields(Type type);
 	
-	Iterable<Variable> findFunctionContainVariables(Function function);
+	Iterable<Variable> findFunctionDirectlyContainVariables(Function function);
 	
-	Iterable<Function> findFileContainFunctions(ProjectFile codeFile);
+	Iterable<Function> findFileDirectlyContainFunctions(ProjectFile codeFile);
 	
-	Iterable<Function> findTypeContainFunctions(Type type);
+	Iterable<Function> findTypeDirectlyContainFunctions(Type type);
 	
 	Package findTypeBelongToPackage(Type type);
 	
 	Package findFileBelongToPackage(ProjectFile file);
+	
+	Project findFileBelongToProject(ProjectFile file);
 	
 	Type findFunctionBelongToType(Function function);
 	
@@ -49,6 +51,8 @@ public interface ContainRelationService {
 	Project findFunctionBelongToProject(Function function);
 	
 	Library findAPIBelongToLibrary(LibraryAPI api);
+	
+	Iterable<LibraryAPI> findLibraryContainAPIs(Library lib);
 
 	Iterable<Project> findMicroServiceContainProjects(MicroService ms);
 	
