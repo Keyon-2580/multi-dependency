@@ -49,7 +49,7 @@ data:
       method_name_table_path: src/main/resources/clone/MethodNameTable.csv
       method_result_path: src/main/resources/clone/type123_method_result.csv
    build:   
-      analyse: false
+      analyse: true
       directory_root_path: src/main/resources/build
    neo4j:
       delete: true

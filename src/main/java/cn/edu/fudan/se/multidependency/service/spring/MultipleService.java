@@ -8,10 +8,12 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
@@ -35,7 +37,6 @@ public class MultipleService {
 	public JSONArray allNodesToZTree() {
 		JSONArray result = new JSONArray();
 		
-		
 		Iterable<MicroService> allMicroServices = msService.findAllMicroService().values();
 		
 		Iterable<Project> allProjects = staticAnalyseService.allProjects().values();
@@ -49,7 +50,8 @@ public class MultipleService {
 			for(Project project : projects) {
 				isProjectAddToNodes.put(project, true);
 //				ZTreeNode projectNode = new ZTreeNode(project.getName(), false);
-				ZTreeNode projectNode = projectToZTreeNode(project);
+//				ZTreeNode projectNode = projectToZTreeNode(project);
+				ZTreeNode projectNode = nodeToZTreeNode(project);
 				node.addChild(projectNode);
 			}
 			
@@ -66,14 +68,15 @@ public class MultipleService {
 			if(isProjectAddToNodes.get(project) != null && isProjectAddToNodes.get(project)) {
 				continue;
 			}
-			ZTreeNode node = projectToZTreeNode(project);
+//			ZTreeNode node = projectToZTreeNode(project);
+			ZTreeNode node = nodeToZTreeNode(project);
 			result.add(node.toJSON());
 		}
 		
 		Iterable<Library> libraries = staticAnalyseService.findAllLibraries();
 		
 		for(Library library : libraries) {
-			ZTreeNode libNode = new ZTreeNode(String.join(":", library.getNodeType().toString(), library.getFullName()), false);
+			ZTreeNode libNode = new ZTreeNode(library.getId(), String.join(":", library.getNodeType().toString(), library.getFullName()), false);
 			
 			Iterable<LibraryAPI> apis = containRelationService.findLibraryContainAPIs(library);
 			for(LibraryAPI api : apis) {
@@ -83,157 +86,49 @@ public class MultipleService {
 			
 			result.add(libNode.toJSON());
 		}
-		
+		System.out.println(result);
 		return result;
 	}
 	
-	public ZTreeNode projectToZTreeNode(Project project) {
-		ZTreeNode projectNode = new ZTreeNode(String.join(":", project.getNodeType().toString(), project.getName() + "(" + project.getLanguage() + ")"), false);
-		Iterable<Package> packages = containRelationService.findProjectContainPackages(project);
-		
-		for(Package pck : packages) {
-
-			ZTreeNode pckNode = new ZTreeNode(pck, false);
-			projectNode.addChild(pckNode);
-			
-			Iterable<ProjectFile> files = containRelationService.findPackageContainFiles(pck);
-			for(ProjectFile file : files) {
-				
-				ZTreeNode fileNode = new ZTreeNode(file, false);
-				pckNode.addChild(fileNode);
-				
-				Iterable<Type> types = containRelationService.findFileContainTypes(file);
-				for(Type type : types) {
-					ZTreeNode typeNode = new ZTreeNode(type, false);
-					fileNode.addChild(typeNode);
-					
-					Iterable<Function> functions = containRelationService.findTypeDirectlyContainFunctions(type);
-					for(Function function : functions) {
-						ZTreeNode functionNode = new ZTreeNode(function, false);
-						typeNode.addChild(functionNode);
-						
-						Iterable<Variable> variables = containRelationService.findFunctionDirectlyContainVariables(function);
-						for(Variable variable : variables) {
-							ZTreeNode variableNode = new ZTreeNode(variable, false);
-							functionNode.addChild(variableNode);
-						}
-					}
-					
-					Iterable<Variable> variables = containRelationService.findTypeDirectlyContainFields(type);
-					for(Variable variable : variables) {
-						ZTreeNode variableNode = new ZTreeNode(variable, false);
-						typeNode.addChild(variableNode);
-					}
-				}
-				
-				Iterable<Function> functions = containRelationService.findFileDirectlyContainFunctions(file);
-				for(Function function : functions) {
-					ZTreeNode functionNode = new ZTreeNode(function, false);
-					fileNode.addChild(functionNode);
-					
-					Iterable<Variable> variables = containRelationService.findFunctionDirectlyContainVariables(function);
-					for(Variable variable : variables) {
-						ZTreeNode variableNode = new ZTreeNode(variable, false);
-						functionNode.addChild(variableNode);
-					}
-				}
-			}
+	private void addNodesToZTreeNode(ZTreeNode parentZTreeNode, Iterable<? extends Node> nodes) {
+		for(Node node : nodes) {
+			parentZTreeNode.addChild(nodeToZTreeNode(node));
 		}
-		return projectNode;
 	}
 	
-	
-	/*public JSONArray projectNodesToZTree(Project project) {
-		JSONArray result = new JSONArray();
-		
-		Iterable<Package> packages = containRelationService.findProjectContainPackages(project);
-		Map<String, Package> pathToPackages = new HashMap<>();
-		for(Package pck : packages) {
-			pathToPackages.put(pck.getDirectoryPath(), pck);
+	public ZTreeNode nodeToZTreeNode(Node node) {
+		ZTreeNode result = null;
+		if(node instanceof Variable) {
+			result = new ZTreeNode(node);
+		} else if(node instanceof Function) {
+			result = new ZTreeNode(node);
+			addNodesToZTreeNode(result, containRelationService.findFunctionDirectlyContainVariables((Function) node));
+		} else if(node instanceof Type) {
+			result = new ZTreeNode(node);
+			addNodesToZTreeNode(result, containRelationService.findTypeDirectlyContainFunctions((Type) node));
+			addNodesToZTreeNode(result, containRelationService.findTypeDirectlyContainFields((Type) node));
+		} else if(node instanceof Namespace) {
+			result = new ZTreeNode(node);
+			addNodesToZTreeNode(result, containRelationService.findNamespaceDirectlyContainTypes((Namespace) node));
+			addNodesToZTreeNode(result, containRelationService.findNamespaceDirectlyContainFunctions((Namespace) node));
+			addNodesToZTreeNode(result, containRelationService.findNamespaceDirectlyContainVariables((Namespace) node));
+		} else if(node instanceof ProjectFile) {
+			result = new ZTreeNode(node);
+			addNodesToZTreeNode(result, containRelationService.findFileContainNamespaces((ProjectFile) node));
+			addNodesToZTreeNode(result, containRelationService.findFileDirectlyContainTypes((ProjectFile) node));
+			addNodesToZTreeNode(result, containRelationService.findFileDirectlyContainFunctions((ProjectFile) node));
+			addNodesToZTreeNode(result, containRelationService.findFileDirectlyContainVariables((ProjectFile) node));
+		} else if(node instanceof Package) {
+			result = new ZTreeNode(node);
+			addNodesToZTreeNode(result, containRelationService.findPackageContainFiles((Package) node));
+		} else if(node instanceof Project) {
+			Project project = (Project) node;
+			result = new ZTreeNode(project.getId(), String.join(":", project.getNodeType().toString(), project.getName() + "(" + project.getLanguage() + ")"), false);
+			addNodesToZTreeNode(result, containRelationService.findProjectContainPackages(project));
+		} else {
+			return null;
 		}
-		
-		for(Package pck : packages) {
-			JSONObject pckNode = CytoscapeUtil.toCytoscapeNode(pck, "Package: " + pck.getName(), "Package");
-			String parentPckPath = FileUtil.extractDirectoryFromFile(pck.getDirectoryPath().substring(0, pck.getDirectoryPath().length() - 1));
-			Package parentPck = pathToPackages.get(parentPckPath + "/");
-			if(parentPck != null) {
-				System.out.println("not null");
-				pckNode.getJSONObject("data").put("parent", String.valueOf(parentPck.getId()));
-			}
-			nodes.add(pckNode);
-			
-			if(level < LEVEL_FILE) {
-				continue;
-			}
-			Iterable<ProjectFile> files = containRelationService.findPackageContainFiles(pck);
-			for(ProjectFile file : files) {
-				JSONObject fileJson = CytoscapeUtil.toCytoscapeNode(file, "File: " + file.getName(), "File");
-				fileJson.getJSONObject("data").put("parent", pck.getId() + "");
-				nodes.add(fileJson);
-				
-				if(level < LEVEL_TYPE) {
-					continue;
-				}
-				Iterable<Type> types = containRelationService.findFileContainTypes(file);
-				for(Type type : types) {
-					JSONObject typeJson = CytoscapeUtil.toCytoscapeNode(type, "Type: " + type.getName(), "Type");
-					typeJson.getJSONObject("data").put("parent", file.getId() + "");
-					nodes.add(typeJson);
-					
-					if(level < LEVEL_FUNCTION) {
-						continue;
-					}
-					Iterable<Function> functions = containRelationService.findTypeContainFunctions(type);
-					for(Function function : functions) {
-						JSONObject functionJson = CytoscapeUtil.toCytoscapeNode(function, "Function: " + function.getName(), "Function");
-						functionJson.getJSONObject("data").put("parent", type.getId() + "");
-						nodes.add(functionJson);
-						
-						if(level < LEVEL_VARIABLE) {
-							continue;
-						}
-						Iterable<Variable> variables = containRelationService.findFunctionContainVariables(function);
-						for(Variable variable : variables) {
-							JSONObject variableJson = CytoscapeUtil.toCytoscapeNode(variable, "Variable: " + variable.getName(), "Variable");
-							variableJson.getJSONObject("data").put("parent", function.getId() + "");
-							nodes.add(variableJson);
-						}
-
-					}
-					
-					if(level < LEVEL_VARIABLE) {
-						continue;
-					}
-					Iterable<Variable> variables = containRelationService.findTypeContainVariables(type);
-					for(Variable variable : variables) {
-						JSONObject variableJson = CytoscapeUtil.toCytoscapeNode(variable, "Variable: " + variable.getName(), "Variable");
-						variableJson.getJSONObject("data").put("parent", type.getId() + "");
-						nodes.add(variableJson);
-					}
-				}
-				
-				if(level < LEVEL_FUNCTION) {
-					continue;
-				}
-				Iterable<Function> functions = containRelationService.findFileContainFunctions(file);
-				for(Function function : functions) {
-					JSONObject functionJson = CytoscapeUtil.toCytoscapeNode(function, "Function: " + function.getName(), "Function");
-					functionJson.getJSONObject("data").put("parent", file.getId() + "");
-					nodes.add(functionJson);
-					
-					if(level < LEVEL_VARIABLE) {
-						continue;
-					}
-					Iterable<Variable> variables = containRelationService.findFunctionContainVariables(function);
-					for(Variable variable : variables) {
-						JSONObject variableJson = CytoscapeUtil.toCytoscapeNode(variable, "Variable: " + variable.getName(), "Variable");
-						variableJson.getJSONObject("data").put("parent", function.getId() + "");
-						nodes.add(variableJson);
-					}
-				}
-			}
-		}
-		
 		return result;
-	}*/
+	}
+	
 }

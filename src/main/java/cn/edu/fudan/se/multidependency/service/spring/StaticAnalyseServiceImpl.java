@@ -149,7 +149,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		CallLibrary<Project> result = new CallLibrary<Project>();
 		result.setCaller(project);
 		Map<Function, List<FunctionCallLibraryAPI>> functionCallLibAPIs = findAllFunctionCallLibraryAPIs();
-		Iterable<Function> functions = containRelationService.findProjectContainFunctions(project);
+		Iterable<Function> functions = containRelationService.findProjectContainAllFunctions(project);
 		for(Function function : functions) {
 			List<FunctionCallLibraryAPI> calls = functionCallLibAPIs.getOrDefault(function, new ArrayList<>());
 			for(FunctionCallLibraryAPI call : calls) {

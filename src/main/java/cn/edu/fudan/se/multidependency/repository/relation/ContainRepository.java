@@ -11,6 +11,7 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
@@ -69,22 +70,30 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	
 	@Query("match (a:Project)-[r:" + RelationType.str_CONTAIN + "]->(b:Package) where id(a)={projectId} return b")
 	public List<Package> findProjectContainPackages(@Param("projectId") Long projectId);
+	@Query("match (a:Project)-[r:" + RelationType.str_CONTAIN + "*3..5]->(b:Function) where id(a)={projectId} return b")
+	public List<Function> findProjectContainFunctions(@Param("projectId") Long projectId);
 	
 	@Query("match (a:Package)-[r:" + RelationType.str_CONTAIN + "]->(b:ProjectFile) where id(a)={packageId} return b")
 	public List<ProjectFile> findPackageContainFiles(@Param("packageId") Long packageId);
 	
-	@Query("match (a:Project)-[r:" + RelationType.str_CONTAIN + "*3..5]->(b:Function) where id(a)={projectId} return b")
-	public List<Function> findProjectContainFunctions(@Param("projectId") Long projectId);
-	
-	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..2]->(b:Type) where id(a)={fileId} return b")
-	public List<Type> findFileContainTypes(@Param("fileId") Long fileId);
-	
+	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "]->(b:Namespace) where id(a)={fileId} return b")
+	public List<Namespace> findFileDirectlyContainNamespaces(@Param("fileId") Long fileId);
+	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "]->(b:Type) where id(a)={fileId} return b")
+	public List<Type> findFileDirectlyContainTypes(@Param("fileId") Long fileId);
 	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "]->(b:Function) where id(a)={fileId} return b")
 	public List<Function> findFileDirectlyContainFunctions(@Param("fileId") Long fileId);
+	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "]->(b:Variable) where id(a)={fileId} return b")
+	public List<Variable> findFileDirectlyContainVariables(@Param("fileId") Long fileId);
+
+	@Query("match (a:Namespace)-[r:" + RelationType.str_CONTAIN + "]->(b:Type) where id(a)={namespaceId} return b")
+	public List<Type> findNamespaceDirectlyContainTypes(@Param("namespaceId") Long namespaceId);
+	@Query("match (a:Namespace)-[r:" + RelationType.str_CONTAIN + "]->(b:Function) where id(a)={namespaceId} return b")
+	public List<Function> findNamespaceDirectlyContainFunctions(@Param("namespaceId") Long namespaceId);
+	@Query("match (a:Namespace)-[r:" + RelationType.str_CONTAIN + "]->(b:Variable) where id(a)={namespaceId} return b")
+	public List<Variable> findNamespaceDirectlyContainVariables(@Param("namespaceId") Long namespaceId);
 	
 	@Query("match (a:Type)-[r:" + RelationType.str_CONTAIN + "]->(b:Function) where id(a)={typeId} return b")
 	public List<Function> findTypeDirectlyContainFunctions(@Param("typeId") Long typeId);
-	
 	@Query("match (a:Type)-[r:" + RelationType.str_CONTAIN + "]->(b:Variable) where id(a)={typeId} return b")
 	public List<Variable> findTypeDirectlyContainFields(@Param("typeId") Long typeId);
 	

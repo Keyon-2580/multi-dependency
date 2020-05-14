@@ -6,6 +6,106 @@ var multiple_microservice_all = function(cytoscapeutil) {
 	
 	var nodeToPosition = new Map();
 	
+	var showZTree = function(nodes) {
+		var setting = {
+			callback: {
+				onClick: function(event, treeId, treeNode) {
+					var id = treeNode.id;
+					console.log(id);
+					if(id <= 0 || cyEntry == null) {
+						return ;
+					}
+					var node = cyEntry.$('#' + id);
+//					console.log(node.data());
+//					console.log(node.position());
+//					cyEntry.pan(node.position());
+//					console.log(cyEntry.pan())
+					console.log(cyEntry.width());
+					console.log(cyEntry.height());
+					cyEntry.fit(node, 350);
+//					cyEntry.pan({
+//						x: 0,
+//						y: 0
+//					})
+//					cyEntry.zoom(3);
+//					cyEntry.pan({
+//						cyEntry.$('#')
+//					})
+				}
+			}	
+				
+		};
+		var zNodes = nodes;
+		var zTreeObj = $.fn.zTree.init($("#ztree"), setting, zNodes);
+	}
+
+	var queryMultipleByTestCaseOrFeatureOrScenario = function(params, queryType) {
+		var url = null;
+		if(queryType == "TestCase") {
+			url = "/multiple/all/testcase";
+		} else if(queryType == "Feature") {
+			url = "/multiple/all/feature";
+		} else if(queryType == "Scenario") {
+			url = "/multiple/all/scenario"; 
+		}
+		var nodes = cyEntry.nodes();
+		for(var i = 0; i < nodes.length; i++) {
+			console.log(nodes[i].data());
+			console.log(nodes[i].position());
+			var nodeId = nodes[i].data().id;
+			var position = nodes[i].position();
+			nodeToPosition.set(nodeId, position);
+		}
+		$.ajax({
+			type : "POST",
+			contentType : "application/json",
+			dataType : "json",
+			url : "/multiple/all",
+			data : JSON.stringify({
+				"showStructure" : $("#showStructure").prop('checked'),
+				"showMicroServiceCallLibs" : $("#showMicroServiceCallLibs").prop('checked'),
+				"showClonesInMicroService" : $("#showClonesInMicroService").prop('checked'),
+				"showCntOfDevUpdMs" : $("#showCntOfDevUpdMs").prop('checked')
+			}),
+			success : function(result) {
+				if (result.result == "success") {
+					console.log(result);
+					cyEntry.destroy();
+					var nodes = result.value.data.nodes;
+					for(var i = 0; i < nodes.length; i++) {
+						var nodeId = nodes[i].data.id;
+						var position = nodeToPosition.get(nodeId);
+						nodes[i].position = position;
+					}
+					showZTree(result.value.ztreeNodes);
+					console.log(result.value.ztreeNodes);
+					console.log(result.value.data);
+					cyEntry = cytoscapeutil.showDataInCytoscape($("#entry"), result.value.data, "preset");
+					cyEntry.remove('edge');
+					queryResult = result;
+					
+					$.ajax({
+						type : "POST",
+						contentType : "application/json",
+						dataType : "json",
+						url : url,
+						data : JSON.stringify(params),
+						success : function(result) {
+							if (result.result == "success") {
+								console.log(result.value);
+								cyEntry.remove('edge');
+								var relatedEdges = result.value.value.edges;
+								cyEntry.add(relatedEdges);
+								processCytoscape(cyEntry);
+								setTapNode(cyEntry, result);
+							}
+						}
+					});
+				}
+			}
+		});
+	}
+	
 	var queryAll = function() {
 		console.log("queryAll")
 		$.ajax({
@@ -23,6 +123,7 @@ var multiple_microservice_all = function(cytoscapeutil) {
 				if (result.result == "success") {
 					console.log(result);
 					cyEntry = cytoscapeutil.showDataInCytoscape($("#entry"), result.value.data, "dagre");
+					showZTree(result.value.ztreeNodes);
 					queryResult = result;
 					processCytoscape(cyEntry);
 					setTapNode(cyEntry, result);
@@ -174,70 +275,6 @@ var multiple_microservice_all = function(cytoscapeutil) {
 		});
 	}
 	
-	var queryMultipleByTestCaseOrFeatureOrScenario = function(params, queryType) {
-		var url = null;
-		if(queryType == "TestCase") {
-			url = "/multiple/all/testcase";
-		} else if(queryType == "Feature") {
-			url = "/multiple/all/feature";
-		} else if(queryType == "Scenario") {
-			url = "/multiple/all/scenario"; 
-		}
-		var nodes = cyEntry.nodes();
-		for(var i = 0; i < nodes.length; i++) {
-			console.log(nodes[i].data());
-			console.log(nodes[i].position());
-			var nodeId = nodes[i].data().id;
-			var position = nodes[i].position();
-			nodeToPosition.set(nodeId, position);
-		}
-		$.ajax({
-			type : "POST",
-			contentType : "application/json",
-			dataType : "json",
-			url : "/multiple/all",
-			data : JSON.stringify({
-				"showStructure" : $("#showStructure").prop('checked'),
-				"showMicroServiceCallLibs" : $("#showMicroServiceCallLibs").prop('checked'),
-				"showClonesInMicroService" : $("#showClonesInMicroService").prop('checked'),
-				"showCntOfDevUpdMs" : $("#showCntOfDevUpdMs").prop('checked')
-			}),
-			success : function(result) {
-				if (result.result == "success") {
-					console.log(result);
-					cyEntry.destroy();
-					var nodes = result.value.data.nodes;
-					for(var i = 0; i < nodes.length; i++) {
-						var nodeId = nodes[i].data.id;
-						var position = nodeToPosition.get(nodeId);
-						nodes[i].position = position;
-					}
-					console.log(result.value.data);
-					cyEntry = cytoscapeutil.showDataInCytoscape($("#entry"), result.value.data, "preset");
-					queryResult = result;
-					
-					$.ajax({
-						type : "POST",
-						contentType : "application/json",
-						dataType : "json",
-						url : url,
-						data : JSON.stringify(params),
-						success : function(result) {
-							if (result.result == "success") {
-								console.log(result.value);
-								cyEntry.remove('edge');
-								var relatedEdges = result.value.value.edges;
-								cyEntry.add(relatedEdges);
-								processCytoscape(cyEntry);
-								setTapNode(cyEntry, result);
-							}
-						}
-					});
-				}
-			}
-		});
-	}
-	
 	var _multiselect = function() {
 		$("#testCaseList").multiselect({
 			enableClickableOptGroups: true,
@@ -329,11 +366,8 @@ var multiple_microservice_all = function(cytoscapeutil) {
 	};
 	var init = function(){
 		_init();
-		console.log("finish _init");
 		queryAll();
 		clearMemo();
-		$("#browser").treeview();
-		
 	};
 	
 	return {

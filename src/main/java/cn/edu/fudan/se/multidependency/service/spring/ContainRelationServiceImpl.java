@@ -14,6 +14,7 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
@@ -49,8 +50,8 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
 	Map<ProjectFile, Iterable<Type>> fileContainTypesCache = new HashMap<>();
 	@Override
-	public Iterable<Type> findFileContainTypes(ProjectFile codeFile) {
-		Iterable<Type> result = fileContainTypesCache.getOrDefault(codeFile, containRepository.findFileContainTypes(codeFile.getId()));
+	public Iterable<Type> findFileDirectlyContainTypes(ProjectFile codeFile) {
+		Iterable<Type> result = fileContainTypesCache.getOrDefault(codeFile, containRepository.findFileDirectlyContainTypes(codeFile.getId()));
 		fileContainTypesCache.put(codeFile, result);
 		return result;
 	}
@@ -103,13 +104,13 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		}
 		Project project = containRepository.findFunctionBelongToProject(function.getId());
 		assert(project != null);
-		findProjectContainFunctions(project);
+		findProjectContainAllFunctions(project);
 		return project;
 	}
 	
 	private Map<Project, List<Function>> projectContainFunctionsCache = new HashMap<>();
 	@Override
-	public Iterable<Function> findProjectContainFunctions(Project project) {
+	public Iterable<Function> findProjectContainAllFunctions(Project project) {
 		List<Function> functions = projectContainFunctionsCache.get(project);
 		if(functions == null) {
 			functions = containRepository.findProjectContainFunctions(project.getId());
@@ -178,7 +179,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		Iterable<Project> projects = findMicroServiceContainProjects(ms);
 		List<Function> result = new ArrayList<>();
 		for(Project project : projects) {
-			for(Function function : findProjectContainFunctions(project)) {
+			for(Function function : findProjectContainAllFunctions(project)) {
 				result.add(function);
 			}
 		}
@@ -224,5 +225,30 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	@Override
 	public Project findFileBelongToProject(ProjectFile file) {
 		return containRepository.findFileBelongToProject(file.getId());
+	}
+
+	@Override
+	public Iterable<Namespace> findFileContainNamespaces(ProjectFile file) {
+		return containRepository.findFileDirectlyContainNamespaces(file.getId());
+	}
+
+	@Override
+	public Iterable<Variable> findFileDirectlyContainVariables(ProjectFile file) {
+		return containRepository.findFileDirectlyContainVariables(file.getId());
+	}
+
+	@Override
+	public Iterable<Type> findNamespaceDirectlyContainTypes(Namespace namespace) {
+		return containRepository.findNamespaceDirectlyContainTypes(namespace.getId());
+	}
+
+	@Override
+	public Iterable<Function> findNamespaceDirectlyContainFunctions(Namespace namespace) {
+		return containRepository.findNamespaceDirectlyContainFunctions(namespace.getId());
+	}
+
+	@Override
+	public Iterable<Variable> findNamespaceDirectlyContainVariables(Namespace namespace) {
+		return containRepository.findNamespaceDirectlyContainVariables(namespace.getId());
 	}
 }

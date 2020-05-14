@@ -21,8 +21,9 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.Micro
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
-import cn.edu.fudan.se.multidependency.utils.MicroServiceUtil;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil;
+import cn.edu.fudan.se.multidependency.utils.MicroServiceUtil;
+import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -179,15 +180,6 @@ public class MicroServiceCallWithEntry {
 		return result;
 	}
 	
-	private void showAllScenarios(JSONArray nodes, JSONArray edges, Map<Scenario, Boolean> isScenarioNodeAdd) {
-		for(Scenario scenario : allScenarios) {
-			if(!isScenarioNodeAdd.getOrDefault(scenario, false)) {
-				nodes.add(CytoscapeUtil.toCytoscapeNode(scenario, scenario.getScenarioId() + " : " + scenario.getName(),  "Scenario"));
-				isScenarioNodeAdd.put(scenario, true);
-			}
-		}
-	}
-	
 	private void showClonesInMicroService(JSONArray edges) {
 		for(Clone<MicroService> clone : clonesInMicroService) {
 			if(clone.sizeOfChildren() >= showClonesMinPair) {
@@ -211,14 +203,32 @@ public class MicroServiceCallWithEntry {
 		Map<String, Boolean> isLibraryWithoutVersionNodeAdd = new HashMap<>();
 		Map<Developer, Boolean> isDeveloperNodeAdd = new HashMap<>();
 		
+		JSONArray ztreeNodes = new JSONArray();
+		result.put("ztreeNodes", ztreeNodes);
+		ZTreeNode msRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "微服务", false);
+		ZTreeNode testcaseRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "测试用例", false);
+		ZTreeNode featureRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "特性", false);
+		ZTreeNode libRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "三方库", false);
+		ZTreeNode scenarioRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "场景", false);
+		ZTreeNode developerRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "开发者", false);
+		
 		if(showAllScenarios) {
-			showAllScenarios(nodes, edges, isScenarioNodeAdd);
+			for(Scenario scenario : allScenarios) {
+				if(!isScenarioNodeAdd.getOrDefault(scenario, false)) {
+					nodes.add(CytoscapeUtil.toCytoscapeNode(scenario, scenario.getScenarioId() + " : " + scenario.getName(),  "Scenario"));
+					isScenarioNodeAdd.put(scenario, true);
+					
+					scenarioRoot.addChild(scenario);
+				}
+			}
 		}
 		if(showAllMicroServices) {
 			for(MicroService ms : allMicroServices) {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false)) {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(ms, "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
+					
+					msRoot.addChild(ms);
 				}
 			}
 		}
@@ -233,6 +243,8 @@ public class MicroServiceCallWithEntry {
 				if(!isDeveloperNodeAdd.getOrDefault(developer, false)) {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(developer, "Developer"));
 					isDeveloperNodeAdd.put(developer, true);
+					
+					developerRoot.addChild(developer);
 				}
 				edges.add(CytoscapeUtil.relationToEdge(ms, developer, "MicroServiceUpdatedByDeveloper", times + "", false));
 			}
@@ -242,12 +254,16 @@ public class MicroServiceCallWithEntry {
 				if(!isFeatureNodeAdd.getOrDefault(feature, false)) {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(feature, feature.getFeatureId() + " : " + feature.getName(), "Feature"));
 					isFeatureNodeAdd.put(feature, true);
+					
+					featureRoot.addChild(feature);
 				}
 				Feature parentFeature = featureToParentFeature.get(feature);
 				if(parentFeature != null && !isFeatureNodeParent.getOrDefault(feature, false)) {
 					if(!isFeatureNodeAdd.getOrDefault(parentFeature, false)) {
 						nodes.add(CytoscapeUtil.toCytoscapeNode(parentFeature, parentFeature.getFeatureId() + " : " + parentFeature.getName(), "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
+
+						featureRoot.addChild(parentFeature);
 					}
 					edges.add(CytoscapeUtil.relationToEdge(parentFeature, feature, null, null, true));
 					isFeatureNodeParent.put(feature, true);
@@ -266,6 +282,8 @@ public class MicroServiceCallWithEntry {
 					if(!isLibraryNodeAdd.getOrDefault(lib, false)) {
 						nodes.add(CytoscapeUtil.toCytoscapeNode(lib, lib.getFullName(), "Library"));
 						isLibraryNodeAdd.put(lib, true);
+						///FIXME
+						libRoot.addChild(lib);
 					}
 					String libraryGroupAndName = lib.groupIdAndName();
 					if(!isLibraryWithoutVersionNodeAdd.getOrDefault(libraryGroupAndName, false)) {
@@ -287,11 +305,16 @@ public class MicroServiceCallWithEntry {
 		
 		for(TestCase testCase : testCaseToEntries.keySet()) {
 			nodes.add(CytoscapeUtil.toCytoscapeNode(testCase, String.join(" : ", " " + testCase.getTestCaseId(), testCase.getName() + " "), "TestCase_" + (testCase.isSuccess() ? "success" : "fail")));
+			
+			testcaseRoot.addChild(testCase);
+			
 			Scenario scenario = this.scenarioDefineTestCases.get(testCase);
 			if(scenario != null) {
 				if(!isScenarioNodeAdd.getOrDefault(scenario, false)) {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(scenario, scenario.getScenarioId() + " : " + scenario.getName(),  "Scenario"));
 					isScenarioNodeAdd.put(scenario, true);
+					
+					scenarioRoot.addChild(scenario);
 				}
 				edges.add(CytoscapeUtil.relationToEdge(scenario, testCase, "ScenarioDefineTestCase", null, true));
 			}
@@ -300,6 +323,8 @@ public class MicroServiceCallWithEntry {
 				if(!isMicroServiceNodeAdd.getOrDefault(entry, false)) {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(entry, "MicroService"));
 					isMicroServiceNodeAdd.put(entry, true);
+					
+					msRoot.addChild(entry);
 				}
 				edges.add(CytoscapeUtil.relationToEdge(testCase, entry, "TestCaseExecuteMicroService", null, true));
 			}
@@ -308,12 +333,16 @@ public class MicroServiceCallWithEntry {
 				if(!isFeatureNodeAdd.getOrDefault(feature, false)) {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(feature, feature.getFeatureId() + " : " + feature.getName(), "Feature"));
 					isFeatureNodeAdd.put(feature, true);
+					
+					featureRoot.addChild(feature);
 				}
 				Feature parentFeature = featureToParentFeature.get(feature);
 				if(parentFeature != null && !isFeatureNodeParent.getOrDefault(feature, false)) {
 					if(!isFeatureNodeAdd.getOrDefault(parentFeature, false)) {
 						nodes.add(CytoscapeUtil.toCytoscapeNode(parentFeature, parentFeature.getFeatureId() + " : " + parentFeature.getName(), "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
+						
+						featureRoot.addChild(parentFeature);
 					}
 					edges.add(CytoscapeUtil.relationToEdge(parentFeature, feature, null, null, true));
 					isFeatureNodeParent.put(feature, true);
@@ -328,11 +357,15 @@ public class MicroServiceCallWithEntry {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false) && !msDependOns.get(ms).isEmpty()) {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(ms, "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
+					
+					msRoot.addChild(ms);
 				}
 				for(MicroService callMs : msDependOns.get(ms).keySet()) {
 					if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
 						nodes.add(CytoscapeUtil.toCytoscapeNode(callMs, "MicroService"));
 						isMicroServiceNodeAdd.put(callMs, true);
+						
+						msRoot.addChild(callMs);
 					}
 					if(MicroServiceUtil.isMicroServiceCall(ms, callMs, calls)) {
 						edges.add(CytoscapeUtil.relationToEdge(ms, callMs, "ShowStructureDependOnCall", null, true));
@@ -346,11 +379,15 @@ public class MicroServiceCallWithEntry {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false) && !calls.get(ms).isEmpty()) {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(ms, "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
+
+					msRoot.addChild(ms);
 				}
 				for(MicroService callMs : calls.get(ms).keySet()) {
 					if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
 						nodes.add(CytoscapeUtil.toCytoscapeNode(callMs, "MicroService"));
 						isMicroServiceNodeAdd.put(callMs, true);
+
+						msRoot.addChild(callMs);
 					}
 					if(!MicroServiceUtil.isMicroServiceDependOn(ms, callMs, msDependOns)) {
 						edges.add(CytoscapeUtil.relationToEdge(ms, callMs, "ShowStructureCall", null, true));
@@ -362,17 +399,27 @@ public class MicroServiceCallWithEntry {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false) && !calls.get(ms).isEmpty()) {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(ms, "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
+
+					msRoot.addChild(ms);
 				}
 				for(MicroService callMs : calls.get(ms).keySet()) {
 					if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
 						nodes.add(CytoscapeUtil.toCytoscapeNode(callMs, "MicroService"));
 						isMicroServiceNodeAdd.put(callMs, true);
+						
+						msRoot.addChild(callMs);
 					}
 					edges.add(CytoscapeUtil.relationToEdge(ms, callMs, "NoStructureCall", null, true));
 				}
 			}
 		}
-		
+
+		ztreeNodes.add(msRoot.toJSON());
+		ztreeNodes.add(testcaseRoot.toJSON());
+		ztreeNodes.add(featureRoot.toJSON());
+		ztreeNodes.add(libRoot.toJSON());
+		ztreeNodes.add(scenarioRoot.toJSON());
+		ztreeNodes.add(developerRoot.toJSON());
 		
 		JSONObject data = new JSONObject();
 		data.put("nodes", nodes);

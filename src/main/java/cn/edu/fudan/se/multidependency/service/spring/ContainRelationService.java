@@ -6,6 +6,7 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
@@ -19,20 +20,23 @@ import cn.edu.fudan.se.multidependency.model.relation.Contain;
 public interface ContainRelationService {
 	
 	Iterable<Package> findProjectContainPackages(Project project);
-	
-	Iterable<Function> findProjectContainFunctions(Project project);
+	Iterable<Function> findProjectContainAllFunctions(Project project);
 	
 	Iterable<ProjectFile> findPackageContainFiles(Package pck);
 	
-	Iterable<Type> findFileContainTypes(ProjectFile codeFile);
+	Iterable<Namespace> findFileContainNamespaces(ProjectFile file);
+	Iterable<Type> findFileDirectlyContainTypes(ProjectFile file);
+	Iterable<Function> findFileDirectlyContainFunctions(ProjectFile file);
+	Iterable<Variable> findFileDirectlyContainVariables(ProjectFile file);
 	
+	Iterable<Type> findNamespaceDirectlyContainTypes(Namespace namespace);
+	Iterable<Function> findNamespaceDirectlyContainFunctions(Namespace namespace);
+	Iterable<Variable> findNamespaceDirectlyContainVariables(Namespace namespace);
+	
+	Iterable<Function> findTypeDirectlyContainFunctions(Type type);
 	Iterable<Variable> findTypeDirectlyContainFields(Type type);
 	
 	Iterable<Variable> findFunctionDirectlyContainVariables(Function function);
-	
-	Iterable<Function> findFileDirectlyContainFunctions(ProjectFile codeFile);
-	
-	Iterable<Function> findTypeDirectlyContainFunctions(Type type);
 	
 	Package findTypeBelongToPackage(Type type);
 	

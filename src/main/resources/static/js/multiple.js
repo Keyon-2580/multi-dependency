@@ -15,6 +15,7 @@ var multiple = function(cytoscapeutil, ztree) {
 		};
 
 		var zNodes = ztree;
+		console.log(zNodes);
 		zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, zNodes);
 	}
 

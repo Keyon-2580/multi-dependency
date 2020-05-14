@@ -10,7 +10,7 @@ var project = function(cytoscapeutil) {
 			var level = $("input[name='level']:checked").val();
 			$.ajax({
 				type: 'GET',
-				url: "/project/cytoscapenew?projectId=" + projectId + "&dependency=" + dependency + "&level=" + level,
+				url: "/project/cytoscape?projectId=" + projectId + "&dependency=" + dependency + "&level=" + level,
 				success: function(result) {
 					if(result.result == "success") {
 						console.log(result.value);
