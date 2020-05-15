@@ -34,6 +34,13 @@ public class MultipleService {
 	@Autowired
 	private ContainRelationService containRelationService;
 	
+	public JSONArray projectToZTree(Project project) {
+		JSONArray result = new JSONArray();
+		ZTreeNode projectNode = nodeToZTreeNode(project);
+		result.add(projectNode.toJSON());
+		return result;
+	}
+	
 	public JSONArray allNodesToZTree() {
 		JSONArray result = new JSONArray();
 		

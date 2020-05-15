@@ -1,5 +1,11 @@
 var project = function(cytoscapeutil) {
 	var cy = null;
+	var showZTree = function(nodes) {
+		var setting = {
+		};
+		var zNodes = nodes;
+		var zTreeObj = $.fn.zTree.init($("#ztree"), setting, zNodes);
+	}
 	var _project = function() {
 		$('#project_select').multiselect({
 			includeSelectAllOption: true
@@ -14,6 +20,9 @@ var project = function(cytoscapeutil) {
 				success: function(result) {
 					if(result.result == "success") {
 						console.log(result.value);
+						if(result.ztreenode != null) {
+							showZTree(result.ztreenode);
+						}
 						var nodes = result.value.nodes;
 						cy = cytoscapeutil.showDataInCytoscape($("#graph"), result.value, "dagre");
 						cy.expandCollapse();

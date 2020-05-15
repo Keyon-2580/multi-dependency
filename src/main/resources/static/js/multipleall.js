@@ -16,21 +16,9 @@ var multiple_microservice_all = function(cytoscapeutil) {
 						return ;
 					}
 					var node = cyEntry.$('#' + id);
-//					console.log(node.data());
-//					console.log(node.position());
-//					cyEntry.pan(node.position());
-//					console.log(cyEntry.pan())
 					console.log(cyEntry.width());
 					console.log(cyEntry.height());
 					cyEntry.fit(node, 350);
-//					cyEntry.pan({
-//						x: 0,
-//						y: 0
-//					})
-//					cyEntry.zoom(3);
-//					cyEntry.pan({
-//						cyEntry.$('#')
-//					})
 				}
 			}	
 				

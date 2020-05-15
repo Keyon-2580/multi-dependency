@@ -103,35 +103,53 @@ public class DependencyOrganizationService {
 		JSONArray edges = new JSONArray();
 		
 		Iterable<Package> packages = containRelationService.findProjectContainPackages(project);
-		Map<String, Package> pathToPackages = new HashMap<>();
-		int count = 0;
+		
 		for(Package pck : packages) {
-			count++;
-			pathToPackages.put(pck.getDirectoryPath(), pck);
-		}
-		System.out.println("包数量：" + count);
-		count = 0;
-		for(Package pck : packages) {
-			JSONObject pckNode = CytoscapeUtil.toCytoscapeNode(pck, "Package: " + pck.getName(), "Package");
-			String parentPckPath = FileUtil.extractDirectoryFromFile(pck.getDirectoryPath().substring(0, pck.getDirectoryPath().length() - 1));
-			Package parentPck = pathToPackages.get(parentPckPath + "/");
-			if(parentPck != null) {
-				pckNode.getJSONObject("data").put("parent", String.valueOf(parentPck.getId()));
+			nodes.add(CytoscapeUtil.toCytoscapeNode(pck, "Package: " + pck.getName(), "Package"));
+			Iterable<ProjectFile> files = containRelationService.findPackageContainFiles(pck);
+			for(ProjectFile file : files) {
+				JSONObject fileJson = CytoscapeUtil.toCytoscapeNode(file, "File: " + file.getName(), "File");
+				fileJson.getJSONObject("data").put("parent", pck.getId());
+				nodes.add(fileJson);
+				
+				Iterable<Type> types = containRelationService.findFileDirectlyContainTypes(file);
+				for(Type type : types) {
+					JSONObject typeJson = CytoscapeUtil.toCytoscapeNode(type, "Type: " + type.getName(), "Type");
+					typeJson.getJSONObject("data").put("parent", file.getId());
+					nodes.add(typeJson);
+					
+					Iterable<Function> functions = containRelationService.findTypeDirectlyContainFunctions(type);
+					for(Function function : functions) {
+						JSONObject functionJson = CytoscapeUtil.toCytoscapeNode(function, "Function: " + function.getName(), "Function");
+						functionJson.getJSONObject("data").put("parent", type.getId());
+						nodes.add(functionJson);
+						Iterable<Variable> variables = containRelationService.findFunctionDirectlyContainVariables(function);
+						for(Variable variable : variables) {
+							JSONObject variableJson = CytoscapeUtil.toCytoscapeNode(variable, "Variable: " + variable.getName(), "Variable");
+							variableJson.getJSONObject("data").put("parent", function.getId());
+							nodes.add(variableJson);
+						}
+
+					}
+					
+					Iterable<Variable> variables = containRelationService.findTypeDirectlyContainFields(type);
+					for(Variable variable : variables) {
+						JSONObject variableJson = CytoscapeUtil.toCytoscapeNode(variable, "Variable: " + variable.getName(), "Variable");
+						variableJson.getJSONObject("data").put("parent", type.getId());
+						nodes.add(variableJson);
+					}
+				}
+				
+				Iterable<Function> functions = containRelationService.findFileDirectlyContainFunctions(file);
+				for(Function function : functions) {
+					JSONObject functionJson = CytoscapeUtil.toCytoscapeNode(function, "Function: " + function.getName(), "Function");
+					functionJson.getJSONObject("data").put("parent", file.getId());
+					nodes.add(functionJson);
+				}
 			}
-			nodes.add(pckNode);
-			count++;
-			if(count > 100) {
-				break;
-			}
-//			Iterable<ProjectFile> files = containRelationService.findPackageContainFiles(pck);
-//			for(ProjectFile file : files) {
-//				JSONObject fileJson = CytoscapeUtil.toCytoscapeNode(file, "File: " + file.getName(), "File");
-//				fileJson.getJSONObject("data").put("parent", pck.getId() + "");
-//				nodes.add(fileJson);
-//			}
 		}
 		
-		/*List<FunctionCallFunction> functionCallFunctions = staticAnalyseService.findFunctionCallFunctionRelations(project);
+		List<FunctionCallFunction> functionCallFunctions = staticAnalyseService.findFunctionCallFunctionRelations(project);
 		for(FunctionCallFunction call : functionCallFunctions) {
 			edges.add(CytoscapeUtil.relationToEdge(call.getFunction(), call.getCallFunction(), "FunctionCallFunction", "call", true));
 		}
@@ -178,7 +196,7 @@ public class DependencyOrganizationService {
 		List<VariableIsType> variableIsType = staticAnalyseService.findProjectContainVariableIsTypeRelations(project);
 		for(VariableIsType relation : variableIsType) {
 			edges.add(CytoscapeUtil.relationToEdge(relation.getVariable(), relation.getType(), "VariableIsType", "VariableIsType", false));
-		}*/
+		}
 		/*List<VariableTypeParameterType> variableTypeParameterTypes = staticAnalyseService.findProjectContainVariableTypeParameterTypeRelations(project);
 		for(VariableTypeParameterType relation : variableTypeParameterTypes) {
 			edges.add(ProjectUtil.relationToEdge(relation.getVariable(), relation.getType(), "VariableParameterType", "use", false));

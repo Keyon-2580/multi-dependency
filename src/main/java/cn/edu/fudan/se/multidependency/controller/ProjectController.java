@@ -16,6 +16,7 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunctio
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.service.spring.DependencyOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
+import cn.edu.fudan.se.multidependency.service.spring.MultipleService;
 import cn.edu.fudan.se.multidependency.service.spring.ProjectOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 
@@ -34,6 +35,9 @@ public class ProjectController {
 	
 	@Autowired
 	private StaticAnalyseService staticAnalyseService;
+	
+	@Autowired
+	private MultipleService multipleService;
 
 	@GetMapping(value = {"/", "/index"})
 	public String index() {
@@ -96,6 +100,7 @@ public class ProjectController {
 				System.out.println("end finding clones");
 //				result.put("value", dependencyOrganizationService.projectToCytoscape(project, calls, clones));
 				result.put("value", dependencyOrganizationService.projectToCytoscape(project));
+				result.put("ztreenode", multipleService.projectToZTree(project));
 			}
 			System.out.println(result.get("value"));
 			if(result.get("value") == null) {

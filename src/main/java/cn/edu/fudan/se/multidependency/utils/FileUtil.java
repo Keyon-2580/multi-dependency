@@ -12,7 +12,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 public class FileUtil {
-	
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
 	
 	public static final String SLASH_WINDOWS = "\\";
 	public static final String SLASH_LINUX = "/";
@@ -38,15 +39,17 @@ public class FileUtil {
 	}
 
 	public static void main(String[] args) {
-		/*JSONObject array = readDirectoryToGenerateProjectJSONFile(
-				new File("D:\\multiple-dependency-project\\train-ticket"), 1, "java", true, "train-ticket");
+		String directoryPath = "D:\\multiple-dependency-project\\train-ticket";
+		directoryPath = "D:\\multiple-dependency-project\\doublelanguage";
+		JSONObject array = readDirectoryToGenerateProjectJSONFileForDoubleLanguageProject(
+				new File(directoryPath), 0, "java", true, "train-ticket");
 		System.out.println(array);
 		try {
 			writeToFileForProjectJSONFile("D:\\testtesttest.log", array);
 		} catch (Exception e) {
 			e.printStackTrace();
-		}*/
-		System.out.println(isFileOrSubDirectoryOfDirectory("/test/test2", "/test", "/"));
+		}
+//		System.out.println(isFileOrSubDirectoryOfDirectory("/test/test2", "/test", "/"));
 	}
 	
 	/**
@@ -56,6 +59,7 @@ public class FileUtil {
 	 * java
 	 * true
 	 * train-ticket
+	 * true/false optional
 	 * @param args
 	 * @throws Exception
 	 */
@@ -66,11 +70,22 @@ public class FileUtil {
 		String language = args[3];
 		boolean isAllMicroService = Boolean.parseBoolean(args[4]);
 		String microserviceGroupName = null;
-		if(args.length == 6) {
+		if(args.length >= 6) {
 			microserviceGroupName = args[5];
 		}
-		JSONObject array = readDirectoryToGenerateProjectJSONFile(
-				new File(projectDirectoryPath), depth, language, isAllMicroService, microserviceGroupName);
+		boolean isSearchDoubleLanguageProject = false;
+		if(args.length >= 7) {
+			Boolean temp = Boolean.valueOf(args[6]);
+			isSearchDoubleLanguageProject = temp == null ? false : temp;
+		}
+		JSONObject array = null;
+		if(isSearchDoubleLanguageProject) {
+			array = readDirectoryToGenerateProjectJSONFileForDoubleLanguageProject(
+					new File(projectDirectoryPath), depth, language, isAllMicroService, microserviceGroupName);
+		} else {
+			array = readDirectoryToGenerateProjectJSONFile(
+					new File(projectDirectoryPath), depth, language, isAllMicroService, microserviceGroupName);
+		}
 		try {
 			writeToFileForProjectJSONFile(outputPath, array);
 		} catch (Exception e) {
@@ -84,13 +99,56 @@ public class FileUtil {
 		}
 	}
 	
-	public static JSONObject readDirectoryToGenerateProjectJSONFile(
-			String rootDirectoryPath, int depth, String defaultLanguage,
+	public static JSONObject readDirectoryToGenerateProjectJSONFileForDoubleLanguageProject(
+			File rootDirectory, int depth, String defaultLanguage,
 			boolean isAllMicroservice, String serviceGroupName) {
-		return readDirectoryToGenerateProjectJSONFile(new File(rootDirectoryPath), 
-				depth, defaultLanguage, isAllMicroservice, serviceGroupName);
-	}
+		JSONObject result = new JSONObject();
+		JSONArray projects = new JSONArray();
+		List<File> projectDirectories = new ArrayList<>();
+		FileUtil.listDirectories(rootDirectory, depth, projectDirectories);
 
+		for(File projectDirectory : projectDirectories) {
+			boolean isDoubleLanguage = false;
+			File[] children = projectDirectory.listFiles();
+			for(File child : children) {
+				if(child.isDirectory() && ("code".equals(child.getName()) || "codej".equals(child.getName()))) {
+					isDoubleLanguage = true;
+					break;
+				}
+			}
+			if(isDoubleLanguage) {
+				JSONObject projectJson = new JSONObject();
+				projectJson.put("project", projectDirectory.getName());
+				projectJson.put("path", projectDirectory.getAbsolutePath());
+				projectJson.put("language", "java");
+				projectJson.put("isMicroservice", isAllMicroservice);
+				if(isAllMicroservice && serviceGroupName != null) {
+					projectJson.put("serviceGroupName", serviceGroupName);
+					projectJson.put("microserviceName", projectDirectory.getName());
+				}
+				projects.add(projectJson);
+				
+				projectJson = (JSONObject) projectJson.clone();
+				projectJson.put("language", "cpp");
+				projects.add(projectJson);				
+			} else {
+				JSONObject projectJson = new JSONObject();
+				projectJson.put("project", projectDirectory.getName());
+				projectJson.put("path", projectDirectory.getAbsolutePath());
+				projectJson.put("language", defaultLanguage == null ? "" : defaultLanguage);
+				projectJson.put("isMicroservice", isAllMicroservice);
+				if(isAllMicroservice && serviceGroupName != null) {
+					projectJson.put("serviceGroupName", serviceGroupName);
+					projectJson.put("microserviceName", projectDirectory.getName());
+				}
+				projects.add(projectJson);
+			}
+		}
+		result.put("projects", projects);
+		result.put("architectures", new JSONObject());
+		return result;
+	}
+	
 	public static JSONObject readDirectoryToGenerateProjectJSONFile(
 			File rootDirectory, int depth, String defaultLanguage,
 			boolean isAllMicroservice, String serviceGroupName) {
@@ -116,8 +174,6 @@ public class FileUtil {
 		result.put("architectures", new JSONObject());
 		return result;
 	}
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
 
 	/**
 	 * 提取文件所在目录
