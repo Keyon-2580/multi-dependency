@@ -1,7 +1,0 @@
-spring:
-   profiles:
-#      active: zhou
-      active: huang
-#      active: fan
-#      active: server
-      
