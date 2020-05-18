@@ -14,5 +14,4 @@ public interface ProjectRepository extends Neo4jRepository<Project, Long> {
 
     @Query("match (n) delete n")
     void clearNode();
-
 }

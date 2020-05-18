@@ -1,5 +1,5 @@
-/target/
+target/
 .idea/
 .settings/
 *.iml
-/src/main/resources/application.yml
+src/main/resources/application.yml

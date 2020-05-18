@@ -1,6 +1,5 @@
 package cn.edu.fudan.se.multidependency.service.nospring.git;
 
-import cn.edu.fudan.se.multidependency.model.node.git.Developer;
 import cn.edu.fudan.se.multidependency.model.node.git.Issue;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 import com.alibaba.fastjson.JSONArray;
