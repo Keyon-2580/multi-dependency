@@ -73,9 +73,9 @@ public class InsertDataMain {
 			 * 静态分析
 			 */
 			JSONConfigFile config = ProjectConfigUtil.extract(JSONUtil.extractJSONObject(new File(yaml.getProjectsConfig())));
-			Iterable<ProjectConfig> projectConfig = config.getProjectConfigs();
-			for(ProjectConfig proejctConfig : projectConfig) {
-				Language language = proejctConfig.getLanguage();
+			Iterable<ProjectConfig> projectsConfig = config.getProjectConfigs();
+			for(ProjectConfig projectConfig : projectsConfig) {
+				Language language = projectConfig.getLanguage();
 				DependsEntityRepoExtractor extractor = null;
 				switch(language) {
 				case cpp:
@@ -89,17 +89,17 @@ public class InsertDataMain {
 				default:
 					throw new Exception();
 				}
-				extractor.setIncludeDirs(proejctConfig.includeDirsArray());
-				extractor.setExcludes(proejctConfig.getExcludes());
-				extractor.setLanguage(proejctConfig.getLanguage());
-				extractor.setProjectPath(proejctConfig.getPath());
-				extractor.setAutoInclude(proejctConfig.isAutoInclude());
+				extractor.setIncludeDirs(projectConfig.includeDirsArray());
+				extractor.setExcludes(projectConfig.getExcludes());
+				extractor.setLanguage(projectConfig.getLanguage());
+				extractor.setProjectPath(projectConfig.getPath());
+				extractor.setAutoInclude(projectConfig.isAutoInclude());
 				EntityRepo entityRepo = extractor.extractEntityRepo();
 				if (extractor.getEntityCount() > 0) {
 					BasicCodeInserterForNeo4jServiceImpl inserter = InserterForNeo4jServiceFactory.getInstance()
-							.createCodeInserterService(entityRepo, proejctConfig);
-					RestfulAPIConfig apiConfig = proejctConfig.getApiConfig();
-					if(apiConfig != null && RestfulAPIConfig.FRAMEWORK_SWAGGER.equals(proejctConfig.getApiConfig().getFramework())) {
+							.createCodeInserterService(entityRepo, projectConfig);
+					RestfulAPIConfig apiConfig = projectConfig.getApiConfig();
+					if(apiConfig != null && RestfulAPIConfig.FRAMEWORK_SWAGGER.equals(projectConfig.getApiConfig().getFramework())) {
 						SwaggerJSON swagger = new SwaggerJSON();
 						swagger.setPath(apiConfig.getPath());
 						swagger.setExcludeTags(apiConfig.getExcludeTags());

@@ -51,7 +51,7 @@ public class FileUtil {
 		}
 //		System.out.println(isFileOrSubDirectoryOfDirectory("/test/test2", "/test", "/"));
 	}
-	
+//	java -jar multi-dependency-0.0.1.jar D:\FudanSE\project\project.log 项目目录 1 java true 项目名称 true
 	/**
 	 * D:\testtesttest.log
 	 * D:\multiple-dependency-project\train-ticket
@@ -66,6 +66,7 @@ public class FileUtil {
 	public static void writeToFileForProjectJSONFile(String[] args) throws Exception {
 		String outputPath = args[0];
 		String projectDirectoryPath = args[1];
+		LOGGER.info("projectDirectoryPath is " + projectDirectoryPath);
 		int depth = Integer.parseInt(args[2]);
 		String language = args[3];
 		boolean isAllMicroService = Boolean.parseBoolean(args[4]);
@@ -78,13 +79,19 @@ public class FileUtil {
 			Boolean temp = Boolean.valueOf(args[6]);
 			isSearchDoubleLanguageProject = temp == null ? false : temp;
 		}
+		File projectDirectory = new File(projectDirectoryPath);
+		if(!projectDirectory.exists()) {
+			LOGGER.error("projectDirectoryPath is null: " + projectDirectoryPath);
+		} else {
+			LOGGER.info("is ProjectDirectoryPath Directory true? " + projectDirectory.isDirectory());
+		}
 		JSONObject array = null;
 		if(isSearchDoubleLanguageProject) {
 			array = readDirectoryToGenerateProjectJSONFileForDoubleLanguageProject(
-					new File(projectDirectoryPath), depth, language, isAllMicroService, microserviceGroupName);
+					projectDirectory, depth, language, isAllMicroService, microserviceGroupName);
 		} else {
 			array = readDirectoryToGenerateProjectJSONFile(
-					new File(projectDirectoryPath), depth, language, isAllMicroService, microserviceGroupName);
+					projectDirectory, depth, language, isAllMicroService, microserviceGroupName);
 		}
 		try {
 			writeToFileForProjectJSONFile(outputPath, array);
@@ -102,6 +109,10 @@ public class FileUtil {
 	public static JSONObject readDirectoryToGenerateProjectJSONFileForDoubleLanguageProject(
 			File rootDirectory, int depth, String defaultLanguage,
 			boolean isAllMicroservice, String serviceGroupName) {
+		if(rootDirectory == null) {
+			LOGGER.error("rootDirectory is null");
+			return new JSONObject();
+		}
 		JSONObject result = new JSONObject();
 		JSONArray projects = new JSONArray();
 		List<File> projectDirectories = new ArrayList<>();
@@ -252,7 +263,7 @@ public class FileUtil {
 	}
 
 	public static void listDirectories(File rootDirectory, int depth, List<File> result) {
-		if(rootDirectory.isFile()) {
+		if(rootDirectory == null || rootDirectory.isFile()) {
 			return;
 		}
 		if(depth == 0 && rootDirectory.isDirectory()) {
