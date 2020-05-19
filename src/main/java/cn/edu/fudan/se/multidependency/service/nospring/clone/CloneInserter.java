@@ -3,6 +3,9 @@ package cn.edu.fudan.se.multidependency.service.nospring.clone;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
@@ -15,7 +18,8 @@ import cn.edu.fudan.se.multidependency.utils.CloneUtil.MethodNameForJavaFromCsv;
 import lombok.Setter;
 
 public class CloneInserter extends ExtractorForNodesAndRelationsImpl {
-	
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CloneUtil.class);
 	@Setter
 	private Language language;
 	@Setter
@@ -42,34 +46,31 @@ public class CloneInserter extends ExtractorForNodesAndRelationsImpl {
 				double value = cloneResult.getValue();
 				MethodNameForJavaFromCsv methodName1 = methodNames.get(start);
 				if(methodName1 == null) {
-					throw new Exception("435454545454554");
+					throw new Exception("methofName1 is null");
 				}
 				MethodNameForJavaFromCsv methodName2 = methodNames.get(end);
 				if(methodName2 == null) {
-					throw new Exception("ewadwadwedawedwae");
+					throw new Exception("methodName2 is null");
 				}
 				Project project1 = this.getNodes().findProject(methodName1.getProjectName(), language);
 				if(project1 == null) {
-//					throw new Exception("project is null " + methodName1.getProjectName());
-					System.out.println("project1 is null " + methodName1.getProjectName());
+					LOGGER.warn("project1 is null " + methodName1.getProjectName());
 					continue;
 				}
 				Project project2 = this.getNodes().findProject(methodName2.getProjectName(), language);
 				if(project2 == null) {
-//					throw new Exception("project is null " + methodName2.getProjectName());
-					System.out.println("project2 is null " + methodName2.getProjectName());
+					LOGGER.warn("project2 is null " + methodName2.getProjectName());
 					continue;
 				}
 				Function function1 = findJavaFunctionByMethod(methodName1, project1);
+				if(function1 == null) {
+					LOGGER.warn("function1 is null " + methodName1);
+					continue;
+				}
 				Function function2 = findJavaFunctionByMethod(methodName2, project2);
-				if(function1 == null || function2 == null) {
-					if(function1 == null) {
-						System.out.println("function1 is null " + methodName1);
-					}
-					if(function2 == null) {
-						System.out.println("function2 is null " + methodName2);
-					}
-					throw new Exception("asafoiafjaofhorhoaerrui");
+				if(function2 == null) {
+					LOGGER.warn("function2 is null " + methodName2);
+					continue;
 				}
 				FunctionCloneFunction clone = new FunctionCloneFunction(function1, function2);
 				clone.setValue(value);

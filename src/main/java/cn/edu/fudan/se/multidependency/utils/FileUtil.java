@@ -49,6 +49,11 @@ public class FileUtil {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		/*directoryPath = "D:\\";
+		File rootDirectory = new File(directoryPath);
+		List<File> result = new ArrayList<>();
+		listDirectories(rootDirectory, 2, result);
+		System.out.println(result);*/
 //		System.out.println(isFileOrSubDirectoryOfDirectory("/test/test2", "/test", "/"));
 	}
 //	java -jar multi-dependency-0.0.1.jar D:\FudanSE\project\project.log 项目目录 1 java true 项目名称 true
@@ -121,6 +126,9 @@ public class FileUtil {
 		for(File projectDirectory : projectDirectories) {
 			boolean isDoubleLanguage = false;
 			File[] children = projectDirectory.listFiles();
+			if(children == null) {
+				continue;
+			}
 			for(File child : children) {
 				if(child.isDirectory() && ("code".equals(child.getName()) || "codej".equals(child.getName()))) {
 					isDoubleLanguage = true;
@@ -240,6 +248,9 @@ public class FileUtil {
 
         if (file.isDirectory()) {
             File[] files = file.listFiles();
+            if(files == null) {
+            	return true;
+            }
             for (File f : files) {
                 delFile(f);
             }
@@ -257,7 +268,11 @@ public class FileUtil {
 			result.add(directory);
 			return;
 		}
-		for(File file : directory.listFiles()) {
+		File[] listFiles = directory.listFiles();
+		if(listFiles == null) {
+			return ;
+		}
+		for(File file : listFiles) {
 			listFiles(file, result);
 		}
 	}
@@ -270,7 +285,11 @@ public class FileUtil {
 			result.add(rootDirectory);
 			return;
 		}
-		for(File file : rootDirectory.listFiles()) {
+		File[] listFiles = rootDirectory.listFiles();
+		if(listFiles == null) {
+			return ;
+		}
+		for(File file : listFiles) {
 			listDirectories(file, depth - 1, result);
 		}
 	}
@@ -290,7 +309,11 @@ public class FileUtil {
 			}
 			return;
 		}
-		for(File file : directory.listFiles()) {
+		File[] listFiles = directory.listFiles();
+		if(listFiles == null) {
+			return ;
+		}
+		for(File file : listFiles) {
 			listFiles(file, result, suffixes);
 		}
 	}
