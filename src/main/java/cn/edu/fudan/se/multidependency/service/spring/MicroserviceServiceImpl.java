@@ -7,9 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
@@ -39,6 +42,8 @@ import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanCall
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanInstanceOfRestfulAPIRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanStartWithFunctionRepository;
 import cn.edu.fudan.se.multidependency.utils.MicroServiceUtil;
+import cn.edu.fudan.se.multidependency.utils.PageUtil;
+import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
 
 @Service
 public class MicroserviceServiceImpl implements MicroserviceService {
@@ -300,6 +305,53 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 			result.add(findMicroServiceCallLibraries(ms));
 		}
 		return result;
+	}
+	
+	private Map<Integer, List<MicroService>> pageMicroServicesCache = new ConcurrentHashMap<>();
+	@Override
+	public List<MicroService> queryAllMicroServicesByPage(int page, int size, String... sortByProperties) {
+		List<MicroService> result = pageMicroServicesCache.get(page);
+		if(result == null || result.size() == 0) {
+			result = new ArrayList<>();
+			Pageable pageable = PageUtil.generatePageable(page, size, sortByProperties);
+			Page<MicroService> pageMS = microServiceRepository.findAll(pageable);
+			for(MicroService ms : pageMS) {
+				result.add(ms);
+			}
+			pageMicroServicesCache.put(page, result);
+		}
+		return result;
+	}
+
+	@Override
+	public List<ZTreeNode> queryMicroServiceContainProjectsZTree(Iterable<MicroService> mss) {
+		List<ZTreeNode> result = new ArrayList<>();
+		for(MicroService ms : mss) {
+			ZTreeNode msNode = new ZTreeNode(ms);
+			Iterable<Project> projects = containRelationService.findMicroServiceContainProjects(ms);
+			for(Project project : projects) {
+				ZTreeNode projectNode = new ZTreeNode(project);
+				msNode.addChild(projectNode);
+			}
+			
+			Iterable<RestfulAPI> apis = containRelationService.findMicroServiceContainRestfulAPI(ms);
+			ZTreeNode apisNode = null;
+			for(RestfulAPI api : apis) {
+				if(apisNode == null) {
+					apisNode = new ZTreeNode(ZTreeNode.DEFAULT_ID, "RestfulAPI", false, ZTreeNode.DEFAULT_TYPE);
+					msNode.addChild(apisNode);
+				}
+				apisNode.addChild(new ZTreeNode(api));
+			}
+			
+			result.add(msNode);
+		}
+		return result;
+	}
+
+	@Override
+	public long countOfAllMicroServices() {
+		return microServiceRepository.count();
 	}
 
 }

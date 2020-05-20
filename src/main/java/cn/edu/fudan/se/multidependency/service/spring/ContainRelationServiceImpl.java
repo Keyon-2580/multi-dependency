@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
@@ -31,136 +33,255 @@ public class ContainRelationServiceImpl implements ContainRelationService {
     
     @Autowired
     ContainRepository containRepository;
+    
+    private Map<Node, Project> nodeBelongToProjectCache = new HashMap<>();
+    private Map<Node, Package> nodeBelongToPackageCache = new HashMap<>();
+    private Map<Node, ProjectFile> nodeBelongToProjectFileCache = new HashMap<>();
+    private Map<Node, Namespace> nodeBelongToNamespaceCache = new HashMap<>();
+    private Map<Node, Type> nodeBelongToTypeCache = new HashMap<>();
+    private Map<Node, Function> nodeBelongToFunctionCache = new HashMap<>();
+    private Map<Node, Library> nodeBelongToLibrary = new HashMap<>();
 
-	Map<Project, Iterable<Package>> projectContainPakcagesCache = new HashMap<>();
+	Map<Project, Collection<Package>> projectContainPakcagesCache = new HashMap<>();
 	@Override
-	public Iterable<Package> findProjectContainPackages(Project project) {
-		Iterable<Package> result = projectContainPakcagesCache.getOrDefault(project, containRepository.findProjectContainPackages(project.getId()));
+	public Collection<Package> findProjectContainPackages(Project project) {
+		Collection<Package> result = projectContainPakcagesCache.getOrDefault(project, containRepository.findProjectContainPackages(project.getId()));
 		projectContainPakcagesCache.put(project, result);
+		result.forEach(pck -> {
+			nodeBelongToProjectCache.put(pck, project);
+		});
 		return result;
 	}
 
-	Map<Package, Iterable<ProjectFile>> packageContainFilesCache = new HashMap<>();
+	Map<Package, Collection<ProjectFile>> packageContainFilesCache = new HashMap<>();
 	@Override
-	public Iterable<ProjectFile> findPackageContainFiles(Package pck) {
-		Iterable<ProjectFile> result = packageContainFilesCache.getOrDefault(pck, containRepository.findPackageContainFiles(pck.getId()));
+	public Collection<ProjectFile> findPackageContainFiles(Package pck) {
+		Collection<ProjectFile> result = packageContainFilesCache.getOrDefault(pck, containRepository.findPackageContainFiles(pck.getId()));
 		packageContainFilesCache.put(pck, result);
+		result.forEach(file -> {
+			nodeBelongToPackageCache.put(file, pck);
+		});
+		return result;
+	}
+	
+	Map<ProjectFile, Map<NodeLabelType, Collection<? extends Node>>> fileDirectlyContainNodesCache = new HashMap<>();
+	private Collection<? extends Node> findFileDirectlyContainNodes(ProjectFile file, NodeLabelType nodeLabelType) {
+		Map<NodeLabelType, Collection<? extends Node>> temp = fileDirectlyContainNodesCache.getOrDefault(file, new HashMap<>());
+		Collection<? extends Node> result = temp.get(nodeLabelType);
+		if(result != null) {
+			return result;
+		}
+		switch(nodeLabelType) {
+		case Namespace:
+			result = containRepository.findFileDirectlyContainNamespaces(file.getId());
+			break;
+		case Type:
+			result = containRepository.findFileDirectlyContainTypes(file.getId());
+			break;
+		case Function:
+			result = containRepository.findFileDirectlyContainFunctions(file.getId());
+			break;
+		case Variable:
+			result = containRepository.findFileDirectlyContainVariables(file.getId());
+			break;
+		default:
+			return new ArrayList<>();
+		}
+		temp.put(nodeLabelType, result);
+		fileDirectlyContainNodesCache.put(file, temp);
+		result.forEach(node -> {
+			nodeBelongToProjectFileCache.put(node, file);
+		});
 		return result;
 	}
 
-	Map<ProjectFile, Iterable<Type>> fileContainTypesCache = new HashMap<>();
 	@Override
-	public Iterable<Type> findFileDirectlyContainTypes(ProjectFile codeFile) {
-		Iterable<Type> result = fileContainTypesCache.getOrDefault(codeFile, containRepository.findFileDirectlyContainTypes(codeFile.getId()));
-		fileContainTypesCache.put(codeFile, result);
-		return result;
+	public Collection<Type> findFileDirectlyContainTypes(ProjectFile file) {
+		return (Collection<Type>) findFileDirectlyContainNodes(file, NodeLabelType.Type);
 	}
 
-	Map<ProjectFile, Iterable<Function>> fileContainFunctionsCache = new HashMap<>();
 	@Override
-	public Iterable<Function> findFileDirectlyContainFunctions(ProjectFile codeFile) {
-		Iterable<Function> result = fileContainFunctionsCache.getOrDefault(codeFile, containRepository.findFileDirectlyContainFunctions(codeFile.getId()));
-		fileContainFunctionsCache.put(codeFile, result);
-		return result;
+	public Collection<Function> findFileDirectlyContainFunctions(ProjectFile file) {
+		return (Collection<Function>) findFileDirectlyContainNodes(file, NodeLabelType.Function);
 	}
 
-	Map<Type, Iterable<Function>> typeContainFunctionsCache = new HashMap<>();
 	@Override
-	public Iterable<Function> findTypeDirectlyContainFunctions(Type type) {
-		Iterable<Function> result = typeContainFunctionsCache.getOrDefault(type, containRepository.findTypeDirectlyContainFunctions(type.getId()));
-		typeContainFunctionsCache.put(type, result);
-		return result;
+	public Collection<Namespace> findFileContainNamespaces(ProjectFile file) {
+		return (Collection<Namespace>) findFileDirectlyContainNodes(file, NodeLabelType.Namespace);
 	}
 
-	Map<Type, Iterable<Variable>> typeContainVariablesCache = new HashMap<>();
 	@Override
-	public Iterable<Variable> findTypeDirectlyContainFields(Type type) {
-		Iterable<Variable> result = typeContainVariablesCache.getOrDefault(type, containRepository.findTypeDirectlyContainFields(type.getId()));
-		typeContainVariablesCache.put(type, result);
+	public Collection<Variable> findFileDirectlyContainVariables(ProjectFile file) {
+		return (Collection<Variable>) findFileDirectlyContainNodes(file, NodeLabelType.Variable);
+	}
+	
+	Map<Type, Map<NodeLabelType, Collection<? extends Node>>> typeDirectlyContainNodesCache = new HashMap<>();
+	private Collection<? extends Node> findTypeDirectlyContainNodes(Type type, NodeLabelType nodeLabelType) {
+		Map<NodeLabelType, Collection<? extends Node>> temp = typeDirectlyContainNodesCache.getOrDefault(type, new HashMap<>());
+		Collection<? extends Node> result = temp.get(nodeLabelType);
+		if(result != null) {
+			return result;
+		}
+		switch(nodeLabelType) {
+		case Function:
+			result = containRepository.findTypeDirectlyContainFunctions(type.getId());
+			break;
+		case Variable:
+			result = containRepository.findTypeDirectlyContainFields(type.getId());
+			break;
+		default:
+			return new ArrayList<>();
+		}
+		temp.put(nodeLabelType, result);
+		typeDirectlyContainNodesCache.put(type, temp);
+		result.forEach(node -> {
+			nodeBelongToTypeCache.put(node, type);
+		});
 		return result;
 	}
-
-	Map<Function, Iterable<Variable>> functionContainVariablesCache = new HashMap<>();
+	
 	@Override
-	public Iterable<Variable> findFunctionDirectlyContainVariables(Function function) {
-		Iterable<Variable> result = functionContainVariablesCache.getOrDefault(function, containRepository.findFunctionDirectlyContainVariables(function.getId()));
+	public Collection<Function> findTypeDirectlyContainFunctions(Type type) {
+		return (Collection<Function>) findTypeDirectlyContainNodes(type, NodeLabelType.Function);
+	}
+
+	@Override
+	public Collection<Variable> findTypeDirectlyContainFields(Type type) {
+		return (Collection<Variable>) findTypeDirectlyContainNodes(type, NodeLabelType.Variable);
+	}
+
+	Map<Function, Collection<Variable>> functionContainVariablesCache = new HashMap<>();
+	@Override
+	public Collection<Variable> findFunctionDirectlyContainVariables(Function function) {
+		Collection<Variable> result = functionContainVariablesCache.getOrDefault(function, containRepository.findFunctionDirectlyContainVariables(function.getId()));
 		functionContainVariablesCache.put(function, result);
+		result.forEach(v -> {
+			nodeBelongToFunctionCache.put(v, function);
+		});
+		return result;
+	}
+
+	Map<Library, Collection<LibraryAPI>> libContainApisCache = new HashMap<>();
+	@Override
+	public Collection<LibraryAPI> findLibraryContainAPIs(Library lib) {
+		Collection<LibraryAPI> result = libContainApisCache.getOrDefault(lib, containRepository.findLibraryContainLibraryAPIs(lib.getId()));
+		libContainApisCache.put(lib, result);
+		result.forEach(api -> {
+			nodeBelongToLibrary.put(api, lib);
+		});
+		return result;
+	}
+
+	@Override
+	public Project findPackageBelongToProject(Package pck) {
+		Project result = nodeBelongToProjectCache.getOrDefault(pck, containRepository.findPackageBelongToProject(pck.getId()));
+		nodeBelongToProjectCache.put(pck, result);
+		return result;
+	}
+
+	@Override
+	public Project findFileBelongToProject(ProjectFile file) {
+		return findPackageBelongToProject(findFileBelongToPackage(file));
+	}
+
+	@Override
+	public Collection<Type> findNamespaceDirectlyContainTypes(Namespace namespace) {
+		return (Collection<Type>) findNamespaceDirectlyContainNodes(namespace, NodeLabelType.Variable);
+	}
+
+	@Override
+	public Collection<Function> findNamespaceDirectlyContainFunctions(Namespace namespace) {
+		return (Collection<Function>) findNamespaceDirectlyContainNodes(namespace, NodeLabelType.Variable);
+	}
+
+	@Override
+	public Collection<Variable> findNamespaceDirectlyContainVariables(Namespace namespace) {
+		return (Collection<Variable>) findNamespaceDirectlyContainNodes(namespace, NodeLabelType.Variable);
+	}
+	
+	Map<Namespace, Map<NodeLabelType, Collection<? extends Node>>> namespaceDirectlyContainNodesCache = new HashMap<>();
+	private Collection<? extends Node> findNamespaceDirectlyContainNodes(Namespace namespace, NodeLabelType nodeLabelType) {
+		Map<NodeLabelType, Collection<? extends Node>> temp = namespaceDirectlyContainNodesCache.getOrDefault(namespace, new HashMap<>());
+		Collection<? extends Node> result = temp.get(nodeLabelType);
+		if(result != null) {
+			return result;
+		}
+		switch(nodeLabelType) {
+		case Type:
+			result = containRepository.findNamespaceDirectlyContainTypes(namespace.getId());
+			break;
+		case Function:
+			result = containRepository.findNamespaceDirectlyContainFunctions(namespace.getId());
+			break;
+		case Variable:
+			result = containRepository.findNamespaceDirectlyContainVariables(namespace.getId());
+			break;
+		default:
+			return new ArrayList<>();
+		}
+		temp.put(nodeLabelType, result);
+		namespaceDirectlyContainNodesCache.put(namespace, temp);
+		result.forEach(node -> {
+			nodeBelongToNamespaceCache.put(node, namespace);
+		});
 		return result;
 	}
 	
 	@Override
 	public Package findTypeBelongToPackage(Type type) {
-		///FIXME
-		return null;
+		Package result = nodeBelongToPackageCache.getOrDefault(type, findFileBelongToPackage(findTypeBelongToFile(type)));
+		nodeBelongToPackageCache.put(type, result);
+		return result;
 	}
 
 	@Override
 	public Project findFunctionBelongToProject(Function function) {
-		for(Project project : projectContainFunctionsCache.keySet()) {
-			List<Function> functions = projectContainFunctionsCache.get(project);
-			if(functions.contains(function)) {
-				return project;
-			}
-		}
-		Project project = containRepository.findFunctionBelongToProject(function.getId());
-		assert(project != null);
-		findProjectContainAllFunctions(project);
+		Project project = nodeBelongToProjectCache.getOrDefault(function, findFileBelongToProject(findFunctionBelongToFile(function)));
+		nodeBelongToProjectCache.put(function, project);
 		return project;
 	}
 	
 	private Map<Project, List<Function>> projectContainFunctionsCache = new HashMap<>();
 	@Override
-	public Iterable<Function> findProjectContainAllFunctions(Project project) {
-		List<Function> functions = projectContainFunctionsCache.get(project);
-		if(functions == null) {
-			functions = containRepository.findProjectContainFunctions(project.getId());
-			projectContainFunctionsCache.put(project, functions);
-		}
+	public Collection<Function> findProjectContainAllFunctions(Project project) {
+		List<Function> functions = projectContainFunctionsCache.getOrDefault(project, containRepository.findProjectContainFunctions(project.getId()));
+		projectContainFunctionsCache.put(project, functions);
+		functions.forEach(f -> {
+			nodeBelongToProjectCache.put(f, project);
+		});
 		return functions;
 	}
 	
-	private Map<Node, ProjectFile> nodeBelongToFileCache = new HashMap<>();
 	@Override
 	public ProjectFile findFunctionBelongToFile(Function function) {
-		ProjectFile file = nodeBelongToFileCache.get(function);
-		if(file == null) {
-			file = containRepository.findFunctionBelongToFile(function.getId());
-			nodeBelongToFileCache.put(function, file);
-		}
+		ProjectFile file = nodeBelongToProjectFileCache.getOrDefault(function, containRepository.findFunctionBelongToFile(function.getId()));
+		nodeBelongToProjectFileCache.put(function, file);
 		return file;
 	}
 	@Override
 	public ProjectFile findTypeBelongToFile(Type type) {
-		ProjectFile file = nodeBelongToFileCache.get(type);
-		if(file == null) {
-			file = containRepository.findTypeBelongToFile(type.getId());
-			nodeBelongToFileCache.put(type, file);
-		}
+		ProjectFile file = nodeBelongToProjectFileCache.getOrDefault(type, containRepository.findFunctionBelongToFile(type.getId()));
+		nodeBelongToProjectFileCache.put(type, file);
 		return file;
 	}
 	@Override
 	public ProjectFile findVariableBelongToFile(Variable variable) {
-		ProjectFile file = nodeBelongToFileCache.get(variable);
-		if(file == null) {
-			file = containRepository.findVariableBelongToFile(variable.getId());
-			nodeBelongToFileCache.put(variable, file);
-		}
+		ProjectFile file = nodeBelongToProjectFileCache.getOrDefault(variable, containRepository.findFunctionBelongToFile(variable.getId()));
+		nodeBelongToProjectFileCache.put(variable, file);
 		return file;
 	}
 
 	@Override
 	public Package findFileBelongToPackage(ProjectFile file) {
-		return containRepository.findFileBelongToPackage(file.getId());
+		Package pck = nodeBelongToPackageCache.getOrDefault(file, containRepository.findFileBelongToPackage(file.getId()));
+		nodeBelongToPackageCache.put(file, pck);
+		return pck;
 	}
 
-	private Map<Function, Type> functionBelongToTypeCache = new HashMap<>();
 	@Override
 	public Type findFunctionBelongToType(Function function) {
-		Type type = functionBelongToTypeCache.get(function);
-		if(type == null) {
-			type = containRepository.findFunctionBelongToType(function.getId());
-			functionBelongToTypeCache.put(function, type);
-		}
+		Type type = nodeBelongToTypeCache.getOrDefault(function, containRepository.findFunctionBelongToType(function.getId()));
+		nodeBelongToTypeCache.put(function, type);
 		return type;
 	}
 
@@ -170,7 +291,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	}
 
 	@Override
-	public Iterable<Project> findMicroServiceContainProjects(MicroService ms) {
+	public Collection<Project> findMicroServiceContainProjects(MicroService ms) {
 		return containRepository.findMicroServiceContainProjects(ms.getId());
 	}
 	
@@ -214,41 +335,4 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		return featureContainFeatures;
 	}
 
-
-
-	@Override
-	public Iterable<LibraryAPI> findLibraryContainAPIs(Library lib) {
-		return containRepository.findLibraryContainLibraryAPIs(lib.getId());
-	}
-
-
-	@Override
-	public Project findFileBelongToProject(ProjectFile file) {
-		return containRepository.findFileBelongToProject(file.getId());
-	}
-
-	@Override
-	public Iterable<Namespace> findFileContainNamespaces(ProjectFile file) {
-		return containRepository.findFileDirectlyContainNamespaces(file.getId());
-	}
-
-	@Override
-	public Iterable<Variable> findFileDirectlyContainVariables(ProjectFile file) {
-		return containRepository.findFileDirectlyContainVariables(file.getId());
-	}
-
-	@Override
-	public Iterable<Type> findNamespaceDirectlyContainTypes(Namespace namespace) {
-		return containRepository.findNamespaceDirectlyContainTypes(namespace.getId());
-	}
-
-	@Override
-	public Iterable<Function> findNamespaceDirectlyContainFunctions(Namespace namespace) {
-		return containRepository.findNamespaceDirectlyContainFunctions(namespace.getId());
-	}
-
-	@Override
-	public Iterable<Variable> findNamespaceDirectlyContainVariables(Namespace namespace) {
-		return containRepository.findNamespaceDirectlyContainVariables(namespace.getId());
-	}
 }

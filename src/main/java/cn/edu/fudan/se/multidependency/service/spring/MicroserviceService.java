@@ -17,8 +17,15 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanI
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanStartWithFunction;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
+import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
 
 public interface MicroserviceService {
+	
+	long countOfAllMicroServices();
+	
+	List<ZTreeNode> queryMicroServiceContainProjectsZTree(Iterable<MicroService> mss);
+	
+	List<MicroService> queryAllMicroServicesByPage(int page, int size, String... sortByProperties);
 	
 	MicroService findMicroServiceById(Long id);
 	

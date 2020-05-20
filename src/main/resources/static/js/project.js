@@ -1,22 +1,21 @@
-var project = function(cytoscapeutil) {
+var project = function(project, cytoscapeutil) {
 	var cy = null;
-	var showZTree = function(nodes) {
+	var showZTree = function(nodes, container = $("#ztree")) {
 		var setting = {
 		};
 		var zNodes = nodes;
-		var zTreeObj = $.fn.zTree.init($("#ztree"), setting, zNodes);
+		var zTreeObj = $.fn.zTree.init(container, setting, zNodes);
 	}
 	var _project = function() {
 		$('#project_select').multiselect({
 			includeSelectAllOption: true
 		});
 		$("#search").click(function(){
-			var projectId = $("#project_select").val();
 			var dependency = $("input[name='dependency']:checked").val();
 			var level = $("input[name='level']:checked").val();
 			$.ajax({
 				type: 'GET',
-				url: "/project/cytoscape?projectId=" + projectId + "&dependency=" + dependency + "&level=" + level,
+				url: "/project/cytoscape?projectId=" + project.id + "&dependency=" + dependency + "&level=" + level,
 				success: function(result) {
 					if(result.result == "success") {
 						console.log(result.value);

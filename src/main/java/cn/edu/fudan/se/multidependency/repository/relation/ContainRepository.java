@@ -30,12 +30,9 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	@Query("match (m:MicroService)-[r:" + RelationType.str_CONTAIN + "]->(p:Project) where id(p)={projectId} return m")
 	public MicroService findProjectBelongToMicroService(@Param("projectId") Long projectId);
 	
-	@Query("match (p:Project)-[r" + RelationType.str_CONTAIN + "*2]->(f:ProjectFile) where id(f)={fileId} return p")
-	public Project findFileBelongToProject(@Param("fileId") Long fileId);
+	@Query("match (p:Project)-[r" + RelationType.str_CONTAIN + "]->(pck:Package) where id(pck)={packageId} return p")
+	public Project findPackageBelongToProject(@Param("packageId") Long pckId);
 	
-	@Query("match (a:Project)-[r:" + RelationType.str_CONTAIN + "*3..5]->(b:Function) where id(b)={functionId} return a")
-	public Project findFunctionBelongToProject(@Param("functionId") Long functionId);
-
 	@Query("match (p:Package)-[r" + RelationType.str_CONTAIN + "]->(f:ProjectFile) where id(f)={fileId} return p")
 	public Package findFileBelongToPackage(@Param("fileId") Long fileId);
 	

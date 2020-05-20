@@ -64,7 +64,7 @@ public class TestCaseController {
 			} catch (Exception e) {
 			}
 		}
-		Project project = staticAnalyseService.findProject(projectId);
+		Project project = staticAnalyseService.queryProject(projectId);
 		if(testCases.size() == 0 || project == null) {
 			request.setAttribute("error", "ERROR!");
 			return "error";
@@ -126,7 +126,7 @@ public class TestCaseController {
 		request.setAttribute("executeFeatures", executeFeatures);
 		request.setAttribute("testCases", allTestCases);
 
-		Iterable<Project> projects = staticAnalyseService.allProjects().values();
+		Iterable<Project> projects = staticAnalyseService.allProjects();
 		
 		Map<String, List<CoverageData>> testCaseToPercent = new LinkedHashMap<>();
 		List<CoverageData> mergeCoverages = new ArrayList<>();

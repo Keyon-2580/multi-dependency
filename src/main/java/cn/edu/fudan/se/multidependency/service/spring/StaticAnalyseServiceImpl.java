@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
@@ -58,6 +60,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.code.VariableIsTypeRe
 import cn.edu.fudan.se.multidependency.repository.relation.code.VariableTypeParameterTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.lib.FunctionCallLibraryAPIRepository;
+import cn.edu.fudan.se.multidependency.utils.PageUtil;
 
 /**
  * 
@@ -199,22 +202,6 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			}
 		}
 		return allFilesCache;
-	}
-
-	private Map<Long, Project> projectsCache = new HashMap<>();
-	@Override
-	public Map<Long, Project> allProjects() {
-		if(projectsCache.size() == 0) {
-			for(Project project : projectRepository.findAll()) {
-				projectsCache.put(project.getId(), project);
-			}
-		}
-		return projectsCache;
-	}
-
-	@Override
-	public Project findProject(Long id) {
-		return allProjects().get(id);
 	}
 
 	@Override
@@ -480,5 +467,41 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		}
 		return cacheForAllLibraries;
 	}
-	
+
+	private Map<Integer, List<Project>> pageProjectsCache = new ConcurrentHashMap<>();
+	@Override
+	public List<Project> queryAllProjectsByPage(int page, int size, String... sortByProperties) {
+		List<Project> result = pageProjectsCache.get(page);
+		if(result == null || result.size() == 0) {
+			result = new ArrayList<>();
+			Pageable pageable = PageUtil.generatePageable(page, size, sortByProperties);
+			Page<Project> pageProjects = projectRepository.findAll(pageable);
+			for(Project project : pageProjects) {
+				result.add(project);
+			}
+			pageProjectsCache.put(page, result);
+		}
+		return result;
+	}
+
+	@Override
+	public long countOfAllProjects() {
+		return projectRepository.count();
+	}
+
+	Map<Long, Project> idToProjectCache = new HashMap<>();
+	Iterable<Project> allProjectsCache = null;
+	@Override
+	public Iterable<Project> allProjects() {
+		allProjectsCache = allProjectsCache == null ? projectRepository.findAll() : allProjectsCache;
+		for(Project project : allProjectsCache) {
+			idToProjectCache.put(project.getId(), project);
+		}
+		return allProjectsCache;
+	}
+
+	@Override
+	public Project queryProject(Long id) {
+		return idToProjectCache.getOrDefault(id, projectRepository.findById(id).get());
+	}	
 }

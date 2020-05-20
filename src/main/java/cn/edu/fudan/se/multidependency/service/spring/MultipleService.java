@@ -1,12 +1,9 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONArray;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
@@ -16,10 +13,6 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
-import cn.edu.fudan.se.multidependency.model.node.lib.Library;
-import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
-import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
-import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
 
 @Service
@@ -34,104 +27,102 @@ public class MultipleService {
 	@Autowired
 	private ContainRelationService containRelationService;
 	
-	public JSONArray projectToZTree(Project project) {
-		JSONArray result = new JSONArray();
-		ZTreeNode projectNode = nodeToZTreeNode(project);
-		result.add(projectNode.toJSON());
-		return result;
-	}
-	
-	public JSONArray allNodesToZTree() {
-		JSONArray result = new JSONArray();
-		
-		Iterable<MicroService> allMicroServices = msService.findAllMicroService().values();
-		
-		Iterable<Project> allProjects = staticAnalyseService.allProjects().values();
-		
-		Map<Project, Boolean> isProjectAddToNodes = new HashMap<>();
-		
-		for(MicroService ms : allMicroServices) {
-			ZTreeNode node = new ZTreeNode(ms, false);
-			
-			Iterable<Project> projects = containRelationService.findMicroServiceContainProjects(ms);
-			for(Project project : projects) {
-				isProjectAddToNodes.put(project, true);
-//				ZTreeNode projectNode = new ZTreeNode(project.getName(), false);
-//				ZTreeNode projectNode = projectToZTreeNode(project);
-				ZTreeNode projectNode = nodeToZTreeNode(project);
-				node.addChild(projectNode);
-			}
-			
-			Iterable<RestfulAPI> apis = containRelationService.findMicroServiceContainRestfulAPI(ms);
-			for(RestfulAPI api : apis) {
-				ZTreeNode apiNode = new ZTreeNode(api, false);
-				node.addChild(apiNode);
-			}
-			
-			result.add(node.toJSON());
-		}
-		
-		for(Project project : allProjects) {
-			if(isProjectAddToNodes.get(project) != null && isProjectAddToNodes.get(project)) {
-				continue;
-			}
-//			ZTreeNode node = projectToZTreeNode(project);
-			ZTreeNode node = nodeToZTreeNode(project);
-			result.add(node.toJSON());
-		}
-		
-		Iterable<Library> libraries = staticAnalyseService.findAllLibraries();
-		
-		for(Library library : libraries) {
-			ZTreeNode libNode = new ZTreeNode(library.getId(), String.join(":", library.getNodeType().toString(), library.getFullName()), false);
-			
-			Iterable<LibraryAPI> apis = containRelationService.findLibraryContainAPIs(library);
-			for(LibraryAPI api : apis) {
-				ZTreeNode apiNode = new ZTreeNode(api, false);
-				libNode.addChild(apiNode);
-			}
-			
-			result.add(libNode.toJSON());
-		}
-		System.out.println(result);
-		return result;
+	public ZTreeNode projectToZTree(Project project) {
+		return structureNodeToZTreeNodeRecursion(project);
 	}
 	
 	private void addNodesToZTreeNode(ZTreeNode parentZTreeNode, Iterable<? extends Node> nodes) {
 		for(Node node : nodes) {
-			parentZTreeNode.addChild(nodeToZTreeNode(node));
+			parentZTreeNode.addChild(structureNodeToZTreeNodeRecursion(node));
 		}
 	}
 	
-	public ZTreeNode nodeToZTreeNode(Node node) {
+	private ZTreeNode structureNodeToZTreeNodeRecursion(Node node) {
 		ZTreeNode result = null;
 		if(node instanceof Variable) {
 			result = new ZTreeNode(node);
 		} else if(node instanceof Function) {
-			result = new ZTreeNode(node);
-			addNodesToZTreeNode(result, containRelationService.findFunctionDirectlyContainVariables((Function) node));
+			Function function = (Function) node;
+			result = new ZTreeNode(function.getId(), function.getName() + function.getParametersIdentifies(), false, function.getNodeType().name());
+			Collection<Variable> variables = containRelationService.findFunctionDirectlyContainVariables((Function) node);
+			if(!variables.isEmpty()) {
+				ZTreeNode variablesNodes = new ZTreeNode("变量 (" + variables.size() + " )");
+				result.addChild(variablesNodes);
+				addNodesToZTreeNode(variablesNodes, variables);
+			}
 		} else if(node instanceof Type) {
 			result = new ZTreeNode(node);
-			addNodesToZTreeNode(result, containRelationService.findTypeDirectlyContainFunctions((Type) node));
-			addNodesToZTreeNode(result, containRelationService.findTypeDirectlyContainFields((Type) node));
+			Collection<Function> functions = containRelationService.findTypeDirectlyContainFunctions((Type) node);
+			if(!functions.isEmpty()) {
+				ZTreeNode functionsNodes = new ZTreeNode("方法 (" + functions.size() + " )");
+				result.addChild(functionsNodes);
+				addNodesToZTreeNode(functionsNodes, functions);
+			}
+			Collection<Variable> fields = containRelationService.findTypeDirectlyContainFields((Type) node);
+			if(!fields.isEmpty()) {
+				ZTreeNode fieldsNodes = new ZTreeNode("属性 (" + fields.size() + " )");
+				result.addChild(fieldsNodes);
+				addNodesToZTreeNode(fieldsNodes, fields);
+			}
 		} else if(node instanceof Namespace) {
 			result = new ZTreeNode(node);
-			addNodesToZTreeNode(result, containRelationService.findNamespaceDirectlyContainTypes((Namespace) node));
-			addNodesToZTreeNode(result, containRelationService.findNamespaceDirectlyContainFunctions((Namespace) node));
-			addNodesToZTreeNode(result, containRelationService.findNamespaceDirectlyContainVariables((Namespace) node));
+			Collection<Type> types = containRelationService.findNamespaceDirectlyContainTypes((Namespace) node);
+			Collection<Function> functions = containRelationService.findNamespaceDirectlyContainFunctions((Namespace) node);
+			Collection<Variable> variables = containRelationService.findNamespaceDirectlyContainVariables((Namespace) node);
+			if(!types.isEmpty()) {
+				ZTreeNode typeNodes = new ZTreeNode("类型 (" + types.size() + " )");
+				result.addChild(typeNodes);
+				addNodesToZTreeNode(result, types);
+			}
+			if(!functions.isEmpty()) {
+				ZTreeNode functionNodes = new ZTreeNode("方法 (" + functions.size() + " )");
+				result.addChild(functionNodes);
+				addNodesToZTreeNode(result, functions);
+			}
+			if(!variables.isEmpty()) {
+				ZTreeNode variablesNodes = new ZTreeNode("属性 (" + variables.size() + " )");
+				result.addChild(variablesNodes);
+				addNodesToZTreeNode(result, variables);
+			}
 		} else if(node instanceof ProjectFile) {
 			result = new ZTreeNode(node);
-			addNodesToZTreeNode(result, containRelationService.findFileContainNamespaces((ProjectFile) node));
-			addNodesToZTreeNode(result, containRelationService.findFileDirectlyContainTypes((ProjectFile) node));
-			addNodesToZTreeNode(result, containRelationService.findFileDirectlyContainFunctions((ProjectFile) node));
-			addNodesToZTreeNode(result, containRelationService.findFileDirectlyContainVariables((ProjectFile) node));
+			Collection<Namespace> namespaces = containRelationService.findFileContainNamespaces((ProjectFile) node);
+			if(!namespaces.isEmpty()) {
+				ZTreeNode namespaceNodes = new ZTreeNode("命名空间 (" + namespaces.size() + " )");
+				result.addChild(namespaceNodes);
+				addNodesToZTreeNode(namespaceNodes, namespaces);
+			}
+			Collection<Type> types = containRelationService.findFileDirectlyContainTypes((ProjectFile) node);
+			if(!types.isEmpty()) {
+				ZTreeNode typeNodes = new ZTreeNode("类型 (" + types.size() + " )");
+				result.addChild(typeNodes);
+				addNodesToZTreeNode(typeNodes, types);
+			}
+			Collection<Function> functions = containRelationService.findFileDirectlyContainFunctions((ProjectFile) node);
+			if(!functions.isEmpty()) {
+				ZTreeNode functionNodes = new ZTreeNode("方法 (" + functions.size() + " )");
+				result.addChild(functionNodes);
+				addNodesToZTreeNode(functionNodes, functions);
+			}
+			Collection<Variable> variables = containRelationService.findFileDirectlyContainVariables((ProjectFile) node);
+			if(!variables.isEmpty()) {
+				ZTreeNode variableNodes = new ZTreeNode("变量 (" + variables.size() + " )");
+				result.addChild(variableNodes);
+				addNodesToZTreeNode(variableNodes, variables);
+			}
 		} else if(node instanceof Package) {
 			result = new ZTreeNode(node);
-			addNodesToZTreeNode(result, containRelationService.findPackageContainFiles((Package) node));
+			Collection<ProjectFile> files = containRelationService.findPackageContainFiles((Package) node);
+			ZTreeNode fileNodes = new ZTreeNode("文件 (" + files.size() + ")");
+			result.addChild(fileNodes);
+			addNodesToZTreeNode(fileNodes, files);
 		} else if(node instanceof Project) {
 			Project project = (Project) node;
-			result = new ZTreeNode(project.getId(), String.join(":", project.getNodeType().toString(), project.getName() + "(" + project.getLanguage() + ")"), false);
-			addNodesToZTreeNode(result, containRelationService.findProjectContainPackages(project));
+			result = new ZTreeNode(project.getId(), project.getName() + "(" + project.getLanguage() + ")", false, project.getNodeType().name());
+			Collection<Package> pcks = containRelationService.findProjectContainPackages(project);
+			ZTreeNode pckNodes = new ZTreeNode("目录 / 包 (" + pcks.size() + ")");
+			result.addChild(pckNodes);
+			addNodesToZTreeNode(pckNodes, pcks);
 		} else {
 			return null;
 		}

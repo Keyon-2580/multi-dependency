@@ -29,9 +29,11 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypePara
 
 public interface StaticAnalyseService {
 	
-	public Map<Long, Project> allProjects();
+	List<Project> queryAllProjectsByPage(int page, int size, String... sortByProperties);
 	
-	public Project findProject(Long id);
+	public Iterable<Project> allProjects();
+	
+	public Project queryProject(Long id);
 	
 	public Map<Long, Type> findTypes();
 	
@@ -101,5 +103,7 @@ public interface StaticAnalyseService {
 	public CallLibrary<Project> findProjectCallLibraries(Project project);
 	
 	public Iterable<Library> findAllLibraries();
+
+	long countOfAllProjects();
 	
 }

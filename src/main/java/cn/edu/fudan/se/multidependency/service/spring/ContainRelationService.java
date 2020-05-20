@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
+import java.util.Collection;
 import java.util.List;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
@@ -19,24 +20,24 @@ import cn.edu.fudan.se.multidependency.model.relation.Contain;
 
 public interface ContainRelationService {
 	
-	Iterable<Package> findProjectContainPackages(Project project);
-	Iterable<Function> findProjectContainAllFunctions(Project project);
+	Collection<Package> findProjectContainPackages(Project project);
+	Collection<Function> findProjectContainAllFunctions(Project project);
 	
-	Iterable<ProjectFile> findPackageContainFiles(Package pck);
+	Collection<ProjectFile> findPackageContainFiles(Package pck);
 	
-	Iterable<Namespace> findFileContainNamespaces(ProjectFile file);
-	Iterable<Type> findFileDirectlyContainTypes(ProjectFile file);
-	Iterable<Function> findFileDirectlyContainFunctions(ProjectFile file);
-	Iterable<Variable> findFileDirectlyContainVariables(ProjectFile file);
+	Collection<Namespace> findFileContainNamespaces(ProjectFile file);
+	Collection<Type> findFileDirectlyContainTypes(ProjectFile file);
+	Collection<Function> findFileDirectlyContainFunctions(ProjectFile file);
+	Collection<Variable> findFileDirectlyContainVariables(ProjectFile file);
 	
-	Iterable<Type> findNamespaceDirectlyContainTypes(Namespace namespace);
-	Iterable<Function> findNamespaceDirectlyContainFunctions(Namespace namespace);
-	Iterable<Variable> findNamespaceDirectlyContainVariables(Namespace namespace);
+	Collection<Type> findNamespaceDirectlyContainTypes(Namespace namespace);
+	Collection<Function> findNamespaceDirectlyContainFunctions(Namespace namespace);
+	Collection<Variable> findNamespaceDirectlyContainVariables(Namespace namespace);
 	
-	Iterable<Function> findTypeDirectlyContainFunctions(Type type);
-	Iterable<Variable> findTypeDirectlyContainFields(Type type);
+	Collection<Function> findTypeDirectlyContainFunctions(Type type);
+	Collection<Variable> findTypeDirectlyContainFields(Type type);
 	
-	Iterable<Variable> findFunctionDirectlyContainVariables(Function function);
+	Collection<Variable> findFunctionDirectlyContainVariables(Function function);
 	
 	Package findTypeBelongToPackage(Type type);
 	
@@ -54,11 +55,13 @@ public interface ContainRelationService {
 	
 	Project findFunctionBelongToProject(Function function);
 	
+	Project findPackageBelongToProject(Package pck);
+	
 	Library findAPIBelongToLibrary(LibraryAPI api);
 	
 	Iterable<LibraryAPI> findLibraryContainAPIs(Library lib);
 
-	Iterable<Project> findMicroServiceContainProjects(MicroService ms);
+	Collection<Project> findMicroServiceContainProjects(MicroService ms);
 	
 	Iterable<Function> findMicroServiceContainFunctions(MicroService ms);
 	

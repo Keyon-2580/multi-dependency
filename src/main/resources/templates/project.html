@@ -32,26 +32,18 @@
 <link rel="stylesheet" th:href="@{/css/import/cytoscape.js-navigator.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/ztree/zTreeStyle/zTreeStyle.css}"></link>
 <link rel="stylesheet" th:href="@{/css/cytoscape_graph.css}"></link>
+<link rel="stylesheet" th:href="@{/css/import/ztree/zTreeStyle/zTreeStyle.css}"></link>
 </head>
 <body>
 	<div th:include="nav.html::nav"></div>
 
 	<div class="container-lg col-sm-12 row" style="margin-bottom: 15px;">
-		<!-- <div class="col-sm-3">
-			<div id="tree"></div>
-		</div> -->
-		<div class="col-sm-12">
+		<div class="col-sm-12" style="margin-top: -30px;">
 			<div id="content">
 				<div class="form-group col-sm-12 row">
 					<div class="col-sm-6 row">
-						<div class="col-sm-3">
-							<label>项目选择：</label>
-						</div>
 						<div class="col-sm-9">
-							<select id="project_select" >
-								<option th:each="project:${projects}" th:value="${project.id}" 
-									th:text="${project.name + ' ( ' + project.language + ' ) '}"> </option>
-							</select>
+							<h3 th:text="${project.name + ' (' + project.language + ' )'}"></h3>
 						</div>
 					</div>
 				</div>			
@@ -114,7 +106,7 @@
 	<script type="text/javascript" th:inline="javascript">
 	//<![CDATA[
 		$(document).ready(function() {
-			project(cytoscapeutil()).init();
+			project([[${project}]], cytoscapeutil()).init();
 		});
 	// ]]>
 	</script>

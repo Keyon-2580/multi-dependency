@@ -24,23 +24,33 @@ public class ZTreeUtil {
 		
 		private static final long serialVersionUID = -8811436922800805233L;
 		
+		public static final String DEFAULT_TYPE = "default";
+		
+		public ZTreeNode(String name) {
+			this(DEFAULT_ID, name, false, DEFAULT_TYPE);
+		}
+		
 		public ZTreeNode(Node node) {
 			this(node, false);
 		}
 		
 		public ZTreeNode(Node node, Boolean open) {
 			this.id = node.getId();
-			this.name = String.join(":", node.getNodeType().toString(), node.getName());
+			this.name = node.getName();
 			this.open = open;
+			this.type = node.getNodeType().toString();
 		}
 		
-		public ZTreeNode(long id, String name, Boolean open) {
+		public ZTreeNode(long id, String name, Boolean open, String type) {
+			this.id = id;
 			this.name = name;
 			this.open = open;
+			this.type = type;
 		}
 		
 		private long id;
 		private String name;
+		private String type;
 		private Boolean open;
 		
 		private List<ZTreeNode> children = new ArrayList<>();
@@ -73,6 +83,7 @@ public class ZTreeUtil {
 					childrenJSON.add(child.toJSON());
 				}
 				result.put("children", childrenJSON);
+				result.put("type", getType());
 			}
 			return result;
 		}

@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.controller;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -8,17 +9,20 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
+import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
 
 @Controller
 @RequestMapping("/microservice")
@@ -29,6 +33,36 @@ public class MicroServiceController {
 	
 	@Autowired
 	private FeatureOrganizationService featureOrganizationService;
+	
+	@GetMapping(value = "/all/{page}")
+	@ResponseBody
+	public List<MicroService> allMicroServicesByPage(@PathVariable("page") int page) {
+		return msService.queryAllMicroServicesByPage(page, Constant.SIZE_OF_PAGE, "name");
+	}
+	
+	@GetMapping(value = "/pages/count")
+	@ResponseBody
+	public long queryMicroServicePagesCount() {
+		long count = msService.countOfAllMicroServices();
+		long pageCount = count % Constant.SIZE_OF_PAGE == 0 ? 
+				count / Constant.SIZE_OF_PAGE : count / Constant.SIZE_OF_PAGE + 1;
+		return pageCount;
+	}
+	
+	@GetMapping(value = "/all/ztree/projects/{page}")
+	@ResponseBody
+	public JSONObject allMicroServicesContainProjectsByPage(@PathVariable("page") int page) {
+		JSONObject result = new JSONObject();
+		Iterable<MicroService> mss = msService.queryAllMicroServicesByPage(page, Constant.SIZE_OF_PAGE, "name");
+		List<ZTreeNode> nodes = msService.queryMicroServiceContainProjectsZTree(mss);
+		JSONArray values = new JSONArray();
+		for(ZTreeNode node : nodes) {
+			values.add(node.toJSON());
+		}
+		result.put("result", "success");
+		result.put("values", values);
+		return result;
+	}
 	
 	@GetMapping(value = {"/", "/index"})
 	public String index(HttpServletRequest request) {

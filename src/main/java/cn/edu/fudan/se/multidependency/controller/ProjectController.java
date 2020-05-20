@@ -1,24 +1,30 @@
 package cn.edu.fudan.se.multidependency.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.service.spring.DependencyOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.MultipleService;
-import cn.edu.fudan.se.multidependency.service.spring.ProjectOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
+import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
 
 @Controller
 @RequestMapping("/project")
@@ -28,9 +34,6 @@ public class ProjectController {
 	private DynamicAnalyseService dynamicAnalyseService;
 
 	@Autowired
-	private ProjectOrganizationService projectOrganizationService;
-
-	@Autowired
 	private DependencyOrganizationService dependencyOrganizationService;
 	
 	@Autowired
@@ -38,31 +41,58 @@ public class ProjectController {
 	
 	@Autowired
 	private MultipleService multipleService;
+	
+	@GetMapping(value = "/all/{page}")
+	@ResponseBody
+	public List<Project> allProjectsByPage(@PathVariable("page") int page) {
+		List<Project> result = staticAnalyseService.queryAllProjectsByPage(page, Constant.SIZE_OF_PAGE, "name");
+		return result;
+	}
+	
+	@GetMapping(value = "/pages/count")
+	@ResponseBody
+	public long queryMicroServicePagesCount() {
+		long count = staticAnalyseService.countOfAllProjects();
+		long pageCount = count % Constant.SIZE_OF_PAGE == 0 ? 
+				count / Constant.SIZE_OF_PAGE : count / Constant.SIZE_OF_PAGE + 1;
+		return pageCount;
+	}
+	
+	@GetMapping(value = "/all/ztree/structure/{page}")
+	@ResponseBody
+	public JSONObject allMicroServicesContainProjectsByPage(@PathVariable("page") int page) {
+		JSONObject result = new JSONObject();
+		Iterable<Project> projects = staticAnalyseService.queryAllProjectsByPage(page, Constant.SIZE_OF_PAGE, "name");
+		List<ZTreeNode> nodes = new ArrayList<>();
+		for(Project project : projects) {
+			ZTreeNode node = multipleService.projectToZTree(project);
+			nodes.add(node);
+		}
+		JSONArray values = new JSONArray();
+		for(ZTreeNode node : nodes) {
+			values.add(node.toJSON());
+		}
+		result.put("result", "success");
+		result.put("values", values);
+		return result;
+	}
 
 	@GetMapping(value = {"/", "/index"})
-	public String index() {
-		return "project";
+	public String index(HttpServletRequest request, @RequestParam(required=true, value="id") long id) {
+		Project project = staticAnalyseService.queryProject(id);
+		if(project == null) {
+			request.setAttribute("error", "没有找到id为 " + id + " 的Project");
+			return "error";
+		} else {
+			request.setAttribute("project", project);
+			return "project";
+		}
 	}
 	
 	@GetMapping("/dynamiccall")
 	@ResponseBody
 	public void dynamicCall() {
 		System.out.println("/project/dynamiccall");
-	}
-	
-	@GetMapping("/treeview")
-	@ResponseBody
-	public JSONObject projectToTreeView() {
-		System.out.println("/project/treeview");
-		JSONObject result = new JSONObject();
-		try {
-			result.put("result", "success");
-			result.put("value", projectOrganizationService.projectsToTreeView());
-		} catch (Exception e) {
-			result.put("result", "fail");
-			result.put("msg", e.getMessage());
-		}
-		return result;
 	}
 	
 	@GetMapping("/cytoscape")
@@ -74,7 +104,7 @@ public class ProjectController {
 		System.out.println("/project/cytoscape");
 		JSONObject result = new JSONObject();
 		try {
-			Project project = projectOrganizationService.findProjectById(projectId);
+			Project project = staticAnalyseService.queryProject(projectId);
 			if(project == null) {
 				throw new Exception("没有找到id为 " + projectId + " 的项目");
 			}

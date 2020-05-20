@@ -28,7 +28,7 @@ public class LibController {
 	@ResponseBody
 	public JSONObject findProjectCallAPIs() {
 		JSONObject result = new JSONObject();
-		Iterable<Project> projects = staticAnalyseService.allProjects().values();
+		Iterable<Project> projects = staticAnalyseService.allProjects();
 		JSONObject values = new JSONObject();
 		for(Project project : projects) {
 			CallLibrary<Project> call = staticAnalyseService.findProjectCallLibraries(project);

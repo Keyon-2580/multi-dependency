@@ -73,7 +73,7 @@ public class FileDependOnFileExtractServiceImpl implements FileDependOnFileExtra
 	
 	@Override
 	public void setProject(Long projectGraphId) {
-		this.project = staticAnalyseService.findProject(projectGraphId);
+		this.project = staticAnalyseService.queryProject(projectGraphId);
 		clearCache();
 	}
 

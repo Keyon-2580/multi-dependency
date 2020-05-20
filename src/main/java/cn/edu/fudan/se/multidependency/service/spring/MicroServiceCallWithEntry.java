@@ -205,12 +205,12 @@ public class MicroServiceCallWithEntry {
 		
 		JSONArray ztreeNodes = new JSONArray();
 		result.put("ztreeNodes", ztreeNodes);
-		ZTreeNode msRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "微服务", false);
-		ZTreeNode testcaseRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "测试用例", false);
-		ZTreeNode featureRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "特性", false);
-		ZTreeNode libRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "三方库", false);
-		ZTreeNode scenarioRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "场景", false);
-		ZTreeNode developerRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "开发者", false);
+		ZTreeNode msRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "微服务", false, ZTreeNode.DEFAULT_TYPE);
+		ZTreeNode testcaseRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "测试用例", false, ZTreeNode.DEFAULT_TYPE);
+		ZTreeNode featureRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "特性", false, ZTreeNode.DEFAULT_TYPE);
+		ZTreeNode libRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "三方库", false, ZTreeNode.DEFAULT_TYPE);
+		ZTreeNode scenarioRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "场景", false, ZTreeNode.DEFAULT_TYPE);
+		ZTreeNode developerRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "开发者", false, ZTreeNode.DEFAULT_TYPE);
 		
 		if(showAllScenarios) {
 			for(Scenario scenario : allScenarios) {
