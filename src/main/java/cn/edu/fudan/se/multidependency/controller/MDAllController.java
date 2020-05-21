@@ -22,7 +22,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
-import cn.edu.fudan.se.multidependency.service.spring.GitAnalyseService;
+import cn.edu.fudan.se.multidependency.service.spring.GitAnalyseServiceImpl;
 import cn.edu.fudan.se.multidependency.service.spring.MicroServiceCallWithEntry;
 import cn.edu.fudan.se.multidependency.service.spring.MicroServiceCallWithEntry.CytoscapeEdge;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
@@ -33,7 +33,7 @@ import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 public class MDAllController {
 
     @Autowired
-    private GitAnalyseService gitAnalyseService;
+    private GitAnalyseServiceImpl gitAnalyseService;
 
 	@Autowired
 	private FeatureOrganizationService featureOrganizationService;

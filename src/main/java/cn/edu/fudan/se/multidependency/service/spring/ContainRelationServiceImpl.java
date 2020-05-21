@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,15 +35,15 @@ public class ContainRelationServiceImpl implements ContainRelationService {
     @Autowired
     ContainRepository containRepository;
     
-    private Map<Node, Project> nodeBelongToProjectCache = new HashMap<>();
-    private Map<Node, Package> nodeBelongToPackageCache = new HashMap<>();
-    private Map<Node, ProjectFile> nodeBelongToProjectFileCache = new HashMap<>();
-    private Map<Node, Namespace> nodeBelongToNamespaceCache = new HashMap<>();
-    private Map<Node, Type> nodeBelongToTypeCache = new HashMap<>();
-    private Map<Node, Function> nodeBelongToFunctionCache = new HashMap<>();
-    private Map<Node, Library> nodeBelongToLibrary = new HashMap<>();
+    private Map<Node, Project> nodeBelongToProjectCache = new ConcurrentHashMap<>();
+    private Map<Node, Package> nodeBelongToPackageCache = new ConcurrentHashMap<>();
+    private Map<Node, ProjectFile> nodeBelongToProjectFileCache = new ConcurrentHashMap<>();
+    private Map<Node, Namespace> nodeBelongToNamespaceCache = new ConcurrentHashMap<>();
+    private Map<Node, Type> nodeBelongToTypeCache = new ConcurrentHashMap<>();
+    private Map<Node, Function> nodeBelongToFunctionCache = new ConcurrentHashMap<>();
+    private Map<Node, Library> nodeBelongToLibrary = new ConcurrentHashMap<>();
 
-	Map<Project, Collection<Package>> projectContainPakcagesCache = new HashMap<>();
+	Map<Project, Collection<Package>> projectContainPakcagesCache = new ConcurrentHashMap<>();
 	@Override
 	public Collection<Package> findProjectContainPackages(Project project) {
 		Collection<Package> result = projectContainPakcagesCache.getOrDefault(project, containRepository.findProjectContainPackages(project.getId()));
@@ -53,7 +54,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		return result;
 	}
 
-	Map<Package, Collection<ProjectFile>> packageContainFilesCache = new HashMap<>();
+	Map<Package, Collection<ProjectFile>> packageContainFilesCache = new ConcurrentHashMap<>();
 	@Override
 	public Collection<ProjectFile> findPackageContainFiles(Package pck) {
 		Collection<ProjectFile> result = packageContainFilesCache.getOrDefault(pck, containRepository.findPackageContainFiles(pck.getId()));
@@ -64,9 +65,9 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		return result;
 	}
 	
-	Map<ProjectFile, Map<NodeLabelType, Collection<? extends Node>>> fileDirectlyContainNodesCache = new HashMap<>();
+	Map<ProjectFile, Map<NodeLabelType, Collection<? extends Node>>> fileDirectlyContainNodesCache = new ConcurrentHashMap<>();
 	private Collection<? extends Node> findFileDirectlyContainNodes(ProjectFile file, NodeLabelType nodeLabelType) {
-		Map<NodeLabelType, Collection<? extends Node>> temp = fileDirectlyContainNodesCache.getOrDefault(file, new HashMap<>());
+		Map<NodeLabelType, Collection<? extends Node>> temp = fileDirectlyContainNodesCache.getOrDefault(file, new ConcurrentHashMap<>());
 		Collection<? extends Node> result = temp.get(nodeLabelType);
 		if(result != null) {
 			return result;
@@ -115,9 +116,9 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		return (Collection<Variable>) findFileDirectlyContainNodes(file, NodeLabelType.Variable);
 	}
 	
-	Map<Type, Map<NodeLabelType, Collection<? extends Node>>> typeDirectlyContainNodesCache = new HashMap<>();
+	Map<Type, Map<NodeLabelType, Collection<? extends Node>>> typeDirectlyContainNodesCache = new ConcurrentHashMap<>();
 	private Collection<? extends Node> findTypeDirectlyContainNodes(Type type, NodeLabelType nodeLabelType) {
-		Map<NodeLabelType, Collection<? extends Node>> temp = typeDirectlyContainNodesCache.getOrDefault(type, new HashMap<>());
+		Map<NodeLabelType, Collection<? extends Node>> temp = typeDirectlyContainNodesCache.getOrDefault(type, new ConcurrentHashMap<>());
 		Collection<? extends Node> result = temp.get(nodeLabelType);
 		if(result != null) {
 			return result;
@@ -150,7 +151,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		return (Collection<Variable>) findTypeDirectlyContainNodes(type, NodeLabelType.Variable);
 	}
 
-	Map<Function, Collection<Variable>> functionContainVariablesCache = new HashMap<>();
+	Map<Function, Collection<Variable>> functionContainVariablesCache = new ConcurrentHashMap<>();
 	@Override
 	public Collection<Variable> findFunctionDirectlyContainVariables(Function function) {
 		Collection<Variable> result = functionContainVariablesCache.getOrDefault(function, containRepository.findFunctionDirectlyContainVariables(function.getId()));
@@ -161,7 +162,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		return result;
 	}
 
-	Map<Library, Collection<LibraryAPI>> libContainApisCache = new HashMap<>();
+	Map<Library, Collection<LibraryAPI>> libContainApisCache = new ConcurrentHashMap<>();
 	@Override
 	public Collection<LibraryAPI> findLibraryContainAPIs(Library lib) {
 		Collection<LibraryAPI> result = libContainApisCache.getOrDefault(lib, containRepository.findLibraryContainLibraryAPIs(lib.getId()));
@@ -181,7 +182,8 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
 	@Override
 	public Project findFileBelongToProject(ProjectFile file) {
-		return findPackageBelongToProject(findFileBelongToPackage(file));
+		Package pck = findFileBelongToPackage(file);
+		return pck == null ? null : findPackageBelongToProject(pck);
 	}
 
 	@Override
@@ -199,9 +201,9 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		return (Collection<Variable>) findNamespaceDirectlyContainNodes(namespace, NodeLabelType.Variable);
 	}
 	
-	Map<Namespace, Map<NodeLabelType, Collection<? extends Node>>> namespaceDirectlyContainNodesCache = new HashMap<>();
+	Map<Namespace, Map<NodeLabelType, Collection<? extends Node>>> namespaceDirectlyContainNodesCache = new ConcurrentHashMap<>();
 	private Collection<? extends Node> findNamespaceDirectlyContainNodes(Namespace namespace, NodeLabelType nodeLabelType) {
-		Map<NodeLabelType, Collection<? extends Node>> temp = namespaceDirectlyContainNodesCache.getOrDefault(namespace, new HashMap<>());
+		Map<NodeLabelType, Collection<? extends Node>> temp = namespaceDirectlyContainNodesCache.getOrDefault(namespace, new ConcurrentHashMap<>());
 		Collection<? extends Node> result = temp.get(nodeLabelType);
 		if(result != null) {
 			return result;
@@ -229,7 +231,11 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	
 	@Override
 	public Package findTypeBelongToPackage(Type type) {
-		Package result = nodeBelongToPackageCache.getOrDefault(type, findFileBelongToPackage(findTypeBelongToFile(type)));
+		ProjectFile file = findTypeBelongToFile(type);
+		if(file == null) {
+			return null;
+		}
+		Package result = nodeBelongToPackageCache.getOrDefault(type, findFileBelongToPackage(file));
 		nodeBelongToPackageCache.put(type, result);
 		return result;
 	}
@@ -241,7 +247,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		return project;
 	}
 	
-	private Map<Project, List<Function>> projectContainFunctionsCache = new HashMap<>();
+	private Map<Project, List<Function>> projectContainFunctionsCache = new ConcurrentHashMap<>();
 	@Override
 	public Collection<Function> findProjectContainAllFunctions(Project project) {
 		List<Function> functions = projectContainFunctionsCache.getOrDefault(project, containRepository.findProjectContainFunctions(project.getId()));

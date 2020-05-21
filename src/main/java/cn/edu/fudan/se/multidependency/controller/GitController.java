@@ -1,12 +1,14 @@
 package cn.edu.fudan.se.multidependency.controller;
 
-import cn.edu.fudan.se.multidependency.service.spring.GitAnalyseService;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSONObject;
+
+import cn.edu.fudan.se.multidependency.service.spring.GitAnalyseService;
 
 @Controller
 @RequestMapping("/git")

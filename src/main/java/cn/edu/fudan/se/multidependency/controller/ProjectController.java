@@ -1,10 +1,15 @@
 package cn.edu.fudan.se.multidependency.controller;
 
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +25,7 @@ import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
+import cn.edu.fudan.se.multidependency.service.nospring.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.spring.DependencyOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.MultipleService;
@@ -29,6 +35,8 @@ import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
 @Controller
 @RequestMapping("/project")
 public class ProjectController {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectController.class);
 	
 	@Autowired
 	private DynamicAnalyseService dynamicAnalyseService;
@@ -57,17 +65,33 @@ public class ProjectController {
 				count / Constant.SIZE_OF_PAGE : count / Constant.SIZE_OF_PAGE + 1;
 		return pageCount;
 	}
-	
 	@GetMapping(value = "/all/ztree/structure/{page}")
 	@ResponseBody
 	public JSONObject allMicroServicesContainProjectsByPage(@PathVariable("page") int page) {
 		JSONObject result = new JSONObject();
 		Iterable<Project> projects = staticAnalyseService.queryAllProjectsByPage(page, Constant.SIZE_OF_PAGE, "name");
 		List<ZTreeNode> nodes = new ArrayList<>();
+//		List<Thread> threads = new ArrayList<>();
+		DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+//		LOGGER.info("开始时间：" + sdf.format(new Timestamp(System.currentTimeMillis())));
 		for(Project project : projects) {
 			ZTreeNode node = multipleService.projectToZTree(project);
 			nodes.add(node);
+//			Thread projectThread = new Thread(() -> {
+//				ZTreeNode node = multipleService.projectToZTree(project);
+//				nodes.add(node);
+//			});
+//			threads.add(projectThread);
+//			projectThread.start();
 		}
+//		for(Thread thread : threads) {
+//			try {
+//				thread.join();
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//		LOGGER.info("结束时间：" + sdf.format(new Timestamp(System.currentTimeMillis())));
 		JSONArray values = new JSONArray();
 		for(ZTreeNode node : nodes) {
 			values.add(node.toJSON());
