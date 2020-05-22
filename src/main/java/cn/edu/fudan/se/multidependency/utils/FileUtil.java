@@ -41,11 +41,12 @@ public class FileUtil {
 	public static void main(String[] args) {
 		String directoryPath = "D:\\multiple-dependency-project\\train-ticket";
 		directoryPath = "D:\\multiple-dependency-project\\doublelanguage";
-		JSONObject array = readDirectoryToGenerateProjectJSONFileForDoubleLanguageProject(
-				new File(directoryPath), 0, "java", true, "train-ticket");
-		System.out.println(array);
+		directoryPath = "D:\\source\\source";
+		/*JSONObject array = readDirectoryToGenerateProjectJSONFileForDoubleLanguageProject(
+				new File(directoryPath), 0, "java", true, "train-ticket");*/
+		JSONObject array = readDirectoryToGenerateProjectJSONFile(new File(directoryPath), 1, "java", true, "source");
 		try {
-			writeToFileForProjectJSONFile("D:\\testtesttest.log", array);
+			writeToFileForProjectJSONFile("D:\\source.log", array);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -160,6 +161,8 @@ public class FileUtil {
 					projectJson.put("serviceGroupName", serviceGroupName);
 					projectJson.put("microserviceName", projectDirectory.getName());
 				}
+				projectJson.put("includeDirs", new JSONArray());
+				projectJson.put("autoInclude", true);
 				projects.add(projectJson);
 			}
 		}
@@ -187,6 +190,8 @@ public class FileUtil {
 				projectJson.put("serviceGroupName", serviceGroupName);
 				projectJson.put("microserviceName", projectDirectory.getName());
 			}
+			projectJson.put("includeDirs", new JSONArray());
+			projectJson.put("autoInclude", true);
 			projects.add(projectJson);
 		}
 		result.put("projects", projects);

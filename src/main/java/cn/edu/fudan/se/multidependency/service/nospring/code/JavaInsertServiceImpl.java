@@ -208,6 +208,9 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 	
 	private String test(TypeEntity typeEntity, FileEntity fileEntity) {
 		Entity parent = typeEntity.getParent();
+		if(parent == null) {
+			return null;
+		}
 		if(parent instanceof FileEntity) {
 			return typeEntity.getQualifiedName();
 		}
@@ -216,7 +219,13 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			return test((TypeEntity) parent, fileEntity) + "$" + index + typeEntity.getRawName().getName();
 		}
 		if(parent instanceof FunctionEntity) {
-			parent = parent.getParent();
+			do {
+				parent = parent.getParent();
+			} while(parent != null && parent.getClass() != TypeEntity.class);
+//			parent = parent.getParent();
+			if(parent == null) {
+				return null;
+			}
 			return test((TypeEntity) parent, fileEntity) + "$" + countIndex(fileEntity, (TypeEntity) parent) + typeEntity.getRawName().getName();
 		}
 		return null;

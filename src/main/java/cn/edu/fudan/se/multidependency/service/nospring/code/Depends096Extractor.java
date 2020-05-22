@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
 import depends.entity.Entity;
@@ -16,14 +19,13 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 import lombok.Setter;
 
 public class Depends096Extractor implements DependsEntityRepoExtractor {
-	private Depends096Extractor() {}
-	private static Depends096Extractor instance = new Depends096Extractor();
-	public static Depends096Extractor getInstance() {
-		return instance;
-	}
+	private static final Logger LOGGER = LoggerFactory.getLogger(Depends096Extractor.class);
+	
+	public Depends096Extractor() {}
 	
 	private EntityRepo executeCommand(Language language, String inputDir, 
 			String[] includeDir, boolean autoInclude) throws Exception {
+		LOGGER.info(projectPath + " " + inputDir);
 		inputDir = FileUtil.uniqFilePath(inputDir);
 		boolean supportImplLink = false;
 		AbstractLangProcessor langProcessor = null;

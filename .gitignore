@@ -3,3 +3,4 @@ target/
 .settings/
 *.iml
 src/main/resources/application.yml
+multi-dependency.log

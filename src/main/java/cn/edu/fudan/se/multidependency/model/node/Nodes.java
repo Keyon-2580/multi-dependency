@@ -1,7 +1,6 @@
 package cn.edu.fudan.se.multidependency.model.node;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,12 +24,12 @@ public class Nodes {
 	
 	private List<Node> allNodes = new ArrayList<>();
 
-	private Map<NodeLabelType, List<Node>> nodeTypeToNodes = new HashMap<>();
+	private Map<NodeLabelType, List<Node>> nodeTypeToNodes = new ConcurrentHashMap<>();
 	
 	/**
 	 * 每个项目内的节点的entityId是唯一的
 	 */
-	private Map<Project, Map<NodeLabelType, Map<Long, Node>>> projectToNodes = new HashMap<>();
+	private Map<Project, Map<NodeLabelType, Map<Long, Node>>> projectToNodes = new ConcurrentHashMap<>();
 	
 	private List<Project> projects = new ArrayList<>();
 	
@@ -63,7 +62,7 @@ public class Nodes {
 	}
 	
 	public Map<NodeLabelType, List<Node>> getAllNodes() {
-		return new HashMap<>(nodeTypeToNodes);
+		return new ConcurrentHashMap<>(nodeTypeToNodes);
 	}
 	
 	public int size() {
@@ -88,8 +87,8 @@ public class Nodes {
 		nodeTypeToNodes.put(node.getNodeType(), nodes);
 		
 		if(inProject != null && projects.contains(inProject)) {
-			Map<NodeLabelType, Map<Long, Node>> projectHasNodes = projectToNodes.getOrDefault(inProject, new HashMap<>());
-			Map<Long, Node> entityIdToNode = projectHasNodes.getOrDefault(node.getNodeType(), new HashMap<>());
+			Map<NodeLabelType, Map<Long, Node>> projectHasNodes = projectToNodes.getOrDefault(inProject, new ConcurrentHashMap<>());
+			Map<Long, Node> entityIdToNode = projectHasNodes.getOrDefault(node.getNodeType(), new ConcurrentHashMap<>());
 			entityIdToNode.put(node.getEntityId(), node);
 			projectHasNodes.put(node.getNodeType(), entityIdToNode);
 			projectToNodes.put(inProject, projectHasNodes);
@@ -129,8 +128,8 @@ public class Nodes {
 	 * @return
 	 */
 	public Map<Long, ? extends Node> findNodesByNodeTypeInProject(NodeLabelType nodeType, Project inProject) {
-		Map<NodeLabelType, Map<Long, Node>> projectHasNodes = projectToNodes.getOrDefault(inProject, new HashMap<>());
-		return projectHasNodes.getOrDefault(nodeType, new HashMap<>());
+		Map<NodeLabelType, Map<Long, Node>> projectHasNodes = projectToNodes.getOrDefault(inProject, new ConcurrentHashMap<>());
+		return projectHasNodes.getOrDefault(nodeType, new ConcurrentHashMap<>());
 	}
 	
 	/**
@@ -143,7 +142,7 @@ public class Nodes {
 	}
 	
 	public Map<String, List<Function>> findFunctionsInProject(Project project) {
-		Map<String, List<Function>> result = new HashMap<>();
+		Map<String, List<Function>> result = new ConcurrentHashMap<>();
 		if(project == null) {
 			return result;
 		}
@@ -173,7 +172,7 @@ public class Nodes {
 	}
 
 	public Map<Integer, Scenario> findScenarios() {
-		Map<Integer, Scenario> scenarios = new HashMap<>();
+		Map<Integer, Scenario> scenarios = new ConcurrentHashMap<>();
 		findNodesByNodeType(NodeLabelType.Scenario).forEach(node -> {
 			Scenario scenario = (Scenario) node;
 			scenarios.put(scenario.getScenarioId(), scenario);
@@ -182,7 +181,7 @@ public class Nodes {
 	}
 	
 	public Map<Integer, TestCase> findTestCases() {
-		Map<Integer, TestCase> features = new HashMap<>();
+		Map<Integer, TestCase> features = new ConcurrentHashMap<>();
 		findNodesByNodeType(NodeLabelType.TestCase).forEach(node -> {
 			TestCase testcase = (TestCase) node;
 			features.put(testcase.getTestCaseId(), testcase);
@@ -195,7 +194,7 @@ public class Nodes {
 	 * @return
 	 */
 	public Map<Integer, Feature> findFeatures() {
-		Map<Integer, Feature> features = new HashMap<>();
+		Map<Integer, Feature> features = new ConcurrentHashMap<>();
 		findNodesByNodeType(NodeLabelType.Feature).forEach(node -> {
 			Feature feature = (Feature) node;
 			features.put(feature.getFeatureId(), feature);
@@ -208,7 +207,7 @@ public class Nodes {
 	 * @return
 	 */
 	public Map<String, Trace> findTraces() {
-		Map<String, Trace> traces = new HashMap<>();
+		Map<String, Trace> traces = new ConcurrentHashMap<>();
 		findNodesByNodeType(NodeLabelType.Trace).forEach(node -> {
 			Trace trace = (Trace) node;
 			traces.put(trace.getTraceId(), trace);
@@ -217,13 +216,15 @@ public class Nodes {
 	}
 	
 	public MicroService findMicroServiceByName(String name) {
-		for(Node node : findNodesByNodeType(NodeLabelType.MicroService)) {
-			MicroService temp = (MicroService) node;
-			if(name.equals(temp.getName())) {
-				return temp;
+		synchronized (this) {
+			for(Node node : findNodesByNodeType(NodeLabelType.MicroService)) {
+				MicroService temp = (MicroService) node;
+				if(name.equals(temp.getName())) {
+					return temp;
+				}
 			}
+			return null;
 		}
-		return null;
 	}
 	
 	public RestfulAPI findRestfulAPIByProjectAndSimpleFunctionName(Project project, String simpleFunctionName) {
@@ -307,7 +308,7 @@ public class Nodes {
 				allLibrariesCache.put(library.getGroupId(), libraries);
 			}
 		}
-		return new HashMap<>(allLibrariesCache);
+		return new ConcurrentHashMap<>(allLibrariesCache);
 	}
 	
 	public Library findLibrary(String group, String name, String version) {
@@ -320,21 +321,21 @@ public class Nodes {
 		return null;
 	}
 	
-	private Map<Library, Map<String, LibraryAPI>> librariesWithAPI = new HashMap<>();
+	private Map<Library, Map<String, LibraryAPI>> librariesWithAPI = new ConcurrentHashMap<>();
 	
 	public void addLibraryAPINode(LibraryAPI api, Library belongToLibrary) {
 		Library lib = findLibrary(belongToLibrary.getGroupId(), belongToLibrary.getName(), belongToLibrary.getVersion());
 		if(lib == null) {
 			return ;
 		}
-		Map<String, LibraryAPI> apis = librariesWithAPI.getOrDefault(lib, new HashMap<>());
+		Map<String, LibraryAPI> apis = librariesWithAPI.getOrDefault(lib, new ConcurrentHashMap<>());
 		apis.put(api.getName(), api);
 		librariesWithAPI.put(lib, apis);
 		this.addNode(api, null);
 	}
 	
 	public LibraryAPI findLibraryAPIInLibraryByAPIName(String apiName, Library belongToLibrary) {
-		return librariesWithAPI.getOrDefault(belongToLibrary, new HashMap<>()).get(apiName);
+		return librariesWithAPI.getOrDefault(belongToLibrary, new ConcurrentHashMap<>()).get(apiName);
 	}
 	
 }

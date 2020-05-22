@@ -113,8 +113,8 @@ public class ProjectConfigUtil {
 	
 	@Data
 	public static class JSONConfigFile {
-		private Iterable<ProjectConfig> projectConfigs = new ArrayList<>();
-		private Iterable<MicroServiceDependency> microServiceDependencies = new ArrayList<>();
+		private Collection<ProjectConfig> projectConfigs = new ArrayList<>();
+		private Collection<MicroServiceDependency> microServiceDependencies = new ArrayList<>();
 	}
 	
 	@Data
