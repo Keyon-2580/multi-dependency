@@ -205,12 +205,12 @@ public class MicroServiceCallWithEntry {
 		
 		JSONArray ztreeNodes = new JSONArray();
 		result.put("ztreeNodes", ztreeNodes);
-		ZTreeNode msRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "微服务", false, ZTreeNode.DEFAULT_TYPE);
-		ZTreeNode testcaseRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "测试用例", false, ZTreeNode.DEFAULT_TYPE);
-		ZTreeNode featureRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "特性", false, ZTreeNode.DEFAULT_TYPE);
-		ZTreeNode libRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "三方库", false, ZTreeNode.DEFAULT_TYPE);
-		ZTreeNode scenarioRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "场景", false, ZTreeNode.DEFAULT_TYPE);
-		ZTreeNode developerRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "开发者", false, ZTreeNode.DEFAULT_TYPE);
+		ZTreeNode msRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "微服务", false, ZTreeNode.DEFAULT_TYPE, true);
+		ZTreeNode testcaseRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "测试用例", false, ZTreeNode.DEFAULT_TYPE, true);
+		ZTreeNode featureRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "特性", false, ZTreeNode.DEFAULT_TYPE, true);
+		ZTreeNode libRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "三方库", false, ZTreeNode.DEFAULT_TYPE, true);
+		ZTreeNode scenarioRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "场景", false, ZTreeNode.DEFAULT_TYPE, true);
+		ZTreeNode developerRoot = new ZTreeNode(ZTreeNode.DEFAULT_ID, "开发者", false, ZTreeNode.DEFAULT_TYPE, true);
 		
 		if(showAllScenarios) {
 			for(Scenario scenario : allScenarios) {
@@ -218,7 +218,7 @@ public class MicroServiceCallWithEntry {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(scenario, scenario.getScenarioId() + " : " + scenario.getName(),  "Scenario"));
 					isScenarioNodeAdd.put(scenario, true);
 					
-					scenarioRoot.addChild(scenario);
+					scenarioRoot.addChild(new ZTreeNode(scenario, false));
 				}
 			}
 		}
@@ -228,7 +228,7 @@ public class MicroServiceCallWithEntry {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(ms, "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
 					
-					msRoot.addChild(ms);
+					msRoot.addChild(new ZTreeNode(ms, false));
 				}
 			}
 		}
@@ -244,7 +244,7 @@ public class MicroServiceCallWithEntry {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(developer, "Developer"));
 					isDeveloperNodeAdd.put(developer, true);
 					
-					developerRoot.addChild(developer);
+					developerRoot.addChild(new ZTreeNode(developer, false));
 				}
 				edges.add(CytoscapeUtil.relationToEdge(ms, developer, "MicroServiceUpdatedByDeveloper", times + "", false));
 			}
@@ -255,7 +255,7 @@ public class MicroServiceCallWithEntry {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(feature, feature.getFeatureId() + " : " + feature.getName(), "Feature"));
 					isFeatureNodeAdd.put(feature, true);
 					
-					featureRoot.addChild(feature);
+					featureRoot.addChild(new ZTreeNode(feature, false));
 				}
 				Feature parentFeature = featureToParentFeature.get(feature);
 				if(parentFeature != null && !isFeatureNodeParent.getOrDefault(feature, false)) {
@@ -263,7 +263,7 @@ public class MicroServiceCallWithEntry {
 						nodes.add(CytoscapeUtil.toCytoscapeNode(parentFeature, parentFeature.getFeatureId() + " : " + parentFeature.getName(), "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
 
-						featureRoot.addChild(parentFeature);
+						featureRoot.addChild(new ZTreeNode(parentFeature, false));
 					}
 					edges.add(CytoscapeUtil.relationToEdge(parentFeature, feature, null, null, true));
 					isFeatureNodeParent.put(feature, true);
@@ -283,7 +283,7 @@ public class MicroServiceCallWithEntry {
 						nodes.add(CytoscapeUtil.toCytoscapeNode(lib, lib.getFullName(), "Library"));
 						isLibraryNodeAdd.put(lib, true);
 						///FIXME
-						libRoot.addChild(lib);
+						libRoot.addChild(new ZTreeNode(lib, false));
 					}
 					String libraryGroupAndName = lib.groupIdAndName();
 					if(!isLibraryWithoutVersionNodeAdd.getOrDefault(libraryGroupAndName, false)) {
@@ -306,7 +306,7 @@ public class MicroServiceCallWithEntry {
 		for(TestCase testCase : testCaseToEntries.keySet()) {
 			nodes.add(CytoscapeUtil.toCytoscapeNode(testCase, String.join(" : ", " " + testCase.getTestCaseId(), testCase.getName() + " "), "TestCase_" + (testCase.isSuccess() ? "success" : "fail")));
 			
-			testcaseRoot.addChild(testCase);
+			testcaseRoot.addChild(new ZTreeNode(testCase, false));
 			
 			Scenario scenario = this.scenarioDefineTestCases.get(testCase);
 			if(scenario != null) {
@@ -314,7 +314,7 @@ public class MicroServiceCallWithEntry {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(scenario, scenario.getScenarioId() + " : " + scenario.getName(),  "Scenario"));
 					isScenarioNodeAdd.put(scenario, true);
 					
-					scenarioRoot.addChild(scenario);
+					scenarioRoot.addChild(new ZTreeNode(scenario, false));
 				}
 				edges.add(CytoscapeUtil.relationToEdge(scenario, testCase, "ScenarioDefineTestCase", null, true));
 			}
@@ -324,7 +324,7 @@ public class MicroServiceCallWithEntry {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(entry, "MicroService"));
 					isMicroServiceNodeAdd.put(entry, true);
 					
-					msRoot.addChild(entry);
+					msRoot.addChild(new ZTreeNode(entry, false));
 				}
 				edges.add(CytoscapeUtil.relationToEdge(testCase, entry, "TestCaseExecuteMicroService", null, true));
 			}
@@ -334,7 +334,7 @@ public class MicroServiceCallWithEntry {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(feature, feature.getFeatureId() + " : " + feature.getName(), "Feature"));
 					isFeatureNodeAdd.put(feature, true);
 					
-					featureRoot.addChild(feature);
+					featureRoot.addChild(new ZTreeNode(feature, false));
 				}
 				Feature parentFeature = featureToParentFeature.get(feature);
 				if(parentFeature != null && !isFeatureNodeParent.getOrDefault(feature, false)) {
@@ -342,7 +342,7 @@ public class MicroServiceCallWithEntry {
 						nodes.add(CytoscapeUtil.toCytoscapeNode(parentFeature, parentFeature.getFeatureId() + " : " + parentFeature.getName(), "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
 						
-						featureRoot.addChild(parentFeature);
+						featureRoot.addChild(new ZTreeNode(parentFeature, false));
 					}
 					edges.add(CytoscapeUtil.relationToEdge(parentFeature, feature, null, null, true));
 					isFeatureNodeParent.put(feature, true);
@@ -358,14 +358,14 @@ public class MicroServiceCallWithEntry {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(ms, "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
 					
-					msRoot.addChild(ms);
+					msRoot.addChild(new ZTreeNode(ms, false));
 				}
 				for(MicroService callMs : msDependOns.get(ms).keySet()) {
 					if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
 						nodes.add(CytoscapeUtil.toCytoscapeNode(callMs, "MicroService"));
 						isMicroServiceNodeAdd.put(callMs, true);
 						
-						msRoot.addChild(callMs);
+						msRoot.addChild(new ZTreeNode(callMs, false));
 					}
 					if(MicroServiceUtil.isMicroServiceCall(ms, callMs, calls)) {
 						edges.add(CytoscapeUtil.relationToEdge(ms, callMs, "ShowStructureDependOnCall", null, true));
@@ -380,14 +380,14 @@ public class MicroServiceCallWithEntry {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(ms, "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
 
-					msRoot.addChild(ms);
+					msRoot.addChild(new ZTreeNode(ms, false));
 				}
 				for(MicroService callMs : calls.get(ms).keySet()) {
 					if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
 						nodes.add(CytoscapeUtil.toCytoscapeNode(callMs, "MicroService"));
 						isMicroServiceNodeAdd.put(callMs, true);
 
-						msRoot.addChild(callMs);
+						msRoot.addChild(new ZTreeNode(callMs, false));
 					}
 					if(!MicroServiceUtil.isMicroServiceDependOn(ms, callMs, msDependOns)) {
 						edges.add(CytoscapeUtil.relationToEdge(ms, callMs, "ShowStructureCall", null, true));
@@ -400,14 +400,14 @@ public class MicroServiceCallWithEntry {
 					nodes.add(CytoscapeUtil.toCytoscapeNode(ms, "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
 
-					msRoot.addChild(ms);
+					msRoot.addChild(new ZTreeNode(ms, false));
 				}
 				for(MicroService callMs : calls.get(ms).keySet()) {
 					if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
 						nodes.add(CytoscapeUtil.toCytoscapeNode(callMs, "MicroService"));
 						isMicroServiceNodeAdd.put(callMs, true);
 						
-						msRoot.addChild(callMs);
+						msRoot.addChild(new ZTreeNode(callMs, false));
 					}
 					edges.add(CytoscapeUtil.relationToEdge(ms, callMs, "NoStructureCall", null, true));
 				}

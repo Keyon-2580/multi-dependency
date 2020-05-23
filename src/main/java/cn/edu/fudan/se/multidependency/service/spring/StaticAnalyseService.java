@@ -3,9 +3,11 @@ package cn.edu.fudan.se.multidependency.service.spring;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
@@ -35,14 +37,7 @@ public interface StaticAnalyseService {
 	
 	public Project queryProject(Long id);
 	
-	public Map<Long, Type> findTypes();
-	
-	
 	public List<Type> findExtendsType(Type type);
-	
-	public Map<Long, ProjectFile> allFiles();
-	
-	public List<Function> allFunctions();
 	
 	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller();
 	
@@ -105,5 +100,15 @@ public interface StaticAnalyseService {
 	public Iterable<Library> findAllLibraries();
 
 	long countOfAllProjects();
+
+	Package queryPackage(long id);
+
+	ProjectFile queryFile(long id);
+
+	Namespace queryNamespace(long id);
+
+	Type queryType(long id);
+
+	Function queryFunction(long id);
 	
 }

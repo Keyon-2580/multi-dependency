@@ -327,10 +327,10 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	public List<ZTreeNode> queryMicroServiceContainProjectsZTree(Iterable<MicroService> mss) {
 		List<ZTreeNode> result = new ArrayList<>();
 		for(MicroService ms : mss) {
-			ZTreeNode msNode = new ZTreeNode(ms);
+			ZTreeNode msNode = new ZTreeNode(ms, true);
 			Iterable<Project> projects = containRelationService.findMicroServiceContainProjects(ms);
 			for(Project project : projects) {
-				ZTreeNode projectNode = new ZTreeNode(project);
+				ZTreeNode projectNode = new ZTreeNode(project, true);
 				msNode.addChild(projectNode);
 			}
 			
@@ -338,10 +338,10 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 			ZTreeNode apisNode = null;
 			for(RestfulAPI api : apis) {
 				if(apisNode == null) {
-					apisNode = new ZTreeNode(ZTreeNode.DEFAULT_ID, "RestfulAPI", false, ZTreeNode.DEFAULT_TYPE);
+					apisNode = new ZTreeNode(ZTreeNode.DEFAULT_ID, "RestfulAPI", false, ZTreeNode.DEFAULT_TYPE, true);
 					msNode.addChild(apisNode);
 				}
-				apisNode.addChild(new ZTreeNode(api));
+				apisNode.addChild(new ZTreeNode(api, false));
 			}
 			
 			result.add(msNode);

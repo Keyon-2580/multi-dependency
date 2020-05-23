@@ -3,7 +3,6 @@ package cn.edu.fudan.se.multidependency.service.spring;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,21 +34,16 @@ public class ContainRelationServiceImpl implements ContainRelationService {
     @Autowired
     ContainRepository containRepository;
     
-    private Map<Node, Project> nodeBelongToProjectCache = new ConcurrentHashMap<>();
-    private Map<Node, Package> nodeBelongToPackageCache = new ConcurrentHashMap<>();
-    private Map<Node, ProjectFile> nodeBelongToProjectFileCache = new ConcurrentHashMap<>();
-    private Map<Node, Namespace> nodeBelongToNamespaceCache = new ConcurrentHashMap<>();
-    private Map<Node, Type> nodeBelongToTypeCache = new ConcurrentHashMap<>();
-    private Map<Node, Function> nodeBelongToFunctionCache = new ConcurrentHashMap<>();
-    private Map<Node, Library> nodeBelongToLibrary = new ConcurrentHashMap<>();
-
+    @Autowired
+    CacheService cache;
+    
 	Map<Project, Collection<Package>> projectContainPakcagesCache = new ConcurrentHashMap<>();
 	@Override
 	public Collection<Package> findProjectContainPackages(Project project) {
 		Collection<Package> result = projectContainPakcagesCache.getOrDefault(project, containRepository.findProjectContainPackages(project.getId()));
 		projectContainPakcagesCache.put(project, result);
 		result.forEach(pck -> {
-			nodeBelongToProjectCache.put(pck, project);
+			cache.cacheNodeBelongToNode(pck, project);
 		});
 		return result;
 	}
@@ -60,7 +54,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		Collection<ProjectFile> result = packageContainFilesCache.getOrDefault(pck, containRepository.findPackageContainFiles(pck.getId()));
 		packageContainFilesCache.put(pck, result);
 		result.forEach(file -> {
-			nodeBelongToPackageCache.put(file, pck);
+			cache.cacheNodeBelongToNode(file, pck);
 		});
 		return result;
 	}
@@ -91,7 +85,8 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		temp.put(nodeLabelType, result);
 		fileDirectlyContainNodesCache.put(file, temp);
 		result.forEach(node -> {
-			nodeBelongToProjectFileCache.put(node, file);
+//			nodeBelongToProjectFileCache.put(node, file);
+			cache.cacheNodeBelongToNode(node, file);
 		});
 		return result;
 	}
@@ -136,7 +131,8 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		temp.put(nodeLabelType, result);
 		typeDirectlyContainNodesCache.put(type, temp);
 		result.forEach(node -> {
-			nodeBelongToTypeCache.put(node, type);
+//			nodeBelongToTypeCache.put(node, type);
+			cache.cacheNodeBelongToNode(node, type);
 		});
 		return result;
 	}
@@ -157,7 +153,8 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		Collection<Variable> result = functionContainVariablesCache.getOrDefault(function, containRepository.findFunctionDirectlyContainVariables(function.getId()));
 		functionContainVariablesCache.put(function, result);
 		result.forEach(v -> {
-			nodeBelongToFunctionCache.put(v, function);
+//			nodeBelongToFunctionCache.put(v, function);
+			cache.cacheNodeBelongToNode(v, function);
 		});
 		return result;
 	}
@@ -168,15 +165,17 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		Collection<LibraryAPI> result = libContainApisCache.getOrDefault(lib, containRepository.findLibraryContainLibraryAPIs(lib.getId()));
 		libContainApisCache.put(lib, result);
 		result.forEach(api -> {
-			nodeBelongToLibrary.put(api, lib);
+//			nodeBelongToLibraryCache.put(api, lib);
+			cache.cacheNodeBelongToNode(api, lib);
 		});
 		return result;
 	}
 
 	@Override
 	public Project findPackageBelongToProject(Package pck) {
-		Project result = nodeBelongToProjectCache.getOrDefault(pck, containRepository.findPackageBelongToProject(pck.getId()));
-		nodeBelongToProjectCache.put(pck, result);
+		Node belongToNode = cache.findNodeBelongToNode(pck, NodeLabelType.Project);
+		Project result = belongToNode == null ? containRepository.findPackageBelongToProject(pck.getId()) : (Project) belongToNode;
+		cache.cacheNodeBelongToNode(pck, result);
 		return result;
 	}
 
@@ -224,26 +223,23 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		temp.put(nodeLabelType, result);
 		namespaceDirectlyContainNodesCache.put(namespace, temp);
 		result.forEach(node -> {
-			nodeBelongToNamespaceCache.put(node, namespace);
+			cache.cacheNodeBelongToNode(node, namespace);
 		});
 		return result;
 	}
 	
 	@Override
-	public Package findTypeBelongToPackage(Type type) {
-		ProjectFile file = findTypeBelongToFile(type);
-		if(file == null) {
+	public Project findFunctionBelongToProject(Function function) {
+		Node belongToNode = cache.findNodeBelongToNode(function, NodeLabelType.Project);
+		if(belongToNode != null) {
+			return (Project) belongToNode;
+		}
+		ProjectFile belongToFile = findFunctionBelongToFile(function);
+		if(belongToFile == null) {
 			return null;
 		}
-		Package result = nodeBelongToPackageCache.getOrDefault(type, findFileBelongToPackage(file));
-		nodeBelongToPackageCache.put(type, result);
-		return result;
-	}
-
-	@Override
-	public Project findFunctionBelongToProject(Function function) {
-		Project project = nodeBelongToProjectCache.getOrDefault(function, findFileBelongToProject(findFunctionBelongToFile(function)));
-		nodeBelongToProjectCache.put(function, project);
+		Project project = findFileBelongToProject(belongToFile);
+		cache.cacheNodeBelongToNode(function, project);
 		return project;
 	}
 	
@@ -253,42 +249,47 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		List<Function> functions = projectContainFunctionsCache.getOrDefault(project, containRepository.findProjectContainFunctions(project.getId()));
 		projectContainFunctionsCache.put(project, functions);
 		functions.forEach(f -> {
-			nodeBelongToProjectCache.put(f, project);
+			cache.cacheNodeBelongToNode(f, project);
 		});
 		return functions;
 	}
 	
 	@Override
 	public ProjectFile findFunctionBelongToFile(Function function) {
-		ProjectFile file = nodeBelongToProjectFileCache.getOrDefault(function, containRepository.findFunctionBelongToFile(function.getId()));
-		nodeBelongToProjectFileCache.put(function, file);
-		return file;
+		Node belongToNode = cache.findNodeBelongToNode(function, NodeLabelType.ProjectFile);
+		ProjectFile result = belongToNode == null ? containRepository.findFunctionBelongToFile(function.getId()) : (ProjectFile) belongToNode;
+		cache.cacheNodeBelongToNode(function, result);
+		return result;
 	}
 	@Override
 	public ProjectFile findTypeBelongToFile(Type type) {
-		ProjectFile file = nodeBelongToProjectFileCache.getOrDefault(type, containRepository.findFunctionBelongToFile(type.getId()));
-		nodeBelongToProjectFileCache.put(type, file);
-		return file;
+		Node belongToNode = cache.findNodeBelongToNode(type, NodeLabelType.ProjectFile);
+		ProjectFile result = belongToNode == null ? containRepository.findTypeBelongToFile(type.getId()) : (ProjectFile) belongToNode;
+		cache.cacheNodeBelongToNode(type, result);
+		return result;
 	}
 	@Override
 	public ProjectFile findVariableBelongToFile(Variable variable) {
-		ProjectFile file = nodeBelongToProjectFileCache.getOrDefault(variable, containRepository.findFunctionBelongToFile(variable.getId()));
-		nodeBelongToProjectFileCache.put(variable, file);
-		return file;
+		Node belongToNode = cache.findNodeBelongToNode(variable, NodeLabelType.ProjectFile);
+		ProjectFile result = belongToNode == null ? containRepository.findVariableBelongToFile(variable.getId()) : (ProjectFile) belongToNode;
+		cache.cacheNodeBelongToNode(variable, result);
+		return result;
 	}
 
 	@Override
 	public Package findFileBelongToPackage(ProjectFile file) {
-		Package pck = nodeBelongToPackageCache.getOrDefault(file, containRepository.findFileBelongToPackage(file.getId()));
-		nodeBelongToPackageCache.put(file, pck);
-		return pck;
+		Node belongToNode = cache.findNodeBelongToNode(file, NodeLabelType.Package);
+		Package result = belongToNode == null ? containRepository.findFileBelongToPackage(file.getId()) : (Package) belongToNode;
+		cache.cacheNodeBelongToNode(file, result);
+		return result;
 	}
 
 	@Override
 	public Type findFunctionBelongToType(Function function) {
-		Type type = nodeBelongToTypeCache.getOrDefault(function, containRepository.findFunctionBelongToType(function.getId()));
-		nodeBelongToTypeCache.put(function, type);
-		return type;
+		Node belongToNode = cache.findNodeBelongToNode(function, NodeLabelType.Type);
+		Type result = belongToNode == null ? containRepository.findFunctionBelongToType(function.getId()) : (Type) belongToNode;
+		cache.cacheNodeBelongToNode(function, result);
+		return result;
 	}
 
 	@Override

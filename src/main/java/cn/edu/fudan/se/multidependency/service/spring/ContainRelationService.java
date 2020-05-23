@@ -39,8 +39,6 @@ public interface ContainRelationService {
 	
 	Collection<Variable> findFunctionDirectlyContainVariables(Function function);
 	
-	Package findTypeBelongToPackage(Type type);
-	
 	Package findFileBelongToPackage(ProjectFile file);
 	
 	Project findFileBelongToProject(ProjectFile file);

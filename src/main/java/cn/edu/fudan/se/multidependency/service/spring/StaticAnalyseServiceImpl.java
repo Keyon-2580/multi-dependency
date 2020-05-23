@@ -11,9 +11,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
@@ -146,6 +149,9 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     
     @Autowired
     ContainRelationService containRelationService;
+    
+    @Autowired
+    CacheService cache;
 
 	@Override
 	public CallLibrary<Project> findProjectCallLibraries(Project project) {
@@ -164,44 +170,10 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return result;
 	}
     
-    private Map<Long, Type> typesCache = new HashMap<>();
-	@Override
-	public Map<Long, Type> findTypes() {
-		if(typesCache == null || typesCache.isEmpty()) {
-			typesCache = new HashMap<>();
-			Iterable<Type> allTypes = typeRepository.findAll();
-			for(Type type : allTypes) {
-				typesCache.put(type.getId(), type);
-			}
-		}
-		return typesCache;
-	}
 	
 	@Override
 	public List<Type> findExtendsType(Type type) {
 		return typeInheritsTypeRepository.findExtendsTypesByTypeId(type.getId());
-	}
-
-	@Override
-	public List<Function> allFunctions() {
-		List<Function> functions = new ArrayList<>();
-		functionRepository.findAll().forEach(function -> {
-			functions.add(function);
-		});
-		return functions;
-	}
-
-	private Map<Long, ProjectFile> allFilesCache = new HashMap<>();
-	@Override
-	public Map<Long, ProjectFile> allFiles() {
-		if(allFilesCache == null || allFilesCache.isEmpty()) {
-			allFilesCache = new HashMap<>();
-			Iterable<ProjectFile> files = fileRepository.findAll();
-			for(ProjectFile file : files) {
-				allFilesCache.put(file.getId(), file);
-			}
-		}
-		return allFilesCache;
 	}
 
 	@Override
@@ -489,19 +461,62 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return projectRepository.count();
 	}
 
-	Map<Long, Project> idToProjectCache = new HashMap<>();
 	Iterable<Project> allProjectsCache = null;
 	@Override
 	public Iterable<Project> allProjects() {
 		allProjectsCache = allProjectsCache == null ? projectRepository.findAll() : allProjectsCache;
 		for(Project project : allProjectsCache) {
-			idToProjectCache.put(project.getId(), project);
+			cache.cacheNodeById(project);
 		}
 		return allProjectsCache;
 	}
 
 	@Override
 	public Project queryProject(Long id) {
-		return idToProjectCache.getOrDefault(id, projectRepository.findById(id).get());
+		Node node = cache.findNodeById(id);
+		Project result = node == null ? projectRepository.findById(id).get() : (node instanceof Project ? (Project) node : projectRepository.findById(id).get());
+		cache.cacheNodeById(result);
+		return result;
+	}
+
+	@Override
+	public Package queryPackage(long id) {
+		Node node = cache.findNodeById(id);
+		Package result = node == null ? packageRepository.findById(id).get() : (node instanceof Package ? (Package) node : packageRepository.findById(id).get());
+		cache.cacheNodeById(result);
+		return result;
+	}
+
+
+	@Override
+	public ProjectFile queryFile(long id) {
+		Node node = cache.findNodeById(id);
+		ProjectFile result = node == null ? fileRepository.findById(id).get() : (node instanceof ProjectFile ? (ProjectFile) node : fileRepository.findById(id).get());
+		cache.cacheNodeById(result);
+		return result;
+	}
+
+	@Override
+	public Namespace queryNamespace(long id) {
+		Node node = cache.findNodeById(id);
+		Namespace result = node == null ? namespaceRepository.findById(id).get() : (node instanceof Namespace ? (Namespace) node : namespaceRepository.findById(id).get());
+		cache.cacheNodeById(result);
+		return result;
+	}
+
+	@Override
+	public Type queryType(long id) {
+		Node node = cache.findNodeById(id);
+		Type result = node == null ? typeRepository.findById(id).get() : (node instanceof Type ? (Type) node : typeRepository.findById(id).get());
+		cache.cacheNodeById(result);
+		return result;
+	}
+
+	@Override
+	public Function queryFunction(long id) {
+		Node node = cache.findNodeById(id);
+		Function result = node == null ? functionRepository.findById(id).get() : (node instanceof Function ? (Function) node : functionRepository.findById(id).get());
+		cache.cacheNodeById(result);
+		return result;
 	}	
 }

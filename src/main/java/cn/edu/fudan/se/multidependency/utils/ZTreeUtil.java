@@ -26,39 +26,29 @@ public class ZTreeUtil {
 		
 		public static final String DEFAULT_TYPE = "default";
 		
-		public ZTreeNode(String name) {
-			this(DEFAULT_ID, name, false, DEFAULT_TYPE);
+		public ZTreeNode(String name, boolean isParent) {
+			this(DEFAULT_ID, name, false, DEFAULT_TYPE, isParent);
 		}
 		
-		public ZTreeNode(Node node) {
-			this(node, false);
+		public ZTreeNode(Node node, boolean isParent) {
+			this(node.getId(), node.getName(), false, node.getNodeType().toString(), isParent);
 		}
 		
-		public ZTreeNode(Node node, Boolean open) {
-			this.id = node.getId();
-			this.name = node.getName();
-			this.open = open;
-			this.type = node.getNodeType().toString();
-		}
-		
-		public ZTreeNode(long id, String name, Boolean open, String type) {
+		public ZTreeNode(long id, String name, boolean open, String type, boolean isParent) {
 			this.id = id;
 			this.name = name;
 			this.open = open;
 			this.type = type;
+			this.parent = isParent;
 		}
 		
 		private long id;
 		private String name;
 		private String type;
-		private Boolean open;
+		private boolean open;
+		private boolean parent;
 		
 		private List<ZTreeNode> children = new ArrayList<>();
-		
-		public void addChild(Node node) {
-			ZTreeNode child = new ZTreeNode(node);
-			addChild(child);
-		}
 		
 		public void addChild(ZTreeNode ztree) {
 			this.children.add(ztree);
@@ -74,16 +64,15 @@ public class ZTreeUtil {
 			JSONObject result = new JSONObject();
 			result.put("name", name);
 			result.put("id", id);
-			if(open != null) {
-				result.put("open", open);
-			}
-			if(!children.isEmpty()) {
+			result.put("type", type);
+			result.put("open", open);
+			result.put("isParent", parent);
+			if(parent) {
 				JSONArray childrenJSON = new JSONArray();
 				for(ZTreeNode child : children) {
 					childrenJSON.add(child.toJSON());
 				}
 				result.put("children", childrenJSON);
-				result.put("type", getType());
 			}
 			return result;
 		}
