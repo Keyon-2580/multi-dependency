@@ -32,7 +32,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 	public DependsCodeInserterForNeo4jServiceImpl(EntityRepo entityRepo, ProjectConfig projectConfig) {
 		super(projectConfig);
 		this.entityRepo = entityRepo;
-		setCurrentEntityId(entityRepo.generateId().longValue());
+		currentEntityId = entityRepo.generateId().longValue() + 1;
 	}
 	
 	protected EntityRepo entityRepo;

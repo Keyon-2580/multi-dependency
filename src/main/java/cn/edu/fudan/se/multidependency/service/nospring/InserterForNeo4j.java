@@ -8,9 +8,9 @@ import cn.edu.fudan.se.multidependency.model.relation.Relations;
 
 public interface InserterForNeo4j {
 
-	public Long generateEntityId();
-	
-	public void setCurrentEntityId(Long entityId);
+//	public Long generateEntityId();
+//	
+//	public void setCurrentEntityId(Long entityId);
 	
 	public void insertToNeo4jDataBase() throws Exception ;
 
@@ -18,6 +18,13 @@ public interface InserterForNeo4j {
 	
 	public void setDelete(boolean delete);
 	
+	/**
+	 * 表示该节点属于哪个Project，inProject可以为null
+	 * 若inProject为null，则表示该节点不属于任何一个项目
+	 * @param node
+	 * @param inProject 
+	 * @return
+	 */
 	public boolean addNode(Node node, Project inProject);
 	
 	public boolean addRelation(Relation relation);

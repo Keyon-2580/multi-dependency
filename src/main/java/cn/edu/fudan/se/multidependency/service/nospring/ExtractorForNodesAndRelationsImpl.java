@@ -9,25 +9,16 @@ import cn.edu.fudan.se.multidependency.model.relation.Relations;
 public abstract class ExtractorForNodesAndRelationsImpl implements ExtractorForNodesAndRelations {
 	
 	protected InserterForNeo4j repository = RepositoryService.getInstance(); //都会存在这里面
+
+	protected long currentEntityId = 0L;
 	
 	protected Long generateEntityId() {
-		return repository.generateEntityId();
-	}
-
-	protected void setCurrentEntityId(Long entityId) {
-		repository.setCurrentEntityId(entityId);
+		return currentEntityId++;
 	}
 	
 	@Override
 	public abstract void addNodesAndRelations() throws Exception;
 	
-	/**
-	 * 表示该节点属于哪个Project，inProject可以为null
-	 * 若inProject为null，则表示该节点不属于任何一个项目
-	 * @param node
-	 * @param inProject 
-	 * @return
-	 */
 	protected boolean addNode(Node node, Project inProject) {
 		return this.repository.addNode(node, inProject);
 	}

@@ -24,19 +24,11 @@ public final class RepositoryService implements InserterForNeo4j {
 	private static RepositoryService repository = new RepositoryService();
 
 	@Setter
-	protected Long currentEntityId = new Long(0L);
-
-	@Setter
 	private String databasePath;
 
 	@Setter
 	private boolean delete;
 	
-	@Override
-	public Long generateEntityId() {
-		return currentEntityId++;
-	}
-
 	private RepositoryService() {}
 	
 	public static RepositoryService getInstance() {
@@ -53,6 +45,8 @@ public final class RepositoryService implements InserterForNeo4j {
 	public void insertToNeo4jDataBase() throws Exception {
 		LOGGER.info("start to store datas to database");
 		DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		LOGGER.info("总计节点数：" + nodes.size());
+		LOGGER.info("总计关系数：" + relations.size());
 		LOGGER.info("开始时间：" + sdf.format(new Timestamp(System.currentTimeMillis())));
 		batchInserterService.init(databasePath, delete);
 		batchInserterService.insertNodes(nodes);
@@ -73,12 +67,6 @@ public final class RepositoryService implements InserterForNeo4j {
 		}
 	}
 
-	/**
-	 * 表示该节点属于哪个Project，Project可以为null
-	 * @param node
-	 * @param inProject 
-	 * @return
-	 */
 	@Override
 	public boolean addNode(Node node, Project inProject) {
 		this.nodes.addNode(node, inProject);

@@ -35,7 +35,7 @@ public class Relations {
 		return size;
 	}
 	
-	public void addRelation(Relation relation) {
+	public synchronized void addRelation(Relation relation) {
 		
 		if(relation instanceof DynamicCallFunction) {
 			DynamicCallFunction call = (DynamicCallFunction) relation;

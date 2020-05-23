@@ -76,10 +76,12 @@ public class InsertDataMain {
 			CountDownLatch latchOfStatic = new CountDownLatch(1);
 			CountDownLatch latchOfOthers = new CountDownLatch(5);
 			ThreadService ts = new ThreadService(yaml, latchOfStatic, latchOfOthers);
-
+			
 			executor.execute(ts::staticAnalyse);
 			latchOfStatic.await();
-			
+			RepositoryService service = RepositoryService.getInstance();
+			LOGGER.info("静态分析节点数：" + service.getNodes().size());
+			LOGGER.info("静态分析关系数：" + service.getRelations().size());
 			executor.execute(ts::msDependAnalyse);
 			executor.execute(ts::dynamicAnalyse);
 			executor.execute(ts::gitAnalyse);
@@ -184,6 +186,7 @@ class ThreadService {
     }
 
     void staticAnalyseCore(ProjectConfig projectConfig) throws Exception{
+    	LOGGER.info(projectConfig.getProject());
         DependsEntityRepoExtractor extractor = new Depends096Extractor();
         extractor.setIncludeDirs(projectConfig.includeDirsArray());
         extractor.setExcludes(projectConfig.getExcludes());

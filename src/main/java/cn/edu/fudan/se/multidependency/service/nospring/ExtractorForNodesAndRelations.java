@@ -6,7 +6,7 @@ import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.Relations;
 
 public interface ExtractorForNodesAndRelations {
-	
+
 	public void addNodesAndRelations() throws Exception ;
 	
 	public Nodes getNodes();

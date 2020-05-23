@@ -75,7 +75,7 @@ public class Nodes {
 	 * @param inProject 
 	 * @return
 	 */
-	public void addNode(Node node, Project inProject) {
+	public synchronized void addNode(Node node, Project inProject) {
 		clearCache();
 		
 		allNodes.add(node);
@@ -99,7 +99,7 @@ public class Nodes {
 		return nodeTypeToNodes.getOrDefault(nodeType, new ArrayList<>());
 	}
 	
-	public Node findNodeByEntityIdInProject(NodeLabelType nodeType, Long entityId, Project inProject) {
+	public Node findNodeByEntityIdInProject(NodeLabelType nodeType, long entityId, Project inProject) {
 		Map<Long, ? extends Node> nodes = findNodesByNodeTypeInProject(nodeType, inProject);
 		if(nodes.get(entityId) != null) {
 			return nodes.get(entityId).getNodeType() == nodeType ? nodes.get(entityId) : null;
@@ -107,7 +107,7 @@ public class Nodes {
 		return null;
 	}
 
-	public Node findNodeByEntityIdInProject(Long entityId, Project inProject) {
+	public Node findNodeByEntityIdInProject(long entityId, Project inProject) {
 		Map<NodeLabelType, Map<Long, Node>> typeToNodes = projectToNodes.get(inProject);
 		if(typeToNodes == null) {
 			return null;
