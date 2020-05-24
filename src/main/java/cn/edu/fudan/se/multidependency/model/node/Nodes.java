@@ -159,11 +159,18 @@ public class Nodes {
 	}
 	
 	public Package findPackageByDirectoryPath(String directoryPath, Project project) {
+		if("/dropwizard__fdse__metrics/metrics-collectd/src/main/java/com/codahale/metrics/collectd/".equals(directoryPath)) {
+			Map<Long, Package> packages = (Map<Long, Package>) findNodesByNodeTypeInProject(NodeLabelType.Package, project);
+			for(Package pck : packages.values()) {
+				if(pck.getDirectoryPath().equals(directoryPath)) {
+					System.out.println(pck);
+					break;
+				}
+			}
+		}
 		@SuppressWarnings("unchecked")
 		Map<Long, Package> packages = (Map<Long, Package>) findNodesByNodeTypeInProject(NodeLabelType.Package, project);
-//		System.out.println(packages.size() + " " + packages + " " + directoryPath);
 		for(Package pck : packages.values()) {
-//			System.out.println(pck.getDirectoryPath() + " " + directoryPath);
 			if(pck.getDirectoryPath().equals(directoryPath)) {
 				return pck;
 			}

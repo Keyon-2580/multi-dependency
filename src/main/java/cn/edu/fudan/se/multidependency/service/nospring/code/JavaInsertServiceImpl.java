@@ -47,6 +47,32 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				file.setPath(filePath);
 				file.setSuffix(FileUtil.extractSuffix(entity.getQualifiedName()));
 				addNode(file, currentProject);
+				
+				// 文件所在目录
+				String directoryPath = FileUtil.extractDirectoryFromFile(entity.getQualifiedName()) + "/";
+				directoryPath = directoryPath.replace("\\", "/");
+				directoryPath = directoryPath.substring(directoryPath.indexOf(projectPath + "/"));
+				Package pck = this.getNodes().findPackageByDirectoryPath(directoryPath, currentProject);
+				if (pck == null) {
+					pck = new Package();
+					pck.setName(directoryPath);
+					pck.setDirectoryPath(directoryPath);
+					Entity parentEntity = entity.getParent();
+					if(parentEntity == null) {
+						// 该java文件没有显式声明packge，为default包
+						pck.setEntityId(entityRepo.generateId().longValue());
+						pck.setName(Package.JAVA_PACKAGE_DEFAULT);
+					} else {
+						pck.setEntityId(parentEntity.getId().longValue());
+						pck.setName(parentEntity.getQualifiedName());
+					}
+					addNode(pck, currentProject);
+					Contain projectContainsPackage = new Contain(currentProject, pck);
+					addRelation(projectContainsPackage);
+				}
+				Contain containFile = new Contain(pck, file);
+				addRelation(containFile);
+				setTypeByteCodeName((FileEntity) entity);
 			} else if(entity instanceof FunctionEntity) {
 				Function function = new Function();
 				function.setImpl(true);
@@ -74,48 +100,6 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				type.setName(entity.getQualifiedName());
 				addNode(type, currentProject);
 			}
-		});
-		// Package到File的包含关系
-		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.ProjectFile, currentProject).forEach((entityId, node) -> {
-			// 目录
-			ProjectFile codeFile = (ProjectFile) node;
-			FileEntity fileEntity = (FileEntity) entityRepo.getEntity(entityId.intValue());
-			// 文件所在目录
-			String directoryPath = FileUtil.extractDirectoryFromFile(fileEntity.getQualifiedName()) + "/";
-			directoryPath = directoryPath.replace("\\", "/");
-			directoryPath = directoryPath.substring(directoryPath.indexOf(projectPath + "/"));
-			Package pck = this.getNodes().findPackageByDirectoryPath(directoryPath, currentProject);
-			if (pck == null) {
-				pck = new Package();
-				pck.setDirectoryPath(directoryPath);
-				Entity parentEntity = fileEntity.getParent();
-				if(parentEntity == null) {
-					// 该java文件没有显式声明packge，为default包
-					pck.setEntityId(entityRepo.generateId().longValue());
-					pck.setName(Package.JAVA_PACKAGE_DEFAULT);
-				} else {
-					pck.setEntityId(parentEntity.getId().longValue());
-					pck.setName(parentEntity.getQualifiedName());
-				}
-//				System.out.println(directoryPath);
-				addNode(pck, currentProject);
-				Contain projectContainsPackage = new Contain(currentProject, pck);
-				addRelation(projectContainsPackage);
-			}
-			
-			Entity parentEntity = fileEntity.getParent();
-			if(parentEntity == null) {
-				// 该java文件没有显式声明packge，为default包
-				pck.setEntityId(entityRepo.generateId().longValue());
-				pck.setName(Package.JAVA_PACKAGE_DEFAULT);
-			} else {
-				pck.setEntityId(parentEntity.getId().longValue());
-				pck.setName(parentEntity.getQualifiedName());
-			}
-			Contain packageContainFile = new Contain(pck, codeFile);
-			addRelation(packageContainFile);
-			
-			setTypeByteCodeName(fileEntity);
 		});
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject).forEach((entityId, node) -> {
 			Type type = (Type) node;
