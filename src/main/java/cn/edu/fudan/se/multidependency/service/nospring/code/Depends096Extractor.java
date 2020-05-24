@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.poi.util.TempFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +83,7 @@ public class Depends096Extractor implements DependsEntityRepoExtractor {
 	@Override
 	public EntityRepo extractEntityRepo() throws Exception {
 		entityRepo = executeCommand(language, projectPath, new String[] {}, autoInclude);
-		TemporaryFile.getInstance().delete();
+		TemporaryFile.resetCurrentThread();
 		return entityRepo;
 	}
 

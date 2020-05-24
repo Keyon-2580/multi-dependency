@@ -16,9 +16,9 @@ server:
 
 data:
    projects:
-      config: src/main/resources/project/train-ticket.json
+#      config: src/main/resources/project/train-ticket.json
 #      config: src/main/resources/project/source-fan.json
-#      config: src/main/resources/project/depends.json
+      config: src/main/resources/project/depends.json
 #      config: src/main/resources/project/leveldb.json
    dynamic:
       analyse: false
