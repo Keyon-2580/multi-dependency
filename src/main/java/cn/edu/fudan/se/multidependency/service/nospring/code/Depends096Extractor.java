@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.poi.util.TempFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,7 @@ import depends.entity.repo.EntityRepo;
 import depends.extractor.AbstractLangProcessor;
 import depends.util.FileUtil;
 import depends.util.FolderCollector;
+import depends.util.TemporaryFile;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import lombok.Setter;
 
@@ -81,7 +83,9 @@ public class Depends096Extractor implements DependsEntityRepoExtractor {
 
 	@Override
 	public EntityRepo extractEntityRepo() throws Exception {
-		return entityRepo = executeCommand(language, projectPath, new String[] {}, autoInclude);
+		entityRepo = executeCommand(language, projectPath, new String[] {}, autoInclude);
+		TemporaryFile.getInstance().delete();
+		return entityRepo;
 	}
 
 }
