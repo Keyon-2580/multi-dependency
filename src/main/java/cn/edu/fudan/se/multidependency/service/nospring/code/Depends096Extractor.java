@@ -49,11 +49,9 @@ public class Depends096Extractor implements DependsEntityRepoExtractor {
 			includeDir = additionalIncludePaths.toArray(new String[] {});
 		}
 		langProcessor.buildDependencies(inputDir, includeDir, new ArrayList<>(), supportImplLink,false);
-		EntityRepo repo = langProcessor.getEntityRepo();
-		return repo;
+		return langProcessor.getEntityRepo();
 	}
 	
-
 	@Setter
 	private Language language;
 	@Setter
@@ -66,9 +64,15 @@ public class Depends096Extractor implements DependsEntityRepoExtractor {
 	private boolean autoInclude;
 
 	private EntityRepo entityRepo ;
+	
+	private int countOfEntities = 0;
 
 	@Override
 	public int getEntityCount() {
+		return countOfEntities;
+	}
+	
+	private int calculateEntityCount(EntityRepo entityRepo) {
 		if(entityRepo == null) {
 			return 0;
 		}
@@ -82,8 +86,10 @@ public class Depends096Extractor implements DependsEntityRepoExtractor {
 
 	@Override
 	public EntityRepo extractEntityRepo() throws Exception {
-		entityRepo = executeCommand(language, projectPath, new String[] {}, autoInclude);
+		this.entityRepo = executeCommand(language, projectPath, new String[] {}, autoInclude);
 		TemporaryFile.resetCurrentThread();
+		this.countOfEntities = calculateEntityCount(this.entityRepo);
+		LOGGER.info(projectPath + "(" + language.toString() + ") : " + countOfEntities);
 		return entityRepo;
 	}
 
