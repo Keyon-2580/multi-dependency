@@ -13,6 +13,8 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
+import cn.edu.fudan.se.multidependency.service.spring.data.FunctionCallPropertion;
+import cn.edu.fudan.se.multidependency.service.spring.data.FunctionCallPropertionDetail;
 
 @Service
 public class TestCaseCoverageService {

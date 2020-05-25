@@ -26,6 +26,7 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.Micro
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanCallSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
+import cn.edu.fudan.se.multidependency.service.spring.data.MicroServiceCallWithEntry;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import lombok.AllArgsConstructor;

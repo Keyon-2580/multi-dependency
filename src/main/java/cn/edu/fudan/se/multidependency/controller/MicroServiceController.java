@@ -24,7 +24,7 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.Micro
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
-import cn.edu.fudan.se.multidependency.service.spring.data.FAN_IO;
+import cn.edu.fudan.se.multidependency.service.spring.data.Fan_IO;
 import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
 
 @Controller
@@ -39,23 +39,23 @@ public class MicroServiceController {
 	
 	@GetMapping(value = "/fanIO/{msId}")
 	@ResponseBody
-	public FAN_IO<MicroService> calculateFanIO(@PathVariable("msId") long id) {
+	public Fan_IO<MicroService> calculateFanIO(@PathVariable("msId") long id) {
 		MicroService ms = msService.findMicroServiceById(id);
 		return msService.microServiceDependencyFanIOInDynamicCall(ms);
 	}
 	
 	@GetMapping(value = "/fanIO")
 	@ResponseBody
-	public Collection<FAN_IO<MicroService>> calculateFanIOs() {
-		List<FAN_IO<MicroService>> result = new ArrayList<>();
+	public Collection<Fan_IO<MicroService>> calculateFanIOs() {
+		List<Fan_IO<MicroService>> result = new ArrayList<>();
 		Collection<MicroService> allMss = msService.findAllMicroService().values();
 		for(MicroService ms : allMss) {
-			FAN_IO<MicroService> fanIO = msService.microServiceDependencyFanIOInDynamicCall(ms);
+			Fan_IO<MicroService> fanIO = msService.microServiceDependencyFanIOInDynamicCall(ms);
 			result.add(fanIO);
 		}
-		result.sort(new Comparator<FAN_IO<MicroService>>() {
+		result.sort(new Comparator<Fan_IO<MicroService>>() {
 			@Override
-			public int compare(FAN_IO<MicroService> o1, FAN_IO<MicroService> o2) {
+			public int compare(Fan_IO<MicroService> o1, Fan_IO<MicroService> o2) {
 				if(o1.size() == o2.size()) {
 					return o1.getNode().getName().compareTo(o2.getNode().getName());
 				}

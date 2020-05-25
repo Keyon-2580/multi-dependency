@@ -33,6 +33,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.dynamic.ScenarioDefin
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.TestCaseExecuteFeatureRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.TestCaseRunTraceRepository;
 import cn.edu.fudan.se.multidependency.service.nospring.RepositoryService;
+import cn.edu.fudan.se.multidependency.service.spring.data.FunctionCallPropertionDetail;
 
 @Service
 public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {

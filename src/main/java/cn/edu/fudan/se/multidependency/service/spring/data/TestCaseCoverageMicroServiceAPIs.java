@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.service.spring;
+package cn.edu.fudan.se.multidependency.service.spring.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -13,6 +13,7 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
+import cn.edu.fudan.se.multidependency.service.spring.data.TestCaseCoverageMicroServiceAPIs;
 
 @Service
 public class APICoverageService {

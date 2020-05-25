@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.service.spring;
+package cn.edu.fudan.se.multidependency.service.spring.data;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,9 +8,8 @@ import java.util.Map;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
-import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
-import cn.edu.fudan.se.multidependency.model.relation.clone.Clone.CloneValueCalculator;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
+import cn.edu.fudan.se.multidependency.service.spring.data.Clone.CloneValueCalculator;
 
 public class CloneValueCalculatorForMicroService implements CloneValueCalculator {
 	

@@ -8,7 +8,6 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
-import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
@@ -17,7 +16,8 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanI
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanStartWithFunction;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
-import cn.edu.fudan.se.multidependency.service.spring.data.FAN_IO;
+import cn.edu.fudan.se.multidependency.service.spring.data.Clone;
+import cn.edu.fudan.se.multidependency.service.spring.data.Fan_IO;
 import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
 
 public interface MicroserviceService {
@@ -87,6 +87,6 @@ public interface MicroserviceService {
 	 * 从动态运行下的微服务之间的依赖中找出某个微服务的FanIn和FanOut
 	 * @return
 	 */
-	FAN_IO<MicroService> microServiceDependencyFanIOInDynamicCall(MicroService ms);
+	Fan_IO<MicroService> microServiceDependencyFanIOInDynamicCall(MicroService ms);
 
 }

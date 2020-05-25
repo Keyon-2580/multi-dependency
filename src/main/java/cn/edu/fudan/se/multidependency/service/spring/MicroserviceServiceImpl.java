@@ -26,7 +26,6 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
-import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
@@ -43,7 +42,9 @@ import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroSer
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanCallSpanRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanInstanceOfRestfulAPIRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanStartWithFunctionRepository;
-import cn.edu.fudan.se.multidependency.service.spring.data.FAN_IO;
+import cn.edu.fudan.se.multidependency.service.spring.data.Clone;
+import cn.edu.fudan.se.multidependency.service.spring.data.CloneValueCalculatorForMicroService;
+import cn.edu.fudan.se.multidependency.service.spring.data.Fan_IO;
 import cn.edu.fudan.se.multidependency.utils.MicroServiceUtil;
 import cn.edu.fudan.se.multidependency.utils.PageUtil;
 import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
@@ -363,11 +364,11 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	}
 
 	@Override
-	public FAN_IO<MicroService> microServiceDependencyFanIOInDynamicCall(MicroService ms) {
+	public Fan_IO<MicroService> microServiceDependencyFanIOInDynamicCall(MicroService ms) {
 		if(ms == null) {
 			return null;
 		}
-		FAN_IO<MicroService> result = new FAN_IO<>(ms);
+		Fan_IO<MicroService> result = new Fan_IO<>(ms);
 		Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> allCalls = msCalls();
 		for(Map.Entry<MicroService, Map<MicroService, MicroServiceCallMicroService>> calls : allCalls.entrySet()) {
 			MicroService caller = calls.getKey();

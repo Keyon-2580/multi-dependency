@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.model.relation.clone;
+package cn.edu.fudan.se.multidependency.service.spring.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import lombok.Data;
 
 /**

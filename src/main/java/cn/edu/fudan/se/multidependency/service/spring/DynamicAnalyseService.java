@@ -15,6 +15,7 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCal
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.ScenarioDefineTestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
+import cn.edu.fudan.se.multidependency.service.spring.data.FunctionCallPropertionDetail;
 
 public interface DynamicAnalyseService {
 	
