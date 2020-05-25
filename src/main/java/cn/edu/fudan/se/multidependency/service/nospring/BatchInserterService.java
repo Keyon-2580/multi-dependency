@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.neo4j.graphdb.ConstraintViolationException;
 import org.neo4j.graphdb.Label;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
@@ -41,15 +42,21 @@ public class BatchInserterService implements Closeable {
 			FileUtil.delFile(directory);
 		}
 		inserter = BatchInserters.inserter(directory);
-	    for(NodeLabelType nodeType : NodeLabelType.values()) {
-	    	Label label = Label.label(nodeType.toString());
-	    	mapLabels.put(nodeType, label);
-	    	String index = nodeType.indexName();
-	    	if(!StringUtils.isBlank(index)) {
-	    		// 创建索引
-	    		inserter.createDeferredSchemaIndex(label).on(index).create();
-	    	}
-	    }
+		for(NodeLabelType nodeType : NodeLabelType.values()) {
+			Label label = Label.label(nodeType.toString());
+			mapLabels.put(nodeType, label);
+			String index = nodeType.indexName();
+			if(!StringUtils.isBlank(index)) {
+				// 创建索引
+				try {
+					inserter.createDeferredSchemaIndex(label).on(index).create();
+				} catch (ConstraintViolationException e) {
+					LOGGER.warn("索引已创建：" + index);
+				} catch (Exception e) {
+					LOGGER.warn("创建索引失败：" + index);
+				}
+			}
+		}
 	}
 	
 	public Long insertNode(Node node) {
