@@ -42,6 +42,8 @@ public class FeatureController {
 
 	@GetMapping(value = {"/", "/index"})
 	public String index(HttpServletRequest request) {
+		request.setAttribute("features", featureOrganizationService.allFeatures());
+		request.setAttribute("testcases", featureOrganizationService.allTestCases());
 		return "feature";
 	}
 	

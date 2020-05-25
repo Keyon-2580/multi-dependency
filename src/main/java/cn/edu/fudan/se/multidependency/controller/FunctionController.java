@@ -26,6 +26,8 @@ import cn.edu.fudan.se.multidependency.service.spring.DependencyOrganizationServ
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
+import cn.edu.fudan.se.multidependency.utils.GraphvizUtil;
+import cn.edu.fudan.se.multidependency.utils.GraphvizUtil.GraphvizTreeNode;
 
 @Controller
 @RequestMapping("/function")
@@ -82,6 +84,23 @@ public class FunctionController {
 		return result;
 	}
 	
+	@GetMapping("/graphviz/span")
+	@ResponseBody
+	public JSONObject dynamicFunctionToGraphviz(@RequestParam("spanGraphId") Long spanGraphId) {
+		JSONObject result = new JSONObject();
+		try {
+			Span span = msService.findSpanById(spanGraphId);
+			List<FunctionDynamicCallFunction> spanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
+			GraphvizTreeNode root = GraphvizUtil.generate(spanFunctionCalls);
+			GraphvizUtil.print(root.toGraphviz(), "D:\\testfunctioncall.png");
+			result.put("result", "success");
+		} catch (Exception e) {
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
+		return result;
+	}
+	
 	@GetMapping("/treeview/span")
 	@ResponseBody
 	public JSONObject dynamicFunctionToTreeView(@RequestParam("spanGraphId") Long spanGraphId) {
@@ -90,12 +109,8 @@ public class FunctionController {
 			JSONArray functionArray = new JSONArray();
 			
 			Span span = msService.findSpanById(spanGraphId);
-			System.out.println(span);
 			SpanStartWithFunction spanStartWithFunction = msService.findSpanStartWithFunctionByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
-			System.out.println(spanStartWithFunction);
-			System.out.println(spanStartWithFunction.getFunction());
 			List<FunctionDynamicCallFunction> spanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
-			System.out.println(spanFunctionCalls.size());
 			functionArray.add(test1(spanStartWithFunction.getFunction(), spanFunctionCalls, 0L));
 			result.put("result", "success");
 			result.put("value", functionArray);
