@@ -15,8 +15,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
@@ -41,6 +43,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroSer
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanCallSpanRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanInstanceOfRestfulAPIRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanStartWithFunctionRepository;
+import cn.edu.fudan.se.multidependency.service.spring.data.FAN_IO;
 import cn.edu.fudan.se.multidependency.utils.MicroServiceUtil;
 import cn.edu.fudan.se.multidependency.utils.PageUtil;
 import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
@@ -78,6 +81,9 @@ public class MicroserviceServiceImpl implements MicroserviceService {
     
     @Autowired
     private ContainRelationService containRelationService;
+    
+    @Autowired
+    private CacheService cache;
 	
 	@Override
 	public List<SpanCallSpan> findSpanCallSpans(Span span) {
@@ -90,13 +96,12 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	}
 
 	private Map<String, MicroService> allMicroServicesGroupByServiceNameCache = new HashMap<>();
-	private Map<Long, MicroService> allMicroServicesGroupByServiceIdCache = new HashMap<>();
 	@Override
 	public Map<String, MicroService> findAllMicroService() {
 		if(allMicroServicesGroupByServiceNameCache.size() == 0) {
 			microServiceRepository.findAll().forEach(ms -> {
 				allMicroServicesGroupByServiceNameCache.put(ms.getName(), ms);
-				allMicroServicesGroupByServiceIdCache.put(ms.getId(), ms);
+				cache.cacheNodeById(ms);
 			});
 		}
 		return allMicroServicesGroupByServiceNameCache;
@@ -104,11 +109,9 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 
 	@Override
 	public MicroService findMicroServiceById(Long id) {
-		MicroService result = allMicroServicesGroupByServiceIdCache.get(id);
-		if(result == null) {
-			result = microServiceRepository.findById(id).get();
-			allMicroServicesGroupByServiceIdCache.put(id, result);
-		}
+		Node node = cache.findNodeById(id);
+		MicroService result = node == null ? microServiceRepository.findById(id).get() : (node instanceof MicroService ? (MicroService) node : microServiceRepository.findById(id).get());
+		cache.cacheNodeById(result);
 		return result;
 	}
 
@@ -143,10 +146,15 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 		return null;
 	}
 
+	private Iterable<MicroServiceCallMicroService> msCallMsCache = null;
+	/**
+	 * 依赖于RelationInserterService
+	 */
 	@Override
 	public Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> msCalls() {
 		Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> result = new HashMap<>();
-		Iterable<MicroServiceCallMicroService> list = microServiceCallMicroServiceRepository.findAll();
+		Iterable<MicroServiceCallMicroService> list = msCallMsCache == null ? microServiceCallMicroServiceRepository.findAll() : msCallMsCache;
+		msCallMsCache = list;
 		for(MicroServiceCallMicroService call : list) {
 			MicroService start = call.getMs();
 			Map<MicroService, MicroServiceCallMicroService> temp = result.getOrDefault(start, new HashMap<>());
@@ -352,6 +360,27 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	@Override
 	public long countOfAllMicroServices() {
 		return microServiceRepository.count();
+	}
+
+	@Override
+	public FAN_IO<MicroService> microServiceDependencyFanIOInDynamicCall(MicroService ms) {
+		if(ms == null) {
+			return null;
+		}
+		FAN_IO<MicroService> result = new FAN_IO<>(ms);
+		Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> allCalls = msCalls();
+		for(Map.Entry<MicroService, Map<MicroService, MicroServiceCallMicroService>> calls : allCalls.entrySet()) {
+			MicroService caller = calls.getKey();
+			for(MicroService called : calls.getValue().keySet()) {
+				if(caller.equals(ms)) {
+					result.addFanOut(called);
+				}
+				if(called.equals(ms)) {
+					result.addFanIn(caller);
+				}
+			}
+		}
+		return result;
 	}
 
 }
