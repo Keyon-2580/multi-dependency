@@ -19,7 +19,7 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 @EqualsAndHashCode
 @NoArgsConstructor
 public class Variable implements Node {
-
+	
 	private static final long serialVersionUID = 7656480620809763012L;
 
 	private String name;
@@ -29,6 +29,11 @@ public class Variable implements Node {
 	private Long entityId;
 	
 	private String typeIdentify;
+	
+	/**
+	 * 是否为类的属性
+	 */
+	private boolean field;
 	
     @Id
     @GeneratedValue
@@ -41,6 +46,7 @@ public class Variable implements Node {
 		properties.put("simpleName", getSimpleName() == null ? "" : getSimpleName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("typeIdentify", getTypeIdentify() == null ? "" : getTypeIdentify());
+		properties.put("field", isField());
 		return properties;
 	}
 

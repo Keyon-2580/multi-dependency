@@ -10,6 +10,7 @@ public enum RelationType implements RelationshipType {
 	FILE_IMPORT_TYPE(RelationType.str_FILE_IMPORT_TYPE),
 	FILE_IMPORT_VARIABLE(RelationType.str_FILE_IMPORT_VARIABLE),
 	FILE_INCLUDE_FILE(RelationType.str_FILE_INCLUDE_FILE),
+	FUNCTION_ACCESS_FIELD(RelationType.str_FUNCTION_ACCESS_FIELD),
 	FUNCTION_CALL_FUNCTION(RelationType.str_FUNCTION_CALL_FUNCTION),
 	FUNCTION_IMPLEMENT_FUNCTION(RelationType.str_FUNCTION_IMPLEMENT_FUNCTION),
 	FUNCTION_IMPLLINK_FUNCTION(RelationType.str_FUNCTION_IMPLLINK_FUNCTION),
@@ -67,6 +68,7 @@ public enum RelationType implements RelationshipType {
 	public static final String str_FILE_IMPORT_TYPE = "FILE_IMPORT_TYPE";
 	public static final String str_FILE_IMPORT_VARIABLE = "FILE_IMPORT_VARIABLE";
 	public static final String str_FILE_INCLUDE_FILE = "FILE_INCLUDE_FILE";
+	public static final String str_FUNCTION_ACCESS_FIELD = "FUNCTION_ACCESS_FIELD";
 	public static final String str_FUNCTION_CALL_FUNCTION = "FUNCTION_CALL_FUNCTION";
 	public static final String str_FUNCTION_IMPLEMENT_FUNCTION = "FUNCTION_IMPLEMENT_FUNCTION";
 	public static final String str_FUNCTION_IMPLLINK_FUNCTION = "FUNCTION_IMPLLINK_FUNCTION";

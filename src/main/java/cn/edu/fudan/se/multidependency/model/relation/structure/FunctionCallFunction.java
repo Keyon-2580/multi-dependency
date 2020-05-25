@@ -30,7 +30,7 @@ public class FunctionCallFunction implements Relation {
 	@EndNode
 	private Function callFunction;
 	
-	private Integer times;
+	private int times = 1;
 	
 	public FunctionCallFunction(Function function, Function callFunction) {
 		super();
@@ -65,7 +65,7 @@ public class FunctionCallFunction implements Relation {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("times", getTimes() == null ? 1 : getTimes());
+		properties.put("times", getTimes());
 		return properties;
 	}
 }

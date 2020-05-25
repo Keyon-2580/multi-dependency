@@ -3,11 +3,15 @@ package cn.edu.fudan.se.multidependency.service.nospring.code;
 import java.util.Collection;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionAccessField;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCastType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionImplLinkFunction;
@@ -22,12 +26,15 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypeParameterType;
 import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.ProjectConfig;
 import depends.deptypes.DependencyType;
+import depends.entity.Entity;
 import depends.entity.FunctionEntity;
 import depends.entity.TypeEntity;
 import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
 
 public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeInserterForNeo4jServiceImpl {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(DependsCodeInserterForNeo4jServiceImpl.class);
 	
 	public DependsCodeInserterForNeo4jServiceImpl(EntityRepo entityRepo, ProjectConfig projectConfig) {
 		super(projectConfig);
@@ -141,12 +148,13 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 		Map<Long, ? extends Node> types = this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject);
 		functions.forEach((id, node) -> {
 			Function function = (Function) node;
+			String functionFullName = function.getParameters().toString().replace('[', '(').replace(']', ')');
 			// 函数调用
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(id.intValue());
-//			System.out.println("------------------");
 			functionEntity.getRelations().forEach(relation -> {
-//				System.out.println(functionEntity.getQualifiedName() + " " + relation.getType() + " " + relation.getEntity().getQualifiedName());
 				switch(relation.getType()) {
+				case DependencyType.CONTAIN:
+					break;
 				case DependencyType.CALL:
 					if(relation.getEntity() instanceof FunctionEntity) {
 						// call其它方法
@@ -208,60 +216,34 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					break;
 				case DependencyType.IMPLLINK:
 					Node impllinkNode = this.getNodes().findNodeByEntityIdInProject(relation.getEntity().getId().longValue(), currentProject);
-					/*if(impllinkNode != null) {
-						System.out.println(impllinkNode.getClass());
-					} else {
-						System.out.println(relation.getEntity().getClass());
-					}*/
 					if(impllinkNode != null && impllinkNode instanceof Function) {
 						Function implLinkFunction = (Function) impllinkNode;
 						FunctionImplLinkFunction functionImplLinkFunction = new FunctionImplLinkFunction(function, implLinkFunction);
 						addRelation(functionImplLinkFunction);
 					}
 					break;
+				case DependencyType.USE:
+					Entity relationEntity = relation.getEntity();
+					if(relation.getEntity() instanceof VarEntity) {
+						Node relationNode = this.getNodes().findNodeByEntityIdInProject(relationEntity.getId().longValue(), currentProject);
+						if(relationNode != null) {
+							assert(relationNode instanceof Variable);
+							Variable var = (Variable) relationNode;
+							if(var.isField()) {
+								FunctionAccessField accessField = new FunctionAccessField(function, var);
+								addRelation(accessField);
+							}
+						}
+					}
+					break;
 				default:
-//					System.out.println("other " + functionEntity.getQualifiedName() + " " + relation.getType() + " " + relation.getEntity().getQualifiedName());
+					LOGGER.info(function.getName() + functionFullName + " " + relation.getType() + " " + relation.getEntity().getClass().toString() + " " + relation.getEntity().getQualifiedName());
 					break;
 				}
 			});
 		});
 	}
 	
-	/*protected void extractRelationsFromDependsType() {
-		entityRepo.getEntities().forEach(entity -> {
-			entity.getRelations().forEach(relation -> {
-				switch(relation.getType()) {
-				case DependencyType.PARAMETER:
-					break;
-				case DependencyType.CALL:
-					break;
-				case DependencyType.CAST:
-					break;
-				case DependencyType.INHERIT:
-					break;
-				case DependencyType.CREATE:
-					break;
-				case DependencyType.IMPLEMENT:
-					break;
-				case DependencyType.MIXIN:
-					break;
-				case DependencyType.ANNOTATION:
-					break;
-				case DependencyType.CONTAIN:
-					break;
-				case DependencyType.RETURN:
-					break;
-				case DependencyType.SET:
-					break;
-				case DependencyType.THROW:
-					break;
-				case DependencyType.USE:
-					break;
-				}
-			});
-		});
-	}*/
-
 	public EntityRepo getEntityRepo() {
 		return entityRepo;
 	}

@@ -170,6 +170,9 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				parentEntity = parentEntity.getParent();
 			}
 			Node parentNode = findNodeByEntityIdInProject(parentEntity);
+			if(parentNode instanceof Type) { 
+				variable.setField(true);
+			}
 			Contain contain = new Contain(parentNode, variable);
 			addRelation(contain);
 		});

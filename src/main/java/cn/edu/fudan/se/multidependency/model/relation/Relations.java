@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionAccessField;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
 
 public class Relations {
@@ -17,10 +19,13 @@ public class Relations {
 	
 	private Map<Function, Map<Function, FunctionCallFunction>> functionCallFunctions = new HashMap<>();
 	
+	private Map<Function, Map<Variable, FunctionAccessField>> functionAccessFields = new HashMap<>();
+	
 	public void clear() {
 		allRelations.clear();
 		traceIdToDynamicCallFunctions.clear();
 		functionCallFunctions.clear();
+		functionAccessFields.clear();
 	}
 	
 	public Map<RelationType, List<Relation>> getAllRelations() {
@@ -62,6 +67,21 @@ public class Relations {
 			}
 		}
 		
+		if(relation instanceof FunctionAccessField) {
+			FunctionAccessField temp = (FunctionAccessField) relation;
+			Function function = temp.getFunction();
+			Variable field = temp.getField();
+			FunctionAccessField hasAccess = hasFunctionAccessField(function, field);
+			if(hasAccess != null) {
+				hasAccess.addTimes();
+				return ;
+			} else {
+				Map<Variable, FunctionAccessField> tempAccess = this.functionAccessFields.getOrDefault(function, new HashMap<>());
+				tempAccess.put(field, temp);
+				this.functionAccessFields.put(function, tempAccess);
+			}
+		}
+		
 		List<Relation> nodes = allRelations.getOrDefault(relation.getRelationType(), new ArrayList<>());
 		nodes.add(relation);
 		allRelations.put(relation.getRelationType(), nodes);
@@ -70,6 +90,11 @@ public class Relations {
 	public FunctionCallFunction hasFunctionCallFunction(Function caller, Function called) {
 		Map<Function, FunctionCallFunction> calls = this.functionCallFunctions.get(caller);
 		return calls == null ? null : calls.get(called);
+	}
+	
+	public FunctionAccessField hasFunctionAccessField(Function function, Variable field) {
+		Map<Variable, FunctionAccessField> accesses = this.functionAccessFields.get(function);
+		return accesses == null ? null : accesses.get(field);
 	}
 	
 	public List<DynamicCallFunction> findDynamicCallFunctionsByTraceId(String traceId) {

@@ -159,6 +159,9 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				parentEntity = parentEntity.getParent();
 			}
 			Node parentNode = findNodeByEntityIdInProject(parentEntity);
+			if(parentNode instanceof Type) { 
+				((Variable) node).setField(true);
+			}
 			Contain contain = new Contain(parentNode, node);
 			addRelation(contain);
 		});

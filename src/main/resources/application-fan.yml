@@ -16,8 +16,8 @@ server:
 
 data:
    projects:
-#      config: src/main/resources/project/train-ticket.json
-      config: src/main/resources/project/source-fan2.json
+      config: src/main/resources/project/train-ticket.json
+#      config: src/main/resources/project/source-fan2.json
 #      config: src/main/resources/project/depends.json
 #      config: src/main/resources/project/leveldb.json
    dynamic:
@@ -53,7 +53,7 @@ data:
       analyse: false
       directory_root_path: src/main/resources/build
    neo4j:
-      delete: false
+      delete: true
       # batchInserter要插入的数据库
 #      path: D:/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
       path: D:/neo4j-community-3.5.16/data/databases/multiple.dependency.db
