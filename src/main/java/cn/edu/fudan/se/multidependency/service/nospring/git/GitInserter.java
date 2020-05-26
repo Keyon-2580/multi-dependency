@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.nospring.git;
 
+import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.*;
@@ -19,36 +20,43 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
     private GitExtractor gitExtractor;
 
-    private IssueExtractor issueExtractor;
+    private boolean isAnalyseIssue;
+
+    private Map<Integer, Issue> issues;
 
     private List<Project> projects;
 
-    private static final String[] SUFFIX = new String[] {".java", ".c", ".cpp"};
+    private static final String[] SUFFIX = new String[]{".java", ".c", ".cpp"};
 
-    private boolean isSelectRange;
+    private boolean selectCommitRange;
 
     private String commitIdFrom;
 
     private String commitIdTo;
 
-    public GitInserter(String gitProjectPath, String issueFilePath, boolean isSelectRange, String commitIdFrom, String commitIdTo) {
+    public GitInserter(String gitProjectPath, String issueFilePath,
+                       String commitIdFrom, String commitIdTo) throws Exception {
         gitExtractor = new GitExtractor(gitProjectPath);
-        issueExtractor = new IssueExtractor(issueFilePath);
+        if (!issueFilePath.equals("")) {
+            this.isAnalyseIssue = true;
+            issues = new IssueExtractor(issueFilePath).extract();
+        }
         projects = this.getNodes().findAllProjects();
-        this.isSelectRange = isSelectRange;
-        this.commitIdFrom = commitIdFrom;
-        this.commitIdTo = commitIdTo;
+        if (!commitIdFrom.equals("") && !commitIdTo.equals("")) {
+            this.selectCommitRange = true;
+            this.commitIdFrom = commitIdFrom;
+            this.commitIdTo = commitIdTo;
+        }
     }
 
     @Override
     public void addNodesAndRelations() throws Exception {
-        Map<Integer, Issue> issues = issueExtractor.extract();
-        addBranchesAndIssues(issues);
-        addCommitsAndRelations(issues);
+        addBranchesAndIssues();
+        addCommitsAndRelations();
         gitExtractor.close();
     }
 
-    public void addBranchesAndIssues(Map<Integer, Issue> issues) {
+    public void addBranchesAndIssues() {
         //添加gitRepository节点和gitRepository到project的包含关系
         GitRepository gitRepository = new GitRepository(generateEntityId(), gitExtractor.getRepositoryName());
         addNode(gitRepository, null);
@@ -65,23 +73,25 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         }
 
         //添加issue节点和gitRepository到issue的包含关系
-        for (Issue issue : issues.values()) {
-            issue.setEntityId(generateEntityId());
-            addNode(issue, null);
-            addRelation(new Contain(gitRepository, issue));
+        if (isAnalyseIssue) {
+            for (Issue issue : issues.values()) {
+                issue.setEntityId(generateEntityId());
+                addNode(issue, null);
+                addRelation(new Contain(gitRepository, issue));
 
-            //添加developer节点和developer到issue的关系
-            Developer developer = this.getNodes().findDeveloperByName(issue.getDeveloperName());
-            if (developer == null) {
-                developer = new Developer(generateEntityId(), issue.getDeveloperName());
-                addNode(developer, null);
+                //添加developer节点和developer到issue的关系
+                Developer developer = this.getNodes().findDeveloperByName(issue.getDeveloperName());
+                if (developer == null) {
+                    developer = new Developer(generateEntityId(), issue.getDeveloperName());
+                    addNode(developer, null);
+                }
+                addRelation(new DeveloperReportIssue(developer, issue));
             }
-            addRelation(new DeveloperReportIssue(developer, issue));
         }
     }
 
-    public void addCommitsAndRelations(Map<Integer, Issue> issues) throws Exception {
-        List<RevCommit> commits = isSelectRange ? gitExtractor.getARangeCommits(commitIdFrom, commitIdTo) : gitExtractor.getAllCommits();
+    public void addCommitsAndRelations() throws Exception {
+        List<RevCommit> commits = selectCommitRange ? gitExtractor.getARangeCommits(commitIdFrom, commitIdTo) : gitExtractor.getAllCommits();
         Collections.reverse(commits);
         for (RevCommit revCommit : commits) {
             //添加commit节点
@@ -125,7 +135,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
                         String oldPath = diff.getOldPath();
                         String changeType = diff.getChangeType().name();
                         String path = DiffEntry.ChangeType.DELETE.name().equals(changeType) ? oldPath : newPath;
-                        if(FileUtil.isFiltered(path, SUFFIX)) continue;
+                        if (FileUtil.isFiltered(path, SUFFIX)) continue;
                         CommitUpdateFile.UpdateType updateType;
                         if (DiffEntry.ChangeType.ADD.name().equals(changeType))
                             updateType = CommitUpdateFile.UpdateType.ADD;
@@ -138,15 +148,18 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
             } else {
                 List<String> filesPath = gitExtractor.getCommitFilesPath(revCommit);
                 for (String path : filesPath) {
-                    if(FileUtil.isFiltered(path, SUFFIX)) continue;
+                    if (FileUtil.isFiltered(path, SUFFIX)) continue;
                     addCommitUpdateFileRelation(path, commit, CommitUpdateFile.UpdateType.ADD);
                 }
             }
+
             //添加Commit到Issue的关系
-            List<Integer> issuesNum = gitExtractor.getRelationBtwCommitAndIssue(revCommit);
-            for (Integer issueNum : issuesNum) {
-                if (issues.containsKey(issueNum)) {
-                    addRelation(new CommitAddressIssue(commit, issues.get(issueNum)));
+            if (isAnalyseIssue) {
+                List<Integer> issuesNum = gitExtractor.getRelationBtwCommitAndIssue(revCommit);
+                for (Integer issueNum : issuesNum) {
+                    if (issues.containsKey(issueNum)) {
+                        addRelation(new CommitAddressIssue(commit, issues.get(issueNum)));
+                    }
                 }
             }
         }

@@ -21,11 +21,11 @@ public class YamlUtil {
 		String applicationUser = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("spring")).get("profiles")).get("active");
 		StringBuilder userYamlPath = new StringBuilder();
 		userYamlPath.append(yamlPath.substring(0, yamlPath.lastIndexOf(".yml")))
-			.append("-").append(applicationUser).append(".yml");
-		
+				.append("-").append(applicationUser).append(".yml");
+
 		return getDataBasePath(userYamlPath.toString());
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static YamlObject getDataBasePath(String yamlPath) throws Exception {
 		LOGGER.info(yamlPath);
@@ -39,88 +39,35 @@ public class YamlUtil {
 		result.setNeo4jDatabasePath(databasePath);
 		boolean delete = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("neo4j")).get("delete");
 		result.setDeleteDatabase(delete);
-		String projectsConfig = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("projects")).get("config");
+		String projectsConfig = (String) ((Map<?, ?>) yaml.get("data")).get("project_config");
 		result.setProjectsConfig(projectsConfig);
-		String dynamicDirectoryRootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("directory_root_path");
-		List<String> dynamicFileSuffix = (List<String>) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("dynamic_file_suffix");
-		result.setDynamicDirectoryRootPath(dynamicDirectoryRootPath);
-		result.setDynamicFileSuffix(dynamicFileSuffix);
-		String featuresPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("features_path");
-		result.setFeaturesPath(featuresPath);
-//		String buildDirectoryRootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("build")).get("directory_root_path");
-//		String buildFilePath = buildDirectoryRootPath+"/"+FileUtil.extractFileName(projectPath)+".txt";
-//		result.setBuildDirectoryRootPath(buildDirectoryRootPath);
-//		result.setBuildFilePath(buildFilePath);
-		String gitDirectoryRootPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("directory_root_path");
-		String issuesPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("issues_path");
-		String commitIdFrom = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("commit_id_from");
-		String commitIdTo = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("commit_id_to");
-		result.setGitDirectoryRootPath(gitDirectoryRootPath);
-		result.setIssuesPath(issuesPath);
-		result.setCommitIdFrom(commitIdFrom);
-		result.setCommitIdTo(commitIdTo);
-		String libsPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("lib")).get("libs_path");
-		result.setLibsPath(libsPath);
-		boolean analyseDynamic = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("dynamic")).get("analyse");
-		boolean analyseGit = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("analyse");
-		boolean gitSelectRange = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("git")).get("select_range");
-		boolean analyseLib = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("lib")).get("analyse");
-		boolean analyseBuild = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("build")).get("analyse");
+
+		boolean analyseDynamic = (boolean) ((Map<?, ?>) yaml.get("data")).get("dynamic_analyse");
+		boolean analyseGit = (boolean) ((Map<?, ?>) yaml.get("data")).get("git_analyse");
+		boolean analyseLib = (boolean) ((Map<?, ?>) yaml.get("data")).get("lib_analyse");
+		boolean analyseClone = (boolean) ((Map<?, ?>) yaml.get("data")).get("clone_analyse");
 		result.setAnalyseDynamic(analyseDynamic);
 		result.setAnalyseGit(analyseGit);
-		result.setGitSelectRange(gitSelectRange);
 		result.setAnalyseLib(analyseLib);
-		result.setAnalyseBuild(analyseBuild);
-
-
-		boolean analyseClone = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("analyse");
-		Language cloneLanguage = Language.valueOf((String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("language"));
-		Granularity granularity = Granularity.valueOf((String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("granularity"));
-		String namePath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("name_path");
-		String resultPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("result_path");
 		result.setAnalyseClone(analyseClone);
-		result.setCloneLanguage(cloneLanguage);
-		result.setCloneGranularity(granularity);
-		result.setNamePath(namePath);
-		result.setResultPath(resultPath);
 		return result;
 	}
-	
+
 	@Data
 	public static class YamlObject {
 		private String projectsConfig;
-		
-		private boolean deleteDatabase;
-		private String neo4jDatabasePath;
-		
-		private boolean analyseDynamic;
-		private String dynamicDirectoryRootPath;
-		private List<String> dynamicFileSuffix;
-		private String featuresPath;
-		
-		private boolean analyseBuild;
-		private String buildDirectoryRootPath;
-		private String buildFilePath;
+
 		private String forTest;
 
+		private boolean deleteDatabase;
+		private String neo4jDatabasePath;
+
+		private boolean analyseDynamic;
+
 		private boolean analyseGit;
-		private String gitDirectoryRootPath;
-		private String issuesPath;
-		private boolean gitSelectRange;
-		private String commitIdFrom;
-		private String commitIdTo;
-		
+
 		private boolean analyseLib;
-		private String libsPath;
-		
+
 		private boolean analyseClone;
-		private Language cloneLanguage;
-		private Granularity cloneGranularity;
-		private String namePath;
-		private String ResultPath;
-	}
-	
-	public static enum Granularity {
-		function, file
 	}
 }
