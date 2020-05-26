@@ -10,7 +10,6 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_FILE_CLONE_FILE)
-public class FileCloneFile implements Relation {
+public class FileCloneFile implements HasCloneValueRelation {
 	private static final long serialVersionUID = -8166989684654207651L;
 
 	@Id

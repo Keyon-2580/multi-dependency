@@ -71,9 +71,12 @@ public class FileDependOnFileExtractServiceImpl implements FileDependOnFileExtra
 
 	private Map<ProjectFile, Map<ProjectFile, FileDependOnFile>> relations = new HashMap<>();
 	
+	@Autowired
+	private NodeService nodeService;
+	
 	@Override
 	public void setProject(Long projectGraphId) {
-		this.project = staticAnalyseService.queryProject(projectGraphId);
+		this.project = nodeService.queryProject(projectGraphId);
 		clearCache();
 	}
 

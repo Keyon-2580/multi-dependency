@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,15 +12,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
+import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
@@ -45,6 +44,7 @@ import cn.edu.fudan.se.multidependency.repository.node.code.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.TypeRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.VariableRepository;
 import cn.edu.fudan.se.multidependency.repository.node.lib.LibraryRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.clone.FileCloneFileRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.FunctionCloneFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportTypeRepository;
@@ -143,6 +143,9 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     
     @Autowired
     FunctionCloneFunctionRepository functionCloneFunctionRepository;
+    
+    @Autowired
+    FileCloneFileRepository fileCloneFileRepository;
     
     @Autowired
     LibraryRepository libraryRepository;
@@ -363,21 +366,40 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return allFunctionCallLibraryAPIsCache;
 	}
 	
-	private Clone<Project> hasClone(Map<Project, Map<Project, Clone<Project>>> projectToProjectClones, Project project1, Project project2) {
-		Map<Project, Clone<Project>> project1ToClones = projectToProjectClones.getOrDefault(project1, new HashMap<>());
-		Clone<Project> clone = project1ToClones.get(project2);
+	private Clone<Project, FunctionCloneFunction> hasFunctionCloneInProject(
+			Map<Project, Map<Project, Clone<Project, FunctionCloneFunction>>> projectToProjectClones, 
+			Project project1, Project project2) {
+		Map<Project, Clone<Project, FunctionCloneFunction>> project1ToClones 
+			= projectToProjectClones.getOrDefault(project1, new HashMap<>());
+		Clone<Project, FunctionCloneFunction> clone = project1ToClones.get(project2);
 		if(clone != null) {
 			return clone;
 		}
-		Map<Project, Clone<Project>> project2ToClones = projectToProjectClones.getOrDefault(project2, new HashMap<>());
+		Map<Project, Clone<Project, FunctionCloneFunction>> project2ToClones 
+			= projectToProjectClones.getOrDefault(project2, new HashMap<>());
+		clone = project2ToClones.get(project1);
+		return clone;
+	}
+	private Clone<Project, FileCloneFile> hasFileCloneInProject(
+			Map<Project, Map<Project, Clone<Project, FileCloneFile>>> projectToProjectClones, 
+			Project project1, Project project2) {
+		Map<Project, Clone<Project, FileCloneFile>> project1ToClones 
+			= projectToProjectClones.getOrDefault(project1, new HashMap<>());
+		Clone<Project, FileCloneFile> clone = project1ToClones.get(project2);
+		if(clone != null) {
+			return clone;
+		}
+		Map<Project, Clone<Project, FileCloneFile>> project2ToClones 
+			= projectToProjectClones.getOrDefault(project2, new HashMap<>());
 		clone = project2ToClones.get(project1);
 		return clone;
 	}
 
 	@Override
-	public Iterable<Clone<Project>> findProjectClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode) {
-		List<Clone<Project>> result = new ArrayList<>();
-		Map<Project, Map<Project, Clone<Project>>> projectToProjectClones = new HashMap<>();
+	public Collection<Clone<Project, FunctionCloneFunction>> findProjectCloneFromFunctionClone(
+			Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode) {
+		List<Clone<Project, FunctionCloneFunction>> result = new ArrayList<>();
+		Map<Project, Map<Project, Clone<Project, FunctionCloneFunction>>> projectToProjectClones = new HashMap<>();
 		for(FunctionCloneFunction functionCloneFunction : functionClones) {
 			Function function1 = functionCloneFunction.getFunction1();
 			Function function2 = functionCloneFunction.getFunction2();
@@ -389,9 +411,9 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			if(removeSameNode && project1.equals(project2)) {
 				continue;
 			}
-			Clone<Project> clone = hasClone(projectToProjectClones, project1, project2);
+			Clone<Project, FunctionCloneFunction> clone = hasFunctionCloneInProject(projectToProjectClones, project1, project2);
 			if(clone == null) {
-				clone = new Clone<Project>();
+				clone = new Clone<Project, FunctionCloneFunction>();
 				clone.setNode1(project1);
 				clone.setNode2(project2);
 				result.add(clone);
@@ -399,7 +421,8 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			// 函数间的克隆作为Children
 			clone.addChild(functionCloneFunction);
 			
-			Map<Project, Clone<Project>> project1ToClones = projectToProjectClones.getOrDefault(project1, new HashMap<>());
+			Map<Project, Clone<Project, FunctionCloneFunction>> project1ToClones 
+				= projectToProjectClones.getOrDefault(project1, new HashMap<>());
 			project1ToClones.put(project2, clone);
 			projectToProjectClones.put(project1, project1ToClones);
 		}
@@ -407,18 +430,26 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	
-	private Iterable<FunctionCloneFunction> allClonesCache = null;
+	private Iterable<FunctionCloneFunction> allFunctionClonesCache = null;
 	@Override
 	public Iterable<FunctionCloneFunction> findAllFunctionCloneFunctions() {
-		if(allClonesCache == null) {
-			allClonesCache = functionCloneFunctionRepository.findAll();
+		if(allFunctionClonesCache == null) {
+			allFunctionClonesCache = functionCloneFunctionRepository.findAll();
 		}
-		return allClonesCache;
+		return allFunctionClonesCache;
 	}
+	
+	private Iterable<FileCloneFile> allFileClonesCache = null;
+	@Override
+	public Iterable<FileCloneFile> findAllFileCloneFiles() {
+		if(allFileClonesCache == null) {
+			allFileClonesCache = fileCloneFileRepository.findAll();
+		}
+		return allFileClonesCache;
+	}	
 
 	@Override
 	public Iterable<FunctionCloneFunction> findProjectContainFunctionCloneFunctions(Project project) {
-//		List<FunctionCloneFunction> result = functionCloneFunctionRepository.findProjectContainFunctionCloneFunctionRelations(project.getId());
 		Iterable<FunctionCloneFunction> allClones = findAllFunctionCloneFunctions();
 		List<FunctionCloneFunction> result = new ArrayList<>();
 		for(FunctionCloneFunction clone : allClones) {
@@ -472,51 +503,49 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
-	public Project queryProject(Long id) {
-		Node node = cache.findNodeById(id);
-		Project result = node == null ? projectRepository.findById(id).get() : (node instanceof Project ? (Project) node : projectRepository.findById(id).get());
-		cache.cacheNodeById(result);
+	public Iterable<FileCloneFile> queryProjectContainFileCloneFiles(Project project) {
+		Iterable<FileCloneFile> allClones = findAllFileCloneFiles();
+		List<FileCloneFile> result = new ArrayList<>();
+		for(FileCloneFile clone : allClones) {
+			if(containRelationService.findFileBelongToProject(clone.getFile1()).equals(project)
+					&& containRelationService.findFileBelongToProject(clone.getFile2()).equals(project)) {
+				result.add(clone);
+			}
+		}
+		
 		return result;
 	}
 
 	@Override
-	public Package queryPackage(long id) {
-		Node node = cache.findNodeById(id);
-		Package result = node == null ? packageRepository.findById(id).get() : (node instanceof Package ? (Package) node : packageRepository.findById(id).get());
-		cache.cacheNodeById(result);
+	public Collection<Clone<Project, FileCloneFile>> queryProjectCloneFromFileClone(Iterable<FileCloneFile> fileClones,
+			boolean removeSameNode) {
+		List<Clone<Project, FileCloneFile>> result = new ArrayList<>();
+		Map<Project, Map<Project, Clone<Project, FileCloneFile>>> projectToProjectClones = new HashMap<>();
+		for(FileCloneFile fileCloneFile : fileClones) {
+			ProjectFile file1= fileCloneFile.getFile1();
+			ProjectFile file2 = fileCloneFile.getFile2();
+			if(file1.equals(file2)) {
+				continue;
+			}
+			Project project1 = containRelationService.findFileBelongToProject(file1);
+			Project project2 = containRelationService.findFileBelongToProject(file2);
+			if(removeSameNode && project1.equals(project2)) {
+				continue;
+			}
+			Clone<Project, FileCloneFile> clone = hasFileCloneInProject(projectToProjectClones, project1, project2);
+			if(clone == null) {
+				clone = new Clone<Project, FileCloneFile>();
+				clone.setNode1(project1);
+				clone.setNode2(project2);
+				result.add(clone);
+			}
+			clone.addChild(fileCloneFile);
+			
+			Map<Project, Clone<Project, FileCloneFile>> project1ToClones = projectToProjectClones.getOrDefault(project1, new HashMap<>());
+			project1ToClones.put(project2, clone);
+			projectToProjectClones.put(project1, project1ToClones);
+		}
 		return result;
 	}
 
-
-	@Override
-	public ProjectFile queryFile(long id) {
-		Node node = cache.findNodeById(id);
-		ProjectFile result = node == null ? fileRepository.findById(id).get() : (node instanceof ProjectFile ? (ProjectFile) node : fileRepository.findById(id).get());
-		cache.cacheNodeById(result);
-		return result;
-	}
-
-	@Override
-	public Namespace queryNamespace(long id) {
-		Node node = cache.findNodeById(id);
-		Namespace result = node == null ? namespaceRepository.findById(id).get() : (node instanceof Namespace ? (Namespace) node : namespaceRepository.findById(id).get());
-		cache.cacheNodeById(result);
-		return result;
-	}
-
-	@Override
-	public Type queryType(long id) {
-		Node node = cache.findNodeById(id);
-		Type result = node == null ? typeRepository.findById(id).get() : (node instanceof Type ? (Type) node : typeRepository.findById(id).get());
-		cache.cacheNodeById(result);
-		return result;
-	}
-
-	@Override
-	public Function queryFunction(long id) {
-		Node node = cache.findNodeById(id);
-		Function result = node == null ? functionRepository.findById(id).get() : (node instanceof Function ? (Function) node : functionRepository.findById(id).get());
-		cache.cacheNodeById(result);
-		return result;
-	}	
 }

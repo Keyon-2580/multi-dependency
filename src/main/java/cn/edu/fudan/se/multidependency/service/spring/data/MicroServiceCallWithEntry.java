@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.spring.data;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,9 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
+import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
+import cn.edu.fudan.se.multidependency.model.relation.clone.HasCloneValueRelation;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
@@ -52,7 +55,9 @@ public class MicroServiceCallWithEntry {
 	
 	private Iterable<Scenario> allScenarios = new ArrayList<>();
 	
-	private Iterable<Clone<MicroService>> clonesInMicroService = new ArrayList<>();
+	private Collection<Clone<MicroService, FunctionCloneFunction>> clonesInMicroServiceFromFunctionClone = new ArrayList<>();
+	
+	private Collection<Clone<MicroService, FileCloneFile>> clonesInMicroServiceFromFileClone = new ArrayList<>();
 	
 	private Iterable<CallLibrary<MicroService>> microServiceCallLibraries = new ArrayList<>();
 	
@@ -70,12 +75,6 @@ public class MicroServiceCallWithEntry {
 	private int showClonesMinPair = 3;
 	private boolean showMicroServiceCallLibs = true;
 	private boolean showCntOfDevUpdMs = true;
-	
-	public JSONArray relatedTracesIds(boolean callChain) {
-		JSONArray result = new JSONArray();
-		
-		return result;
-	}
 	
 	public List<CytoscapeEdge> relatedEdgeObjs() {
 		List<CytoscapeEdge> result = new ArrayList<>();
@@ -179,13 +178,24 @@ public class MicroServiceCallWithEntry {
 		return result;
 	}
 	
-	private void showClonesInMicroService(JSONArray edges) {
-		for(Clone<MicroService> clone : clonesInMicroService) {
-			if(clone.sizeOfChildren() >= showClonesMinPair) {
-				JSONObject edge = CytoscapeUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", clone.calculateValue(), false);
-				edges.add(edge);
-				edge.getJSONObject("data").put("id", clone.getId());
-				
+	private void showClonesInMicroService(JSONArray edges, Class<? extends HasCloneValueRelation> relationClass) {
+		if(relationClass == FunctionCloneFunction.class) {
+			for(Clone<MicroService, FunctionCloneFunction> clone : clonesInMicroServiceFromFunctionClone) {
+				if(clone.sizeOfChildren() >= showClonesMinPair) {
+					JSONObject edge = CytoscapeUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", clone.calculateValue(), false);
+					edges.add(edge);
+					edge.getJSONObject("data").put("id", clone.getId());
+					
+				}
+			}
+		} else {
+			for(Clone<MicroService, FileCloneFile> clone : clonesInMicroServiceFromFileClone) {
+				if(clone.sizeOfChildren() >= showClonesMinPair) {
+					JSONObject edge = CytoscapeUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", clone.calculateValue(), false);
+					edges.add(edge);
+					edge.getJSONObject("data").put("id", clone.getId());
+					
+				}
 			}
 		}
 	}
@@ -271,7 +281,7 @@ public class MicroServiceCallWithEntry {
 		}
 		
 		if(showClonesInMicroService) {
-			showClonesInMicroService(edges);
+			showClonesInMicroService(edges, FileCloneFile.class);
 		}
 		
 		if(showMicroServiceCallLibs) {
@@ -573,7 +583,7 @@ public class MicroServiceCallWithEntry {
 		}
 		
 		if(showClonesInMicroService) {
-			showClonesInMicroService(edges);
+			showClonesInMicroService(edges, FileCloneFile.class);
 		}
 		
 		if(showMicroServiceCallLibs) {
@@ -610,9 +620,9 @@ public class MicroServiceCallWithEntry {
 		return result;
 	}
 	
-	public Map<String, List<FunctionCloneFunction>> cloneDetails() {
-		Map<String, List<FunctionCloneFunction>> result = new HashMap<>();
-		for(Clone<MicroService> clone : getClonesInMicroService()) {
+	public Map<String, Collection<FunctionCloneFunction>> cloneDetails() {
+		Map<String, Collection<FunctionCloneFunction>> result = new HashMap<>();
+		for(Clone<MicroService, FunctionCloneFunction> clone : getClonesInMicroServiceFromFunctionClone()) {
 			result.put(clone.getId(), clone.getChildren());
 		}
 		return result;

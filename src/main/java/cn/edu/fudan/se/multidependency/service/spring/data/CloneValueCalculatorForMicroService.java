@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.spring.data;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,7 @@ import java.util.Map;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
-import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
+import cn.edu.fudan.se.multidependency.model.relation.clone.HasCloneValueRelation;
 import cn.edu.fudan.se.multidependency.service.spring.data.Clone.CloneValueCalculator;
 
 public class CloneValueCalculatorForMicroService implements CloneValueCalculator {
@@ -27,20 +28,14 @@ public class CloneValueCalculatorForMicroService implements CloneValueCalculator
 	}
 
 	@Override
-	public String calculate(Clone<? extends Node> clone) {
+	public String calculate(Clone<? extends Node, ? extends HasCloneValueRelation> clone) {
 		assert(clone.getNode1() instanceof MicroService && clone.getNode2() instanceof MicroService);
 		StringBuilder builder = new StringBuilder();
 		builder.append("(");
-		List<FunctionCloneFunction> functionClones = clone.getChildren();
-//		MicroService ms1 = (MicroService) clone.getNode1();
-//		MicroService ms2 = (MicroService) clone.getNode2();
-//		int functionSizeOfMs1 = msToFunctions.get(ms1).size();
-//		int functionSizeOfMs2 = msToFunctions.get(ms2).size();
-//		double a = functionClones.size() / (functionSizeOfMs1 + functionSizeOfMs2 + 0.0);
-//		builder.append(a);
-		builder.append(functionClones.size());
+		Collection<? extends HasCloneValueRelation> childrenClones = clone.getChildren();
+		builder.append(childrenClones.size());
 		builder.append(", ");
-		double b = clone.getValue() / (functionClones.size() + 0.0);
+		double b = clone.getValue() / (childrenClones.size() + 0.0);
 		builder.append(String.format("%.2f", b));
 		builder.append(")");
 		return builder.toString();

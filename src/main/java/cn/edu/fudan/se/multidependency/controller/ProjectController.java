@@ -40,6 +40,7 @@ import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.DependencyOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.MultipleService;
+import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
 
@@ -60,6 +61,9 @@ public class ProjectController {
 	
 	@Autowired
 	private ContainRelationService containRelationService;
+	
+	@Autowired
+	private NodeService nodeService;
 	
 	@Autowired
 	private MultipleService multipleService;
@@ -87,7 +91,7 @@ public class ProjectController {
     public JSONObject functionContainNodesToZTree(@RequestParam("functionId") long id) {
     	JSONObject result = new JSONObject();
 		try {
-			Function function = staticAnalyseService.queryFunction(id);
+			Function function = nodeService.queryFunction(id);
 			if(function == null) {
 				throw new Exception("file is null, fileId: " + id);
 			}
@@ -115,7 +119,7 @@ public class ProjectController {
     public JSONObject typeContainNodesToZTree(@RequestParam("typeId") long id, @PathVariable("childrenType") String childrenType) {
     	JSONObject result = new JSONObject();
 		try {
-			Type type = staticAnalyseService.queryType(id);
+			Type type = nodeService.queryType(id);
 			if(type == null) {
 				throw new Exception("file is null, fileId: " + id);
 			}
@@ -159,7 +163,7 @@ public class ProjectController {
     public JSONObject namespaceContainNodesToZTree(@RequestParam("namespaceId") long id, @PathVariable("childrenType") String childrenType) {
     	JSONObject result = new JSONObject();
 		try {
-			Namespace namespace = staticAnalyseService.queryNamespace(id);
+			Namespace namespace = nodeService.queryNamespace(id);
 			if(namespace == null) {
 				throw new Exception("namespace is null, namespaceId: " + id);
 			}
@@ -214,7 +218,7 @@ public class ProjectController {
     public JSONObject fileContainNodesToZTree(@RequestParam("fileId") long id, @PathVariable("childrenType") String childrenType) {
     	JSONObject result = new JSONObject();
 		try {
-			ProjectFile file = staticAnalyseService.queryFile(id);
+			ProjectFile file = nodeService.queryFile(id);
 			if(file == null) {
 				throw new Exception("file is null, fileId: " + id);
 			}
@@ -280,7 +284,7 @@ public class ProjectController {
     public JSONObject packageContainFilesToZTree(@RequestParam("packageId") long id) {
     	JSONObject result = new JSONObject();
 		try {
-			Package pck = staticAnalyseService.queryPackage(id);
+			Package pck = nodeService.queryPackage(id);
 			if(pck == null) {
 				throw new Exception("package is null, pckId: " + id);
 			}
@@ -306,7 +310,7 @@ public class ProjectController {
     public JSONObject allProjectContainPackagesByPageToZTree(@RequestParam("projectId") long projectId) {
     	JSONObject result = new JSONObject();
 		try {
-			Project project = staticAnalyseService.queryProject(projectId);
+			Project project = nodeService.queryProject(projectId);
 			if(project == null) {
 				throw new Exception("project is null, projectId: " + projectId);
 			}
@@ -385,7 +389,7 @@ public class ProjectController {
 
 	@GetMapping(value = {"/", "/index"})
 	public String index(HttpServletRequest request, @RequestParam(required=true, value="id") long id) {
-		Project project = staticAnalyseService.queryProject(id);
+		Project project = nodeService.queryProject(id);
 		if(project == null) {
 			request.setAttribute("error", "没有找到id为 " + id + " 的Project");
 			return "error";
@@ -410,7 +414,7 @@ public class ProjectController {
 		System.out.println("/project/cytoscape");
 		JSONObject result = new JSONObject();
 		try {
-			Project project = staticAnalyseService.queryProject(projectId);
+			Project project = nodeService.queryProject(projectId);
 			if(project == null) {
 				throw new Exception("没有找到id为 " + projectId + " 的项目");
 			}

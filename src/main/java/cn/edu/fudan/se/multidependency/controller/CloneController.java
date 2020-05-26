@@ -30,10 +30,10 @@ public class CloneController {
 	public JSONObject findProjectClones() {
 		JSONObject result = new JSONObject();
 		Iterable<FunctionCloneFunction> allClones = staticAnalyseService.findAllFunctionCloneFunctions();
-		Iterable<Clone<Project>> clones = staticAnalyseService.findProjectClone(allClones, true);
+		Iterable<Clone<Project, FunctionCloneFunction>> clones = staticAnalyseService.findProjectCloneFromFunctionClone(allClones, true);
 		result.put("result", "success");
 		result.put("projectValues", clones);
-		Iterable<Clone<MicroService>> msClones = msService.findMicroServiceClone(allClones, true);
+		Iterable<Clone<MicroService,  FunctionCloneFunction>> msClones = msService.findMicroServiceCloneFromFunctionClone(allClones, true);
 		result.put("msValues", msClones);
 		return result;
 	}

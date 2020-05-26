@@ -1,15 +1,14 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
+import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
@@ -34,8 +33,6 @@ public interface StaticAnalyseService {
 	List<Project> queryAllProjectsByPage(int page, int size, String... sortByProperties);
 	
 	public Iterable<Project> allProjects();
-	
-	public Project queryProject(Long id);
 	
 	public List<Type> findExtendsType(Type type);
 	
@@ -81,14 +78,28 @@ public interface StaticAnalyseService {
 	
 	public Iterable<FunctionCloneFunction> findAllFunctionCloneFunctions();
 	
+	public Iterable<FileCloneFile> findAllFileCloneFiles();
+	
 	public Iterable<FunctionCloneFunction> findProjectContainFunctionCloneFunctions(Project project);
+	
+	public Iterable<FileCloneFile> queryProjectContainFileCloneFiles(Project project);
 	
 	/**
 	 * 根据函数间的克隆找出项目间的克隆
 	 * @param functionClones
 	 * @return
 	 */
-	public Iterable<Clone<Project>> findProjectClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode);
+	public Collection<Clone<Project, FunctionCloneFunction>> findProjectCloneFromFunctionClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode);
+	
+	/**
+	 * 根据文件间的克隆找出项目间的克隆
+	 * @param fileClones
+	 * @param removeSameNode
+	 * @return
+	 */
+	public Collection<Clone<Project, FileCloneFile>> queryProjectCloneFromFileClone(Iterable<FileCloneFile> fileClones, boolean removeSameNode);
+	
+	
 	
 	/**
 	 * 找出Project调用了哪些三方
@@ -101,14 +112,4 @@ public interface StaticAnalyseService {
 
 	long countOfAllProjects();
 
-	Package queryPackage(long id);
-
-	ProjectFile queryFile(long id);
-
-	Namespace queryNamespace(long id);
-
-	Type queryType(long id);
-
-	Function queryFunction(long id);
-	
 }

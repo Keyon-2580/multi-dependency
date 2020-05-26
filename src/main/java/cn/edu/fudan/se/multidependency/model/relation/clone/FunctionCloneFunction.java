@@ -10,7 +10,6 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,7 +22,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_FUNCTION_CLONE_FUNCTION)
-public class FunctionCloneFunction implements Relation {
+public class FunctionCloneFunction implements HasCloneValueRelation {
 	
 	private static final long serialVersionUID = -5264263917272265233L;
 
@@ -65,6 +64,5 @@ public class FunctionCloneFunction implements Relation {
 		properties.put("value", getValue());
 		return properties;
 	}
-	
 	
 }

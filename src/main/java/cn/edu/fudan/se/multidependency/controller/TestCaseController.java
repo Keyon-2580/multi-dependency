@@ -26,6 +26,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.service.spring.APICoverageService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
+import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.TestCaseCoverageService;
 import cn.edu.fudan.se.multidependency.service.spring.data.FunctionCallPropertion;
@@ -50,6 +51,9 @@ public class TestCaseController {
 	@Autowired
 	private APICoverageService apiCoverageService;
 	
+	@Autowired
+	private NodeService nodeService;
+	
 	@GetMapping("/detail")
 	public String detail(HttpServletRequest request, @RequestParam("testcases") String testCaseIds, @RequestParam("project") Long projectId) {
 		String[] testCasesIdsArray = testCaseIds.split(",");
@@ -64,7 +68,7 @@ public class TestCaseController {
 			} catch (Exception e) {
 			}
 		}
-		Project project = staticAnalyseService.queryProject(projectId);
+		Project project = nodeService.queryProject(projectId);
 		if(testCases.size() == 0 || project == null) {
 			request.setAttribute("error", "ERROR!");
 			return "error";
