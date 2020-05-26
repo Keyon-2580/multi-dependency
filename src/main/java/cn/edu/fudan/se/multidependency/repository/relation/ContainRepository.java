@@ -48,6 +48,9 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	@Query("match (a:Type)-[r:" + RelationType.str_CONTAIN + "]->(b:Function) where id(b)={functionId} return a")
 	public Type findFunctionBelongToType(@Param("functionId") Long functionId);
 	
+	@Query("match (a:Type)-[r:" + RelationType.str_CONTAIN + "*1..2]->(b:Variable) where id(b)={variableId} return a")
+	public Type findVariableBelongToType(@Param("variableId") Long variableId);
+	
 	@Query("match (lib:Library)-[r:" + RelationType.str_CONTAIN + "]->(api:LibraryAPI) where id(api)={libraryAPIId} return lib")
 	public Library findLibraryAPIBelongToLibrary(@Param("libraryAPIId") Long libraryAPIId);
 
@@ -99,4 +102,5 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 
 	@Query("match (lib:Library)-[r:" + RelationType.str_CONTAIN + "]->(api:LibraryAPI) where id(lib)={libraryId} return api")
 	public List<LibraryAPI> findLibraryContainLibraryAPIs(@Param("libraryId") Long libraryId);
+
 }

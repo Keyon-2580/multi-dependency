@@ -26,6 +26,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFuncti
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportVariable;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileIncludeFile;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionAccessField;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCastType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionParameterType;
@@ -50,6 +51,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportFuncti
 import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportVariableRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FileIncludeFileRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionAccessFieldRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionCallFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionCastTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionParameterTypeRepository;
@@ -95,6 +97,9 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	
 	@Autowired
 	FunctionRepository functionRepository;
+	
+	@Autowired
+	FunctionAccessFieldRepository functionAccessFieldRepository;
 	
 	@Autowired
 	FunctionDynamicCallFunctionRepository functionDynamicCallFunctionRepository;
@@ -247,6 +252,11 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	@Override
 	public List<FileIncludeFile> findProjectContainFileIncludeFileRelations(Project project) {
 		return fileIncludeFileRepository.findProjectContainFileIncludeFileRelations(project.getId());
+	}
+	
+	@Override
+	public List<FunctionAccessField> findProjectContainFunctionAccessVariableRelations(Project project) {
+		return functionAccessFieldRepository.findProjectContainFunctionAccessFieldRelations(project.getId());
 	}
 
 	@Override
@@ -547,5 +557,6 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		}
 		return result;
 	}
+
 
 }

@@ -22,6 +22,7 @@ public interface ContainRelationService {
 	
 	Collection<Package> findProjectContainPackages(Project project);
 	Collection<Function> findProjectContainAllFunctions(Project project);
+	Collection<Variable> findProjectContainAllFields(Project project);
 	
 	Collection<ProjectFile> findPackageContainFiles(Package pck);
 	
@@ -44,6 +45,8 @@ public interface ContainRelationService {
 	Project findFileBelongToProject(ProjectFile file);
 	
 	Type findFunctionBelongToType(Function function);
+
+	Type findVariableBelongToType(Variable node);
 	
 	ProjectFile findFunctionBelongToFile(Function function);
 	

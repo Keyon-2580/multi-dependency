@@ -16,6 +16,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFuncti
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportVariable;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileIncludeFile;
+import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionAccessField;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCastType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionParameterType;
@@ -67,6 +68,7 @@ public interface StaticAnalyseService {
 	public List<NodeAnnotationType> findProjectContainNodeAnnotationTypeRelations(Project project);
 	public List<VariableIsType> findProjectContainVariableIsTypeRelations(Project project);
 	public List<VariableTypeParameterType> findProjectContainVariableTypeParameterTypeRelations(Project project);
+	public List<FunctionAccessField> findProjectContainFunctionAccessVariableRelations(Project project);
 
 	public boolean isSubType(Type subType, Type superType);
 	

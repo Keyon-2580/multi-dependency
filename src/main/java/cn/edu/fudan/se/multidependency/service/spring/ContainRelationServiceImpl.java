@@ -293,6 +293,14 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	}
 
 	@Override
+	public Type findVariableBelongToType(Variable variable) {
+		Node belongToNode = cache.findNodeBelongToNode(variable, NodeLabelType.Type);
+		Type result = belongToNode == null ? containRepository.findVariableBelongToType(variable.getId()) : (Type) belongToNode;
+		cache.cacheNodeBelongToNode(variable, result);
+		return result;
+	}
+
+	@Override
 	public Library findAPIBelongToLibrary(LibraryAPI api) {
 		return containRepository.findLibraryAPIBelongToLibrary(api.getId());
 	}
@@ -340,6 +348,12 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	public List<Contain> findAllFeatureContainFeatures() {
 		List<Contain> featureContainFeatures = containRepository.findAllFeatureContainFeatures();
 		return featureContainFeatures;
+	}
+
+	@Override
+	public Collection<Variable> findProjectContainAllFields(Project project) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
