@@ -4,3 +4,5 @@ target/
 *.iml
 src/main/resources/application.yml
 multi-dependency.log
+.classpath
+.project
