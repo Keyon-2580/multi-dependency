@@ -35,9 +35,7 @@ import cn.edu.fudan.se.multidependency.service.nospring.structure.MicroServiceAr
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil;
-import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.JSONConfigFile;
-import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.ProjectConfig;
-import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.RestfulAPIConfig;
+import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.*;
 import cn.edu.fudan.se.multidependency.utils.YamlUtil;
 import depends.entity.repo.EntityRepo;
 
@@ -45,7 +43,7 @@ public class InsertDataMain {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InsertDataMain.class);
 
-	private static final Executor executor = Executors.newCachedThreadPool();
+    private static final Executor executor = Executors.newCachedThreadPool();
 
     public static void main(String[] args) throws Exception {
         LOGGER.info("InsertDataMain");
@@ -65,8 +63,9 @@ public class InsertDataMain {
 
     public static void checkMicroserviceTrace(String[] args) throws Exception {
         YamlUtil.YamlObject yaml = getYaml(args);
+        JSONConfigFile config = ProjectConfigUtil.extract(JSONUtil.extractJSONObject(new File(yaml.getProjectsConfig())));
         LOGGER.info("输出trace");
-        new TraceStartExtractor(analyseDynamicLogs(yaml)).addNodesAndRelations();
+        new TraceStartExtractor(analyseDynamicLogs(config.getDynamicsConfig())).addNodesAndRelations();
     }
 
 
@@ -74,27 +73,27 @@ public class InsertDataMain {
         try {
             YamlUtil.YamlObject yaml = getYaml(args);
 
-			CountDownLatch latchOfStatic = new CountDownLatch(1);
-			CountDownLatch latchOfOthers = new CountDownLatch(5);
-			ThreadService ts = new ThreadService(yaml, latchOfStatic, latchOfOthers);
-			
-			executor.execute(ts::staticAnalyse);
-			latchOfStatic.await();
-			RepositoryService service = RepositoryService.getInstance();
-			LOGGER.info("静态分析节点数：" + service.getNodes().size());
-			LOGGER.info("静态分析关系数：" + service.getRelations().size());
-			executor.execute(ts::msDependAnalyse);
-			executor.execute(ts::dynamicAnalyse);
-			executor.execute(ts::gitAnalyse);
-			executor.execute(ts::cloneAnalyse);
-			executor.execute(ts::libAnalyse);
+            CountDownLatch latchOfStatic = new CountDownLatch(1);
+            CountDownLatch latchOfOthers = new CountDownLatch(5);
+            ThreadService ts = new ThreadService(yaml, latchOfStatic, latchOfOthers);
 
-			latchOfOthers.await();
-			InserterForNeo4j repository = RepositoryService.getInstance();
-			repository.setDatabasePath(yaml.getNeo4jDatabasePath());
-			repository.setDelete(yaml.isDeleteDatabase());
-			repository.insertToNeo4jDataBase();
-		} catch (Exception e) {
+            executor.execute(ts::staticAnalyse);
+            latchOfStatic.await();
+            RepositoryService service = RepositoryService.getInstance();
+            LOGGER.info("静态分析节点数：" + service.getNodes().size());
+            LOGGER.info("静态分析关系数：" + service.getRelations().size());
+            executor.execute(ts::msDependAnalyse);
+            executor.execute(ts::dynamicAnalyse);
+            executor.execute(ts::gitAnalyse);
+            executor.execute(ts::cloneAnalyse);
+            executor.execute(ts::libAnalyse);
+
+            latchOfOthers.await();
+            InserterForNeo4j repository = RepositoryService.getInstance();
+            repository.setDatabasePath(yaml.getNeo4jDatabasePath());
+            repository.setDelete(yaml.isDeleteDatabase());
+            repository.insertToNeo4jDataBase();
+        } catch (Exception e) {
             // 所有步骤中有一个出错，都会终止执行
             e.printStackTrace();
         }
@@ -111,83 +110,69 @@ public class InsertDataMain {
         return new FeatureAndTestCaseFromJSONFileForMicroserviceInserter(featuresJsonPath);
     }
 
-	public static ExtractorForNodesAndRelations insertDynamic(Language language, File[] dynamicLogFiles) throws Exception {
-		switch (language) {
-			case java:
-				return new JavassistDynamicInserter(dynamicLogFiles);
-			case cpp:
-				return new CppDynamicInserter(dynamicLogFiles);
-		}
-		throw new LanguageErrorException(language.toString());
-	}
+    public static ExtractorForNodesAndRelations insertDynamic(Language language, File[] dynamicLogFiles) throws Exception {
+        switch (language) {
+            case java:
+                return new JavassistDynamicInserter(dynamicLogFiles);
+            case cpp:
+                return new CppDynamicInserter(dynamicLogFiles);
+        }
+        throw new LanguageErrorException(language.toString());
+    }
 
-	public static File[] analyseDynamicLogs(YamlUtil.YamlObject yaml) {
-		File[] result = null;
-		String[] dynamicFileSuffixes = new String[yaml.getDynamicFileSuffix().size()];
-		yaml.getDynamicFileSuffix().toArray(dynamicFileSuffixes); // 后缀为.log
-		LOGGER.info("分析动态运行文件的后缀为：" + yaml.getDynamicFileSuffix());
-		File dynamicDirectory = new File(yaml.getDynamicDirectoryRootPath());
-		LOGGER.info("分析动态运行文件的目录为：" + yaml.getDynamicDirectoryRootPath());
-		List<File> resultList = new ArrayList<>();
-		FileUtil.listFiles(dynamicDirectory, resultList, dynamicFileSuffixes);
-		result = new File[resultList.size()];
-		resultList.toArray(result);
-		return result;
-	}
-	
-	/*public static void insertBuildInfo(YamlUtils.YamlObject yaml) throws Exception {
-		for (String l : yaml.getAnalyseLanguages()) {
-			Language language = Language.valueOf(l);
-			if (language != Language.cpp) {
-				continue;
-			}
-			BuildInserterForNeo4jService buildInserter = InserterForNeo4jServiceFactory.getInstance()
-					.createBuildInserterService(language);
-			File buildInfoFile = new File(yaml.getBuildFilePath());
-			buildInserter.setBuildInfoFile(buildInfoFile);
-			buildInserter.addNodesAndRelations();
-		}
-	}*/
+    public static File[] analyseDynamicLogs(DynamicConfig dynamicConfig) {
+        File[] result;
+        String[] dynamicFileSuffixes = new String[dynamicConfig.getFileSuffixes().size()];
+        dynamicConfig.getFileSuffixes().toArray(dynamicFileSuffixes); // 后缀为.log
+        LOGGER.info("分析动态运行文件的后缀为：" + dynamicConfig.getFileSuffixes());
+        File dynamicDirectory = new File(dynamicConfig.getLogsPath());
+        LOGGER.info("分析动态运行文件的目录为：" + dynamicConfig.getLogsPath());
+        List<File> resultList = new ArrayList<>();
+        FileUtil.listFiles(dynamicDirectory, resultList, dynamicFileSuffixes);
+        result = new File[resultList.size()];
+        resultList.toArray(result);
+        return result;
+    }
+
 }
 
 class ThreadService {
     private static final Logger LOGGER = LoggerFactory.getLogger(InsertDataMain.class);
     private static YamlUtil.YamlObject yaml;
     private static JSONConfigFile config;
-    private static Collection<ProjectConfig> projectsConfig;
     private static final Executor executor = Executors.newCachedThreadPool();
     private static CountDownLatch latchOfStatic, latchOfOthers;
 
     ThreadService(YamlUtil.YamlObject yaml, CountDownLatch latchOfStatic, CountDownLatch latchOfOthers) throws Exception {
         ThreadService.yaml = yaml;
         config = ProjectConfigUtil.extract(JSONUtil.extractJSONObject(new File(yaml.getProjectsConfig())));
-        projectsConfig = config.getProjectConfigs();
         ThreadService.latchOfStatic = latchOfStatic;
         ThreadService.latchOfOthers = latchOfOthers;
     }
 
     void staticAnalyse() {
-		CountDownLatch latchOfProjects = new CountDownLatch((projectsConfig).size());
-		for (ProjectConfig projectConfig : projectsConfig) {
-			executor.execute(()->{
-				try {
-					staticAnalyseCore(projectConfig);
+        Collection<ProjectConfig> projectsConfig = config.getProjectsConfig();
+        CountDownLatch latchOfProjects = new CountDownLatch((projectsConfig).size());
+        for (ProjectConfig projectConfig : projectsConfig) {
+            executor.execute(() -> {
+                try {
+                    staticAnalyseCore(projectConfig);
                     latchOfProjects.countDown();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			});
-		}
-		try {
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        try {
             latchOfProjects.await();
-			latchOfStatic.countDown();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+            latchOfStatic.countDown();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    void staticAnalyseCore(ProjectConfig projectConfig) throws Exception{
-    	LOGGER.info(projectConfig.getProject());
+    void staticAnalyseCore(ProjectConfig projectConfig) throws Exception {
+        LOGGER.info(projectConfig.getProject());
         DependsEntityRepoExtractor extractor = new Depends096Extractor();
         extractor.setIncludeDirs(projectConfig.includeDirsArray());
         extractor.setExcludes(projectConfig.getExcludes());
@@ -226,17 +211,18 @@ class ThreadService {
         try {
             if (yaml.isAnalyseDynamic()) {
                 LOGGER.info("动态运行分析");
-                File[] dynamicLogs = InsertDataMain.analyseDynamicLogs(yaml);
+                DynamicConfig dynamicConfig = config.getDynamicsConfig();
+                File[] dynamicLogs = InsertDataMain.analyseDynamicLogs(dynamicConfig);
 
                 LOGGER.info("输出trace，只输出日志中记录的trace，不做数据库操作");
                 new TraceStartExtractor(dynamicLogs).addNodesAndRelations();
 
                 for (Language language : Language.values()) {
-					InsertDataMain.insertDynamic(language, dynamicLogs).addNodesAndRelations();
+                    InsertDataMain.insertDynamic(language, dynamicLogs).addNodesAndRelations();
                 }
 
                 LOGGER.info("引入特性与测试用例，对应到trace");
-                new FeatureAndTestCaseFromJSONFileForMicroserviceInserter(yaml.getFeaturesPath()).addNodesAndRelations();
+                new FeatureAndTestCaseFromJSONFileForMicroserviceInserter(dynamicConfig.getFeaturesPath()).addNodesAndRelations();
             }
             latchOfOthers.countDown();
         } catch (Exception e) {
@@ -245,15 +231,28 @@ class ThreadService {
     }
 
     void gitAnalyse() {
-        try {
-            if (yaml.isAnalyseGit()) {
-                LOGGER.info("Git库分析");
-                new GitInserter(yaml.getGitDirectoryRootPath(), yaml.getIssuesPath(),
-                        yaml.isGitSelectRange(), yaml.getCommitIdFrom(), yaml.getCommitIdTo()).addNodesAndRelations();
+        if (yaml.isAnalyseGit()) {
+            LOGGER.info("Git库分析");
+            Collection<GitConfig> gitsConfig = config.getGitsConfig();
+            CountDownLatch latchOfGits = new CountDownLatch((gitsConfig).size());
+            for (GitConfig gitConfig : gitsConfig) {
+                executor.execute(() -> {
+                    try {
+                        LOGGER.info(gitConfig.getPath());
+                        new GitInserter(gitConfig.getPath(), gitConfig.getIssueFilePath(), gitConfig.getCommitIdFrom(),
+                                gitConfig.getCommitIdTo()).addNodesAndRelations();
+                        latchOfGits.countDown();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
             }
-            latchOfOthers.countDown();
-        } catch (Exception e) {
-            e.printStackTrace();
+            try {
+                latchOfGits.await();
+                latchOfOthers.countDown();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -261,13 +260,16 @@ class ThreadService {
         try {
             if (yaml.isAnalyseClone()) {
                 LOGGER.info("克隆依赖分析");
-                switch(yaml.getCloneGranularity()) {
-                case function:
-                	new CloneInserterForFunction(yaml.getCloneLanguage(), yaml.getNamePath(), yaml.getResultPath()).addNodesAndRelations();
-                	break;
-                case file:
-                	new CloneInserterForFile(yaml.getCloneLanguage(), yaml.getNamePath(), yaml.getResultPath()).addNodesAndRelations();
-                	break;
+                Collection<CloneConfig> clonesConfig = config.getClonesConfig();
+                for (CloneConfig cloneConfig : clonesConfig) {
+                    switch (cloneConfig.getGranularity()) {
+                        case function:
+                            new CloneInserterForFunction(cloneConfig.getLanguage(), cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();
+                            break;
+                        case file:
+                            new CloneInserterForFile(cloneConfig.getLanguage(), cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();
+                            break;
+                    }
                 }
             }
             latchOfOthers.countDown();
@@ -281,7 +283,10 @@ class ThreadService {
         try {
             if (yaml.isAnalyseLib()) {
                 LOGGER.info("三方依赖分析");
-                new LibraryInserter(yaml.getLibsPath()).addNodesAndRelations();
+                Collection<LibConfig> libsConfig = config.getLibsConfig();
+                for (LibConfig libConfig : libsConfig) {
+                    new LibraryInserter(libConfig.getPath()).addNodesAndRelations();
+                }
             }
             latchOfOthers.countDown();
         } catch (Exception e) {
