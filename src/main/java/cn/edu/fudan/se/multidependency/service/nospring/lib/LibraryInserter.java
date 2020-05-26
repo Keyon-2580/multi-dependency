@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 
-import cn.edu.fudan.se.multidependency.InsertDataMain;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
@@ -39,7 +38,7 @@ public class LibraryInserter extends ExtractorForNodesAndRelationsImpl {
 			Project project = null;
 			if(StringUtils.isBlank(projectName)) {
 				if(this.getNodes().findAllProjects().size() > 1) {
-					throw new Exception("不知道三方依赖的项目是啥 " + libraryJsonPath);
+					throw new Exception("未找到项目依赖第三方 " + libraryJsonPath);
 				} else {
 					project = this.getNodes().findAllProjects().get(0);
 				}
@@ -47,8 +46,7 @@ public class LibraryInserter extends ExtractorForNodesAndRelationsImpl {
 				project = this.getNodes().findProject(projectName, Language.java);
 			}
 			if(project == null) {
-//				throw new Exception("不知道三方依赖的项目是啥 " + libraryJsonPath + " " + projectName);
-				LOGGER.warn(String.join(" ", "不知道三方依赖的项目是啥 ", libraryJsonPath, projectName));
+				LOGGER.warn(String.join(" ", "未找到项目依赖第三方", libraryJsonPath, projectName));
 				continue;
 			}
 //			this.getNodes().findFileByPath(path)

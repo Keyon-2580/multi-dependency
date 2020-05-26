@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.utils;
+package cn.edu.fudan.se.multidependency.utils.config;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,7 +8,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.Language;
-import lombok.Data;
 
 public class ProjectConfigUtil {
 
@@ -141,7 +140,7 @@ public class ProjectConfigUtil {
 				result.addFileSuffix(fileSuffixes.getString(i));
 			}
 		}
-		result.setLogsPath(json.getString("logs_path"));
+		result.setLogsDirectoryPath(json.getString("logs_path"));
 		result.setFeaturesPath(json.getString("features_path"));
 		return result;
 	}
@@ -184,105 +183,6 @@ public class ProjectConfigUtil {
 			result.add(config);
 		}
 		return result;
-	}
-
-	@Data
-	public static class JSONConfigFile {
-		private Collection<ProjectConfig> projectsConfig;
-		private Collection<MicroServiceDependency> microServiceDependencies;
-		private DynamicConfig dynamicsConfig;
-		private Collection<GitConfig> gitsConfig;
-		private Collection<LibConfig> libsConfig;
-		private Collection<CloneConfig> clonesConfig;
-	}
-
-	@Data
-	public static class ProjectConfig {
-		private String path;
-		private String project;
-		private Language language;
-		private boolean isMicroService;
-		private String microserviceName;
-		private String serviceGroupName;
-		private List<String> excludes = new ArrayList<>();
-		private List<String> includeDirs = new ArrayList<>();
-		private boolean autoInclude;
-		private RestfulAPIConfig apiConfig;
-
-		public void addExclude(String exclude) {
-			this.excludes.add(exclude);
-		}
-
-		public void addIncludeDir(String includeDir) {
-			this.includeDirs.add(includeDir);
-		}
-
-		public String[] includeDirsArray() {
-			String[] result = new String[includeDirs.size()];
-			for(int i = 0; i < result.length; i++) {
-				result[i] = includeDirs.get(i);
-			}
-			return result;
-		}
-	}
-
-	@Data
-	public static class RestfulAPIConfig {
-		private String framework;
-		private List<String> excludeTags = new ArrayList<>();
-		private String path;
-		public static final String FRAMEWORK_SWAGGER = "swagger";
-
-		public void addExcludeTag(String excludeTag) {
-			this.excludeTags.add(excludeTag);
-		}
-	}
-
-	@Data
-	public static class MicroServiceDependency {
-		private String microService;
-		private List<String> dependencies = new ArrayList<>();
-
-		public void addDependency(String dependency) {
-			this.dependencies.add(dependency);
-		}
-	}
-
-	@Data
-	public static class DynamicConfig {
-		private List<String> fileSuffixes = new ArrayList<>();;
-		private String logsPath;
-		private String featuresPath;
-
-		public void addFileSuffix(String fileSuffix) {
-			this.fileSuffixes.add(fileSuffix);
-		}
-	}
-
-	@Data
-	public static class GitConfig {
-		private String path;
-		private String commitIdFrom;
-		private String commitIdTo;
-		private String issueFilePath;
-	}
-
-	@Data
-	public static class LibConfig {
-		private Language language;
-		private String path;
-	}
-
-	@Data
-	public static class CloneConfig {
-		private Language language;
-		private Granularity granularity;
-		private String namePath;
-		private String resultPath;
-	}
-
-	public enum Granularity {
-		function, file
 	}
 
 }

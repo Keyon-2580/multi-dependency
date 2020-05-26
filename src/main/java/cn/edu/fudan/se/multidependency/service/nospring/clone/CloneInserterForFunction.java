@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.nospring.clone;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,9 +13,9 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
 import cn.edu.fudan.se.multidependency.utils.CloneUtil;
-import cn.edu.fudan.se.multidependency.utils.FunctionUtil;
 import cn.edu.fudan.se.multidependency.utils.CloneUtil.CloneResultFromCsv;
 import cn.edu.fudan.se.multidependency.utils.CloneUtil.MethodNameForJavaFromCsv;
+import cn.edu.fudan.se.multidependency.utils.FunctionUtil;
 import lombok.Setter;
 
 public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl {
@@ -85,7 +86,8 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 		String functionNameFromCsv = FunctionUtil.extractFunctionNameAndParameters(methodName.getFunctionFullName()).get(0);
 		List<Function> functions = functionNameToFunctions.get(functionNameFromCsv);
 		if(functions == null) {
-			System.out.println(methodName.getFunctionFullName());
+			LOGGER.warn("没有找到该方法名的方法：" + methodName.getFunctionFullName());
+			functions = new ArrayList<>();
 		}
 		for(Function function : functions) {
 			if(FunctionUtil.isSameJavaFunction(function, methodName.getFunctionFullName())) {

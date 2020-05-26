@@ -15,7 +15,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFuncti
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportVariable;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
-import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.ProjectConfig;
+import cn.edu.fudan.se.multidependency.utils.config.ProjectConfig;
 import depends.entity.Entity;
 import depends.entity.FileEntity;
 import depends.entity.FunctionEntity;

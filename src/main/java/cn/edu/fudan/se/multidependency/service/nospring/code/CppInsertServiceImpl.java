@@ -11,7 +11,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileIncludeFile;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
-import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.ProjectConfig;
+import cn.edu.fudan.se.multidependency.utils.config.ProjectConfig;
 import depends.entity.AliasEntity;
 import depends.entity.Entity;
 import depends.entity.FileEntity;

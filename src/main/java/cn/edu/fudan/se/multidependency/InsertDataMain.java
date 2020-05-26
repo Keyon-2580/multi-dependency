@@ -1,9 +1,6 @@
 package cn.edu.fudan.se.multidependency;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -11,33 +8,15 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
-import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelations;
 import cn.edu.fudan.se.multidependency.service.nospring.InserterForNeo4j;
 import cn.edu.fudan.se.multidependency.service.nospring.InserterForNeo4jServiceFactory;
 import cn.edu.fudan.se.multidependency.service.nospring.RepositoryService;
-import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserterForFile;
-import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserterForFunction;
-import cn.edu.fudan.se.multidependency.service.nospring.code.BasicCodeInserterForNeo4jServiceImpl;
-import cn.edu.fudan.se.multidependency.service.nospring.code.Depends096Extractor;
-import cn.edu.fudan.se.multidependency.service.nospring.code.DependsEntityRepoExtractor;
-import cn.edu.fudan.se.multidependency.service.nospring.code.RestfulAPIFileExtractor;
-import cn.edu.fudan.se.multidependency.service.nospring.code.RestfulAPIFileExtractorImpl;
-import cn.edu.fudan.se.multidependency.service.nospring.code.SwaggerJSON;
-import cn.edu.fudan.se.multidependency.service.nospring.dynamic.CppDynamicInserter;
-import cn.edu.fudan.se.multidependency.service.nospring.dynamic.FeatureAndTestCaseFromJSONFileForMicroserviceInserter;
-import cn.edu.fudan.se.multidependency.service.nospring.dynamic.JavassistDynamicInserter;
+import cn.edu.fudan.se.multidependency.service.nospring.ThreadService;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.TraceStartExtractor;
-import cn.edu.fudan.se.multidependency.service.nospring.git.GitInserter;
-import cn.edu.fudan.se.multidependency.service.nospring.lib.LibraryInserter;
-import cn.edu.fudan.se.multidependency.service.nospring.structure.MicroServiceArchitectureInserter;
-import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
-import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil;
-import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.*;
 import cn.edu.fudan.se.multidependency.utils.YamlUtil;
-import depends.entity.repo.EntityRepo;
+import cn.edu.fudan.se.multidependency.utils.config.JSONConfigFile;
+import cn.edu.fudan.se.multidependency.utils.config.ProjectConfigUtil;
 
 public class InsertDataMain {
 
@@ -65,9 +44,8 @@ public class InsertDataMain {
         YamlUtil.YamlObject yaml = getYaml(args);
         JSONConfigFile config = ProjectConfigUtil.extract(JSONUtil.extractJSONObject(new File(yaml.getProjectsConfig())));
         LOGGER.info("输出trace");
-        new TraceStartExtractor(analyseDynamicLogs(config.getDynamicsConfig())).addNodesAndRelations();
+        new TraceStartExtractor(InserterForNeo4jServiceFactory.analyseDynamicLogs(config.getDynamicsConfig())).addNodesAndRelations();
     }
-
 
     public static void insert(String[] args) {
         try {
@@ -100,197 +78,4 @@ public class InsertDataMain {
         System.exit(0);
     }
 
-    /**
-     * 通过feature的json文件引入
-     *
-     * @param featuresJsonPath
-     * @throws Exception
-     */
-    public static ExtractorForNodesAndRelations insertFeatureAndTestCaseByJSONFile(String featuresJsonPath) throws Exception {
-        return new FeatureAndTestCaseFromJSONFileForMicroserviceInserter(featuresJsonPath);
-    }
-
-    public static ExtractorForNodesAndRelations insertDynamic(Language language, File[] dynamicLogFiles) throws Exception {
-        switch (language) {
-            case java:
-                return new JavassistDynamicInserter(dynamicLogFiles);
-            case cpp:
-                return new CppDynamicInserter(dynamicLogFiles);
-        }
-        throw new LanguageErrorException(language.toString());
-    }
-
-    public static File[] analyseDynamicLogs(DynamicConfig dynamicConfig) {
-        File[] result;
-        String[] dynamicFileSuffixes = new String[dynamicConfig.getFileSuffixes().size()];
-        dynamicConfig.getFileSuffixes().toArray(dynamicFileSuffixes); // 后缀为.log
-        LOGGER.info("分析动态运行文件的后缀为：" + dynamicConfig.getFileSuffixes());
-        File dynamicDirectory = new File(dynamicConfig.getLogsPath());
-        LOGGER.info("分析动态运行文件的目录为：" + dynamicConfig.getLogsPath());
-        List<File> resultList = new ArrayList<>();
-        FileUtil.listFiles(dynamicDirectory, resultList, dynamicFileSuffixes);
-        result = new File[resultList.size()];
-        resultList.toArray(result);
-        return result;
-    }
-
-}
-
-class ThreadService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(InsertDataMain.class);
-    private static YamlUtil.YamlObject yaml;
-    private static JSONConfigFile config;
-    private static final Executor executor = Executors.newCachedThreadPool();
-    private static CountDownLatch latchOfStatic, latchOfOthers;
-
-    ThreadService(YamlUtil.YamlObject yaml, CountDownLatch latchOfStatic, CountDownLatch latchOfOthers) throws Exception {
-        ThreadService.yaml = yaml;
-        config = ProjectConfigUtil.extract(JSONUtil.extractJSONObject(new File(yaml.getProjectsConfig())));
-        ThreadService.latchOfStatic = latchOfStatic;
-        ThreadService.latchOfOthers = latchOfOthers;
-    }
-
-    void staticAnalyse() {
-        Collection<ProjectConfig> projectsConfig = config.getProjectsConfig();
-        CountDownLatch latchOfProjects = new CountDownLatch((projectsConfig).size());
-        for (ProjectConfig projectConfig : projectsConfig) {
-            executor.execute(() -> {
-                try {
-                    staticAnalyseCore(projectConfig);
-                    latchOfProjects.countDown();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-        }
-        try {
-            latchOfProjects.await();
-            latchOfStatic.countDown();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    void staticAnalyseCore(ProjectConfig projectConfig) throws Exception {
-        LOGGER.info(projectConfig.getProject());
-        DependsEntityRepoExtractor extractor = new Depends096Extractor();
-        extractor.setIncludeDirs(projectConfig.includeDirsArray());
-        extractor.setExcludes(projectConfig.getExcludes());
-        extractor.setLanguage(projectConfig.getLanguage());
-        extractor.setProjectPath(projectConfig.getPath());
-        extractor.setAutoInclude(projectConfig.isAutoInclude());
-        EntityRepo entityRepo = extractor.extractEntityRepo();
-        if (extractor.getEntityCount() > 0) {
-            BasicCodeInserterForNeo4jServiceImpl inserter = InserterForNeo4jServiceFactory.getInstance()
-                    .createCodeInserterService(entityRepo, projectConfig);
-            RestfulAPIConfig apiConfig = projectConfig.getApiConfig();
-            if (apiConfig != null && RestfulAPIConfig.FRAMEWORK_SWAGGER.equals(projectConfig.getApiConfig().getFramework())) {
-                SwaggerJSON swagger = new SwaggerJSON();
-                swagger.setPath(apiConfig.getPath());
-                swagger.setExcludeTags(apiConfig.getExcludeTags());
-                RestfulAPIFileExtractor restfulAPIFileExtractorImpl = new RestfulAPIFileExtractorImpl(swagger);
-                inserter.setRestfulAPIFileExtractor(restfulAPIFileExtractorImpl);
-            }
-            inserter.addNodesAndRelations();
-        }
-    }
-
-    void msDependAnalyse() {
-        try {
-            if (config.getMicroServiceDependencies() != null) {
-                LOGGER.info("微服务依赖存储");
-                new MicroServiceArchitectureInserter(config.getMicroServiceDependencies()).addNodesAndRelations();
-            }
-            latchOfOthers.countDown();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    void dynamicAnalyse() {
-        try {
-            if (yaml.isAnalyseDynamic()) {
-                LOGGER.info("动态运行分析");
-                DynamicConfig dynamicConfig = config.getDynamicsConfig();
-                File[] dynamicLogs = InsertDataMain.analyseDynamicLogs(dynamicConfig);
-
-                LOGGER.info("输出trace，只输出日志中记录的trace，不做数据库操作");
-                new TraceStartExtractor(dynamicLogs).addNodesAndRelations();
-
-                for (Language language : Language.values()) {
-                    InsertDataMain.insertDynamic(language, dynamicLogs).addNodesAndRelations();
-                }
-
-                LOGGER.info("引入特性与测试用例，对应到trace");
-                new FeatureAndTestCaseFromJSONFileForMicroserviceInserter(dynamicConfig.getFeaturesPath()).addNodesAndRelations();
-            }
-            latchOfOthers.countDown();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    void gitAnalyse() {
-        if (yaml.isAnalyseGit()) {
-            LOGGER.info("Git库分析");
-            Collection<GitConfig> gitsConfig = config.getGitsConfig();
-            CountDownLatch latchOfGits = new CountDownLatch((gitsConfig).size());
-            for (GitConfig gitConfig : gitsConfig) {
-                executor.execute(() -> {
-                    try {
-                        LOGGER.info(gitConfig.getPath());
-                        new GitInserter(gitConfig.getPath(), gitConfig.getIssueFilePath(), gitConfig.getCommitIdFrom(),
-                                gitConfig.getCommitIdTo()).addNodesAndRelations();
-                        latchOfGits.countDown();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
-            try {
-                latchOfGits.await();
-                latchOfOthers.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    void cloneAnalyse() {
-        try {
-            if (yaml.isAnalyseClone()) {
-                LOGGER.info("克隆依赖分析");
-                Collection<CloneConfig> clonesConfig = config.getClonesConfig();
-                for (CloneConfig cloneConfig : clonesConfig) {
-                    switch (cloneConfig.getGranularity()) {
-                        case function:
-                            new CloneInserterForFunction(cloneConfig.getLanguage(), cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();
-                            break;
-                        case file:
-                            new CloneInserterForFile(cloneConfig.getLanguage(), cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();
-                            break;
-                    }
-                }
-            }
-            latchOfOthers.countDown();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    void libAnalyse() {
-        try {
-            if (yaml.isAnalyseLib()) {
-                LOGGER.info("三方依赖分析");
-                Collection<LibConfig> libsConfig = config.getLibsConfig();
-                for (LibConfig libConfig : libsConfig) {
-                    new LibraryInserter(libConfig.getPath()).addNodesAndRelations();
-                }
-            }
-            latchOfOthers.countDown();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

@@ -27,7 +27,7 @@
     ]
   },
   "dynamics": {
-    "file_suffix": [
+    "file_suffixes": [
       ""
     ],
     "logs_path": "",

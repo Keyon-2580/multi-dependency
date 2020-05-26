@@ -6,7 +6,7 @@ import java.util.List;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
-import cn.edu.fudan.se.multidependency.utils.ProjectConfigUtil.MicroServiceDependency;
+import cn.edu.fudan.se.multidependency.utils.config.MicroServiceDependency;
 
 public class MicroServiceArchitectureInserter extends ExtractorForNodesAndRelationsImpl {
 	
@@ -19,6 +19,7 @@ public class MicroServiceArchitectureInserter extends ExtractorForNodesAndRelati
 	@Override
 	public void addNodesAndRelations() throws Exception {
 		for(MicroServiceDependency dependency : microServiceDependencies) {
+			System.out.println(dependency);
 			String microServiceName = dependency.getMicroService();
 			MicroService microService = this.getNodes().findMicroServiceByName(microServiceName);
 			if(microService == null) {
