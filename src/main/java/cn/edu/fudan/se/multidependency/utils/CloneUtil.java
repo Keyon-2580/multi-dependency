@@ -71,16 +71,16 @@ public class CloneUtil {
 			String line = null;
 			while((line = reader.readLine()) != null) {
 				String[] values = line.split(",");
-				if(values.length != 9) {
+				if(values.length != 4) {
 					LOGGER.warn("克隆数据格式不正确：" + line);
 					continue;
 				}
 				FilePathForJavaFromCsv file = new FilePathForJavaFromCsv();
 				file.setLine(line);
 				file.setLineId(Integer.parseInt(values[0]));
-				file.setFilePath(values[2]);
-				file.setStartLine(Integer.parseInt(values[3]));
-				file.setEndLine(Integer.parseInt(values[4]));
+				file.setFilePath(values[1]);
+				file.setStartLine(Integer.parseInt(values[2]));
+				file.setEndLine(Integer.parseInt(values[3]));
 				result.put(file.getLineId(), file);
 			}
 		}

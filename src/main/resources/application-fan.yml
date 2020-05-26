@@ -47,9 +47,12 @@ data:
    clone: 
       analyse: true
       language: java
+#      granularity: function
+#      name_path: src/main/resources/clone/function/MethodNameTable.csv
+#      result_path: src/main/resources/clone/function/type123_method_result.csv
       granularity: file
-      name_path: src/main/resources/clone/function/MethodNameTable.csv
-      result_path: src/main/resources/clone/function/type123_method_result.csv
+      name_path: src/main/resources/clone/file/MeasureIndex.csv
+      result_path: src/main/resources/clone/file/type123_method_result.csv
    build:   
       analyse: false
       directory_root_path: src/main/resources/build
