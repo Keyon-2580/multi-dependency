@@ -52,7 +52,8 @@ public enum RelationType implements RelationshipType {
 	
 	FUNCTION_CALL_LIBRARY_API(RelationType.str_FUNCTION_CALL_LIBRARY_API),
 	
-	FUNCTION_CLONE_FUNCTION(RelationType.str_FUNCTION_CLONE_FUNCTION);
+	FUNCTION_CLONE_FUNCTION(RelationType.str_FUNCTION_CLONE_FUNCTION),
+	FILE_CLONE_FILE(RelationType.str_FILE_CLONE_FILE);
 
 	/**
 	 * 结构关系
@@ -109,6 +110,7 @@ public enum RelationType implements RelationshipType {
 	public static final String str_FUNCTION_CALL_LIBRARY_API = "FUNCTION_CALL_LIBRARY_API";
 	
 	public static final String str_FUNCTION_CLONE_FUNCTION = "FUNCTION_CLONE_FUNCTION";
+	public static final String str_FILE_CLONE_FILE = "FILE_CLONE_FILE";
 	
 	private String name;
 

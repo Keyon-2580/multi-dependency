@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.codehaus.plexus.util.StringUtils;
+
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.git.Branch;
@@ -19,6 +21,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
 public class Nodes {
 	
@@ -32,6 +35,21 @@ public class Nodes {
 	private Map<Project, Map<NodeLabelType, Map<Long, Node>>> projectToNodes = new ConcurrentHashMap<>();
 	
 	private List<Project> projects = new ArrayList<>();
+	
+	private Map<String, ProjectFile> filePathToFile = new ConcurrentHashMap<>();
+	
+	public ProjectFile findFileByPathRecursion(String path) {
+		ProjectFile result = filePathToFile.get(path);
+		String newPath = path;
+		while(result == null) {
+			newPath = FileUtil.extractPath(newPath);
+			if(StringUtils.isBlank(newPath)) {
+				return null;
+			}
+			result = filePathToFile.get(newPath);
+		}
+		return result;
+	}
 	
 	public List<Project> findAllProjects() {
 		return new ArrayList<>(projects);
@@ -59,6 +77,7 @@ public class Nodes {
 		projectToNodes.clear();
 		projects.clear();
 		librariesWithAPI.clear();
+		filePathToFile.clear();
 	}
 	
 	public Map<NodeLabelType, List<Node>> getAllNodes() {
@@ -81,6 +100,9 @@ public class Nodes {
 		allNodes.add(node);
 		if(node instanceof Project) {
 			projects.add((Project) node);
+		}
+		if(node instanceof ProjectFile) {
+			this.filePathToFile.put(((ProjectFile) node).getPath(), (ProjectFile) node);
 		}
 		List<Node> nodes = nodeTypeToNodes.getOrDefault(node.getNodeType(), new ArrayList<>());
 		nodes.add(node);

@@ -17,7 +17,7 @@ import cn.edu.fudan.se.multidependency.utils.CloneUtil.CloneResultFromCsv;
 import cn.edu.fudan.se.multidependency.utils.CloneUtil.MethodNameForJavaFromCsv;
 import lombok.Setter;
 
-public class CloneInserter extends ExtractorForNodesAndRelationsImpl {
+public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CloneUtil.class);
 	@Setter
@@ -27,7 +27,7 @@ public class CloneInserter extends ExtractorForNodesAndRelationsImpl {
 	@Setter
 	private String methodResultPath;
 	
-	public CloneInserter(Language language, String methodNameTablePath, String methodResultPath) {
+	public CloneInserterForFunction(Language language, String methodNameTablePath, String methodResultPath) {
 		super();
 		this.language = language;
 		this.methodNameTablePath = methodNameTablePath;

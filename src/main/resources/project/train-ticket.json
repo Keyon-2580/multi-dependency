@@ -743,6 +743,12 @@
 		"language": "java",
 		"isMicroservice": true,
 		"microserviceName" : "verification-code(15678)"
+	}, {
+		"path": "D:\\multiple-dependency-project\\train-ticket\\ts-ui-test",
+		"serviceGroupName": "train-ticket",
+		"project": "ts-ui-test",
+		"language": "java",
+		"isMicroservice": false
 	}],
 	"architectures" : {
 		"projects" : [

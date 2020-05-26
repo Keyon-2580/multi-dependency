@@ -75,12 +75,14 @@ public class YamlUtil {
 
 		boolean analyseClone = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("analyse");
 		Language cloneLanguage = Language.valueOf((String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("language"));
-		String methodNameTablePath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("method_name_table_path");
-		String methodResultPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("method_result_path");
+		Granularity granularity = Granularity.valueOf((String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("granularity"));
+		String namePath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("name_path");
+		String resultPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("clone")).get("result_path");
 		result.setAnalyseClone(analyseClone);
 		result.setCloneLanguage(cloneLanguage);
-		result.setMethodNameTablePath(methodNameTablePath);
-		result.setMethodResultPath(methodResultPath);
+		result.setCloneGranularity(granularity);
+		result.setNamePath(namePath);
+		result.setResultPath(resultPath);
 		return result;
 	}
 	
@@ -113,7 +115,12 @@ public class YamlUtil {
 		
 		private boolean analyseClone;
 		private Language cloneLanguage;
-		private String methodNameTablePath;
-		private String methodResultPath;
+		private Granularity cloneGranularity;
+		private String namePath;
+		private String ResultPath;
+	}
+	
+	public static enum Granularity {
+		function, file
 	}
 }

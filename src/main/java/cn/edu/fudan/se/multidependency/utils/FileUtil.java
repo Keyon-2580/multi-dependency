@@ -37,19 +37,51 @@ public class FileUtil {
 		}
 		return !(fileOrSubDirectoryPath.substring(parentDirectoryPath.length() + 1)).contains(slash);
 	}
+	
+	/**
+	 * D:\a\a.java -> D:/a/a.java -> /a.java
+	 * /a/a/a.java -> /a/a.java
+	 * @param filePath
+	 * @return
+	 */
+	public static String extractPath(String filePath) {
+		if(filePath == null) {
+			return "";
+		}
+		try {
+			String newFilePath = filePath.replace(SLASH_WINDOWS, SLASH_LINUX);
+			if(!newFilePath.contains(SLASH_LINUX) || SLASH_LINUX.equals(newFilePath)) {
+				return "";
+			}
+			newFilePath = newFilePath.substring(newFilePath.indexOf(SLASH_LINUX) + 1);
+			if(!newFilePath.contains(SLASH_LINUX)) {
+				return "";
+			}
+			newFilePath = newFilePath.substring(newFilePath.indexOf(SLASH_LINUX));
+			return newFilePath;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "";
+		}
+	}
 
 	public static void main(String[] args) {
 		String directoryPath = "D:\\multiple-dependency-project\\train-ticket";
+		System.out.println("result: " + extractPath(directoryPath));
 		directoryPath = "D:\\multiple-dependency-project\\doublelanguage";
+		System.out.println("result: " + extractPath(directoryPath));
 		directoryPath = "D:\\source\\source";
+		System.out.println("result: " + extractPath(directoryPath));
+		directoryPath = "D:\\source";
+		System.out.println("result: " + extractPath(directoryPath));
 		/*JSONObject array = readDirectoryToGenerateProjectJSONFileForDoubleLanguageProject(
 				new File(directoryPath), 0, "java", true, "train-ticket");*/
-		JSONObject array = readDirectoryToGenerateProjectJSONFile(new File(directoryPath), 1, "java", true, "source");
+		/*JSONObject array = readDirectoryToGenerateProjectJSONFile(new File(directoryPath), 1, "java", true, "source");
 		try {
 			writeToFileForProjectJSONFile("D:\\source.log", array);
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
+		}*/
 		/*directoryPath = "D:\\";
 		File rootDirectory = new File(directoryPath);
 		List<File> result = new ArrayList<>();

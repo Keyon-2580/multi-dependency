@@ -14,17 +14,23 @@ import org.slf4j.LoggerFactory;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 public class CloneUtil {
-
+	
 	@Data
-	public static class MethodNameForJavaFromCsv {
+	public static class FilePathForJavaFromCsv {
 		private String line;
-		private Integer lineId;
-		private String projectName;
+		private int lineId;
 		private String filePath;
 		private int startLine;
 		private int endLine;
+	}
+
+	@Data
+	@EqualsAndHashCode(callSuper = true)
+	public static class MethodNameForJavaFromCsv extends FilePathForJavaFromCsv {
+		private String projectName;
 		private String packageName;
 		private String className;
 		private String functionSimpleName;
@@ -57,6 +63,28 @@ public class CloneUtil {
 			builder.append(")");
 			return builder.toString();
 		}
+	}
+	
+	public static Map<Integer, FilePathForJavaFromCsv> readJavaCloneCsvForFilePath(String filePath) throws Exception {
+		Map<Integer, FilePathForJavaFromCsv> result = new HashMap<>();
+		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
+			String line = null;
+			while((line = reader.readLine()) != null) {
+				String[] values = line.split(",");
+				if(values.length != 9) {
+					LOGGER.warn("克隆数据格式不正确：" + line);
+					continue;
+				}
+				FilePathForJavaFromCsv file = new FilePathForJavaFromCsv();
+				file.setLine(line);
+				file.setLineId(Integer.parseInt(values[0]));
+				file.setFilePath(values[2]);
+				file.setStartLine(Integer.parseInt(values[3]));
+				file.setEndLine(Integer.parseInt(values[4]));
+				result.put(file.getLineId(), file);
+			}
+		}
+		return result;
 	}
 	
 	public static Map<Integer, MethodNameForJavaFromCsv> readJavaCloneCsvForMethodName(String filePath) throws Exception {

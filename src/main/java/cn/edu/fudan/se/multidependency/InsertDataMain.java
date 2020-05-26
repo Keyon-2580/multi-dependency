@@ -17,13 +17,14 @@ import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRela
 import cn.edu.fudan.se.multidependency.service.nospring.InserterForNeo4j;
 import cn.edu.fudan.se.multidependency.service.nospring.InserterForNeo4jServiceFactory;
 import cn.edu.fudan.se.multidependency.service.nospring.RepositoryService;
-import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserter;
+import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserterForFile;
+import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserterForFunction;
 import cn.edu.fudan.se.multidependency.service.nospring.code.BasicCodeInserterForNeo4jServiceImpl;
+import cn.edu.fudan.se.multidependency.service.nospring.code.Depends096Extractor;
 import cn.edu.fudan.se.multidependency.service.nospring.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.nospring.code.RestfulAPIFileExtractor;
 import cn.edu.fudan.se.multidependency.service.nospring.code.RestfulAPIFileExtractorImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.code.SwaggerJSON;
-import cn.edu.fudan.se.multidependency.service.nospring.code.Depends096Extractor;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.CppDynamicInserter;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.FeatureAndTestCaseFromJSONFileForMicroserviceInserter;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.JavassistDynamicInserter;
@@ -260,7 +261,14 @@ class ThreadService {
         try {
             if (yaml.isAnalyseClone()) {
                 LOGGER.info("克隆依赖分析");
-                new CloneInserter(yaml.getCloneLanguage(), yaml.getMethodNameTablePath(), yaml.getMethodResultPath()).addNodesAndRelations();
+                switch(yaml.getCloneGranularity()) {
+                case function:
+                	new CloneInserterForFunction(yaml.getCloneLanguage(), yaml.getNamePath(), yaml.getResultPath()).addNodesAndRelations();
+                	break;
+                case file:
+                	new CloneInserterForFile(yaml.getCloneLanguage(), yaml.getNamePath(), yaml.getResultPath()).addNodesAndRelations();
+                	break;
+                }
             }
             latchOfOthers.countDown();
         } catch (Exception e) {
