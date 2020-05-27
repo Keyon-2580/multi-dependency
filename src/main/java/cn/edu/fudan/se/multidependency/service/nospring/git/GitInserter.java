@@ -166,7 +166,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
     }
 
     public void addCommitUpdateFileRelation(String filePath, Commit commit, CommitUpdateFile.UpdateType updateType) {
-        ProjectFile file = this.getNodes().findFileByPath(filePath);
+        ProjectFile file = this.getNodes().findFileByPathRecursion(filePath);
         if (file == null) {
             String prefix = projects.size() > 1 ? "/" : "/" + projects.get(0).getName() + "/";
             file = new ProjectFile(generateEntityId(), FileUtil.extractFileName(filePath), prefix + filePath, FileUtil.extractSuffix(filePath));

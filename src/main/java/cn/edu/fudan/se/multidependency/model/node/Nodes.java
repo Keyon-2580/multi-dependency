@@ -317,7 +317,7 @@ public class Nodes {
 		return null;
 	}
 
-	public ProjectFile findFileByPath(String path){
+	/*public ProjectFile findFileByPath(String path){
 		for(Node node : findNodesByNodeType(NodeLabelType.ProjectFile)){
 			ProjectFile file = (ProjectFile) node;
 			if(file.getPath().endsWith(path)) {
@@ -325,7 +325,7 @@ public class Nodes {
 			}
 		}
 		return null;
-	}
+	}*/
 	
 	private Map<String, List<Library>> allLibrariesCache = new ConcurrentHashMap<>();
 	public Map<String, List<Library>> findAllLibraries() {
