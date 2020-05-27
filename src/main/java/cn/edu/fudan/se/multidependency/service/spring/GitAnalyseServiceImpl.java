@@ -71,7 +71,7 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
             }
             Set<Project> updProjects = new HashSet<>();
             for (ProjectFile file : files) {
-            	Project project = containRelationService.findFileBelongToProject(file);
+                Project project = containRelationService.findFileBelongToProject(file);
                 if (project != null) {
                     updProjects.add(project);
                 }
@@ -89,7 +89,7 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
         if (cntOfDevUpdMsListCache != null) {
             return cntOfDevUpdMsListCache;
         }
-        List<DeveloperUpdateNode<MicroService>> result = new ArrayList<>();
+        Map<MicroService, DeveloperUpdateNode<MicroService>> result = new HashMap<>();
         for (Map.Entry<Developer, Map<Project, Integer>> developer : calCntOfDevUpdPro().entrySet()) {
             List<Map.Entry<Project, Integer>> list = new ArrayList<>(developer.getValue().entrySet());
             list.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
@@ -100,15 +100,20 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
                 Developer d = developer.getKey();
                 int times = project.getValue();
                 MicroService microService = containRelationService.findProjectBelongToMicroService(project.getKey());
-                DeveloperUpdateNode<MicroService> temp = new DeveloperUpdateNode<>();
-                temp.setDeveloper(d);
-                temp.setNode(microService);
-                temp.setTimes(times);
-                result.add(temp);
+                if (!result.containsKey(microService)) {
+                    DeveloperUpdateNode<MicroService> temp = new DeveloperUpdateNode<>();
+                    temp.setDeveloper(d);
+                    temp.setNode(microService);
+                    temp.setTimes(times);
+                    result.put(microService, temp);
+                } else {
+                    DeveloperUpdateNode<MicroService> temp = result.get(microService);
+                    temp.setTimes(temp.getTimes() + times);
+                }
             }
         }
-        cntOfDevUpdMsListCache = result;
-        return result;
+        cntOfDevUpdMsListCache = new ArrayList<>(result.values());
+        return cntOfDevUpdMsListCache;
     }
 
     @Override
@@ -161,7 +166,7 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
                 Map<ProjectFile, Integer> m = result.get(from);
                 for (int j = i + 1; j < num; j++) {
                     ProjectFile to = files.get(j);
-                    m.put(to, m.getOrDefault(to, 0)+1);
+                    m.put(to, m.getOrDefault(to, 0) + 1);
                 }
             }
         }
