@@ -6,14 +6,12 @@ import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.git.*;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
-import org.codehaus.plexus.util.StringUtils;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
