@@ -17,8 +17,8 @@ server:
 data:
    project_config: src/main/resources/project/train-ticket_fan.json
    dynamic_analyse: true
-   git_analyse: true
-   lib_analyse: true
+   git_analyse: false
+   lib_analyse: false
    clone_analyse: true
 #   projects:
 #      config: src/main/resources/project/train-ticket.json

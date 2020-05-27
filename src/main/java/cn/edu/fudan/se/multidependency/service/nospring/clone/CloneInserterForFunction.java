@@ -3,6 +3,9 @@ package cn.edu.fudan.se.multidependency.service.nospring.clone;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,11 +17,16 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunctio
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
 import cn.edu.fudan.se.multidependency.utils.CloneUtil;
 import cn.edu.fudan.se.multidependency.utils.CloneUtil.CloneResultFromCsv;
+import cn.edu.fudan.se.multidependency.utils.CloneUtil.FilePathForJavaFromCsv;
 import cn.edu.fudan.se.multidependency.utils.CloneUtil.MethodNameForJavaFromCsv;
 import cn.edu.fudan.se.multidependency.utils.FunctionUtil;
 import lombok.Setter;
 
 public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl {
+
+	private static final Executor executor = Executors.newCachedThreadPool();
+	
+	private CountDownLatch latch;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CloneUtil.class);
 	@Setter
@@ -27,19 +35,43 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 	private String methodNameTablePath;
 	@Setter
 	private String methodResultPath;
+
+	private Map<Integer, MethodNameForJavaFromCsv> methodNames;
+	private Iterable<CloneResultFromCsv> cloneResults;
 	
 	public CloneInserterForFunction(Language language, String methodNameTablePath, String methodResultPath) {
 		super();
 		this.language = language;
 		this.methodNameTablePath = methodNameTablePath;
 		this.methodResultPath = methodResultPath;
+		this.latch = new CountDownLatch(2);
 	}
 
 	@Override
 	public void addNodesAndRelations() throws Exception {
 		if(Language.java == language) {
-			Map<Integer, MethodNameForJavaFromCsv> methodNames = CloneUtil.readJavaCloneCsvForMethodName(methodNameTablePath);
-			Iterable<CloneResultFromCsv> cloneResults = CloneUtil.readCloneResultCsv(methodResultPath);
+			executor.execute(() -> {
+				try {
+					methodNames = CloneUtil.readJavaCloneCsvForMethodName(methodNameTablePath);
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					latch.countDown();
+				}
+			});
+			
+			executor.execute(() -> {
+				try {
+					cloneResults = CloneUtil.readCloneResultCsv(methodResultPath);
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					latch.countDown();
+				}
+			});
+			
+			latch.await();
+
 			
 			for(CloneResultFromCsv cloneResult : cloneResults) {
 				int start = cloneResult.getStart();

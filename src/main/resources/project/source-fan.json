@@ -270,5 +270,28 @@
 		"project": "xetorthio__fdse__jedis",
 		"language": "java",
 		"isMicroservice": true
+	}],
+	"dynamics": {
+		"file_suffixes": [
+			""
+		],
+		"logs_path": "",
+		"features_path": ""
+	},
+	"gits": [{
+		"path": "",
+		"commit_id_from": "",
+		"commit_id_to": "",
+		"issues_path": ""
+	}],
+	"libs": [{
+		"language": "",
+		"path": ""
+	}],
+	"clones": [{
+		"language": "java",
+		"granularity": "file",
+		"name_path": "",
+		"result_path": ""
 	}]
 }
