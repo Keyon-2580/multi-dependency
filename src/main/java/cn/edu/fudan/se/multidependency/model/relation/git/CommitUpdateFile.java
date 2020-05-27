@@ -33,13 +33,10 @@ public class CommitUpdateFile implements Relation {
 	@EndNode
 	private ProjectFile file;
 
-	private UpdateType updateType;
+	private String updateType;
 
-	public static enum UpdateType {
-		ADD, MODIFY, DELETE
-	}
 
-	public CommitUpdateFile(Commit commit, ProjectFile file, UpdateType updateType){
+	public CommitUpdateFile(Commit commit, ProjectFile file, String updateType){
 		this.commit = commit;
 		this.file = file;
 		this.updateType = updateType;
@@ -63,7 +60,7 @@ public class CommitUpdateFile implements Relation {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("updateType", getUpdateType().toString() == null ? "" : getUpdateType().toString() );
+		properties.put("updateType", getUpdateType() == null ? "" : getUpdateType());
 		return properties;
 	}
 

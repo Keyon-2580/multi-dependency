@@ -1030,7 +1030,7 @@
       "path": "D:/my_data/SDTeam/train-ticket",
       "commit_id_from": "",
       "commit_id_to": "",
-      "issues_path": "src/main/resources/git/issues/train-ticket.json"
+      "issues_path": ""
     }
   ],
   "libs": [

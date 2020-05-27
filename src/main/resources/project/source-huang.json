@@ -1,0 +1,61 @@
+{
+  "projects": [
+    {
+      "path": "D:\\my_data\\SDTeam\\multi_dependencies\\projects\\source\\SmellPattern",
+      "includeDirs": [],
+      "microserviceName": "SmellPattern",
+      "autoInclude": true,
+      "serviceGroupName": "source",
+      "project": "SmellPattern",
+      "language": "java",
+      "isMicroservice": true
+    },
+    {
+      "path": "D:\\my_data\\SDTeam\\multi_dependencies\\projects\\source\\square__fdse__retrofit",
+      "includeDirs": [],
+      "microserviceName": "square__fdse__retrofit",
+      "autoInclude": true,
+      "serviceGroupName": "source",
+      "project": "square__fdse__retrofit",
+      "language": "java",
+      "isMicroservice": true
+    }
+  ],
+  "architectures": {
+  },
+  "dynamics": {
+    "file_suffixes": [
+      ""
+    ],
+    "logs_path": "",
+    "features_path": ""
+  },
+  "gits": [
+    {
+      "path": "D:\\my_data\\SDTeam\\multi_dependencies\\projects\\source\\SmellPattern",
+      "commit_id_from": "",
+      "commit_id_to": "",
+      "issues_path": ""
+    },
+    {
+      "path": "D:\\my_data\\SDTeam\\multi_dependencies\\projects\\source\\square__fdse__retrofit",
+      "commit_id_from": "",
+      "commit_id_to": "",
+      "issues_path": ""
+    }
+  ],
+  "libs": [
+    {
+      "language": "java",
+      "path": ""
+    }
+  ],
+  "clones": [
+    {
+      "language": "java",
+      "granularity": "file",
+      "name_path": "",
+      "result_path": ""
+    }
+  ]
+}

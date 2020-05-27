@@ -26,10 +26,13 @@ public class Branch implements Node {
 
     private Long entityId;
 
+    private String branchId;
+
     private String name;
 
-    public Branch(Long entityId, String name){
+    public Branch(Long entityId, String branchId, String name){
         this.entityId = entityId;
+        this.branchId = branchId;
         this.name = name;
     }
 

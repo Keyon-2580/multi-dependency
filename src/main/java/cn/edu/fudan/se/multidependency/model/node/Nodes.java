@@ -297,10 +297,10 @@ public class Nodes {
 		return null;
 	}
 
-	public Branch findBranchByName(String name){
+	public Branch findBranchByBranchId(String branchId){
 		for(Node node : findNodesByNodeType(NodeLabelType.Branch)){
 			Branch branch = (Branch) node;
-			if(name.equals(branch.getName())) {
+			if(branchId.equals(branch.getBranchId())) {
 				return branch;
 			}
 		}

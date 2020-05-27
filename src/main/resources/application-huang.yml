@@ -15,11 +15,11 @@ server:
   port: 8080
 
 data:
-  project_config: src/main/resources/project/test.json
-  dynamic_analyse: true
+  project_config: src/main/resources/project/source-huang.json
+  dynamic_analyse: false
   git_analyse: true
-  lib_analyse: true
-  clone_analyse: true
+  lib_analyse: false
+  clone_analyse: false
 
   neo4j:
     delete: true

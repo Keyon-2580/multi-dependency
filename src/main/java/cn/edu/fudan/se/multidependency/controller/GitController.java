@@ -30,4 +30,30 @@ public class GitController {
         }
         return result;
     }
+    @GetMapping("/topKFileBeUpd")
+    @ResponseBody
+    public JSONObject topKFileBeUpd() {
+        JSONObject result = new JSONObject();
+        try {
+            result.put("result", "success");
+            result.put("value", gitAnalyseService.getTopKFileBeUpd(10));
+        } catch (Exception e) {
+            result.put("result", "fail");
+            result.put("msg", e.getMessage());
+        }
+        return result;
+    }
+    @GetMapping("/topKFileCoChange")
+    @ResponseBody
+    public JSONObject topKFileCoChange() {
+        JSONObject result = new JSONObject();
+        try {
+            result.put("result", "success");
+            result.put("value", gitAnalyseService.getTopKFileCoChange(10));
+        } catch (Exception e) {
+            result.put("result", "fail");
+            result.put("msg", e.getMessage());
+        }
+        return result;
+    }
 }

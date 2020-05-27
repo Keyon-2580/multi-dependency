@@ -1,20 +1,19 @@
 package cn.edu.fudan.se.multidependency.service.nospring.git;
 
-import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.*;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.git.*;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
+import org.codehaus.plexus.util.StringUtils;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
@@ -23,8 +22,6 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
     private boolean isAnalyseIssue;
 
     private Map<Integer, Issue> issues;
-
-    private List<Project> projects;
 
     private static final String[] SUFFIX = new String[]{".java", ".c", ".cpp"};
 
@@ -41,7 +38,6 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
             this.isAnalyseIssue = true;
             issues = new IssueExtractor(issueFilePath).extract();
         }
-        projects = this.getNodes().findAllProjects();
         if (!commitIdFrom.equals("") && !commitIdTo.equals("")) {
             this.selectCommitRange = true;
             this.commitIdFrom = commitIdFrom;
@@ -60,14 +56,14 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         //添加gitRepository节点和gitRepository到project的包含关系
         GitRepository gitRepository = new GitRepository(generateEntityId(), gitExtractor.getRepositoryName());
         addNode(gitRepository, null);
-        for (Project project : projects) {
-            addRelation(new Contain(gitRepository, project));
-        }
+//        for (Project project : projects) {
+//            addRelation(new Contain(gitRepository, project));
+//        }
 
         //添加branch节点和gitRepository到branch的包含关系
         List<Ref> branches = gitExtractor.getBranches();
         for (Ref branch : branches) {
-            Branch branchNode = new Branch(generateEntityId(), branch.getName());
+            Branch branchNode = new Branch(generateEntityId(), branch.getObjectId().toString(), branch.getName());
             addNode(branchNode, null);
             addRelation(new Contain(gitRepository, branchNode));
         }
@@ -92,7 +88,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
     public void addCommitsAndRelations() throws Exception {
         List<RevCommit> commits = selectCommitRange ? gitExtractor.getARangeCommits(commitIdFrom, commitIdTo) : gitExtractor.getAllCommits();
-        Collections.reverse(commits);
+//        Collections.reverse(commits);
         for (RevCommit revCommit : commits) {
             //添加commit节点
             Commit commit = new Commit(generateEntityId(), revCommit.getName(), revCommit.getShortMessage(),
@@ -110,7 +106,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
             //添加branch到commit的包含关系
             List<Ref> branchesOfCommit = gitExtractor.getBranchesByCommitId(revCommit);
             for (Ref branch : branchesOfCommit) {
-                Branch branchNode = this.getNodes().findBranchByName(branch.getName());
+                Branch branchNode = this.getNodes().findBranchByBranchId(branch.getObjectId().toString());
                 if (branchNode == null) {
                     throw new Exception(branch.getName() + "is non-existent");
                 }
@@ -131,25 +127,20 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
                     List<DiffEntry> diffs = gitExtractor.getDiffBetweenCommits(revCommit, parentRevCommit);
                     if (diffs == null) continue;
                     for (DiffEntry diff : diffs) {
-                        String newPath = diff.getNewPath();
-                        String oldPath = diff.getOldPath();
+                        String newPath = "/" + gitExtractor.getRepositoryName() + "/" + diff.getNewPath();
+                        String oldPath = "/" + gitExtractor.getRepositoryName() + "/" + diff.getOldPath();
                         String changeType = diff.getChangeType().name();
                         String path = DiffEntry.ChangeType.DELETE.name().equals(changeType) ? oldPath : newPath;
-                        if (FileUtil.isFiltered(path, SUFFIX)) continue;
-                        CommitUpdateFile.UpdateType updateType;
-                        if (DiffEntry.ChangeType.ADD.name().equals(changeType))
-                            updateType = CommitUpdateFile.UpdateType.ADD;
-                        else if (DiffEntry.ChangeType.MODIFY.name().equals(changeType))
-                            updateType = CommitUpdateFile.UpdateType.MODIFY;
-                        else updateType = CommitUpdateFile.UpdateType.DELETE;
-                        addCommitUpdateFileRelation(path, commit, updateType);
+                        if (FileUtil.isFiltered(newPath, SUFFIX)) continue;
+                        addCommitUpdateFileRelation(path, commit, changeType);
                     }
                 }
             } else {
                 List<String> filesPath = gitExtractor.getCommitFilesPath(revCommit);
                 for (String path : filesPath) {
                     if (FileUtil.isFiltered(path, SUFFIX)) continue;
-                    addCommitUpdateFileRelation(path, commit, CommitUpdateFile.UpdateType.ADD);
+                    path = "/" + gitExtractor.getRepositoryName() + "/" + path;
+                    addCommitUpdateFileRelation(path, commit, "ADD");
                 }
             }
 
@@ -165,13 +156,10 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         }
     }
 
-    public void addCommitUpdateFileRelation(String filePath, Commit commit, CommitUpdateFile.UpdateType updateType) {
+    public void addCommitUpdateFileRelation(String filePath, Commit commit, String updateType) {
         ProjectFile file = this.getNodes().findFileByPathRecursion(filePath);
-        if (file == null) {
-            String prefix = projects.size() > 1 ? "/" : "/" + projects.get(0).getName() + "/";
-            file = new ProjectFile(generateEntityId(), FileUtil.extractFileName(filePath), prefix + filePath, FileUtil.extractSuffix(filePath));
-            addNode(file, null);
+        if (file != null) {
+            addRelation(new CommitUpdateFile(commit, file, updateType));
         }
-        addRelation(new CommitUpdateFile(commit, file, updateType));
     }
 }

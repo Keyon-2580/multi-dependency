@@ -221,6 +221,17 @@
 			<artifactId>org.eclipse.jgit</artifactId>
 			<version>5.7.0.202003110725-r</version>
 		</dependency>
+		<dependency>
+			<groupId>cn.emergentdesign.se</groupId>
+			<artifactId>depends</artifactId>
+			<version>0.9.6</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
 	</dependencies>
 
