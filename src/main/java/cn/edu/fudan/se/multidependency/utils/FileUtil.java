@@ -167,6 +167,10 @@ public class FileUtil {
 					isDoubleLanguage = true;
 					break;
 				}
+				if(child.isDirectory() && ("supportc".equals(child.getName()) || "supportj".equals(child.getName()))) {
+					isDoubleLanguage = true;
+					break;
+				}
 			}
 			if(isDoubleLanguage) {
 				JSONObject projectJson = new JSONObject();
