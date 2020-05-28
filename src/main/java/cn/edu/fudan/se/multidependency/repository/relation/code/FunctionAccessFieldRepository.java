@@ -14,4 +14,7 @@ public interface FunctionAccessFieldRepository extends Neo4jRepository<FunctionA
 	@Query("MATCH result=(function:Function)-[r:" + RelationType.str_FUNCTION_ACCESS_FIELD + "]->(field:Variable) with function,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..5]->(function) where id(project)={projectId} RETURN result")
 	List<FunctionAccessField> findProjectContainFunctionAccessFieldRelations(@Param("projectId") Long projectId);
 
+	@Query("MATCH result=(function:Function)-[r:" + RelationType.str_FUNCTION_ACCESS_FIELD + "]->(field:Variable) where id(function)={functionId} RETURN result")
+	List<FunctionAccessField> findFunctionAccessFields(@Param("functionId") long functionId);
+	
 }

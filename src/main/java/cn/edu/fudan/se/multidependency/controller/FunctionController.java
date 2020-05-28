@@ -8,6 +8,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -22,6 +23,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanStartWithFunction;
+import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionCallFunctionRepository;
 import cn.edu.fudan.se.multidependency.service.spring.DependencyOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
@@ -44,6 +46,20 @@ public class FunctionController {
 	
 	@Autowired
 	private DependencyOrganizationService dependencyOrganizationService;
+	
+	@Autowired
+	private FunctionCallFunctionRepository functionCallFunctionRepository;
+	
+	@GetMapping("/testfanout/{fileId}")
+	@ResponseBody
+	public void testFanout(@PathVariable("fileId") long fileId) {
+//		functionCallFunctionRepository.queryTest(fileId);
+		System.out.println(functionCallFunctionRepository.queryTest(fileId));
+//		List<Object> result = functionCallFunctionRepository.queryTest(fileId);
+//		for(Object r : result) {
+//			System.out.println(r.getClass());
+//		}
+	}
 	
 	private List<Function> test(Function startFunction, List<FunctionDynamicCallFunction> calls, Long depth) {
 		List<Function> result = new ArrayList<>();

@@ -36,7 +36,18 @@ public class ContainRelationServiceImpl implements ContainRelationService {
     
     @Autowired
     CacheService cache;
-    
+
+	Map<Project, Collection<ProjectFile>> projectContainFilesCache = new ConcurrentHashMap<>();
+	@Override
+	public Collection<ProjectFile> findProjectContainAllFiles(Project project) {
+		Collection<ProjectFile> result = projectContainFilesCache.getOrDefault(project, containRepository.findProjectContainFiles(project.getId()));
+		projectContainFilesCache.put(project, result);
+		result.forEach(file -> {
+			cache.cacheNodeBelongToNode(file, project);
+		});
+		return result;
+	}
+	
 	Map<Project, Collection<Package>> projectContainPakcagesCache = new ConcurrentHashMap<>();
 	@Override
 	public Collection<Package> findProjectContainPackages(Project project) {
@@ -352,8 +363,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
 	@Override
 	public Collection<Variable> findProjectContainAllFields(Project project) {
-		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<>();
 	}
 
 }

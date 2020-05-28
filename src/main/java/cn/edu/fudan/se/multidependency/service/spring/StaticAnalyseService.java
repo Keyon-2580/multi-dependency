@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
@@ -28,6 +29,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypeParameterType;
 import cn.edu.fudan.se.multidependency.service.spring.data.Clone;
+import cn.edu.fudan.se.multidependency.service.spring.data.Fan_IO;
 
 public interface StaticAnalyseService {
 	
@@ -35,7 +37,21 @@ public interface StaticAnalyseService {
 	
 	public Iterable<Project> allProjects();
 	
-	public List<Type> findExtendsType(Type type);
+	public Collection<Type> findExtendsType(Type type);
+	
+	/**
+	 * 找出type继承的Type
+	 * @param type
+	 * @return
+	 */
+	public Collection<Type> findInheritsType(Type type);
+	
+	/**
+	 * 找出哪些Type继承该type
+	 * @param type
+	 * @return
+	 */
+	public Collection<Type> findInheritsFromType(Type type);
 	
 	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller();
 	
@@ -113,5 +129,12 @@ public interface StaticAnalyseService {
 	public Iterable<Library> findAllLibraries();
 
 	long countOfAllProjects();
+	
+	List<Fan_IO<ProjectFile>> queryAllFileFanIOs(Project project);
+	
+	Fan_IO<ProjectFile> queryJavaFileFanIO(ProjectFile file);
+	
+	Collection<FunctionCallFunction> queryFunctionCallFunctions(Function function);
 
+	Collection<FunctionCallFunction> queryFunctionCallByFunctions(Function function);
 }

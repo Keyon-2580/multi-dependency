@@ -70,6 +70,8 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	
 	@Query("match (a:Project)-[r:" + RelationType.str_CONTAIN + "]->(b:Package) where id(a)={projectId} return b")
 	public List<Package> findProjectContainPackages(@Param("projectId") Long projectId);
+	@Query("match (a:Project)-[r:" + RelationType.str_CONTAIN + "*2]->(b:ProjectFile) where id(a)={projectId} return b")
+	public List<ProjectFile> findProjectContainFiles(@Param("projectId") Long projectId);
 	@Query("match (a:Project)-[r:" + RelationType.str_CONTAIN + "*3..5]->(b:Function) where id(a)={projectId} return b")
 	public List<Function> findProjectContainFunctions(@Param("projectId") Long projectId);
 	

@@ -23,6 +23,7 @@ public interface ContainRelationService {
 	Collection<Package> findProjectContainPackages(Project project);
 	Collection<Function> findProjectContainAllFunctions(Project project);
 	Collection<Variable> findProjectContainAllFields(Project project);
+	Collection<ProjectFile> findProjectContainAllFiles(Project project);
 	
 	Collection<ProjectFile> findPackageContainFiles(Package pck);
 	

@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +17,10 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
+import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
@@ -65,6 +68,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.code.VariableTypePara
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.lib.FunctionCallLibraryAPIRepository;
 import cn.edu.fudan.se.multidependency.service.spring.data.Clone;
+import cn.edu.fudan.se.multidependency.service.spring.data.Fan_IO;
 import cn.edu.fudan.se.multidependency.utils.PageUtil;
 
 /**
@@ -74,7 +78,6 @@ import cn.edu.fudan.se.multidependency.utils.PageUtil;
  */
 @Service
 public class StaticAnalyseServiceImpl implements StaticAnalyseService {
-	
 	
 	@Autowired
 	ProjectFileRepository fileRepository;
@@ -180,10 +183,20 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     
 	
 	@Override
-	public List<Type> findExtendsType(Type type) {
+	public Collection<Type> findExtendsType(Type type) {
 		return typeInheritsTypeRepository.findExtendsTypesByTypeId(type.getId());
 	}
 
+	@Override
+	public Collection<Type> findInheritsType(Type type) {
+		return typeInheritsTypeRepository.findInheritsFromTypeByTypeId(type.getId());
+	}
+	
+	@Override
+	public Collection<Type> findInheritsFromType(Type type) {
+		return typeInheritsTypeRepository.findInheritsTypesByTypeId(type.getId());
+	}
+	
 	@Override
 	public List<FileImportType> findProjectContainFileImportTypeRelations(Project project) {
 		return fileImportTypeRepository.findProjectContainFileImportTypeRelations(project.getId());
@@ -558,5 +571,97 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return result;
 	}
 
+
+	@Override
+	public Fan_IO<ProjectFile> queryJavaFileFanIO(ProjectFile file) {
+		Fan_IO<ProjectFile> result = new Fan_IO<ProjectFile>(file);
+		Collection<Type> typesInFile = containRelationService.findFileDirectlyContainTypes(file);
+		Collection<Function> functions = new ArrayList<>();
+		Collection<Variable> variables = new ArrayList<>();
+		for(Type type : typesInFile) {
+			Collection<Function> functionsInType = containRelationService.findTypeDirectlyContainFunctions(type);
+			functions.addAll(functionsInType);
+			for(Function function : functions) {
+				Collection<Variable> variablesInFunction = containRelationService.findFunctionDirectlyContainVariables(function);
+				variables.addAll(variablesInFunction);
+			}
+			Collection<Variable> variablesInType = containRelationService.findTypeDirectlyContainFields(type);
+			variables.addAll(variablesInType);
+		}
+		
+		for(Type type : typesInFile) {
+			Collection<Type> inherits = findInheritsType(type);
+			for(Type inheritsType : inherits) {
+				ProjectFile belongToFile = containRelationService.findTypeBelongToFile(inheritsType);
+				if(!file.equals(belongToFile)) {
+					result.addFanOut(belongToFile);
+				}
+			}
+			inherits = findInheritsFromType(type);
+			for(Type inheritsType : inherits) {
+				ProjectFile belongToFile = containRelationService.findTypeBelongToFile(inheritsType);
+				if(!file.equals(belongToFile)) {
+					result.addFanIn(belongToFile);
+				}
+			}
+		}
+		
+		for(Function function : functions) {
+			Collection<FunctionCallFunction> calls = queryFunctionCallFunctions(function);
+			for(FunctionCallFunction call : calls) {
+				ProjectFile belongToFile = containRelationService.findFunctionBelongToFile(call.getCallFunction());
+				if(!file.equals(belongToFile)) {
+					result.addFanOut(belongToFile);
+					result.addFanOutRelations(call);
+				}
+			}
+			
+			calls = queryFunctionCallByFunctions(function);
+			for(FunctionCallFunction call : calls) {
+				ProjectFile belongToFile = containRelationService.findFunctionBelongToFile(call.getFunction());
+				if(!file.equals(belongToFile)) {
+					result.addFanIn(belongToFile);
+					result.addFanInRelations(call);
+				}
+			}
+		}
+		
+		for(Variable variable : variables) {
+			
+		}
+		
+		
+		return result;
+	}
+
+	@Override
+	public List<Fan_IO<ProjectFile>> queryAllFileFanIOs(Project project) {
+		List<Fan_IO<ProjectFile>> result = new ArrayList<>();
+		Collection<ProjectFile> files = containRelationService.findProjectContainAllFiles(project);
+		for(ProjectFile file : files) {
+			Fan_IO<ProjectFile> fanIO = queryJavaFileFanIO(file);
+			result.add(fanIO);
+		}
+		result.sort(new Comparator<Fan_IO<ProjectFile>>() {
+			@Override
+			public int compare(Fan_IO<ProjectFile> o1, Fan_IO<ProjectFile> o2) {
+				if(o1.size() == o2.size()) {
+					return o1.getNode().getName().compareTo(o2.getNode().getName());
+				}
+				return o2.size() - o1.size();
+			}
+		});
+		return result;
+	}
+
+	@Override
+	public Collection<FunctionCallFunction> queryFunctionCallFunctions(Function function) {
+		return functionCallFunctionRepository.queryFunctionCallFunctions(function.getId());
+	}
+
+	@Override
+	public Collection<FunctionCallFunction> queryFunctionCallByFunctions(Function function) {
+		return functionCallFunctionRepository.queryFunctionCallByFunctions(function.getId());
+	}
 
 }

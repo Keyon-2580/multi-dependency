@@ -42,6 +42,7 @@ import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.MultipleService;
 import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
+import cn.edu.fudan.se.multidependency.service.spring.data.Fan_IO;
 import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
 
 @Controller
@@ -67,6 +68,16 @@ public class ProjectController {
 	
 	@Autowired
 	private MultipleService multipleService;
+	
+	@GetMapping(value = "/fanIO/file/{projectId}")
+	@ResponseBody
+	public Collection<Fan_IO<ProjectFile>> calculateFanIOs(@PathVariable("projectId") long id) {
+		Project project = nodeService.queryProject(id);
+		List<Fan_IO<ProjectFile>> result = staticAnalyseService.queryAllFileFanIOs(project);
+		int minSize = 35;
+		result = result.subList(0, result.size() < minSize ? result.size() : minSize);
+		return result;
+	}
 	
 	@GetMapping(value = "/all/{page}")
 	@ResponseBody

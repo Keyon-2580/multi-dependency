@@ -357,7 +357,7 @@ var multiple_microservice_all = function(cytoscapeutil) {
 		var myChart = echarts.init(document.getElementById('main'));
 		$.ajax({
 			type : "GET",
-			url : "/microservice//fanIO",
+			url : "/microservice/fanIO",
 			success : function(result) {
 				console.log(result);
 				var xAxisData = [];
