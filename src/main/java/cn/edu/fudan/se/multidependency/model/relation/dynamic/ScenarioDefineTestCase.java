@@ -9,6 +9,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
@@ -39,13 +40,13 @@ public class ScenarioDefineTestCase implements Relation {
 	private TestCase testCase;
 
 	@Override
-	public Long getStartNodeGraphId() {
-		return scenario.getId();
+	public Node getStartNode() {
+		return scenario;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return testCase.getId();
+	public Node getEndNode() {
+		return testCase;
 	}
 
 	@Override

@@ -1,15 +1,21 @@
 package cn.edu.fudan.se.multidependency.model.relation.git;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.neo4j.ogm.annotation.EndNode;
+import org.neo4j.ogm.annotation.GeneratedValue;
+import org.neo4j.ogm.annotation.Id;
+import org.neo4j.ogm.annotation.RelationshipEntity;
+import org.neo4j.ogm.annotation.StartNode;
+
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.neo4j.ogm.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -34,13 +40,13 @@ public class DeveloperSubmitCommit implements Relation {
     }
 
     @Override
-    public Long getStartNodeGraphId() {
-        return developer.getId();
+    public Node getStartNode() {
+        return developer;
     }
 
     @Override
-    public Long getEndNodeGraphId() {
-        return commit.getId();
+    public Node getEndNode() {
+        return commit;
     }
 
     @Override

@@ -9,9 +9,10 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -20,7 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_FUNCTION_CALL_FUNCTION)
 @EqualsAndHashCode
-public class FunctionCallFunction implements Relation {
+public class FunctionCallFunction implements RelationWithTimes {
 	
 	private static final long serialVersionUID = 5982413005555063698L;
 
@@ -44,13 +45,13 @@ public class FunctionCallFunction implements Relation {
     private Long id;
 	
 	@Override
-	public Long getStartNodeGraphId() {
-		return function.getId();
+	public Node getStartNode() {
+		return function;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return callFunction.getId();
+	public Node getEndNode() {
+		return callFunction;
 	}
 	
 	public void addTimes() {

@@ -11,21 +11,23 @@ import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_NODE_ANNOTATION_TYPE)
-public class NodeAnnotationType implements Relation {
+public class NodeAnnotationType implements RelationWithTimes {
 
 	private static final long serialVersionUID = 8248026322068428052L;
 	
 	@Id
     @GeneratedValue
     private Long id;
+	
+	private int times = 1;
 	
 	public NodeAnnotationType(Node startNode, Type annotationType) {
 		super();
@@ -40,13 +42,13 @@ public class NodeAnnotationType implements Relation {
 	private Type annotationType;
 
 	@Override
-	public Long getStartNodeGraphId() {
-		return startNode.getId();
+	public Node getStartNode() {
+		return startNode;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return annotationType.getId();
+	public Node getEndNode() {
+		return annotationType;
 	}
 
 	@Override
@@ -56,7 +58,13 @@ public class NodeAnnotationType implements Relation {
 
 	@Override
 	public Map<String, Object> getProperties() {
-		return new HashMap<>();
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("times", getTimes());
+		return properties;
+	}
+	
+	public void addTimes() {
+		this.times++;
 	}
 
 }

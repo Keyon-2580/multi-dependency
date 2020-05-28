@@ -9,6 +9,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
@@ -35,13 +36,13 @@ public class SpanInstanceOfRestfulAPI implements Relation {
 //	private Integer testCaseId;
 
 	@Override
-	public Long getStartNodeGraphId() {
-		return span.getId();
+	public Node getStartNode() {
+		return span;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return api.getId();
+	public Node getEndNode() {
+		return api;
 	}
 
 	@Override

@@ -9,6 +9,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
@@ -41,13 +42,13 @@ public class FunctionCallLibraryAPI implements Relation {
 	private int times;
 	
 	@Override
-	public Long getStartNodeGraphId() {
-		return function.getId();
+	public Node getStartNode() {
+		return function;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return api.getId();
+	public Node getEndNode() {
+		return api;
 	}
 
 	@Override

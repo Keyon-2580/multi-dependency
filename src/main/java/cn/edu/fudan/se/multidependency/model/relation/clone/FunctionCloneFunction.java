@@ -9,6 +9,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
@@ -44,13 +45,13 @@ public class FunctionCloneFunction implements HasCloneValueRelation {
 	}
 	
 	@Override
-	public Long getStartNodeGraphId() {
-		return function1.getId();
+	public Node getStartNode() {
+		return function1;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return function2.getId();
+	public Node getEndNode() {
+		return function2;
 	}
 
 	@Override

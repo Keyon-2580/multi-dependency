@@ -9,17 +9,18 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_FUNCTION_RETURN_TYPE)
-public class FunctionReturnType implements Relation {
+public class FunctionReturnType implements RelationWithTimes {
 
 	private static final long serialVersionUID = -3315100529955945595L;
 
@@ -28,6 +29,8 @@ public class FunctionReturnType implements Relation {
 	
 	@EndNode
 	private Type returnType;
+	
+	private int times = 1;
 	
 	public FunctionReturnType(Function function, Type returnType) {
 		super();
@@ -40,13 +43,13 @@ public class FunctionReturnType implements Relation {
     private Long id;
 	
 	@Override
-	public Long getStartNodeGraphId() {
-		return function.getId();
+	public Node getStartNode() {
+		return function;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return returnType.getId();
+	public Node getEndNode() {
+		return returnType;
 	}
 
 	@Override
@@ -56,7 +59,12 @@ public class FunctionReturnType implements Relation {
 
 	@Override
 	public Map<String, Object> getProperties() {
-		return new HashMap<>();
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("times", getTimes());
+		return properties;
 	}
-
+	
+	public void addTimes() {
+		this.times++;
+	}
 }

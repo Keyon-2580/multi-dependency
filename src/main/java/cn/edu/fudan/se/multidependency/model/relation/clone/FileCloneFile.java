@@ -9,6 +9,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
@@ -38,13 +39,13 @@ public class FileCloneFile implements HasCloneValueRelation {
 	}
 
 	@Override
-	public Long getStartNodeGraphId() {
-		return file1.getId();
+	public Node getStartNode() {
+		return file1;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return file2.getId();
+	public Node getEndNode() {
+		return file2;
 	}
 
 	@Override

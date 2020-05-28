@@ -9,6 +9,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
@@ -40,13 +41,13 @@ public class FunctionImplementFunction implements Relation {
 	private Function implementFunction;
 
 	@Override
-	public Long getStartNodeGraphId() {
-		return function.getId();
+	public Node getStartNode() {
+		return function;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return implementFunction.getId();
+	public Node getEndNode() {
+		return implementFunction;
 	}
 
 	@Override

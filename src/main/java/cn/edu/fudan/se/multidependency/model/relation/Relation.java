@@ -3,15 +3,25 @@ package cn.edu.fudan.se.multidependency.model.relation;
 import java.io.Serializable;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
+
 public interface Relation extends Serializable {
 	
 	Long getId();
 	
 	void setId(Long id);
 
-	Long getStartNodeGraphId();
+	default Long getStartNodeGraphId() {
+		return getStartNode().getId();
+	}
 	
-	Long getEndNodeGraphId();
+	default Long getEndNodeGraphId() {
+		return getEndNode().getId();
+	}
+	
+	Node getStartNode();
+	
+	Node getEndNode();
 	
 	RelationType getRelationType();
 	

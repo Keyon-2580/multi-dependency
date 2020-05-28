@@ -9,6 +9,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
@@ -38,13 +39,13 @@ public class VariableIsType implements Relation {
 	private Type type;
 
 	@Override
-	public Long getStartNodeGraphId() {
-		return variable.getId();
+	public Node getStartNode() {
+		return variable;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return type.getId();
+	public Node getEndNode() {
+		return type;
 	}
 
 	@Override

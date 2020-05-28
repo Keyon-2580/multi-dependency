@@ -37,13 +37,13 @@ public class Contain implements Relation {
 	private Node end;
 
 	@Override
-	public Long getStartNodeGraphId() {
-		return start.getId();
+	public Node getStartNode() {
+		return start;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return end.getId();
+	public Node getEndNode() {
+		return end;
 	}
 
 	@Override

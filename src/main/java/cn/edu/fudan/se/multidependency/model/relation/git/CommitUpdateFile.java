@@ -9,6 +9,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
@@ -43,13 +44,13 @@ public class CommitUpdateFile implements Relation {
 	}
 
 	@Override
-	public Long getStartNodeGraphId() {
-		return commit.getId();
+	public Node getStartNode() {
+		return commit;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return file.getId();
+	public Node getEndNode() {
+		return file;
 	}
 
 	@Override

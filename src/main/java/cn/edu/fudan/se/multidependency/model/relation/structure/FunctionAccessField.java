@@ -9,10 +9,11 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -21,7 +22,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_FUNCTION_ACCESS_FIELD)
 @EqualsAndHashCode
-public class FunctionAccessField implements Relation {
+public class FunctionAccessField implements RelationWithTimes {
 	
 	private static final long serialVersionUID = -2911695752320415027L;
 
@@ -48,13 +49,13 @@ public class FunctionAccessField implements Relation {
 	}
 
 	@Override
-	public Long getStartNodeGraphId() {
-		return function.getId();
+	public Node getStartNode() {
+		return function;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return field.getId();
+	public Node getEndNode() {
+		return field;
 	}
 
 	@Override

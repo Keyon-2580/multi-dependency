@@ -9,6 +9,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
@@ -51,13 +52,13 @@ public class TraceRunWithFunction implements DynamicCallFunction {
 	private String order;
 	
 	@Override
-	public Long getStartNodeGraphId() {
-		return trace.getId();
+	public Node getStartNode() {
+		return trace;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return function.getId();
+	public Node getEndNode() {
+		return function;
 	}
 
 	@Override

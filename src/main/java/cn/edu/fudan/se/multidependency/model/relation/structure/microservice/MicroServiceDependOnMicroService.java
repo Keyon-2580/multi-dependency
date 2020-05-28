@@ -9,6 +9,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
@@ -37,13 +38,13 @@ public class MicroServiceDependOnMicroService implements Relation {
 	private MicroService end;
 	
 	@Override
-	public Long getStartNodeGraphId() {
-		return start.getId();
+	public Node getStartNode() {
+		return start;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return end.getId();
+	public Node getEndNode() {
+		return end;
 	}
 
 	@Override

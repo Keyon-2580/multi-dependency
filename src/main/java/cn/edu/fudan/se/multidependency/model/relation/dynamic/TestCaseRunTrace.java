@@ -9,6 +9,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
@@ -39,13 +40,13 @@ public class TestCaseRunTrace implements Relation {
 	private Trace trace;
 
 	@Override
-	public Long getStartNodeGraphId() {
-		return testCase.getId();
+	public Node getStartNode() {
+		return testCase;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return trace.getId();
+	public Node getEndNode() {
+		return trace;
 	}
 
 	@Override

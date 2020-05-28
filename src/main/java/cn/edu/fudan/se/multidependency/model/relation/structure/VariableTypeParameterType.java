@@ -9,17 +9,18 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @RelationshipEntity(RelationType.str_VARIABLE_TYPE_PARAMETER_TYPE)
 @Data
 @NoArgsConstructor
-public class VariableTypeParameterType implements Relation {
+public class VariableTypeParameterType implements RelationWithTimes {
 
 	private static final long serialVersionUID = 2157443508230175654L;
 
@@ -33,14 +34,16 @@ public class VariableTypeParameterType implements Relation {
 	@EndNode
 	private Type type;
 	
+	private int times = 1;
+	
 	@Override
-	public Long getStartNodeGraphId() {
-		return variable.getId();
+	public Node getStartNode() {
+		return variable;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return type.getId();
+	public Node getEndNode() {
+		return type;
 	}
 
 	@Override
@@ -50,7 +53,13 @@ public class VariableTypeParameterType implements Relation {
 
 	@Override
 	public Map<String, Object> getProperties() {
-		return new HashMap<>();
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("times", getTimes());
+		return properties;
+	}
+	
+	public void addTimes() {
+		this.times++;
 	}
 
 }

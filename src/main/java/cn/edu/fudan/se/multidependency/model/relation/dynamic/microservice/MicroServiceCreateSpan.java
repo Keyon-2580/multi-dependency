@@ -9,6 +9,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
@@ -39,13 +40,13 @@ public class MicroServiceCreateSpan implements Relation {
 	private Span span;
 
 	@Override
-	public Long getStartNodeGraphId() {
-		return microservice.getId();
+	public Node getStartNode() {
+		return microservice;
 	}
 
 	@Override
-	public Long getEndNodeGraphId() {
-		return span.getId();
+	public Node getEndNode() {
+		return span;
 	}
 
 	@Override

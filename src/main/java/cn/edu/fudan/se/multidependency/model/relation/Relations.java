@@ -1,35 +1,49 @@
 package cn.edu.fudan.se.multidependency.model.relation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCallFunction;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionAccessField;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
 
 public class Relations {
 
-	private Map<RelationType, List<Relation>> allRelations = new HashMap<>();
+	private Map<RelationType, List<Relation>> allRelations = new ConcurrentHashMap<>();
 	
-	private Map<String, List<DynamicCallFunction>> traceIdToDynamicCallFunctions = new HashMap<>();
+	private Map<String, List<DynamicCallFunction>> traceIdToDynamicCallFunctions = new ConcurrentHashMap<>();
 	
-	private Map<Function, Map<Function, FunctionCallFunction>> functionCallFunctions = new HashMap<>();
+	private Map<Node, Map<Node, Map<RelationType, RelationWithTimes>>> startNodesToNodeRelations = new ConcurrentHashMap<>();
 	
-	private Map<Function, Map<Variable, FunctionAccessField>> functionAccessFields = new HashMap<>();
+	private RelationWithTimes hasRelationWithTimes(Node startNode, Node endNode, RelationType relationType) {
+		Map<Node, Map<RelationType, RelationWithTimes>> endNodesTemp = startNodesToNodeRelations.get(startNode);
+		if(endNodesTemp == null) {
+			return null;
+		}
+		Map<RelationType, RelationWithTimes> relationsTemp = endNodesTemp.get(endNode);
+		if(relationsTemp == null) {
+			return null;
+		}
+		return relationsTemp.get(relationType);
+	}
+	
+	private void addRelationWithTimes(RelationWithTimes relation) {
+		Map<Node, Map<RelationType, RelationWithTimes>> endNodesTemp = startNodesToNodeRelations.getOrDefault(relation.getStartNode(), new ConcurrentHashMap<>());
+		Map<RelationType, RelationWithTimes> relationsTemp = endNodesTemp.getOrDefault(relation.getEndNode(), new ConcurrentHashMap<>());
+		relationsTemp.put(relation.getRelationType(), relation);
+		endNodesTemp.put(relation.getEndNode(), relationsTemp);
+		startNodesToNodeRelations.put(relation.getStartNode(), endNodesTemp);
+	}
 	
 	public void clear() {
 		allRelations.clear();
 		traceIdToDynamicCallFunctions.clear();
-		functionCallFunctions.clear();
-		functionAccessFields.clear();
+		startNodesToNodeRelations.clear();
 	}
 	
 	public Map<RelationType, List<Relation>> getAllRelations() {
-		return new HashMap<>(allRelations);
+		return new ConcurrentHashMap<>(allRelations);
 	}
 	
 	public int size() {
@@ -47,62 +61,37 @@ public class Relations {
 			if(call.getTraceId() == null) {
 				return;
 			}
-			List<DynamicCallFunction> calls = traceIdToDynamicCallFunctions.getOrDefault(call.getTraceId(), new ArrayList<>());
+			List<DynamicCallFunction> calls = traceIdToDynamicCallFunctions.getOrDefault(call.getTraceId(), new CopyOnWriteArrayList<>());
 			calls.add(call);
 			traceIdToDynamicCallFunctions.put(call.getTraceId(), calls);
 		}
 		
-		if(relation instanceof FunctionCallFunction) {
-			FunctionCallFunction temp = (FunctionCallFunction) relation;
-			Function caller = temp.getFunction();
-			Function called = temp.getCallFunction();
-			FunctionCallFunction hasCall = hasFunctionCallFunction(caller, called);
-			if(hasCall != null) {
-				hasCall.addTimes();
-				return;
+		if(relation instanceof RelationWithTimes) {
+			RelationWithTimes relationWithTimes = hasRelationWithTimes(relation.getStartNode(), relation.getEndNode(), relation.getRelationType());
+			if(relationWithTimes == null) {
+				addRelationWithTimes((RelationWithTimes) relation);
+				addRelationDirectly(relation);
 			} else {
-				Map<Function, FunctionCallFunction> tempCall = this.functionCallFunctions.getOrDefault(caller, new HashMap<>());
-				tempCall.put(called, temp);
-				this.functionCallFunctions.put(caller, tempCall);
+				relationWithTimes.addTimes();
 			}
+		} else {
+			addRelationDirectly(relation);
 		}
 		
-		if(relation instanceof FunctionAccessField) {
-			FunctionAccessField temp = (FunctionAccessField) relation;
-			Function function = temp.getFunction();
-			Variable field = temp.getField();
-			FunctionAccessField hasAccess = hasFunctionAccessField(function, field);
-			if(hasAccess != null) {
-				hasAccess.addTimes();
-				return ;
-			} else {
-				Map<Variable, FunctionAccessField> tempAccess = this.functionAccessFields.getOrDefault(function, new HashMap<>());
-				tempAccess.put(field, temp);
-				this.functionAccessFields.put(function, tempAccess);
-			}
-		}
-		
-		List<Relation> nodes = allRelations.getOrDefault(relation.getRelationType(), new ArrayList<>());
-		nodes.add(relation);
-		allRelations.put(relation.getRelationType(), nodes);
 	}
 	
-	public FunctionCallFunction hasFunctionCallFunction(Function caller, Function called) {
-		Map<Function, FunctionCallFunction> calls = this.functionCallFunctions.get(caller);
-		return calls == null ? null : calls.get(called);
-	}
-	
-	public FunctionAccessField hasFunctionAccessField(Function function, Variable field) {
-		Map<Variable, FunctionAccessField> accesses = this.functionAccessFields.get(function);
-		return accesses == null ? null : accesses.get(field);
+	private void addRelationDirectly(Relation relation) {
+		List<Relation> relations = allRelations.getOrDefault(relation.getRelationType(), new CopyOnWriteArrayList<>());
+		relations.add(relation);
+		allRelations.put(relation.getRelationType(), relations);
 	}
 	
 	public List<DynamicCallFunction> findDynamicCallFunctionsByTraceId(String traceId) {
-		return traceIdToDynamicCallFunctions.getOrDefault(traceId, new ArrayList<>());
+		return traceIdToDynamicCallFunctions.getOrDefault(traceId, new CopyOnWriteArrayList<>());
 	}
 	
 	public List<? extends Relation> findRelationsMap(RelationType relationType) {
-		return allRelations.getOrDefault(relationType, new ArrayList<>());
+		return allRelations.getOrDefault(relationType, new CopyOnWriteArrayList<>());
 	}
 	
 	public boolean existRelation(Relation relation) {
