@@ -970,8 +970,8 @@
 	  "gits": [
 	    {
 	      "path": "D:/multiple-dependency-project/train-ticket",
-	      "commit_id_from": "3ea128078eb0ec45f110a77ed151933339d0f626",
-	      "commit_id_to": "5122684aff988277b8c50c26576b28bfffef3289a",
+	      "commit_id_from": "",
+	      "commit_id_to": "",
 	      "issues_path": "src/main/resources/git/train-ticket-issues.json"
 	    }
 	  ],
@@ -982,11 +982,17 @@
 	    }
 	  ],
 	  "clones": [
-	    {
-	      "language": "java",
-	      "granularity": "function",
-	      "name_path": "src/main/resources/clone/function/MethodNameTable.csv",
-	      "result_path": "src/main/resources/clone/function/type123_method_result.csv"
-	    }
+		  {
+			  "language": "java",
+			  "granularity": "file",
+			  "name_path": "src/main/resources/clone/file/train-ticket/result/MeasureIndex.csv",
+			  "result_path": "src/main/resources/clone/file/train-ticket/result/type123_method_result.csv"
+		  },
+		  {
+			  "language": "java",
+			  "granularity": "function",
+			  "name_path": "src/main/resources/clone/function/train-ticket/resultFolder/MethodNameTable.csv",
+			  "result_path": "src/main/resources/clone/function/train-ticket/result/type123_method_result.csv"
+		  }
 	  ]
 }

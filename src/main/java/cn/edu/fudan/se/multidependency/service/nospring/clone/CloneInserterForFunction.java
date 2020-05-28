@@ -17,7 +17,6 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunctio
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
 import cn.edu.fudan.se.multidependency.utils.CloneUtil;
 import cn.edu.fudan.se.multidependency.utils.CloneUtil.CloneResultFromCsv;
-import cn.edu.fudan.se.multidependency.utils.CloneUtil.FilePathForJavaFromCsv;
 import cn.edu.fudan.se.multidependency.utils.CloneUtil.MethodNameForJavaFromCsv;
 import cn.edu.fudan.se.multidependency.utils.FunctionUtil;
 import lombok.Setter;
@@ -79,11 +78,15 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 				double value = cloneResult.getValue();
 				MethodNameForJavaFromCsv methodName1 = methodNames.get(start);
 				if(methodName1 == null) {
-					throw new Exception("methofName1 is null");
+//					throw new Exception("methofName1 is null " + start + " " + end);
+					LOGGER.warn("methofName1 is null " + start + " " + end);
+					continue;
 				}
 				MethodNameForJavaFromCsv methodName2 = methodNames.get(end);
 				if(methodName2 == null) {
-					throw new Exception("methodName2 is null");
+//					throw new Exception("methodName2 is null " + start + " " + end);
+					LOGGER.warn("methodName2 is null " + start + " " + end);
+					continue;
 				}
 				Project project1 = this.getNodes().findProject(methodName1.getProjectName(), language);
 				if(project1 == null) {
