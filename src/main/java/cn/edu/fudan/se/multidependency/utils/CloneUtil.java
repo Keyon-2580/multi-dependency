@@ -19,7 +19,7 @@ import lombok.EqualsAndHashCode;
 public class CloneUtil {
 	
 	@Data
-	public static class FilePathForJavaFromCsv {
+	public static class FilePathFromCsv {
 		private String line;
 		private int lineId;
 		private String filePath;
@@ -29,7 +29,7 @@ public class CloneUtil {
 
 	@Data
 	@EqualsAndHashCode(callSuper = true)
-	public static class MethodNameForJavaFromCsv extends FilePathForJavaFromCsv {
+	public static class MethodNameForJavaFromCsv extends FilePathFromCsv {
 		private String projectName;
 		private String packageName;
 		private String className;
@@ -40,8 +40,10 @@ public class CloneUtil {
 		}
 		private String getFunctionName() {
 			StringBuilder builder = new StringBuilder();
-			builder.append((StringUtils.isBlank(packageName) ? "default" : packageName));
-			builder.append(".");
+			if(!StringUtils.isBlank(packageName)) {
+				builder.append(packageName);
+				builder.append(".");
+			}
 			builder.append(className);
 			builder.append(".");
 			builder.append(functionSimpleName);
@@ -65,8 +67,8 @@ public class CloneUtil {
 		}
 	}
 	
-	public static Map<Integer, FilePathForJavaFromCsv> readJavaCloneCsvForFilePath(String filePath) throws Exception {
-		Map<Integer, FilePathForJavaFromCsv> result = new HashMap<>();
+	public static Map<Integer, FilePathFromCsv> readJavaCloneCsvForFilePath(String filePath) throws Exception {
+		Map<Integer, FilePathFromCsv> result = new HashMap<>();
 		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
 			String line = null;
 			while((line = reader.readLine()) != null) {
@@ -75,7 +77,7 @@ public class CloneUtil {
 					LOGGER.warn("克隆数据格式不正确：" + line);
 					continue;
 				}
-				FilePathForJavaFromCsv file = new FilePathForJavaFromCsv();
+				FilePathFromCsv file = new FilePathFromCsv();
 				file.setLine(line);
 				file.setLineId(Integer.parseInt(values[0]));
 				file.setFilePath(values[1]);

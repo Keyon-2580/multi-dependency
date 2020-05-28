@@ -71,20 +71,17 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 			
 			latch.await();
 
-			
 			for(CloneResultFromCsv cloneResult : cloneResults) {
 				int start = cloneResult.getStart();
 				int end = cloneResult.getEnd();
 				double value = cloneResult.getValue();
 				MethodNameForJavaFromCsv methodName1 = methodNames.get(start);
 				if(methodName1 == null) {
-//					throw new Exception("methofName1 is null " + start + " " + end);
 					LOGGER.warn("methofName1 is null " + start + " " + end);
 					continue;
 				}
 				MethodNameForJavaFromCsv methodName2 = methodNames.get(end);
 				if(methodName2 == null) {
-//					throw new Exception("methodName2 is null " + start + " " + end);
 					LOGGER.warn("methodName2 is null " + start + " " + end);
 					continue;
 				}

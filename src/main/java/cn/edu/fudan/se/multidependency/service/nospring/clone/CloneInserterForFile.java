@@ -14,7 +14,7 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
 import cn.edu.fudan.se.multidependency.utils.CloneUtil;
 import cn.edu.fudan.se.multidependency.utils.CloneUtil.CloneResultFromCsv;
-import cn.edu.fudan.se.multidependency.utils.CloneUtil.FilePathForJavaFromCsv;
+import cn.edu.fudan.se.multidependency.utils.CloneUtil.FilePathFromCsv;
 import lombok.Setter;
 
 public class CloneInserterForFile extends ExtractorForNodesAndRelationsImpl {
@@ -39,7 +39,7 @@ public class CloneInserterForFile extends ExtractorForNodesAndRelationsImpl {
 		this.latch = new CountDownLatch(2);
 	}
 	
-	private Map<Integer, FilePathForJavaFromCsv> filePaths;
+	private Map<Integer, FilePathFromCsv> filePaths;
 	private Iterable<CloneResultFromCsv> cloneResults;
 
 	@Override
@@ -70,11 +70,11 @@ public class CloneInserterForFile extends ExtractorForNodesAndRelationsImpl {
 			int start = cloneResult.getStart();
 			int end = cloneResult.getEnd();
 			double value = cloneResult.getValue();
-			FilePathForJavaFromCsv filePath1 = filePaths.get(start);
+			FilePathFromCsv filePath1 = filePaths.get(start);
 			if(filePath1 == null) {
 				throw new Exception("filePath1 is null");
 			}
-			FilePathForJavaFromCsv filePath2 = filePaths.get(end);
+			FilePathFromCsv filePath2 = filePaths.get(end);
 			if(filePath2 == null) {
 				throw new Exception("filePath2 is null");
 			}
