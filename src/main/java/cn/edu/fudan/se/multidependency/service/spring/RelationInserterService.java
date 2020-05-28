@@ -32,9 +32,6 @@ public class RelationInserterService {
 	private FeatureOrganizationService featureOrganizationService;
 	
 	@Autowired
-	private FileDependOnFileExtractService fileDependOnFileExtractor;
-	
-	@Autowired
 	private MicroserviceService microserviceService;
 	
 	/*@Autowired
@@ -90,27 +87,6 @@ public class RelationInserterService {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-//	@Bean
-	public void testFileDependOnFileExtractService() {
-		try {
-			fileDependOnFileExtractor.extractFileDependOnFiles();
-			fileDependOnFileExtractor.save();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		/*Map<Long, Project> allProjects = staticAnalyseService.allProjects();
-		for(Long id : allProjects.keySet()) {
-			try {
-				fileDependOnFileExtractor.setProject(id);
-				System.out.println("extractFileDependOnFiles");
-				fileDependOnFileExtractor.extractFileDependOnFiles();
-				fileDependOnFileExtractor.save();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}*/
 	}
 
 }
