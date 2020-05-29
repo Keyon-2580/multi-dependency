@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_FILE_CLONE_FILE)
-public class FileCloneFile implements HasCloneValueRelation {
+public class FileCloneFile implements CloneRelation {
 	private static final long serialVersionUID = -8166989684654207651L;
 
 	@Id
@@ -32,6 +32,10 @@ public class FileCloneFile implements HasCloneValueRelation {
 	private ProjectFile file2;
 	
 	private double value;
+	
+	private int file1Index;
+	
+	private int file2Index;
 	
 	private int file1StartLine;
 	
@@ -70,6 +74,36 @@ public class FileCloneFile implements HasCloneValueRelation {
 		properties.put("file2StartLine", getFile2StartLine());
 		properties.put("file2EndLine", getFile2EndLine());
 		return properties;
+	}
+
+	@Override
+	public int getNode1StartLine() {
+		return file1StartLine;
+	}
+
+	@Override
+	public int getNode1EndLine() {
+		return file1EndLine;
+	}
+
+	@Override
+	public int getNode2StartLine() {
+		return file2StartLine;
+	}
+
+	@Override
+	public int getNode2EndLine() {
+		return file2EndLine;
+	}
+
+	@Override
+	public int getNode1Index() {
+		return file1Index;
+	}
+
+	@Override
+	public int getNode2Index() {
+		return file2Index;
 	}
 
 }

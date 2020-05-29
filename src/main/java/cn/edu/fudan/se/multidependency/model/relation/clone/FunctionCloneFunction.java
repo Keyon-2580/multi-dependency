@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_FUNCTION_CLONE_FUNCTION)
-public class FunctionCloneFunction implements HasCloneValueRelation {
+public class FunctionCloneFunction implements CloneRelation {
 	
 	private static final long serialVersionUID = -5264263917272265233L;
 
@@ -46,6 +46,10 @@ public class FunctionCloneFunction implements HasCloneValueRelation {
 	private int function2StartLine;
 	
 	private int function2EndLine;
+	
+	private int function1Index;
+	
+	private int function2Index;
 	
 	public FunctionCloneFunction(Function function1, Function function2) {
 		this.function1 = function1;
@@ -76,6 +80,36 @@ public class FunctionCloneFunction implements HasCloneValueRelation {
 		properties.put("function2StartLine", getFunction2StartLine());
 		properties.put("function2EndLine", getFunction2EndLine());
 		return properties;
+	}
+
+	@Override
+	public int getNode1StartLine() {
+		return function1StartLine;
+	}
+
+	@Override
+	public int getNode1EndLine() {
+		return function1EndLine;
+	}
+
+	@Override
+	public int getNode2StartLine() {
+		return function2StartLine;
+	}
+
+	@Override
+	public int getNode2EndLine() {
+		return function2EndLine;
+	}
+
+	@Override
+	public int getNode1Index() {
+		return function1Index;
+	}
+
+	@Override
+	public int getNode2Index() {
+		return function2Index;
 	}
 	
 }

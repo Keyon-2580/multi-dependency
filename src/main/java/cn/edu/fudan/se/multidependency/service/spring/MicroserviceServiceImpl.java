@@ -85,6 +85,9 @@ public class MicroserviceServiceImpl implements MicroserviceService {
     private ContainRelationService containRelationService;
     
     @Autowired
+    private CloneAnalyseService cloneAnalyse;
+    
+    @Autowired
     private CacheService cache;
 	
 	@Override
@@ -264,7 +267,7 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 
 	@Override
 	public Collection<Clone<MicroService, FunctionCloneFunction>> findMicroServiceCloneFromFunctionClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode) {
-		Collection<Clone<Project, FunctionCloneFunction>> projectClones = staticAnalyseService.findProjectCloneFromFunctionClone(functionClones, removeSameNode);
+		Collection<Clone<Project, FunctionCloneFunction>> projectClones = cloneAnalyse.findProjectCloneFromFunctionClone(functionClones, removeSameNode);
 		List<Clone<MicroService, FunctionCloneFunction>> result = new ArrayList<>();
 		Map<MicroService, Map<MicroService, Clone<MicroService, FunctionCloneFunction>>> msToMsClones = new HashMap<>();
 		for(Clone<Project, FunctionCloneFunction> projectClone : projectClones) {
@@ -306,7 +309,7 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	@Override
 	public Collection<Clone<MicroService, FileCloneFile>> findMicroServiceCloneFromFileClone(
 			Iterable<FileCloneFile> fileClones, boolean removeSameNode) {
-		Iterable<Clone<Project, FileCloneFile>> projectClones = staticAnalyseService.queryProjectCloneFromFileClone(fileClones, removeSameNode);
+		Iterable<Clone<Project, FileCloneFile>> projectClones = cloneAnalyse.queryProjectCloneFromFileClone(fileClones, removeSameNode);
 		List<Clone<MicroService, FileCloneFile>> result = new ArrayList<>();
 		Map<MicroService, Map<MicroService, Clone<MicroService, FileCloneFile>>> msToMsClones = new HashMap<>();
 		for(Clone<Project, FileCloneFile> projectClone : projectClones) {

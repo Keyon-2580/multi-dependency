@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.relation.clone.HasCloneValueRelation;
+import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
 import lombok.Data;
 
 /**
@@ -14,7 +14,7 @@ import lombok.Data;
  *
  */
 @Data
-public class Clone<N extends Node, C extends HasCloneValueRelation> implements Serializable {
+public class Clone<N extends Node, C extends CloneRelation> implements Serializable {
 	
 	private static final long serialVersionUID = -2262794801616872866L;
 	
@@ -36,7 +36,7 @@ public class Clone<N extends Node, C extends HasCloneValueRelation> implements S
 	}
 	
 	public static interface CloneValueCalculator {
-		String calculate(Clone<? extends Node, ? extends HasCloneValueRelation> clone);
+		String calculate(Clone<? extends Node, ? extends CloneRelation> clone);
 	}
 	
 	private transient CloneValueCalculator calculator;

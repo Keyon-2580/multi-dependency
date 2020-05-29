@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,7 +135,7 @@ public class CloneUtil {
 		private double value;
 	}
 	
-	public static Iterable<CloneResultFromCsv> readCloneResultCsv(String filePath) throws Exception {
+	public static Collection<CloneResultFromCsv> readCloneResultCsv(String filePath) throws Exception {
 		List<CloneResultFromCsv> result = new ArrayList<>();
 		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
 			String line = null;

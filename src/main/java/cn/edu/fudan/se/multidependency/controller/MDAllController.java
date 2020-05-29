@@ -21,10 +21,10 @@ import com.alibaba.fastjson.JSONObject;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
+import cn.edu.fudan.se.multidependency.service.spring.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.GitAnalyseServiceImpl;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
-import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.data.MicroServiceCallWithEntry;
 import cn.edu.fudan.se.multidependency.service.spring.data.MicroServiceCallWithEntry.CytoscapeEdge;
 
@@ -41,11 +41,8 @@ public class MDAllController {
 	@Autowired
 	private MicroserviceService msService;
 	
-//	@Autowired
-//	private DynamicAnalyseService dynamicAnalyseService;
-	
 	@Autowired
-	private StaticAnalyseService staticAnalyseService;
+	private CloneAnalyseService cloneAnalyse;
 	
 	@GetMapping("")
 	public String multipleMicroServiceAll(HttpServletRequest request) {
@@ -79,8 +76,8 @@ public class MDAllController {
 			callsWithEntry.setShowCntOfDevUpdMs(showCntOfDevUpdMs);
 			callsWithEntry.setShowClonesMinPair(showClonesMinPair);
 			if(showClonesInMicroService) {
-				callsWithEntry.setClonesInMicroServiceFromFunctionClone(msService.findMicroServiceCloneFromFunctionClone(staticAnalyseService.findAllFunctionCloneFunctions(), true));
-				callsWithEntry.setClonesInMicroServiceFromFileClone(msService.findMicroServiceCloneFromFileClone(staticAnalyseService.findAllFileCloneFiles(), true));
+				callsWithEntry.setClonesInMicroServiceFromFunctionClone(msService.findMicroServiceCloneFromFunctionClone(cloneAnalyse.findAllFunctionCloneFunctions(), true));
+				callsWithEntry.setClonesInMicroServiceFromFileClone(msService.findMicroServiceCloneFromFileClone(cloneAnalyse.findAllFileCloneFiles(), true));
 				callsWithEntry.setShowClonesMinPair(showClonesMinPair);
 			}
 			if(showMicroServiceCallLibs) {
@@ -174,8 +171,8 @@ public class MDAllController {
 		callsWithEntry.setShowCntOfDevUpdMs(showCntOfDevUpdMs);
 		
 		if(showClonesInMicroService) {
-			callsWithEntry.setClonesInMicroServiceFromFunctionClone(msService.findMicroServiceCloneFromFunctionClone(staticAnalyseService.findAllFunctionCloneFunctions(), true));
-			callsWithEntry.setClonesInMicroServiceFromFileClone(msService.findMicroServiceCloneFromFileClone(staticAnalyseService.findAllFileCloneFiles(), true));
+			callsWithEntry.setClonesInMicroServiceFromFunctionClone(msService.findMicroServiceCloneFromFunctionClone(cloneAnalyse.findAllFunctionCloneFunctions(), true));
+			callsWithEntry.setClonesInMicroServiceFromFileClone(msService.findMicroServiceCloneFromFileClone(cloneAnalyse.findAllFileCloneFiles(), true));
 			callsWithEntry.setShowClonesMinPair(showClonesMinPair);
 		}
 		if(showMicroServiceCallLibs) {

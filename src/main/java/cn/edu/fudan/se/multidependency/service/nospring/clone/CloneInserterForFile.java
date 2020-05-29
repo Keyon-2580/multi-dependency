@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.nospring.clone;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -40,7 +41,7 @@ public class CloneInserterForFile extends ExtractorForNodesAndRelationsImpl {
 	}
 	
 	private Map<Integer, FilePathFromCsv> filePaths;
-	private Iterable<CloneResultFromCsv> cloneResults;
+	private Collection<CloneResultFromCsv> cloneResults;
 
 	@Override
 	public void addNodesAndRelations() throws Exception {
@@ -65,7 +66,8 @@ public class CloneInserterForFile extends ExtractorForNodesAndRelationsImpl {
 		});
 		
 		latch.await();
-		
+		LOGGER.info("文件克隆对数：" + cloneResults.size());
+		int sizeOfFileCloneFiles = 0;
 		for(CloneResultFromCsv cloneResult : cloneResults) {
 			int start = cloneResult.getStart();
 			int end = cloneResult.getEnd();
@@ -89,13 +91,17 @@ public class CloneInserterForFile extends ExtractorForNodesAndRelationsImpl {
 				continue;
 			}
 			FileCloneFile clone = new FileCloneFile(file1, file2);
+			clone.setFile1Index(start);
+			clone.setFile2Index(end);
 			clone.setFile1StartLine(filePath1.getStartLine());
 			clone.setFile1EndLine(filePath1.getEndLine());
 			clone.setFile2StartLine(filePath2.getStartLine());
 			clone.setFile2EndLine(filePath2.getEndLine());
 			clone.setValue(value);
 			addRelation(clone);
+			sizeOfFileCloneFiles++;
 		}
+		LOGGER.info("插入文件级克隆关系数：" + sizeOfFileCloneFiles);
 	}
 
 }

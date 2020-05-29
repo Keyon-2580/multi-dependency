@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.nospring.clone;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -36,7 +37,7 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 	private String methodResultPath;
 
 	private Map<Integer, MethodNameForJavaFromCsv> methodNames;
-	private Iterable<CloneResultFromCsv> cloneResults;
+	private Collection<CloneResultFromCsv> cloneResults;
 	
 	public CloneInserterForFunction(Language language, String methodNameTablePath, String methodResultPath) {
 		super();
@@ -70,19 +71,20 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 			});
 			
 			latch.await();
-
+			LOGGER.info("方法克隆对数：" + cloneResults.size());
+			int sizeOfFunctionCloneFunctions = 0;
 			for(CloneResultFromCsv cloneResult : cloneResults) {
 				int start = cloneResult.getStart();
 				int end = cloneResult.getEnd();
 				double value = cloneResult.getValue();
 				MethodNameForJavaFromCsv methodName1 = methodNames.get(start);
 				if(methodName1 == null) {
-					LOGGER.warn("methofName1 is null " + start + " " + end);
+					LOGGER.warn("methodName1 is null, index: " + start);
 					continue;
 				}
 				MethodNameForJavaFromCsv methodName2 = methodNames.get(end);
 				if(methodName2 == null) {
-					LOGGER.warn("methodName2 is null " + start + " " + end);
+					LOGGER.warn("methodName2 is null, index: " + end);
 					continue;
 				}
 				Project project1 = this.getNodes().findProject(methodName1.getProjectName(), language);
@@ -106,13 +108,17 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 					continue;
 				}
 				FunctionCloneFunction clone = new FunctionCloneFunction(function1, function2);
+				clone.setFunction1Index(start);
+				clone.setFunction2Index(end);
 				clone.setFunction1StartLine(methodName1.getStartLine());
 				clone.setFunction1EndLine(methodName1.getEndLine());
 				clone.setFunction2StartLine(methodName2.getStartLine());
 				clone.setFunction2EndLine(methodName2.getEndLine());
 				clone.setValue(value);
 				addRelation(clone);
+				sizeOfFunctionCloneFunctions++;
 			}
+			LOGGER.info("插入方法级克隆数：" + sizeOfFunctionCloneFunctions);
 		}
 	}
 	

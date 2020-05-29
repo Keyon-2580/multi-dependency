@@ -18,7 +18,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
-import cn.edu.fudan.se.multidependency.model.relation.clone.HasCloneValueRelation;
+import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
@@ -178,7 +178,7 @@ public class MicroServiceCallWithEntry {
 		return result;
 	}
 	
-	private void showClonesInMicroService(JSONArray edges, Class<? extends HasCloneValueRelation> relationClass) {
+	private void showClonesInMicroService(JSONArray edges, Class<? extends CloneRelation> relationClass) {
 		if(relationClass == FunctionCloneFunction.class) {
 			for(Clone<MicroService, FunctionCloneFunction> clone : clonesInMicroServiceFromFunctionClone) {
 				if(clone.sizeOfChildren() >= showClonesMinPair) {

@@ -11,9 +11,8 @@ import com.alibaba.fastjson.JSONObject;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
-import cn.edu.fudan.se.multidependency.repository.relation.clone.FileCloneFileRepository;
+import cn.edu.fudan.se.multidependency.service.spring.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
-import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.data.Clone;
 
 @Controller
@@ -21,25 +20,41 @@ import cn.edu.fudan.se.multidependency.service.spring.data.Clone;
 public class CloneController {
 	
 	@Autowired
-	private StaticAnalyseService staticAnalyseService;
-	
-	@Autowired
 	private MicroserviceService msService;
 	
 	@Autowired
-	private FileCloneFileRepository fileCloneFileRepository;
+	private CloneAnalyseService cloneAnalyse;
 	
-	@GetMapping("/file/group")
+	@GetMapping("/file/group/node")
 	@ResponseBody
-	public void testCloneFileGroup() {
+	public Object testCloneFileGroupNode() {
+		return cloneAnalyse.groupFileCloneNode();
+	}
+	
+	@GetMapping("/file/group/relation")
+	@ResponseBody
+	public Object testCloneFileGroupRelation() {
+		return cloneAnalyse.groupFileCloneRelation();
+	}
+	
+	@GetMapping("/function/group/node")
+	@ResponseBody
+	public Object testCloneFunctionGroupNode() {
+		return cloneAnalyse.groupFunctionCloneNode();
+	}
+
+	@GetMapping("/function/group/relation")
+	@ResponseBody
+	public Object testCloneFunctionGroupRelation() {
+		return cloneAnalyse.groupFunctionCloneRelation();
 	}
 
 	@GetMapping("/clones")
 	@ResponseBody
 	public JSONObject findProjectClones() {
 		JSONObject result = new JSONObject();
-		Iterable<FunctionCloneFunction> allClones = staticAnalyseService.findAllFunctionCloneFunctions();
-		Iterable<Clone<Project, FunctionCloneFunction>> clones = staticAnalyseService.findProjectCloneFromFunctionClone(allClones, true);
+		Iterable<FunctionCloneFunction> allClones = cloneAnalyse.findAllFunctionCloneFunctions();
+		Iterable<Clone<Project, FunctionCloneFunction>> clones = cloneAnalyse.findProjectCloneFromFunctionClone(allClones, true);
 		result.put("result", "success");
 		result.put("projectValues", clones);
 		Iterable<Clone<MicroService,  FunctionCloneFunction>> msClones = msService.findMicroServiceCloneFromFunctionClone(allClones, true);
