@@ -13,8 +13,8 @@ import cn.edu.fudan.se.multidependency.InsertDataMain;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserterForFile;
 import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserterForFunction;
-import cn.edu.fudan.se.multidependency.service.nospring.code.BasicCodeInserterForNeo4jServiceImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.code.Depends096Extractor;
+import cn.edu.fudan.se.multidependency.service.nospring.code.DependsCodeInserterForNeo4jServiceImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.nospring.code.RestfulAPIFileExtractor;
 import cn.edu.fudan.se.multidependency.service.nospring.code.RestfulAPIFileExtractorImpl;
@@ -34,7 +34,6 @@ import cn.edu.fudan.se.multidependency.utils.config.LibConfig;
 import cn.edu.fudan.se.multidependency.utils.config.ProjectConfig;
 import cn.edu.fudan.se.multidependency.utils.config.ProjectConfigUtil;
 import cn.edu.fudan.se.multidependency.utils.config.RestfulAPIConfig;
-import depends.entity.repo.EntityRepo;
 
 public class ThreadService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(InsertDataMain.class);
@@ -81,20 +80,17 @@ public class ThreadService {
 		extractor.setLanguage(projectConfig.getLanguage());
 		extractor.setProjectPath(projectConfig.getPath());
 		extractor.setAutoInclude(projectConfig.isAutoInclude());
-		EntityRepo entityRepo = extractor.extractEntityRepo();
-		if (extractor.getEntityCount() > 0) {
-			BasicCodeInserterForNeo4jServiceImpl inserter = InserterForNeo4jServiceFactory.getInstance()
-					.createCodeInserterService(entityRepo, projectConfig);
-			RestfulAPIConfig apiConfig = projectConfig.getApiConfig();
-			if (apiConfig != null && RestfulAPIConfig.FRAMEWORK_SWAGGER.equals(projectConfig.getApiConfig().getFramework())) {
-				SwaggerJSON swagger = new SwaggerJSON();
-				swagger.setPath(apiConfig.getPath());
-				swagger.setExcludeTags(apiConfig.getExcludeTags());
-				RestfulAPIFileExtractor restfulAPIFileExtractorImpl = new RestfulAPIFileExtractorImpl(swagger);
-				inserter.setRestfulAPIFileExtractor(restfulAPIFileExtractorImpl);
-			}
-			inserter.addNodesAndRelations();
+		DependsCodeInserterForNeo4jServiceImpl inserter = InserterForNeo4jServiceFactory.getInstance()
+				.createCodeInserterService(extractor.extractEntityRepo(), projectConfig);
+		RestfulAPIConfig apiConfig = projectConfig.getApiConfig();
+		if (apiConfig != null && RestfulAPIConfig.FRAMEWORK_SWAGGER.equals(projectConfig.getApiConfig().getFramework())) {
+			SwaggerJSON swagger = new SwaggerJSON();
+			swagger.setPath(apiConfig.getPath());
+			swagger.setExcludeTags(apiConfig.getExcludeTags());
+			RestfulAPIFileExtractor restfulAPIFileExtractorImpl = new RestfulAPIFileExtractorImpl(swagger);
+			inserter.setRestfulAPIFileExtractor(restfulAPIFileExtractorImpl);
 		}
+		inserter.addNodesAndRelations();
 	}
 	
 	public void msDependAnalyse() {
