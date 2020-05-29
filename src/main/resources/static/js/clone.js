@@ -20,12 +20,14 @@ var clone = function(cytoscapeutil) {
 						console.log(size);
 						var html = "";
 						for(var i = 0; i < size; i++) {
+							html += '<div class="col-sm-12 div_cytoscape_div">';
+							html += '<div class="div_cytoscape_treeview">';
+							html += '<ul id="ztree" class="ztree"></ul>';
+							html += '</div>';
 							html += '<div class="div_cytoscape" style="float: left; display: inline;">';
-//							html += '<div class="div_cytoscape_treeview">';
-//							html += '<ul id="ztree" class="ztree"></ul>';
-//							html += '</div>';
 							html += '<div id="cloneGroupDiv_' + i + '" class="div_cytoscape_content cy"></div>';
 							html += '</div>'
+							html += '</div>';
 							html += '<div><hr/></div>';
 						}
 						$("#content").html(html);
@@ -76,23 +78,30 @@ var clone = function(cytoscapeutil) {
 				}
 			});
 		});
-		/*var myChart = echarts.init(document.getElementById('main'));
+		var myChart = echarts.init(document.getElementById('main'));
 		$.ajax({
 			type : "GET",
-			url : "/project/fanIO/file/" + project.id,
+			url : "/clone/file/group/histogram",
 			success : function(result) {
 				console.log(result);
 				var xAxisData = [];
-				var fanInData = [];
-				var fanOutData = [];
-				console.log(result.length);
-				for(var i = 0; i < result.length; i++) {
-					xAxisData[i] = result[i].node.name;
-					console.log(xAxisData[i]);
-					fanInData[i] = result[i].fanIn.length == 0 ? null : result[i].fanIn.length;
-					fanOutData[i] = result[i].fanOut.length == 0 ? null : result[i].fanOut.length;
+				var filesData = [];
+				var projectsData = [];
+				for(var i = 0; i < result.size; i++) {
+					xAxisData[i] = "group_" + i;
+					filesData[i] = result.value.fileSize[i];
+					projectsData[i] = result.value.projectSize[i];
 				}
 				var option = {
+						dataZoom: [{
+							type: 'slider',
+							show: true,
+							xAxisIndex: [0],
+							left: '9%',
+							bottom: -5,
+							start: 0,
+							end: 50 //初始化滚动条
+						}],
 		        	    tooltip: {
 		        	        trigger: 'axis',
 		        	        axisPointer: {            // 坐标轴指示器，坐标轴触发有效
@@ -100,7 +109,7 @@ var clone = function(cytoscapeutil) {
 		        	        }
 		        	    },
 		        	    legend: {
-		        	        data: ['FAN_IN', 'FAN_OUT']
+		        	        data: ['克隆组相关文件数', '克隆跨项目数']
 		        	    },
 		        	    grid: {
 		        	        left: '3%',
@@ -125,23 +134,23 @@ var clone = function(cytoscapeutil) {
 		        	    ],
 		        	    series: [
 		        	        {
-		        	            name: 'FAN_IN',
+		        	            name: '克隆组相关文件数',
 		        	            type: 'bar',
-		        	            stack: 'fan',
-		        	            data: fanInData
+		        	            stack: 'cloneFile',
+		        	            data: filesData
 		        	        },
 		        	        {
-		        	            name: 'FAN_OUT',
+		        	            name: '克隆跨项目数',
 		        	            type: 'bar',
-		        	            stack: 'fan',
-		        	            data: fanOutData
+		        	            stack: 'cloneProject',
+		        	            data: projectsData
 		        	        }
 		        	    ]
 		        	};
 		        // 使用刚指定的配置项和数据显示图表。
 		        myChart.setOption(option);
 			}
-		});*/
+		});
 	};
 	var _showImg = function(){
 		$("#showImg").click(function() {
