@@ -54,6 +54,10 @@ public interface CloneAnalyseService {
 	Collection<Clone<MicroService, FileCloneFile>> findMicroServiceCloneFromFileClone(
 			Iterable<FileCloneFile> fileClones, boolean removeSameNode);
 	
+	JSONObject clonesToCytoscape(Collection<? extends CloneRelation> groupRelations);
+	
 	JSONObject fileCloneFilesToCytoscape(Collection<FileCloneFile> groupRelations);
+	
+	JSONObject functionCloneFunctionsToCytoscape(Collection<FunctionCloneFunction> relations);
 	
 }

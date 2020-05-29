@@ -1,12 +1,16 @@
 package cn.edu.fudan.se.multidependency.controller;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -17,9 +21,9 @@ import com.alibaba.fastjson.JSONObject;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
-import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.service.spring.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
@@ -35,9 +39,50 @@ public class CloneController {
 	@Autowired
 	private ContainRelationService containRelationService;
 	
-	@GetMapping("/index")
-	public String index() {
+	@GetMapping("/file")
+	public String fileIndex(HttpServletRequest request) {
+		request.setAttribute("level", "file");
 		return "clone";
+	}
+	
+	@GetMapping("/function")
+	public String functionIndex(HttpServletRequest request) {
+		request.setAttribute("level", "function");
+		return "clone";
+	}
+	
+	@GetMapping("/function/group/histogram")
+	@ResponseBody
+	public JSONObject functionCloneGroupToHistogram() {
+		JSONObject result = new JSONObject();
+		try {
+			JSONObject histograms = new JSONObject();
+			JSONArray functionSizeArray = new JSONArray();
+			JSONArray projectSizeArray = new JSONArray();
+			Collection<Collection<? extends Node>> nodeGroups = cloneAnalyse.groupFunctionCloneNode();
+			int size = 0;
+			for(Collection<? extends Node> nodes : nodeGroups) {
+				size++;
+				int functionSize = 0, projectSize = 0;
+				Set<Project> projects = new HashSet<>();
+				for(Node node : nodes) {
+					functionSize++;
+					ProjectFile belongToFile = containRelationService.findFunctionBelongToFile((Function) node);
+					projects.add(containRelationService.findFileBelongToProject(belongToFile));
+				}
+				projectSize = projects.size();
+				functionSizeArray.add(functionSize);
+				projectSizeArray.add(projectSize);
+			}
+			histograms.put("functionSize", functionSizeArray);
+			histograms.put("projectSize", projectSizeArray);
+			result.put("result", "success");
+			result.put("value", histograms);
+			result.put("size", size);
+		} catch (Exception e) {
+			
+		}
+		return result;
 	}
 	
 	@GetMapping("/file/group/histogram")
@@ -73,25 +118,67 @@ public class CloneController {
 		return result;
 	}
 	
-	@GetMapping("/file/group/cytoscape")
+	@GetMapping("/{level}/group/cytoscape/{index}")
 	@ResponseBody
-	public JSONObject fileCloneGroupToCytoscape(@RequestParam("top") int top) {
+	public JSONObject cloneGroupByIndexToCytoscape(@PathVariable("level") String level, @PathVariable("index") int index) {
+		JSONObject result = new JSONObject();
+		try {
+			int i = 0;
+			JSONObject value = null;
+			Collection<Collection<? extends CloneRelation>> groupRelations = null;
+			switch(level) {
+			case "function":
+				groupRelations = cloneAnalyse.groupFunctionCloneRelation();
+				break;
+			case "file":
+				groupRelations = cloneAnalyse.groupFileCloneRelation();
+				break;
+			default:
+				groupRelations = new ArrayList<>();
+			}
+			for(Collection<? extends CloneRelation> relations : groupRelations) {
+				if(i++ >= index) {
+					value = cloneAnalyse.clonesToCytoscape(relations);
+					break;
+				}
+			}
+			result.put("result", "success");
+			result.put("value", value);
+		} catch (Exception e) {
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
+		
+		return result;
+	}
+	
+	@GetMapping("/{level}/group/cytoscape")
+	@ResponseBody
+	public JSONObject cloneGroupToCytoscape(@PathVariable("level") String level, @RequestParam("top") int top) {
 		JSONObject result = new JSONObject();
 		try {
 			JSONArray cytoscapeArray = new JSONArray();
-			JSONArray zTreeArray = new JSONArray();
 			int i = 0;
-			for(Collection<? extends CloneRelation> relations : cloneAnalyse.groupFileCloneRelation()) {
+			Collection<Collection<? extends CloneRelation>> groupRelations = null;
+			switch(level) {
+			case "function":
+				groupRelations = cloneAnalyse.groupFunctionCloneRelation();
+				break;
+			case "file":
+				groupRelations = cloneAnalyse.groupFileCloneRelation();
+				break;
+			default:
+				groupRelations = new ArrayList<>();
+			}
+			for(Collection<? extends CloneRelation> relations : groupRelations) {
 				if(i++ >= top) {
 					break;
 				}
-				cytoscapeArray.add(cloneAnalyse.fileCloneFilesToCytoscape((Collection<FileCloneFile>) relations));
-				
+				cytoscapeArray.add(cloneAnalyse.clonesToCytoscape(relations));
 			}
 			result.put("size", i - 1);
 			result.put("result", "success");
 			result.put("value", cytoscapeArray);
-			result.put("ztree", zTreeArray);
 		} catch (Exception e) {
 			result.put("result", "fail");
 			result.put("msg", e.getMessage());
