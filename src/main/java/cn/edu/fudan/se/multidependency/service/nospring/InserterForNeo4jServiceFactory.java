@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.service.nospring.build.BuildInserterForNeo4jService;
-import cn.edu.fudan.se.multidependency.service.nospring.code.BasicCodeInserterForNeo4jServiceImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.code.CppInsertServiceImpl;
+import cn.edu.fudan.se.multidependency.service.nospring.code.DependsCodeInserterForNeo4jServiceImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.code.JavaInsertServiceImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.CppDynamicInserter;
 import cn.edu.fudan.se.multidependency.service.nospring.dynamic.FeatureAndTestCaseFromJSONFileForMicroserviceInserter;
@@ -33,7 +33,7 @@ public class InserterForNeo4jServiceFactory {
 		return instance;
 	}
 	
-	public BasicCodeInserterForNeo4jServiceImpl createCodeInserterService(EntityRepo entityRepo, ProjectConfig config) throws Exception {
+	public DependsCodeInserterForNeo4jServiceImpl createCodeInserterService(EntityRepo entityRepo, ProjectConfig config) throws Exception {
 		switch(config.getLanguage()) {
 		case java:
 			return new JavaInsertServiceImpl(entityRepo, config);

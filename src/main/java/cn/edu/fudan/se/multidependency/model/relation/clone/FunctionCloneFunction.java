@@ -39,6 +39,14 @@ public class FunctionCloneFunction implements HasCloneValueRelation {
 	
 	private double value;
 	
+	private int function1StartLine;
+	
+	private int function1EndLine;
+	
+	private int function2StartLine;
+	
+	private int function2EndLine;
+	
 	public FunctionCloneFunction(Function function1, Function function2) {
 		this.function1 = function1;
 		this.function2 = function2;
@@ -63,6 +71,10 @@ public class FunctionCloneFunction implements HasCloneValueRelation {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("value", getValue());
+		properties.put("function1StartLine", getFunction1StartLine());
+		properties.put("function1EndLine", getFunction1EndLine());
+		properties.put("function2StartLine", getFunction2StartLine());
+		properties.put("function2EndLine", getFunction2EndLine());
 		return properties;
 	}
 	

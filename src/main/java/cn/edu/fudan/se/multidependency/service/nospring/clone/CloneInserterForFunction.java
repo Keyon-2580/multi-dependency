@@ -106,6 +106,10 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 					continue;
 				}
 				FunctionCloneFunction clone = new FunctionCloneFunction(function1, function2);
+				clone.setFunction1StartLine(methodName1.getStartLine());
+				clone.setFunction1EndLine(methodName1.getEndLine());
+				clone.setFunction2StartLine(methodName2.getStartLine());
+				clone.setFunction2EndLine(methodName2.getEndLine());
 				clone.setValue(value);
 				addRelation(clone);
 			}

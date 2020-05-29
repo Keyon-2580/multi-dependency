@@ -33,6 +33,14 @@ public class FileCloneFile implements HasCloneValueRelation {
 	
 	private double value;
 	
+	private int file1StartLine;
+	
+	private int file1EndLine;
+	
+	private int file2StartLine;
+	
+	private int file2EndLine;
+	
 	public FileCloneFile(ProjectFile file1, ProjectFile file2) {
 		this.file1 = file1;
 		this.file2 = file2;
@@ -57,6 +65,10 @@ public class FileCloneFile implements HasCloneValueRelation {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("value", getValue());
+		properties.put("file1StartLine", getFile1StartLine());
+		properties.put("file1EndLine", getFile1EndLine());
+		properties.put("file2StartLine", getFile2StartLine());
+		properties.put("file2EndLine", getFile2EndLine());
 		return properties;
 	}
 

@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
+import cn.edu.fudan.se.multidependency.repository.relation.clone.FileCloneFileRepository;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.data.Clone;
@@ -24,6 +25,14 @@ public class CloneController {
 	
 	@Autowired
 	private MicroserviceService msService;
+	
+	@Autowired
+	private FileCloneFileRepository fileCloneFileRepository;
+	
+	@GetMapping("/file/group")
+	@ResponseBody
+	public void testCloneFileGroup() {
+	}
 
 	@GetMapping("/clones")
 	@ResponseBody

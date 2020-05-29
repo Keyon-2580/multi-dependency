@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.clone.HasCloneValueRelation;
 import lombok.Data;
 

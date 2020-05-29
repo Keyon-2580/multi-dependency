@@ -89,6 +89,10 @@ public class CloneInserterForFile extends ExtractorForNodesAndRelationsImpl {
 				continue;
 			}
 			FileCloneFile clone = new FileCloneFile(file1, file2);
+			clone.setFile1StartLine(filePath1.getStartLine());
+			clone.setFile1EndLine(filePath1.getEndLine());
+			clone.setFile2StartLine(filePath2.getStartLine());
+			clone.setFile2EndLine(filePath2.getEndLine());
 			clone.setValue(value);
 			addRelation(clone);
 		}
