@@ -76,8 +76,8 @@ public class MDAllController {
 			callsWithEntry.setShowCntOfDevUpdMs(showCntOfDevUpdMs);
 			callsWithEntry.setShowClonesMinPair(showClonesMinPair);
 			if(showClonesInMicroService) {
-				callsWithEntry.setClonesInMicroServiceFromFunctionClone(msService.findMicroServiceCloneFromFunctionClone(cloneAnalyse.findAllFunctionCloneFunctions(), true));
-				callsWithEntry.setClonesInMicroServiceFromFileClone(msService.findMicroServiceCloneFromFileClone(cloneAnalyse.findAllFileCloneFiles(), true));
+				callsWithEntry.setClonesInMicroServiceFromFunctionClone(cloneAnalyse.findMicroServiceCloneFromFunctionClone(cloneAnalyse.findAllFunctionCloneFunctions(), true));
+				callsWithEntry.setClonesInMicroServiceFromFileClone(cloneAnalyse.findMicroServiceCloneFromFileClone(cloneAnalyse.findAllFileCloneFiles(), true));
 				callsWithEntry.setShowClonesMinPair(showClonesMinPair);
 			}
 			if(showMicroServiceCallLibs) {
@@ -171,8 +171,8 @@ public class MDAllController {
 		callsWithEntry.setShowCntOfDevUpdMs(showCntOfDevUpdMs);
 		
 		if(showClonesInMicroService) {
-			callsWithEntry.setClonesInMicroServiceFromFunctionClone(msService.findMicroServiceCloneFromFunctionClone(cloneAnalyse.findAllFunctionCloneFunctions(), true));
-			callsWithEntry.setClonesInMicroServiceFromFileClone(msService.findMicroServiceCloneFromFileClone(cloneAnalyse.findAllFileCloneFiles(), true));
+			callsWithEntry.setClonesInMicroServiceFromFunctionClone(cloneAnalyse.findMicroServiceCloneFromFunctionClone(cloneAnalyse.findAllFunctionCloneFunctions(), true));
+			callsWithEntry.setClonesInMicroServiceFromFileClone(cloneAnalyse.findMicroServiceCloneFromFileClone(cloneAnalyse.findAllFileCloneFiles(), true));
 			callsWithEntry.setShowClonesMinPair(showClonesMinPair);
 		}
 		if(showMicroServiceCallLibs) {

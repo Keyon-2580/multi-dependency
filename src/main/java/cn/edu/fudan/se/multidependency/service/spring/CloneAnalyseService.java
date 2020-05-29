@@ -2,10 +2,13 @@ package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.Collection;
 
+import com.alibaba.fastjson.JSONObject;
+
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
@@ -44,5 +47,13 @@ public interface CloneAnalyseService {
 	 * @return
 	 */
 	public Collection<Clone<Project, FileCloneFile>> queryProjectCloneFromFileClone(Iterable<FileCloneFile> fileClones, boolean removeSameNode);
+	
+	Collection<Clone<MicroService, FunctionCloneFunction>> findMicroServiceCloneFromFunctionClone(
+			Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode);
+	
+	Collection<Clone<MicroService, FileCloneFile>> findMicroServiceCloneFromFileClone(
+			Iterable<FileCloneFile> fileClones, boolean removeSameNode);
+	
+	JSONObject fileCloneFilesToCytoscape(Collection<FileCloneFile> groupRelations);
 	
 }

@@ -302,7 +302,7 @@ public class MicroServiceCallWithEntry {
 					Map<String, JSONObject> temp = hasLibraryToVersionEdge.getOrDefault(lib.getId(), new HashMap<>());
 					JSONObject edge = temp.get(libraryGroupAndName);
 					if(edge == null) {
-						edge = CytoscapeUtil.relationToEdge(lib.getId(), libraryGroupAndName, "LibraryVersionIsFromLibrary", "", false);
+						edge = CytoscapeUtil.relationToEdge(String.valueOf(lib.getId()), libraryGroupAndName, "LibraryVersionIsFromLibrary", "", false);
 						edges.add(edge);
 						temp.put(libraryGroupAndName, edge);
 						hasLibraryToVersionEdge.put(lib.getId(), temp);
@@ -594,7 +594,7 @@ public class MicroServiceCallWithEntry {
 					Map<String, JSONObject> temp = hasLibraryToVersionEdge.getOrDefault(lib.getId(), new HashMap<>());
 					JSONObject edge = temp.get(libraryGroupAndName);
 					if(edge == null) {
-						edge = CytoscapeUtil.relationToEdge(lib.getId(), libraryGroupAndName, "LibraryVersionIsFromLibrary", "", false);
+						edge = CytoscapeUtil.relationToEdge(String.valueOf(lib.getId()), libraryGroupAndName, "LibraryVersionIsFromLibrary", "", false);
 						edges.add(edge);
 						temp.put(libraryGroupAndName, edge);
 						hasLibraryToVersionEdge.put(lib.getId(), temp);

@@ -361,7 +361,7 @@ public class FeatureOrganizationService {
 			if(span.getOrder() == 0) {
 				// 入口
 				
-				edges.add(CytoscapeUtil.relationToEdge("-1", api.getId(), "APICall", "(0)", false));
+				edges.add(CytoscapeUtil.relationToEdge("-1", String.valueOf(api.getId()), "APICall", "(0)", false));
 			}
 			Iterable<SpanCallSpan> calls = spanCallSpans.getOrDefault(span, new ArrayList<>());
 			for(SpanCallSpan call : calls) {

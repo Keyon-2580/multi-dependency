@@ -30,11 +30,11 @@ public class CytoscapeUtil {
 		return result;
 	}
 	
-	public static JSONObject relationToEdge(Object startId, Object endId, String type, String value, boolean autoId) {
+	public static JSONObject relationToEdge(String startId, String endId, String type, String value, boolean autoId) {
 		JSONObject edge = new JSONObject();
 		JSONObject data = new JSONObject();
 		if(autoId) {
-			data.put("id", startId + "_" + endId);
+			data.put("id", String.join("_", startId, endId));
 		}
 		data.put("source", startId);
 		data.put("target", endId);
@@ -44,6 +44,10 @@ public class CytoscapeUtil {
 		data.put("value", StringUtils.isBlank(value) ? "" : value);
 		edge.put("data", data);
 		return edge;
+	}
+	
+	public static JSONObject relationToEdge(Long startId, Long endId, String type, String value, boolean autoId) {
+		return relationToEdge(String.valueOf(startId), String.valueOf(endId), type, value, autoId);
 	}
 	
 	public static JSONObject relationToEdge(Node start, Node end, String type, String value, boolean autoId) {

@@ -1,7 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
@@ -26,8 +24,6 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
-import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
-import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanCallSpan;
@@ -43,8 +39,6 @@ import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroSer
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanCallSpanRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanInstanceOfRestfulAPIRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanStartWithFunctionRepository;
-import cn.edu.fudan.se.multidependency.service.spring.data.Clone;
-import cn.edu.fudan.se.multidependency.service.spring.data.CloneValueCalculatorForMicroService;
 import cn.edu.fudan.se.multidependency.service.spring.data.Fan_IO;
 import cn.edu.fudan.se.multidependency.utils.MicroServiceUtil;
 import cn.edu.fudan.se.multidependency.utils.PageUtil;
@@ -83,9 +77,6 @@ public class MicroserviceServiceImpl implements MicroserviceService {
     
     @Autowired
     private ContainRelationService containRelationService;
-    
-    @Autowired
-    private CloneAnalyseService cloneAnalyse;
     
     @Autowired
     private CacheService cache;
@@ -240,114 +231,6 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 		}
 		return result;
 	}
-	
-	private Clone<MicroService, FunctionCloneFunction> hasCloneInFunctionClones(
-			Map<MicroService, Map<MicroService, Clone<MicroService, FunctionCloneFunction>>> msToMsClones, MicroService ms1, MicroService ms2) {
-		Map<MicroService, Clone<MicroService, FunctionCloneFunction>> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
-		Clone<MicroService, FunctionCloneFunction> clone = ms1ToClones.get(ms2);
-		if(clone != null) {
-			return clone;
-		}
-		Map<MicroService, Clone<MicroService, FunctionCloneFunction>> ms2ToClones = msToMsClones.getOrDefault(ms2, new HashMap<>());
-		clone = ms2ToClones.get(ms1);
-		return clone;
-	}
-	
-	private Clone<MicroService, FileCloneFile> hasCloneInFileClones(
-			Map<MicroService, Map<MicroService, Clone<MicroService, FileCloneFile>>> msToMsClones, MicroService ms1, MicroService ms2) {
-		Map<MicroService, Clone<MicroService, FileCloneFile>> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
-		Clone<MicroService, FileCloneFile> clone = ms1ToClones.get(ms2);
-		if(clone != null) {
-			return clone;
-		}
-		Map<MicroService, Clone<MicroService, FileCloneFile>> ms2ToClones = msToMsClones.getOrDefault(ms2, new HashMap<>());
-		clone = ms2ToClones.get(ms1);
-		return clone;
-	}
-
-	@Override
-	public Collection<Clone<MicroService, FunctionCloneFunction>> findMicroServiceCloneFromFunctionClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode) {
-		Collection<Clone<Project, FunctionCloneFunction>> projectClones = cloneAnalyse.findProjectCloneFromFunctionClone(functionClones, removeSameNode);
-		List<Clone<MicroService, FunctionCloneFunction>> result = new ArrayList<>();
-		Map<MicroService, Map<MicroService, Clone<MicroService, FunctionCloneFunction>>> msToMsClones = new HashMap<>();
-		for(Clone<Project, FunctionCloneFunction> projectClone : projectClones) {
-			Project project1 = projectClone.getNode1();
-			Project project2 = projectClone.getNode2();
-			if(removeSameNode && project1.equals(project2)) {
-				continue;
-			}
-			MicroService ms1 = containRelationService.findProjectBelongToMicroService(project1);
-			MicroService ms2 = containRelationService.findProjectBelongToMicroService(project2);
-			if(ms1 == null || ms2 == null) {
-				continue;
-			}
-			if(removeSameNode && ms1.equals(ms2)) {
-				continue;
-			}
-			Clone<MicroService, FunctionCloneFunction> clone = hasCloneInFunctionClones(msToMsClones, ms1, ms2);
-			if(clone == null) {
-				clone = new Clone<MicroService, FunctionCloneFunction>();
-				clone.setNode1(ms1);
-				clone.setNode2(ms2);
-				result.add(clone);
-				CloneValueCalculatorForMicroService calculator = new CloneValueCalculatorForMicroService();
-				Iterable<Function> functions1 = containRelationService.findMicroServiceContainFunctions(ms1);
-				Iterable<Function> functions2 = containRelationService.findMicroServiceContainFunctions(ms2);
-				calculator.addFunctions(functions1, ms1);
-				calculator.addFunctions(functions2, ms2);
-				clone.setCalculator(calculator);
-			}
-			clone.addChildren(projectClone.getChildren());
-			Map<MicroService, Clone<MicroService, FunctionCloneFunction>> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
-			ms1ToClones.put(ms2, clone);
-			msToMsClones.put(ms1, ms1ToClones);
-			
-		}
-		return result;
-	}
-
-	@Override
-	public Collection<Clone<MicroService, FileCloneFile>> findMicroServiceCloneFromFileClone(
-			Iterable<FileCloneFile> fileClones, boolean removeSameNode) {
-		Iterable<Clone<Project, FileCloneFile>> projectClones = cloneAnalyse.queryProjectCloneFromFileClone(fileClones, removeSameNode);
-		List<Clone<MicroService, FileCloneFile>> result = new ArrayList<>();
-		Map<MicroService, Map<MicroService, Clone<MicroService, FileCloneFile>>> msToMsClones = new HashMap<>();
-		for(Clone<Project, FileCloneFile> projectClone : projectClones) {
-			Project project1 = projectClone.getNode1();
-			Project project2 = projectClone.getNode2();
-			if(removeSameNode && project1.equals(project2)) {
-				continue;
-			}
-			MicroService ms1 = containRelationService.findProjectBelongToMicroService(project1);
-			MicroService ms2 = containRelationService.findProjectBelongToMicroService(project2);
-			if(ms1 == null || ms2 == null) {
-				continue;
-			}
-			if(removeSameNode && ms1.equals(ms2)) {
-				continue;
-			}
-			Clone<MicroService, FileCloneFile> clone = hasCloneInFileClones(msToMsClones, ms1, ms2);
-			if(clone == null) {
-				clone = new Clone<MicroService, FileCloneFile>();
-				clone.setNode1(ms1);
-				clone.setNode2(ms2);
-				result.add(clone);
-				CloneValueCalculatorForMicroService calculator = new CloneValueCalculatorForMicroService();
-				Iterable<Function> functions1 = containRelationService.findMicroServiceContainFunctions(ms1);
-				Iterable<Function> functions2 = containRelationService.findMicroServiceContainFunctions(ms2);
-				calculator.addFunctions(functions1, ms1);
-				calculator.addFunctions(functions2, ms2);
-				clone.setCalculator(calculator);
-			}
-			clone.addChildren(projectClone.getChildren());
-			Map<MicroService, Clone<MicroService, FileCloneFile>> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
-			ms1ToClones.put(ms2, clone);
-			msToMsClones.put(ms1, ms1ToClones);
-			
-		}
-		return result;
-	}
-
 
 	@Override
 	public CallLibrary<MicroService> findMicroServiceCallLibraries(MicroService ms) {
