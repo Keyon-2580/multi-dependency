@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,8 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction
 import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil;
-import cn.edu.fudan.se.multidependency.utils.FileUtil;
+import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeEdge;
+import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeNode;
 
 @Service
 public class DependencyOrganizationService {
@@ -61,7 +63,7 @@ public class DependencyOrganizationService {
 			Function function1 = clone.getFunction1();
 			Function function2 = clone.getFunction2();
 			if(!hasFunctionCallFunction.getOrDefault(function1, new HashMap<>()).getOrDefault(function2, false)) {
-				edges.add(CytoscapeUtil.relationToEdge(function1, function2, "Function_clone_Function", "Function_clone_Function", false));
+				edges.add(new CytoscapeEdge(null, function1.getId().toString(), function2.getId().toString(), "Function_clone_Function", "Function_clone_Function").toJSON());
 				Map<Function, Boolean> temp = hasFunctionCallFunction.getOrDefault(function1, new HashMap<>());
 				temp.put(function2, true);
 				hasFunctionCallFunction.put(function1, temp);
@@ -84,7 +86,7 @@ public class DependencyOrganizationService {
 			Function start = call.getFunction();
 			Function end = call.getCallFunction();
 			if(!hasFunctionCallFunction.getOrDefault(start, new HashMap<>()).getOrDefault(end, false)) {
-				edges.add(CytoscapeUtil.relationToEdge(start, end, "FunctionDynamicCallFunction", "FunctionDynamicCallFunction", false));
+				edges.add(new CytoscapeEdge(null, start.getId().toString(), end.getId().toString(), "FunctionDynamicCallFunction", "FunctionDynamicCallFunction").toJSON());
 				Map<Function, Boolean> temp = hasFunctionCallFunction.getOrDefault(start, new HashMap<>());
 				temp.put(end, true);
 				hasFunctionCallFunction.put(start, temp);
@@ -99,51 +101,50 @@ public class DependencyOrganizationService {
 	
 	public JSONObject projectToCytoscape(Project project) {
 		JSONObject result = new JSONObject();
-		JSONArray nodes = new JSONArray();
-		JSONArray edges = new JSONArray();
+		List<CytoscapeNode> nodes = new ArrayList<>();
+		List<CytoscapeEdge> edges = new ArrayList<>();
 		
 		Iterable<Package> packages = containRelationService.findProjectContainPackages(project);
 		
 		for(Package pck : packages) {
-			nodes.add(CytoscapeUtil.toCytoscapeNode(pck, "Package: " + pck.getName(), "Package"));
+			nodes.add(new CytoscapeNode(pck.getId(), "Package: " + pck.getName(), "Package"));
 			Iterable<ProjectFile> files = containRelationService.findPackageContainFiles(pck);
 			for(ProjectFile file : files) {
-				JSONObject fileJson = CytoscapeUtil.toCytoscapeNode(file, "File: " + file.getName(), "File");
-				fileJson.getJSONObject("data").put("parent", pck.getId());
-				nodes.add(fileJson);
+				CytoscapeNode fileNode = new CytoscapeNode(file.getId(), "File: " + file.getName(), "File");
+				fileNode.setParent(pck.getId().toString());
+				nodes.add(fileNode);
 				
 				Iterable<Type> types = containRelationService.findFileDirectlyContainTypes(file);
 				for(Type type : types) {
-					JSONObject typeJson = CytoscapeUtil.toCytoscapeNode(type, "Type: " + type.getName(), "Type");
-					typeJson.getJSONObject("data").put("parent", file.getId());
+					CytoscapeNode typeJson = new CytoscapeNode(type.getId(), "Type: " + type.getName(), "Type");
+					typeJson.setParent(file.getId().toString());
 					nodes.add(typeJson);
 					
 					Iterable<Function> functions = containRelationService.findTypeDirectlyContainFunctions(type);
 					for(Function function : functions) {
-						JSONObject functionJson = CytoscapeUtil.toCytoscapeNode(function, "Function: " + function.getName(), "Function");
-						functionJson.getJSONObject("data").put("parent", type.getId());
+						CytoscapeNode functionJson = new CytoscapeNode(function.getId(), "Function: " + function.getName(), "Function");
+						functionJson.setParent(type.getId().toString());
 						nodes.add(functionJson);
 						Iterable<Variable> variables = containRelationService.findFunctionDirectlyContainVariables(function);
 						for(Variable variable : variables) {
-							JSONObject variableJson = CytoscapeUtil.toCytoscapeNode(variable, "Variable: " + variable.getName(), "Variable");
-							variableJson.getJSONObject("data").put("parent", function.getId());
+							CytoscapeNode variableJson = new CytoscapeNode(variable.getId(), "Variable: " + variable.getName(), "Variable");
+							variableJson.setParent(function.getId());
 							nodes.add(variableJson);
 						}
-
 					}
 					
 					Iterable<Variable> variables = containRelationService.findTypeDirectlyContainFields(type);
 					for(Variable variable : variables) {
-						JSONObject variableJson = CytoscapeUtil.toCytoscapeNode(variable, "Variable: " + variable.getName(), "Variable");
-						variableJson.getJSONObject("data").put("parent", type.getId());
+						CytoscapeNode variableJson = new CytoscapeNode(variable.getId(), "Variable: " + variable.getName(), "Variable");
+						variableJson.setParent(type.getId());
 						nodes.add(variableJson);
 					}
 				}
 				
 				Iterable<Function> functions = containRelationService.findFileDirectlyContainFunctions(file);
 				for(Function function : functions) {
-					JSONObject functionJson = CytoscapeUtil.toCytoscapeNode(function, "Function: " + function.getName(), "Function");
-					functionJson.getJSONObject("data").put("parent", file.getId());
+					CytoscapeNode functionJson = new CytoscapeNode(function.getId(), "Function: " + function.getName(), "Function");
+					functionJson.setParent(file.getId());
 					nodes.add(functionJson);
 				}
 			}
@@ -151,60 +152,60 @@ public class DependencyOrganizationService {
 		
 		List<FunctionCallFunction> functionCallFunctions = staticAnalyseService.findFunctionCallFunctionRelations(project);
 		for(FunctionCallFunction call : functionCallFunctions) {
-			edges.add(CytoscapeUtil.relationToEdge(call.getFunction(), call.getCallFunction(), "FunctionCallFunction", "call", true));
+			edges.add(new CytoscapeEdge(call.getFunction(), call.getCallFunction(), "FunctionCallFunction", "call"));
 		}
 		
 		List<TypeInheritsType> typeInheritsType = staticAnalyseService.findProjectContainInheritsRelations(project);
 		for(TypeInheritsType inherit : typeInheritsType) {
 			if(inherit.isExtends()) {
-				edges.add(CytoscapeUtil.relationToEdge(inherit.getStart(), inherit.getEnd(), "TypeExtendsType", "extends", true));
+				edges.add(new CytoscapeEdge(inherit.getStart(), inherit.getEnd(), "TypeExtendsType", "extends"));
 			}
 			if(inherit.isImplements()) {
-				edges.add(CytoscapeUtil.relationToEdge(inherit.getStart(), inherit.getEnd(), "TypeImplementsType", "implements", true));
+				edges.add(new CytoscapeEdge(inherit.getStart(), inherit.getEnd(), "TypeImplementsType", "implements"));
 			}
 		}
 		
 		List<TypeCallFunction> typeCallFunctions = staticAnalyseService.findProjectContainTypeCallFunctions(project);
 		for(TypeCallFunction call : typeCallFunctions) {
-			edges.add(CytoscapeUtil.relationToEdge(call.getType(), call.getCallFunction(), "TypeCallFunction", "call", true));
+			edges.add(new CytoscapeEdge(call.getType(), call.getCallFunction(), "TypeCallFunction", "call"));
 		}
 		
 		List<FunctionCastType> functionCastTypes = staticAnalyseService.findProjectContainFunctionCastTypeRelations(project);
 		for(FunctionCastType relation : functionCastTypes) {
-			edges.add(CytoscapeUtil.relationToEdge(relation.getFunction(), relation.getCastType(), "FunctionCastType", "cast", true));
+			edges.add(new CytoscapeEdge(relation.getFunction(), relation.getCastType(), "FunctionCastType", "cast"));
 		}
 		List<FunctionParameterType> functionParameterTypes = staticAnalyseService.findProjectContainFunctionParameterTypeRelations(project);
 		for(FunctionParameterType relation : functionParameterTypes) {
-			edges.add(CytoscapeUtil.relationToEdge(relation.getFunction(), relation.getParameterType(), "FunctionParameterType", "parameter", true));
+			edges.add(new CytoscapeEdge(relation.getFunction(), relation.getParameterType(), "FunctionParameterType", "parameter"));
 		}
 		List<FunctionReturnType> functionReturnTypes = staticAnalyseService.findProjectContainFunctionReturnTypeRelations(project);
 		for(FunctionReturnType relation : functionReturnTypes) {
-			edges.add(CytoscapeUtil.relationToEdge(relation.getFunction(), relation.getReturnType(), "FunctionReturnType", "return", true));
+			edges.add(new CytoscapeEdge(relation.getFunction(), relation.getReturnType(), "FunctionReturnType", "return"));
 		}
 		List<FunctionThrowType> functionThrowTypes = staticAnalyseService.findProjectContainFunctionThrowTypeRelations(project);
 		for(FunctionThrowType relation : functionThrowTypes) {
-			edges.add(CytoscapeUtil.relationToEdge(relation.getFunction(), relation.getType(), "FunctionThrowType", "throw", true));
+			edges.add(new CytoscapeEdge(relation.getFunction(), relation.getType(), "FunctionThrowType", "throw"));
 		}
 		List<FileImportType> fileImportTypes = staticAnalyseService.findProjectContainFileImportTypeRelations(project);
 		for(FileImportType relation : fileImportTypes) {
-			edges.add(CytoscapeUtil.relationToEdge(relation.getFile(), relation.getType(), "FileImportType", "import", true));
+			edges.add(new CytoscapeEdge(relation.getFile(), relation.getType(), "FileImportType", "import"));
 		}
 		List<FileImportFunction> fileImportFunctions = staticAnalyseService.findProjectContainFileImportFunctionRelations(project);
 		for(FileImportFunction relation : fileImportFunctions) {
-			edges.add(CytoscapeUtil.relationToEdge(relation.getFile(), relation.getFunction(), "FileImportFunction", "import", true));
+			edges.add(new CytoscapeEdge(relation.getFile(), relation.getFunction(), "FileImportFunction", "import"));
 		}
 		List<VariableIsType> variableIsType = staticAnalyseService.findProjectContainVariableIsTypeRelations(project);
 		for(VariableIsType relation : variableIsType) {
-			edges.add(CytoscapeUtil.relationToEdge(relation.getVariable(), relation.getType(), "VariableIsType", "VariableIsType", false));
+			edges.add(new CytoscapeEdge(null, relation.getVariable().getId().toString(), relation.getType().getId().toString(), "VariableIsType", "VariableIsType"));
 		}
 		/*List<VariableTypeParameterType> variableTypeParameterTypes = staticAnalyseService.findProjectContainVariableTypeParameterTypeRelations(project);
 		for(VariableTypeParameterType relation : variableTypeParameterTypes) {
 			edges.add(ProjectUtil.relationToEdge(relation.getVariable(), relation.getType(), "VariableParameterType", "use", false));
 		}*/
 		
-		
-		result.put("nodes", nodes);
-		result.put("edges", edges);
+
+		result.put("nodes", CytoscapeUtil.toNodes(nodes));
+		result.put("edges", CytoscapeUtil.toEdges(edges));
 		return result;
 	}
 	

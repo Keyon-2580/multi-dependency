@@ -48,6 +48,15 @@ public class CloneInserterForFile extends ExtractorForNodesAndRelationsImpl {
 		executor.execute(() -> {
 			try {
 				filePaths = CloneUtil.readJavaCloneCsvForFilePath(namePath);
+				for(Map.Entry<Integer, FilePathFromCsv> entry : filePaths.entrySet()) {
+					FilePathFromCsv filePath = entry.getValue();
+					ProjectFile file = this.getNodes().findFileByPathRecursion(filePath.getFilePath());
+					if(file == null) {
+						LOGGER.warn("file is null " + filePath.getFilePath());
+						continue;
+					}
+					file.setLine(filePath.getEndLine());
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {

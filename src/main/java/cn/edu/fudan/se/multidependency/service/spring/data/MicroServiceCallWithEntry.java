@@ -16,19 +16,19 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
+import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
-import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil;
+import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeEdge;
+import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeNode;
 import cn.edu.fudan.se.multidependency.utils.MicroServiceUtil;
 import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
@@ -81,7 +81,7 @@ public class MicroServiceCallWithEntry {
 		for(TestCase testCase : testCaseToEntries.keySet()) {
 			List<MicroService> entries = testCaseToEntries.getOrDefault(testCase, new ArrayList<>());
 			for(MicroService entry : entries) {
-				result.add(new CytoscapeEdge(testCase.getId() + "_" + entry.getId(), testCase.getId(), entry.getId()));
+				result.add(new CytoscapeEdge(testCase.getId() + "_" + entry.getId(), testCase.getId().toString(), entry.getId().toString(), ""));
 			}
 		}
 		for(MicroService ms : calls.keySet()) {
@@ -91,35 +91,14 @@ public class MicroServiceCallWithEntry {
 				obj.put("source", ms.getId());
 				obj.put("target", callMs.getId());
 				obj.put("value", calls.get(ms).get(callMs).getTimes());
-				result.add(new CytoscapeEdge(ms.getId() + "_" + callMs.getId(), ms.getId(), callMs.getId()));
+				result.add(new CytoscapeEdge(ms.getId() + "_" + callMs.getId(), ms.getId().toString(), callMs.getId().toString(), ""));
 			}
 		}
 		return result;
 	}
 	
-	@Data
-	@NoArgsConstructor
-	@AllArgsConstructor
-	@EqualsAndHashCode
-	public static class CytoscapeEdge {
-		private String id;
-		private Long source;
-		private Long target;
-		
-		public JSONObject toJson(String value, String type) {
-			JSONObject obj = new JSONObject();
-			obj.put("id", id);
-			obj.put("source", source);
-			obj.put("target", target);
-			obj.put("value", value == null ? "" : value);
-			obj.put("type", type == null ? "" : type);
-			return obj;
-		}
-	}
-	
 	public JSONArray relatedEdgeIds() {
 		JSONArray result = new JSONArray();
-		System.out.println("relatedEdgeIds");
 		for(TestCase testCase : testCaseToEntries.keySet()) {
 			List<MicroService> entries = testCaseToEntries.getOrDefault(testCase, new ArrayList<>());
 			for(MicroService entry : entries) {
@@ -178,23 +157,20 @@ public class MicroServiceCallWithEntry {
 		return result;
 	}
 	
-	private void showClonesInMicroService(JSONArray edges, Class<? extends CloneRelation> relationClass) {
+	private void showClonesInMicroService(List<CytoscapeEdge> edges, Class<? extends CloneRelation> relationClass) {
 		if(relationClass == FunctionCloneFunction.class) {
 			for(Clone<MicroService, FunctionCloneFunction> clone : clonesInMicroServiceFromFunctionClone) {
 				if(clone.sizeOfChildren() >= showClonesMinPair) {
-					JSONObject edge = CytoscapeUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", clone.calculateValue(), false);
+					CytoscapeEdge edge = new CytoscapeEdge(clone.getId(), clone.getNode1().getId().toString(), clone.getNode2().getId().toString(), "all_MicroService_clone_MicroService", clone.calculateValue());
 					edges.add(edge);
-					edge.getJSONObject("data").put("id", clone.getId());
-					
+//					edge.getJSONObject("data").put("id", clone.getId());
 				}
 			}
 		} else {
 			for(Clone<MicroService, FileCloneFile> clone : clonesInMicroServiceFromFileClone) {
 				if(clone.sizeOfChildren() >= showClonesMinPair) {
-					JSONObject edge = CytoscapeUtil.relationToEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService", clone.calculateValue(), false);
+					CytoscapeEdge edge = new CytoscapeEdge(clone.getId(), clone.getNode1().getId().toString(), clone.getNode2().getId().toString(), "all_MicroService_clone_MicroService", clone.calculateValue());
 					edges.add(edge);
-					edge.getJSONObject("data").put("id", clone.getId());
-					
 				}
 			}
 		}
@@ -202,8 +178,8 @@ public class MicroServiceCallWithEntry {
 	
 	public JSONObject toCytoscapeWithStructure() {
 		JSONObject result = new JSONObject();
-		JSONArray nodes = new JSONArray();
-		JSONArray edges = new JSONArray();
+		List<CytoscapeNode> nodes = new ArrayList<>();
+		List<CytoscapeEdge> edges = new ArrayList<>();
 		Map<MicroService, Boolean> isMicroServiceNodeAdd = new HashMap<>();
 		Map<Scenario, Boolean> isScenarioNodeAdd = new HashMap<>();
 		Map<Feature, Boolean> isFeatureNodeAdd = new HashMap<>();
@@ -224,7 +200,7 @@ public class MicroServiceCallWithEntry {
 		if(showAllScenarios) {
 			for(Scenario scenario : allScenarios) {
 				if(!isScenarioNodeAdd.getOrDefault(scenario, false)) {
-					nodes.add(CytoscapeUtil.toCytoscapeNode(scenario, scenario.getScenarioId() + " : " + scenario.getName(),  "Scenario"));
+					nodes.add(new CytoscapeNode(scenario.getId(), scenario.getScenarioId() + " : " + scenario.getName(),  "Scenario"));
 					isScenarioNodeAdd.put(scenario, true);
 					
 					scenarioRoot.addChild(new ZTreeNode(scenario, false));
@@ -234,7 +210,7 @@ public class MicroServiceCallWithEntry {
 		if(showAllMicroServices) {
 			for(MicroService ms : allMicroServices) {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false)) {
-					nodes.add(CytoscapeUtil.toCytoscapeNode(ms, "MicroService"));
+					nodes.add(new CytoscapeNode(ms.getId(), ms.getName(), "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
 					
 					msRoot.addChild(new ZTreeNode(ms, false));
@@ -250,31 +226,29 @@ public class MicroServiceCallWithEntry {
 				}
 				int times = update.getTimes();
 				if(!isDeveloperNodeAdd.getOrDefault(developer, false)) {
-					nodes.add(CytoscapeUtil.toCytoscapeNode(developer, "Developer"));
+					nodes.add(new CytoscapeNode(developer.getId(), developer.getName(), "Developer"));
 					isDeveloperNodeAdd.put(developer, true);
 					
 					developerRoot.addChild(new ZTreeNode(developer, false));
 				}
-				edges.add(CytoscapeUtil.relationToEdge(ms, developer, "MicroServiceUpdatedByDeveloper", times + "", false));
+				edges.add(new CytoscapeEdge(null, ms.getId().toString(), developer.getId().toString(), "MicroServiceUpdatedByDeveloper", times + ""));
 			}
 		}
 		if(showAllFeatures) {
 			for(Feature feature : allFeatures) {
 				if(!isFeatureNodeAdd.getOrDefault(feature, false)) {
-					nodes.add(CytoscapeUtil.toCytoscapeNode(feature, feature.getFeatureId() + " : " + feature.getName(), "Feature"));
+					nodes.add(new CytoscapeNode(feature.getId(), feature.getFeatureId() + " : " + feature.getName(), "Feature"));
 					isFeatureNodeAdd.put(feature, true);
-					
 					featureRoot.addChild(new ZTreeNode(feature, false));
 				}
 				Feature parentFeature = featureToParentFeature.get(feature);
 				if(parentFeature != null && !isFeatureNodeParent.getOrDefault(feature, false)) {
 					if(!isFeatureNodeAdd.getOrDefault(parentFeature, false)) {
-						nodes.add(CytoscapeUtil.toCytoscapeNode(parentFeature, parentFeature.getFeatureId() + " : " + parentFeature.getName(), "Feature"));
+						nodes.add(new CytoscapeNode(parentFeature.getId(), parentFeature.getFeatureId() + " : " + parentFeature.getName(), "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
-
 						featureRoot.addChild(new ZTreeNode(parentFeature, false));
 					}
-					edges.add(CytoscapeUtil.relationToEdge(parentFeature, feature, null, null, true));
+					edges.add(new CytoscapeEdge(parentFeature, feature, "", ""));
 					isFeatureNodeParent.put(feature, true);
 				}
 			}
@@ -285,62 +259,62 @@ public class MicroServiceCallWithEntry {
 		}
 		
 		if(showMicroServiceCallLibs) {
-			Map<Long, Map<String, JSONObject>> hasLibraryToVersionEdge = new HashMap<>();
+			Map<Long, Map<String, CytoscapeEdge>> hasLibraryToVersionEdge = new HashMap<>();
 			for(CallLibrary<MicroService> call : microServiceCallLibraries) {
 				for(Library lib : call.getCallLibraries()) {
 					if(!isLibraryNodeAdd.getOrDefault(lib, false)) {
-						nodes.add(CytoscapeUtil.toCytoscapeNode(lib, lib.getFullName(), "Library"));
+						nodes.add(new CytoscapeNode(lib.getId(), lib.getFullName(), "Library"));
 						isLibraryNodeAdd.put(lib, true);
 						///FIXME
 						libRoot.addChild(new ZTreeNode(lib, false));
 					}
 					String libraryGroupAndName = lib.groupIdAndName();
 					if(!isLibraryWithoutVersionNodeAdd.getOrDefault(libraryGroupAndName, false)) {
-						nodes.add(CytoscapeUtil.toCytoscapeNode(libraryGroupAndName, libraryGroupAndName, "Library"));
+						nodes.add(new CytoscapeNode(libraryGroupAndName, libraryGroupAndName, "Library", ""));
 						isLibraryWithoutVersionNodeAdd.put(libraryGroupAndName, true);
 					}
-					Map<String, JSONObject> temp = hasLibraryToVersionEdge.getOrDefault(lib.getId(), new HashMap<>());
-					JSONObject edge = temp.get(libraryGroupAndName);
+					Map<String, CytoscapeEdge> temp = hasLibraryToVersionEdge.getOrDefault(lib.getId(), new HashMap<>());
+					CytoscapeEdge edge = temp.get(libraryGroupAndName);
 					if(edge == null) {
-						edge = CytoscapeUtil.relationToEdge(String.valueOf(lib.getId()), libraryGroupAndName, "LibraryVersionIsFromLibrary", "", false);
+						edge = new CytoscapeEdge(null, String.valueOf(lib.getId()), libraryGroupAndName, "LibraryVersionIsFromLibrary", "");
 						edges.add(edge);
 						temp.put(libraryGroupAndName, edge);
 						hasLibraryToVersionEdge.put(lib.getId(), temp);
 					}
-					edges.add(CytoscapeUtil.relationToEdge(call.getCaller(), lib, "MicroServiceCallLibrary", call.timesOfCallLib(lib) + "", false));
+					edges.add(new CytoscapeEdge(null, call.getCaller().getId().toString(), lib.getId().toString(), "MicroServiceCallLibrary", call.timesOfCallLib(lib) + ""));
 				}
 			}
 		}
 		
 		for(TestCase testCase : testCaseToEntries.keySet()) {
-			nodes.add(CytoscapeUtil.toCytoscapeNode(testCase, String.join(" : ", " " + testCase.getTestCaseId(), testCase.getName() + " "), "TestCase_" + (testCase.isSuccess() ? "success" : "fail")));
+			nodes.add(new CytoscapeNode(testCase.getId(), String.join(" : ", " " + testCase.getTestCaseId(), testCase.getName() + " "), "TestCase_" + (testCase.isSuccess() ? "success" : "fail")));
 			
 			testcaseRoot.addChild(new ZTreeNode(testCase, false));
 			
 			Scenario scenario = this.scenarioDefineTestCases.get(testCase);
 			if(scenario != null) {
 				if(!isScenarioNodeAdd.getOrDefault(scenario, false)) {
-					nodes.add(CytoscapeUtil.toCytoscapeNode(scenario, scenario.getScenarioId() + " : " + scenario.getName(),  "Scenario"));
+					nodes.add(new CytoscapeNode(scenario.getId(), scenario.getScenarioId() + " : " + scenario.getName(),  "Scenario"));
 					isScenarioNodeAdd.put(scenario, true);
 					
 					scenarioRoot.addChild(new ZTreeNode(scenario, false));
 				}
-				edges.add(CytoscapeUtil.relationToEdge(scenario, testCase, "ScenarioDefineTestCase", null, true));
+				edges.add(new CytoscapeEdge(scenario, testCase, "ScenarioDefineTestCase", ""));
 			}
 			List<MicroService> entries = testCaseToEntries.getOrDefault(testCase, new ArrayList<>());
 			for(MicroService entry : entries) {
 				if(!isMicroServiceNodeAdd.getOrDefault(entry, false)) {
-					nodes.add(CytoscapeUtil.toCytoscapeNode(entry, "MicroService"));
+					nodes.add(new CytoscapeNode(entry.getId(), entry.getName(), "MicroService"));
 					isMicroServiceNodeAdd.put(entry, true);
 					
 					msRoot.addChild(new ZTreeNode(entry, false));
 				}
-				edges.add(CytoscapeUtil.relationToEdge(testCase, entry, "TestCaseExecuteMicroService", null, true));
+				edges.add(new CytoscapeEdge(testCase, entry, "TestCaseExecuteMicroService", ""));
 			}
 			List<Feature> features = testCaseExecuteFeatures.getOrDefault(testCase, new ArrayList<>());
 			for(Feature feature : features) {
 				if(!isFeatureNodeAdd.getOrDefault(feature, false)) {
-					nodes.add(CytoscapeUtil.toCytoscapeNode(feature, feature.getFeatureId() + " : " + feature.getName(), "Feature"));
+					nodes.add(new CytoscapeNode(feature.getId(), feature.getFeatureId() + " : " + feature.getName(), "Feature"));
 					isFeatureNodeAdd.put(feature, true);
 					
 					featureRoot.addChild(new ZTreeNode(feature, false));
@@ -348,77 +322,76 @@ public class MicroServiceCallWithEntry {
 				Feature parentFeature = featureToParentFeature.get(feature);
 				if(parentFeature != null && !isFeatureNodeParent.getOrDefault(feature, false)) {
 					if(!isFeatureNodeAdd.getOrDefault(parentFeature, false)) {
-						nodes.add(CytoscapeUtil.toCytoscapeNode(parentFeature, parentFeature.getFeatureId() + " : " + parentFeature.getName(), "Feature"));
+						nodes.add(new CytoscapeNode(parentFeature.getId(), parentFeature.getFeatureId() + " : " + parentFeature.getName(), "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
 						
 						featureRoot.addChild(new ZTreeNode(parentFeature, false));
 					}
-					edges.add(CytoscapeUtil.relationToEdge(parentFeature, feature, null, null, true));
+					edges.add(new CytoscapeEdge(parentFeature, feature, "", ""));
 					isFeatureNodeParent.put(feature, true);
 				}
-				System.out.println(testCase.getName() + " " + feature.getName());
-				edges.add(CytoscapeUtil.relationToEdge(feature, testCase, "FeatureExecutedByTestCase", null, true));
+				edges.add(new CytoscapeEdge(feature, testCase, "FeatureExecutedByTestCase", ""));
 			}
 		}
 		
 		if(showStructure) {
 			for(MicroService ms : msDependOns.keySet()) {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false) && !msDependOns.get(ms).isEmpty()) {
-					nodes.add(CytoscapeUtil.toCytoscapeNode(ms, "MicroService"));
+					nodes.add(new CytoscapeNode(ms.getId(), ms.getName(), "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
 					
 					msRoot.addChild(new ZTreeNode(ms, false));
 				}
 				for(MicroService callMs : msDependOns.get(ms).keySet()) {
 					if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
-						nodes.add(CytoscapeUtil.toCytoscapeNode(callMs, "MicroService"));
+						nodes.add(new CytoscapeNode(callMs.getId(), callMs.getName(), "MicroService"));
 						isMicroServiceNodeAdd.put(callMs, true);
 						
 						msRoot.addChild(new ZTreeNode(callMs, false));
 					}
 					if(MicroServiceUtil.isMicroServiceCall(ms, callMs, calls)) {
-						edges.add(CytoscapeUtil.relationToEdge(ms, callMs, "ShowStructureDependOnCall", null, true));
+						edges.add(new CytoscapeEdge(ms, callMs, "ShowStructureDependOnCall"));
 					} else {
-						edges.add(CytoscapeUtil.relationToEdge(ms, callMs, "ShowStructureDependOn", null, true));
+						edges.add(new CytoscapeEdge(ms, callMs, "ShowStructureDependOn"));
 					}
 				}
 			}
 			
 			for(MicroService ms : calls.keySet()) {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false) && !calls.get(ms).isEmpty()) {
-					nodes.add(CytoscapeUtil.toCytoscapeNode(ms, "MicroService"));
+					nodes.add(new CytoscapeNode(ms.getId(), ms.getName(), "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
 
 					msRoot.addChild(new ZTreeNode(ms, false));
 				}
 				for(MicroService callMs : calls.get(ms).keySet()) {
 					if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
-						nodes.add(CytoscapeUtil.toCytoscapeNode(callMs, "MicroService"));
+						nodes.add(new CytoscapeNode(callMs.getId(), callMs.getName(), "MicroService"));
 						isMicroServiceNodeAdd.put(callMs, true);
 
 						msRoot.addChild(new ZTreeNode(callMs, false));
 					}
 					if(!MicroServiceUtil.isMicroServiceDependOn(ms, callMs, msDependOns)) {
-						edges.add(CytoscapeUtil.relationToEdge(ms, callMs, "ShowStructureCall", null, true));
+						edges.add(new CytoscapeEdge(ms, callMs, "ShowStructureCall"));
 					}
 				}
 			}
 		} else {
 			for(MicroService ms : calls.keySet()) {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false) && !calls.get(ms).isEmpty()) {
-					nodes.add(CytoscapeUtil.toCytoscapeNode(ms, "MicroService"));
+					nodes.add(new CytoscapeNode(ms.getId(), ms.getName(), "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
 
 					msRoot.addChild(new ZTreeNode(ms, false));
 				}
 				for(MicroService callMs : calls.get(ms).keySet()) {
 					if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
-						nodes.add(CytoscapeUtil.toCytoscapeNode(callMs, "MicroService"));
+						nodes.add(new CytoscapeNode(callMs.getId(), callMs.getName(), "MicroService"));
 						isMicroServiceNodeAdd.put(callMs, true);
 						
 						msRoot.addChild(new ZTreeNode(callMs, false));
 					}
-					edges.add(CytoscapeUtil.relationToEdge(ms, callMs, "NoStructureCall", null, true));
+					edges.add(new CytoscapeEdge(ms, callMs, "NoStructureCall"));
 				}
 			}
 		}
@@ -431,16 +404,16 @@ public class MicroServiceCallWithEntry {
 		ztreeNodes.add(developerRoot.toJSON());
 		
 		JSONObject data = new JSONObject();
-		data.put("nodes", nodes);
-		data.put("edges", edges);
+		data.put("nodes", CytoscapeUtil.toNodes(nodes));
+		data.put("edges", CytoscapeUtil.toEdges(edges));
 		result.put("data", data);
 		return result;	
 	}
 	
 	public JSONObject toCytoscapeWithOutStructure() {
 		JSONObject result = new JSONObject();
-		JSONArray nodes = new JSONArray();
-		JSONArray edges = new JSONArray();
+		List<CytoscapeNode> nodes = new ArrayList<>();
+		List<CytoscapeEdge> edges = new ArrayList<>();
 		Map<MicroService, Boolean> isMicroServiceNodeAdd = new HashMap<>();
 		Map<Feature, Boolean> isFeatureNodeAdd = new HashMap<>();
 		Map<Feature, Boolean> isFeatureNodeParent = new HashMap<>();
@@ -448,7 +421,7 @@ public class MicroServiceCallWithEntry {
 		if(showAllMicroServices) {
 			for(MicroService ms : allMicroServices) {
 				if(!isMicroServiceNodeAdd.getOrDefault(ms, false)) {
-					nodes.add(CytoscapeUtil.toCytoscapeNode(ms, "MicroService"));
+					nodes.add(new CytoscapeNode(ms.getId(), ms.getName(), "MicroService"));
 					isMicroServiceNodeAdd.put(ms, true);
 				}
 			}
@@ -456,129 +429,122 @@ public class MicroServiceCallWithEntry {
 		if(showAllFeatures) {
 			for(Feature feature : allFeatures) {
 				if(!isFeatureNodeAdd.getOrDefault(feature, false)) {
-					nodes.add(CytoscapeUtil.toCytoscapeNode(feature, feature.getFeatureId() + " : " + feature.getName(), "Feature"));
+					nodes.add(new CytoscapeNode(feature.getId(), feature.getFeatureId() + " : " + feature.getName(), "Feature"));
 					isFeatureNodeAdd.put(feature, true);
 				}
 				Feature parentFeature = featureToParentFeature.get(feature);
 				if(parentFeature != null && !isFeatureNodeParent.getOrDefault(feature, false)) {
 					if(!isFeatureNodeAdd.getOrDefault(parentFeature, false)) {
-						nodes.add(CytoscapeUtil.toCytoscapeNode(parentFeature, parentFeature.getFeatureId() + " : " + parentFeature.getName(), "Feature"));
+						nodes.add(new CytoscapeNode(parentFeature.getId(), parentFeature.getFeatureId() + " : " + parentFeature.getName(), "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
 					}
-					edges.add(CytoscapeUtil.relationToEdge(parentFeature, feature, null, null, true));
+					edges.add(new CytoscapeEdge(parentFeature, feature, "", ""));
 					isFeatureNodeParent.put(feature, true);
 				}
 			}
 		}
 		
 		for(TestCase testCase : testCaseToEntries.keySet()) {
-			nodes.add(CytoscapeUtil.toCytoscapeNode(testCase, String.join(" : ", " " + testCase.getTestCaseId(), testCase.getName() + " "), "TestCase_" + (testCase.isSuccess() ? "success" : "fail")));
+			nodes.add(new CytoscapeNode(testCase.getId(), String.join(" : ", " " + testCase.getTestCaseId(), testCase.getName() + " "), "TestCase_" + (testCase.isSuccess() ? "success" : "fail")));
 			List<MicroService> entries = testCaseToEntries.getOrDefault(testCase, new ArrayList<>());
 			for(MicroService entry : entries) {
 				if(!isMicroServiceNodeAdd.getOrDefault(entry, false)) {
-					nodes.add(CytoscapeUtil.toCytoscapeNode(entry, "MicroService"));
+					nodes.add(new CytoscapeNode(entry.getId(), entry.getName(), "MicroService"));
 					isMicroServiceNodeAdd.put(entry, true);
 				}
-				edges.add(CytoscapeUtil.relationToEdge(testCase, entry, null, null, true));
+				edges.add(new CytoscapeEdge(testCase, entry, "", ""));
 			}
 			List<Feature> features = testCaseExecuteFeatures.getOrDefault(testCase, new ArrayList<>());
 			for(Feature feature : features) {
 				if(!isFeatureNodeAdd.getOrDefault(feature, false)) {
-					nodes.add(CytoscapeUtil.toCytoscapeNode(feature, feature.getFeatureId() + " : " + feature.getName(), "Feature"));
+					nodes.add(new CytoscapeNode(feature.getId(), feature.getFeatureId() + " : " + feature.getName(), "Feature"));
 					isFeatureNodeAdd.put(feature, true);
 				}
 				Feature parentFeature = featureToParentFeature.get(feature);
 				if(parentFeature != null && !isFeatureNodeParent.getOrDefault(feature, false)) {
 					if(!isFeatureNodeAdd.getOrDefault(parentFeature, false)) {
-						nodes.add(CytoscapeUtil.toCytoscapeNode(parentFeature, parentFeature.getFeatureId() + " : " + parentFeature.getName(), "Feature"));
+						nodes.add(new CytoscapeNode(parentFeature.getId(), parentFeature.getFeatureId() + " : " + parentFeature.getName(), "Feature"));
 						isFeatureNodeAdd.put(parentFeature, true);
 					}
-					edges.add(CytoscapeUtil.relationToEdge(parentFeature, feature, null, "is child of", true));
+					edges.add(new CytoscapeEdge(parentFeature, feature, "", "is child of"));
 					isFeatureNodeParent.put(feature, true);
 				}
-				edges.add(CytoscapeUtil.relationToEdge(feature, testCase, null, null, true));
+				edges.add(new CytoscapeEdge(feature, testCase, "", ""));
 			}
 		}
 		for(MicroService ms : calls.keySet()) {
 			if(!isMicroServiceNodeAdd.getOrDefault(ms, false)) {
-				nodes.add(CytoscapeUtil.toCytoscapeNode(ms, "MicroService"));
+				nodes.add(new CytoscapeNode(ms.getId(), ms.getName(), "MicroService"));
 				isMicroServiceNodeAdd.put(ms, true);
 			}
 			for(MicroService callMs : calls.get(ms).keySet()) {
 				if(!isMicroServiceNodeAdd.getOrDefault(callMs, false)) {
-					nodes.add(CytoscapeUtil.toCytoscapeNode(callMs, "MicroService"));
+					nodes.add(new CytoscapeNode(callMs.getId(), callMs.getName(), "MicroService"));
 					isMicroServiceNodeAdd.put(callMs, true);
 				}
-				edges.add(CytoscapeUtil.relationToEdge(ms, callMs, null, null, true));
+				edges.add(new CytoscapeEdge(ms, callMs, "", ""));
 			}
 		}
 		
 		JSONObject data = new JSONObject();
-		data.put("nodes", nodes);
-		data.put("edges", edges);
+		data.put("nodes", CytoscapeUtil.toNodes(nodes));
+		data.put("edges", CytoscapeUtil.toEdges(edges));
 		result.put("value", data);
 		return result;
 	}
 	
-	public JSONArray structureEdges(String type) {
-		JSONArray edges = new JSONArray();
+	public List<CytoscapeEdge> structureEdges(String type) {
+		List<CytoscapeEdge> edges = new ArrayList<>();
 		for(MicroService ms : msDependOns.keySet()) {
 			for(MicroService callMs : msDependOns.get(ms).keySet()) {
-				System.out.println("all_MicroService_DependOn_MicroService");
-				edges.add(CytoscapeUtil.relationToEdge(ms, callMs, type, null, false));
+				edges.add(new CytoscapeEdge(null, ms.getId().toString(), callMs.getId().toString(), type));
 			}
 		}
 		return edges;
 	}
 	
-	public JSONArray parentFeatureEdges(String type) {
-		JSONArray edges = new JSONArray();
+	public List<CytoscapeEdge> parentFeatureEdges(String type) {
+		List<CytoscapeEdge> edges = new ArrayList<>();
 		for(Feature feature : allFeatures) {
 			Feature parentFeature = featureToParentFeature.get(feature);
 			if(parentFeature != null) {
-				edges.add(CytoscapeUtil.relationToEdge(parentFeature, feature, type, null, true));
+				edges.add(new CytoscapeEdge(parentFeature, feature, type));
 			}
 		}
 		return edges;
 	}
 
 	public JSONObject testCaseEdges() {
-		System.out.println("testCaseEdges");
 		JSONObject result = new JSONObject();
-		JSONArray edges = new JSONArray();
+		List<CytoscapeEdge> edges = new ArrayList<>();
 		
 		if(showStructure) {
 			System.out.println("showStructure " + msDependOns.size());
-			JSONArray structureEdges = structureEdges("all_MicroService_DependOn_MicroService");
-			for(int i = 0; i < structureEdges.size(); i++) {
-				edges.add(structureEdges.get(i));
-			}
+			List<CytoscapeEdge> structureEdges = structureEdges("all_MicroService_DependOn_MicroService");
+			edges.addAll(structureEdges);
 		}
 		
-		JSONArray parentFeatureEdges = parentFeatureEdges("all_Feature_Contain_Feature");
-		for(int i = 0; i < parentFeatureEdges.size(); i++) {
-			edges.add(parentFeatureEdges.get(i));
-		}
-		
+		List<CytoscapeEdge> parentFeatureEdges = parentFeatureEdges("all_Feature_Contain_Feature");
+		edges.addAll(parentFeatureEdges);
 		
 		for(TestCase testCase : testCaseToEntries.keySet()) {
 			Scenario scenario = this.scenarioDefineTestCases.get(testCase);
 			if(scenario != null) {
-				edges.add(CytoscapeUtil.relationToEdge(scenario, testCase, "all_ScenarioDefineTestCase", null, true));
+				edges.add(new CytoscapeEdge(scenario, testCase, "all_ScenarioDefineTestCase"));
 			}
 			List<MicroService> entries = testCaseToEntries.getOrDefault(testCase, new ArrayList<>());
 			for(MicroService entry : entries) {
-				edges.add(CytoscapeUtil.relationToEdge(testCase, entry, "all_TestCaseExecuteMicroService", null, true));
+				edges.add(new CytoscapeEdge(testCase, entry, "all_TestCaseExecuteMicroService"));
 			}
 			List<Feature> features = testCaseExecuteFeatures.getOrDefault(testCase, new ArrayList<>());
 			for(Feature feature : features) {
-				edges.add(CytoscapeUtil.relationToEdge(testCase, feature, "all_FeatureExecutedByTestCase", null, true));
+				edges.add(new CytoscapeEdge(testCase, feature, "all_FeatureExecutedByTestCase"));
 			}
 		}
 		
 		for(MicroService ms : calls.keySet()) {
 			for(MicroService callMs : calls.get(ms).keySet()) {
-				edges.add(CytoscapeUtil.relationToEdge(ms, callMs, "all_MicroService_call_MicroService", null, true));
+				edges.add(new CytoscapeEdge(ms, callMs, "all_MicroService_call_MicroService"));
 			}
 		}
 		
@@ -587,19 +553,19 @@ public class MicroServiceCallWithEntry {
 		}
 		
 		if(showMicroServiceCallLibs) {
-			Map<Long, Map<String, JSONObject>> hasLibraryToVersionEdge = new HashMap<>();
+			Map<Long, Map<String, CytoscapeEdge>> hasLibraryToVersionEdge = new HashMap<>();
 			for(CallLibrary<MicroService> call : microServiceCallLibraries) {
 				for(Library lib : call.getCallLibraries()) {
 					String libraryGroupAndName = lib.groupIdAndName();
-					Map<String, JSONObject> temp = hasLibraryToVersionEdge.getOrDefault(lib.getId(), new HashMap<>());
-					JSONObject edge = temp.get(libraryGroupAndName);
+					Map<String, CytoscapeEdge> temp = hasLibraryToVersionEdge.getOrDefault(lib.getId(), new HashMap<>());
+					CytoscapeEdge edge = temp.get(libraryGroupAndName);
 					if(edge == null) {
-						edge = CytoscapeUtil.relationToEdge(String.valueOf(lib.getId()), libraryGroupAndName, "LibraryVersionIsFromLibrary", "", false);
+						edge = new CytoscapeEdge(null, lib.getId().toString(), libraryGroupAndName, "LibraryVersionIsFromLibrary", "");
 						edges.add(edge);
 						temp.put(libraryGroupAndName, edge);
 						hasLibraryToVersionEdge.put(lib.getId(), temp);
 					}
-					edges.add(CytoscapeUtil.relationToEdge(call.getCaller(), lib, "MicroServiceCallLibrary", call.timesOfCallLib(lib) + "", false));
+					edges.add(new CytoscapeEdge(null, call.getCaller().getId().toString(), lib.getId().toString(), "MicroServiceCallLibrary", call.timesOfCallLib(lib) + ""));
 				}
 			}
 		}
@@ -611,11 +577,11 @@ public class MicroServiceCallWithEntry {
 					continue;
 				}
 				int times = update.getTimes();
-				edges.add(CytoscapeUtil.relationToEdge(ms, developer, "MicroServiceUpdatedByDeveloper", times + "", false));
+				edges.add(new CytoscapeEdge(null, ms.getId().toString(), developer.getId().toString(), "MicroServiceUpdatedByDeveloper", times + ""));
 			}
 		}
 		JSONObject data = new JSONObject();
-		data.put("edges", edges);
+		data.put("edges", CytoscapeUtil.toEdges(edges));
 		result.put("value", data);
 		return result;
 	}

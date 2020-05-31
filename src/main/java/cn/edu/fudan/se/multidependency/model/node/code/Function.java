@@ -44,6 +44,10 @@ public class Function implements Node {
 	private String inFilePath;
 	
 	private boolean impl;
+	
+	private int startLine = -1;
+	
+	private int endLine = -1;
 
 	/**
 	 * 插入时使用这个，因为用BatchInserter的时候插入这个会转成字符串插入，用SDN读取时对应不到这个List
@@ -55,6 +59,17 @@ public class Function implements Node {
 	 * 用SDN读取到这个
 	 */
 	private String parametersIdentifies;
+	
+	public String getFunctionFullName() {
+		return this.getName() + this.getParametersIdentifies();
+	}
+	
+	public int getLines() {
+		if(startLine <= 0 || endLine <= 0) {
+			return -1;
+		}
+		return endLine - startLine + 1;
+	}
 	
 	@Override
 	public Map<String, Object> getProperties() {
@@ -68,6 +83,8 @@ public class Function implements Node {
 		properties.put("inFilePath", getInFilePath() == null ? "" : getInFilePath());
 		properties.put("simpleName", getSimpleName() == null ? "" : getSimpleName());
 		properties.put("impl", isImpl());
+		properties.put("startLine", getStartLine());
+		properties.put("endLine", getEndLine());
 		return properties;
 	}
 	

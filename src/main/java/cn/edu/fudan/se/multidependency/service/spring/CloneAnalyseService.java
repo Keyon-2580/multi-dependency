@@ -56,8 +56,4 @@ public interface CloneAnalyseService {
 	
 	JSONObject clonesToCytoscape(Collection<? extends CloneRelation> groupRelations);
 	
-	JSONObject fileCloneFilesToCytoscape(Collection<FileCloneFile> groupRelations);
-	
-	JSONObject functionCloneFunctionsToCytoscape(Collection<FunctionCloneFunction> relations);
-	
 }

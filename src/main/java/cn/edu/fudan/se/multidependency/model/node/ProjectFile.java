@@ -31,6 +31,8 @@ public class ProjectFile implements Node {
 	
 	private String suffix;
 	
+	private int line = -1;
+	
 	public ProjectFile(Long entityId, String name, String path, String suffix) {
 		this.entityId = entityId;
 		this.name = name;
@@ -45,6 +47,7 @@ public class ProjectFile implements Node {
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("path", getPath() == null ? "" : getPath());
 		properties.put("suffix", getSuffix() == null ? "" : getSuffix());
+		properties.put("line", getLine());
 		return properties;
 	}
 

@@ -26,7 +26,7 @@ import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService
 import cn.edu.fudan.se.multidependency.service.spring.GitAnalyseServiceImpl;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.data.MicroServiceCallWithEntry;
-import cn.edu.fudan.se.multidependency.service.spring.data.MicroServiceCallWithEntry.CytoscapeEdge;
+import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeEdge;
 
 @Controller
 @RequestMapping("/multiple/all")
@@ -221,16 +221,27 @@ public class MDAllController {
 				List<CytoscapeEdge> edges2 = callsWithEntry2.relatedEdgeObjs();
 				nodes = new JSONArray();
 				edges = new JSONArray();
+				System.out.println(edges2);
 				for(CytoscapeEdge edge1 : edges1) {
+					System.out.println(edge1 + " " + edges2.contains(edge1));
 					if(edges2.contains(edge1)) {
-						edges.add(edge1.toJson("", "NewEdges_Edge1_Edge2"));
+						edges2.get(edges2.indexOf(edge1)).setType("NewEdges_Edge1_Edge2");
+						edge1.setValue("");
+						edge1.setType("NewEdges_Edge1_Edge2");
+						edges.add(edge1.toJSONDataContent());
 					} else {
-						edges.add(edge1.toJson("", "NewEdges_Edge1"));
+						edge1.setValue("");
+						edge1.setType("NewEdges_Edge1");
+						edges.add(edge1.toJSONDataContent());
 					}
 				}
+				System.out.println(edges1);
 				for(CytoscapeEdge edge2 : edges2) {
+					System.out.println(edge2 + " " + edges1.contains(edge2));
 					if(!edges1.contains(edge2)) {
-						edges.add(edge2.toJson("", "NewEdges_Edge2"));
+						edge2.setValue("");
+						edge2.setType("NewEdges_Edge2");
+						edges.add(edge2.toJSONDataContent());
 					}
 				}
 			}
