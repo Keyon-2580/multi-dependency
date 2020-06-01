@@ -132,7 +132,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				TypeEntity typeEntity = varEntity.getType();
 				// 方法的参数
 				if(typeEntity != null 
-						&& Inferer.externalType != typeEntity
+//						&& Inferer.externalType != typeEntity
 						&& Inferer.buildInType != typeEntity
 						&& Inferer.genericParameterType != typeEntity
 						&& this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentEntity.getId().longValue(), currentProject) != null) {

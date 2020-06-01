@@ -48,7 +48,7 @@ public class Depends096Extractor implements DependsEntityRepoExtractor {
 			additionalIncludePaths.addAll(Arrays.asList(includeDir));
 			includeDir = additionalIncludePaths.toArray(new String[] {});
 		}
-		langProcessor.buildDependencies(inputDir, includeDir, new ArrayList<>(), supportImplLink,false);
+		langProcessor.buildDependencies(inputDir, includeDir, new ArrayList<>(), supportImplLink, false, true);
 		return langProcessor.getEntityRepo();
 	}
 	
