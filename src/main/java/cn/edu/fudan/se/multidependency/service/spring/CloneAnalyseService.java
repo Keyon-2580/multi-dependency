@@ -1,18 +1,21 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.Collection;
+import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneRelationNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.service.spring.data.Clone;
+import cn.edu.fudan.se.multidependency.service.spring.data.CloneLineValue;
 
 public interface CloneAnalyseService {
 	
@@ -56,4 +59,15 @@ public interface CloneAnalyseService {
 	
 	JSONObject clonesToCytoscape(Collection<? extends CloneRelation> groupRelations);
 	
+	Map<Integer, Map<Project, CloneLineValue<Project>>> projectCloneLineValuesCalculateGroupByFile();
+	
+	Map<Integer, Map<Project, CloneLineValue<Project>>> projectCloneLineValuesCalculateGroupByFunction();
+	
+	Map<Project, CloneLineValue<Project>> projectCloneLineValues();
+	
+	Map<MicroService, CloneLineValue<MicroService>> msCloneLineValues(Iterable<MicroService> mss);
+	
+	CloneLineValue<MicroService> msCloneLineValuesGroup(MicroService ms, int group, Class<? extends CloneRelationNode> nodeClass);
+	
+	Map<MicroService, CloneLineValue<MicroService>> msCloneLineValuesGroup(Iterable<MicroService> mss, int group, Class<? extends CloneRelationNode> nodeClass);
 }

@@ -15,6 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneRelationNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
@@ -23,6 +24,7 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunctio
 import cn.edu.fudan.se.multidependency.repository.relation.clone.FileCloneFileRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.FunctionCloneFunctionRepository;
 import cn.edu.fudan.se.multidependency.service.spring.data.Clone;
+import cn.edu.fudan.se.multidependency.service.spring.data.CloneLineValue;
 import cn.edu.fudan.se.multidependency.service.spring.data.CloneValueCalculatorForMicroService;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeEdge;
@@ -42,17 +44,199 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     ContainRelationService containRelationService;
     
     @Autowired
+    StaticAnalyseService staticAnalyseService;
+    
+    @Autowired
     CacheService cacheService;
+    
+    @Override
+    public Map<MicroService, CloneLineValue<MicroService>> msCloneLineValuesGroup(Iterable<MicroService> mss, int group, Class<? extends CloneRelationNode> nodeClass) {
+    	Map<MicroService, CloneLineValue<MicroService>> result = new HashMap<>();
+    	for(MicroService ms : mss) {
+    		result.put(ms, msCloneLineValuesGroup(ms, group, nodeClass));
+    	}
+    	return result;
+    }
+    
+    @Override
+    public Map<MicroService, CloneLineValue<MicroService>> msCloneLineValues(Iterable<MicroService> mss) {
+    	Map<MicroService, CloneLineValue<MicroService>> result = new HashMap<>();
+    	Map<Project, CloneLineValue<Project>> projectResults = projectCloneLineValues();
+    	for(MicroService ms : mss) {
+    		CloneLineValue<MicroService> cloneLineValue = new CloneLineValue<MicroService>(ms);
+    		Iterable<Project> projects = containRelationService.findMicroServiceContainProjects(ms);
+    		for(Project project : projects) {
+        		CloneLineValue<Project> projectResult = projectResults.get(project);
+        		if(projectResult == null) {
+        			continue;
+        		}
+        		cloneLineValue.addAllFiles(projectResult.getAllFiles());
+        		cloneLineValue.addAllCloneFiles(projectResult.getCloneFiles());
+        		cloneLineValue.addAllCloneFunctions(projectResult.getCloneFunctions());
+        	}
+    		result.put(ms, cloneLineValue);
+    	}
+    	return result;
+    }
 
+    @Override
+    public CloneLineValue<MicroService> msCloneLineValuesGroup(MicroService ms, int group, Class<? extends CloneRelationNode> nodeClass) {
+    	CloneLineValue<MicroService> result = new CloneLineValue<>(ms);
+    	Map<Integer, Map<Project, CloneLineValue<Project>>> projectResultsGroup = null;
+    	if(nodeClass == Function.class) {
+    		projectResultsGroup = projectCloneLineValuesCalculateGroupByFunction();
+    	} else {
+    		projectResultsGroup = projectCloneLineValuesCalculateGroupByFile();
+    	}
+    	Map<Project, CloneLineValue<Project>> projectResults = projectResultsGroup.get(group);
+    	if(projectResults == null) {
+    		return result;
+    	}
+    	Iterable<Project> projects = containRelationService.findMicroServiceContainProjects(ms);
+    	for(Project project : projects) {
+    		CloneLineValue<Project> projectResult = projectResults.get(project);
+    		if(projectResult == null) {
+    			continue;
+    		}
+    		result.addAllFiles(projectResult.getAllFiles());
+    		result.addAllCloneFiles(projectResult.getCloneFiles());
+    		result.addAllCloneFunctions(projectResult.getCloneFunctions());
+    	}
+    	return result;
+    }
+    
+    Map<Integer, Map<Project, CloneLineValue<Project>>> projectCloneValuesCalculateByFileCache = null;
+    @Override
+    public Map<Integer, Map<Project, CloneLineValue<Project>>> projectCloneLineValuesCalculateGroupByFile() {
+    	if(projectCloneValuesCalculateByFileCache != null) {
+    		return projectCloneValuesCalculateByFileCache;
+    	}
+    	Collection<Collection<? extends Node>> groupFileClones = groupFileCloneNode();
+    	Map<Integer, Map<Project, CloneLineValue<Project>>> result = new HashMap<>();
+    	for(int i = -1; i < groupFileClones.size(); i++) {
+    		Map<Project, CloneLineValue<Project>> projectToCloneValue = new HashMap<>();
+    		for(Project project : staticAnalyseService.allProjects()) {
+    			CloneLineValue<Project> projectCloneValue = new CloneLineValue<Project>(project);
+    			projectCloneValue.addAllFiles(containRelationService.findProjectContainAllFiles(project));
+    			projectToCloneValue.put(project, projectCloneValue);
+    		}
+    		result.put(i, projectToCloneValue);
+    	}
+    	int index = 0;
+    	for(Collection<? extends Node> group : groupFileClones) {
+    		for(Node node : group) {
+    			ProjectFile file = (ProjectFile) node;
+    			Project project = containRelationService.findFileBelongToProject(file);
+    			CloneLineValue<Project> allProjectCloneValue = result.get(-1).get(project);
+    			CloneLineValue<Project> groupProjectCloneValue = result.get(index).get(project);
+    			allProjectCloneValue.addCloneFile(file);
+    			groupProjectCloneValue.addCloneFile(file);
+    			result.get(index).put(project, groupProjectCloneValue);
+    			result.get(-1).put(project, allProjectCloneValue);
+    		}
+    		index++;
+    	}
+    	projectCloneValuesCalculateByFileCache = result;
+    	return result;
+    }
+    
+    Map<Project, CloneLineValue<Project>> projectCloneValuesCache = null;
+    @Override
+    public Map<Project, CloneLineValue<Project>> projectCloneLineValues() {
+    	if(projectCloneValuesCache != null) {
+    		return projectCloneValuesCache;
+    	}
+    	Map<Project, CloneLineValue<Project>> result = new HashMap<>();
+    	for(Project project : staticAnalyseService.allProjects()) {
+    		CloneLineValue<Project> projectCloneValue = new CloneLineValue<Project>(project);
+    		projectCloneValue.addAllFiles(containRelationService.findProjectContainAllFiles(project));
+    		result.put(project, projectCloneValue);
+    	}
+    	for(FunctionCloneFunction cloneRelation : findAllFunctionCloneFunctions()) {
+    		result.get(containRelationService.findFunctionBelongToProject(cloneRelation.getFunction1())).addCloneFunction(cloneRelation.getFunction1());
+    		result.get(containRelationService.findFunctionBelongToProject(cloneRelation.getFunction2())).addCloneFunction(cloneRelation.getFunction2());
+    	}
+    	for(FileCloneFile cloneRelation : findAllFileCloneFiles()) {
+    		result.get(containRelationService.findFileBelongToProject(cloneRelation.getFile1())).addCloneFile(cloneRelation.getFile1());
+    		result.get(containRelationService.findFileBelongToProject(cloneRelation.getFile2())).addCloneFile(cloneRelation.getFile2());
+    	}
+    	projectCloneValuesCache = result;
+    	return result;
+    }
+    
+    Map<Integer, Map<Project, CloneLineValue<Project>>> projectCloneValuesCalculateByFunctionCache = null;
+    @Override
+    public Map<Integer, Map<Project, CloneLineValue<Project>>> projectCloneLineValuesCalculateGroupByFunction() {
+    	if(projectCloneValuesCalculateByFunctionCache != null) {
+    		return projectCloneValuesCalculateByFunctionCache;
+    	}
+    	Collection<Collection<? extends Node>> groupFunctionClones = groupFunctionCloneNode();
+    	Map<Integer, Map<Project, CloneLineValue<Project>>> result = new HashMap<>();
+    	for(int i = -1; i < groupFunctionClones.size(); i++) {
+    		Map<Project, CloneLineValue<Project>> projectToCloneValue = new HashMap<>();
+    		for(Project project : staticAnalyseService.allProjects()) {
+    			CloneLineValue<Project> projectCloneValue = new CloneLineValue<Project>(project);
+    			projectCloneValue.addAllFiles(containRelationService.findProjectContainAllFiles(project));
+    			projectToCloneValue.put(project, projectCloneValue);
+    		}
+    		result.put(i, projectToCloneValue);
+    	}
+    	int index = 0;
+    	for(Collection<? extends Node> group : groupFunctionClones) {
+    		for(Node node : group) {
+    			Function function = (Function) node;
+    			Project project = containRelationService.findFunctionBelongToProject(function);
+    			CloneLineValue<Project> allProjectCloneValue = result.get(-1).get(project);
+    			CloneLineValue<Project> groupProjectCloneValue = result.get(index).get(project);
+    			allProjectCloneValue.addCloneFunction(function);
+    			groupProjectCloneValue.addCloneFunction(function);
+    			result.get(index).put(project, groupProjectCloneValue);
+    			result.get(-1).put(project, allProjectCloneValue);
+    		}
+    		index++;
+    	}
+    	projectCloneValuesCalculateByFunctionCache = result;
+    	return result;
+    }
+    
+    public CloneLineValue<Project> projectCloneValuesCalculate(Project project, int groupIndex, Class<? extends CloneRelationNode> nodeClass) {
+    	CloneLineValue<Project> projectCloneValue = new CloneLineValue<Project>(project);
+    	projectCloneValue.addAllFiles(containRelationService.findProjectContainAllFiles(project));
+    	int index = 0;
+    	if(nodeClass == Function.class) {
+    		for(Collection<? extends Node> group : groupFunctionCloneNode()) {
+    			if(groupIndex == index || groupIndex < 0) {
+    				for(Node node : group) {
+    					Function function = (Function) node;
+    					if(containRelationService.findFunctionBelongToProject(function).equals(project)) {
+    						projectCloneValue.addCloneFunction(function);
+    					}
+    				}
+    			}
+    			index++;
+    		}
+    	} else {
+    		for(Collection<? extends Node> group : groupFileCloneNode()) {
+    			if(groupIndex == index || groupIndex < 0) {
+    				for(Node node : group) {
+    					ProjectFile file = (ProjectFile) node;
+    					if(containRelationService.findFileBelongToProject(file).equals(project)) {
+    						projectCloneValue.addCloneFile(file);
+    					}
+    				}
+    			}
+    			index++;
+    		}
+    	}
+    	return projectCloneValue;
+    }
+    
 	@Override
 	public JSONObject clonesToCytoscape(Collection<? extends CloneRelation> groupRelations) {
 		Map<Node, ZTreeNode> nodeToZTreeNode = new HashMap<>();
 		Map<Project, ZTreeNode> projectToZTreeNode = new HashMap<>();
-		
 		JSONObject result = new JSONObject();
-//		JSONArray nodes = new JSONArray();
 		List<CytoscapeNode> nodes = new ArrayList<>();
-//		JSONArray edges = new JSONArray();
 		List<CytoscapeEdge> edges = new ArrayList<>();
 		Map<Node, Boolean> isNodeToCytoscapeNode = new HashMap<>();
 		Map<String, Boolean> isIdToCytoscapeEdge = new HashMap<>();
@@ -148,160 +332,6 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 		result.put("edges", CytoscapeUtil.toEdges(edges));
 		return result;
 	}
-	
-	/*@Override
-	public JSONObject functionCloneFunctionsToCytoscape(Collection<FunctionCloneFunction> groupRelations) {
-		Map<Node, ZTreeNode> nodeToZTreeNode = new HashMap<>();
-		Map<Project, ZTreeNode> projectToZTreeNode = new HashMap<>();
-		
-		JSONObject result = new JSONObject();
-		JSONArray nodes = new JSONArray();
-		JSONArray edges = new JSONArray();
-		Map<Node, Boolean> isNodeToCytoscapeNode = new HashMap<>();
-		Map<String, Boolean> isIdToCytoscapeEdge = new HashMap<>();
-		for(FunctionCloneFunction cloneRelation : groupRelations) {
-			Function function1 = cloneRelation.getFunction1();
-			if(!isNodeToCytoscapeNode.getOrDefault(function1, false)) {
-				isNodeToCytoscapeNode.put(function1, true);
-				nodes.add(CytoscapeUtil.toCytoscapeNode(function1, "Function"));
-				nodeToZTreeNode.put(function1, new ZTreeNode(function1, false));
-			}
-			Function function2 = cloneRelation.getFunction2();
-			if(!isNodeToCytoscapeNode.getOrDefault(function2, false)) {
-				isNodeToCytoscapeNode.put(function2, true);
-				nodes.add(CytoscapeUtil.toCytoscapeNode(function2, "Function"));
-				nodeToZTreeNode.put(function2, new ZTreeNode(function2, false));
-			}
-			ProjectFile file1 = containRelationService.findFunctionBelongToFile(function1);
-			if(!isNodeToCytoscapeNode.getOrDefault(file1, false)) {
-				isNodeToCytoscapeNode.put(file1, true);
-				nodes.add(CytoscapeUtil.toCytoscapeNode(file1, "File"));
-				nodeToZTreeNode.put(file1, new ZTreeNode(file1.getId(), file1.getPath(), false, "File", true));
-			}
-			String file1ContainFunction1Id = String.join("_", String.valueOf(file1.getId()), String.valueOf(function1.getId()));
-			if(!isIdToCytoscapeEdge.getOrDefault(file1ContainFunction1Id, false)) {
-				isIdToCytoscapeEdge.put(file1ContainFunction1Id, true);
-				edges.add(CytoscapeUtil.relationToEdge(file1, function1, "Contain", "", true));
-				nodeToZTreeNode.get(file1).addChild(nodeToZTreeNode.get(function1));
-			}
-			ProjectFile file2 = containRelationService.findFunctionBelongToFile(function2);
-			if(!isNodeToCytoscapeNode.getOrDefault(file2, false)) {
-				isNodeToCytoscapeNode.put(file2, true);
-				nodes.add(CytoscapeUtil.toCytoscapeNode(file2, "File"));
-				nodeToZTreeNode.put(file2, new ZTreeNode(file2.getId(), file2.getPath(), false, "File", true));
-			}
-			String file2ContainFunction2Id = String.join("_", String.valueOf(file2.getId()), String.valueOf(function2.getId()));
-			if(!isIdToCytoscapeEdge.getOrDefault(file2ContainFunction2Id, false)) {
-				isIdToCytoscapeEdge.put(file2ContainFunction2Id, true);
-				edges.add(CytoscapeUtil.relationToEdge(file2, function2, "Contain", "", true));
-				nodeToZTreeNode.get(file2).addChild(nodeToZTreeNode.get(function2));
-			}
-			edges.add(CytoscapeUtil.relationToEdge(function1, function2, "Clone", String.valueOf(cloneRelation.getValue()), true));
-			Project project1 = containRelationService.findFileBelongToProject(file1);
-			if(!isNodeToCytoscapeNode.getOrDefault(project1, false)) {
-				isNodeToCytoscapeNode.put(project1, true);
-				nodes.add(CytoscapeUtil.toCytoscapeNode(project1, project1.getName() + "(" + project1.getLanguage().toString() + ")", "Project"));
-				projectToZTreeNode.put(project1, new ZTreeNode(project1.getId(), project1.getName() + "(" + project1.getLanguage() + ")", false, "Project", true));
-			}
-			String project1ContainFile1Id = String.join("_", String.valueOf(project1.getId()), String.valueOf(file1.getId()));
-			if(!isIdToCytoscapeEdge.getOrDefault(project1ContainFile1Id, false)) {
-				isIdToCytoscapeEdge.put(project1ContainFile1Id, true);
-				edges.add(CytoscapeUtil.relationToEdge(project1, file1, "Contain", "", true));
-				projectToZTreeNode.get(project1).addChild(nodeToZTreeNode.get(file1));
-			}
-			Project project2 = containRelationService.findFileBelongToProject(file2);
-			if(!isNodeToCytoscapeNode.getOrDefault(project2, false)) {
-				isNodeToCytoscapeNode.put(project2, true);
-				nodes.add(CytoscapeUtil.toCytoscapeNode(project2, project2.getName() + "(" + project2.getLanguage().toString() + ")", "Project"));
-				projectToZTreeNode.put(project2, new ZTreeNode(project2.getId(), project2.getName() + "(" + project2.getLanguage() + ")", false, "Project", true));
-			}
-			String project2ContainFile2Id = String.join("_", String.valueOf(project2.getId()), String.valueOf(file2.getId()));
-			if(!isIdToCytoscapeEdge.getOrDefault(project2ContainFile2Id, false)) {
-				isIdToCytoscapeEdge.put(project2ContainFile2Id, true);
-				edges.add(CytoscapeUtil.relationToEdge(project2, file2, "Contain", "", true));
-				projectToZTreeNode.get(project2).addChild(nodeToZTreeNode.get(file2));
-			}
-		}
-
-		JSONArray ztreeResult = new JSONArray();
-		for(ZTreeNode node : projectToZTreeNode.values()) {
-			ztreeResult.add(node.toJSON());
-		}
-		result.put("ztree", ztreeResult);
-		result.put("nodes", nodes);
-		result.put("edges", edges);
-		return result;
-	}
-    
-    @Override
-	public JSONObject fileCloneFilesToCytoscape(Collection<FileCloneFile> groupRelations) {
-		JSONObject result = new JSONObject();
-		JSONArray nodes = new JSONArray();
-		JSONArray edges = new JSONArray();
-		Map<Node, Boolean> isNodeToCytoscapeNode = new HashMap<>();
-		Map<String, Boolean> isIdToCytoscapeEdge = new HashMap<>();
-		for(FileCloneFile cloneRelation : groupRelations) {
-			ProjectFile file1 = cloneRelation.getFile1();
-			if(!isNodeToCytoscapeNode.getOrDefault(file1, false)) {
-				isNodeToCytoscapeNode.put(file1, true);
-				nodes.add(CytoscapeUtil.toCytoscapeNode(file1, "File"));
-			}
-			ProjectFile file2 = cloneRelation.getFile2();
-			if(!isNodeToCytoscapeNode.getOrDefault(file2, false)) {
-				isNodeToCytoscapeNode.put(file2, true);
-				nodes.add(CytoscapeUtil.toCytoscapeNode(file2, "File"));
-			}
-			edges.add(CytoscapeUtil.relationToEdge(file1, file2, "Clone", String.valueOf(cloneRelation.getValue()), true));
-			Project project1 = containRelationService.findFileBelongToProject(file1);
-			if(!isNodeToCytoscapeNode.getOrDefault(project1, false)) {
-				isNodeToCytoscapeNode.put(project1, true);
-				nodes.add(CytoscapeUtil.toCytoscapeNode(project1, project1.getName() + "(" + project1.getLanguage().toString() + ")", "Project"));
-			}
-			String project1ContainFile1Id = String.join("_", String.valueOf(project1.getId()), String.valueOf(file1.getId()));
-			if(!isIdToCytoscapeEdge.getOrDefault(project1ContainFile1Id, false)) {
-				isIdToCytoscapeEdge.put(project1ContainFile1Id, true);
-				edges.add(CytoscapeUtil.relationToEdge(project1, file1, "Contain", "", true));
-			}
-			Project project2 = containRelationService.findFileBelongToProject(file2);
-			if(!isNodeToCytoscapeNode.getOrDefault(project2, false)) {
-				isNodeToCytoscapeNode.put(project2, true);
-				nodes.add(CytoscapeUtil.toCytoscapeNode(project2, project2.getName() + "(" + project2.getLanguage().toString() + ")", "Project"));
-			}
-			String project2ContainFile2Id = String.join("_", String.valueOf(project2.getId()), String.valueOf(file2.getId()));
-			if(!isIdToCytoscapeEdge.getOrDefault(project2ContainFile2Id, false)) {
-				isIdToCytoscapeEdge.put(project2ContainFile2Id, true);
-				edges.add(CytoscapeUtil.relationToEdge(project2, file2, "Contain", "", true));
-			}
-			MicroService ms1 = containRelationService.findProjectBelongToMicroService(project1);
-			if(ms1 != null) {
-				if(!isNodeToCytoscapeNode.getOrDefault(ms1, false)) {
-					isNodeToCytoscapeNode.put(ms1, true);
-					nodes.add(CytoscapeUtil.toCytoscapeNode(ms1, "MicroService"));
-				}
-				String ms1ContainProject1Id = String.join("_", String.valueOf(ms1.getId()), String.valueOf(project1.getId()));
-				if(!isIdToCytoscapeEdge.getOrDefault(ms1ContainProject1Id, false)) {
-					isIdToCytoscapeEdge.put(ms1ContainProject1Id, true);
-					edges.add(CytoscapeUtil.relationToEdge(ms1, project1, "Contain", "", true));
-				}
-			}
-			MicroService ms2 = containRelationService.findProjectBelongToMicroService(project2);
-			if(ms2 != null) {
-				if(!isNodeToCytoscapeNode.getOrDefault(ms2, false)) {
-					isNodeToCytoscapeNode.put(ms2, true);
-					nodes.add(CytoscapeUtil.toCytoscapeNode(ms2, "MicroService"));
-				}
-				String ms2ContainProject2Id = String.join("_", String.valueOf(ms2.getId()), String.valueOf(project2.getId()));
-				if(!isIdToCytoscapeEdge.getOrDefault(ms2ContainProject2Id, false)) {
-					isIdToCytoscapeEdge.put(ms2ContainProject2Id, true);
-					edges.add(CytoscapeUtil.relationToEdge(ms2, project2, "Contain", "", true));
-				}
-			}
-		}
-		
-		result.put("nodes", nodes);
-		result.put("edges", edges);
-		return result;
-	}*/
     
 	Collection<Collection<? extends CloneRelation>> groupFunctionCloneRelationCache = null;
 	@Override

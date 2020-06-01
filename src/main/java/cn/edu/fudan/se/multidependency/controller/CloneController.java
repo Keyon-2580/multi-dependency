@@ -2,7 +2,9 @@ package cn.edu.fudan.se.multidependency.controller;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
@@ -27,7 +30,9 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.service.spring.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
+import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.data.Clone;
+import cn.edu.fudan.se.multidependency.service.spring.data.CloneLineValue;
 
 @Controller
 @RequestMapping("/clone")
@@ -39,15 +44,43 @@ public class CloneController {
 	@Autowired
 	private ContainRelationService containRelationService;
 	
-	@GetMapping("/file")
-	public String fileIndex(HttpServletRequest request) {
-		request.setAttribute("level", "file");
-		return "clone";
+	@Autowired
+	private MicroserviceService msService;
+	
+	@GetMapping("/microservice/line")
+	@ResponseBody
+	public Object msCloneLineValue() {
+		Map<Long, CloneLineValue<MicroService>> result = new HashMap<>();
+		for(Map.Entry<MicroService, CloneLineValue<MicroService>> entry : cloneAnalyse.msCloneLineValues(msService.findAllMicroService().values()).entrySet()) {
+			result.put(entry.getKey().getId(), entry.getValue());
+		}
+		return result;
 	}
 	
-	@GetMapping("/function")
-	public String functionIndex(HttpServletRequest request) {
-		request.setAttribute("level", "function");
+	@GetMapping("/{level}/microservice/{group}")
+	@ResponseBody
+	public Object cloneMicroService(@PathVariable("level") String level, @PathVariable("group") int group, @RequestParam("microserviceId") long id) {
+		MicroService ms = msService.findMicroServiceById(id);
+		if(ms == null) {
+			return "";
+		}
+		return cloneAnalyse.msCloneLineValuesGroup(ms, group, Constant.cloneLevelToClass(level));
+	}
+	
+	@GetMapping("/{level}/project")
+	@ResponseBody
+	public Object cloneProject(@PathVariable("level") String level) {
+		if("function".equals(level)) {
+			return cloneAnalyse.projectCloneLineValuesCalculateGroupByFunction();
+		} else if("file".equals(level)) {
+			return cloneAnalyse.projectCloneLineValuesCalculateGroupByFile();
+		}
+		return "";
+	}
+	
+	@GetMapping("/{level}")
+	public String cloneIndex(@PathVariable("level") String level, HttpServletRequest request) {
+		request.setAttribute("level", level);
 		return "clone";
 	}
 	

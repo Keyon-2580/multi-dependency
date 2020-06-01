@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.config.Constant;
+import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
@@ -25,6 +27,7 @@ import cn.edu.fudan.se.multidependency.service.spring.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.GitAnalyseServiceImpl;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
+import cn.edu.fudan.se.multidependency.service.spring.data.CloneLineValue;
 import cn.edu.fudan.se.multidependency.service.spring.data.MicroServiceCallWithEntry;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeEdge;
 
@@ -76,6 +79,9 @@ public class MDAllController {
 			callsWithEntry.setShowCntOfDevUpdMs(showCntOfDevUpdMs);
 			callsWithEntry.setShowClonesMinPair(showClonesMinPair);
 			if(showClonesInMicroService) {
+				Iterable<MicroService> allMicroServices = msService.findAllMicroService().values();
+				Map<MicroService, CloneLineValue<MicroService>> msCloneValues = cloneAnalyse.msCloneLineValuesGroup(allMicroServices, -1, Constant.cloneLevelToClass("file"));
+				callsWithEntry.setMsToCloneLineValue(msCloneValues);
 				callsWithEntry.setClonesInMicroServiceFromFunctionClone(cloneAnalyse.findMicroServiceCloneFromFunctionClone(cloneAnalyse.findAllFunctionCloneFunctions(), true));
 				callsWithEntry.setClonesInMicroServiceFromFileClone(cloneAnalyse.findMicroServiceCloneFromFileClone(cloneAnalyse.findAllFileCloneFiles(), true));
 				callsWithEntry.setShowClonesMinPair(showClonesMinPair);

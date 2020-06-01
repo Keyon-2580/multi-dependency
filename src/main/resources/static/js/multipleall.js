@@ -16,8 +16,6 @@ var multiple_microservice_all = function(cytoscapeutil) {
 						return ;
 					}
 					var node = cyEntry.$('#' + id);
-					console.log(cyEntry.width());
-					console.log(cyEntry.height());
 					cyEntry.fit(node, 350);
 				}
 			}	
@@ -70,6 +68,11 @@ var multiple_microservice_all = function(cytoscapeutil) {
 					console.log(result.value.data);
 					cyEntry = cytoscapeutil.showDataInCytoscape($("#entry"), result.value.data, "preset");
 					cyEntry.remove('edge');
+
+					if($("#showClonesInMicroService").prop('checked') == true) {
+						console.log("true");
+						console.log(cyEntry.nodes());
+					}
 					queryResult = result;
 					
 					$.ajax({
@@ -115,6 +118,26 @@ var multiple_microservice_all = function(cytoscapeutil) {
 					queryResult = result;
 					processCytoscape(cyEntry);
 					setTapNode(cyEntry, result);
+				}
+				if($("#showClonesInMicroService").prop('checked') == true) {
+					console.log("true");
+					console.log(cyEntry.nodes());
+					cyEntry.$("#11019").data("name", "eeeeee")
+					$.ajax({
+						type: 'GET',
+						url: "/clone/microservice/line",
+						success: function(result) {
+							console.log(result);
+							for(var id in result) {
+								cyEntry.$("#" + id).data("height", 50);
+								cyEntry.$("#" + id).data("name", result[id].project.name 
+										+ "\n文件总行数：" + result[id].allFilesLines + "，文件数：" + result[id].allFiles.length
+										+ "\n克隆相关文件行数：" + result[id].allCloneFilesLines + "，文件数：" + result[id].cloneFiles.length
+										+ "\n克隆相关方法行数：" + result[id].allCloneFunctionsLines + "，方法数：" + result[id].cloneFunctions.length
+								);
+							}
+						}
+					});
 				}
 			}
 		});

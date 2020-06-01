@@ -260,15 +260,30 @@ var cytoscapeutil = function() {
 					style: {
 						'shape' : 'hexagon',
 						'width': function(content) {
-							return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
+//							return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
+							var split = content.data().name.split("\n");
+							var maxWidth = 0;
+							for(var i = 0; i < split.length; i++) {
+								var width = split[i].replace(/[^\u0000-\u00ff]/g,"aa").length * 14;
+								if(width > maxWidth) {
+									maxWidth = width;
+								}
+							}
+							return maxWidth;
 						},
-						'height': 30,
+						'height': function(content) {
+							var split = content.data().name.split("\n");
+							var length = split.length;
+							return 17 * length;
+						},
 						'text-valign': 'center',
 						'text-halign': 'center',
 						'border-width': 1.5,
 						'border-color': '#555',
 						'background-color': '#f6f6f6',
-						'content': 'data(name)'
+						'content': 'data(name)',
+						"text-wrap": "wrap"
+//					      "text-max-width": 80
 					}
 				},
 				{

@@ -63,6 +63,8 @@ public class MicroServiceCallWithEntry {
 	
 	private Iterable<DeveloperUpdateNode<MicroService>> cntOfDevUpdMs;
 	
+	private Map<MicroService, CloneLineValue<MicroService>> msToCloneLineValue = new HashMap<>();
+	
 	public boolean containCall(MicroService caller, MicroService called) {
 		return this.calls.getOrDefault(caller, new HashMap<>()) != null;
 	}
@@ -125,7 +127,6 @@ public class MicroServiceCallWithEntry {
 	
 	public JSONArray relatedMicroServiceIds() {
 		JSONArray result = new JSONArray();
-		System.out.println("relatedNodeIds");
 		Map<MicroService, Boolean> isMicroServiceNodeAdd = new HashMap<>();
 		
 		for(TestCase testCase : testCaseToEntries.keySet()) {
@@ -161,15 +162,16 @@ public class MicroServiceCallWithEntry {
 		if(relationClass == FunctionCloneFunction.class) {
 			for(Clone<MicroService, FunctionCloneFunction> clone : clonesInMicroServiceFromFunctionClone) {
 				if(clone.sizeOfChildren() >= showClonesMinPair) {
-					CytoscapeEdge edge = new CytoscapeEdge(clone.getId(), clone.getNode1().getId().toString(), clone.getNode2().getId().toString(), "all_MicroService_clone_MicroService", clone.calculateValue());
+//					CytoscapeEdge edge = new CytoscapeEdge(clone.getId(), clone.getNode1().getId().toString(), clone.getNode2().getId().toString(), "all_MicroService_clone_MicroService", clone.calculateValue());
+					CytoscapeEdge edge = new CytoscapeEdge(clone.getId(), clone.getNode1().getId().toString(), clone.getNode2().getId().toString(), "all_MicroService_clone_MicroService", "");
 					edges.add(edge);
-//					edge.getJSONObject("data").put("id", clone.getId());
 				}
 			}
 		} else {
 			for(Clone<MicroService, FileCloneFile> clone : clonesInMicroServiceFromFileClone) {
 				if(clone.sizeOfChildren() >= showClonesMinPair) {
-					CytoscapeEdge edge = new CytoscapeEdge(clone.getId(), clone.getNode1().getId().toString(), clone.getNode2().getId().toString(), "all_MicroService_clone_MicroService", clone.calculateValue());
+//					CytoscapeEdge edge = new CytoscapeEdge(clone.getId(), clone.getNode1().getId().toString(), clone.getNode2().getId().toString(), "all_MicroService_clone_MicroService", clone.calculateValue());
+					CytoscapeEdge edge = new CytoscapeEdge(clone.getId(), clone.getNode1().getId().toString(), clone.getNode2().getId().toString(), "all_MicroService_clone_MicroService", "");
 					edges.add(edge);
 				}
 			}
