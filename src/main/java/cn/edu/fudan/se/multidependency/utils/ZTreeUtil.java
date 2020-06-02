@@ -47,6 +47,7 @@ public class ZTreeUtil {
 		private String type;
 		private boolean open;
 		private boolean parent;
+		private boolean checked = true;
 		
 		private List<ZTreeNode> children = new ArrayList<>();
 		
@@ -67,6 +68,7 @@ public class ZTreeUtil {
 			result.put("type", type);
 			result.put("open", open);
 			result.put("isParent", parent);
+			result.put("checked", checked);
 			if(parent) {
 				JSONArray childrenJSON = new JSONArray();
 				for(ZTreeNode child : children) {

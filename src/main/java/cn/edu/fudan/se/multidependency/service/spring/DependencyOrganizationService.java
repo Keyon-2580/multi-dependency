@@ -63,7 +63,7 @@ public class DependencyOrganizationService {
 			Function function1 = clone.getFunction1();
 			Function function2 = clone.getFunction2();
 			if(!hasFunctionCallFunction.getOrDefault(function1, new HashMap<>()).getOrDefault(function2, false)) {
-				edges.add(new CytoscapeEdge(null, function1.getId().toString(), function2.getId().toString(), "Function_clone_Function", "Function_clone_Function").toJSON());
+				edges.add(new CytoscapeEdge(function1, function2, "Function_clone_Function", "Function_clone_Function").toJSON());
 				Map<Function, Boolean> temp = hasFunctionCallFunction.getOrDefault(function1, new HashMap<>());
 				temp.put(function2, true);
 				hasFunctionCallFunction.put(function1, temp);
@@ -86,7 +86,7 @@ public class DependencyOrganizationService {
 			Function start = call.getFunction();
 			Function end = call.getCallFunction();
 			if(!hasFunctionCallFunction.getOrDefault(start, new HashMap<>()).getOrDefault(end, false)) {
-				edges.add(new CytoscapeEdge(null, start.getId().toString(), end.getId().toString(), "FunctionDynamicCallFunction", "FunctionDynamicCallFunction").toJSON());
+				edges.add(new CytoscapeEdge(start, end, "FunctionDynamicCallFunction", "FunctionDynamicCallFunction").toJSON());
 				Map<Function, Boolean> temp = hasFunctionCallFunction.getOrDefault(start, new HashMap<>());
 				temp.put(end, true);
 				hasFunctionCallFunction.put(start, temp);
@@ -196,7 +196,7 @@ public class DependencyOrganizationService {
 		}
 		List<VariableIsType> variableIsType = staticAnalyseService.findProjectContainVariableIsTypeRelations(project);
 		for(VariableIsType relation : variableIsType) {
-			edges.add(new CytoscapeEdge(null, relation.getVariable().getId().toString(), relation.getType().getId().toString(), "VariableIsType", "VariableIsType"));
+			edges.add(new CytoscapeEdge(relation.getVariable(), relation.getType(), "VariableIsType", "VariableIsType"));
 		}
 		/*List<VariableTypeParameterType> variableTypeParameterTypes = staticAnalyseService.findProjectContainVariableTypeParameterTypeRelations(project);
 		for(VariableTypeParameterType relation : variableTypeParameterTypes) {

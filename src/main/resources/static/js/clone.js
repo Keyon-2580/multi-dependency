@@ -1,4 +1,26 @@
 var clone = function(cytoscapeutil, level) {
+	var isFullScreen = false;
+	function showFull(divId){
+		var full=document.getElementById(divId);
+		launchIntoFullscreen(full);
+		isFullScreen = true;
+		$(".div_cytoscape").css("height", "100%");
+		$(".div_cytoscape_content").css("height", "100%");
+		$(".div_cytoscape_treeview").css("height", "100%");
+	}
+	function delFull() {
+		exitFullscreen();
+	}
+	window.onresize = function() {
+		console.log("resize");
+		if(isFullScreen == true) {
+			isFullScreen = false;
+		} else {
+			$(".div_cytoscape").css("height", "500px");
+			$(".div_cytoscape_content").css("height", "500px");
+			$(".div_cytoscape_treeview").css("height", "500px");
+		}
+	};
 	var cys = [];
 	var showZTree = function(nodes, container = $("#ztree"), cy) {
 		var setting = {
@@ -12,28 +34,56 @@ var clone = function(cytoscapeutil, level) {
 		cy.style().selector('node[type="Function"]').style({
 			'shape' : 'ellipse',
 			'width': function(content) {
-				return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 9;
+				var split = content.data().name.split("\n");
+				var maxWidth = 0;
+				console.log(split);
+				for(var i = 0; i < split.length; i++) {
+					var width = split[i].replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
+					if(width > maxWidth) {
+						maxWidth = width;
+					}
+				}
+				return maxWidth;
 			},
-			'height': 30,
+			'height': function(content) {
+				var split = content.data().name.split("\n");
+				var length = split.length;
+				return 21 * length;
+			},
 			'text-valign': 'center',
 			'text-halign': 'center',
 			'border-width': 1.5,
 			'border-color': '#555',
 			'background-color': '#f6f6f6',
-			'content': 'data(name)'
+			'content': 'data(name)',
+			'text-wrap': 'wrap'
 		}).update();
 		cy.style().selector('node[type="File"]').style({
 			'shape' : 'ellipse',
 			'width': function(content) {
-				return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 9;
+				var split = content.data().name.split("\n");
+				var maxWidth = 0;
+				console.log(split);
+				for(var i = 0; i < split.length; i++) {
+					var width = split[i].replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
+					if(width > maxWidth) {
+						maxWidth = width;
+					}
+				}
+				return maxWidth;
 			},
-			'height': 30,
+			'height': function(content) {
+				var split = content.data().name.split("\n");
+				var length = split.length;
+				return 21 * length;
+			},
 			'text-valign': 'center',
 			'text-halign': 'center',
 			'border-width': 1.5,
 			'border-color': '#555',
 			'background-color': '#f6f6f6',
-			'content': 'data(name)'
+			'content': 'data(name)',
+			'text-wrap': 'wrap'
 		}).update();
 		cy.style().selector('node[type="Project"]').style({
 			'shape' : 'rectangle',
@@ -63,6 +113,7 @@ var clone = function(cytoscapeutil, level) {
 		cy.add(edges);
 		return cy;
 	}
+	var cys = {};
 	var _clone = function() {
 		$("#searchTop").click(function(){
 			var top = $("#topInput").val();
@@ -76,7 +127,10 @@ var clone = function(cytoscapeutil, level) {
 						var size = result.size;
 						var html = "";
 						for(var i = 0; i < size; i++) {
-							html += '<div class="col-sm-12 div_cytoscape_div">';
+							html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='" + i +"'>全屏</button>";
+//							html += "<button class='btn btn-default save_top' name='" + i +"'>保存图片</button><p></p></div>";
+							html += "<p></p></div>";
+							html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble_' + i + '">';
 								html += '<div class="div_cytoscape_treeview">';
 									html += '<ul id="ztree_' + i + '" class="ztree"></ul>';
 								html += '</div>';
@@ -84,11 +138,24 @@ var clone = function(cytoscapeutil, level) {
 									html += '<div id="cloneGroupDiv_' + i + '" class="div_cytoscape_content cy"></div>';
 								html += '</div>'
 							html += '</div>';
+							html += '<div id="cloneImg_' + i + '">'
+							html += '</div>'
 							html += '<div class="col-sm-12"><hr/></div>';
 						}
 						$("#content").html(html);
+						$(".fullscreen_btn_top").click(function() {
+							showFull("fullscreenAble_" + $(this).attr("name"));
+						});
+						/*$(".save_top").click(function(){
+							var i = $(this).attr("name");
+							var cy = cys[i];
+							cytoscapeutil.showImg(cy, "cloneImg_" + i)
+							$("#clone_img_" + i).css("height", "500px");
+							console.log(cys);
+						});*/
 						for(var i = 0; i < size; i++) {
 							var cy = _showCytoscape($("#cloneGroupDiv_" + i), result.value[i]);
+							cys[i] = cy;
 							showZTree(result.value[i].ztree, $("#ztree_" + i), cy);
 						}
 					}
@@ -185,7 +252,9 @@ var clone = function(cytoscapeutil, level) {
 							if(result.result == "success") {
 								console.log(result.value);
 								var html = "";
-								html += '<div class="col-sm-12 div_cytoscape_div">';
+								html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn'>全屏</button>";
+								html += "<p></p></div>";
+								html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble">';
 								html += '<div class="div_cytoscape_treeview">';
 								html += '<ul id="ztree" class="ztree"></ul>';
 								html += '</div>';
@@ -195,6 +264,9 @@ var clone = function(cytoscapeutil, level) {
 								html += '</div>';
 								html += '<div class="col-sm-12"><hr/></div>';
 								$("#specifiedCytoscape").html(html);
+								$(".fullscreen_btn").click(function(){
+									showFull("fullscreenAble");
+								})
 								var cy = _showCytoscape($("#cloneGroupDiv"), result.value);
 								showZTree(result.value.ztree, $("#ztree"), cy);
 							}

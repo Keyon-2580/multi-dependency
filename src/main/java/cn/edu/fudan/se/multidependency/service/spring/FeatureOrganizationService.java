@@ -74,22 +74,25 @@ public class FeatureOrganizationService {
 		List<CytoscapeEdge> edges = new ArrayList<>();
 		
 		for(Feature feature : allFeatures()) {
-			nodes.add(new CytoscapeNode(feature.getId(), feature.getFeatureId() + " : " + feature.getName(), "Feature", feature.getFeatureId() + ":" + feature.getName()));
+			CytoscapeNode featureNode = new CytoscapeNode(feature.getId(), feature.getFeatureId() + " : " + feature.getName(), "Feature");
+			featureNode.setValue(feature.getFeatureId() + ":" + feature.getName());
+			nodes.add(featureNode);
 			
 			List<TestCaseExecuteFeature> executes = featureExecutedByTestCases.get(feature);
 			for(TestCaseExecuteFeature execute : executes) {
 				TestCase testcase = execute.getTestCase();
 				
-				CytoscapeNode testCaseNode = new CytoscapeNode(testcase.getId(), String.join(" : ", " " + testcase.getTestCaseId(), testcase.getName() + " "), "TestCase_" + (testcase.isSuccess() ? "success" : "fail"), testcase.getTestCaseId() + " : " + testcase.getName());
+				CytoscapeNode testCaseNode = new CytoscapeNode(testcase.getId(), String.join(" : ", " " + testcase.getTestCaseId(), testcase.getName() + " "), "TestCase_" + (testcase.isSuccess() ? "success" : "fail"));
+				testCaseNode.setValue(testcase.getTestCaseId() + " : " + testcase.getName());
 				nodes.add(testCaseNode);
 				
-				edges.add(new CytoscapeEdge(null, testcase, feature, "TestCaseExecuteFeature"));
+				edges.add(new CytoscapeEdge(testcase, feature, "TestCaseExecuteFeature"));
 			}
 		}
 		
 		for(Feature feature : featureToParentFeature.keySet()) {
 			Feature parentFeature = featureToParentFeature.get(feature);
-			edges.add(new CytoscapeEdge(null, parentFeature, feature, "FeatureContainFeature"));
+			edges.add(new CytoscapeEdge(parentFeature, feature, "FeatureContainFeature"));
 		}
 		
 		result.put("nodes", CytoscapeUtil.toNodes(nodes));
@@ -244,13 +247,13 @@ public class FeatureOrganizationService {
  		for(MicroService ms : selectMsCalls.keySet()) {
 			for(MicroService callMs : selectMsCalls.get(ms).keySet()) {
 				MicroServiceCallMicroService msCallMs = selectMsCalls.get(ms).get(callMs);
-				edges.add(new CytoscapeEdge(null, ms.getId().toString(), callMs.getId().toString(), "selectTestCase", msCallMs.getTimes() + ""));
+				edges.add(new CytoscapeEdge(ms, callMs, "selectTestCase", msCallMs.getTimes() + ""));
 			}
 		}
 		for(MicroService ms : scaleMsCalls.keySet()) {
 			for(MicroService callMs : scaleMsCalls.get(ms).keySet()) {
 				MicroServiceCallMicroService msCallMs = scaleMsCalls.get(ms).get(callMs);
-				edges.add(new CytoscapeEdge(null, ms.getId().toString(), callMs.getId().toString(), "allTestCase", msCallMs.getTimes() + ""));
+				edges.add(new CytoscapeEdge(ms, callMs, "allTestCase", msCallMs.getTimes() + ""));
 			}
 		}
 		List<MicroService> allMicroServices = allMicroServices();
@@ -298,7 +301,7 @@ public class FeatureOrganizationService {
 					}
 				}
 				if(flag) {
-					edges.add(new CytoscapeEdge(null, caller.getId().toString(), called.getId().toString(), "selectTestCase", ""));
+					edges.add(new CytoscapeEdge(caller, called, "selectTestCase", ""));
 				}
 			}
 		}
@@ -306,7 +309,7 @@ public class FeatureOrganizationService {
 		for(MicroService ms : scaleMsCalls.keySet()) {
 			for(MicroService callMs : scaleMsCalls.get(ms).keySet()) {
 				MicroServiceCallMicroService msCallMs = scaleMsCalls.get(ms).get(callMs);
-				edges.add(new CytoscapeEdge(null, ms.getId().toString(), callMs.getId().toString(), "allTestCase", msCallMs.getTimes() + ""));
+				edges.add(new CytoscapeEdge(ms, callMs, "allTestCase", msCallMs.getTimes() + ""));
 			}
 		}
 		List<MicroService> allMicroServices = allMicroServices();
@@ -336,7 +339,8 @@ public class FeatureOrganizationService {
 		JSONObject result = new JSONObject();
 		List<CytoscapeNode> nodes = new ArrayList<>();
 		List<CytoscapeEdge> edges = new ArrayList<>();
-		CytoscapeNode entry = new CytoscapeNode("-1", "Entry", "Entry", "Entry");
+		CytoscapeNode entry = new CytoscapeNode("-1", "Entry", "Entry");
+		entry.setValue("Entry");
 		nodes.add(entry);
 		
 		Set<MicroService> relatedMicroServices = findRelatedMicroServiceForTraces(trace);
@@ -358,7 +362,7 @@ public class FeatureOrganizationService {
 			}
 			if(span.getOrder() == 0) {
 				// 入口
-				edges.add(new CytoscapeEdge(null, entry.getId(), String.valueOf(api.getId()), "APICall", "(0)"));
+				edges.add(new CytoscapeEdge(entry.getId(), String.valueOf(api.getId()), "APICall", "(0)"));
 			}
 			Iterable<SpanCallSpan> calls = spanCallSpans.getOrDefault(span, new ArrayList<>());
 			for(SpanCallSpan call : calls) {
@@ -371,7 +375,7 @@ public class FeatureOrganizationService {
 					nodes.add(callApiNode);
 					isAPINodeAdd.put(callApi, true);
 				}
-				edges.add(new CytoscapeEdge(null, api.getId().toString(), callApi.getId().toString(), "APICall", "(" + callSpan.getOrder() + ")"));
+				edges.add(new CytoscapeEdge(api, callApi, "APICall", "(" + callSpan.getOrder() + ")"));
 			}
 		}
 
@@ -420,7 +424,7 @@ public class FeatureOrganizationService {
 		for(MicroService ms : msCalls.keySet()) {
 			for(MicroService callMs : msCalls.get(ms).keySet()) {
 				MicroServiceCallMicroService msCallMs = msCalls.get(ms).get(callMs);
-				edges.add(new CytoscapeEdge(null, ms.getId().toString(), callMs.getId().toString(), "", String.valueOf(msCallMs.getTimes())));
+				edges.add(new CytoscapeEdge(ms, callMs, "", String.valueOf(msCallMs.getTimes())));
 			}
 		}
 		List<MicroService> relatedMSs = removeUnuseMS ? new ArrayList<>(findRelatedMicroServiceForTraces(traces)) : allMicroServices();

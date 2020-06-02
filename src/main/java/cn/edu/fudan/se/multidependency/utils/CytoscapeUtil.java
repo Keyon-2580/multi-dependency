@@ -27,18 +27,14 @@ public class CytoscapeUtil {
 		private double positionY;
 		
 		public CytoscapeNode(long id, String name, String type) {
-			this(String.valueOf(id), name, type, "");
+			this(String.valueOf(id), name, type);
 		}
 		
-		public CytoscapeNode(long id, String name, String type, String value) {
-			this(String.valueOf(id), name, type, value);
-		}
-
-		public CytoscapeNode(String id, String name, String type, String value) {
+		public CytoscapeNode(String id, String name, String type) {
 			this.id = id;
 			this.name = name;
 			this.type = type;
-			this.value = value;
+			this.value = "";
 		}
 		
 		public void setParent(long parent) {
@@ -58,7 +54,7 @@ public class CytoscapeUtil {
 			JSONObject data = new JSONObject();
 			data.put("id", getId());
 			data.put("name", getName() == null ? "" : getName());
-			data.put("type", getType());
+			data.put("type", getType() == null ? "" : getType());
 			data.put("value", getValue() == null ? "" : getValue());
 			if(getParent() != null) {
 				data.put("parent", getParent());
@@ -79,7 +75,7 @@ public class CytoscapeUtil {
 		private String type;
 		private String value;
 		
-		public static String generateId(Node source, Node target) {
+		/*public static String generateId(Node source, Node target) {
 			return generateId(source.getId(), target.getId());
 		}
 		
@@ -89,26 +85,21 @@ public class CytoscapeUtil {
 
 		public static String generateId(String sourceId, String targetId) {
 			return String.join("_", sourceId, targetId);
-		}
+		}*/
 		
 		public CytoscapeEdge(Node source, Node target, String type, String value) {
-			this(generateId(source, target), source.getId().toString(), target.getId().toString(), type, value);
+			this(source.getId().toString(), target.getId().toString(), type, value);
 		}
 		
 		public CytoscapeEdge(Node source, Node target, String type) {
-			this(generateId(source, target), source.getId().toString(), target.getId().toString(), type, "");
-		}
-		
-		public CytoscapeEdge(String id, Node source, Node target, String type) {
-			this(id, source.getId().toString(), target.getId().toString(), type, "");
+			this(source.getId().toString(), target.getId().toString(), type, "");
 		}
 
-		public CytoscapeEdge(String id, String sourceId, String targetId, String type) {
-			this(id, sourceId, targetId, type, "");
+		public CytoscapeEdge(String sourceId, String targetId, String type) {
+			this(sourceId, targetId, type, "");
 		}
 		
-		public CytoscapeEdge(String id, String sourceId, String targetId, String type, String value) {
-			this.id = id;
+		public CytoscapeEdge(String sourceId, String targetId, String type, String value) {
 			this.sourceId = sourceId;
 			this.targetId = targetId;
 			this.type = type;

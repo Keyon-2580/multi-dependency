@@ -206,36 +206,6 @@ public class TestCaseController {
 		return result;
 	}
 	
-	@PostMapping(value = "/microservice/query/entry")
-	@ResponseBody
-	public JSONObject getMicroServiceEntry(@RequestBody Map<String, Object> params) {
-		JSONObject result = new JSONObject();
-		try {
-			List<String> idsStr = (List<String>) params.get("ids");
-			System.out.println(idsStr);
-			List<Integer> ids = new ArrayList<>();
-			for(String idStr : idsStr) {
-				ids.add(Integer.parseInt(idStr));
-			}
-			Iterable<TestCase> allTestCases = featureOrganizationService.allTestCases();
-			List<TestCase> selectTestCases = new ArrayList<>();
-			for(TestCase testCase :allTestCases) {
-				int id = testCase.getTestCaseId();
-				if(ids.contains(id)) {
-					selectTestCases.add(testCase);
-				}
-			}
-			MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(selectTestCases);
-			result.put("result", "success");
-			result.put("value", callsWithEntry.toCytoscapeWithOutStructure());
-		} catch (Exception e) {
-			e.printStackTrace();
-			result.put("result", "fail");
-			result.put("msg", e.getMessage());
-		}
-		return result;
-	}
-	
 	@PostMapping(value = "/microservice/query/union")
 	@ResponseBody
 	public JSONObject getMicroservice(@RequestBody Map<String, Object> params) {

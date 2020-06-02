@@ -3,9 +3,33 @@ var multiple_microservice_all = function(cytoscapeutil) {
 	
 	var firstTestCaseId = null;
 	var secondTestCaseId = null;
-	
+	var toggleNode = function(id, checked) {
+		var node = cyEntry.$("#" + id);
+		if(checked) {
+			cyEntry.$("#" + id).style({"visibility": "visible"});
+			for(var i = 0; i < node.connectedEdges().length; i++) {
+//				var edge = node.connectedEdges()[i].data();
+//				var self = sourceId == id ? edge.source : edge.target;
+//				var other = sourceId == id ? edge.target : edge.source;
+//				if(cyEntry.$("#" + other).visible()) {
+//					cyEntry.$("#" + node.connectedEdges()[i].data().id).style({"visibility": "visible"});
+//				}
+				cyEntry.$("#" + node.connectedEdges()[i].data().id).style({"visibility": "visible"});
+			}
+		} else {
+			cyEntry.$("#" + id).style({"visibility": "hidden"});
+			for(var i = 0; i < node.connectedEdges().length; i++) {
+//				var edge = node.connectedEdges()[i].data();
+//				var self = sourceId == id ? edge.source : edge.target;
+//				var other = sourceId == id ? edge.target : edge.source;
+//				if(cyEntry.$("#" + other).hidden()) {
+//					cyEntry.$("#" + node.connectedEdges()[i].data().id).style({"visibility": "hidden"});
+//				}
+				cyEntry.$("#" + node.connectedEdges()[i].data().id).style({"visibility": "hidden"});
+			}
+		}
+	}
 	var nodeToPosition = new Map();
-	
 	var showZTree = function(nodes) {
 		var setting = {
 			callback: {
@@ -17,9 +41,24 @@ var multiple_microservice_all = function(cytoscapeutil) {
 					}
 					var node = cyEntry.$('#' + id);
 					cyEntry.fit(node, 350);
+				},
+				onCheck: function(event, treeId, treeNode) {
+					var id = treeNode.id;
+					var children = treeNode.children;
+					if(children != null) {
+						for(var i = 0; i < children.length; i++) {
+							toggleNode(children[i].id, treeNode.checked);
+						}
+					} else{
+						toggleNode(id, treeNode.checked);
+					}
 				}
-			}	
-				
+			},
+			check: {
+				enable: true,
+				chkStyle: "checkbox",
+				chkboxType: { "Y" : "ps", "N" : "ps" }
+			}
 		};
 		var zNodes = nodes;
 		var zTreeObj = $.fn.zTree.init($("#ztree"), setting, zNodes);
@@ -36,8 +75,6 @@ var multiple_microservice_all = function(cytoscapeutil) {
 		}
 		var nodes = cyEntry.nodes();
 		for(var i = 0; i < nodes.length; i++) {
-			console.log(nodes[i].data());
-			console.log(nodes[i].position());
 			var nodeId = nodes[i].data().id;
 			var position = nodes[i].position();
 			nodeToPosition.set(nodeId, position);
@@ -46,16 +83,10 @@ var multiple_microservice_all = function(cytoscapeutil) {
 			type : "POST",
 			contentType : "application/json",
 			dataType : "json",
-			url : "/multiple/all",
-			data : JSON.stringify({
-				"showStructure" : $("#showStructure").prop('checked'),
-				"showMicroServiceCallLibs" : $("#showMicroServiceCallLibs").prop('checked'),
-				"showClonesInMicroService" : $("#showClonesInMicroService").prop('checked'),
-				"showCntOfDevUpdMs" : $("#showCntOfDevUpdMs").prop('checked')
-			}),
+			url : url,
+			data : JSON.stringify(params),
 			success : function(result) {
 				if (result.result == "success") {
-					console.log(result);
 					cyEntry.destroy();
 					var nodes = result.value.data.nodes;
 					for(var i = 0; i < nodes.length; i++) {
@@ -64,41 +95,32 @@ var multiple_microservice_all = function(cytoscapeutil) {
 						nodes[i].position = position;
 					}
 					showZTree(result.value.ztreeNodes);
-					console.log(result.value.ztreeNodes);
-					console.log(result.value.data);
 					cyEntry = cytoscapeutil.showDataInCytoscape($("#entry"), result.value.data, "preset");
-					cyEntry.remove('edge');
-
+					processCytoscape(cyEntry);
+					setTapNode(cyEntry, result);
 					if($("#showClonesInMicroService").prop('checked') == true) {
-						console.log("true");
-						console.log(cyEntry.nodes());
-					}
-					queryResult = result;
-					
-					$.ajax({
-						type : "POST",
-						contentType : "application/json",
-						dataType : "json",
-						url : url,
-						data : JSON.stringify(params),
-						success : function(result) {
-							if (result.result == "success") {
-								console.log(result.value);
-								cyEntry.remove('edge');
-								var relatedEdges = result.value.value.edges;
-								cyEntry.add(relatedEdges);
-								processCytoscape(cyEntry);
-								setTapNode(cyEntry, result);
+						$.ajax({
+							type: 'GET',
+							url: "/clone/microservice/line",
+							success: function(result) {
+								console.log(result);
+								for(var id in result) {
+									cyEntry.$("#" + id).data("height", 50);
+									cyEntry.$("#" + id).data("name", result[id].project.name 
+											+ "\n文件总行数：" + result[id].allFilesLines + "，文件数：" + result[id].allFiles.length
+											+ "\n克隆相关文件行数：" + result[id].allCloneFilesLines + "，文件数：" + result[id].cloneFiles.length
+											+ "\n克隆相关方法行数：" + result[id].allCloneFunctionsLines + "，方法数：" + result[id].cloneFunctions.length
+									);
+								}
 							}
-						}
-					});
+						});
+					}
 				}
 			}
 		});
 	}
 	
 	var queryAll = function() {
-		console.log("queryAll")
 		$.ajax({
 			type : "POST",
 			contentType : "application/json",
@@ -115,29 +137,25 @@ var multiple_microservice_all = function(cytoscapeutil) {
 					console.log(result);
 					cyEntry = cytoscapeutil.showDataInCytoscape($("#entry"), result.value.data, "dagre");
 					showZTree(result.value.ztreeNodes);
-					queryResult = result;
 					processCytoscape(cyEntry);
 					setTapNode(cyEntry, result);
-				}
-				if($("#showClonesInMicroService").prop('checked') == true) {
-					console.log("true");
-					console.log(cyEntry.nodes());
-					cyEntry.$("#11019").data("name", "eeeeee")
-					$.ajax({
-						type: 'GET',
-						url: "/clone/microservice/line",
-						success: function(result) {
-							console.log(result);
-							for(var id in result) {
-								cyEntry.$("#" + id).data("height", 50);
-								cyEntry.$("#" + id).data("name", result[id].project.name 
-										+ "\n文件总行数：" + result[id].allFilesLines + "，文件数：" + result[id].allFiles.length
-										+ "\n克隆相关文件行数：" + result[id].allCloneFilesLines + "，文件数：" + result[id].cloneFiles.length
-										+ "\n克隆相关方法行数：" + result[id].allCloneFunctionsLines + "，方法数：" + result[id].cloneFunctions.length
-								);
+					if($("#showClonesInMicroService").prop('checked') == true) {
+						$.ajax({
+							type: 'GET',
+							url: "/clone/microservice/line",
+							success: function(result) {
+								console.log(result);
+								for(var id in result) {
+									cyEntry.$("#" + id).data("height", 50);
+									cyEntry.$("#" + id).data("name", result[id].project.name 
+											+ "\n文件总行数：" + result[id].allFilesLines + "，文件数：" + result[id].allFiles.length
+											+ "\n克隆相关文件行数：" + result[id].allCloneFilesLines + "，文件数：" + result[id].cloneFiles.length
+											+ "\n克隆相关方法行数：" + result[id].allCloneFunctionsLines + "，方法数：" + result[id].cloneFunctions.length
+									);
+								}
 							}
-						}
-					});
+						});
+					}
 				}
 			}
 		});
@@ -171,6 +189,11 @@ var multiple_microservice_all = function(cytoscapeutil) {
 				if (result.result == "success") {
 					console.log(result);
 					cyEntry.batch(function(){
+						cyEntry.remove('edge[type="ShowStructureDependOnCall"]');
+						cyEntry.remove('edge[type="ShowStructureDependOn"]');
+						cyEntry.remove('edge[type="ShowStructureCall"]');
+						cyEntry.remove('edge[type="NoStructureCall"]');
+						cyEntry.remove('edge[type="TestCaseExecuteMicroService"]');
 						cyEntry.remove('edge[type="all_MicroService_DependOn_MicroService"]');
 						cyEntry.remove('edge[type="all_MicroService_call_MicroService"]');
 						cyEntry.remove('edge[type="all_FeatureExecutedByTestCase"]');
@@ -439,103 +462,9 @@ var multiple_microservice_all = function(cytoscapeutil) {
 		        	        }
 		        	    ]
 		        	};
-		        // 使用刚指定的配置项和数据显示图表。
 		        myChart.setOption(option);
 			}
 		});
-        // 指定图表的配置项和数据
-        var option = {
-        	    tooltip: {
-        	        trigger: 'axis',
-        	        axisPointer: {            // 坐标轴指示器，坐标轴触发有效
-        	            type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
-        	        }
-        	    },
-        	    legend: {
-        	        data: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎', '百度', '谷歌', '必应', '其他']
-        	    },
-        	    grid: {
-        	        left: '3%',
-        	        right: '4%',
-        	        bottom: '3%',
-        	        containLabel: true
-        	    },
-        	    xAxis: [
-        	        {
-        	            type: 'category',
-        	            data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-        	        }
-        	    ],
-        	    yAxis: [
-        	        {
-        	            type: 'value'
-        	        }
-        	    ],
-        	    series: [
-        	        {
-        	            name: '直接访问',
-        	            type: 'bar',
-        	            data: [320, 332, 301, 334, 390, 330, 320]
-        	        },
-        	        {
-        	            name: '邮件营销',
-        	            type: 'bar',
-        	            stack: '广告',
-        	            data: [120, 132, 101, 134, 90, 230, 210]
-        	        },
-        	        {
-        	            name: '联盟广告',
-        	            type: 'bar',
-        	            stack: '广告',
-        	            data: [220, 182, 191, 234, 290, 330, 310]
-        	        },
-        	        {
-        	            name: '视频广告',
-        	            type: 'bar',
-        	            stack: '广告',
-        	            data: [150, 232, 201, 154, 190, 330, 410]
-        	        },
-        	        {
-        	            name: '搜索引擎',
-        	            type: 'bar',
-        	            data: [862, 1018, 964, 1026, 1679, 1600, 1570],
-        	            markLine: {
-        	                lineStyle: {
-        	                    type: 'dashed'
-        	                },
-        	                data: [
-        	                    [{type: 'min'}, {type: 'max'}]
-        	                ]
-        	            }
-        	        },
-        	        {
-        	            name: '百度',
-        	            type: 'bar',
-        	            barWidth: 5,
-        	            stack: '搜索引擎',
-        	            data: [620, 732, 701, 734, 1090, 1130, 1120]
-        	        },
-        	        {
-        	            name: '谷歌',
-        	            type: 'bar',
-        	            stack: '搜索引擎',
-        	            data: [120, 132, 101, 134, 290, 230, 220]
-        	        },
-        	        {
-        	            name: '必应',
-        	            type: 'bar',
-        	            stack: '搜索引擎',
-        	            data: [60, 72, 71, 74, 190, 130, 110]
-        	        },
-        	        {
-        	            name: '其他',
-        	            type: 'bar',
-        	            stack: '搜索引擎',
-        	            data: [62, 82, 91, 84, 109, 110, 120]
-        	        }
-        	    ]
-        	};
-
 	}
 	
 	var init = function(){
