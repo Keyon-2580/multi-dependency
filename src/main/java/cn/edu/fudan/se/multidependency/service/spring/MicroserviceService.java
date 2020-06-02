@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public interface MicroserviceService {
 	
 	MicroService findMicroServiceById(Long id);
 	
-	Map<String, MicroService> findAllMicroService();
+	Collection<MicroService> findAllMicroService();
 	
 	Trace findTraceByFeature(Feature feature);
 	

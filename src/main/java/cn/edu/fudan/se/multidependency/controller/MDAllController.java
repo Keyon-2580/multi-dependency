@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import cn.edu.fudan.se.multidependency.config.Constant;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
@@ -150,7 +150,7 @@ public class MDAllController {
 		MicroServiceCallWithEntry callsWithEntry = featureOrganizationService.findMsCallMsByTestCases(selectTestCases);
 		callsWithEntry.setAllTestCases(featureOrganizationService.allTestCases());
 		callsWithEntry.setAllFeatures(featureOrganizationService.allFeatures());
-		callsWithEntry.setAllMicroServices(msService.findAllMicroService().values());
+		callsWithEntry.setAllMicroServices(msService.findAllMicroService());
 		callsWithEntry.setAllScenarios(featureOrganizationService.allScenarios());
 		
 		callsWithEntry.setMsDependOns(msService.msDependOns());
@@ -159,8 +159,8 @@ public class MDAllController {
 		callsWithEntry.setShowClonesInMicroService(showClonesInMicroService);
 		callsWithEntry.setShowCntOfDevUpdMs(showCntOfDevUpdMs);
 		if(showClonesInMicroService) {
-			Iterable<MicroService> allMicroServices = msService.findAllMicroService().values();
-			Map<MicroService, CloneLineValue<MicroService>> msCloneValues = cloneAnalyse.msCloneLineValuesGroup(allMicroServices, -1, Constant.cloneLevelToClass("file"));
+			Iterable<MicroService> allMicroServices = msService.findAllMicroService();
+			Map<MicroService, CloneLineValue<MicroService>> msCloneValues = cloneAnalyse.msCloneLineValuesGroup(allMicroServices, -1, CloneLevel.file);
 			callsWithEntry.setMsToCloneLineValue(msCloneValues);
 			callsWithEntry.setClonesInMicroServiceFromFunctionClone(cloneAnalyse.findMicroServiceCloneFromFunctionClone(cloneAnalyse.findAllFunctionCloneFunctions(), true));
 			callsWithEntry.setClonesInMicroServiceFromFileClone(cloneAnalyse.findMicroServiceCloneFromFileClone(cloneAnalyse.findAllFileCloneFiles(), true));

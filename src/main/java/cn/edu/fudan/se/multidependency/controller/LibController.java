@@ -39,7 +39,7 @@ public class LibController {
 		result.put("projectValues", values);
 		
 		values = new JSONObject();
-		Iterable<MicroService> mss = msService.findAllMicroService().values();
+		Iterable<MicroService> mss = msService.findAllMicroService();
 		for(MicroService ms : mss) {
 			CallLibrary<MicroService> call = msService.findMicroServiceCallLibraries(ms);
 			values.put(ms.getName(), call);

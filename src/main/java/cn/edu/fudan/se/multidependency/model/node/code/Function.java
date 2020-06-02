@@ -13,6 +13,7 @@ import org.neo4j.ogm.annotation.Transient;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneRelationNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -134,5 +135,10 @@ public class Function implements Node, CloneRelationNode {
 	@Override
 	public String indexName() {
 		return LABEL_INDEX;
+	}
+
+	@Override
+	public CloneLevel getCloneLevel() {
+		return CloneLevel.function;
 	}
 }

@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -91,16 +92,20 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 		return microserviceCreateSpanRepository.findMicroServiceCreateSpan(span.getSpanId());
 	}
 
-	private Map<String, MicroService> allMicroServicesGroupByServiceNameCache = new HashMap<>();
+	private List<MicroService> allMicroServicesCache = null;
 	@Override
-	public Map<String, MicroService> findAllMicroService() {
-		if(allMicroServicesGroupByServiceNameCache.size() == 0) {
+	public Collection<MicroService> findAllMicroService() {
+		if(allMicroServicesCache == null) {
+			allMicroServicesCache = new ArrayList<>();
 			microServiceRepository.findAll().forEach(ms -> {
-				allMicroServicesGroupByServiceNameCache.put(ms.getName(), ms);
 				cache.cacheNodeById(ms);
+				allMicroServicesCache.add(ms);
+			});
+			allMicroServicesCache.sort((ms1, ms2) -> {
+				return ms1.getName().compareTo(ms2.getName());
 			});
 		}
-		return allMicroServicesGroupByServiceNameCache;
+		return allMicroServicesCache;
 	}
 
 	@Override
@@ -186,7 +191,7 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	@Override
 	public Map<MicroService, List<RestfulAPI>> microServiceContainsAPIs() {
 		Map<MicroService, List<RestfulAPI>> result = new HashMap<>();
-		for(MicroService ms : findAllMicroService().values()) {
+		for(MicroService ms : findAllMicroService()) {
 			List<RestfulAPI> temp = new ArrayList<>();
 			Iterable<RestfulAPI> apis = containRelationService.findMicroServiceContainRestfulAPI(ms);
 			for(RestfulAPI api : apis) {
@@ -253,7 +258,7 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 	@Override
 	public Iterable<CallLibrary<MicroService>> findAllMicroServiceCallLibraries() {
 		List<CallLibrary<MicroService>> result = new ArrayList<>();
-		for(MicroService ms : findAllMicroService().values()) {
+		for(MicroService ms : findAllMicroService()) {
 			result.add(findMicroServiceCallLibraries(ms));
 		}
 		return result;

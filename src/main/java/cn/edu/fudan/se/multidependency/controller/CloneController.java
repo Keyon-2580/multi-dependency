@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
@@ -51,7 +51,7 @@ public class CloneController {
 	@ResponseBody
 	public Object msCloneLineValue() {
 		Map<Long, CloneLineValue<MicroService>> result = new HashMap<>();
-		for(Map.Entry<MicroService, CloneLineValue<MicroService>> entry : cloneAnalyse.msCloneLineValues(msService.findAllMicroService().values()).entrySet()) {
+		for(Map.Entry<MicroService, CloneLineValue<MicroService>> entry : cloneAnalyse.msCloneLineValues(msService.findAllMicroService()).entrySet()) {
 			result.put(entry.getKey().getId(), entry.getValue());
 		}
 		return result;
@@ -64,7 +64,22 @@ public class CloneController {
 		if(ms == null) {
 			return "";
 		}
-		return cloneAnalyse.msCloneLineValuesGroup(ms, group, Constant.cloneLevelToClass(level));
+		return cloneAnalyse.msCloneLineValuesGroup(ms, group, CloneLevel.valueOf(level));
+	}
+	
+	@GetMapping("/{level}/microservice")
+	@ResponseBody
+	public JSONObject cloneMicroService(@PathVariable("level") String level) {
+		JSONObject result = new JSONObject();
+		Collection<MicroService> mss = msService.findAllMicroService();
+		if("function".equals(level)) {
+			result.put("data", cloneAnalyse.msCloneLineValuesCalculateGroupByFunction(mss));
+			result.put("microservices", cloneAnalyse.msSortByMsCloneLineCount(mss, CloneLevel.function));
+		} else if("file".equals(level)) {
+			result.put("data", cloneAnalyse.msCloneLineValuesCalculateGroupByFile(mss));
+			result.put("microservices", cloneAnalyse.msSortByMsCloneLineCount(mss, CloneLevel.file));
+		}
+		return result;
 	}
 	
 	@GetMapping("/{level}/project")

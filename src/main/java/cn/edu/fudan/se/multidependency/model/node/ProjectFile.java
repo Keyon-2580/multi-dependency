@@ -7,6 +7,7 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneRelationNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -61,6 +62,11 @@ public class ProjectFile implements Node, CloneRelationNode {
 	@Override
 	public String indexName() {
 		return LABEL_INDEX;
+	}
+
+	@Override
+	public CloneLevel getCloneLevel() {
+		return CloneLevel.file;
 	}
 
 }

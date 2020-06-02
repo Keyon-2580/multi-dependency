@@ -36,7 +36,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class FeatureOrganizationService {
 	
-	private final Map<String, MicroService> allMicroService;
+	private final Collection<MicroService> allMicroService;
 	private final Map<TestCase, List<TestCaseExecuteFeature>> testCaseExecuteFeatures;
 	private final Map<Feature, List<TestCaseExecuteFeature>> featureExecutedByTestCases;
 	private final Map<Feature, Feature> featureToParentFeature;
@@ -256,7 +256,7 @@ public class FeatureOrganizationService {
 				edges.add(new CytoscapeEdge(ms, callMs, "allTestCase", msCallMs.getTimes() + ""));
 			}
 		}
-		List<MicroService> allMicroServices = allMicroServices();
+		Collection<MicroService> allMicroServices = allMicroServices();
 		Set<MicroService> relatedAllMicroServices = findRelatedMicroServiceForTestCases(scaleTestCases);
 		Set<MicroService> relatedSelectMicroServices = findRelatedMicroServiceForTestCases(selectTestCases);
 		for(MicroService ms : allMicroServices) {
@@ -312,7 +312,7 @@ public class FeatureOrganizationService {
 				edges.add(new CytoscapeEdge(ms, callMs, "allTestCase", msCallMs.getTimes() + ""));
 			}
 		}
-		List<MicroService> allMicroServices = allMicroServices();
+		Collection<MicroService> allMicroServices = allMicroServices();
 		Set<MicroService> relatedAllMicroServices = findRelatedMicroServiceForTestCases(scaleTestCases);
 		Set<MicroService> relatedSelectMicroServices = findRelatedMicroServiceForTestCases(selectTestCases);
 		for(MicroService ms : allMicroServices) {
@@ -427,7 +427,7 @@ public class FeatureOrganizationService {
 				edges.add(new CytoscapeEdge(ms, callMs, "", String.valueOf(msCallMs.getTimes())));
 			}
 		}
-		List<MicroService> relatedMSs = removeUnuseMS ? new ArrayList<>(findRelatedMicroServiceForTraces(traces)) : allMicroServices();
+		Collection<MicroService> relatedMSs = removeUnuseMS ? new ArrayList<>(findRelatedMicroServiceForTraces(traces)) : allMicroServices();
 		for(MicroService ms : relatedMSs) {
 			nodes.add(new CytoscapeNode(ms.getId(), ms.getName(), "MicroService"));
 		}
@@ -774,25 +774,8 @@ public class FeatureOrganizationService {
 	 * 所有微服务
 	 * @return
 	 */
-	public List<MicroService> allMicroServices() {
-		List<MicroService> result = new ArrayList<>();
-		for(MicroService ms : allMicroService.values()) {
-			result.add(ms);
-		}
-		return result;
-	}
-	
-	/**
-	 * 根据微服务名查找微服务
-	 * @param name
-	 * @return
-	 */
-	public MicroService findMicroServiceByName(String name) {
-		try {
-			return allMicroService.get(name);
-		} catch (Exception e) {
-			return null;
-		}
+	public Collection<MicroService> allMicroServices() {
+		return allMicroService;
 	}
 	
 	/**

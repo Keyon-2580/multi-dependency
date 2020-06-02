@@ -15,6 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneRelationNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
@@ -50,10 +51,10 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     CacheService cacheService;
     
     @Override
-    public Map<MicroService, CloneLineValue<MicroService>> msCloneLineValuesGroup(Iterable<MicroService> mss, int group, Class<? extends CloneRelationNode> nodeClass) {
+    public Map<MicroService, CloneLineValue<MicroService>> msCloneLineValuesGroup(Iterable<MicroService> mss, int group, CloneLevel level) {
     	Map<MicroService, CloneLineValue<MicroService>> result = new HashMap<>();
     	for(MicroService ms : mss) {
-    		result.put(ms, msCloneLineValuesGroup(ms, group, nodeClass));
+    		result.put(ms, msCloneLineValuesGroup(ms, group, level));
     	}
     	return result;
     }
@@ -78,12 +79,64 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     	}
     	return result;
     }
+    
+    @Override
+    public Map<Integer, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFunction(Collection<MicroService> mss) {
+    	Map<Integer, Map<Long, CloneLineValue<MicroService>>> result = new HashMap<>();
+    	Map<Integer, Map<Project, CloneLineValue<Project>>> projectGroups = projectCloneLineValuesCalculateGroupByFunction();
+    	for(Map.Entry<Integer, Map<Project, CloneLineValue<Project>>> projectGroup : projectGroups.entrySet()) {
+    		int group = projectGroup.getKey();
+    		Map<Project, CloneLineValue<Project>> projectsValue = projectGroup.getValue();
+    		Map<Long, CloneLineValue<MicroService>> mssValue = new HashMap<>();
+    		for(MicroService ms : mss) {
+    			CloneLineValue<MicroService> value = new CloneLineValue<>(ms);
+    			Iterable<Project> projects = containRelationService.findMicroServiceContainProjects(ms);
+    			for(Project project : projects) {
+    				CloneLineValue<Project> projectValue = projectsValue.get(project);
+    				if(projectValue != null) {
+    					value.addAllFiles(projectValue.getAllFiles());
+    					value.addAllCloneFiles(projectValue.getCloneFiles());
+    					value.addAllCloneFunctions(projectValue.getCloneFunctions());
+    				}
+    			}
+    			mssValue.put(ms.getId(), value);
+    		}
+    		result.put(group, mssValue);
+    	}
+    	return result;
+    }
+    
+    @Override
+    public Map<Integer, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFile(Collection<MicroService> mss) {
+    	Map<Integer, Map<Long, CloneLineValue<MicroService>>> result = new HashMap<>();
+    	Map<Integer, Map<Project, CloneLineValue<Project>>> projectGroups = projectCloneLineValuesCalculateGroupByFile();
+    	for(Map.Entry<Integer, Map<Project, CloneLineValue<Project>>> projectGroup : projectGroups.entrySet()) {
+    		int group = projectGroup.getKey();
+    		Map<Project, CloneLineValue<Project>> projectsValue = projectGroup.getValue();
+    		Map<Long, CloneLineValue<MicroService>> mssValue = new HashMap<>();
+    		for(MicroService ms : mss) {
+    			CloneLineValue<MicroService> value = new CloneLineValue<>(ms);
+    			Iterable<Project> projects = containRelationService.findMicroServiceContainProjects(ms);
+    			for(Project project : projects) {
+    				CloneLineValue<Project> projectValue = projectsValue.get(project);
+    				if(projectValue != null) {
+    					value.addAllFiles(projectValue.getAllFiles());
+    					value.addAllCloneFiles(projectValue.getCloneFiles());
+    					value.addAllCloneFunctions(projectValue.getCloneFunctions());
+    				}
+    			}
+    			mssValue.put(ms.getId(), value);
+    		}
+    		result.put(group, mssValue);
+    	}
+    	return result;
+    }
 
     @Override
-    public CloneLineValue<MicroService> msCloneLineValuesGroup(MicroService ms, int group, Class<? extends CloneRelationNode> nodeClass) {
+    public CloneLineValue<MicroService> msCloneLineValuesGroup(MicroService ms, int group, CloneLevel level) {
     	CloneLineValue<MicroService> result = new CloneLineValue<>(ms);
     	Map<Integer, Map<Project, CloneLineValue<Project>>> projectResultsGroup = null;
-    	if(nodeClass == Function.class) {
+    	if(level == CloneLevel.function) {
     		projectResultsGroup = projectCloneLineValuesCalculateGroupByFunction();
     	} else {
     		projectResultsGroup = projectCloneLineValuesCalculateGroupByFile();
@@ -690,6 +743,37 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 			msToMsClones.put(ms1, ms1ToClones);
 			
 		}
+		return result;
+	}
+
+	@Override
+	public Collection<MicroService> msSortByMsCloneLineCount(Collection<MicroService> mss, CloneLevel level) {
+		List<MicroService> result = new ArrayList<>(mss);
+		Map<Integer, Map<Long, CloneLineValue<MicroService>>> temp = new HashMap<>();
+		Map<MicroService, Integer> msCount = new HashMap<>();
+		if(level == CloneLevel.function) {
+			temp = msCloneLineValuesCalculateGroupByFunction(mss);
+		} else {
+			temp = msCloneLineValuesCalculateGroupByFile(mss);
+		}
+		for(int group : temp.keySet()) {
+			if(group == -1) {
+				continue;
+			}
+			Map<Long, CloneLineValue<MicroService>> values = temp.get(group);
+			for(MicroService ms : mss) {
+				CloneLineValue<MicroService> value = values.getOrDefault(ms.getId(), new CloneLineValue<MicroService>(ms));
+				if(!value.getCloneFunctions().isEmpty()) {
+					int count = msCount.getOrDefault(ms, 0) + 1;
+					msCount.put(ms, count);
+				}
+			}
+		}
+		
+		result.sort((ms1, ms2) -> {
+			return msCount.getOrDefault(ms2, 0) - msCount.getOrDefault(ms1, 0);
+		});
+		System.out.println(result);
 		return result;
 	}
 	

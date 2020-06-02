@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class MultipleDependencyApp {
 	@Bean
 	public FeatureOrganizationService organize(MicroserviceService microserviceService, DynamicAnalyseService dynamicAnalyseService, ContainRelationService containRelationService) {
 		System.out.println("organizeFeature");
-		Map<String, MicroService> allMicroService = microserviceService.findAllMicroService();
+		Collection<MicroService> allMicroService = microserviceService.findAllMicroService();
 		Map<Feature, List<TestCaseExecuteFeature>> featureExecutedByTestCases = dynamicAnalyseService.findAllFeatureExecutedByTestCases();
 		Map<TestCase, List<TestCaseExecuteFeature>> testCaseExecuteFeatures = dynamicAnalyseService.findAllTestCaseExecuteFeatures();
 		Map<TestCase, List<TestCaseRunTrace>> testCaseRunTraces = dynamicAnalyseService.findAllTestCaseRunTraces();

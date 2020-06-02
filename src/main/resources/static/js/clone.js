@@ -114,6 +114,61 @@ var clone = function(cytoscapeutil, level) {
 		return cy;
 	}
 	var cys = {};
+	var table = function(){
+		console.log("rrr");
+		$.ajax({
+			type : "GET",
+			url : "/clone/" + level + "/microservice",
+			success : function(result) {
+				$("#table").addClass("table");
+				$("#table").addClass("table-bordered");
+				console.log(result);
+				var html = "<table class='table table-bordered' id='table'>";
+				html += "<tr>";
+				html += "<td>";
+				html += "</td>";
+				for(var i = 0; i < result.microservices.length; i++) {
+					var ms = result.microservices[i];
+					html += "<td>";
+					html += ms.name;
+					html += "</td>";
+				}
+				html += "</tr>";
+				for(var group in result.data) {
+					if(group == -1) {
+						continue;
+					}
+					html += "<tr>";
+					html += "<td>" + group + "</td>";
+					var map = result.data[group];
+					for(var i = 0; i < result.microservices.length; i++) {
+						html += "<td>";
+						var data = map[result.microservices[i].id];
+						if(level == "file") {
+							for(var j = 0; j < data.cloneFiles.length; j++) {
+								html += data.cloneFiles[j].name;
+								if(j != data.cloneFiles.length - 1) {
+									html += "<br/>";
+								}
+							}
+						} else if(level == "function") {
+							for(var j = 0; j < data.cloneFunctions.length; j++) {
+								html += data.cloneFunctions[j].name;
+								if(j != data.cloneFunctions.length - 1) {
+									html += "<br/>";
+								}
+							}
+						}
+						html += "</td>";
+					}
+					html += "</tr>"
+				}
+				html += "</table>";
+				$("#table_div").html(html);
+				$("#table_wait").text("");
+			}
+		});
+	}
 	var _clone = function() {
 		$("#searchTop").click(function(){
 			var top = $("#topInput").val();
@@ -162,6 +217,7 @@ var clone = function(cytoscapeutil, level) {
 				}
 			});
 		});
+		table();
 		var myChart = echarts.init(document.getElementById('main'));
 		$.ajax({
 			type : "GET",

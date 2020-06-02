@@ -8,7 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneRelationNode;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
@@ -67,7 +67,17 @@ public interface CloneAnalyseService {
 	
 	Map<MicroService, CloneLineValue<MicroService>> msCloneLineValues(Iterable<MicroService> mss);
 	
-	CloneLineValue<MicroService> msCloneLineValuesGroup(MicroService ms, int group, Class<? extends CloneRelationNode> nodeClass);
+	CloneLineValue<MicroService> msCloneLineValuesGroup(MicroService ms, int group, CloneLevel level);
 	
-	Map<MicroService, CloneLineValue<MicroService>> msCloneLineValuesGroup(Iterable<MicroService> mss, int group, Class<? extends CloneRelationNode> nodeClass);
+	Map<MicroService, CloneLineValue<MicroService>> msCloneLineValuesGroup(Iterable<MicroService> mss, int group, CloneLevel level);
+	
+//	Map<Integer, Map<MicroService, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFile(Collection<MicroService> mss);
+//	
+//	Map<Integer, Map<MicroService, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFunction(Collection<MicroService> mss);
+	
+	Collection<MicroService> msSortByMsCloneLineCount(Collection<MicroService> mss, CloneLevel level);
+	
+	Map<Integer, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFile(Collection<MicroService> mss);
+	
+	Map<Integer, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFunction(Collection<MicroService> mss);
 }

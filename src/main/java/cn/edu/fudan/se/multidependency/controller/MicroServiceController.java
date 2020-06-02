@@ -48,7 +48,7 @@ public class MicroServiceController {
 	@ResponseBody
 	public Collection<Fan_IO<MicroService>> calculateFanIOs() {
 		List<Fan_IO<MicroService>> result = new ArrayList<>();
-		Collection<MicroService> allMss = msService.findAllMicroService().values();
+		Collection<MicroService> allMss = msService.findAllMicroService();
 		for(MicroService ms : allMss) {
 			Fan_IO<MicroService> fanIO = msService.microServiceDependencyFanIOInDynamicCall(ms);
 			result.add(fanIO);
@@ -64,6 +64,12 @@ public class MicroServiceController {
 		});
 		
 		return result;
+	}
+	
+	@GetMapping(value = "/all")
+	@ResponseBody
+	public Collection<MicroService> allMicroServices() {
+		return msService.findAllMicroService();
 	}
 	
 	@GetMapping(value = "/all/{page}")
