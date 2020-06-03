@@ -33,6 +33,7 @@ import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.data.Clone;
 import cn.edu.fudan.se.multidependency.service.spring.data.CloneLineValue;
+import cn.edu.fudan.se.multidependency.service.spring.show.CloneShowService;
 
 @Controller
 @RequestMapping("/clone")
@@ -40,6 +41,9 @@ public class CloneController {
 	
 	@Autowired
 	private CloneAnalyseService cloneAnalyse;
+
+	@Autowired
+	private CloneShowService cloneShow;
 	
 	@Autowired
 	private ContainRelationService containRelationService;
@@ -67,7 +71,7 @@ public class CloneController {
 		return cloneAnalyse.msCloneLineValuesGroup(ms, group, CloneLevel.valueOf(level));
 	}
 	
-	@GetMapping("/{level}/microservice")
+	@GetMapping("/{level}/table/microservice")
 	@ResponseBody
 	public JSONObject cloneMicroService(@PathVariable("level") String level) {
 		JSONObject result = new JSONObject();
@@ -99,63 +103,51 @@ public class CloneController {
 		return "clone";
 	}
 	
-	@GetMapping("/function/group/histogram")
+	@GetMapping("/{level}/group/histogram")
 	@ResponseBody
-	public JSONObject functionCloneGroupToHistogram() {
+	public JSONObject cloneGroupToHistogram(@PathVariable("level") String level) {
 		JSONObject result = new JSONObject();
 		try {
 			JSONObject histograms = new JSONObject();
-			JSONArray functionSizeArray = new JSONArray();
+			JSONArray nodeSizeArray = new JSONArray();
 			JSONArray projectSizeArray = new JSONArray();
-			Collection<Collection<? extends Node>> nodeGroups = cloneAnalyse.groupFunctionCloneNode();
+			Collection<Collection<? extends Node>> nodeGroups = new ArrayList<>();
+			if(CloneLevel.function.toString().equals(level)) {
+				nodeGroups = cloneAnalyse.groupFunctionCloneNode();
+			} else {
+				nodeGroups = cloneAnalyse.groupFileCloneNode();
+			}
 			int size = 0;
 			for(Collection<? extends Node> nodes : nodeGroups) {
 				size++;
-				int functionSize = 0, projectSize = 0;
-				Set<Project> projects = new HashSet<>();
+				int nodeSize = 0, projectSize = 0;
+				Set<Node> projects = new HashSet<>();
 				for(Node node : nodes) {
-					functionSize++;
-					ProjectFile belongToFile = containRelationService.findFunctionBelongToFile((Function) node);
-					projects.add(containRelationService.findFileBelongToProject(belongToFile));
+					nodeSize++;
+					if(node instanceof Function) {
+						ProjectFile belongToFile = containRelationService.findFunctionBelongToFile((Function) node);
+						Project belongToProject = containRelationService.findFileBelongToProject(belongToFile);
+						MicroService belongToMS = containRelationService.findProjectBelongToMicroService(belongToProject);
+						if(belongToMS == null) {
+							projects.add(belongToProject);
+						} else {
+							projects.add(belongToMS);
+						}
+					} else if(node instanceof ProjectFile) {
+						Project belongToProject = containRelationService.findFileBelongToProject((ProjectFile) node);
+						MicroService belongToMS = containRelationService.findProjectBelongToMicroService(belongToProject);
+						if(belongToMS == null) {
+							projects.add(belongToProject);
+						} else {
+							projects.add(belongToMS);
+						}
+					}
 				}
 				projectSize = projects.size();
-				functionSizeArray.add(functionSize);
+				nodeSizeArray.add(nodeSize);
 				projectSizeArray.add(projectSize);
 			}
-			histograms.put("functionSize", functionSizeArray);
-			histograms.put("projectSize", projectSizeArray);
-			result.put("result", "success");
-			result.put("value", histograms);
-			result.put("size", size);
-		} catch (Exception e) {
-			
-		}
-		return result;
-	}
-	
-	@GetMapping("/file/group/histogram")
-	@ResponseBody
-	public JSONObject fileCloneGroupToHistogram() {
-		JSONObject result = new JSONObject();
-		try {
-			JSONObject histograms = new JSONObject();
-			JSONArray fileSizeArray = new JSONArray();
-			JSONArray projectSizeArray = new JSONArray();
-			Collection<Collection<? extends Node>> nodeGroups = cloneAnalyse.groupFileCloneNode();
-			int size = 0;
-			for(Collection<? extends Node> nodes : nodeGroups) {
-				size++;
-				int fileSize = 0, projectSize = 0;
-				Set<Project> projects = new HashSet<>();
-				for(Node node : nodes) {
-					fileSize++;
-					projects.add(containRelationService.findFileBelongToProject((ProjectFile) node));
-				}
-				projectSize = projects.size();
-				fileSizeArray.add(fileSize);
-				projectSizeArray.add(projectSize);
-			}
-			histograms.put("fileSize", fileSizeArray);
+			histograms.put("nodeSize", nodeSizeArray);
 			histograms.put("projectSize", projectSizeArray);
 			result.put("result", "success");
 			result.put("value", histograms);
@@ -186,7 +178,7 @@ public class CloneController {
 			}
 			for(Collection<? extends CloneRelation> relations : groupRelations) {
 				if(i++ >= index) {
-					value = cloneAnalyse.clonesToCytoscape(relations);
+					value = cloneShow.clonesToCytoscape(relations);
 					break;
 				}
 			}
@@ -222,7 +214,7 @@ public class CloneController {
 				if(i++ >= top) {
 					break;
 				}
-				cytoscapeArray.add(cloneAnalyse.clonesToCytoscape(relations));
+				cytoscapeArray.add(cloneShow.clonesToCytoscape(relations));
 			}
 			result.put("size", i - 1);
 			result.put("result", "success");

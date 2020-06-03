@@ -22,7 +22,7 @@ var clone = function(cytoscapeutil, level) {
 		}
 	};
 	var cys = [];
-	var showZTree = function(nodes, container = $("#ztree"), cy) {
+	var showZTree = function(nodes, container, cy) {
 		var setting = {
 		};
 		var zNodes = nodes;
@@ -98,6 +98,19 @@ var clone = function(cytoscapeutil, level) {
 			'background-color': '#f6f6f6',
 			'content': 'data(name)'
 		}).update();
+		cy.style().selector('node[type="MicroService"]').style({
+			'shape' : 'hexagon',
+			'width': function(content) {
+				return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 9;
+			},
+			'height': 30,
+			'text-valign': 'center',
+			'text-halign': 'center',
+			'border-width': 1.5,
+			'border-color': '#555',
+			'background-color': '#f6f6f6',
+			'content': 'data(name)'
+		}).update();
 		cy.style().selector('edge[type="Clone"]').style({
 			'content': 'data(value)',
 			'curve-style': 'bezier',
@@ -109,16 +122,14 @@ var clone = function(cytoscapeutil, level) {
 		}).update();
 		var edges = cy.remove('edge[type="Clone"]');
 		cy.layout({name : 'dagre'}).run();
-		console.log(edges);
 		cy.add(edges);
 		return cy;
 	}
 	var cys = {};
 	var table = function(){
-		console.log("rrr");
 		$.ajax({
 			type : "GET",
-			url : "/clone/" + level + "/microservice",
+			url : "/clone/" + level + "/table/microservice",
 			success : function(result) {
 				$("#table").addClass("table");
 				$("#table").addClass("table-bordered");
@@ -187,7 +198,7 @@ var clone = function(cytoscapeutil, level) {
 							html += "<p></p></div>";
 							html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble_' + i + '">';
 								html += '<div class="div_cytoscape_treeview">';
-									html += '<ul id="ztree_' + i + '" class="ztree"></ul>';
+									html += '<ul id="node_ztree_' + i + '" class="ztree"></ul>';
 								html += '</div>';
 								html += '<div class="div_cytoscape" style="float: left; display: inline;">';
 									html += '<div id="cloneGroupDiv_' + i + '" class="div_cytoscape_content cy"></div>';
@@ -198,6 +209,7 @@ var clone = function(cytoscapeutil, level) {
 							html += '<div class="col-sm-12"><hr/></div>';
 						}
 						$("#content").html(html);
+						$(".fullscreen_btn_top").unbind("click");
 						$(".fullscreen_btn_top").click(function() {
 							showFull("fullscreenAble_" + $(this).attr("name"));
 						});
@@ -211,7 +223,7 @@ var clone = function(cytoscapeutil, level) {
 						for(var i = 0; i < size; i++) {
 							var cy = _showCytoscape($("#cloneGroupDiv_" + i), result.value[i]);
 							cys[i] = cy;
-							showZTree(result.value[i].ztree, $("#ztree_" + i), cy);
+							showZTree(result.value[i].ztree, $("#node_ztree_" + i), cy);
 						}
 					}
 				}
@@ -229,8 +241,7 @@ var clone = function(cytoscapeutil, level) {
 				var projectsData = [];
 				for(var i = 0; i < result.size; i++) {
 					xAxisData[i] = "group_" + i;
-					nodesData[i] = result.value[level + "Size"][i];
-					
+					nodesData[i] = result.value["nodeSize"][i];
 					projectsData[i] = result.value.projectSize[i];
 				}
 				var legendLevel = "";
@@ -265,29 +276,25 @@ var clone = function(cytoscapeutil, level) {
 		        	        bottom: '3%',
 		        	        containLabel: true
 		        	    },
-		        	    xAxis: [
-		        	        {
+		        	    xAxis: [{
 		        	            type: 'category',
 		        	            data: xAxisData,
 		        	            axisLabel: {  
 		        	                interval:0,  
 		        	                rotate:40  
-		        	             }  
+		        	            }  
 		        	        }
 		        	    ],
-		        	    yAxis: [
-		        	        {
+		        	    yAxis: [{
 		        	            type: 'value'
 		        	        }
 		        	    ],
-		        	    series: [
-		        	        {
+		        	    series: [{
 		        	            name: legendLevel,
 		        	            type: 'bar',
 		        	            stack: 'cloneNode',
 		        	            data: nodesData
-		        	        },
-		        	        {
+		        	        },{
 		        	            name: '克隆跨项目数',
 		        	            type: 'bar',
 		        	            stack: 'cloneProject',
@@ -312,7 +319,7 @@ var clone = function(cytoscapeutil, level) {
 								html += "<p></p></div>";
 								html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble">';
 								html += '<div class="div_cytoscape_treeview">';
-								html += '<ul id="ztree" class="ztree"></ul>';
+								html += '<ul id="node_ztree_num" class="ztree"></ul>';
 								html += '</div>';
 								html += '<div class="div_cytoscape" style="float: left; display: inline;">';
 								html += '<div id="cloneGroupDiv" class="div_cytoscape_content cy"></div>';
@@ -320,11 +327,12 @@ var clone = function(cytoscapeutil, level) {
 								html += '</div>';
 								html += '<div class="col-sm-12"><hr/></div>';
 								$("#specifiedCytoscape").html(html);
+								$(".fullscreen_btn").unbind("click");
 								$(".fullscreen_btn").click(function(){
 									showFull("fullscreenAble");
 								})
 								var cy = _showCytoscape($("#cloneGroupDiv"), result.value);
-								showZTree(result.value.ztree, $("#ztree"), cy);
+								showZTree(result.value.ztree, $("#node_ztree_num"), cy);
 							}
 						}
 					});
