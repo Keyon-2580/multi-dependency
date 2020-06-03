@@ -51,7 +51,8 @@ public class ThreadService {
 	
 	public void staticAnalyse() {
 		Collection<ProjectConfig> projectsConfig = config.getProjectsConfig();
-		CountDownLatch latchOfProjects = new CountDownLatch((projectsConfig).size());
+		CountDownLatch latchOfProjects = new CountDownLatch(projectsConfig.size());
+		LOGGER.info("项目结构存储线程开始，数量：" + latchOfProjects.getCount());
 		for (ProjectConfig projectConfig : projectsConfig) {
 			executor.execute(() -> {
 				try {
@@ -59,6 +60,7 @@ public class ThreadService {
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
+					LOGGER.info("项目结构存储线程结束，线程-1：" + (latchOfProjects.getCount() - 1));
 					latchOfProjects.countDown();
 				}
 			});
@@ -73,7 +75,7 @@ public class ThreadService {
 	}
 	
 	public void staticAnalyseCore(ProjectConfig projectConfig) throws Exception {
-		LOGGER.info(projectConfig.getProject());
+		LOGGER.info(projectConfig.getProject() + " " + projectConfig.getLanguage());
 		DependsEntityRepoExtractor extractor = new Depends096Extractor();
 		extractor.setIncludeDirs(projectConfig.includeDirsArray());
 		extractor.setExcludes(projectConfig.getExcludes());
