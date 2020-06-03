@@ -1,5 +1,8 @@
 package cn.edu.fudan.se.multidependency.service.nospring.code;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Package;
@@ -31,7 +34,7 @@ import depends.entity.repo.EntityRepo;
  */
 public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl {
 
-//	private static final Logger LOGGER = LoggerFactory.getLogger(CppInsertServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CppInsertServiceImpl.class);
 	
 	public CppInsertServiceImpl(EntityRepo entityRepo, ProjectConfig projectConfig) {
 		super(entityRepo, projectConfig);
@@ -39,6 +42,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 	
 	@Override
 	protected void addNodesWithContainRelations() {
+		LOGGER.info("{} {} addNodesWithContainRelations", this.currentProject.getName(), this.currentProject.getLanguage());
 		final String projectPath = currentProject.getPath();
 		entityRepo.entityIterator().forEachRemaining(entity -> {
 			// 每个entity对应相应的node
@@ -114,6 +118,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				// " + entity.toString());
 			}
 		});
+		LOGGER.info("{} {} namespace findNodesByNodeTypeInProject", this.currentProject.getName(), this.currentProject.getLanguage());
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Namespace, currentProject).forEach((entityId, node) -> {
 			Namespace namespace = (Namespace) node;
 			PackageEntity packageEntity = (PackageEntity) entityRepo.getEntity(entityId.intValue());
@@ -125,6 +130,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			Contain contain = new Contain(parentNode, namespace);
 			addRelation(contain);
 		});
+		LOGGER.info("{} {} type findNodesByNodeTypeInProject", this.currentProject.getName(), this.currentProject.getLanguage());
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject).forEach((entityId, node) -> {
 			Type type = (Type) node;
 			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(entityId.intValue());
@@ -137,6 +143,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			Contain contain = new Contain(parentNode, type);
 			addRelation(contain);
 		});
+		LOGGER.info("{} {} function findNodesByNodeTypeInProject", this.currentProject.getName(), this.currentProject.getLanguage());
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Function, currentProject).forEach((entityId, node) -> {
 			Function function = (Function) node;
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(entityId.intValue());
@@ -160,6 +167,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				}
 			}
 		});
+		LOGGER.info("{} {} variable findNodesByNodeTypeInProject", this.currentProject.getName(), this.currentProject.getLanguage());
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Variable, currentProject).forEach((entityId, node) -> {
 			Variable variable = (Variable) node;
 			VarEntity varEntity = (VarEntity) entityRepo.getEntity(entityId.intValue());
@@ -191,6 +199,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 	 * c中文件的include关系
 	 */
 	protected void extractRelationsFromFiles() {
+		LOGGER.info("{} {} file extractRelationsFromFiles", this.currentProject.getName(), this.currentProject.getLanguage());
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.ProjectFile, currentProject).forEach((entityId, node) -> {
 			ProjectFile file = (ProjectFile) node;
 			FileEntity fileEntity = (FileEntity) entityRepo.getEntity(entityId.intValue());
