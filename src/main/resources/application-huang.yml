@@ -16,10 +16,10 @@ server:
 
 data:
   project_config: src/main/resources/project/test.json
-  dynamic_analyse: true
-  git_analyse: true
+  dynamic_analyse: false
+  git_analyse: false
   lib_analyse: false
-  clone_analyse: true
+  clone_analyse: false
 
   neo4j:
     delete: true

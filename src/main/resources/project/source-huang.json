@@ -19,43 +19,66 @@
       "project": "square__fdse__retrofit",
       "language": "java",
       "isMicroservice": true
+    },
+    {
+      "path": "D:\\my_data\\SDTeam\\multi_dependencies\\projects\\source\\alibaba__fdse__dubbo",
+      "includeDirs": [],
+      "microserviceName": "alibaba__fdse__dubbo",
+      "autoInclude": true,
+      "serviceGroupName": "source",
+      "project": "alibaba__fdse__dubbo",
+      "language": "java",
+      "isMicroservice": true
+    },
+    {
+      "path": "D:\\my_data\\SDTeam\\multi_dependencies\\projects\\source\\google__fdse__guava",
+      "includeDirs": [],
+      "microserviceName": "google__fdse__guava",
+      "autoInclude": true,
+      "serviceGroupName": "source",
+      "project": "google__fdse__guava",
+      "language": "java",
+      "isMicroservice": true
+    },
+    {
+      "path": "D:\\my_data\\SDTeam\\multi_dependencies\\projects\\source\\iluwatar__fdse__java-design-patterns",
+      "includeDirs": [],
+      "microserviceName": "iluwatar__fdse__java-design-patterns",
+      "autoInclude": true,
+      "serviceGroupName": "source",
+      "project": "iluwatar__fdse__java-design-patterns",
+      "language": "java",
+      "isMicroservice": true
+    },
+    {
+      "path": "D:\\my_data\\SDTeam\\multi_dependencies\\projects\\source\\netty__fdse__netty",
+      "includeDirs": [],
+      "microserviceName": "netty__fdse__netty",
+      "autoInclude": true,
+      "serviceGroupName": "source",
+      "project": "netty__fdse__netty",
+      "language": "java",
+      "isMicroservice": true
+    },
+    {
+      "path": "D:\\my_data\\SDTeam\\multi_dependencies\\projects\\source\\square__fdse__okhttp",
+      "includeDirs": [],
+      "microserviceName": "square__fdse__okhttp",
+      "autoInclude": true,
+      "serviceGroupName": "source",
+      "project": "square__fdse__okhttp",
+      "language": "java",
+      "isMicroservice": true
     }
   ],
   "architectures": {
   },
   "dynamics": {
-    "file_suffixes": [
-      ""
-    ],
-    "logs_path": "",
-    "features_path": ""
   },
   "gits": [
-    {
-      "path": "D:\\my_data\\SDTeam\\multi_dependencies\\projects\\source\\SmellPattern",
-      "commit_id_from": "",
-      "commit_id_to": "",
-      "issues_path": ""
-    },
-    {
-      "path": "D:\\my_data\\SDTeam\\multi_dependencies\\projects\\source\\square__fdse__retrofit",
-      "commit_id_from": "",
-      "commit_id_to": "",
-      "issues_path": ""
-    }
   ],
   "libs": [
-    {
-      "language": "java",
-      "path": ""
-    }
   ],
   "clones": [
-    {
-      "language": "java",
-      "granularity": "file",
-      "name_path": "",
-      "result_path": ""
-    }
   ]
 }
