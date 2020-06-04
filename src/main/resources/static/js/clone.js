@@ -28,9 +28,37 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			$(".div_cytoscape_treeview").css("height", "500px");
 		}
 	};
+	var toggleNode = function(id, checked, cy) {
+		var node = cy.$("#" + id);
+		if(node == null) {
+			return;
+		}
+		if(checked) {
+			cy.$("#" + id).style({"visibility": "visible"});
+			for(var i = 0; i < node.connectedEdges().length; i++) {
+				cy.$("#" + node.connectedEdges()[i].data().id).style({"visibility": "visible"});
+			}
+		} else {
+			cy.$("#" + id).style({"visibility": "hidden"});
+			for(var i = 0; i < node.connectedEdges().length; i++) {
+				cy.$("#" + node.connectedEdges()[i].data().id).style({"visibility": "hidden"});
+			}
+		}
+	}
 	var cys = [];
 	var showZTree = function(nodes, container, cy) {
 		var setting = {
+				callback: {
+					onCheck: function(event, treeId, treeNode) {
+						var id = treeNode.id;
+						toggleNode(id, treeNode.checked, cy);
+					}
+				},
+				check: {
+					enable: true,
+					chkStyle: "checkbox",
+					chkboxType: { "Y" : "", "N" : "" }
+				}
 		};
 		var zNodes = nodes;
 		var zTreeObj = $.fn.zTree.init(container, setting, zNodes);
@@ -65,12 +93,37 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			'content': 'data(name)',
 			'text-wrap': 'wrap'
 		}).update();
+		cy.style().selector('node[type="CloneGroup"]').style({
+			'shape' : 'rectangle',
+			'width': function(content) {
+				var split = content.data().name.split("\n");
+				var maxWidth = 0;
+				for(var i = 0; i < split.length; i++) {
+					var width = split[i].replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
+					if(width > maxWidth) {
+						maxWidth = width;
+					}
+				}
+				return maxWidth;
+			},
+			'height': function(content) {
+				var split = content.data().name.split("\n");
+				var length = split.length;
+				return 21 * length;
+			},
+			'text-valign': 'center',
+			'text-halign': 'center',
+			'border-width': 1.5,
+			'border-color': '#555',
+			'background-color': '#f6f6f6',
+			'content': 'data(name)',
+			'text-wrap': 'wrap'
+		}).update();
 		cy.style().selector('node[type="File"]').style({
 			'shape' : 'ellipse',
 			'width': function(content) {
 				var split = content.data().name.split("\n");
 				var maxWidth = 0;
-				console.log(split);
 				for(var i = 0; i < split.length; i++) {
 					var width = split[i].replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
 					if(width > maxWidth) {
@@ -200,9 +253,9 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 						var size = result.size;
 						
 						var html = "";
-						html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn'>全屏</button>";
+						html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='group'>全屏</button>";
 						html += "<p></p></div>";
-						html += '<div class="col-sm-12 div_cytoscape_div" id="groupfullscreenAble">';
+						html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble_group">';
 						html += '<div class="div_cytoscape_treeview">';
 						html += '<ul id="node_ztree_groups" class="ztree"></ul>';
 						html += '</div>';

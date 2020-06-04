@@ -30,7 +30,7 @@ import depends.relations.Inferer;
 
 public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CppInsertServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(JavaInsertServiceImpl.class);
 
 	public JavaInsertServiceImpl(EntityRepo entityRepo, ProjectConfig projectConfig) {
 		super(entityRepo, projectConfig);
