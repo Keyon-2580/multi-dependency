@@ -160,7 +160,7 @@ public class MDAllController {
 		callsWithEntry.setShowCntOfDevUpdMs(showCntOfDevUpdMs);
 		if(showClonesInMicroService) {
 			Iterable<MicroService> allMicroServices = msService.findAllMicroService();
-			Map<MicroService, CloneLineValue<MicroService>> msCloneValues = cloneAnalyse.msCloneLineValuesGroup(allMicroServices, -1, CloneLevel.file);
+			Map<MicroService, CloneLineValue<MicroService>> msCloneValues = cloneAnalyse.msCloneLineValuesGroup(allMicroServices, -1, CloneLevel.file, false, false);
 			callsWithEntry.setMsToCloneLineValue(msCloneValues);
 			callsWithEntry.setClonesInMicroServiceFromFunctionClone(cloneAnalyse.findMicroServiceCloneFromFunctionClone(cloneAnalyse.findAllFunctionCloneFunctions(), true));
 			callsWithEntry.setClonesInMicroServiceFromFileClone(cloneAnalyse.findMicroServiceCloneFromFileClone(cloneAnalyse.findAllFileCloneFiles(), true));

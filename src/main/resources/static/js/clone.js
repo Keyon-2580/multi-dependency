@@ -1,4 +1,11 @@
-var clone = function(cytoscapeutil, level) {
+/**
+ * "/clone/" + level + "/table/microservice",
+ * "/clone/" + level + "/group/cytoscape?top=" + top,
+ * "/clone/" + level + "/group/histogram",
+ * "/clone/" + level + "/group/cytoscape/" + num,
+ */
+var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
+	var urlRemoveParams = "removeFileClone=" + removeFileClone + "&removeDataClass=" + removeDataClass;
 	var isFullScreen = false;
 	function showFull(divId){
 		var full=document.getElementById(divId);
@@ -129,20 +136,20 @@ var clone = function(cytoscapeutil, level) {
 	var table = function(){
 		$.ajax({
 			type : "GET",
-			url : "/clone/" + level + "/table/microservice",
+			url : "/clone/" + level + "/table/microservice?" + urlRemoveParams,
 			success : function(result) {
 				$("#table").addClass("table");
 				$("#table").addClass("table-bordered");
 				console.log(result);
 				var html = "<table class='table table-bordered' id='table'>";
 				html += "<tr>";
-				html += "<td>";
-				html += "</td>";
+				html += "<th>";
+				html += "</th>";
 				for(var i = 0; i < result.microservices.length; i++) {
 					var ms = result.microservices[i];
-					html += "<td>";
+					html += "<th>";
 					html += ms.name;
-					html += "</td>";
+					html += "</th>";
 				}
 				html += "</tr>";
 				for(var group in result.data) {
@@ -186,12 +193,28 @@ var clone = function(cytoscapeutil, level) {
 			console.log(top);
 			$.ajax({
 				type : "GET",
-				url : "/clone/" + level + "/group/cytoscape?top=" + top,
+				url : "/clone/" + level + "/group/cytoscape?top=" + top + "&" + urlRemoveParams,
 				success : function(result) {
 					if(result.result == "success") {
 						console.log(result.value);
 						var size = result.size;
+						
 						var html = "";
+						html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn'>全屏</button>";
+						html += "<p></p></div>";
+						html += '<div class="col-sm-12 div_cytoscape_div" id="groupfullscreenAble">';
+						html += '<div class="div_cytoscape_treeview">';
+						html += '<ul id="node_ztree_groups" class="ztree"></ul>';
+						html += '</div>';
+						html += '<div class="div_cytoscape" style="float: left; display: inline;">';
+						html += '<div id="cloneGroupsDiv" class="div_cytoscape_content cy"></div>';
+						html += '</div>'
+						html += '</div>';
+						html += '<div class="col-sm-12"><hr/></div>';
+						$("#groupCytoscape").html(html);
+						showZTree(result.groupValue.ztree, $("#node_ztree_groups"), _showCytoscape($("#cloneGroupsDiv"), result.groupValue));
+						
+						html = "";
 						for(var i = 0; i < size; i++) {
 							html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='" + i +"'>全屏</button>";
 //							html += "<button class='btn btn-default save_top' name='" + i +"'>保存图片</button><p></p></div>";
@@ -233,7 +256,7 @@ var clone = function(cytoscapeutil, level) {
 		var myChart = echarts.init(document.getElementById('main'));
 		$.ajax({
 			type : "GET",
-			url : "/clone/" + level + "/group/histogram",
+			url : "/clone/" + level + "/group/histogram?" + urlRemoveParams,
 			success : function(result) {
 				console.log(result);
 				var xAxisData = [];
@@ -310,7 +333,7 @@ var clone = function(cytoscapeutil, level) {
 		        	console.log(num);
 		        	$.ajax({
 						type : "GET",
-						url : "/clone/" + level + "/group/cytoscape/" + num,
+						url : "/clone/" + level + "/group/cytoscape/" + num + "?" + urlRemoveParams,
 						success : function(result) {
 							if(result.result == "success") {
 								console.log(result.value);

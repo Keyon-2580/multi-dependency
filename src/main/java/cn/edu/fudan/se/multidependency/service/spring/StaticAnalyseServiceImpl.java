@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
@@ -21,7 +20,6 @@ import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
-import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
@@ -66,7 +64,6 @@ import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynam
 import cn.edu.fudan.se.multidependency.repository.relation.lib.FunctionCallLibraryAPIRepository;
 import cn.edu.fudan.se.multidependency.service.spring.data.Fan_IO;
 import cn.edu.fudan.se.multidependency.utils.PageUtil;
-import lombok.Data;
 
 /**
  * 
@@ -512,10 +509,44 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return functionCallFunctionRepository.queryFunctionCallByFunctions(function.getId());
 	}
 	
-	@Data
-	private static class CloneGroup<N extends Node, R extends CloneRelation> {
-		Collection<N> nodes;
-		Collection<R> relations;
+	@Override
+	public boolean isDataClass(Type type) {
+		Collection<Variable> fields = containRelationService.findTypeDirectlyContainFields(type);
+		Collection<Function> functions = containRelationService.findTypeDirectlyContainFunctions(type);
+		if(fields.isEmpty() && functions.isEmpty()) {
+			return true;
+		} else if(fields.isEmpty()) {
+			return false;
+		} else if(functions.isEmpty()) {
+			return true;
+		}
+		for(Function f : functions) {
+			if(f.isConstructor()) {
+				continue;
+			}
+			if(!f.getSimpleName().startsWith("get") 
+					&& !f.getSimpleName().startsWith("set") 
+					&& !f.getSimpleName().startsWith("is")
+					&& !"equals".equals(f.getSimpleName())
+					&& !"toString".equals(f.getSimpleName())
+					&& !"hashCode".equals(f.getSimpleName())) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean isDataFile(ProjectFile file) {
+		Collection<Type> types = containRelationService.findFileDirectlyContainTypes(file);
+		for(Type type : types) {
+			if(!isDataClass(type)) {
+//				System.out.println(file.getPath() + " isDataFile false");
+				return false;
+			}
+		}
+//		System.out.println(file.getPath() + " isDataFile true");
+		return true;
 	}
 
 }

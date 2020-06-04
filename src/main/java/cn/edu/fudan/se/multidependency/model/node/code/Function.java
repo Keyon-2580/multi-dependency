@@ -41,7 +41,7 @@ public class Function implements Node, CloneRelationNode {
 
 	private boolean fromDynamic = false;
 	
-	private boolean contrustor;
+	private boolean constructor;
 	
 	private String inFilePath;
 	
@@ -81,7 +81,7 @@ public class Function implements Node, CloneRelationNode {
 		properties.put("returnTypeIdentify", getReturnTypeIdentify() == null ? "" : getReturnTypeIdentify());
 		properties.put("parametersIdentifies", getParameters().toString().replace('[', '(').replace(']', ')'));
 		properties.put("fromDynamic", isFromDynamic());
-		properties.put("constructor", isContrustor());
+		properties.put("constructor", isConstructor());
 		properties.put("inFilePath", getInFilePath() == null ? "" : getInFilePath());
 		properties.put("simpleName", getSimpleName() == null ? "" : getSimpleName());
 		properties.put("impl", isImpl());

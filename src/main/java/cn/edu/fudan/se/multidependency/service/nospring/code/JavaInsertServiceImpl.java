@@ -86,7 +86,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				if(functionName.contains(".")) {
 					String[] functionNameSplit = functionName.split("\\.");
 					if(functionNameSplit.length >= 2) {
-						function.setContrustor(functionNameSplit[functionNameSplit.length - 1].equals(functionNameSplit[functionNameSplit.length - 2]));
+						function.setConstructor(functionNameSplit[functionNameSplit.length - 1].equals(functionNameSplit[functionNameSplit.length - 2]));
 					}
 				}
 				function.setSimpleName(entity.getRawName().getName());
@@ -152,7 +152,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 
 			Type type = (Type) findNodeByEntityIdInProject(parentEntity);
 			String newFunctionName = null;
-			if(function.isContrustor()) {
+			if(function.isConstructor()) {
 				newFunctionName = type.getName();
 			} else {
 				newFunctionName = type.getName() + "." + function.getSimpleName();

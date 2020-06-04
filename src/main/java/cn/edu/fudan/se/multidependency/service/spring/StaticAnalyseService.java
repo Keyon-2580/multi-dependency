@@ -110,4 +110,8 @@ public interface StaticAnalyseService {
 
 	Collection<FunctionCallFunction> queryFunctionCallByFunctions(Function function);
 	
+	boolean isDataClass(Type type);
+	
+	boolean isDataFile(ProjectFile file);
+	
 }
