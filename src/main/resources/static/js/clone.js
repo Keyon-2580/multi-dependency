@@ -217,7 +217,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 						var data = map[result.microservices[i].id];
 						if(level == "file") {
 							for(var j = 0; j < data.cloneFiles.length; j++) {
-								html += data.cloneFiles[j].name;
+								html += data.cloneFiles[j].path;
 								if(j != data.cloneFiles.length - 1) {
 									html += "<br/>";
 								}

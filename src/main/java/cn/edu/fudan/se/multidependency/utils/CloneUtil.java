@@ -89,18 +89,49 @@ public class CloneUtil {
 		}
 		return result;
 	}
-	
+	public static void main(String[] args) {
+		String line = "18,ts-admin-route-service,D:\\projectPath1\\nostub\\removeDocument\\train-ticket\\ts-admin-route-service\\src\\main\\java\\adminroute\\config\\SecurityConfig.java,63,80,adminroute.config,SecurityConfig,configure,HttpSecurity#Map<String, String>#Map<String, Map<String,String>>#String#";
+		String[] values = line.split(",");
+		if(values.length < 9) {
+			LOGGER.warn("克隆数据格式不正确：" + line);
+			return;
+		}
+		MethodNameForJavaFromCsv method = new MethodNameForJavaFromCsv();
+		int length = 0;
+		method.setLine(line);
+		method.setLineId(Integer.parseInt(values[0]));
+		method.setProjectName(values[1]);
+		method.setFilePath(values[2]);
+		method.setStartLine(Integer.parseInt(values[3]));
+		method.setEndLine(Integer.parseInt(values[4]));
+		method.setPackageName(values[5]);
+		method.setClassName(values[6]);
+		method.setFunctionSimpleName(values[7]);
+		for(int i = 0; i < 8; i++) {
+			length += values[i].length() + 1;
+		}
+		String parametersStr = line.substring(length);
+		String[] parameters = parametersStr.split("#");
+		for(String parameter : parameters) {
+			if(StringUtils.isBlank(parameter) || "None".equals(parameter)) {
+				continue;
+			}
+			method.addParameterType(parameter);
+		}
+		System.out.println(method);;
+	}
 	public static Map<Integer, MethodNameForJavaFromCsv> readJavaCloneCsvForMethodName(String filePath) throws Exception {
 		Map<Integer, MethodNameForJavaFromCsv> result = new HashMap<>();
 		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
 			String line = null;
 			while((line = reader.readLine()) != null) {
 				String[] values = line.split(",");
-				if(values.length != 9) {
+				if(values.length < 9) {
 					LOGGER.warn("克隆数据格式不正确：" + line);
 					continue;
 				}
 				MethodNameForJavaFromCsv method = new MethodNameForJavaFromCsv();
+				int length = 0;
 				method.setLine(line);
 				method.setLineId(Integer.parseInt(values[0]));
 				method.setProjectName(values[1]);
@@ -110,7 +141,10 @@ public class CloneUtil {
 				method.setPackageName(values[5]);
 				method.setClassName(values[6]);
 				method.setFunctionSimpleName(values[7]);
-				String parametersStr = values[8];
+				for(int i = 0; i < 8; i++) {
+					length += values[i].length() + 1;
+				}
+				String parametersStr = line.substring(length);
 				String[] parameters = parametersStr.split("#");
 				for(String parameter : parameters) {
 					if(StringUtils.isBlank(parameter) || "None".equals(parameter)) {

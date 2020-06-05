@@ -17,6 +17,19 @@ public class FunctionUtil {
 			functionFullName = functionFullName.replaceAll("<[^<>]*>", "");
 		}
 		System.out.println(extractFunctionNameAndParameters(functionFullName));
+		
+		StringBuilder builder = new StringBuilder();
+		builder.append("configure");
+		builder.append("(");
+		for(int i = 0; i < 5; i++) {
+			if(i != 0) {
+				builder.append(",");
+			}
+			builder.append("Map<String, Map<String,String>>");
+		}
+		builder.append(")");
+		functionFullName = builder.toString();
+		System.out.println(extractFunctionNameAndParameters(functionFullName));
 	}
 	
 	/**
