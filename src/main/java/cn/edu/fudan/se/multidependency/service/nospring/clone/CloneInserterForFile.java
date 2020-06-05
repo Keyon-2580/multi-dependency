@@ -24,7 +24,7 @@ public class CloneInserterForFile extends ExtractorForNodesAndRelationsImpl {
 	
 	private CountDownLatch latch;
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(CloneUtil.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CloneInserterForFile.class);
 	@Setter
 	private Language language;
 	@Setter
