@@ -1,9 +1,9 @@
 package cn.edu.fudan.se.multidependency.model.node;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.codehaus.plexus.util.StringUtils;
 
@@ -25,7 +25,7 @@ import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
 public class Nodes {
 	
-	private List<Node> allNodes = new CopyOnWriteArrayList<>();
+	private List<Node> allNodes = new ArrayList<>();
 
 	private Map<NodeLabelType, List<Node>> nodeTypeToNodes = new ConcurrentHashMap<>();
 	
@@ -34,7 +34,7 @@ public class Nodes {
 	 */
 	private Map<Project, Map<NodeLabelType, Map<Long, Node>>> projectToNodes = new ConcurrentHashMap<>();
 	
-	private List<Project> projects = new CopyOnWriteArrayList<>();
+	private List<Project> projects = new ArrayList<>();
 	
 	private Map<String, ProjectFile> filePathToFile = new ConcurrentHashMap<>();
 	
@@ -52,10 +52,10 @@ public class Nodes {
 	}
 	
 	public List<Project> findAllProjects() {
-		return new CopyOnWriteArrayList<>(projects);
+		return new ArrayList<>(projects);
 	}
 	
-	public Project findProject(String name, Language language) {
+	public synchronized Project findProject(String name, Language language) {
 		if(language == null) {
 			return null;
 		}
@@ -104,7 +104,7 @@ public class Nodes {
 		if(node instanceof ProjectFile) {
 			this.filePathToFile.put(((ProjectFile) node).getPath(), (ProjectFile) node);
 		}
-		List<Node> nodes = nodeTypeToNodes.getOrDefault(node.getNodeType(), new CopyOnWriteArrayList<>());
+		List<Node> nodes = nodeTypeToNodes.getOrDefault(node.getNodeType(), new ArrayList<>());
 		nodes.add(node);
 		nodeTypeToNodes.put(node.getNodeType(), nodes);
 		
@@ -118,7 +118,7 @@ public class Nodes {
 	}
 	
 	public List<? extends Node> findNodesByNodeType(NodeLabelType nodeType) {
-		return nodeTypeToNodes.getOrDefault(nodeType, new CopyOnWriteArrayList<>());
+		return nodeTypeToNodes.getOrDefault(nodeType, new ArrayList<>());
 	}
 	
 	public Node findNodeByEntityIdInProject(NodeLabelType nodeType, long entityId, Project inProject) {
@@ -172,7 +172,7 @@ public class Nodes {
 		Map<Long, Function> functions = (Map<Long, Function>) findNodesByNodeTypeInProject(NodeLabelType.Function, project);
 		functions.values().forEach(function -> {
 			String functionName = function.getName();
-			List<Function> fs = result.getOrDefault(functionName, new CopyOnWriteArrayList<>());
+			List<Function> fs = result.getOrDefault(functionName, new ArrayList<>());
 			fs.add(function);
 			result.put(functionName, fs);
 		});
@@ -332,7 +332,7 @@ public class Nodes {
 		if(allLibrariesCache.isEmpty()) {
 			for(Node node : findNodesByNodeType(NodeLabelType.Library)) {
 				Library library = (Library) node;
-				List<Library> libraries = allLibrariesCache.getOrDefault(library.getGroupId(), new CopyOnWriteArrayList<>());
+				List<Library> libraries = allLibrariesCache.getOrDefault(library.getGroupId(), new ArrayList<>());
 				libraries.add(library);
 				allLibrariesCache.put(library.getGroupId(), libraries);
 			}
@@ -341,7 +341,7 @@ public class Nodes {
 	}
 	
 	public Library findLibrary(String group, String name, String version) {
-		Iterable<Library> libraries = findAllLibraries().getOrDefault(group, new CopyOnWriteArrayList<>());
+		Iterable<Library> libraries = findAllLibraries().getOrDefault(group, new ArrayList<>());
 		for(Library library : libraries) {
 			if(library.getName().equals(name) && library.getVersion().equals(version)) {
 				return library;
