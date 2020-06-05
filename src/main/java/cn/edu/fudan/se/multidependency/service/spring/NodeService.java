@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
+import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
@@ -11,6 +12,8 @@ public interface NodeService {
 	Package queryPackage(long id);
 
 	ProjectFile queryFile(long id);
+	
+	ProjectFile queryFile(String path);
 
 	Namespace queryNamespace(long id);
 
@@ -19,5 +22,7 @@ public interface NodeService {
 	Function queryFunction(long id);
 	
 	Project queryProject(Long id);
+	
+	Project queryProject(String name, Language language);
 
 }

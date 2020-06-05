@@ -50,6 +50,11 @@ public class Function implements Node, CloneRelationNode {
 	private int startLine = -1;
 	
 	private int endLine = -1;
+	
+	/*
+	 * FilePath
+	 */
+	private String fullName;
 
 	/**
 	 * 插入时使用这个，因为用BatchInserter的时候插入这个会转成字符串插入，用SDN读取时对应不到这个List
@@ -62,7 +67,7 @@ public class Function implements Node, CloneRelationNode {
 	 */
 	private String parametersIdentifies;
 	
-	public String getFunctionFullName() {
+	public String getFunctionIdentify() {
 		return this.getName() + this.getParametersIdentifies();
 	}
 	
@@ -87,6 +92,7 @@ public class Function implements Node, CloneRelationNode {
 		properties.put("impl", isImpl());
 		properties.put("startLine", getStartLine());
 		properties.put("endLine", getEndLine());
+		properties.put("fullName", getFullName() == null? "" : getFullName());
 		return properties;
 	}
 	

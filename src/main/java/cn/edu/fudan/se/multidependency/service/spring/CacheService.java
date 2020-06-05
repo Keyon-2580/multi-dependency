@@ -7,16 +7,19 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 
 @Service
 public class CacheService {
 
+	private final Map<String, ProjectFile> pathToFile = new ConcurrentHashMap<>();
 	private final Map<Long, Node> idToNodeCache = new ConcurrentHashMap<>();
 	private final Map<Node, Map<NodeLabelType, Node>> nodeBelongToNodeCache = new ConcurrentHashMap<>();
 	
     public void clearCache() {
     	idToNodeCache.clear();
     	nodeBelongToNodeCache.clear();
+    	pathToFile.clear();
     }
     
     public void cacheNodeBelongToNode(Node node, Node belongToNode) {
@@ -38,8 +41,22 @@ public class CacheService {
 	}
 	
 	public Node cacheNodeById(Node node) {
+		if(node == null) {
+			return null;
+		}
 		idToNodeCache.put(node.getId(), node);
+		if(node instanceof ProjectFile) {
+			this.pathToFile.put(((ProjectFile) node).getPath(), (ProjectFile) node);
+		}
 		return node;
+	}
+	
+	public void cacheFileByPath(String path, ProjectFile file) {
+		this.pathToFile.put(path, file);
+	}
+	
+	public ProjectFile findFileByPath(String path) {
+		return this.pathToFile.get(path);
 	}
 	
 }

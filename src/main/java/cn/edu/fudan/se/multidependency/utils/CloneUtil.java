@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 public class CloneUtil {
 	
@@ -30,6 +31,7 @@ public class CloneUtil {
 
 	@Data
 	@EqualsAndHashCode(callSuper = true)
+	@ToString(callSuper = true)
 	public static class MethodNameForJavaFromCsv extends FilePathFromCsv {
 		private String projectName;
 		private String packageName;

@@ -1,8 +1,10 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
+import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
@@ -16,6 +18,7 @@ import cn.edu.fudan.se.multidependency.repository.node.code.NamespaceRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.TypeRepository;
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
 @Service
 public class NodeServiceImpl implements NodeService {
@@ -87,5 +90,35 @@ public class NodeServiceImpl implements NodeService {
 		Project result = node == null ? projectRepository.findById(id).get() : (node instanceof Project ? (Project) node : projectRepository.findById(id).get());
 		cache.cacheNodeById(result);
 		return result;
+	}
+
+	@Override
+	public ProjectFile queryFile(String path) {
+		ProjectFile file = null;
+		String newPath = path;
+		while(file == null) {
+			file = cache.findFileByPath(newPath);
+			if(file != null) {
+				return file;
+			}
+			file = fileRepository.findFileByPath(newPath);
+			newPath = FileUtil.extractPath(newPath);
+			if(StringUtils.isBlank(newPath)) {
+				break;
+			}
+		}
+		if(file != null) {
+			cache.cacheNodeById(file);
+			cache.cacheFileByPath(path, file);
+			cache.cacheFileByPath(newPath, file);
+		}
+		return file;
+	}
+
+	@Override
+	public Project queryProject(String name, Language language) {
+		Project project = projectRepository.findProjectByNameAndLanguage(name, language.toString());
+		cache.cacheNodeById(project);
+		return project;
 	}
 }
