@@ -75,6 +75,8 @@ public class FunctionCloneFunction implements CloneRelation {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("value", getValue());
+		properties.put("function1Index", getFunction1Index());
+		properties.put("function2Index", getFunction2Index());
 		properties.put("function1StartLine", getFunction1StartLine());
 		properties.put("function1EndLine", getFunction1EndLine());
 		properties.put("function2StartLine", getFunction2StartLine());

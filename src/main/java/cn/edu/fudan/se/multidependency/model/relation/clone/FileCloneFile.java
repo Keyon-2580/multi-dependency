@@ -69,6 +69,8 @@ public class FileCloneFile implements CloneRelation {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("value", getValue());
+		properties.put("file1Index", getFile1Index());
+		properties.put("file2Index", getFile2Index());
 		properties.put("file1StartLine", getFile1StartLine());
 		properties.put("file1EndLine", getFile1EndLine());
 		properties.put("file2StartLine", getFile2StartLine());
