@@ -74,6 +74,7 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 			LOGGER.info("方法克隆对数：" + cloneResults.size());
 			int sizeOfFunctionCloneFunctions = 0;
 			for(CloneResultFromCsv cloneResult : cloneResults) {
+				LOGGER.info(cloneResult.toString());
 				int start = cloneResult.getStart();
 				int end = cloneResult.getEnd();
 				double value = cloneResult.getValue();

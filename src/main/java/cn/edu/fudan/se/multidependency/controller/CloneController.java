@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,11 +31,13 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.service.spring.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
+import cn.edu.fudan.se.multidependency.service.spring.data.CloneLineValue;
 import cn.edu.fudan.se.multidependency.service.spring.show.CloneShowService;
 
 @Controller
 @RequestMapping("/clone")
 public class CloneController {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CloneController.class);
 	
 	@Autowired
 	private CloneAnalyseService cloneAnalyse;
@@ -67,11 +72,19 @@ public class CloneController {
 		JSONObject result = new JSONObject();
 		Collection<MicroService> mss = msService.findAllMicroService();
 		if("function".equals(level)) {
-			result.put("data", cloneAnalyse.msCloneLineValuesCalculateGroupByFunction(mss, removeFileClone));
-			result.put("microservices", cloneAnalyse.msSortByMsCloneLineCount(mss, CloneLevel.function, removeFileClone, removeDataClass));
+			LOGGER.info("function level table, get data");
+			Map<Integer, Map<Long, CloneLineValue<MicroService>>> data = cloneAnalyse.msCloneLineValuesCalculateGroupByFunction(mss, removeFileClone);
+			result.put("data", data);
+			LOGGER.info("get microservices");
+			Collection<MicroService> microservices = cloneAnalyse.msSortByMsCloneLineCount(mss, CloneLevel.function, removeFileClone, removeDataClass);
+			result.put("microservices", microservices);
 		} else if("file".equals(level)) {
-			result.put("data", cloneAnalyse.msCloneLineValuesCalculateGroupByFile(mss, removeFileClone));
-			result.put("microservices", cloneAnalyse.msSortByMsCloneLineCount(mss, CloneLevel.file, removeFileClone, removeDataClass));
+			LOGGER.info("file level table, get data");
+			Map<Integer, Map<Long, CloneLineValue<MicroService>>> data = cloneAnalyse.msCloneLineValuesCalculateGroupByFile(mss, removeFileClone);
+			result.put("data", data);
+			LOGGER.info("get microservices");
+			Collection<MicroService> microservices = cloneAnalyse.msSortByMsCloneLineCount(mss, CloneLevel.file, removeFileClone, removeDataClass);
+			result.put("microservices", microservices);
 		}
 		return result;
 	}
@@ -89,10 +102,13 @@ public class CloneController {
 			JSONArray projectSizeArray = new JSONArray();
 			Collection<Collection<? extends Node>> nodeGroups = new ArrayList<>();
 			if(CloneLevel.function.toString().equals(level)) {
+				LOGGER.info("function level histogram");
 				nodeGroups = cloneAnalyse.groupFunctionCloneNode(removeFileClone);
 			} else {
+				LOGGER.info("file level histogram");
 				nodeGroups = cloneAnalyse.groupFileCloneNode(removeDataClass);
 			}
+			LOGGER.info("克隆组数：" + nodeGroups.size());
 			int size = 0;
 			for(Collection<? extends Node> nodes : nodeGroups) {
 				size++;

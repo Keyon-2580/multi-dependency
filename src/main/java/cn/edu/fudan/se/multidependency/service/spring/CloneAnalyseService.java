@@ -7,7 +7,6 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
@@ -24,9 +23,9 @@ public interface CloneAnalyseService {
 	
 //	Collection<>isCloneBetween
 	
-	Collection<Collection<Clone<Function, FunctionCloneFunction>>> queryFunctionCloneGroup();
+	/*Collection<Collection<Clone<Function, FunctionCloneFunction>>> queryFunctionCloneGroup();
 	
-	Collection<Collection<Clone<ProjectFile, FileCloneFile>>> queryFileCloneGroup();
+	Collection<Collection<Clone<ProjectFile, FileCloneFile>>> queryFileCloneGroup();*/
 
 	public Iterable<FunctionCloneFunction> findAllFunctionCloneFunctions();
 	

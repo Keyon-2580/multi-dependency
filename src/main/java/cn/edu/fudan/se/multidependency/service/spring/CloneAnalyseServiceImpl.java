@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ import cn.edu.fudan.se.multidependency.service.spring.data.CloneValueCalculatorF
 
 @Service
 public class CloneAnalyseServiceImpl implements CloneAnalyseService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CloneAnalyseServiceImpl.class);
     
     @Autowired
     FunctionCloneFunctionRepository functionCloneFunctionRepository;
@@ -77,16 +80,17 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     	return result;
     }
     
-    private Map<Integer, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFunctionCache = null;
+    private Map<Boolean, Map<Integer, Map<Long, CloneLineValue<MicroService>>>> msCloneLineValuesCalculateGroupByFunctionCache = null;
     @Override
     public Map<Integer, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFunction(
     		Collection<MicroService> mss, boolean removeFileLevelClone) {
-    	if(msCloneLineValuesCalculateGroupByFunctionCache != null) {
-    		return msCloneLineValuesCalculateGroupByFunctionCache;
+    	if(msCloneLineValuesCalculateGroupByFunctionCache.get(removeFileLevelClone) != null) {
+    		return msCloneLineValuesCalculateGroupByFunctionCache.get(removeFileLevelClone);
     	}
     	Map<Integer, Map<Long, CloneLineValue<MicroService>>> result = new HashMap<>();
     	Map<Integer, Map<Project, CloneLineValue<Project>>> projectGroups = 
     			projectCloneLineValuesCalculateGroupByFunction(removeFileLevelClone);
+    	LOGGER.info("finish projectCloneLineValuesCalculateGroupByFunction");
     	for(Map.Entry<Integer, Map<Project, CloneLineValue<Project>>> projectGroup : projectGroups.entrySet()) {
     		int group = projectGroup.getKey();
     		Map<Project, CloneLineValue<Project>> projectsValue = projectGroup.getValue();
@@ -106,7 +110,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     		}
     		result.put(group, mssValue);
     	}
-    	msCloneLineValuesCalculateGroupByFunctionCache = result;
+    	msCloneLineValuesCalculateGroupByFunctionCache.put(removeFileLevelClone, null);
     	return result;
     }
     
@@ -118,6 +122,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     	}
     	Map<Integer, Map<Long, CloneLineValue<MicroService>>> result = new HashMap<>();
     	Map<Integer, Map<Project, CloneLineValue<Project>>> projectGroups = projectCloneLineValuesCalculateGroupByFile(removeDataClass);
+    	LOGGER.info("finish projectCloneLineValuesCalculateGroupByFile");
     	for(Map.Entry<Integer, Map<Project, CloneLineValue<Project>>> projectGroup : projectGroups.entrySet()) {
     		int group = projectGroup.getKey();
     		Map<Project, CloneLineValue<Project>> projectsValue = projectGroup.getValue();
@@ -175,6 +180,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     		return projectCloneValuesCalculateByFileCache.get(removeDataClass);
     	}
     	Collection<Collection<? extends Node>> groupFileClones = groupFileCloneNode(removeDataClass);
+    	LOGGER.info("finish groupFileCloneNode");
     	Map<Integer, Map<Project, CloneLineValue<Project>>> result = new HashMap<>();
     	for(int i = -1; i < groupFileClones.size(); i++) {
     		Map<Project, CloneLineValue<Project>> projectToCloneValue = new HashMap<>();
@@ -356,6 +362,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 			result = groupCloneNodes(findAllFileCloneFiles(), false, removeDataClass);
 			groupFileCloneNodeCache.put(removeDataClass, result);
 		}
+		LOGGER.info("finish groupCloneNodes");
 		return result;
 	}
 	
@@ -366,6 +373,9 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 		List<Collection<? extends Node>> result = new ArrayList<>();
 		Map<Node, Collection<Node>> nodeToCollection = new HashMap<>();
 		for(CloneRelation relation : relations) {
+			LOGGER.info(new StringBuilder().append("relation: ")
+					.append(relation.getStartNodeGraphId()).append(" ")
+					.append(relation.getEndNodeGraphId()).toString());
 			Node node1 = relation.getStartNode();
 			Node node2 = relation.getEndNode();
 			if(removeDataClass && node1 instanceof ProjectFile) {
@@ -472,7 +482,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 		return result;
 	}
 
-	@Override
+	/*@Override
 	public Collection<Collection<Clone<Function, FunctionCloneFunction>>> queryFunctionCloneGroup() {
 		List<Collection<Clone<Function, FunctionCloneFunction>>> result = new ArrayList<>();
 		return result;
@@ -482,7 +492,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 	public Collection<Collection<Clone<ProjectFile, FileCloneFile>>> queryFileCloneGroup() {
 		List<Collection<Clone<ProjectFile, FileCloneFile>>> result = new ArrayList<>();
 		return result;
-	}
+	}*/
 
 	@Override
 	public Iterable<FileCloneFile> queryProjectContainFileCloneFiles(Project project) {
