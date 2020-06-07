@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -150,6 +152,49 @@ public class CloneController {
 		return result;
 	}
 	
+	@PostMapping("/{level}/group/cytoscape")
+	@ResponseBody
+	public JSONObject cloneGroupByGroupsToCytoscape(@PathVariable("level") String level, 
+			@RequestBody Map<String, Object> params, 
+			@RequestParam(name="removeFileClone", required=false, defaultValue="false") boolean removeFileClone,
+			@RequestParam(name="removeDataClass", required=false, defaultValue="false") boolean removeDataClass) {
+		System.out.println(removeFileClone + " " + removeDataClass);
+		JSONObject result = new JSONObject();
+		try {
+			List<String> idsStr = (List<String>) params.get("groups");
+			List<Integer> selectedGroups = new ArrayList<>();
+			for(String idStr : idsStr) {
+				selectedGroups.add(Integer.parseInt(idStr));
+			}
+			selectedGroups.sort((group1, group2) -> {
+				return group1 - group2;
+			});
+			
+			JSONArray cytoscapeArray = new JSONArray();
+			for(int i = 0; i < selectedGroups.size(); i++) {
+				List<Integer> groups = new ArrayList<>();
+				groups.add(selectedGroups.get(i));
+				cytoscapeArray.add(cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), false, removeFileClone, removeDataClass));
+			}
+			result.put("size", selectedGroups.size());
+			result.put("groups", selectedGroups);
+			result.put("result", "success");
+			result.put("value", cytoscapeArray);
+			List<Integer> groups = new ArrayList<>();
+			for(int j = 0; j < selectedGroups.size(); j++) {
+				groups.add(selectedGroups.get(j));
+			}
+			// 合并
+			result.put("groupValue", cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), true, removeFileClone, removeDataClass));
+			result.put("result", "success");
+		} catch (Exception e) {
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
+		
+		return result;
+	}
+	
 	@GetMapping("/{level}/group/cytoscape/{index}")
 	@ResponseBody
 	public JSONObject cloneGroupByIndexToCytoscape(@PathVariable("level") String level, 
@@ -193,6 +238,8 @@ public class CloneController {
 			for(int j = 0; j < top; j++) {
 				groups.add(j);
 			}
+			result.put("groups", groups);
+			// 合并
 			result.put("groupValue", cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), true, removeFileClone, removeDataClass));
 		} catch (Exception e) {
 			result.put("result", "fail");

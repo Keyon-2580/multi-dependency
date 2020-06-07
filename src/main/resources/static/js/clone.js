@@ -4,6 +4,15 @@
  * "/clone/" + level + "/group/histogram",
  * "/clone/" + level + "/group/cytoscape/" + num,
  */
+function copyToClip(content) {
+    var aux = document.createElement("input"); 
+    aux.setAttribute("value", content); 
+    document.body.appendChild(aux); 
+    aux.select();
+    document.execCommand("copy"); 
+    document.body.removeChild(aux);
+    alert("复制成功");
+}
 var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 	var urlRemoveParams = "removeFileClone=" + removeFileClone + "&removeDataClass=" + removeDataClass;
 	var isFullScreen = false;
@@ -63,15 +72,59 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 		var zNodes = nodes;
 		var zTreeObj = $.fn.zTree.init(container, setting, zNodes);
 	}
-	var _showCytoscape = function(container, data) {
+	var _showCytoscape = function(container, data, copyDivId = "") {
 		var cy = cytoscapeutil.showDataInCytoscape(container, data, "random");
+		if(copyDivId != "") {
+			console.log(copyDivId);
+			cy.on('tap', 'node', function(evt){
+				var node = evt.target;
+				if(node.data().type == "File") {
+					var value = node.data().value;
+					var html = "<a class='clipBoard'>";
+					html += value;
+					html += "</a>";
+					$("#" + copyDivId).html(html);
+					$(".clipBoard").click(function(){
+						var content = $(this).text();
+						copyToClip(content)
+					});
+				} else if(node.data().type == "Function") {
+					var value = node.data().value;
+					var html = "<a class='clipBoard'>";
+					html += value;
+					html += "</a>";
+					html += "&nbsp;&nbsp;from&nbsp;&nbsp;";
+					var connect = node.connectedEdges();
+					for(var i = 0; i < connect.length; i++) {
+						if(connect[i].data().type == "Contain") {
+							html += "<a class='clipBoard'>";
+							html += cy.$("#" + connect[i].data().source).data().value;
+							html += "</a>";
+						}
+					}
+					$("#" + copyDivId).html(html);
+					$(".clipBoard").click(function(){
+						var content = $(this).text();
+						copyToClip(content)
+					});
+				}
+			})
+			cy.on('tap', 'edge', function(evt){
+				var edge = evt.target;
+				console.log(edge.data);
+				$(".clipBoard").click(function(){
+					var content = $(this).text();
+					console.log(content);
+					copyToClip(content)
+				});
+			})
+		}
 		cys[cys.length] = cy;
 		cy.style().selector('node[type="Function"]').style({
 			'shape' : 'ellipse',
 			'width': function(content) {
 				var split = content.data().name.split("\n");
 				var maxWidth = 0;
-				console.log(split);
 				for(var i = 0; i < split.length; i++) {
 					var width = split[i].replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
 					if(width > maxWidth) {
@@ -241,66 +294,100 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 		});
 	}
 	var _clone = function() {
+		var _showGroupsResult = function(result) {
+			console.log(result);
+			var size = result.size;
+			var html = "";
+			html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='group'>全屏</button>";
+			html += "<p></p></div>";
+			html += "<div><h4>groups: " + result.groups + "</h4></div>"
+			html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble_group">';
+			html += '<div class="div_cytoscape_treeview">';
+			html += '<ul id="node_ztree_groups" class="ztree"></ul>';
+			html += '</div>';
+			html += '<div class="div_cytoscape" style="float: left; display: inline;">';
+			html += '<div id="cloneGroupsDiv" class="div_cytoscape_content cy"></div>';
+			html += '</div>'
+			html += '</div>';
+			html += '<div class="col-sm-12" id="copyDiv_group"></div>';
+			html += '<div class="col-sm-12"><hr/></div>';
+			$("#groupCytoscape").html(html);
+			showZTree(result.groupValue.ztree, $("#node_ztree_groups"), _showCytoscape($("#cloneGroupsDiv"), result.groupValue, "copyDiv_group"));
+			
+			html = "";
+			for(var i = 0; i < size; i++) {
+				html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='" + i +"'>全屏</button>";
+				html += "<div><h4>groups: " + result.groups[i] + "</h4></div>"
+//				html += "<button class='btn btn-default save_top' name='" + i +"'>保存图片</button><p></p></div>";
+				html += "<p></p></div>";
+				html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble_' + i + '">';
+					html += '<div class="div_cytoscape_treeview">';
+						html += '<ul id="node_ztree_' + i + '" class="ztree"></ul>';
+					html += '</div>';
+					html += '<div class="div_cytoscape" style="float: left; display: inline;">';
+						html += '<div id="cloneGroupDiv_' + i + '" class="div_cytoscape_content cy"></div>';
+					html += '</div>'
+				html += '</div>';
+				html += '<div id="cloneImg_' + i + '">'
+				html += '</div>';
+				html += '<div class="col-sm-12" id="copyDiv_' + i + '"></div>';
+				html += '<div class="col-sm-12"><hr/></div>';
+			}
+			$("#content").html(html);
+			$(".fullscreen_btn_top").unbind("click");
+			$(".fullscreen_btn_top").click(function() {
+				showFull("fullscreenAble_" + $(this).attr("name"));
+			});
+			/*$(".save_top").click(function(){
+				var i = $(this).attr("name");
+				var cy = cys[i];
+				cytoscapeutil.showImg(cy, "cloneImg_" + i)
+				$("#clone_img_" + i).css("height", "500px");
+				console.log(cys);
+			});*/
+			for(var i = 0; i < size; i++) {
+				var cy = _showCytoscape($("#cloneGroupDiv_" + i), result.value[i], "copyDiv_" + i);
+				cys[i] = cy;
+				showZTree(result.value[i].ztree, $("#node_ztree_" + i), cy);
+			}
+		}
+		
+		$("#searchSelected").click(function(){
+			var groups = $("#searchGroups").val();
+			if(groups.length == 0) {
+				return ;
+			}
+			var params = {
+				"groups" : groups
+			}
+			var url = "/clone/" + level + "/group/cytoscape?" + urlRemoveParams;
+			$.ajax({
+				type : "POST",
+				contentType : "application/json",
+				dataType : "json",
+				url : url,
+				data : JSON.stringify(params),
+				success : function(result) {
+					if(result.result == "success") {
+						_showGroupsResult(result);
+					}
+				}
+			});
+		});
+		
+		
 		$("#searchTop").click(function(){
 			var top = $("#topInput").val();
 			console.log(top);
+			if(top <= 0) {
+				return ;
+			}
 			$.ajax({
 				type : "GET",
 				url : "/clone/" + level + "/group/cytoscape?top=" + top + "&" + urlRemoveParams,
 				success : function(result) {
 					if(result.result == "success") {
-						console.log(result.value);
-						var size = result.size;
-						
-						var html = "";
-						html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='group'>全屏</button>";
-						html += "<p></p></div>";
-						html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble_group">';
-						html += '<div class="div_cytoscape_treeview">';
-						html += '<ul id="node_ztree_groups" class="ztree"></ul>';
-						html += '</div>';
-						html += '<div class="div_cytoscape" style="float: left; display: inline;">';
-						html += '<div id="cloneGroupsDiv" class="div_cytoscape_content cy"></div>';
-						html += '</div>'
-						html += '</div>';
-						html += '<div class="col-sm-12"><hr/></div>';
-						$("#groupCytoscape").html(html);
-						showZTree(result.groupValue.ztree, $("#node_ztree_groups"), _showCytoscape($("#cloneGroupsDiv"), result.groupValue));
-						
-						html = "";
-						for(var i = 0; i < size; i++) {
-							html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='" + i +"'>全屏</button>";
-//							html += "<button class='btn btn-default save_top' name='" + i +"'>保存图片</button><p></p></div>";
-							html += "<p></p></div>";
-							html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble_' + i + '">';
-								html += '<div class="div_cytoscape_treeview">';
-									html += '<ul id="node_ztree_' + i + '" class="ztree"></ul>';
-								html += '</div>';
-								html += '<div class="div_cytoscape" style="float: left; display: inline;">';
-									html += '<div id="cloneGroupDiv_' + i + '" class="div_cytoscape_content cy"></div>';
-								html += '</div>'
-							html += '</div>';
-							html += '<div id="cloneImg_' + i + '">'
-							html += '</div>'
-							html += '<div class="col-sm-12"><hr/></div>';
-						}
-						$("#content").html(html);
-						$(".fullscreen_btn_top").unbind("click");
-						$(".fullscreen_btn_top").click(function() {
-							showFull("fullscreenAble_" + $(this).attr("name"));
-						});
-						/*$(".save_top").click(function(){
-							var i = $(this).attr("name");
-							var cy = cys[i];
-							cytoscapeutil.showImg(cy, "cloneImg_" + i)
-							$("#clone_img_" + i).css("height", "500px");
-							console.log(cys);
-						});*/
-						for(var i = 0; i < size; i++) {
-							var cy = _showCytoscape($("#cloneGroupDiv_" + i), result.value[i]);
-							cys[i] = cy;
-							showZTree(result.value[i].ztree, $("#node_ztree_" + i), cy);
-						}
+						_showGroupsResult(result);
 					}
 				}
 			});
@@ -312,6 +399,9 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			url : "/clone/" + level + "/group/histogram?" + urlRemoveParams,
 			success : function(result) {
 				console.log(result);
+				$("#searchGroups").append('<optgroup id="select_single" label="single">单项目克隆</optgroup>');
+				$("#searchGroups").append('<optgroup id="select_between" label="between">跨项目克隆</optgroup>');
+				
 				var xAxisData = [];
 				var nodesData = [];
 				var projectsData = [];
@@ -319,7 +409,20 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 					xAxisData[i] = "group_" + i;
 					nodesData[i] = result.value["nodeSize"][i];
 					projectsData[i] = result.value.projectSize[i];
+					var html = '<option value="' + i + '" >' + xAxisData[i] + '_' + nodesData[i] + ',' + projectsData[i]  + '</option>';
+					if(projectsData[i] > 1) {
+						$("#select_between").append(html);
+					} else {
+						$("#select_single").append(html);
+					}
 				}
+				$('#searchGroups').multiselect({
+					maxHeight: 200,
+					enableCollapsibleOptGroups: true,
+		            enableClickableOptGroups: true,
+		            enableCollapsibleOptGroups: true,
+		            includeSelectAllOption: true
+				});
 				var legendLevel = "";
 				if(level == "function") {
 					legendLevel = "克隆组相关方法数";
@@ -401,13 +504,14 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 								html += '<div id="cloneGroupDiv" class="div_cytoscape_content cy"></div>';
 								html += '</div>'
 								html += '</div>';
+								html += '<div class="col-sm-12" id="copyDiv_group_one"></div>';
 								html += '<div class="col-sm-12"><hr/></div>';
 								$("#specifiedCytoscape").html(html);
 								$(".fullscreen_btn").unbind("click");
 								$(".fullscreen_btn").click(function(){
 									showFull("fullscreenAble");
 								})
-								var cy = _showCytoscape($("#cloneGroupDiv"), result.value);
+								var cy = _showCytoscape($("#cloneGroupDiv"), result.value, "copyDiv_group_one");
 								showZTree(result.value.ztree, $("#node_ztree_num"), cy);
 							}
 						}

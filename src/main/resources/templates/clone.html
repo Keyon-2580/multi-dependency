@@ -79,15 +79,28 @@
 			<hr/>
 		</div>
 		<div class="col-sm-12 row">
-			<div class="col-sm-5">
+			<div class="col-sm-6">
 				<div class="col-sm-12 row" >
 					<form role="form" >
 						<div class="form-group row col-sm-12">
 							<div class="col-sm-6">
-								<label>top：<input class="" type="number"  id="topInput" /></label>
+								<label>search top：<input class="form-control" type="number"  id="topInput" /></label>
 							</div>
 							<div class="col-sm-6">
 									<button id="searchTop" type="button" class="btn btn-default">搜索</button>
+							</div>
+						</div>
+					</form>
+					<form role="form" >
+						<div class="form-group row col-sm-12">
+							<div class="col-sm-6">
+								<label>search groups：
+									<select id="searchGroups" class="multiselect" multiple="multiple">
+									</select>
+								</label>
+							</div>
+							<div class="col-sm-6">
+									<button id="searchSelected" type="button" class="btn btn-default">搜索</button>
 							</div>
 						</div>
 					</form>

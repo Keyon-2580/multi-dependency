@@ -80,7 +80,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     	return result;
     }
     
-    private Map<Boolean, Map<Integer, Map<Long, CloneLineValue<MicroService>>>> msCloneLineValuesCalculateGroupByFunctionCache = null;
+    private Map<Boolean, Map<Integer, Map<Long, CloneLineValue<MicroService>>>> msCloneLineValuesCalculateGroupByFunctionCache = new ConcurrentHashMap<>();
     @Override
     public Map<Integer, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFunction(
     		Collection<MicroService> mss, boolean removeFileLevelClone) {
@@ -110,7 +110,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     		}
     		result.put(group, mssValue);
     	}
-    	msCloneLineValuesCalculateGroupByFunctionCache.put(removeFileLevelClone, null);
+    	msCloneLineValuesCalculateGroupByFunctionCache.put(removeFileLevelClone, result);
     	return result;
     }
     

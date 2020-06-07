@@ -160,16 +160,16 @@ public class MicroServiceCallWithEntry {
 		if(relationClass == FunctionCloneFunction.class) {
 			for(Clone<MicroService, FunctionCloneFunction> clone : clonesInMicroServiceFromFunctionClone) {
 				if(clone.sizeOfChildren() >= showClonesMinPair) {
-//					CytoscapeEdge edge = new CytoscapeEdge(clone.getNode1().getId().toString(), clone.getNode2().getId().toString(), "all_MicroService_clone_MicroService", clone.calculateValue());
-					CytoscapeEdge edge = new CytoscapeEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService");
+					CytoscapeEdge edge = new CytoscapeEdge(clone.getNode1().getId().toString(), clone.getNode2().getId().toString(), "all_MicroService_clone_MicroService", clone.calculateValue());
+//					CytoscapeEdge edge = new CytoscapeEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService");
 					edges.add(edge);
 				}
 			}
 		} else {
 			for(Clone<MicroService, FileCloneFile> clone : clonesInMicroServiceFromFileClone) {
 				if(clone.sizeOfChildren() >= showClonesMinPair) {
-//					CytoscapeEdge edge = new CytoscapeEdge(clone.getNode1().getId().toString(), clone.getNode2().getId().toString(), "all_MicroService_clone_MicroService", clone.calculateValue());
-					CytoscapeEdge edge = new CytoscapeEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService");
+					CytoscapeEdge edge = new CytoscapeEdge(clone.getNode1().getId().toString(), clone.getNode2().getId().toString(), "all_MicroService_clone_MicroService", clone.calculateValue());
+//					CytoscapeEdge edge = new CytoscapeEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService");
 					edges.add(edge);
 				}
 			}

@@ -78,21 +78,27 @@ public class CloneShowServiceImpl implements CloneShowService {
 					Function function1 = (Function) node1;
 					if(!isNodeToCytoscapeNode.getOrDefault(function1, false)) {
 						isNodeToCytoscapeNode.put(function1, true);
-						nodes.add(new CytoscapeNode(function1.getId(), function1.getFunctionIdentify() + "\n(" + function1.getStartLine() + " , " + function1.getEndLine() + ")", "Function"));
+						CytoscapeNode function1CytoscapeNode = new CytoscapeNode(function1.getId(), function1.getName() + "\n(" + function1.getStartLine() + " , " + function1.getEndLine() + ")", "Function");
+						function1CytoscapeNode.setValue(function1.getFunctionIdentify());
+						nodes.add(function1CytoscapeNode);
 						groupEdges.add(new CytoscapeEdge(function1.getId().toString(), groupId.toString(), "nodeIsInCloneGroup"));
 						nodeToZTreeNode.put(function1, new ZTreeNode(function1.getId(), function1.getFunctionIdentify() + "(" + function1.getStartLine() + " , " + function1.getEndLine(), false, "Function", false));
 					}
 					Function function2 = (Function) node2;
 					if(!isNodeToCytoscapeNode.getOrDefault(function2, false)) {
 						isNodeToCytoscapeNode.put(function2, true);
-						nodes.add(new CytoscapeNode(function2.getId(), function2.getFunctionIdentify() + "\n(" + function1.getStartLine() + " , " + function1.getEndLine() + ")", "Function"));
+						CytoscapeNode function2CytoscapeNode = new CytoscapeNode(function2.getId(), function2.getName() + "\n(" + function1.getStartLine() + " , " + function1.getEndLine() + ")", "Function");
+						function2CytoscapeNode.setValue(function2.getFunctionIdentify());
+						nodes.add(function2CytoscapeNode);
 						groupEdges.add(new CytoscapeEdge(function2.getId().toString(), groupId.toString(), "nodeIsInCloneGroup"));
 						nodeToZTreeNode.put(function2, new ZTreeNode(function2.getId(), function2.getFunctionIdentify() + "(" + function2.getStartLine() + " , " + function2.getEndLine(), false, "Function", false));
 					}
 					file1 = containRelationService.findFunctionBelongToFile(function1);
 					if(!isNodeToCytoscapeNode.getOrDefault(file1, false)) {
 						isNodeToCytoscapeNode.put(file1, true);
-						nodes.add(new CytoscapeNode(file1.getId(), file1.getName() + "\n(" + file1.getLine() + ")", "File"));
+						CytoscapeNode file1CytoscapeNode = new CytoscapeNode(file1.getId(), file1.getName() + "\n(" + file1.getLine() + ")", "File");
+						file1CytoscapeNode.setValue(file1.getPath());
+						nodes.add(file1CytoscapeNode);
 						nodeToZTreeNode.put(file1, new ZTreeNode(file1.getId(), file1.getPath() + "(" + file1.getLine() + ")", false, "File", true));
 					}
 					String file1ContainFunction1Id = String.join("_", String.valueOf(file1.getId()), String.valueOf(function1.getId()));
@@ -104,7 +110,9 @@ public class CloneShowServiceImpl implements CloneShowService {
 					file2 = containRelationService.findFunctionBelongToFile(function2);
 					if(!isNodeToCytoscapeNode.getOrDefault(file2, false)) {
 						isNodeToCytoscapeNode.put(file2, true);
-						nodes.add(new CytoscapeNode(file2.getId(), file2.getName() + "\n(" + file2.getLine() + ")", "File"));
+						CytoscapeNode file2CytoscapeNode = new CytoscapeNode(file2.getId(), file2.getName() + "\n(" + file2.getLine() + ")", "File");
+						file2CytoscapeNode.setValue(file2.getPath());
+						nodes.add(file2CytoscapeNode);
 						nodeToZTreeNode.put(file2, new ZTreeNode(file2.getId(), file2.getPath() + "(" + file2.getLine() + ")", false, "File", true));
 					}
 					String file2ContainFunction2Id = String.join("_", String.valueOf(file2.getId()), String.valueOf(function2.getId()));
@@ -117,14 +125,18 @@ public class CloneShowServiceImpl implements CloneShowService {
 					file1 = (ProjectFile) node1;
 					if(!isNodeToCytoscapeNode.getOrDefault(file1, false)) {
 						isNodeToCytoscapeNode.put(file1, true);
-						nodes.add(new CytoscapeNode(file1.getId(), file1.getName() + "\n(" + file1.getLine() + ")", "File"));
+						CytoscapeNode file1CytoscapeNode = new CytoscapeNode(file1.getId(), file1.getName() + "\n(" + file1.getLine() + ")", "File");
+						file1CytoscapeNode.setValue(file1.getPath());
+						nodes.add(file1CytoscapeNode);
 						groupEdges.add(new CytoscapeEdge(file1.getId().toString(), groupId.toString(), "nodeIsInCloneGroup"));
 						nodeToZTreeNode.put(file1, new ZTreeNode(file1.getId(), file1.getPath() + "(" + file1.getLine() + ")", false, "File", false));
 					}
 					file2 = (ProjectFile) node2;
 					if(!isNodeToCytoscapeNode.getOrDefault(file2, false)) {
 						isNodeToCytoscapeNode.put(file2, true);
-						nodes.add(new CytoscapeNode(file2.getId(), file2.getName() + "\n(" + file2.getLine() + ")", "File"));
+						CytoscapeNode file2CytoscapeNode = new CytoscapeNode(file2.getId(), file2.getName() + "\n(" + file2.getLine() + ")", "File");
+						file2CytoscapeNode.setValue(file2.getPath());
+						nodes.add(file2CytoscapeNode);
 						groupEdges.add(new CytoscapeEdge(file2.getId().toString(), groupId.toString(), "nodeIsInCloneGroup"));
 						nodeToZTreeNode.put(file2, new ZTreeNode(file2.getId(), file2.getPath() + "(" + file2.getLine() + ")", false, "File", false));
 					}
