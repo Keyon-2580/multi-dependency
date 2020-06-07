@@ -1,0 +1,33 @@
+{
+	"architectures": {},
+	"projects": [{
+		"path": "D:\\source\\source\\google__fdse__guava",
+		"includeDirs": [],
+		"microserviceName": "google__fdse__guava",
+		"autoInclude": true,
+		"serviceGroupName": "source",
+		"project": "google__fdse__guava",
+		"language": "java",
+		"isMicroservice": true
+	}],
+	"dynamics": {
+		"file_suffixes": [
+			""
+		],
+		"logs_path": "",
+		"features_path": ""
+	},
+	"gits": [{
+		"path": "",
+		"commit_id_from": "",
+		"commit_id_to": "",
+		"issues_path": ""
+	}],
+	"libs": [],
+	"clones": [{
+		"language": "java",
+		"granularity": "function",
+		"name_path": "src/main/resources/clone/source/function/resultFolder/MethodNameTable.csv",
+		"result_path": "src/main/resources/clone/source/function/result/type123_method_result.csv"
+	}]
+}
