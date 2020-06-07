@@ -15,11 +15,11 @@ server:
    port: 8080
 
 data:
-#   project_config: src/main/resources/project/train-ticket_fan.json
-   project_config: src/main/resources/project/source-fan-functiontest.json
-   dynamic_analyse: false
-   git_analyse: false
-   lib_analyse: false
+   project_config: src/main/resources/project/train-ticket_fan.json
+#   project_config: src/main/resources/project/source-fan-functiontest.json
+   dynamic_analyse: true
+   git_analyse: true
+   lib_analyse: true
    clone_analyse: true
 #   projects:
 #      config: src/main/resources/project/train-ticket.json

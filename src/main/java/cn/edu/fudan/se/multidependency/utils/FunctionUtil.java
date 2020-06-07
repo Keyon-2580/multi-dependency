@@ -13,12 +13,13 @@ public class FunctionUtil {
 //		System.out.println(extractFunctionNameAndParameters("depends.format.json.JsonFormatDependencyDumper.toJson(JDepObject, String)"));
 		String functionFullName = "depends.extractor.cpp.MacroEhcacheRepo.putMacros(List<String>, Map<String, List<String>>, String, Map<String, String>, IASTPreprocessorMacroDefinition[])";
 		functionFullName = "depends.extractor.cpp.MacroEhcacheRepo.MacroEhcacheRepo(List<String>, Map<String, List<String>>, String, Map<String, String>, IASTPreprocessorMacroDefinition[])";
-		while(functionFullName.contains("<")) {
-			functionFullName = functionFullName.replaceAll("<[^<>]*>", "");
-		}
+		functionFullName = "com.google.common.cache.CacheTesting.checkRecency(LoadingCache<Integer, Integer>,int,Receiver<ReferenceEntry<Integer, Integer)";
+//		while(functionFullName.contains("<")) {
+//			functionFullName = functionFullName.replaceAll("<[^<>]*>", "");
+//		}
 		System.out.println(extractFunctionNameAndParameters(functionFullName));
 		
-		StringBuilder builder = new StringBuilder();
+	/*	StringBuilder builder = new StringBuilder();
 		builder.append("configure");
 		builder.append("(");
 		for(int i = 0; i < 5; i++) {
@@ -29,7 +30,7 @@ public class FunctionUtil {
 		}
 		builder.append(")");
 		functionFullName = builder.toString();
-		System.out.println(extractFunctionNameAndParameters(functionFullName));
+		System.out.println(extractFunctionNameAndParameters(functionFullName));*/
 	}
 	
 	/**
@@ -53,9 +54,6 @@ public class FunctionUtil {
 	}
 	
 	public static List<String> extractFunctionNameAndParameters(String functionFullName) throws Exception {
-		while(functionFullName.contains("<")) {
-			functionFullName = functionFullName.replaceAll("<[^<>]*>", "");
-		}
 		List<String> result = new ArrayList<>();
 		int index = functionFullName.indexOf("(");
 		String functionName = functionFullName.substring(0, index);
@@ -71,8 +69,25 @@ public class FunctionUtil {
 		}
 		result.add(functionName);
 		String parametersStr = functionFullName.substring(index + 1, functionFullName.length() - 1);
+		int maxTimes = 0;
+		while(parametersStr.contains("<") && parametersStr.contains(">")) {
+			parametersStr = parametersStr.replaceAll("<[^<>]*>", "");
+			if(++maxTimes > 20) {
+				break;
+			}
+		}
 		String[] parameters = parametersStr.split(",");
 		for(String parameter : parameters) {
+			maxTimes = 0;
+			while(parameter.contains("<") && !parameter.contains(">")) {
+				parameter = parameter + ">";
+				parameter = parameter.replaceAll("<[^<>]*>", "");
+				if(++maxTimes > 20) {
+					break;
+				}
+			}
+			parameter.replace(">", "");
+			parameter.replace("<", "");
 			if(!StringUtils.isBlank(parameter)) {
 				result.add(parameter.trim());
 			}

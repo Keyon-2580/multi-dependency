@@ -75,7 +75,7 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 			int sizeOfFunctionCloneFunctions = 0;
 			try {
 				for(CloneResultFromCsv cloneResult : cloneResults) {
-					LOGGER.info(cloneResult.toString());
+//					LOGGER.info(cloneResult.toString());
 					int start = cloneResult.getStart();
 					int end = cloneResult.getEnd();
 					double value = cloneResult.getValue();
@@ -106,7 +106,7 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 					}
 					function1.setStartLine(methodName1.getStartLine());
 					function1.setEndLine(methodName1.getEndLine());
-					/*Function function2 = findJavaFunctionByMethod(methodName2, project2);
+					Function function2 = findJavaFunctionByMethod(methodName2, project2);
 					if(function2 == null) {
 						LOGGER.warn("function2 is null " + methodName2);
 						continue;
@@ -121,9 +121,8 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 					clone.setFunction2StartLine(methodName2.getStartLine());
 					clone.setFunction2EndLine(methodName2.getEndLine());
 					clone.setValue(value);
-					addRelation(clone);*/
+					addRelation(clone);
 					sizeOfFunctionCloneFunctions++;
-					LOGGER.info("当前方法克隆对数：" + sizeOfFunctionCloneFunctions);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
