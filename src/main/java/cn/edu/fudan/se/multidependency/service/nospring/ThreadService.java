@@ -9,7 +9,6 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.edu.fudan.se.multidependency.InsertDataMain;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserterForFile;
 import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserterForFunction;
@@ -36,19 +35,19 @@ import cn.edu.fudan.se.multidependency.utils.config.ProjectConfigUtil;
 import cn.edu.fudan.se.multidependency.utils.config.RestfulAPIConfig;
 
 public class ThreadService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(InsertDataMain.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ThreadService.class);
 	private static YamlUtil.YamlObject yaml;
 	private static JSONConfigFile config;
 	private static final Executor executor = Executors.newCachedThreadPool();
 	private static CountDownLatch latchOfStatic, latchOfOthers;
-	
+
 	public ThreadService(YamlUtil.YamlObject yaml, CountDownLatch latchOfStatic, CountDownLatch latchOfOthers) throws Exception {
 		ThreadService.yaml = yaml;
 		config = ProjectConfigUtil.extract(JSONUtil.extractJSONObject(new File(yaml.getProjectsConfig())));
 		ThreadService.latchOfStatic = latchOfStatic;
 		ThreadService.latchOfOthers = latchOfOthers;
 	}
-	
+
 	public void staticAnalyse() {
 		Collection<ProjectConfig> projectsConfig = config.getProjectsConfig();
 		CountDownLatch latchOfProjects = new CountDownLatch(projectsConfig.size());
@@ -73,7 +72,7 @@ public class ThreadService {
 			latchOfStatic.countDown();
 		}
 	}
-	
+
 	public void staticAnalyseCore(ProjectConfig projectConfig) throws Exception {
 		LOGGER.info(projectConfig.getProject() + " " + projectConfig.getLanguage());
 		DependsEntityRepoExtractor extractor = new Depends096Extractor();
@@ -94,7 +93,7 @@ public class ThreadService {
 		}
 		inserter.addNodesAndRelations();
 	}
-	
+
 	public void msDependAnalyse() {
 		try {
 			if (config.getMicroServiceDependencies() != null) {
@@ -110,21 +109,21 @@ public class ThreadService {
 			latchOfOthers.countDown();
 		}
 	}
-	
+
 	public void dynamicAnalyse() {
 		try {
 			if (yaml.isAnalyseDynamic()) {
 				LOGGER.info("动态运行分析");
 				DynamicConfig dynamicConfig = config.getDynamicsConfig();
 				File[] dynamicLogs = InserterForNeo4jServiceFactory.analyseDynamicLogs(dynamicConfig);
-				
+
 				LOGGER.info("输出trace，只输出日志中记录的trace，不做数据库操作");
 				new TraceStartExtractor(dynamicLogs).addNodesAndRelations();
-				
+
 				for (Language language : Language.values()) {
 					InserterForNeo4jServiceFactory.insertDynamic(language, dynamicLogs).addNodesAndRelations();
 				}
-				
+
 				LOGGER.info("引入特性与测试用例，对应到trace");
 				new FeatureAndTestCaseFromJSONFileForMicroserviceInserter(dynamicConfig.getFeaturesPath()).addNodesAndRelations();
 			}
@@ -135,7 +134,7 @@ public class ThreadService {
 			latchOfOthers.countDown();
 		}
 	}
-	
+
 	public void gitAnalyse() {
 		try {
 			if (yaml.isAnalyseGit()) {
@@ -164,19 +163,19 @@ public class ThreadService {
 			latchOfOthers.countDown();
 		}
 	}
-	
+
 	public void cloneAnalyse() {
 		try {
 			if (yaml.isAnalyseClone()) {
 				LOGGER.info("克隆依赖分析");
 				for (CloneConfig cloneConfig : config.getClonesConfig()) {
 					switch (cloneConfig.getGranularity()) {
-					case function:
-						new CloneInserterForFunction(cloneConfig.getLanguage(), cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();
-						break;
-					case file:
-						new CloneInserterForFile(cloneConfig.getLanguage(), cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();
-						break;
+						case function:
+							new CloneInserterForFunction(cloneConfig.getLanguage(), cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();
+							break;
+						case file:
+							new CloneInserterForFile(cloneConfig.getLanguage(), cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();
+							break;
 					}
 				}
 			}
@@ -186,20 +185,20 @@ public class ThreadService {
 			LOGGER.info("克隆分析线程结束，线程-1：" + (latchOfOthers.getCount() - 1));
 			latchOfOthers.countDown();
 		}
-		
+
 	}
-	
+
 	public void libAnalyse() {
 		try {
 			if (yaml.isAnalyseLib()) {
 				LOGGER.info("三方依赖分析");
 				for (LibConfig libConfig : config.getLibsConfig()) {
 					switch(libConfig.getLanguage()) {
-					case java:
-						new LibraryInserter(libConfig.getPath()).addNodesAndRelations();
-						break;
-					case cpp:
-						break;
+						case java:
+							new LibraryInserter(libConfig.getPath()).addNodesAndRelations();
+							break;
+						case cpp:
+							break;
 					}
 				}
 			}

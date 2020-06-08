@@ -23,4 +23,6 @@ data:
     # batchInserter要插入的数据库
     path: D:/neo4j-community-3.5.16/data/databases/multiple.dependency.db
 
-    test: this property is for YamlUtilsTest
+  serialize_path: C:/Users/SongJee/Desktop/serializePath/RepositoryService.txt
+
+  test: this property is for YamlUtilsTest

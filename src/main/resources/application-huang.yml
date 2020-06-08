@@ -17,12 +17,14 @@ server:
 data:
   project_config: src/main/resources/project/test.json
   dynamic_analyse: false
-  git_analyse: false
+  git_analyse: true
   lib_analyse: false
-  clone_analyse: false
+  clone_analyse: true
 
   neo4j:
     delete: true
     path: D:/software/neo4j-community-3.5.3/data/databases/multiple.dependency.db
+
+  serialize_path: C:/Users/SongJee/Desktop/serializePath/RepositoryService.txt
 
   test: this property is for YamlUtilsTest
