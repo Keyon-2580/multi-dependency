@@ -18,30 +18,20 @@ import cn.edu.fudan.se.multidependency.utils.YamlUtil;
 import cn.edu.fudan.se.multidependency.utils.config.JSONConfigFile;
 import cn.edu.fudan.se.multidependency.utils.config.ProjectConfigUtil;
 
-public class InsertDataMain {
+public class InsertAllData {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InsertDataMain.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InsertAllData.class);
 
     private static final Executor executor = Executors.newCachedThreadPool();
 
     public static void main(String[] args) throws Exception {
-        LOGGER.info("InsertDataMain");
+        LOGGER.info("InsertAllData");
         insert(args);
 //		checkMicroserviceTrace(args);
     }
 
-    public static YamlUtil.YamlObject getYaml(String[] args) throws Exception {
-        YamlUtil.YamlObject yaml = null;
-        if (args == null || args.length == 0) {
-            yaml = YamlUtil.getDataBasePathDefault("src/main/resources/application.yml");
-        } else {
-            yaml = YamlUtil.getDataBasePath(args[0]);
-        }
-        return yaml;
-    }
-
     public static void checkMicroserviceTrace(String[] args) throws Exception {
-        YamlUtil.YamlObject yaml = getYaml(args);
+        YamlUtil.YamlObject yaml = YamlUtil.getYaml(args);
         JSONConfigFile config = ProjectConfigUtil.extract(JSONUtil.extractJSONObject(new File(yaml.getProjectsConfig())));
         LOGGER.info("输出trace");
         new TraceStartExtractor(InserterForNeo4jServiceFactory.analyseDynamicLogs(config.getDynamicsConfig())).addNodesAndRelations();
@@ -49,7 +39,7 @@ public class InsertDataMain {
 
     public static void insert(String[] args) {
         try {
-            YamlUtil.YamlObject yaml = getYaml(args);
+            YamlUtil.YamlObject yaml = YamlUtil.getYaml(args);
 
             CountDownLatch latchOfStatic = new CountDownLatch(1);
             CountDownLatch latchOfOthers = new CountDownLatch(5);
