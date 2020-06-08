@@ -397,23 +397,22 @@ public class FileUtil {
 		if (!file.exists()) {
 			file.createNewFile();
 		}
-		FileOutputStream fos = new FileOutputStream(file);
-		ObjectOutputStream oos = new ObjectOutputStream(fos);
-		oos.writeObject(obj);
-		long endTimeOfSerialize = System.currentTimeMillis();
-		LOGGER.info("序列化所花时间：" + (float) ((endTimeOfSerialize - startTimeOfSerialize) / 1000.00) + " s,  or "
-				+ (float) ((endTimeOfSerialize - startTimeOfSerialize) / 60000.00) + " min.");
+		try(ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));){
+			oos.writeObject(obj);
+			long endTimeOfSerialize = System.currentTimeMillis();
+			LOGGER.info("序列化所花时间：" + (float) ((endTimeOfSerialize - startTimeOfSerialize) / 1000.00) + " s,  or "
+					+ (float) ((endTimeOfSerialize - startTimeOfSerialize) / 60000.00) + " min.");
+		}
 	}
 
 	public static Object readObject (String filePath) throws IOException, ClassNotFoundException {
 		long startTimeOfUnSerialize = System.currentTimeMillis();
-		File file = new File(filePath);
-		FileInputStream fis = new FileInputStream(file);
-		ObjectInputStream ois = new ObjectInputStream(fis);
-		Object obj = ois.readObject();
-		long endTimeOfUnSerialize = System.currentTimeMillis();
-		LOGGER.info("反序列化所花时间：" + (float) ((endTimeOfUnSerialize - startTimeOfUnSerialize) / 1000.00) + " s,  or "
-				+ (float) ((endTimeOfUnSerialize - startTimeOfUnSerialize) / 60000.00) + " min.");
-		return obj;
+		try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(filePath)));) {
+			Object obj = ois.readObject();
+			long endTimeOfUnSerialize = System.currentTimeMillis();
+			LOGGER.info("反序列化所花时间：" + (float) ((endTimeOfUnSerialize - startTimeOfUnSerialize) / 1000.00) + " s,  or "
+					+ (float) ((endTimeOfUnSerialize - startTimeOfUnSerialize) / 60000.00) + " min.");
+			return obj;
+		}
 	}
 }

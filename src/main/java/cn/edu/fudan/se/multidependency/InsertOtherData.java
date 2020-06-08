@@ -1,20 +1,17 @@
 package cn.edu.fudan.se.multidependency;
 
-import cn.edu.fudan.se.multidependency.model.node.Nodes;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
-import cn.edu.fudan.se.multidependency.model.relation.Relations;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.edu.fudan.se.multidependency.service.nospring.InserterForNeo4j;
 import cn.edu.fudan.se.multidependency.service.nospring.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.nospring.ThreadService;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import cn.edu.fudan.se.multidependency.utils.YamlUtil;
-import org.neo4j.cypher.internal.compiler.v2_3.No;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 public class InsertOtherData {
     private static final Logger LOGGER = LoggerFactory.getLogger(InsertOtherData.class);
