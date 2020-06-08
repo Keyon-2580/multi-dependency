@@ -104,13 +104,17 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 						LOGGER.warn("function1 is null " + methodName1);
 						continue;
 					}
-					function1.setStartLine(methodName1.getStartLine());
-					function1.setEndLine(methodName1.getEndLine());
 					Function function2 = findJavaFunctionByMethod(methodName2, project2);
 					if(function2 == null) {
 						LOGGER.warn("function2 is null " + methodName2);
 						continue;
 					}
+					if(function1.equals(function2)) {
+						LOGGER.warn("方法相同：" + methodName1 + " " + methodName2);
+						continue;
+					}
+					function1.setStartLine(methodName1.getStartLine());
+					function1.setEndLine(methodName1.getEndLine());
 					function2.setStartLine(methodName2.getStartLine());
 					function2.setEndLine(methodName2.getEndLine());
 					FunctionCloneFunction clone = new FunctionCloneFunction(function1, function2);
