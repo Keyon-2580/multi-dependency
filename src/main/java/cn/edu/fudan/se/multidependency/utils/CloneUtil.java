@@ -13,6 +13,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -187,6 +189,43 @@ public class CloneUtil {
 				result.add(new CloneResultFromCsv(start, end, value));
 			}
 		}
+		return result;
+	}
+	
+	public static Collection<Collection<? extends Node>> groupCloneNodes(Iterable<? extends CloneRelation> relations) {
+		List<Collection<? extends Node>> result = new ArrayList<>();
+		Map<Node, Collection<Node>> nodeToCollection = new HashMap<>();
+		for(CloneRelation relation : relations) {
+			Node node1 = relation.getStartNode();
+			Node node2 = relation.getEndNode();
+			Collection<Node> collections1 = nodeToCollection.get(node1);
+			Collection<Node> collections2 = nodeToCollection.get(node2);
+			if(collections1 == null && collections2 == null) {
+				collections1 = new ArrayList<>();
+				collections1.add(node1);
+				collections1.add(node2);
+				result.add(collections1);
+				nodeToCollection.put(node1, collections1);
+				nodeToCollection.put(node2, collections1);
+			} else if(collections1 != null && collections2 == null) {
+				collections1.add(node2);
+				nodeToCollection.put(node2, collections1);
+			} else if(collections1 == null && collections2 != null) {
+				collections2.add(node1);
+				nodeToCollection.put(node1, collections2);
+			} else {
+				if(collections1 != collections2) {
+					collections1.addAll(collections2);
+					result.remove(collections2);
+					for(Node node : collections2) {
+						nodeToCollection.put(node, collections1);
+					}
+				}
+			}
+		}
+		result.sort((collection1, collection2) -> {
+			return collection2.size() - collection1.size();
+		});
 		return result;
 	}
 }

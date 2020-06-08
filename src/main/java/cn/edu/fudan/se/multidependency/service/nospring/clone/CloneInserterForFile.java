@@ -1,6 +1,8 @@
 package cn.edu.fudan.se.multidependency.service.nospring.clone;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -10,7 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.edu.fudan.se.multidependency.model.Language;
+import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
+import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
 import cn.edu.fudan.se.multidependency.utils.CloneUtil;
@@ -77,6 +83,7 @@ public class CloneInserterForFile extends ExtractorForNodesAndRelationsImpl {
 		latch.await();
 		LOGGER.info("文件克隆对数：" + cloneResults.size());
 		int sizeOfFileCloneFiles = 0;
+		List<FileCloneFile> clones = new ArrayList<>();
 		for(CloneResultFromCsv cloneResult : cloneResults) {
 			int start = cloneResult.getStart();
 			int end = cloneResult.getEnd();
@@ -108,9 +115,23 @@ public class CloneInserterForFile extends ExtractorForNodesAndRelationsImpl {
 			clone.setFile2EndLine(filePath2.getEndLine());
 			clone.setValue(value);
 			addRelation(clone);
+			clones.add(clone);
 			sizeOfFileCloneFiles++;
 		}
 		LOGGER.info("插入文件级克隆关系数：" + sizeOfFileCloneFiles);
+		Collection<Collection<? extends Node>> groups = CloneUtil.groupCloneNodes(clones);
+		int groupCount = 0;
+		for(Collection<? extends Node> nodes : groups) {
+			CloneGroup group = new CloneGroup();
+			group.setEntityId(generateEntityId());
+			group.setGroup(String.valueOf(groupCount++));
+			group.setName("group_" + group.getGroup());
+			group.setLevel(NodeLabelType.ProjectFile);
+			addNode(group, null);
+			for(Node node : nodes) {
+				addRelation(new Contain(group, node));
+			}
+		}
+		LOGGER.info("插入文件级克隆组，组数：" + groupCount);
 	}
-
 }

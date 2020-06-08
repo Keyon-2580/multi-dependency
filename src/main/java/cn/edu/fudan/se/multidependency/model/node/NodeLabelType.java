@@ -6,7 +6,8 @@ public enum NodeLabelType {
 	Library, LibraryAPI, License,
 	MicroService, RestfulAPI, Span,
 	Scenario, TestCase, Feature, Trace, Bug,
-	GitRepository, Branch, Commit, Issue, Label, Developer;
+	GitRepository, Branch, Commit, Issue, Label, Developer,
+	CloneGroup;
 	
 	public String indexName() {
 		switch(this) {

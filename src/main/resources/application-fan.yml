@@ -15,8 +15,8 @@ server:
    port: 8080
 
 data:
-#   project_config: src/main/resources/project/train-ticket_fan.json
-   project_config: src/main/resources/project/leveldb.json
+   project_config: src/main/resources/project/train-ticket_fan.json
+#   project_config: src/main/resources/project/leveldb.json
 #   project_config: src/main/resources/project/source-fan-functiontest.json
    dynamic_analyse: true
    git_analyse: true
