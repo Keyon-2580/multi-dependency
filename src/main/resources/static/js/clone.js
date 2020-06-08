@@ -374,8 +374,22 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 				}
 			});
 		});
-		
-		
+		$("#searchCountOfMSs").click(function(){
+			var count = $("#CountMSsInput").val();
+			console.log(count);
+			if(top < 0) {
+				return ;
+			}
+			$.ajax({
+				type : "GET",
+				url : "/clone/" + level + "/group/cytoscape?projectsCount=" + count + "&" + urlRemoveParams,
+				success : function(result) {
+					if(result.result == "success") {
+						_showGroupsResult(result);
+					}
+				}
+			});
+		});
 		$("#searchTop").click(function(){
 			var top = $("#topInput").val();
 			console.log(top);

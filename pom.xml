@@ -5,7 +5,7 @@
 
 	<groupId>cn.edu.fudan.se</groupId>
 	<artifactId>multi-dependency</artifactId>
-	<version>1.1.0d-identifier.0.1</version>
+	<version>1.2.0-identifier.0.1</version>
 	<packaging>jar</packaging>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -230,6 +230,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+					<mainClass>cn.edu.fudan.se.multidependency.MultipleDependencyApp</mainClass>
 					<includeSystemScope>true</includeSystemScope>
 				</configuration>
 			</plugin>

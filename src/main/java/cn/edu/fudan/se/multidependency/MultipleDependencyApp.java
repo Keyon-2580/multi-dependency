@@ -38,29 +38,35 @@ public class MultipleDependencyApp {
 	
 	public static void main(String[] args) {
 		LOGGER.info("MultipleDependencyApp");
-		if(args == null || args.length == 0) {
+		if (args == null || args.length == 0) {
 			SpringApplication.run(MultipleDependencyApp.class, args);
 		} else {
 			String operation = args[0];
 			LOGGER.info(operation);
 			String[] parameters = new String[args.length - 1];
-			for(int i = 0; i < parameters.length; i++) {
+			for (int i = 0; i < parameters.length; i++) {
 				parameters[i] = args[i + 1];
 			}
-			switch(operation) {
-			case "-i":
-				InsertDataMain.insert(parameters);
-				break;
-			case "-m":
-				SpringApplication.run(MultipleDependencyApp.class, args);
-				break;
-			case "-p":
-				try {
-					cn.edu.fudan.se.multidependency.utils.FileUtil.writeToFileForProjectJSONFile(parameters);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				break;
+			switch (operation) {
+				case "-a":
+					InsertAllData.insert(parameters);
+					break;
+				case "-s":
+					InsertStaticData.insert(parameters);
+					break;
+				case "-o":
+					InsertOtherData.insert(parameters);
+					break;
+				case "-m":
+					SpringApplication.run(MultipleDependencyApp.class, args);
+					break;
+				case "-p":
+					try {
+						cn.edu.fudan.se.multidependency.utils.FileUtil.writeToFileForProjectJSONFile(parameters);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					break;
 			}
 		}
 	}

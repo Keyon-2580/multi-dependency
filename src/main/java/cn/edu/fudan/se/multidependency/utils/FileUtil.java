@@ -1,7 +1,6 @@
 package cn.edu.fudan.se.multidependency.utils;
 
-import java.io.File;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 public class FileUtil {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
-	
+
 	public static final String SLASH_WINDOWS = "\\";
 	public static final String SLASH_LINUX = "/";
 	/**
@@ -37,7 +36,7 @@ public class FileUtil {
 		}
 		return !(fileOrSubDirectoryPath.substring(parentDirectoryPath.length() + 1)).contains(slash);
 	}
-	
+
 	/**
 	 * D:\a\a.java -> D:/a/a.java -> /a.java
 	 * /a/a/a.java -> /a/a.java
@@ -137,13 +136,13 @@ public class FileUtil {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void writeToFileForProjectJSONFile(String outputPath, JSONObject content) throws Exception {
 		try(PrintWriter writer = new PrintWriter(new File(outputPath))) {
 			writer.println(content.toJSONString());
 		}
 	}
-	
+
 	public static JSONObject readDirectoryToGenerateProjectJSONFileForDoubleLanguageProject(
 			File rootDirectory, int depth, String defaultLanguage,
 			boolean isAllMicroservice, String serviceGroupName) {
@@ -183,10 +182,10 @@ public class FileUtil {
 					projectJson.put("microserviceName", projectDirectory.getName());
 				}
 				projects.add(projectJson);
-				
+
 				projectJson = (JSONObject) projectJson.clone();
 				projectJson.put("language", "cpp");
-				projects.add(projectJson);				
+				projects.add(projectJson);
 			} else {
 				JSONObject projectJson = new JSONObject();
 				projectJson.put("project", projectDirectory.getName());
@@ -206,7 +205,7 @@ public class FileUtil {
 		result.put("architectures", new JSONObject());
 		return result;
 	}
-	
+
 	public static JSONObject readDirectoryToGenerateProjectJSONFile(
 			File rootDirectory, int depth, String defaultLanguage,
 			boolean isAllMicroservice, String serviceGroupName) {
@@ -283,21 +282,21 @@ public class FileUtil {
 	 * @return
 	 */
 	public static boolean delFile(File file) {
-        if (!file.exists()) {
-            return false;
-        }
+		if (!file.exists()) {
+			return false;
+		}
 
-        if (file.isDirectory()) {
-            File[] files = file.listFiles();
-            if(files == null) {
-            	return true;
-            }
-            for (File f : files) {
-                delFile(f);
-            }
-        }
-        return file.delete();
-    }
+		if (file.isDirectory()) {
+			File[] files = file.listFiles();
+			if(files == null) {
+				return true;
+			}
+			for (File f : files) {
+				delFile(f);
+			}
+		}
+		return file.delete();
+	}
 
 	/**
 	 * 列出目录下所有文件，将结果保存到result中
@@ -390,5 +389,30 @@ public class FileUtil {
 			}
 		}
 		return true;
+	}
+
+	public static void writeObject (String filePath, Object obj) throws IOException {
+		long startTimeOfSerialize = System.currentTimeMillis();
+		File file = new File(filePath);
+		if (!file.exists()) {
+			file.createNewFile();
+		}
+		try(ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));){
+			oos.writeObject(obj);
+			long endTimeOfSerialize = System.currentTimeMillis();
+			LOGGER.info("序列化所花时间：" + (float) ((endTimeOfSerialize - startTimeOfSerialize) / 1000.00) + " s,  or "
+					+ (float) ((endTimeOfSerialize - startTimeOfSerialize) / 60000.00) + " min.");
+		}
+	}
+
+	public static Object readObject (String filePath) throws IOException, ClassNotFoundException {
+		long startTimeOfUnSerialize = System.currentTimeMillis();
+		try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(filePath)));) {
+			Object obj = ois.readObject();
+			long endTimeOfUnSerialize = System.currentTimeMillis();
+			LOGGER.info("反序列化所花时间：" + (float) ((endTimeOfUnSerialize - startTimeOfUnSerialize) / 1000.00) + " s,  or "
+					+ (float) ((endTimeOfUnSerialize - startTimeOfUnSerialize) / 60000.00) + " min.");
+			return obj;
+		}
 	}
 }

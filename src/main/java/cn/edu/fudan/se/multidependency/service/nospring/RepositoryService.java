@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.nospring;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -15,71 +16,76 @@ import cn.edu.fudan.se.multidependency.model.relation.Relations;
 import lombok.Getter;
 import lombok.Setter;
 
-public final class RepositoryService implements InserterForNeo4j {
+public final class RepositoryService implements InserterForNeo4j, Serializable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(RepositoryService.class);
-	
-	protected BatchInserterService batchInserterService = BatchInserterService.getInstance();
-	
-	private static RepositoryService repository = new RepositoryService();
+    private static final Logger LOGGER = LoggerFactory.getLogger(RepositoryService.class);
 
-	@Setter
-	private String databasePath;
+    private static final long serialVersionUID = 4968121323297165683L;
 
-	@Setter
-	private boolean delete;
-	
-	private RepositoryService() {}
-	
-	public static RepositoryService getInstance() {
-		return repository;
-	}
-	
-	@Getter
-	private Nodes nodes = new Nodes();
+    protected transient BatchInserterService batchInserterService = BatchInserterService.getInstance();
 
-	@Getter
-	private Relations relations = new Relations();
-	
-	@Override
-	public void insertToNeo4jDataBase() throws Exception {
-		LOGGER.info("start to store datas to database");
-		DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		LOGGER.info("总计节点数：" + nodes.size());
-		LOGGER.info("总计关系数：" + relations.size());
-		LOGGER.info("开始时间：" + sdf.format(new Timestamp(System.currentTimeMillis())));
-		batchInserterService.init(databasePath, delete);
-		batchInserterService.insertNodes(nodes);
-		batchInserterService.insertRelations(relations);
-		closeBatchInserter();
-		LOGGER.info("结束时间：" + sdf.format(new Timestamp(System.currentTimeMillis())));
-	}
+    private static RepositoryService repository = new RepositoryService();
 
-	@Override
-	public boolean addRelation(Relation relation) {
-		this.relations.addRelation(relation);
-		return true;
-	}
+    @Setter
+    private String databasePath;
 
-	private void closeBatchInserter() {
-		if(this.batchInserterService != null) {
-			this.batchInserterService.close();
-		}
-	}
+    @Setter
+    private boolean delete;
 
-	@Override
-	public boolean addNode(Node node, Project inProject) {
-		this.nodes.addNode(node, inProject);
-		return true;
-	}
+    private RepositoryService() {
+    }
 
-	@Override
-	public boolean existNode(Node node) {
-		return this.nodes.existNode(node);
-	}
+    public static RepositoryService getInstance() {
+        return repository;
+    }
 
-	@Override
-	public boolean existRelation(Relation relation) {
-		return this.relations.existRelation(relation);
-	}
+    @Getter
+    @Setter
+    private Nodes nodes = new Nodes();
+
+    @Getter
+    @Setter
+    private Relations relations = new Relations();
+
+    @Override
+    public void insertToNeo4jDataBase() throws Exception {
+        LOGGER.info("start to store datas to database");
+        DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        LOGGER.info("总计节点数：" + nodes.size());
+        LOGGER.info("总计关系数：" + relations.size());
+        LOGGER.info("开始时间：" + sdf.format(new Timestamp(System.currentTimeMillis())));
+        batchInserterService.init(databasePath, delete);
+        batchInserterService.insertNodes(nodes);
+        batchInserterService.insertRelations(relations);
+        closeBatchInserter();
+        LOGGER.info("结束时间：" + sdf.format(new Timestamp(System.currentTimeMillis())));
+    }
+
+    @Override
+    public boolean addRelation(Relation relation) {
+        this.relations.addRelation(relation);
+        return true;
+    }
+
+    private void closeBatchInserter() {
+        if (this.batchInserterService != null) {
+            this.batchInserterService.close();
+        }
+    }
+
+    @Override
+    public boolean addNode(Node node, Project inProject) {
+        this.nodes.addNode(node, inProject);
+        return true;
+    }
+
+    @Override
+    public boolean existNode(Node node) {
+        return this.nodes.existNode(node);
+    }
+
+    @Override
+    public boolean existRelation(Relation relation) {
+        return this.relations.existRelation(relation);
+    }
 }
