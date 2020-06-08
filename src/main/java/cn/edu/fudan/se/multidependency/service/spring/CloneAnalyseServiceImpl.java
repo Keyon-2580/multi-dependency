@@ -734,14 +734,26 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 		return result;
 	}
 
-	private Map<CloneLevel, Collection<MicroService>> msSortByMsCloneLineCountCache = new HashMap<>();
+	private Map<CloneLevel, Map<Boolean, Collection<MicroService>>> msSortByMsCloneLineCountCache = new ConcurrentHashMap<>();
 	@Override
 	public Collection<MicroService> msSortByMsCloneLineCount(Collection<MicroService> mss, CloneLevel level, 
 			boolean removeFileLevelClone, boolean removeDataClass) {
-		Collection<MicroService> cache = msSortByMsCloneLineCountCache.get(level);
-		if(cache != null && !cache.isEmpty()) {
-			return cache;
+		Map<Boolean, Collection<MicroService>> mapCache = msSortByMsCloneLineCountCache.get(level);
+		if(mapCache != null) {
+			if(CloneLevel.function == level) {
+				Collection<MicroService> cache = mapCache.get(removeFileLevelClone);
+				if(cache != null && !cache.isEmpty()) {
+					return cache;
+				}
+			} else {
+				Collection<MicroService> cache = mapCache.get(removeDataClass);
+				if(cache != null && !cache.isEmpty()) {
+					return cache;
+				}
+			}
 		}
+		mapCache = new ConcurrentHashMap<>();
+		
 		List<MicroService> result = new ArrayList<>(mss);
 		Map<Integer, Map<Long, CloneLineValue<MicroService>>> temp = new HashMap<>();
 		Map<MicroService, Integer> msCount = new HashMap<>();
@@ -773,7 +785,12 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 		result.sort((ms1, ms2) -> {
 			return msCount.getOrDefault(ms2, 0) - msCount.getOrDefault(ms1, 0);
 		});
-		msSortByMsCloneLineCountCache.put(level, result);
+		if(CloneLevel.function == level) {
+			mapCache.put(removeFileLevelClone, result);
+		} else {
+			mapCache.put(removeDataClass, result);
+		}
+		msSortByMsCloneLineCountCache.put(level, mapCache);
 		return result;
 	}
 

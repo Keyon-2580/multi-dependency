@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.controller;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,7 @@ public class CloneController {
 			@RequestParam(name="removeFileClone", required=false, defaultValue="false") boolean removeFileClone,
 			@RequestParam(name="removeDataClass", required=false, defaultValue="false") boolean removeDataClass) {
 		System.out.println(removeFileClone + " " + removeDataClass);
+		request.setAttribute("microservicesCount", msService.findAllMicroService().size());
 		request.setAttribute("level", level);
 		request.setAttribute("removeFileClone", removeFileClone);
 		request.setAttribute("removeDataClass", removeDataClass);
@@ -220,27 +222,80 @@ public class CloneController {
 	@GetMapping("/{level}/group/cytoscape")
 	@ResponseBody
 	public JSONObject cloneGroupToCytoscape(@PathVariable("level") String level, 
-			@RequestParam("top") int top,
+			@RequestParam(name="top", required=false, defaultValue="-1") int top,
+			@RequestParam(name="projectsCount", required=false, defaultValue="-1") int projectsCount,
 			@RequestParam(name="removeFileClone", required=false, defaultValue="false") boolean removeFileClone,
 			@RequestParam(name="removeDataClass", required=false, defaultValue="false") boolean removeDataClass) {
 		JSONObject result = new JSONObject();
 		try {
 			JSONArray cytoscapeArray = new JSONArray();
-			for(int i = 0; i < top; i++) {
+			if(top != -1) {
+				for(int i = 0; i < top; i++) {
+					List<Integer> groups = new ArrayList<>();
+					groups.add(i);
+					cytoscapeArray.add(cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), false, removeFileClone, removeDataClass));
+				}
+				result.put("size", top);
+				result.put("result", "success");
+				result.put("value", cytoscapeArray);
 				List<Integer> groups = new ArrayList<>();
-				groups.add(i);
-				cytoscapeArray.add(cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), false, removeFileClone, removeDataClass));
+				for(int j = 0; j < top; j++) {
+					groups.add(j);
+				}
+				result.put("groups", groups);
+				// 合并
+				result.put("groupValue", cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), true, removeFileClone, removeDataClass));
+				return result;
+			} 
+			if(projectsCount != -1) {
+				Collection<MicroService> mss = msService.findAllMicroService();
+				Map<Integer, Map<Long, CloneLineValue<MicroService>>> data = new HashMap<>();
+				if("function".equals(level)) {
+					data = cloneAnalyse.msCloneLineValuesCalculateGroupByFunction(mss, removeFileClone);
+				} else if("file".equals(level)) {
+					data = cloneAnalyse.msCloneLineValuesCalculateGroupByFile(mss, removeFileClone);
+				}
+				List<Integer> groups = new ArrayList<>();
+				CloneLevel cloneLevel = CloneLevel.valueOf(level);
+				cloneLevel = cloneLevel == null ? CloneLevel.file : cloneLevel;
+				for(Map.Entry<Integer, Map<Long, CloneLineValue<MicroService>>> entry : data.entrySet()) {
+					int group = entry.getKey();
+					if(group < 0) {
+						continue;
+					}
+					int count = 0;
+					Map<Long, CloneLineValue<MicroService>> value = entry.getValue();
+					for(Map.Entry<Long, CloneLineValue<MicroService>> msEntry : value.entrySet()) {
+						CloneLineValue<MicroService> msValue = msEntry.getValue();
+						if(CloneLevel.function == cloneLevel) {
+							if(!msValue.getCloneFunctions().isEmpty()) {
+								count++;
+							}
+						} else {
+							if(!msValue.getCloneFiles().isEmpty()) {
+								count++;
+							}
+						}
+					}
+					if(count >= projectsCount) {
+						groups.add(group);
+					}
+				}
+				
+				for(int i = 0; i < groups.size(); i++) {
+					List<Integer> group = new ArrayList<>();
+					group.add(groups.get(i));
+					cytoscapeArray.add(cloneShow.clonesGroupsToCytoscape(group, CloneLevel.valueOf(level), false, removeFileClone, removeDataClass));
+				}
+				result.put("size", groups.size());
+				result.put("result", "success");
+				result.put("value", cytoscapeArray);
+				result.put("groups", groups);
+				// 合并
+				result.put("groupValue", cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), true, removeFileClone, removeDataClass));
+				return result;
 			}
-			result.put("size", top);
-			result.put("result", "success");
-			result.put("value", cytoscapeArray);
-			List<Integer> groups = new ArrayList<>();
-			for(int j = 0; j < top; j++) {
-				groups.add(j);
-			}
-			result.put("groups", groups);
-			// 合并
-			result.put("groupValue", cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), true, removeFileClone, removeDataClass));
+			throw new Exception("参数错误，top：" + top + "，projectsCount：" + projectsCount);
 		} catch (Exception e) {
 			result.put("result", "fail");
 			result.put("msg", e.getMessage());
