@@ -11,7 +11,6 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Transient;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneRelationNode;
@@ -23,7 +22,7 @@ import lombok.NoArgsConstructor;
 @NodeEntity
 @NoArgsConstructor
 @EqualsAndHashCode
-public class Function implements Node, CloneRelationNode {
+public class Function implements CodeNode, CloneRelationNode {
 
 	private static final long serialVersionUID = 6993550414163132668L;
 	
@@ -43,18 +42,13 @@ public class Function implements Node, CloneRelationNode {
 	
 	private boolean constructor;
 	
-	private String inFilePath;
-	
 	private boolean impl;
 	
 	private int startLine = -1;
 	
 	private int endLine = -1;
-	
-	/*
-	 * FilePath
-	 */
-//	private String fullName;
+    
+    private String identifier;
 
 	/**
 	 * 插入时使用这个，因为用BatchInserter的时候插入这个会转成字符串插入，用SDN读取时对应不到这个List
@@ -67,7 +61,7 @@ public class Function implements Node, CloneRelationNode {
 	 */
 	private String parametersIdentifies;
 	
-	public String getFunctionIdentify() {
+	public String getFunctionIdentifier() {
 		return this.getName() + this.getParametersIdentifies();
 	}
 	
@@ -87,12 +81,11 @@ public class Function implements Node, CloneRelationNode {
 		properties.put("parametersIdentifies", getParameters().toString().replace('[', '(').replace(']', ')'));
 		properties.put("fromDynamic", isFromDynamic());
 		properties.put("constructor", isConstructor());
-		properties.put("inFilePath", getInFilePath() == null ? "" : getInFilePath());
 		properties.put("simpleName", getSimpleName() == null ? "" : getSimpleName());
 		properties.put("impl", isImpl());
 		properties.put("startLine", getStartLine());
 		properties.put("endLine", getEndLine());
-//		properties.put("fullName", getFullName() == null? "" : getFullName());
+		properties.put("identifier", getIdentifier() == null ? "" : getIdentifier());
 		return properties;
 	}
 	
@@ -146,5 +139,26 @@ public class Function implements Node, CloneRelationNode {
 	@Override
 	public CloneLevel getCloneLevel() {
 		return CloneLevel.function;
+	}
+
+	@Override
+	public String getIdentifierSuffix() {
+		return "#M";
+	}
+
+	@Override
+	public String getIdentifierSimpleName() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(getSimpleName());
+		builder.append("(");
+		if(!parameters.isEmpty()) {
+			builder.append(parameters.get(0));
+		}
+		for(int i = 1; i < parameters.size(); i++) {
+			builder.append(",");
+			builder.append(parameters.get(i));
+		}
+		builder.append(")");
+		return builder.toString();
 	}
 }

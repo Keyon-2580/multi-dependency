@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.codehaus.plexus.util.StringUtils;
 
 import cn.edu.fudan.se.multidependency.model.Language;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.git.Branch;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
@@ -37,6 +38,16 @@ public class Nodes {
 	private List<Project> projects = new ArrayList<>();
 	
 	private Map<String, ProjectFile> filePathToFile = new ConcurrentHashMap<>();
+	
+	private Map<String, CodeNode> identifierToCodeNode = new ConcurrentHashMap<>();
+	
+	public void addCodeNode(CodeNode node) {
+		this.identifierToCodeNode.put(node.getIdentifier(), node);
+	}
+	
+	public CodeNode findCodeNodeByIdentifier(String identifier) {
+		return identifierToCodeNode.get(identifier);
+	}
 	
 	public ProjectFile findFileByPathRecursion(String path) {
 		ProjectFile result = filePathToFile.get(path);
@@ -78,6 +89,7 @@ public class Nodes {
 		projects.clear();
 		librariesWithAPI.clear();
 		filePathToFile.clear();
+		identifierToCodeNode.clear();
 	}
 	
 	public Map<NodeLabelType, List<Node>> getAllNodes() {

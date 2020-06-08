@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
@@ -250,6 +252,34 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 
 	public void setEntityRepo(EntityRepo entityRepo) {
 		this.entityRepo = entityRepo;
+	}
+	
+	protected String processIdentifier(CodeNode node) {
+		if(node.getIdentifier() != null) {
+			return node.getIdentifier();
+		}
+		Entity entity = entityRepo.getEntity(node.getEntityId().intValue());
+		Entity parentEntity = entity.getParent();
+		if(parentEntity == null) {
+			return "";
+		}
+		Node parentNode = this.getNodes().findNodeByEntityIdInProject(parentEntity.getId().longValue(), currentProject);
+		if(parentNode == null) {
+			return "";
+		}
+		if(parentNode instanceof ProjectFile) {
+			String identifier = new StringBuilder().append(((ProjectFile) parentNode).getPath()).append(CodeNode.FILE_IDENTIFIER_SUFFIX)
+					.append(node.getIdentifierSimpleName()).append(node.getIdentifierSuffix()).toString();
+			node.setIdentifier(identifier);
+			return identifier;
+		} else if(parentNode instanceof CodeNode) {
+			String identifier = new StringBuilder().append(processIdentifier((CodeNode) parentNode))
+					.append(node.getIdentifierSimpleName()).append(node.getIdentifierSuffix()).toString();
+			node.setIdentifier(identifier);
+			return identifier;
+		} else {
+			return "";
+		}
 	}
 
 }

@@ -79,19 +79,19 @@ public class CloneShowServiceImpl implements CloneShowService {
 					if(!isNodeToCytoscapeNode.getOrDefault(function1, false)) {
 						isNodeToCytoscapeNode.put(function1, true);
 						CytoscapeNode function1CytoscapeNode = new CytoscapeNode(function1.getId(), function1.getName() + "\n(" + function1.getStartLine() + " , " + function1.getEndLine() + ")", "Function");
-						function1CytoscapeNode.setValue(function1.getFunctionIdentify());
+						function1CytoscapeNode.setValue(function1.getFunctionIdentifier());
 						nodes.add(function1CytoscapeNode);
 						groupEdges.add(new CytoscapeEdge(function1.getId().toString(), groupId.toString(), "nodeIsInCloneGroup"));
-						nodeToZTreeNode.put(function1, new ZTreeNode(function1.getId(), function1.getFunctionIdentify() + "(" + function1.getStartLine() + " , " + function1.getEndLine(), false, "Function", false));
+						nodeToZTreeNode.put(function1, new ZTreeNode(function1.getId(), function1.getFunctionIdentifier() + "(" + function1.getStartLine() + " , " + function1.getEndLine(), false, "Function", false));
 					}
 					Function function2 = (Function) node2;
 					if(!isNodeToCytoscapeNode.getOrDefault(function2, false)) {
 						isNodeToCytoscapeNode.put(function2, true);
 						CytoscapeNode function2CytoscapeNode = new CytoscapeNode(function2.getId(), function2.getName() + "\n(" + function1.getStartLine() + " , " + function1.getEndLine() + ")", "Function");
-						function2CytoscapeNode.setValue(function2.getFunctionIdentify());
+						function2CytoscapeNode.setValue(function2.getFunctionIdentifier());
 						nodes.add(function2CytoscapeNode);
 						groupEdges.add(new CytoscapeEdge(function2.getId().toString(), groupId.toString(), "nodeIsInCloneGroup"));
-						nodeToZTreeNode.put(function2, new ZTreeNode(function2.getId(), function2.getFunctionIdentify() + "(" + function2.getStartLine() + " , " + function2.getEndLine(), false, "Function", false));
+						nodeToZTreeNode.put(function2, new ZTreeNode(function2.getId(), function2.getFunctionIdentifier() + "(" + function2.getStartLine() + " , " + function2.getEndLine(), false, "Function", false));
 					}
 					file1 = containRelationService.findFunctionBelongToFile(function1);
 					if(!isNodeToCytoscapeNode.getOrDefault(file1, false)) {
