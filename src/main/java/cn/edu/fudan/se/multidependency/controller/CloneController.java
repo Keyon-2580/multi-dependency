@@ -31,6 +31,8 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
+import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
+import cn.edu.fudan.se.multidependency.repository.relation.clone.FileCloneFileRepository;
 import cn.edu.fudan.se.multidependency.service.spring.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;

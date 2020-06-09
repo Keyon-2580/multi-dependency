@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
@@ -104,5 +105,17 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 
 	@Query("match (lib:Library)-[r:" + RelationType.str_CONTAIN + "]->(api:LibraryAPI) where id(lib)={libraryId} return api")
 	public List<LibraryAPI> findLibraryContainLibraryAPIs(@Param("libraryId") Long libraryId);
+
+	@Query("match (group:CloneGroup)-[r:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where id(group)={groupId} return file")
+	public List<ProjectFile> findCloneGroupContainFiles(@Param("groupId") long groupId);
+	
+	@Query("match (group:CloneGroup)-[r:" + RelationType.str_CONTAIN + "]->(function:Function) where id(group)={groupId} return function")
+	public List<Function> findCloneGroupContainFunctions(@Param("groupId") long groupId);
+	
+	@Query("match (group:CloneGroup)-[r:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where id(file)={fileId} return group")
+	public CloneGroup findFileBelongToCloneGroup(@Param("fileId") long fileId);
+	
+	@Query("match (group:CloneGroup)-[r:" + RelationType.str_CONTAIN + "]->(function:Function) where id(function)={functionId} return group")
+	public CloneGroup findFunctionBelongToCloneGroup(@Param("functionId") long functionId);
 
 }

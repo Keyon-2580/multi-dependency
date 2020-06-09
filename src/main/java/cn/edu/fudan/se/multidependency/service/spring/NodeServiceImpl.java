@@ -9,10 +9,12 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
+import cn.edu.fudan.se.multidependency.repository.node.clone.CloneGroupRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.FunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.NamespaceRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.PackageRepository;
@@ -43,6 +45,9 @@ public class NodeServiceImpl implements NodeService {
 	
 	@Autowired
 	ProjectFileRepository fileRepository;
+	
+	@Autowired
+	CloneGroupRepository cloneGroupRepository;
 
 	@Override
 	public Package queryPackage(long id) {
@@ -85,7 +90,7 @@ public class NodeServiceImpl implements NodeService {
 	}
 
 	@Override
-	public Project queryProject(Long id) {
+	public Project queryProject(long id) {
 		Node node = cache.findNodeById(id);
 		Project result = node == null ? projectRepository.findById(id).get() : (node instanceof Project ? (Project) node : projectRepository.findById(id).get());
 		cache.cacheNodeById(result);
@@ -120,5 +125,13 @@ public class NodeServiceImpl implements NodeService {
 		Project project = projectRepository.findProjectByNameAndLanguage(name, language.toString());
 		cache.cacheNodeById(project);
 		return project;
+	}
+
+	@Override
+	public CloneGroup queryCloneGroup(long id) {
+		Node node = cache.findNodeById(id);
+		CloneGroup result = node == null ? cloneGroupRepository.findById(id).get() : (node instanceof CloneGroup ? (CloneGroup) node : cloneGroupRepository.findById(id).get());
+		cache.cacheNodeById(result);
+		return result;
 	}
 }

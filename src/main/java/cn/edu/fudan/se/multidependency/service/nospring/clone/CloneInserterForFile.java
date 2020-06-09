@@ -127,6 +127,7 @@ public class CloneInserterForFile extends ExtractorForNodesAndRelationsImpl {
 			group.setGroup(String.valueOf(groupCount++));
 			group.setName("group_" + group.getGroup());
 			group.setLevel(NodeLabelType.ProjectFile);
+			group.setSize(nodes.size());
 			addNode(group, null);
 			for(Node node : nodes) {
 				addRelation(new Contain(group, node));

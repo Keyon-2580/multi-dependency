@@ -15,6 +15,7 @@ import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
@@ -36,7 +37,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
     
     @Autowired
     CacheService cache;
-
+    
 	Map<Project, Collection<ProjectFile>> projectContainFilesCache = new ConcurrentHashMap<>();
 	@Override
 	public Collection<ProjectFile> findProjectContainAllFiles(Project project) {
@@ -361,9 +362,56 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		return featureContainFeatures;
 	}
 
+	Map<CloneGroup, Collection<ProjectFile>> groupContainFilesCache = new ConcurrentHashMap<>();
 	@Override
-	public Collection<Variable> findProjectContainAllFields(Project project) {
-		return new ArrayList<>();
+	public Collection<ProjectFile> findCloneGroupContainFiles(CloneGroup group) {
+		Collection<ProjectFile> result = groupContainFilesCache.get(group);
+		if(result == null) {
+			result = containRepository.findCloneGroupContainFiles(group.getId());
+			groupContainFilesCache.put(group, result);
+		}
+		return result;
+	}
+
+	Map<CloneGroup, Collection<Function>> groupContainFunctionsCache = new ConcurrentHashMap<>();
+	@Override
+	public Collection<Function> findCloneGroupContainFunctions(CloneGroup group) {
+		Collection<Function> result = groupContainFunctionsCache.get(group);
+		if(result == null) {
+			result = containRepository.findCloneGroupContainFunctions(group.getId());
+			groupContainFunctionsCache.put(group, result);
+		}
+		return result;
+	}
+
+	@Override
+	public CloneGroup findFileBelongToCloneGroup(ProjectFile file) {
+		Node node = cache.findNodeBelongToNode(file, NodeLabelType.CloneGroup);
+		CloneGroup result = null;
+		if(node == null) {
+			result = containRepository.findFileBelongToCloneGroup(file.getId());
+		} else {
+			result = (CloneGroup) node;
+		}
+		if(result != null) {
+			cache.cacheNodeBelongToNode(file, result);
+		}
+		return result;
+	}
+
+	@Override
+	public CloneGroup findFunctionBelongToCloneGroup(Function function) {
+		Node node = cache.findNodeBelongToNode(function, NodeLabelType.CloneGroup);
+		CloneGroup result = null;
+		if(node == null) {
+			result = containRepository.findFunctionBelongToCloneGroup(function.getId());
+		} else {
+			result = (CloneGroup) node;
+		}
+		if(result != null) {
+			cache.cacheNodeBelongToNode(function, result);
+		}
+		return result;
 	}
 
 }

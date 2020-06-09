@@ -6,6 +6,7 @@ import java.util.List;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
@@ -22,7 +23,7 @@ public interface ContainRelationService {
 	
 	Collection<Package> findProjectContainPackages(Project project);
 	Collection<Function> findProjectContainAllFunctions(Project project);
-	Collection<Variable> findProjectContainAllFields(Project project);
+//	Collection<Variable> findProjectContainAllFields(Project project);
 	Collection<ProjectFile> findProjectContainAllFiles(Project project);
 	
 	Collection<ProjectFile> findPackageContainFiles(Package pck);
@@ -74,5 +75,13 @@ public interface ContainRelationService {
 	List<Span> findTraceContainSpans(Trace trace);
 	
 	List<Contain> findAllFeatureContainFeatures();
+	
+	Collection<ProjectFile> findCloneGroupContainFiles(CloneGroup group);
+	
+	Collection<Function> findCloneGroupContainFunctions(CloneGroup group);
+	
+	CloneGroup findFileBelongToCloneGroup(ProjectFile file);
+	
+	CloneGroup findFunctionBelongToCloneGroup(Function function);
 	
 }

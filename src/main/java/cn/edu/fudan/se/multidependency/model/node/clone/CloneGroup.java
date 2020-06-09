@@ -33,6 +33,8 @@ public class CloneGroup implements Node {
 	
 	private String level;
 	
+	private int size;
+	
 	public void setLevel(NodeLabelType label) {
 		this.level = label.toString();
 	}
@@ -44,6 +46,7 @@ public class CloneGroup implements Node {
 		properties.put("name", getName() == null ? "" : getName());
 		properties.put("group", getGroup() == null ? "" : getGroup());
 		properties.put("level", getLevel() == null ? "" : getLevel());
+		properties.put("size", getSize());
 		return properties;
 	}
 

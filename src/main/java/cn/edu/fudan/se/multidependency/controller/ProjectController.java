@@ -36,7 +36,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
-import cn.edu.fudan.se.multidependency.service.spring.CloneAnalyseService;
+import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.DependencyOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
@@ -71,7 +71,7 @@ public class ProjectController {
 	private MultipleService multipleService;
 	
 	@Autowired
-	private CloneAnalyseService cloneAnalyse;
+	private BasicCloneQueryService basicCloneQueryService;
 	
 	@GetMapping(value = "/fanIO/file/{projectId}")
 	@ResponseBody
@@ -450,7 +450,7 @@ public class ProjectController {
 				List<FunctionDynamicCallFunction> calls = dynamicAnalyseService.findFunctionDynamicCallsByProject(project);
 				System.out.println(calls.size());
 				System.out.println("start to find clones");
-				Iterable<FunctionCloneFunction> clones = cloneAnalyse.findProjectContainFunctionCloneFunctions(project);
+				Iterable<FunctionCloneFunction> clones = basicCloneQueryService.queryProjectContainFunctionCloneFunctions(project);
 //				result.put("value", dependencyOrganizationService.projectStaticAndDynamicToCytoscape(project, calls));
 				System.out.println("end finding clones");
 //				result.put("value", dependencyOrganizationService.projectToCytoscape(project, calls, clones));

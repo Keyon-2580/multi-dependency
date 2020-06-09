@@ -23,6 +23,7 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
+import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.spring.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.GitAnalyseServiceImpl;
@@ -46,6 +47,9 @@ public class MDAllController {
 	
 	@Autowired
 	private CloneAnalyseService cloneAnalyse;
+	
+	@Autowired
+	private BasicCloneQueryService basicCloneQueryService;
 	
 	@GetMapping("")
 	public String multipleMicroServiceAll(HttpServletRequest request) {
@@ -162,8 +166,8 @@ public class MDAllController {
 			Iterable<MicroService> allMicroServices = msService.findAllMicroService();
 			Map<MicroService, CloneLineValue<MicroService>> msCloneValues = cloneAnalyse.msCloneLineValuesGroup(allMicroServices, -1, CloneLevel.file, false, false);
 			callsWithEntry.setMsToCloneLineValue(msCloneValues);
-			callsWithEntry.setClonesInMicroServiceFromFunctionClone(cloneAnalyse.findMicroServiceCloneFromFunctionClone(cloneAnalyse.findAllFunctionCloneFunctions(), true));
-			callsWithEntry.setClonesInMicroServiceFromFileClone(cloneAnalyse.findMicroServiceCloneFromFileClone(cloneAnalyse.findAllFileCloneFiles(), true));
+			callsWithEntry.setClonesInMicroServiceFromFunctionClone(cloneAnalyse.findMicroServiceCloneFromFunctionClone(basicCloneQueryService.findAllFunctionCloneFunctions(), true));
+			callsWithEntry.setClonesInMicroServiceFromFileClone(cloneAnalyse.findMicroServiceCloneFromFileClone(basicCloneQueryService.findAllFileCloneFiles(), true));
 			callsWithEntry.setShowClonesMinPair(showClonesMinPair);
 		}
 		if(showMicroServiceCallLibs) {

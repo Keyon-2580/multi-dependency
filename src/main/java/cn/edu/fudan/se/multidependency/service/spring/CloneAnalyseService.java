@@ -21,19 +21,42 @@ public interface CloneAnalyseService {
 	Collection<Collection<? extends Node>> groupFileCloneNode(boolean removeDataClass);
 	Collection<Collection<? extends Node>> groupFunctionCloneNode(boolean removeFileClone);
 	
-//	Collection<>isCloneBetween
+	Map<Integer, Map<Project, CloneLineValue<Project>>> projectCloneLineValuesCalculateGroupByFile(boolean removeDataClass);
 	
-	/*Collection<Collection<Clone<Function, FunctionCloneFunction>>> queryFunctionCloneGroup();
+	Map<Integer, Map<Project, CloneLineValue<Project>>> projectCloneLineValuesCalculateGroupByFunction(boolean removeFileLevelClone);
 	
-	Collection<Collection<Clone<ProjectFile, FileCloneFile>>> queryFileCloneGroup();*/
-
-	public Iterable<FunctionCloneFunction> findAllFunctionCloneFunctions();
+//	Map<Project, CloneLineValue<Project>> projectCloneLineValues();
 	
-	public Iterable<FileCloneFile> findAllFileCloneFiles();
+//	Map<MicroService, CloneLineValue<MicroService>> msCloneLineValues(Iterable<MicroService> mss);
 	
-	public Iterable<FunctionCloneFunction> findProjectContainFunctionCloneFunctions(Project project);
+	CloneLineValue<MicroService> msCloneLineValuesGroup(MicroService ms, int group, CloneLevel level, boolean removeFileLevelClone, boolean removeDataClass);
 	
-	public Iterable<FileCloneFile> queryProjectContainFileCloneFiles(Project project);
+	Collection<MicroService> msSortByMsCloneLineCount(Collection<MicroService> mss, CloneLevel level, boolean removeFileLevelClone, boolean removeDataClass);
+	
+	Map<Integer, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFile(Collection<MicroService> mss, boolean removeDataClass);
+	
+	Map<Integer, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFunction(Collection<MicroService> mss, boolean removeFileClone);
+	
+	boolean isCloneBetweenFiles(ProjectFile file1, ProjectFile file2);
+	
+	// MDAllController
+	
+	public Map<MicroService, CloneLineValue<MicroService>> msCloneLineValuesGroup(Iterable<MicroService> mss, int group, CloneLevel level, boolean removeFileLevelClone, boolean removeDataClass);
+	
+	/**
+	 * 根据函数间的克隆找出微服务间的克隆
+	 * @param functionClones
+	 * @return
+	 */
+	public Collection<Clone<MicroService, FunctionCloneFunction>> findMicroServiceCloneFromFunctionClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode);
+	
+	/**
+	 * 根据文件间的克隆找出微服务间的克隆
+	 * @param fileClones
+	 * @param removeSameNode
+	 * @return
+	 */
+	public Collection<Clone<MicroService, FileCloneFile>> findMicroServiceCloneFromFileClone(Iterable<FileCloneFile> fileClones, boolean removeSameNode);
 	
 	/**
 	 * 根据函数间的克隆找出项目间的克隆
@@ -49,34 +72,5 @@ public interface CloneAnalyseService {
 	 * @return
 	 */
 	public Collection<Clone<Project, FileCloneFile>> queryProjectCloneFromFileClone(Iterable<FileCloneFile> fileClones, boolean removeSameNode);
-	
-	Collection<Clone<MicroService, FunctionCloneFunction>> findMicroServiceCloneFromFunctionClone(
-			Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode);
-	
-	Collection<Clone<MicroService, FileCloneFile>> findMicroServiceCloneFromFileClone(
-			Iterable<FileCloneFile> fileClones, boolean removeSameNode);
-	
-	Map<Integer, Map<Project, CloneLineValue<Project>>> projectCloneLineValuesCalculateGroupByFile(boolean removeDataClass);
-	
-	Map<Integer, Map<Project, CloneLineValue<Project>>> projectCloneLineValuesCalculateGroupByFunction(boolean removeFileLevelClone);
-	
-	Map<Project, CloneLineValue<Project>> projectCloneLineValues();
-	
-	Map<MicroService, CloneLineValue<MicroService>> msCloneLineValues(Iterable<MicroService> mss);
-	
-	CloneLineValue<MicroService> msCloneLineValuesGroup(MicroService ms, int group, CloneLevel level, boolean removeFileLevelClone, boolean removeDataClass);
-	
-	Map<MicroService, CloneLineValue<MicroService>> msCloneLineValuesGroup(Iterable<MicroService> mss, int group, CloneLevel level, boolean removeFileLevelClone, boolean removeDataClass);
-	
-//	Map<Integer, Map<MicroService, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFile(Collection<MicroService> mss);
-//	
-//	Map<Integer, Map<MicroService, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFunction(Collection<MicroService> mss);
-	
-	Collection<MicroService> msSortByMsCloneLineCount(Collection<MicroService> mss, CloneLevel level, boolean removeFileLevelClone, boolean removeDataClass);
-	
-	Map<Integer, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFile(Collection<MicroService> mss, boolean removeDataClass);
-	
-	Map<Integer, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFunction(Collection<MicroService> mss, boolean removeFileClone);
-	
-	boolean isCloneBetweenFiles(ProjectFile file1, ProjectFile file2);
+
 }
