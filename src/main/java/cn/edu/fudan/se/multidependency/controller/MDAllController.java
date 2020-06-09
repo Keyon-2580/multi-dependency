@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
@@ -164,7 +165,7 @@ public class MDAllController {
 		callsWithEntry.setShowCntOfDevUpdMs(showCntOfDevUpdMs);
 		if(showClonesInMicroService) {
 			Iterable<MicroService> allMicroServices = msService.findAllMicroService();
-			Map<MicroService, CloneLineValue<MicroService>> msCloneValues = cloneAnalyse.msCloneLineValuesGroup(allMicroServices, -1, CloneLevel.file, false, false);
+			Map<MicroService, CloneLineValue<MicroService>> msCloneValues = cloneAnalyse.msCloneLineValuesGroup(allMicroServices, CloneGroup.allGroup(CloneLevel.file), CloneLevel.file, false, false);
 			callsWithEntry.setMsToCloneLineValue(msCloneValues);
 			callsWithEntry.setClonesInMicroServiceFromFunctionClone(cloneAnalyse.findMicroServiceCloneFromFunctionClone(basicCloneQueryService.findAllFunctionCloneFunctions(), true));
 			callsWithEntry.setClonesInMicroServiceFromFileClone(cloneAnalyse.findMicroServiceCloneFromFileClone(basicCloneQueryService.findAllFileCloneFiles(), true));

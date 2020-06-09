@@ -297,10 +297,15 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 		var _showGroupsResult = function(result) {
 			console.log(result);
 			var size = result.size;
+			var groups = result.groups;
+			var groupsName = "";
+			for(var i = 0; i < groups.length; i++) {
+				groupsName += groups[i].name + " ; ";
+			}
 			var html = "";
 			html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='group'>全屏</button>";
 			html += "<p></p></div>";
-			html += "<div><h4>groups: " + result.groups + "</h4></div>"
+			html += "<div><h4>groups: " + groupsName + "</h4></div>"
 			html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble_group">';
 			html += '<div class="div_cytoscape_treeview">';
 			html += '<ul id="node_ztree_groups" class="ztree"></ul>';
@@ -317,7 +322,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			html = "";
 			for(var i = 0; i < size; i++) {
 				html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='" + i +"'>全屏</button>";
-				html += "<div><h4>groups: " + result.groups[i] + "</h4></div>"
+				html += "<div><h4>groups: " + result.groups[i].name + "</h4></div>"
 //				html += "<button class='btn btn-default save_top' name='" + i +"'>保存图片</button><p></p></div>";
 				html += "<p></p></div>";
 				html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble_' + i + '">';
@@ -415,15 +420,15 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 				console.log(result);
 				$("#searchGroups").append('<optgroup id="select_single" label="single">单项目克隆</optgroup>');
 				$("#searchGroups").append('<optgroup id="select_between" label="between">跨项目克隆</optgroup>');
-				
+				var groups = result.groups;
 				var xAxisData = [];
 				var nodesData = [];
 				var projectsData = [];
 				for(var i = 0; i < result.size; i++) {
-					xAxisData[i] = "group_" + i;
+					xAxisData[i] = groups[i].name;
 					nodesData[i] = result.value["nodeSize"][i];
 					projectsData[i] = result.value.projectSize[i];
-					var html = '<option value="' + i + '" >' + xAxisData[i] + '_' + nodesData[i] + ',' + projectsData[i]  + '</option>';
+					var html = '<option value="' + groups[i].id + '" >' + xAxisData[i] + '_' + nodesData[i] + ',' + projectsData[i]  + '</option>';
 					if(projectsData[i] > 1) {
 						$("#select_between").append(html);
 					} else {
@@ -499,11 +504,9 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 		        myChart.on('click', function(params) {
 		        	var name = params.name;
 		        	console.log(name);
-		        	var num = name.split("_")[1];
-		        	console.log(num);
 		        	$.ajax({
 						type : "GET",
-						url : "/clone/" + level + "/group/cytoscape/" + num + "?" + urlRemoveParams,
+						url : "/clone/" + level + "/group/cytoscape/" + name + "?" + urlRemoveParams,
 						success : function(result) {
 							if(result.result == "success") {
 								console.log(result.value);

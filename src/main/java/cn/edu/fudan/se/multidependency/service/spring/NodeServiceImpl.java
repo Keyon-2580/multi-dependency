@@ -1,5 +1,8 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +13,7 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
@@ -132,6 +136,21 @@ public class NodeServiceImpl implements NodeService {
 		Node node = cache.findNodeById(id);
 		CloneGroup result = node == null ? cloneGroupRepository.findById(id).get() : (node instanceof CloneGroup ? (CloneGroup) node : cloneGroupRepository.findById(id).get());
 		cache.cacheNodeById(result);
+		return result;
+	}
+
+	private Map<CloneLevel, Map<String, CloneGroup>> nameToGroupCache = new ConcurrentHashMap<>();
+	@Override
+	public CloneGroup queryCloneGroup(CloneLevel level, String name) {
+		Map<String, CloneGroup> nameToGroup = nameToGroupCache.getOrDefault(level, new ConcurrentHashMap<>());
+		CloneGroup result = nameToGroup.get(name);
+		if(result == null) {
+			result = cloneGroupRepository.findCloneGroupsByLevelAndName(level.toString(), name);
+		}
+		if(result != null) {
+			nameToGroup.put(name, result);
+			nameToGroupCache.put(level, nameToGroup);
+		}
 		return result;
 	}
 }

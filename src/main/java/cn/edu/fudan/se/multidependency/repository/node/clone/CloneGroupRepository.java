@@ -13,5 +13,9 @@ import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 public interface CloneGroupRepository extends Neo4jRepository<CloneGroup, Long> {
 
 	@Query("match (group:CloneGroup) where group.level={level} return group")
-	public List<CloneGroup> findCloneGroupsByLevel(@Param("level") String level);
+	List<CloneGroup> findCloneGroupsByLevel(@Param("level") String level);
+	
+	@Query("match (group:CloneGroup) where group.level={level} and group.name={name} return group")
+	CloneGroup findCloneGroupsByLevelAndName(@Param("level") String level, @Param("name") String name);
+	
 }

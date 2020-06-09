@@ -28,15 +28,17 @@ import com.alibaba.fastjson.JSONObject;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
-import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
-import cn.edu.fudan.se.multidependency.repository.relation.clone.FileCloneFileRepository;
 import cn.edu.fudan.se.multidependency.service.spring.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
+import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.data.CloneLineValue;
+import cn.edu.fudan.se.multidependency.service.spring.data.FileCloneGroup;
+import cn.edu.fudan.se.multidependency.service.spring.data.FunctionCloneGroup;
 import cn.edu.fudan.se.multidependency.service.spring.show.CloneShowService;
 
 @Controller
@@ -55,6 +57,9 @@ public class CloneController {
 	
 	@Autowired
 	private MicroserviceService msService;
+	
+	@Autowired
+	private NodeService nodeService;
 	
 	@GetMapping("/{level}")
 	public String cloneIndex(@PathVariable("level") String level, 
@@ -77,18 +82,14 @@ public class CloneController {
 		System.out.println(removeFileClone + " " + removeDataClass);
 		JSONObject result = new JSONObject();
 		Collection<MicroService> mss = msService.findAllMicroService();
-		if("function".equals(level)) {
-			LOGGER.info("function level table, get data");
-			Map<Integer, Map<Long, CloneLineValue<MicroService>>> data = cloneAnalyse.msCloneLineValuesCalculateGroupByFunction(mss, removeFileClone);
+		if(CloneLevel.valueOf(level) == CloneLevel.function) {
+			Map<String, Map<Long, CloneLineValue<MicroService>>> data = cloneAnalyse.msCloneLineValuesCalculateGroupByFunction(mss, removeFileClone);
 			result.put("data", data);
-			LOGGER.info("get microservices");
 			Collection<MicroService> microservices = cloneAnalyse.msSortByMsCloneLineCount(mss, CloneLevel.function, removeFileClone, removeDataClass);
 			result.put("microservices", microservices);
-		} else if("file".equals(level)) {
-			LOGGER.info("file level table, get data");
-			Map<Integer, Map<Long, CloneLineValue<MicroService>>> data = cloneAnalyse.msCloneLineValuesCalculateGroupByFile(mss, removeFileClone);
+		} else {
+			Map<String, Map<Long, CloneLineValue<MicroService>>> data = cloneAnalyse.msCloneLineValuesCalculateGroupByFile(mss, removeFileClone);
 			result.put("data", data);
-			LOGGER.info("get microservices");
 			Collection<MicroService> microservices = cloneAnalyse.msSortByMsCloneLineCount(mss, CloneLevel.file, removeFileClone, removeDataClass);
 			result.put("microservices", microservices);
 		}
@@ -106,13 +107,22 @@ public class CloneController {
 			JSONObject histograms = new JSONObject();
 			JSONArray nodeSizeArray = new JSONArray();
 			JSONArray projectSizeArray = new JSONArray();
+			List<CloneGroup> groups = new ArrayList<>();
 			Collection<Collection<? extends Node>> nodeGroups = new ArrayList<>();
-			if(CloneLevel.function.toString().equals(level)) {
-				LOGGER.info("function level histogram");
-				nodeGroups = cloneAnalyse.groupFunctionCloneNode(removeFileClone);
+			if(CloneLevel.valueOf(level) == CloneLevel.function) {
+				Collection<FunctionCloneGroup> functionGroups = cloneAnalyse.groupFunctionClones(removeFileClone);
+				for(FunctionCloneGroup group : functionGroups) {
+					Collection<? extends Node> nodes = group.getFunctions();
+					nodeGroups.add(nodes);
+					groups.add(group.getGroup());
+				}
 			} else {
-				LOGGER.info("file level histogram");
-				nodeGroups = cloneAnalyse.groupFileCloneNode(removeDataClass);
+				Collection<FileCloneGroup> fileGroups = cloneAnalyse.groupFileClones(removeDataClass);
+				for(FileCloneGroup group : fileGroups) {
+					Collection<? extends Node> nodes = group.getFiles();
+					nodeGroups.add(nodes);
+					groups.add(group.getGroup());
+				}
 			}
 			LOGGER.info("克隆组数：" + nodeGroups.size());
 			int size = 0;
@@ -149,6 +159,7 @@ public class CloneController {
 			histograms.put("projectSize", projectSizeArray);
 			result.put("result", "success");
 			result.put("value", histograms);
+			result.put("groups", groups);
 			result.put("size", size);
 		} catch (Exception e) {
 			
@@ -165,28 +176,27 @@ public class CloneController {
 		System.out.println(removeFileClone + " " + removeDataClass);
 		JSONObject result = new JSONObject();
 		try {
-			List<String> idsStr = (List<String>) params.get("groups");
-			List<Integer> selectedGroups = new ArrayList<>();
-			for(String idStr : idsStr) {
-				selectedGroups.add(Integer.parseInt(idStr));
+			List<String> groupsStr = (List<String>) params.get("groups");
+			List<CloneGroup> selectedGroups = new ArrayList<>();
+			for(String idStr : groupsStr) {
+				CloneGroup group = nodeService.queryCloneGroup(Long.valueOf(idStr));
+				if(group != null) {
+					selectedGroups.add(group);
+				}
 			}
-			selectedGroups.sort((group1, group2) -> {
-				return group1 - group2;
-			});
-			
 			JSONArray cytoscapeArray = new JSONArray();
-			for(int i = 0; i < selectedGroups.size(); i++) {
-				List<Integer> groups = new ArrayList<>();
-				groups.add(selectedGroups.get(i));
+			for(CloneGroup group : selectedGroups) {
+				List<CloneGroup> groups = new ArrayList<>();
+				groups.add(group);
 				cytoscapeArray.add(cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), false, removeFileClone, removeDataClass));
 			}
 			result.put("size", selectedGroups.size());
 			result.put("groups", selectedGroups);
 			result.put("result", "success");
 			result.put("value", cytoscapeArray);
-			List<Integer> groups = new ArrayList<>();
-			for(int j = 0; j < selectedGroups.size(); j++) {
-				groups.add(selectedGroups.get(j));
+			List<CloneGroup> groups = new ArrayList<>();
+			for(CloneGroup group : selectedGroups) {
+				groups.add(group);
 			}
 			// 合并
 			result.put("groupValue", cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), true, removeFileClone, removeDataClass));
@@ -199,17 +209,20 @@ public class CloneController {
 		return result;
 	}
 	
-	@GetMapping("/{level}/group/cytoscape/{index}")
+	@GetMapping("/{level}/group/cytoscape/{name}")
 	@ResponseBody
 	public JSONObject cloneGroupByIndexToCytoscape(@PathVariable("level") String level, 
-			@PathVariable("index") int index,
+			@PathVariable("name") String name,
 			@RequestParam(name="removeFileClone", required=false, defaultValue="false") boolean removeFileClone,
 			@RequestParam(name="removeDataClass", required=false, defaultValue="false") boolean removeDataClass) {
 		System.out.println(removeFileClone + " " + removeDataClass);
 		JSONObject result = new JSONObject();
 		try {
-			List<Integer> groups = new ArrayList<>();
-			groups.add(index);
+			List<CloneGroup> groups = new ArrayList<>();
+			CloneGroup cloneGroup = nodeService.queryCloneGroup(CloneLevel.valueOf(level), name);
+			if(cloneGroup != null) {
+				groups.add(cloneGroup);
+			}
 			JSONObject value = cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), false, removeFileClone, removeDataClass);
 			result.put("result", "success");
 			result.put("value", value);
@@ -232,18 +245,36 @@ public class CloneController {
 		try {
 			JSONArray cytoscapeArray = new JSONArray();
 			if(top != -1) {
-				for(int i = 0; i < top; i++) {
-					List<Integer> groups = new ArrayList<>();
-					groups.add(i);
-					cytoscapeArray.add(cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), false, removeFileClone, removeDataClass));
+				List<CloneGroup> groups = new ArrayList<>();
+				int count = 0;
+				if(CloneLevel.valueOf(level) == CloneLevel.function) {
+					Collection<FileCloneGroup> fileCloneGroups = cloneAnalyse.groupFileClones(removeDataClass);
+					for(FileCloneGroup group : fileCloneGroups) {
+						List<CloneGroup> singleGroup = new ArrayList<>();
+						singleGroup.add(group.getGroup());
+						groups.add(group.getGroup());
+						cytoscapeArray.add(cloneShow.clonesGroupsToCytoscape(singleGroup, CloneLevel.file, false, removeFileClone, removeDataClass));
+						count++;
+						if(count >= top) {
+							break;
+						}
+					}
+				} else {
+					Collection<FunctionCloneGroup> functionCloneGroups = cloneAnalyse.groupFunctionClones(removeFileClone);
+					for(FunctionCloneGroup group : functionCloneGroups) {
+						List<CloneGroup> singleGroup = new ArrayList<>();
+						singleGroup.add(group.getGroup());
+						groups.add(group.getGroup());
+						cytoscapeArray.add(cloneShow.clonesGroupsToCytoscape(singleGroup, CloneLevel.function, false, removeFileClone, removeDataClass));
+						count++;
+						if(count >= top) {
+							break;
+						}
+					}
 				}
 				result.put("size", top);
 				result.put("result", "success");
 				result.put("value", cytoscapeArray);
-				List<Integer> groups = new ArrayList<>();
-				for(int j = 0; j < top; j++) {
-					groups.add(j);
-				}
 				result.put("groups", groups);
 				// 合并
 				result.put("groupValue", cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), true, removeFileClone, removeDataClass));
@@ -251,20 +282,17 @@ public class CloneController {
 			} 
 			if(projectsCount != -1) {
 				Collection<MicroService> mss = msService.findAllMicroService();
-				Map<Integer, Map<Long, CloneLineValue<MicroService>>> data = new HashMap<>();
+				Map<String, Map<Long, CloneLineValue<MicroService>>> data = new HashMap<>();
 				if("function".equals(level)) {
 					data = cloneAnalyse.msCloneLineValuesCalculateGroupByFunction(mss, removeFileClone);
 				} else if("file".equals(level)) {
 					data = cloneAnalyse.msCloneLineValuesCalculateGroupByFile(mss, removeFileClone);
 				}
-				List<Integer> groups = new ArrayList<>();
+				List<CloneGroup> groups = new ArrayList<>();
 				CloneLevel cloneLevel = CloneLevel.valueOf(level);
 				cloneLevel = cloneLevel == null ? CloneLevel.file : cloneLevel;
-				for(Map.Entry<Integer, Map<Long, CloneLineValue<MicroService>>> entry : data.entrySet()) {
-					int group = entry.getKey();
-					if(group < 0) {
-						continue;
-					}
+				for(Map.Entry<String, Map<Long, CloneLineValue<MicroService>>> entry : data.entrySet()) {
+					String group = entry.getKey();
 					int count = 0;
 					Map<Long, CloneLineValue<MicroService>> value = entry.getValue();
 					for(Map.Entry<Long, CloneLineValue<MicroService>> msEntry : value.entrySet()) {
@@ -280,12 +308,12 @@ public class CloneController {
 						}
 					}
 					if(count >= projectsCount) {
-						groups.add(group);
+						groups.add(nodeService.queryCloneGroup(cloneLevel, group));
 					}
 				}
 				
 				for(int i = 0; i < groups.size(); i++) {
-					List<Integer> group = new ArrayList<>();
+					List<CloneGroup> group = new ArrayList<>();
 					group.add(groups.get(i));
 					cytoscapeArray.add(cloneShow.clonesGroupsToCytoscape(group, CloneLevel.valueOf(level), false, removeFileClone, removeDataClass));
 				}
