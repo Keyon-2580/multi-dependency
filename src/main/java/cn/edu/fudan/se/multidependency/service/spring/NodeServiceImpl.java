@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
@@ -145,7 +146,11 @@ public class NodeServiceImpl implements NodeService {
 		Map<String, CloneGroup> nameToGroup = nameToGroupCache.getOrDefault(level, new ConcurrentHashMap<>());
 		CloneGroup result = nameToGroup.get(name);
 		if(result == null) {
-			result = cloneGroupRepository.findCloneGroupsByLevelAndName(level.toString(), name);
+			if(level == CloneLevel.function) {
+				result = cloneGroupRepository.findCloneGroupsByLevelAndName(NodeLabelType.Function.toString(), name);
+			} else {
+				result = cloneGroupRepository.findCloneGroupsByLevelAndName(NodeLabelType.ProjectFile.toString(), name);
+			}
 		}
 		if(result != null) {
 			nameToGroup.put(name, result);

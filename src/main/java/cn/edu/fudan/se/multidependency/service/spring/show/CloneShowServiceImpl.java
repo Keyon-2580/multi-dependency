@@ -55,7 +55,6 @@ public class CloneShowServiceImpl implements CloneShowService {
 		List<CytoscapeEdge> groupEdges = new ArrayList<>();
 		Map<Node, Boolean> isNodeToCytoscapeNode = new HashMap<>();
 		Map<String, Boolean> isIdToCytoscapeEdge = new HashMap<>();
-		
 		for(FileCloneGroup fileGroup : fileGroups) {
 			if(!groups.contains(fileGroup.getGroup())) {
 				continue;

@@ -296,16 +296,15 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 	var _clone = function() {
 		var _showGroupsResult = function(result) {
 			console.log(result);
-			var size = result.size;
-			var groups = result.groups;
+			var size = result.groups.length;
 			var groupsName = "";
-			for(var i = 0; i < groups.length; i++) {
-				groupsName += groups[i].name + " ; ";
+			for(var i = 0; i < size; i++) {
+				groupsName += result.groups[i].name + " ; ";
 			}
 			var html = "";
 			html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='group'>全屏</button>";
 			html += "<p></p></div>";
-			html += "<div><h4>groups: " + groupsName + "</h4></div>"
+			html += "<div><h4>" + groupsName + "</h4></div>"
 			html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble_group">';
 			html += '<div class="div_cytoscape_treeview">';
 			html += '<ul id="node_ztree_groups" class="ztree"></ul>';
@@ -322,7 +321,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			html = "";
 			for(var i = 0; i < size; i++) {
 				html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='" + i +"'>全屏</button>";
-				html += "<div><h4>groups: " + result.groups[i].name + "</h4></div>"
+				html += "<div><h4>" + result.groups[i].name + "</h4></div>"
 //				html += "<button class='btn btn-default save_top' name='" + i +"'>保存图片</button><p></p></div>";
 				html += "<p></p></div>";
 				html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble_' + i + '">';
