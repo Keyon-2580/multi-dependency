@@ -5,7 +5,7 @@
 
 	<groupId>cn.edu.fudan.se</groupId>
 	<artifactId>multi-dependency</artifactId>
-	<version>1.2.0-identifier.0.1</version>
+	<version>1.2.1-pre</version>
 	<packaging>jar</packaging>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
