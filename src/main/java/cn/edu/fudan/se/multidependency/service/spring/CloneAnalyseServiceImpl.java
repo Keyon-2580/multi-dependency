@@ -3,8 +3,10 @@ package cn.edu.fudan.se.multidependency.service.spring;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -211,27 +213,6 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     	return result;
     }
     
-    /*@Override
-    public Map<MicroService, CloneLineValue<MicroService>> msCloneLineValues(Iterable<MicroService> mss) {
-    	Map<MicroService, CloneLineValue<MicroService>> result = new HashMap<>();
-    	Map<Project, CloneLineValue<Project>> projectResults = projectCloneLineValues();
-    	for(MicroService ms : mss) {
-    		CloneLineValue<MicroService> cloneLineValue = new CloneLineValue<MicroService>(ms);
-    		Iterable<Project> projects = containRelationService.findMicroServiceContainProjects(ms);
-    		for(Project project : projects) {
-        		CloneLineValue<Project> projectResult = projectResults.get(project);
-        		if(projectResult == null) {
-        			continue;
-        		}
-        		cloneLineValue.addAllFiles(projectResult.getAllFiles());
-        		cloneLineValue.addAllCloneFiles(projectResult.getCloneFiles());
-        		cloneLineValue.addAllCloneFunctions(projectResult.getCloneFunctions());
-        	}
-    		result.put(ms, cloneLineValue);
-    	}
-    	return result;
-    }*/
-    
     private Map<Boolean, Map<String, Map<Long, CloneLineValue<MicroService>>>> msCloneLineValuesCalculateGroupByFunctionCache = new ConcurrentHashMap<>();
     @Override
     public Map<String, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFunction(
@@ -324,30 +305,6 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     	return result;
     }
     
-    /*Map<Project, CloneLineValue<Project>> projectCloneValuesCache = null;
-    @Override
-    public Map<Project, CloneLineValue<Project>> projectCloneLineValues() {
-    	if(projectCloneValuesCache != null) {
-    		return projectCloneValuesCache;
-    	}
-    	Map<Project, CloneLineValue<Project>> result = new HashMap<>();
-    	for(Project project : staticAnalyseService.allProjects()) {
-    		CloneLineValue<Project> projectCloneValue = new CloneLineValue<Project>(project);
-    		projectCloneValue.addAllFiles(containRelationService.findProjectContainAllFiles(project));
-    		result.put(project, projectCloneValue);
-    	}
-    	for(FunctionCloneFunction cloneRelation : findAllFunctionCloneFunctions()) {
-    		result.get(containRelationService.findFunctionBelongToProject(cloneRelation.getFunction1())).addCloneFunction(cloneRelation.getFunction1());
-    		result.get(containRelationService.findFunctionBelongToProject(cloneRelation.getFunction2())).addCloneFunction(cloneRelation.getFunction2());
-    	}
-    	for(FileCloneFile cloneRelation : findAllFileCloneFiles()) {
-    		result.get(containRelationService.findFileBelongToProject(cloneRelation.getFile1())).addCloneFile(cloneRelation.getFile1());
-    		result.get(containRelationService.findFileBelongToProject(cloneRelation.getFile2())).addCloneFile(cloneRelation.getFile2());
-    	}
-    	projectCloneValuesCache = result;
-    	return result;
-    }*/
-
 	@Override
 	public Collection<Clone<Project, FileCloneFile>> queryProjectCloneFromFileClone(Iterable<FileCloneFile> fileClones,
 			boolean removeSameNode) {
@@ -619,6 +576,84 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 			return false;
 		}
 		return group1.equals(group2);
+	}
+	
+	private Collection<Project> fileCloneGroupContainProjects(FileCloneGroup group) {
+		Set<Project> result = new HashSet<>();
+		for(ProjectFile file : group.getFiles()) {
+			Project project = containRelationService.findFileBelongToProject(file);
+			result.add(project);
+		}
+		return result;
+	}
+	
+	private Collection<Project> functionCloneGroupContainProjects(FunctionCloneGroup group) {
+		Set<Project> result = new HashSet<>();
+		for(Function function : group.getFunctions()) {
+			Project project = containRelationService.findFunctionBelongToProject(function);
+			result.add(project);
+		}
+		return result;
+	}
+
+	@Override
+	public Collection<FileCloneGroup> groupFileClonesContainProjects(Collection<FileCloneGroup> groups,
+			Collection<Project> projects) {
+		Set<FileCloneGroup> result = new HashSet<>();
+		for(FileCloneGroup group : groups) {
+			Collection<Project> containProjects = fileCloneGroupContainProjects(group);
+			boolean contain = true;
+			for(Project p : projects) {
+				if(!containProjects.contains(p)) {
+					contain = false;
+					break;
+				}
+			}
+			if(contain) {
+				result.add(group);
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public Collection<FunctionCloneGroup> groupFunctionClonesContainProjects(Collection<FunctionCloneGroup> groups,
+			Collection<Project> projects) {
+		Set<FunctionCloneGroup> result = new HashSet<>();
+		for(FunctionCloneGroup group : groups) {
+			Collection<Project> containProjects = functionCloneGroupContainProjects(group);
+			boolean contain = true;
+			for(Project p : projects) {
+				if(!containProjects.contains(p)) {
+					contain = false;
+					break;
+				}
+			}
+			if(contain) {
+				result.add(group);
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public Collection<FileCloneGroup> groupFileClonesContainMSs(Collection<FileCloneGroup> groups,
+			Collection<MicroService> mss) {
+		Collection<Project> projects = new ArrayList<>();
+		for(MicroService ms : mss) {
+			projects.addAll(containRelationService.findMicroServiceContainProjects(ms));
+		}
+		return groupFileClonesContainProjects(groups, projects);
+	}
+
+	@Override
+	public Collection<FunctionCloneGroup> groupFunctionClonesContainMSs(Collection<FunctionCloneGroup> groups,
+			Collection<MicroService> mss) {
+		Collection<Project> projects = new ArrayList<>();
+		for(MicroService ms : mss) {
+			projects.addAll(containRelationService.findMicroServiceContainProjects(ms));
+		}
+		return groupFunctionClonesContainProjects(groups, projects);
 	}
 	
 }

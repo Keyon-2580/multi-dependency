@@ -68,6 +68,7 @@ public class CloneController {
 			@RequestParam(name="removeDataClass", required=false, defaultValue="false") boolean removeDataClass) {
 		System.out.println(removeFileClone + " " + removeDataClass);
 		request.setAttribute("microservicesCount", msService.findAllMicroService().size());
+		request.setAttribute("microservices", msService.findAllMicroService());
 		request.setAttribute("level", level);
 		request.setAttribute("removeFileClone", removeFileClone);
 		request.setAttribute("removeDataClass", removeDataClass);
@@ -175,14 +176,39 @@ public class CloneController {
 			@RequestParam(name="removeDataClass", required=false, defaultValue="false") boolean removeDataClass) {
 		System.out.println(removeFileClone + " " + removeDataClass);
 		System.out.println(params);
+		CloneLevel cloneLevel = CloneLevel.valueOf(level);
+		cloneLevel = cloneLevel == null ? CloneLevel.file : cloneLevel;
 		JSONObject result = new JSONObject();
 		try {
-			List<String> groupsStr = (List<String>) params.get("groups");
+			String searchWhat = (String) params.get("search");
 			List<CloneGroup> selectedGroups = new ArrayList<>();
-			for(String idStr : groupsStr) {
-				CloneGroup group = nodeService.queryCloneGroup(Long.valueOf(idStr));
-				if(group != null) {
-					selectedGroups.add(group);
+			if("groups".equals(searchWhat)) {
+				List<String> groupsStr = (List<String>) params.get("groups");
+				for(String idStr : groupsStr) {
+					CloneGroup group = nodeService.queryCloneGroup(Long.valueOf(idStr));
+					if(group != null) {
+						selectedGroups.add(group);
+					}
+				}
+			} else if("projects".equals(searchWhat)) {
+				List<String> projectsStr = (List<String>) params.get("projects");
+				List<MicroService> mss = new ArrayList<>();
+				for(String idStr : projectsStr) {
+					MicroService ms = msService.findMicroServiceById(Long.valueOf(idStr));
+					if(ms != null) {
+						mss.add(ms);
+					}
+				}
+				if(cloneLevel == CloneLevel.function) {
+					Collection<FunctionCloneGroup> functionCloneGroups = cloneAnalyse.groupFunctionClonesContainMSs(cloneAnalyse.groupFunctionClones(removeFileClone), mss);
+					for(FunctionCloneGroup g : functionCloneGroups) {
+						selectedGroups.add(g.getGroup());
+					}
+				} else {
+					Collection<FileCloneGroup> fileCloneGroups = cloneAnalyse.groupFileClonesContainMSs(cloneAnalyse.groupFileClones(removeDataClass), mss);
+					for(FileCloneGroup g : fileCloneGroups) {
+						selectedGroups.add(g.getGroup());
+					}
 				}
 			}
 			System.out.println(selectedGroups);
@@ -190,7 +216,7 @@ public class CloneController {
 			for(CloneGroup group : selectedGroups) {
 				List<CloneGroup> groups = new ArrayList<>();
 				groups.add(group);
-				cytoscapeArray.add(cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), false, removeFileClone, removeDataClass));
+				cytoscapeArray.add(cloneShow.clonesGroupsToCytoscape(groups, cloneLevel, false, removeFileClone, removeDataClass));
 			}
 			result.put("size", selectedGroups.size());
 			result.put("groups", selectedGroups);
@@ -201,7 +227,7 @@ public class CloneController {
 				groups.add(group);
 			}
 			// 合并
-			result.put("groupValue", cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), true, removeFileClone, removeDataClass));
+			result.put("groupValue", cloneShow.clonesGroupsToCytoscape(groups, cloneLevel, true, removeFileClone, removeDataClass));
 			result.put("result", "success");
 		} catch (Exception e) {
 			result.put("result", "fail");
@@ -241,7 +267,8 @@ public class CloneController {
 	@ResponseBody
 	public JSONObject cloneGroupToCytoscape(@PathVariable("level") String level, 
 			@RequestParam(name="top", required=false, defaultValue="-1") int top,
-			@RequestParam(name="projectsCount", required=false, defaultValue="-1") int projectsCount,
+			@RequestParam(name="minProjectsCount", required=false, defaultValue="-1") int minProjectsCount,
+			@RequestParam(name="maxProjectsCount", required=false, defaultValue="-1") int maxProjectsCount,
 			@RequestParam(name="removeFileClone", required=false, defaultValue="false") boolean removeFileClone,
 			@RequestParam(name="removeDataClass", required=false, defaultValue="false") boolean removeDataClass) {
 		JSONObject result = new JSONObject();
@@ -249,7 +276,7 @@ public class CloneController {
 			JSONArray cytoscapeArray = new JSONArray();
 			CloneLevel cloneLevel = CloneLevel.valueOf(level);
 			cloneLevel = cloneLevel == null ? CloneLevel.file : cloneLevel;
-			if(top != -1) {
+			if(top >= 0) {
 				List<CloneGroup> groups = new ArrayList<>();
 				int count = 0;
 				if(cloneLevel == CloneLevel.function) {
@@ -284,7 +311,7 @@ public class CloneController {
 				result.put("groupValue", cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), true, removeFileClone, removeDataClass));
 				return result;
 			} 
-			if(projectsCount != -1) {
+			if(minProjectsCount >= 0 || maxProjectsCount >= 0) {
 				Collection<MicroService> mss = msService.findAllMicroService();
 				Map<String, Map<Long, CloneLineValue<MicroService>>> data = new HashMap<>();
 				if(cloneLevel == CloneLevel.function) {
@@ -303,17 +330,14 @@ public class CloneController {
 					Map<Long, CloneLineValue<MicroService>> value = entry.getValue();
 					for(Map.Entry<Long, CloneLineValue<MicroService>> msEntry : value.entrySet()) {
 						CloneLineValue<MicroService> msValue = msEntry.getValue();
-						if(CloneLevel.function == cloneLevel) {
-							if(!msValue.getCloneFunctions().isEmpty()) {
-								count++;
-							}
-						} else {
-							if(!msValue.getCloneFiles().isEmpty()) {
-								count++;
-							}
+						if(CloneLevel.function == cloneLevel && !msValue.getCloneFunctions().isEmpty()) {
+							count++;
+						} 
+						if(CloneLevel.file == cloneLevel && !msValue.getCloneFiles().isEmpty()) {
+							count++;
 						}
 					}
-					if(count >= projectsCount) {
+					if(isCountIn(count, minProjectsCount, maxProjectsCount)) {
 						groups.add(nodeService.queryCloneGroup(cloneLevel, group));
 					}
 				}
@@ -330,13 +354,26 @@ public class CloneController {
 				result.put("groupValue", cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), true, removeFileClone, removeDataClass));
 				return result;
 			}
-			throw new Exception("参数错误，top：" + top + "，projectsCount：" + projectsCount);
+			throw new Exception("参数错误，top：" + top + "，projectsCount：" + minProjectsCount);
 		} catch (Exception e) {
 			result.put("result", "fail");
 			result.put("msg", e.getMessage());
 		}
 		
 		return result;
+	}
+	
+	private boolean isCountIn(int count, int min, int max) {
+		if(min < 0 && max < 0) {
+			return false;
+		} else if(min < 0) {
+			return count <= max;
+		} else if(max < 0) {
+			return count >= min;
+		} else {
+			return count <= max && count >= min;
+		}
+		
 	}
 	
 }

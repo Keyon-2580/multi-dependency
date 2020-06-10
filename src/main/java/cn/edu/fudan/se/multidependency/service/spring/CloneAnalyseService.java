@@ -17,14 +17,17 @@ import cn.edu.fudan.se.multidependency.service.spring.data.FunctionCloneGroup;
 
 public interface CloneAnalyseService {
 	
-//	Collection<Collection<? extends CloneRelation>> groupFileCloneRelation(boolean removeDataClass);
-//	Collection<Collection<? extends CloneRelation>> groupFunctionCloneRelation(boolean removeFileClone);
-//	Collection<Collection<? extends Node>> groupFileCloneNode(boolean removeDataClass);
-//	Collection<Collection<? extends Node>> groupFunctionCloneNode(boolean removeFileClone);
-	
 	Collection<FileCloneGroup> groupFileClones(boolean removeDataClass);
 	
 	Collection<FunctionCloneGroup> groupFunctionClones(boolean removeFileClone);
+	
+	Collection<FileCloneGroup> groupFileClonesContainProjects(Collection<FileCloneGroup> groups, Collection<Project> projects);
+	
+	Collection<FunctionCloneGroup> groupFunctionClonesContainProjects(Collection<FunctionCloneGroup> groups, Collection<Project> projects);
+	
+	Collection<FileCloneGroup> groupFileClonesContainMSs(Collection<FileCloneGroup> groups, Collection<MicroService> mss);
+	
+	Collection<FunctionCloneGroup> groupFunctionClonesContainMSs(Collection<FunctionCloneGroup> groups, Collection<MicroService> mss);
 	
 //	Map<Project, CloneLineValue<Project>> projectCloneLineValues();
 	

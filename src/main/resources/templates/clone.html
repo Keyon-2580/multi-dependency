@@ -84,7 +84,7 @@
 					<form role="form" >
 						<div class="form-group row col-sm-12">
 							<div class="col-sm-6">
-								<label>search top：<input class="form-control" type="number"  id="topInput" /></label>
+								<label>top：<input class="form-control" type="number"  id="topInput" /></label>
 							</div>
 							<div class="col-sm-6">
 									<button id="searchTop" type="button" class="btn btn-default">搜索</button>
@@ -94,7 +94,7 @@
 					<form role="form" >
 						<div class="form-group row col-sm-12">
 							<div class="col-sm-6">
-								<label>search groups：
+								<label>克隆组：
 									<select id="searchGroups" class="multiselect" multiple="multiple">
 									</select>
 								</label>
@@ -107,12 +107,30 @@
 					<form role="form" >
 						<div class="form-group row col-sm-12">
 							<div class="col-sm-6">
-								<label>跨项目数(? / <span th:text="${microservicesCount}"></span>) &gt;=
-									<input class="form-control" type="number"  id="CountMSsInput" />
-								</label>
+								<label>跨项目数(? / <span th:text="${microservicesCount}"></span>)
+								</label> 
+									<br/>&gt;=
+									<input class="" type="number"  id="minCountMSsInput" /> 
+									<br/>&lt;=
+									<input class="" type="number"  id="maxCountMSsInput" />
 							</div>
 							<div class="col-sm-6">
-									<button id="searchCountOfMSs" type="button" class="btn btn-default">搜索</button>
+								<button id="searchCountOfMSs" type="button" class="btn btn-default">搜索</button>
+							</div>
+						</div>
+					</form>
+					<form role="form" >
+						<div class="form-group row col-sm-12">
+							<div class="col-sm-6">
+								<label>克隆组包含项目：
+									<select id="searchProjectsSelect" class="multiselect" multiple="multiple">
+										<option th:each="ms : ${microservices}" th:value="${ms.id}" th:text="${ms.name}">
+										</option>
+									</select>
+								</label> 
+							</div>
+							<div class="col-sm-6">
+								<button id="searchMSs" type="button" class="btn btn-default">搜索</button>
 							</div>
 						</div>
 					</form>

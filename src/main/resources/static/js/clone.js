@@ -294,6 +294,13 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 		});
 	}
 	var _clone = function() {
+		$('#searchProjectsSelect').multiselect({
+			maxHeight: 200,
+			enableCollapsibleOptGroups: true,
+            enableClickableOptGroups: true,
+            enableCollapsibleOptGroups: true,
+            includeSelectAllOption: true
+		});
 		var _showGroupsResult = function(result) {
 			console.log(result);
 			var size = result.groups.length;
@@ -355,14 +362,33 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 				showZTree(result.value[i].ztree, $("#node_ztree_" + i), cy);
 			}
 		}
-		
-		$("#searchSelected").click(function(){
-			var groups = $("#searchGroups").val();
-			if(groups.length == 0) {
+		$("#searchCountOfMSs").click(function(){
+			var minCount = $("#minCountMSsInput").val();
+			var maxCount = $("#maxCountMSsInput").val();
+			minCount = minCount == null ? -1 : minCount;
+			maxCount = maxCount == null ? -1 : maxCount;
+			if(minCount < 0 && maxCount < 0) {
+				return ;
+			}
+			var url = "/clone/" + level + "/group/cytoscape?" + urlRemoveParams + "&minProjectsCount=" + minCount + "&maxProjectsCount=" + maxCount;
+			$.ajax({
+				type : "GET",
+				url : url,
+				success : function(result) {
+					if(result.result == "success") {
+						_showGroupsResult(result);
+					}
+				}
+			});
+		});
+		$("#searchMSs").click(function(){
+			var msIds = $("#searchProjectsSelect").val();
+			if(msIds.length == 0) {
 				return ;
 			}
 			var params = {
-				"groups" : groups
+				"projects" : msIds,
+				"search" : "projects"
 			}
 			var url = "/clone/" + level + "/group/cytoscape?" + urlRemoveParams;
 			$.ajax({
@@ -378,15 +404,23 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 				}
 			});
 		});
-		$("#searchCountOfMSs").click(function(){
-			var count = $("#CountMSsInput").val();
-			console.log(count);
-			if(top < 0) {
+		
+		$("#searchSelected").click(function(){
+			var groups = $("#searchGroups").val();
+			if(groups.length == 0) {
 				return ;
 			}
+			var params = {
+				"groups" : groups,
+				"search" : "groups"
+			}
+			var url = "/clone/" + level + "/group/cytoscape?" + urlRemoveParams;
 			$.ajax({
-				type : "GET",
-				url : "/clone/" + level + "/group/cytoscape?projectsCount=" + count + "&" + urlRemoveParams,
+				type : "POST",
+				contentType : "application/json",
+				dataType : "json",
+				url : url,
+				data : JSON.stringify(params),
 				success : function(result) {
 					if(result.result == "success") {
 						_showGroupsResult(result);
@@ -417,8 +451,8 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			url : "/clone/" + level + "/group/histogram?" + urlRemoveParams,
 			success : function(result) {
 				console.log(result);
-				$("#searchGroups").append('<optgroup id="select_single" label="single">单项目克隆</optgroup>');
-				$("#searchGroups").append('<optgroup id="select_between" label="between">跨项目克隆</optgroup>');
+				$("#searchGroups").append('<optgroup id="select_single" label="单项目">单项目克隆</optgroup>');
+				$("#searchGroups").append('<optgroup id="select_between" label="跨项目">跨项目克隆</optgroup>');
 				var groups = result.groups;
 				var xAxisData = [];
 				var nodesData = [];

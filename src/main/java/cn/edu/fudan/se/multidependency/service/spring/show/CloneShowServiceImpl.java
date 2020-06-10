@@ -207,6 +207,7 @@ public class CloneShowServiceImpl implements CloneShowService {
 					groupEdges.add(new CytoscapeEdge(function2.getId().toString(), cloneGroup.getId().toString(), "nodeIsInCloneGroup"));
 					nodeToZTreeNode.put(function2, new ZTreeNode(function2.getId(), function2.getFunctionIdentifier() + "(" + function2.getStartLine() + " , " + function2.getEndLine(), false, "Function", false));
 				}
+				edges.add(new CytoscapeEdge(function1, function2, "Clone", String.valueOf(cloneRelation.getValue())));
 				ProjectFile file1 = containRelationService.findFunctionBelongToFile(function1);
 				if(!isNodeToCytoscapeNode.getOrDefault(file1, false)) {
 					isNodeToCytoscapeNode.put(file1, true);
