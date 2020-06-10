@@ -391,13 +391,13 @@ public class FileUtil {
 		return true;
 	}
 
-	public static void writeObject (String filePath, Object obj) throws IOException {
+	public static void writeObject(String filePath, Object obj) throws IOException {
 		long startTimeOfSerialize = System.currentTimeMillis();
 		File file = new File(filePath);
 		if (!file.exists()) {
 			file.createNewFile();
 		}
-		try(ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));){
+		try (ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file)))) {
 			oos.writeObject(obj);
 			long endTimeOfSerialize = System.currentTimeMillis();
 			LOGGER.info("序列化所花时间：" + (float) ((endTimeOfSerialize - startTimeOfSerialize) / 1000.00) + " s,  or "
@@ -405,9 +405,9 @@ public class FileUtil {
 		}
 	}
 
-	public static Object readObject (String filePath) throws IOException, ClassNotFoundException {
+	public static Object readObject(String filePath) throws IOException, ClassNotFoundException {
 		long startTimeOfUnSerialize = System.currentTimeMillis();
-		try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(filePath)));) {
+		try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(new File(filePath))))) {
 			Object obj = ois.readObject();
 			long endTimeOfUnSerialize = System.currentTimeMillis();
 			LOGGER.info("反序列化所花时间：" + (float) ((endTimeOfUnSerialize - startTimeOfUnSerialize) / 1000.00) + " s,  or "
