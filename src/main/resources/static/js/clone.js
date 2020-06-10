@@ -512,6 +512,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 								var html = "";
 								html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn'>全屏</button>";
 								html += "<p></p></div>";
+								html += "<div><h4>" + result.group.name + "</h4></div>"
 								html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble">';
 								html += '<div class="div_cytoscape_treeview">';
 								html += '<ul id="node_ztree_num" class="ztree"></ul>';

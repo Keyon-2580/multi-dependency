@@ -228,6 +228,7 @@ public class CloneController {
 			JSONObject value = cloneShow.clonesGroupsToCytoscape(groups, CloneLevel.valueOf(level), false, removeFileClone, removeDataClass);
 			result.put("result", "success");
 			result.put("value", value);
+			result.put("group", cloneGroup);
 		} catch (Exception e) {
 			result.put("result", "fail");
 			result.put("msg", e.getMessage());
