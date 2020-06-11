@@ -538,14 +538,19 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 
 	@Override
 	public boolean isDataFile(ProjectFile file) {
+		if(!ProjectFile.SUFFIX_JAVA.equals(file.getSuffix())) {
+			// 如果不是java文件，直接返回false
+			return false;
+		}
 		Collection<Type> types = containRelationService.findFileDirectlyContainTypes(file);
+		if(types.isEmpty()) {
+			return false;
+		}
 		for(Type type : types) {
 			if(!isDataClass(type)) {
-//				System.out.println(file.getPath() + " isDataFile false");
 				return false;
 			}
 		}
-//		System.out.println(file.getPath() + " isDataFile true");
 		return true;
 	}
 

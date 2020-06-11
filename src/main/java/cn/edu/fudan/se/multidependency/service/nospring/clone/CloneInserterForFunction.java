@@ -30,6 +30,8 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 
 	private static final Executor executor = Executors.newCachedThreadPool();
 	
+	private static long functionCloneGroupNumber = 0;
+	
 	private CountDownLatch latch;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CloneInserterForFunction.class);
@@ -137,11 +139,11 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 		}
 		LOGGER.info("插入方法级克隆数：" + sizeOfFunctionCloneFunctions);
 		Collection<Collection<? extends Node>> groups = CloneUtil.groupCloneNodes(clones);
-		int groupCount = 0;
+		long groupCount = functionCloneGroupNumber;
 		for(Collection<? extends Node> nodes : groups) {
 			CloneGroup group = new CloneGroup();
 			group.setEntityId(generateEntityId());
-			group.setName("group_" + groupCount++);
+			group.setName("group_" + functionCloneGroupNumber++);
 			group.setLevel(NodeLabelType.Function);
 			group.setSize(nodes.size());
 			addNode(group, null);
@@ -149,7 +151,7 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 				addRelation(new Contain(group, node));
 			}
 		}
-		LOGGER.info("插入方法级克隆组，组数：" + groupCount);
+		LOGGER.info("插入方法级克隆组，组数：" + (functionCloneGroupNumber - groupCount));
 	}
 
 	@Override

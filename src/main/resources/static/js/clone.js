@@ -234,7 +234,27 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			'font-size' : 20
 		}).update();
 		var edges = cy.remove('edge[type="Clone"]');
-		cy.layout({name : 'dagre'}).run();
+//		cy.layout({name : 'dagre'}).run();
+		cy.layout({
+			name : "concentric",
+			concentric: function( node ){
+				console.log(node.degree());
+//		          return node.degree();
+					if(node.data().type == "CloneGroup") {
+						return 300;
+					} else if(node.data().type == "Function") {
+						return 200;
+					} else if(node.data().type == "File") {
+						return 100;
+					} else if(node.data().type == "MicroService") {
+						return 2;
+					} 
+					return 1;
+		        },
+		        levelWidth: function( nodes ){
+		          return 3;
+		        }
+		}).run();
 		cy.add(edges);
 		return cy;
 	}

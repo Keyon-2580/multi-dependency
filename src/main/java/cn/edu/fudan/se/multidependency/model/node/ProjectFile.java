@@ -33,6 +33,8 @@ public class ProjectFile implements Node, CloneRelationNode {
 	
 	private String suffix;
 	
+	public static final String SUFFIX_JAVA = ".java";
+	
 	private int line = -1;
 	
 	public ProjectFile(Long entityId, String name, String path, String suffix) {
