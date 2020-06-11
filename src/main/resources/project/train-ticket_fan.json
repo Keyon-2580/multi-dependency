@@ -179,7 +179,8 @@
 		"serviceGroupName": "train-ticket",
 		"project": "ts-common",
 		"language": "java",
-		"isMicroservice": false
+		"isMicroservice": true,
+		"microserviceName" : "ts-common"
 	}, {
 		"path": "D:\\multiple-dependency-project\\train-ticket\\ts-config-service",
 		"serviceGroupName": "train-ticket",
@@ -748,7 +749,8 @@
 		"serviceGroupName": "train-ticket",
 		"project": "ts-ui-test",
 		"language": "java",
-		"isMicroservice": false
+		"isMicroservice": true,
+		"microserviceName" : "ts-ui-test"
 	}],
 	"architectures" : {
 		"projects" : [

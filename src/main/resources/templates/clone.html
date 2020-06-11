@@ -65,7 +65,13 @@
 	<div th:include="nav.html::nav"></div>
 	<div class="col-sm-12 row" style="margin-bottom: 15px;">
 		<div class="col-sm-12 row">
-			<div id="main" style="width: 100%;height:400px;"></div>
+			<div class="col-sm-12">
+				<button id="histogram_sort_nodes">按克隆组内节点数排序</button>			
+				<button id="histogram_sort_projects">按克隆组跨项目数排序</button>			
+			</div>
+			<div class="col-sm-12">
+				<div id="main" style="width: 100%;height:400px;"></div>
+			</div>
 			<hr/>
 		</div>
 		<div id="specifiedCytoscape">

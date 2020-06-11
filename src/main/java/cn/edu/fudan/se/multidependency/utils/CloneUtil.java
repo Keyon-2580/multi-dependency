@@ -192,6 +192,11 @@ public class CloneUtil {
 		return result;
 	}
 	
+	/**
+	 * 计算连通图
+	 * @param relations
+	 * @return
+	 */
 	public static Collection<Collection<? extends Node>> groupCloneNodes(Iterable<? extends CloneRelation> relations) {
 		List<Collection<? extends Node>> result = new ArrayList<>();
 		Map<Node, Collection<Node>> nodeToCollection = new HashMap<>();
@@ -226,6 +231,34 @@ public class CloneUtil {
 		result.sort((collection1, collection2) -> {
 			return collection2.size() - collection1.size();
 		});
+		return result;
+	}
+	
+	@Data
+	@AllArgsConstructor
+	public static class Group {
+		private String line;
+		private Collection<Integer> groupIds = new ArrayList<>();
+		public Group(String line) {
+			this.line = line;
+		}
+		public void addId(int id) {
+			this.groupIds.add(id);
+		}
+	}
+	
+	public static Collection<Group> readGroupFile(String filePath) throws Exception {
+		List<Group> result = new ArrayList<>();
+		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
+			String line = null;
+			while((line = reader.readLine()) != null) {
+				Group group = new Group(line);
+				String[] values = line.split(",");
+				for(String value : values) {
+					group.addId(Integer.parseInt(value));
+				}
+			}
+		}
 		return result;
 	}
 }

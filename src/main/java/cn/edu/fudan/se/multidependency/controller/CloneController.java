@@ -3,10 +3,8 @@ package cn.edu.fudan.se.multidependency.controller;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -25,12 +23,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.service.spring.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
@@ -100,68 +94,69 @@ public class CloneController {
 	@GetMapping("/{level}/group/histogram")
 	@ResponseBody
 	public JSONObject cloneGroupToHistogram(@PathVariable("level") String level,
+			@RequestParam(name="sort", required=false, defaultValue="nodes") String sort,
 			@RequestParam(name="removeFileClone", required=false, defaultValue="false") boolean removeFileClone,
 			@RequestParam(name="removeDataClass", required=false, defaultValue="false") boolean removeDataClass) {
-		System.out.println("histogram: " + removeFileClone + " " + removeDataClass);
+		System.out.println("histogram: " + removeFileClone + " " + removeDataClass + " " + sort);
 		JSONObject result = new JSONObject();
 		try {
 			JSONObject histograms = new JSONObject();
 			JSONArray nodeSizeArray = new JSONArray();
 			JSONArray projectSizeArray = new JSONArray();
 			List<CloneGroup> groups = new ArrayList<>();
-			Collection<Collection<? extends Node>> nodeGroups = new ArrayList<>();
 			if(CloneLevel.valueOf(level) == CloneLevel.function) {
 				Collection<FunctionCloneGroup> functionGroups = cloneAnalyse.groupFunctionClones(removeFileClone);
-				for(FunctionCloneGroup group : functionGroups) {
-					Collection<? extends Node> nodes = group.getFunctions();
-					nodeGroups.add(nodes);
+				List<FunctionCloneGroup> sortGroups = new ArrayList<>(functionGroups);
+				sortGroups.sort((group1, group2) -> {
+					if("nodes".equals(sort)) {
+						int s = group2.getFunctions().size() - group1.getFunctions().size();
+						if(s == 0) {
+							return cloneAnalyse.functionCloneGroupContainMSs(group2).size() - cloneAnalyse.functionCloneGroupContainMSs(group1).size();
+						}
+						return s;
+					} else {
+						int s = cloneAnalyse.functionCloneGroupContainMSs(group2).size() - cloneAnalyse.functionCloneGroupContainMSs(group1).size();
+						if(s == 0) {
+							return group2.getFunctions().size() - group1.getFunctions().size();
+						}
+						return s;
+					}
+				});
+				for(FunctionCloneGroup group : sortGroups) {
 					groups.add(group.getGroup());
+					nodeSizeArray.add(group.getFunctions().size());
+					projectSizeArray.add(cloneAnalyse.functionCloneGroupContainMSs(group).size());
 				}
 			} else {
 				Collection<FileCloneGroup> fileGroups = cloneAnalyse.groupFileClones(removeDataClass);
-				for(FileCloneGroup group : fileGroups) {
-					Collection<? extends Node> nodes = group.getFiles();
-					nodeGroups.add(nodes);
-					groups.add(group.getGroup());
-				}
-			}
-			LOGGER.info("克隆组数：" + nodeGroups.size());
-			int size = 0;
-			for(Collection<? extends Node> nodes : nodeGroups) {
-				size++;
-				int nodeSize = 0, projectSize = 0;
-				Set<Node> projects = new HashSet<>();
-				for(Node node : nodes) {
-					nodeSize++;
-					if(node instanceof Function) {
-						ProjectFile belongToFile = containRelationService.findFunctionBelongToFile((Function) node);
-						Project belongToProject = containRelationService.findFileBelongToProject(belongToFile);
-						MicroService belongToMS = containRelationService.findProjectBelongToMicroService(belongToProject);
-						if(belongToMS == null) {
-							projects.add(belongToProject);
-						} else {
-							projects.add(belongToMS);
+				List<FileCloneGroup> sortGroups = new ArrayList<>(fileGroups);
+				sortGroups.sort((group1, group2) -> {
+					if("nodes".equals(sort)) {
+						int s = group2.getFiles().size() - group1.getFiles().size();
+						if(s == 0) {
+							return cloneAnalyse.fileCloneGroupContainMSs(group2).size() - cloneAnalyse.fileCloneGroupContainMSs(group1).size();
 						}
-					} else if(node instanceof ProjectFile) {
-						Project belongToProject = containRelationService.findFileBelongToProject((ProjectFile) node);
-						MicroService belongToMS = containRelationService.findProjectBelongToMicroService(belongToProject);
-						if(belongToMS == null) {
-							projects.add(belongToProject);
-						} else {
-							projects.add(belongToMS);
+						return s;
+					} else {
+						int s = cloneAnalyse.fileCloneGroupContainMSs(group2).size() - cloneAnalyse.fileCloneGroupContainMSs(group1).size();
+						if(s == 0) {
+							return group2.getFiles().size() - group1.getFiles().size();
 						}
+						return s;
 					}
+				});
+				for(FileCloneGroup group : sortGroups) {
+					groups.add(group.getGroup());
+					nodeSizeArray.add(group.getFiles().size());
+					projectSizeArray.add(cloneAnalyse.fileCloneGroupContainMSs(group).size());
 				}
-				projectSize = projects.size();
-				nodeSizeArray.add(nodeSize);
-				projectSizeArray.add(projectSize);
 			}
 			histograms.put("nodeSize", nodeSizeArray);
 			histograms.put("projectSize", projectSizeArray);
 			result.put("result", "success");
 			result.put("value", histograms);
 			result.put("groups", groups);
-			result.put("size", size);
+//			result.put("size", size);
 		} catch (Exception e) {
 			
 		}

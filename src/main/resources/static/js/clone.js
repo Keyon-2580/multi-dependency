@@ -465,131 +465,140 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			});
 		});
 		table();
-		var myChart = echarts.init(document.getElementById('main'));
-		$.ajax({
-			type : "GET",
-			url : "/clone/" + level + "/group/histogram?" + urlRemoveParams,
-			success : function(result) {
-				console.log(result);
-				$("#searchGroups").append('<optgroup id="select_single" label="单项目">单项目克隆</optgroup>');
-				$("#searchGroups").append('<optgroup id="select_between" label="跨项目">跨项目克隆</optgroup>');
-				var groups = result.groups;
-				var xAxisData = [];
-				var nodesData = [];
-				var projectsData = [];
-				for(var i = 0; i < result.size; i++) {
-					xAxisData[i] = groups[i].name;
-					nodesData[i] = result.value["nodeSize"][i];
-					projectsData[i] = result.value.projectSize[i];
-					var html = '<option value="' + groups[i].id + '" >' + xAxisData[i] + '_' + nodesData[i] + ',' + projectsData[i]  + '</option>';
-					if(projectsData[i] > 1) {
-						$("#select_between").append(html);
-					} else {
-						$("#select_single").append(html);
-					}
-				}
-				$('#searchGroups').multiselect({
-					maxHeight: 200,
-					enableCollapsibleOptGroups: true,
-		            enableClickableOptGroups: true,
-		            enableCollapsibleOptGroups: true,
-		            includeSelectAllOption: true
-				});
-				var legendLevel = "";
-				if(level == "function") {
-					legendLevel = "克隆组相关方法数";
-				}
-				if(level == "file") {
-					legendLevel = "克隆组相关文件数";
-				}
-				var option = {
-						dataZoom: [{
-							type: 'slider',
-							show: true,
-							xAxisIndex: [0],
-							left: '9%',
-							bottom: -5,
-							start: 0,
-							end: 50
-						}],
-		        	    tooltip: {
-		        	        trigger: 'axis',
-		        	        axisPointer: {
-		        	            type: 'shadow'
-		        	        }
-		        	    },
-		        	    legend: {
-		        	        data: [legendLevel, '克隆跨项目数']
-		        	    },
-		        	    grid: {
-		        	        left: '3%',
-		        	        right: '4%',
-		        	        bottom: '3%',
-		        	        containLabel: true
-		        	    },
-		        	    xAxis: [{
-		        	            type: 'category',
-		        	            data: xAxisData,
-		        	            axisLabel: {  
-		        	                interval:0,  
-		        	                rotate:40  
-		        	            }  
-		        	        }
-		        	    ],
-		        	    yAxis: [{
-		        	            type: 'value'
-		        	        }
-		        	    ],
-		        	    series: [{
-		        	            name: legendLevel,
-		        	            type: 'bar',
-		        	            stack: 'cloneNode',
-		        	            data: nodesData
-		        	        },{
-		        	            name: '克隆跨项目数',
-		        	            type: 'bar',
-		        	            stack: 'cloneProject',
-		        	            data: projectsData
-		        	        }
-		        	    ]
-		        	};
-		        myChart.setOption(option);
-		        myChart.on('click', function(params) {
-		        	var name = params.name;
-		        	console.log(name);
-		        	$.ajax({
-						type : "GET",
-						url : "/clone/" + level + "/group/cytoscape/" + name + "?" + urlRemoveParams,
-						success : function(result) {
-							if(result.result == "success") {
-								console.log(result.value);
-								var html = "";
-								html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn'>全屏</button>";
-								html += "<p></p></div>";
-								html += "<div><h4>" + result.group.name + "</h4></div>"
-								html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble">';
-								html += '<div class="div_cytoscape_treeview">';
-								html += '<ul id="node_ztree_num" class="ztree"></ul>';
-								html += '</div>';
-								html += '<div class="div_cytoscape" style="float: left; display: inline;">';
-								html += '<div id="cloneGroupDiv" class="div_cytoscape_content cy"></div>';
-								html += '</div>'
-								html += '</div>';
-								html += '<div class="col-sm-12" id="copyDiv_group_one"></div>';
-								html += '<div class="col-sm-12"><hr/></div>';
-								$("#specifiedCytoscape").html(html);
-								$(".fullscreen_btn").unbind("click");
-								$(".fullscreen_btn").click(function(){
-									showFull("fullscreenAble");
-								})
-								var cy = _showCytoscape($("#cloneGroupDiv"), result.value, "copyDiv_group_one");
-								showZTree(result.value.ztree, $("#node_ztree_num"), cy);
-							}
+		var histogram = function(sort) {
+			var myChart = echarts.init(document.getElementById('main'));
+			$.ajax({
+				type : "GET",
+				url : "/clone/" + level + "/group/histogram?sort=" + sort + "&" + urlRemoveParams,
+				success : function(result) {
+					console.log(result);
+					$("#searchGroups").append('<optgroup id="select_single" label="单项目">单项目克隆</optgroup>');
+					$("#searchGroups").append('<optgroup id="select_between" label="跨项目">跨项目克隆</optgroup>');
+					var xAxisData = [];
+					var nodesData = [];
+					var projectsData = [];
+					for(var i = 0; i < result.groups.length; i++) {
+						xAxisData[i] = result.groups[i].name;
+						nodesData[i] = result.value.nodeSize[i];
+						projectsData[i] = result.value.projectSize[i];
+						var html = '<option value="' + result.groups[i].id + '" >' + xAxisData[i] + '_' + nodesData[i] + ',' + projectsData[i]  + '</option>';
+						if(projectsData[i] > 1) {
+							$("#select_between").append(html);
+						} else {
+							$("#select_single").append(html);
 						}
+					}
+					$('#searchGroups').multiselect({
+						maxHeight: 200,
+						enableCollapsibleOptGroups: true,
+			            enableClickableOptGroups: true,
+			            enableCollapsibleOptGroups: true,
+			            includeSelectAllOption: true
 					});
-		        });
-			}
-		});
+					var legendLevel = "";
+					if(level == "function") {
+						legendLevel = "克隆组相关方法数";
+					}
+					if(level == "file") {
+						legendLevel = "克隆组相关文件数";
+					}
+					var option = {
+							dataZoom: [{
+								type: 'slider',
+								show: true,
+								xAxisIndex: [0],
+								left: '9%',
+								bottom: -5,
+								start: 0,
+								end: 50
+							}],
+			        	    tooltip: {
+			        	        trigger: 'axis',
+			        	        axisPointer: {
+			        	            type: 'shadow'
+			        	        }
+			        	    },
+			        	    legend: {
+			        	        data: [legendLevel, '克隆跨项目数']
+			        	    },
+			        	    grid: {
+			        	        left: '3%',
+			        	        right: '4%',
+			        	        bottom: '3%',
+			        	        containLabel: true
+			        	    },
+			        	    xAxis: [{
+			        	            type: 'category',
+			        	            data: xAxisData,
+			        	            axisLabel: {  
+			        	                interval:0,  
+			        	                rotate:40  
+			        	            }  
+			        	        }
+			        	    ],
+			        	    yAxis: [{
+			        	            type: 'value'
+			        	        }
+			        	    ],
+			        	    series: [{
+			        	            name: legendLevel,
+			        	            type: 'bar',
+			        	            stack: 'cloneNode',
+			        	            data: nodesData
+			        	        },{
+			        	            name: '克隆跨项目数',
+			        	            type: 'bar',
+			        	            stack: 'cloneProject',
+			        	            data: projectsData
+			        	        }
+			        	    ]
+			        	};
+			        myChart.setOption(option);
+			        myChart.on('click', function(params) {
+			        	var name = params.name;
+			        	console.log(name);
+			        	$.ajax({
+							type : "GET",
+							url : "/clone/" + level + "/group/cytoscape/" + name + "?" + urlRemoveParams,
+							success : function(result) {
+								if(result.result == "success") {
+									console.log(result.value);
+									var html = "";
+									html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn'>全屏</button>";
+									html += "<p></p></div>";
+									html += "<div><h4>" + result.group.name + "</h4></div>"
+									html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble">';
+									html += '<div class="div_cytoscape_treeview">';
+									html += '<ul id="node_ztree_num" class="ztree"></ul>';
+									html += '</div>';
+									html += '<div class="div_cytoscape" style="float: left; display: inline;">';
+									html += '<div id="cloneGroupDiv" class="div_cytoscape_content cy"></div>';
+									html += '</div>'
+									html += '</div>';
+									html += '<div class="col-sm-12" id="copyDiv_group_one"></div>';
+									html += '<div class="col-sm-12"><hr/></div>';
+									$("#specifiedCytoscape").html(html);
+									$(".fullscreen_btn").unbind("click");
+									$(".fullscreen_btn").click(function(){
+										showFull("fullscreenAble");
+									})
+									var cy = _showCytoscape($("#cloneGroupDiv"), result.value, "copyDiv_group_one");
+									showZTree(result.value.ztree, $("#node_ztree_num"), cy);
+								}
+							}
+						});
+			        });
+				}
+			});
+		}
+		histogram("nodes");
+		$("#histogram_sort_nodes").click(function() {
+			histogram("nodes");
+		})
+		$("#histogram_sort_projects").click(function() {
+			histogram("projects");
+		})
+		
 	};
 	var _showImg = function(){
 		$("#showImg").click(function() {

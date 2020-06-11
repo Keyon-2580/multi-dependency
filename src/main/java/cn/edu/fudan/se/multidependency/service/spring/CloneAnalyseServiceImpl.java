@@ -578,21 +578,49 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 		return group1.equals(group2);
 	}
 	
-	private Collection<Project> fileCloneGroupContainProjects(FileCloneGroup group) {
+	public Collection<MicroService> fileCloneGroupContainMSs(FileCloneGroup group) {
+		Set<MicroService> result = new HashSet<>();
+		Collection<Project> fileCloneGroupContainProjects = fileCloneGroupContainProjects(group);
+		for(Project project : fileCloneGroupContainProjects) {
+			result.add(containRelationService.findProjectBelongToMicroService(project));
+		}
+		return result;
+	}
+	
+	public Collection<MicroService> functionCloneGroupContainMSs(FunctionCloneGroup group) {
+		Set<MicroService> result = new HashSet<>();
+		Collection<Project> functionCloneGroupContainProjects = functionCloneGroupContainProjects(group);
+		for(Project project : functionCloneGroupContainProjects) {
+			result.add(containRelationService.findProjectBelongToMicroService(project));
+		}
+		return result;
+	}
+	
+	private Map<FileCloneGroup, Collection<Project>> fileCloneGroupContainProjectsCache = new ConcurrentHashMap<>();
+	public Collection<Project> fileCloneGroupContainProjects(FileCloneGroup group) {
+		if(fileCloneGroupContainProjectsCache.get(group) != null) {
+			return fileCloneGroupContainProjectsCache.get(group);
+		}
 		Set<Project> result = new HashSet<>();
 		for(ProjectFile file : group.getFiles()) {
 			Project project = containRelationService.findFileBelongToProject(file);
 			result.add(project);
 		}
+		fileCloneGroupContainProjectsCache.put(group, result);
 		return result;
 	}
 	
-	private Collection<Project> functionCloneGroupContainProjects(FunctionCloneGroup group) {
+	private Map<FunctionCloneGroup, Collection<Project>> functionCloneGroupContainProjectsCache = new ConcurrentHashMap<>();
+	public Collection<Project> functionCloneGroupContainProjects(FunctionCloneGroup group) {
+		if(functionCloneGroupContainProjectsCache.get(group) != null) {
+			return functionCloneGroupContainProjectsCache.get(group);
+		}
 		Set<Project> result = new HashSet<>();
 		for(Function function : group.getFunctions()) {
 			Project project = containRelationService.findFunctionBelongToProject(function);
 			result.add(project);
 		}
+		functionCloneGroupContainProjectsCache.put(group, result);
 		return result;
 	}
 
