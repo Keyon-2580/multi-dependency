@@ -55,9 +55,43 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 		}
 	}
 	var cys = [];
-	var showZTree = function(nodes, container, cy) {
+	var showZTree = function(nodes, container, cy, copyDivId = "") {
 		var setting = {
 				callback: {
+					onClick: function(event, treeId, treeNode) {
+						var id = treeNode.id;
+						console.log(treeNode);
+						console.log(id);
+						if(id <= 0 || cy == null) {
+							return ;
+						}
+						var node = cy.$('#' + id);
+						if(node != null) {
+							console.log(node.data());
+							cy.fit(node);
+						}
+						var html = "<table class='table table-bordered'>";
+						var children = treeNode.children;
+						html += "<tr>";
+						html += "<td><a class='clipBoard'>";
+						html += treeNode.name;
+						html += "</a></td>";
+						if(children != null) {
+							html += "<td>";
+							for(var i = 0; i < children.length; i++) {
+								html += "<a class='clipBoard'>" + children[i].name + "</a></br>";
+							}
+							html += "</td>";
+						}
+						html += "</tr>";
+						html += "</table>";
+						console.log(children);
+						$("#" + copyDivId).html(html);
+						$(".clipBoard").click(function(){
+							var content = $(this).text();
+							copyToClip(content)
+						});
+					},
 					onCheck: function(event, treeId, treeNode) {
 						var id = treeNode.id;
 						toggleNode(id, treeNode.checked, cy);
@@ -343,7 +377,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			html += '<div class="col-sm-12" id="copyDiv_group"></div>';
 			html += '<div class="col-sm-12"><hr/></div>';
 			$("#groupCytoscape").html(html);
-			showZTree(result.groupValue.ztree, $("#node_ztree_groups"), _showCytoscape($("#cloneGroupsDiv"), result.groupValue, "copyDiv_group"));
+			showZTree(result.groupValue.ztree, $("#node_ztree_groups"), _showCytoscape($("#cloneGroupsDiv"), result.groupValue, "copyDiv_group"), "copyDiv_group");
 			
 			html = "";
 			for(var i = 0; i < size; i++) {
@@ -379,7 +413,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			for(var i = 0; i < size; i++) {
 				var cy = _showCytoscape($("#cloneGroupDiv_" + i), result.value[i], "copyDiv_" + i);
 				cys[i] = cy;
-				showZTree(result.value[i].ztree, $("#node_ztree_" + i), cy);
+				showZTree(result.value[i].ztree, $("#node_ztree_" + i), cy, "copyDiv_" + i);
 			}
 		}
 		$("#searchCountOfMSs").click(function(){
@@ -583,7 +617,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 										showFull("fullscreenAble");
 									})
 									var cy = _showCytoscape($("#cloneGroupDiv"), result.value, "copyDiv_group_one");
-									showZTree(result.value.ztree, $("#node_ztree_num"), cy);
+									showZTree(result.value.ztree, $("#node_ztree_num"), cy, "copyDiv_group_one");
 								}
 							}
 						});
