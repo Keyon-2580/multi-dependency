@@ -76,7 +76,18 @@
 		</div>
 		<div id="specifiedCytoscape">
 		</div>
-		<div class="col-sm-12">
+		<div class="col-sm-12 row" style="margin-top: 15px;">
+			<div class="col-sm-12">
+				<button id="projects_size_histogram_sort_nodes">按节点数排序</button>			
+				<button id="projects_size_histogram_sort_groups">按组数排序</button>			
+				<button id="projects_size_histogram_sort_ratio">按节点数/组数排序</button>			
+			</div>
+			<div class="col-sm-12">
+				<div id="projects_size_histogram" style="width: 100%;height:400px;"></div>
+			</div>
+			<hr/>
+		</div>
+		<div class="col-sm-12" style="margin-top: 15px;">
 			<i id="table_wait">查询中...</i>
 			<div id="table_div">
 				<table class="table table-bordered" id="table">

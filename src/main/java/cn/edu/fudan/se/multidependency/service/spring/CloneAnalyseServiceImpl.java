@@ -81,7 +81,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 			result.add(fileGroup);
 		}
 		result.sort((group1, group2) -> {
-			return group2.getFiles().size() - group1.getFiles().size();
+			return group2.getNodes().size() - group1.getNodes().size();
 		});
 		groupFileCloneRelationCache.put(removeDataClass, result);
 		return result;
@@ -115,7 +115,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 			result.add(functionGroup);
 		}
 		result.sort((group1, group2) -> {
-			return group2.getFunctions().size() - group1.getFunctions().size();
+			return group2.getNodes().size() - group1.getNodes().size();
 		});
 		groupFunctionCloneRelationCache.put(removeFileClone, result);
 		return result;
@@ -149,7 +149,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     	}
     	Collection<FileCloneGroup> groupFileClones = groupFileClones(removeDataClass);
     	for(FileCloneGroup group : groupFileClones) {
-    		for(ProjectFile file : group.getFiles()) {
+    		for(ProjectFile file : group.getNodes()) {
     			Project project = containRelationService.findFileBelongToProject(file);
     			CloneLineValue<Project> groupProjectCloneValue = result.get(group.getGroup()).get(project);
     			CloneLineValue<Project> allGroupProjectCloneValue = result.get(CloneGroup.ALL_CLONE_GROUP_FILE).get(project);
@@ -189,7 +189,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     	}
     	Collection<FunctionCloneGroup> groupFunctionClones = groupFunctionClones(removeFileLevelClone);
     	for(FunctionCloneGroup group : groupFunctionClones) {
-    		for(Function function : group.getFunctions()) {
+    		for(Function function : group.getNodes()) {
     			ProjectFile file = containRelationService.findFunctionBelongToFile(function);
     			Project project = containRelationService.findFileBelongToProject(file);
     			CloneLineValue<Project> groupProjectCloneValue = result.get(group.getGroup()).get(project);
@@ -602,7 +602,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 			return fileCloneGroupContainProjectsCache.get(group);
 		}
 		Set<Project> result = new HashSet<>();
-		for(ProjectFile file : group.getFiles()) {
+		for(ProjectFile file : group.getNodes()) {
 			Project project = containRelationService.findFileBelongToProject(file);
 			result.add(project);
 		}
@@ -616,7 +616,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 			return functionCloneGroupContainProjectsCache.get(group);
 		}
 		Set<Project> result = new HashSet<>();
-		for(Function function : group.getFunctions()) {
+		for(Function function : group.getNodes()) {
 			Project project = containRelationService.findFunctionBelongToProject(function);
 			result.add(project);
 		}

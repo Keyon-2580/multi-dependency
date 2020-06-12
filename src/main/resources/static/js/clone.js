@@ -1,9 +1,3 @@
-/**
- * "/clone/" + level + "/table/microservice",
- * "/clone/" + level + "/group/cytoscape?top=" + top,
- * "/clone/" + level + "/group/histogram",
- * "/clone/" + level + "/group/cytoscape/" + num,
- */
 function copyToClip(content) {
     var aux = document.createElement("input"); 
     aux.setAttribute("value", content); 
@@ -499,6 +493,83 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			});
 		});
 		table();
+		var histogramProjectsSize = function(sort) {
+			var myChart = echarts.init(document.getElementById('projects_size_histogram'));
+			$.ajax({
+				type : "GET",
+				url : "/clone/" + level + "/group/histogram/projects/size?sort=" + sort + "&" + urlRemoveParams,
+				success : function(result) {
+					console.log(result);
+					var xAxisData = [];
+					var nodesData = [];
+					var groupsData = [];
+					var ratioData = [];
+					for(var i = 0; i < result.length; i++) {
+						xAxisData[i] = result[i].x;
+						nodesData[i] = result[i].nodesSize;
+						groupsData[i] = result[i].groupsSize;
+						ratioData[i] = result[i].ratio;
+					}
+					var option = {
+							dataZoom: [{
+								type: 'slider',
+								show: true,
+								xAxisIndex: [0],
+								left: '9%',
+								bottom: -5,
+								start: 0,
+								end: 50
+							}],
+			        	    tooltip: {
+			        	        trigger: 'axis',
+			        	        axisPointer: {
+			        	            type: 'shadow'
+			        	        }
+			        	    },
+			        	    legend: {
+			        	        data: ["节点数", "组数", "节点数/组数"]
+			        	    },
+			        	    grid: {
+			        	        left: '3%',
+			        	        right: '4%',
+			        	        bottom: '3%',
+			        	        containLabel: true
+			        	    },
+			        	    xAxis: [{
+			        	            type: 'category',
+			        	            data: xAxisData,
+			        	            axisLabel: {  
+			        	                interval:0,  
+			        	                rotate:40  
+			        	            }  
+			        	        }
+			        	    ],
+			        	    yAxis: [{
+			        	            type: 'value'
+			        	        }
+			        	    ],
+			        	    series: [{
+			        	            name: "节点数",
+			        	            type: 'bar',
+			        	            stack: '节点数',
+			        	            data: nodesData
+			        	        },{
+			        	            name: '组数',
+			        	            type: 'bar',
+			        	            stack: '组数',
+			        	            data: groupsData
+			        	        },{
+			        	        	name: "节点数/组数",
+			        	        	type: 'bar',
+			        	        	stack: '节点数/组数',
+			        	        	data: ratioData
+			        	        }
+			        	    ]
+			        	};
+			        myChart.setOption(option);
+				}
+			});
+		}
 		var histogram = function(sort) {
 			var myChart = echarts.init(document.getElementById('main'));
 			$.ajax({
@@ -626,11 +697,21 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			});
 		}
 		histogram("nodes");
+		histogramProjectsSize("nodes");
 		$("#histogram_sort_nodes").click(function() {
 			histogram("nodes");
 		})
 		$("#histogram_sort_projects").click(function() {
 			histogram("projects");
+		})
+		$("#projects_size_histogram_sort_groups").click(function() {
+			histogramProjectsSize("groups");
+		})
+		$("#projects_size_histogram_sort_nodes").click(function() {
+			histogramProjectsSize("nodes");
+		})
+		$("#projects_size_histogram_sort_ratio").click(function() {
+			histogramProjectsSize("ratio");
 		})
 		
 	};

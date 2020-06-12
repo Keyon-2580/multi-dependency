@@ -16,6 +16,19 @@ import cn.edu.fudan.se.multidependency.service.spring.data.FileCloneGroup;
 import cn.edu.fudan.se.multidependency.service.spring.data.FunctionCloneGroup;
 
 public interface CloneAnalyseService {
+	/**
+	 * 获取文件级克隆组的克隆节点和关系
+	 * @param removeDataClass
+	 * @return
+	 */
+	Collection<FileCloneGroup> groupFileClones(boolean removeDataClass);
+	
+	/**
+	 * 获取方法级克隆组的克隆节点和关系
+	 * @param removeFileClone
+	 * @return
+	 */
+	Collection<FunctionCloneGroup> groupFunctionClones(boolean removeFileClone);
 	
 	Collection<Project> fileCloneGroupContainProjects(FileCloneGroup group);
 	
@@ -24,10 +37,6 @@ public interface CloneAnalyseService {
 	Collection<MicroService> fileCloneGroupContainMSs(FileCloneGroup group);
 	
 	Collection<MicroService> functionCloneGroupContainMSs(FunctionCloneGroup group);
-	
-	Collection<FileCloneGroup> groupFileClones(boolean removeDataClass);
-	
-	Collection<FunctionCloneGroup> groupFunctionClones(boolean removeFileClone);
 	
 	Collection<FileCloneGroup> groupFileClonesContainProjects(Collection<FileCloneGroup> groups, Collection<Project> projects);
 	

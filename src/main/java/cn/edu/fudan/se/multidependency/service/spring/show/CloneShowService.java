@@ -6,9 +6,12 @@ import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
+import cn.edu.fudan.se.multidependency.service.spring.data.HistogramWithProjectsSize;
 
 public interface CloneShowService {
 
 	JSONObject clonesGroupsToCytoscape(Collection<CloneGroup> groups, CloneLevel level, boolean showGroupNode, boolean removeFileLevelClone, boolean removeDataClass);
+	
+	Collection<HistogramWithProjectsSize> withProjectsSizeToHistogram(CloneLevel level, boolean removeDataClass, boolean removeFileClone);
 	
 }

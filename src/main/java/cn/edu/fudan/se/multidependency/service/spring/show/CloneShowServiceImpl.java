@@ -25,8 +25,10 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.service.spring.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
+import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.data.FileCloneGroup;
 import cn.edu.fudan.se.multidependency.service.spring.data.FunctionCloneGroup;
+import cn.edu.fudan.se.multidependency.service.spring.data.HistogramWithProjectsSize;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeEdge;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeNode;
@@ -40,6 +42,42 @@ public class CloneShowServiceImpl implements CloneShowService {
 	
 	@Autowired
 	private ContainRelationService containRelationService;
+	
+	@Autowired
+	private MicroserviceService msService;
+
+	@Override
+	public Collection<HistogramWithProjectsSize> withProjectsSizeToHistogram(CloneLevel level, boolean removeDataClass, boolean removeFileClone) {
+		Map<Integer, HistogramWithProjectsSize> map = new HashMap<>();
+		if(level == CloneLevel.function) {
+			Collection<FunctionCloneGroup> groups = cloneAnalyseService.groupFunctionClones(removeFileClone);
+			for(FunctionCloneGroup group : groups) {
+				Collection<MicroService> mss = cloneAnalyseService.functionCloneGroupContainMSs(group);
+				int mssSize = mss.size();
+				if(mssSize == 0) {
+					continue;
+				}
+				HistogramWithProjectsSize histogram = map.getOrDefault(mssSize, new HistogramWithProjectsSize(mssSize));
+				histogram.addGroupSize(1);
+				histogram.addNodesSize(group.sizeOfNodes());
+				map.put(mssSize, histogram);
+			}
+		} else {
+			Collection<FileCloneGroup> groups = cloneAnalyseService.groupFileClones(removeDataClass);
+			for(FileCloneGroup group : groups) {
+				Collection<MicroService> mss = cloneAnalyseService.fileCloneGroupContainMSs(group);
+				int mssSize = mss.size();
+				if(mssSize == 0) {
+					continue;
+				}
+				HistogramWithProjectsSize histogram = map.getOrDefault(mssSize, new HistogramWithProjectsSize(mssSize));
+				histogram.addGroupSize(1);
+				histogram.addNodesSize(group.sizeOfNodes());
+				map.put(mssSize, histogram);
+			}
+		}
+		return map.values();
+	}
 	
 	private JSONObject fileClonesGroupsToCytoscape(Collection<CloneGroup> groups, 
 			boolean showGroupNode, boolean removeDataClass) {

@@ -33,6 +33,7 @@ import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.data.CloneLineValue;
 import cn.edu.fudan.se.multidependency.service.spring.data.FileCloneGroup;
 import cn.edu.fudan.se.multidependency.service.spring.data.FunctionCloneGroup;
+import cn.edu.fudan.se.multidependency.service.spring.data.HistogramWithProjectsSize;
 import cn.edu.fudan.se.multidependency.service.spring.show.CloneShowService;
 
 @Controller
@@ -83,12 +84,44 @@ public class CloneController {
 			Collection<MicroService> microservices = cloneAnalyse.msSortByMsCloneLineCount(mss, CloneLevel.function, removeFileClone, removeDataClass);
 			result.put("microservices", microservices);
 		} else {
-			Map<String, Map<Long, CloneLineValue<MicroService>>> data = cloneAnalyse.msCloneLineValuesCalculateGroupByFile(mss, removeFileClone);
+			Map<String, Map<Long, CloneLineValue<MicroService>>> data = cloneAnalyse.msCloneLineValuesCalculateGroupByFile(mss, removeDataClass);
 			result.put("data", data);
 			Collection<MicroService> microservices = cloneAnalyse.msSortByMsCloneLineCount(mss, CloneLevel.file, removeFileClone, removeDataClass);
 			result.put("microservices", microservices);
 		}
 		return result;
+	}
+
+	@GetMapping("/{level}/group/histogram/projects/size")
+	@ResponseBody
+	public List<HistogramWithProjectsSize> cloneGroupWithProjectsSizeToHistogram(@PathVariable("level") String level,
+			@RequestParam(name="sort", required=false, defaultValue="nodes") String sort,
+			@RequestParam(name="removeFileClone", required=false, defaultValue="false") boolean removeFileClone,
+			@RequestParam(name="removeDataClass", required=false, defaultValue="false") boolean removeDataClass) {
+		System.out.println("histogram: " + removeFileClone + " " + removeDataClass + " " + sort);
+		CloneLevel cloneLevel = CloneLevel.valueOf(level);
+		cloneLevel = cloneLevel == null ? CloneLevel.file : cloneLevel;
+		List<HistogramWithProjectsSize> histograms = new ArrayList<>(cloneShow.withProjectsSizeToHistogram(cloneLevel, removeDataClass, removeFileClone));
+		if("nodes".equals(sort)) {
+			histograms.sort((h1, h2) -> {
+				return h2.getNodesSize() - h1.getNodesSize();
+			});
+		} else if("groups".equals(sort)) {
+			histograms.sort((h1, h2) -> {
+				return h2.getGroupsSize() - h1.getGroupsSize();
+			});
+		} else if("ratio".equals(sort)) {
+			histograms.sort((h1, h2) -> {
+				if(h2.getRatio() > h1.getRatio()) {
+					return 1;
+				} else if(h2.getRatio() == h1.getRatio()) {
+					return 0;
+				} else {
+					return -1;
+				}
+			});
+		}
+		return histograms;
 	}
 	
 	@GetMapping("/{level}/group/histogram")
@@ -109,7 +142,7 @@ public class CloneController {
 				List<FunctionCloneGroup> sortGroups = new ArrayList<>(functionGroups);
 				sortGroups.sort((group1, group2) -> {
 					if("nodes".equals(sort)) {
-						int s = group2.getFunctions().size() - group1.getFunctions().size();
+						int s = group2.sizeOfNodes() - group1.sizeOfNodes();
 						if(s == 0) {
 							return cloneAnalyse.functionCloneGroupContainMSs(group2).size() - cloneAnalyse.functionCloneGroupContainMSs(group1).size();
 						}
@@ -117,14 +150,14 @@ public class CloneController {
 					} else {
 						int s = cloneAnalyse.functionCloneGroupContainMSs(group2).size() - cloneAnalyse.functionCloneGroupContainMSs(group1).size();
 						if(s == 0) {
-							return group2.getFunctions().size() - group1.getFunctions().size();
+							return group2.sizeOfNodes() - group1.sizeOfNodes();
 						}
 						return s;
 					}
 				});
 				for(FunctionCloneGroup group : sortGroups) {
 					groups.add(group.getGroup());
-					nodeSizeArray.add(group.getFunctions().size());
+					nodeSizeArray.add(group.getNodes().size());
 					projectSizeArray.add(cloneAnalyse.functionCloneGroupContainMSs(group).size());
 				}
 			} else {
@@ -132,7 +165,7 @@ public class CloneController {
 				List<FileCloneGroup> sortGroups = new ArrayList<>(fileGroups);
 				sortGroups.sort((group1, group2) -> {
 					if("nodes".equals(sort)) {
-						int s = group2.getFiles().size() - group1.getFiles().size();
+						int s = group2.sizeOfNodes() - group1.sizeOfNodes();
 						if(s == 0) {
 							return cloneAnalyse.fileCloneGroupContainMSs(group2).size() - cloneAnalyse.fileCloneGroupContainMSs(group1).size();
 						}
@@ -140,14 +173,14 @@ public class CloneController {
 					} else {
 						int s = cloneAnalyse.fileCloneGroupContainMSs(group2).size() - cloneAnalyse.fileCloneGroupContainMSs(group1).size();
 						if(s == 0) {
-							return group2.getFiles().size() - group1.getFiles().size();
+							return group2.sizeOfNodes() - group1.sizeOfNodes();
 						}
 						return s;
 					}
 				});
 				for(FileCloneGroup group : sortGroups) {
 					groups.add(group.getGroup());
-					nodeSizeArray.add(group.getFiles().size());
+					nodeSizeArray.add(group.getNodes().size());
 					projectSizeArray.add(cloneAnalyse.fileCloneGroupContainMSs(group).size());
 				}
 			}
