@@ -683,5 +683,45 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 		}
 		return groupFunctionClonesContainProjects(groups, projects);
 	}
-	
+
+	@Override
+	public String exportCloneMicroService(Map<String, Map<Long, CloneLineValue<MicroService>>> data,
+											 Collection<MicroService> microservices, CloneLevel level) {
+		final String CSV_COLUMN_SEPARATOR = ",";
+		final String CSV_ROW_SEPARATOR = "\r\n";
+		StringBuffer buf = new StringBuffer();
+		buf.append(" ").append(CSV_COLUMN_SEPARATOR);
+		for (MicroService microService : microservices) {
+			buf.append(microService.getName()).append(CSV_COLUMN_SEPARATOR);
+		}
+		buf.append(CSV_ROW_SEPARATOR);
+		for (Map.Entry<String, Map<Long, CloneLineValue<MicroService>>> group : data.entrySet()) {
+			buf.append(group.getKey()).append(CSV_COLUMN_SEPARATOR);
+			Map<Long, CloneLineValue<MicroService>> map = group.getValue();
+			for (MicroService microService : microservices) {
+				CloneLineValue<MicroService> clv = map.get(microService.getId());
+				boolean hasData = false;
+				buf.append("\"");
+				if(level == CloneLevel.function) {
+					for (Function function : clv.getCloneFunctions()) {
+						hasData = true;
+						buf.append(function.getName()).append(CSV_ROW_SEPARATOR);
+					}
+				} else {
+					for (ProjectFile projectFile : clv.getCloneFiles()) {
+						hasData = true;
+						buf.append(projectFile.getPath()).append(CSV_ROW_SEPARATOR);
+					}
+				}
+				if (hasData) {
+					int len = buf.length();
+					if (len > 2) buf.delete(len-2, len);
+				}
+				buf.append("\"");
+				buf.append(CSV_COLUMN_SEPARATOR);
+			}
+			buf.append(CSV_ROW_SEPARATOR);
+		}
+		return buf.toString();
+	}
 }

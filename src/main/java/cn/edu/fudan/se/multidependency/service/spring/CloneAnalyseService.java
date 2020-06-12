@@ -72,14 +72,14 @@ public interface CloneAnalyseService {
 	
 	// MDAllController
 	
-	public Map<MicroService, CloneLineValue<MicroService>> msCloneLineValuesGroup(Iterable<MicroService> mss, CloneGroup group, CloneLevel level, boolean removeFileLevelClone, boolean removeDataClass);
+	Map<MicroService, CloneLineValue<MicroService>> msCloneLineValuesGroup(Iterable<MicroService> mss, CloneGroup group, CloneLevel level, boolean removeFileLevelClone, boolean removeDataClass);
 	
 	/**
 	 * 根据函数间的克隆找出微服务间的克隆
 	 * @param functionClones
 	 * @return
 	 */
-	public Collection<Clone<MicroService, FunctionCloneFunction>> findMicroServiceCloneFromFunctionClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode);
+	Collection<Clone<MicroService, FunctionCloneFunction>> findMicroServiceCloneFromFunctionClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode);
 	
 	/**
 	 * 根据文件间的克隆找出微服务间的克隆
@@ -87,14 +87,14 @@ public interface CloneAnalyseService {
 	 * @param removeSameNode
 	 * @return
 	 */
-	public Collection<Clone<MicroService, FileCloneFile>> findMicroServiceCloneFromFileClone(Iterable<FileCloneFile> fileClones, boolean removeSameNode);
+	Collection<Clone<MicroService, FileCloneFile>> findMicroServiceCloneFromFileClone(Iterable<FileCloneFile> fileClones, boolean removeSameNode);
 	
 	/**
 	 * 根据函数间的克隆找出项目间的克隆
 	 * @param functionClones
 	 * @return
 	 */
-	public Collection<Clone<Project, FunctionCloneFunction>> findProjectCloneFromFunctionClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode);
+	Collection<Clone<Project, FunctionCloneFunction>> findProjectCloneFromFunctionClone(Iterable<FunctionCloneFunction> functionClones, boolean removeSameNode);
 	
 	/**
 	 * 根据文件间的克隆找出项目间的克隆
@@ -102,6 +102,8 @@ public interface CloneAnalyseService {
 	 * @param removeSameNode
 	 * @return
 	 */
-	public Collection<Clone<Project, FileCloneFile>> queryProjectCloneFromFileClone(Iterable<FileCloneFile> fileClones, boolean removeSameNode);
+	Collection<Clone<Project, FileCloneFile>> queryProjectCloneFromFileClone(Iterable<FileCloneFile> fileClones, boolean removeSameNode);
+
+	String exportCloneMicroService(Map<String, Map<Long, CloneLineValue<MicroService>>> data, Collection<MicroService> microservices, CloneLevel level);
 
 }
