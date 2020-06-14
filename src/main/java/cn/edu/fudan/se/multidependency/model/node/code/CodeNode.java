@@ -11,7 +11,5 @@ public interface CodeNode extends Node {
 	String getIdentifierSimpleName();
 
     String getIdentifierSuffix();
-    
-    static final String FILE_IDENTIFIER_SUFFIX = "#F";
 	
 }

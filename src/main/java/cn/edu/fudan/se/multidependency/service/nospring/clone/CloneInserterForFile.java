@@ -19,9 +19,9 @@ import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
-import cn.edu.fudan.se.multidependency.utils.CloneUtil;
-import cn.edu.fudan.se.multidependency.utils.CloneUtil.CloneResultFromCsv;
-import cn.edu.fudan.se.multidependency.utils.CloneUtil.FilePathFromCsv;
+import cn.edu.fudan.se.multidependency.utils.clone.CloneUtil;
+import cn.edu.fudan.se.multidependency.utils.clone.data.CloneResultFromCsv;
+import cn.edu.fudan.se.multidependency.utils.clone.data.FilePathFromCsv;
 import lombok.Setter;
 
 public class CloneInserterForFile extends ExtractorForNodesAndRelationsImpl {

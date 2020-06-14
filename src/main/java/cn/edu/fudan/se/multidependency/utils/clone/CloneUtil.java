@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.utils;
+package cn.edu.fudan.se.multidependency.utils.clone;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,65 +13,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import cn.edu.fudan.se.multidependency.utils.FunctionUtil;
+import cn.edu.fudan.se.multidependency.utils.clone.data.CloneResultFromCsv;
+import cn.edu.fudan.se.multidependency.utils.clone.data.FilePathFromCsv;
+import cn.edu.fudan.se.multidependency.utils.clone.data.Group;
+import cn.edu.fudan.se.multidependency.utils.clone.data.MethodIdentifierFromCsv;
+import cn.edu.fudan.se.multidependency.utils.clone.data.MethodNameForJavaFromCsv;
 
 public class CloneUtil {
 	
-	@Data
-	public static class FilePathFromCsv {
-		private String line;
-		private int lineId;
-		private String filePath;
-		private int startLine;
-		private int endLine;
-	}
+	private static final Logger LOGGER = LoggerFactory.getLogger(CloneUtil.class);
 
-	@Data
-	@EqualsAndHashCode(callSuper = true)
-	@ToString(callSuper = true)
-	public static class MethodNameForJavaFromCsv extends FilePathFromCsv {
-		private String projectName;
-		private String packageName;
-		private String className;
-		private String functionSimpleName;
-		private List<String> parameterTypes = new ArrayList<>();
-		public void addParameterType(String type) {
-			this.parameterTypes.add(type);
-		}
-		private String getFunctionName() {
-			StringBuilder builder = new StringBuilder();
-			if(!StringUtils.isBlank(packageName)) {
-				builder.append(packageName);
-				builder.append(".");
-			}
-			builder.append(className);
-			builder.append(".");
-			builder.append(functionSimpleName);
-			return builder.toString();
-		}
-		public int countOfParameterTypes() {
-			return parameterTypes.size();
-		}
-		public String getFunctionFullName() {
-			StringBuilder builder = new StringBuilder();
-			builder.append(getFunctionName());
-			builder.append("(");
-			for(int i = 0; i < this.parameterTypes.size(); i++) {
-				if(i != 0) {
-					builder.append(",");
-				}
-				builder.append(parameterTypes.get(i));
-			}
-			builder.append(")");
-			return builder.toString();
-		}
-	}
-	
 	public static Map<Integer, FilePathFromCsv> readJavaCloneCsvForFilePath(String filePath) throws Exception {
 		Map<Integer, FilePathFromCsv> result = new HashMap<>();
 		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
@@ -93,37 +48,66 @@ public class CloneUtil {
 		}
 		return result;
 	}
-	public static void main(String[] args) {
-		String line = "18,ts-admin-route-service,D:\\projectPath1\\nostub\\removeDocument\\train-ticket\\ts-admin-route-service\\src\\main\\java\\adminroute\\config\\SecurityConfig.java,63,80,adminroute.config,SecurityConfig,configure,HttpSecurity#Map<String, String>#Map<String, Map<String,String>>#String#";
-		String[] values = line.split(",");
-		if(values.length < 9) {
-			LOGGER.warn("克隆数据格式不正确：" + line);
-			return;
-		}
-		MethodNameForJavaFromCsv method = new MethodNameForJavaFromCsv();
-		int length = 0;
-		method.setLine(line);
-		method.setLineId(Integer.parseInt(values[0]));
-		method.setProjectName(values[1]);
-		method.setFilePath(values[2]);
-		method.setStartLine(Integer.parseInt(values[3]));
-		method.setEndLine(Integer.parseInt(values[4]));
-		method.setPackageName(values[5]);
-		method.setClassName(values[6]);
-		method.setFunctionSimpleName(values[7]);
-		for(int i = 0; i < 8; i++) {
-			length += values[i].length() + 1;
-		}
-		String parametersStr = line.substring(length);
-		String[] parameters = parametersStr.split("#");
-		for(String parameter : parameters) {
-			if(StringUtils.isBlank(parameter) || "None".equals(parameter)) {
-				continue;
-			}
-			method.addParameterType(parameter);
-		}
-		System.out.println(method);;
+	
+	public static void main(String[] args) throws Exception {
+		Map<Integer, MethodIdentifierFromCsv> result = readMethodIdentifiersCsv("D:\\multiple-dependency-project\\clone\\MearureNameCatch\\resultFolder\\MethodNameTable.csv");
+		System.out.println(result.get(0));
+		System.out.println(result.get(10));
+		System.out.println(result.get(20));
+		System.out.println(result.get(0).getFunctionSimpleName());
+		System.out.println(result.get(0).getIdentifier());
 	}
+	
+	public static Map<Integer, MethodIdentifierFromCsv> readMethodIdentifiersCsv(String filePath) throws Exception {
+		Map<Integer, MethodIdentifierFromCsv> result = new HashMap<>();
+		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
+			String line = null;
+			while((line = reader.readLine()) != null) {
+				String[] values = line.split(",");
+				MethodIdentifierFromCsv method = new MethodIdentifierFromCsv();
+				method.setLine(line);
+				method.setLineId(Integer.parseInt(values[0]));
+				method.setProjectName(values[1]);
+				method.setStartLine(Integer.parseInt(values[2]));
+				method.setEndLine(Integer.parseInt(values[3]));
+				int functionSimpleNameIndex = 4;
+				for(functionSimpleNameIndex = 4; functionSimpleNameIndex < values.length; functionSimpleNameIndex++) {
+					String suffix = Constant.isEndWithCodeNodeIdentifierSuffix(values[functionSimpleNameIndex]);
+					if(suffix != null) {
+						if(Constant.CODE_NODE_IDENTIFIER_SUFFIX_FILE.equals(suffix)) {
+							String path = values[functionSimpleNameIndex].substring(0, values[functionSimpleNameIndex].lastIndexOf("#"));
+							path = path.replace("\\", "/");
+							path = path.substring(path.indexOf("/" + method.getProjectName() + "/"));
+							method.setFilePath(path);
+							method.addIdentifier(path + Constant.CODE_NODE_IDENTIFIER_SUFFIX_FILE);
+						} else if(Constant.CODE_NODE_IDENTIFIER_SUFFIX_FUNCTION.equals(suffix)) {
+							method.setFunctionSimpleName(values[functionSimpleNameIndex].substring(0, values[functionSimpleNameIndex].lastIndexOf("#")));
+						} else {
+							method.addIdentifier(values[functionSimpleNameIndex]);
+						}
+					} else {
+						break;
+					}
+				}
+				int length = 0;
+				for(int i = 0; i < functionSimpleNameIndex; i++) {
+					length += values[i].length() + 1;
+				}
+				String parametersStr = line.substring(length);
+				String[] parameters = parametersStr.split("#");
+				for(String parameter : parameters) {
+					if(StringUtils.isBlank(parameter) || "None".equals(parameter)) {
+						continue;
+					}
+					method.addParameterType(FunctionUtil.processParameter(parameter));
+				}
+				result.put(method.getLineId(), method);
+			}
+		}
+		return result;
+	}
+	
+	@Deprecated
 	public static Map<Integer, MethodNameForJavaFromCsv> readJavaCloneCsvForMethodName(String filePath) throws Exception {
 		Map<Integer, MethodNameForJavaFromCsv> result = new HashMap<>();
 		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
@@ -160,17 +144,6 @@ public class CloneUtil {
 			}
 		}
 		return result;
-	}
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(CloneUtil.class);
-	
-	
-	@Data
-	@AllArgsConstructor
-	public static class CloneResultFromCsv {
-		private int start;
-		private int end;
-		private double value;
 	}
 	
 	public static Collection<CloneResultFromCsv> readCloneResultCsv(String filePath) throws Exception {
@@ -232,19 +205,6 @@ public class CloneUtil {
 			return collection2.size() - collection1.size();
 		});
 		return result;
-	}
-	
-	@Data
-	@AllArgsConstructor
-	public static class Group {
-		private String line;
-		private Collection<Integer> groupIds = new ArrayList<>();
-		public Group(String line) {
-			this.line = line;
-		}
-		public void addId(int id) {
-			this.groupIds.add(id);
-		}
 	}
 	
 	public static Collection<Group> readGroupFile(String filePath) throws Exception {

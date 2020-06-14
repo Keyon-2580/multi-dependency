@@ -11,53 +11,45 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
-import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
-import cn.edu.fudan.se.multidependency.utils.FunctionUtil;
 import cn.edu.fudan.se.multidependency.utils.clone.CloneUtil;
 import cn.edu.fudan.se.multidependency.utils.clone.data.CloneResultFromCsv;
-import cn.edu.fudan.se.multidependency.utils.clone.data.MethodNameForJavaFromCsv;
+import cn.edu.fudan.se.multidependency.utils.clone.data.MethodIdentifierFromCsv;
 import lombok.Setter;
 
-@Deprecated
-public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl {
-
-	private static final Executor executor = Executors.newCachedThreadPool();
+public class CloneInserterForMethod extends ExtractorForNodesAndRelationsImpl {
+private static final Executor executor = Executors.newCachedThreadPool();
 	
 	private static long functionCloneGroupNumber = 0;
 	
 	private CountDownLatch latch;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CloneInserterForFunction.class);
-	@Setter
-	private Language language;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CloneInserterForMethod.class);
 	@Setter
 	private String methodNameTablePath;
 	@Setter
 	private String methodResultPath;
 
-	private Map<Integer, MethodNameForJavaFromCsv> methodNames;
+	private Map<Integer, MethodIdentifierFromCsv> methodIdentifiers;
 	private Collection<CloneResultFromCsv> cloneResults;
 	
-	public CloneInserterForFunction(Language language, String methodNameTablePath, String methodResultPath) {
+	public CloneInserterForMethod(String methodNameTablePath, String methodResultPath) {
 		super();
-		this.language = language;
 		this.methodNameTablePath = methodNameTablePath;
 		this.methodResultPath = methodResultPath;
 		this.latch = new CountDownLatch(2);
 	}
 	
-	private void processJava() throws Exception {
+	private void process() throws Exception {
 		executor.execute(() -> {
 			try {
-				methodNames = CloneUtil.readJavaCloneCsvForMethodName(methodNameTablePath);
+				methodIdentifiers = CloneUtil.readMethodIdentifiersCsv(methodNameTablePath);
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
@@ -84,36 +76,28 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 				int start = cloneResult.getStart();
 				int end = cloneResult.getEnd();
 				double value = cloneResult.getValue();
-				MethodNameForJavaFromCsv methodName1 = methodNames.get(start);
+				MethodIdentifierFromCsv methodName1 = methodIdentifiers.get(start);
 				if(methodName1 == null) {
 					LOGGER.warn("methodName1 is null, index: " + start);
 					continue;
 				}
-				MethodNameForJavaFromCsv methodName2 = methodNames.get(end);
+				MethodIdentifierFromCsv methodName2 = methodIdentifiers.get(end);
 				if(methodName2 == null) {
 					LOGGER.warn("methodName2 is null, index: " + end);
 					continue;
 				}
-				Project project1 = this.getNodes().findProject(methodName1.getProjectName(), language);
-				if(project1 == null) {
-					LOGGER.warn("project1 is null " + methodName1.getProjectName());
+				Node node1 = this.getNodes().findCodeNodeByIdentifier(methodName1.getIdentifier());
+				if(node1 == null) {
+					LOGGER.warn("function1 is null " + methodName1.getIdentifier());
+					continue;
+				} 
+				Function function1 = (Function) node1;
+				Node node2 = this.getNodes().findCodeNodeByIdentifier(methodName2.getIdentifier());
+				if(node2 == null) {
+					LOGGER.warn("function2 is null " + methodName2.getIdentifier());
 					continue;
 				}
-				Project project2 = this.getNodes().findProject(methodName2.getProjectName(), language);
-				if(project2 == null) {
-					LOGGER.warn("project2 is null " + methodName2.getProjectName());
-					continue;
-				}
-				Function function1 = findJavaFunctionByMethod(methodName1, project1);
-				if(function1 == null) {
-					LOGGER.warn("function1 is null " + methodName1);
-					continue;
-				}
-				Function function2 = findJavaFunctionByMethod(methodName2, project2);
-				if(function2 == null) {
-					LOGGER.warn("function2 is null " + methodName2);
-					continue;
-				}
+				Function function2 = (Function) node2;
 				if(function1.equals(function2)) {
 					LOGGER.warn("方法相同：" + methodName1 + " " + methodName2);
 					continue;
@@ -157,26 +141,7 @@ public class CloneInserterForFunction extends ExtractorForNodesAndRelationsImpl 
 
 	@Override
 	public void addNodesAndRelations() throws Exception {
-		if(Language.java == language) {
-			processJava();
-		}
+		process();
 	}
 	
-	private Function findJavaFunctionByMethod(MethodNameForJavaFromCsv methodName, Project project) throws Exception {
-		Function result = null;
-		Map<String, List<Function>> functionNameToFunctions = this.getNodes().findFunctionsInProject(project);
-		String functionNameFromCsv = FunctionUtil.extractFunctionNameAndParameters(methodName.getFunctionFullName()).get(0);
-		List<Function> functions = functionNameToFunctions.get(functionNameFromCsv);
-		if(functions == null) {
-			LOGGER.warn("没有找到该方法名的方法：" + methodName.getFunctionFullName());
-			functions = new ArrayList<>();
-		}
-		for(Function function : functions) {
-			if(FunctionUtil.isSameJavaFunction(function, methodName.getFunctionFullName())) {
-				result = function;
-			}
-		}
-		return result;
-	}
-
 }

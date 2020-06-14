@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserterForFile;
 import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserterForFunction;
+import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserterForMethod;
 import cn.edu.fudan.se.multidependency.service.nospring.code.Depends096Extractor;
 import cn.edu.fudan.se.multidependency.service.nospring.code.DependsCodeInserterForNeo4jServiceImpl;
 import cn.edu.fudan.se.multidependency.service.nospring.code.DependsEntityRepoExtractor;
@@ -171,7 +172,8 @@ public class ThreadService {
 				for (CloneConfig cloneConfig : config.getClonesConfig()) {
 					switch (cloneConfig.getGranularity()) {
 						case function:
-							new CloneInserterForFunction(cloneConfig.getLanguage(), cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();
+//							new CloneInserterForFunction(cloneConfig.getLanguage(), cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();
+							new CloneInserterForMethod(cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();
 							break;
 						case file:
 							new CloneInserterForFile(cloneConfig.getLanguage(), cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();

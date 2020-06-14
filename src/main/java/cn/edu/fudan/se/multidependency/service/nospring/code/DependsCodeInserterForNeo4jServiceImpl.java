@@ -6,6 +6,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
@@ -268,7 +269,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 			return "";
 		}
 		if(parentNode instanceof ProjectFile) {
-			String identifier = new StringBuilder().append(((ProjectFile) parentNode).getPath()).append(CodeNode.FILE_IDENTIFIER_SUFFIX)
+			String identifier = new StringBuilder().append(((ProjectFile) parentNode).getPath()).append(Constant.CODE_NODE_IDENTIFIER_SUFFIX_FILE)
 					.append(node.getIdentifierSimpleName()).append(node.getIdentifierSuffix()).toString();
 			node.setIdentifier(identifier);
 			return identifier;

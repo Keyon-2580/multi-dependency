@@ -11,6 +11,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Transient;
 
+import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneRelationNode;
@@ -143,7 +144,7 @@ public class Function implements CodeNode, CloneRelationNode {
 
 	@Override
 	public String getIdentifierSuffix() {
-		return "#M";
+		return Constant.CODE_NODE_IDENTIFIER_SUFFIX_FUNCTION;
 	}
 
 	@Override

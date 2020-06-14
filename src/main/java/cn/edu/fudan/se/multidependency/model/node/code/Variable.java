@@ -7,6 +7,7 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
+import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -64,7 +65,7 @@ public class Variable implements CodeNode {
 
 	@Override
 	public String getIdentifierSuffix() {
-		return "#V";
+		return Constant.CODE_NODE_IDENTIFIER_SUFFIX_VARIABLE;
 	}
 
 	@Override

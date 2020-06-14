@@ -79,20 +79,32 @@ public class FunctionUtil {
 		String[] parameters = parametersStr.split(",");
 		for(String parameter : parameters) {
 			maxTimes = 0;
-			while(parameter.contains("<") && !parameter.contains(">")) {
-				parameter = parameter + ">";
-				parameter = parameter.replaceAll("<[^<>]*>", "");
-				if(++maxTimes > 20) {
-					break;
-				}
-			}
-			parameter.replace(">", "");
-			parameter.replace("<", "");
 			if(!StringUtils.isBlank(parameter)) {
-				result.add(parameter.trim());
+				result.add(processParameter(parameter).trim());
 			}
 		}
 		return result;
+	}
+	
+	public static String processParameter(String parameter) {
+		int maxTimes = 0;
+		while(parameter.contains("<") && parameter.contains(">")) {
+			parameter = parameter.replaceAll("<[^<>]*>", "");
+			if(++maxTimes > 20) {
+				break;
+			}
+		}
+		maxTimes = 0;
+		while(parameter.contains("<") && !parameter.contains(">")) {
+			parameter = parameter + ">";
+			parameter = parameter.replaceAll("<[^<>]*>", "");
+			if(++maxTimes > 20) {
+				break;
+			}
+		}
+		parameter.replace(">", "");
+		parameter.replace("<", "");
+		return parameter;
 	}
 	
 }
