@@ -492,7 +492,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 				}
 			});
 		});
-		table();
+		// table();
 		var histogramProjectsSize = function(sort) {
 			var myChart = echarts.init(document.getElementById('projects_size_histogram'));
 			$.ajax({
@@ -736,7 +736,28 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			}).run();
 		});
 	};
-	
+
+	// 导出CSV
+	$("#export").click(function(){
+		var xmlResquest = new XMLHttpRequest();
+		xmlResquest.open("GET", "/clone/" + level + "/table/microservice/export?" + urlRemoveParams, true);
+		xmlResquest.setRequestHeader("Content-type", "application/csv");
+		xmlResquest.responseType = "blob";
+		xmlResquest.onload = function (oEvent) {
+			var content = xmlResquest.response;
+			var elink = document.createElement('a');
+			elink.download = "clone_" + level + "_data.csv";
+			elink.style.display = 'none';
+			var blob = new Blob([content]);
+			elink.href = URL.createObjectURL(blob);
+			document.body.appendChild(elink);
+			elink.click();
+			document.body.removeChild(elink);
+		};
+		xmlResquest.send();
+
+	});
+
 	return {
 		init: function(){
 			_clone();

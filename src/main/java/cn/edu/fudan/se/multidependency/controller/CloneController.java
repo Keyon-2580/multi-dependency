@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.controller;
 
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,7 +8,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,6 +94,27 @@ public class CloneController {
 			result.put("microservices", microservices);
 		}
 		return result;
+	}
+
+	@GetMapping("/{level}/table/microservice/export")
+	public void exportCloneMicroService(@PathVariable("level") String level, HttpServletResponse res,
+									   @RequestParam(name="removeFileClone", required=false, defaultValue="false") boolean removeFileClone,
+									   @RequestParam(name="removeDataClass", required=false, defaultValue="false") boolean removeDataClass) {
+		System.out.println("导出csv");
+		Collection<MicroService> mss = msService.findAllMicroService();
+		Map<String, Map<Long, CloneLineValue<MicroService>>> data = CloneLevel.valueOf(level) == CloneLevel.function ?
+				cloneAnalyse.msCloneLineValuesCalculateGroupByFunction(mss, removeFileClone) :
+				cloneAnalyse.msCloneLineValuesCalculateGroupByFile(mss, removeFileClone) ;
+		Collection<MicroService> microservices = cloneAnalyse.msSortByMsCloneLineCount(mss, CloneLevel.valueOf(level), removeFileClone, removeDataClass);
+		String cloneMicroService = cloneAnalyse.exportCloneMicroService(data, microservices, CloneLevel.valueOf(level));
+		try {
+			OutputStream os = res.getOutputStream();
+			os.write(cloneMicroService.getBytes("gbk"));
+			os.flush();
+			os.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@GetMapping("/{level}/group/histogram/projects/size")
