@@ -57,10 +57,18 @@ public class Function implements CodeNode, CloneRelationNode {
 	@Transient
 	private List<String> parameters = new ArrayList<>();
 	
+	@Transient
+	private List<String> simpleParameters = new ArrayList<>();
+	
 	/**
 	 * 用SDN读取到这个
 	 */
 	private String parametersIdentifies;
+
+	/**
+	 * 用SDN读取到这个
+	 */
+	private String simpleParametersIdentifies;
 	
 	public String getFunctionIdentifier() {
 		return this.getName() + this.getParametersIdentifies();
@@ -80,6 +88,7 @@ public class Function implements CodeNode, CloneRelationNode {
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("returnTypeIdentify", getReturnTypeIdentify() == null ? "" : getReturnTypeIdentify());
 		properties.put("parametersIdentifies", getParameters().toString().replace('[', '(').replace(']', ')'));
+		properties.put("simpleParametersIdentifies", getSimpleParameters().toString().replace('[', '(').replace(']', ')'));
 		properties.put("fromDynamic", isFromDynamic());
 		properties.put("constructor", isConstructor());
 		properties.put("simpleName", getSimpleName() == null ? "" : getSimpleName());
@@ -93,6 +102,25 @@ public class Function implements CodeNode, CloneRelationNode {
 	@Override
 	public NodeLabelType getNodeType() {
 		return NodeLabelType.Function;
+	}
+	
+	public List<String> getSimpleParameters() {
+		if(simpleParameters == null || simpleParameters.size() == 0) {
+			if(getSimpleParametersIdentifies() != null) {
+				simpleParameters = new ArrayList<>();
+				String parametersStr = getSimpleParametersIdentifies().substring(
+						getSimpleParametersIdentifies().lastIndexOf("(") + 1, getSimpleParametersIdentifies().length() - 1);
+				if (!StringUtils.isBlank(parametersStr)) {
+					String[] parameters = parametersStr.split(",");
+					for (String parameter : parameters) {
+						this.simpleParameters.add(parameter);
+					}
+				}
+			} else {
+				return new ArrayList<>();
+			}
+		}
+		return simpleParameters;
 	}
 
 	public List<String> getParameters() {
@@ -113,13 +141,15 @@ public class Function implements CodeNode, CloneRelationNode {
 		return parameters;
 	}
 	
-	public void cleanParameters() {
-		this.parameters.clear();
-	}
-	
 	public void addParameterIdentifies(String... parameters) {
 		for(String parameter : parameters) {
 			this.parameters.add(parameter);
+		}
+	}
+	
+	public void addSimpleParameterIdentifiers(String... simpleParameters) {
+		for(String parameter : simpleParameters) {
+			this.simpleParameters.add(parameter);
 		}
 	}
 
@@ -152,13 +182,14 @@ public class Function implements CodeNode, CloneRelationNode {
 		StringBuilder builder = new StringBuilder();
 		builder.append(getSimpleName());
 		builder.append("(");
-		if(!parameters.isEmpty()) {
-			builder.append(parameters.get(0));
+		builder.append(String.join(",", simpleParameters));
+		/*if(!simpleParameters.isEmpty()) {
+			builder.append(simpleParameters.get(0));
 		}
-		for(int i = 1; i < parameters.size(); i++) {
+		for(int i = 1; i < simpleParameters.size(); i++) {
 			builder.append(",");
-			builder.append(parameters.get(i));
-		}
+			builder.append(simpleParameters.get(i));
+		}*/
 		builder.append(")");
 		return builder.toString();
 	}

@@ -56,15 +56,17 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 		file.setEntityId(entity.getId().longValue());
 		String filePath = entity.getQualifiedName();
 		file.setName(FileUtil.extractFileName(filePath));
-		filePath = filePath.replace("\\", "/");
-		filePath = filePath.substring(filePath.indexOf(projectPath + "/"));
+//		filePath = filePath.replace("\\", "/");
+//		filePath = filePath.substring(filePath.indexOf(projectPath + "/"));
+		filePath = FileUtil.extractFilePath(filePath, projectPath);
 		file.setPath(filePath);
 		file.setSuffix(FileUtil.extractSuffix(entity.getQualifiedName()));
 		addNode(file, currentProject);
 		// 文件所在目录
 		String directoryPath = FileUtil.extractDirectoryFromFile(entity.getQualifiedName()) + "/";
-		directoryPath = directoryPath.replace("\\", "/");
-		directoryPath = directoryPath.substring(directoryPath.indexOf(projectPath + "/"));
+//		directoryPath = directoryPath.replace("\\", "/");
+//		directoryPath = directoryPath.substring(directoryPath.indexOf(projectPath + "/"));
+		directoryPath = FileUtil.extractFilePath(directoryPath, projectPath);
 		Package pck = this.getNodes().findPackageByDirectoryPath(directoryPath, currentProject);
 		if (pck == null) {
 			pck = new Package();
@@ -192,6 +194,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				} else {
 					function.addParameterIdentifies(parameterName);
 				}
+				function.addSimpleParameterIdentifiers(parameterName);
 			}
 			processIdentifier(function);
 			this.getNodes().addCodeNode(function);

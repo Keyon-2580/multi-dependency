@@ -112,7 +112,7 @@ public class NodeServiceImpl implements NodeService {
 				return file;
 			}
 			file = fileRepository.findFileByPath(newPath);
-			newPath = FileUtil.extractPath(newPath);
+			newPath = FileUtil.extractNextPath(newPath);
 			if(StringUtils.isBlank(newPath)) {
 				break;
 			}

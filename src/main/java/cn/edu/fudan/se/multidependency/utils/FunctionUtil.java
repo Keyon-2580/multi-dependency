@@ -3,10 +3,6 @@ package cn.edu.fudan.se.multidependency.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
-
 public class FunctionUtil {
 	
 	public static void main(String[] args) throws Exception {
@@ -33,26 +29,6 @@ public class FunctionUtil {
 		System.out.println(extractFunctionNameAndParameters(functionFullName));*/
 	}
 	
-	/**
-	 * 
-	 * @param function
-	 * @param functionFullName packageName + className + functionName + parameters
-	 * @return
-	 * @throws Exception
-	 */
-	public static boolean isSameJavaFunction(Function function, String functionFullName) throws Exception {
-		List<String> functionNameAndParameters = extractFunctionNameAndParameters(functionFullName);
-		String functionName = functionNameAndParameters.get(0);
-		if(!function.getName().equals(functionName)) {
-			return false;
-		}
-		if(function.getParameters().size() != (functionNameAndParameters.size() - 1)) {
-			return false;
-		}
-		/// FIXME
-		return true;
-	}
-	
 	public static List<String> extractFunctionNameAndParameters(String functionFullName) throws Exception {
 		List<String> result = new ArrayList<>();
 		int index = functionFullName.indexOf("(");
@@ -69,42 +45,24 @@ public class FunctionUtil {
 		}
 		result.add(functionName);
 		String parametersStr = functionFullName.substring(index + 1, functionFullName.length() - 1);
-		int maxTimes = 0;
-		while(parametersStr.contains("<") && parametersStr.contains(">")) {
-			parametersStr = parametersStr.replaceAll("<[^<>]*>", "");
-			if(++maxTimes > 20) {
-				break;
-			}
-		}
-		String[] parameters = parametersStr.split(",");
+		result.add(parametersStr.replace(" ", ""));
+		/*String[] parameters = parametersStr.split(",");
+		Queue<String> queue = new LinkedList<>();
+		int middleBracket = 0;
 		for(String parameter : parameters) {
-			maxTimes = 0;
-			if(!StringUtils.isBlank(parameter)) {
-				result.add(processParameter(parameter).trim());
+			if(StringUtils.isBlank(parameter)) {
+				continue;
 			}
-		}
+			queue.offer(parameter);
+			if(!parameter.contains("<") && !parameter.contains(">") && middleBracket == 0) {
+				result.add(queue.poll());
+			} else if(parameter.contains("<")) {
+				middleBracket++;
+			} else if(parameter.contains(">")) {
+				middleBracket--;
+			}
+		}*/
 		return result;
-	}
-	
-	public static String processParameter(String parameter) {
-		int maxTimes = 0;
-		while(parameter.contains("<") && parameter.contains(">")) {
-			parameter = parameter.replaceAll("<[^<>]*>", "");
-			if(++maxTimes > 20) {
-				break;
-			}
-		}
-		maxTimes = 0;
-		while(parameter.contains("<") && !parameter.contains(">")) {
-			parameter = parameter + ">";
-			parameter = parameter.replaceAll("<[^<>]*>", "");
-			if(++maxTimes > 20) {
-				break;
-			}
-		}
-		parameter.replace(">", "");
-		parameter.replace("<", "");
-		return parameter;
 	}
 	
 }

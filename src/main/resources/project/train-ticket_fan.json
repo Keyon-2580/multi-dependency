@@ -751,6 +751,26 @@
 		"language": "java",
 		"isMicroservice": true,
 		"microserviceName" : "ts-ui-test"
+	}, {
+		"path": "D:\\multiple-dependency-project\\train-ticket\\leveldb-1.22",
+		"serviceGroupName": "train-ticket",
+		"project": "leveldb-1.22",
+		"language": "cpp",
+		"isMicroservice": true,
+		"includeDirs" : [
+		],
+		"autoInclude" : true,
+		"microserviceName" : "leveldb-1.22"
+	}, {
+		"path": "D:\\multiple-dependency-project\\train-ticket\\depends",
+		"serviceGroupName": "train-ticket",
+		"project": "depends",
+		"language": "java",
+		"isMicroservice": true,
+		"includeDirs" : [
+		],
+		"autoInclude" : true,
+		"microserviceName" : "depends"
 	}],
 	"architectures" : {
 		"projects" : [
@@ -981,20 +1001,24 @@
 	    {
 	      "language": "java",
 	      "path": "src/main/resources/lib/train-ticket_2020-04-27.json"
+	    },
+	    {
+	    	"language": "java",
+	    	"path": "src/main/resources/lib/depends_2020-04-27.json"
 	    }
 	  ],
 	  "clones": [
 		  {
 			  "language": "java",
 			  "granularity": "file",
-			  "name_path": "src/main/resources/clone/file/train-ticket/result/MeasureIndex.csv",
-			  "result_path": "src/main/resources/clone/file/train-ticket/result/type123_method_result.csv"
+			  "name_path": "src/main/resources/clone/file/multiple-fan/java/result/MeasureIndex.csv",
+			  "result_path": "src/main/resources/clone/file/multiple-fan/java/result/type123_method_result.csv"
 		  },
 		  {
 			  "language": "java",
 			  "granularity": "function",
-			  "name_path": "src/main/resources/clone/function/train-ticket/resultFolder/MethodNameTable.csv",
-			  "result_path": "src/main/resources/clone/function/train-ticket/result/type123_method_result.csv"
+			  "name_path": "src/main/resources/clone/function/multiple-fan/java/resultFolder/MethodNameTable.csv",
+			  "result_path": "src/main/resources/clone/function/multiple-fan/java/result/type123_method_result.csv"
 		  }
 	  ]
 }

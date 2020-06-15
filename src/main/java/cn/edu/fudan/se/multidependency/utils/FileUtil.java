@@ -43,7 +43,7 @@ public class FileUtil {
 	 * @param filePath
 	 * @return
 	 */
-	public static String extractPath(String filePath) {
+	public static String extractNextPath(String filePath) {
 		if(filePath == null) {
 			return "";
 		}
@@ -63,16 +63,33 @@ public class FileUtil {
 			return "";
 		}
 	}
+	
+	/**
+	 * "D:\\multiple-dependency-project\\depends-update\\depends\\src\\main\\java\\depends\\format\\AbstractFormatDependencyDumper.java"
+	 * /depends
+	 * /depends/src/main/java/depends/format/AbstractFormatDependencyDumper.java
+	 * @param fullPath
+	 * @param projectPath
+	 * @return
+	 */
+	public static String extractFilePath(String fullPath, String projectPath) {
+		String filePath = fullPath;
+		filePath = filePath.replace(SLASH_WINDOWS, SLASH_LINUX);
+		filePath = filePath.substring(filePath.indexOf(projectPath + SLASH_LINUX));
+		return filePath;
+	}
 
 	public static void main(String[] args) {
-		String directoryPath = "D:\\multiple-dependency-project\\train-ticket";
-		System.out.println("result: " + extractPath(directoryPath));
+		String filePath = "D:\\multiple-dependency-project\\depends-update\\depends\\src\\main\\java\\depends\\format\\AbstractFormatDependencyDumper.java";
+		System.out.println(extractFilePath(filePath, "/depends"));
+		/*String directoryPath = "D:\\multiple-dependency-project\\train-ticket";
+		System.out.println("result: " + extractNextPath(directoryPath));
 		directoryPath = "D:\\multiple-dependency-project\\doublelanguage";
-		System.out.println("result: " + extractPath(directoryPath));
+		System.out.println("result: " + extractNextPath(directoryPath));
 		directoryPath = "D:\\source\\source";
-		System.out.println("result: " + extractPath(directoryPath));
+		System.out.println("result: " + extractNextPath(directoryPath));
 		directoryPath = "D:\\source";
-		System.out.println("result: " + extractPath(directoryPath));
+		System.out.println("result: " + extractNextPath(directoryPath));*/
 		/*JSONObject array = readDirectoryToGenerateProjectJSONFileForDoubleLanguageProject(
 				new File(directoryPath), 0, "java", true, "train-ticket");*/
 		/*JSONObject array = readDirectoryToGenerateProjectJSONFile(new File(directoryPath), 1, "java", true, "source");
@@ -356,23 +373,6 @@ public class FileUtil {
 		for(File file : listFiles) {
 			listFiles(file, result, suffixes);
 		}
-	}
-
-	/**
-	 * 提取文件所属项目名
-	 * @param filePath
-	 * @return
-	 */
-	public static String extractProjectNameFromFile(String filePath) {
-		int idx1 = -1, idx2 = -1;
-		if(filePath.contains("\\")) {
-			idx1 = filePath.indexOf("\\");
-			idx2 = filePath.indexOf("\\",1);
-		} else if(filePath.contains("/")) {
-			idx1 = filePath.indexOf("/");
-			idx2 = filePath.indexOf("/",1);
-		}
-		return idx1 >= 0 && idx2 >= 0 ? filePath.substring(idx1+1, idx2) : "";
 	}
 
 	/**

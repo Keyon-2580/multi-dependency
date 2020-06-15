@@ -56,7 +56,7 @@ public class Nodes implements Serializable {
         ProjectFile result = filePathToFile.get(path);
         String newPath = path;
         while (result == null) {
-            newPath = FileUtil.extractPath(newPath);
+            newPath = FileUtil.extractNextPath(newPath);
             if (StringUtils.isBlank(newPath)) {
                 return null;
             }

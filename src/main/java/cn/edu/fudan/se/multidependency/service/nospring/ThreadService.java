@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserterForFile;
-import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserterForFunction;
 import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserterForMethod;
 import cn.edu.fudan.se.multidependency.service.nospring.code.Depends096Extractor;
 import cn.edu.fudan.se.multidependency.service.nospring.code.DependsCodeInserterForNeo4jServiceImpl;

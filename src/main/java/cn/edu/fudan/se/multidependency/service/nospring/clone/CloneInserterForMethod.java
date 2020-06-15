@@ -88,13 +88,13 @@ private static final Executor executor = Executors.newCachedThreadPool();
 				}
 				Node node1 = this.getNodes().findCodeNodeByIdentifier(methodName1.getIdentifier());
 				if(node1 == null) {
-					LOGGER.warn("function1 is null " + methodName1.getIdentifier());
+					LOGGER.warn("function1 is null " + methodName1.getLineId() + " " + methodName1.getIdentifier());
 					continue;
 				} 
 				Function function1 = (Function) node1;
 				Node node2 = this.getNodes().findCodeNodeByIdentifier(methodName2.getIdentifier());
 				if(node2 == null) {
-					LOGGER.warn("function2 is null " + methodName2.getIdentifier());
+					LOGGER.warn("function2 is null " + methodName2.getLineId() + " " + methodName2.getIdentifier());
 					continue;
 				}
 				Function function2 = (Function) node2;

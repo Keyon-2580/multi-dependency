@@ -49,32 +49,30 @@ public class LibraryInserter extends ExtractorForNodesAndRelationsImpl {
 				LOGGER.warn(String.join(" ", "未找到项目依赖第三方", libraryJsonPath, projectName));
 				continue;
 			}
-//			this.getNodes().findFileByPath(path)
-//			List<Function>this.getNodes().findFunctionsInProject(project)
 			JSONObject projectJson = libJson.getJSONObject(projectName);
 			for(String fileName : projectJson.keySet()) {
 				JSONObject fileJson = projectJson.getJSONObject(fileName);
 				for(String functionFullName : fileJson.keySet()) {
 					List<String> functionNameAndParameters = FunctionUtil.extractFunctionNameAndParameters(functionFullName);
-					if(functionNameAndParameters.size() < 1) {
+					if(functionNameAndParameters.isEmpty()) {
 						throw new Exception("函数名和变量数量小于1");
 					}
 					String functionName = functionNameAndParameters.get(0);
 					List<Function> functions = this.getNodes().findFunctionsInProject(project).get(functionName);
 					if(functions == null) {
-//						System.out.println(functionName);
 						LOGGER.warn(String.join(" ", "没有函数名为", functionName, "的函数"));
+						continue;
 					}
 					Function givenFunction = null;
 					for(Function function : functions) {
-						if(function.getParameters().size() != (functionNameAndParameters.size() - 1)) {
-							continue;
+						List<String> parameterTypes = function.getSimpleParameters();
+						if(String.join(",", parameterTypes).equals(functionNameAndParameters.get(1))) {
+							givenFunction = function;
 						}
-						/// FIXME
-						givenFunction = function;
 					}
 					if(givenFunction == null) {
-						throw new Exception("函数为null，函数名：" + functionName);
+						LOGGER.warn("函数为null，函数名：" + functionName);
+						continue;
 					}
 					JSONObject functionJson = fileJson.getJSONObject(functionFullName);
 					for(String apiName : functionJson.keySet()) {

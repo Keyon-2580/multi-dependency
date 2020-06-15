@@ -16,12 +16,10 @@ import org.slf4j.LoggerFactory;
 import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
-import cn.edu.fudan.se.multidependency.utils.FunctionUtil;
 import cn.edu.fudan.se.multidependency.utils.clone.data.CloneResultFromCsv;
 import cn.edu.fudan.se.multidependency.utils.clone.data.FilePathFromCsv;
 import cn.edu.fudan.se.multidependency.utils.clone.data.Group;
 import cn.edu.fudan.se.multidependency.utils.clone.data.MethodIdentifierFromCsv;
-import cn.edu.fudan.se.multidependency.utils.clone.data.MethodNameForJavaFromCsv;
 
 public class CloneUtil {
 	
@@ -99,45 +97,7 @@ public class CloneUtil {
 					if(StringUtils.isBlank(parameter) || "None".equals(parameter)) {
 						continue;
 					}
-					method.addParameterType(FunctionUtil.processParameter(parameter));
-				}
-				result.put(method.getLineId(), method);
-			}
-		}
-		return result;
-	}
-	
-	@Deprecated
-	public static Map<Integer, MethodNameForJavaFromCsv> readJavaCloneCsvForMethodName(String filePath) throws Exception {
-		Map<Integer, MethodNameForJavaFromCsv> result = new HashMap<>();
-		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
-			String line = null;
-			while((line = reader.readLine()) != null) {
-				String[] values = line.split(",");
-				if(values.length < 9) {
-					LOGGER.warn("克隆数据格式不正确：" + line);
-					continue;
-				}
-				MethodNameForJavaFromCsv method = new MethodNameForJavaFromCsv();
-				int length = 0;
-				method.setLine(line);
-				method.setLineId(Integer.parseInt(values[0]));
-				method.setProjectName(values[1]);
-				method.setFilePath(values[2]);
-				method.setStartLine(Integer.parseInt(values[3]));
-				method.setEndLine(Integer.parseInt(values[4]));
-				method.setPackageName(values[5]);
-				method.setClassName(values[6]);
-				method.setFunctionSimpleName(values[7]);
-				for(int i = 0; i < 8; i++) {
-					length += values[i].length() + 1;
-				}
-				String parametersStr = line.substring(length);
-				String[] parameters = parametersStr.split("#");
-				for(String parameter : parameters) {
-					if(StringUtils.isBlank(parameter) || "None".equals(parameter)) {
-						continue;
-					}
+//					method.addParameterType(FunctionUtil.processParameter(parameter));
 					method.addParameterType(parameter);
 				}
 				result.put(method.getLineId(), method);

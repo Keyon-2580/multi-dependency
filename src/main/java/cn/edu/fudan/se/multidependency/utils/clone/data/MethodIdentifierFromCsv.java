@@ -21,13 +21,14 @@ public class MethodIdentifierFromCsv extends FilePathFromCsv {
 		StringBuilder builder = new StringBuilder();
 		builder.append(functionSimpleName);
 		builder.append("(");
-		if(!parameterTypes.isEmpty()) {
-			builder.append(parameterTypes.get(0));
-		}
-		for(int i = 1; i < parameterTypes.size(); i++) {
-			builder.append(",");
-			builder.append(parameterTypes.get(i));
-		}
+		builder.append(String.join(",", parameterTypes));
+//		if(!parameterTypes.isEmpty()) {
+//			builder.append(parameterTypes.get(0));
+//		}
+//		for(int i = 1; i < parameterTypes.size(); i++) {
+//			builder.append(",");
+//			builder.append(parameterTypes.get(i));
+//		}
 		builder.append(")");
 		return builder.toString();
 	}
