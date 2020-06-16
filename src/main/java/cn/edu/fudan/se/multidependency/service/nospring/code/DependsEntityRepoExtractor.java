@@ -1,6 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.nospring.code;
 
-import java.util.Collection;
+import java.util.List;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import depends.entity.repo.EntityRepo;
@@ -18,7 +18,7 @@ public interface DependsEntityRepoExtractor {
 	
 	void setProjectPath(String projectPath);
 	
-	void setExcludes(Collection<String> excludes);
+	void setExcludes(List<String> excludes);
 
 	int getEntityCount();
 	

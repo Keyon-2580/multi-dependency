@@ -3,7 +3,6 @@ package cn.edu.fudan.se.multidependency.service.nospring.code;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +36,7 @@ import lombok.Setter;
  * @author fan
  *
  */
+@Deprecated
 public class DependsEntityRepoExtractorImpl implements DependsEntityRepoExtractor {
 	private DependsEntityRepoExtractorImpl() {}
 	private static DependsEntityRepoExtractorImpl instance = new DependsEntityRepoExtractorImpl();
@@ -59,7 +59,7 @@ public class DependsEntityRepoExtractorImpl implements DependsEntityRepoExtracto
 	@Setter
 	private String projectPath;
 	@Setter
-	private Collection<String> excludes;
+	private List<String> excludes;
 	
 	private String slash;
 
@@ -108,7 +108,7 @@ public class DependsEntityRepoExtractorImpl implements DependsEntityRepoExtracto
 	private void initCppExtractor(String src) {
 		entityRepo = new InMemoryEntityRepo();
     	inferer = new Inferer(entityRepo,new CppImportLookupStrategy(),new CppBuiltInType(),false);
-    	preprocessorHandler = new PreprocessorHandler(src, new ArrayList<>());
+    	preprocessorHandler = new PreprocessorHandler(src, new ArrayList<>(), new ArrayList<>());
     	TemporaryFile.reset();
     	macroRepo = new MacroFileRepo(entityRepo);
 	}
