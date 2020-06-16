@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.nospring.code;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,7 @@ import depends.entity.PackageEntity;
 import depends.entity.TypeEntity;
 import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
+import depends.relations.Inferer;
 
 /**
  * 
@@ -188,13 +190,19 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			for (VarEntity varEntity : functionEntity.getParameters()) {
 				String parameterName = varEntity.getRawType().getName();
 				TypeEntity typeEntity = varEntity.getType();
-				if (typeEntity != null && this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type,
-						typeEntity.getId().longValue(), currentProject) != null) {
-					function.addParameterIdentifies(typeEntity.getQualifiedName());
+				if(!StringUtils.isBlank(varEntity.getTypeIdentifier())) {
+					function.addParameterIdentifiers(varEntity.getTypeIdentifier());
 				} else {
-					function.addParameterIdentifies(parameterName);
+					if(typeEntity != null 
+//						&& Inferer.externalType != typeEntity
+							&& Inferer.buildInType != typeEntity
+							&& Inferer.genericParameterType != typeEntity
+							&& this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentEntity.getId().longValue(), currentProject) != null) {
+						function.addParameterIdentifiers(typeEntity.getQualifiedName());
+					} else {
+						function.addParameterIdentifiers(parameterName);
+					}
 				}
-				function.addSimpleParameterIdentifiers(parameterName);
 			}
 			processIdentifier(function);
 			this.getNodes().addCodeNode(function);

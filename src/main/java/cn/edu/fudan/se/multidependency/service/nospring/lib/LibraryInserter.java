@@ -65,7 +65,7 @@ public class LibraryInserter extends ExtractorForNodesAndRelationsImpl {
 					}
 					Function givenFunction = null;
 					for(Function function : functions) {
-						List<String> parameterTypes = function.getSimpleParameters();
+						List<String> parameterTypes = function.getParameters();
 						if(String.join(",", parameterTypes).equals(functionNameAndParameters.get(1))) {
 							givenFunction = function;
 						}

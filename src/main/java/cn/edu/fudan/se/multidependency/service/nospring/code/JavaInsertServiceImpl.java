@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.service.nospring.code;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -159,19 +160,18 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				String parameterName = varEntity.getRawType().getName();
 				TypeEntity typeEntity = varEntity.getType();
 				// 方法的参数
-				if(typeEntity != null 
+				if(!StringUtils.isBlank(varEntity.getTypeIdentifier())) {
+					function.addParameterIdentifiers(varEntity.getTypeIdentifier());
+				} else {
+					if(typeEntity != null 
 //						&& Inferer.externalType != typeEntity
-						&& Inferer.buildInType != typeEntity
-						&& Inferer.genericParameterType != typeEntity
-						&& this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentEntity.getId().longValue(), currentProject) != null) {
-					function.addParameterIdentifies(typeEntity.getQualifiedName());
-				} else {
-					function.addParameterIdentifies(parameterName);
-				}
-				if(varEntity.getTypeIdentifier() != null && !"".equals(varEntity.getTypeIdentifier())) {
-					function.addSimpleParameterIdentifiers(varEntity.getTypeIdentifier());
-				} else {
-					function.addSimpleParameterIdentifiers(parameterName);
+							&& Inferer.buildInType != typeEntity
+							&& Inferer.genericParameterType != typeEntity
+							&& this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentEntity.getId().longValue(), currentProject) != null) {
+						function.addParameterIdentifiers(parameterName);
+					} else {
+						function.addParameterIdentifiers(parameterName);
+					}
 				}
 			}
 			Type type = (Type) findNodeByEntityIdInProject(parentEntity);
