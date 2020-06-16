@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
@@ -33,7 +34,10 @@ import cn.edu.fudan.se.multidependency.service.spring.data.FunctionCloneGroup;
 @Service
 public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CloneAnalyseServiceImpl.class);
-    
+
+	@Autowired
+	private NodeService nodeService;
+	
     @Autowired
     FunctionCloneFunctionRepository functionCloneFunctionRepository;
     
@@ -54,11 +58,10 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 	
     @Autowired
     BasicCloneQueryService basicCloneQueryService;
-
+    
 	Map<Boolean, Collection<FileCloneGroup>> groupFileCloneRelationCache = new ConcurrentHashMap<>();
-    @Override
-	public Collection<FileCloneGroup> groupFileClones(boolean removeDataClass) {
-		if(groupFileCloneRelationCache.get(removeDataClass) != null) {
+	private Collection<FileCloneGroup> groupFileClones(boolean removeDataClass) {
+    	if(groupFileCloneRelationCache.get(removeDataClass) != null) {
 			return groupFileCloneRelationCache.get(removeDataClass);
 		}
 		Collection<CloneGroup> groups = basicCloneQueryService.queryGroups(CloneLevel.file);
@@ -85,11 +88,36 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 		});
 		groupFileCloneRelationCache.put(removeDataClass, result);
 		return result;
+    }
+
+	private Map<Language, Map<Boolean, Collection<FileCloneGroup>>> languageToFileGroup = new ConcurrentHashMap<>();
+    @Override
+	public Collection<FileCloneGroup> groupFileClones(boolean removeDataClass, Language language) {
+		Collection<FileCloneGroup> allFileGroups = groupFileClones(removeDataClass);
+		if(language == null) {
+			return allFileGroups;
+		}
+		if(languageToFileGroup.get(language) != null && languageToFileGroup.get(language).get(removeDataClass) != null) {
+    		return languageToFileGroup.get(language).get(removeDataClass);
+    	}
+		Collection<FileCloneGroup> result = new ArrayList<>();
+		for(FileCloneGroup group : allFileGroups) {
+			for(ProjectFile file : group.getNodes()) {
+				Project project = containRelationService.findFileBelongToProject(file);
+				if(project.getLanguage().equals(language.toString())) {
+					result.add(group);
+				}
+				break;
+			}
+		}
+		Map<Boolean, Collection<FileCloneGroup>> temp = new ConcurrentHashMap<>();
+		temp.put(removeDataClass, result);
+		languageToFileGroup.put(language, temp);
+		return result;
 	}
 	
 	Map<Boolean, Collection<FunctionCloneGroup>> groupFunctionCloneRelationCache = new ConcurrentHashMap<>();
-    @Override
-	public Collection<FunctionCloneGroup> groupFunctionClones(boolean removeFileClone) {
+	private Collection<FunctionCloneGroup> groupFunctionClones(boolean removeFileClone) {
 		if(groupFunctionCloneRelationCache.get(removeFileClone) != null) {
 			return groupFunctionCloneRelationCache.get(removeFileClone);
 		}
@@ -121,86 +149,125 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 		return result;
 	}
     
-    Map<Boolean, Map<CloneGroup, Map<Project, CloneLineValue<Project>>>> projectCloneValuesCalculateByFileCache = new ConcurrentHashMap<>();
+	private Map<Language, Map<Boolean, Collection<FunctionCloneGroup>>> languageToFunctionGroup = new ConcurrentHashMap<>();
     @Override
-    public Map<CloneGroup, Map<Project, CloneLineValue<Project>>> projectCloneLineValuesCalculateGroupByFile(boolean removeDataClass) {
-    	if(projectCloneValuesCalculateByFileCache.get(removeDataClass) != null) {
-    		return projectCloneValuesCalculateByFileCache.get(removeDataClass);
+	public Collection<FunctionCloneGroup> groupFunctionClones(boolean removeFileClone, Language language) {
+    	Collection<FunctionCloneGroup> allFunctionGroups = groupFunctionClones(removeFileClone);
+    	if(language == null) {
+    		return allFunctionGroups;
     	}
-    	LOGGER.info("finish groupFileCloneNode");
-    	Map<CloneGroup, Map<Project, CloneLineValue<Project>>> result = new HashMap<>();
-    	
-    	Map<Project, CloneLineValue<Project>> projectToCloneValue = new HashMap<>();
-		for(Project project : staticAnalyseService.allProjects()) {
+    	if(languageToFunctionGroup.get(language) != null && languageToFunctionGroup.get(language).get(removeFileClone) != null) {
+    		return languageToFunctionGroup.get(language).get(removeFileClone);
+    	}
+		Collection<FunctionCloneGroup> result = new ArrayList<>();
+		for(FunctionCloneGroup group : allFunctionGroups) {
+			for(Function function : group.getNodes()) {
+				Project project = containRelationService.findFunctionBelongToProject(function);
+				if(project.getLanguage().equals(language.toString())) {
+					result.add(group);
+				}
+				break;
+			}
+		}
+		Map<Boolean, Collection<FunctionCloneGroup>> temp = new ConcurrentHashMap<>();
+		temp.put(removeFileClone, result);
+		languageToFunctionGroup.put(language, temp);
+		return result;
+	}
+    
+    private Map<String, Map<Long, CloneLineValue<Project>>> projectCloneLineValuesCalculate(CloneLevel level, boolean removeDataClass, boolean removeFileClone, Language language) {
+    	Map<String, Map<Long, CloneLineValue<Project>>> result = new HashMap<>();
+    	Iterable<Project> projects = staticAnalyseService.allProjects();
+    	if(language != null) {
+    		projects = nodeService.queryProjects(language);
+    	}
+    	Map<Long, CloneLineValue<Project>> projectToCloneValue = new HashMap<>();
+		for(Project project : projects) {
 			CloneLineValue<Project> projectCloneValue = new CloneLineValue<Project>(project);
 			projectCloneValue.addAllFiles(containRelationService.findProjectContainAllFiles(project));
-			projectToCloneValue.put(project, projectCloneValue);
+			projectToCloneValue.put(project.getId(), projectCloneValue);
 		}
-		result.put(CloneGroup.ALL_CLONE_GROUP_FILE, projectToCloneValue);
-    	
-    	for(CloneGroup group : basicCloneQueryService.queryGroups(CloneLevel.file)) {
+		result.put(CloneGroup.ALL_CLONE_GROUP_FUNCTION.getName(), projectToCloneValue);
+		
+    	for(CloneGroup group : basicCloneQueryService.queryGroups(level)) {
     		projectToCloneValue = new HashMap<>();
-    		for(Project project : staticAnalyseService.allProjects()) {
+    		for(Project project : projects) {
     			CloneLineValue<Project> projectCloneValue = new CloneLineValue<Project>(project);
     			projectCloneValue.addAllFiles(containRelationService.findProjectContainAllFiles(project));
-    			projectToCloneValue.put(project, projectCloneValue);
+    			projectToCloneValue.put(project.getId(), projectCloneValue);
     		}
-    		result.put(group, projectToCloneValue);
+    		result.put(group.getName(), projectToCloneValue);
     	}
-    	Collection<FileCloneGroup> groupFileClones = groupFileClones(removeDataClass);
-    	for(FileCloneGroup group : groupFileClones) {
-    		for(ProjectFile file : group.getNodes()) {
-    			Project project = containRelationService.findFileBelongToProject(file);
-    			CloneLineValue<Project> groupProjectCloneValue = result.get(group.getGroup()).get(project);
-    			CloneLineValue<Project> allGroupProjectCloneValue = result.get(CloneGroup.ALL_CLONE_GROUP_FILE).get(project);
-    			groupProjectCloneValue.addCloneFile(file);
-    			allGroupProjectCloneValue.addCloneFile(file);
-    			result.get(group.getGroup()).put(project, groupProjectCloneValue);
-    			result.get(CloneGroup.ALL_CLONE_GROUP_FILE).put(project, allGroupProjectCloneValue);
+    	if(CloneLevel.function == level) {
+    		Collection<FunctionCloneGroup> groupFunctionClones = groupFunctionClones(removeFileClone, language);
+    		for(FunctionCloneGroup group : groupFunctionClones) {
+    			for(Function function : group.getNodes()) {
+    				ProjectFile file = containRelationService.findFunctionBelongToFile(function);
+    				Project project = containRelationService.findFileBelongToProject(file);
+    				CloneLineValue<Project> groupProjectCloneValue = result.get(group.getGroup().getName()).get(project.getId());
+    				CloneLineValue<Project> allGroupProjectCloneValue = result.get(CloneGroup.ALL_CLONE_GROUP_FUNCTION.getName()).get(project.getId());
+    				groupProjectCloneValue.addCloneFunction(function);
+    				allGroupProjectCloneValue.addCloneFunction(function);
+    				result.get(group.getGroup().getName()).put(project.getId(), groupProjectCloneValue);
+    				result.get(CloneGroup.ALL_CLONE_GROUP_FUNCTION.getName()).put(project.getId(), allGroupProjectCloneValue);
+    			}
     		}
+    	} else {
+    		Collection<FileCloneGroup> groupFileClones = groupFileClones(removeDataClass, language);
+        	for(FileCloneGroup group : groupFileClones) {
+        		for(ProjectFile file : group.getNodes()) {
+        			Project project = containRelationService.findFileBelongToProject(file);
+        			CloneLineValue<Project> groupProjectCloneValue = result.get(group.getGroup().getName()).get(project.getId());
+        			CloneLineValue<Project> allGroupProjectCloneValue = result.get(CloneGroup.ALL_CLONE_GROUP_FILE.getName()).get(project.getId());
+        			groupProjectCloneValue.addCloneFile(file);
+        			allGroupProjectCloneValue.addCloneFile(file);
+        			result.get(group.getGroup().getName()).put(project.getId(), groupProjectCloneValue);
+        			result.get(CloneGroup.ALL_CLONE_GROUP_FILE.getName()).put(project.getId(), allGroupProjectCloneValue);
+        		}
+        	}
     	}
-    	projectCloneValuesCalculateByFileCache.put(removeDataClass, result);
     	return result;
     }
     
-    Map<Boolean, Map<CloneGroup, Map<Project, CloneLineValue<Project>>>> projectCloneValuesCalculateByFunctionCache = new ConcurrentHashMap<>();
+  	Map<Boolean, Map<String, Map<Long, CloneLineValue<Project>>>> allProjectCloneValuesCalculateByFunctionCache = new ConcurrentHashMap<>();
+  	Map<Boolean, Map<String, Map<Long, CloneLineValue<Project>>>> javaProjectCloneValuesCalculateByFunctionCache = new ConcurrentHashMap<>();
+  	Map<Boolean, Map<String, Map<Long, CloneLineValue<Project>>>> cppProjectCloneValuesCalculateByFunctionCache = new ConcurrentHashMap<>();
     @Override
-    public Map<CloneGroup, Map<Project, CloneLineValue<Project>>> projectCloneLineValuesCalculateGroupByFunction(boolean removeFileLevelClone) {
-    	if(projectCloneValuesCalculateByFunctionCache.get(removeFileLevelClone) != null) {
-    		return projectCloneValuesCalculateByFunctionCache.get(removeFileLevelClone);
+    public Map<String, Map<Long, CloneLineValue<Project>>> projectCloneLineValuesCalculateGroupByFunction(boolean removeFileLevelClone, Language language) {
+    	Map<Boolean, Map<String, Map<Long, CloneLineValue<Project>>>> cache = null;
+    	if(language == null) {
+    		cache = allProjectCloneValuesCalculateByFunctionCache;
+    	} else if(Language.cpp == language) {
+    		cache = javaProjectCloneValuesCalculateByFunctionCache;
+    	} else {
+    		cache = cppProjectCloneValuesCalculateByFunctionCache;
     	}
-    	Map<CloneGroup, Map<Project, CloneLineValue<Project>>> result = new HashMap<>();
-    	Map<Project, CloneLineValue<Project>> projectToCloneValue = new HashMap<>();
-		for(Project project : staticAnalyseService.allProjects()) {
-			CloneLineValue<Project> projectCloneValue = new CloneLineValue<Project>(project);
-			projectCloneValue.addAllFiles(containRelationService.findProjectContainAllFiles(project));
-			projectToCloneValue.put(project, projectCloneValue);
-		}
-		result.put(CloneGroup.ALL_CLONE_GROUP_FUNCTION, projectToCloneValue);
-		
-    	for(CloneGroup group : basicCloneQueryService.queryGroups(CloneLevel.function)) {
-    		projectToCloneValue = new HashMap<>();
-    		for(Project project : staticAnalyseService.allProjects()) {
-    			CloneLineValue<Project> projectCloneValue = new CloneLineValue<Project>(project);
-    			projectCloneValue.addAllFiles(containRelationService.findProjectContainAllFiles(project));
-    			projectToCloneValue.put(project, projectCloneValue);
-    		}
-    		result.put(group, projectToCloneValue);
+    	if(cache.get(removeFileLevelClone) != null) {
+    		return cache.get(removeFileLevelClone);
     	}
-    	Collection<FunctionCloneGroup> groupFunctionClones = groupFunctionClones(removeFileLevelClone);
-    	for(FunctionCloneGroup group : groupFunctionClones) {
-    		for(Function function : group.getNodes()) {
-    			ProjectFile file = containRelationService.findFunctionBelongToFile(function);
-    			Project project = containRelationService.findFileBelongToProject(file);
-    			CloneLineValue<Project> groupProjectCloneValue = result.get(group.getGroup()).get(project);
-    			CloneLineValue<Project> allGroupProjectCloneValue = result.get(CloneGroup.ALL_CLONE_GROUP_FUNCTION).get(project);
-    			groupProjectCloneValue.addCloneFunction(function);
-    			allGroupProjectCloneValue.addCloneFunction(function);
-    			result.get(group.getGroup()).put(project, groupProjectCloneValue);
-    			result.get(CloneGroup.ALL_CLONE_GROUP_FUNCTION).put(project, allGroupProjectCloneValue);
-    		}
+    	Map<String, Map<Long, CloneLineValue<Project>>> result = projectCloneLineValuesCalculate(CloneLevel.function, false, removeFileLevelClone, language);
+    	cache.put(removeFileLevelClone, result);
+    	return result;
+    }
+
+  	Map<Boolean, Map<String, Map<Long, CloneLineValue<Project>>>> allProjectCloneValuesCalculateByFileCache = new ConcurrentHashMap<>();
+  	Map<Boolean, Map<String, Map<Long, CloneLineValue<Project>>>> javaProjectCloneValuesCalculateByFileCache = new ConcurrentHashMap<>();
+  	Map<Boolean, Map<String, Map<Long, CloneLineValue<Project>>>> cppProjectCloneValuesCalculateByFileCache = new ConcurrentHashMap<>();
+    @Override
+    public Map<String, Map<Long, CloneLineValue<Project>>> projectCloneLineValuesCalculateGroupByFile(boolean removeDataClass, Language language) {
+    	Map<Boolean, Map<String, Map<Long, CloneLineValue<Project>>>> cache = null;
+    	if(language == null) {
+    		cache = allProjectCloneValuesCalculateByFileCache;
+    	} else if(Language.cpp == language) {
+    		cache = cppProjectCloneValuesCalculateByFileCache;
+    	} else {
+    		cache = javaProjectCloneValuesCalculateByFileCache;
     	}
-    	projectCloneValuesCalculateByFunctionCache.put(removeFileLevelClone, result);
+    	if(cache.get(removeDataClass) != null) {
+    		return cache.get(removeDataClass);
+    	}
+    	Map<String, Map<Long, CloneLineValue<Project>>> result = projectCloneLineValuesCalculate(CloneLevel.file, removeDataClass, false, language);
+    	cache.put(removeDataClass, result);
     	return result;
     }
     
@@ -215,23 +282,23 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     
     private Map<Boolean, Map<String, Map<Long, CloneLineValue<MicroService>>>> msCloneLineValuesCalculateGroupByFunctionCache = new ConcurrentHashMap<>();
     @Override
-    public Map<String, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFunction(
-    		Collection<MicroService> mss, boolean removeFileLevelClone) {
+    public Map<String, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFunction(boolean removeFileLevelClone) {
     	if(msCloneLineValuesCalculateGroupByFunctionCache.get(removeFileLevelClone) != null) {
     		return msCloneLineValuesCalculateGroupByFunctionCache.get(removeFileLevelClone);
     	}
+    	Collection<MicroService> mss = msService.findAllMicroService();
     	Map<String, Map<Long, CloneLineValue<MicroService>>> result = new HashMap<>();
-    	Map<CloneGroup, Map<Project, CloneLineValue<Project>>> projectGroups = projectCloneLineValuesCalculateGroupByFunction(removeFileLevelClone);
+    	Map<String, Map<Long, CloneLineValue<Project>>> projectGroups = projectCloneLineValuesCalculateGroupByFunction(removeFileLevelClone, null);
     	LOGGER.info("finish projectCloneLineValuesCalculateGroupByFunction");
-    	for(Map.Entry<CloneGroup, Map<Project, CloneLineValue<Project>>> projectGroup : projectGroups.entrySet()) {
-    		CloneGroup group = projectGroup.getKey();
-    		Map<Project, CloneLineValue<Project>> projectsValue = projectGroup.getValue();
+    	for(Map.Entry<String, Map<Long, CloneLineValue<Project>>> projectGroup : projectGroups.entrySet()) {
+    		String group = projectGroup.getKey();
+    		Map<Long, CloneLineValue<Project>> projectsValue = projectGroup.getValue();
     		Map<Long, CloneLineValue<MicroService>> mssValue = new HashMap<>();
     		for(MicroService ms : mss) {
     			CloneLineValue<MicroService> value = new CloneLineValue<>(ms);
     			Iterable<Project> projects = containRelationService.findMicroServiceContainProjects(ms);
     			for(Project project : projects) {
-    				CloneLineValue<Project> projectValue = projectsValue.get(project);
+    				CloneLineValue<Project> projectValue = projectsValue.get(project.getId());
     				if(projectValue != null) {
     					value.addAllFiles(projectValue.getAllFiles());
     					value.addAllCloneFiles(projectValue.getCloneFiles());
@@ -240,7 +307,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     			}
     			mssValue.put(ms.getId(), value);
     		}
-    		result.put(group.getName(), mssValue);
+    		result.put(group, mssValue);
     	}
     	msCloneLineValuesCalculateGroupByFunctionCache.put(removeFileLevelClone, result);
     	return result;
@@ -248,22 +315,23 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     
     Map<Boolean, Map<String, Map<Long, CloneLineValue<MicroService>>>> msCloneLineValuesCalculateGroupByFileCache = new ConcurrentHashMap<>();
     @Override
-    public Map<String, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFile(Collection<MicroService> mss, boolean removeDataClass) {
+    public Map<String, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFile(boolean removeDataClass) {
     	if(msCloneLineValuesCalculateGroupByFileCache.get(removeDataClass) != null) {
     		return msCloneLineValuesCalculateGroupByFileCache.get(removeDataClass);
     	}
+    	Collection<MicroService> mss = msService.findAllMicroService();
     	Map<String, Map<Long, CloneLineValue<MicroService>>> result = new HashMap<>();
-    	Map<CloneGroup, Map<Project, CloneLineValue<Project>>> projectGroups = projectCloneLineValuesCalculateGroupByFile(removeDataClass);
+    	Map<String, Map<Long, CloneLineValue<Project>>> projectGroups = projectCloneLineValuesCalculateGroupByFile(removeDataClass, null);
     	LOGGER.info("finish projectCloneLineValuesCalculateGroupByFile");
-    	for(Map.Entry<CloneGroup, Map<Project, CloneLineValue<Project>>> projectGroup : projectGroups.entrySet()) {
-    		CloneGroup group = projectGroup.getKey();
-    		Map<Project, CloneLineValue<Project>> projectsValue = projectGroup.getValue();
+    	for(Map.Entry<String, Map<Long, CloneLineValue<Project>>> projectGroup : projectGroups.entrySet()) {
+    		String group = projectGroup.getKey();
+    		Map<Long, CloneLineValue<Project>> projectsValue = projectGroup.getValue();
     		Map<Long, CloneLineValue<MicroService>> mssValue = new HashMap<>();
     		for(MicroService ms : mss) {
     			CloneLineValue<MicroService> value = new CloneLineValue<>(ms);
     			Iterable<Project> projects = containRelationService.findMicroServiceContainProjects(ms);
     			for(Project project : projects) {
-    				CloneLineValue<Project> projectValue = projectsValue.get(project);
+    				CloneLineValue<Project> projectValue = projectsValue.get(project.getId());
     				if(projectValue != null) {
     					value.addAllFiles(projectValue.getAllFiles());
     					value.addAllCloneFiles(projectValue.getCloneFiles());
@@ -272,7 +340,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     			}
     			mssValue.put(ms.getId(), value);
     		}
-    		result.put(group.getName(), mssValue);
+    		result.put(group, mssValue);
     	}
     	msCloneLineValuesCalculateGroupByFileCache.put(removeDataClass, result);
     	return result;
@@ -282,19 +350,19 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
     public CloneLineValue<MicroService> msCloneLineValuesGroup(MicroService ms, CloneGroup group, CloneLevel level,
     		boolean removeFileLevelClone, boolean removeDataClass) {
     	CloneLineValue<MicroService> result = new CloneLineValue<>(ms);
-    	Map<CloneGroup, Map<Project, CloneLineValue<Project>>> projectResultsGroup = null;
+    	Map<String, Map<Long, CloneLineValue<Project>>> projectResultsGroup = null;
     	if(level == CloneLevel.function) {
-    		projectResultsGroup = projectCloneLineValuesCalculateGroupByFunction(removeFileLevelClone);
+    		projectResultsGroup = projectCloneLineValuesCalculateGroupByFunction(removeFileLevelClone, null);
     	} else {
-    		projectResultsGroup = projectCloneLineValuesCalculateGroupByFile(removeDataClass);
+    		projectResultsGroup = projectCloneLineValuesCalculateGroupByFile(removeDataClass, null);
     	}
-    	Map<Project, CloneLineValue<Project>> projectResults = projectResultsGroup.get(group);
+    	Map<Long, CloneLineValue<Project>> projectResults = projectResultsGroup.get(group.getName());
     	if(projectResults == null) {
     		return result;
     	}
     	Iterable<Project> projects = containRelationService.findMicroServiceContainProjects(ms);
     	for(Project project : projects) {
-    		CloneLineValue<Project> projectResult = projectResults.get(project);
+    		CloneLineValue<Project> projectResult = projectResults.get(project.getId());
     		if(projectResult == null) {
     			continue;
     		}
@@ -510,8 +578,9 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 
 	private Map<CloneLevel, Map<Boolean, Collection<MicroService>>> msSortByMsCloneLineCountCache = new ConcurrentHashMap<>();
 	@Override
-	public Collection<MicroService> msSortByMsCloneLineCount(Collection<MicroService> mss, CloneLevel level, 
+	public Collection<MicroService> msSortByMsCloneLineCount(CloneLevel level, 
 			boolean removeFileLevelClone, boolean removeDataClass) {
+		Collection<MicroService> mss = msService.findAllMicroService();
 		Map<Boolean, Collection<MicroService>> mapCache = msSortByMsCloneLineCountCache.get(level);
 		if(mapCache != null) {
 			if(CloneLevel.function == level) {
@@ -532,9 +601,9 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 		Map<String, Map<Long, CloneLineValue<MicroService>>> temp = new HashMap<>();
 		Map<MicroService, Integer> msCount = new HashMap<>();
 		if(level == CloneLevel.function) {
-			temp = msCloneLineValuesCalculateGroupByFunction(mss, removeFileLevelClone);
+			temp = msCloneLineValuesCalculateGroupByFunction(removeFileLevelClone);
 		} else {
-			temp = msCloneLineValuesCalculateGroupByFile(mss, removeDataClass);
+			temp = msCloneLineValuesCalculateGroupByFile(removeDataClass);
 		}
 		for(String group : temp.keySet()) {
 			Map<Long, CloneLineValue<MicroService>> values = temp.get(group);
@@ -580,7 +649,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 	
 	public Collection<MicroService> fileCloneGroupContainMSs(FileCloneGroup group) {
 		Set<MicroService> result = new HashSet<>();
-		Collection<Project> fileCloneGroupContainProjects = fileCloneGroupContainProjects(group);
+		Collection<Project> fileCloneGroupContainProjects = fileCloneGroupContainProjects(group, null);
 		for(Project project : fileCloneGroupContainProjects) {
 			result.add(containRelationService.findProjectBelongToMicroService(project));
 		}
@@ -589,7 +658,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 	
 	public Collection<MicroService> functionCloneGroupContainMSs(FunctionCloneGroup group) {
 		Set<MicroService> result = new HashSet<>();
-		Collection<Project> functionCloneGroupContainProjects = functionCloneGroupContainProjects(group);
+		Collection<Project> functionCloneGroupContainProjects = functionCloneGroupContainProjects(group, null);
 		for(Project project : functionCloneGroupContainProjects) {
 			result.add(containRelationService.findProjectBelongToMicroService(project));
 		}
@@ -597,28 +666,40 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 	}
 	
 	private Map<FileCloneGroup, Collection<Project>> fileCloneGroupContainProjectsCache = new ConcurrentHashMap<>();
-	public Collection<Project> fileCloneGroupContainProjects(FileCloneGroup group) {
+	public Collection<Project> fileCloneGroupContainProjects(FileCloneGroup group, Language language) {
 		if(fileCloneGroupContainProjectsCache.get(group) != null) {
 			return fileCloneGroupContainProjectsCache.get(group);
 		}
 		Set<Project> result = new HashSet<>();
 		for(ProjectFile file : group.getNodes()) {
 			Project project = containRelationService.findFileBelongToProject(file);
-			result.add(project);
+			if(language == null) {
+				result.add(project);
+			} else {
+				if(project.getLanguage().equals(language.toString())) {
+					result.add(project);
+				}
+			}
 		}
 		fileCloneGroupContainProjectsCache.put(group, result);
 		return result;
 	}
 	
 	private Map<FunctionCloneGroup, Collection<Project>> functionCloneGroupContainProjectsCache = new ConcurrentHashMap<>();
-	public Collection<Project> functionCloneGroupContainProjects(FunctionCloneGroup group) {
+	public Collection<Project> functionCloneGroupContainProjects(FunctionCloneGroup group, Language language) {
 		if(functionCloneGroupContainProjectsCache.get(group) != null) {
 			return functionCloneGroupContainProjectsCache.get(group);
 		}
 		Set<Project> result = new HashSet<>();
 		for(Function function : group.getNodes()) {
 			Project project = containRelationService.findFunctionBelongToProject(function);
-			result.add(project);
+			if(language == null) {
+				result.add(project);
+			} else {
+				if(project.getLanguage().equals(language.toString())) {
+					result.add(project);
+				}
+			}
 		}
 		functionCloneGroupContainProjectsCache.put(group, result);
 		return result;
@@ -629,7 +710,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 			Collection<Project> projects) {
 		Set<FileCloneGroup> result = new HashSet<>();
 		for(FileCloneGroup group : groups) {
-			Collection<Project> containProjects = fileCloneGroupContainProjects(group);
+			Collection<Project> containProjects = fileCloneGroupContainProjects(group, null);
 			boolean contain = true;
 			for(Project p : projects) {
 				if(!containProjects.contains(p)) {
@@ -649,7 +730,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 			Collection<Project> projects) {
 		Set<FunctionCloneGroup> result = new HashSet<>();
 		for(FunctionCloneGroup group : groups) {
-			Collection<Project> containProjects = functionCloneGroupContainProjects(group);
+			Collection<Project> containProjects = functionCloneGroupContainProjects(group, null);
 			boolean contain = true;
 			for(Project p : projects) {
 				if(!containProjects.contains(p)) {
@@ -700,6 +781,47 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 			Map<Long, CloneLineValue<MicroService>> map = group.getValue();
 			for (MicroService microService : microservices) {
 				CloneLineValue<MicroService> clv = map.get(microService.getId());
+				boolean hasData = false;
+				buf.append("\"");
+				if(level == CloneLevel.function) {
+					for (Function function : clv.getCloneFunctions()) {
+						hasData = true;
+						buf.append(function.getName()).append(CSV_ROW_SEPARATOR);
+					}
+				} else {
+					for (ProjectFile projectFile : clv.getCloneFiles()) {
+						hasData = true;
+						buf.append(projectFile.getPath()).append(CSV_ROW_SEPARATOR);
+					}
+				}
+				if (hasData) {
+					int len = buf.length();
+					if (len > 2) buf.delete(len-2, len);
+				}
+				buf.append("\"");
+				buf.append(CSV_COLUMN_SEPARATOR);
+			}
+			buf.append(CSV_ROW_SEPARATOR);
+		}
+		return buf.toString();
+	}
+
+	@Override
+	public String exportCloneProject(Map<String, Map<Long, CloneLineValue<Project>>> data,
+											 Collection<Project> projects, CloneLevel level) {
+		final String CSV_COLUMN_SEPARATOR = ",";
+		final String CSV_ROW_SEPARATOR = "\r\n";
+		StringBuffer buf = new StringBuffer();
+		buf.append(" ").append(CSV_COLUMN_SEPARATOR);
+		for (Project project : projects) {
+			buf.append(project.getName()).append("(").append(project.getLanguage().toString()).append(")").append(CSV_COLUMN_SEPARATOR);
+		}
+		buf.append(CSV_ROW_SEPARATOR);
+		for (Map.Entry<String, Map<Long, CloneLineValue<Project>>> group : data.entrySet()) {
+			buf.append(group.getKey()).append(CSV_COLUMN_SEPARATOR);
+			Map<Long, CloneLineValue<Project>> map = group.getValue();
+			for (Project project : projects) {
+				CloneLineValue<Project> clv = map.get(project.getId());
 				boolean hasData = false;
 				buf.append("\"");
 				if(level == CloneLevel.function) {

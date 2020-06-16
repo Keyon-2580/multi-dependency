@@ -7,7 +7,13 @@ function copyToClip(content) {
     document.body.removeChild(aux);
     alert("复制成功");
 }
-var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
+var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass, language) {
+	var mainUrl = "";
+	if(language == null) {
+		mainUrl = "/clone/" + level;
+	} else {
+		mainUrl = "/language/clone/" + language + "/" + level;
+	}
 	var urlRemoveParams = "removeFileClone=" + removeFileClone + "&removeDataClass=" + removeDataClass;
 	var isFullScreen = false;
 	function showFull(divId){
@@ -288,9 +294,10 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 	}
 	var cys = {};
 	var table = function(){
+		var url = mainUrl;
 		$.ajax({
 			type : "GET",
-			url : "/clone/" + level + "/table/microservice?" + urlRemoveParams,
+			url : mainUrl + "/table/project?" + urlRemoveParams,
 			success : function(result) {
 				$("#table").addClass("table");
 				$("#table").addClass("table-bordered");
@@ -299,10 +306,10 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 				html += "<tr>";
 				html += "<th>";
 				html += "</th>";
-				for(var i = 0; i < result.microservices.length; i++) {
-					var ms = result.microservices[i];
+				for(var i = 0; i < result.projects.length; i++) {
+					var project = result.projects[i];
 					html += "<th>";
-					html += ms.name;
+					html += project.name;
 					html += "</th>";
 				}
 				html += "</tr>";
@@ -313,9 +320,9 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 					html += "<tr>";
 					html += "<td>" + group + "</td>";
 					var map = result.data[group];
-					for(var i = 0; i < result.microservices.length; i++) {
+					for(var i = 0; i < result.projects.length; i++) {
 						html += "<td>";
-						var data = map[result.microservices[i].id];
+						var data = map[result.projects[i].id];
 						if(level == "file") {
 							for(var j = 0; j < data.cloneFiles.length; j++) {
 								html += data.cloneFiles[j].path;
@@ -410,15 +417,16 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 				showZTree(result.value[i].ztree, $("#node_ztree_" + i), cy, "copyDiv_" + i);
 			}
 		}
-		$("#searchCountOfMSs").click(function(){
-			var minCount = $("#minCountMSsInput").val();
-			var maxCount = $("#maxCountMSsInput").val();
+		$("#searchCountOfProjects").click(function(){
+			var minCount = $("#minCountProjectsInput").val();
+			var maxCount = $("#maxCountProjectsInput").val();
+			var url = mainUrl + "/group/cytoscape?" + urlRemoveParams + "&minProjectsCount=" + minCount + "&maxProjectsCount=" + maxCount;;
+			
 			minCount = minCount == null ? -1 : minCount;
 			maxCount = maxCount == null ? -1 : maxCount;
 			if(minCount < 0 && maxCount < 0) {
 				return ;
 			}
-			var url = "/clone/" + level + "/group/cytoscape?" + urlRemoveParams + "&minProjectsCount=" + minCount + "&maxProjectsCount=" + maxCount;
 			$.ajax({
 				type : "GET",
 				url : url,
@@ -429,16 +437,16 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 				}
 			});
 		});
-		$("#searchMSs").click(function(){
-			var msIds = $("#searchProjectsSelect").val();
-			if(msIds.length == 0) {
+		$("#searchProjects").click(function(){
+			var projectIds = $("#searchProjectsSelect").val();
+			if(projectIds.length == 0) {
 				return ;
 			}
 			var params = {
-				"projects" : msIds,
+				"projects" : projectIds,
 				"search" : "projects"
 			}
-			var url = "/clone/" + level + "/group/cytoscape?" + urlRemoveParams;
+			var url = mainUrl + "/group/cytoscape?" + urlRemoveParams;
 			$.ajax({
 				type : "POST",
 				contentType : "application/json",
@@ -462,7 +470,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 				"groups" : groups,
 				"search" : "groups"
 			}
-			var url = "/clone/" + level + "/group/cytoscape?" + urlRemoveParams;
+			var url = mainUrl + "/group/cytoscape?" + urlRemoveParams;
 			$.ajax({
 				type : "POST",
 				contentType : "application/json",
@@ -484,7 +492,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			}
 			$.ajax({
 				type : "GET",
-				url : "/clone/" + level + "/group/cytoscape?top=" + top + "&" + urlRemoveParams,
+				url : mainUrl + "/group/cytoscape?top=" + top + "&" + urlRemoveParams,
 				success : function(result) {
 					if(result.result == "success") {
 						_showGroupsResult(result);
@@ -497,7 +505,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			var myChart = echarts.init(document.getElementById('projects_size_histogram'));
 			$.ajax({
 				type : "GET",
-				url : "/clone/" + level + "/group/histogram/projects/size?sort=" + sort + "&" + urlRemoveParams,
+				url : mainUrl + "/group/histogram/projects/size?sort=" + sort + "&" + urlRemoveParams,
 				success : function(result) {
 					console.log(result);
 					var xAxisData = [];
@@ -574,7 +582,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			var myChart = echarts.init(document.getElementById('main'));
 			$.ajax({
 				type : "GET",
-				url : "/clone/" + level + "/group/histogram?sort=" + sort + "&" + urlRemoveParams,
+				url : mainUrl + "/group/histogram?sort=" + sort + "&" + urlRemoveParams,
 				success : function(result) {
 					console.log(result);
 					$("#searchGroups").append('<optgroup id="select_single" label="单项目">单项目克隆</optgroup>');
@@ -664,7 +672,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 			        	console.log(name);
 			        	$.ajax({
 							type : "GET",
-							url : "/clone/" + level + "/group/cytoscape/" + name + "?" + urlRemoveParams,
+							url : mainUrl + "/group/cytoscape/" + name + "?" + urlRemoveParams,
 							success : function(result) {
 								if(result.result == "success") {
 									console.log(result.value);
@@ -740,7 +748,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass) {
 	// 导出CSV
 	$("#export").click(function(){
 		var xmlResquest = new XMLHttpRequest();
-		xmlResquest.open("GET", "/clone/" + level + "/table/microservice/export?" + urlRemoveParams, true);
+		xmlResquest.open("GET", mainUrl + "/table/project/export?" + urlRemoveParams, true);
 		xmlResquest.setRequestHeader("Content-type", "application/csv");
 		xmlResquest.responseType = "blob";
 		xmlResquest.onload = function (oEvent) {

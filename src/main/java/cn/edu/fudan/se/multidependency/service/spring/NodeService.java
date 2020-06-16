@@ -1,5 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
+import java.util.Collection;
+
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
@@ -26,6 +28,8 @@ public interface NodeService {
 	Project queryProject(long id);
 	
 	Project queryProject(String name, Language language);
+	
+	Collection<Project> queryProjects(Language language);
 	
 	CloneGroup queryCloneGroup(long id);
 

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
@@ -25,7 +26,6 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
 import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
 import cn.edu.fudan.se.multidependency.service.spring.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
-import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.data.FileCloneGroup;
 import cn.edu.fudan.se.multidependency.service.spring.data.FunctionCloneGroup;
 import cn.edu.fudan.se.multidependency.service.spring.data.HistogramWithProjectsSize;
@@ -43,17 +43,20 @@ public class CloneShowServiceImpl implements CloneShowService {
 	@Autowired
 	private ContainRelationService containRelationService;
 	
-	@Autowired
-	private MicroserviceService msService;
-
 	@Override
-	public Collection<HistogramWithProjectsSize> withProjectsSizeToHistogram(CloneLevel level, boolean removeDataClass, boolean removeFileClone) {
+	public Collection<HistogramWithProjectsSize> withProjectsSizeToHistogram(Language language, CloneLevel level, boolean removeDataClass, boolean removeFileClone) {
 		Map<Integer, HistogramWithProjectsSize> map = new HashMap<>();
 		if(level == CloneLevel.function) {
-			Collection<FunctionCloneGroup> groups = cloneAnalyseService.groupFunctionClones(removeFileClone);
+			Collection<FunctionCloneGroup> groups = cloneAnalyseService.groupFunctionClones(removeFileClone, language);
 			for(FunctionCloneGroup group : groups) {
-				Collection<MicroService> mss = cloneAnalyseService.functionCloneGroupContainMSs(group);
-				int mssSize = mss.size();
+				int mssSize = 0;
+				if(language == null) {
+					Collection<MicroService> mss = cloneAnalyseService.functionCloneGroupContainMSs(group);
+					mssSize = mss.size();
+				} else {
+					Collection<Project> projects = cloneAnalyseService.functionCloneGroupContainProjects(group, language);
+					mssSize = projects.size();
+				}
 				if(mssSize == 0) {
 					continue;
 				}
@@ -63,7 +66,7 @@ public class CloneShowServiceImpl implements CloneShowService {
 				map.put(mssSize, histogram);
 			}
 		} else {
-			Collection<FileCloneGroup> groups = cloneAnalyseService.groupFileClones(removeDataClass);
+			Collection<FileCloneGroup> groups = cloneAnalyseService.groupFileClones(removeDataClass, language);
 			for(FileCloneGroup group : groups) {
 				Collection<MicroService> mss = cloneAnalyseService.fileCloneGroupContainMSs(group);
 				int mssSize = mss.size();
@@ -79,9 +82,9 @@ public class CloneShowServiceImpl implements CloneShowService {
 		return map.values();
 	}
 	
-	private JSONObject fileClonesGroupsToCytoscape(Collection<CloneGroup> groups, 
+	private JSONObject fileClonesGroupsToCytoscape(Language language, Collection<CloneGroup> groups, 
 			boolean showGroupNode, boolean removeDataClass) {
-		Collection<FileCloneGroup> fileGroups = cloneAnalyseService.groupFileClones(removeDataClass);
+		Collection<FileCloneGroup> fileGroups = cloneAnalyseService.groupFileClones(removeDataClass, language);
 		Map<Node, ZTreeNode> nodeToZTreeNode = new HashMap<>();
 		Map<Project, ZTreeNode> projectToZTreeNode = new HashMap<>();
 		Map<MicroService, ZTreeNode> msToZTreeNode = new HashMap<>();
@@ -123,8 +126,22 @@ public class CloneShowServiceImpl implements CloneShowService {
 				}
 				edges.add(new CytoscapeEdge(file1, file2, "Clone", String.valueOf(cloneRelation.getValue())));
 				Project project1 = containRelationService.findFileBelongToProject(file1);
-				MicroService ms1 = containRelationService.findProjectBelongToMicroService(project1);
-				if(ms1 == null) {
+				if(language == null) {
+					MicroService ms1 = containRelationService.findProjectBelongToMicroService(project1);
+					if(ms1 != null) {
+						if(!isNodeToCytoscapeNode.getOrDefault(ms1, false)) {
+							isNodeToCytoscapeNode.put(ms1, true);
+							nodes.add(new CytoscapeNode(ms1.getId(), ms1.getName(), "MicroService"));
+							msToZTreeNode.put(ms1, new ZTreeNode(ms1.getId(), ms1.getName(), false, "MicroService", true));
+						}
+						String ms1ContainFile1Id = String.join("_", String.valueOf(ms1.getId()), String.valueOf(file1.getId()));
+						if(!isIdToCytoscapeEdge.getOrDefault(ms1ContainFile1Id, false)) {
+							isIdToCytoscapeEdge.put(ms1ContainFile1Id, true);
+							edges.add(new CytoscapeEdge(ms1, file1, "Contain"));
+							msToZTreeNode.get(ms1).addChild(nodeToZTreeNode.get(file1));
+						}
+					}
+				} else {
 					if(!isNodeToCytoscapeNode.getOrDefault(project1, false)) {
 						isNodeToCytoscapeNode.put(project1, true);
 						nodes.add(new CytoscapeNode(project1.getId(), project1.getName() + "(" + project1.getLanguage().toString() + ")", "Project"));
@@ -136,22 +153,24 @@ public class CloneShowServiceImpl implements CloneShowService {
 						edges.add(new CytoscapeEdge(project1, file1, "Contain"));
 						projectToZTreeNode.get(project1).addChild(nodeToZTreeNode.get(file1));
 					}
-				} else {
-					if(!isNodeToCytoscapeNode.getOrDefault(ms1, false)) {
-						isNodeToCytoscapeNode.put(ms1, true);
-						nodes.add(new CytoscapeNode(ms1.getId(), ms1.getName(), "MicroService"));
-						msToZTreeNode.put(ms1, new ZTreeNode(ms1.getId(), ms1.getName(), false, "MicroService", true));
-					}
-					String ms1ContainFile1Id = String.join("_", String.valueOf(ms1.getId()), String.valueOf(file1.getId()));
-					if(!isIdToCytoscapeEdge.getOrDefault(ms1ContainFile1Id, false)) {
-						isIdToCytoscapeEdge.put(ms1ContainFile1Id, true);
-						edges.add(new CytoscapeEdge(ms1, file1, "Contain"));
-						msToZTreeNode.get(ms1).addChild(nodeToZTreeNode.get(file1));
-					}
 				}
 				Project project2 = containRelationService.findFileBelongToProject(file2);
-				MicroService ms2 = containRelationService.findProjectBelongToMicroService(project2);
-				if(ms2 == null) {
+				if(language == null) {
+					MicroService ms2 = containRelationService.findProjectBelongToMicroService(project2);
+					if(ms2 != null) {
+						if(!isNodeToCytoscapeNode.getOrDefault(ms2, false)) {
+							isNodeToCytoscapeNode.put(ms2, true);
+							nodes.add(new CytoscapeNode(ms2.getId(), ms2.getName(), "MicroService"));
+							msToZTreeNode.put(ms2, new ZTreeNode(ms2.getId(), ms2.getName(), false, "MicroService", true));
+						}
+						String ms2ContainFile2Id = String.join("_", String.valueOf(ms2.getId()), String.valueOf(file2.getId()));
+						if(!isIdToCytoscapeEdge.getOrDefault(ms2ContainFile2Id, false)) {
+							isIdToCytoscapeEdge.put(ms2ContainFile2Id, true);
+							edges.add(new CytoscapeEdge(ms2, file2, "Contain"));
+							msToZTreeNode.get(ms2).addChild(nodeToZTreeNode.get(file2));
+						}
+					}
+				} else {
 					if(!isNodeToCytoscapeNode.getOrDefault(project2, false)) {
 						isNodeToCytoscapeNode.put(project2, true);
 						nodes.add(new CytoscapeNode(project2.getId(), project2.getName() + "(" + project2.getLanguage().toString() + ")", "Project"));
@@ -162,18 +181,6 @@ public class CloneShowServiceImpl implements CloneShowService {
 						isIdToCytoscapeEdge.put(project2ContainFile2Id, true);
 						edges.add(new CytoscapeEdge(project2, file2, "Contain"));
 						projectToZTreeNode.get(project2).addChild(nodeToZTreeNode.get(file2));
-					}
-				} else {
-					if(!isNodeToCytoscapeNode.getOrDefault(ms2, false)) {
-						isNodeToCytoscapeNode.put(ms2, true);
-						nodes.add(new CytoscapeNode(ms2.getId(), ms2.getName(), "MicroService"));
-						msToZTreeNode.put(ms2, new ZTreeNode(ms2.getId(), ms2.getName(), false, "MicroService", true));
-					}
-					String ms2ContainFile2Id = String.join("_", String.valueOf(ms2.getId()), String.valueOf(file2.getId()));
-					if(!isIdToCytoscapeEdge.getOrDefault(ms2ContainFile2Id, false)) {
-						isIdToCytoscapeEdge.put(ms2ContainFile2Id, true);
-						edges.add(new CytoscapeEdge(ms2, file2, "Contain"));
-						msToZTreeNode.get(ms2).addChild(nodeToZTreeNode.get(file2));
 					}
 				}
 			}
@@ -202,9 +209,9 @@ public class CloneShowServiceImpl implements CloneShowService {
 		return result;
 	}
 	
-	private JSONObject functionClonesGroupsToCytoscape(Collection<CloneGroup> groups, 
+	private JSONObject functionClonesGroupsToCytoscape(Language language, Collection<CloneGroup> groups, 
 			boolean showGroupNode, boolean removeFileLevelClone) {
-		Collection<FunctionCloneGroup> functionGroups = cloneAnalyseService.groupFunctionClones(removeFileLevelClone);
+		Collection<FunctionCloneGroup> functionGroups = cloneAnalyseService.groupFunctionClones(removeFileLevelClone, language);
 		Map<Node, ZTreeNode> nodeToZTreeNode = new HashMap<>();
 		Map<Project, ZTreeNode> projectToZTreeNode = new HashMap<>();
 		Map<MicroService, ZTreeNode> msToZTreeNode = new HashMap<>();
@@ -275,8 +282,22 @@ public class CloneShowServiceImpl implements CloneShowService {
 					nodeToZTreeNode.get(file2).addChild(nodeToZTreeNode.get(function2));
 				}
 				Project project1 = containRelationService.findFileBelongToProject(file1);
-				MicroService ms1 = containRelationService.findProjectBelongToMicroService(project1);
-				if(ms1 == null) {
+				if(language == null) {
+					MicroService ms1 = containRelationService.findProjectBelongToMicroService(project1);
+					if(ms1 != null) {
+						if(!isNodeToCytoscapeNode.getOrDefault(ms1, false)) {
+							isNodeToCytoscapeNode.put(ms1, true);
+							nodes.add(new CytoscapeNode(ms1.getId(), ms1.getName(), "MicroService"));
+							msToZTreeNode.put(ms1, new ZTreeNode(ms1.getId(), ms1.getName(), false, "MicroService", true));
+						}
+						String ms1ContainFile1Id = String.join("_", String.valueOf(ms1.getId()), String.valueOf(file1.getId()));
+						if(!isIdToCytoscapeEdge.getOrDefault(ms1ContainFile1Id, false)) {
+							isIdToCytoscapeEdge.put(ms1ContainFile1Id, true);
+							edges.add(new CytoscapeEdge(ms1, file1, "Contain"));
+							msToZTreeNode.get(ms1).addChild(nodeToZTreeNode.get(file1));
+						}
+					}
+				} else {
 					if(!isNodeToCytoscapeNode.getOrDefault(project1, false)) {
 						isNodeToCytoscapeNode.put(project1, true);
 						nodes.add(new CytoscapeNode(project1.getId(), project1.getName() + "(" + project1.getLanguage().toString() + ")", "Project"));
@@ -288,22 +309,24 @@ public class CloneShowServiceImpl implements CloneShowService {
 						edges.add(new CytoscapeEdge(project1, file1, "Contain"));
 						projectToZTreeNode.get(project1).addChild(nodeToZTreeNode.get(file1));
 					}
-				} else {
-					if(!isNodeToCytoscapeNode.getOrDefault(ms1, false)) {
-						isNodeToCytoscapeNode.put(ms1, true);
-						nodes.add(new CytoscapeNode(ms1.getId(), ms1.getName(), "MicroService"));
-						msToZTreeNode.put(ms1, new ZTreeNode(ms1.getId(), ms1.getName(), false, "MicroService", true));
-					}
-					String ms1ContainFile1Id = String.join("_", String.valueOf(ms1.getId()), String.valueOf(file1.getId()));
-					if(!isIdToCytoscapeEdge.getOrDefault(ms1ContainFile1Id, false)) {
-						isIdToCytoscapeEdge.put(ms1ContainFile1Id, true);
-						edges.add(new CytoscapeEdge(ms1, file1, "Contain"));
-						msToZTreeNode.get(ms1).addChild(nodeToZTreeNode.get(file1));
-					}
 				}
 				Project project2 = containRelationService.findFileBelongToProject(file2);
-				MicroService ms2 = containRelationService.findProjectBelongToMicroService(project2);
-				if(ms2 == null) {
+				if(language == null) {
+					MicroService ms2 = containRelationService.findProjectBelongToMicroService(project2);
+					if(ms2 != null) {
+						if(!isNodeToCytoscapeNode.getOrDefault(ms2, false)) {
+							isNodeToCytoscapeNode.put(ms2, true);
+							nodes.add(new CytoscapeNode(ms2.getId(), ms2.getName(), "MicroService"));
+							msToZTreeNode.put(ms2, new ZTreeNode(ms2.getId(), ms2.getName(), false, "MicroService", true));
+						}
+						String ms2ContainFile2Id = String.join("_", String.valueOf(ms2.getId()), String.valueOf(file2.getId()));
+						if(!isIdToCytoscapeEdge.getOrDefault(ms2ContainFile2Id, false)) {
+							isIdToCytoscapeEdge.put(ms2ContainFile2Id, true);
+							edges.add(new CytoscapeEdge(ms2, file2, "Contain"));
+							msToZTreeNode.get(ms2).addChild(nodeToZTreeNode.get(file2));
+						}
+					}
+				} else {
 					if(!isNodeToCytoscapeNode.getOrDefault(project2, false)) {
 						isNodeToCytoscapeNode.put(project2, true);
 						nodes.add(new CytoscapeNode(project2.getId(), project2.getName() + "(" + project2.getLanguage().toString() + ")", "Project"));
@@ -314,18 +337,6 @@ public class CloneShowServiceImpl implements CloneShowService {
 						isIdToCytoscapeEdge.put(project2ContainFile2Id, true);
 						edges.add(new CytoscapeEdge(project2, file2, "Contain"));
 						projectToZTreeNode.get(project2).addChild(nodeToZTreeNode.get(file2));
-					}
-				} else {
-					if(!isNodeToCytoscapeNode.getOrDefault(ms2, false)) {
-						isNodeToCytoscapeNode.put(ms2, true);
-						nodes.add(new CytoscapeNode(ms2.getId(), ms2.getName(), "MicroService"));
-						msToZTreeNode.put(ms2, new ZTreeNode(ms2.getId(), ms2.getName(), false, "MicroService", true));
-					}
-					String ms2ContainFile2Id = String.join("_", String.valueOf(ms2.getId()), String.valueOf(file2.getId()));
-					if(!isIdToCytoscapeEdge.getOrDefault(ms2ContainFile2Id, false)) {
-						isIdToCytoscapeEdge.put(ms2ContainFile2Id, true);
-						edges.add(new CytoscapeEdge(ms2, file2, "Contain"));
-						msToZTreeNode.get(ms2).addChild(nodeToZTreeNode.get(file2));
 					}
 				}
 			}
@@ -355,13 +366,13 @@ public class CloneShowServiceImpl implements CloneShowService {
 	}
     
 	@Override
-	public JSONObject clonesGroupsToCytoscape(Collection<CloneGroup> groups, CloneLevel level, 
+	public JSONObject clonesGroupsToCytoscape(Language language, Collection<CloneGroup> groups, CloneLevel level, 
 			boolean showGroupNode,
 			boolean removeFileLevelClone, boolean removeDataClass) {
 		if(level == CloneLevel.function) {
-			return functionClonesGroupsToCytoscape(groups, showGroupNode, removeFileLevelClone);
+			return functionClonesGroupsToCytoscape(language, groups, showGroupNode, removeFileLevelClone);
 		} else {
-			return fileClonesGroupsToCytoscape(groups, showGroupNode, removeDataClass);
+			return fileClonesGroupsToCytoscape(language, groups, showGroupNode, removeDataClass);
 		}
 	}
 }

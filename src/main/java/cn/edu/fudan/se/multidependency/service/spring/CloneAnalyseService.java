@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.service.spring;
 import java.util.Collection;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
@@ -21,18 +22,18 @@ public interface CloneAnalyseService {
 	 * @param removeDataClass
 	 * @return
 	 */
-	Collection<FileCloneGroup> groupFileClones(boolean removeDataClass);
+	Collection<FileCloneGroup> groupFileClones(boolean removeDataClass, Language language);
 	
 	/**
 	 * 获取方法级克隆组的克隆节点和关系
 	 * @param removeFileClone
 	 * @return
 	 */
-	Collection<FunctionCloneGroup> groupFunctionClones(boolean removeFileClone);
+	Collection<FunctionCloneGroup> groupFunctionClones(boolean removeFileClone, Language language);
 	
-	Collection<Project> fileCloneGroupContainProjects(FileCloneGroup group);
+	Collection<Project> fileCloneGroupContainProjects(FileCloneGroup group, Language language);
 	
-	Collection<Project> functionCloneGroupContainProjects(FunctionCloneGroup group);
+	Collection<Project> functionCloneGroupContainProjects(FunctionCloneGroup group, Language language);
 	
 	Collection<MicroService> fileCloneGroupContainMSs(FileCloneGroup group);
 	
@@ -46,21 +47,17 @@ public interface CloneAnalyseService {
 	
 	Collection<FunctionCloneGroup> groupFunctionClonesContainMSs(Collection<FunctionCloneGroup> groups, Collection<MicroService> mss);
 	
-//	Map<Project, CloneLineValue<Project>> projectCloneLineValues();
-	
-//	Map<MicroService, CloneLineValue<MicroService>> msCloneLineValues(Iterable<MicroService> mss);
-	
 	CloneLineValue<MicroService> msCloneLineValuesGroup(MicroService ms, CloneGroup group, CloneLevel level, boolean removeFileLevelClone, boolean removeDataClass);
 	
-	Collection<MicroService> msSortByMsCloneLineCount(Collection<MicroService> mss, CloneLevel level, boolean removeFileLevelClone, boolean removeDataClass);
+	Collection<MicroService> msSortByMsCloneLineCount(CloneLevel level, boolean removeFileLevelClone, boolean removeDataClass);
 	
-	Map<CloneGroup, Map<Project, CloneLineValue<Project>>> projectCloneLineValuesCalculateGroupByFile(boolean removeDataClass);
+	Map<String, Map<Long, CloneLineValue<Project>>> projectCloneLineValuesCalculateGroupByFile(boolean removeDataClass, Language language);
 	
-	Map<CloneGroup, Map<Project, CloneLineValue<Project>>> projectCloneLineValuesCalculateGroupByFunction(boolean removeFileLevelClone);
+	Map<String, Map<Long, CloneLineValue<Project>>> projectCloneLineValuesCalculateGroupByFunction(boolean removeFileLevelClone, Language language);
 	
-	Map<String, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFile(Collection<MicroService> mss, boolean removeDataClass);
+	Map<String, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFile(boolean removeDataClass);
 	
-	Map<String, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFunction(Collection<MicroService> mss, boolean removeFileClone);
+	Map<String, Map<Long, CloneLineValue<MicroService>>> msCloneLineValuesCalculateGroupByFunction(boolean removeFileClone);
 	
 	/**
 	 * 根据俩文件是否在同一克隆组判断是否有克隆关系
@@ -106,4 +103,5 @@ public interface CloneAnalyseService {
 
 	String exportCloneMicroService(Map<String, Map<Long, CloneLineValue<MicroService>>> data, Collection<MicroService> microservices, CloneLevel level);
 
+	String exportCloneProject(Map<String, Map<Long, CloneLineValue<Project>>> data, Collection<Project> projects, CloneLevel level);
 }

@@ -762,6 +762,16 @@
 		"autoInclude" : true,
 		"microserviceName" : "leveldb-1.22"
 	}, {
+		"path": "D:\\multiple-dependency-project\\train-ticket\\leveldb-1.23",
+		"serviceGroupName": "train-ticket",
+		"project": "leveldb-1.23",
+		"language": "cpp",
+		"isMicroservice": true,
+		"includeDirs" : [
+		],
+		"autoInclude" : true,
+		"microserviceName" : "leveldb-1.23"
+	}, {
 		"path": "D:\\multiple-dependency-project\\train-ticket\\depends",
 		"serviceGroupName": "train-ticket",
 		"project": "depends",
@@ -1019,6 +1029,12 @@
 			  "granularity": "function",
 			  "name_path": "src/main/resources/clone/function/multiple-fan/java/resultFolder/MethodNameTable.csv",
 			  "result_path": "src/main/resources/clone/function/multiple-fan/java/result/type123_method_result.csv"
+		  },
+		  {
+			  "language": "cpp",
+			  "granularity": "file",
+			  "name_path": "src/main/resources/clone/file/multiple-fan/cpp/result/MeasureIndex.csv",
+			  "result_path": "src/main/resources/clone/file/multiple-fan/cpp/result/type123_method_result.csv"
 		  }
 	  ]
 }

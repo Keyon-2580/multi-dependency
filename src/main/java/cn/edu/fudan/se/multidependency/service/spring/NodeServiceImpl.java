@@ -1,5 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -130,6 +132,23 @@ public class NodeServiceImpl implements NodeService {
 		Project project = projectRepository.findProjectByNameAndLanguage(name, language.toString());
 		cache.cacheNodeById(project);
 		return project;
+	}
+	
+	private Map<Language, Collection<Project>> languageToProjectsCache = new ConcurrentHashMap<>();
+	@Override
+	public Collection<Project> queryProjects(Language language) {
+		if(language == null) {
+			return new ArrayList<Project>();
+		}
+		Collection<Project> result = languageToProjectsCache.get(language);
+		if(result == null) {
+			result = projectRepository.findProjectsByLanguage(language.toString());
+			for(Project project : result) {
+				cache.cacheNodeById(project);
+			}
+			languageToProjectsCache.put(language, result);
+		}
+		return result;
 	}
 
 	@Override

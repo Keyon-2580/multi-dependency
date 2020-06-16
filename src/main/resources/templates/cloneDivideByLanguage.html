@@ -125,15 +125,15 @@
 					<form role="form" >
 						<div class="form-group row col-sm-12">
 							<div class="col-sm-6">
-								<label>跨项目数(? / <span th:text="${projectsCount}"></span>)
+								<label>跨项目数(? / <span th:text="${microservicesCount}"></span>)
 								</label> 
 									<br/>&gt;=
-									<input class="" type="number"  id="minCountProjectsInput" /> 
+									<input class="" type="number"  id="minCountMSsInput" /> 
 									<br/>&lt;=
-									<input class="" type="number"  id="maxCountProjectsInput" />
+									<input class="" type="number"  id="maxCountMSsInput" />
 							</div>
 							<div class="col-sm-6">
-								<button id="searchCountOfProjects" type="button" class="btn btn-default">搜索</button>
+								<button id="searchCountOfMSs" type="button" class="btn btn-default">搜索</button>
 							</div>
 						</div>
 					</form>
@@ -142,13 +142,13 @@
 							<div class="col-sm-6">
 								<label>克隆组包含项目：
 									<select id="searchProjectsSelect" class="multiselect" multiple="multiple">
-										<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name}">
+										<option th:each="ms : ${microservices}" th:value="${ms.id}" th:text="${ms.name}">
 										</option>
 									</select>
 								</label> 
 							</div>
 							<div class="col-sm-6">
-								<button id="searchProjects" type="button" class="btn btn-default">搜索</button>
+								<button id="searchMSs" type="button" class="btn btn-default">搜索</button>
 							</div>
 						</div>
 					</form>
@@ -165,11 +165,7 @@
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-			 var language = [[${language}]];
-			 if(language == null || language == ""){
-				 language = null;
-			 }
-			clone(cytoscapeutil(), [[${level}]], [[${removeFileClone}]], [[${removeDataClass}]], language).init();		
+			clone(cytoscapeutil(), [[${level}]], [[${removeFileClone}]], [[${removeDataClass}]]).init();		
 		});
 		// ]]>
 	</script>
