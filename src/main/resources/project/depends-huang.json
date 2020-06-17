@@ -6,8 +6,6 @@
       "language": "java",
       "isMicroservice": false,
       "excludes": [
-        "D:\\my_data\\SDTeam\\depends_\\unedited\\depends\\src\\test\\resources",
-        "D:\\my_data\\SDTeam\\depends_\\unedited\\depends\\src\\test\\java\\depends\\extractor\\java\\InheritTypeTest.java"
       ]
     }
   ],
