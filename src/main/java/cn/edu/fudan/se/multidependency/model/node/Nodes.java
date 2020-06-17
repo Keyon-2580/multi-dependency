@@ -41,6 +41,24 @@ public class Nodes implements Serializable {
     private List<Project> projects = new ArrayList<>();
 
     private Map<String, ProjectFile> filePathToFile = new ConcurrentHashMap<>();
+    
+    private Map<String, Map<Integer, Function>> functionStartLineInFile = new ConcurrentHashMap<>();
+    
+    public synchronized void putFunctionStartLineInFile(ProjectFile file, Function function) {
+    	Map<Integer, Function> functions = functionStartLineInFile.getOrDefault(file.getPath(), new ConcurrentHashMap<>());
+    	if(function.getStartLine() > 0) {
+    		functions.put(function.getStartLine(), function);
+    	}
+    	functionStartLineInFile.put(file.getPath(), functions);
+    }
+    
+    public Function findFunctionByStartLineInFile(ProjectFile file, int startLine) {
+    	Map<Integer, Function> functions = functionStartLineInFile.get(file.getPath());
+    	if(functions == null) {
+    		return null;
+    	}
+    	return functions.get(startLine);
+    }
 	
 	private Map<String, CodeNode> identifierToCodeNode = new ConcurrentHashMap<>();
 	
@@ -130,6 +148,19 @@ public class Nodes implements Serializable {
             projectHasNodes.put(node.getNodeType(), entityIdToNode);
             projectToNodes.put(inProject, projectHasNodes);
         }
+    }
+
+    private Map<Library, Map<String, LibraryAPI>> librariesWithAPI = new ConcurrentHashMap<>();
+
+    public synchronized void addLibraryAPINode(LibraryAPI api, Library belongToLibrary) {
+        Library lib = findLibrary(belongToLibrary.getGroupId(), belongToLibrary.getName(), belongToLibrary.getVersion());
+        if (lib == null) {
+            return;
+        }
+        Map<String, LibraryAPI> apis = librariesWithAPI.getOrDefault(lib, new ConcurrentHashMap<>());
+        apis.put(api.getName(), api);
+        librariesWithAPI.put(lib, apis);
+        this.addNode(api, null);
     }
 
     public List<? extends Node> findNodesByNodeType(NodeLabelType nodeType) {
@@ -368,19 +399,6 @@ public class Nodes implements Serializable {
             }
         }
         return null;
-    }
-
-    private Map<Library, Map<String, LibraryAPI>> librariesWithAPI = new ConcurrentHashMap<>();
-
-    public void addLibraryAPINode(LibraryAPI api, Library belongToLibrary) {
-        Library lib = findLibrary(belongToLibrary.getGroupId(), belongToLibrary.getName(), belongToLibrary.getVersion());
-        if (lib == null) {
-            return;
-        }
-        Map<String, LibraryAPI> apis = librariesWithAPI.getOrDefault(lib, new ConcurrentHashMap<>());
-        apis.put(api.getName(), api);
-        librariesWithAPI.put(lib, apis);
-        this.addNode(api, null);
     }
 
     public LibraryAPI findLibraryAPIInLibraryByAPIName(String apiName, Library belongToLibrary) {

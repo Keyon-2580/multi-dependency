@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.service.nospring.clone;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -48,14 +49,14 @@ public class CloneInserterForFile extends ExtractorForNodesAndRelationsImpl {
 		this.latch = new CountDownLatch(2);
 	}
 	
-	private Map<Integer, FilePathFromCsv> filePaths;
-	private Collection<CloneResultFromCsv> cloneResults;
+	private Map<Integer, FilePathFromCsv> filePaths = new HashMap<>();
+	private Collection<CloneResultFromCsv> cloneResults = new ArrayList<>();
 
 	@Override
 	public void addNodesAndRelations() throws Exception {
 		executor.execute(() -> {
 			try {
-				filePaths = CloneUtil.readJavaCloneCsvForFilePath(namePath);
+				filePaths = CloneUtil.readCloneCsvForFilePath(namePath);
 				for(Map.Entry<Integer, FilePathFromCsv> entry : filePaths.entrySet()) {
 					FilePathFromCsv filePath = entry.getValue();
 					ProjectFile file = this.getNodes().findFileByPathRecursion(filePath.getFilePath());

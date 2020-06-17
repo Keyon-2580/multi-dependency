@@ -171,8 +171,13 @@ public class ThreadService {
 				for (CloneConfig cloneConfig : config.getClonesConfig()) {
 					switch (cloneConfig.getGranularity()) {
 						case function:
-//							new CloneInserterForFunction(cloneConfig.getLanguage(), cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();
-							new CloneInserterForMethod(cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();
+							CloneInserterForMethod inserter = new CloneInserterForMethod(cloneConfig.getNamePath(), cloneConfig.getResultPath());
+							if(Language.cpp == cloneConfig.getLanguage()) {
+							} else {
+								inserter.setUseMethodIdentifier(true);
+							}
+							inserter.setUseMethodIdentifier(false);
+							inserter.addNodesAndRelations();
 							break;
 						case file:
 							new CloneInserterForFile(cloneConfig.getLanguage(), cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();

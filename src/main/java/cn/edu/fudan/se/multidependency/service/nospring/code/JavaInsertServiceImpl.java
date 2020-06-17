@@ -92,6 +92,8 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 		function.setSimpleName(entity.getRawName().getName());
 		function.setName(functionName);
 		function.setEntityId(entity.getId().longValue());
+		function.setStartLine(entity.getStartLine());
+		function.setEndLine(entity.getStopLine());
 		addNode(function, currentProject);
 		return function;
 	}
@@ -184,6 +186,12 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			function.setName(newFunctionName);
 			processIdentifier(function);
 			this.getNodes().addCodeNode(function);
+			while(!(parentEntity instanceof FileEntity)) {
+				// 找出方法所在的文件
+				parentEntity = parentEntity.getParent();
+			}
+			ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(parentEntity.getId().longValue(), currentProject);
+			this.getNodes().putFunctionStartLineInFile(file, function);
 		});
 		LOGGER.info("{} {} variable findNodesByNodeTypeInProject", this.currentProject.getName(), this.currentProject.getLanguage());
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Variable, currentProject).forEach((entityId, node) -> {

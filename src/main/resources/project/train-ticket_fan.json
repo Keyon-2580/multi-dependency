@@ -1027,7 +1027,7 @@
 		  {
 			  "language": "java",
 			  "granularity": "function",
-			  "name_path": "src/main/resources/clone/function/multiple-fan/java/resultFolder/MethodNameTable.csv",
+			  "name_path": "src/main/resources/clone/function/multiple-fan/java/result/MeasureIndex.csv",
 			  "result_path": "src/main/resources/clone/function/multiple-fan/java/result/type123_method_result.csv"
 		  },
 		  {
@@ -1035,6 +1035,12 @@
 			  "granularity": "file",
 			  "name_path": "src/main/resources/clone/file/multiple-fan/cpp/result/MeasureIndex.csv",
 			  "result_path": "src/main/resources/clone/file/multiple-fan/cpp/result/type123_method_result.csv"
+		  },
+		  {
+			  "language": "cpp",
+			  "granularity": "function",
+			  "name_path": "src/main/resources/clone/function/multiple-fan/cpp/result/MeasureIndex.csv",
+			  "result_path": "src/main/resources/clone/function/multiple-fan/cpp/result/type123_method_result.csv"
 		  }
 	  ]
 }

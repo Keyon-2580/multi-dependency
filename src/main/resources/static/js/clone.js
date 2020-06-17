@@ -590,6 +590,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass, lan
 					var xAxisData = [];
 					var nodesData = [];
 					var projectsData = [];
+					$("#histogram_group_count").text(result.groups.length);
 					for(var i = 0; i < result.groups.length; i++) {
 						xAxisData[i] = result.groups[i].name;
 						nodesData[i] = result.value.nodeSize[i];

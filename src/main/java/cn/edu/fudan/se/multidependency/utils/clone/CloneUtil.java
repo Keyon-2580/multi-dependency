@@ -25,7 +25,7 @@ public class CloneUtil {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CloneUtil.class);
 
-	public static Map<Integer, FilePathFromCsv> readJavaCloneCsvForFilePath(String filePath) throws Exception {
+	public static Map<Integer, FilePathFromCsv> readCloneCsvForFilePath(String filePath) throws Exception {
 		Map<Integer, FilePathFromCsv> result = new HashMap<>();
 		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
 			String line = null;
