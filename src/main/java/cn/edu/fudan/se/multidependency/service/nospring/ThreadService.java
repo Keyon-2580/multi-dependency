@@ -172,10 +172,6 @@ public class ThreadService {
 					switch (cloneConfig.getGranularity()) {
 						case function:
 							CloneInserterForMethod inserter = new CloneInserterForMethod(cloneConfig.getNamePath(), cloneConfig.getResultPath());
-							if(Language.cpp == cloneConfig.getLanguage()) {
-							} else {
-								inserter.setUseMethodIdentifier(true);
-							}
 							inserter.setUseMethodIdentifier(false);
 							inserter.addNodesAndRelations();
 							break;
