@@ -51,6 +51,8 @@ public interface StaticAnalyseService {
 	public Collection<Type> findInheritsFromType(Type type);
 	
 	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller();
+	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller(Project project);
+	public Map<Function, List<FunctionAccessField>> findAllFunctionAccessRelationsGroupByCaller(Project project);
 	
 	public Iterable<TypeInheritsType> findAllInheritsRelations();
 	public Iterable<FileIncludeFile> findAllFileIncludeFileRelations();
