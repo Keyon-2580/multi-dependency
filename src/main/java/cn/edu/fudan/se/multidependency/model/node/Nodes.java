@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.model.node;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,8 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.codehaus.plexus.util.StringUtils;
 
 import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.code.NodeWithLine;
 import cn.edu.fudan.se.multidependency.model.node.git.Branch;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
@@ -42,33 +43,71 @@ public class Nodes implements Serializable {
 
     private Map<String, ProjectFile> filePathToFile = new ConcurrentHashMap<>();
     
-    private Map<String, Map<Integer, Function>> functionStartLineInFile = new ConcurrentHashMap<>();
+    private Map<String, Map<Integer, NodeWithLine>> nodeInFileByEndLine = new ConcurrentHashMap<>();
     
-    public synchronized void putFunctionStartLineInFile(ProjectFile file, Function function) {
-    	Map<Integer, Function> functions = functionStartLineInFile.getOrDefault(file.getPath(), new ConcurrentHashMap<>());
-    	if(function.getStartLine() > 0) {
-    		functions.put(function.getStartLine(), function);
+    private Map<String, List<Collection<NodeWithLine>>> fileContainsNodesSortByLineCache = new ConcurrentHashMap<>();
+    
+    public synchronized void putNodeToFileByEndLine(ProjectFile file, NodeWithLine node) {
+    	Map<Integer, NodeWithLine> functions = nodeInFileByEndLine.getOrDefault(file.getPath(), new ConcurrentHashMap<>());
+    	if(node.getEndLine() > 0) {
+    		functions.put(node.getEndLine(), node);
     	}
-    	functionStartLineInFile.put(file.getPath(), functions);
+    	nodeInFileByEndLine.put(file.getPath(), functions);
+    	fileContainsNodesSortByLineCache.clear();
     }
     
-    public Function findFunctionByStartLineInFile(ProjectFile file, int startLine) {
-    	Map<Integer, Function> functions = functionStartLineInFile.get(file.getPath());
-    	if(functions == null) {
+    public static final int FILE_NODES_WITH_LINE_PAGE = 300;
+    
+    /**
+     * 按节点开始行数的顺序获取文件的所有节点（Type、Function）
+     * 每300行存放一个Node的集合，加速查询
+     * @param file
+     * @return
+     */
+    public List<Collection<NodeWithLine>> fileContainsNodesSortByLine(ProjectFile file) {
+    	if(fileContainsNodesSortByLineCache.get(file.getPath()) != null) {
+    		return fileContainsNodesSortByLineCache.get(file.getPath());
+    	}
+    	// 获取该文件下的所有节点，按节点所在的开始行数排序
+    	Map<Integer, NodeWithLine> nodesMap = nodeInFileByEndLine.getOrDefault(file, new ConcurrentHashMap<>());
+    	List<NodeWithLine> nodes = new ArrayList<>(nodesMap.values());
+    	nodes.sort((node1, node2) -> {
+    		return node1.getEndLine() - node2.getEndLine();
+    	});
+    	List<Collection<NodeWithLine>> result = new ArrayList<>();
+    	for(NodeWithLine node : nodes) {
+    		int endLine = node.getEndLine();
+    		int page = endLine / FILE_NODES_WITH_LINE_PAGE;
+    		Collection<NodeWithLine> nodesByPage = null;
+    		if(result.size() <= page) {
+    			nodesByPage = new ArrayList<>();
+    			result.add(nodesByPage);
+    		} else {
+    			nodesByPage = result.get(page);
+    		}
+    		nodesByPage.add(node);
+    	}
+    	fileContainsNodesSortByLineCache.put(file.getPath(), result);
+    	return result;
+    }
+    
+    public NodeWithLine findNodeByEndLineInFile(ProjectFile file, int endLine) {
+    	Map<Integer, NodeWithLine> nodes = nodeInFileByEndLine.get(file.getPath());
+    	if(nodes == null) {
     		return null;
     	}
-    	return functions.get(startLine);
+    	return nodes.get(endLine);
     }
 	
-	private Map<String, CodeNode> identifierToCodeNode = new ConcurrentHashMap<>();
+	/*private Map<String, CodeNode> identifierToCodeNode = new ConcurrentHashMap<>();
 	
 	public void addCodeNode(CodeNode node) {
 		this.identifierToCodeNode.put(node.getIdentifier(), node);
-	}
+	}*/
 	
-	public CodeNode findCodeNodeByIdentifier(String identifier) {
+	/*public CodeNode findCodeNodeByIdentifier(String identifier) {
 		return identifierToCodeNode.get(identifier);
-	}
+	}*/
 
     public ProjectFile findFileByPathRecursion(String path) {
         ProjectFile result = filePathToFile.get(path);
@@ -101,6 +140,7 @@ public class Nodes implements Serializable {
 
     private void clearCache() {
         this.allLibrariesCache.clear();
+    	this.fileContainsNodesSortByLineCache.clear();
     }
 
     public void clear() {

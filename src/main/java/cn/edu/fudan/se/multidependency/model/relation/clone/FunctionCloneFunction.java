@@ -1,8 +1,5 @@
 package cn.edu.fudan.se.multidependency.model.relation.clone;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
@@ -15,11 +12,7 @@ import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 边视作没有方向
- * @author fan
- *
- */
+
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_FUNCTION_CLONE_FUNCTION)
@@ -39,17 +32,17 @@ public class FunctionCloneFunction implements CloneRelation {
 	
 	private double value;
 	
-	private int function1StartLine;
+	private int node1Index;
 	
-	private int function1EndLine;
+	private int node2Index;
 	
-	private int function2StartLine;
+	private int node1StartLine;
 	
-	private int function2EndLine;
+	private int node1EndLine;
 	
-	private int function1Index;
+	private int node2StartLine;
 	
-	private int function2Index;
+	private int node2EndLine;
 	
 	public FunctionCloneFunction(Function function1, Function function2) {
 		this.function1 = function1;
@@ -71,47 +64,4 @@ public class FunctionCloneFunction implements CloneRelation {
 		return RelationType.FUNCTION_CLONE_FUNCTION;
 	}
 
-	@Override
-	public Map<String, Object> getProperties() {
-		Map<String, Object> properties = new HashMap<>();
-		properties.put("value", getValue());
-		properties.put("function1Index", getFunction1Index());
-		properties.put("function2Index", getFunction2Index());
-		properties.put("function1StartLine", getFunction1StartLine());
-		properties.put("function1EndLine", getFunction1EndLine());
-		properties.put("function2StartLine", getFunction2StartLine());
-		properties.put("function2EndLine", getFunction2EndLine());
-		return properties;
-	}
-
-	@Override
-	public int getNode1StartLine() {
-		return function1StartLine;
-	}
-
-	@Override
-	public int getNode1EndLine() {
-		return function1EndLine;
-	}
-
-	@Override
-	public int getNode2StartLine() {
-		return function2StartLine;
-	}
-
-	@Override
-	public int getNode2EndLine() {
-		return function2EndLine;
-	}
-
-	@Override
-	public int getNode1Index() {
-		return function1Index;
-	}
-
-	@Override
-	public int getNode2Index() {
-		return function2Index;
-	}
-	
 }

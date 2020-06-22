@@ -114,6 +114,8 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			type.setEntityId(entity.getId().longValue());
 			type.setName(entity.getQualifiedName());
 			type.setSimpleName(entity.getRawName().getName());
+			type.setStartLine(entity.getStartLine());
+			type.setEndLine(entity.getStopLine());
 			addNode(type, currentProject);
 			return type;
 		} else {
@@ -162,7 +164,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			Contain contain = new Contain(parentNode, namespace);
 			addRelation(contain);
 			processIdentifier(namespace);
-			this.getNodes().addCodeNode(namespace);
+//			this.getNodes().addCodeNode(namespace);
 		});
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject).forEach((entityId, node) -> {
 			Type type = (Type) node;
@@ -176,7 +178,13 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			Contain contain = new Contain(parentNode, type);
 			addRelation(contain);
 			processIdentifier(type);
-			this.getNodes().addCodeNode(type);
+//			this.getNodes().addCodeNode(type);
+			while(!(parentEntity instanceof FileEntity)) {
+				// 找出方法所在的文件
+				parentEntity = parentEntity.getParent();
+			}
+			ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(parentEntity.getId().longValue(), currentProject);
+			this.getNodes().putNodeToFileByEndLine(file, type);
 		});
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Function, currentProject).forEach((entityId, node) -> {
 			Function function = (Function) node;
@@ -207,13 +215,13 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				}
 			}
 			processIdentifier(function);
-			this.getNodes().addCodeNode(function);
+//			this.getNodes().addCodeNode(function);
 			while(!(parentEntity instanceof FileEntity)) {
 				// 找出方法所在的文件
 				parentEntity = parentEntity.getParent();
 			}
 			ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(parentEntity.getId().longValue(), currentProject);
-			this.getNodes().putFunctionStartLineInFile(file, function);
+			this.getNodes().putNodeToFileByEndLine(file, function);
 		});
 		LOGGER.info("{} {} variable findNodesByNodeTypeInProject", this.currentProject.getName(), this.currentProject.getLanguage());
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Variable, currentProject).forEach((entityId, node) -> {
@@ -232,7 +240,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			Contain contain = new Contain(parentNode, variable);
 			addRelation(contain);
 			processIdentifier(variable);
-			this.getNodes().addCodeNode(variable);
+//			this.getNodes().addCodeNode(variable);
 		});
 	}
 

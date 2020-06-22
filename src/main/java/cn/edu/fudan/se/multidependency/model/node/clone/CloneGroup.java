@@ -23,12 +23,20 @@ public class CloneGroup implements Node {
 	
 	public static final CloneGroup ALL_CLONE_GROUP_FUNCTION = new CloneGroup("group_all", CloneLevel.function);
 	
+	public static final CloneGroup ALL_CLONE_GROUP_Type = new CloneGroup("group_all", CloneLevel.type);
+	
+	public static final CloneGroup ALL_CLONE_GROUP_SNIPPET = new CloneGroup("group_all", CloneLevel.snippet);
+	
+	private static final Map<CloneLevel, CloneGroup> levelToAllGroup = new HashMap<>();
+	static {
+		levelToAllGroup.put(CloneLevel.function, ALL_CLONE_GROUP_FILE);
+		levelToAllGroup.put(CloneLevel.function, ALL_CLONE_GROUP_Type);
+		levelToAllGroup.put(CloneLevel.function, ALL_CLONE_GROUP_FUNCTION);
+		levelToAllGroup.put(CloneLevel.function, ALL_CLONE_GROUP_SNIPPET);
+	}
+	
 	public static CloneGroup allGroup(CloneLevel level) {
-		if(level == CloneLevel.function) {
-			return ALL_CLONE_GROUP_FUNCTION;
-		} else {
-			return ALL_CLONE_GROUP_FILE;
-		}
+		return levelToAllGroup.get(level);
 	}
 
 	private static final long serialVersionUID = -8494229666439859350L;

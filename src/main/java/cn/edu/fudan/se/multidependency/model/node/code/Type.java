@@ -9,6 +9,8 @@ import org.neo4j.ogm.annotation.NodeEntity;
 
 import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneRelationNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -17,7 +19,7 @@ import lombok.NoArgsConstructor;
 @NodeEntity
 @EqualsAndHashCode
 @NoArgsConstructor
-public class Type implements CodeNode {
+public class Type implements CodeNode, CloneRelationNode, NodeWithLine {
 	
 	private static final long serialVersionUID = 6805501035295416590L;
 	
@@ -35,6 +37,10 @@ public class Type implements CodeNode {
     
     private String simpleName;
 	
+	private int startLine = -1;
+	
+	private int endLine = -1;
+	
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
@@ -43,6 +49,8 @@ public class Type implements CodeNode {
 		properties.put("aliasName", getAliasName() == null ? (getName() == null ? "" : getName()) : getAliasName());
 		properties.put("identifier", getIdentifier() == null ? "" : getIdentifier());
 		properties.put("simpleName", getSimpleName() == null ? "" : getSimpleName());
+		properties.put("startLine", getStartLine());
+		properties.put("endLine", getEndLine());
 		return properties;
 	}
 	
@@ -66,5 +74,10 @@ public class Type implements CodeNode {
 	@Override
 	public String getIdentifierSimpleName() {
 		return getSimpleName();
+	}
+
+	@Override
+	public CloneLevel getCloneLevel() {
+		return CloneLevel.type;
 	}
 }
