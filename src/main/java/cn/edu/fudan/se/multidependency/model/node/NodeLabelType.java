@@ -2,7 +2,7 @@ package cn.edu.fudan.se.multidependency.model.node;
 
 public enum NodeLabelType {
 	Project, Package, ProjectFile,
-	Namespace, Type, Function, Variable,
+	Namespace, Type, Function, Variable, Snippet,
 	Library, LibraryAPI, License,
 	MicroService, RestfulAPI, Span,
 	Scenario, TestCase, Feature, Trace, Bug,

@@ -43,8 +43,6 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 		file.setEntityId(entity.getId().longValue());
 		String filePath = entity.getQualifiedName();
 		file.setName(FileUtil.extractFileName(filePath));
-//		filePath = filePath.replace("\\", "/");
-//		filePath = filePath.substring(filePath.indexOf(projectPath + "/"));
 		filePath = FileUtil.extractFilePath(filePath, projectPath);
 		file.setPath(filePath);
 		file.setSuffix(FileUtil.extractSuffix(entity.getQualifiedName()));
@@ -52,8 +50,6 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 		
 		// 文件所在目录
 		String directoryPath = FileUtil.extractDirectoryFromFile(entity.getQualifiedName()) + "/";
-//		directoryPath = directoryPath.replace("\\", "/");
-//		directoryPath = directoryPath.substring(directoryPath.indexOf(projectPath + "/"));
 		directoryPath = FileUtil.extractFilePath(directoryPath, projectPath);
 		Package pck = this.getNodes().findPackageByDirectoryPath(directoryPath, currentProject);
 		if (pck == null) {
@@ -113,6 +109,8 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 		type.setEntityId(entity.getId().longValue());
 		type.setName(entity.getQualifiedName());
 		type.setSimpleName(entity.getRawName().getName());
+		type.setStartLine(entity.getStartLine());
+		type.setEndLine(entity.getStopLine());
 		addNode(type, currentProject);
 		return type;
 	}
@@ -145,7 +143,13 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			type.setName(typeEntityName.get(entityId.intValue()));
 			type.setAliasName(typeEntityName.get(entityId.intValue()));
 			processIdentifier(type);
-			this.getNodes().addCodeNode(type);
+//			this.getNodes().addCodeNode(type);
+			while(!(parentEntity instanceof FileEntity)) {
+				// 找出方法所在的文件
+				parentEntity = parentEntity.getParent();
+			}
+			ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(parentEntity.getId().longValue(), currentProject);
+			this.getNodes().putNodeToFileByEndLine(file, type);
 		});
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Function, currentProject).forEach((entityId, node) -> {
 			Function function = (Function) node;
@@ -185,13 +189,13 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			}
 			function.setName(newFunctionName);
 			processIdentifier(function);
-			this.getNodes().addCodeNode(function);
+//			this.getNodes().addCodeNode(function);
 			while(!(parentEntity instanceof FileEntity)) {
 				// 找出方法所在的文件
 				parentEntity = parentEntity.getParent();
 			}
 			ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(parentEntity.getId().longValue(), currentProject);
-			this.getNodes().putFunctionStartLineInFile(file, function);
+			this.getNodes().putNodeToFileByEndLine(file, function);
 		});
 		LOGGER.info("{} {} variable findNodesByNodeTypeInProject", this.currentProject.getName(), this.currentProject.getLanguage());
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Variable, currentProject).forEach((entityId, node) -> {
@@ -208,7 +212,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			Contain contain = new Contain(parentNode, node);
 			addRelation(contain);
 			processIdentifier((Variable) node);
-			this.getNodes().addCodeNode((Variable) node);
+//			this.getNodes().addCodeNode((Variable) node);
 		});
 	}
 	
