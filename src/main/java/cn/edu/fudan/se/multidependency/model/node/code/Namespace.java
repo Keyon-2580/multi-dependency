@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NodeEntity
 @Data
 @NoArgsConstructor
-public class Namespace implements CodeNode {
+public class Namespace implements CodeUnit {
 	
 	private static final long serialVersionUID = 7914006834768560932L;
 
@@ -30,6 +30,10 @@ public class Namespace implements CodeNode {
     private String identifier;
     
     private String simpleName;
+	
+	private int startLine = -1;
+	
+	private int endLine = -1;
 
 	@Override
 	public Map<String, Object> getProperties() {
@@ -38,6 +42,8 @@ public class Namespace implements CodeNode {
 		properties.put("name", getName() == null ? "" : getName());
 		properties.put("identifier", getIdentifier() == null ? "" : getIdentifier());
 		properties.put("simpleName", getSimpleName() == null ? "" : getSimpleName());
+		properties.put("startLine", getStartLine());
+		properties.put("endLine", getEndLine());
 		return properties;
 	}
 

@@ -35,20 +35,20 @@ public class CloneLineValue<P> implements Serializable {
 	public void addAllFiles(Collection<ProjectFile> files) {
 		this.allFiles.addAll(files);
 		for(ProjectFile file : files) {
-			this.allFilesLines += file.getLine();
+			this.allFilesLines += file.getLines();
 		}
 	}
 	
 	public void addAllCloneFiles(Collection<ProjectFile> files) {
 		this.cloneFiles.addAll(files);
 		for(ProjectFile file : files) {
-			this.allCloneFilesLines += file.getLine();
+			this.allCloneFilesLines += file.getLines();
 		}
 	}
 	
 	public void addCloneFile(ProjectFile file) {
 		this.cloneFiles.add(file);
-		this.allCloneFilesLines += file.getLine();
+		this.allCloneFilesLines += file.getLines();
 	}
 	
 	public void addAllCloneFunctions(Collection<Function> functions) {

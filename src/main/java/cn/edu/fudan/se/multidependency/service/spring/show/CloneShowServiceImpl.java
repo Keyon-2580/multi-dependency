@@ -110,19 +110,19 @@ public class CloneShowServiceImpl implements CloneShowService {
 				ProjectFile file2 = cloneRelation.getFile2();
 				if(!isNodeToCytoscapeNode.getOrDefault(file1, false)) {
 					isNodeToCytoscapeNode.put(file1, true);
-					CytoscapeNode file1CytoscapeNode = new CytoscapeNode(file1.getId(), file1.getName() + "\n(" + file1.getLine() + ")", "File");
+					CytoscapeNode file1CytoscapeNode = new CytoscapeNode(file1.getId(), file1.getName() + "\n(" + file1.getLines() + ")", "File");
 					file1CytoscapeNode.setValue(file1.getPath());
 					nodes.add(file1CytoscapeNode);
 					groupEdges.add(new CytoscapeEdge(file1.getId().toString(), cloneGroup.getId().toString(), "nodeIsInCloneGroup"));
-					nodeToZTreeNode.put(file1, new ZTreeNode(file1.getId(), file1.getPath() + "(" + file1.getLine() + ")", false, "File", false));
+					nodeToZTreeNode.put(file1, new ZTreeNode(file1.getId(), file1.getPath() + "(" + file1.getLines() + ")", false, "File", false));
 				}
 				if(!isNodeToCytoscapeNode.getOrDefault(file2, false)) {
 					isNodeToCytoscapeNode.put(file2, true);
-					CytoscapeNode file2CytoscapeNode = new CytoscapeNode(file2.getId(), file2.getName() + "\n(" + file2.getLine() + ")", "File");
+					CytoscapeNode file2CytoscapeNode = new CytoscapeNode(file2.getId(), file2.getName() + "\n(" + file2.getLines() + ")", "File");
 					file2CytoscapeNode.setValue(file2.getPath());
 					nodes.add(file2CytoscapeNode);
 					groupEdges.add(new CytoscapeEdge(file2.getId().toString(), cloneGroup.getId().toString(), "nodeIsInCloneGroup"));
-					nodeToZTreeNode.put(file2, new ZTreeNode(file2.getId(), file2.getPath() + "(" + file2.getLine() + ")", false, "File", false));
+					nodeToZTreeNode.put(file2, new ZTreeNode(file2.getId(), file2.getPath() + "(" + file2.getLines() + ")", false, "File", false));
 				}
 				edges.add(new CytoscapeEdge(file1, file2, "Clone", String.valueOf(cloneRelation.getValue())));
 				Project project1 = containRelationService.findFileBelongToProject(file1);
@@ -256,10 +256,10 @@ public class CloneShowServiceImpl implements CloneShowService {
 				ProjectFile file1 = containRelationService.findFunctionBelongToFile(function1);
 				if(!isNodeToCytoscapeNode.getOrDefault(file1, false)) {
 					isNodeToCytoscapeNode.put(file1, true);
-					CytoscapeNode file1CytoscapeNode = new CytoscapeNode(file1.getId(), file1.getName() + "\n(" + file1.getLine() + ")", "File");
+					CytoscapeNode file1CytoscapeNode = new CytoscapeNode(file1.getId(), file1.getName() + "\n(" + file1.getLines() + ")", "File");
 					file1CytoscapeNode.setValue(file1.getPath());
 					nodes.add(file1CytoscapeNode);
-					nodeToZTreeNode.put(file1, new ZTreeNode(file1.getId(), file1.getPath() + "(" + file1.getLine() + ")", false, "File", true));
+					nodeToZTreeNode.put(file1, new ZTreeNode(file1.getId(), file1.getPath() + "(" + file1.getLines() + ")", false, "File", true));
 				}
 				String file1ContainFunction1Id = String.join("_", String.valueOf(file1.getId()), String.valueOf(function1.getId()));
 				if(!isIdToCytoscapeEdge.getOrDefault(file1ContainFunction1Id, false)) {
@@ -270,10 +270,10 @@ public class CloneShowServiceImpl implements CloneShowService {
 				ProjectFile file2 = containRelationService.findFunctionBelongToFile(function2);
 				if(!isNodeToCytoscapeNode.getOrDefault(file2, false)) {
 					isNodeToCytoscapeNode.put(file2, true);
-					CytoscapeNode file2CytoscapeNode = new CytoscapeNode(file2.getId(), file2.getName() + "\n(" + file2.getLine() + ")", "File");
+					CytoscapeNode file2CytoscapeNode = new CytoscapeNode(file2.getId(), file2.getName() + "\n(" + file2.getLines() + ")", "File");
 					file2CytoscapeNode.setValue(file2.getPath());
 					nodes.add(file2CytoscapeNode);
-					nodeToZTreeNode.put(file2, new ZTreeNode(file2.getId(), file2.getPath() + "(" + file2.getLine() + ")", false, "File", true));
+					nodeToZTreeNode.put(file2, new ZTreeNode(file2.getId(), file2.getPath() + "(" + file2.getLines() + ")", false, "File", true));
 				}
 				String file2ContainFunction2Id = String.join("_", String.valueOf(file2.getId()), String.valueOf(function2.getId()));
 				if(!isIdToCytoscapeEdge.getOrDefault(file2ContainFunction2Id, false)) {

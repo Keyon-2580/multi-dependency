@@ -47,7 +47,7 @@ public class CloneInserterForFile extends CloneInserter {
 				LOGGER.warn("file is null " + filePath.getFilePath());
 				continue;
 			}
-			file.setLine(filePath.getEndLine());
+			file.setEndLine(filePath.getEndLine());
 		}
 	}
 

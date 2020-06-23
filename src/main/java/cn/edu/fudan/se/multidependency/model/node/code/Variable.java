@@ -17,7 +17,11 @@ import lombok.NoArgsConstructor;
 @NodeEntity
 @EqualsAndHashCode
 @NoArgsConstructor
-public class Variable implements CodeNode {
+public class Variable implements CodeUnit {
+	
+	@Id
+	@GeneratedValue
+	private Long id;
 	
 	private static final long serialVersionUID = 7656480620809763012L;
 
@@ -31,14 +35,14 @@ public class Variable implements CodeNode {
     
     private String identifier;
 	
+	private int startLine = -1;
+	
+	private int endLine = -1;
+	
 	/**
 	 * 是否为类的属性
 	 */
 	private boolean field;
-	
-    @Id
-    @GeneratedValue
-    private Long id;
     
 	@Override
 	public Map<String, Object> getProperties() {
@@ -49,6 +53,8 @@ public class Variable implements CodeNode {
 		properties.put("typeIdentify", getTypeIdentify() == null ? "" : getTypeIdentify());
 		properties.put("field", isField());
 		properties.put("identifier", getIdentifier() == null ? "" : getIdentifier());
+		properties.put("startLine", getStartLine());
+		properties.put("endLine", getEndLine());
 		return properties;
 	}
 

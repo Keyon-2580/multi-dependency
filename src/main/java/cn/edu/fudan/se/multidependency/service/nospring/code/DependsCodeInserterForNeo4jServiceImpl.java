@@ -10,7 +10,7 @@ import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeUnit;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
@@ -255,7 +255,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 		this.entityRepo = entityRepo;
 	}
 	
-	protected String processIdentifier(CodeNode node) {
+	protected String processIdentifier(CodeUnit node) {
 		if(node.getIdentifier() != null) {
 			return node.getIdentifier();
 		}
@@ -273,8 +273,8 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					.append(node.getIdentifierSimpleName()).append(node.getIdentifierSuffix()).toString();
 			node.setIdentifier(identifier);
 			return identifier;
-		} else if(parentNode instanceof CodeNode) {
-			String identifier = new StringBuilder().append(processIdentifier((CodeNode) parentNode))
+		} else if(parentNode instanceof CodeUnit) {
+			String identifier = new StringBuilder().append(processIdentifier((CodeUnit) parentNode))
 					.append(node.getIdentifierSimpleName()).append(node.getIdentifierSuffix()).toString();
 			node.setIdentifier(identifier);
 			return identifier;

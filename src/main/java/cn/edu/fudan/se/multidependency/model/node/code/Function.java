@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @NodeEntity
 @NoArgsConstructor
 @EqualsAndHashCode
-public class Function implements CodeNode, CloneRelationNode, NodeWithLine {
+public class Function implements CodeUnit, CloneRelationNode {
 
 	private static final long serialVersionUID = 6993550414163132668L;
 	

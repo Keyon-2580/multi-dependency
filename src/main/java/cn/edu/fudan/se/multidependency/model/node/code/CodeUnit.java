@@ -2,7 +2,7 @@ package cn.edu.fudan.se.multidependency.model.node.code;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 
-public interface CodeNode extends Node {
+public interface CodeUnit extends Node, NodeWithLine {
 	
 	String getIdentifier();
 	
