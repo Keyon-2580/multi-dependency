@@ -40,7 +40,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.microservice.MicroSer
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanCallSpanRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanInstanceOfRestfulAPIRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.microservice.SpanStartWithFunctionRepository;
-import cn.edu.fudan.se.multidependency.service.spring.data.Fan_IO;
+import cn.edu.fudan.se.multidependency.service.spring.metric.Fan_IO;
 import cn.edu.fudan.se.multidependency.utils.MicroServiceUtil;
 import cn.edu.fudan.se.multidependency.utils.PageUtil;
 import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;

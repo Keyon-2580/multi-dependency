@@ -26,7 +26,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction
 import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypeParameterType;
-import cn.edu.fudan.se.multidependency.service.spring.data.Fan_IO;
+import cn.edu.fudan.se.multidependency.service.spring.metric.Fan_IO;
 
 public interface StaticAnalyseService {
 	

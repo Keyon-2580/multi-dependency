@@ -62,7 +62,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.code.VariableIsTypeRe
 import cn.edu.fudan.se.multidependency.repository.relation.code.VariableTypeParameterTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.lib.FunctionCallLibraryAPIRepository;
-import cn.edu.fudan.se.multidependency.service.spring.data.Fan_IO;
+import cn.edu.fudan.se.multidependency.service.spring.metric.Fan_IO;
 import cn.edu.fudan.se.multidependency.utils.PageUtil;
 
 /**

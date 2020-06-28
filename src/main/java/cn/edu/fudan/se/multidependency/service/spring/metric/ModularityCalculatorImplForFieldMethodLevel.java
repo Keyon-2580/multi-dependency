@@ -11,7 +11,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionAccessFi
 import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
-import cn.edu.fudan.se.multidependency.service.spring.data.Fan_IO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
