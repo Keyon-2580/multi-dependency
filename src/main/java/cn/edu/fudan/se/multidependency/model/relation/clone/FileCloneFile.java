@@ -42,6 +42,8 @@ public class FileCloneFile implements CloneRelation {
 	
 	private int node2EndLine;
 	
+	private String cloneType;
+	
 	public FileCloneFile(ProjectFile file1, ProjectFile file2) {
 		this.file1 = file1;
 		this.file2 = file2;

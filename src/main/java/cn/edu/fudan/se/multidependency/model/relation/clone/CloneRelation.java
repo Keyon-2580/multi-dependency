@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
+import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 
 public interface CloneRelation extends Relation {
 
@@ -21,6 +22,10 @@ public interface CloneRelation extends Relation {
 
 	int getNode2Index();
 	
+	void setCloneType(String cloneType);
+	
+	String getCloneType();
+	
 	default Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("value", getValue());
@@ -30,6 +35,7 @@ public interface CloneRelation extends Relation {
 		properties.put("node1EndLine", getNode1EndLine());
 		properties.put("node2StartLine", getNode2StartLine());
 		properties.put("node2EndLine", getNode2EndLine());
+		properties.put("cloneType", getCloneType() == null ? "" : getCloneType());
 		return properties;
 	}
 }

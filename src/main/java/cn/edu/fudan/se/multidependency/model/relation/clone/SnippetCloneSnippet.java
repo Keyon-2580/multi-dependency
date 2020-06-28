@@ -47,6 +47,8 @@ public class SnippetCloneSnippet implements CloneRelation {
 	private int node2StartLine;
 	
 	private int node2EndLine;
+	
+	private String cloneType;
 
 	@Override
 	public Node getStartNode() {

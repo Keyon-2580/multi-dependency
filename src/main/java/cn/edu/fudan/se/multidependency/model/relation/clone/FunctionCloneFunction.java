@@ -44,6 +44,8 @@ public class FunctionCloneFunction implements CloneRelation {
 	
 	private int node2EndLine;
 	
+	private String cloneType;
+	
 	public FunctionCloneFunction(Function function1, Function function2) {
 		this.function1 = function1;
 		this.function2 = function2;
