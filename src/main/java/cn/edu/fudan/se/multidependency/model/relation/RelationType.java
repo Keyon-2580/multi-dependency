@@ -52,10 +52,6 @@ public enum RelationType implements RelationshipType {
 	
 	FUNCTION_CALL_LIBRARY_API(RelationType.str_FUNCTION_CALL_LIBRARY_API),
 	
-	FUNCTION_CLONE_FUNCTION(RelationType.str_FUNCTION_CLONE_FUNCTION),
-	SNIPPET_CLONE_SNIPPET(RelationType.str_SNIPPET_CLONE_SNIPPET),
-	TYPE_CLONE_TYPE(RelationType.str_TYPE_CLONE_TYPE),
-	FILE_CLONE_FILE(RelationType.str_FILE_CLONE_FILE),
 	CLONE(RelationType.str_CLONE);
 
 	/**
@@ -113,10 +109,6 @@ public enum RelationType implements RelationshipType {
 	public static final String str_FUNCTION_CALL_LIBRARY_API = "FUNCTION_CALL_LIBRARY_API";
 	
 	public static final String str_CLONE = "CLONE";
-	public static final String str_FUNCTION_CLONE_FUNCTION = "FUNCTION_CLONE_FUNCTION";
-	public static final String str_FILE_CLONE_FILE = "FILE_CLONE_FILE";
-	public static final String str_TYPE_CLONE_TYPE = "TYPE_CLONE_TYPE";
-	public static final String str_SNIPPET_CLONE_SNIPPET = "SNIPPET_CLONE_SNIPPET";
 	
 	private String name;
 

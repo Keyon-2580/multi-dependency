@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NodeEntity
 @EqualsAndHashCode
 @NoArgsConstructor
-public class Variable implements CodeUnit {
+public class Variable implements CodeNode {
 	
 	@Id
 	@GeneratedValue
@@ -78,4 +78,5 @@ public class Variable implements CodeUnit {
 	public String getIdentifierSimpleName() {
 		return getSimpleName();
 	}
+	
 }

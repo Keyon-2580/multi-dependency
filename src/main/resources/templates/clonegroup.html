@@ -26,7 +26,7 @@
 <script type="text/javascript" th:src="@{/js/import/echarts-4.7.0/dist/echarts.js}"></script>
 <script type="text/javascript" th:src="@{/js/windowUtil.js}"></script>
 <script type="text/javascript" th:src="@{/js/cytoscapeutils.js}"></script>
-<script type="text/javascript" th:src="@{/js/clone.js}"></script>
+<script type="text/javascript" th:src="@{/js/clonegroup.js}"></script>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
@@ -64,6 +64,47 @@
 <body>
 	<div th:include="nav.html::nav"></div>
 	<div class="col-sm-12 row" style="margin-bottom: 15px;">
+		<div class="col-sm-12 row">
+			<form role="form">
+				<div class="form-group row col-sm-12">
+					<div class="col-sm-12">
+						<label for="name">克隆关系类型</label>
+						<div>
+							<select id="searchCloneRelationTypeSelect" name="searchCloneRelationTypeSelect" class="multiselect form-control" multiple="multiple">
+								<option th:each="cloneRelationType : ${cloneRelationTypes}" th:value="${cloneRelationType}" th:text="${cloneRelationType}">
+								</option>
+							</select>
+						</div>
+					</div>
+					<div class="col-sm-12" style="margin-top: 10px;">
+						<label for="name">语言</label>
+						<div>
+							<label class="checkbox-inline">
+						        <input type="checkbox" id="languageJava" name="language" value="java"> java
+						    </label>
+						    <label class="checkbox-inline">
+						        <input type="checkbox" id="languageCpp" name="language" value="cpp"> cpp
+						    </label>
+						</div>
+					</div>
+					<div class="col-sm-12" style="margin-top: 10px;">
+						<label for="name">过滤</label>
+						<div>
+							<label class="checkbox-inline">
+						        <input type="checkbox" id="dataclass" name="filter" value="dataclass"> 数据类
+						    </label>
+						    <label class="checkbox-inline">
+						        <input type="checkbox" id="fileclone" name="filter" value="fileclone"> 文件间已有克隆关系
+						    </label>
+						</div>
+					</div>
+					<div class="col-sm-12" style="margin-top: 10px;">
+						<button id="searchCloneRelationType" type="button" class="btn btn-default">搜索</button>
+					</div>
+				</div>
+			</form>
+			<hr/>
+		</div>
 		<div class="col-sm-12 row">
 			<div class="col-sm-12">
 				<h5>克隆组数：<span id="histogram_group_count"></span></h5>
@@ -105,16 +146,6 @@
 					<form role="form" >
 						<div class="form-group row col-sm-12">
 							<div class="col-sm-6">
-								<label>top：<input class="form-control" type="number"  id="topInput" /></label>
-							</div>
-							<div class="col-sm-6">
-									<button id="searchTop" type="button" class="btn btn-default">搜索</button>
-							</div>
-						</div>
-					</form>
-					<form role="form" >
-						<div class="form-group row col-sm-12">
-							<div class="col-sm-6">
 								<label>克隆组：
 									<select id="searchGroups" class="multiselect" multiple="multiple">
 									</select>
@@ -128,7 +159,7 @@
 					<form role="form" >
 						<div class="form-group row col-sm-12">
 							<div class="col-sm-6">
-								<label>跨项目数(? / <span th:text="${projectsCount}"></span>)
+								<label>跨项目数(? / <span id="projectsCount"></span>)
 								</label> 
 									<br/>&gt;=
 									<input class="" type="number"  id="minCountProjectsInput" /> 
@@ -144,9 +175,7 @@
 						<div class="form-group row col-sm-12">
 							<div class="col-sm-6">
 								<label>克隆组包含项目：
-									<select id="searchProjectsSelect" class="multiselect" multiple="multiple">
-										<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name}">
-										</option>
+									<select id="searchProjectsSelect" class="multiselect" name="searchProjectsSelect" multiple="multiple">
 									</select>
 								</label> 
 							</div>
@@ -168,11 +197,7 @@
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-			 var language = [[${language}]];
-			 if(language == null || language == ""){
-				 language = null;
-			 }
-			clone(cytoscapeutil(), [[${level}]], [[${removeFileClone}]], [[${removeDataClass}]], language).init();		
+			clone(cytoscapeutil()).init();		
 		});
 		// ]]>
 	</script>

@@ -1,5 +1,8 @@
 package cn.edu.fudan.se.multidependency.model.relation.clone;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
@@ -7,7 +10,8 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.code.CodeUnit;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
+import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_CLONE)
-public class Clone implements CloneRelation {
+public class Clone implements Relation {
 	private static final long serialVersionUID = 8708817258770543568L;
 
 	@Id
@@ -23,10 +27,15 @@ public class Clone implements CloneRelation {
     private Long id;
 	 	
 	@StartNode
-	private CodeUnit codeUnit1;
+	private CodeNode codeNode1;
 	
 	@EndNode
-	private CodeUnit codeUnit2;
+	private CodeNode codeNode2;
+	
+	public Clone(CodeNode codeNode1, CodeNode codeNode2) {
+		this.codeNode1 = codeNode1;
+		this.codeNode2 = codeNode2;
+	}
 	
 	private double value;
 	
@@ -42,20 +51,42 @@ public class Clone implements CloneRelation {
 	
 	private int node2EndLine;
 	
+	/**
+	 * 克隆关系类型：文件间克隆，方法间克隆等
+	 */
+	private String cloneRelationType;
+	
+	/**
+	 * 克隆类型，type1，type2等
+	 */
 	private String cloneType;
 
 	@Override
 	public Node getStartNode() {
-		return codeUnit1;
+		return codeNode1;
 	}
 
 	@Override
 	public Node getEndNode() {
-		return codeUnit2;
+		return codeNode2;
 	}
 
 	@Override
 	public RelationType getRelationType() {
 		return RelationType.CLONE;
+	}
+	
+	public Map<String, Object> getProperties() {
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("value", getValue());
+		properties.put("node1Index", getNode1Index());
+		properties.put("node2Index", getNode2Index());
+		properties.put("node1StartLine", getNode1StartLine());
+		properties.put("node1EndLine", getNode1EndLine());
+		properties.put("node2StartLine", getNode2StartLine());
+		properties.put("node2EndLine", getNode2EndLine());
+		properties.put("cloneRelationType", getCloneRelationType() == null ? "" : getCloneRelationType());
+		properties.put("cloneType", getCloneType() == null ? "" : getCloneType());
+		return properties;
 	}
 }

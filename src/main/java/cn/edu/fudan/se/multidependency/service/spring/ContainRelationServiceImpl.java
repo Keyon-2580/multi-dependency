@@ -16,8 +16,10 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
+import cn.edu.fudan.se.multidependency.model.node.code.Snippet;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
@@ -297,6 +299,14 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	}
 
 	@Override
+	public ProjectFile findSnippetBelongToFile(Snippet snippet) {
+		Node belongToNode = cache.findNodeBelongToNode(snippet, NodeLabelType.ProjectFile);
+		ProjectFile result = belongToNode == null ? containRepository.findSnippetBelongToFile(snippet.getId()) : (ProjectFile) belongToNode;
+		cache.cacheNodeBelongToNode(snippet, result);
+		return result;
+	}
+
+	@Override
 	public Type findFunctionBelongToType(Function function) {
 		Node belongToNode = cache.findNodeBelongToNode(function, NodeLabelType.Type);
 		Type result = belongToNode == null ? containRepository.findFunctionBelongToType(function.getId()) : (Type) belongToNode;
@@ -412,6 +422,38 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 			cache.cacheNodeBelongToNode(function, result);
 		}
 		return result;
+	}
+
+	@Override
+	public Project findCodeNodeBelongToProject(CodeNode node) {
+		if(node instanceof ProjectFile) {
+			return findFileBelongToProject((ProjectFile) node);
+		} else if(node instanceof Type) {
+			return findFileBelongToProject(findTypeBelongToFile((Type) node));
+		} else if(node instanceof Function) {
+			return findFunctionBelongToProject((Function) node);
+		} else if(node instanceof Variable) {
+			return findFileBelongToProject(findVariableBelongToFile((Variable) node));
+		} else if(node instanceof Snippet) {
+			return findFileBelongToProject(findSnippetBelongToFile((Snippet) node));
+		}
+		return null;
+	}
+
+	@Override
+	public ProjectFile findCodeNodeBelongToFile(CodeNode node) {
+		if(node instanceof ProjectFile) {
+			return (ProjectFile) node;
+		} else if(node instanceof Type) {
+			return findTypeBelongToFile((Type) node);
+		} else if(node instanceof Function) {
+			return findFunctionBelongToFile((Function) node);
+		} else if(node instanceof Variable) {
+			return findVariableBelongToFile((Variable) node);
+		} else if(node instanceof Snippet) {
+			return findSnippetBelongToFile((Snippet) node);
+		}
+		return null;
 	}
 
 }

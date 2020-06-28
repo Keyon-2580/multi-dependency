@@ -1,14 +1,19 @@
 package cn.edu.fudan.se.multidependency.model.node.clone;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Transient;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -19,26 +24,6 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode
 public class CloneGroup implements Node {
 	
-	public static final CloneGroup ALL_CLONE_GROUP_FILE = new CloneGroup("group_all", CloneLevel.file);
-	
-	public static final CloneGroup ALL_CLONE_GROUP_FUNCTION = new CloneGroup("group_all", CloneLevel.function);
-	
-	public static final CloneGroup ALL_CLONE_GROUP_Type = new CloneGroup("group_all", CloneLevel.type);
-	
-	public static final CloneGroup ALL_CLONE_GROUP_SNIPPET = new CloneGroup("group_all", CloneLevel.snippet);
-	
-	private static final Map<CloneLevel, CloneGroup> levelToAllGroup = new HashMap<>();
-	static {
-		levelToAllGroup.put(CloneLevel.function, ALL_CLONE_GROUP_FILE);
-		levelToAllGroup.put(CloneLevel.function, ALL_CLONE_GROUP_Type);
-		levelToAllGroup.put(CloneLevel.function, ALL_CLONE_GROUP_FUNCTION);
-		levelToAllGroup.put(CloneLevel.function, ALL_CLONE_GROUP_SNIPPET);
-	}
-	
-	public static CloneGroup allGroup(CloneLevel level) {
-		return levelToAllGroup.get(level);
-	}
-
 	private static final long serialVersionUID = -8494229666439859350L;
 
 	@Id
@@ -49,29 +34,23 @@ public class CloneGroup implements Node {
 
 	private Long entityId;
 	
-	private String level;
-	
 	private int size;
 	
-	public CloneGroup(String name, CloneLevel level) {
-		this.id = Long.MIN_VALUE;
-		this.level = level == CloneLevel.function ? NodeLabelType.Function.toString() : NodeLabelType.ProjectFile.toString();
+	private String language;
+	
+	public CloneGroup(String name) {
 		this.name = name;
 		this.size = -1;
 		this.entityId = -1L;
 	}
 	
-	public void setLevel(NodeLabelType label) {
-		this.level = label.toString();
-	}
-
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("name", getName() == null ? "" : getName());
-		properties.put("level", getLevel() == null ? "" : getLevel());
 		properties.put("size", getSize());
+		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		return properties;
 	}
 
@@ -83,6 +62,30 @@ public class CloneGroup implements Node {
 	@Override
 	public String indexName() {
 		return null;
+	}
+	
+	@Transient
+	private Set<CodeNode> nodes = new HashSet<>();
+
+	@Transient
+	private Set<Clone> relations = new HashSet<>();
+	
+	/*@Transient
+	private Set<CloneRelationType> cloneRelationTypes = new HashSet<>();
+	
+	@Transient
+	private Set<CloneType> cloneTypes = new HashSet<>();*/
+	
+	public void addNode(CodeNode node) {
+		this.nodes.add(node);
+	}
+	
+	public void addRelation(Clone relation) {
+		this.relations.add(relation);
+	}
+	
+	public int sizeOfNodes() {
+		return this.nodes.size();
 	}
 
 }

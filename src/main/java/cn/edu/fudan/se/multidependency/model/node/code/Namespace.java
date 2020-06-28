@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NodeEntity
 @Data
 @NoArgsConstructor
-public class Namespace implements CodeUnit {
+public class Namespace implements CodeNode {
 	
 	private static final long serialVersionUID = 7914006834768560932L;
 

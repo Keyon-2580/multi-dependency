@@ -7,9 +7,7 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneRelationNode;
-import cn.edu.fudan.se.multidependency.model.node.code.NodeWithLine;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -18,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NodeEntity
 @NoArgsConstructor
 @EqualsAndHashCode
-public class ProjectFile implements Node, CloneRelationNode, NodeWithLine {
+public class ProjectFile implements CodeNode {
 	
 	private static final long serialVersionUID = -8736926263545574636L;
 
@@ -72,8 +70,24 @@ public class ProjectFile implements Node, CloneRelationNode, NodeWithLine {
 	}
 
 	@Override
-	public CloneLevel getCloneLevel() {
-		return CloneLevel.file;
+	public String getIdentifier() {
+		return path;
+	}
+
+	@Override
+	public String getIdentifierSimpleName() {
+		return path;
+	}
+
+	@Override
+	public String getIdentifierSuffix() {
+		return "#F";
+	}
+
+	@Override
+	public void setIdentifier(String identifier) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

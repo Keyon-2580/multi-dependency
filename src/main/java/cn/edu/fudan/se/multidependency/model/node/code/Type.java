@@ -9,8 +9,6 @@ import org.neo4j.ogm.annotation.NodeEntity;
 
 import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneRelationNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -19,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NodeEntity
 @EqualsAndHashCode
 @NoArgsConstructor
-public class Type implements CodeUnit, CloneRelationNode {
+public class Type implements CodeNode {
 	
 	private static final long serialVersionUID = 6805501035295416590L;
 	
@@ -76,8 +74,4 @@ public class Type implements CodeUnit, CloneRelationNode {
 		return getSimpleName();
 	}
 
-	@Override
-	public CloneLevel getCloneLevel() {
-		return CloneLevel.type;
-	}
 }

@@ -7,14 +7,22 @@ function copyToClip(content) {
     document.body.removeChild(aux);
     alert("复制成功");
 }
-var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass, language) {
-	var mainUrl = "";
-	if(language == null) {
-		mainUrl = "/clone/" + level;
-	} else {
-		mainUrl = "/language/clone/" + language + "/" + level;
+var clone = function(cytoscapeutil) {
+	var param = {
+		searchCloneRelationTypeSelect : null,
+		language: null,
+		filter: null
 	}
-	var urlRemoveParams = "removeFileClone=" + removeFileClone + "&removeDataClass=" + removeDataClass;
+	var initParam = function() {
+		param = {
+			searchCloneRelationTypeSelect : null,
+			language: null,
+			filter: null
+		}
+	}
+	var histogramProjectsSizeChart = echarts.init(document.getElementById('projects_size_histogram'));
+	var histogramChart = echarts.init(document.getElementById('main'));
+	var mainUrl = "/clonegroup";
 	var isFullScreen = false;
 	function showFull(divId){
 		var full=document.getElementById(divId);
@@ -28,7 +36,6 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass, lan
 		exitFullscreen();
 	}
 	window.onresize = function() {
-		console.log("resize");
 		if(isFullScreen == true) {
 			isFullScreen = false;
 		} else {
@@ -154,6 +161,32 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass, lan
 			})
 		}
 		cys[cys.length] = cy;
+		cy.style().selector('node[type="Type"]').style({
+			'shape' : 'ellipse',
+			'width': function(content) {
+				var split = content.data().name.split("\n");
+				var maxWidth = 0;
+				for(var i = 0; i < split.length; i++) {
+					var width = split[i].replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
+					if(width > maxWidth) {
+						maxWidth = width;
+					}
+				}
+				return maxWidth;
+			},
+			'height': function(content) {
+				var split = content.data().name.split("\n");
+				var length = split.length;
+				return 21 * length;
+			},
+			'text-valign': 'center',
+			'text-halign': 'center',
+			'border-width': 1.5,
+			'border-color': '#555',
+			'background-color': '#f6f6f6',
+			'content': 'data(name)',
+			'text-wrap': 'wrap'
+		}).update();
 		cy.style().selector('node[type="Function"]').style({
 			'shape' : 'ellipse',
 			'width': function(content) {
@@ -349,7 +382,62 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass, lan
 		});
 	}
 	var _clone = function() {
+		$("#searchCloneRelationType").click(function() {
+			param.searchCloneRelationTypeSelect = $("#searchCloneRelationTypeSelect").val();
+			param.language = [];
+			param.filter = [];
+			if($("#languageJava").prop("checked")) {
+				param.language[param.language.length] = "java";
+			}
+			if($("#languageCpp").prop("checked")) {
+				param.language[param.language.length] = "cpp";
+			}
+			if(param.language.length == 0) {
+				alert("请选择语言！");
+				initParam();
+				return;
+			}
+			if($("#dataclass").prop("checked")) {
+				param.filter[param.filter.length] = "dataclass";
+			}
+			if($("#fileclone").prop("checked")) {
+				param.filter[param.filter.length] = "fileclone";
+			}
+			console.log(param);
+			histogram("nodes");
+			histogramProjectsSize("nodes");
+			$.ajax({
+				type : "POST",
+				contentType : "application/json",
+				dataType : "json",
+				url : mainUrl + "/projects",
+				data : JSON.stringify(param),
+				success : function(result) {
+					console.log(result);
+					$("#projectsCount").text(result.length);
+					$("#searchProjectsSelect").empty();
+					for(var i = 0; i < result.length; i++) {
+						var html = '<option value="' + result[i].id + '">' + result[i].name + '</option>';
+						$("#searchProjectsSelect").append(html);
+					}
+				}
+			});
+		});
+		$('#searchCloneRelationTypeSelect').multiselect({
+			maxHeight: 200,
+			enableCollapsibleOptGroups: true,
+            enableClickableOptGroups: true,
+            enableCollapsibleOptGroups: true,
+            includeSelectAllOption: true
+		});
 		$('#searchProjectsSelect').multiselect({
+			maxHeight: 200,
+			enableCollapsibleOptGroups: true,
+            enableClickableOptGroups: true,
+            enableCollapsibleOptGroups: true,
+            includeSelectAllOption: true
+		});
+		$('#searchGroups').multiselect({
 			maxHeight: 200,
 			enableCollapsibleOptGroups: true,
             enableClickableOptGroups: true,
@@ -420,16 +508,17 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass, lan
 		$("#searchCountOfProjects").click(function(){
 			var minCount = $("#minCountProjectsInput").val();
 			var maxCount = $("#maxCountProjectsInput").val();
-			var url = mainUrl + "/group/cytoscape?" + urlRemoveParams + "&minProjectsCount=" + minCount + "&maxProjectsCount=" + maxCount;;
-			
 			minCount = minCount == null ? -1 : minCount;
 			maxCount = maxCount == null ? -1 : maxCount;
 			if(minCount < 0 && maxCount < 0) {
 				return ;
 			}
 			$.ajax({
-				type : "GET",
-				url : url,
+				url : mainUrl + "/cytoscape/count?&minProjectsCount=" + minCount + "&maxProjectsCount=" + maxCount,
+				type : "POST",
+				contentType : "application/json",
+				dataType : "json",
+				data : JSON.stringify(param),
 				success : function(result) {
 					if(result.result == "success") {
 						_showGroupsResult(result);
@@ -442,17 +531,14 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass, lan
 			if(projectIds.length == 0) {
 				return ;
 			}
-			var params = {
-				"projects" : projectIds,
-				"search" : "projects"
-			}
-			var url = mainUrl + "/group/cytoscape?" + urlRemoveParams;
+			param.projects = projectIds;
+			param.search = "projects";
 			$.ajax({
 				type : "POST",
 				contentType : "application/json",
 				dataType : "json",
-				url : url,
-				data : JSON.stringify(params),
+				url : mainUrl + "/cytoscape",
+				data : JSON.stringify(param),
 				success : function(result) {
 					if(result.result == "success") {
 						_showGroupsResult(result);
@@ -466,33 +552,14 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass, lan
 			if(groups.length == 0) {
 				return ;
 			}
-			var params = {
-				"groups" : groups,
-				"search" : "groups"
-			}
-			var url = mainUrl + "/group/cytoscape?" + urlRemoveParams;
+			param.groups = groups;
+			param.search = "groups";
 			$.ajax({
 				type : "POST",
 				contentType : "application/json",
 				dataType : "json",
-				url : url,
-				data : JSON.stringify(params),
-				success : function(result) {
-					if(result.result == "success") {
-						_showGroupsResult(result);
-					}
-				}
-			});
-		});
-		$("#searchTop").click(function(){
-			var top = $("#topInput").val();
-			console.log(top);
-			if(top <= 0) {
-				return ;
-			}
-			$.ajax({
-				type : "GET",
-				url : mainUrl + "/group/cytoscape?top=" + top + "&" + urlRemoveParams,
+				url : mainUrl + "/cytoscape",
+				data : JSON.stringify(param),
 				success : function(result) {
 					if(result.result == "success") {
 						_showGroupsResult(result);
@@ -502,10 +569,12 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass, lan
 		});
 		// table();
 		var histogramProjectsSize = function(sort) {
-			var myChart = echarts.init(document.getElementById('projects_size_histogram'));
 			$.ajax({
-				type : "GET",
-				url : mainUrl + "/group/histogram/projects/size?sort=" + sort + "&" + urlRemoveParams,
+				type : "POST",
+				url : mainUrl + "/histogram/projects/size?sort=" + sort,
+				contentType : "application/json",
+				dataType : "json",
+				data : JSON.stringify(param),
 				success : function(result) {
 					console.log(result);
 					var xAxisData = [];
@@ -574,17 +643,20 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass, lan
 			        	        }
 			        	    ]
 			        	};
-			        myChart.setOption(option);
+					histogramProjectsSizeChart.setOption(option);
 				}
 			});
 		}
 		var histogram = function(sort) {
-			var myChart = echarts.init(document.getElementById('main'));
 			$.ajax({
-				type : "GET",
-				url : mainUrl + "/group/histogram?sort=" + sort + "&" + urlRemoveParams,
+				type : "POST",
+				url : mainUrl + "/histogram?sort=" + sort,
+				contentType : "application/json",
+				dataType : "json",
+				data : JSON.stringify(param),
 				success : function(result) {
 					console.log(result);
+					$("#searchGroups").empty();
 					$("#searchGroups").append('<optgroup id="select_single" label="单项目">单项目克隆</optgroup>');
 					$("#searchGroups").append('<optgroup id="select_between" label="跨项目">跨项目克隆</optgroup>');
 					var xAxisData = [];
@@ -601,20 +673,6 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass, lan
 						} else {
 							$("#select_single").append(html);
 						}
-					}
-					$('#searchGroups').multiselect({
-						maxHeight: 200,
-						enableCollapsibleOptGroups: true,
-			            enableClickableOptGroups: true,
-			            enableCollapsibleOptGroups: true,
-			            includeSelectAllOption: true
-					});
-					var legendLevel = "";
-					if(level == "function") {
-						legendLevel = "克隆组相关方法数";
-					}
-					if(level == "file") {
-						legendLevel = "克隆组相关文件数";
 					}
 					var option = {
 							dataZoom: [{
@@ -633,7 +691,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass, lan
 			        	        }
 			        	    },
 			        	    legend: {
-			        	        data: [legendLevel, '克隆跨项目数']
+			        	        data: ["克隆组内节点数", '克隆跨项目数']
 			        	    },
 			        	    grid: {
 			        	        left: '3%',
@@ -655,7 +713,7 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass, lan
 			        	        }
 			        	    ],
 			        	    series: [{
-			        	            name: legendLevel,
+			        	            name: "克隆组内节点数",
 			        	            type: 'bar',
 			        	            stack: 'cloneNode',
 			        	            data: nodesData
@@ -667,13 +725,15 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass, lan
 			        	        }
 			        	    ]
 			        	};
-			        myChart.setOption(option);
-			        myChart.on('click', function(params) {
+					histogramChart.setOption(option);
+					histogramChart.off('click');
+					histogramChart.on('click', function(params) {
 			        	var name = params.name;
-			        	console.log(name);
+			        	var languagesLength = param.language.length;
+			        	var singleLanguage = languagesLength != 1 ? false : true;
 			        	$.ajax({
 							type : "GET",
-							url : mainUrl + "/group/cytoscape/" + name + "?" + urlRemoveParams,
+							url : mainUrl + "/cytoscape/" + name + "?singleLanguage=" + singleLanguage,
 							success : function(result) {
 								if(result.result == "success") {
 									console.log(result.value);
@@ -705,8 +765,6 @@ var clone = function(cytoscapeutil, level, removeFileClone, removeDataClass, lan
 				}
 			});
 		}
-		histogram("nodes");
-		histogramProjectsSize("nodes");
 		$("#histogram_sort_nodes").click(function() {
 			histogram("nodes");
 		})

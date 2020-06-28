@@ -10,8 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.codehaus.plexus.util.StringUtils;
 
 import cn.edu.fudan.se.multidependency.model.Language;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.node.code.NodeWithLine;
 import cn.edu.fudan.se.multidependency.model.node.git.Branch;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
@@ -43,12 +43,12 @@ public class Nodes implements Serializable {
 
     private Map<String, ProjectFile> filePathToFile = new ConcurrentHashMap<>();
     
-    private Map<String, Map<Integer, NodeWithLine>> nodeInFileByEndLine = new ConcurrentHashMap<>();
+    private Map<String, Map<Integer, CodeNode>> nodeInFileByEndLine = new ConcurrentHashMap<>();
     
-    private Map<String, List<Collection<NodeWithLine>>> fileContainsNodesSortByLineCache = new ConcurrentHashMap<>();
+    private Map<String, List<Collection<CodeNode>>> fileContainsNodesSortByLineCache = new ConcurrentHashMap<>();
     
-    public synchronized void putNodeToFileByEndLine(ProjectFile file, NodeWithLine node) {
-    	Map<Integer, NodeWithLine> functions = nodeInFileByEndLine.getOrDefault(file.getPath(), new ConcurrentHashMap<>());
+    public synchronized void putNodeToFileByEndLine(ProjectFile file, CodeNode node) {
+    	Map<Integer, CodeNode> functions = nodeInFileByEndLine.getOrDefault(file.getPath(), new ConcurrentHashMap<>());
     	if(node.getEndLine() > 0) {
     		functions.put(node.getEndLine(), node);
     	}
@@ -64,21 +64,21 @@ public class Nodes implements Serializable {
      * @param file
      * @return
      */
-    public List<Collection<NodeWithLine>> fileContainsNodesSortByLine(ProjectFile file) {
+    public List<Collection<CodeNode>> fileContainsNodesSortByLine(ProjectFile file) {
     	if(fileContainsNodesSortByLineCache.get(file.getPath()) != null) {
     		return fileContainsNodesSortByLineCache.get(file.getPath());
     	}
     	// 获取该文件下的所有节点，按节点所在的开始行数排序
-    	Map<Integer, NodeWithLine> nodesMap = nodeInFileByEndLine.getOrDefault(file, new ConcurrentHashMap<>());
-    	List<NodeWithLine> nodes = new ArrayList<>(nodesMap.values());
+    	Map<Integer, CodeNode> nodesMap = nodeInFileByEndLine.getOrDefault(file, new ConcurrentHashMap<>());
+    	List<CodeNode> nodes = new ArrayList<>(nodesMap.values());
     	nodes.sort((node1, node2) -> {
     		return node1.getEndLine() - node2.getEndLine();
     	});
-    	List<Collection<NodeWithLine>> result = new ArrayList<>();
-    	for(NodeWithLine node : nodes) {
+    	List<Collection<CodeNode>> result = new ArrayList<>();
+    	for(CodeNode node : nodes) {
     		int endLine = node.getEndLine();
     		int page = endLine / FILE_NODES_WITH_LINE_PAGE;
-    		Collection<NodeWithLine> nodesByPage = null;
+    		Collection<CodeNode> nodesByPage = null;
     		if(result.size() <= page) {
     			nodesByPage = new ArrayList<>();
     			result.add(nodesByPage);
@@ -91,8 +91,8 @@ public class Nodes implements Serializable {
     	return result;
     }
     
-    public NodeWithLine findNodeByEndLineInFile(ProjectFile file, int endLine) {
-    	Map<Integer, NodeWithLine> nodes = nodeInFileByEndLine.get(file.getPath());
+    public CodeNode findNodeByEndLineInFile(ProjectFile file, int endLine) {
+    	Map<Integer, CodeNode> nodes = nodeInFileByEndLine.get(file.getPath());
     	if(nodes == null) {
     		return null;
     	}
@@ -269,15 +269,6 @@ public class Nodes implements Serializable {
     }
 
     public Package findPackageByDirectoryPath(String directoryPath, Project project) {
-        if ("/dropwizard__fdse__metrics/metrics-collectd/src/main/java/com/codahale/metrics/collectd/".equals(directoryPath)) {
-            Map<Long, Package> packages = (Map<Long, Package>) findNodesByNodeTypeInProject(NodeLabelType.Package, project);
-            for (Package pck : packages.values()) {
-                if (pck.getDirectoryPath().equals(directoryPath)) {
-                    System.out.println(pck);
-                    break;
-                }
-            }
-        }
         @SuppressWarnings("unchecked")
         Map<Long, Package> packages = (Map<Long, Package>) findNodesByNodeTypeInProject(NodeLabelType.Package, project);
         for (Package pck : packages.values()) {

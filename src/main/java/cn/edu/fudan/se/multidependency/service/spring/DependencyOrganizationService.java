@@ -17,7 +17,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
-import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
 import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
@@ -52,16 +52,16 @@ public class DependencyOrganizationService {
 	private Map<ProjectFile, Package> fileBelongToPackage = new HashMap<>();
 	
 	public JSONObject projectToCytoscape(Project project, Iterable<FunctionDynamicCallFunction> dynamicCalls,
-			Iterable<FunctionCloneFunction> clones) {
+			Iterable<Clone> functionClones) {
 		JSONObject result = new JSONObject();
 		JSONObject staticAndDynamicResult = projectToCytoscape(project, dynamicCalls);
 		JSONArray nodes = staticAndDynamicResult.getJSONArray("nodes");
 		JSONArray edges = staticAndDynamicResult.getJSONArray("edges");
 		
 		Map<Function, Map<Function, Boolean>> hasFunctionCallFunction = new HashMap<>();
-		for(FunctionCloneFunction clone : clones) {
-			Function function1 = clone.getFunction1();
-			Function function2 = clone.getFunction2();
+		for(Clone clone : functionClones) {
+			Function function1 = (Function) clone.getCodeNode1();
+			Function function2 = (Function) clone.getCodeNode2();
 			if(!hasFunctionCallFunction.getOrDefault(function1, new HashMap<>()).getOrDefault(function2, false)) {
 				edges.add(new CytoscapeEdge(function1, function2, "Function_clone_Function", "Function_clone_Function").toJSON());
 				Map<Function, Boolean> temp = hasFunctionCallFunction.getOrDefault(function1, new HashMap<>());
