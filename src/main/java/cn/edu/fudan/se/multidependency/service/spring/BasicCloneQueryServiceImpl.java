@@ -1,32 +1,24 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
-import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
-import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
-import cn.edu.fudan.se.multidependency.model.relation.clone.FunctionCloneFunction;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.repository.node.clone.CloneGroupRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.clone.FileCloneFileRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.clone.FunctionCloneFunctionRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository;
 
 @Service
 public class BasicCloneQueryServiceImpl implements BasicCloneQueryService {
 
     @Autowired
-    FunctionCloneFunctionRepository functionCloneFunctionRepository;
-    
-    @Autowired
-    FileCloneFileRepository fileCloneFileRepository;
+    CloneRepository cloneRepository;
     
     @Autowired
     ContainRelationService containRelationService;
@@ -38,99 +30,70 @@ public class BasicCloneQueryServiceImpl implements BasicCloneQueryService {
     CacheService cacheService;
     
     @Autowired
-    MicroserviceService msService;
+    CloneGroupRepository cloneGroupRepository;
+
+    private Map<CloneRelationType, Collection<Clone>> cloneTypeToClones = new ConcurrentHashMap<>();
+	@Override
+	public Collection<Clone> findClonesByCloneType(CloneRelationType cloneType) {
+		Collection<Clone> result = cloneTypeToClones.get(cloneType);
+		if(result == null) {
+			result = cloneRepository.findAllClonesByCloneType(cloneType.toString());
+			cloneTypeToClones.put(cloneType, result);
+		}
+		return result;
+	}
+
+	private Map<CloneRelationType, Collection<CloneGroup>> cloneTypeToGroups = new ConcurrentHashMap<>();
+	@Override
+	public Collection<CloneGroup> findGroupsContainCloneTypeRelation(CloneRelationType cloneType) {
+		Collection<CloneGroup> result = cloneTypeToGroups.get(cloneType);
+		if(result == null) {
+			result = cloneRepository.findGroupsByCloneType(cloneType.toString());
+			result.removeIf(group -> {
+				Collection<Clone> clones = findGroupContainCloneRelations(group);
+				boolean flag = false;
+				for(Clone clone : clones) {
+					if(!clone.getCloneRelationType().equals(cloneType.toString())) {
+						flag = true;
+						break;
+					}
+				}
+				return flag;
+			});
+			cloneTypeToGroups.put(cloneType, result);
+		}
+		return result;
+	}
 	
-    @Autowired
-    private CloneGroupRepository cloneGroupRepository;
+	@Override
+	public CloneGroup queryCloneGroup(long id) {
+		Node node = cacheService.findNodeById(id);
+		CloneGroup result = node == null ? cloneGroupRepository.findById(id).get() : (node instanceof CloneGroup ? (CloneGroup) node : cloneGroupRepository.findById(id).get());
+		cacheService.cacheNodeById(result);
+		return result;
+	}
+
+	private Map<CloneGroup, Collection<Clone>> groupContainClonesCache = new ConcurrentHashMap<>();
+	@Override
+	public Collection<Clone> findGroupContainCloneRelations(CloneGroup group) {
+		Collection<Clone> result = groupContainClonesCache.get(group);
+		if(result == null) {
+			result = cloneRepository.findCloneGroupContainClones(group.getId());
+			groupContainClonesCache.put(group, result);
+		}
+		return result;
+	}
+
+	private Map<String, CloneGroup> nameToGroupCache = new ConcurrentHashMap<>();
+	@Override
+	public CloneGroup queryCloneGroup(String name) {
+		CloneGroup result = nameToGroupCache.get(name);
+		if(result == null) {
+			result = cloneGroupRepository.queryCloneGroup(name);
+			nameToGroupCache.put(name, result);
+			cacheService.cacheNodeById(result);
+		}
+		return result;
+	}
     
-	private Map<CloneGroup, Collection<FunctionCloneFunction>> groupContainFunctionCloneRelationsCache = new ConcurrentHashMap<>();
-	@Override
-	public Collection<FunctionCloneFunction> queryGroupContainFunctionClones(CloneGroup group) {
-		Collection<FunctionCloneFunction> result = groupContainFunctionCloneRelationsCache.get(group);
-		if(result == null) {
-			result = functionCloneFunctionRepository.findCloneGroupContainFunctionClones(group.getId());
-		}
-		groupContainFunctionCloneRelationsCache.put(group, result);
-		return result;
-	}
-	
-	private Map<CloneGroup, Collection<FileCloneFile>> groupContainFileCloneRelationsCache = new ConcurrentHashMap<>();
-	@Override
-	public Collection<FileCloneFile> queryGroupContainFileClones(CloneGroup group) {
-		Collection<FileCloneFile> result = groupContainFileCloneRelationsCache.get(group);
-		if(result == null) {
-			result = fileCloneFileRepository.findCloneGroupContainFileClones(group.getId());
-		}
-		groupContainFileCloneRelationsCache.put(group, result);
-		return result;
-	}
-	
-	private Iterable<FunctionCloneFunction> allFunctionClonesCache = null;
-	@Override
-	public Iterable<FunctionCloneFunction> findAllFunctionCloneFunctions() {
-		if(allFunctionClonesCache == null) {
-			allFunctionClonesCache = functionCloneFunctionRepository.findAll();
-		}
-		return allFunctionClonesCache;
-	}
-
-	private Iterable<FileCloneFile> allFileClonesCache = null;
-	@Override
-	public Iterable<FileCloneFile> findAllFileCloneFiles() {
-		if(allFileClonesCache == null) {
-			allFileClonesCache = fileCloneFileRepository.findAll();
-		}
-		return allFileClonesCache;
-	}	
-	
-	@Override
-	public Iterable<FunctionCloneFunction> queryProjectContainFunctionCloneFunctions(Project project) {
-		Iterable<FunctionCloneFunction> allClones = findAllFunctionCloneFunctions();
-		List<FunctionCloneFunction> result = new ArrayList<>();
-		for(FunctionCloneFunction clone : allClones) {
-			if(containRelationService.findFunctionBelongToProject(clone.getFunction1()).equals(project)
-					&& containRelationService.findFunctionBelongToProject(clone.getFunction2()).equals(project)) {
-				result.add(clone);
-			}
-		}
-		
-		return result;
-	}
-
-	@Override
-	public Iterable<FileCloneFile> queryProjectContainFileCloneFiles(Project project) {
-		Iterable<FileCloneFile> allClones = findAllFileCloneFiles();
-		List<FileCloneFile> result = new ArrayList<>();
-		for(FileCloneFile clone : allClones) {
-			if(containRelationService.findFileBelongToProject(clone.getFile1()).equals(project)
-					&& containRelationService.findFileBelongToProject(clone.getFile2()).equals(project)) {
-				result.add(clone);
-			}
-		}
-		
-		return result;
-	}
-	
-    private Map<CloneLevel, Collection<CloneGroup>> cloneLevelToGroupsCache = new ConcurrentHashMap<>();
-    @Override
-	public Collection<CloneGroup> queryGroups(CloneLevel level) {
-    	if(cloneLevelToGroupsCache.get(level) != null) {
-    		return cloneLevelToGroupsCache.get(level);
-    	}
-    	String cloneLevel = "";
-    	if(level == CloneLevel.function) {
-    		cloneLevel = NodeLabelType.Function.toString();
-    	} else {
-    		cloneLevel = NodeLabelType.ProjectFile.toString();
-    	}
-		List<CloneGroup> result = cloneGroupRepository.findCloneGroupsByLevel(cloneLevel);
-		result.sort((group1, group2) -> {
-			return group2.getSize() - group1.getSize();
-		});
-		cloneLevelToGroupsCache.put(level, result);
-		for(CloneGroup group : result) {
-			cacheService.cacheNodeById(group);
-		}
-		return result;
-	}
 }

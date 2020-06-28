@@ -62,7 +62,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.code.VariableIsTypeRe
 import cn.edu.fudan.se.multidependency.repository.relation.code.VariableTypeParameterTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.lib.FunctionCallLibraryAPIRepository;
-import cn.edu.fudan.se.multidependency.service.spring.data.Fan_IO;
+import cn.edu.fudan.se.multidependency.service.spring.metric.Fan_IO;
 import cn.edu.fudan.se.multidependency.utils.PageUtil;
 
 /**
@@ -342,6 +342,32 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			Function caller = call.getFunction();
 			List<FunctionCallFunction> group = result.getOrDefault(caller, new ArrayList<>());
 			group.add(call);
+			result.put(caller, group);
+		}
+		return result;
+	}
+
+	@Override
+	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller(Project project) {
+		Iterable<FunctionCallFunction> allCalls = findFunctionCallFunctionRelations(project);
+		Map<Function, List<FunctionCallFunction>> result = new HashMap<>();
+		for(FunctionCallFunction call : allCalls) {
+			Function caller = call.getFunction();
+			List<FunctionCallFunction> group = result.getOrDefault(caller, new ArrayList<>());
+			group.add(call);
+			result.put(caller, group);
+		}
+		return result;
+	}
+
+	@Override
+	public Map<Function, List<FunctionAccessField>> findAllFunctionAccessRelationsGroupByCaller(Project project) {
+		Iterable<FunctionAccessField> allAccesses = findProjectContainFunctionAccessVariableRelations(project);
+		Map<Function, List<FunctionAccessField>> result = new HashMap<>();
+		for(FunctionAccessField access : allAccesses) {
+			Function caller = access.getFunction();
+			List<FunctionAccessField> group = result.getOrDefault(caller, new ArrayList<>());
+			group.add(access);
 			result.put(caller, group);
 		}
 		return result;

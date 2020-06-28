@@ -171,10 +171,10 @@ public class ThreadService {
 				for (CloneConfig cloneConfig : config.getClonesConfig()) {
 					switch (cloneConfig.getGranularity()) {
 						case function:
-							new CloneInserterForMethod(cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();
+							new CloneInserterForMethod(cloneConfig.getNamePath(), cloneConfig.getResultPath(), cloneConfig.getLanguage()).addNodesAndRelations();
 							break;
 						case file:
-							new CloneInserterForFile(cloneConfig.getNamePath(), cloneConfig.getResultPath()).addNodesAndRelations();
+							new CloneInserterForFile(cloneConfig.getNamePath(), cloneConfig.getResultPath(), cloneConfig.getLanguage()).addNodesAndRelations();
 							break;
 					}
 				}

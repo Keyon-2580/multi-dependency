@@ -9,29 +9,30 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
-import cn.edu.fudan.se.multidependency.model.relation.clone.FileCloneFile;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.utils.clone.CloneUtil;
 import cn.edu.fudan.se.multidependency.utils.clone.data.CloneResultFromCsv;
 import cn.edu.fudan.se.multidependency.utils.clone.data.FilePathFromCsv;
-import lombok.Setter;
 
 public class CloneInserterForFile extends CloneInserter {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CloneInserterForFile.class);
-	@Setter
 	private String namePath;
-	@Setter
 	private String resultPath;
+	private Language language;
 	
-	public CloneInserterForFile(String namePath, String resultPath) {
+	public CloneInserterForFile(String namePath, String resultPath, Language language) {
 		super();
 		this.namePath = namePath;
 		this.resultPath = resultPath;
+		this.language = language;
 	}
 	
 	private Map<Integer, FilePathFromCsv> filePaths = new HashMap<>();
@@ -47,7 +48,7 @@ public class CloneInserterForFile extends CloneInserter {
 				LOGGER.warn("file is null " + filePath.getFilePath());
 				continue;
 			}
-			file.setLine(filePath.getEndLine());
+			file.setEndLine(filePath.getEndLine());
 		}
 	}
 
@@ -60,7 +61,7 @@ public class CloneInserterForFile extends CloneInserter {
 	protected void extractNodesAndRelations() throws Exception {
 		LOGGER.info("文件克隆对数：" + cloneResults.size());
 		int sizeOfFileCloneFiles = 0;
-		List<FileCloneFile> clones = new ArrayList<>();
+		List<Clone> clones = new ArrayList<>();
 		for(CloneResultFromCsv cloneResult : cloneResults) {
 			int start = cloneResult.getStart();
 			int end = cloneResult.getEnd();
@@ -83,7 +84,7 @@ public class CloneInserterForFile extends CloneInserter {
 				LOGGER.warn("file2 is null " + filePath2.getLineId() + " " + filePath2.getFilePath());
 				continue;
 			}
-			FileCloneFile clone = new FileCloneFile(file1, file2);
+			Clone clone = new Clone(file1, file2);
 			clone.setNode1Index(start);
 			clone.setNode2Index(end);
 			clone.setNode1StartLine(filePath1.getStartLine());
@@ -91,18 +92,19 @@ public class CloneInserterForFile extends CloneInserter {
 			clone.setNode2StartLine(filePath2.getStartLine());
 			clone.setNode2EndLine(filePath2.getEndLine());
 			clone.setValue(value);
+			clone.setCloneRelationType(CloneRelationType.str_FILE_CLONE_FILE);
 			addRelation(clone);
 			clones.add(clone);
 			sizeOfFileCloneFiles++;
 		}
 		LOGGER.info("插入文件级克隆关系数：" + sizeOfFileCloneFiles);
-		Collection<Collection<? extends Node>> groups = CloneUtil.groupCloneNodes(clones);
+		Collection<Collection<CodeNode>> groups = CloneUtil.groupCloneNodes(clones);
 		long groupCount = cloneGroupNumber;
 		for(Collection<? extends Node> nodes : groups) {
 			CloneGroup group = new CloneGroup();
+			group.setLanguage(language.toString());
 			group.setEntityId(generateEntityId());
-			group.setName("group_" + cloneGroupNumber++);
-			group.setLevel(NodeLabelType.ProjectFile);
+			group.setName(String.join("_", "file", "group", String.valueOf(cloneGroupNumber++)));
 			group.setSize(nodes.size());
 			addNode(group, null);
 			for(Node node : nodes) {

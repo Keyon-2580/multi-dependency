@@ -12,6 +12,7 @@ public class Constant {
     public static final String CODE_NODE_IDENTIFIER_SUFFIX_TYPE = "#T";
     public static final String CODE_NODE_IDENTIFIER_SUFFIX_FUNCTION = "#M";
     public static final String CODE_NODE_IDENTIFIER_SUFFIX_VARIABLE = "#V";
+    public static final String CODE_NODE_IDENTIFIER_SUFFIX_SNIPPET = "#S";
 
     private static final Set<String> CODE_NODE_IDENTIFIER_SUFFIXs = new HashSet<>();
     
@@ -21,6 +22,7 @@ public class Constant {
     	CODE_NODE_IDENTIFIER_SUFFIXs.add(CODE_NODE_IDENTIFIER_SUFFIX_TYPE);
     	CODE_NODE_IDENTIFIER_SUFFIXs.add(CODE_NODE_IDENTIFIER_SUFFIX_FUNCTION);
     	CODE_NODE_IDENTIFIER_SUFFIXs.add(CODE_NODE_IDENTIFIER_SUFFIX_VARIABLE);
+    	CODE_NODE_IDENTIFIER_SUFFIXs.add(CODE_NODE_IDENTIFIER_SUFFIX_SNIPPET);
     }
 
 	public static String isEndWithCodeNodeIdentifierSuffix(String str) {

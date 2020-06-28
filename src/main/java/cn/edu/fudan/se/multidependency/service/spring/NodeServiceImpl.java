@@ -11,12 +11,10 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
@@ -159,22 +157,4 @@ public class NodeServiceImpl implements NodeService {
 		return result;
 	}
 
-	private Map<CloneLevel, Map<String, CloneGroup>> nameToGroupCache = new ConcurrentHashMap<>();
-	@Override
-	public CloneGroup queryCloneGroup(CloneLevel level, String name) {
-		Map<String, CloneGroup> nameToGroup = nameToGroupCache.getOrDefault(level, new ConcurrentHashMap<>());
-		CloneGroup result = nameToGroup.get(name);
-		if(result == null) {
-			if(level == CloneLevel.function) {
-				result = cloneGroupRepository.findCloneGroupsByLevelAndName(NodeLabelType.Function.toString(), name);
-			} else {
-				result = cloneGroupRepository.findCloneGroupsByLevelAndName(NodeLabelType.ProjectFile.toString(), name);
-			}
-		}
-		if(result != null) {
-			nameToGroup.put(name, result);
-			nameToGroupCache.put(level, nameToGroup);
-		}
-		return result;
-	}
 }

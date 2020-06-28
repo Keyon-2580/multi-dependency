@@ -7,10 +7,8 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneRelationNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -19,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NodeEntity
 @EqualsAndHashCode
 @NoArgsConstructor
-public class Snippet implements Node, CloneRelationNode, NodeWithLine {
+public class Snippet implements CodeNode {
 	
 	private static final long serialVersionUID = -2425172282148281962L;
 
@@ -56,7 +54,23 @@ public class Snippet implements Node, CloneRelationNode, NodeWithLine {
 	}
 
 	@Override
-	public CloneLevel getCloneLevel() {
-		return CloneLevel.snippet;
+	public String getIdentifier() {
+		return getName();
+	}
+
+	@Override
+	public String getIdentifierSimpleName() {
+		return getName();
+	}
+
+	@Override
+	public String getIdentifierSuffix() {
+		return Constant.CODE_NODE_IDENTIFIER_SUFFIX_SNIPPET;
+	}
+
+	@Override
+	public void setIdentifier(String identifier) {
+		// TODO Auto-generated method stub
+		
 	}
 }

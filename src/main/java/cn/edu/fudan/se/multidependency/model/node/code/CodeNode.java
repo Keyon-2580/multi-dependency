@@ -11,5 +11,16 @@ public interface CodeNode extends Node {
 	String getIdentifierSimpleName();
 
     String getIdentifierSuffix();
+
+	int getStartLine();
+	
+	int getEndLine();
+	
+	default int getLines() {
+		if(getStartLine() <= 0 || getEndLine() <= 0) {
+			return -1;
+		}
+		return getEndLine() - getStartLine() + 1;
+	}
 	
 }

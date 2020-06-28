@@ -9,8 +9,8 @@ import java.util.Map;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
-import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
-import cn.edu.fudan.se.multidependency.service.spring.data.Clone.CloneValueCalculator;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
+import cn.edu.fudan.se.multidependency.service.spring.data.CloneValue.CloneValueCalculator;
 
 public class CloneValueCalculatorForMicroService implements CloneValueCalculator {
 	
@@ -28,11 +28,11 @@ public class CloneValueCalculatorForMicroService implements CloneValueCalculator
 	}
 
 	@Override
-	public String calculate(Clone<? extends Node, ? extends CloneRelation> clone) {
+	public String calculate(CloneValue<? extends Node> clone) {
 		assert(clone.getNode1() instanceof MicroService && clone.getNode2() instanceof MicroService);
 		StringBuilder builder = new StringBuilder();
 		builder.append("(");
-		Collection<? extends CloneRelation> childrenClones = clone.getChildren();
+		Collection<? extends Clone> childrenClones = clone.getChildren();
 		builder.append(childrenClones.size());
 		builder.append(", ");
 		double b = clone.getValue() / (childrenClones.size() + 0.0);

@@ -15,7 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelation;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.utils.clone.data.CloneResultFromCsv;
 import cn.edu.fudan.se.multidependency.utils.clone.data.FilePathFromCsv;
 import cn.edu.fudan.se.multidependency.utils.clone.data.Group;
@@ -130,14 +131,14 @@ public class CloneUtil {
 	 * @param relations
 	 * @return
 	 */
-	public static Collection<Collection<? extends Node>> groupCloneNodes(Iterable<? extends CloneRelation> relations) {
-		List<Collection<? extends Node>> result = new ArrayList<>();
-		Map<Node, Collection<Node>> nodeToCollection = new HashMap<>();
-		for(CloneRelation relation : relations) {
-			Node node1 = relation.getStartNode();
-			Node node2 = relation.getEndNode();
-			Collection<Node> collections1 = nodeToCollection.get(node1);
-			Collection<Node> collections2 = nodeToCollection.get(node2);
+	public static Collection<Collection<CodeNode>> groupCloneNodes(Collection<Clone> relations) {
+		List<Collection<CodeNode>> result = new ArrayList<>();
+		Map<Node, Collection<CodeNode>> nodeToCollection = new HashMap<>();
+		for(Clone relation : relations) {
+			CodeNode node1 = relation.getCodeNode1();
+			CodeNode node2 = relation.getCodeNode2();
+			Collection<CodeNode> collections1 = nodeToCollection.get(node1);
+			Collection<CodeNode> collections2 = nodeToCollection.get(node2);
 			if(collections1 == null && collections2 == null) {
 				collections1 = new ArrayList<>();
 				collections1.add(node1);
@@ -161,6 +162,7 @@ public class CloneUtil {
 				}
 			}
 		}
+		System.out.println(relations.size() + " " + result.size());
 		result.sort((collection1, collection2) -> {
 			return collection2.size() - collection1.size();
 		});

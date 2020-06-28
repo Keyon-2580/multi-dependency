@@ -7,8 +7,10 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
+import cn.edu.fudan.se.multidependency.model.node.code.Snippet;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
@@ -42,6 +44,10 @@ public interface ContainRelationService {
 	
 	Collection<Variable> findFunctionDirectlyContainVariables(Function function);
 	
+	Project findCodeNodeBelongToProject(CodeNode node);
+	
+	ProjectFile findCodeNodeBelongToFile(CodeNode node);
+	
 	Package findFileBelongToPackage(ProjectFile file);
 	
 	Project findFileBelongToProject(ProjectFile file);
@@ -55,6 +61,8 @@ public interface ContainRelationService {
 	ProjectFile findTypeBelongToFile(Type type);
 	
 	ProjectFile findVariableBelongToFile(Variable variable);
+	
+	ProjectFile findSnippetBelongToFile(Snippet snippet);
 	
 	Project findFunctionBelongToProject(Function function);
 	

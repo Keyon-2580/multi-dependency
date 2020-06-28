@@ -18,18 +18,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
-import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
+import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
-import cn.edu.fudan.se.multidependency.service.spring.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.GitAnalyseServiceImpl;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
-import cn.edu.fudan.se.multidependency.service.spring.data.CloneLineValue;
+import cn.edu.fudan.se.multidependency.service.spring.clone.CloneAnalyseService;
+import cn.edu.fudan.se.multidependency.service.spring.clone.CloneValueService;
 import cn.edu.fudan.se.multidependency.service.spring.data.MicroServiceCallWithEntry;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeEdge;
 
@@ -48,6 +46,9 @@ public class MDAllController {
 	
 	@Autowired
 	private CloneAnalyseService cloneAnalyse;
+	
+	@Autowired
+	private CloneValueService cloneValueService;
 	
 	@Autowired
 	private BasicCloneQueryService basicCloneQueryService;
@@ -164,11 +165,10 @@ public class MDAllController {
 		callsWithEntry.setShowClonesInMicroService(showClonesInMicroService);
 		callsWithEntry.setShowCntOfDevUpdMs(showCntOfDevUpdMs);
 		if(showClonesInMicroService) {
-			Iterable<MicroService> allMicroServices = msService.findAllMicroService();
-			Map<MicroService, CloneLineValue<MicroService>> msCloneValues = cloneAnalyse.msCloneLineValuesGroup(allMicroServices, CloneGroup.allGroup(CloneLevel.file), CloneLevel.file, false, false);
-			callsWithEntry.setMsToCloneLineValue(msCloneValues);
-			callsWithEntry.setClonesInMicroServiceFromFunctionClone(cloneAnalyse.findMicroServiceCloneFromFunctionClone(basicCloneQueryService.findAllFunctionCloneFunctions(), true));
-			callsWithEntry.setClonesInMicroServiceFromFileClone(cloneAnalyse.findMicroServiceCloneFromFileClone(basicCloneQueryService.findAllFileCloneFiles(), true));
+//			Iterable<MicroService> allMicroServices = msService.findAllMicroService();
+//			Map<MicroService, CloneLineValue<MicroService>> msCloneValues = cloneAnalyse.msCloneLineValuesGroup(allMicroServices, CloneGroup.allGroup(CloneLevel.file), CloneLevel.file, false, false);
+//			callsWithEntry.setMsToCloneLineValue(msCloneValues);
+			callsWithEntry.setClonesInMicroServiceFromFileClone(cloneValueService.findMicroServiceCloneFromFileClone(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), true));
 			callsWithEntry.setShowClonesMinPair(showClonesMinPair);
 		}
 		if(showMicroServiceCallLibs) {

@@ -7,8 +7,7 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneRelationNode;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -17,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NodeEntity
 @NoArgsConstructor
 @EqualsAndHashCode
-public class ProjectFile implements Node, CloneRelationNode {
+public class ProjectFile implements CodeNode {
 	
 	private static final long serialVersionUID = -8736926263545574636L;
 
@@ -33,9 +32,13 @@ public class ProjectFile implements Node, CloneRelationNode {
 	
 	private String suffix;
 	
-	public static final String SUFFIX_JAVA = ".java";
+	private int endLine = -1;
 	
-	private int line = -1;
+	public int getStartLine() {
+		return 1;
+	}
+	
+	public static final String SUFFIX_JAVA = ".java";
 	
 	public ProjectFile(Long entityId, String name, String path, String suffix) {
 		this.entityId = entityId;
@@ -51,7 +54,7 @@ public class ProjectFile implements Node, CloneRelationNode {
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("path", getPath() == null ? "" : getPath());
 		properties.put("suffix", getSuffix() == null ? "" : getSuffix());
-		properties.put("line", getLine());
+		properties.put("endLine", getEndLine());
 		return properties;
 	}
 
@@ -67,8 +70,24 @@ public class ProjectFile implements Node, CloneRelationNode {
 	}
 
 	@Override
-	public CloneLevel getCloneLevel() {
-		return CloneLevel.file;
+	public String getIdentifier() {
+		return path;
+	}
+
+	@Override
+	public String getIdentifierSimpleName() {
+		return path;
+	}
+
+	@Override
+	public String getIdentifierSuffix() {
+		return "#F";
+	}
+
+	@Override
+	public void setIdentifier(String identifier) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

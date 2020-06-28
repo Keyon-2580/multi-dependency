@@ -46,6 +46,9 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "*1..4]->(b:Variable) where id(b)={variableId} return a")
 	public ProjectFile findVariableBelongToFile(@Param("variableId") Long variableId);
 	
+	@Query("match (a:ProjectFile)-[r:" + RelationType.str_CONTAIN + "]->(b:Snippet) where id(b)={snippetId} return a")
+	public ProjectFile findSnippetBelongToFile(@Param("snippetId") Long snippetId);
+	
 	@Query("match (a:Type)-[r:" + RelationType.str_CONTAIN + "]->(b:Function) where id(b)={functionId} return a")
 	public Type findFunctionBelongToType(@Param("functionId") Long functionId);
 	

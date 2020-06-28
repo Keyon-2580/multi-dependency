@@ -26,7 +26,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction
 import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypeParameterType;
-import cn.edu.fudan.se.multidependency.service.spring.data.Fan_IO;
+import cn.edu.fudan.se.multidependency.service.spring.metric.Fan_IO;
 
 public interface StaticAnalyseService {
 	
@@ -51,6 +51,8 @@ public interface StaticAnalyseService {
 	public Collection<Type> findInheritsFromType(Type type);
 	
 	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller();
+	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller(Project project);
+	public Map<Function, List<FunctionAccessField>> findAllFunctionAccessRelationsGroupByCaller(Project project);
 	
 	public Iterable<TypeInheritsType> findAllInheritsRelations();
 	public Iterable<FileIncludeFile> findAllFileIncludeFileRelations();
