@@ -9,4 +9,5 @@ public class CloneResultFromCsv {
 	private int start;
 	private int end;
 	private double value;
+	private String type;
 }

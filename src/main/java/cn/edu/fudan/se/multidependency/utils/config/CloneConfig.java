@@ -9,4 +9,5 @@ public class CloneConfig {
 	private Granularity granularity;
 	private String namePath;
 	private String resultPath;
+	private String groupPath;
 }

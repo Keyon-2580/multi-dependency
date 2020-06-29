@@ -93,6 +93,7 @@ public class CloneGroupController {
 				groups.add(cloneGroup);
 			}
 			JSONObject value = cloneShow.clonesGroupsToCytoscape(groups, false, singleLanguage);
+			System.out.println(value);
 			result.put("result", "success");
 			result.put("value", value);
 			result.put("group", cloneGroup);

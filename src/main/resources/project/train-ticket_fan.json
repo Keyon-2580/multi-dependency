@@ -1019,28 +1019,32 @@
 	  ],
 	  "clones": [
 		  {
-			  "language": "java",
+			  "language"   : "java",
 			  "granularity": "file",
-			  "name_path": "src/main/resources/clone/file/multiple-fan/java/result/MeasureIndex.csv",
-			  "result_path": "src/main/resources/clone/file/multiple-fan/java/result/type123_method_result.csv"
+			  "name_path"  : "src/main/resources/clone/file/multiple-fan/java/result/MeasureIndex.csv",
+			  "result_path": "src/main/resources/clone/file/multiple-fan/java/similarity.csv",
+			  "group_path" : "src/main/resources/clone/file/multiple-fan/java/result/type123_method_group_result.csv"
 		  },
 		  {
-			  "language": "java",
+			  "language"   : "java",
 			  "granularity": "function",
-			  "name_path": "src/main/resources/clone/function/multiple-fan/java/result/MeasureIndex.csv",
-			  "result_path": "src/main/resources/clone/function/multiple-fan/java/result/type123_method_result.csv"
+			  "name_path"  : "src/main/resources/clone/function/multiple-fan/java/result/MeasureIndex.csv",
+			  "result_path": "src/main/resources/clone/function/multiple-fan/java/similarity.csv",
+			  "group_path" : "src/main/resources/clone/function/multiple-fan/java/result/type123_method_group_result.csv"
 		  },
 		  {
-			  "language": "cpp",
+			  "language"   : "cpp",
 			  "granularity": "file",
-			  "name_path": "src/main/resources/clone/file/multiple-fan/cpp/result/MeasureIndex.csv",
-			  "result_path": "src/main/resources/clone/file/multiple-fan/cpp/result/type123_method_result.csv"
+			  "name_path"  : "src/main/resources/clone/file/multiple-fan/cpp/result/MeasureIndex.csv",
+			  "result_path": "src/main/resources/clone/file/multiple-fan/cpp/similarity.csv",
+			  "group_path" : "src/main/resources/clone/file/multiple-fan/cpp/result/type123_method_group_result.csv"
 		  },
 		  {
-			  "language": "cpp",
+			  "language"   : "cpp",
 			  "granularity": "function",
-			  "name_path": "src/main/resources/clone/function/multiple-fan/cpp/result/MeasureIndex.csv",
-			  "result_path": "src/main/resources/clone/function/multiple-fan/cpp/result/type123_method_result.csv"
+			  "name_path"  : "src/main/resources/clone/function/multiple-fan/cpp/result/MeasureIndex.csv",
+			  "result_path": "src/main/resources/clone/function/multiple-fan/cpp/similarity.csv",
+			  "group_path" : "src/main/resources/clone/function/multiple-fan/cpp/result/type123_method_group_result.csv"
 		  }
 	  ]
 }

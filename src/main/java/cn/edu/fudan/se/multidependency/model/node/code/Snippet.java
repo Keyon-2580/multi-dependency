@@ -32,6 +32,8 @@ public class Snippet implements CodeNode {
 	private int startLine = -1;
 	
 	private int endLine = -1;
+	
+	private String identifier;
 
 	@Override
 	public Map<String, Object> getProperties() {
@@ -40,6 +42,7 @@ public class Snippet implements CodeNode {
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("startLine", getStartLine());
 		properties.put("endLine", getEndLine());
+		properties.put("identifier", getIdentifier() == null ? "" : getIdentifier());
 		return properties;
 	}
 
@@ -54,11 +57,6 @@ public class Snippet implements CodeNode {
 	}
 
 	@Override
-	public String getIdentifier() {
-		return getName();
-	}
-
-	@Override
 	public String getIdentifierSimpleName() {
 		return getName();
 	}
@@ -68,9 +66,4 @@ public class Snippet implements CodeNode {
 		return Constant.CODE_NODE_IDENTIFIER_SUFFIX_SNIPPET;
 	}
 
-	@Override
-	public void setIdentifier(String identifier) {
-		// TODO Auto-generated method stub
-		
-	}
 }

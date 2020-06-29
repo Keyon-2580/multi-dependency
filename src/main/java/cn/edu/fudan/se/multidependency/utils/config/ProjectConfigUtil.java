@@ -180,6 +180,7 @@ public class ProjectConfigUtil {
 			config.setGranularity(Granularity.valueOf(json.getString("granularity")));
 			config.setNamePath(json.getString("name_path"));
 			config.setResultPath(json.getString("result_path"));
+			config.setGroupPath(json.getString("group_path"));
 			result.add(config);
 		}
 		return result;

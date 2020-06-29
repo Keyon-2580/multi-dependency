@@ -31,8 +31,11 @@ public class CloneUtil {
 		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
 			String line = null;
 			while((line = reader.readLine()) != null) {
+				if("".equals(line.trim())) {
+					continue;
+				}
 				String[] values = line.split(",");
-				if(values.length != 4) {
+				if(values.length < 4) {
 					LOGGER.warn("克隆数据格式不正确：" + line);
 					continue;
 				}
@@ -48,20 +51,14 @@ public class CloneUtil {
 		return result;
 	}
 	
-	public static void main(String[] args) throws Exception {
-		Map<Integer, MethodIdentifierFromCsv> result = readMethodIdentifiersCsv("D:\\multiple-dependency-project\\clone\\MearureNameCatch\\resultFolder\\MethodNameTable.csv");
-		System.out.println(result.get(0));
-		System.out.println(result.get(10));
-		System.out.println(result.get(20));
-		System.out.println(result.get(0).getFunctionSimpleName());
-		System.out.println(result.get(0).getIdentifier());
-	}
-	
 	public static Map<Integer, MethodIdentifierFromCsv> readMethodIdentifiersCsv(String filePath) throws Exception {
 		Map<Integer, MethodIdentifierFromCsv> result = new HashMap<>();
 		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
 			String line = null;
 			while((line = reader.readLine()) != null) {
+				if("".equals(line.trim())) {
+					continue;
+				}
 				String[] values = line.split(",");
 				MethodIdentifierFromCsv method = new MethodIdentifierFromCsv();
 				method.setLine(line);
@@ -112,15 +109,22 @@ public class CloneUtil {
 		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
 			String line = null;
 			while((line = reader.readLine()) != null) {
+				if("".equals(line.trim())) {
+					continue;
+				}
 				String[] values = line.split(",");
-				if(values.length != 3) {
+				if(values.length < 3) {
 					LOGGER.warn("克隆数据格式不正确：" + line);
 					continue;
 				}
 				int start = Integer.parseInt(values[0]);
 				int end = Integer.parseInt(values[1]);
 				double value = Double.parseDouble(values[2]);
-				result.add(new CloneResultFromCsv(start, end, value));
+				String type = "";
+				if(values.length > 3) {
+					type = values[3];
+				}
+				result.add(new CloneResultFromCsv(start, end, value, type));
 			}
 		}
 		return result;
@@ -162,7 +166,6 @@ public class CloneUtil {
 				}
 			}
 		}
-		System.out.println(relations.size() + " " + result.size());
 		result.sort((collection1, collection2) -> {
 			return collection2.size() - collection1.size();
 		});
@@ -174,11 +177,15 @@ public class CloneUtil {
 		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
 			String line = null;
 			while((line = reader.readLine()) != null) {
+				if("".equals(line.trim())) {
+					continue;
+				}
 				Group group = new Group(line);
 				String[] values = line.split(",");
 				for(String value : values) {
 					group.addId(Integer.parseInt(value));
 				}
+				result.add(group);
 			}
 		}
 		return result;

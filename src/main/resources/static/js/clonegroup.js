@@ -113,6 +113,32 @@ var clone = function(cytoscapeutil) {
 		var zNodes = nodes;
 		var zTreeObj = $.fn.zTree.init(container, setting, zNodes);
 	}
+	var ellipseStyle = {
+			'shape' : 'ellipse',
+			'width': function(content) {
+				var split = content.data().name.split("\n");
+				var maxWidth = 0;
+				for(var i = 0; i < split.length; i++) {
+					var width = split[i].replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
+					if(width > maxWidth) {
+						maxWidth = width;
+					}
+				}
+				return maxWidth;
+			},
+			'height': function(content) {
+				var split = content.data().name.split("\n");
+				var length = split.length;
+				return 21 * length;
+			},
+			'text-valign': 'center',
+			'text-halign': 'center',
+			'border-width': 1.5,
+			'border-color': '#555',
+			'background-color': '#f6f6f6',
+			'content': 'data(name)',
+			'text-wrap': 'wrap'
+		}
 	var _showCytoscape = function(container, data, copyDivId = "") {
 		var cy = cytoscapeutil.showDataInCytoscape(container, data, "random");
 		if(copyDivId != "") {
@@ -129,7 +155,7 @@ var clone = function(cytoscapeutil) {
 						var content = $(this).text();
 						copyToClip(content)
 					});
-				} else if(node.data().type == "Function") {
+				} else if(node.data().type == "Function" || node.data().type == "Type" || node.data().type == "Snippet") {
 					var value = node.data().value;
 					var html = "<a class='clipBoard'>";
 					html += value;
@@ -161,58 +187,9 @@ var clone = function(cytoscapeutil) {
 			})
 		}
 		cys[cys.length] = cy;
-		cy.style().selector('node[type="Type"]').style({
-			'shape' : 'ellipse',
-			'width': function(content) {
-				var split = content.data().name.split("\n");
-				var maxWidth = 0;
-				for(var i = 0; i < split.length; i++) {
-					var width = split[i].replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
-					if(width > maxWidth) {
-						maxWidth = width;
-					}
-				}
-				return maxWidth;
-			},
-			'height': function(content) {
-				var split = content.data().name.split("\n");
-				var length = split.length;
-				return 21 * length;
-			},
-			'text-valign': 'center',
-			'text-halign': 'center',
-			'border-width': 1.5,
-			'border-color': '#555',
-			'background-color': '#f6f6f6',
-			'content': 'data(name)',
-			'text-wrap': 'wrap'
-		}).update();
-		cy.style().selector('node[type="Function"]').style({
-			'shape' : 'ellipse',
-			'width': function(content) {
-				var split = content.data().name.split("\n");
-				var maxWidth = 0;
-				for(var i = 0; i < split.length; i++) {
-					var width = split[i].replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
-					if(width > maxWidth) {
-						maxWidth = width;
-					}
-				}
-				return maxWidth;
-			},
-			'height': function(content) {
-				var split = content.data().name.split("\n");
-				var length = split.length;
-				return 21 * length;
-			},
-			'text-valign': 'center',
-			'text-halign': 'center',
-			'border-width': 1.5,
-			'border-color': '#555',
-			'background-color': '#f6f6f6',
-			'content': 'data(name)',
-			'text-wrap': 'wrap'
-		}).update();
+		cy.style().selector('node[type="Type"]').style(ellipseStyle).update();
+		cy.style().selector('node[type="Function"]').style(ellipseStyle).update();
+		cy.style().selector('node[type="Snippet"]').style(ellipseStyle).update();
 		cy.style().selector('node[type="CloneGroup"]').style({
 			'shape' : 'rectangle',
 			'width': function(content) {
@@ -239,32 +216,7 @@ var clone = function(cytoscapeutil) {
 			'content': 'data(name)',
 			'text-wrap': 'wrap'
 		}).update();
-		cy.style().selector('node[type="File"]').style({
-			'shape' : 'ellipse',
-			'width': function(content) {
-				var split = content.data().name.split("\n");
-				var maxWidth = 0;
-				for(var i = 0; i < split.length; i++) {
-					var width = split[i].replace(/[^\u0000-\u00ff]/g,"aa").length * 10;
-					if(width > maxWidth) {
-						maxWidth = width;
-					}
-				}
-				return maxWidth;
-			},
-			'height': function(content) {
-				var split = content.data().name.split("\n");
-				var length = split.length;
-				return 21 * length;
-			},
-			'text-valign': 'center',
-			'text-halign': 'center',
-			'border-width': 1.5,
-			'border-color': '#555',
-			'background-color': '#f6f6f6',
-			'content': 'data(name)',
-			'text-wrap': 'wrap'
-		}).update();
+		cy.style().selector('node[type="File"]').style(ellipseStyle).update();
 		cy.style().selector('node[type="Project"]').style({
 			'shape' : 'rectangle',
 			'width': function(content) {
@@ -309,7 +261,7 @@ var clone = function(cytoscapeutil) {
 //		          return node.degree();
 					if(node.data().type == "CloneGroup") {
 						return 300;
-					} else if(node.data().type == "Function") {
+					} else if(node.data().type == "Function" || node.data().type == "Type" || node.data().type == "Snippet") {
 						return 200;
 					} else if(node.data().type == "File") {
 						return 100;
@@ -415,29 +367,23 @@ var clone = function(cytoscapeutil) {
 				success : function(result) {
 					console.log(result);
 					$("#projectsCount").text(result.length);
+					$("#searchProjectsSelectDiv").html('<label>克隆组包含项目：<select id="searchProjectsSelect" class="multiselect" name="searchProjectsSelect" multiple="multiple"></select></label>');
 					$("#searchProjectsSelect").empty();
 					for(var i = 0; i < result.length; i++) {
 						var html = '<option value="' + result[i].id + '">' + result[i].name + '</option>';
 						$("#searchProjectsSelect").append(html);
 					}
+					$('#searchProjectsSelect').multiselect({
+						maxHeight: 200,
+						enableCollapsibleOptGroups: true,
+			            enableClickableOptGroups: true,
+			            enableCollapsibleOptGroups: true,
+			            includeSelectAllOption: true
+					});
 				}
 			});
 		});
 		$('#searchCloneRelationTypeSelect').multiselect({
-			maxHeight: 200,
-			enableCollapsibleOptGroups: true,
-            enableClickableOptGroups: true,
-            enableCollapsibleOptGroups: true,
-            includeSelectAllOption: true
-		});
-		$('#searchProjectsSelect').multiselect({
-			maxHeight: 200,
-			enableCollapsibleOptGroups: true,
-            enableClickableOptGroups: true,
-            enableCollapsibleOptGroups: true,
-            includeSelectAllOption: true
-		});
-		$('#searchGroups').multiselect({
 			maxHeight: 200,
 			enableCollapsibleOptGroups: true,
             enableClickableOptGroups: true,
@@ -656,7 +602,7 @@ var clone = function(cytoscapeutil) {
 				data : JSON.stringify(param),
 				success : function(result) {
 					console.log(result);
-					$("#searchGroups").empty();
+					$("#searchGroupsDiv").html('<label>克隆组：<select id="searchGroups" class="multiselect" multiple="multiple"></select></label>');
 					$("#searchGroups").append('<optgroup id="select_single" label="单项目">单项目克隆</optgroup>');
 					$("#searchGroups").append('<optgroup id="select_between" label="跨项目">跨项目克隆</optgroup>');
 					var xAxisData = [];
@@ -674,6 +620,13 @@ var clone = function(cytoscapeutil) {
 							$("#select_single").append(html);
 						}
 					}
+					$('#searchGroups').multiselect({
+						maxHeight: 200,
+						enableCollapsibleOptGroups: true,
+			            enableClickableOptGroups: true,
+			            enableCollapsibleOptGroups: true,
+			            includeSelectAllOption: true
+					});
 					var option = {
 							dataZoom: [{
 								type: 'slider',

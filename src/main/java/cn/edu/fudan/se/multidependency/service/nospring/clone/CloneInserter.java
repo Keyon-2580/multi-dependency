@@ -14,7 +14,7 @@ public abstract class CloneInserter extends ExtractorForNodesAndRelationsImpl {
 
 	public CloneInserter() {
 		super();
-		this.latch = new CountDownLatch(2);
+		this.latch = new CountDownLatch(3);
 	}
 	
 	private static final Executor executor = Executors.newCachedThreadPool();
@@ -23,12 +23,15 @@ public abstract class CloneInserter extends ExtractorForNodesAndRelationsImpl {
 	
 	protected abstract void readResult() throws Exception;
 	
+	protected abstract void readGroup() throws Exception;
+	
 	protected abstract void extractNodesAndRelations() throws Exception;
 	
 	@Override
 	public void addNodesAndRelations() throws Exception {
 		processFile();
 		extractNodesAndRelations();
+		readGroup();
 	}
 
 	private void processFile() throws Exception {
@@ -44,6 +47,15 @@ public abstract class CloneInserter extends ExtractorForNodesAndRelationsImpl {
 		executor.execute(() -> {
 			try {
 				readResult();
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				latch.countDown();
+			}
+		});
+		executor.execute(() -> {
+			try {
+				readGroup();
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
