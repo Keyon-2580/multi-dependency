@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -28,12 +27,15 @@ import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
+import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneShowService;
+import cn.edu.fudan.se.multidependency.service.spring.clone.PredicateForCloneGroup;
 import cn.edu.fudan.se.multidependency.service.spring.clone.PredicateForDataFile;
+import cn.edu.fudan.se.multidependency.service.spring.clone.PredicateForFileClone;
 import cn.edu.fudan.se.multidependency.service.spring.clone.PredicateForLanguage;
 import cn.edu.fudan.se.multidependency.service.spring.data.HistogramWithProjectsSize;
 
@@ -55,6 +57,9 @@ public class CloneGroupController {
 	
 	@Autowired
 	private MicroserviceService msService;
+	
+	@Autowired
+	private ContainRelationService containRelationService;
 	
 	@Autowired
 	private NodeService nodeService;
@@ -114,19 +119,20 @@ public class CloneGroupController {
 		}
 		CloneRelationType cloneRelationType = CloneRelationType.valueOf(cloneRelationTypes.get(0));
 		cloneRelationType = cloneRelationType == null ? CloneRelationType.FILE_CLONE_FILE : cloneRelationType;
-		List<Predicate<CloneGroup>> predicates = new ArrayList<>();
+		PredicateForCloneGroup predicate = new PredicateForCloneGroup();
+		
 		if(languages.size() == 1) {
-			predicates.add(new PredicateForLanguage(Language.valueOf(languages.get(0))));
+			predicate.addFilter(new PredicateForLanguage(Language.valueOf(languages.get(0))));
 		}
 		for(String filter : filters) {
 			if("dataclass".equals(filter)) {
-				predicates.add(new PredicateForDataFile(staticAnalyseService));
+				predicate.addFilter(new PredicateForDataFile(staticAnalyseService));
 			}
 			if("fileclone".equals(filter)) {
-				
+				predicate.addFilter(new PredicateForFileClone(cloneAnalyse, containRelationService));
 			}
 		}
-		return cloneAnalyse.group(cloneRelationType, predicates);
+		return cloneAnalyse.group(cloneRelationType, predicate);
 	}
 	
 	@PostMapping("/histogram")

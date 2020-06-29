@@ -61,12 +61,10 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 	}
     
     @Override
-	public Collection<CloneGroup> group(CloneRelationType cloneRelationType, Collection<Predicate<CloneGroup>> predicates) {
+	public Collection<CloneGroup> group(CloneRelationType cloneRelationType, Predicate<CloneGroup> predicate) {
     	Collection<CloneGroup> groups = basicCloneQueryService.findGroupsContainCloneTypeRelation(cloneRelationType);
     	List<CloneGroup> result = new LinkedList<>(groups);
-    	for(Predicate<CloneGroup> pre : predicates) {
-    		result.removeIf(pre);
-    	}
+    	result.removeIf(predicate);
     	for(CloneGroup group : result) {
     		Collection<Clone> clones = basicCloneQueryService.findGroupContainCloneRelations(group);
     		for(Clone clone : clones) {

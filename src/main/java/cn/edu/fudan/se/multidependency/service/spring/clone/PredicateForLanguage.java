@@ -1,11 +1,9 @@
 package cn.edu.fudan.se.multidependency.service.spring.clone;
 
-import java.util.function.Predicate;
-
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 
-public class PredicateForLanguage implements Predicate<CloneGroup> {
+public class PredicateForLanguage implements FilterForCloneGroup {
 	
 	private Language language;
 	
@@ -18,7 +16,7 @@ public class PredicateForLanguage implements Predicate<CloneGroup> {
 	 * 如果language == java，则去除非java的克隆组
 	 */
 	@Override
-	public boolean test(CloneGroup t) {
+	public boolean remove(CloneGroup t) {
 		if(language == null) {
 			return false;
 		}

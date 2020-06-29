@@ -19,7 +19,7 @@ public interface CloneAnalyseService {
 	 * @param predicates
 	 * @return
 	 */
-	Collection<CloneGroup> group(CloneRelationType cloneRelationType, Collection<Predicate<CloneGroup>> predicates);
+	Collection<CloneGroup> group(CloneRelationType cloneRelationType, Predicate<CloneGroup> predicate);
 	
 	CloneGroup addNodeAndRelationToCloneGroup(CloneGroup cloneGroup);
 	
