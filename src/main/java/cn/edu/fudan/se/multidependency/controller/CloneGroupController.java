@@ -174,7 +174,7 @@ public class CloneGroupController {
 			});
 			for(CloneGroup group : sortGroups) {
 				nodeSizeArray.add(group.getNodes().size());
-				if(languages.size() == 1) {
+				if(languages.size() != 1) {
 					projectSizeArray.add(cloneAnalyse.cloneGroupContainMicroServices(group).size());
 				} else {
 					projectSizeArray.add(cloneAnalyse.cloneGroupContainProjects(group).size());
