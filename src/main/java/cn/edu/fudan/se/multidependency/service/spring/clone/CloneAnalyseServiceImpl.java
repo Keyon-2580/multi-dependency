@@ -60,20 +60,25 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 		return group;
 	}
     
+	private Map<CloneRelationType, Collection<CloneGroup>> typeToGroupCache = new ConcurrentHashMap<>();
     @Override
 	public Collection<CloneGroup> group(CloneRelationType cloneRelationType, Predicate<CloneGroup> predicate) {
-    	Collection<CloneGroup> groups = basicCloneQueryService.findGroupsContainCloneTypeRelation(cloneRelationType);
-    	List<CloneGroup> result = new LinkedList<>(groups);
-    	result.removeIf(predicate);
-    	for(CloneGroup group : result) {
-    		Collection<Clone> clones = basicCloneQueryService.findGroupContainCloneRelations(group);
-    		for(Clone clone : clones) {
-    			group.addRelation(clone);
-    			group.addNode(clone.getCodeNode1());
-    			group.addNode(clone.getCodeNode2());
+    	Collection<CloneGroup> groups = typeToGroupCache.get(cloneRelationType);
+    	if(groups == null) {
+    		groups = basicCloneQueryService.findGroupsContainCloneTypeRelation(cloneRelationType);
+    		for(CloneGroup group : groups) {
+    			Collection<Clone> clones = basicCloneQueryService.findGroupContainCloneRelations(group);
+    			for(Clone clone : clones) {
+    				group.addRelation(clone);
+    				group.addNode(clone.getCodeNode1());
+    				group.addNode(clone.getCodeNode2());
+    			}
     		}
+    		typeToGroupCache.put(cloneRelationType, groups);
     	}
-    	return result;
+    	List<CloneGroup> list = new LinkedList<>(groups);
+    	list.removeIf(predicate);
+    	return list;
 	}
 
 	private Map<CloneGroup, Collection<Project>> cloneGroupContainProjectsCache = new ConcurrentHashMap<>();
