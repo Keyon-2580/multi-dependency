@@ -10,37 +10,41 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
-import cn.edu.fudan.se.multidependency.model.node.code.Variable;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@RelationshipEntity(RelationType.str_VARIABLE_IS_TYPE)
 @Data
 @NoArgsConstructor
-public class VariableIsType implements Relation {
-	private static final long serialVersionUID = 1767344862220786333L;
+@RelationshipEntity(RelationType.str_THORW)
+public class Throw implements RelationWithTimes {
+
+	private static final long serialVersionUID = -5858763297137981586L;
+	
 	@Id
     @GeneratedValue
     private Long id;
 
-	public VariableIsType(Variable variable, Type type) {
+	public Throw(Function function, Type type) {
 		super();
-		this.variable = variable;
+		this.function = function;
 		this.type = type;
 	}
 
 	@StartNode
-	private Variable variable;
+	private Function function;
 	
 	@EndNode
 	private Type type;
+	
+	private int times = 1;
 
 	@Override
 	public Node getStartNode() {
-		return variable;
+		return function;
 	}
 
 	@Override
@@ -50,12 +54,18 @@ public class VariableIsType implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.VARIABLE_IS_TYPE;
+		return RelationType.THROW;
 	}
 
 	@Override
 	public Map<String, Object> getProperties() {
-		return new HashMap<>();
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("times", getTimes());
+		return properties;
+	}
+	
+	public void addTimes() {
+		this.times++;
 	}
 
 }

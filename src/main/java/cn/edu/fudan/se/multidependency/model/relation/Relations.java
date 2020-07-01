@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCallFunctionByTestCase;
 
 public class Relations implements Serializable {
 
@@ -15,7 +15,7 @@ public class Relations implements Serializable {
 
     private Map<RelationType, List<Relation>> allRelations = new ConcurrentHashMap<>();
 
-    private Map<String, List<DynamicCallFunction>> traceIdToDynamicCallFunctions = new ConcurrentHashMap<>();
+    private Map<String, List<DynamicCallFunctionByTestCase>> traceIdToDynamicCallFunctions = new ConcurrentHashMap<>();
 
     private Map<Node, Map<Node, Map<RelationType, RelationWithTimes>>> startNodesToNodeRelations = new ConcurrentHashMap<>();
 
@@ -59,12 +59,12 @@ public class Relations implements Serializable {
 
     public synchronized void addRelation(Relation relation) {
 
-        if (relation instanceof DynamicCallFunction) {
-            DynamicCallFunction call = (DynamicCallFunction) relation;
+        if (relation instanceof DynamicCallFunctionByTestCase) {
+            DynamicCallFunctionByTestCase call = (DynamicCallFunctionByTestCase) relation;
             if (call.getTraceId() == null) {
                 return;
             }
-            List<DynamicCallFunction> calls = traceIdToDynamicCallFunctions.getOrDefault(call.getTraceId(), new CopyOnWriteArrayList<>());
+            List<DynamicCallFunctionByTestCase> calls = traceIdToDynamicCallFunctions.getOrDefault(call.getTraceId(), new CopyOnWriteArrayList<>());
             calls.add(call);
             traceIdToDynamicCallFunctions.put(call.getTraceId(), calls);
         }
@@ -89,7 +89,7 @@ public class Relations implements Serializable {
         allRelations.put(relation.getRelationType(), relations);
     }
 
-    public List<DynamicCallFunction> findDynamicCallFunctionsByTraceId(String traceId) {
+    public List<DynamicCallFunctionByTestCase> findDynamicCallFunctionsByTraceId(String traceId) {
         return traceIdToDynamicCallFunctions.getOrDefault(traceId, new CopyOnWriteArrayList<>());
     }
 

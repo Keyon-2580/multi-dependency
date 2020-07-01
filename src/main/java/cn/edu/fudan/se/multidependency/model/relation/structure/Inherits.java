@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_TYPE_INHERITS_TYPE)
-public class TypeInheritsType implements Relation {
+@RelationshipEntity(RelationType.str_INHERITS)
+public class Inherits implements Relation {
 	
 	private static final long serialVersionUID = 3740594031088738257L;
 
@@ -40,7 +40,7 @@ public class TypeInheritsType implements Relation {
 		return INHERIT_TYPE_IMPLEMENTS.equals(inheritType);
 	}
 	
-	public TypeInheritsType(Type start, Type end, String inheritType) {
+	public Inherits(Type start, Type end, String inheritType) {
 		super();
 		this.start = start;
 		this.end = end;
@@ -65,7 +65,7 @@ public class TypeInheritsType implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.TYPE_INHERITS_TYPE;
+		return RelationType.INHERITS;
 	}
 
 	@Override

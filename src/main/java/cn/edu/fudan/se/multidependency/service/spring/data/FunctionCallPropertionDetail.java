@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
 import lombok.Getter;
 
 public class FunctionCallPropertionDetail {
 
 	@Getter
-	private FunctionCallFunction functionCallFunction;
+	private Call functionCallFunction;
 	
 	/**
 	 * 该函数调用在哪些测试用例下发生，发生几次

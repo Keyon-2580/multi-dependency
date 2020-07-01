@@ -11,36 +11,33 @@ import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_FUNCTION_THORW_TYPE)
-public class FunctionThrowType implements RelationWithTimes {
+@RelationshipEntity(RelationType.str_IMPLLINK)
+@EqualsAndHashCode
+public class ImplLink implements Relation {
+	private static final long serialVersionUID = -5543957038003318L;
 
-	private static final long serialVersionUID = -5858763297137981586L;
-	
 	@Id
     @GeneratedValue
     private Long id;
-
-	public FunctionThrowType(Function function, Type type) {
-		super();
+	
+	public ImplLink(Function function, Function impllinkFunction) {
 		this.function = function;
-		this.type = type;
+		this.impllinkFunction = impllinkFunction;
 	}
-
+	
 	@StartNode
 	private Function function;
 	
 	@EndNode
-	private Type type;
-	
-	private int times = 1;
+	private Function impllinkFunction;
 
 	@Override
 	public Node getStartNode() {
@@ -49,23 +46,18 @@ public class FunctionThrowType implements RelationWithTimes {
 
 	@Override
 	public Node getEndNode() {
-		return type;
+		return impllinkFunction;
 	}
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.FUNCTION_THROW_TYPE;
+		return RelationType.IMPLLINK;
 	}
 
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("times", getTimes());
 		return properties;
-	}
-	
-	public void addTimes() {
-		this.times++;
 	}
 
 }

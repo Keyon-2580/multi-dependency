@@ -15,7 +15,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
-import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCallFunctionByTestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.ScenarioDefineTestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
@@ -110,7 +110,7 @@ public class FeatureAndTestCaseFromJSONFileForMicroserviceInserter extends Extra
 					TestCaseRunTrace testcaseRunTrace = new TestCaseRunTrace(testcase, trace);
 					addRelation(testcaseRunTrace);
 					
-					List<DynamicCallFunction> calls = this.getRelations().findDynamicCallFunctionsByTraceId(traceId);
+					List<DynamicCallFunctionByTestCase> calls = this.getRelations().findDynamicCallFunctionsByTraceId(traceId);
 					calls.forEach(call -> {
 						call.setTestCaseId(testcaseId);
 					});

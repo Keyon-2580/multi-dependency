@@ -11,21 +11,17 @@ import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportVariable;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FileIncludeFile;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionAccessField;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCastType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionParameterType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionReturnType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionThrowType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.NodeAnnotationType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction;
-import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypeParameterType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Access;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Annotation;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Cast;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Import;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Include;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Inherits;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Parameter;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Return;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Throw;
+import cn.edu.fudan.se.multidependency.model.relation.structure.VariableType;
 import cn.edu.fudan.se.multidependency.service.spring.metric.Fan_IO;
 
 public interface StaticAnalyseService {
@@ -50,40 +46,29 @@ public interface StaticAnalyseService {
 	 */
 	public Collection<Type> findInheritsFromType(Type type);
 	
-	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller();
-	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller(Project project);
-	public Map<Function, List<FunctionAccessField>> findAllFunctionAccessRelationsGroupByCaller(Project project);
+	public List<Call> findAllFunctionCallFunctionRelations();
 	
-	public Iterable<TypeInheritsType> findAllInheritsRelations();
-	public Iterable<FileIncludeFile> findAllFileIncludeFileRelations();
-	public Iterable<FileImportType> findAllFileImportTypeRelations();
-	public Iterable<FileImportFunction> findAllFileImportFunctionRelations();
-	public Iterable<FileImportVariable> findAllFileImportVariableRelations();
-	public Iterable<FunctionCallFunction> findAllFunctionCallFunctionRelations();
-	public Iterable<TypeCallFunction> findAllTypeCallFunctions();
-	public Iterable<FunctionCastType> findAllFunctionCastTypeRelations();
-	public Iterable<FunctionParameterType> findAllFunctionParameterTypeRelations();
-	public Iterable<FunctionReturnType> findAllFunctionReturnTypeRelations();
-	public Iterable<FunctionThrowType> findAllFunctionThrowTypeRelations();
-	public Iterable<NodeAnnotationType> findAllNodeAnnotationTypeRelations();
-	public Iterable<VariableIsType> findAllVariableIsTypeRelations();
-	public Iterable<VariableTypeParameterType> findAllVariableTypeParameterTypeRelations();
+	public Map<Function, List<Call>> findAllFunctionCallRelationsGroupByCaller();
+	public Map<Function, List<Call>> findAllFunctionCallRelationsGroupByCaller(Project project);
+	public Map<Function, List<Access>> findAllFunctionAccessRelationsGroupByCaller(Project project);
 
-	public List<TypeInheritsType> findProjectContainInheritsRelations(Project project);
-	public List<FileIncludeFile> findProjectContainFileIncludeFileRelations(Project project);
-	public List<FileImportType> findProjectContainFileImportTypeRelations(Project project);
-	public List<FileImportFunction> findProjectContainFileImportFunctionRelations(Project project);
-	public List<FileImportVariable> findProjectContainFileImportVariableRelations(Project project);
-	public List<FunctionCallFunction> findFunctionCallFunctionRelations(Project project);
-	public List<TypeCallFunction> findProjectContainTypeCallFunctions(Project project);
-	public List<FunctionCastType> findProjectContainFunctionCastTypeRelations(Project project);
-	public List<FunctionParameterType> findProjectContainFunctionParameterTypeRelations(Project project);
-	public List<FunctionReturnType> findProjectContainFunctionReturnTypeRelations(Project project);
-	public List<FunctionThrowType> findProjectContainFunctionThrowTypeRelations(Project project);
-	public List<NodeAnnotationType> findProjectContainNodeAnnotationTypeRelations(Project project);
-	public List<VariableIsType> findProjectContainVariableIsTypeRelations(Project project);
-	public List<VariableTypeParameterType> findProjectContainVariableTypeParameterTypeRelations(Project project);
-	public List<FunctionAccessField> findProjectContainFunctionAccessVariableRelations(Project project);
+	public List<Inherits> findProjectContainInheritsRelations(Project project);
+	public List<Include> findProjectContainFileIncludeFileRelations(Project project);
+	public List<Import> findProjectContainImportRelations(Project project);
+	public List<Import> findProjectContainFileImportTypeRelations(Project project);
+	public List<Import> findProjectContainFileImportFunctionRelations(Project project);
+	public List<Import> findProjectContainFileImportVariableRelations(Project project);
+	public List<Call> findFunctionCallFunctionRelations(Project project);
+	public List<Call> findProjectContainTypeCallFunctions(Project project);
+	public List<Cast> findProjectContainFunctionCastTypeRelations(Project project);
+	public List<Return> findProjectContainFunctionReturnTypeRelations(Project project);
+	public List<Throw> findProjectContainFunctionThrowTypeRelations(Project project);
+	public List<Annotation> findProjectContainNodeAnnotationTypeRelations(Project project);
+	public List<VariableType> findProjectContainVariableIsTypeRelations(Project project);
+	public List<Parameter> findProjectContainParameterRelations(Project project);
+	public List<Parameter> findProjectContainFunctionParameterTypeRelations(Project project);
+	public List<Parameter> findProjectContainVariableTypeParameterTypeRelations(Project project);
+	public List<Access> findProjectContainFunctionAccessVariableRelations(Project project);
 
 	public boolean isSubType(Type subType, Type superType);
 	
@@ -108,9 +93,9 @@ public interface StaticAnalyseService {
 	
 	Fan_IO<ProjectFile> queryJavaFileFanIO(ProjectFile file);
 	
-	Collection<FunctionCallFunction> queryFunctionCallFunctions(Function function);
+	Collection<Call> queryFunctionCallFunctions(Function function);
 
-	Collection<FunctionCallFunction> queryFunctionCallByFunctions(Function function);
+	Collection<Call> queryFunctionCallByFunctions(Function function);
 	
 	boolean isDataClass(Type type);
 	

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
@@ -22,21 +23,17 @@ import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportVariable;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FileIncludeFile;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionAccessField;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCastType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionParameterType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionReturnType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionThrowType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.NodeAnnotationType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction;
-import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypeParameterType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Access;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Annotation;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Cast;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Import;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Include;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Inherits;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Parameter;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Return;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Throw;
+import cn.edu.fudan.se.multidependency.model.relation.structure.VariableType;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.FunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.NamespaceRepository;
@@ -45,21 +42,17 @@ import cn.edu.fudan.se.multidependency.repository.node.code.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.TypeRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.VariableRepository;
 import cn.edu.fudan.se.multidependency.repository.node.lib.LibraryRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportFunctionRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportTypeRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.FileImportVariableRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.FileIncludeFileRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionAccessFieldRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionCallFunctionRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionCastTypeRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionParameterTypeRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionReturnTypeRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionThrowTypeRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.NodeAnnotationTypeRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.TypeCallFunctionRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.TypeInheritsTypeRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.AccessRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.AnnotationRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.CallRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.CastRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.ImportRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.IncludeRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.InheritsRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.ParameterRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.ReturnRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.ThrowRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.VariableIsTypeRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.VariableTypeParameterTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.lib.FunctionCallLibraryAPIRepository;
 import cn.edu.fudan.se.multidependency.service.spring.metric.Fan_IO;
@@ -77,35 +70,28 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	ProjectFileRepository fileRepository;
 	
 	@Autowired
-	FileIncludeFileRepository fileIncludeFileRepository;
+	IncludeRepository fileIncludeFileRepository;
 	
 	@Autowired
-	FileImportTypeRepository fileImportTypeRepository;
-	@Autowired
-	FileImportFunctionRepository fileImportFunctionRepository;
-	@Autowired
-	FileImportVariableRepository fileImportVariableRepository;
+	ImportRepository importRepository;
 	
 	@Autowired
-	FunctionCallFunctionRepository functionCallFunctionRepository;
-	
-	@Autowired
-	TypeCallFunctionRepository typeCallFunctionRepository;
+	CallRepository callRepository;
 	
 	@Autowired
 	FunctionRepository functionRepository;
 	
 	@Autowired
-	FunctionAccessFieldRepository functionAccessFieldRepository;
+	AccessRepository functionAccessFieldRepository;
 	
 	@Autowired
 	FunctionDynamicCallFunctionRepository functionDynamicCallFunctionRepository;
 	
 	@Autowired
-	FunctionReturnTypeRepository functionReturnTypeRepository;
+	ReturnRepository functionReturnTypeRepository;
 	
 	@Autowired
-	FunctionParameterTypeRepository functionParameterTypeRepository;
+	ParameterRepository parameterRepository;
 	
 	@Autowired
 	NamespaceRepository namespaceRepository;
@@ -120,7 +106,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     TypeRepository typeRepository;
     
     @Autowired
-    TypeInheritsTypeRepository typeInheritsTypeRepository;
+    InheritsRepository typeInheritsTypeRepository;
 
     @Autowired
     VariableIsTypeRepository variableIsTypeRepository;
@@ -129,16 +115,13 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     VariableRepository variableRepository;
     
     @Autowired
-    FunctionCastTypeRepository functionCastTypeRepository;
+    CastRepository functionCastTypeRepository;
     
     @Autowired
-    FunctionThrowTypeRepository functionThrowTypeRepository;
+    ThrowRepository functionThrowTypeRepository;
     
     @Autowired
-    NodeAnnotationTypeRepository nodeAnnotationTypeRepository;
-    
-    @Autowired
-    VariableTypeParameterTypeRepository variableTypeParameterTypeRepository;
+    AnnotationRepository nodeAnnotationTypeRepository;
     
     @Autowired
     FunctionCallLibraryAPIRepository functionCallLibraryAPIRepository;
@@ -186,161 +169,101 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 	
 	@Override
-	public List<FileImportType> findProjectContainFileImportTypeRelations(Project project) {
-		return fileImportTypeRepository.findProjectContainFileImportTypeRelations(project.getId());
+	public List<Import> findProjectContainImportRelations(Project project) {
+		return importRepository.findProjectContainImportRelations(project.getId());
+	}
+	
+	@Override
+	public List<Import> findProjectContainFileImportTypeRelations(Project project) {
+		return importRepository.findProjectContainFileImportTypeRelations(project.getId());
 	}
 
 	@Override
-	public List<FileImportFunction> findProjectContainFileImportFunctionRelations(Project project) {
-		return fileImportFunctionRepository.findProjectContainFileImportFunctionRelations(project.getId());
+	public List<Import> findProjectContainFileImportFunctionRelations(Project project) {
+		return importRepository.findProjectContainFileImportFunctionRelations(project.getId());
 	}
 
 	@Override
-	public List<FileImportVariable> findProjectContainFileImportVariableRelations(Project project) {
-		return fileImportVariableRepository.findProjectContainFileImportVariableRelations(project.getId());
+	public List<Import> findProjectContainFileImportVariableRelations(Project project) {
+		return importRepository.findProjectContainFileImportVariableRelations(project.getId());
 	}
 
 	@Override
-	public List<FunctionCallFunction> findFunctionCallFunctionRelations(Project project) {
-		return functionCallFunctionRepository.findProjectContainFunctionCallFunctionRelations(project.getId());
+	public List<Call> findFunctionCallFunctionRelations(Project project) {
+		return callRepository.findProjectContainFunctionCallFunctionRelations(project.getId());
 	}
 
 	@Override
-	public List<TypeInheritsType> findProjectContainInheritsRelations(Project project) {
+	public List<Inherits> findProjectContainInheritsRelations(Project project) {
 		return typeInheritsTypeRepository.findProjectContainTypeInheritsTypeRelations(project.getId());
 	}
 
 	@Override
-	public List<TypeCallFunction> findProjectContainTypeCallFunctions(Project project) {
-		return typeCallFunctionRepository.findProjectContainTypeCallFunctionRelations(project.getId());
+	public List<Call> findProjectContainTypeCallFunctions(Project project) {
+		return callRepository.findProjectContainTypeCallFunctionRelations(project.getId());
 	}
 
 	@Override
-	public List<FunctionCastType> findProjectContainFunctionCastTypeRelations(Project project) {
+	public List<Cast> findProjectContainFunctionCastTypeRelations(Project project) {
 		return functionCastTypeRepository.findProjectContainFunctionCastTypeRelations(project.getId());
 	}
-
+	
 	@Override
-	public List<FunctionParameterType> findProjectContainFunctionParameterTypeRelations(Project project) {
-		return functionParameterTypeRepository.findProjectContainFunctionParameterTypeRelations(project.getId());
+	public List<Parameter> findProjectContainParameterRelations(Project project) {
+		return parameterRepository.findProjectContainParameterRelations(project.getId());
 	}
 
 	@Override
-	public List<FunctionReturnType> findProjectContainFunctionReturnTypeRelations(Project project) {
+	public List<Parameter> findProjectContainFunctionParameterTypeRelations(Project project) {
+		return parameterRepository.findProjectContainFunctionParameterTypeRelations(project.getId());
+	}
+
+	@Override
+	public List<Parameter> findProjectContainVariableTypeParameterTypeRelations(Project project) {
+		return parameterRepository.findProjectContainVariableTypeParameterTypeRelations(project.getId());
+	}
+
+	@Override
+	public List<Return> findProjectContainFunctionReturnTypeRelations(Project project) {
 		return functionReturnTypeRepository.findProjectContainFunctionReturnTypeRelations(project.getId());
 	}
 
 	@Override
-	public List<FunctionThrowType> findProjectContainFunctionThrowTypeRelations(Project project) {
+	public List<Throw> findProjectContainFunctionThrowTypeRelations(Project project) {
 		return functionThrowTypeRepository.findProjectContainFunctionThrowTypeRelations(project.getId());
 	}
 
 	@Override
-	public List<NodeAnnotationType> findProjectContainNodeAnnotationTypeRelations(Project project) {
+	public List<Annotation> findProjectContainNodeAnnotationTypeRelations(Project project) {
 		return nodeAnnotationTypeRepository.findProjectContainNodeAnnotationTypeRelations(project.getId());
 	}
 
 	@Override
-	public List<VariableIsType> findProjectContainVariableIsTypeRelations(Project project) {
+	public List<VariableType> findProjectContainVariableIsTypeRelations(Project project) {
 		return variableIsTypeRepository.findProjectContainVariableIsTypeRelations(project.getId());
 	}
 
 	@Override
-	public List<VariableTypeParameterType> findProjectContainVariableTypeParameterTypeRelations(Project project) {
-		return variableTypeParameterTypeRepository.findProjectContainVariableTypeParameterTypeRelations(project.getId());
-	}
-
-	@Override
-	public List<FileIncludeFile> findProjectContainFileIncludeFileRelations(Project project) {
+	public List<Include> findProjectContainFileIncludeFileRelations(Project project) {
 		return fileIncludeFileRepository.findProjectContainFileIncludeFileRelations(project.getId());
 	}
 	
 	@Override
-	public List<FunctionAccessField> findProjectContainFunctionAccessVariableRelations(Project project) {
+	public List<Access> findProjectContainFunctionAccessVariableRelations(Project project) {
 		return functionAccessFieldRepository.findProjectContainFunctionAccessFieldRelations(project.getId());
 	}
 
 	@Override
-	public Iterable<TypeInheritsType> findAllInheritsRelations() {
-		return typeInheritsTypeRepository.findAll();
-	}
-
-	@Override
-	public Iterable<FileIncludeFile> findAllFileIncludeFileRelations() {
-		return fileIncludeFileRepository.findAll();
-	}
-
-	@Override
-	public Iterable<FileImportType> findAllFileImportTypeRelations() {
-		return fileImportTypeRepository.findAll();
-	}
-
-	@Override
-	public Iterable<FileImportFunction> findAllFileImportFunctionRelations() {
-		return fileImportFunctionRepository.findAll();
-	}
-
-	@Override
-	public Iterable<FileImportVariable> findAllFileImportVariableRelations() {
-		return fileImportVariableRepository.findAll();
-	}
-
-	private Iterable<FunctionCallFunction> functionCallFunctionCache = null;
-	@Override
-	public Iterable<FunctionCallFunction> findAllFunctionCallFunctionRelations() {
-		if(functionCallFunctionCache == null) {
-			functionCallFunctionCache = functionCallFunctionRepository.findAll();
-		}
-		return functionCallFunctionCache;
-	}
-
-	@Override
-	public Iterable<TypeCallFunction> findAllTypeCallFunctions() {
-		return typeCallFunctionRepository.findAll();
-	}
-
-	@Override
-	public Iterable<FunctionCastType> findAllFunctionCastTypeRelations() {
-		return functionCastTypeRepository.findAll();
-	}
-
-	@Override
-	public Iterable<FunctionParameterType> findAllFunctionParameterTypeRelations() {
-		return functionParameterTypeRepository.findAll();
-	}
-
-	@Override
-	public Iterable<FunctionReturnType> findAllFunctionReturnTypeRelations() {
-		return functionReturnTypeRepository.findAll();
-	}
-
-	@Override
-	public Iterable<FunctionThrowType> findAllFunctionThrowTypeRelations() {
-		return functionThrowTypeRepository.findAll();
-	}
-
-	@Override
-	public Iterable<NodeAnnotationType> findAllNodeAnnotationTypeRelations() {
-		return nodeAnnotationTypeRepository.findAll();
-	}
-
-	@Override
-	public Iterable<VariableIsType> findAllVariableIsTypeRelations() {
-		return variableIsTypeRepository.findAll();
-	}
-
-	@Override
-	public Iterable<VariableTypeParameterType> findAllVariableTypeParameterTypeRelations() {
-		return variableTypeParameterTypeRepository.findAll();
-	}
-
-	@Override
-	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller() {
-		Iterable<FunctionCallFunction> allCalls = findAllFunctionCallFunctionRelations();
-		Map<Function, List<FunctionCallFunction>> result = new HashMap<>();
-		for(FunctionCallFunction call : allCalls) {
-			Function caller = call.getFunction();
-			List<FunctionCallFunction> group = result.getOrDefault(caller, new ArrayList<>());
+	public Map<Function, List<Call>> findAllFunctionCallRelationsGroupByCaller() {
+		List<Call> allCalls = findAllFunctionCallFunctionRelations();
+		Map<Function, List<Call>> result = new HashMap<>();
+		for(Call call : allCalls) {
+			CodeNode callerNode = call.getCallerNode();
+			if(!(callerNode instanceof Function)) {
+				continue;
+			}
+			Function caller = (Function) callerNode;
+			List<Call> group = result.getOrDefault(caller, new ArrayList<>());
 			group.add(call);
 			result.put(caller, group);
 		}
@@ -348,12 +271,16 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
-	public Map<Function, List<FunctionCallFunction>> findAllFunctionCallRelationsGroupByCaller(Project project) {
-		Iterable<FunctionCallFunction> allCalls = findFunctionCallFunctionRelations(project);
-		Map<Function, List<FunctionCallFunction>> result = new HashMap<>();
-		for(FunctionCallFunction call : allCalls) {
-			Function caller = call.getFunction();
-			List<FunctionCallFunction> group = result.getOrDefault(caller, new ArrayList<>());
+	public Map<Function, List<Call>> findAllFunctionCallRelationsGroupByCaller(Project project) {
+		Iterable<Call> allCalls = findFunctionCallFunctionRelations(project);
+		Map<Function, List<Call>> result = new HashMap<>();
+		for(Call call : allCalls) {
+			CodeNode callerNode = call.getCallerNode();
+			if(!(callerNode instanceof Function)) {
+				continue;
+			}
+			Function caller = (Function) callerNode;
+			List<Call> group = result.getOrDefault(caller, new ArrayList<>());
 			group.add(call);
 			result.put(caller, group);
 		}
@@ -361,12 +288,12 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
-	public Map<Function, List<FunctionAccessField>> findAllFunctionAccessRelationsGroupByCaller(Project project) {
-		Iterable<FunctionAccessField> allAccesses = findProjectContainFunctionAccessVariableRelations(project);
-		Map<Function, List<FunctionAccessField>> result = new HashMap<>();
-		for(FunctionAccessField access : allAccesses) {
+	public Map<Function, List<Access>> findAllFunctionAccessRelationsGroupByCaller(Project project) {
+		Iterable<Access> allAccesses = findProjectContainFunctionAccessVariableRelations(project);
+		Map<Function, List<Access>> result = new HashMap<>();
+		for(Access access : allAccesses) {
 			Function caller = access.getFunction();
-			List<FunctionAccessField> group = result.getOrDefault(caller, new ArrayList<>());
+			List<Access> group = result.getOrDefault(caller, new ArrayList<>());
 			group.add(access);
 			result.put(caller, group);
 		}
@@ -478,8 +405,8 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		}
 		
 		for(Function function : functions) {
-			Collection<FunctionCallFunction> calls = queryFunctionCallFunctions(function);
-			for(FunctionCallFunction call : calls) {
+			Collection<Call> calls = queryFunctionCallFunctions(function);
+			for(Call call : calls) {
 				ProjectFile belongToFile = containRelationService.findFunctionBelongToFile(call.getCallFunction());
 				if(!file.equals(belongToFile)) {
 					result.addFanOut(belongToFile);
@@ -488,8 +415,8 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			}
 			
 			calls = queryFunctionCallByFunctions(function);
-			for(FunctionCallFunction call : calls) {
-				ProjectFile belongToFile = containRelationService.findFunctionBelongToFile(call.getFunction());
+			for(Call call : calls) {
+				ProjectFile belongToFile = containRelationService.findCodeNodeBelongToFile(call.getCallerNode());
 				if(!file.equals(belongToFile)) {
 					result.addFanIn(belongToFile);
 					result.addFanInRelations(call);
@@ -526,13 +453,13 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
-	public Collection<FunctionCallFunction> queryFunctionCallFunctions(Function function) {
-		return functionCallFunctionRepository.queryFunctionCallFunctions(function.getId());
+	public Collection<Call> queryFunctionCallFunctions(Function function) {
+		return callRepository.queryFunctionCallFunctions(function.getId());
 	}
 
 	@Override
-	public Collection<FunctionCallFunction> queryFunctionCallByFunctions(Function function) {
-		return functionCallFunctionRepository.queryFunctionCallByFunctions(function.getId());
+	public Collection<Call> queryFunctionCallByFunctions(Function function) {
+		return callRepository.queryFunctionCallByFunctions(function.getId());
 	}
 	
 	@Override
@@ -579,5 +506,12 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		}
 		return true;
 	}
+
+
+	@Override
+	public List<Call> findAllFunctionCallFunctionRelations() {
+		return callRepository.findAllFunctionCallFunctionRelations();
+	}
+
 
 }

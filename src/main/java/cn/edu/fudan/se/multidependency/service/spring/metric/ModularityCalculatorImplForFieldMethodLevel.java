@@ -1,5 +1,13 @@
 package cn.edu.fudan.se.multidependency.service.spring.metric;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Project;
@@ -7,15 +15,10 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionAccessField;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Access;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 @Service
 public class ModularityCalculatorImplForFieldMethodLevel implements ModularityCalculator {
@@ -61,8 +64,8 @@ public class ModularityCalculatorImplForFieldMethodLevel implements ModularityCa
 	public Modularity calculate(Project project) {
 		this.project = project;
 
-		Map<Function, List<FunctionCallFunction>> staticCalls = staticAnalyseService.findAllFunctionCallRelationsGroupByCaller(project);
-		Map<Function, List<FunctionAccessField>> staticAccesses = staticAnalyseService.findAllFunctionAccessRelationsGroupByCaller(project);
+		Map<Function, List<Call>> staticCalls = staticAnalyseService.findAllFunctionCallRelationsGroupByCaller(project);
+		Map<Function, List<Access>> staticAccesses = staticAnalyseService.findAllFunctionAccessRelationsGroupByCaller(project);
 
 		Map<Function,List<RelationWithTimes>> staticFunctionCallsAndAccesses = new HashMap<>();
 		//Map<Function,List<RelationWithTimes>> staticFunctionCallers = new HashMap<>();
@@ -73,10 +76,10 @@ public class ModularityCalculatorImplForFieldMethodLevel implements ModularityCa
 
 		double weightSum = 0;
 		for (Function caller:staticCalls.keySet()){
-			Iterable<FunctionCallFunction> calls = staticCalls.get(caller);
+			Iterable<Call> calls = staticCalls.get(caller);
 			List<RelationWithTimes> callsTmp = new ArrayList<>();
 			int times = 0;
-			for (FunctionCallFunction call:calls){
+			for (Call call:calls){
 				callsTmp.add(call);
 				times +=call.getTimes();
 
@@ -91,10 +94,10 @@ public class ModularityCalculatorImplForFieldMethodLevel implements ModularityCa
 			weightSum += times;
 		}
 		for (Function caller:staticAccesses.keySet()){
-			Iterable<FunctionAccessField> accesses = staticAccesses.get(caller);
+			Iterable<Access> accesses = staticAccesses.get(caller);
 			List<RelationWithTimes> accessesTmp = new ArrayList<>();
 			int times = 0;
-			for (FunctionAccessField access:accesses){
+			for (Access access:accesses){
 				accessesTmp.add(access);
 				times += access.getTimes();
 
@@ -130,8 +133,8 @@ public class ModularityCalculatorImplForFieldMethodLevel implements ModularityCa
 		double q_sum = 0.0;
 
 		for(Function caller:staticCalls.keySet()){
-			Iterable<FunctionCallFunction> calls = staticCalls.get(caller);
-			for (FunctionCallFunction call:calls){
+			Iterable<Call> calls = staticCalls.get(caller);
+			for (Call call:calls){
 				Function function = caller;
 				Function callFunction = call.getCallFunction();
 				double a_i_j =0.0;
@@ -145,8 +148,8 @@ public class ModularityCalculatorImplForFieldMethodLevel implements ModularityCa
 		}
 
 		for(Function caller:staticAccesses.keySet()){
-			Iterable<FunctionAccessField> accesses = staticAccesses.get(caller);
-			for (FunctionAccessField access:accesses){
+			Iterable<Access> accesses = staticAccesses.get(caller);
+			for (Access access:accesses){
 				Function function = caller;
 				Variable var = access.getField();
 				double a_i_j =0.0;

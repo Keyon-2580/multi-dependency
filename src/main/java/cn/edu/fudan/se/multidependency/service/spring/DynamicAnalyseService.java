@@ -11,7 +11,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
-import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCall;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.ScenarioDefineTestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
@@ -21,13 +21,13 @@ public interface DynamicAnalyseService {
 	
 	Map<Function, Map<Function, FunctionCallPropertionDetail>> findFunctionCallFunctionDynamicCalled(Iterable<TestCase> testcases);
 
-	List<FunctionDynamicCallFunction> findFunctionDynamicCallsByTraceAndMicroService(Trace trace, MicroService ms);
+	List<DynamicCall> findFunctionDynamicCallsByTraceAndMicroService(Trace trace, MicroService ms);
 	
-	List<FunctionDynamicCallFunction> findFunctionDynamicCallsByTrace(Trace trace);
+	List<DynamicCall> findFunctionDynamicCallsByTrace(Trace trace);
 	
-	List<FunctionDynamicCallFunction> findFunctionDynamicCallsByTraceAndSpan(Trace trace, Span span);
+	List<DynamicCall> findFunctionDynamicCallsByTraceAndSpan(Trace trace, Span span);
 
-	List<FunctionDynamicCallFunction> findFunctionCallsByTraceIdAndSpanId(String traceId, String spanId);
+	List<DynamicCall> findFunctionCallsByTraceIdAndSpanId(String traceId, String spanId);
 	
 	List<TestCase> findTestCasesByFeatureName(String featureName);
 	
@@ -49,9 +49,9 @@ public interface DynamicAnalyseService {
 	
 	List<Feature> findFeaturesByFeatureId(Integer... featureIds);
 
-	List<FunctionDynamicCallFunction> findFunctionDynamicCallsByMicroService(MicroService ms);
+	List<DynamicCall> findFunctionDynamicCallsByMicroService(MicroService ms);
 	
-	List<FunctionDynamicCallFunction> findFunctionDynamicCallsByProject(Project project);
+	List<DynamicCall> findFunctionDynamicCallsByProject(Project project);
 
 	TestCase findTestCaseByTestCaseId(Integer testCaseId);
 
@@ -61,9 +61,9 @@ public interface DynamicAnalyseService {
 
 	Feature findFeatureById(Long id);
 
-	List<FunctionDynamicCallFunction> findFunctionDynamicCallFunctionRelations(Project project, boolean isTraceRunForTestCase);
+	List<DynamicCall> findFunctionDynamicCallFunctionRelations(Project project, boolean isTraceRunForTestCase);
 
-	Iterable<FunctionDynamicCallFunction> findAllFunctionDynamicCallFunctionRelations(boolean b);
+	Iterable<DynamicCall> findAllFunctionDynamicCallFunctionRelations(boolean b);
 	
 	Trace findTraceByTraceId(String traceId);
 

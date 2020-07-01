@@ -10,62 +10,52 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@RelationshipEntity(RelationType.str_VARIABLE_TYPE)
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_FUNCTION_CAST_TYPE)
-public class FunctionCastType implements RelationWithTimes {
-
-	private static final long serialVersionUID = 5982413005555063698L;
-
+public class VariableType implements Relation {
+	private static final long serialVersionUID = 1767344862220786333L;
 	@Id
     @GeneratedValue
     private Long id;
 
+	public VariableType(Variable variable, Type type) {
+		super();
+		this.variable = variable;
+		this.type = type;
+	}
+
 	@StartNode
-	private Function function;
+	private Variable variable;
 	
 	@EndNode
-	private Type castType;
-	
-	private int times = 1;
-
-	public FunctionCastType(Function function, Type castType) {
-		super();
-		this.function = function;
-		this.castType = castType;
-	}
+	private Type type;
 
 	@Override
 	public Node getStartNode() {
-		return function;
+		return variable;
 	}
 
 	@Override
 	public Node getEndNode() {
-		return castType;
+		return type;
 	}
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.FUNCTION_CAST_TYPE;
+		return RelationType.VARIABLE_TYPE;
 	}
 
 	@Override
 	public Map<String, Object> getProperties() {
-		Map<String, Object> properties = new HashMap<>();
-		properties.put("times", getTimes());
-		return properties;
-	}
-	
-	public void addTimes() {
-		this.times++;
+		return new HashMap<>();
 	}
 
 }

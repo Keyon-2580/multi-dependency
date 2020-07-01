@@ -10,45 +10,62 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@RelationshipEntity(RelationType.str_VARIABLE_TYPE_PARAMETER_TYPE)
+/**
+ * 方法访问属性关系
+ * @author fan
+ *
+ */
 @Data
 @NoArgsConstructor
-public class VariableTypeParameterType implements RelationWithTimes {
+@RelationshipEntity(RelationType.str_ACCESS)
+@EqualsAndHashCode
+public class Access implements RelationWithTimes {
+	
+	private static final long serialVersionUID = -2911695752320415027L;
 
-	private static final long serialVersionUID = 2157443508230175654L;
+	@StartNode
+	private Function function;
+	
+	@EndNode
+	private Variable field;
+	
+	private int times = 1;
 
 	@Id
     @GeneratedValue
     private Long id;
 	
-	@StartNode
-	private Variable variable;
+	public Access(Function function, Variable field) {
+		this.function = function;;
+		this.field = field;
+		this.times = 1;
+	}
 	
-	@EndNode
-	private Type type;
-	
-	private int times = 1;
-	
+	public void addTimes() {
+		this.times++;
+	}
+
 	@Override
 	public Node getStartNode() {
-		return variable;
+		return function;
 	}
 
 	@Override
 	public Node getEndNode() {
-		return type;
+		return field;
 	}
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.VARIABLE_TYPE_PARAMETER_TYPE;
+		return RelationType.ACCESS;
 	}
 
 	@Override
@@ -58,8 +75,4 @@ public class VariableTypeParameterType implements RelationWithTimes {
 		return properties;
 	}
 	
-	public void addTimes() {
-		this.times++;
-	}
-
 }

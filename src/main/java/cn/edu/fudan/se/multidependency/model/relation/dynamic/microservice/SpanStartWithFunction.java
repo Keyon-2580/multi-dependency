@@ -13,14 +13,14 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCallFunctionByTestCase;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_SPAN_START_WITH_FUNCTION)
-public class SpanStartWithFunction implements DynamicCallFunction {
+public class SpanStartWithFunction implements DynamicCallFunctionByTestCase {
 
 	private static final long serialVersionUID = 7462518725070039162L;
 	

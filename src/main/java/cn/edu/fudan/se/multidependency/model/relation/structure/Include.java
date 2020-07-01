@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_FILE_INCLUDE_FILE)
-public class FileIncludeFile implements Relation {
+@RelationshipEntity(RelationType.str_INCLUDE)
+public class Include implements Relation {
 
 	private static final long serialVersionUID = 364395424089272866L;
 	
@@ -33,7 +33,7 @@ public class FileIncludeFile implements Relation {
 	@EndNode
 	private ProjectFile end;
 
-	public FileIncludeFile(ProjectFile start, ProjectFile end) {
+	public Include(ProjectFile start, ProjectFile end) {
 		super();
 		this.start = start;
 		this.end = end;
@@ -51,7 +51,7 @@ public class FileIncludeFile implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.FILE_INCLUDE_FILE;
+		return RelationType.INCLUDE;
 	}
 
 	@Override

@@ -9,17 +9,17 @@ import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Inherits;
 
 @Repository
-public interface TypeInheritsTypeRepository extends Neo4jRepository<TypeInheritsType, Long> {
+public interface InheritsRepository extends Neo4jRepository<Inherits, Long> {
 	
 	/**
 	 * 找出继承给定id的Type的Type
 	 * @param id
 	 * @return
 	 */
-	@Query("match (a:Type)-[r:" + RelationType.str_TYPE_INHERITS_TYPE + "]-(b:Type) where id(a) = {0} and r.inheritType=\"" + TypeInheritsType.INHERIT_TYPE_EXTENDS + "\" return b")
+	@Query("match (a:Type)-[r:" + RelationType.str_INHERITS + "]-(b:Type) where id(a) = {0} and r.inheritType=\"" + Inherits.INHERIT_TYPE_EXTENDS + "\" return b")
     List<Type> findExtendsTypesByTypeId(Long id);
 	
 	/**
@@ -27,7 +27,7 @@ public interface TypeInheritsTypeRepository extends Neo4jRepository<TypeInherits
 	 * @param id
 	 * @return
 	 */
-	@Query("match (a:Type)-[r:" + RelationType.str_TYPE_INHERITS_TYPE + "]-(b:Type) where id(a) = {0} return b")
+	@Query("match (a:Type)-[r:" + RelationType.str_INHERITS + "]-(b:Type) where id(a) = {0} return b")
     List<Type> findInheritsTypesByTypeId(Long id);
 	
 	/**
@@ -35,13 +35,13 @@ public interface TypeInheritsTypeRepository extends Neo4jRepository<TypeInherits
 	 * @param id
 	 * @return
 	 */
-	@Query("match (a:Type)-[r:" + RelationType.str_TYPE_INHERITS_TYPE + "]-(b:Type) where id(b) = {0} return a")
+	@Query("match (a:Type)-[r:" + RelationType.str_INHERITS + "]-(b:Type) where id(b) = {0} return a")
     List<Type> findInheritsFromTypeByTypeId(Long id);
 	
-	@Query("MATCH result=(type1:Type)-[r:" + RelationType.str_TYPE_INHERITS_TYPE + "]->(type2:Type) with type1,type2,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type1) where id(project)={projectId} RETURN result")
-	List<TypeInheritsType> findProjectContainTypeInheritsTypeRelations(@Param("projectId") Long projectId);
+	@Query("MATCH result=(type1:Type)-[r:" + RelationType.str_INHERITS + "]->(type2:Type) with type1,type2,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type1) where id(project)={projectId} RETURN result")
+	List<Inherits> findProjectContainTypeInheritsTypeRelations(@Param("projectId") Long projectId);
 
-	@Query("match p=(a:Type)-[r:" + RelationType.str_TYPE_INHERITS_TYPE + "*1..]->(b:Type) where id(a)={subTypeId} and id(b)={superTypeId} return b;")
+	@Query("match p=(a:Type)-[r:" + RelationType.str_INHERITS + "*1..]->(b:Type) where id(a)={subTypeId} and id(b)={superTypeId} return b;")
 	Type findIsTypeInheritsType(@Param("subTypeId") Long subTypeId, @Param("superTypeId") Long superTypeId);
 	
 	@Query("match (file1:ProjectFile)-[:CONTAIN]->(t:Type)-[r:TYPE_INHERITS_TYPE]->(types:Type)<-[:CONTAIN]-(file2:ProjectFile) where  id(file1) <> id(file2) return r,file1,file2")

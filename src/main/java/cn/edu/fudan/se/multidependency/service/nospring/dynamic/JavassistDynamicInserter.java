@@ -20,7 +20,7 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
-import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCall;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TraceRunWithFunction;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanCallSpan;
@@ -327,9 +327,9 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 		return null;
 	}
 
-	private FunctionDynamicCallFunction generateFunctionDynamicCall(Function callerFunction, Function calledFunction,
+	private DynamicCall generateFunctionDynamicCall(Function callerFunction, Function calledFunction,
 			JavaDynamicFunctionExecution callerDynamicFunction, JavaDynamicFunctionExecution calledDynamicFunction) {
-		FunctionDynamicCallFunction relation = new FunctionDynamicCallFunction(callerFunction, calledFunction,
+		DynamicCall relation = new DynamicCall(callerFunction, calledFunction,
 				calledDynamicFunction.getProject(), calledDynamicFunction.getLanguage().toString());
 		relation.setTraceId(callerDynamicFunction.getTraceId());
 		relation.setSpanId(callerDynamicFunction.getSpanId());

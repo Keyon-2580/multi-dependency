@@ -13,7 +13,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FileIncludeFile;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Include;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import cn.edu.fudan.se.multidependency.utils.config.ProjectConfig;
 import depends.entity.AliasEntity;
@@ -265,7 +265,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				if (entity instanceof FileEntity) {
 					ProjectFile includeFile = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.ProjectFile, entity.getId().longValue(), currentProject);
 					if (includeFile != null) {
-						FileIncludeFile fileIncludeFile = new FileIncludeFile(file, includeFile);
+						Include fileIncludeFile = new Include(file, includeFile);
 						addRelation(fileIncludeFile);
 					}
 				} else {

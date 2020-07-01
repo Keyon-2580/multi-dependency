@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
@@ -19,11 +20,11 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
-import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCall;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.ScenarioDefineTestCase;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseExecuteFeature;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
 import cn.edu.fudan.se.multidependency.repository.node.microservice.TraceRepository;
 import cn.edu.fudan.se.multidependency.repository.node.testcase.FeatureRepository;
 import cn.edu.fudan.se.multidependency.repository.node.testcase.ScenarioRepository;
@@ -124,27 +125,27 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	}
 
 	@Override
-	public List<FunctionDynamicCallFunction> findFunctionCallsByTraceIdAndSpanId(String traceId, String spanId) {
+	public List<DynamicCall> findFunctionCallsByTraceIdAndSpanId(String traceId, String spanId) {
 		return functionDynamicCallFunctionRepository.findFunctionCallsByTraceIdAndSpanId(traceId, spanId);
 	}
 
 	@Override
-	public List<FunctionDynamicCallFunction> findFunctionDynamicCallsByTrace(Trace trace) {
+	public List<DynamicCall> findFunctionDynamicCallsByTrace(Trace trace) {
 		return functionDynamicCallFunctionRepository.findFunctionCallsByTraceId(trace.getTraceId());
 	}
 
 	@Override
-	public List<FunctionDynamicCallFunction> findFunctionDynamicCallsByTraceAndSpan(Trace trace, Span span) {
+	public List<DynamicCall> findFunctionDynamicCallsByTraceAndSpan(Trace trace, Span span) {
 		return functionDynamicCallFunctionRepository.findFunctionCallsByTraceIdAndSpanId(trace.getTraceId(), span.getSpanId());
 	}
 
 	@Override
-	public List<FunctionDynamicCallFunction> findFunctionDynamicCallsByTraceAndMicroService(Trace trace,
+	public List<DynamicCall> findFunctionDynamicCallsByTraceAndMicroService(Trace trace,
 			MicroService ms) {
-		List<FunctionDynamicCallFunction> result = new ArrayList<>();
-		List<FunctionDynamicCallFunction> calls = findFunctionDynamicCallsByTrace(trace);
+		List<DynamicCall> result = new ArrayList<>();
+		List<DynamicCall> calls = findFunctionDynamicCallsByTrace(trace);
 		Iterable<Project> projects = containRelationService.findMicroServiceContainProjects(ms);
-		for(FunctionDynamicCallFunction call : calls) {
+		for(DynamicCall call : calls) {
 			for(Project project : projects) {
 				if(project.getName().equals(call.getProjectName())) {
 					result.add(call);
@@ -156,8 +157,8 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	}
 
 	@Override
-	public List<FunctionDynamicCallFunction> findFunctionDynamicCallsByMicroService(MicroService ms) {
-		List<FunctionDynamicCallFunction> result = new ArrayList<>();
+	public List<DynamicCall> findFunctionDynamicCallsByMicroService(MicroService ms) {
+		List<DynamicCall> result = new ArrayList<>();
 		Iterable<Project> projects = containRelationService.findMicroServiceContainProjects(ms);
 		for(Project project : projects) {
 			result.addAll(findFunctionDynamicCallsByProject(project));
@@ -166,7 +167,7 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	}
 
 	@Override
-	public List<FunctionDynamicCallFunction> findFunctionDynamicCallsByProject(Project project) {
+	public List<DynamicCall> findFunctionDynamicCallsByProject(Project project) {
 		return functionDynamicCallFunctionRepository.findFunctionCallsByProjectNameAndLanguage(project.getName(), project.getLanguage());
 	}
 
@@ -264,7 +265,7 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	}
 
 	@Override
-	public List<FunctionDynamicCallFunction> findFunctionDynamicCallFunctionRelations(Project project, boolean isTraceRunForTestCase) {
+	public List<DynamicCall> findFunctionDynamicCallFunctionRelations(Project project, boolean isTraceRunForTestCase) {
 		if(isTraceRunForTestCase) {
 			/// FIXME
 		}
@@ -272,16 +273,16 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 	}
 
 	@Override
-	public Iterable<FunctionDynamicCallFunction> findAllFunctionDynamicCallFunctionRelations(boolean b) {
+	public Iterable<DynamicCall> findAllFunctionDynamicCallFunctionRelations(boolean b) {
 		if(b) {
 			/// FIXME
 		}
 		return functionDynamicCallFunctionRepository.findAll();
 	}
 
-	private Map<TestCase, List<FunctionCallFunction>> functionCallFunctionDynamicCalledCache = new HashMap<>();
-	public List<FunctionCallFunction> findFunctionCallFunctionDynamicCalled(TestCase testCase) {
-		List<FunctionCallFunction> result = functionCallFunctionDynamicCalledCache.get(testCase);
+	private Map<TestCase, List<Call>> functionCallFunctionDynamicCalledCache = new HashMap<>();
+	public List<Call> findFunctionCallFunctionDynamicCalled(TestCase testCase) {
+		List<Call> result = functionCallFunctionDynamicCalledCache.get(testCase);
 		if(result == null) {
 			result = functionDynamicCallFunctionRepository.findFunctionCallFunctionDynamicCalled(testCase.getTestCaseId());
 			functionCallFunctionDynamicCalledCache.put(testCase, result);
@@ -289,9 +290,9 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		return result;
 	}
 	
-	private Map<TestCase, List<FunctionCallFunction>> functionCallFunctionNotDynamicCalledCache = new HashMap<>();
-	public List<FunctionCallFunction> findFunctionCallFunctionNotDynamicCalled(TestCase testCase) {
-		List<FunctionCallFunction> result = functionCallFunctionNotDynamicCalledCache.get(testCase);
+	private Map<TestCase, List<Call>> functionCallFunctionNotDynamicCalledCache = new HashMap<>();
+	public List<Call> findFunctionCallFunctionNotDynamicCalled(TestCase testCase) {
+		List<Call> result = functionCallFunctionNotDynamicCalledCache.get(testCase);
 		if(result == null) {
 			result = functionDynamicCallFunctionRepository.findFunctionCallFunctionNotDynamicCalled(testCase.getTestCaseId());
 			functionCallFunctionNotDynamicCalledCache.put(testCase, result);
@@ -299,10 +300,10 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		return result;
 	}
 	
-	public List<FunctionDynamicCallFunction> findDynamicCallsByCallerIdAndCalledIdAndTestCaseId(Function caller, Function called, TestCase testCase) {
-		List<FunctionDynamicCallFunction> result = new ArrayList<>();
-		List<FunctionDynamicCallFunction> calls = findDynamicCallsByCallerIdAndTestCaseId(caller, testCase);
-		for(FunctionDynamicCallFunction call : calls) {
+	public List<DynamicCall> findDynamicCallsByCallerIdAndCalledIdAndTestCaseId(Function caller, Function called, TestCase testCase) {
+		List<DynamicCall> result = new ArrayList<>();
+		List<DynamicCall> calls = findDynamicCallsByCallerIdAndTestCaseId(caller, testCase);
+		for(DynamicCall call : calls) {
 			if(call.getCallFunction().equals(called)) {
 				result.add(call);
 			}
@@ -310,10 +311,10 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		return result;
 	}
 	
-	private Map<TestCase, Map<Function, List<FunctionDynamicCallFunction>>> testCaseAndCallerToDynamicCallsCache = new HashMap<>();
-	public List<FunctionDynamicCallFunction> findDynamicCallsByCallerIdAndTestCaseId(Function caller, TestCase testCase) {
-		List<FunctionDynamicCallFunction> result = new ArrayList<>();
-		Map<Function, List<FunctionDynamicCallFunction>> calls = testCaseAndCallerToDynamicCallsCache.getOrDefault(testCase, new HashMap<>());
+	private Map<TestCase, Map<Function, List<DynamicCall>>> testCaseAndCallerToDynamicCallsCache = new HashMap<>();
+	public List<DynamicCall> findDynamicCallsByCallerIdAndTestCaseId(Function caller, TestCase testCase) {
+		List<DynamicCall> result = new ArrayList<>();
+		Map<Function, List<DynamicCall>> calls = testCaseAndCallerToDynamicCallsCache.getOrDefault(testCase, new HashMap<>());
 		result = calls.get(caller);
 		if(result == null) {
 			result = functionDynamicCallFunctionRepository.findDynamicCallsByCallerIdAndTestCaseId(caller.getId(), testCase.getTestCaseId());
@@ -337,13 +338,17 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 		Map<Function, Map<Function, FunctionCallPropertionDetail>> result = new HashMap<>();
 		for(TestCase testCase : testCases) {
 			// 动态直接调用了的静态调用
-			List<FunctionCallFunction> dynamicCallStaticCalls = findFunctionCallFunctionDynamicCalled(testCase);
-			for(FunctionCallFunction dynamicCall : dynamicCallStaticCalls) {
-				Function caller = dynamicCall.getFunction();
+			List<Call> dynamicCallStaticCalls = findFunctionCallFunctionDynamicCalled(testCase);
+			for(Call dynamicCall : dynamicCallStaticCalls) {
+				CodeNode callerNode = dynamicCall.getCallerNode();
+				if(!(callerNode instanceof Function)) {
+					continue;
+				}
+				Function caller = (Function) callerNode;
 				Function called = dynamicCall.getCallFunction();
 				Map<Function, FunctionCallPropertionDetail> calledFunctionToDetail = result.getOrDefault(caller, new HashMap<>());
 				FunctionCallPropertionDetail detail = calledFunctionToDetail.getOrDefault(called, new FunctionCallPropertionDetail());
-				List<FunctionDynamicCallFunction> dynamic = findDynamicCallsByCallerIdAndCalledIdAndTestCaseId(caller, called, testCase);
+				List<DynamicCall> dynamic = findDynamicCallsByCallerIdAndCalledIdAndTestCaseId(caller, called, testCase);
 				detail.addTestCaseCall(testCase, dynamic.size());
 				calledFunctionToDetail.put(called, detail);
 				result.put(caller, calledFunctionToDetail);
@@ -351,13 +356,17 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 			
 			// 从动态没有直接调用的静态调用里
 			// 找到可能存在调用子类的调用
-			List<FunctionCallFunction> dynamicNotCalls = findFunctionCallFunctionNotDynamicCalled(testCase);
-			for(FunctionCallFunction call : dynamicNotCalls) {
-				Function caller = call.getFunction();
+			List<Call> dynamicNotCalls = findFunctionCallFunctionNotDynamicCalled(testCase);
+			for(Call call : dynamicNotCalls) {
+				CodeNode callerNode = call.getCallerNode();
+				if(!(callerNode instanceof Function)) {
+					continue;
+				}
+				Function caller = (Function) callerNode;
 				Function called = call.getCallFunction();
-				List<FunctionDynamicCallFunction> dynamicCalls = findDynamicCallsByCallerIdAndTestCaseId(caller, testCase);
+				List<DynamicCall> dynamicCalls = findDynamicCallsByCallerIdAndTestCaseId(caller, testCase);
 				Function callSubTypeFunction = null;
-				for(FunctionDynamicCallFunction dynamicCall : dynamicCalls) {
+				for(DynamicCall dynamicCall : dynamicCalls) {
 					Function dynamicCaller = dynamicCall.getFunction();
 					Function dynamicCalled = dynamicCall.getCallFunction();
 					if(!caller.equals(dynamicCaller) || !called.getSimpleName().equals(dynamicCalled.getSimpleName())
@@ -382,7 +391,7 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 				if(callSubTypeFunction != null) {
 					Map<Function, FunctionCallPropertionDetail> group = result.getOrDefault(caller, new HashMap<>());
 					FunctionCallPropertionDetail detail = group.getOrDefault(called, new FunctionCallPropertionDetail());
-					List<FunctionDynamicCallFunction> dynamic = findDynamicCallsByCallerIdAndCalledIdAndTestCaseId(caller, callSubTypeFunction, testCase);
+					List<DynamicCall> dynamic = findDynamicCallsByCallerIdAndCalledIdAndTestCaseId(caller, callSubTypeFunction, testCase);
 					detail.addTestCaseCall(testCase, dynamic.size());
 					group.put(called, detail);
 					result.put(caller, group);	

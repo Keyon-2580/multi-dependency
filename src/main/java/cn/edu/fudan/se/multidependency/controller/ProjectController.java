@@ -35,7 +35,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
-import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCall;
 import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.DependencyOrganizationService;
@@ -276,7 +276,7 @@ public class ProjectController {
 			case "variable":
 				Collection<Variable> variables = containRelationService.findFileDirectlyContainVariables(file);
 				if(!variables.isEmpty()) {
-					ZTreeNode variableNodes = new ZTreeNode("变量 (" + variables.size() + ")", false);
+					ZTreeNode variableNodes = new ZTreeNode("变量 (" + variables.size() + ")", true);
 					for(Variable variable : variables) {
 						ZTreeNode node = new ZTreeNode(variable, true);
 						variableNodes.addChild(node);
@@ -434,7 +434,7 @@ public class ProjectController {
 				throw new Exception("没有找到id为 " + projectId + " 的项目");
 			}
 			if("dynamic".equals(dependency)) {
-				List<FunctionDynamicCallFunction> calls = dynamicAnalyseService.findFunctionDynamicCallsByProject(project);
+				List<DynamicCall> calls = dynamicAnalyseService.findFunctionDynamicCallsByProject(project);
 				System.out.println(calls.size());
 				dependencyOrganizationService.dynamicCallDependency(calls);
 				if("file".equals(level)) {
@@ -447,7 +447,7 @@ public class ProjectController {
 				result.put("value", dependencyOrganizationService.projectToCytoscape(project));
 			}
 			if("all".equals(dependency)) {
-				List<FunctionDynamicCallFunction> calls = dynamicAnalyseService.findFunctionDynamicCallsByProject(project);
+				List<DynamicCall> calls = dynamicAnalyseService.findFunctionDynamicCallsByProject(project);
 				System.out.println(calls.size());
 				System.out.println("start to find clones");
 //				Iterable<Clone> clones = basicCloneQueryService.queryProjectContainFunctionCloneFunctions(project);

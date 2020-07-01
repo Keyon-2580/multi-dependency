@@ -10,51 +10,57 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 方法以类型作为方法参数的关系
+ * 变量以类型作为类型参数的关系
+ * @author fan
+ *
+ */
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_TYPE_CALL_FUNCTION)
-public class TypeCallFunction implements RelationWithTimes {
-	
-	private static final long serialVersionUID = 5982413005555063698L;
+@RelationshipEntity(RelationType.str_PARAMETER)
+public class Parameter implements RelationWithTimes {
 
-	@StartNode
-	private Type type;
+	private static final long serialVersionUID = -8796616144049338126L;
 	
-	@EndNode
-	private Function callFunction;
-	
-	private int times = 1;
-	
-	public TypeCallFunction(Type type, Function callFunction) {
-		super();
-		this.type = type;
-		this.callFunction = callFunction;
-	}
-
 	@Id
     @GeneratedValue
     private Long id;
 	
+	@StartNode
+	private CodeNode codeNode;
+	
+	@EndNode
+	private Type parameterType;
+	
+	private int times = 1;
+
+	public Parameter(CodeNode codeNode, Type parameterType) {
+		super();
+		this.codeNode = codeNode;
+		this.parameterType = parameterType;
+	}
+
 	@Override
 	public Node getStartNode() {
-		return type;
+		return codeNode;
 	}
 
 	@Override
 	public Node getEndNode() {
-		return callFunction;
+		return parameterType;
 	}
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.TYPE_CALL_FUNCTION;
+		return RelationType.PARAMETER;
 	}
 
 	@Override

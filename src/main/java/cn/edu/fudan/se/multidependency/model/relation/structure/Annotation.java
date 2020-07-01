@@ -10,54 +10,62 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
+import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_FUNCTION_IMPLLINK_FUNCTION)
-@EqualsAndHashCode
-public class FunctionImplLinkFunction implements Relation {
-	private static final long serialVersionUID = -5543957038003318L;
+@RelationshipEntity(RelationType.str_ANNOTATION)
+public class Annotation implements RelationWithTimes {
 
+	private static final long serialVersionUID = 8248026322068428052L;
+	
 	@Id
     @GeneratedValue
     private Long id;
 	
-	public FunctionImplLinkFunction(Function function, Function impllinkFunction) {
-		this.function = function;
-		this.impllinkFunction = impllinkFunction;
-	}
+	private int times = 1;
 	
+	public Annotation(CodeNode startNode, Type annotationType) {
+		super();
+		this.startNode = startNode;
+		this.annotationType = annotationType;
+	}
+
 	@StartNode
-	private Function function;
+	private CodeNode startNode;
 	
 	@EndNode
-	private Function impllinkFunction;
+	private Type annotationType;
 
 	@Override
 	public Node getStartNode() {
-		return function;
+		return startNode;
 	}
 
 	@Override
 	public Node getEndNode() {
-		return impllinkFunction;
+		return annotationType;
 	}
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.FUNCTION_IMPLLINK_FUNCTION;
+		return RelationType.ANNOTATION;
 	}
 
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
+		properties.put("times", getTimes());
 		return properties;
+	}
+	
+	public void addTimes() {
+		this.times++;
 	}
 
 }

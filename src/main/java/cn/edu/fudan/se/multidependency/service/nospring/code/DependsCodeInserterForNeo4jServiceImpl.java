@@ -14,19 +14,17 @@ import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionAccessField;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCastType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionImplLinkFunction;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionImplementFunction;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionParameterType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionReturnType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionThrowType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.NodeAnnotationType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.TypeCallFunction;
-import cn.edu.fudan.se.multidependency.model.relation.structure.TypeInheritsType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.VariableTypeParameterType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Access;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Annotation;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Cast;
+import cn.edu.fudan.se.multidependency.model.relation.structure.ImplLink;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Implement;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Inherits;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Parameter;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Return;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Throw;
+import cn.edu.fudan.se.multidependency.model.relation.structure.VariableType;
 import cn.edu.fudan.se.multidependency.utils.config.ProjectConfig;
 import depends.deptypes.DependencyType;
 import depends.entity.Entity;
@@ -68,7 +66,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 			inherits.forEach(inherit -> {
 				Type other = (Type) types.get(inherit.getId().longValue());
 				if(other != null) {
-					TypeInheritsType typeExtends = new TypeInheritsType(type, other, TypeInheritsType.INHERIT_TYPE_EXTENDS);
+					Inherits typeExtends = new Inherits(type, other, Inherits.INHERIT_TYPE_EXTENDS);
 					addRelation(typeExtends);
 				}
 			});
@@ -76,7 +74,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 			imps.forEach(imp -> {
 				Type other = (Type) types.get(imp.getId().longValue());
 				if(other != null) {
-					TypeInheritsType typeImplements = new TypeInheritsType(type, other, TypeInheritsType.INHERIT_TYPE_IMPLEMENTS);
+					Inherits typeImplements = new Inherits(type, other, Inherits.INHERIT_TYPE_IMPLEMENTS);
 					addRelation(typeImplements);
 				}
 			});
@@ -85,7 +83,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 				case DependencyType.ANNOTATION:
 					Type annotationType = (Type) types.get(relation.getEntity().getId().longValue());
 					if(annotationType != null) {
-						NodeAnnotationType typeAnnotationType = new NodeAnnotationType(type, annotationType);
+						Annotation typeAnnotationType = new Annotation(type, annotationType);
 						addRelation(typeAnnotationType);
 					}
 					break;
@@ -95,7 +93,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 						// call其它方法
 						Function other = (Function) getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, relation.getEntity().getId().longValue(), currentProject);
 						if(other != null) {
-							TypeCallFunction call = new TypeCallFunction(type, other);
+							Call call = new Call(type, other);
 							addRelation(call);
 						}
 					} 					
@@ -116,7 +114,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 			if(typeEntity != null && typeEntity.getClass() == TypeEntity.class) {
 				Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, typeEntity.getId().longValue(), currentProject);
 				if(type != null) {
-					VariableIsType variableIsType = new VariableIsType(variable, type);
+					VariableType variableIsType = new VariableType(variable, type);
 					addRelation(variableIsType);
 				}
 			}
@@ -126,9 +124,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 				case DependencyType.PARAMETER:
 					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, relation.getEntity().getId().longValue(), currentProject);
 					if(type != null && typeParameter != type) {
-						VariableTypeParameterType variableTypeParameterType = new VariableTypeParameterType();
-						variableTypeParameterType.setVariable(variable);
-						variableTypeParameterType.setType(type);
+						Parameter variableTypeParameterType = new Parameter(variable, type);
 						addRelation(variableTypeParameterType);
 						typeParameter = type;
 					}
@@ -136,7 +132,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 				case DependencyType.ANNOTATION:
 					Type annotationType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, relation.getEntity().getId().longValue(), currentProject);
 					if(annotationType != null) {
-						NodeAnnotationType typeAnnotationType = new NodeAnnotationType(variable, annotationType);
+						Annotation typeAnnotationType = new Annotation(variable, annotationType);
 						addRelation(typeAnnotationType);
 					}
 				default:
@@ -163,7 +159,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 						// call其它方法
 						Function other = (Function) functions.get(relation.getEntity().getId().longValue());
 						if(other != null) {
-							FunctionCallFunction call = new FunctionCallFunction(function, other);
+							Call call = new Call(function, other);
 							addRelation(call);
 						}
 					} else {
@@ -177,35 +173,35 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 				case DependencyType.RETURN:
 					Type returnType = (Type) types.get(relation.getEntity().getId().longValue());
 					if(returnType != null) {
-						FunctionReturnType functionReturnType = new FunctionReturnType(function, returnType);
+						Return functionReturnType = new Return(function, returnType);
 						addRelation(functionReturnType);
 					}
 					break;
 				case DependencyType.PARAMETER:
 					Type parameterType = (Type) types.get(relation.getEntity().getId().longValue());
 					if(parameterType != null) {
-						FunctionParameterType functionParameterType = new FunctionParameterType(function, parameterType);
+						Parameter functionParameterType = new Parameter(function, parameterType);
 						addRelation(functionParameterType);
 					}
 					break;
 				case DependencyType.THROW:
 					Type throwType = (Type) types.get(relation.getEntity().getId().longValue());
 					if(throwType != null) {
-						FunctionThrowType functionThrowType = new FunctionThrowType(function, throwType);
+						Throw functionThrowType = new Throw(function, throwType);
 						addRelation(functionThrowType);
 					}
 					break;
 				case DependencyType.ANNOTATION:
 					Type annotationType = (Type) types.get(relation.getEntity().getId().longValue());
 					if(annotationType != null) {
-						NodeAnnotationType functionAnnotationType = new NodeAnnotationType(function, annotationType);
+						Annotation functionAnnotationType = new Annotation(function, annotationType);
 						addRelation(functionAnnotationType);
 					}
 					break;
 				case DependencyType.CAST:
 					Type castType = (Type) types.get(relation.getEntity().getId().longValue());
 					if(castType != null) {
-						FunctionCastType functionCastType = new FunctionCastType(function, castType);
+						Cast functionCastType = new Cast(function, castType);
 						addRelation(functionCastType);
 					}
 					break;
@@ -213,7 +209,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					Node implementNode = this.getNodes().findNodeByEntityIdInProject(relation.getEntity().getId().longValue(), currentProject);
 					if(implementNode != null && implementNode instanceof Function) {
 						Function implementFunction = (Function) implementNode;
-						FunctionImplementFunction functionImplementFunction = new FunctionImplementFunction(function, implementFunction);
+						Implement functionImplementFunction = new Implement(function, implementFunction);
 						addRelation(functionImplementFunction);
 					}
 					break;
@@ -221,7 +217,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					Node impllinkNode = this.getNodes().findNodeByEntityIdInProject(relation.getEntity().getId().longValue(), currentProject);
 					if(impllinkNode != null && impllinkNode instanceof Function) {
 						Function implLinkFunction = (Function) impllinkNode;
-						FunctionImplLinkFunction functionImplLinkFunction = new FunctionImplLinkFunction(function, implLinkFunction);
+						ImplLink functionImplLinkFunction = new ImplLink(function, implLinkFunction);
 						addRelation(functionImplLinkFunction);
 					}
 					break;
@@ -233,7 +229,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 							assert(relationNode instanceof Variable);
 							Variable var = (Variable) relationNode;
 							if(var.isField()) {
-								FunctionAccessField accessField = new FunctionAccessField(function, var);
+								Access accessField = new Access(function, var);
 								addRelation(accessField);
 							}
 						}

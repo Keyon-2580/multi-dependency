@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCall;
 import guru.nidi.graphviz.attribute.Rank;
 import guru.nidi.graphviz.attribute.Rank.RankDir;
 import guru.nidi.graphviz.engine.Format;
@@ -93,10 +93,10 @@ public class GraphvizUtil {
 		return name.toString();
 	}
 	
-	public static GraphvizTreeNode generate(List<FunctionDynamicCallFunction> calls) {
+	public static GraphvizTreeNode generate(List<DynamicCall> calls) {
 		GraphvizTreeNode root = new GraphvizTreeNode("Entry");
 		Map<String, GraphvizTreeNode> map = new HashMap<>();
-		for(FunctionDynamicCallFunction call : calls) {
+		for(DynamicCall call : calls) {
 			Function caller = call.getFunction();
 			Function called = call.getCallFunction();
 			String callerName = generate(caller, call.getFromOrder(), call.getFromDepth());

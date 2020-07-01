@@ -15,9 +15,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportFunction;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FileImportVariable;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Import;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import cn.edu.fudan.se.multidependency.utils.config.ProjectConfig;
 import depends.entity.Entity;
@@ -287,19 +285,19 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				if(entity instanceof FunctionEntity) {
 					Function function = (Function) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, entity.getId().longValue(), currentProject);
 					if(function != null) {
-						FileImportFunction fileImportFunction = new FileImportFunction(file, function);
+						Import fileImportFunction = new Import(file, function);
 						addRelation(fileImportFunction);
 					}
 				} else if(entity instanceof VarEntity) {
 					Variable variable = (Variable) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Variable, entity.getId().longValue(), currentProject);
 					if(variable != null) {
-						FileImportVariable fileImportVariable = new FileImportVariable(file, variable);
+						Import fileImportVariable = new Import(file, variable);
 						addRelation(fileImportVariable);
 					}
 				} else if(entity.getClass() == TypeEntity.class) {
 					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, entity.getId().longValue(), currentProject);
 					if(type != null) {
-						FileImportType fileImportType = new FileImportType(file, type);
+						Import fileImportType = new Import(file, type);
 						addRelation(fileImportType);
 					}
 				} else {

@@ -17,8 +17,8 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_DYNAMIC_FUNCTION_CALL_FUNCTION)
-public class FunctionDynamicCallFunction implements DynamicCallFunction {
+@RelationshipEntity(RelationType.str_DYNAMIC_CALL)
+public class DynamicCall implements DynamicCallFunctionByTestCase {
 
 	private static final long serialVersionUID = -7640490954063715746L;
 	
@@ -28,7 +28,7 @@ public class FunctionDynamicCallFunction implements DynamicCallFunction {
 	@EndNode
 	private Function callFunction;
 	
-	public FunctionDynamicCallFunction(Function function, Function callFunction, String projectName, String language) {
+	public DynamicCall(Function function, Function callFunction, String projectName, String language) {
 		super();
 		this.function = function;
 		this.callFunction = callFunction;
@@ -72,7 +72,7 @@ public class FunctionDynamicCallFunction implements DynamicCallFunction {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.DYNAMIC_FUNCTION_CALL_FUNCTION;
+		return RelationType.DYNAMIC_CALL;
 	}
 
 	@Override

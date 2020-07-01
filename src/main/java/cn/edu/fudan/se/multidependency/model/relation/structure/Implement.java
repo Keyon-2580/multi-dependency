@@ -10,61 +10,61 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+/**
+ * 该implement为C/C++中的.c/cpp文件内的方法 implement .h文件内声明的方法
+ * 不是类实现接口，实现接口的关系在inherits类中
+ * @author fan
+ *
+ */
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_NODE_ANNOTATION_TYPE)
-public class NodeAnnotationType implements RelationWithTimes {
-
-	private static final long serialVersionUID = 8248026322068428052L;
+@RelationshipEntity(RelationType.str_IMPLEMENT)
+@EqualsAndHashCode
+public class Implement implements Relation {
 	
+	private static final long serialVersionUID = 7582417525375943056L;
+
 	@Id
     @GeneratedValue
     private Long id;
 	
-	private int times = 1;
-	
-	public NodeAnnotationType(Node startNode, Type annotationType) {
-		super();
-		this.startNode = startNode;
-		this.annotationType = annotationType;
+	public Implement(Function function, Function implementFunction) {
+		this.function = function;
+		this.implementFunction = implementFunction;
 	}
-
+	
 	@StartNode
-	private Node startNode;
+	private Function function;
 	
 	@EndNode
-	private Type annotationType;
+	private Function implementFunction;
 
 	@Override
 	public Node getStartNode() {
-		return startNode;
+		return function;
 	}
 
 	@Override
 	public Node getEndNode() {
-		return annotationType;
+		return implementFunction;
 	}
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.NODE_ANNOTATION_TYPE;
+		return RelationType.IMPLEMENT;
 	}
 
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("times", getTimes());
 		return properties;
 	}
 	
-	public void addTimes() {
-		this.times++;
-	}
-
 }

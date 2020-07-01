@@ -10,55 +10,52 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_FUNCTION_IMPLEMENT_FUNCTION)
-@EqualsAndHashCode
-public class FunctionImplementFunction implements Relation {
-	
-	private static final long serialVersionUID = 7582417525375943056L;
+@RelationshipEntity(RelationType.str_IMPORT)
+public class Import implements Relation {
+	private static final long serialVersionUID = 1908046997347759875L;
 
 	@Id
     @GeneratedValue
     private Long id;
 	
-	public FunctionImplementFunction(Function function, Function implementFunction) {
-		this.function = function;
-		this.implementFunction = implementFunction;
-	}
-	
 	@StartNode
-	private Function function;
-	
+	private ProjectFile file;
+
 	@EndNode
-	private Function implementFunction;
+	private CodeNode importCodeNode;
+
+	public Import(ProjectFile file, CodeNode importCodeNode) {
+		super();
+		this.file = file;
+		this.importCodeNode = importCodeNode;
+	}
 
 	@Override
 	public Node getStartNode() {
-		return function;
+		return file;
 	}
 
 	@Override
 	public Node getEndNode() {
-		return implementFunction;
+		return importCodeNode;
 	}
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.FUNCTION_IMPLEMENT_FUNCTION;
+		return RelationType.IMPORT;
 	}
 
 	@Override
 	public Map<String, Object> getProperties() {
-		Map<String, Object> properties = new HashMap<>();
-		return properties;
+		return new HashMap<>();
 	}
-	
 }

@@ -21,9 +21,9 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
-import cn.edu.fudan.se.multidependency.model.relation.dynamic.FunctionDynamicCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCall;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanStartWithFunction;
-import cn.edu.fudan.se.multidependency.repository.relation.code.FunctionCallFunctionRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.CallRepository;
 import cn.edu.fudan.se.multidependency.service.spring.DependencyOrganizationService;
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
@@ -48,41 +48,41 @@ public class FunctionController {
 	private DependencyOrganizationService dependencyOrganizationService;
 	
 	@Autowired
-	private FunctionCallFunctionRepository functionCallFunctionRepository;
+	private CallRepository functionCallFunctionRepository;
 	
 	@GetMapping("/testfanout/{fileId}")
 	@ResponseBody
 	public void testFanout(@PathVariable("fileId") long fileId) {
 //		functionCallFunctionRepository.queryTest(fileId);
-		System.out.println(functionCallFunctionRepository.queryTest(fileId));
+//		System.out.println(functionCallFunctionRepository.queryTest(fileId));
 //		List<Object> result = functionCallFunctionRepository.queryTest(fileId);
 //		for(Object r : result) {
 //			System.out.println(r.getClass());
 //		}
 	}
 	
-	private List<Function> test(Function startFunction, List<FunctionDynamicCallFunction> calls, Long depth) {
+	private List<Function> test(Function startFunction, List<DynamicCall> calls, Long depth) {
 		List<Function> result = new ArrayList<>();
-		List<FunctionDynamicCallFunction> temp = new ArrayList<>();
+		List<DynamicCall> temp = new ArrayList<>();
 		
-		for(FunctionDynamicCallFunction call : calls) {
+		for(DynamicCall call : calls) {
 			if(call.getFunction().equals(startFunction) && call.getFromDepth().equals(depth)) {
 				temp.add(call);
 			}
 		}
-		temp.sort(new Comparator<FunctionDynamicCallFunction>() {
+		temp.sort(new Comparator<DynamicCall>() {
 			@Override
-			public int compare(FunctionDynamicCallFunction o1, FunctionDynamicCallFunction o2) {
+			public int compare(DynamicCall o1, DynamicCall o2) {
 				return o1.getToOrder().compareTo(o2.getToOrder());
 			}
 		});
-		for(FunctionDynamicCallFunction t : temp) {
+		for(DynamicCall t : temp) {
 			result.add(t.getCallFunction());
 		}
 		return result;
 	}
 	
-	private JSONObject test1(Function f, List<FunctionDynamicCallFunction> calls, Long depth) {
+	private JSONObject test1(Function f, List<DynamicCall> calls, Long depth) {
 		JSONObject result = new JSONObject();
 		result.put("text", f.getName() + " " + f.getParametersIdentifies());
 		JSONArray tagsArray = new JSONArray();
@@ -106,7 +106,7 @@ public class FunctionController {
 		JSONObject result = new JSONObject();
 		try {
 			Span span = msService.findSpanById(spanGraphId);
-			List<FunctionDynamicCallFunction> spanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
+			List<DynamicCall> spanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
 			GraphvizTreeNode root = GraphvizUtil.generate(spanFunctionCalls);
 			GraphvizUtil.print(root.toGraphviz(), "D:\\testfunctioncall.png");
 			result.put("result", "success");
@@ -126,7 +126,7 @@ public class FunctionController {
 			
 			Span span = msService.findSpanById(spanGraphId);
 			SpanStartWithFunction spanStartWithFunction = msService.findSpanStartWithFunctionByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
-			List<FunctionDynamicCallFunction> spanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
+			List<DynamicCall> spanFunctionCalls = dynamicAnalyseService.findFunctionCallsByTraceIdAndSpanId(span.getTraceId(), span.getSpanId());
 			functionArray.add(test1(spanStartWithFunction.getFunction(), spanFunctionCalls, 0L));
 			result.put("result", "success");
 			result.put("value", functionArray);
@@ -152,7 +152,7 @@ public class FunctionController {
 			if(ms == null) {
 				throw new Exception("没有id为 " + microserviceGraphId + " 的MicroService");
 			}
-			List<FunctionDynamicCallFunction> calls = new ArrayList<>();
+			List<DynamicCall> calls = new ArrayList<>();
 			if(traceId == null) {
 				calls = dynamicAnalyseService.findFunctionDynamicCallsByMicroService(ms);
 			} else {

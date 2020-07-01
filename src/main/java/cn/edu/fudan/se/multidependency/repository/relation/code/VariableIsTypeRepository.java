@@ -8,12 +8,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.model.relation.structure.VariableIsType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.VariableType;
 
 @Repository
-public interface VariableIsTypeRepository extends Neo4jRepository<VariableIsType, Long>{
+public interface VariableIsTypeRepository extends Neo4jRepository<VariableType, Long>{
 
-	@Query("MATCH result=(variable:Variable)-[r:" + RelationType.str_VARIABLE_IS_TYPE + "]->(type:Type) with variable,type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)={projectId} RETURN result")
-	List<VariableIsType> findProjectContainVariableIsTypeRelations(@Param("projectId") Long projectId);
+	@Query("MATCH result=(variable:Variable)-[r:" + RelationType.str_VARIABLE_TYPE + "]->(type:Type) with variable,type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)={projectId} RETURN result")
+	List<VariableType> findProjectContainVariableIsTypeRelations(@Param("projectId") Long projectId);
 
 }

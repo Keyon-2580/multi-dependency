@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_TRACE_RUN_WITH_FUNCTION)
-public class TraceRunWithFunction implements DynamicCallFunction {
+public class TraceRunWithFunction implements DynamicCallFunctionByTestCase {
 
 	private static final long serialVersionUID = 1477035391487647267L;
 

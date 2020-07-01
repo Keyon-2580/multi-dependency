@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
 import cn.edu.fudan.se.multidependency.service.spring.data.FunctionCallPropertion;
 import cn.edu.fudan.se.multidependency.service.spring.data.FunctionCallPropertionDetail;
 
@@ -45,7 +45,7 @@ public class TestCaseCoverageService {
 	public FunctionCallPropertion findFunctionCallFunctionDynamicCalled(List<TestCase> testCases, Project project) {
 		System.out.println("findFunctionCallFunctionDynamicCalled " + testCases.size());
 		// 所有静态调用
-		Map<Function, List<FunctionCallFunction>> staticCalls = staticAnalyseService.findAllFunctionCallRelationsGroupByCaller();
+		Map<Function, List<Call>> staticCalls = staticAnalyseService.findAllFunctionCallRelationsGroupByCaller();
 		// 被动态调用的静态调用
 		Map<Function, Map<Function, FunctionCallPropertionDetail>> dynamicCalls = dynamicAnalyseService.findFunctionCallFunctionDynamicCalled(testCases);
 		if(project != null) {

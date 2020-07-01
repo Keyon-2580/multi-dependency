@@ -7,13 +7,14 @@ import java.util.Map;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
-import cn.edu.fudan.se.multidependency.model.relation.structure.FunctionCallFunction;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
 
 public class FunctionCallPropertion {
 	
-	public FunctionCallPropertion(Map<Function, List<FunctionCallFunction>> staticCalls, Map<Function, Map<Function, FunctionCallPropertionDetail>> dynamicCalls) {
+	public FunctionCallPropertion(Map<Function, List<Call>> staticCalls, Map<Function, Map<Function, FunctionCallPropertionDetail>> dynamicCalls) {
 		this.staticCalls = staticCalls;
 		this.dynamicCalls = dynamicCalls;
 	}
@@ -21,9 +22,9 @@ public class FunctionCallPropertion {
 	/**
 	 *  所有静态调用
 	 */
-	private Map<Function, List<FunctionCallFunction>> staticCalls;
+	private Map<Function, List<Call>> staticCalls;
 	
-	public Map<Function, List<FunctionCallFunction>> getStaticCalls() {
+	public Map<Function, List<Call>> getStaticCalls() {
 		return new HashMap<>(staticCalls);
 	}
 	
@@ -43,14 +44,18 @@ public class FunctionCallPropertion {
 		JSONArray callTags = new JSONArray();
 		callTags.add("call");
 		callTags.add("function");
-		for(Function caller : staticCalls.keySet()) {
+		for(CodeNode callerNode : staticCalls.keySet()) {
+			if(!(callerNode instanceof Function)) {
+				continue;
+			}
+			Function caller = (Function) callerNode;
 			JSONObject functionJson = new JSONObject();
 			functionJson.put("tags", tags);
 			Map<Function, FunctionCallPropertionDetail> details = dynamicCalls.getOrDefault(caller, new HashMap<>());
 			JSONArray callFunctionArray = new JSONArray();
-			List<FunctionCallFunction> callFunctions = staticCalls.get(caller);
+			List<Call> callFunctions = staticCalls.get(caller);
 			functionJson.put("text", caller.getName() + caller.getParametersIdentifies() + " (" + details.size() + " / " + callFunctions.size() + ") ");
-			for(FunctionCallFunction callFunction : callFunctions) {
+			for(Call callFunction : callFunctions) {
 				JSONObject callFunctionJson = new JSONObject();
 				callFunctionJson.put("tags", callTags);
 				callFunctionArray.add(callFunctionJson);
@@ -94,7 +99,7 @@ public class FunctionCallPropertion {
 	
 	public int sizeOfStaticFunctionCallFunction() {
 		int count = 0;
-		for(List<FunctionCallFunction> call : staticCalls.values()) {
+		for(List<Call> call : staticCalls.values()) {
 			count += call.size();
 		}
 		

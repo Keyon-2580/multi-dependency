@@ -11,41 +11,35 @@ import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
-import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_FUNCTION_ACCESS_FIELD)
-@EqualsAndHashCode
-public class FunctionAccessField implements RelationWithTimes {
-	
-	private static final long serialVersionUID = -2911695752320415027L;
+@RelationshipEntity(RelationType.str_CAST)
+public class Cast implements RelationWithTimes {
+
+	private static final long serialVersionUID = 5982413005555063698L;
+
+	@Id
+    @GeneratedValue
+    private Long id;
 
 	@StartNode
 	private Function function;
 	
 	@EndNode
-	private Variable field;
+	private Type castType;
 	
 	private int times = 1;
 
-	@Id
-    @GeneratedValue
-    private Long id;
-	
-	public FunctionAccessField(Function function, Variable field) {
-		this.function = function;;
-		this.field = field;
-		this.times = 1;
-	}
-	
-	public void addTimes() {
-		this.times++;
+	public Cast(Function function, Type castType) {
+		super();
+		this.function = function;
+		this.castType = castType;
 	}
 
 	@Override
@@ -55,12 +49,12 @@ public class FunctionAccessField implements RelationWithTimes {
 
 	@Override
 	public Node getEndNode() {
-		return field;
+		return castType;
 	}
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.FUNCTION_ACCESS_FIELD;
+		return RelationType.CAST;
 	}
 
 	@Override
@@ -70,4 +64,8 @@ public class FunctionAccessField implements RelationWithTimes {
 		return properties;
 	}
 	
+	public void addTimes() {
+		this.times++;
+	}
+
 }
