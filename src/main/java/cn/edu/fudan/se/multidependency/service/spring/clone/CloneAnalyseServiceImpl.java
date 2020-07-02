@@ -113,6 +113,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 	public Collection<CloneGroup> findGroupsContainProjects(Collection<CloneGroup> groups, Collection<Project> projects) {
 		Set<CloneGroup> result = new HashSet<>();
 		for(CloneGroup group : groups) {
+			// 克隆组包含的项目
 			Collection<Project> containProjects = cloneGroupContainProjects(group);
 			boolean contain = true;
 			for(Project p : projects) {

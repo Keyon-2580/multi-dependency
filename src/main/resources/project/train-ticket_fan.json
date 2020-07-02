@@ -1004,7 +1004,7 @@
 	      "path": "D:/multiple-dependency-project/train-ticket",
 	      "commit_id_from": "",
 	      "commit_id_to": "",
-	      "issues_path": "src/main/resources/git/train-ticket-issues.json"
+	      "issues_path": "src/main/resources/git/issues/train-ticket.json"
 	    }
 	  ],
 	  "libs": [

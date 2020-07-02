@@ -24,11 +24,11 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
-import cn.edu.fudan.se.multidependency.service.spring.GitAnalyseServiceImpl;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneValueService;
 import cn.edu.fudan.se.multidependency.service.spring.data.MicroServiceCallWithEntry;
+import cn.edu.fudan.se.multidependency.service.spring.history.GitAnalyseServiceImpl;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeEdge;
 
 @Controller

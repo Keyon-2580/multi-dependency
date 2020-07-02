@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.service.spring;
+package cn.edu.fudan.se.multidependency.service.spring.history;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -22,6 +22,7 @@ import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.DeveloperSubmitCommitRepository;
+import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 
 @Service
 public class GitAnalyseServiceImpl implements GitAnalyseService {

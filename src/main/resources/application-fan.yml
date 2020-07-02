@@ -20,7 +20,7 @@ data:
 #   project_config: src/main/resources/project/leveldb.json
 #   project_config: src/main/resources/project/source-fan-functiontest.json
    dynamic_analyse: false
-   git_analyse: false
+   git_analyse: true
    lib_analyse: false
    clone_analyse: true
    neo4j:

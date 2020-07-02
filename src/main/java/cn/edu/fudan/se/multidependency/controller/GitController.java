@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 
-import cn.edu.fudan.se.multidependency.service.spring.GitAnalyseService;
+import cn.edu.fudan.se.multidependency.service.spring.history.GitAnalyseService;
 
 @Controller
 @RequestMapping("/git")

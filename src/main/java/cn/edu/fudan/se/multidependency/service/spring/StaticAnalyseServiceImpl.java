@@ -52,7 +52,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.code.InheritsReposito
 import cn.edu.fudan.se.multidependency.repository.relation.code.ParameterRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.ReturnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.ThrowRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.VariableIsTypeRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.VariableTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.lib.FunctionCallLibraryAPIRepository;
 import cn.edu.fudan.se.multidependency.service.spring.metric.Fan_IO;
@@ -109,7 +109,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     InheritsRepository typeInheritsTypeRepository;
 
     @Autowired
-    VariableIsTypeRepository variableIsTypeRepository;
+    VariableTypeRepository variableIsTypeRepository;
     
     @Autowired
     VariableRepository variableRepository;

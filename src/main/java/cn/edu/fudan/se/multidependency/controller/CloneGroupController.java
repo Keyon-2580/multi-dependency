@@ -242,7 +242,7 @@ public class CloneGroupController {
 				}
 			} else if("projects".equals(searchWhat)) {
 				List<String> projectsStr = (List<String>) params.get("projects");
-				Collection<CloneGroup> cloneGroups = this.selectGroups(params);
+				Collection<CloneGroup> cloneGroups = selectGroups(params);
 				if(languages.size() != 1) {
 					List<MicroService> mss = new ArrayList<>();
 					for(String idStr : projectsStr) {
@@ -253,7 +253,13 @@ public class CloneGroupController {
 					}
 					selectedGroups = cloneAnalyse.findGroupsContainMicroServices(cloneGroups, mss);
 				} else {
-					Collection<Project> projects = nodeService.queryProjects(Language.valueOf(languages.get(0)));
+					List<Project> projects = new ArrayList<>();
+					for(String idStr : projectsStr) {
+						Project project = nodeService.queryProject(Long.valueOf(idStr));
+						if(project != null) {
+							projects.add(project);
+						}
+					}
 					selectedGroups = cloneAnalyse.findGroupsContainProjects(cloneGroups, projects);
 				}
 			}
