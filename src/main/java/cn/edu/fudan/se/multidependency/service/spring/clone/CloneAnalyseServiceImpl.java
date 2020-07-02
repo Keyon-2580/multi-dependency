@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -186,38 +187,26 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 		return group1.equals(group2);
 	}
 	
-	/*@Override
-	public String exportCloneMicroService(Map<String, Map<Long, CloneLineValue<MicroService>>> data,
-											 Collection<MicroService> microservices, CloneRelationType cloneRelationType) {
+	@Override
+	public String exportCloneGroup(Collection<? extends Node> projects, Collection<CloneGroup> selectedGroups) {
 		final String CSV_COLUMN_SEPARATOR = ",";
 		final String CSV_ROW_SEPARATOR = "\r\n";
 		StringBuffer buf = new StringBuffer();
 		buf.append(" ").append(CSV_COLUMN_SEPARATOR);
-		for (MicroService microService : microservices) {
-			buf.append(microService.getName()).append(CSV_COLUMN_SEPARATOR);
+		for (Node project : projects) {
+			buf.append(project.getName()).append(CSV_COLUMN_SEPARATOR);
 		}
 		buf.append(CSV_ROW_SEPARATOR);
-		for (Map.Entry<String, Map<Long, CloneLineValue<MicroService>>> group : data.entrySet()) {
-			buf.append(group.getKey()).append(CSV_COLUMN_SEPARATOR);
-			Map<Long, CloneLineValue<MicroService>> map = group.getValue();
-			for (MicroService microService : microservices) {
-				CloneLineValue<MicroService> clv = map.get(microService.getId());
-				boolean hasData = false;
+		for (CloneGroup group : selectedGroups) {
+			buf.append(group.getName()).append(CSV_COLUMN_SEPARATOR);
+			for (Node project : projects) {
 				buf.append("\"");
-				if(level == CloneLevel.function) {
-					for (Function function : clv.getCloneFunctions()) {
-						hasData = true;
-						buf.append(function.getName()).append(CSV_ROW_SEPARATOR);
+				for (CodeNode codeNode : group.getNodes()) {
+					Project belongedProject = containRelationService.findCodeNodeBelongToProject(codeNode);
+					if ((project instanceof Project && belongedProject.getName().equals(project.getName())) ||
+						(project instanceof MicroService && containRelationService.findProjectBelongToMicroService(belongedProject).getName().equals(project.getName()))) {
+						buf.append(codeNode.getIdentifier()).append(CSV_ROW_SEPARATOR);
 					}
-				} else {
-					for (ProjectFile projectFile : clv.getCloneFiles()) {
-						hasData = true;
-						buf.append(projectFile.getPath()).append(CSV_ROW_SEPARATOR);
-					}
-				}
-				if (hasData) {
-					int len = buf.length();
-					if (len > 2) buf.delete(len-2, len);
 				}
 				buf.append("\"");
 				buf.append(CSV_COLUMN_SEPARATOR);
@@ -227,7 +216,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 		return buf.toString();
 	}
 
-	@Override
+	/*@Override
 	public String exportCloneProject(Map<String, Map<Long, CloneLineValue<Project>>> data,
 											 Collection<Project> projects, CloneRelationType cloneRelationType) {
 		final String CSV_COLUMN_SEPARATOR = ",";

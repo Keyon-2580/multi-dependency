@@ -1,11 +1,13 @@
 package cn.edu.fudan.se.multidependency.controller;
 
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -333,7 +335,20 @@ public class CloneGroupController {
 		
 		return result;
 	}
-	
+
+	@PostMapping("/export")
+	public void exportCloneGroup(HttpServletResponse httpServletResponse, @RequestBody Map<String, Object> params) {
+		try {
+			String res = cloneAnalyse.exportCloneGroup(projects(params), selectGroups(params));
+			OutputStream os = httpServletResponse.getOutputStream();
+			os.write(res.getBytes("gbk"));
+			os.flush();
+			os.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	private boolean isCountIn(int count, int min, int max) {
 		if(min < 0 && max < 0) {
 			return false;
