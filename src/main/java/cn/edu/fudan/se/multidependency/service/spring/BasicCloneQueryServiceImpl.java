@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.repository.node.clone.CloneGroupRepository;
@@ -37,7 +38,26 @@ public class BasicCloneQueryServiceImpl implements BasicCloneQueryService {
 	public Collection<Clone> findClonesByCloneType(CloneRelationType cloneType) {
 		Collection<Clone> result = cloneTypeToClones.get(cloneType);
 		if(result == null) {
-			result = cloneRepository.findAllClonesByCloneType(cloneType.toString());
+			switch(cloneType) {
+			case FILE_CLONE_FILE:
+				result = cloneRepository.findAllFileClones();
+				break;
+			case FUNCTION_CLONE_FUNCTION:
+				result = cloneRepository.findAllFunctionClones();
+				break;
+			case TYPE_CLONE_TYPE:
+				result = cloneRepository.findAllTypeClones();
+				break;
+			case SNIPPET_CLONE_SNIPPET:
+				result = cloneRepository.findAllSnippetClones();
+				break;
+			case FUNCTION_CLONE_SNIPPET:
+			case TYPE_CLONE_FUNCTION:
+			case TYPE_CLONE_SNIPPET:
+				result = cloneRepository.findAllClonesByCloneType(cloneType.toString());
+			default:
+				break;
+			}
 			cloneTypeToClones.put(cloneType, result);
 		}
 		return result;
@@ -48,18 +68,42 @@ public class BasicCloneQueryServiceImpl implements BasicCloneQueryService {
 	public Collection<CloneGroup> findGroupsContainCloneTypeRelation(CloneRelationType cloneType) {
 		Collection<CloneGroup> result = cloneTypeToGroups.get(cloneType);
 		if(result == null) {
-			result = cloneRepository.findGroupsByCloneType(cloneType.toString());
-			result.removeIf(group -> {
-				Collection<Clone> clones = findGroupContainCloneRelations(group);
-				boolean flag = false;
-				for(Clone clone : clones) {
-					if(!clone.getCloneRelationType().equals(cloneType.toString())) {
-						flag = true;
-						break;
+			switch(cloneType) {
+			case FILE_CLONE_FILE:
+//				result = cloneRepository.findGroupsByFileCloneFileRelation();
+				result = cloneRepository.findGroups(CloneLevel.file.toString());
+				break;
+			case FUNCTION_CLONE_FUNCTION:
+//				result = cloneRepository.findGroupsByFunctionCloneFunctionRelation();
+				result = cloneRepository.findGroups(CloneLevel.function.toString());
+				break;
+			case TYPE_CLONE_TYPE:
+//				result = cloneRepository.findGroupsByTypeCloneTypeRelation();
+				result = cloneRepository.findGroups(CloneLevel.type.toString());
+				break;
+			case SNIPPET_CLONE_SNIPPET:
+//				result = cloneRepository.findGroupsBySnippetCloneSnippetRelation();
+				result = cloneRepository.findGroups(CloneLevel.snippet.toString());
+				break;
+			case FUNCTION_CLONE_SNIPPET:
+			case TYPE_CLONE_FUNCTION:
+			case TYPE_CLONE_SNIPPET:
+				result = cloneRepository.findGroupsByCloneType(cloneType.toString());
+				result.removeIf(group -> {
+					Collection<Clone> clones = findGroupContainCloneRelations(group);
+					boolean flag = false;
+					for(Clone clone : clones) {
+						if(!clone.getCloneRelationType().equals(cloneType.toString())) {
+							flag = true;
+							break;
+						}
 					}
-				}
-				return flag;
-			});
+					return flag;
+				});
+				break;
+			default:
+				break;
+			}
 			cloneTypeToGroups.put(cloneType, result);
 		}
 		return result;

@@ -2,6 +2,8 @@ package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -140,10 +142,14 @@ public class NodeServiceImpl implements NodeService {
 		}
 		Collection<Project> result = languageToProjectsCache.get(language);
 		if(result == null) {
-			result = projectRepository.findProjectsByLanguage(language.toString());
-			for(Project project : result) {
+			List<Project> projects = projectRepository.findProjectsByLanguage(language.toString());
+			projects.sort((p1, p2) -> {
+				return p1.getName().compareTo(p2.getName());
+			});
+			for(Project project : projects) {
 				cache.cacheNodeById(project);
 			}
+			result = projects;
 			languageToProjectsCache.put(language, result);
 		}
 		return result;
@@ -154,6 +160,26 @@ public class NodeServiceImpl implements NodeService {
 		Node node = cache.findNodeById(id);
 		CloneGroup result = node == null ? cloneGroupRepository.findById(id).get() : (node instanceof CloneGroup ? (CloneGroup) node : cloneGroupRepository.findById(id).get());
 		cache.cacheNodeById(result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, Package> queryAllPackages() {
+		Map<Long, Package> result = new HashMap<>();
+		Iterable<Package> all = packageRepository.findAll();
+		for(Package pck : all) {
+			result.put(pck.getId(), pck);
+		}
+		return result;
+	}
+
+	@Override
+	public List<ProjectFile> queryAllFiles() {
+		List<ProjectFile> result = new ArrayList<>();
+		Iterable<ProjectFile> files = fileRepository.findAll();
+		for(ProjectFile file : files) {
+			result.add(file);
+		}
 		return result;
 	}
 

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
@@ -126,6 +127,7 @@ public class CloneInserterForFile extends CloneInserter {
 			cloneGroup.setEntityId(generateEntityId());
 			cloneGroup.setName(String.join("_", "file", "group", String.valueOf(cloneGroupNumber++)));
 			cloneGroup.setSize(group.getGroupIds().size());
+			cloneGroup.setCloneLevel(CloneLevel.file.toString());
 			addNode(cloneGroup, null);
 			for(int id : group.getGroupIds()) {
 				CodeNode node = this.cloneFileIdToCodeNode.get(id);

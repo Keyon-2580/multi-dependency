@@ -1,19 +1,38 @@
 package cn.edu.fudan.se.multidependency.service.nospring.git;
 
-import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.node.git.*;
-import cn.edu.fudan.se.multidependency.model.relation.Contain;
-import cn.edu.fudan.se.multidependency.model.relation.git.*;
-import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
-import cn.edu.fudan.se.multidependency.utils.FileUtil;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.git.Branch;
+import cn.edu.fudan.se.multidependency.model.node.git.Commit;
+import cn.edu.fudan.se.multidependency.model.node.git.Developer;
+import cn.edu.fudan.se.multidependency.model.node.git.GitRepository;
+import cn.edu.fudan.se.multidependency.model.node.git.Issue;
+import cn.edu.fudan.se.multidependency.model.relation.Contain;
+import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.model.relation.git.CommitAddressIssue;
+import cn.edu.fudan.se.multidependency.model.relation.git.CommitInheritCommit;
+import cn.edu.fudan.se.multidependency.model.relation.git.CommitUpdateFile;
+import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperReportIssue;
+import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperSubmitCommit;
+import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
+import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserterForMethod;
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
 public class GitInserter extends ExtractorForNodesAndRelationsImpl {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(CloneInserterForMethod.class);
 
     private GitExtractor gitExtractor;
 
@@ -47,6 +66,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
     public void addNodesAndRelations() throws Exception {
         addBranchesAndIssues();
         addCommitsAndRelations();
+        addProjectFileCoChangeRelation();
         gitExtractor.close();
     }
 
@@ -83,9 +103,10 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
             }
         }
     }
-
+    
     public void addCommitsAndRelations() throws Exception {
         List<RevCommit> commits = selectCommitRange ? gitExtractor.getARangeCommits(commitIdFrom, commitIdTo) : gitExtractor.getAllCommits();
+        LOGGER.info("commit 数量：" + commits.size());
 //        Collections.reverse(commits);
         for (RevCommit revCommit : commits) {
             //添加commit节点
@@ -112,6 +133,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
             }
 
             //添加commit到commit的继承关系
+            List<ProjectFile> files = new ArrayList<>();
             if (revCommit.getParentCount() > 0) {
                 RevCommit[] parentRevCommits = revCommit.getParents();
                 for (RevCommit parentRevCommit : parentRevCommits) {
@@ -130,7 +152,10 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
                         String changeType = diff.getChangeType().name();
                         String path = DiffEntry.ChangeType.DELETE.name().equals(changeType) ? oldPath : newPath;
                         if (FileUtil.isFiltered(newPath, SUFFIX)) continue;
-                        addCommitUpdateFileRelation(path, commit, changeType);
+                        CommitUpdateFile update = addCommitUpdateFileRelation(path, commit, changeType);
+                        if(update != null) {
+                        	files.add(update.getFile());
+                        }
                     }
                 }
             } else {
@@ -138,9 +163,19 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
                 for (String path : filesPath) {
                     if (FileUtil.isFiltered(path, SUFFIX)) continue;
                     path = "/" + gitExtractor.getRepositoryName() + "/" + path;
-                    addCommitUpdateFileRelation(path, commit, "ADD");
+                    CommitUpdateFile update = addCommitUpdateFileRelation(path, commit, "ADD");
+                    if(update != null) {
+                    	files.add(update.getFile());
+                    }
                 }
             }
+            
+//            addProjectFileCoChangeRelation(new ArrayList<>(files));
+//            List<ProjectFile> filesList = new ArrayList<>(files);
+            files.sort((file1, file2) -> {
+            	return file1.getPath().compareTo(file2.getPath());
+            });
+            addProjectFileCoChangeRelation(files);
 
             //添加Commit到Issue的关系
             if (isAnalyseIssue) {
@@ -153,11 +188,45 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
             }
         }
     }
+    
+    private void addProjectFileCoChangeRelation() {
+    	int count = 0;
+    	for(Map<String, CoChange> values : fileCoChanges.values()) {
+    		for(CoChange cc : values.values()) {
+    			count++;
+    			addRelation(cc);
+    		}
+    	}
+    	LOGGER.info("插入文件cochange关系，关系数：" + count);
+    }
+    
+    private Map<String, Map<String, CoChange>> fileCoChanges = new HashMap<>();
+    private void addProjectFileCoChangeRelation(List<ProjectFile> files) {
+    	for(int i = 0; i < files.size(); i++) {
+    		ProjectFile file1 = files.get(i);
+    		Map<String, CoChange> file1ToCochanges = fileCoChanges.getOrDefault(file1.getPath(), new HashMap<>());
+    		for(int j = i + 1; j < files.size(); j++) {
+    			ProjectFile file2 = files.get(j);
+    			CoChange cochange = file1ToCochanges.get(file2.getPath());
+//    			LOGGER.info(file1.getPath() + " " + file2.getPath() + " " + file1ToCochanges.containsKey(file2.getPath()));
+    			if(cochange == null) {
+    				cochange = new CoChange(file1, file2);
+    				cochange.setTimes(0);
+    			}
+    			cochange.addTimes();
+    			file1ToCochanges.put(file2.getPath(), cochange);
+    		}
+    		fileCoChanges.put(file1.getPath(), file1ToCochanges);
+    	}
+    }
 
-    public void addCommitUpdateFileRelation(String filePath, Commit commit, String updateType) {
+    private CommitUpdateFile addCommitUpdateFileRelation(String filePath, Commit commit, String updateType) {
         ProjectFile file = this.getNodes().findFileByPathRecursion(filePath);
+        CommitUpdateFile update = null;
         if (file != null) {
-            addRelation(new CommitUpdateFile(commit, file, updateType));
+        	update = new CommitUpdateFile(commit, file, updateType);
+            addRelation(update);
         }
+        return update;
     }
 }

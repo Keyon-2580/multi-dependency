@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
@@ -44,6 +45,55 @@ public class CloneValueServiceImpl implements CloneValueService {
 	
     @Autowired
     BasicCloneQueryService basicCloneQueryService;
+    
+	public Map<Package, Map<Package, CloneValue<Package>>> queryPackageCloneFromFileClone(Collection<Clone> fileClones,
+			boolean removeSameNode) {
+		List<CloneValue<Package>> result = new ArrayList<>();
+		Map<Package, Map<Package, CloneValue<Package>>> pckToPackageClones = new HashMap<>();
+		for(Clone clone : fileClones) {
+			CodeNode node1 = clone.getCodeNode1();
+			CodeNode node2 = clone.getCodeNode2();
+			if(!(node1 instanceof ProjectFile) || !(node2 instanceof ProjectFile)) {
+				continue;
+			}
+			ProjectFile file1 = (ProjectFile) node1;
+			ProjectFile file2 = (ProjectFile) node2;
+			if(file1.equals(file2)) {
+				continue;
+			}
+			Package pck1 = containRelationService.findFileBelongToPackage(file1);
+			Package pck2 = containRelationService.findFileBelongToPackage(file2);
+			if(removeSameNode && pck1.equals(pck2)) {
+				continue;
+			}
+			CloneValue<Package> cloneValue = hasFileCloneInPackage(pckToPackageClones, pck1, pck2);
+			if(cloneValue == null) {
+				cloneValue = new CloneValue<Package>();
+				cloneValue.setNode1(pck1);
+				cloneValue.setNode2(pck2);
+				result.add(cloneValue);
+			}
+			cloneValue.addChild(clone);
+			
+			Map<Package, CloneValue<Package>> pck1ToClones = pckToPackageClones.getOrDefault(pck1, new HashMap<>());
+			pck1ToClones.put(pck2, cloneValue);
+			pckToPackageClones.put(pck1, pck1ToClones);
+		}
+		return pckToPackageClones;
+	}
+	
+	private CloneValue<Package> hasFileCloneInPackage(
+			Map<Package, Map<Package, CloneValue<Package>>> pckToPackageClones, 
+			Package pck1, Package pck2) {
+		Map<Package, CloneValue<Package>> pck1ToClones = pckToPackageClones.getOrDefault(pck1, new HashMap<>());
+		CloneValue<Package> clone = pck1ToClones.get(pck2);
+		if(clone != null) {
+			return clone;
+		}
+		Map<Package, CloneValue<Package>> pck2ToClones = pckToPackageClones.getOrDefault(pck2, new HashMap<>());
+		clone = pck2ToClones.get(pck1);
+		return clone;
+	}
 
 	@Override
 	public Collection<CloneValue<Project>> queryProjectCloneFromFileClone(Collection<Clone> fileClones,

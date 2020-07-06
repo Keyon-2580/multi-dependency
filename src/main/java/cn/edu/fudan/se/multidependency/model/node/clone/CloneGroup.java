@@ -38,6 +38,8 @@ public class CloneGroup implements Node {
 	
 	private String language;
 	
+	private String cloneLevel;
+	
 	public CloneGroup(String name) {
 		this.name = name;
 		this.size = -1;
@@ -51,6 +53,7 @@ public class CloneGroup implements Node {
 		properties.put("name", getName() == null ? "" : getName());
 		properties.put("size", getSize());
 		properties.put("language", getLanguage() == null ? "" : getLanguage());
+		properties.put("cloneLevel", getCloneLevel() == null ? "" : getCloneLevel());
 		return properties;
 	}
 
@@ -69,12 +72,6 @@ public class CloneGroup implements Node {
 
 	@Transient
 	private Set<Clone> relations = new HashSet<>();
-	
-	/*@Transient
-	private Set<CloneRelationType> cloneRelationTypes = new HashSet<>();
-	
-	@Transient
-	private Set<CloneType> cloneTypes = new HashSet<>();*/
 	
 	public void addNode(CodeNode node) {
 		this.nodes.add(node);

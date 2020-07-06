@@ -10,11 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Snippet;
+import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
@@ -138,10 +140,10 @@ public class CloneInserterForMethod extends CloneInserter {
 			Clone clone = new Clone(node1, node2);
 			clone.setNode1Index(start);
 			clone.setNode2Index(end);
-			clone.setNode1StartLine(node1.getStartLine());
-			clone.setNode1EndLine(node1.getEndLine());
-			clone.setNode2StartLine(node2.getStartLine());
-			clone.setNode2EndLine(node2.getEndLine());
+			clone.setNode1StartLine(filePath1.getStartLine());
+			clone.setNode1EndLine(filePath1.getEndLine());
+			clone.setNode2StartLine(filePath2.getStartLine());
+			clone.setNode2EndLine(filePath2.getEndLine());
 			clone.setValue(value);
 			clone.setCloneRelationType(cloneType.toString());
 			clone.setCloneType(String.join("_", "type", type));
@@ -155,17 +157,36 @@ public class CloneInserterForMethod extends CloneInserter {
 			CloneGroup cloneGroup = new CloneGroup();
 			cloneGroup.setLanguage(language.toString());
 			cloneGroup.setEntityId(generateEntityId());
-			cloneGroup.setName(String.join("_", "file", "group", String.valueOf(cloneGroupNumber++)));
+			cloneGroup.setName(String.join("_", "method", "group", String.valueOf(cloneGroupNumber++)));
 			cloneGroup.setSize(group.getGroupIds().size());
-			addNode(cloneGroup, null);
+			CloneLevel level = null;
+			boolean uniqueNodeType = true;
 			for(int id : group.getGroupIds()) {
 				CodeNode node = this.cloneNodeIdToCodeNode.get(id);
 				if(node == null) {
 					LOGGER.error("找不到clone id为 " + id + " 的节点");
 					continue;
 				}
+				if(uniqueNodeType) {
+					CloneLevel temp = CloneLevel.getCodeNodeCloneLevel(node);
+					if(temp == null) {
+						LOGGER.error("节点类型错误，找不到克隆级别");
+						continue;
+					}
+					if(level == null) {
+						level = temp;
+					} else {
+						if(level != temp) {
+							uniqueNodeType = false;
+						}
+					}
+				}
 				addRelation(new Contain(cloneGroup, node));
 			}
+			if(uniqueNodeType) {
+				cloneGroup.setCloneLevel(level.toString());
+			}
+			addNode(cloneGroup, null);
 		}
 		LOGGER.info("插入文件级克隆组，组数：" + (cloneGroupNumber - groupCount));
 	}

@@ -1,6 +1,8 @@
 package cn.edu.fudan.se.multidependency.service.spring;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Package;
@@ -12,11 +14,15 @@ import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 
 public interface NodeService {
+	Map<Long, Package> queryAllPackages();
+	
 	Package queryPackage(long id);
 
 	ProjectFile queryFile(long id);
 	
 	ProjectFile queryFile(String path);
+	
+	List<ProjectFile> queryAllFiles();
 
 	Namespace queryNamespace(long id);
 

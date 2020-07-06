@@ -456,4 +456,9 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		return null;
 	}
 
+	@Override
+	public boolean isDifferentPackage(ProjectFile file1, ProjectFile file2) {
+		return findFileBelongToPackage(file1).equals(findFileBelongToPackage(file2));
+	}
+
 }

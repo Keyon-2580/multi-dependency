@@ -92,4 +92,6 @@ public interface ContainRelationService {
 	
 	CloneGroup findFunctionBelongToCloneGroup(Function function);
 	
+	boolean isDifferentPackage(ProjectFile file1, ProjectFile file2);
+	
 }

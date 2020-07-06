@@ -14,6 +14,10 @@ public class PredicateForCloneGroup implements Predicate<CloneGroup> {
 		this.filters.add(filter);
 	}
 	
+	public int size() {
+		return filters.size();
+	}
+	
 	@Override
 	public boolean test(CloneGroup t) {
 		for(FilterForCloneGroup filter : filters) {
