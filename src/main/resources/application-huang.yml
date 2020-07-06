@@ -15,11 +15,11 @@ server:
   port: 8080
 
 data:
-  project_config: src/main/resources/project/uftrace.json
+  project_config: src/main/resources/project/train-ticket.json
   dynamic_analyse: false
   git_analyse: false
   lib_analyse: false
-  clone_analyse: false
+  clone_analyse: true
 
   neo4j:
     delete: true

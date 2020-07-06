@@ -63,3 +63,73 @@ train-ticket.json中有六个数据项：projects、architectures、dynamics、g
 **6. 打开neo4j数据库，运行`src/main/java/cn.edu.fudan.se.multidependency/MultipleDependencyApp`。**
 
 springboot启动成功后，使用浏览器打开网址[http://127.0.0.1:8080](http://127.0.0.1:8080)，查看视图。
+
+
+## docker部署
+
+现仅支持在docker上部署已生成数据库（即.db)，并java -jar运行打包好的multi-dependency-***.jar包，运行程序展示页面效果。
+
+下面以10.141.221.86服务器，目录`/home/fdse/user/zdh/docker`目录作为本地docker目录，进行说明。
+该目录下主要包括：`data`、`logs`目录，重点关注`data`目录即可，主要用于放置数据库。
+
+
+1）本地生成完整的jar包，并上传服务器，对应目录：`/home/fdse/user/zdh/docker`
+
+2）将生成好的数据库，比如`multi-dependency-java-file-function.db`拷贝到`/home/fdse/user/zdh/docker/data/databases`下，如果有重名的，请改名或删除之前的数据库
+
+3）修改docker-compose.yml文件
+
+注意：如果当前服务未停止，请先使用：`sudo docker-compose down`命令停止服务。在停止前不要修改`docker-compose.yml`文件，因`sudo docker-compose down`命令是按照`docker-compose.yml`文件内的配置停止服务，如果修改，则会出现停止失败
+
+
+~~~~
+version: '3'
+services:
+
+  multi-neo4j:
+    image: neo4j:3.5.19
+    container_name: multi-neo4j
+    volumes:
+      - /home/fdse/user/zdh/docker/data:/data
+      - /home/fdse/user/zdh/docker/logs:/var/lib/neo4j/logs
+      # 指定容器时间为宿主机时间
+      - /etc/localtime:/etc/localtime
+    restart: always
+    ports:
+      - "9474:7474"
+      - "9687:7687"
+    environment:
+      - NEO4J_dbms_memory_heap_maxSize=32G
+      #修改默认用户密码
+      - NEO4J_AUTH=neo4j/admin  
+      - NEO4J_dbms_active__database=multi-dependency-java-file-function.db
+      - TZ="Asia/Shanghai"
+    networks:
+      - my-network
+      
+networks:
+  my-network:
+      # driver: overlay
+    driver: bridge 
+
+~~~~
+
+修改内容主要为1个位置：NEO4J_dbms_active__database=multi-dependency-java-file-function.db   改此数据库名称，与前面拷贝数据库名对应
+
+4）修改完成后，即可运行`sudo docker-compose up -d`启动服务，如果成功，会有提示。
+
+可以先通过：`sudo docker ps -a`查看容器中服务启动状况，没有问题的话，即可访问。
+
+根据配置，以86服务器为例：
+
+数据库访问地址：`10.141.221.86:9474`,  内部bolt地址是：`10.141.221.86:9687`,用户名：`neo4j`，密码：`admin`，进行访问
+
+5）运行多维度可视化程序，即java -jar运行打包好的multi-dependency-***.jar包，此处设定spring启动端口号为：9494，可根据自己要求设定，但请避免与系统既有端口冲突
+
+`java -jar -Xmx16384m -Dspring.data.neo4j.username=neo4j -Dspring.data.neo4j.password=admin -Dspring.data.neo4j.uri=bolt://localhost:9687 -Dserver.port=9494  multi-dependency-1.2.5a.jar -m`
+
+或者后台运行
+
+`nohup java -jar -Xmx16384m -Dspring.data.neo4j.username=neo4j -Dspring.data.neo4j.password=admin -Dspring.data.neo4j.uri=bolt://localhost:9687 -Dserver.port=9494  multi-dependency-1.2.5a.jar -m &`
+
+多维度可视化页面地址：`10.141.221.86:9494`，即可访问

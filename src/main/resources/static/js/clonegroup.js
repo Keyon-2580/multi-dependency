@@ -760,13 +760,14 @@ var clone = function(cytoscapeutil) {
 	// 导出CSV
 	$("#export").click(function(){
 		var xmlResquest = new XMLHttpRequest();
-		xmlResquest.open("GET", mainUrl + "/table/project/export?" + urlRemoveParams, true);
-		xmlResquest.setRequestHeader("Content-type", "application/csv");
+		xmlResquest.open("POST", mainUrl + "/export", true);
+		//xmlResquest.setRequestHeader("Content-type", "application/csv");
+		xmlResquest.setRequestHeader("Content-Type", "application/json");
 		xmlResquest.responseType = "blob";
 		xmlResquest.onload = function (oEvent) {
 			var content = xmlResquest.response;
 			var elink = document.createElement('a');
-			elink.download = "clone_" + level + "_data.csv";
+			elink.download = "clone_data.csv";
 			elink.style.display = 'none';
 			var blob = new Blob([content]);
 			elink.href = URL.createObjectURL(blob);
@@ -774,8 +775,7 @@ var clone = function(cytoscapeutil) {
 			elink.click();
 			document.body.removeChild(elink);
 		};
-		xmlResquest.send();
-
+		xmlResquest.send(JSON.stringify(param));
 	});
 
 	return {

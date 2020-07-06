@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
@@ -90,8 +91,8 @@ public interface CloneAnalyseService {
 	 * @return
 	 */
 	boolean isCloneBetweenFiles(ProjectFile file1, ProjectFile file2);
-	
-//	String exportCloneMicroService(Map<String, Map<Long, CloneLineValue<MicroService>>> data, Collection<MicroService> microservices, CloneRelationType cloneRelationType);
-//	
+
+	String exportCloneGroup(Collection<? extends Node> projects, Collection<CloneGroup> selectedGroups);
+//
 //	String exportCloneProject(Map<String, Map<Long, CloneLineValue<Project>>> data, Collection<Project> projects, CloneRelationType cloneRelationType);
 }
