@@ -49,8 +49,4 @@ public class Branch implements Node {
         return NodeLabelType.Branch;
     }
 
-    @Override
-    public String indexName() {
-        return null;
-    }
 }

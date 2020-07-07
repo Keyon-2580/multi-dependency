@@ -52,11 +52,6 @@ public class Snippet implements CodeNode {
 	}
 
 	@Override
-	public String indexName() {
-		return null;
-	}
-
-	@Override
 	public String getIdentifierSimpleName() {
 		return getName();
 	}

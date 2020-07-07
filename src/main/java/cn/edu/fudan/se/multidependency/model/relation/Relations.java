@@ -31,10 +31,13 @@ public class Relations implements Serializable {
         return relationsTemp.get(relationType);
     }
 
-    private void addRelationWithTimes(RelationWithTimes relation) {
+    private void addRelationWithTimes(Relation relation) {
+    	if(!(relation instanceof RelationWithTimes)) {
+    		return ;
+    	}
         Map<Node, Map<RelationType, RelationWithTimes>> endNodesTemp = startNodesToNodeRelations.getOrDefault(relation.getStartNode(), new ConcurrentHashMap<>());
         Map<RelationType, RelationWithTimes> relationsTemp = endNodesTemp.getOrDefault(relation.getEndNode(), new ConcurrentHashMap<>());
-        relationsTemp.put(relation.getRelationType(), relation);
+        relationsTemp.put(relation.getRelationType(), (RelationWithTimes) relation);
         endNodesTemp.put(relation.getEndNode(), relationsTemp);
         startNodesToNodeRelations.put(relation.getStartNode(), endNodesTemp);
     }
@@ -72,7 +75,7 @@ public class Relations implements Serializable {
         if (relation instanceof RelationWithTimes) {
             RelationWithTimes relationWithTimes = hasRelationWithTimes(relation.getStartNode(), relation.getEndNode(), relation.getRelationType());
             if (relationWithTimes == null) {
-                addRelationWithTimes((RelationWithTimes) relation);
+                addRelationWithTimes(relation);
                 addRelationDirectly(relation);
             } else {
                 relationWithTimes.addTimes();

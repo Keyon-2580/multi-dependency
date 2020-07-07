@@ -2,11 +2,10 @@ package cn.edu.fudan.se.multidependency.service.nospring.git;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -51,14 +50,14 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
     public GitInserter(String gitProjectPath, String issueFilePath,
                        String commitIdFrom, String commitIdTo) throws Exception {
         gitExtractor = new GitExtractor(gitProjectPath);
-        if (!issueFilePath.equals("")) {
-            this.isAnalyseIssue = true;
-            issues = new IssueExtractor(issueFilePath).extract();
+        if(!StringUtils.isBlank(issueFilePath)) {
+        	this.isAnalyseIssue = true;
+        	issues = new IssueExtractor(issueFilePath).extract();
         }
-        if (!commitIdFrom.equals("") && !commitIdTo.equals("")) {
-            this.selectCommitRange = true;
-            this.commitIdFrom = commitIdFrom;
-            this.commitIdTo = commitIdTo;
+        if(!StringUtils.isBlank(commitIdFrom) && !StringUtils.isBlank(commitIdTo)) {
+        	this.selectCommitRange = true;
+        	this.commitIdFrom = commitIdFrom;
+        	this.commitIdTo = commitIdTo;
         }
     }
 
@@ -74,9 +73,6 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         //添加gitRepository节点和gitRepository到project的包含关系
         GitRepository gitRepository = new GitRepository(generateEntityId(), gitExtractor.getRepositoryName());
         addNode(gitRepository, null);
-//        for (Project project : projects) {
-//            addRelation(new Contain(gitRepository, project));
-//        }
 
         //添加branch节点和gitRepository到branch的包含关系
         List<Ref> branches = gitExtractor.getBranches();
@@ -170,8 +166,6 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
                 }
             }
             
-//            addProjectFileCoChangeRelation(new ArrayList<>(files));
-//            List<ProjectFile> filesList = new ArrayList<>(files);
             files.sort((file1, file2) -> {
             	return file1.getPath().compareTo(file2.getPath());
             });

@@ -9,17 +9,17 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.model.relation.StructureRelation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_INHERITS)
-public class Inherits implements Relation {
+public class Inherits implements StructureRelation {
 	
 	private static final long serialVersionUID = 3740594031088738257L;
 
@@ -54,12 +54,12 @@ public class Inherits implements Relation {
 	private Type end;
 
 	@Override
-	public Node getStartNode() {
+	public CodeNode getStartCodeNode() {
 		return start;
 	}
 
 	@Override
-	public Node getEndNode() {
+	public CodeNode getEndCodeNode() {
 		return end;
 	}
 

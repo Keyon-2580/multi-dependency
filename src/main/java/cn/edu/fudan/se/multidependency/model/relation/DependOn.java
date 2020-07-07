@@ -1,21 +1,54 @@
 package cn.edu.fudan.se.multidependency.model.relation;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class DependOn<S extends Node, T extends Node> implements Serializable {
+@NoArgsConstructor
+public class DependOn<N extends Node> implements Relation, RelationWithTimes {
 	
-	private static final long serialVersionUID = -1157441684129004481L;
+	private static final long serialVersionUID = 6381791099417646137L;
 
-	private S source;
+    private Long id;
 	
-	private T target;
+	private int times;
 	
-	private Collection<Relation> children = new ArrayList<>();
+	private N startNode;
+	
+	private N endNode;
+
+	public DependOn(N startNode, N endNode) {
+		this.startNode = startNode;
+		this.endNode = endNode;
+	}
+	
+	@Override
+	public void addTimes() {
+		times++;
+	}
+
+	@Override
+	public Node getStartNode() {
+		return startNode;
+	}
+
+	@Override
+	public Node getEndNode() {
+		return endNode;
+	}
+
+	@Override
+	public RelationType getRelationType() {
+		return null;
+	}
+
+	@Override
+	public Map<String, Object> getProperties() {
+		return new HashMap<>();
+	}
 
 }

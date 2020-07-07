@@ -48,11 +48,6 @@ public class Scenario implements Node {
 		return NodeLabelType.Scenario;
 	}
 	
-	public static final String LABEL_INDEX = "scenarioName";
-	@Override
-	public String indexName() {
-		return LABEL_INDEX;
-	}
-
+	public static final String LABEL_INDEX = "name";
 
 }

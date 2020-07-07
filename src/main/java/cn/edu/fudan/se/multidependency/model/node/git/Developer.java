@@ -47,9 +47,4 @@ public class Developer implements Node {
 		return NodeLabelType.Developer;
 	}
 
-	@Override
-	public String indexName() {
-		return null;
-	}
-
 }

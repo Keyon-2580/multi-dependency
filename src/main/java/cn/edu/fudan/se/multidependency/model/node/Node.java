@@ -21,8 +21,6 @@ public interface Node extends Serializable {
 	 */
 	NodeLabelType getNodeType();
 	
-	String indexName();
-	
 	String getName();
 	
 }

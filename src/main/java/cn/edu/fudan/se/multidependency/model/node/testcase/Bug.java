@@ -43,9 +43,5 @@ public class Bug implements Node {
 	}
 	
 	public static final String LABEL_INDEX = "name";
-	@Override
-	public String indexName() {
-		return LABEL_INDEX;
-	}
 
 }

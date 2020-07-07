@@ -21,6 +21,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
+import cn.edu.fudan.se.multidependency.model.relation.StructureRelation;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Access;
@@ -152,7 +153,6 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return result;
 	}
     
-	
 	@Override
 	public Collection<Type> findExtendsType(Type type) {
 		return typeInheritsTypeRepository.findExtendsTypesByTypeId(type.getId());
@@ -167,10 +167,23 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	public Collection<Type> findInheritsFromType(Type type) {
 		return typeInheritsTypeRepository.findInheritsTypesByTypeId(type.getId());
 	}
-	
+
+	@Override
+	public List<StructureRelation> findProjectContainStructureRelations(Project project) {
+		List<StructureRelation> result = new ArrayList<>();
+		result.addAll(findProjectContainFunctionCallFunctionRelations(project));
+		result.addAll(findProjectContainInheritsRelations(project));
+		result.addAll(findProjectContainTypeCallFunctions(project));
+		return result;
+	}
+
+	private Map<Project, List<Import>> projectContainImportRelationsCache = new ConcurrentHashMap<>();
 	@Override
 	public List<Import> findProjectContainImportRelations(Project project) {
-		return importRepository.findProjectContainImportRelations(project.getId());
+		if(projectContainImportRelationsCache.get(project) == null) {
+			projectContainImportRelationsCache.put(project, importRepository.findProjectContainImportRelations(project.getId()));
+		}
+		return projectContainImportRelationsCache.get(project);
 	}
 	
 	@Override
@@ -188,29 +201,49 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return importRepository.findProjectContainFileImportVariableRelations(project.getId());
 	}
 
+	private Map<Project, List<Call>> projectContainFunctionCallFunctionRelationsCache = new ConcurrentHashMap<>();
 	@Override
-	public List<Call> findFunctionCallFunctionRelations(Project project) {
-		return callRepository.findProjectContainFunctionCallFunctionRelations(project.getId());
-	}
-
-	@Override
-	public List<Inherits> findProjectContainInheritsRelations(Project project) {
-		return typeInheritsTypeRepository.findProjectContainTypeInheritsTypeRelations(project.getId());
-	}
-
-	@Override
-	public List<Call> findProjectContainTypeCallFunctions(Project project) {
-		return callRepository.findProjectContainTypeCallFunctionRelations(project.getId());
-	}
-
-	@Override
-	public List<Cast> findProjectContainFunctionCastTypeRelations(Project project) {
-		return functionCastTypeRepository.findProjectContainFunctionCastTypeRelations(project.getId());
+	public List<Call> findProjectContainFunctionCallFunctionRelations(Project project) {
+		if(projectContainFunctionCallFunctionRelationsCache.get(project) == null) {
+			projectContainFunctionCallFunctionRelationsCache.put(project, callRepository.findProjectContainFunctionCallFunctionRelations(project.getId()));
+		}
+		return projectContainFunctionCallFunctionRelationsCache.get(project);
 	}
 	
+	private Map<Project, List<Call>> projectContainTypeCallFunctionRelationsCache = new ConcurrentHashMap<>();
+	@Override
+	public List<Call> findProjectContainTypeCallFunctions(Project project) {
+		if(projectContainTypeCallFunctionRelationsCache.get(project) == null) {
+			projectContainTypeCallFunctionRelationsCache.put(project, callRepository.findProjectContainTypeCallFunctionRelations(project.getId()));
+		}
+		return projectContainTypeCallFunctionRelationsCache.get(project);
+	}
+
+	private Map<Project, List<Inherits>> projectContainInheritsRelationsCache = new ConcurrentHashMap<>();
+	@Override
+	public List<Inherits> findProjectContainInheritsRelations(Project project) {
+		if(projectContainInheritsRelationsCache.get(project) == null) {
+			projectContainInheritsRelationsCache.put(project, typeInheritsTypeRepository.findProjectContainTypeInheritsTypeRelations(project.getId()));
+		}
+		return projectContainInheritsRelationsCache.get(project);
+	}
+
+	private Map<Project, List<Cast>> projectContainFunctionCastTypeRelationsCache = new ConcurrentHashMap<>();
+	@Override
+	public List<Cast> findProjectContainFunctionCastTypeRelations(Project project) {
+		if(projectContainFunctionCastTypeRelationsCache.get(project) == null) {
+			projectContainFunctionCastTypeRelationsCache.put(project, functionCastTypeRepository.findProjectContainFunctionCastTypeRelations(project.getId()));
+		}
+		return projectContainFunctionCastTypeRelationsCache.get(project);
+	}
+	
+	private Map<Project, List<Parameter>> projectContainParameterRelationsCache = new ConcurrentHashMap<>();
 	@Override
 	public List<Parameter> findProjectContainParameterRelations(Project project) {
-		return parameterRepository.findProjectContainParameterRelations(project.getId());
+		if(projectContainParameterRelationsCache.get(project) == null) {
+			projectContainParameterRelationsCache.put(project, parameterRepository.findProjectContainParameterRelations(project.getId()));
+		}
+		return projectContainParameterRelationsCache.get(project);
 	}
 
 	@Override
@@ -223,9 +256,13 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return parameterRepository.findProjectContainVariableTypeParameterTypeRelations(project.getId());
 	}
 
+	private Map<Project, List<Return>> projectContainFunctionReturnTypeRelationsCache = new ConcurrentHashMap<>();
 	@Override
 	public List<Return> findProjectContainFunctionReturnTypeRelations(Project project) {
-		return functionReturnTypeRepository.findProjectContainFunctionReturnTypeRelations(project.getId());
+		if(projectContainFunctionReturnTypeRelationsCache.get(project) == null) {
+			projectContainFunctionReturnTypeRelationsCache.put(project, functionReturnTypeRepository.findProjectContainFunctionReturnTypeRelations(project.getId()));
+		}
+		return projectContainFunctionReturnTypeRelationsCache.get(project);
 	}
 
 	@Override
@@ -272,7 +309,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 
 	@Override
 	public Map<Function, List<Call>> findAllFunctionCallRelationsGroupByCaller(Project project) {
-		Iterable<Call> allCalls = findFunctionCallFunctionRelations(project);
+		Iterable<Call> allCalls = findProjectContainFunctionCallFunctionRelations(project);
 		Map<Function, List<Call>> result = new HashMap<>();
 		for(Call call : allCalls) {
 			CodeNode callerNode = call.getCallerNode();
@@ -512,6 +549,5 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	public List<Call> findAllFunctionCallFunctionRelations() {
 		return callRepository.findAllFunctionCallFunctionRelations();
 	}
-
 
 }

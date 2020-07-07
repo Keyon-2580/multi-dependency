@@ -1,6 +1,6 @@
 package cn.edu.fudan.se.multidependency.model.relation;
 
-public interface RelationWithTimes extends Relation {
+public interface RelationWithTimes {
 	
 	void addTimes();
 	

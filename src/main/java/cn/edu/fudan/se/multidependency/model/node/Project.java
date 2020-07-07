@@ -59,10 +59,6 @@ public class Project implements Node {
 	}
 
 	
-	public static final String LABEL_INDEX = "projectName";
-	@Override
-	public String indexName() {
-		return LABEL_INDEX;
-	}
+	public static final String LABEL_INDEX = "name";
 
 }

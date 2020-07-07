@@ -42,9 +42,4 @@ public class Label implements Node {
 		return NodeLabelType.Label;
 	}
 
-	@Override
-	public String indexName() {
-		return null;
-	}
-
 }

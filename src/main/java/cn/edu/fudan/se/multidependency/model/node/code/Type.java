@@ -58,11 +58,7 @@ public class Type implements CodeNode {
 	}
 
 	
-	public static final String LABEL_INDEX = "typeName";
-	@Override
-	public String indexName() {
-		return LABEL_INDEX;
-	}
+	public static final String LABEL_INDEX = "identifier";
 
 	@Override
 	public String getIdentifierSuffix() {

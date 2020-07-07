@@ -52,11 +52,7 @@ public class Namespace implements CodeNode {
 		return NodeLabelType.Namespace;
 	}
 	
-	public static final String LABEL_INDEX = "namespaceName";
-	@Override
-	public String indexName() {
-		return LABEL_INDEX;
-	}
+	public static final String LABEL_INDEX = "identifier";
 
 	@Override
 	public String getIdentifierSuffix() {

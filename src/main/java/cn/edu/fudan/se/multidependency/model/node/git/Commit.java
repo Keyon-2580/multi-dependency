@@ -1,19 +1,18 @@
 package cn.edu.fudan.se.multidependency.model.node.git;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Transient;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.neo4j.ogm.annotation.Transient;
 
 @Data
 @NodeEntity
@@ -61,11 +60,7 @@ public class Commit implements Node {
 		return NodeLabelType.Commit;
 	}
 	
-	public static final String LABEL_INDEX = "commitTime";
-	@Override
-	public String indexName() {
-		return LABEL_INDEX;
-	}
+	public static final String LABEL_INDEX = "commitId";
 
 	@Override
 	public String getName() {

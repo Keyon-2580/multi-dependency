@@ -9,18 +9,19 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
+import cn.edu.fudan.se.multidependency.model.relation.StructureRelation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_THORW)
-public class Throw implements RelationWithTimes {
+public class Throw implements RelationWithTimes, StructureRelation {
 
 	private static final long serialVersionUID = -5858763297137981586L;
 	
@@ -43,12 +44,12 @@ public class Throw implements RelationWithTimes {
 	private int times = 1;
 
 	@Override
-	public Node getStartNode() {
+	public CodeNode getStartCodeNode() {
 		return function;
 	}
 
 	@Override
-	public Node getEndNode() {
+	public CodeNode getEndCodeNode() {
 		return type;
 	}
 

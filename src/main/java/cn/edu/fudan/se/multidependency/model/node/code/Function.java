@@ -120,11 +120,7 @@ public class Function implements CodeNode {
 		return parametersIdentifies;
 	}
 	
-	public static final String LABEL_INDEX = "functionName";
-	@Override
-	public String indexName() {
-		return LABEL_INDEX;
-	}
+	public static final String LABEL_INDEX = "identifier";
 
 	@Override
 	public String getIdentifierSuffix() {

@@ -47,10 +47,6 @@ public class Trace implements Node {
 	}
 	
 	public static final String LABEL_INDEX = "traceId";
-	@Override
-	public String indexName() {
-		return LABEL_INDEX;
-	}
 
 	@Override
 	public String getName() {

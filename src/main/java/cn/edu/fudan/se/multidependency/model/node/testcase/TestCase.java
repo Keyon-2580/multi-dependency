@@ -61,11 +61,6 @@ public class TestCase implements Node {
 		return NodeLabelType.TestCase;
 	}
 	
-	public static final String LABEL_INDEX = "testCaseName";
-	@Override
-	public String indexName() {
-		return LABEL_INDEX;
-	}
-
+	public static final String LABEL_INDEX = "name";
 
 }

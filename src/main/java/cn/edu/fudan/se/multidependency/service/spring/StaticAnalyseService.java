@@ -9,6 +9,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
+import cn.edu.fudan.se.multidependency.model.relation.StructureRelation;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Access;
@@ -28,64 +29,65 @@ public interface StaticAnalyseService {
 	
 	List<Project> queryAllProjectsByPage(int page, int size, String... sortByProperties);
 	
-	public Iterable<Project> allProjects();
+	Iterable<Project> allProjects();
 	
-	public Collection<Type> findExtendsType(Type type);
+	Collection<Type> findExtendsType(Type type);
 	
 	/**
 	 * 找出type继承的Type
 	 * @param type
 	 * @return
 	 */
-	public Collection<Type> findInheritsType(Type type);
+	Collection<Type> findInheritsType(Type type);
 	
 	/**
 	 * 找出哪些Type继承该type
 	 * @param type
 	 * @return
 	 */
-	public Collection<Type> findInheritsFromType(Type type);
+	Collection<Type> findInheritsFromType(Type type);
 	
-	public List<Call> findAllFunctionCallFunctionRelations();
+	List<Call> findAllFunctionCallFunctionRelations();
 	
-	public Map<Function, List<Call>> findAllFunctionCallRelationsGroupByCaller();
-	public Map<Function, List<Call>> findAllFunctionCallRelationsGroupByCaller(Project project);
-	public Map<Function, List<Access>> findAllFunctionAccessRelationsGroupByCaller(Project project);
+	Map<Function, List<Call>> findAllFunctionCallRelationsGroupByCaller();
+	Map<Function, List<Call>> findAllFunctionCallRelationsGroupByCaller(Project project);
+	Map<Function, List<Access>> findAllFunctionAccessRelationsGroupByCaller(Project project);
 
-	public List<Inherits> findProjectContainInheritsRelations(Project project);
-	public List<Include> findProjectContainFileIncludeFileRelations(Project project);
-	public List<Import> findProjectContainImportRelations(Project project);
-	public List<Import> findProjectContainFileImportTypeRelations(Project project);
-	public List<Import> findProjectContainFileImportFunctionRelations(Project project);
-	public List<Import> findProjectContainFileImportVariableRelations(Project project);
-	public List<Call> findFunctionCallFunctionRelations(Project project);
-	public List<Call> findProjectContainTypeCallFunctions(Project project);
-	public List<Cast> findProjectContainFunctionCastTypeRelations(Project project);
-	public List<Return> findProjectContainFunctionReturnTypeRelations(Project project);
-	public List<Throw> findProjectContainFunctionThrowTypeRelations(Project project);
-	public List<Annotation> findProjectContainNodeAnnotationTypeRelations(Project project);
-	public List<VariableType> findProjectContainVariableIsTypeRelations(Project project);
-	public List<Parameter> findProjectContainParameterRelations(Project project);
-	public List<Parameter> findProjectContainFunctionParameterTypeRelations(Project project);
-	public List<Parameter> findProjectContainVariableTypeParameterTypeRelations(Project project);
-	public List<Access> findProjectContainFunctionAccessVariableRelations(Project project);
+	List<StructureRelation> findProjectContainStructureRelations(Project project);
+	List<Inherits> findProjectContainInheritsRelations(Project project);
+	List<Include> findProjectContainFileIncludeFileRelations(Project project);
+	List<Import> findProjectContainImportRelations(Project project);
+	List<Import> findProjectContainFileImportTypeRelations(Project project);
+	List<Import> findProjectContainFileImportFunctionRelations(Project project);
+	List<Import> findProjectContainFileImportVariableRelations(Project project);
+	List<Call> findProjectContainFunctionCallFunctionRelations(Project project);
+	List<Call> findProjectContainTypeCallFunctions(Project project);
+	List<Cast> findProjectContainFunctionCastTypeRelations(Project project);
+	List<Return> findProjectContainFunctionReturnTypeRelations(Project project);
+	List<Throw> findProjectContainFunctionThrowTypeRelations(Project project);
+	List<Annotation> findProjectContainNodeAnnotationTypeRelations(Project project);
+	List<VariableType> findProjectContainVariableIsTypeRelations(Project project);
+	List<Parameter> findProjectContainParameterRelations(Project project);
+	List<Parameter> findProjectContainFunctionParameterTypeRelations(Project project);
+	List<Parameter> findProjectContainVariableTypeParameterTypeRelations(Project project);
+	List<Access> findProjectContainFunctionAccessVariableRelations(Project project);
 
-	public boolean isSubType(Type subType, Type superType);
+	boolean isSubType(Type subType, Type superType);
 	
 	/**
 	 * 找出所有函数调用第三方库数据
 	 * @return
 	 */
-	public Map<Function, List<FunctionCallLibraryAPI>> findAllFunctionCallLibraryAPIs();
+	Map<Function, List<FunctionCallLibraryAPI>> findAllFunctionCallLibraryAPIs();
 	
 	/**
 	 * 找出Project调用了哪些三方
 	 * @param project
 	 * @return
 	 */
-	public CallLibrary<Project> findProjectCallLibraries(Project project);
+	CallLibrary<Project> findProjectCallLibraries(Project project);
 	
-	public Iterable<Library> findAllLibraries();
+	Iterable<Library> findAllLibraries();
 
 	long countOfAllProjects();
 	

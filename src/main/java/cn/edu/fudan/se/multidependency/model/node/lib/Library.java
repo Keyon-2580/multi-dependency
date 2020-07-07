@@ -64,9 +64,4 @@ public class Library implements Node {
 		return NodeLabelType.Library;
 	}
 
-	@Override
-	public String indexName() {
-		return null;
-	}
-
 }

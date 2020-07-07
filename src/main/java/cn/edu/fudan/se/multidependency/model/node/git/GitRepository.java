@@ -46,8 +46,4 @@ public class GitRepository implements Node {
         return NodeLabelType.GitRepository;
     }
 
-    @Override
-    public String indexName() {
-        return null;
-    }
 }

@@ -57,11 +57,7 @@ public class Feature implements Node {
 		return NodeLabelType.Feature;
 	}
 	
-	public static final String LABEL_INDEX = "featureName";
-	@Override
-	public String indexName() {
-		return LABEL_INDEX;
-	}
+	public static final String LABEL_INDEX = "name";
 
 
 }

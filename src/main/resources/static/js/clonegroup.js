@@ -5,7 +5,7 @@ function copyToClip(content) {
     aux.select();
     document.execCommand("copy"); 
     document.body.removeChild(aux);
-    alert("复制成功");
+//    alert("复制成功");
 }
 var clone = function(cytoscapeutil) {
 	var param = {

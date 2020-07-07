@@ -62,22 +62,17 @@ public class CloneGroup implements Node {
 		return NodeLabelType.CloneGroup;
 	}
 
-	@Override
-	public String indexName() {
-		return null;
-	}
-	
 	@Transient
 	private Set<CodeNode> nodes = new HashSet<>();
 
 	@Transient
 	private Set<Clone> relations = new HashSet<>();
 	
-	public void addNode(CodeNode node) {
+	public synchronized void addNode(CodeNode node) {
 		this.nodes.add(node);
 	}
 	
-	public void addRelation(Clone relation) {
+	public synchronized void addRelation(Clone relation) {
 		this.relations.add(relation);
 	}
 	

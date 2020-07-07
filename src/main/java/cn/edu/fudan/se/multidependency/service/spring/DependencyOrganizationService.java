@@ -147,7 +147,7 @@ public class DependencyOrganizationService {
 			}
 		}
 		
-		List<Call> functionCallFunctions = staticAnalyseService.findFunctionCallFunctionRelations(project);
+		List<Call> functionCallFunctions = staticAnalyseService.findProjectContainFunctionCallFunctionRelations(project);
 		for(Call call : functionCallFunctions) {
 			edges.add(new CytoscapeEdge(call.getCallerNode(), call.getCallFunction(), "FunctionCallFunction", "call"));
 		}

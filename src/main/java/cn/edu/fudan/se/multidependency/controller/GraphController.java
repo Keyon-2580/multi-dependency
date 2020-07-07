@@ -5,16 +5,19 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
+import cn.edu.fudan.se.multidependency.service.spring.GraphService;
 import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneValueServiceImpl;
@@ -40,6 +43,9 @@ public class GraphController {
 	@Autowired
 	private ContainRelationService containRelationService;
 	
+	@Autowired
+	private GraphService graphService;
+	
 	@RequestMapping("/file")
 	@ResponseBody
 	public JSONObject fileClones() {
@@ -51,6 +57,87 @@ public class GraphController {
 		fileGraph.setContainRelationService(containRelationService);
 //		return fileGraph.matrix();
 		return fileGraph.matrixForClone();
+	}
+	
+	@RequestMapping("/file/cycle/{projectId}")
+	@ResponseBody
+	public JSONObject fileCycle(@PathVariable("projectId") long projectId) {
+		JSONObject result = new JSONObject();
+		try {
+			Project project = nodeService.queryProject(projectId);
+			if(project == null) {
+				throw new Exception();
+			}
+			result.put("data", graphService.cycleFiles(project));
+		} catch (Exception e) {
+			
+		}
+		return result;
+	}
+	
+	@RequestMapping("/package/cycle/{projectId}")
+	@ResponseBody
+	public JSONObject packageCycle(@PathVariable("projectId") long projectId) {
+		JSONObject result = new JSONObject();
+		try {
+			Project project = nodeService.queryProject(projectId);
+			if(project == null) {
+				throw new Exception();
+			}
+			result.put("data", graphService.cyclePackages(project));
+		} catch (Exception e) {
+			
+		}
+		return result;
+	}
+	@RequestMapping("/package/cytoscape/{projectId}")
+	@ResponseBody
+	public JSONObject packageStructureCytoscapeGraph(@PathVariable("projectId") long projectId) {
+		JSONObject result = new JSONObject();
+		try {
+			Project project = nodeService.queryProject(projectId);
+			if(project == null) {
+				throw new Exception();
+			}
+			System.out.println(project);
+			result.put("data", graphService.packageToCytoscape(project));
+		} catch (Exception e) {
+			
+		}
+		return result;
+	}
+	@RequestMapping("/package/clone/{projectId}")
+	@ResponseBody
+	public JSONObject packageCloneGraph(@PathVariable("projectId") long projectId) {
+		JSONObject result = new JSONObject();
+		try {
+			Project project = nodeService.queryProject(projectId);
+			if(project == null) {
+				throw new Exception();
+			}
+			System.out.println(project);
+			result.put("matrix", graphService.cloneMatrix(project));
+		} catch (Exception e) {
+			
+		}
+		return result;
+	}
+	@RequestMapping("/package/structure/{projectId}")
+	@ResponseBody
+	public JSONObject packageStructureGraph(@PathVariable("projectId") long projectId) {
+		JSONObject result = new JSONObject();
+		try {
+			Project project = nodeService.queryProject(projectId);
+			if(project == null) {
+				throw new Exception();
+			}
+			System.out.println(project);
+			result.put("data", graphService.staticGraphDependency(project));
+			result.put("matrix", graphService.strcutureMatrix(project));
+		} catch (Exception e) {
+			
+		}
+		return result;
 	}
 	
 	@RequestMapping("/package")

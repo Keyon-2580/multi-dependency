@@ -1,11 +1,15 @@
 package cn.edu.fudan.se.multidependency.model.node;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Transient;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -52,10 +56,12 @@ public class Package implements Node {
 		return NodeLabelType.Package;
 	}
 	
-	public static final String LABEL_INDEX = "packageName";
-	@Override
-	public String indexName() {
-		return LABEL_INDEX;
+	@Transient
+	private Set<ProjectFile> files = new HashSet<>();
+	public synchronized void addFiles(Collection<ProjectFile> files) {
+		this.files.addAll(files);
 	}
+	
+	public static final String LABEL_INDEX = "directoryPath";
 
 }

@@ -5,12 +5,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
@@ -46,38 +47,62 @@ public class CloneValueServiceImpl implements CloneValueService {
     @Autowired
     BasicCloneQueryService basicCloneQueryService;
     
+
+	@Override
+	public Collection<CloneValue<Package>> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones,
+			boolean removeSameNode) {
+		Collection<CloneValue<Package>> cache = removeSameNodeToCloneValuePackages.get(removeSameNode);
+		if(cache == null) {
+			queryPackageCloneFromFileClone(fileClones, removeSameNode);
+			cache = removeSameNodeToCloneValuePackages.get(removeSameNode);
+		}
+		List<CloneValue<Package>> result = new ArrayList<>(cache);
+		result.sort((v1, v2) -> {
+			return v2.getChildren().size() - v1.getChildren().size();
+		});
+		return result;
+	}
+    
+    private Map<Boolean, Collection<CloneValue<Package>>> removeSameNodeToCloneValuePackages = new ConcurrentHashMap<>();
+    private Map<Boolean, Map<Package, Map<Package, CloneValue<Package>>>> queryPackageCloneFromFileCloneCache = new ConcurrentHashMap<>();
 	public Map<Package, Map<Package, CloneValue<Package>>> queryPackageCloneFromFileClone(Collection<Clone> fileClones,
 			boolean removeSameNode) {
-		List<CloneValue<Package>> result = new ArrayList<>();
-		Map<Package, Map<Package, CloneValue<Package>>> pckToPackageClones = new HashMap<>();
-		for(Clone clone : fileClones) {
-			CodeNode node1 = clone.getCodeNode1();
-			CodeNode node2 = clone.getCodeNode2();
-			if(!(node1 instanceof ProjectFile) || !(node2 instanceof ProjectFile)) {
-				continue;
-			}
-			ProjectFile file1 = (ProjectFile) node1;
-			ProjectFile file2 = (ProjectFile) node2;
-			if(file1.equals(file2)) {
-				continue;
-			}
-			Package pck1 = containRelationService.findFileBelongToPackage(file1);
-			Package pck2 = containRelationService.findFileBelongToPackage(file2);
-			if(removeSameNode && pck1.equals(pck2)) {
-				continue;
-			}
-			CloneValue<Package> cloneValue = hasFileCloneInPackage(pckToPackageClones, pck1, pck2);
-			if(cloneValue == null) {
-				cloneValue = new CloneValue<Package>();
-				cloneValue.setNode1(pck1);
-				cloneValue.setNode2(pck2);
-				result.add(cloneValue);
-			}
-			cloneValue.addChild(clone);
+		Map<Package, Map<Package, CloneValue<Package>>> pckToPackageClones = queryPackageCloneFromFileCloneCache.get(removeSameNode);
+		if(pckToPackageClones == null) {
+			Collection<CloneValue<Package>> cache = new ArrayList<>();
+			pckToPackageClones = new HashMap<>();
 			
-			Map<Package, CloneValue<Package>> pck1ToClones = pckToPackageClones.getOrDefault(pck1, new HashMap<>());
-			pck1ToClones.put(pck2, cloneValue);
-			pckToPackageClones.put(pck1, pck1ToClones);
+			for(Clone clone : fileClones) {
+				CodeNode node1 = clone.getCodeNode1();
+				CodeNode node2 = clone.getCodeNode2();
+				if(!(node1 instanceof ProjectFile) || !(node2 instanceof ProjectFile)) {
+					continue;
+				}
+				ProjectFile file1 = (ProjectFile) node1;
+				ProjectFile file2 = (ProjectFile) node2;
+				if(file1.equals(file2)) {
+					continue;
+				}
+				Package pck1 = containRelationService.findFileBelongToPackage(file1);
+				Package pck2 = containRelationService.findFileBelongToPackage(file2);
+				if(removeSameNode && pck1.equals(pck2)) {
+					continue;
+				}
+				CloneValue<Package> cloneValue = hasFileCloneInPackage(pckToPackageClones, pck1, pck2);
+				if(cloneValue == null) {
+					cloneValue = new CloneValue<Package>();
+					cloneValue.setNode1(pck1);
+					cloneValue.setNode2(pck2);
+					cache.add(cloneValue);
+				}
+				cloneValue.addChild(clone);
+				
+				Map<Package, CloneValue<Package>> pck1ToClones = pckToPackageClones.getOrDefault(pck1, new HashMap<>());
+				pck1ToClones.put(pck2, cloneValue);
+				pckToPackageClones.put(pck1, pck1ToClones);
+			}
+			removeSameNodeToCloneValuePackages.put(removeSameNode, cache);
+			queryPackageCloneFromFileCloneCache.put(removeSameNode, pckToPackageClones);
 		}
 		return pckToPackageClones;
 	}

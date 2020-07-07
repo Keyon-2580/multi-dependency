@@ -9,18 +9,18 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
+import cn.edu.fudan.se.multidependency.model.relation.StructureRelation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_ANNOTATION)
-public class Annotation implements RelationWithTimes {
+public class Annotation implements RelationWithTimes, StructureRelation {
 
 	private static final long serialVersionUID = 8248026322068428052L;
 	
@@ -43,12 +43,12 @@ public class Annotation implements RelationWithTimes {
 	private Type annotationType;
 
 	@Override
-	public Node getStartNode() {
+	public CodeNode getStartCodeNode() {
 		return startNode;
 	}
 
 	@Override
-	public Node getEndNode() {
+	public CodeNode getEndCodeNode() {
 		return annotationType;
 	}
 

@@ -64,10 +64,6 @@ public class ProjectFile implements CodeNode {
 	}
 
 	public static final String LABEL_INDEX = "path";
-	@Override
-	public String indexName() {
-		return LABEL_INDEX;
-	}
 
 	@Override
 	public String getIdentifier() {

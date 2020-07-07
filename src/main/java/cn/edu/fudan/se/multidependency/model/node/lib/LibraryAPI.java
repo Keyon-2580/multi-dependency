@@ -42,9 +42,4 @@ public class LibraryAPI implements Node {
 		return NodeLabelType.LibraryAPI;
 	}
 
-	@Override
-	public String indexName() {
-		return null;
-	}
-
 }
