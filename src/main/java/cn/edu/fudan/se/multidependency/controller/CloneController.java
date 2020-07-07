@@ -1,10 +1,15 @@
 package cn.edu.fudan.se.multidependency.controller;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -47,4 +52,17 @@ public class CloneController {
 		return cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), true, pck1, pck2);
 	}
 	
+	@PostMapping("/package/multiple")
+	@ResponseBody
+	public Collection<CloneValue<Package>> cloneInMultiplePackages(@RequestBody Map<String, Object> params) {
+		List<Long> pckIds = (List<Long>) params.getOrDefault("ids", new ArrayList<>());
+		List<Package> pcks = new ArrayList<>();
+		for(Long pckId : pckIds) {
+			Package pck = nodeService.queryPackage(pckId);
+			if(pck != null) {
+				pcks.add(pck);
+			}
+		}
+		return cloneValueService.queryPackageCloneFromFileClone(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), true, pcks);
+	}
 }

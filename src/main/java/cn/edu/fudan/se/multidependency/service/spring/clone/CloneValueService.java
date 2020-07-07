@@ -1,7 +1,9 @@
 package cn.edu.fudan.se.multidependency.service.spring.clone;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
@@ -46,6 +48,28 @@ public interface CloneValueService {
 	
 	Collection<CloneValue<Package>> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones, boolean removeSameNode);
 	
+	default Collection<CloneValue<Package>> queryPackageCloneFromFileClone(Collection<Clone> fileClones, boolean removeSameNode, List<Package> pcks) {
+		if(pcks == null || pcks.isEmpty()) {
+			return new ArrayList<>();
+		}
+		List<CloneValue<Package>> result = new ArrayList<>();
+		for(int i = 0; i < pcks.size(); i++) {
+			for(int j = i + 1; j < pcks.size(); j++) {
+				result.add(queryPackageCloneFromFileCloneSort(fileClones, removeSameNode, pcks.get(i), pcks.get(j)));
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 两个包之间的文件级克隆的聚合，两个包之间不分先后顺序
+	 * @param fileClones
+	 * @param removeSameNode
+	 * @param pck1
+	 * @param pck2
+	 * @return
+	 */
 	default CloneValue<Package> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones, boolean removeSameNode, Package pck1, Package pck2) {
 		Map<Package, Map<Package, CloneValue<Package>>> packageClones = queryPackageCloneFromFileClone(fileClones, removeSameNode);
 		Map<Package, CloneValue<Package>> map = packageClones.getOrDefault(pck1, new HashMap<>());
