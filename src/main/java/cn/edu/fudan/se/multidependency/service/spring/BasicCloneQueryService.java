@@ -28,18 +28,4 @@ public interface BasicCloneQueryService {
 	
 	CloneGroup queryCloneGroup(String name);
 	
-	/**
-	 * 查询一个克隆组包含的所有方法克隆关系
-	 * @param group
-	 * @return
-	 */
-	/*Collection<Clone> queryGroupContainFunctionClones(CloneGroup group);*/
-	
-	/**
-	 * 查询一个克隆组包含的所有文件克隆关系
-	 * @param group
-	 * @return
-	 */
-	/*Collection<Clone> queryGroupContainFileClones(CloneGroup group);*/
-	
 }

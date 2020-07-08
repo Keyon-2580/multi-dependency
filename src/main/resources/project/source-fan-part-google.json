@@ -42,6 +42,12 @@
 		"name_path"  : "src/main/resources/clone/file/source-part-fan-google/result/MeasureIndex.csv",
 		"result_path": "src/main/resources/clone/file/source-part-fan-google/similarity.csv",
 		"group_path" : "src/main/resources/clone/file/source-part-fan-google/result/type123_method_group_result.csv"
+	},{
+		"language"   : "java",
+		"granularity": "function",
+		"name_path"  : "src/main/resources/clone/function/source-part-fan-google/result/MeasureIndex.csv",
+		"result_path": "src/main/resources/clone/function/source-part-fan-google/similarity.csv",
+		"group_path" : "src/main/resources/clone/function/source-part-fan-google/result/type123_method_group_result.csv"
 	}
 	]
 }

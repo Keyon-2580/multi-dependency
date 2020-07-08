@@ -151,7 +151,7 @@ public class CloneInserterForMethod extends CloneInserter {
 			addRelation(clone);
 			sizeOfClones++;
 		}
-		LOGGER.info("插入克隆数：" + sizeOfClones);
+		LOGGER.info("插入方法级克隆数：" + sizeOfClones);
 		long groupCount = cloneGroupNumber;
 		for(Group group : this.groups) {
 			CloneGroup cloneGroup = new CloneGroup();

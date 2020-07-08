@@ -44,7 +44,6 @@ public class APICoverageService {
 		Iterable<Span> relatedSpans = featureOrganizationService.relatedSpan(testCases);
 		int i = 0;
 		for(Span span : relatedSpans) {
-			System.out.println(i++);
 			MicroService microService = featureOrganizationService.spanBelongToMicroservice(span);
 			assert(microService != null);
 			TestCaseCoverageMicroServiceAPIs coverage = result.get(microService);
@@ -52,7 +51,6 @@ public class APICoverageService {
 			
 			SpanInstanceOfRestfulAPI instanceOf = msService.findSpanBelongToAPI(span);
 			if(instanceOf == null) {
-				System.out.println("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee " + span.getApiFunctionName() + " " + span.getSpanId());
 				continue;
 			}
 			RestfulAPI api = instanceOf.getApi();

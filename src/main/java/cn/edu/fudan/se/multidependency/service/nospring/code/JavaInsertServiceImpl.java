@@ -141,7 +141,6 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			type.setName(typeEntityName.get(entityId.intValue()));
 			type.setAliasName(typeEntityName.get(entityId.intValue()));
 			processIdentifier(type);
-//			this.getNodes().addCodeNode(type);
 			while(!(parentEntity instanceof FileEntity)) {
 				// 找出方法所在的文件
 				parentEntity = parentEntity.getParent();
@@ -210,7 +209,6 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			Contain contain = new Contain(parentNode, node);
 			addRelation(contain);
 			processIdentifier((Variable) node);
-//			this.getNodes().addCodeNode((Variable) node);
 		});
 	}
 	

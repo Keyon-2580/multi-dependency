@@ -8,10 +8,6 @@ import cn.edu.fudan.se.multidependency.model.relation.Relations;
 
 public interface InserterForNeo4j {
 
-//	public Long generateEntityId();
-//	
-//	public void setCurrentEntityId(Long entityId);
-	
 	public void insertToNeo4jDataBase() throws Exception ;
 
 	public void setDatabasePath(String databasePath);
