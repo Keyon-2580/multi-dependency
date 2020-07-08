@@ -3,8 +3,10 @@ package cn.edu.fudan.se.multidependency.service.spring.data;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import lombok.Data;
 
@@ -29,10 +31,25 @@ public class CloneValue<N extends Node> implements Serializable {
 	}
 	
 	// 两个克隆节点内部的克隆对
-	private Collection<Clone> children = new ArrayList<>();
+	private List<Clone> children = new ArrayList<>();
 	
 	public int sizeOfChildren() {
 		return children.size();
+	}
+	
+	public void sortChildren() {
+		children.sort((clone1, clone2) -> {
+			CodeNode node11 = clone1.getCodeNode1();
+			CodeNode node21 = clone2.getCodeNode1();
+			int sort = node11.getIdentifier().compareTo(node21.getIdentifier());
+			if(sort == 0) {
+				CodeNode node12 = clone1.getCodeNode2();
+				CodeNode node22 = clone2.getCodeNode2();
+				return node12.getIdentifier().compareTo(node22.getIdentifier());
+			} else {
+				return sort;
+			}
+		});
 	}
 	
 	public static interface CloneValueCalculator {

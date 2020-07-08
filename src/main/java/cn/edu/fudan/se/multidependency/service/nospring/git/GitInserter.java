@@ -105,11 +105,12 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         LOGGER.info("commit 数量：" + commits.size());
 //        Collections.reverse(commits);
         for (RevCommit revCommit : commits) {
+        	
             //添加commit节点
             Commit commit = new Commit(generateEntityId(), revCommit.getName(), revCommit.getShortMessage(),
                     revCommit.getFullMessage(), revCommit.getAuthorIdent().getWhen().toString());
             addNode(commit, null);
-
+            
             //添加developer节点和developer到commit的关系
             Developer developer = this.getNodes().findDeveloperByName(revCommit.getAuthorIdent().getName());
             if (developer == null) {

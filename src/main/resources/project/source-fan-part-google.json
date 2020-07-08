@@ -1,0 +1,47 @@
+{
+	"architectures": {},
+	"projects": [{
+		"path": "D:\\sourceCode\\source-java-part-google\\google__fdse__auto",
+		"includeDirs": [],
+		"microserviceName": "google__fdse__auto",
+		"autoInclude": true,
+		"serviceGroupName": "source",
+		"project": "google__fdse__auto",
+		"language": "java",
+		"isMicroservice": true
+	}, {
+		"path": "D:\\sourceCode\\source-java-part-google\\google__fdse__guava",
+		"includeDirs": [],
+		"microserviceName": "google__fdse__guava",
+		"autoInclude": true,
+		"serviceGroupName": "source",
+		"project": "google__fdse__guava",
+		"language": "java",
+		"isMicroservice": true
+	}, {
+		"path": "D:\\sourceCode\\source-java-part-google\\google__fdse__guice",
+		"includeDirs": [],
+		"microserviceName": "google__fdse__guice",
+		"autoInclude": true,
+		"serviceGroupName": "source",
+		"project": "google__fdse__guice",
+		"language": "java",
+		"isMicroservice": true
+	}],
+	"dynamics": {
+	},
+	"gits": [{
+		"path": "D:\\sourceCode\\source-java-part-google\\google__fdse__guava",
+		"commit_id_from": "10ccb819ae4946fe6143590e3fedaea60eaf223f",
+		"commit_id_to": "5f2fbf27b2f8f7c72adfe6b366c7aaec2e36b81b"
+	}],
+	"libs": [],
+	"clones": [{
+		"language"   : "java",
+		"granularity": "file",
+		"name_path"  : "src/main/resources/clone/file/source-part-fan-google/result/MeasureIndex.csv",
+		"result_path": "src/main/resources/clone/file/source-part-fan-google/similarity.csv",
+		"group_path" : "src/main/resources/clone/file/source-part-fan-google/result/type123_method_group_result.csv"
+	}
+	]
+}

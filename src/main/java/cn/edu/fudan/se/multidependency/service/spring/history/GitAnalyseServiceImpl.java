@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.spring.history;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,8 +20,10 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
+import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.DeveloperSubmitCommitRepository;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
@@ -38,6 +42,9 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 
     @Autowired
     private ContainRelationService containRelationService;
+    
+    @Autowired
+    private CoChangeRepository cochangeRepository;
 
     Iterable<Commit> allCommitsCache = null;
 
@@ -46,8 +53,6 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
     Iterable<DeveloperUpdateNode<MicroService>> cntOfDevUpdMsListCache = null;
 
     Map<ProjectFile, Integer> cntOfFileBeUpdtdCache = null;
-
-    Map<ProjectFile, Map<ProjectFile, Integer>> cntOfFileCoChangeCache = null;
 
     @Override
     public Iterable<Commit> findAllCommits() {
@@ -150,53 +155,50 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
         return result;
     }
 
-    @Override
-    public Map<ProjectFile, Map<ProjectFile, Integer>> calCntOfFileCoChange() {
-        if (cntOfFileCoChangeCache != null) {
-            return cntOfFileCoChangeCache;
-        }
-        Map<ProjectFile, Map<ProjectFile, Integer>> result = new HashMap<>();
-        for (Commit commit : findAllCommits()) {
-            List<ProjectFile> files = commitUpdateFileRepository.findUpdatedFilesByCommitId(commit.getId());
-            int num = files.size();
-            for (int i = 0; i < num; i++) {
-                ProjectFile from = files.get(i);
-                if (!result.containsKey(from)) {
-                    result.put(from, new HashMap<>());
-                }
-                Map<ProjectFile, Integer> m = result.get(from);
-                for (int j = i + 1; j < num; j++) {
-                    ProjectFile to = files.get(j);
-                    m.put(to, m.getOrDefault(to, 0) + 1);
-                }
-            }
-        }
-        cntOfFileCoChangeCache = result;
-        return result;
-    }
+    private Map<ProjectFile, Map<ProjectFile, CoChange>> cntOfFileCoChangeCache = new ConcurrentHashMap<>();
+    private List<CoChange> allCoChangeCache = null;
+	@Override
+	public synchronized Collection<CoChange> calCntOfFileCoChange() {
+		if(allCoChangeCache != null) {
+			return allCoChangeCache;
+		}
+		allCoChangeCache = cochangeRepository.findGreaterThanCountCoChanges(1);
+		allCoChangeCache.sort((c1, c2) -> {
+			return c2.getTimes() - c1.getTimes();
+		});
+		for(CoChange cochange : allCoChangeCache) {
+			ProjectFile file1 = cochange.getFile1();
+			ProjectFile file2 = cochange.getFile2();
+			Map<ProjectFile, CoChange> ccs = cntOfFileCoChangeCache.getOrDefault(file1, new HashMap<>());
+			ccs.put(file2, cochange);
+			cntOfFileCoChangeCache.put(file1, ccs);
+		}
+		return allCoChangeCache;
+	}
 
-    @Override
-    public Map<ProjectFile, Map<ProjectFile, Integer>> getTopKFileCoChange(int k) {
-        if (cntOfFileCoChangeCache == null) {
-            cntOfFileCoChangeCache = calCntOfFileCoChange();
-        }
-        Queue<ProjectFile[]> filePairs = new PriorityQueue<>(
-                Comparator.comparingInt(o -> cntOfFileCoChangeCache.get(o[0]).get(o[1])));
-        for (ProjectFile from : cntOfFileCoChangeCache.keySet()) {
-            for (ProjectFile to : cntOfFileCoChangeCache.get(from).keySet()) {
-                filePairs.offer(new ProjectFile[]{from, to});
-                if (filePairs.size() > k) filePairs.poll();
-            }
-        }
-        Map<ProjectFile, Map<ProjectFile, Integer>> result = new HashMap<>();
-        for (ProjectFile[] filePair : filePairs) {
-            ProjectFile from = filePair[0];
-            ProjectFile to = filePair[1];
-            if (!result.containsKey(from)) {
-                result.put(from, new HashMap<>());
-            }
-            result.get(from).put(to, cntOfFileCoChangeCache.get(from).get(to));
-        }
-        return result;
-    }
+	@Override
+	public Collection<CoChange> getTopKFileCoChange(int k) {
+		calCntOfFileCoChange();
+		return allCoChangeCache.subList(0, k);
+	}
+
+	@Override
+	public CoChange findCoChangeBetweenTwoFiles(ProjectFile file1, ProjectFile file2) {
+		Map<ProjectFile, CoChange> ccs = cntOfFileCoChangeCache.getOrDefault(file1, new HashMap<>());
+		CoChange result = ccs.get(file2);
+		if(result == null) {
+			ccs = cntOfFileCoChangeCache.getOrDefault(file2, new HashMap<>());
+			result = ccs.get(file1);
+		}
+		if(result == null) {
+			result = cochangeRepository.findCoChangesBetweenTwoFiles(file1.getId(), file2.getId());
+			if(result != null) {
+				ccs = cntOfFileCoChangeCache.getOrDefault(file1, new HashMap<>());
+				ccs.put(file2, result);
+				cntOfFileCoChangeCache.put(file1, ccs);
+			}
+		}
+		return result;
+	}
+    
 }

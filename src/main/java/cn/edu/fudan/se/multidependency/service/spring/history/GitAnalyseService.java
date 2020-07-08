@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.spring.history;
 
+import java.util.Collection;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
@@ -7,6 +8,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
+import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
 
 public interface GitAnalyseService {
@@ -21,8 +23,10 @@ public interface GitAnalyseService {
 	
 	Map<ProjectFile, Integer> getTopKFileBeUpd(int k);
 	
-	Map<ProjectFile, Map<ProjectFile, Integer>> calCntOfFileCoChange();
+	Collection<CoChange> calCntOfFileCoChange();
 	
-	Map<ProjectFile, Map<ProjectFile, Integer>> getTopKFileCoChange(int k);
+	Collection<CoChange> getTopKFileCoChange(int k);
+	
+	CoChange findCoChangeBetweenTwoFiles(ProjectFile file1, ProjectFile file2);
 	
 }
