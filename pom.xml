@@ -5,12 +5,12 @@
 
 	<groupId>cn.edu.fudan.se</groupId>
 	<artifactId>multi-dependency</artifactId>
-	<version>1.2.6</version>
+	<version>1.2.7</version>
 	<packaging>jar</packaging>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.4.RELEASE</version>
+		<version>2.2.8.RELEASE</version>
 	</parent>
 	<name>multi-dependency</name>
 	<url>http://maven.apache.org</url>
@@ -18,8 +18,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- <neo4j-ogm.version>3.2.4</neo4j-ogm.version> -->
-		<neo4j.version>3.5.14</neo4j.version>
-		<maven-jar-plugin.version>3.0.0</maven-jar-plugin.version>
+		<neo4j.version>3.5.19</neo4j.version>
+		<maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
 	</properties>
 
 	<dependencies>
