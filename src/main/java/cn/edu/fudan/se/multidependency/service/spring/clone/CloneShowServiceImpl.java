@@ -307,4 +307,50 @@ public class CloneShowServiceImpl implements CloneShowService {
 		result.put("edges", CytoscapeUtil.toEdges(edges));
 		return result;
 	}
+
+	@Override
+	public JSONArray graphFileClones(Collection<Clone> clones) {
+		Map<CodeNode, Map<CodeNode, Clone>> values = new HashMap<>();
+		Set<CodeNode> nodes = new HashSet<>();
+		for(Clone clone : clones) {
+			CodeNode node1 = clone.getCodeNode1();
+			CodeNode node2 = clone.getCodeNode2();
+			Map<CodeNode, Clone> temp = values.get(node1);
+			if(temp == null) {
+				temp = values.get(node2);
+				if(temp == null) {
+					temp = new HashMap<>();
+				}
+				temp.put(node1, clone);
+				values.put(node2, temp);
+			} else {
+				temp.put(node2, clone);
+				values.put(node1, temp);
+			}
+			nodes.add(node1);
+			nodes.add(node2);
+		}
+		JSONArray result = new JSONArray();
+		for(Map.Entry<CodeNode, Map<CodeNode, Clone>> entryNode1 : values.entrySet()) {
+			CodeNode node1 = entryNode1.getKey();
+			JSONObject nodeJSON = new JSONObject();
+			nodeJSON.put("name", node1.getIdentifier());
+			JSONArray imports = new JSONArray();
+			for(Map.Entry<CodeNode, Clone> entryNode2 : entryNode1.getValue().entrySet()) {
+				CodeNode node2 = entryNode2.getKey();
+				imports.add(node2.getIdentifier());
+			}
+			nodeJSON.put("imports", imports);
+			result.add(nodeJSON);
+			nodes.remove(node1);
+		}
+		for(CodeNode node : nodes) {
+			JSONObject nodeJSON = new JSONObject();
+			nodeJSON.put("name", node.getIdentifier());
+			JSONArray imports = new JSONArray();
+			nodeJSON.put("imports", imports);
+			result.add(nodeJSON);
+		}
+		return result;
+	}
 }

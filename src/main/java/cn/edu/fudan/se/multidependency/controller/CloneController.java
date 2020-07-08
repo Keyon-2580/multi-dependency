@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.spring.NodeService;
+import cn.edu.fudan.se.multidependency.service.spring.clone.CloneShowService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneValueService;
 import cn.edu.fudan.se.multidependency.service.spring.data.CloneValue;
 import cn.edu.fudan.se.multidependency.service.spring.data.PackageCloneValueWithFileCoChange;
@@ -33,6 +35,9 @@ public class CloneController {
 	
 	@Autowired
 	private BasicCloneQueryService basicCloneQueryService;
+	
+	@Autowired
+	private CloneShowService cloneShowService;
 	
 	@Autowired
 	private NodeService nodeService;
@@ -59,6 +64,28 @@ public class CloneController {
 			return null;
 		}
 		return cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), true, pck1, pck2);
+	}
+	
+	/**
+	 * 两个包之间的文件依赖
+	 * @param package1Id
+	 * @param package2Id
+	 * @return
+	 */
+	@GetMapping("/package/double/json")
+	@ResponseBody
+	public JSONObject cloneInPackageJson(@RequestParam("package1") long package1Id,
+			@RequestParam("package2") long package2Id) {
+		Package pck1 = nodeService.queryPackage(package1Id);
+		Package pck2 = nodeService.queryPackage(package2Id);
+		if(pck1 == null || pck2 == null) {
+			return null;
+		}
+		CloneValue<Package> value = cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), true, pck1, pck2);
+		JSONObject result = new JSONObject();
+		List<Clone> children = value.getChildren();
+		result.put("result", cloneShowService.graphFileClones(children));
+		return result;
 	}
 	
 	/**
