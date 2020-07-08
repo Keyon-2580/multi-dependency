@@ -14,9 +14,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Snippet;
-import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
@@ -183,9 +181,7 @@ public class CloneInserterForMethod extends CloneInserter {
 				}
 				addRelation(new Contain(cloneGroup, node));
 			}
-			if(uniqueNodeType) {
-				cloneGroup.setCloneLevel(level.toString());
-			}
+			cloneGroup.setCloneLevel(uniqueNodeType ? level.toString() : CloneLevel.multiple_level.toString());
 			addNode(cloneGroup, null);
 		}
 		LOGGER.info("插入文件级克隆组，组数：" + (cloneGroupNumber - groupCount));

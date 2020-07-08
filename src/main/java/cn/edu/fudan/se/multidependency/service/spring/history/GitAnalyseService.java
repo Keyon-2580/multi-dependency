@@ -27,6 +27,21 @@ public interface GitAnalyseService {
 	
 	Collection<CoChange> getTopKFileCoChange(int k);
 	
+	/**
+	 * 找出两个文件的Cochange关系
+	 * @param file1
+	 * @param file2
+	 * @return
+	 */
 	CoChange findCoChangeBetweenTwoFiles(ProjectFile file1, ProjectFile file2);
 	
+	/**
+	 * 给一个cochange，找到贡献cochange次数的commit
+	 * commit按时间倒叙排序
+	 * @param cochange
+	 * @return
+	 */
+	Collection<Commit> findCommitsByCoChange(CoChange cochange);
+	
+	CoChange findCoChangeById(long cochangeId);
 }

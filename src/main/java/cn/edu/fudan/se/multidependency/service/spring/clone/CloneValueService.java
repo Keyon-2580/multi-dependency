@@ -11,6 +11,7 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.service.spring.data.CloneValue;
+import cn.edu.fudan.se.multidependency.service.spring.data.PackageCloneValueWithFileCoChange;
 
 public interface CloneValueService {
 	
@@ -81,5 +82,7 @@ public interface CloneValueService {
 		value.sortChildren();
 		return value;
 	}
+	
+	PackageCloneValueWithFileCoChange queryPackageCloneWithFileCoChange(Collection<Clone> fileClones, boolean removeSameNode, Package pck1, Package pck2) throws Exception;
 	
 }

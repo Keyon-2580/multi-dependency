@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.controller;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.service.spring.history.GitAnalyseService;
 
@@ -20,6 +22,17 @@ public class GitController {
 
     @Autowired
     private GitAnalyseService gitAnalyseService;
+    
+    @GetMapping("/cochange/commits")
+    @ResponseBody
+    public Collection<Commit> findCommitsByCoChange(@RequestParam("cochangeId") long cochangeId) {
+    	CoChange cochange = gitAnalyseService.findCoChangeById(cochangeId);
+    	System.out.println(cochange);
+    	if(cochange == null) {
+    		return new ArrayList<>();
+    	}
+    	return gitAnalyseService.findCommitsByCoChange(cochange);
+    }
 
     @GetMapping("/developerToMicroservice")
     @ResponseBody

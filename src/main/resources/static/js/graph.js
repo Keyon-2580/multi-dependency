@@ -188,6 +188,7 @@ var graph = function(cytoscapeutil) {
 		var cy = cytoscapeutil.showDataInCytoscape($("#cloneGroupsDiv"), data, "random");
 	};
 	var doublePackagesClone = function(pck1Id, pck2Id, index) {
+		$("#package_files_clone").html("");
 		$.ajax({
 			type: "get",
 			url: "/clone/package/double?package1=" + pck1Id + "&package2=" + pck2Id,
@@ -195,7 +196,8 @@ var graph = function(cytoscapeutil) {
 				console.log(result);
 				var html = index + "<h4>" + result.node1.directoryPath 
 					+ "</h4>&<h4>" + result.node2.directoryPath 
-					+ "</h4>" + result.children.length + "<table class='table table-bordered'>";
+					+ "</h4>" + result.children.length + "<table class='table table-bordered'>"
+					+ "<tr><th>file1</th><th>file2</th><th>type</th><th>value</th></tr>";
 				var children = result.children;
 				for(var i = 0; i < children.length; i++) {
 					html += "<tr>";
@@ -215,6 +217,45 @@ var graph = function(cytoscapeutil) {
 				}
 				html += "</table>"
 				$("#package_files_clone").html(html);
+			}
+		})
+	}
+	var doublePackagesCloneWithCoChange = function(pck1Id, pck2Id, index) {
+		$("#package_files_clone").html("");
+		$.ajax({
+			type: "get",
+			url: "/clone/package/double/cochange?package1=" + pck1Id + "&package2=" + pck2Id,
+			success: function(result) {
+				console.log(result);
+				var html = index + "<h4>" + result.pck1.directoryPath 
+					+ "</h4>&<h4>" + result.pck2.directoryPath 
+					+ "</h4>" + result.children.length + "<table class='table table-bordered'>"
+					+ "<tr><th>file1</th><th>file2</th><th>type</th><th>value</th><th>cochange</th></tr>";
+				var children = result.children;
+				for(var i = 0; i < children.length; i++) {
+					html += "<tr>";
+					html += "<td>";
+					html += "<span>" + children[i].file1.path + "</span><span> (" + children[i].file1.lines + ") </span>";
+					html += "</td>";
+					html += "<td>";
+					html += "<span>" + children[i].file2.path + "</span><span> (" + children[i].file2.lines + ") </span>";
+					html += "</td>";
+					html += "<td>";
+					html += children[i].fileClone.cloneType;
+					html += "</td>";
+					html += "<td>";
+					html += children[i].fileClone.value;
+					html += "</td>";
+					html += "<td>";
+					html += "<a class='cochangeTimes' index='" + i + "'>" + children[i].cochangeTimes + "</a>";
+					html += "</td>";
+					html += "</tr>";
+				}
+				html += "</table>"
+				$("#package_files_clone").html(html);
+				$(".cochangeTimes").click(function() {
+					console.log(children[$(this).attr("index")].cochange);
+				});
 			}
 		})
 	}
@@ -247,7 +288,8 @@ var graph = function(cytoscapeutil) {
 				$(".package").click(function() {
 					console.log($(this).attr("id1"));
 					console.log($(this).attr("id2"));
-					doublePackagesClone($(this).attr("id1"), $(this).attr("id2"), $(this).attr("index"));
+//					doublePackagesClone($(this).attr("id1"), $(this).attr("id2"), $(this).attr("index"));
+					doublePackagesCloneWithCoChange($(this).attr("id1"), $(this).attr("id2"), $(this).attr("index"));
 				});
 			}
 		});

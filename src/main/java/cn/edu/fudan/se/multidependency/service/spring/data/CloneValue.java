@@ -30,7 +30,7 @@ public class CloneValue<N extends Node> implements Serializable {
 		return node1.getId() + "_" + node2.getId();
 	}
 	
-	// 两个克隆节点内部的克隆对
+	// 两个克隆节点内部的克隆关系
 	private List<Clone> children = new ArrayList<>();
 	
 	public int sizeOfChildren() {
@@ -67,7 +67,11 @@ public class CloneValue<N extends Node> implements Serializable {
 	
 	public void addChild(Clone clone) {
 		this.children.add(clone);
-		this.value += clone.getValue();
+		addValue(clone.getValue());
+	}
+	
+	public void addValue(double value) {
+		this.value += value;
 	}
 	
 	public void addChildren(Collection<Clone> clones) {

@@ -200,5 +200,27 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 		}
 		return result;
 	}
+
+	@Override
+	public Collection<Commit> findCommitsByCoChange(CoChange cochange) {
+		ProjectFile file1 = cochange.getFile1();
+		ProjectFile file2 = cochange.getFile2();
+		List<Commit> result = commitRepository.findCommitsInTwoFiles(file1.getId(), file2.getId());
+		if(result.isEmpty()) {
+			result = commitRepository.findCommitsInTwoFiles(file2.getId(), file1.getId());
+		}
+		System.out.println(result.size());
+		
+		result.sort((c1, c2) -> {
+			/// FIXME
+			return 0;
+		});
+		return result;
+	}
+
+	@Override
+	public CoChange findCoChangeById(long cochangeId) {
+		return cochangeRepository.findById(cochangeId).get();
+	}
     
 }

@@ -7,7 +7,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Snippet;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 
 public enum CloneLevel {
-	file, function, type, snippet;
+	file, function, type, snippet, multiple_level;
 	
 	public static CloneLevel getCodeNodeCloneLevel(CodeNode node) {
 		if(node instanceof ProjectFile) {

@@ -17,6 +17,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository;
 import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.spring.CacheService;
@@ -25,6 +26,9 @@ import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.data.CloneValue;
 import cn.edu.fudan.se.multidependency.service.spring.data.CloneValueCalculatorForMicroService;
+import cn.edu.fudan.se.multidependency.service.spring.data.FileCloneWithCoChange;
+import cn.edu.fudan.se.multidependency.service.spring.data.PackageCloneValueWithFileCoChange;
+import cn.edu.fudan.se.multidependency.service.spring.history.GitAnalyseService;
 
 @Service
 public class CloneValueServiceImpl implements CloneValueService {
@@ -47,6 +51,8 @@ public class CloneValueServiceImpl implements CloneValueService {
     @Autowired
     BasicCloneQueryService basicCloneQueryService;
     
+    @Autowired
+    GitAnalyseService gitAnalyseService;
 
 	@Override
 	public Collection<CloneValue<Package>> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones,
@@ -60,6 +66,24 @@ public class CloneValueServiceImpl implements CloneValueService {
 		result.sort((v1, v2) -> {
 			return v2.getChildren().size() - v1.getChildren().size();
 		});
+		return result;
+	}
+
+	@Override
+	public PackageCloneValueWithFileCoChange queryPackageCloneWithFileCoChange(Collection<Clone> fileClones,
+			boolean removeSameNode, Package pck1, Package pck2) throws Exception {
+		CloneValue<Package> temp = queryPackageCloneFromFileCloneSort(fileClones, removeSameNode, pck1, pck2);
+		PackageCloneValueWithFileCoChange result = new PackageCloneValueWithFileCoChange();
+		result.setPck1(temp.getNode1());
+		result.setPck2(temp.getNode2());
+		List<Clone> children = temp.getChildren();
+		for(Clone clone : children) {
+			ProjectFile file1 = (ProjectFile) clone.getCodeNode1();
+			ProjectFile file2 = (ProjectFile) clone.getCodeNode2();
+			CoChange cochange = gitAnalyseService.findCoChangeBetweenTwoFiles(file1, file2);
+			result.addChild(new FileCloneWithCoChange(clone, cochange));
+		}
+		result.sortChildren();
 		return result;
 	}
     
