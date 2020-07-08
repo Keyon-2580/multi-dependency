@@ -7,6 +7,8 @@
 <script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/jquery.treeview.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/popper-1.14.7.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/jquery-1.12.0.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/d3.v3.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape-panzoom.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape-navigator.js}"></script>
@@ -34,6 +36,7 @@
 <link rel="stylesheet" th:href="@{/css/import/cytoscape.js-navigator.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/jquery.jqplot.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/ztree/zTreeStyle/zTreeStyle.css}"></link>
+<link rel="stylesheet" th:href="@{/css/circlechart.css}"></link>
 <style type="text/css">
 .div_cytoscape_div{
 	background-color: #ffffff;
@@ -189,6 +192,8 @@
 		</div>
 		<div class="col-sm-12" id="groupCytoscape">
 		</div>
+		<div class="col-sm-12" id="groupCytoscape2">
+		</div>
 		<div class="col-sm-12">
 			<div id="content">
 			</div>
@@ -201,5 +206,6 @@
 		});
 		// ]]>
 	</script>
+	<script type="text/javascript" th:src="@{/js/circlechart.js}"></script>
 </body>
 </html>
