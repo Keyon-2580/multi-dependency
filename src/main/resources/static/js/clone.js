@@ -227,10 +227,35 @@ var clone = function(cytoscapeutil) {
 			url: "/clone/package/double/cochange?package1=" + pck1Id + "&package2=" + pck2Id,
 			success: function(result) {
 				console.log(result);
-				var html = index + "<h4>" + result.pck1.directoryPath 
-					+ "</h4>&<h4>" + result.pck2.directoryPath 
-					+ "</h4>" + result.children.length + "<table class='table table-bordered'>"
-					+ "<tr><th>file1</th><th>file2</th><th>type</th><th>value</th><th>cochange</th></tr>";
+				var html = index + "&nbsp;&nbsp;" + result.children.length;
+				html += "<table class='table table-bordered'>";
+				html += "<tr>";
+				html += "<th>包路径";
+				html += "</th>";
+				html += "<th>包内文件数";
+				html += "</th>";
+				html += "<th>克隆文件数";
+				html += "</th>";
+				html += "</tr>";
+				html += "<tr>";
+				html += "<td>" + result.pck1.directoryPath;
+				html += "</td>";
+				html += "<td>" + result.allFiles1.length;
+				html += "</td>";
+				html += "<td>" + result.cloneFiles1.length;
+				html += "</td>";
+				html += "</tr>";
+				html += "<tr>";
+				html += "<td>" + result.pck2.directoryPath;
+				html += "</td>";
+				html += "<td>" + result.allFiles2.length;
+				html += "</td>";
+				html += "<td>" + result.cloneFiles2.length;
+				html += "</td>";
+				html += "</tr>";
+				html += "</table>";
+				html += "<table class='table table-bordered'>"
+				+ "<tr><th>file1</th><th>file2</th><th>type</th><th>value</th><th>cochange</th></tr>";
 				var children = result.children;
 				for(var i = 0; i < children.length; i++) {
 					var cochangeId = children[i].cochange == null ? -1 : children[i].cochange.id;

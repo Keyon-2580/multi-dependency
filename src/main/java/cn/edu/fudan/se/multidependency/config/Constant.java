@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Constant {
+	
+	public static final String TIMESTAMP = "yyyy-MM-dd HH:mm:ss";
 
 	public static final int SIZE_OF_PAGE = 15;
     

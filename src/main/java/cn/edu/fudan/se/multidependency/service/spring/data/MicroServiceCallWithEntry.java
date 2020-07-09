@@ -59,7 +59,7 @@ public class MicroServiceCallWithEntry {
 	
 //	private Collection<CloneValue<MicroService>> clonesInMicroServiceFromFunctionClone = new ArrayList<>();
 	
-	private Collection<CloneValue<MicroService>> clonesInMicroServiceFromFileClone = new ArrayList<>();
+	private Collection<CloneValueForDoubleNodes<MicroService>> clonesInMicroServiceFromFileClone = new ArrayList<>();
 	
 	private Iterable<CallLibrary<MicroService>> microServiceCallLibraries = new ArrayList<>();
 	
@@ -155,7 +155,7 @@ public class MicroServiceCallWithEntry {
 	}
 	
 	private void showClonesInMicroService(List<CytoscapeEdge> edges) {
-		for(CloneValue<MicroService> clone : clonesInMicroServiceFromFileClone) {
+		for(CloneValueForDoubleNodes<MicroService> clone : clonesInMicroServiceFromFileClone) {
 			if(clone.sizeOfChildren() >= showClonesMinPair) {
 				CytoscapeEdge edge = new CytoscapeEdge(clone.getNode1().getId().toString(), clone.getNode2().getId().toString(), "all_MicroService_clone_MicroService", clone.calculateValue());
 //					CytoscapeEdge edge = new CytoscapeEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService");
@@ -412,7 +412,7 @@ public class MicroServiceCallWithEntry {
 	
 	public Map<String, Collection<Clone>> cloneDetails() {
 		Map<String, Collection<Clone>> result = new HashMap<>();
-		for(CloneValue<MicroService> clone : getClonesInMicroServiceFromFileClone()) {
+		for(CloneValueForDoubleNodes<MicroService> clone : getClonesInMicroServiceFromFileClone()) {
 			result.put(clone.getId(), clone.getChildren());
 		}
 		return result;

@@ -39,10 +39,11 @@ public interface CloneRepository extends Neo4jRepository<Clone, Long> {
 	 * @param cloneRelationType
 	 * @return
 	 */
+	@Deprecated
 	@Query("match p= (g:CloneGroup)-[:" + RelationType.str_CONTAIN + "]->()-[r:" + RelationType.str_CLONE + "]->()<-[:" + RelationType.str_CONTAIN + "]-(g) where r.cloneRelationType={cloneRelationType} return g")
 	public List<CloneGroup> findGroupsByCloneType(@Param("cloneRelationType") String cloneRelationType);
 	
-	@Query("match p= (g:CloneGroup)-[:" + RelationType.str_CONTAIN + "]->(:ProjectFile)-[r:" + RelationType.str_CLONE + "]->(:ProjectFile)<-[:" + RelationType.str_CONTAIN + "]-(g) return g")
+	/*@Query("match p= (g:CloneGroup)-[:" + RelationType.str_CONTAIN + "]->(:ProjectFile)-[r:" + RelationType.str_CLONE + "]->(:ProjectFile)<-[:" + RelationType.str_CONTAIN + "]-(g) return g")
 	public List<CloneGroup> findGroupsByFileCloneFileRelation();
 	
 	@Query("match p= (g:CloneGroup)-[:" + RelationType.str_CONTAIN + "]->(:Function)-[r:" + RelationType.str_CLONE + "]->(:Function)<-[:" + RelationType.str_CONTAIN + "]-(g) return g")
@@ -52,7 +53,7 @@ public interface CloneRepository extends Neo4jRepository<Clone, Long> {
 	public List<CloneGroup> findGroupsByTypeCloneTypeRelation();
 	
 	@Query("match p= (g:CloneGroup)-[:" + RelationType.str_CONTAIN + "]->(:Snippet)-[r:" + RelationType.str_CLONE + "]->(:Snippet)<-[:" + RelationType.str_CONTAIN + "]-(g) return g")
-	public List<CloneGroup> findGroupsBySnippetCloneSnippetRelation();
+	public List<CloneGroup> findGroupsBySnippetCloneSnippetRelation();*/
 	
 	@Query("match p= (g:CloneGroup) where g.cloneLevel = {cloneLevel} return g")
 	public List<CloneGroup> findGroups(@Param("cloneLevel") String cloneLevel);

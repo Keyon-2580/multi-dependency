@@ -24,7 +24,7 @@ import cn.edu.fudan.se.multidependency.service.spring.CacheService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
-import cn.edu.fudan.se.multidependency.service.spring.data.CloneValue;
+import cn.edu.fudan.se.multidependency.service.spring.data.CloneValueForDoubleNodes;
 import cn.edu.fudan.se.multidependency.service.spring.data.CloneValueCalculatorForMicroService;
 import cn.edu.fudan.se.multidependency.service.spring.data.FileCloneWithCoChange;
 import cn.edu.fudan.se.multidependency.service.spring.data.PackageCloneValueWithFileCoChange;
@@ -55,14 +55,14 @@ public class CloneValueServiceImpl implements CloneValueService {
     GitAnalyseService gitAnalyseService;
 
 	@Override
-	public Collection<CloneValue<Package>> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones,
+	public Collection<CloneValueForDoubleNodes<Package>> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones,
 			boolean removeSameNode) {
-		Collection<CloneValue<Package>> cache = removeSameNodeToCloneValuePackages.get(removeSameNode);
+		Collection<CloneValueForDoubleNodes<Package>> cache = removeSameNodeToCloneValuePackages.get(removeSameNode);
 		if(cache == null) {
 			queryPackageCloneFromFileClone(fileClones, removeSameNode);
 			cache = removeSameNodeToCloneValuePackages.get(removeSameNode);
 		}
-		List<CloneValue<Package>> result = new ArrayList<>(cache);
+		List<CloneValueForDoubleNodes<Package>> result = new ArrayList<>(cache);
 		result.sort((v1, v2) -> {
 			return v2.getChildren().size() - v1.getChildren().size();
 		});
@@ -72,14 +72,23 @@ public class CloneValueServiceImpl implements CloneValueService {
 	@Override
 	public PackageCloneValueWithFileCoChange queryPackageCloneWithFileCoChange(Collection<Clone> fileClones,
 			boolean removeSameNode, Package pck1, Package pck2) throws Exception {
-		CloneValue<Package> temp = queryPackageCloneFromFileCloneSort(fileClones, removeSameNode, pck1, pck2);
+		CloneValueForDoubleNodes<Package> temp = queryPackageCloneFromFileCloneSort(fileClones, removeSameNode, pck1, pck2);
 		PackageCloneValueWithFileCoChange result = new PackageCloneValueWithFileCoChange();
 		result.setPck1(temp.getNode1());
 		result.setPck2(temp.getNode2());
+		result.addFile1(containRelationService.findPackageContainFiles(pck1));
+		result.addFile2(containRelationService.findPackageContainFiles(pck2));
 		List<Clone> children = temp.getChildren();
 		for(Clone clone : children) {
 			ProjectFile file1 = (ProjectFile) clone.getCodeNode1();
 			ProjectFile file2 = (ProjectFile) clone.getCodeNode2();
+			if(containRelationService.findFileBelongToPackage(file1).equals(pck1)) {
+				result.addCloneFile1(file1);
+				result.addCloneFile2(file2);
+			} else {
+				result.addCloneFile1(file2);
+				result.addCloneFile2(file1);
+			}
 			CoChange cochange = gitAnalyseService.findCoChangeBetweenTwoFiles(file1, file2);
 			result.addChild(new FileCloneWithCoChange(clone, cochange));
 		}
@@ -87,13 +96,13 @@ public class CloneValueServiceImpl implements CloneValueService {
 		return result;
 	}
     
-    private Map<Boolean, Collection<CloneValue<Package>>> removeSameNodeToCloneValuePackages = new ConcurrentHashMap<>();
-    private Map<Boolean, Map<Package, Map<Package, CloneValue<Package>>>> queryPackageCloneFromFileCloneCache = new ConcurrentHashMap<>();
-	public Map<Package, Map<Package, CloneValue<Package>>> queryPackageCloneFromFileClone(Collection<Clone> fileClones,
+    private Map<Boolean, Collection<CloneValueForDoubleNodes<Package>>> removeSameNodeToCloneValuePackages = new ConcurrentHashMap<>();
+    private Map<Boolean, Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>>> queryPackageCloneFromFileCloneCache = new ConcurrentHashMap<>();
+	public Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> queryPackageCloneFromFileClone(Collection<Clone> fileClones,
 			boolean removeSameNode) {
-		Map<Package, Map<Package, CloneValue<Package>>> pckToPackageClones = queryPackageCloneFromFileCloneCache.get(removeSameNode);
+		Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> pckToPackageClones = queryPackageCloneFromFileCloneCache.get(removeSameNode);
 		if(pckToPackageClones == null) {
-			Collection<CloneValue<Package>> cache = new ArrayList<>();
+			Collection<CloneValueForDoubleNodes<Package>> cache = new ArrayList<>();
 			pckToPackageClones = new HashMap<>();
 			
 			for(Clone clone : fileClones) {
@@ -112,16 +121,23 @@ public class CloneValueServiceImpl implements CloneValueService {
 				if(removeSameNode && pck1.equals(pck2)) {
 					continue;
 				}
-				CloneValue<Package> cloneValue = hasFileCloneInPackage(pckToPackageClones, pck1, pck2);
+				CloneValueForDoubleNodes<Package> cloneValue = hasFileCloneInPackage(pckToPackageClones, pck1, pck2);
 				if(cloneValue == null) {
-					cloneValue = new CloneValue<Package>();
+					cloneValue = new CloneValueForDoubleNodes<Package>();
 					cloneValue.setNode1(pck1);
 					cloneValue.setNode2(pck2);
 					cache.add(cloneValue);
 				}
 				cloneValue.addChild(clone);
+				if(pck1.equals(cloneValue.getNode1())) {
+					cloneValue.addCodeNodeToNode1(file1);
+					cloneValue.addCodeNodeToNode2(file2);
+				} else {
+					cloneValue.addCodeNodeToNode2(file1);
+					cloneValue.addCodeNodeToNode1(file2);
+				}
 				
-				Map<Package, CloneValue<Package>> pck1ToClones = pckToPackageClones.getOrDefault(pck1, new HashMap<>());
+				Map<Package, CloneValueForDoubleNodes<Package>> pck1ToClones = pckToPackageClones.getOrDefault(pck1, new HashMap<>());
 				pck1ToClones.put(pck2, cloneValue);
 				pckToPackageClones.put(pck1, pck1ToClones);
 			}
@@ -131,24 +147,24 @@ public class CloneValueServiceImpl implements CloneValueService {
 		return pckToPackageClones;
 	}
 	
-	private CloneValue<Package> hasFileCloneInPackage(
-			Map<Package, Map<Package, CloneValue<Package>>> pckToPackageClones, 
+	private CloneValueForDoubleNodes<Package> hasFileCloneInPackage(
+			Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> pckToPackageClones, 
 			Package pck1, Package pck2) {
-		Map<Package, CloneValue<Package>> pck1ToClones = pckToPackageClones.getOrDefault(pck1, new HashMap<>());
-		CloneValue<Package> clone = pck1ToClones.get(pck2);
+		Map<Package, CloneValueForDoubleNodes<Package>> pck1ToClones = pckToPackageClones.getOrDefault(pck1, new HashMap<>());
+		CloneValueForDoubleNodes<Package> clone = pck1ToClones.get(pck2);
 		if(clone != null) {
 			return clone;
 		}
-		Map<Package, CloneValue<Package>> pck2ToClones = pckToPackageClones.getOrDefault(pck2, new HashMap<>());
+		Map<Package, CloneValueForDoubleNodes<Package>> pck2ToClones = pckToPackageClones.getOrDefault(pck2, new HashMap<>());
 		clone = pck2ToClones.get(pck1);
 		return clone;
 	}
 
 	@Override
-	public Collection<CloneValue<Project>> queryProjectCloneFromFileClone(Collection<Clone> fileClones,
+	public Collection<CloneValueForDoubleNodes<Project>> queryProjectCloneFromFileClone(Collection<Clone> fileClones,
 			boolean removeSameNode) {
-		List<CloneValue<Project>> result = new ArrayList<>();
-		Map<Project, Map<Project, CloneValue<Project>>> projectToProjectClones = new HashMap<>();
+		List<CloneValueForDoubleNodes<Project>> result = new ArrayList<>();
+		Map<Project, Map<Project, CloneValueForDoubleNodes<Project>>> projectToProjectClones = new HashMap<>();
 		for(Clone clone : fileClones) {
 			CodeNode node1 = clone.getCodeNode1();
 			CodeNode node2 = clone.getCodeNode2();
@@ -165,52 +181,52 @@ public class CloneValueServiceImpl implements CloneValueService {
 			if(removeSameNode && project1.equals(project2)) {
 				continue;
 			}
-			CloneValue<Project> cloneValue = hasFileCloneInProject(projectToProjectClones, project1, project2);
+			CloneValueForDoubleNodes<Project> cloneValue = hasFileCloneInProject(projectToProjectClones, project1, project2);
 			if(cloneValue == null) {
-				cloneValue = new CloneValue<Project>();
+				cloneValue = new CloneValueForDoubleNodes<Project>();
 				cloneValue.setNode1(project1);
 				cloneValue.setNode2(project2);
 				result.add(cloneValue);
 			}
 			cloneValue.addChild(clone);
 			
-			Map<Project, CloneValue<Project>> project1ToClones = projectToProjectClones.getOrDefault(project1, new HashMap<>());
+			Map<Project, CloneValueForDoubleNodes<Project>> project1ToClones = projectToProjectClones.getOrDefault(project1, new HashMap<>());
 			project1ToClones.put(project2, cloneValue);
 			projectToProjectClones.put(project1, project1ToClones);
 		}
 		return result;
 	}
 	
-	private CloneValue<Project> hasFunctionCloneInProject(
-			Map<Project, Map<Project, CloneValue<Project>>> projectToProjectClones, 
+	private CloneValueForDoubleNodes<Project> hasFunctionCloneInProject(
+			Map<Project, Map<Project, CloneValueForDoubleNodes<Project>>> projectToProjectClones, 
 			Project project1, Project project2) {
-		Map<Project, CloneValue<Project>> project1ToClones = projectToProjectClones.getOrDefault(project1, new HashMap<>());
-		CloneValue<Project> cloneValue = project1ToClones.get(project2);
+		Map<Project, CloneValueForDoubleNodes<Project>> project1ToClones = projectToProjectClones.getOrDefault(project1, new HashMap<>());
+		CloneValueForDoubleNodes<Project> cloneValue = project1ToClones.get(project2);
 		if(cloneValue != null) {
 			return cloneValue;
 		}
-		Map<Project, CloneValue<Project>> project2ToClones = projectToProjectClones.getOrDefault(project2, new HashMap<>());
+		Map<Project, CloneValueForDoubleNodes<Project>> project2ToClones = projectToProjectClones.getOrDefault(project2, new HashMap<>());
 		cloneValue = project2ToClones.get(project1);
 		return cloneValue;
 	}
 	
-	private CloneValue<Project> hasFileCloneInProject(
-			Map<Project, Map<Project, CloneValue<Project>>> projectToProjectClones, 
+	private CloneValueForDoubleNodes<Project> hasFileCloneInProject(
+			Map<Project, Map<Project, CloneValueForDoubleNodes<Project>>> projectToProjectClones, 
 			Project project1, Project project2) {
-		Map<Project, CloneValue<Project>> project1ToClones = projectToProjectClones.getOrDefault(project1, new HashMap<>());
-		CloneValue<Project> clone = project1ToClones.get(project2);
+		Map<Project, CloneValueForDoubleNodes<Project>> project1ToClones = projectToProjectClones.getOrDefault(project1, new HashMap<>());
+		CloneValueForDoubleNodes<Project> clone = project1ToClones.get(project2);
 		if(clone != null) {
 			return clone;
 		}
-		Map<Project, CloneValue<Project>> project2ToClones = projectToProjectClones.getOrDefault(project2, new HashMap<>());
+		Map<Project, CloneValueForDoubleNodes<Project>> project2ToClones = projectToProjectClones.getOrDefault(project2, new HashMap<>());
 		clone = project2ToClones.get(project1);
 		return clone;
 	}
 
 	@Override
-	public Collection<CloneValue<Project>> findProjectCloneFromFunctionClone(Collection<Clone> functionClones, boolean removeSameNode) {
-		List<CloneValue<Project>> result = new ArrayList<>();
-		Map<Project, Map<Project, CloneValue<Project>>> projectToProjectClones = new HashMap<>();
+	public Collection<CloneValueForDoubleNodes<Project>> findProjectCloneFromFunctionClone(Collection<Clone> functionClones, boolean removeSameNode) {
+		List<CloneValueForDoubleNodes<Project>> result = new ArrayList<>();
+		Map<Project, Map<Project, CloneValueForDoubleNodes<Project>>> projectToProjectClones = new HashMap<>();
 		for(Clone functionCloneFunction : functionClones) {
 			CodeNode node1 = functionCloneFunction.getCodeNode1();
 			CodeNode node2 = functionCloneFunction.getCodeNode2();
@@ -227,9 +243,9 @@ public class CloneValueServiceImpl implements CloneValueService {
 			if(removeSameNode && project1.equals(project2)) {
 				continue;
 			}
-			CloneValue<Project> clone = hasFunctionCloneInProject(projectToProjectClones, project1, project2);
+			CloneValueForDoubleNodes<Project> clone = hasFunctionCloneInProject(projectToProjectClones, project1, project2);
 			if(clone == null) {
-				clone = new CloneValue<Project>();
+				clone = new CloneValueForDoubleNodes<Project>();
 				clone.setNode1(project1);
 				clone.setNode2(project2);
 				result.add(clone);
@@ -237,7 +253,7 @@ public class CloneValueServiceImpl implements CloneValueService {
 			// 函数间的克隆作为Children
 			clone.addChild(functionCloneFunction);
 			
-			Map<Project, CloneValue<Project>> project1ToClones 
+			Map<Project, CloneValueForDoubleNodes<Project>> project1ToClones 
 				= projectToProjectClones.getOrDefault(project1, new HashMap<>());
 			project1ToClones.put(project2, clone);
 			projectToProjectClones.put(project1, project1ToClones);
@@ -245,36 +261,36 @@ public class CloneValueServiceImpl implements CloneValueService {
 		return result;
 	}
 	
-	private CloneValue<MicroService> hasCloneInFunctionClones(
-			Map<MicroService, Map<MicroService, CloneValue<MicroService>>> msToMsClones, MicroService ms1, MicroService ms2) {
-		Map<MicroService, CloneValue<MicroService>> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
-		CloneValue<MicroService> clone = ms1ToClones.get(ms2);
+	private CloneValueForDoubleNodes<MicroService> hasCloneInFunctionClones(
+			Map<MicroService, Map<MicroService, CloneValueForDoubleNodes<MicroService>>> msToMsClones, MicroService ms1, MicroService ms2) {
+		Map<MicroService, CloneValueForDoubleNodes<MicroService>> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
+		CloneValueForDoubleNodes<MicroService> clone = ms1ToClones.get(ms2);
 		if(clone != null) {
 			return clone;
 		}
-		Map<MicroService, CloneValue<MicroService>> ms2ToClones = msToMsClones.getOrDefault(ms2, new HashMap<>());
+		Map<MicroService, CloneValueForDoubleNodes<MicroService>> ms2ToClones = msToMsClones.getOrDefault(ms2, new HashMap<>());
 		clone = ms2ToClones.get(ms1);
 		return clone;
 	}
 	
-	private CloneValue<MicroService> hasCloneInFileClones(
-			Map<MicroService, Map<MicroService, CloneValue<MicroService>>> msToMsClones, MicroService ms1, MicroService ms2) {
-		Map<MicroService, CloneValue<MicroService>> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
-		CloneValue<MicroService> clone = ms1ToClones.get(ms2);
+	private CloneValueForDoubleNodes<MicroService> hasCloneInFileClones(
+			Map<MicroService, Map<MicroService, CloneValueForDoubleNodes<MicroService>>> msToMsClones, MicroService ms1, MicroService ms2) {
+		Map<MicroService, CloneValueForDoubleNodes<MicroService>> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
+		CloneValueForDoubleNodes<MicroService> clone = ms1ToClones.get(ms2);
 		if(clone != null) {
 			return clone;
 		}
-		Map<MicroService, CloneValue<MicroService>> ms2ToClones = msToMsClones.getOrDefault(ms2, new HashMap<>());
+		Map<MicroService, CloneValueForDoubleNodes<MicroService>> ms2ToClones = msToMsClones.getOrDefault(ms2, new HashMap<>());
 		clone = ms2ToClones.get(ms1);
 		return clone;
 	}
 
 	@Override
-	public Collection<CloneValue<MicroService>> findMicroServiceCloneFromFunctionClone(Collection<Clone> functionClones, boolean removeSameNode) {
-		Collection<CloneValue<Project>> projectClones = findProjectCloneFromFunctionClone(functionClones, removeSameNode);
-		List<CloneValue<MicroService>> result = new ArrayList<>();
-		Map<MicroService, Map<MicroService, CloneValue<MicroService>>> msToMsClones = new HashMap<>();
-		for(CloneValue<Project> projectClone : projectClones) {
+	public Collection<CloneValueForDoubleNodes<MicroService>> findMicroServiceCloneFromFunctionClone(Collection<Clone> functionClones, boolean removeSameNode) {
+		Collection<CloneValueForDoubleNodes<Project>> projectClones = findProjectCloneFromFunctionClone(functionClones, removeSameNode);
+		List<CloneValueForDoubleNodes<MicroService>> result = new ArrayList<>();
+		Map<MicroService, Map<MicroService, CloneValueForDoubleNodes<MicroService>>> msToMsClones = new HashMap<>();
+		for(CloneValueForDoubleNodes<Project> projectClone : projectClones) {
 			Project project1 = projectClone.getNode1();
 			Project project2 = projectClone.getNode2();
 			if(removeSameNode && project1.equals(project2)) {
@@ -288,9 +304,9 @@ public class CloneValueServiceImpl implements CloneValueService {
 			if(removeSameNode && ms1.equals(ms2)) {
 				continue;
 			}
-			CloneValue<MicroService> clone = hasCloneInFunctionClones(msToMsClones, ms1, ms2);
+			CloneValueForDoubleNodes<MicroService> clone = hasCloneInFunctionClones(msToMsClones, ms1, ms2);
 			if(clone == null) {
-				clone = new CloneValue<MicroService>();
+				clone = new CloneValueForDoubleNodes<MicroService>();
 				clone.setNode1(ms1);
 				clone.setNode2(ms2);
 				result.add(clone);
@@ -302,7 +318,7 @@ public class CloneValueServiceImpl implements CloneValueService {
 				clone.setCalculator(calculator);
 			}
 			clone.addChildren(projectClone.getChildren());
-			Map<MicroService, CloneValue<MicroService>> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
+			Map<MicroService, CloneValueForDoubleNodes<MicroService>> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
 			ms1ToClones.put(ms2, clone);
 			msToMsClones.put(ms1, ms1ToClones);
 			
@@ -311,12 +327,12 @@ public class CloneValueServiceImpl implements CloneValueService {
 	}
 
 	@Override
-	public Collection<CloneValue<MicroService>> findMicroServiceCloneFromFileClone(
+	public Collection<CloneValueForDoubleNodes<MicroService>> findMicroServiceCloneFromFileClone(
 			Collection<Clone> fileClones, boolean removeSameNode) {
-		Iterable<CloneValue<Project>> projectClones = queryProjectCloneFromFileClone(fileClones, removeSameNode);
-		List<CloneValue<MicroService>> result = new ArrayList<>();
-		Map<MicroService, Map<MicroService, CloneValue<MicroService>>> msToMsClones = new HashMap<>();
-		for(CloneValue<Project> projectClone : projectClones) {
+		Iterable<CloneValueForDoubleNodes<Project>> projectClones = queryProjectCloneFromFileClone(fileClones, removeSameNode);
+		List<CloneValueForDoubleNodes<MicroService>> result = new ArrayList<>();
+		Map<MicroService, Map<MicroService, CloneValueForDoubleNodes<MicroService>>> msToMsClones = new HashMap<>();
+		for(CloneValueForDoubleNodes<Project> projectClone : projectClones) {
 			Project project1 = projectClone.getNode1();
 			Project project2 = projectClone.getNode2();
 			if(removeSameNode && project1.equals(project2)) {
@@ -330,9 +346,9 @@ public class CloneValueServiceImpl implements CloneValueService {
 			if(removeSameNode && ms1.equals(ms2)) {
 				continue;
 			}
-			CloneValue<MicroService> clone = hasCloneInFileClones(msToMsClones, ms1, ms2);
+			CloneValueForDoubleNodes<MicroService> clone = hasCloneInFileClones(msToMsClones, ms1, ms2);
 			if(clone == null) {
-				clone = new CloneValue<MicroService>();
+				clone = new CloneValueForDoubleNodes<MicroService>();
 				clone.setNode1(ms1);
 				clone.setNode2(ms2);
 				result.add(clone);
@@ -344,7 +360,7 @@ public class CloneValueServiceImpl implements CloneValueService {
 				clone.setCalculator(calculator);
 			}
 			clone.addChildren(projectClone.getChildren());
-			Map<MicroService, CloneValue<MicroService>> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
+			Map<MicroService, CloneValueForDoubleNodes<MicroService>> ms1ToClones = msToMsClones.getOrDefault(ms1, new HashMap<>());
 			ms1ToClones.put(ms2, clone);
 			msToMsClones.put(ms1, ms1ToClones);
 			

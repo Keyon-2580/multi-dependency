@@ -10,7 +10,7 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
-import cn.edu.fudan.se.multidependency.service.spring.data.CloneValue.CloneValueCalculator;
+import cn.edu.fudan.se.multidependency.service.spring.data.CloneValueForDoubleNodes.CloneValueCalculator;
 
 public class CloneValueCalculatorForMicroService implements CloneValueCalculator {
 	
@@ -28,7 +28,7 @@ public class CloneValueCalculatorForMicroService implements CloneValueCalculator
 	}
 
 	@Override
-	public String calculate(CloneValue<? extends Node> clone) {
+	public String calculate(CloneValueForDoubleNodes<? extends Node> clone) {
 		assert(clone.getNode1() instanceof MicroService && clone.getNode2() instanceof MicroService);
 		StringBuilder builder = new StringBuilder();
 		builder.append("(");

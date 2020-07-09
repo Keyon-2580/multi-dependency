@@ -1,5 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.spring.history;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -15,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
@@ -209,11 +212,10 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 		if(result.isEmpty()) {
 			result = commitRepository.findCommitsInTwoFiles(file2.getId(), file1.getId());
 		}
-		System.out.println(result.size());
-		
 		result.sort((c1, c2) -> {
-			/// FIXME
-			return 0;
+	        Timestamp time1 = Timestamp.valueOf(c1.getAuthoredDate());
+	        Timestamp time2 = Timestamp.valueOf(c2.getAuthoredDate());
+			return time2.compareTo(time1);
 		});
 		return result;
 	}

@@ -10,25 +10,20 @@ import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import lombok.Data;
 
+@Data
 /**
- * 节点node1和node2不分方向
+ * 若Node为Package，则表示这个Package下有多少克隆关系
  * @author fan
  *
+ * @param <N>
  */
-@Data
-public class CloneValue<N extends Node> implements Serializable {
+public class CloneValueForSingleNode<N extends Node> implements Serializable  {
+
+	private static final long serialVersionUID = -1015918498310454795L;
 	
-	private static final long serialVersionUID = -2262794801616872866L;
-	
-	private N node1;
-	
-	private N node2;
+	private N node;
 	
 	private double value = 0;
-	
-	public String getId() {
-		return node1.getId() + "_" + node2.getId();
-	}
 	
 	// 两个克隆节点内部的克隆关系
 	private List<Clone> children = new ArrayList<>();
@@ -52,19 +47,6 @@ public class CloneValue<N extends Node> implements Serializable {
 		});
 	}
 	
-	public static interface CloneValueCalculator {
-		String calculate(CloneValue<? extends Node> clone);
-	}
-	
-	private transient CloneValueCalculator calculator;
-	
-	public String calculateValue() {
-		if(calculator != null) {
-			return this.calculator.calculate(this);
-		}
-		return "clone: " + getValue();
-	}
-	
 	public void addChild(Clone clone) {
 		this.children.add(clone);
 		addValue(clone.getValue());
@@ -79,5 +61,5 @@ public class CloneValue<N extends Node> implements Serializable {
 			addChild(clone);
 		}
 	}
-	
+
 }

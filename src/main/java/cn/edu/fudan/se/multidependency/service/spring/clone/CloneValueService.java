@@ -10,7 +10,7 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
-import cn.edu.fudan.se.multidependency.service.spring.data.CloneValue;
+import cn.edu.fudan.se.multidependency.service.spring.data.CloneValueForDoubleNodes;
 import cn.edu.fudan.se.multidependency.service.spring.data.PackageCloneValueWithFileCoChange;
 
 public interface CloneValueService {
@@ -20,7 +20,7 @@ public interface CloneValueService {
 	 * @param functionClones
 	 * @return
 	 */
-	Collection<CloneValue<MicroService>> findMicroServiceCloneFromFunctionClone(Collection<Clone> functionClones, boolean removeSameNode);
+	Collection<CloneValueForDoubleNodes<MicroService>> findMicroServiceCloneFromFunctionClone(Collection<Clone> functionClones, boolean removeSameNode);
 	
 	/**
 	 * 根据文件间的克隆找出微服务间的克隆
@@ -28,14 +28,14 @@ public interface CloneValueService {
 	 * @param removeSameNode
 	 * @return
 	 */
-	Collection<CloneValue<MicroService>> findMicroServiceCloneFromFileClone(Collection<Clone> fileClones, boolean removeSameNode);
+	Collection<CloneValueForDoubleNodes<MicroService>> findMicroServiceCloneFromFileClone(Collection<Clone> fileClones, boolean removeSameNode);
 	
 	/**
 	 * 根据函数间的克隆找出项目间的克隆
 	 * @param functionClones
 	 * @return
 	 */
-	Collection<CloneValue<Project>> findProjectCloneFromFunctionClone(Collection<Clone> functionClones, boolean removeSameNode);
+	Collection<CloneValueForDoubleNodes<Project>> findProjectCloneFromFunctionClone(Collection<Clone> functionClones, boolean removeSameNode);
 	
 	/**
 	 * 根据文件间的克隆找出项目间的克隆
@@ -43,17 +43,17 @@ public interface CloneValueService {
 	 * @param removeSameNode
 	 * @return
 	 */
-	Collection<CloneValue<Project>> queryProjectCloneFromFileClone(Collection<Clone> fileClones, boolean removeSameNode);
+	Collection<CloneValueForDoubleNodes<Project>> queryProjectCloneFromFileClone(Collection<Clone> fileClones, boolean removeSameNode);
 	
-	Map<Package, Map<Package, CloneValue<Package>>> queryPackageCloneFromFileClone(Collection<Clone> fileClones, boolean removeSameNode);
+	Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> queryPackageCloneFromFileClone(Collection<Clone> fileClones, boolean removeSameNode);
 	
-	Collection<CloneValue<Package>> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones, boolean removeSameNode);
+	Collection<CloneValueForDoubleNodes<Package>> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones, boolean removeSameNode);
 	
-	default Collection<CloneValue<Package>> queryPackageCloneFromFileClone(Collection<Clone> fileClones, boolean removeSameNode, List<Package> pcks) {
+	default Collection<CloneValueForDoubleNodes<Package>> queryPackageCloneFromFileClone(Collection<Clone> fileClones, boolean removeSameNode, List<Package> pcks) {
 		if(pcks == null || pcks.isEmpty()) {
 			return new ArrayList<>();
 		}
-		List<CloneValue<Package>> result = new ArrayList<>();
+		List<CloneValueForDoubleNodes<Package>> result = new ArrayList<>();
 		for(int i = 0; i < pcks.size(); i++) {
 			for(int j = i + 1; j < pcks.size(); j++) {
 				result.add(queryPackageCloneFromFileCloneSort(fileClones, removeSameNode, pcks.get(i), pcks.get(j)));
@@ -71,10 +71,10 @@ public interface CloneValueService {
 	 * @param pck2
 	 * @return
 	 */
-	default CloneValue<Package> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones, boolean removeSameNode, Package pck1, Package pck2) {
-		Map<Package, Map<Package, CloneValue<Package>>> packageClones = queryPackageCloneFromFileClone(fileClones, removeSameNode);
-		Map<Package, CloneValue<Package>> map = packageClones.getOrDefault(pck1, new HashMap<>());
-		CloneValue<Package> value = map.get(pck2);
+	default CloneValueForDoubleNodes<Package> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones, boolean removeSameNode, Package pck1, Package pck2) {
+		Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> packageClones = queryPackageCloneFromFileClone(fileClones, removeSameNode);
+		Map<Package, CloneValueForDoubleNodes<Package>> map = packageClones.getOrDefault(pck1, new HashMap<>());
+		CloneValueForDoubleNodes<Package> value = map.get(pck2);
 		if(value == null) {
 			map = packageClones.getOrDefault(pck2, new HashMap<>());
 			value = map.get(pck1);

@@ -75,7 +75,9 @@ public class BasicCloneQueryServiceImpl implements BasicCloneQueryService {
 		return result;
 	}
 
+	@Deprecated
 	private Map<CloneRelationType, Collection<CloneGroup>> cloneTypeToGroups = new ConcurrentHashMap<>();
+	@Deprecated
 	@Override
 	public Collection<CloneGroup> findGroupsContainCloneTypeRelation(CloneRelationType cloneType) {
 		Collection<CloneGroup> result = cloneTypeToGroups.get(cloneType);

@@ -27,7 +27,7 @@ public class PackageGraph {
 
 	@Setter
 	@Getter
-	private Map<Package, Map<Package, CloneValue<Package>>> packageCloneValues = new HashMap<>();
+	private Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> packageCloneValues = new HashMap<>();
 	
 	public JSONObject changeToEChartsGraph() {
 		JSONObject result = new JSONObject();
@@ -44,11 +44,11 @@ public class PackageGraph {
 		result.put("nodes", packagesArray);
 		result.put("legend", lengendsArray);
 		JSONArray linksArray = new JSONArray();
-		for(Map.Entry<Package, Map<Package, CloneValue<Package>>> entry1 : packageCloneValues.entrySet()) {
+		for(Map.Entry<Package, Map<Package, CloneValueForDoubleNodes<Package>>> entry1 : packageCloneValues.entrySet()) {
 			Package pck1 = entry1.getKey();
-			for(Map.Entry<Package, CloneValue<Package>> entry2 : entry1.getValue().entrySet()) {
+			for(Map.Entry<Package, CloneValueForDoubleNodes<Package>> entry2 : entry1.getValue().entrySet()) {
 				Package pck2 = entry2.getKey();
-				CloneValue<Package> cloneValue = entry2.getValue();
+				CloneValueForDoubleNodes<Package> cloneValue = entry2.getValue();
 				JSONObject linkJson = new JSONObject();
 				linkJson.put("source", pck1.getId().toString());
 				linkJson.put("target", pck2.getId().toString());
@@ -93,11 +93,11 @@ public class PackageGraph {
 		result.put("legend", lengendsArray);
 		result.put("categories", categoriesArray);
 		JSONArray linksArray = new JSONArray();
-		for(Map.Entry<Package, Map<Package, CloneValue<Package>>> entry1 : packageCloneValues.entrySet()) {
+		for(Map.Entry<Package, Map<Package, CloneValueForDoubleNodes<Package>>> entry1 : packageCloneValues.entrySet()) {
 			Package pck1 = entry1.getKey();
-			for(Map.Entry<Package, CloneValue<Package>> entry2 : entry1.getValue().entrySet()) {
+			for(Map.Entry<Package, CloneValueForDoubleNodes<Package>> entry2 : entry1.getValue().entrySet()) {
 				Package pck2 = entry2.getKey();
-				CloneValue<Package> cloneValue = entry2.getValue();
+				CloneValueForDoubleNodes<Package> cloneValue = entry2.getValue();
 				JSONObject linkJson = new JSONObject();
 				linkJson.put("source", pck1.getId().toString());
 				linkJson.put("target", pck2.getId().toString());

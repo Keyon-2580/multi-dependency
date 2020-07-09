@@ -2,8 +2,10 @@ package cn.edu.fudan.se.multidependency.controller;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,13 +19,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
+import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneShowService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneValueService;
-import cn.edu.fudan.se.multidependency.service.spring.data.CloneValue;
+import cn.edu.fudan.se.multidependency.service.spring.data.CloneValueForDoubleNodes;
 import cn.edu.fudan.se.multidependency.service.spring.data.PackageCloneValueWithFileCoChange;
 
 @Controller
@@ -41,6 +45,9 @@ public class CloneController {
 	
 	@Autowired
 	private NodeService nodeService;
+	
+	@Autowired
+	private ContainRelationService containRelationService;
 
 	@GetMapping("/packages")
 	public String graph() {
@@ -49,7 +56,7 @@ public class CloneController {
 	
 	@GetMapping("/package")
 	@ResponseBody
-	public Collection<CloneValue<Package>> cloneInPackages() {
+	public Collection<CloneValueForDoubleNodes<Package>> cloneInPackages() {
 		return cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), true);
 	}
 	
@@ -61,14 +68,29 @@ public class CloneController {
 	 */
 	@GetMapping("/package/double")
 	@ResponseBody
-	public CloneValue<Package> cloneInPackage(@RequestParam("package1") long package1Id,
+	public CloneValueForDoubleNodes<Package> cloneInPackage(@RequestParam("package1") long package1Id,
 			@RequestParam("package2") long package2Id) {
 		Package pck1 = nodeService.queryPackage(package1Id);
 		Package pck2 = nodeService.queryPackage(package2Id);
 		if(pck1 == null || pck2 == null) {
 			return null;
 		}
-		return cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), true, pck1, pck2);
+		JSONObject result = new JSONObject();
+		CloneValueForDoubleNodes<Package> cloneValue = cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), true, pck1, pck2);
+		JSONObject pck1JSON = new JSONObject();
+		pck1JSON.put("package", pck1);
+		Collection<ProjectFile> files1 = containRelationService.findPackageContainFiles(pck1);
+		pck1JSON.put("files", files1);
+		JSONObject pck2JSON = new JSONObject();
+		pck2JSON.put("package", pck2);
+		Collection<ProjectFile> files2 = containRelationService.findPackageContainFiles(pck2);
+		pck2JSON.put("files", files2);
+		
+		result.put("result", "success");
+		result.put("cloneValue", cloneValue);
+		result.put("package1", pck1JSON);
+		result.put("package2", pck2JSON);
+		return cloneValue;
 	}
 	
 	/**
@@ -86,7 +108,7 @@ public class CloneController {
 		if(pck1 == null || pck2 == null) {
 			return null;
 		}
-		CloneValue<Package> value = cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), true, pck1, pck2);
+		CloneValueForDoubleNodes<Package> value = cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), true, pck1, pck2);
 		JSONObject result = new JSONObject();
 		List<Clone> children = value.getChildren();
 		result.put("result", cloneShowService.graphFileClones(children));
@@ -118,7 +140,7 @@ public class CloneController {
 	
 	@PostMapping("/package/multiple")
 	@ResponseBody
-	public Collection<CloneValue<Package>> cloneInMultiplePackages(@RequestBody Map<String, Object> params) {
+	public Collection<CloneValueForDoubleNodes<Package>> cloneInMultiplePackages(@RequestBody Map<String, Object> params) {
 		List<Long> pckIds = (List<Long>) params.getOrDefault("ids", new ArrayList<>());
 		List<Package> pcks = new ArrayList<>();
 		for(Long pckId : pckIds) {

@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.nospring.git;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Branch;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
@@ -106,9 +108,11 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 //        Collections.reverse(commits);
         for (RevCommit revCommit : commits) {
         	
-            //添加commit节点
-            Commit commit = new Commit(generateEntityId(), revCommit.getName(), revCommit.getShortMessage(),
-                    revCommit.getFullMessage(), revCommit.getAuthorIdent().getWhen().toString());
+        	//添加commit节点
+        	SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constant.TIMESTAMP);
+        	String authoredDate = simpleDateFormat.format(revCommit.getAuthorIdent().getWhen());
+        	Commit commit = new Commit(generateEntityId(), revCommit.getName(), revCommit.getShortMessage(),
+        	        revCommit.getFullMessage(), authoredDate);
             addNode(commit, null);
             
             //添加developer节点和developer到commit的关系
