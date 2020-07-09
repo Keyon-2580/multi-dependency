@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.service.spring;
 import java.util.Collection;
 
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 
@@ -21,6 +22,13 @@ public interface BasicCloneQueryService {
 	 * @return
 	 */
 	Collection<CloneGroup> findGroupsContainCloneTypeRelation(CloneRelationType cloneType);
+	
+	/**
+	 * 找出包含某克隆类型级别的克隆组
+	 * @param cloneType
+	 * @return
+	 */
+	Collection<CloneGroup> findGroupsContainCloneTypeRelation(CloneLevel cloneType);
 	
 	Collection<Clone> findGroupContainCloneRelations(CloneGroup group);
 	

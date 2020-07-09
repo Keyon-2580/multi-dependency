@@ -57,17 +57,6 @@ public interface CloneRepository extends Neo4jRepository<Clone, Long> {
 	@Query("match p= (g:CloneGroup) where g.cloneLevel = {cloneLevel} return g")
 	public List<CloneGroup> findGroups(@Param("cloneLevel") String cloneLevel);
 	
-	/*@Query("match p= (g:CloneGroup) where g.cloneLevel = file return g")
-	public List<CloneGroup> findFileCloneGroups();
-	
-	@Query("match p= (g:CloneGroup) where g.cloneLevel = type return g")
-	public List<CloneGroup> findTypeCloneGroups();
-	
-	@Query("match p= (g:CloneGroup) where g.cloneLevel = function return g")
-	public List<CloneGroup> findFunctionCloneGroups();
-	
-	@Query("match p= (g:CloneGroup) where g.cloneLevel = snippet return g")
-	public List<CloneGroup> findSnippetCloneGroups();*/
 	/**
 	 * 根据克隆组的id找出克隆组内的所有克隆关系
 	 * @param groupId

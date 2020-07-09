@@ -1,4 +1,4 @@
-var graph = function(cytoscapeutil) {
+var clone = function(cytoscapeutil) {
 	var showGraph = function(data) {
 		var myChart = echarts.init(document.getElementById('package_graph'));
 		option = {
@@ -233,6 +233,7 @@ var graph = function(cytoscapeutil) {
 					+ "<tr><th>file1</th><th>file2</th><th>type</th><th>value</th><th>cochange</th></tr>";
 				var children = result.children;
 				for(var i = 0; i < children.length; i++) {
+					var cochangeId = children[i].cochange == null ? -1 : children[i].cochange.id;
 					html += "<tr>";
 					html += "<td>";
 					html += "<span>" + children[i].file1.path + "</span><span> (" + children[i].file1.lines + ") </span>";
@@ -247,7 +248,8 @@ var graph = function(cytoscapeutil) {
 					html += children[i].fileClone.value;
 					html += "</td>";
 					html += "<td>";
-					html += "<a class='cochangeTimes' index='" + i + "'>" + children[i].cochangeTimes + "</a>";
+					html += "<a class='cochangeTimes' target='_blank' href='/git/cochange/commits?cochangeId=" + cochangeId
+						+ "' index='" + i + "'>" + children[i].cochangeTimes + "</a>";
 					html += "</td>";
 					html += "</tr>";
 				}

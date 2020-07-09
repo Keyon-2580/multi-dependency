@@ -62,6 +62,18 @@ public class BasicCloneQueryServiceImpl implements BasicCloneQueryService {
 		}
 		return result;
 	}
+	
+	private Map<CloneLevel, Collection<CloneGroup>> cloneLevelToGroups = new ConcurrentHashMap<>();
+	@Override
+	public Collection<CloneGroup> findGroupsContainCloneTypeRelation(CloneLevel level) {
+		Collection<CloneGroup> result = cloneLevelToGroups.get(level);
+		if(result == null) {
+			level = level == null ? CloneLevel.file : level;
+			result = cloneRepository.findGroups(level.toString());
+			cloneLevelToGroups.put(level, result);
+		}
+		return result;
+	}
 
 	private Map<CloneRelationType, Collection<CloneGroup>> cloneTypeToGroups = new ConcurrentHashMap<>();
 	@Override
@@ -70,19 +82,15 @@ public class BasicCloneQueryServiceImpl implements BasicCloneQueryService {
 		if(result == null) {
 			switch(cloneType) {
 			case FILE_CLONE_FILE:
-//				result = cloneRepository.findGroupsByFileCloneFileRelation();
 				result = cloneRepository.findGroups(CloneLevel.file.toString());
 				break;
 			case FUNCTION_CLONE_FUNCTION:
-//				result = cloneRepository.findGroupsByFunctionCloneFunctionRelation();
 				result = cloneRepository.findGroups(CloneLevel.function.toString());
 				break;
 			case TYPE_CLONE_TYPE:
-//				result = cloneRepository.findGroupsByTypeCloneTypeRelation();
 				result = cloneRepository.findGroups(CloneLevel.type.toString());
 				break;
 			case SNIPPET_CLONE_SNIPPET:
-//				result = cloneRepository.findGroupsBySnippetCloneSnippetRelation();
 				result = cloneRepository.findGroups(CloneLevel.snippet.toString());
 				break;
 			case FUNCTION_CLONE_SNIPPET:

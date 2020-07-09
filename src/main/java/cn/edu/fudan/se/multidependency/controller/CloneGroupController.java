@@ -26,8 +26,8 @@ import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
-import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
@@ -68,7 +68,8 @@ public class CloneGroupController {
 
 	@GetMapping(value = {"", "/", "/index"})
 	public String index(HttpServletRequest request) {
-		request.setAttribute("cloneRelationTypes", CloneRelationType.values());
+//		request.setAttribute("cloneRelationTypes", CloneRelationType.values());
+		request.setAttribute("cloneLevels", CloneLevel.values());
 		request.setAttribute("search", false);
 		return "clonegroup";
 	}
@@ -119,8 +120,11 @@ public class CloneGroupController {
 		if(cloneRelationTypes.isEmpty()) {
 			throw new Exception();
 		}
-		CloneRelationType cloneRelationType = CloneRelationType.valueOf(cloneRelationTypes.get(0));
-		cloneRelationType = cloneRelationType == null ? CloneRelationType.FILE_CLONE_FILE : cloneRelationType;
+//		CloneRelationType cloneRelationType = CloneRelationType.valueOf(cloneRelationTypes.get(0));
+//		cloneRelationType = cloneRelationType == null ? CloneRelationType.FILE_CLONE_FILE : cloneRelationType;
+		System.out.println(cloneRelationTypes.get(0));
+		CloneLevel cloneLevel = CloneLevel.valueOf(cloneRelationTypes.get(0));
+		cloneLevel = cloneLevel == null ? CloneLevel.file : cloneLevel;
 		PredicateForCloneGroup predicate = new PredicateForCloneGroup();
 		
 		if(languages.size() == 1) {
@@ -134,7 +138,7 @@ public class CloneGroupController {
 				predicate.addFilter(new PredicateForFileClone(cloneAnalyse, containRelationService));
 			}
 		}
-		return cloneAnalyse.group(cloneRelationType, predicate);
+		return cloneAnalyse.group(cloneLevel, predicate);
 	}
 	
 	@PostMapping("/histogram")

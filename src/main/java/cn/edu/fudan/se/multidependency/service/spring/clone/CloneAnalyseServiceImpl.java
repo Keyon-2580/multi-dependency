@@ -11,17 +11,17 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
-import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository;
 import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.spring.CacheService;
@@ -61,9 +61,9 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 		return group;
 	}
     
-	private Map<CloneRelationType, Collection<CloneGroup>> typeToGroupCache = new ConcurrentHashMap<>();
+	private Map<CloneLevel, Collection<CloneGroup>> typeToGroupCache = new ConcurrentHashMap<>();
     @Override
-	public Collection<CloneGroup> group(CloneRelationType cloneRelationType, Predicate<CloneGroup> predicate) {
+	public Collection<CloneGroup> group(CloneLevel cloneRelationType, Predicate<CloneGroup> predicate) {
     	Collection<CloneGroup> groups = typeToGroupCache.get(cloneRelationType);
     	if(groups == null) {
     		groups = basicCloneQueryService.findGroupsContainCloneTypeRelation(cloneRelationType);

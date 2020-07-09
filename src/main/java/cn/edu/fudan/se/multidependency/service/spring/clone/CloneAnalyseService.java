@@ -8,8 +8,8 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
-import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.service.spring.data.CloneLineValue;
 
 public interface CloneAnalyseService {
@@ -20,7 +20,7 @@ public interface CloneAnalyseService {
 	 * @param predicates
 	 * @return
 	 */
-	Collection<CloneGroup> group(CloneRelationType cloneRelationType, Predicate<CloneGroup> predicate);
+	Collection<CloneGroup> group(CloneLevel cloneRelationType, Predicate<CloneGroup> predicate);
 	
 	CloneGroup addNodeAndRelationToCloneGroup(CloneGroup cloneGroup);
 	

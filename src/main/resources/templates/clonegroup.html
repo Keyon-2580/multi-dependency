@@ -74,7 +74,7 @@
 						<label for="name">克隆关系类型</label>
 						<div>
 							<select id="searchCloneRelationTypeSelect" name="searchCloneRelationTypeSelect" class="multiselect form-control" multiple="multiple">
-								<option th:each="cloneRelationType : ${cloneRelationTypes}" th:value="${cloneRelationType}" th:text="${cloneRelationType}">
+								<option th:each="cloneRelationType : ${cloneLevels}" th:value="${cloneRelationType}" th:text="${cloneRelationType}">
 								</option>
 							</select>
 						</div>

@@ -160,10 +160,5 @@ public class GraphController {
 		}
 		return result;
 	}
-
-	@RequestMapping("/")
-	public String graph() {
-		return "graph";
-	}
 	
 }

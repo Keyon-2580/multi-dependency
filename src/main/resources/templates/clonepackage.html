@@ -25,7 +25,7 @@
 <script type="text/javascript" th:src="@{/js/import/ztree/jquery.ztree.all.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/echarts-4.7.0/dist/echarts.js}"></script>
 <script type="text/javascript" th:src="@{/js/cytoscapeutils.js}"></script>
-<script type="text/javascript" th:src="@{/js/graph.js}"></script>
+<script type="text/javascript" th:src="@{/js/clone.js}"></script>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
@@ -93,7 +93,7 @@
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-			graph(cytoscapeutil()).init();		
+			clone(cytoscapeutil()).init();		
 		});
 		// ]]>
 	</script>

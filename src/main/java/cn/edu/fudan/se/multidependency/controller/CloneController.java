@@ -41,6 +41,11 @@ public class CloneController {
 	
 	@Autowired
 	private NodeService nodeService;
+
+	@GetMapping("/packages")
+	public String graph() {
+		return "clonepackage";
+	}
 	
 	@GetMapping("/package")
 	@ResponseBody
