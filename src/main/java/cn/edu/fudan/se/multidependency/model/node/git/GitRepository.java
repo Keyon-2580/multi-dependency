@@ -27,10 +27,16 @@ public class GitRepository implements Node {
     private Long entityId;
 
     private String name;
+    
+    private String gitPath;
+    
+    private String path;
 
-    public GitRepository(Long entityId, String name){
+    public GitRepository(Long entityId, String name, String gitPath, String path){
         this.entityId = entityId;
         this.name = name;
+        this.gitPath = gitPath;
+        this.path = path;
     }
 
     @Override
@@ -38,6 +44,8 @@ public class GitRepository implements Node {
         Map<String, Object> properties = new HashMap<>();
         properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
         properties.put("name", getName() == null ? "" : getName());
+        properties.put("gitPath", getGitPath() == null ? "" : getGitPath());
+        properties.put("path", getPath() == null ? "" : getPath());
         return properties;
     }
 

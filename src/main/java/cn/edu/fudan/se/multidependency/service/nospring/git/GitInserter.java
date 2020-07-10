@@ -28,12 +28,11 @@ import cn.edu.fudan.se.multidependency.model.relation.git.CommitUpdateFile;
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperReportIssue;
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperSubmitCommit;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
-import cn.edu.fudan.se.multidependency.service.nospring.clone.CloneInserterForMethod;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
 public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(CloneInserterForMethod.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(GitInserter.class);
 
     private GitExtractor gitExtractor;
 
@@ -41,7 +40,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
     private Map<Integer, Issue> issues;
 
-    private static final String[] SUFFIX = new String[]{".java", ".c", ".cpp"};
+    private static final String[] SUFFIX = new String[]{".java", ".c", ".cpp", ".cc", ".h"};
 
     private boolean selectCommitRange;
 
@@ -73,7 +72,8 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
     public void addBranchesAndIssues() {
         //添加gitRepository节点和gitRepository到project的包含关系
-        GitRepository gitRepository = new GitRepository(generateEntityId(), gitExtractor.getRepositoryName());
+        GitRepository gitRepository = new GitRepository(generateEntityId(), gitExtractor.getRepositoryName(), gitExtractor.getGitPath(), gitExtractor.getRepositoryPath());
+        LOGGER.info(gitRepository.getPath());
         addNode(gitRepository, null);
 
         //添加branch节点和gitRepository到branch的包含关系

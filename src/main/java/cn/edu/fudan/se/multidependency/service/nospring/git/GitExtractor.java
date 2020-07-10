@@ -1,11 +1,19 @@
 package cn.edu.fudan.se.multidependency.service.nospring.git;
 
-import cn.edu.fudan.se.multidependency.utils.FileUtil;
-import com.google.common.collect.Lists;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.lib.*;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectReader;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -14,14 +22,13 @@ import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.google.common.collect.Lists;
+
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
 public class GitExtractor {
+	
+//	private static final Logger LOGGER = LoggerFactory.getLogger(GitExtractor.class);
 
     private String gitProjectPath;
 
@@ -51,6 +58,14 @@ public class GitExtractor {
 
     public String getRepositoryName() {
         return FileUtil.extractFileName(gitProjectPath);
+    }
+    
+    public String getGitPath() {
+    	return repository.getDirectory().getAbsolutePath();
+    }
+    
+    public String getRepositoryPath() {
+    	return gitProjectPath;
     }
 
     public List<RevCommit> getAllCommits() {
