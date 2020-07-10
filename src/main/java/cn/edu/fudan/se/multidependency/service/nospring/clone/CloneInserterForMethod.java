@@ -181,7 +181,11 @@ public class CloneInserterForMethod extends CloneInserter {
 				}
 				addRelation(new Contain(cloneGroup, node));
 			}
-			cloneGroup.setCloneLevel(uniqueNodeType ? level.toString() : CloneLevel.multiple_level.toString());
+			if(level == null) {
+				cloneGroup.setCloneLevel(CloneLevel.multiple_level.toString());
+			} else {
+				cloneGroup.setCloneLevel(uniqueNodeType ? level.toString() : CloneLevel.multiple_level.toString());
+			}
 			addNode(cloneGroup, null);
 		}
 		LOGGER.info("插入文件级克隆组，组数：" + (cloneGroupNumber - groupCount));

@@ -292,7 +292,7 @@ var clone = function(cytoscapeutil) {
 			url: "/clone/package",
 			success:function(result) {
 				console.log(result);
-				var html = "<table class='table table-bordered'>";;
+				var html = "<div><span>" + result.length + "</span></div><table class='table table-bordered'>";;
 				html += "<tr><th>index</th><th>目录</th><th>目录</th><th>文件克隆对数</th></tr>";
 				for(var i = 0; i < result.length; i++) {
 					html += "<tr>";
