@@ -1,8 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.nospring.git;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +19,6 @@ import cn.edu.fudan.se.multidependency.model.node.git.Developer;
 import cn.edu.fudan.se.multidependency.model.node.git.GitRepository;
 import cn.edu.fudan.se.multidependency.model.node.git.Issue;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
-import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.model.relation.git.CommitAddressIssue;
 import cn.edu.fudan.se.multidependency.model.relation.git.CommitInheritCommit;
 import cn.edu.fudan.se.multidependency.model.relation.git.CommitUpdateFile;
@@ -66,7 +63,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
     public void addNodesAndRelations() throws Exception {
         addBranchesAndIssues();
         addCommitsAndRelations();
-        addProjectFileCoChangeRelation();
+//        addProjectFileCoChangeRelation();
         gitExtractor.close();
     }
 
@@ -134,7 +131,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
             }
 
             //添加commit到commit的继承关系
-            List<ProjectFile> files = new ArrayList<>();
+//            List<ProjectFile> files = new ArrayList<>();
             if (revCommit.getParentCount() > 0) {
                 RevCommit[] parentRevCommits = revCommit.getParents();
                 for (RevCommit parentRevCommit : parentRevCommits) {
@@ -154,9 +151,9 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
                         String path = DiffEntry.ChangeType.DELETE.name().equals(changeType) ? oldPath : newPath;
                         if (FileUtil.isFiltered(newPath, SUFFIX)) continue;
                         CommitUpdateFile update = addCommitUpdateFileRelation(path, commit, changeType);
-                        if(update != null) {
+                        /*if(update != null) {
                         	files.add(update.getFile());
-                        }
+                        }*/
                     }
                 }
             } else {
@@ -164,17 +161,18 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
                 for (String path : filesPath) {
                     if (FileUtil.isFiltered(path, SUFFIX)) continue;
                     path = "/" + gitExtractor.getRepositoryName() + "/" + path;
-                    CommitUpdateFile update = addCommitUpdateFileRelation(path, commit, "ADD");
+                    addCommitUpdateFileRelation(path, commit, "ADD");
+                    /*CommitUpdateFile update = addCommitUpdateFileRelation(path, commit, "ADD");
                     if(update != null) {
                     	files.add(update.getFile());
-                    }
+                    }*/
                 }
             }
             
-            files.sort((file1, file2) -> {
+            /*files.sort((file1, file2) -> {
             	return file1.getPath().compareTo(file2.getPath());
             });
-            addProjectFileCoChangeRelation(files);
+            addProjectFileCoChangeRelation(files);*/
 
             //添加Commit到Issue的关系
             if (isAnalyseIssue) {
@@ -188,7 +186,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         }
     }
     
-    private void addProjectFileCoChangeRelation() {
+    /*private void addProjectFileCoChangeRelation() {
     	int count = 0;
     	for(Map<String, CoChange> values : fileCoChanges.values()) {
     		for(CoChange cc : values.values()) {
@@ -217,7 +215,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
     		}
     		fileCoChanges.put(file1.getPath(), file1ToCochanges);
     	}
-    }
+    }*/
 
     private CommitUpdateFile addCommitUpdateFileRelation(String filePath, Commit commit, String updateType) {
         ProjectFile file = this.getNodes().findFileByPathRecursion(filePath);
