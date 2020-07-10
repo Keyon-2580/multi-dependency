@@ -22,6 +22,8 @@ import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Snippet;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.node.git.Commit;
+import cn.edu.fudan.se.multidependency.model.node.git.GitRepository;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
@@ -29,6 +31,7 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
+import cn.edu.fudan.se.multidependency.repository.node.git.GitRepoRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 
 @Service
@@ -39,6 +42,9 @@ public class ContainRelationServiceImpl implements ContainRelationService {
     
     @Autowired
     CacheService cache;
+    
+    @Autowired
+    GitRepoRepository gitRepoRepository;
     
 	Map<Project, Collection<ProjectFile>> projectContainFilesCache = new ConcurrentHashMap<>();
 	@Override
@@ -459,6 +465,16 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	@Override
 	public boolean isDifferentPackage(ProjectFile file1, ProjectFile file2) {
 		return findFileBelongToPackage(file1).equals(findFileBelongToPackage(file2));
+	}
+
+	@Override
+	public GitRepository findCommitBelongToGitRepository(Commit commit) {
+		Node belongToNode = cache.findNodeBelongToNode(commit, NodeLabelType.GitRepository);
+		GitRepository result = belongToNode == null ? gitRepoRepository.findCommitBelongToGitRepository(commit.getId()) : (GitRepository) belongToNode;
+		cache.cacheNodeBelongToNode(commit, result);
+		cache.cacheNodeById(commit);
+		cache.cacheNodeById(result);
+		return result;
 	}
 
 }

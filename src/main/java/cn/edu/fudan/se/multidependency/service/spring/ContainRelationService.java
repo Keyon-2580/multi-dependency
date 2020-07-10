@@ -13,6 +13,8 @@ import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Snippet;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.node.git.Commit;
+import cn.edu.fudan.se.multidependency.model.node.git.GitRepository;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
@@ -94,4 +96,5 @@ public interface ContainRelationService {
 	
 	boolean isDifferentPackage(ProjectFile file1, ProjectFile file2);
 	
+	GitRepository findCommitBelongToGitRepository(Commit commit);
 }

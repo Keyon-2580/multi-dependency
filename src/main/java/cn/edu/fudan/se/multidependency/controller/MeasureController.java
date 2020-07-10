@@ -1,7 +1,7 @@
 package cn.edu.fudan.se.multidependency.controller;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.repository.node.code.ProjectRepository;
+import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.metric.ModularityCalculatorImplForFieldMethodLevel;
 import com.alibaba.fastjson.JSONObject;

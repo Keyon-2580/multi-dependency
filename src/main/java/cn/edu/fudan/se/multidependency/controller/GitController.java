@@ -12,8 +12,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
+import cn.edu.fudan.se.multidependency.model.node.git.GitRepository;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
+import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.history.GitAnalyseService;
 
 @Controller
@@ -21,7 +25,25 @@ import cn.edu.fudan.se.multidependency.service.spring.history.GitAnalyseService;
 public class GitController {
 
     @Autowired
-    private GitAnalyseService gitAnalyseService;
+    GitAnalyseService gitAnalyseService;
+    
+    @Autowired
+    NodeService nodeService;
+    
+    @Autowired
+    ContainRelationService containRelationService;
+    
+    @GetMapping("/repo/commit")
+    @ResponseBody
+    public GitRepository queryGitRepoByCommit(@RequestParam("commitId") long commitId) {
+    	Node node = nodeService.queryNodeById(commitId);
+    	if(node == null || !(node instanceof Commit)) {
+    		return null;
+    	}
+    	Commit commit = (Commit) node;
+    	GitRepository result = containRelationService.findCommitBelongToGitRepository(commit);
+    	return result;
+    }
     
     @GetMapping("/cochange/commits")
     @ResponseBody

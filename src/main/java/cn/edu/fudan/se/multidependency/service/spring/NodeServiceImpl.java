@@ -21,12 +21,14 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
+import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.clone.CloneGroupRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.FunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.NamespaceRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.PackageRepository;
-import cn.edu.fudan.se.multidependency.repository.node.code.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.TypeRepository;
+import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
+import cn.edu.fudan.se.multidependency.repository.node.git.GitRepoRepository;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
 @Service
@@ -55,6 +57,12 @@ public class NodeServiceImpl implements NodeService {
 	
 	@Autowired
 	CloneGroupRepository cloneGroupRepository;
+	
+	@Autowired
+	GitRepoRepository gitRepoRepository;
+	
+	@Autowired
+	CommitRepository commitRepository;
 
 	@Override
 	public Package queryPackage(long id) {
@@ -129,7 +137,7 @@ public class NodeServiceImpl implements NodeService {
 
 	@Override
 	public Project queryProject(String name, Language language) {
-		Project project = projectRepository.findProjectByNameAndLanguage(name, language.toString());
+		Project project = projectRepository.queryProjectByNameAndLanguage(name, language.toString());
 		cache.cacheNodeById(project);
 		return project;
 	}
@@ -142,7 +150,7 @@ public class NodeServiceImpl implements NodeService {
 		}
 		Collection<Project> result = languageToProjectsCache.get(language);
 		if(result == null) {
-			List<Project> projects = projectRepository.findProjectsByLanguage(language.toString());
+			List<Project> projects = projectRepository.queryProjectsByLanguage(language.toString());
 			projects.sort((p1, p2) -> {
 				return p1.getName().compareTo(p2.getName());
 			});
@@ -179,6 +187,16 @@ public class NodeServiceImpl implements NodeService {
 		Iterable<ProjectFile> files = fileRepository.findAll();
 		for(ProjectFile file : files) {
 			result.add(file);
+		}
+		return result;
+	}
+
+	@Override
+	public Node queryNodeById(long id) {
+		Node result = cache.findNodeById(id);
+		if(result == null) {
+			result = projectRepository.queryNodeById(id);
+			cache.cacheNodeById(result);
 		}
 		return result;
 	}
