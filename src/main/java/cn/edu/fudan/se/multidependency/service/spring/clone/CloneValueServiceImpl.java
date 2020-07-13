@@ -95,7 +95,7 @@ public class CloneValueServiceImpl implements CloneValueService {
 	}
     
     private Collection<CloneValueForDoubleNodes<Package>> removeSameNodeToCloneValuePackages = null;
-    private Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> queryPackageCloneFromFileCloneCache = new ConcurrentHashMap<>();
+    private Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> queryPackageCloneFromFileCloneCache = null;
 	public Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> queryPackageCloneFromFileClone(Collection<Clone> fileClones) {
 		Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> pckToPackageClones = queryPackageCloneFromFileCloneCache;
 		if(pckToPackageClones == null) {

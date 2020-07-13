@@ -40,17 +40,15 @@ public class DuplicatedPackageDetectorImpl implements DuplicatedPackageDetector 
 		PackageCloneValueCalculator.getInstance().setContainRelationService(containRelationService);
 		for(CloneValueForDoubleNodes<Package> packageClone : packageClones) {
 			boolean isDuplicated = (boolean) packageClone.calculateValue(PackageCloneValueCalculator.getInstance());
-			if(isDuplicated) {
+			if(!isDuplicated) {
 				continue;
 			}
 			if(idToPackageClone.get(packageClone.getId()) != null) {
 				continue;
 			}
 			DuplicatedPackage temp = new DuplicatedPackage(packageClone);
-			idToPackageClone.put(temp.getClonePackages().getId(), temp);
-			if(isChild.get(temp.getId()) == null) {
-				isChild.put(temp.getId(), false);
-			}
+			idToPackageClone.put(temp.getId(), temp);
+			isChild.put(temp.getId(), false);
 			
 			Package currentPackage1 = packageClone.getNode1();
 			Package currentPackage2 = packageClone.getNode2();
@@ -76,7 +74,6 @@ public class DuplicatedPackageDetectorImpl implements DuplicatedPackageDetector 
 			}
 			
 		}
-
 		List<DuplicatedPackage> result = new ArrayList<>();
 		for(Map.Entry<String, DuplicatedPackage> entry : idToPackageClone.entrySet()) {
 			String id = entry.getKey();
@@ -84,7 +81,6 @@ public class DuplicatedPackageDetectorImpl implements DuplicatedPackageDetector 
 				result.add(entry.getValue());
 			}
 		}
-		
 		return result;
 	}
 

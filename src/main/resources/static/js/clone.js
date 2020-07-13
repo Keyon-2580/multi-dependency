@@ -187,6 +187,46 @@ var clone = function(cytoscapeutil) {
 	var showPackageCytoscapeGraph = function(data) {
 		var cy = cytoscapeutil.showDataInCytoscape($("#cloneGroupsDiv"), data, "random");
 	};
+	var duplicatedPackage = function() {
+		$("#packages_duplicated").html("");
+		$.ajax({
+			type: "get",
+			url: "/clone/package/duplicated?threshold=10",
+			success: function(result) {
+				console.log(result);
+				var html = "<table class='table table-bordered'>";
+//					+ "<tr><th>file1</th><th>file2</th><th>type</th><th>value</th></tr>";
+				var tr = function(layer, duplicated) {
+					console.log(layer);
+					var prefix = "";
+					for(var i = 0; i < layer; i++) {
+						prefix += "|--------";
+					}
+					html += "<tr>";
+					html += "<td>";
+					html += prefix + duplicated.package1.directoryPath
+					html += "</td>";
+					html += "<td>";
+					html += prefix + duplicated.package2.directoryPath
+					html += "</td>";
+					html += "<td>";
+					html += duplicated.clonePackages.children.length;
+					html += "</td>";
+					html += "</tr>";
+					for(var key in duplicated.childrenClonePackages) {
+//						console.log(key);
+//						console.log(duplicated.childrenClonePackages[key])
+						tr(layer + 1, duplicated.childrenClonePackages[key]);
+					}
+				}
+				for(var i = 0; i < result.length; i++) {
+					tr(0, result[i]);
+				}
+				html += "</table>"
+				$("#packages_duplicated").html(html);
+			}
+		})
+	}
 	var doublePackagesClone = function(pck1Id, pck2Id, index) {
 		$("#package_files_clone").html("");
 		$.ajax({
@@ -318,6 +358,7 @@ var clone = function(cytoscapeutil) {
 //					doublePackagesClone($(this).attr("id1"), $(this).attr("id2"), $(this).attr("index"));
 					doublePackagesCloneWithCoChange($(this).attr("id1"), $(this).attr("id2"), $(this).attr("index"));
 				});
+				duplicatedPackage();
 			}
 		});
 	}
