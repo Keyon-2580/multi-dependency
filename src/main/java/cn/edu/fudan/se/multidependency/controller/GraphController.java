@@ -21,7 +21,7 @@ import cn.edu.fudan.se.multidependency.service.spring.GraphService;
 import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneValueServiceImpl;
-import cn.edu.fudan.se.multidependency.service.spring.data.FileGraph;
+import cn.edu.fudan.se.multidependency.service.spring.clone.data.FileGraph;
 import cn.edu.fudan.se.multidependency.service.spring.data.PackageGraph;
 
 @Controller
@@ -152,7 +152,7 @@ public class GraphController {
 				graph.add(pck, containRelationService.findPackageBelongToProject(pck));
 			}
 			Collection<Clone> fileClones = basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE);
-			graph.setPackageCloneValues(cloneValueService.queryPackageCloneFromFileClone(fileClones, true));
+			graph.setPackageCloneValues(cloneValueService.queryPackageCloneFromFileClone(fileClones));
 			result.put("result", "success");
 			result.put("data", graph.changeToEChartsGraph());
 		} catch (Exception e) {

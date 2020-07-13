@@ -27,8 +27,8 @@ import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneShowService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneValueService;
-import cn.edu.fudan.se.multidependency.service.spring.data.CloneValueForDoubleNodes;
-import cn.edu.fudan.se.multidependency.service.spring.data.PackageCloneValueWithFileCoChange;
+import cn.edu.fudan.se.multidependency.service.spring.clone.data.CloneValueForDoubleNodes;
+import cn.edu.fudan.se.multidependency.service.spring.clone.data.PackageCloneValueWithFileCoChange;
 
 @Controller
 @RequestMapping("/clone")
@@ -57,7 +57,7 @@ public class CloneController {
 	@GetMapping("/package")
 	@ResponseBody
 	public Collection<CloneValueForDoubleNodes<Package>> cloneInPackages() {
-		return cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), true);
+		return cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE));
 	}
 	
 	/**
@@ -76,7 +76,7 @@ public class CloneController {
 			return null;
 		}
 		JSONObject result = new JSONObject();
-		CloneValueForDoubleNodes<Package> cloneValue = cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), true, pck1, pck2);
+		CloneValueForDoubleNodes<Package> cloneValue = cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pck1, pck2);
 		JSONObject pck1JSON = new JSONObject();
 		pck1JSON.put("package", pck1);
 		Collection<ProjectFile> files1 = containRelationService.findPackageContainFiles(pck1);
@@ -108,7 +108,7 @@ public class CloneController {
 		if(pck1 == null || pck2 == null) {
 			return null;
 		}
-		CloneValueForDoubleNodes<Package> value = cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), true, pck1, pck2);
+		CloneValueForDoubleNodes<Package> value = cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pck1, pck2);
 		JSONObject result = new JSONObject();
 		List<Clone> children = value.getChildren();
 		result.put("result", cloneShowService.graphFileClones(children));
@@ -131,7 +131,7 @@ public class CloneController {
 			return null;
 		}
 		try {
-			return cloneValueService.queryPackageCloneWithFileCoChange(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), true, pck1, pck2);
+			return cloneValueService.queryPackageCloneWithFileCoChange(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pck1, pck2);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -149,6 +149,6 @@ public class CloneController {
 				pcks.add(pck);
 			}
 		}
-		return cloneValueService.queryPackageCloneFromFileClone(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), true, pcks);
+		return cloneValueService.queryPackageCloneFromFileClone(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pcks);
 	}
 }

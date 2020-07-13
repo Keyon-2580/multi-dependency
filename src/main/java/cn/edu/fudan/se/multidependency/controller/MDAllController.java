@@ -168,7 +168,7 @@ public class MDAllController {
 //			Iterable<MicroService> allMicroServices = msService.findAllMicroService();
 //			Map<MicroService, CloneLineValue<MicroService>> msCloneValues = cloneAnalyse.msCloneLineValuesGroup(allMicroServices, CloneGroup.allGroup(CloneLevel.file), CloneLevel.file, false, false);
 //			callsWithEntry.setMsToCloneLineValue(msCloneValues);
-			callsWithEntry.setClonesInMicroServiceFromFileClone(cloneValueService.findMicroServiceCloneFromFileClone(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), true));
+			callsWithEntry.setClonesInMicroServiceFromFileClone(cloneValueService.findMicroServiceCloneFromFileClone(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE)));
 			callsWithEntry.setShowClonesMinPair(showClonesMinPair);
 		}
 		if(showMicroServiceCallLibs) {

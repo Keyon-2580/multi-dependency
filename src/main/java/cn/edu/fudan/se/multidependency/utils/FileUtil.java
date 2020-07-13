@@ -80,8 +80,10 @@ public class FileUtil {
 	}
 
 	public static void main(String[] args) {
-		String filePath = "D:\\multiple-dependency-project\\depends-update\\depends\\src\\main\\java\\depends\\format\\AbstractFormatDependencyDumper.java";
-		System.out.println(extractFilePath(filePath, "/depends"));
+//		String filePath = "D:\\multiple-dependency-project\\depends-update\\depends\\src\\main\\java\\depends\\format\\AbstractFormatDependencyDumper.java";
+//		System.out.println(extractFilePath(filePath, "/depends"));
+		String directoryPath = "/google__fdse__auto/value/src/it/functional/src/test/java/com/google/auto/value/enums/";
+		System.out.println(extractDirectoryFromFile(extractDirectoryFromFile(directoryPath)) + "/");
 		/*String directoryPath = "D:\\multiple-dependency-project\\train-ticket";
 		System.out.println("result: " + extractNextPath(directoryPath));
 		directoryPath = "D:\\multiple-dependency-project\\doublelanguage";

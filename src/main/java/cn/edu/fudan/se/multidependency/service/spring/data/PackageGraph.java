@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.service.spring.clone.data.CloneValueForDoubleNodes;
 import lombok.Getter;
 import lombok.Setter;
 

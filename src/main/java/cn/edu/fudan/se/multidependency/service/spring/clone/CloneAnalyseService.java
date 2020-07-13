@@ -10,7 +10,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
-import cn.edu.fudan.se.multidependency.service.spring.data.CloneLineValue;
+import cn.edu.fudan.se.multidependency.service.spring.clone.data.CloneLineValue;
 
 public interface CloneAnalyseService {
 	/**

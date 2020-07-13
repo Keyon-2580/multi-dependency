@@ -28,7 +28,7 @@ import cn.edu.fudan.se.multidependency.service.spring.CacheService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
-import cn.edu.fudan.se.multidependency.service.spring.data.CloneLineValue;
+import cn.edu.fudan.se.multidependency.service.spring.clone.data.CloneLineValue;
 
 @Service
 public class CloneAnalyseServiceImpl implements CloneAnalyseService {

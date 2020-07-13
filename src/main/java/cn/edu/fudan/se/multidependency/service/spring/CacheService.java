@@ -7,12 +7,14 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 
 @Service
 public class CacheService {
 
 	private final Map<String, ProjectFile> pathToFile = new ConcurrentHashMap<>();
+	private final Map<String, Package> directoryToPackage = new ConcurrentHashMap<>();
 	private final Map<Long, Node> idToNodeCache = new ConcurrentHashMap<>();
 	private final Map<Node, Map<NodeLabelType, Node>> nodeBelongToNodeCache = new ConcurrentHashMap<>();
 	
@@ -46,7 +48,10 @@ public class CacheService {
 		}
 		idToNodeCache.put(node.getId(), node);
 		if(node instanceof ProjectFile) {
-			this.pathToFile.put(((ProjectFile) node).getPath(), (ProjectFile) node);
+//			this.pathToFile.put(((ProjectFile) node).getPath(), (ProjectFile) node);
+			cacheFileByPath(((ProjectFile) node).getPath(), (ProjectFile) node);
+		} else if(node instanceof Package) {
+			cachePackageByDirectory(((Package) node).getDirectoryPath(), (Package) node);
 		}
 		return node;
 	}
@@ -58,5 +63,13 @@ public class CacheService {
 	public ProjectFile findFileByPath(String path) {
 		return this.pathToFile.get(path);
 	}
+	
+	public void cachePackageByDirectory(String directory, Package pck) {
+		this.directoryToPackage.put(directory, pck);
+	}
+	
+//	public Package findPackageByDirectoryPath(String directoryPath) {
+//		
+//	}
 	
 }

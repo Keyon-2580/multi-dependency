@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.service.spring.data;
+package cn.edu.fudan.se.multidependency.service.spring.clone.data;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;

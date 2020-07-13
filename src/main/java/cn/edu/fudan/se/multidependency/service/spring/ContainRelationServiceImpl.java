@@ -33,6 +33,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.repository.node.git.GitRepoRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
 @Service
 public class ContainRelationServiceImpl implements ContainRelationService {
@@ -45,6 +46,9 @@ public class ContainRelationServiceImpl implements ContainRelationService {
     
     @Autowired
     GitRepoRepository gitRepoRepository;
+    
+    @Autowired
+    NodeService nodeService;
     
 	Map<Project, Collection<ProjectFile>> projectContainFilesCache = new ConcurrentHashMap<>();
 	@Override
@@ -475,6 +479,13 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		cache.cacheNodeById(commit);
 		cache.cacheNodeById(result);
 		return result;
+	}
+
+	@Override
+	public Package findPackageInPackage(Package pck) {
+		String directoryPath = pck.getDirectoryPath();
+		String lastDirectoryPath = FileUtil.extractDirectoryFromFile(FileUtil.extractDirectoryFromFile(directoryPath)) + "/";
+		return nodeService.queryPackage(lastDirectoryPath);
 	}
 
 }

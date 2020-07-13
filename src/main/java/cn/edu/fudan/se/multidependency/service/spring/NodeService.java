@@ -20,6 +20,8 @@ public interface NodeService {
 	Map<Long, Package> queryAllPackages();
 	
 	Package queryPackage(long id);
+	
+	Package queryPackage(String directoryPath);
 
 	ProjectFile queryFile(long id);
 	

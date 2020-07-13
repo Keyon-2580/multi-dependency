@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.service.spring.data;
+package cn.edu.fudan.se.multidependency.service.spring.clone.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,22 +24,30 @@ public class CloneValueForDoubleNodes<N extends Node> implements Serializable {
 	
 	private static final long serialVersionUID = -2262794801616872866L;
 	
-	private N node1;
+	protected N node1;
 	
-	private N node2;
+	protected N node2;
 	
-	private double value = 0;
+	protected double value = 0;
 	
-	public String getId() {
-		return node1.getId() + "_" + node2.getId();
+	protected String id;
+	
+	public CloneValueForDoubleNodes(N node1, N node2) {
+		this.node1 = node1;
+		this.node2 = node2;
+		this.id = String.join("_", node1.getId().toString(), node2.getId().toString());
 	}
 	
-	// 两个克隆节点内部的克隆关系
-	private List<Clone> children = new ArrayList<>();
+	public String getId() {
+		return this.id;
+	}
 	
-	private Set<CodeNode> nodesInNode1 = new HashSet<>();
+	// 两个克隆节点内部的节点之间的克隆关系对
+	protected List<Clone> children = new ArrayList<>();
 	
-	private Set<CodeNode> nodesInNode2 = new HashSet<>();
+	protected Set<CodeNode> nodesInNode1 = new HashSet<>();
+	
+	protected Set<CodeNode> nodesInNode2 = new HashSet<>();
 	
 	public void addCodeNodeToNode1(CodeNode node) {
 		this.nodesInNode1.add(node);
@@ -68,14 +76,13 @@ public class CloneValueForDoubleNodes<N extends Node> implements Serializable {
 		});
 	}
 	
-	public static interface CloneValueCalculator {
-		String calculate(CloneValueForDoubleNodes<? extends Node> clone);
-	}
+	protected transient CloneValueCalculator<?> calculator;
 	
-	private transient CloneValueCalculator calculator;
-	
-	public String calculateValue() {
+	public Object calculateValue(CloneValueCalculator<?> calculator) {
 		if(calculator != null) {
+			return calculator.calculate(this);
+		}
+		if(this.calculator != null) {
 			return this.calculator.calculate(this);
 		}
 		return "clone: " + getValue();

@@ -23,6 +23,8 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.Micro
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
+import cn.edu.fudan.se.multidependency.service.spring.clone.data.CloneLineValue;
+import cn.edu.fudan.se.multidependency.service.spring.clone.data.CloneValueForDoubleNodes;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeEdge;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeNode;
@@ -157,7 +159,7 @@ public class MicroServiceCallWithEntry {
 	private void showClonesInMicroService(List<CytoscapeEdge> edges) {
 		for(CloneValueForDoubleNodes<MicroService> clone : clonesInMicroServiceFromFileClone) {
 			if(clone.sizeOfChildren() >= showClonesMinPair) {
-				CytoscapeEdge edge = new CytoscapeEdge(clone.getNode1().getId().toString(), clone.getNode2().getId().toString(), "all_MicroService_clone_MicroService", clone.calculateValue());
+				CytoscapeEdge edge = new CytoscapeEdge(clone.getNode1().getId().toString(), clone.getNode2().getId().toString(), "all_MicroService_clone_MicroService", clone.calculateValue(null).toString());
 //					CytoscapeEdge edge = new CytoscapeEdge(clone.getNode1(), clone.getNode2(), "all_MicroService_clone_MicroService");
 				edges.add(edge);
 			}

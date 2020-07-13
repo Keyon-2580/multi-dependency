@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.service.spring.data;
+package cn.edu.fudan.se.multidependency.service.spring.clone.data;
 
 import java.util.ArrayList;
 import java.util.Collection;

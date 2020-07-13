@@ -20,12 +20,12 @@ import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.clone.CloneGroupRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.FunctionRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.NamespaceRepository;
-import cn.edu.fudan.se.multidependency.repository.node.code.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.TypeRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.GitRepoRepository;
@@ -130,7 +130,6 @@ public class NodeServiceImpl implements NodeService {
 		if(file != null) {
 			cache.cacheNodeById(file);
 			cache.cacheFileByPath(path, file);
-			cache.cacheFileByPath(newPath, file);
 		}
 		return file;
 	}
@@ -198,6 +197,17 @@ public class NodeServiceImpl implements NodeService {
 			result = projectRepository.queryNodeById(id);
 			cache.cacheNodeById(result);
 		}
+		return result;
+	}
+
+	///FIXME
+	@Override
+	public Package queryPackage(String directoryPath) {
+		if(directoryPath == null) {
+			return null;
+		}
+		Package result = packageRepository.queryPackage(directoryPath);
+		cache.cacheNodeById(result);
 		return result;
 	}
 

@@ -97,4 +97,24 @@ public interface ContainRelationService {
 	boolean isDifferentPackage(ProjectFile file1, ProjectFile file2);
 	
 	GitRepository findCommitBelongToGitRepository(Commit commit);
+	
+	/**
+	 * 包的上一级包
+	 * @param pck
+	 * @return
+	 */
+	Package findPackageInPackage(Package pck);
+	
+	/**
+	 * child是否在parent下
+	 * @param child
+	 * @param parent
+	 * @return
+	 */
+	default boolean isDirectlyParentOfPackage(Package child, Package parent) {
+		if(child == null || parent == null) {
+			return false;
+		}
+		return parent.equals(findPackageInPackage(child));
+	}
 }
