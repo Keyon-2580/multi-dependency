@@ -68,8 +68,8 @@ public class CacheService {
 		this.directoryToPackage.put(directory, pck);
 	}
 	
-//	public Package findPackageByDirectoryPath(String directoryPath) {
-//		
-//	}
+	public Package findPackageByDirectoryPath(String directoryPath) {
+		return this.directoryToPackage.get(directoryPath);
+	}
 	
 }

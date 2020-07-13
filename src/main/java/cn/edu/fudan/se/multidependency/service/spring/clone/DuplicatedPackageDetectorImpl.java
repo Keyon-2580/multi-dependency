@@ -62,7 +62,7 @@ public class DuplicatedPackageDetectorImpl implements DuplicatedPackageDetector 
 				if(parentPackageClone == null) {
 					break;
 				}
-				if((double) parentPackageClone.calculateValue(PackageCloneValueCalculator.getInstance()) < threshold) {
+				if(!(boolean) parentPackageClone.calculateValue(PackageCloneValueCalculator.getInstance())) {
 					break;
 				}
 				DuplicatedPackage parentDuplicatedPackage = idToPackageClone.getOrDefault(parentPackageClone.getId(), new DuplicatedPackage(parentPackageClone));

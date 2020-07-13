@@ -200,14 +200,16 @@ public class NodeServiceImpl implements NodeService {
 		return result;
 	}
 
-	///FIXME
 	@Override
 	public Package queryPackage(String directoryPath) {
 		if(directoryPath == null) {
 			return null;
 		}
-		Package result = packageRepository.queryPackage(directoryPath);
-		cache.cacheNodeById(result);
+		Package result = cache.findPackageByDirectoryPath(directoryPath);
+		if(result == null) {
+			result = packageRepository.queryPackage(directoryPath);
+			cache.cacheNodeById(result);
+		}
 		return result;
 	}
 

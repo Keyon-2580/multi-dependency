@@ -2,10 +2,8 @@ package cn.edu.fudan.se.multidependency.controller;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -27,7 +25,9 @@ import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneShowService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneValueService;
+import cn.edu.fudan.se.multidependency.service.spring.clone.DuplicatedPackageDetector;
 import cn.edu.fudan.se.multidependency.service.spring.clone.data.CloneValueForDoubleNodes;
+import cn.edu.fudan.se.multidependency.service.spring.clone.data.DuplicatedPackage;
 import cn.edu.fudan.se.multidependency.service.spring.clone.data.PackageCloneValueWithFileCoChange;
 
 @Controller
@@ -48,6 +48,9 @@ public class CloneController {
 	
 	@Autowired
 	private ContainRelationService containRelationService;
+	
+	@Autowired
+	private DuplicatedPackageDetector duplicatedPackageDetector;
 
 	@GetMapping("/packages")
 	public String graph() {
@@ -58,6 +61,12 @@ public class CloneController {
 	@ResponseBody
 	public Collection<CloneValueForDoubleNodes<Package>> cloneInPackages() {
 		return cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE));
+	}
+	
+	@GetMapping("/package/duplicated")
+	@ResponseBody
+	public Collection<DuplicatedPackage> duplicatedPackages(@RequestParam("threshold") int threshold) {
+		return duplicatedPackageDetector.detectDuplicatedPackages(threshold);
 	}
 	
 	/**
