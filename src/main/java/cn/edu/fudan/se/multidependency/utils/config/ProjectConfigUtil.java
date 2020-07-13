@@ -154,6 +154,7 @@ public class ProjectConfigUtil {
 			config.setCommitIdFrom(json.getString("commit_id_from"));
 			config.setCommitIdTo(json.getString("commit_id_to"));
 			config.setIssueFilePath(json.getString("issues_path"));
+			config.setCalculateCochange(json.getBooleanValue("calculate_cochange"));
 			result.add(config);
 		}
 		return result;

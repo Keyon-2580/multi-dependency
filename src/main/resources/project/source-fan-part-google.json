@@ -32,8 +32,9 @@
 	},
 	"gits": [{
 		"path": "D:\\sourceCode\\source-java-part-google\\google__fdse__guava",
-		"commit_id_from": "",
-		"commit_id_to": ""
+		"commit_id_from": "c0c117a04ab47f2fb380311efec97a7d9851cd6e",
+		"commit_id_to": "5f2fbf27b2f8f7c72adfe6b366c7aaec2e36b81b",
+		"calculate_cochange": true
 	}],
 	"libs": [],
 	"clones": [{

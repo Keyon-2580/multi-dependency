@@ -8,4 +8,5 @@ public class GitConfig {
 	private String commitIdFrom;
 	private String commitIdTo;
 	private String issueFilePath;
+	private boolean calculateCochange;
 }
