@@ -58,7 +58,4 @@ public class Project implements Node {
 		return NodeLabelType.Project;
 	}
 
-	
-	public static final String LABEL_INDEX = "name";
-
 }

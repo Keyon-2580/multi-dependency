@@ -61,8 +61,6 @@ public class Span implements Node {
 		return NodeLabelType.Span;
 	}
 	
-	public static final String LABEL_INDEX = "spanId";
-
 	@Override
 	public String getName() {
 		return getSpanId();

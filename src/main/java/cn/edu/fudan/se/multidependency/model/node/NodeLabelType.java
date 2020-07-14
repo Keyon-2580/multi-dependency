@@ -1,5 +1,8 @@
 package cn.edu.fudan.se.multidependency.model.node;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum NodeLabelType {
 	Project, Package, ProjectFile,
 	Namespace, Type, Function, Variable, Snippet,
@@ -9,64 +12,75 @@ public enum NodeLabelType {
 	GitRepository, Branch, Commit, Issue, Label, Developer,
 	CloneGroup;
 	
-	public String indexName() {
+	public List<String> indexes() {
+		List<String> result = new ArrayList<>();
 		switch(this) {
-		case Commit:
-//			return cn.edu.fudan.se.multidependency.model.node.git.Commit.LABEL_INDEX;
-			return "";
-		case Feature:
-			return cn.edu.fudan.se.multidependency.model.node.testcase.Feature.LABEL_INDEX;
-		case Function:
-			return cn.edu.fudan.se.multidependency.model.node.code.Function.LABEL_INDEX;
-		case Issue:
-//			return cn.edu.fudan.se.multidependency.model.node.git.Issue.LABEL_INDEX;
-			return "";
-		case MicroService:
-			return cn.edu.fudan.se.multidependency.model.node.microservice.MicroService.LABEL_INDEX;
-		case Namespace:
-//			return cn.edu.fudan.se.multidependency.model.node.code.Namespace.LABEL_INDEX;
-			return "";
-		case Package:
-			return cn.edu.fudan.se.multidependency.model.node.Package.LABEL_INDEX;
-		case Project:
-			return cn.edu.fudan.se.multidependency.model.node.Project.LABEL_INDEX;
-		case ProjectFile:
-			return cn.edu.fudan.se.multidependency.model.node.ProjectFile.LABEL_INDEX;
-		case Scenario:
-//			return cn.edu.fudan.se.multidependency.model.node.testcase.Scenario.LABEL_INDEX;
-			return "";
-		case Span:
-//			return cn.edu.fudan.se.multidependency.model.node.microservice.Span.LABEL_INDEX;
-			return "";
-		case TestCase:
-			return cn.edu.fudan.se.multidependency.model.node.testcase.TestCase.LABEL_INDEX;
-		case Trace:
-//			return cn.edu.fudan.se.multidependency.model.node.testcase.Trace.LABEL_INDEX;
-			return "";
-		case Type:
-			return cn.edu.fudan.se.multidependency.model.node.code.Type.LABEL_INDEX;
-		case Variable:
-			return cn.edu.fudan.se.multidependency.model.node.code.Variable.LABEL_INDEX;
-		case Bug:
-//			return cn.edu.fudan.se.multidependency.model.node.testcase.Bug.LABEL_INDEX;
-			return "";
-		case License:
-//			return cn.edu.fudan.se.multidependency.model.node.lib.License.LABEL_INDEX;
-			return "";
-		case RestfulAPI:
-			return cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI.LABEL_INDEX;
-		case Developer:
-//			return cn.edu.fudan.se.multidependency.model.node.git.Developer.LABEL_INDEX;
-			return "";
-		case GitRepository:
-//			return cn.edu.fudan.se.multidependency.model.node.git.GitRepository.LABEL_INDEX;
-			return "";
 		case Branch:
-//			return cn.edu.fudan.se.multidependency.model.node.git.Branch.LABEL_INDEX;
-			return "";
+			break;
+		case Bug:
+			break;
+		case CloneGroup:
+			result.add("cloneLevel");
+			result.add("name");
+			break;
+		case Commit:
+			result.add("commitId");
+			break;
+		case Developer:
+			break;
+		case Feature:
+			result.add("name");
+			break;
+		case Function:
+			break;
+		case GitRepository:
+			break;
+		case Issue:
+			break;
+		case Label:
+			break;
+		case Library:
+			break;
+		case LibraryAPI:
+			break;
+		case License:
+			break;
+		case MicroService:
+			result.add("name");
+			break;
+		case Namespace:
+			break;
+		case Package:
+			result.add("directoryPath");
+			break;
+		case Project:
+			result.add("name");
+			result.add("language");
+			break;
+		case ProjectFile:
+			result.add("path");
+			break;
+		case RestfulAPI:
+			break;
+		case Scenario:
+			break;
+		case Snippet:
+			break;
+		case Span:
+			break;
+		case TestCase:
+			break;
+		case Trace:
+			result.add("traceId");
+			break;
+		case Type:
+			break;
+		case Variable:
+			break;
 		default:
-			return null;
+			break;
 		}
+		return result;
 	}
 	
 }

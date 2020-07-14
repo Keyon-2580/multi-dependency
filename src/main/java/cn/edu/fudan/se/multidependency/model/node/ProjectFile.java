@@ -7,6 +7,7 @@ import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
+import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -63,8 +64,6 @@ public class ProjectFile implements CodeNode {
 		return NodeLabelType.ProjectFile;
 	}
 
-	public static final String LABEL_INDEX = "path";
-
 	@Override
 	public String getIdentifier() {
 		return path;
@@ -77,13 +76,12 @@ public class ProjectFile implements CodeNode {
 
 	@Override
 	public String getIdentifierSuffix() {
-		return "#F";
+		return Constant.CODE_NODE_IDENTIFIER_SUFFIX_FILE;
 	}
 
 	@Override
 	public void setIdentifier(String identifier) {
-		// TODO Auto-generated method stub
-		
+		// do nothing
 	}
 
 }

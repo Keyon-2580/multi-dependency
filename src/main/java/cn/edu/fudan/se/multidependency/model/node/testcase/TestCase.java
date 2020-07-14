@@ -61,6 +61,4 @@ public class TestCase implements Node {
 		return NodeLabelType.TestCase;
 	}
 	
-	public static final String LABEL_INDEX = "name";
-
 }

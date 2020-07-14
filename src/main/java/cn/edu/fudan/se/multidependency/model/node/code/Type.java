@@ -58,8 +58,6 @@ public class Type implements CodeNode {
 	}
 
 	
-	public static final String LABEL_INDEX = "identifier";
-
 	@Override
 	public String getIdentifierSuffix() {
 		return Constant.CODE_NODE_IDENTIFIER_SUFFIX_TYPE;

@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.ConstraintViolationException;
 import org.neo4j.graphdb.Label;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
@@ -45,9 +44,16 @@ public class BatchInserterService implements Closeable {
 		for(NodeLabelType nodeType : NodeLabelType.values()) {
 			Label label = Label.label(nodeType.toString());
 			mapLabels.put(nodeType, label);
-			String index = nodeType.indexName();
-			if(!StringUtils.isBlank(index)) {
-				// 创建索引
+		}
+	}
+	
+	public void createIndexes() {
+		if(inserter == null) {
+			return ;
+		}
+		for(NodeLabelType nodeType : NodeLabelType.values()) {
+			Label label = Label.label(nodeType.toString());
+			for(String index : nodeType.indexes()) {
 				try {
 					inserter.createDeferredSchemaIndex(label).on(index).create();
 				} catch (ConstraintViolationException e) {

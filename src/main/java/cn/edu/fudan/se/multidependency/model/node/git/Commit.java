@@ -60,8 +60,6 @@ public class Commit implements Node {
 		return NodeLabelType.Commit;
 	}
 	
-	public static final String LABEL_INDEX = "commitId";
-
 	@Override
 	public String getName() {
 		return commitId;

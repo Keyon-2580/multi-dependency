@@ -63,8 +63,6 @@ public class Variable implements CodeNode {
 		return NodeLabelType.Variable;
 	}
 	
-	public static final String LABEL_INDEX = "identifier";
-
 	@Override
 	public String getIdentifierSuffix() {
 		return Constant.CODE_NODE_IDENTIFIER_SUFFIX_VARIABLE;

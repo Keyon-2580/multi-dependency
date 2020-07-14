@@ -45,6 +45,4 @@ public class License implements Node {
 		return NodeLabelType.License;
 	}
 	
-	public static final String LABEL_INDEX = "name";
-
 }

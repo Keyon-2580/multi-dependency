@@ -62,6 +62,4 @@ public class Package implements Node {
 		this.files.addAll(files);
 	}
 	
-	public static final String LABEL_INDEX = "directoryPath";
-
 }

@@ -46,8 +46,6 @@ public class Trace implements Node {
 		return NodeLabelType.Trace;
 	}
 	
-	public static final String LABEL_INDEX = "traceId";
-
 	@Override
 	public String getName() {
 		return getTraceId();

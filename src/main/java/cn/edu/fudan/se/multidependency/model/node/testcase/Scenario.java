@@ -48,6 +48,4 @@ public class Scenario implements Node {
 		return NodeLabelType.Scenario;
 	}
 	
-	public static final String LABEL_INDEX = "name";
-
 }

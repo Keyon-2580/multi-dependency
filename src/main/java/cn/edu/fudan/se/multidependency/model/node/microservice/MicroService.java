@@ -48,6 +48,4 @@ public class MicroService implements Node {
 		return NodeLabelType.MicroService;
 	}
 	
-	public static final String LABEL_INDEX = "name";
-
 }

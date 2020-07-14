@@ -55,8 +55,6 @@ public interface CloneRepository extends Neo4jRepository<Clone, Long> {
 	@Query("match p= (g:CloneGroup)-[:" + RelationType.str_CONTAIN + "]->(:Snippet)-[r:" + RelationType.str_CLONE + "]->(:Snippet)<-[:" + RelationType.str_CONTAIN + "]-(g) return g")
 	public List<CloneGroup> findGroupsBySnippetCloneSnippetRelation();*/
 	
-	@Query("match p= (g:CloneGroup) where g.cloneLevel = {cloneLevel} return g")
-	public List<CloneGroup> findGroups(@Param("cloneLevel") String cloneLevel);
 	
 	/**
 	 * 根据克隆组的id找出克隆组内的所有克隆关系

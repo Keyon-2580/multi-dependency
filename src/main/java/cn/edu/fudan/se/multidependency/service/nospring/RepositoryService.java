@@ -53,12 +53,20 @@ public final class RepositoryService implements InserterForNeo4j, Serializable {
         DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         LOGGER.info("总计节点数：" + nodes.size());
         LOGGER.info("总计关系数：" + relations.size());
-        LOGGER.info("开始时间：" + sdf.format(new Timestamp(System.currentTimeMillis())));
+        LOGGER.info("初始化数据库：" + sdf.format(new Timestamp(System.currentTimeMillis())));
         batchInserterService.init(databasePath, delete);
+        LOGGER.info("初始化数据库结束：" + sdf.format(new Timestamp(System.currentTimeMillis())));
+        LOGGER.info("插入节点：" + sdf.format(new Timestamp(System.currentTimeMillis())));
         batchInserterService.insertNodes(nodes);
+        LOGGER.info("插入节点结束：" + sdf.format(new Timestamp(System.currentTimeMillis())));
+        LOGGER.info("插入关系：" + sdf.format(new Timestamp(System.currentTimeMillis())));
         batchInserterService.insertRelations(relations);
+        LOGGER.info("插入关系结束：" + sdf.format(new Timestamp(System.currentTimeMillis())));
+        LOGGER.info("创建索引：" + sdf.format(new Timestamp(System.currentTimeMillis())));
+        batchInserterService.createIndexes();
+        LOGGER.info("创建索引结束：" + sdf.format(new Timestamp(System.currentTimeMillis())));
         closeBatchInserter();
-        LOGGER.info("结束时间：" + sdf.format(new Timestamp(System.currentTimeMillis())));
+        LOGGER.info("数据库插入操作结束，关闭数据库：" + sdf.format(new Timestamp(System.currentTimeMillis())));
     }
 
     @Override

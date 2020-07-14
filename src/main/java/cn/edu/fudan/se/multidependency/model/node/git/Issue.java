@@ -79,8 +79,6 @@ public class Issue implements Node {
 		return NodeLabelType.Issue;
 	}
 	
-	public static final String LABEL_INDEX = "title";
-
 	@Override
 	public String getName() {
 		return title;

@@ -57,7 +57,4 @@ public class Feature implements Node {
 		return NodeLabelType.Feature;
 	}
 	
-	public static final String LABEL_INDEX = "name";
-
-
 }
