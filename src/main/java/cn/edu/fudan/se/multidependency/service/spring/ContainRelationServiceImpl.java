@@ -483,9 +483,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
 	@Override
 	public Package findPackageInPackage(Package pck) {
-		String directoryPath = pck.getDirectoryPath();
-		String lastDirectoryPath = FileUtil.extractDirectoryFromFile(FileUtil.extractDirectoryFromFile(directoryPath)) + "/";
-		return nodeService.queryPackage(lastDirectoryPath);
+		return nodeService.queryPackage(pck.lastPackageDirectoryPath());
 	}
 
 }

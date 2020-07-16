@@ -18,6 +18,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Snippet;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
+import cn.edu.fudan.se.multidependency.model.relation.clone.CloneType;
 import cn.edu.fudan.se.multidependency.utils.clone.CloneUtil;
 import cn.edu.fudan.se.multidependency.utils.clone.data.CloneResultFromCsv;
 import cn.edu.fudan.se.multidependency.utils.clone.data.FilePathFromCsv;
@@ -144,7 +145,8 @@ public class CloneInserterForMethod extends CloneInserter {
 			clone.setNode2EndLine(filePath2.getEndLine());
 			clone.setValue(value);
 			clone.setCloneRelationType(cloneType.toString());
-			clone.setCloneType(String.join("_", "type", type));
+//			clone.setCloneType(String.join("_", "type", type));
+			clone.setCloneType(CloneType.getCloneType(type).toString());
 			clones.add(clone);
 			addRelation(clone);
 			sizeOfClones++;

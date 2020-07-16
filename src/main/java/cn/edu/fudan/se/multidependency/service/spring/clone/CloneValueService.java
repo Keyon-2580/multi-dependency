@@ -74,13 +74,13 @@ public interface CloneValueService {
 	default CloneValueForDoubleNodes<Package> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones, Package pck1, Package pck2) {
 		Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> packageClones = queryPackageCloneFromFileClone(fileClones);
 		Map<Package, CloneValueForDoubleNodes<Package>> map = packageClones.getOrDefault(pck1, new HashMap<>());
-		CloneValueForDoubleNodes<Package> value = map.get(pck2);
-		if(value == null) {
+		CloneValueForDoubleNodes<Package> result = map.get(pck2);
+		if(result == null) {
 			map = packageClones.getOrDefault(pck2, new HashMap<>());
-			value = map.get(pck1);
+			result = map.get(pck1);
 		}
-		value.sortChildren();
-		return value;
+		result.sortChildren();
+		return result;
 	}
 	
 	PackageCloneValueWithFileCoChange queryPackageCloneWithFileCoChange(Collection<Clone> fileClones, Package pck1, Package pck2) throws Exception;

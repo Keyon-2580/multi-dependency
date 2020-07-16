@@ -70,6 +70,14 @@ public class Clone implements Relation {
 	public Node getEndNode() {
 		return codeNode2;
 	}
+	
+	public boolean containsNode(CodeNode node) {
+		return node.equals(getCodeNode1()) || node.equals(getCodeNode2());
+	}
+	
+	public boolean containsNode(CodeNode node1, CodeNode node2) {
+		return containsNode(node1) && containsNode(node2);
+	}
 
 	@Override
 	public RelationType getRelationType() {

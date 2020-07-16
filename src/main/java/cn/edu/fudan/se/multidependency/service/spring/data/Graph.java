@@ -11,6 +11,9 @@ import cn.edu.fudan.se.multidependency.model.relation.Relation;
 
 public class Graph {
 	private List<Node> nodes = new ArrayList<>();
+	public List<Node> getNodes(){
+		return new ArrayList<>(nodes);
+	}
 	/**
 	 * 直接相邻的点，无向
 	 */
