@@ -17,9 +17,9 @@ server:
 data:
   project_config: src/main/resources/project/train-ticket.json
   dynamic_analyse: false
-  git_analyse: false
+  git_analyse: true
   lib_analyse: false
-  clone_analyse: true
+  clone_analyse: false
 
   neo4j:
     delete: true

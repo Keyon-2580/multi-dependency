@@ -2,11 +2,15 @@ package cn.edu.fudan.se.multidependency.service.nospring.git;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import cn.edu.fudan.se.multidependency.config.Constant;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -17,6 +21,8 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.revwalk.filter.CommitTimeRevFilter;
+import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
@@ -78,7 +84,7 @@ public class GitExtractor {
         return null;
     }
 
-    public List<RevCommit> getARangeCommits(String from, String to) {
+    public List<RevCommit> getARangeCommitsById(String from, String to) {
         List<RevCommit> commits = new ArrayList<>();
         try (RevWalk walk = new RevWalk(repository)) {
             RevCommit commit = walk.parseCommit(repository.resolve(to));
@@ -92,6 +98,20 @@ public class GitExtractor {
             walk.dispose();
             return commits;
         }catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public List<RevCommit> getARangeCommitsByTime(String since, String until) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constant.TIMESTAMP);
+        try {
+            Date sinceDate = simpleDateFormat.parse(since);
+            Date untilDate = simpleDateFormat.parse(until);
+            RevFilter between = CommitTimeRevFilter.between(sinceDate, untilDate);
+            Iterable<RevCommit> commits = git.log().setRevFilter(between).call();
+            return Lists.newArrayList(commits.iterator());
+        } catch (ParseException | GitAPIException e) {
             e.printStackTrace();
         }
         return null;

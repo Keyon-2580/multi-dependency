@@ -5,8 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Comparator;
 
-import org.apache.commons.lang3.StringUtils;
+import cn.edu.fudan.se.multidependency.utils.config.GitConfig;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -29,7 +30,6 @@ import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperReportIssue;
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperSubmitCommit;
 import cn.edu.fudan.se.multidependency.service.nospring.ExtractorForNodesAndRelationsImpl;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
-import lombok.Setter;
 
 public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 	
@@ -37,42 +37,23 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
     private GitExtractor gitExtractor;
 
-    private boolean isAnalyseIssue;
-
     private Map<Integer, Issue> issues;
 
     private static final String[] SUFFIX = new String[]{".java", ".c", ".cpp", ".cc", ".h"};
 
-    private boolean selectCommitRange;
 
-    private String commitIdFrom;
-
-    private String commitIdTo;
+    private GitConfig gitConfig;
     
-    @Setter
-    private boolean calculateCoChange = false;
-    public GitInserter(String gitProjectPath, String issueFilePath,
-    		String commitIdFrom, String commitIdTo, boolean calculateCoChange) throws Exception {
-    	gitExtractor = new GitExtractor(gitProjectPath);
-    	if(!StringUtils.isBlank(issueFilePath)) {
-    		this.isAnalyseIssue = true;
-    		issues = new IssueExtractor(issueFilePath).extract();
-    	}
-    	if(!StringUtils.isBlank(commitIdFrom) && !StringUtils.isBlank(commitIdTo)) {
-    		this.selectCommitRange = true;
-    		this.commitIdFrom = commitIdFrom;
-    		this.commitIdTo = commitIdTo;
-    	}
-    	this.calculateCoChange = calculateCoChange;
-    }
-    
-    public GitInserter(String gitProjectPath, String issueFilePath,
-                       String commitIdFrom, String commitIdTo) throws Exception {
-    	this(gitProjectPath, issueFilePath, commitIdFrom, commitIdTo, false);
+    public GitInserter(GitConfig gitConfig) throws Exception {
+        this.gitConfig = gitConfig;
     }
 
     @Override
     public void addNodesAndRelations() throws Exception {
+        gitExtractor = new GitExtractor(gitConfig.getPath());
+        if(gitConfig.isAnalyseIssue()) {
+            issues = new IssueExtractor(gitConfig.getIssueFilePath()).extract();
+        }
         addBranchesAndIssues();
         addCommitsAndRelations();
         addProjectFileCoChangeRelation();
@@ -94,7 +75,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         }
 
         //添加issue节点和gitRepository到issue的包含关系
-        if (isAnalyseIssue) {
+        if (gitConfig.isAnalyseIssue()) {
             for (Issue issue : issues.values()) {
                 issue.setEntityId(generateEntityId());
                 addNode(issue, null);
@@ -112,9 +93,18 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
     }
     
     public void addCommitsAndRelations() throws Exception {
-        List<RevCommit> commits = selectCommitRange ? gitExtractor.getARangeCommits(commitIdFrom, commitIdTo) : gitExtractor.getAllCommits();
+        List<RevCommit> commits;
+        if (!gitConfig.isSpecifyCommitRange()) {
+            commits = gitExtractor.getAllCommits();
+        } else {
+            if (gitConfig.isSpecifyByCommitId()) {
+                commits = gitExtractor.getARangeCommitsById(gitConfig.getCommitIdFrom(), gitConfig.getCommitIdTo());
+            } else {
+                commits = gitExtractor.getARangeCommitsByTime(gitConfig.getCommitTimeSince(), gitConfig.getCommitTimeUntil());
+            }
+        }
         LOGGER.info("commit 数量：" + commits.size());
-//        Collections.reverse(commits);
+//      Collections.reverse(commits);
         for (RevCommit revCommit : commits) {
         	
         	//添加commit节点
@@ -144,7 +134,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
             //添加commit到commit的继承关系
             List<ProjectFile> files = null;
-            if(calculateCoChange) {
+            if(gitConfig.isCalculateCochange()) {
             	files = new ArrayList<>();
             }
             if (revCommit.getParentCount() > 0) {
@@ -166,7 +156,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
                         String path = DiffEntry.ChangeType.DELETE.name().equals(changeType) ? oldPath : newPath;
                         if (FileUtil.isFiltered(newPath, SUFFIX)) continue;
                         CommitUpdateFile update = addCommitUpdateFileRelation(path, commit, changeType);
-                        if(calculateCoChange && update != null) {
+                        if(gitConfig.isCalculateCochange() && update != null) {
                         	files.add(update.getFile());
                         }
                     }
@@ -178,7 +168,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
                     path = "/" + gitExtractor.getRepositoryName() + "/" + path;
                     addCommitUpdateFileRelation(path, commit, "ADD");
                     CommitUpdateFile update = addCommitUpdateFileRelation(path, commit, "ADD");
-                    if(calculateCoChange && update != null) {
+                    if(gitConfig.isCalculateCochange() && update != null) {
                     	files.add(update.getFile());
                     }
                 }
@@ -187,7 +177,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
             addProjectFileCoChangeRelation(files);
 
             //添加Commit到Issue的关系
-            if (isAnalyseIssue) {
+            if (gitConfig.isAnalyseIssue()) {
                 List<Integer> issuesNum = gitExtractor.getRelationBtwCommitAndIssue(revCommit);
                 for (Integer issueNum : issuesNum) {
                     if (issues.containsKey(issueNum)) {
@@ -200,7 +190,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
     
     private Map<String, Map<String, CoChange>> fileCoChanges;
     private void addProjectFileCoChangeRelation() {
-    	if(!calculateCoChange || fileCoChanges == null) {
+    	if(!gitConfig.isCalculateCochange() || fileCoChanges == null) {
     		return ;
     	}
     	LOGGER.info("开始添加文件cochange关系");
@@ -215,15 +205,13 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
     }
     
     private void addProjectFileCoChangeRelation(List<ProjectFile> files) {
-    	if(!calculateCoChange || files == null) {
+    	if(!gitConfig.isCalculateCochange() || files == null) {
     		return ;
     	}
     	if(fileCoChanges == null) {
     		fileCoChanges = new HashMap<>();
     	}
-        files.sort((file1, file2) -> {
-        	return file1.getPath().compareTo(file2.getPath());
-        });
+        files.sort(Comparator.comparing(ProjectFile::getPath));
     	for(int i = 0; i < files.size(); i++) {
     		ProjectFile file1 = files.get(i);
     		Map<String, CoChange> file1ToCochanges = fileCoChanges.getOrDefault(file1.getPath(), new HashMap<>());

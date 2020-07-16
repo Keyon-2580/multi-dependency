@@ -145,8 +145,7 @@ public class ThreadService {
 					executor.execute(() -> {
 						try {
 							LOGGER.info(gitConfig.getPath());
-							new GitInserter(gitConfig.getPath(), gitConfig.getIssueFilePath(), gitConfig.getCommitIdFrom(),
-									gitConfig.getCommitIdTo(), gitConfig.isCalculateCochange()).addNodesAndRelations();
+							new GitInserter(gitConfig).addNodesAndRelations();
 						} catch (Exception e) {
 							e.printStackTrace();
 						} finally {
