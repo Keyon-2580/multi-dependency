@@ -79,7 +79,9 @@ public interface CloneValueService {
 			map = packageClones.getOrDefault(pck2, new HashMap<>());
 			result = map.get(pck1);
 		}
-		result.sortChildren();
+		if(result != null) {
+			result.sortChildren();
+		}
 		return result;
 	}
 	

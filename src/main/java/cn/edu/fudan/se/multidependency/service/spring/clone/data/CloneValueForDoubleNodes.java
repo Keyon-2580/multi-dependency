@@ -49,6 +49,18 @@ public class CloneValueForDoubleNodes<N extends Node> implements Serializable {
 	
 	protected Set<CodeNode> nodesInNode2 = new HashSet<>();
 	
+	protected Set<CodeNode> allNodesInNode1 = new HashSet<>();
+	
+	protected Set<CodeNode> allNodesInNode2 = new HashSet<>();
+	
+	public double ratio1() {
+		return allNodesInNode1.isEmpty() ? -1 : (nodesInNode1.size() + 0.0) / allNodesInNode1.size();
+	}
+	
+	public double ratio2() {
+		return allNodesInNode2.isEmpty() ? -1 : (nodesInNode2.size() + 0.0) / allNodesInNode2.size();
+	}
+	
 	public void addCodeNodeToNode1(CodeNode node) {
 		this.nodesInNode1.add(node);
 	}
