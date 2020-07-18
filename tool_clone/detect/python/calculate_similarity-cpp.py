@@ -4,11 +4,11 @@ import json
 import os
 import re
 
-measure_index_file = '../result/MeasureIndex.csv'
-clone_group_file = '../result/type123_method_group_result.csv'
-token_data_folder = '../tokenData'
-state_file = '../result/state.json'
-output_file = './similarity.csv'
+measure_index_file = 'result/MeasureIndex.csv'
+clone_group_file = 'result/type123_method_group_result.csv'
+token_data_folder = 'tokenData'
+state_file = 'result/state.json'
+output_file = 'similarity.csv'
 start_offset = -2147483647
 comment_pattern1 = re.compile('//.*?\n', re.S)
 comment_pattern2 = re.compile('/\*.*?\*/', re.S)
@@ -170,6 +170,11 @@ def process():
     for group in clone_groups:
         cnt += 1
         print('%.2f%%' % (cnt*100.0/size))
+
+        #过滤掉克隆实例特别多的克隆组
+        if len(group) > 100:
+            continue
+
         for i in range(0, len(group) - 1):
             for j in range(i + 1, len(group)):
                 measure1 = measures[group[i]]
