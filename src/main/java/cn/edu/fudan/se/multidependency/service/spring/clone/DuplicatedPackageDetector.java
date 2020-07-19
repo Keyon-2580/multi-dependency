@@ -6,7 +6,7 @@ import cn.edu.fudan.se.multidependency.service.spring.clone.data.DuplicatedPacka
 
 public interface DuplicatedPackageDetector {
 
-	Collection<DuplicatedPackage> detectDuplicatedPackages(int threshold);
+	Collection<DuplicatedPackage> detectDuplicatedPackages(int threshold, double percentage);
 	
 	
 }

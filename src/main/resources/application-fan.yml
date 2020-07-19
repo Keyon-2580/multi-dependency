@@ -16,10 +16,10 @@ server:
 
 data:
 #   project_config: src/main/resources/project/simpletest.json
-   project_config: src/main/resources/project/train-ticket_fan.json
+#   project_config: src/main/resources/project/train-ticket_fan.json
 #   project_config: src/main/resources/project/leveldb.json
 #   project_config: src/main/resources/project/source-fan-part.json
-#   project_config: src/main/resources/project/source-fan-part-google.json
+   project_config: src/main/resources/project/source-fan-part-google.json
    dynamic_analyse: false
    git_analyse: true
    lib_analyse: false

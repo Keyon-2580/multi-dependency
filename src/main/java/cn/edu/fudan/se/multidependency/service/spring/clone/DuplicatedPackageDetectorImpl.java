@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,13 +52,13 @@ public class DuplicatedPackageDetectorImpl implements DuplicatedPackageDetector 
 	}
 
 	@Override
-	public Collection<DuplicatedPackage> detectDuplicatedPackages(int threshold) {
+	public Collection<DuplicatedPackage> detectDuplicatedPackages(int threshold, double percentage) {
 		Map<String, DuplicatedPackage> idToPackageClone = new HashMap<>();
 		Map<String, Boolean> isChild = new HashMap<>();
 		Collection<Clone> fileClones = basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE);
 		Collection<CloneValueForDoubleNodes<Package>> packageClones = cloneValueService.queryPackageCloneFromFileCloneSort(fileClones);
-		PackageCloneValueCalculator.getInstance().setThreshold(threshold);
-		PackageCloneValueCalculator.getInstance().setContainRelationService(containRelationService);
+		PackageCloneValueCalculator.getInstance().setCountThreshold(threshold);
+		PackageCloneValueCalculator.getInstance().setPercentageThreshold(percentage);
 		for(CloneValueForDoubleNodes<Package> packageClone : packageClones) {
 			boolean isDuplicated = (boolean) packageClone.calculateValue(PackageCloneValueCalculator.getInstance());
 			if(!isDuplicated) {
@@ -93,31 +92,57 @@ public class DuplicatedPackageDetectorImpl implements DuplicatedPackageDetector 
 				parentPackage1 = containRelationService.findPackageInPackage(parentPackage1);
 				parentPackage2 = containRelationService.findPackageInPackage(parentPackage2);
 			}
-			/*if(parentPackage1 == null && parentPackage2 == null) {
-				String lastPackageDirectoryPath1 = currentPackage1.lastPackageDirectoryPath();
-				String lastPackageDirectoryPath2 = currentPackage2.lastPackageDirectoryPath();
-				if(!(FileUtil.SLASH_LINUX.equals(lastPackageDirectoryPath1) || FileUtil.SLASH_LINUX.equals(lastPackageDirectoryPath2))) {
-					parentPackage1 = new Package();
-					parentPackage2 = new Package();
-					parentPackage1.setId(UUID.fromString(lastPackageDirectoryPath1).timestamp() + 1);
-					parentPackage1.setDirectoryPath(lastPackageDirectoryPath1);
-					parentPackage2.setDirectoryPath(lastPackageDirectoryPath2);
-					parentPackage1.setName(lastPackageDirectoryPath1);
-					parentPackage2.setName(lastPackageDirectoryPath2);
-					CloneValueForDoubleNodes<Package> cloneValueForDoubleNodes = new CloneValueForDoubleNodes<Package>(parentPackage1, parentPackage2);
-				}
-			}*/
 		}
 		
-		
+		Map<String, DuplicatedPackage> parentDuplicatedPacakges = new HashMap<>();
+		for(Map.Entry<String, DuplicatedPackage> entry : idToPackageClone.entrySet()) {
+			String id = entry.getKey();
+			if(isChild.get(id) == false) {
+				DuplicatedPackage value = entry.getValue();
+				Package pck1 = value.getPackage1();
+				Package pck2 = value.getPackage2();
+				Package parentPck1 = containRelationService.findPackageInPackage(pck1);
+				Package parentPck2 = containRelationService.findPackageInPackage(pck2);
+				if(parentPck1 == null && parentPck2 == null) {
+					String parentPck1Path = pck1.lastPackageDirectoryPath();
+					String parentPck2Path = pck2.lastPackageDirectoryPath();
+					String parentId = String.join("_", parentPck1Path, parentPck2Path);
+					DuplicatedPackage parentDuplicated = parentDuplicatedPacakges.get(parentId);
+					if(parentDuplicated == null) {
+						parentPck1 = new Package();
+						parentPck1.setId(-1L);
+						parentPck1.setEntityId(-1L);
+						parentPck1.setDirectoryPath(parentPck1Path);
+						parentPck1.setName(parentPck1Path);
+						parentPck2 = new Package();
+						parentPck2.setId(-1L);
+						parentPck2.setEntityId(-1L);
+						parentPck2.setDirectoryPath(parentPck1Path);
+						parentPck2.setName(parentPck1Path);
+						parentDuplicated = new DuplicatedPackage(new CloneValueForDoubleNodes<Package>(parentPck1, parentPck2, parentId));
+						parentDuplicatedPacakges.put(parentDuplicated.getId(), parentDuplicated);
+					}
+					parentDuplicated.addChild(value);
+					isChild.put(id, true);
+				}
+			}
+		}
 		
 		List<DuplicatedPackage> result = new ArrayList<>();
+		
+		for(DuplicatedPackage parentDuplicatedPackage : parentDuplicatedPacakges.values()) {
+			result.add(parentDuplicatedPackage);
+		}
+		
 		for(Map.Entry<String, DuplicatedPackage> entry : idToPackageClone.entrySet()) {
 			String id = entry.getKey();
 			if(isChild.get(id) == false) {
 				result.add(entry.getValue());
 			}
 		}
+		result.sort((d1, d2) -> {
+			return d1.getPackage1().getDirectoryPath().compareTo(d2.getPackage1().getDirectoryPath());
+		});
 		return result;
 	}
 

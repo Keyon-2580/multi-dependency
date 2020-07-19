@@ -191,7 +191,7 @@ var clone = function(cytoscapeutil) {
 		$("#packages_duplicated").html("");
 		$.ajax({
 			type: "get",
-			url: "/clone/package/duplicated?threshold=10",
+			url: "/clone/package/duplicated?threshold=10&percentage=0.8",
 			success: function(result) {
 				console.log(result);
 				var html = "<table class='table table-bordered'>";
@@ -310,7 +310,7 @@ var clone = function(cytoscapeutil) {
 					html += children[i].fileClone.cloneType;
 					html += "</td>";
 					html += "<td>";
-					html += children[i].fileClone.value;
+					html += "<a target='_blank' href='/clone/compare?id1=" + children[i].file1.id + "&id2=" + children[i].file2.id + "'>" + children[i].fileClone.value + "</a>";
 					html += "</td>";
 					html += "<td>";
 					html += "<a class='cochangeTimes' target='_blank' href='/git/cochange/commits?cochangeId=" + cochangeId

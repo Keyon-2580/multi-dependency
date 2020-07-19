@@ -86,7 +86,7 @@ var clone = function(cytoscapeutil) {
 						if(children != null) {
 							html += "<td>";
 							for(var i = 0; i < children.length; i++) {
-								html += "<a class='clipBoard'>" + children[i].name + "</a></br>";
+								html += "<a class='clipBoard'>" + id + " " + children[i].name + "</a></br>";
 							}
 							html += "</td>";
 						}
