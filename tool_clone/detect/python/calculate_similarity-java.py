@@ -185,7 +185,7 @@ def process():
                 measure2_file = '%s/allTokenCsv%d' % (token_data_folder, measure2_file_id)
                 tokens1 = read_tokens(measure1_file, offset1, measure1['end_token'] - measure1['start_token'])
                 tokens2 = read_tokens(measure2_file, offset2, measure2['end_token'] - measure2['start_token'])
-                if len(tokens1) + len(tokens2) > 2000:
+                if len(tokens1) + len(tokens2) > 50000:
                     continue
                 similarity = suffix_array_similarity(tokens1, tokens2)
                 if 1 != int(similarity):
