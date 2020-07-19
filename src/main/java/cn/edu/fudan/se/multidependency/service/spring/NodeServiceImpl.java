@@ -213,4 +213,17 @@ public class NodeServiceImpl implements NodeService {
 		return result;
 	}
 
+	List<Project> allProjectsCache = null;
+	@Override
+	public Collection<Project> allProjects() {
+		if(allProjectsCache == null) {
+			allProjectsCache = projectRepository.queryAllProjects();
+			allProjectsCache.sort((p1, p2) -> p1.getName().compareTo(p2.getName()));
+		}
+		for(Project project : allProjectsCache) {
+			cache.cacheNodeById(project);
+		}
+		return allProjectsCache;
+	}
+
 }

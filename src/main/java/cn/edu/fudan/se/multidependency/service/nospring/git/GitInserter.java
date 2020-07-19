@@ -44,7 +44,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
     private GitConfig gitConfig;
     
-    public GitInserter(GitConfig gitConfig) throws Exception {
+    public GitInserter(GitConfig gitConfig) {
         this.gitConfig = gitConfig;
     }
 

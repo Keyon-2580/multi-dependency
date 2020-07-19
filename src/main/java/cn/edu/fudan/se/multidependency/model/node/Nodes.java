@@ -368,7 +368,7 @@ public class Nodes implements Serializable {
         return null;
     }
 
-    public Commit findCommitByCommitId(String commitId) {
+    public synchronized Commit findCommitByCommitId(String commitId) {
         for (Node node : findNodesByNodeType(NodeLabelType.Commit)) {
             Commit commit = (Commit) node;
             if (commitId.equals(commit.getCommitId())) {
@@ -378,7 +378,7 @@ public class Nodes implements Serializable {
         return null;
     }
 
-    public Branch findBranchByBranchId(String branchId) {
+    public synchronized Branch findBranchByBranchId(String branchId) {
         for (Node node : findNodesByNodeType(NodeLabelType.Branch)) {
             Branch branch = (Branch) node;
             if (branchId.equals(branch.getBranchId())) {
@@ -388,7 +388,7 @@ public class Nodes implements Serializable {
         return null;
     }
 
-    public Developer findDeveloperByName(String name) {
+    public synchronized Developer findDeveloperByName(String name) {
         for (Node node : findNodesByNodeType(NodeLabelType.Developer)) {
             Developer developer = (Developer) node;
             if (name.equals(developer.getName())) {

@@ -73,6 +73,25 @@
 			</div>
 			<div class="col-sm-12 row">
 				<div class="div_treeview" style="width: 100%">
+					<h4>设置项目绝对路径</h4>
+					<div>
+						<div class="col-sm-8">
+							<select class="form-control" id="projectAbsolutePath" >
+								<option value='-1' selected="selected">--请选择--</option>
+								<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
+							</select>
+						</div>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" id="setProjectAbsolutePath" placeholder="请输入Project所在的目录的绝对路径，将“\”改为“/”"/>
+						</div>
+						<div class="col-sm-8">
+							<button class="btn" id="buttonProjectAbsolutePath">设置</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-12 row">
+				<div class="div_treeview" style="width: 100%">
 					<h4>项目结构</h4>
 					<p><i id='iconProject'></i></p>
 					<div class="div_treeview_content">

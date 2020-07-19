@@ -393,21 +393,6 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
-	public long countOfAllProjects() {
-		return projectRepository.count();
-	}
-
-	Iterable<Project> allProjectsCache = null;
-	@Override
-	public Iterable<Project> allProjects() {
-		allProjectsCache = allProjectsCache == null ? projectRepository.findAll() : allProjectsCache;
-		for(Project project : allProjectsCache) {
-			cache.cacheNodeById(project);
-		}
-		return allProjectsCache;
-	}
-
-	@Override
 	public Fan_IO<ProjectFile> queryJavaFileFanIO(ProjectFile file) {
 		Fan_IO<ProjectFile> result = new Fan_IO<ProjectFile>(file);
 		Collection<Type> typesInFile = containRelationService.findFileDirectlyContainTypes(file);

@@ -24,6 +24,9 @@ public interface ProjectRepository extends Neo4jRepository<Project, Long> {
 	
 	@Query("match (project:Project) where project.language={language} return project")
 	List<Project> queryProjectsByLanguage(@Param("language") String language);
+
+	@Query("match (project:Project) return project")
+	List<Project> queryAllProjects();
 	
 	@Query("match (n) where id(n) = {id} return n")
 	Node queryNodeById(@Param("id") long id);

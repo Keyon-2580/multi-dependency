@@ -40,41 +40,45 @@
 }
 
 .mergely.a.rhs.start {
-    border-top:1px solid #a3d1ff;
+    border-top:2px solid rgba(50, 50, 255, 0.5);
 }
 
 .mergely.a.lhs.start.end,.mergely.a.rhs.end {
-    border-bottom:1px solid #a3d1ff;
+    border-bottom:2px solid rgba(50, 50, 255, 0.5);
 }
 
 .mergely.a.rhs {
-    background-color:#ddeeff
+    background-color:rgba(50, 50, 255, 0.2);
 }
 
 .mergely.a.lhs.start.end.first {
     border-bottom:0;
-    border-top:1px solid #a3d1ff;
+    border-top:2px solid rgba(50, 50, 255, 0.5);
 }
 
 .mergely.d.lhs {
-    background-color:#FFFCE9;
+    background-color:rgba(255, 50, 50, 0.2);
 }
 
 .mergely.d.lhs.end,.mergely.d.rhs.start.end {
-    border-bottom:1px solid #f8e8e8;
+    border-bottom:2px solid rgba(255, 50, 50, 0.5);
 }
 
 .mergely.d.rhs.start.end.first {
     border-bottom:0;
-    border-top:1px solid #f8e8e8;
+    border-top:2px solid rgba(255, 50, 50, 0.5);
 }
 
 .mergely.d.lhs.start {
-    border-top:1px solid #f8e8e8;
+    border-top:2px solid rgba(255, 50, 50, 0.5);
 }
 
-.mergely.c.lhs,.mergely.c.rhs {
-    background-color:rgba(255, 70, 70, 0.41);
+.mergely.c.lhs {
+    background-color:rgba(255, 50, 50, 0.2);
+}
+
+.mergely.c.rhs {
+    background-color:rgba(50, 50, 255, 0.2);
 }
 
 .mergely.c.lhs.start,.mergely.c.rhs.start {
@@ -85,17 +89,18 @@
 
 }
 
-.mergely.ch.a.rhs {
-    background-color:#fdffdd;
+.mergely.ch.d.lhs {
+    background-color:rgba(255, 50, 50, 0.5);
+    color:#C6C6C6;
     border-radius:5px;
-    font-weight:100;
+    font-weight:400;
     padding-left:5px;
     padding-right:5px;
 }
 
-.mergely.ch.d.lhs {
-    background-color:#fdffdd;
-    color:red;
+.mergely.ch.a.rhs {
+    background-color:rgba(50, 50, 255, 0.5);
+    color:#C6C6C6;
     border-radius:5px;
     font-weight:400;
     padding-left:5px;
