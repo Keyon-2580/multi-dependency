@@ -12,6 +12,7 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
+import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 
 @Controller
@@ -22,13 +23,16 @@ public class LibController {
 	private StaticAnalyseService staticAnalyseService;
 	
 	@Autowired
+	private NodeService nodeService;
+	
+	@Autowired
 	private MicroserviceService msService;
 	
 	@GetMapping("/apis")
 	@ResponseBody
 	public JSONObject findProjectCallAPIs() {
 		JSONObject result = new JSONObject();
-		Iterable<Project> projects = staticAnalyseService.allProjects();
+		Iterable<Project> projects = nodeService.allProjects();
 		JSONObject values = new JSONObject();
 		for(Project project : projects) {
 			CallLibrary<Project> call = staticAnalyseService.findProjectCallLibraries(project);

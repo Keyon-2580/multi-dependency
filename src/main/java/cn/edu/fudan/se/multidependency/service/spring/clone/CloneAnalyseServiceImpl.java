@@ -27,6 +27,7 @@ import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.spring.CacheService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
+import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.data.CloneLineValue;
 
@@ -49,6 +50,9 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 	
     @Autowired
     BasicCloneQueryService basicCloneQueryService;
+    
+    @Autowired
+    NodeService nodeService;
 
 	@Override
 	public CloneGroup addNodeAndRelationToCloneGroup(CloneGroup group) {
@@ -159,7 +163,7 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 	
 	@Override
 	public Map<CloneGroup, Map<Project, CloneLineValue<Project>>> projectCloneLineValues(Collection<CloneGroup> groups) {
-		Iterable<Project> allProjects = staticAnalyseService.allProjects();
+		Iterable<Project> allProjects = nodeService.allProjects();
 		Map<CloneGroup, Map<Project, CloneLineValue<Project>>> result = new HashMap<>();
 		for(CloneGroup group : groups) {
 			Map<Project, CloneLineValue<Project>> temp = new HashMap<>();

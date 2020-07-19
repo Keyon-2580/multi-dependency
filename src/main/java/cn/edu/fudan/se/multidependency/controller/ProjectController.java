@@ -99,7 +99,7 @@ public class ProjectController {
 	@GetMapping(value = "/pages/count")
 	@ResponseBody
 	public long queryMicroServicePagesCount() {
-		long count = staticAnalyseService.countOfAllProjects();
+		long count = nodeService.allProjects().size();
 		long pageCount = count % Constant.SIZE_OF_PAGE == 0 ? 
 				count / Constant.SIZE_OF_PAGE : count / Constant.SIZE_OF_PAGE + 1;
 		return pageCount;
@@ -429,8 +429,9 @@ public class ProjectController {
 	@PostMapping("/absolute")
 	@ResponseBody
 	public JSONObject setAbsolutePath(@RequestBody Map<String, Object> params) {
-		long projectId = (long) params.get("id");
+		long projectId = Long.valueOf(params.get("id").toString());
 		String absolutePath = (String) params.get("path");
+		absolutePath = absolutePath.replace("\\", "/");
 		JSONObject result = new JSONObject();
 		Project project = nodeService.queryProject(projectId);
 		if(project == null) {
@@ -447,6 +448,22 @@ public class ProjectController {
 	
 	@GetMapping("/absolute")
 	@ResponseBody
+	public JSONObject queryAbsolutePath(@RequestParam("id") long projectId) {
+		JSONObject result = new JSONObject();
+		Project project = nodeService.queryProject(projectId);
+		if(project == null) {
+			result.put("result", "fail");
+			result.put("msg", "没找到Project");
+			return result;
+		}
+		result.put("result", "success");
+		result.put("project", project);
+		result.put("path", projectService.getAbsolutePath(project));
+		return result;
+	}
+	
+	/*@GetMapping("/absolute")
+	@ResponseBody
 	public JSONObject setAbsolutePath(@RequestParam("id") long projectId, @RequestParam("path") String absolutePath) {
 //		long projectId = (long) params.get("id");
 //		String absolutePath = (String) params.get("path");
@@ -462,7 +479,7 @@ public class ProjectController {
 		result.put("project", project);
 		result.put("path", absolutePath);
 		return result;
-	}
+	}*/
 	
 	@GetMapping("/cytoscape")
 	@ResponseBody

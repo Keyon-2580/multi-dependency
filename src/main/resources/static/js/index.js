@@ -247,6 +247,42 @@ var index = function(cytoscapeutil) {
 	var _index = function() {
 		_microservice();
 		_project();
+		$("#projectAbsolutePath").change(function(){
+			var id = $(this).val();
+			if(id == -1) {
+				return ;
+			}
+			$.ajax({
+				url : "/project/absolute?id=" + id,
+				type : "GET",
+				success : function(result) {
+					if(result.result == "success") {
+						$("#setProjectAbsolutePath").val(result.path);
+					}
+				}
+			});
+		});
+		$("#buttonProjectAbsolutePath").click(function(){
+			var projectId = $("#projectAbsolutePath").val();
+			var path = $("#setProjectAbsolutePath").val();
+			console.log(projectId + " " + path);
+			var param = {
+				id : projectId,
+				path : path
+			}
+			$.ajax({
+				url : "/project/absolute",
+				type : "POST",
+				contentType : "application/json",
+				dataType : "json",
+				data : JSON.stringify(param),
+				success : function(result) {
+					if(result.result == "success") {
+						alert("设置成功");
+					}
+				}
+			});
+		})
 	};
 	
 	return {

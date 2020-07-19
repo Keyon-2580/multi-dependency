@@ -179,6 +179,6 @@ public class CloneController {
 		String file1AbsolutePath = projectService.getAbsolutePath(project1) + file1.getPath();
 		String file2AbsolutePath = projectService.getAbsolutePath(project2) + file2.getPath();
 		
-		return "redirect:/compare?leftFile=" + file1AbsolutePath + "&rightFile=" + file2AbsolutePath;
+		return "redirect:/compare?leftFilePath=" + file1AbsolutePath + "&rightFilePath=" + file2AbsolutePath;
 	}
 }

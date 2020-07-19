@@ -29,8 +29,6 @@ public interface StaticAnalyseService {
 	
 	List<Project> queryAllProjectsByPage(int page, int size, String... sortByProperties);
 	
-	Iterable<Project> allProjects();
-	
 	Collection<Type> findExtendsType(Type type);
 	
 	/**
@@ -88,8 +86,6 @@ public interface StaticAnalyseService {
 	CallLibrary<Project> findProjectCallLibraries(Project project);
 	
 	Iterable<Library> findAllLibraries();
-
-	long countOfAllProjects();
 	
 	List<Fan_IO<ProjectFile>> queryAllFileFanIOs(Project project);
 	
