@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
@@ -38,7 +39,8 @@ public class ThreadService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ThreadService.class);
 	private static YamlUtil.YamlObject yaml;
 	private static JSONConfigFile config;
-	private static final Executor executor = Executors.newCachedThreadPool();
+	private static final ExecutorService executor = Executors.newCachedThreadPool();
+	private static final ExecutorService executorForGit = Executors.newFixedThreadPool(5);
 	private static CountDownLatch latchOfStatic, latchOfOthers;
 
 	public ThreadService(YamlUtil.YamlObject yaml, CountDownLatch latchOfStatic, CountDownLatch latchOfOthers) throws Exception {
@@ -141,28 +143,27 @@ public class ThreadService {
 			if (yaml.isAnalyseGit()) {
 				LOGGER.info("Git库分析");
 				Collection<GitConfig> gitsConfig = config.getGitsConfig();
-//				CountDownLatch latchOfGits = new CountDownLatch((gitsConfig).size());
+				CountDownLatch latchOfGits = new CountDownLatch((gitsConfig).size());
 				for (GitConfig gitConfig : gitsConfig) {
 					LOGGER.info(gitConfig.getPath());
-					new GitInserter(gitConfig).addNodesAndRelations();
-					/*executor.execute(() -> {
+					executorForGit.execute(() -> {
 						try {
 							LOGGER.info(gitConfig.getPath());
 							new GitInserter(gitConfig).addNodesAndRelations();
 						} catch (Exception e) {
-//							e.printStackTrace();
 							LOGGER.error(gitConfig.getPath() + " " + e.getMessage());
 						} finally {
 							latchOfGits.countDown();
 						}
-					});*/
+					});
 				}
-//				latchOfGits.await();
+				latchOfGits.await();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			LOGGER.info("git分析线程结束，线程-1：" + (latchOfOthers.getCount() - 1));
+			executorForGit.shutdown();
 			latchOfOthers.countDown();
 		}
 	}
