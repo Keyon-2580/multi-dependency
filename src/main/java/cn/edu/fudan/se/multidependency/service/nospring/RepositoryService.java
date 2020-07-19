@@ -65,6 +65,7 @@ public final class RepositoryService implements InserterForNeo4j, Serializable {
         LOGGER.info("创建索引：" + sdf.format(new Timestamp(System.currentTimeMillis())));
         batchInserterService.createIndexes();
         LOGGER.info("创建索引结束：" + sdf.format(new Timestamp(System.currentTimeMillis())));
+        LOGGER.info("正在关闭数据库... " + sdf.format(new Timestamp(System.currentTimeMillis())));
         closeBatchInserter();
         LOGGER.info("数据库插入操作结束，关闭数据库：" + sdf.format(new Timestamp(System.currentTimeMillis())));
     }

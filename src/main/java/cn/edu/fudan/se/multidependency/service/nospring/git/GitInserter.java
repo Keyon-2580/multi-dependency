@@ -62,7 +62,8 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
     public void addBranchesAndIssues() {
         //添加gitRepository节点和gitRepository到project的包含关系
-        GitRepository gitRepository = new GitRepository(generateEntityId(), gitExtractor.getRepositoryName(), gitExtractor.getGitPath(), gitExtractor.getRepositoryPath());
+        GitRepository gitRepository = new GitRepository(generateEntityId(), 
+        		gitExtractor.getRepositoryName(), gitExtractor.getGitPath(), gitExtractor.getRepositoryPath());
         LOGGER.info(gitRepository.getPath());
         addNode(gitRepository, null);
 

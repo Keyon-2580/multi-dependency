@@ -57,6 +57,7 @@ public class ThreadService {
 				try {
 					staticAnalyseCore(projectConfig);
 				} catch (Exception e) {
+					LOGGER.error(projectConfig.getPath() + " " + e.getMessage());
 					e.printStackTrace();
 				} finally {
 					LOGGER.info("项目结构存储线程结束，线程-1：" + (latchOfProjects.getCount() - 1));
@@ -140,20 +141,23 @@ public class ThreadService {
 			if (yaml.isAnalyseGit()) {
 				LOGGER.info("Git库分析");
 				Collection<GitConfig> gitsConfig = config.getGitsConfig();
-				CountDownLatch latchOfGits = new CountDownLatch((gitsConfig).size());
+//				CountDownLatch latchOfGits = new CountDownLatch((gitsConfig).size());
 				for (GitConfig gitConfig : gitsConfig) {
-					executor.execute(() -> {
+					LOGGER.info(gitConfig.getPath());
+					new GitInserter(gitConfig).addNodesAndRelations();
+					/*executor.execute(() -> {
 						try {
 							LOGGER.info(gitConfig.getPath());
 							new GitInserter(gitConfig).addNodesAndRelations();
 						} catch (Exception e) {
-							e.printStackTrace();
+//							e.printStackTrace();
+							LOGGER.error(gitConfig.getPath() + " " + e.getMessage());
 						} finally {
 							latchOfGits.countDown();
 						}
-					});
+					});*/
 				}
-				latchOfGits.await();
+//				latchOfGits.await();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
