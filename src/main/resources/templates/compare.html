@@ -164,9 +164,11 @@
 
         function copyToClip(content) {
         	if(content.split(":").length > 1) {
-	        	content = content.replaceAll("/","\\");
+//	        	content = content.replaceAll("/","\\");
+	        	content = content.split('/').join('\\');
         	} else {
-        		content = content.replaceAll("\\", "/");
+//        		content = content.replaceAll("\\", "/");
+	        	content = content.split('\\').join('/');
         	}
             const aux = document.createElement("input");
             aux.setAttribute("value", content);
