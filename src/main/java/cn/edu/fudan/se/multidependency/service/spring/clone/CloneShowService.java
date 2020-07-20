@@ -16,4 +16,5 @@ public interface CloneShowService {
 	Collection<HistogramWithProjectsSize> withProjectsSizeToHistogram(Collection<CloneGroup> groups, boolean singleLanguage);
 	
 	JSONArray graphFileClones(Collection<Clone> clones);
+	JSONArray graphFileCloneGroups(Collection<CloneGroup> groups);
 }
