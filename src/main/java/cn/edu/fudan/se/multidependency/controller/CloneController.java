@@ -28,9 +28,9 @@ import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.ProjectService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneShowService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneValueService;
-import cn.edu.fudan.se.multidependency.service.spring.clone.DuplicatedPackageDetector;
+import cn.edu.fudan.se.multidependency.service.spring.clone.SimilarPackageDetector;
 import cn.edu.fudan.se.multidependency.service.spring.clone.data.CloneValueForDoubleNodes;
-import cn.edu.fudan.se.multidependency.service.spring.clone.data.DuplicatedPackage;
+import cn.edu.fudan.se.multidependency.service.spring.clone.data.SimilarPackage;
 import cn.edu.fudan.se.multidependency.service.spring.clone.data.PackageCloneValueWithFileCoChange;
 
 @Controller
@@ -56,7 +56,7 @@ public class CloneController {
 	private ContainRelationService containRelationService;
 	
 	@Autowired
-	private DuplicatedPackageDetector duplicatedPackageDetector;
+	private SimilarPackageDetector similarPackageDetector;
 
 	@GetMapping("/packages")
 	public String graph() {
@@ -71,9 +71,9 @@ public class CloneController {
 	
 	@GetMapping("/package/duplicated")
 	@ResponseBody
-	public Collection<DuplicatedPackage> duplicatedPackages(@RequestParam("threshold") int threshold,
+	public Collection<SimilarPackage> similarPackages(@RequestParam("threshold") int threshold,
 			@RequestParam("percentage") double percentage) {
-		return duplicatedPackageDetector.detectDuplicatedPackages(threshold, percentage);
+		return similarPackageDetector.detectSimilarPackages(threshold, percentage);
 	}
 	
 	/**

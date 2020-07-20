@@ -195,22 +195,22 @@ var clone = function(cytoscapeutil) {
 			success: function(result) {
 				console.log(result);
 				var html = "<table class='table table-bordered'>";
-//					+ "<tr><th>file1</th><th>file2</th><th>type</th><th>value</th></tr>";
+				html += "<tr><th>目录1</th><th>目录2</th><th>内部克隆文件对数</th></tr>";
 				var tr = function(layer, duplicated) {
 					var prefix = "";
 					for(var i = 0; i < layer; i++) {
 						prefix += "|--------";
 					}
 					html += "<tr>";
-					html += "<td>";
+					html += layer == 0 ? "<th>" : "<td>";
 					html += prefix + duplicated.package1.directoryPath
-					html += "</td>";
-					html += "<td>";
+					html += layer == 0 ? "</th>" : "</td>";
+					html += layer == 0 ? "<th>" : "<td>";
 					html += prefix + duplicated.package2.directoryPath
-					html += "</td>";
-					html += "<td>";
+					html += layer == 0 ? "</th>" : "</td>";
+					html += layer == 0 ? "<th>" : "<td>";
 					html += duplicated.clonePackages.children.length;
-					html += "</td>";
+					html += layer == 0 ? "</th>" : "</td>";
 					html += "</tr>";
 					for(var key in duplicated.childrenClonePackages) {
 //						console.log(key);
