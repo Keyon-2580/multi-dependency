@@ -1,9 +1,11 @@
 package cn.edu.fudan.se.multidependency.model.relation;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.neo4j.ogm.annotation.RelationshipEntity;
+import org.neo4j.ogm.annotation.Transient;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import lombok.Data;
@@ -18,22 +20,18 @@ public class DependOn implements Relation {
 
     private Long id;
 	
-//	private int times;
-	
 	private Node startNode;
 	
 	private Node endNode;
+	
+	@Transient
+	private Map<RelationType, List<Relation>> relations = new HashMap<>();
 
 	public DependOn(Node startNode, Node endNode) {
 		this.startNode = startNode;
 		this.endNode = endNode;
 	}
 	
-	/*@Override
-	public void addTimes() {
-		times++;
-	}*/
-
 	@Override
 	public Node getStartNode() {
 		return startNode;
