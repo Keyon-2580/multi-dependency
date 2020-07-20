@@ -3,10 +3,7 @@ package cn.edu.fudan.se.multidependency.controller;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -428,21 +425,29 @@ public class ProjectController {
 	
 	@PostMapping("/absolute")
 	@ResponseBody
-	public JSONObject setAbsolutePath(@RequestBody Map<String, Object> params) {
-		long projectId = Long.valueOf(params.get("id").toString());
-		String absolutePath = (String) params.get("path");
-		absolutePath = absolutePath.replace("\\", "/");
+	public JSONObject setAbsolutePath(@RequestBody Map<String, Object>[] params) {
+    	int len = params.length;
+		long projectId;
+		String absolutePath;
 		JSONObject result = new JSONObject();
-		Project project = nodeService.queryProject(projectId);
-		if(project == null) {
-			result.put("result", "fail");
-			result.put("msg", "没找到Project");
-			return result;
+		int i;
+    	for(i = 0; i < len; i ++) {
+			projectId = Long.parseLong(params[i].get("id").toString());
+			absolutePath = (String) params[i].get("path");
+			absolutePath = absolutePath.replace("\\", "/");
+			Project project = nodeService.queryProject(projectId);
+			if(project == null) {
+				result.put("result", "fail");
+				result.put("msg", "没找到Project");
+				break;
+			}
+			projectService.setAbsolutePath(project, absolutePath);
+			result.put("project", project);
+			result.put("path", absolutePath);
 		}
-		projectService.setAbsolutePath(project, absolutePath);
-		result.put("result", "success");
-		result.put("project", project);
-		result.put("path", absolutePath);
+    	if(i == len) {
+			result.put("result", "success");
+		}
 		return result;
 	}
 	
