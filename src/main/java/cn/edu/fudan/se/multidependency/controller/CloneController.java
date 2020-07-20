@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
@@ -27,9 +28,9 @@ import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.ProjectService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneShowService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneValueService;
-import cn.edu.fudan.se.multidependency.service.spring.clone.DuplicatedPackageDetector;
+import cn.edu.fudan.se.multidependency.service.spring.clone.SimilarPackageDetector;
 import cn.edu.fudan.se.multidependency.service.spring.clone.data.CloneValueForDoubleNodes;
-import cn.edu.fudan.se.multidependency.service.spring.clone.data.DuplicatedPackage;
+import cn.edu.fudan.se.multidependency.service.spring.clone.data.SimilarPackage;
 import cn.edu.fudan.se.multidependency.service.spring.clone.data.PackageCloneValueWithFileCoChange;
 
 @Controller
@@ -55,7 +56,7 @@ public class CloneController {
 	private ContainRelationService containRelationService;
 	
 	@Autowired
-	private DuplicatedPackageDetector duplicatedPackageDetector;
+	private SimilarPackageDetector similarPackageDetector;
 
 	@GetMapping("/packages")
 	public String graph() {
@@ -70,9 +71,9 @@ public class CloneController {
 	
 	@GetMapping("/package/duplicated")
 	@ResponseBody
-	public Collection<DuplicatedPackage> duplicatedPackages(@RequestParam("threshold") int threshold,
+	public Collection<SimilarPackage> similarPackages(@RequestParam("threshold") int threshold,
 			@RequestParam("percentage") double percentage) {
-		return duplicatedPackageDetector.detectDuplicatedPackages(threshold, percentage);
+		return similarPackageDetector.detectSimilarPackages(threshold, percentage);
 	}
 	
 	/**
@@ -138,7 +139,7 @@ public class CloneController {
 	 */
 	@GetMapping("/package/double/cochange")
 	@ResponseBody
-	public PackageCloneValueWithFileCoChange cloneInPackageWithCoChange(@RequestParam("package1") long package1Id,
+	public PackageCloneValueWithFileCoChange clonesInPackageWithCoChange(@RequestParam("package1") long package1Id,
 			@RequestParam("package2") long package2Id) {
 		Package pck1 = nodeService.queryPackage(package1Id);
 		Package pck2 = nodeService.queryPackage(package2Id);
@@ -150,6 +151,25 @@ public class CloneController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
+		}
+	}
+	
+	@GetMapping("/package/double/graph")
+	@ResponseBody
+	public JSONArray clonesInPackageToGraph(@RequestParam("package1") long package1Id,
+			@RequestParam("package2") long package2Id) {
+		Package pck1 = nodeService.queryPackage(package1Id);
+		Package pck2 = nodeService.queryPackage(package2Id);
+		if(pck1 == null || pck2 == null) {
+			return null;
+		}
+		try {
+			CloneValueForDoubleNodes<Package> value = cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pck1, pck2);
+			Collection<Clone> clones = value == null ? new ArrayList<>() : value.getChildren();
+			return cloneShowService.graphFileClones(clones);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new JSONArray();
 		}
 	}
 	

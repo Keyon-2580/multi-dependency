@@ -195,23 +195,22 @@ var clone = function(cytoscapeutil) {
 			success: function(result) {
 				console.log(result);
 				var html = "<table class='table table-bordered'>";
-//					+ "<tr><th>file1</th><th>file2</th><th>type</th><th>value</th></tr>";
+				html += "<tr><th>目录1</th><th>目录2</th><th>内部克隆文件对数</th></tr>";
 				var tr = function(layer, duplicated) {
-					console.log(layer);
 					var prefix = "";
 					for(var i = 0; i < layer; i++) {
 						prefix += "|--------";
 					}
 					html += "<tr>";
-					html += "<td>";
+					html += layer == 0 ? "<th>" : "<td>";
 					html += prefix + duplicated.package1.directoryPath
-					html += "</td>";
-					html += "<td>";
+					html += layer == 0 ? "</th>" : "</td>";
+					html += layer == 0 ? "<th>" : "<td>";
 					html += prefix + duplicated.package2.directoryPath
-					html += "</td>";
-					html += "<td>";
+					html += layer == 0 ? "</th>" : "</td>";
+					html += layer == 0 ? "<th>" : "<td>";
 					html += duplicated.clonePackages.children.length;
-					html += "</td>";
+					html += layer == 0 ? "</th>" : "</td>";
 					html += "</tr>";
 					for(var key in duplicated.childrenClonePackages) {
 //						console.log(key);
@@ -318,10 +317,19 @@ var clone = function(cytoscapeutil) {
 					html += "</td>";
 					html += "</tr>";
 				}
-				html += "</table>"
+				html += "</table>";
+				html += "<div id='fileClonesGraph'></div>"
 				$("#package_files_clone").html(html);
 				$(".cochangeTimes").click(function() {
 					console.log(children[$(this).attr("index")].cochange);
+				});
+				$.ajax({
+					type: "get",
+					url: "/clone/package/double/graph?package1=" + pck1Id + "&package2=" + pck2Id,
+					success: function(result) {
+						console.log(result);
+						cloneGroupToGraph(result, "fileClonesGraph");
+					}
 				});
 			}
 		})
@@ -381,6 +389,247 @@ var clone = function(cytoscapeutil) {
 			}
 		});
 	}
+	/*将克隆组关系数据展现在图上
+	*result:数据
+	* divId:将被显示的divID
+	 */
+	var cloneGroupToGraph = function(result,divId) {
+		//设置数组
+		var clonedata = result
+		
+		var diameter = 1800,
+		radius = diameter / 2,
+		innerRadius = radius - 300;
+		
+		var cluster = d3.layout.cluster()
+		.size([360, innerRadius])
+		.sort(null)
+		.value(function(d) { return d.size; });
+		
+		var bundle = d3.layout.bundle();
+		
+		var line = d3.svg.line.radial()
+		.interpolate("bundle")
+		.tension(.85)
+		.radius(function(d) { return d.y; })
+		.angle(function(d) { return d.x / 180 * Math.PI; });
+		
+		
+		var svg = d3.select("#" + divId).append("svg")
+		.attr("width", diameter)
+		.attr("height", diameter)
+		.attr("id", "svg1")
+		.append("g")
+		.attr("transform", "translate(" + radius + "," + radius + ")");
+		
+		
+		var link = svg.append("g").selectAll(".link"),
+		node = svg.append("g").selectAll(".node");
+		
+		//设置数组读取数据
+		var nodes = cluster.nodes(packageHierarchy(clonedata)),
+		links = packageImports(nodes);
+		// var nodes = cluster.nodes(packageClone(classes)),
+		//     links = packageCloneImports(nodes);
+		
+		console.log(nodes)
+		
+		link = link
+		.data(bundle(links))
+		.enter().append("path")
+		.each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
+		.attr("class", "link")
+		.attr("d", line);
+		
+		node = node
+		.data(nodes.filter(function(n) { return !n.children; }))
+		.enter().append("text")
+		// .style("fill", function (d) { if (checkChangeType(d.key, changes)== 3) { return '#b47500';}
+		//                               if (checkChangeType(d.key, changes)== 4) { return '#00b40a';}})
+		.attr("class", "node")
+		.attr("dy", ".31em")
+		.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+		.style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+		.text(function(d) { return d.key; })
+		.on("mouseover", mouseovered)
+		.on("mouseout", mouseouted)
+		.call(text => text.append("title").text(function(d) { return d.key; }));
+		// .call(text => text.append("title").text(d => `${node.data.name}
+		// ${d.outgoing.length} outgoing
+		// ${d.incoming.length} incoming`));
+		
+		String.prototype.replaceAt=function(index, replacement) {
+			return this.substr(0, index) + replacement+ this.substr(index + replacement.length);
+		}
+		
+		String.prototype.replaceAll = function(search, replacement) {
+			var target = this;
+			return target.replace(new RegExp(search, 'g'), replacement);
+		};
+		
+		
+		var width = 360;
+		var height = 360;
+		var radius = Math.min(width, height) / 2;
+		var donutWidth = 75;
+		var legendRectSize = 18;                                  // NEW
+		var legendSpacing = 4;
+		
+		var legend = d3.select('svg')
+		.append("g")
+		.selectAll("g")
+		// .data(color.domain())
+		//.enter()
+		.append('g')
+		.attr('class', 'legend')
+		.attr('transform', function(d, i) {
+			var height = legendRectSize;
+			var x = 0;
+			var y = (i+1) * height;
+			return 'translate(' + x + ',' + y + ')';
+		});
+		
+		d3.select('svg')
+		.select("g:nth-child(0)").append('text').text("Component Colors:");
+		//.attr('transform', 'translate(0,0)');
+		
+		
+		legend.append('rect')
+		.attr('width', legendRectSize)
+		.attr('height', legendRectSize)
+		// .style('fill', color)
+		// .style('stroke', color);
+		
+		legend.append('text')
+		.attr('x', legendRectSize + legendSpacing)
+		.attr('y', legendRectSize - legendSpacing)
+		.text(function(d) { return d; });
+		
+		function mouseovered(d) {
+			node
+			.each(function(n) { n.target = n.source = false; });
+			
+			link
+			.classed("link--target", function(l) { if (l.target === d) return l.source.source = true; })
+			.classed("link--source", function(l) { if (l.source === d) return l.target.target = true; })
+			.filter(function(l) { return l.target === d || l.source === d; })
+			// .style("stroke", function (l) { if (checkOldLink(l, old_links)) { return '#b400ad';}})
+			.style("stroke", "#e0230a")
+			.each(function() { this.parentNode.appendChild(this); });
+			
+			node
+			.classed("node--target", function(n) { return n.target; })
+			.classed("node--source", function(n) { return n.source; });
+			
+		}
+		
+		function mouseouted(d) {
+			link
+			.classed("link--target", false)
+			.classed("link--source", false)
+			.style("stroke", 'DarkGray');
+			
+			node
+			.classed("node--target", false)
+			.classed("node--source", false);
+			
+		}
+		
+		d3.select(self.frameElement).style("height", diameter + "px");
+		
+		// Lazily construct the package hierarchy from class names.
+		function packageHierarchy(classes) {
+			var map = {};
+			
+			function find(name, data) {
+				var node = map[name], i;
+				if (!node) {
+					node = map[name] = data || {name: name, children: []};
+					console.log(node)
+					if (name.length) {
+						node.parent = find(name.substring(0, i = name.lastIndexOf("/")));
+						node.parent.children.push(node);
+						node.key = name.substring(i + 1);
+					}
+				}
+				return node;
+			}
+			
+			// classes.result.forEach(function(d) {
+			classes.forEach(function(d) {
+				console.log(d)
+				find(d.name, d);
+			});
+			
+			return map[""];
+		}
+		
+		// Return a list of imports for the given array of nodes.
+		function packageImports(nodes) {
+			var map = {},
+			imports = [];
+			
+			// Compute a map from name to node.
+			nodes.forEach(function(d) {
+				map[d.name] = d;
+			});
+			
+			// For each import, construct a link from the source to target node.
+			nodes.forEach(function(d) {
+				if (d.imports) d.imports.forEach(function(i) {
+					imports.push({source: map[d.name], target: map[i]});
+				});
+			});
+			
+			return imports;
+		}
+		
+		//仿写packageHierarchy函数，用于处理clone关系json
+		function packageClone(classes) {
+			var map = {};
+			
+			function find(name, data) {
+				var node = map[name], i;
+				if (!node) {
+					node = map[name] = data || {data: {source: name}, children: [], parent: []};
+					// console.log(node)
+					if (name.length) {
+						node.parent = find(name.substring(0, i = name.lastIndexOf(".")));
+						node.parent.children.push(node);
+						node.key = name.substring(i + 1);
+					}
+				}
+				return node;
+			}
+			
+			classes.value.edges.forEach(function(d) {
+				// console.log(d)
+				find(d.data.source, d);
+			});
+			
+			return map[""];
+		}
+		
+		// Return a list of imports for the given array of nodes.
+		function packageCloneImports(nodes) {
+			var map = {},
+			imports = [];
+			
+			// Compute a map from name to node.
+			nodes.forEach(function(d) {
+				// console.log(d.data.source)
+				map[d.source] = d.data.source;
+			});
+			
+			// For each import, construct a link from the source to target node.
+			nodes.forEach(function(d) {
+				if (d.data.target)
+					imports.push({source: map[d.source], target: d.data.target});
+			});
+			// console.log(imports)
+			return imports;
+		}
+	};
 	var _graph = function() {
 		packagesClone();
 		/*showTreeMapGraph('project_path', [

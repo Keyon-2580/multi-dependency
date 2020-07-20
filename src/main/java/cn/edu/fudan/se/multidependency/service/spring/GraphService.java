@@ -21,10 +21,10 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.relation.DependOn;
-import cn.edu.fudan.se.multidependency.model.relation.PackageDependOnPackage;
 import cn.edu.fudan.se.multidependency.model.relation.StructureRelation;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
+import cn.edu.fudan.se.multidependency.repository.relation.DependOnRepository;
 import cn.edu.fudan.se.multidependency.service.spring.data.Graph;
 import cn.edu.fudan.se.multidependency.service.spring.data.MatrixContent;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeEdge;
@@ -42,6 +42,9 @@ public class GraphService {
 	
 	@Autowired
 	private BasicCloneQueryService basicCloneQueryService;
+	
+	@Autowired
+	private DependOnRepository DependOnRepository;
 	
 	public Collection<Collection<ProjectFile>> cycleFiles(Project project) {
 		List<Collection<ProjectFile>> result = new ArrayList<>();
@@ -88,7 +91,7 @@ public class GraphService {
 			Package endPackage = containRelationService.findFileBelongToPackage(containRelationService.findCodeNodeBelongToFile(endNode));
 			graph.addNode(startPackage);
 			graph.addNode(endPackage);
-			graph.addEdge(new PackageDependOnPackage(startPackage, endPackage));
+			graph.addEdge(new DependOn(startPackage, endPackage));
 		}
 		graph.computeStronglyConnectedComponents();
 		

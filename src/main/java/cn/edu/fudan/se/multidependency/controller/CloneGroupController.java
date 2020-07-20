@@ -112,6 +112,29 @@ public class CloneGroupController {
 		
 		return result;
 	}
+
+	/**
+	 * 两个克隆组之间的文件依赖
+	 * @param name
+	 * @return
+	 */
+	@GetMapping("/cytoscape/double/json")
+	@ResponseBody
+	public JSONObject cloneInCloneGroupJson(
+			@RequestParam("clonegroupName") String name) {
+		JSONObject result = new JSONObject();
+		List<CloneGroup> groups = new ArrayList<>();
+		CloneGroup cloneGroup = basicCloneQueryService.queryCloneGroup(name);
+		cloneGroup = cloneAnalyse.addNodeAndRelationToCloneGroup(cloneGroup);
+		if(cloneGroup != null) {
+			groups.add(cloneGroup);
+		}
+//		JSONObject value = cloneShow.graphFileCloneGroups(groups);
+//		System.out.println(value);
+		result.put("result", cloneShow.graphFileCloneGroups(groups));
+
+		return result;
+	}
 	
 	private Collection<CloneGroup> selectGroups(Map<String, Object> params) throws Exception {
 		List<String> cloneRelationTypes = (List<String>) params.getOrDefault("searchCloneRelationTypeSelect", new ArrayList<>());

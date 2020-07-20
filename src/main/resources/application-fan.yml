@@ -20,6 +20,7 @@ data:
 #   project_config: src/main/resources/project/leveldb.json
 #   project_config: src/main/resources/project/source-fan-part.json
    project_config: src/main/resources/project/source-fan-part-google.json
+#   project_config: src/main/resources/project/cassandra_fan.json
    dynamic_analyse: false
    git_analyse: true
    lib_analyse: false
@@ -30,6 +31,7 @@ data:
 #      path: D:/neo4j-community-3.5.3-windows/neo4j-community-3.5.3/data/databases/multiple.dependency.db
       path: D:/neo4j-community-3.5.16/data/databases/multiple.dependency.db
       
-   serialize_path: D:/multiple-dependency-project/RepositoryService.txt
+#   serialize_path: D:/multiple-dependency-project/RepositoryService.txt
+   serialize_path: D:/multiple-dependency-project/RepositoryService-google.txt
    
    test: this property is for YamlUtilsTest

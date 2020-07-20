@@ -106,6 +106,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         }
         LOGGER.info("commit 数量：" + commits.size());
 //      Collections.reverse(commits);
+        int i = 0;
         for (RevCommit revCommit : commits) {
         	
         	//添加commit节点
@@ -113,6 +114,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         	String authoredDate = simpleDateFormat.format(revCommit.getAuthorIdent().getWhen());
         	Commit commit = new Commit(generateEntityId(), revCommit.getName(), revCommit.getShortMessage(),
         	        revCommit.getFullMessage(), authoredDate);
+//        	System.out.println(String.join(" ", commit.getCommitId(), String.valueOf(i++)));
             addNode(commit, null);
             
             //添加developer节点和developer到commit的关系
