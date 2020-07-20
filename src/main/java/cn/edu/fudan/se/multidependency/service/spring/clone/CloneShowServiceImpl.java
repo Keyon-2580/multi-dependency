@@ -357,6 +357,9 @@ public class CloneShowServiceImpl implements CloneShowService {
 		result.put("nodes", CytoscapeUtil.toNodes(nodes));
 		result.put("edges", CytoscapeUtil.toEdges(edges));
 		result.put("clones", allClones);
+		allClones.sort((c1, c2) -> {
+			return c2.getValue() > c1.getValue() ? 1 : c2.getValue() == c1.getValue() ? 0 : -1;
+		});
 		return result;
 	}
 
