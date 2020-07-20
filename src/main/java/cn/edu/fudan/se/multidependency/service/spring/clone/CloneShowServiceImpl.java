@@ -125,13 +125,14 @@ public class CloneShowServiceImpl implements CloneShowService {
 		List<CytoscapeEdge> groupEdges = new ArrayList<>();
 		Map<Node, Boolean> isNodeToCytoscapeNode = new HashMap<>();
 		Map<String, Boolean> isIdToCytoscapeEdge = new HashMap<>();
-		
+		List<Clone> allClones = new ArrayList<>();
 		for(CloneGroup cloneGroup : groups) {
 			CytoscapeNode groupNode = new CytoscapeNode(cloneGroup.getId(), cloneGroup.getName(), "CloneGroup");
 			groupNodes.add(groupNode);
 			groupZTreeNodes.add(new ZTreeNode(cloneGroup.getId(), cloneGroup.getName(), false, "CloneGroup", false));
 //			Collection<Clone> clones = cloneGroup.getRelations();
 			Collection<Clone> clones = removeType1RelatedClone(cloneGroup);
+			allClones.addAll(clones);
 			for(Clone cloneRelation : clones) {
 				CodeNode node1 = cloneRelation.getCodeNode1();
 				CodeNode node2 = cloneRelation.getCodeNode2();
@@ -355,6 +356,7 @@ public class CloneShowServiceImpl implements CloneShowService {
 		result.put("ztree", ztreeResult);
 		result.put("nodes", CytoscapeUtil.toNodes(nodes));
 		result.put("edges", CytoscapeUtil.toEdges(edges));
+		result.put("clones", allClones);
 		return result;
 	}
 

@@ -410,10 +410,11 @@ var clone = function(cytoscapeutil) {
 			html += '</div>'
 			html += '</div>';
 			html += '<div class="col-sm-12" id="copyDiv_group"></div>';
+			html += '<div class="col-sm-12" id="table_clones_groupall"></div>';
 			html += '<div class="col-sm-12"><hr/></div>';
 			$("#groupCytoscape").html(html);
 			showZTree(result.groupValue.ztree, $("#node_ztree_groups"), _showCytoscape($("#cloneGroupsDiv"), result.groupValue, "copyDiv_group"), "copyDiv_group");
-			
+//			showClonesTable(result.value)
 			html = "";
 			for(var i = 0; i < size; i++) {
 				html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='" + i +"'>全屏</button>";
@@ -431,6 +432,7 @@ var clone = function(cytoscapeutil) {
 				html += '<div id="cloneImg_' + i + '">'
 				html += '</div>';
 				html += '<div class="col-sm-12" id="copyDiv_' + i + '"></div>';
+				html += '<div class="col-sm-12" id="table_clones_group_' + i + '"></div>';
 				html += '<div class="col-sm-12"><hr/></div>';
 			}
 			$("#content").html(html);
@@ -449,6 +451,7 @@ var clone = function(cytoscapeutil) {
 				var cy = _showCytoscape($("#cloneGroupDiv_" + i), result.value[i], "copyDiv_" + i);
 				cys[i] = cy;
 				showZTree(result.value[i].ztree, $("#node_ztree_" + i), cy, "copyDiv_" + i);
+				showClonesTable(result.value[i].clones, "table_clones_group_" + i);
 			}
 		}
 		$("#searchCountOfProjects").click(function(){
@@ -593,6 +596,37 @@ var clone = function(cytoscapeutil) {
 				}
 			});
 		}
+		var showClonesTable = function(clones, divId) {
+			console.log(clones);
+			var html = "<table class='table table-bordered'>";
+			html += "<tr>";
+			html += "<th>file1";
+			html += "</th>";
+			html += "<th>file2";
+			html += "</th>";
+			html += "<th>type";
+			html += "</th>";
+			html += "<th>value";
+			html += "</th>";
+			html += "</tr>";
+			for(var i = 0; i < clones.length; i++) {
+				if(clones[i].cloneRelationType != "FILE_CLONE_FILE") {
+					continue;
+				}
+				html += "<tr>";
+				html += "<td>" + clones[i].codeNode1.path;
+				html += "</td>";
+				html += "<td>" + clones[i].codeNode2.path;
+				html += "</td>";
+				html += "<td>" + clones[i].cloneType;
+				html += "</td>";
+				html += "<td>" + "<a target='_blank' href='/clone/compare?id1=" + clones[i].codeNode1.id + "&id2=" + clones[i].codeNode2.id + "'>" + clones[i].value + "</a>";
+				html += "</td>";
+				html += "</tr>";
+			}
+			html += "</table>";
+			$("#" + divId).html(html);
+		};
 		var histogram = function(sort) {
 			$.ajax({
 				type : "POST",
@@ -703,6 +737,7 @@ var clone = function(cytoscapeutil) {
 									html += '</div>'
 									html += '</div>';
 									html += '<div class="col-sm-12" id="copyDiv_group_one"></div>';
+									html += '<div class="col-sm-12" id="table_clones_one"></div>';
 									html += '<div class="col-sm-12"><hr/></div>';
 									$("#specifiedCytoscape").html(html);
 									$(".fullscreen_btn").unbind("click");
@@ -711,6 +746,7 @@ var clone = function(cytoscapeutil) {
 									})
 									var cy = _showCytoscape($("#cloneGroupDiv"), result.value, "copyDiv_group_one");
 									showZTree(result.value.ztree, $("#node_ztree_num"), cy, "copyDiv_group_one");
+									showClonesTable(result.value.clones, "table_clones_one");
 								}
 							}
 						});
