@@ -1,16 +1,13 @@
 package cn.edu.fudan.se.multidependency.model.node;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Transient;
 
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -56,10 +53,8 @@ public class Package implements Node {
 		return NodeLabelType.Package;
 	}
 	
-	@Transient
-	private Set<ProjectFile> files = new HashSet<>();
-	public synchronized void addFiles(Collection<ProjectFile> files) {
-		this.files.addAll(files);
+	public String lastPackageDirectoryPath() {
+		return FileUtil.extractDirectoryFromFile(FileUtil.extractDirectoryFromFile(directoryPath)) + "/";
 	}
 	
 }

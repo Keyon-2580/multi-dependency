@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -19,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -34,7 +37,6 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
-import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCall;
 import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
@@ -42,6 +44,7 @@ import cn.edu.fudan.se.multidependency.service.spring.DependencyOrganizationServ
 import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.MultipleService;
 import cn.edu.fudan.se.multidependency.service.spring.NodeService;
+import cn.edu.fudan.se.multidependency.service.spring.ProjectService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.metric.Fan_IO;
 import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
@@ -73,6 +76,9 @@ public class ProjectController {
 	@Autowired
 	private BasicCloneQueryService basicCloneQueryService;
 	
+	@Autowired
+	private ProjectService projectService;
+	
 	@GetMapping(value = "/fanIO/file/{projectId}")
 	@ResponseBody
 	public Collection<Fan_IO<ProjectFile>> calculateFanIOs(@PathVariable("projectId") long id) {
@@ -93,7 +99,7 @@ public class ProjectController {
 	@GetMapping(value = "/pages/count")
 	@ResponseBody
 	public long queryMicroServicePagesCount() {
-		long count = staticAnalyseService.countOfAllProjects();
+		long count = nodeService.allProjects().size();
 		long pageCount = count % Constant.SIZE_OF_PAGE == 0 ? 
 				count / Constant.SIZE_OF_PAGE : count / Constant.SIZE_OF_PAGE + 1;
 		return pageCount;
@@ -419,6 +425,61 @@ public class ProjectController {
 	public void dynamicCall() {
 		System.out.println("/project/dynamiccall");
 	}
+	
+	@PostMapping("/absolute")
+	@ResponseBody
+	public JSONObject setAbsolutePath(@RequestBody Map<String, Object> params) {
+		long projectId = Long.valueOf(params.get("id").toString());
+		String absolutePath = (String) params.get("path");
+		absolutePath = absolutePath.replace("\\", "/");
+		JSONObject result = new JSONObject();
+		Project project = nodeService.queryProject(projectId);
+		if(project == null) {
+			result.put("result", "fail");
+			result.put("msg", "没找到Project");
+			return result;
+		}
+		projectService.setAbsolutePath(project, absolutePath);
+		result.put("result", "success");
+		result.put("project", project);
+		result.put("path", absolutePath);
+		return result;
+	}
+	
+	@GetMapping("/absolute")
+	@ResponseBody
+	public JSONObject queryAbsolutePath(@RequestParam("id") long projectId) {
+		JSONObject result = new JSONObject();
+		Project project = nodeService.queryProject(projectId);
+		if(project == null) {
+			result.put("result", "fail");
+			result.put("msg", "没找到Project");
+			return result;
+		}
+		result.put("result", "success");
+		result.put("project", project);
+		result.put("path", projectService.getAbsolutePath(project));
+		return result;
+	}
+	
+	/*@GetMapping("/absolute")
+	@ResponseBody
+	public JSONObject setAbsolutePath(@RequestParam("id") long projectId, @RequestParam("path") String absolutePath) {
+//		long projectId = (long) params.get("id");
+//		String absolutePath = (String) params.get("path");
+		JSONObject result = new JSONObject();
+		Project project = nodeService.queryProject(projectId);
+		if(project == null) {
+			result.put("result", "fail");
+			result.put("msg", "没找到Project");
+			return result;
+		}
+		projectService.setAbsolutePath(project, absolutePath);
+		result.put("result", "success");
+		result.put("project", project);
+		result.put("path", absolutePath);
+		return result;
+	}*/
 	
 	@GetMapping("/cytoscape")
 	@ResponseBody

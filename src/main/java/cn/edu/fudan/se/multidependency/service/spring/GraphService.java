@@ -55,7 +55,7 @@ public class GraphService {
 			ProjectFile endFile = containRelationService.findCodeNodeBelongToFile(endNode);
 			graph.addNode(startFile);
 			graph.addNode(endFile);
-			graph.addEdge(new DependOn<ProjectFile>(startFile, endFile));
+			graph.addEdge(new DependOn(startFile, endFile));
 		}
 		System.out.println("计算强连通图");
 		graph.computeStronglyConnectedComponents();

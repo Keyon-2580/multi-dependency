@@ -1,0 +1,25 @@
+{
+	"architectures": {},
+	"projects": [{
+		"path": "D:\\git\\cassandra",
+		"includeDirs": [],
+		"microserviceName": "cassandra",
+		"autoInclude": true,
+		"serviceGroupName": "cassandra",
+		"project": "cassandra",
+		"language": "java",
+		"isMicroservice": true
+	}],
+	"dynamics": {
+	},
+	"gits": [{
+		"path": "D:\\git\\cassandra",
+		"specify_commit_range": true,
+		"commit_time_since": "2016-02-14 22:36:33",
+	    "commit_time_until": "2020-07-19 20:05:19",
+		"calculate_cochange": false
+	}],
+	"libs": [],
+	"clones": [
+	]
+}

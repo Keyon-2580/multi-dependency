@@ -24,30 +24,42 @@ public class CloneValueForDoubleNodes<N extends Node> implements Serializable {
 	
 	private static final long serialVersionUID = -2262794801616872866L;
 	
-	protected N node1;
+	private N node1;
 	
-	protected N node2;
+	private N node2;
 	
-	protected double value = 0;
+	private double value = 0;
 	
-	protected String id;
+	private String id;
 	
 	public CloneValueForDoubleNodes(N node1, N node2) {
-		this.node1 = node1;
-		this.node2 = node2;
-		this.id = String.join("_", node1.getId().toString(), node2.getId().toString());
+		this(node1, node2, String.join("_", node1.getId().toString(), node2.getId().toString()));
 	}
 	
-	public String getId() {
-		return this.id;
+	public CloneValueForDoubleNodes(N node1, N node2, String id) {
+		this.node1 = node1;
+		this.node2 = node2;
+		this.id = id;
 	}
 	
 	// 两个克隆节点内部的节点之间的克隆关系对
-	protected List<Clone> children = new ArrayList<>();
+	private List<Clone> children = new ArrayList<>();
 	
-	protected Set<CodeNode> nodesInNode1 = new HashSet<>();
+	private Set<CodeNode> nodesInNode1 = new HashSet<>();
 	
-	protected Set<CodeNode> nodesInNode2 = new HashSet<>();
+	private Set<CodeNode> nodesInNode2 = new HashSet<>();
+	
+	private Set<CodeNode> allNodesInNode1 = new HashSet<>();
+	
+	private Set<CodeNode> allNodesInNode2 = new HashSet<>();
+	
+	/*public double ratio1() {
+		return allNodesInNode1.isEmpty() ? -1 : (nodesInNode1.size() + 0.0) / allNodesInNode1.size();
+	}
+	
+	public double ratio2() {
+		return allNodesInNode2.isEmpty() ? -1 : (nodesInNode2.size() + 0.0) / allNodesInNode2.size();
+	}*/
 	
 	public void addCodeNodeToNode1(CodeNode node) {
 		this.nodesInNode1.add(node);
@@ -76,7 +88,7 @@ public class CloneValueForDoubleNodes<N extends Node> implements Serializable {
 		});
 	}
 	
-	protected transient CloneValueCalculator<?> calculator;
+	private transient CloneValueCalculator<?> calculator;
 	
 	public Object calculateValue(CloneValueCalculator<?> calculator) {
 		if(calculator != null) {

@@ -191,7 +191,7 @@ var clone = function(cytoscapeutil) {
 		$("#packages_duplicated").html("");
 		$.ajax({
 			type: "get",
-			url: "/clone/package/duplicated?threshold=10",
+			url: "/clone/package/duplicated?threshold=10&percentage=0.8",
 			success: function(result) {
 				console.log(result);
 				var html = "<table class='table table-bordered'>";
@@ -310,7 +310,7 @@ var clone = function(cytoscapeutil) {
 					html += children[i].fileClone.cloneType;
 					html += "</td>";
 					html += "<td>";
-					html += children[i].fileClone.value;
+					html += "<a target='_blank' href='/clone/compare?id1=" + children[i].file1.id + "&id2=" + children[i].file2.id + "'>" + children[i].fileClone.value + "</a>";
 					html += "</td>";
 					html += "<td>";
 					html += "<a class='cochangeTimes' target='_blank' href='/git/cochange/commits?cochangeId=" + cochangeId
@@ -333,7 +333,8 @@ var clone = function(cytoscapeutil) {
 			success:function(result) {
 				console.log(result);
 				var html = "<div><span>" + result.length + "</span></div><table class='table table-bordered'>";;
-				html += "<tr><th>index</th><th>目录</th><th>目录</th><th>文件克隆对数</th></tr>";
+				html += "<tr><th>index</th><th>目录</th><th>目录</th>" +
+						"<th>目录1文件数</th><th>目录2文件数</th><th>目录1克隆文件数</th><th>目录2克隆文件数</th><th>目录1占比</th><th>目录2占比</th><th>文件克隆对数</th></tr>";
 				for(var i = 0; i < result.length; i++) {
 					html += "<tr>";
 					html += "<td>";
@@ -344,6 +345,24 @@ var clone = function(cytoscapeutil) {
 					html += "</td>";
 					html += "<td>";
 					html += result[i].node2.directoryPath;
+					html += "</td>";
+					html += "<td>";
+					html += result[i].allNodesInNode1.length;
+					html += "</td>";
+					html += "<td>";
+					html += result[i].allNodesInNode2.length;
+					html += "</td>";
+					html += "<td>";
+					html += result[i].nodesInNode1.length;
+					html += "</td>";
+					html += "<td>";
+					html += result[i].nodesInNode2.length;
+					html += "</td>";
+					html += "<td>";
+					html += (result[i].nodesInNode1.length / result[i].allNodesInNode1.length).toFixed(2);
+					html += "</td>";
+					html += "<td>";
+					html += (result[i].nodesInNode2.length / result[i].allNodesInNode2.length).toFixed(2);
 					html += "</td>";
 					html += "<td>";
 					html += "<a class='package' index='" + (i + 1) + "' href='#package_files_clone' id2='" + result[i].node2.id + "' id1='" + result[i].node1.id + "'>" + result[i].children.length + "</a>";

@@ -130,7 +130,7 @@ public class TestCaseController {
 		request.setAttribute("executeFeatures", executeFeatures);
 		request.setAttribute("testCases", allTestCases);
 
-		Iterable<Project> projects = staticAnalyseService.allProjects();
+		Iterable<Project> projects = nodeService.allProjects();
 		
 		Map<String, List<CoverageData>> testCaseToPercent = new LinkedHashMap<>();
 		List<CoverageData> mergeCoverages = new ArrayList<>();

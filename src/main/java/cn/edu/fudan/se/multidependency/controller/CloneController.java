@@ -17,12 +17,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.NodeService;
+import cn.edu.fudan.se.multidependency.service.spring.ProjectService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneShowService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.CloneValueService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.DuplicatedPackageDetector;
@@ -33,6 +35,9 @@ import cn.edu.fudan.se.multidependency.service.spring.clone.data.PackageCloneVal
 @Controller
 @RequestMapping("/clone")
 public class CloneController {
+	
+	@Autowired
+	private ProjectService projectService;
 
 	@Autowired
 	private CloneValueService cloneValueService;
@@ -65,8 +70,9 @@ public class CloneController {
 	
 	@GetMapping("/package/duplicated")
 	@ResponseBody
-	public Collection<DuplicatedPackage> duplicatedPackages(@RequestParam("threshold") int threshold) {
-		return duplicatedPackageDetector.detectDuplicatedPackages(threshold);
+	public Collection<DuplicatedPackage> duplicatedPackages(@RequestParam("threshold") int threshold,
+			@RequestParam("percentage") double percentage) {
+		return duplicatedPackageDetector.detectDuplicatedPackages(threshold, percentage);
 	}
 	
 	/**
@@ -159,5 +165,20 @@ public class CloneController {
 			}
 		}
 		return cloneValueService.queryPackageCloneFromFileClone(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pcks);
+	}
+	
+	@GetMapping("/compare")
+	public String compare(@RequestParam("id1") long file1Id, @RequestParam("id2") long file2Id) {
+		ProjectFile file1 = nodeService.queryFile(file1Id);
+		ProjectFile file2 = nodeService.queryFile(file2Id);
+		if(file1 == null || file2 == null) {
+			return "error";
+		}
+		Project project1 = containRelationService.findFileBelongToProject(file1);
+		Project project2 = containRelationService.findFileBelongToProject(file2);
+		String file1AbsolutePath = projectService.getAbsolutePath(project1) + file1.getPath();
+		String file2AbsolutePath = projectService.getAbsolutePath(project2) + file2.getPath();
+		
+		return "redirect:/compare?leftFilePath=" + file1AbsolutePath + "&rightFilePath=" + file2AbsolutePath;
 	}
 }

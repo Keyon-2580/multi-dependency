@@ -31,7 +31,6 @@ public abstract class CloneInserter extends ExtractorForNodesAndRelationsImpl {
 	public void addNodesAndRelations() throws Exception {
 		processFile();
 		extractNodesAndRelations();
-		readGroup();
 	}
 
 	private void processFile() throws Exception {

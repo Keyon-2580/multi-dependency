@@ -15,6 +15,8 @@ import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 
 public interface NodeService {
+	Collection<Project> allProjects();
+	
 	Node queryNodeById(long id);
 	
 	Map<Long, Package> queryAllPackages();

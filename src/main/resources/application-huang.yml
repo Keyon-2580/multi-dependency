@@ -15,11 +15,11 @@ server:
   port: 8080
 
 data:
-  project_config: src/main/resources/project/train-ticket.json
+  project_config: src/main/resources/project/depends-huang.json
   dynamic_analyse: false
-  git_analyse: false
+  git_analyse: true
   lib_analyse: false
-  clone_analyse: true
+  clone_analyse: false
 
   neo4j:
     delete: true

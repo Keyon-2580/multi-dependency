@@ -3,9 +3,9 @@ package cn.edu.fudan.se.multidependency.service.spring.clone;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -131,6 +131,8 @@ public class CloneValueServiceImpl implements CloneValueService {
 					cloneValue.addCodeNodeToNode2(file1);
 					cloneValue.addCodeNodeToNode1(file2);
 				}
+				cloneValue.setAllNodesInNode1(new HashSet<>(containRelationService.findPackageContainFiles(cloneValue.getNode1())));
+				cloneValue.setAllNodesInNode2(new HashSet<>(containRelationService.findPackageContainFiles(cloneValue.getNode2())));
 				
 				Map<Package, CloneValueForDoubleNodes<Package>> pck1ToClones = pckToPackageClones.getOrDefault(pck1, new HashMap<>());
 				pck1ToClones.put(pck2, cloneValue);

@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.Language;
+import org.apache.commons.lang3.StringUtils;
 
 public class ProjectConfigUtil {
 
@@ -151,9 +152,17 @@ public class ProjectConfigUtil {
 			JSONObject json = array.getJSONObject(i);
 			GitConfig config = new GitConfig();
 			config.setPath(json.getString("path"));
+			config.setSpecifyCommitRange(json.getBooleanValue("specify_commit_range"));
+			config.setSpecifyByCommitId(json.getBooleanValue("specify_by_commit_id"));
 			config.setCommitIdFrom(json.getString("commit_id_from"));
 			config.setCommitIdTo(json.getString("commit_id_to"));
-			config.setIssueFilePath(json.getString("issues_path"));
+			config.setCommitTimeSince(json.getString("commit_time_since"));
+			config.setCommitTimeUntil(json.getString("commit_time_until"));
+			String issueFilePath = json.getString("issues_path");
+			if (!StringUtils.isBlank(issueFilePath)) {
+				config.setAnalyseIssue(true);
+				config.setIssueFilePath(issueFilePath);
+			}
 			config.setCalculateCochange(json.getBooleanValue("calculate_cochange"));
 			result.add(config);
 		}

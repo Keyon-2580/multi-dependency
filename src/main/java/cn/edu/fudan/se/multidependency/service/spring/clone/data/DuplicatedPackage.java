@@ -4,20 +4,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
-@Data
 public class DuplicatedPackage {
 
+	@Getter
 	private CloneValueForDoubleNodes<Package> clonePackages;
 	
+	@Getter
 	private Map<String, DuplicatedPackage> childrenClonePackages;
 	
+	@Getter
 	private Package package1;
 	
+	@Getter
 	private Package package2;
 	
+	@Getter
+	private String id;
+	
+	@Getter
+	@Setter
 	private double value;
 	
 	private void swapPackage() {
@@ -34,6 +43,7 @@ public class DuplicatedPackage {
 		if(package1.getDirectoryPath().compareTo(package2.getDirectoryPath()) > 0) {
 			swapPackage();
 		}
+		this.id = clonePackages.getId();
 	}
 	
 	public void addChild(DuplicatedPackage child) {
@@ -41,22 +51,6 @@ public class DuplicatedPackage {
 			return ;
 		}
 		this.childrenClonePackages.put(child.getId(), child);
-	}
-
-	public CloneValueForDoubleNodes<Package> getClonePackages() {
-		return clonePackages;
-	}
-	
-	public String getId() {
-		return clonePackages.getId();
-	}
-
-	public double getValue() {
-		return value;
-	}
-
-	public void setValue(double value) {
-		this.value = value;
 	}
 
 }

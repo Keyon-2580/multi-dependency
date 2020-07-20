@@ -3,33 +3,36 @@ package cn.edu.fudan.se.multidependency.model.relation;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.neo4j.ogm.annotation.RelationshipEntity;
+
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class DependOn<N extends Node> implements Relation, RelationWithTimes {
+@RelationshipEntity(RelationType.str_DEPEND_ON)
+public class DependOn implements Relation {
 	
 	private static final long serialVersionUID = 6381791099417646137L;
 
     private Long id;
 	
-	private int times;
+//	private int times;
 	
-	private N startNode;
+	private Node startNode;
 	
-	private N endNode;
+	private Node endNode;
 
-	public DependOn(N startNode, N endNode) {
+	public DependOn(Node startNode, Node endNode) {
 		this.startNode = startNode;
 		this.endNode = endNode;
 	}
 	
-	@Override
+	/*@Override
 	public void addTimes() {
 		times++;
-	}
+	}*/
 
 	@Override
 	public Node getStartNode() {
@@ -43,7 +46,7 @@ public class DependOn<N extends Node> implements Relation, RelationWithTimes {
 
 	@Override
 	public RelationType getRelationType() {
-		return null;
+		return RelationType.DEPEND_ON;
 	}
 
 	@Override

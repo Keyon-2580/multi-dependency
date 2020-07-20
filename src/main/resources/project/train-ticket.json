@@ -1028,9 +1028,14 @@
   "gits": [
     {
       "path": "D:\\my_data\\SDTeam\\train-ticket",
+      "specify_commit_range": true,
+      "specify_by_commit_id": false,
       "commit_id_from": "",
       "commit_id_to": "",
-      "issues_path": "src/main/resources/git/train-ticket-issues.json"
+      "commit_time_since": "2020-01-03 18:32:31",
+      "commit_time_until": "2020-07-01 20:05:19",
+      "issues_path": "",
+      "calculate_cochange": false
     }
   ],
   "libs": [

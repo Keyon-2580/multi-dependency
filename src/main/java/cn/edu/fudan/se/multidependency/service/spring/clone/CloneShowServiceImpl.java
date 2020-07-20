@@ -24,7 +24,10 @@ import cn.edu.fudan.se.multidependency.model.node.code.Snippet;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.clone.CloneType;
+import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
+import cn.edu.fudan.se.multidependency.service.spring.data.Graph;
 import cn.edu.fudan.se.multidependency.service.spring.data.HistogramWithProjectsSize;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeEdge;
@@ -35,10 +38,13 @@ import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
 public class CloneShowServiceImpl implements CloneShowService {
 	
 	@Autowired
-	private CloneAnalyseService cloneAnalyseService;
+	CloneAnalyseService cloneAnalyseService;
 	
 	@Autowired
-	private ContainRelationService containRelationService;
+	ContainRelationService containRelationService;
+	
+    @Autowired
+    BasicCloneQueryService basicCloneQueryService;
 	
 	@Override
 	public Collection<HistogramWithProjectsSize> withProjectsSizeToHistogram(Collection<CloneGroup> groups, boolean singleLanguage) {
@@ -63,6 +69,49 @@ public class CloneShowServiceImpl implements CloneShowService {
 		return map.values();
 	}
 	
+	public Collection<Clone> removeType1RelatedClone(CloneGroup cloneGroup) {
+		Collection<Clone> clones = basicCloneQueryService.findGroupContainCloneRelations(cloneGroup);
+		List<Clone> removeClones = new ArrayList<>();
+		List<CodeNode> specificNodes = new ArrayList<>();
+		List<CodeNode> removeNodes = new ArrayList<>();
+		Graph graph = new Graph();
+		for(Clone clone : clones) {
+			if(CloneType.type_1.toString().equals(clone.getCloneType())) {
+				CodeNode node1 = clone.getCodeNode1();
+				CodeNode node2 = clone.getCodeNode2();
+				graph.addNode(node1);
+				graph.addNode(node2);
+				graph.addEdge(clone);
+			}
+		}
+		graph.computeConnectedComponents();
+		for(List<Node> vs : graph.getConnectedComponents()) {
+			specificNodes.add((CodeNode) vs.get(0));
+			for(int i = 1; i < vs.size(); i++) {
+				removeNodes.add((CodeNode) vs.get(i));
+			}
+		}
+		for(Clone clone : clones) {
+			switch(CloneType.valueOf(clone.getCloneType())) {
+			case type_1:
+				if(!(specificNodes.contains(clone.getCodeNode1()) || specificNodes.contains(clone.getCodeNode2()))) {
+					removeClones.add(clone);
+				}
+				break;
+			case type_2:
+			case type_3:
+				if(removeNodes.contains(clone.getCodeNode1()) || removeNodes.contains(clone.getCodeNode2())) {
+					removeClones.add(clone);
+				}
+				break;
+			default:
+				break;
+			}
+		}
+		clones.removeAll(removeClones);
+		return clones;
+	}
+	
 	@Override
 	public JSONObject clonesGroupsToCytoscape(Collection<CloneGroup> groups, boolean showGroupNode, boolean singleLanguage) {
 		Map<Node, ZTreeNode> nodeToZTreeNode = new HashMap<>();
@@ -76,13 +125,15 @@ public class CloneShowServiceImpl implements CloneShowService {
 		List<CytoscapeEdge> groupEdges = new ArrayList<>();
 		Map<Node, Boolean> isNodeToCytoscapeNode = new HashMap<>();
 		Map<String, Boolean> isIdToCytoscapeEdge = new HashMap<>();
-		
+		List<Clone> allClones = new ArrayList<>();
 		for(CloneGroup cloneGroup : groups) {
 			CytoscapeNode groupNode = new CytoscapeNode(cloneGroup.getId(), cloneGroup.getName(), "CloneGroup");
 			groupNodes.add(groupNode);
 			groupZTreeNodes.add(new ZTreeNode(cloneGroup.getId(), cloneGroup.getName(), false, "CloneGroup", false));
-			
-			for(Clone cloneRelation : cloneGroup.getRelations()) {
+//			Collection<Clone> clones = cloneGroup.getRelations();
+			Collection<Clone> clones = removeType1RelatedClone(cloneGroup);
+			allClones.addAll(clones);
+			for(Clone cloneRelation : clones) {
 				CodeNode node1 = cloneRelation.getCodeNode1();
 				CodeNode node2 = cloneRelation.getCodeNode2();
 				ProjectFile file1 = null;
@@ -305,6 +356,10 @@ public class CloneShowServiceImpl implements CloneShowService {
 		result.put("ztree", ztreeResult);
 		result.put("nodes", CytoscapeUtil.toNodes(nodes));
 		result.put("edges", CytoscapeUtil.toEdges(edges));
+		result.put("clones", allClones);
+		allClones.sort((c1, c2) -> {
+			return c2.getValue() > c1.getValue() ? 1 : c2.getValue() == c1.getValue() ? 0 : -1;
+		});
 		return result;
 	}
 
