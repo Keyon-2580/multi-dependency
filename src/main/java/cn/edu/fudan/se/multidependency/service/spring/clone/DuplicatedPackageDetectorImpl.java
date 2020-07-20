@@ -117,8 +117,8 @@ public class DuplicatedPackageDetectorImpl implements DuplicatedPackageDetector 
 						parentPck2 = new Package();
 						parentPck2.setId(-1L);
 						parentPck2.setEntityId(-1L);
-						parentPck2.setDirectoryPath(parentPck1Path);
-						parentPck2.setName(parentPck1Path);
+						parentPck2.setDirectoryPath(parentPck2Path);
+						parentPck2.setName(parentPck2Path);
 						parentDuplicated = new DuplicatedPackage(new CloneValueForDoubleNodes<Package>(parentPck1, parentPck2, parentId));
 						parentDuplicatedPacakges.put(parentDuplicated.getId(), parentDuplicated);
 					}
