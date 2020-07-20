@@ -115,13 +115,16 @@ public class CloneInserterForFile extends CloneInserter {
 			clone.setNode2EndLine(filePath2.getEndLine());
 			clone.setValue(value);
 			clone.setCloneRelationType(CloneRelationType.str_FILE_CLONE_FILE);
-//			clone.setCloneType(String.join("_", "type", type));
 			clone.setCloneType(CloneType.getCloneType(type).toString());
 			addRelation(clone);
 			clones.add(clone);
 			sizeOfFileCloneFiles++;
 		}
 		LOGGER.info("插入文件级克隆关系数：" + sizeOfFileCloneFiles);
+		addGroupFromGroupFile();
+	}
+	
+	private void addGroupFromGroupFile() {
 		long groupCount = cloneGroupNumber;
 		for(Group group : this.groups) {
 			CloneGroup cloneGroup = new CloneGroup();
@@ -134,8 +137,21 @@ public class CloneInserterForFile extends CloneInserter {
 			for(int id : group.getGroupIds()) {
 				CodeNode node = this.cloneFileIdToCodeNode.get(id);
 				if(node == null) {
-					LOGGER.error("找不到clone id为 " + id + " 的节点");
-					continue;
+					FilePathFromCsv filePath = filePaths.get(id);
+					if(filePath == null) {
+						LOGGER.error("找不到clone id为 " + id + " 的节点");
+						continue;
+					} else {
+						ProjectFile file = this.getNodes().findFileByPathRecursion(filePath.getFilePath());
+						if(file == null) {
+							LOGGER.error("找不到clone id为 " + id + " 的节点");
+							continue;
+						} else {
+							this.cloneFileIdToCodeNode.put(id, file);
+							node = file;
+							LOGGER.warn("找不到clone id为 " + id + " 的节点");
+						}
+					}
 				}
 				addRelation(new Contain(cloneGroup, node));
 			}

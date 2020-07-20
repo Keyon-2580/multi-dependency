@@ -145,13 +145,16 @@ public class CloneInserterForMethod extends CloneInserter {
 			clone.setNode2EndLine(filePath2.getEndLine());
 			clone.setValue(value);
 			clone.setCloneRelationType(cloneType.toString());
-//			clone.setCloneType(String.join("_", "type", type));
 			clone.setCloneType(CloneType.getCloneType(type).toString());
 			clones.add(clone);
 			addRelation(clone);
 			sizeOfClones++;
 		}
 		LOGGER.info("插入方法级克隆数：" + sizeOfClones);
+		addGroupFromGroupFile();
+	}
+	
+	private void addGroupFromGroupFile() {
 		long groupCount = cloneGroupNumber;
 		for(Group group : this.groups) {
 			CloneGroup cloneGroup = new CloneGroup();
@@ -192,5 +195,4 @@ public class CloneInserterForMethod extends CloneInserter {
 		}
 		LOGGER.info("插入文件级克隆组，组数：" + (cloneGroupNumber - groupCount));
 	}
-	
 }

@@ -598,31 +598,42 @@ var clone = function(cytoscapeutil) {
 		}
 		var showClonesTable = function(clones, divId) {
 			console.log(clones);
+			if(clones.length == 0) {
+				return ;
+			}
 			var html = "<table class='table table-bordered'>";
-			html += "<tr>";
-			html += "<th>file1";
-			html += "</th>";
-			html += "<th>file2";
-			html += "</th>";
-			html += "<th>type";
-			html += "</th>";
-			html += "<th>value";
-			html += "</th>";
-			html += "</tr>";
+			if(clones[0].cloneRelationType != "FILE_CLONE_FILE") {
+//				html += "<tr><th>node1</th><th>file1</th><th>node2</th><th>file2</th><th>type</th><th>value</th></tr>";
+			} else {
+				html += "<tr><th>file1</th><th>file2</th><th>type</th><th>value</th></tr>";
+			}
 			for(var i = 0; i < clones.length; i++) {
 				if(clones[i].cloneRelationType != "FILE_CLONE_FILE") {
-					continue;
+//					var file1 = "";
+//					var file2 = "";
+//					if
+//					html += "<tr>";
+//					html += "<td>" + clones[i].codeNode1.path;
+//					html += "</td>";
+//					html += "<td>" + clones[i].codeNode2.path;
+//					html += "</td>";
+//					html += "<td>" + clones[i].cloneType;
+//					html += "</td>";
+//					html += "<td>" + "<a target='_blank' href='/clone/compare?id1=" + clones[i].codeNode1.id + "&id2=" + clones[i].codeNode2.id + "'>" + clones[i].value + "</a>";
+//					html += "</td>";
+//					html += "</tr>";
+				} else {
+					html += "<tr>";
+					html += "<td>" + clones[i].codeNode1.path;
+					html += "</td>";
+					html += "<td>" + clones[i].codeNode2.path;
+					html += "</td>";
+					html += "<td>" + clones[i].cloneType;
+					html += "</td>";
+					html += "<td>" + "<a target='_blank' href='/clone/compare?id1=" + clones[i].codeNode1.id + "&id2=" + clones[i].codeNode2.id + "'>" + clones[i].value + "</a>";
+					html += "</td>";
+					html += "</tr>";
 				}
-				html += "<tr>";
-				html += "<td>" + clones[i].codeNode1.path;
-				html += "</td>";
-				html += "<td>" + clones[i].codeNode2.path;
-				html += "</td>";
-				html += "<td>" + clones[i].cloneType;
-				html += "</td>";
-				html += "<td>" + "<a target='_blank' href='/clone/compare?id1=" + clones[i].codeNode1.id + "&id2=" + clones[i].codeNode2.id + "'>" + clones[i].value + "</a>";
-				html += "</td>";
-				html += "</tr>";
 			}
 			html += "</table>";
 			$("#" + divId).html(html);
