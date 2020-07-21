@@ -31,7 +31,7 @@
             background-color: #1D1D1D;
             color: rgba(255, 50, 50, 0.7);
             width: 70px;
-            height: 50px;
+            height: 40px;
             border-radius: 10px;
         }
 
@@ -41,8 +41,46 @@
             background-color: #1D1D1D;
             color: rgba(50, 50, 255, 0.7);
             width: 70px;
-            height: 50px;
+            height: 40px;
             border-radius: 10px;
+        }
+
+        #leftFilePath {
+            background-color: #1A1A1A;
+            color: rgba(255, 50, 50, 0.7);
+            border: 0;
+            width: 83%;
+        }
+
+        #rightFilePath {
+            background-color: #1A1A1A;
+            color: rgba(50, 50, 255, 0.7);
+            border: 0;
+            width: 86%;
+        }
+
+        #lhs_encode {
+            font-size: 20px;
+            font-family: "微软雅黑",serif;
+            background-color: #1D1D1D;
+            color: rgba(225, 50, 50, 0.7);
+            width: 140px;
+            height: 40px;
+            border-radius: 10px;
+        }
+
+        #rhs_encode {
+            font-size: 20px;
+            font-family: "微软雅黑",serif;
+            background-color: #1D1D1D;
+            color: rgba(50, 50, 225, 0.7);
+            width: 140px;
+            height: 40px;
+            border-radius: 10px;
+        }
+
+        #compare-lhs-margin {
+            display: none;
         }
 
         #compare-lhs-margin {
@@ -80,20 +118,6 @@
 
         #compare .CodeMirror-lines pre, #compare .CodeMirror-gutter-text pre {
             line-height: 18px;
-        }
-
-        #leftFilePath {
-            background-color: #1A1A1A;
-            color: rgba(255, 50, 50, 0.7);
-            border: 0;
-            width: 83%;
-        }
-
-        #rightFilePath {
-            background-color: #1A1A1A;
-            color: rgba(50, 50, 255, 0.7);
-            border: 0;
-            width: 86%;
         }
 
     </style>
@@ -142,16 +166,17 @@
                 sidefileName[side] = fileName;
             }
         });
-
+        let myFiles;
         function setFile(files, side) {
-            const leftFile = files[0];
+            myFiles = files;
+            const file = files[0];
             const reader = new FileReader();
             reader.onload = function(e){
                 $('#compare').mergely(side, e.target.result);
             }
-            reader.readAsText(leftFile);
-            $("#path-" + side).html(leftFile.name);
-            sidefileName[side] = leftFile.name;
+            reader.readAsText(file, document.getElementById(side + "_encode").value);
+            $("#path-" + side).html(file.name);
+            sidefileName[side] = file.name;
         }
 
         function openLeft() {
@@ -160,6 +185,13 @@
 
         function openRight() {
             document.getElementById("rightFileDialog").click();
+        }
+
+        function reSet(side) {
+            $('#compare').mergely('clear', side);
+            $("#path-" + side).html("");
+            sidefileName[side] = "";
+            setFile(myFiles, side);
         }
 
         function copyToClip(content) {
@@ -198,6 +230,14 @@
                 <div>
                     <input id="leftFileDialog" type="file" onchange="setFile(this.files, 'lhs')" style="display: none"/>
                     <button id="leftFileButton" type="button" onclick="openLeft()">选择</button>
+                    <label for="lhs_encode"></label>
+                    <select id="lhs_encode" value="UTF-8" onchange="reSet('lhs')">
+                        <option value="UTF-8">UTF-8</option>
+                        <option value="GBK">GBK</option>
+                        <option value="GB2312">GB2312</option>
+                        <option value="GB18030">GB18030</option>
+                        <option value="ISO-8859-2">ISO-8859-2</option>
+                    </select>
                     <span id="path-lhs" class="dmsm"></span>
                 </div>
                 <div>
@@ -210,6 +250,14 @@
                 <div>
                     <input id="rightFileDialog" type="file" onchange="setFile(this.files, 'rhs')" style="display: none"/>
                     <button id="rightFileButton" type="button" onclick="openRight()">选择</button>
+                    <label for="rhs_encode"></label>
+                    <select id="rhs_encode" value="UTF-8" onchange="reSet('rhs')">
+                        <option value="UTF-8">UTF-8</option>
+                        <option value="GBK">GBK</option>
+                        <option value="GB2312">GB2312</option>
+                        <option value="GB18030">GB18030</option>
+                        <option value="ISO-8859-2">ISO-8859-2</option>
+                    </select>
                     <span id="path-rhs" class="dmsm"></span>
                 </div>
                 <div>
