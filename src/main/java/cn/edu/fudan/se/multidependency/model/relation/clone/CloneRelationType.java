@@ -3,8 +3,8 @@ package cn.edu.fudan.se.multidependency.model.relation.clone;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.node.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
-import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 
 public enum CloneRelationType {
 	FILE_CLONE_FILE(CloneRelationType.str_FILE_CLONE_FILE),

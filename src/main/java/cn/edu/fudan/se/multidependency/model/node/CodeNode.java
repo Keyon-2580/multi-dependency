@@ -1,6 +1,4 @@
-package cn.edu.fudan.se.multidependency.model.node.code;
-
-import cn.edu.fudan.se.multidependency.model.node.Node;
+package cn.edu.fudan.se.multidependency.model.node;
 
 public interface CodeNode extends Node {
 	

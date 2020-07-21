@@ -14,6 +14,8 @@ import org.neo4j.unsafe.batchinsert.BatchInserters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ibm.icu.impl.UResource.Array;
+
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Nodes;
@@ -33,7 +35,7 @@ public class BatchInserterService implements Closeable {
 	
 	private BatchInserter inserter = null;
 	
-    private Map<NodeLabelType, Label> mapLabels = new HashMap<>();
+    private Map<NodeLabelType, List<Label>> mapLabels = new HashMap<>();
     
 	public void init(String databasePath, boolean initDatabase) throws Exception {
 		File directory = new File(databasePath);
@@ -42,8 +44,12 @@ public class BatchInserterService implements Closeable {
 		}
 		inserter = BatchInserters.inserter(directory);
 		for(NodeLabelType nodeType : NodeLabelType.values()) {
-			Label label = Label.label(nodeType.toString());
-			mapLabels.put(nodeType, label);
+			List<Label> labels = new ArrayList<>();
+			for(String labelStr : nodeType.labels()) {
+				Label label = Label.label(labelStr);
+				labels.add(label);
+			}
+			mapLabels.put(nodeType, labels);
 		}
 	}
 	
@@ -66,7 +72,12 @@ public class BatchInserterService implements Closeable {
 	}
 	
 	public Long insertNode(Node node) {
-		node.setId(inserter.createNode(node.getProperties(), mapLabels.get(node.getNodeType())));
+		List<Label> labels = mapLabels.get(node.getNodeType());
+		Label[] labelsArray = new Label[labels.size()];
+		for(int i = 0; i < labels.size(); i++) {
+			labelsArray[i] = labels.get(i);
+		}
+		node.setId(inserter.createNode(node.getProperties(), labelsArray));
 		return node.getId();
 	}
 	
