@@ -37,7 +37,7 @@ public interface ProjectRepository extends Neo4jRepository<Project, Long> {
 			"WITH project, sum(file.endLine) as loc\r\n" +
 			"WITH size((project)-[:" + RelationType.str_CONTAIN + "]->(:Package)) as nop, \r\n" + 
 			"     size((project)-[:" + RelationType.str_CONTAIN + "*2]->(:ProjectFile)) as nof,\r\n" + 
-			"     size((project)-[:" + RelationType.str_CONTAIN + "*3..4]-(:Function)) as nom,\r\n" + 
+			"     size((project)-[:" + RelationType.str_CONTAIN + "*3..5]-(:Function)) as nom,\r\n" + 
 			"     loc,\r\n" + 
 			"     project\r\n" + 
 			"RETURN project, nop, nof, nom, loc order by(project.name) desc;")

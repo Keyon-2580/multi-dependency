@@ -17,6 +17,7 @@ import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.service.spring.MetricCalculator;
 import cn.edu.fudan.se.multidependency.service.spring.metric.FileMetrics;
 import cn.edu.fudan.se.multidependency.service.spring.metric.ModularityCalculatorImplForFieldMethodLevel;
+import cn.edu.fudan.se.multidependency.service.spring.metric.PackageMetrics;
 import cn.edu.fudan.se.multidependency.service.spring.metric.ProjectMetrics;
 
 @Controller
@@ -48,6 +49,12 @@ public class MeasureController {
     @ResponseBody
     public Collection<ProjectMetrics> calculateProjectMetrics() {
     	return metricCalculator.calculateProjectMetrics();
+    }
+    
+    @GetMapping("/package")
+    @ResponseBody
+    public Collection<PackageMetrics> calculatePackageMetrics() {
+    	return metricCalculator.calculatePackageMetrics();
     }
 
     @GetMapping("/modularityMetricQ")

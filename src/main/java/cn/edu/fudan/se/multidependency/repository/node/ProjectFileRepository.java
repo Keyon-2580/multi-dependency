@@ -21,7 +21,7 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"WITH size((file)-[:" + RelationType.str_DEPEND_ON + "]->()) as fanOut, \r\n" + 
 			"     size((file)<-[:" + RelationType.str_DEPEND_ON + "]-()) as fanIn,\r\n" + 
 			"     size((file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-()) as changeTimes,\r\n" + 
-			"     size((file)-[:" + RelationType.str_CONTAIN + "*1..3]-(:Function)) as nom,\r\n" + 
+			"     size((file)-[:" + RelationType.str_CONTAIN + "*1..3]->(:Function)) as nom,\r\n" + 
 			"     file.endLine as loc,\r\n" + 
 			"     file\r\n" + 
 			"RETURN  file,fanIn,fanOut,changeTimes,nom,loc order by(file.path) desc;")
