@@ -25,8 +25,8 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	private HubLikeComponentDetector hubLikeComponentDetector;
 	
 	@Override
-	public Collection<Collection<DependOn>> findCyclePackages() {
-		return cycleASDetector.findCyclePackages();
+	public Collection<Collection<DependOn>> cyclePackages() {
+		return cycleASDetector.cyclePackages();
 	}
 
 	@Override

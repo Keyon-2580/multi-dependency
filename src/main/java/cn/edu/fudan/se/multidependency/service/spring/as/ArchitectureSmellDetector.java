@@ -11,7 +11,7 @@ public interface ArchitectureSmellDetector {
 	 * 包的循环依赖的检测
 	 * @return
 	 */
-	Collection<Collection<DependOn>> findCyclePackages();
+	Collection<Collection<DependOn>> cyclePackages();
 	
 	Collection<Package> unusedPackages();
 	

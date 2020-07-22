@@ -22,7 +22,7 @@ public class ArchitectureSmellController {
 	@GetMapping("/cycle/package")
 	@ResponseBody
 	public Collection<Collection<DependOn>>  cyclePackages() {
-		return detector.findCyclePackages();
+		return detector.cyclePackages();
 	}
 	
 	@GetMapping("/unused/package")

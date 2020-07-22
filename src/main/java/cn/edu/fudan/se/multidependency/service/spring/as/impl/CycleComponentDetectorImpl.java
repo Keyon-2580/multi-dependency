@@ -38,7 +38,7 @@ public class CycleComponentDetectorImpl implements CycleComponentDetector {
 	}
 	
 	@Override
-	public Collection<Collection<DependOn>> findCyclePackages() {
+	public Collection<Collection<DependOn>> cyclePackages() {
 		Collection<CyclePackages> cyclePackages = packageRepository.cyclePackages();
 		List<Collection<DependOn>> result = new ArrayList<>();
 		for(CyclePackages cycle : cyclePackages) {

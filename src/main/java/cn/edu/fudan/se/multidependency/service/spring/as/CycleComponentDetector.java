@@ -10,5 +10,5 @@ public interface CycleComponentDetector {
 	 * 包的循环依赖的检测
 	 * @return
 	 */
-	Collection<Collection<DependOn>> findCyclePackages();
+	Collection<Collection<DependOn>> cyclePackages();
 }
