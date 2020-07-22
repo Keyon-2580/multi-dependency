@@ -14,4 +14,6 @@ public interface ArchitectureSmellDetector {
 	Collection<Collection<DependOn>> findCyclePackages();
 	
 	Collection<Package> unusedPackages();
+	
+	Collection<Package> hubLikePackages();
 }

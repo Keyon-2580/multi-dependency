@@ -2,12 +2,13 @@ package cn.edu.fudan.se.multidependency.service.spring.metric;
 
 import org.springframework.data.neo4j.annotation.QueryResult;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import lombok.Data;
 
 @Data
 @QueryResult
-public class PackageMetrics {
+public class PackageMetrics implements FanIOMetric {
 
 	private Package pck;
 	
@@ -35,5 +36,10 @@ public class PackageMetrics {
 	 * 代码行
 	 */
 	private int loc;
+
+	@Override
+	public Node getComponent() {
+		return pck;
+	}
 	
 }

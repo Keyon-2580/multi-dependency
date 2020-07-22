@@ -9,6 +9,7 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.DependOn;
 import cn.edu.fudan.se.multidependency.service.spring.as.ArchitectureSmellDetector;
 import cn.edu.fudan.se.multidependency.service.spring.as.CycleComponentDetector;
+import cn.edu.fudan.se.multidependency.service.spring.as.HubLikeComponentDetector;
 import cn.edu.fudan.se.multidependency.service.spring.as.UnusedComponentDetector;
 
 @Service
@@ -20,6 +21,9 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	@Autowired
 	private UnusedComponentDetector unusedComponentDetector;
 	
+	@Autowired
+	private HubLikeComponentDetector hubLikeComponentDetector;
+	
 	@Override
 	public Collection<Collection<DependOn>> findCyclePackages() {
 		return cycleASDetector.findCyclePackages();
@@ -28,6 +32,11 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	@Override
 	public Collection<Package> unusedPackages() {
 		return unusedComponentDetector.unusedPackage();
+	}
+
+	@Override
+	public Collection<Package> hubLikePackages() {
+		return hubLikeComponentDetector.hubLikePackages();
 	}
 
 	

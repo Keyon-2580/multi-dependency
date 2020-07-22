@@ -30,4 +30,10 @@ public class ArchitectureSmellController {
 	public Collection<Package> unusdPackages() {
 		return detector.unusedPackages();
 	}
+	
+	@GetMapping("/hublike/package")
+	@ResponseBody
+	public Collection<Package> hubLikePackages() {
+		return detector.hubLikePackages();
+	}
 }

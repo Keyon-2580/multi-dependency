@@ -10,7 +10,7 @@ import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import lombok.Data;
 
 @Data
-public class Fan_IO<T extends Node> implements Serializable {
+public class Fan_IO<T extends Node> implements FanIOMetric, Serializable {
 	
 	private static final long serialVersionUID = 110963529785572680L;
 
@@ -58,6 +58,21 @@ public class Fan_IO<T extends Node> implements Serializable {
 	
 	public Fan_IO(T node) {
 		this.node = node;
+	}
+
+	@Override
+	public Node getComponent() {
+		return node;
+	}
+
+	@Override
+	public int getFanIn() {
+		return getFanInRelations().size();
+	}
+
+	@Override
+	public int getFanOut() {
+		return getFanOutRelations().size();
 	}
 	
 	
