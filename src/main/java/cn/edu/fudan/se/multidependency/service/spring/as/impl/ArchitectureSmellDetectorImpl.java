@@ -8,14 +8,14 @@ import org.springframework.stereotype.Service;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.DependOn;
 import cn.edu.fudan.se.multidependency.service.spring.as.ArchitectureSmellDetector;
-import cn.edu.fudan.se.multidependency.service.spring.as.CycleASDetector;
+import cn.edu.fudan.se.multidependency.service.spring.as.CycleComponentDetector;
 import cn.edu.fudan.se.multidependency.service.spring.as.UnusedComponentDetector;
 
 @Service
 public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector {
 	
 	@Autowired
-	private CycleASDetector cycleASDetector;
+	private CycleComponentDetector cycleASDetector;
 
 	@Autowired
 	private UnusedComponentDetector unusedComponentDetector;
