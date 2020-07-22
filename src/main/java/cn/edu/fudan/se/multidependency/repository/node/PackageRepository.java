@@ -8,7 +8,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
-import cn.edu.fudan.se.multidependency.service.spring.as.CyclePackages;
+import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.service.spring.as.data.CyclePackages;
 import cn.edu.fudan.se.multidependency.service.spring.metric.PackageMetrics;
 
 @Repository
@@ -36,5 +37,8 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 			"return partition, packages " + 
 			"ORDER BY size(packages) DESC")
 	public List<CyclePackages> cyclePackages();
+	
+	@Query("match (p:Package) where not (p)-[:" + RelationType.str_DEPEND_ON + "]-() return p")
+	public List<Package> unusedPackages();
 	
 }

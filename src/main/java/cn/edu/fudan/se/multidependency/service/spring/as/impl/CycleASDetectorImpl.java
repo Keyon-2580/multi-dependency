@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.service.spring.as;
+package cn.edu.fudan.se.multidependency.service.spring.as.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,6 +11,8 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.DependOn;
 import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.DependOnRepository;
+import cn.edu.fudan.se.multidependency.service.spring.as.CycleASDetector;
+import cn.edu.fudan.se.multidependency.service.spring.as.data.CyclePackages;
 
 @Service
 public class CycleASDetectorImpl implements CycleASDetector {

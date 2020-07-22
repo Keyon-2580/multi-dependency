@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.service.spring.as;
+package cn.edu.fudan.se.multidependency.service.spring.as.data;
 
 import java.util.Collection;
 
