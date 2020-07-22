@@ -1,32 +1,39 @@
 package cn.edu.fudan.se.multidependency.model.relation;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import org.neo4j.ogm.annotation.EndNode;
+import org.neo4j.ogm.annotation.GeneratedValue;
+import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.RelationshipEntity;
-import org.neo4j.ogm.annotation.Transient;
+import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_DEPEND_ON)
+@EqualsAndHashCode
 public class DependOn implements Relation {
 	
 	private static final long serialVersionUID = 6381791099417646137L;
 
+	@Id
+    @GeneratedValue
     private Long id;
 	
+    @StartNode
 	private Node startNode;
-	
+
+    @EndNode
 	private Node endNode;
 	
-	@Transient
-	private Map<RelationType, List<Relation>> relations = new HashMap<>();
-
+	private int times;
+	
 	public DependOn(Node startNode, Node endNode) {
 		this.startNode = startNode;
 		this.endNode = endNode;
@@ -49,7 +56,9 @@ public class DependOn implements Relation {
 
 	@Override
 	public Map<String, Object> getProperties() {
-		return new HashMap<>();
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("times", getTimes());
+		return properties;
 	}
 
 }

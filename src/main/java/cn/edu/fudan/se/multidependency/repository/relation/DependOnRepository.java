@@ -25,4 +25,13 @@ public interface DependOnRepository extends Neo4jRepository<DependOn, Long> {
 	@Query("match p=(project:Project)-[:" + RelationType.str_CONTAIN + "]->(:Package)-[r:" + RelationType.str_DEPEND_ON + "]->(:Package)<-[:" + RelationType.str_CONTAIN + "]-(project) where id(project)={id} return p")
 	public List<DependOn> findPackageDependsInProject(@Param("id") long projectId);	
 	
+	@Query("CALL algo.scc.stream(\"Package\", \"DEPEND_ON\") " + 
+			"YIELD nodeId, partition " + 
+			"with partition, collect(algo.getNodeById(nodeId)) AS packages " + 
+			"match result=(a:Package)-[r:DEPEND_ON]->(b:Package) where partition = {partition} and a in packages and b in packages return result")
+	public List<DependOn> cyclePackagesBySCC(@Param("partition") int partition);
+	
+	@Query("match result=(a:Package)-[:DEPEND_ON]->(b:Package) where id(a) in {ids} and id(b) in {ids} return result")
+	public List<DependOn> cyclePackagesByIds(@Param("ids") long[] ids);
+	
 }
