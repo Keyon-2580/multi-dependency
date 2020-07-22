@@ -11,6 +11,8 @@ import cn.edu.fudan.se.multidependency.service.spring.as.ArchitectureSmellDetect
 import cn.edu.fudan.se.multidependency.service.spring.as.CycleComponentDetector;
 import cn.edu.fudan.se.multidependency.service.spring.as.HubLikeComponentDetector;
 import cn.edu.fudan.se.multidependency.service.spring.as.UnusedComponentDetector;
+import cn.edu.fudan.se.multidependency.service.spring.metric.FileMetrics;
+import cn.edu.fudan.se.multidependency.service.spring.metric.PackageMetrics;
 
 @Service
 public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector {
@@ -35,9 +37,13 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	}
 
 	@Override
-	public Collection<Package> hubLikePackages() {
+	public Collection<PackageMetrics> hubLikePackages() {
 		return hubLikeComponentDetector.hubLikePackages();
 	}
-
 	
+	@Override
+	public Collection<FileMetrics> hubLikeFiles() {
+		return hubLikeComponentDetector.hubLikeFiles();
+	}
+
 }

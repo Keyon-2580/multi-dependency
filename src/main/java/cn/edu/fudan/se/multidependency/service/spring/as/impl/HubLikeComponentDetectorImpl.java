@@ -11,41 +11,44 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
+import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.as.HubLikeComponentDetector;
 import cn.edu.fudan.se.multidependency.service.spring.metric.FanIOMetric;
+import cn.edu.fudan.se.multidependency.service.spring.metric.FileMetrics;
 import cn.edu.fudan.se.multidependency.service.spring.metric.PackageMetrics;
 
 @Service
 public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
+	
+	public static final int MIN_FILE_FAN_IN = 20;
+	public static final int MIN_FILE_FAN_OUT = 20;
+	public static final int MIN_PACKAGE_FAN_IN = 5;
+	public static final int MIN_PACKAGE_FAN_OUT = 5;
 	
 	@Autowired
 	private PackageRepository packageRepository;
 	
 	@Autowired
 	private ContainRelationService containRelationService;
+	
+	@Autowired
+	private ProjectFileRepository fileRepository;
 
 	@Override
-	public Collection<Package> hubLikePackages() {
-		List<Package> result = new ArrayList<>();
-		/*List<PackageMetrics> packageMetrics = packageRepository.calculatePackageMetrics();
-		int fanOutMedian = calculateFanOutMedian(packageMetrics);
-		int fanInMedian = calculateFanInMedian(packageMetrics);
-		for(PackageMetrics metric : packageMetrics) {
-			if(isHubLikeComponent(metric, fanOutMedian, fanInMedian)) {
-				result.add(metric.getPck());
-			}
-		}*/
-		Map<Project, List<Package>> projectToHubLikePackages = hubLikePackagesInDifferentProject();
-		for(Map.Entry<Project, List<Package>> entry : projectToHubLikePackages.entrySet()) {
+	public Collection<PackageMetrics> hubLikePackages() {
+		List<PackageMetrics> result = new ArrayList<>();
+		Map<Project, List<PackageMetrics>> projectToHubLikePackages = hubLikePackagesInDifferentProject();
+		for(Map.Entry<Project, List<PackageMetrics>> entry : projectToHubLikePackages.entrySet()) {
 			result.addAll(entry.getValue());
 		}
 		return result;
 	}
 	
-	public Map<Project, List<Package>> hubLikePackagesInDifferentProject() {
-		Map<Project, List<Package>> result = new HashMap<>();
+	public Map<Project, List<PackageMetrics>> hubLikePackagesInDifferentProject() {
+		Map<Project, List<PackageMetrics>> result = new HashMap<>();
 		List<PackageMetrics> packageMetrics = packageRepository.calculatePackageMetrics();
 		Map<Project, List<PackageMetrics>> projectToPackageMetrics = new HashMap<>();
 		for(PackageMetrics metric : packageMetrics) {
@@ -61,16 +64,61 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 			List<PackageMetrics> metrics = entry.getValue();
 			int fanOutMedian = calculateFanOutMedian(metrics);
 			int fanInMedian = calculateFanInMedian(metrics);
-			List<Package> temp = new ArrayList<>();
+			List<PackageMetrics> temp = new ArrayList<>();
 			for(PackageMetrics metric : metrics) {
-				if(isHubLikeComponent(metric, fanOutMedian, fanInMedian)) {
-					temp.add(metric.getPck());
+				if(isHubLikeComponent(metric, fanOutMedian, fanInMedian, MIN_PACKAGE_FAN_IN, MIN_PACKAGE_FAN_OUT)) {
+					temp.add(metric);
 				}
 			}
 			result.put(project, temp);
 		}
 		
 		return result;
+	}
+
+	@Override
+	public Collection<FileMetrics> hubLikeFiles() {
+		List<FileMetrics> result = new ArrayList<>();
+		Map<Project, List<FileMetrics>> projectToHubLikeFiles = hubLikeFilesInDifferentProject();
+		for(Map.Entry<Project, List<FileMetrics>> entry : projectToHubLikeFiles.entrySet()) {
+			result.addAll(entry.getValue());
+		}
+		return result;
+	}
+
+	public Map<Project, List<FileMetrics>> hubLikeFilesInDifferentProject() {
+		Map<Project, List<FileMetrics>> result = new HashMap<>();
+		List<FileMetrics> packageMetrics = fileRepository.calculateFileMetrics();
+		Map<Project, List<FileMetrics>> projectToFileMetrics = new HashMap<>();
+		for(FileMetrics metric : packageMetrics) {
+			ProjectFile file = metric.getFile();
+			Project project = containRelationService.findFileBelongToProject(file);
+			List<FileMetrics> temp = projectToFileMetrics.getOrDefault(project, new ArrayList<>());
+			temp.add(metric);
+			projectToFileMetrics.put(project, temp);
+		}
+		
+		for(Map.Entry<Project, List<FileMetrics>> entry : projectToFileMetrics.entrySet()) {
+			Project project = entry.getKey();
+			List<FileMetrics> metrics = entry.getValue();
+			int fanOutMedian = calculateFanOutMedian(metrics);
+			int fanInMedian = calculateFanInMedian(metrics);
+			List<FileMetrics> temp = new ArrayList<>();
+			for(FileMetrics metric : metrics) {
+				if(isHubLikeComponent(metric, fanOutMedian, fanInMedian, MIN_FILE_FAN_IN, MIN_FILE_FAN_OUT)) {
+					temp.add(metric);
+				}
+			}
+			result.put(project, temp);
+		}
+		
+		return result;
+	}
+	
+	private boolean isHubLikeComponent(FanIOMetric metric, int fanOutMedian, int fanInMedian, int minFanIn, int minFanOut) {
+		return ((metric.getFanIn() >= minFanIn) && (metric.getFanOut() >= minFanOut)) || ((metric.fanIODValue() < (metric.allFanIO() / 4.0)) 
+				&& (metric.getFanIn() > fanInMedian) 
+				&& (metric.getFanOut() > fanOutMedian));
 	}
 	
 	private int calculateFanInMedian(Collection<? extends FanIOMetric> metrics) {
@@ -98,11 +146,4 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 			return list.get(size / 2).getFanOut();
 		}
 	}
-	
-	private boolean isHubLikeComponent(FanIOMetric metric, int fanOutMedian, int fanInMedian) {
-		return (metric.fanIODValue() < metric.allFanIO() / 4.0) 
-				&& (metric.getFanIn() > fanInMedian) 
-				&& (metric.getFanOut() > fanOutMedian);
-	}
-
 }

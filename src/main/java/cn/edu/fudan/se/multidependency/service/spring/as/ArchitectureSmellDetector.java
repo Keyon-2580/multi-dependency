@@ -4,6 +4,8 @@ import java.util.Collection;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.DependOn;
+import cn.edu.fudan.se.multidependency.service.spring.metric.FileMetrics;
+import cn.edu.fudan.se.multidependency.service.spring.metric.PackageMetrics;
 
 public interface ArchitectureSmellDetector {
 	
@@ -15,5 +17,7 @@ public interface ArchitectureSmellDetector {
 	
 	Collection<Package> unusedPackages();
 	
-	Collection<Package> hubLikePackages();
+	Collection<PackageMetrics> hubLikePackages();
+	
+	Collection<FileMetrics> hubLikeFiles();
 }

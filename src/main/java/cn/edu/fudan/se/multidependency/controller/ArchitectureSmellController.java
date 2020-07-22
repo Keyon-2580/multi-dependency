@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.DependOn;
 import cn.edu.fudan.se.multidependency.service.spring.as.impl.ArchitectureSmellDetectorImpl;
+import cn.edu.fudan.se.multidependency.service.spring.metric.FileMetrics;
+import cn.edu.fudan.se.multidependency.service.spring.metric.PackageMetrics;
 
 @Controller
 @RequestMapping("/as")
@@ -33,7 +35,14 @@ public class ArchitectureSmellController {
 	
 	@GetMapping("/hublike/package")
 	@ResponseBody
-	public Collection<Package> hubLikePackages() {
+	public Collection<PackageMetrics> hubLikePackages() {
 		return detector.hubLikePackages();
 	}
+	
+	@GetMapping("/hublike/file")
+	@ResponseBody
+	public Collection<FileMetrics> hubLikeFiles() {
+		return detector.hubLikeFiles();
+	}
+
 }
