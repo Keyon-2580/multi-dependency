@@ -1,5 +1,14 @@
 {
 	"projects" : [{
+		"path": "D:\\git\\multi-dependency",
+		"serviceGroupName": "multi",
+		"project": "multi-dependency",
+		"language": "java",
+		"isMicroservice": true,
+		"includeDirs" : [],
+		"autoInclude" : true,
+		"microserviceName" : "multi"
+	}, {
 		"path": "D:\\multiple-dependency-project\\train-ticket\\ts-admin-basic-info-service",
 		"serviceGroupName": "train-ticket",
 		"project": "ts-admin-basic-info-service",

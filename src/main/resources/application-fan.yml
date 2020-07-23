@@ -16,15 +16,15 @@ server:
 
 data:
 #   project_config: src/main/resources/project/simpletest.json
-#   project_config: src/main/resources/project/train-ticket_fan.json
+   project_config: src/main/resources/project/train-ticket_fan.json
 #   project_config: src/main/resources/project/leveldb.json
 #   project_config: src/main/resources/project/source-fan-part.json
-   project_config: src/main/resources/project/source-fan-part-google.json
+#   project_config: src/main/resources/project/source-fan-part-google.json
 #   project_config: src/main/resources/project/cassandra_fan.json
    dynamic_analyse: false
-   git_analyse: true
+   git_analyse: false
    lib_analyse: false
-   clone_analyse: true
+   clone_analyse: false
    neo4j:
       delete: true
       # batchInserter要插入的数据库
