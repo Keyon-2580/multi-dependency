@@ -230,6 +230,19 @@ var clone = function(cytoscapeutil) {
 			'background-color': '#f6f6f6',
 			'content': 'data(name)'
 		}).update();
+		cy.style().selector('node[type="Package"]').style({
+			'shape' : 'rectangle',
+			'width': function(content) {
+				return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 9;
+			},
+			'height': 30,
+			'text-valign': 'center',
+			'text-halign': 'center',
+			'border-width': 1.5,
+			'border-color': '#555',
+			'background-color': '#f6f6f6',
+			'content': 'data(name)'
+		}).update();
 		cy.style().selector('node[type="MicroService"]').style({
 			'shape' : 'hexagon',
 			'width': function(content) {
