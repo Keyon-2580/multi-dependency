@@ -38,6 +38,12 @@ public class ArchitectureSmellController {
 		return detector.cyclePackages();
 	}
 	
+	@GetMapping("/cycle/file")
+	@ResponseBody
+	public Collection<Collection<DependOn>> cycleFiles() {
+		return detector.cycleFiles();
+	}
+	
 	@GetMapping("/unused/package")
 	@ResponseBody
 	public Collection<Package> unusdPackages() {

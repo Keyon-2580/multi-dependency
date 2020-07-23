@@ -30,6 +30,11 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	public Collection<Collection<DependOn>> cyclePackages() {
 		return cycleASDetector.cyclePackages();
 	}
+	
+	@Override
+	public Collection<Collection<DependOn>> cycleFiles() {
+		return cycleASDetector.cycleFiles();
+	}
 
 	@Override
 	public Collection<Package> unusedPackages() {

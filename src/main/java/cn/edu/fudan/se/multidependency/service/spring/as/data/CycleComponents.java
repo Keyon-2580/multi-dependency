@@ -4,15 +4,15 @@ import java.util.Collection;
 
 import org.springframework.data.neo4j.annotation.QueryResult;
 
-import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import lombok.Data;
 
 @Data
 @QueryResult
-public class CyclePackages {
+public class CycleComponents<T extends Node> {
 	
 	int partition;
 	
-	Collection<Package> packages;
+	Collection<T> components;
 	
 }

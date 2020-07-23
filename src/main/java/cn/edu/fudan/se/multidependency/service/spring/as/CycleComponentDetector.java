@@ -11,4 +11,10 @@ public interface CycleComponentDetector {
 	 * @return
 	 */
 	Collection<Collection<DependOn>> cyclePackages();
+	
+	/**
+	 * 文件的循环依赖的检测
+	 * @return
+	 */
+	Collection<Collection<DependOn>> cycleFiles();
 }

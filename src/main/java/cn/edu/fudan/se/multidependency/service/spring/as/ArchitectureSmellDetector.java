@@ -15,6 +15,8 @@ public interface ArchitectureSmellDetector {
 	 */
 	Collection<Collection<DependOn>> cyclePackages();
 	
+	Collection<Collection<DependOn>> cycleFiles();
+	
 	Collection<Package> unusedPackages();
 	
 	Collection<PackageMetrics> hubLikePackages();
