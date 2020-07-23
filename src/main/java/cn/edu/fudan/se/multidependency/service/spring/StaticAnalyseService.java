@@ -16,9 +16,10 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.Access;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Annotation;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Cast;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Extends;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Implements;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Import;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Include;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Inherits;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Parameter;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Return;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Throw;
@@ -52,7 +53,8 @@ public interface StaticAnalyseService {
 	Map<Function, List<Access>> findAllFunctionAccessRelationsGroupByCaller(Project project);
 
 	List<StructureRelation> findProjectContainStructureRelations(Project project);
-	List<Inherits> findProjectContainInheritsRelations(Project project);
+	List<Extends> findProjectContainInheritsRelations(Project project);
+	List<Implements> findProjectContainImplementsRelations(Project project);
 	List<Include> findProjectContainFileIncludeFileRelations(Project project);
 	List<Import> findProjectContainImportRelations(Project project);
 	List<Import> findProjectContainFileImportTypeRelations(Project project);

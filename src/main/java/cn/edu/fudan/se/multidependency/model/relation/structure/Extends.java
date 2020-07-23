@@ -10,55 +10,48 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.StructureRelation;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-/**
- * 该implement为C/C++中的.c/cpp文件内的方法 implement .h文件内声明的方法
- * 不是类实现接口，实现接口的关系在inherits类中
- * @author fan
- *
- */
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_IMPLEMENT)
-@EqualsAndHashCode
-public class Implement implements StructureRelation {
+@RelationshipEntity(RelationType.str_EXTENDS)
+public class Extends implements StructureRelation {
 	
-	private static final long serialVersionUID = 7582417525375943056L;
+	private static final long serialVersionUID = 3740594031088738257L;
 
 	@Id
     @GeneratedValue
     private Long id;
 	
-	public Implement(Function function, Function implementFunction) {
-		this.function = function;
-		this.implementFunction = implementFunction;
+	public Extends(Type start, Type end) {
+		super();
+		this.start = start;
+		this.end = end;
 	}
-	
+
 	@StartNode
-	private Function function;
+	private Type start;
 	
 	@EndNode
-	private Function implementFunction;
+	private Type end;
 
 	@Override
 	public CodeNode getStartCodeNode() {
-		return function;
+		return start;
 	}
 
 	@Override
 	public CodeNode getEndCodeNode() {
-		return implementFunction;
+		return end;
 	}
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.IMPLEMENT;
+		return RelationType.EXTENDS;
 	}
 
 	@Override
@@ -66,5 +59,4 @@ public class Implement implements StructureRelation {
 		Map<String, Object> properties = new HashMap<>();
 		return properties;
 	}
-	
 }

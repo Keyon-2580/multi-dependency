@@ -22,7 +22,6 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCall;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Cast;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Import;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Inherits;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Parameter;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Return;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Throw;
@@ -150,16 +149,6 @@ public class DependencyOrganizationService {
 		List<Call> functionCallFunctions = staticAnalyseService.findProjectContainFunctionCallFunctionRelations(project);
 		for(Call call : functionCallFunctions) {
 			edges.add(new CytoscapeEdge(call.getCallerNode(), call.getCallFunction(), "FunctionCallFunction", "call"));
-		}
-		
-		List<Inherits> typeInheritsType = staticAnalyseService.findProjectContainInheritsRelations(project);
-		for(Inherits inherit : typeInheritsType) {
-			if(inherit.isExtends()) {
-				edges.add(new CytoscapeEdge(inherit.getStart(), inherit.getEnd(), "TypeExtendsType", "extends"));
-			}
-			if(inherit.isImplements()) {
-				edges.add(new CytoscapeEdge(inherit.getStart(), inherit.getEnd(), "TypeImplementsType", "implements"));
-			}
 		}
 		
 		List<Call> typeCallFunctions = staticAnalyseService.findProjectContainTypeCallFunctions(project);

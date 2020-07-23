@@ -28,9 +28,10 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.Access;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Annotation;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Cast;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Extends;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Implements;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Import;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Include;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Inherits;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Parameter;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Return;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Throw;
@@ -47,9 +48,10 @@ import cn.edu.fudan.se.multidependency.repository.relation.code.AccessRepository
 import cn.edu.fudan.se.multidependency.repository.relation.code.AnnotationRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.CallRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.CastRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.ExtendsRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.ImplementsRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.ImportRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.IncludeRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.code.InheritsRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.ParameterRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.ReturnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.ThrowRepository;
@@ -107,7 +109,10 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     TypeRepository typeRepository;
     
     @Autowired
-    InheritsRepository typeInheritsTypeRepository;
+    ExtendsRepository typeInheritsTypeRepository;
+    
+    @Autowired
+    ImplementsRepository implementsRepository;
 
     @Autowired
     VariableTypeRepository variableIsTypeRepository;
@@ -155,17 +160,23 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     
 	@Override
 	public Collection<Type> findExtendsType(Type type) {
-		return typeInheritsTypeRepository.findExtendsTypesByTypeId(type.getId());
+//		return typeInheritsTypeRepository.findExtendsTypesByTypeId(type.getId());
+		/// FIXME
+		return new ArrayList<>();
 	}
 
 	@Override
 	public Collection<Type> findInheritsType(Type type) {
-		return typeInheritsTypeRepository.findInheritsFromTypeByTypeId(type.getId());
+//		return typeInheritsTypeRepository.findInheritsFromTypeByTypeId(type.getId());
+		/// FIXME
+		return new ArrayList<>();
 	}
 	
 	@Override
 	public Collection<Type> findInheritsFromType(Type type) {
-		return typeInheritsTypeRepository.findInheritsTypesByTypeId(type.getId());
+//		return typeInheritsTypeRepository.findInheritsTypesByTypeId(type.getId());
+		/// FIXME
+		return new ArrayList<>();
 	}
 
 	@Override
@@ -219,13 +230,15 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return projectContainTypeCallFunctionRelationsCache.get(project);
 	}
 
-	private Map<Project, List<Inherits>> projectContainInheritsRelationsCache = new ConcurrentHashMap<>();
+	private Map<Project, List<Extends>> projectContainInheritsRelationsCache = new ConcurrentHashMap<>();
 	@Override
-	public List<Inherits> findProjectContainInheritsRelations(Project project) {
-		if(projectContainInheritsRelationsCache.get(project) == null) {
-			projectContainInheritsRelationsCache.put(project, typeInheritsTypeRepository.findProjectContainTypeInheritsTypeRelations(project.getId()));
-		}
-		return projectContainInheritsRelationsCache.get(project);
+	public List<Extends> findProjectContainInheritsRelations(Project project) {
+//		if(projectContainInheritsRelationsCache.get(project) == null) {
+//			projectContainInheritsRelationsCache.put(project, typeInheritsTypeRepository.findProjectContainTypeInheritsTypeRelations(project.getId()));
+//		}
+//		return projectContainInheritsRelationsCache.get(project);
+		/// FIXME
+		return new ArrayList<>();
 	}
 
 	private Map<Project, List<Cast>> projectContainFunctionCastTypeRelationsCache = new ConcurrentHashMap<>();
@@ -340,15 +353,16 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	private Map<Type, Map<Type, Boolean>> subTypeCache = new HashMap<>();
 	@Override
 	public boolean isSubType(Type subType, Type superType) {
-		Map<Type, Boolean> superTypeMap = subTypeCache.getOrDefault(subType, new HashMap<>());
+		/*Map<Type, Boolean> superTypeMap = subTypeCache.getOrDefault(subType, new HashMap<>());
 		Boolean is = superTypeMap.get(superType);
 		if(is == null) {
 			Type queryType = typeInheritsTypeRepository.findIsTypeInheritsType(subType.getId(), superType.getId());
 			is = queryType != null;
 			superTypeMap.put(superType, is);
 		}
-		subTypeCache.put(subType, superTypeMap);
-		return is;
+		subTypeCache.put(subType, superTypeMap);*/
+		/// FIXME
+		return false;
 	}
 
 
@@ -533,6 +547,12 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	@Override
 	public List<Call> findAllFunctionCallFunctionRelations() {
 		return callRepository.findAllFunctionCallFunctionRelations();
+	}
+
+	@Override
+	public List<Implements> findProjectContainImplementsRelations(Project project) {
+		/// FIXME
+		return new ArrayList<>();
 	}
 
 }

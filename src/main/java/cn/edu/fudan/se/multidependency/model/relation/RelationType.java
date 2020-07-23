@@ -4,13 +4,13 @@ import org.neo4j.graphdb.RelationshipType;
 
 public enum RelationType implements RelationshipType {
 	CONTAIN(RelationType.str_CONTAIN),
-	INHERITS(RelationType.str_INHERITS),
+	EXTENDS(RelationType.str_EXTENDS),
 	IMPORT(RelationType.str_IMPORT),
 	INCLUDE(RelationType.str_INCLUDE),
 	ACCESS(RelationType.str_ACCESS),
 	CALL(RelationType.str_CALL),
 	CREATE(RelationType.str_CREATE),
-	IMPLEMENT(RelationType.str_IMPLEMENT),
+	IMPLEMENTS(RelationType.str_IMPLEMENTS),
 	IMPLLINK(RelationType.str_IMPLLINK),
 	PARAMETER(RelationType.str_PARAMETER),
 	RETURN(RelationType.str_RETURN),
@@ -61,13 +61,13 @@ public enum RelationType implements RelationshipType {
 	/**
 	 * 依赖关系
 	 */
-	public static final String str_INHERITS = "INHERITS";
+	public static final String str_EXTENDS = "EXTENDS";
 	public static final String str_IMPORT = "IMPORT";
 	public static final String str_INCLUDE = "INCLUDE";
 	public static final String str_ACCESS = "ACCESS";
 	public static final String str_CALL = "CALL";
 	public static final String str_CREATE = "CREATE";
-	public static final String str_IMPLEMENT = "IMPLEMENT";
+	public static final String str_IMPLEMENTS = "IMPLEMENTS";
 	public static final String str_IMPLLINK = "IMPLLINK";
 	public static final String str_PARAMETER = "PARAMETER";
 	public static final String str_CAST = "CAST";

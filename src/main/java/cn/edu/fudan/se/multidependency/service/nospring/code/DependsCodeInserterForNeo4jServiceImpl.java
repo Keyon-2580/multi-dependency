@@ -20,8 +20,8 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Cast;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Create;
 import cn.edu.fudan.se.multidependency.model.relation.structure.ImplLink;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Implement;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Inherits;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Implements;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Extends;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Parameter;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Return;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Throw;
@@ -67,7 +67,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 			inherits.forEach(inherit -> {
 				Type other = (Type) types.get(inherit.getId().longValue());
 				if(other != null) {
-					Inherits typeExtends = new Inherits(type, other, Inherits.INHERIT_TYPE_EXTENDS);
+					Extends typeExtends = new Extends(type, other);
 					addRelation(typeExtends);
 				}
 			});
@@ -75,7 +75,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 			imps.forEach(imp -> {
 				Type other = (Type) types.get(imp.getId().longValue());
 				if(other != null) {
-					Inherits typeImplements = new Inherits(type, other, Inherits.INHERIT_TYPE_IMPLEMENTS);
+					Implements typeImplements = new Implements(type, other);
 					addRelation(typeImplements);
 				}
 			});
@@ -218,7 +218,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					Node implementNode = this.getNodes().findNodeByEntityIdInProject(relation.getEntity().getId().longValue(), currentProject);
 					if(implementNode != null && implementNode instanceof Function) {
 						Function implementFunction = (Function) implementNode;
-						Implement functionImplementFunction = new Implement(function, implementFunction);
+						Implements functionImplementFunction = new Implements(function, implementFunction);
 						addRelation(functionImplementFunction);
 					}
 					break;
