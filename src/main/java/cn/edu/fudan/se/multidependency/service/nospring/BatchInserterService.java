@@ -14,8 +14,6 @@ import org.neo4j.unsafe.batchinsert.BatchInserters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ibm.icu.impl.UResource.Array;
-
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Nodes;
