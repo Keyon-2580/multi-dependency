@@ -9,8 +9,7 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.DependOn;
-import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.DependOnRepository;
+import cn.edu.fudan.se.multidependency.repository.as.ASRepository;
 import cn.edu.fudan.se.multidependency.service.spring.as.CycleComponentDetector;
 import cn.edu.fudan.se.multidependency.service.spring.as.data.CyclePackages;
 
@@ -18,10 +17,7 @@ import cn.edu.fudan.se.multidependency.service.spring.as.data.CyclePackages;
 public class CycleComponentDetectorImpl implements CycleComponentDetector {
 
 	@Autowired
-	private PackageRepository packageRepository;
-	
-	@Autowired
-	private DependOnRepository dependOnRepository;
+	private ASRepository asRepository;
 	
 	@SuppressWarnings("unused")
 	private Collection<DependOn> findCyclePackageRelationsByIds(CyclePackages cycle) {
@@ -30,16 +26,16 @@ public class CycleComponentDetectorImpl implements CycleComponentDetector {
 		for(Package pck : cycle.getPackages()) {
 			ids[i] = pck.getId();
 		}
-		return dependOnRepository.cyclePackagesByIds(ids);
+		return asRepository.cyclePackagesByIds(ids);
 	}
 	
 	private Collection<DependOn> findCyclePackageRelationsBySCC(CyclePackages cycle) {
-		return dependOnRepository.cyclePackagesBySCC(cycle.getPartition());
+		return asRepository.cyclePackagesBySCC(cycle.getPartition());
 	}
 	
 	@Override
 	public Collection<Collection<DependOn>> cyclePackages() {
-		Collection<CyclePackages> cyclePackages = packageRepository.cyclePackages();
+		Collection<CyclePackages> cyclePackages = asRepository.cyclePackages();
 		List<Collection<DependOn>> result = new ArrayList<>();
 		for(CyclePackages cycle : cyclePackages) {
 			result.add(findCyclePackageRelationsBySCC(cycle));

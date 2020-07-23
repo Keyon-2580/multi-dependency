@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.controller;
+package cn.edu.fudan.se.multidependency.controller.as;
 
 import java.util.Collection;
 
