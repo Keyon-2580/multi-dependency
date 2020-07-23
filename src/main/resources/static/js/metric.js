@@ -5,7 +5,7 @@ var metric = function() {
 			url: "/metric/package",
 			success: function(result) {
 				console.log(result);
-				var html = "<table class='table table-bordered'>";
+				var html = "<table id='packageTable' class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th>index</th>";
 				html += "<th>id</th>";
@@ -40,7 +40,7 @@ var metric = function() {
 			url: "/metric/project",
 			success: function(result) {
 				console.log(result);
-				var html = "<table class='table table-bordered'>";
+				var html = "<table id='projectTable' class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th>index</th>";
 				html += "<th>id</th>";
@@ -72,7 +72,7 @@ var metric = function() {
 			url: "/metric/file",
 			success: function(result) {
 				console.log(result);
-				var html = "<table class='table table-bordered'>";
+				var html = "<table id='fileTable' class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th>index</th>";
 				html += "<th>id</th>";
@@ -82,6 +82,7 @@ var metric = function() {
 				html += "<th>Fan In</th>";
 				html += "<th>Fan Out</th>";
 				html += "<th>修改次数</th>";
+				html += "<th>PageRank Score</th>";
 				html += "</tr>";
 				for(var i = 0; i < result.length; i++) {
 					html += "<tr>";
@@ -93,6 +94,7 @@ var metric = function() {
 					html += "<td>" + result[i].fanIn + "</td>";
 					html += "<td>" + result[i].fanOut + "</td>";
 					html += "<td>" + result[i].changeTimes + "</td>";
+					html += "<td>" + result[i].score + "</td>";
 					html += "</tr>";
 				}
 				html += "</table>";
@@ -106,6 +108,15 @@ var metric = function() {
 			projectMetric();
 			packageMetric();
 			fileMetric();
+			$("#projectButton").click(function() {
+				tableToExcel("projectTable", "projectMetrics.xlsx");
+			});
+			$("#packageButton").click(function() {
+				tableToExcel("packageTable", "packageMetrics.xlsx");
+			});
+			$("#fileButton").click(function() {
+				tableToExcel("fileTable", "fileMetrics.xlsx");
+			});
 		}
 	}
 }

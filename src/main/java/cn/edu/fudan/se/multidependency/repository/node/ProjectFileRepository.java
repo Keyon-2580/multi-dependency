@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.repository.node;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.neo4j.annotation.Query;
@@ -23,8 +24,17 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"     size((file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-()) as changeTimes,\r\n" + 
 			"     size((file)-[:" + RelationType.str_CONTAIN + "*1..3]->(:Function)) as nom,\r\n" + 
 			"     file.endLine as loc,\r\n" + 
+			"     file.score as score,\r\n" + 
 			"     file\r\n" + 
-			"RETURN  file,fanIn,fanOut,changeTimes,nom,loc order by(file.path) desc;")
+			"RETURN  file,fanIn,fanOut,changeTimes,nom,loc,score order by(file.path);")
 	public List<FileMetrics> calculateFileMetrics();
 	
+	
+	@Query("CALL algo.pageRank.stream('ProjectFile', 'DEPEND_ON', {iterations:{iterations}, dampingFactor:{dampingFactor}})\r\n" + 
+			"YIELD nodeId, score\r\n" + 
+			"with algo.getNodeById(nodeId) AS file, score \r\n" + 
+			"set file.score=score\r\n" + 
+			"RETURN file, score\r\n" + 
+			"ORDER BY score DESC")
+	public Collection<ProjectFile> pageRank(@Param("iterations") int iterations, @Param("dampingFactor") double dampingFactor);
 }

@@ -28,6 +28,7 @@
 <script type="text/javascript" th:src="@{/js/import/echarts-4.7.0/dist/echarts.js}"></script>
 <script type="text/javascript" th:src="@{/js/windowUtil.js}"></script>
 <script type="text/javascript" th:src="@{/js/cytoscapeutils.js}"></script>
+<script type="text/javascript" th:src="@{/js/excelUtil.js}"></script>
 <script type="text/javascript" th:src="@{/js/metric.js}"></script>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
@@ -74,11 +75,20 @@
 				<li><a href="#fileMetrics">文件指标</a></li>
 			</ul>
 		</div>
+		<div class="col-sm-12">
+			<button id="projectButton" class="btn btn-primary">导出excel</button>
+		</div>
 		<div id="projectMetrics" class="col-sm-12">
 		
 		</div>
+		<div class="col-sm-12">
+			<button id="packageButton" class="btn btn-primary">导出excel</button>
+		</div>
 		<div id="packageMetrics" class="col-sm-12">
 		
+		</div>
+		<div class="col-sm-12">
+			<button id="fileButton" class="btn btn-primary">导出excel</button>
 		</div>
 		<div id="fileMetrics" class="col-sm-12">
 		

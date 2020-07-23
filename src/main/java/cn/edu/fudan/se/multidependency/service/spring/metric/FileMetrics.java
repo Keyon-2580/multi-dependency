@@ -36,6 +36,11 @@ public class FileMetrics implements FanIOMetric {
 	 * 代码行
 	 */
 	private int loc;
+	
+	/**
+	 * PageRank Score
+	 */
+	private double score;
 
 	@Override
 	public Node getComponent() {
