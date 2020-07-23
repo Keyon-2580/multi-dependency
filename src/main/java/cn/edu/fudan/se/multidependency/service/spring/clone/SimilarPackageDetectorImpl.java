@@ -16,12 +16,12 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.data.CloneValueForDoubleNodes;
-import cn.edu.fudan.se.multidependency.service.spring.clone.data.DuplicatedPackage;
-import cn.edu.fudan.se.multidependency.service.spring.clone.data.PackageCloneValueCalculator;
+import cn.edu.fudan.se.multidependency.service.spring.clone.data.SimilarPackage;
+import cn.edu.fudan.se.multidependency.service.spring.clone.data.DefaultPackageCloneValueCalculator;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
 @Service
-public class DuplicatedPackageDetectorImpl implements DuplicatedPackageDetector {
+public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 	
 	@Autowired
 	private CloneValueService cloneValueService;
@@ -52,22 +52,22 @@ public class DuplicatedPackageDetectorImpl implements DuplicatedPackageDetector 
 	}
 
 	@Override
-	public Collection<DuplicatedPackage> detectDuplicatedPackages(int threshold, double percentage) {
-		Map<String, DuplicatedPackage> idToPackageClone = new HashMap<>();
+	public Collection<SimilarPackage> detectSimilarPackages(int threshold, double percentage) {
+		Map<String, SimilarPackage> idToPackageClone = new HashMap<>();
 		Map<String, Boolean> isChild = new HashMap<>();
 		Collection<Clone> fileClones = basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE);
 		Collection<CloneValueForDoubleNodes<Package>> packageClones = cloneValueService.queryPackageCloneFromFileCloneSort(fileClones);
-		PackageCloneValueCalculator.getInstance().setCountThreshold(threshold);
-		PackageCloneValueCalculator.getInstance().setPercentageThreshold(percentage);
+		DefaultPackageCloneValueCalculator.getInstance().setCountThreshold(threshold);
+		DefaultPackageCloneValueCalculator.getInstance().setPercentageThreshold(percentage);
 		for(CloneValueForDoubleNodes<Package> packageClone : packageClones) {
-			boolean isDuplicated = (boolean) packageClone.calculateValue(PackageCloneValueCalculator.getInstance());
-			if(!isDuplicated) {
+			boolean isSimilar = (boolean) packageClone.calculateValue(DefaultPackageCloneValueCalculator.getInstance());
+			if(!isSimilar) {
 				continue;
 			}
 			if(idToPackageClone.get(packageClone.getId()) != null) {
 				continue;
 			}
-			DuplicatedPackage temp = new DuplicatedPackage(packageClone);
+			SimilarPackage temp = new SimilarPackage(packageClone);
 			idToPackageClone.put(temp.getId(), temp);
 			isChild.put(temp.getId(), false);
 			String id = temp.getId();
@@ -80,25 +80,25 @@ public class DuplicatedPackageDetectorImpl implements DuplicatedPackageDetector 
 				if(parentPackageClone == null) {
 					break;
 				}
-				if(!(boolean) parentPackageClone.calculateValue(PackageCloneValueCalculator.getInstance())) {
+				if(!(boolean) parentPackageClone.calculateValue(DefaultPackageCloneValueCalculator.getInstance())) {
 					break;
 				}
-				DuplicatedPackage parentDuplicatedPackage = idToPackageClone.getOrDefault(parentPackageClone.getId(), new DuplicatedPackage(parentPackageClone));
-				idToPackageClone.put(parentDuplicatedPackage.getId(), parentDuplicatedPackage);
+				SimilarPackage parentSimilarPackage = idToPackageClone.getOrDefault(parentPackageClone.getId(), new SimilarPackage(parentPackageClone));
+				idToPackageClone.put(parentSimilarPackage.getId(), parentSimilarPackage);
 				isChild.put(id, true);
-				isChild.put(parentDuplicatedPackage.getId(), false);
-				parentDuplicatedPackage.addChild(idToPackageClone.get(id));
-				id = parentDuplicatedPackage.getId();
+				isChild.put(parentSimilarPackage.getId(), false);
+				parentSimilarPackage.addChild(idToPackageClone.get(id));
+				id = parentSimilarPackage.getId();
 				parentPackage1 = containRelationService.findPackageInPackage(parentPackage1);
 				parentPackage2 = containRelationService.findPackageInPackage(parentPackage2);
 			}
 		}
 		
-		Map<String, DuplicatedPackage> parentDuplicatedPacakges = new HashMap<>();
-		for(Map.Entry<String, DuplicatedPackage> entry : idToPackageClone.entrySet()) {
+		Map<String, SimilarPackage> parentSimilarPacakges = new HashMap<>();
+		for(Map.Entry<String, SimilarPackage> entry : idToPackageClone.entrySet()) {
 			String id = entry.getKey();
 			if(isChild.get(id) == false) {
-				DuplicatedPackage value = entry.getValue();
+				SimilarPackage value = entry.getValue();
 				Package pck1 = value.getPackage1();
 				Package pck2 = value.getPackage2();
 				Package parentPck1 = containRelationService.findPackageInPackage(pck1);
@@ -107,8 +107,8 @@ public class DuplicatedPackageDetectorImpl implements DuplicatedPackageDetector 
 					String parentPck1Path = pck1.lastPackageDirectoryPath();
 					String parentPck2Path = pck2.lastPackageDirectoryPath();
 					String parentId = String.join("_", parentPck1Path, parentPck2Path);
-					DuplicatedPackage parentDuplicated = parentDuplicatedPacakges.get(parentId);
-					if(parentDuplicated == null) {
+					SimilarPackage parentSimilar = parentSimilarPacakges.get(parentId);
+					if(parentSimilar == null) {
 						parentPck1 = new Package();
 						parentPck1.setId(-1L);
 						parentPck1.setEntityId(-1L);
@@ -119,22 +119,22 @@ public class DuplicatedPackageDetectorImpl implements DuplicatedPackageDetector 
 						parentPck2.setEntityId(-1L);
 						parentPck2.setDirectoryPath(parentPck2Path);
 						parentPck2.setName(parentPck2Path);
-						parentDuplicated = new DuplicatedPackage(new CloneValueForDoubleNodes<Package>(parentPck1, parentPck2, parentId));
-						parentDuplicatedPacakges.put(parentDuplicated.getId(), parentDuplicated);
+						parentSimilar = new SimilarPackage(new CloneValueForDoubleNodes<Package>(parentPck1, parentPck2, parentId));
+						parentSimilarPacakges.put(parentSimilar.getId(), parentSimilar);
 					}
-					parentDuplicated.addChild(value);
+					parentSimilar.addChild(value);
 					isChild.put(id, true);
 				}
 			}
 		}
 		
-		List<DuplicatedPackage> result = new ArrayList<>();
+		List<SimilarPackage> result = new ArrayList<>();
 		
-		for(DuplicatedPackage parentDuplicatedPackage : parentDuplicatedPacakges.values()) {
-			result.add(parentDuplicatedPackage);
+		for(SimilarPackage parentSimilarPackage : parentSimilarPacakges.values()) {
+			result.add(parentSimilarPackage);
 		}
 		
-		for(Map.Entry<String, DuplicatedPackage> entry : idToPackageClone.entrySet()) {
+		for(Map.Entry<String, SimilarPackage> entry : idToPackageClone.entrySet()) {
 			String id = entry.getKey();
 			if(isChild.get(id) == false) {
 				result.add(entry.getValue());

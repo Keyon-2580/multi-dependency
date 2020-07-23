@@ -9,6 +9,7 @@ public enum RelationType implements RelationshipType {
 	INCLUDE(RelationType.str_INCLUDE),
 	ACCESS(RelationType.str_ACCESS),
 	CALL(RelationType.str_CALL),
+	CREATE(RelationType.str_CREATE),
 	IMPLEMENT(RelationType.str_IMPLEMENT),
 	IMPLLINK(RelationType.str_IMPLLINK),
 	PARAMETER(RelationType.str_PARAMETER),
@@ -65,6 +66,7 @@ public enum RelationType implements RelationshipType {
 	public static final String str_INCLUDE = "INCLUDE";
 	public static final String str_ACCESS = "ACCESS";
 	public static final String str_CALL = "CALL";
+	public static final String str_CREATE = "CREATE";
 	public static final String str_IMPLEMENT = "IMPLEMENT";
 	public static final String str_IMPLLINK = "IMPLLINK";
 	public static final String str_PARAMETER = "PARAMETER";

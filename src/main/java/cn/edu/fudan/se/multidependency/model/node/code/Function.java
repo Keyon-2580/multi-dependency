@@ -12,6 +12,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Transient;
 
 import cn.edu.fudan.se.multidependency.config.Constant;
+import cn.edu.fudan.se.multidependency.model.node.CodeUnit;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,8 +21,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NodeEntity
 @NoArgsConstructor
-@EqualsAndHashCode
-public class Function implements CodeNode {
+@EqualsAndHashCode(callSuper=false)
+public class Function extends CodeUnit {
 
 	private static final long serialVersionUID = 6993550414163132668L;
 	

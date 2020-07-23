@@ -8,7 +8,6 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 import cn.edu.fudan.se.multidependency.config.Constant;
-import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -16,8 +15,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NodeEntity
 @NoArgsConstructor
-@EqualsAndHashCode
-public class ProjectFile implements CodeNode {
+@EqualsAndHashCode(callSuper=false)
+public class ProjectFile extends CodeUnit {
 	
 	private static final long serialVersionUID = -8736926263545574636L;
 
@@ -34,6 +33,8 @@ public class ProjectFile implements CodeNode {
 	private String suffix;
 	
 	private int endLine = -1;
+	
+	private double score = -1;
 	
 	public int getStartLine() {
 		return 1;
@@ -56,6 +57,7 @@ public class ProjectFile implements CodeNode {
 		properties.put("path", getPath() == null ? "" : getPath());
 		properties.put("suffix", getSuffix() == null ? "" : getSuffix());
 		properties.put("endLine", getEndLine());
+		properties.put("score", getScore());
 		return properties;
 	}
 

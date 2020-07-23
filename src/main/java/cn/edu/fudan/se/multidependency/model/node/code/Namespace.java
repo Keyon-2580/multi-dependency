@@ -8,14 +8,17 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 import cn.edu.fudan.se.multidependency.config.Constant;
+import cn.edu.fudan.se.multidependency.model.node.CodeUnit;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@NodeEntity
 @Data
+@NodeEntity
 @NoArgsConstructor
-public class Namespace implements CodeNode {
+@EqualsAndHashCode(callSuper=false)
+public class Namespace extends CodeUnit {
 	
 	private static final long serialVersionUID = 7914006834768560932L;
 

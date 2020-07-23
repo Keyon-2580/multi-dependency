@@ -7,10 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.edu.fudan.se.multidependency.config.Constant;
+import cn.edu.fudan.se.multidependency.model.node.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
@@ -18,6 +18,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.Access;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Annotation;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Cast;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Create;
 import cn.edu.fudan.se.multidependency.model.relation.structure.ImplLink;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Implement;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Inherits;
@@ -88,7 +89,6 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					}
 					break;
 				case DependencyType.CALL:
-//					System.out.println("type call" + typeEntity + " " + relation.getEntity().getClass() + " " + relation.getEntity());
 					if(relation.getEntity() instanceof FunctionEntity) {
 						// call其它方法
 						Function other = (Function) getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, relation.getEntity().getId().longValue(), currentProject);
@@ -96,10 +96,16 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 							Call call = new Call(type, other);
 							addRelation(call);
 						}
-					} 					
+					}
 					break;
 				case DependencyType.CREATE:
-//					System.out.println("type create" + typeEntity + " " + relation.getEntity().getClass() + " " + relation.getEntity());
+					if(relation.getEntity().getClass() == TypeEntity.class) {
+						Type other = (Type) types.get(relation.getEntity().getId().longValue());
+						if(other != null) {
+							Create create = new Create(type, other);
+							addRelation(create);
+						}
+					} 
 					break;
 				}
 			});
@@ -162,13 +168,16 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 							Call call = new Call(function, other);
 							addRelation(call);
 						}
-					} else {
-						///FIXME
-//						System.out.println("function call " + relation.getEntity().getClass() + " " + relation.getEntity());
 					}
 					break;
 				case DependencyType.CREATE:
-//					System.out.println("function create " + relation.getEntity().getClass() + " " + relation.getEntity());
+					if(relation.getEntity().getClass() == TypeEntity.class) {
+						Type other = (Type) types.get(relation.getEntity().getId().longValue());
+						if(other != null) {
+							Create create = new Create(function, other);
+							addRelation(create);
+						}
+					}
 					break;
 				case DependencyType.RETURN:
 					Type returnType = (Type) types.get(relation.getEntity().getId().longValue());

@@ -1,26 +1,28 @@
 package cn.edu.fudan.se.multidependency.controller;
 
-import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
-import cn.edu.fudan.se.multidependency.service.spring.NodeService;
-import cn.edu.fudan.se.multidependency.service.spring.metric.ModularityCalculatorImplForFieldMethodLevel;
-import com.alibaba.fastjson.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.alibaba.fastjson.JSONObject;
+
+import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
+import cn.edu.fudan.se.multidependency.service.spring.MetricCalculator;
+import cn.edu.fudan.se.multidependency.service.spring.metric.FileMetrics;
+import cn.edu.fudan.se.multidependency.service.spring.metric.ModularityCalculatorImplForFieldMethodLevel;
+import cn.edu.fudan.se.multidependency.service.spring.metric.PackageMetrics;
+import cn.edu.fudan.se.multidependency.service.spring.metric.ProjectMetrics;
 
 @Controller
 @RequestMapping("/metric")
 public class MeasureController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MeasureController.class);
 
     @Autowired
     ProjectRepository projectRepository;
@@ -28,10 +30,36 @@ public class MeasureController {
     @Autowired
     ModularityCalculatorImplForFieldMethodLevel modularityCalculator;
 
+    @Autowired
+    MetricCalculator metricCalculator;
+    
+    @GetMapping(value= {"", "/", "/index"})
+    public String index() {
+    	return "metric";
+    }
+    
+    
+    @GetMapping("/file")
+    @ResponseBody
+    public Collection<FileMetrics> calculateFileMetrics() {
+    	return metricCalculator.calculateFileMetrics();
+    }
+    
+    @GetMapping("/project")
+    @ResponseBody
+    public Collection<ProjectMetrics> calculateProjectMetrics() {
+    	return metricCalculator.calculateProjectMetrics();
+    }
+    
+    @GetMapping("/package")
+    @ResponseBody
+    public Collection<PackageMetrics> calculatePackageMetrics() {
+    	return metricCalculator.calculatePackageMetrics();
+    }
 
     @GetMapping("/modularityMetricQ")
     @ResponseBody
-    public JSONObject  modularityMetricQ() {
+    public JSONObject modularityMetricQ() {
         JSONObject result = new JSONObject();
 
         Map<String, Double> metricQs = new HashMap<>();

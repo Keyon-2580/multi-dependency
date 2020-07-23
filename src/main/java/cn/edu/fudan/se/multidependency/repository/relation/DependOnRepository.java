@@ -25,4 +25,5 @@ public interface DependOnRepository extends Neo4jRepository<DependOn, Long> {
 	@Query("match p=(project:Project)-[:" + RelationType.str_CONTAIN + "]->(:Package)-[r:" + RelationType.str_DEPEND_ON + "]->(:Package)<-[:" + RelationType.str_CONTAIN + "]-(project) where id(project)={id} return p")
 	public List<DependOn> findPackageDependsInProject(@Param("id") long projectId);	
 	
+	
 }

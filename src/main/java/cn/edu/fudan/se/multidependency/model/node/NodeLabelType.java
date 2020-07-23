@@ -10,7 +10,46 @@ public enum NodeLabelType {
 	MicroService, RestfulAPI, Span,
 	Scenario, TestCase, Feature, Trace, Bug,
 	GitRepository, Branch, Commit, Issue, Label, Developer,
-	CloneGroup;
+	CloneGroup, CodeUnit;
+	
+	public List<String> labels() {
+		List<String> result = new ArrayList<>();
+		switch(this) {
+		case ProjectFile:
+		case Namespace:
+		case Type:
+		case Function:
+			result.add(this.toString());
+			result.add(CodeUnit.toString());
+			break;
+		case CodeUnit:
+		case Branch:
+		case Bug:
+		case CloneGroup:
+		case Commit:
+		case Developer:
+		case Feature:
+		case GitRepository:
+		case Issue:
+		case Label:
+		case Library:
+		case LibraryAPI:
+		case License:
+		case MicroService:
+		case Package:
+		case Project:
+		case RestfulAPI:
+		case Scenario:
+		case Snippet:
+		case Span:
+		case TestCase:
+		case Trace:
+		case Variable:
+			result.add(this.toString());
+		}
+		
+		return result;
+	}
 	
 	public List<String> indexes() {
 		List<String> result = new ArrayList<>();

@@ -8,13 +8,13 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
-public class DuplicatedPackage {
+public class SimilarPackage {
 
 	@Getter
 	private CloneValueForDoubleNodes<Package> clonePackages;
 	
 	@Getter
-	private Map<String, DuplicatedPackage> childrenClonePackages;
+	private Map<String, SimilarPackage> childrenClonePackages;
 	
 	@Getter
 	private Package package1;
@@ -35,7 +35,7 @@ public class DuplicatedPackage {
 		package2 = pck;
 	}
 	
-	public DuplicatedPackage(@NonNull CloneValueForDoubleNodes<Package> clonePackages) {
+	public SimilarPackage(@NonNull CloneValueForDoubleNodes<Package> clonePackages) {
 		this.clonePackages = clonePackages;
 		this.childrenClonePackages = new HashMap<>();
 		this.package1 = clonePackages.getNode1();
@@ -46,7 +46,7 @@ public class DuplicatedPackage {
 		this.id = clonePackages.getId();
 	}
 	
-	public void addChild(DuplicatedPackage child) {
+	public void addChild(SimilarPackage child) {
 		if(childrenClonePackages == null) {
 			return ;
 		}

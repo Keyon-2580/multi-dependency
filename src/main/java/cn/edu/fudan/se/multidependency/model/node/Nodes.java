@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.codehaus.plexus.util.StringUtils;
 
 import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.model.node.code.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.git.Branch;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
