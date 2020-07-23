@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -277,6 +278,7 @@ public class CloneShowServiceImpl implements CloneShowService {
 				}
 				
 				Project project1 = containRelationService.findFileBelongToProject(file1);
+				Package package1 = containRelationService.findFileBelongToPackage(file1);
 				if(!singleLanguage) {
 					MicroService ms1 = containRelationService.findProjectBelongToMicroService(project1);
 					if(ms1 != null) {
@@ -288,7 +290,9 @@ public class CloneShowServiceImpl implements CloneShowService {
 						String ms1ContainFile1Id = String.join("_", String.valueOf(ms1.getId()), String.valueOf(file1.getId()));
 						if(!isIdToCytoscapeEdge.getOrDefault(ms1ContainFile1Id, false)) {
 							isIdToCytoscapeEdge.put(ms1ContainFile1Id, true);
-							edges.add(new CytoscapeEdge(ms1, file1, "Contain"));
+							nodes.add(new CytoscapeNode(package1.getId(), package1.getName(), "Package"));
+							edges.add(new CytoscapeEdge(ms1, package1, "Contain"));
+							edges.add(new CytoscapeEdge(package1, file1, "Contain"));
 							msToZTreeNode.get(ms1).addChild(nodeToZTreeNode.get(file1));
 						}
 					}
@@ -301,11 +305,14 @@ public class CloneShowServiceImpl implements CloneShowService {
 					String project1ContainFile1Id = String.join("_", String.valueOf(project1.getId()), String.valueOf(file1.getId()));
 					if(!isIdToCytoscapeEdge.getOrDefault(project1ContainFile1Id, false)) {
 						isIdToCytoscapeEdge.put(project1ContainFile1Id, true);
-						edges.add(new CytoscapeEdge(project1, file1, "Contain"));
+						nodes.add(new CytoscapeNode(package1.getId(), package1.getName(), "Package"));
+						edges.add(new CytoscapeEdge(project1, package1, "Contain"));
+						edges.add(new CytoscapeEdge(package1, file1, "Contain"));
 						projectToZTreeNode.get(project1).addChild(nodeToZTreeNode.get(file1));
 					}
 				}
 				Project project2 = containRelationService.findFileBelongToProject(file2);
+				Package package2 = containRelationService.findFileBelongToPackage(file2);
 				if(!singleLanguage) {
 					MicroService ms2 = containRelationService.findProjectBelongToMicroService(project2);
 					if(ms2 != null) {
@@ -317,7 +324,9 @@ public class CloneShowServiceImpl implements CloneShowService {
 						String ms2ContainFile2Id = String.join("_", String.valueOf(ms2.getId()), String.valueOf(file2.getId()));
 						if(!isIdToCytoscapeEdge.getOrDefault(ms2ContainFile2Id, false)) {
 							isIdToCytoscapeEdge.put(ms2ContainFile2Id, true);
-							edges.add(new CytoscapeEdge(ms2, file2, "Contain"));
+							nodes.add(new CytoscapeNode(package2.getId(), package2.getName(), "Package"));
+							edges.add(new CytoscapeEdge(ms2, package2, "Contain"));
+							edges.add(new CytoscapeEdge(package2, file2, "Contain"));
 							msToZTreeNode.get(ms2).addChild(nodeToZTreeNode.get(file2));
 						}
 					}
@@ -330,7 +339,9 @@ public class CloneShowServiceImpl implements CloneShowService {
 					String project2ContainFile2Id = String.join("_", String.valueOf(project2.getId()), String.valueOf(file2.getId()));
 					if(!isIdToCytoscapeEdge.getOrDefault(project2ContainFile2Id, false)) {
 						isIdToCytoscapeEdge.put(project2ContainFile2Id, true);
-						edges.add(new CytoscapeEdge(project2, file2, "Contain"));
+						nodes.add(new CytoscapeNode(package2.getId(), package2.getName(), "Package"));
+						edges.add(new CytoscapeEdge(project2, package2, "Contain"));
+						edges.add(new CytoscapeEdge(package2, file2, "Contain"));
 						projectToZTreeNode.get(project2).addChild(nodeToZTreeNode.get(file2));
 					}
 				}
