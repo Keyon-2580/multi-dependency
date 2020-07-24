@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
-import cn.edu.fudan.se.multidependency.model.relation.DependOn;
+import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.service.spring.as.ArchitectureSmellDetector;
 import cn.edu.fudan.se.multidependency.service.spring.as.CycleComponentDetector;
 import cn.edu.fudan.se.multidependency.service.spring.as.HubLikeComponentDetector;
@@ -27,12 +27,12 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	private HubLikeComponentDetector hubLikeComponentDetector;
 	
 	@Override
-	public Collection<Collection<DependOn>> cyclePackages() {
+	public Collection<Collection<DependsOn>> cyclePackages() {
 		return cycleASDetector.cyclePackages();
 	}
 	
 	@Override
-	public Collection<Collection<DependOn>> cycleFiles() {
+	public Collection<Collection<DependsOn>> cycleFiles() {
 		return cycleASDetector.cycleFiles();
 	}
 

@@ -19,8 +19,8 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	public ProjectFile findFileByPath(@Param("filePath") String filePath);
 	
 	@Query("MATCH (file:ProjectFile)\r\n" + 
-			"WITH size((file)-[:" + RelationType.str_DEPEND_ON + "]->()) as fanOut, \r\n" + 
-			"     size((file)<-[:" + RelationType.str_DEPEND_ON + "]-()) as fanIn,\r\n" + 
+			"WITH size((file)-[:" + RelationType.str_DEPENDS_ON + "]->()) as fanOut, \r\n" + 
+			"     size((file)<-[:" + RelationType.str_DEPENDS_ON + "]-()) as fanIn,\r\n" + 
 			"     size((file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-()) as changeTimes,\r\n" + 
 			"     size((file)-[:" + RelationType.str_CONTAIN + "*1..3]->(:Function)) as nom,\r\n" + 
 			"     file.endLine as loc,\r\n" + 
