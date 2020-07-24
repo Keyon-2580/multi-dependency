@@ -17,7 +17,7 @@ import cn.edu.fudan.se.multidependency.service.spring.as.data.CycleComponents;
 @Repository
 public interface ASRepository extends Neo4jRepository<Project, Long> {
 	
-	@Query("CALL algo.scc.stream(\"Package\", \"DEPEND_ON\") " + 
+	@Query("CALL algo.scc.stream(\"Package\", \"" + RelationType.str_DEPENDS_ON + "\") " + 
 			"YIELD nodeId, partition " + 
 			"with partition, collect(algo.getNodeById(nodeId)) AS components " + 
 			"where size(components) >= 2 " + 
@@ -25,7 +25,7 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 			"ORDER BY size(components) DESC")
 	public List<CycleComponents<Package>> cyclePackages();
 	
-	@Query("CALL algo.scc.stream(\"ProjectFile\", \"DEPEND_ON\") " + 
+	@Query("CALL algo.scc.stream(\"ProjectFile\", \"" + RelationType.str_DEPENDS_ON + "\") " + 
 			"YIELD nodeId, partition " + 
 			"with partition, collect(algo.getNodeById(nodeId)) AS components " + 
 			"where size(components) >= 2 " + 
@@ -36,18 +36,18 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 	@Query("match (p:Package) where not (p)-[:" + RelationType.str_DEPENDS_ON + "]-() return p")
 	public List<Package> unusedPackages();
 
-	@Query("CALL algo.scc.stream(\"Package\", \"DEPEND_ON\") " + 
+	@Query("CALL algo.scc.stream(\"Package\", \"" + RelationType.str_DEPENDS_ON + "\") " + 
 			"YIELD nodeId, partition " + 
 			"with partition, collect(algo.getNodeById(nodeId)) AS packages " + 
-			"match result=(a:Package)-[r:DEPEND_ON]->(b:Package) where partition = {partition} and a in packages and b in packages return result")
+			"match result=(a:Package)-[r:" + RelationType.str_DEPENDS_ON + "]->(b:Package) where partition = {partition} and a in packages and b in packages return result")
 	public List<DependsOn> cyclePackagesBySCC(@Param("partition") int partition);
 	
-	@Query("CALL algo.scc.stream(\"ProjectFile\", \"DEPEND_ON\") " + 
+	@Query("CALL algo.scc.stream(\"ProjectFile\", \"" + RelationType.str_DEPENDS_ON + "\") " + 
 			"YIELD nodeId, partition " + 
 			"with partition, collect(algo.getNodeById(nodeId)) AS files " + 
-			"match result=(a:ProjectFile)-[r:DEPEND_ON]->(b:ProjectFile) where partition = {partition} and a in files and b in files return result")
+			"match result=(a:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(b:ProjectFile) where partition = {partition} and a in files and b in files return result")
 	public List<DependsOn> cycleFilesBySCC(@Param("partition") int partition);
 	
 	@Deprecated
-	@Query("match result=(a:Package)-[:DEPEND_ON]->(b:Package) where id(a) in {ids} and id(b) in {ids} return result")
+	@Query("match result=(a:Package)-[:DEPENDS_ON]->(b:Package) where id(a) in {ids} and id(b) in {ids} return result")
 	public List<DependsOn> cyclePackagesByIds(@Param("ids") long[] ids);}

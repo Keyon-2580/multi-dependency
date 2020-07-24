@@ -11,7 +11,7 @@ import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 
 @Repository
-public interface DependOnRepository extends Neo4jRepository<DependsOn, Long> {
+public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 
 	@Query("match p=(:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(:ProjectFile) return p")
 	public List<DependsOn> findFileDepends();	
