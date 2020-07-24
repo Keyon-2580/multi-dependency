@@ -49,6 +49,7 @@ var metric = function() {
 				html += "<th>NOF（文件数）</th>";
 				html += "<th>NOM（方法数）</th>";
 				html += "<th>LOC（代码行）</th>";
+				html += "<th>Commit次数</th>";
 				html += "</tr>";
 				for(var i = 0; i < result.length; i++) {
 					html += "<tr>";
@@ -59,6 +60,7 @@ var metric = function() {
 					html += "<td>" + result[i].nof + "</td>";
 					html += "<td>" + result[i].nom + "</td>";
 					html += "<td>" + result[i].loc + "</td>";
+					html += "<td>" + result[i].commitTimes + "</td>";
 					html += "</tr>";
 				}
 				html += "</table>";
