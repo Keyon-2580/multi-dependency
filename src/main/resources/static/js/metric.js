@@ -82,6 +82,7 @@ var metric = function() {
 				html += "<th>Fan In</th>";
 				html += "<th>Fan Out</th>";
 				html += "<th>修改次数</th>";
+				html += "<th>协同修改次数</th>";
 				html += "<th>PageRank Score</th>";
 				html += "</tr>";
 				for(var i = 0; i < result.length; i++) {
@@ -94,6 +95,7 @@ var metric = function() {
 					html += "<td>" + result[i].fanIn + "</td>";
 					html += "<td>" + result[i].fanOut + "</td>";
 					html += "<td>" + result[i].changeTimes + "</td>";
+					html += "<td>" + result[i].cochangeTimes + "</td>";
 					html += "<td>" + result[i].score + "</td>";
 					html += "</tr>";
 				}
