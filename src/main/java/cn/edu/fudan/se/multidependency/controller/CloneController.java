@@ -139,8 +139,7 @@ public class CloneController {
 	 */
 	@GetMapping("/package/double/cochange")
 	@ResponseBody
-	public PackageCloneValueWithFileCoChange clonesInPackageWithCoChange(@RequestParam("package1") long package1Id,
-			@RequestParam("package2") long package2Id) {
+	public PackageCloneValueWithFileCoChange clonesInPackageWithCoChange(@RequestParam("package1") long package1Id, @RequestParam("package2") long package2Id) {
 		Package pck1 = nodeService.queryPackage(package1Id);
 		Package pck2 = nodeService.queryPackage(package2Id);
 		if(pck1 == null || pck2 == null) {

@@ -340,9 +340,9 @@ var clone = function(cytoscapeutil) {
 			url: "/clone/package",
 			success:function(result) {
 				console.log(result);
-				var html = "<div><span>" + result.length + "</span></div><table class='table table-bordered'>";;
-				html += "<tr><th>index</th><th>目录</th><th>目录</th>" +
-						"<th>目录1文件数</th><th>目录2文件数</th><th>目录1克隆文件数</th><th>目录2克隆文件数</th><th>目录1占比</th><th>目录2占比</th><th>文件克隆对数</th></tr>";
+				var html = "<div><span>" + result.length + "</span></div><table class='table table-bordered'>";
+				html += "<tr><th>index</th><th>目录</th><th>目录</th>";
+				html += "<th>目录1文件数</th><th>目录2文件数</th><th>目录1克隆文件数</th><th>目录2克隆文件数</th><th>目录1占比</th><th>目录2占比</th><th>文件克隆对数</th></tr>";
 				for(var i = 0; i < result.length; i++) {
 					html += "<tr>";
 					html += "<td>";

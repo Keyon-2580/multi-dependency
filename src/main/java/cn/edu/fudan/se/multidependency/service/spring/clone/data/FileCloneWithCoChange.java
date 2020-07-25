@@ -44,5 +44,9 @@ public class FileCloneWithCoChange {
 			}
 		}
 	}
+
+	public int getCochangeTimes() {
+		return cochangeTimes;
+	}
 	
 }

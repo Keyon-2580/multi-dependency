@@ -412,8 +412,8 @@ var clone = function(cytoscapeutil) {
 			}
 			var html = "";
 			html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='group'>全屏</button>";
-			html += "<p></p></div>";
 			html += "<div><h4>" + groupsName + "</h4></div>"
+			html += "<p></p></div>";
 			html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble_group">';
 			html += '<div class="div_cytoscape_treeview">';
 			html += '<ul id="node_ztree_groups" class="ztree"></ul>';
@@ -435,12 +435,12 @@ var clone = function(cytoscapeutil) {
 //				html += "<button class='btn btn-default save_top' name='" + i +"'>保存图片</button><p></p></div>";
 				html += "<p></p></div>";
 				html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble_' + i + '">';
-					html += '<div class="div_cytoscape_treeview">';
-						html += '<ul id="node_ztree_' + i + '" class="ztree"></ul>';
-					html += '</div>';
-					html += '<div class="div_cytoscape" style="float: left; display: inline;">';
-						html += '<div id="cloneGroupDiv_' + i + '" class="div_cytoscape_content cy"></div>';
-					html += '</div>'
+				html += '<div class="div_cytoscape_treeview">';
+				html += '<ul id="node_ztree_' + i + '" class="ztree"></ul>';
+				html += '</div>';
+				html += '<div class="div_cytoscape" style="float: left; display: inline;">';
+				html += '<div id="cloneGroupDiv_' + i + '" class="div_cytoscape_content cy"></div>';
+				html += '</div>'
 				html += '</div>';
 				html += '<div id="cloneImg_' + i + '">'
 				html += '</div>';
@@ -464,7 +464,7 @@ var clone = function(cytoscapeutil) {
 				var cy = _showCytoscape($("#cloneGroupDiv_" + i), result.value[i], "copyDiv_" + i);
 				cys[i] = cy;
 				showZTree(result.value[i].ztree, $("#node_ztree_" + i), cy, "copyDiv_" + i);
-				showClonesTable(result.value[i].clones, "table_clones_group_" + i);
+				showClonesTable(result.value[i].clonesWithCoChange, "table_clones_group_" + i);
 			}
 		}
 		$("#searchCountOfProjects").click(function(){
@@ -609,44 +609,35 @@ var clone = function(cytoscapeutil) {
 				}
 			});
 		}
-		var showClonesTable = function(clones, divId) {
-			console.log(clones);
-			if(clones.length == 0) {
+
+		/*
+		为文件克隆添加cochange值
+		by Kinsgley
+		2020/07/24
+		*/
+		var showClonesTable = function(clonesWithCoChange, divId) {
+			console.log(clonesWithCoChange);
+			if(clonesWithCoChange.length == 0) {
 				return ;
 			}
 			var html = "<table class='table table-bordered'>";
-			if(clones[0].cloneRelationType != "FILE_CLONE_FILE") {
-//				html += "<tr><th>node1</th><th>file1</th><th>node2</th><th>file2</th><th>type</th><th>value</th></tr>";
-			} else {
-				html += "<tr><th>file1</th><th>file2</th><th>type</th><th>value</th></tr>";
-			}
-			for(var i = 0; i < clones.length; i++) {
-				if(clones[i].cloneRelationType != "FILE_CLONE_FILE") {
-//					var file1 = "";
-//					var file2 = "";
-//					if
-//					html += "<tr>";
-//					html += "<td>" + clones[i].codeNode1.path;
-//					html += "</td>";
-//					html += "<td>" + clones[i].codeNode2.path;
-//					html += "</td>";
-//					html += "<td>" + clones[i].cloneType;
-//					html += "</td>";
-//					html += "<td>" + "<a target='_blank' href='/clone/compare?id1=" + clones[i].codeNode1.id + "&id2=" + clones[i].codeNode2.id + "'>" + clones[i].value + "</a>";
-//					html += "</td>";
-//					html += "</tr>";
-				} else {
-					html += "<tr>";
-					html += "<td>" + clones[i].codeNode1.path;
-					html += "</td>";
-					html += "<td>" + clones[i].codeNode2.path;
-					html += "</td>";
-					html += "<td>" + clones[i].cloneType;
-					html += "</td>";
-					html += "<td>" + "<a target='_blank' href='/clone/compare?id1=" + clones[i].codeNode1.id + "&id2=" + clones[i].codeNode2.id + "'>" + clones[i].value + "</a>";
-					html += "</td>";
-					html += "</tr>";
-				}
+			html += "<tr><th>file1</th><th>file2</th><th>type</th><th>value</th><th>cochange</th></tr>";
+			for(var i = 0; i < clonesWithCoChange.length; i++) {
+				var cochangeId = clonesWithCoChange[i].cochange == null ? -1 : clonesWithCoChange[i].cochange.id;
+				html += "<tr>";
+				html += "<td>" + clonesWithCoChange[i].file1.path;
+				html += "</td>";
+				html += "<td>" + clonesWithCoChange[i].file2.path;
+				html += "</td>";
+				html += "<td>" + clonesWithCoChange[i].fileClone.cloneType;
+				html += "</td>";
+				html += "<td>" ;
+				html += "<a target='_blank' href='/clone/compare?id1=" + clonesWithCoChange[i].file1.id + "&id2=" + clonesWithCoChange[i].file2.id + "'>" + clonesWithCoChange[i].fileClone.value + "</a>";
+				html += "</td>";
+				html += "<td>" ;
+				html += "<a class='cochangeTimes' target='_blank' href='/git/cochange/commits?cochangeId=" + cochangeId + "' index='" + i + "'>" + clonesWithCoChange[i].cochangeTimes + "</a>";
+				html += "</td>";
+				html += "</tr>";
 			}
 			html += "</table>";
 			$("#" + divId).html(html);

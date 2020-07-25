@@ -1,16 +1,11 @@
 package cn.edu.fudan.se.multidependency.service.spring.clone;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
+import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.service.spring.clone.data.FileCloneWithCoChange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +24,7 @@ import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.spring.NodeService;
 import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
+import cn.edu.fudan.se.multidependency.service.spring.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.clone.data.CloneLineValue;
 
 @Service
@@ -50,9 +46,12 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 	
     @Autowired
     BasicCloneQueryService basicCloneQueryService;
-    
-    @Autowired
-    NodeService nodeService;
+
+	@Autowired
+	NodeService nodeService;
+
+	@Autowired
+	GitAnalyseService gitAnalyseService;
 
 	@Override
 	public CloneGroup addNodeAndRelationToCloneGroup(CloneGroup group) {
@@ -260,4 +259,22 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 		}
 		return buf.toString();
 	}*/
+
+	@Override
+	public Collection<FileCloneWithCoChange> addCoChangeToFileClones(Collection<Clone> fileClones) {
+		Collection<FileCloneWithCoChange> fileCloneWithCoChanges = new ArrayList<>();
+		for(Clone fileClone: fileClones) {
+			ProjectFile cloneFile1 = (ProjectFile) fileClone.getCodeNode1();
+			ProjectFile cloneFile2 = (ProjectFile) fileClone.getCodeNode2();
+			CoChange coChange = gitAnalyseService.findCoChangeBetweenTwoFiles(cloneFile1, cloneFile2);
+			FileCloneWithCoChange fileCloneWithCoChange = null;
+			try {
+				fileCloneWithCoChange = new FileCloneWithCoChange(fileClone, coChange);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			fileCloneWithCoChanges.add(fileCloneWithCoChange);
+		}
+		return fileCloneWithCoChanges;
+	}
 }

@@ -10,7 +10,9 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.service.spring.clone.data.CloneLineValue;
+import cn.edu.fudan.se.multidependency.service.spring.clone.data.FileCloneWithCoChange;
 
 public interface CloneAnalyseService {
 	/**
@@ -95,4 +97,6 @@ public interface CloneAnalyseService {
 	String exportCloneGroup(Collection<? extends Node> projects, Collection<CloneGroup> selectedGroups);
 //
 //	String exportCloneProject(Map<String, Map<Long, CloneLineValue<Project>>> data, Collection<Project> projects, CloneRelationType cloneRelationType);
+
+	Collection<FileCloneWithCoChange> addCoChangeToFileClones(Collection<Clone> fileClones) throws Exception;
 }

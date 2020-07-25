@@ -1,14 +1,10 @@
 package cn.edu.fudan.se.multidependency.service.spring.clone;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.service.spring.clone.data.FileCloneWithCoChange;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +32,7 @@ import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeNode;
 import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
 
 @Service
-public class CloneShowServiceImpl implements CloneShowService {
+public class CloneShowServiceImpl<pubilc> implements CloneShowService {
 	
 	@Autowired
 	CloneAnalyseService cloneAnalyseService;
@@ -113,6 +109,7 @@ public class CloneShowServiceImpl implements CloneShowService {
 		return clones;
 	}
 	
+	@SneakyThrows
 	@Override
 	public JSONObject clonesGroupsToCytoscape(Collection<CloneGroup> groups, boolean showGroupNode, boolean singleLanguage) {
 		Map<Node, ZTreeNode> nodeToZTreeNode = new HashMap<>();
@@ -367,9 +364,14 @@ public class CloneShowServiceImpl implements CloneShowService {
 		result.put("ztree", ztreeResult);
 		result.put("nodes", CytoscapeUtil.toNodes(nodes));
 		result.put("edges", CytoscapeUtil.toEdges(edges));
-		result.put("clones", allClones);
-		allClones.sort((c1, c2) -> {
-			return c2.getValue() > c1.getValue() ? 1 : c2.getValue() == c1.getValue() ? 0 : -1;
+		List<FileCloneWithCoChange> allClonesWithCoChange = new ArrayList<>(cloneAnalyseService.addCoChangeToFileClones(allClones));
+		result.put("clonesWithCoChange", allClonesWithCoChange);
+		//根据cochange次数降序排列
+		allClonesWithCoChange.sort(new Comparator<FileCloneWithCoChange>() {
+			@Override
+			public int compare(FileCloneWithCoChange f1, FileCloneWithCoChange f2) {
+				return Integer.compare(f2.getCochangeTimes(), f1.getCochangeTimes());
+			}
 		});
 		return result;
 	}
