@@ -11,11 +11,11 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.repository.as.ASRepository;
-import cn.edu.fudan.se.multidependency.service.spring.as.CycleComponentDetector;
+import cn.edu.fudan.se.multidependency.service.spring.as.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.spring.as.data.CycleComponents;
 
 @Service
-public class CycleComponentDetectorImpl implements CycleComponentDetector {
+public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 
 	@Autowired
 	private ASRepository asRepository;

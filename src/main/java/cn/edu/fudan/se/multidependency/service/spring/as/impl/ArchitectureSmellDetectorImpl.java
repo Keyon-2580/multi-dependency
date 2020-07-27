@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.service.spring.as.ArchitectureSmellDetector;
-import cn.edu.fudan.se.multidependency.service.spring.as.CycleComponentDetector;
+import cn.edu.fudan.se.multidependency.service.spring.as.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.spring.as.HubLikeComponentDetector;
 import cn.edu.fudan.se.multidependency.service.spring.as.UnusedComponentDetector;
 import cn.edu.fudan.se.multidependency.service.spring.metric.FileMetrics;
@@ -18,7 +18,7 @@ import cn.edu.fudan.se.multidependency.service.spring.metric.PackageMetrics;
 public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector {
 	
 	@Autowired
-	private CycleComponentDetector cycleASDetector;
+	private CyclicDependencyDetector cycleASDetector;
 
 	@Autowired
 	private UnusedComponentDetector unusedComponentDetector;

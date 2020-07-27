@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 
-public interface CycleComponentDetector {
+public interface CyclicDependencyDetector {
 
 	/**
 	 * 包的循环依赖的检测
