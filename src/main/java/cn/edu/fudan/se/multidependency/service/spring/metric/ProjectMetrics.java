@@ -31,5 +31,10 @@ public class ProjectMetrics {
 	 */
 	private int loc;
 	
+	/**
+	 * 与该项目相关的commit次数
+	 */
+	private int commitTimes;
+	
 	
 }

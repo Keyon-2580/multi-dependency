@@ -224,5 +224,10 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 	public CoChange findCoChangeById(long cochangeId) {
 		return cochangeRepository.findById(cochangeId).get();
 	}
+
+	@Override
+	public Collection<Commit> findCommitsInProject(Project project) {
+		return commitRepository.findCommitsInProject(project.getId());
+	}
     
 }

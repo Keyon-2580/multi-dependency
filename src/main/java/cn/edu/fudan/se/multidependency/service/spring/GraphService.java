@@ -20,11 +20,11 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.relation.DependOn;
+import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.StructureRelation;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
-import cn.edu.fudan.se.multidependency.repository.relation.DependOnRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.service.spring.data.Graph;
 import cn.edu.fudan.se.multidependency.service.spring.data.MatrixContent;
 import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeEdge;
@@ -44,7 +44,7 @@ public class GraphService {
 	private BasicCloneQueryService basicCloneQueryService;
 	
 	@Autowired
-	private DependOnRepository DependOnRepository;
+	private DependsOnRepository DependOnRepository;
 	
 	public Collection<Collection<ProjectFile>> cycleFiles(Project project) {
 		List<Collection<ProjectFile>> result = new ArrayList<>();
@@ -58,7 +58,7 @@ public class GraphService {
 			ProjectFile endFile = containRelationService.findCodeNodeBelongToFile(endNode);
 			graph.addNode(startFile);
 			graph.addNode(endFile);
-			graph.addEdge(new DependOn(startFile, endFile));
+			graph.addEdge(new DependsOn(startFile, endFile));
 		}
 		System.out.println("计算强连通图");
 		graph.computeStronglyConnectedComponents();
@@ -91,7 +91,7 @@ public class GraphService {
 			Package endPackage = containRelationService.findFileBelongToPackage(containRelationService.findCodeNodeBelongToFile(endNode));
 			graph.addNode(startPackage);
 			graph.addNode(endPackage);
-			graph.addEdge(new DependOn(startPackage, endPackage));
+			graph.addEdge(new DependsOn(startPackage, endPackage));
 		}
 		graph.computeStronglyConnectedComponents();
 		

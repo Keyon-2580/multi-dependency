@@ -16,9 +16,9 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_DEPEND_ON)
+@RelationshipEntity(RelationType.str_DEPENDS_ON)
 @EqualsAndHashCode
-public class DependOn implements Relation {
+public class DependsOn implements Relation {
 	
 	private static final long serialVersionUID = 6381791099417646137L;
 
@@ -34,7 +34,7 @@ public class DependOn implements Relation {
 	
 	private int times;
 	
-	public DependOn(Node startNode, Node endNode) {
+	public DependsOn(Node startNode, Node endNode) {
 		this.startNode = startNode;
 		this.endNode = endNode;
 	}
@@ -51,7 +51,7 @@ public class DependOn implements Relation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.DEPEND_ON;
+		return RelationType.DEPENDS_ON;
 	}
 
 	@Override

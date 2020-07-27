@@ -44,4 +44,6 @@ public interface GitAnalyseService {
 	Collection<Commit> findCommitsByCoChange(CoChange cochange);
 	
 	CoChange findCoChangeById(long cochangeId);
+	
+	Collection<Commit> findCommitsInProject(Project project);
 }

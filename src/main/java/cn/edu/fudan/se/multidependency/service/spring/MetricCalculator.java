@@ -5,9 +5,11 @@ import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
+import cn.edu.fudan.se.multidependency.service.spring.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.spring.metric.FileMetrics;
 import cn.edu.fudan.se.multidependency.service.spring.metric.PackageMetrics;
 import cn.edu.fudan.se.multidependency.service.spring.metric.ProjectMetrics;
@@ -24,6 +26,9 @@ public class MetricCalculator {
 	@Autowired
 	private PackageRepository packageRepository;
 	
+	@Autowired
+	private GitAnalyseService gitAnalyseService;
+	
 	private Collection<FileMetrics> fileMetricsCache = null;
 	public Collection<FileMetrics> calculateFileMetrics() {
 		if(fileMetricsCache != null) {
@@ -37,7 +42,13 @@ public class MetricCalculator {
 		if(projectMetricsCache != null) {
 			return projectMetricsCache;
 		}
-		return projectMetricsCache = projectRepository.calculateProjectMetrics();
+		Collection<ProjectMetrics> result = projectRepository.calculateProjectMetrics();
+		for(ProjectMetrics projectMetric : result) {
+			Collection<Commit> commits = gitAnalyseService.findCommitsInProject(projectMetric.getProject());
+			projectMetric.setCommitTimes(commits.size());
+		}
+		projectMetricsCache = result;
+		return result;
 	}
 	
 	private Collection<PackageMetrics> pckMetricsCache = null;

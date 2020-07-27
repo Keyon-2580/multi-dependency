@@ -9,20 +9,20 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.relation.DependOn;
+import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.repository.as.ASRepository;
-import cn.edu.fudan.se.multidependency.service.spring.as.CycleComponentDetector;
+import cn.edu.fudan.se.multidependency.service.spring.as.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.spring.as.data.CycleComponents;
 
 @Service
-public class CycleComponentDetectorImpl implements CycleComponentDetector {
+public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 
 	@Autowired
 	private ASRepository asRepository;
 	
 	@SuppressWarnings("unused")
 	@Deprecated
-	private Collection<DependOn> findCyclePackageRelationsByIds(CycleComponents<Package> cycle) {
+	private Collection<DependsOn> findCyclePackageRelationsByIds(CycleComponents<Package> cycle) {
 		long[] ids = new long[cycle.getComponents().size()];
 		int i = 0;
 		for(Package pck : cycle.getComponents()) {
@@ -31,18 +31,18 @@ public class CycleComponentDetectorImpl implements CycleComponentDetector {
 		return asRepository.cyclePackagesByIds(ids);
 	}
 	
-	private Collection<DependOn> findCyclePackageRelationsBySCC(CycleComponents<Package> cycle) {
+	private Collection<DependsOn> findCyclePackageRelationsBySCC(CycleComponents<Package> cycle) {
 		return asRepository.cyclePackagesBySCC(cycle.getPartition());
 	}
 	
-	private Collection<DependOn> findCycleFileRelationsBySCC(CycleComponents<ProjectFile> cycle) {
+	private Collection<DependsOn> findCycleFileRelationsBySCC(CycleComponents<ProjectFile> cycle) {
 		return asRepository.cycleFilesBySCC(cycle.getPartition());
 	}
 	
 	@Override
-	public Collection<Collection<DependOn>> cyclePackages() {
+	public Collection<Collection<DependsOn>> cyclePackages() {
 		Collection<CycleComponents<Package>> cyclePackages = asRepository.cyclePackages();
-		List<Collection<DependOn>> result = new ArrayList<>();
+		List<Collection<DependsOn>> result = new ArrayList<>();
 		for(CycleComponents<Package> cycle : cyclePackages) {
 			result.add(findCyclePackageRelationsBySCC(cycle));
 		}
@@ -50,9 +50,9 @@ public class CycleComponentDetectorImpl implements CycleComponentDetector {
 	}
 
 	@Override
-	public Collection<Collection<DependOn>> cycleFiles() {
+	public Collection<Collection<DependsOn>> cycleFiles() {
 		Collection<CycleComponents<ProjectFile>> cycleFiles = asRepository.cycleFiles();
-		List<Collection<DependOn>> result = new ArrayList<>();
+		List<Collection<DependsOn>> result = new ArrayList<>();
 		for(CycleComponents<ProjectFile> cycle : cycleFiles) {
 			result.add(findCycleFileRelationsBySCC(cycle));
 		}

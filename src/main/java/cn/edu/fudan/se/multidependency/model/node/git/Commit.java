@@ -36,6 +36,8 @@ public class Commit implements Node {
     private String fullMessage;
 
 	private String authoredDate;
+	
+	private int commitFilesSize;
 
 	public Commit(Long entityId, String commitId, String shortMessage, String fullMessage, String authoredDate){
 		this.entityId = entityId;
@@ -52,6 +54,7 @@ public class Commit implements Node {
 	    properties.put("commitId", getCommitId() == null ? "" : getCommitId());
 	    properties.put("shortMessage", getShortMessage() == null ? "" : getShortMessage());
 		properties.put("authoredDate", getAuthoredDate() == null ? "" : getAuthoredDate());
+		properties.put("commitFilesSize", getCommitFilesSize());
 		return properties;
 	}
 

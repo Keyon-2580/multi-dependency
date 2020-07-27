@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.relation.DependOn;
+import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.service.spring.as.impl.ArchitectureSmellDetectorImpl;
 import cn.edu.fudan.se.multidependency.service.spring.metric.FileMetrics;
@@ -34,13 +34,13 @@ public class ArchitectureSmellController {
 	
 	@GetMapping("/cycle/package")
 	@ResponseBody
-	public Collection<Collection<DependOn>> cyclePackages() {
+	public Collection<Collection<DependsOn>> cyclePackages() {
 		return detector.cyclePackages();
 	}
 	
 	@GetMapping("/cycle/file")
 	@ResponseBody
-	public Collection<Collection<DependOn>> cycleFiles() {
+	public Collection<Collection<DependsOn>> cycleFiles() {
 		return detector.cycleFiles();
 	}
 	
