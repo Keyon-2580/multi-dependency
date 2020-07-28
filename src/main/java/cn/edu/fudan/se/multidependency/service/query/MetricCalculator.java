@@ -2,7 +2,11 @@ package cn.edu.fudan.se.multidependency.service.query;
 
 import java.util.Collection;
 
+import javax.annotation.Resource;
+
+import org.codehaus.plexus.component.annotations.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
@@ -11,6 +15,7 @@ import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
 import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
 import cn.edu.fudan.se.multidependency.service.query.metric.ProjectMetrics;
 
@@ -29,6 +34,9 @@ public class MetricCalculator {
 	@Autowired
 	private GitAnalyseService gitAnalyseService;
 	
+	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
+	private ModularityCalculator modularityCalculator;
+	
 	private Collection<FileMetrics> fileMetricsCache = null;
 	public Collection<FileMetrics> calculateFileMetrics() {
 		if(fileMetricsCache != null) {
@@ -46,6 +54,7 @@ public class MetricCalculator {
 		for(ProjectMetrics projectMetric : result) {
 			Collection<Commit> commits = gitAnalyseService.findCommitsInProject(projectMetric.getProject());
 			projectMetric.setCommitTimes(commits.size());
+			projectMetric.setModularity(modularityCalculator.calculate(projectMetric.getProject()).getValue());
 		}
 		projectMetricsCache = result;
 		return result;
