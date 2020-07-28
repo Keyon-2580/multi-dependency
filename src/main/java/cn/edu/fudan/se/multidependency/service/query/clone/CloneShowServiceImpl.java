@@ -120,6 +120,7 @@ public class CloneShowServiceImpl<pubilc> implements CloneShowService {
 		List<CytoscapeEdge> edges = new ArrayList<>();
 		List<CytoscapeNode> groupNodes = new ArrayList<>();
 		List<CytoscapeEdge> groupEdges = new ArrayList<>();
+		List<Package> packageList = new ArrayList<>();
 		Map<Node, Boolean> isNodeToCytoscapeNode = new HashMap<>();
 		Map<String, Boolean> isIdToCytoscapeEdge = new HashMap<>();
 		List<Clone> allClones = new ArrayList<>();
@@ -286,9 +287,15 @@ public class CloneShowServiceImpl<pubilc> implements CloneShowService {
 						String ms1ContainFile1Id = String.join("_", String.valueOf(ms1.getId()), String.valueOf(file1.getId()));
 						if(!isIdToCytoscapeEdge.getOrDefault(ms1ContainFile1Id, false)) {
 							isIdToCytoscapeEdge.put(ms1ContainFile1Id, true);
-							nodes.add(new CytoscapeNode(package1.getId(), package1.getName(), "Package"));
-							edges.add(new CytoscapeEdge(ms1, package1, "Contain"));
-							edges.add(new CytoscapeEdge(package1, file1, "Contain"));
+								if(!packageList.contains(package1)){
+									nodes.add(new CytoscapeNode(package1.getId(), package1.getDirectoryPath(), "Package"));
+									edges.add(new CytoscapeEdge(ms1, package1, "Contain"));
+									edges.add(new CytoscapeEdge(package1, file1, "Contain"));
+									packageList.add(package1);
+								}else{
+									nodes.add(new CytoscapeNode(package1.getId(), package1.getDirectoryPath(), "Package"));
+									edges.add(new CytoscapeEdge(package1, file1, "Contain"));
+								}
 							msToZTreeNode.get(ms1).addChild(nodeToZTreeNode.get(file1));
 						}
 					}
@@ -301,9 +308,15 @@ public class CloneShowServiceImpl<pubilc> implements CloneShowService {
 					String project1ContainFile1Id = String.join("_", String.valueOf(project1.getId()), String.valueOf(file1.getId()));
 					if(!isIdToCytoscapeEdge.getOrDefault(project1ContainFile1Id, false)) {
 						isIdToCytoscapeEdge.put(project1ContainFile1Id, true);
-						nodes.add(new CytoscapeNode(package1.getId(), package1.getName(), "Package"));
-						edges.add(new CytoscapeEdge(project1, package1, "Contain"));
-						edges.add(new CytoscapeEdge(package1, file1, "Contain"));
+						if(!packageList.contains(package1)){
+							nodes.add(new CytoscapeNode(package1.getId(), package1.getDirectoryPath(), "Package"));
+							edges.add(new CytoscapeEdge(project1, package1, "Contain"));
+							edges.add(new CytoscapeEdge(package1, file1, "Contain"));
+							packageList.add(package1);
+						}else{
+							nodes.add(new CytoscapeNode(package1.getId(), package1.getDirectoryPath(), "Package"));
+							edges.add(new CytoscapeEdge(package1, file1, "Contain"));
+						}
 						projectToZTreeNode.get(project1).addChild(nodeToZTreeNode.get(file1));
 					}
 				}
@@ -320,9 +333,15 @@ public class CloneShowServiceImpl<pubilc> implements CloneShowService {
 						String ms2ContainFile2Id = String.join("_", String.valueOf(ms2.getId()), String.valueOf(file2.getId()));
 						if(!isIdToCytoscapeEdge.getOrDefault(ms2ContainFile2Id, false)) {
 							isIdToCytoscapeEdge.put(ms2ContainFile2Id, true);
-							nodes.add(new CytoscapeNode(package2.getId(), package2.getName(), "Package"));
-							edges.add(new CytoscapeEdge(ms2, package2, "Contain"));
-							edges.add(new CytoscapeEdge(package2, file2, "Contain"));
+							if(!packageList.contains(package2)){
+								nodes.add(new CytoscapeNode(package2.getId(), package2.getDirectoryPath(), "Package"));
+								edges.add(new CytoscapeEdge(ms2, package2, "Contain"));
+								edges.add(new CytoscapeEdge(package2, file1, "Contain"));
+								packageList.add(package2);
+							}else{
+								nodes.add(new CytoscapeNode(package2.getId(), package2.getDirectoryPath(), "Package"));
+								edges.add(new CytoscapeEdge(package2, file1, "Contain"));
+							}
 							msToZTreeNode.get(ms2).addChild(nodeToZTreeNode.get(file2));
 						}
 					}
@@ -335,9 +354,15 @@ public class CloneShowServiceImpl<pubilc> implements CloneShowService {
 					String project2ContainFile2Id = String.join("_", String.valueOf(project2.getId()), String.valueOf(file2.getId()));
 					if(!isIdToCytoscapeEdge.getOrDefault(project2ContainFile2Id, false)) {
 						isIdToCytoscapeEdge.put(project2ContainFile2Id, true);
-						nodes.add(new CytoscapeNode(package2.getId(), package2.getName(), "Package"));
-						edges.add(new CytoscapeEdge(project2, package2, "Contain"));
-						edges.add(new CytoscapeEdge(package2, file2, "Contain"));
+						if(!packageList.contains(package2)){
+							nodes.add(new CytoscapeNode(package2.getId(), package2.getDirectoryPath(), "Package"));
+							edges.add(new CytoscapeEdge(project2, package2, "Contain"));
+							edges.add(new CytoscapeEdge(package2, file1, "Contain"));
+							packageList.add(package2);
+						}else{
+							nodes.add(new CytoscapeNode(package2.getId(), package2.getDirectoryPath(), "Package"));
+							edges.add(new CytoscapeEdge(package2, file1, "Contain"));
+						}
 						projectToZTreeNode.get(project2).addChild(nodeToZTreeNode.get(file2));
 					}
 				}

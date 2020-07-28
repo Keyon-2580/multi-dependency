@@ -227,7 +227,7 @@ var clone = function(cytoscapeutil) {
 			'text-halign': 'center',
 			'border-width': 1.5,
 			'border-color': '#555',
-			'background-color': '#f6f6f6',
+			'background-color': '#9af486',
 			'content': 'data(name)'
 		}).update();
 		cy.style().selector('node[type="Package"]').style({
