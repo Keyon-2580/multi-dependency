@@ -35,7 +35,6 @@ public enum RelationType implements RelationshipType {
 
 	FILE_BUILD_DEPENDS_FILE(RelationType.str_FILE_BUILD_DEPENDS_FILE),
 	
-	FILE_DEPEND_ON_FILE(RelationType.str_FILE_DEPEND_ON_FILE),
 	SPAN_INSTANCE_OF_RESTFUL_API(RelationType.str_SPAN_INSTANCE_OF_RESTFUL_API),
 	
 	MICROSERVICE_DEPEND_ON_MICROSERVICE(RelationType.str_MICROSERVICE_DEPEND_ON_MICROSERVICE),
@@ -92,7 +91,6 @@ public enum RelationType implements RelationshipType {
 	
 	public static final String str_MICROSERVICE_CALL_MICROSERVICE = "MICROSERVICE_CALL_MICROSERVICE";
 	public static final String str_MICROSERVICE_DEPEND_ON_MICROSERVICE = "MICROSERVICE_DEPEND_ON_MICROSERVICE";
-	public static final String str_FILE_DEPEND_ON_FILE = "FILE_DEPEND_ON_FILE";
 
 	public static final String str_COMMIT_UPDATE_FILE = "COMMIT_UPDATE_FILE";
 	public static final String str_COMMIT_ADDRESS_ISSUE = "COMMIT_ADDRESS_ISSUE";

@@ -13,25 +13,25 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
-import cn.edu.fudan.se.multidependency.service.query.MetricCalculator;
 import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculator;
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculatorImplForFieldMethodLevel;
 import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
 import cn.edu.fudan.se.multidependency.service.query.metric.ProjectMetrics;
+import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller
 @RequestMapping("/metric")
 public class MeasureController {
 
     @Autowired
-    ProjectRepository projectRepository;
-
-    @Autowired
     ModularityCalculatorImplForFieldMethodLevel modularityCalculator;
 
     @Autowired
     MetricCalculator metricCalculator;
+    
+    @Autowired
+    NodeService nodeService;
     
     @GetMapping(value= {"", "/", "/index"})
     public String index() {
@@ -63,7 +63,7 @@ public class MeasureController {
         JSONObject result = new JSONObject();
 
         Map<String, Double> metricQs = new HashMap<>();
-        for (Project project:projectRepository.findAll()){
+        for (Project project:nodeService.allProjects()){
             metricQs.put(project.getName(),modularityCalculator.calculate(project).getValue());
         }
 

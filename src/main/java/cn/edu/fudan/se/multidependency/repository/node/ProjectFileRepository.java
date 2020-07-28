@@ -33,7 +33,7 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"RETURN  file,fanIn,fanOut,changeTimes,cochangeTimes,nom,loc,score order by(file.path);")
 	public List<FileMetrics> calculateFileMetrics();
 	
-	@Query("CALL algo.pageRank.stream('ProjectFile', 'DEPEND_ON', {iterations:{iterations}, dampingFactor:{dampingFactor}})\r\n" + 
+	@Query("CALL algo.pageRank.stream('ProjectFile', '" + RelationType.str_DEPENDS_ON + "', {iterations:{iterations}, dampingFactor:{dampingFactor}})\r\n" + 
 			"YIELD nodeId, score\r\n" + 
 			"with algo.getNodeById(nodeId) AS file, score \r\n" + 
 			"set file.score=score\r\n" + 

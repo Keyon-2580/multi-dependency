@@ -36,5 +36,10 @@ public class ProjectMetrics {
 	 */
 	private int commitTimes;
 	
+	/**
+	 * 模块度
+	 */
+	private double modularity;
+	
 	
 }
