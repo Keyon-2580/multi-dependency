@@ -25,10 +25,10 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.TestCaseRunTrace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanCallSpan;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
-import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
-import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
-import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
-import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
+import cn.edu.fudan.se.multidependency.service.query.MicroserviceService;
+import cn.edu.fudan.se.multidependency.service.query.dynamic.DynamicAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.dynamic.FeatureOrganizationService;
+import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 
 @SpringBootApplication
 @EnableNeo4jRepositories(basePackages = {"cn.edu.fudan.se.multidependency.repository"})

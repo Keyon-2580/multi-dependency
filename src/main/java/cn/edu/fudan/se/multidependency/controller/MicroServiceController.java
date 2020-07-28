@@ -22,10 +22,10 @@ import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCallMicroService;
 import cn.edu.fudan.se.multidependency.model.relation.structure.microservice.MicroServiceDependOnMicroService;
-import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
-import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
-import cn.edu.fudan.se.multidependency.service.spring.metric.Fan_IO;
-import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
+import cn.edu.fudan.se.multidependency.service.query.MicroserviceService;
+import cn.edu.fudan.se.multidependency.service.query.dynamic.FeatureOrganizationService;
+import cn.edu.fudan.se.multidependency.service.query.metric.Fan_IO;
+import cn.edu.fudan.se.multidependency.utils.query.ZTreeUtil.ZTreeNode;
 
 @Controller
 @RequestMapping("/microservice")

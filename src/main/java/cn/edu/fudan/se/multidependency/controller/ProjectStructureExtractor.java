@@ -4,8 +4,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.service.spring.MultipleService;
-import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
+import cn.edu.fudan.se.multidependency.service.query.MultipleService;
+import cn.edu.fudan.se.multidependency.utils.query.ZTreeUtil.ZTreeNode;
 
 public class ProjectStructureExtractor implements Callable<ZTreeNode> {
 	Project project;

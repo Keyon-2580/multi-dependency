@@ -28,18 +28,18 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
-import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
-import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
-import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
-import cn.edu.fudan.se.multidependency.service.spring.NodeService;
-import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
-import cn.edu.fudan.se.multidependency.service.spring.clone.CloneAnalyseService;
-import cn.edu.fudan.se.multidependency.service.spring.clone.CloneShowService;
-import cn.edu.fudan.se.multidependency.service.spring.clone.PredicateForCloneGroup;
-import cn.edu.fudan.se.multidependency.service.spring.clone.PredicateForDataFile;
-import cn.edu.fudan.se.multidependency.service.spring.clone.PredicateForFileClone;
-import cn.edu.fudan.se.multidependency.service.spring.clone.PredicateForLanguage;
-import cn.edu.fudan.se.multidependency.service.spring.data.HistogramWithProjectsSize;
+import cn.edu.fudan.se.multidependency.service.query.MicroserviceService;
+import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
+import cn.edu.fudan.se.multidependency.service.query.clone.CloneAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.clone.CloneShowService;
+import cn.edu.fudan.se.multidependency.service.query.clone.PredicateForCloneGroup;
+import cn.edu.fudan.se.multidependency.service.query.clone.PredicateForDataFile;
+import cn.edu.fudan.se.multidependency.service.query.clone.PredicateForFileClone;
+import cn.edu.fudan.se.multidependency.service.query.clone.PredicateForLanguage;
+import cn.edu.fudan.se.multidependency.service.query.data.HistogramWithProjectsSize;
+import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
+import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller
 @RequestMapping("/clonegroup")

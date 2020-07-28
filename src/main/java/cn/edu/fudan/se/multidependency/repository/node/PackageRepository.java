@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
-import cn.edu.fudan.se.multidependency.service.spring.metric.PackageMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
 
 @Repository
 public interface PackageRepository extends Neo4jRepository<Package, Long> {

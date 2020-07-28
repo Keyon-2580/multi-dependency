@@ -15,7 +15,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
-import cn.edu.fudan.se.multidependency.service.nospring.BatchInserterService;
+import cn.edu.fudan.se.multidependency.service.insert.BatchInserterService;
 import cn.edu.fudan.se.multidependency.utils.YamlUtil;
 
 public class BatchInserterServiceTest {

@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import cn.edu.fudan.se.multidependency.utils.query.DynamicUtil;
+
 public class JavaDynamicUtilTest {
 	@Test
 	public void testFind() {

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.service.spring.metric.FileMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
 
 @Repository
 public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long> {

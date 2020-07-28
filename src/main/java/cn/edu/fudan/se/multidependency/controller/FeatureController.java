@@ -21,8 +21,8 @@ import com.alibaba.fastjson.JSONObject;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
-import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
-import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
+import cn.edu.fudan.se.multidependency.service.query.dynamic.DynamicAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.dynamic.FeatureOrganizationService;
 
 @Controller
 @RequestMapping("/feature")

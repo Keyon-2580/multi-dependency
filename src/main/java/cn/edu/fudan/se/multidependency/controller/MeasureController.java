@@ -14,11 +14,11 @@ import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
-import cn.edu.fudan.se.multidependency.service.spring.MetricCalculator;
-import cn.edu.fudan.se.multidependency.service.spring.metric.FileMetrics;
-import cn.edu.fudan.se.multidependency.service.spring.metric.ModularityCalculatorImplForFieldMethodLevel;
-import cn.edu.fudan.se.multidependency.service.spring.metric.PackageMetrics;
-import cn.edu.fudan.se.multidependency.service.spring.metric.ProjectMetrics;
+import cn.edu.fudan.se.multidependency.service.query.MetricCalculator;
+import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculatorImplForFieldMethodLevel;
+import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.ProjectMetrics;
 
 @Controller
 @RequestMapping("/metric")

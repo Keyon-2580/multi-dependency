@@ -8,11 +8,11 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.edu.fudan.se.multidependency.service.nospring.InserterForNeo4j;
-import cn.edu.fudan.se.multidependency.service.nospring.InserterForNeo4jServiceFactory;
-import cn.edu.fudan.se.multidependency.service.nospring.RepositoryService;
-import cn.edu.fudan.se.multidependency.service.nospring.ThreadService;
-import cn.edu.fudan.se.multidependency.service.nospring.dynamic.TraceStartExtractor;
+import cn.edu.fudan.se.multidependency.service.insert.InserterForNeo4j;
+import cn.edu.fudan.se.multidependency.service.insert.InserterForNeo4jServiceFactory;
+import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
+import cn.edu.fudan.se.multidependency.service.insert.ThreadService;
+import cn.edu.fudan.se.multidependency.service.insert.dynamic.TraceStartExtractor;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 import cn.edu.fudan.se.multidependency.utils.YamlUtil;
 import cn.edu.fudan.se.multidependency.utils.config.JSONConfigFile;

@@ -22,14 +22,14 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Scenario;
 import cn.edu.fudan.se.multidependency.model.node.testcase.TestCase;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
-import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
-import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
-import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
-import cn.edu.fudan.se.multidependency.service.spring.clone.CloneAnalyseService;
-import cn.edu.fudan.se.multidependency.service.spring.clone.CloneValueService;
-import cn.edu.fudan.se.multidependency.service.spring.data.MicroServiceCallWithEntry;
-import cn.edu.fudan.se.multidependency.service.spring.history.GitAnalyseServiceImpl;
-import cn.edu.fudan.se.multidependency.utils.CytoscapeUtil.CytoscapeEdge;
+import cn.edu.fudan.se.multidependency.service.query.MicroserviceService;
+import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
+import cn.edu.fudan.se.multidependency.service.query.clone.CloneAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.clone.CloneValueService;
+import cn.edu.fudan.se.multidependency.service.query.data.MicroServiceCallWithEntry;
+import cn.edu.fudan.se.multidependency.service.query.dynamic.FeatureOrganizationService;
+import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseServiceImpl;
+import cn.edu.fudan.se.multidependency.utils.query.CytoscapeUtil.CytoscapeEdge;
 
 @Controller
 @RequestMapping("/multiple/all")

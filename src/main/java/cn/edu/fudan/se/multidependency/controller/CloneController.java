@@ -22,16 +22,16 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
-import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
-import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
-import cn.edu.fudan.se.multidependency.service.spring.NodeService;
-import cn.edu.fudan.se.multidependency.service.spring.ProjectService;
-import cn.edu.fudan.se.multidependency.service.spring.clone.CloneShowService;
-import cn.edu.fudan.se.multidependency.service.spring.clone.CloneValueService;
-import cn.edu.fudan.se.multidependency.service.spring.clone.SimilarPackageDetector;
-import cn.edu.fudan.se.multidependency.service.spring.clone.data.CloneValueForDoubleNodes;
-import cn.edu.fudan.se.multidependency.service.spring.clone.data.SimilarPackage;
-import cn.edu.fudan.se.multidependency.service.spring.clone.data.PackageCloneValueWithFileCoChange;
+import cn.edu.fudan.se.multidependency.service.query.ProjectService;
+import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
+import cn.edu.fudan.se.multidependency.service.query.clone.CloneShowService;
+import cn.edu.fudan.se.multidependency.service.query.clone.CloneValueService;
+import cn.edu.fudan.se.multidependency.service.query.clone.SimilarPackageDetector;
+import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueForDoubleNodes;
+import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChange;
+import cn.edu.fudan.se.multidependency.service.query.clone.data.SimilarPackage;
+import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
+import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller
 @RequestMapping("/clone")

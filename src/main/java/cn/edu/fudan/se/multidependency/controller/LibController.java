@@ -11,9 +11,9 @@ import com.alibaba.fastjson.JSONObject;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
-import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
-import cn.edu.fudan.se.multidependency.service.spring.NodeService;
-import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.MicroserviceService;
+import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller
 @RequestMapping("/lib")

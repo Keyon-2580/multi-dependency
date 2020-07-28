@@ -1,7 +1,7 @@
 package cn.edu.fudan.se.multidependency;
 
-import cn.edu.fudan.se.multidependency.service.nospring.RepositoryService;
-import cn.edu.fudan.se.multidependency.service.nospring.ThreadService;
+import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
+import cn.edu.fudan.se.multidependency.service.insert.ThreadService;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import cn.edu.fudan.se.multidependency.utils.YamlUtil;
 import org.slf4j.Logger;

@@ -35,16 +35,16 @@ import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCall;
-import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
-import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
-import cn.edu.fudan.se.multidependency.service.spring.DependencyOrganizationService;
-import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
-import cn.edu.fudan.se.multidependency.service.spring.MultipleService;
-import cn.edu.fudan.se.multidependency.service.spring.NodeService;
-import cn.edu.fudan.se.multidependency.service.spring.ProjectService;
-import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
-import cn.edu.fudan.se.multidependency.service.spring.metric.Fan_IO;
-import cn.edu.fudan.se.multidependency.utils.ZTreeUtil.ZTreeNode;
+import cn.edu.fudan.se.multidependency.service.query.DependencyOrganizationService;
+import cn.edu.fudan.se.multidependency.service.query.MultipleService;
+import cn.edu.fudan.se.multidependency.service.query.ProjectService;
+import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
+import cn.edu.fudan.se.multidependency.service.query.dynamic.DynamicAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.metric.Fan_IO;
+import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
+import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
+import cn.edu.fudan.se.multidependency.utils.query.ZTreeUtil.ZTreeNode;
 
 @Controller
 @RequestMapping("/project")

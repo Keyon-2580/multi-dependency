@@ -13,9 +13,9 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
-import cn.edu.fudan.se.multidependency.service.spring.as.impl.ArchitectureSmellDetectorImpl;
-import cn.edu.fudan.se.multidependency.service.spring.metric.FileMetrics;
-import cn.edu.fudan.se.multidependency.service.spring.metric.PackageMetrics;
+import cn.edu.fudan.se.multidependency.service.query.as.impl.ArchitectureSmellDetectorImpl;
+import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
 
 @Controller
 @RequestMapping("/as")

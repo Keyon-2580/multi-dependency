@@ -16,9 +16,9 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.GitRepository;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
-import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
-import cn.edu.fudan.se.multidependency.service.spring.NodeService;
-import cn.edu.fudan.se.multidependency.service.spring.history.GitAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
+import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller
 @RequestMapping("/git")

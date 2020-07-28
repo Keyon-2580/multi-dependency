@@ -15,14 +15,14 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
-import cn.edu.fudan.se.multidependency.service.spring.BasicCloneQueryService;
-import cn.edu.fudan.se.multidependency.service.spring.ContainRelationService;
-import cn.edu.fudan.se.multidependency.service.spring.GraphService;
-import cn.edu.fudan.se.multidependency.service.spring.NodeService;
-import cn.edu.fudan.se.multidependency.service.spring.StaticAnalyseService;
-import cn.edu.fudan.se.multidependency.service.spring.clone.CloneValueServiceImpl;
-import cn.edu.fudan.se.multidependency.service.spring.clone.data.FileGraph;
-import cn.edu.fudan.se.multidependency.service.spring.data.PackageGraph;
+import cn.edu.fudan.se.multidependency.service.query.GraphService;
+import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
+import cn.edu.fudan.se.multidependency.service.query.clone.CloneValueServiceImpl;
+import cn.edu.fudan.se.multidependency.service.query.clone.data.FileGraph;
+import cn.edu.fudan.se.multidependency.service.query.data.PackageGraph;
+import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
+import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller
 @RequestMapping("/graph")

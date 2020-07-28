@@ -24,10 +24,10 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCall;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanStartWithFunction;
 import cn.edu.fudan.se.multidependency.repository.relation.code.CallRepository;
-import cn.edu.fudan.se.multidependency.service.spring.DependencyOrganizationService;
-import cn.edu.fudan.se.multidependency.service.spring.DynamicAnalyseService;
-import cn.edu.fudan.se.multidependency.service.spring.FeatureOrganizationService;
-import cn.edu.fudan.se.multidependency.service.spring.MicroserviceService;
+import cn.edu.fudan.se.multidependency.service.query.DependencyOrganizationService;
+import cn.edu.fudan.se.multidependency.service.query.MicroserviceService;
+import cn.edu.fudan.se.multidependency.service.query.dynamic.DynamicAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.dynamic.FeatureOrganizationService;
 import cn.edu.fudan.se.multidependency.utils.GraphvizUtil;
 import cn.edu.fudan.se.multidependency.utils.GraphvizUtil.GraphvizTreeNode;
 

@@ -3,8 +3,8 @@ package cn.edu.fudan.se.multidependency.service.code;
 import org.junit.Test;
 
 import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.service.nospring.code.DependsEntityRepoExtractor;
-import cn.edu.fudan.se.multidependency.service.nospring.code.DependsEntityRepoExtractorImpl;
+import cn.edu.fudan.se.multidependency.service.insert.code.DependsEntityRepoExtractor;
+import cn.edu.fudan.se.multidependency.service.insert.code.DependsEntityRepoExtractorImpl;
 import depends.entity.repo.EntityRepo;
 
 public class DependsEntityRepoExtractorImplTest {
