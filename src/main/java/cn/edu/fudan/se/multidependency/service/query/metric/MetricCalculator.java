@@ -1,12 +1,10 @@
-package cn.edu.fudan.se.multidependency.service.query;
+package cn.edu.fudan.se.multidependency.service.query.metric;
 
 import java.util.Collection;
 
 import javax.annotation.Resource;
 
-import org.codehaus.plexus.component.annotations.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
@@ -14,10 +12,6 @@ import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
-import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
-import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
-import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
-import cn.edu.fudan.se.multidependency.service.query.metric.ProjectMetrics;
 
 @Service
 public class MetricCalculator {

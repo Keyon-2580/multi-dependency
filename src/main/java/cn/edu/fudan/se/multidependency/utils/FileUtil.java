@@ -260,12 +260,12 @@ public class FileUtil {
 	 */
 	public static String extractDirectoryFromFile(String filePath) {
 //		LOGGER.info("extractDirectoryFromFile " + filePath);
-		if(filePath.contains("\\")) {
-			return filePath.substring(0, filePath.lastIndexOf("\\"));
-		} else if(filePath.contains("/")) {
-			return filePath.substring(0, filePath.lastIndexOf("/"));
+		if(filePath.contains(SLASH_WINDOWS)) {
+			return filePath.substring(0, filePath.lastIndexOf(SLASH_WINDOWS));
+		} else if(filePath.contains(SLASH_LINUX)) {
+			return filePath.substring(0, filePath.lastIndexOf(SLASH_LINUX));
 		} else {
-			return "/";
+			return SLASH_LINUX;
 		}
 	}
 
@@ -276,10 +276,10 @@ public class FileUtil {
 	 */
 	public static String extractFileName(String filePath) {
 //		LOGGER.info("extractFileName " + filePath);
-		if(filePath.contains("\\")) {
-			return filePath.substring(filePath.lastIndexOf("\\") + 1);
-		} else if(filePath.contains("/")) {
-			return filePath.substring(filePath.lastIndexOf("/") + 1);
+		if(filePath.contains(SLASH_WINDOWS)) {
+			return filePath.substring(filePath.lastIndexOf(SLASH_WINDOWS) + 1);
+		} else if(filePath.contains(SLASH_LINUX)) {
+			return filePath.substring(filePath.lastIndexOf(SLASH_LINUX) + 1);
 		} else {
 			return filePath;
 		}

@@ -8,6 +8,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.Language;
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
+
 import org.apache.commons.lang3.StringUtils;
 
 public class ProjectConfigUtil {
@@ -65,15 +67,16 @@ public class ProjectConfigUtil {
 		ProjectConfig result = new ProjectConfig();
 		Language language = Language.valueOf(projectJson.getString("language"));
 		String projectPath = projectJson.getString("path");
-		boolean isMicroservice = projectJson.getBooleanValue("isMicroservice");
+		String projectName = FileUtil.extractFileName(projectPath);
+		Boolean isMicroservice = projectJson.getBoolean("isMicroservice");
+		isMicroservice = isMicroservice == null ? true : isMicroservice;
 		String microserviceName = projectJson.getString("microserviceName");
-		if(microserviceName == null) {
-			microserviceName = "";
-		}
+		microserviceName = microserviceName == null ? projectName : microserviceName;
 		String serviceGroupName = projectJson.getString("serviceGroupName");
-		serviceGroupName = serviceGroupName == null ? "" : serviceGroupName;
-		String projectName = projectJson.getString("project");
-		boolean autoInclude = projectJson.getBooleanValue("autoInclude");
+		serviceGroupName = serviceGroupName == null ? projectName : serviceGroupName;
+//		String projectName = projectJson.getString("project");
+		Boolean autoInclude = projectJson.getBoolean("autoInclude");
+		autoInclude = autoInclude == null ? true : autoInclude;
 		JSONArray excludesArray = projectJson.getJSONArray("excludes");
 		if(excludesArray != null) {
 			for(int i = 0; i < excludesArray.size(); i++) {

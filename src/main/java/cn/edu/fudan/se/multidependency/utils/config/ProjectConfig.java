@@ -16,7 +16,7 @@ public class ProjectConfig {
 	private String serviceGroupName;
 	private List<String> excludes = new ArrayList<>();
 	private List<String> includeDirs = new ArrayList<>();
-	private boolean autoInclude;
+	private boolean autoInclude = true;
 	private RestfulAPIConfig apiConfig;
 
 	public void addExclude(String exclude) {

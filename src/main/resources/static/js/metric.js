@@ -115,13 +115,13 @@ var metric = function() {
 			packageMetric();
 			fileMetric();
 			$("#projectButton").click(function() {
-				tableToExcel("projectTable", "projectMetrics.xlsx");
+				tableToExcel("projectTable", "projectMetrics");
 			});
 			$("#packageButton").click(function() {
-				tableToExcel("packageTable", "packageMetrics.xlsx");
+				tableToExcel("packageTable", "packageMetrics");
 			});
 			$("#fileButton").click(function() {
-				tableToExcel("fileTable", "fileMetrics.xlsx");
+				tableToExcel("fileTable", "fileMetrics");
 			});
 		}
 	}
