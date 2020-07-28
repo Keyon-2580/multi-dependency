@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
@@ -553,6 +554,13 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	public List<Implements> findProjectContainImplementsRelations(Project project) {
 		/// FIXME
 		return new ArrayList<>();
+	}
+
+	@Override
+	public boolean isInDifferentModule(ProjectFile file1, ProjectFile file2) {
+		Package pck1 = containRelationService.findFileBelongToPackage(file1);
+		Package pck2 = containRelationService.findFileBelongToPackage(file2);
+		return !pck1.equals(pck2);
 	}
 
 }

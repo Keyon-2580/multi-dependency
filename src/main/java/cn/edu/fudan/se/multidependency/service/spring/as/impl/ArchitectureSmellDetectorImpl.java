@@ -7,9 +7,12 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
+import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.service.spring.as.ArchitectureSmellDetector;
 import cn.edu.fudan.se.multidependency.service.spring.as.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.spring.as.HubLikeComponentDetector;
+import cn.edu.fudan.se.multidependency.service.spring.as.ImplicitCrossModuleDependencyDetector;
+import cn.edu.fudan.se.multidependency.service.spring.as.SimilarComponentDetector;
 import cn.edu.fudan.se.multidependency.service.spring.as.UnusedComponentDetector;
 import cn.edu.fudan.se.multidependency.service.spring.metric.FileMetrics;
 import cn.edu.fudan.se.multidependency.service.spring.metric.PackageMetrics;
@@ -25,6 +28,12 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	
 	@Autowired
 	private HubLikeComponentDetector hubLikeComponentDetector;
+	
+	@Autowired
+	private ImplicitCrossModuleDependencyDetector icdDependencyDetector;
+	
+	@Autowired
+	private SimilarComponentDetector similarComponentDetector;
 	
 	@Override
 	public Collection<Collection<DependsOn>> cyclePackages() {
@@ -49,6 +58,11 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	@Override
 	public Collection<FileMetrics> hubLikeFiles() {
 		return hubLikeComponentDetector.hubLikeFiles();
+	}
+
+	@Override
+	public Collection<CoChange> cochangesInDifferentModule(int minCochange) {
+		return icdDependencyDetector.cochangesInDifferentModule(minCochange);
 	}
 
 }

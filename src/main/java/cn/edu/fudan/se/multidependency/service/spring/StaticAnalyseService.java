@@ -101,4 +101,6 @@ public interface StaticAnalyseService {
 	
 	boolean isDataFile(ProjectFile file);
 	
+	boolean isInDifferentModule(ProjectFile file1, ProjectFile file2);
+	
 }

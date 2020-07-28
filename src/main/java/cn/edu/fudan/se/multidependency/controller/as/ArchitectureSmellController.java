@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -26,7 +27,13 @@ public class ArchitectureSmellController {
 	@Autowired
 	private ProjectFileRepository fileRepository;
 	
-	@GetMapping("pagerank/file")
+	@GetMapping("/icd/{times}")
+	@ResponseBody
+	public Object icd(@PathVariable("times") int times) {
+		return detector.cochangesInDifferentModule(times);
+	}
+	
+	@GetMapping("/pagerank/file")
 	@ResponseBody
 	public Collection<ProjectFile> pagerankFile() {
 		return fileRepository.pageRank(20, 0.85);
