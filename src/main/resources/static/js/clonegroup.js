@@ -761,7 +761,7 @@ var clone = function(cytoscapeutil) {
 									})
 									var cy = _showCytoscape($("#cloneGroupDiv"), result.value, "copyDiv_group_one");
 									showZTree(result.value.ztree, $("#node_ztree_num"), cy, "copyDiv_group_one");
-									showClonesTable(result.value.clones, "table_clones_one");
+									showClonesTable(result.value.clonesWithCoChange, "table_clones_one");
 								}
 							}
 						});
