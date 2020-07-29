@@ -1,13 +1,5 @@
 package cn.edu.fudan.se.multidependency.service.query.as;
 
-import java.util.Collection;
-
-import cn.edu.fudan.se.multidependency.model.node.Package;
-import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
-import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
-import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
-import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
-
 public interface ArchitectureSmellDetector {
 	
 	/**
@@ -31,4 +23,6 @@ public interface ArchitectureSmellDetector {
 	Object similarFiles();
 	
 	Object similarPackages();
+	
+	Object multipleASFiles(int minCoChangeSInLogicCouplingFiles);
 }

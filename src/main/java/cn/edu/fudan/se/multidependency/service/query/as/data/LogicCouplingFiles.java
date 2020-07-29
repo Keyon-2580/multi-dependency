@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class LogicCoupling {
+public class LogicCouplingFiles {
 	
 	private ProjectFile file1;
 	

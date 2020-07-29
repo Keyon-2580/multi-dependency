@@ -21,64 +21,105 @@ public class ArchitectureSmellController {
 	@Autowired
 	private ProjectFileRepository fileRepository;
 	
-	@GetMapping("/icd/{times}")
+	@GetMapping("")
+	public String index() {
+		return "as/as";
+	}
+	
+	@GetMapping("/icd")
+	public String icd() {
+		return "as/icd";
+	}
+	
+	@GetMapping("/cycle")
+	public String cycle() {
+		return "as/cycle";
+	}
+	
+	@GetMapping("/hublike")
+	public String hublike() {
+		return "as/hublike";
+	}
+	
+	@GetMapping("/unstable")
+	public String unstable() {
+		return "as/unstable";
+	}
+	
+	@GetMapping("/similar")
+	public String similar() {
+		return "as/similar";
+	}
+
+	@GetMapping("/multiple")
+	public String multiple() {
+		return "as/multiple";
+	}
+	
+	@GetMapping("/api/icd/{times}")
 	@ResponseBody
 	public Object icd(@PathVariable("times") int times) {
 		return detector.cochangesInDifferentModule(times);
 	}
 	
-	@GetMapping("/pagerank/file")
+	@GetMapping("/api/pagerank/file")
 	@ResponseBody
 	public Object pagerankFile() {
 		return fileRepository.pageRank(20, 0.85);
 	}
 	
-	@GetMapping("/cycle/package")
+	@GetMapping("/api/cycle/package")
 	@ResponseBody
 	public Object cyclePackages(@RequestParam(required=false, name="relation", defaultValue="false") boolean relation) {
 		return detector.cyclePackages(relation);
 	}
 	
-	@GetMapping("/cycle/file")
+	@GetMapping("/api/cycle/file")
 	@ResponseBody
 	public Object cycleFiles(@RequestParam(required=false, name="relation", defaultValue="false") boolean relation) {
 		return detector.cycleFiles(relation);
 	}
 	
-	@GetMapping("/unused/package")
+	@GetMapping("/api/unused/package")
 	@ResponseBody
 	public Object unusdPackages() {
 		return detector.unusedPackages();
 	}
 	
-	@GetMapping("/hublike/package")
+	@GetMapping("/api/hublike/package")
 	@ResponseBody
 	public Object hubLikePackages() {
 		return detector.hubLikePackages();
 	}
 	
-	@GetMapping("/hublike/file")
+	@GetMapping("/api/hublike/file")
 	@ResponseBody
 	public Object hubLikeFiles() {
 		return detector.hubLikeFiles();
 	}
 	
-	@GetMapping("/unstable/file")
+	@GetMapping("/api/unstable/file")
 	@ResponseBody
 	public Object unstableFiles() {
 		return detector.unstableFiles();
 	}
 	
-	@GetMapping("/similar/file")
+	@GetMapping("/api/similar/file")
 	@ResponseBody
 	public Object similarFiles() {
 		return detector.similarFiles();
 	}
 	
-	@GetMapping("/similar/package")
+	@GetMapping("/api/similar/package")
 	@ResponseBody
 	public Object similarPackages() {
 		return detector.similarPackages();
+	}
+	
+	@GetMapping("/api/multiple")
+	@ResponseBody
+	public Object multipleAS() {
+		return detector.multipleASFiles(4);
 	}
 
 }
