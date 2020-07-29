@@ -56,8 +56,9 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 		Map<String, Boolean> isChild = new HashMap<>();
 		Collection<Clone> fileClones = basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE);
 		Collection<CloneValueForDoubleNodes<Package>> packageClones = cloneValueService.queryPackageCloneFromFileCloneSort(fileClones);
-		DefaultPackageCloneValueCalculator.getInstance().setCountThreshold(threshold);
-		DefaultPackageCloneValueCalculator.getInstance().setPercentageThreshold(percentage);
+//		DefaultPackageCloneValueCalculator.getInstance().setCountThreshold(threshold);
+//		DefaultPackageCloneValueCalculator.getInstance().setPercentageThreshold(percentage);
+		DefaultPackageCloneValueCalculator.getInstance().initThreshold();
 		for(CloneValueForDoubleNodes<Package> packageClone : packageClones) {
 			boolean isSimilar = (boolean) packageClone.calculateValue(DefaultPackageCloneValueCalculator.getInstance());
 			if(!isSimilar) {

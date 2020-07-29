@@ -31,10 +31,10 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
+import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.GitRepoRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
-import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
 @Service
 public class ContainRelationServiceImpl implements ContainRelationService {
@@ -50,6 +50,9 @@ public class ContainRelationServiceImpl implements ContainRelationService {
     
     @Autowired
     NodeService nodeService;
+    
+    @Autowired
+    PackageRepository packageRepository;
     
 	Map<Project, Collection<ProjectFile>> projectContainFilesCache = new ConcurrentHashMap<>();
 	@Override
@@ -485,6 +488,12 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	@Override
 	public Package findPackageInPackage(Package pck) {
 		return nodeService.queryPackage(pck.lastPackageDirectoryPath());
+	}
+
+	@Override
+	public Collection<Package> findPackageContainSubPackages(Package pck) {
+		
+		return packageRepository.findPackageContainSubPackages(pck.getDirectoryPath());
 	}
 
 }

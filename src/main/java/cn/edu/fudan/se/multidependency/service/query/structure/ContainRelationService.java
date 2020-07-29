@@ -105,6 +105,8 @@ public interface ContainRelationService {
 	 */
 	Package findPackageInPackage(Package pck);
 	
+	Collection<Package> findPackageContainSubPackages(Package pck);
+	
 	/**
 	 * child是否在parent下
 	 * @param child

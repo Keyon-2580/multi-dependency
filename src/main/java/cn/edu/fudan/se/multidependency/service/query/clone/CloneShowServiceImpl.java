@@ -1,13 +1,14 @@
 package cn.edu.fudan.se.multidependency.service.query.clone;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import cn.edu.fudan.se.multidependency.model.node.Package;
-import cn.edu.fudan.se.multidependency.service.query.clone.data.FileCloneWithCoChange;
-import cn.edu.fudan.se.multidependency.service.query.data.Graph;
-import cn.edu.fudan.se.multidependency.service.query.data.HistogramWithProjectsSize;
-import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
@@ -25,13 +27,20 @@ import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneType;
+import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueForDoubleNodes;
+import cn.edu.fudan.se.multidependency.service.query.clone.data.DefaultPackageCloneValueCalculator;
+import cn.edu.fudan.se.multidependency.service.query.clone.data.FileCloneWithCoChange;
+import cn.edu.fudan.se.multidependency.service.query.data.Graph;
+import cn.edu.fudan.se.multidependency.service.query.data.HistogramWithProjectsSize;
+import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.utils.query.CytoscapeUtil;
 import cn.edu.fudan.se.multidependency.utils.query.CytoscapeUtil.CytoscapeEdge;
 import cn.edu.fudan.se.multidependency.utils.query.CytoscapeUtil.CytoscapeNode;
 import cn.edu.fudan.se.multidependency.utils.query.ZTreeUtil.ZTreeNode;
+import lombok.SneakyThrows;
 
 @Service
-public class CloneShowServiceImpl<pubilc> implements CloneShowService {
+public class CloneShowServiceImpl implements CloneShowService {
 	
 	@Autowired
 	CloneAnalyseService cloneAnalyseService;
@@ -512,6 +521,43 @@ public class CloneShowServiceImpl<pubilc> implements CloneShowService {
 			nodeJSON.put("imports", imports);
 			result.add(nodeJSON);
 		}
+		return result;
+	}
+
+	@Override
+	public JSONObject crossPackageCloneToCytoscape(Collection<CloneValueForDoubleNodes<Package>> cloneDoublePackages) {
+		JSONObject result = new JSONObject();
+		Set<Package> pcks = new HashSet<>();
+		Map<String, CytoscapeNode> packageNodes = new HashMap<>();
+		Map<String, CytoscapeEdge> cloneEdges = new HashMap<>();
+		Map<String, CytoscapeNode> parentNodes = new HashMap<>();
+		Map<String, CytoscapeEdge> containEdges = new HashMap<>();
+		
+		for(CloneValueForDoubleNodes<Package> clone : cloneDoublePackages) {
+			boolean isSimilar = (boolean) clone.calculateValue(DefaultPackageCloneValueCalculator.getInstance());
+			if(!isSimilar) {
+				continue;
+			}
+			Package pck1 = clone.getNode1();
+			Package pck2 = clone.getNode2();
+			pcks.add(pck1);
+			pcks.add(pck2);
+			if(packageNodes.get(pck1.getId().toString()) == null) {
+				packageNodes.put(pck1.getId().toString(), new CytoscapeNode(pck1.getId(), pck1.getDirectoryPath(), "Package"));
+			}
+			if(packageNodes.get(pck2.getId().toString()) == null) {
+				packageNodes.put(pck2.getId().toString(), new CytoscapeNode(pck2.getId(), pck2.getDirectoryPath(), "Package"));
+			}
+			String edgeId = String.join("_", pck1.getId().toString(), pck2.getId().toString());
+			if(cloneEdges.get(edgeId) == null) {
+				cloneEdges.put(edgeId, new CytoscapeEdge(pck1.getId().toString(), pck2.getId().toString(), "Clone", String.valueOf(clone.getValue())));
+			}
+			
+			
+		}
+		
+		result.put("nodes", CytoscapeUtil.toNodes(packageNodes.values()));
+		result.put("edges", CytoscapeUtil.toEdges(cloneEdges.values()));
 		return result;
 	}
 }

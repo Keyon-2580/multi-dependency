@@ -12,6 +12,9 @@ import lombok.Setter;
  */
 public class DefaultPackageCloneValueCalculator implements CloneValueCalculator<Boolean> {
 	
+	public static final int DEFAULT_COUNT_THRESHOLD = 10;
+	public static final double DEFAULT_PERCENTAGE_THRESHOLD = 0.8;
+	
 	private DefaultPackageCloneValueCalculator() {}
 	
 	private static DefaultPackageCloneValueCalculator instance = new DefaultPackageCloneValueCalculator();
@@ -21,14 +24,19 @@ public class DefaultPackageCloneValueCalculator implements CloneValueCalculator<
 	 */
 	@Setter
 	@Getter
-	private int countThreshold = 10;
+	private int countThreshold = DEFAULT_COUNT_THRESHOLD;
 	
 	@Setter
 	@Getter
-	private double percentageThreshold = 0.8;
+	private double percentageThreshold = DEFAULT_PERCENTAGE_THRESHOLD;
 	
 	public static DefaultPackageCloneValueCalculator getInstance() {
 		return instance;
+	}
+	
+	public void initThreshold() {
+		this.countThreshold = DEFAULT_COUNT_THRESHOLD;
+		this.percentageThreshold = DEFAULT_PERCENTAGE_THRESHOLD;
 	}
 
 	@Override

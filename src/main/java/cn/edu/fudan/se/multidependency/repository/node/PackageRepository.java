@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.repository.node;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.neo4j.annotation.Query;
@@ -29,4 +30,11 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 			"RETURN pck, loc, nof, nom, fanIn, fanOut order by(pck.directoryPath) desc;")
 	public List<PackageMetrics> calculatePackageMetrics();
 	
+	/**
+	 * 目录下有多少子包
+	 * @param directoryPath
+	 * @return
+	 */
+	@Query("match (n:Package) where n.directoryPath =~ ({directoryPath} + \"[^/]*/\") return n")
+	public Collection<Package> findPackageContainSubPackages(@Param("directoryPath") String directoryPath);
 }

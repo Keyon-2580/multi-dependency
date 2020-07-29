@@ -735,6 +735,46 @@ var clone = function(cytoscapeutil) {
 				showGraph(result.data);
 			}
 		});*/
+		var graph = function() {
+			$.ajax({
+				type : "get",
+				url : "/clone/package/cytoscape",
+				success : function(result) {
+					console.log(result);
+					if(result.result == "success") {
+						var cy = cytoscapeutil.showDataInCytoscape($("#graph"), result.value, "dagre");
+						cy.style().selector('node[type="Package"]').style({
+							'shape' : 'rectangle',
+							'width': function(content) {
+								return content.data().name.replace(/[^\u0000-\u00ff]/g,"aa").length * 9;
+							},
+							'height': 30,
+							'text-valign': 'center',
+							'text-halign': 'center',
+							'border-width': 1.5,
+							'border-color': '#555',
+							'background-color': '#f6f6f6',
+							'content': 'data(name)'
+						}).update();
+						cy.style().selector('edge[type="Clone"]').style({
+							'content': 'data(value)',
+							'curve-style': 'bezier',
+							'width': 1,
+							'line-color': 'green',
+							'line-style': 'dashed',
+							'target-arrow-shape' : 'none',
+							'font-size' : 20
+						}).update();
+						var edges = cy.remove('edge[type="Clone"]');
+//					cy.layout({name : 'dagre'}).run();
+						cy.layout({
+							name : "dagre"
+						}).run();
+						cy.add(edges);
+					}
+				}
+			});
+		}
 	}
 	
 	return {

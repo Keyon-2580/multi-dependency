@@ -63,6 +63,18 @@ public class CloneController {
 		return "clonepackage";
 	}
 	
+	@GetMapping("/package/cytoscape")
+	@ResponseBody
+	public JSONObject packageClonesToCytoscape() {
+		JSONObject result = new JSONObject();
+		result.put("result", "success");
+		result.put("value", cloneShowService.crossPackageCloneToCytoscape(
+				cloneValueService.queryPackageCloneFromFileCloneSort(
+				basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE))));
+		
+		return result;
+	}
+	
 	@GetMapping("/package")
 	@ResponseBody
 	public Collection<CloneValueForDoubleNodes<Package>> cloneInPackages() {
