@@ -12,6 +12,7 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.service.query.as.data.CycleComponents;
 
 @Repository
@@ -23,7 +24,7 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 			"where size(components) >= 2 " + 
 			"return partition, components " + 
 			"ORDER BY size(components) DESC")
-	public List<CycleComponents<Package>> cyclePackages();
+	public List<CycleComponents<Package>> packageCycles();
 	
 	@Query("CALL algo.scc.stream(\"ProjectFile\", \"" + RelationType.str_DEPENDS_ON + "\") " + 
 			"YIELD nodeId, partition " + 
@@ -31,7 +32,7 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 			"where size(components) >= 2 " + 
 			"return partition, components " + 
 			"ORDER BY size(components) DESC")
-	public List<CycleComponents<ProjectFile>> cycleFiles();
+	public List<CycleComponents<ProjectFile>> fileCycles();
 	
 	@Query("match (p:Package) where not (p)-[:" + RelationType.str_DEPENDS_ON + "]-() return p")
 	public List<Package> unusedPackages();
@@ -48,6 +49,9 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 			"match result=(a:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(b:ProjectFile) where partition = {partition} and a in files and b in files return result")
 	public List<DependsOn> cycleFilesBySCC(@Param("partition") int partition);
 	
-	@Deprecated
-	@Query("match result=(a:Package)-[:DEPENDS_ON]->(b:Package) where id(a) in {ids} and id(b) in {ids} return result")
-	public List<DependsOn> cyclePackagesByIds(@Param("ids") long[] ids);}
+	
+	@Query("match p= (file1:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->(file2:ProjectFile) where r.times >= {count} and not (file1)-[:"
+			+ RelationType.str_DEPENDS_ON + "]-(file2) return p")
+	public List<CoChange> cochangeFilesWithoutDependsOn(@Param("count") int minCoChangeCount);
+	
+}

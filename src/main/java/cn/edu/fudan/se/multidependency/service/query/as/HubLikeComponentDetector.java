@@ -1,13 +1,15 @@
 package cn.edu.fudan.se.multidependency.service.query.as;
 
-import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
-import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
+import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikeFile;
+import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikePackage;
 
 public interface HubLikeComponentDetector {
 
-	Collection<PackageMetrics> hubLikePackages();
+	Map<Project, List<HubLikePackage>> hubLikePackages();
 	
-	Collection<FileMetrics> hubLikeFiles();
+	Map<Project, List<HubLikeFile>> hubLikeFiles();
 }

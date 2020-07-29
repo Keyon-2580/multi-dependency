@@ -1,21 +1,15 @@
 package cn.edu.fudan.se.multidependency.controller.as;
 
-import java.util.Collection;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import cn.edu.fudan.se.multidependency.model.node.Package;
-import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.service.query.as.impl.ArchitectureSmellDetectorImpl;
-import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
-import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
 
 @Controller
 @RequestMapping("/as")
@@ -35,38 +29,56 @@ public class ArchitectureSmellController {
 	
 	@GetMapping("/pagerank/file")
 	@ResponseBody
-	public Collection<ProjectFile> pagerankFile() {
+	public Object pagerankFile() {
 		return fileRepository.pageRank(20, 0.85);
 	}
 	
 	@GetMapping("/cycle/package")
 	@ResponseBody
-	public Collection<Collection<DependsOn>> cyclePackages() {
-		return detector.cyclePackages();
+	public Object cyclePackages(@RequestParam(required=false, name="relation", defaultValue="false") boolean relation) {
+		return detector.cyclePackages(relation);
 	}
 	
 	@GetMapping("/cycle/file")
 	@ResponseBody
-	public Collection<Collection<DependsOn>> cycleFiles() {
-		return detector.cycleFiles();
+	public Object cycleFiles(@RequestParam(required=false, name="relation", defaultValue="false") boolean relation) {
+		return detector.cycleFiles(relation);
 	}
 	
 	@GetMapping("/unused/package")
 	@ResponseBody
-	public Collection<Package> unusdPackages() {
+	public Object unusdPackages() {
 		return detector.unusedPackages();
 	}
 	
 	@GetMapping("/hublike/package")
 	@ResponseBody
-	public Collection<PackageMetrics> hubLikePackages() {
+	public Object hubLikePackages() {
 		return detector.hubLikePackages();
 	}
 	
 	@GetMapping("/hublike/file")
 	@ResponseBody
-	public Collection<FileMetrics> hubLikeFiles() {
+	public Object hubLikeFiles() {
 		return detector.hubLikeFiles();
+	}
+	
+	@GetMapping("/unstable/file")
+	@ResponseBody
+	public Object unstableFiles() {
+		return detector.unstableFiles();
+	}
+	
+	@GetMapping("/similar/file")
+	@ResponseBody
+	public Object similarFiles() {
+		return detector.similarFiles();
+	}
+	
+	@GetMapping("/similar/package")
+	@ResponseBody
+	public Object similarPackages() {
+		return detector.similarPackages();
 	}
 
 }

@@ -45,6 +45,7 @@ import cn.edu.fudan.se.multidependency.repository.node.code.NamespaceRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.TypeRepository;
 import cn.edu.fudan.se.multidependency.repository.node.code.VariableRepository;
 import cn.edu.fudan.se.multidependency.repository.node.lib.LibraryRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.AccessRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.AnnotationRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.CallRepository;
@@ -142,6 +143,9 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     
     @Autowired
     CacheService cache;
+    
+    @Autowired
+    DependsOnRepository dependsOnRepository;
 
 	@Override
 	public CallLibrary<Project> findProjectCallLibraries(Project project) {
@@ -562,6 +566,11 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		Package pck1 = containRelationService.findFileBelongToPackage(file1);
 		Package pck2 = containRelationService.findFileBelongToPackage(file2);
 		return !pck1.equals(pck2);
+	}
+
+	@Override
+	public boolean isDependsOn(ProjectFile file1, ProjectFile file2) {
+		return !dependsOnRepository.findDependsOnInFiles(file1.getId(), file2.getId()).isEmpty();
 	}
 
 }

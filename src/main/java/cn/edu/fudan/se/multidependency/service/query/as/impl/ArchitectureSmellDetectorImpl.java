@@ -1,21 +1,28 @@
 package cn.edu.fudan.se.multidependency.service.query.as.impl;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
-import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
-import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.service.query.as.ArchitectureSmellDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.HubLikeComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.ImplicitCrossModuleDependencyDetector;
-import cn.edu.fudan.se.multidependency.service.query.as.SimilarComponentDetector;
+import cn.edu.fudan.se.multidependency.service.query.as.SimilarComponentsDetector;
+import cn.edu.fudan.se.multidependency.service.query.as.UnstableDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.UnusedComponentDetector;
-import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
-import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
+import cn.edu.fudan.se.multidependency.service.query.as.data.Cycle;
+import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikeFile;
+import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikePackage;
+import cn.edu.fudan.se.multidependency.service.query.as.data.LogicCoupling;
+import cn.edu.fudan.se.multidependency.service.query.as.data.SimilarComponents;
+import cn.edu.fudan.se.multidependency.service.query.as.data.UnstableFile;
 
 @Service
 public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector {
@@ -33,36 +40,54 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	private ImplicitCrossModuleDependencyDetector icdDependencyDetector;
 	
 	@Autowired
-	private SimilarComponentDetector similarComponentDetector;
+	private SimilarComponentsDetector similarComponentsDetector;
+	
+	@Autowired
+	private UnstableDependencyDetector unstableDependencyDetector;
 	
 	@Override
-	public Collection<Collection<DependsOn>> cyclePackages() {
-		return cycleASDetector.cyclePackages();
+	public Map<Project, List<Cycle<Package>>> cyclePackages(boolean withRelation) {
+		return cycleASDetector.cyclePackages(withRelation);
 	}
 	
 	@Override
-	public Collection<Collection<DependsOn>> cycleFiles() {
-		return cycleASDetector.cycleFiles();
+	public Map<Project, List<Cycle<ProjectFile>>> cycleFiles(boolean withRelation) {
+		return cycleASDetector.cycleFiles(withRelation);
 	}
 
 	@Override
-	public Collection<Package> unusedPackages() {
+	public Map<Project, List<Package>> unusedPackages() {
 		return unusedComponentDetector.unusedPackage();
 	}
 
 	@Override
-	public Collection<PackageMetrics> hubLikePackages() {
+	public Map<Project, List<HubLikePackage>> hubLikePackages() {
 		return hubLikeComponentDetector.hubLikePackages();
 	}
 	
 	@Override
-	public Collection<FileMetrics> hubLikeFiles() {
+	public Map<Project, List<HubLikeFile>> hubLikeFiles() {
 		return hubLikeComponentDetector.hubLikeFiles();
 	}
 
 	@Override
-	public Collection<CoChange> cochangesInDifferentModule(int minCochange) {
+	public Collection<LogicCoupling> cochangesInDifferentModule(int minCochange) {
 		return icdDependencyDetector.cochangesInDifferentModule(minCochange);
+	}
+
+	@Override
+	public Map<Project, List<UnstableFile>> unstableFiles() {
+		return unstableDependencyDetector.unstableFiles();
+	}
+
+	@Override
+	public Collection<SimilarComponents<ProjectFile>> similarFiles() {
+		return similarComponentsDetector.similarFiles();
+	}
+
+	@Override
+	public Collection<SimilarComponents<Package>> similarPackages() {
+		return similarComponentsDetector.similarPackages();
 	}
 
 }

@@ -14,15 +14,21 @@ public interface ArchitectureSmellDetector {
 	 * 包的循环依赖的检测
 	 * @return
 	 */
-	Collection<Collection<DependsOn>> cyclePackages();
+	Object cyclePackages(boolean withRelation);
 	
-	Collection<Collection<DependsOn>> cycleFiles();
+	Object cycleFiles(boolean withRelation);
 	
-	Collection<Package> unusedPackages();
+	Object unusedPackages();
 	
-	Collection<PackageMetrics> hubLikePackages();
+	Object hubLikePackages();
 	
-	Collection<FileMetrics> hubLikeFiles();
+	Object hubLikeFiles();
 	
-	Collection<CoChange> cochangesInDifferentModule(int minCochange);
+	Object cochangesInDifferentModule(int minCochange);
+	
+	Object unstableFiles();
+	
+	Object similarFiles();
+	
+	Object similarPackages();
 }

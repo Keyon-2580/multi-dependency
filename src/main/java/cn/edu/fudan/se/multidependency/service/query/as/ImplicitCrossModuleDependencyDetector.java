@@ -2,10 +2,10 @@ package cn.edu.fudan.se.multidependency.service.query.as;
 
 import java.util.Collection;
 
-import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.service.query.as.data.LogicCoupling;
 
 public interface ImplicitCrossModuleDependencyDetector {
 
-	Collection<CoChange> cochangesInDifferentModule(int minCochange);
+	Collection<LogicCoupling> cochangesInDifferentModule(int minCochange);
 	
 }
