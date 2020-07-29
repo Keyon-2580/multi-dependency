@@ -30,11 +30,11 @@ var multiple = function(cytoscapeutil) {
 						var value = result[project][i];
 						html += "<tr>";
 						html += "<td>" + value.file.path + "</td>";
-						html += "<td>" + value.cycle + "</td>";
-						html += "<td>" + value.hublike + "</td>";
-						html += "<td>" + value.unstable + "</td>";
-						html += "<td>" + value.logicCoupling + "</td>";
-						html += "<td>" + value.similar+ "</td>";
+						html += "<td>" + (value.cycle == true ? "T" : "") + "</td>";
+						html += "<td>" + (value.hublike == true ? "T" : "") + "</td>";
+						html += "<td>" + (value.unstable == true ? "T" : "") + "</td>";
+						html += "<td>" + (value.logicCoupling == true ? "T" : "") + "</td>";
+						html += "<td>" + (value.similar == true ? "T" : "") + "</td>";
 						html += "<td>" + value.file.score + "</td>";
 						html += "</tr>";
 					}
