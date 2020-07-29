@@ -36,7 +36,7 @@ public class MetricCalculator {
 		if(fileMetricsCache != null) {
 			return fileMetricsCache;
 		}
-		return fileMetricsCache = fileRepository.calculateFileMetrics();
+		return fileMetricsCache = fileRepository.calculateFileMetricsWithCoChangeCommitTimes();
 	}
 
 	private Collection<ProjectMetrics> projectMetricsCache = null;

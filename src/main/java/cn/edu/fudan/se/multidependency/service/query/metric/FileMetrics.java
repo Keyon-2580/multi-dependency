@@ -30,7 +30,12 @@ public class FileMetrics implements FanIOMetric {
 	/**
 	 * 协同修改次数，与其它文件共同修改的commit次数
 	 */
-	private int cochangeTimes;
+	private int cochangeCommitTimes;
+	
+	/**
+	 * 与该文件协同修改的文件数量
+	 */
+	private int cochangeFileCount;
 	
 	/**
 	 * 方法数

@@ -88,7 +88,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 
 	public Map<Project, List<FileMetrics>> hubLikeFilesInDifferentProject() {
 		Map<Project, List<FileMetrics>> result = new HashMap<>();
-		List<FileMetrics> packageMetrics = fileRepository.calculateFileMetrics();
+		List<FileMetrics> packageMetrics = fileRepository.calculateFileMetricsWithCoChangeCommitTimes();
 		Map<Project, List<FileMetrics>> projectToFileMetrics = new HashMap<>();
 		for(FileMetrics metric : packageMetrics) {
 			ProjectFile file = metric.getFile();
