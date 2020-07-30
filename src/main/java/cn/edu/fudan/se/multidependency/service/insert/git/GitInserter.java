@@ -106,7 +106,6 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         }
         LOGGER.info("commit 数量：" + commits.size());
 //      Collections.reverse(commits);
-        int i = 0;
         for (RevCommit revCommit : commits) {
         	
         	//添加commit节点

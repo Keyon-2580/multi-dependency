@@ -2,13 +2,17 @@ package cn.edu.fudan.se.multidependency.service.query.as;
 
 public interface ArchitectureSmellDetector {
 	
+	void setCyclePackagesWithRelation(boolean withRelation);
+
+	void setCycleFilesWithRelation(boolean withRelation);	
+	
 	/**
 	 * 包的循环依赖的检测
 	 * @return
 	 */
-	Object cyclePackages(boolean withRelation);
+	Object cyclePackages();
 	
-	Object cycleFiles(boolean withRelation);
+	Object cycleFiles();
 	
 	Object unusedPackages();
 	
