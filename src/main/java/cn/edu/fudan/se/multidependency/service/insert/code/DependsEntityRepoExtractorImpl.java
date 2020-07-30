@@ -26,9 +26,9 @@ import depends.extractor.java.JavaFileParser;
 import depends.extractor.java.JavaImportLookupStrategy;
 import depends.extractor.java.JavaProcessor;
 import depends.relations.Inferer;
-import depends.util.FileTraversal;
-import depends.util.FileUtil;
-import depends.util.TemporaryFile;
+import multilang.depends.util.file.FileTraversal;
+import multilang.depends.util.file.FileUtil;
+import multilang.depends.util.file.TemporaryFile;
 import lombok.Setter;
 
 /**

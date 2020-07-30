@@ -4,7 +4,7 @@ import depends.entity.repo.EntityRepo;
 import depends.entity.repo.InMemoryEntityRepo;
 import depends.extractor.ParserTest;
 import depends.relations.Inferer;
-import depends.util.TemporaryFile;
+import multilang.depends.util.file.TemporaryFile;
 
 public abstract class JavaParserTest  extends ParserTest {
 	protected EntityRepo entityRepo ;

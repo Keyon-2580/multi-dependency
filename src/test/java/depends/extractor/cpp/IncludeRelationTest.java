@@ -2,7 +2,7 @@ package depends.extractor.cpp;
 
 import depends.deptypes.DependencyType;
 import depends.entity.AliasEntity;
-import depends.util.FileUtil;
+import multilang.depends.util.file.FileUtil;
 import org.junit.Before;
 import org.junit.Test;
 

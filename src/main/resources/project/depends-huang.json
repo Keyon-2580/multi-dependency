@@ -1,8 +1,8 @@
 {
   "projects": [
     {
-      "path": "D:\\my_data\\SDTeam\\multi_dependencies\\projects_to_be_analyzed\\guava",
-      "project": "guava",
+      "path": "D:\\my_data\\SDTeam\\depends_\\edited-to-jar\\fork\\depends",
+      "project": "depends",
       "language": "java",
       "isMicroservice": false,
       "excludes": [
