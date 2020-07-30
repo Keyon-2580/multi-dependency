@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
-import cn.edu.fudan.se.multidependency.service.query.as.impl.ArchitectureSmellDetectorImpl;
+import cn.edu.fudan.se.multidependency.service.query.as.ArchitectureSmellDetector;
 
 @Controller
 @RequestMapping("/as")
 public class ArchitectureSmellController {
 	
 	@Autowired
-	private ArchitectureSmellDetectorImpl detector;
+	private ArchitectureSmellDetector detector;
 	
 	@Autowired
 	private ProjectFileRepository fileRepository;
@@ -71,13 +71,15 @@ public class ArchitectureSmellController {
 	@GetMapping("/api/cycle/package")
 	@ResponseBody
 	public Object cyclePackages(@RequestParam(required=false, name="relation", defaultValue="false") boolean relation) {
-		return detector.cyclePackages(relation);
+		detector.setCyclePackagesWithRelation(relation);
+		return detector.cyclePackages();
 	}
 	
 	@GetMapping("/api/cycle/file")
 	@ResponseBody
 	public Object cycleFiles(@RequestParam(required=false, name="relation", defaultValue="false") boolean relation) {
-		return detector.cycleFiles(relation);
+		detector.setCycleFilesWithRelation(relation);
+		return detector.cycleFiles();
 	}
 	
 	@GetMapping("/api/unused/package")

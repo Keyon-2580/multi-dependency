@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,9 +29,16 @@ import cn.edu.fudan.se.multidependency.service.query.as.data.MultipleASFile;
 import cn.edu.fudan.se.multidependency.service.query.as.data.SimilarComponents;
 import cn.edu.fudan.se.multidependency.service.query.as.data.UnstableFile;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
+import lombok.Setter;
 
 @Service
 public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector {
+	
+	@Setter
+	private boolean cyclePackagesWithRelation = false;
+	
+	@Setter
+	private boolean cycleFilesWithRelation = false;
 	
 	@Autowired
 	private CyclicDependencyDetector cycleASDetector;
@@ -37,7 +46,7 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	@Autowired
 	private UnusedComponentDetector unusedComponentDetector;
 	
-	@Autowired
+	@Resource(name="hubLikeComponentDetectorImpl")
 	private HubLikeComponentDetector hubLikeComponentDetector;
 	
 	@Autowired
@@ -53,13 +62,13 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	private ContainRelationService containRelationService;
 	
 	@Override
-	public Map<Project, List<Cycle<Package>>> cyclePackages(boolean withRelation) {
-		return cycleASDetector.cyclePackages(withRelation);
+	public Map<Project, List<Cycle<Package>>> cyclePackages() {
+		return cycleASDetector.cyclePackages(cyclePackagesWithRelation);
 	}
 	
 	@Override
-	public Map<Project, List<Cycle<ProjectFile>>> cycleFiles(boolean withRelation) {
-		return cycleASDetector.cycleFiles(withRelation);
+	public Map<Project, List<Cycle<ProjectFile>>> cycleFiles() {
+		return cycleASDetector.cycleFiles(cycleFilesWithRelation);
 	}
 
 	@Override
@@ -102,7 +111,7 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 		Map<Project, List<MultipleASFile>> result = new HashMap<>();
 		
 		Map<ProjectFile, MultipleASFile> map = new HashMap<>();
-		Map<Project, List<Cycle<ProjectFile>>> cycleFiles = cycleFiles(false);
+		Map<Project, List<Cycle<ProjectFile>>> cycleFiles = cycleASDetector.cycleFiles(cycleFilesWithRelation);
 		Map<Project, List<HubLikeFile>> hubLikeFiles = hubLikeFiles();
 		Map<Project, List<UnstableFile>> unstableFiles = unstableFiles();
 		Collection<LogicCouplingFiles> logicCouplingFiles = cochangesInDifferentModule(minCoChangeSInLogicCouplingFiles);
