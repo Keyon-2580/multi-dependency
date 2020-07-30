@@ -91,7 +91,7 @@
 			<artifactId>depends</artifactId>
 			<version>0.9.6</version>
 			<scope>system</scope>
-			<systemPath>${pom.basedir}/lib/depends-0.9.6l-jar-with-dependencies.jar</systemPath>
+			<systemPath>${pom.basedir}/lib/depends-0.9.6m-jar-with-dependencies.jar</systemPath>
 			<!-- <systemPath>${project.basedir}/lib/depends.jar</systemPath> -->
 			<!-- <exclusions>
 				<exclusion>
@@ -103,6 +103,12 @@
 					<artifactId>slf4j-log4j12</artifactId>
 				</exclusion>
 			</exclusions> -->
+		</dependency>
+		<dependency>
+			<groupId>cn.emergentdesign.se</groupId>
+			<artifactId>utils</artifactId>
+			<version>0.0.1</version>
+			<systemPath>${pom.basedir}/lib/utils-0.0.1.jar</systemPath>
 		</dependency>
 		<!-- <dependency>
 		    <groupId>org.neo4j</groupId>
@@ -153,63 +159,7 @@
 		    <groupId>org.codehaus.plexus</groupId>
 		    <artifactId>plexus-utils</artifactId>
 		    <version>3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.cdt</groupId>
-			<artifactId>org.eclipse.cdt.core</artifactId>
-			<version>6.9.0.201909091953</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/org.eclipse.cdt.core_6.9.0.201909091953.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>eclipse-photon</groupId>
-			<artifactId>org.eclipse.equinox.registry</artifactId>
-			<version>3.8.500.v20190714-1850</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/org.eclipse.equinox.registry_3.8.500.v20190714-1850.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>eclipse-photon</groupId>
-			<artifactId>org.eclipse.core.runtime</artifactId>
-			<version>3.14.0.v20180417-0825</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/org.eclipse.core.runtime-3.14.0.v20180417-0825.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>eclipse-photon</groupId>
-			<artifactId>org.eclipse.equinox.common</artifactId>
-			<version>3.10.500.v20190815-1535</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/org.eclipse.equinox.common_3.10.500.v20190815-1535.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>eclipse-photon</groupId>
-			<artifactId>org.eclipse.osgi</artifactId>
-			<version>3.15.0.v20190830-1434</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/org.eclipse.osgi_3.15.0.v20190830-1434.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>eclipse-photon</groupId>
-			<artifactId>org.eclipse.equinox.preferences</artifactId>
-			<version>3.7.500.v20190815-1535</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/org.eclipse.equinox.preferences_3.7.500.v20190815-1535.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>eclipse-photon</groupId>
-			<artifactId>org.eclipse.core.jobs</artifactId>
-			<version>3.10.500.v20190620-1426</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/org.eclipse.core.jobs_3.10.500.v20190620-1426.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>eclipse-photon</groupId>
-			<artifactId>org.eclipse.core.resources</artifactId>
-			<version>3.13.500.v20190819-0800</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/org.eclipse.core.resources_3.13.500.v20190819-0800.jar</systemPath>
-		</dependency> -->
+		</dependency>-->
 		<dependency>
 		    <groupId>org.projectlombok</groupId>
 		    <artifactId>lombok</artifactId>

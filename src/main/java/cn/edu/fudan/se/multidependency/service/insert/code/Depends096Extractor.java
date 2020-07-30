@@ -12,9 +12,9 @@ import cn.edu.fudan.se.multidependency.model.Language;
 import depends.entity.Entity;
 import depends.entity.repo.EntityRepo;
 import depends.extractor.AbstractLangProcessor;
-import depends.util.FileUtil;
-import depends.util.FolderCollector;
-import depends.util.TemporaryFile;
+import multilang.depends.util.file.FileUtil;
+import multilang.depends.util.file.FolderCollector;
+import multilang.depends.util.file.TemporaryFile;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import lombok.Setter;
 

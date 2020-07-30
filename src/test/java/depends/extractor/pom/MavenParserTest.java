@@ -3,7 +3,7 @@ package depends.extractor.pom;
 import depends.entity.repo.EntityRepo;
 import depends.extractor.ParserTest;
 import depends.relations.Inferer;
-import depends.util.TemporaryFile;
+import multilang.depends.util.file.TemporaryFile;
 
 import java.util.ArrayList;
 import java.util.List;
