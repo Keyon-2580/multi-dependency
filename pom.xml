@@ -108,6 +108,7 @@
 			<groupId>cn.emergentdesign.se</groupId>
 			<artifactId>utils</artifactId>
 			<version>0.0.1</version>
+			<scope>system</scope>
 			<systemPath>${pom.basedir}/lib/utils-0.0.1.jar</systemPath>
 		</dependency>
 		<!-- <dependency>
