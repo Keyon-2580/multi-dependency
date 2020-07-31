@@ -73,7 +73,7 @@ public class MetricCalculator {
 				fileMetrics.setCochangeCommitTimes(fileRepository.cochangeCommitsWithFile(file.getId()).size());
 			}
 			Project project = containRelationService.findFileBelongToProject(file);
-			List<FileMetrics> temp = result.getOrDefault(project, new ArrayList<>());
+			List<FileMetrics> temp = result.getOrDefault(project.getId(), new ArrayList<>());
 			temp.add(fileMetrics);
 			result.put(project.getId(), temp);
 		}
@@ -99,13 +99,14 @@ public class MetricCalculator {
 	Map<Long, List<PackageMetrics>> packageMetricsCache = null;
 	public Map<Long, List<PackageMetrics>> calculatePackageMetrics() {
 		if(packageMetricsCache != null) {
-			return null;
+			return packageMetricsCache;
 		}
 		Map<Long, List<PackageMetrics>> result = new HashMap<>();
+		System.out.println(packageRepository.calculatePackageMetrics().size());
 		for(PackageMetrics pckMetrics : packageRepository.calculatePackageMetrics()) {
 			Package pck = pckMetrics.getPck();
 			Project project = containRelationService.findPackageBelongToProject(pck);
-			List<PackageMetrics> temp = result.getOrDefault(project, new ArrayList<>());
+			List<PackageMetrics> temp = result.getOrDefault(project.getId(), new ArrayList<>());
 			temp.add(pckMetrics);
 			result.put(project.getId(), temp);
 		}

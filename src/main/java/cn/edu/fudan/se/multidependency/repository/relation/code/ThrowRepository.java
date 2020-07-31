@@ -13,6 +13,6 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.Throw;
 @Repository
 public interface ThrowRepository extends Neo4jRepository<Throw, Long> {
 
-	@Query("MATCH result=(function:Function)-[r:" + RelationType.str_THORW + "]->(type:Type) with function,type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)={projectId} RETURN result")
+	@Query("MATCH result=(function:Function)-[r:" + RelationType.str_THROW + "]->(type:Type) with function,type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)={projectId} RETURN result")
 	List<Throw> findProjectContainFunctionThrowTypeRelations(@Param("projectId") Long projectId);
 }

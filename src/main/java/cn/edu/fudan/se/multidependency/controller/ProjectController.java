@@ -3,7 +3,11 @@ package cn.edu.fudan.se.multidependency.controller;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -75,6 +79,17 @@ public class ProjectController {
 	
 	@Autowired
 	private ProjectService projectService;
+	
+	@GetMapping("/all")
+	@ResponseBody
+	public Map<Long, Project> allProjects() {
+		Collection<Project> projects = nodeService.allProjects();
+		Map<Long, Project> result = new HashMap<>();
+		for(Project project : projects) {
+			result.put(project.getId(), project);
+		}
+		return result;
+	}
 	
 	@GetMapping(value = "/fanIO/file/{projectId}")
 	@ResponseBody

@@ -13,9 +13,13 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Resource;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.config.PropertyConfig;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
@@ -54,6 +58,9 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
     Iterable<DeveloperUpdateNode<MicroService>> cntOfDevUpdMsListCache = null;
 
     Map<ProjectFile, Integer> cntOfFileBeUpdtdCache = null;
+    
+//    @Autowired
+//    private PropertyConfig propertyConfig;
 
     @Override
     public Iterable<Commit> findAllCommits() {
@@ -155,12 +162,23 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
         }
         return result;
     }
+    
+	@Bean("createCoChanges")
+	public List<CoChange> createCoChanges(PropertyConfig propertyConfig, CoChangeRepository cochangeRepository) {
+		if(propertyConfig.isCalculateCoChange()) {
+			System.out.println("创建cochange关系");
+			cochangeRepository.deleteAll();
+			return cochangeRepository.createCoChanges();
+		}
+		return new ArrayList<>();
+	}
 
     private Map<ProjectFile, Map<ProjectFile, CoChange>> cntOfFileCoChangeCache = new ConcurrentHashMap<>();
+    @Resource(name="createCoChanges")
     private List<CoChange> allCoChangeCache = null;
 	@Override
 	public synchronized Collection<CoChange> calCntOfFileCoChange() {
-		if(allCoChangeCache != null) {
+		if(allCoChangeCache != null && !allCoChangeCache.isEmpty()) {
 			return allCoChangeCache;
 		}
 		allCoChangeCache = cochangeRepository.findGreaterThanCountCoChanges(1);

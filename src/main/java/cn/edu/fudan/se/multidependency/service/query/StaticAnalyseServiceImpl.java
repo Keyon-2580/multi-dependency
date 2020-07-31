@@ -9,10 +9,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.config.PropertyConfig;
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
@@ -22,6 +25,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
+import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.StructureRelation;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
@@ -59,6 +63,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.code.ReturnRepository
 import cn.edu.fudan.se.multidependency.repository.relation.code.ThrowRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.VariableTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.lib.FunctionCallLibraryAPIRepository;
 import cn.edu.fudan.se.multidependency.service.query.metric.Fan_IO;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
@@ -571,6 +576,32 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	@Override
 	public boolean isDependsOn(ProjectFile file1, ProjectFile file2) {
 		return !dependsOnRepository.findDependsOnInFiles(file1.getId(), file2.getId()).isEmpty();
+	}
+	
+	@Bean("createDependsOn")
+	public List<DependsOn> createDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, ProjectFileRepository fileRepository) {
+		if(propertyConfig.isCalculateDependsOn()) {
+			System.out.println("创建Depends On关系");
+			dependsOnRepository.deleteAll();
+			dependsOnRepository.createDependsOnWithExtends();
+			dependsOnRepository.createDependsOnWithImplements();
+			dependsOnRepository.createDependsOnWithCall();
+			dependsOnRepository.createDependsOnWithCreate();
+			dependsOnRepository.createDependsOnWithCast();
+			dependsOnRepository.createDependsOnWithThrow();
+			dependsOnRepository.createDependsOnWithParameter();
+			dependsOnRepository.createDependsOnWithVariableType();
+			dependsOnRepository.createDependsOnWithAccess();
+			dependsOnRepository.createDependsOnWithImpllink();
+			dependsOnRepository.createDependsOnWithAnnotation();
+			dependsOnRepository.createDependsOnWithTimes();
+			dependsOnRepository.deleteNullTimesDependsOn();
+			dependsOnRepository.createDependsOnInPackage();
+			dependsOnRepository.addTimesOnDependsOnInPackage();
+			dependsOnRepository.deleteNullTimesDependsOnInPackage();
+			fileRepository.pageRank(20, 0.85);
+		}
+		return new ArrayList<>();
 	}
 
 }
