@@ -4,11 +4,11 @@ import json
 import os
 import re
 
-measure_index_file = 'result/MeasureIndex.csv'
-clone_group_file = 'result/type123_method_group_result.csv'
-token_data_folder = 'tokenData'
-state_file = 'result/state.json'
-output_file = 'similarity.csv'
+measure_index_file = '../result/MeasureIndex.csv'
+clone_group_file = '../result/type123_method_group_result.csv'
+token_data_folder = '../tokenData'
+state_file = '../result/state.json'
+output_file = './similarity.csv'
 start_offset = -2147483647
 comment_pattern1 = re.compile('//.*?\n', re.S)
 comment_pattern2 = re.compile('/\*.*?\*/', re.S)
@@ -52,7 +52,7 @@ def read_lines(file, start_line, end_line):
     """读取文件指定行"""
     lines = list()
     try:
-        f = open(file, 'r')
+        f = open(file, 'r', encoding='utf8')
         lines = f.readlines()
         lines = lines[start_line-1: end_line]
     except BaseException as e:
@@ -168,11 +168,6 @@ def process():
     for group in clone_groups:
         cnt += 1
         print('%.2f%%' % (cnt*100.0/size))
-
-        #过滤掉克隆实例特别多的克隆组
-        if len(group) > 100:
-            continue
-
         for i in range(0, len(group) - 1):
             for j in range(i + 1, len(group)):
                 measure1 = measures[group[i]]
@@ -183,8 +178,6 @@ def process():
                 measure2_file = '%s/allTokenCsv%d' % (token_data_folder, measure2_file_id)
                 tokens1 = read_tokens(measure1_file, offset1, measure1['end_token'] - measure1['start_token'])
                 tokens2 = read_tokens(measure2_file, offset2, measure2['end_token'] - measure2['start_token'])
-                if len(tokens1) + len(tokens2) > 50000:
-                    continue
                 similarity = suffix_array_similarity(tokens1, tokens2)
                 if 1 != int(similarity):
                     f.write('%s,%s,%f,%d\n' % (group[i], group[j], similarity, 3))

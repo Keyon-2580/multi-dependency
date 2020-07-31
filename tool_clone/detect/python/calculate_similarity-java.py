@@ -99,30 +99,26 @@ def suffix_array_similarity(tokens1, tokens2):
     tokens.extend(tokens2)
     sa = SuffixArray(tokens)
     res = sa.process()
-    measure1_snippets = list()
-    measure2_snippets = list()
+    
+    clonePairs = list()
     for pair in res:
+        first_from = search_index(measures, pair[0], pair[2])
+        first_to = search_index(measures, pair[0] + pair[2], pair[2])
+        second_from = search_index(measures, pair[1], pair[2])
+        second_to = search_index(measures, pair[1] + pair[2], pair[2])
+        if first_from == second_from:
+            continue
+        if first_from != first_to or second_from != second_to:
+            continue
         if pair[2] == 0:
             continue
-        #搜索片段所在的方法
-        snippet1_idx = search_index(measures, pair[0], pair[2])
-        snippet2_idx = search_index(measures, pair[1], pair[2])
-        #如果存在-1说明片段超过方法边界，跳过
-        if snippet1_idx == -1 or snippet2_idx == -1:
-            continue
-        #如果相等说明片段在同一个方法内，跳过
-        if snippet1_idx == snippet2_idx:
-            continue
-        if snippet1_idx == 0 and snippet2_idx == 1:
-            measure1_snippets.append((pair[0], pair[2]))
-            measure2_snippets.append((pair[1], pair[2]))
-        else:
-            measure1_snippets.append((pair[1], pair[2]))
-            measure2_snippets.append((pair[0], pair[2]))
+        x1 = min(pair[0], pair[1])
+        x2 = max(pair[0], pair[1])
+        clonePairs.append(ClonePair(x1, x2, pair[2]))
+
     #计算方法内连续片段的长度
-    cover1 = calc_cover_length(measure1_snippets)
-    cover2 = calc_cover_length(measure2_snippets)
-    return min(cover1, cover2)/ max(len(tokens1), len(tokens2))
+    cover = calc_cover_length(clonePairs)
+    return cover/ max(len(tokens1), len(tokens2))
 
 def search_index(measures, pos, height):
     """搜索子串所在的方法索引"""
@@ -133,29 +129,31 @@ def search_index(measures, pos, height):
             break
     return idx
 
-def calc_cover_length(snippets):
+def calc_cover_length(pairs):
     """计算重叠片段长度"""
-    snippets = sorted(snippets, key=lambda x:x[0])
+    pairs = sorted(pairs, key=lambda x:x.first)
     idx = 0
-    scope = list()
+    total_size = 0
+    start_token = 0
     size = 0
-    while idx < len(snippets):
+    while idx < len(pairs):
         if idx == 0:
-            scope = list(snippets[idx])
+            start_token = pairs[idx].first
+            size = pairs[idx].size
             idx += 1
             continue
-        if scope[0] + scope[1] >= snippets[idx][0]:
-            if scope[0] + scope[1] >= snippets[idx][0] + snippets[idx][1]:
+        if start_token + size >= pairs[idx].first:
+            if start_token + size >= pairs[idx].first + pairs[idx].size:
                 pass
             else:
-                scope[1] = snippets[idx][0] - scope[0] + snippets[idx][1]
+                size = pairs[idx].first - start_token + pairs[idx].size
             idx += 1
         else:
-            size += scope[1]
-            scope = list(snippets[idx])
+            total_size += size
+            start_token = pairs[idx].first
+            size = pairs[idx].size
             idx += 1
-    size = max(size, scope[1])
-    return size
+    return max(size, total_size)
 
 def process():
     """计算每个克隆组中每个克隆实例之间的相似度"""
@@ -264,6 +262,13 @@ class Measure():
     def __init__(self, start, end):
         self.start = start
         self.end = end
+
+class ClonePair():
+    def __init__(self, first, second, size):
+        self.first = first
+        self.second = second
+        self.size = size
+
 
 def read_tokens(file, offset, size):
     """读取保存在磁盘上的方法的token"""

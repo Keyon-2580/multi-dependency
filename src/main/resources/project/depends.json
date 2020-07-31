@@ -1,8 +1,8 @@
 {
 	"projects" : [
 		{
-			"path": "D:\\multiple-dependency-project\\depends-removetestcode",
-			"project": "depends-removetestcode",
+			"path": "D:\\multiple-dependency-project\\depends",
+			"project": "depends",
 			"language": "java",
 			"isMicroservice": false,
 			"excludes" : [
