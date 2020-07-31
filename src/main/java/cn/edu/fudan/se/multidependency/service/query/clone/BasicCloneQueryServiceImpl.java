@@ -130,13 +130,13 @@ public class BasicCloneQueryServiceImpl implements BasicCloneQueryService {
 		return result;
 	}
 
-	private Map<CloneGroup, Collection<Clone>> groupContainClonesCache = new ConcurrentHashMap<>();
+	private Map<Long, Collection<Clone>> groupContainClonesCache = new ConcurrentHashMap<>();
 	@Override
 	public Collection<Clone> findGroupContainCloneRelations(CloneGroup group) {
-		Collection<Clone> result = groupContainClonesCache.get(group);
+		Collection<Clone> result = groupContainClonesCache.get(group.getId());
 		if(result == null) {
 			result = cloneRepository.findCloneGroupContainClones(group.getId());
-			groupContainClonesCache.put(group, result);
+			groupContainClonesCache.put(group.getId(), result);
 		}
 		return result;
 	}
