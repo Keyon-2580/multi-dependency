@@ -41,8 +41,8 @@ public class MeasureController {
     
     @GetMapping("/file")
     @ResponseBody
-    public Collection<FileMetrics> calculateFileMetrics() {
-    	return metricCalculator.calculateFileMetrics();
+    public Object calculateFileMetrics() {
+    	return metricCalculator.calculateFileMetrics(true);
     }
     
     @GetMapping("/project")
@@ -53,7 +53,7 @@ public class MeasureController {
     
     @GetMapping("/package")
     @ResponseBody
-    public Collection<PackageMetrics> calculatePackageMetrics() {
+    public Object calculatePackageMetrics() {
     	return metricCalculator.calculatePackageMetrics();
     }
 

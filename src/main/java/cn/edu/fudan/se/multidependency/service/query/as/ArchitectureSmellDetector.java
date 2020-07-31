@@ -22,6 +22,7 @@ public interface ArchitectureSmellDetector {
 	
 	Object cochangesInDifferentModule(int minCochange);
 	
+	Object unstableFiles(int minFanIn, int cochangeTimesThreshold, int cochangeFilesThreshold);
 	Object unstableFiles();
 	
 	Object similarFiles();

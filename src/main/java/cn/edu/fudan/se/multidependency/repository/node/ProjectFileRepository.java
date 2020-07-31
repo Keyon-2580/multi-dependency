@@ -1,6 +1,5 @@
 package cn.edu.fudan.se.multidependency.repository.node;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.neo4j.annotation.Query;
@@ -9,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
 
@@ -28,6 +28,9 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"     file\r\n" + 
 			"RETURN  file,fanIn,fanOut,changeTimes,nom,loc,cochangeFileCount order by(file.path) desc;")
 	public List<FileMetrics> calculateFileMetrics();
+	
+	@Query("match (file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) where id(file) = {fileId} with c where size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 return c")
+	public List<Commit> cochangeCommitsWithFile(@Param("fileId") long fileId);
 	
 	@Query("MATCH (file:ProjectFile)\r\n" + 
 			"with file\r\n" +
@@ -51,5 +54,11 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"set file.score=score\r\n" + 
 			"RETURN file, score\r\n" + 
 			"ORDER BY score DESC")
-	public Collection<ProjectFile> pageRank(@Param("iterations") int iterations, @Param("dampingFactor") double dampingFactor);
+	public List<ProjectFile> pageRank(@Param("iterations") int iterations, @Param("dampingFactor") double dampingFactor);
+	
+	@Query("match (f1:ProjectFile)-[r:DEPENDS_ON]->(f2:ProjectFile) where id(f2)={fileId} return f1")
+	public List<ProjectFile> calculateFanIn(@Param("fileId") long fileId);
+	
+	@Query("match (f1:ProjectFile)-[r:DEPENDS_ON]->(f2:ProjectFile) where id(f1)={fileId} return f2")
+	public List<ProjectFile> calculateFanOut(@Param("fileId") long fileId);
 }

@@ -7,6 +7,14 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.service.query.as.data.UnstableFile;
 
 public interface UnstableDependencyDetector {
+	
+	void initThreshold();
+	
+	void setFanInThreshold(int minFanIn);
+	
+	void setCoChangeTimesThreshold(int cochangeTimesThreshold);
+	
+	void setCoChangeFilesThreshold(int cochangeFilesThreshold);
 
 	Map<Project, List<UnstableFile>> unstableFiles();
 	

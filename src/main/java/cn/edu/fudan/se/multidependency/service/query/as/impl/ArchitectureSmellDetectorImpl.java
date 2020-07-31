@@ -90,9 +90,18 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	public Collection<LogicCouplingFiles> cochangesInDifferentModule(int minCochange) {
 		return icdDependencyDetector.cochangesInDifferentModule(minCochange);
 	}
+	
+	@Override
+	public Map<Project, List<UnstableFile>> unstableFiles(int minFanIn, int cochangeTimesThreshold, int cochangeFilesThreshold) {
+		unstableDependencyDetector.setFanInThreshold(minFanIn);
+		unstableDependencyDetector.setCoChangeFilesThreshold(cochangeFilesThreshold);
+		unstableDependencyDetector.setCoChangeTimesThreshold(cochangeTimesThreshold);
+		return unstableDependencyDetector.unstableFiles();
+	}
 
 	@Override
 	public Map<Project, List<UnstableFile>> unstableFiles() {
+		unstableDependencyDetector.initThreshold();
 		return unstableDependencyDetector.unstableFiles();
 	}
 
