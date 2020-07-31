@@ -146,6 +146,13 @@ var metric = function() {
 			$("#projectButton").click(function() {
 				tableToExcel("projectTable", "projectMetrics");
 			});
+			$("#fileButton").click(function() {
+//				window.href="/";
+				$.ajax({
+					type: "get",
+					url: "/metric/excel/file"
+				});
+			});
 		}
 	}
 }

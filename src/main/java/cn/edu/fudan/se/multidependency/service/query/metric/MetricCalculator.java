@@ -96,7 +96,7 @@ public class MetricCalculator {
 		return result;
 	}
 	
-	Map<Long, List<PackageMetrics>> packageMetricsCache = null;
+	private Map<Long, List<PackageMetrics>> packageMetricsCache = null;
 	public Map<Long, List<PackageMetrics>> calculatePackageMetrics() {
 		if(packageMetricsCache != null) {
 			return packageMetricsCache;
