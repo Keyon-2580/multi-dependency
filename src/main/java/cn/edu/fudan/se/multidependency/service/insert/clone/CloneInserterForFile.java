@@ -120,7 +120,7 @@ public class CloneInserterForFile extends CloneInserter {
 			clones.add(clone);
 			sizeOfFileCloneFiles++;
 		}
-		LOGGER.info("插入文件级克隆关系数：" + sizeOfFileCloneFiles);
+		LOGGER.info("插入文件级克隆数，对数：" + sizeOfFileCloneFiles);
 		addGroupFromGroupFile();
 	}
 	
@@ -139,17 +139,16 @@ public class CloneInserterForFile extends CloneInserter {
 				if(node == null) {
 					FilePathFromCsv filePath = filePaths.get(id);
 					if(filePath == null) {
-						LOGGER.error("找不到clone id为 " + id + " 的节点");
+						LOGGER.error("文件克隆组中找不到clone id为 " + id + " 的节点");
 						continue;
 					} else {
 						ProjectFile file = this.getNodes().findFileByPathRecursion(filePath.getFilePath());
 						if(file == null) {
-							LOGGER.error("找不到clone id为 " + id + " 的节点");
+							LOGGER.error("库中找不到clone id为 " + id + " 的文件节点");
 							continue;
 						} else {
 							this.cloneFileIdToCodeNode.put(id, file);
 							node = file;
-							LOGGER.warn("找不到clone id为 " + id + " 的节点");
 						}
 					}
 				}
