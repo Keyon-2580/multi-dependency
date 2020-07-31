@@ -261,9 +261,12 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 	}*/
 
 	@Override
-	public Collection<FileCloneWithCoChange> addCoChangeToFileClones(Collection<Clone> fileClones) {
+	public Collection<FileCloneWithCoChange> addCoChangeToFileClones(Collection<Clone> clones) {
 		Collection<FileCloneWithCoChange> fileCloneWithCoChanges = new ArrayList<>();
-		for(Clone fileClone: fileClones) {
+		for(Clone fileClone: clones) {
+			if(!(fileClone.getCodeNode1() instanceof ProjectFile)) {
+				continue;
+			}
 			ProjectFile cloneFile1 = (ProjectFile) fileClone.getCodeNode1();
 			ProjectFile cloneFile2 = (ProjectFile) fileClone.getCodeNode2();
 			CoChange coChange = gitAnalyseService.findCoChangeBetweenTwoFiles(cloneFile1, cloneFile2);

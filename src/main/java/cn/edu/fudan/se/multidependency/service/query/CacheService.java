@@ -26,6 +26,9 @@ public class CacheService {
     
     public void cacheNodeBelongToNode(Node node, Node belongToNode) {
     	Map<NodeLabelType, Node> belongToNodes = nodeBelongToNodeCache.getOrDefault(node, new ConcurrentHashMap<>());
+    	if(belongToNode == null) {
+    		return ;
+    	}
     	belongToNodes.put(belongToNode.getNodeType(), belongToNode);
     	this.nodeBelongToNodeCache.put(node, belongToNodes);
     	cacheNodeById(node);

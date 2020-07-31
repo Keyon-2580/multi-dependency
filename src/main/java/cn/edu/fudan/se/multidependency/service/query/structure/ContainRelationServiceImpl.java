@@ -315,7 +315,32 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	@Override
 	public ProjectFile findSnippetBelongToFile(Snippet snippet) {
 		Node belongToNode = cache.findNodeBelongToNode(snippet, NodeLabelType.ProjectFile);
-		ProjectFile result = belongToNode == null ? containRepository.findSnippetBelongToFile(snippet.getId()) : (ProjectFile) belongToNode;
+		ProjectFile result = belongToNode == null ? containRepository.findSnippetDirectlyBelongToFile(snippet.getId()) : (ProjectFile) belongToNode;
+		if(result == null) {
+			Type type = findSnippetDirectlyBelongToType(snippet);
+			if(type != null) {
+				result = findTypeBelongToFile(type);
+			} else {
+				Function function = findSnippetDirectlyBelongToFunction(snippet);
+				result = findFunctionBelongToFile(function);
+			}
+		}
+		cache.cacheNodeBelongToNode(snippet, result);
+		return result;
+	}
+
+	@Override
+	public Type findSnippetDirectlyBelongToType(Snippet snippet) {
+		Node belongToNode = cache.findNodeBelongToNode(snippet, NodeLabelType.Type);
+		Type result = belongToNode == null ? containRepository.findSnippetDirectlyBelongToType(snippet.getId()) : (Type) belongToNode;
+		cache.cacheNodeBelongToNode(snippet, result);
+		return result;
+	}
+
+	@Override
+	public Function findSnippetDirectlyBelongToFunction(Snippet snippet) {
+		Node belongToNode = cache.findNodeBelongToNode(snippet, NodeLabelType.Function);
+		Function result = belongToNode == null ? containRepository.findSnippetDirectlyBelongToFunction(snippet.getId()) : (Function) belongToNode;
 		cache.cacheNodeBelongToNode(snippet, result);
 		return result;
 	}
@@ -417,9 +442,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		} else {
 			result = (CloneGroup) node;
 		}
-		if(result != null) {
-			cache.cacheNodeBelongToNode(file, result);
-		}
+		cache.cacheNodeBelongToNode(file, result);
 		return result;
 	}
 

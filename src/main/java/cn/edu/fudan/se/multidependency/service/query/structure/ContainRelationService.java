@@ -66,6 +66,10 @@ public interface ContainRelationService {
 	
 	ProjectFile findSnippetBelongToFile(Snippet snippet);
 	
+	Type findSnippetDirectlyBelongToType(Snippet snippet);
+	
+	Function findSnippetDirectlyBelongToFunction(Snippet snippet);
+	
 	Project findFunctionBelongToProject(Function function);
 	
 	Project findPackageBelongToProject(Package pck);

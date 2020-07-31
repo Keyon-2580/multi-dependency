@@ -94,6 +94,7 @@ public class CloneGroupController {
 			@RequestParam("singleLanguage") boolean singleLanguage) {
 		JSONObject result = new JSONObject();
 		try {
+			System.out.println(name);
 			List<CloneGroup> groups = new ArrayList<>();
 			CloneGroup cloneGroup = basicCloneQueryService.queryCloneGroup(name);
 			cloneGroup = cloneAnalyse.addNodeAndRelationToCloneGroup(cloneGroup);
@@ -101,11 +102,11 @@ public class CloneGroupController {
 				groups.add(cloneGroup);
 			}
 			JSONObject value = cloneShow.clonesGroupsToCytoscape(groups, false, singleLanguage);
-			System.out.println(value);
 			result.put("result", "success");
 			result.put("value", value);
 			result.put("group", cloneGroup);
 		} catch (Exception e) {
+			e.printStackTrace();
 			result.put("result", "fail");
 			result.put("msg", e.getMessage());
 		}
@@ -215,7 +216,7 @@ public class CloneGroupController {
 			result.put("value", histograms);
 			result.put("groups", sortGroups);
 		} catch (Exception e) {
-			
+			e.printStackTrace();
 		}
 		return result;
 	}
