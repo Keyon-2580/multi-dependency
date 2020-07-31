@@ -120,9 +120,9 @@ public class CloneUtil {
 				int start = Integer.parseInt(values[0]);
 				int end = Integer.parseInt(values[1]);
 				double value = Double.parseDouble(values[2]);
-				if(value < 0.7) {
-					continue;
-				}
+//				if(value < 0.7) {
+//					continue;
+//				}
 				String type = "";
 				if(values.length > 3) {
 					type = values[3];

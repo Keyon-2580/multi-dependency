@@ -1,10 +1,7 @@
 package cn.edu.fudan.se.multidependency.model.node;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.codehaus.plexus.util.StringUtils;
@@ -44,7 +41,7 @@ public class Nodes implements Serializable {
     
     private Map<String, Map<Integer, CodeNode>> nodeInFileByEndLine = new ConcurrentHashMap<>();
     
-    private Map<String, List<Collection<CodeNode>>> fileContainsNodesSortByLineCache = new ConcurrentHashMap<>();
+    private Map<String, Map<Integer, List<CodeNode>>> fileContainsNodesSortByLineCache = new ConcurrentHashMap<>();
     
     public synchronized void putNodeToFileByEndLine(ProjectFile file, CodeNode node) {
     	Map<Integer, CodeNode> functions = nodeInFileByEndLine.getOrDefault(file.getPath(), new ConcurrentHashMap<>());
@@ -63,24 +60,35 @@ public class Nodes implements Serializable {
      * @param file
      * @return
      */
-    public List<Collection<CodeNode>> fileContainsNodesSortByLine(ProjectFile file) {
+    public Map<Integer, List<CodeNode>> fileContainsNodesSortByLine(ProjectFile file) {
     	if(fileContainsNodesSortByLineCache.get(file.getPath()) != null) {
     		return fileContainsNodesSortByLineCache.get(file.getPath());
     	}
     	// 获取该文件下的所有节点，按节点所在的开始行数排序
-    	Map<Integer, CodeNode> nodesMap = nodeInFileByEndLine.getOrDefault(file, new ConcurrentHashMap<>());
+    	Map<Integer, CodeNode> nodesMap = nodeInFileByEndLine.getOrDefault(file.getPath(), new ConcurrentHashMap<>());
     	List<CodeNode> nodes = new ArrayList<>(nodesMap.values());
-    	nodes.sort((node1, node2) -> {
-    		return node1.getEndLine() - node2.getEndLine();
-    	});
-    	List<Collection<CodeNode>> result = new ArrayList<>();
+    	nodes.sort((node1, node2) ->
+                (int)(node1.getEndLine() - node2.getEndLine())
+        );
+    	Map<Integer, List<CodeNode>> result = new ConcurrentHashMap<>();
+
+//        nodes.forEach( codeNode -> {
+//            result.put(codeNode.getEndLine(),codeNode);
+//                }
+//        );
+//
     	for(CodeNode node : nodes) {
     		int endLine = node.getEndLine();
     		int page = endLine / FILE_NODES_WITH_LINE_PAGE;
-    		Collection<CodeNode> nodesByPage = null;
+            List<CodeNode> nodesByPage = null;
+
     		if(result.size() <= page) {
+    		    for (int i =0; i < page - result.size(); i++){
+                    nodesByPage = new ArrayList<>();
+                    result.put(page-1-i,nodesByPage);
+                }
     			nodesByPage = new ArrayList<>();
-    			result.add(nodesByPage);
+    			result.put(page,nodesByPage);
     		} else {
     			nodesByPage = result.get(page);
     		}
@@ -96,6 +104,35 @@ public class Nodes implements Serializable {
     		return null;
     	}
     	return nodes.get(endLine);
+    }
+
+    public CodeNode findFatherNodeByLineInFile(ProjectFile file, int startLine, int endLine) {
+        Map<Integer, List<CodeNode>> nodes = fileContainsNodesSortByLine(file);
+        if(nodes == null) {
+            return null;
+        }
+        int pageKey = endLine / FILE_NODES_WITH_LINE_PAGE;
+
+        CodeNode codeNode = null;
+        boolean isFound = false;
+        while (!isFound && pageKey <= nodes.size()-1) {
+            List<CodeNode> codeNodes = nodes.get(pageKey);
+            if(codeNodes == null || codeNodes.isEmpty()){
+                pageKey++;
+                continue;
+            }
+            for (CodeNode node : codeNodes) {
+                int line1 = node.getStartLine();
+                int line2 = node.getEndLine();
+                if (startLine >= line1 && endLine <= line2) {
+                    codeNode = node;
+                    isFound = true;
+                    break;
+                }
+            }
+            pageKey++;
+        }
+        return codeNode;
     }
 	
 	/*private Map<String, CodeNode> identifierToCodeNode = new ConcurrentHashMap<>();

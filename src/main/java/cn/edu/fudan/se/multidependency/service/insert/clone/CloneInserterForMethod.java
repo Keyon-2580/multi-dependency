@@ -32,6 +32,9 @@ public class CloneInserterForMethod extends CloneInserter {
 	private String groupPath;
 	private Language language;
 
+	//括号前后各加2行，避免由于括号原因的导致方法识别问题
+	public static final int SNIPPET_ADJUSTMENT_LINES = 4;
+
 	private Map<Integer, FilePathFromCsv> methodPaths = new HashMap<>();
 	private Collection<CloneResultFromCsv> cloneResults = new ArrayList<>();
 	private Collection<Group> groups = new ArrayList<>();
@@ -98,34 +101,60 @@ public class CloneInserterForMethod extends CloneInserter {
 			if(node2 == null) {
 				node2 = this.getNodes().findNodeByEndLineInFile(file2, filePath2.getEndLine());
 			}
-			if(node1 == null || node2 == null) {
-				// 既不是方法也不是Type的，改为片段
-				if(node1 == null) {
-					LOGGER.warn("node1 is null "  + filePath1.getLineId() + " " + filePath1.getFilePath() + " " + filePath1.getStartLine() + " " + filePath1.getEndLine());
+
+			// 既不是方法也不是Type的，改为片段
+			if(node1 == null) {
+				LOGGER.warn("node1 is null "  + filePath1.getLineId() + " " + filePath1.getFilePath() + " " + filePath1.getStartLine() + " " + filePath1.getEndLine());
+
+				CodeNode fatherNode1 = this.getNodes().findFatherNodeByLineInFile(file1, filePath1.getStartLine(),filePath1.getEndLine());
+				//括号前后各加2行，避免由于括号原因的导致方法识别问题
+				int snippetLines1 = filePath1.getEndLine() - filePath1.getStartLine() + 1 + SNIPPET_ADJUSTMENT_LINES;
+				if (fatherNode1 != null && snippetLines1 >= fatherNode1.getLines()){
+					node1 = fatherNode1;
+				}else {
+					Snippet snippet1 = new Snippet();
+					snippet1.setEntityId(generateEntityId());
+					snippet1.setStartLine(filePath1.getStartLine());
+					snippet1.setEndLine(filePath1.getEndLine());
+					snippet1.setIdentifier(String.join(",", file1.getPath(), String.valueOf(filePath1.getStartLine()), String.valueOf(filePath1.getEndLine())));
+					snippet1.setName(String.join(",", file1.getName(), String.valueOf(filePath1.getStartLine()), String.valueOf(filePath1.getEndLine())));
+					addNode(snippet1, null);
+					if (fatherNode1 != null) {
+						addRelation(new Contain(fatherNode1, snippet1));
+					} else {
+						addRelation(new Contain(file1, snippet1));
+					}
+
+					node1 = snippet1;
 				}
-				if(node2 == null) {
-					LOGGER.warn("node2 is null "  + filePath2.getLineId() + " " + filePath2.getFilePath() + " " + filePath2.getStartLine() + " " + filePath2.getEndLine());
-				}
-				Snippet snippet1 = new Snippet();
-				snippet1.setEntityId(generateEntityId());
-				snippet1.setStartLine(filePath1.getStartLine());
-				snippet1.setEndLine(filePath1.getEndLine());
-				snippet1.setIdentifier(String.join(",", file1.getPath(), String.valueOf(filePath1.getStartLine()), String.valueOf(filePath1.getEndLine())));
-				snippet1.setName(String.join(",", file1.getName(), String.valueOf(filePath1.getStartLine()), String.valueOf(filePath1.getEndLine())));
-				addNode(snippet1, null);
-				addRelation(new Contain(file1, snippet1));
-				Snippet snippet2 = new Snippet();
-				snippet2.setEntityId(generateEntityId());
-				snippet2.setStartLine(filePath2.getStartLine());
-				snippet2.setEndLine(filePath2.getEndLine());
-				snippet2.setIdentifier(String.join(",", file2.getPath(), String.valueOf(filePath2.getStartLine()), String.valueOf(filePath2.getEndLine())));
-				snippet2.setName(String.join(",", file2.getName(), String.valueOf(filePath2.getStartLine()), String.valueOf(filePath2.getEndLine())));
-				addNode(snippet2, null);
-				addRelation(new Contain(file2, snippet2));
-				
-				node1 = snippet1;
-				node2 = snippet2;
 			}
+
+			if(node2 == null) {
+				LOGGER.warn("node2 is null "  + filePath2.getLineId() + " " + filePath2.getFilePath() + " " + filePath2.getStartLine() + " " + filePath2.getEndLine());
+
+				CodeNode fatherNode2 = this.getNodes().findFatherNodeByLineInFile(file2, filePath2.getStartLine(),filePath2.getEndLine());
+				//括号前后各加2行，避免由于括号原因的导致方法识别问题
+				int snippetLines2 = filePath2.getEndLine() - filePath2.getStartLine() + 1 + SNIPPET_ADJUSTMENT_LINES;
+				if (fatherNode2 != null && snippetLines2 >= fatherNode2.getLines()){
+					node2 = fatherNode2;
+				}else {
+					Snippet snippet2 = new Snippet();
+					snippet2.setEntityId(generateEntityId());
+					snippet2.setStartLine(filePath2.getStartLine());
+					snippet2.setEndLine(filePath2.getEndLine());
+					snippet2.setIdentifier(String.join(",", file2.getPath(), String.valueOf(filePath2.getStartLine()), String.valueOf(filePath2.getEndLine())));
+					snippet2.setName(String.join(",", file2.getName(), String.valueOf(filePath2.getStartLine()), String.valueOf(filePath2.getEndLine())));
+					addNode(snippet2, null);
+					if (fatherNode2 != null) {
+						addRelation(new Contain(fatherNode2, snippet2));
+					} else {
+						addRelation(new Contain(file2, snippet2));
+					}
+
+					node2 = snippet2;
+				}
+			}
+
 			if(node1.getClass() != node2.getClass()) {
 				LOGGER.warn("有克隆关系的两个节点不是同一个类型的节点" + filePath1.getLineId() + " " + filePath2.getLineId());
 			}
@@ -136,21 +165,24 @@ public class CloneInserterForMethod extends CloneInserter {
 			}
 			cloneNodeIdToCodeNode.put(filePath1.getLineId(), node1);
 			cloneNodeIdToCodeNode.put(filePath2.getLineId(), node2);
-			Clone clone = new Clone(node1, node2);
-			clone.setNode1Index(start);
-			clone.setNode2Index(end);
-			clone.setNode1StartLine(filePath1.getStartLine());
-			clone.setNode1EndLine(filePath1.getEndLine());
-			clone.setNode2StartLine(filePath2.getStartLine());
-			clone.setNode2EndLine(filePath2.getEndLine());
-			clone.setValue(value);
-			clone.setCloneRelationType(cloneType.toString());
-			clone.setCloneType(CloneType.getCloneType(type).toString());
-			clones.add(clone);
-			addRelation(clone);
-			sizeOfClones++;
+
+			if (value >= 0.7) {
+				Clone clone = new Clone(node1, node2);
+				clone.setNode1Index(start);
+				clone.setNode2Index(end);
+				clone.setNode1StartLine(filePath1.getStartLine());
+				clone.setNode1EndLine(filePath1.getEndLine());
+				clone.setNode2StartLine(filePath2.getStartLine());
+				clone.setNode2EndLine(filePath2.getEndLine());
+				clone.setValue(value);
+				clone.setCloneRelationType(cloneType.toString());
+				clone.setCloneType(CloneType.getCloneType(type).toString());
+				clones.add(clone);
+				addRelation(clone);
+				sizeOfClones++;
+			}
 		}
-		LOGGER.info("插入方法级克隆数：" + sizeOfClones);
+		LOGGER.info("插入方法级克隆数，对数：" + sizeOfClones);
 		addGroupFromGroupFile();
 	}
 	
@@ -167,7 +199,7 @@ public class CloneInserterForMethod extends CloneInserter {
 			for(int id : group.getGroupIds()) {
 				CodeNode node = this.cloneNodeIdToCodeNode.get(id);
 				if(node == null) {
-					LOGGER.error("找不到clone id为 " + id + " 的节点");
+					LOGGER.error("方法克隆组中找不到clone id为 " + id + " 的节点");
 					continue;
 				}
 				if(uniqueNodeType) {
@@ -193,6 +225,6 @@ public class CloneInserterForMethod extends CloneInserter {
 			}
 			addNode(cloneGroup, null);
 		}
-		LOGGER.info("插入文件级克隆组，组数：" + (cloneGroupNumber - groupCount));
+		LOGGER.info("插入方法级克隆组，组数：" + (cloneGroupNumber - groupCount));
 	}
 }
