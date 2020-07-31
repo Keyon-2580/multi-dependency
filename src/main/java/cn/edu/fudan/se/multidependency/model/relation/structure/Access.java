@@ -10,7 +10,6 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
@@ -33,7 +32,7 @@ public class Access implements RelationWithTimes, StructureRelation {
 	private static final long serialVersionUID = -2911695752320415027L;
 
 	@StartNode
-	private Function function;
+	private CodeNode startNode;
 	
 	@EndNode
 	private Variable field;
@@ -44,8 +43,8 @@ public class Access implements RelationWithTimes, StructureRelation {
     @GeneratedValue
     private Long id;
 	
-	public Access(Function function, Variable field) {
-		this.function = function;;
+	public Access(CodeNode startNode, Variable field) {
+		this.startNode = startNode;
 		this.field = field;
 		this.times = 1;
 	}
@@ -56,7 +55,7 @@ public class Access implements RelationWithTimes, StructureRelation {
 
 	@Override
 	public CodeNode getStartCodeNode() {
-		return function;
+		return startNode;
 	}
 
 	@Override

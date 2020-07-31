@@ -348,7 +348,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		Iterable<Access> allAccesses = findProjectContainFunctionAccessVariableRelations(project);
 		Map<Function, List<Access>> result = new HashMap<>();
 		for(Access access : allAccesses) {
-			Function caller = access.getFunction();
+			Function caller = (Function) access.getStartNode();
 			List<Access> group = result.getOrDefault(caller, new ArrayList<>());
 			group.add(access);
 			result.put(caller, group);

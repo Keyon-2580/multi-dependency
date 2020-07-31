@@ -159,7 +159,7 @@ public class DependencyOrganizationService {
 		
 		List<Cast> functionCastTypes = staticAnalyseService.findProjectContainFunctionCastTypeRelations(project);
 		for(Cast relation : functionCastTypes) {
-			edges.add(new CytoscapeEdge(relation.getFunction(), relation.getCastType(), "FunctionCastType", "cast"));
+			edges.add(new CytoscapeEdge(relation.getStartNode(), relation.getCastType(), "FunctionCastType", "cast"));
 		}
 		List<Parameter> functionParameterTypes = staticAnalyseService.findProjectContainFunctionParameterTypeRelations(project);
 		for(Parameter relation : functionParameterTypes) {

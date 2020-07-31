@@ -10,7 +10,6 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
@@ -30,22 +29,22 @@ public class Cast implements RelationWithTimes, StructureRelation {
     private Long id;
 
 	@StartNode
-	private Function function;
+	private CodeNode startNode;
 	
 	@EndNode
 	private Type castType;
 	
 	private int times = 1;
 
-	public Cast(Function function, Type castType) {
+	public Cast(CodeNode startNode, Type castType) {
 		super();
-		this.function = function;
+		this.startNode = startNode;
 		this.castType = castType;
 	}
 
 	@Override
 	public CodeNode getStartCodeNode() {
-		return function;
+		return startNode;
 	}
 
 	@Override

@@ -107,6 +107,32 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 						}
 					} 
 					break;
+				case DependencyType.CAST:
+					Type castType = (Type) types.get(relation.getEntity().getId().longValue());
+					if(castType != null) {
+						Cast functionCastType = new Cast(type, castType);
+						addRelation(functionCastType);
+					}
+					break;
+				case DependencyType.THROW:
+//					LOGGER.info(typeEntity + " " + relation.getType() + " " + relation.getEntity().getClass() + " " + relation.getEntity());
+					break;
+				case DependencyType.USE:
+					Entity relationEntity = relation.getEntity();
+					if(relation.getEntity() instanceof VarEntity) {
+						Node relationNode = this.getNodes().findNodeByEntityIdInProject(relationEntity.getId().longValue(), currentProject);
+						if(relationNode != null) {
+							assert(relationNode instanceof Variable);
+							Variable var = (Variable) relationNode;
+							if(var.isField()) {
+								Access accessField = new Access(type, var);
+								addRelation(accessField);
+							}
+						}
+					}
+					break;
+				default:
+					break;
 				}
 			});
 		});
@@ -158,8 +184,6 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(id.intValue());
 			functionEntity.getRelations().forEach(relation -> {
 				switch(relation.getType()) {
-				case DependencyType.CONTAIN:
-					break;
 				case DependencyType.CALL:
 					if(relation.getEntity() instanceof FunctionEntity) {
 						// call其它方法
@@ -243,6 +267,8 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 							}
 						}
 					}
+					break;
+				case DependencyType.CONTAIN:
 					break;
 				default:
 					LOGGER.info(function.getName() + functionFullName + " " + relation.getType() + " " + relation.getEntity().getClass().toString() + " " + relation.getEntity().getQualifiedName());
