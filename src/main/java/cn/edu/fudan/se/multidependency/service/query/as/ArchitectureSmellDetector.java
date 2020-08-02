@@ -1,5 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.query.as;
 
+import java.io.OutputStream;
+
 public interface ArchitectureSmellDetector {
 	
 	void setCyclePackagesWithRelation(boolean withRelation);
@@ -30,4 +32,6 @@ public interface ArchitectureSmellDetector {
 	Object similarPackages();
 	
 	Object multipleASFiles(int minCoChangeSInLogicCouplingFiles);
+	
+	void printMultipleASFiles(OutputStream stream, int minCoChangeSInLogicCouplingFiles);
 }

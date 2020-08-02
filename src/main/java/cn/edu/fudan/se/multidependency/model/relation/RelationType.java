@@ -14,7 +14,7 @@ public enum RelationType implements RelationshipType {
 	IMPLLINK(RelationType.str_IMPLLINK),
 	PARAMETER(RelationType.str_PARAMETER),
 	RETURN(RelationType.str_RETURN),
-	THROW(RelationType.str_THORW),
+	THROW(RelationType.str_THROW),
 	CAST(RelationType.str_CAST),
 	VARIABLE_TYPE(RelationType.str_VARIABLE_TYPE),
 	ANNOTATION(RelationType.str_ANNOTATION),
@@ -73,7 +73,7 @@ public enum RelationType implements RelationshipType {
 	public static final String str_RETURN = "RETURN";
 	public static final String str_VARIABLE_TYPE = "VARIABLE_TYPE";
 	public static final String str_DYNAMIC_CALL = "DYNAMIC_CALL";
-	public static final String str_THORW = "THORW";
+	public static final String str_THROW = "THROW";
 	public static final String str_ANNOTATION = "ANNOTATION";
 	
 	public static final String str_TESTCASE_EXECUTE_FEATURE = "TESTCASE_EXECUTE_FEATURE";
