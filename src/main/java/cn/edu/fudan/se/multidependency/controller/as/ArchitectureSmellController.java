@@ -1,5 +1,10 @@
 package cn.edu.fudan.se.multidependency.controller.as;
 
+import java.io.OutputStream;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +25,20 @@ public class ArchitectureSmellController {
 	
 	@Autowired
 	private ProjectFileRepository fileRepository;
+	
+	@GetMapping("/excel/multiple")
+    @ResponseBody
+    public void printPackageMetric(HttpServletRequest request, HttpServletResponse response) {
+		try {
+	        response.addHeader("Content-Disposition", "attachment;filename=multiple_as.xlsx");  
+	        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); 
+			OutputStream stream = response.getOutputStream();
+
+			detector.printMultipleASFiles(stream, 4);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	@GetMapping("")
 	public String index() {

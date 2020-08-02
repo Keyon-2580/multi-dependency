@@ -39,6 +39,20 @@ public class MeasureController {
     @Autowired
     NodeService nodeService;
     
+    @GetMapping("/excel/package")
+    @ResponseBody
+    public void printPackageMetric(HttpServletRequest request, HttpServletResponse response) {
+		try {
+	        response.addHeader("Content-Disposition", "attachment;filename=package_metrics.xlsx");  
+	        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); 
+			OutputStream stream = response.getOutputStream();
+
+			metricShowService.printPackageMetricExcel(stream);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+    
     @GetMapping("/excel/file")
     @ResponseBody
     public void printFileMetric(HttpServletRequest request, HttpServletResponse response) {

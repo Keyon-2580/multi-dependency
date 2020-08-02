@@ -28,6 +28,77 @@ public class MetricShowService {
 	
 	@Autowired
 	private MetricCalculator metricCalculator;
+	
+	public void printPackageMetricExcel(OutputStream stream) {
+		Workbook hwb = new XSSFWorkbook();
+		Map<Long, List<PackageMetrics>> allPackageMetrics = metricCalculator.calculatePackageMetrics();
+		Collection<Project> projects = nodeService.allProjects();
+		for(Project project : projects) {
+			Sheet sheet = hwb.createSheet(new StringBuilder().append(project.getName()).append("(").append(project.getLanguage()).append(")").toString());
+			List<PackageMetrics> packageMetrics = allPackageMetrics.get(project.getId());
+			Row row = sheet.createRow(0);
+			CellStyle style = hwb.createCellStyle();
+			style.setAlignment(HorizontalAlignment.CENTER);
+//			sheet.setColumnWidth(0, "xxxxxxxxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(1, "xxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(2, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(3, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(4, "xxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(5, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(6, "xxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(7, "xxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(8, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(9, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(10, "xxxxxx".length() * 256);
+//			sheet.setColumnWidth(11, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(12, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(13, "xxxxxxxxxx".length() * 256);
+			Cell cell = null;
+			cell = row.createCell(0);
+			cell.setCellValue("id");
+			cell.setCellStyle(style);
+			cell = row.createCell(1);
+			cell.setCellValue("目录");
+			cell.setCellStyle(style);
+			cell = row.createCell(2);
+			cell.setCellValue("NOF");
+			cell.setCellStyle(style);
+			cell = row.createCell(3);
+			cell.setCellValue("NOM");
+			cell.setCellStyle(style);
+			cell = row.createCell(4);
+			cell.setCellValue("LOC");
+			cell.setCellStyle(style);
+			cell = row.createCell(5);
+			cell.setCellValue("Fan In");
+			cell.setCellStyle(style);
+			cell = row.createCell(6);
+			cell.setCellValue("Fan Out");
+			cell.setCellStyle(style);
+			for (int i = 0; i < packageMetrics.size(); i++) {
+				PackageMetrics packageMetric = packageMetrics.get(i);
+				row = sheet.createRow(i + 1);
+				row.createCell(0).setCellValue(packageMetric.getPck().getId());
+				row.createCell(1).setCellValue(packageMetric.getPck().getDirectoryPath());
+				row.createCell(2).setCellValue(packageMetric.getNof());
+				row.createCell(3).setCellValue(packageMetric.getNom());
+				row.createCell(4).setCellValue(packageMetric.getLoc());
+				row.createCell(5).setCellValue(packageMetric.getFanIn());
+				row.createCell(6).setCellValue(packageMetric.getFanOut());
+			}			
+		}
+		try {
+			hwb.write(stream);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				stream.close();
+				hwb.close();
+			} catch (IOException e) {
+			}
+		}
+	}
 
 	public void printFileMetricExcel(OutputStream stream) {
 		Workbook hwb = new XSSFWorkbook();
