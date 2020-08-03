@@ -753,6 +753,7 @@ var clone = function(cytoscapeutil) {
 									html += '</div>';
 									html += '<div class="col-sm-12" id="copyDiv_group_one"></div>';
 									html += '<div class="col-sm-12" id="table_clones_one"></div>';
+									html += '<div class="col-sm-12" id="chart_clones_one"></div>';
 									html += '<div class="col-sm-12"><hr/></div>';
 									$("#specifiedCytoscape").html(html);
 									$(".fullscreen_btn").unbind("click");
@@ -762,6 +763,14 @@ var clone = function(cytoscapeutil) {
 									var cy = _showCytoscape($("#cloneGroupDiv"), result.value, "copyDiv_group_one");
 									showZTree(result.value.ztree, $("#node_ztree_num"), cy, "copyDiv_group_one");
 									showClonesTable(result.value.clonesWithCoChange, "table_clones_one");
+									$.ajax({
+										type: "get",
+										url: mainUrl + "/cytoscape/double/json?clonegroupName=" + name,
+										success: function(result) {
+											console.log(result);
+											cloneGroupToGraph(result.result, "chart_clones_one");
+										}
+									});
 								}
 							}
 						});
@@ -1064,52 +1073,6 @@ var clone = function(cytoscapeutil) {
 				});
 			});
 
-			return imports;
-		}
-
-		//仿写packageHierarchy函数，用于处理clone关系json
-		function packageClone(classes) {
-			var map = {};
-
-			function find(name, data) {
-				var node = map[name], i;
-				if (!node) {
-					node = map[name] = data || {data: {source: name}, children: [], parent: []};
-					// console.log(node)
-					if (name.length) {
-						node.parent = find(name.substring(0, i = name.lastIndexOf(".")));
-						node.parent.children.push(node);
-						node.key = name.substring(i + 1);
-					}
-				}
-				return node;
-			}
-
-			classes.value.edges.forEach(function(d) {
-				// console.log(d)
-				find(d.data.source, d);
-			});
-
-			return map[""];
-		}
-
-		// Return a list of imports for the given array of nodes.
-		function packageCloneImports(nodes) {
-			var map = {},
-				imports = [];
-
-			// Compute a map from name to node.
-			nodes.forEach(function(d) {
-				// console.log(d.data.source)
-				map[d.source] = d.data.source;
-			});
-
-			// For each import, construct a link from the source to target node.
-			nodes.forEach(function(d) {
-				if (d.data.target)
-					imports.push({source: map[d.source], target: d.data.target});
-			});
-			// console.log(imports)
 			return imports;
 		}
 	};
