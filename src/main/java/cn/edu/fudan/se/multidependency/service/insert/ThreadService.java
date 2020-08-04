@@ -39,8 +39,8 @@ public class ThreadService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ThreadService.class);
 	private static YamlUtil.YamlObject yaml;
 	private static JSONConfigFile config;
-	private static final ExecutorService executor = Executors.newCachedThreadPool();
-	private static final ExecutorService executorForGit = Executors.newFixedThreadPool(5);
+	private static ExecutorService executor = Executors.newCachedThreadPool();
+	private static ExecutorService executorForGit = Executors.newFixedThreadPool(5);
 	private static CountDownLatch latchOfStatic, latchOfOthers;
 
 	public ThreadService(YamlUtil.YamlObject yaml, CountDownLatch latchOfStatic, CountDownLatch latchOfOthers) throws Exception {
@@ -48,6 +48,11 @@ public class ThreadService {
 		config = ProjectConfigUtil.extract(JSONUtil.extractJSONObject(new File(yaml.getProjectsConfig())));
 		ThreadService.latchOfStatic = latchOfStatic;
 		ThreadService.latchOfOthers = latchOfOthers;
+		if(yaml.getProjectThreadsType() == -1){
+			this.executor = Executors.newCachedThreadPool();
+		}else{
+			this.executor = Executors.newFixedThreadPool(yaml.getProjectThreadsType());
+		}
 	}
 
 	public void staticAnalyse() {

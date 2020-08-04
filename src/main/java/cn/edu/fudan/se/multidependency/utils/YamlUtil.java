@@ -56,6 +56,8 @@ public class YamlUtil {
 		boolean analyseGit = (boolean) ((Map<?, ?>) yaml.get("data")).get("git_analyse");
 		boolean analyseLib = (boolean) ((Map<?, ?>) yaml.get("data")).get("lib_analyse");
 		boolean analyseClone = (boolean) ((Map<?, ?>) yaml.get("data")).get("clone_analyse");
+		int projectThreadsType = (int) ((Map<?, ?>) yaml.get("data")).get("project_analyse_threads_count");
+		result.setProjectThreadsType(projectThreadsType);
 		result.setAnalyseDynamic(analyseDynamic);
 		result.setAnalyseGit(analyseGit);
 		result.setAnalyseLib(analyseLib);
@@ -81,5 +83,7 @@ public class YamlUtil {
 		private boolean analyseLib;
 
 		private boolean analyseClone;
+
+		private int projectThreadsType;
 	}
 }
