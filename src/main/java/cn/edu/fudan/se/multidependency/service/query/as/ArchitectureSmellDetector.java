@@ -1,6 +1,11 @@
 package cn.edu.fudan.se.multidependency.service.query.as;
 
 import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
+
+import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.service.query.as.data.CyclicHierarchy;
 
 public interface ArchitectureSmellDetector {
 	
@@ -32,6 +37,8 @@ public interface ArchitectureSmellDetector {
 	Object similarPackages();
 	
 	Object multipleASFiles(int minCoChangeSInLogicCouplingFiles);
+	
+	Object cyclicHierarchies();
 	
 	void printMultipleASFiles(OutputStream stream, int minCoChangeSInLogicCouplingFiles);
 }

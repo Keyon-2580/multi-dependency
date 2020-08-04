@@ -26,6 +26,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
+import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.StructureRelation;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
@@ -583,22 +584,36 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		if(propertyConfig.isCalculateDependsOn()) {
 			System.out.println("创建Depends On关系");
 			dependsOnRepository.deleteAll();
-			dependsOnRepository.createDependsOnWithExtends();
-			dependsOnRepository.createDependsOnWithImplements();
-			dependsOnRepository.createDependsOnWithCall();
-			dependsOnRepository.createDependsOnWithCreate();
-			dependsOnRepository.createDependsOnWithCast();
-			dependsOnRepository.createDependsOnWithThrow();
-			dependsOnRepository.createDependsOnWithParameter();
-			dependsOnRepository.createDependsOnWithVariableType();
-			dependsOnRepository.createDependsOnWithAccess();
-			dependsOnRepository.createDependsOnWithImpllink();
-			dependsOnRepository.createDependsOnWithAnnotation();
-			dependsOnRepository.createDependsOnWithTimes();
-			dependsOnRepository.deleteNullTimesDependsOn();
-			dependsOnRepository.createDependsOnInPackage();
-			dependsOnRepository.addTimesOnDependsOnInPackage();
-			dependsOnRepository.deleteNullTimesDependsOnInPackage();
+			
+			dependsOnRepository.createDependsOnWithCallInTypes();
+			dependsOnRepository.createDependsOnWithCreateInTypes();
+			dependsOnRepository.createDependsOnWithCastInTypes();
+			dependsOnRepository.createDependsOnWithThrowInTypes();
+			dependsOnRepository.createDependsOnWithParameterInTypes();
+			dependsOnRepository.createDependsOnWithVariableTypeInTypes();
+			dependsOnRepository.createDependsOnWithAccessInTypes();
+			dependsOnRepository.createDependsOnWithAnnotationInTypes();
+			dependsOnRepository.createDependsOnWithTimesInTypes();
+			dependsOnRepository.deleteNullTimesDependsOnInTypes();
+			
+			dependsOnRepository.createDependsOnWithExtendsInFiles();
+			dependsOnRepository.createDependsOnWithImplementsInFiles();
+			dependsOnRepository.createDependsOnWithCallInFiles();
+			dependsOnRepository.createDependsOnWithCreateInFiles();
+			dependsOnRepository.createDependsOnWithCastInFiles();
+			dependsOnRepository.createDependsOnWithThrowInFiles();
+			dependsOnRepository.createDependsOnWithParameterInFiles();
+			dependsOnRepository.createDependsOnWithVariableTypeInFiles();
+			dependsOnRepository.createDependsOnWithAccessInFiles();
+			dependsOnRepository.createDependsOnWithImpllinkInFiles();
+			dependsOnRepository.createDependsOnWithAnnotationInFiles();
+			dependsOnRepository.createDependsOnWithTimesInFiles();
+			dependsOnRepository.deleteNullTimesDependsOnInFiles();
+			
+			dependsOnRepository.createDependsOnInPackages();
+			dependsOnRepository.addTimesOnDependsOnInPackages();
+			dependsOnRepository.deleteNullTimesDependsOnInPackages();
+			
 			fileRepository.pageRank(20, 0.85);
 		}
 		return new ArrayList<>();

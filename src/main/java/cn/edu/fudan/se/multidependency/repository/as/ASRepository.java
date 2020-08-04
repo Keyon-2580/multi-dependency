@@ -54,4 +54,7 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 			+ RelationType.str_DEPENDS_ON + "]-(file2) return p")
 	public List<CoChange> cochangeFilesWithoutDependsOn(@Param("count") int minCoChangeCount);
 	
+	@Query("MATCH p=(a:Type)-[r:" + RelationType.str_DEPENDS_ON + "]->(b:Type) where (a)<-[:" + RelationType.str_EXTENDS + "*1..]-(b) or (a)<-[:" + RelationType.str_IMPLEMENTS + "*1..]-(b) RETURN p")
+	public List<DependsOn> cyclicHierarchyDepends();
+	
 }

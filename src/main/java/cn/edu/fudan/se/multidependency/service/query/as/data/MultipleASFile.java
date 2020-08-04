@@ -25,8 +25,10 @@ public class MultipleASFile {
 	
 	private boolean unstable;
 	
+	private boolean cyclicHierarchy;
+	
 	public int smellCount() {
-		return (cycle ? 1 : 0) + (hublike ? 1 : 0) + (logicCoupling ? 1 : 0) + (similar ? 1 : 0) + (unstable ? 1 : 0);
+		return (cycle ? 1 : 0) + (hublike ? 1 : 0) + (logicCoupling ? 1 : 0) + (similar ? 1 : 0) + (unstable ? 1 : 0) + (cyclicHierarchy ? 1 : 0);
 	}
 	
 	private static String toString(boolean b) {
@@ -47,6 +49,9 @@ public class MultipleASFile {
 	}
 	public String similarToString() {
 		return toString(this.similar);
+	}
+	public String cyclicHierarchyToString() {
+		return toString(this.cyclicHierarchy);
 	}
 	
 }

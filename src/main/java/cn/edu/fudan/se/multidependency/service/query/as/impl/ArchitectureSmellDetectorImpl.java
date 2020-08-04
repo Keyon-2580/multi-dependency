@@ -23,14 +23,17 @@ import org.springframework.stereotype.Service;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.service.query.as.ArchitectureSmellDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.CyclicDependencyDetector;
+import cn.edu.fudan.se.multidependency.service.query.as.CyclicHierarchyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.HubLikeComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.ImplicitCrossModuleDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.SimilarComponentsDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.UnstableDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.UnusedComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.data.Cycle;
+import cn.edu.fudan.se.multidependency.service.query.as.data.CyclicHierarchy;
 import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikeFile;
 import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikePackage;
 import cn.edu.fudan.se.multidependency.service.query.as.data.LogicCouplingFiles;
@@ -66,6 +69,9 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	
 	@Autowired
 	private UnstableDependencyDetector unstableDependencyDetector;
+	
+	@Autowired
+	private CyclicHierarchyDetector cyclicHierarchyDetector;
 	
 	@Autowired
 	private ContainRelationService containRelationService;
@@ -123,7 +129,12 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	public Collection<SimilarComponents<Package>> similarPackages() {
 		return similarComponentsDetector.similarPackages();
 	}
-
+	
+	@Override
+	public Map<Project, List<CyclicHierarchy>> cyclicHierarchies() {
+		return cyclicHierarchyDetector.cyclicHierarchies();
+	}
+	
 	@Override
 	public Map<Project, List<MultipleASFile>> multipleASFiles(int minCoChangeSInLogicCouplingFiles) {
 		Map<Project, List<MultipleASFile>> result = new HashMap<>();
@@ -132,6 +143,7 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 		Map<Project, List<Cycle<ProjectFile>>> cycleFiles = cycleASDetector.cycleFiles(cycleFilesWithRelation);
 		Map<Project, List<HubLikeFile>> hubLikeFiles = hubLikeFiles();
 		Map<Project, List<UnstableFile>> unstableFiles = unstableFiles();
+		Map<Project, List<CyclicHierarchy>> cyclicHierarchies = cyclicHierarchyDetector.cyclicHierarchies();
 		Collection<LogicCouplingFiles> logicCouplingFiles = cochangesInDifferentModule(minCoChangeSInLogicCouplingFiles);
 		Collection<SimilarComponents<ProjectFile>> similarFiles = similarFiles();
 		
@@ -142,6 +154,16 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 					mas.setCycle(true);
 					map.put(file, mas);
 				}
+			}
+		}
+		
+		for(Map.Entry<Project, List<CyclicHierarchy>> entry : cyclicHierarchies.entrySet()) {
+			for(CyclicHierarchy cyclicHierarchy : entry.getValue()) {
+				Type superType = cyclicHierarchy.getSuperType();
+				ProjectFile file = containRelationService.findTypeBelongToFile(superType);
+				MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
+				mas.setCyclicHierarchy(true);
+				map.put(file, mas);
 			}
 		}
 		
@@ -250,16 +272,20 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 			cell = row.createCell(6);
 			cell.setCellValue("similar");
 			cell.setCellStyle(style);
+			cell = row.createCell(7);
+			cell.setCellValue("cyclicHierarchy");
+			cell.setCellStyle(style);
 			for (int i = 0; i < packageMetrics.size(); i++) {
-				MultipleASFile packageMetric = packageMetrics.get(i);
+				MultipleASFile mas = packageMetrics.get(i);
 				row = sheet.createRow(i + 1);
-				row.createCell(0).setCellValue(packageMetric.getFile().getId());
-				row.createCell(1).setCellValue(packageMetric.getFile().getPath());
-				row.createCell(2).setCellValue(packageMetric.cycleToString());
-				row.createCell(3).setCellValue(packageMetric.hubLikeToString());
-				row.createCell(4).setCellValue(packageMetric.unstableToString());
-				row.createCell(5).setCellValue(packageMetric.logicCouplingToString());
-				row.createCell(6).setCellValue(packageMetric.similarToString());
+				row.createCell(0).setCellValue(mas.getFile().getId());
+				row.createCell(1).setCellValue(mas.getFile().getPath());
+				row.createCell(2).setCellValue(mas.cycleToString());
+				row.createCell(3).setCellValue(mas.hubLikeToString());
+				row.createCell(4).setCellValue(mas.unstableToString());
+				row.createCell(5).setCellValue(mas.logicCouplingToString());
+				row.createCell(6).setCellValue(mas.similarToString());
+				row.createCell(7).setCellValue(mas.cyclicHierarchyToString());
 			}			
 		}
 		try {

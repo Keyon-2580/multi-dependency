@@ -137,6 +137,12 @@ public class ArchitectureSmellController {
 		return detector.similarPackages();
 	}
 	
+	@GetMapping("/api/cyclic/hierarchy")
+	@ResponseBody
+	public Object cyclicHierarchies() {
+		return detector.cyclicHierarchies();
+	}
+	
 	@GetMapping("/api/multiple")
 	@ResponseBody
 	public Object multipleAS() {
