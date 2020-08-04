@@ -106,19 +106,22 @@ public class CloneInserterForFile extends CloneInserter {
 				continue;
 			}
 			cloneFileIdToCodeNode.put(filePath2.getLineId(), file2);
-			Clone clone = new Clone(file1, file2);
-			clone.setNode1Index(start);
-			clone.setNode2Index(end);
-			clone.setNode1StartLine(filePath1.getStartLine());
-			clone.setNode1EndLine(filePath1.getEndLine());
-			clone.setNode2StartLine(filePath2.getStartLine());
-			clone.setNode2EndLine(filePath2.getEndLine());
-			clone.setValue(value);
-			clone.setCloneRelationType(CloneRelationType.str_FILE_CLONE_FILE);
-			clone.setCloneType(CloneType.getCloneType(type).toString());
-			addRelation(clone);
-			clones.add(clone);
-			sizeOfFileCloneFiles++;
+			if (value >= 0.7) {
+				Clone clone = new Clone(file1, file2);
+				clone.setNode1Index(start);
+				clone.setNode2Index(end);
+				clone.setNode1StartLine(filePath1.getStartLine());
+				clone.setNode1EndLine(filePath1.getEndLine());
+				clone.setNode2StartLine(filePath2.getStartLine());
+				clone.setNode2EndLine(filePath2.getEndLine());
+				clone.setValue(value);
+				clone.setCloneRelationType(CloneRelationType.str_FILE_CLONE_FILE);
+				clone.setCloneType(CloneType.getCloneType(type).toString());
+				addRelation(clone);
+				clones.add(clone);
+				sizeOfFileCloneFiles++;
+			}
+
 		}
 		LOGGER.info("插入文件级克隆数，对数：" + sizeOfFileCloneFiles);
 		addGroupFromGroupFile();
