@@ -29,4 +29,24 @@ public class MultipleASFile {
 		return (cycle ? 1 : 0) + (hublike ? 1 : 0) + (logicCoupling ? 1 : 0) + (similar ? 1 : 0) + (unstable ? 1 : 0);
 	}
 	
+	private static String toString(boolean b) {
+		return b ? "T" : "";
+	}
+	
+	public String cycleToString() {
+		return toString(this.cycle);
+	}
+	public String hubLikeToString() {
+		return toString(this.hublike);
+	}
+	public String unstableToString() {
+		return toString(this.unstable);
+	}
+	public String logicCouplingToString() {
+		return toString(this.logicCoupling);
+	}
+	public String similarToString() {
+		return toString(this.similar);
+	}
+	
 }

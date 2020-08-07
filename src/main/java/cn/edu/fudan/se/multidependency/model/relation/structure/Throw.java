@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_THORW)
+@RelationshipEntity(RelationType.str_THROW)
 public class Throw implements RelationWithTimes, StructureRelation {
 
 	private static final long serialVersionUID = -5858763297137981586L;

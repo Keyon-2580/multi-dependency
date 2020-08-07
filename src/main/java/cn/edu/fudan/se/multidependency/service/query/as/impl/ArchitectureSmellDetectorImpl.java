@@ -1,5 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.query.as.impl;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,6 +10,13 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -189,6 +198,82 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 		}
 		
 		return result;
+	}
+
+	@Override
+	public void printMultipleASFiles(OutputStream stream, int minCoChangeSInLogicCouplingFiles) {
+		Workbook hwb = new XSSFWorkbook();
+		Map<Project, List<MultipleASFile>> multiple = multipleASFiles(minCoChangeSInLogicCouplingFiles);
+		List<Project> projects = new ArrayList<>(multiple.keySet());
+		projects.sort((p1, p2) -> {
+			return p1.getName().compareTo(p2.getName());
+		});
+		for(Project project : projects) {
+			Sheet sheet = hwb.createSheet(new StringBuilder().append(project.getName()).append("(").append(project.getLanguage()).append(")").toString());
+			List<MultipleASFile> packageMetrics = multiple.get(project);
+			Row row = sheet.createRow(0);
+			CellStyle style = hwb.createCellStyle();
+			style.setAlignment(HorizontalAlignment.CENTER);
+//			sheet.setColumnWidth(0, "xxxxxxxxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(1, "xxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(2, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(3, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(4, "xxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(5, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(6, "xxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(7, "xxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(8, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(9, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(10, "xxxxxx".length() * 256);
+//			sheet.setColumnWidth(11, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(12, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
+//			sheet.setColumnWidth(13, "xxxxxxxxxx".length() * 256);
+			Cell cell = null;
+			cell = row.createCell(0);
+			cell.setCellValue("id");
+			cell.setCellStyle(style);
+			cell = row.createCell(1);
+			cell.setCellValue("文件");
+			cell.setCellStyle(style);
+			cell = row.createCell(2);
+			cell.setCellValue("cycle");
+			cell.setCellStyle(style);
+			cell = row.createCell(3);
+			cell.setCellValue("hublike");
+			cell.setCellStyle(style);
+			cell = row.createCell(4);
+			cell.setCellValue("unstable");
+			cell.setCellStyle(style);
+			cell = row.createCell(5);
+			cell.setCellValue("logicCoupling");
+			cell.setCellStyle(style);
+			cell = row.createCell(6);
+			cell.setCellValue("similar");
+			cell.setCellStyle(style);
+			for (int i = 0; i < packageMetrics.size(); i++) {
+				MultipleASFile packageMetric = packageMetrics.get(i);
+				row = sheet.createRow(i + 1);
+				row.createCell(0).setCellValue(packageMetric.getFile().getId());
+				row.createCell(1).setCellValue(packageMetric.getFile().getPath());
+				row.createCell(2).setCellValue(packageMetric.cycleToString());
+				row.createCell(3).setCellValue(packageMetric.hubLikeToString());
+				row.createCell(4).setCellValue(packageMetric.unstableToString());
+				row.createCell(5).setCellValue(packageMetric.logicCouplingToString());
+				row.createCell(6).setCellValue(packageMetric.similarToString());
+			}			
+		}
+		try {
+			hwb.write(stream);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				stream.close();
+				hwb.close();
+			} catch (IOException e) {
+			}
+		}
+		
 	}
 
 }

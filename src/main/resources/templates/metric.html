@@ -70,28 +70,30 @@
 	<div class="col-sm-12 row" style="margin-bottom: 15px;">
 		<div class="col-sm-12">
 			<ul>
-				<li><a href="#projectMetrics">项目指标</a></li>
-				<li><a href="#packageMetrics">目录指标</a></li>
-				<li><a href="#fileMetrics">文件指标</a></li>
+				<li><a href="#projectMetricsDiv">项目指标</a></li>
+				<li><a href="#packageMetricsDiv">目录指标</a></li>
+				<li><a href="#fileMetricsDiv">文件指标</a></li>
 			</ul>
 		</div>
-		<div class="col-sm-12">
-			<button id="projectButton" class="btn btn-primary">导出excel</button>
+		<div id="projectMetricsDiv" class="col-sm-12">
+			<div><h3>Project</h3></div>
+			<div class="col-sm-12"><button id="projectButton" class="btn btn-primary">输出 excel</button></div>
+			<div id="projectMetrics" class="col-sm-12">
+			
+			</div>
 		</div>
-		<div id="projectMetrics" class="col-sm-12">
-		
+		<div id="packageMetricsDiv" class="col-sm-12">
+			<div><h3>Package</h3></div>
+			<div id="packageMetrics" class="col-sm-12">
+			
+			</div>
 		</div>
-		<div class="col-sm-12">
-			<button id="packageButton" class="btn btn-primary">导出excel</button>
-		</div>
-		<div id="packageMetrics" class="col-sm-12">
-		
-		</div>
-		<div class="col-sm-12">
-			<button id="fileButton" class="btn btn-primary">导出excel</button>
-		</div>
-		<div id="fileMetrics" class="col-sm-12">
-		
+		<div id="fileMetricsDiv" class="col-sm-12">
+			<div><h3>File</h3></div>
+			<div class="col-sm-12"><button id="fileButton" class="btn btn-primary">全部输出</button><a href="/metric/excel/file">打印</a></div>
+			<div id="fileMetrics" class="col-sm-12">
+			
+			</div>
 		</div>
 	</div>
 	<script type="text/javascript" th:inline="javascript">

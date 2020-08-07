@@ -1,20 +1,19 @@
 package cn.edu.fudan.se.multidependency.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+
+import lombok.Getter;
 
 @Configuration
 public class PropertyConfig {
-	/*@Value("${data.code.path}")
-	private String codePath;
 	
-	public String getCodePath() {
-		return codePath;
-	}
+	@Getter
+	@Value("${config.starter.cochange}")
+	private boolean calculateCoChange;
 	
-	@Value("${data.code.language}")
-	private String language;
+	@Getter
+	@Value("${config.starter.depends_on}")
+	private boolean calculateDependsOn;
 	
-	public String getLanguage() {
-		return language;
-	}*/
 }
