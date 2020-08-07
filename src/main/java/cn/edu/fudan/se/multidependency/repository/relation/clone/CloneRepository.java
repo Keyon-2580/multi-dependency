@@ -19,19 +19,19 @@ public interface CloneRepository extends Neo4jRepository<Clone, Long> {
 	 * @param cloneType
 	 * @return
 	 */
-	@Query("match p= ()-[r:" + RelationType.str_CLONE + "]->() where r.cloneRelationType={cloneRelationType} return p")
+	@Query("match p= ()-[:" + RelationType.str_CLONE + "]->() where r.cloneRelationType={cloneRelationType} return p")
 	public List<Clone> findAllClonesByCloneType(@Param("cloneRelationType") String cloneRelationType);
 	
-	@Query("match p= (:ProjectFile)-[r:" + RelationType.str_CLONE + "]->(:ProjectFile) return p")
+	@Query("match p= (:ProjectFile)-[:" + RelationType.str_CLONE + "]->(:ProjectFile) return p")
 	public List<Clone> findAllFileClones();
 	
-	@Query("match p= (:Function)-[r:" + RelationType.str_CLONE + "]->(:Function) return p")
+	@Query("match p= (:Function)-[:" + RelationType.str_CLONE + "]->(:Function) return p")
 	public List<Clone> findAllFunctionClones();
 	
-	@Query("match p= (:Type)-[r:" + RelationType.str_CLONE + "]->(:Type) return p")
+	@Query("match p= (:Type)-[:" + RelationType.str_CLONE + "]->(:Type) return p")
 	public List<Clone> findAllTypeClones();
 	
-	@Query("match p= (:Snippet)-[r:" + RelationType.str_CLONE + "]->(:Snippet) return p")
+	@Query("match p= (:Snippet)-[:" + RelationType.str_CLONE + "]->(:Snippet) return p")
 	public List<Clone> findAllSnippetClones();
 
 	/**
