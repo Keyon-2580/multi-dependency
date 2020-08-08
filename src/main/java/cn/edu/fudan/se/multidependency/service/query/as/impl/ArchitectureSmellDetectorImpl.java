@@ -41,6 +41,7 @@ import cn.edu.fudan.se.multidependency.service.query.as.data.MultipleASFile;
 import cn.edu.fudan.se.multidependency.service.query.as.data.SimilarComponents;
 import cn.edu.fudan.se.multidependency.service.query.as.data.UnstableFile;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
+import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import lombok.Setter;
 
 @Service
@@ -75,6 +76,9 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	
 	@Autowired
 	private ContainRelationService containRelationService;
+	
+	@Autowired
+	private NodeService nodeService;
 	
 	@Override
 	public Map<Project, List<Cycle<Package>>> cyclePackages() {
@@ -136,7 +140,7 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	}
 	
 	@Override
-	public Map<Project, List<MultipleASFile>> multipleASFiles(int minCoChangeSInLogicCouplingFiles) {
+	public Map<Project, List<MultipleASFile>> multipleASFiles(int minCoChangeSInLogicCouplingFiles, boolean removeNoASFile) {
 		Map<Project, List<MultipleASFile>> result = new HashMap<>();
 		
 		Map<ProjectFile, MultipleASFile> map = new HashMap<>();
@@ -200,6 +204,13 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 			}
 		}
 		
+		if(!removeNoASFile) {
+			for(ProjectFile file : nodeService.queryAllFiles()) {
+				MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
+				map.put(file, mas);
+			}
+		}
+		
 		for(Map.Entry<ProjectFile, MultipleASFile> entry : map.entrySet()) {
 			ProjectFile file = entry.getKey();
 			MultipleASFile value = entry.getValue();
@@ -225,7 +236,7 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	@Override
 	public void printMultipleASFiles(OutputStream stream, int minCoChangeSInLogicCouplingFiles) {
 		Workbook hwb = new XSSFWorkbook();
-		Map<Project, List<MultipleASFile>> multiple = multipleASFiles(minCoChangeSInLogicCouplingFiles);
+		Map<Project, List<MultipleASFile>> multiple = multipleASFiles(minCoChangeSInLogicCouplingFiles, false);
 		List<Project> projects = new ArrayList<>(multiple.keySet());
 		projects.sort((p1, p2) -> {
 			return p1.getName().compareTo(p2.getName());

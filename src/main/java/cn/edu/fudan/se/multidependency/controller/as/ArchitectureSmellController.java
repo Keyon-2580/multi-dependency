@@ -146,7 +146,7 @@ public class ArchitectureSmellController {
 	@GetMapping("/api/multiple")
 	@ResponseBody
 	public Object multipleAS() {
-		return detector.multipleASFiles(4);
+		return detector.multipleASFiles(4, false);
 	}
 
 }
