@@ -1,9 +1,5 @@
 package cn.edu.fudan.se.multidependency;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,8 +12,6 @@ import cn.edu.fudan.se.multidependency.utils.YamlUtil;
 public class InsertOtherData {
     private static final Logger LOGGER = LoggerFactory.getLogger(InsertOtherData.class);
 
-    private static final Executor executor = Executors.newCachedThreadPool();
-
     public static void main(String[] args) {
         LOGGER.info("InsertOtherData");
         insert(args);
@@ -27,9 +21,7 @@ public class InsertOtherData {
         try {
             YamlUtil.YamlObject yaml = YamlUtil.getYaml(args);
 
-            CountDownLatch latchOfStatic = new CountDownLatch(0);
-            CountDownLatch latchOfOthers = new CountDownLatch(5);
-            ThreadService ts = new ThreadService(yaml, latchOfStatic, latchOfOthers);
+            ThreadService ts = new ThreadService(yaml);
 
             RepositoryService service = RepositoryService.getInstance();
             RepositoryService serializedService = (RepositoryService) FileUtil.readObject(yaml.getSerializePath());
@@ -39,12 +31,8 @@ public class InsertOtherData {
             LOGGER.info("静态分析节点数：" + service.getNodes().size());
             LOGGER.info("静态分析关系数：" + service.getRelations().size());
 
-            executor.execute(ts::msDependAnalyse);
-            executor.execute(ts::dynamicAnalyse);
-            executor.execute(ts::gitAnalyse);
-            executor.execute(ts::cloneAnalyse);
-            executor.execute(ts::libAnalyse);
-            latchOfOthers.await();
+            ts.othersAnalyse();
+            
             InserterForNeo4j repository = RepositoryService.getInstance();
             repository.setDatabasePath(yaml.getNeo4jDatabasePath());
             repository.setDelete(yaml.isDeleteDatabase());
@@ -52,7 +40,7 @@ public class InsertOtherData {
         } catch (Exception e) {
             // 所有步骤中有一个出错，都会终止执行
             e.printStackTrace();
+            LOGGER.error("插入出错：" + e.getMessage());
         }
-        System.exit(0);
     }
 }

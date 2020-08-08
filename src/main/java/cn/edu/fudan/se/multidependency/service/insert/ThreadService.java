@@ -3,12 +3,8 @@ package cn.edu.fudan.se.multidependency.service.insert;
 import java.io.File;
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,51 +36,53 @@ import cn.edu.fudan.se.multidependency.utils.config.RestfulAPIConfig;
 
 public class ThreadService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ThreadService.class);
-	private static YamlUtil.YamlObject yaml;
-	private static JSONConfigFile config;
-	private static ExecutorService executor = Executors.newCachedThreadPool();
-	private static ExecutorService executorForGit = Executors.newFixedThreadPool(5);
-	private static CountDownLatch latchOfStatic, latchOfOthers;
+	
+	private static final int EXECUTOR_FOR_GIR_REPOSITORY_COUNT = 5;
+	
+	public static final int OTHERS_ANALYSE_COUNT = 5;
+	
+	private YamlUtil.YamlObject yaml;
+	private JSONConfigFile config;
+	private CountDownLatch latchOfOthers;
 
-	public ThreadService(YamlUtil.YamlObject yaml, CountDownLatch latchOfStatic, CountDownLatch latchOfOthers) throws Exception {
-		ThreadService.yaml = yaml;
-		config = ProjectConfigUtil.extract(JSONUtil.extractJSONObject(new File(yaml.getProjectsConfig())));
-		ThreadService.latchOfStatic = latchOfStatic;
-		ThreadService.latchOfOthers = latchOfOthers;
-		if(yaml.getProjectThreadsType() == -1){
-			this.executor = Executors.newCachedThreadPool();
-		}else{
-			this.executor = Executors.newFixedThreadPool(yaml.getProjectThreadsType());
-		}
+	public ThreadService(YamlUtil.YamlObject yaml) throws Exception {
+		this.yaml = yaml;
+		this.config = ProjectConfigUtil.extract(JSONUtil.extractJSONObject(new File(yaml.getProjectsConfig())));
 	}
 
-	public void staticAnalyse() {
+	public void staticAnalyse() throws Exception {
 		Collection<ProjectConfig> projectsConfig = config.getProjectsConfig();
-		CountDownLatch latchOfProjects = new CountDownLatch(projectsConfig.size());
-		LOGGER.info("项目结构存储线程开始，数量：" + latchOfProjects.getCount());
-		for (ProjectConfig projectConfig : projectsConfig) {
-			executor.execute(() -> {
-				try {
-					staticAnalyseCore(projectConfig);
-				} catch (Exception e) {
-					LOGGER.error(projectConfig.getPath() + " " + e.getMessage());
-					e.printStackTrace();
-				} finally {
-					LOGGER.info("项目结构存储线程结束，线程-1：" + (latchOfProjects.getCount() - 1));
-					latchOfProjects.countDown();
-				}
-			});
-		}
+		LOGGER.info("项目结构存储线程开始，项目数量：" + projectsConfig.size());
+		ExecutorService executorForStructure = yaml.getProjectThreadsType() <= 0 ? Executors.newCachedThreadPool() 
+				: Executors.newFixedThreadPool(yaml.getProjectThreadsType());
 		try {
+			CountDownLatch latchOfProjects = new CountDownLatch(projectsConfig.size());
+			for (ProjectConfig projectConfig : projectsConfig) {
+				executorForStructure.execute(() -> {
+					try {
+						staticAnalyseCore(projectConfig);
+					} catch (Exception e) {
+						LOGGER.error(projectConfig.getPath() + " " + e.getMessage());
+						e.printStackTrace();
+					} finally {
+						synchronized (latchOfProjects) {
+							LOGGER.info(new StringBuilder().append("解析项目 ")
+									.append(projectConfig.getProject())
+									.append("(").append(projectConfig.getLanguage()).append(")")
+									.append(" 结束，线程- 1：").append((latchOfProjects.getCount() - 1)).toString());
+						}
+						latchOfProjects.countDown();
+					}
+				});
+			}
+			// 待所有项目解析完成
 			latchOfProjects.await();
-		} catch (Exception e) {
-			e.printStackTrace();
 		} finally {
-			latchOfStatic.countDown();
+			executorForStructure.shutdown();
 		}
 	}
 
-	public void staticAnalyseCore(ProjectConfig projectConfig) throws Exception {
+	private void staticAnalyseCore(ProjectConfig projectConfig) throws Exception {
 		LOGGER.info(projectConfig.getProject() + " " + projectConfig.getLanguage());
 		DependsEntityRepoExtractor extractor = new Depends096Extractor();
 		extractor.setIncludeDirs(projectConfig.includeDirsArray());
@@ -104,52 +102,81 @@ public class ThreadService {
 		}
 		inserter.addNodesAndRelations();
 	}
-
-	public void msDependAnalyse() {
+	
+	public void othersAnalyse() throws Exception {
+		latchOfOthers = new CountDownLatch(OTHERS_ANALYSE_COUNT);
+		ExecutorService executorForOthers = Executors.newCachedThreadPool();
 		try {
-			if (config.getMicroServiceDependencies() != null) {
-				LOGGER.info("微服务依赖存储");
-				new MicroServiceArchitectureInserter(config.getMicroServiceDependencies()).addNodesAndRelations();
-				LOGGER.info("微服务依赖存储添加结束");
+			executorForOthers.execute(this::msDependAnalyse);
+			executorForOthers.execute(this::dynamicAnalyse);
+			executorForOthers.execute(this::gitAnalyse);
+			executorForOthers.execute(this::cloneAnalyse);
+			executorForOthers.execute(this::libAnalyse);
+			latchOfOthers.await();
+		} finally {
+			executorForOthers.shutdown();
+		}
+	}
+
+	private void msDependAnalyse() {
+		try {
+			if (config.getMicroServiceDependencies() == null) {
+				return ;
 			}
+			LOGGER.info("微服务依赖存储");
+			new MicroServiceArchitectureInserter(config.getMicroServiceDependencies()).addNodesAndRelations();
 		} catch (Exception e) {
 			e.printStackTrace();
 			LOGGER.error("微服务结构依赖提取出错：" + e.getMessage());
 		} finally {
-			LOGGER.info("微服务依赖存储线程结束，线程-1：" + (latchOfOthers.getCount() - 1));
+			if(config.getMicroServiceDependencies() == null) {
+				logEndOfOtherAnalyse("未执行微服务依赖存储");
+			} else {
+				logEndOfOtherAnalyse("微服务依赖存储线程结束");
+			}
 			latchOfOthers.countDown();
 		}
 	}
 
-	public void dynamicAnalyse() {
+	private void dynamicAnalyse() {
 		try {
-			if (yaml.isAnalyseDynamic()) {
-				LOGGER.info("动态运行分析");
-				DynamicConfig dynamicConfig = config.getDynamicsConfig();
-				File[] dynamicLogs = InserterForNeo4jServiceFactory.analyseDynamicLogs(dynamicConfig);
-
-				LOGGER.info("输出trace，只输出日志中记录的trace，不做数据库操作");
-				new TraceStartExtractor(dynamicLogs).addNodesAndRelations();
-
-				for (Language language : Language.values()) {
-					InserterForNeo4jServiceFactory.insertDynamic(language, dynamicLogs).addNodesAndRelations();
-				}
-
-				LOGGER.info("引入特性与测试用例，对应到trace");
-				new FeatureAndTestCaseFromJSONFileForMicroserviceInserter(dynamicConfig.getFeaturesPath()).addNodesAndRelations();
+			if(!yaml.isAnalyseDynamic()) {
+				return ;
 			}
+			LOGGER.info("动态运行分析");
+			DynamicConfig dynamicConfig = config.getDynamicsConfig();
+			File[] dynamicLogs = InserterForNeo4jServiceFactory.analyseDynamicLogs(dynamicConfig);
+			
+			LOGGER.info("输出trace，只输出日志中记录的trace，不做数据库操作");
+			new TraceStartExtractor(dynamicLogs).addNodesAndRelations();
+			
+			for (Language language : Language.values()) {
+				InserterForNeo4jServiceFactory.insertDynamic(language, dynamicLogs).addNodesAndRelations();
+			}
+			
+			LOGGER.info("引入特性与测试用例，对应到trace");
+			new FeatureAndTestCaseFromJSONFileForMicroserviceInserter(dynamicConfig.getFeaturesPath()).addNodesAndRelations();
 		} catch (Exception e) {
 			e.printStackTrace();
+			LOGGER.error("Error: dynamicAnalyse " + e.getMessage());
 		} finally {
-			LOGGER.info("动态分析线程结束，线程-1：" + (latchOfOthers.getCount() - 1));
+			if(yaml.isAnalyseDynamic()) {
+				logEndOfOtherAnalyse("动态分析线程结束");
+			} else {
+				logEndOfOtherAnalyse("未执行动态分析");
+			}
 			latchOfOthers.countDown();
 		}
 	}
 
-	public void gitAnalyse() {
+	private void gitAnalyse() {
 		try {
-			if (yaml.isAnalyseGit()) {
-				LOGGER.info("Git库分析");
+			if(!yaml.isAnalyseGit()) {
+				return ;
+			}
+			LOGGER.info("Git库分析");
+			ExecutorService executorForGit = Executors.newFixedThreadPool(EXECUTOR_FOR_GIR_REPOSITORY_COUNT);
+			try {
 				Collection<GitConfig> gitsConfig = config.getGitsConfig();
 				CountDownLatch latchOfGits = new CountDownLatch((gitsConfig).size());
 				for (GitConfig gitConfig : gitsConfig) {
@@ -166,59 +193,83 @@ public class ThreadService {
 					});
 				}
 				latchOfGits.await();
+			} catch (Exception e) {
+				e.printStackTrace();
+				LOGGER.error("Error: gitAnalyse " + e.getMessage());
+			} finally {
+				executorForGit.shutdown();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		} finally {
-			LOGGER.info("git分析线程结束，线程-1：" + (latchOfOthers.getCount() - 1));
-			executorForGit.shutdown();
+			if(yaml.isAnalyseGit()) {
+				logEndOfOtherAnalyse("git分析线程结束");
+			} else {
+				logEndOfOtherAnalyse("未执行git分析");
+			}
 			latchOfOthers.countDown();
 		}
 	}
 
-	public void cloneAnalyse() {
+	private void cloneAnalyse() {
 		try {
-			if (yaml.isAnalyseClone()) {
-				LOGGER.info("克隆依赖分析");
-				for (CloneConfig cloneConfig : config.getClonesConfig()) {
-					switch (cloneConfig.getGranularity()) {
-						case function:
-							new CloneInserterForMethod(cloneConfig.getNamePath(), cloneConfig.getResultPath(), cloneConfig.getGroupPath(), cloneConfig.getLanguage()).addNodesAndRelations();
-							break;
-						case file:
-							new CloneInserterForFile(cloneConfig.getNamePath(), cloneConfig.getResultPath(), cloneConfig.getGroupPath(), cloneConfig.getLanguage()).addNodesAndRelations();
-							break;
-					}
+			if(!yaml.isAnalyseClone()) {
+				return ;
+			}
+			LOGGER.info("克隆依赖分析");
+			for (CloneConfig cloneConfig : config.getClonesConfig()) {
+				switch (cloneConfig.getGranularity()) {
+				case function:
+					new CloneInserterForMethod(cloneConfig.getNamePath(), cloneConfig.getResultPath(), cloneConfig.getGroupPath(), cloneConfig.getLanguage()).addNodesAndRelations();
+					break;
+				case file:
+					new CloneInserterForFile(cloneConfig.getNamePath(), cloneConfig.getResultPath(), cloneConfig.getGroupPath(), cloneConfig.getLanguage()).addNodesAndRelations();
+					break;
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			LOGGER.error("Error: cloneAnalyse " + e.getMessage());
 		} finally {
-			LOGGER.info("克隆分析线程结束，线程-1：" + (latchOfOthers.getCount() - 1));
+			if(yaml.isAnalyseClone()) {
+				logEndOfOtherAnalyse("克隆分析线程结束");
+			} else {
+				logEndOfOtherAnalyse("未执行克隆分析");
+			}
 			latchOfOthers.countDown();
 		}
 
 	}
 
-	public void libAnalyse() {
+	private void libAnalyse() {
 		try {
-			if (yaml.isAnalyseLib()) {
-				LOGGER.info("三方依赖分析");
-				for (LibConfig libConfig : config.getLibsConfig()) {
-					switch(libConfig.getLanguage()) {
-						case java:
-							new LibraryInserter(libConfig.getPath()).addNodesAndRelations();
-							break;
-						case cpp:
-							break;
-					}
+			if(!yaml.isAnalyseLib()) {
+				return ;
+			}
+			LOGGER.info("三方依赖分析");
+			for (LibConfig libConfig : config.getLibsConfig()) {
+				switch(libConfig.getLanguage()) {
+				case java:
+					new LibraryInserter(libConfig.getPath()).addNodesAndRelations();
+					break;
+				case cpp:
+					break;
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			LOGGER.error("Error: libAnalyse " + e.getMessage());
 		} finally {
-			LOGGER.info("lib分析线程结束，线程-1：" + (latchOfOthers.getCount() - 1));
+			if(yaml.isAnalyseLib()) {
+				logEndOfOtherAnalyse("lib分析线程结束");
+			} else {
+				logEndOfOtherAnalyse("未执行lib分析");
+			}
 			latchOfOthers.countDown();
+		}
+	}
+	
+	private void logEndOfOtherAnalyse(String start) {
+		synchronized (latchOfOthers) {
+			LOGGER.info(String.join("，线程 - 1：", start, String.valueOf(latchOfOthers.getCount() - 1)));
 		}
 	}
 }
