@@ -65,7 +65,7 @@ public class CloneInserterForMethod extends CloneInserter {
 
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
-		LOGGER.info("方法级克隆对数：" + cloneResults.size());
+		LOGGER.info("从文件读入"+ language.toString() + "方法级克隆对数：" + cloneResults.size());
 		List<Clone> clones = new ArrayList<>();
 		int sizeOfClones = 0;
 		for(CloneResultFromCsv cloneResult : cloneResults) {
@@ -182,17 +182,17 @@ public class CloneInserterForMethod extends CloneInserter {
 				sizeOfClones++;
 			}
 		}
-		LOGGER.info("插入方法级克隆数，对数：" + sizeOfClones);
+		LOGGER.info("插入"+language.toString()+"方法级克隆数，对数：" + sizeOfClones);
 		addGroupFromGroupFile();
 	}
 	
 	private void addGroupFromGroupFile() {
-		long groupCount = cloneGroupNumber;
+		long groupCount = 0;
 		for(Group group : this.groups) {
 			CloneGroup cloneGroup = new CloneGroup();
 			cloneGroup.setLanguage(language.toString());
 			cloneGroup.setEntityId(generateEntityId());
-			cloneGroup.setName(String.join("_", "method", "group", String.valueOf(cloneGroupNumber++)));
+			cloneGroup.setName(String.join("_", language.toString(), "method", "group", String.valueOf(groupCount++)));
 			cloneGroup.setSize(group.getGroupIds().size());
 			CloneLevel level = null;
 			boolean uniqueNodeType = true;
@@ -225,6 +225,7 @@ public class CloneInserterForMethod extends CloneInserter {
 			}
 			addNode(cloneGroup, null);
 		}
-		LOGGER.info("插入方法级克隆组，组数：" + (cloneGroupNumber - groupCount));
+		cloneGroupNumber += groupCount;
+		LOGGER.info("插入"+language.toString()+"方法级克隆组，组数：" + (groupCount));
 	}
 }

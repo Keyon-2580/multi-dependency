@@ -12,9 +12,9 @@ public enum CloneLevel {
 	public static CloneLevel getCodeNodeCloneLevel(CodeNode node) {
 		if(node instanceof ProjectFile) {
 			return file;
-		} else if(node instanceof Type) {
-			return function;
 		} else if(node instanceof Function) {
+			return function;
+		} else if(node instanceof Type) {
 			return type;
 		} else if(node instanceof Snippet) {
 			return snippet;

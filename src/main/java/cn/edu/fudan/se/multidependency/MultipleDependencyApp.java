@@ -71,39 +71,5 @@ public class MultipleDependencyApp {
 		}
 	}
 	
-	@Bean
-	public FeatureOrganizationService organize(MicroserviceService microserviceService, DynamicAnalyseService dynamicAnalyseService, ContainRelationService containRelationService) {
-		System.out.println("organizeFeature");
-		Collection<MicroService> allMicroService = microserviceService.findAllMicroService();
-		Map<Feature, List<TestCaseExecuteFeature>> featureExecutedByTestCases = dynamicAnalyseService.findAllFeatureExecutedByTestCases();
-		Map<TestCase, List<TestCaseExecuteFeature>> testCaseExecuteFeatures = dynamicAnalyseService.findAllTestCaseExecuteFeatures();
-		Map<TestCase, List<TestCaseRunTrace>> testCaseRunTraces = dynamicAnalyseService.findAllTestCaseRunTraces();
-		Map<Trace, List<Span>> traceToSpans = new HashMap<>();
-		Map<Span, List<SpanCallSpan>> spanCallSpans = new HashMap<>();
-		Map<Span, MicroServiceCreateSpan> spanBelongToMicroService = new HashMap<>();
-		Map<Feature, Feature> featureToParentFeature = dynamicAnalyseService.findAllFeatureToParentFeature();
-		Map<Scenario, List<ScenarioDefineTestCase>> scenarioDefineTestCases = dynamicAnalyseService.findAllScenarioDefineTestCases();
-		
-		for (List<TestCaseRunTrace> runs : testCaseRunTraces.values()) {
-			for(TestCaseRunTrace run : runs) {
-				Trace trace = run.getTrace();
-				List<Span> spans = containRelationService.findTraceContainSpans(trace);
-				traceToSpans.put(trace, spans);
-				for (Span span : spans) {
-					List<SpanCallSpan> callSpans = microserviceService.findSpanCallSpans(span);
-					spanCallSpans.put(span, callSpans);
-					MicroServiceCreateSpan microServiceCreateSpan = microserviceService.findMicroServiceCreateSpan(span);
-					spanBelongToMicroService.put(span, microServiceCreateSpan);
-				}
-			}
-		}
-		Map<MicroService, List<RestfulAPI>> microServiceContainAPIs = microserviceService.microServiceContainsAPIs();
-		Map<Span, SpanInstanceOfRestfulAPI> spanInstanceOfRestfulAPIs = microserviceService.findAllSpanInstanceOfRestfulAPIs();
-		FeatureOrganizationService organization = new FeatureOrganizationService(
-				allMicroService, testCaseExecuteFeatures, featureExecutedByTestCases, 
-				featureToParentFeature, testCaseRunTraces, traceToSpans, spanCallSpans, spanBelongToMicroService, scenarioDefineTestCases,
-				microServiceContainAPIs, spanInstanceOfRestfulAPIs);
 
-		return organization;
-	}	
 }

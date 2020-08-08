@@ -1,12 +1,14 @@
 package cn.edu.fudan.se.multidependency.service.query.dynamic;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.MicroServiceCreateSpan;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanCallSpan;
+import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanInstanceOfRestfulAPI;
+import cn.edu.fudan.se.multidependency.service.query.MicroserviceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
@@ -416,6 +418,42 @@ public class DynamicAnalyseServiceImpl implements DynamicAnalyseService {
 			result.put(s, defines);
 		}
 		return result;
+	}
+
+	@Bean
+	public FeatureOrganizationService organize(MicroserviceService microserviceService, DynamicAnalyseService dynamicAnalyseService, ContainRelationService containRelationService) {
+		System.out.println("organizeFeature");
+		Collection<MicroService> allMicroService = microserviceService.findAllMicroService();
+		Map<Feature, List<TestCaseExecuteFeature>> featureExecutedByTestCases = dynamicAnalyseService.findAllFeatureExecutedByTestCases();
+		Map<TestCase, List<TestCaseExecuteFeature>> testCaseExecuteFeatures = dynamicAnalyseService.findAllTestCaseExecuteFeatures();
+		Map<TestCase, List<TestCaseRunTrace>> testCaseRunTraces = dynamicAnalyseService.findAllTestCaseRunTraces();
+		Map<Trace, List<Span>> traceToSpans = new HashMap<>();
+		Map<Span, List<SpanCallSpan>> spanCallSpans = new HashMap<>();
+		Map<Span, MicroServiceCreateSpan> spanBelongToMicroService = new HashMap<>();
+		Map<Feature, Feature> featureToParentFeature = dynamicAnalyseService.findAllFeatureToParentFeature();
+		Map<Scenario, List<ScenarioDefineTestCase>> scenarioDefineTestCases = dynamicAnalyseService.findAllScenarioDefineTestCases();
+
+		for (List<TestCaseRunTrace> runs : testCaseRunTraces.values()) {
+			for(TestCaseRunTrace run : runs) {
+				Trace trace = run.getTrace();
+				List<Span> spans = containRelationService.findTraceContainSpans(trace);
+				traceToSpans.put(trace, spans);
+				for (Span span : spans) {
+					List<SpanCallSpan> callSpans = microserviceService.findSpanCallSpans(span);
+					spanCallSpans.put(span, callSpans);
+					MicroServiceCreateSpan microServiceCreateSpan = microserviceService.findMicroServiceCreateSpan(span);
+					spanBelongToMicroService.put(span, microServiceCreateSpan);
+				}
+			}
+		}
+		Map<MicroService, List<RestfulAPI>> microServiceContainAPIs = microserviceService.microServiceContainsAPIs();
+		Map<Span, SpanInstanceOfRestfulAPI> spanInstanceOfRestfulAPIs = microserviceService.findAllSpanInstanceOfRestfulAPIs();
+		FeatureOrganizationService organization = new FeatureOrganizationService(
+				allMicroService, testCaseExecuteFeatures, featureExecutedByTestCases,
+				featureToParentFeature, testCaseRunTraces, traceToSpans, spanCallSpans, spanBelongToMicroService, scenarioDefineTestCases,
+				microServiceContainAPIs, spanInstanceOfRestfulAPIs);
+
+		return organization;
 	}
 
 }

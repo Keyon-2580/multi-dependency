@@ -70,7 +70,7 @@ public class CloneInserterForFile extends CloneInserter {
 
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
-		LOGGER.info("文件克隆对数：" + cloneResults.size());
+		LOGGER.info("从文件读入"+ language.toString() + "文件克隆对数：" + cloneResults.size());
 		int sizeOfFileCloneFiles = 0;
 		List<Clone> clones = new ArrayList<>();
 		for(CloneResultFromCsv cloneResult : cloneResults) {
@@ -106,31 +106,34 @@ public class CloneInserterForFile extends CloneInserter {
 				continue;
 			}
 			cloneFileIdToCodeNode.put(filePath2.getLineId(), file2);
-			Clone clone = new Clone(file1, file2);
-			clone.setNode1Index(start);
-			clone.setNode2Index(end);
-			clone.setNode1StartLine(filePath1.getStartLine());
-			clone.setNode1EndLine(filePath1.getEndLine());
-			clone.setNode2StartLine(filePath2.getStartLine());
-			clone.setNode2EndLine(filePath2.getEndLine());
-			clone.setValue(value);
-			clone.setCloneRelationType(CloneRelationType.str_FILE_CLONE_FILE);
-			clone.setCloneType(CloneType.getCloneType(type).toString());
-			addRelation(clone);
-			clones.add(clone);
-			sizeOfFileCloneFiles++;
+			if (value >= 0.7) {
+				Clone clone = new Clone(file1, file2);
+				clone.setNode1Index(start);
+				clone.setNode2Index(end);
+				clone.setNode1StartLine(filePath1.getStartLine());
+				clone.setNode1EndLine(filePath1.getEndLine());
+				clone.setNode2StartLine(filePath2.getStartLine());
+				clone.setNode2EndLine(filePath2.getEndLine());
+				clone.setValue(value);
+				clone.setCloneRelationType(CloneRelationType.str_FILE_CLONE_FILE);
+				clone.setCloneType(CloneType.getCloneType(type).toString());
+				addRelation(clone);
+				clones.add(clone);
+				sizeOfFileCloneFiles++;
+			}
+
 		}
-		LOGGER.info("插入文件级克隆数，对数：" + sizeOfFileCloneFiles);
+		LOGGER.info("插入"+language.toString()+"文件级克隆数，对数：" + sizeOfFileCloneFiles);
 		addGroupFromGroupFile();
 	}
 	
 	private void addGroupFromGroupFile() {
-		long groupCount = cloneGroupNumber;
+		long groupCount = 0;
 		for(Group group : this.groups) {
 			CloneGroup cloneGroup = new CloneGroup();
 			cloneGroup.setLanguage(language.toString());
 			cloneGroup.setEntityId(generateEntityId());
-			cloneGroup.setName(String.join("_", "file", "group", String.valueOf(cloneGroupNumber++)));
+			cloneGroup.setName(String.join("_", language.toString(), "file", "group", String.valueOf(groupCount++)));
 			cloneGroup.setSize(group.getGroupIds().size());
 			cloneGroup.setCloneLevel(CloneLevel.file.toString());
 			addNode(cloneGroup, null);
@@ -155,7 +158,8 @@ public class CloneInserterForFile extends CloneInserter {
 				addRelation(new Contain(cloneGroup, node));
 			}
 		}
-		LOGGER.info("插入文件级克隆组，组数：" + (cloneGroupNumber - groupCount));
+		cloneGroupNumber += groupCount;
+		LOGGER.info("插入"+language.toString()+"文件级克隆组，组数：" + (groupCount));
 	}
 
 }
