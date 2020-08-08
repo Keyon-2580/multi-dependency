@@ -11,8 +11,13 @@ spring:
 server:
   port: 8080
 
+config:
+  starter:
+    cochange: true
+    depends_on: true
 data:
   project_config: src/main/resources/project/template.json
+  project_analyse_threads_count: 3
   dynamic_analyse: true
   git_analyse: true
   lib_analyse: true
