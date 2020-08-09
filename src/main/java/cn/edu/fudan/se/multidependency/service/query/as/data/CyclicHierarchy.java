@@ -8,7 +8,6 @@ import java.util.Set;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 public class CyclicHierarchy {

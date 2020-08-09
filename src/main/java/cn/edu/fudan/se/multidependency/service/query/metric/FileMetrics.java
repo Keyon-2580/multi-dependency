@@ -5,10 +5,12 @@ import org.springframework.data.neo4j.annotation.QueryResult;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper=false)
 @QueryResult
-public class FileMetrics implements FanIOMetric {
+public class FileMetrics extends FanIOMetric {
 
 	private ProjectFile file;
 	

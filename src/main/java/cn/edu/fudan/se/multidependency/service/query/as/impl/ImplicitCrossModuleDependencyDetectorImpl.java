@@ -28,8 +28,8 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 	private ASRepository asRepository;
 
 	@Override
-	public Collection<LogicCouplingFiles> cochangesInDifferentModule(int minCochange) {
-		Collection<CoChange> cochangesWithOutDependsOn = asRepository.cochangeFilesWithoutDependsOn(minCochange);
+	public Collection<LogicCouplingFiles> cochangesInDifferentModule() {
+		Collection<CoChange> cochangesWithOutDependsOn = asRepository.cochangeFilesWithoutDependsOn(getMinCoChange());
 		List<LogicCouplingFiles> result = new ArrayList<>();
 		for(CoChange cochange : cochangesWithOutDependsOn) {
 			if(staticAnalyseService.isInDifferentModule(cochange.getFile1(), cochange.getFile2())) {
@@ -51,6 +51,17 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 			}
 		}
 		return result;
+	}
+	
+	private int minCoChange = 10;
+	
+	@Override
+	public void setMinCoChange(int minCoChange) {
+		this.minCoChange = minCoChange;
+	}
+	@Override
+	public int getMinCoChange() {
+		return minCoChange;
 	}
 
 }

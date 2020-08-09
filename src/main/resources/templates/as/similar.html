@@ -30,11 +30,6 @@
 <script type="text/javascript" th:src="@{/js/cytoscapeutils.js}"></script>
 <script type="text/javascript" th:src="@{/js/as/hublike.js}"></script>
 <script type="text/javascript" th:src="@{/js/as/unstable.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/cyclic.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/hierarchy.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/similar.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/unused.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/icd.js}"></script>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
@@ -83,10 +78,10 @@
 						<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
 					</select>
 				</div>
-			</div>
 				<div>
-					<a href="/as/cyclic" target="_blank">检测</a>
+					<a href="/as/cycle" target="_blank">检测</a>
 				</div>
+			</div>
 		</div>
 		<div class="col-sm-12">
 			<div>
@@ -94,9 +89,6 @@
 				<select class="projectSelect">
 					<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
 				</select>
-			</div>
-			<div>
-				<a href="/as/cylic/hierarchy" target="_blank">检测</a>
 			</div>
 		</div>
 		<div class="col-sm-12">
@@ -107,10 +99,10 @@
 				<select id="hubLikeDependencyProjects" class="projectSelect">
 					<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
 				</select><br/>
-				最小文件级fan in：<input placeholder="输入文件级最小 fan in" id="hubLikeMinFileFanIn" type="number" /><br/>
-				最小文件级fan out：<input placeholder="输入文件级最小 fan out" id="hubLikeMinFileFanOut" type="number" /><br/>
-				最小包级fan in：<input placeholder="输入包级最小 fan in" id="hubLikeMinPackageFanIn" type="number" /><br/>
-				最小包级fan out：<input placeholder="输入包级最小 fan out" id="hubLikeMinPackageFanOut" type="number" />
+				最小文件级fan in：<input placeholder="输入文件级最小 fan in" id="hubLikeMinFileFanIn" /><br/>
+				最小文件级fan out：<input placeholder="输入文件级最小 fan out" id="hubLikeMinFileFanOut" /><br/>
+				最小包级fan in：<input placeholder="输入包级最小 fan in" id="hubLikeMinPackageFanIn" /><br/>
+				最小包级fan out：<input placeholder="输入包级最小 fan out" id="hubLikeMinPackageFanOut" />
 			</div>
 			<div>
 				<button id="hubLikeMinFanIOSave">保存</button>
@@ -125,9 +117,9 @@
 				<select id="unstableDependencyProjects" class="projectSelect">
 					<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
 				</select><br/>
-				FanInThreshold：<input id="unstableFanInThreshold" type="number" /><br/>
-				CoChangeTimesThreshold：<input id="unstableCoChangeTimesThreshold" type="number" /><br/>
-				CoChangeFilesThreshold：<input id="unstableCoChangeFilesThreshold" type="number" />
+				FanInThreshold：<input id="unstableFanInThreshold" /><br/>
+				CoChangeTimesThreshold：<input id="unstableCoChangeTimesThreshold" /><br/>
+				CoChangeFilesThreshold：<input id="unstableCoChangeFilesThreshold" />
 			</div>
 			<div>
 				<button id="unstableThresholdSave">保存</button>
@@ -138,39 +130,18 @@
 			<div>
 				<h4>Implicit Cross-Module Dependency</h4>
 			</div>
-			<div>
-				minCoChange：<input id="icdMinCoChange" type="number" />
-			</div>
-			<div>
-				<button id="icdMinCoChangeSave">保存</button>
-				<a href="/as/icd" target="_blank">检测</a>
-			</div>
 		</div>
 		<div class="col-sm-12">
 			<div>
 				<h4>Similar Components</h4>
 			</div>
-			<div>
-				<a href="/as/similar" target="_blank">检测</a>
-			</div>
 		</div>
-		<div class="col-sm-12">
+				<div class="col-sm-12">
 			<div>
-				<h4>Unused Components</h4>
+				<h4>Unused Component</h4>
 				<select class="projectSelect">
 					<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
 				</select>
-			</div>
-			<div>
-				<a href="/as/unused" target="_blank">检测</a>
-			</div>
-		</div>
-		<div class="col-sm-12">
-			<div>
-				<h4>Multiple Smells</h4>
-			</div>
-			<div>
-				<a href="/as/multiple" target="_blank">检测</a>
 			</div>
 		</div>
 	</div>
@@ -179,7 +150,6 @@
 		 $(document).ready(function() {
 			hublike(cytoscapeutil()).init();
 			unstable(cytoscapeutil()).init();
-			icd(cytoscapeutil()).init();
 		});
 		// ]]>
 	</script>

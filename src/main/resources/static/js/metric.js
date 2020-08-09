@@ -37,7 +37,7 @@ var metric = function() {
 						html += "<td>" + metrics[i].changeTimes + "</td>";
 						html += "<td>" + metrics[i].cochangeCommitTimes + "</td>";
 						html += "<td>" + metrics[i].cochangeFileCount + "</td>";
-						html += "<td>" + metrics[i].score + "</td>";
+						html += "<td>" + metrics[i].file.score + "</td>";
 						html += "</tr>";
 					}
 					html += "</table></div>";

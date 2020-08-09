@@ -29,7 +29,7 @@ public class UnstableFile {
 	
 	public void addCoChange(CoChange cochange) {
 		ProjectFile cochangeFile = cochange.getFile1();
-		if(!cochangeFile.equals(file)) {
+		if(cochangeFile.equals(file)) {
 			cochangeFile = cochange.getFile2();
 		}
 		cochangeFiles.add(cochangeFile);

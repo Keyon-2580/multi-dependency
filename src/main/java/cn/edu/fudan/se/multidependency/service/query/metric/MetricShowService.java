@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Service
@@ -102,7 +101,7 @@ public class MetricShowService {
 
 	public void printFileMetricExcel(OutputStream stream) {
 		Workbook hwb = new XSSFWorkbook();
-		Map<Long, List<FileMetrics>> allFileMetrics = metricCalculator.calculateFileMetrics(true);
+		Map<Long, List<FileMetrics>> allFileMetrics = metricCalculator.calculateFileMetrics();
 		Collection<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
 			Sheet sheet = hwb.createSheet(new StringBuilder().append(project.getName()).append("(").append(project.getLanguage()).append(")").toString());

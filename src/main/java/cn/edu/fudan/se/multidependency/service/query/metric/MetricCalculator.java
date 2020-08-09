@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
@@ -20,7 +21,6 @@ import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
-import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Service
 public class MetricCalculator {
@@ -38,39 +38,36 @@ public class MetricCalculator {
 	private GitAnalyseService gitAnalyseService;
 	
 	@Autowired
-	private NodeService nodeService;
-	
-	@Autowired
 	private ContainRelationService containRelationService;
 	
 	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
 	private ModularityCalculator modularityCalculator;
 	
-	private Map<Long, List<FileMetrics>> fileMetricsCache = null;
-	/*public Map<Long, List<FileMetrics>> calculateFileMetrics() {
-		if(fileMetricsCache != null) {
-			return fileMetricsCache;
+	private Map<ProjectFile, FileMetrics> commitFileMetricsCache = null;
+	public Map<ProjectFile, FileMetrics> calculateCommitFileMetrics() {
+		if(commitFileMetricsCache != null) {
+			return commitFileMetricsCache;
 		}
-		Map<Long, List<FileMetrics>> result = new HashMap<>();
-		for(FileMetrics fileMetrics : fileRepository.calculateFileMetricsWithCoChangeCommitTimes()) {
-			ProjectFile file = fileMetrics.getFile();
-			Project project = containRelationService.findFileBelongToProject(file);
-			List<FileMetrics> temp = result.getOrDefault(project, new ArrayList<>());
-			temp.add(fileMetrics);
-			result.put(project.getId(), temp);
+		Map<ProjectFile, FileMetrics> result = new HashMap<>();
+		List<FileMetrics> metrics = fileRepository.calculateFileMetricsWithCoChangeCommitTimes();
+		for(FileMetrics metric : metrics) {
+			result.put(metric.getFile(), metric);
 		}
-		fileMetricsCache = result;
+		commitFileMetricsCache = result;
 		return result;
-	}*/
-	public Map<Long, List<FileMetrics>> calculateFileMetrics(boolean calculateCoCangeCommitTimes) {
+	}
+	
+	private Map<Long, List<FileMetrics>> fileMetricsCache = null;
+	public Map<Long, List<FileMetrics>> calculateFileMetrics() {
 		if(fileMetricsCache != null) {
 			return fileMetricsCache;
 		}
 		Map<Long, List<FileMetrics>> result = new HashMap<>();
+		Map<ProjectFile, FileMetrics> commitFileMetricsCache = calculateCommitFileMetrics();
 		for(FileMetrics fileMetrics : fileRepository.calculateFileMetrics()) {
 			ProjectFile file = fileMetrics.getFile();
-			if(calculateCoCangeCommitTimes) {
-				fileMetrics.setCochangeCommitTimes(fileRepository.cochangeCommitsWithFile(file.getId()).size());
+			if(commitFileMetricsCache.get(file) != null) {
+				fileMetrics.setCochangeCommitTimes(commitFileMetricsCache.get(file).getCochangeCommitTimes());
 			}
 			Project project = containRelationService.findFileBelongToProject(file);
 			List<FileMetrics> temp = result.getOrDefault(project.getId(), new ArrayList<>());
@@ -81,18 +78,26 @@ public class MetricCalculator {
 		return result;
 	}
 
-	private Collection<ProjectMetrics> projectMetricsCache = null;
-	public Collection<ProjectMetrics> calculateProjectMetrics() {
+	private Map<Project, ProjectMetrics> projectMetricsCache = null;
+	public Map<Project, ProjectMetrics> calculateProjectMetrics(boolean calculateModularityAndCommits) {
 		if(projectMetricsCache != null) {
 			return projectMetricsCache;
 		}
-		Collection<ProjectMetrics> result = projectRepository.calculateProjectMetrics();
-		for(ProjectMetrics projectMetric : result) {
-			Collection<Commit> commits = gitAnalyseService.findCommitsInProject(projectMetric.getProject());
-			projectMetric.setCommitTimes(commits.size());
-			projectMetric.setModularity(modularityCalculator.calculate(projectMetric.getProject()).getValue());
+		Collection<ProjectMetrics> temp = projectRepository.calculateProjectMetrics();
+		Map<Project, ProjectMetrics> result = new HashMap<>();
+		Map<Project, ProjectMetrics> calculateResult = new ConcurrentHashMap<>();
+		for(ProjectMetrics projectMetric : temp) {
+			if(calculateModularityAndCommits) {
+				Collection<Commit> commits = gitAnalyseService.findCommitsInProject(projectMetric.getProject());
+				projectMetric.setCommitTimes(commits.size());
+				projectMetric.setModularity(modularityCalculator.calculate(projectMetric.getProject()).getValue());
+				calculateResult.put(projectMetric.getProject(), projectMetric);
+			}
+			result.put(projectMetric.getProject(), projectMetric);
 		}
-		projectMetricsCache = result;
+		if(!calculateResult.isEmpty()) {
+			projectMetricsCache = calculateResult;
+		}
 		return result;
 	}
 	

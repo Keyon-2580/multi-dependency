@@ -25,14 +25,14 @@ public class UnusedComponentDetectorImpl implements UnusedComponentDetector {
 	private ContainRelationService containRelationService;
 
 	@Override
-	public Map<Project, List<Package>> unusedPackage() {
-		Map<Project, List<Package>> result = new HashMap<>();
+	public Map<Long, List<Package>> unusedPackage() {
+		Map<Long, List<Package>> result = new HashMap<>();
 		Collection<Package> pcks = asRepository.unusedPackages();
 		for(Package pck : pcks) {
 			Project project = containRelationService.findPackageBelongToProject(pck);
 			List<Package> temp = result.getOrDefault(project, new ArrayList<>());
 			temp.add(pck);
-			result.put(project, temp);
+			result.put(project.getId(), temp);
 		}
 		return result;
 	}

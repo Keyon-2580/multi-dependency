@@ -227,4 +227,14 @@ public class NodeServiceImpl implements NodeService {
 		return allProjectsCache;
 	}
 
+	@Override
+	public Map<Long, Project> allProjectsById() {
+		Collection<Project> projects = allProjects();
+		Map<Long, Project> result = new HashMap<>();
+		for(Project project : projects) {
+			result.put(project.getId(), project);
+		}
+		return result;
+	}
+
 }

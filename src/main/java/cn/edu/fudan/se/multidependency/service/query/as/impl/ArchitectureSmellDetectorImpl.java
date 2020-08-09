@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
@@ -20,7 +18,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
@@ -31,35 +28,26 @@ import cn.edu.fudan.se.multidependency.service.query.as.HubLikeComponentDetector
 import cn.edu.fudan.se.multidependency.service.query.as.ImplicitCrossModuleDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.SimilarComponentsDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.UnstableDependencyDetector;
-import cn.edu.fudan.se.multidependency.service.query.as.UnusedComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.data.Cycle;
 import cn.edu.fudan.se.multidependency.service.query.as.data.CyclicHierarchy;
 import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikeFile;
-import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikePackage;
 import cn.edu.fudan.se.multidependency.service.query.as.data.LogicCouplingFiles;
 import cn.edu.fudan.se.multidependency.service.query.as.data.MultipleASFile;
 import cn.edu.fudan.se.multidependency.service.query.as.data.SimilarComponents;
 import cn.edu.fudan.se.multidependency.service.query.as.data.UnstableFile;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
-import lombok.Setter;
 
 @Service
 public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector {
 	
-	@Setter
-	private boolean cyclePackagesWithRelation = false;
-	
-	@Setter
-	private boolean cycleFilesWithRelation = false;
-	
 	@Autowired
 	private CyclicDependencyDetector cycleASDetector;
 
-	@Autowired
-	private UnusedComponentDetector unusedComponentDetector;
+//	@Autowired
+//	private UnusedComponentDetector unusedComponentDetector;
 	
-	@Resource(name="hubLikeComponentDetectorImpl")
+	@Autowired
 	private HubLikeComponentDetector hubLikeComponentDetector;
 	
 	@Autowired
@@ -81,75 +69,16 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	private NodeService nodeService;
 	
 	@Override
-	public Map<Project, List<Cycle<Package>>> cyclePackages() {
-		return cycleASDetector.cyclePackages(cyclePackagesWithRelation);
-	}
-	
-	@Override
-	public Map<Project, List<Cycle<ProjectFile>>> cycleFiles() {
-		return cycleASDetector.cycleFiles(cycleFilesWithRelation);
-	}
-
-	@Override
-	public Map<Project, List<Package>> unusedPackages() {
-		return unusedComponentDetector.unusedPackage();
-	}
-
-	@Override
-	public Map<Project, List<HubLikePackage>> hubLikePackages() {
-		return hubLikeComponentDetector.hubLikePackages();
-	}
-	
-	@Override
-	public Map<Project, List<HubLikeFile>> hubLikeFiles() {
-		return hubLikeComponentDetector.hubLikeFiles();
-	}
-
-	@Override
-	public Collection<LogicCouplingFiles> cochangesInDifferentModule(int minCochange) {
-		return icdDependencyDetector.cochangesInDifferentModule(minCochange);
-	}
-	
-	@Override
-	public Map<Project, List<UnstableFile>> unstableFiles(int minFanIn, int cochangeTimesThreshold, int cochangeFilesThreshold) {
-		unstableDependencyDetector.setFanInThreshold(minFanIn);
-		unstableDependencyDetector.setCoChangeFilesThreshold(cochangeFilesThreshold);
-		unstableDependencyDetector.setCoChangeTimesThreshold(cochangeTimesThreshold);
-		return unstableDependencyDetector.unstableFiles();
-	}
-
-	@Override
-	public Map<Project, List<UnstableFile>> unstableFiles() {
-		unstableDependencyDetector.initThreshold();
-		return unstableDependencyDetector.unstableFiles();
-	}
-
-	@Override
-	public Collection<SimilarComponents<ProjectFile>> similarFiles() {
-		return similarComponentsDetector.similarFiles();
-	}
-
-	@Override
-	public Collection<SimilarComponents<Package>> similarPackages() {
-		return similarComponentsDetector.similarPackages();
-	}
-	
-	@Override
-	public Map<Project, List<CyclicHierarchy>> cyclicHierarchies() {
-		return cyclicHierarchyDetector.cyclicHierarchies();
-	}
-	
-	@Override
-	public Map<Project, List<MultipleASFile>> multipleASFiles(int minCoChangeSInLogicCouplingFiles, boolean removeNoASFile) {
+	public Map<Project, List<MultipleASFile>> multipleASFiles(boolean removeNoASFile) {
 		Map<Project, List<MultipleASFile>> result = new HashMap<>();
 		
 		Map<ProjectFile, MultipleASFile> map = new HashMap<>();
-		Map<Project, List<Cycle<ProjectFile>>> cycleFiles = cycleASDetector.cycleFiles(cycleFilesWithRelation);
-		Map<Project, List<HubLikeFile>> hubLikeFiles = hubLikeFiles();
-		Map<Project, List<UnstableFile>> unstableFiles = unstableFiles();
-		Map<Project, List<CyclicHierarchy>> cyclicHierarchies = cyclicHierarchyDetector.cyclicHierarchies();
-		Collection<LogicCouplingFiles> logicCouplingFiles = cochangesInDifferentModule(minCoChangeSInLogicCouplingFiles);
-		Collection<SimilarComponents<ProjectFile>> similarFiles = similarFiles();
+		Map<Long, List<Cycle<ProjectFile>>> cycleFiles = cycleASDetector.cycleFiles();
+		Map<Long, List<HubLikeFile>> hubLikeFiles = hubLikeComponentDetector.hubLikeFiles();
+		Map<Long, List<UnstableFile>> unstableFiles = unstableDependencyDetector.unstableFiles();
+		Map<Long, List<CyclicHierarchy>> cyclicHierarchies = cyclicHierarchyDetector.cyclicHierarchies();
+		Collection<LogicCouplingFiles> logicCouplingFiles = icdDependencyDetector.cochangesInDifferentModule();
+		Collection<SimilarComponents<ProjectFile>> similarFiles = similarComponentsDetector.similarFiles();
 		
 		for(List<Cycle<ProjectFile>> cycleFilesGroup : cycleFiles.values()) {
 			for(Cycle<ProjectFile> files : cycleFilesGroup) {
@@ -161,7 +90,7 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 			}
 		}
 		
-		for(Map.Entry<Project, List<CyclicHierarchy>> entry : cyclicHierarchies.entrySet()) {
+		for(Map.Entry<Long, List<CyclicHierarchy>> entry : cyclicHierarchies.entrySet()) {
 			for(CyclicHierarchy cyclicHierarchy : entry.getValue()) {
 				Type superType = cyclicHierarchy.getSuperType();
 				ProjectFile file = containRelationService.findTypeBelongToFile(superType);
@@ -234,9 +163,9 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	}
 
 	@Override
-	public void printMultipleASFiles(OutputStream stream, int minCoChangeSInLogicCouplingFiles) {
+	public void printMultipleASFiles(OutputStream stream) {
 		Workbook hwb = new XSSFWorkbook();
-		Map<Project, List<MultipleASFile>> multiple = multipleASFiles(minCoChangeSInLogicCouplingFiles, false);
+		Map<Project, List<MultipleASFile>> multiple = multipleASFiles(false);
 		List<Project> projects = new ArrayList<>(multiple.keySet());
 		projects.sort((p1, p2) -> {
 			return p1.getName().compareTo(p2.getName());

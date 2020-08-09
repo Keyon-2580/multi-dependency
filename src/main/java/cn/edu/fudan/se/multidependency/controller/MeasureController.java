@@ -76,13 +76,13 @@ public class MeasureController {
     @GetMapping("/file")
     @ResponseBody
     public Object calculateFileMetrics() {
-    	return metricCalculator.calculateFileMetrics(true);
+    	return metricCalculator.calculateFileMetrics();
     }
     
     @GetMapping("/project")
     @ResponseBody
     public Collection<ProjectMetrics> calculateProjectMetrics() {
-    	return metricCalculator.calculateProjectMetrics();
+    	return metricCalculator.calculateProjectMetrics(true).values();
     }
     
     @GetMapping("/package")

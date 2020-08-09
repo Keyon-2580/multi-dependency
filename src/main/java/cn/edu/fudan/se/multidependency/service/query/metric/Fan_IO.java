@@ -8,9 +8,11 @@ import java.util.List;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
-public class Fan_IO<T extends Node> implements FanIOMetric, Serializable {
+@EqualsAndHashCode(callSuper=false)
+public class Fan_IO<T extends Node> extends FanIOMetric implements Serializable {
 	
 	private static final long serialVersionUID = 110963529785572680L;
 

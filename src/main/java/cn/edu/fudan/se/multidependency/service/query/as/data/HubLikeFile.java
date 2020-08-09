@@ -1,6 +1,5 @@
 package cn.edu.fudan.se.multidependency.service.query.as.data;
 
-import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import lombok.AllArgsConstructor;
 import lombok.Data;

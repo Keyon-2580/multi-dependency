@@ -1,14 +1,20 @@
 package cn.edu.fudan.se.multidependency.service.query.metric;
 
+import java.io.Serializable;
+
 import org.springframework.data.neo4j.annotation.QueryResult;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper=false)
 @QueryResult
-public class PackageMetrics implements FanIOMetric {
+public class PackageMetrics extends FanIOMetric implements Serializable {
+
+	private static final long serialVersionUID = 1749274223605679116L;
 
 	private Package pck;
 	
@@ -41,5 +47,5 @@ public class PackageMetrics implements FanIOMetric {
 	public Node getComponent() {
 		return pck;
 	}
-	
+
 }

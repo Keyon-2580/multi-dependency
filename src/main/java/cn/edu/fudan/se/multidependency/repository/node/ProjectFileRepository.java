@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
 
@@ -18,6 +17,10 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	@Query("match (f:ProjectFile) where f.path={filePath} return f")
 	public ProjectFile findFileByPath(@Param("filePath") String filePath);
 	
+	/**
+	 * 所有文件的指标
+	 * @return
+	 */
 	@Query("MATCH (file:ProjectFile)\r\n" + 
 			"WITH size((file)-[:DEPENDS_ON]->()) as fanOut, \r\n" + 
 			"     size((file)<-[:DEPENDS_ON]-()) as fanIn,\r\n" + 
@@ -29,9 +32,13 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"RETURN  file,fanIn,fanOut,changeTimes,nom,loc,cochangeFileCount order by(file.path) desc;")
 	public List<FileMetrics> calculateFileMetrics();
 	
-	@Query("match (file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) where id(file) = {fileId} with c where size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 return c")
-	public List<Commit> cochangeCommitsWithFile(@Param("fileId") long fileId);
+//	@Query("match (file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) where id(file) = {fileId} with c where size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 return c")
+//	public List<Commit> cochangeCommitsWithFile(@Param("fileId") long fileId);
 	
+	/**
+	 * 有commit更新的文件，并且该commit提交文件的个数大于1
+	 * @return
+	 */
 	@Query("MATCH (file:ProjectFile)\r\n" + 
 			"with file\r\n" +
 			"match (file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) with file, c where size((c)-[:" 
@@ -52,7 +59,7 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"YIELD nodeId, score\r\n" + 
 			"with algo.getNodeById(nodeId) AS file, score \r\n" + 
 			"set file.score=score\r\n" + 
-			"RETURN file, score\r\n" + 
+			"RETURN file\r\n" + 
 			"ORDER BY score DESC")
 	public List<ProjectFile> pageRank(@Param("iterations") int iterations, @Param("dampingFactor") double dampingFactor);
 	

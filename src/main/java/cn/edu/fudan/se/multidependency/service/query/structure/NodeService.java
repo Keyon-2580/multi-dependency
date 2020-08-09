@@ -16,6 +16,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Type;
 
 public interface NodeService {
 	Collection<Project> allProjects();
+	Map<Long, Project> allProjectsById();
 	
 	Node queryNodeById(long id);
 	

@@ -4,36 +4,7 @@ import java.io.OutputStream;
 
 public interface ArchitectureSmellDetector {
 	
-	void setCyclePackagesWithRelation(boolean withRelation);
-
-	void setCycleFilesWithRelation(boolean withRelation);	
+	Object multipleASFiles(boolean removeNoASFile);
 	
-	/**
-	 * 包的循环依赖的检测
-	 * @return
-	 */
-	Object cyclePackages();
-	
-	Object cycleFiles();
-	
-	Object unusedPackages();
-	
-	Object hubLikePackages();
-	
-	Object hubLikeFiles();
-	
-	Object cochangesInDifferentModule(int minCochange);
-	
-	Object unstableFiles(int minFanIn, int cochangeTimesThreshold, int cochangeFilesThreshold);
-	Object unstableFiles();
-	
-	Object similarFiles();
-	
-	Object similarPackages();
-	
-	Object multipleASFiles(int minCoChangeSInLogicCouplingFiles, boolean removeNoASFile);
-	
-	Object cyclicHierarchies();
-	
-	void printMultipleASFiles(OutputStream stream, int minCoChangeSInLogicCouplingFiles);
+	void printMultipleASFiles(OutputStream stream);
 }

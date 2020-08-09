@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,17 +20,51 @@ import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculator;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
-import lombok.Setter;
 
 @Service
 public class UnstableDependencyDetectorImpl implements UnstableDependencyDetector {
 
-	@Setter
-	private int fanInThreshold;
-	@Setter
-	private int coChangeTimesThreshold;
-	@Setter
-	private int coChangeFilesThreshold;
+	private Map<Project, Integer> projectToFanInThreshold = new ConcurrentHashMap<>();
+	private Map<Project, Integer> projectToCoChangeTimesThreshold = new ConcurrentHashMap<>();
+	private Map<Project, Integer> projectToCoChangeFilesThreshold = new ConcurrentHashMap<>();
+	
+	public void setFanInThreshold(Project project, int threshold) {
+		this.projectToFanInThreshold.put(project, threshold);
+	}
+
+	@Override
+	public void setCoChangeTimesThreshold(Project project, int cochangeTimesThreshold) {
+		this.projectToCoChangeTimesThreshold.put(project, cochangeTimesThreshold);
+	}
+
+	@Override
+	public void setCoChangeFilesThreshold(Project project, int cochangeFilesThreshold) {
+		this.projectToCoChangeFilesThreshold.put(project, cochangeFilesThreshold);
+	}
+
+	@Override
+	public int getFanInThreshold(Project project) {
+		if(projectToFanInThreshold.get(project) == null) {
+			projectToFanInThreshold.put(project, 20);
+		}
+		return projectToFanInThreshold.get(project);
+	}
+
+	@Override
+	public int getCoChangeTimesThreshold(Project project) {
+		if(projectToCoChangeTimesThreshold.get(project) == null) {
+			projectToCoChangeTimesThreshold.put(project, 4);
+		}
+		return projectToCoChangeTimesThreshold.get(project);
+	}
+
+	@Override
+	public int getCoChangeFilesThreshold(Project project) {
+		if(projectToCoChangeFilesThreshold.get(project) == null) {
+			projectToCoChangeFilesThreshold.put(project, 10);
+		}
+		return projectToCoChangeFilesThreshold.get(project);
+	}
 	
 	@Autowired
 	private MetricCalculator metricCalculator;
@@ -44,29 +79,29 @@ public class UnstableDependencyDetectorImpl implements UnstableDependencyDetecto
 	private GitAnalyseService gitAnalyseService;
 
 	@Override
-	public Map<Project, List<UnstableFile>> unstableFiles() {
-		Map<Project, List<UnstableFile>> result = new HashMap<>();
-		
-		Map<Long, List<FileMetrics>> fileMetrics = metricCalculator.calculateFileMetrics(false);
-		for(Map.Entry<Long, List<FileMetrics>> entry : fileMetrics.entrySet()) {
-			Project project = nodeService.queryProject(entry.getKey());
-			List<UnstableFile> unstableFiles = new ArrayList<>();
-			for(FileMetrics metrics : entry.getValue()) {
-				UnstableFile unstableFile = isUnstableFile(metrics);
-				if(unstableFile != null) {
-					unstableFiles.add(unstableFile);
-				}
-			}
-			if(!unstableFiles.isEmpty()) {
-				result.put(project, unstableFiles);
-			}
+	public Map<Long, List<UnstableFile>> unstableFiles() {
+		Map<Long, List<UnstableFile>> result = new HashMap<>();
+		Collection<Project> projects = nodeService.allProjects();
+		for(Project project : projects) {
+			result.put(project.getId(), unstableFiles(project));
 		}
-		
 		return result;
 	}
 	
-	private UnstableFile isUnstableFile(FileMetrics metrics) {
-		if(metrics.getFanIn() < fanInThreshold) {
+	public List<UnstableFile> unstableFiles(Project project) {
+		List<FileMetrics> fileMetrics = metricCalculator.calculateFileMetrics().get(project.getId());
+		List<UnstableFile> unstableFiles = new ArrayList<>();
+		for(FileMetrics metrics : fileMetrics) {
+			UnstableFile unstableFile = isUnstableFile(project, metrics);
+			if(unstableFile != null) {
+				unstableFiles.add(unstableFile);
+			}
+		}
+		return unstableFiles;
+	}
+	
+	private UnstableFile isUnstableFile(Project project, FileMetrics metrics) {
+		if(metrics.getFanIn() < getFanInThreshold(project)) {
 			return null;
 		}
 		int coChangeFilesCount = 0;
@@ -75,13 +110,13 @@ public class UnstableDependencyDetectorImpl implements UnstableDependencyDetecto
 		List<CoChange> cochanges = new ArrayList<>();
 		for(ProjectFile dependedOnFile : fanInFiles) {
 			CoChange cochange = gitAnalyseService.findCoChangeBetweenTwoFiles(file, dependedOnFile);
-			if(cochange != null && cochange.getTimes() >= this.coChangeTimesThreshold) {
+			if(cochange != null && cochange.getTimes() >= getCoChangeTimesThreshold(project)) {
 				coChangeFilesCount++;
 				cochanges.add(cochange);
 			}
 		}
 		UnstableFile result = null;
-		if(coChangeFilesCount >= coChangeFilesThreshold) {
+		if(coChangeFilesCount >= getCoChangeFilesThreshold(project)) {
 			result = new UnstableFile();
 			result.setFile(file);
 			result.setFanIn(metrics.getFanIn());
@@ -89,13 +124,5 @@ public class UnstableDependencyDetectorImpl implements UnstableDependencyDetecto
 		}
 		return result;
 	}
-
-	@Override
-	public void initThreshold() {
-		fanInThreshold = 20;
-		coChangeTimesThreshold = 4;
-		coChangeFilesThreshold = 10;
-	}
-
 
 }
