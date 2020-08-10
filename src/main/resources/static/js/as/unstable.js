@@ -31,12 +31,33 @@ var unstable = function(cytoscapeutil) {
 	}
 	
 	var _save = function() {
-		
+		var setThreshold = function(projectId, fanInThreshold, cochangeTimesThreshold, cochangeFilesThreshold) {
+			$.ajax({
+				type: "post",
+				url: "/as/unstable/threshold/" + projectId 
+					+ "?fanInThreshold=" + fanInThreshold
+					+ "&cochangeTimesThreshold=" + cochangeTimesThreshold
+					+ "&cochangeFilesThreshold=" + cochangeFilesThreshold,
+				success: function(result) {
+					if(result == true) {
+						alert("修改成功");
+					} else {
+						alert("修改失败");
+					}
+				}
+			});
+		};
+		$("#unstableThresholdSave").click(function() {
+			var fanInThreshold = $("#unstableFanInThreshold").val();
+			var cochangeTimesThreshold = $("#unstableCoChangeTimesThreshold").val();
+			var cochangeFilesThreshold = $("#unstableCoChangeFilesThreshold").val();
+			var projectId = $("#unstableDependencyProjects").val();
+			setThreshold(projectId, fanInThreshold, cochangeTimesThreshold, cochangeFilesThreshold);
+		});
 	}
 	
 	var _get = function() {
 		var getThreshold = function(projectId) {
-			console.log("rrrr");
 			$.ajax({
 				type: "get",
 				url: "/as/unstable/threshold/" + projectId,

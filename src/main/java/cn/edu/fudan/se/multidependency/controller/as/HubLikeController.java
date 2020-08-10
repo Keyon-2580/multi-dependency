@@ -50,20 +50,18 @@ public class HubLikeController {
 		return result;
 	}
 
-	@PostMapping("/fanio/{projectId}/{fileOrPackage}")
+	@PostMapping("/fanio/{projectId}")
 	@ResponseBody
-	public Object hublike(@PathVariable("fileOrPackage") String fileOrPackage,
-			@PathVariable("projectId") long projectId, 
-			@RequestParam("minFanIn") int minFanIn, @RequestParam("minFanOut") int minFanOut) {
+	public boolean hublike(@PathVariable("projectId") long projectId, 
+			@RequestParam("hubLikeMinFileFanIn") int hubLikeMinFileFanIn, @RequestParam("hubLikeMinFileFanOut") int hubLikeMinFileFanOut, 
+			@RequestParam("hubLikeMinPackageFanIn") int hubLikeMinPackageFanIn, @RequestParam("hubLikeMinPackageFanOut") int hubLikeMinPackageFanOut) {
 		Project project = nodeService.queryProject(projectId);
-		if("package".equals(fileOrPackage)) {
-			hubLikeComponentDetector.setProjectMinPackageFanIO(project, minFanIn, minFanOut);
-			hubLikeComponentDetector.hubLikePackages(project);
-		} else {
-			hubLikeComponentDetector.setProjectMinFileFanIO(project, minFanIn, minFanOut);
-			hubLikeComponentDetector.hubLikeFiles(project);
+		if(project == null) {
+			return false;
 		}
-		return "";
+		hubLikeComponentDetector.setProjectMinFileFanIO(project, hubLikeMinFileFanIn, hubLikeMinFileFanOut);
+		hubLikeComponentDetector.setProjectMinPackageFanIO(project, hubLikeMinPackageFanIn, hubLikeMinPackageFanOut);
+		return true;
 	}
 	
 }

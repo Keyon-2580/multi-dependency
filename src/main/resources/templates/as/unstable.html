@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Architectural Smell</title>
+<title>Unstable Dependency</title>
 <script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/jquery.treeview.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/popper-1.14.7.min.js}"></script>
@@ -78,7 +78,6 @@
 			var projects = [[${projects}]];
 			var unstableFiles = [[${files}]];
 			unstable(cytoscapeutil()).unstable(projects, unstableFiles);	
-			unstable(cytoscapeutil()).init();
 		});
 		// ]]>
 	</script>

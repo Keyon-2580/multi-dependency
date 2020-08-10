@@ -45,7 +45,35 @@ var hublike = function(cytoscapeutil) {
 	}
 	
 	var _save = function() {
-		
+		var setMinFanIO = function(projectId, 
+				hubLikeMinFileFanIn, hubLikeMinFileFanOut,
+				hubLikeMinPackageFanIn, hubLikeMinPackageFanOut) {
+			$.ajax({
+				type: "post",
+				url: "/as/hublike/fanio/" + projectId
+					+ "?hubLikeMinFileFanIn=" + hubLikeMinFileFanIn
+					+ "&hubLikeMinFileFanOut=" + hubLikeMinFileFanOut
+					+ "&hubLikeMinPackageFanIn=" + hubLikeMinPackageFanIn
+					+ "&hubLikeMinPackageFanOut=" + hubLikeMinPackageFanOut,
+				success: function(result) {
+					if(result == true) {
+						alert("修改成功");
+					} else {
+						alert("修改失败");
+					}
+				}
+			})
+		}
+		$("#hubLikeMinFanIOSave").click(function() {
+			var projectId = $("#hubLikeDependencyProjects").val();
+			var hubLikeMinFileFanIn = $("#hubLikeMinFileFanIn").val();
+			var hubLikeMinFileFanOut = $("#hubLikeMinFileFanOut").val();
+			var hubLikeMinPackageFanIn = $("#hubLikeMinPackageFanIn").val();
+			var hubLikeMinPackageFanOut = $("#hubLikeMinPackageFanOut").val();
+			setMinFanIO(projectId, 
+					hubLikeMinFileFanIn, hubLikeMinFileFanOut,
+					hubLikeMinPackageFanIn, hubLikeMinPackageFanOut)
+		});
 	}
 	
 	var _get = function() {

@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
@@ -41,6 +43,22 @@ public class UnstableController {
 		result[1] = unstableDependencyDetector.getCoChangeTimesThreshold(project);
 		result[2] = unstableDependencyDetector.getCoChangeFilesThreshold(project);
 		return result;
+	}
+	
+	@PostMapping("/threshold/{projectId}")
+	@ResponseBody
+	public boolean minFanIOs(@PathVariable("projectId") long projectId, 
+			@RequestParam("fanInThreshold") int fanInThreshold,
+			@RequestParam("cochangeTimesThreshold") int cochangeTimesThreshold,
+			@RequestParam("cochangeFilesThreshold") int cochangeFilesThreshold) {
+		Project project = nodeService.queryProject(projectId);
+		if(project == null) {
+			return false;
+		}
+		unstableDependencyDetector.setFanInThreshold(project, fanInThreshold);
+		unstableDependencyDetector.setCoChangeTimesThreshold(project, cochangeTimesThreshold);
+		unstableDependencyDetector.setCoChangeFilesThreshold(project, cochangeFilesThreshold);
+		return true;
 	}
 
 }

@@ -22,7 +22,23 @@ var icd = function(cytoscapeutil) {
 	}
 	
 	var _save = function() {
-		
+		var set = function(icdMinCoChange) {
+			$.ajax({
+				type: "post",
+				url: "/as/icd/cochange?minCoChange=" + icdMinCoChange,
+				success: function(result) {
+					if(result == true) {
+						alert("修改成功");
+					} else {
+						alert("修改失败");
+					}
+				}
+			})
+		}
+		$("#icdMinCoChangeSave").click(function() {
+			var icdMinCoChange = $("#icdMinCoChange").val();
+			set(icdMinCoChange);
+		})
 	}
 	
 	var _get = function() {
