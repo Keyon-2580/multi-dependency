@@ -102,10 +102,10 @@ def suffix_array_similarity(tokens1, tokens2):
     
     clonePairs = list()
     for pair in res:
-        first_from = search_index(measures, pair[0], pair[2])
-        first_to = search_index(measures, pair[0] + pair[2], pair[2])
-        second_from = search_index(measures, pair[1], pair[2])
-        second_to = search_index(measures, pair[1] + pair[2], pair[2])
+        first_from = search_index(measures, pair[0])
+        first_to = search_index(measures, pair[0] + pair[2]-1)
+        second_from = search_index(measures, pair[1])
+        second_to = search_index(measures, pair[1] + pair[2]-1)
         if first_from == second_from:
             continue
         if first_from != first_to or second_from != second_to:
@@ -120,11 +120,11 @@ def suffix_array_similarity(tokens1, tokens2):
     cover = calc_cover_length(clonePairs)
     return cover/ max(len(tokens1), len(tokens2))
 
-def search_index(measures, pos, height):
+def search_index(measures, pos):
     """搜索子串所在的方法索引"""
     idx = -1
     for i in range(len(measures)):
-        if pos >= measures[i].start and (pos + height - 1) <= measures[i].end:
+        if pos >= measures[i].start and pos <= measures[i].end:
             idx = i
             break
     return idx
@@ -153,7 +153,8 @@ def calc_cover_length(pairs):
             start_token = pairs[idx].first
             size = pairs[idx].size
             idx += 1
-    return max(size, total_size)
+    total_size += size
+    return total_size
 
 def process():
     """计算每个克隆组中每个克隆实例之间的相似度"""
