@@ -5,6 +5,7 @@ import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.service.query.as.data.UnstableFile;
+import cn.edu.fudan.se.multidependency.service.query.as.data.UnstablePackage;
 
 public interface UnstableDependencyDetector {
 	
@@ -21,5 +22,7 @@ public interface UnstableDependencyDetector {
 	int getCoChangeFilesThreshold(Project project);
 
 	Map<Long, List<UnstableFile>> unstableFiles();
+	
+	Map<Long, List<UnstablePackage>> unstablePackages();
 	
 }

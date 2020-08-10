@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.config.PropertyConfig;
@@ -26,7 +25,6 @@ import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.lib.Library;
 import cn.edu.fudan.se.multidependency.model.node.lib.LibraryAPI;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
-import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.StructureRelation;
 import cn.edu.fudan.se.multidependency.model.relation.lib.CallLibrary;
 import cn.edu.fudan.se.multidependency.model.relation.lib.FunctionCallLibraryAPI;
@@ -64,7 +62,6 @@ import cn.edu.fudan.se.multidependency.repository.relation.code.ReturnRepository
 import cn.edu.fudan.se.multidependency.repository.relation.code.ThrowRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.VariableTypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.dynamic.FunctionDynamicCallFunctionRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.lib.FunctionCallLibraryAPIRepository;
 import cn.edu.fudan.se.multidependency.service.query.metric.Fan_IO;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
@@ -617,6 +614,19 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			fileRepository.pageRank(20, 0.85);
 		}
 		return new ArrayList<>();
+	}
+
+	@Override
+	public Map<Package, List<DependsOn>> findPackageDependsOn(Project project) {
+		List<DependsOn> dependsOns = dependsOnRepository.findPackageDependsInProject(project.getId());
+		Map<Package, List<DependsOn>> result = new HashMap<>();
+		for(DependsOn dependsOn : dependsOns) {
+			Package start = (Package) dependsOn.getStartNode();
+			List<DependsOn> temp = result.getOrDefault(start, new ArrayList<>());
+			temp.add(dependsOn);
+			result.put(start, temp);
+		}
+		return result;
 	}
 
 }

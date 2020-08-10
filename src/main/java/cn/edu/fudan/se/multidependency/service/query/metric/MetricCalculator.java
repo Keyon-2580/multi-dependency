@@ -107,7 +107,6 @@ public class MetricCalculator {
 			return packageMetricsCache;
 		}
 		Map<Long, List<PackageMetrics>> result = new HashMap<>();
-		System.out.println(packageRepository.calculatePackageMetrics().size());
 		for(PackageMetrics pckMetrics : packageRepository.calculatePackageMetrics()) {
 			Package pck = pckMetrics.getPck();
 			Project project = containRelationService.findPackageBelongToProject(pck);

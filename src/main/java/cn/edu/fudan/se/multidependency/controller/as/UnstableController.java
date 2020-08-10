@@ -28,6 +28,7 @@ public class UnstableController {
 	public String hubLike(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
 		request.setAttribute("files", unstableDependencyDetector.unstableFiles());
+		request.setAttribute("packages", unstableDependencyDetector.unstablePackages());
 		return "as/unstable";
 	}
 	

@@ -48,4 +48,8 @@ public class PackageMetrics extends FanIOMetric implements Serializable {
 		return pck;
 	}
 
+	public double getInstability() {
+		return getFanOut() / (getFanOut() + getFanIn() + 0.0);
+	}
+	
 }

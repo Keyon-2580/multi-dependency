@@ -77,7 +77,8 @@
 		 $(document).ready(function() {
 			var projects = [[${projects}]];
 			var unstableFiles = [[${files}]];
-			unstable(cytoscapeutil()).unstable(projects, unstableFiles);	
+			var unstablePackages = [[${packages}]];
+			unstable(cytoscapeutil()).unstable(projects, unstableFiles, unstablePackages);	
 		});
 		// ]]>
 	</script>

@@ -1,5 +1,5 @@
 var unstable = function(cytoscapeutil) {
-	var _unstable = function(projects, files) {
+	var _unstable = function(projects, files, packages) {
 		var html = "";
 
 		for(var projectIndex in projects) {
@@ -21,6 +21,24 @@ var unstable = function(cytoscapeutil) {
 				html += "<td width='20%'>" + file.fanIn + "</td>";
 				html += "<td width='10%'>" + file.cochangeFiles.length + "</td>";
 				html += "<td width='10%'>" + file.cochangeTimesWithFile.length + "</td>";
+				html += "</tr>";
+			}
+			html += "</table>";
+			
+			var unstablePackages = packages[project.id];
+			html += "<table class='table table-bordered'>";
+			html += "<tr>";
+			html += "<th>Package</th>";
+			html += "<th>Bad Dependencies</th>";
+			html += "<th>Total Dependencies</th>";
+			html += "</tr>";
+			for(var packageIndex in unstablePackages) {
+				var pck = unstablePackages[packageIndex];
+				console.log(pck);
+				html += "<tr>";
+				html += "<td>" + pck.pck.directoryPath + "</td>";
+				html += "<td>" + pck.badDependsOns.length + "</td>";
+				html += "<td>" + pck.totalDependsOns.length + "</td>";
 				html += "</tr>";
 			}
 			
@@ -83,8 +101,8 @@ var unstable = function(cytoscapeutil) {
 			_save();
 			_get();
 		},
-		unstable: function(projects, files) {
-			_unstable(projects, files);
+		unstable: function(projects, files, unstablePackages) {
+			_unstable(projects, files, unstablePackages);
 		}
 	}
 }
