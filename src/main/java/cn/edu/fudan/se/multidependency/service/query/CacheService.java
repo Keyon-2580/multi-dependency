@@ -13,6 +13,32 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 @Service
 public class CacheService {
 
+	private final Map<String, Map<String, Object>> cache = new ConcurrentHashMap<>();
+	
+	public void remove(Class<?> cls, String key) {
+		if(cache.get(className(cls)) != null) {
+			cache.get(className(cls)).remove(key);
+		}
+	}
+	
+	public void remove(Class<?> cls) {
+		cache.put(className(cls), new ConcurrentHashMap<>());
+	}
+	
+	public void cache(Class<?> cls, String key, Object data) {
+		Map<String, Object> temp = cache.getOrDefault(className(cls), new ConcurrentHashMap<>());
+		temp.put(key, data);
+	}
+	
+	public Object get(Class<?> cls, String key) {
+		Map<String, Object> temp = cache.getOrDefault(className(cls), new ConcurrentHashMap<>());
+		return temp.get(key);
+	}
+	
+	private String className(Class<?> cls) {
+		return cls.getName();
+	}
+	
 	private final Map<String, ProjectFile> pathToFile = new ConcurrentHashMap<>();
 	private final Map<String, Package> directoryToPackage = new ConcurrentHashMap<>();
 	private final Map<Long, Node> idToNodeCache = new ConcurrentHashMap<>();

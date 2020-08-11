@@ -75,25 +75,34 @@
 	<div class="col-sm-12 row" style="margin-bottom: 15px;">
 		<div class="col-sm-12">
 			<div>
-				<h4>Cyclic Dependency</h4>
+				<h3 style="margin-top: 0px;">Cyclic Dependency</h3>
 			</div>
-				<div>
-					<a href="/as/cyclic" target="_blank">检测</a>
-				</div>
+			<div>
+				<p>package-level与file-level的循环依赖</p>
+			</div>
+			<div>
+				<a href="/as/cyclic" target="_blank" class="btn btn-default">检测</a>
+			</div>
 		<hr/>
 		</div>
 		<div class="col-sm-12">
 			<div>
-				<h4>Cyclic Hierarchy</h4>
+				<h3 style="margin-top: 0px;">Cyclic Hierarchy</h3>
 			</div>
 			<div>
-				<a href="/as/cylic/hierarchy" target="_blank">检测</a>
+				<p>循环的层次结构，父类依赖子类</p>
+			</div>
+			<div>
+				<a href="/as/cylic/hierarchy" target="_blank" class="btn btn-default">检测</a>
 			</div>
 		<hr/>
 		</div>
 		<div class="col-sm-12 row">
 			<div class="col-sm-12">
-				<h3>Hub-Like Dependency</h3>
+				<h3 style="margin-top: 0px;">Hub-Like Dependency</h3>
+			</div>
+			<div class="col-sm-12">
+				<p>Hub-Like类型的依赖</p>
 			</div>
 			<div class="form">
 				<div class="col-sm-12 row">
@@ -104,30 +113,94 @@
 						</select>
 					</div>
 				</div>
-				<div class="col-sm-12">
-					<div class="form-group">
+				<div class="col-sm-12 row">
+					<div class="col-sm-4 form-group">
 						<label for="hubLikeMinFileFanIn">最小文件级fan in</label>
-						<input class="form-control" placeholder="输入文件级最小 fan in" id="hubLikeMinFileFanIn" type="number" /><br/>
-					</div>
-					<div class="form-group col-sm-12 row">
-						<label for="hubLikeMinFileFanOut" class="col-sm-2 control-label">最小文件级fan out：</label>
-						<div class="col-sm-6">
-							<input class="form-control" placeholder="输入文件级最小 fan out" id="hubLikeMinFileFanOut" type="number" /><br/>
-						</div>
-					</div>
-					<div class="form-group col-sm-12 row">
-					<label for="hubLikeMinPackageFanIn">最小包级fan in：</label>
-					<input class="form-control" placeholder="输入包级最小 fan in" id="hubLikeMinPackageFanIn" type="number" /><br/>
-					</div>
-					<div class="form-group col-sm-12 row">
-					<label for="hubLikeMinPackageFanOut">最小包级fan out：</label>
-					<input class="form-control" placeholder="输入包级最小 fan out" id="hubLikeMinPackageFanOut" type="number" />
+						<input class="form-control" placeholder="输入文件级最小 fan in" id="hubLikeMinFileFanIn" type="number" />
 					</div>
 				</div>
-				<div class="col-sm-12">
-					<button id="hubLikeMinFanIOSave">保存</button>
-					<a href="/as/hublike" target="_blank">检测</a>
+				<div class="col-sm-12 row">
+					<div class="col-sm-4 form-group">
+						<label for="hubLikeMinFileFanOut" class="control-label">最小文件级fan out：</label>
+						<input class="form-control" placeholder="输入文件级最小 fan out" id="hubLikeMinFileFanOut" type="number" />
+					</div>
 				</div>
+				<div class="col-sm-12 row">
+					<div class="col-sm-4 form-group">
+						<label for="hubLikeMinPackageFanIn">最小包级fan in：</label>
+						<input class="form-control" placeholder="输入包级最小 fan in" id="hubLikeMinPackageFanIn" type="number" />
+					</div>
+				</div>
+				<div class="col-sm-12 row">
+					<div class="col-sm-4 form-group">
+						<label for="hubLikeMinPackageFanOut">最小包级fan out：</label>
+						<input class="form-control" placeholder="输入包级最小 fan out" id="hubLikeMinPackageFanOut" type="number" />
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-12">
+				<button id="hubLikeMinFanIOSave" class="btn btn-default">保存</button>
+				<a href="/as/hublike" target="_blank" class="btn btn-default">检测</a>
+			</div>
+			<div class="col-sm-12">
+			<hr/>
+			</div>
+		</div>
+		<div class="col-sm-12 row">
+			<div class="col-sm-12">
+				<h3 style="margin-top: 0px;">Unstable Dependency</h3>
+			</div>
+			<div class="form">
+				<div class="col-sm-12 row">
+					<div class="col-sm-4 form-group">
+						<label for="unstableDependencyProjects">项目</label>
+						<select id="unstableDependencyProjects" class="projectSelect form-control">
+							<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
+						</select>
+					</div>
+				</div>
+				<div class="col-sm-12 row">
+					<div class="col-sm-4 form-group">
+						<label for="unstableFanInThreshold">FanInThreshold：</label>
+						<input id="unstableFanInThreshold" type="number" class="form-control"/>
+					</div>
+				</div>
+				<div class="col-sm-12 row">
+					<div class="col-sm-4 form-group">
+						<label for="unstableCoChangeTimesThreshold">CoChangeTimesThreshold：</label>
+						<input id="unstableCoChangeTimesThreshold" type="number" class="form-control"/>
+					</div>
+				</div>
+				<div class="col-sm-12 row">
+					<div class="col-sm-4 form-group">
+						<label for="unstableCoChangeFilesThreshold">CoChangeFilesThreshold：</label>
+						<input id="unstableCoChangeFilesThreshold" type="number" class="form-control"/>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-12">
+				<button id="unstableThresholdSave" class="btn btn-default">保存</button>
+				<a href="/as/unstable" target="_blank" class="btn btn-default">检测</a>
+			</div>
+			<div class="col-sm-12">
+			<hr/>
+			</div>
+		</div>
+		<div class="col-sm-12 row">
+			<div class="col-sm-12">
+				<h3 style="margin-top: 0px;">Implicit Cross-Module Dependency</h3>
+			</div>
+			<div class="form">
+				<div class="col-sm-12 row">
+					<div class="col-sm-4 form-group">
+						<label for="icdMinCoChange">minCoChange：</label>
+						<input id="icdMinCoChange" type="number" class="form-control"/>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-12">
+				<button id="icdMinCoChangeSave" class="btn btn-default">保存</button>
+				<a href="/as/icd" target="_blank" class="btn btn-default">检测</a>
 			</div>
 			<div class="col-sm-12">
 			<hr/>
@@ -135,62 +208,32 @@
 		</div>
 		<div class="col-sm-12">
 			<div>
-				<h4>Unstable Dependency</h4>
+				<h3 style="margin-top: 0px;">Similar Components</h3>
 			</div>
 			<div>
-				<select id="unstableDependencyProjects" class="projectSelect">
-					<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
-				</select><br/>
-				FanInThreshold：<input id="unstableFanInThreshold" type="number" /><br/>
-				CoChangeTimesThreshold：<input id="unstableCoChangeTimesThreshold" type="number" /><br/>
-				CoChangeFilesThreshold：<input id="unstableCoChangeFilesThreshold" type="number" />
+				<a href="/as/similar" target="_blank" class="btn btn-default">检测</a>
 			</div>
-			<div>
-				<button id="unstableThresholdSave">保存</button>
-				<a href="/as/unstable" target="_blank">检测</a>
+			<div class="col-sm-12">
+			<hr/>
 			</div>
-		<hr/>
 		</div>
 		<div class="col-sm-12">
 			<div>
-				<h4>Implicit Cross-Module Dependency</h4>
+				<h3 style="margin-top: 0px;">Unused Components</h3>
 			</div>
 			<div>
-				minCoChange：<input id="icdMinCoChange" type="number" />
+				<a href="/as/unused" target="_blank" class="btn btn-default">检测</a>
 			</div>
-			<div>
-				<button id="icdMinCoChangeSave">保存</button>
-				<a href="/as/icd" target="_blank">检测</a>
+			<div class="col-sm-12">
+			<hr/>
 			</div>
-		<hr/>
 		</div>
 		<div class="col-sm-12">
 			<div>
-				<h4>Similar Components</h4>
+				<h3 style="margin-top: 0px;">Multiple Smells</h3>
 			</div>
 			<div>
-				<a href="/as/similar" target="_blank">检测</a>
-			</div>
-		<hr/>
-		</div>
-		<div class="col-sm-12">
-			<div>
-				<h4>Unused Components</h4>
-				<select class="projectSelect">
-					<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
-				</select>
-			</div>
-			<div>
-				<a href="/as/unused" target="_blank">检测</a>
-			</div>
-		<hr/>
-		</div>
-		<div class="col-sm-12">
-			<div>
-				<h4>Multiple Smells</h4>
-			</div>
-			<div>
-				<a href="/as/multiple" target="_blank">检测</a>
+				<a href="/as/multiple" target="_blank" class="btn btn-default">检测</a>
 			</div>
 		</div>
 	</div>

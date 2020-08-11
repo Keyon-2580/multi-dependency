@@ -8,34 +8,33 @@ var hublike = function(cytoscapeutil) {
 			var hubLikeFiles = files[project.id];
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
-			html += "<th>File</th>";
-			html += "<th>Fan In</th>";
-			html += "<th>Fan Out</th>";
+			html += "<th width='50%'>File</th>";
+			html += "<th width='25%'>Fan In</th>";
+			html += "<th width='25%'>Fan Out</th>";
 			html += "</tr>";
 			for(var fileIndex in hubLikeFiles) {
 				var file = hubLikeFiles[fileIndex];
 				console.log(file);
 				html += "<tr>";
-				html += "<td width='50%'>" + file.file.path + "</td>";
-				html += "<td width='20%'>" + file.fanIn + "</td>";
-				html += "<td width='20%'>" + file.fanOut + "</td>";
-				html += "<td width='10%'>" + file.file.score + "</td>";
+				html += "<td>" + file.file.path + "</td>";
+				html += "<td>" + file.fanIn + "</td>";
+				html += "<td>" + file.fanOut + "</td>";
 				html += "</tr>";
 			}
 			
 			var hubLikePackages = packages[project.id];
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
-			html += "<th>Package</th>";
-			html += "<th>Fan In</th>";
-			html += "<th>Fan Out</th>";
+			html += "<th width='50%'>Package</th>";
+			html += "<th width='25%'>Ca（afferent couplings）</th>";
+			html += "<th width='25%'>Ce（efferent couplings）</th>";
 			html += "</tr>";
 			for(var packageIndex in hubLikePackages) {
 				var pck = hubLikePackage[packageIndex];
 				html += "<tr>";
-				html += "<td width='50%'>" + pck.pck.directoryPath + "</td>";
-				html += "<td width='20%'>" + pck.fanIn + "</td>";
-				html += "<td width='30%'>" + pck.fanOut + "</td>";
+				html += "<td>" + pck.pck.directoryPath + "</td>";
+				html += "<td>" + pck.fanIn + "</td>";
+				html += "<td>" + pck.fanOut + "</td>";
 				html += "</tr>";
 			}
 			html += "</table>";

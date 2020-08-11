@@ -16,6 +16,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
+import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.as.UnstableDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.data.UnstableFile;
@@ -86,13 +87,21 @@ public class UnstableDependencyDetectorImpl implements UnstableDependencyDetecto
 	@Autowired
 	private StaticAnalyseService staticAnalyseService;
 	
+	@Autowired
+	private CacheService cache;
+	
 	@Override
 	public Map<Long, List<UnstableFile>> unstableFiles() {
+		String key = Thread.currentThread().getStackTrace()[1].getMethodName();
+		if(cache.get(getClass(), key) != null) {
+			return (Map<Long, List<UnstableFile>>) cache.get(getClass(), key);
+		}
 		Map<Long, List<UnstableFile>> result = new HashMap<>();
 		Collection<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
 			result.put(project.getId(), unstableFiles(project));
 		}
+		cache.cache(getClass(), key, result);
 		return result;
 	}
 	
@@ -133,14 +142,20 @@ public class UnstableDependencyDetectorImpl implements UnstableDependencyDetecto
 		return result;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<Long, List<UnstablePackage>> unstablePackages() {
-		Collection<Project> projects = nodeService.allProjects();
+		String key = Thread.currentThread().getStackTrace()[1].getMethodName();
+		if(cache.get(getClass(), key) != null) {
+			return (Map<Long, List<UnstablePackage>>) cache.get(getClass(), key);
+		}
 		Map<Long, List<UnstablePackage>> result = new HashMap<>();
+		Collection<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
 			List<UnstablePackage> temp = unstablePackages(project);
 			result.put(project.getId(), temp);
 		}
+		cache.cache(getClass(), key, result);
 		return result;
 	}
 	

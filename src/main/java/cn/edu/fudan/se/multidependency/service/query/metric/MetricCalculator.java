@@ -19,6 +19,7 @@ import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
+import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 
@@ -40,6 +41,9 @@ public class MetricCalculator {
 	@Autowired
 	private ContainRelationService containRelationService;
 	
+	@Autowired
+	private CacheService cache;
+	
 	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
 	private ModularityCalculator modularityCalculator;
 	
@@ -57,10 +61,11 @@ public class MetricCalculator {
 		return result;
 	}
 	
-	private Map<Long, List<FileMetrics>> fileMetricsCache = null;
+	@SuppressWarnings("unchecked")
 	public Map<Long, List<FileMetrics>> calculateFileMetrics() {
-		if(fileMetricsCache != null) {
-			return fileMetricsCache;
+		String key = "calculateFileMetrics";
+		if(cache.get(getClass(), key) != null) {
+			return (Map<Long, List<FileMetrics>>) cache.get(getClass(), key);
 		}
 		Map<Long, List<FileMetrics>> result = new HashMap<>();
 		Map<ProjectFile, FileMetrics> commitFileMetricsCache = calculateCommitFileMetrics();
@@ -74,14 +79,14 @@ public class MetricCalculator {
 			temp.add(fileMetrics);
 			result.put(project.getId(), temp);
 		}
-		fileMetricsCache = result;
+		cache.cache(getClass(), key, result);
 		return result;
 	}
 
-	private Map<Project, ProjectMetrics> projectMetricsCache = null;
 	public Map<Project, ProjectMetrics> calculateProjectMetrics(boolean calculateModularityAndCommits) {
-		if(projectMetricsCache != null) {
-			return projectMetricsCache;
+		String key = "";
+		if(cache.get(getClass(), key) != null) {
+			return (Map<Project, ProjectMetrics>) cache.get(getClass(), key);
 		}
 		Collection<ProjectMetrics> temp = projectRepository.calculateProjectMetrics();
 		Map<Project, ProjectMetrics> result = new HashMap<>();
@@ -96,15 +101,15 @@ public class MetricCalculator {
 			result.put(projectMetric.getProject(), projectMetric);
 		}
 		if(!calculateResult.isEmpty()) {
-			projectMetricsCache = calculateResult;
+			cache.cache(getClass(), key, result);
 		}
 		return result;
 	}
 	
-	private Map<Long, List<PackageMetrics>> packageMetricsCache = null;
 	public Map<Long, List<PackageMetrics>> calculatePackageMetrics() {
-		if(packageMetricsCache != null) {
-			return packageMetricsCache;
+		String key = "calculatePackageMetrics";
+		if(cache.get(getClass(), key) != null) {
+			return (Map<Long, List<PackageMetrics>>) cache.get(getClass(), key);
 		}
 		Map<Long, List<PackageMetrics>> result = new HashMap<>();
 		for(PackageMetrics pckMetrics : packageRepository.calculatePackageMetrics()) {
@@ -114,7 +119,7 @@ public class MetricCalculator {
 			temp.add(pckMetrics);
 			result.put(project.getId(), temp);
 		}
-		packageMetricsCache = result;
+		cache.cache(getClass(), key, result);
 		return result;
 	}
 	
