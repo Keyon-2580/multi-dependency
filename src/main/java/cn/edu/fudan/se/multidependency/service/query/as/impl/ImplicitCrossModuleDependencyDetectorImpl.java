@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.as.ASRepository;
+import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.as.ImplicitCrossModuleDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.data.LogicCouplingFiles;
@@ -20,15 +21,21 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 	@Autowired
 	private StaticAnalyseService staticAnalyseService;
 	
-	
 	@Autowired
 	private GitAnalyseService gitAnalyseService;
 	
 	@Autowired
 	private ASRepository asRepository;
+	
+	@Autowired
+	private CacheService cache;
 
 	@Override
 	public Collection<LogicCouplingFiles> cochangesInDifferentModule() {
+		String key = "cochangesInDifferentModule";
+		if(cache.get(getClass(), key) != null) {
+			return (Collection<LogicCouplingFiles>) cache.get(getClass(), key);
+		}
 		Collection<CoChange> cochangesWithOutDependsOn = asRepository.cochangeFilesWithoutDependsOn(getMinCoChange());
 		List<LogicCouplingFiles> result = new ArrayList<>();
 		for(CoChange cochange : cochangesWithOutDependsOn) {
@@ -36,8 +43,10 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 				result.add(new LogicCouplingFiles(cochange.getFile1(), cochange.getFile2(), cochange.getTimes()));
 			}
 		}
+		cache.cache(getClass(), key, result);
 		return result;
 	}
+	
 	public Collection<LogicCouplingFiles> cochangesInDifferentModuleUsingGitCoChange(int minCochange) {
 		Collection<CoChange> allCochanges = gitAnalyseService.calCntOfFileCoChange();
 		List<LogicCouplingFiles> result = new ArrayList<>();
@@ -58,7 +67,9 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 	@Override
 	public void setMinCoChange(int minCoChange) {
 		this.minCoChange = minCoChange;
+		cache.remove(getClass());
 	}
+	
 	@Override
 	public int getMinCoChange() {
 		return minCoChange;

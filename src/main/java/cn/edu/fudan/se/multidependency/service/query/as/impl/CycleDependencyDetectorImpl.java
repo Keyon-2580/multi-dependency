@@ -14,6 +14,7 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.repository.as.ASRepository;
+import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.as.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.data.Cycle;
 import cn.edu.fudan.se.multidependency.service.query.as.data.CycleComponents;
@@ -26,6 +27,9 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 	private ASRepository asRepository;
 	
 	@Autowired
+	private CacheService cache;
+	
+	@Autowired
 	private ContainRelationService containRelationService;	
 	
 	private Collection<DependsOn> findCyclePackageRelationsBySCC(CycleComponents<Package> cycle) {
@@ -36,11 +40,11 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 		return asRepository.cycleFilesBySCC(cycle.getPartition());
 	}
 	
-	private Map<Long, List<Cycle<Package>>> cyclePackagesCache = null;
 	@Override
 	public Map<Long, List<Cycle<Package>>> cyclePackages() {
-		if(cyclePackagesCache != null) {
-			return cyclePackagesCache;
+		String key = "cyclePackages";
+		if(cache.get(getClass(), key) != null) {
+			return (Map<Long, List<Cycle<Package>>>) cache.get(getClass(), key);
 		}
 		Collection<CycleComponents<Package>> cycles = asRepository.packageCycles();
 		Map<Long, List<Cycle<Package>>> result = new HashMap<>();
@@ -55,15 +59,15 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 				break;
 			}
 		}
-		cyclePackagesCache = result;
+		cache.cache(getClass(), key, result);
 		return result;
 	}
 
-	private Map<Long, List<Cycle<ProjectFile>>> cyclicFilesCache = null;
 	@Override
 	public Map<Long, List<Cycle<ProjectFile>>> cycleFiles() {
-		if(cyclicFilesCache != null) {
-			return cyclicFilesCache;
+		String key = "cycleFiles";
+		if(cache.get(getClass(), key) != null) {
+			return (Map<Long, List<Cycle<ProjectFile>>>) cache.get(getClass(), key);
 		}
 		Collection<CycleComponents<ProjectFile>> cycles = asRepository.fileCycles();
 		Map<Long, List<Cycle<ProjectFile>>> result = new HashMap<>();
@@ -78,7 +82,7 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 				break;
 			}
 		}
-		cyclicFilesCache = result;
+		cache.cache(getClass(), key, result);
 		return result;
 	}
 }

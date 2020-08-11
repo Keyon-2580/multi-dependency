@@ -22,12 +22,13 @@ public class CacheService {
 	}
 	
 	public void remove(Class<?> cls) {
-		cache.put(className(cls), new ConcurrentHashMap<>());
+		cache.remove(className(cls));
 	}
 	
 	public void cache(Class<?> cls, String key, Object data) {
 		Map<String, Object> temp = cache.getOrDefault(className(cls), new ConcurrentHashMap<>());
 		temp.put(key, data);
+		cache.put(className(cls), temp);
 	}
 	
 	public Object get(Class<?> cls, String key) {

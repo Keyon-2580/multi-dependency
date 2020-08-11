@@ -7,6 +7,6 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 
 public interface UnusedComponentDetector {
 
-	Map<Long, List<Package>> unusedPackage();
+	Map<Long, List<Package>> unusedPackages();
 	
 }

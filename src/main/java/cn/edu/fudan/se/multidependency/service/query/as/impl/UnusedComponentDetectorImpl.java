@@ -30,8 +30,8 @@ public class UnusedComponentDetectorImpl implements UnusedComponentDetector {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<Long, List<Package>> unusedPackage() {
-		String key = Thread.currentThread().getStackTrace()[1].getMethodName();
+	public Map<Long, List<Package>> unusedPackages() {
+		String key = "unusedPackages";
 		Map<Long, List<Package>> result = null;
 		if(cache.get(this.getClass(), key) != null) {
 			return (Map<Long, List<Package>>) cache.get(this.getClass(), key);

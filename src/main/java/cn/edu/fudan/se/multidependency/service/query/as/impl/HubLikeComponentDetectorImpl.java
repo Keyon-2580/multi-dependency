@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.as.HubLikeComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikeFile;
 import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikePackage;
@@ -28,13 +29,44 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 	
 	@Autowired
 	private NodeService nodeService;
+	
+	@Autowired
+	private CacheService cache;
 
 	@Override
+	public Map<Long, List<HubLikeFile>> hubLikeFiles() {
+		String key = "hubLikeFiles";
+		if(cache.get(getClass(), key) != null) {
+			return (Map<Long, List<HubLikeFile>>) cache.get(getClass(), key);
+		}
+		Collection<Project> projects = nodeService.allProjects();
+		Map<Long, List<HubLikeFile>> result = new HashMap<>();
+		for(Project project : projects) {
+			result.put(project.getId(), hubLikeFiles(project));
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, List<HubLikePackage>> hubLikePackages() {
+		String key = "hubLikePackages";
+		if(cache.get(getClass(), key) != null) {
+			return (Map<Long, List<HubLikePackage>>) cache.get(getClass(), key);
+		}
+		Collection<Project> projects = nodeService.allProjects();
+		Map<Long, List<HubLikePackage>> result = new HashMap<>();
+		for(Project project : projects) {
+			result.put(project.getId(), hubLikePackages(project));
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
 	public List<HubLikeFile> hubLikeFiles(Project project) {
 		return hubLikeFiles(project, getProjectMinFileFanIO(project)[0], getProjectMinFileFanIO(project)[1]);
 	}
 
-	@Override
 	public List<HubLikePackage> hubLikePackages(Project project) {
 		return hubLikePackages(project, getProjectMinFileFanIO(project)[0], getProjectMinFileFanIO(project)[1]);
 	}
@@ -103,6 +135,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		result[0] = minFanIn;
 		result[1] = minFanOut;
 		projectMinFileFanIOs.put(project, result);
+		cache.remove(getClass());
 	}
 
 	@Override
@@ -111,10 +144,10 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		result[0] = minFanIn;
 		result[1] = minFanOut;
 		projectMinPackageFanIOs.put(project, result);
+		cache.remove(getClass());
 	}
 
-	@Override
-	public double defaultPackageMinFanIn(Project project) {
+	private double defaultPackageMinFanIn(Project project) {
 		if(project == null) {
 			return Integer.MAX_VALUE;
 		}
@@ -122,8 +155,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		return metricCalculator.calculateProjectMetrics(false).get(project).getNop() / 5;
 	}
 
-	@Override
-	public double defaultPackageMinFanOut(Project project) {
+	private double defaultPackageMinFanOut(Project project) {
 		if(project == null) {
 			return Integer.MAX_VALUE;
 		}
@@ -131,8 +163,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		return metricCalculator.calculateProjectMetrics(false).get(project).getNop() / 5;
 	}
 
-	@Override
-	public double defaultFileMinFanIn(Project project) {
+	private double defaultFileMinFanIn(Project project) {
 		if(project == null) {
 			return Integer.MAX_VALUE;
 		}
@@ -140,52 +171,11 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		return metricCalculator.calculateProjectMetrics(false).get(project).getNof() / 5;
 	}
 
-	@Override
-	public double defaultFileMinFanOut(Project project) {
+	private double defaultFileMinFanOut(Project project) {
 		if(project == null) {
 			return Integer.MAX_VALUE;
 		}
 //		return FanIOMetric.calculateFanOutUpperQuartile(metricCalculator.calculateFileMetrics().get(project.getId()));
 		return metricCalculator.calculateProjectMetrics(false).get(project).getNof() / 5;
-	}
-
-	@Override
-	public void resetProjectMinFileFanIO(int minFanIn, int minFanOut) {
-		
-	}
-
-	@Override
-	public void resetProjectMinPackageFanIO(int minFanIn, int minFanOut) {
-		
-	}
-
-	@Override
-	public void resetProjectMinFileFanIO() {
-		
-	}
-
-	@Override
-	public void resetProjectMinPackageFanIO() {
-		
-	}
-
-	@Override
-	public Map<Long, List<HubLikeFile>> hubLikeFiles() {
-		Collection<Project> projects = nodeService.allProjects();
-		Map<Long, List<HubLikeFile>> result = new HashMap<>();
-		for(Project project : projects) {
-			result.put(project.getId(), hubLikeFiles(project));
-		}
-		return result;
-	}
-
-	@Override
-	public Map<Long, List<HubLikePackage>> hubLikePackages() {
-		Collection<Project> projects = nodeService.allProjects();
-		Map<Long, List<HubLikePackage>> result = new HashMap<>();
-		for(Project project : projects) {
-			result.put(project.getId(), hubLikePackages(project));
-		}
-		return result;
 	}
 }

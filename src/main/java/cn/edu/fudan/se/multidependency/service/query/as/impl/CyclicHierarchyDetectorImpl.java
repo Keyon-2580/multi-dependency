@@ -12,6 +12,7 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.repository.as.ASRepository;
+import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.as.CyclicHierarchyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.data.CyclicHierarchy;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
@@ -25,8 +26,15 @@ public class CyclicHierarchyDetectorImpl implements CyclicHierarchyDetector {
 	@Autowired
 	private ContainRelationService containRelationService;
 
+	@Autowired
+	private CacheService cache;
+	
 	@Override
 	public Map<Long, List<CyclicHierarchy>> cyclicHierarchies() {
+		String key = "cyclicHierarchies";
+		if(cache.get(getClass(), key) != null) {
+			return (Map<Long, List<CyclicHierarchy>>) cache.get(getClass(), key);
+		}
 		List<DependsOn> hierarchyDepends = asRepository.cyclicHierarchyDepends();
 		Map<Type, CyclicHierarchy> typeToCycleHierarchies = new HashMap<>();
 		for(DependsOn relation : hierarchyDepends) {
@@ -45,6 +53,7 @@ public class CyclicHierarchyDetectorImpl implements CyclicHierarchyDetector {
 			temp.add(cycleHierarchy);
 			result.put(project.getId(), temp);
 		}
+		cache.cache(getClass(), key, result);
 		return result;
 	}
 

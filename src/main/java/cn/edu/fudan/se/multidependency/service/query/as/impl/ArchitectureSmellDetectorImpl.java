@@ -44,9 +44,6 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	@Autowired
 	private CyclicDependencyDetector cycleASDetector;
 
-//	@Autowired
-//	private UnusedComponentDetector unusedComponentDetector;
-	
 	@Autowired
 	private HubLikeComponentDetector hubLikeComponentDetector;
 	

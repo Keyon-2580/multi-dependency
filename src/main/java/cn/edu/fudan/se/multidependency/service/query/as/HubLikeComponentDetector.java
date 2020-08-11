@@ -13,18 +13,6 @@ public interface HubLikeComponentDetector {
 	
 	Map<Long, List<HubLikePackage>> hubLikePackages();
 	
-	List<HubLikePackage> hubLikePackages(Project project);
-	
-	List<HubLikeFile> hubLikeFiles(Project project);
-	
-	double defaultFileMinFanIn(Project project);
-	
-	double defaultFileMinFanOut(Project project);
-	
-	double defaultPackageMinFanIn(Project project);
-	
-	double defaultPackageMinFanOut(Project project);
-	
 	int[] getProjectMinFileFanIO(Project project);
 	
 	void setProjectMinFileFanIO(Project project, int minFanIn, int minFanOut);
@@ -33,11 +21,4 @@ public interface HubLikeComponentDetector {
 	
 	void setProjectMinPackageFanIO(Project project, int minFanIn, int minFanOut);
 	
-	void resetProjectMinFileFanIO();
-	
-	void resetProjectMinPackageFanIO();
-	
-	void resetProjectMinFileFanIO(int minFanIn, int minFanOut);
-	
-	void resetProjectMinPackageFanIO(int minFanIn, int minFanOut);
 }

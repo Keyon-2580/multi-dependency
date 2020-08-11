@@ -23,7 +23,7 @@ public class UnusedComponentController {
 	@GetMapping("")
 	public String unused(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("packages", unusedComponentDetector.unusedPackage());
+		request.setAttribute("packages", unusedComponentDetector.unusedPackages());
 		return "as/unused";
 	}
 	

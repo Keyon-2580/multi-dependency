@@ -36,16 +36,19 @@ public class UnstableDependencyDetectorImpl implements UnstableDependencyDetecto
 	
 	public void setFanInThreshold(Project project, int threshold) {
 		this.projectToFanInThreshold.put(project, threshold);
+		cache.remove(getClass());
 	}
 
 	@Override
 	public void setCoChangeTimesThreshold(Project project, int cochangeTimesThreshold) {
 		this.projectToCoChangeTimesThreshold.put(project, cochangeTimesThreshold);
+		cache.remove(getClass());
 	}
 
 	@Override
 	public void setCoChangeFilesThreshold(Project project, int cochangeFilesThreshold) {
 		this.projectToCoChangeFilesThreshold.put(project, cochangeFilesThreshold);
+		cache.remove(getClass());
 	}
 
 	@Override
@@ -92,7 +95,7 @@ public class UnstableDependencyDetectorImpl implements UnstableDependencyDetecto
 	
 	@Override
 	public Map<Long, List<UnstableFile>> unstableFiles() {
-		String key = Thread.currentThread().getStackTrace()[1].getMethodName();
+		String key = "unstableFiles";
 		if(cache.get(getClass(), key) != null) {
 			return (Map<Long, List<UnstableFile>>) cache.get(getClass(), key);
 		}
@@ -145,7 +148,7 @@ public class UnstableDependencyDetectorImpl implements UnstableDependencyDetecto
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<Long, List<UnstablePackage>> unstablePackages() {
-		String key = Thread.currentThread().getStackTrace()[1].getMethodName();
+		String key = "unstablePackages";
 		if(cache.get(getClass(), key) != null) {
 			return (Map<Long, List<UnstablePackage>>) cache.get(getClass(), key);
 		}
