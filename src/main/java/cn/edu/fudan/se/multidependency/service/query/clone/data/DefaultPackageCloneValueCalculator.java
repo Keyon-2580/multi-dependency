@@ -13,7 +13,7 @@ import lombok.Setter;
 public class DefaultPackageCloneValueCalculator implements CloneValueCalculator<Boolean> {
 	
 	public static final int DEFAULT_COUNT_THRESHOLD = 10;
-	public static final double DEFAULT_PERCENTAGE_THRESHOLD = 0.8;
+	public static final double DEFAULT_PERCENTAGE_THRESHOLD = 0.5;
 	
 	private DefaultPackageCloneValueCalculator() {}
 	
