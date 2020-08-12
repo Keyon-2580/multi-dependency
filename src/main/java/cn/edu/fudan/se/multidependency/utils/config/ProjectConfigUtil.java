@@ -166,7 +166,10 @@ public class ProjectConfigUtil {
 				config.setAnalyseIssue(true);
 				config.setIssueFilePath(issueFilePath);
 			}
-			config.setCalculateCochange(json.getBooleanValue("calculate_cochange"));
+			JSONArray branches = json.getJSONArray("branches");
+			for(int j = 0; j < branches.size(); j++) {
+				config.addBranch(branches.getString(j));
+			}
 			result.add(config);
 		}
 		return result;

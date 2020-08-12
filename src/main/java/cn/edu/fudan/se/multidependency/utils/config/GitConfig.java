@@ -1,5 +1,8 @@
 package cn.edu.fudan.se.multidependency.utils.config;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import lombok.Data;
 
 @Data
@@ -13,5 +16,10 @@ public class GitConfig {
 	private String commitTimeUntil;
 	private boolean isAnalyseIssue;
 	private String issueFilePath;
-	private boolean calculateCochange;
+	
+	private Set<String> branches = new HashSet<>();
+	
+	public void addBranch(String branch) {
+		this.branches.add(branch);
+	}
 }

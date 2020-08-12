@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.insert.git;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
@@ -10,7 +11,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import cn.edu.fudan.se.multidependency.config.Constant;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -21,6 +21,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.revwalk.filter.AndRevFilter;
 import org.eclipse.jgit.revwalk.filter.CommitTimeRevFilter;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -30,9 +31,10 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.collect.Lists;
 
+import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
-public class GitExtractor {
+public class GitExtractor implements Closeable {
 	
 //	private static final Logger LOGGER = LoggerFactory.getLogger(GitExtractor.class);
 
@@ -41,6 +43,15 @@ public class GitExtractor {
     private Repository repository;
 
     private Git git;
+    
+    public Ref checkout(Ref branch) {
+    	try {
+			git.checkout().setName(branch.getName()).call();
+		} catch (GitAPIException e) {
+			e.printStackTrace();
+		}
+    	return branch;
+    }
 
     public GitExtractor(String gitProjectPath) {
         this.gitProjectPath = gitProjectPath;
@@ -59,7 +70,7 @@ public class GitExtractor {
         } catch (GitAPIException e) {
             e.printStackTrace();
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public String getRepositoryName() {
@@ -76,22 +87,24 @@ public class GitExtractor {
 
     public List<RevCommit> getAllCommits() {
         try{
-            Iterable<RevCommit> commits = git.log().call();
+            Iterable<RevCommit> commits = git.log().setRevFilter(RevFilter.NO_MERGES).call();
+//            Iterable<RevCommit> commits = git.log().call();
             return Lists.newArrayList(commits.iterator());
         }catch (GitAPIException e){
             e.printStackTrace();
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public List<RevCommit> getARangeCommitsById(String from, String to) {
         try {
-            Iterable<RevCommit> commits = git.log().addRange(repository.resolve(from),repository.resolve(to)).call();
+            Iterable<RevCommit> commits = git.log().setRevFilter(RevFilter.NO_MERGES).addRange(repository.resolve(from),repository.resolve(to)).call();
+//            Iterable<RevCommit> commits = git.log().addRange(repository.resolve(from),repository.resolve(to)).call();
             return Lists.newArrayList(commits.iterator());
         }catch (IOException | GitAPIException e) {
             e.printStackTrace();
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public List<RevCommit> getARangeCommitsByTime(String since, String until) {
@@ -100,34 +113,33 @@ public class GitExtractor {
             Date sinceDate = simpleDateFormat.parse(since);
             Date untilDate = simpleDateFormat.parse(until);
             RevFilter between = CommitTimeRevFilter.between(sinceDate, untilDate);
-            Iterable<RevCommit> commits = git.log().setRevFilter(between).call();
+            Iterable<RevCommit> commits = git.log().setRevFilter(AndRevFilter.create(between, RevFilter.NO_MERGES)).call();
+//            Iterable<RevCommit> commits = git.log().setRevFilter(between).call();
             return Lists.newArrayList(commits.iterator());
         } catch (ParseException | GitAPIException e) {
             e.printStackTrace();
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public List<Ref> getBranchesByCommitId(RevCommit revCommit) {
-        List<Ref> refs = null;
         try{
-            refs = git.branchList().setContains(revCommit.getName()).call();
+            return git.branchList().setContains(revCommit.getName()).call();
         }catch (GitAPIException e){
             e.printStackTrace();
         }
-        return refs;
+        return new ArrayList<>();
     }
 
     public List<DiffEntry> getDiffBetweenCommits(RevCommit revCommit, RevCommit parentRevCommit) {
         AbstractTreeIterator currentTreeParser = prepareTreeParser(revCommit.getName());
         AbstractTreeIterator prevTreeParser = prepareTreeParser(parentRevCommit.getName());
-        List<DiffEntry> diffs = null;
         try {
-            diffs = git.diff().setNewTree(currentTreeParser).setOldTree(prevTreeParser).call();
+        	return git.diff().setNewTree(currentTreeParser).setOldTree(prevTreeParser).call();
         } catch (GitAPIException e) {
             e.printStackTrace();
         }
-        return diffs;
+        return new ArrayList<>();
     }
 
     private CanonicalTreeParser prepareTreeParser(String objectId) {
@@ -179,7 +191,11 @@ public class GitExtractor {
     }
 
     public void close() {
-        git.close();
-        repository.close();
+    	if(git != null) {
+    		git.close();
+    	}
+    	if(repository != null) {
+    		repository.close();
+    	}
     }
 }

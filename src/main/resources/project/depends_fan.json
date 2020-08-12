@@ -116,5 +116,17 @@
 		"issues_path": "src/main/resources/git/issues/depends.json"
 	}],
 	"libs": [],
-	"clones": []
+	"clones": [{
+		"language"   : "java",
+		"granularity": "file",
+		"name_path"  : "src/main/resources/clone/file/depends-fan/0.9.6b/result/MeasureIndex.csv",
+		"result_path": "src/main/resources/clone/file/depends-fan/0.9.6b/similarity.csv",
+		"group_path" : "src/main/resources/clone/file/depends-fan/0.9.6b/result/type123_method_group_result.csv"
+	}, {
+		"language"   : "java",
+		"granularity": "function",
+		"name_path"  : "src/main/resources/clone/function/depends-fan/0.9.6b/result/MeasureIndex.csv",
+		"result_path": "src/main/resources/clone/function/depends-fan/0.9.6b/similarity.csv",
+		"group_path" : "src/main/resources/clone/function/depends-fan/0.9.6b/result/type123_method_group_result.csv"
+	}]
 }
