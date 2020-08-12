@@ -56,7 +56,10 @@ public interface CloneValueService {
 		List<CloneValueForDoubleNodes<Package>> result = new ArrayList<>();
 		for(int i = 0; i < pcks.size(); i++) {
 			for(int j = i + 1; j < pcks.size(); j++) {
-				result.add(queryPackageCloneFromFileCloneSort(fileClones, pcks.get(i), pcks.get(j)));
+				CloneValueForDoubleNodes<Package> queryResult = queryPackageCloneFromFileCloneSort(fileClones, pcks.get(i), pcks.get(j));
+				if(queryResult != null){
+					result.add(queryResult);
+				}
 			}
 		}
 		

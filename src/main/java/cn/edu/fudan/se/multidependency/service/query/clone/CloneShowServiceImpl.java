@@ -453,6 +453,7 @@ public class CloneShowServiceImpl implements CloneShowService {
 			CodeNode node1 = entryNode1.getKey();
 			JSONObject nodeJSON = new JSONObject();
 			nodeJSON.put("name", node1.getIdentifier());
+			nodeJSON.put("id", node1.getId());
 			JSONArray imports = new JSONArray();
 			for(Map.Entry<CodeNode, Clone> entryNode2 : entryNode1.getValue().entrySet()) {
 				CodeNode node2 = entryNode2.getKey();
@@ -465,6 +466,7 @@ public class CloneShowServiceImpl implements CloneShowService {
 		for(CodeNode node : nodes) {
 			JSONObject nodeJSON = new JSONObject();
 			nodeJSON.put("name", node.getIdentifier());
+			nodeJSON.put("id", node.getId());
 			JSONArray imports = new JSONArray();
 			nodeJSON.put("imports", imports);
 			result.add(nodeJSON);
@@ -505,6 +507,7 @@ public class CloneShowServiceImpl implements CloneShowService {
 			CodeNode node1 = entryNode1.getKey();
 			JSONObject nodeJSON = new JSONObject();
 			nodeJSON.put("name", node1.getIdentifier());
+			nodeJSON.put("id", node1.getId());
 			JSONArray imports = new JSONArray();
 			for(Map.Entry<CodeNode, Clone> entryNode2 : entryNode1.getValue().entrySet()) {
 				CodeNode node2 = entryNode2.getKey();
@@ -517,6 +520,7 @@ public class CloneShowServiceImpl implements CloneShowService {
 		for(CodeNode node : nodes) {
 			JSONObject nodeJSON = new JSONObject();
 			nodeJSON.put("name", node.getIdentifier());
+			nodeJSON.put("id", node.getId());
 			JSONArray imports = new JSONArray();
 			nodeJSON.put("imports", imports);
 			result.add(nodeJSON);
