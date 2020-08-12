@@ -34,6 +34,8 @@ public class UnstableDependencyDetectorImpl implements UnstableDependencyDetecto
 	private Map<Project, Integer> projectToCoChangeTimesThreshold = new ConcurrentHashMap<>();
 	private Map<Project, Integer> projectToCoChangeFilesThreshold = new ConcurrentHashMap<>();
 	
+	private UnstableFileDetectStrategy unstableFileDetectStrategy;
+	
 	public void setFanInThreshold(Project project, int threshold) {
 		this.projectToFanInThreshold.put(project, threshold);
 		cache.remove(getClass());
@@ -121,7 +123,7 @@ public class UnstableDependencyDetectorImpl implements UnstableDependencyDetecto
 	}
 	
 	private UnstableFile isUnstableFile(Project project, FileMetrics metrics) {
-		if(metrics.getFanIn() < getFanInThreshold(project)) {
+		/*if(metrics.getFanIn() < getFanInThreshold(project)) {
 			return null;
 		}
 		int coChangeFilesCount = 0;
@@ -142,7 +144,11 @@ public class UnstableDependencyDetectorImpl implements UnstableDependencyDetecto
 			result.setFanIn(metrics.getFanIn());
 			result.addAllCoChanges(cochanges);
 		}
-		return result;
+		return result;*/
+//		unstableFileDetectStrategy = new UnstableFileDetectStrategyUsingInstability(metricCalculator, staticAnalyseService, unstablePackageThreshold);
+		unstableFileDetectStrategy = new UnstableFileDetectStrategyUsingCoChange(getFanInThreshold(project), 
+				getCoChangeTimesThreshold(project), getCoChangeFilesThreshold(project), fileRepository, gitAnalyseService);
+		return unstableFileDetectStrategy.isUnstableFile(project, metrics);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -182,7 +188,7 @@ public class UnstableDependencyDetectorImpl implements UnstableDependencyDetecto
 			List<DependsOn> dependsOns = entry.getValue();
 			for(DependsOn dependsOn : dependsOns) {
 				Package dependsOnPackage = (Package) dependsOn.getEndNode();
-				if(metricsMap.get(pck).getInstability() > metricsMap.get(dependsOnPackage).getInstability()) {
+				if(metricsMap.get(pck).getInstability() < metricsMap.get(dependsOnPackage).getInstability()) {
 					badDependencies.add(dependsOn);
 				}
 				totalDependencies.add(dependsOn);

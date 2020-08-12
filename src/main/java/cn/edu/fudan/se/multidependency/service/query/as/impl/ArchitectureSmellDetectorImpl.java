@@ -77,12 +77,15 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 		Collection<LogicCouplingFiles> logicCouplingFiles = icdDependencyDetector.cochangesInDifferentModule();
 		Collection<SimilarComponents<ProjectFile>> similarFiles = similarComponentsDetector.similarFiles();
 		
+		List<ProjectFile> allFiles = nodeService.queryAllFiles();
+		
 		for(List<Cycle<ProjectFile>> cycleFilesGroup : cycleFiles.values()) {
 			for(Cycle<ProjectFile> files : cycleFilesGroup) {
 				for(ProjectFile file : files.getComponents()) {
 					MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
 					mas.setCycle(true);
 					map.put(file, mas);
+					allFiles.remove(file);
 				}
 			}
 		}
@@ -94,6 +97,7 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 				MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
 				mas.setCyclicHierarchy(true);
 				map.put(file, mas);
+				allFiles.remove(file);
 			}
 		}
 		
@@ -102,6 +106,7 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 				MultipleASFile mas = map.getOrDefault(file.getFile(), new MultipleASFile(file.getFile()));
 				mas.setHublike(true);
 				map.put(file.getFile(), mas);
+				allFiles.remove(file.getFile());
 			}
 		}
 		
@@ -110,6 +115,7 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 				MultipleASFile mas = map.getOrDefault(file.getFile(), new MultipleASFile(file.getFile()));
 				mas.setUnstable(true);
 				map.put(file.getFile(), mas);
+				allFiles.remove(file.getFile());
 			}
 		}
 		
@@ -120,6 +126,8 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 			mas = map.getOrDefault(files.getFile2(), new MultipleASFile(files.getFile2()));
 			mas.setLogicCoupling(true);
 			map.put(files.getFile2(), mas);
+			allFiles.remove(files.getFile1());
+			allFiles.remove(files.getFile2());
 		}
 		
 		for(SimilarComponents<ProjectFile> similarFilesGroup : similarFiles) {
@@ -127,11 +135,16 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 				MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
 				mas.setSimilar(true);
 				map.put(file, mas);
+				allFiles.remove(file);
 			}
 		}
 		
 		if(!removeNoASFile) {
-			for(ProjectFile file : nodeService.queryAllFiles()) {
+//			for(ProjectFile file : nodeService.queryAllFiles()) {
+//				MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
+//				map.put(file, mas);
+//			}
+			for(ProjectFile file : allFiles) {
 				MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
 				map.put(file, mas);
 			}

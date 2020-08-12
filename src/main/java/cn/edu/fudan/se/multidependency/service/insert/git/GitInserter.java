@@ -94,7 +94,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
     }
     
     public void addCommitsAndRelations() throws Exception {
-        List<RevCommit> commits;
+        List<RevCommit> commits = null;
         if (!gitConfig.isSpecifyCommitRange()) {
             commits = gitExtractor.getAllCommits();
         } else {
@@ -141,6 +141,9 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
             }
             if (revCommit.getParentCount() > 0) {
                 RevCommit[] parentRevCommits = revCommit.getParents();
+                /*if(parentRevCommits.length >= 2) {
+                	System.out.println(parentRevCommits.length + " " + revCommit.getFullMessage() + " " + revCommit.getName());
+                }*/
                 for (RevCommit parentRevCommit : parentRevCommits) {
                     String parentCommitId = parentRevCommit.getName();
                     Commit parentCommit = this.getNodes().findCommitByCommitId(parentCommitId);

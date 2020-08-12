@@ -93,4 +93,8 @@ public abstract class FanIOMetric {
 			return list.get(size / 2).getFanOut();
 		}
 	}
+
+	public double getInstability() {
+		return getFanOut() / (getFanOut() + getFanIn() + 0.0);
+	}
 }

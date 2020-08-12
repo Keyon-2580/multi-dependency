@@ -629,4 +629,17 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return result;
 	}
 
+	@Override
+	public Map<ProjectFile, List<DependsOn>> findFileDependsOn(Project project) {
+		List<DependsOn> dependsOns = dependsOnRepository.findFileDependsInProject(project.getId());
+		Map<ProjectFile, List<DependsOn>> result = new HashMap<>();
+		for(DependsOn dependsOn : dependsOns) {
+			ProjectFile start = (ProjectFile) dependsOn.getStartNode();
+			List<DependsOn> temp = result.getOrDefault(start, new ArrayList<>());
+			temp.add(dependsOn);
+			result.put(start, temp);
+		}
+		return result;
+	}
+
 }
