@@ -1,9 +1,6 @@
 package cn.edu.fudan.se.multidependency.controller;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -211,5 +208,38 @@ public class CloneController {
 		String file2AbsolutePath = projectService.getAbsolutePath(project2) + file2.getPath();
 		
 		return "redirect:/compare?leftFilePath=" + file1AbsolutePath + "&rightFilePath=" + file2AbsolutePath;
+	}
+
+	/**
+	 * 查询一个project中所有的包克隆关系
+	 * @return
+	 */
+	@GetMapping("/packages/all")
+	@ResponseBody
+	public JSONArray clonesInPackageWithCoChange(/*@RequestParam("project") long projectId*/) {
+		Project project = nodeService.queryProject(67728);
+		Collection<Package> pckList = containRelationService.findProjectContainPackages(project);
+		Collection<Clone> clones = new ArrayList<>();
+
+		List<Package> pcks = new ArrayList<>(pckList);
+
+		int k = 0;
+
+		for(int i = 0; i < pcks.size(); i++) {
+			for(int j = i + 1; j < pcks.size(); j++) {
+				try {
+					CloneValueForDoubleNodes<Package> value = cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pcks.get(i), pcks.get(j));
+					if(value != null){
+						clones.addAll(value.getChildren());
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					return new JSONArray();
+				}
+			}
+		}
+
+		assert false;
+		return cloneShowService.graphFileClones(clones);
 	}
 }
