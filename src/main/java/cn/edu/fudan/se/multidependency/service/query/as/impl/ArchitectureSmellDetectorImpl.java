@@ -24,12 +24,14 @@ import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.service.query.as.ArchitectureSmellDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.CyclicHierarchyDetector;
+import cn.edu.fudan.se.multidependency.service.query.as.GodComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.HubLikeComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.ImplicitCrossModuleDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.SimilarComponentsDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.UnstableDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.data.Cycle;
 import cn.edu.fudan.se.multidependency.service.query.as.data.CyclicHierarchy;
+import cn.edu.fudan.se.multidependency.service.query.as.data.GodFile;
 import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikeFile;
 import cn.edu.fudan.se.multidependency.service.query.as.data.LogicCouplingFiles;
 import cn.edu.fudan.se.multidependency.service.query.as.data.MultipleASFile;
@@ -60,8 +62,11 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 	private CyclicHierarchyDetector cyclicHierarchyDetector;
 	
 	@Autowired
-	private ContainRelationService containRelationService;
+	private GodComponentDetector godComponentDetector;
 	
+	@Autowired
+	private ContainRelationService containRelationService;
+ 	
 	@Autowired
 	private NodeService nodeService;
 	
@@ -74,6 +79,7 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 		Map<Long, List<HubLikeFile>> hubLikeFiles = hubLikeComponentDetector.hubLikeFiles();
 		Map<Long, List<UnstableFile>> unstableFiles = unstableDependencyDetector.unstableFiles();
 		Map<Long, List<CyclicHierarchy>> cyclicHierarchies = cyclicHierarchyDetector.cyclicHierarchies();
+		Map<Long, List<GodFile>> godFiles = godComponentDetector.godFiles();
 		Collection<LogicCouplingFiles> logicCouplingFiles = icdDependencyDetector.cochangesInDifferentModule();
 		Collection<SimilarComponents<ProjectFile>> similarFiles = similarComponentsDetector.similarFiles();
 		
@@ -87,6 +93,15 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 					map.put(file, mas);
 					allFiles.remove(file);
 				}
+			}
+		}
+		
+		for(List<GodFile> files : godFiles.values()) {
+			for(GodFile file : files) {
+				MultipleASFile mas = map.getOrDefault(file.getFile(), new MultipleASFile(file.getFile()));
+				mas.setGod(true);
+				map.put(file.getFile(), mas);
+				allFiles.remove(file.getFile());
 			}
 		}
 		

@@ -24,7 +24,8 @@ var multiple = function(cytoscapeutil) {
 					html += "<th>unstable</th>";
 					html += "<th>logic coupling</th>";
 					html += "<th>simiar</th>";
-					html += "<th>cyclicHierarchy</th>"
+					html += "<th>cyclic hierarchy</th>";
+					html += "<th>god component</th>";
 					html += "<th>page rank</th>";
 					html += "</tr>";
 					for(var i = 0 ; i < result[project].length; i++) {
@@ -37,6 +38,7 @@ var multiple = function(cytoscapeutil) {
 						html += "<td>" + (value.logicCoupling == true ? "T" : "") + "</td>";
 						html += "<td>" + (value.similar == true ? "T" : "") + "</td>";
 						html += "<td>" + (value.cyclicHierarchy == true ? "T" : "") + "</td>";
+						html += "<td>" + (value.god == true ? "T" : "") + "</td>";
 						html += "<td>" + value.file.score + "</td>";
 						html += "</tr>";
 					}

@@ -33,6 +33,7 @@
 <script type="text/javascript" th:src="@{/js/as/cyclic.js}"></script>
 <script type="text/javascript" th:src="@{/js/as/hierarchy.js}"></script>
 <script type="text/javascript" th:src="@{/js/as/similar.js}"></script>
+<script type="text/javascript" th:src="@{/js/as/godComponents.js}"></script>
 <script type="text/javascript" th:src="@{/js/as/unused.js}"></script>
 <script type="text/javascript" th:src="@{/js/as/icd.js}"></script>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
@@ -206,6 +207,40 @@
 			<hr/>
 			</div>
 		</div>
+		<div class="col-sm-12 row">
+			<div class="col-sm-12">
+				<h3 style="margin-top: 0px;">God Components</h3>
+			</div>
+			<div class="form">
+				<div class="col-sm-12 row">
+					<div class="col-sm-4 form-group">
+						<label for="godComponentsProjects">项目</label>
+						<select id="godComponentsProjects" class="projectSelect form-control">
+							<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
+						</select>
+					</div>
+				</div>
+				<div class="col-sm-12 row">
+					<div class="col-sm-4 form-group">
+						<label for="minFileLOCThreshold">min file's LOC：</label>
+						<input id="minFileLOCThreshold" type="number" class="form-control"/>
+					</div>
+				</div>
+				<div class="col-sm-12 row">
+					<div class="col-sm-4 form-group">
+						<label for="minFileCountInPackageThreshold">min file's count in Package：</label>
+						<input id="minFileCountInPackageThreshold" type="number" class="form-control"/>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-12">
+				<button id="godThresholdSave" class="btn btn-default">保存</button>
+				<a href="/as/god" target="_blank" class="btn btn-default">检测</a>
+			</div>
+			<div class="col-sm-12">
+			<hr/>
+			</div>
+		</div>
 		<div class="col-sm-12">
 			<div>
 				<h3 style="margin-top: 0px;">Similar Components</h3>
@@ -243,6 +278,7 @@
 			hublike(cytoscapeutil()).init();
 			unstable(cytoscapeutil()).init();
 			icd(cytoscapeutil()).init();
+			god(cytoscapeutil()).init();
 		});
 		// ]]>
 	</script>
