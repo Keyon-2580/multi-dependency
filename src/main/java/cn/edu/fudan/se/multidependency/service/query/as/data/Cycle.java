@@ -31,4 +31,8 @@ public class Cycle<T extends Node> {
 		return components.getComponents();
 	}
 	
+	public int getPartition() {
+		return components.getPartition();
+	}
+	
 }

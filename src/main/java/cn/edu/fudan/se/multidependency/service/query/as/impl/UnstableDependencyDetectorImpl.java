@@ -12,9 +12,7 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
-import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
@@ -99,7 +97,7 @@ public class UnstableDependencyDetectorImpl implements UnstableDependencyDetecto
 	public Map<Long, List<UnstableFile>> unstableFiles() {
 		String key = "unstableFiles";
 		if(cache.get(getClass(), key) != null) {
-			return (Map<Long, List<UnstableFile>>) cache.get(getClass(), key);
+			return cache.get(getClass(), key);
 		}
 		Map<Long, List<UnstableFile>> result = new HashMap<>();
 		Collection<Project> projects = nodeService.allProjects();

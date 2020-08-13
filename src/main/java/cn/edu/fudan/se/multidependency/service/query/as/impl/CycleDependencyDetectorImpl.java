@@ -44,7 +44,7 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 	public Map<Long, List<Cycle<Package>>> cyclePackages() {
 		String key = "cyclePackages";
 		if(cache.get(getClass(), key) != null) {
-			return (Map<Long, List<Cycle<Package>>>) cache.get(getClass(), key);
+			return cache.get(getClass(), key);
 		}
 		Collection<CycleComponents<Package>> cycles = asRepository.packageCycles();
 		Map<Long, List<Cycle<Package>>> result = new HashMap<>();
@@ -53,7 +53,7 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 			cyclePackage.addAll(findCyclePackageRelationsBySCC(cycle));
 			for(Package pck : cycle.getComponents()) {
 				Project project = containRelationService.findPackageBelongToProject(pck);
-				List<Cycle<Package>> temp = result.getOrDefault(project, new ArrayList<>());
+				List<Cycle<Package>> temp = result.getOrDefault(project.getId(), new ArrayList<>());
 				temp.add(cyclePackage);
 				result.put(project.getId(), temp);
 				break;
@@ -67,7 +67,7 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 	public Map<Long, List<Cycle<ProjectFile>>> cycleFiles() {
 		String key = "cycleFiles";
 		if(cache.get(getClass(), key) != null) {
-			return (Map<Long, List<Cycle<ProjectFile>>>) cache.get(getClass(), key);
+			return cache.get(getClass(), key);
 		}
 		Collection<CycleComponents<ProjectFile>> cycles = asRepository.fileCycles();
 		Map<Long, List<Cycle<ProjectFile>>> result = new HashMap<>();
@@ -76,7 +76,7 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 			cycleFile.addAll(findCycleFileRelationsBySCC(cycle));
 			for(ProjectFile file : cycle.getComponents()) {
 				Project project = containRelationService.findFileBelongToProject(file);
-				List<Cycle<ProjectFile>> temp = result.getOrDefault(project, new ArrayList<>());
+				List<Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new ArrayList<>());
 				temp.add(cycleFile);
 				result.put(project.getId(), temp);
 				break;

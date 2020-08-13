@@ -33,7 +33,7 @@ public class CyclicHierarchyDetectorImpl implements CyclicHierarchyDetector {
 	public Map<Long, List<CyclicHierarchy>> cyclicHierarchies() {
 		String key = "cyclicHierarchies";
 		if(cache.get(getClass(), key) != null) {
-			return (Map<Long, List<CyclicHierarchy>>) cache.get(getClass(), key);
+			return cache.get(getClass(), key);
 		}
 		List<DependsOn> hierarchyDepends = asRepository.cyclicHierarchyDepends();
 		Map<Type, CyclicHierarchy> typeToCycleHierarchies = new HashMap<>();
@@ -49,7 +49,7 @@ public class CyclicHierarchyDetectorImpl implements CyclicHierarchyDetector {
 			Type superType = entry.getKey();
 			CyclicHierarchy cycleHierarchy = entry.getValue();
 			Project project = containRelationService.findCodeNodeBelongToProject(superType);
-			List<CyclicHierarchy> temp = result.getOrDefault(project, new ArrayList<>());
+			List<CyclicHierarchy> temp = result.getOrDefault(project.getId(), new ArrayList<>());
 			temp.add(cycleHierarchy);
 			result.put(project.getId(), temp);
 		}

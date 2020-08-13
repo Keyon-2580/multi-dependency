@@ -31,9 +31,10 @@ public class CacheService {
 		cache.put(className(cls), temp);
 	}
 	
-	public Object get(Class<?> cls, String key) {
+	@SuppressWarnings("unchecked")
+	public <T> T get(Class<?> cls, String key) {
 		Map<String, Object> temp = cache.getOrDefault(className(cls), new ConcurrentHashMap<>());
-		return temp.get(key);
+		return (T) (temp.get(key));
 	}
 	
 	private String className(Class<?> cls) {

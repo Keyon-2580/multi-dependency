@@ -30,7 +30,7 @@ var hublike = function(cytoscapeutil) {
 			html += "<th width='25%'>Ce（efferent couplings）</th>";
 			html += "</tr>";
 			for(var packageIndex in hubLikePackages) {
-				var pck = hubLikePackage[packageIndex];
+				var pck = hubLikePackages[packageIndex];
 				html += "<tr>";
 				html += "<td>" + pck.pck.directoryPath + "</td>";
 				html += "<td>" + pck.fanIn + "</td>";

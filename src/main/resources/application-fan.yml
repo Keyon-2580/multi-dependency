@@ -18,8 +18,8 @@ config:
    starter:
 #      cochange: false
 #      depends_on: false
-      cochange: true
-      depends_on: true
+      cochange: false
+      depends_on: false
 
 data:
 #   project_config: src/main/resources/project/simpletest.json

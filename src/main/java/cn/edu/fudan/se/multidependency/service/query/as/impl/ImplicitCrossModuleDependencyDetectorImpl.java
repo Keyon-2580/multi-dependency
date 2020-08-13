@@ -34,7 +34,7 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 	public Collection<LogicCouplingFiles> cochangesInDifferentModule() {
 		String key = "cochangesInDifferentModule";
 		if(cache.get(getClass(), key) != null) {
-			return (Collection<LogicCouplingFiles>) cache.get(getClass(), key);
+			return cache.get(getClass(), key);
 		}
 		Collection<CoChange> cochangesWithOutDependsOn = asRepository.cochangeFilesWithoutDependsOn(getMinCoChange());
 		List<LogicCouplingFiles> result = new ArrayList<>();

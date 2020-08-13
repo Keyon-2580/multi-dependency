@@ -61,11 +61,10 @@ public class MetricCalculator {
 		return result;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public Map<Long, List<FileMetrics>> calculateFileMetrics() {
 		String key = "calculateFileMetrics";
 		if(cache.get(getClass(), key) != null) {
-			return (Map<Long, List<FileMetrics>>) cache.get(getClass(), key);
+			return cache.get(getClass(), key);
 		}
 		Map<Long, List<FileMetrics>> result = new HashMap<>();
 		Map<ProjectFile, FileMetrics> commitFileMetricsCache = calculateCommitFileMetrics();
@@ -86,7 +85,7 @@ public class MetricCalculator {
 	public Map<Project, ProjectMetrics> calculateProjectMetrics(boolean calculateModularityAndCommits) {
 		String key = "";
 		if(cache.get(getClass(), key) != null) {
-			return (Map<Project, ProjectMetrics>) cache.get(getClass(), key);
+			return cache.get(getClass(), key);
 		}
 		Collection<ProjectMetrics> temp = projectRepository.calculateProjectMetrics();
 		Map<Project, ProjectMetrics> result = new HashMap<>();
@@ -109,7 +108,7 @@ public class MetricCalculator {
 	public Map<Long, List<PackageMetrics>> calculatePackageMetrics() {
 		String key = "calculatePackageMetrics";
 		if(cache.get(getClass(), key) != null) {
-			return (Map<Long, List<PackageMetrics>>) cache.get(getClass(), key);
+			return cache.get(getClass(), key);
 		}
 		Map<Long, List<PackageMetrics>> result = new HashMap<>();
 		for(PackageMetrics pckMetrics : packageRepository.calculatePackageMetrics()) {

@@ -40,7 +40,7 @@ public class UnusedComponentDetectorImpl implements UnusedComponentDetector {
 		Collection<Package> pcks = asRepository.unusedPackages();
 		for(Package pck : pcks) {
 			Project project = containRelationService.findPackageBelongToProject(pck);
-			List<Package> temp = result.getOrDefault(project, new ArrayList<>());
+			List<Package> temp = result.getOrDefault(project.getId(), new ArrayList<>());
 			temp.add(pck);
 			result.put(project.getId(), temp);
 		}
