@@ -53,6 +53,12 @@ public class CyclicHierarchyDetectorImpl implements CyclicHierarchyDetector {
 			temp.add(cycleHierarchy);
 			result.put(project.getId(), temp);
 		}
+		
+		for(List<CyclicHierarchy> temp : result.values()) {
+			temp.sort((t1, t2) -> {
+				return t2.getSubTypes().size() - t1.getSubTypes().size();
+			});
+		}
 		cache.cache(getClass(), key, result);
 		return result;
 	}

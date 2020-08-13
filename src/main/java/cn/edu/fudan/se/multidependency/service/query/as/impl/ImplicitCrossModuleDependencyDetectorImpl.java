@@ -59,6 +59,9 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 				result.add(new LogicCouplingFiles(cochange.getFile1(), cochange.getFile2(), cochange.getTimes()));
 			}
 		}
+		result.sort((f1, f2) -> {
+			return f2.getCochangeTimes() - f1.getCochangeTimes();
+		});
 		return result;
 	}
 	

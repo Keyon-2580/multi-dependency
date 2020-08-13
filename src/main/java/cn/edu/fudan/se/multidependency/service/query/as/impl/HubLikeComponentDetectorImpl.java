@@ -82,6 +82,9 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 				result.add(new HubLikeFile(metric.getFile(), metric.getFanOut(), metric.getFanIn(), metric.getLoc()));
 			}
 		}
+		result.sort((f1, f2) -> {
+			return (f2.getFanIn() + f2.getFanOut()) - (f1.getFanIn() + f1.getFanOut());
+		});
 		return result;
 	}
 	
@@ -96,6 +99,9 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 				result.add(new HubLikePackage(metric.getPck(), metric.getFanOut(), metric.getFanIn(), metric.getLoc()));
 			}
 		}
+		result.sort((p1, p2) -> {
+			return (p2.getFanIn() + p2.getFanOut()) - (p1.getFanIn() + p1.getFanOut());
+		});
 		return result;
 	}
 	
