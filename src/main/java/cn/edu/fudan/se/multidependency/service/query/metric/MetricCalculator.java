@@ -105,6 +105,14 @@ public class MetricCalculator {
 		return result;
 	}
 	
+	public Collection<FileMetrics> calculateFileMetrics(Project project) {
+		return calculateFileMetrics().get(project.getId());
+	}
+	
+	public Collection<PackageMetrics> calculatePackageMetrics(Project project) {
+		return calculatePackageMetrics().get(project.getId());
+	}
+	
 	public Map<Long, List<PackageMetrics>> calculatePackageMetrics() {
 		String key = "calculatePackageMetrics";
 		if(cache.get(getClass(), key) != null) {
