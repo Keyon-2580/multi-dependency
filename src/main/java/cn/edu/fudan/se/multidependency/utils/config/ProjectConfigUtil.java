@@ -167,8 +167,10 @@ public class ProjectConfigUtil {
 				config.setIssueFilePath(issueFilePath);
 			}
 			JSONArray branches = json.getJSONArray("branches");
-			for(int j = 0; j < branches.size(); j++) {
-				config.addBranch(branches.getString(j));
+			if(branches != null) {
+				for(int j = 0; j < branches.size(); j++) {
+					config.addBranch(branches.getString(j));
+				}
 			}
 			result.add(config);
 		}

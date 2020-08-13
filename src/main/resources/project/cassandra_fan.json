@@ -16,12 +16,8 @@
 		"path": "D:\\multiple-dependency-project\\project\\cassandra",
 		"specify_commit_range": true,
 		"commit_time_since": "2019-02-14 22:36:33",
-	    "commit_time_until": "2020-07-19 20:05:19",
-	    "branches": [
-	    	"cassandra-3.0",
-	    	"cassandra-3.11"
-	    ]
-	}],
+	    "commit_time_until": "2020-07-19 20:05:19"
+ 	}],
 	"libs": [],
 	"clones": [{
 		"language"   : "java",

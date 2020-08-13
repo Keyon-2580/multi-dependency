@@ -42,6 +42,8 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
     
     private List<Ref> branches = null;
     
+    private GitRepository gitRepository;
+    
     public GitInserter(GitConfig gitConfig) {
         this.gitConfig = gitConfig;
         this.gitExtractor = new GitExtractor(gitConfig.getPath());
@@ -50,33 +52,36 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
 
     @Override
     public void addNodesAndRelations() throws Exception {
-        if(gitConfig.isAnalyseIssue()) {
-            issues = new IssueExtractor(gitConfig.getIssueFilePath()).extract();
-        }
-//        addBranchesAndIssues();
         //添加gitRepository节点和gitRepository到project的包含关系
-        
-        GitRepository gitRepository = new GitRepository(generateEntityId(), 
-        		gitExtractor.getRepositoryName(), gitExtractor.getGitPath(), gitExtractor.getRepositoryPath());
+        gitRepository = new GitRepository(generateEntityId(), gitExtractor.getRepositoryName(), gitExtractor.getGitPath(), gitExtractor.getRepositoryPath());
         addNode(gitRepository, null);
         LOGGER.info(gitExtractor.getGitPath() + " " + gitExtractor.getRepositoryPath() + " " + gitExtractor.getRepositoryName() + " " + gitRepository.getPath());
         
-        Set<String> branchNames = gitConfig.getBranches();
-        for(Ref branch : branches) {
-        	String name = branch.getName();
-        	name = name.substring("refs/heads/".length());
-        	System.out.println(branchNames + " " + name + " " + branchNames.contains(name));
-        	if(!branchNames.contains(name)) {
-        		continue;
-        	}
-        	Branch branchNode = new Branch(generateEntityId(), branch.getObjectId().toString(), branch.getName());
-        	addNode(branchNode, null);
-        	addRelation(new Contain(gitRepository, branchNode));
-        	gitExtractor.checkout(branch);
-        	addCommitsAndRelations(branchNode);
+        addIssues();
+        
+        if(!gitConfig.getBranches().isEmpty()) {
+        	addSpecificBranches();
+        } else {
+        	addAllBranches();
         }
         
         close();
+    }
+    
+    private void addSpecificBranches() throws Exception {
+        Set<String> branchNames = gitConfig.getBranches();
+    	for(Ref branch : branches) {
+    		String name = branch.getName();
+    		name = name.substring("refs/heads/".length());
+    		if(!branchNames.contains(name)) {
+    			continue;
+    		}
+    		gitExtractor.checkout(branch);
+    		Branch branchNode = new Branch(generateEntityId(), branch.getObjectId().toString(), branch.getName());
+    		addNode(branchNode, null);
+    		addRelation(new Contain(gitRepository, branchNode));
+    		addCommitsAndRelations(branchNode);
+    	}
     }
     
     private void addCommitsAndRelations(Branch branch) throws Exception {
@@ -91,19 +96,35 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
             }
         }
         LOGGER.info("commit 数量：" + commits.size());
+//      Collections.reverse(commits);
         for (RevCommit revCommit : commits) {
-        	Commit commit = this.getNodes().findCommitByCommitId(revCommit.getName());
-        	if(commit != null) {
+        	String authoredDate = new SimpleDateFormat(Constant.TIMESTAMP).format(revCommit.getAuthorIdent().getWhen());
+        	Commit commit = null;
+        	if(branch != null) {
+        		commit = this.getNodes().findCommitByCommitId(revCommit.getName());
+        		if(commit != null) {
+        			addRelation(new Contain(branch, commit));
+        			continue;
+        		} 
+        		//添加commit节点
+        		commit = new Commit(generateEntityId(), revCommit.getName(), revCommit.getShortMessage(),
+        				revCommit.getFullMessage(), authoredDate);
+        		addNode(commit, null);
         		addRelation(new Contain(branch, commit));
-        		continue;
-        	} 
-        	//添加commit节点
-        	SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constant.TIMESTAMP);
-        	String authoredDate = simpleDateFormat.format(revCommit.getAuthorIdent().getWhen());
-        	commit = new Commit(generateEntityId(), revCommit.getName(), revCommit.getShortMessage(),
-        	        revCommit.getFullMessage(), authoredDate);
-            addNode(commit, null);
-            addRelation(new Contain(branch, commit));
+        	} else {
+        		commit = new Commit(generateEntityId(), revCommit.getName(), revCommit.getShortMessage(),
+        				revCommit.getFullMessage(), authoredDate);
+        		addNode(commit, null);
+        		//添加branch到commit的包含关系
+        		List<Ref> branchesOfCommit = gitExtractor.getBranchesByCommitId(revCommit);
+        		for (Ref refBranch : branchesOfCommit) {
+        			Branch branchNode = this.getNodes().findBranchByBranchId(refBranch.getObjectId().toString());
+        			if (branchNode == null) {
+        				throw new Exception(refBranch.getName() + "is non-existent");
+        			}
+        			addRelation(new Contain(branchNode, commit));
+        		}
+        	}
             
             //添加developer节点和developer到commit的关系
             Developer developer = this.getNodes().findDeveloperByName(revCommit.getAuthorIdent().getName());
@@ -165,14 +186,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         return update;
     }
 
-    private void addBranchesAndIssues() {
-        //添加gitRepository节点和gitRepository到project的包含关系
-    	System.out.println(gitExtractor.getGitPath() + " " + gitExtractor.getRepositoryPath() + " " + gitExtractor.getRepositoryName());
-        GitRepository gitRepository = new GitRepository(generateEntityId(), 
-        		gitExtractor.getRepositoryName(), gitExtractor.getGitPath(), gitExtractor.getRepositoryPath());
-        LOGGER.info(gitRepository.getPath());
-        addNode(gitRepository, null);
-
+    private void addAllBranches() throws Exception {
         //添加branch节点和gitRepository到branch的包含关系
         List<Ref> branches = gitExtractor.getBranches();
         for (Ref branch : branches) {
@@ -180,22 +194,26 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
             addNode(branchNode, null);
             addRelation(new Contain(gitRepository, branchNode));
         }
-
-        //添加issue节点和gitRepository到issue的包含关系
-        if (gitConfig.isAnalyseIssue()) {
-            for (Issue issue : issues.values()) {
-                issue.setEntityId(generateEntityId());
-                addNode(issue, null);
-                addRelation(new Contain(gitRepository, issue));
-
-                //添加developer节点和developer到issue的关系
-                Developer developer = this.getNodes().findDeveloperByName(issue.getDeveloperName());
-                if (developer == null) {
-                    developer = new Developer(generateEntityId(), issue.getDeveloperName());
-                    addNode(developer, null);
-                }
-                addRelation(new DeveloperReportIssue(developer, issue));
-            }
+    	addCommitsAndRelations(null);
+    }
+    
+    private void addIssues() throws Exception {
+    	//添加issue节点和gitRepository到issue的包含关系
+    	if (gitConfig.isAnalyseIssue()) {
+    		issues = new IssueExtractor(gitConfig.getIssueFilePath()).extract();
+    		for (Issue issue : issues.values()) {
+    			issue.setEntityId(generateEntityId());
+    			addNode(issue, null);
+    			addRelation(new Contain(gitRepository, issue));
+    			
+    			//添加developer节点和developer到issue的关系
+    			Developer developer = this.getNodes().findDeveloperByName(issue.getDeveloperName());
+    			if (developer == null) {
+    				developer = new Developer(generateEntityId(), issue.getDeveloperName());
+    				addNode(developer, null);
+    			}
+    			addRelation(new DeveloperReportIssue(developer, issue));
+    		}
         }
     }
     
