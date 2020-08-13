@@ -115,7 +115,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
     TypeRepository typeRepository;
     
     @Autowired
-    ExtendsRepository typeInheritsTypeRepository;
+    ExtendsRepository extendsRepository;
     
     @Autowired
     ImplementsRepository implementsRepository;
@@ -166,26 +166,28 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		}
 		return result;
 	}
-    
+	
 	@Override
-	public Collection<Type> findExtendsType(Type type) {
-//		return typeInheritsTypeRepository.findExtendsTypesByTypeId(type.getId());
-		/// FIXME
+	public Collection<Type> findWhatExtendsType(Type type) {
 		return new ArrayList<>();
 	}
 
 	@Override
-	public Collection<Type> findInheritsType(Type type) {
-//		return typeInheritsTypeRepository.findInheritsFromTypeByTypeId(type.getId());
-		/// FIXME
+	public Collection<Type> findTypeExtendsWhat(Type type) {
 		return new ArrayList<>();
+		
 	}
-	
+
 	@Override
-	public Collection<Type> findInheritsFromType(Type type) {
-//		return typeInheritsTypeRepository.findInheritsTypesByTypeId(type.getId());
-		/// FIXME
+	public Collection<Type> findWhatImplementsType(Type type) {
 		return new ArrayList<>();
+		
+	}
+
+	@Override
+	public Collection<Type> findTypeImplementsType(Type type) {
+		return new ArrayList<>();
+		
 	}
 
 	@Override
@@ -433,14 +435,14 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		}
 		
 		for(Type type : typesInFile) {
-			Collection<Type> inherits = findInheritsType(type);
+			Collection<Type> inherits = findTypeExtendsWhat(type);
 			for(Type inheritsType : inherits) {
 				ProjectFile belongToFile = containRelationService.findTypeBelongToFile(inheritsType);
 				if(!file.equals(belongToFile)) {
 					result.addFanOut(belongToFile);
 				}
 			}
-			inherits = findInheritsFromType(type);
+			inherits = findWhatExtendsType(type);
 			for(Type inheritsType : inherits) {
 				ProjectFile belongToFile = containRelationService.findTypeBelongToFile(inheritsType);
 				if(!file.equals(belongToFile)) {
@@ -555,7 +557,13 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 
 	@Override
 	public List<Call> findAllFunctionCallFunctionRelations() {
-		return callRepository.findAllFunctionCallFunctionRelations();
+		String key = "findAllFunctionCallFunctionRelations";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<Call> result = callRepository.findAllFunctionCallFunctionRelations();
+		cache.cache(getClass(), key, result);
+		return result;
 	}
 
 	@Override
