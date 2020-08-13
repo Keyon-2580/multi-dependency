@@ -97,6 +97,26 @@ var metric = function() {
 		});
 	}
 	
+	var showModularity = function(container, projectId) {
+		$.ajax({
+			type: "get",
+			url: "/metric/project/modularity?projectId=" + projectId,
+			success: function(modularity) {
+				container.text(modularity);
+			}
+		});
+	}
+	
+	var showCommitTimes = function(container, projectId) {
+		$.ajax({
+			type: "get",
+			url: "/metric/project/commitTimes?projectId=" + projectId,
+			success: function(commitTimes) {
+				container.text(commitTimes);
+			}
+		});
+	}
+	
 	var projectMetric = function() {
 		$.ajax({
 			type: "get",
@@ -124,12 +144,17 @@ var metric = function() {
 					html += "<td>" + result[i].nof + "</td>";
 					html += "<td>" + result[i].nom + "</td>";
 					html += "<td>" + result[i].loc + "</td>";
-					html += "<td>" + result[i].commitTimes + "</td>";
-					html += "<td>" + result[i].modularity + "</td>";
+					html += "<td id='commitTimes_" + result[i].project.id + "'>" + (result[i].commitTimes < 0 ? "计算中..." : result[i].commitTimes) + "</td>";
+					html += "<td id='modularity_" + result[i].project.id + "'>" + (result[i].modularity < 0 ? "计算中..." : result[i].modularity) + "</td>";
 					html += "</tr>";
 				}
 				html += "</table>";
 				$("#projectMetrics").html(html);
+				for(var i = 0; i < result.length; i++) {
+					var projectId = result[i].project.id;
+					showModularity($("#modularity_" + result[i].project.id), result[i].project.id);
+					showCommitTimes($("#commitTimes_" + result[i].project.id), result[i].project.id);
+				}
 			}
 		});
 	}

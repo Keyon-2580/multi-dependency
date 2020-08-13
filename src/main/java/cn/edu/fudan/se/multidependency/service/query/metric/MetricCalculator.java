@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
@@ -81,29 +79,6 @@ public class MetricCalculator {
 		cache.cache(getClass(), key, result);
 		return result;
 	}
-
-	public Map<Project, ProjectMetrics> calculateProjectMetrics(boolean calculateModularityAndCommits) {
-		String key = "";
-		if(cache.get(getClass(), key) != null) {
-			return cache.get(getClass(), key);
-		}
-		Collection<ProjectMetrics> temp = projectRepository.calculateProjectMetrics();
-		Map<Project, ProjectMetrics> result = new HashMap<>();
-		Map<Project, ProjectMetrics> calculateResult = new ConcurrentHashMap<>();
-		for(ProjectMetrics projectMetric : temp) {
-			if(calculateModularityAndCommits) {
-				Collection<Commit> commits = gitAnalyseService.findCommitsInProject(projectMetric.getProject());
-				projectMetric.setCommitTimes(commits.size());
-				projectMetric.setModularity(modularityCalculator.calculate(projectMetric.getProject()).getValue());
-				calculateResult.put(projectMetric.getProject(), projectMetric);
-			}
-			result.put(projectMetric.getProject(), projectMetric);
-		}
-		if(!calculateResult.isEmpty()) {
-			cache.cache(getClass(), key, result);
-		}
-		return result;
-	}
 	
 	public Collection<FileMetrics> calculateFileMetrics(Project project) {
 		return calculateFileMetrics().get(project.getId());
@@ -136,5 +111,32 @@ public class MetricCalculator {
 	
 	public Collection<ProjectFile> calculateFanOut(ProjectFile file) {
 		return fileRepository.calculateFanOut(file.getId());
+	}
+
+	public Map<Long, ProjectMetrics> calculateProjectMetrics(boolean calculateModularityAndCommits) {
+		String key = "calculateProjectMetrics";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		Map<Long, ProjectMetrics> result = new HashMap<>();
+		for(ProjectMetrics projectMetric : projectRepository.calculateProjectMetrics()) {
+			if(calculateModularityAndCommits) {
+				projectMetric.setCommitTimes(calculateProjectCommits(projectMetric.getProject()));
+				projectMetric.setModularity(calculateProjectModularity(projectMetric.getProject()));
+			}
+			result.put(projectMetric.getProject().getId(), projectMetric);
+		}
+		if(calculateModularityAndCommits) {
+			cache.cache(getClass(), key, result);
+		}
+		return result;
+	}
+	
+	public double calculateProjectModularity(Project project) {
+		return modularityCalculator.calculate(project).getValue();
+	}
+	
+	public int calculateProjectCommits(Project project) {
+		return gitAnalyseService.findCommitsInProject(project).size();
 	}
 }

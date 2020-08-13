@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
@@ -82,7 +83,27 @@ public class MeasureController {
     @GetMapping("/project")
     @ResponseBody
     public Collection<ProjectMetrics> calculateProjectMetrics() {
-    	return metricCalculator.calculateProjectMetrics(true).values();
+    	return metricCalculator.calculateProjectMetrics(false).values();
+    }
+    
+    @GetMapping("/project/modularity")
+    @ResponseBody
+    public double projectModularity(@RequestParam("projectId") long id) {
+    	Project project = nodeService.queryProject(id);
+    	if(project == null) {
+    		return -1;
+    	}
+    	return metricCalculator.calculateProjectModularity(project);
+    }
+    
+    @GetMapping("/project/commitTimes")
+    @ResponseBody
+    public int projectCommitTimes(@RequestParam("projectId") long id) {
+    	Project project = nodeService.queryProject(id);
+    	if(project == null) {
+    		return -1;
+    	}
+    	return metricCalculator.calculateProjectCommits(project);
     }
     
     @GetMapping("/package")

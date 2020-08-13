@@ -176,7 +176,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 			return Integer.MAX_VALUE;
 		}
 //		return FanIOMetric.calculateFanInUpperQuartile(metricCalculator.calculateFileMetrics().get(project.getId()));
-		return metricCalculator.calculateProjectMetrics(false).get(project).getNof() / 5;
+		return metricCalculator.calculateProjectMetrics(false).get(project.getId()).getNof() / 5;
 //		return 30;
 	}
 
@@ -185,7 +185,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 			return Integer.MAX_VALUE;
 		}
 //		return FanIOMetric.calculateFanOutUpperQuartile(metricCalculator.calculateFileMetrics().get(project.getId()));
-		return metricCalculator.calculateProjectMetrics(false).get(project).getNof() / 5;
+		return metricCalculator.calculateProjectMetrics(false).get(project.getId()).getNof() / 5;
 //		return 30;
 	}
 }

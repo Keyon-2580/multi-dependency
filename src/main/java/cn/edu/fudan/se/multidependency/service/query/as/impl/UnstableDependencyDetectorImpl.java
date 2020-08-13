@@ -121,28 +121,6 @@ public class UnstableDependencyDetectorImpl implements UnstableDependencyDetecto
 	}
 	
 	private UnstableFile isUnstableFile(Project project, FileMetrics metrics) {
-		/*if(metrics.getFanIn() < getFanInThreshold(project)) {
-			return null;
-		}
-		int coChangeFilesCount = 0;
-		ProjectFile file = metrics.getFile();
-		Collection<ProjectFile> fanInFiles = fileRepository.calculateFanIn(file.getId());
-		List<CoChange> cochanges = new ArrayList<>();
-		for(ProjectFile dependedOnFile : fanInFiles) {
-			CoChange cochange = gitAnalyseService.findCoChangeBetweenTwoFiles(file, dependedOnFile);
-			if(cochange != null && cochange.getTimes() >= getCoChangeTimesThreshold(project)) {
-				coChangeFilesCount++;
-				cochanges.add(cochange);
-			}
-		}
-		UnstableFile result = null;
-		if(coChangeFilesCount >= getCoChangeFilesThreshold(project)) {
-			result = new UnstableFile();
-			result.setFile(file);
-			result.setFanIn(metrics.getFanIn());
-			result.addAllCoChanges(cochanges);
-		}
-		return result;*/
 //		unstableFileDetectStrategy = new UnstableFileDetectStrategyUsingInstability(metricCalculator, staticAnalyseService, unstablePackageThreshold);
 		unstableFileDetectStrategy = new UnstableFileDetectStrategyUsingCoChange(getFanInThreshold(project), 
 				getCoChangeTimesThreshold(project), getCoChangeFilesThreshold(project), fileRepository, gitAnalyseService);

@@ -34,12 +34,12 @@ public class ProjectMetrics {
 	/**
 	 * 与该项目相关的commit次数
 	 */
-	private int commitTimes;
+	private int commitTimes = -1;
 	
 	/**
 	 * 模块度
 	 */
-	private double modularity;
+	private double modularity = -1;
 	
 	
 }
