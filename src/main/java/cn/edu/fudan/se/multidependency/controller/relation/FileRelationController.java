@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
@@ -27,6 +28,9 @@ public class FileRelationController {
 	
 	@Autowired
 	private StaticAnalyseService staticAnalyseService;
+	
+	@Autowired
+	private GitAnalyseService gitAnalyseService;
 
 	@GetMapping("")
 	public String index(HttpServletRequest request, @PathVariable("fileId") long id) {
@@ -71,5 +75,14 @@ public class FileRelationController {
 		ProjectFile file = nodeService.queryFile(id);
 		Project project = containRelationService.findFileBelongToProject(file);
 		return staticAnalyseService.findFileDependsOn(project).get(file);
+	}
+	
+	@GetMapping("/cochange")
+	@ResponseBody
+	public Object cochange(HttpServletRequest request, @PathVariable("fileId") long id) {
+		ProjectFile file = nodeService.queryFile(id);
+
+		return null;
+		
 	}
 }

@@ -13,7 +13,6 @@ import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.as.ImplicitCrossModuleDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.data.LogicCouplingFiles;
-import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 
 @Service
 public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossModuleDependencyDetector {
@@ -21,8 +20,8 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 	@Autowired
 	private StaticAnalyseService staticAnalyseService;
 	
-	@Autowired
-	private GitAnalyseService gitAnalyseService;
+	/*@Autowired
+	private GitAnalyseService gitAnalyseService;*/
 	
 	@Autowired
 	private ASRepository asRepository;
@@ -47,7 +46,7 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 		return result;
 	}
 	
-	public Collection<LogicCouplingFiles> cochangesInDifferentModuleUsingGitCoChange(int minCochange) {
+	/*public Collection<LogicCouplingFiles> cochangesInDifferentModuleUsingGitCoChange(int minCochange) {
 		Collection<CoChange> allCochanges = gitAnalyseService.calCntOfFileCoChange();
 		List<LogicCouplingFiles> result = new ArrayList<>();
 		for(CoChange cochange : allCochanges) {
@@ -63,7 +62,7 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 			return f2.getCochangeTimes() - f1.getCochangeTimes();
 		});
 		return result;
-	}
+	}*/
 	
 	private int minCoChange = 10;
 	
