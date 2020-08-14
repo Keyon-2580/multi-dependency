@@ -18,8 +18,8 @@ config:
    starter:
 #      cochange: false
 #      depends_on: false
-      cochange: false
-      depends_on: false
+      cochange: true
+      depends_on: true
 
 data:
 #   project_config: src/main/resources/project/simpletest.json
@@ -32,7 +32,7 @@ data:
 #   project_config: src/main/resources/project/depends_fan.json
    project_analyse_threads_count: 5
    dynamic_analyse: false
-   git_analyse: false
+   git_analyse: true
    lib_analyse: false
    clone_analyse: false
    neo4j:
