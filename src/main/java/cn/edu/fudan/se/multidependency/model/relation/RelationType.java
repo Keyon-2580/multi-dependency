@@ -4,6 +4,7 @@ import org.neo4j.graphdb.RelationshipType;
 
 public enum RelationType implements RelationshipType {
 	CONTAIN(RelationType.str_CONTAIN),
+	HAS(RelationType.str_HAS),
 	EXTENDS(RelationType.str_EXTENDS),
 	IMPORT(RelationType.str_IMPORT),
 	INCLUDE(RelationType.str_INCLUDE),
@@ -56,6 +57,7 @@ public enum RelationType implements RelationshipType {
 	 * 结构关系
 	 */
 	public static final String str_CONTAIN = "CONTAIN";
+	public static final String str_HAS = "HAS";
 
 	/**
 	 * 依赖关系
