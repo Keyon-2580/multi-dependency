@@ -1,16 +1,17 @@
 package cn.edu.fudan.se.multidependency.utils.config;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
-
-import org.apache.commons.lang3.StringUtils;
 
 public class ProjectConfigUtil {
 
@@ -161,10 +162,25 @@ public class ProjectConfigUtil {
 			config.setCommitIdTo(json.getString("commit_id_to"));
 			config.setCommitTimeSince(json.getString("commit_time_since"));
 			config.setCommitTimeUntil(json.getString("commit_time_until"));
-			String issueFilePath = json.getString("issues_path");
-			if (!StringUtils.isBlank(issueFilePath)) {
-				config.setAnalyseIssue(true);
-				config.setIssueFilePath(issueFilePath);
+			JSONArray issueFilePathes = json.getJSONArray("issues_pathes");
+			String issueDirectoryPath = json.getString("issues_directory");
+			if(issueFilePathes != null) {
+				for(int j = 0; i < issueFilePathes.size(); i++) {
+					if(issueFilePathes.getString(j) != null) {
+						config.addIssuePath(issueFilePathes.getString(j));
+					}
+				}
+			}
+			if (!StringUtils.isBlank(issueDirectoryPath)) {
+				try {
+					List<File> files = new ArrayList<>();
+					FileUtil.listFiles(new File(issueDirectoryPath), files);
+					for(File file : files) {
+						config.addIssuePath(file.getAbsolutePath());
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			JSONArray branches = json.getJSONArray("branches");
 			if(branches != null) {

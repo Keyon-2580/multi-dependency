@@ -1,23 +1,33 @@
 package cn.edu.fudan.se.multidependency.service.insert.git;
 
-import cn.edu.fudan.se.multidependency.model.node.git.Issue;
-import cn.edu.fudan.se.multidependency.utils.JSONUtil;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
+import cn.edu.fudan.se.multidependency.model.node.git.Issue;
+import cn.edu.fudan.se.multidependency.utils.JSONUtil;
+
 public class IssueExtractor {
 
-    private String issueFilePath;
+    private Collection<String> issueFilePathes;
 
-    public IssueExtractor(String issueFilePath) {
-        this.issueFilePath = issueFilePath;
+    public IssueExtractor(Collection<String> issueFilePathes) {
+    	this.issueFilePathes = issueFilePathes;
+    }
+    
+    public Map<Integer, Issue> extract() throws Exception {
+    	Map<Integer, Issue> result = new HashMap<>();
+    	for(String issueFilePath : this.issueFilePathes) {
+    		result.putAll(extract(issueFilePath));
+    	}
+    	return result;
     }
 
-    public Map<Integer,Issue> extract() throws Exception {
+    private Map<Integer, Issue> extract(String issueFilePath) throws Exception {
         Map<Integer,Issue> result = new HashMap<>();
         File file = new File(issueFilePath);
         JSONArray issues = JSONUtil.extractJSONArray(file);

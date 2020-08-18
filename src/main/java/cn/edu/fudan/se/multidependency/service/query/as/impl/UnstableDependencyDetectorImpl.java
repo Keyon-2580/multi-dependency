@@ -137,8 +137,9 @@ public class UnstableDependencyDetectorImpl implements UnstableDependencyDetecto
 		Map<Long, List<UnstablePackage>> result = new HashMap<>();
 		Collection<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
-			List<UnstablePackage> temp = unstablePackages(project);
-			result.put(project.getId(), temp);
+//			List<UnstablePackage> temp = unstablePackages(project);
+//			result.put(project.getId(), temp);
+			result.put(project.getId(), new ArrayList<>());
 		}
 		cache.cache(getClass(), key, result);
 		return result;

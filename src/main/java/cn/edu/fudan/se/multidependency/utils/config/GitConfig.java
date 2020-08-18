@@ -14,12 +14,15 @@ public class GitConfig {
 	private String commitIdTo;
 	private String commitTimeSince;
 	private String commitTimeUntil;
-	private boolean isAnalyseIssue;
-	private String issueFilePath;
+	private Set<String> issueFilePathes = new HashSet<>();
 	
 	private Set<String> branches = new HashSet<>();
 	
 	public void addBranch(String branch) {
 		this.branches.add(branch);
+	}
+	
+	public void addIssuePath(String issueFilePath) {
+		this.issueFilePathes.add(issueFilePath);
 	}
 }

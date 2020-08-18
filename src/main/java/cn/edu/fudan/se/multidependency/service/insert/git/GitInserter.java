@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.insert.git;
 
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -160,13 +161,13 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
                 for (String path : filesPath) {
                     if (FileUtil.isFiltered(path, SUFFIX)) continue;
                     path = "/" + gitExtractor.getRepositoryName() + "/" + path;
-                    addCommitUpdateFileRelation(path, commit, "ADD");
+                    addCommitUpdateFileRelation(path, commit, DiffEntry.ChangeType.ADD.name());
                 }
             }
             
             //添加Commit到Issue的关系
-            if (gitConfig.isAnalyseIssue()) {
-                List<Integer> issuesNum = gitExtractor.getRelationBtwCommitAndIssue(revCommit);
+            if (issues != null) {
+                Collection<Integer> issuesNum = gitExtractor.getRelationBtwCommitAndIssue(revCommit);
                 for (Integer issueNum : issuesNum) {
                     if (issues.containsKey(issueNum)) {
                         addRelation(new CommitAddressIssue(commit, issues.get(issueNum)));
@@ -199,22 +200,20 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
     
     private void addIssues() throws Exception {
     	//添加issue节点和gitRepository到issue的包含关系
-    	if (gitConfig.isAnalyseIssue()) {
-    		issues = new IssueExtractor(gitConfig.getIssueFilePath()).extract();
-    		for (Issue issue : issues.values()) {
-    			issue.setEntityId(generateEntityId());
-    			addNode(issue, null);
-    			addRelation(new Contain(gitRepository, issue));
-    			
-    			//添加developer节点和developer到issue的关系
-    			Developer developer = this.getNodes().findDeveloperByName(issue.getDeveloperName());
-    			if (developer == null) {
-    				developer = new Developer(generateEntityId(), issue.getDeveloperName());
-    				addNode(developer, null);
-    			}
-    			addRelation(new DeveloperReportIssue(developer, issue));
+    	issues = new IssueExtractor(gitConfig.getIssueFilePathes()).extract();
+    	for (Issue issue : issues.values()) {
+    		issue.setEntityId(generateEntityId());
+    		addNode(issue, null);
+    		addRelation(new Contain(gitRepository, issue));
+    		
+    		//添加developer节点和developer到issue的关系
+    		Developer developer = this.getNodes().findDeveloperByName(issue.getDeveloperName());
+    		if (developer == null) {
+    			developer = new Developer(generateEntityId(), issue.getDeveloperName());
+    			addNode(developer, null);
     		}
-        }
+    		addRelation(new DeveloperReportIssue(developer, issue));
+    	}
     }
     
     private void close() {

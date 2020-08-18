@@ -7,7 +7,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -172,16 +174,16 @@ public class GitExtractor implements Closeable {
         return null;
     }
 
-    public List<Integer> getRelationBtwCommitAndIssue(RevCommit commit) {
+    public Set<Integer> getRelationBtwCommitAndIssue(RevCommit commit) {
         String issueNumRegex = "#[1-9][0-9]*";
-        List<Integer> issueNumFromShort = getMatcher(issueNumRegex, commit.getShortMessage());
-        List<Integer> issueNumFromFull = getMatcher(issueNumRegex, commit.getFullMessage());
+        Set<Integer> issueNumFromShort = getMatcher(issueNumRegex, commit.getShortMessage());
+        Set<Integer> issueNumFromFull = getMatcher(issueNumRegex, commit.getFullMessage());
         issueNumFromShort.addAll(issueNumFromFull);
         return issueNumFromShort;
     }
 
-    public List<Integer> getMatcher(String regex, String source) {
-        List<Integer> result = new ArrayList<>();
+    public Set<Integer> getMatcher(String regex, String source) {
+        Set<Integer> result = new HashSet<>();
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(source);
         while (matcher.find()) {
