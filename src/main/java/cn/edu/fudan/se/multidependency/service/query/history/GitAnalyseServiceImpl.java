@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.config.PropertyConfig;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
@@ -30,6 +31,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepositor
 import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.DeveloperSubmitCommitRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
+import cn.edu.fudan.se.multidependency.service.query.history.data.CoChangeFile;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 
 @Service
@@ -168,7 +170,7 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 		if(propertyConfig.isCalculateCoChange()) {
 			System.out.println("创建cochange关系");
 			cochangeRepository.deleteAll();
-			return cochangeRepository.createCoChanges();
+			return cochangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE);
 		}
 		return new ArrayList<>();
 	}
@@ -247,6 +249,21 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 	@Override
 	public Collection<Commit> findCommitsInProject(Project project) {
 		return commitRepository.findCommitsInProject(project.getId());
+	}
+
+	@Override
+	public Collection<CoChangeFile> cochangesWithFile(ProjectFile file) {
+		List<CoChangeFile> result = new ArrayList<>();
+		for(CoChange cochange : cochangeRepository.cochangesLeft(file.getId())) {
+			result.add(new CoChangeFile(file, cochange));
+		}
+		for(CoChange cochange : cochangeRepository.cochangesRight(file.getId())) {
+			result.add(new CoChangeFile(file, cochange));
+		}
+		result.sort((f1, f2) -> {
+			return f2.getTimes() - f1.getTimes();
+		});
+		return result;
 	}
     
 }

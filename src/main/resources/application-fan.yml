@@ -16,8 +16,6 @@ server:
 
 config:
    starter:
-#      cochange: false
-#      depends_on: false
       cochange: true
       depends_on: true
 
@@ -43,10 +41,10 @@ data:
       path: D:/neo4j-community-3.5.16/data/databases/multiple.dependency.db
 #      path: D:/neo4j-community-3.5.16/data/databases/multiple.dependency.depends.versions.db
       
-#   serialize_path: D:/multiple-dependency-project/RepositoryService.txt
+   serialize_path: D:/multiple-dependency-project/RepositoryService.txt
 #   serialize_path: D:/multiple-dependency-project/RepositoryService-google.txt
 #   serialize_path: D:/multiple-dependency-project/RepositoryService-depends-versions.txt
 #   serialize_path: D:/multiple-dependency-project/RepositoryService-cassandra.txt
-   serialize_path: D:/multiple-dependency-project/RepositoryService-fastjson.txt
+#   serialize_path: D:/multiple-dependency-project/RepositoryService-fastjson.txt
     
    test: this property is for YamlUtilsTest

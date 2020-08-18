@@ -81,8 +81,7 @@ public class FileRelationController {
 	@ResponseBody
 	public Object cochange(HttpServletRequest request, @PathVariable("fileId") long id) {
 		ProjectFile file = nodeService.queryFile(id);
-
-		return null;
+		return gitAnalyseService.cochangesWithFile(file);
 		
 	}
 }

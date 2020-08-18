@@ -10,6 +10,7 @@ import cn.edu.fudan.se.multidependency.model.node.git.Developer;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
+import cn.edu.fudan.se.multidependency.service.query.history.data.CoChangeFile;
 
 public interface GitAnalyseService {
 
@@ -26,6 +27,8 @@ public interface GitAnalyseService {
 	Collection<CoChange> calCntOfFileCoChange();
 	
 	Collection<CoChange> getTopKFileCoChange(int k);
+	
+	Collection<CoChangeFile> cochangesWithFile(ProjectFile file);
 	
 	/**
 	 * 找出两个文件的Cochange关系

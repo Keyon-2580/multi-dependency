@@ -15,12 +15,16 @@ var unstable = function(cytoscapeutil) {
 			html += "</tr>";
 			for(var fileIndex in unstableFiles) {
 				var file = unstableFiles[fileIndex];
+				var count = 0;
+				for(var i in file.cochangeTimesWithFile) {
+					count++;
+				}
 				console.log(file);
 				html += "<tr>";
 				html += "<td width='50%'>" + file.file.path + "</td>";
 				html += "<td width='20%'>" + file.fanIn + "</td>";
 				html += "<td width='10%'>" + file.cochangeFiles.length + "</td>";
-				html += "<td width='10%'>" + file.cochangeTimesWithFile.length + "</td>";
+				html += "<td width='10%'>" + count + "</td>";
 				html += "</tr>";
 			}
 			html += "</table>";
