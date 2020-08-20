@@ -14,6 +14,7 @@ public class InsertStaticData {
     public static void main(String[] args) {
         LOGGER.info("InsertStaticData");
         insert(args);
+        System.exit(0);
     }
 
     public static void insert(String[] args) {
