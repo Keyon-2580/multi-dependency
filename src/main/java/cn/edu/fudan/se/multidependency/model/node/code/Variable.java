@@ -45,6 +45,8 @@ public class Variable implements CodeNode {
 	 */
 	private boolean field;
     
+    private String language;
+    
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
@@ -56,6 +58,7 @@ public class Variable implements CodeNode {
 		properties.put("identifier", getIdentifier() == null ? "" : getIdentifier());
 		properties.put("startLine", getStartLine());
 		properties.put("endLine", getEndLine());
+		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		return properties;
 	}
 

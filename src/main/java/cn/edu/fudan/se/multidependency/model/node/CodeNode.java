@@ -14,6 +14,8 @@ public interface CodeNode extends Node {
 	
 	int getEndLine();
 	
+	String getLanguage();
+	
 	default int getLines() {
 		if(getStartLine() <= 0 || getEndLine() <= 0) {
 			return -1;
