@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.utils.clone.data.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +18,6 @@ import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
-import cn.edu.fudan.se.multidependency.utils.clone.data.CloneResultFromCsv;
-import cn.edu.fudan.se.multidependency.utils.clone.data.FilePathFromCsv;
-import cn.edu.fudan.se.multidependency.utils.clone.data.Group;
-import cn.edu.fudan.se.multidependency.utils.clone.data.MethodIdentifierFromCsv;
 
 public class CloneUtil {
 	
@@ -128,6 +125,36 @@ public class CloneUtil {
 					type = values[3];
 				}
 				result.add(new CloneResultFromCsv(start, end, value, type));
+			}
+		}
+		return result;
+	}
+
+	public static Collection<CloneResultWithLocFromCsv> readCloneResultWithLocCsv(String filePath) throws Exception {
+		List<CloneResultWithLocFromCsv> result = new ArrayList<>();
+		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
+			String line = null;
+			while((line = reader.readLine()) != null) {
+				if("".equals(line.trim())) {
+					continue;
+				}
+				String[] values = line.split(",");
+				if(values.length < 8) {
+					LOGGER.warn("克隆数据格式不正确：" + line);
+					continue;
+				}
+				int start = Integer.parseInt(values[0]);
+				int end = Integer.parseInt(values[1]);
+				double value = Double.parseDouble(values[2]);
+				String type = values[3];
+				int linesSize1 = Integer.parseInt(values[4]);
+				int linesSize2 = Integer.parseInt(values[5]);
+				int loc1 = Integer.parseInt(values[6]);
+				int loc2 = Integer.parseInt(values[7]);
+//				if(value < 0.7) {
+//					continue;
+//				}
+				result.add(new CloneResultWithLocFromCsv(start, end, value, type, linesSize1, linesSize2, loc1, loc2));
 			}
 		}
 		return result;
