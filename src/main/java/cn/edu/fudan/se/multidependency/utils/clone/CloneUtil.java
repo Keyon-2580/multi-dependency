@@ -6,10 +6,11 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import cn.edu.fudan.se.multidependency.utils.clone.data.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,11 @@ import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
+import cn.edu.fudan.se.multidependency.utils.clone.data.CloneResultFromCsv;
+import cn.edu.fudan.se.multidependency.utils.clone.data.CloneResultWithLocFromCsv;
+import cn.edu.fudan.se.multidependency.utils.clone.data.FilePathFromCsv;
+import cn.edu.fudan.se.multidependency.utils.clone.data.Group;
+import cn.edu.fudan.se.multidependency.utils.clone.data.MethodIdentifierFromCsv;
 
 public class CloneUtil {
 	
@@ -131,7 +137,7 @@ public class CloneUtil {
 	}
 
 	public static Collection<CloneResultWithLocFromCsv> readCloneResultWithLocCsv(String filePath) throws Exception {
-		List<CloneResultWithLocFromCsv> result = new ArrayList<>();
+		Set<CloneResultWithLocFromCsv> result = new HashSet<>();
 		try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
 			String line = null;
 			while((line = reader.readLine()) != null) {
