@@ -49,6 +49,8 @@ public class Function extends CodeUnit {
 	private int endLine = -1;
     
     private String identifier;
+    
+    private String language;
 
 	/**
 	 * 插入时使用这个，因为用BatchInserter的时候插入这个会转成字符串插入，用SDN读取时对应不到这个List
@@ -80,6 +82,7 @@ public class Function extends CodeUnit {
 		properties.put("startLine", getStartLine());
 		properties.put("endLine", getEndLine());
 		properties.put("identifier", getIdentifier() == null ? "" : getIdentifier());
+		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		return properties;
 	}
 	

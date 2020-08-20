@@ -37,6 +37,8 @@ public class Namespace extends CodeUnit {
 	private int startLine = -1;
 	
 	private int endLine = -1;
+    
+    private String language;
 
 	@Override
 	public Map<String, Object> getProperties() {
@@ -47,6 +49,7 @@ public class Namespace extends CodeUnit {
 		properties.put("simpleName", getSimpleName() == null ? "" : getSimpleName());
 		properties.put("startLine", getStartLine());
 		properties.put("endLine", getEndLine());
+		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		return properties;
 	}
 

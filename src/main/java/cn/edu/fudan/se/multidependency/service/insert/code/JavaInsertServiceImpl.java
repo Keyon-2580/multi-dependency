@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Package;
@@ -38,6 +39,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 	private ProjectFile process(FileEntity entity) {
 		final String projectPath = currentProject.getPath();
 		ProjectFile file = new ProjectFile();
+		file.setLanguage(Language.java.name());
 		file.setEntityId(entity.getId().longValue());
 		String filePath = entity.getQualifiedName();
 		file.setName(FileUtil.extractFileName(filePath));
@@ -77,6 +79,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 	private Function process(FunctionEntity entity) {
 		Function function = new Function();
 		function.setImpl(true);
+		function.setLanguage(Language.java.name());
 		String functionName = entity.getQualifiedName();
 		if(functionName.contains(".")) {
 			String[] functionNameSplit = functionName.split("\\.");
@@ -95,6 +98,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 	
 	private Variable process(VarEntity entity) {
 		Variable variable = new Variable();
+		variable.setLanguage(Language.java.name());
 		variable.setEntityId(entity.getId().longValue());
 		variable.setTypeIdentify(((VarEntity) entity).getRawType().getName());
 		variable.setName(entity.getQualifiedName());
@@ -105,6 +109,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 	
 	private Type process(TypeEntity entity) {
 		Type type = new Type();
+		type.setLanguage(Language.java.name());
 		type.setEntityId(entity.getId().longValue());
 		type.setName(entity.getQualifiedName());
 		type.setSimpleName(entity.getRawName().getName());

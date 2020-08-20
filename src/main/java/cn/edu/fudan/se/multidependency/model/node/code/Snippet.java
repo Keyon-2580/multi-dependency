@@ -35,6 +35,8 @@ public class Snippet extends CodeUnit {
 	private int endLine = -1;
 	
 	private String identifier;
+    
+    private String language;
 
 	@Override
 	public Map<String, Object> getProperties() {
@@ -44,6 +46,7 @@ public class Snippet extends CodeUnit {
 		properties.put("startLine", getStartLine());
 		properties.put("endLine", getEndLine());
 		properties.put("identifier", getIdentifier() == null ? "" : getIdentifier());
+		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		return properties;
 	}
 

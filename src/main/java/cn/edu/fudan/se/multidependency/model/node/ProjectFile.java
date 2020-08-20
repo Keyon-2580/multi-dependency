@@ -35,6 +35,8 @@ public class ProjectFile extends CodeUnit {
 	private int endLine = -1;
 	
 	private double score = -1;
+    
+    private String language;
 	
 	public int getStartLine() {
 		return 1;
@@ -58,6 +60,7 @@ public class ProjectFile extends CodeUnit {
 		properties.put("suffix", getSuffix() == null ? "" : getSuffix());
 		properties.put("endLine", getEndLine());
 		properties.put("score", getScore());
+		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		return properties;
 	}
 
