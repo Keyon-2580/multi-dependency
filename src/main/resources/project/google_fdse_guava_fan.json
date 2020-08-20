@@ -1,22 +1,7 @@
 {
 	"architectures": {},
 	"projects": [{
-		"path": "D:\\sourceCode\\source-java-part-google\\google__fdse__guava_copy\\android",
-		"language": "java"
-	}, {
-		"path": "D:\\sourceCode\\source-java-part-google\\google__fdse__guava_copy\\guava",
-		"language": "java"
-	}, {
-		"path": "D:\\sourceCode\\source-java-part-google\\google__fdse__guava_copy\\guava-bom",
-		"language": "java"
-	}, {
-		"path": "D:\\sourceCode\\source-java-part-google\\google__fdse__guava_copy\\guava-gwt",
-		"language": "java"
-	}, {
-		"path": "D:\\sourceCode\\source-java-part-google\\google__fdse__guava_copy\\guava-testlib",
-		"language": "java"
-	}, {
-		"path": "D:\\sourceCode\\source-java-part-google\\google__fdse__guava_copy\\guava-tests",
+		"path": "D:\\sourceCode\\source-java-part-google\\google__fdse__guava_copy",
 		"language": "java"
 	}],
 	"dynamics": {
@@ -32,9 +17,9 @@
 	"clones": [{
 		"language"   : "java",
 		"granularity": "file",
-		"name_path"  : "src/main/resources/clone/file/google_fdse_guava_fan/result/MeasureIndex.csv",
-		"result_path": "src/main/resources/clone/file/google_fdse_guava_fan/similarity.csv",
-		"group_path" : "src/main/resources/clone/file/google_fdse_guava_fan/result/type123_method_group_result.csv"
+		"name_path"  : "src/main/resources/clone/file/source-part-guava-zhou/java/result/MeasureIndex2.csv",
+		"result_path": "src/main/resources/clone/file/source-part-guava-zhou/java/similarity.csv",
+		"group_path" : "src/main/resources/clone/file/source-part-guava-zhou/java/result/type123_method_group_result.csv"
 	}
 	]
 }
