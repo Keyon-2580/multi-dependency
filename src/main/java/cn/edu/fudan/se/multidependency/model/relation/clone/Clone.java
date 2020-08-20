@@ -51,6 +51,14 @@ public class Clone implements Relation {
 	
 	private int node2EndLine;
 	
+	private int linesSize1 = -1;
+	
+	private int linesSize2 = -1;
+	
+	private int loc1 = -1;
+	
+	private int loc2 = -1;
+	
 	/**
 	 * 克隆关系类型：文件间克隆，方法间克隆等
 	 */
@@ -95,6 +103,10 @@ public class Clone implements Relation {
 		properties.put("node2EndLine", getNode2EndLine());
 		properties.put("cloneRelationType", getCloneRelationType() == null ? "" : getCloneRelationType());
 		properties.put("cloneType", getCloneType() == null ? "" : getCloneType());
+		properties.put("linesSize1", getLinesSize1());
+		properties.put("linesSize2", getLinesSize2());
+		properties.put("loc1", getLoc1());
+		properties.put("loc2", getLoc2());
 		return properties;
 	}
 }

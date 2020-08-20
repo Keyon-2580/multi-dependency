@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.service.insert.clone.CloneInserterForFile;
+import cn.edu.fudan.se.multidependency.service.insert.clone.CloneInserterForFileWithLoc;
 import cn.edu.fudan.se.multidependency.service.insert.clone.CloneInserterForMethod;
 import cn.edu.fudan.se.multidependency.service.insert.code.Depends096Extractor;
 import cn.edu.fudan.se.multidependency.service.insert.code.DependsCodeInserterForNeo4jServiceImpl;
@@ -221,7 +221,8 @@ public class ThreadService {
 					new CloneInserterForMethod(cloneConfig.getNamePath(), cloneConfig.getResultPath(), cloneConfig.getGroupPath(), cloneConfig.getLanguage()).addNodesAndRelations();
 					break;
 				case file:
-					new CloneInserterForFile(cloneConfig.getNamePath(), cloneConfig.getResultPath(), cloneConfig.getGroupPath(), cloneConfig.getLanguage()).addNodesAndRelations();
+//					new CloneInserterForFile(cloneConfig.getNamePath(), cloneConfig.getResultPath(), cloneConfig.getGroupPath(), cloneConfig.getLanguage()).addNodesAndRelations();
+					new CloneInserterForFileWithLoc(cloneConfig.getNamePath(), cloneConfig.getResultPath(), cloneConfig.getGroupPath(), cloneConfig.getLanguage()).addNodesAndRelations();
 					break;
 				}
 			}
