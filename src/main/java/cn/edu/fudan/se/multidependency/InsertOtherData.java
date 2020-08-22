@@ -15,6 +15,7 @@ public class InsertOtherData {
     public static void main(String[] args) {
         LOGGER.info("InsertOtherData");
         insert(args);
+        System.exit(0);
     }
 
     public static void insert(String[] args) {

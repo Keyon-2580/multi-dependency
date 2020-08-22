@@ -209,10 +209,9 @@ def calc_small_file_clone_similarity(measures, measure_indecies, state):
         tokens = read_tokens(measure_file, offset, measure['end_token'] - measure['start_token'])
         if token_size > len(tokens) > 0:
             small_file_measure_indecies[key] = value
-            small_file_token_index[key] = len(tokens)
+            small_file_token_index[key] = tokens
 
-    small_file_token_index_sorted = sorted(small_file_token_index.items(), key=lambda d: d[1])
-    #small_file_sorted_keys = list(small_file_token_index_sorted.keys())
+    small_file_token_index_sorted = sorted(small_file_token_index.items(), key=lambda d: len(d[1]))
 
     print('less than 30 token file clone, size: %d\n' % len(small_file_token_index_sorted))
     small_file_clone_similarity = list()
@@ -222,23 +221,55 @@ def calc_small_file_clone_similarity(measures, measure_indecies, state):
         token_i = small_file_token_index_sorted[i][1]
         for j in range(i+1, len(small_file_token_index_sorted)):
             token_j = small_file_token_index_sorted[j][1]
-            if token_j + token_i < 16 and token_j - token_i > 5:
+            token_size_i = len(token_i)
+            token_size_j = len(token_j)
+            if token_size_j + token_size_i < 16 and token_size_j - token_size_i > 5:
                 break
-            if token_j - token_i > 10:
+            if token_size_j - token_size_i > 10:
                 break
-            group = list()
+
+            similarity = suffix_array_similarity(token_i, token_j)
+            if similarity < 0.6:
+                continue
             key_i = small_file_token_index_sorted[i][0]
             key_j = small_file_token_index_sorted[j][0]
-            group.append(key_i)
-            group.append(key_j)
-            small_file_clone_similarity += calc_clone_group_similarity_values(measures, measure_indecies, state, group, True)
+            m1 = measure_indecies[key_i]
+            m2 = measure_indecies[key_j]
+            lines1 = read_lines(m1[0], int(m1[1]), int(m1[2]))
+            lines2 = read_lines(m2[0], int(m2[1]), int(m2[2]))
+            code1 = remove_comments('\n'.join(lines1))
+            code2 = remove_comments('\n'.join(lines2))
+            str_similarity = get_equal_rate(code1, code2)
+            if str_similarity < 0.6:
+                continue
+
+            code_lines1 = remove_comments_and_mull_string('\n'.join(lines1))
+            code_lines2 = remove_comments_and_mull_string('\n'.join(lines2))
+            lines1_size = len(lines1) + 1
+            lines2_size = len(lines2) + 1
+            code_lines1_size = len(code_lines1)
+            code_lines2_size = len(code_lines2)
+
+            if 1 != int(similarity):
+                value = CloneSimilarityData(key_i, key_j, similarity, 3, lines1_size, lines2_size,
+                                    code_lines1_size, code_lines2_size)
+                small_file_clone_similarity.append(value)
+            else:
+                if len(lines1) == 0 or len(lines2) == 0:
+                    value = CloneSimilarityData(key_i, key_j, similarity, 2, lines1_size, lines2_size,
+                                        code_lines1_size, code_lines2_size)
+                    small_file_clone_similarity.append(value)
+                code_type = get_code_type(code1, code2)
+                value = CloneSimilarityData(key_i, key_j, similarity, code_type, lines1_size, lines2_size,
+                                    code_lines1_size, code_lines2_size)
+                small_file_clone_similarity.append(value)
 
             cnt += 1
 
     return small_file_clone_similarity
 
 
-def calc_clone_group_similarity_values(measures, measure_indecies, state, group, isSmallFile=False):
+def calc_clone_group_similarity_values(measures, measure_indecies, state, group):
     clone_similarity_values = list()
     for i in range(0, len(group) - 1):
         measure1 = measures[group[i]]
@@ -257,6 +288,8 @@ def calc_clone_group_similarity_values(measures, measure_indecies, state, group,
                 print('clone file/method pass, token size: %d\n' % len(tokens2))
                 continue
             similarity = suffix_array_similarity(tokens1, tokens2)
+            if similarity < 0.6:
+                continue
             m1 = measure_indecies[group[i]]
             m2 = measure_indecies[group[j]]
             lines1 = read_lines(m1[0], int(m1[1]), int(m1[2]))
@@ -268,12 +301,6 @@ def calc_clone_group_similarity_values(measures, measure_indecies, state, group,
             code_lines1_size = len(code_lines1)
             code_lines2_size = len(code_lines2)
 
-            if isSmallFile:
-                code1 = remove_comments('\n'.join(lines1))
-                code2 = remove_comments('\n'.join(lines2))
-                str_similarity = get_equal_rate(code1, code2)
-                if str_similarity < 0.6 or similarity < 0.6:
-                    continue
             if 1 != int(similarity):
                 value = CloneSimilarityData(group[i], group[j], similarity, 3, lines1_size, lines2_size,
                                             code_lines1_size, code_lines2_size)
@@ -316,7 +343,7 @@ def process():
         print('%.2f%%' % (cnt * 100.0 / size))
 
         # 过滤掉克隆实例特别多的克隆组
-        if len(group) > 100:
+        if len(group) > 200:
             print('clone group pass, id : %d, size: %d\n' % (cnt - 1, len(group)))
             continue
 

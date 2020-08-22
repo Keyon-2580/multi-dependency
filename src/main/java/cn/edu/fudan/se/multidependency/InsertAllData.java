@@ -23,6 +23,7 @@ public class InsertAllData {
         LOGGER.info("InsertAllData");
         insert(args);
 //		checkMicroserviceTrace(args);
+        System.exit(0);
     }
 
     public static void checkMicroserviceTrace(String[] args) throws Exception {
