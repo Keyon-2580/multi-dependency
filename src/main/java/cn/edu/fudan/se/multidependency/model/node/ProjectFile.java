@@ -33,6 +33,8 @@ public class ProjectFile extends CodeUnit {
 	private String suffix;
 	
 	private int endLine = -1;
+
+	private int loc = 0;
 	
 	private double score = -1;
     
@@ -59,6 +61,7 @@ public class ProjectFile extends CodeUnit {
 		properties.put("path", getPath() == null ? "" : getPath());
 		properties.put("suffix", getSuffix() == null ? "" : getSuffix());
 		properties.put("endLine", getEndLine());
+		properties.put("loc", getLoc());
 		properties.put("score", getScore());
 		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		return properties;
