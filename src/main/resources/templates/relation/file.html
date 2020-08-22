@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Architectural Smell</title>
+<title th:text="${file.name}"></title>
 <script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/jquery.treeview.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/popper-1.14.7.min.js}"></script>
@@ -28,14 +28,7 @@
 <script type="text/javascript" th:src="@{/js/import/echarts-4.7.0/dist/echarts.js}"></script>
 <script type="text/javascript" th:src="@{/js/windowUtil.js}"></script>
 <script type="text/javascript" th:src="@{/js/cytoscapeutils.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/hublike.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/unstable.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/cyclic.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/hierarchy.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/similar.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/godComponents.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/unused.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/icd.js}"></script>
+<script type="text/javascript" th:src="@{/js/relation/file.js}"></script>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
@@ -76,7 +69,43 @@
 	<div class="col-sm-12 row" style="margin-bottom: 15px;">
 		<div class="col-sm-12">
 			<div>
-				<h3 style="margin-top: 0px;" th:text="${file.path}"></h3>
+				<h4 style="margin-top: 0px;" th:text="${file.path}"></h4>
+			</div>
+		</div>
+		<hr/>
+		<div class="col-sm-12">
+			<div>
+				<h5>metric</h5>
+			</div>
+			<div id="metric_content">
+			</div>
+		</div>
+		<hr/>
+		<div class="col-sm-12">
+			<div>
+				<h5>type</h5>
+			</div>
+			<div id="contain_type_content">
+			</div>
+		</div>
+		<hr/>
+		<div class="col-sm-12 sm">
+			<div>
+				<h5>depends</h5>
+			</div>
+			<div class="col-sm-6">
+				<div>
+					<h5>depended by</h5>
+				</div>
+				<div id="dependedBy_content">
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div>
+					<h5>depends on</h5>
+				</div>
+				<div id="dependsOn_content">
+				</div>
 			</div>
 		</div>
 		<hr/>
@@ -84,10 +113,7 @@
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-			hublike(cytoscapeutil()).init();
-			unstable(cytoscapeutil()).init();
-			icd(cytoscapeutil()).init();
-			god(cytoscapeutil()).init();
+			 rFile([[${file}]].id, cytoscapeutil()).init();
 		});
 		// ]]>
 	</script>

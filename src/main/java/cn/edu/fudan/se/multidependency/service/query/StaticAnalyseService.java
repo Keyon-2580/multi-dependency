@@ -102,4 +102,8 @@ public interface StaticAnalyseService {
 	Map<Package, List<DependsOn>> findPackageDependsOn(Project project);
 	
 	Map<ProjectFile, List<DependsOn>> findFileDependsOn(Project project);
+	
+	Collection<DependsOn> findFileDependsOn(ProjectFile file);
+	
+	Collection<DependsOn> findFileDependedOnBy(ProjectFile file);
 }

@@ -14,5 +14,8 @@ import java.util.List;
 public interface CommitUpdateFileRepository extends Neo4jRepository<CommitUpdateFile, Long> {
 
     @Query("match (c:Commit)-[r:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f:ProjectFile) where id(c)={cId} return f")
-    List<ProjectFile> findUpdatedFilesByCommitId(@Param("cId") Long commitId);
+    List<ProjectFile> findUpdatedFilesByCommitId(@Param("cId") long commitId);
+    
+    @Query("match p=(c:Commit)-[r:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile) where id(c)={id} return p")
+    List<CommitUpdateFile> findCommitUpdatedFiles(@Param("id") long commitId);
 }

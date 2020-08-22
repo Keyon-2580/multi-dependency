@@ -31,10 +31,14 @@ public class CytoscapeUtil {
 		}
 		
 		public CytoscapeNode(String id, String name, String type) {
+			this(id, name, type, "");
+		}
+		
+		public CytoscapeNode(String id, String name, String type, String value) {
 			this.id = id;
 			this.name = name;
 			this.type = type;
-			this.value = "";
+			this.value = value;
 		}
 		
 		public void setParent(long parent) {

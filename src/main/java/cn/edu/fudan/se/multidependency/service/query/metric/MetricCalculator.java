@@ -45,17 +45,17 @@ public class MetricCalculator {
 	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
 	private ModularityCalculator modularityCalculator;
 	
-	private Map<ProjectFile, FileMetrics> commitFileMetricsCache = null;
 	public Map<ProjectFile, FileMetrics> calculateCommitFileMetrics() {
-		if(commitFileMetricsCache != null) {
-			return commitFileMetricsCache;
+		String key = "calculateCommitFileMetrics";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
 		}
 		Map<ProjectFile, FileMetrics> result = new HashMap<>();
 		List<FileMetrics> metrics = fileRepository.calculateFileMetricsWithCoChangeCommitTimes();
 		for(FileMetrics metric : metrics) {
 			result.put(metric.getFile(), metric);
 		}
-		commitFileMetricsCache = result;
+		cache.cache(getClass(), key, result);
 		return result;
 	}
 	
@@ -111,6 +111,15 @@ public class MetricCalculator {
 	
 	public Collection<ProjectFile> calculateFanOut(ProjectFile file) {
 		return fileRepository.calculateFanOut(file.getId());
+	}
+	
+	public FileMetrics calculateFileMetric(ProjectFile file) {
+		FileMetrics fileMetrics = fileRepository.calculateFileMetrics(file.getId());
+		Map<ProjectFile, FileMetrics> commitFileMetricsCache = calculateCommitFileMetrics();
+		if(commitFileMetricsCache.get(file) != null) {
+			fileMetrics.setCochangeCommitTimes(commitFileMetricsCache.get(file).getCochangeCommitTimes());
+		}
+		return fileMetrics;
 	}
 
 	public Map<Long, ProjectMetrics> calculateProjectMetrics(boolean calculateModularityAndCommits) {

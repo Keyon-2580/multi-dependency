@@ -626,6 +626,10 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 
 	@Override
 	public Map<Package, List<DependsOn>> findPackageDependsOn(Project project) {
+		String key = "findPackageDependsOn_" + project.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
 		List<DependsOn> dependsOns = dependsOnRepository.findPackageDependsInProject(project.getId());
 		Map<Package, List<DependsOn>> result = new HashMap<>();
 		for(DependsOn dependsOn : dependsOns) {
@@ -634,11 +638,16 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			temp.add(dependsOn);
 			result.put(start, temp);
 		}
+		cache.cache(getClass(), key, result);
 		return result;
 	}
 
 	@Override
 	public Map<ProjectFile, List<DependsOn>> findFileDependsOn(Project project) {
+		String key = "findFileDependsOn_" + project.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
 		List<DependsOn> dependsOns = dependsOnRepository.findFileDependsInProject(project.getId());
 		Map<ProjectFile, List<DependsOn>> result = new HashMap<>();
 		for(DependsOn dependsOn : dependsOns) {
@@ -647,6 +656,39 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			temp.add(dependsOn);
 			result.put(start, temp);
 		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+	
+	@Override
+	public Collection<DependsOn> findFileDependsOn(ProjectFile file) {
+		String key = "findFileDependsOn_" + file.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<DependsOn> result = dependsOnRepository.findFileDependsOn(file.getId());
+		result.sort((d1, d2) -> {
+			ProjectFile file1 = (ProjectFile) d1.getEndNode();
+			ProjectFile file2 = (ProjectFile) d2.getEndNode();
+			return file1.getPath().compareTo(file2.getPath());
+		});
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+	
+	@Override
+	public Collection<DependsOn> findFileDependedOnBy(ProjectFile file) {
+		String key = "findFileDependedOnBy_" + file.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<DependsOn> result = dependsOnRepository.findFileDependedOnBy(file.getId());
+		result.sort((d1, d2) -> {
+			ProjectFile file1 = (ProjectFile) d1.getStartNode();
+			ProjectFile file2 = (ProjectFile) d2.getStartNode();
+			return file1.getPath().compareTo(file2.getPath());
+		});
+		cache.cache(getClass(), key, result);
 		return result;
 	}
 

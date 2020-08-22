@@ -16,7 +16,7 @@ var hublike = function(cytoscapeutil) {
 				var file = hubLikeFiles[fileIndex];
 				console.log(file);
 				html += "<tr>";
-				html += "<td>" + file.file.path + "</td>";
+				html += "<td><a target='_blank' href='/relation/file/" + file.file.id + "'>" + file.file.path + "</a></td>";
 				html += "<td>" + file.fanIn + "</td>";
 				html += "<td>" + file.fanOut + "</td>";
 				html += "</tr>";

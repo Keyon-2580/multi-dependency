@@ -9,10 +9,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculator;
+import cn.edu.fudan.se.multidependency.service.query.relation.FileRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
@@ -31,6 +32,12 @@ public class FileRelationController {
 	
 	@Autowired
 	private GitAnalyseService gitAnalyseService;
+	
+	@Autowired
+	private MetricCalculator metricCalculator;
+	
+	@Autowired
+	private FileRelationService fileRelationService;
 
 	@GetMapping("")
 	public String index(HttpServletRequest request, @PathVariable("fileId") long id) {
@@ -41,45 +48,65 @@ public class FileRelationController {
 		return "relation/file";
 	}
 	
+	@GetMapping("/metric")
+	@ResponseBody
+	public Object metric(@PathVariable("fileId") long id) {
+		ProjectFile file = nodeService.queryFile(id);
+		return metricCalculator.calculateFileMetric(file);
+	}
+	
 	@GetMapping("/contain/type")
 	@ResponseBody
-	public Object contain(HttpServletRequest request, @PathVariable("fileId") long id) {
+	public Object contain(@PathVariable("fileId") long id) {
 		ProjectFile file = nodeService.queryFile(id);
 		return containRelationService.findFileDirectlyContainTypes(file);
 	}
 	
 	@GetMapping("/import/type")
 	@ResponseBody
-	public Object importType(HttpServletRequest request, @PathVariable("fileId") long id) {
+	public Object importType(@PathVariable("fileId") long id) {
 		ProjectFile file = nodeService.queryFile(id);
 		return staticAnalyseService.findProjectContainFileImportTypeRelations(containRelationService.findFileBelongToProject(file));
 	}
 	
 	@GetMapping("/import/function")
 	@ResponseBody
-	public Object importFunction(HttpServletRequest request, @PathVariable("fileId") long id) {
+	public Object importFunction(@PathVariable("fileId") long id) {
 		ProjectFile file = nodeService.queryFile(id);
 		return staticAnalyseService.findProjectContainFileImportFunctionRelations(containRelationService.findFileBelongToProject(file));
 	}
 	
 	@GetMapping("/import/variable")
 	@ResponseBody
-	public Object importVariable(HttpServletRequest request, @PathVariable("fileId") long id) {
+	public Object importVariable(@PathVariable("fileId") long id) {
 		ProjectFile file = nodeService.queryFile(id);
 		return staticAnalyseService.findProjectContainFileImportVariableRelations(containRelationService.findFileBelongToProject(file));
 	}
 	
 	@GetMapping("/dependsOn")
 	@ResponseBody
-	public Object dependsOn(HttpServletRequest request, @PathVariable("fileId") long id) {
+	public Object dependsOn(@PathVariable("fileId") long id) {
 		ProjectFile file = nodeService.queryFile(id);
-		Project project = containRelationService.findFileBelongToProject(file);
-		return staticAnalyseService.findFileDependsOn(project).get(file);
+		return staticAnalyseService.findFileDependsOn(file);
+	}
+	
+	@GetMapping("/dependedBy")
+	@ResponseBody
+	public Object dependedOn(@PathVariable("fileId") long id) {
+		ProjectFile file = nodeService.queryFile(id);
+		return staticAnalyseService.findFileDependedOnBy(file);
+	}
+	
+	@GetMapping("/dependsOn/cytoscape")
+	@ResponseBody
+	public Object dependsOnCytoscape(@PathVariable("fileId") long id) {
+		ProjectFile file = nodeService.queryFile(id);
+		return fileRelationService.dependsOnCytoscape(file);
 	}
 	
 	@GetMapping("/cochange")
 	@ResponseBody
-	public Object cochange(HttpServletRequest request, @PathVariable("fileId") long id) {
+	public Object cochange(@PathVariable("fileId") long id) {
 		ProjectFile file = nodeService.queryFile(id);
 		return gitAnalyseService.cochangesWithFile(file);
 		

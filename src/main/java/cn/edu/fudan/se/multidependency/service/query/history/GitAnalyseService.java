@@ -9,10 +9,13 @@ import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.model.relation.git.CommitUpdateFile;
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
 import cn.edu.fudan.se.multidependency.service.query.history.data.CoChangeFile;
 
 public interface GitAnalyseService {
+	
+	Collection<CommitUpdateFile> queryCommitUpdateFiles(Commit commit);
 
 	Iterable<Commit> findAllCommits();
 	

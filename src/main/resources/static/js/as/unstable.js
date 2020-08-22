@@ -21,7 +21,7 @@ var unstable = function(cytoscapeutil) {
 				}
 				console.log(file);
 				html += "<tr>";
-				html += "<td width='50%'>" + file.file.path + "</td>";
+				html += "<td width='50%'><a target='_blank' href='/relation/file/" + file.file.id + "'>" + file.file.path + "</a></td>";
 				html += "<td width='20%'>" + file.fanIn + "</td>";
 				html += "<td width='10%'>" + file.cochangeFiles.length + "</td>";
 				html += "<td width='10%'>" + count + "</td>";

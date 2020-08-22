@@ -1,7 +1,5 @@
 package cn.edu.fudan.se.multidependency.controller.relation;
 
-import java.util.ArrayList;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,14 +36,21 @@ public class FunctionRelationController {
 		request.setAttribute("file", file);
 		request.setAttribute("pck", containRelationService.findFileBelongToPackage(file));
 		request.setAttribute("project", containRelationService.findFileBelongToProject(file));
-		return "relation/file";
+		return "relation/function";
 	}
 	
 	@GetMapping("/call")
 	@ResponseBody
 	public Object call(HttpServletRequest request, @PathVariable("functionId") long id) {
 		Function function = nodeService.queryFunction(id);
-		return staticAnalyseService.findAllFunctionCallRelationsGroupByCaller().getOrDefault(function, new ArrayList<>());
+		return staticAnalyseService.queryFunctionCallFunctions(function);
+	}
+	
+	@GetMapping("/called")
+	@ResponseBody
+	public Object called(@PathVariable("functionId") long id) {
+		Function function = nodeService.queryFunction(id);
+		return staticAnalyseService.queryFunctionCallByFunctions(function);
 	}
 	
 }

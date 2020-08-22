@@ -36,20 +36,34 @@ public class TypeRelationController {
 		request.setAttribute("file", file);
 		request.setAttribute("pck", containRelationService.findFileBelongToPackage(file));
 		request.setAttribute("project", containRelationService.findFileBelongToProject(file));
-		return "relation/file";
+		return "relation/type";
 	}
 	
 	@GetMapping("/contain/field")
 	@ResponseBody
-	public Object contain(HttpServletRequest request, @PathVariable("typeId") long id) {
+	public Object contain(@PathVariable("typeId") long id) {
 		Type type = nodeService.queryType(id);
 		return containRelationService.findTypeDirectlyContainFields(type);
 	}
 	
+	@GetMapping("/contain/function")
+	@ResponseBody
+	public Object containFunction(@PathVariable("typeId") long id) {
+		Type type = nodeService.queryType(id);
+		return containRelationService.findTypeDirectlyContainFunctions(type);
+	}
+	
 	@GetMapping("/extends")
 	@ResponseBody
-	public Object extendsRelation(HttpServletRequest request, @PathVariable("typeId") long id) {
+	public Object extendsRelation(@PathVariable("typeId") long id) {
 		Type type = nodeService.queryType(id);
 		return staticAnalyseService.findWhatExtendsType(type);
+	}
+	
+	@GetMapping("/extended")
+	@ResponseBody
+	public Object extendedRelation(@PathVariable("typeId") long id) {
+		Type type = nodeService.queryType(id);
+		return staticAnalyseService.findTypeExtendsWhat(type);
 	}
 }

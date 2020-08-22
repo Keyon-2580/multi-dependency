@@ -25,6 +25,7 @@ import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.model.relation.git.CommitUpdateFile;
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
@@ -263,6 +264,17 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 		result.sort((f1, f2) -> {
 			return f2.getTimes() - f1.getTimes();
 		});
+		return result;
+	}
+
+	@Override
+	public Collection<CommitUpdateFile> queryCommitUpdateFiles(Commit commit) {
+		String key = "queryCommitUpdateFiles_" + commit.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<CommitUpdateFile> result = commitUpdateFileRepository.findCommitUpdatedFiles(commit.getId());
+		cache.cache(getClass(), key, result);
 		return result;
 	}
     
