@@ -4,7 +4,46 @@ var rFile = function(fileId, cytoscapeutil) {
 		metric(fileId);
 		depends(fileId);
 		issues(fileId);
+		commits(fileId);
 	};
+	
+	var commits = function(fileId) {
+		$.ajax({
+			type: "get",
+			url: "/relation/file/" + fileId + "/commit",
+			success: function(result) {
+				console.log(result);
+				var html = "<table class='table table-bordered'>";
+				html += "<tr>";
+				html += "<td width='20%'></td>";
+				for(var i = 0; i < result.files.length; i++) {
+					html += "<td><a target='_blank' href='/relation/file/" + result.files[i].id + "'>";
+					html += result.files[i].name;
+					html += "</a></td>";
+				}
+				html += "</tr>";
+				for(var i = 0; i < result.commits.length; i++) {
+					html += "<tr>";
+					html += "<td>" + (i + 1) + ":" + "<a target='_blank' href='/commit/" + result.commits[i].id + "'>" + result.commits[i].commitId + "(" + result.commits[i].commitFilesSize + ") </a></td>";
+					for(var j = 0; j < result.files.length; j++) {
+						if(result.update[i][j] == true) {
+							html += "<td>T</td>";
+						} else {
+							html += "<td></td>";
+						}
+					}
+					html += "</tr>";
+				}
+				/*var html = "<ol>";
+				for(var i = 0; i < result.length; i++) {
+					html += "<li><a target='_blank' href='/commit/" + result[i].id + "'>" + result[i].commitId + "</a></li>";
+				}
+				html += "</ol>";*/
+				html += "</table>";
+				$("#commit_content").html(html);
+			}
+		})
+	}
 	
 	var issues = function(fileId) {
 		$.ajax({

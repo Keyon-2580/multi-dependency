@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.history.CommitQueryService;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.history.IssueQueryService;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculator;
@@ -42,6 +43,9 @@ public class FileRelationController {
 	
 	@Autowired
 	private IssueQueryService issueService;
+	
+	@Autowired
+	private CommitQueryService commitService;
 
 	@GetMapping("")
 	public String index(HttpServletRequest request, @PathVariable("fileId") long id) {
@@ -113,6 +117,14 @@ public class FileRelationController {
 	public Object cochange(@PathVariable("fileId") long id) {
 		ProjectFile file = nodeService.queryFile(id);
 		return gitAnalyseService.cochangesWithFile(file);
+	}
+	
+	@GetMapping("/commit")
+	@ResponseBody
+	public Object commit(@PathVariable("fileId") long id) {
+		ProjectFile file = nodeService.queryFile(id);
+//		return commitService.queryUpdatedByCommits(file);
+		return commitService.queryUpdatedFilesByCommitsInFile(file);
 	}
 	
 	@GetMapping("/issue")

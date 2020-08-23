@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Multiple Architectural Smell</title>
+<title th:text="${type.name}"></title>
 <script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/jquery.treeview.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/popper-1.14.7.min.js}"></script>
@@ -28,7 +28,7 @@
 <script type="text/javascript" th:src="@{/js/import/echarts-4.7.0/dist/echarts.js}"></script>
 <script type="text/javascript" th:src="@{/js/windowUtil.js}"></script>
 <script type="text/javascript" th:src="@{/js/cytoscapeutils.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/multiple.js}"></script>
+<script type="text/javascript" th:src="@{/js/relation/type.js}"></script>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
@@ -68,17 +68,37 @@
 	<div th:include="nav.html::nav"></div>
 	<div class="col-sm-12 row" style="margin-bottom: 15px;">
 		<div class="col-sm-12">
-			<div id="content">
+			<div>
+				<h4 style="margin-top: 0px;" th:text="${type.name}"></h4>
+			</div>
+			<div>
+				<h5>file: <a target="_blank" th:href="${'/relation/file/' + file.id}" th:text="${file.path}"></a></h5>
 			</div>
 		</div>
+		<hr/>
+		<div class="col-sm-12">
+			<div>
+				<h5>fields</h5>
+			</div>
+			<div id="contain_field_content">
+			</div>
+		</div>
+		<hr/>
+		<div class="col-sm-12">
+			<div>
+				<h5>functions</h5>
+			</div>
+			<div id="contain_function_content">
+			</div>
+		</div>
+		<hr/>
 	</div>
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-			multiple(cytoscapeutil()).init();		
+			 rType([[${type}]].id, cytoscapeutil()).init();
 		});
 		// ]]>
 	</script>
-<!--	<script type="text/javascript" th:src="@{/js/circlechart.js}"></script>-->
 </body>
 </html>

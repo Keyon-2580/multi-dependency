@@ -9,14 +9,14 @@ var commit = function(commitId, cytoscapeutil) {
 			type: "get",
 			url: "/commit/" + commitId + "/issues",
 			success: function(result) {
-				var html = "<ul>";
+				var html = "<ol>";
 				console.log(result);
 				for(var i = 0; i < result.length; i++) {
 					html += "<li><a target='_blank' href='/issue/" + result[i].id + "' >";
 					html += result[i].number + " " + result[i].title;
 					html += "</a></li>";
 				}
-				html += "</ul>";
+				html += "</ol>";
 				$("#issue_content").html(html);
 			}
 		});
@@ -32,11 +32,11 @@ var commit = function(commitId, cytoscapeutil) {
 				for(var i in result) {
 					console.log(i);
 					html += "<div><h5>" + i + "</h5></div>"
-					html += "<ul>";
+					html += "<ol>";
 					for(var j = 0; j < result[i].length; j++) {
 						html += "<li><a target='_blank' href='/relation/file/" + result[i][j].id + "'>" + result[i][j].path + "</a></li>";
 					}
-					html += "</ul>";
+					html += "</ol>";
 				}
 				$("#file_content").html(html);
 			}

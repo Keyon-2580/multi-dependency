@@ -15,10 +15,10 @@ var hierarchy = function(cytoscapeutil) {
 				var cycle = cyclicTypes[cycleIndex];
 				console.log(cycle);
 				html += "<tr>";
-				html += "<td>" + cycle.superType.name + "</td>";
+				html += "<td><a target='_blank' href='/relation/type/" + cycle.superType.id + "'>" + cycle.superType.name + "</a></td>";
 				html += "<td>";
 				for(var i = 0; i < cycle.subTypes.length; i++) {
-					html += cycle.subTypes[i].name + "<br/>";
+					html += "<a target='_blank' href='/relation/type/" + cycle.subTypes[i].id + "'</a>" + cycle.subTypes[i].name + "<br/>";
 				}
 				html += "</td>";
 				html += "</tr>";

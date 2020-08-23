@@ -19,8 +19,13 @@ public interface CommitRepository extends Neo4jRepository<Commit, Long> {
 	List<Commit> findCommitsInTwoFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
 	
     @Query("match (project:Project)-[:" + RelationType.str_CONTAIN + "*2]->(:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(commit:Commit) where id(project)={projectId} return distinct commit;")
-    List<Commit> findCommitsInProject(@Param("projectId") long projectId);
+    List<Commit> queryCommitsInProject(@Param("projectId") long projectId);
     
     @Query("match (c:Commit) where (c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-() return c order by c.authoredDate desc;")
-    List<Commit> findAllCommits();
+    List<Commit> queryAllCommits();
+    
+    @Query("match (c:Commit)-[:" 
+    		+ RelationType.str_COMMIT_UPDATE_FILE 
+    		+ "]->(file:ProjectFile) where id(file)={fileId} return c order by c.authoredDate desc;")
+    List<Commit> queryUpdatedByCommits(@Param("fileId") long fileId);
 }

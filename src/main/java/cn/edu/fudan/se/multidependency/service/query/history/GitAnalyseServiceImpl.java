@@ -249,7 +249,7 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 
 	@Override
 	public Collection<Commit> findCommitsInProject(Project project) {
-		return commitRepository.findCommitsInProject(project.getId());
+		return commitRepository.queryCommitsInProject(project.getId());
 	}
 
 	@Override
