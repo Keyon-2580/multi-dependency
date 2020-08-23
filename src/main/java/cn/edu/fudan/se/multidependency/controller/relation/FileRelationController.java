@@ -123,7 +123,13 @@ public class FileRelationController {
 	@ResponseBody
 	public Object commit(@PathVariable("fileId") long id) {
 		ProjectFile file = nodeService.queryFile(id);
-//		return commitService.queryUpdatedByCommits(file);
+		return commitService.queryUpdatedByCommits(file);
+	}
+	
+	@GetMapping("/commit/matrix")
+	@ResponseBody
+	public Object commitMatrix(@PathVariable("fileId") long id) {
+		ProjectFile file = nodeService.queryFile(id);
 		return commitService.queryUpdatedFilesByCommitsInFile(file);
 	}
 	

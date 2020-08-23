@@ -5,8 +5,10 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -35,8 +37,10 @@ import cn.edu.fudan.se.multidependency.service.query.as.data.GodFile;
 import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikeFile;
 import cn.edu.fudan.se.multidependency.service.query.as.data.LogicCouplingFiles;
 import cn.edu.fudan.se.multidependency.service.query.as.data.MultipleASFile;
+import cn.edu.fudan.se.multidependency.service.query.as.data.PieFilesData;
 import cn.edu.fudan.se.multidependency.service.query.as.data.SimilarComponents;
 import cn.edu.fudan.se.multidependency.service.query.as.data.UnstableFile;
+import cn.edu.fudan.se.multidependency.service.query.history.IssueQueryService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
@@ -69,6 +73,41 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
  	
 	@Autowired
 	private NodeService nodeService;
+	
+	@Autowired
+	private IssueQueryService issueQueryService;
+	
+	public PieFilesData smellAndIssueFiles() {
+		Map<Project, List<MultipleASFile>> multipleASFiles = multipleASFiles(true);
+		Set<ProjectFile> smellFiles = new HashSet<>();
+		for(Collection<MultipleASFile> temp : multipleASFiles.values()) {
+			for(MultipleASFile f : temp) {
+				smellFiles.add(f.getFile());
+			}
+		}
+		Set<ProjectFile> issueFiles = issueQueryService.queryRelatedFilesOnAllIssues();
+		
+		Set<ProjectFile> normalFiles = new HashSet<>();
+		Set<ProjectFile> onlyIssueFiles = new HashSet<>();
+		Set<ProjectFile> onlySmellFiles = new HashSet<>();
+		Set<ProjectFile> issueAndSmellFiles = new HashSet<>();
+		
+		Collection<ProjectFile> allFiles = nodeService.queryAllFiles();
+		for(ProjectFile file : allFiles) {
+			if(smellFiles.contains(file) && issueFiles.contains(file)) {
+				issueAndSmellFiles.add(file);
+			} else if(smellFiles.contains(file)) {
+				onlySmellFiles.add(file);
+			} else if(issueFiles.contains(file)) {
+				onlyIssueFiles.add(file);
+			} else {
+				normalFiles.add(file);
+			}
+		}
+		PieFilesData data = new PieFilesData(normalFiles, onlyIssueFiles, onlySmellFiles, issueAndSmellFiles);
+		return data;
+	}
+	
 	
 	@Override
 	public Map<Project, List<MultipleASFile>> multipleASFiles(boolean removeNoASFile) {
@@ -177,9 +216,9 @@ public class ArchitectureSmellDetectorImpl implements ArchitectureSmellDetector 
 		
 		for(Map.Entry<Project, List<MultipleASFile>> entry : result.entrySet()) {
 			entry.getValue().sort((m1, m2) -> {
-				if(m2.smellCount() == m1.smellCount()) {
-					return m2.getFile().getScore() > m1.getFile().getScore() ? 1 : -1;
-				}
+//				if(m2.smellCount() == m1.smellCount()) {
+//					return m2.getFile().getScore() > m1.getFile().getScore() ? 1 : -1;
+//				}
 				return m2.smellCount() - m1.smellCount();
 			});
 		}

@@ -18,7 +18,7 @@ var cyclic = function(cytoscapeutil) {
 				html += "<td>" + cycle.partition + "</td>";
 				html += "<td>";
 				for(var i = 0; i < cycle.components.length; i++) {
-					html += cycle.components[i].path + "<br/>";
+					html += "<a target='_blank' href='/relation/file/" + cycle.components[i].id + "'>" + cycle.components[i].path + "</a><br/>";
 				}
 				html += "</td>";
 				html += "</tr>";

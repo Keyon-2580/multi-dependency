@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import cn.edu.fudan.se.multidependency.service.query.as.ArchitectureSmellDetector;
+import cn.edu.fudan.se.multidependency.service.query.as.impl.ArchitectureSmellDetectorImpl;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller
@@ -19,10 +19,16 @@ import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 public class ArchitectureSmellController {
 	
 	@Autowired
-	private ArchitectureSmellDetector detector;
+	private ArchitectureSmellDetectorImpl detector;
 	
 	@Autowired
 	private NodeService nodeService;
+	
+	@GetMapping("/issue/pie")
+	@ResponseBody
+	public Object issue() {
+		return detector.smellAndIssueFiles();
+	}
 	
 	@GetMapping("")
 	public String index(HttpServletRequest request) {

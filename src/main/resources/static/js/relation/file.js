@@ -10,16 +10,16 @@ var rFile = function(fileId, cytoscapeutil) {
 	var commits = function(fileId) {
 		$.ajax({
 			type: "get",
-			url: "/relation/file/" + fileId + "/commit",
+			url: "/relation/file/" + fileId + "/commit/matrix",
 			success: function(result) {
 				console.log(result);
 				var html = "<table class='table table-bordered'>";
 				html += "<tr>";
 				html += "<td width='20%'></td>";
 				for(var i = 0; i < result.files.length; i++) {
-					html += "<td><a target='_blank' href='/relation/file/" + result.files[i].id + "'>";
+					html += "<td>" + i + ":" + "<a target='_blank' href='/relation/file/" + result.files[i].id + "'>";
 					html += result.files[i].name;
-					html += "</a></td>";
+					html += "</a>(" + result.commitTimes[result.files[i].id] + ")</td>";
 				}
 				html += "</tr>";
 				for(var i = 0; i < result.commits.length; i++) {

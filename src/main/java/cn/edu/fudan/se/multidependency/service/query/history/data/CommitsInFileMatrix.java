@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.query.history.data;
 
 import java.util.List;
+import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
@@ -18,5 +19,7 @@ public class CommitsInFileMatrix {
 	List<Commit> commits;
 	
 	boolean[][] update;
+	
+	Map<Long, Integer> commitTimes;
 	
 }

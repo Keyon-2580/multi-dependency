@@ -78,10 +78,12 @@ public class CommitQueryServiceImpl implements CommitQueryService {
 			return gitAnalyseService.queryCommitUpdateFiles(c2).size() - gitAnalyseService.queryCommitUpdateFiles(c1).size();
 		});
 		Map<ProjectFile, Integer> files = new HashMap<>();
+		Map<Long, Integer> filePathToCommitTimes = new HashMap<>();
 		for(Commit commit : commits) {
 			Collection<CommitUpdateFile> updateFiles = gitAnalyseService.queryCommitUpdateFiles(commit);
 			for(CommitUpdateFile update : updateFiles) {
 				files.put(update.getFile(), files.getOrDefault(update.getFile(), 0) + 1);
+				filePathToCommitTimes.put(update.getFile().getId(), filePathToCommitTimes.getOrDefault(update.getFile().getId(), 0) + 1);
 			}
 		}
 		List<ProjectFile> sortFiles = new ArrayList<>(files.keySet());
@@ -106,7 +108,7 @@ public class CommitQueryServiceImpl implements CommitQueryService {
 				updates[i][files.get(update.getFile())] = true;
 			}
 		}
-		CommitsInFileMatrix result = new CommitsInFileMatrix(file, sortFiles, commits, updates);
+		CommitsInFileMatrix result = new CommitsInFileMatrix(file, sortFiles, commits, updates, filePathToCommitTimes);
 		return result;
 	}
 
