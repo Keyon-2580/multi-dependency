@@ -3,7 +3,24 @@ var rFile = function(fileId, cytoscapeutil) {
 		containType(fileId);
 		metric(fileId);
 		depends(fileId);
+		issues(fileId);
 	};
+	
+	var issues = function(fileId) {
+		$.ajax({
+			type: "get",
+			url: "/relation/file/" + fileId + "/issue",
+			success: function(result) {
+				console.log(result);
+				var html = "<ol>";
+				for(var i = 0; i < result.length; i++) {
+					html += "<li><a target='_blank' href='/issue/" + result[i].id + "'>Issue: " + result[i].number + " " + result[i].title + "</a></li>";
+				}
+				html += "</ol>";
+				$("#issue_content").html(html);
+			}
+		})
+	}
 	
 	var depends = function(fileId) {
 		$.ajax({
@@ -11,11 +28,11 @@ var rFile = function(fileId, cytoscapeutil) {
 			url: "/relation/file/" + fileId + "/dependedBy",
 			success: function(result) {
 				console.log(result);
-				var html = "<ul>";
+				var html = "<ol>";
 				for(var i = 0; i < result.length; i++) {
 					html += "<li><a target='_blank' href='/relation/file/" + result[i].startNode.id + "'>" + result[i].startNode.path + "</a></li>";
 				}
-				html += "</ul>";
+				html += "</ol>";
 				$("#dependedBy_content").html(html);
 			}
 		})
@@ -24,11 +41,11 @@ var rFile = function(fileId, cytoscapeutil) {
 			url: "/relation/file/" + fileId + "/dependsOn",
 			success: function(result) {
 				console.log(result);
-				var html = "<ul>";
+				var html = "<ol>";
 				for(var i = 0; i < result.length; i++) {
 					html += "<li><a target='_blank' href='/relation/file/" + result[i].endNode.id + "'>" + result[i].endNode.path + "</a></li>";
 				}
-				html += "</ul>";
+				html += "</ol>";
 				$("#dependsOn_content").html(html);
 			}
 		});

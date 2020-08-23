@@ -20,4 +20,7 @@ public interface CommitRepository extends Neo4jRepository<Commit, Long> {
 	
     @Query("match (project:Project)-[:" + RelationType.str_CONTAIN + "*2]->(:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(commit:Commit) where id(project)={projectId} return distinct commit;")
     List<Commit> findCommitsInProject(@Param("projectId") long projectId);
+    
+    @Query("match (c:Commit) where (c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-() return c order by c.authoredDate desc;")
+    List<Commit> findAllCommits();
 }

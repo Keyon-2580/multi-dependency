@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.query.history;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
@@ -16,6 +17,8 @@ import cn.edu.fudan.se.multidependency.service.query.history.data.CoChangeFile;
 public interface GitAnalyseService {
 	
 	Collection<CommitUpdateFile> queryCommitUpdateFiles(Commit commit);
+	
+	Map<String, List<ProjectFile>> queryCommitUpdateFilesGroupByUpdateType(Commit commit);
 
 	Iterable<Commit> findAllCommits();
 	

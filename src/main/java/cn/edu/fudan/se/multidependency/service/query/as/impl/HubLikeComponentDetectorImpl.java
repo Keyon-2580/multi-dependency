@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.repository.as.ASRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.as.HubLikeComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikeFile;
@@ -32,6 +33,10 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 	
 	@Autowired
 	private CacheService cache;
+	
+	@SuppressWarnings("unused")
+	@Autowired
+	private ASRepository asRepository;
 
 	@Override
 	public Map<Long, List<HubLikeFile>> hubLikeFiles() {
@@ -79,13 +84,14 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		List<FileMetrics> fileMetrics = metricCalculator.calculateFileMetrics().get(project.getId());
 		for(FileMetrics metric : fileMetrics) {
 			if(isHubLikeComponent(metric, minFanIn, minFanOut)) {
-				result.add(new HubLikeFile(metric.getFile(), metric.getFanOut(), metric.getFanIn(), metric.getLoc()));
+				result.add(new HubLikeFile(metric.getFile(), metric.getFanOut(), metric.getFanIn()));
 			}
 		}
 		result.sort((f1, f2) -> {
 			return (f2.getFanIn() + f2.getFanOut()) - (f1.getFanIn() + f1.getFanOut());
 		});
 		return result;
+		/*return asRepository.findHubLikeFiles(project.getId(), minFanIn, minFanOut);*/
 	}
 	
 	public List<HubLikePackage> hubLikePackages(Project project, int minFanIn, int minFanOut) {

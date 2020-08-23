@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title th:text="${file.name}"></title>
+<title>Issues</title>
 <script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/jquery.treeview.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/popper-1.14.7.min.js}"></script>
@@ -28,7 +28,7 @@
 <script type="text/javascript" th:src="@{/js/import/echarts-4.7.0/dist/echarts.js}"></script>
 <script type="text/javascript" th:src="@{/js/windowUtil.js}"></script>
 <script type="text/javascript" th:src="@{/js/cytoscapeutils.js}"></script>
-<script type="text/javascript" th:src="@{/js/relation/file.js}"></script>
+<script type="text/javascript" th:src="@{/js/issue.js}"></script>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
@@ -68,62 +68,25 @@
 	<div th:include="nav.html::nav"></div>
 	<div class="col-sm-12 row" style="margin-bottom: 15px;">
 		<div class="col-sm-12">
-			<div>
-				<h4 style="margin-top: 0px;" th:text="${file.id + ' ' + file.path}"></h4>
+			<div id="issueDiv">
+				<table class="table table-bordered">
+					<tr>
+						<th>id</th>
+						<th>number</th>
+						<th>title</th>
+						<th>createTime</th>
+						<th>updateTime</th>
+					</tr>
+					<tr th:each="issue : ${issues}">
+						<td th:text="${issue.id}"></td>
+						<td th:text="${issue.number}"></td>
+						<td><a th:href="${'/issue/' + issue.id}" target="_blank" th:text="${issue.title}"></a></td>
+						<td th:text="${issue.createTime}"></td>
+						<td th:text="${issue.updateTime}"></td>
+					</tr>
+				</table>
 			</div>
 		</div>
-		<hr/>
-		<div class="col-sm-12">
-			<div>
-				<h5>metric</h5>
-			</div>
-			<div id="metric_content">
-			</div>
-		</div>
-		<hr/>
-		<div class="col-sm-12">
-			<div>
-				<h5>type</h5>
-			</div>
-			<div id="contain_type_content">
-			</div>
-		</div>
-		<hr/>
-		<div class="col-sm-12">
-			<div>
-				<h5>issues</h5>
-			</div>
-			<div id="issue_content">
-			</div>
-		</div>
-		<hr/>
-		<div class="col-sm-12">
-			<div>
-				<h5>depends</h5>
-			</div>
-			<div class="col-sm-6">
-				<div>
-					<h5>depended by</h5>
-				</div>
-				<div id="dependedBy_content">
-				</div>
-			</div>
-			<div class="col-sm-6">
-				<div>
-					<h5>depends on</h5>
-				</div>
-				<div id="dependsOn_content">
-				</div>
-			</div>
-		</div>
-		<hr/>
 	</div>
-	<script type="text/javascript" th:inline="javascript">
-		//<![CDATA[
-		 $(document).ready(function() {
-			 rFile([[${file}]].id, cytoscapeutil()).init();
-		});
-		// ]]>
-	</script>
 </body>
 </html>

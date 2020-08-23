@@ -7,11 +7,15 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.node.git.Issue;
+import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 
 @Repository
 public interface IssueRepository extends Neo4jRepository<Issue, Long> {
 
-	@Query("match (issue:Issue) return issue;")
+	@Query("match (issue:Issue) return issue order by issue.number desc;")
 	List<Issue> queryAllIssues();
+	
+	@Query("match (issue:Issue)<-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE + "]-(:Commit) return issue order by issue.number desc;")
+	List<Issue> queryIssueAddressedByCommit();
 	
 }

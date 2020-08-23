@@ -277,5 +277,23 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 		cache.cache(getClass(), key, result);
 		return result;
 	}
+
+	@Override
+	public Map<String, List<ProjectFile>> queryCommitUpdateFilesGroupByUpdateType(Commit commit) {
+		String key = "queryCommitUpdateFilesGroupByUpdateType_" + commit.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		Collection<CommitUpdateFile> allUpdates = queryCommitUpdateFiles(commit);
+		Map<String, List<ProjectFile>> result = new HashMap<>();
+		for(CommitUpdateFile update : allUpdates) {
+			String type = update.getUpdateType();
+			List<ProjectFile> files = result.getOrDefault(type, new ArrayList<>());
+			files.add(update.getFile());
+			result.put(type, files);
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
     
 }

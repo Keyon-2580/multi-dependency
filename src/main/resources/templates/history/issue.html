@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title th:text="${file.name}"></title>
+<title>Issue</title>
 <script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/jquery.treeview.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/popper-1.14.7.min.js}"></script>
@@ -28,7 +28,7 @@
 <script type="text/javascript" th:src="@{/js/import/echarts-4.7.0/dist/echarts.js}"></script>
 <script type="text/javascript" th:src="@{/js/windowUtil.js}"></script>
 <script type="text/javascript" th:src="@{/js/cytoscapeutils.js}"></script>
-<script type="text/javascript" th:src="@{/js/relation/file.js}"></script>
+<script type="text/javascript" th:src="@{/js/history/issue.js}"></script>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
@@ -68,62 +68,55 @@
 	<div th:include="nav.html::nav"></div>
 	<div class="col-sm-12 row" style="margin-bottom: 15px;">
 		<div class="col-sm-12">
+			<div id="issueDiv">
+				<h4>Issue: <span th:text="${issue.number}"></span></h4>
+				<table class="table">
+					<tr>
+						<td align="right" width="10%"><b>id：</b></td>
+						<td th:text="${issue.id}"></td>
+					</tr>
+					<tr>
+						<td align="right"><b>number：</b></td>
+						<td th:text="${issue.number}"></td>
+					</tr>
+					<tr>
+						<td align="right"><b>title：</b></td>
+						<td th:text="${issue.title}"></td>
+					</tr>
+					<tr>
+						<td align="right"><b>createTime：</b></td>
+						<td th:text="${issue.createTime}"></td>
+					</tr>
+					<tr>
+						<td align="right"><b>updateTime：</b></td>
+						<td th:text="${issue.updateTime}"></td>
+					</tr>
+					<tr>
+						<td align="right"><b>closeTime：</b></td>
+						<td th:text="${issue.updateTime}"></td>
+					</tr>
+				</table>
+			</div>
 			<div>
-				<h4 style="margin-top: 0px;" th:text="${file.id + ' ' + file.path}"></h4>
-			</div>
-		</div>
-		<hr/>
-		<div class="col-sm-12">
-			<div>
-				<h5>metric</h5>
-			</div>
-			<div id="metric_content">
-			</div>
-		</div>
-		<hr/>
-		<div class="col-sm-12">
-			<div>
-				<h5>type</h5>
-			</div>
-			<div id="contain_type_content">
-			</div>
-		</div>
-		<hr/>
-		<div class="col-sm-12">
-			<div>
-				<h5>issues</h5>
-			</div>
-			<div id="issue_content">
-			</div>
-		</div>
-		<hr/>
-		<div class="col-sm-12">
-			<div>
-				<h5>depends</h5>
-			</div>
-			<div class="col-sm-6">
-				<div>
-					<h5>depended by</h5>
-				</div>
-				<div id="dependedBy_content">
+				<h4>related commits: </h4>
+				<div id="commit_content">
 				</div>
 			</div>
-			<div class="col-sm-6">
-				<div>
-					<h5>depends on</h5>
-				</div>
-				<div id="dependsOn_content">
+			<div>
+				<h4>related files: </h4>			
+				<div id="file_content">
+					
 				</div>
 			</div>
 		</div>
-		<hr/>
 	</div>
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-			 rFile([[${file}]].id, cytoscapeutil()).init();
+			 issue([[${issue}]].id, cytoscapeutil()).init();
 		});
 		// ]]>
 	</script>
+<!--	<script type="text/javascript" th:src="@{/js/circlechart.js}"></script>-->
 </body>
 </html>

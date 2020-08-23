@@ -2,13 +2,14 @@ package cn.edu.fudan.se.multidependency.service.query.history;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Issue;
-import cn.edu.fudan.se.multidependency.model.relation.git.CommitAddressIssue;
 import cn.edu.fudan.se.multidependency.repository.node.git.IssueRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CommitAddressIssueRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
@@ -26,12 +27,33 @@ public class IssueQueryServiceImpl implements IssueQueryService {
 	private CacheService cache;
 
 	@Override
+	public Issue queryIssue(long id) {
+		if(cache.findNodeById(id) != null) {
+			return (Issue) cache.findNodeById(id);
+		}
+		Issue result = issueRepository.findById(id).get();
+		cache.cacheNodeById(result);
+		return result;
+	}
+
+	@Override
 	public Collection<Issue> queryAllIssues() {
 		String key = "queryAllIssues";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
 		Collection<Issue> result = issueRepository.queryAllIssues();
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Collection<Issue> queryIssueAddressedByCommit() {
+		String key = "queryIssueAddressedByCommit";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		Collection<Issue> result = issueRepository.queryIssueAddressedByCommit();
 		cache.cache(getClass(), key, result);
 		return result;
 	}
@@ -52,7 +74,46 @@ public class IssueQueryServiceImpl implements IssueQueryService {
 
 	@Override
 	public Collection<Issue> queryRelatedIssuesOnFile(ProjectFile file) {
-		return null;
+		String key = "queryRelatedIssuesOnFile_" + file.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<Issue> result = commitAddressIssueRepository.queryRelatedIssuesOnFile(file.getId());
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Collection<Issue> queryIssuesAddressedByCommit(Commit commit) {
+		String key = "queryIssuesAddressedByCommit_" + commit.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<Issue> result = commitAddressIssueRepository.queryIssuesAddressedByCommit(commit.getId());
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Collection<Commit> queryRelatedCommitsOnIssue(Issue issue) {
+		String key = "queryRelatedCommitsOnIssue_" + issue.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<Commit> result = commitAddressIssueRepository.queryRelatedCommitsOnIssue(issue.getId());
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Set<ProjectFile> queryRelatedFilesOnAllIssues() {
+		String key = "queryRelatedFilesOnAllIssues";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		Set<ProjectFile> result = commitAddressIssueRepository.queryRelatedFilesOnAllIssues();
+		cache.cache(getClass(), key, result);
+		return result;
 	}
 
 

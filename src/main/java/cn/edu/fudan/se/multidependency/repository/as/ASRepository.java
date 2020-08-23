@@ -14,9 +14,16 @@ import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.service.query.as.data.CycleComponents;
+import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikeFile;
 
 @Repository
 public interface ASRepository extends Neo4jRepository<Project, Long> {
+	
+	@Query("match (project:Project)-[:CONTAIN*2]->(file:ProjectFile) where id(project)={id} "
+			+ "with file, size((file)-[:DEPENDS_ON]->()) as fanOut, size((file)<-[:DEPENDS_ON]-()) as fanIn "
+			+ "where fanOut >= {fanOut} and fanIn >= {fanIn} return file, fanIn, fanOut "
+			+ "order by fanIn + fanOut desc;")
+	public List<HubLikeFile> findHubLikeFiles(@Param("id") long projectId, @Param("fanIn") int fanIn, @Param("fanOut") int fanOut);
 	
 	@Query("CALL algo.scc.stream(\"Package\", \"" + RelationType.str_DEPENDS_ON + "\") " + 
 			"YIELD nodeId, partition " + 
