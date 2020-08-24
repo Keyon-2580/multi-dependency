@@ -13,8 +13,10 @@ import org.springframework.stereotype.Service;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
+import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueCalculator;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueForDoubleNodes;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.DefaultPackageCloneValueCalculator;
+import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueCalculatorByFileLoc;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.SimilarPackage;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
@@ -58,9 +60,10 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 		Collection<CloneValueForDoubleNodes<Package>> packageClones = cloneValueService.queryPackageCloneFromFileCloneSort(fileClones);
 //		DefaultPackageCloneValueCalculator.getInstance().setCountThreshold(threshold);
 //		DefaultPackageCloneValueCalculator.getInstance().setPercentageThreshold(percentage);
-		DefaultPackageCloneValueCalculator.getInstance().initThreshold();
+		CloneValueCalculator<Boolean> calculator = DefaultPackageCloneValueCalculator.getInstance();
+		calculator = PackageCloneValueCalculatorByFileLoc.getInstance();
 		for(CloneValueForDoubleNodes<Package> packageClone : packageClones) {
-			boolean isSimilar = (boolean) packageClone.calculateValue(DefaultPackageCloneValueCalculator.getInstance());
+			boolean isSimilar = (boolean) packageClone.calculateValue(calculator);
 			if(!isSimilar) {
 				continue;
 			}

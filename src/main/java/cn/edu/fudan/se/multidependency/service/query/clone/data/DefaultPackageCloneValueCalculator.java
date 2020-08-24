@@ -15,7 +15,9 @@ public class DefaultPackageCloneValueCalculator implements CloneValueCalculator<
 	public static final int DEFAULT_COUNT_THRESHOLD = 10;
 	public static final double DEFAULT_PERCENTAGE_THRESHOLD = 0.5;
 	
-	private DefaultPackageCloneValueCalculator() {}
+	private DefaultPackageCloneValueCalculator() {
+		initThreshold();
+	}
 	
 	private static DefaultPackageCloneValueCalculator instance = new DefaultPackageCloneValueCalculator();
 	
