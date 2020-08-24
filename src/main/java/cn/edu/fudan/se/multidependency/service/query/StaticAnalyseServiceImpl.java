@@ -716,7 +716,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	public boolean setPackageLoSc(PackageRepository packageRepository) {
 		System.out.println("计算Package总代码行");
 		packageRepository.setPackageLoc();
-		packageRepository.setPackageLocRemoveInvalidLine();
+		packageRepository.setPackageLines();
 		return true;
 	}
 

@@ -42,6 +42,11 @@ public class PackageMetrics extends FanIOMetric implements Serializable {
 	 * 代码行
 	 */
 	private int loc;
+	
+	/**
+	 * 文件总行数
+	 */
+	private int lines;
 
 	@Override
 	public Node getComponent() {

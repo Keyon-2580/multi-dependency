@@ -37,7 +37,7 @@ public class Package implements Node, Module {
     
     private long loc = -1;
     
-    private long locRemoveInvalidLine = -1;
+    private long lines = -1;
 
 	private static final long serialVersionUID = -4892461872164624064L;
 	

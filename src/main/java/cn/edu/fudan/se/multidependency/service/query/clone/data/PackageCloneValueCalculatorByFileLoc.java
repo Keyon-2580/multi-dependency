@@ -47,23 +47,23 @@ public class PackageCloneValueCalculatorByFileLoc implements CloneValueCalculato
 			Collection<CodeNode> nodesInPackage1 = clone.getNodesInNode1();
 			Collection<CodeNode> nodesInPackage2 = clone.getNodesInNode2();
 			
-			long cloneFilesLOCRemoveInvalidLine = 0;
+			long cloneFilesLOC = 0;
 			for(CodeNode node : nodesInPackage1) {
 				if(!(node instanceof ProjectFile)) {
 					throw new Exception("克隆节点不为file类型");
 				}
-				cloneFilesLOCRemoveInvalidLine += ((ProjectFile) node).getLoc();
+				cloneFilesLOC += ((ProjectFile) node).getLoc();
 			}
 			for(CodeNode node : nodesInPackage2) {
 				if(!(node instanceof ProjectFile)) {
 					throw new Exception("克隆节点不为file类型");
 				}
-				cloneFilesLOCRemoveInvalidLine += ((ProjectFile) node).getLoc();
+				cloneFilesLOC += ((ProjectFile) node).getLoc();
 			}
 			
-			long allPackageLines = ((Package) node1).getLocRemoveInvalidLine() + ((Package) node2).getLocRemoveInvalidLine();
+			long allPackageLoc = ((Package) node1).getLoc() + ((Package) node2).getLoc();
 			
-			if((cloneFilesLOCRemoveInvalidLine + 0.0) / (allPackageLines) >= percentageThreshold) {
+			if((cloneFilesLOC + 0.0) / (allPackageLoc) >= percentageThreshold) {
 				return true;
 			}
 		} catch (Exception e) {
