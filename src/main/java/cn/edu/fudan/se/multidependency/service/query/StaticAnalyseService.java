@@ -32,13 +32,33 @@ public interface StaticAnalyseService {
 	
 	List<Project> queryAllProjectsByPage(int page, int size, String... sortByProperties);
 	
-	Collection<Type> findWhatExtendsType(Type type);
+	/**
+	 * 找子类
+	 * @param type
+	 * @return
+	 */
+	Collection<Type> queryExtendsSubTypes(Type type);
 	
-	Collection<Type> findTypeExtendsWhat(Type type);
+	/**
+	 * 找父类
+	 * @param type
+	 * @return
+	 */
+	Collection<Type> queryExtendsSuperTypes(Type type);
 	
-	Collection<Type> findWhatImplementsType(Type type);
+	/**
+	 * 找子类
+	 * @param type
+	 * @return
+	 */
+	Collection<Type> queryImplementsSubTypes(Type type);
 	
-	Collection<Type> findTypeImplementsType(Type type);
+	/**
+	 * 找父类
+	 * @param type
+	 * @return
+	 */
+	Collection<Type> queryImplementsSuperTypes(Type type);
 	
 	List<Call> findAllFunctionCallFunctionRelations();
 	

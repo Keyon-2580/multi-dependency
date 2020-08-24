@@ -168,26 +168,46 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 	
 	@Override
-	public Collection<Type> findWhatExtendsType(Type type) {
-		return new ArrayList<>();
+	public Collection<Type> queryExtendsSubTypes(Type type) {
+		String key = "queryExtendsSubTypes_" + type.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<Type> result = extendsRepository.querySubTypes(type.getId());
+		cache.cache(getClass(), key, result);
+		return result;
 	}
 
 	@Override
-	public Collection<Type> findTypeExtendsWhat(Type type) {
-		return new ArrayList<>();
-		
+	public Collection<Type> queryExtendsSuperTypes(Type type) {
+		String key = "queryExtendsSuperTypes_" + type.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<Type> result = extendsRepository.querySuperTypes(type.getId());
+		cache.cache(getClass(), key, result);
+		return result;
 	}
 
 	@Override
-	public Collection<Type> findWhatImplementsType(Type type) {
-		return new ArrayList<>();
-		
+	public Collection<Type> queryImplementsSubTypes(Type type) {
+		String key = "queryImplementsSubTypes_" + type.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<Type> result = implementsRepository.querySubTypes(type.getId());
+		cache.cache(getClass(), key, result);
+		return result;
 	}
 
 	@Override
-	public Collection<Type> findTypeImplementsType(Type type) {
-		return new ArrayList<>();
-		
+	public Collection<Type> queryImplementsSuperTypes(Type type) {
+		String key = "queryImplementsSuperTypes_" + type.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<Type> result = implementsRepository.querySuperTypes(type.getId());
+		return result;
 	}
 
 	@Override
@@ -435,14 +455,14 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		}
 		
 		for(Type type : typesInFile) {
-			Collection<Type> inherits = findTypeExtendsWhat(type);
+			Collection<Type> inherits = queryExtendsSuperTypes(type);
 			for(Type inheritsType : inherits) {
 				ProjectFile belongToFile = containRelationService.findTypeBelongToFile(inheritsType);
 				if(!file.equals(belongToFile)) {
 					result.addFanOut(belongToFile);
 				}
 			}
-			inherits = findWhatExtendsType(type);
+			inherits = queryExtendsSubTypes(type);
 			for(Type inheritsType : inherits) {
 				ProjectFile belongToFile = containRelationService.findTypeBelongToFile(inheritsType);
 				if(!file.equals(belongToFile)) {

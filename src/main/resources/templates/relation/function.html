@@ -7,6 +7,7 @@
 <script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/jquery.treeview.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/popper-1.14.7.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/import/jquery-1.12.0.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/d3.v3.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape-panzoom.js}"></script>
@@ -66,50 +67,12 @@
 <body>
 	<div th:include="nav.html::nav"></div>
 	<div class="col-sm-12 row" style="margin-bottom: 15px;">
-		<div class="col-sm-12 row">
-			<div class="col-sm-12">
+		<div class="col-sm-12">
+			<div>
 				<h4 style="margin-top: 0px;" th:text="${type.name}"></h4>
 			</div>
-			<div class="col-sm-6">
-				<table class="table">
-					<tr>
-						<td width="20%" align="right"><b>id: </b></td>
-						<td th:text="${type.id}"></td>
-					</tr>
-					<tr>
-						<td width="20%" align="right"><b>file: </b></td>
-						<td><a th:href="${'/relation/file/' + file.id}" th:text="${file.path}"></a></td>
-					</tr>
-					<tr>
-						<td width="20%" align="right"><b>language: </b></td>
-						<td th:text="${type.language}"></td>
-					</tr>
-					<tr>
-						<td width="20%" align="right"><b>identifier: </b></td>
-						<td th:text="${type.identifier}"></td>
-					</tr>
-					<tr>
-						<td width="20%" align="right"><b>name: </b></td>
-						<td th:text="${type.name}"></td>
-					</tr>
-					<tr>
-						<td width="20%" align="right"><b>alias: </b></td>
-						<td th:text="${type.aliasName}"></td>
-					</tr>
-					<tr>
-						<td width="20%" align="right"><b>simple name: </b></td>
-						<td th:text="${type.simpleName}"></td>
-					</tr>
-					<tr>
-						<td width="20%" align="right"><b>start line: </b></td>
-						<td th:text="${type.startLine}"></td>
-					</tr>
-					<tr>
-						<td width="20%" align="right"><b>end line: </b></td>
-						<td th:text="${type.endLine}"></td>
-					</tr>
-					
-				</table>
+			<div>
+				<h5>file: <a target="_blank" th:href="${'/relation/file/' + file.id}" th:text="${file.path}"></a></h5>
 			</div>
 		</div>
 		<hr/>
@@ -126,30 +89,6 @@
 				<h5>functions</h5>
 			</div>
 			<div id="contain_function_content">
-			</div>
-		</div>
-		<hr/>
-		<div class="col-sm-12 row">
-			<div class="col-sm-12"><h5>继承</h5></div>
-			<div class="col-sm-6">
-				<h5>子类</h5>
-				<div id="extends_content_subType"></div>
-			</div>
-			<div class="col-sm-6">
-				<h5>父类</h5>
-				<div id="extends_content_superType"></div>
-			</div>
-		</div>
-		<hr/>
-		<div class="col-sm-12 row">
-			<div class="col-sm-12">实现</div>
-			<div class="col-sm-6">
-				<h5>子类</h5>
-				<div id="implements_content_subType"></div>
-			</div>
-			<div class="col-sm-6">
-				<h5>父类</h5>
-				<div id="implements_content_superType"></div>
 			</div>
 		</div>
 		<hr/>

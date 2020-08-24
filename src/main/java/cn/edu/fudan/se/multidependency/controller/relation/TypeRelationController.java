@@ -53,17 +53,31 @@ public class TypeRelationController {
 		return containRelationService.findTypeDirectlyContainFunctions(type);
 	}
 	
-	@GetMapping("/extends")
+	@GetMapping("/extends/super")
 	@ResponseBody
 	public Object extendsRelation(@PathVariable("typeId") long id) {
 		Type type = nodeService.queryType(id);
-		return staticAnalyseService.findWhatExtendsType(type);
+		return staticAnalyseService.queryExtendsSuperTypes(type);
 	}
 	
-	@GetMapping("/extended")
+	@GetMapping("/extends/sub")
 	@ResponseBody
 	public Object extendedRelation(@PathVariable("typeId") long id) {
 		Type type = nodeService.queryType(id);
-		return staticAnalyseService.findTypeExtendsWhat(type);
+		return staticAnalyseService.queryExtendsSubTypes(type);
+	}
+	
+	@GetMapping("/implements/super")
+	@ResponseBody
+	public Object implementsRelation(@PathVariable("typeId") long id) {
+		Type type = nodeService.queryType(id);
+		return staticAnalyseService.queryImplementsSuperTypes(type);
+	}
+	
+	@GetMapping("/implements/sub")
+	@ResponseBody
+	public Object implementedRelation(@PathVariable("typeId") long id) {
+		Type type = nodeService.queryType(id);
+		return staticAnalyseService.queryImplementsSubTypes(type);
 	}
 }
