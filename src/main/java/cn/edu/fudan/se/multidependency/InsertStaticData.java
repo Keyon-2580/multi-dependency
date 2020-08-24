@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.edu.fudan.se.multidependency.service.insert.BatchInserterService;
 import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.insert.ThreadService;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
@@ -14,7 +15,6 @@ public class InsertStaticData {
     public static void main(String[] args) {
         LOGGER.info("InsertStaticData");
         insert(args);
-        System.exit(0);
     }
 
     public static void insert(String[] args) {
@@ -28,8 +28,9 @@ public class InsertStaticData {
             RepositoryService service = RepositoryService.getInstance();
             LOGGER.info("静态分析节点数：" + service.getNodes().size());
             LOGGER.info("静态分析关系数：" + service.getRelations().size());
-
+            
             FileUtil.writeObject(yaml.getSerializePath(), service);
+            System.exit(0);
         } catch (Exception e) {
             // 所有步骤中有一个出错，都会终止执行
             e.printStackTrace();
