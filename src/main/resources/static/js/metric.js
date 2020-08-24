@@ -29,7 +29,7 @@ var metric = function() {
 						html += "<tr>";
 						html += "<td>" + (i + 1) + "</td>";
 						html += "<td>" + metrics[i].file.id + "</td>";
-						html += "<td>" + metrics[i].file.path + "</td>";
+						html += "<td><a target='_blank' href='/relation/file/" + metrics[i].file.id + "'>" + metrics[i].file.path + "</a></td>";
 						html += "<td>" + metrics[i].loc + "</td>";
 						html += "<td>" + metrics[i].nom + "</td>";
 						html += "<td>" + metrics[i].fanIn + "</td>";

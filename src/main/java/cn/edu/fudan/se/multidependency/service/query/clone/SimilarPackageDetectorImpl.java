@@ -16,7 +16,6 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueCalculator;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueForDoubleNodes;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.DefaultPackageCloneValueCalculator;
-import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueCalculatorByFileLoc;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.SimilarPackage;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
@@ -61,7 +60,7 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 //		DefaultPackageCloneValueCalculator.getInstance().setCountThreshold(threshold);
 //		DefaultPackageCloneValueCalculator.getInstance().setPercentageThreshold(percentage);
 		CloneValueCalculator<Boolean> calculator = DefaultPackageCloneValueCalculator.getInstance();
-		calculator = PackageCloneValueCalculatorByFileLoc.getInstance();
+//		calculator = PackageCloneValueCalculatorByFileLoc.getInstance();
 		for(CloneValueForDoubleNodes<Package> packageClone : packageClones) {
 			boolean isSimilar = (boolean) packageClone.calculateValue(calculator);
 			if(!isSimilar) {
