@@ -47,6 +47,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 		file.setPath(filePath);
 		file.setSuffix(FileUtil.extractSuffix(entity.getQualifiedName()));
 		file.setEndLine(entity.getStopLine());
+		file.setLoc(entity.getLoc()+1);
 		addNode(file, currentProject);
 		
 		// 文件所在目录
