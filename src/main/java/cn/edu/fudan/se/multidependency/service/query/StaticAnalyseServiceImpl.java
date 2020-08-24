@@ -711,5 +711,13 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		cache.cache(getClass(), key, result);
 		return result;
 	}
+	
+	@Bean
+	public boolean setPackageLoSc(PackageRepository packageRepository) {
+		System.out.println("计算Package总代码行");
+		packageRepository.setPackageLoc();
+		packageRepository.setPackageLocRemoveInvalidLine();
+		return true;
+	}
 
 }

@@ -30,6 +30,12 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 			"RETURN pck, loc, nof, nom, fanIn, fanOut order by(pck.directoryPath) desc;")
 	public List<PackageMetrics> calculatePackageMetrics();
 	
+	@Query("match (pck:Package)-[:CONTAIN]->(file:ProjectFile) with pck, sum(file.endLine) as loc set pck.loc = loc;")
+	public void setPackageLoc();
+	
+	@Query("match (pck:Package)-[:CONTAIN]->(file:ProjectFile) with pck, sum(file.loc) as loc set pck.locRemoveInvalidLine = loc;")
+	public void setPackageLocRemoveInvalidLine();
+	
 	/**
 	 * 目录下有多少子包
 	 * @param directoryPath

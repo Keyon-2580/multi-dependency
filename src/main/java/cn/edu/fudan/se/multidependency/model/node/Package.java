@@ -34,6 +34,10 @@ public class Package implements Node, Module {
     private String name;
 
     private Long entityId;
+    
+    private long loc = -1;
+    
+    private long locRemoveInvalidLine = -1;
 
 	private static final long serialVersionUID = -4892461872164624064L;
 	

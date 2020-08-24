@@ -10,14 +10,14 @@ import lombok.Setter;
  * @author fan
  *
  */
-public class PackageCloneValueCalculatorByFile implements CloneValueCalculator<Boolean> {
+public class PackageCloneValueCalculatorByFileLoc implements CloneValueCalculator<Boolean> {
 	
 	public static final int DEFAULT_COUNT_THRESHOLD = 10;
 	public static final double DEFAULT_PERCENTAGE_THRESHOLD = 0.5;
 	
-	private PackageCloneValueCalculatorByFile() {}
+	private PackageCloneValueCalculatorByFileLoc() {}
 	
-	private static PackageCloneValueCalculatorByFile instance = new PackageCloneValueCalculatorByFile();
+	private static PackageCloneValueCalculatorByFileLoc instance = new PackageCloneValueCalculatorByFileLoc();
 	
 	/**
 	 * 若两个包内的有克隆关系的文件总数大于等于此值，则认为这两个包之间重复读过高
@@ -30,7 +30,7 @@ public class PackageCloneValueCalculatorByFile implements CloneValueCalculator<B
 	@Getter
 	private double percentageThreshold = DEFAULT_PERCENTAGE_THRESHOLD;
 	
-	public static PackageCloneValueCalculatorByFile getInstance() {
+	public static PackageCloneValueCalculatorByFileLoc getInstance() {
 		return instance;
 	}
 	
