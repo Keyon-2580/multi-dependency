@@ -1,18 +1,25 @@
 package cn.edu.fudan.se.multidependency.service.query.history;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Issue;
 import cn.edu.fudan.se.multidependency.repository.node.git.IssueRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CommitAddressIssueRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
+import cn.edu.fudan.se.multidependency.service.query.history.data.IssueFile;
+import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
+import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Service
 public class IssueQueryServiceImpl implements IssueQueryService {
@@ -25,6 +32,12 @@ public class IssueQueryServiceImpl implements IssueQueryService {
 	
 	@Autowired
 	private CacheService cache;
+	
+	@Autowired
+	private NodeService nodeService;
+	
+	@Autowired
+	private ContainRelationService containRelationService;
 
 	@Override
 	public Issue queryIssue(long id) {
@@ -112,6 +125,36 @@ public class IssueQueryServiceImpl implements IssueQueryService {
 			return cache.get(getClass(), key);
 		}
 		Set<ProjectFile> result = commitAddressIssueRepository.queryRelatedFilesOnAllIssues();
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+	
+	private IssueFile queryIssueFile(ProjectFile file) {
+		IssueFile issueFile = new IssueFile(file);
+		issueFile.addAll(queryRelatedIssuesOnFile(file));
+		return issueFile;
+	}
+
+	@Override
+	public Map<Long, List<IssueFile>> queryRelatedFilesOnAllIssuesGroupByProject() {
+		String key = "queryRelatedFilesOnAllIssuesGroupByProject";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		
+		Set<ProjectFile> issueFiles = queryRelatedFilesOnAllIssues();
+		Collection<Project> projects = nodeService.allProjects();
+		Map<Long, List<IssueFile>> result = new HashMap<>();
+		for(Project project : projects) {
+			result.put(project.getId(), new ArrayList<>());
+		}
+		
+		for(ProjectFile file : issueFiles) {
+			Project belongToProject = containRelationService.findFileBelongToProject(file);
+			List<IssueFile> files = result.get(belongToProject.getId());
+			files.add(queryIssueFile(file));
+			result.put(belongToProject.getId(), files);
+		}
 		cache.cache(getClass(), key, result);
 		return result;
 	}

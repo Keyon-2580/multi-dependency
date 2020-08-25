@@ -44,6 +44,9 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 	@Query("match (p:Package) where not (p)-[:" + RelationType.str_DEPENDS_ON + "]-() return p")
 	public List<Package> unusedPackages();
 
+	@Query("match (f:ProjectFile) where not (f)-[:" + RelationType.str_DEPENDS_ON + "]-() return f")
+	public List<ProjectFile> unusedFiles();
+	
 	@Query("CALL algo.scc.stream(\"Package\", \"" + RelationType.str_DEPENDS_ON + "\") " + 
 			"YIELD nodeId, partition " + 
 			"with partition, collect(algo.getNodeById(nodeId)) AS packages " + 

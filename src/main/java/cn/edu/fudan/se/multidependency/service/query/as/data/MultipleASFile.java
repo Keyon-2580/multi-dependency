@@ -5,7 +5,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import lombok.Data;
 
 @Data
-public class MultipleASFile {
+public class MultipleASFile implements MultipleAS {
 	
 	public MultipleASFile(ProjectFile file) {
 		this.file = file;
@@ -29,12 +29,8 @@ public class MultipleASFile {
 	
 	private boolean god;
 	
-	public int smellCount() {
-		return (cycle ? 1 : 0) + (hublike ? 1 : 0) + (logicCoupling ? 1 : 0) 
-				+ (similar ? 1 : 0) + (unstable ? 1 : 0) + (cyclicHierarchy ? 1 : 0)
-				+ (god ? 1 : 0);
-	}
-	
+	private boolean unused;
+
 	private static String toString(boolean b) {
 		return b ? "T" : "";
 	}
@@ -67,4 +63,36 @@ public class MultipleASFile {
 		return toString(this.cyclicHierarchy);
 	}
 	
+	public String unusedToString() {
+		return toString(this.unused);
+	}
+	
+	public boolean isSmellFile(MultipleAS smell) {
+		if(smell.isCycle() && isCycle()) {
+			return true;
+		}
+		if(smell.isCyclicHierarchy() && isCyclicHierarchy()) {
+			return true;
+		}
+		if(smell.isGod() && isGod()) {
+			return true;
+		}
+		if(smell.isHublike() && isHublike()) {
+			return true;
+		}
+		if(smell.isLogicCoupling() && isLogicCoupling()) {
+			return true;
+		}
+		if(smell.isSimilar() && isSimilar()) {
+			return true;
+		}
+		if(smell.isUnstable() && isUnstable()) {
+			return true;
+		}
+		if(smell.isUnused() && isUnused()) {
+			return true;
+		}
+		return false;
+	}
+
 }

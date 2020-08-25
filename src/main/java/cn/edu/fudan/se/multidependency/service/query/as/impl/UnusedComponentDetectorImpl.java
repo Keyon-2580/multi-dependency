@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.repository.as.ASRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.as.UnusedComponentDetector;
@@ -28,13 +29,12 @@ public class UnusedComponentDetectorImpl implements UnusedComponentDetector {
 	@Autowired
 	private CacheService cache;
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Map<Long, List<Package>> unusedPackages() {
 		String key = "unusedPackages";
 		Map<Long, List<Package>> result = null;
 		if(cache.get(this.getClass(), key) != null) {
-			return (Map<Long, List<Package>>) cache.get(this.getClass(), key);
+			return cache.get(this.getClass(), key);
 		}
 		result = new HashMap<>();
 		Collection<Package> pcks = asRepository.unusedPackages();
@@ -42,6 +42,25 @@ public class UnusedComponentDetectorImpl implements UnusedComponentDetector {
 			Project project = containRelationService.findPackageBelongToProject(pck);
 			List<Package> temp = result.getOrDefault(project.getId(), new ArrayList<>());
 			temp.add(pck);
+			result.put(project.getId(), temp);
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, List<ProjectFile>> unusedFiles() {
+		String key = "unusedFiles";
+		Map<Long, List<ProjectFile>> result = null;
+		if(cache.get(this.getClass(), key) != null) {
+			return cache.get(this.getClass(), key);
+		}
+		result = new HashMap<>();
+		Collection<ProjectFile> files = asRepository.unusedFiles();
+		for(ProjectFile file : files) {
+			Project project = containRelationService.findFileBelongToProject(file);
+			List<ProjectFile> temp = result.getOrDefault(project.getId(), new ArrayList<>());
+			temp.add(file);
 			result.put(project.getId(), temp);
 		}
 		cache.cache(getClass(), key, result);

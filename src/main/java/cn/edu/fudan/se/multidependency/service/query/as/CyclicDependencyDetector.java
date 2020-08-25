@@ -1,6 +1,5 @@
 package cn.edu.fudan.se.multidependency.service.query.as;
 
-import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
@@ -13,11 +12,11 @@ public interface CyclicDependencyDetector {
 	 * 包的循环依赖的检测
 	 * @return
 	 */
-	Map<Long, List<Cycle<Package>>> cyclePackages();
+	Map<Long, Map<Integer, Cycle<Package>>> cyclePackages();
 	
 	/**
 	 * 文件的循环依赖的检测
 	 * @return
 	 */
-	Map<Long, List<Cycle<ProjectFile>>> cycleFiles();
+	Map<Long, Map<Integer, Cycle<ProjectFile>>> cycleFiles();
 }

@@ -1,5 +1,8 @@
 var cyclic = function(cytoscapeutil) {
-	var _cyclic = function(projects, files, packages) {
+	var charts = echarts.init(document.getElementById('cycleGraph'));
+	var showTable = function(projects, files, packages) {
+		console.log(files);
+		console.log(packages);
 		var html = "";
 
 		for(var projectIndex in projects) {
@@ -13,9 +16,10 @@ var cyclic = function(cytoscapeutil) {
 			html += "</tr>";
 			for(var cycleIndex in cyclicFiles) {
 				var cycle = cyclicFiles[cycleIndex];
+				console.log(cycleIndex);
 				console.log(cycle);
 				html += "<tr>";
-				html += "<td>" + cycle.partition + "</td>";
+				html += "<td><a href='#cycleGraph' class='cycleFiles' project='" + project.id + "' partition='" + cycle.partition + "'>" + cycle.partition + "</a></td>";
 				html += "<td>";
 				for(var i = 0; i < cycle.components.length; i++) {
 					html += "<a target='_blank' href='/relation/file/" + cycle.components[i].id + "'>" + cycle.components[i].path + "</a><br/>";
@@ -45,6 +49,61 @@ var cyclic = function(cytoscapeutil) {
 		}
 		
 		$("#content").html(html);
+	}
+	var _cyclic = function(projects, files, packages) {
+		showTable(projects, files, packages);
+		$(".cycleFiles").click(function() {
+			var partition = $(this).attr("partition");
+			var projectId = $(this).attr("project");
+			var cycleFiles = files[projectId][partition];
+			console.log(cycleFiles);
+			showGraph(cycleFiles);
+		});
+	}
+	
+	var showGraph = function(cycleFiles) {
+		var nodes = [];
+		for(var i = 0; i < cycleFiles.components.length; i++) {
+			var file = cycleFiles.components[i];
+			nodes[i] = {
+				name: file.name,
+				id: file.id + "",
+				category: 1
+			}
+		}
+		console.log(nodes);
+		var links = [];
+		for(var i = 0; i < cycleFiles.relations.length; i++) {
+			var relation = cycleFiles.relations[i];
+			links[i] = {
+				source: relation.startNode.id + "",
+				target: relation.endNode.id + "",
+				weight: 1,
+				name: "dependsOn"
+			}
+		}
+		console.log(links);
+		var option = {
+				title: {
+					text: 'cycle files',
+					top: 'top',
+					left: 'left'
+				},
+				tooltip: {},
+				animation: false,
+				series : [
+					{
+						name: 'cycle',
+						type: 'graph',
+						layout: 'force',
+						data: nodes,
+						links: links,
+						roam: true,
+						edgeSymbol: ['arrow']
+					}
+				]
+		}
+		charts.setOption(option);
 	}
 	
 	return {

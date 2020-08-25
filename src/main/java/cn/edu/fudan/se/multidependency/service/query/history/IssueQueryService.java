@@ -1,11 +1,14 @@
 package cn.edu.fudan.se.multidependency.service.query.history;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Issue;
+import cn.edu.fudan.se.multidependency.service.query.history.data.IssueFile;
 
 public interface IssueQueryService {
 	
@@ -20,6 +23,8 @@ public interface IssueQueryService {
 	Collection<Issue> queryIssueAddressedByCommit();
 	
 	Set<ProjectFile> queryRelatedFilesOnAllIssues();
+	
+	Map<Long, List<IssueFile>> queryRelatedFilesOnAllIssuesGroupByProject();
 	
 	Collection<ProjectFile> queryRelatedFilesOnIssue(Issue issue);
 	

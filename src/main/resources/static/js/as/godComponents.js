@@ -15,7 +15,7 @@ var god = function(cytoscapeutil) {
 				var file = unstableFiles[fileIndex];
 				console.log(file);
 				html += "<tr>";
-				html += "<td>" + file.file.path + "</td>";
+				html += "<td><a target='_blank' href='/relation/file/" + file.file.id + "'>" + file.file.path + "</a></td>";
 				html += "<td>" + file.metrics.loc + "</td>";
 				html += "</tr>";
 			}
