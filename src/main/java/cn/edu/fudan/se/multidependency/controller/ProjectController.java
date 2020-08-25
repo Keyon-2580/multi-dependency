@@ -15,6 +15,11 @@ import java.util.concurrent.FutureTask;
 
 import javax.servlet.http.HttpServletRequest;
 
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
+import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
+import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
+import cn.edu.fudan.se.multidependency.service.query.data.ProjectStructure;
+import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +60,7 @@ import cn.edu.fudan.se.multidependency.utils.query.ZTreeUtil.ZTreeNode;
 public class ProjectController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectController.class);
-	
+
 	@Autowired
 	private DynamicAnalyseService dynamicAnalyseService;
 
@@ -70,7 +75,14 @@ public class ProjectController {
 	
 	@Autowired
 	private NodeService nodeService;
-	
+
+	@Autowired
+	private HasRepository hasRepository;
+
+
+	@Autowired
+	private HasRelationService hasRelationService;
+
 	@Autowired
 	private MultipleService multipleService;
 	
@@ -79,7 +91,15 @@ public class ProjectController {
 	
 	@Autowired
 	private ProjectService projectService;
-	
+
+	@GetMapping("/graph")
+	public String index() {
+//		request.setAttribute("cloneRelationTypes", CloneRelationType.values());
+//		request.setAttribute("cloneLevels", CloneLevel.values());
+//		request.setAttribute("search", false);
+		return "projectgraph";
+	}
+
 	@GetMapping("/all")
 	@ResponseBody
 	public Map<Long, Project> allProjects() {
@@ -550,5 +570,66 @@ public class ProjectController {
 		
 		return result;
 	}
-	
+
+	private final JSONObject resultHas = new JSONObject();
+	private final List<PackageStructure> childrenall = new ArrayList<>();
+	@GetMapping("/has")
+	@ResponseBody
+	public JSONArray projectHas(@RequestParam("projectId") long projectId) {
+		JSONArray result = new JSONArray();
+
+		Project project = nodeService.queryProject(projectId);
+		ProjectStructure projectStructure = hasRelationService.projectHasInitialize(project);
+
+		List<PackageStructure> childrenPackages = projectStructure.getChildren();
+		List<PackageStructure> childrenPackagesnew = new ArrayList<>();
+		JSONObject nodeJSON = new JSONObject();
+		JSONObject nodeJSON2 = new JSONObject();
+
+		for(PackageStructure pckstru : childrenPackages){
+			PackageStructure pcknew = hasRelationService.packageHasInitialize(pckstru.getPck());
+			childrenPackagesnew.add(pcknew);
+		}
+
+		nodeJSON.put("name", project.getName());
+		nodeJSON.put("children",getHasJson(childrenPackagesnew));
+		nodeJSON2.put("result",nodeJSON);
+
+		result.add(nodeJSON2);
+
+		return result;
+	}
+
+	/**
+	 * 递归遍历项目中所有package的包含关系
+	 */
+	public JSONArray getHasJson(List<PackageStructure> childrenPackages){
+		JSONArray rtJA = new JSONArray();
+		for(PackageStructure pckstru :childrenPackages){
+			List<PackageStructure> pckList = pckstru.getChildrenPackages();
+			List<ProjectFile> fileList = pckstru.getChildrenFiles();
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name",pckstru.getPck().getName());
+			JSONArray jsonArray = new JSONArray();
+			if(fileList.size() > 0){
+				for(ProjectFile profile : fileList){
+					JSONObject jsonObject2 = new JSONObject();
+					jsonObject2.put("size",1000);
+					jsonObject2.put("name",profile.getName());
+					jsonArray.add(jsonObject2);
+				}
+			}
+
+			if(jsonArray.size() > 0){
+				jsonObject.put("children",jsonArray);
+			}
+
+			if(pckList.size()>0){//如果该属性还有子属性,继续做查询,直到该属性没有孩子,也就是最后一个节点
+				jsonObject.put("children", getHasJson(pckList));
+			}
+//			System.out.println(pckList.size());
+			rtJA.add(jsonObject);
+		}
+		return rtJA;
+	}
 }
