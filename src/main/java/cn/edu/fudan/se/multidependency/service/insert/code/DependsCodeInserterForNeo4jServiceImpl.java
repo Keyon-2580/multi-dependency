@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.insert.code;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -10,10 +11,12 @@ import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
+import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Access;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Annotation;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
@@ -26,6 +29,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.Parameter;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Return;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Throw;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableType;
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import cn.edu.fudan.se.multidependency.utils.config.ProjectConfig;
 import depends.deptypes.DependencyType;
 import depends.entity.Entity;
@@ -55,6 +59,39 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 		super.addNodesAndRelations();
 		addNodesWithContainRelations();
 		addRelations();
+	}
+
+	protected void addEmptyPackages() {
+		Map<String, Package> emptyPackages = new HashMap<>();
+		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Package, currentProject).forEach((entityId, node) -> {
+			Package currentPackage = (Package) node;
+			String directoryPath = currentPackage.getDirectoryPath();
+			String parentDirectoryPath = FileUtil.extractDirectoryFromFile(directoryPath.substring(0, directoryPath.length() - 1)) + "/";
+			Package parentPackage = this.getNodes().findPackageByDirectoryPath(parentDirectoryPath, currentProject);
+			while(parentPackage == null) {
+				if(emptyPackages.get(parentDirectoryPath) != null || parentDirectoryPath.equals(currentProject.getPath() + "/")) {
+					break;
+				}
+				parentPackage = new Package();
+				parentPackage.setEntityId(generateEntityId());
+				parentPackage.setDirectoryPath(parentDirectoryPath);
+				parentPackage.setLines(0);
+				parentPackage.setLoc(0);
+				if(!currentPackage.getName().contains("/") && currentPackage.getName().contains(".")) {
+					parentPackage.setName(currentPackage.getName().substring(0, currentPackage.getName().lastIndexOf(".")));
+				} else {
+					parentPackage.setName(parentDirectoryPath);
+				}
+				emptyPackages.put(parentDirectoryPath, parentPackage);
+				currentPackage = parentPackage;
+				parentDirectoryPath = FileUtil.extractDirectoryFromFile(parentDirectoryPath.substring(0, parentDirectoryPath.length() - 1)) + "/";
+				parentPackage = this.getNodes().findPackageByDirectoryPath(parentDirectoryPath, currentProject);
+			}
+		});
+		for(Package pck : emptyPackages.values()) {
+			this.addNode(pck, currentProject);
+			this.addRelation(new Contain(currentProject, pck));
+		}
 	}
 	
 	protected void extractRelationsFromTypes() {

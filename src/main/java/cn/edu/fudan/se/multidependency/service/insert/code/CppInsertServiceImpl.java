@@ -73,7 +73,8 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 		Package pck = this.getNodes().findPackageByDirectoryPath(directoryPath, currentProject);
 		if (pck == null) {
 			pck = new Package();
-			pck.setEntityId(entityRepo.generateId().longValue());
+//			pck.setEntityId(entityRepo.generateId().longValue());
+			pck.setEntityId(generateEntityId());
 			pck.setName(directoryPath);
 			pck.setDirectoryPath(directoryPath);
 			addNode(pck, currentProject);
@@ -157,6 +158,9 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			} else {
 			}
 		});
+		
+		addEmptyPackages();
+		
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Namespace, currentProject).forEach((entityId, node) -> {
 			Namespace namespace = (Namespace) node;
 			PackageEntity packageEntity = (PackageEntity) entityRepo.getEntity(entityId.intValue());

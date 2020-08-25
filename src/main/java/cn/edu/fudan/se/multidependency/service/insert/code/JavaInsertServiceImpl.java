@@ -61,7 +61,8 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			Entity parentEntity = entity.getParent();
 			if(parentEntity == null) {
 				// 该java文件没有显式声明packge，为default包
-				pck.setEntityId(entityRepo.generateId().longValue());
+//				pck.setEntityId(entityRepo.generateId().longValue());
+				pck.setEntityId(generateEntityId());
 				pck.setName(Package.JAVA_PACKAGE_DEFAULT);
 			} else {
 				pck.setEntityId(parentEntity.getId().longValue());
@@ -119,7 +120,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 		addNode(type, currentProject);
 		return type;
 	}
-
+	
 	@Override
 	protected void addNodesWithContainRelations() {
 		entityRepo.entityIterator().forEachRemaining(entity -> {
@@ -135,6 +136,9 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				process((TypeEntity) entity);
 			}
 		});
+		
+		addEmptyPackages();
+		
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject).forEach((entityId, node) -> {
 			Type type = (Type) node;
 			Entity typeEntity = entityRepo.getEntity(entityId.intValue());
