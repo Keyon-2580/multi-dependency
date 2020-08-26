@@ -66,8 +66,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 		Map<String, Package> emptyPackages = new HashMap<>();
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Package, currentProject).forEach((entityId, node) -> {
 			Package currentPackage = (Package) node;
-			String directoryPath = currentPackage.getDirectoryPath();
-			String parentDirectoryPath = FileUtil.extractDirectoryFromFile(directoryPath.substring(0, directoryPath.length() - 1)) + "/";
+			String parentDirectoryPath = currentPackage.lastPackageDirectoryPath();
 			Package parentPackage = this.getNodes().findPackageByDirectoryPath(parentDirectoryPath, currentProject);
 			while(parentPackage == null) {
 				if(emptyPackages.get(parentDirectoryPath) != null || parentDirectoryPath.equals(currentProject.getPath() + "/")) {
@@ -85,7 +84,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 				}
 				emptyPackages.put(parentDirectoryPath, parentPackage);
 				currentPackage = parentPackage;
-				parentDirectoryPath = FileUtil.extractDirectoryFromFile(parentDirectoryPath.substring(0, parentDirectoryPath.length() - 1)) + "/";
+				parentDirectoryPath = parentPackage.lastPackageDirectoryPath();
 				parentPackage = this.getNodes().findPackageByDirectoryPath(parentDirectoryPath, currentProject);
 			}
 		});
@@ -96,8 +95,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 		
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Package, currentProject).forEach((entityId, node) -> {
 			Package currentPackage = (Package) node;
-			String parentPackageDirectoryPath = FileUtil.extractDirectoryFromFile(currentPackage.getDirectoryPath().substring(0, currentPackage.getDirectoryPath().length() - 1)) + "/";
-			Package parentPackage = this.getNodes().findPackageByDirectoryPath(parentPackageDirectoryPath, currentProject);
+			Package parentPackage = this.getNodes().findPackageByDirectoryPath(currentPackage.lastPackageDirectoryPath(), currentProject);
 			if(parentPackage != null) {
 				addRelation(new Has(parentPackage, currentPackage));
 			}

@@ -39,6 +39,8 @@ public class Nodes implements Serializable {
 
     private Map<String, ProjectFile> filePathToFile = new ConcurrentHashMap<>();
     
+    private Map<String, Package> directoryPathToPackage = new ConcurrentHashMap<>();
+    
     private Map<String, Map<Integer, CodeNode>> nodeInFileByEndLine = new ConcurrentHashMap<>();
     
     private Map<String, Map<Integer, List<CodeNode>>> fileContainsNodesSortByLineCache = new ConcurrentHashMap<>();
@@ -186,6 +188,7 @@ public class Nodes implements Serializable {
         projects.clear();
         librariesWithAPI.clear();
         filePathToFile.clear();
+        directoryPathToPackage.clear();
     }
 
     public Map<NodeLabelType, List<Node>> getAllNodes() {
@@ -209,6 +212,9 @@ public class Nodes implements Serializable {
         allNodes.add(node);
         if (node instanceof Project) {
             projects.add((Project) node);
+        }
+        if(node instanceof Package) {
+        	this.directoryPathToPackage.put(((Package) node).getDirectoryPath(), (Package) node);
         }
         if (node instanceof ProjectFile) {
             this.filePathToFile.put(((ProjectFile) node).getPath(), (ProjectFile) node);
@@ -305,14 +311,15 @@ public class Nodes implements Serializable {
     }
 
     public Package findPackageByDirectoryPath(String directoryPath, Project project) {
-        @SuppressWarnings("unchecked")
+        /*@SuppressWarnings("unchecked")
         Map<Long, Package> packages = (Map<Long, Package>) findNodesByNodeTypeInProject(NodeLabelType.Package, project);
         for (Package pck : packages.values()) {
             if (pck.getDirectoryPath().equals(directoryPath)) {
                 return pck;
             }
         }
-        return null;
+        return null;*/
+    	return this.directoryPathToPackage.get(directoryPath);
     }
 
     public Map<Integer, Scenario> findScenarios() {
