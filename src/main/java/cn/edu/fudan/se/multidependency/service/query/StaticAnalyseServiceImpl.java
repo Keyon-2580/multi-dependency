@@ -9,12 +9,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import cn.edu.fudan.se.multidependency.config.PropertyConfig;
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
@@ -603,46 +601,6 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	public boolean isDependsOn(ProjectFile file1, ProjectFile file2) {
 		return !dependsOnRepository.findDependsOnInFiles(file1.getId(), file2.getId()).isEmpty();
 	}
-	
-	@Bean("createDependsOn")
-	public List<DependsOn> createDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, ProjectFileRepository fileRepository) {
-		if(propertyConfig.isCalculateDependsOn()) {
-			System.out.println("创建Depends On关系");
-			dependsOnRepository.deleteAll();
-			
-			dependsOnRepository.createDependsOnWithCallInTypes();
-			dependsOnRepository.createDependsOnWithCreateInTypes();
-			dependsOnRepository.createDependsOnWithCastInTypes();
-			dependsOnRepository.createDependsOnWithThrowInTypes();
-			dependsOnRepository.createDependsOnWithParameterInTypes();
-			dependsOnRepository.createDependsOnWithVariableTypeInTypes();
-			dependsOnRepository.createDependsOnWithAccessInTypes();
-			dependsOnRepository.createDependsOnWithAnnotationInTypes();
-			dependsOnRepository.createDependsOnWithTimesInTypes();
-			dependsOnRepository.deleteNullTimesDependsOnInTypes();
-			
-			dependsOnRepository.createDependsOnWithExtendsInFiles();
-			dependsOnRepository.createDependsOnWithImplementsInFiles();
-			dependsOnRepository.createDependsOnWithCallInFiles();
-			dependsOnRepository.createDependsOnWithCreateInFiles();
-			dependsOnRepository.createDependsOnWithCastInFiles();
-			dependsOnRepository.createDependsOnWithThrowInFiles();
-			dependsOnRepository.createDependsOnWithParameterInFiles();
-			dependsOnRepository.createDependsOnWithVariableTypeInFiles();
-			dependsOnRepository.createDependsOnWithAccessInFiles();
-			dependsOnRepository.createDependsOnWithImpllinkInFiles();
-			dependsOnRepository.createDependsOnWithAnnotationInFiles();
-			dependsOnRepository.createDependsOnWithTimesInFiles();
-			dependsOnRepository.deleteNullTimesDependsOnInFiles();
-			
-			dependsOnRepository.createDependsOnInPackages();
-			dependsOnRepository.addTimesOnDependsOnInPackages();
-			dependsOnRepository.deleteNullTimesDependsOnInPackages();
-			
-			fileRepository.pageRank(20, 0.85);
-		}
-		return new ArrayList<>();
-	}
 
 	@Override
 	public Map<Package, List<DependsOn>> findPackageDependsOn(Project project) {
@@ -710,14 +668,6 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		});
 		cache.cache(getClass(), key, result);
 		return result;
-	}
-	
-	@Bean
-	public boolean setPackageLoSc(PackageRepository packageRepository) {
-		System.out.println("计算Package总代码行");
-		packageRepository.setPackageLoc();
-		packageRepository.setPackageLines();
-		return true;
 	}
 
 }

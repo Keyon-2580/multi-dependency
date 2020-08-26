@@ -14,11 +14,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
-import cn.edu.fudan.se.multidependency.config.Constant;
-import cn.edu.fudan.se.multidependency.config.PropertyConfig;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
@@ -165,16 +162,6 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
         }
         return result;
     }
-    
-	@Bean("createCoChanges")
-	public List<CoChange> createCoChanges(PropertyConfig propertyConfig, CoChangeRepository cochangeRepository) {
-		if(propertyConfig.isCalculateCoChange()) {
-			System.out.println("创建cochange关系");
-			cochangeRepository.deleteAll();
-			return cochangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE);
-		}
-		return new ArrayList<>();
-	}
 
     private Map<ProjectFile, Map<ProjectFile, CoChange>> cntOfFileCoChangeCache = new ConcurrentHashMap<>();
     
