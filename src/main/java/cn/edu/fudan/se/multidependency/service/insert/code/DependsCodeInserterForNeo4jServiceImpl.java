@@ -17,6 +17,7 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
+import cn.edu.fudan.se.multidependency.model.relation.Has;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Access;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Annotation;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
@@ -92,6 +93,15 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 			this.addNode(pck, currentProject);
 			this.addRelation(new Contain(currentProject, pck));
 		}
+		
+		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Package, currentProject).forEach((entityId, node) -> {
+			Package currentPackage = (Package) node;
+			String parentPackageDirectoryPath = FileUtil.extractDirectoryFromFile(currentPackage.getDirectoryPath().substring(0, currentPackage.getDirectoryPath().length() - 1)) + "/";
+			Package parentPackage = this.getNodes().findPackageByDirectoryPath(parentPackageDirectoryPath, currentProject);
+			if(parentPackage != null) {
+				addRelation(new Has(parentPackage, currentPackage));
+			}
+		});
 	}
 	
 	protected void extractRelationsFromTypes() {
