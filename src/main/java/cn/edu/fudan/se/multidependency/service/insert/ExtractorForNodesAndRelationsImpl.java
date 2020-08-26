@@ -12,7 +12,7 @@ public abstract class ExtractorForNodesAndRelationsImpl implements ExtractorForN
 
 	protected long currentEntityId = 0L;
 	
-	protected Long generateEntityId() {
+	protected long generateEntityId() {
 		return currentEntityId++;
 	}
 	

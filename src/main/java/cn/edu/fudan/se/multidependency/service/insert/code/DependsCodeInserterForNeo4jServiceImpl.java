@@ -23,14 +23,13 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.Annotation;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Cast;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Create;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Extends;
 import cn.edu.fudan.se.multidependency.model.relation.structure.ImplLink;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Implements;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Extends;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Parameter;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Return;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Throw;
 import cn.edu.fudan.se.multidependency.model.relation.structure.VariableType;
-import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import cn.edu.fudan.se.multidependency.utils.config.ProjectConfig;
 import depends.deptypes.DependencyType;
 import depends.entity.Entity;
@@ -46,7 +45,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 	public DependsCodeInserterForNeo4jServiceImpl(EntityRepo entityRepo, ProjectConfig projectConfig) {
 		super(projectConfig);
 		this.entityRepo = entityRepo;
-		currentEntityId = entityRepo.generateId().longValue() + 1;
+		currentEntityId = this.entityRepo.generateId().longValue() + 1;
 	}
 	
 	protected EntityRepo entityRepo;
@@ -64,7 +63,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 
 	protected void addEmptyPackages() {
 		Map<String, Package> emptyPackages = new HashMap<>();
-		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Package, currentProject).forEach((entityId, node) -> {
+		this.getNodes().findPackagesInProject(currentProject).forEach((path, node) -> {
 			Package currentPackage = (Package) node;
 			String parentDirectoryPath = currentPackage.lastPackageDirectoryPath();
 			Package parentPackage = this.getNodes().findPackageByDirectoryPath(parentDirectoryPath, currentProject);
@@ -74,6 +73,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 				}
 				parentPackage = new Package();
 				parentPackage.setEntityId(generateEntityId());
+//				parentPackage.setEntityId(this.entityRepo.generateId().longValue());
 				parentPackage.setDirectoryPath(parentDirectoryPath);
 				parentPackage.setLines(0);
 				parentPackage.setLoc(0);
@@ -92,14 +92,14 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 			this.addNode(pck, currentProject);
 			this.addRelation(new Contain(currentProject, pck));
 		}
-		
-		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Package, currentProject).forEach((entityId, node) -> {
+		this.getNodes().findPackagesInProject(currentProject).forEach((directoryPath, node) -> {
 			Package currentPackage = (Package) node;
 			Package parentPackage = this.getNodes().findPackageByDirectoryPath(currentPackage.lastPackageDirectoryPath(), currentProject);
 			if(parentPackage != null) {
 				addRelation(new Has(parentPackage, currentPackage));
 			}
 		});
+		
 	}
 	
 	protected void extractRelationsFromTypes() {

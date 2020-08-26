@@ -39,7 +39,7 @@ public class Nodes implements Serializable {
 
     private Map<String, ProjectFile> filePathToFile = new ConcurrentHashMap<>();
     
-    private Map<String, Package> directoryPathToPackage = new ConcurrentHashMap<>();
+    private Map<Project, Map<String, Package>> directoryPathToPackageInProject = new ConcurrentHashMap<>();
     
     private Map<String, Map<Integer, CodeNode>> nodeInFileByEndLine = new ConcurrentHashMap<>();
     
@@ -188,7 +188,7 @@ public class Nodes implements Serializable {
         projects.clear();
         librariesWithAPI.clear();
         filePathToFile.clear();
-        directoryPathToPackage.clear();
+        directoryPathToPackageInProject.clear();
     }
 
     public Map<NodeLabelType, List<Node>> getAllNodes() {
@@ -214,7 +214,9 @@ public class Nodes implements Serializable {
             projects.add((Project) node);
         }
         if(node instanceof Package) {
-        	this.directoryPathToPackage.put(((Package) node).getDirectoryPath(), (Package) node);
+        	Map<String, Package> directoryPathToPackage = directoryPathToPackageInProject.getOrDefault(inProject, new ConcurrentHashMap<>());
+        	directoryPathToPackage.put(((Package) node).getDirectoryPath(), (Package) node);
+        	this.directoryPathToPackageInProject.put(inProject, directoryPathToPackage);
         }
         if (node instanceof ProjectFile) {
             this.filePathToFile.put(((ProjectFile) node).getPath(), (ProjectFile) node);
@@ -269,10 +271,15 @@ public class Nodes implements Serializable {
         }
         return null;
     }
+    
+    public Map<String, Package> findPackagesInProject(Project project) {
+    	return this.directoryPathToPackageInProject.getOrDefault(project, new HashMap<>());
+    }
 
     /**
      * 在给定project中查找指定节点类型的所有节点
      * entity : node
+     * 不建议使用该方法获取Project包含的Package节点，应使用 Map<String, Package> findPackagesInProject(Project project)
      *
      * @param nodeType
      * @param inProject
@@ -319,7 +326,7 @@ public class Nodes implements Serializable {
             }
         }
         return null;*/
-    	return this.directoryPathToPackage.get(directoryPath);
+    	return this.directoryPathToPackageInProject.getOrDefault(project, new HashMap<>()).get(directoryPath);
     }
 
     public Map<Integer, Scenario> findScenarios() {
