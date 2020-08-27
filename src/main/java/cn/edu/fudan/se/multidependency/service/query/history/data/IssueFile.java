@@ -27,14 +27,38 @@ public class IssueFile {
 		this.issues.addAll(issues);
 	}
 	
-	@Override
-	public boolean equals(Object obj) {
-		return file.equals(obj);
+	public static IssueFile contains(List<IssueFile> issueFiles, ProjectFile file) {
+		IssueFile temp = new IssueFile(file);
+		int index = issueFiles.indexOf(temp);
+		if(index < 0) {
+			return null;
+		}
+		return issueFiles.get(index);
 	}
-	
+
 	@Override
 	public int hashCode() {
-		return file.hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((file == null) ? 0 : file.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		IssueFile other = (IssueFile) obj;
+		if (file == null) {
+			if (other.file != null)
+				return false;
+		} else if (!file.equals(other.file))
+			return false;
+		return true;
 	}
 	
 }

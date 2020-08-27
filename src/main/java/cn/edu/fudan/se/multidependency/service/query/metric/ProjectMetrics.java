@@ -32,6 +32,11 @@ public class ProjectMetrics {
 	private int loc;
 	
 	/**
+	 * 文件总行数
+	 */
+	private int lines;
+	
+	/**
 	 * 与该项目相关的commit次数
 	 */
 	private int commitTimes = -1;

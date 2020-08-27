@@ -32,6 +32,7 @@ import cn.edu.fudan.se.multidependency.service.query.as.MultipleArchitectureSmel
 import cn.edu.fudan.se.multidependency.service.query.as.SimilarComponentsDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.UnstableDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.UnusedComponentDetector;
+import cn.edu.fudan.se.multidependency.service.query.as.data.CirclePacking;
 import cn.edu.fudan.se.multidependency.service.query.as.data.Cycle;
 import cn.edu.fudan.se.multidependency.service.query.as.data.CyclicHierarchy;
 import cn.edu.fudan.se.multidependency.service.query.as.data.GodFile;
@@ -83,6 +84,50 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 	
 	@Autowired
 	private IssueQueryService issueQueryService;
+	
+	@Override
+	public Map<Long, List<CirclePacking>> circlePacking(MultipleAS multipleAS) {
+		Map<Long, List<CirclePacking>> result = new HashMap<>();
+		Map<Long, List<MultipleASFile>> multipleASFiles = multipleASFiles(true);
+		Map<Long, List<IssueFile>> issueFilesGroupByProject = issueQueryService.queryRelatedFilesOnAllIssuesGroupByProject();
+		
+		Collection<Project> projects = nodeService.allProjects();
+		
+		for(Project project : projects) {
+			List<CirclePacking> circles = new ArrayList<>();
+			CirclePacking onlySmellCircle = new CirclePacking(CirclePacking.TYPE_ONLY_SMELL);
+			CirclePacking onlyIssueCircle = new CirclePacking(CirclePacking.TYPE_ONLY_ISSUE);
+			CirclePacking smellAndIssueCircle = new CirclePacking(CirclePacking.TYPE_SMELL_ISSUE);
+			
+			List<IssueFile> issueFiles = new ArrayList<>(issueFilesGroupByProject.get(project.getId()));
+			List<MultipleASFile> asFiles = multipleASFiles.get(project.getId());
+			for(MultipleASFile smellFile : asFiles) {
+				if(!smellFile.isSmellFile(multipleAS)) {
+					continue;
+				}
+				IssueFile issueFile = IssueFile.contains(issueFiles, smellFile.getFile());
+				if(issueFile != null) {
+					// 既是issueFile又是smellFile
+					smellAndIssueCircle.addProjectFile(smellFile.getFile(), issueFile.getIssues());
+					issueFiles.remove(issueFile);
+				} else {
+					// 仅是smellFile
+					onlySmellCircle.addProjectFile(smellFile.getFile());
+				}
+			}
+			for(IssueFile issueFile : issueFiles) {
+				// 仅是issueFile
+				onlyIssueCircle.addProjectFile(issueFile.getFile(), issueFile.getIssues());
+			}
+			
+			circles.add(smellAndIssueCircle);
+			circles.add(onlySmellCircle);
+			circles.add(onlyIssueCircle);
+			result.put(project.getId(), circles);
+		}
+		
+		return result;
+	}
 	
 	@Override
 	public Map<Long, PieFilesData> smellAndIssueFiles(MultipleAS multipleAS) {

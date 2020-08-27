@@ -134,6 +134,7 @@ var metric = function() {
 				html += "<th>NOF（文件数）</th>";
 				html += "<th>NOM（方法数）</th>";
 				html += "<th>LOC（代码行）</th>";
+				html += "<th>lines（文件总行数）</th>";
 				html += "<th>Commit次数</th>";
 				html += "<th>Modularity（模块度）</th>";
 				html += "</tr>";
@@ -146,6 +147,7 @@ var metric = function() {
 					html += "<td>" + result[i].nof + "</td>";
 					html += "<td>" + result[i].nom + "</td>";
 					html += "<td>" + result[i].loc + "</td>";
+					html += "<td>" + result[i].lines + "</td>";
 					html += "<td id='commitTimes_" + result[i].project.id + "'>" + (result[i].commitTimes < 0 ? "计算中..." : result[i].commitTimes) + "</td>";
 					html += "<td id='modularity_" + result[i].project.id + "'>" + (result[i].modularity < 0 ? "计算中..." : result[i].modularity) + "</td>";
 					html += "</tr>";

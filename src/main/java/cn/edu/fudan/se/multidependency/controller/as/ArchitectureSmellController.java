@@ -45,6 +45,52 @@ public class ArchitectureSmellController {
 		return detector.projectHistogramOnVersion();
 	}
 
+	@GetMapping("/issue/circle")
+	@ResponseBody
+	public Object circle(
+			@RequestParam(name="cycle", required=false, defaultValue="true") boolean cycle,
+			@RequestParam(name="hublike", required=false, defaultValue="true") boolean hublike,
+			@RequestParam(name="logicCoupling", required=false, defaultValue="true") boolean logicCoupling,
+			@RequestParam(name="similar", required=false, defaultValue="true") boolean similar,
+			@RequestParam(name="unstable", required=false, defaultValue="true") boolean unstable,
+			@RequestParam(name="hierarchy", required=false, defaultValue="true") boolean hierarchy,
+			@RequestParam(name="godComponent", required=false, defaultValue="true") boolean godComponent,
+			@RequestParam(name="unused", required=false, defaultValue="true") boolean unused) {
+		return detector.circlePacking(new MultipleAS() {
+			@Override
+			public boolean isCycle() {
+				return cycle;
+			}
+			@Override
+			public boolean isHublike() {
+				return hublike;
+			}
+			@Override
+			public boolean isLogicCoupling() {
+				return logicCoupling;
+			}
+			@Override
+			public boolean isSimilar() {
+				return similar;
+			}
+			@Override
+			public boolean isUnstable() {
+				return unstable;
+			}
+			@Override
+			public boolean isCyclicHierarchy() {
+				return hierarchy;
+			}
+			@Override
+			public boolean isGod() {
+				return godComponent;
+			}
+			@Override
+			public boolean isUnused() {
+				return unused;
+			}
+		});
+	}
 	
 	@GetMapping("/issue/pie")
 	@ResponseBody
@@ -57,17 +103,7 @@ public class ArchitectureSmellController {
 			@RequestParam(name="hierarchy", required=false, defaultValue="true") boolean hierarchy,
 			@RequestParam(name="godComponent", required=false, defaultValue="true") boolean godComponent,
 			@RequestParam(name="unused", required=false, defaultValue="true") boolean unused) {
-//		boolean cycle = (boolean) params.getOrDefault("cycle", true);
-//		boolean hublike = (boolean) params.getOrDefault("hublike", true);
-//		boolean logicCoupling = (boolean) params.getOrDefault("logicCoupling", true);
-//		boolean similar = (boolean) params.getOrDefault("similar", true);
-//		boolean unstable = (boolean) params.getOrDefault("unstable", true);
-//		boolean hierarchy = (boolean) params.getOrDefault("hierarchy", true);
-//		boolean godComponent = (boolean) params.getOrDefault("godComponent", true);
-//		boolean unused = (boolean) params.getOrDefault("unused", true);
-		System.out.println(cycle + " " + hublike + " " + logicCoupling + " " + similar + " " + unstable + " " + hierarchy + " " + godComponent + " " + unused);
 		return detector.smellAndIssueFiles(new MultipleAS() {
-			
 			@Override
 			public boolean isCycle() {
 				return cycle;

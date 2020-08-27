@@ -1,13 +1,13 @@
 var multiple = function(projects, files, cytoscapeutil) {
 	var param = {
 			cycle: true,
-			hublike: false,
-			logicCoupling: false,
-			similar: false,
-			unstable: false,
-			hierarchy: false,
-			godComponent: false,
-			unused: false
+			hublike: true,
+			logicCoupling: true,
+			similar: true,
+			unstable: true,
+			hierarchy: true,
+			godComponent: true,
+			unused: true
 	}
 	
 	var _histogram = function(data, divId) {
@@ -157,7 +157,7 @@ var multiple = function(projects, files, cytoscapeutil) {
 			var project = projects[i];
 			html += "<div>";
 				html += "<div>";
-				html += "<h4>" + project.name + " (" + project.language + ") ";
+				html += "<h4>" + project.name + " (" + project.language + ") </h4>";
 				html += "</div>";
 				html += "<div class='col-sm-12 row'>";
 					html += "<div class='col-sm-6'>";
@@ -166,6 +166,9 @@ var multiple = function(projects, files, cytoscapeutil) {
 					html += "<div class='col-sm-6'>";
 					html += "<div id='issueFilesPie_" + project.id + "' style='height: 400px;'></div>";
 					html += "</div>";
+				html += "</div>";
+				html += "<div class=''>";
+				html += "<div id='circle_" + project.id + "'></div>";
 				html += "</div>";
 				html += "<div>";
 				html += "<table class='table table-bordered'>";
@@ -201,6 +204,44 @@ var multiple = function(projects, files, cytoscapeutil) {
 			html += "</div>";
 		}
 		$("#table").html(html);
+		var data = {
+				"children": [{
+					"children": [{
+							"size": 1000,
+							"name": "TraverserRewrite.java"
+						},{
+							"size": 1000,
+							"name": "CharMatcherRewrite.java"
+						}],
+						"name": "default"
+				},{
+					"children": [{
+							"size": 1000,
+							"name": "XmlEscapersTest.java"
+					}],
+					"name": "com.google.common.xml"
+				}],
+				"name": "google__fdse__guava"
+	}
+//	projectToGraph(data, "circle_0");
+		$.ajax({
+			type: "get",
+			url: "/as/issue/circle",
+			data: param,
+			success: function(result) {
+				console.log(result);
+				for(var i = 0; i < projects.length; i++) {
+					var data = {};
+					var project = projects[i];
+					var minIssueSize = 0;
+					var maxIssueSize = 0;
+					var circles = result[project.id];
+					for(var j = 0; j < circles.length; j++) {
+					}
+					
+				}
+			}
+		});
 		$.ajax({
 			type: "get",
 			url: "/as/issue/pie",
