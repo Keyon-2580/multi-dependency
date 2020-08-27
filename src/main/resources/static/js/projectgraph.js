@@ -11709,7 +11709,7 @@ var projectgraph = function () {
 
                 $.ajax({
                     type : "GET",
-                    url : mainUrl + "/has?projectId=" + projectlist[1],
+                    url : mainUrl + "/has?projectId=" + projectlist[0],
                     success : function(result) {
                         // console.log(result[0].result);
                         resultjson = result[0].result;
