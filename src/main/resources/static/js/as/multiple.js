@@ -3,11 +3,23 @@ var multiple = function(projects, files, cytoscapeutil) {
 			cycle: true,
 			hublike: true,
 			logicCoupling: true,
-			similar: true,
-			unstable: true,
+			similar: false,
+			unstable: false,
 			hierarchy: true,
-			godComponent: true,
+			godComponent: false,
 			unused: true
+	}
+	
+	function paramToRequestParam() {
+		var str = "?cycle=" + param.cycle + 
+			"&hublike=" + param.hublike + 
+			"&logicCoupling=" + param.logicCoupling + 
+			"&similar=" + param.similar + 
+			"&unstable=" + param.unstable + 
+			"&hierarchy=" + param.hierarchy + 
+			"&godComponent=" + param.godComponent + 
+			"&unused=" + param.unused;
+		return str;
 	}
 	
 	var _histogram = function(data, divId) {
@@ -157,7 +169,7 @@ var multiple = function(projects, files, cytoscapeutil) {
 			var project = projects[i];
 			html += "<div>";
 				html += "<div>";
-				html += "<h4>" + project.name + " (" + project.language + ") </h4>";
+				html += "<h4><a target='_blank' href='/as/multiple/project/" + project.id + paramToRequestParam() + "'>" + project.name + " (" + project.language + ") </h4></a>";
 				html += "</div>";
 				html += "<div class='col-sm-12 row'>";
 					html += "<div class='col-sm-6'>";
