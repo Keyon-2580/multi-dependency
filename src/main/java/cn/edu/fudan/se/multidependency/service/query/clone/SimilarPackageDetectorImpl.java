@@ -165,9 +165,7 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 		rowKey.set(0);
 		Workbook hwb = new XSSFWorkbook();
 		Collection<SimilarPackage> similarPackages = detectSimilarPackages(10,0.5);
-		//Collection<Project> projects = nodeService.allProjects();
 		Sheet sheet = hwb.createSheet(new StringBuilder().append("SimilarPackages").toString());
-		//List<PackageMetrics> packageMetrics = allPackageMetrics.get(project.getId());
 		Row row = sheet.createRow(rowKey.get());
 		rowKey.set(rowKey.get()+1);
 		CellStyle style = hwb.createCellStyle();
@@ -216,5 +214,4 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 			printSimilarPackage(sheet, layer + 1, child);
 		}
 	}
-
 }
