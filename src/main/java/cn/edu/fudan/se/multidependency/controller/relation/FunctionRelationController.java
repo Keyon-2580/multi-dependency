@@ -32,7 +32,7 @@ public class FunctionRelationController {
 	public String index(HttpServletRequest request, @PathVariable("functionId") long id) {
 		Function function = nodeService.queryFunction(id);
 		ProjectFile file = containRelationService.findFunctionBelongToFile(function);
-		request.setAttribute("function", function);
+		request.setAttribute("func", function);
 		request.setAttribute("file", file);
 		request.setAttribute("pck", containRelationService.findFileBelongToPackage(file));
 		request.setAttribute("project", containRelationService.findFileBelongToProject(file));
