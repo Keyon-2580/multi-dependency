@@ -2,6 +2,8 @@ package cn.edu.fudan.se.multidependency.service.query.clone;
 
 import java.util.Collection;
 
+import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
@@ -35,5 +37,7 @@ public interface BasicCloneQueryService {
 	CloneGroup queryCloneGroup(long id);
 	
 	CloneGroup queryCloneGroup(String name);
-	
+
+	Collection<ProjectFile> findProjectContainCloneFiles(Project project);
+
 }

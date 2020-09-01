@@ -2,8 +2,11 @@ package cn.edu.fudan.se.multidependency.service.query.clone;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
+import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -152,5 +155,12 @@ public class BasicCloneQueryServiceImpl implements BasicCloneQueryService {
 		}
 		return result;
 	}
-    
+
+	Map<Project, Collection<ProjectFile>> projectContainCloneFilesCache = new ConcurrentHashMap<>();
+	@Override
+	public Collection<ProjectFile> findProjectContainCloneFiles(Project project) {
+		Collection<ProjectFile> result = projectContainCloneFilesCache.getOrDefault(project, cloneRepository.findProjectContainCloneFiles(project.getId()));
+		return result;
+	}
+
 }
