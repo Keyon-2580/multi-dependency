@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.controller;
 
+import java.io.OutputStream;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ import cn.edu.fudan.se.multidependency.service.query.clone.data.SimilarPackage;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 @Controller
 @RequestMapping("/clone")
 public class CloneController {
@@ -59,6 +63,22 @@ public class CloneController {
 	public String graph() {
 		return "clonepackage";
 	}
+
+
+	@GetMapping("/packages/export")
+	@ResponseBody
+	public void printPackageMetric(HttpServletRequest request, HttpServletResponse response) {
+		try {
+			response.addHeader("Content-Disposition", "attachment;filename=similar_packages.xlsx");
+			response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+			OutputStream stream = response.getOutputStream();
+
+			similarPackageDetector.exportSimilarPackages(stream);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	
 	@GetMapping("/package/cytoscape")
 	@ResponseBody
@@ -242,4 +262,5 @@ public class CloneController {
 		assert false;
 		return cloneShowService.graphFileClones(clones);
 	}
+
 }
