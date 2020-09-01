@@ -12,7 +12,7 @@ var projectgraph = function () {
             g = svg.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
 
         var color = d3.scaleLinear()
-            .domain([-1, 5])
+            .domain([0, 1])
             .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
             .interpolate(d3.interpolateHcl);
 
@@ -32,7 +32,7 @@ var projectgraph = function () {
             .data(nodes)
             .enter().append("circle")
             .attr("class", function(d) { return d.parent ? d.children ? "circlepacking_node" : "circlepacking_node circlepacking_node--leaf" : "circlepacking_node circlepacking_node--root"; })
-            .style("fill", function(d) {return d.children ? color(d.depth) : (getCloneByName(projectdata,d.data.name) ? "\t#FFB6C1" : null); })
+            .style("fill", function(d) {return d.children ? color(d.depth/(d.depth+19)) : (getCloneByName(projectdata,d.data.name) ? "\t#FFB6C1" : null); })
             .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
             .call(text => text.append("title").text(function(d) { return d.parent ? d.data.name + "\n所属包：" + d.parent.data.name : d.data.name; }));
 
@@ -118,7 +118,7 @@ var projectgraph = function () {
 
                 $.ajax({
                     type : "GET",
-                    url : mainUrl + "/has?projectId=" + projectlist[0],
+                    url : mainUrl + "/has?projectId=" + projectlist[1],
                     success : function(result) {
                         // console.log(result[0].result);
                         resultjson = result[0].result;
