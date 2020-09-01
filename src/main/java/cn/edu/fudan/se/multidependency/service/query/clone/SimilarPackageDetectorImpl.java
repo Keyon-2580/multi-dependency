@@ -1,5 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.query.clone;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,6 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import cn.edu.fudan.se.multidependency.model.node.CodeNode;
+import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
+import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
+import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,30 +32,32 @@ import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
 @Service
 public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
-	
+
 	@Autowired
 	private CloneValueService cloneValueService;
-	
+
 	@Autowired
 	private BasicCloneQueryService basicCloneQueryService;
-	
+
 	@Autowired
 	private ContainRelationService containRelationService;
-	
+
 	private Map<String, Package> directoryPathToPacakge = new ConcurrentHashMap<>();
-	
+
+	private ThreadLocal<Integer> rowKey = new ThreadLocal<>();
+
 	private Package findParentPackage(Package pck) {
 		directoryPathToPacakge.put(pck.getDirectoryPath(), pck);
 		String parentDirectoryPath = pck.lastPackageDirectoryPath();
-		if(FileUtil.SLASH_LINUX.equals(parentDirectoryPath)) {
+		if (FileUtil.SLASH_LINUX.equals(parentDirectoryPath)) {
 			return null;
 		}
 		Package parent = directoryPathToPacakge.get(parentDirectoryPath);
-		if(parent != null) {
+		if (parent != null) {
 			return parent;
 		}
 		parent = containRelationService.findPackageInPackage(pck);
-		if(parent != null) {
+		if (parent != null) {
 			directoryPathToPacakge.put(parentDirectoryPath, parent);
 		}
 		return parent;
@@ -61,12 +73,12 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 //		DefaultPackageCloneValueCalculator.getInstance().setPercentageThreshold(percentage);
 		CloneValueCalculator<Boolean> calculator = DefaultPackageCloneValueCalculator.getInstance();
 //		calculator = PackageCloneValueCalculatorByFileLoc.getInstance();
-		for(CloneValueForDoubleNodes<Package> packageClone : packageClones) {
+		for (CloneValueForDoubleNodes<Package> packageClone : packageClones) {
 			boolean isSimilar = (boolean) packageClone.calculateValue(calculator);
-			if(!isSimilar) {
+			if (!isSimilar) {
 				continue;
 			}
-			if(idToPackageClone.get(packageClone.getId()) != null) {
+			if (idToPackageClone.get(packageClone.getId()) != null) {
 				continue;
 			}
 			SimilarPackage temp = new SimilarPackage(packageClone);
@@ -77,12 +89,12 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 			Package currentPackage2 = packageClone.getNode2();
 			Package parentPackage1 = findParentPackage(currentPackage1);
 			Package parentPackage2 = findParentPackage(currentPackage2);
-			while(parentPackage1 != null && parentPackage2 != null) {
+			while (parentPackage1 != null && parentPackage2 != null) {
 				CloneValueForDoubleNodes<Package> parentPackageClone = cloneValueService.queryPackageCloneFromFileCloneSort(fileClones, parentPackage1, parentPackage2);
-				if(parentPackageClone == null) {
+				if (parentPackageClone == null) {
 					break;
 				}
-				if(!(boolean) parentPackageClone.calculateValue(DefaultPackageCloneValueCalculator.getInstance())) {
+				if (!(boolean) parentPackageClone.calculateValue(DefaultPackageCloneValueCalculator.getInstance())) {
 					break;
 				}
 				SimilarPackage parentSimilarPackage = idToPackageClone.getOrDefault(parentPackageClone.getId(), new SimilarPackage(parentPackageClone));
@@ -95,22 +107,22 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 				parentPackage2 = containRelationService.findPackageInPackage(parentPackage2);
 			}
 		}
-		
+
 		Map<String, SimilarPackage> parentSimilarPacakges = new HashMap<>();
-		for(Map.Entry<String, SimilarPackage> entry : idToPackageClone.entrySet()) {
+		for (Map.Entry<String, SimilarPackage> entry : idToPackageClone.entrySet()) {
 			String id = entry.getKey();
-			if(isChild.get(id) == false) {
+			if (isChild.get(id) == false) {
 				SimilarPackage value = entry.getValue();
 				Package pck1 = value.getPackage1();
 				Package pck2 = value.getPackage2();
 				Package parentPck1 = containRelationService.findPackageInPackage(pck1);
 				Package parentPck2 = containRelationService.findPackageInPackage(pck2);
-				if(parentPck1 == null && parentPck2 == null) {
+				if (parentPck1 == null && parentPck2 == null) {
 					String parentPck1Path = pck1.lastPackageDirectoryPath();
 					String parentPck2Path = pck2.lastPackageDirectoryPath();
 					String parentId = String.join("_", parentPck1Path, parentPck2Path);
 					SimilarPackage parentSimilar = parentSimilarPacakges.get(parentId);
-					if(parentSimilar == null) {
+					if (parentSimilar == null) {
 						parentPck1 = new Package();
 						parentPck1.setId(-1L);
 						parentPck1.setEntityId(-1L);
@@ -129,16 +141,16 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 				}
 			}
 		}
-		
+
 		List<SimilarPackage> result = new ArrayList<>();
-		
-		for(SimilarPackage parentSimilarPackage : parentSimilarPacakges.values()) {
+
+		for (SimilarPackage parentSimilarPackage : parentSimilarPacakges.values()) {
 			result.add(parentSimilarPackage);
 		}
-		
-		for(Map.Entry<String, SimilarPackage> entry : idToPackageClone.entrySet()) {
+
+		for (Map.Entry<String, SimilarPackage> entry : idToPackageClone.entrySet()) {
 			String id = entry.getKey();
-			if(isChild.get(id) == false) {
+			if (isChild.get(id) == false) {
 				result.add(entry.getValue());
 			}
 		}
@@ -146,6 +158,63 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 			return d1.getPackage1().getDirectoryPath().compareTo(d2.getPackage1().getDirectoryPath());
 		});
 		return result;
+	}
+
+	@Override
+	public void exportSimilarPackages(OutputStream stream) {
+		rowKey.set(0);
+		Workbook hwb = new XSSFWorkbook();
+		Collection<SimilarPackage> similarPackages = detectSimilarPackages(10,0.5);
+		//Collection<Project> projects = nodeService.allProjects();
+		Sheet sheet = hwb.createSheet(new StringBuilder().append("SimilarPackages").toString());
+		//List<PackageMetrics> packageMetrics = allPackageMetrics.get(project.getId());
+		Row row = sheet.createRow(rowKey.get());
+		rowKey.set(rowKey.get()+1);
+		CellStyle style = hwb.createCellStyle();
+		style.setAlignment(HorizontalAlignment.CENTER);
+
+		Cell cell = null;
+		cell = row.createCell(0);
+		cell.setCellValue("目录1");
+		cell.setCellStyle(style);
+		cell = row.createCell(1);
+		cell.setCellValue("目录2");
+		cell.setCellStyle(style);
+		cell = row.createCell(2);
+		cell.setCellValue("内部克隆文件对数");
+		cell.setCellStyle(style);
+
+		for(SimilarPackage similarPackage:similarPackages){
+			printSimilarPackage(sheet, 0, similarPackage);
+		}
+
+		try {
+			hwb.write(stream);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				stream.close();
+				hwb.close();
+			} catch (IOException e) {
+			}
+		}
+	}
+
+	private void printSimilarPackage(Sheet sheet, int layer, SimilarPackage similarPackage){
+		String prefix = "";
+		for(int i = 0; i < layer; i++) {
+			prefix += "|--------";
+		}
+		Row row = sheet.createRow(rowKey.get());
+		rowKey.set(rowKey.get()+1);
+		row.createCell(0).setCellValue(prefix + similarPackage.getPackage1().getDirectoryPath());
+		row.createCell(1).setCellValue(prefix + similarPackage.getPackage2().getDirectoryPath());
+		row.createCell(2).setCellValue(similarPackage.getClonePackages().sizeOfChildren());
+
+		for (SimilarPackage child:similarPackage.getChildrenClonePackages().values()){
+			printSimilarPackage(sheet, layer + 1, child);
+		}
 	}
 
 }
