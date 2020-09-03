@@ -338,13 +338,15 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 			Package parentPackage1 = findParentPackage(currentPackage1);
 			Package parentPackage2 = findParentPackage(currentPackage2);
 			while(parentPackage1 != null && parentPackage2 != null && !parentPackage1.getId().equals(parentPackage2.getId())) {
-//				CloneValueForDoubleNodes<Package> parentPackageClone = cloneValueService.queryPackageCloneFromFileCloneSort(fileClones, parentPackage1, parentPackage2);
-//				if(parentPackageClone == null) {
-//					break;
-//				}
-//				SimilarPackage parentSimilarPackage = idToPackageClone.getOrDefault(parentPackageClone.getId(), new SimilarPackage(parentPackageClone));
-				String parentId = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
-				SimilarPackage parentSimilarPackage = new SimilarPackage(new CloneValueForDoubleNodes<Package>(parentPackage1, parentPackage2, parentId));
+				SimilarPackage parentSimilarPackage;
+				CloneValueForDoubleNodes<Package> childPackageClone = cloneValueService.queryPackageCloneFromFileCloneSort(fileClones, parentPackage1, parentPackage2);
+				if(childPackageClone != null) {
+					parentSimilarPackage = idToPackageClone.getOrDefault(childPackageClone.getId(), new SimilarPackage(childPackageClone));
+				}
+				else {
+					String parentId = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
+					parentSimilarPackage = new SimilarPackage(new CloneValueForDoubleNodes<Package>(parentPackage1, parentPackage2, parentId));
+				}
 				if(!isSimilarPackages(parentPackage1, parentPackage2)) {
 					break;
 				}
