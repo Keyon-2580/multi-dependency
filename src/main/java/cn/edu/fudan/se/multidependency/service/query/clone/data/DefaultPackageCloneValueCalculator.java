@@ -22,7 +22,7 @@ public class DefaultPackageCloneValueCalculator implements CloneValueCalculator<
 	private static DefaultPackageCloneValueCalculator instance = new DefaultPackageCloneValueCalculator();
 	
 	/**
-	 * 若两个包内的有克隆关系的文件总数大于等于此值，则认为这两个包之间重复读过高
+	 * 若两个包内的有克隆关系的文件总数大于等于此值，则认为这两个包之间重复度过高
 	 */
 	@Setter
 	@Getter
