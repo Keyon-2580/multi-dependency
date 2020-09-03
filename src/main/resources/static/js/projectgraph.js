@@ -2,7 +2,7 @@ var projectgraph = function () {
     var mainUrl = "/project";
 
     var projectToGraph = function(result,divId){
-        console.log(result);
+        // console.log(result);
         var projectdata = result;
         var svg = d3.select("#" + divId)
                 .attr("width", 1800)
@@ -42,8 +42,7 @@ var projectgraph = function () {
             .attr("class", "circlepacking_label")
             .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0; })
             .style("display", function(d) { return d.parent === root ? "inline" : "none"; })
-            .style("font-size", function(d) { console.log(color(d.depth));
-                console.log(d.data.name);
+            .style("font-size", function(d) {
                 return d.children ? color(d.depth) : (getCloneByName(projectdata,d.data.name) ? "\t#FFB6C1" : null); })
             .text(function(d) { return d.data.name; });
 
@@ -116,20 +115,40 @@ var projectgraph = function () {
                     projectlist.push(x);
                 }
 
-                $.ajax({
-                    type : "GET",
-                    url : mainUrl + "/has?projectId=" + projectlist[1],
-                    success : function(result) {
-                        // console.log(result[0].result);
-                        resultjson = result[0].result;
-                        projectToGraph(resultjson,"projectToGraph");
-                    }
-                })
+                var html = ""
 
-                // projectId = result[0].id;
-                // console.log(resultjson);
+                for(var i = 0; i < projectlist.length; i++){
+                    html += "<svg id = projectToGraph_" + projectlist[i] + "></svg>";
+                    // console.log(html);
+                    $("#projectToGraph").html(html);
+
+                    // console.log(projectlist[i])
+
+
+
+                }
+
+                Loop_ajax(0, projectlist);
             }
         })
+
+        function Loop_ajax(index, projectlist) {
+            if (index < projectlist.length) {
+                $.ajax({
+                    type : "GET",
+                    url : mainUrl + "/has?projectId=" + projectlist[index],
+                    success : function(result) {
+                        resultjson = result[0].result;
+                        // console.log(projectlist[index])
+                        console.log("projectToGraph_" + projectlist[index])
+                        projectToGraph(resultjson,"projectToGraph_" + projectlist[index]);
+                        if (index < projectlist.length) {
+                            Loop_ajax(index + 1, projectlist);
+                        }
+                    }
+                })
+            }
+        }
     }
 
     var _graph = function(){
