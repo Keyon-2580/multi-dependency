@@ -9,17 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import cn.edu.fudan.se.multidependency.model.node.CodeNode;
-import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
-import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
-import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import cn.edu.fudan.se.multidependency.model.node.CodeNode;
 import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
-import org.neo4j.cypher.internal.CacheLookup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,8 +45,6 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 	private final Map<Collection<Long>, Integer> cloneNodesOfPackages2 = new HashMap<>();
 	private final Collection<Collection<Long>> clonePackages = new ArrayList<>();
 	private final Collection<Collection<Long>> similarPackages = new ArrayList<>();
-	private final Map<String, Package> directoryPathToPacakge = new ConcurrentHashMap<>();
-
 
 	private Map<String, Package> directoryPathToPacakge = new ConcurrentHashMap<>();
 
