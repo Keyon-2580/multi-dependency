@@ -81,7 +81,9 @@ public interface ContainRelationService {
 	Collection<Project> findMicroServiceContainProjects(MicroService ms);
 	
 	Iterable<Function> findMicroServiceContainFunctions(MicroService ms);
-	
+
+	Iterable<ProjectFile> findMicroServiceContainFiles(MicroService ms);
+
 	MicroService findProjectBelongToMicroService(Project project);
 	
 	List<RestfulAPI> findMicroServiceContainRestfulAPI(MicroService microService);
