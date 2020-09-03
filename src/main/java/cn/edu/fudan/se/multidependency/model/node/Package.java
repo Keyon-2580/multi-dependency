@@ -36,6 +36,8 @@ public class Package implements Node, Module {
     private Long entityId;
     
     private long loc = -1;
+
+    private int allNodes = 0;
     
     private long lines = -1;
 

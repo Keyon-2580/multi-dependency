@@ -382,7 +382,19 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		}
 		return result;
 	}
-	
+
+	@Override
+	public Iterable<ProjectFile> findMicroServiceContainFiles(MicroService ms) {
+		Iterable<Project> projects = findMicroServiceContainProjects(ms);
+		List<ProjectFile> result = new ArrayList<>();
+		for(Project project : projects) {
+			for(ProjectFile file : findProjectContainAllFiles(project)) {
+				result.add(file);
+			}
+		}
+		return result;
+	}
+
 	@Override
 	public List<RestfulAPI> findMicroServiceContainRestfulAPI(MicroService microService) {
 		return containRepository.findMicroServiceContainRestfulAPI(microService.getId());
