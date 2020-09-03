@@ -1,5 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.query.clone;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,6 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import cn.edu.fudan.se.multidependency.model.node.CodeNode;
+import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
+import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
+import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
 import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
 import org.neo4j.cypher.internal.CacheLookup;
@@ -25,13 +35,13 @@ import cn.edu.fudan.se.multidependency.utils.FileUtil;
 
 @Service
 public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
-	
+
 	@Autowired
 	private CloneValueService cloneValueService;
-	
+
 	@Autowired
 	private BasicCloneQueryService basicCloneQueryService;
-	
+
 	@Autowired
 	private ContainRelationService containRelationService;
 
@@ -45,18 +55,23 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 	private final Collection<Collection<Long>> similarPackages = new ArrayList<>();
 	private final Map<String, Package> directoryPathToPacakge = new ConcurrentHashMap<>();
 
+
+	private Map<String, Package> directoryPathToPacakge = new ConcurrentHashMap<>();
+
+	private ThreadLocal<Integer> rowKey = new ThreadLocal<>();
+
 	private Package findParentPackage(Package pck) {
 		directoryPathToPacakge.put(pck.getDirectoryPath(), pck);
 		String parentDirectoryPath = pck.lastPackageDirectoryPath();
-		if(FileUtil.SLASH_LINUX.equals(parentDirectoryPath)) {
+		if (FileUtil.SLASH_LINUX.equals(parentDirectoryPath)) {
 			return null;
 		}
 		Package parent = directoryPathToPacakge.get(parentDirectoryPath);
-		if(parent != null) {
+		if (parent != null) {
 			return parent;
 		}
 		parent = containRelationService.findPackageInPackage(pck);
-		if(parent != null) {
+		if (parent != null) {
 			directoryPathToPacakge.put(parentDirectoryPath, parent);
 		}
 		return parent;
@@ -414,4 +429,57 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 		return result;
 	}
 
+	public void exportSimilarPackages(OutputStream stream) {
+		rowKey.set(0);
+		Workbook hwb = new XSSFWorkbook();
+		Collection<SimilarPackage> similarPackages = detectSimilarPackages(10,0.5);
+		Sheet sheet = hwb.createSheet(new StringBuilder().append("SimilarPackages").toString());
+		Row row = sheet.createRow(rowKey.get());
+		rowKey.set(rowKey.get()+1);
+		CellStyle style = hwb.createCellStyle();
+		style.setAlignment(HorizontalAlignment.CENTER);
+
+		Cell cell = null;
+		cell = row.createCell(0);
+		cell.setCellValue("目录1");
+		cell.setCellStyle(style);
+		cell = row.createCell(1);
+		cell.setCellValue("目录2");
+		cell.setCellStyle(style);
+		cell = row.createCell(2);
+		cell.setCellValue("内部克隆文件对数");
+		cell.setCellStyle(style);
+
+		for(SimilarPackage similarPackage:similarPackages){
+			printSimilarPackage(sheet, 0, similarPackage);
+		}
+
+		try {
+			hwb.write(stream);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				stream.close();
+				hwb.close();
+			} catch (IOException e) {
+			}
+		}
+	}
+
+	private void printSimilarPackage(Sheet sheet, int layer, SimilarPackage similarPackage){
+		String prefix = "";
+		for(int i = 0; i < layer; i++) {
+			prefix += "|--------";
+		}
+		Row row = sheet.createRow(rowKey.get());
+		rowKey.set(rowKey.get()+1);
+		row.createCell(0).setCellValue(prefix + similarPackage.getPackage1().getDirectoryPath());
+		row.createCell(1).setCellValue(prefix + similarPackage.getPackage2().getDirectoryPath());
+		row.createCell(2).setCellValue(similarPackage.getClonePackages().sizeOfChildren());
+
+		for (SimilarPackage child:similarPackage.getChildrenSimilarPackages()){
+			printSimilarPackage(sheet, layer + 1, child);
+		}
+	}
 }
