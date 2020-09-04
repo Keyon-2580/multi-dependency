@@ -592,7 +592,8 @@ public class ProjectController {
 		}
 
 		nodeJSON.put("name", project.getName());
-		nodeJSON.put("children",getHasJson(childrenPackagesnew));
+		Collection<ProjectFile> clonefiles = basicCloneQueryService.findProjectContainCloneFiles(project);
+		nodeJSON.put("children",getHasJson(clonefiles,childrenPackagesnew));
 		nodeJSON2.put("result",nodeJSON);
 
 		result.add(nodeJSON2);
@@ -603,7 +604,7 @@ public class ProjectController {
 	/**
 	 * 递归遍历项目中所有package的包含关系
 	 */
-	public JSONArray getHasJson(List<PackageStructure> childrenPackages){
+	public JSONArray getHasJson(Collection<ProjectFile> clonefiles,List<PackageStructure> childrenPackages){
 		JSONArray rtJA = new JSONArray();
 		for(PackageStructure pckstru :childrenPackages){
 			List<PackageStructure> pckList = pckstru.getChildrenPackages();
@@ -615,6 +616,11 @@ public class ProjectController {
 				for(ProjectFile profile : fileList){
 					JSONObject jsonObject2 = new JSONObject();
 					jsonObject2.put("size",1000);
+					if(clonefiles.contains(profile)){
+						jsonObject2.put("clone",true);
+					}else{
+						jsonObject2.put("clone",false);
+					}
 					jsonObject2.put("name",profile.getName());
 					jsonArray.add(jsonObject2);
 				}
@@ -625,7 +631,7 @@ public class ProjectController {
 			}
 
 			if(pckList.size()>0){//如果该属性还有子属性,继续做查询,直到该属性没有孩子,也就是最后一个节点
-				jsonObject.put("children", getHasJson(pckList));
+				jsonObject.put("children", getHasJson(clonefiles,pckList));
 			}
 //			System.out.println(pckList.size());
 			rtJA.add(jsonObject);

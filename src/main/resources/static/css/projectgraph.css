@@ -12,13 +12,12 @@
 }
 
 .circlepacking_label {
-    font: 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font: 18px "Helvetica Neue", Helvetica, Arial, sans-serif;
     text-anchor: middle;
     text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff;
 }
 
 .circlepacking_label,
-.circlepacking_node--root,
-.circlepacking_node--leaf {
+.circlepacking_node--root {
     pointer-events: none;
 }

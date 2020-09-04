@@ -37,9 +37,10 @@ public class HasRelationServiceImpl implements HasRelationService {
         return result;
     }
 
+    Map<Project, Collection<Package>> packageHasPakcagesCache = new ConcurrentHashMap<>();
     @Override
     public Collection<Package> findPackageHasPackages(Package pck) {
-        Collection<Package> result = projectHasPakcagesCache.getOrDefault(pck, hasRepository.findPackageHasPackages(pck.getId()));
+        Collection<Package> result = packageHasPakcagesCache.getOrDefault(pck, hasRepository.findPackageHasPackages(pck.getId()));
         return result;
     }
 
