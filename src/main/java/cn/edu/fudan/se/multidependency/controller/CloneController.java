@@ -67,7 +67,7 @@ public class CloneController {
 
 	@GetMapping("/packages/export")
 	@ResponseBody
-	public void printPackageMetric(HttpServletRequest request, HttpServletResponse response) {
+	public void exportSimilarPackages(HttpServletRequest request, HttpServletResponse response) {
 		try {
 			response.addHeader("Content-Disposition", "attachment;filename=similar_packages.xlsx");
 			response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");

@@ -195,31 +195,88 @@ var clone = function(cytoscapeutil) {
 			success: function(result) {
 				console.log(result);
 				var html = "<table class='table table-bordered'>";
-				html += "<tr><th>目录1</th><th>目录2</th><th>内部克隆文件对数</th></tr>";
-				var tr = function(layer, duplicated) {
+				html += "<tr><th>目录1</th><th>目录1克隆占比</th><th>目录2</th><th>目录2克隆占比</th><th>克隆文件对数</th><th>总克隆占比</th></tr>";
+				var tr = function(index, layer, duplicated) {
 					var prefix = "";
 					for(var i = 0; i < layer; i++) {
 						prefix += "|--------";
 					}
-					html += "<tr>";
-					html += layer == 0 ? "<th>" : "<td>";
-					html += prefix + duplicated.package1.directoryPath
-					html += layer == 0 ? "</th>" : "</td>";
-					html += layer == 0 ? "<th>" : "<td>";
-					html += prefix + duplicated.package2.directoryPath
-					html += layer == 0 ? "</th>" : "</td>";
-					html += layer == 0 ? "<th>" : "<td>";
-					html += duplicated.clonePackages.children.length;
-					html += layer == 0 ? "</th>" : "</td>";
-					html += "</tr>";
-					for(var key in duplicated.childrenClonePackages) {
-//						console.log(key);
-//						console.log(duplicated.childrenClonePackages[key])
-						tr(layer + 1, duplicated.childrenClonePackages[key]);
+					switch (index) {
+						case 0:
+							html += "<tr>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += prefix + duplicated.package1.directoryPath;
+							html += layer == 0 ? "</th>" : "</td>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += duplicated.cloneNodes1 + "/" + duplicated.allNodes1 + "=" + ((duplicated.cloneNodes1 + 0.0) / duplicated.allNodes1).toFixed(2);
+							html += layer == 0 ? "</th>" : "</td>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += prefix + duplicated.package2.directoryPath;
+							html += layer == 0 ? "</th>" : "</td>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += duplicated.cloneNodes2 + "/" + duplicated.allNodes2 + "=" + ((duplicated.cloneNodes2 + 0.0) / duplicated.allNodes2).toFixed(2);
+							html += layer == 0 ? "</th>" : "</td>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += duplicated.clonePackages.children.length;
+							html += layer == 0 ? "</th>" : "</td>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += "(" + duplicated.cloneNodes1 + "+" + duplicated.cloneNodes2 + ")/(" + duplicated.allNodes1 + "+" + duplicated.allNodes2 + ")=" + ((duplicated.cloneNodes1 + duplicated.cloneNodes2 + 0.0) / (duplicated.allNodes1 + duplicated.allNodes2)).toFixed(2);
+							html += layer == 0 ? "</th>" : "</td>";
+							html += "</tr>";
+							break;
+						case -1:
+							html += "<tr style='color: #A9A9A9'>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += prefix + duplicated.directoryPath;
+							html += layer == 0 ? "</th>" : "</td>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += "0/" + duplicated.allNodes + "=0.00";
+							html += layer == 0 ? "</th>" : "</td>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += layer == 0 ? "</th>" : "</td>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += layer == 0 ? "</th>" : "</td>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += layer == 0 ? "</th>" : "</td>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += layer == 0 ? "</th>" : "</td>";
+							html += "</tr>";
+							break;
+						case 1:
+							html += "<tr style='color: #A9A9A9'>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += layer == 0 ? "</th>" : "</td>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += layer == 0 ? "</th>" : "</td>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += prefix + duplicated.directoryPath;
+							html += layer == 0 ? "</th>" : "</td>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += "0/" + duplicated.allNodes + "=0.00";
+							html += layer == 0 ? "</th>" : "</td>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += layer == 0 ? "</th>" : "</td>";
+							html += layer == 0 ? "<th>" : "<td>";
+							html += layer == 0 ? "</th>" : "</td>";
+							html += "</tr>";
+							break;
+					}
+					if(index == 0) {
+						for(var key1 = 0; key1 < duplicated.childrenSimilarPackages.length; key1 ++) {
+							tr(0, layer + 1, duplicated.childrenSimilarPackages[key1]);
+						}
+
+						for(var key2 = 0; key2 < duplicated.childrenOtherPackages1.length; key2 ++) {
+							tr(-1, layer + 1, duplicated.childrenOtherPackages1[key2]);
+						}
+
+						for(var key3 = 0; key3 < duplicated.childrenOtherPackages2.length; key3 ++) {
+							tr(1, layer + 1, duplicated.childrenOtherPackages2[key3]);
+						}
 					}
 				}
-				for(var i = 0; i < result.length; i++) {
-					tr(0, result[i]);
+				for(var i = 0; i < result.length; i ++) {
+					tr(0, 0, result[i]);
 				}
 				html += "</table>"
 				$("#packages_duplicated").html(html);
