@@ -45,10 +45,15 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
     
     private GitRepository gitRepository;
     
+    private Commit currentVersionCommit = null;
+    
+    private String currentVersionCommitId;
+    
     public GitInserter(GitConfig gitConfig) {
         this.gitConfig = gitConfig;
         this.gitExtractor = new GitExtractor(gitConfig.getPath());
         this.branches = gitExtractor.getBranches();
+        this.currentVersionCommitId = gitConfig.getCurrentVersionCommitId();
     }
 
     @Override
@@ -110,12 +115,12 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         		} 
         		//添加commit节点
         		commit = new Commit(generateEntityId(), revCommit.getName(), revCommit.getShortMessage(),
-        				revCommit.getFullMessage(), authoredDate, merge);
+        				revCommit.getFullMessage(), authoredDate, merge, revCommit.getCommitTime());
         		addNode(commit, null);
         		addRelation(new Contain(branch, commit));
         	} else {
         		commit = new Commit(generateEntityId(), revCommit.getName(), revCommit.getShortMessage(),
-        				revCommit.getFullMessage(), authoredDate, merge);
+        				revCommit.getFullMessage(), authoredDate, merge, revCommit.getCommitTime());
         		addNode(commit, null);
         		//添加branch到commit的包含关系
         		List<Ref> branchesOfCommit = gitExtractor.getBranchesByCommitId(revCommit);
@@ -126,6 +131,14 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         			}
         			addRelation(new Contain(branchNode, commit));
         		}
+        	}
+        	
+        	if(commit.getCommitId().equals(this.currentVersionCommitId)) {
+        		this.currentVersionCommit = commit;
+        	}
+        	
+        	if(currentVersionCommit != null && currentVersionCommit.getCommitTime() > commit.getCommitTime()) {
+        		commit.setUsingForIssue(false);
         	}
             
             //添加developer节点和developer到commit的关系
@@ -167,7 +180,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
             }
             
             //添加Commit到Issue的关系
-            if (issues != null) {
+            if (issues != null && commit.isUsingForIssue()) {
                 Collection<Integer> issuesNum = gitExtractor.getRelationBtwCommitAndIssue(revCommit);
                 for (Integer issueNum : issuesNum) {
                     if (issues.containsKey(issueNum)) {

@@ -37,19 +37,25 @@ public class Commit implements Node {
 
 	private String authoredDate;
 	
+	private int commitTime;
+	
 	private int commitFilesSize;
 	
 	private boolean merge;
 	
 	private boolean usingForIssue;
 
-	public Commit(Long entityId, String commitId, String shortMessage, String fullMessage, String authoredDate, boolean merge){
+	public Commit(Long entityId, String commitId, String shortMessage, 
+			String fullMessage, String authoredDate, boolean merge,
+			int commitTime){
 		this.entityId = entityId;
 		this.commitId = commitId;
 		this.shortMessage = shortMessage;
 		this.fullMessage = fullMessage;
 		this.authoredDate = authoredDate;
+		this.commitTime = commitTime;
 		this.merge = merge;
+		this.usingForIssue = true;
 	}
 
 	@Override

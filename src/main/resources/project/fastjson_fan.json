@@ -11,7 +11,7 @@
 		"specify_by_commit_id": true,
 		"commit_id_from" : "93e1b9819ad300d7c0b9c977afce63c2fb8c0996",
 		"commit_id_to" : "e697d4aad5e3e4b4df9dc7fb6364d312e7239ef0",
-		"commit_current" : "",
+		"commit_id_current" : "",
 		"issues_directory" : "D:\\git\\multi-dependency\\src\\main\\resources\\git\\issues\\fastjson"
  	}],
 	"clones": [{

@@ -162,6 +162,7 @@ public class ProjectConfigUtil {
 			config.setCommitIdTo(json.getString("commit_id_to"));
 			config.setCommitTimeSince(json.getString("commit_time_since"));
 			config.setCommitTimeUntil(json.getString("commit_time_until"));
+			config.setCurrentVersionCommitId(json.getString("commit_id_current"));
 			JSONArray issueFilePathes = json.getJSONArray("issues_pathes");
 			String issueDirectoryPath = json.getString("issues_directory");
 			if(issueFilePathes != null) {

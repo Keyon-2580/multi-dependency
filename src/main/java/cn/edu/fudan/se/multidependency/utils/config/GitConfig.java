@@ -14,6 +14,7 @@ public class GitConfig {
 	private String commitIdTo;
 	private String commitTimeSince;
 	private String commitTimeUntil;
+	private String currentVersionCommitId;
 	private Set<String> issueFilePathes = new HashSet<>();
 	
 	private Set<String> branches = new HashSet<>();
