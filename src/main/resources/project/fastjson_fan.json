@@ -1,22 +1,20 @@
 {
 	"projects": [{
-		"path": "D:\\git\\fastjson-1.2.73",
+		"path": "D:\\git\\fastjson-1.2.70",
 		"serviceGroupName": "fastjson",
 		"language": "java",
 		"isMicroservice": true
 	}],
 	"gits": [{
-		"path": "D:\\git\\fastjson-1.2.73",
+		"path": "D:\\git\\fastjson-1.2.70",
 		"specify_commit_range": true,
 		"specify_by_commit_id": true,
-		"commit_id_from" : "93e1b9819ad300d7c0b9c977afce63c2fb8c0996",
+		"commit_id_from" : "a08711109489846903176988129e0f96a07d0f8c",
 		"commit_id_to" : "e697d4aad5e3e4b4df9dc7fb6364d312e7239ef0",
-		"commit_id_current" : "",
+		"commit_id_current" : "d191d464890f15384ea94843161976db536d72ac",
 		"issues_directory" : "D:\\git\\multi-dependency\\src\\main\\resources\\git\\issues\\fastjson"
  	}],
-	"clones": [{
-		
-	}]
+	"clones": []
 
 	,
 	"dynamics": {

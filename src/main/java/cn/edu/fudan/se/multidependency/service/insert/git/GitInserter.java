@@ -180,7 +180,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
             }
             
             //添加Commit到Issue的关系
-            if (issues != null && commit.isUsingForIssue()) {
+            if (issues != null && commit.isUsingForIssue() && !commit.isMerge()) {
                 Collection<Integer> issuesNum = gitExtractor.getRelationBtwCommitAndIssue(revCommit);
                 for (Integer issueNum : issuesNum) {
                     if (issues.containsKey(issueNum)) {
