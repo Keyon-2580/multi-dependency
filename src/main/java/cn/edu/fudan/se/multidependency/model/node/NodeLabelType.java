@@ -10,7 +10,8 @@ public enum NodeLabelType {
 	MicroService, RestfulAPI, Span,
 	Scenario, TestCase, Feature, Trace, Bug,
 	GitRepository, Branch, Commit, Issue, Label, Developer,
-	CloneGroup, CodeUnit;
+	CloneGroup, CodeUnit,
+	Module;
 	
 	public List<String> labels() {
 		List<String> result = new ArrayList<>();

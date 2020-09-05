@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.insert.code;
 
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,7 @@ public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForN
 		super();
 		this.isMicroservice = projectConfig.isMicroService();
 		this.serviceGroupName = projectConfig.getServiceGroupName();
-		this.currentProject = new Project(projectConfig.getProject(), "/" + projectConfig.getProject(), projectConfig.getLanguage());
+		this.currentProject = new Project(projectConfig.getProject(), "/" + FileUtil.extractFileName(projectConfig.getPath()), projectConfig.getLanguage());
 		this.microserviceName = projectConfig.getMicroserviceName();
 		if(StringUtils.isBlank(microserviceName)) {
 			this.microserviceName = projectConfig.getProject();
