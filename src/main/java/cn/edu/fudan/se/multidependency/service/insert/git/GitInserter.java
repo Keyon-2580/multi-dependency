@@ -91,15 +91,16 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
             commits = gitExtractor.getAllCommits();
         } else {
             if (gitConfig.isSpecifyByCommitId()) {
-                commits = gitExtractor.getARangeCommitsById(gitConfig.getCommitIdFrom(), gitConfig.getCommitIdTo());
+                commits = gitExtractor.getARangeCommitsById(gitConfig.getCommitIdFrom(), gitConfig.getCommitIdTo(), false);
             } else {
-                commits = gitExtractor.getARangeCommitsByTime(gitConfig.getCommitTimeSince(), gitConfig.getCommitTimeUntil());
+                commits = gitExtractor.getARangeCommitsByTime(gitConfig.getCommitTimeSince(), gitConfig.getCommitTimeUntil(), false);
             }
         }
         LOGGER.info("commit 数量：" + commits.size());
 //      Collections.reverse(commits);
         for (RevCommit revCommit : commits) {
         	String authoredDate = new SimpleDateFormat(Constant.TIMESTAMP).format(revCommit.getAuthorIdent().getWhen());
+        	boolean merge = revCommit.getParentCount() > 1;
         	Commit commit = null;
         	if(branch != null) {
         		commit = this.getNodes().findCommitByCommitId(revCommit.getName());
@@ -109,12 +110,12 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         		} 
         		//添加commit节点
         		commit = new Commit(generateEntityId(), revCommit.getName(), revCommit.getShortMessage(),
-        				revCommit.getFullMessage(), authoredDate);
+        				revCommit.getFullMessage(), authoredDate, merge);
         		addNode(commit, null);
         		addRelation(new Contain(branch, commit));
         	} else {
         		commit = new Commit(generateEntityId(), revCommit.getName(), revCommit.getShortMessage(),
-        				revCommit.getFullMessage(), authoredDate);
+        				revCommit.getFullMessage(), authoredDate, merge);
         		addNode(commit, null);
         		//添加branch到commit的包含关系
         		List<Ref> branchesOfCommit = gitExtractor.getBranchesByCommitId(revCommit);
