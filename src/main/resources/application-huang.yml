@@ -20,10 +20,10 @@ config:
     depends_on: false
 
 data:
-  project_config: src/main/resources/project/depends-huang.json
+  project_config: src/main/resources/project/jhotdraw.json
   project_analyse_threads_count: 5
   dynamic_analyse: false
-  git_analyse: false
+  git_analyse: true
   lib_analyse: false
   clone_analyse: false
 
@@ -31,6 +31,6 @@ data:
     delete: true
     path: D:/software/neo4j-community-3.5.3/data/databases/multiple.dependency.db
 
-  serialize_path: C:/Users/SongJee/Desktop/serializePath/RepositoryService.txt
+  serialize_path: C:/Users/SongJee/Desktop/lab/serializePath/RepositoryService.txt
 
   test: this property is for YamlUtilsTest

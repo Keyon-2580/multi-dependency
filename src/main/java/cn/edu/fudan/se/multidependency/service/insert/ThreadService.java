@@ -155,7 +155,7 @@ public class ThreadService {
 			}
 			
 			LOGGER.info("引入特性与测试用例，对应到trace");
-			new FeatureAndTestCaseFromJSONFileForMicroserviceInserter(dynamicConfig.getFeaturesPath()).addNodesAndRelations();
+//			new FeatureAndTestCaseFromJSONFileForMicroserviceInserter(dynamicConfig.getFeaturesPath()).addNodesAndRelations();
 		} catch (Exception e) {
 			e.printStackTrace();
 			LOGGER.error("Error: dynamicAnalyse " + e.getMessage());
