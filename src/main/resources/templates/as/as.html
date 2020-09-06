@@ -75,18 +75,28 @@
 	<div th:include="nav.html::nav"></div>
 	<div class="col-sm-12 row" style="margin-bottom: 15px;">
 		<div class="col-sm-12">
-			<div>
-				<h3 style="margin-top: 0px;">Cyclic Dependency</h3>
+			<div class="col-sm-12 row">
+				<h4 style="margin-top: 0px;">Cyclic Dependency</h4>
 			</div>
 			<div>
-				<p>package-level与file-level的循环依赖</p>
+				<!-- <p>package-level与file-level的循环依赖</p> -->
 			</div>
-			<div>
-				<a href="/as/cyclic" target="_blank" class="btn btn-default">检测</a>
+			<div class="col-sm-12 row">
+				<div class="col-sm-4 form-group">
+					<label for="cycleDependencyProjects">Project: </label>
+					<select id="cycleDependencyProjects" class="projectSelect form-control">
+						<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
+					</select>
+				</div>
 			</div>
-		<hr/>
+			<div class="col-sm-12">
+				<a href="/as/cyclic" target="_blank" class="btn btn-default">Detect</a>
+			</div>
 		</div>
 		<div class="col-sm-12">
+			<hr/>
+		</div>
+		<!-- <div class="col-sm-12">
 			<div>
 				<h3 style="margin-top: 0px;">Cyclic Hierarchy</h3>
 			</div>
@@ -97,18 +107,18 @@
 				<a href="/as/cylic/hierarchy" target="_blank" class="btn btn-default">检测</a>
 			</div>
 		<hr/>
-		</div>
+		</div> -->
 		<div class="col-sm-12 row">
 			<div class="col-sm-12">
-				<h3 style="margin-top: 0px;">Hub-Like Dependency</h3>
+				<h4 style="margin-top: 0px;">Hub-Like Dependency</h4>
 			</div>
 			<div class="col-sm-12">
-				<p>Hub-Like类型的依赖</p>
+				<!-- <p>Hub-Like类型的依赖</p> -->
 			</div>
-			<div class="form">
+			<div class="form col-sm-12">
 				<div class="col-sm-12 row">
 					<div class="col-sm-4 form-group">
-						<label for="hubLikeDependencyProjects">项目</label>
+						<label for="hubLikeDependencyProjects">Project: </label>
 						<select id="hubLikeDependencyProjects" class="projectSelect form-control">
 							<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
 						</select>
@@ -116,32 +126,32 @@
 				</div>
 				<div class="col-sm-12 row">
 					<div class="col-sm-4 form-group">
-						<label for="hubLikeMinFileFanIn">最小文件级fan in</label>
-						<input class="form-control" placeholder="输入文件级最小 fan in" id="hubLikeMinFileFanIn" type="number" />
+						<label for="hubLikeMinFileFanIn">File-Level Fan In Threshold: </label>
+						<input class="form-control" placeholder="File-Level Fan In Threshold" id="hubLikeMinFileFanIn" type="number" />
 					</div>
 				</div>
 				<div class="col-sm-12 row">
 					<div class="col-sm-4 form-group">
-						<label for="hubLikeMinFileFanOut" class="control-label">最小文件级fan out：</label>
-						<input class="form-control" placeholder="输入文件级最小 fan out" id="hubLikeMinFileFanOut" type="number" />
+						<label for="hubLikeMinFileFanOut" class="control-label">File-Level Fan Out Threshold: </label>
+						<input class="form-control" placeholder="File-Level Fan Out Threshold" id="hubLikeMinFileFanOut" type="number" />
 					</div>
 				</div>
 				<div class="col-sm-12 row">
 					<div class="col-sm-4 form-group">
-						<label for="hubLikeMinPackageFanIn">最小包级fan in：</label>
-						<input class="form-control" placeholder="输入包级最小 fan in" id="hubLikeMinPackageFanIn" type="number" />
+						<label for="hubLikeMinPackageFanIn">Module-Level Fan In Threshold: </label>
+						<input class="form-control" placeholder="Module-Level Fan In Threshold" id="hubLikeMinPackageFanIn" type="number" />
 					</div>
 				</div>
 				<div class="col-sm-12 row">
 					<div class="col-sm-4 form-group">
-						<label for="hubLikeMinPackageFanOut">最小包级fan out：</label>
-						<input class="form-control" placeholder="输入包级最小 fan out" id="hubLikeMinPackageFanOut" type="number" />
+						<label for="hubLikeMinPackageFanOut">Module-Level Fan Out Threshold: </label>
+						<input class="form-control" placeholder="Module-Level Fan Out Threshold" id="hubLikeMinPackageFanOut" type="number" />
 					</div>
 				</div>
-			</div>
-			<div class="col-sm-12">
-				<button id="hubLikeMinFanIOSave" class="btn btn-default">保存</button>
-				<a href="/as/hublike" target="_blank" class="btn btn-default">检测</a>
+				<div class="col-sm-12">
+					<button id="hubLikeMinFanIOSave" class="btn btn-default">Save</button>
+					<a href="/as/hublike" target="_blank" class="btn btn-default">Detect</a>
+				</div>
 			</div>
 			<div class="col-sm-12">
 			<hr/>
@@ -149,12 +159,72 @@
 		</div>
 		<div class="col-sm-12 row">
 			<div class="col-sm-12">
-				<h3 style="margin-top: 0px;">Unstable Dependency</h3>
+				<h4 style="margin-top: 0px;">Unstable Dependency</h4>
 			</div>
-			<div class="form">
+			<div class="form col-sm-12">
 				<div class="col-sm-12 row">
 					<div class="col-sm-4 form-group">
-						<label for="unstableDependencyProjects">项目</label>
+						<label for="unstableDependencyProjects">Project: </label>
+						<select id="unstableDependencyProjects" class="projectSelect form-control">
+							<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
+						</select>
+					</div>
+				</div>
+				<div class="col-sm-12 row">
+					<div class="col-sm-6">
+						<div class="col-sm-12 row">
+							<h5><b>Detect By Co-Change</b></h5>
+						</div>
+						<div class="col-sm-12 row">
+							<div class="col-sm-6 form-group">
+								<label for="unstableFanInThreshold">Fan In Threshold: </label>
+								<input id="unstableFanInThreshold" type="number" class="form-control"/>
+							</div>
+						</div>
+						<div class="col-sm-12 row">
+							<div class="col-sm-6 form-group">
+								<label for="unstableCoChangeTimesThreshold">Co-Change Times Threshold: </label>
+								<input id="unstableCoChangeTimesThreshold" type="number" class="form-control"/>
+							</div>
+						</div>
+						<div class="col-sm-12 row">
+							<div class="col-sm-6 form-group">
+								<label for="unstableCoChangeFilesThreshold">Co-Change Files Count Threshold: </label>
+								<input id="unstableCoChangeFilesThreshold" type="number" class="form-control"/>
+							</div>
+						</div>
+						<div class="col-sm-12">
+							<button id="unstableThresholdSave" class="btn btn-default">Save</button>
+							<a href="/as/unstable/cochange" target="_blank" class="btn btn-default">Detect</a>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="col-sm-12 row">
+							<h5><b>Detect By Instability</b></h5>
+						</div>
+						<div class="col-sm-6 form-group">
+							<label for="unstableBadDependencyThreshold">Ratio (Bad Dependencies / All Dependencies) Threshold: </label>
+							<input id="unstableBadDependencyThreshold" type="number" class="form-control" />
+						</div>
+						<div class="col-sm-12">
+							<button id="unstableThresholdSave" class="btn btn-default">Save</button>
+							<a href="/as/unstable/instability" target="_blank" class="btn btn-default">Detect</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-12">
+			<hr/>
+			</div>
+		</div>
+		<div class="col-sm-12 row">
+			<div class="col-sm-12">
+				<h4 style="margin-top: 0px;">Logical Coupling</h4>
+			</div>
+			<div class="form col-sm-12">
+				<div class="col-sm-12 row">
+					<div class="col-sm-4 form-group">
+						<label for="unstableDependencyProjects">Project: </label>
 						<select id="unstableDependencyProjects" class="projectSelect form-control">
 							<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
 						</select>
@@ -162,52 +232,26 @@
 				</div>
 				<div class="col-sm-12 row">
 					<div class="col-sm-4 form-group">
-						<label for="unstableFanInThreshold">FanInThreshold：</label>
-						<input id="unstableFanInThreshold" type="number" class="form-control"/>
+						<label for="icdMinCoChangeFile">File-Level Co-Change Threshold: </label>
+						<input id="icdMinCoChangeFile" type="number" class="form-control"/>
 					</div>
 				</div>
 				<div class="col-sm-12 row">
 					<div class="col-sm-4 form-group">
-						<label for="unstableCoChangeTimesThreshold">CoChangeTimesThreshold：</label>
-						<input id="unstableCoChangeTimesThreshold" type="number" class="form-control"/>
+						<label for="icdMinCoChangeModule">Module-Level Co-Change Threshold: </label>
+						<input id="icdMinCoChangeModule" type="number" class="form-control"/>
 					</div>
 				</div>
-				<div class="col-sm-12 row">
-					<div class="col-sm-4 form-group">
-						<label for="unstableCoChangeFilesThreshold">CoChangeFilesThreshold：</label>
-						<input id="unstableCoChangeFilesThreshold" type="number" class="form-control"/>
-					</div>
+				<div class="col-sm-12">
+					<button id="icdMinCoChangeSave" class="btn btn-default">Save</button>
+					<a href="/as/icd" target="_blank" class="btn btn-default">Detect</a>
 				</div>
-			</div>
-			<div class="col-sm-12">
-				<button id="unstableThresholdSave" class="btn btn-default">保存</button>
-				<a href="/as/unstable" target="_blank" class="btn btn-default">检测</a>
 			</div>
 			<div class="col-sm-12">
 			<hr/>
 			</div>
 		</div>
-		<div class="col-sm-12 row">
-			<div class="col-sm-12">
-				<h3 style="margin-top: 0px;">Implicit Cross-Module Dependency</h3>
-			</div>
-			<div class="form">
-				<div class="col-sm-12 row">
-					<div class="col-sm-4 form-group">
-						<label for="icdMinCoChange">minCoChange：</label>
-						<input id="icdMinCoChange" type="number" class="form-control"/>
-					</div>
-				</div>
-			</div>
-			<div class="col-sm-12">
-				<button id="icdMinCoChangeSave" class="btn btn-default">保存</button>
-				<a href="/as/icd" target="_blank" class="btn btn-default">检测</a>
-			</div>
-			<div class="col-sm-12">
-			<hr/>
-			</div>
-		</div>
-		<div class="col-sm-12 row">
+		<!-- <div class="col-sm-12 row">
 			<div class="col-sm-12">
 				<h3 style="margin-top: 0px;">God Components</h3>
 			</div>
@@ -240,13 +284,40 @@
 			<div class="col-sm-12">
 			<hr/>
 			</div>
+		</div> -->
+		<div class="col-sm-12">
+			<div>
+				<h4 style="margin-top: 0px;">Similar Components</h4>
+			</div>
+			<div class="col-sm-12 row">
+				<div class="col-sm-4 form-group">
+					<label for="unstableDependencyProjects">Project: </label>
+					<select id="unstableDependencyProjects" class="projectSelect form-control">
+						<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
+					</select>
+				</div>
+				<div class="col-sm-12">
+					<a href="/as/similar" target="_blank" class="btn btn-default">Detect</a>
+				</div>
+				</div>
+			<div class="col-sm-12">
+			<hr/>
+			</div>
 		</div>
 		<div class="col-sm-12">
 			<div>
-				<h3 style="margin-top: 0px;">Similar Components</h3>
+				<h4 style="margin-top: 0px;">Unused Components</h4>
 			</div>
-			<div>
-				<a href="/as/similar" target="_blank" class="btn btn-default">检测</a>
+			<div class="col-sm-12 row">
+				<div class="col-sm-4 form-group">
+					<label for="unusedComponentsProjects">Project: </label>
+					<select id="unusedComponentsProjects" class="projectSelect form-control">
+						<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
+					</select>
+				</div>
+				<div class="col-sm-12">
+					<a href="/as/unused" target="_blank" class="btn btn-default">Detect</a>
+				</div>
 			</div>
 			<div class="col-sm-12">
 			<hr/>
@@ -254,21 +325,10 @@
 		</div>
 		<div class="col-sm-12">
 			<div>
-				<h3 style="margin-top: 0px;">Unused Components</h3>
+				<h4 style="margin-top: 0px;">Multiple Smells</h4>
 			</div>
 			<div>
-				<a href="/as/unused" target="_blank" class="btn btn-default">检测</a>
-			</div>
-			<div class="col-sm-12">
-			<hr/>
-			</div>
-		</div>
-		<div class="col-sm-12">
-			<div>
-				<h3 style="margin-top: 0px;">Multiple Smells</h3>
-			</div>
-			<div>
-				<a href="/as/multiple" target="_blank" class="btn btn-default">检测</a>
+				<a href="/as/multiple" target="_blank" class="btn btn-default">Detect</a>
 			</div>
 		</div>
 	</div>

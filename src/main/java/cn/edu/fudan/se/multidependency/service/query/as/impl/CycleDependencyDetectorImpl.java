@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.ar.Module;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.repository.as.ASRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
@@ -82,5 +83,11 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 		}
 		cache.cache(getClass(), key, result);
 		return result;
+	}
+
+	@Override
+	public Map<Long, Map<Integer, Cycle<Module>>> cycleModules() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
