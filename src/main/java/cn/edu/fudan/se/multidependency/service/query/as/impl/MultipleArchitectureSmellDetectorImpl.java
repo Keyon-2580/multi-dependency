@@ -67,11 +67,11 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 	@Autowired
 	private UnstableDependencyDetector unstableDependencyDetector;
 	
-	@Autowired
-	private CyclicHierarchyDetector cyclicHierarchyDetector;
+//	@Autowired
+//	private CyclicHierarchyDetector cyclicHierarchyDetector;
 	
-	@Autowired
-	private GodComponentDetector godComponentDetector;
+//	@Autowired
+//	private GodComponentDetector godComponentDetector;
 	
 	@Autowired
 	private UnusedComponentDetector unusedComponentDetector;
@@ -181,8 +181,8 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 		Map<Long, Map<Integer, Cycle<ProjectFile>>> cycleFiles = cycleASDetector.cycleFiles();
 		Map<Long, List<HubLikeFile>> hubLikeFiles = hubLikeComponentDetector.hubLikeFiles();
 		Map<Long, List<UnstableFile>> unstableFiles = unstableDependencyDetector.unstableFiles();
-		Map<Long, List<CyclicHierarchy>> cyclicHierarchies = cyclicHierarchyDetector.cyclicHierarchies();
-		Map<Long, List<GodFile>> godFiles = godComponentDetector.godFiles();
+//		Map<Long, List<CyclicHierarchy>> cyclicHierarchies = cyclicHierarchyDetector.cyclicHierarchies();
+//		Map<Long, List<GodFile>> godFiles = godComponentDetector.godFiles();
 		Map<Long, List<ProjectFile>> unusedFiles = unusedComponentDetector.unusedFiles();
 		
 		Collection<LogicCouplingFiles> logicCouplingFiles = icdDependencyDetector.cochangesInDifferentModule();
@@ -201,7 +201,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 			}
 		}
 		
-		for(List<GodFile> files : godFiles.values()) {
+		/*for(List<GodFile> files : godFiles.values()) {
 			for(GodFile file : files) {
 				MultipleASFile mas = map.getOrDefault(file.getFile(), new MultipleASFile(file.getFile()));
 				mas.setGod(true);
@@ -219,7 +219,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 				map.put(file, mas);
 				allFiles.remove(file);
 			}
-		}
+		}*/
 		
 		for(List<HubLikeFile> hubLikeFilesGroup : hubLikeFiles.values()) {
 			for(HubLikeFile file : hubLikeFilesGroup) {
