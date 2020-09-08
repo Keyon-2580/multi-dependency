@@ -280,8 +280,8 @@ var dependCluster = function () {
 }
 
 var projectToGraph = function(result,divId){
-    var projectdata = result
-    // console.log(projectdata.children)
+    var projectdata = result[0].result
+    console.log(projectdata)
     var svg = d3.select("#" + divId)
             .attr("width", 1800)
             .attr("height", 1800),
@@ -311,7 +311,7 @@ var projectToGraph = function(result,divId){
         .data(nodes)
         .enter().append("circle")
         .attr("class", function(d) { return d.parent ? d.children ? "circlepacking_node" : "circlepacking_node circlepacking_node--leaf" : "circlepacking_node circlepacking_node--root"; })
-        // .style("fill", function(d) {return d.children ? color(d.depth) : (getCloneByName(projectdata,d.data.name) ? "\t#FFB6C1" : null); })
+        .style("fill", function(d) {return d.children ? color(d.depth) : null; })
         .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
         .call(text => text.append("title").text(function(d) { return d.data.name; }));
 
