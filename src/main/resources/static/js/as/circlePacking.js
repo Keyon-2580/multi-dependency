@@ -1,9 +1,9 @@
 var projectToGraph = function(result,divId){
-	var projectdata = result
-	// console.log(projectdata.children)
+	console.log(result);
+	var projectdata = result;
 	var svg = d3.select("#" + divId)
-			.attr("width", 1800)
-			.attr("height", 1800),
+			.attr("width", 1200)
+			.attr("height", 1000),
 		margin = 20,
 		diameter = +svg.attr("width"),
 		g = svg.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
@@ -21,7 +21,6 @@ var projectToGraph = function(result,divId){
 		.sum(function(d) { return d.size; })
 		.sort(function(a, b) { return b.value - a.value; });
 
-
 	var focus = root,
 		nodes = pack(root).descendants(),
 		view;
@@ -30,31 +29,26 @@ var projectToGraph = function(result,divId){
 		.data(nodes)
 		.enter().append("circle")
 		.attr("class", function(d) { return d.parent ? d.children ? "circlepacking_node" : "circlepacking_node circlepacking_node--leaf" : "circlepacking_node circlepacking_node--root"; })
-		// .style("fill", function(d) {return d.children ? color(d.depth) : (getCloneByName(projectdata,d.data.name) ? "\t#FFB6C1" : null); })
-		.on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
-		.call(text => text.append("title").text(function(d) { return d.data.name; }));
+		.style("fill", function(d) { console.log(color(d.depth)); return d.children ? color(d.depth) : null; })
+		.on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); });
 
 	var text = g.selectAll("text")
 		.data(nodes)
 		.enter().append("text")
-		.attr("class", "circlepacking_label")
+		.attr("class", "label")
 		.style("fill-opacity", function(d) { return d.parent === root ? 1 : 0; })
 		.style("display", function(d) { return d.parent === root ? "inline" : "none"; })
-		.style("font-size", function(d) { return d.children ? "18px" : "13px"; })
 		.text(function(d) { return d.data.name; });
 
 	var node = g.selectAll("circle,text");
 
 	svg
-		.style("background", "white")
+		.style("background", color(-1))
 		.on("click", function() { zoom(root); });
 
 	zoomTo([root.x, root.y, root.r * 2 + margin]);
 
 	function zoom(d) {
-		if(!d.children){
-			d = d.parent;
-		}
 		var focus0 = focus; focus = d;
 
 		var transition = d3.transition()
@@ -76,25 +70,4 @@ var projectToGraph = function(result,divId){
 		node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
 		circle.attr("r", function(d) { return d.r * k; });
 	}
-
-	// function getCloneByName(data,name){
-	// 	if(data.name === name){
-	// 		return data.clone;
-	// 	}else{
-	// 		if(data.children){
-	// 			for(var i = 0; i < data.children.length; i++) {
-	// 				// console.log(d.name)
-	// 				if (data.children[i] === name) {
-	// 					return data.children[i].clone;
-	// 				} else {
-	// 					var findResult = getCloneByName(data.children[i], name);
-	// 					if(findResult) {
-	// 						return findResult;
-	// 					}
-	// 				}
-	// 			}
-	// 			// console.log(typeof(projectdata.children[2].children) != "undefined")
-	// 		}
-	// 	}
-	// }
-};
+}
