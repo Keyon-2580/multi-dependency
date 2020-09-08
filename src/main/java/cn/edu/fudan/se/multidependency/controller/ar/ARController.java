@@ -2,12 +2,17 @@ package cn.edu.fudan.se.multidependency.controller.ar;
 
 import cn.edu.fudan.se.multidependency.service.query.ar.ClusterService;
 import cn.edu.fudan.se.multidependency.service.query.ar.ShowService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
+import java.util.Set;
 
 
 @Controller
@@ -24,25 +29,25 @@ public class ARController {
     @ResponseBody
     public void exportNeo4jCSV() {}
 
-    @GetMapping("/staticDependGraph")
+    @GetMapping("/dependGraph/static")
     public String staticDependGraph() {
         System.out.println("test staticDependGraph");
-        return "ar/static";
+        return "ar/static_depend_graph";
     }
 
-    @GetMapping("/dynamicDependGraph")
+    @GetMapping("/dependGraph/dynamic")
     public String dynamicDependGraph() {
         System.out.println("test dynamicDependGraph");
-        return "ar/dynamic";
+        return "ar/dynamic_depend_graph";
     }
 
-    @GetMapping("/cochangeDependGraph")
+    @GetMapping("/dependGraph/cochange")
     public String cochangeDependGraph() {
         System.out.println("test cochangeDependGraph");
-        return "ar/cochange";
+        return "ar/cochange_depend_graph";
     }
 
-    @GetMapping("/json/static")
+    @GetMapping("/dependJson/static")
     @ResponseBody
     public JSONObject staicDependJson() {
         JSONObject result = new JSONObject();
@@ -51,7 +56,7 @@ public class ARController {
         return result;
     }
 
-    @GetMapping("/json/dynamic")
+    @GetMapping("/dependJson/dynamic")
     @ResponseBody
     public JSONObject dynamicDependJson() {
         JSONObject result = new JSONObject();
@@ -60,12 +65,26 @@ public class ARController {
         return result;
     }
 
-    @GetMapping("/json/cochange")
+    @GetMapping("/dependJson/cochange")
     @ResponseBody
     public JSONObject cochangeDependJson() {
         JSONObject result = new JSONObject();
         System.out.println("test cochangedependJson");
         result.put("result", showService.cochangeDependGraph());
         return result;
+    }
+
+    @GetMapping("/clusterGraph/static")
+    public String staticClusterGraph() {
+        return "ar/static_cluster_graph";
+    }
+
+    @GetMapping("/clusterJson/static")
+    @ResponseBody
+    public JSONArray staticClusterJson() {
+        String filePath = "C:\\Users\\SongJee\\Desktop\\static_alone.csv";
+        JSONArray jsonArray = clusterService.getClusterJson(filePath);
+        String s = jsonArray.toString();
+        return jsonArray;
     }
 }

@@ -16,7 +16,7 @@ server:
 
 config:
   starter:
-    cochange: true
+    cochange: false
     depends_on: false
 
 data:

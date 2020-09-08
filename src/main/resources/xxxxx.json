@@ -1,0 +1,1134 @@
+[
+  {
+    "result": {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ViewChangeListener.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ToolListener.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "Tool.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "PointConstrainer.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "Painter.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "Locator.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "JHotDrawRuntimeException.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "JHotDrawException.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "HandleEnumeration.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "Handle.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "FigureVisitor.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "FigureSelectionListener.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "FigureSelection.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "FigureEnumeration.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "FigureChangeListener.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "FigureChangeEvent.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "FigureAttributeConstant.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "Figure.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "DrawingView.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "DrawingEditor.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "DrawingChangeListener.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "DrawingChangeEvent.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "Drawing.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "Cursor.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "Connector.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ConnectionFigure.java"
+                            }
+                          ],
+                          "name": "CH.ifa.draw.framework"
+                        },
+                        {
+                          "children": [
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ToolButton.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ToggleGridCommand.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "TextHolder.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "StandardFigureSelection.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "StandardDrawingView.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "StandardDrawing.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "SingleFigureEnumerator.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "SimpleUpdateStrategy.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "SendToBackCommand.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "SelectionTool.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "SelectAreaTracker.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "SelectAllCommand.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ReverseFigureEnumerator.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "RelativeLocator.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "QuadTree.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "AbstractCommand.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "AbstractConnector.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "AbstractFigure.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "AbstractHandle.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "AbstractLocator.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "AbstractTool.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ActionTool.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "AlignCommand.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "AWTCursor.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "BoxHandleKit.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "BringToFrontCommand.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "BufferedUpdateStrategy.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ChangeAttributeCommand.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ChangeConnectionEndHandle.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ChangeConnectionHandle.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ChangeConnectionStartHandle.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ChopBoxConnector.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "CompositeFigure.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ConnectionHandle.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ConnectionTool.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "CopyCommand.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "CreationTool.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "CutCommand.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "DecoratorFigure.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "DeleteCommand.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "DeleteFromDrawingVisitor.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "DragTracker.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "DuplicateCommand.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "FastBufferedUpdateStrategy.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "FigureAndEnumerator.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "FigureChangeAdapter.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "FigureChangeEventMulticaster.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "FigureEnumerator.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "FigureTransferCommand.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "GridConstrainer.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "HandleAndEnumerator.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "HandleEnumerator.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "HandleTracker.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "InsertIntoDrawingVisitor.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "LocatorConnector.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "LocatorHandle.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "NullDrawingView.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "NullHandle.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "NullPainter.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "NullTool.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "OffsetLocator.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "OrderedFigureElement.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "PasteCommand.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "PeripheralLocator.java"
+                            }
+                          ],
+                          "name": "CH.ifa.draw.standard"
+                        },
+                        {
+                          "children": [
+                            {
+                              "children": [
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "JHDDropTargetListener.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "JHDDragSourceListener.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "DragNDropTool.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "DNDInterface.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "DNDHelper.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "DNDFiguresTransferable.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "DNDFigures.java"
+                                }
+                              ],
+                              "name": "CH.ifa.draw.contrib.dnd"
+                            },
+                            {
+                              "children": [
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "URLContentProducer.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "TriangleFigureGeometricAdapter.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "TextHolderContentProducer.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "StandardDisposableResourceManager.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "StandardDisposableResourceHolder.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "RoundRectangleGeometricAdapter.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "ResourceManagerNotSetException.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "ResourceDisposabilityStrategy.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "ResourceContentProducer.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "PolygonFigureGeometricAdapter.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "HTMLTextAreaTool.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "HTMLTextAreaFigure.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "HTMLLayouter.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "HTMLContentProducerContext.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "HTMLContentProducer.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "HTMLColorContentProducer.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "GeometricFigure.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "FigureDataContentProducer.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "FigureContentProducerContext.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "ETSLADisposalStrategy.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "EllipseFigureGeometricAdapter.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "DisposableResourceManagerFactory.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "DisposableResourceManager.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "DisposableResourceHolder.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "DiamondFigureGeometricAdapter.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "ContentProducerRegistry.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "ContentProducerContext.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "ContentProducer.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "ColorContentProducer.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "AttributeFigureContentProducer.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "AttributeContentProducerContext.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "AbstractContentProducer.java"
+                                }
+                              ],
+                              "name": "CH.ifa.draw.contrib.html"
+                            },
+                            {
+                              "children": [
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "ZoomUpdateStrategy.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "ZoomTool.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "ZoomDrawingView.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "ZoomCommand.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "ZoomAreaTracker.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "ScalingGraphics.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "MiniMapZoomableView.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "DoubleBufferImage.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "AreaTracker.java"
+                                }
+                              ],
+                              "name": "CH.ifa.draw.contrib.zoom"
+                            }
+                          ],
+                          "name": "CH.ifa.draw.contrib"
+                        },
+                        {
+                          "children": [
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "DrawApplet.java"
+                            }
+                          ],
+                          "name": "CH.ifa.draw.applet"
+                        },
+                        {
+                          "children": [
+                            {
+                              "children": [
+                                {
+                                  "children": [
+                                    {
+                                      "size": 1000,
+                                      "clone": false,
+                                      "name": "CollectionsFactoryJDK12.java"
+                                    }
+                                  ],
+                                  "name": "CH.ifa.draw.util.collections.jdk12"
+                                },
+                                {
+                                  "children": [
+                                    {
+                                      "size": 1000,
+                                      "clone": false,
+                                      "name": "SetWrapper.java"
+                                    },
+                                    {
+                                      "size": 1000,
+                                      "clone": false,
+                                      "name": "MapWrapper.java"
+                                    },
+                                    {
+                                      "size": 1000,
+                                      "clone": false,
+                                      "name": "ListWrapper.java"
+                                    },
+                                    {
+                                      "size": 1000,
+                                      "clone": false,
+                                      "name": "IteratorWrapper.java"
+                                    },
+                                    {
+                                      "size": 1000,
+                                      "clone": false,
+                                      "name": "CollectionsFactoryJDK11.java"
+                                    }
+                                  ],
+                                  "name": "CH.ifa.draw.util.collections.jdk11"
+                                }
+                              ],
+                              "name": "CH.ifa.draw.util.collections"
+                            }
+                          ],
+                          "name": "CH.ifa.draw.util"
+                        },
+                        {
+                          "children": [
+                            {
+                              "children": [
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "MiniMapDesktop.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "MiniMapApplication.java"
+                                }
+                              ],
+                              "name": "CH.ifa.draw.samples.minimap"
+                            },
+                            {
+                              "children": [
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "NodeFigure.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "NetApp.java"
+                                }
+                              ],
+                              "name": "CH.ifa.draw.samples.net"
+                            },
+                            {
+                              "children": [
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "NothingApplet.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "NothingApp.java"
+                                }
+                              ],
+                              "name": "CH.ifa.draw.samples.nothing"
+                            },
+                            {
+                              "children": [
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "URLTool.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "PatternPainter.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "MySelectionTool.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "JavaDrawViewer.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "JavaDrawApplet.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "JavaDrawApp.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "FollowURLTool.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "BouncingDrawing.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "Animator.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "AnimationDecorator.java"
+                                }
+                              ],
+                              "name": "CH.ifa.draw.samples.javadraw"
+                            },
+                            {
+                              "children": [
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "PertFigureCreationTool.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "PertFigure.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "PertDependency.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "PertApplication.java"
+                                },
+                                {
+                                  "size": 1000,
+                                  "clone": false,
+                                  "name": "PertApplet.java"
+                                }
+                              ],
+                              "name": "CH.ifa.draw.samples.pert"
+                            }
+                          ],
+                          "name": "CH.ifa.draw.samples"
+                        },
+                        {
+                          "children": [
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "DrawApplication.java"
+                            }
+                          ],
+                          "name": "CH.ifa.draw.application"
+                        },
+                        {
+                          "children": [
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "UngroupCommand.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "TextTool.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "TextFigure.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ShortestDistanceConnector.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ScribbleTool.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "RoundRectangleFigure.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "RectangleFigure.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "RadiusHandle.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "PolyLineLocator.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "PolyLineHandle.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "PolyLineFigure.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "PolyLineConnector.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "NumberTextFigure.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "NullFigure.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "NullConnector.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "LineFigure.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "LineDecoration.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "LineConnection.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "InsertImageCommand.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ImageFigure.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "GroupHandle.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "GroupFigure.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "GroupCommand.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "FontSizeHandle.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "FigureAttributes.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "EllipseFigure.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ElbowHandle.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ElbowConnection.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ConnectedTextTool.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ChopEllipseConnector.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "BorderTool.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "BorderDecorator.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "AttributeFigure.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "ArrowTip.java"
+                            },
+                            {
+                              "size": 1000,
+                              "clone": false,
+                              "name": "AbstractLineDecoration.java"
+                            }
+                          ],
+                          "name": "CH.ifa.draw.figures"
+                        }
+                      ],
+                      "name": "CH.ifa.draw"
+                    }
+                  ],
+                  "name": "CH.ifa"
+                }
+              ],
+              "name": "CH"
+            }
+          ],
+          "name": "/JHotDraw/src/"
+        }
+      ],
+      "name": "jhotdraw"
+    }
+  }
+]

@@ -5,11 +5,13 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.service.query.ar.ClusterService;
 import cn.edu.fudan.se.multidependency.service.query.ar.DependencyMatrix;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
 @Service
 public class ClusterServiceImpl implements ClusterService {
@@ -47,4 +49,66 @@ public class ClusterServiceImpl implements ClusterService {
         }
         FileUtil.exportToFile(dirPath + relationFileName, relationBuf.toString());
     }
+
+    public JSONArray getClusterJson(String filePath) {
+        List<Set<String>> list = readClusterResultCsv(filePath);
+        JSONArray result = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject1 = new JSONObject();
+        jsonObject1.put("name", "default");
+        JSONArray jsonArray1 = new JSONArray();
+        int i = 0;
+        for (Set<String> cluster : list) {
+            JSONArray jsonArray2 = new JSONArray();
+
+            for(String path : cluster) {
+                JSONObject jsonObject2 = new JSONObject();
+                jsonObject2.put("size", 1);
+                jsonObject2.put("name", FileUtil.extractFileName(path));
+                jsonArray2.add(jsonObject2);
+            }
+
+            JSONObject jsonObject3 = new JSONObject();
+            jsonObject3.put("name", "default");
+            jsonObject3.put("children", jsonArray2);
+            i++;
+
+            jsonArray1.add(jsonObject3);
+        }
+
+        jsonObject1.put("children", jsonArray1);
+        jsonObject.put("result", jsonObject1);
+
+        result.add(jsonObject);
+        return result;
+    }
+
+    private List<Set<String>> readClusterResultCsv(String filePath)  {
+        Map<Integer, Set<String>> map = new HashMap<>();
+        try(BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
+            String line;
+            boolean flag = false;
+            while((line = reader.readLine()) != null) {
+                if("".equals(line.trim()) || !flag) {
+                    flag = true;
+                    continue;
+                }
+                String[] values = line.split(",");
+                if(values.length < 3) {
+                    continue;
+                }
+                String path = values[0];
+                int cluster = Integer.parseInt(values[1]);
+                if (!map.containsKey(cluster)) {
+                    map.put(cluster, new HashSet<>());
+                } else {
+                    map.get(cluster).add(path);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>(map.values());
+    }
+
 }

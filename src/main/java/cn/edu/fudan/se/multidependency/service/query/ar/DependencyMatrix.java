@@ -68,21 +68,25 @@ public class DependencyMatrix {
             staticDependGraph = new HashMap<>();
             dynamicDependGraph = new HashMap<>();
             cochangeDependGraph = new HashMap<>();
+            projectFiles = (List<ProjectFile>) fileRepository.findAll();
+            initGraphNodes();
             calculate();
             isLoaded = true;
         }
     }
 
+    private void initGraphNodes() {
+        for (ProjectFile projectFile : projectFiles) {
+            adjacencyList.put(projectFile.getPath(), new HashMap<>());
+            staticDependGraph.put(projectFile.getPath(), new HashSet<>());
+            dynamicDependGraph.put(projectFile.getPath(), new HashSet<>());
+            cochangeDependGraph.put(projectFile.getPath(), new HashSet<>());
+        }
+    }
+
     private void calculate() {
-        projectFiles = (List<ProjectFile>) fileRepository.findAll();
         for (ProjectFile projectFile : projectFiles) {
             this.from = projectFile;
-            if (!adjacencyList.containsKey(from.getPath())) {
-                adjacencyList.put(from.getPath(), new HashMap<>());
-                staticDependGraph.put(from.getPath(), new HashSet<>());
-                dynamicDependGraph.put(from.getPath(), new HashSet<>());
-                cochangeDependGraph.put(from.getPath(), new HashSet<>());
-            }
             this.edges = adjacencyList.get(from.getPath());
 
             //静态
@@ -131,10 +135,6 @@ public class DependencyMatrix {
                     break;
                 case 2:
                     cochangeDependGraph.get(from.getPath()).add(to.getPath());
-                    if (!adjacencyList.containsKey(to.getPath())) {
-                        adjacencyList.put(to.getPath(), new HashMap<>());
-                        cochangeDependGraph.put(to.getPath(), new HashSet<>());
-                    }
                     Map<String, Double> tmp = adjacencyList.get(to.getPath());
                     tmp.put(from.getPath(), tmp.getOrDefault(from.getPath(), 0.0) + val);
                     cochangeDependGraph.get(to.getPath()).add(from.getPath());

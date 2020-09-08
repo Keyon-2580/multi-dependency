@@ -1,0 +1,1173 @@
+[
+  {
+    "result": {
+      "children": [
+        {
+          "children": [
+            {
+              "size": 1,
+              "name": "SplitConnectionTool.java"
+            },
+            {
+              "size": 1,
+              "name": "PolygonFigureGeometricAdapter.java"
+            },
+            {
+              "size": 1,
+              "name": "AWTCursor.java"
+            },
+            {
+              "size": 1,
+              "name": "PertFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "ElbowHandle.java"
+            },
+            {
+              "size": 1,
+              "name": "BoxHandleKit.java"
+            },
+            {
+              "size": 1,
+              "name": "StandardDrawingView.java"
+            },
+            {
+              "size": 1,
+              "name": "PolygonHandle.java"
+            },
+            {
+              "size": 1,
+              "name": "FloatingTextArea.java"
+            },
+            {
+              "size": 1,
+              "name": "ShortestDistanceConnector.java"
+            },
+            {
+              "size": 1,
+              "name": "HandleEnumerator.java"
+            },
+            {
+              "size": 1,
+              "name": "FontSizeHandle.java"
+            },
+            {
+              "size": 1,
+              "name": "AbstractHandle.java"
+            },
+            {
+              "size": 1,
+              "name": "LineConnection.java"
+            },
+            {
+              "size": 1,
+              "name": "BorderDecorator.java"
+            },
+            {
+              "size": 1,
+              "name": "TextFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "LocatorHandle.java"
+            },
+            {
+              "size": 1,
+              "name": "ChangeConnectionHandle.java"
+            },
+            {
+              "size": 1,
+              "name": "ConnectionFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "MDI_DrawApplication.java"
+            },
+            {
+              "size": 1,
+              "name": "OrderedFigureElement.java"
+            },
+            {
+              "size": 1,
+              "name": "PertApplication.java"
+            },
+            {
+              "size": 1,
+              "name": "PolygonFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "GridConstrainer.java"
+            },
+            {
+              "size": 1,
+              "name": "HandleAndEnumerator.java"
+            },
+            {
+              "size": 1,
+              "name": "QuadTree.java"
+            },
+            {
+              "size": 1,
+              "name": "PertDependency.java"
+            },
+            {
+              "size": 1,
+              "name": "PolyLineHandle.java"
+            },
+            {
+              "size": 1,
+              "name": "NothingApp.java"
+            },
+            {
+              "size": 1,
+              "name": "ChopBoxConnector.java"
+            },
+            {
+              "size": 1,
+              "name": "PolygonScaleHandle.java"
+            },
+            {
+              "size": 1,
+              "name": "PolyLineLocator.java"
+            },
+            {
+              "size": 1,
+              "name": "NullDrawingView.java"
+            },
+            {
+              "size": 1,
+              "name": "MDIDesktopPane.java"
+            },
+            {
+              "size": 1,
+              "name": "AbstractFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "FastBufferedUpdateStrategy.java"
+            },
+            {
+              "size": 1,
+              "name": "DrawApplication.java"
+            },
+            {
+              "size": 1,
+              "name": "ChopPolygonConnector.java"
+            },
+            {
+              "size": 1,
+              "name": "PeripheralLocator.java"
+            },
+            {
+              "size": 1,
+              "name": "ConnectionTool.java"
+            },
+            {
+              "size": 1,
+              "name": "NullPainter.java"
+            },
+            {
+              "size": 1,
+              "name": "NothingApplet.java"
+            },
+            {
+              "size": 1,
+              "name": "PertApplet.java"
+            },
+            {
+              "size": 1,
+              "name": "HandleEnumeration.java"
+            },
+            {
+              "size": 1,
+              "name": "NumberTextFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "ChangeConnectionEndHandle.java"
+            },
+            {
+              "size": 1,
+              "name": "RadiusHandle.java"
+            },
+            {
+              "size": 1,
+              "name": "NullFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "NetApp.java"
+            },
+            {
+              "size": 1,
+              "name": "ChangeConnectionStartHandle.java"
+            },
+            {
+              "size": 1,
+              "name": "ChopEllipseConnector.java"
+            },
+            {
+              "size": 1,
+              "name": "ElbowConnection.java"
+            },
+            {
+              "size": 1,
+              "name": "LineFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "AutoscrollHelper.java"
+            },
+            {
+              "size": 1,
+              "name": "PolyLineFigure.java"
+            }
+          ],
+          "name": "default"
+        },
+        {
+          "children": [
+            {
+              "size": 1,
+              "name": "CustomSelectionTool.java"
+            },
+            {
+              "size": 1,
+              "name": "AreaTracker.java"
+            },
+            {
+              "size": 1,
+              "name": "DrawingEditor.java"
+            },
+            {
+              "size": 1,
+              "name": "Handle.java"
+            },
+            {
+              "size": 1,
+              "name": "DNDHelper.java"
+            },
+            {
+              "size": 1,
+              "name": "FigureSelection.java"
+            },
+            {
+              "size": 1,
+              "name": "NullTool.java"
+            },
+            {
+              "size": 1,
+              "name": "ClippingUpdateStrategy.java"
+            },
+            {
+              "size": 1,
+              "name": "PertFigureCreationTool.java"
+            },
+            {
+              "size": 1,
+              "name": "FigureChangeListener.java"
+            },
+            {
+              "size": 1,
+              "name": "ActionTool.java"
+            },
+            {
+              "size": 1,
+              "name": "DragNDropTool.java"
+            },
+            {
+              "size": 1,
+              "name": "ScribbleTool.java"
+            },
+            {
+              "size": 1,
+              "name": "UndoableTool.java"
+            },
+            {
+              "size": 1,
+              "name": "HandleTracker.java"
+            },
+            {
+              "size": 1,
+              "name": "FigureVisitor.java"
+            },
+            {
+              "size": 1,
+              "name": "ToggleGridCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "JHotDrawException.java"
+            },
+            {
+              "size": 1,
+              "name": "SingleFigureEnumerator.java"
+            },
+            {
+              "size": 1,
+              "name": "Cursor.java"
+            },
+            {
+              "size": 1,
+              "name": "FigureChangeEvent.java"
+            },
+            {
+              "size": 1,
+              "name": "PolygonTool.java"
+            },
+            {
+              "size": 1,
+              "name": "DrawingChangeEvent.java"
+            },
+            {
+              "size": 1,
+              "name": "InsertIntoDrawingVisitor.java"
+            },
+            {
+              "size": 1,
+              "name": "PatternPainter.java"
+            },
+            {
+              "size": 1,
+              "name": "GroupHandle.java"
+            },
+            {
+              "size": 1,
+              "name": "FigureSelectionListener.java"
+            },
+            {
+              "size": 1,
+              "name": "FigureChangeAdapter.java"
+            },
+            {
+              "size": 1,
+              "name": "FollowURLTool.java"
+            },
+            {
+              "size": 1,
+              "name": "MySelectionTool.java"
+            },
+            {
+              "size": 1,
+              "name": "PopupMenuFigureSelection.java"
+            },
+            {
+              "size": 1,
+              "name": "ZoomAreaTracker.java"
+            },
+            {
+              "size": 1,
+              "name": "FigureAttributeConstant.java"
+            },
+            {
+              "size": 1,
+              "name": "AbstractTool.java"
+            },
+            {
+              "size": 1,
+              "name": "ComponentFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "Drawing.java"
+            },
+            {
+              "size": 1,
+              "name": "URLTool.java"
+            },
+            {
+              "size": 1,
+              "name": "DrawingChangeListener.java"
+            },
+            {
+              "size": 1,
+              "name": "NullHandle.java"
+            },
+            {
+              "size": 1,
+              "name": "BufferedUpdateStrategy.java"
+            },
+            {
+              "size": 1,
+              "name": "ReverseFigureEnumerator.java"
+            },
+            {
+              "size": 1,
+              "name": "ZoomDrawingView.java"
+            },
+            {
+              "size": 1,
+              "name": "PointConstrainer.java"
+            },
+            {
+              "size": 1,
+              "name": "SimpleUpdateStrategy.java"
+            },
+            {
+              "size": 1,
+              "name": "SelectAreaTracker.java"
+            },
+            {
+              "size": 1,
+              "name": "ViewChangeListener.java"
+            },
+            {
+              "size": 1,
+              "name": "Painter.java"
+            },
+            {
+              "size": 1,
+              "name": "SelectionTool.java"
+            },
+            {
+              "size": 1,
+              "name": "FigureChangeEventMulticaster.java"
+            },
+            {
+              "size": 1,
+              "name": "DeleteFromDrawingVisitor.java"
+            },
+            {
+              "size": 1,
+              "name": "DNDInterface.java"
+            },
+            {
+              "size": 1,
+              "name": "ToolListener.java"
+            },
+            {
+              "size": 1,
+              "name": "Animator.java"
+            },
+            {
+              "size": 1,
+              "name": "ZoomTool.java"
+            },
+            {
+              "size": 1,
+              "name": "Tool.java"
+            },
+            {
+              "size": 1,
+              "name": "JHotDrawRuntimeException.java"
+            }
+          ],
+          "name": "default"
+        },
+        {
+          "children": [
+            {
+              "size": 1,
+              "name": "WindowMenu.java"
+            },
+            {
+              "size": 1,
+              "name": "ColorMap.java"
+            },
+            {
+              "size": 1,
+              "name": "FigureAttributes.java"
+            },
+            {
+              "size": 1,
+              "name": "RoundRectangleGeometricAdapter.java"
+            },
+            {
+              "size": 1,
+              "name": "AttributeFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "ImageFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "OffsetLocator.java"
+            },
+            {
+              "size": 1,
+              "name": "StorableInput.java"
+            },
+            {
+              "size": 1,
+              "name": "CommandMenuItem.java"
+            },
+            {
+              "size": 1,
+              "name": "Bounds.java"
+            },
+            {
+              "size": 1,
+              "name": "CommandMenu.java"
+            },
+            {
+              "size": 1,
+              "name": "NodeFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "StandardFigureSelection.java"
+            },
+            {
+              "size": 1,
+              "name": "EllipseFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "AbstractLocator.java"
+            },
+            {
+              "size": 1,
+              "name": "StorageFormatManager.java"
+            },
+            {
+              "size": 1,
+              "name": "VersionRequester.java"
+            },
+            {
+              "size": 1,
+              "name": "Locator.java"
+            },
+            {
+              "size": 1,
+              "name": "CommandListener.java"
+            },
+            {
+              "size": 1,
+              "name": "PaletteLayout.java"
+            },
+            {
+              "size": 1,
+              "name": "TriangleFigureGeometricAdapter.java"
+            },
+            {
+              "size": 1,
+              "name": "StorageFormat.java"
+            },
+            {
+              "size": 1,
+              "name": "CTXWindowMenu.java"
+            },
+            {
+              "size": 1,
+              "name": "DuplicateCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "StorableOutput.java"
+            },
+            {
+              "size": 1,
+              "name": "VersionManagement.java"
+            },
+            {
+              "size": 1,
+              "name": "RoundRectangleFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "JavaDrawApplet.java"
+            },
+            {
+              "size": 1,
+              "name": "SVGStorageFormat.java"
+            },
+            {
+              "size": 1,
+              "name": "StandardStorageFormat.java"
+            },
+            {
+              "size": 1,
+              "name": "SerializationStorageFormat.java"
+            },
+            {
+              "size": 1,
+              "name": "Clipboard.java"
+            },
+            {
+              "size": 1,
+              "name": "SVGDrawApp.java"
+            },
+            {
+              "size": 1,
+              "name": "TriangleRotationHandle.java"
+            },
+            {
+              "size": 1,
+              "name": "PaletteIcon.java"
+            },
+            {
+              "size": 1,
+              "name": "Command.java"
+            },
+            {
+              "size": 1,
+              "name": "UndoableHandle.java"
+            },
+            {
+              "size": 1,
+              "name": "Connector.java"
+            },
+            {
+              "size": 1,
+              "name": "NullConnector.java"
+            },
+            {
+              "size": 1,
+              "name": "CommandCheckBoxMenuItem.java"
+            },
+            {
+              "size": 1,
+              "name": "JavaDrawApp.java"
+            },
+            {
+              "size": 1,
+              "name": "CommandChoice.java"
+            },
+            {
+              "size": 1,
+              "name": "Storable.java"
+            },
+            {
+              "size": 1,
+              "name": "DiamondFigureGeometricAdapter.java"
+            },
+            {
+              "size": 1,
+              "name": "CommandHolder.java"
+            },
+            {
+              "size": 1,
+              "name": "UndoableCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "Filler.java"
+            },
+            {
+              "size": 1,
+              "name": "JDOStorageFormat.java"
+            },
+            {
+              "size": 1,
+              "name": "TextAreaFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "RelativeLocator.java"
+            },
+            {
+              "size": 1,
+              "name": "Animatable.java"
+            },
+            {
+              "size": 1,
+              "name": "CommandButton.java"
+            },
+            {
+              "size": 1,
+              "name": "ReverseListEnumerator.java"
+            },
+            {
+              "size": 1,
+              "name": "EllipseFigureGeometricAdapter.java"
+            },
+            {
+              "size": 1,
+              "name": "AbstractLineDecoration.java"
+            },
+            {
+              "size": 1,
+              "name": "GraphLayout.java"
+            },
+            {
+              "size": 1,
+              "name": "PaletteListener.java"
+            },
+            {
+              "size": 1,
+              "name": "FloatingTextField.java"
+            },
+            {
+              "size": 1,
+              "name": "HTMLTextAreaFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "AbstractConnector.java"
+            },
+            {
+              "size": 1,
+              "name": "TriangleFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "Geom.java"
+            },
+            {
+              "size": 1,
+              "name": "DiamondFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "RectangleFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "FigureTransferCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "ArrowTip.java"
+            },
+            {
+              "size": 1,
+              "name": "Iconkit.java"
+            },
+            {
+              "size": 1,
+              "name": "StandardVersionControlStrategy.java"
+            },
+            {
+              "size": 1,
+              "name": "PolyLineConnector.java"
+            },
+            {
+              "size": 1,
+              "name": "PaletteButton.java"
+            },
+            {
+              "size": 1,
+              "name": "LineDecoration.java"
+            },
+            {
+              "size": 1,
+              "name": "JavaDrawViewer.java"
+            },
+            {
+              "size": 1,
+              "name": "VersionControlStrategy.java"
+            },
+            {
+              "size": 1,
+              "name": "LocatorConnector.java"
+            },
+            {
+              "size": 1,
+              "name": "ToolButton.java"
+            }
+          ],
+          "name": "default"
+        },
+        {
+          "children": [
+            {
+              "size": 1,
+              "name": "BouncingDrawing.java"
+            },
+            {
+              "size": 1,
+              "name": "CreationTool.java"
+            },
+            {
+              "size": 1,
+              "name": "ConnectionHandle.java"
+            },
+            {
+              "size": 1,
+              "name": "CompositeFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "GeometricFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "TextTool.java"
+            },
+            {
+              "size": 1,
+              "name": "SimpleLayouter.java"
+            },
+            {
+              "size": 1,
+              "name": "TextHolder.java"
+            },
+            {
+              "size": 1,
+              "name": "Layoutable.java"
+            },
+            {
+              "size": 1,
+              "name": "StandardLayouter.java"
+            },
+            {
+              "size": 1,
+              "name": "GraphicalCompositeFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "NestedCreationTool.java"
+            },
+            {
+              "size": 1,
+              "name": "GroupFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "Figure.java"
+            },
+            {
+              "size": 1,
+              "name": "DecoratorFigure.java"
+            },
+            {
+              "size": 1,
+              "name": "HTMLLayouter.java"
+            },
+            {
+              "size": 1,
+              "name": "AnimationDecorator.java"
+            },
+            {
+              "size": 1,
+              "name": "StandardDrawing.java"
+            },
+            {
+              "size": 1,
+              "name": "HTMLTextAreaTool.java"
+            },
+            {
+              "size": 1,
+              "name": "Layouter.java"
+            },
+            {
+              "size": 1,
+              "name": "ConnectedTextTool.java"
+            },
+            {
+              "size": 1,
+              "name": "TextAreaTool.java"
+            },
+            {
+              "size": 1,
+              "name": "TextHolderContentProducer.java"
+            }
+          ],
+          "name": "default"
+        },
+        {
+          "children": [
+            {
+              "size": 1,
+              "name": "SelectAllCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "ZoomUpdateStrategy.java"
+            },
+            {
+              "size": 1,
+              "name": "DNDFigures.java"
+            },
+            {
+              "size": 1,
+              "name": "UngroupCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "PasteCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "DNDFiguresTransferable.java"
+            },
+            {
+              "size": 1,
+              "name": "InsertImageCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "UndoRedoActivity.java"
+            },
+            {
+              "size": 1,
+              "name": "CollectionsFactory.java"
+            },
+            {
+              "size": 1,
+              "name": "ListWrapper.java"
+            },
+            {
+              "size": 1,
+              "name": "FigureAndEnumerator.java"
+            },
+            {
+              "size": 1,
+              "name": "CopyCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "CollectionsFactoryJDK11.java"
+            },
+            {
+              "size": 1,
+              "name": "GroupCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "SendToBackCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "IteratorWrapper.java"
+            },
+            {
+              "size": 1,
+              "name": "MapWrapper.java"
+            },
+            {
+              "size": 1,
+              "name": "DrawingView.java"
+            },
+            {
+              "size": 1,
+              "name": "UndoCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "ScalingGraphics.java"
+            },
+            {
+              "size": 1,
+              "name": "BringToFrontCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "FigureEnumeration.java"
+            },
+            {
+              "size": 1,
+              "name": "DoubleBufferImage.java"
+            },
+            {
+              "size": 1,
+              "name": "UndoManager.java"
+            },
+            {
+              "size": 1,
+              "name": "DeleteCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "AbstractCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "CutCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "Helper.java"
+            },
+            {
+              "size": 1,
+              "name": "JHDDropTargetListener.java"
+            },
+            {
+              "size": 1,
+              "name": "SetWrapper.java"
+            },
+            {
+              "size": 1,
+              "name": "AlignCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "ChangeAttributeCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "FigureEnumerator.java"
+            },
+            {
+              "size": 1,
+              "name": "DragTracker.java"
+            },
+            {
+              "size": 1,
+              "name": "JHDDragSourceListener.java"
+            },
+            {
+              "size": 1,
+              "name": "RedoCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "Undoable.java"
+            },
+            {
+              "size": 1,
+              "name": "UndoableAdapter.java"
+            },
+            {
+              "size": 1,
+              "name": "CollectionsFactoryJDK12.java"
+            },
+            {
+              "size": 1,
+              "name": "DesktopEvent.java"
+            },
+            {
+              "size": 1,
+              "name": "ZoomCommand.java"
+            },
+            {
+              "size": 1,
+              "name": "BorderTool.java"
+            }
+          ],
+          "name": "default"
+        },
+        {
+          "children": [
+            {
+              "size": 1,
+              "name": "DesktopEventService.java"
+            },
+            {
+              "size": 1,
+              "name": "SplitPaneDesktop.java"
+            },
+            {
+              "size": 1,
+              "name": "DesktopListener.java"
+            },
+            {
+              "size": 1,
+              "name": "MiniMapApplication.java"
+            },
+            {
+              "size": 1,
+              "name": "JScrollPaneDesktop.java"
+            },
+            {
+              "size": 1,
+              "name": "JPanelDesktop.java"
+            },
+            {
+              "size": 1,
+              "name": "MiniMapZoomableView.java"
+            },
+            {
+              "size": 1,
+              "name": "SplitPaneDrawApplication.java"
+            },
+            {
+              "size": 1,
+              "name": "MiniMapDesktop.java"
+            },
+            {
+              "size": 1,
+              "name": "MiniMapView.java"
+            }
+          ],
+          "name": "default"
+        },
+        {
+          "children": [
+            {
+              "size": 1,
+              "name": "ContentProducerRegistry.java"
+            },
+            {
+              "size": 1,
+              "name": "HTMLContentProducerContext.java"
+            },
+            {
+              "size": 1,
+              "name": "AttributeContentProducerContext.java"
+            },
+            {
+              "size": 1,
+              "name": "ColorContentProducer.java"
+            },
+            {
+              "size": 1,
+              "name": "FigureDataContentProducer.java"
+            },
+            {
+              "size": 1,
+              "name": "ContentProducer.java"
+            },
+            {
+              "size": 1,
+              "name": "URLContentProducer.java"
+            },
+            {
+              "size": 1,
+              "name": "HTMLColorContentProducer.java"
+            },
+            {
+              "size": 1,
+              "name": "ContentProducerContext.java"
+            },
+            {
+              "size": 1,
+              "name": "FigureContentProducerContext.java"
+            },
+            {
+              "size": 1,
+              "name": "HTMLContentProducer.java"
+            },
+            {
+              "size": 1,
+              "name": "ResourceContentProducer.java"
+            },
+            {
+              "size": 1,
+              "name": "AttributeFigureContentProducer.java"
+            }
+          ],
+          "name": "default"
+        },
+        {
+          "children": [
+            {
+              "size": 1,
+              "name": "DisposableResourceManagerFactory.java"
+            },
+            {
+              "size": 1,
+              "name": "DisposableResourceManager.java"
+            },
+            {
+              "size": 1,
+              "name": "StandardDisposableResourceHolder.java"
+            },
+            {
+              "size": 1,
+              "name": "StandardDisposableResourceManager.java"
+            },
+            {
+              "size": 1,
+              "name": "ResourceManagerNotSetException.java"
+            },
+            {
+              "size": 1,
+              "name": "ResourceDisposabilityStrategy.java"
+            },
+            {
+              "size": 1,
+              "name": "ETSLADisposalStrategy.java"
+            }
+          ],
+          "name": "default"
+        }
+      ],
+      "name": "default"
+    }
+  }
+]

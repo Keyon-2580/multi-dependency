@@ -597,7 +597,7 @@ public class ProjectController {
 		nodeJSON2.put("result",nodeJSON);
 
 		result.add(nodeJSON2);
-
+		String s = result.toString();
 		return result;
 	}
 
