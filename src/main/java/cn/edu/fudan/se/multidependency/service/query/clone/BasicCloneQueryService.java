@@ -8,6 +8,7 @@ import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
+import com.alibaba.fastjson.JSONArray;
 
 public interface BasicCloneQueryService {
 
@@ -39,5 +40,9 @@ public interface BasicCloneQueryService {
 	CloneGroup queryCloneGroup(String name);
 
 	Collection<ProjectFile> findProjectContainCloneFiles(Project project);
+
+	Collection<Clone> findClonesInProject(Project project);
+
+	JSONArray ClonesInProject(Collection<Clone> clones);
 
 }

@@ -16,6 +16,7 @@ import java.util.concurrent.FutureTask;
 import javax.servlet.http.HttpServletRequest;
 
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
 import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
 import cn.edu.fudan.se.multidependency.service.query.data.ProjectStructure;
@@ -577,6 +578,7 @@ public class ProjectController {
 	@ResponseBody
 	public JSONArray projectHas(@RequestParam("projectId") long projectId) {
 		JSONArray result = new JSONArray();
+		JSONArray clone = new JSONArray();
 
 		Project project = nodeService.queryProject(projectId);
 		ProjectStructure projectStructure = hasRelationService.projectHasInitialize(project);
@@ -585,6 +587,7 @@ public class ProjectController {
 		List<PackageStructure> childrenPackagesnew = new ArrayList<>();
 		JSONObject nodeJSON = new JSONObject();
 		JSONObject nodeJSON2 = new JSONObject();
+		JSONObject nodeJSON3 = new JSONObject();
 
 		for(PackageStructure pckstru : childrenPackages){
 			PackageStructure pcknew = hasRelationService.packageHasInitialize(pckstru.getPck());
@@ -593,10 +596,14 @@ public class ProjectController {
 
 		nodeJSON.put("name", project.getName());
 		Collection<ProjectFile> clonefiles = basicCloneQueryService.findProjectContainCloneFiles(project);
+		Collection<Clone> cloneList = basicCloneQueryService.findClonesInProject(project);
+		clone = basicCloneQueryService.ClonesInProject(cloneList);
 		nodeJSON.put("children",getHasJson(clonefiles,childrenPackagesnew));
 		nodeJSON2.put("result",nodeJSON);
+		nodeJSON3.put("clone",clone);
 
 		result.add(nodeJSON2);
+		result.add(nodeJSON3);
 
 		return result;
 	}
@@ -616,6 +623,7 @@ public class ProjectController {
 				for(ProjectFile profile : fileList){
 					JSONObject jsonObject2 = new JSONObject();
 					jsonObject2.put("size",1000);
+					jsonObject2.put("long_name",profile.getPath());
 					if(clonefiles.contains(profile)){
 						jsonObject2.put("clone",true);
 					}else{

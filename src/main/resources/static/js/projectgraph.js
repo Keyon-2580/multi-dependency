@@ -3,7 +3,8 @@ var projectgraph = function () {
 
     var projectToGraph = function(result,divId){
         // console.log(result);
-        var projectdata = result;
+        var projectdata = result[0].result;
+        var clonedata = result[1].clone;
         var svg = d3.select("#" + divId)
                 .attr("width", 1800)
                 .attr("height", 1800),
@@ -32,9 +33,9 @@ var projectgraph = function () {
             .data(nodes)
             .enter().append("circle")
             .attr("class", function(d) { return d.parent ? d.children ? "circlepacking_node" : "circlepacking_node circlepacking_node--leaf" : "circlepacking_node circlepacking_node--root"; })
-            .style("fill", function(d) {return d.children ? color(d.depth/(d.depth+14)) : (getCloneByName(projectdata,d.data.name) ? "\t#FFB6C1" : null); })
+            .style("fill", function(d) {return d.children ? color(d.depth/(d.depth+14)) : (getCloneBooleanByName(projectdata,d.data.name) ? "\t#FFB6C1" : null); })
             .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
-            .call(text => text.append("title").text(function(d) { return d.parent ? d.data.name + "\n所属包：" + d.parent.data.name : d.data.name; }));
+            .call(text => text.append("title").text(function(d) { return d.parent ? d.data.name + "\n所属包：" + d.parent.data.name + setCloneTitle(getCloneDataByName(clonedata,d.data.long_name)): d.data.name; }));
 
         var text = g.selectAll("text")
             .data(nodes)
@@ -43,7 +44,7 @@ var projectgraph = function () {
             .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0; })
             .style("display", function(d) { return d.parent === root ? "inline" : "none"; })
             .style("font-size", function(d) {
-                return d.children ? color(d.depth) : (getCloneByName(projectdata,d.data.name) ? "\t#FFB6C1" : null); })
+                return d.children ? color(d.depth) : (getCloneBooleanByName(projectdata,d.data.name) ? "\t#FFB6C1" : null); })
             .text(function(d) { return d.data.name; });
 
         var node = g.selectAll("circle,text");
@@ -80,7 +81,7 @@ var projectgraph = function () {
             circle.attr("r", function(d) { return d.r * k; });
         }
 
-        function getCloneByName(data,name){
+        function getCloneBooleanByName(data,name){
             if(data.name === name){
                 return data.clone;
             }else{
@@ -90,7 +91,7 @@ var projectgraph = function () {
                         if (data.children[i] === name) {
                             return data.children[i].clone;
                         } else {
-                            var findResult = getCloneByName(data.children[i], name);
+                            var findResult = getCloneBooleanByName(data.children[i], name);
                             if(findResult) {
                                 return findResult;
                             }
@@ -98,6 +99,47 @@ var projectgraph = function () {
                     }
                     // console.log(typeof(projectdata.children[2].children) != "undefined")
                 }
+            }
+        }
+
+        function getCloneDataByName(data,name){
+            var result = [];
+            for(var i = 0; i < data.length; i++){
+                var import_result = findNameInImports(data[i].imports,name);
+                if(data[i].name === name){
+                    return data[i].imports;
+                }else if(import_result){
+                    var temp = {};
+                    temp["name"] = data[i].name;
+                    temp["clone_type"] = import_result.clone_type;
+                    result.push(temp);
+                }
+            }
+            return result;
+        }
+
+        function findNameInImports(data,name){
+            for(var i = 0; i < data.length; i++){
+                if(data[i].name === name){
+                    return data[i];
+                }
+            }
+            return null;
+        }
+
+        function setCloneTitle(data){
+            if(data.length > 0){
+                var result = "\n克隆关系:";
+                for(var i = 0; i < data.length; i++){
+                    result += "\n{\n克隆文件:";
+                    result += data[i].name;
+                    result += "\n克隆类型:";
+                    result += data[i].clone_type;
+                    result += "\n}";
+                }
+                return result;
+            }else{
+                return null;
             }
         }
     }
@@ -123,9 +165,6 @@ var projectgraph = function () {
                     $("#projectToGraph").html(html);
 
                     // console.log(projectlist[i])
-
-
-
                 }
 
                 Loop_ajax(0, projectlist);
@@ -138,7 +177,7 @@ var projectgraph = function () {
                     type : "GET",
                     url : mainUrl + "/has?projectId=" + projectlist[index],
                     success : function(result) {
-                        resultjson = result[0].result;
+                        resultjson = result;
                         // console.log(projectlist[index])
                         console.log("projectToGraph_" + projectlist[index])
                         projectToGraph(resultjson,"projectToGraph_" + projectlist[index]);

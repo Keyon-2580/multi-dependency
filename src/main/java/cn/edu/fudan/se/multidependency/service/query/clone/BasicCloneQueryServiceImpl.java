@@ -1,16 +1,16 @@
 package cn.edu.fudan.se.multidependency.service.query.clone;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
+
+import cn.edu.fudan.se.multidependency.model.node.*;
+import cn.edu.fudan.se.multidependency.model.node.Package;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
-import cn.edu.fudan.se.multidependency.model.node.Package;
-import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
@@ -163,4 +163,52 @@ public class BasicCloneQueryServiceImpl implements BasicCloneQueryService {
 		return result;
 	}
 
+	Map<Project, Collection<Clone>> ClonesInProjectCache = new ConcurrentHashMap<>();
+	@Override
+	public Collection<Clone> findClonesInProject(Project project) {
+		cloneRepository.setProjectClone();
+		Collection<Clone> result = ClonesInProjectCache.getOrDefault(project, cloneRepository.findClonesInProject(project.getId()));
+		return result;
+	}
+
+	@Override
+	public JSONArray ClonesInProject(Collection<Clone> clones) {
+		Map<CodeNode, Map<CodeNode, Clone>> values = new HashMap<>();
+		for(Clone clone : clones) {
+			CodeNode node1 = clone.getCodeNode1();
+			CodeNode node2 = clone.getCodeNode2();
+			Map<CodeNode, Clone> temp = values.get(node1);
+			if(temp == null) {
+				temp = values.get(node2);
+				if(temp == null) {
+					temp = new HashMap<>();
+				}
+				temp.put(node1, clone);
+				values.put(node2, temp);
+			} else {
+				temp.put(node2, clone);
+				values.put(node1, temp);
+			}
+		}
+		JSONArray result = new JSONArray();
+		for(Map.Entry<CodeNode, Map<CodeNode, Clone>> entryNode1 : values.entrySet()) {
+			CodeNode node1 = entryNode1.getKey();
+			JSONObject nodeJSON = new JSONObject();
+			nodeJSON.put("name", node1.getIdentifier());
+			nodeJSON.put("id", node1.getId());
+			JSONArray imports = new JSONArray();
+			for(Map.Entry<CodeNode, Clone> entryNode2 : entryNode1.getValue().entrySet()) {
+				CodeNode node2 = entryNode2.getKey();
+				String clonetype = entryNode2.getValue().getCloneType();
+				JSONArray imports2 = new JSONArray();
+				JSONObject nodeJSON2 = new JSONObject();
+				nodeJSON2.put("name", node2.getIdentifier());
+				nodeJSON2.put("clone_type", clonetype);
+				imports.add(nodeJSON2);
+			}
+			nodeJSON.put("imports", imports);
+			result.add(nodeJSON);
+		}
+		return result;
+	}
 }

@@ -234,33 +234,12 @@ public class CloneController {
 	 * 查询一个project中所有的包克隆关系
 	 * @return
 	 */
-	@GetMapping("/packages/all")
+	@GetMapping("/project/all")
 	@ResponseBody
-	public JSONArray clonesInPackageWithCoChange(/*@RequestParam("project") long projectId*/) {
-		Project project = nodeService.queryProject(67728);
-		Collection<Package> pckList = containRelationService.findProjectContainPackages(project);
-		Collection<Clone> clones = new ArrayList<>();
-
-		List<Package> pcks = new ArrayList<>(pckList);
-
-		int k = 0;
-
-		for(int i = 0; i < pcks.size(); i++) {
-			for(int j = i + 1; j < pcks.size(); j++) {
-				try {
-					CloneValueForDoubleNodes<Package> value = cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pcks.get(i), pcks.get(j));
-					if(value != null){
-						clones.addAll(value.getChildren());
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-					return new JSONArray();
-				}
-			}
-		}
-
-		assert false;
-		return cloneShowService.graphFileClones(clones);
+	public JSONArray clonesInPackageWithCoChange(@RequestParam("project") long projectId) {
+		Project project = nodeService.queryProject(projectId);
+		Collection<Clone> cloneList = basicCloneQueryService.findClonesInProject(project);
+		return basicCloneQueryService.ClonesInProject(cloneList);
 	}
 
 }
