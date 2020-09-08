@@ -34,8 +34,8 @@ public class SummaryAggregationDataServiceImpl implements SummaryAggregationData
 			pckToPackageClones = new HashMap<>();
 			
 			for(Relation clone : fileClones) {
-				CodeNode node1 = ((Clone)clone).getCodeNode1();
-				CodeNode node2 = ((Clone)clone).getCodeNode2();
+				CodeNode node1 = (CodeNode)clone.getStartNode();
+				CodeNode node2 = (CodeNode)clone.getEndNode();
 				if(!(node1 instanceof ProjectFile) || !(node2 instanceof ProjectFile)) {
 					continue;
 				}
@@ -49,7 +49,7 @@ public class SummaryAggregationDataServiceImpl implements SummaryAggregationData
 				if(pck1.equals(pck2)) {
 					continue;
 				}
-				RelationDataForDoubleNodes<Node, Relation> cloneValue = sumSubNodeRelationForSuperNode(pckToPackageClones, pck1, pck2);
+				RelationDataForDoubleNodes<Node, Relation> cloneValue = getSuperNodeRelationWithSubNodeRelation(pckToPackageClones, pck1, pck2);
 				if(cloneValue == null) {
 					cloneValue = new RelationDataForDoubleNodes(pck1, pck2);
 					cache.add(cloneValue);
@@ -139,7 +139,7 @@ public class SummaryAggregationDataServiceImpl implements SummaryAggregationData
 				if(pck1.equals(pck2)) {
 					continue;
 				}
-				RelationDataForDoubleNodes<Node, Relation> coChangeTimes = (RelationDataForDoubleNodes<Node, Relation>)sumSubNodeRelationForSuperNode(pckToPackageCoChanges, pck1, pck2);
+				RelationDataForDoubleNodes<Node, Relation> coChangeTimes = (RelationDataForDoubleNodes<Node, Relation>) getSuperNodeRelationWithSubNodeRelation(pckToPackageCoChanges, pck1, pck2);
 				if(coChangeTimes == null) {
 					coChangeTimes = new RelationDataForDoubleNodes<Node, Relation>(pck1, pck2);
 					cache.add(coChangeTimes);

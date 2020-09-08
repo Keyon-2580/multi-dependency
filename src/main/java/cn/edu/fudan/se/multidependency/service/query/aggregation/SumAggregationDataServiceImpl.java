@@ -4,7 +4,6 @@ import cn.edu.fudan.se.multidependency.model.node.*;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
-import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.RelationAggregatorForMicroServiceByClone;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.RelationDataForDoubleNodes;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
@@ -35,7 +34,7 @@ public class SumAggregationDataServiceImpl implements SumAggregationDataService 
 			if(ms1 == null || ms2 == null || ms1.equals(ms2)) {
 				continue;
 			}
-			RelationDataForDoubleNodes<Node, Relation> msClone =  sumSubNodeRelationForSuperNode(msToMsClones, ms1, ms2);
+			RelationDataForDoubleNodes<Node, Relation> msClone =  getSuperNodeRelationWithSubNodeRelation(msToMsClones, ms1, ms2);
 			if(msClone == null) {
 				msClone = new RelationDataForDoubleNodes(ms1, ms2);
 				result.add(msClone);
@@ -75,7 +74,7 @@ public class SumAggregationDataServiceImpl implements SumAggregationDataService 
 			if(ms1.equals(ms2)) {
 				continue;
 			}
-			RelationDataForDoubleNodes<Node, Relation> msClone = sumSubNodeRelationForSuperNode(msToMsClones, ms1, ms2);
+			RelationDataForDoubleNodes<Node, Relation> msClone = getSuperNodeRelationWithSubNodeRelation(msToMsClones, ms1, ms2);
 			if(msClone == null) {
 				msClone = new RelationDataForDoubleNodes<Node, Relation>(ms1, ms2);
 				result.add(msClone);
@@ -115,7 +114,7 @@ public class SumAggregationDataServiceImpl implements SumAggregationDataService 
 			if(project1.equals(project2)) {
 				continue;
 			}
-			RelationDataForDoubleNodes<Node, Relation> cloneValue = sumSubNodeRelationForSuperNode(projectToProjectClones, project1, project2);
+			RelationDataForDoubleNodes<Node, Relation> cloneValue = getSuperNodeRelationWithSubNodeRelation(projectToProjectClones, project1, project2);
 			if(cloneValue == null) {
 				cloneValue = new RelationDataForDoubleNodes<Node, Relation>(project1, project2);
 				result.add(cloneValue);
@@ -150,7 +149,7 @@ public class SumAggregationDataServiceImpl implements SumAggregationDataService 
 			if(project1.equals(project2)) {
 				continue;
 			}
-			RelationDataForDoubleNodes<Node, Relation> clone = (RelationDataForDoubleNodes<Node, Relation>) sumSubNodeRelationForSuperNode(projectToProjectClones, project1, project2);
+			RelationDataForDoubleNodes<Node, Relation> clone = (RelationDataForDoubleNodes<Node, Relation>) getSuperNodeRelationWithSubNodeRelation(projectToProjectClones, project1, project2);
 			if(clone == null) {
 				clone = new RelationDataForDoubleNodes(project1, project2);
 				result.add(clone);

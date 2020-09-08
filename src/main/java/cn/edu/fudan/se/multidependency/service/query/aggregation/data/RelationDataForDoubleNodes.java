@@ -34,7 +34,7 @@ public class RelationDataForDoubleNodes<N extends Node , R extends Relation> imp
 		this(node1, node2, String.join("_", node1.getId().toString(), node2.getId().toString()));
 	}
 
-	public RelationDataForDoubleNodes(N node1, Node N, String id) {
+	public RelationDataForDoubleNodes(N node1, N node2, String id) {
 		this.node1 = node1;
 		this.node2 = node2;
 		this.id = id;

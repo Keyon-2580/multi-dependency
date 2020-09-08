@@ -9,7 +9,7 @@ import java.util.Map;
 
 public interface AggregationDataService {
 
-    default RelationDataForDoubleNodes<Node, Relation> sumSubNodeRelationForSuperNode(
+    default RelationDataForDoubleNodes<Node, Relation> getSuperNodeRelationWithSubNodeRelation(
             Map<Node, Map<Node, RelationDataForDoubleNodes<Node, Relation>>> superNodeToSuperNodeRelations,
             Node superNode1, Node superNode2) {
         Map<Node, RelationDataForDoubleNodes<Node, Relation>> superNode1ToRelations = superNodeToSuperNodeRelations.getOrDefault(superNode1, new HashMap<>());

@@ -114,7 +114,7 @@ public class HotspotPackageDetectorImpl implements HotspotPackageDetector {
 				if (parentPackageClone == null) {
 					break;
 				}
-				if (!(boolean) parentPackageClone.aggregateValue(RelationAggregatorForPackageByFileClone.getInstance())) {
+				if (!(boolean) parentPackageClone.aggregateValue(aggregator)) {
 					break;
 				}
 				HotspotPackage parentHotspotPackage = idToPackageRelation.getOrDefault(parentPackageClone.getId(), new HotspotPackage(parentPackageClone));

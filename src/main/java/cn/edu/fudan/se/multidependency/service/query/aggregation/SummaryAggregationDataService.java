@@ -158,19 +158,19 @@ public interface SummaryAggregationDataService extends AggregationDataService{
      * @return
      */
     default RelationDataForDoubleNodes<Node, Relation> querySuperNodeRelationFromSubNodeRelationSort(Collection<? extends Relation> subNodeRelations, Node pck1, Node pck2) {
-        Map<Node, Map<Node, RelationDataForDoubleNodes<Node, Relation>>> packageClones = new HashMap<>();
+        Map<Node, Map<Node, RelationDataForDoubleNodes<Node, Relation>>> packageRelations = new HashMap<>();
         if(subNodeRelations == null || subNodeRelations.isEmpty())
             return null;
         if(((List<Relation>)subNodeRelations).get(0) instanceof Clone)
-            packageClones = queryPackageCloneFromFileClone(subNodeRelations);
+            packageRelations = queryPackageCloneFromFileClone(subNodeRelations);
         else if(((List<Relation>)subNodeRelations).get(0) instanceof CoChange){
-            packageClones = queryPackageCoChangeFromFileCoChange(subNodeRelations);
+            packageRelations = queryPackageCoChangeFromFileCoChange(subNodeRelations);
         }else
             return null;
-        Map<Node, RelationDataForDoubleNodes<Node, Relation>> map = packageClones.getOrDefault(pck1, new HashMap<>());
+        Map<Node, RelationDataForDoubleNodes<Node, Relation>> map = packageRelations.getOrDefault(pck1, new HashMap<>());
         RelationDataForDoubleNodes<Node, Relation> result = map.get(pck2);
         if(result == null) {
-            map = packageClones.getOrDefault(pck2, new HashMap<>());
+            map = packageRelations.getOrDefault(pck2, new HashMap<>());
             result = map.get(pck1);
         }
         if(result != null) {
