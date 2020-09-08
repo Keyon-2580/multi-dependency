@@ -199,7 +199,7 @@ var dependencyToGraph = function(result,divId) {
             .classed("link--source", function(l) { if (l.source === d) return l.target.target = true; })
             .filter(function(l) { return l.target === d || l.source === d; })
             // .style("stroke", function (l) { if (checkOldLink(l, old_links)) { return '#b400ad';}})
-            .style("stroke", "#e0230a")
+            .style("stroke", function (l) {if (l.target === d) return "#2ca02c"; else return "#d62728"; })
             .each(function() { this.parentNode.appendChild(this); });
 
         node
