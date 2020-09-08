@@ -104,51 +104,201 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 		Collection<Package> childrenPackages2 = hasRelationService.findPackageHasPackages(pck2);
 		int childrenSimilarPackages1 = 0;
 		int childrenSimilarPackages2 = 0;
+//		for(Package childPackage1 : childrenPackages1) {
+//			boolean flag = false;
+//			for(Package childPackage2 : childrenPackages2) {
+//				Collection<Long> children1 = new ArrayList<>();
+//				children1.add(childPackage1.getId());
+//				children1.add(childPackage2.getId());
+//				if(similarPackages.contains(children1)) {
+//					allNodes1 += allNodesOfPackage.get(childPackage1.getId());
+//					cloneNodes1 += cloneNodesOfPackages.get(children1);
+//					childrenSimilarPackages1 ++;
+//					flag = true;
+//					break;
+//				}
+//				else if(clonePackages.contains(children1)) {
+//					allNodes1 += allNodesOfPackage.get(childPackage1.getId());
+//					cloneNodes1 += cloneNodesOfPackages2.get(children1);
+//					flag = true;
+//					break;
+//				}
+//			}
+//			if(!flag) {
+//				allNodes1 += getAllFilesNum(childPackage1);
+//			}
+//		}
+//		for(Package childPackage2 : childrenPackages2) {
+//			boolean flag = false;
+//			for(Package childPackage1 : childrenPackages1) {
+//				Collection<Long> children2 = new ArrayList<>();
+//				children2.add(childPackage2.getId());
+//				children2.add(childPackage1.getId());
+//				if(similarPackages.contains(children2)) {
+//					allNodes2 += allNodesOfPackage.get(childPackage2.getId());
+//					cloneNodes2 += cloneNodesOfPackages.get(children2);
+//					childrenSimilarPackages2 ++;
+//					flag = true;
+//					break;
+//				}
+//				else if(clonePackages.contains(children2)) {
+//					allNodes2 += allNodesOfPackage.get(childPackage2.getId());
+//					cloneNodes2 += cloneNodesOfPackages2.get(children2);
+//					flag = true;
+//					break;
+//				}
+//			}
+//			if(!flag) {
+//				allNodes2 += getAllFilesNum(childPackage2);
+//			}
+//		}
 		for(Package childPackage1 : childrenPackages1) {
 			boolean flag = false;
+			int index = 0;
+			Collection<Long> children1 = new ArrayList<>();
+			Collection<Long> children2 = new ArrayList<>();
 			for(Package childPackage2 : childrenPackages2) {
-				Collection<Long> children1 = new ArrayList<>();
+				children1.clear();
 				children1.add(childPackage1.getId());
 				children1.add(childPackage2.getId());
 				if(similarPackages.contains(children1)) {
-					allNodes1 += allNodesOfPackage.get(childPackage1.getId());
-					cloneNodes1 += cloneNodesOfPackages.get(children1);
-					childrenSimilarPackages1 ++;
-					flag = true;
-					break;
+					if(!flag) {
+						children2.clear();
+						children2.add(childPackage1.getId());
+						children2.add(childPackage2.getId());
+						index = 0;
+						flag = true;
+					}
+					else {
+						int cloneNodesOfChildren1 = cloneNodesOfPackages.get(children1);
+						int cloneNodesOfChildren2;
+						if(index == 0) {
+							cloneNodesOfChildren2 = cloneNodesOfPackages.get(children2);
+						}
+						else {
+							cloneNodesOfChildren2 = cloneNodesOfPackages2.get(children2);
+						}
+						if(cloneNodesOfChildren1 > cloneNodesOfChildren2) {
+							children2.clear();
+							children2.add(childPackage1.getId());
+							children2.add(childPackage2.getId());
+							index = 0;
+							flag = true;
+						}
+					}
 				}
 				else if(clonePackages.contains(children1)) {
-					allNodes1 += allNodesOfPackage.get(childPackage1.getId());
-					cloneNodes1 += cloneNodesOfPackages2.get(children1);
-					flag = true;
-					break;
+					if(!flag) {
+						children2.clear();
+						children2.add(childPackage1.getId());
+						children2.add(childPackage2.getId());
+						index = 1;
+						flag = true;
+					}
+					else {
+						int cloneNodesOfChildren1 = cloneNodesOfPackages2.get(children1);
+						int cloneNodesOfChildren2;
+						if(index == 0) {
+							cloneNodesOfChildren2 = cloneNodesOfPackages.get(children2);
+						}
+						else {
+							cloneNodesOfChildren2 = cloneNodesOfPackages2.get(children2);
+						}
+						if(cloneNodesOfChildren1 > cloneNodesOfChildren2) {
+							children2.clear();
+							children2.add(childPackage1.getId());
+							children2.add(childPackage2.getId());
+							index = 1;
+							flag = true;
+						}
+					}
 				}
 			}
-			if(!flag) {
+			if(flag && similarPackages.contains(children2)) {
+				allNodes1 += allNodesOfPackage.get(childPackage1.getId());
+				cloneNodes1 += cloneNodesOfPackages.get(children2);
+				childrenSimilarPackages1 ++;
+			}
+			else if(flag && clonePackages.contains(children2)) {
+				allNodes1 += allNodesOfPackage.get(childPackage1.getId());
+				cloneNodes1 += cloneNodesOfPackages2.get(children2);
+			}
+			else {
 				allNodes1 += getAllFilesNum(childPackage1);
 			}
 		}
 		for(Package childPackage2 : childrenPackages2) {
+			int index = 0;
 			boolean flag = false;
+			Collection<Long> children2 = new ArrayList<>();
+			Collection<Long> children1 = new ArrayList<>();
 			for(Package childPackage1 : childrenPackages1) {
-				Collection<Long> children2 = new ArrayList<>();
+				children2.clear();
 				children2.add(childPackage2.getId());
 				children2.add(childPackage1.getId());
 				if(similarPackages.contains(children2)) {
-					allNodes2 += allNodesOfPackage.get(childPackage2.getId());
-					cloneNodes2 += cloneNodesOfPackages.get(children2);
-					childrenSimilarPackages2 ++;
-					flag = true;
-					break;
+					if(!flag) {
+						children1.clear();
+						children1.add(childPackage2.getId());
+						children1.add(childPackage1.getId());
+						index = 0;
+						flag = true;
+					}
+					else {
+						int cloneNodesOfChildren2 = cloneNodesOfPackages.get(children2);
+						int cloneNodesOfChildren1;
+						if(index == 0) {
+							cloneNodesOfChildren1 = cloneNodesOfPackages.get(children1);
+						}
+						else {
+							cloneNodesOfChildren1 = cloneNodesOfPackages2.get(children1);
+						}
+						if(cloneNodesOfChildren2 > cloneNodesOfChildren1) {
+							children1.clear();
+							children1.add(childPackage2.getId());
+							children1.add(childPackage1.getId());
+							index = 0;
+							flag = true;
+						}
+					}
 				}
 				else if(clonePackages.contains(children2)) {
-					allNodes2 += allNodesOfPackage.get(childPackage2.getId());
-					cloneNodes2 += cloneNodesOfPackages2.get(children2);
-					flag = true;
-					break;
+					if(!flag) {
+						children1.clear();
+						children1.add(childPackage2.getId());
+						children1.add(childPackage1.getId());
+						index = 1;
+						flag = true;
+					}
+					else {
+						int cloneNodesOfChildren2 = cloneNodesOfPackages2.get(children2);
+						int cloneNodesOfChildren1;
+						if(index == 0) {
+							cloneNodesOfChildren1 = cloneNodesOfPackages.get(children1);
+						}
+						else {
+							cloneNodesOfChildren1 = cloneNodesOfPackages2.get(children1);
+						}
+						if(cloneNodesOfChildren2 > cloneNodesOfChildren1) {
+							children1.clear();
+							children1.add(childPackage2.getId());
+							children1.add(childPackage1.getId());
+							index = 1;
+							flag = true;
+						}
+					}
 				}
 			}
-			if(!flag) {
+			if(flag && similarPackages.contains(children1)) {
+				allNodes2 += allNodesOfPackage.get(childPackage2.getId());
+				cloneNodes2 += cloneNodesOfPackages.get(children1);
+				childrenSimilarPackages2 ++;
+			}
+			else if(flag && clonePackages.contains(children1)) {
+				allNodes2 += allNodesOfPackage.get(childPackage2.getId());
+				cloneNodes2 += cloneNodesOfPackages2.get(children1);
+			}
+			else {
 				allNodes2 += getAllFilesNum(childPackage2);
 			}
 		}
@@ -196,63 +346,211 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 		Package package2 = rootSimilarPackage.getPackage2();
 		Collection<Package> childrenPackages1 = hasRelationService.findPackageHasPackages(package1);
 		Collection<Package> childrenPackages2 = hasRelationService.findPackageHasPackages(package2);
+//		for(Package childPackage1 : childrenPackages1) {
+//			boolean flag = false;
+//			for(Package childPackage2 : childrenPackages2) {
+//				Collection<Long> children1 = new ArrayList<>();
+//				children1.add(childPackage1.getId());
+//				children1.add(childPackage2.getId());
+//				if(similarPackages.contains(children1)) {
+//					SimilarPackage childSimilarPackage1;
+//					CloneValueForDoubleNodes<Package> childPackageClone = cloneValueService.queryPackageCloneFromFileCloneSort(fileClones, childPackage1, childPackage2);
+//					if(childPackageClone != null) {
+//						childSimilarPackage1 = idToPackageClone.getOrDefault(childPackageClone.getId(), new SimilarPackage(childPackageClone));
+//					}
+//					else {
+//						String childrenId1 = String.join("_", childPackage1.getDirectoryPath(), childPackage2.getDirectoryPath());
+//						childSimilarPackage1 = new SimilarPackage(new CloneValueForDoubleNodes<Package>(childPackage1, childPackage2, childrenId1));
+//					}
+//					if(!rootSimilarPackage.isContainSimilarChild(childSimilarPackage1)) {
+//						AddChildrenPackages(childSimilarPackage1, fileClones, idToPackageClone);
+//						Collection<Long> packages1 = new ArrayList<>();
+//						Collection<Long> packages2 = new ArrayList<>();
+//						packages1.add(childSimilarPackage1.getPackage1().getId());
+//						packages1.add(childSimilarPackage1.getPackage2().getId());
+//						packages2.add(childSimilarPackage1.getPackage2().getId());
+//						packages2.add(childSimilarPackage1.getPackage1().getId());
+//						int allNodes1 = allNodesOfPackage.get(childSimilarPackage1.getPackage1().getId());
+//						int allNodes2 = allNodesOfPackage.get(childSimilarPackage1.getPackage2().getId());
+//						int cloneNodes1 = cloneNodesOfPackages.get(packages1);
+//						int cloneNodes2 = cloneNodesOfPackages.get(packages2);
+//						childSimilarPackage1.setData(allNodes1, allNodes2, cloneNodes1, cloneNodes2);
+//						rootSimilarPackage.addSimilarChild(childSimilarPackage1);
+//					}
+//					flag = true;
+//					break;
+//				}
+//				else if(clonePackages.contains(children1)) {
+//					CloneValueForDoubleNodes<Package> childPackageClone1 = cloneValueService.queryPackageCloneFromFileCloneSort(fileClones, childPackage1, childPackage2);
+//					SimilarPackage childSimilarPackage1 = new SimilarPackage(childPackageClone1);
+//					if(!rootSimilarPackage.isContainSimilarChild(childSimilarPackage1)) {
+//						AddChildrenPackages(childSimilarPackage1, fileClones, idToPackageClone);
+//						Collection<Long> packages1 = new ArrayList<>();
+//						Collection<Long> packages2 = new ArrayList<>();
+//						packages1.add(childSimilarPackage1.getPackage1().getId());
+//						packages1.add(childSimilarPackage1.getPackage2().getId());
+//						packages2.add(childSimilarPackage1.getPackage2().getId());
+//						packages2.add(childSimilarPackage1.getPackage1().getId());
+//						int allNodes1 = allNodesOfPackage.get(childSimilarPackage1.getPackage1().getId());
+//						int allNodes2 = allNodesOfPackage.get(childSimilarPackage1.getPackage2().getId());
+//						int cloneNodes1 = cloneNodesOfPackages2.get(packages1);
+//						int cloneNodes2 = cloneNodesOfPackages2.get(packages2);
+//						childSimilarPackage1.setData(allNodes1, allNodes2, cloneNodes1, cloneNodes2);
+//						rootSimilarPackage.addSimilarChild(childSimilarPackage1);
+//					}
+//					flag = true;
+//					break;
+//				}
+//			}
+//			if(!flag) {
+//				if(!rootSimilarPackage.isContainOtherChild1(childPackage1)) {
+//					childPackage1.setAllNodes(getAllFilesNum(childPackage1));
+//					rootSimilarPackage.addOtherChild1(childPackage1);
+//				}
+//			}
+//		}
+//		for(Package childPackage2 : childrenPackages2) {
+//			boolean flag = false;
+//			for(Package childPackage1 : childrenPackages1) {
+//				Collection<Long> children2 = new ArrayList<>();
+//				children2.add(childPackage2.getId());
+//				children2.add(childPackage1.getId());
+//				if(similarPackages.contains(children2)) {
+//					flag = true;
+//					break;
+//				}
+//				else if(clonePackages.contains(children2)) {
+//					flag = true;
+//					break;
+//				}
+//			}
+//			if(!flag) {
+//				if(!rootSimilarPackage.isContainOtherChild2(childPackage2)) {
+//					childPackage2.setAllNodes(getAllFilesNum(childPackage2));
+//					rootSimilarPackage.addOtherChild2(childPackage2);
+//				}
+//			}
+//		}
 		for(Package childPackage1 : childrenPackages1) {
+			int index = 0;
 			boolean flag = false;
+			Collection<Long> children1 = new ArrayList<>();
+			Collection<Long> children2 = new ArrayList<>();
+			Package childPackage = null;
 			for(Package childPackage2 : childrenPackages2) {
-				Collection<Long> children1 = new ArrayList<>();
+				children1.clear();
 				children1.add(childPackage1.getId());
 				children1.add(childPackage2.getId());
 				if(similarPackages.contains(children1)) {
-					SimilarPackage childSimilarPackage1;
-					CloneValueForDoubleNodes<Package> childPackageClone = cloneValueService.queryPackageCloneFromFileCloneSort(fileClones, childPackage1, childPackage2);
-					if(childPackageClone != null) {
-						childSimilarPackage1 = idToPackageClone.getOrDefault(childPackageClone.getId(), new SimilarPackage(childPackageClone));
+					if(!flag) {
+						children2.clear();
+						children2.add(childPackage1.getId());
+						children2.add(childPackage2.getId());
+						childPackage = childPackage2;
+						index = 0;
+						flag = true;
 					}
 					else {
-						String childrenId1 = String.join("_", childPackage1.getDirectoryPath(), childPackage2.getDirectoryPath());
-						childSimilarPackage1 = new SimilarPackage(new CloneValueForDoubleNodes<Package>(childPackage1, childPackage2, childrenId1));
+						int cloneNodesOfChildren1 = cloneNodesOfPackages.get(children1);
+						int cloneNodesOfChildren2;
+						if(index == 0) {
+							cloneNodesOfChildren2 = cloneNodesOfPackages.get(children2);
+						}
+						else {
+							cloneNodesOfChildren2 = cloneNodesOfPackages2.get(children2);
+						}
+						if(cloneNodesOfChildren1 > cloneNodesOfChildren2) {
+							children2.clear();
+							children2.add(childPackage1.getId());
+							children2.add(childPackage2.getId());
+							childPackage = childPackage2;
+							index = 0;
+							flag = true;
+						}
 					}
-					if(!rootSimilarPackage.isContainSimilarChild(childSimilarPackage1)) {
-						AddChildrenPackages(childSimilarPackage1, fileClones, idToPackageClone);
-						Collection<Long> packages1 = new ArrayList<>();
-						Collection<Long> packages2 = new ArrayList<>();
-						packages1.add(childSimilarPackage1.getPackage1().getId());
-						packages1.add(childSimilarPackage1.getPackage2().getId());
-						packages2.add(childSimilarPackage1.getPackage2().getId());
-						packages2.add(childSimilarPackage1.getPackage1().getId());
-						int allNodes1 = allNodesOfPackage.get(childSimilarPackage1.getPackage1().getId());
-						int allNodes2 = allNodesOfPackage.get(childSimilarPackage1.getPackage2().getId());
-						int cloneNodes1 = cloneNodesOfPackages.get(packages1);
-						int cloneNodes2 = cloneNodesOfPackages.get(packages2);
-						childSimilarPackage1.setData(allNodes1, allNodes2, cloneNodes1, cloneNodes2);
-						rootSimilarPackage.addSimilarChild(childSimilarPackage1);
-					}
-					flag = true;
-					break;
 				}
 				else if(clonePackages.contains(children1)) {
-					CloneValueForDoubleNodes<Package> childPackageClone1 = cloneValueService.queryPackageCloneFromFileCloneSort(fileClones, childPackage1, childPackage2);
-					SimilarPackage childSimilarPackage1 = new SimilarPackage(childPackageClone1);
-					if(!rootSimilarPackage.isContainSimilarChild(childSimilarPackage1)) {
-						AddChildrenPackages(childSimilarPackage1, fileClones, idToPackageClone);
-						Collection<Long> packages1 = new ArrayList<>();
-						Collection<Long> packages2 = new ArrayList<>();
-						packages1.add(childSimilarPackage1.getPackage1().getId());
-						packages1.add(childSimilarPackage1.getPackage2().getId());
-						packages2.add(childSimilarPackage1.getPackage2().getId());
-						packages2.add(childSimilarPackage1.getPackage1().getId());
-						int allNodes1 = allNodesOfPackage.get(childSimilarPackage1.getPackage1().getId());
-						int allNodes2 = allNodesOfPackage.get(childSimilarPackage1.getPackage2().getId());
-						int cloneNodes1 = cloneNodesOfPackages2.get(packages1);
-						int cloneNodes2 = cloneNodesOfPackages2.get(packages2);
-						childSimilarPackage1.setData(allNodes1, allNodes2, cloneNodes1, cloneNodes2);
-						rootSimilarPackage.addSimilarChild(childSimilarPackage1);
+					if(!flag) {
+						children2.clear();
+						children2.add(childPackage1.getId());
+						children2.add(childPackage2.getId());
+						childPackage = childPackage2;
+						index = 1;
+						flag = true;
 					}
-					flag = true;
-					break;
+					else {
+						int cloneNodesOfChildren1 = cloneNodesOfPackages2.get(children1);
+						int cloneNodesOfChildren2;
+						if(index == 0) {
+							cloneNodesOfChildren2 = cloneNodesOfPackages.get(children2);
+						}
+						else {
+							cloneNodesOfChildren2 = cloneNodesOfPackages2.get(children2);
+						}
+						if(cloneNodesOfChildren1 > cloneNodesOfChildren2) {
+							children2.clear();
+							children2.add(childPackage1.getId());
+							children2.add(childPackage2.getId());
+							childPackage = childPackage2;
+							index = 1;
+							flag = true;
+						}
+					}
 				}
 			}
-			if(!flag) {
+			if(flag && similarPackages.contains(children2)) {
+				SimilarPackage childSimilarPackage1;
+				CloneValueForDoubleNodes<Package> childPackageClone = cloneValueService.queryPackageCloneFromFileCloneSort(fileClones, childPackage1, childPackage);
+				if(childPackageClone != null) {
+					childSimilarPackage1 = idToPackageClone.getOrDefault(childPackageClone.getId(), new SimilarPackage(childPackageClone));
+				}
+				else {
+					String childrenId1 = String.join("_", childPackage1.getDirectoryPath(), childPackage.getDirectoryPath());
+					childSimilarPackage1 = new SimilarPackage(new CloneValueForDoubleNodes<Package>(childPackage1, childPackage, childrenId1));
+				}
+				if(!rootSimilarPackage.isContainSimilarChild(childSimilarPackage1)) {
+					AddChildrenPackages(childSimilarPackage1, fileClones, idToPackageClone);
+					Collection<Long> packages1 = new ArrayList<>();
+					Collection<Long> packages2 = new ArrayList<>();
+					packages1.add(childSimilarPackage1.getPackage1().getId());
+					packages1.add(childSimilarPackage1.getPackage2().getId());
+					packages2.add(childSimilarPackage1.getPackage2().getId());
+					packages2.add(childSimilarPackage1.getPackage1().getId());
+					int allNodes1 = allNodesOfPackage.get(childSimilarPackage1.getPackage1().getId());
+					int allNodes2 = allNodesOfPackage.get(childSimilarPackage1.getPackage2().getId());
+					int cloneNodes1 = cloneNodesOfPackages.get(packages1);
+					int cloneNodes2 = cloneNodesOfPackages.get(packages2);
+					childSimilarPackage1.setData(allNodes1, allNodes2, cloneNodes1, cloneNodes2);
+					rootSimilarPackage.addSimilarChild(childSimilarPackage1);
+				}
+			}
+			else if(flag && clonePackages.contains(children2)) {
+				SimilarPackage childSimilarPackage1;
+				CloneValueForDoubleNodes<Package> childPackageClone = cloneValueService.queryPackageCloneFromFileCloneSort(fileClones, childPackage1, childPackage);
+				if(childPackageClone != null) {
+					childSimilarPackage1 = idToPackageClone.getOrDefault(childPackageClone.getId(), new SimilarPackage(childPackageClone));
+				}
+				else {
+					String childrenId1 = String.join("_", childPackage1.getDirectoryPath(), childPackage.getDirectoryPath());
+					childSimilarPackage1 = new SimilarPackage(new CloneValueForDoubleNodes<Package>(childPackage1, childPackage, childrenId1));
+				}
+				if(!rootSimilarPackage.isContainSimilarChild(childSimilarPackage1)) {
+					AddChildrenPackages(childSimilarPackage1, fileClones, idToPackageClone);
+					Collection<Long> packages1 = new ArrayList<>();
+					Collection<Long> packages2 = new ArrayList<>();
+					packages1.add(childSimilarPackage1.getPackage1().getId());
+					packages1.add(childSimilarPackage1.getPackage2().getId());
+					packages2.add(childSimilarPackage1.getPackage2().getId());
+					packages2.add(childSimilarPackage1.getPackage1().getId());
+					int allNodes1 = allNodesOfPackage.get(childSimilarPackage1.getPackage1().getId());
+					int allNodes2 = allNodesOfPackage.get(childSimilarPackage1.getPackage2().getId());
+					int cloneNodes1 = cloneNodesOfPackages2.get(packages1);
+					int cloneNodes2 = cloneNodesOfPackages2.get(packages2);
+					childSimilarPackage1.setData(allNodes1, allNodes2, cloneNodes1, cloneNodes2);
+					rootSimilarPackage.addSimilarChild(childSimilarPackage1);
+				}
+			}
+			else {
 				if(!rootSimilarPackage.isContainOtherChild1(childPackage1)) {
 					childPackage1.setAllNodes(getAllFilesNum(childPackage1));
 					rootSimilarPackage.addOtherChild1(childPackage1);
@@ -260,18 +558,65 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 			}
 		}
 		for(Package childPackage2 : childrenPackages2) {
+			int index = 0;
 			boolean flag = false;
+			Collection<Long> children2 = new ArrayList<>();
+			Collection<Long> children1 = new ArrayList<>();
 			for(Package childPackage1 : childrenPackages1) {
-				Collection<Long> children2 = new ArrayList<>();
+				children2.clear();
 				children2.add(childPackage2.getId());
 				children2.add(childPackage1.getId());
 				if(similarPackages.contains(children2)) {
-					flag = true;
-					break;
+					if(!flag) {
+						children1.clear();
+						children1.add(childPackage2.getId());
+						children1.add(childPackage1.getId());
+						index = 0;
+						flag = true;
+					}
+					else {
+						int cloneNodesOfChildren2 = cloneNodesOfPackages.get(children2);
+						int cloneNodesOfChildren1;
+						if(index == 0) {
+							cloneNodesOfChildren1 = cloneNodesOfPackages.get(children1);
+						}
+						else {
+							cloneNodesOfChildren1 = cloneNodesOfPackages2.get(children1);
+						}
+						if(cloneNodesOfChildren2 > cloneNodesOfChildren1) {
+							children1.clear();
+							children1.add(childPackage2.getId());
+							children1.add(childPackage1.getId());
+							index = 0;
+							flag = true;
+						}
+					}
 				}
 				else if(clonePackages.contains(children2)) {
-					flag = true;
-					break;
+					if(!flag) {
+						children1.clear();
+						children1.add(childPackage2.getId());
+						children1.add(childPackage1.getId());
+						index = 1;
+						flag = true;
+					}
+					else {
+						int cloneNodesOfChildren2 = cloneNodesOfPackages2.get(children2);
+						int cloneNodesOfChildren1;
+						if(index == 0) {
+							cloneNodesOfChildren1 = cloneNodesOfPackages.get(children1);
+						}
+						else {
+							cloneNodesOfChildren1 = cloneNodesOfPackages2.get(children1);
+						}
+						if(cloneNodesOfChildren2 > cloneNodesOfChildren1) {
+							children1.clear();
+							children1.add(childPackage2.getId());
+							children1.add(childPackage1.getId());
+							index = 1;
+							flag = true;
+						}
+					}
 				}
 			}
 			if(!flag) {
@@ -294,6 +639,11 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 		for(CloneValueForDoubleNodes<Package> packageClone : packageClones) {
 			Package pck1 = packageClone.getNode1();
 			Package pck2 = packageClone.getNode2();
+			if(pck1.getDirectoryPath().compareTo(pck2.getDirectoryPath()) > 0) {
+				Package pck = pck1;
+				pck1 = pck2;
+				pck2 = pck;
+			}
 			Collection<Long> clonePackages1 = new ArrayList<>();
 			Collection<Long> clonePackages2 = new ArrayList<>();
 			clonePackages1.add(pck1.getId());
@@ -315,7 +665,14 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 			if(idToPackageClone.get(packageClone.getId()) != null) {
 				continue;
 			}
-			if(!isSimilarPackages(packageClone.getNode1(), packageClone.getNode2())) {
+			Package pck1 = packageClone.getNode1();
+			Package pck2 = packageClone.getNode2();
+			if(pck1.getDirectoryPath().compareTo(pck2.getDirectoryPath()) > 0) {
+				Package pck = pck1;
+				pck1 = pck2;
+				pck2 = pck;
+			}
+			if(!isSimilarPackages(pck1, pck2)) {
 				continue;
 			}
 			SimilarPackage temp = new SimilarPackage(packageClone);
@@ -326,7 +683,14 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 			if(idToPackageClone.get(packageClone.getId()) != null) {
 				continue;
 			}
-			if(!isSimilarPackages(packageClone.getNode1(), packageClone.getNode2())) {
+			Package pck1 = packageClone.getNode1();
+			Package pck2 = packageClone.getNode2();
+			if(pck1.getDirectoryPath().compareTo(pck2.getDirectoryPath()) > 0) {
+				Package pck = pck1;
+				pck1 = pck2;
+				pck2 = pck;
+			}
+			if(!isSimilarPackages(pck1, pck2)) {
 				continue;
 			}
 			SimilarPackage temp = new SimilarPackage(packageClone);
