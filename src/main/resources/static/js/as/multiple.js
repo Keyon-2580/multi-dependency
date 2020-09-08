@@ -3,11 +3,11 @@ var multiple = function(projects, files, cytoscapeutil) {
 			cycle: true,
 			hublike: true,
 			logicCoupling: true,
-			similar: false,
-			unstable: false,
-			hierarchy: true,
-			godComponent: false,
-			unused: true
+			similar: true,
+			unstable: true,
+//			hierarchy: false,
+//			godComponent: false,
+			unused: false
 	}
 	
 	function paramToRequestParam() {
@@ -16,8 +16,8 @@ var multiple = function(projects, files, cytoscapeutil) {
 			"&logicCoupling=" + param.logicCoupling + 
 			"&similar=" + param.similar + 
 			"&unstable=" + param.unstable + 
-			"&hierarchy=" + param.hierarchy + 
-			"&godComponent=" + param.godComponent + 
+//			"&hierarchy=" + param.hierarchy + 
+//			"&godComponent=" + param.godComponent + 
 			"&unused=" + param.unused;
 		return str;
 	}
@@ -185,15 +185,15 @@ var multiple = function(projects, files, cytoscapeutil) {
 				html += "<div>";
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
-				html += "<th>文件</th>";
+				html += "<th>File</th>";
 				html += "<th>cycle</th>";
 				html += "<th>hublike</th>";
 				html += "<th>unstable</th>";
 				html += "<th>logic coupling</th>";
 				html += "<th>simiar</th>";
-				html += "<th>cyclic hierarchy</th>";
-				html += "<th>god component</th>";
-				html += "<th>unused component</th>";
+//				html += "<th>cyclic hierarchy</th>";
+//				html += "<th>god component</th>";
+//				html += "<th>unused component</th>";
 				html += "<th>page rank</th>";
 				html += "</tr>";
 				for(var j = 0 ; j < files[project.id].length; j++) {
@@ -205,9 +205,9 @@ var multiple = function(projects, files, cytoscapeutil) {
 					html += "<td>" + (value.unstable == true ? "T" : "") + "</td>";
 					html += "<td>" + (value.logicCoupling == true ? "T" : "") + "</td>";
 					html += "<td>" + (value.similar == true ? "T" : "") + "</td>";
-					html += "<td>" + (value.cyclicHierarchy == true ? "T" : "") + "</td>";
-					html += "<td>" + (value.god == true ? "T" : "") + "</td>";
-					html += "<td>" + (value.unused == true ? "T" : "") + "</td>";
+//					html += "<td>" + (value.cyclicHierarchy == true ? "T" : "") + "</td>";
+//					html += "<td>" + (value.god == true ? "T" : "") + "</td>";
+//					html += "<td>" + (value.unused == true ? "T" : "") + "</td>";
 					html += "<td>" + value.file.score + "</td>";
 					html += "</tr>";
 				}

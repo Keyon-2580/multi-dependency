@@ -15,6 +15,7 @@ import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.repository.as.ASRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.as.CyclicDependencyDetector;
+import cn.edu.fudan.se.multidependency.service.query.as.ModuleService;
 import cn.edu.fudan.se.multidependency.service.query.as.data.Cycle;
 import cn.edu.fudan.se.multidependency.service.query.as.data.CycleComponents;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
@@ -30,6 +31,9 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 	
 	@Autowired
 	private ContainRelationService containRelationService;	
+	
+	@Autowired
+	private ModuleService moduleService;
 	
 	private Collection<DependsOn> findCyclePackageRelationsBySCC(CycleComponents<Package> cycle) {
 		return asRepository.cyclePackagesBySCC(cycle.getPartition());
@@ -50,12 +54,16 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 		for(CycleComponents<Package> cycle : cycles) {
 			Cycle<Package> cyclePackage = new Cycle<Package>(cycle);
 			cyclePackage.addAll(findCyclePackageRelationsBySCC(cycle));
+			boolean flag = false;
 			for(Package pck : cycle.getComponents()) {
-				Project project = containRelationService.findPackageBelongToProject(pck);
-				Map<Integer, Cycle<Package>> temp = result.getOrDefault(project.getId(), new HashMap<>());
-				temp.put(cyclePackage.getPartition(), cyclePackage);
-				result.put(project.getId(), temp);
-				break;
+				cyclePackage.putComponentBelongToGroup(pck, pck);
+				if(!flag) {
+					Project project = containRelationService.findPackageBelongToProject(pck);
+					Map<Integer, Cycle<Package>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+					temp.put(cyclePackage.getPartition(), cyclePackage);
+					result.put(project.getId(), temp);
+					flag = true;
+				}
 			}
 		}
 		cache.cache(getClass(), key, result);
@@ -73,12 +81,16 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 		for(CycleComponents<ProjectFile> cycle : cycles) {
 			Cycle<ProjectFile> cycleFile = new Cycle<ProjectFile>(cycle);
 			cycleFile.addAll(findCycleFileRelationsBySCC(cycle));
+			boolean flag = false;
 			for(ProjectFile file : cycle.getComponents()) {
-				Project project = containRelationService.findFileBelongToProject(file);
-				Map<Integer, Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new HashMap<>());
-				temp.put(cycleFile.getPartition(), cycleFile);
-				result.put(project.getId(), temp);
-				break;
+				cycleFile.putComponentBelongToGroup(file, moduleService.findFileBelongToModule(file));
+				if(!flag) {
+					Project project = containRelationService.findFileBelongToProject(file);
+					Map<Integer, Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+					temp.put(cycleFile.getPartition(), cycleFile);
+					result.put(project.getId(), temp);
+					flag = true;
+				}
 			}
 		}
 		cache.cache(getClass(), key, result);
@@ -87,7 +99,12 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 
 	@Override
 	public Map<Long, Map<Integer, Cycle<Module>>> cycleModules() {
-		// TODO Auto-generated method stub
-		return null;
+		String key = "cycleModules";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		Map<Long, Map<Integer, Cycle<Module>>> result = new HashMap<>();
+		cache.cache(getClass(), key, result);
+		return result;
 	}
 }

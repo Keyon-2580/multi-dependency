@@ -39,7 +39,7 @@ public class Commit implements Node {
 	
 	private int commitTime;
 	
-	private int commitFilesSize;
+	private int commitFilesSize = -1;
 	
 	private boolean merge;
 	

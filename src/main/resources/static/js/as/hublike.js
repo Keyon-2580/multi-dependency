@@ -8,9 +8,9 @@ var hublike = function(cytoscapeutil) {
 			var hubLikeFiles = files[project.id];
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
-			html += "<th width='50%'>File</th>";
-			html += "<th width='25%'>Fan In</th>";
-			html += "<th width='25%'>Fan Out</th>";
+			html += "<th width='80%'>File</th>";
+			html += "<th width='10%'>Fan In</th>";
+			html += "<th width='10%'>Fan Out</th>";
 			html += "</tr>";
 			for(var fileIndex in hubLikeFiles) {
 				var file = hubLikeFiles[fileIndex];

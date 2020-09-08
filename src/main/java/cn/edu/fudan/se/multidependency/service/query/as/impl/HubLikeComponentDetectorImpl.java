@@ -165,7 +165,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		}
 //		return FanIOMetric.calculateFanInUpperQuartile(metricCalculator.calculatePackageMetrics().get(project.getId()));
 //		return metricCalculator.calculateProjectMetrics(false).get(project).getNop() / 5;
-		return 10;
+		return 5;
 	}
 
 	private double defaultPackageMinFanOut(Project project) {
@@ -174,7 +174,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		}
 //		return FanIOMetric.calculateFanOutUpperQuartile(metricCalculator.calculatePackageMetrics().get(project.getId()));
 //		return metricCalculator.calculateProjectMetrics(false).get(project).getNop() / 5;
-		return 10;
+		return 5;
 	}
 
 	private double defaultFileMinFanIn(Project project) {
@@ -182,8 +182,8 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 			return Integer.MAX_VALUE;
 		}
 //		return FanIOMetric.calculateFanInUpperQuartile(metricCalculator.calculateFileMetrics().get(project.getId()));
-		return metricCalculator.calculateProjectMetrics(false).get(project.getId()).getNof() / 5;
-//		return 30;
+//		return metricCalculator.calculateProjectMetrics(false).get(project.getId()).getNof() / 5;
+		return 20;
 	}
 
 	private double defaultFileMinFanOut(Project project) {
@@ -191,7 +191,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 			return Integer.MAX_VALUE;
 		}
 //		return FanIOMetric.calculateFanOutUpperQuartile(metricCalculator.calculateFileMetrics().get(project.getId()));
-		return metricCalculator.calculateProjectMetrics(false).get(project.getId()).getNof() / 5;
-//		return 30;
+//		return metricCalculator.calculateProjectMetrics(false).get(project.getId()).getNof() / 5;
+		return 20;
 	}
 }

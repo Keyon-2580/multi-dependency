@@ -8,13 +8,9 @@ import java.util.Set;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
-import lombok.Data;
 
-@Data
-public class UnstableFile {
+public class UnstableFileInHistory extends UnstableComponent<ProjectFile> {
 
-	private ProjectFile file;
-	
 	private int fanIn;
 	
 	private Set<ProjectFile> cochangeFiles = new HashSet<>();
@@ -29,11 +25,27 @@ public class UnstableFile {
 	
 	public void addCoChange(CoChange cochange) {
 		ProjectFile cochangeFile = cochange.getFile1();
-		if(cochangeFile.equals(file)) {
+		if(cochangeFile.equals(super.getComponent())) {
 			cochangeFile = cochange.getFile2();
 		}
 		cochangeFiles.add(cochangeFile);
 		cochangeTimesWithFile.put(cochangeFile.getId(), cochange);
 	}
-	
+
+	public int getFanIn() {
+		return fanIn;
+	}
+
+	public void setFanIn(int fanIn) {
+		this.fanIn = fanIn;
+	}
+
+	public Set<ProjectFile> getCochangeFiles() {
+		return cochangeFiles;
+	}
+
+	public Map<Long, CoChange> getCochangeTimesWithFile() {
+		return cochangeTimesWithFile;
+	}
+
 }

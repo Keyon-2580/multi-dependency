@@ -16,8 +16,8 @@ server:
 
 config:
    starter:
-      cochange: true
-      depends_on: true
+      cochange: false
+      depends_on: false
 
 data:
 #   project_config: src/main/resources/project/simpletest.json
@@ -34,7 +34,7 @@ data:
    dynamic_analyse: false
    git_analyse: true
    lib_analyse: false
-   clone_analyse: false
+   clone_analyse: true
    neo4j:
       delete: true
       # batchInserter要插入的数据库

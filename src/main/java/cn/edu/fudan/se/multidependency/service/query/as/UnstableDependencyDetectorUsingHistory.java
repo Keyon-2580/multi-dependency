@@ -4,10 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.service.query.as.data.UnstableFile;
-import cn.edu.fudan.se.multidependency.service.query.as.data.UnstablePackage;
+import cn.edu.fudan.se.multidependency.service.query.as.data.UnstableFileInHistory;
 
-public interface UnstableDependencyDetector {
+public interface UnstableDependencyDetectorUsingHistory {
+
+	Map<Long, List<UnstableFileInHistory>> unstableFiles();
 	
 	void setFanInThreshold(Project project, int minFanIn);
 	
@@ -20,9 +21,4 @@ public interface UnstableDependencyDetector {
 	int getCoChangeTimesThreshold(Project project);
 	
 	int getCoChangeFilesThreshold(Project project);
-
-	Map<Long, List<UnstableFile>> unstableFiles();
-	
-	Map<Long, List<UnstablePackage>> unstablePackages();
-	
 }

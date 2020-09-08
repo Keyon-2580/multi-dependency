@@ -31,9 +31,7 @@
 <script type="text/javascript" th:src="@{/js/as/hublike.js}"></script>
 <script type="text/javascript" th:src="@{/js/as/unstable.js}"></script>
 <script type="text/javascript" th:src="@{/js/as/cyclic.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/hierarchy.js}"></script>
 <script type="text/javascript" th:src="@{/js/as/similar.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/godComponents.js}"></script>
 <script type="text/javascript" th:src="@{/js/as/unused.js}"></script>
 <script type="text/javascript" th:src="@{/js/as/icd.js}"></script>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
@@ -194,8 +192,7 @@
 							</div>
 						</div>
 						<div class="col-sm-12">
-							<button id="unstableThresholdSave" class="btn btn-default">Save</button>
-							<a href="/as/unstable/cochange" target="_blank" class="btn btn-default">Detect</a>
+							<button id="unstableHistoryThresholdSave" class="btn btn-default">Save</button>
 						</div>
 					</div>
 					<div class="col-sm-6">
@@ -203,12 +200,28 @@
 							<h5><b>Detect By Instability</b></h5>
 						</div>
 						<div class="col-sm-6 form-group">
-							<label for="unstableBadDependencyThreshold">Ratio (Bad Dependencies / All Dependencies) Threshold: </label>
-							<input id="unstableBadDependencyThreshold" type="number" class="form-control" />
+							<label for="unstableFileFanOutThreshold">File-Level All Outgoing Dependencies Threshold: </label>
+							<input id="unstableFileFanOutThreshold" type="number" class="form-control"/>
+						</div>
+						<div class="col-sm-6 form-group">
+							<label for="unstableModuleFanOutThreshold">Module-Level All Outgoing Dependencies Threshold: </label>
+							<input id="unstableModuleFanOutThreshold" type="number" class="form-control"/>
+						</div>
+						<div class="form-group col-sm-12 row">
+							<div class="col-sm-12">
+								<label for="unstableRatioThreshold">Ratio<br/> (Bad Outgoing Dependencies / All Outgoing Dependencies) <br/>Threshold: </label>
+							</div>
+							<div class="col-sm-6">
+								<input id="unstableRatioThreshold" class="form-control" />
+							</div>
 						</div>
 						<div class="col-sm-12">
-							<button id="unstableThresholdSave" class="btn btn-default">Save</button>
-							<a href="/as/unstable/instability" target="_blank" class="btn btn-default">Detect</a>
+							<button id="unstableInstabilityThresholdSave" class="btn btn-default">Save</button>
+						</div>
+					</div>
+					<div class="col-sm-12">
+						<div class="" style="margin-top: 15px;">
+							<a href="/as/unstable" target="_blank" class="btn btn-default">Detect</a>
 						</div>
 					</div>
 				</div>
@@ -338,7 +351,7 @@
 			hublike(cytoscapeutil()).init();
 			unstable(cytoscapeutil()).init();
 			icd(cytoscapeutil()).init();
-			god(cytoscapeutil()).init();
+		//	god(cytoscapeutil()).init();
 		});
 		// ]]>
 	</script>

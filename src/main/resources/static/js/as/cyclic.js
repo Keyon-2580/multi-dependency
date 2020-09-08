@@ -62,13 +62,21 @@ var cyclic = function(cytoscapeutil) {
 	}
 	
 	var showGraph = function(cycleFiles) {
+		console.log(cycleFiles);
+		var categories = [];
+		for(var i = 0; i < cycleFiles.groups.length; i++) {
+			categories[i] = {
+				name : "module_" + cycleFiles.groups[i].id
+			};
+		}
 		var nodes = [];
 		for(var i = 0; i < cycleFiles.components.length; i++) {
 			var file = cycleFiles.components[i];
 			nodes[i] = {
 				name: file.name,
 				id: file.id + "",
-				category: 1
+				category: "module_" + cycleFiles.componentToGroup[file.id].id,
+				draggable: true
 			}
 		}
 		console.log(nodes);
@@ -91,6 +99,12 @@ var cyclic = function(cytoscapeutil) {
 				},
 				tooltip: {},
 				animation: false,
+				legend: [{
+		            // selectedMode: 'single',
+		            data: categories.map(function (a) {
+		                return a.name;
+		            })
+		        }],
 				series : [
 					{
 						name: 'cycle',
@@ -98,6 +112,10 @@ var cyclic = function(cytoscapeutil) {
 						layout: 'force',
 						data: nodes,
 						links: links,
+						categories: categories,
+						label: {
+							position: 'right'
+						},
 						roam: true,
 						edgeSymbol: ['arrow']
 					}

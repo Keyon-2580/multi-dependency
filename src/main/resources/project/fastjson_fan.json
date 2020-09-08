@@ -1,22 +1,24 @@
 {
 	"projects": [{
-		"path": "D:\\git\\fastjson-1.2.70",
-		"serviceGroupName": "fastjson",
-		"language": "java",
-		"isMicroservice": true
+		"path": "D:\\git\\fastjson-1.2.56",
+		"language": "java"
 	}],
 	"gits": [{
-		"path": "D:\\git\\fastjson-1.2.70",
+		"path": "D:\\git\\fastjson-1.2.56",
 		"specify_commit_range": true,
 		"specify_by_commit_id": true,
-		"commit_id_from" : "a08711109489846903176988129e0f96a07d0f8c",
-		"commit_id_to" : "e697d4aad5e3e4b4df9dc7fb6364d312e7239ef0",
-		"commit_id_current" : "d191d464890f15384ea94843161976db536d72ac",
+		"commit_id_from" : "00bbb28bf0bdc9bb39dc0f26c0da7fc5875573d1",
+		"commit_id_to" : "f164d8519ff061baac6f8d58a5a1b88c2afab00e",
+		"commit_id_current" : "e44c60347298924c588012c9cf158f3e3eb993f6",
 		"issues_directory" : "D:\\git\\multi-dependency\\src\\main\\resources\\git\\issues\\fastjson"
  	}],
-	"clones": []
-
-	,
+ 	"clones": [{
+		"language"   : "java",
+		"granularity": "file",
+		"name_path"  : "src/main/resources/clone/file/fastjson/1.2.56/result/MeasureIndex.csv",
+		"result_path": "src/main/resources/clone/file/fastjson/1.2.56/similarity.csv",
+		"group_path" : "src/main/resources/clone/file/fastjson/1.2.56/result/type123_method_group_result.csv"
+	}],
 	"dynamics": {
 	},
 	"architectures": {},

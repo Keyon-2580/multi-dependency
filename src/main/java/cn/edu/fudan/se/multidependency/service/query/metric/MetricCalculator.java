@@ -67,6 +67,7 @@ public class MetricCalculator {
 		Map<Long, List<FileMetrics>> result = new HashMap<>();
 		Map<ProjectFile, FileMetrics> commitFileMetricsCache = calculateCommitFileMetrics();
 		for(FileMetrics fileMetrics : fileRepository.calculateFileMetrics()) {
+			fileMetrics.setInstability((fileMetrics.getFanIn() + fileMetrics.getFanOut()) == 0 ? -1 : (fileMetrics.getFanOut() + 0.0) / (fileMetrics.getFanIn() + fileMetrics.getFanOut()));
 			ProjectFile file = fileMetrics.getFile();
 			if(commitFileMetricsCache.get(file) != null) {
 				fileMetrics.setCochangeCommitTimes(commitFileMetricsCache.get(file).getCochangeCommitTimes());

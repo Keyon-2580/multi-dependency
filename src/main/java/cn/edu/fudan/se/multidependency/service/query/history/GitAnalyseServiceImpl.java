@@ -163,8 +163,6 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
         return result;
     }
 
-    private Map<ProjectFile, Map<ProjectFile, CoChange>> cntOfFileCoChangeCache = new ConcurrentHashMap<>();
-    
 	@Override
 	public Collection<CoChange> calCntOfFileCoChange() {
 		String key = "allFileCoChanges";
@@ -175,13 +173,6 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 		result.sort((c1, c2) -> {
 			return c2.getTimes() - c1.getTimes();
 		});
-		for(CoChange cochange : result) {
-			ProjectFile file1 = cochange.getFile1();
-			ProjectFile file2 = cochange.getFile2();
-			Map<ProjectFile, CoChange> ccs = cntOfFileCoChangeCache.getOrDefault(file1, new HashMap<>());
-			ccs.put(file2, cochange);
-			cntOfFileCoChangeCache.put(file1, ccs);
-		}
 		cache.cache(getClass(), key, result);
 		return result;
 	}
@@ -190,25 +181,24 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 	public Collection<CoChange> getTopKFileCoChange(int k) {
 		return new ArrayList<>(calCntOfFileCoChange()).subList(0, k);
 	}
+	
+	private CoChange findCoChange(ProjectFile file1, ProjectFile file2) {
+		String key = "findCoChange_" + file1.getId() + "_" + file2.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		CoChange result = cochangeRepository.findCoChangesBetweenTwoFiles(file1.getId(), file2.getId());
+		if(result != null) {
+			cache.cache(getClass(), key, result);
+		}
+		return result;
+	}
 
 	@Override
 	public CoChange findCoChangeBetweenTwoFiles(ProjectFile file1, ProjectFile file2) {
-		calCntOfFileCoChange();
-		Map<ProjectFile, CoChange> ccs = cntOfFileCoChangeCache.getOrDefault(file1, new HashMap<>());
-		CoChange result = ccs.get(file2);
+		CoChange result = findCoChange(file1, file2);
 		if(result == null) {
-			ccs = cntOfFileCoChangeCache.getOrDefault(file2, new HashMap<>());
-			result = ccs.get(file1);
-		}
-		if(result == null) {
-			result = cochangeRepository.findCoChangesBetweenTwoFiles(file1.getId(), file2.getId());
-			if(result != null) {
-				ccs = cntOfFileCoChangeCache.getOrDefault(file1, new HashMap<>());
-				ccs.put(file2, result);
-				cntOfFileCoChangeCache.put(file1, ccs);
-			} else {
-				result = cochangeRepository.findCoChangesBetweenTwoFiles(file2.getId(), file1.getId());
-			}
+			return findCoChange(file2, file1);
 		}
 		return result;
 	}
