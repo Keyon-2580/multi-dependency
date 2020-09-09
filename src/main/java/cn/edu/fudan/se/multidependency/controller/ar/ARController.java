@@ -8,12 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.List;
-import java.util.Set;
-
 
 @Controller
 @RequestMapping("/ar")
@@ -27,7 +22,9 @@ public class ARController {
 
     @GetMapping("/exportNeo4jCSV")
     @ResponseBody
-    public void exportNeo4jCSV() {}
+    public void exportNeo4jCSV() {
+        clusterService.exportNeo4jCSV("C:\\Users\\SongJee\\Desktop\\Dissertation\\cluster\\import\\");
+    }
 
     @GetMapping("/dependGraph/static")
     public String staticDependGraph() {
@@ -79,12 +76,34 @@ public class ARController {
         return "ar/static_cluster_graph";
     }
 
+    @GetMapping("/clusterGraph/dynamic")
+    public String dynamicClusterGraph() {
+        return "ar/dynamic_cluster_graph";
+    }
+
+    @GetMapping("/clusterGraph/cochange")
+    public String cochangeClusterGraph() {
+        return "ar/cochange_cluster_graph";
+    }
+
     @GetMapping("/clusterJson/static")
     @ResponseBody
     public JSONArray staticClusterJson() {
         String filePath = "C:\\Users\\SongJee\\Desktop\\static_alone.csv";
-        JSONArray jsonArray = clusterService.getClusterJson(filePath);
-        String s = jsonArray.toString();
-        return jsonArray;
+        return clusterService.getClusterJson(filePath);
+    }
+
+    @GetMapping("/clusterJson/dynamic")
+    @ResponseBody
+    public JSONArray dynamicClusterJson() {
+        String filePath = "C:\\Users\\SongJee\\Desktop\\dynamic_alone.csv";
+        return clusterService.getClusterJson(filePath);
+    }
+
+    @GetMapping("/clusterJson/cochange")
+    @ResponseBody
+    public JSONArray cochangeClusterJson() {
+        String filePath = "C:\\Users\\SongJee\\Desktop\\history_alone.csv";
+        return clusterService.getClusterJson(filePath);
     }
 }

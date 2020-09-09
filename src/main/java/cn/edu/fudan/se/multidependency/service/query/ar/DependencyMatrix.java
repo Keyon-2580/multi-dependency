@@ -111,12 +111,12 @@ public class DependencyMatrix {
             calculate(fileRepository.getCastFromFuncToType(fromId), CAST_FROM_FUNC_TO_TYPE);
 
             //动态
-            this.flag = 1;
-            calculate(fileRepository.getDynamicCallBtwFunc(fromId), DYNAMIC_CALL_BTW_FUNC);
+//            this.flag = 1;
+//            calculate(fileRepository.getDynamicCallBtwFunc(fromId), DYNAMIC_CALL_BTW_FUNC);
 
             //演化
-            this.flag = 2;
-            calculate(fileRepository.getCoChangeFiles(fromId), CO_CHANGE);
+//            this.flag = 2;
+//            calculate(fileRepository.getCoChangeFiles(fromId), CO_CHANGE);
         }
     }
 

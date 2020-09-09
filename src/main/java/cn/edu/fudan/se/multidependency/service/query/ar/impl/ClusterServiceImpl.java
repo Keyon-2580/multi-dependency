@@ -20,6 +20,7 @@ public class ClusterServiceImpl implements ClusterService {
     private DependencyMatrix dependencyMatrix;
 
     public void exportNeo4jCSV(String dirPath) {
+        dependencyMatrix.init();
         String nodeFileName = "nodes.csv";
         String relationFileName = "relations.csv";
         final String CSV_COL_SPR = ",";
@@ -55,9 +56,8 @@ public class ClusterServiceImpl implements ClusterService {
         JSONArray result = new JSONArray();
         JSONObject jsonObject = new JSONObject();
         JSONObject jsonObject1 = new JSONObject();
-        jsonObject1.put("name", "default");
+        jsonObject1.put("name", "");
         JSONArray jsonArray1 = new JSONArray();
-        int i = 0;
         for (Set<String> cluster : list) {
             JSONArray jsonArray2 = new JSONArray();
 
@@ -65,13 +65,13 @@ public class ClusterServiceImpl implements ClusterService {
                 JSONObject jsonObject2 = new JSONObject();
                 jsonObject2.put("size", 1);
                 jsonObject2.put("name", FileUtil.extractFileName(path));
+//                jsonObject2.put("name", path);
                 jsonArray2.add(jsonObject2);
             }
 
             JSONObject jsonObject3 = new JSONObject();
-            jsonObject3.put("name", "default");
+            jsonObject3.put("name", "");
             jsonObject3.put("children", jsonArray2);
-            i++;
 
             jsonArray1.add(jsonObject3);
         }

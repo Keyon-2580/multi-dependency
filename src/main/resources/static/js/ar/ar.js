@@ -2,7 +2,7 @@ var staticDependGraph = function() {
     var mainUrl = "/ar";
     $.ajax({
         type: "get",
-        url: mainUrl + "/json/static",
+        url: mainUrl + "/dependJson/static",
         success: function(result) {
             console.log(result);
             dependencyToGraph(result.result, "static_depend_graph");
@@ -14,7 +14,7 @@ var dynamicDependGraph = function() {
     var mainUrl = "/ar";
     $.ajax({
         type: "get",
-        url: mainUrl + "/json/dynamic",
+        url: mainUrl + "/dependJson/dynamic",
         success: function(result) {
             console.log(result);
             dependencyToGraph(result.result, "dynamic_depend_graph");
@@ -26,7 +26,7 @@ var cochangeDependGraph = function() {
     var mainUrl = "/ar";
     $.ajax({
         type: "get",
-        url: mainUrl + "/json/cochange",
+        url: mainUrl + "/dependJson/cochange",
         success: function(result) {
             console.log(result);
             dependencyToGraph(result.result, "cochange_depend_graph");
@@ -268,11 +268,44 @@ var dependencyToGraph = function(result,divId) {
     }
 };
 
-var dependCluster = function () {
+var staticClusterGraph = function () {
     var mainUrl = "/ar";
     $.ajax({
         type : "GET",
         url : mainUrl + "/clusterJson/static",
+        success : function(result) {
+            projectToGraph(result,"graph");
+        }
+    })
+}
+
+var staticClusterGraph = function () {
+    var mainUrl = "/ar";
+    $.ajax({
+        type : "GET",
+        url : mainUrl + "/clusterJson/static",
+        success : function(result) {
+            projectToGraph(result,"graph");
+        }
+    })
+}
+
+var dynamicClusterGraph = function () {
+    var mainUrl = "/ar";
+    $.ajax({
+        type : "GET",
+        url : mainUrl + "/clusterJson/dynamic",
+        success : function(result) {
+            projectToGraph(result,"graph");
+        }
+    })
+}
+
+var cochangeClusterGraph = function () {
+    var mainUrl = "/ar";
+    $.ajax({
+        type : "GET",
+        url : mainUrl + "/clusterJson/cochange",
         success : function(result) {
             projectToGraph(result,"graph");
         }
@@ -357,26 +390,5 @@ var projectToGraph = function(result,divId){
         node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
         circle.attr("r", function(d) { return d.r * k; });
     }
-
-    // function getCloneByName(data,name){
-    // 	if(data.name === name){
-    // 		return data.clone;
-    // 	}else{
-    // 		if(data.children){
-    // 			for(var i = 0; i < data.children.length; i++) {
-    // 				// console.log(d.name)
-    // 				if (data.children[i] === name) {
-    // 					return data.children[i].clone;
-    // 				} else {
-    // 					var findResult = getCloneByName(data.children[i], name);
-    // 					if(findResult) {
-    // 						return findResult;
-    // 					}
-    // 				}
-    // 			}
-    // 			// console.log(typeof(projectdata.children[2].children) != "undefined")
-    // 		}
-    // 	}
-    // }
 };
 
