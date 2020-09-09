@@ -2,8 +2,8 @@ var projectToGraph = function(result,divId){
 	console.log(result);
 	var projectdata = result;
 	var svg = d3.select("#" + divId)
-			.attr("width", 1200)
-			.attr("height", 1000),
+			.attr("width", 800)
+			.attr("height", 800),
 		margin = 20,
 		diameter = +svg.attr("width"),
 		g = svg.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
@@ -34,7 +34,7 @@ var projectToGraph = function(result,divId){
 		.data(nodes)
 		.enter().append("circle")
 		.attr("class", function(d) { return d.parent ? d.children ? "circlepacking_node" : "circlepacking_node circlepacking_node--leaf" : "circlepacking_node circlepacking_node--root"; })
-		.style("fill", function(d) { return d.children ? color(d.depth) : color_count(getCountByName(projectdata,d.data.name)); })
+		.style("fill", function(d) { return d.children ? color(d.depth) : GetColorCount(getCountByName(projectdata,d.data.name))})
 		.on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); });
 
 	var text = g.selectAll("text")
@@ -100,5 +100,10 @@ var projectToGraph = function(result,divId){
 				// console.log(typeof(projectdata.children[2].children) != "undefined")
 			}
 		}
+	}
+
+	function GetColorCount(count){
+		if(count === 1) return null;
+		else return color_count(count);
 	}
 }

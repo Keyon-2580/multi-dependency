@@ -68,14 +68,14 @@ public class ProjectConfigUtil {
 		ProjectConfig result = new ProjectConfig();
 		Language language = Language.valueOf(projectJson.getString("language"));
 		String projectPath = projectJson.getString("path");
-		String projectName = projectJson.getString("project");
+//		String projectName = projectJson.getString("project");
+		String projectName = FileUtil.extractFileName(projectPath);
 		Boolean isMicroservice = projectJson.getBoolean("isMicroservice");
 		isMicroservice = isMicroservice == null ? true : isMicroservice;
 		String microserviceName = projectJson.getString("microserviceName");
 		microserviceName = microserviceName == null ? projectName : microserviceName;
 		String serviceGroupName = projectJson.getString("serviceGroupName");
 		serviceGroupName = serviceGroupName == null ? projectName : serviceGroupName;
-//		String projectName = projectJson.getString("project");
 		Boolean autoInclude = projectJson.getBoolean("autoInclude");
 		autoInclude = autoInclude == null ? true : autoInclude;
 		JSONArray excludesArray = projectJson.getJSONArray("excludes");

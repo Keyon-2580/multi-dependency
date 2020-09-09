@@ -41,7 +41,7 @@ var multiple = function(projects, files, cytoscapeutil) {
         	        }
         	    },
         	    legend: {
-        	        data: ["所有文件数", 'smell文件数', 'issue文件数']
+        	        data: ["All Files", 'Smell Files', 'Issue Files']
         	    },
         	    grid: {
         	        left: '3%',
@@ -63,17 +63,17 @@ var multiple = function(projects, files, cytoscapeutil) {
         	        }
         	    ],
         	    series: [{
-        	            name: "所有文件数",
+        	            name: "All Files",
         	            type: 'bar',
         	            stack: 'allFiles',
         	            data: data.allFiles
         	        },{
-        	            name: 'smell文件数',
+        	            name: 'Smell Files',
         	            type: 'bar',
         	            stack: 'smellFiles',
         	            data: data.smellFiles
         	        },{
-        	        	name: 'issue文件数',
+        	        	name: 'Issue Files',
         	        	type: 'bar',
         	        	stack: 'issueFiles',
         	        	data: data.issueFiles
@@ -185,6 +185,7 @@ var multiple = function(projects, files, cytoscapeutil) {
 				html += "<div>";
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
+				html += "<th>id</th>";
 				html += "<th>File</th>";
 				html += "<th>cycle</th>";
 				html += "<th>hublike</th>";
@@ -199,6 +200,7 @@ var multiple = function(projects, files, cytoscapeutil) {
 				for(var j = 0 ; j < files[project.id].length; j++) {
 					var value = files[project.id][j];
 					html += "<tr>";
+					html += "<td>" + value.file.id + "</td>";
 					html += "<td><a target='_blank' href='/relation/file/" + value.file.id + "'>" + value.file.path + "</a></td>";
 					html += "<td>" + (value.cycle == true ? "T" : "") + "</td>";
 					html += "<td>" + (value.hublike == true ? "T" : "") + "</td>";

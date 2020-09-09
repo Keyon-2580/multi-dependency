@@ -16,8 +16,8 @@ server:
 
 config:
    starter:
-      cochange: false
-      depends_on: false
+      cochange: true
+      depends_on: true
 
 data:
 #   project_config: src/main/resources/project/simpletest.json
@@ -30,7 +30,7 @@ data:
    project_config: src/main/resources/project/fastjson_version_fan.json
 #   project_config: src/main/resources/project/depends_fan.json
 #   project_config: src/main/resources/project/depends_fan2.json
-   project_analyse_threads_count: 5
+   project_analyse_threads_count: 6
    dynamic_analyse: false
    git_analyse: true
    lib_analyse: false
