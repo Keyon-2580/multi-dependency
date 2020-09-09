@@ -109,15 +109,18 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 				if(issueFile != null) {
 					// 既是issueFile又是smellFile
 					smellAndIssueCircle.addProjectFile(smellFile.getFile(), issueFile.getIssues());
+					smellAndIssueCircle.setFileSmellCount(smellFile.getFile(), smellFile.getSmellCount());
 					issueFiles.remove(issueFile);
 				} else {
 					// 仅是smellFile
 					onlySmellCircle.addProjectFile(smellFile.getFile());
+					onlySmellCircle.setFileSmellCount(smellFile.getFile(), smellFile.getSmellCount());
 				}
 			}
 			for(IssueFile issueFile : issueFiles) {
 				// 仅是issueFile
 				onlyIssueCircle.addProjectFile(issueFile.getFile(), issueFile.getIssues());
+				onlyIssueCircle.setFileSmellCount(issueFile.getFile(), 0);
 			}
 			
 			circles.add(smellAndIssueCircle);
@@ -305,7 +308,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 //				if(m2.smellCount() == m1.smellCount()) {
 //					return m2.getFile().getScore() > m1.getFile().getScore() ? 1 : -1;
 //				}
-				return m2.smellCount() - m1.smellCount();
+				return m2.getSmellCount() - m1.getSmellCount();
 			});
 		}
 		

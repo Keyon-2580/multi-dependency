@@ -29,6 +29,12 @@ public class CirclePacking {
 	
 	private Map<Long, List<Issue>> fileIdToIssues = new HashMap<>();
 	
+	private Map<Long, Integer> fileIdToSmellCount = new HashMap<>();
+	
+	public void setFileSmellCount(ProjectFile file, int count) {
+		fileIdToSmellCount.put(file.getId(), count);
+	}
+	
 	public int getMaxIssueSize() {
 		int max = 0;
 		for(ProjectFile file : files) {

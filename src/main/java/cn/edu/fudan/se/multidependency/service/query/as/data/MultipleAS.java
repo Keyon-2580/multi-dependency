@@ -23,9 +23,10 @@ public interface MultipleAS {
 //				+ (isSimilar() ? 1 : 0) + (isUnstable() ? 1 : 0) + (isCyclicHierarchy() ? 1 : 0)
 //				+ (isGod() ? 1 : 0) + (isUnused() ? 1 : 0);
 //	}
-	default int smellCount() {
+	default int getSmellCount() {
 		return (isCycle() ? 1 : 0) + (isHublike() ? 1 : 0) + (isLogicCoupling() ? 1 : 0) 
-				+ (isSimilar() ? 1 : 0) + (isUnstable() ? 1 : 0) 
-				+ (isUnused() ? 1 : 0);
+				+ (isSimilar() ? 1 : 0) + (isUnstable() ? 1 : 0) ;
+//				+ (isUnused() ? 1 : 0);
 	}
+	
 }

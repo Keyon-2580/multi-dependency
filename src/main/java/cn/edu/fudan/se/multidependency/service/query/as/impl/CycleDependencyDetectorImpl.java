@@ -82,15 +82,26 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 			Cycle<ProjectFile> cycleFile = new Cycle<ProjectFile>(cycle);
 			cycleFile.addAll(findCycleFileRelationsBySCC(cycle));
 			boolean flag = false;
+			Project project = null;
+			boolean crossModule = false;
+			Module lastModule = null;
 			for(ProjectFile file : cycle.getComponents()) {
-				cycleFile.putComponentBelongToGroup(file, moduleService.findFileBelongToModule(file));
+				Module fileBelongToModule = moduleService.findFileBelongToModule(file);
+				if(lastModule == null) {
+					lastModule = fileBelongToModule;
+				} else if(!lastModule.equals(fileBelongToModule)) {
+					crossModule = true;
+				}
+				cycleFile.putComponentBelongToGroup(file, fileBelongToModule);
 				if(!flag) {
-					Project project = containRelationService.findFileBelongToProject(file);
-					Map<Integer, Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new HashMap<>());
-					temp.put(cycleFile.getPartition(), cycleFile);
-					result.put(project.getId(), temp);
+					project = containRelationService.findFileBelongToProject(file);
 					flag = true;
 				}
+			}
+			if(crossModule) {
+				Map<Integer, Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+				temp.put(cycleFile.getPartition(), cycleFile);
+				result.put(project.getId(), temp);
 			}
 		}
 		cache.cache(getClass(), key, result);

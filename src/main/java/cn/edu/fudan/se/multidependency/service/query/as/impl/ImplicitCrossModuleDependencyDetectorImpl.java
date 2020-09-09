@@ -10,19 +10,12 @@ import org.springframework.stereotype.Service;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
-import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.as.ImplicitCrossModuleDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.ModuleService;
 import cn.edu.fudan.se.multidependency.service.query.as.data.LogicCouplingFiles;
 
 @Service
 public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossModuleDependencyDetector {
-	
-	@Autowired
-	private StaticAnalyseService staticAnalyseService;
-	
-	/*@Autowired
-	private GitAnalyseService gitAnalyseService;*/
 	
 	@Autowired
 	private CoChangeRepository cochangeRepository;

@@ -104,6 +104,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         LOGGER.info("commit 数量：" + commits.size());
 //      Collections.reverse(commits);
         for (RevCommit revCommit : commits) {
+//        	System.out.println(revCommit.getName());
         	String authoredDate = new SimpleDateFormat(Constant.TIMESTAMP).format(revCommit.getAuthorIdent().getWhen());
         	boolean merge = revCommit.getParentCount() > 1;
         	Commit commit = null;
@@ -214,8 +215,12 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
     
     private void addIssues() throws Exception {
     	//添加issue节点和gitRepository到issue的包含关系
-    	issues = new IssueExtractor(gitConfig.getIssueFilePathes()).extract();
-    	for (Issue issue : issues.values()) {
+    	IssueExtractor issueExtractor = new IssueExtractor(gitConfig.getIssueFilePathes());
+    	issues = issueExtractor.extract();
+    	Map<Integer, Issue> newIssues = issueExtractor.newIssues();
+    	System.out.println("newIssues size: " + newIssues.size());
+//    	for (Issue issue : issues.values()) {
+    	for (Issue issue : newIssues.values()) {
     		issue.setEntityId(generateEntityId());
     		addNode(issue, null);
     		addRelation(new Contain(gitRepository, issue));
