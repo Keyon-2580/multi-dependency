@@ -3,6 +3,8 @@ package cn.edu.fudan.se.multidependency.controller;
 import java.io.OutputStream;
 import java.util.*;
 
+import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,6 +61,9 @@ public class CloneController {
 	@Autowired
 	private SimilarPackageDetector similarPackageDetector;
 
+	@Autowired
+	private HotspotPackageDetector hotspotPackageDetector;
+
 	@GetMapping("/packages")
 	public String graph() {
 		return "clonepackage";
@@ -100,9 +105,9 @@ public class CloneController {
 	
 	@GetMapping("/package/duplicated")
 	@ResponseBody
-	public Collection<SimilarPackage> similarPackages(@RequestParam("threshold") int threshold,
+	public Collection<HotspotPackage> similarPackages(@RequestParam("threshold") int threshold,
 			@RequestParam("percentage") double percentage) {
-		return similarPackageDetector.detectSimilarPackages(threshold, percentage);
+		return hotspotPackageDetector.detectHotspotPackages();
 	}
 	
 	/**

@@ -208,19 +208,19 @@ var clone = function(cytoscapeutil) {
 							html += prefix + duplicated.package1.directoryPath;
 							html += layer == 0 ? "</th>" : "</td>";
 							html += layer == 0 ? "<th>" : "<td>";
-							html += duplicated.cloneNodes1 + "/" + duplicated.allNodes1 + "=" + ((duplicated.cloneNodes1 + 0.0) / duplicated.allNodes1).toFixed(2);
+							html += duplicated.relationNodes1 + "/" + duplicated.allNodes1 + "=" + ((duplicated.relationNodes1 + 0.0) / duplicated.allNodes1).toFixed(2);
 							html += layer == 0 ? "</th>" : "</td>";
 							html += layer == 0 ? "<th>" : "<td>";
 							html += prefix + duplicated.package2.directoryPath;
 							html += layer == 0 ? "</th>" : "</td>";
 							html += layer == 0 ? "<th>" : "<td>";
-							html += duplicated.cloneNodes2 + "/" + duplicated.allNodes2 + "=" + ((duplicated.cloneNodes2 + 0.0) / duplicated.allNodes2).toFixed(2);
+							html += duplicated.relationNodes2 + "/" + duplicated.allNodes2 + "=" + ((duplicated.relationNodes2 + 0.0) / duplicated.allNodes2).toFixed(2);
 							html += layer == 0 ? "</th>" : "</td>";
 							html += layer == 0 ? "<th>" : "<td>";
-							html += duplicated.clonePackages.children.length;
+							html += duplicated.relationPackages.children.length;
 							html += layer == 0 ? "</th>" : "</td>";
 							html += layer == 0 ? "<th>" : "<td>";
-							html += "(" + duplicated.cloneNodes1 + "+" + duplicated.cloneNodes2 + ")/(" + duplicated.allNodes1 + "+" + duplicated.allNodes2 + ")=" + ((duplicated.cloneNodes1 + duplicated.cloneNodes2 + 0.0) / (duplicated.allNodes1 + duplicated.allNodes2)).toFixed(2);
+							html += "(" + duplicated.relationNodes1 + "+" + duplicated.relationNodes2 + ")/(" + duplicated.allNodes1 + "+" + duplicated.allNodes2 + ")=" + ((duplicated.relationNodes1 + duplicated.relationNodes2 + 0.0) / (duplicated.allNodes1 + duplicated.allNodes2)).toFixed(2);
 							html += layer == 0 ? "</th>" : "</td>";
 							html += "</tr>";
 							break;
@@ -262,8 +262,8 @@ var clone = function(cytoscapeutil) {
 							break;
 					}
 					if(index == 0) {
-						for(var key1 = 0; key1 < duplicated.childrenSimilarPackages.length; key1 ++) {
-							tr(0, layer + 1, duplicated.childrenSimilarPackages[key1]);
+						for(var key1 = 0; key1 < duplicated.childrenHotspotPackages.length; key1 ++) {
+							tr(0, layer + 1, duplicated.childrenHotspotPackages[key1]);
 						}
 
 						for(var key2 = 0; key2 < duplicated.childrenOtherPackages1.length; key2 ++) {

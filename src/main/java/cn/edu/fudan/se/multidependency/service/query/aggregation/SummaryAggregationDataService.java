@@ -84,7 +84,7 @@ public interface SummaryAggregationDataService extends AggregationDataService{
     Map<Node, Map<Node, RelationDataForDoubleNodes<Node, Relation>>> queryPackageCoChangeFromFileCoChange(Collection<? extends Relation> fileCoChanges);
 
     /**
-     * 根据文件间的co-chage找出包间的co-change，排序
+     * 根据文件间的co-change找出包间的co-change，排序
      * @param fileCoChanges
      * @return
      */
@@ -133,7 +133,7 @@ public interface SummaryAggregationDataService extends AggregationDataService{
 
 
 
-    default Collection<RelationDataForDoubleNodes<Node, Relation>> querySuperNodeRelationFromSubNodeRelation(Collection<Relation> subNodeRelations, List<Node> pcks) {
+    default Collection<RelationDataForDoubleNodes<Node, Relation>> querySuperNodeRelationFromSubNodeRelation(Collection<? extends Relation> subNodeRelations, List<Node> pcks) {
         if(pcks == null || pcks.isEmpty()) {
             return new ArrayList<>();
         }

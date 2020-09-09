@@ -97,7 +97,7 @@ public class HotspotPackage {
 		this.relationNodes2 = relationNodes2;
 	}
 
-	public boolean isContainSimilarChild(SimilarPackage p) {
+	public boolean isContainHotspotChild(HotspotPackage p) {
 		return this.childrenHotspotPackages.contains(p);
 	}
 
