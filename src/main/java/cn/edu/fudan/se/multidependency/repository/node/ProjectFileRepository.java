@@ -139,4 +139,5 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 
 	@Query("match (f1:ProjectFile)-[r:CO_CHANGE]->(f2:ProjectFile) where id(f1)={fileId} return f2 as projectFile, r.times as count")
 	List<DependencyPair> getCoChangeFiles(@Param("fileId") long fileId);
+
 }

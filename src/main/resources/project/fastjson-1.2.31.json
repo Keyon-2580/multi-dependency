@@ -1,0 +1,23 @@
+{
+  "projects": [
+    {
+      "path": "C:\\Users\\SongJee\\Desktop\\fastjson-1.2.31",
+      "project": "fastjson-1.2.31",
+      "language": "java",
+      "isMicroservice": false,
+      "excludes": [
+        "D:\\my_data\\Dissertation\\jhotdraw-git\\JHotDraw\\src\\CH\\ifa\\draw\\test"
+      ]
+    }
+  ],
+  "architectures": {
+  },
+  "dynamics": {
+  },
+  "gits": [
+  ],
+  "libs": [
+  ],
+  "clones": [
+  ]
+}

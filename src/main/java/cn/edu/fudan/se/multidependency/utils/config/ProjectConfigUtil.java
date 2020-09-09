@@ -68,7 +68,7 @@ public class ProjectConfigUtil {
 		ProjectConfig result = new ProjectConfig();
 		Language language = Language.valueOf(projectJson.getString("language"));
 		String projectPath = projectJson.getString("path");
-		String projectName = FileUtil.extractFileName(projectPath);
+		String projectName = projectJson.getString("project");
 		Boolean isMicroservice = projectJson.getBoolean("isMicroservice");
 		isMicroservice = isMicroservice == null ? true : isMicroservice;
 		String microserviceName = projectJson.getString("microserviceName");

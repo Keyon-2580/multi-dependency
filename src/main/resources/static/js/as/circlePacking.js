@@ -2,8 +2,8 @@ var projectToGraph = function(result,divId){
 	console.log(result);
 	var projectdata = result;
 	var svg = d3.select("#" + divId)
-			.attr("width", 600)
-			.attr("height", 600),
+			.attr("width", 1200)
+			.attr("height", 1000),
 		margin = 20,
 		diameter = +svg.attr("width"),
 		g = svg.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
@@ -81,23 +81,18 @@ var projectToGraph = function(result,divId){
 
 	function getCountByName(data,name){
 		if(data.name === name){
-//			console.log(data.count)
-//			if(data.count == 0) return 0;
-//			return (data.count + 1);
-			return data.count;
+			console.log(data.count)
+			return (data.count + 1);
 		}else{
 			if(data.children){
 				for(var i = 0; i < data.children.length; i++) {
 					// console.log(d.name)
 					if (data.children[i] === name) {
-//						console.log(data.children[i].count)
-//						if(data.children[i].count == 0) return 0;
-//						return (data.children[i].count + 1);
-						return data.children[i].count;
+						console.log(data.children[i].count)
+						return (data.children[i].count + 1);
 					} else {
 						var findResult = getCountByName(data.children[i], name);
 						if(findResult) {
-//							if(data.children[i].count == 0) return 0;
 							return findResult;
 						}
 					}
