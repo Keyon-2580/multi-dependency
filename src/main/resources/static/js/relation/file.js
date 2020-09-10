@@ -24,7 +24,8 @@ var rFile = function(fileId, cytoscapeutil) {
 				html += "</tr>";
 				for(var i = 0; i < result.commits.length; i++) {
 					html += "<tr>";
-					html += "<td>" + (i + 1) + ":" + "<a target='_blank' href='/commit/" + result.commits[i].id + "'>" + result.commits[i].commitId + "(" + result.commits[i].merge + " " + result.commits[i].commitFilesSize + ") </a></td>";
+//					html += "<td>" + (i + 1) + ":" + "<a target='_blank' href='/commit/" + result.commits[i].id + "'>" + result.commits[i].commitId + "(" + result.commits[i].merge + " " + result.commits[i].commitFilesSize + ") </a></td>";
+					html += "<td>" + (i + 1) + ":" + "<a target='_blank' href='/commit/" + result.commits[i].id + "'>" + result.commits[i].commitId + "(" + result.commits[i].commitFilesSize + ") </a></td>";
 					for(var j = 0; j < result.files.length; j++) {
 						if(result.update[i][j] == true) {
 							html += "<td>T</td>";

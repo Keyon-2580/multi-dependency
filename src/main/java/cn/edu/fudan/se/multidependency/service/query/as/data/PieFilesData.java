@@ -4,6 +4,7 @@ import java.util.Set;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.git.Issue;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -17,6 +18,10 @@ public class PieFilesData {
 	Set<ProjectFile> onlyIssueFiles;
 	Set<ProjectFile> onlySmellFiles;
 	Set<ProjectFile> issueAndSmellFiles;
+	
+	Set<Issue> allIssues;
+	
+	Set<Issue> smellIssues;
 	
 	public int getAllFilesSize() {
 		return normalFiles.size() + onlyIssueFiles.size() + onlySmellFiles.size() + issueAndSmellFiles.size();

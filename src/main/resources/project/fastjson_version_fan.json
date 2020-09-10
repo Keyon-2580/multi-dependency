@@ -6,6 +6,9 @@
 		"path": "D:\\git\\article\\fastjson-1.2.09",
 		"language": "java"
 	},{
+		"path": "D:\\git\\article\\fastjson-1.2.12",
+		"language": "java"
+	},{
 		"path": "D:\\git\\article\\fastjson-1.2.31",
 		"language": "java"
 	},{
@@ -31,14 +34,22 @@
 		"specify_commit_range": true,
 		"specify_by_commit_id": true,
 		"commit_id_from" : "50c8b4d366c9de1f3568ea23a216e5b69ae9e640",
-		"commit_id_to" : "1a8496e531c6a6dadba37ece5bcc4e55ec07ae81",
+		"commit_id_to" : "3339419d999830665bd7c73b8df561d12cf92772",
 		"commit_id_current" : "1c74949dbb565ae0fa68b13320efcacbc5c7400b",
+		"issues_directory" : "D:\\git\\multi-dependency\\src\\main\\resources\\git\\issues\\fastjson"
+ 	}, {
+		"path": "D:\\git\\article\\fastjson-1.2.12",
+		"specify_commit_range": true,
+		"specify_by_commit_id": true,
+		"commit_id_from" : "1c74949dbb565ae0fa68b13320efcacbc5c7400b",
+		"commit_id_to" : "1a8496e531c6a6dadba37ece5bcc4e55ec07ae81",
+		"commit_id_current" : "3339419d999830665bd7c73b8df561d12cf92772",
 		"issues_directory" : "D:\\git\\multi-dependency\\src\\main\\resources\\git\\issues\\fastjson"
  	}, {
 		"path": "D:\\git\\article\\fastjson-1.2.31",
 		"specify_commit_range": true,
 		"specify_by_commit_id": true,
-		"commit_id_from" : "1c74949dbb565ae0fa68b13320efcacbc5c7400b",
+		"commit_id_from" : "3339419d999830665bd7c73b8df561d12cf92772",
 		"commit_id_to" : "03d77b6e629b6ff825a1c8cc3f7cbba7feb98395",
 		"commit_id_current" : "1a8496e531c6a6dadba37ece5bcc4e55ec07ae81",
 		"issues_directory" : "D:\\git\\multi-dependency\\src\\main\\resources\\git\\issues\\fastjson"

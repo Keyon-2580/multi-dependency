@@ -35,7 +35,13 @@ var projectToGraph = function(result,divId){
 		.enter().append("circle")
 		.attr("class", function(d) { return d.parent ? d.children ? "circlepacking_node" : "circlepacking_node circlepacking_node--leaf" : "circlepacking_node circlepacking_node--root"; })
 		.style("fill", function(d) { return d.children ? color(d.depth) : GetColorCount(getCountByName(projectdata,d.data.name))})
-		.on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); });
+		.on("click", function(d) { 
+			if (focus !== d) zoom(d), d3.event.stopPropagation(); 
+			console.log(d);
+			if(d.depth == 2) {
+				window.open('/relation/file/' + d.data.id, '_blank');
+			}
+		});
 
 	var text = g.selectAll("text")
 		.data(nodes)

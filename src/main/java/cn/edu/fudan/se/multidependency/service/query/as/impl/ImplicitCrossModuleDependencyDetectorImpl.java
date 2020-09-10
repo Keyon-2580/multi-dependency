@@ -35,6 +35,7 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 		Collection<CoChange> cochangesWithOutDependsOn = cochangeRepository.findGreaterThanCountCoChanges(getMinCoChange());
 		List<LogicCouplingFiles> result = new ArrayList<>();
 		for(CoChange cochange : cochangesWithOutDependsOn) {
+			System.out.println(cochange.getTimes() + " " + cochange.getFile1().getPath() + " " + cochange.getFile2().getPath() + moduleService.isInDependence(cochange.getFile1(), cochange.getFile2()));
 			if(moduleService.isInDependence(cochange.getFile1(), cochange.getFile2())) {
 				result.add(new LogicCouplingFiles(cochange.getFile1(), cochange.getFile2(), cochange.getTimes()));
 			}
@@ -43,17 +44,17 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 		return result;
 	}
 	
-	private int minCoChange = 10;
+	private int minFileCoChange = 10;
 	
 	@Override
 	public void setMinCoChange(int minCoChange) {
-		this.minCoChange = minCoChange;
+		this.minFileCoChange = minCoChange;
 		cache.remove(getClass());
 	}
 	
 	@Override
 	public int getMinCoChange() {
-		return minCoChange;
+		return minFileCoChange;
 	}
 
 }

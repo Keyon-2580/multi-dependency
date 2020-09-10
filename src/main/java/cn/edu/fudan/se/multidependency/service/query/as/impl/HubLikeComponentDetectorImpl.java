@@ -82,6 +82,8 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 			return result;
 		}
 		List<FileMetrics> fileMetrics = metricCalculator.calculateFileMetrics().get(project.getId());
+		System.out.println(metricCalculator.calculateFileMetrics().keySet() + " " + project.getId()
+		);
 		for(FileMetrics metric : fileMetrics) {
 			if(isHubLikeComponent(metric, minFanIn, minFanOut)) {
 				result.add(new HubLikeFile(metric.getFile(), metric.getFanOut(), metric.getFanIn()));

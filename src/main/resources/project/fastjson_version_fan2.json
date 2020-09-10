@@ -1,21 +1,6 @@
 {
 	"projects": [{
-		"path": "D:\\git\\article\\withtest\\fastjson-1.2.06",
-		"language": "java"
-	},{
-		"path": "D:\\git\\article\\withtest\\fastjson-1.2.09",
-		"language": "java"
-	},{
-		"path": "D:\\git\\article\\withtest\\fastjson-1.2.31",
-		"language": "java"
-	},{
-		"path": "D:\\git\\article\\withtest\\fastjson-1.2.47",
-		"language": "java"
-	},{
-		"path": "D:\\git\\article\\withtest\\fastjson-1.2.56",
-		"language": "java"
-	},{
-		"path": "D:\\git\\article\\withtest\\fastjson-1.2.62",
+		"path": "D:\\git\\article\\fastjson-1.2.12",
 		"language": "java"
 	}],
 	"gits": [{

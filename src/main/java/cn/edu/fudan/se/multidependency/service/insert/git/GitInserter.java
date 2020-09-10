@@ -101,7 +101,9 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
                 commits = gitExtractor.getARangeCommitsByTime(gitConfig.getCommitTimeSince(), gitConfig.getCommitTimeUntil(), false);
             }
         }
-        LOGGER.info("commit 数量：" + commits.size());
+        int beforeReleaseCommits = 0;
+        int afterReleaseCommits = 0;
+        LOGGER.info(gitRepository.getName() + ", commit 数量：" + commits.size());
 //      Collections.reverse(commits);
         for (RevCommit revCommit : commits) {
 //        	System.out.println(revCommit.getName());
@@ -140,6 +142,9 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         	
         	if(currentVersionCommit != null && currentVersionCommit.getCommitTime() > commit.getCommitTime()) {
         		commit.setUsingForIssue(false);
+        		beforeReleaseCommits++;
+        	} else {
+        		afterReleaseCommits++;
         	}
             
             //添加developer节点和developer到commit的关系
@@ -190,6 +195,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
                 }
             }
         }
+        System.out.println(gitRepository.getName() + " " + beforeReleaseCommits + ", " + afterReleaseCommits);
     }
     
     private CommitUpdateFile addCommitUpdateFileRelation(String filePath, Commit commit, String updateType) {

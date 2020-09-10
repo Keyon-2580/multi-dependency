@@ -34,7 +34,8 @@ var multipleProject = function(project, circlePacking, cytoscapeutil) {
 				children[j] = {
 					"name" : circlePacking[i].files[j].id + "(I: " + circlePacking[i].fileIdToIssues[circlePacking[i].files[j].id].length + ")(S: " + circlePacking[i].fileIdToSmellCount[circlePacking[i].files[j].id] + ")",
 					"size" : (circlePacking[i].fileIdToIssues[circlePacking[i].files[j].id].length + 1) * 100,
-					"count" : (circlePacking[i].fileIdToSmellCount[circlePacking[i].files[j].id])
+					"count" : (circlePacking[i].fileIdToSmellCount[circlePacking[i].files[j].id]),
+					"id" : circlePacking[i].files[j].id
 				}
 			}
 			data.children[i] = {

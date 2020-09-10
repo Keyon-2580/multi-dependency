@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.git.Issue;
 import cn.edu.fudan.se.multidependency.service.query.as.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.HubLikeComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.ImplicitCrossModuleDependencyDetector;
@@ -171,7 +172,16 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 					normalFiles.add(file);
 				}
 			}
-			PieFilesData data = new PieFilesData(project, normalFiles, onlyIssueFiles, onlySmellFiles, issueAndSmellFiles);
+			Set<Issue> allIssues = new HashSet<>(issueQueryService.queryIssues(project));
+			Set<Issue> smellIssues = new HashSet<>();
+			for(ProjectFile file : onlySmellFiles) {
+				smellIssues.addAll(issueQueryService.queryRelatedIssuesOnFile(file));
+			}
+			for(ProjectFile file : issueAndSmellFiles) {
+				smellIssues.addAll(issueQueryService.queryRelatedIssuesOnFile(file));
+			}
+			
+			PieFilesData data = new PieFilesData(project, normalFiles, onlyIssueFiles, onlySmellFiles, issueAndSmellFiles, allIssues, smellIssues);
 			result.put(project.getId(), data);
 		}
 		return result;

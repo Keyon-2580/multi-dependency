@@ -23,7 +23,7 @@ public class ARController {
     @GetMapping("/exportNeo4jCSV")
     @ResponseBody
     public void exportNeo4jCSV() {
-        clusterService.exportNeo4jCSV("D:\\neo4j-community-3.5.16\\import\\fastjson-1.2.62\\");
+        clusterService.exportNeo4jCSV("D:\\neo4j-community-3.5.16\\import\\fastjson-1.2.12");
     }
 
     @GetMapping("/dependGraph/static")

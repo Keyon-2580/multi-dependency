@@ -66,6 +66,7 @@ public class Commit implements Node {
 	    properties.put("shortMessage", getShortMessage() == null ? "" : getShortMessage());
 		properties.put("authoredDate", getAuthoredDate() == null ? "" : getAuthoredDate());
 		properties.put("commitFilesSize", getCommitFilesSize());
+		properties.put("usingForIssue", isUsingForIssue());
 		properties.put("merge", isMerge());
 		return properties;
 	}

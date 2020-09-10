@@ -8,6 +8,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.ar.Module;
 import cn.edu.fudan.se.multidependency.repository.as.ModuleRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
+import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 
 @Service
 public class ModuleService {
@@ -17,6 +18,9 @@ public class ModuleService {
 	
 	@Autowired
 	private CacheService cache;
+	
+	@Autowired
+	private StaticAnalyseService staticAnalyseService;
 	
 	public Module findFileBelongToModule(ProjectFile file) {
 		if(cache.findNodeBelongToNode(file, NodeLabelType.Module) != null) {
@@ -31,14 +35,13 @@ public class ModuleService {
 		return !findFileBelongToModule(file1).equals(findFileBelongToModule(file2));
 	}
 	
-	/**
-	 * 两个文件所在的模块之间是否没有依赖关系，彼此独立
-	 * @param file1
-	 * @param file2
-	 * @return
-	 */
 	public boolean isInDependence(ProjectFile file1, ProjectFile file2) {
-		return isInDependence(findFileBelongToModule(file1), findFileBelongToModule(file2));
+		Module module1 = findFileBelongToModule(file1);
+		Module module2 = findFileBelongToModule(file2);
+		if(module1.equals(module2)) {
+			return false;
+		}
+		return !(staticAnalyseService.isDependsOn(file1, file2) || staticAnalyseService.isDependsOn(file2, file1));
 	}
 	
 	public boolean isInDependence(Module m1, Module m2) {

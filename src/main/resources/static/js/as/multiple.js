@@ -83,9 +83,46 @@ var multiple = function(projects, files, cytoscapeutil) {
 		histogramChart.setOption(option);
 	}
 	
-	var _pie = function(project, pies, allFilesPieDivId, smellAndIssueFilesPieDivId) {
+	var _pie = function(project, pies, allFilesPieDivId, smellAndIssueFilesPieDivId, issuesDivId) {
+		console.log(pies);
+		var issuesPie = echarts.init(document.getElementById(issuesDivId));
 		var allFilesPie = echarts.init(document.getElementById(allFilesPieDivId));
 		var smellAndIssueFilesPie = echarts.init(document.getElementById(smellAndIssueFilesPieDivId));
+		var issuesPieOption = {
+				title: {
+					text: 'Issues占比',
+					left: 'center'
+				},
+				tooltip: {
+					trigger: 'item',
+					formatter: '{a} <br/>{b} : {c} ({d}%)'
+				},
+				legend: {
+					orient: 'vertical',
+					left: 'left',
+					data: ['没有smellFiles关联的issue', '有smellFiles关联的Issue']
+				},
+				series: [
+					{
+						name: '文件',
+						type: 'pie',
+						radius: '55%',
+						center: ['50%', '60%'],
+						data: [
+							{value: (pies.allIssues.length - pies.smellIssues.length), name: '没有smellFiles关联的issue'},
+							{value: pies.smellIssues.length, name: '有smellFiles关联的Issue'}
+							],
+							emphasis: {
+								itemStyle: {
+									shadowBlur: 10,
+									shadowOffsetX: 0,
+									shadowColor: 'rgba(0, 0, 0, 0.5)'
+								}
+							}
+					}
+					]
+		}
+		issuesPie.setOption(issuesPieOption);
 		var allFilesOption = {
 				title: {
 					text: '文件占比',
@@ -172,11 +209,14 @@ var multiple = function(projects, files, cytoscapeutil) {
 				html += "<h4><a target='_blank' href='/as/multiple/project/" + project.id + paramToRequestParam() + "'>" + project.name + " (" + project.language + ") </h4></a>";
 				html += "</div>";
 				html += "<div class='col-sm-12 row'>";
-					html += "<div class='col-sm-6'>";
+					html += "<div class='col-sm-4'>";
 					html += "<div id='allFilesPie_" + project.id + "' style='height: 400px;'></div>";
 					html += "</div>";
-					html += "<div class='col-sm-6'>";
+					html += "<div class='col-sm-4'>";
 					html += "<div id='issueFilesPie_" + project.id + "' style='height: 400px;'></div>";
+					html += "</div>";
+					html += "<div class='col-sm-4'>";
+					html += "<div id='issuesPie_" + project.id + "' style='height: 400px;'></div>";
 					html += "</div>";
 				html += "</div>";
 				html += "<div class=''>";
@@ -264,7 +304,7 @@ var multiple = function(projects, files, cytoscapeutil) {
 				console.log(result);
 				for(var i = 0; i < projects.length; i++) {
 					var project = projects[i];
-					_pie(project, result[project.id], "allFilesPie_" + project.id, "issueFilesPie_" + project.id);
+					_pie(project, result[project.id], "allFilesPie_" + project.id, "issueFilesPie_" + project.id, "issuesPie_" + project.id);
 				}
 			}
 		});
