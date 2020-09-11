@@ -199,7 +199,7 @@ var clone = function(cytoscapeutil) {
 				var tr = function(index, layer, duplicated) {
 					var prefix = "";
 					for(var i = 0; i < layer; i++) {
-						prefix += "|--------";
+						prefix += "|---";
 					}
 					switch (index) {
 						case 0:
