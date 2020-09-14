@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.service.query.clone.data;
+package cn.edu.fudan.se.multidependency.service.query.aggregation.data;
 
 import java.util.Collection;
 
@@ -6,6 +6,7 @@ import cn.edu.fudan.se.multidependency.model.node.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,21 +15,21 @@ import lombok.Setter;
  * @author fan
  *
  */
-public class PackageCloneValueCalculatorByFileLoc implements CloneValueCalculator<Boolean> {
+public class RelationAggregatorForPackageByCloneLoc implements RelationAggregator<Boolean> {
 	
 	public static final double DEFAULT_PERCENTAGE_THRESHOLD = 0.5;
 	
-	private PackageCloneValueCalculatorByFileLoc() {
+	private RelationAggregatorForPackageByCloneLoc() {
 		initThreshold();
 	}
 	
-	private static PackageCloneValueCalculatorByFileLoc instance = new PackageCloneValueCalculatorByFileLoc();
+	private static RelationAggregatorForPackageByCloneLoc instance = new RelationAggregatorForPackageByCloneLoc();
 	
 	@Setter
 	@Getter
 	private double percentageThreshold = DEFAULT_PERCENTAGE_THRESHOLD;
 	
-	public static PackageCloneValueCalculatorByFileLoc getInstance() {
+	public static RelationAggregatorForPackageByCloneLoc getInstance() {
 		return instance;
 	}
 	
@@ -37,26 +38,26 @@ public class PackageCloneValueCalculatorByFileLoc implements CloneValueCalculato
 	}
 
 	@Override
-	public Boolean calculate(CloneValueForDoubleNodes<? extends Node> clone) {
-		Node node1 = clone.getNode1();
-		Node node2 = clone.getNode2();
+	public Boolean aggregate(RelationDataForDoubleNodes<? extends Node, ? extends Relation> doubleNodes){
+		Node node1 = doubleNodes.getNode1();
+		Node node2 = doubleNodes.getNode2();
 		if(!(node1 instanceof Package) || !(node2 instanceof Package)) {
 			return false;
 		}
 		try {
-			Collection<CodeNode> nodesInPackage1 = clone.getNodesInNode1();
-			Collection<CodeNode> nodesInPackage2 = clone.getNodesInNode2();
+			Collection<CodeNode> nodesInPackage1 = doubleNodes.getNodesInNode1();
+			Collection<CodeNode> nodesInPackage2 = doubleNodes.getNodesInNode2();
 			
 			long cloneFilesLOC = 0;
 			for(CodeNode node : nodesInPackage1) {
 				if(!(node instanceof ProjectFile)) {
-					throw new Exception("克隆节点不为file类型");
+					throw new Exception("clone节点不为file类型");
 				}
 				cloneFilesLOC += ((ProjectFile) node).getLoc();
 			}
 			for(CodeNode node : nodesInPackage2) {
 				if(!(node instanceof ProjectFile)) {
-					throw new Exception("克隆节点不为file类型");
+					throw new Exception("clone节点不为file类型");
 				}
 				cloneFilesLOC += ((ProjectFile) node).getLoc();
 			}
@@ -69,8 +70,6 @@ public class PackageCloneValueCalculatorByFileLoc implements CloneValueCalculato
 		} catch (Exception e) {
 			return false;
 		}
-		
 		return false;
 	}
-
 }

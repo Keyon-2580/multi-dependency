@@ -229,7 +229,7 @@ def calc_small_file_clone_similarity(measures, measure_indecies, state):
                 break
 
             similarity = suffix_array_similarity(token_i, token_j)
-            if similarity < 0.6:
+            if similarity < 0.7:
                 continue
             key_i = small_file_token_index_sorted[i][0]
             key_j = small_file_token_index_sorted[j][0]
@@ -240,7 +240,7 @@ def calc_small_file_clone_similarity(measures, measure_indecies, state):
             code1 = remove_comments('\n'.join(lines1))
             code2 = remove_comments('\n'.join(lines2))
             str_similarity = get_equal_rate(code1, code2)
-            if str_similarity < 0.6:
+            if str_similarity < 0.7:
                 continue
 
             code_lines1 = remove_comments_and_mull_string('\n'.join(lines1))
@@ -288,7 +288,7 @@ def calc_clone_group_similarity_values(measures, measure_indecies, state, group)
                 print('clone file/method pass, token size: %d\n' % len(tokens2))
                 continue
             similarity = suffix_array_similarity(tokens1, tokens2)
-            if similarity < 0.6:
+            if similarity < 0.7:
                 continue
             m1 = measure_indecies[group[i]]
             m2 = measure_indecies[group[j]]

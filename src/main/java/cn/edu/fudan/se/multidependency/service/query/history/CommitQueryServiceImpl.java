@@ -7,14 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.relation.git.CommitUpdateFile;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.history.data.CommitsInFileMatrix;
 
@@ -30,15 +28,6 @@ public class CommitQueryServiceImpl implements CommitQueryService {
 	@Autowired
 	private GitAnalyseService gitAnalyseService;
 	
-	@Autowired
-	private CommitUpdateFileRepository commitUpdateFileRepository;
-	
-	@Bean
-	public int setCommitSize() {
-		System.out.println("设置commit update文件数");
-		return commitUpdateFileRepository.setCommitFilesSize();
-	}
-
 	@Override
 	public Commit queryCommit(long id) {
 		if(cache.findNodeById(id) != null) {

@@ -1,7 +1,10 @@
 package cn.edu.fudan.se.multidependency.controller;
 
+import java.io.OutputStream;
 import java.util.*;
 
+import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +33,9 @@ import cn.edu.fudan.se.multidependency.service.query.clone.data.SimilarPackage;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 @Controller
 @RequestMapping("/clone")
 public class CloneController {
@@ -55,10 +61,29 @@ public class CloneController {
 	@Autowired
 	private SimilarPackageDetector similarPackageDetector;
 
+	@Autowired
+	private HotspotPackageDetector hotspotPackageDetector;
+
 	@GetMapping("/packages")
 	public String graph() {
 		return "clonepackage";
 	}
+
+
+	@GetMapping("/packages/export")
+	@ResponseBody
+	public void exportSimilarPackages(HttpServletRequest request, HttpServletResponse response) {
+		try {
+			response.addHeader("Content-Disposition", "attachment;filename=similar_packages.xlsx");
+			response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+			OutputStream stream = response.getOutputStream();
+
+			similarPackageDetector.exportSimilarPackages(stream);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	
 	@GetMapping("/package/cytoscape")
 	@ResponseBody
@@ -80,9 +105,9 @@ public class CloneController {
 	
 	@GetMapping("/package/duplicated")
 	@ResponseBody
-	public Collection<SimilarPackage> similarPackages(@RequestParam("threshold") int threshold,
+	public Collection<HotspotPackage> similarPackages(@RequestParam("threshold") int threshold,
 			@RequestParam("percentage") double percentage) {
-		return similarPackageDetector.detectSimilarPackages(threshold, percentage);
+		return hotspotPackageDetector.detectHotspotPackages();
 	}
 	
 	/**
@@ -214,32 +239,12 @@ public class CloneController {
 	 * 查询一个project中所有的包克隆关系
 	 * @return
 	 */
-	@GetMapping("/packages/all")
+	@GetMapping("/project/all")
 	@ResponseBody
-	public JSONArray clonesInPackageWithCoChange(/*@RequestParam("project") long projectId*/) {
-		Project project = nodeService.queryProject(67728);
-		Collection<Package> pckList = containRelationService.findProjectContainPackages(project);
-		Collection<Clone> clones = new ArrayList<>();
-
-		List<Package> pcks = new ArrayList<>(pckList);
-
-		int k = 0;
-
-		for(int i = 0; i < pcks.size(); i++) {
-			for(int j = i + 1; j < pcks.size(); j++) {
-				try {
-					CloneValueForDoubleNodes<Package> value = cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pcks.get(i), pcks.get(j));
-					if(value != null){
-						clones.addAll(value.getChildren());
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-					return new JSONArray();
-				}
-			}
-		}
-
-		assert false;
-		return cloneShowService.graphFileClones(clones);
+	public JSONArray clonesInPackageWithCoChange(@RequestParam("project") long projectId) {
+		Project project = nodeService.queryProject(projectId);
+		Collection<Clone> cloneList = basicCloneQueryService.findClonesInProject(project);
+		return basicCloneQueryService.ClonesInProject(cloneList);
 	}
+
 }

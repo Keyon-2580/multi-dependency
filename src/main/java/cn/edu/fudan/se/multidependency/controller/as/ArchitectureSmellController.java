@@ -1,6 +1,9 @@
 package cn.edu.fudan.se.multidependency.controller.as;
 
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -8,11 +11,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.service.query.as.MultipleArchitectureSmellDetector;
+import cn.edu.fudan.se.multidependency.service.query.as.data.CirclePacking;
 import cn.edu.fudan.se.multidependency.service.query.as.data.MultipleAS;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
@@ -44,7 +50,104 @@ public class ArchitectureSmellController {
 	public Object histogram() {
 		return detector.projectHistogramOnVersion();
 	}
+	
+	@GetMapping("/multiple/project/{projectId}")
+	public String projectMultiple(HttpServletRequest request, @PathVariable("projectId") long projectId,
+			@RequestParam(name="cycle", required=false, defaultValue="true") boolean cycle,
+			@RequestParam(name="hublike", required=false, defaultValue="true") boolean hublike,
+			@RequestParam(name="logicCoupling", required=false, defaultValue="true") boolean logicCoupling,
+			@RequestParam(name="similar", required=false, defaultValue="true") boolean similar,
+			@RequestParam(name="unstable", required=false, defaultValue="true") boolean unstable,
+			@RequestParam(name="hierarchy", required=false, defaultValue="true") boolean hierarchy,
+			@RequestParam(name="godComponent", required=false, defaultValue="true") boolean godComponent,
+			@RequestParam(name="unused", required=false, defaultValue="true") boolean unused) {
+		Project project = nodeService.queryProject(projectId);
+		request.setAttribute("project", project);
+		Map<Long, List<CirclePacking>> circlePackings = detector.circlePacking(new MultipleAS() {
+			@Override
+			public boolean isCycle() {
+				return cycle;
+			}
+			@Override
+			public boolean isHublike() {
+				return hublike;
+			}
+			@Override
+			public boolean isLogicCoupling() {
+				return logicCoupling;
+			}
+			@Override
+			public boolean isSimilar() {
+				return similar;
+			}
+			@Override
+			public boolean isUnstable() {
+				return unstable;
+			}
+			@Override
+			public boolean isCyclicHierarchy() {
+				return hierarchy;
+			}
+			@Override
+			public boolean isGod() {
+				return godComponent;
+			}
+			@Override
+			public boolean isUnused() {
+				return unused;
+			}
+		});
+		List<CirclePacking> circlePacking = circlePackings.getOrDefault(project.getId(), new ArrayList<>());
+		request.setAttribute("circlePacking", circlePacking);
+		return "as/multiple_project";
+	}
 
+	@GetMapping("/issue/circle")
+	@ResponseBody
+	public Object circle(
+			@RequestParam(name="cycle", required=false, defaultValue="true") boolean cycle,
+			@RequestParam(name="hublike", required=false, defaultValue="true") boolean hublike,
+			@RequestParam(name="logicCoupling", required=false, defaultValue="true") boolean logicCoupling,
+			@RequestParam(name="similar", required=false, defaultValue="true") boolean similar,
+			@RequestParam(name="unstable", required=false, defaultValue="true") boolean unstable,
+			@RequestParam(name="hierarchy", required=false, defaultValue="true") boolean hierarchy,
+			@RequestParam(name="godComponent", required=false, defaultValue="true") boolean godComponent,
+			@RequestParam(name="unused", required=false, defaultValue="true") boolean unused) {
+		return detector.circlePacking(new MultipleAS() {
+			@Override
+			public boolean isCycle() {
+				return cycle;
+			}
+			@Override
+			public boolean isHublike() {
+				return hublike;
+			}
+			@Override
+			public boolean isLogicCoupling() {
+				return logicCoupling;
+			}
+			@Override
+			public boolean isSimilar() {
+				return similar;
+			}
+			@Override
+			public boolean isUnstable() {
+				return unstable;
+			}
+			@Override
+			public boolean isCyclicHierarchy() {
+				return hierarchy;
+			}
+			@Override
+			public boolean isGod() {
+				return godComponent;
+			}
+			@Override
+			public boolean isUnused() {
+				return unused;
+			}
+		});
+	}
 	
 	@GetMapping("/issue/pie")
 	@ResponseBody
@@ -57,17 +160,7 @@ public class ArchitectureSmellController {
 			@RequestParam(name="hierarchy", required=false, defaultValue="true") boolean hierarchy,
 			@RequestParam(name="godComponent", required=false, defaultValue="true") boolean godComponent,
 			@RequestParam(name="unused", required=false, defaultValue="true") boolean unused) {
-//		boolean cycle = (boolean) params.getOrDefault("cycle", true);
-//		boolean hublike = (boolean) params.getOrDefault("hublike", true);
-//		boolean logicCoupling = (boolean) params.getOrDefault("logicCoupling", true);
-//		boolean similar = (boolean) params.getOrDefault("similar", true);
-//		boolean unstable = (boolean) params.getOrDefault("unstable", true);
-//		boolean hierarchy = (boolean) params.getOrDefault("hierarchy", true);
-//		boolean godComponent = (boolean) params.getOrDefault("godComponent", true);
-//		boolean unused = (boolean) params.getOrDefault("unused", true);
-		System.out.println(cycle + " " + hublike + " " + logicCoupling + " " + similar + " " + unstable + " " + hierarchy + " " + godComponent + " " + unused);
 		return detector.smellAndIssueFiles(new MultipleAS() {
-			
 			@Override
 			public boolean isCycle() {
 				return cycle;

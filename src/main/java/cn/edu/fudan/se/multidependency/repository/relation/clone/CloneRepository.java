@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.repository.relation.clone;
 
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -64,5 +65,22 @@ public interface CloneRepository extends Neo4jRepository<Clone, Long> {
 	@Query("match p= (g:CloneGroup)-[:" + RelationType.str_CONTAIN + "]->()-[:" + RelationType.str_CLONE + "]->()<-[:" + RelationType.str_CONTAIN + "]-(g) where id(g)={groupId} return p")
 	public List<Clone> findCloneGroupContainClones(@Param("groupId") long groupId);
 
+	/**
+	 * 根据项目的id找出项目内所有有克隆的文件
+	 * @param projectId
+	 * @return
+	 */
+	@Query("match (project:Project)-[:CONTAIN*2]->(file:ProjectFile)-[:CLONE]-() where id(project)={projectId} return file;")
+	public List<ProjectFile> findProjectContainCloneFiles(@Param("projectId") long projectId);
 
+	@Query("match (project:Project)-[:CONTAIN*2..4]->(node:CodeUnit) set node.projectId = id(project);")
+	void setProjectClone();
+
+	/**
+	 * 根据项目的id找出项目内所有克隆关系
+	 * @param projectId
+	 * @return
+	 */
+	@Query("match p=(node1:CodeUnit)-[:CLONE]->(node2:CodeUnit) where node1.projectId={projectId}  and node2.projectId={projectId} return p;")
+	public List<Clone> findClonesInProject(@Param("projectId") long projectId);
 }

@@ -16,6 +16,7 @@ import java.util.concurrent.FutureTask;
 import javax.servlet.http.HttpServletRequest;
 
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
 import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
 import cn.edu.fudan.se.multidependency.service.query.data.ProjectStructure;
@@ -577,6 +578,7 @@ public class ProjectController {
 	@ResponseBody
 	public JSONArray projectHas(@RequestParam("projectId") long projectId) {
 		JSONArray result = new JSONArray();
+		JSONArray clone = new JSONArray();
 
 		Project project = nodeService.queryProject(projectId);
 		ProjectStructure projectStructure = hasRelationService.projectHasInitialize(project);
@@ -585,6 +587,7 @@ public class ProjectController {
 		List<PackageStructure> childrenPackagesnew = new ArrayList<>();
 		JSONObject nodeJSON = new JSONObject();
 		JSONObject nodeJSON2 = new JSONObject();
+		JSONObject nodeJSON3 = new JSONObject();
 
 		for(PackageStructure pckstru : childrenPackages){
 			PackageStructure pcknew = hasRelationService.packageHasInitialize(pckstru.getPck());
@@ -592,10 +595,15 @@ public class ProjectController {
 		}
 
 		nodeJSON.put("name", project.getName());
-		nodeJSON.put("children",getHasJson(childrenPackagesnew));
+		Collection<ProjectFile> clonefiles = basicCloneQueryService.findProjectContainCloneFiles(project);
+		Collection<Clone> cloneList = basicCloneQueryService.findClonesInProject(project);
+		clone = basicCloneQueryService.ClonesInProject(cloneList);
+		nodeJSON.put("children",getHasJson(clonefiles,childrenPackagesnew));
 		nodeJSON2.put("result",nodeJSON);
+		nodeJSON3.put("clone",clone);
 
 		result.add(nodeJSON2);
+		result.add(nodeJSON3);
 
 		return result;
 	}
@@ -603,7 +611,7 @@ public class ProjectController {
 	/**
 	 * 递归遍历项目中所有package的包含关系
 	 */
-	public JSONArray getHasJson(List<PackageStructure> childrenPackages){
+	public JSONArray getHasJson(Collection<ProjectFile> clonefiles,List<PackageStructure> childrenPackages){
 		JSONArray rtJA = new JSONArray();
 		for(PackageStructure pckstru :childrenPackages){
 			List<PackageStructure> pckList = pckstru.getChildrenPackages();
@@ -615,6 +623,12 @@ public class ProjectController {
 				for(ProjectFile profile : fileList){
 					JSONObject jsonObject2 = new JSONObject();
 					jsonObject2.put("size",1000);
+					jsonObject2.put("long_name",profile.getPath());
+					if(clonefiles.contains(profile)){
+						jsonObject2.put("clone",true);
+					}else{
+						jsonObject2.put("clone",false);
+					}
 					jsonObject2.put("name",profile.getName());
 					jsonArray.add(jsonObject2);
 				}
@@ -625,7 +639,7 @@ public class ProjectController {
 			}
 
 			if(pckList.size()>0){//如果该属性还有子属性,继续做查询,直到该属性没有孩子,也就是最后一个节点
-				jsonObject.put("children", getHasJson(pckList));
+				jsonObject.put("children", getHasJson(clonefiles,pckList));
 			}
 //			System.out.println(pckList.size());
 			rtJA.add(jsonObject);
