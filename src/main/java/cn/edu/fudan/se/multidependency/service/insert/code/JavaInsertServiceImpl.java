@@ -46,7 +46,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 		filePath = FileUtil.extractFilePath(filePath, projectPath);
 		file.setPath(filePath);
 		file.setSuffix(FileUtil.extractSuffix(entity.getQualifiedName()));
-		file.setEndLine(entity.getStopLine());
+		file.setEndLine(entity.getEndLine());
 		file.setLoc(entity.getLoc()+1);
 		addNode(file, currentProject);
 		
@@ -93,7 +93,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 		function.setName(functionName);
 		function.setEntityId(entity.getId().longValue());
 		function.setStartLine(entity.getStartLine());
-		function.setEndLine(entity.getStopLine());
+		function.setEndLine(entity.getEndLine());
 		addNode(function, currentProject);
 		return function;
 	}
@@ -116,7 +116,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 		type.setName(entity.getQualifiedName());
 		type.setSimpleName(entity.getRawName().getName());
 		type.setStartLine(entity.getStartLine());
-		type.setEndLine(entity.getStopLine());
+		type.setEndLine(entity.getEndLine());
 		addNode(type, currentProject);
 		return type;
 	}
