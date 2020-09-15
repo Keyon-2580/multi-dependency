@@ -46,7 +46,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 	private Namespace process(PackageEntity entity) {
 		// C++中的命名空间
 		Namespace namespace = new Namespace();
-		namespace.setLanguage(Language.java.name());
+		namespace.setLanguage(Language.cpp.name());
 		namespace.setName(entity.getQualifiedName());
 		namespace.setEntityId(entity.getId().longValue());
 		namespace.setSimpleName(entity.getRawName().getName());
@@ -57,7 +57,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 	private ProjectFile process(FileEntity entity) {
 		final String projectPath = currentProject.getPath();
 		ProjectFile file = new ProjectFile();
-		file.setLanguage(Language.java.name());
+		file.setLanguage(Language.cpp.name());
 		file.setEntityId(entity.getId().longValue());
 		String filePath = entity.getQualifiedName();
 		file.setName(FileUtil.extractFileName(filePath));
@@ -88,7 +88,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 	
 	private Function process(FunctionEntity entity) {
 		Function function = new Function();
-		function.setLanguage(Language.java.name());
+		function.setLanguage(Language.cpp.name());
 		function.setName(entity.getDisplayName());
 		function.setEntityId(entity.getId().longValue());
 		function.setImpl(entity.getClass() == FunctionEntityImpl.class);
@@ -101,7 +101,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 	
 	private Variable process(VarEntity entity) {
 		Variable variable = new Variable();
-		variable.setLanguage(Language.java.name());
+		variable.setLanguage(Language.cpp.name());
 		variable.setEntityId(entity.getId().longValue());
 		variable.setName(entity.getQualifiedName());
 		variable.setTypeIdentify(((VarEntity) entity).getRawType().getName());
@@ -115,7 +115,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				entity.getId().longValue(), currentProject);
 		if(node == null) {
 			Type type = new Type();
-			type.setLanguage(Language.java.name());
+			type.setLanguage(Language.cpp.name());
 			type.setEntityId(entity.getId().longValue());
 			type.setName(entity.getQualifiedName());
 			type.setSimpleName(entity.getRawName().getName());
