@@ -88,7 +88,7 @@ def remove_comments_and_mull_string(code_lines):
 
 
 def get_equal_rate(str1, str2):
-   return difflib.SequenceMatcher(None, str1, str2).quick_ratio()
+    return difflib.SequenceMatcher(None, str1, str2).quick_ratio()
 
 
 def get_code_type(code1, code2):
@@ -250,24 +250,31 @@ def calc_small_file_clone_similarity(measures, measure_indecies, state):
             code_lines1_size = len(code_lines1)
             code_lines2_size = len(code_lines2)
 
+            (key1, key2) = swap_clone_pair(key_i, key_j)
+
             if 1 != int(similarity):
-                value = CloneSimilarityData(key_i, key_j, similarity, 3, lines1_size, lines2_size,
-                                    code_lines1_size, code_lines2_size)
+                value = CloneSimilarityData(key1, key2, similarity, 3, lines1_size, lines2_size,
+                                            code_lines1_size, code_lines2_size)
                 small_file_clone_similarity.append(value)
             else:
                 if len(lines1) == 0 or len(lines2) == 0:
-                    value = CloneSimilarityData(key_i, key_j, similarity, 2, lines1_size, lines2_size,
-                                        code_lines1_size, code_lines2_size)
+                    value = CloneSimilarityData(key1, key2, similarity, 2, lines1_size, lines2_size,
+                                                code_lines1_size, code_lines2_size)
                     small_file_clone_similarity.append(value)
                 code_type = get_code_type(code1, code2)
-                value = CloneSimilarityData(key_i, key_j, similarity, code_type, lines1_size, lines2_size,
-                                    code_lines1_size, code_lines2_size)
+                value = CloneSimilarityData(key1, key2, similarity, code_type, lines1_size, lines2_size,
+                                            code_lines1_size, code_lines2_size)
                 small_file_clone_similarity.append(value)
 
             cnt += 1
 
     return small_file_clone_similarity
 
+def swap_clone_pair(key1, key2):
+    if int(key1) <= int(key2):
+        return (key1, key2)
+    else:
+        return (key2, key1)
 
 def calc_clone_group_similarity_values(measures, measure_indecies, state, group):
     clone_similarity_values = list()
