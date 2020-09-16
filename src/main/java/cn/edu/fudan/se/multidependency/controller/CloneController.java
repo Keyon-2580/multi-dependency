@@ -1,10 +1,15 @@
 package cn.edu.fudan.se.multidependency.controller;
 
 import java.io.OutputStream;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
+import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,6 +74,7 @@ public class CloneController {
 		return "clonepackage";
 	}
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(RepositoryService.class);
 
 	@GetMapping("/packages/export")
 	@ResponseBody
@@ -102,14 +108,13 @@ public class CloneController {
 	public Collection<CloneValueForDoubleNodes<Package>> cloneInPackages() {
 		return cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE));
 	}
-	
+
 	@GetMapping("/package/duplicated")
 	@ResponseBody
-	public Collection<HotspotPackage> similarPackages(@RequestParam("threshold") int threshold,
-			@RequestParam("percentage") double percentage) {
+	public Collection<HotspotPackage> similarPackages(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
 		return hotspotPackageDetector.detectHotspotPackages();
 	}
-	
+
 	/**
 	 * 两个包之间的文件依赖
 	 * @param package1Id
