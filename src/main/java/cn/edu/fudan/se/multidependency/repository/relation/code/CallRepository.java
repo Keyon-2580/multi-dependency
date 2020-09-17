@@ -40,4 +40,7 @@ public interface CallRepository extends Neo4jRepository<Call, Long> {
 
 	@Query("MATCH result=(function1:Function)-[r:" + RelationType.str_CALL + "]->(function2:Function) RETURN result")
 	List<Call> findAllFunctionCallFunctionRelations();
+
+	@Query("match result=(function:Function)-[:" + RelationType.str_CALL + "]-(:Function) where id(function) = {functionId} return result")
+	List<Call> findFunctionContainCalls(@Param("functionId") long functionId);
 }

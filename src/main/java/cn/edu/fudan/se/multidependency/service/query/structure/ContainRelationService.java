@@ -22,6 +22,9 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.RestfulAPI;
 import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 public interface ContainRelationService {
 	
@@ -36,6 +39,9 @@ public interface ContainRelationService {
 	Collection<Type> findFileDirectlyContainTypes(ProjectFile file);
 	Collection<Function> findFileDirectlyContainFunctions(ProjectFile file);
 	Collection<Variable> findFileDirectlyContainVariables(ProjectFile file);
+
+	Collection<Type> findFileDirectlyImportTypes(ProjectFile file);
+	Collection<Function> findFileDirectlyImportFunctions(ProjectFile file);
 	
 	Collection<Type> findNamespaceDirectlyContainTypes(Namespace namespace);
 	Collection<Function> findNamespaceDirectlyContainFunctions(Namespace namespace);
@@ -103,6 +109,9 @@ public interface ContainRelationService {
 	boolean isDifferentPackage(ProjectFile file1, ProjectFile file2);
 	
 	GitRepository findCommitBelongToGitRepository(Commit commit);
+
+	Collection<Call> findFunctionContainCalls (Function function);
+	JSONObject doubleFileStructure(List<ProjectFile> fileList);
 	
 	/**
 	 * 包的上一级包

@@ -252,4 +252,27 @@ public class CloneController {
 		return basicCloneQueryService.ClonesInProject(cloneList);
 	}
 
+	/**
+	 * 查询一个project中所有的包克隆关系
+	 * @return
+	 */
+	@GetMapping("/file/double/json")
+	@ResponseBody
+	public JSONObject DoubleFilesStructureJson(@RequestParam("fileId1") long fileId1, @RequestParam("fileId2") long fileId2) {
+		ProjectFile file1 = nodeService.queryFile(fileId1);
+		ProjectFile file2 = nodeService.queryFile(fileId2);
+		List<ProjectFile> fileList = new ArrayList<>();
+		fileList.add(file1);
+		fileList.add(file2);
+		return containRelationService.doubleFileStructure(fileList);
+	}
+
+	@GetMapping("/file/double")
+	public String DoubleFilesStructure(@RequestParam("fileId1") long file1Id, @RequestParam("fileId2") long file2Id,HttpServletRequest request) {
+		request.setAttribute("fileId1", file1Id);
+		request.setAttribute("fileId2", file2Id);
+//		return "/doublefilestructure?fileId1=" + file1Id + "&fileId2=" + file2Id;
+		return "/doublefilestructure";
+	}
+
 }

@@ -6,6 +6,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
+import cn.edu.fudan.se.multidependency.repository.relation.code.CallRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.ImportRepository;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import lombok.ToString;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,6 +59,12 @@ public class ContainRelationServiceImpl implements ContainRelationService {
     
     @Autowired
     PackageRepository packageRepository;
+
+    @Autowired
+	CallRepository callRepository;
+
+    @Autowired
+	ImportRepository importRepository;
     
 	Map<Project, Collection<ProjectFile>> projectContainFilesCache = new ConcurrentHashMap<>();
 	@Override
@@ -527,8 +539,85 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
 	@Override
 	public Collection<Package> findPackageContainSubPackages(Package pck) {
-		
 		return packageRepository.findPackageContainSubPackages(pck.getDirectoryPath());
 	}
 
+	@Override
+	public Collection<Call> findFunctionContainCalls(Function function) {
+		return callRepository.findFunctionContainCalls(function.getId());
+	}
+
+	@Override
+	public Collection<Type> findFileDirectlyImportTypes(ProjectFile file) {
+		return importRepository.findFileImportTypes(file.getId());
+	}
+
+	@Override
+	public Collection<Function> findFileDirectlyImportFunctions(ProjectFile file) {
+		return importRepository.findFileImportFunctions(file.getId());
+	}
+
+	@Override
+	public JSONObject doubleFileStructure(List<ProjectFile> fileList) {
+		JSONObject result = new JSONObject();
+		for(ProjectFile file: fileList){
+			JSONArray result3 = new JSONArray();
+			System.out.println(file.getName());
+			JSONObject temp1 = new JSONObject();
+			temp1.put("name",file.getPath());
+			temp1.put("open",false);
+			JSONArray filechildren = new JSONArray();
+			Collection<Type> containtypes = findFileDirectlyContainTypes(file);
+//			System.out.println(containtypes);
+			Collection<Type> importtypes = findFileDirectlyImportTypes(file);
+			Collection<Function> importfunctions = findFileDirectlyImportFunctions(file);
+			if(containtypes.size() > 0){
+				JSONObject temp2 = new JSONObject();
+				temp2.put("name", "ContainTypes");
+				JSONArray arraytemp2 = new JSONArray();
+				for(Type type: containtypes){
+//					System.out.println("containtypes");
+					JSONObject temp3 = new JSONObject();
+					temp3.put("name", type.getName());
+					arraytemp2.add(temp3);
+				}
+				System.out.println(arraytemp2);
+				temp2.put("children", arraytemp2);
+				filechildren.add(temp2);
+			}
+
+			if(importtypes.size() > 0){
+				JSONObject temp2 = new JSONObject();
+				temp2.put("name", "ImportTypes");
+				JSONArray arraytemp2 = new JSONArray();
+				for(Type type: importtypes){
+//					System.out.println("importtypes");
+					JSONObject temp3 = new JSONObject();
+					temp3.put("name", type.getName());
+					arraytemp2.add(temp3);
+				}
+				temp2.put("children", arraytemp2);
+				filechildren.add(temp2);
+			}
+
+			if(importfunctions.size() > 0){
+				JSONObject temp2 = new JSONObject();
+				temp2.put("name", "ImportFunctions");
+				JSONArray arraytemp2 = new JSONArray();
+				for(Function function: importfunctions){
+//					System.out.println("importfunctions");
+					JSONObject temp3 = new JSONObject();
+					temp3.put("name", function.getName());
+					arraytemp2.add(temp3);
+				}
+				temp2.put("children", arraytemp2);
+				filechildren.add(temp2);
+			}
+			temp1.put("children",filechildren);
+			result3.add(temp1);
+			result.put(file.getId().toString(),result3);
+		}
+		System.out.println(result);
+		return result;
+	}
 }

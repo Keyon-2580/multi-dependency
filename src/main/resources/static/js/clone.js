@@ -363,7 +363,7 @@ var clone = function(cytoscapeutil) {
 					html += "<span>" + children[i].file2.path + "</span><span> (" + children[i].file2.lines + ") </span>";
 					html += "</td>";
 					html += "<td>";
-					html += children[i].fileClone.cloneType;
+					html += "<a target='_blank' href='/clone/file/double?fileId1=" + children[i].file1.id + "&fileId2=" + children[i].file2.id + "'>" + children[i].fileClone.cloneType+ "</a>";
 					html += "</td>";
 					html += "<td>";
 					html += "<a target='_blank' href='/clone/compare?id1=" + children[i].file1.id + "&id2=" + children[i].file2.id + "'>" + children[i].fileClone.value + "</a>";
