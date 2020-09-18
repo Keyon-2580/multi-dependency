@@ -92,8 +92,8 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 		function.setSimpleName(entity.getRawName().getName());
 		function.setName(functionName);
 		function.setEntityId(entity.getId().longValue());
-		function.setStartLine(entity.getStartLine());
-		function.setEndLine(entity.getEndLine());
+		function.setStartLine(entity.getStartLine() == null ? -1 : entity.getStartLine());
+		function.setEndLine(entity.getEndLine() == null ? -1 : entity.getEndLine());
 		addNode(function, currentProject);
 		return function;
 	}
@@ -115,8 +115,8 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 		type.setEntityId(entity.getId().longValue());
 		type.setName(entity.getQualifiedName());
 		type.setSimpleName(entity.getRawName().getName());
-		type.setStartLine(entity.getStartLine());
-		type.setEndLine(entity.getEndLine());
+		type.setStartLine(entity.getStartLine() == null ? -1 :entity.getStartLine());
+		type.setEndLine(entity.getEndLine() == null ? -1 :entity.getEndLine());
 		addNode(type, currentProject);
 		return type;
 	}

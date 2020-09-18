@@ -119,8 +119,8 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			type.setEntityId(entity.getId().longValue());
 			type.setName(entity.getQualifiedName());
 			type.setSimpleName(entity.getRawName().getName());
-			type.setStartLine(entity.getStartLine());
-			type.setEndLine(entity.getEndLine());
+			type.setStartLine(entity.getStartLine() == null ? -1 :entity.getStartLine());
+			type.setEndLine(entity.getEndLine() == null ? -1 :entity.getEndLine());
 			addNode(type, currentProject);
 			return type;
 		} else {
