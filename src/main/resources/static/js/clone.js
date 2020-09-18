@@ -217,7 +217,13 @@ var clone = function(cytoscapeutil) {
 							html += duplicated.relationNodes2 + "/" + duplicated.allNodes2 + "=" + ((duplicated.relationNodes2 + 0.0) / duplicated.allNodes2).toFixed(2);
 							html += layer == 0 ? "</th>" : "</td>";
 							html += layer == 0 ? "<th>" : "<td>";
-							html += duplicated.relationPackages.children.length;
+							var len = duplicated.relationPackages.children.length;
+							if(len > 0) {
+								html += "<a class='package' index='" + (0) + "' href='#package_files_clone' id2='" + duplicated.package2.id + "' id1='" + duplicated.package1.id + "'>" + len + "</a>";
+							}
+							else {
+								html += len;
+							}
 							html += layer == 0 ? "</th>" : "</td>";
 							html += layer == 0 ? "<th>" : "<td>";
 							html += "(" + duplicated.relationNodes1 + "+" + duplicated.relationNodes2 + ")/(" + duplicated.allNodes1 + "+" + duplicated.allNodes2 + ")=" + ((duplicated.relationNodes1 + duplicated.relationNodes2 + 0.0) / (duplicated.allNodes1 + duplicated.allNodes2)).toFixed(2);
@@ -280,6 +286,12 @@ var clone = function(cytoscapeutil) {
 				}
 				html += "</table>"
 				$("#packages_duplicated").html(html);
+				$(".package").click(function() {
+					console.log($(this).attr("id1"));
+					console.log($(this).attr("id2"));
+//					doublePackagesClone($(this).attr("id1"), $(this).attr("id2"), $(this).attr("index"));
+					doublePackagesCloneWithCoChange($(this).attr("id1"), $(this).attr("id2"), $(this).attr("index"));
+				});
 			}
 		})
 	}
@@ -353,6 +365,9 @@ var clone = function(cytoscapeutil) {
 				html += "<table class='table table-bordered'>"
 				+ "<tr><th>file1</th><th>file2</th><th>type</th><th>value</th><th>cochange</th></tr>";
 				var children = result.children;
+				var num_type1 = 0;
+				var num_type2 = 0;
+				var num_type3 = 0;
 				for(var i = 0; i < children.length; i++) {
 					var cochangeId = children[i].cochange == null ? -1 : children[i].cochange.id;
 					html += "<tr>";
@@ -363,7 +378,19 @@ var clone = function(cytoscapeutil) {
 					html += "<span>" + children[i].file2.path + "</span><span> (" + children[i].file2.lines + ") </span>";
 					html += "</td>";
 					html += "<td>";
-					html += "<a target='_blank' href='/clone/file/double?fileId1=" + children[i].file1.id + "&fileId2=" + children[i].file2.id + "'>" + children[i].fileClone.cloneType+ "</a>";
+					var type = children[i].fileClone.cloneType;
+					switch (type){
+						case 'type_1':
+							num_type1++;
+							break;
+						case 'type_2':
+							num_type2++;
+							break;
+						case 'type_3':
+							num_type3++;
+							break;
+					}
+					html += "<a target='_blank' href='/clone/file/double?fileId1=" + children[i].file1.id + "&fileId2=" + children[i].file2.id + "'>" + type + "</a>";
 					html += "</td>";
 					html += "<td>";
 					html += "<a target='_blank' href='/clone/compare?id1=" + children[i].file1.id + "&id2=" + children[i].file2.id + "'>" + children[i].fileClone.value + "</a>";
@@ -374,6 +401,18 @@ var clone = function(cytoscapeutil) {
 					html += "</td>";
 					html += "</tr>";
 				}
+				html += "</table>";
+				html += "<table class='table table-bordered'>"
+					+ "<tr><th>Type_1数量</th><th>Type_2数量</th><th>Type_3数量</th></tr>";
+				html += "<td>";
+				html += num_type1;
+				html += "</td>";
+				html += "<td>";
+				html += num_type2;
+				html += "</td>";
+				html += "<td>";
+				html += num_type3;
+				html += "</td>";
 				html += "</table>";
 				html += "<div id='fileClonesGraph'></div>"
 				$("#package_files_clone").html(html);
