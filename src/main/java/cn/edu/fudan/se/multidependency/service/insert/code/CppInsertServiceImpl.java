@@ -64,7 +64,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 		filePath = FileUtil.extractFilePath(filePath, projectPath);
 		file.setPath(filePath);
 		file.setSuffix(FileUtil.extractSuffix(entity.getQualifiedName()));
-		file.setEndLine(entity.getEndLine());
+		file.setEndLine(entity.getEndLine() == null ? -1 : entity.getEndLine());
 		file.setLoc(entity.getLoc()+1);
 		addNode(file, currentProject);
 		// 文件所在目录
@@ -94,7 +94,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 		function.setImpl(entity.getClass() == FunctionEntityImpl.class);
 		function.setSimpleName(entity.getRawName().getName());
 		function.setStartLine(entity.getStartLine());
-		function.setEndLine(entity.getEndLine());
+		function.setEndLine(entity.getEndLine() == null ? -1 : entity.getEndLine());
 		addNode(function, currentProject);
 		return function;
 	}
