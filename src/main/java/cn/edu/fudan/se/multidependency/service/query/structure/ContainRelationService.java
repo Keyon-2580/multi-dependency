@@ -23,6 +23,8 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.Span;
 import cn.edu.fudan.se.multidependency.model.node.testcase.Trace;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Import;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Include;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -42,6 +44,9 @@ public interface ContainRelationService {
 
 	Collection<Type> findFileDirectlyImportTypes(ProjectFile file);
 	Collection<Function> findFileDirectlyImportFunctions(ProjectFile file);
+	Collection<Variable> findFileDirectlyImportVariables(ProjectFile file);
+	Collection<Import> findFileDirectlyImports(ProjectFile file);
+	Collection<Include> findFileDirectlyIncludes(ProjectFile file);
 	
 	Collection<Type> findNamespaceDirectlyContainTypes(Namespace namespace);
 	Collection<Function> findNamespaceDirectlyContainFunctions(Namespace namespace);

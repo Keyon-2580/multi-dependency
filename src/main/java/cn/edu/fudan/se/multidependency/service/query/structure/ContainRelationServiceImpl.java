@@ -6,12 +6,17 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.relation.Relation;
+import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Import;
+import cn.edu.fudan.se.multidependency.model.relation.structure.Include;
+import cn.edu.fudan.se.multidependency.repository.node.code.TypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.CallRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.ImportRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.code.IncludeRepository;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import lombok.ToString;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,6 +70,12 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
     @Autowired
 	ImportRepository importRepository;
+
+	@Autowired
+	IncludeRepository includeRepository;
+
+	@Autowired
+	TypeRepository typeRepository;
     
 	Map<Project, Collection<ProjectFile>> projectContainFilesCache = new ConcurrentHashMap<>();
 	@Override
@@ -558,66 +569,109 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	}
 
 	@Override
+	public Collection<Variable> findFileDirectlyImportVariables(ProjectFile file) {
+		return importRepository.findFileImportVariables(file.getId());
+	}
+
+	@Override
+	public Collection<Import> findFileDirectlyImports(ProjectFile file) {
+		return importRepository.findFileImports(file.getId());
+	}
+
+	@Override
+	public Collection<Include> findFileDirectlyIncludes(ProjectFile file) {
+		return includeRepository.findFileIncludes(file.getId());
+	}
+
+
+	public Map<RelationType, Collection<Relation>> findTypeStructureDependencyRelations(Type type) {
+		Map<RelationType, Collection<Relation>> structureDependencyTypes = new ConcurrentHashMap<>();
+		Collection<Relation> dependencyRelations = typeRepository.findTypeStructureDependencyRelations(type.getId());
+		dependencyRelations.forEach( dependencyRelation -> {
+			Collection<Relation> tmpDependencyRelations = structureDependencyTypes.getOrDefault(dependencyRelation.getRelationType(), new ArrayList<>());
+			tmpDependencyRelations.add(dependencyRelation);
+			structureDependencyTypes.put(dependencyRelation.getRelationType(),tmpDependencyRelations);
+		});
+		return structureDependencyTypes;
+	}
+
+	@Override
 	public JSONObject doubleFileStructure(List<ProjectFile> fileList) {
 		JSONObject result = new JSONObject();
 		for(ProjectFile file: fileList){
-			JSONArray result3 = new JSONArray();
-			System.out.println(file.getName());
+			JSONArray result1 = new JSONArray();
 			JSONObject temp1 = new JSONObject();
-			temp1.put("name",file.getPath());
-			temp1.put("open",false);
-			JSONArray filechildren = new JSONArray();
-			Collection<Type> containtypes = findFileDirectlyContainTypes(file);
-//			System.out.println(containtypes);
-			Collection<Type> importtypes = findFileDirectlyImportTypes(file);
-			Collection<Function> importfunctions = findFileDirectlyImportFunctions(file);
-			if(containtypes.size() > 0){
+			temp1.put("name","#F: "+file.getPath());
+			temp1.put("open",true);
+			JSONArray fileChildren = new JSONArray();
+			Collection<Import> fileImports = findFileDirectlyImports(file);
+			Collection<Include> fileIncludes = findFileDirectlyIncludes(file);
+			Collection<Type> containTypes = findFileDirectlyContainTypes(file);
+
+			if(fileImports != null && fileImports.size() > 0){
 				JSONObject temp2 = new JSONObject();
-				temp2.put("name", "ContainTypes");
+				temp2.put("name", "#R: " + "Import");
+				temp2.put("open",true);
 				JSONArray arraytemp2 = new JSONArray();
-				for(Type type: containtypes){
-//					System.out.println("containtypes");
+				for(Import fileImport: fileImports){
 					JSONObject temp3 = new JSONObject();
-					temp3.put("name", type.getName());
+					temp3.put("name", "#" + fileImport.getEndCodeNode().getNodeType().toString() + ": " + fileImport.getEndCodeNode().getName());
 					arraytemp2.add(temp3);
 				}
-				System.out.println(arraytemp2);
 				temp2.put("children", arraytemp2);
-				filechildren.add(temp2);
+				fileChildren.add(temp2);
 			}
 
-			if(importtypes.size() > 0){
+			if(fileIncludes != null && fileIncludes.size() > 0){
 				JSONObject temp2 = new JSONObject();
-				temp2.put("name", "ImportTypes");
+				temp2.put("name", "#R: " + "Include");
+				temp2.put("open",true);
 				JSONArray arraytemp2 = new JSONArray();
-				for(Type type: importtypes){
-//					System.out.println("importtypes");
+				for(Include fileInclude: fileIncludes){
 					JSONObject temp3 = new JSONObject();
-					temp3.put("name", type.getName());
+					temp3.put("name", "#" + fileInclude.getEndCodeNode().getNodeType().toString() + ": " + fileInclude.getEndCodeNode().getName());
 					arraytemp2.add(temp3);
 				}
 				temp2.put("children", arraytemp2);
-				filechildren.add(temp2);
+				fileChildren.add(temp2);
 			}
 
-			if(importfunctions.size() > 0){
+			if(containTypes != null && containTypes.size() > 0){
 				JSONObject temp2 = new JSONObject();
-				temp2.put("name", "ImportFunctions");
+				temp2.put("name", "#R: Contain");
+				temp2.put("open",true);
 				JSONArray arraytemp2 = new JSONArray();
-				for(Function function: importfunctions){
-//					System.out.println("importfunctions");
+				for(Type type: containTypes){
 					JSONObject temp3 = new JSONObject();
-					temp3.put("name", function.getName());
+					temp3.put("name", "#T: " + type.getName());
+					temp3.put("open",true);
+					JSONArray arraytemp3 = new JSONArray();
+					Map<RelationType, Collection<Relation>> dependencyRelations = findTypeStructureDependencyRelations(type);
+					for(Map.Entry<RelationType, Collection<Relation>> entry : dependencyRelations.entrySet()){
+
+						JSONObject temp4 = new JSONObject();
+						temp4.put("name", "#R: " + entry.getKey());
+						temp4.put("open",true);
+						JSONArray arraytemp4 = new JSONArray();
+						for(Relation relation: entry.getValue()){
+							JSONObject temp5 = new JSONObject();
+							temp5.put("name","#T: " + relation.getEndNode().getName());
+							arraytemp4.add(temp5);
+						}
+						temp4.put("children",arraytemp4);
+						arraytemp3.add(temp4);
+					}
+					temp3.put("children",arraytemp3);
 					arraytemp2.add(temp3);
 				}
 				temp2.put("children", arraytemp2);
-				filechildren.add(temp2);
+				fileChildren.add(temp2);
 			}
-			temp1.put("children",filechildren);
-			result3.add(temp1);
-			result.put(file.getId().toString(),result3);
+
+			temp1.put("children",fileChildren);
+			result1.add(temp1);
+			result.put(file.getId().toString(),result1);
 		}
-		System.out.println(result);
 		return result;
 	}
 }
