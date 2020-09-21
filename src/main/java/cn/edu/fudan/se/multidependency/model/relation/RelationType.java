@@ -19,6 +19,9 @@ public enum RelationType implements RelationshipType {
 	CAST(RelationType.str_CAST),
 	VARIABLE_TYPE(RelationType.str_VARIABLE_TYPE),
 	ANNOTATION(RelationType.str_ANNOTATION),
+
+	DEPENDENCY(RelationType.str_DEPENDENCY),
+	ASSOCIATION(RelationType.str_ASSOCIATION),
 	
 	DYNAMIC_CALL(RelationType.str_DYNAMIC_CALL),
 	
@@ -58,6 +61,8 @@ public enum RelationType implements RelationshipType {
 	 */
 	public static final String str_CONTAIN = "CONTAIN";
 	public static final String str_HAS = "HAS";
+	public static final String str_DEPENDENCY = "DEPENDENCY";
+	public static final String str_ASSOCIATION = "ASSOCIATION";
 
 	/**
 	 * 依赖关系

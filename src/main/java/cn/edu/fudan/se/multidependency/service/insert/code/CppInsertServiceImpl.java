@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.insert.code;
 
+import depends.entity.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,16 +18,10 @@ import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Include;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import cn.edu.fudan.se.multidependency.utils.config.ProjectConfig;
-import depends.entity.AliasEntity;
-import depends.entity.Entity;
-import depends.entity.FileEntity;
-import depends.entity.FunctionEntity;
-import depends.entity.FunctionEntityImpl;
-import depends.entity.PackageEntity;
-import depends.entity.TypeEntity;
-import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
 import depends.relations.Inferer;
+
+import java.util.List;
 
 /**
  * 
@@ -104,7 +99,17 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 		variable.setLanguage(Language.cpp.name());
 		variable.setEntityId(entity.getId().longValue());
 		variable.setName(entity.getQualifiedName());
-		variable.setTypeIdentify(((VarEntity) entity).getRawType().getName());
+		String typeIdentify = ((VarEntity) entity).getRawType().getName();
+		List<GenericName> varArguments = ((VarEntity) entity).getRawName().getArguments();
+		if(varArguments != null && !varArguments.isEmpty()){
+			typeIdentify += "<";
+			for (GenericName arg : varArguments){
+				typeIdentify += arg.getName() + ",";
+			}
+			typeIdentify = typeIdentify.substring(0,typeIdentify.length()-1);
+			typeIdentify += ">";
+		}
+		variable.setTypeIdentify(typeIdentify);
 		variable.setSimpleName(entity.getRawName().getName());
 		addNode(variable, currentProject);
 		return variable;

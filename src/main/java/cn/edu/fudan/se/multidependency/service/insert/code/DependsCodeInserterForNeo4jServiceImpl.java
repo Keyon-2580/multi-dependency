@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.model.relation.structure.*;
+import depends.entity.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,24 +21,8 @@ import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.Has;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Access;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Annotation;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Cast;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Create;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Extends;
-import cn.edu.fudan.se.multidependency.model.relation.structure.ImplLink;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Implements;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Parameter;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Return;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Throw;
-import cn.edu.fudan.se.multidependency.model.relation.structure.VariableType;
 import cn.edu.fudan.se.multidependency.utils.config.ProjectConfig;
 import depends.deptypes.DependencyType;
-import depends.entity.Entity;
-import depends.entity.FunctionEntity;
-import depends.entity.TypeEntity;
-import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
 
 public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeInserterForNeo4jServiceImpl {
@@ -133,30 +120,55 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 						addRelation(typeAnnotationType);
 					}
 					break;
-				case DependencyType.CALL:
-					if(relation.getEntity() instanceof FunctionEntity) {
-						// call其它方法
-						Function other = (Function) getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, relation.getEntity().getId().longValue(), currentProject);
-						if(other != null) {
-							Call call = new Call(type, other);
-							addRelation(call);
+				case DependencyType.CONTAIN:
+					if(relation.getEntity().getClass() == TypeEntity.class && relation.getEntity().getId() != -1) {
+						// 关联的type，即成员变量的类型，此处仅指代类型直接定义的成员变量，不包含通过List<？>、Set<？>等基本数据类型中参数类型（此种情况将在变量的参数类型中处理）
+						Type other = (Type) getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, relation.getEntity().getId().longValue(), currentProject);
+						if(other != null && other != type) {
+							Association association = new Association(type, other);
+							addRelation(association);
 						}
+					}
+					break;
+				case DependencyType.CALL:
+					if( relation.getEntity().getClass() == FunctionEntity.class ) {
+						// call其它类的方法，即成员变量赋值时，调用其他类的方法赋值。定义为对其他类的依赖
+						Entity parentEntityType = relation.getEntity().getParent();
+						if(parentEntityType != null && parentEntityType.getClass() == TypeEntity.class){
+							Type parentType = (Type) types.get(parentEntityType.getId().longValue());
+							if(parentType != null && parentType != type){
+								Dependency dependency = new Dependency(type, parentType, RelationType.str_CALL);
+								addRelation(dependency);
+							}
+						}
+//						Function other = (Function) getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, relation.getEntity().getId().longValue(), currentProject);
+//						if(other != null) {
+//							Call call = new Call(type, other);
+//							addRelation(call);
+//						}
+//					}else if(relation.getEntity().getClass() == TypeEntity.class){
+//						Type other = (Type) types.get(relation.getEntity().getId().longValue());
+//						if(other != null && other != type) {
+//							Dependency dependency = new Dependency(type, other, RelationType.str_CALL);
+//							addRelation(dependency);
+//						}
 					}
 					break;
 				case DependencyType.CREATE:
 					if(relation.getEntity().getClass() == TypeEntity.class) {
 						Type other = (Type) types.get(relation.getEntity().getId().longValue());
-						if(other != null) {
-							Create create = new Create(type, other);
-							addRelation(create);
+						if(other != null && other != type) {
+							Dependency dependency = new Dependency(type, other, RelationType.str_CREATE);
+							addRelation(dependency);
 						}
 					} 
 					break;
 				case DependencyType.CAST:
 					Type castType = (Type) types.get(relation.getEntity().getId().longValue());
-					if(castType != null) {
-						Cast functionCastType = new Cast(type, castType);
-						addRelation(functionCastType);
+					if(castType != null && castType != type) {
+						Dependency dependency = new Dependency(type,castType, RelationType.str_CAST);
+						//Cast functionCastType = new Cast(type, castType);
+						addRelation(dependency);
 					}
 					break;
 				case DependencyType.THROW:
@@ -173,6 +185,12 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 								Access accessField = new Access(type, var);
 								addRelation(accessField);
 							}
+						}
+					}else if(relation.getEntity().getClass() == TypeEntity.class && relation.getEntity().getId() != -1){
+						Type other = (Type) types.get(relation.getEntity().getId().longValue());
+						if(other != null && other != type) {
+							Dependency dependency = new Dependency(type, other,RelationType.str_PARAMETER);
+							addRelation(dependency);
 						}
 					}
 					break;
@@ -193,6 +211,19 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 				if(type != null) {
 					VariableType variableIsType = new VariableType(variable, type);
 					addRelation(variableIsType);
+					if(!variable.isField()){
+						Entity parentTypeEntity = varEntity.getParent();
+						while (parentTypeEntity != null && parentTypeEntity.getClass() != TypeEntity.class){
+							parentTypeEntity = parentTypeEntity.getParent();
+						}
+						if(parentTypeEntity != null){
+							Type parentType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentTypeEntity.getId().longValue(), currentProject);
+							if(parentType != null && parentType != type){
+								Dependency dependency = new Dependency(parentType,type, RelationType.str_VARIABLE_TYPE);
+								addRelation(dependency);
+							}
+						}
+					}
 				}
 			}
 			Type typeParameter = null;
@@ -203,6 +234,25 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					if(type != null && typeParameter != type) {
 						Parameter variableTypeParameterType = new Parameter(variable, type);
 						addRelation(variableTypeParameterType);
+						Entity parentTypeEntity = varEntity.getParent();
+						if(!variable.isField()){
+							while (parentTypeEntity != null && parentTypeEntity.getClass() != TypeEntity.class){
+								parentTypeEntity = parentTypeEntity.getParent();
+							}
+							if(parentTypeEntity != null){
+								Type parentType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentTypeEntity.getId().longValue(), currentProject);
+								if(parentType != null && parentType != type){
+									Dependency dependency = new Dependency(parentType,type,RelationType.str_VARIABLE_TYPE);
+									addRelation(dependency);
+								}
+							}
+						}else if (parentTypeEntity != null && parentTypeEntity.getClass() != TypeEntity.class){
+							Type parentType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentTypeEntity.getId().longValue(), currentProject);
+							if(parentType != null && parentType != type){
+								Association association = new Association(parentType,type);
+								addRelation(association);
+							}
+						}
 						typeParameter = type;
 					}
 					break;
@@ -227,6 +277,8 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 			String functionFullName = function.getParameters().toString().replace('[', '(').replace(']', ')');
 			// 函数调用
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(id.intValue());
+			Entity functionParentTypeEntity = functionEntity.getParent();
+			Type functionParentType = (Type) types.get(functionParentTypeEntity.getId().longValue());
 			functionEntity.getRelations().forEach(relation -> {
 				switch(relation.getType()) {
 				case DependencyType.CALL:
@@ -245,6 +297,10 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 						if(other != null) {
 							Create create = new Create(function, other);
 							addRelation(create);
+							if(functionParentType != null && functionParentType != other){
+								Dependency dependency = new Dependency(functionParentType, other, RelationType.str_CREATE);
+								addRelation(dependency);
+							}
 						}
 					}
 					break;
@@ -253,6 +309,10 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					if(returnType != null) {
 						Return functionReturnType = new Return(function, returnType);
 						addRelation(functionReturnType);
+						if(functionParentType != null && functionParentType != returnType){
+							Dependency dependency = new Dependency(functionParentType, returnType, RelationType.str_RETURN);
+							addRelation(dependency);
+						}
 					}
 					break;
 				case DependencyType.PARAMETER:
@@ -260,6 +320,10 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					if(parameterType != null) {
 						Parameter functionParameterType = new Parameter(function, parameterType);
 						addRelation(functionParameterType);
+						if(functionParentType != null && functionParentType != parameterType){
+							Dependency dependency = new Dependency(functionParentType, parameterType, RelationType.str_PARAMETER);
+							addRelation(dependency);
+						}
 					}
 					break;
 				case DependencyType.THROW:
@@ -267,6 +331,10 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					if(throwType != null) {
 						Throw functionThrowType = new Throw(function, throwType);
 						addRelation(functionThrowType);
+						if(functionParentType != null && functionParentType != throwType){
+							Dependency dependency = new Dependency(functionParentType, throwType, RelationType.str_THROW);
+							addRelation(dependency);
+						}
 					}
 					break;
 				case DependencyType.ANNOTATION:
@@ -274,6 +342,10 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					if(annotationType != null) {
 						Annotation functionAnnotationType = new Annotation(function, annotationType);
 						addRelation(functionAnnotationType);
+						if(functionParentType != null && functionParentType != annotationType){
+							Dependency dependency = new Dependency(functionParentType, annotationType, RelationType.str_ANNOTATION);
+							addRelation(dependency);
+						}
 					}
 					break;
 				case DependencyType.CAST:
@@ -281,6 +353,10 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					if(castType != null) {
 						Cast functionCastType = new Cast(function, castType);
 						addRelation(functionCastType);
+						if(functionParentType != null && functionParentType != castType){
+							Dependency dependency = new Dependency(functionParentType, castType, RelationType.str_CAST);
+							addRelation(dependency);
+						}
 					}
 					break;
 				case DependencyType.IMPLEMENT:
@@ -311,9 +387,20 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 								addRelation(accessField);
 							}
 						}
-					}
+					} else if(relation.getEntity().getClass() == TypeEntity.class){
+						Type useType = (Type) types.get(relation.getEntity().getId().longValue());
+						if(useType != null && functionParentType !=null && functionParentType != useType) {
+							Dependency dependency = new Dependency(functionParentType, useType, RelationType.str_CALL);
+							addRelation(dependency);
+					    }
+				    }
 					break;
 				case DependencyType.CONTAIN:
+					Type containType = (Type) types.get(relation.getEntity().getId().longValue());
+					if(containType != null && functionParentType !=null && functionParentType != containType) {
+						Dependency dependency = new Dependency(functionParentType, containType, RelationType.str_VARIABLE_TYPE);
+						addRelation(dependency);
+					}
 					break;
 				default:
 					LOGGER.info(function.getName() + functionFullName + " " + relation.getType() + " " + relation.getEntity().getClass().toString() + " " + relation.getEntity().getQualifiedName());
