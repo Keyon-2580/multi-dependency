@@ -610,7 +610,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
 			if(fileImports != null && fileImports.size() > 0){
 				JSONObject temp2 = new JSONObject();
-				temp2.put("name", "#R: " + "Import");
+				temp2.put("name", "#R: " + "IMPORT");
 				temp2.put("open",true);
 				JSONArray arraytemp2 = new JSONArray();
 				for(Import fileImport: fileImports){
@@ -624,7 +624,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
 			if(fileIncludes != null && fileIncludes.size() > 0){
 				JSONObject temp2 = new JSONObject();
-				temp2.put("name", "#R: " + "Include");
+				temp2.put("name", "#R: " + "INCLUDE");
 				temp2.put("open",true);
 				JSONArray arraytemp2 = new JSONArray();
 				for(Include fileInclude: fileIncludes){
@@ -638,7 +638,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
 			if(containTypes != null && containTypes.size() > 0){
 				JSONObject temp2 = new JSONObject();
-				temp2.put("name", "#R: Contain");
+				temp2.put("name", "#R: CONTAIN");
 				temp2.put("open",true);
 				JSONArray arraytemp2 = new JSONArray();
 				for(Type type: containTypes){
@@ -646,6 +646,35 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 					temp3.put("name", "#T: " + type.getName());
 					temp3.put("open",true);
 					JSONArray arraytemp3 = new JSONArray();
+
+					Collection<Variable> containVariables = findTypeDirectlyContainFields(type);
+					if(containVariables != null && containVariables.size() > 0){
+						JSONObject temp4 = new JSONObject();
+						temp4.put("name", "#R: CONTAIN" );
+						temp4.put("open",true);
+						JSONArray arraytemp4 = new JSONArray();
+						for(Variable variable: containVariables){
+							JSONObject temp5 = new JSONObject();
+							temp5.put("name","#V: " + variable.getName());
+							arraytemp4.add(temp5);
+						}
+						temp4.put("children",arraytemp4);
+						arraytemp3.add(temp4);
+					}
+					Collection<Function> containFunctions = findTypeDirectlyContainFunctions(type);
+					if(containFunctions != null && containFunctions.size() > 0){
+						JSONObject temp4 = new JSONObject();
+						temp4.put("name", "#R: CONTAIN" );
+						temp4.put("open",true);
+						JSONArray arraytemp4 = new JSONArray();
+						for(Function variable: containFunctions){
+							JSONObject temp5 = new JSONObject();
+							temp5.put("name","#M: " + variable.getName());
+							arraytemp4.add(temp5);
+						}
+						temp4.put("children",arraytemp4);
+						arraytemp3.add(temp4);
+					}
 					Map<RelationType, Collection<Relation>> dependencyRelations = findTypeStructureDependencyRelations(type);
 					for(Map.Entry<RelationType, Collection<Relation>> entry : dependencyRelations.entrySet()){
 
