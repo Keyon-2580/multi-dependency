@@ -268,9 +268,18 @@ public class CloneController {
 	}
 
 	@GetMapping("/file/double")
-	public String DoubleFilesStructure(@RequestParam("fileId1") long file1Id, @RequestParam("fileId2") long file2Id,HttpServletRequest request) {
+	public String DoubleFilesStructure(@RequestParam("fileId1") long file1Id, @RequestParam("fileId2") long file2Id
+									,@RequestParam("cloneType") String cloneType, @RequestParam("linesSize1") long linesSize1,
+									   @RequestParam("linesSize2") long linesSize2,@RequestParam("loc1") long loc1,
+									   @RequestParam("loc2") long loc2,@RequestParam("value") float value,HttpServletRequest request) {
 		request.setAttribute("fileId1", file1Id);
 		request.setAttribute("fileId2", file2Id);
+		request.setAttribute("cloneType", cloneType);
+		request.setAttribute("linesSize1", linesSize1);
+		request.setAttribute("linesSize2", linesSize2);
+		request.setAttribute("loc1", loc1);
+		request.setAttribute("loc2", loc2);
+		request.setAttribute("value", value);
 //		return "/doublefilestructure?fileId1=" + file1Id + "&fileId2=" + file2Id;
 		return "/doublefilestructure";
 	}

@@ -33,6 +33,10 @@
             float: left;
         }
 
+        .div_file_table {
+            width: 100%;
+        }
+
         .div_file1 {
             width: 46%;
             float:left;
@@ -50,6 +54,8 @@
         }
     </style>
 <body>
+<div class = "div_file_table" id = "file_table">
+</div>
 <div class="div_file_all" style="margin-bottom: 15px;">
     <div class = "div_file1">
         <ul id="tree_file1" class="ztree"></ul>
@@ -63,7 +69,17 @@
     $(document).ready(function() {
         var fileId1 = [[${fileId1}]];
         var fileId2 = [[${fileId2}]];
-        doublefile().init(fileId1,fileId2);
+        // var cloneType1 =  "";
+        var URL = window.location.search;
+        URL = URL.split('?')[1]; //获取参数列表
+        var params = URL.split('&');
+        var cloneType = params[2];
+        var linesSize1 = [[${linesSize1}]];
+        var linesSize2 = [[${linesSize2}]];
+        var loc1 = [[${loc1}]];
+        var loc2 = [[${loc2}]];
+        var value = [[${value}]];
+        doublefile().init(fileId1,fileId2,cloneType,linesSize1,linesSize2,loc1,loc2,value);
     });
     // ]]>
 </script>

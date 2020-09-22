@@ -379,6 +379,11 @@ var clone = function(cytoscapeutil) {
 					html += "</td>";
 					html += "<td>";
 					var type = children[i].fileClone.cloneType;
+					var linesSize1 = children[i].fileClone.linesSize1;
+					var linesSize2 = children[i].fileClone.linesSize2;
+					var loc1 = children[i].fileClone.loc1;
+					var loc2 = children[i].fileClone.loc2;
+					var value = children[i].fileClone.value;
 					switch (type){
 						case 'type_1':
 							num_type1++;
@@ -390,10 +395,12 @@ var clone = function(cytoscapeutil) {
 							num_type3++;
 							break;
 					}
-					html += "<a target='_blank' href='/clone/file/double?fileId1=" + children[i].file1.id + "&fileId2=" + children[i].file2.id + "'>" + type + "</a>";
+					html += "<a target='_blank' href='/clone/file/double?fileId1=" + children[i].file1.id + "&fileId2=" + children[i].file2.id
+						+ "&cloneType=" + type +"&linesSize1=" + linesSize1 + "&linesSize2=" + linesSize2 +"&loc1=" + loc1 +"&loc2=" + loc2
+						+"&value=" + value + "'>" + type + "</a>";
 					html += "</td>";
 					html += "<td>";
-					html += "<a target='_blank' href='/clone/compare?id1=" + children[i].file1.id + "&id2=" + children[i].file2.id + "'>" + children[i].fileClone.value + "</a>";
+					html += "<a target='_blank' href='/clone/compare?id1=" + children[i].file1.id + "&id2=" + children[i].file2.id +"'>" + children[i].fileClone.value + "</a>";
 					html += "</td>";
 					html += "<td>";
 					html += "<a class='cochangeTimes' target='_blank' href='/git/cochange/commits?cochangeId=" + cochangeId
