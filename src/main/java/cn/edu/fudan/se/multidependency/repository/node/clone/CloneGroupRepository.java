@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.repository.node.clone;
 
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -17,5 +18,35 @@ public interface CloneGroupRepository extends Neo4jRepository<CloneGroup, Long> 
 	
 	@Query("match (group:CloneGroup) where group.name={name} return group")
 	CloneGroup queryCloneGroup(@Param("name") String groupName);
-	
+
+	@Query("match (n:ProjectFile) where n.suffix=\".java\" set n.language = \"java\";")
+	void setJavaLanguageBySuffix();
+
+	@Query("match (n:ProjectFile) where n.suffix<>\".java\" set n.language = \"cpp\";")
+	void setCppLanguageBySuffix();
+
+	@Query("match (n:CloneGroup)-[r:CONTAIN]-() delete r;")
+	void deleteCloneGroupContainRelations();
+
+	@Query("match (n:CloneGroup) delete n;")
+	void deleteCloneGroupRelations();
+
+	@Query("CALL algo.unionFind.stream(\"ProjectFile\", \"CLONE\")\n" +
+			"YIELD nodeId,setId\n" +
+			"with setId, collect(algo.getNodeById(nodeId)) AS files\n" +
+			"where size(files) > 1\n" +
+			"match (file:ProjectFile) where file in files set file.cloneGroupId = \"file_group_\" + setId;")
+	void setFileGroup();
+
+	@Query("match (file:ProjectFile) where file.cloneGroupId is not null with file.cloneGroupId as cloneGroupId, count(file) as count with cloneGroupId create (:CloneGroup{name: cloneGroupId, cloneLevel: \"file\", entityId: -1});\n")
+	void createCloneGroupRelations();
+
+	@Query("MATCH (n:CloneGroup) with n match (file:ProjectFile) where file.cloneGroupId = n.name create (n)-[:CONTAIN]->(file);\n")
+	void createCloneGroupContainRelations();
+
+	@Query("MATCH (n:CloneGroup) with n set n.size = size((n)-[:CONTAIN]->());\n")
+	void setCloneGroupContainSize();
+
+	@Query("MATCH (n:CloneGroup)-[:CONTAIN]->(file:ProjectFile) where n.language is null with n, file set n.language = file.language;\n")
+	void setCloneGroupLanguage();
 }

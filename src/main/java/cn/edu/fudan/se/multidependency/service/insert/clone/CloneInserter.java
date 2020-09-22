@@ -23,7 +23,7 @@ public abstract class CloneInserter extends ExtractorForNodesAndRelationsImpl {
 	
 	protected abstract void readResult() throws Exception;
 	
-	protected abstract void readGroup() throws Exception;
+//	protected abstract void readGroup() throws Exception;
 	
 	protected abstract void extractNodesAndRelations() throws Exception;
 	
@@ -52,15 +52,15 @@ public abstract class CloneInserter extends ExtractorForNodesAndRelationsImpl {
 				latch.countDown();
 			}
 		});
-		executor.execute(() -> {
-			try {
-				readGroup();
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-				latch.countDown();
-			}
-		});
+//		executor.execute(() -> {
+//			try {
+//				readGroup();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			} finally {
+//				latch.countDown();
+//			}
+//		});
 		latch.await();
 	}
 }
