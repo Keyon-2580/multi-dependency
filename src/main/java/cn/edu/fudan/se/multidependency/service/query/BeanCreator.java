@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.service.query;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.repository.node.clone.CloneGroupRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -71,6 +72,24 @@ public class BeanCreator {
 			dependsOnRepository.deleteNullTimesDependsOnInPackages();
 			
 			fileRepository.pageRank(20, 0.85);
+		}
+		return new ArrayList<>();
+	}
+
+	@Bean("createCloneGroup")
+	public List<DependsOn> createCloneGroup(PropertyConfig propertyConfig, CloneGroupRepository cloneGroupRepository) {
+		if(propertyConfig.isCalculateCloneGroup()) {
+			System.out.println("创建Clone Group关系");
+			cloneGroupRepository.setJavaLanguageBySuffix();
+			cloneGroupRepository.setCppLanguageBySuffix();
+			cloneGroupRepository.deleteCloneGroupContainRelations();
+			cloneGroupRepository.deleteCloneGroupRelations();
+
+			cloneGroupRepository.setFileGroup();
+			cloneGroupRepository.createCloneGroupRelations();
+			cloneGroupRepository.createCloneGroupContainRelations();
+			cloneGroupRepository.setCloneGroupContainSize();
+			cloneGroupRepository.setCloneGroupLanguage();
 		}
 		return new ArrayList<>();
 	}

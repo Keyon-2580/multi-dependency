@@ -64,10 +64,10 @@ public class CloneInserterForFileWithLoc extends CloneInserter {
 		cloneResults = CloneUtil.readCloneResultWithLocCsv(resultPath);
 	}
 
-	@Override
-	protected void readGroup() throws Exception {
-		groups = CloneUtil.readGroupFile(groupPath);
-	}
+//	@Override
+//	protected void readGroup() throws Exception {
+//		groups = CloneUtil.readGroupFile(groupPath);
+//	}
 
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
@@ -133,7 +133,7 @@ public class CloneInserterForFileWithLoc extends CloneInserter {
 
 		}
 		LOGGER.info("插入"+language.toString()+"文件级克隆数，对数：" + sizeOfFileCloneFiles);
-		addGroupFromGroupFile();
+		//addGroupFromGroupFile();
 	}
 	
 	private void addGroupFromGroupFile() {

@@ -58,10 +58,10 @@ public class CloneInserterForMethod extends CloneInserter {
 		cloneResults = CloneUtil.readCloneResultCsv(methodResultPath);
 	}
 
-	@Override
-	protected void readGroup() throws Exception {
-		groups = CloneUtil.readGroupFile(groupPath);
-	}
+//	@Override
+//	protected void readGroup() throws Exception {
+//		groups = CloneUtil.readGroupFile(groupPath);
+//	}
 
 	@Override
 	protected void extractNodesAndRelations() throws Exception {

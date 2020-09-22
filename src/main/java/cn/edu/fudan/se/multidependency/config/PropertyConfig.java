@@ -15,5 +15,9 @@ public class PropertyConfig {
 	@Getter
 	@Value("${config.starter.depends_on}")
 	private boolean calculateDependsOn;
+
+	@Getter
+	@Value("${config.starter.clone_group}")
+	private boolean calculateCloneGroup;
 	
 }
