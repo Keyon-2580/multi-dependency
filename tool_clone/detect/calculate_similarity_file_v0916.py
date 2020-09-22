@@ -58,7 +58,7 @@ def read_lines(file, start_line, end_line):
     lines = list()
     try:
         if file.endswith('.java') or file.endswith('.JAVA'):
-            with open(file, 'r', encoding='utf8') as f:
+            with open(file, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
         else:
             with open(file, 'r') as f:
