@@ -63,9 +63,9 @@ public class HotspotPackage {
 		this.childrenOtherPackages2 = new ArrayList<>();
 		this.package1 = (Package) relationPackages.getNode1();
 		this.package2 = (Package) relationPackages.getNode2();
-		if(package1.getDirectoryPath().compareTo(package2.getDirectoryPath()) > 0) {
-			swapPackage();
-		}
+//		if(package1.getDirectoryPath().compareTo(package2.getDirectoryPath()) > 0) {
+//			swapPackage();
+//		}
 		this.id = relationPackages.getId();
 	}
 

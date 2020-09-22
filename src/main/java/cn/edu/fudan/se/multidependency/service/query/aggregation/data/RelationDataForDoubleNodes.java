@@ -50,7 +50,22 @@ public class RelationDataForDoubleNodes<N extends Node , R extends Relation> imp
 	private Set<CodeNode> allNodesInNode1 = new HashSet<>();
 	
 	private Set<CodeNode> allNodesInNode2 = new HashSet<>();
-	
+
+	private int cloneNodesCount1 = 0;
+
+	private int cloneNodesCount2 = 0;
+
+	private int allNodesCount1 = 0;
+
+	private int allNodesCount2 = 0;
+
+	private int childrenPackagesCount1 = 0;
+
+	private int childrenPackagesCount2 = 0;
+
+	private int childrenHotspotPackageCount1 = 0;
+
+	private int childrenHotspotPackageCount2 = 0;
 	/*public double ratio1() {
 		return allNodesInNode1.isEmpty() ? -1 : (nodesInNode1.size() + 0.0) / allNodesInNode1.size();
 	}
@@ -115,5 +130,16 @@ public class RelationDataForDoubleNodes<N extends Node , R extends Relation> imp
 		for(R  relation : relations) {
 			addChild(relation);
 		}
+	}
+
+	public void setDate(int cloneNodesCount1, int cloneNodesCount2, int allNodesCount1, int allNodesCount2, int childrenPackagesCount1, int childrenPackagesCount2, int childrenHotspotPackageCount1, int childrenHotspotPackageCount2) {
+		this.cloneNodesCount1 = cloneNodesCount1;
+		this.cloneNodesCount2 = cloneNodesCount2;
+		this.allNodesCount1 = allNodesCount1;
+		this.allNodesCount2 = allNodesCount2;
+		this.childrenPackagesCount1 = childrenPackagesCount1;
+		this.childrenPackagesCount2 = childrenPackagesCount2;
+		this.childrenHotspotPackageCount1 = childrenHotspotPackageCount1;
+		this.childrenHotspotPackageCount2 = childrenHotspotPackageCount2;
 	}
 }

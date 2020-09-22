@@ -7,6 +7,7 @@ import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueCalcul
 import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueForDoubleNodes;
 import lombok.Getter;
 import lombok.Setter;
+import org.bouncycastle.util.Pack;
 
 /**
  * 默认的判定有克隆关系的两个包是否相似的类
@@ -46,28 +47,15 @@ public class RelationAggregatorForPackageByFileClone implements RelationAggregat
 
 	@Override
 	public Boolean aggregate(RelationDataForDoubleNodes<? extends Node, ? extends Relation> doubleNodes) {
-		Node node1 = doubleNodes.getNode1();
-		Node node2 = doubleNodes.getNode2();
-		if(!(node1 instanceof Package) || !(node2 instanceof Package)) {
-			return false;
-		}
-		//（包内很多文件，只有一部分文件克隆的情况）
-		// 先判断两个包内有克隆关系的 文件数 （不是文件克隆对数）是否大于等于countThreshold （默认10）
-		if(doubleNodes.getNodesInNode1().size() + doubleNodes.getNodesInNode2().size() >= countThreshold) {
-			return true;
-		}
-		try {
-			// 如果小于countThreshold（有可能是文件少，但是基本都有克隆关系的情况），
-			// 则计算 克隆相关的文件数 / 两个包的文件总数 是否大于等于 percentageThreshold （默认0.8）
-			if((doubleNodes.getNodesInNode1().size() + doubleNodes.getNodesInNode2().size() + 0.0)
-					/ (doubleNodes.getAllNodesInNode1().size() + doubleNodes.getAllNodesInNode2().size()) >= percentageThreshold) {
-				return true;
-			}
-		} catch (Exception e) {
-			return false;
-		}
-		
-		return false;
+		int cloneNodes1 = doubleNodes.getCloneNodesCount1();
+		int cloneNodes2 = doubleNodes.getCloneNodesCount2();
+		int allNodes1 = doubleNodes.getAllNodesCount1();
+		int allNodes2 = doubleNodes.getAllNodesCount2();
+		int childrenPackages1 = doubleNodes.getChildrenPackagesCount1();
+		int childrenPackages2 = doubleNodes.getChildrenPackagesCount2();
+		int childrenHotspotPackageCount1 = doubleNodes.getChildrenHotspotPackageCount1();
+		int childrenHotspotPackageCount2 = doubleNodes.getChildrenHotspotPackageCount2();
+		return (cloneNodes1 + cloneNodes2 + 0.0) / (allNodes1 + allNodes2) > 0.5 || (childrenPackages1 != 0 && (childrenHotspotPackageCount1 + 0.0) / childrenPackages1 > 0.5) || (childrenPackages2 != 0 && (childrenHotspotPackageCount2 + 0.0) / childrenPackages2 > 0.5);
 	}
 
 }
