@@ -124,42 +124,42 @@ public class CloneInserterForFile extends CloneInserter {
 
 		}
 		LOGGER.info("插入"+language.toString()+"文件级克隆数，对数：" + sizeOfFileCloneFiles);
-		addGroupFromGroupFile();
+		//addGroupFromGroupFile();
 	}
 	
-	private void addGroupFromGroupFile() {
-		long groupCount = 0;
-		for(Group group : this.groups) {
-			CloneGroup cloneGroup = new CloneGroup();
-			cloneGroup.setLanguage(language.toString());
-			cloneGroup.setEntityId(generateEntityId());
-			cloneGroup.setName(String.join("_", language.toString(), "file", "group", String.valueOf(groupCount++)));
-			cloneGroup.setSize(group.getGroupIds().size());
-			cloneGroup.setCloneLevel(CloneLevel.file.toString());
-			addNode(cloneGroup, null);
-			for(int id : group.getGroupIds()) {
-				CodeNode node = this.cloneFileIdToCodeNode.get(id);
-				if(node == null) {
-					FilePathFromCsv filePath = filePaths.get(id);
-					if(filePath == null) {
-						LOGGER.error("文件克隆组中找不到clone id为 " + id + " 的节点");
-						continue;
-					} else {
-						ProjectFile file = this.getNodes().findFileByPathRecursion(filePath.getFilePath());
-						if(file == null) {
-							LOGGER.error("库中找不到clone id为 " + id + " 的文件节点");
-							continue;
-						} else {
-							this.cloneFileIdToCodeNode.put(id, file);
-							node = file;
-						}
-					}
-				}
-				addRelation(new Contain(cloneGroup, node));
-			}
-		}
-		cloneGroupNumber += groupCount;
-		LOGGER.info("插入"+language.toString()+"文件级克隆组，组数：" + (groupCount));
-	}
+//	private void addGroupFromGroupFile() {
+//		long groupCount = 0;
+//		for(Group group : this.groups) {
+//			CloneGroup cloneGroup = new CloneGroup();
+//			cloneGroup.setLanguage(language.toString());
+//			cloneGroup.setEntityId(generateEntityId());
+//			cloneGroup.setName(String.join("_", language.toString(), "file", "group", String.valueOf(groupCount++)));
+//			cloneGroup.setSize(group.getGroupIds().size());
+//			cloneGroup.setCloneLevel(CloneLevel.file.toString());
+//			addNode(cloneGroup, null);
+//			for(int id : group.getGroupIds()) {
+//				CodeNode node = this.cloneFileIdToCodeNode.get(id);
+//				if(node == null) {
+//					FilePathFromCsv filePath = filePaths.get(id);
+//					if(filePath == null) {
+//						LOGGER.error("文件克隆组中找不到clone id为 " + id + " 的节点");
+//						continue;
+//					} else {
+//						ProjectFile file = this.getNodes().findFileByPathRecursion(filePath.getFilePath());
+//						if(file == null) {
+//							LOGGER.error("库中找不到clone id为 " + id + " 的文件节点");
+//							continue;
+//						} else {
+//							this.cloneFileIdToCodeNode.put(id, file);
+//							node = file;
+//						}
+//					}
+//				}
+//				addRelation(new Contain(cloneGroup, node));
+//			}
+//		}
+//		cloneGroupNumber += groupCount;
+//		LOGGER.info("插入"+language.toString()+"文件级克隆组，组数：" + (groupCount));
+//	}
 
 }

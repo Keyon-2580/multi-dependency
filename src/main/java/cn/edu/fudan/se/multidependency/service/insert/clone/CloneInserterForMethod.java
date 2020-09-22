@@ -29,7 +29,7 @@ public class CloneInserterForMethod extends CloneInserter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CloneInserterForMethod.class);
 	private String methodNameTablePath;
 	private String methodResultPath;
-	private String groupPath;
+//	private String groupPath;
 	private Language language;
 
 	//括号前后各加2行，避免由于括号原因的导致方法识别问题
@@ -37,14 +37,14 @@ public class CloneInserterForMethod extends CloneInserter {
 
 	private Map<Integer, FilePathFromCsv> methodPaths = new HashMap<>();
 	private Collection<CloneResultFromCsv> cloneResults = new ArrayList<>();
-	private Collection<Group> groups = new ArrayList<>();
+//	private Collection<Group> groups = new ArrayList<>();
 	private Map<Integer, CodeNode> cloneNodeIdToCodeNode = new HashMap<>();
 	
-	public CloneInserterForMethod(String methodNameTablePath, String methodResultPath, String groupPath, Language language) {
+	public CloneInserterForMethod(String methodNameTablePath, String methodResultPath, Language language) {
 		super();
 		this.methodNameTablePath = methodNameTablePath;
 		this.methodResultPath = methodResultPath;
-		this.groupPath = groupPath;
+//		this.groupPath = groupPath;
 		this.language = language;
 	}
 
@@ -183,49 +183,49 @@ public class CloneInserterForMethod extends CloneInserter {
 			}
 		}
 		LOGGER.info("插入"+language.toString()+"方法级克隆数，对数：" + sizeOfClones);
-		addGroupFromGroupFile();
+//		addGroupFromGroupFile();
 	}
 	
-	private void addGroupFromGroupFile() {
-		long groupCount = 0;
-		for(Group group : this.groups) {
-			CloneGroup cloneGroup = new CloneGroup();
-			cloneGroup.setLanguage(language.toString());
-			cloneGroup.setEntityId(generateEntityId());
-			cloneGroup.setName(String.join("_", language.toString(), "method", "group", String.valueOf(groupCount++)));
-			cloneGroup.setSize(group.getGroupIds().size());
-			CloneLevel level = null;
-			boolean uniqueNodeType = true;
-			for(int id : group.getGroupIds()) {
-				CodeNode node = this.cloneNodeIdToCodeNode.get(id);
-				if(node == null) {
-					LOGGER.error("方法克隆组中找不到clone id为 " + id + " 的节点");
-					continue;
-				}
-				if(uniqueNodeType) {
-					CloneLevel temp = CloneLevel.getCodeNodeCloneLevel(node);
-					if(temp == null) {
-						LOGGER.error("节点类型错误，找不到克隆级别");
-						continue;
-					}
-					if(level == null) {
-						level = temp;
-					} else {
-						if(level != temp) {
-							uniqueNodeType = false;
-						}
-					}
-				}
-				addRelation(new Contain(cloneGroup, node));
-			}
-			if(level == null) {
-				cloneGroup.setCloneLevel(CloneLevel.multiple_level.toString());
-			} else {
-				cloneGroup.setCloneLevel(uniqueNodeType ? level.toString() : CloneLevel.multiple_level.toString());
-			}
-			addNode(cloneGroup, null);
-		}
-		cloneGroupNumber += groupCount;
-		LOGGER.info("插入"+language.toString()+"方法级克隆组，组数：" + (groupCount));
-	}
+//	private void addGroupFromGroupFile() {
+//		long groupCount = 0;
+//		for(Group group : this.groups) {
+//			CloneGroup cloneGroup = new CloneGroup();
+//			cloneGroup.setLanguage(language.toString());
+//			cloneGroup.setEntityId(generateEntityId());
+//			cloneGroup.setName(String.join("_", language.toString(), "method", "group", String.valueOf(groupCount++)));
+//			cloneGroup.setSize(group.getGroupIds().size());
+//			CloneLevel level = null;
+//			boolean uniqueNodeType = true;
+//			for(int id : group.getGroupIds()) {
+//				CodeNode node = this.cloneNodeIdToCodeNode.get(id);
+//				if(node == null) {
+//					LOGGER.error("方法克隆组中找不到clone id为 " + id + " 的节点");
+//					continue;
+//				}
+//				if(uniqueNodeType) {
+//					CloneLevel temp = CloneLevel.getCodeNodeCloneLevel(node);
+//					if(temp == null) {
+//						LOGGER.error("节点类型错误，找不到克隆级别");
+//						continue;
+//					}
+//					if(level == null) {
+//						level = temp;
+//					} else {
+//						if(level != temp) {
+//							uniqueNodeType = false;
+//						}
+//					}
+//				}
+//				addRelation(new Contain(cloneGroup, node));
+//			}
+//			if(level == null) {
+//				cloneGroup.setCloneLevel(CloneLevel.multiple_level.toString());
+//			} else {
+//				cloneGroup.setCloneLevel(uniqueNodeType ? level.toString() : CloneLevel.multiple_level.toString());
+//			}
+//			addNode(cloneGroup, null);
+//		}
+//		cloneGroupNumber += groupCount;
+//		LOGGER.info("插入"+language.toString()+"方法级克隆组，组数：" + (groupCount));
+//	}
 }

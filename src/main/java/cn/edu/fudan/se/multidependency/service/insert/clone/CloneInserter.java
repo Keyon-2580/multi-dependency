@@ -8,13 +8,13 @@ import cn.edu.fudan.se.multidependency.service.insert.ExtractorForNodesAndRelati
 
 public abstract class CloneInserter extends ExtractorForNodesAndRelationsImpl {
 	
-	protected static long cloneGroupNumber = 0;
+//	protected static long cloneGroupNumber = 0;
 	
 	private CountDownLatch latch;
 
 	public CloneInserter() {
 		super();
-		this.latch = new CountDownLatch(3);
+		this.latch = new CountDownLatch(2);
 	}
 	
 	private static final Executor executor = Executors.newCachedThreadPool();
@@ -36,6 +36,7 @@ public abstract class CloneInserter extends ExtractorForNodesAndRelationsImpl {
 	private void processFile() throws Exception {
 		executor.execute(() -> {
 			try {
+				System.out.println("readMeasureIndex");
 				readMeasureIndex();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -45,6 +46,7 @@ public abstract class CloneInserter extends ExtractorForNodesAndRelationsImpl {
 		});
 		executor.execute(() -> {
 			try {
+				System.out.println("readResult");
 				readResult();
 			} catch (Exception e) {
 				e.printStackTrace();
