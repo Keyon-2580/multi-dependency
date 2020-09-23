@@ -30,10 +30,7 @@ var clone = function(cytoscapeutil) {
 		myChart.setOption(option);
 	}
 	var drawPic = function(canvas, width, height, result){
-		console.log(result);
 		var data = result.data;
-		console.log(data);
-		console.log(canvas);
 		var packageIndex = result.packageIndex;
 		var cxt = canvas.getContext("2d");
 		var per = 10;
@@ -78,10 +75,7 @@ var clone = function(cytoscapeutil) {
 		return cxt;
 	};
 	var drawPackagePic = function(canvas, width, height, result){
-		console.log(result);
 		var data = result.matrix;
-		console.log(data);
-		console.log(canvas);
 		var cxt = canvas.getContext("2d");
 		var per = 10;
 		cxt.save();
@@ -99,7 +93,6 @@ var clone = function(cytoscapeutil) {
 		cxt.save();
 		for(var i = 0; i < data.length; i++){
 			for(var j = 0; j < data[i].length; j++) {
-				console.log(data[i][j]);
 				if(data[i][j].integerValue != 0) {
 					if(i == j) {
 						cxt.fillStyle="green";
@@ -187,121 +180,13 @@ var clone = function(cytoscapeutil) {
 	var showPackageCytoscapeGraph = function(data) {
 		var cy = cytoscapeutil.showDataInCytoscape($("#cloneGroupsDiv"), data, "random");
 	};
-	var duplicatedPackage = function() {
-		$("#packages_duplicated").html("");
-		$.ajax({
-			type: "get",
-			url: "/clone/package/duplicated?threshold=10&percentage=0.8",
-			success: function(result) {
-				console.log(result);
-				var html = "<table class='table table-bordered'>";
-				html += "<tr><th>目录1</th><th>目录1克隆占比</th><th>目录2</th><th>目录2克隆占比</th><th>克隆文件对数</th><th>总克隆占比</th></tr>";
-				var tr = function(index, layer, duplicated) {
-					var prefix = "";
-					for(var i = 0; i < layer; i++) {
-						prefix += "|---";
-					}
-					switch (index) {
-						case 0:
-							html += "<tr>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += prefix + duplicated.package1.directoryPath;
-							html += layer == 0 ? "</th>" : "</td>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += duplicated.relationNodes1 + "/" + duplicated.allNodes1 + "=" + ((duplicated.relationNodes1 + 0.0) / duplicated.allNodes1).toFixed(2);
-							html += layer == 0 ? "</th>" : "</td>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += prefix + duplicated.package2.directoryPath;
-							html += layer == 0 ? "</th>" : "</td>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += duplicated.relationNodes2 + "/" + duplicated.allNodes2 + "=" + ((duplicated.relationNodes2 + 0.0) / duplicated.allNodes2).toFixed(2);
-							html += layer == 0 ? "</th>" : "</td>";
-							html += layer == 0 ? "<th>" : "<td>";
-							var len = duplicated.relationPackages.children.length;
-							if(len > 0) {
-								html += "<a class='package' index='" + (0) + "' href='#package_files_clone' id2='" + duplicated.package2.id + "' id1='" + duplicated.package1.id + "'>" + len + "</a>";
-							}
-							else {
-								html += len;
-							}
-							html += layer == 0 ? "</th>" : "</td>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += "(" + duplicated.relationNodes1 + "+" + duplicated.relationNodes2 + ")/(" + duplicated.allNodes1 + "+" + duplicated.allNodes2 + ")=" + ((duplicated.relationNodes1 + duplicated.relationNodes2 + 0.0) / (duplicated.allNodes1 + duplicated.allNodes2)).toFixed(2);
-							html += layer == 0 ? "</th>" : "</td>";
-							html += "</tr>";
-							break;
-						case -1:
-							html += "<tr style='color: #A9A9A9'>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += prefix + duplicated.directoryPath;
-							html += layer == 0 ? "</th>" : "</td>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += "0/" + duplicated.allNodes + "=0.00";
-							html += layer == 0 ? "</th>" : "</td>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += layer == 0 ? "</th>" : "</td>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += layer == 0 ? "</th>" : "</td>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += layer == 0 ? "</th>" : "</td>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += layer == 0 ? "</th>" : "</td>";
-							html += "</tr>";
-							break;
-						case 1:
-							html += "<tr style='color: #A9A9A9'>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += layer == 0 ? "</th>" : "</td>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += layer == 0 ? "</th>" : "</td>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += prefix + duplicated.directoryPath;
-							html += layer == 0 ? "</th>" : "</td>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += "0/" + duplicated.allNodes + "=0.00";
-							html += layer == 0 ? "</th>" : "</td>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += layer == 0 ? "</th>" : "</td>";
-							html += layer == 0 ? "<th>" : "<td>";
-							html += layer == 0 ? "</th>" : "</td>";
-							html += "</tr>";
-							break;
-					}
-					if(index == 0) {
-						for(var key1 = 0; key1 < duplicated.childrenHotspotPackages.length; key1 ++) {
-							tr(0, layer + 1, duplicated.childrenHotspotPackages[key1]);
-						}
-
-						for(var key2 = 0; key2 < duplicated.childrenOtherPackages1.length; key2 ++) {
-							tr(-1, layer + 1, duplicated.childrenOtherPackages1[key2]);
-						}
-
-						for(var key3 = 0; key3 < duplicated.childrenOtherPackages2.length; key3 ++) {
-							tr(1, layer + 1, duplicated.childrenOtherPackages2[key3]);
-						}
-					}
-				}
-				for(var i = 0; i < result.length; i ++) {
-					tr(0, 0, result[i]);
-				}
-				html += "</table>"
-				$("#packages_duplicated").html(html);
-				$(".package").click(function() {
-					console.log($(this).attr("id1"));
-					console.log($(this).attr("id2"));
-//					doublePackagesClone($(this).attr("id1"), $(this).attr("id2"), $(this).attr("index"));
-					doublePackagesCloneWithCoChange($(this).attr("id1"), $(this).attr("id2"), $(this).attr("index"));
-				});
-			}
-		})
-	}
 	var doublePackagesClone = function(pck1Id, pck2Id, index) {
 		$("#package_files_clone").html("");
 		$.ajax({
 			type: "get",
 			url: "/clone/package/double?package1=" + pck1Id + "&package2=" + pck2Id,
 			success: function(result) {
-				console.log(result);
+				console.log("success");
 				var html = index + "<h4>" + result.node1.directoryPath 
 					+ "</h4>&<h4>" + result.node2.directoryPath 
 					+ "</h4>" + result.children.length + "<table class='table table-bordered'>"
@@ -334,7 +219,7 @@ var clone = function(cytoscapeutil) {
 			type: "get",
 			url: "/clone/package/double/cochange?package1=" + pck1Id + "&package2=" + pck2Id,
 			success: function(result) {
-				console.log(result);
+				console.log("success");
 				var html = index + "&nbsp;&nbsp;" + result.children.length;
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
@@ -424,13 +309,12 @@ var clone = function(cytoscapeutil) {
 				html += "<div id='fileClonesGraph'></div>"
 				$("#package_files_clone").html(html);
 				$(".cochangeTimes").click(function() {
-					console.log(children[$(this).attr("index")].cochange);
 				});
 				$.ajax({
 					type: "get",
 					url: "/clone/package/double/graph?package1=" + pck1Id + "&package2=" + pck2Id,
 					success: function(result) {
-						console.log(result);
+						console.log("success");
 						cloneGroupToGraph(result, "fileClonesGraph");
 					}
 				});
@@ -442,7 +326,7 @@ var clone = function(cytoscapeutil) {
 			type: "get",
 			url: "/clone/package",
 			success:function(result) {
-				console.log(result);
+				console.log("success");
 				var html = "<div><span>" + result.length + "</span></div><table class='table table-bordered'>";
 				html += "<tr><th>index</th><th>目录</th><th>目录</th>";
 				html += "<th>目录1文件数</th><th>目录2文件数</th><th>目录1克隆文件数</th><th>目录2克隆文件数</th><th>目录1占比</th><th>目录2占比</th><th>文件克隆对数</th></tr>";
@@ -483,12 +367,9 @@ var clone = function(cytoscapeutil) {
 				html += "</table>";
 				$("#packages_clone").html(html);
 				$(".package").click(function() {
-					console.log($(this).attr("id1"));
-					console.log($(this).attr("id2"));
 //					doublePackagesClone($(this).attr("id1"), $(this).attr("id2"), $(this).attr("index"));
 					doublePackagesCloneWithCoChange($(this).attr("id1"), $(this).attr("id2"), $(this).attr("index"));
 				});
-				duplicatedPackage();
 			}
 		});
 	}
@@ -534,8 +415,6 @@ var clone = function(cytoscapeutil) {
 		links = packageImports(nodes);
 		// var nodes = cluster.nodes(packageClone(classes)),
 		//     links = packageCloneImports(nodes);
-		
-		console.log(nodes)
 		
 		link = link
 		.data(bundle(links))
@@ -648,7 +527,6 @@ var clone = function(cytoscapeutil) {
 				var node = map[name], i;
 				if (!node) {
 					node = map[name] = data || {name: name, children: []};
-					console.log(node)
 					if (name.length) {
 						node.parent = find(name.substring(0, i = name.lastIndexOf("/")));
 						node.parent.children.push(node);
@@ -660,7 +538,6 @@ var clone = function(cytoscapeutil) {
 			
 			// classes.result.forEach(function(d) {
 			classes.forEach(function(d) {
-				console.log(d)
 				find(d.name, d);
 			});
 			
@@ -695,7 +572,6 @@ var clone = function(cytoscapeutil) {
 				var node = map[name], i;
 				if (!node) {
 					node = map[name] = data || {data: {source: name}, children: [], parent: []};
-					// console.log(node)
 					if (name.length) {
 						node.parent = find(name.substring(0, i = name.lastIndexOf(".")));
 						node.parent.children.push(node);
@@ -706,7 +582,6 @@ var clone = function(cytoscapeutil) {
 			}
 			
 			classes.value.edges.forEach(function(d) {
-				// console.log(d)
 				find(d.data.source, d);
 			});
 			
@@ -720,7 +595,6 @@ var clone = function(cytoscapeutil) {
 			
 			// Compute a map from name to node.
 			nodes.forEach(function(d) {
-				// console.log(d.data.source)
 				map[d.source] = d.data.source;
 			});
 			
@@ -729,7 +603,6 @@ var clone = function(cytoscapeutil) {
 				if (d.data.target)
 					imports.push({source: map[d.source], target: d.data.target});
 			});
-			// console.log(imports)
 			return imports;
 		}
 	};
@@ -826,7 +699,6 @@ var clone = function(cytoscapeutil) {
 			type : "get",
 			url : "/graph/package/cytoscape/90559",
 			success : function(result) {
-				console.log(result);
 				showPackageCytoscapeGraph(result.data);
 			}
 		});*/
@@ -834,7 +706,6 @@ var clone = function(cytoscapeutil) {
 			type : "get",
 			url : "/graph/package/structure/90559",
 			success : function(result) {
-				console.log(result);
 				showGraph(result.data);
 			}
 		});*/
@@ -843,7 +714,7 @@ var clone = function(cytoscapeutil) {
 				type : "get",
 				url : "/clone/package/cytoscape",
 				success : function(result) {
-					console.log(result);
+					console.log("success");
 					if(result.result == "success") {
 						var cy = cytoscapeutil.showDataInCytoscape($("#graph"), result.value, "dagre");
 						cy.style().selector('node[type="Package"]').style({

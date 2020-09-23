@@ -109,12 +109,6 @@ public class CloneController {
 		return cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE));
 	}
 
-	@GetMapping("/package/duplicated")
-	@ResponseBody
-	public Collection<HotspotPackage> similarPackages(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
-		return hotspotPackageDetector.detectHotspotPackages();
-	}
-
 	/**
 	 * 两个包之间的文件依赖
 	 * @param package1Id
