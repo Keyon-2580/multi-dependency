@@ -25,10 +25,10 @@ var doublefile = function() {
             url : "/clone/file/double/json?fileId1="+ fileId1 +"&fileId2=" + fileId2,
             success : function(result) {
                 var html = ""
-                html += "<table>"
+                html += "<table class = \"gridtable\">"
                     + "<tr><th>ID</th><th>cloneType</th><th>linesSize</th><th>loc</th><th>value</th></tr>"
-                    + "<tr><td>1</td><td>" + cloneType + "</td><td>" + linesSize1 +"</td><td>" + loc1 +"</td><td>" + value
-                    + "<tr><td>2</td><td>" + cloneType + "</td><td>" + linesSize2 +"</td><td>" + loc2 +"</td><td>" + value ;
+                    + "<tr><td>1</td><td>" + cloneType.split("=")[1] + "</td><td>" + linesSize1 +"</td><td>" + loc1 +"</td><td>" + value + "</td></tr>"
+                    + "<tr><td>2</td><td>" + cloneType.split("=")[1] + "</td><td>" + linesSize2 +"</td><td>" + loc2 +"</td><td>" + value + "</td></tr>";
                 console.log(html)
 
                 $("#file_table").html(html);
