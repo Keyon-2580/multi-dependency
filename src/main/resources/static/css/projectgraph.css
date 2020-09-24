@@ -21,3 +21,23 @@
 .circlepacking_node--root {
     pointer-events: none;
 }
+
+line {
+    stroke-width: 4px;
+    stroke: #d62728;
+}
+
+.showLineButton {
+    float: right;
+    margin-right: 50px;
+    margin-top: 50px;
+    color: black;
+    font-family:Arial;
+    padding: 10px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    border-radius: 3px;
+    cursor: pointer;
+}

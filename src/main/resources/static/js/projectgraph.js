@@ -1,3 +1,10 @@
+var svg_global;
+var diameter_global;
+var g_global;
+var flag = true;
+
+var jsonLinks_global;
+
 var projectgraph = function () {
     var mainUrl = "/project";
 
@@ -5,12 +12,18 @@ var projectgraph = function () {
         // console.log(result);
         var projectdata = result[0].result;
         var clonedata = result[1].clone;
+        var jsonLinks = result[2].links;
+        jsonLinks_global = jsonLinks;
         var svg = d3.select("#" + divId)
-                .attr("width", 1800)
-                .attr("height", 1800),
+                .attr("width", 1500)
+                .attr("height", 1500),
             margin = 20,
             diameter = +svg.attr("width"),
             g = svg.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+
+        svg_global = svg;
+        g_global = g;
+        diameter_global = diameter;
 
         var color = d3.scaleLinear()
             .domain([0, 1])
@@ -32,26 +45,46 @@ var projectgraph = function () {
         var circle = g.selectAll("circle")
             .data(nodes)
             .enter().append("circle")
-            .attr("class", function(d) { return d.parent ? d.children ? "circlepacking_node" : "circlepacking_node circlepacking_node--leaf" : "circlepacking_node circlepacking_node--root"; })
-            .style("fill", function(d) {return d.children ? color(d.depth/(d.depth+14)) : (getCloneBooleanByName(projectdata,d.data.name) ? "\t#FFB6C1" : null); })
-            .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
-            .call(text => text.append("title").text(function(d) { return d.parent ? d.data.name + "\n所属包：" + d.parent.data.name + setCloneTitle(getCloneDataByName(clonedata,d.data.long_name)): d.data.name; }));
+            .attr("class", function(d) {
+                return d.parent ? d.children ? "circlepacking_node" : "circlepacking_node circlepacking_node--leaf" : "circlepacking_node circlepacking_node--root";
+            })
+            .style("fill", function(d) {
+                return d.children ? color(d.depth/(d.depth+14)) : (getCloneBooleanByName(projectdata,d.data.name) ? "\t#FFB6C1" : null);
+            })
+            .attr("id", function (d) {
+                return d.data.id;
+            })
+            .on("click", function(d) {
+                if (focus !== d) zoom(d), d3.event.stopPropagation();
+            })
+            .call(text => text.append("title").text(function(d) {
+                return d.parent ? d.data.name + "\n所属包：" + d.parent.data.name + setCloneTitle(getCloneDataByName(clonedata,d.data.long_name)): d.data.name;
+            }));
 
         var text = g.selectAll("text")
             .data(nodes)
             .enter().append("text")
             .attr("class", "circlepacking_label")
-            .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0; })
-            .style("display", function(d) { return d.parent === root ? "inline" : "none"; })
+            .style("fill-opacity", function(d) {
+                return d.parent === root ? 1 : 0;
+            })
+            .style("display", function(d) {
+                return d.parent === root ? "inline" : "none";
+            })
             .style("font-size", function(d) {
-                return d.children ? color(d.depth) : (getCloneBooleanByName(projectdata,d.data.name) ? "\t#FFB6C1" : null); })
-            .text(function(d) { return d.data.name; });
+                return d.children ? color(d.depth) : (getCloneBooleanByName(projectdata,d.data.name) ? "\t#FFB6C1" : null);
+            })
+            .text(function(d) {
+                return d.data.name;
+            });
 
         var node = g.selectAll("circle,text");
 
         svg
             .style("background", "white")
-            .on("click", function() { zoom(root); });
+            .on("click", function() {
+                zoom(root);
+            });
 
         zoomTo([root.x, root.y, root.r * 2 + margin]);
 
@@ -65,20 +98,34 @@ var projectgraph = function () {
                 .duration(d3.event.altKey ? 7500 : 750)
                 .tween("zoom", function(d) {
                     var i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2 + margin]);
-                    return function(t) { zoomTo(i(t)); };
+                    return function(t) {
+                        zoomTo(i(t));
+                    };
                 });
 
             transition.selectAll("text")
-                .filter(function(d) { return d.parent === focus || this.style.display === "inline"; })
-                .style("fill-opacity", function(d) { return d.parent === focus ? 1 : 0; })
-                .on("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
-                .on("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
+                .filter(function(d) {
+                    return d.parent === focus || this.style.display === "inline";
+                })
+                .style("fill-opacity", function(d) {
+                    return d.parent === focus ? 1 : 0;
+                })
+                .on("start", function(d) {
+                    if (d.parent === focus) this.style.display = "inline";
+                })
+                .on("end", function(d) {
+                    if (d.parent !== focus) this.style.display = "none";
+                });
         }
 
         function zoomTo(v) {
             var k = diameter / v[2]; view = v;
-            node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
-            circle.attr("r", function(d) { return d.r * k; });
+            node.attr("transform", function(d) {
+                return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")";
+            });
+            circle.attr("r", function(d) {
+                return d.r * k;
+            });
         }
 
         function getCloneBooleanByName(data,name){
@@ -161,6 +208,7 @@ var projectgraph = function () {
 
                 for(var i = 0; i < projectlist.length; i++){
                     html += "<svg id = projectToGraph_" + projectlist[i] + "></svg>";
+                    html += "<button class = \"showLineButton\" type=\"button\" onclick= showLine(\"showLineButton_" + projectlist[i] + "\") id = showLineButton_" + projectlist[i] + ">显示包克隆关系</button>";
                     // console.log(html);
                     $("#projectToGraph").html(html);
 
@@ -199,6 +247,70 @@ var projectgraph = function () {
             _graph();
         }
     }
+}
+
+var showLine = function(buttonId){
+    var links;
+    function drawLink() {
+        links = svg_global.append('g')
+            .style('stroke', '#aaa')
+            .attr("class", "packageLink")
+            .selectAll('line')
+            .data(jsonLinks_global)
+            .enter().append('line');
+
+        function getTranslateX(translateText) {
+            var start = translateText.indexOf("(");
+            var comma = translateText.indexOf(",");
+            return parseFloat(translateText.slice(start + 1, comma));
+        }
+
+        function getTranslateY(translateText) {
+            var comma = translateText.indexOf(",");
+            var end = translateText.indexOf(")");
+            return parseFloat(translateText.slice(comma + 1, end));
+        }
+
+        function getCircleTransform(id) {
+            // return d3.select("#" + id.replace(/\./g, '\\.')).attr("transform");
+            // console.log(d3.select("#L1\\.M0\\.L1\\.M0").attr("transform"));
+            d3.select("#" + id)
+                .style("stroke","#d62728")
+                .style("stroke-width","1.5px")
+            return d3.select("#" + id).attr("transform");
+        }
+        links.attr("x1", function (d) {
+            var test = getCircleTransform(d.source_id);
+            return getTranslateX(getCircleTransform(d.source_id)) + diameter_global / 2;
+        })
+            .attr("y1", function (d) {
+                return getTranslateY(getCircleTransform(d.source_id)) + diameter_global / 2;
+            })
+            .attr("x2", function (d) {
+                return getTranslateX(getCircleTransform(d.target_id)) + diameter_global / 2;
+            })
+            .attr("y2", function (d) {
+                return getTranslateY(getCircleTransform(d.target_id)) + diameter_global / 2;
+            });
+    }
+
+    function clearLink(){
+        g_global.selectAll("circle")
+            .style("stroke","")
+            .style("stroke-width","")
+        var svg1 = d3.select(".packageLink") .remove();
+    }
+
+    if(flag){
+        drawLink();
+        document.getElementById(buttonId).innerHTML = "取消包克隆关系"
+        flag = false;
+    }else{
+        clearLink();
+        document.getElementById(buttonId).innerHTML = "显示包克隆关系"
+        flag = true;
+    }
+
 }
 
 

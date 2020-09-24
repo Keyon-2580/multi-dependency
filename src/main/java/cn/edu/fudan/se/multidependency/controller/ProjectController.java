@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServletRequest;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
 import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
 import cn.edu.fudan.se.multidependency.service.query.data.ProjectStructure;
 import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
@@ -92,6 +94,9 @@ public class ProjectController {
 	
 	@Autowired
 	private ProjectService projectService;
+
+	@Autowired
+	private HotspotPackageDetector hotspotPackageDetector;
 
 	@GetMapping("/graph")
 	public String index() {
@@ -579,6 +584,7 @@ public class ProjectController {
 	public JSONArray projectHas(@RequestParam("projectId") long projectId) {
 		JSONArray result = new JSONArray();
 		JSONArray clone = new JSONArray();
+		JSONArray links = new JSONArray();
 
 		Project project = nodeService.queryProject(projectId);
 		ProjectStructure projectStructure = hasRelationService.projectHasInitialize(project);
@@ -588,6 +594,7 @@ public class ProjectController {
 		JSONObject nodeJSON = new JSONObject();
 		JSONObject nodeJSON2 = new JSONObject();
 		JSONObject nodeJSON3 = new JSONObject();
+		JSONObject nodeJSON4 = new JSONObject();
 
 		for(PackageStructure pckstru : childrenPackages){
 			PackageStructure pcknew = hasRelationService.packageHasInitialize(pckstru.getPck());
@@ -595,15 +602,27 @@ public class ProjectController {
 		}
 
 		nodeJSON.put("name", project.getName());
+		nodeJSON.put("id", "id_" + project.getId().toString());
 		Collection<ProjectFile> clonefiles = basicCloneQueryService.findProjectContainCloneFiles(project);
 		Collection<Clone> cloneList = basicCloneQueryService.findClonesInProject(project);
 		clone = basicCloneQueryService.ClonesInProject(cloneList);
 		nodeJSON.put("children",getHasJson(clonefiles,childrenPackagesnew));
+
+		Collection<HotspotPackage> hotspotPackages = hotspotPackageDetector.detectHotspotPackages();
+		for(HotspotPackage hotspotPackage: hotspotPackages){
+			JSONObject link = new JSONObject();
+			link.put("source_id", "id_" + hotspotPackage.getPackage1().getId().toString());
+			link.put("target_id", "id_" + hotspotPackage.getPackage2().getId().toString());
+			links.add(link);
+		}
+
 		nodeJSON2.put("result",nodeJSON);
 		nodeJSON3.put("clone",clone);
+		nodeJSON4.put("links",links);
 
 		result.add(nodeJSON2);
 		result.add(nodeJSON3);
+		result.add(nodeJSON4);
 
 		return result;
 	}
@@ -618,6 +637,7 @@ public class ProjectController {
 			List<ProjectFile> fileList = pckstru.getChildrenFiles();
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("name",pckstru.getPck().getName());
+			jsonObject.put("id","id_" + pckstru.getPck().getId().toString());
 			JSONArray jsonArray = new JSONArray();
 			if(fileList.size() > 0){
 				for(ProjectFile profile : fileList){
@@ -630,6 +650,7 @@ public class ProjectController {
 						jsonObject2.put("clone",false);
 					}
 					jsonObject2.put("name",profile.getName());
+					jsonObject2.put("id","id_" + profile.getId().toString());
 					jsonArray.add(jsonObject2);
 				}
 			}
