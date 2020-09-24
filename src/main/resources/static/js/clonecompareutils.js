@@ -1451,6 +1451,37 @@ g#outerArcs path.outerArc.unlinked { fill: #DDDDDD; }
 /*
 跨包克隆包内克隆文件对比
 */
+
+var setFilesContext = function (file1AbsolutePath, file2AbsolutePath) {
+    $.ajax({
+        type : "GET",
+        url : "/clone/compare/files?file1AbsolutePath="+ file1AbsolutePath +"&file2AbsolutePath=" + file2AbsolutePath,
+        success : function(result) {
+            console.log("success");
+            $('#compare').mergely({
+                width: 'auto',
+                height: 'auto',
+                cmsettings: {readOnly: false, lineNumbers: true},
+                lhs: function (setValue) {
+                    var file1Context = "";
+                    var len1 = result.file1.length;
+                    for(var i = 0; i < len1; i ++) {
+                        file1Context += result.file1[i] + "\n";
+                    }
+                    setValue(file1Context);
+                },
+                rhs: function (setValue) {
+                    var file2Context = "";
+                    var len2 = result.file1.length;
+                    for(var i = 0; i < len2; i ++) {
+                        file2Context += result.file2[i] + "\n";
+                    }
+                    setValue(file2Context);
+                }
+            });
+        }
+    })
+}
 !function(a) {
     if ("object" == typeof exports && "object" == typeof module)
         module.exports = a();

@@ -1,13 +1,12 @@
 package cn.edu.fudan.se.multidependency.controller;
 
-import java.io.OutputStream;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
+import java.io.*;
 import java.util.*;
 
 import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
+import org.bouncycastle.util.Pack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,7 +101,6 @@ public class CloneController {
 		
 		return result;
 	}
-	
 	@GetMapping("/package")
 	@ResponseBody
 	public Collection<CloneValueForDoubleNodes<Package>> cloneInPackages() {
@@ -218,7 +216,7 @@ public class CloneController {
 		}
 		return cloneValueService.queryPackageCloneFromFileClone(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pcks);
 	}
-	
+
 	@GetMapping("/compare")
 	public String compare(@RequestParam("id1") long file1Id, @RequestParam("id2") long file2Id) {
 		ProjectFile file1 = nodeService.queryFile(file1Id);
@@ -230,10 +228,39 @@ public class CloneController {
 		Project project2 = containRelationService.findFileBelongToProject(file2);
 		String file1AbsolutePath = projectService.getAbsolutePath(project1) + file1.getPath();
 		String file2AbsolutePath = projectService.getAbsolutePath(project2) + file2.getPath();
-		
 		return "redirect:/compare?leftFilePath=" + file1AbsolutePath + "&rightFilePath=" + file2AbsolutePath;
 	}
 
+	@GetMapping("/compare/files")
+	@ResponseBody
+	public JSONObject compareFiles(@RequestParam("file1AbsolutePath") String file1AbsolutePath, @RequestParam("file2AbsolutePath") String file2AbsolutePath) {
+		JSONObject context = new JSONObject();
+		File file1 = new File(file1AbsolutePath);
+		BufferedReader br;
+		String fileLine;
+		JSONArray fileContext1 = new JSONArray();
+		try {
+			br = new BufferedReader(new FileReader(file1));
+			while ((fileLine = br.readLine())!= null) {
+				fileContext1.add(fileLine);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		File file2 = new File(file2AbsolutePath);
+		JSONArray fileContext2 = new JSONArray();
+		try {
+			br = new BufferedReader(new FileReader(file2));
+			while ((fileLine = br.readLine())!= null) {
+				fileContext2.add(fileLine);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		context.put("file1", fileContext1);
+		context.put("file2", fileContext2);
+		return context;
+	}
 	/**
 	 * 查询一个project中所有的包克隆关系
 	 * @return

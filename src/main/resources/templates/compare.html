@@ -129,18 +129,22 @@
         };
 
         $(document).ready(function () {
-            $('#compare').mergely({
-                width: 'auto',
-                height: 'auto',
-                cmsettings: {readOnly: false, lineNumbers: true},
-                lhs: function (setValue) {
-                    setValue('I am good at java!');
-                },
-                rhs: function (setValue) {
-                    setValue('I am good at php!');
-                }
-            });
-
+            var URL = window.location.search;
+            URL = URL.split('leftFilePath=')[1];
+            var file1AbsolutePath = URL.split('&')[0];
+            var file2AbsolutePath = URL.split('rightFilePath=')[1];
+            setFilesContext(file1AbsolutePath, file2AbsolutePath);
+            // $('#compare').mergely({
+            //     width: 'auto',
+            //     height: 'auto',
+            //     cmsettings: {readOnly: false, lineNumbers: true},
+            //     lhs: function (setValue) {
+            //         setValue('I am good at java!');
+            //     },
+            //     rhs: function (setValue) {
+            //         setValue('I am good at php!');
+            //     }
+            // });
             window.filesInfo = function (files, target) {
                 let node = target;
                 while (true) {
