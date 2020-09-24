@@ -89,6 +89,12 @@ var projectgraph = function () {
         zoomTo([root.x, root.y, root.r * 2 + margin]);
 
         function zoom(d) {
+            g_global.selectAll("circle")
+                .style("stroke","")
+                .style("stroke-width","")
+            var svg1 = d3.select(".packageLink") .remove();
+            flag = true;
+
             if(!d.children){
                 d = d.parent;
             }
@@ -303,7 +309,7 @@ var showLine = function(buttonId){
 
     if(flag){
         drawLink();
-        document.getElementById(buttonId).innerHTML = "取消包克隆关系"
+        document.getElementById(buttonId).innerHTML = "显示包克隆关系"
         flag = false;
     }else{
         clearLink();
