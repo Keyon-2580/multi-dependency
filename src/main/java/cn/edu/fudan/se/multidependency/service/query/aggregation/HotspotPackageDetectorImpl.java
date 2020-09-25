@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,8 +43,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 
 	@Autowired
 	private HasRelationService hasRelationService;
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(RepositoryService.class);
+	private Collection<HotspotPackage> rootHotspotPackages = new ArrayList<>();
 	private Map<String, Package> directoryPathToPackage = new ConcurrentHashMap<>();
 	private ThreadLocal<Integer> rowKey = new ThreadLocal<>();
 	private Package findParentPackage(Package pck) {
@@ -537,6 +538,9 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 
 	@Override
 	public Collection<HotspotPackage> detectHotspotPackagesByFileClone() {
+		if(!rootHotspotPackages.isEmpty()) {
+			return rootHotspotPackages;
+		}
 		Map<Long, Integer> allNodesOfPackage = new HashMap<>();
 		Map<String, Integer> cloneNodesOfHotspotPackages = new HashMap<>();
 		Map<String, Integer> cloneNodesOfClonePackages = new HashMap<>();
@@ -716,6 +720,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 				return -1;
 			}
 		});
+		rootHotspotPackages = result;
 		return result;
 	}
 
@@ -751,22 +756,28 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 		rowKey.set(rowKey.get()+1);
 		CellStyle style = hwb.createCellStyle();
 		style.setAlignment(HorizontalAlignment.CENTER);
-
 		Cell cell = null;
 		cell = row.createCell(0);
 		cell.setCellValue("目录1");
 		cell.setCellStyle(style);
 		cell = row.createCell(1);
-		cell.setCellValue("目录2");
+		cell.setCellValue("目录1克隆占比");
 		cell.setCellStyle(style);
 		cell = row.createCell(2);
-		cell.setCellValue("内部克隆文件对数");
+		cell.setCellValue("目录2");
 		cell.setCellStyle(style);
-
+		cell = row.createCell(3);
+		cell.setCellValue("目录2克隆占比");
+		cell.setCellStyle(style);
+		cell = row.createCell(4);
+		cell.setCellValue("克隆文件对数");
+		cell.setCellStyle(style);
+		cell = row.createCell(5);
+		cell.setCellValue("总克隆占比");
+		cell.setCellStyle(style);
 		for(HotspotPackage HotspotPackage:HotspotPackages){
 			printHotspotPackage(sheet, 0, HotspotPackage);
 		}
-
 		try {
 			hwb.write(stream);
 		} catch (Exception e) {
@@ -783,16 +794,54 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 	private void printHotspotPackage(Sheet sheet, int layer, HotspotPackage hotspotPackage){
 		String prefix = "";
 		for(int i = 0; i < layer; i++) {
-			prefix += "|--------";
+			prefix += "|---";
 		}
 		Row row = sheet.createRow(rowKey.get());
 		rowKey.set(rowKey.get()+1);
 		row.createCell(0).setCellValue(prefix + hotspotPackage.getPackage1().getDirectoryPath());
-		row.createCell(1).setCellValue(prefix + hotspotPackage.getPackage2().getDirectoryPath());
-		row.createCell(2).setCellValue(hotspotPackage.getRelationPackages().sizeOfChildren());
-
-		for (HotspotPackage child:hotspotPackage.getChildrenHotspotPackages()){
-			printHotspotPackage(sheet, layer + 1, child);
+		BigDecimal percent1 = BigDecimal.valueOf((hotspotPackage.getRelationNodes1() + 0.0) / hotspotPackage.getAllNodes1());
+		percent1 = percent1.setScale(2, RoundingMode.HALF_UP);
+		row.createCell(1).setCellValue(hotspotPackage.getRelationNodes1() + "/" + hotspotPackage.getAllNodes1() + "=" + percent1.toString());
+		row.createCell(2).setCellValue(prefix + hotspotPackage.getPackage2().getDirectoryPath());
+		BigDecimal percent2 = BigDecimal.valueOf((hotspotPackage.getRelationNodes2() + 0.0) / hotspotPackage.getAllNodes2());
+		percent2 = percent2.setScale(2, RoundingMode.HALF_UP);
+		row.createCell(3).setCellValue(hotspotPackage.getRelationNodes2() + "/" + hotspotPackage.getAllNodes2() + "=" + percent2.toString());
+		row.createCell(4).setCellValue(hotspotPackage.getRelationPackages().sizeOfChildren());
+		BigDecimal percent = BigDecimal.valueOf((hotspotPackage.getRelationNodes1() + hotspotPackage.getRelationNodes2() + 0.0) / (hotspotPackage.getAllNodes1() + hotspotPackage.getAllNodes2()));
+		percent = percent.setScale(2, RoundingMode.HALF_UP);
+		row.createCell(5).setCellValue("(" + hotspotPackage.getRelationNodes1() + "+" + hotspotPackage.getRelationNodes2() + ")/(" + hotspotPackage.getAllNodes1() + "+" + hotspotPackage.getAllNodes2() + "=" + percent.toString());
+		for (HotspotPackage hotspotPackageChild : hotspotPackage.getChildrenHotspotPackages()){
+			printHotspotPackage(sheet, layer + 1, hotspotPackageChild);
+		}
+		for (Package packageChild1 : hotspotPackage.getChildrenOtherPackages1()){
+			printOtherPackage(sheet, -1, layer + 1, packageChild1);
+		}
+		for (Package packageChild2:hotspotPackage.getChildrenOtherPackages2()){
+			printOtherPackage(sheet, 1, layer + 1, packageChild2);
+		}
+	}
+	private void printOtherPackage(Sheet sheet, int index, int layer, Package otherPackage){
+		String prefix = "";
+		for(int i = 0; i < layer; i++) {
+			prefix += "|---";
+		}
+		Row row = sheet.createRow(rowKey.get());
+		rowKey.set(rowKey.get()+1);
+		if(index == -1) {
+			row.createCell(0).setCellValue(prefix + otherPackage.getDirectoryPath());
+			row.createCell(1).setCellValue("0/" + otherPackage.getAllNodes() + "=0.00");
+			row.createCell(2).setCellValue("");
+			row.createCell(3).setCellValue("");
+			row.createCell(4).setCellValue("");
+			row.createCell(5).setCellValue("");
+		}
+		if(index == 1) {
+			row.createCell(0).setCellValue("");
+			row.createCell(1).setCellValue("");
+			row.createCell(2).setCellValue(prefix + otherPackage.getDirectoryPath());
+			row.createCell(3).setCellValue("0/" + otherPackage.getAllNodes() + "=0.00");
+			row.createCell(4).setCellValue("");
+			row.createCell(5).setCellValue("");
 		}
 	}
 }
