@@ -1,12 +1,14 @@
 package cn.edu.fudan.se.multidependency.controller;
 
 import java.io.*;
+import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
-
+import java.nio.*;
 import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
-import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
-import org.bouncycastle.util.Pack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
@@ -33,13 +33,11 @@ import cn.edu.fudan.se.multidependency.service.query.clone.CloneValueService;
 import cn.edu.fudan.se.multidependency.service.query.clone.SimilarPackageDetector;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueForDoubleNodes;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChange;
-import cn.edu.fudan.se.multidependency.service.query.clone.data.SimilarPackage;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 @Controller
 @RequestMapping("/clone")
 public class CloneController {
@@ -233,32 +231,64 @@ public class CloneController {
 
 	@GetMapping("/compare/files")
 	@ResponseBody
-	public JSONObject compareFiles(@RequestParam("file1AbsolutePath") String file1AbsolutePath, @RequestParam("file2AbsolutePath") String file2AbsolutePath) {
+	public JSONObject compareFiles(@RequestParam("file1AbsolutePath") String file1AbsolutePath, @RequestParam("file2AbsolutePath") String file2AbsolutePath, @RequestParam("decoder1") String decoder1, @RequestParam("decoder2") String decoder2) {
 		JSONObject context = new JSONObject();
 		File file1 = new File(file1AbsolutePath);
-		BufferedReader br;
-		String fileLine;
-		JSONArray fileContext1 = new JSONArray();
 		try {
-			br = new BufferedReader(new FileReader(file1));
-			while ((fileLine = br.readLine())!= null) {
-				fileContext1.add(fileLine);
+			FileChannel inChannel1 = new FileInputStream(file1).getChannel();
+			MappedByteBuffer buffer1 = inChannel1.map(FileChannel.MapMode.READ_ONLY, 0, file1.length());
+			Charset charset1;
+			switch (decoder1) {
+				case "GBK":
+					charset1 = Charset.forName("GBK");
+					break;
+				case "GB2312":
+					charset1 = Charset.forName("GB2312");
+					break;
+				case "GB18030":
+					charset1 = Charset.forName("GB18030");
+					break;
+				case "ISO-8859-2":
+					charset1 = Charset.forName("ISO-8859-2");
+					break;
+				default:
+					charset1 = StandardCharsets.UTF_8;
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+			CharsetDecoder charsetDecoder1 = charset1.newDecoder();
+			CharBuffer charBuffer1 = charsetDecoder1.decode(buffer1);
+			context.put("file1", charBuffer1.toString());
+		}
+		catch (Exception e) {
+			System.out.println(e);
 		}
 		File file2 = new File(file2AbsolutePath);
-		JSONArray fileContext2 = new JSONArray();
 		try {
-			br = new BufferedReader(new FileReader(file2));
-			while ((fileLine = br.readLine())!= null) {
-				fileContext2.add(fileLine);
+			FileChannel inChannel2 = new FileInputStream(file2).getChannel();
+			MappedByteBuffer buffer2 = inChannel2.map(FileChannel.MapMode.READ_ONLY, 0, file2.length());
+			Charset charset2;
+			switch (decoder2) {
+				case "GBK":
+					charset2 = Charset.forName("GBK");
+					break;
+				case "GB2312":
+					charset2 = Charset.forName("GB2312");
+					break;
+				case "GB18030":
+					charset2 = Charset.forName("GB18030");
+					break;
+				case "ISO-8859-2":
+					charset2 = Charset.forName("ISO-8859-2");
+					break;
+				default:
+					charset2 = StandardCharsets.UTF_8;
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+			CharsetDecoder charsetDecoder2 = charset2.newDecoder();
+			CharBuffer charBuffer2 = charsetDecoder2.decode(buffer2);
+			context.put("file2", charBuffer2.toString());
 		}
-		context.put("file1", fileContext1);
-		context.put("file2", fileContext2);
+		catch (Exception e) {
+			System.out.println(e);
+		}
 		return context;
 	}
 	/**

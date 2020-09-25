@@ -4,6 +4,7 @@
     <title>Compare</title>
     <script th:src="@{/js/jquery.min.js}" type="text/javascript"></script>
     <script th:src="@{/js/clonecompareutils.js}" type="text/javascript"></script>
+    <script th:src="@{/js/compare.js}" type="text/javascript"></script>
     <script th:src="@{/js/codemirror.js}" type="text/javascript"></script>
 	<link rel="stylesheet" th:href="@{/css/codemirror.css}"></link>
 	<link rel="stylesheet" th:href="@{/css/compare.css}"></link>
@@ -59,7 +60,7 @@
             width: 86%;
         }
 
-        #lhs_encode {
+        #lhs_decode {
             font-size: 20px;
             font-family: "微软雅黑",serif;
             background-color: #1D1D1D;
@@ -69,7 +70,7 @@
             border-radius: 10px;
         }
 
-        #rhs_encode {
+        #rhs_decode {
             font-size: 20px;
             font-family: "微软雅黑",serif;
             background-color: #1D1D1D;
@@ -127,24 +128,50 @@
             "lhs": "",
             "rhs": "",
         };
-
+        var URL = window.location.search;
+        URL = URL.split('leftFilePath=')[1];
+        var file1AbsolutePath = URL.split('&')[0];
+        var file2AbsolutePath = URL.split('rightFilePath=')[1];
         $(document).ready(function () {
-            var URL = window.location.search;
-            URL = URL.split('leftFilePath=')[1];
-            var file1AbsolutePath = URL.split('&')[0];
-            var file2AbsolutePath = URL.split('rightFilePath=')[1];
-            setFilesContext(file1AbsolutePath, file2AbsolutePath);
-            // $('#compare').mergely({
-            //     width: 'auto',
-            //     height: 'auto',
-            //     cmsettings: {readOnly: false, lineNumbers: true},
-            //     lhs: function (setValue) {
-            //         setValue('I am good at java!');
-            //     },
-            //     rhs: function (setValue) {
-            //         setValue('I am good at php!');
-            //     }
-            // });
+            var lhsDecoder = document.getElementById("lhs_decode").value;
+            var rhsDecoder = document.getElementById("rhs_decode").value;
+            if(document.cookie) {
+                lhsDecoder = document.cookie.split('&')[0];
+                rhsDecoder = document.cookie.split('&')[1];
+                switch (lhsDecoder) {
+                    case "GBK":
+                        lhs_decode.selectedIndex=1;
+                        break;
+                    case "GB2312":
+                        lhs_decode.selectedIndex=2;
+                        break;
+                    case "GB18030":
+                        lhs_decode.selectedIndex=3;
+                        break;
+                    case "ISO-8859-2":
+                        lhs_decode.selectedIndex=4;
+                        break;
+                    default:
+                        lhs_decode.selectedIndex=0;
+                }
+                switch (rhsDecoder) {
+                    case "GBK":
+                        rhs_decode.selectedIndex=1;
+                        break;
+                    case "GB2312":
+                        rhs_decode.selectedIndex=2;
+                        break;
+                    case "GB18030":
+                        rhs_decode.selectedIndex=3;
+                        break;
+                    case "ISO-8859-2":
+                        rhs_decode.selectedIndex=4;
+                        break;
+                    default:
+                        rhs_decode.selectedIndex=0;
+                }
+            }
+            setFilesContext(file1AbsolutePath, file2AbsolutePath, lhsDecoder, rhsDecoder);
             window.filesInfo = function (files, target) {
                 let node = target;
                 while (true) {
@@ -169,6 +196,7 @@
                 $("#path-" + side).html(fileName);
                 sidefileName[side] = fileName;
             }
+            document.cookie = document.getElementById("lhs_decode").value + "&" + document.getElementById("rhs_decode").value;
         });
         let myFiles;
         function setFile(files, side) {
@@ -178,7 +206,7 @@
             reader.onload = function(e){
                 $('#compare').mergely(side, e.target.result);
             }
-            reader.readAsText(file, document.getElementById(side + "_encode").value);
+            reader.readAsText(file, document.getElementById(side + "_decode").value);
             $("#path-" + side).html(file.name);
             sidefileName[side] = file.name;
         }
@@ -191,19 +219,14 @@
             document.getElementById("rightFileDialog").click();
         }
 
-        function reSet(side) {
-            $('#compare').mergely('clear', side);
-            $("#path-" + side).html("");
-            sidefileName[side] = "";
-            setFile(myFiles, side);
+        function setContext() {
+            document.cookie = document.getElementById("lhs_decode").value + "&" + document.getElementById("rhs_decode").value;
+            location.reload();
         }
-
         function copyToClip(content) {
         	if(content.split(":").length > 1) {
-//	        	content = content.replaceAll("/","\\");
 	        	content = content.split('/').join('\\');
         	} else {
-//        		content = content.replaceAll("\\", "/");
 	        	content = content.split('\\').join('/');
         	}
             const aux = document.createElement("input");
@@ -234,8 +257,8 @@
                 <div>
                     <input id="leftFileDialog" type="file" onchange="setFile(this.files, 'lhs')" style="display: none"/>
                     <button id="leftFileButton" type="button" onclick="openLeft()">选择</button>
-                    <label for="lhs_encode"></label>
-                    <select id="lhs_encode" value="UTF-8" onchange="reSet('lhs')">
+                    <label for="lhs_decode"></label>
+                    <select id="lhs_decode" value="UTF-8" onchange="setContext()">
                         <option value="UTF-8">UTF-8</option>
                         <option value="GBK">GBK</option>
                         <option value="GB2312">GB2312</option>
@@ -254,8 +277,8 @@
                 <div>
                     <input id="rightFileDialog" type="file" onchange="setFile(this.files, 'rhs')" style="display: none"/>
                     <button id="rightFileButton" type="button" onclick="openRight()">选择</button>
-                    <label for="rhs_encode"></label>
-                    <select id="rhs_encode" value="UTF-8" onchange="reSet('rhs')">
+                    <label for="rhs_decode"></label>
+                    <select id="rhs_decode" value="UTF-8" onchange="setContext()">
                         <option value="UTF-8">UTF-8</option>
                         <option value="GBK">GBK</option>
                         <option value="GB2312">GB2312</option>
