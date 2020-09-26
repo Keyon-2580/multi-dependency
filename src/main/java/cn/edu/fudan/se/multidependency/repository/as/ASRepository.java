@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
@@ -19,6 +20,9 @@ import cn.edu.fudan.se.multidependency.service.query.as.data.UnstableComponentBy
 
 @Repository
 public interface ASRepository extends Neo4jRepository<Project, Long> {
+	
+	@Query("match (c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(file:ProjectFile) where id(file) = {id} and c.usingForIssue=true return c")
+	public List<Commit> findCommitsUsingForIssue(@Param("id") long fileId);
 	
 	@Query("match (project:Project)-[:CONTAIN*2]->(file:ProjectFile) where id(project)={id} "
 			+ "with file, size((file)-[:DEPENDS_ON]->()) as fanOut, size((file)<-[:DEPENDS_ON]-()) as fanIn "
@@ -78,4 +82,15 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 	public List<UnstableComponentByInstability<ProjectFile>> unstableFilesByInstability(
 			@Param("projectId") long projectId, @Param("fanOut") int fanOut, @Param("ratio") double ratio);
 	
+	@Query("match (project:Project)-[:CONTAIN]->(pck:Package) where id(project)={projectId} and pck.fanOut >= {fanOut} "
+			+ "with pck match (pck)-[:DEPENDS_ON]->(dependsPck:Package) "
+			+ "where dependsPck.instability > pck.instability "
+			+ "with pck, count(dependsPck) as badDependencies, pck.fanOut as allDependencies "
+			+ "with pck, badDependencies, allDependencies "
+			+ "where ((badDependencies + 0.0) / allDependencies) >= {ratio} "
+			+ "return pck as component, pck.instability as instability, badDependencies, allDependencies")
+	public List<UnstableComponentByInstability<Package>> unstablePackagesByInstability(
+			@Param("projectId") long projectId, @Param("fanOut") int fanOut, @Param("ratio") double ratio);
+	
 }
+

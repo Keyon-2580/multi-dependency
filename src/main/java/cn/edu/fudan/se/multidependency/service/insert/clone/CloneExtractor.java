@@ -6,13 +6,13 @@ import java.util.concurrent.Executors;
 
 import cn.edu.fudan.se.multidependency.service.insert.ExtractorForNodesAndRelationsImpl;
 
-public abstract class CloneInserter extends ExtractorForNodesAndRelationsImpl {
+public abstract class CloneExtractor extends ExtractorForNodesAndRelationsImpl {
 	
 	protected static long cloneGroupNumber = 0;
 	
 	private CountDownLatch latch;
 
-	public CloneInserter() {
+	public CloneExtractor() {
 		super();
 		this.latch = new CountDownLatch(3);
 	}

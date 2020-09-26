@@ -7,7 +7,7 @@ var multiple = function(projects, files, cytoscapeutil) {
 			unstable: true,
 //			hierarchy: false,
 //			godComponent: false,
-			unused: false
+			unused: true
 	}
 	
 	function paramToRequestParam() {
@@ -100,7 +100,7 @@ var multiple = function(projects, files, cytoscapeutil) {
 				legend: {
 					orient: 'vertical',
 					left: 'left',
-					data: ['没有smellFiles关联的issue', '有smellFiles关联的Issue']
+					data: ['无Smell Files关联的Issues', '有Smell File关联的Issues']
 				},
 				series: [
 					{
@@ -109,8 +109,8 @@ var multiple = function(projects, files, cytoscapeutil) {
 						radius: '55%',
 						center: ['50%', '60%'],
 						data: [
-							{value: (pies.allIssues.length - pies.smellIssues.length), name: '没有smellFiles关联的issue'},
-							{value: pies.smellIssues.length, name: '有smellFiles关联的Issue'}
+							{value: (pies.allIssues.length - pies.smellIssues.length), name: '无Smell Files关联的Issues'},
+							{value: pies.smellIssues.length, name: '有Smell File关联的Issues'}
 							],
 							emphasis: {
 								itemStyle: {

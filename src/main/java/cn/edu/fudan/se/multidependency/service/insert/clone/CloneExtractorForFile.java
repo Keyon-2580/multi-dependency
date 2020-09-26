@@ -23,15 +23,15 @@ import cn.edu.fudan.se.multidependency.utils.clone.data.CloneResultFromCsv;
 import cn.edu.fudan.se.multidependency.utils.clone.data.FilePathFromCsv;
 import cn.edu.fudan.se.multidependency.utils.clone.data.Group;
 
-public class CloneInserterForFile extends CloneInserter {
+public class CloneExtractorForFile extends CloneExtractor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CloneInserterForFile.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CloneExtractorForFile.class);
 	private String namePath;
 	private String resultPath;
 	private String groupPath;
 	private Language language;
 	
-	public CloneInserterForFile(String namePath, String resultPath, String groupPath, Language language) {
+	public CloneExtractorForFile(String namePath, String resultPath, String groupPath, Language language) {
 		super();
 		this.namePath = namePath;
 		this.resultPath = resultPath;

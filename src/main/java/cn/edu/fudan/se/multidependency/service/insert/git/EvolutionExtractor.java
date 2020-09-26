@@ -29,9 +29,9 @@ import cn.edu.fudan.se.multidependency.service.insert.ExtractorForNodesAndRelati
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import cn.edu.fudan.se.multidependency.utils.config.GitConfig;
 
-public class GitInserter extends ExtractorForNodesAndRelationsImpl {
+public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(GitInserter.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(EvolutionExtractor.class);
 
     private GitExtractor gitExtractor;
 
@@ -49,7 +49,7 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
     
     private String currentVersionCommitId;
     
-    public GitInserter(GitConfig gitConfig) {
+    public EvolutionExtractor(GitConfig gitConfig) {
         this.gitConfig = gitConfig;
         this.gitExtractor = new GitExtractor(gitConfig.getPath());
         this.branches = gitExtractor.getBranches();
@@ -96,9 +96,9 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
             commits = gitExtractor.getAllCommits();
         } else {
             if (gitConfig.isSpecifyByCommitId()) {
-                commits = gitExtractor.getARangeCommitsById(gitConfig.getCommitIdFrom(), gitConfig.getCommitIdTo(), false);
+                commits = gitExtractor.getARangeCommitsById(gitConfig.getCommitIdFrom(), gitConfig.getCommitIdTo(), true);
             } else {
-                commits = gitExtractor.getARangeCommitsByTime(gitConfig.getCommitTimeSince(), gitConfig.getCommitTimeUntil(), false);
+                commits = gitExtractor.getARangeCommitsByTime(gitConfig.getCommitTimeSince(), gitConfig.getCommitTimeUntil(), true);
             }
         }
         int beforeReleaseCommits = 0;

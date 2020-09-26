@@ -28,15 +28,17 @@ data:
 #   project_config: src/main/resources/project/google_fdse_guava_fan.json
 #   project_config: src/main/resources/project/cassandra_fan.json
 #   project_config: src/main/resources/project/guava_version_fan_solo.json
-   project_config: src/main/resources/project/fastjson_version_fan.json
+#   project_config: src/main/resources/project/fastjson_version_fan.json
+#   project_config: D:/git/multi-dependency/src/main/resources/project/fastjson-1.2.31.json
+   project_config: D:/git/multi-dependency/src/main/resources/project/multiple-dependency.json
 #   project_config: src/main/resources/project/fastjson_version_fan2.json
 #   project_config: src/main/resources/project/depends_fan.json
 #   project_config: src/main/resources/project/depends_fan2.json
    project_analyse_threads_count: 10
    dynamic_analyse: false
-   git_analyse: true
+   git_analyse: false
    lib_analyse: false
-   clone_analyse: true
+   clone_analyse: false
    neo4j:
       delete: true
       # batchInserter要插入的数据库

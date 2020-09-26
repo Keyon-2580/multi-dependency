@@ -23,6 +23,8 @@ import org.springframework.stereotype.Service;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Issue;
+import cn.edu.fudan.se.multidependency.repository.as.ASRepository;
+import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.as.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.HubLikeComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.ImplicitCrossModuleDependencyDetector;
@@ -86,6 +88,22 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 	@Autowired
 	private IssueQueryService issueQueryService;
 	
+	@Autowired
+	private ASRepository asRepository;
+	
+	@Autowired
+	private CacheService cache;
+	
+	public int fileCommitsCount(ProjectFile file) {
+		String key = "fileCommitsCount_" + file.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		int result = asRepository.findCommitsUsingForIssue(file.getId()).size();
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+	
 	@Override
 	public Map<Long, List<CirclePacking>> circlePacking(MultipleAS multipleAS) {
 		Map<Long, List<CirclePacking>> result = new HashMap<>();
@@ -111,17 +129,20 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 					// 既是issueFile又是smellFile
 					smellAndIssueCircle.addProjectFile(smellFile.getFile(), issueFile.getIssues());
 					smellAndIssueCircle.setFileSmellCount(smellFile.getFile(), smellFile.getSmellCount());
+					smellAndIssueCircle.setFileCommitsCount(smellFile.getFile(), fileCommitsCount(smellFile.getFile()));
 					issueFiles.remove(issueFile);
 				} else {
 					// 仅是smellFile
 					onlySmellCircle.addProjectFile(smellFile.getFile());
 					onlySmellCircle.setFileSmellCount(smellFile.getFile(), smellFile.getSmellCount());
+					onlySmellCircle.setFileCommitsCount(smellFile.getFile(), fileCommitsCount(smellFile.getFile()));
 				}
 			}
 			for(IssueFile issueFile : issueFiles) {
 				// 仅是issueFile
 				onlyIssueCircle.addProjectFile(issueFile.getFile(), issueFile.getIssues());
 				onlyIssueCircle.setFileSmellCount(issueFile.getFile(), 0);
+				onlyIssueCircle.setFileCommitsCount(issueFile.getFile(), fileCommitsCount(issueFile.getFile()));
 			}
 			
 			circles.add(smellAndIssueCircle);
@@ -197,7 +218,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> unstableFilesUsingInstability = unstableDependencyDetectorUsingInstability.unstableFiles();
 //		Map<Long, List<CyclicHierarchy>> cyclicHierarchies = cyclicHierarchyDetector.cyclicHierarchies();
 //		Map<Long, List<GodFile>> godFiles = godComponentDetector.godFiles();
-		Map<Long, List<ProjectFile>> unusedFiles = unusedComponentDetector.unusedFiles();
+//		Map<Long, List<ProjectFile>> unusedFiles = unusedComponentDetector.unusedFiles();
 		
 		Collection<LogicCouplingFiles> logicCouplingFiles = icdDependencyDetector.cochangesInDifferentModule();
 		Collection<SimilarComponents<ProjectFile>> similarFiles = similarComponentsDetector.similarFiles();
@@ -286,14 +307,14 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 			allFiles.remove(file2);
 		}
 		
-		for(List<ProjectFile> files : unusedFiles.values()) {
-			for(ProjectFile file : files) {
-				MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
-				mas.setUnused(true);
-				map.put(file, mas);
-				allFiles.remove(file);
-			}
-		}
+//		for(List<ProjectFile> files : unusedFiles.values()) {
+//			for(ProjectFile file : files) {
+//				MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
+//				mas.setUnused(true);
+//				map.put(file, mas);
+//				allFiles.remove(file);
+//			}
+//		}
 		
 		if(!removeNoASFile) {
 			for(ProjectFile file : allFiles) {

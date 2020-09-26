@@ -104,7 +104,7 @@ var rFile = function(fileId, cytoscapeutil) {
 				html += "<td width='12.5%'>Fan In</td>";
 				html += "<td width='12.5%'>Fan Out</td>";
 				html += "<td width='12.5%'>change times</td>";
-				html += "<td width='12.5%'>cochange commit times</td>";
+				html += "<td width='12.5%'>cochange times</td>";
 				html += "<td width='12.5%'>instability</td>";
 				html += "<td width='12.5%'>score</td>";
 				html += "</tr>";

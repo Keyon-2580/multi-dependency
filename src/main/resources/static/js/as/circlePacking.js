@@ -2,8 +2,8 @@ var projectToGraph = function(result,divId){
 	console.log(result);
 	var projectdata = result;
 	var svg = d3.select("#" + divId)
-			.attr("width", 800)
-			.attr("height", 800),
+			.attr("width", 1600)
+			.attr("height", 1600),
 		margin = 20,
 		diameter = +svg.attr("width"),
 		g = svg.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");

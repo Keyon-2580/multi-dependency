@@ -19,10 +19,10 @@ import lombok.Setter;
  * @author fan
  *
  */
-public abstract class BasicCodeInserterForNeo4jServiceImpl extends ExtractorForNodesAndRelationsImpl {
-	private static final Logger LOGGER = LoggerFactory.getLogger(BasicCodeInserterForNeo4jServiceImpl.class);
+public abstract class BasicCodeExtractorForNeo4jServiceImpl extends ExtractorForNodesAndRelationsImpl {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BasicCodeExtractorForNeo4jServiceImpl.class);
 
-	public BasicCodeInserterForNeo4jServiceImpl(ProjectConfig projectConfig) {
+	public BasicCodeExtractorForNeo4jServiceImpl(ProjectConfig projectConfig) {
 		super();
 		this.isMicroservice = projectConfig.isMicroService();
 		this.serviceGroupName = projectConfig.getServiceGroupName();

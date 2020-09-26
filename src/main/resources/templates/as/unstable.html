@@ -78,7 +78,8 @@
 			var projects = [[${projects}]];
 			var filesUsingInstability = [[${filesUsingInstability}]];
 			var filesUsingHistory = [[${filesUsingHistory}]];
-			unstable(cytoscapeutil()).unstable(projects, filesUsingInstability, filesUsingHistory);	
+			var packages = [[${packages}]];
+			unstable(cytoscapeutil()).unstable(projects, filesUsingInstability, filesUsingHistory, packages);	
 		});
 		// ]]>
 	</script>

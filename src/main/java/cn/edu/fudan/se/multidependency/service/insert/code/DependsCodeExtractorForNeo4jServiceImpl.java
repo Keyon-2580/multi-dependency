@@ -38,11 +38,11 @@ import depends.entity.TypeEntity;
 import depends.entity.VarEntity;
 import depends.entity.repo.EntityRepo;
 
-public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeInserterForNeo4jServiceImpl {
+public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeExtractorForNeo4jServiceImpl {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(DependsCodeInserterForNeo4jServiceImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DependsCodeExtractorForNeo4jServiceImpl.class);
 	
-	public DependsCodeInserterForNeo4jServiceImpl(EntityRepo entityRepo, ProjectConfig projectConfig) {
+	public DependsCodeExtractorForNeo4jServiceImpl(EntityRepo entityRepo, ProjectConfig projectConfig) {
 		super(projectConfig);
 		this.entityRepo = entityRepo;
 		currentEntityId = this.entityRepo.generateId().longValue() + 1;

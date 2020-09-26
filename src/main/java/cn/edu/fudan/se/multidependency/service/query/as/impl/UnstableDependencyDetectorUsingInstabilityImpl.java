@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.ar.Module;
@@ -37,10 +38,28 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 	private Map<Project, Integer> projectToFileFanOutThreshold = new ConcurrentHashMap<>();
 	private Map<Project, Integer> projectToModuleFanOutThreshold = new ConcurrentHashMap<>();
 	private Map<Project, Double> projectToRatioThreshold = new ConcurrentHashMap<>();
+
+	@Override
+	public Map<Long, List<UnstableComponentByInstability<Package>>> unstablePackages() {
+		String key = "unstablePackages";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		Collection<Project> projects = nodeService.allProjects();
+		Map<Long, List<UnstableComponentByInstability<Package>>> result = new HashMap<>();
+		for(Project project : projects) {
+			List<UnstableComponentByInstability<Package>> temp = asRepository.unstablePackagesByInstability(project.getId(), 1, 0.3);
+			result.put(project.getId(), temp);
+		}
+		
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
 	
 	@Override
-	public Map<Long, List<UnstableComponentByInstability<Module>>> unstableModule() {
-		return null;
+	public Map<Long, List<UnstableComponentByInstability<Module>>> unstableModules() {
+		return new HashMap<>();
 	}
 
 	@Override
@@ -95,5 +114,4 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 		}
 		return projectToRatioThreshold.get(project);
 	}
-
 }

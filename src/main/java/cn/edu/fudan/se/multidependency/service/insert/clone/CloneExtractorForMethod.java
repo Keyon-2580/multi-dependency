@@ -24,9 +24,9 @@ import cn.edu.fudan.se.multidependency.utils.clone.data.CloneResultFromCsv;
 import cn.edu.fudan.se.multidependency.utils.clone.data.FilePathFromCsv;
 import cn.edu.fudan.se.multidependency.utils.clone.data.Group;
 
-public class CloneInserterForMethod extends CloneInserter {
+public class CloneExtractorForMethod extends CloneExtractor {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(CloneInserterForMethod.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CloneExtractorForMethod.class);
 	private String methodNameTablePath;
 	private String methodResultPath;
 	private String groupPath;
@@ -40,7 +40,7 @@ public class CloneInserterForMethod extends CloneInserter {
 	private Collection<Group> groups = new ArrayList<>();
 	private Map<Integer, CodeNode> cloneNodeIdToCodeNode = new HashMap<>();
 	
-	public CloneInserterForMethod(String methodNameTablePath, String methodResultPath, String groupPath, Language language) {
+	public CloneExtractorForMethod(String methodNameTablePath, String methodResultPath, String groupPath, Language language) {
 		super();
 		this.methodNameTablePath = methodNameTablePath;
 		this.methodResultPath = methodResultPath;

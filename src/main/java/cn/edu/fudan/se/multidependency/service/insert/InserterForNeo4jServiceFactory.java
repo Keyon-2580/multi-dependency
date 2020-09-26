@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 import cn.edu.fudan.se.multidependency.exception.LanguageErrorException;
 import cn.edu.fudan.se.multidependency.model.Language;
 import cn.edu.fudan.se.multidependency.service.insert.build.BuildInserterForNeo4jService;
-import cn.edu.fudan.se.multidependency.service.insert.code.CppInsertServiceImpl;
-import cn.edu.fudan.se.multidependency.service.insert.code.DependsCodeInserterForNeo4jServiceImpl;
-import cn.edu.fudan.se.multidependency.service.insert.code.JavaInsertServiceImpl;
+import cn.edu.fudan.se.multidependency.service.insert.code.CppExtractorServiceImpl;
+import cn.edu.fudan.se.multidependency.service.insert.code.DependsCodeExtractorForNeo4jServiceImpl;
+import cn.edu.fudan.se.multidependency.service.insert.code.JavaExtractorServiceImpl;
 import cn.edu.fudan.se.multidependency.service.insert.dynamic.CppDynamicInserter;
 import cn.edu.fudan.se.multidependency.service.insert.dynamic.FeatureAndTestCaseFromJSONFileForMicroserviceInserter;
 import cn.edu.fudan.se.multidependency.service.insert.dynamic.JavassistDynamicInserter;
@@ -33,12 +33,12 @@ public class InserterForNeo4jServiceFactory {
 		return instance;
 	}
 	
-	public DependsCodeInserterForNeo4jServiceImpl createCodeInserterService(EntityRepo entityRepo, ProjectConfig config) throws Exception {
+	public DependsCodeExtractorForNeo4jServiceImpl createCodeInserterService(EntityRepo entityRepo, ProjectConfig config) throws Exception {
 		switch(config.getLanguage()) {
 		case java:
-			return new JavaInsertServiceImpl(entityRepo, config);
+			return new JavaExtractorServiceImpl(entityRepo, config);
 		case cpp:
-			return new CppInsertServiceImpl(entityRepo, config);
+			return new CppExtractorServiceImpl(entityRepo, config);
 		}
 		throw new Exception("程序语言不为java或c/c++，提取失败");
 	}

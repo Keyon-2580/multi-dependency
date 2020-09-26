@@ -1,5 +1,6 @@
 var similar = function(cytoscapeutil, files) {
 	var _similar = function() {
+		console.log(files);
 		var html = "";
 		html += "<table class='table table-bordered'>";
 		html += "<tr>";
@@ -7,18 +8,24 @@ var similar = function(cytoscapeutil, files) {
 		html += "<th>Module1</th>";
 		html += "<th>File2</th>";
 		html += "<th>Module2</th>";
-		html += "<th>clone value</th>";
-		html += "<th>Co-change Times</th>";
+		html += "<th>Clone Type</th>";
+		html += "<th>Clone Value</th>";
+		html += "<th>Node1 Change Times</th>";
+		html += "<th>Node2 Change Times</th>";
+		html += "<th>Co-Change Times</th>";
 		html += "</tr>";
 		for(var fileIndex in files) {
 			var file = files[fileIndex];
 			console.log(file);
 			html += "<tr>";
-			html += "<td>" + file.node1.path + "</td>";
+			html += "<td><a target='_blank' href='/relation/file/" + file.node1.id + "'>" + file.node1.path + "</a></td>";
 			html += "<td>" + file.module1.name + "</td>";
-			html += "<td>" + file.node2.path + "</td>";
+			html += "<td><a target='_blank' href='/relation/file/" + file.node2.id + "'>" + file.node2.path + "</a></td>";
 			html += "<td>" + file.module2.name + "</td>";
+			html += "<td>" + file.cloneType + "</td>";
 			html += "<td>" + file.value + "</td>";
+			html += "<td>" + file.node1ChangeTimes + "</td>";
+			html += "<td>" + file.node2ChangeTimes + "</td>";
 			html += "<td>" + file.cochangeTimes + "</td>";
 			html += "</tr>";
 		}
@@ -26,37 +33,6 @@ var similar = function(cytoscapeutil, files) {
 		
 		$("#content").html(html);
 	}
-	
-//	var _save = function() {
-//		var set = function(icdMinCoChange) {
-//			$.ajax({
-//				type: "post",
-//				url: "/as/icd/cochange?minCoChange=" + icdMinCoChange,
-//				success: function(result) {
-//					if(result == true) {
-//						alert("修改成功");
-//					} else {
-//						alert("修改失败");
-//					}
-//				}
-//			})
-//		}
-//		$("#icdMinCoChangeSave").click(function() {
-//			var icdMinCoChange = $("#icdMinCoChange").val();
-//			set(icdMinCoChange);
-//		})
-//	}
-//	
-//	var _get = function() {
-//		$.ajax({
-//			type: "get",
-//			url: "/as/icd/cochange",
-//			success: function(result) {
-//				console.log(result);
-//				$("#icdMinCoChange").val(result);
-//			}
-//		})
-//	}
 	
 	return {
 		init : function() {

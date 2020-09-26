@@ -31,6 +31,12 @@ public class CirclePacking {
 	
 	private Map<Long, Integer> fileIdToSmellCount = new HashMap<>();
 	
+	private Map<Long, Integer> fileIdToCommitsCount = new HashMap<>();
+	
+	public void setFileCommitsCount(ProjectFile file, int count) {
+		fileIdToCommitsCount.put(file.getId(), count);
+	}
+	
 	public void setFileSmellCount(ProjectFile file, int count) {
 		fileIdToSmellCount.put(file.getId(), count);
 	}
