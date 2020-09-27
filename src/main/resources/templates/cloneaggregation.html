@@ -49,10 +49,18 @@
 <body>
 	<div th:include="nav.html::nav"></div>
 	<div class="col-sm-12 row" style="margin-bottom: 15px;">
-		
+		<div class="col-sm-12">
+			<div class="text-center">
+				<button id="analysis" class="btn btn-default" type="button" onclick="analysis()">分析克隆聚合</button>
+				<button id="show" class="btn btn-default" type="button" onclick="show()">显示聚合结果</button>
+			</div>
+		</div>
+		<div class="col-sm-12"><hr/></div>
 		<div>
 			<div class="col-sm-12" id="packages_aggregation"></div>
-			<div class="col-sm-12"><hr/></div>
+		</div>
+		<div class="col-sm-12"><hr/></div>
+		<div>
 			<div class="col-sm-12" id="package_files_clone"></div>
 		</div>
 		<div class="col-sm-12">
@@ -63,10 +71,16 @@
 	</div>
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
-		 $(document).ready(function() {
-		 	clone(cytoscapeutil()).init();
-		});
+		//  $(document).ready(function() {
+		//  	clone(cytoscapeutil()).init();
+		// });
 		// ]]>
+		function analysis() {
+			analysisAggregationPackage();
+		}
+		function show() {
+			showAggregationResult();
+		}
 	</script>
 </body>
 </html>
