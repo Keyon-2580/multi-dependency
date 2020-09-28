@@ -184,11 +184,11 @@ var gitRepoMetric = function() {
 				html += "<th>Issues</th>";
 				html += "</tr>";
 				for(var i = 0; i < result.length; i++) {
-					html += "<tr>";
-					html += "<td>" + (i + 1) + "</td>";
-					html += "<td>" + result[i].gitRepository.id + "</td>";
-					html += "<td>" + result[i].gitRepository.name + "</td>";
-					for (var j = 0; j < result[i].projectMetricsList.length;j++){
+					for (var j = 0; j < result[i].projectMetricsList.length; j++){
+						html += "<tr>";
+						html += "<td>" + (i + 1) + "</td>";
+						html += "<td>" + result[i].gitRepository.id + "</td>";
+						html += "<td>" + result[i].gitRepository.name + "</td>";
 						projectMetricTmp = result[i].projectMetricsList[j];
 						html += "<td>" + projectMetricTmp.project.name + " ("  + projectMetricTmp.project.language + ") " + "</td>";
 						html += "<td>" + projectMetricTmp.nop + "</td>";
@@ -196,11 +196,11 @@ var gitRepoMetric = function() {
 						html += "<td>" + projectMetricTmp.nom + "</td>";
 						html += "<td>" + projectMetricTmp.loc + "</td>";
 						html += "<td>" + projectMetricTmp.lines + "</td>";
+						target='_blank'
+						html += "<td id='numOfCommits_" + result[i].gitRepository.id + "'>" + "<a target='_blank' href='/commit'>" +  (result[i].numOfCommits < 0 ? "计算中..." : result[i].numOfCommits) + "</a>" + "</td>";
+						html += "<td id='numOfIssues_" + result[i].gitRepository.id + "'>" + "<a target='_blank' href='/issue'>" + (result[i].numOfIssues < 0 ? "计算中..." : result[i].numOfIssues) + "</a>" + "</td>";
+						html += "</tr>";
 					}
-					target='_blank'
-					html += "<td id='numOfCommits_" + result[i].gitRepository.id + "'>" + "<a target='_blank' href='/commit'>" +  (result[i].numOfCommits < 0 ? "计算中..." : result[i].numOfCommits) + "</a>" + "</td>";
-					html += "<td id='numOfIssues_" + result[i].gitRepository.id + "'>" + "<a target='_blank' href='/issue'>" + (result[i].numOfIssues < 0 ? "计算中..." : result[i].numOfIssues) + "</a>" + "</td>";
-					html += "</tr>";
 				}
 				html += "</table>";
 				$("#gitRepoMetric").html(html);
