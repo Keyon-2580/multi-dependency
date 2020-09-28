@@ -106,6 +106,11 @@ public class ProjectController {
 		return "projectgraph";
 	}
 
+	@GetMapping("/tree")
+	public String tree() {
+		return "projecttree";
+	}
+
 	@GetMapping("/all")
 	@ResponseBody
 	public Map<Long, Project> allProjects() {
@@ -613,6 +618,8 @@ public class ProjectController {
 			JSONObject link = new JSONObject();
 			link.put("source_id", "id_" + hotspotPackage.getPackage1().getId().toString());
 			link.put("target_id", "id_" + hotspotPackage.getPackage2().getId().toString());
+			link.put("source_projectBelong", "id_" + containRelationService.findPackageBelongToProject(hotspotPackage.getPackage1()));
+			link.put("target_projectBelong", "id_" + containRelationService.findPackageBelongToProject(hotspotPackage.getPackage2()));
 			links.add(link);
 		}
 
