@@ -76,7 +76,7 @@ var doublePackagesCloneWithCoChange = function(pck1Id, pck2Id, index) {
                 html += "<a target='_blank' href='/clone/compare?id1=" + children[i].file1.id + "&id2=" + children[i].file2.id +"'>" + children[i].fileClone.value + "</a>";
                 html += "</td>";
                 html += "<td>";
-                html += "<a class='cochangeTimes' target='_blank' href='/git/cochange/commits?cochangeId=" + cochangeId
+                html += "<a class='cochangeTimes' target='_blank' href='/commit/cochange?cochangeId=" + cochangeId
                     + "' index='" + i + "'>" + children[i].cochangeTimes + "</a>";
                 html += "</td>";
                 html += "</tr>";

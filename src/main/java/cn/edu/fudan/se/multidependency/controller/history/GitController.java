@@ -61,16 +61,16 @@ public class GitController {
     	return result;
     }
     
-    @GetMapping("/cochange/commits")
-    @ResponseBody
-    public Collection<Commit> findCommitsByCoChange(@RequestParam("cochangeId") long cochangeId) {
-    	CoChange cochange = gitAnalyseService.findCoChangeById(cochangeId);
-    	System.out.println(cochange);
-    	if(cochange == null) {
-    		return new ArrayList<>();
-    	}
-    	return gitAnalyseService.findCommitsByCoChange(cochange);
-    }
+//    @GetMapping("/cochange/commits")
+//    @ResponseBody
+//    public Collection<Commit> findCommitsByCoChange(@RequestParam("cochangeId") long cochangeId) {
+//    	CoChange cochange = gitAnalyseService.findCoChangeById(cochangeId);
+//    	System.out.println(cochange);
+//    	if(cochange == null) {
+//    		return new ArrayList<>();
+//    	}
+//    	return gitAnalyseService.findCommitsByCoChange(cochange);
+//    }
 
     @GetMapping("/developerToMicroservice")
     @ResponseBody
