@@ -176,6 +176,16 @@ public class Nodes implements Serializable {
         return null;
     }
 
+    public synchronized List<Project> findProject(String name) {
+        List<Project> pjs = new ArrayList<>();
+        for (Project project : projects) {
+            if (project.getName().equals(name) ) {
+                pjs.add(project);
+            }
+        }
+        return pjs;
+    }
+
     private void clearCache() {
         this.allLibrariesCache.clear();
     	this.fileContainsNodesSortByLineCache.clear();

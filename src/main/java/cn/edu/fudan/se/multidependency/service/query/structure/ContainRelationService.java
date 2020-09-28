@@ -115,6 +115,8 @@ public interface ContainRelationService {
 	
 	GitRepository findCommitBelongToGitRepository(Commit commit);
 
+	Collection<Project> findGitRepositoryContainProject(GitRepository gitRepository);
+
 	Collection<Call> findFunctionContainCalls (Function function);
 	JSONObject doubleFileStructure(List<ProjectFile> fileList);
 	

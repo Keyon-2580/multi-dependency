@@ -13,6 +13,7 @@ import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.model.relation.git.CommitUpdateFile;
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
 import cn.edu.fudan.se.multidependency.service.query.history.data.CoChangeFile;
+import cn.edu.fudan.se.multidependency.service.query.history.data.GitRepoMetric;
 
 public interface GitAnalyseService {
 	
@@ -55,4 +56,6 @@ public interface GitAnalyseService {
 	CoChange findCoChangeById(long cochangeId);
 	
 	Collection<Commit> findCommitsInProject(Project project);
+
+	Map<Long, GitRepoMetric> calculateGitRepoMetrics();
 }
