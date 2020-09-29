@@ -95,24 +95,38 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 			Type type = (Type) node;
 			// 继承与实现
 			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(id.intValue());
-			Collection<TypeEntity> inherits = typeEntity.getInheritedTypes();
-			inherits.forEach(inherit -> {
-				Type other = (Type) types.get(inherit.getId().longValue());
-				if(other != null) {
-					Extends typeExtends = new Extends(type, other);
-					addRelation(typeExtends);
-				}
-			});
-			Collection<TypeEntity> imps = typeEntity.getImplementedTypes();
-			imps.forEach(imp -> {
-				Type other = (Type) types.get(imp.getId().longValue());
-				if(other != null) {
-					Implements typeImplements = new Implements(type, other);
-					addRelation(typeImplements);
-				}
-			});
+//			Collection<TypeEntity> inherits = typeEntity.getInheritedTypes();
+//			inherits.forEach(inherit -> {
+//				Type other = (Type) types.get(inherit.getId().longValue());
+//				if(other != null) {
+//					Extends typeExtends = new Extends(type, other);
+//					addRelation(typeExtends);
+//				}
+//			});
+//			Collection<TypeEntity> imps = typeEntity.getImplementedTypes();
+//			imps.forEach(imp -> {
+//				Type other = (Type) types.get(imp.getId().longValue());
+//				if(other != null) {
+//					Implements typeImplements = new Implements(type, other);
+//					addRelation(typeImplements);
+//				}
+//			});
 			typeEntity.getRelations().forEach(relation -> {
 				switch(relation.getType()) {
+				case DependencyType.INHERIT:
+						Type extendsType = (Type) types.get(relation.getEntity().getId().longValue());
+						if(extendsType != null){
+							Extends typeExtends = new Extends(type, extendsType);
+							addRelation(typeExtends);
+						}
+						break;
+				case DependencyType.IMPLEMENT:
+					Type implementsType = (Type) types.get(relation.getEntity().getId().longValue());
+					if(implementsType != null){
+						Implements typeImplements = new Implements(type, implementsType);
+						addRelation(typeImplements);
+					}
+					break;
 				case DependencyType.ANNOTATION:
 					Type annotationType = (Type) types.get(relation.getEntity().getId().longValue());
 					if(annotationType != null) {

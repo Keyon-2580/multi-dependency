@@ -85,13 +85,13 @@
 		    <artifactId>neo4j</artifactId>
 			<version>${neo4j.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>cn.emergentdesign.se</groupId>
 			<artifactId>depends</artifactId>
 			<version>0.9.6</version>
 			<scope>system</scope>
-			<systemPath>${pom.basedir}/lib/depends-0.9.6p-jar-with-dependencies.jar</systemPath>
+			<systemPath>${pom.basedir}/lib/depends-0.9.6q-jar-with-dependencies.jar</systemPath>
 			<!-- <systemPath>${project.basedir}/lib/depends.jar</systemPath> -->
 			<!-- <exclusions>
 				<exclusion>

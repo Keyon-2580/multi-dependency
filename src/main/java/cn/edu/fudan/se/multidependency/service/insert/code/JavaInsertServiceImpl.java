@@ -1,10 +1,13 @@
 package cn.edu.fudan.se.multidependency.service.insert.code;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import depends.deptypes.DependencyType;
 import depends.entity.*;
+import depends.extractor.MultiDeclareResolve;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -296,28 +299,51 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.ProjectFile, currentProject).forEach((entityId, node) -> {
 			ProjectFile file = (ProjectFile) node;
 			FileEntity fileEntity = (FileEntity) entityRepo.getEntity(entityId.intValue());
-			fileEntity.getImportedTypes().forEach(entity -> {
-				if(entity instanceof FunctionEntity) {
-					Function function = (Function) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, entity.getId().longValue(), currentProject);
-					if(function != null) {
-						Import fileImportFunction = new Import(file, function);
-						addRelation(fileImportFunction);
+//			fileEntity.getImportedTypes().forEach(entity -> {
+//				if(entity instanceof FunctionEntity) {
+//					Function function = (Function) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, entity.getId().longValue(), currentProject);
+//					if(function != null) {
+//						Import fileImportFunction = new Import(file, function);
+//						addRelation(fileImportFunction);
+//					}
+//				} else if(entity instanceof VarEntity) {
+//					Variable variable = (Variable) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Variable, entity.getId().longValue(), currentProject);
+//					if(variable != null) {
+//						Import fileImportVariable = new Import(file, variable);
+//						addRelation(fileImportVariable);
+//					}
+//				} else if(entity.getClass() == TypeEntity.class) {
+//					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, entity.getId().longValue(), currentProject);
+//					if(type != null) {
+//						Import fileImportType = new Import(file, type);
+//						addRelation(fileImportType);
+//					}
+//				} else{
+//					// MultiDeclareEntities
+//					System.out.println("extractRelationsFromFiles() " + fileEntity + " " + entity.getClass() + " " + entity.toString());
+//				}
+//			});
+			fileEntity.getRelations().forEach(relation -> {
+				if(relation.getType() == DependencyType.IMPORT) {
+					if (relation.getEntity() instanceof FunctionEntity) {
+						Function function = (Function) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, relation.getEntity().getId().longValue(), currentProject);
+						if (function != null) {
+							Import fileImportFunction = new Import(file, function);
+							addRelation(fileImportFunction);
+						} else if (relation.getEntity() instanceof VarEntity) {
+							Variable variable = (Variable) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Variable, relation.getEntity().getId().longValue(), currentProject);
+							if (variable != null) {
+								Import fileImportVariable = new Import(file, variable);
+								addRelation(fileImportVariable);
+							}
+						} else if (relation.getEntity().getClass() == TypeEntity.class) {
+							Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, relation.getEntity().getId().longValue(), currentProject);
+							if (type != null) {
+								Import fileImportType = new Import(file, type);
+								addRelation(fileImportType);
+							}
+						}
 					}
-				} else if(entity instanceof VarEntity) {
-					Variable variable = (Variable) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Variable, entity.getId().longValue(), currentProject);
-					if(variable != null) {
-						Import fileImportVariable = new Import(file, variable);
-						addRelation(fileImportVariable);
-					}
-				} else if(entity.getClass() == TypeEntity.class) {
-					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, entity.getId().longValue(), currentProject);
-					if(type != null) {
-						Import fileImportType = new Import(file, type);
-						addRelation(fileImportType);
-					}
-				} else {
-					// MultiDeclareEntities
-					System.out.println("extractRelationsFromFiles() " + fileEntity + " " + entity.getClass() + " " + entity.toString());
 				}
 			});
 		});
