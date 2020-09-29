@@ -1,7 +1,7 @@
 var projecttree = function () {
     var ShowTree = function(data, divId){
-        var width = 1700,
-            height = 1700;
+        var width = 1400,
+            height = 1400;
 
         var force = d3.layout.force()
             .size([width, height])
@@ -119,7 +119,7 @@ var projecttree = function () {
     var LoadDataOfTree = function(){
         $.ajax({
             type : "GET",
-            url : "/project/has?projectId=4",
+            url : "/project/has?projectId=182051&showType=tree",
             success : function(result) {
                 resultjson = result;
                 // console.log(projectlist[index])
