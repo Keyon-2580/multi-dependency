@@ -78,7 +78,7 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 		for(GitRepository gitRepository : gitRepoRepository.findAll()) {
 			GitRepoMetric gitRepoMetric = new GitRepoMetric();
 			gitRepoMetric.setGitRepository(gitRepository);
-			Collection<ProjectMetrics> ProjectMetricList = metricCalculator.calculateProjectMetrics(false).values();
+			Collection<ProjectMetrics> ProjectMetricList = metricCalculator.calculateProjectMetricsByGitRepository(false, gitRepository).values();
 			gitRepoMetric.setProjectMetricsList(ProjectMetricList);
 			gitRepoMetric.setNumOfCommits(calculateGitRepoCommits(gitRepository));
 			gitRepoMetric.setNumOfIssues(0);
