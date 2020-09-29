@@ -19,5 +19,9 @@ public class PropertyConfig {
 	@Getter
 	@Value("${config.starter.clone_group}")
 	private boolean calculateCloneGroup;
+
+	@Getter
+	@Value("${config.starter.module_clone}")
+	private boolean setModuleClone;
 	
 }

@@ -53,8 +53,10 @@ public enum RelationType implements RelationshipType {
 	FUNCTION_CALL_LIBRARY_API(RelationType.str_FUNCTION_CALL_LIBRARY_API),
 	
 	CLONE(RelationType.str_CLONE),
-	
-	DEPENDS_ON(RelationType.str_DEPENDS_ON);
+
+	DEPENDS_ON(RelationType.str_DEPENDS_ON),
+
+	MODULE_CLONE(RelationType.str_MODULE_CLONE);
 
 	/**
 	 * 结构关系
@@ -107,7 +109,7 @@ public enum RelationType implements RelationshipType {
 	public static final String str_CO_CHANGE = "CO_CHANGE";
 	
 	public static final String str_FUNCTION_CALL_LIBRARY_API = "FUNCTION_CALL_LIBRARY_API";
-	
+
 	public static final String str_CLONE = "CLONE";
 	
 	/**
@@ -115,6 +117,7 @@ public enum RelationType implements RelationshipType {
 	 */
 	
 	public static final String str_DEPENDS_ON = "DEPENDS_ON";
+	public static final String str_MODULE_CLONE = "MODULE_CLONE";
 	
 	private String name;
 

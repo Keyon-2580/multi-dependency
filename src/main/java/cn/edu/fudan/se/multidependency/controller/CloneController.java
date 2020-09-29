@@ -7,6 +7,8 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.nio.*;
+
+import cn.edu.fudan.se.multidependency.model.relation.clone.ModuleClone;
 import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
 import org.slf4j.Logger;
@@ -35,6 +37,7 @@ import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueForDou
 import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChange;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
+import cn.edu.fudan.se.multidependency.repository.relation.clone.ModuleCloneRepository;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,6 +68,9 @@ public class CloneController {
 
 	@Autowired
 	private HotspotPackageDetector hotspotPackageDetector;
+
+	@Autowired
+	private ModuleCloneRepository moduleCloneRepository;
 
 	@GetMapping("/packages")
 	public String graph() {
@@ -99,10 +105,21 @@ public class CloneController {
 		
 		return result;
 	}
+
+//	@GetMapping("/package")
+//	@ResponseBody
+//	public Collection<CloneValueForDoubleNodes<Package>> cloneInPackages() {
+//		return cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE));
+//	}
+
 	@GetMapping("/package")
 	@ResponseBody
-	public Collection<CloneValueForDoubleNodes<Package>> cloneInPackages() {
-		return cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE));
+	public List<ModuleClone> cloneInPackages() {
+		List<ModuleClone> result = moduleCloneRepository.getAllModuleClone();
+		result.sort((v1, v2) -> {
+			return v2.getClonePairs() - v1.getClonePairs();
+		});
+		return result;
 	}
 
 	/**
