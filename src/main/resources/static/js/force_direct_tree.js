@@ -53,7 +53,7 @@ var projecttree = function () {
                 .attr("class", "projecttree_node")
                 .attr("cx", function(d) { return d.x; })
                 .attr("cy", function(d) { return d.y; })
-                .attr("r", function(d) { return Math.sqrt(d.size) / 10 || 4.5; })
+                .attr("r", function(d) { return Math.sqrt(d.size) / 10 || 6; })
                 .style("fill", color)
                 .on("click", click)
                 .call(force.drag);
@@ -71,34 +71,47 @@ var projecttree = function () {
 
 // Color leaf nodes orange, and packages white or blue.
         function color(d) {
-            return d._children ? "#3182bd" : d.children ? "#c6dbef" : "#fd8d3c";
+            if(d.name === data.name){
+                return "#fc0505"
+            }else{
+                return d._children ? "#3182bd" : d.children ? "#c6dbef" : d.collapse_children ? "#3182bd" : "#fd8d3c";
+            }
         }
-
 // Toggle children on click.
         function click(d) {
             if (!d3.event.defaultPrevented) {
-                if (d.children) {
+                if(d.collapse_children){
+                    d.children = d.collapse_children;
+                    d.collapse_children = null;
+                } else if (d.children) {
                     d._children = d.children;
                     d.children = null;
-                } else {
+                } else if(d._children){
                     d.children = d._children;
                     d._children = null;
                 }
+
+                // console.log(d);
                 update();
             }
         }
 
 // Returns a list of all nodes under the root.
         function flatten(root) {
+            // console.log(root)
             var nodes = [], i = 0;
 
             function recurse(node) {
                 if (node.children) node.children.forEach(recurse);
+                if (node.collapse_children) node.collapse_children.forEach(function(d){
+                    if (!d.id) d.id = ++i;
+                });
                 if (!node.id) node.id = ++i;
                 nodes.push(node);
             }
 
             recurse(root);
+            console.log(nodes)
             return nodes;
         }
     }

@@ -1,7 +1,7 @@
-var svg_global;
+var svg_global = {};
 var diameter_global;
-var g_global;
-var flag = true;
+var g_global = {};
+var flag = {};
 
 var jsonLinks_global;
 
@@ -13,7 +13,17 @@ var projectgraph = function () {
         var projectdata = result[0].result;
         var clonedata = result[1].clone;
         var jsonLinks = result[2].links;
-        jsonLinks_global = jsonLinks;
+
+        for(var i = 0; i < jsonLinks.length; i++){
+            if(jsonLinks[i].source_projectBelong !== projectdata.id || jsonLinks[i].target_projectBelong !== projectdata.id){
+                jsonLinks.splice(i,1);
+            }
+        }
+
+        if(typeof(jsonLinks) !== "undefined"){
+            jsonLinks_global[projectdata.id] = jsonLinks;
+        }
+
         var svg = d3.select("#" + divId)
                 .attr("width", 1500)
                 .attr("height", 1500),
@@ -21,9 +31,10 @@ var projectgraph = function () {
             diameter = +svg.attr("width"),
             g = svg.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
 
-        svg_global = svg;
-        g_global = g;
+        svg_global[projectdata.id] = svg;
+        g_global[projectdata.id] = g;
         diameter_global = diameter;
+        flag[projectdata.id] = true;
 
         var color = d3.scaleLinear()
             .domain([0, 1])
@@ -214,7 +225,7 @@ var projectgraph = function () {
 
                 for(var i = 0; i < projectlist.length; i++){
                     html += "<svg id = projectToGraph_" + projectlist[i] + "></svg>";
-                    html += "<button class = \"showLineButton\" type=\"button\" onclick= showLine(\"showLineButton_" + projectlist[i] + "\") id = showLineButton_" + projectlist[i] + ">显示包克隆关系</button>";
+                    html += "<button class = \"showLineButton\" type=\"button\" onclick= showLine(\"" + projectlist[i] + "\") id = showLineButton_" + projectlist[i] + ">显示包克隆关系</button>";
                     // console.log(html);
                     $("#projectToGraph").html(html);
 
@@ -232,7 +243,7 @@ var projectgraph = function () {
                     url : mainUrl + "/has?projectId=" + projectlist[index],
                     success : function(result) {
                         resultjson = result;
-                        // console.log(projectlist[index])
+                        console.log(projectlist[index])
                         console.log("projectToGraph_" + projectlist[index])
                         projectToGraph(resultjson,"projectToGraph_" + projectlist[index]);
                         if (index < projectlist.length) {
@@ -255,14 +266,14 @@ var projectgraph = function () {
     }
 }
 
-var showLine = function(buttonId){
+var showLine = function(projectId){
     var links;
     function drawLink() {
-        links = svg_global.append('g')
+        links = svg_global["id_" + projectId].append('g')
             .style('stroke', '#aaa')
             .attr("class", "packageLink")
             .selectAll('line')
-            .data(jsonLinks_global)
+            .data(jsonLinks_global["id_" + projectId])
             .enter().append('line');
 
         function getTranslateX(translateText) {
@@ -301,22 +312,23 @@ var showLine = function(buttonId){
     }
 
     function clearLink(){
-        g_global.selectAll("circle")
+        g_global["id_" + projectId].selectAll("circle")
             .style("stroke","")
             .style("stroke-width","")
         var svg1 = d3.select(".packageLink") .remove();
     }
 
-    if(flag){
-        drawLink();
-        document.getElementById(buttonId).innerHTML = "显示包克隆关系"
-        flag = false;
-    }else{
-        clearLink();
-        document.getElementById(buttonId).innerHTML = "显示包克隆关系"
-        flag = true;
+    if(typeof(jsonLinks_global["id_" + projectId]) !== "undefined"){
+        if(flag){
+            drawLink();
+            document.getElementById("showLineButton_" + projectId).innerHTML = "显示包克隆关系"
+            flag["id_" + projectId] = false;
+        }else{
+            clearLink();
+            document.getElementById("showLineButton_" + projectId).innerHTML = "显示包克隆关系"
+            flag["id_" + projectId] = true;
+        }
     }
-
 }
 
 
