@@ -2,7 +2,6 @@ package cn.edu.fudan.se.multidependency.repository.node.clone;
 
 import java.util.List;
 
-import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -49,4 +48,12 @@ public interface CloneGroupRepository extends Neo4jRepository<CloneGroup, Long> 
 
 	@Query("MATCH (n:CloneGroup)-[:CONTAIN]->(file:ProjectFile) where n.language is null with n, file set n.language = file.language;\n")
 	void setCloneGroupLanguage();
+
+	/**
+	 * 判断是否存在co-change关系
+	 * @param
+	 * @return
+	 */
+	@Query("match (n:CloneGroup) return n limit 10")
+	List<CloneGroup> findCoChangesLimit();
 }

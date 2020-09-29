@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
+import cn.edu.fudan.se.multidependency.repository.node.clone.CloneGroupRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.context.annotation.Bean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +36,7 @@ public class BeanCreator {
 
 	@Autowired
 	private BasicCloneQueryService basicCloneQueryService;
-	
+
 	@Bean
 	public int setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository) {
 		System.out.println("设置commit update文件数...");
@@ -43,12 +45,21 @@ public class BeanCreator {
     
 	@Bean("createCoChanges")
 	public List<CoChange> createCoChanges(PropertyConfig propertyConfig, CoChangeRepository cochangeRepository) {
+		List<CoChange> coChanges = new ArrayList<>();
 		if(propertyConfig.isCalculateCoChange()) {
-			System.out.println("创建cochange关系...");
-			cochangeRepository.deleteAll();
-			return cochangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE);
+			coChanges = cochangeRepository.findCoChangesLimit();
+			if ( coChanges != null && coChanges.size() > 0){
+				System.out.println("已存在创建cochange关系" );
+				return coChanges;
+			} else {
+				System.out.println("创建cochange关系...");
+				cochangeRepository.deleteAll();
+				coChanges.addAll( cochangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE));
+				System.out.println("创建module cochange关系");
+				coChanges.addAll(cochangeRepository.createCoChangesForModule());
+			}
 		}
-		return new ArrayList<>();
+		return coChanges;
 	}
 
 	@Bean("createDependsOn")
@@ -92,19 +103,27 @@ public class BeanCreator {
 	}
 
 	@Bean("createCloneGroup")
-	public List<DependsOn> createCloneGroup(PropertyConfig propertyConfig, CloneGroupRepository cloneGroupRepository) {
+	public List<CloneGroup> createCloneGroup(PropertyConfig propertyConfig, CloneGroupRepository cloneGroupRepository) {
 		if(propertyConfig.isCalculateCloneGroup()) {
-			System.out.println("创建Clone Group关系...");
-			cloneGroupRepository.setJavaLanguageBySuffix();
-			cloneGroupRepository.setCppLanguageBySuffix();
-			cloneGroupRepository.deleteCloneGroupContainRelations();
-			cloneGroupRepository.deleteCloneGroupRelations();
+			List<CloneGroup> cloneGroups = cloneGroupRepository.findCoChangesLimit();
+			if ( cloneGroups != null && cloneGroups.size() > 0){
+				System.out.println("已存在Clone Group关系");
+				return cloneGroups;
+			} else {
+				System.out.println("创建Clone Group关系...");
+				cloneGroupRepository.deleteAll();
+				cloneGroupRepository.setJavaLanguageBySuffix();
+				cloneGroupRepository.setCppLanguageBySuffix();
+				cloneGroupRepository.deleteCloneGroupContainRelations();
+				cloneGroupRepository.deleteCloneGroupRelations();
 
-			cloneGroupRepository.setFileGroup();
-			cloneGroupRepository.createCloneGroupRelations();
-			cloneGroupRepository.createCloneGroupContainRelations();
-			cloneGroupRepository.setCloneGroupContainSize();
-			cloneGroupRepository.setCloneGroupLanguage();
+				cloneGroupRepository.setFileGroup();
+				cloneGroupRepository.createCloneGroupRelations();
+				cloneGroupRepository.createCloneGroupContainRelations();
+				cloneGroupRepository.setCloneGroupContainSize();
+				cloneGroupRepository.setCloneGroupLanguage();
+			}
+
 		}
 		return new ArrayList<>();
 	}
