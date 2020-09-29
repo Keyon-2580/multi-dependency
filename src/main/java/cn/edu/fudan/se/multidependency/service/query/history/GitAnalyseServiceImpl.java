@@ -211,8 +211,8 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 			return c2.getTimes() - c1.getTimes();
 		});
 		for(CoChange cochange : result) {
-			ProjectFile file1 = cochange.getFile1();
-			ProjectFile file2 = cochange.getFile2();
+			ProjectFile file1 = (ProjectFile)cochange.getNode1();
+			ProjectFile file2 = (ProjectFile)cochange.getNode2();
 			Map<ProjectFile, CoChange> ccs = cntOfFileCoChangeCache.getOrDefault(file1, new HashMap<>());
 			ccs.put(file2, cochange);
 			cntOfFileCoChangeCache.put(file1, ccs);
@@ -250,8 +250,8 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 
 	@Override
 	public Collection<Commit> findCommitsByCoChange(CoChange cochange) {
-		ProjectFile file1 = cochange.getFile1();
-		ProjectFile file2 = cochange.getFile2();
+		ProjectFile file1 = (ProjectFile)cochange.getNode1();
+		ProjectFile file2 = (ProjectFile)cochange.getNode2();
 		List<Commit> result = commitRepository.findCommitsInTwoFiles(file1.getId(), file2.getId());
 		if(result.isEmpty()) {
 			result = commitRepository.findCommitsInTwoFiles(file2.getId(), file1.getId());

@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.model.relation.git;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
@@ -20,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_CO_CHANGE)
-public class CoChange implements Relation {
+public class CoChange implements Relation, RelationWithTimes {
 	
 	private static final long serialVersionUID = -8677714146194368352L;
 
@@ -29,16 +30,24 @@ public class CoChange implements Relation {
     private Long id;
 	
 	@StartNode
-	private ProjectFile file1;
+	private Node node1;
 	
 	@EndNode
-	private ProjectFile file2;
+	private Node node2;
 	
 	private int times = 1;
+
+	private String cochangeType = "";
 	
-	public CoChange(ProjectFile file1, ProjectFile file2) {
-		this.file1 = file1;
-		this.file2 = file2;
+	public CoChange(Node node1, Node node2) {
+		this.node1 = node1;
+		this.node2 = node2;
+	}
+
+	public CoChange(Node node1, Node node2, String cochangeType) {
+		this.node1 = node1;
+		this.node2 = node2;
+		this.cochangeType = cochangeType;
 	}
 	
 	public void addTimes() {
@@ -47,12 +56,12 @@ public class CoChange implements Relation {
 
 	@Override
 	public Node getStartNode() {
-		return file1;
+		return node1;
 	}
 
 	@Override
 	public Node getEndNode() {
-		return file2;
+		return node2;
 	}
 
 	@Override
@@ -64,6 +73,7 @@ public class CoChange implements Relation {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("times", getTimes());
+		properties.put("cochangeType", getCochangeType());
 		return properties;
 	}
 	

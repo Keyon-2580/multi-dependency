@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,8 +39,8 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 		Collection<CoChange> cochangesWithOutDependsOn = asRepository.cochangeFilesWithoutDependsOn(getMinCoChange());
 		List<LogicCouplingFiles> result = new ArrayList<>();
 		for(CoChange cochange : cochangesWithOutDependsOn) {
-			if(staticAnalyseService.isInDifferentModule(cochange.getFile1(), cochange.getFile2())) {
-				result.add(new LogicCouplingFiles(cochange.getFile1(), cochange.getFile2(), cochange.getTimes()));
+			if(staticAnalyseService.isInDifferentModule((ProjectFile) cochange.getNode1(), (ProjectFile)cochange.getNode2())) {
+				result.add(new LogicCouplingFiles((ProjectFile)cochange.getNode1(), (ProjectFile)cochange.getNode2(), cochange.getTimes()));
 			}
 		}
 		cache.cache(getClass(), key, result);

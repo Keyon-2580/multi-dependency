@@ -28,9 +28,9 @@ public class UnstableFile {
 	}
 	
 	public void addCoChange(CoChange cochange) {
-		ProjectFile cochangeFile = cochange.getFile1();
+		ProjectFile cochangeFile = (ProjectFile)cochange.getNode1();
 		if(cochangeFile.equals(file)) {
-			cochangeFile = cochange.getFile2();
+			cochangeFile = (ProjectFile)cochange.getNode2();
 		}
 		cochangeFiles.add(cochangeFile);
 		cochangeTimesWithFile.put(cochangeFile.getId(), cochange);

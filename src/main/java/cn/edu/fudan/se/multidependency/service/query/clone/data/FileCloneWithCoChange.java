@@ -31,8 +31,8 @@ public class FileCloneWithCoChange {
 			cochangeTimes = 0;
 			this.cochange = cochange;
 		} else {
-			ProjectFile cochangeFile1 = cochange.getFile1();
-			ProjectFile cochangeFile2 = cochange.getFile2();
+			ProjectFile cochangeFile1 = (ProjectFile)cochange.getNode1();
+			ProjectFile cochangeFile2 = (ProjectFile)cochange.getNode2();
 			if((cloneFile1.equals(cochangeFile1) && cloneFile2.equals(cochangeFile2)) 
 					|| (cloneFile2.equals(cochangeFile1) && cloneFile1.equals(cochangeFile2))) {
 				this.file1 = cloneFile1;
