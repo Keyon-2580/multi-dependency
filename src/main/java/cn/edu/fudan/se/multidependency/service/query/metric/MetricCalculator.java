@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import cn.edu.fudan.se.multidependency.model.node.git.GitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -134,6 +135,27 @@ public class MetricCalculator {
 				projectMetric.setModularity(calculateProjectModularity(projectMetric.getProject()));
 			}
 			result.put(projectMetric.getProject().getId(), projectMetric);
+		}
+		if(calculateModularityAndCommits) {
+			cache.cache(getClass(), key, result);
+		}
+		return result;
+	}
+
+	public Map<Long, ProjectMetrics> calculateProjectMetricsByGitRepository(boolean calculateModularityAndCommits, GitRepository gitRepository) {
+		String key = "calculateProjectMetricsByGitRepository";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		Map<Long, ProjectMetrics> result = new HashMap<>();
+		for(ProjectMetrics projectMetric : projectRepository.calculateProjectMetrics()) {
+			if(calculateModularityAndCommits) {
+				projectMetric.setCommitTimes(calculateProjectCommits(projectMetric.getProject()));
+				projectMetric.setModularity(calculateProjectModularity(projectMetric.getProject()));
+			}
+			if(gitRepository.getName().equals(projectMetric.getProject().getName())) {
+				result.put(projectMetric.getProject().getId(), projectMetric);
+			}
 		}
 		if(calculateModularityAndCommits) {
 			cache.cache(getClass(), key, result);

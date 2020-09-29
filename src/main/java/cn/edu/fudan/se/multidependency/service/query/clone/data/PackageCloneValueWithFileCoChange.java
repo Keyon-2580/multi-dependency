@@ -26,7 +26,11 @@ public class PackageCloneValueWithFileCoChange implements Serializable {
 	private Set<ProjectFile> cloneFiles1 = new HashSet<>();
 	
 	private Set<ProjectFile> cloneFiles2 = new HashSet<>();
-	
+
+	private Set<ProjectFile> noneCloneFiles1 = new HashSet<>();
+
+	private Set<ProjectFile> noneCloneFiles2 = new HashSet<>();
+
 	private Set<ProjectFile> allFiles1 = new HashSet<>();
 	
 	private Set<ProjectFile> allFiles2 = new HashSet<>();
@@ -46,7 +50,14 @@ public class PackageCloneValueWithFileCoChange implements Serializable {
 	public void addFile2(ProjectFile file) {
 		this.allFiles2.add(file);
 	}
-	
+
+	public void addNoneCloneFiles1(Collection<ProjectFile> files) {
+		this.noneCloneFiles1.addAll(files);
+	}
+	public void addNoneCloneFiles2(Collection<ProjectFile> files) {
+		this.noneCloneFiles2.addAll(files);
+	}
+
 	public void addFile1(Collection<ProjectFile> files) {
 		this.allFiles1.addAll(files);
 	}

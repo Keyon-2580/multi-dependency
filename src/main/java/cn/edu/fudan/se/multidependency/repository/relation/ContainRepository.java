@@ -127,4 +127,7 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	@Query("match (group:CloneGroup)-[r:" + RelationType.str_CONTAIN + "]->(function:Function) where id(function)={functionId} return group")
 	public CloneGroup findFunctionBelongToCloneGroup(@Param("functionId") long functionId);
 
+	@Query("match (gitRepo:GitRepository)-[r:" + RelationType.str_CONTAIN + "]->(project:Project) where id(gitRepo)={gitRepoId} return project")
+	public List<Project> findGitRepositoryContainProjects(@Param("gitRepoId") long gitRepoId);
+
 }

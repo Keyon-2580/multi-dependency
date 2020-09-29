@@ -156,6 +156,7 @@ public class ProjectConfigUtil {
 			JSONObject json = array.getJSONObject(i);
 			GitConfig config = new GitConfig();
 			config.setPath(json.getString("path"));
+			config.setProject(json.getString("project"));
 			config.setSpecifyCommitRange(json.getBooleanValue("specify_commit_range"));
 			config.setSpecifyByCommitId(json.getBooleanValue("specify_by_commit_id"));
 			config.setCommitIdFrom(json.getString("commit_id_from"));

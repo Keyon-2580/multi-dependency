@@ -105,7 +105,11 @@
         var loc1 = [[${loc1}]];
         var loc2 = [[${loc2}]];
         var value = [[${value}]];
-        doublefile().init(fileId1,fileId2,cloneType,linesSize1,linesSize2,loc1,loc2,value);
+        var cochange = params[8].split('=')[1];
+        var filePath1 = params[9].split('=')[1];
+        var filePath2 = params[10].split('=')[1];
+        var cochangeId = params[11].split('=')[1];
+        doublefile().init(fileId1,fileId2,cloneType,linesSize1,linesSize2,loc1,loc2,value,cochange,filePath1,filePath2,cochangeId);
     });
     // ]]>
 </script>

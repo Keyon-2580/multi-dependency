@@ -540,6 +540,11 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	}
 
 	@Override
+	public Collection<Project> findGitRepositoryContainProject(GitRepository gitRepository) {
+		return containRepository.findGitRepositoryContainProjects(gitRepository.getId());
+	}
+
+	@Override
 	public Package findPackageInPackage(Package pck) {
 		return nodeService.queryPackage(pck.lastPackageDirectoryPath());
 	}

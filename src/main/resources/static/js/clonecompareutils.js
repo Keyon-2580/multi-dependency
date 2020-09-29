@@ -1,8 +1,26 @@
+var showtree = function(divId, zNodes) {
+    var zTreeObj;
+    var setting = {
+        check : {
+            enable : false
+        },
+        data : {
+            simpleData : {
+                enable : true
+            }
+        }
+    };
+
+    console.log(zNodes);
+    zTreeObj = $.fn.zTree.init($("#" + divId), setting, zNodes);
+}
+
 /*
 跨包克隆包内详细信息展示
 */
 var doublePackagesCloneWithCoChange = function(pck1Id, pck2Id, index) {
     $("#package_files_clone").html("");
+
     $.ajax({
         type: "get",
         url: "/clone/package/double/cochange?package1=" + pck1Id + "&package2=" + pck2Id,
@@ -70,13 +88,15 @@ var doublePackagesCloneWithCoChange = function(pck1Id, pck2Id, index) {
                 }
                 html += "<a target='_blank' href='/clone/file/double?fileId1=" + children[i].file1.id + "&fileId2=" + children[i].file2.id
                     + "&cloneType=" + type +"&linesSize1=" + linesSize1 + "&linesSize2=" + linesSize2 +"&loc1=" + loc1 +"&loc2=" + loc2
-                    +"&value=" + value + "'>" + type + "</a>";
+                    +"&value=" + value + "&cochange=" + children[i].cochangeTimes + "&filePath1=" + children[i].file1.path +
+                    "&filePath2=" + children[i].file2.path + "&cochangeId=" + cochangeId
+                    + "'>" + type + "</a>";
                 html += "</td>";
                 html += "<td>";
                 html += "<a target='_blank' href='/clone/compare?id1=" + children[i].file1.id + "&id2=" + children[i].file2.id +"'>" + children[i].fileClone.value + "</a>";
                 html += "</td>";
                 html += "<td>";
-                html += "<a class='cochangeTimes' target='_blank' href='/git/cochange/commits?cochangeId=" + cochangeId
+                html += "<a class='cochangeTimes' target='_blank' href='/commit/cochange?cochangeId=" + cochangeId
                     + "' index='" + i + "'>" + children[i].cochangeTimes + "</a>";
                 html += "</td>";
                 html += "</tr>";
@@ -151,7 +171,7 @@ var cloneGroupToGraph = function(result,divId) {
     // var nodes = cluster.nodes(packageClone(classes)),
     //     links = packageCloneImports(nodes);
 
-    console.log(nodes)
+    // console.log(nodes)
 
     link = link
         .data(bundle(links))
@@ -307,7 +327,7 @@ var cloneGroupToGraph = function(result,divId) {
             var node = map[name], i;
             if (!node) {
                 node = map[name] = data || {name: name, children: []};
-                console.log(node)
+                // console.log(node)
                 if (name.length) {
                     node.parent = find(name.substring(0, i = name.lastIndexOf("/")));
                     node.parent.children.push(node);
@@ -319,7 +339,7 @@ var cloneGroupToGraph = function(result,divId) {
 
         // classes.result.forEach(function(d) {
         classes.forEach(function(d) {
-            console.log(d)
+            // console.log(d)
             find(d.name, d);
         });
 

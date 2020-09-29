@@ -13,6 +13,11 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import cn.edu.fudan.se.multidependency.model.node.git.GitRepository;
+import cn.edu.fudan.se.multidependency.repository.node.git.GitRepoRepository;
+import cn.edu.fudan.se.multidependency.service.query.history.data.GitRepoMetric;
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculator;
+import cn.edu.fudan.se.multidependency.service.query.metric.ProjectMetrics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +40,9 @@ import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationSe
 @Service
 public class GitAnalyseServiceImpl implements GitAnalyseService {
 
+	@Autowired
+	private GitRepoRepository gitRepoRepository;
+
     @Autowired
     private CommitRepository commitRepository;
 
@@ -49,6 +57,9 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
     
     @Autowired
     private CoChangeRepository cochangeRepository;
+
+	@Autowired
+	MetricCalculator metricCalculator;
     
     @Autowired
     private CacheService cache;
@@ -56,6 +67,30 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
     private Map<Developer, Map<Project, Integer>> cntOfDevUpdProCache = null;
 
     private Map<ProjectFile, Integer> cntOfFileBeUpdtdCache = null;
+
+	@Override
+	public Map<Long, GitRepoMetric> calculateGitRepoMetrics() {
+		String key = "calculateGitRepoMetrics";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		Map<Long, GitRepoMetric> result = new HashMap<>();
+		for(GitRepository gitRepository : gitRepoRepository.findAll()) {
+			GitRepoMetric gitRepoMetric = new GitRepoMetric();
+			gitRepoMetric.setGitRepository(gitRepository);
+			Collection<ProjectMetrics> ProjectMetricList = metricCalculator.calculateProjectMetrics(false).values();
+			gitRepoMetric.setProjectMetricsList(ProjectMetricList);
+			gitRepoMetric.setNumOfCommits(calculateGitRepoCommits(gitRepository));
+			gitRepoMetric.setNumOfIssues(0);
+			result.put(gitRepository.getId(), gitRepoMetric);
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	public int calculateGitRepoCommits(GitRepository gitRepository) {
+		return gitRepoRepository.queryCommitsInGitRepo(gitRepository.getId()).size();
+	}
     
     @Override
     public Iterable<Commit> findAllCommits() {

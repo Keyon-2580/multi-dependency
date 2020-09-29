@@ -166,9 +166,84 @@ public class CloneController {
 	 * @param package2Id
 	 * @return
 	 */
+	@GetMapping("/package/double/filetree")
+	@ResponseBody
+	public JSONObject clonesInPackageWithCoChange(@RequestParam("package1") long package1Id, @RequestParam("package2") long package2Id) {
+		Package pck1 = nodeService.queryPackage(package1Id);
+		Package pck2 = nodeService.queryPackage(package2Id);
+		JSONObject result = new JSONObject();
+		if(pck1 == null || pck2 == null) {
+			return null;
+		}
+		try {
+			PackageCloneValueWithFileCoChange pckClone = cloneValueService.queryPackageCloneWithFileCoChange(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pck1, pck2);
+
+			JSONArray cloneFiles1 = setCloneAndNoneCloneFiles(pckClone.getCloneFiles1());
+			JSONArray cloneFiles2 = setCloneAndNoneCloneFiles(pckClone.getCloneFiles2());
+			JSONArray noneCloneFiles1 = setCloneAndNoneCloneFiles(pckClone.getCloneFiles1());
+			JSONArray noneCloneFiles2 = setCloneAndNoneCloneFiles(pckClone.getCloneFiles2());
+
+			JSONObject clone1 = new JSONObject();
+			JSONObject noneClone1 = new JSONObject();
+			JSONObject clone2 = new JSONObject();
+			JSONObject noneClone2 = new JSONObject();
+			JSONObject package1 = new JSONObject();
+			JSONObject package2 = new JSONObject();
+
+			JSONArray packageContain1 = new JSONArray();
+			JSONArray packageContain2 = new JSONArray();
+
+			clone1.put("name", "cloneFiles");
+			clone1.put("open", false);
+			clone1.put("children", cloneFiles1);
+			clone2.put("name", "cloneFiles");
+			clone2.put("open", false);
+			clone2.put("children", cloneFiles2);
+
+			noneClone1.put("name", "noneCloneFiles");
+			noneClone1.put("open", false);
+			noneClone1.put("children", noneCloneFiles1);
+			noneClone2.put("name", "noneCloneFiles");
+			noneClone2.put("open", false);
+			noneClone2.put("children", noneCloneFiles2);
+
+			packageContain1.add(clone1);
+			packageContain1.add(noneClone1);
+			packageContain2.add(clone2);
+			packageContain2.add(noneClone2);
+
+			package1.put("name",pck1.getDirectoryPath());
+			package1.put("open", false);
+			package1.put("children",packageContain1);
+			package2.put("name",pck2.getDirectoryPath());
+			package2.put("open", false);
+			package2.put("children",packageContain2);
+
+			JSONArray result1 = new JSONArray();
+			JSONArray result2 = new JSONArray();
+			result1.add(package1);
+			result2.add(package2);
+
+			result.put(pck1.getId().toString(),result1);
+			result.put(pck2.getId().toString(),result2);
+
+			return result;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	/**
+	 * 两个包之间的文件依赖加上cochange次数
+	 * @param package1Id
+	 * @param package2Id
+	 * @return
+	 */
 	@GetMapping("/package/double/cochange")
 	@ResponseBody
-	public PackageCloneValueWithFileCoChange clonesInPackageWithCoChange(@RequestParam("package1") long package1Id, @RequestParam("package2") long package2Id) {
+	public PackageCloneValueWithFileCoChange clonesInPackage(@RequestParam("package1") long package1Id, @RequestParam("package2") long package2Id) {
 		Package pck1 = nodeService.queryPackage(package1Id);
 		Package pck2 = nodeService.queryPackage(package2Id);
 		if(pck1 == null || pck2 == null) {
@@ -181,6 +256,16 @@ public class CloneController {
 			return null;
 		}
 	}
+
+	private JSONArray setCloneAndNoneCloneFiles(Set<ProjectFile> files){
+		JSONArray temp = new JSONArray();
+		for(ProjectFile projectFile: files){
+			JSONObject cloneFile = new JSONObject();
+			cloneFile.put("name", projectFile.getPath());
+			temp.add(cloneFile);
+		}
+		return temp;
+	}
 	
 	@GetMapping("/package/double/graph")
 	@ResponseBody
@@ -188,6 +273,7 @@ public class CloneController {
 			@RequestParam("package2") long package2Id) {
 		Package pck1 = nodeService.queryPackage(package1Id);
 		Package pck2 = nodeService.queryPackage(package2Id);
+		JSONObject result = new JSONObject();
 		if(pck1 == null || pck2 == null) {
 			return null;
 		}

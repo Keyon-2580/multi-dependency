@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class GitConfig {
 	private String path;
+	private String project;
 	private boolean specifyCommitRange;
 	private boolean specifyByCommitId;
 	private String commitIdFrom;

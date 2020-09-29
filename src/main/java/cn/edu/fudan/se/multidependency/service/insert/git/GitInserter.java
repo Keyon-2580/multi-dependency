@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -56,6 +57,13 @@ public class GitInserter extends ExtractorForNodesAndRelationsImpl {
         //添加gitRepository节点和gitRepository到project的包含关系
         gitRepository = new GitRepository(generateEntityId(), gitExtractor.getRepositoryName(), gitExtractor.getGitPath(), gitExtractor.getRepositoryPath());
         addNode(gitRepository, null);
+        List<Project> projectList = this.getNodes().findProject(gitConfig.getProject());
+        if(!projectList.isEmpty()) {
+            projectList.forEach( project -> {
+                addRelation(new Contain(gitRepository , project));
+            });
+        }
+
         LOGGER.info(gitExtractor.getGitPath() + " " + gitExtractor.getRepositoryPath() + " " + gitExtractor.getRepositoryName() + " " + gitRepository.getPath());
         
         addIssues();
