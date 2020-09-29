@@ -1,11 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.query.clone;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -89,9 +84,45 @@ public class CloneValueServiceImpl implements CloneValueService {
 			CoChange cochange = gitAnalyseService.findCoChangeBetweenTwoFiles(file1, file2);
 			result.addChild(new FileCloneWithCoChange(clone, cochange));
 		}
+
+		Set<ProjectFile> cloneFiles1 = result.getCloneFiles1();
+		Set<ProjectFile> cloneFiles2 = result.getCloneFiles2();
+		Set<ProjectFile> allFiles1 = result.getAllFiles1();
+		System.out.println(allFiles1);
+		Set<ProjectFile> allFiles2 = result.getAllFiles2();
+
+		Set<ProjectFile> noneCloneFiles1 = new HashSet();
+		Set<ProjectFile> noneCloneFiles2 = new HashSet();
+
+		for(ProjectFile projectFile: allFiles1){
+			noneCloneFiles1.add(projectFile);
+		}
+
+		for(ProjectFile projectFile: allFiles2){
+			noneCloneFiles2.add(projectFile);
+		}
+
+		noneCloneFiles1.removeAll(cloneFiles1);
+		noneCloneFiles2.removeAll(cloneFiles2);
+
+		result.addNoneCloneFiles1(noneCloneFiles1);
+		result.addNoneCloneFiles2(noneCloneFiles2);
+
+//		result.addNoneCloneFiles1(addNoneCloneFiles(cloneFiles1,allFiles1));
+//		result.addNoneCloneFiles1(addNoneCloneFiles(cloneFiles2,allFiles2));
+
 		result.sortChildren();
 		return result;
 	}
+
+//	private Set<ProjectFile> addNoneCloneFiles(Set<ProjectFile> cloneFiles, Set<ProjectFile> allFiles){
+//		for(ProjectFile projectFile: cloneFiles){
+//			if(allFiles.contains(projectFile)){
+//				allFiles.remove(projectFile);
+//			}
+//		}
+//		return allFiles;
+//	}
     
     private Collection<CloneValueForDoubleNodes<Package>> removeSameNodeToCloneValuePackages = null;
     private Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> queryPackageCloneFromFileCloneCache = null;
