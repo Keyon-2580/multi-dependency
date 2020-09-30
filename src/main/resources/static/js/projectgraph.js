@@ -1,9 +1,11 @@
-var svg_global = {};
-var diameter_global;
-var g_global = {};
 var flag = {};
+var project_index = {};
+var y = 0;
 
-var jsonLinks_global;
+var jsonLinks_global = [];
+var diameter_global = [];
+var svg_global = [];
+var g_global = [];
 
 var projectgraph = function () {
     var mainUrl = "/project";
@@ -14,15 +16,36 @@ var projectgraph = function () {
         var clonedata = result[1].clone;
         var jsonLinks = result[2].links;
 
+        project_index[projectdata.id] = y;
+        // console.log(jsonLinks);
+
+        var delete_index = [];
         for(var i = 0; i < jsonLinks.length; i++){
             if(jsonLinks[i].source_projectBelong !== projectdata.id || jsonLinks[i].target_projectBelong !== projectdata.id){
-                jsonLinks.splice(i,1);
+                // console.log("1111111111111111111111111111111111111111")
+                // jsonLinks.splice(i,1);
+                delete_index.push(i);
             }
         }
 
-        if(typeof(jsonLinks) !== "undefined"){
-            jsonLinks_global[projectdata.id] = jsonLinks;
+        // console.log(length);
+        // console.log(delete_index.length);
+        if (delete_index.length !== jsonLinks.length){
+            for(var i = delete_index.length; i > 0; i--){
+                jsonLinks.splice(delete_index[i],1);
+            }
+            jsonLinks_global.push(jsonLinks);
+        }else{
+            jsonLinks_global.push(0);
         }
+
+        // console.log(delete_index);
+        //
+        // if(typeof(jsonLinks) !== "undefined"){
+        //     // console.log(typeof(jsonLinks));
+        //     // console.log(jsonLinks);
+        //
+        // }
 
         var svg = d3.select("#" + divId)
                 .attr("width", 1500)
@@ -31,10 +54,11 @@ var projectgraph = function () {
             diameter = +svg.attr("width"),
             g = svg.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
 
-        svg_global[projectdata.id] = svg;
-        g_global[projectdata.id] = g;
-        diameter_global = diameter;
+        svg_global.push(svg);
+        g_global.push(g);
+        diameter_global.push(diameter);
         flag[projectdata.id] = true;
+        y++;
 
         var color = d3.scaleLinear()
             .domain([0, 1])
@@ -100,7 +124,7 @@ var projectgraph = function () {
         zoomTo([root.x, root.y, root.r * 2 + margin]);
 
         function zoom(d) {
-            g_global.selectAll("circle")
+            g.selectAll("circle")
                 .style("stroke","")
                 .style("stroke-width","")
             var svg1 = d3.select(".packageLink") .remove();
@@ -240,11 +264,11 @@ var projectgraph = function () {
             if (index < projectlist.length) {
                 $.ajax({
                     type : "GET",
-                    url : mainUrl + "/has?projectId=" + projectlist[index],
+                    url : mainUrl + "/has?projectId=" + projectlist[index] + "&showType=graph",
                     success : function(result) {
                         resultjson = result;
-                        console.log(projectlist[index])
-                        console.log("projectToGraph_" + projectlist[index])
+                        // console.log(projectlist[index])
+                        // console.log("projectToGraph_" + projectlist[index])
                         projectToGraph(resultjson,"projectToGraph_" + projectlist[index]);
                         if (index < projectlist.length) {
                             Loop_ajax(index + 1, projectlist);
@@ -269,12 +293,13 @@ var projectgraph = function () {
 var showLine = function(projectId){
     var links;
     function drawLink() {
-        links = svg_global["id_" + projectId].append('g')
+        links = svg_global[project_index["id_" + projectId]].append('g')
             .style('stroke', '#aaa')
             .attr("class", "packageLink")
             .selectAll('line')
-            .data(jsonLinks_global["id_" + projectId])
+            .data(jsonLinks_global[project_index["id_" + projectId]])
             .enter().append('line');
+
 
         function getTranslateX(translateText) {
             var start = translateText.indexOf("(");
@@ -298,28 +323,34 @@ var showLine = function(projectId){
         }
         links.attr("x1", function (d) {
             var test = getCircleTransform(d.source_id);
-            return getTranslateX(getCircleTransform(d.source_id)) + diameter_global / 2;
+            return getTranslateX(getCircleTransform(d.source_id)) + diameter_global[project_index["id_" + projectId]] / 2;
         })
             .attr("y1", function (d) {
-                return getTranslateY(getCircleTransform(d.source_id)) + diameter_global / 2;
+                return getTranslateY(getCircleTransform(d.source_id)) + diameter_global[project_index["id_" + projectId]] / 2;
             })
             .attr("x2", function (d) {
-                return getTranslateX(getCircleTransform(d.target_id)) + diameter_global / 2;
+                return getTranslateX(getCircleTransform(d.target_id)) + diameter_global[project_index["id_" + projectId]] / 2;
             })
             .attr("y2", function (d) {
-                return getTranslateY(getCircleTransform(d.target_id)) + diameter_global / 2;
+                return getTranslateY(getCircleTransform(d.target_id)) + diameter_global[project_index["id_" + projectId]] / 2;
             });
     }
 
     function clearLink(){
-        g_global["id_" + projectId].selectAll("circle")
+        g_global[project_index["id_" + projectId]].selectAll("circle")
             .style("stroke","")
             .style("stroke-width","")
         var svg1 = d3.select(".packageLink") .remove();
     }
 
-    if(typeof(jsonLinks_global["id_" + projectId]) !== "undefined"){
-        if(flag){
+    // console.log(projectId);
+    // console.log(project_index);
+    // console.log(project_index["id_" + projectId]);
+    console.log(jsonLinks_global);
+    console.log(jsonLinks_global[project_index["id_" + projectId]]);
+
+    if(typeof(jsonLinks_global[project_index["id_" + projectId]]) !== "undefined"){
+        if(flag["id_" + projectId]){
             drawLink();
             document.getElementById("showLineButton_" + projectId).innerHTML = "显示包克隆关系"
             flag["id_" + projectId] = false;
