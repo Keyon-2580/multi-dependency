@@ -234,7 +234,9 @@ var projectgraph = function () {
 
     var loaddata = function () {
         var resultjson = null;
-        var projectlist = new Array();
+        var projectlist = [];
+        var projectlist_guava = [];
+        var guava_id;
         var projectId = null;
 
         $.ajax({
@@ -243,7 +245,18 @@ var projectgraph = function () {
             success : function(result) {
                 for(x in result){
                     projectlist.push(x);
+                    var name_temp = {};
+                    // console.log(x);
+                    name_temp["id"] = x;
+                    name_temp["name"] = result[x].name;
+                    projectlist_guava.push(name_temp);
                 }
+
+                projectlist_guava.map((item,index) => {
+                    if(item.name === "guava"){
+                        guava_id = item.id;
+                    }
+                })
 
                 var html = ""
 
@@ -256,7 +269,18 @@ var projectgraph = function () {
                     // console.log(projectlist[i])
                 }
 
-                Loop_ajax(0, projectlist);
+                $.ajax({
+                    type : "GET",
+                    url : mainUrl + "/has?projectId=" + guava_id + "&showType=graph",
+                    success : function(result) {
+                        resultjson = result;
+                        // console.log(projectlist[index])
+                        // console.log("projectToGraph_" + projectlist[index])
+                        projectToGraph(resultjson,"projectToGraph_" + guava_id);
+                    }
+                })
+
+                // Loop_ajax(0, projectlist);
             }
         })
 

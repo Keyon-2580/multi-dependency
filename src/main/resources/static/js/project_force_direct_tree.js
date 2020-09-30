@@ -117,16 +117,39 @@ var projecttree = function () {
     }
 
     var LoadDataOfTree = function(){
+        var projectlist = [];
+        var guava_id;
+
         $.ajax({
-            type : "GET",
-            url : "/project/has?projectId=182051&showType=tree",
-            success : function(result) {
-                resultjson = result;
-                // console.log(projectlist[index])
-                // console.log("projectToGraph_" + projectlist[index])
-                ShowTree(resultjson[0].result,"ProjectToTree");
+            type: "GET",
+            url: "/project/all",
+            success: function (result) {
+                for (x in result) {
+                    var name_temp = {};
+                    // console.log(x);
+                    name_temp["id"] = x;
+                    name_temp["name"] = result[x].name;
+                    projectlist.push(name_temp);
+                }
+
+                projectlist.map((item, index) => {
+                    if (item.name === "guava") {
+                        guava_id = item.id;
+                    }
+                })
+
+                $.ajax({
+                    type : "GET",
+                    url : "/project/has?projectId=" + guava_id + "&showType=tree",
+                    success : function(result) {
+                        resultjson = result;
+                        // console.log(projectlist[index])
+                        // console.log("projectToGraph_" + projectlist[index])
+                        ShowTree(resultjson[0].result,"ProjectToTree");
+                    }
+                })
             }
-        })
+        });
     }
 
     return {

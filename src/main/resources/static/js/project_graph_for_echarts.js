@@ -10,13 +10,15 @@ var projectgraphforecharts = function(){
         var links_package = result.links_package;
 
         for(var i = links_package.length; i > 0; i--){
-            if(links_package[i-1].source_projectBelong !== projectId ||links_package[i-1].target_projectBelong !== projectId){
+            console.log(typeof(projectId) );
+            console.log(typeof(links_package[i-1].source_projectBelong) );
+            if(links_package[i-1].source_projectBelong.toString() !== projectId || links_package[i-1].target_projectBelong.toString() !== projectId){
                 delete links_package[i-1];
             }
         }
 
         // var graph = echarts.dataTool.gexf.parse(xml);
-        // console.log(graph);
+        console.log(links_package);
         var categories = [];
         for (var i = 0; i < 3; i++) {
             categories[i] = {
@@ -53,14 +55,14 @@ var projectgraphforecharts = function(){
                     type: 'graph',
                     layout: 'force',
                     data: result.nodes,
-                    links: Object.assign(result.links, result.links_package),
+                    links: Object.assign(result.links, links_package),
                     categories: categories,
                     roam: true,
                     label: {
                         position: 'right'
                     },
                     force: {
-                        repulsion: 10
+                        repulsion: 50
                     }
                 }
             ]
@@ -25506,15 +25508,48 @@ var projectgraphforecharts = function(){
                     }
                 }
             ]
-        }
+        };
+
+        var projectlist = [];
+        var guava_id;
 
         $.ajax({
-            type : "GET",
-            url : "/project/has/echarts?projectId=7442",
-            success : function(result) {
-                ProjectToEcharts("container", result, 7442);
+            type: "GET",
+            url: "/project/all",
+            success: function (result) {
+                for (x in result) {
+                    var name_temp = {};
+                    // console.log(x);
+                    name_temp["id"] = x;
+                    name_temp["name"] = result[x].name;
+                    projectlist.push(name_temp);
+                }
+
+                projectlist.map((item,index) => {
+                    if(item.name === "guava"){
+                        guava_id = item.id;
+                    }
+                })
+
+                $.ajax({
+                    type : "GET",
+                    url : "/project/has/echarts?projectId=" + guava_id,
+                    success : function(result) {
+                        ProjectToEcharts("container", result, guava_id);
+                    }
+                })
             }
-        })
+        });
+
+        // ProjectToEcharts("container", result1, 7442);
+
+        // $.ajax({
+        //     type : "GET",
+        //     url : "/project/has/echarts?projectId=7442",
+        //     success : function(result) {
+        //         ProjectToEcharts("container", result, 7442);
+        //     }
+        // })
     }
 
     return {
