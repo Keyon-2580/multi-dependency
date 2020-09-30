@@ -23,5 +23,9 @@ public class PropertyConfig {
 	@Getter
 	@Value("${config.starter.module_clone}")
 	private boolean setModuleClone;
-	
+
+	@Getter
+	@Value("${config.starter.aggregation_clone}")
+	private boolean setAggregationClone;
+
 }

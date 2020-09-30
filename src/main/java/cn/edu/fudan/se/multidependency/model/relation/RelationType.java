@@ -56,7 +56,8 @@ public enum RelationType implements RelationshipType {
 
 	DEPENDS_ON(RelationType.str_DEPENDS_ON),
 
-	MODULE_CLONE(RelationType.str_MODULE_CLONE);
+	MODULE_CLONE(RelationType.str_MODULE_CLONE),
+	AGGREGATION_CLONE(RelationType.str_AGGREGATION_CLONE);
 
 	/**
 	 * 结构关系
@@ -118,6 +119,7 @@ public enum RelationType implements RelationshipType {
 	
 	public static final String str_DEPENDS_ON = "DEPENDS_ON";
 	public static final String str_MODULE_CLONE = "MODULE_CLONE";
+	public static final String str_AGGREGATION_CLONE = "AGGREGATION_CLONE";
 	
 	private String name;
 

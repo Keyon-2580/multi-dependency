@@ -5,7 +5,13 @@ import java.util.Collection;
 import java.util.List;
 
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
+import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
 import cn.edu.fudan.se.multidependency.repository.node.clone.CloneGroupRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.clone.AggregationCloneRepository;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
+import org.apache.catalina.Host;
+import org.neo4j.cypher.internal.v3_4.expressions.Add;
 import org.springframework.stereotype.Component;
 import org.springframework.context.annotation.Bean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +42,9 @@ public class BeanCreator {
 
 	@Autowired
 	private BasicCloneQueryService basicCloneQueryService;
+
+	@Autowired
+	private HotspotPackageDetector hotspotPackageDetector;
 
 	@Bean
 	public int setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository) {
@@ -140,7 +149,7 @@ public class BeanCreator {
 	@Bean("setModuleClone")
 	public List<ModuleClone> setModuleClone(PropertyConfig propertyConfig, ModuleCloneRepository moduleCloneRepository) {
 		if(propertyConfig.isSetModuleClone()) {
-			System.out.println("设置Module Clone信息...");
+			System.out.println("设置Module Clone基础信息...");
 			if(moduleCloneRepository.getNumberOfModuleClone() == 0) {
 				Collection<CloneValueForDoubleNodes<Package>> result = cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE));
 				for(CloneValueForDoubleNodes<Package> moduleClone : result) {
@@ -150,5 +159,26 @@ public class BeanCreator {
 			return moduleCloneRepository.getAllModuleClone();
 		}
 		return new ArrayList<>();
+	}
+
+	@Bean("setAggregationClone")
+	public List<AggregationClone> setAggregationClone(PropertyConfig propertyConfig, AggregationCloneRepository aggregationCloneRepository) {
+		if(propertyConfig.isSetAggregationClone()) {
+			System.out.println("设置Aggregation Clone聚合结果...");
+			if(aggregationCloneRepository.getNumberOfAggregationClone() == 0) {
+				Collection<HotspotPackage> hotspotPackages = hotspotPackageDetector.detectHotspotPackages();
+				AddChildrenPackages(-1, -1, hotspotPackages, aggregationCloneRepository);
+			}
+			return aggregationCloneRepository.getAllAggregationClone();
+		}
+		return new ArrayList<>();
+	}
+
+	public void AddChildrenPackages(long parent1Id, long parent2Id, Collection<HotspotPackage> hotspotPackages, AggregationCloneRepository aggregationCloneRepository) {
+		for(HotspotPackage hotspotPackage : hotspotPackages) {
+			Collection<HotspotPackage> childrenHotspotPackages = hotspotPackage.getChildrenHotspotPackages();
+			AddChildrenPackages(hotspotPackage.getPackage1().getId(), hotspotPackage.getPackage2().getId(), childrenHotspotPackages, aggregationCloneRepository);
+			aggregationCloneRepository.createAggregationClone(hotspotPackage.getPackage1().getId(), hotspotPackage.getPackage2().getId(), parent1Id, parent2Id, hotspotPackage.getRelationPackages().getChildren().size(), hotspotPackage.getAllNodes1(), hotspotPackage.getAllNodes2(), hotspotPackage.getRelationNodes1(), hotspotPackage.getRelationNodes2());
+		}
 	}
 }

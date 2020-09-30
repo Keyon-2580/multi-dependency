@@ -1,13 +1,13 @@
-var analysisAggregationPackage = function() {
-	$.ajax({
-		type: "get",
-		url: "/cloneaggregation/analysis?threshold=10&percentage=0.8",
-		success: function(result) {
-			console.log("克隆聚合结果数量：" + result);
-			alert("分析完毕！")
-		}
-	})
-}
+// var analysisAggregationPackage = function() {
+// 	$.ajax({
+// 		type: "get",
+// 		url: "/cloneaggregation/analysis?threshold=10&percentage=0.8",
+// 		success: function(result) {
+// 			console.log("克隆聚合结果数量：" + result);
+// 			alert("分析完毕！")
+// 		}
+// 	})
+// }
 var showAggregationResult = function() {
 	$("#packages_aggregation").html("");
 	$.ajax({
@@ -38,7 +38,7 @@ var showAggregationResult = function() {
 						html += duplicated.relationNodes2 + "/" + duplicated.allNodes2 + "=" + ((duplicated.relationNodes2 + 0.0) / duplicated.allNodes2).toFixed(2);
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
-						var len = duplicated.relationPackages.children.length;
+						var len = duplicated.clonePairs;
 						if(len > 0) {
 							html += "<a class='package' href='#package_files_clone' id2='" + duplicated.package2.id + "' id1='" + duplicated.package1.id + "'>" + len + "</a>";
 						}

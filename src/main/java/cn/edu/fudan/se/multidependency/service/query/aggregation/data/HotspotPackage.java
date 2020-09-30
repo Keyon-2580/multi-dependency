@@ -3,7 +3,6 @@ package cn.edu.fudan.se.multidependency.service.query.aggregation.data;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
-import cn.edu.fudan.se.multidependency.service.query.clone.data.SimilarPackage;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -32,6 +31,9 @@ public class HotspotPackage {
 	private Package package2;
 
 	@Getter
+	private int clonePairs;
+
+	@Getter
 	private int relationNodes1;
 
 	@Getter
@@ -50,12 +52,6 @@ public class HotspotPackage {
 	@Setter
 	private double value;
 	
-	private void swapPackage() {
-		Package pck = package1;
-		package1 = package2;
-		package2 = pck;
-	}
-	
 	public HotspotPackage(@NonNull RelationDataForDoubleNodes<Node, Relation> relationPackages) {
 		this.relationPackages = relationPackages;
 		this.childrenHotspotPackages = new ArrayList<>();
@@ -63,10 +59,8 @@ public class HotspotPackage {
 		this.childrenOtherPackages2 = new ArrayList<>();
 		this.package1 = (Package) relationPackages.getNode1();
 		this.package2 = (Package) relationPackages.getNode2();
-//		if(package1.getDirectoryPath().compareTo(package2.getDirectoryPath()) > 0) {
-//			swapPackage();
-//		}
 		this.id = relationPackages.getId();
+		this.clonePairs = relationPackages.getChildren().size();
 	}
 
 	public void addHotspotChild(HotspotPackage child) {
@@ -109,4 +103,7 @@ public class HotspotPackage {
 		return this.childrenOtherPackages2.contains(p);
 	}
 
+	public void setClonePairs(int clonePairs) {
+		this.clonePairs = clonePairs;
+	}
 }
