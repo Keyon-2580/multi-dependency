@@ -25,9 +25,9 @@ public class MultipleASFile implements MultipleAS {
 	
 	private boolean unstable;
 	
-	private boolean cyclicHierarchy;
+//	private boolean cyclicHierarchy;
 	
-	private boolean god;
+//	private boolean god;
 	
 	private boolean unused;
 
@@ -35,9 +35,9 @@ public class MultipleASFile implements MultipleAS {
 		return b ? "T" : "";
 	}
 	
-	public String godToString() {
-		return toString(this.god);
-	}
+//	public String godToString() {
+//		return toString(this.god);
+//	}
 	
 	public String cycleToString() {
 		return toString(this.cycle);
@@ -59,9 +59,9 @@ public class MultipleASFile implements MultipleAS {
 		return toString(this.similar);
 	}
 	
-	public String cyclicHierarchyToString() {
-		return toString(this.cyclicHierarchy);
-	}
+//	public String cyclicHierarchyToString() {
+//		return toString(this.cyclicHierarchy);
+//	}
 	
 	public String unusedToString() {
 		return toString(this.unused);
@@ -71,12 +71,12 @@ public class MultipleASFile implements MultipleAS {
 		if(smell.isCycle() && isCycle()) {
 			return true;
 		}
-		if(smell.isCyclicHierarchy() && isCyclicHierarchy()) {
-			return true;
-		}
-		if(smell.isGod() && isGod()) {
-			return true;
-		}
+//		if(smell.isCyclicHierarchy() && isCyclicHierarchy()) {
+//			return true;
+//		}
+//		if(smell.isGod() && isGod()) {
+//			return true;
+//		}
 		if(smell.isHublike() && isHublike()) {
 			return true;
 		}

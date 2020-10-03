@@ -76,9 +76,10 @@
 		//<![CDATA[
 		 $(document).ready(function() {
 			var projects = [[${projects}]];
-			var unstableFiles = [[${files}]];
-			var unstablePackages = [[${packages}]];
-			unstable(cytoscapeutil()).unstable(projects, unstableFiles, unstablePackages);	
+			var filesUsingInstability = [[${filesUsingInstability}]];
+			var filesUsingHistory = [[${filesUsingHistory}]];
+			var packages = [[${packages}]];
+			unstable(cytoscapeutil()).unstable(projects, filesUsingInstability, filesUsingHistory, packages);	
 		});
 		// ]]>
 	</script>

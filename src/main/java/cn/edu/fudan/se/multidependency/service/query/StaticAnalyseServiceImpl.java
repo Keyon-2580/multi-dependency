@@ -591,15 +591,8 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
-	public boolean isInDifferentModule(ProjectFile file1, ProjectFile file2) {
-		Package pck1 = containRelationService.findFileBelongToPackage(file1);
-		Package pck2 = containRelationService.findFileBelongToPackage(file2);
-		return !pck1.equals(pck2);
-	}
-
-	@Override
 	public boolean isDependsOn(ProjectFile file1, ProjectFile file2) {
-		return !dependsOnRepository.findDependsOnInFiles(file1.getId(), file2.getId()).isEmpty();
+		return dependsOnRepository.isFileDependsOnFile(file1.getId(), file2.getId());
 	}
 
 	@Override

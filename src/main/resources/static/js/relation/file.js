@@ -15,7 +15,7 @@ var rFile = function(fileId, cytoscapeutil) {
 				console.log(result);
 				var html = "<table class='table table-bordered'>";
 				html += "<tr>";
-				html += "<td width='20%'></td>";
+				html += "<td width='30%'></td>";
 				for(var i = 0; i < result.files.length; i++) {
 					html += "<td>" + i + ":" + "<a target='_blank' href='/relation/file/" + result.files[i].id + "'>";
 					html += result.files[i].name;
@@ -24,6 +24,7 @@ var rFile = function(fileId, cytoscapeutil) {
 				html += "</tr>";
 				for(var i = 0; i < result.commits.length; i++) {
 					html += "<tr>";
+//					html += "<td>" + (i + 1) + ":" + "<a target='_blank' href='/commit/" + result.commits[i].id + "'>" + result.commits[i].commitId + "(" + result.commits[i].merge + " " + result.commits[i].commitFilesSize + ") </a></td>";
 					html += "<td>" + (i + 1) + ":" + "<a target='_blank' href='/commit/" + result.commits[i].id + "'>" + result.commits[i].commitId + "(" + result.commits[i].commitFilesSize + ") </a></td>";
 					for(var j = 0; j < result.files.length; j++) {
 						if(result.update[i][j] == true) {
@@ -103,7 +104,7 @@ var rFile = function(fileId, cytoscapeutil) {
 				html += "<td width='12.5%'>Fan In</td>";
 				html += "<td width='12.5%'>Fan Out</td>";
 				html += "<td width='12.5%'>change times</td>";
-				html += "<td width='12.5%'>cochange commit times</td>";
+				html += "<td width='12.5%'>cochange times</td>";
 				html += "<td width='12.5%'>instability</td>";
 				html += "<td width='12.5%'>score</td>";
 				html += "</tr>";
@@ -114,7 +115,7 @@ var rFile = function(fileId, cytoscapeutil) {
 				html += "<td>" + result.fanOut + "</td>";
 				html += "<td>" + result.changeTimes + "</td>";
 				html += "<td>" + result.cochangeCommitTimes + "</td>";
-				html += "<td>" + result.instability + "</td>";
+				html += "<td>" + ((result.fanIn + result.fanOut == 0) ? -1 : ((result.fanOut) / (result.fanIn + result.fanOut)).toFixed(2)) + "</td>";
 				html += "<td>" + result.component.score + "</td>";
 				html += "</tr>";
 				html += "</table>";

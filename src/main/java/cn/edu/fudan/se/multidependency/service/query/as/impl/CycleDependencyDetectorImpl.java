@@ -10,10 +10,12 @@ import org.springframework.stereotype.Service;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.ar.Module;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.repository.as.ASRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.as.CyclicDependencyDetector;
+import cn.edu.fudan.se.multidependency.service.query.as.ModuleService;
 import cn.edu.fudan.se.multidependency.service.query.as.data.Cycle;
 import cn.edu.fudan.se.multidependency.service.query.as.data.CycleComponents;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
@@ -29,6 +31,9 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 	
 	@Autowired
 	private ContainRelationService containRelationService;	
+	
+	@Autowired
+	private ModuleService moduleService;
 	
 	private Collection<DependsOn> findCyclePackageRelationsBySCC(CycleComponents<Package> cycle) {
 		return asRepository.cyclePackagesBySCC(cycle.getPartition());
@@ -49,12 +54,16 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 		for(CycleComponents<Package> cycle : cycles) {
 			Cycle<Package> cyclePackage = new Cycle<Package>(cycle);
 			cyclePackage.addAll(findCyclePackageRelationsBySCC(cycle));
+			boolean flag = false;
 			for(Package pck : cycle.getComponents()) {
-				Project project = containRelationService.findPackageBelongToProject(pck);
-				Map<Integer, Cycle<Package>> temp = result.getOrDefault(project.getId(), new HashMap<>());
-				temp.put(cyclePackage.getPartition(), cyclePackage);
-				result.put(project.getId(), temp);
-				break;
+				cyclePackage.putComponentBelongToGroup(pck, pck);
+				if(!flag) {
+					Project project = containRelationService.findPackageBelongToProject(pck);
+					Map<Integer, Cycle<Package>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+					temp.put(cyclePackage.getPartition(), cyclePackage);
+					result.put(project.getId(), temp);
+					flag = true;
+				}
 			}
 		}
 		cache.cache(getClass(), key, result);
@@ -72,14 +81,40 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 		for(CycleComponents<ProjectFile> cycle : cycles) {
 			Cycle<ProjectFile> cycleFile = new Cycle<ProjectFile>(cycle);
 			cycleFile.addAll(findCycleFileRelationsBySCC(cycle));
+			boolean flag = false;
+			Project project = null;
+			boolean crossModule = false;
+			Module lastModule = null;
 			for(ProjectFile file : cycle.getComponents()) {
-				Project project = containRelationService.findFileBelongToProject(file);
+				Module fileBelongToModule = moduleService.findFileBelongToModule(file);
+				if(lastModule == null) {
+					lastModule = fileBelongToModule;
+				} else if(!lastModule.equals(fileBelongToModule)) {
+					crossModule = true;
+				}
+				cycleFile.putComponentBelongToGroup(file, fileBelongToModule);
+				if(!flag) {
+					project = containRelationService.findFileBelongToProject(file);
+					flag = true;
+				}
+			}
+			if(crossModule) {
 				Map<Integer, Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new HashMap<>());
 				temp.put(cycleFile.getPartition(), cycleFile);
 				result.put(project.getId(), temp);
-				break;
 			}
 		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, Map<Integer, Cycle<Module>>> cycleModules() {
+		String key = "cycleModules";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		Map<Long, Map<Integer, Cycle<Module>>> result = new HashMap<>();
 		cache.cache(getClass(), key, result);
 		return result;
 	}

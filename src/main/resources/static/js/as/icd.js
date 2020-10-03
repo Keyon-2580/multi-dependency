@@ -11,8 +11,8 @@ var icd = function(cytoscapeutil) {
 			var file = files[fileIndex];
 			console.log(file);
 			html += "<tr>";
-			html += "<td width='40%'>" + file.file1.path + "</td>";
-			html += "<td width='40%'>" + file.file2.path + "</td>";
+			html += "<td width='40%'><a href='/relation/file/" + file.file1.id + "' target='_blank'>" + file.file1.path + "</a></td>";
+			html += "<td width='40%'><a href='/relation/file/" + file.file2.id + "' target='_blank'>" + file.file2.path + "</a></td>";
 			html += "<td width='20%'>" + file.cochangeTimes + "</td>";
 			html += "</tr>";
 		}
@@ -36,7 +36,7 @@ var icd = function(cytoscapeutil) {
 			})
 		}
 		$("#icdMinCoChangeSave").click(function() {
-			var icdMinCoChange = $("#icdMinCoChange").val();
+			var icdMinCoChange = $("#icdMinCoChangeFile").val();
 			set(icdMinCoChange);
 		})
 	}

@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.service.query.history;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,6 +39,21 @@ public class IssueQueryServiceImpl implements IssueQueryService {
 	
 	@Autowired
 	private ContainRelationService containRelationService;
+
+	@Override
+	public Collection<Issue> queryIssues(Project project) {
+		String key = "queryIssuesProject_" + project.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<IssueFile> issueFiles = queryRelatedFilesOnAllIssuesGroupByProject().get(project.getId());
+		Set<Issue> issues = new HashSet<>();
+		for(IssueFile issueFile : issueFiles) {
+			issues.addAll(issueFile.getIssues());
+		}
+		cache.cache(getClass(), key, issues);
+		return issues;
+	}
 
 	@Override
 	public Issue queryIssue(long id) {

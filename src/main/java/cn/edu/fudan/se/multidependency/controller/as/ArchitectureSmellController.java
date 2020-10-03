@@ -84,14 +84,14 @@ public class ArchitectureSmellController {
 			public boolean isUnstable() {
 				return unstable;
 			}
-			@Override
+			/*@Override
 			public boolean isCyclicHierarchy() {
 				return hierarchy;
 			}
 			@Override
 			public boolean isGod() {
 				return godComponent;
-			}
+			}*/
 			@Override
 			public boolean isUnused() {
 				return unused;
@@ -134,14 +134,14 @@ public class ArchitectureSmellController {
 			public boolean isUnstable() {
 				return unstable;
 			}
-			@Override
+			/*@Override
 			public boolean isCyclicHierarchy() {
 				return hierarchy;
 			}
 			@Override
 			public boolean isGod() {
 				return godComponent;
-			}
+			}*/
 			@Override
 			public boolean isUnused() {
 				return unused;
@@ -181,14 +181,14 @@ public class ArchitectureSmellController {
 			public boolean isUnstable() {
 				return unstable;
 			}
-			@Override
+			/*@Override
 			public boolean isCyclicHierarchy() {
 				return hierarchy;
 			}
 			@Override
 			public boolean isGod() {
 				return godComponent;
-			}
+			}*/
 			@Override
 			public boolean isUnused() {
 				return unused;

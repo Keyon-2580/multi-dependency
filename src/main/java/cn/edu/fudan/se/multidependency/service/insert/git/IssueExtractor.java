@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -14,18 +15,33 @@ import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 public class IssueExtractor {
 
     private Collection<String> issueFilePathes;
+    
+    private Map<Integer, Issue> newIssues = new HashMap<>();
+    
+    private static final Map<String, Map<Integer, Issue>> sameIssuePath = new ConcurrentHashMap<>();
 
     public IssueExtractor(Collection<String> issueFilePathes) {
     	this.issueFilePathes = issueFilePathes;
     }
     
-    public Map<Integer, Issue> extract() throws Exception {
+    public synchronized Map<Integer, Issue> extract() throws Exception {
     	Map<Integer, Issue> result = new HashMap<>();
     	for(String issueFilePath : this.issueFilePathes) {
-    		result.putAll(extract(issueFilePath));
+    		if(sameIssuePath.containsKey(issueFilePath)) {
+    			result.putAll(sameIssuePath.get(issueFilePath));
+    		} else {
+    			Map<Integer, Issue> temp = extract(issueFilePath);
+    			result.putAll(temp);
+    			newIssues.putAll(temp);
+    			sameIssuePath.put(issueFilePath, temp);
+    		}
     	}
     	return result;
     }
+
+	public Map<Integer, Issue> newIssues() {
+		return newIssues;
+	}
 
     private Map<Integer, Issue> extract(String issueFilePath) throws Exception {
         Map<Integer,Issue> result = new HashMap<>();

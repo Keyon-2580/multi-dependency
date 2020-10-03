@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @NodeEntity
 @NoArgsConstructor
 @EqualsAndHashCode
-public class Package implements Node, Module {
+public class Package implements Node {
 
     @Id
     @GeneratedValue

@@ -32,7 +32,9 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
     @Query("match p= (f1:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->(f2:ProjectFile) where id(f1)={file1Id} and id(f2)={file2Id} return p")
     CoChange findCoChangesBetweenTwoFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
     
-    @Query("match (f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile) where id(f1) < id(f2) with f1,f2,count(c) as times where times >= {minCoChangeTimes} create p=(f1)-[:" + RelationType.str_CO_CHANGE 
+//    @Query("match (f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile) where id(f1) < id(f2) and (c.merge=false or c.merge is null) and c.usingForIssue=false with f1,f2,count(c) as times where times >= {minCoChangeTimes} create p=(f1)-[:" + RelationType.str_CO_CHANGE 
+//    		+ "{times:times}]->(f2) with p return count(p)")
+    @Query("match (f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile) where id(f1) < id(f2) and (c.merge=false or c.merge is null) with f1,f2,count(c) as times where times >= {minCoChangeTimes} create p=(f1)-[:" + RelationType.str_CO_CHANGE 
     		+ "{times:times}]->(f2) with p return count(p)")
     List<CoChange> createCoChanges(@Param("minCoChangeTimes") int minCoChangeTimes);
 

@@ -14,6 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.LogCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.ObjectId;
@@ -98,10 +99,13 @@ public class GitExtractor implements Closeable {
         return new ArrayList<>();
     }
 
-    public List<RevCommit> getARangeCommitsById(String from, String to) {
+    public List<RevCommit> getARangeCommitsById(String from, String to, boolean removeMerge) {
         try {
-            Iterable<RevCommit> commits = git.log().setRevFilter(RevFilter.NO_MERGES).addRange(repository.resolve(from),repository.resolve(to)).call();
-//            Iterable<RevCommit> commits = git.log().addRange(repository.resolve(from),repository.resolve(to)).call();
+        	LogCommand command = git.log();
+        	if(removeMerge) {
+        		command = command.setRevFilter(RevFilter.NO_MERGES);
+        	}
+            Iterable<RevCommit> commits = command.addRange(repository.resolve(from),repository.resolve(to)).call();
             return Lists.newArrayList(commits.iterator());
         }catch (IOException | GitAPIException e) {
             e.printStackTrace();
@@ -109,13 +113,14 @@ public class GitExtractor implements Closeable {
         return new ArrayList<>();
     }
 
-    public List<RevCommit> getARangeCommitsByTime(String since, String until) {
+    public List<RevCommit> getARangeCommitsByTime(String since, String until, boolean removeMerge) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constant.TIMESTAMP);
         try {
             Date sinceDate = simpleDateFormat.parse(since);
             Date untilDate = simpleDateFormat.parse(until);
             RevFilter between = CommitTimeRevFilter.between(sinceDate, untilDate);
-            Iterable<RevCommit> commits = git.log().setRevFilter(AndRevFilter.create(between, RevFilter.NO_MERGES)).call();
+            RevFilter filter = removeMerge ? AndRevFilter.create(between, RevFilter.NO_MERGES) : between;
+            Iterable<RevCommit> commits = git.log().setRevFilter(filter).call();
 //            Iterable<RevCommit> commits = git.log().setRevFilter(between).call();
             return Lists.newArrayList(commits.iterator());
         } catch (ParseException | GitAPIException e) {

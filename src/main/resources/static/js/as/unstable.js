@@ -1,11 +1,33 @@
 var unstable = function(cytoscapeutil) {
-	var _unstable = function(projects, files, packages) {
+	var _unstable = function(projects, filesUsingInstability, filesUsingHistory, packages) {
 		var html = "";
 
 		for(var projectIndex in projects) {
 			var project = projects[projectIndex];
 			html += "<h4>" + project.name + " (" + project.language + ")</h4>";
-			var unstableFiles = files[project.id];
+			var unstableFiles = filesUsingInstability[project.id];
+			console.log(unstableFiles);
+			html += "<h5>Instability</h5>";
+			html += "<table class='table table-bordered'>";
+			html += "<tr>";
+			html += "<th>File</th>";
+			html += "<th>Instability</th>";
+			html += "<th>All Outgoing Dependencies</th>";
+			html += "<th>Bad Outgoing Dependencies</th>";
+			html += "</tr>";
+			for(var fileIndex in unstableFiles) {
+				var file = unstableFiles[fileIndex];
+				console.log(file);
+				html += "<tr>";
+				html += "<td><a target='_blank' href='/relation/file/" + file.component.id + "'>" + file.component.path + "</a></td>";
+				html += "<td>" + file.instability.toFixed(2) + "</td>";
+				html += "<td>" + file.allDependencies + "</td>";
+				html += "<td>" + file.badDependencies + "</td>";
+				html += "</tr>";
+			}
+			html += "</table>";
+			unstableFiles = filesUsingHistory[project.id];
+			html += "<h5>History</h5>";
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
 			html += "<th>File</th>";
@@ -21,7 +43,7 @@ var unstable = function(cytoscapeutil) {
 				}
 				console.log(file);
 				html += "<tr>";
-				html += "<td width='50%'><a target='_blank' href='/relation/file/" + file.file.id + "'>" + file.file.path + "</a></td>";
+				html += "<td width='50%'><a target='_blank' href='/relation/file/" + file.component.id + "'>" + file.component.path + "</a></td>";
 				html += "<td width='20%'>" + file.fanIn + "</td>";
 				html += "<td width='10%'>" + file.cochangeFiles.length + "</td>";
 				html += "<td width='10%'>" + count + "</td>";
@@ -30,22 +52,24 @@ var unstable = function(cytoscapeutil) {
 			html += "</table>";
 			
 			var unstablePackages = packages[project.id];
+			html += "<h5>Unstable Packages</h5>";
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
 			html += "<th>Package</th>";
-			html += "<th>Bad Dependencies</th>";
-			html += "<th>Total Dependencies</th>";
+			html += "<th>Instability</th>";
+			html += "<th>All Outgoing Dependencies</th>";
+			html += "<th>Bad Outgoing Dependencies</th>";
 			html += "</tr>";
-			for(var packageIndex in unstablePackages) {
-				var pck = unstablePackages[packageIndex];
+			for(var pckIndex in unstablePackages) {
+				var pck = unstablePackages[pckIndex];
 				console.log(pck);
 				html += "<tr>";
-				html += "<td>" + pck.pck.directoryPath + "</td>";
-				html += "<td>" + pck.badDependsOns.length + "</td>";
-				html += "<td>" + pck.totalDependsOns.length + "</td>";
+				html += "<td><a target='_blank' href='/relation/file/" + pck.component.id + "'>" + pck.component.name + "</a></td>";
+				html += "<td>" + pck.instability.toFixed(2) + "</td>";
+				html += "<td>" + pck.allDependencies + "</td>";
+				html += "<td>" + pck.badDependencies + "</td>";
 				html += "</tr>";
 			}
-			
 			html += "</table>";
 		}
 		
@@ -53,10 +77,10 @@ var unstable = function(cytoscapeutil) {
 	}
 	
 	var _save = function() {
-		var setThreshold = function(projectId, fanInThreshold, cochangeTimesThreshold, cochangeFilesThreshold) {
+		var setHistoryThreshold = function(projectId, fanInThreshold, cochangeTimesThreshold, cochangeFilesThreshold) {
 			$.ajax({
 				type: "post",
-				url: "/as/unstable/threshold/" + projectId 
+				url: "/as/unstable/threshold/history/" + projectId 
 					+ "?fanInThreshold=" + fanInThreshold
 					+ "&cochangeTimesThreshold=" + cochangeTimesThreshold
 					+ "&cochangeFilesThreshold=" + cochangeFilesThreshold,
@@ -69,20 +93,44 @@ var unstable = function(cytoscapeutil) {
 				}
 			});
 		};
-		$("#unstableThresholdSave").click(function() {
+		var setInstabilityThreshold = function(projectId, unstableFileFanOutThreshold, unstableModuleFanOutThreshold, unstableRatioThreshold) {
+			$.ajax({
+				type: "post",
+				url: "/as/unstable/threshold/instability/" + projectId 
+					+ "?fileFanOutThreshold=" + unstableFileFanOutThreshold
+					+ "&moduleFanOutThreshold=" + unstableModuleFanOutThreshold
+					+ "&ratioThreshold=" + unstableRatioThreshold,
+				success: function(result) {
+					if(result == true) {
+						alert("修改成功");
+					} else {
+						alert("修改失败");
+					}
+				}
+			});
+		};
+		$("#unstableHistoryThresholdSave").click(function() {
 			var fanInThreshold = $("#unstableFanInThreshold").val();
 			var cochangeTimesThreshold = $("#unstableCoChangeTimesThreshold").val();
 			var cochangeFilesThreshold = $("#unstableCoChangeFilesThreshold").val();
 			var projectId = $("#unstableDependencyProjects").val();
-			setThreshold(projectId, fanInThreshold, cochangeTimesThreshold, cochangeFilesThreshold);
+			setHistoryThreshold(projectId, fanInThreshold, cochangeTimesThreshold, cochangeFilesThreshold);
 		});
+		
+		$("#unstableInstabilityThresholdSave").click(function() {
+			var unstableFileFanOutThreshold = $("#unstableFileFanOutThreshold").val();
+			var unstableModuleFanOutThreshold = $("#unstableModuleFanOutThreshold").val();
+			var unstableRatioThreshold = $("#unstableRatioThreshold").val();
+			var projectId = $("#unstableDependencyProjects").val();
+			setInstabilityThreshold(projectId, unstableFileFanOutThreshold, unstableModuleFanOutThreshold, unstableRatioThreshold);
+		})
 	}
 	
 	var _get = function() {
-		var getThreshold = function(projectId) {
+		var getHistoryThreshold = function(projectId) {
 			$.ajax({
 				type: "get",
-				url: "/as/unstable/threshold/" + projectId,
+				url: "/as/unstable/threshold/history/" + projectId,
 				success: function(result) {
 					console.log(result);
 					$("#unstableFanInThreshold").val(result[0]);
@@ -90,12 +138,26 @@ var unstable = function(cytoscapeutil) {
 					$("#unstableCoChangeFilesThreshold").val(result[2]);
 				}
 			})
-		}
+		};
+		var getInstabilityThreshold = function(projectId) {
+			$.ajax({
+				type: "get",
+				url: "/as/unstable/threshold/instability/" + projectId,
+				success: function(result) {
+					console.log(result);
+					$("#unstableFileFanOutThreshold").val(result[0]);
+					$("#unstableModuleFanOutThreshold").val(result[1]);
+					$("#unstableRatioThreshold").val(result[2]);
+				}
+			})
+		};
 		$("#unstableDependencyProjects").change(function() {
-			getThreshold($(this).val())
+			getHistoryThreshold($(this).val())
+			getInstabilityThreshold($(this).val());
 		})
 		if($("#unstableDependencyProjects").val() != null) {
-			getThreshold($("#unstableDependencyProjects").val());
+			getHistoryThreshold($("#unstableDependencyProjects").val());
+			getInstabilityThreshold($("#unstableDependencyProjects").val());
 		}
 		
 	}
@@ -105,8 +167,8 @@ var unstable = function(cytoscapeutil) {
 			_save();
 			_get();
 		},
-		unstable: function(projects, files, unstablePackages) {
-			_unstable(projects, files, unstablePackages);
+		unstable: function(projects, files, unstablePackages, packages) {
+			_unstable(projects, files, unstablePackages, packages);
 		}
 	}
 }
