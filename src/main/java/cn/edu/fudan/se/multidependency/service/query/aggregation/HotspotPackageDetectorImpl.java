@@ -48,7 +48,6 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 
 	@Autowired
 	private HasRelationService hasRelationService;
-	private Collection<HotspotPackage> rootHotspotPackages = new ArrayList<>();
 	private Map<String, Package> directoryPathToPackage = new ConcurrentHashMap<>();
 	private ThreadLocal<Integer> rowKey = new ThreadLocal<>();
 	private Package findParentPackage(Package pck) {
@@ -543,9 +542,6 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 
 	@Override
 	public Collection<HotspotPackage> detectHotspotPackagesByFileClone() {
-		if(!rootHotspotPackages.isEmpty()) {
-			return rootHotspotPackages;
-		}
 		Map<Long, Integer> allNodesOfPackage = new HashMap<>();
 		Map<String, Integer> cloneNodesOfHotspotPackages = new HashMap<>();
 		Map<String, Integer> cloneNodesOfClonePackages = new HashMap<>();
@@ -725,7 +721,6 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 				return -1;
 			}
 		});
-		rootHotspotPackages = result;
 		return result;
 	}
 
