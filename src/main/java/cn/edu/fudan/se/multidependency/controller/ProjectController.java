@@ -16,6 +16,7 @@ import java.util.concurrent.FutureTask;
 import javax.servlet.http.HttpServletRequest;
 
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
+import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
@@ -626,13 +627,13 @@ public class ProjectController {
 		result.add(nodeJSON3);
 
 		if(showType.equals("graph")) {
-			Collection<HotspotPackage> hotspotPackages = hotspotPackageDetector.detectHotspotPackages();
-			for (HotspotPackage hotspotPackage : hotspotPackages) {
+			List<AggregationClone> aggregationCloneList = hotspotPackageDetector.quickDetectHotspotPackages();
+			for (AggregationClone aggregationClone : aggregationCloneList) {
 				JSONObject link = new JSONObject();
-				link.put("source_id", "id_" + hotspotPackage.getPackage1().getId().toString());
-				link.put("target_id", "id_" + hotspotPackage.getPackage2().getId().toString());
-				link.put("source_projectBelong", "id_" + containRelationService.findPackageBelongToProject(hotspotPackage.getPackage1()).getId());
-				link.put("target_projectBelong", "id_" + containRelationService.findPackageBelongToProject(hotspotPackage.getPackage2()).getId());
+				link.put("source_id", "id_" + aggregationClone.getNode1().getId().toString());
+				link.put("target_id", "id_" + aggregationClone.getNode2().getId().toString());
+				link.put("source_projectBelong", "id_" + containRelationService.findPackageBelongToProject((Package)(aggregationClone.getNode1())).getId());
+				link.put("target_projectBelong", "id_" + containRelationService.findPackageBelongToProject((Package)(aggregationClone.getNode2())).getId());
 				links.add(link);
 			}
 			nodeJSON4.put("links",links);
@@ -736,18 +737,18 @@ public class ProjectController {
 		result.put("clone",clone);
 
 
-		Collection<HotspotPackage> hotspotPackages = hotspotPackageDetector.detectHotspotPackages();
-		for (HotspotPackage hotspotPackage : hotspotPackages) {
+		List<AggregationClone> aggregationCloneList = hotspotPackageDetector.quickDetectHotspotPackages();
+		for (AggregationClone aggregationClone : aggregationCloneList) {
 			JSONObject link = new JSONObject();
-			link.put("source", hotspotPackage.getPackage1().getId().toString());
-			link.put("target", hotspotPackage.getPackage2().getId().toString());
+			link.put("source", aggregationClone.getNode1().getId().toString());
+			link.put("target", aggregationClone.getNode1().getId().toString());
 			JSONObject lineStyle = new JSONObject();
 			lineStyle.put("color", "#f50000");
 			lineStyle.put("width", 3);
 			lineStyle.put("opacity", 1);
 			link.put("lineStyle", lineStyle);
-			link.put("source_projectBelong", containRelationService.findPackageBelongToProject(hotspotPackage.getPackage1()).getId());
-			link.put("target_projectBelong", containRelationService.findPackageBelongToProject(hotspotPackage.getPackage2()).getId());
+			link.put("source_projectBelong", containRelationService.findPackageBelongToProject((Package)(aggregationClone.getNode1())).getId());
+			link.put("target_projectBelong", containRelationService.findPackageBelongToProject((Package)(aggregationClone.getNode2())).getId());
 			links_package.add(link);
 		}
 		result.put("links_package",links_package);

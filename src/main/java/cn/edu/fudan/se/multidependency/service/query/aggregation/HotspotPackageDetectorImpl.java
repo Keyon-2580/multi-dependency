@@ -44,6 +44,9 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 	private GitAnalyseService gitAnalyseService;
 
 	@Autowired
+	private AggregationCloneRepository aggregationCloneRepository;
+
+	@Autowired
 	private HasRelationService hasRelationService;
 	private Collection<HotspotPackage> rootHotspotPackages = new ArrayList<>();
 	private Map<String, Package> directoryPathToPackage = new ConcurrentHashMap<>();
@@ -846,8 +849,9 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 			row.createCell(5).setCellValue("");
 		}
 	}
+
+	@Override
 	public List<AggregationClone> quickDetectHotspotPackages() {
-		AggregationCloneRepository aggregationCloneRepository = null;
 		return aggregationCloneRepository.findAggregationClone(-1, -1);
 	}
 }
