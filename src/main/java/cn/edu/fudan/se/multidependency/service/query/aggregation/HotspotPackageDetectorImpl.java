@@ -3,8 +3,10 @@ package cn.edu.fudan.se.multidependency.service.query.aggregation;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
+import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.repository.relation.clone.AggregationCloneRepository;
 import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.*;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
@@ -597,8 +599,9 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 			if(idToPackageClone.get(packageClone.getId()) != null) {
 				continue;
 			}
-			Package currentPackage1 = (Package) packageClone.getNode1();
-			Package currentPackage2 = (Package) packageClone.getNode2();
+			HotspotPackage hotspotPackage = new HotspotPackage(packageClone);
+			Package currentPackage1 = hotspotPackage.getPackage1();
+			Package currentPackage2 = hotspotPackage.getPackage2();
 			String currentPackages = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
 			Collection<String> cloneChildren = new ArrayList<>();
 			if(cloneChildrenPackagesOfPackages.containsKey(currentPackages)) {
@@ -618,8 +621,6 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 					cloneChildrenPackagesOfPackages.put(parentPackages, cloneChildren);
 				}
 			}
-			HotspotPackage hotspotPackage = new HotspotPackage(packageClone);
-			idToPackageClone.put(hotspotPackage.getId(), hotspotPackage);
 			if(isHotspotPackages(aggregator, allNodesOfPackage, cloneNodesOfClonePackages, cloneNodesOfHotspotPackages, clonePackages, hotspotPackages, currentPackage1, currentPackage2)) {
 				isHotspot.put(currentPackages, true);
 			}
@@ -627,6 +628,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 				isHotspot.put(currentPackages, false);
 			}
 			isChild.put(currentPackages, false);
+			idToPackageClone.put(hotspotPackage.getId(), hotspotPackage);
 			boolean flag = false;
 			while(parentPackage1 != null && parentPackage2 != null && !parentPackage1.getId().equals(parentPackage2.getId())) {
 				HotspotPackage parentHotspotPackage;
@@ -843,5 +845,9 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 			row.createCell(4).setCellValue("");
 			row.createCell(5).setCellValue("");
 		}
+	}
+	public List<AggregationClone> quickDetectHotspotPackages() {
+		AggregationCloneRepository aggregationCloneRepository = null;
+		return aggregationCloneRepository.findAggregationClone(-1, -1);
 	}
 }

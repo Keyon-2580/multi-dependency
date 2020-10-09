@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
 import cn.edu.fudan.se.multidependency.repository.node.clone.CloneGroupRepository;
@@ -37,6 +40,7 @@ import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueForDou
 @Component
 public class BeanCreator {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(BeanCreator.class);
 	@Autowired
 	private CloneValueService cloneValueService;
 
@@ -48,7 +52,7 @@ public class BeanCreator {
 
 	@Bean
 	public int setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository) {
-		System.out.println("设置commit update文件数...");
+		LOGGER.info("设置commit update文件数...");
 		return commitUpdateFileRepository.setCommitFilesSize();
 	}
     
@@ -58,13 +62,13 @@ public class BeanCreator {
 		if(propertyConfig.isCalculateCoChange()) {
 			coChanges = cochangeRepository.findCoChangesLimit();
 			if ( coChanges != null && coChanges.size() > 0){
-				System.out.println("已存在创建cochange关系" );
+				LOGGER.info("已存在cochange关系" );
 				return coChanges;
 			} else {
-				System.out.println("创建cochange关系...");
+				LOGGER.info("创建cochange关系...");
 				cochangeRepository.deleteAll();
 				coChanges.addAll( cochangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE));
-				System.out.println("创建module cochange关系");
+				LOGGER.info("创建module cochange关系");
 				coChanges.addAll(cochangeRepository.createCoChangesForModule());
 			}
 		}
@@ -74,7 +78,7 @@ public class BeanCreator {
 	@Bean("createDependsOn")
 	public List<DependsOn> createDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, ProjectFileRepository fileRepository) {
 		if(propertyConfig.isCalculateDependsOn()) {
-			System.out.println("创建Depends On关系...");
+			LOGGER.info("创建Depends On关系...");
 			dependsOnRepository.deleteAll();
 			
 			dependsOnRepository.createDependsOnWithCallInTypes();
@@ -116,10 +120,10 @@ public class BeanCreator {
 		if(propertyConfig.isCalculateCloneGroup()) {
 			List<CloneGroup> cloneGroups = cloneGroupRepository.findCoChangesLimit();
 			if ( cloneGroups != null && cloneGroups.size() > 0){
-				System.out.println("已存在Clone Group关系");
+				LOGGER.info("已存在Clone Group关系");
 				return cloneGroups;
 			} else {
-				System.out.println("创建Clone Group关系...");
+				LOGGER.info("创建Clone Group关系...");
 				cloneGroupRepository.deleteAll();
 				cloneGroupRepository.setJavaLanguageBySuffix();
 				cloneGroupRepository.setCppLanguageBySuffix();
@@ -139,7 +143,7 @@ public class BeanCreator {
 	
 	@Bean
 	public boolean setPackageLoSc(PackageRepository packageRepository) {
-		System.out.println("计算Package总代码行...");
+		LOGGER.info("计算Package总代码行...");
 		packageRepository.setEmptyPackageLocAndLines();
 		packageRepository.setPackageLoc();
 		packageRepository.setPackageLines();
@@ -149,14 +153,21 @@ public class BeanCreator {
 	@Bean("setModuleClone")
 	public List<ModuleClone> setModuleClone(PropertyConfig propertyConfig, ModuleCloneRepository moduleCloneRepository) {
 		if(propertyConfig.isSetModuleClone()) {
-			System.out.println("设置Module Clone基础信息...");
-			if(moduleCloneRepository.getNumberOfModuleClone() == 0) {
-				Collection<CloneValueForDoubleNodes<Package>> result = cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE));
-				for(CloneValueForDoubleNodes<Package> moduleClone : result) {
-					moduleCloneRepository.createModuleClone(moduleClone.getNode1().getId(), moduleClone.getNode2().getId(), moduleClone.getChildren().size(), moduleClone.getAllNodesInNode1().size(), moduleClone.getAllNodesInNode2().size(), moduleClone.getNodesInNode1().size(), moduleClone.getNodesInNode2().size());
-				}
+			List<ModuleClone> moduleClones = moduleCloneRepository.getAllModuleClone();
+			if(moduleClones != null &&moduleClones.size() > 0) {
+				LOGGER.info("已存在Module Clone基础信息...");
 			}
-			return moduleCloneRepository.getAllModuleClone();
+			else {
+				LOGGER.info("设置Module Clone基础信息...");
+				if(moduleCloneRepository.getNumberOfModuleClone() == 0) {
+					Collection<CloneValueForDoubleNodes<Package>> result = cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE));
+					for(CloneValueForDoubleNodes<Package> moduleClone : result) {
+						moduleCloneRepository.createModuleClone(moduleClone.getNode1().getId(), moduleClone.getNode2().getId(), moduleClone.getChildren().size(), moduleClone.getAllNodesInNode1().size(), moduleClone.getAllNodesInNode2().size(), moduleClone.getNodesInNode1().size(), moduleClone.getNodesInNode2().size());
+					}
+				}
+				moduleClones = moduleCloneRepository.getAllModuleClone();
+			}
+			return moduleClones;
 		}
 		return new ArrayList<>();
 	}
@@ -164,12 +175,19 @@ public class BeanCreator {
 	@Bean("setAggregationClone")
 	public List<AggregationClone> setAggregationClone(PropertyConfig propertyConfig, AggregationCloneRepository aggregationCloneRepository) {
 		if(propertyConfig.isSetAggregationClone()) {
-			System.out.println("设置Aggregation Clone聚合结果...");
-			if(aggregationCloneRepository.getNumberOfAggregationClone() == 0) {
-				Collection<HotspotPackage> hotspotPackages = hotspotPackageDetector.detectHotspotPackages();
-				AddChildrenPackages(-1, -1, hotspotPackages, aggregationCloneRepository);
+			List<AggregationClone> aggregationClone = aggregationCloneRepository.getAllAggregationClone();
+			if(aggregationClone != null && aggregationClone.size() > 0) {
+				LOGGER.info("已存在Aggregation Clone聚合结果...");
 			}
-			return aggregationCloneRepository.getAllAggregationClone();
+			else {
+				LOGGER.info("设置Aggregation Clone聚合结果...");
+				if(aggregationCloneRepository.getNumberOfAggregationClone() == 0) {
+					Collection<HotspotPackage> hotspotPackages = hotspotPackageDetector.detectHotspotPackages();
+					AddChildrenPackages(-1, -1, hotspotPackages, aggregationCloneRepository);
+				}
+				aggregationClone = aggregationCloneRepository.getAllAggregationClone();
+			}
+			return aggregationClone;
 		}
 		return new ArrayList<>();
 	}
