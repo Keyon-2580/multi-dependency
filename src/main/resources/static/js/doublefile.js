@@ -36,12 +36,12 @@ var doublefile = function() {
                     + "<tr><td><a class='cochangeTimes' target='_blank' href='/git/cochange/commits?cochangeId=" + cochangeId
                     + "'>" + cochange + "</a></td><td><a target='_blank' href='/clone/compare?id1=" + fileId1 + "&id2=" + fileId2 +"'>" + value + "</td></tr>";
                 html += "</table>";
-                console.log(html)
+                // console.log(html)
 
                 $("#file_table").html(html);
 
                 var data1 = result[fileId1];
-                console.log()
+                // console.log()
                 showtree("tree_file1", data1);
                 var data2 = result[fileId2];
                 showtree("tree_file2", data2);

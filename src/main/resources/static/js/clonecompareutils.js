@@ -26,33 +26,28 @@ var doublePackagesCloneWithCoChange = function(pck1Id, pck2Id, index) {
         url: "/clone/package/double/cochange?package1=" + pck1Id + "&package2=" + pck2Id,
         success: function(result) {
             console.log("success");
-            var html = index + "&nbsp;&nbsp;" + result.children.length;
-            html += "<table class='table table-bordered'>";
-            html += "<tr>";
-            html += "<th>包路径";
-            html += "</th>";
-            html += "<th>包内文件数";
-            html += "</th>";
-            html += "<th>克隆文件数";
-            html += "</th>";
-            html += "</tr>";
-            html += "<tr>";
-            html += "<td>" + result.pck1.directoryPath;
-            html += "</td>";
-            html += "<td>" + result.allFiles1.length;
-            html += "</td>";
-            html += "<td>" + result.cloneFiles1.length;
-            html += "</td>";
-            html += "</tr>";
-            html += "<tr>";
-            html += "<td>" + result.pck2.directoryPath;
-            html += "</td>";
-            html += "<td>" + result.allFiles2.length;
-            html += "</td>";
-            html += "<td>" + result.cloneFiles2.length;
-            html += "</td>";
-            html += "</tr>";
-            html += "</table>";
+
+            $.ajax({
+                type: "get",
+                url: "/clone/package/double/filetree?package1=" + pck1Id + "&package2=" + pck2Id,
+                success: function (result) {
+                    var html_tree = "";
+                    html_tree += "    <div class = \"div_file1\">\n"
+                        + "        <ul id=\"tree_file1\" class=\"ztree\"></ul>\n"
+                        + "    </div>\n"
+                        + "    <div class=\"div_file2\">\n"
+                        + "        <ul id=\"tree_file2\" class=\"ztree\"></ul>\n"
+                        + "    </div>";
+
+                    $("#package_files_tree").html(html_tree);
+                    var data1 = result[pck1Id];
+                    showtree("tree_file1", data1);
+                    var data2 = result[pck2Id];
+                    showtree("tree_file2", data2);
+                }
+            });
+            var html = "";
+
             html += "<table class='table table-bordered'>"
                 + "<tr><th>file1</th><th>file2</th><th>type</th><th>value</th><th>cochange</th></tr>";
             var children = result.children;
