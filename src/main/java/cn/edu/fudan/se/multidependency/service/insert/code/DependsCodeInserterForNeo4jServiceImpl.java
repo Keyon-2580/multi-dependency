@@ -88,7 +88,130 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 		});
 		
 	}
-	
+
+	protected void addCommonParentEmptyPackages() {
+		Map<String, Package> emptyPackages = new HashMap<>();
+		Map<String, Map<String, Package>> childPackages = new HashMap<>();
+		this.getNodes().findPackagesInProject(currentProject).forEach((path, node) -> {
+			Package currentPackage = (Package) node;
+			String parentDirectoryPath = currentPackage.lastPackageDirectoryPath();
+			Package parentPackage = this.getNodes().findPackageByDirectoryPath(parentDirectoryPath, currentProject);
+
+			Map<String, Package> leafChildList = childPackages.getOrDefault(currentPackage.getDirectoryPath(), new HashMap<>());
+			leafChildList.put(currentPackage.getDirectoryPath(), currentPackage);
+			childPackages.put(currentPackage.getDirectoryPath(), leafChildList);
+
+			if(parentPackage != null){
+				Map<String, Package> childList = childPackages.getOrDefault(parentPackage.getDirectoryPath(), new HashMap<>());
+				childList.put(currentPackage.getDirectoryPath(), currentPackage);
+				childPackages.put(parentPackage.getDirectoryPath(), childList);
+			}
+			while(parentPackage == null) {
+				if(parentDirectoryPath.equals(currentProject.getPath() + "/")) {
+					break;
+				}
+				if(emptyPackages.get(parentDirectoryPath) != null ) {
+					parentPackage = emptyPackages.get(parentDirectoryPath);
+					Map<String, Package> childList = childPackages.getOrDefault(parentPackage.getDirectoryPath(), new HashMap<>());
+					childList.put(currentPackage.getDirectoryPath(), currentPackage);
+					childPackages.put(parentPackage.getDirectoryPath(), childList);
+					break;
+				}
+
+				parentPackage = new Package();
+				parentPackage.setEntityId(generateEntityId());
+//				parentPackage.setEntityId(this.entityRepo.generateId().longValue());
+				parentPackage.setDirectoryPath(parentDirectoryPath);
+				parentPackage.setLines(0);
+				parentPackage.setLoc(0);
+				if(!currentPackage.getName().contains("/") && currentPackage.getName().contains(".")) {
+					parentPackage.setName(currentPackage.getName().substring(0, currentPackage.getName().lastIndexOf(".")));
+				} else {
+					parentPackage.setName(parentDirectoryPath);
+				}
+				emptyPackages.put(parentDirectoryPath, parentPackage);
+
+				Map<String, Package>  childList = childPackages.getOrDefault(parentPackage.getDirectoryPath(), new HashMap<>());
+				childList.put(currentPackage.getDirectoryPath(), currentPackage);
+				childPackages.put(parentPackage.getDirectoryPath(), childList);
+
+				currentPackage = parentPackage;
+				parentDirectoryPath = parentPackage.lastPackageDirectoryPath();
+				parentPackage = this.getNodes().findPackageByDirectoryPath(parentDirectoryPath, currentProject);
+			}
+		});
+
+		for(Map.Entry<String, Map<String, Package>> entry : childPackages.entrySet()){
+			String currentDirectoryPath = entry.getKey();
+			Map<String, Package> childPck = entry.getValue();
+
+			Package emptyPck = emptyPackages.get(currentDirectoryPath);
+			if(emptyPck !=  null && childPck.size() > 1){
+				this.addNode(emptyPck, currentProject);
+				this.addRelation(new Contain(currentProject, emptyPck));
+			}
+
+			Package currentPck = childPck.get(currentDirectoryPath);
+			if(currentPck != null || childPck.size() > 1){
+				if (currentPck == null){
+					currentPck = emptyPackages.get(currentDirectoryPath);
+				}
+				if (currentPck == null){
+					LOGGER.error("Empty Package Finding Error.");
+					continue;
+				}
+
+				String parentDirectoryPath = currentPck.lastPackageDirectoryPath();
+				if(parentDirectoryPath.equals(currentProject.getPath() + "/")) {
+					continue;
+				}
+
+				Map<String, Package> parentChild = childPackages.get(parentDirectoryPath);
+				if(parentChild == null){
+					LOGGER.error("Empty Package Finding Error: " + currentPck.getDirectoryPath() + " -- " + parentDirectoryPath);
+					continue;
+				}
+
+				Package parentPck = parentChild.get(parentDirectoryPath);
+				while (parentPck == null){
+					if(parentDirectoryPath.equals(currentProject.getPath() + "/")) {
+						break;
+					}
+					Map<String, Package> child = childPackages.get(parentDirectoryPath);
+					if(child == null){
+						LOGGER.error("Empty Package Finding Error: " + currentPck.getDirectoryPath() + " -- " + parentDirectoryPath);
+						continue;
+					}
+					Package pck = emptyPackages.get(parentDirectoryPath);
+					if(child != null && child.size() > 1 && pck != null){
+						addRelation(new Has(pck, currentPck));
+						break;
+					}
+					if(pck != null){
+						parentDirectoryPath = pck.lastPackageDirectoryPath();
+						if(parentDirectoryPath.equals(currentProject.getPath() + "/")) {
+							break;
+						}
+						parentChild = childPackages.get(parentDirectoryPath);
+						if(parentChild == null){
+							LOGGER.error("Empty Package Finding Error: " + currentPck.getDirectoryPath() + " -- " + parentDirectoryPath);
+							break;
+						}
+						parentPck = parentChild.get(parentDirectoryPath);
+
+					}else {
+						System.out.println("Empty Package Finding Error, too.");
+						break;
+					}
+				}
+
+				if (parentPck != null){
+					addRelation(new Has(parentPck, currentPck));
+				}
+			}
+		}
+	}
+
 	protected void extractRelationsFromTypes() {
 		Map<Long, ? extends Node> types = this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject);
 		types.forEach((id, node) -> {

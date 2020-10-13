@@ -163,8 +163,9 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 			} else {
 			}
 		});
-		
+
 		addEmptyPackages();
+//		addCommonParentEmptyPackages();
 		
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Namespace, currentProject).forEach((entityId, node) -> {
 			Namespace namespace = (Namespace) node;

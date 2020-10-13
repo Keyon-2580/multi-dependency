@@ -142,8 +142,9 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 				process((TypeEntity) entity);
 			}
 		});
-		
+
 		addEmptyPackages();
+//		addCommonParentEmptyPackages();
 		
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject).forEach((entityId, node) -> {
 			Type type = (Type) node;
@@ -317,7 +318,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 					}
 				} else {
 					// MultiDeclareEntities
-					System.out.println("extractRelationsFromFiles() " + fileEntity + " " + entity.getClass() + " " + entity.toString());
+					//System.out.println("extractRelationsFromFiles() " + fileEntity + " " + entity.getClass() + " " + entity.toString());
 				}
 			});
 		});
