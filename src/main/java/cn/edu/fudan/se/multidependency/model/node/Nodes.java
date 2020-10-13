@@ -244,6 +244,46 @@ public class Nodes implements Serializable {
         }
     }
 
+    /**
+     * 尚需测试
+     * @TODO
+     * @param node
+     * @param inProject
+     */
+    public synchronized void deleteNode(Node node, Project inProject) {
+        clearCache();
+
+        allNodes.remove(node);
+        if (node instanceof Project) {
+            projects.remove((Project) node);
+        }
+        if(node instanceof Package) {
+            Map<String, Package> directoryPathToPackage = directoryPathToPackageInProject.getOrDefault(inProject, new ConcurrentHashMap<>());
+            if(directoryPathToPackage.containsKey(((Package) node).getDirectoryPath())){
+                directoryPathToPackage.remove(((Package) node).getDirectoryPath(), (Package) node);
+                this.directoryPathToPackageInProject.put(inProject, directoryPathToPackage);
+            }
+        }
+        if (node instanceof ProjectFile ) {
+            this.filePathToFile.remove(((ProjectFile) node).getPath(), (ProjectFile) node);
+        }
+        List<Node> nodes = nodeTypeToNodes.getOrDefault(node.getNodeType(), new ArrayList<>());
+        if (nodes.contains(node)){
+            nodes.remove(node);
+            nodeTypeToNodes.put(node.getNodeType(), nodes);
+        }
+
+        if (inProject != null && projects.contains(inProject)) {
+            Map<NodeLabelType, Map<Long, Node>> projectHasNodes = projectToNodes.getOrDefault(inProject, new ConcurrentHashMap<>());
+            Map<Long, Node> entityIdToNode = projectHasNodes.getOrDefault(node.getNodeType(), new ConcurrentHashMap<>());
+            if(entityIdToNode.containsKey(node.getEntityId())){
+                entityIdToNode.remove(node.getEntityId(), node);
+                projectHasNodes.put(node.getNodeType(), entityIdToNode);
+                projectToNodes.put(inProject, projectHasNodes);
+            }
+        }
+    }
+
     private Map<Library, Map<String, LibraryAPI>> librariesWithAPI = new ConcurrentHashMap<>();
 
     public synchronized void addLibraryAPINode(LibraryAPI api, Library belongToLibrary) {

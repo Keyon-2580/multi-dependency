@@ -90,10 +90,46 @@ public class Relations implements Serializable {
 
     }
 
+    /**
+     * 尚需测试
+     * @TODO
+     * @param relation
+     */
+    public synchronized void deleteRelation(Relation relation) {
+
+        if (relation instanceof DynamicCallFunctionByTestCase) {
+            DynamicCallFunctionByTestCase call = (DynamicCallFunctionByTestCase) relation;
+            if (call.getTraceId() == null) {
+                return;
+            }
+            List<DynamicCallFunctionByTestCase> calls = traceIdToDynamicCallFunctions.getOrDefault(call.getTraceId(), new CopyOnWriteArrayList<>());
+            if(calls.contains(relation)){
+                calls.remove(relation);
+                traceIdToDynamicCallFunctions.put(call.getTraceId(), calls);
+            }
+
+        }
+
+        if (relation instanceof RelationWithTimes) {
+            return;
+        } else {
+            deleteRelationDirectly(relation);
+        }
+
+    }
+
     private void addRelationDirectly(Relation relation) {
         List<Relation> relations = allRelations.getOrDefault(relation.getRelationType(), new CopyOnWriteArrayList<>());
         relations.add(relation);
         allRelations.put(relation.getRelationType(), relations);
+    }
+
+    private void deleteRelationDirectly(Relation relation) {
+        List<Relation> relations = allRelations.getOrDefault(relation.getRelationType(), new CopyOnWriteArrayList<>());
+        if(relations.contains(relation)){
+            relations.remove(relation);
+            allRelations.put(relation.getRelationType(), relations);
+        }
     }
 
     public List<DynamicCallFunctionByTestCase> findDynamicCallFunctionsByTraceId(String traceId) {
