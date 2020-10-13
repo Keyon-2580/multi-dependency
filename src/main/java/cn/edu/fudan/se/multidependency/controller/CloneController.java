@@ -197,8 +197,8 @@ public class CloneController {
 
 			JSONArray cloneFiles1 = setCloneAndNoneCloneFiles(pckClone.getCloneFiles1());
 			JSONArray cloneFiles2 = setCloneAndNoneCloneFiles(pckClone.getCloneFiles2());
-			JSONArray noneCloneFiles1 = setCloneAndNoneCloneFiles(pckClone.getCloneFiles1());
-			JSONArray noneCloneFiles2 = setCloneAndNoneCloneFiles(pckClone.getCloneFiles2());
+			JSONArray noneCloneFiles1 = setCloneAndNoneCloneFiles(pckClone.getNoneCloneFiles1());
+			JSONArray noneCloneFiles2 = setCloneAndNoneCloneFiles(pckClone.getNoneCloneFiles2());
 
 			JSONObject clone1 = new JSONObject();
 			JSONObject noneClone1 = new JSONObject();
@@ -210,18 +210,18 @@ public class CloneController {
 			JSONArray packageContain1 = new JSONArray();
 			JSONArray packageContain2 = new JSONArray();
 
-			clone1.put("name", "cloneFiles");
-			clone1.put("open", false);
+			clone1.put("name", "cloneFiles(" +  pckClone.getCloneFiles1().size() + ")");
+			clone1.put("open", true);
 			clone1.put("children", cloneFiles1);
-			clone2.put("name", "cloneFiles");
-			clone2.put("open", false);
+			clone2.put("name", "cloneFiles(" +  pckClone.getCloneFiles2().size() + ")");
+			clone2.put("open", true);
 			clone2.put("children", cloneFiles2);
 
-			noneClone1.put("name", "noneCloneFiles");
-			noneClone1.put("open", false);
+			noneClone1.put("name", "noneCloneFiles(" +  pckClone.getNoneCloneFiles1().size() + ")");
+			noneClone1.put("open", true);
 			noneClone1.put("children", noneCloneFiles1);
-			noneClone2.put("name", "noneCloneFiles");
-			noneClone2.put("open", false);
+			noneClone2.put("name", "noneCloneFiles(" +  pckClone.getNoneCloneFiles2().size() + ")");
+			noneClone2.put("open", true);
 			noneClone2.put("children", noneCloneFiles2);
 
 			packageContain1.add(clone1);
@@ -229,11 +229,13 @@ public class CloneController {
 			packageContain2.add(clone2);
 			packageContain2.add(noneClone2);
 
-			package1.put("name",pck1.getDirectoryPath());
-			package1.put("open", false);
+			int size1 = pckClone.getCloneFiles1().size() + pckClone.getNoneCloneFiles1().size();
+			int size2 = pckClone.getCloneFiles2().size() + pckClone.getNoneCloneFiles2().size();
+			package1.put("name",pck1.getDirectoryPath() + "(" + size1 + ")");
+			package1.put("open", true);
 			package1.put("children",packageContain1);
-			package2.put("name",pck2.getDirectoryPath());
-			package2.put("open", false);
+			package2.put("name",pck2.getDirectoryPath() + "(" + size2 + ")");
+			package2.put("open", true);
 			package2.put("children",packageContain2);
 
 			JSONArray result1 = new JSONArray();
