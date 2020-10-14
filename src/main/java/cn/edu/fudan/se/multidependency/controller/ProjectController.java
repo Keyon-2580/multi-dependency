@@ -627,7 +627,7 @@ public class ProjectController {
 		result.add(nodeJSON3);
 
 		if(showType.equals("graph")) {
-			List<AggregationClone> aggregationCloneList = hotspotPackageDetector.quickDetectHotspotPackages();
+			List<AggregationClone> aggregationCloneList = hotspotPackageDetector.quickDetectHotspotPackages(-1, -1);
 			for (AggregationClone aggregationClone : aggregationCloneList) {
 				JSONObject link = new JSONObject();
 				link.put("source_id", "id_" + aggregationClone.getNode1().getId().toString());
@@ -737,7 +737,7 @@ public class ProjectController {
 		result.put("clone",clone);
 
 
-		List<AggregationClone> aggregationCloneList = hotspotPackageDetector.quickDetectHotspotPackages();
+		List<AggregationClone> aggregationCloneList = hotspotPackageDetector.quickDetectHotspotPackages(-1, -1);
 		for (AggregationClone aggregationClone : aggregationCloneList) {
 			JSONObject link = new JSONObject();
 			link.put("source", aggregationClone.getNode1().getId().toString());
