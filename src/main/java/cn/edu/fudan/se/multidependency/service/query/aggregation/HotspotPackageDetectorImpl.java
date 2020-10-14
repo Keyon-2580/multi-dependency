@@ -846,7 +846,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 	}
 
 	@Override
-	public List<AggregationClone> quickDetectHotspotPackages() {
-		return aggregationCloneRepository.findAggregationClone(-1, -1);
+	public List<AggregationClone> quickDetectHotspotPackages(long parent1Id, long parent2Id) {
+		return aggregationCloneRepository.findAggregationClone(parent1Id, parent2Id);
 	}
 }
