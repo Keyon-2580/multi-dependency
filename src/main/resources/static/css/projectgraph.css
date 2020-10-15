@@ -41,3 +41,8 @@ line {
     border-radius: 3px;
     cursor: pointer;
 }
+
+
+#projectToGraph {
+    border:2px solid red;
+}

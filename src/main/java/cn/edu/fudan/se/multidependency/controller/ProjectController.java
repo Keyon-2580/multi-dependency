@@ -653,31 +653,46 @@ public class ProjectController {
 			List<ProjectFile> fileList = pckstru.getChildrenFiles();
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("name",pckstru.getPck().getName());
+//			jsonObject.put("long_name",pckstru.getPck().getDirectoryPath());
+			jsonObject.put("size",fileList.size());
 			jsonObject.put("id","id_" + pckstru.getPck().getId().toString());
-			JSONArray jsonArray = new JSONArray();
+			float cloneFilesInAllFiles = 0;
 			if(fileList.size() > 0){
 				for(ProjectFile profile : fileList){
-					JSONObject jsonObject2 = new JSONObject();
-					jsonObject2.put("size",1000);
-					jsonObject2.put("long_name",profile.getPath());
 					if(clonefiles.contains(profile)){
-						jsonObject2.put("clone",true);
-					}else{
-						jsonObject2.put("clone",false);
+						cloneFilesInAllFiles += 1;
 					}
-					jsonObject2.put("name",profile.getName());
-					jsonObject2.put("id","id_" + profile.getId().toString());
-					jsonArray.add(jsonObject2);
 				}
 			}
+			if(fileList.size() > 0){
+				jsonObject.put("clone_ratio",cloneFilesInAllFiles / (float)(fileList.size()));
+			}else{
+				jsonObject.put("clone_ratio", 0);
+			}
+//			JSONArray jsonArray = new JSONArray();
+//			if(fileList.size() > 0){
+//				for(ProjectFile profile : fileList){
+//					JSONObject jsonObject2 = new JSONObject();
+//					jsonObject2.put("size",1000);
+//					jsonObject2.put("long_name",profile.getPath());
+//					if(clonefiles.contains(profile)){
+//						jsonObject2.put("clone",true);
+//					}else{
+//						jsonObject2.put("clone",false);
+//					}
+//					jsonObject2.put("name",profile.getName());
+//					jsonObject2.put("id","id_" + profile.getId().toString());
+//					jsonArray.add(jsonObject2);
+//				}
+//			}
 
-			if(jsonArray.size() > 0){
-				if(showType.equals("graph")){
-					jsonObject.put("children",jsonArray);
-				}else{
-					jsonObject.put("collapse_children",jsonArray);
-				}
-			}
+//			if(jsonArray.size() > 0){
+//				if(showType.equals("graph")){
+//					jsonObject.put("children",jsonArray);
+//				}else{
+//					jsonObject.put("collapse_children",jsonArray);
+//				}
+//			}
 
 			if(pckList.size()>0){//如果该属性还有子属性,继续做查询,直到该属性没有孩子,也就是最后一个节点
 				jsonObject.put("children", getHasJson(clonefiles,pckList, showType));
