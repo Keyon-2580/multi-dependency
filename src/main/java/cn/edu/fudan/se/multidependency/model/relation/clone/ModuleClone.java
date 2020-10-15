@@ -52,6 +52,11 @@ public class ModuleClone implements Relation {
 	 */
 	private String cloneType;
 
+	/**
+	 * 克隆包间clone文件的co-change数量
+	 */
+	private int moduleCloneCochangeTimes = 0;
+
 	@Override
 	public Node getStartNode() {
 		return node1;

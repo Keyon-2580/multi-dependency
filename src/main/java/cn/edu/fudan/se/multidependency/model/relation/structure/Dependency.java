@@ -36,7 +36,7 @@ public class Dependency implements RelationWithTimes, StructureRelation {
 		this.startCodeNode = startCodeNode;
 		this.endCodeNode = endCodeNode;
 		this.times = 1;
-		dependencyTypes = "";
+		this.dependencyTypes = "";
 	}
 
 	public Dependency(CodeNode startCodeNode, CodeNode endCodeNode, String dependencyTypes) {

@@ -25,4 +25,13 @@ public interface ModuleCloneRepository extends Neo4jRepository<ModuleClone, Long
 
     @Query("match p= ()-[r:" + RelationType.str_MODULE_CLONE + "]->() return p")
     List<ModuleClone> getAllModuleClone();
+
+    @Query("match p = (p1:Package) - [:" + RelationType.str_MODULE_CLONE + "] -> (p2:Package), " +
+            "(p1) -[:CONTAIN] -> (f1:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]- (c:Commit) - [:" + RelationType.str_COMMIT_UPDATE_FILE + "]-> (f2:ProjectFile) <- [:CONTAIN] - (p2) \n" +
+            "where size( (f1) -[:CLONE] - (f2) ) > 0 " +
+            "with p, count(distinct c) as moduleCloneCoChangeTimes " +
+            "where moduleCloneCoChangeTimes >= {minCoChangeTimes} " +
+            "foreach (r in relationships(p)  |  set r.moduleCloneCochangeTimes = moduleCloneCoChangeTimes ) " +
+            "with p return p")
+    List<ModuleClone> setModuleCloneCochangeTimes(@Param("minCoChangeTimes") int minCoChangeTimes);
 }

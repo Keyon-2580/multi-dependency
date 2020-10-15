@@ -165,6 +165,8 @@ public class BeanCreator {
 						moduleCloneRepository.createModuleClone(moduleClone.getNode1().getId(), moduleClone.getNode2().getId(), moduleClone.getChildren().size(), moduleClone.getAllNodesInNode1().size(), moduleClone.getAllNodesInNode2().size(), moduleClone.getNodesInNode1().size(), moduleClone.getNodesInNode2().size());
 					}
 				}
+				LOGGER.info("设置Module Clone基础信息(co-change)...");
+				moduleCloneRepository.setModuleCloneCochangeTimes(0);
 				moduleClones = moduleCloneRepository.getAllModuleClone();
 			}
 			return moduleClones;

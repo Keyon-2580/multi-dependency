@@ -41,9 +41,9 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
 
     @Query("match (p1:Package) -[:CONTAIN] -> (f1:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]- (c:Commit) - [:" + RelationType.str_COMMIT_UPDATE_FILE + "]-> (f2:ProjectFile) <- [:CONTAIN] - (p2:Package)" +
             "where id(p1) < id(p2)  " +
-            "with p1, p2, count(distinct c) as moduleCoChangeTimes" +
-            "where moduleCoChangeTimes >= {minCoChangeTimes}" +
-            "create p = (p1) - [:CO_CHANGE{times: moduleCoChangeTimes } ] -> (p2)")
+            "with p1, p2, count(distinct c) as moduleCoChangeTimes " +
+            "where moduleCoChangeTimes >= {minCoChangeTimes} " +
+            "create p = (p1) - [:CO_CHANGE{times: moduleCoChangeTimes } ] -> (p2) with p return p")
     List<CoChange> createCoChangesForModule(@Param("minCoChangeTimes") int minCoChangeTimes);
     
     @Query("match p= (f:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->(:ProjectFile) where id(f)={fileId} return p")
