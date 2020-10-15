@@ -81,7 +81,7 @@ public class BeanCreator {
 		if(propertyConfig.isCalculateDependsOn()) {
 			dependsOns = dependsOnRepository.findFileDepends();
 			if(dependsOns != null && dependsOns.size() > 0){
-				LOGGER.info("已存在cochange关系关系" );
+				LOGGER.info("已存在Depends On关系" );
 				return dependsOns;
 			} else {
 				LOGGER.info("创建Depends On关系...");
