@@ -69,7 +69,7 @@ public class BeanCreator {
 				cochangeRepository.deleteAll();
 				coChanges.addAll( cochangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE));
 				LOGGER.info("创建module cochange关系");
-				coChanges.addAll(cochangeRepository.createCoChangesForModule());
+				coChanges.addAll(cochangeRepository.createCoChangesForModule(Constant.COUNT_OF_MIN_COCHANGE));
 			}
 		}
 		return coChanges;
