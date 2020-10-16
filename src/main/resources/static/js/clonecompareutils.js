@@ -15,6 +15,42 @@ var showtree = function(divId, zNodes) {
     zTreeObj = $.fn.zTree.init($("#" + divId), setting, zNodes);
 }
 
+var doublePackagesCloneShow = function(pck1Id, pck2Id, path1, path2, path1CloneRate, path2CloneRate, cloneRate, cochangeRate, clonePairs) {
+    $("#package_clone_detail").html("");
+
+    var html = "";
+    html += "</table>";
+    html += "<table class='table table-bordered'>"
+        + "<tr><th>目录1</th><th>目录1克隆占比</th><th>目录2</th><th>目录2克隆占比</th><th>总克隆占比</th><th>包克隆CoChange占比</th><th>克隆文件对数</th></tr>";
+    html += "<tr>";
+    html += "<td>";
+    html += path1;
+    html += "</td>";
+    html += "<td>";
+    html += path1CloneRate;
+    html += "</td>";
+    html += "<td>";
+    html += path2;
+    html += "</td>";
+    html += "<td>";
+    html += path2CloneRate;
+    html += "</td>";
+    html += "<td>";
+    html += cloneRate;
+    html += "</td>";
+    html += "<td>";
+    html += cochangeRate;
+    html += "</td>";
+    html += "<td>";
+    html += clonePairs;
+    html += "</td>";
+    html += "</tr>";
+    html += "</table>";
+
+    $("#package_clone_detail").html(html);
+}
+
+
 /*
 跨包克隆包内详细信息展示
 */

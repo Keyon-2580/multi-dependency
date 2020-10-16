@@ -103,8 +103,8 @@ public class CloneAggregationController {
         List<AggregationClone> aggregationClones = aggregationCloneRepository.findAggregationClone(parent1Id, parent2Id);
 
         for(AggregationClone aggregationClone : aggregationClones) {
-            CoChange packageCoChanges = new CoChange();
-            ModuleClone packageCloneCoChanges = new ModuleClone();
+            CoChange packageCoChanges = null;
+            ModuleClone packageCloneCoChanges = null;
             if(parent1Id > -1 && parent2Id > -1){
                 packageCoChanges = coChangeRepository.findModuleCoChange(aggregationClone.getStartNode().getId(), aggregationClone.getEndNode().getId());
                 packageCloneCoChanges = moduleCloneRepository.findModuleClone(aggregationClone.getStartNode().getId(), aggregationClone.getEndNode().getId());

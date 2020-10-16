@@ -224,17 +224,17 @@ public class CloneController {
 			JSONArray packageContain2 = new JSONArray();
 
 			clone1.put("name", "cloneFiles(" +  pckClone.getCloneFiles1().size() + ")");
-			clone1.put("open", true);
+			clone1.put("open", false);
 			clone1.put("children", cloneFiles1);
 			clone2.put("name", "cloneFiles(" +  pckClone.getCloneFiles2().size() + ")");
-			clone2.put("open", true);
+			clone2.put("open", false);
 			clone2.put("children", cloneFiles2);
 
 			noneClone1.put("name", "noneCloneFiles(" +  pckClone.getNoneCloneFiles1().size() + ")");
-			noneClone1.put("open", true);
+			noneClone1.put("open", false);
 			noneClone1.put("children", noneCloneFiles1);
 			noneClone2.put("name", "noneCloneFiles(" +  pckClone.getNoneCloneFiles2().size() + ")");
-			noneClone2.put("open", true);
+			noneClone2.put("open", false);
 			noneClone2.put("children", noneCloneFiles2);
 
 			packageContain1.add(clone1);

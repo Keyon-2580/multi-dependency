@@ -16,7 +16,7 @@ var showAggregationResult = function() {
 		success: function(result) {
 			console.log("success");
 			var html = "<table class='table table-bordered'>";
-			html += "<tr><th>目录1</th><th>目录1克隆占比</th><th>目录2</th><th>目录2克隆占比</th><th>克隆文件对数</th><th>总克隆占比</th><th>总CoChange占比</th></tr>";
+			html += "<tr><th>目录1</th><th>目录1克隆占比</th><th>目录2</th><th>目录2克隆占比</th><th>总克隆占比</th><th>包克隆CoChange占比</th><th>克隆文件对数</th></tr>";
 			var tr = function(index, layer, duplicated) {
 				var prefix = "";
 				for(var i = 0; i < layer; i++) {
@@ -29,31 +29,46 @@ var showAggregationResult = function() {
 						html += prefix + duplicated.package1.directoryPath;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
-						html += duplicated.relationNodes1 + "/" + duplicated.allNodes1 + "=" + ((duplicated.relationNodes1 + 0.0) / duplicated.allNodes1).toFixed(2);
+						var path1CloneRate = duplicated.relationNodes1 + "/" + duplicated.allNodes1 + "=" + ((duplicated.relationNodes1 + 0.0) / duplicated.allNodes1).toFixed(2);
+						html += path1CloneRate;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
 						html += prefix + duplicated.package2.directoryPath;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
-						html += duplicated.relationNodes2 + "/" + duplicated.allNodes2 + "=" + ((duplicated.relationNodes2 + 0.0) / duplicated.allNodes2).toFixed(2);
+						var path2CloneRate = duplicated.relationNodes2 + "/" + duplicated.allNodes2 + "=" + ((duplicated.relationNodes2 + 0.0) / duplicated.allNodes2).toFixed(2);
+						html += path2CloneRate;
+						html += layer == 0 ? "</th>" : "</td>";
+						html += layer == 0 ? "<th>" : "<td>";
+						var cloneRate = "(" + duplicated.relationNodes1 + "+" + duplicated.relationNodes2 + ")/(" + duplicated.allNodes1 + "+" + duplicated.allNodes2 + ")=" + ((duplicated.relationNodes1 + duplicated.relationNodes2 + 0.0) / (duplicated.allNodes1 + duplicated.allNodes2)).toFixed(2);
+						html += cloneRate;
+						html += layer == 0 ? "</th>" : "</td>";
+						html += layer == 0 ? "<th id='cochangeRateId'>" : "<td id='cochangeRateId'>";
+						var cochangeRate = "";
+						if(duplicated.packageCochangeTimes < 3){
+							cochangeRate = duplicated.packageCloneCochangeTimes + "/" + duplicated.packageCochangeTimes + "=0.00";
+						}else {
+							cochangeRate = duplicated.packageCloneCochangeTimes  + "/" + duplicated.packageCochangeTimes  + "=" + ((duplicated.packageCloneCochangeTimes  + 0.0) / duplicated.packageCochangeTimes ).toFixed(2);
+						}
+						html += cochangeRate;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
 						var len = duplicated.clonePairs;
 						if(len > 0) {
-							html += "<a class='package' href='#package_files_clone' id2='" + duplicated.package2.id + "' id1='" + duplicated.package1.id + "'>" + len + "</a>";
+							html += "<a class='package' href='#package_files_clone' " +
+								"id1='" + duplicated.package1.id + "' " +
+								"id2='" + duplicated.package2.id + "' " +
+								"path1='" + duplicated.package1.directoryPath + "' " +
+								"path2='" + duplicated.package2.directoryPath + "' " +
+								"path1CloneRate='" + path1CloneRate + "' " +
+								"path2CloneRate='" + path2CloneRate + "' " +
+								"cloneRate='" + cloneRate + "' " +
+								"cochangeRate='" + cochangeRate + "' " +
+								"clonePairs='" + len + "' " +
+								">" + len + "</a>";
 						}
 						else {
 							html += len;
-						}
-						html += layer == 0 ? "</th>" : "</td>";
-						html += layer == 0 ? "<th>" : "<td>";
-						html += "(" + duplicated.relationNodes1 + "+" + duplicated.relationNodes2 + ")/(" + duplicated.allNodes1 + "+" + duplicated.allNodes2 + ")=" + ((duplicated.relationNodes1 + duplicated.relationNodes2 + 0.0) / (duplicated.allNodes1 + duplicated.allNodes2)).toFixed(2);
-						html += layer == 0 ? "</th>" : "</td>";
-						html += layer == 0 ? "<th>" : "<td>";
-						if(duplicated.packageCochangeTimes < 3){
-							html += duplicated.packageCloneCochangeTimes + "/" + duplicated.packageCochangeTimes + "=0.00";
-						}else {
-							html += duplicated.packageCloneCochangeTimes  + "/" + duplicated.packageCochangeTimes  + "=" + ((duplicated.packageCloneCochangeTimes  + 0.0) / duplicated.packageCochangeTimes ).toFixed(2);
 						}
 						html += layer == 0 ? "</th>" : "</td>";
 						html += "</tr>";
@@ -115,6 +130,7 @@ var showAggregationResult = function() {
 			html += "</table>"
 			$("#packages_aggregation").html(html);
 			$(".package").click(function() {
+				doublePackagesCloneShow($(this).attr("id1"), $(this).attr("id2"), $(this).attr("path1"), $(this).attr("path2"), $(this).attr("path1CloneRate"), $(this).attr("path2CloneRate"), $(this).attr("cloneRate"), $(this).attr("cochangeRate"), $(this).attr("clonePairs"));
 				doublePackagesCloneWithCoChange($(this).attr("id1"), $(this).attr("id2"));
 			});
 		}
