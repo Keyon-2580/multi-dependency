@@ -78,23 +78,6 @@ public class CloneAggregationController {
     @ResponseBody
     public List<HotspotPackage> showHotspotPackages(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
         List<HotspotPackage> result = getHotspotPackages(-1, -1);
-        result.sort((d1, d2) -> {
-            int allNodes1 = d1.getAllNodes1() + d1.getAllNodes2();
-            int cloneNodes1 = d1.getRelationNodes1() + d1.getRelationNodes2();
-            double percentageThreshold1 = (cloneNodes1 + 0.0) / allNodes1;
-            int allNodes2 = d2.getAllNodes1() + d2.getAllNodes2();
-            int cloneNodes2 = d2.getRelationNodes1() + d2.getRelationNodes2();
-            double percentageThreshold2 = (cloneNodes2 + 0.0) / allNodes2;
-            if(percentageThreshold1 < percentageThreshold2) {
-                return 1;
-            }
-            else if(percentageThreshold1 == percentageThreshold2) {
-                return Integer.compare(cloneNodes2, cloneNodes1);
-            }
-            else {
-                return -1;
-            }
-        });
         return result;
     }
 
@@ -142,6 +125,24 @@ public class CloneAggregationController {
             }
             result.add(hotspotPackage);
         }
+
+        result.sort((d1, d2) -> {
+            int allNodes1 = d1.getAllNodes1() + d1.getAllNodes2();
+            int cloneNodes1 = d1.getRelationNodes1() + d1.getRelationNodes2();
+            double percentageThreshold1 = (cloneNodes1 + 0.0) / allNodes1;
+            int allNodes2 = d2.getAllNodes1() + d2.getAllNodes2();
+            int cloneNodes2 = d2.getRelationNodes1() + d2.getRelationNodes2();
+            double percentageThreshold2 = (cloneNodes2 + 0.0) / allNodes2;
+            if(percentageThreshold1 < percentageThreshold2) {
+                return 1;
+            }
+            else if(percentageThreshold1 == percentageThreshold2) {
+                return Integer.compare(cloneNodes2, cloneNodes1);
+            }
+            else {
+                return -1;
+            }
+        });
         return result;
     }
     @GetMapping("/package/export")
