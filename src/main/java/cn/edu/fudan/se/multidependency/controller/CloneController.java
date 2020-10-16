@@ -9,6 +9,8 @@ import java.util.*;
 import java.nio.*;
 
 import cn.edu.fudan.se.multidependency.model.relation.clone.ModuleClone;
+import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
 import org.slf4j.Logger;
@@ -67,10 +69,10 @@ public class CloneController {
 	private SimilarPackageDetector similarPackageDetector;
 
 	@Autowired
-	private HotspotPackageDetector hotspotPackageDetector;
+	private ModuleCloneRepository moduleCloneRepository;
 
 	@Autowired
-	private ModuleCloneRepository moduleCloneRepository;
+	private CoChangeRepository coChangeRepository;
 
 	@GetMapping("/packages")
 	public String graph() {
@@ -116,6 +118,17 @@ public class CloneController {
 	@ResponseBody
 	public List<ModuleClone> cloneInPackages() {
 		List<ModuleClone> result = moduleCloneRepository.getAllModuleClone();
+		result.forEach( moduleClone -> {
+			Package pck1 = (Package)moduleClone.getNode1();
+			Package pck2 = (Package)moduleClone.getNode2();
+			CoChange moduleCoChange = coChangeRepository.findModuleCoChange(pck1.getId(),pck2.getId());
+			if(moduleCoChange != null){
+				moduleClone.setModuleCochangeTimes(moduleCoChange.getTimes());
+			}else {
+				moduleClone.setModuleCochangeTimes(0);
+			}
+
+		});
 		result.sort((v1, v2) -> {
 			return v2.getClonePairs() - v1.getClonePairs();
 		});

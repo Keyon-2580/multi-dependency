@@ -221,7 +221,7 @@ var clone = function(cytoscapeutil) {
 				console.log("success");
 				var html = "<div><span>" + result.length + "</span></div><table class='table table-bordered'>";
 				html += "<tr><th>index</th><th>目录</th><th>目录</th>";
-				html += "<th>目录1文件数</th><th>目录2文件数</th><th>目录1克隆文件数</th><th>目录2克隆文件数</th><th>目录1占比</th><th>目录2占比</th><th>文件克隆对数</th><th>目录cochange(clone)</th></tr>";
+				html += "<th>目录1文件数</th><th>目录2文件数</th><th>目录1克隆文件数</th><th>目录2克隆文件数</th><th>目录1占比</th><th>目录2占比</th><th>文件克隆对数</th><th>目录cochange占比</th></tr>";
 				for(var i = 0; i < result.length; i++) {
 					html += "<tr>";
 					html += "<td>";
@@ -255,7 +255,11 @@ var clone = function(cytoscapeutil) {
 					html += "<a class='package' index='" + (i + 1) + "' href='#package_files_clone' id2='" + result[i].node2.id + "' id1='" + result[i].node1.id + "'>" + result[i].clonePairs + "</a>";
 					html += "</td>";
 					html += "<td>";
-					html += result[i].moduleCloneCochangeTimes;
+					if(result[i].moduleCochangeTimes < 3){
+						html += result[i].moduleCloneCochangeTimes + "/" + result[i].moduleCochangeTimes + "=0.00";
+					}else {
+						html += result[i].moduleCloneCochangeTimes + "/" + result[i].moduleCochangeTimes  + "=" + ((result[i].moduleCloneCochangeTimes  + 0.0) / result[i].moduleCochangeTimes ).toFixed(2);
+					}
 					html += "</td>";
 					html += "</tr>";
 				}

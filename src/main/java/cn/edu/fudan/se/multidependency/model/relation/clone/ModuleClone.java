@@ -57,6 +57,12 @@ public class ModuleClone implements Relation {
 	 */
 	private int moduleCloneCochangeTimes = 0;
 
+	/**
+	 * 克隆包间的co-change数量
+	 */
+	@Transient
+	private int moduleCochangeTimes = 0;
+
 	@Override
 	public Node getStartNode() {
 		return node1;
