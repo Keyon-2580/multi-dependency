@@ -16,7 +16,7 @@ var showAggregationResult = function() {
 		success: function(result) {
 			console.log("success");
 			var html = "<table class='table table-bordered'>";
-			html += "<tr><th>目录1</th><th>目录1克隆占比</th><th>目录2</th><th>目录2克隆占比</th><th>克隆文件对数</th><th>总克隆占比</th></tr>";
+			html += "<tr><th>目录1</th><th>目录1克隆占比</th><th>目录2</th><th>目录2克隆占比</th><th>克隆文件对数</th><th>总克隆占比</th><th>总CoChange占比</th></tr>";
 			var tr = function(index, layer, duplicated) {
 				var prefix = "";
 				for(var i = 0; i < layer; i++) {
@@ -48,6 +48,13 @@ var showAggregationResult = function() {
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
 						html += "(" + duplicated.relationNodes1 + "+" + duplicated.relationNodes2 + ")/(" + duplicated.allNodes1 + "+" + duplicated.allNodes2 + ")=" + ((duplicated.relationNodes1 + duplicated.relationNodes2 + 0.0) / (duplicated.allNodes1 + duplicated.allNodes2)).toFixed(2);
+						html += layer == 0 ? "</th>" : "</td>";
+						html += layer == 0 ? "<th>" : "<td>";
+						if(duplicated.packageCochangeTimes < 3){
+							html += duplicated.packageCloneCochangeTimes + "/" + duplicated.packageCochangeTimes + "=0.00";
+						}else {
+							html += duplicated.packageCloneCochangeTimes  + "/" + duplicated.packageCochangeTimes  + "=" + ((duplicated.packageCloneCochangeTimes  + 0.0) / duplicated.packageCochangeTimes ).toFixed(2);
+						}
 						html += layer == 0 ? "</th>" : "</td>";
 						html += "</tr>";
 						break;
