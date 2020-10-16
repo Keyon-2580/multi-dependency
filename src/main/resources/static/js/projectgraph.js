@@ -24,14 +24,17 @@ var loaddata = function () {
         type : "GET",
         url : "/project/all",
         success : function(result) {
-            var name_temp = {};
+            // console.log(result);
             for(x in result){
                 // projectlist.push(x);
+                var name_temp = {};
                 // console.log(x);
                 name_temp["id"] = x;
                 name_temp["name"] = result[x].name;
                 projectlist.push(name_temp);
             }
+
+            console.log(projectlist)
 
             // projectlist_guava.map((item,index) => {
             //     if(item.name === "guava"){
@@ -51,7 +54,7 @@ var loaddata = function () {
             }
             html += "</select>";
             html += "";
-            console.log(html)
+            // console.log(html)
             $("#projectToGraph_util").html(html);
 
             projectGraphAjax(projectlist[0].id);
@@ -59,31 +62,32 @@ var loaddata = function () {
             // Loop_ajax(0, projectlist);
         }
     })
-    function Loop_ajax(index, projectlist) {
-        if (index < projectlist.length) {
-            $.ajax({
-                type : "GET",
-                url : mainUrl + "/has?projectId=" + projectlist[index] + "&showType=graph",
-                success : function(result) {
-                    resultjson = result;
-                    // console.log(projectlist[index])
-                    // console.log("projectToGraph_" + projectlist[index])
-                    projectToGraph(resultjson,"projectToGraph_" + projectlist[index]);
-                    if (index < projectlist.length) {
-                        Loop_ajax(index + 1, projectlist);
-                    }
-                }
-            })
-        }
-    }
+
+    //多项目加载（暂不需要）
+    // function Loop_ajax(index, projectlist) {
+    //     if (index < projectlist.length) {
+    //         $.ajax({
+    //             type : "GET",
+    //             url : mainUrl + "/has?projectId=" + projectlist[index] + "&showType=graph",
+    //             success : function(result) {
+    //                 resultjson = result;
+    //                 // console.log(projectlist[index])
+    //                 // console.log("projectToGraph_" + projectlist[index])
+    //                 projectToGraph(resultjson,"projectToGraph_" + projectlist[index]);
+    //                 if (index < projectlist.length) {
+    //                     Loop_ajax(index + 1, projectlist);
+    //                 }
+    //             }
+    //         })
+    //     }
+    // }
 }
 
 //绘制气泡图
 var projectToGraph = function(result,divId){
     // console.log(result);
     var projectdata = result[0].result;
-    var clonedata = result[1].clone;
-    var jsonLinks = result[2].links;
+    var jsonLinks = result[1].links;
 
     // console.log(jsonLinks);
 
@@ -154,8 +158,8 @@ var projectToGraph = function(result,divId){
                 var ratio = getCloneRatioByName(projectdata,d.data.id)[1];
                 var id = getCloneRatioByName(projectdata,d.data.id)[0];
 
-                console.log(ratio)
-                console.log(id)
+                // console.log(ratio)
+                // console.log(id)
                 if(ratio === 0){
                     // console.log("white")
                     return null;
@@ -275,21 +279,21 @@ var projectToGraph = function(result,divId){
         }
     }
 
-    function getCloneDataByName(data,name){
-        var result = [];
-        for(var i = 0; i < data.length; i++){
-            var import_result = findNameInImports(data[i].imports,name);
-            if(data[i].name === name){
-                return data[i].imports;
-            }else if(import_result){
-                var temp = {};
-                temp["name"] = data[i].name;
-                temp["clone_type"] = import_result.clone_type;
-                result.push(temp);
-            }
-        }
-        return result;
-    }
+    // function getCloneDataByName(data,name){
+    //     var result = [];
+    //     for(var i = 0; i < data.length; i++){
+    //         var import_result = findNameInImports(data[i].imports,name);
+    //         if(data[i].name === name){
+    //             return data[i].imports;
+    //         }else if(import_result){
+    //             var temp = {};
+    //             temp["name"] = data[i].name;
+    //             temp["clone_type"] = import_result.clone_type;
+    //             result.push(temp);
+    //         }
+    //     }
+    //     return result;
+    // }
 
     function findNameInImports(data,name){
         for(var i = 0; i < data.length; i++){
@@ -319,74 +323,92 @@ var projectToGraph = function(result,divId){
 
 //绘制气泡图连线
 var showLine = function(){
-    var links;
-    function drawLink() {
-        links = svg_global.append('g')
-            .style('stroke', '#aaa')
-            .attr("class", "packageLink")
-            .selectAll('line')
-            .data(jsonLinks_global)
-            .enter().append('line');
-
-
-        function getTranslateX(translateText) {
-            var start = translateText.indexOf("(");
-            var comma = translateText.indexOf(",");
-            return parseFloat(translateText.slice(start + 1, comma));
-        }
-
-        function getTranslateY(translateText) {
-            var comma = translateText.indexOf(",");
-            var end = translateText.indexOf(")");
-            return parseFloat(translateText.slice(comma + 1, end));
-        }
-
-        function getCircleTransform(id) {
-            // return d3.select("#" + id.replace(/\./g, '\\.')).attr("transform");
-            // console.log(d3.select("#L1\\.M0\\.L1\\.M0").attr("transform"));
-            d3.select("#" + id)
-                .style("stroke","#d62728")
-                .style("stroke-width","1.5px")
-            return d3.select("#" + id).attr("transform");
-        }
-        links.attr("x1", function (d) {
-            var test = getCircleTransform(d.source_id);
-            return getTranslateX(getCircleTransform(d.source_id)) + diameter_global / 2;
-        })
-            .attr("y1", function (d) {
-                return getTranslateY(getCircleTransform(d.source_id)) + diameter_global / 2;
-            })
-            .attr("x2", function (d) {
-                return getTranslateX(getCircleTransform(d.target_id)) + diameter_global / 2;
-            })
-            .attr("y2", function (d) {
-                return getTranslateY(getCircleTransform(d.target_id)) + diameter_global / 2;
-            });
-    }
-
-    function clearLink(){
-        g_global.selectAll("circle")
-            .style("stroke","")
-            .style("stroke-width","")
-        var svg1 = d3.select(".packageLink") .remove();
-    }
 
     // console.log(projectId);
     // console.log(project_index);
     // console.log(project_index["id_" + projectId]);
-    console.log(jsonLinks_global);
+    // console.log(jsonLinks_global);
 
     if(typeof(jsonLinks_global) !== "undefined"){
         if(flag){
-            drawLink();
+            drawLink(jsonLinks_global);
             document.getElementById("showLineId").innerHTML = "显示包克隆关系";
-            flag = false;
         }else{
             clearLink();
             document.getElementById("showLineId").innerHTML = "显示包克隆关系";
-            flag = true;
         }
     }
+}
+
+function drawLink(jsonLinks) {
+    var links = svg_global.append('g')
+        .style('stroke', '#aaa')
+        .attr("class", "packageLink")
+        .selectAll('line')
+        .data(jsonLinks)
+        .enter().append('line')
+        .attr("onclick", function(d){
+            source_id = d.source_id.split("_")[1];
+            target_id = d.target_id.split("_")[1];
+            return "drawChildrenLinks(\"" + source_id + "\", \"" + target_id + "\")";
+        });
+
+
+    function getTranslateX(translateText) {
+        var start = translateText.indexOf("(");
+        var comma = translateText.indexOf(",");
+        return parseFloat(translateText.slice(start + 1, comma));
+    }
+
+    function getTranslateY(translateText) {
+        var comma = translateText.indexOf(",");
+        var end = translateText.indexOf(")");
+        return parseFloat(translateText.slice(comma + 1, end));
+    }
+
+    function getCircleTransform(id) {
+        // return d3.select("#" + id.replace(/\./g, '\\.')).attr("transform");
+        // console.log(d3.select("#L1\\.M0\\.L1\\.M0").attr("transform"));
+        d3.select("#" + id)
+            .style("stroke","#d62728")
+            .style("stroke-width","1.5px")
+        return d3.select("#" + id).attr("transform");
+    }
+    links.attr("x1", function (d) {
+        var test = getCircleTransform(d.source_id);
+        return getTranslateX(getCircleTransform(d.source_id)) + diameter_global / 2;
+    })
+        .attr("y1", function (d) {
+            return getTranslateY(getCircleTransform(d.source_id)) + diameter_global / 2;
+        })
+        .attr("x2", function (d) {
+            return getTranslateX(getCircleTransform(d.target_id)) + diameter_global / 2;
+        })
+        .attr("y2", function (d) {
+            return getTranslateY(getCircleTransform(d.target_id)) + diameter_global / 2;
+        });
+
+    flag = false;
+}
+
+function clearLink(){
+    g_global.selectAll("circle")
+        .style("stroke","")
+        .style("stroke-width","")
+    var svg1 = d3.select(".packageLink") .remove();
+
+    flag = true;
+}
+
+function drawChildrenLinks(package1Id, package2Id){
+    clearLink();
+    $.ajax({
+        type : "GET",
+        url : "/project/has/childrenlinks?package1Id=" + package1Id + "&package2Id=" + package2Id,
+        success : function(result) {
+            drawLink(result);
+        }
+    });
 }
 
 //单选下拉框，切换项目
@@ -396,9 +418,20 @@ var gradeChange = function(projectId){
 
 //调用接口请求数据
 var projectGraphAjax = function(projectId){
+    var projectList={
+        "projectIds": [
+            {
+                "id" : projectId
+            }
+        ],
+        "showType": "graph"
+    }
     $.ajax({
-        type : "GET",
-        url : "/project/has?projectId=" + projectId + "&showType=graph",
+        type:"POST",
+        url : "/project/has",
+        contentType: "application/json", //必须这样写
+        dataType:"json",
+        data:JSON.stringify(projectList),
         success : function(result) {
             // resultjson = result;
             // console.log(projectlist[index])
