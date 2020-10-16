@@ -24,8 +24,8 @@ var loaddata = function () {
         type : "GET",
         url : "/project/all",
         success : function(result) {
-            var name_temp = {};
             for(x in result){
+                var name_temp = {};
                 // projectlist.push(x);
                 // console.log(x);
                 name_temp["id"] = x;
