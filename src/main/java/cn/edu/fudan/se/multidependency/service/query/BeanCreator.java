@@ -120,7 +120,7 @@ public class BeanCreator {
 			}
 
 		}
-		return new ArrayList<>();
+		return dependsOns;
 	}
 
 	@Bean("createCloneGroup")
@@ -174,7 +174,7 @@ public class BeanCreator {
 					}
 				}
 				LOGGER.info("设置Module Clone基础信息(co-change)...");
-				moduleCloneRepository.setModuleCloneCochangeTimes(0);
+				moduleCloneRepository.setModuleCloneCochangeTimes(3);
 				moduleClones = moduleCloneRepository.getAllModuleClone();
 			}
 			return moduleClones;

@@ -7,7 +7,11 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
+import cn.edu.fudan.se.multidependency.model.relation.clone.ModuleClone;
+import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.AggregationCloneRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.clone.ModuleCloneRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.RelationDataForDoubleNodes;
@@ -34,6 +38,12 @@ public class CloneAggregationController {
 
     @Autowired
     private HasRelationService hasRelationService;
+
+    @Autowired
+    private CoChangeRepository  coChangeRepository;
+
+    @Autowired
+    private ModuleCloneRepository moduleCloneRepository;
 
     @GetMapping(value = {""})
     public String graph() {
@@ -91,11 +101,31 @@ public class CloneAggregationController {
     public List<HotspotPackage> getHotspotPackages(long parent1Id, long parent2Id) {
         List<HotspotPackage> result = new ArrayList<>();
         List<AggregationClone> aggregationClones = aggregationCloneRepository.findAggregationClone(parent1Id, parent2Id);
+
         for(AggregationClone aggregationClone : aggregationClones) {
+            CoChange packageCoChanges = new CoChange();
+            ModuleClone packageCloneCoChanges = new ModuleClone();
+            if(parent1Id > -1 && parent2Id > -1){
+                packageCoChanges = coChangeRepository.findModuleCoChange(aggregationClone.getStartNode().getId(), aggregationClone.getEndNode().getId());
+                packageCloneCoChanges = moduleCloneRepository.findModuleClone(aggregationClone.getStartNode().getId(), aggregationClone.getEndNode().getId());
+            }
+
             List<HotspotPackage> childrenHotspotPackages = getHotspotPackages(aggregationClone.getNode1().getId(), aggregationClone.getNode2().getId());
             RelationDataForDoubleNodes<Node, Relation> relationDataForDoubleNodes = new RelationDataForDoubleNodes<Node, Relation>(aggregationClone.getNode1(), aggregationClone.getNode2());
             HotspotPackage hotspotPackage = new HotspotPackage(relationDataForDoubleNodes);
             hotspotPackage.setClonePairs(aggregationClone.getClonePairs());
+            if(packageCoChanges != null){
+                hotspotPackage.setPackageCochangeTimes(packageCoChanges.getTimes());
+            }else {
+                hotspotPackage.setPackageCochangeTimes(0);
+            }
+
+            if(packageCloneCoChanges != null){
+                hotspotPackage.setPackageCloneCochangeTimes(packageCloneCoChanges.getModuleCloneCochangeTimes());
+            }else {
+                hotspotPackage.setPackageCloneCochangeTimes(0);
+            }
+
             hotspotPackage.setData(aggregationClone.getAllNodesInNode1(), aggregationClone.getAllNodesInNode2(), aggregationClone.getNodesInNode1(), aggregationClone.getNodesInNode2());
             Collection<Package> childrenPackage1 = hasRelationService.findPackageHasPackages(hotspotPackage.getPackage1());
             Collection<Package> childrenPackage2 = hasRelationService.findPackageHasPackages(hotspotPackage.getPackage2());
