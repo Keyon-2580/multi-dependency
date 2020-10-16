@@ -81,7 +81,7 @@ public class ProjectController {
 	private NodeService nodeService;
 
 	@Autowired
-	private HasRepository hasRepository;
+	private ProjectService projectService;
 
 
 	@Autowired
@@ -92,9 +92,6 @@ public class ProjectController {
 	
 	@Autowired
 	private BasicCloneQueryService basicCloneQueryService;
-	
-	@Autowired
-	private ProjectService projectService;
 
 	@Autowired
 	private HotspotPackageDetector hotspotPackageDetector;
@@ -591,116 +588,19 @@ public class ProjectController {
 		return result;
 	}
 
-	@GetMapping("/has")
+	@PostMapping("/has")
 	@ResponseBody
-	public JSONArray projectHas(@RequestParam("projectId") long projectId, @RequestParam("showType") String showType) {
-		JSONArray result = new JSONArray();
-		JSONArray clone = new JSONArray();
-		JSONArray links = new JSONArray();
-
-		Project project = nodeService.queryProject(projectId);
-		ProjectStructure projectStructure = hasRelationService.projectHasInitialize(project);
-
-		List<PackageStructure> childrenPackages = projectStructure.getChildren();
-		List<PackageStructure> childrenPackagesnew = new ArrayList<>();
-		JSONObject nodeJSON = new JSONObject();
-		JSONObject nodeJSON2 = new JSONObject();
-		JSONObject nodeJSON3 = new JSONObject();
-		JSONObject nodeJSON4 = new JSONObject();
-
-		for(PackageStructure pckstru : childrenPackages){
-			PackageStructure pcknew = hasRelationService.packageHasInitialize(pckstru.getPck());
-			childrenPackagesnew.add(pcknew);
-		}
-
-		nodeJSON.put("name", project.getName());
-		nodeJSON.put("id", "id_" + project.getId().toString());
-		Collection<ProjectFile> clonefiles = basicCloneQueryService.findProjectContainCloneFiles(project);
-		Collection<Clone> cloneList = basicCloneQueryService.findClonesInProject(project);
-		clone = basicCloneQueryService.ClonesInProject(cloneList);
-		nodeJSON.put("children",getHasJson(clonefiles,childrenPackagesnew, showType));
-
-		nodeJSON2.put("result",nodeJSON);
-		nodeJSON3.put("clone",clone);
-
-		result.add(nodeJSON2);
-		result.add(nodeJSON3);
-
-		if(showType.equals("graph")) {
-			List<AggregationClone> aggregationCloneList = hotspotPackageDetector.quickDetectHotspotPackages(-1, -1);
-			for (AggregationClone aggregationClone : aggregationCloneList) {
-				JSONObject link = new JSONObject();
-				link.put("source_id", "id_" + aggregationClone.getNode1().getId().toString());
-				link.put("target_id", "id_" + aggregationClone.getNode2().getId().toString());
-				link.put("source_projectBelong", "id_" + containRelationService.findPackageBelongToProject((Package)(aggregationClone.getNode1())).getId());
-				link.put("target_projectBelong", "id_" + containRelationService.findPackageBelongToProject((Package)(aggregationClone.getNode2())).getId());
-				links.add(link);
-			}
-			nodeJSON4.put("links",links);
-			result.add(nodeJSON4);
-		}
-
-		return result;
+	public JSONArray projectHas(@RequestBody JSONObject requestBody) {
+		return projectService.getMultipleProjectsGraphJson(requestBody);
 	}
 
 	/**
-	 * 递归遍历项目中所有package的包含关系
-	 */
-	public JSONArray getHasJson(Collection<ProjectFile> clonefiles,List<PackageStructure> childrenPackages, String showType){
-		JSONArray rtJA = new JSONArray();
-		for(PackageStructure pckstru :childrenPackages){
-			List<PackageStructure> pckList = pckstru.getChildrenPackages();
-			List<ProjectFile> fileList = pckstru.getChildrenFiles();
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("name",pckstru.getPck().getName());
-//			jsonObject.put("long_name",pckstru.getPck().getDirectoryPath());
-			jsonObject.put("size",fileList.size());
-			jsonObject.put("id","id_" + pckstru.getPck().getId().toString());
-			float cloneFilesInAllFiles = 0;
-			if(fileList.size() > 0){
-				for(ProjectFile profile : fileList){
-					if(clonefiles.contains(profile)){
-						cloneFilesInAllFiles += 1;
-					}
-				}
-			}
-			if(fileList.size() > 0){
-				jsonObject.put("clone_ratio",cloneFilesInAllFiles / (float)(fileList.size()));
-			}else{
-				jsonObject.put("clone_ratio", 0);
-			}
-//			JSONArray jsonArray = new JSONArray();
-//			if(fileList.size() > 0){
-//				for(ProjectFile profile : fileList){
-//					JSONObject jsonObject2 = new JSONObject();
-//					jsonObject2.put("size",1000);
-//					jsonObject2.put("long_name",profile.getPath());
-//					if(clonefiles.contains(profile)){
-//						jsonObject2.put("clone",true);
-//					}else{
-//						jsonObject2.put("clone",false);
-//					}
-//					jsonObject2.put("name",profile.getName());
-//					jsonObject2.put("id","id_" + profile.getId().toString());
-//					jsonArray.add(jsonObject2);
-//				}
-//			}
-
-//			if(jsonArray.size() > 0){
-//				if(showType.equals("graph")){
-//					jsonObject.put("children",jsonArray);
-//				}else{
-//					jsonObject.put("collapse_children",jsonArray);
-//				}
-//			}
-
-			if(pckList.size()>0){//如果该属性还有子属性,继续做查询,直到该属性没有孩子,也就是最后一个节点
-				jsonObject.put("children", getHasJson(clonefiles,pckList, showType));
-			}
-//			System.out.println(pckList.size());
-			rtJA.add(jsonObject);
-		}
-		return rtJA;
+	* 返回气泡图不同关系的连线数据
+	 * */
+	@GetMapping("/has/childrenlinks")
+	@ResponseBody
+	public JSONArray getProjectGraphCloneLink(@RequestParam("package1Id") long package1Id, @RequestParam("package2Id") long package2Id) {
+		return projectService.projectGraphCloneLink(package1Id, package2Id);
 	}
 
 	@GetMapping("/has/echarts")
