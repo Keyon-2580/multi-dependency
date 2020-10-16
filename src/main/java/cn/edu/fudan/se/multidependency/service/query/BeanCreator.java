@@ -77,42 +77,50 @@ public class BeanCreator {
 
 	@Bean("createDependsOn")
 	public List<DependsOn> createDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, ProjectFileRepository fileRepository) {
+		List<DependsOn> dependsOns = new ArrayList<>();
 		if(propertyConfig.isCalculateDependsOn()) {
-			LOGGER.info("创建Depends On关系...");
-			dependsOnRepository.deleteAll();
-			
-			dependsOnRepository.createDependsOnWithCallInTypes();
-			dependsOnRepository.createDependsOnWithCreateInTypes();
-			dependsOnRepository.createDependsOnWithCastInTypes();
-			dependsOnRepository.createDependsOnWithThrowInTypes();
-			dependsOnRepository.createDependsOnWithParameterInTypes();
-			dependsOnRepository.createDependsOnWithVariableTypeInTypes();
-			dependsOnRepository.createDependsOnWithAccessInTypes();
-			dependsOnRepository.createDependsOnWithAnnotationInTypes();
-			dependsOnRepository.createDependsOnWithTimesInTypes();
-			dependsOnRepository.deleteNullTimesDependsOnInTypes();
-			
-			dependsOnRepository.createDependsOnWithExtendsInFiles();
-			dependsOnRepository.createDependsOnWithImplementsInFiles();
-			dependsOnRepository.createDependsOnWithCallInFiles();
-			dependsOnRepository.createDependsOnWithCreateInFiles();
-			dependsOnRepository.createDependsOnWithCastInFiles();
-			dependsOnRepository.createDependsOnWithThrowInFiles();
-			dependsOnRepository.createDependsOnWithParameterInFiles();
-			dependsOnRepository.createDependsOnWithVariableTypeInFiles();
-			dependsOnRepository.createDependsOnWithAccessInFiles();
-			dependsOnRepository.createDependsOnWithImpllinkInFiles();
-			dependsOnRepository.createDependsOnWithAnnotationInFiles();
-			dependsOnRepository.createDependsOnWithTimesInFiles();
-			dependsOnRepository.deleteNullTimesDependsOnInFiles();
-			
-			dependsOnRepository.createDependsOnInPackages();
-			dependsOnRepository.addTimesOnDependsOnInPackages();
-			dependsOnRepository.deleteNullTimesDependsOnInPackages();
-			
-			fileRepository.pageRank(20, 0.85);
+			dependsOns = dependsOnRepository.findFileDepends();
+			if(dependsOns != null && dependsOns.size() > 0){
+				LOGGER.info("已存在Depends On关系" );
+				return dependsOns;
+			} else {
+				LOGGER.info("创建Depends On关系...");
+				dependsOnRepository.deleteAll();
+
+				dependsOnRepository.createDependsOnWithCallInTypes();
+				dependsOnRepository.createDependsOnWithCreateInTypes();
+				dependsOnRepository.createDependsOnWithCastInTypes();
+				dependsOnRepository.createDependsOnWithThrowInTypes();
+				dependsOnRepository.createDependsOnWithParameterInTypes();
+				dependsOnRepository.createDependsOnWithVariableTypeInTypes();
+				dependsOnRepository.createDependsOnWithAccessInTypes();
+				dependsOnRepository.createDependsOnWithAnnotationInTypes();
+				dependsOnRepository.createDependsOnWithTimesInTypes();
+				dependsOnRepository.deleteNullTimesDependsOnInTypes();
+
+				dependsOnRepository.createDependsOnWithExtendsInFiles();
+				dependsOnRepository.createDependsOnWithImplementsInFiles();
+				dependsOnRepository.createDependsOnWithCallInFiles();
+				dependsOnRepository.createDependsOnWithCreateInFiles();
+				dependsOnRepository.createDependsOnWithCastInFiles();
+				dependsOnRepository.createDependsOnWithThrowInFiles();
+				dependsOnRepository.createDependsOnWithParameterInFiles();
+				dependsOnRepository.createDependsOnWithVariableTypeInFiles();
+				dependsOnRepository.createDependsOnWithAccessInFiles();
+				dependsOnRepository.createDependsOnWithImpllinkInFiles();
+				dependsOnRepository.createDependsOnWithAnnotationInFiles();
+				dependsOnRepository.createDependsOnWithTimesInFiles();
+				dependsOnRepository.deleteNullTimesDependsOnInFiles();
+
+				dependsOnRepository.createDependsOnInPackages();
+				dependsOnRepository.addTimesOnDependsOnInPackages();
+				dependsOnRepository.deleteNullTimesDependsOnInPackages();
+
+				fileRepository.pageRank(20, 0.85);
+			}
+
 		}
-		return new ArrayList<>();
+		return dependsOns;
 	}
 
 	@Bean("createCloneGroup")
@@ -165,6 +173,8 @@ public class BeanCreator {
 						moduleCloneRepository.createModuleClone(moduleClone.getNode1().getId(), moduleClone.getNode2().getId(), moduleClone.getChildren().size(), moduleClone.getAllNodesInNode1().size(), moduleClone.getAllNodesInNode2().size(), moduleClone.getNodesInNode1().size(), moduleClone.getNodesInNode2().size());
 					}
 				}
+				LOGGER.info("设置Module Clone基础信息(co-change)...");
+				moduleCloneRepository.setModuleCloneCochangeTimes(3);
 				moduleClones = moduleCloneRepository.getAllModuleClone();
 			}
 			return moduleClones;

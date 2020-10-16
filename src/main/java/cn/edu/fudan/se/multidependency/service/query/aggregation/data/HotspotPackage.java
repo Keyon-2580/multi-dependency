@@ -51,6 +51,14 @@ public class HotspotPackage {
 	@Getter
 	@Setter
 	private double value;
+
+	@Getter
+	@Setter
+	private int packageCochangeTimes = 0;
+
+	@Getter
+	@Setter
+	private int packageCloneCochangeTimes = 0;
 	
 	public HotspotPackage(@NonNull RelationDataForDoubleNodes<Node, Relation> relationPackages) {
 		this.relationPackages = relationPackages;

@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.repository.relation.git;
 
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -41,9 +42,9 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
 
     @Query("match (p1:Package) -[:CONTAIN] -> (f1:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]- (c:Commit) - [:" + RelationType.str_COMMIT_UPDATE_FILE + "]-> (f2:ProjectFile) <- [:CONTAIN] - (p2:Package)" +
             "where id(p1) < id(p2)  " +
-            "with p1, p2, count(distinct c) as moduleCoChangeTimes" +
-            "where moduleCoChangeTimes >= {minCoChangeTimes}" +
-            "create p = (p1) - [:CO_CHANGE{times: moduleCoChangeTimes } ] -> (p2)")
+            "with p1, p2, count(distinct c) as moduleCoChangeTimes " +
+            "where moduleCoChangeTimes >= {minCoChangeTimes} " +
+            "create p = (p1) - [:CO_CHANGE{times: moduleCoChangeTimes } ] -> (p2) with p return p")
     List<CoChange> createCoChangesForModule(@Param("minCoChangeTimes") int minCoChangeTimes);
     
     @Query("match p= (f:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->(:ProjectFile) where id(f)={fileId} return p")
@@ -62,4 +63,7 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
 
     @Query("match p= (:Package)-[r:" + RelationType.str_CO_CHANGE + "]->(:Package) return p")
     List<CoChange> getAllModuleCoChange();
+
+    @Query("match p= (p1:Package)-[r:" + RelationType.str_CO_CHANGE + "]-(p2:Package) where id(p1) = {parent1Id} and id(p2) = {parent2Id} return r")
+    CoChange findModuleCoChange(@Param("parent1Id") long parent1Id, @Param("parent2Id") long parent2Id);
 }
