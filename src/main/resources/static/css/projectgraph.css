@@ -27,7 +27,7 @@ line {
     stroke: #d62728;
 }
 
-.showLineButton {
+button {
     float: right;
     margin-right: 50px;
     margin-top: 50px;

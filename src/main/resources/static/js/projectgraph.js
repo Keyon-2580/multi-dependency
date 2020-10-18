@@ -6,6 +6,7 @@ var jsonLinks_global;
 var diameter_global;
 var svg_global;
 var g_global;
+var projectList_global;
 
 var projectgraph = function () {
     return {
@@ -34,8 +35,6 @@ var loaddata = function () {
                 projectlist.push(name_temp);
             }
 
-            console.log(projectlist)
-
             // projectlist_guava.map((item,index) => {
             //     if(item.name === "guava"){
             //         guava_id = item.id;
@@ -53,11 +52,25 @@ var loaddata = function () {
                 // html += "<button class = \"showLineButton\" type=\"button\" onclick= showLine(\"" + projectlist[i] + "\") id = showLineButton_" + projectlist[i] + ">显示包克隆关系</button>";
             }
             html += "</select>";
-            html += "";
+
+            html += "<select id = \"multipleProjectSelect\" class=\"selectpicker\" multiple>";
+            for(var i = 0; i < projectlist.length; i++) {
+                if (i === 0) {
+                    html += "<option selected=\"selected\" value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
+                } else {
+                    html += "<option value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
+                }
+            }
+            html += "</select>";
+            html += "<button id = \"multipleProjectsButton\" type=\"button\" onclick= showMultipleButton()>加载项目</button>\n";
+
             // console.log(html)
             $("#projectToGraph_util").html(html);
 
-            projectGraphAjax(projectlist[0].id);
+            var temp_array = [];
+            temp_array.push(projectlist[0].id);
+            projectList_global = temp_array.concat();
+            projectGraphAjax(temp_array);
 
             // Loop_ajax(0, projectlist);
         }
@@ -109,6 +122,7 @@ var projectToGraph = function(result,divId){
             // })),
         margin = 20,
         diameter = +svg.attr("width"),
+        g_remove = svg.selectAll("g").remove();
         g = svg.append("g").attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
 
     svg_global = svg;
@@ -323,15 +337,48 @@ var projectToGraph = function(result,divId){
 
 //绘制气泡图连线
 var showLine = function(){
+    console.log(jsonLinks_global.length);
+    var jsonLinks_local = jsonLinks_global.concat();
+    var temp_delete_number = 0;
 
-    // console.log(projectId);
+    for(var i = jsonLinks_local.length; i > 0; i--){
+        var source_project = jsonLinks_local[i - 1].source_projectBelong.split("_")[1];
+        var target_project = jsonLinks_local[i - 1].target_projectBelong.split("_")[1];
+        var temp_flag_source = false;
+        var temp_flag_target = false;
+
+        // if(typeof(projectList_global.find((n) => n === source_project) === "undefined")
+        //     || typeof(projectList_global.find((n) => n === target_project) === "undefined")){
+        //     jsonLinks_local.splice(i - 1, 1);
+        //     temp_delete_number++;
+        // }
+
+        for(var j = 0; j < projectList_global.length; j++){
+            if(source_project === projectList_global[j]){
+                temp_flag_source = true;
+            }
+        }
+
+        for(var k = 0; k < projectList_global.length; k++){
+            if(target_project === projectList_global[k] ){
+                temp_flag_target = true;
+            }
+        }
+
+        if(temp_flag_source === false || temp_flag_target === false){
+            jsonLinks_local.splice(i - 1, 1);
+            temp_delete_number++;
+        }
+    }
+    console.log(jsonLinks_local.length);
+    // console.log(projectList_global);
     // console.log(project_index);
     // console.log(project_index["id_" + projectId]);
     // console.log(jsonLinks_global);
 
-    if(typeof(jsonLinks_global) !== "undefined"){
+    if(typeof(jsonLinks_local) !== "undefined" && (temp_delete_number !== jsonLinks_global.length)){
         if(flag){
-            drawLink(jsonLinks_global);
+            drawLink(jsonLinks_local);
             document.getElementById("showLineId").innerHTML = "显示包克隆关系";
         }else{
             clearLink();
@@ -411,21 +458,45 @@ function drawChildrenLinks(package1Id, package2Id){
     });
 }
 
-//单选下拉框，切换项目
-var gradeChange = function(projectId){
-    projectGraphAjax(projectId);
+//多选下拉框，加载多项目
+var showMultipleButton = function(){
+    var value = $('#multipleProjectSelect').val();
+    projectList_global = [];
+    projectList_global = value;
+    console.log(projectList_global);
+    projectGraphAjax(value);
 }
 
+//单选下拉框，切换项目
+// var gradeChange = function(projectId){
+//     var projectIds = {};
+//     projectGraphAjax(projectId);
+// }
+
 //调用接口请求数据
-var projectGraphAjax = function(projectId){
-    var projectList={
-        "projectIds": [
-            {
-                "id" : projectId
-            }
-        ],
-        "showType": "graph"
+var projectGraphAjax = function(projectIds){
+    var projectList = {};
+    var projectIds_array = [];
+
+    for(var i = 0; i < projectIds.length; i++){
+        var tempId = {};
+        tempId["id"] = projectIds[i];
+        projectIds_array.push(tempId);
     }
+
+    projectList["projectIds"] = projectIds_array;
+    projectList["showType"] = "graph";
+
+    // console.log(projectList);
+
+    // var projectList={
+    //     "projectIds": [
+    //         {
+    //             "id" : projectId
+    //         }
+    //     ],
+    //     "showType": "graph"
+    // }
     $.ajax({
         type:"POST",
         url : "/project/has",
@@ -433,6 +504,7 @@ var projectGraphAjax = function(projectId){
         dataType:"json",
         data:JSON.stringify(projectList),
         success : function(result) {
+            console.log(result);
             // resultjson = result;
             // console.log(projectlist[index])
             // console.log("projectToGraph_" + projectlist[index])
