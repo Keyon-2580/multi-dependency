@@ -179,7 +179,7 @@ public class ProjectServiceImpl implements ProjectService{
     @Override
     public JSONArray projectGraphCloneLink(long package1Id, long package2Id) {
         JSONArray links = new JSONArray();
-        List<HotspotPackage> hotspotPackageList = hotspotPackageDetector.quickDetectHotspotPackages();
+        List<HotspotPackage> hotspotPackageList = hotspotPackageDetector.quickDetectHotspotPackages(package1Id, package2Id);
         for (HotspotPackage hotspotPackage : hotspotPackageList) {
             JSONObject link = new JSONObject();
             link.put("source_id", "id_" + hotspotPackage.getPackage1().getId().toString());

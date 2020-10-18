@@ -26,8 +26,6 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-import java.io.PrintStream;
-import java.io.FileNotFoundException;
 
 @Service
 public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
@@ -57,15 +55,6 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 	private ModuleCloneRepository moduleCloneRepository;
 
 	private ThreadLocal<Integer> rowKey = new ThreadLocal<>();
-	PrintStream ps;
-
-	{
-		try {
-			ps = new PrintStream("H:/My Postgraduate/Laboratory/multi-dependency/文件/log.txt");
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-	}
 
 	@Override
 	public Collection<HotspotPackage> detectHotspotPackages() {
@@ -180,6 +169,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 //		calculator = PackageCloneValueCalculaƒtorByFileLoc.getInstance();
 	    return aggregatePackageRelation(fileClones,packageClones,aggregator);
 	}
+
 	@Override
 	public Collection<HotspotPackage> detectHotspotPackagesByFileClone() {
 		Map<String, Package> directoryPathToParentPackage = new HashMap<>();
@@ -369,7 +359,6 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 	}
 
 	public List<HotspotPackage> detectHotspotPackagesByFileClone3() {
-		System.setOut(ps);
 		Map<String, Package> directoryPathToParentPackage = new HashMap<>();
 		Map<String, Collection<Package>> directoryPathToChildrenPackages = new HashMap<>();
 		Map<String, HotspotPackage> directoryPathToHotspotPackage = new HashMap<>();
@@ -419,16 +408,20 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 			if(cloneChildrenPackagesOfPackages.containsKey(currentPackages)) {
 				cloneChildren = cloneChildrenPackagesOfPackages.get(currentPackages);
 			}
+//			directoryPathToHotspotPackage.put(currentPackages, hotspotPackage);
 			if(!cloneChildren.isEmpty()) {
 				continue;
 			}
 			Package parentPackage1 = findParentPackage(directoryPathToParentPackage, currentPackage1);
 			Package parentPackage2 = findParentPackage(directoryPathToParentPackage, currentPackage2);
 			isHotspot.put(currentPackages, isHotspotPackage(aggregator, isHotspot, directoryPathToChildrenPackages, hotspotPackage));
+//			directoryPathToHotspotPackage.put(currentPackages, hotspotPackage);
 			isChild.put(currentPackages, false);
 			String parentPackages;
+			HotspotPackage parentHotspotPackage;
 			while(parentPackage1 != null && parentPackage2 != null && !parentPackage1.getId().equals(parentPackage2.getId())) {
-				HotspotPackage parentHotspotPackage = findHotspotPackage(fileClones, directoryPathToHotspotPackage, parentPackage1, parentPackage2);
+				hotspotPackage = findHotspotPackage(fileClones, directoryPathToHotspotPackage, currentPackage1, currentPackage2);
+				parentHotspotPackage = findHotspotPackage(fileClones, directoryPathToHotspotPackage, parentPackage1, parentPackage2);
 				currentPackages = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
 				parentPackages = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
 				if(isHotspot.containsKey(parentPackages)) {
@@ -440,11 +433,13 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 					cloneChildren.remove(currentPackages);
 					cloneChildrenPackagesOfPackages.put(parentPackages, cloneChildren);
 					parentHotspotPackage.addHotspotChild(hotspotPackage);
+//					directoryPathToHotspotPackage.put(parentPackages, parentHotspotPackage);
 				}
 				if(!cloneChildren.isEmpty()) {
 					break;
 				}
 				isHotspot.put(parentPackages, isHotspotPackage(aggregator, isHotspot, directoryPathToChildrenPackages, parentHotspotPackage));
+//				directoryPathToHotspotPackage.put(parentPackages, parentHotspotPackage);
 				if(isHotspot.get(parentPackages)) {
 					isChild.put(currentPackages, true);
 				}
@@ -502,26 +497,8 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 	}
 
 	@Override
-	public List<HotspotPackage> quickDetectHotspotPackages() {
-		List<HotspotPackage> result = getHotspotPackages(-1, -1);
-		result.sort((d1, d2) -> {
-			int allNodes1 = d1.getAllNodes1() + d1.getAllNodes2();
-			int cloneNodes1 = d1.getRelationNodes1() + d1.getRelationNodes2();
-			double percentageThreshold1 = (cloneNodes1 + 0.0) / allNodes1;
-			int allNodes2 = d2.getAllNodes1() + d2.getAllNodes2();
-			int cloneNodes2 = d2.getRelationNodes1() + d2.getRelationNodes2();
-			double percentageThreshold2 = (cloneNodes2 + 0.0) / allNodes2;
-			if(percentageThreshold1 < percentageThreshold2) {
-				return 1;
-			}
-			else if(percentageThreshold1 == percentageThreshold2) {
-				return Integer.compare(cloneNodes2, cloneNodes1);
-			}
-			else {
-				return -1;
-			}
-		});
-		return result;
+	public List<HotspotPackage> quickDetectHotspotPackages(long parent1Id, long parent2Id) {
+		return getHotspotPackages(parent1Id, parent2Id);
 	}
 
 	@Override
@@ -800,6 +777,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 		packageClone.setDate(allNodes1, allNodes2, cloneNodes1, cloneNodes2);
 		return aggregator.aggregate(packageClone);
 	}
+
 	//递归加载聚合结果
 	public List<HotspotPackage> getHotspotPackages(long parent1Id, long parent2Id) {
 		List<HotspotPackage> result = new ArrayList<>();

@@ -39,7 +39,7 @@ public class CloneAggregationController {
     @GetMapping("/show")
     @ResponseBody
     public Collection<HotspotPackage> showHotspotPackages(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
-        return hotspotPackageDetector.quickDetectHotspotPackages();
+        return hotspotPackageDetector.quickDetectHotspotPackages(-1, -1);
     }
 
     @GetMapping("/package/export")
