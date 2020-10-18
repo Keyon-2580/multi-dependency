@@ -56,67 +56,6 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
-    /**
-     * 递归遍历项目中所有package的包含关系
-     */
-    public JSONArray getHasJson(Collection<ProjectFile> clonefiles, List<PackageStructure> childrenPackages, String showType){
-        JSONArray rtJA = new JSONArray();
-        for(PackageStructure pckstru :childrenPackages){
-            List<PackageStructure> pckList = pckstru.getChildrenPackages();
-            List<ProjectFile> fileList = pckstru.getChildrenFiles();
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("name",pckstru.getPck().getName());
-//			jsonObject.put("long_name",pckstru.getPck().getDirectoryPath());
-            jsonObject.put("size",fileList.size());
-            jsonObject.put("id","id_" + pckstru.getPck().getId().toString());
-            float cloneFilesInAllFiles = 0;
-            if(fileList.size() > 0){
-                for(ProjectFile profile : fileList){
-                    if(clonefiles.contains(profile)){
-                        cloneFilesInAllFiles += 1;
-                    }
-                }
-            }
-            if(fileList.size() > 0){
-                jsonObject.put("clone_ratio",cloneFilesInAllFiles / (float)(fileList.size()));
-            }else{
-                jsonObject.put("clone_ratio", 0);
-            }
-//			JSONArray jsonArray = new JSONArray();
-//			if(fileList.size() > 0){
-//				for(ProjectFile profile : fileList){
-//					JSONObject jsonObject2 = new JSONObject();
-//					jsonObject2.put("size",1000);
-//					jsonObject2.put("long_name",profile.getPath());
-//					if(clonefiles.contains(profile)){
-//						jsonObject2.put("clone",true);
-//					}else{
-//						jsonObject2.put("clone",false);
-//					}
-//					jsonObject2.put("name",profile.getName());
-//					jsonObject2.put("id","id_" + profile.getId().toString());
-//					jsonArray.add(jsonObject2);
-//				}
-//			}
-
-//			if(jsonArray.size() > 0){
-//				if(showType.equals("graph")){
-//					jsonObject.put("children",jsonArray);
-//				}else{
-//					jsonObject.put("collapse_children",jsonArray);
-//				}
-//			}
-
-            if(pckList.size()>0){//如果该属性还有子属性,继续做查询,直到该属性没有孩子,也就是最后一个节点
-                jsonObject.put("children", getHasJson(clonefiles,pckList, showType));
-            }
-//			System.out.println(pckList.size());
-            rtJA.add(jsonObject);
-        }
-        return rtJA;
-    }
-
-    @Override
     public JSONArray getMultipleProjectsGraphJson(JSONObject dataList) {
         String showType = dataList.getString("showType");
         JSONArray projectIds = dataList.getJSONArray("projectIds");
@@ -172,6 +111,68 @@ public class ProjectServiceImpl implements ProjectService{
         result.put("children",getHasJson(clonefiles,childrenPackagesnew, showType));
 
         return result;
+    }
+
+    @Override
+    /**
+     * 递归遍历项目中所有package的包含关系
+     */
+    public JSONArray getHasJson(Collection<ProjectFile> clonefiles, List<PackageStructure> childrenPackages, String showType){
+        JSONArray rtJA = new JSONArray();
+        for(PackageStructure pckstru :childrenPackages){
+            List<PackageStructure> pckList = pckstru.getChildrenPackages();
+            List<ProjectFile> fileList = pckstru.getChildrenFiles();
+            JSONObject jsonObject = new JSONObject();
+//            jsonObject.put("name",pckstru.getPck().getName());
+            jsonObject.put("name",pckstru.getPck().getDirectoryPath());
+//			jsonObject.put("long_name",pckstru.getPck().getDirectoryPath());
+            jsonObject.put("size",fileList.size());
+            jsonObject.put("id","id_" + pckstru.getPck().getId().toString());
+            float cloneFilesInAllFiles = 0;
+            if(fileList.size() > 0){
+                for(ProjectFile profile : fileList){
+                    if(clonefiles.contains(profile)){
+                        cloneFilesInAllFiles += 1;
+                    }
+                }
+            }
+            if(fileList.size() > 0){
+                jsonObject.put("clone_ratio",cloneFilesInAllFiles / (float)(fileList.size()));
+            }else{
+                jsonObject.put("clone_ratio", 0);
+            }
+//			JSONArray jsonArray = new JSONArray();
+//			if(fileList.size() > 0){
+//				for(ProjectFile profile : fileList){
+//					JSONObject jsonObject2 = new JSONObject();
+//					jsonObject2.put("size",1000);
+//					jsonObject2.put("long_name",profile.getPath());
+//					if(clonefiles.contains(profile)){
+//						jsonObject2.put("clone",true);
+//					}else{
+//						jsonObject2.put("clone",false);
+//					}
+//					jsonObject2.put("name",profile.getName());
+//					jsonObject2.put("id","id_" + profile.getId().toString());
+//					jsonArray.add(jsonObject2);
+//				}
+//			}
+
+//			if(jsonArray.size() > 0){
+//				if(showType.equals("graph")){
+//					jsonObject.put("children",jsonArray);
+//				}else{
+//					jsonObject.put("collapse_children",jsonArray);
+//				}
+//			}
+
+            if(pckList.size()>0){//如果该属性还有子属性,继续做查询,直到该属性没有孩子,也就是最后一个节点
+                jsonObject.put("children", getHasJson(clonefiles,pckList, showType));
+            }
+//			System.out.println(pckList.size());
+            rtJA.add(jsonObject);
+        }
+        return rtJA;
     }
 
     @Override

@@ -28,7 +28,6 @@ line {
 }
 
 button {
-    float: right;
     margin-right: 50px;
     margin-top: 50px;
     color: black;
@@ -42,6 +41,15 @@ button {
     cursor: pointer;
 }
 
+#showLineId{
+    float: right;
+}
+
+#multipleProjectSelect{
+    margin-left: 20px;
+    margin-bottom: 47px;
+    margin-right: 20px;
+}
 
 #projectToGraph {
     border:2px solid red;

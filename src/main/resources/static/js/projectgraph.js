@@ -18,14 +18,12 @@ var projectgraph = function () {
 
 //加载数据
 var loaddata = function () {
-    var resultjson = null;
     var projectlist = [];
 
     $.ajax({
         type : "GET",
         url : "/project/all",
         success : function(result) {
-            // console.log(result);
             for(x in result){
                 // projectlist.push(x);
                 var name_temp = {};
@@ -42,16 +40,6 @@ var loaddata = function () {
             // })
 
             var html = ""
-            html += "<select onchange=\"gradeChange(this.options[this.options.selectedIndex].value)\" >";
-            for(var i = 0; i < projectlist.length; i++){
-                if(i === 0){
-                    html += "<option id = \"project_graph_select\" selected=\"selected\" value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
-                }else{
-                    html += "<option id = \"project_graph_select\" value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
-                }
-                // html += "<button class = \"showLineButton\" type=\"button\" onclick= showLine(\"" + projectlist[i] + "\") id = showLineButton_" + projectlist[i] + ">显示包克隆关系</button>";
-            }
-            html += "</select>";
 
             html += "<select id = \"multipleProjectSelect\" class=\"selectpicker\" multiple>";
             for(var i = 0; i < projectlist.length; i++) {
@@ -309,30 +297,30 @@ var projectToGraph = function(result,divId){
     //     return result;
     // }
 
-    function findNameInImports(data,name){
-        for(var i = 0; i < data.length; i++){
-            if(data[i].name === name){
-                return data[i];
-            }
-        }
-        return null;
-    }
-
-    function setCloneTitle(data){
-        if(data.length > 0){
-            var result = "\n克隆关系:";
-            for(var i = 0; i < data.length; i++){
-                result += "\n{\n克隆文件:";
-                result += data[i].name;
-                result += "\n克隆类型:";
-                result += data[i].clone_type;
-                result += "\n}";
-            }
-            return result;
-        }else{
-            return null;
-        }
-    }
+    // function findNameInImports(data,name){
+    //     for(var i = 0; i < data.length; i++){
+    //         if(data[i].name === name){
+    //             return data[i];
+    //         }
+    //     }
+    //     return null;
+    // }
+    //
+    // function setCloneTitle(data){
+    //     if(data.length > 0){
+    //         var result = "\n克隆关系:";
+    //         for(var i = 0; i < data.length; i++){
+    //             result += "\n{\n克隆文件:";
+    //             result += data[i].name;
+    //             result += "\n克隆类型:";
+    //             result += data[i].clone_type;
+    //             result += "\n}";
+    //         }
+    //         return result;
+    //     }else{
+    //         return null;
+    //     }
+    // }
 }
 
 //绘制气泡图连线
@@ -346,12 +334,6 @@ var showLine = function(){
         var target_project = jsonLinks_local[i - 1].target_projectBelong.split("_")[1];
         var temp_flag_source = false;
         var temp_flag_target = false;
-
-        // if(typeof(projectList_global.find((n) => n === source_project) === "undefined")
-        //     || typeof(projectList_global.find((n) => n === target_project) === "undefined")){
-        //     jsonLinks_local.splice(i - 1, 1);
-        //     temp_delete_number++;
-        // }
 
         for(var j = 0; j < projectList_global.length; j++){
             if(source_project === projectList_global[j]){
@@ -371,10 +353,6 @@ var showLine = function(){
         }
     }
     console.log(jsonLinks_local.length);
-    // console.log(projectList_global);
-    // console.log(project_index);
-    // console.log(project_index["id_" + projectId]);
-    // console.log(jsonLinks_global);
 
     if(typeof(jsonLinks_local) !== "undefined" && (temp_delete_number !== jsonLinks_global.length)){
         if(flag){
@@ -466,12 +444,6 @@ var showMultipleButton = function(){
     console.log(projectList_global);
     projectGraphAjax(value);
 }
-
-//单选下拉框，切换项目
-// var gradeChange = function(projectId){
-//     var projectIds = {};
-//     projectGraphAjax(projectId);
-// }
 
 //调用接口请求数据
 var projectGraphAjax = function(projectIds){
