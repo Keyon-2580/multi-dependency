@@ -5,9 +5,11 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
+import cn.edu.fudan.se.multidependency.model.relation.clone.ModuleClone;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.AggregationCloneRepository;
-import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
+import cn.edu.fudan.se.multidependency.repository.relation.clone.ModuleCloneRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.*;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
@@ -16,8 +18,6 @@ import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationServic
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +26,8 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.io.PrintStream;
+import java.io.FileNotFoundException;
 
 @Service
 public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
@@ -48,383 +49,21 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 
 	@Autowired
 	private HasRelationService hasRelationService;
-	private Map<String, Package> directoryPathToPackage = new ConcurrentHashMap<>();
+
+	@Autowired
+	private CoChangeRepository coChangeRepository;
+
+	@Autowired
+	private ModuleCloneRepository moduleCloneRepository;
+
 	private ThreadLocal<Integer> rowKey = new ThreadLocal<>();
-	private Package findParentPackage(Package pck) {
-		directoryPathToPackage.put(pck.getDirectoryPath(), pck);
-		String parentDirectoryPath = pck.lastPackageDirectoryPath();
-		if (FileUtil.SLASH_LINUX.equals(parentDirectoryPath)) {
-			return null;
-		}
-		Package parent = directoryPathToPackage.get(parentDirectoryPath);
-		if (parent != null) {
-			return parent;
-		}
-		parent = containRelationService.findPackageInPackage(pck);
-		if (parent != null) {
-			directoryPathToPackage.put(parentDirectoryPath, parent);
-		}
-		return parent;
-	}
+	PrintStream ps;
 
-	private int getAllFilesNum(Map<Long, Integer> allNodesOfPackage, Package pck) {
-		if(allNodesOfPackage.containsKey(pck.getId())) {
-			return allNodesOfPackage.get(pck.getId());
-		}
-		int number = containRelationService.findPackageContainFiles(pck).size();
-		Collection<Package> childrenPackages = hasRelationService.findPackageHasPackages(pck);
-		for(Package childPackage : childrenPackages) {
-			number += getAllFilesNum(allNodesOfPackage, childPackage);
-		}
-		return number;
-	}
-
-	//判断pck1和pck2两个包是否可以聚合
-	private boolean isHotspotPackages(RelationAggregator<Boolean> aggregator, Map<Long, Integer> allNodesOfPackage, Map<String, Integer> cloneNodesOfClonePackages, Map<String, Integer> cloneNodesOfHotspotPackages, Collection<String> clonePackages, Collection<String> hotspotPackages, Package pck1, Package pck2) {
-		String packages1 = String.join("_", pck1.getDirectoryPath(), pck2.getDirectoryPath());
-		String packages2 = String.join("_", pck2.getDirectoryPath(), pck1.getDirectoryPath());
-		if(hotspotPackages.contains(packages1) || hotspotPackages.contains(packages2)) {
-			return true;
-		}
-		int allNodes1 = containRelationService.findPackageContainFiles(pck1).size();
-		int allNodes2 = containRelationService.findPackageContainFiles(pck2).size();
-		int cloneNodes1 = 0;
-		int cloneNodes2 = 0;
-		if(clonePackages.contains(packages1) || clonePackages.contains(packages2)) {
-			cloneNodes1 = cloneNodesOfClonePackages.get(packages1);
-			cloneNodes2 = cloneNodesOfClonePackages.get(packages2);
-		}
-		//遍历包下文件或子包，函数待改进
-		Collection<Package> childrenPackages1 = hasRelationService.findPackageHasPackages(pck1);
-		Collection<Package> childrenPackages2 = hasRelationService.findPackageHasPackages(pck2);
-		int childrenHotspotPackageCount1 = 0;
-		int childrenHotspotPackageCount2 = 0;
-		for(Package childPackage1 : childrenPackages1) {
-			boolean flag = false;
-			int index = 0;
-			String children1 = "";
-			String children2 = "";
-			for(Package childPackage2 : childrenPackages2) {
-				children1 = String.join("_", childPackage1.getDirectoryPath(), childPackage2.getDirectoryPath());
-				if(hotspotPackages.contains(children1)) {
-					if(!flag) {
-						children2 = children1;
-						index = 0;
-						flag = true;
-					}
-					else {
-						int cloneNodesOfChildren1 = cloneNodesOfHotspotPackages.get(children1);
-						int cloneNodesOfChildren2;
-						if(index == 0) {
-							cloneNodesOfChildren2 = cloneNodesOfHotspotPackages.get(children2);
-						}
-						else {
-							cloneNodesOfChildren2 = cloneNodesOfClonePackages.get(children2);
-						}
-						if(cloneNodesOfChildren1 > cloneNodesOfChildren2) {
-							children2 = children1;
-							index = 0;
-							flag = true;
-						}
-					}
-				}
-				else if(clonePackages.contains(children1)) {
-					if(!flag) {
-						children2 = children1;
-						index = 1;
-						flag = true;
-					}
-					else {
-						int cloneNodesOfChildren1 = cloneNodesOfClonePackages.get(children1);
-						int cloneNodesOfChildren2;
-						if(index == 0) {
-							cloneNodesOfChildren2 = cloneNodesOfHotspotPackages.get(children2);
-						}
-						else {
-							cloneNodesOfChildren2 = cloneNodesOfClonePackages.get(children2);
-						}
-						if(cloneNodesOfChildren1 > cloneNodesOfChildren2) {
-							children2 = children1;
-							index = 1;
-							flag = true;
-						}
-					}
-				}
-			}
-			if(flag && hotspotPackages.contains(children2)) {
-				allNodes1 += allNodesOfPackage.get(childPackage1.getId());
-				cloneNodes1 += cloneNodesOfHotspotPackages.get(children2);
-				childrenHotspotPackageCount1 ++;
-			}
-			else if(flag && clonePackages.contains(children2)) {
-				allNodes1 += allNodesOfPackage.get(childPackage1.getId());
-				cloneNodes1 += cloneNodesOfClonePackages.get(children2);
-			}
-			else {
-				allNodes1 += getAllFilesNum(allNodesOfPackage, childPackage1);
-			}
-		}
-		for(Package childPackage2 : childrenPackages2) {
-			int index = 0;
-			boolean flag = false;
-			String children2 = "";
-			String children1 = "";
-			for(Package childPackage1 : childrenPackages1) {
-				children2 = String.join("_", childPackage2.getDirectoryPath(), childPackage1.getDirectoryPath());
-				if(hotspotPackages.contains(children2)) {
-					if(!flag) {
-						children1 = children2;
-						index = 0;
-						flag = true;
-					}
-					else {
-						int cloneNodesOfChildren2 = cloneNodesOfHotspotPackages.get(children2);
-						int cloneNodesOfChildren1;
-						if(index == 0) {
-							cloneNodesOfChildren1 = cloneNodesOfHotspotPackages.get(children1);
-						}
-						else {
-							cloneNodesOfChildren1 = cloneNodesOfClonePackages.get(children1);
-						}
-						if(cloneNodesOfChildren2 > cloneNodesOfChildren1) {
-							children1 = children2;
-							index = 0;
-							flag = true;
-						}
-					}
-				}
-				else if(clonePackages.contains(children2)) {
-					if(!flag) {
-						children1 = children2;
-						index = 1;
-						flag = true;
-					}
-					else {
-						int cloneNodesOfChildren2 = cloneNodesOfClonePackages.get(children2);
-						int cloneNodesOfChildren1;
-						if(index == 0) {
-							cloneNodesOfChildren1 = cloneNodesOfHotspotPackages.get(children1);
-						}
-						else {
-							cloneNodesOfChildren1 = cloneNodesOfClonePackages.get(children1);
-						}
-						if(cloneNodesOfChildren2 > cloneNodesOfChildren1) {
-							children1 = children2;
-							index = 1;
-							flag = true;
-						}
-					}
-				}
-			}
-			if(flag && hotspotPackages.contains(children1)) {
-				allNodes2 += allNodesOfPackage.get(childPackage2.getId());
-				cloneNodes2 += cloneNodesOfHotspotPackages.get(children1);
-				childrenHotspotPackageCount2 ++;
-			}
-			else if(flag && clonePackages.contains(children1)) {
-				allNodes2 += allNodesOfPackage.get(childPackage2.getId());
-				cloneNodes2 += cloneNodesOfClonePackages.get(children1);
-			}
-			else {
-				allNodes2 += getAllFilesNum(allNodesOfPackage, childPackage2);
-			}
-		}
-		allNodesOfPackage.put(pck1.getId(), allNodes1);
-		allNodesOfPackage.put(pck2.getId(), allNodes2);
-		RelationDataForDoubleNodes<Node, Relation> packageClone = new RelationDataForDoubleNodes<Node, Relation>(pck1, pck2);
-		packageClone.setDate(cloneNodes1, cloneNodes2, allNodes1, allNodes2, childrenPackages1.size(), childrenPackages2.size(), childrenHotspotPackageCount1, childrenHotspotPackageCount2);
-		if(aggregator.aggregate(packageClone)) {
-			cloneNodesOfHotspotPackages.put(packages1, cloneNodes1);
-			cloneNodesOfHotspotPackages.put(packages2, cloneNodes2);
-			hotspotPackages.add(packages1);
-			hotspotPackages.add(packages2);
-			return true;
-		}
-		else {
-			cloneNodesOfClonePackages.put(packages1, cloneNodes1);
-			cloneNodesOfClonePackages.put(packages2, cloneNodes2);
-			clonePackages.add(packages1);
-			clonePackages.add(packages2);
-			return false;
-		}
-	}
-
-	//加载根目录的子目录
-	public void AddChildrenPackages(Map<Long, Integer> allNodesOfPackage, Map<String, Integer> cloneNodesOfClonePackages, Map<String, Integer> cloneNodesOfHotspotPackages, Collection<String> clonePackages, Collection<String> hotspotPackages, HotspotPackage rootHotspotPackage, Collection<? extends Relation> fileClones, Map<String, HotspotPackage> idToPackageClone) {
-		Package package1 = rootHotspotPackage.getPackage1();
-		Package package2 = rootHotspotPackage.getPackage2();
-		Collection<Package> childrenPackages1 = hasRelationService.findPackageHasPackages(package1);
-		Collection<Package> childrenPackages2 = hasRelationService.findPackageHasPackages(package2);
-		for(Package childPackage1 : childrenPackages1) {
-			int index = 0;
-			boolean flag = false;
-			String children1 = "";
-			String children2 = "";
-			Package childPackage = null;
-			for(Package childPackage2 : childrenPackages2) {
-				children1 = String.join("_", childPackage1.getDirectoryPath(), childPackage2.getDirectoryPath());
-				if(hotspotPackages.contains(children1)) {
-					if(!flag) {
-						children2 = children1;
-						childPackage = childPackage2;
-						index = 0;
-						flag = true;
-					}
-					else {
-						int cloneNodesOfChildren1 = cloneNodesOfHotspotPackages.get(children1);
-						int cloneNodesOfChildren2;
-						if(index == 0) {
-							cloneNodesOfChildren2 = cloneNodesOfHotspotPackages.get(children2);
-						}
-						else {
-							cloneNodesOfChildren2 = cloneNodesOfClonePackages.get(children2);
-						}
-						if(cloneNodesOfChildren1 > cloneNodesOfChildren2) {
-							children2 = children1;
-							childPackage = childPackage2;
-							index = 0;
-							flag = true;
-						}
-					}
-				}
-				else if(clonePackages.contains(children1)) {
-					if(!flag) {
-						children2 = children1;
-						childPackage = childPackage2;
-						index = 1;
-						flag = true;
-					}
-					else {
-						int cloneNodesOfChildren1 = cloneNodesOfClonePackages.get(children1);
-						int cloneNodesOfChildren2;
-						if(index == 0) {
-							cloneNodesOfChildren2 = cloneNodesOfHotspotPackages.get(children2);
-						}
-						else {
-							cloneNodesOfChildren2 = cloneNodesOfClonePackages.get(children2);
-						}
-						if(cloneNodesOfChildren1 > cloneNodesOfChildren2) {
-							children2 = children1;
-							childPackage = childPackage2;
-							index = 1;
-							flag = true;
-						}
-					}
-				}
-			}
-			if(flag && hotspotPackages.contains(children2)) {
-				HotspotPackage childHotspotPackage1;
-				RelationDataForDoubleNodes<Node, Relation> childPackageClone = summaryAggregationDataService.querySuperNodeRelationFromSubNodeRelationSort(fileClones, childPackage1, childPackage);
-				if(childPackageClone != null) {
-					childHotspotPackage1 = idToPackageClone.getOrDefault(childPackageClone.getId(), new HotspotPackage(childPackageClone));
-				}
-				else {
-					String childrenId1 = String.join("_", childPackage1.getDirectoryPath(), childPackage.getDirectoryPath());
-					childHotspotPackage1 = new HotspotPackage(new RelationDataForDoubleNodes<Node, Relation>(childPackage1, childPackage, childrenId1));
-				}
-				if(!rootHotspotPackage.isContainHotspotChild(childHotspotPackage1)) {
-					AddChildrenPackages(allNodesOfPackage, cloneNodesOfClonePackages, cloneNodesOfHotspotPackages, clonePackages, hotspotPackages, childHotspotPackage1, fileClones, idToPackageClone);
-					Package childrenPackage1 = childHotspotPackage1.getPackage1();
-					Package childrenPackage2 = childHotspotPackage1.getPackage2();
-					String packages1 = String.join("_", childrenPackage1.getDirectoryPath(), childrenPackage2.getDirectoryPath());
-					String packages2 = String.join("_", childrenPackage2.getDirectoryPath(), childrenPackage1.getDirectoryPath());
-					int allNodes1 = allNodesOfPackage.get(childrenPackage1.getId());
-					int allNodes2 = allNodesOfPackage.get(childrenPackage2.getId());
-					int cloneNodes1 = cloneNodesOfHotspotPackages.get(packages1);
-					int cloneNodes2 = cloneNodesOfHotspotPackages.get(packages2);
-					childHotspotPackage1.setData(allNodes1, allNodes2, cloneNodes1, cloneNodes2);
-					rootHotspotPackage.addHotspotChild(childHotspotPackage1);
-				}
-			}
-			else if(flag && clonePackages.contains(children2)) {
-				HotspotPackage childHotspotPackage1;
-				RelationDataForDoubleNodes<Node, Relation> childPackageClone = summaryAggregationDataService.querySuperNodeRelationFromSubNodeRelationSort(fileClones, childPackage1, childPackage);
-				if(childPackageClone != null) {
-					childHotspotPackage1 = idToPackageClone.getOrDefault(childPackageClone.getId(), new HotspotPackage(childPackageClone));
-				}
-				else {
-					String childrenId1 = String.join("_", childPackage1.getDirectoryPath(), childPackage.getDirectoryPath());
-					childHotspotPackage1 = new HotspotPackage(new RelationDataForDoubleNodes<Node, Relation>(childPackage1, childPackage, childrenId1));
-				}
-				if(!rootHotspotPackage.isContainHotspotChild(childHotspotPackage1)) {
-					AddChildrenPackages(allNodesOfPackage, cloneNodesOfClonePackages, cloneNodesOfHotspotPackages, clonePackages, hotspotPackages, childHotspotPackage1, fileClones, idToPackageClone);
-					Package childrenPackage1 = childHotspotPackage1.getPackage1();
-					Package childrenPackage2 = childHotspotPackage1.getPackage2();
-					String packages1 = String.join("_", childrenPackage1.getDirectoryPath(), childrenPackage2.getDirectoryPath());
-					String packages2 = String.join("_", childrenPackage2.getDirectoryPath(), childrenPackage1.getDirectoryPath());
-					int allNodes1 = allNodesOfPackage.get(childrenPackage1.getId());
-					int allNodes2 = allNodesOfPackage.get(childrenPackage2.getId());
-					int cloneNodes1 = cloneNodesOfClonePackages.get(packages1);
-					int cloneNodes2 = cloneNodesOfClonePackages.get(packages2);
-					childHotspotPackage1.setData(allNodes1, allNodes2, cloneNodes1, cloneNodes2);
-					rootHotspotPackage.addHotspotChild(childHotspotPackage1);
-				}
-			}
-			else {
-				if(!rootHotspotPackage.isContainOtherChild1(childPackage1)) {
-					childPackage1.setAllNodes(getAllFilesNum(allNodesOfPackage, childPackage1));
-					rootHotspotPackage.addOtherChild1(childPackage1);
-				}
-			}
-		}
-		for(Package childPackage2 : childrenPackages2) {
-			int index = 0;
-			boolean flag = false;
-			String children2 = "";
-			String children1 = "";
-			for(Package childPackage1 : childrenPackages1) {
-				children2 = String.join("_", childPackage2.getDirectoryPath(), childPackage1.getDirectoryPath());
-				if(hotspotPackages.contains(children2)) {
-					if(!flag) {
-						children1 = children2;
-						index = 0;
-						flag = true;
-					}
-					else {
-						int cloneNodesOfChildren2 = cloneNodesOfHotspotPackages.get(children2);
-						int cloneNodesOfChildren1;
-						if(index == 0) {
-							cloneNodesOfChildren1 = cloneNodesOfHotspotPackages.get(children1);
-						}
-						else {
-							cloneNodesOfChildren1 = cloneNodesOfClonePackages.get(children1);
-						}
-						if(cloneNodesOfChildren2 > cloneNodesOfChildren1) {
-							children1 = children2;
-							index = 0;
-							flag = true;
-						}
-					}
-				}
-				else if(clonePackages.contains(children2)) {
-					if(!flag) {
-						children1 = children2;
-						index = 1;
-						flag = true;
-					}
-					else {
-						int cloneNodesOfChildren2 = cloneNodesOfClonePackages.get(children2);
-						int cloneNodesOfChildren1;
-						if(index == 0) {
-							cloneNodesOfChildren1 = cloneNodesOfHotspotPackages.get(children1);
-						}
-						else {
-							cloneNodesOfChildren1 = cloneNodesOfClonePackages.get(children1);
-						}
-						if(cloneNodesOfChildren2 > cloneNodesOfChildren1) {
-							children1 = children2;
-							index = 1;
-							flag = true;
-						}
-					}
-				}
-			}
-			if(!flag) {
-				if(!rootHotspotPackage.isContainOtherChild2(childPackage2)) {
-					childPackage2.setAllNodes(getAllFilesNum(allNodesOfPackage, childPackage2));
-					rootHotspotPackage.addOtherChild2(childPackage2);
-				}
-			}
+	{
+		try {
+			ps = new PrintStream("H:/My Postgraduate/Laboratory/multi-dependency/文件/log.txt");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -439,6 +78,8 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 	private Collection<HotspotPackage> aggregatePackageRelation(Collection<? extends Relation> subNodeRelations,
 																Collection<RelationDataForDoubleNodes<Node, Relation>> packageRelations,
 																RelationAggregator<Boolean> aggregator) {
+
+		Map<String, Package> directoryPathToParentPackage = new HashMap<>();
 		Map<String, HotspotPackage> idToPackageRelation = new HashMap<>();
 		Map<String, Boolean> isChild = new HashMap<>();
 		for (RelationDataForDoubleNodes<Node, Relation> packageRelation : packageRelations) {
@@ -455,8 +96,8 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 			String id = temp.getId();
 			Package currentPackage1 = (Package)packageRelation.getNode1();
 			Package currentPackage2 = (Package)packageRelation.getNode2();
-			Package parentPackage1 = findParentPackage(currentPackage1);
-			Package parentPackage2 = findParentPackage(currentPackage2);
+			Package parentPackage1 = findParentPackage3(directoryPathToParentPackage, currentPackage1);
+			Package parentPackage2 = findParentPackage3(directoryPathToParentPackage, currentPackage2);
 			while (parentPackage1 != null && parentPackage2 != null) {
 				RelationDataForDoubleNodes<Node, Relation> parentPackageClone = summaryAggregationDataService.querySuperNodeRelationFromSubNodeRelationSort(subNodeRelations, parentPackage1, parentPackage2);
 				if (parentPackageClone == null) {
@@ -539,9 +180,9 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 //		calculator = PackageCloneValueCalculaƒtorByFileLoc.getInstance();
 	    return aggregatePackageRelation(fileClones,packageClones,aggregator);
 	}
-
 	@Override
 	public Collection<HotspotPackage> detectHotspotPackagesByFileClone() {
+		Map<String, Package> directoryPathToParentPackage = new HashMap<>();
 		Map<Long, Integer> allNodesOfPackage = new HashMap<>();
 		Map<String, Integer> cloneNodesOfHotspotPackages = new HashMap<>();
 		Map<String, Integer> cloneNodesOfClonePackages = new HashMap<>();
@@ -558,8 +199,8 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 		for(RelationDataForDoubleNodes<Node, Relation> packageClone : packageClones) {
 			Package currentPackage1 = (Package) packageClone.getNode1();
 			Package currentPackage2 = (Package) packageClone.getNode2();
-			Package parentPackage1 = findParentPackage(currentPackage1);
-			Package parentPackage2 = findParentPackage(currentPackage2);
+			Package parentPackage1 = findParentPackage3(directoryPathToParentPackage, currentPackage1);
+			Package parentPackage2 = findParentPackage3(directoryPathToParentPackage, currentPackage2);
 			while(parentPackage1 != null && parentPackage2 != null && !parentPackage1.getId().equals(parentPackage2.getId())) {
 				String currentPackages = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
 				String parentPackages = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
@@ -574,8 +215,8 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 				cloneChildrenPackagesOfPackages.put(parentPackages, cloneChildren);
 				currentPackage1 = parentPackage1;
 				currentPackage2 = parentPackage2;
-				parentPackage1 = findParentPackage(currentPackage1);
-				parentPackage2 = findParentPackage(currentPackage2);
+				parentPackage1 = findParentPackage3(directoryPathToParentPackage, currentPackage1);
+				parentPackage2 = findParentPackage3(directoryPathToParentPackage, currentPackage2);
 			}
 		}
 		//预处理
@@ -587,8 +228,8 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 			if(clonePackages.contains(currentPackages1) || clonePackages.contains(currentPackages2)) {
 				continue;
 			}
-			allNodesOfPackage.put(currentPackage1.getId(), packageClone.getAllNodesInNode1().size());
-			allNodesOfPackage.put(currentPackage2.getId(), packageClone.getAllNodesInNode2().size());
+//			allNodesOfPackage.put(currentPackage1.getId(), packageClone.getAllNodesInNode1().size());
+//			allNodesOfPackage.put(currentPackage2.getId(), packageClone.getAllNodesInNode2().size());
 			cloneNodesOfClonePackages.put(currentPackages1, packageClone.getNodesInNode1().size());
 			cloneNodesOfClonePackages.put(currentPackages2, packageClone.getNodesInNode2().size());
 			clonePackages.add(currentPackages1);
@@ -609,8 +250,8 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 			if(!cloneChildren.isEmpty()) {
 				continue;
 			}
-			Package parentPackage1 = findParentPackage(currentPackage1);
-			Package parentPackage2 = findParentPackage(currentPackage2);
+			Package parentPackage1 = findParentPackage3(directoryPathToParentPackage, currentPackage1);
+			Package parentPackage2 = findParentPackage3(directoryPathToParentPackage, currentPackage2);
 			String parentPackages = "";
 			if(parentPackage1 != null && parentPackage2 != null && !parentPackage1.getId().equals(parentPackage2.getId())) {
 				parentPackages = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
@@ -620,7 +261,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 					cloneChildrenPackagesOfPackages.put(parentPackages, cloneChildren);
 				}
 			}
-			if(isHotspotPackages(aggregator, allNodesOfPackage, cloneNodesOfClonePackages, cloneNodesOfHotspotPackages, clonePackages, hotspotPackages, currentPackage1, currentPackage2)) {
+			if(isHotspotPackages3(aggregator, allNodesOfPackage, cloneNodesOfClonePackages, cloneNodesOfHotspotPackages, clonePackages, hotspotPackages, currentPackage1, currentPackage2)) {
 				isHotspot.put(currentPackages, true);
 			}
 			else {
@@ -634,11 +275,14 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 				RelationDataForDoubleNodes<Node, Relation> childPackageClone = summaryAggregationDataService.querySuperNodeRelationFromSubNodeRelationSort(fileClones, parentPackage1, parentPackage2);
 				if(childPackageClone != null) {
 					parentHotspotPackage = idToPackageClone.getOrDefault(childPackageClone.getId(), new HotspotPackage(childPackageClone));
+					if(parentHotspotPackage.getPackage1().getDirectoryPath().equals(parentPackage2.getDirectoryPath()) && parentHotspotPackage.getPackage2().getDirectoryPath().equals(parentPackage1.getDirectoryPath())) {
+						parentHotspotPackage.swapPackages();
+					}
 				}
 				else {
-					String parentId = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
-					parentHotspotPackage = new HotspotPackage(new RelationDataForDoubleNodes<Node, Relation>(parentPackage1, parentPackage2, parentId));
+					parentHotspotPackage = new HotspotPackage(new RelationDataForDoubleNodes<Node, Relation>(parentPackage1, parentPackage2));
 				}
+//				HotspotPackage parentHotspotPackage = new HotspotPackage(new RelationDataForDoubleNodes<Node, Relation>(parentPackage1, parentPackage2));
 				currentPackages = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
 				parentPackages = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
 				cloneChildren = new ArrayList<>();
@@ -652,7 +296,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 				if(!cloneChildren.isEmpty()) {
 					break;
 				}
-				if(isHotspotPackages(aggregator, allNodesOfPackage, cloneNodesOfClonePackages, cloneNodesOfHotspotPackages, clonePackages, hotspotPackages, parentPackage1, parentPackage2)) {
+				if(isHotspotPackages3(aggregator, allNodesOfPackage, cloneNodesOfClonePackages, cloneNodesOfHotspotPackages, clonePackages, hotspotPackages, parentPackage1, parentPackage2)) {
 					isChild.put(currentPackages, true);
 					isHotspot.put(parentPackages, true);
 				}
@@ -663,8 +307,8 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 				idToPackageClone.put(parentHotspotPackage.getId(), parentHotspotPackage);
 				currentPackage1 = parentPackage1;
 				currentPackage2 = parentPackage2;
-				parentPackage1 = findParentPackage(currentPackage1);
-				parentPackage2 = findParentPackage(currentPackage2);
+				parentPackage1 = findParentPackage3(directoryPathToParentPackage, currentPackage1);
+				parentPackage2 = findParentPackage3(directoryPathToParentPackage, currentPackage2);
 				flag = true;
 			}
 		}
@@ -678,8 +322,8 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 			String currentPackages1 = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
 			String currentPackages2 = String.join("_", currentPackage2.getDirectoryPath(), currentPackage1.getDirectoryPath());
 			if((!isChild.get(currentPackages1) && isHotspot.get(currentPackages1))) {
-				Package parentPackage1 = findParentPackage(currentPackage1);
-				Package parentPackage2 = findParentPackage(currentPackage2);
+				Package parentPackage1 = findParentPackage3(directoryPathToParentPackage, currentPackage1);
+				Package parentPackage2 = findParentPackage3(directoryPathToParentPackage, currentPackage2);
 				if(parentPackage1 != null && parentPackage2 != null && !parentPackage1.getId().equals(parentPackage2.getId())) {
 					String parentPackages = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
 					if((isHotspot.containsKey(parentPackages) && isHotspot.get(parentPackages))) {
@@ -700,10 +344,166 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 
 		//加载根目录的子目录
 		for(HotspotPackage rootHotspotPackage : result) {
-			AddChildrenPackages(allNodesOfPackage, cloneNodesOfClonePackages, cloneNodesOfHotspotPackages, clonePackages, hotspotPackages, rootHotspotPackage, fileClones, idToPackageClone);
+			AddChildrenPackages3(allNodesOfPackage, cloneNodesOfClonePackages, cloneNodesOfHotspotPackages, clonePackages, hotspotPackages, rootHotspotPackage, fileClones, idToPackageClone);
 		}
 
 		//聚合排序
+		result.sort((d1, d2) -> {
+			int allNodes1 = d1.getAllNodes1() + d1.getAllNodes2();
+			int cloneNodes1 = d1.getRelationNodes1() + d1.getRelationNodes2();
+			double percentageThreshold1 = (cloneNodes1 + 0.0) / allNodes1;
+			int allNodes2 = d2.getAllNodes1() + d2.getAllNodes2();
+			int cloneNodes2 = d2.getRelationNodes1() + d2.getRelationNodes2();
+			double percentageThreshold2 = (cloneNodes2 + 0.0) / allNodes2;
+			if(percentageThreshold1 < percentageThreshold2) {
+				return 1;
+			}
+			else if(percentageThreshold1 == percentageThreshold2) {
+				return Integer.compare(cloneNodes2, cloneNodes1);
+			}
+			else {
+				return -1;
+			}
+		});
+		return result;
+	}
+
+	public List<HotspotPackage> detectHotspotPackagesByFileClone3() {
+		System.setOut(ps);
+		Map<String, Package> directoryPathToParentPackage = new HashMap<>();
+		Map<String, Collection<Package>> directoryPathToChildrenPackages = new HashMap<>();
+		Map<String, HotspotPackage> directoryPathToHotspotPackage = new HashMap<>();
+		Map<String, Collection<String>> cloneChildrenPackagesOfPackages = new HashMap<>();
+		Map<String, Boolean> isChild = new HashMap<>();
+		Map<String, Boolean> isHotspot = new HashMap<>();
+		Collection<? extends Relation> fileClones = basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE);
+		List<RelationDataForDoubleNodes<Node, Relation>> packageClones = (List<RelationDataForDoubleNodes<Node, Relation>>) summaryAggregationDataService.queryPackageCloneFromFileCloneSort(fileClones);
+		RelationAggregator<Boolean> aggregator = RelationAggregatorForPackageByFileClone.getInstance();
+
+		//预处理
+		for(RelationDataForDoubleNodes<Node, Relation> packageClone : packageClones) {
+			Package currentPackage1 = (Package) packageClone.getNode1();
+			Package currentPackage2 = (Package) packageClone.getNode2();
+			Package parentPackage1 = findParentPackage(directoryPathToParentPackage, currentPackage1);
+			Package parentPackage2 = findParentPackage(directoryPathToParentPackage, currentPackage2);
+			while(parentPackage1 != null && parentPackage2 != null && !parentPackage1.getId().equals(parentPackage2.getId())) {
+				String currentPackages = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
+				String parentPackages = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
+				Collection<String> cloneChildren = new ArrayList<>();
+				if(cloneChildrenPackagesOfPackages.containsKey(parentPackages)) {
+					cloneChildren = cloneChildrenPackagesOfPackages.get(parentPackages);
+				}
+				if(cloneChildren.contains(currentPackages)) {
+					break;
+				}
+				cloneChildren.add(currentPackages);
+				cloneChildrenPackagesOfPackages.put(parentPackages, cloneChildren);
+				currentPackage1 = parentPackage1;
+				currentPackage2 = parentPackage2;
+				parentPackage1 = findParentPackage(directoryPathToParentPackage, currentPackage1);
+				parentPackage2 = findParentPackage(directoryPathToParentPackage, currentPackage2);
+			}
+		}
+
+		//检测
+		for(RelationDataForDoubleNodes<Node, Relation> packageClone : packageClones) {
+			Package currentPackage1 = (Package) packageClone.getNode1();
+			Package currentPackage2 = (Package) packageClone.getNode2();
+			HotspotPackage hotspotPackage = findHotspotPackage(fileClones, directoryPathToHotspotPackage, currentPackage1, currentPackage2);
+			hotspotPackage.setData(packageClone.getAllNodesInNode1().size(), packageClone.getAllNodesInNode2().size(), packageClone.getNodesInNode1().size(), packageClone.getNodesInNode2().size());
+			String currentPackages = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
+			if(isHotspot.containsKey(currentPackages)) {
+				continue;
+			}
+			Collection<String> cloneChildren = new ArrayList<>();
+			if(cloneChildrenPackagesOfPackages.containsKey(currentPackages)) {
+				cloneChildren = cloneChildrenPackagesOfPackages.get(currentPackages);
+			}
+			if(!cloneChildren.isEmpty()) {
+				continue;
+			}
+			Package parentPackage1 = findParentPackage(directoryPathToParentPackage, currentPackage1);
+			Package parentPackage2 = findParentPackage(directoryPathToParentPackage, currentPackage2);
+			isHotspot.put(currentPackages, isHotspotPackage(aggregator, isHotspot, directoryPathToChildrenPackages, hotspotPackage));
+			isChild.put(currentPackages, false);
+			String parentPackages;
+			while(parentPackage1 != null && parentPackage2 != null && !parentPackage1.getId().equals(parentPackage2.getId())) {
+				HotspotPackage parentHotspotPackage = findHotspotPackage(fileClones, directoryPathToHotspotPackage, parentPackage1, parentPackage2);
+				currentPackages = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
+				parentPackages = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
+				if(isHotspot.containsKey(parentPackages)) {
+					break;
+				}
+				cloneChildren = new ArrayList<>();
+				if(cloneChildrenPackagesOfPackages.containsKey(parentPackages)) {
+					cloneChildren = cloneChildrenPackagesOfPackages.get(parentPackages);
+					cloneChildren.remove(currentPackages);
+					cloneChildrenPackagesOfPackages.put(parentPackages, cloneChildren);
+					parentHotspotPackage.addHotspotChild(hotspotPackage);
+				}
+				if(!cloneChildren.isEmpty()) {
+					break;
+				}
+				isHotspot.put(parentPackages, isHotspotPackage(aggregator, isHotspot, directoryPathToChildrenPackages, parentHotspotPackage));
+				if(isHotspot.get(parentPackages)) {
+					isChild.put(currentPackages, true);
+				}
+				isChild.put(parentPackages, false);
+				currentPackage1 = parentPackage1;
+				currentPackage2 = parentPackage2;
+				parentPackage1 = findParentPackage(directoryPathToParentPackage, currentPackage1);
+				parentPackage2 = findParentPackage(directoryPathToParentPackage, currentPackage2);
+			}
+		}
+
+		//确定根目录
+		List<HotspotPackage> result = new ArrayList<>();
+		for(Map.Entry<String, HotspotPackage> entry : directoryPathToHotspotPackage.entrySet()) {
+			String currentPackages = entry.getKey();
+			HotspotPackage hotspotPackage = entry.getValue();
+			Package currentPackage1 = hotspotPackage.getPackage1();
+			Package currentPackage2 = hotspotPackage.getPackage2();
+			if((!isChild.get(currentPackages) && isHotspot.get(currentPackages))) {
+				Package parentPackage1 = findParentPackage(directoryPathToParentPackage, currentPackage1);
+				Package parentPackage2 = findParentPackage(directoryPathToParentPackage, currentPackage2);
+				if(parentPackage1 != null && parentPackage2 != null && !parentPackage1.getId().equals(parentPackage2.getId())) {
+					String parentPackages = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
+					if((isHotspot.containsKey(parentPackages) && isHotspot.get(parentPackages))) {
+						isChild.put(currentPackages, true);
+						continue;
+					}
+				}
+				if(!result.contains(hotspotPackage)) {
+					result.add(hotspotPackage);
+				}
+			}
+		}
+
+		//聚合排序
+		result.sort((d1, d2) -> {
+			int allNodes1 = d1.getAllNodes1() + d1.getAllNodes2();
+			int cloneNodes1 = d1.getRelationNodes1() + d1.getRelationNodes2();
+			double percentageThreshold1 = (cloneNodes1 + 0.0) / allNodes1;
+			int allNodes2 = d2.getAllNodes1() + d2.getAllNodes2();
+			int cloneNodes2 = d2.getRelationNodes1() + d2.getRelationNodes2();
+			double percentageThreshold2 = (cloneNodes2 + 0.0) / allNodes2;
+			if(percentageThreshold1 < percentageThreshold2) {
+				return 1;
+			}
+			else if(percentageThreshold1 == percentageThreshold2) {
+				return Integer.compare(cloneNodes2, cloneNodes1);
+			}
+			else {
+				return -1;
+			}
+		});
+
+		return result;
+	}
+
+	@Override
+	public List<HotspotPackage> quickDetectHotspotPackages() {
+		List<HotspotPackage> result = getHotspotPackages(-1, -1);
 		result.sort((d1, d2) -> {
 			int allNodes1 = d1.getAllNodes1() + d1.getAllNodes2();
 			int cloneNodes1 = d1.getRelationNodes1() + d1.getRelationNodes2();
@@ -739,7 +539,6 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 		RelationAggregator<Boolean> aggregator = RelationAggregatorForPackageByCoChange.getInstance();
 		return aggregatePackageRelation(fileCoChanges,packageRelations,aggregator);
 	}
-
 
 	@Override
 	public Collection<HotspotPackage> detectHotspotPackagesByFileCoChangeTimes() {
@@ -845,8 +644,575 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 		}
 	}
 
-	@Override
-	public List<AggregationClone> quickDetectHotspotPackages(long parent1Id, long parent2Id) {
-		return aggregationCloneRepository.findAggregationClone(parent1Id, parent2Id);
+	//寻找HotspotPackage
+	private HotspotPackage findHotspotPackage(Collection<? extends Relation> fileClones, Map<String, HotspotPackage> directoryPathToHotspotPackage, Package pck1, Package pck2) {
+		String key = String.join("_", pck1.getDirectoryPath(), pck2.getDirectoryPath());
+		if(!directoryPathToHotspotPackage.containsKey(key)) {
+			HotspotPackage hotspotPackage;
+			RelationDataForDoubleNodes<Node, Relation> packageClone = summaryAggregationDataService.querySuperNodeRelationFromSubNodeRelationSort(fileClones, pck1, pck2);
+			if(packageClone != null) {
+				hotspotPackage = new HotspotPackage(packageClone);
+				if(hotspotPackage.getPackage1().getDirectoryPath().equals(pck2.getDirectoryPath()) && hotspotPackage.getPackage2().getDirectoryPath().equals(pck1.getDirectoryPath())) {
+					hotspotPackage.swapPackages();
+				}
+			}
+			else {
+				hotspotPackage = new HotspotPackage(new RelationDataForDoubleNodes<Node, Relation>(pck1, pck2));
+			}
+			directoryPathToHotspotPackage.put(key, hotspotPackage);
+		}
+		return directoryPathToHotspotPackage.get(key);
+	}
+
+	//寻找父包
+	private Package findParentPackage(Map<String, Package> directoryPathToParentPackage, Package pck) {
+		String parentPackageDirectoryPath = pck.lastPackageDirectoryPath();
+		if(FileUtil.SLASH_LINUX.equals(parentPackageDirectoryPath)) {
+			return null;
+		}
+		Package parentPackage;
+		if(directoryPathToParentPackage.containsKey(parentPackageDirectoryPath)) {
+			parentPackage = directoryPathToParentPackage.get(parentPackageDirectoryPath);
+		}
+		else {
+			parentPackage = containRelationService.findPackageInPackage(pck);
+		}
+		if(parentPackage != null && isEmptyPackage(parentPackage)) {
+			Package grandParentPackage = findParentPackage(directoryPathToParentPackage, parentPackage);
+			if(grandParentPackage != null) {
+				parentPackage = grandParentPackage;
+			}
+		}
+		if(parentPackage != null) {
+			directoryPathToParentPackage.put(parentPackageDirectoryPath, parentPackage);
+		}
+		return parentPackage;
+	}
+
+	//寻找子包集
+	private Collection<Package> getChildrenPackages(Map<String, Collection<Package>> directoryPathToChildrenPackages, Package pck) {
+		String packageDirectoryPath = pck.getDirectoryPath();
+		if(directoryPathToChildrenPackages.containsKey(packageDirectoryPath)) {
+			return directoryPathToChildrenPackages.get(packageDirectoryPath);
+		}
+		Collection<Package> result = new ArrayList<>();
+		Collection<Package> children = hasRelationService.findPackageHasPackages(pck);
+		for(Package child : children) {
+			if(isEmptyPackage(child)) {
+				result.addAll(getChildrenPackages(directoryPathToChildrenPackages, child));
+			}
+			else {
+				result.add(child);
+			}
+		}
+		directoryPathToChildrenPackages.put(packageDirectoryPath, result);
+		return result;
+	}
+
+	//获取包下文件总数
+	private int getAllFilesNum(Map<Long, Integer> allNodesOfPackage, Package pck) {
+		if(allNodesOfPackage.containsKey(pck.getId())) {
+			return allNodesOfPackage.get(pck.getId());
+		}
+		int number = containRelationService.findPackageContainFiles(pck).size();
+		Collection<Package> childrenPackages = hasRelationService.findPackageHasPackages(pck);
+		for(Package childPackage : childrenPackages) {
+			number += getAllFilesNum(allNodesOfPackage, childPackage);
+		}
+		allNodesOfPackage.put(pck.getId(), number);
+		return number;
+	}
+	
+	//判断是否为空包
+	private boolean isEmptyPackage(Package pck) {
+		return hasRelationService.findPackageHasPackages(pck).size() == 1 && containRelationService.findPackageContainFiles(pck).size() == 0;
+	}
+	
+	//判断是否为包含文件的分支结点
+	private boolean isBranchPackageWithFiles(Package pck) {
+		return hasRelationService.findPackageHasPackages(pck).size() > 0 && containRelationService.findPackageContainFiles(pck).size() > 0;
+	}
+	
+	//判断是否为叶子结点
+	private boolean isLeafPackage(Package pck) {
+		return hasRelationService.findPackageHasPackages(pck).size() == 0;
+	}
+	
+	//判断是否符合聚合条件
+	private boolean isHotspotPackage(RelationAggregator<Boolean> aggregator, Map<String, Boolean> isHotspot, Map<String, Collection<Package>> directoryPathToChildrenPackages, HotspotPackage hotspotPackage) {
+		Package currentPackage1 = hotspotPackage.getPackage1();
+		Package currentPackage2 = hotspotPackage.getPackage2();
+		RelationDataForDoubleNodes<Node, Relation> packageClone = new RelationDataForDoubleNodes<Node, Relation>(currentPackage1, currentPackage2);
+		int allNodes1 = 0;
+		int allNodes2 = 0;
+		int cloneNodes1 = 0;
+		int	cloneNodes2 = 0;
+
+		//包下只有文件情况
+		if(isLeafPackage(currentPackage1) || isLeafPackage(currentPackage2)) {
+			packageClone.setDate(hotspotPackage.getAllNodes1(), hotspotPackage.getAllNodes2(), hotspotPackage.getRelationNodes1(), hotspotPackage.getRelationNodes2());
+			return aggregator.aggregate(packageClone);
+		}
+
+		//包下另有文件情况
+		if(isBranchPackageWithFiles(currentPackage1) || isBranchPackageWithFiles(currentPackage2)) {
+			allNodes1 = 1;
+			allNodes2 = 1;
+			packageClone.setDate(hotspotPackage.getAllNodes1(), hotspotPackage.getAllNodes2(), hotspotPackage.getRelationNodes1(), hotspotPackage.getRelationNodes2());
+			if(aggregator.aggregate(packageClone)) {
+				cloneNodes1 = 1;
+				cloneNodes2 = 1;
+			}
+		}
+
+		//遍历包下子包
+		Collection<HotspotPackage> childrenHotspotPackages = hotspotPackage.getChildrenHotspotPackages();
+		Collection<Package> childrenPackage1 = new ArrayList<>(getChildrenPackages(directoryPathToChildrenPackages, currentPackage1));
+		Collection<Package> childrenPackage2 = new ArrayList<>(getChildrenPackages(directoryPathToChildrenPackages, currentPackage2));
+		Collection<Package> childrenHotspotPackage1 = new ArrayList<>();
+		Collection<Package> childrenHotspotPackage2 = new ArrayList<>();
+		allNodes1 += childrenPackage1.size();
+		allNodes2 += childrenPackage2.size();
+		for(HotspotPackage childHotspotPackage : childrenHotspotPackages) {
+			Package childPackage1 = childHotspotPackage.getPackage1();
+			Package childPackage2 = childHotspotPackage.getPackage2();
+			String childrenPackages = String.join("_", childPackage1.getDirectoryPath(), childPackage2.getDirectoryPath());
+			if(isHotspot.get(childrenPackages)) {
+				if(!childrenHotspotPackage1.contains(childPackage1)) {
+					childrenHotspotPackage1.add(childPackage1);
+					cloneNodes1 += 1;
+				}
+				if(!childrenHotspotPackage2.contains(childPackage2)) {
+					childrenHotspotPackage2.add(childPackage1);
+					cloneNodes2 += 1;
+				}
+			}
+			childrenPackage1.remove(childPackage1);
+			childrenPackage2.remove(childPackage2);
+		}
+		for(Package otherChild1 : childrenPackage1) {
+			hotspotPackage.addOtherChild1(otherChild1);
+		}
+		for(Package otherChild2 : childrenPackage2) {
+			hotspotPackage.addOtherChild2(otherChild2);
+		}
+		hotspotPackage.setData(allNodes1, allNodes2, cloneNodes1, cloneNodes2);
+		packageClone.setDate(allNodes1, allNodes2, cloneNodes1, cloneNodes2);
+		return aggregator.aggregate(packageClone);
+	}
+	//递归加载聚合结果
+	public List<HotspotPackage> getHotspotPackages(long parent1Id, long parent2Id) {
+		List<HotspotPackage> result = new ArrayList<>();
+		List<AggregationClone> aggregationClones = aggregationCloneRepository.findAggregationClone(parent1Id, parent2Id);
+
+		for(AggregationClone aggregationClone : aggregationClones) {
+			CoChange packageCoChanges = null;
+			ModuleClone packageCloneCoChanges = null;
+			if(parent1Id > -1 && parent2Id > -1){
+				packageCoChanges = coChangeRepository.findModuleCoChange(aggregationClone.getStartNode().getId(), aggregationClone.getEndNode().getId());
+				packageCloneCoChanges = moduleCloneRepository.findModuleClone(aggregationClone.getStartNode().getId(), aggregationClone.getEndNode().getId());
+			}
+
+			List<HotspotPackage> childrenHotspotPackages = getHotspotPackages(aggregationClone.getNode1().getId(), aggregationClone.getNode2().getId());
+			RelationDataForDoubleNodes<Node, Relation> relationDataForDoubleNodes = new RelationDataForDoubleNodes<Node, Relation>(aggregationClone.getNode1(), aggregationClone.getNode2());
+			HotspotPackage hotspotPackage = new HotspotPackage(relationDataForDoubleNodes);
+			hotspotPackage.setClonePairs(aggregationClone.getClonePairs());
+			if(packageCoChanges != null){
+				hotspotPackage.setPackageCochangeTimes(packageCoChanges.getTimes());
+			}else {
+				hotspotPackage.setPackageCochangeTimes(0);
+			}
+
+			if(packageCloneCoChanges != null){
+				hotspotPackage.setPackageCloneCochangeTimes(packageCloneCoChanges.getModuleCloneCochangeTimes());
+			}else {
+				hotspotPackage.setPackageCloneCochangeTimes(0);
+			}
+
+			hotspotPackage.setData(aggregationClone.getAllNodesInNode1(), aggregationClone.getAllNodesInNode2(), aggregationClone.getNodesInNode1(), aggregationClone.getNodesInNode2());
+			Collection<Package> childrenPackage1 = hasRelationService.findPackageHasPackages(hotspotPackage.getPackage1());
+			Collection<Package> childrenPackage2 = hasRelationService.findPackageHasPackages(hotspotPackage.getPackage2());
+			for(HotspotPackage childHotspotPackage : childrenHotspotPackages) {
+				hotspotPackage.addHotspotChild(childHotspotPackage);
+				childrenPackage1.remove(childHotspotPackage.getPackage1());
+				childrenPackage2.remove(childHotspotPackage.getPackage2());
+			}
+			for(Package childPackage1 : childrenPackage1) {
+				hotspotPackage.addOtherChild1(childPackage1);
+			}
+			for(Package childPackage2 : childrenPackage2) {
+				hotspotPackage.addOtherChild2(childPackage2);
+			}
+			result.add(hotspotPackage);
+		}
+
+		result.sort((d1, d2) -> {
+			int allNodes1 = d1.getAllNodes1() + d1.getAllNodes2();
+			int cloneNodes1 = d1.getRelationNodes1() + d1.getRelationNodes2();
+			double percentageThreshold1 = (cloneNodes1 + 0.0) / allNodes1;
+			int allNodes2 = d2.getAllNodes1() + d2.getAllNodes2();
+			int cloneNodes2 = d2.getRelationNodes1() + d2.getRelationNodes2();
+			double percentageThreshold2 = (cloneNodes2 + 0.0) / allNodes2;
+			if(percentageThreshold1 < percentageThreshold2) {
+				return 1;
+			}
+			else if(percentageThreshold1 == percentageThreshold2) {
+				return Integer.compare(cloneNodes2, cloneNodes1);
+			}
+			else {
+				return -1;
+			}
+		});
+		return result;
+	}
+
+	//寻找父包
+	private Package findParentPackage3(Map<String, Package> directoryPathToParentPackage, Package pck) {
+		directoryPathToParentPackage.put(pck.getDirectoryPath(), pck);
+		String parentDirectoryPath = pck.lastPackageDirectoryPath();
+		if (FileUtil.SLASH_LINUX.equals(parentDirectoryPath)) {
+			return null;
+		}
+		Package parent = directoryPathToParentPackage.get(parentDirectoryPath);
+		if (parent == null) {
+			parent = containRelationService.findPackageInPackage(pck);
+			if (parent != null) {
+				directoryPathToParentPackage.put(parentDirectoryPath, parent);
+			}
+		}
+		return parent;
+	}
+
+	//判断pck1和pck2两个包是否可以聚合
+	private boolean isHotspotPackages3(RelationAggregator<Boolean> aggregator, Map<Long, Integer> allNodesOfPackage, Map<String, Integer> cloneNodesOfClonePackages, Map<String, Integer> cloneNodesOfHotspotPackages, Collection<String> clonePackages, Collection<String> hotspotPackages, Package pck1, Package pck2) {
+		String packages1 = String.join("_", pck1.getDirectoryPath(), pck2.getDirectoryPath());
+		String packages2 = String.join("_", pck2.getDirectoryPath(), pck1.getDirectoryPath());
+		if(hotspotPackages.contains(packages1) || hotspotPackages.contains(packages2)) {
+			return true;
+		}
+		int allNodes1 = getAllFilesNum(allNodesOfPackage, pck1);
+		int allNodes2 = getAllFilesNum(allNodesOfPackage, pck2);
+		int cloneNodes1 = 0;
+		int cloneNodes2 = 0;
+		if(clonePackages.contains(packages1) || clonePackages.contains(packages2)) {
+			cloneNodes1 = cloneNodesOfClonePackages.get(packages1);
+			cloneNodes2 = cloneNodesOfClonePackages.get(packages2);
+		}
+		//遍历包下文件或子包，函数待改进
+		Collection<Package> childrenPackages1 = hasRelationService.findPackageHasPackages(pck1);
+		Collection<Package> childrenPackages2 = hasRelationService.findPackageHasPackages(pck2);
+		int childrenHotspotPackageCount1 = 0;
+		int childrenHotspotPackageCount2 = 0;
+		for(Package childPackage1 : childrenPackages1) {
+			boolean flag = false;
+			int index = 0;
+			String children1 = "";
+			String children2 = "";
+			for(Package childPackage2 : childrenPackages2) {
+				children1 = String.join("_", childPackage1.getDirectoryPath(), childPackage2.getDirectoryPath());
+				if(hotspotPackages.contains(children1)) {
+					if(!flag) {
+						children2 = children1;
+						index = 0;
+						flag = true;
+					}
+					else {
+						int cloneNodesOfChildren1 = cloneNodesOfHotspotPackages.get(children1);
+						int cloneNodesOfChildren2;
+						if(index == 0) {
+							cloneNodesOfChildren2 = cloneNodesOfHotspotPackages.get(children2);
+						}
+						else {
+							cloneNodesOfChildren2 = cloneNodesOfClonePackages.get(children2);
+						}
+						if(cloneNodesOfChildren1 > cloneNodesOfChildren2) {
+							children2 = children1;
+							index = 0;
+							flag = true;
+						}
+					}
+				}
+				else if(clonePackages.contains(children1)) {
+					if(!flag) {
+						children2 = children1;
+						index = 1;
+						flag = true;
+					}
+					else {
+						int cloneNodesOfChildren1 = cloneNodesOfClonePackages.get(children1);
+						int cloneNodesOfChildren2;
+						if(index == 0) {
+							cloneNodesOfChildren2 = cloneNodesOfHotspotPackages.get(children2);
+						}
+						else {
+							cloneNodesOfChildren2 = cloneNodesOfClonePackages.get(children2);
+						}
+						if(cloneNodesOfChildren1 > cloneNodesOfChildren2) {
+							children2 = children1;
+							index = 1;
+							flag = true;
+						}
+					}
+				}
+			}
+			if(flag && hotspotPackages.contains(children2)) {
+				cloneNodes1 += cloneNodesOfHotspotPackages.get(children2);
+				childrenHotspotPackageCount1 ++;
+			}
+			else if(flag && clonePackages.contains(children2)) {
+				cloneNodes1 += cloneNodesOfClonePackages.get(children2);
+			}
+		}
+		for(Package childPackage2 : childrenPackages2) {
+			int index = 0;
+			boolean flag = false;
+			String children2 = "";
+			String children1 = "";
+			for(Package childPackage1 : childrenPackages1) {
+				children2 = String.join("_", childPackage2.getDirectoryPath(), childPackage1.getDirectoryPath());
+				if(hotspotPackages.contains(children2)) {
+					if(!flag) {
+						children1 = children2;
+						index = 0;
+						flag = true;
+					}
+					else {
+						int cloneNodesOfChildren2 = cloneNodesOfHotspotPackages.get(children2);
+						int cloneNodesOfChildren1;
+						if(index == 0) {
+							cloneNodesOfChildren1 = cloneNodesOfHotspotPackages.get(children1);
+						}
+						else {
+							cloneNodesOfChildren1 = cloneNodesOfClonePackages.get(children1);
+						}
+						if(cloneNodesOfChildren2 > cloneNodesOfChildren1) {
+							children1 = children2;
+							index = 0;
+							flag = true;
+						}
+					}
+				}
+				else if(clonePackages.contains(children2)) {
+					if(!flag) {
+						children1 = children2;
+						index = 1;
+						flag = true;
+					}
+					else {
+						int cloneNodesOfChildren2 = cloneNodesOfClonePackages.get(children2);
+						int cloneNodesOfChildren1;
+						if(index == 0) {
+							cloneNodesOfChildren1 = cloneNodesOfHotspotPackages.get(children1);
+						}
+						else {
+							cloneNodesOfChildren1 = cloneNodesOfClonePackages.get(children1);
+						}
+						if(cloneNodesOfChildren2 > cloneNodesOfChildren1) {
+							children1 = children2;
+							index = 1;
+							flag = true;
+						}
+					}
+				}
+			}
+			if(flag && hotspotPackages.contains(children1)) {
+				cloneNodes2 += cloneNodesOfHotspotPackages.get(children1);
+				childrenHotspotPackageCount2 ++;
+			}
+			else if(flag && clonePackages.contains(children1)) {
+				cloneNodes2 += cloneNodesOfClonePackages.get(children1);
+			}
+		}
+		RelationDataForDoubleNodes<Node, Relation> packageClone = new RelationDataForDoubleNodes<Node, Relation>(pck1, pck2);
+		packageClone.setDate3(cloneNodes1, cloneNodes2, allNodes1, allNodes2, childrenPackages1.size(), childrenPackages2.size(), childrenHotspotPackageCount1, childrenHotspotPackageCount2);
+		if(aggregator.aggregate(packageClone)) {
+			cloneNodesOfHotspotPackages.put(packages1, cloneNodes1);
+			cloneNodesOfHotspotPackages.put(packages2, cloneNodes2);
+			hotspotPackages.add(packages1);
+			hotspotPackages.add(packages2);
+			return true;
+		}
+		else {
+			cloneNodesOfClonePackages.put(packages1, cloneNodes1);
+			cloneNodesOfClonePackages.put(packages2, cloneNodes2);
+			clonePackages.add(packages1);
+			clonePackages.add(packages2);
+			return false;
+		}
+	}
+
+	//加载根目录的子目录
+	public void AddChildrenPackages3(Map<Long, Integer> allNodesOfPackage, Map<String, Integer> cloneNodesOfClonePackages, Map<String, Integer> cloneNodesOfHotspotPackages, Collection<String> clonePackages, Collection<String> hotspotPackages, HotspotPackage rootHotspotPackage, Collection<? extends Relation> fileClones, Map<String, HotspotPackage> idToPackageClone) {
+		Package package1 = rootHotspotPackage.getPackage1();
+		Package package2 = rootHotspotPackage.getPackage2();
+		Collection<Package> childrenPackages1 = hasRelationService.findPackageHasPackages(package1);
+		Collection<Package> childrenPackages2 = hasRelationService.findPackageHasPackages(package2);
+		for(Package childPackage1 : childrenPackages1) {
+			int index = 0;
+			boolean flag = false;
+			String children1 = "";
+			String children2 = "";
+			Package childPackage = null;
+			for(Package childPackage2 : childrenPackages2) {
+				children1 = String.join("_", childPackage1.getDirectoryPath(), childPackage2.getDirectoryPath());
+				if(hotspotPackages.contains(children1)) {
+					if(!flag) {
+						children2 = children1;
+						childPackage = childPackage2;
+						index = 0;
+						flag = true;
+					}
+					else {
+						int cloneNodesOfChildren1 = cloneNodesOfHotspotPackages.get(children1);
+						int cloneNodesOfChildren2;
+						if(index == 0) {
+							cloneNodesOfChildren2 = cloneNodesOfHotspotPackages.get(children2);
+						}
+						else {
+							cloneNodesOfChildren2 = cloneNodesOfClonePackages.get(children2);
+						}
+						if(cloneNodesOfChildren1 > cloneNodesOfChildren2) {
+							children2 = children1;
+							childPackage = childPackage2;
+							index = 0;
+							flag = true;
+						}
+					}
+				}
+				else if(clonePackages.contains(children1)) {
+					if(!flag) {
+						children2 = children1;
+						childPackage = childPackage2;
+						index = 1;
+						flag = true;
+					}
+					else {
+						int cloneNodesOfChildren1 = cloneNodesOfClonePackages.get(children1);
+						int cloneNodesOfChildren2;
+						if(index == 0) {
+							cloneNodesOfChildren2 = cloneNodesOfHotspotPackages.get(children2);
+						}
+						else {
+							cloneNodesOfChildren2 = cloneNodesOfClonePackages.get(children2);
+						}
+						if(cloneNodesOfChildren1 > cloneNodesOfChildren2) {
+							children2 = children1;
+							childPackage = childPackage2;
+							index = 1;
+							flag = true;
+						}
+					}
+				}
+			}
+			if(flag && hotspotPackages.contains(children2)) {
+				HotspotPackage childHotspotPackage1;
+				RelationDataForDoubleNodes<Node, Relation> childPackageClone = summaryAggregationDataService.querySuperNodeRelationFromSubNodeRelationSort(fileClones, childPackage1, childPackage);
+				if(childPackageClone != null) {
+					childHotspotPackage1 = idToPackageClone.getOrDefault(childPackageClone.getId(), new HotspotPackage(childPackageClone));
+					if(childHotspotPackage1.getPackage1().getDirectoryPath().equals(childPackage.getDirectoryPath()) && childHotspotPackage1.getPackage2().getDirectoryPath().equals(childPackage1.getDirectoryPath())) {
+						childHotspotPackage1.swapPackages();
+					}
+				}
+				else {
+					childHotspotPackage1 = new HotspotPackage(new RelationDataForDoubleNodes<Node, Relation>(childPackage1, childPackage));
+				}
+				AddChildrenPackages3(allNodesOfPackage, cloneNodesOfClonePackages, cloneNodesOfHotspotPackages, clonePackages, hotspotPackages, childHotspotPackage1, fileClones, idToPackageClone);
+				Package childrenPackage1 = childHotspotPackage1.getPackage1();
+				Package childrenPackage2 = childHotspotPackage1.getPackage2();
+				String packages1 = String.join("_", childrenPackage1.getDirectoryPath(), childrenPackage2.getDirectoryPath());
+				String packages2 = String.join("_", childrenPackage2.getDirectoryPath(), childrenPackage1.getDirectoryPath());
+				int allNodes1 = getAllFilesNum(allNodesOfPackage, childrenPackage1);
+				int allNodes2 = getAllFilesNum(allNodesOfPackage, childrenPackage2);
+				int cloneNodes1 = cloneNodesOfHotspotPackages.get(packages1);
+				int cloneNodes2 = cloneNodesOfHotspotPackages.get(packages2);
+				childHotspotPackage1.setData(allNodes1, allNodes2, cloneNodes1, cloneNodes2);
+				rootHotspotPackage.addHotspotChild(childHotspotPackage1);
+			}
+			else if(flag && clonePackages.contains(children2)) {
+				HotspotPackage childHotspotPackage1;
+				RelationDataForDoubleNodes<Node, Relation> childPackageClone = summaryAggregationDataService.querySuperNodeRelationFromSubNodeRelationSort(fileClones, childPackage1, childPackage);
+				if(childPackageClone != null) {
+					childHotspotPackage1 = idToPackageClone.getOrDefault(childPackageClone.getId(), new HotspotPackage(childPackageClone));
+					if(childHotspotPackage1.getPackage1().getDirectoryPath().equals(childPackage.getDirectoryPath()) && childHotspotPackage1.getPackage2().getDirectoryPath().equals(childPackage1.getDirectoryPath())) {
+						childHotspotPackage1.swapPackages();
+					}
+				}
+				else {
+					childHotspotPackage1 = new HotspotPackage(new RelationDataForDoubleNodes<Node, Relation>(childPackage1, childPackage));
+				}
+				AddChildrenPackages3(allNodesOfPackage, cloneNodesOfClonePackages, cloneNodesOfHotspotPackages, clonePackages, hotspotPackages, childHotspotPackage1, fileClones, idToPackageClone);
+				Package childrenPackage1 = childHotspotPackage1.getPackage1();
+				Package childrenPackage2 = childHotspotPackage1.getPackage2();
+				String packages1 = String.join("_", childrenPackage1.getDirectoryPath(), childrenPackage2.getDirectoryPath());
+				String packages2 = String.join("_", childrenPackage2.getDirectoryPath(), childrenPackage1.getDirectoryPath());
+				int allNodes1 = getAllFilesNum(allNodesOfPackage, childrenPackage1);
+				int allNodes2 = getAllFilesNum(allNodesOfPackage, childrenPackage2);
+				int cloneNodes1 = cloneNodesOfClonePackages.get(packages1);
+				int cloneNodes2 = cloneNodesOfClonePackages.get(packages2);
+				childHotspotPackage1.setData(allNodes1, allNodes2, cloneNodes1, cloneNodes2);
+				rootHotspotPackage.addHotspotChild(childHotspotPackage1);
+			}
+			else {
+				childPackage1.setAllNodes(getAllFilesNum(allNodesOfPackage, childPackage1));
+				rootHotspotPackage.addOtherChild1(childPackage1);
+			}
+		}
+		for(Package childPackage2 : childrenPackages2) {
+			int index = 0;
+			boolean flag = false;
+			String children2 = "";
+			String children1 = "";
+			for(Package childPackage1 : childrenPackages1) {
+				children2 = String.join("_", childPackage2.getDirectoryPath(), childPackage1.getDirectoryPath());
+				if(hotspotPackages.contains(children2)) {
+					if(!flag) {
+						children1 = children2;
+						index = 0;
+						flag = true;
+					}
+					else {
+						int cloneNodesOfChildren2 = cloneNodesOfHotspotPackages.get(children2);
+						int cloneNodesOfChildren1;
+						if(index == 0) {
+							cloneNodesOfChildren1 = cloneNodesOfHotspotPackages.get(children1);
+						}
+						else {
+							cloneNodesOfChildren1 = cloneNodesOfClonePackages.get(children1);
+						}
+						if(cloneNodesOfChildren2 > cloneNodesOfChildren1) {
+							children1 = children2;
+							index = 0;
+							flag = true;
+						}
+					}
+				}
+				else if(clonePackages.contains(children2)) {
+					if(!flag) {
+						children1 = children2;
+						index = 1;
+						flag = true;
+					}
+					else {
+						int cloneNodesOfChildren2 = cloneNodesOfClonePackages.get(children2);
+						int cloneNodesOfChildren1;
+						if(index == 0) {
+							cloneNodesOfChildren1 = cloneNodesOfHotspotPackages.get(children1);
+						}
+						else {
+							cloneNodesOfChildren1 = cloneNodesOfClonePackages.get(children1);
+						}
+						if(cloneNodesOfChildren2 > cloneNodesOfChildren1) {
+							children1 = children2;
+							index = 1;
+							flag = true;
+						}
+					}
+				}
+			}
+			if(!flag) {
+				childPackage2.setAllNodes(getAllFilesNum(allNodesOfPackage, childPackage2));
+				rootHotspotPackage.addOtherChild2(childPackage2);
+			}
+		}
 	}
 }

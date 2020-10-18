@@ -47,15 +47,10 @@ public class RelationAggregatorForPackageByFileClone implements RelationAggregat
 
 	@Override
 	public Boolean aggregate(RelationDataForDoubleNodes<? extends Node, ? extends Relation> doubleNodes) {
-		int cloneNodes1 = doubleNodes.getCloneNodesCount1();
-		int cloneNodes2 = doubleNodes.getCloneNodesCount2();
 		int allNodes1 = doubleNodes.getAllNodesCount1();
 		int allNodes2 = doubleNodes.getAllNodesCount2();
-		int childrenPackages1 = doubleNodes.getChildrenPackagesCount1();
-		int childrenPackages2 = doubleNodes.getChildrenPackagesCount2();
-		int childrenHotspotPackageCount1 = doubleNodes.getChildrenHotspotPackageCount1();
-		int childrenHotspotPackageCount2 = doubleNodes.getChildrenHotspotPackageCount2();
-		return (cloneNodes1 + cloneNodes2 + 0.0) / (allNodes1 + allNodes2) > 0.5 || (childrenPackages1 != 0 && (childrenHotspotPackageCount1 + 0.0) / childrenPackages1 > 0.5) || (childrenPackages2 != 0 && (childrenHotspotPackageCount2 + 0.0) / childrenPackages2 > 0.5);
+		int cloneNodes1 = doubleNodes.getCloneNodesCount1();
+		int cloneNodes2 = doubleNodes.getCloneNodesCount2();
+		return ((cloneNodes1 + cloneNodes2 + 0.0) / (allNodes1 + allNodes2) > 0.5);
 	}
-
 }

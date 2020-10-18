@@ -6,6 +6,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
 import cn.edu.fudan.se.multidependency.service.query.data.ProjectStructure;
@@ -178,13 +179,13 @@ public class ProjectServiceImpl implements ProjectService{
     @Override
     public JSONArray projectGraphCloneLink(long package1Id, long package2Id) {
         JSONArray links = new JSONArray();
-        List<AggregationClone> aggregationCloneList = hotspotPackageDetector.quickDetectHotspotPackages(package1Id, package2Id);
-        for (AggregationClone aggregationClone : aggregationCloneList) {
+        List<HotspotPackage> hotspotPackageList = hotspotPackageDetector.quickDetectHotspotPackages();
+        for (HotspotPackage hotspotPackage : hotspotPackageList) {
             JSONObject link = new JSONObject();
-            link.put("source_id", "id_" + aggregationClone.getNode1().getId().toString());
-            link.put("target_id", "id_" + aggregationClone.getNode2().getId().toString());
-            link.put("source_projectBelong", "id_" + containRelationService.findPackageBelongToProject((Package)(aggregationClone.getNode1())).getId());
-            link.put("target_projectBelong", "id_" + containRelationService.findPackageBelongToProject((Package)(aggregationClone.getNode2())).getId());
+            link.put("source_id", "id_" + hotspotPackage.getPackage1().getId().toString());
+            link.put("target_id", "id_" + hotspotPackage.getPackage2().getId().toString());
+            link.put("source_projectBelong", "id_" + containRelationService.findPackageBelongToProject(hotspotPackage.getPackage1()).getId());
+            link.put("target_projectBelong", "id_" + containRelationService.findPackageBelongToProject(hotspotPackage.getPackage2()).getId());
             links.add(link);
         }
         return links;

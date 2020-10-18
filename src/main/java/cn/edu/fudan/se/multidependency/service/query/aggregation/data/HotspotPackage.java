@@ -69,27 +69,40 @@ public class HotspotPackage {
 		this.package2 = (Package) relationPackages.getNode2();
 		this.id = relationPackages.getId();
 		this.clonePairs = relationPackages.getChildren().size();
+		this.allNodes1 = 0;
+		this.allNodes2 = 0;
+		this.relationNodes1 = 0;
+		this.relationNodes2 = 0;
 	}
 
-	public void addHotspotChild(HotspotPackage child) {
+	public boolean addHotspotChild(HotspotPackage child) {
 		if(childrenHotspotPackages == null) {
-			return ;
+			return false;
 		}
-		this.childrenHotspotPackages.add(child);
+		if(!this.childrenHotspotPackages.contains(child)) {
+			this.childrenHotspotPackages.add(child);
+		}
+		return true;
 	}
 
-	public void addOtherChild1(Package child) {
+	public boolean addOtherChild1(Package child) {
 		if(childrenOtherPackages1 == null) {
-			return ;
+			return false;
 		}
-		this.childrenOtherPackages1.add(child);
+		if(!this.childrenOtherPackages1.contains(child)) {
+			this.childrenOtherPackages1.add(child);
+		}
+		return true;
 	}
 
-	public void addOtherChild2(Package child) {
+	public boolean addOtherChild2(Package child) {
 		if(childrenOtherPackages2 == null) {
-			return ;
+			return false;
 		}
-		this.childrenOtherPackages2.add(child);
+		if(!this.childrenOtherPackages2.contains(child)) {
+			this.childrenOtherPackages2.add(child);
+		}
+		return true;
 	}
 
 	public void setData(int allNodes1, int allNodes2, int relationNodes1, int relationNodes2) {
@@ -99,19 +112,12 @@ public class HotspotPackage {
 		this.relationNodes2 = relationNodes2;
 	}
 
-	public boolean isContainHotspotChild(HotspotPackage p) {
-		return this.childrenHotspotPackages.contains(p);
-	}
-
-	public boolean isContainOtherChild1(Package p) {
-		return this.childrenOtherPackages1.contains(p);
-	}
-
-	public boolean isContainOtherChild2(Package p) {
-		return this.childrenOtherPackages2.contains(p);
-	}
-
 	public void setClonePairs(int clonePairs) {
 		this.clonePairs = clonePairs;
+	}
+	public void swapPackages() {
+		Package pck = this.package1;
+		this.package1 = this.package2;
+		this.package2 = pck;
 	}
 }

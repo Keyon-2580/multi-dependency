@@ -19,7 +19,7 @@ public interface HotspotPackageDetector {
 
 	Collection<HotspotPackage> detectHotspotPackagesByFileCoChangeTimes();
 
-	List<AggregationClone> quickDetectHotspotPackages(long parent1Id, long parent2Id);
+	List<HotspotPackage> quickDetectHotspotPackages();
 
 	void exportHotspotPackages(OutputStream stream);
 }
