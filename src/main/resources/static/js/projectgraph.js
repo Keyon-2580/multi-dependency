@@ -54,6 +54,7 @@ var loaddata = function () {
 
             // console.log(html)
             $("#projectToGraph_util").html(html);
+            $('.selectpicker').selectpicker();
 
             var temp_array = [];
             temp_array.push(projectlist[0].id);
