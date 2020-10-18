@@ -1,8 +1,10 @@
 package cn.edu.fudan.se.multidependency.service.query;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import cn.edu.fudan.se.multidependency.model.Language;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
@@ -42,7 +44,7 @@ public class CacheService {
 	}
 	
 	private final Map<String, ProjectFile> pathToFile = new ConcurrentHashMap<>();
-	private final Map<String, Package> directoryToPackage = new ConcurrentHashMap<>();
+	private final Map<String, Map<String, Package>> directoryToPackage = new ConcurrentHashMap<>();
 	private final Map<Long, Node> idToNodeCache = new ConcurrentHashMap<>();
 	private final Map<Node, Map<NodeLabelType, Node>> nodeBelongToNodeCache = new ConcurrentHashMap<>();
 	
@@ -82,7 +84,11 @@ public class CacheService {
 //			this.pathToFile.put(((ProjectFile) node).getPath(), (ProjectFile) node);
 			cacheFileByPath(((ProjectFile) node).getPath(), (ProjectFile) node);
 		} else if(node instanceof Package) {
-			cachePackageByDirectory(((Package) node).getDirectoryPath(), (Package) node);
+			String language = ((Package) node).getLanguage();
+			if (language == null){
+				language = Language.java.name();
+			}
+			cachePackageByDirectory(((Package) node).getDirectoryPath(), language, (Package) node);
 		}
 		return node;
 	}
@@ -95,12 +101,14 @@ public class CacheService {
 		return this.pathToFile.get(path);
 	}
 	
-	public void cachePackageByDirectory(String directory, Package pck) {
-		this.directoryToPackage.put(directory, pck);
+	public void cachePackageByDirectory(String directory, String language, Package pck) {
+		Map<String, Package> packageMap = this.directoryToPackage.getOrDefault(language, new ConcurrentHashMap<>());
+		packageMap.put(directory, pck);
+		this.directoryToPackage.put(language, packageMap);
 	}
 	
-	public Package findPackageByDirectoryPath(String directoryPath) {
-		return this.directoryToPackage.get(directoryPath);
+	public Package findPackageByDirectoryPath(String directoryPath, String language) {
+		return this.directoryToPackage.get(language).get(directoryPath);
 	}
 	
 }

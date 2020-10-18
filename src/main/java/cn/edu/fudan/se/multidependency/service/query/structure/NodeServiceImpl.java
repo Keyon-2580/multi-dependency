@@ -202,13 +202,13 @@ public class NodeServiceImpl implements NodeService {
 	}
 
 	@Override
-	public Package queryPackage(String directoryPath) {
+	public Package queryPackage(String directoryPath,String language) {
 		if(directoryPath == null) {
 			return null;
 		}
-		Package result = cache.findPackageByDirectoryPath(directoryPath);
+		Package result = cache.findPackageByDirectoryPath(directoryPath, language);
 		if(result == null) {
-			result = packageRepository.queryPackage(directoryPath);
+			result = packageRepository.queryPackage(directoryPath,language);
 			cache.cacheNodeById(result);
 		}
 		return result;

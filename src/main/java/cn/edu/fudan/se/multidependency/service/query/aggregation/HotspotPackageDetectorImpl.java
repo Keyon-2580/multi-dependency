@@ -126,11 +126,13 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 						parentPck1.setEntityId(-1L);
 						parentPck1.setDirectoryPath(parentPck1Path);
 						parentPck1.setName(parentPck1Path);
+						parentPck1.setLanguage(pck1.getLanguage());
 						parentPck2 = new Package();
 						parentPck2.setId(-1L);
 						parentPck2.setEntityId(-1L);
 						parentPck2.setDirectoryPath(parentPck2Path);
 						parentPck2.setName(parentPck2Path);
+						parentPck1.setLanguage(pck2.getLanguage());
 						parentSimilar = new HotspotPackage(new RelationDataForDoubleNodes(parentPck1, parentPck2, parentId));
 						parentSimilarPackges.put(parentSimilar.getId(), parentSimilar);
 					}

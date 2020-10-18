@@ -546,12 +546,16 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
 	@Override
 	public Package findPackageInPackage(Package pck) {
-		return nodeService.queryPackage(pck.lastPackageDirectoryPath());
+		return nodeService.queryPackage(pck.lastPackageDirectoryPath(), pck.getLanguage());
 	}
 
 	@Override
 	public Collection<Package> findPackageContainSubPackages(Package pck) {
-		return packageRepository.findPackageContainSubPackages(pck.getDirectoryPath());
+		String language = pck.getLanguage();
+		if (language == null ){
+			language = containRepository.findPackageBelongToProject(pck.getId()).getLanguage();
+		}
+		return packageRepository.findPackageContainSubPackages(pck.getDirectoryPath(), language);
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.model.node;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.Language;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -32,6 +33,8 @@ public class Package implements Node, Module {
     private String directoryPath;
 	
     private String name;
+    
+	private String language;
 
     private Long entityId;
     
@@ -51,6 +54,9 @@ public class Package implements Node, Module {
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("directoryPath", getDirectoryPath() == null ? "" : getDirectoryPath());
 		properties.put("name", getName() == null ? "" : getName());
+		properties.put("language", getLanguage() == null ? "" : getLanguage());
+		properties.put("loc", getLoc());
+		properties.put("lines", getLines());
 		return properties;
 	}
 

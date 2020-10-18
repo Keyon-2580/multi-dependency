@@ -24,7 +24,7 @@ public interface NodeService {
 	
 	Package queryPackage(long id);
 	
-	Package queryPackage(String directoryPath);
+	Package queryPackage(String directoryPath,String language);
 
 	ProjectFile queryFile(long id);
 	

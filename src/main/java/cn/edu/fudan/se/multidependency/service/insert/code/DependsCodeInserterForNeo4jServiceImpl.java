@@ -60,6 +60,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 				}
 				parentPackage = new Package();
 				parentPackage.setEntityId(generateEntityId());
+				parentPackage.setLanguage(currentPackage.getLanguage());
 //				parentPackage.setEntityId(this.entityRepo.generateId().longValue());
 				parentPackage.setDirectoryPath(parentDirectoryPath);
 				parentPackage.setLines(0);
@@ -120,6 +121,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 
 				parentPackage = new Package();
 				parentPackage.setEntityId(generateEntityId());
+				parentPackage.setLanguage(currentPackage.getLanguage());
 //				parentPackage.setEntityId(this.entityRepo.generateId().longValue());
 				parentPackage.setDirectoryPath(parentDirectoryPath);
 				parentPackage.setLines(0);

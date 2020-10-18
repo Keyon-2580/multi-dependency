@@ -15,8 +15,8 @@ import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
 @Repository
 public interface PackageRepository extends Neo4jRepository<Package, Long> {
     
-	@Query("match (p:Package) where p.directoryPath={directoryPath} return p")
-	public Package queryPackage(@Param("directoryPath") String directoryPath);
+	@Query("match (p:Package) where p.directoryPath={directoryPath} and p.language = {language} return p")
+	public Package queryPackage(@Param("directoryPath") String directoryPath, @Param("language") String language);
 	
 	
 	@Query("MATCH (pck:Package) where pck.lines > 0\r\n" + 
@@ -44,6 +44,6 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 	 * @param directoryPath
 	 * @return
 	 */
-	@Query("match (n:Package) where n.directoryPath =~ ({directoryPath} + \"[^/]*/\") return n")
-	public Collection<Package> findPackageContainSubPackages(@Param("directoryPath") String directoryPath);
+	@Query("match (n:Package) where n.language = {language} and n.directoryPath =~ ({directoryPath} + \"[^/]*/\") return n")
+	public Collection<Package> findPackageContainSubPackages(@Param("directoryPath") String directoryPath, @Param("language")String language);
 }

@@ -71,6 +71,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 //			pck.setEntityId(entityRepo.generateId().longValue());
 			pck.setEntityId(generateEntityId());
 			pck.setName(directoryPath);
+			pck.setLanguage(Language.cpp.name());
 			pck.setDirectoryPath(directoryPath);
 			addNode(pck, currentProject);
 			Contain projectContainsPackage = new Contain(currentProject, pck);

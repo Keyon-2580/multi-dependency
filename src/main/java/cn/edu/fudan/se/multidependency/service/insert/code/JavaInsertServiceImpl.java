@@ -53,6 +53,7 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 		if (pck == null) {
 			pck = new Package();
 			pck.setName(directoryPath);
+			pck.setLanguage(Language.java.name());
 			pck.setDirectoryPath(directoryPath);
 			Entity parentEntity = entity.getParent();
 			if(parentEntity == null) {
