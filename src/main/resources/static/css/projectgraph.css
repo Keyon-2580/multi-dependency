@@ -25,6 +25,7 @@
 line {
     stroke-width: 4px;
     stroke: #d62728;
+    cursor:pointer;
 }
 
 button {
@@ -39,10 +40,6 @@ button {
     font-size: 12px;
     border-radius: 3px;
     cursor: pointer;
-}
-
-#showLineId{
-    float: right;
 }
 
 .dropdown{

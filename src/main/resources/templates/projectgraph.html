@@ -15,6 +15,7 @@
     <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
     <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-select.min.css}"></link>
     <link rel="stylesheet" th:href="@{/css/projectgraph.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/table_common.css}"></link>
 </head>
 <body>
 <div th:include="nav.html::nav"></div>
@@ -22,9 +23,8 @@
 </div>
 <div id = "projectToGraph">
     <svg id = "projectToGraphSvg"></svg>
-    <button class = "showLineButton" id = "showLineId" type="button" onclick= showLine()>显示包克隆关系</button>
 </div>
-
+<div id = "projectCloneTable"></div>
     <script type="text/javascript" th:src="@{/js/projectgraph.js}"></script>
     <script type="text/javascript" th:inline="javascript">
         // var divId = "#projectToGraph";
