@@ -23,5 +23,7 @@ public interface ProjectService {
 
 	JSONArray getMultipleProjectsGraphJson(JSONObject dataList);
 
-	JSONArray projectGraphCloneLink(long package1Id, long package2Id);
+	JSONObject cloneGraphAndTableOfChildrenPackages(long package1Id, long package2Id);
+
+	JSONArray getAllProjectsLinks();
 }

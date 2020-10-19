@@ -34,28 +34,3 @@
     border: 3px solid;
     border-radius: 10px;
 }
-
-table.gridtable {
-    font-family: verdana,arial,sans-serif;
-    font-size:13px;
-    color:#333333;
-    border-width: 2px;
-    border-color: #666666;
-    border-collapse: collapse;
-}
-table.gridtable th {
-    border-width: 2px;
-    padding: 8px;
-    width: 100px;
-    border-style: solid;
-    border-color: #666666;
-    background-color: #dedede;
-}
-table.gridtable td {
-    border-width: 2px;
-    padding: 8px;
-    width: 100px;
-    border-style: solid;
-    border-color: #666666;
-    background-color: #ffffff;
-}

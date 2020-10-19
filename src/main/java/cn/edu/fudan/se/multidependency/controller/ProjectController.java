@@ -599,8 +599,8 @@ public class ProjectController {
 	 * */
 	@GetMapping("/has/childrenlinks")
 	@ResponseBody
-	public JSONArray getProjectGraphCloneLink(@RequestParam("package1Id") long package1Id, @RequestParam("package2Id") long package2Id) {
-		return projectService.projectGraphCloneLink(package1Id, package2Id);
+	public JSONObject getProjectGraphCloneLink(@RequestParam("package1Id") long package1Id, @RequestParam("package2Id") long package2Id) {
+		return projectService.cloneGraphAndTableOfChildrenPackages(package1Id, package2Id);
 	}
 
 	@GetMapping("/has/echarts")

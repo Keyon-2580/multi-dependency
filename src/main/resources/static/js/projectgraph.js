@@ -51,6 +51,12 @@ var loaddata = function () {
             }
             html += "</select>";
             html += "<button id = \"multipleProjectsButton\" type=\"button\" onclick= showMultipleButton()>加载项目</button>\n";
+            html += "<select id = \"relationTypeSelect\" class=\"selectpicker\">";
+            html += "<option selected=\"selected\" value=\"clone\">Clone</option>";
+            html += "<option value=\"cochange\">Cochange</option>";
+            html += "<option value=\"depedency\">Depedency</option>";
+            html += "</select>";
+            html += "<button class = \"showLineButton\" id = \"showLineId\" type=\"button\" onclick= showLine()>显示关系</button>";
 
             // console.log(html)
             $("#projectToGraph_util").html(html);
@@ -83,6 +89,46 @@ var loaddata = function () {
     //         })
     //     }
     // }
+}
+
+//调用接口请求数据
+var projectGraphAjax = function(projectIds){
+    var projectList = {};
+    var projectIds_array = [];
+
+    for(var i = 0; i < projectIds.length; i++){
+        var tempId = {};
+        tempId["id"] = projectIds[i];
+        projectIds_array.push(tempId);
+    }
+
+    projectList["projectIds"] = projectIds_array;
+    projectList["showType"] = "graph";
+
+    // console.log(projectList);
+
+    // var projectList={
+    //     "projectIds": [
+    //         {
+    //             "id" : projectId
+    //         }
+    //     ],
+    //     "showType": "graph"
+    // }
+    $.ajax({
+        type:"POST",
+        url : "/project/has",
+        contentType: "application/json", //必须这样写
+        dataType:"json",
+        data:JSON.stringify(projectList),
+        success : function(result) {
+            // console.log(result);
+            // resultjson = result;
+            // console.log(projectlist[index])
+            // console.log("projectToGraph_" + projectlist[index])
+            projectToGraph(result,"projectToGraphSvg");
+        }
+    })
 }
 
 //绘制气泡图
@@ -326,7 +372,6 @@ var projectToGraph = function(result,divId){
 
 //绘制气泡图连线
 var showLine = function(){
-    console.log(jsonLinks_global.length);
     var jsonLinks_local = jsonLinks_global.concat();
     var temp_delete_number = 0;
 
@@ -353,15 +398,14 @@ var showLine = function(){
             temp_delete_number++;
         }
     }
-    console.log(jsonLinks_local.length);
 
     if(typeof(jsonLinks_local) !== "undefined" && (temp_delete_number !== jsonLinks_global.length)){
         if(flag){
             drawLink(jsonLinks_local);
-            document.getElementById("showLineId").innerHTML = "显示包克隆关系";
+            document.getElementById("showLineId").innerHTML = "隐藏关系";
         }else{
             clearLink();
-            document.getElementById("showLineId").innerHTML = "显示包克隆关系";
+            document.getElementById("showLineId").innerHTML = "显示关系";
         }
     }
 }
@@ -426,13 +470,16 @@ function clearLink(){
     flag = true;
 }
 
+//点击连线，获取子包关系,绘制图下方表格
 function drawChildrenLinks(package1Id, package2Id){
     clearLink();
     $.ajax({
         type : "GET",
         url : "/project/has/childrenlinks?package1Id=" + package1Id + "&package2Id=" + package2Id,
         success : function(result) {
-            drawLink(result);
+            console.log(result);
+            drawLink(result.children_graphlinks);
+            drawCloneTableBelow(result.table);
         }
     });
 }
@@ -442,48 +489,41 @@ var showMultipleButton = function(){
     var value = $('#multipleProjectSelect').val();
     projectList_global = [];
     projectList_global = value;
-    console.log(projectList_global);
+    // console.log(projectList_global);
     projectGraphAjax(value);
 }
 
-//调用接口请求数据
-var projectGraphAjax = function(projectIds){
-    var projectList = {};
-    var projectIds_array = [];
+function drawCloneTableBelow(tableData){
+    var cleartable = d3.selectAll("table").remove();
+    var clonefiles1 = tableData.clonefiles1;
+    var clonefiles2 = tableData.clonefiles2;
+    var nonclonefiles1 = tableData.nonclonefiles1;
+    var nonclonefiles2 = tableData.nonclonefiles2;
+    let html = "";
+    html += "<table class = \"gridtable\">"
+        + "<tr><th>目录1</th><th>目录1克隆占比</th><th>目录2</th><th>目录2克隆占比</th><th>总克隆占比</th></tr>";
 
-    for(var i = 0; i < projectIds.length; i++){
-        var tempId = {};
-        tempId["id"] = projectIds[i];
-        projectIds_array.push(tempId);
+    for(let i = 0; i < clonefiles1.length; i++){
+        var path1CloneRate = clonefiles1[i].relationNodes1 + "/" + clonefiles1[i].allNodes1 + "=" + ((clonefiles1[i].relationNodes1 + 0.0) / clonefiles1[i].allNodes1).toFixed(2);
+        var path2CloneRate = clonefiles2[i].relationNodes2 + "/" + clonefiles2[i].allNodes2 + "=" + ((clonefiles2[i].relationNodes2 + 0.0) / clonefiles2[i].allNodes2).toFixed(2);
+        var cloneRate = "(" + clonefiles1[i].relationNodes1 + "+" + clonefiles2[i].relationNodes2 + ")/(" + clonefiles1[i].allNodes1 + "+" + clonefiles2[i].allNodes2 + ")=" + ((clonefiles1[i].relationNodes1 + clonefiles2[i].relationNodes2 + 0.0) / (clonefiles1[i].allNodes1 + clonefiles2[i].allNodes2)).toFixed(2);
+        html += "<tr><td>" + clonefiles1[i].name + "</td><td>" + path1CloneRate + "</td><td>" + clonefiles2[i].name + "</td><td>" + path2CloneRate + "</td><td>" + cloneRate + "</td></tr>";
     }
 
-    projectList["projectIds"] = projectIds_array;
-    projectList["showType"] = "graph";
-
-    // console.log(projectList);
-
-    // var projectList={
-    //     "projectIds": [
-    //         {
-    //             "id" : projectId
-    //         }
-    //     ],
-    //     "showType": "graph"
-    // }
-    $.ajax({
-        type:"POST",
-        url : "/project/has",
-        contentType: "application/json", //必须这样写
-        dataType:"json",
-        data:JSON.stringify(projectList),
-        success : function(result) {
-            console.log(result);
-            // resultjson = result;
-            // console.log(projectlist[index])
-            // console.log("projectToGraph_" + projectlist[index])
-            projectToGraph(result,"projectToGraphSvg");
+    if(nonclonefiles1.length > 0){
+        for(let i = 0; i < nonclonefiles1.length; i++){
+            html += "<tr><td>" + nonclonefiles1[i].name + "</td><td> </td><td> </td><td> </td><td> </td></tr>";
         }
-    })
+    }
+
+    if(nonclonefiles2.length > 0){
+        for(let i = 0; i < nonclonefiles2.length; i++){
+            html += "<tr><td> </td><td> </td><td>" + nonclonefiles2[i].name + "</td><td> </td><td> </td></tr>";
+        }
+    }
+
+    html += "</table>";
+    $("#projectCloneTable").html(html);
 }
 
 
