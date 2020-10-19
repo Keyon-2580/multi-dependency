@@ -45,6 +45,11 @@ public class HasRelationServiceImpl implements HasRelationService {
     }
 
     @Override
+    public Package findPackageInPackage(Package pck) {
+        return hasRepository.findPackageInPackage(pck.getId());
+    }
+
+    @Override
     public ProjectStructure projectHasInitialize(Project project) {
         ProjectStructure result = new ProjectStructure(project);
 //        System.out.println(hasRepository.findProjectHasPackages(project.getId()));

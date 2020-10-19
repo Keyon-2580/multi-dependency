@@ -12,6 +12,8 @@ public interface HasRelationService {
 
     Collection<Package> findPackageHasPackages(Package pck);
 
+    Package findPackageInPackage(Package pck);
+
     ProjectStructure projectHasInitialize(Project project);
 
     PackageStructure packageHasInitialize(Package pck);

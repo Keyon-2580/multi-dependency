@@ -9,9 +9,11 @@ import java.util.List;
 
 public interface HotspotPackageDetector {
 
-	Collection<HotspotPackage> detectHotspotPackages();
+	List<HotspotPackage> detectHotspotPackages();
 
-	Collection<HotspotPackage> detectHotspotPackagesByFileClone();
+	List<HotspotPackage> detectHotspotPackagesByFileClone();
+
+	List<HotspotPackage> detectHotspotPackagesByFileCloneWithoutEmptyPackage();
 
 	Collection<HotspotPackage> detectHotspotPackagesByFileCloneLoc();
 

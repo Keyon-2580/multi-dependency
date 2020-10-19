@@ -144,8 +144,8 @@ public class JavaInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImp
 			}
 		});
 
-		addEmptyPackages();
-//		addCommonParentEmptyPackages();
+//		addEmptyPackages();
+		addCommonParentEmptyPackages();
 		
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject).forEach((entityId, node) -> {
 			Type type = (Type) node;
