@@ -207,7 +207,7 @@ def calc_small_file_clone_similarity(measures, measure_indecies, state):
         measure_file_id, offset = calc_file_id(state, measure['start_token'])
         measure_file = '%s/allTokenCsv%d' % (token_data_folder, measure_file_id)
         tokens = read_tokens(measure_file, offset, measure['end_token'] - measure['start_token'])
-        if token_size > len(tokens) > 0:
+        if token_size > len(tokens) > 4:
             small_file_measure_indecies[key] = value
             small_file_token_index[key] = tokens
 
