@@ -413,6 +413,12 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 						if(other != null) {
 							Call call = new Call(function, other);
 							addRelation(call);
+							//根据call关系，建立起对应的Type的Dependency关系
+							Type otherType = (Type) types.get(relation.getEntity().getId().longValue());
+							if(functionParentType != null && otherType != null && functionParentType != otherType){
+								Dependency dependency = new Dependency(functionParentType, otherType, RelationType.str_CALL);
+								addRelation(dependency);
+							}
 						}
 					}
 					break;
