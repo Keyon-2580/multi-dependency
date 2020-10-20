@@ -17,7 +17,6 @@ var showtree = function(divId, zNodes) {
 
 var doublePackagesCloneShow = function(pck1Id, pck2Id, path1, path2, path1CloneRate, path2CloneRate, cloneRate, cochangeRate, clonePairs) {
     $("#package_clone_detail").html("");
-
     var html = "";
     html += "</table>";
     html += "<table class='table table-bordered'>"
@@ -1521,4 +1520,22 @@ var setFilesContext = function (file1AbsolutePath, file2AbsolutePath, decoder1, 
             });
         }
     })
+}
+
+/*
+显示跨包克隆聚合详细信息
+*/
+var showDetails = function (id1, id2, path1, path2, cloneNodes1, allNodes1, cloneNodes2, allNodes2, cloneCochangeTimes, allCochangeTimes, clonePairs) {
+    var path1CloneRate = cloneNodes1 + "/" + allNodes1 + "=" + ((cloneNodes1 + 0.0) / allNodes1).toFixed(2);
+    var path2CloneRate = cloneNodes2 + "/" + allNodes2 + "=" + ((cloneNodes2 + 0.0) / allNodes2).toFixed(2);
+    var cloneRate = "(" + cloneNodes1 + "+" + cloneNodes2 + ")/(" + allNodes1 + "+" + allNodes2 + ")=" + ((cloneNodes1 + cloneNodes2 + 0.0) / (allNodes1 + allNodes2)).toFixed(2);
+    var cochangeRate = "";
+    if(allCochangeTimes < 3){
+        cochangeRate = cloneCochangeTimes + "/" + allCochangeTimes + "=0.00";
+    }
+    else {
+        cochangeRate = cloneCochangeTimes  + "/" + allCochangeTimes  + "=" + ((cloneCochangeTimes  + 0.0) / allCochangeTimes).toFixed(2);
+    }
+    doublePackagesCloneShow(id1, id2, path1, path2, path1CloneRate, path2CloneRate, cloneRate, cochangeRate, clonePairs);
+    doublePackagesCloneWithCoChange(id1, id2);
 }

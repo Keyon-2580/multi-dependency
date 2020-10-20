@@ -47,25 +47,28 @@ var showAggregationResult = function() {
 						var cochangeRate = "";
 						if(duplicated.packageCochangeTimes < 3){
 							cochangeRate = duplicated.packageCloneCochangeTimes + "/" + duplicated.packageCochangeTimes + "=0.00";
-						}else {
-							cochangeRate = duplicated.packageCloneCochangeTimes  + "/" + duplicated.packageCochangeTimes  + "=" + ((duplicated.packageCloneCochangeTimes  + 0.0) / duplicated.packageCochangeTimes ).toFixed(2);
+						}
+						else {
+							cochangeRate = duplicated.packageCloneCochangeTimes  + "/" + duplicated.packageCochangeTimes  + "=" + ((duplicated.packageCloneCochangeTimes  + 0.0) / duplicated.packageCochangeTimes).toFixed(2);
 						}
 						html += cochangeRate;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
 						var len = duplicated.clonePairs;
 						if(len > 0) {
-							html += "<a class='package' href='#package_files_clone' " +
-								"id1='" + duplicated.package1.id + "' " +
-								"id2='" + duplicated.package2.id + "' " +
-								"path1='" + duplicated.package1.directoryPath + "' " +
-								"path2='" + duplicated.package2.directoryPath + "' " +
-								"path1CloneRate='" + path1CloneRate + "' " +
-								"path2CloneRate='" + path2CloneRate + "' " +
-								"cloneRate='" + cloneRate + "' " +
-								"cochangeRate='" + cochangeRate + "' " +
-								"clonePairs='" + len + "' " +
-								">" + len + "</a>";
+							html += "<a target='_blank' class='package' href='/cloneaggregation/details" +
+								"?id1=" + duplicated.package1.id +
+								"&id2=" + duplicated.package2.id +
+								"&path1=" + duplicated.package1.directoryPath +
+								"&path2=" + duplicated.package2.directoryPath +
+								"&cloneNodes1=" + duplicated.relationNodes1 +
+								"&allNodes1=" + duplicated.allNodes1 +
+								"&cloneNodes2=" + duplicated.relationNodes2 +
+								"&allNodes2=" + duplicated.allNodes2 +
+								"&cloneCochangeTimes=" + duplicated.packageCloneCochangeTimes +
+								"&allCochangeTimes=" + duplicated.packageCochangeTimes +
+								"&clonePairs=" + len +
+								"'>" + len + "</a>";
 						}
 						else {
 							html += len;
@@ -129,10 +132,6 @@ var showAggregationResult = function() {
 			}
 			html += "</table>"
 			$("#packages_aggregation").html(html);
-			$(".package").click(function() {
-				doublePackagesCloneShow($(this).attr("id1"), $(this).attr("id2"), $(this).attr("path1"), $(this).attr("path2"), $(this).attr("path1CloneRate"), $(this).attr("path2CloneRate"), $(this).attr("cloneRate"), $(this).attr("cochangeRate"), $(this).attr("clonePairs"));
-				doublePackagesCloneWithCoChange($(this).attr("id1"), $(this).attr("id2"));
-			});
 		}
 	})
 }

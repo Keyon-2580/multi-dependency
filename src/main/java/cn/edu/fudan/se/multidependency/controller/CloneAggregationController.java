@@ -3,6 +3,8 @@ package cn.edu.fudan.se.multidependency.controller;
 import java.io.OutputStream;
 import java.util.*;
 
+import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
@@ -54,5 +56,10 @@ public class CloneAggregationController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @GetMapping("/details")
+    public String showDetails(@RequestParam("id1") long id1, @RequestParam("id2") long id2, @RequestParam("path1") String path1, @RequestParam("path2") String path2, @RequestParam("cloneNodes1") int cloneNodes1, @RequestParam("allNodes1") int allNodes1, @RequestParam("cloneNodes2") int cloneNodes2, @RequestParam("allNodes2") int allNodes2, @RequestParam("cloneCochangeTimes") int cloneCochangeTimes, @RequestParam("allCochangeTimes") int allCochangeTimes, @RequestParam("clonePairs") int clonePairs) {
+        return "details";
     }
 }

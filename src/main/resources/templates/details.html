@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Clone</title>
+    <script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/jquery.treeview.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/popper-1.14.7.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/d3.v3.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape-panzoom.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape-navigator.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape-hierarchical.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/expand-collapse/layout-base-1.0.2.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/expand-collapse/cose-base-1.0.2.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/expand-collapse/cytoscape-cose-bilkent-4.1.0.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/expand-collapse/cytoscape-undo-red-1.3.3.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/expand-collapse/cytoscape-expand-collapse.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/dagre.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape-dagre.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/klay.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/cytoscape.js-3.13.1/cytoscape-klay.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-3.3.2.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-multiselect-0.9.15.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/ztree/jquery.ztree.all.js}"></script>
+    <script type="text/javascript" th:src="@{/js/import/echarts-4.7.0/dist/echarts.js}"></script>
+    <script type="text/javascript" th:src="@{/js/cytoscapeutils.js}"></script>
+    <script type="text/javascript" th:src="@{/js/cloneaggregation.js}"></script>
+    <script type="text/javascript" th:src="@{/js/clonecompareutils.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/import/cytoscape.js-panzoom.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/import/cytoscape.js-navigator.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/import/jquery.jqplot.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/import/ztree/zTreeStyle/zTreeStyle.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/circlechart.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/doublefile_tree.css}"></link>
+</head>
+<body>
+<script type="text/javascript">
+    var URL = window.location.search;
+    URL = URL.split('?id1=')[1];
+    var file1AbsolutePath = URL.split('&')[0];
+    var file2AbsolutePath = URL.split('rightFilePath=')[1];
+    var id1 = URL.split('&id2=')[0];
+    URL = URL.split('&id2=')[1];
+    var id2 = URL.split('&path1=')[0];
+    URL = URL.split('&path1=')[1];
+    var path1 = URL.split('&path2=')[0];
+    URL = URL.split('&path2=')[1];
+    var path2 = URL.split('&cloneNodes1=')[0];
+    URL = URL.split('&cloneNodes1=')[1];
+    var cloneNodes1 = URL.split('&allNodes1=')[0];
+    URL = URL.split('&allNodes1=')[1];
+    var allNodes1 = URL.split('&cloneNodes2=')[0];
+    URL = URL.split('&cloneNodes2=')[1];
+    var cloneNodes2 = URL.split('&allNodes2=')[0];
+    URL = URL.split('&allNodes2=')[1];
+    var allNodes2 = URL.split('&cloneCochangeTimes=')[0];
+    URL = URL.split('&cloneCochangeTimes=')[1];
+    var cloneCochangeTimes = URL.split('&allCochangeTimes=')[0];
+    URL = URL.split('&allCochangeTimes=')[1];
+    var allCochangeTimes = URL.split('&clonePairs=')[0];
+    URL = URL.split('&clonePairs=')[1];
+    var clonePairs = URL;
+    $(document).ready(function () {
+        showDetails(id1, id2, path1, path2, cloneNodes1, allNodes1, cloneNodes2, allNodes2, cloneCochangeTimes, allCochangeTimes, clonePairs);
+    });
+</script>
+<div th:include="nav.html::nav"></div>
+<div class="col-sm-12 row" style="margin-bottom: 15px;">
+    <div>
+        <div class="col-sm-12" id="package_clone_detail"></div>
+        <div class="col-sm-12" id="package_files_tree"></div>
+        <div class="col-sm-12" id="package_files_clone"></div>
+    </div>
+</div>
+</body>
+</html>
