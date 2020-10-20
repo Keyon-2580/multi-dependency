@@ -383,14 +383,14 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 				String currentPackages = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
 				String parentPackages = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
 				Collection<String> cloneChildren = new ArrayList<>();
-				if(cloneChildrenPackagesOfPackages.containsKey(parentPackages)) {
-					cloneChildren = cloneChildrenPackagesOfPackages.get(parentPackages);
+				if(!cloneChildrenPackagesOfPackages.containsKey(parentPackages)) {
+					cloneChildrenPackagesOfPackages.put(parentPackages, cloneChildren);
 				}
+				cloneChildren = cloneChildrenPackagesOfPackages.get(parentPackages);
 				if(cloneChildren.contains(currentPackages)) {
 					break;
 				}
 				cloneChildren.add(currentPackages);
-				cloneChildrenPackagesOfPackages.put(parentPackages, cloneChildren);
 				currentPackage1 = parentPackage1;
 				currentPackage2 = parentPackage2;
 //				parentPackage1 = findParentPackageDeleteEmptyPackage(directoryPathToParentPackage, currentPackage1);
@@ -484,8 +484,14 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 	}
 
 	@Override
-	public List<HotspotPackage> quickDetectHotspotPackages(long parent1Id, long parent2Id) {
-		return getHotspotPackages(parent1Id, parent2Id);
+	public HotspotPackage detectHotspotPackagesByPackageId(long pck1Id, long pck2Id) {
+		AggregationClone aggregationClone = aggregationCloneRepository.findAggregationCloneById(pck1Id, pck2Id);
+		return setHotspotPackageData(aggregationClone, pck1Id, pck2Id);
+	}
+
+	@Override
+	public List<HotspotPackage> detectHotspotPackagesByParentId(long parent1Id, long parent2Id) {
+		return loadHotspotPackagesByParentId(parent1Id, parent2Id);
 	}
 
 	@Override
@@ -764,75 +770,91 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 		return aggregator.aggregate(packageClone);
 	}
 
-	//递归加载聚合结果
-	public List<HotspotPackage> getHotspotPackages(long parent1Id, long parent2Id) {
-		List<HotspotPackage> result = new ArrayList<>();
-		List<AggregationClone> aggregationClones = aggregationCloneRepository.findAggregationClone(parent1Id, parent2Id);
-
-		for(AggregationClone aggregationClone : aggregationClones) {
-			Package currentPackage1 = (Package) aggregationClone.getStartNode();
-			Package currentPackage2 = (Package) aggregationClone.getEndNode();
-			CoChange packageCoChanges = null;
-			ModuleClone packageCloneCoChanges = null;
-			if(parent1Id > -1 && parent2Id > -1){
-				packageCoChanges = coChangeRepository.findModuleCoChange(currentPackage1.getId(), currentPackage2.getId());
-				packageCloneCoChanges = moduleCloneRepository.findModuleClone(currentPackage1.getId(), currentPackage2.getId());
-			}
-
-			List<HotspotPackage> childrenHotspotPackages = getHotspotPackages(currentPackage1.getId(), currentPackage2.getId());
-			RelationDataForDoubleNodes<Node, Relation> relationDataForDoubleNodes = new RelationDataForDoubleNodes<Node, Relation>(currentPackage1, currentPackage2);
-			HotspotPackage hotspotPackage = new HotspotPackage(relationDataForDoubleNodes);
-			hotspotPackage.setClonePairs(aggregationClone.getClonePairs());
-			hotspotPackage.setData(aggregationClone.getAllNodesInNode1(), aggregationClone.getAllNodesInNode2(), aggregationClone.getNodesInNode1(), aggregationClone.getNodesInNode2());
-			if(packageCoChanges != null){
-				hotspotPackage.setPackageCochangeTimes(packageCoChanges.getTimes());
-			}
-			else {
-				hotspotPackage.setPackageCochangeTimes(0);
-			}
-
-			if(packageCloneCoChanges != null){
-				hotspotPackage.setPackageCloneCochangeTimes(packageCloneCoChanges.getModuleCloneCochangeTimes());
-			}
-			else {
-				hotspotPackage.setPackageCloneCochangeTimes(0);
-			}
-			if(childrenHotspotPackages.size() > 0) {
-				//将有子包的包下文件打包
-				if(isBranchPackageWithFiles(currentPackage1) && isBranchPackageWithFiles(currentPackage2)) {
-					ModuleClone moduleClone = moduleCloneRepository.findModuleClone(currentPackage1.getId(), currentPackage2.getId());
-					Package childPackage1 = buildPackageForFiles(currentPackage1);
-					Package childPackage2 = buildPackageForFiles(currentPackage2);
-					if(moduleClone != null) {
-						HotspotPackage childHotspotPackage = new HotspotPackage(new RelationDataForDoubleNodes<Node, Relation>(childPackage1, childPackage2));
-						childHotspotPackage.setData(moduleClone.getAllNodesInNode1(), moduleClone.getAllNodesInNode2(), moduleClone.getNodesInNode1(), moduleClone.getNodesInNode2());
-						childHotspotPackage.setClonePairs(moduleClone.getClonePairs());
-						hotspotPackage.setClonePairs(0);
-						hotspotPackage.addHotspotChild(childHotspotPackage);
+	//设置HotspotPackage信息
+	public HotspotPackage setHotspotPackageData(AggregationClone aggregationClone, long parent1Id, long parent2Id) {
+		Package currentPackage1 = (Package) aggregationClone.getStartNode();
+		Package currentPackage2 = (Package) aggregationClone.getEndNode();
+		CoChange packageCoChanges = null;
+		ModuleClone packageCloneCoChanges = null;
+		if(parent1Id > -1 && parent2Id > -1){
+			packageCoChanges = coChangeRepository.findModuleCoChange(currentPackage1.getId(), currentPackage2.getId());
+			packageCloneCoChanges = moduleCloneRepository.findModuleClone(currentPackage1.getId(), currentPackage2.getId());
+		}
+		RelationDataForDoubleNodes<Node, Relation> relationDataForDoubleNodes = new RelationDataForDoubleNodes<Node, Relation>(currentPackage1, currentPackage2);
+		HotspotPackage hotspotPackage = new HotspotPackage(relationDataForDoubleNodes);
+		hotspotPackage.setClonePairs(aggregationClone.getClonePairs());
+		hotspotPackage.setData(aggregationClone.getAllNodesInNode1(), aggregationClone.getAllNodesInNode2(), aggregationClone.getNodesInNode1(), aggregationClone.getNodesInNode2());
+		if(packageCoChanges != null){
+			hotspotPackage.setPackageCochangeTimes(packageCoChanges.getTimes());
+		}
+		else {
+			hotspotPackage.setPackageCochangeTimes(0);
+		}
+		if(packageCloneCoChanges != null){
+			hotspotPackage.setPackageCloneCochangeTimes(packageCloneCoChanges.getModuleCloneCochangeTimes());
+		}
+		else {
+			hotspotPackage.setPackageCloneCochangeTimes(0);
+		}
+		List<HotspotPackage> childrenHotspotPackages = loadHotspotPackagesByParentId(currentPackage1.getId(), currentPackage2.getId());
+		if(childrenHotspotPackages.size() > 0) {
+			//将有子包的包下文件打包
+			if(isBranchPackageWithFiles(currentPackage1) && isBranchPackageWithFiles(currentPackage2)) {
+				ModuleClone moduleClone = moduleCloneRepository.findModuleClone(currentPackage1.getId(), currentPackage2.getId());
+				Package childPackage1 = buildPackageForFiles(currentPackage1);
+				Package childPackage2 = buildPackageForFiles(currentPackage2);
+				if(moduleClone != null) {
+					HotspotPackage childHotspotPackage = new HotspotPackage(new RelationDataForDoubleNodes<Node, Relation>(childPackage1, childPackage2));
+					childHotspotPackage.setData(moduleClone.getAllNodesInNode1(), moduleClone.getAllNodesInNode2(), moduleClone.getNodesInNode1(), moduleClone.getNodesInNode2());
+					childHotspotPackage.setClonePairs(moduleClone.getClonePairs());
+					if(packageCoChanges != null){
+						childHotspotPackage.setPackageCochangeTimes(packageCoChanges.getTimes());
 					}
 					else {
-						childPackage1.setAllNodes(containRelationService.findPackageContainFiles(currentPackage1).size());
-						childPackage2.setAllNodes(containRelationService.findPackageContainFiles(currentPackage2).size());
-						hotspotPackage.addOtherChild1(childPackage1);
-						hotspotPackage.addOtherChild2(childPackage2);
+						childHotspotPackage.setPackageCochangeTimes(0);
 					}
-				}
-
-				Collection<Package> childrenPackages1 = hasRelationService.findPackageHasPackages(hotspotPackage.getPackage1());
-				Collection<Package> childrenPackages2 = hasRelationService.findPackageHasPackages(hotspotPackage.getPackage2());
-				for(HotspotPackage childHotspotPackage : childrenHotspotPackages) {
+					if(packageCloneCoChanges != null){
+						childHotspotPackage.setPackageCloneCochangeTimes(packageCloneCoChanges.getModuleCloneCochangeTimes());
+					}
+					else {
+						childHotspotPackage.setPackageCloneCochangeTimes(0);
+					}
+					hotspotPackage.setPackageCochangeTimes(0);
+					hotspotPackage.setPackageCloneCochangeTimes(0);
+					hotspotPackage.setClonePairs(0);
 					hotspotPackage.addHotspotChild(childHotspotPackage);
-					childrenPackages1.remove(childHotspotPackage.getPackage1());
-					childrenPackages2.remove(childHotspotPackage.getPackage2());
 				}
-				for(Package childPackage1 : childrenPackages1) {
+				else {
+					childPackage1.setAllNodes(containRelationService.findPackageContainFiles(currentPackage1).size());
+					childPackage2.setAllNodes(containRelationService.findPackageContainFiles(currentPackage2).size());
 					hotspotPackage.addOtherChild1(childPackage1);
-				}
-				for(Package childPackage2 : childrenPackages2) {
 					hotspotPackage.addOtherChild2(childPackage2);
 				}
 			}
-			result.add(hotspotPackage);
+
+			Collection<Package> childrenPackages1 = hasRelationService.findPackageHasPackages(hotspotPackage.getPackage1());
+			Collection<Package> childrenPackages2 = hasRelationService.findPackageHasPackages(hotspotPackage.getPackage2());
+			for(HotspotPackage childHotspotPackage : childrenHotspotPackages) {
+				hotspotPackage.addHotspotChild(childHotspotPackage);
+				childrenPackages1.remove(childHotspotPackage.getPackage1());
+				childrenPackages2.remove(childHotspotPackage.getPackage2());
+			}
+			for(Package childPackage1 : childrenPackages1) {
+				hotspotPackage.addOtherChild1(childPackage1);
+			}
+			for(Package childPackage2 : childrenPackages2) {
+				hotspotPackage.addOtherChild2(childPackage2);
+			}
+		}
+		return hotspotPackage;
+	}
+
+	//递归加载聚合结果
+	public List<HotspotPackage> loadHotspotPackagesByParentId(long parent1Id, long parent2Id) {
+		List<HotspotPackage> result = new ArrayList<>();
+		List<AggregationClone> aggregationClones = aggregationCloneRepository.findAggregationCloneByParentId(parent1Id, parent2Id);
+		for(AggregationClone aggregationClone : aggregationClones) {
+			result.add(setHotspotPackageData(aggregationClone, parent1Id, parent2Id));
 		}
 		//聚合排序，每一次均进行排序
 		result.sort((d1, d2) -> {

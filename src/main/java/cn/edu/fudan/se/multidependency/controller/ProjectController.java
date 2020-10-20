@@ -15,10 +15,7 @@ import java.util.concurrent.FutureTask;
 
 import javax.servlet.http.HttpServletRequest;
 
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
-import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
-import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
 import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
@@ -652,7 +649,7 @@ public class ProjectController {
 		result.put("clone",clone);
 
 
-		List<HotspotPackage> hotspotPackageList = hotspotPackageDetector.quickDetectHotspotPackages(-1, -1);
+		List<HotspotPackage> hotspotPackageList = hotspotPackageDetector.detectHotspotPackagesByParentId(-1, -1);
 		for (HotspotPackage hotspotPackage : hotspotPackageList) {
 			JSONObject link = new JSONObject();
 			link.put("source", hotspotPackage.getPackage1().getId().toString());
