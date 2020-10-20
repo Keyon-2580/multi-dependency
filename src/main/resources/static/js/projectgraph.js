@@ -472,14 +472,16 @@ function clearLink(){
 
 //点击连线，获取子包关系,绘制图下方表格
 function drawChildrenLinks(package1Id, package2Id){
-    clearLink();
     $.ajax({
         type : "GET",
         url : "/project/has/childrenlinks?package1Id=" + package1Id + "&package2Id=" + package2Id,
         success : function(result) {
             console.log(result);
-            drawLink(result.children_graphlinks);
-            drawCloneTableBelow(result.table);
+            if(result.children_graphlinks.length > 0){
+                clearLink();
+                drawLink(result.children_graphlinks);
+                drawCloneTableBelow(result.table);
+            }
         }
     });
 }
@@ -501,24 +503,55 @@ function drawCloneTableBelow(tableData){
     var nonclonefiles2 = tableData.nonclonefiles2;
     let html = "";
     html += "<table class = \"gridtable\">"
-        + "<tr><th>目录1</th><th>目录1克隆占比</th><th>目录2</th><th>目录2克隆占比</th><th>总克隆占比</th></tr>";
+        + "<tr><th>目录1</th><th>目录1克隆占比</th><th>目录2</th><th>目录2克隆占比</th><th>总克隆占比</th><th>包克隆Cochange占比</th><th>克隆文件对数</th></tr>";
 
     for(let i = 0; i < clonefiles1.length; i++){
+        var packageCochangeTimes = clonefiles1[i].packageCochangeTimes;
+        var packageCloneCochangeTimes = clonefiles1[i].packageCloneCochangeTimes;
+        var clonePairs = clonefiles1[i].clonePairs;
         var path1CloneRate = clonefiles1[i].relationNodes1 + "/" + clonefiles1[i].allNodes1 + "=" + ((clonefiles1[i].relationNodes1 + 0.0) / clonefiles1[i].allNodes1).toFixed(2);
         var path2CloneRate = clonefiles2[i].relationNodes2 + "/" + clonefiles2[i].allNodes2 + "=" + ((clonefiles2[i].relationNodes2 + 0.0) / clonefiles2[i].allNodes2).toFixed(2);
         var cloneRate = "(" + clonefiles1[i].relationNodes1 + "+" + clonefiles2[i].relationNodes2 + ")/(" + clonefiles1[i].allNodes1 + "+" + clonefiles2[i].allNodes2 + ")=" + ((clonefiles1[i].relationNodes1 + clonefiles2[i].relationNodes2 + 0.0) / (clonefiles1[i].allNodes1 + clonefiles2[i].allNodes2)).toFixed(2);
-        html += "<tr><td>" + clonefiles1[i].name + "</td><td>" + path1CloneRate + "</td><td>" + clonefiles2[i].name + "</td><td>" + path2CloneRate + "</td><td>" + cloneRate + "</td></tr>";
+        var cochangeRate = "";
+
+        if(packageCochangeTimes < 3){
+            cochangeRate = packageCloneCochangeTimes + "/" + packageCochangeTimes + "=0.00";
+        }else {
+            cochangeRate = packageCloneCochangeTimes  + "/" + packageCochangeTimes  + "=" + ((packageCloneCochangeTimes  + 0.0) / packageCochangeTimes ).toFixed(2);
+        }
+
+        html += "<tr><td>" + clonefiles1[i].name + "</td><td>" + path1CloneRate + "</td><td>" + clonefiles2[i].name + "</td><td>" + path2CloneRate + "</td><td>" + cloneRate + "</td>";
+        html += "<td>" + cochangeRate + "</td>";
+        html += "<td>";
+        if(clonePairs > 0) {
+            html += "<a target='_blank' class='package' href='/cloneaggregation/details" +
+                "?id1=" + clonefiles1[i].id +
+                "&id2=" + clonefiles2[i].id +
+                "&path1=" + clonefiles1[i].name +
+                "&path2=" + clonefiles2[i].name +
+                "&cloneNodes1=" + clonefiles1[i].relationNodes1 +
+                "&allNodes1=" + clonefiles1[i].allNodes1 +
+                "&cloneNodes2=" + clonefiles2[i].relationNodes2 +
+                "&allNodes2=" + clonefiles2[i].allNodes2 +
+                "&cloneCochangeTimes=" + packageCloneCochangeTimes +
+                "&allCochangeTimes=" + packageCochangeTimes +
+                "&clonePairs=" + clonePairs +
+                "'>" + clonePairs + "</a>";
+        }else {
+            html += clonePairs;
+        }
+        html += "</td></tr>";
     }
 
     if(nonclonefiles1.length > 0){
         for(let i = 0; i < nonclonefiles1.length; i++){
-            html += "<tr><td>" + nonclonefiles1[i].name + "</td><td> </td><td> </td><td> </td><td> </td></tr>";
+            html += "<tr><td>" + nonclonefiles1[i].name + "</td><td> </td><td> </td><td> </td><td> </td><td> </td></tr>";
         }
     }
 
     if(nonclonefiles2.length > 0){
         for(let i = 0; i < nonclonefiles2.length; i++){
-            html += "<tr><td> </td><td> </td><td>" + nonclonefiles2[i].name + "</td><td> </td><td> </td></tr>";
+            html += "<tr><td> </td><td> </td><td>" + nonclonefiles2[i].name + "</td><td> </td><td> </td><td> </td></tr>";
         }
     }
 
