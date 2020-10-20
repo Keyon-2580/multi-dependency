@@ -752,7 +752,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 					cloneNodes1 += 1;
 				}
 				if(!childrenHotspotPackage2.contains(childPackage2)) {
-					childrenHotspotPackage2.add(childPackage1);
+					childrenHotspotPackage2.add(childPackage2);
 					cloneNodes2 += 1;
 				}
 			}
