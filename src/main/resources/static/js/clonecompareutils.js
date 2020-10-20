@@ -15,7 +15,7 @@ var showtree = function(divId, zNodes) {
     zTreeObj = $.fn.zTree.init($("#" + divId), setting, zNodes);
 }
 
-var doublePackagesCloneShow = function(pck1Id, pck2Id, path1, path2, path1CloneRate, path2CloneRate, cloneRate, cochangeRate, clonePairs) {
+var doublePackagesCloneShow = function(path1, path2, path1CloneRate, path2CloneRate, cloneRate, cochangeRate, clonePairs) {
     $("#package_clone_detail").html("");
     var html = "";
     html += "</table>";
@@ -1536,6 +1536,6 @@ var showDetails = function (id1, id2, path1, path2, cloneNodes1, allNodes1, clon
     else {
         cochangeRate = cloneCochangeTimes  + "/" + allCochangeTimes  + "=" + ((cloneCochangeTimes  + 0.0) / allCochangeTimes).toFixed(2);
     }
-    doublePackagesCloneShow(id1, id2, path1, path2, path1CloneRate, path2CloneRate, cloneRate, cochangeRate, clonePairs);
+    doublePackagesCloneShow(path1, path2, path1CloneRate, path2CloneRate, cloneRate, cochangeRate, clonePairs);
     doublePackagesCloneWithCoChange(id1, id2);
 }
