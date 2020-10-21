@@ -11,9 +11,11 @@ public interface HotspotPackageDetector {
 
 	List<HotspotPackage> detectHotspotPackages();
 
-	List<HotspotPackage> detectHotspotPackagesByFileClone();
+	List<HotspotPackage> detectHotspotPackagesByFileClone_1();
 
-	List<HotspotPackage> detectHotspotPackagesByFileCloneWithoutEmptyPackage();
+	List<HotspotPackage> detectHotspotPackagesByFileClone_2();
+
+	List<HotspotPackage> detectHotspotPackagesByFileClone_3();
 
 	Collection<HotspotPackage> detectHotspotPackagesByFileCloneLoc();
 
