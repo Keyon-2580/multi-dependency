@@ -22,14 +22,14 @@ var loaddata = function () {
 
     $.ajax({
         type : "GET",
-        url : "/project/all",
+        url : "/project/all/name",
         success : function(result) {
-            for(x in result){
+            for(var i = 0; i < result.length; i++){
                 // projectlist.push(x);
                 var name_temp = {};
                 // console.log(x);
-                name_temp["id"] = x;
-                name_temp["name"] = result[x].name;
+                name_temp["id"] = result[i].id;
+                name_temp["name"] = result[i].name;
                 projectlist.push(name_temp);
             }
 

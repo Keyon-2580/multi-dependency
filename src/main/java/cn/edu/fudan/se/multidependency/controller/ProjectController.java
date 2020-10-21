@@ -3,11 +3,7 @@ package cn.edu.fudan.se.multidependency.controller;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -121,6 +117,23 @@ public class ProjectController {
 		Map<Long, Project> result = new HashMap<>();
 		for(Project project : projects) {
 			result.put(project.getId(), project);
+		}
+		return result;
+	}
+
+	@GetMapping("/all/name")
+	@ResponseBody
+	public JSONArray allProjectsNames() {
+		JSONArray result = new JSONArray();
+		List<Project> projects = new ArrayList<>(nodeService.allProjects());
+
+		projects.sort(Comparator.comparing(Project::getName));
+
+		for(Project project : projects) {
+			JSONObject temp_project = new JSONObject();
+			temp_project.put("id", project.getId());
+			temp_project.put("name", project.getName() + "(" + project.getLanguage() + ")");
+			result.add(temp_project);
 		}
 		return result;
 	}
