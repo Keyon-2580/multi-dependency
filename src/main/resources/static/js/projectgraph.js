@@ -93,6 +93,7 @@ var loaddata = function () {
 
 //调用接口请求数据
 var projectGraphAjax = function(projectIds){
+    d3.selectAll("svg > *").remove();
     var projectList = {};
     var projectIds_array = [];
 
@@ -492,10 +493,15 @@ var showMultipleButton = function(){
     projectList_global = [];
     projectList_global = value;
     // console.log(projectList_global);
+    var table_clear = d3.selectAll("table").remove();
+    document.getElementById("showLineId").innerHTML = "显示关系";
+    flag = true;
     projectGraphAjax(value);
 }
 
 function drawCloneTableBelow(tableData){
+    var table_clear = d3.selectAll("table").remove();
+
     var cleartable = d3.selectAll("table").remove();
     var clonefiles1 = tableData.clonefiles1;
     var clonefiles2 = tableData.clonefiles2;
