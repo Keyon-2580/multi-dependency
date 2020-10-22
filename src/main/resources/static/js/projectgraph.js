@@ -411,18 +411,33 @@ var showLine = function(){
     }
 }
 
+    // .attr("class", "packageLink")
 function drawLink(jsonLinks) {
+    console.log(jsonLinks);
     var links = svg_global.append('g')
         .style('stroke', '#aaa')
         .attr("class", "packageLink")
         .selectAll('line')
         .data(jsonLinks)
         .enter().append('line')
+        .attr("stroke-dasharray", function (d){
+            console.log(d);
+            return d.bottom_package ? "20,2" : null;
+        })
+        .attr("stroke", function (d){
+            return d.similarityValue === 1 ? "#ff4d4d" : d.similarityValue >= 0.9 ? "#ffaf40" : "#ffcccc";
+        })
         .attr("onclick", function(d){
             source_id = d.source_id.split("_")[1];
             target_id = d.target_id.split("_")[1];
             return "drawChildrenLinks(\"" + source_id + "\", \"" + target_id + "\")";
-        });
+        })
+        .call(text => text.append("title").text(function(d) {
+            return "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\nsimilarityValue: " + d.similarityValue
+                + "\npackageCochangeTimes: " + d.packageCochangeTimes
+                + "\npackageCloneCochangeTimes: " + d.packageCloneCochangeTimes
+                + "\nclonePairs: " + d.clonePairs;
+        }));
 
 
     function getTranslateX(translateText) {
@@ -437,26 +452,27 @@ function drawLink(jsonLinks) {
         return parseFloat(translateText.slice(comma + 1, end));
     }
 
-    function getCircleTransform(id) {
+    function getCircleTransform(id, similarityValue) {
         // return d3.select("#" + id.replace(/\./g, '\\.')).attr("transform");
         // console.log(d3.select("#L1\\.M0\\.L1\\.M0").attr("transform"));
         d3.select("#" + id)
-            .style("stroke","#d62728")
+            .style("stroke",function (d){
+                return similarityValue === 1 ? "#ff4d4d" : similarityValue >= 0.9 ? "#ffaf40" : "#ffcccc";
+            })
             .style("stroke-width","1.5px")
         return d3.select("#" + id).attr("transform");
     }
     links.attr("x1", function (d) {
-        var test = getCircleTransform(d.source_id);
-        return getTranslateX(getCircleTransform(d.source_id)) + diameter_global / 2;
+        return getTranslateX(getCircleTransform(d.source_id, d.similarityValue)) + diameter_global / 2;
     })
         .attr("y1", function (d) {
-            return getTranslateY(getCircleTransform(d.source_id)) + diameter_global / 2;
+            return getTranslateY(getCircleTransform(d.source_id, d.similarityValue)) + diameter_global / 2;
         })
         .attr("x2", function (d) {
-            return getTranslateX(getCircleTransform(d.target_id)) + diameter_global / 2;
+            return getTranslateX(getCircleTransform(d.target_id, d.similarityValue)) + diameter_global / 2;
         })
         .attr("y2", function (d) {
-            return getTranslateY(getCircleTransform(d.target_id)) + diameter_global / 2;
+            return getTranslateY(getCircleTransform(d.target_id, d.similarityValue)) + diameter_global / 2;
         });
 
     flag = false;

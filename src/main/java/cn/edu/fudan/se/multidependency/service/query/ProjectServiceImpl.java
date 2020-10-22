@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -180,12 +181,24 @@ public class ProjectServiceImpl implements ProjectService{
         List<HotspotPackage> hotspotPackageList = hotspotPackageDetector.detectHotspotPackagesByParentId(-1, -1);
 
         for(HotspotPackage hotspotPackage: hotspotPackageList){
+            DecimalFormat decimalFormat = new DecimalFormat("0.00");
             JSONObject link = new JSONObject();
 
             link.put("source_id", "id_" + hotspotPackage.getPackage1().getId().toString());
             link.put("target_id", "id_" + hotspotPackage.getPackage2().getId().toString());
+            link.put("source_name", hotspotPackage.getPackage1().getDirectoryPath());
+            link.put("target_name", hotspotPackage.getPackage2().getDirectoryPath());
+            link.put("packageCochangeTimes", hotspotPackage.getPackageCochangeTimes());
+            link.put("packageCloneCochangeTimes", hotspotPackage.getPackageCloneCochangeTimes());
+            link.put("clonePairs", hotspotPackage.getClonePairs());
             link.put("source_projectBelong", "id_" + containRelationService.findPackageBelongToProject(hotspotPackage.getPackage1()).getId());
             link.put("target_projectBelong", "id_" + containRelationService.findPackageBelongToProject(hotspotPackage.getPackage2()).getId());
+            if(hotspotPackage.getClonePairs() == 0){
+                link.put("bottom_package", false);
+            }else{
+                link.put("bottom_package", true);
+            }
+            link.put("similarityValue", decimalFormat.format(hotspotPackage.getSimilarityValue()));
             result.add(link);
         }
         return result;
@@ -211,6 +224,7 @@ public class ProjectServiceImpl implements ProjectService{
         JSONObject nonClone2 = new JSONObject();
 
         for(HotspotPackage hotspotPackage: childrenHotspotPackages){
+            DecimalFormat decimalFormat = new DecimalFormat("0.00");
             JSONObject link = new JSONObject();
 
             JSONObject temp_clonefile1 = new JSONObject();
@@ -218,8 +232,19 @@ public class ProjectServiceImpl implements ProjectService{
 
             link.put("source_id", "id_" + hotspotPackage.getPackage1().getId().toString());
             link.put("target_id", "id_" + hotspotPackage.getPackage2().getId().toString());
+            link.put("source_name", hotspotPackage.getPackage1().getDirectoryPath());
+            link.put("target_name", hotspotPackage.getPackage2().getDirectoryPath());
+            link.put("packageCochangeTimes", hotspotPackage.getPackageCochangeTimes());
+            link.put("packageCloneCochangeTimes", hotspotPackage.getPackageCloneCochangeTimes());
+            link.put("clonePairs", hotspotPackage.getClonePairs());
             link.put("source_projectBelong", "id_" + containRelationService.findPackageBelongToProject(hotspotPackage.getPackage1()).getId());
             link.put("target_projectBelong", "id_" + containRelationService.findPackageBelongToProject(hotspotPackage.getPackage2()).getId());
+            if(hotspotPackage.getClonePairs() == 0){
+                link.put("bottom_package", false);
+            }else{
+                link.put("bottom_package", true);
+            }
+            link.put("similarityValue", hotspotPackage.getSimilarityValue());
             graph_links.add(link);
 
             temp_clonefile1.put("id", hotspotPackage.getPackage1().getId());
@@ -232,7 +257,7 @@ public class ProjectServiceImpl implements ProjectService{
             temp_clonefile2.put("allNodes2", hotspotPackage.getAllNodes2());
             temp_clonefile1.put("packageCochangeTimes", hotspotPackage.getPackageCochangeTimes());
             temp_clonefile1.put("packageCloneCochangeTimes", hotspotPackage.getPackageCloneCochangeTimes());
-            temp_clonefile1.put("clonePairs", hotspotPackage.getClonePairs());
+            temp_clonefile1.put("clonePairs", decimalFormat.format(hotspotPackage.getClonePairs()));
 
             cloneFiles1.add(temp_clonefile1);
             cloneFiles2.add(temp_clonefile2);

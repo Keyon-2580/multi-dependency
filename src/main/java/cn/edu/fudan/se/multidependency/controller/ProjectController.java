@@ -131,7 +131,7 @@ public class ProjectController {
 
 		for(Project project : projects) {
 			JSONObject temp_project = new JSONObject();
-			temp_project.put("id", project.getId());
+			temp_project.put("id", project.getId().toString());
 			temp_project.put("name", project.getName() + "(" + project.getLanguage() + ")");
 			result.add(temp_project);
 		}

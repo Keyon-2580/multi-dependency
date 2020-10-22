@@ -1,5 +1,5 @@
 .circlepacking_node {
-    cursor: pointer;
+    /*cursor: pointer;*/
 }
 
 .circlepacking_node:hover {
@@ -24,7 +24,6 @@
 
 line {
     stroke-width: 4px;
-    stroke: #d62728;
     cursor:pointer;
 }
 
