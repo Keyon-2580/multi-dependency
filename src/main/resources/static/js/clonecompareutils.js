@@ -118,9 +118,7 @@ var doublePackagesCloneWithCoChange = function(pck1Id, pck2Id, index) {
                 }
                 html += "<a target='_blank' href='/clone/file/double?fileId1=" + children[i].file1.id + "&fileId2=" + children[i].file2.id
                     + "&cloneType=" + type +"&linesSize1=" + linesSize1 + "&linesSize2=" + linesSize2 +"&loc1=" + loc1 +"&loc2=" + loc2
-                    +"&value=" + value + "&cochange=" + children[i].cochangeTimes + "&filePath1=" + children[i].file1.path +
-                    "&filePath2=" + children[i].file2.path + "&cochangeId=" + cochangeId
-                    + "'>" + type + "</a>";
+                    +"&value=" + value + "'>" + type + "</a>";
                 html += "</td>";
                 html += "<td>";
                 html += "<a target='_blank' href='/clone/compare?id1=" + children[i].file1.id + "&id2=" + children[i].file2.id +"'>" + children[i].fileClone.value + "</a>";
