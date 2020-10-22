@@ -244,7 +244,7 @@ public class ProjectServiceImpl implements ProjectService{
             }else{
                 link.put("bottom_package", true);
             }
-            link.put("similarityValue", hotspotPackage.getSimilarityValue());
+            link.put("similarityValue", decimalFormat.format(hotspotPackage.getSimilarityValue()));
             graph_links.add(link);
 
             temp_clonefile1.put("id", hotspotPackage.getPackage1().getId());
@@ -257,7 +257,7 @@ public class ProjectServiceImpl implements ProjectService{
             temp_clonefile2.put("allNodes2", hotspotPackage.getAllNodes2());
             temp_clonefile1.put("packageCochangeTimes", hotspotPackage.getPackageCochangeTimes());
             temp_clonefile1.put("packageCloneCochangeTimes", hotspotPackage.getPackageCloneCochangeTimes());
-            temp_clonefile1.put("clonePairs", decimalFormat.format(hotspotPackage.getClonePairs()));
+            temp_clonefile1.put("clonePairs", hotspotPackage.getClonePairs());
 
             cloneFiles1.add(temp_clonefile1);
             cloneFiles2.add(temp_clonefile2);

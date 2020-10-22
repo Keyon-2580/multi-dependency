@@ -425,7 +425,7 @@ function drawLink(jsonLinks) {
             return d.bottom_package ? "20,2" : null;
         })
         .attr("stroke", function (d){
-            return d.similarityValue === 1 ? "#ff4d4d" : d.similarityValue >= 0.9 ? "#ffaf40" : "#ffcccc";
+            return d.similarityValue === 1 ? "#c23616" : d.similarityValue >= 0.9 ? "#ff6b6b" : "#f3910c";
         })
         .attr("onclick", function(d){
             source_id = d.source_id.split("_")[1];
@@ -457,7 +457,7 @@ function drawLink(jsonLinks) {
         // console.log(d3.select("#L1\\.M0\\.L1\\.M0").attr("transform"));
         d3.select("#" + id)
             .style("stroke",function (d){
-                return similarityValue === 1 ? "#ff4d4d" : similarityValue >= 0.9 ? "#ffaf40" : "#ffcccc";
+                return similarityValue === 1 ? "#c23616" : similarityValue >= 0.9 ? "#ff6b6b" : "#f3910c";
             })
             .style("stroke-width","1.5px")
         return d3.select("#" + id).attr("transform");
