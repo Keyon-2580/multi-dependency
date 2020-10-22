@@ -251,8 +251,20 @@ var clone = function(cytoscapeutil) {
 					html += "<td>";
 					html += (result[i].nodesInNode2 / result[i].allNodesInNode2).toFixed(2);
 					html += "</td>";
-					html += "<td>";
-					html += "<a class='package' index='" + (i + 1) + "' href='#package_files_clone' id2='" + result[i].node2.id + "' id1='" + result[i].node1.id + "'>" + result[i].clonePairs + "</a>";
+					html += "<td>"
+					html += "<a target='_blank' class='package' href='/cloneaggregation/details" +
+						"?id1=" + result[i].node1.id +
+						"&id2=" + result[i].node2.id +
+						"&path1=" + result[i].node1.directoryPath +
+						"&path2=" + result[i].node2.directoryPath +
+						"&cloneNodes1=" + result[i].nodesInNode1 +
+						"&allNodes1=" + result[i].allNodesInNode1 +
+						"&cloneNodes2=" + result[i].nodesInNode2 +
+						"&allNodes2=" + result[i].allNodesInNode2 +
+						"&cloneCochangeTimes=" + result[i].moduleCloneCochangeTimes +
+						"&allCochangeTimes=" + result[i].moduleCochangeTimes +
+						"&clonePairs=" + result[i].clonePairs +
+						"'>" + result[i].clonePairs + "</a>";
 					html += "</td>";
 					html += "<td>";
 					if(result[i].moduleCochangeTimes < 3){
