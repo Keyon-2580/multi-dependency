@@ -33,7 +33,7 @@ var doublefile = function() {
 
                 html += "<table class = \"gridtable\" style = \"margin-top: 20px\">"
                     + "<tr><th>cochange</th><th>value</th></tr>"
-                    + "<tr><td><a class='cochangeTimes' target='_blank' href='/git/cochange/commits?cochangeId=" + cochangeId
+                    + "<tr><td><a class='cochangeTimes' target='_blank' href='/commit/cochange?cochangeId=" + cochangeId
                     + "'>" + cochange + "</a></td><td><a target='_blank' href='/clone/compare?id1=" + fileId1 + "&id2=" + fileId2 +"'>" + value + "</td></tr>";
                 html += "</table>";
                 // console.log(html)
