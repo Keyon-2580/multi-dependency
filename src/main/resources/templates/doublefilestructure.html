@@ -32,22 +32,21 @@
 <script type="text/javascript">
     //<![CDATA[
     $(document).ready(function() {
-        var fileId1 = [[${fileId1}]];
-        var fileId2 = [[${fileId2}]];
-        // var cloneType1 =  "";
+        var fileId1 = [[${file1Id}]];
+        var fileId2 = [[${file2Id}]];
         var URL = window.location.search;
         URL = URL.split('?')[1]; //获取参数列表
         var params = URL.split('&');
-        var cloneType = params[2];
+        var cloneType = params[2].split('=')[1];
         var linesSize1 = [[${linesSize1}]];
         var linesSize2 = [[${linesSize2}]];
         var loc1 = [[${loc1}]];
         var loc2 = [[${loc2}]];
         var value = [[${value}]];
-        var cochange = params[8].split('=')[1];
+        var cochange = [[${cochange}]];
         var filePath1 = params[9].split('=')[1];
         var filePath2 = params[10].split('=')[1];
-        var cochangeId = params[11].split('=')[1];
+        var cochangeId = [[${cochangeId}]];
         doublefile().init(fileId1,fileId2,cloneType,linesSize1,linesSize2,loc1,loc2,value,cochange,filePath1,filePath2,cochangeId);
     });
     // ]]>

@@ -437,20 +437,24 @@ public class CloneController {
 	}
 
 	@GetMapping("/file/double")
-	public String DoubleFilesStructure(@RequestParam("fileId1") long file1Id, @RequestParam("fileId2") long file2Id
-									,@RequestParam("cloneType") String cloneType, @RequestParam("linesSize1") long linesSize1,
-									   @RequestParam("linesSize2") long linesSize2,@RequestParam("loc1") long loc1,
-									   @RequestParam("loc2") long loc2,@RequestParam("value") float value,HttpServletRequest request) {
-		request.setAttribute("fileId1", file1Id);
-		request.setAttribute("fileId2", file2Id);
-		request.setAttribute("cloneType", cloneType);
+	public String DoubleFilesStructure(@RequestParam("file1Id") long file1Id, @RequestParam("file1Id") long file2Id,
+									   @RequestParam("cloneType") String cloneType, @RequestParam("linesSize1") int linesSize1,
+									   @RequestParam("linesSize2") int linesSize2, @RequestParam("loc1") int loc1,
+									   @RequestParam("loc2") int loc2, @RequestParam("value") double value,
+									   @RequestParam("cochange") int cochange, @RequestParam("filePath1") String filePath1,
+									   @RequestParam("filePath2") String filePath2, @RequestParam("cochangeId") long cochangeId,
+									   HttpServletRequest request) {
+		request.setAttribute("file1Id", file1Id);
+		request.setAttribute("file2Id", file2Id);
 		request.setAttribute("linesSize1", linesSize1);
 		request.setAttribute("linesSize2", linesSize2);
 		request.setAttribute("loc1", loc1);
 		request.setAttribute("loc2", loc2);
 		request.setAttribute("value", value);
+		request.setAttribute("cochange", cochange);
+		request.setAttribute("cochangeId", cochangeId);
 //		return "/doublefilestructure?fileId1=" + file1Id + "&fileId2=" + file2Id;
-		return "/doublefilestructure";
+		return "doublefilestructure";
 	}
 
 }

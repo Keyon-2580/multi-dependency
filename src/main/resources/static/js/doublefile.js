@@ -27,8 +27,8 @@ var doublefile = function() {
                 var html = ""
                 html += "<table class = \"gridtable\">"
                     + "<tr><th>ID</th><th>filePath</th><th>cloneType</th><th>linesSize</th><th>loc</th></tr>"
-                    + "<tr><td>1</td><td>" + filePath1 + "</td><td>" + cloneType.split("=")[1] + "</td><td>" + linesSize1 +"</td><td>" + loc1 +"</td></tr>"
-                    + "<tr><td>2</td><td>" + filePath2 + "</td><td>" + cloneType.split("=")[1] + "</td><td>" + linesSize2 +"</td><td>" + loc2 +"</td></tr>";
+                    + "<tr><td>1</td><td>" + filePath1 + "</td><td>" + cloneType + "</td><td>" + linesSize1 +"</td><td>" + loc1 +"</td></tr>"
+                    + "<tr><td>2</td><td>" + filePath2 + "</td><td>" + cloneType + "</td><td>" + linesSize2 +"</td><td>" + loc2 +"</td></tr>";
                 html += "</table>";
 
                 html += "<table class = \"gridtable\" style = \"margin-top: 20px\">"
