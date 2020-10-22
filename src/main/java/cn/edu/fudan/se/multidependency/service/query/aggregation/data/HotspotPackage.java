@@ -50,7 +50,7 @@ public class HotspotPackage {
 	
 	@Getter
 	@Setter
-	private double value;
+	private double similarityValue;
 
 	@Getter
 	@Setter
@@ -110,6 +110,7 @@ public class HotspotPackage {
 		this.allNodes2 = allNodes2;
 		this.relationNodes1 = relationNodes1;
 		this.relationNodes2 = relationNodes2;
+		this.similarityValue = (relationNodes1 + relationNodes2 + 0.0) / (allNodes1 + allNodes2);
 	}
 
 	public void setClonePairs(int clonePairs) {
