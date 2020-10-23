@@ -591,7 +591,14 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 		else {
 			hotspotPackage.setPackageCloneCochangeTimes(0);
 		}
-		List<HotspotPackage> childrenHotspotPackages = loadHotspotPackagesByParentId(currentPackage1.getId(), currentPackage2.getId(), language);
+		List<HotspotPackage> childrenHotspotPackages = new ArrayList<>();
+		if(language.equals("all")) {
+			childrenHotspotPackages.addAll(loadHotspotPackagesByParentId(currentPackage1.getId(), currentPackage2.getId(), "java"));
+			childrenHotspotPackages.addAll(loadHotspotPackagesByParentId(currentPackage1.getId(), currentPackage2.getId(), "cpp"));
+		}
+		else {
+			childrenHotspotPackages.addAll(loadHotspotPackagesByParentId(currentPackage1.getId(), currentPackage2.getId(), language));
+		}
 		if(childrenHotspotPackages.size() > 0) {
 			//将有子包的包下文件打包
 			if(isBranchPackageWithFiles(currentPackage1) && isBranchPackageWithFiles(currentPackage2)) {
