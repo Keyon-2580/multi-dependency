@@ -41,11 +41,29 @@
 <body>
 	<div th:include="nav.html::nav"></div>
 	<div class="col-sm-12 row" style="margin-bottom: 15px;">
-		<div class="col-sm-12" id="packages_aggregation"></div>
+		<div class="col-sm-12">
+			<ul>
+				<li><a href="#cpp">cpp项目</a></li>
+				<li><a href="#java">java项目</a></li>
+			</ul>
+		</div>
+		<div class="col-sm-12" id="cpp">
+			<div class="col-sm-12">
+				<h3>cpp项目</h3>
+			</div>
+			<div class="col-sm-12" id="aggregation_cpp"></div>
+		</div>
+		<div class="col-sm-12" id="java">
+			<div class="col-sm-12">
+				<h3>java项目</h3>
+			</div>
+			<div class="col-sm-12" id="aggregation_java"></div>
+		</div>
 	</div>
 	<script type="text/javascript" th:inline="javascript">
 		 $(document).ready(function() {
-		 	showAggregationResult();
+			 showAggregationResultOfJava();
+			 showAggregationResultOfCpp();
 		});
 	</script>
 </body>

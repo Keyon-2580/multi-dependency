@@ -3,8 +3,6 @@ package cn.edu.fudan.se.multidependency.controller;
 import java.io.OutputStream;
 import java.util.*;
 
-import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
@@ -33,15 +31,27 @@ public class CloneAggregationController {
     }
 
     /**
-     * 两个包之间的克隆聚合
+     * java项目两个包之间的克隆聚合
      * @param threshold
      * @param percentage
      * @return
      */
-    @GetMapping("/show")
+    @GetMapping("/show/java")
     @ResponseBody
-    public Collection<HotspotPackage> showHotspotPackages(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
-        return hotspotPackageDetector.detectHotspotPackagesByParentId(-1, -1);
+    public Collection<HotspotPackage> showHotspotPackagesOfJava(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
+        return hotspotPackageDetector.detectHotspotPackagesByParentId(-1, -1, "java");
+    }
+
+    /**
+     * cpp项目两个包之间的克隆聚合
+     * @param threshold
+     * @param percentage
+     * @return
+     */
+    @GetMapping("/show/cpp")
+    @ResponseBody
+    public Collection<HotspotPackage> showHotspotPackagesOfCpp(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
+        return hotspotPackageDetector.detectHotspotPackagesByParentId(-1, -1, "cpp");
     }
 
     @GetMapping("/package/export")

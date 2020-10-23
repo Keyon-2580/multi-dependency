@@ -662,7 +662,7 @@ public class ProjectController {
 		result.put("clone",clone);
 
 
-		List<HotspotPackage> hotspotPackageList = hotspotPackageDetector.detectHotspotPackagesByParentId(-1, -1);
+		List<HotspotPackage> hotspotPackageList = hotspotPackageDetector.detectHotspotPackagesByParentId(-1, -1, "all");
 		for (HotspotPackage hotspotPackage : hotspotPackageList) {
 			JSONObject link = new JSONObject();
 			link.put("source", hotspotPackage.getPackage1().getId().toString());

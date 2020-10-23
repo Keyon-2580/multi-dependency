@@ -178,7 +178,7 @@ public class ProjectServiceImpl implements ProjectService{
     @Override
     public JSONArray getAllProjectsLinks(){
         JSONArray result = new JSONArray();
-        List<HotspotPackage> hotspotPackageList = hotspotPackageDetector.detectHotspotPackagesByParentId(-1, -1);
+        List<HotspotPackage> hotspotPackageList = hotspotPackageDetector.detectHotspotPackagesByParentId(-1, -1, "all");
 
         for(HotspotPackage hotspotPackage: hotspotPackageList){
             DecimalFormat decimalFormat = new DecimalFormat("0.00");
@@ -207,7 +207,7 @@ public class ProjectServiceImpl implements ProjectService{
     @Override
     public JSONObject cloneGraphAndTableOfChildrenPackages(long package1Id, long package2Id) {
         JSONObject result = new JSONObject();
-        HotspotPackage parentHotspotPackage = hotspotPackageDetector.detectHotspotPackagesByPackageId(package1Id, package2Id);
+        HotspotPackage parentHotspotPackage = hotspotPackageDetector.detectHotspotPackagesByPackageId(package1Id, package2Id, "all");
         Collection<HotspotPackage> childrenHotspotPackages = parentHotspotPackage.getChildrenHotspotPackages();
         Collection<Package> nonClonePacksges1 = parentHotspotPackage.getChildrenOtherPackages1();
         Collection<Package> nonClonePacksges2 = parentHotspotPackage.getChildrenOtherPackages2();

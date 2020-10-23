@@ -1,5 +1,4 @@
 var showtree = function(divId, zNodes) {
-    var zTreeObj;
     var setting = {
         check : {
             enable : false
@@ -10,17 +9,15 @@ var showtree = function(divId, zNodes) {
             }
         }
     };
-
     console.log(zNodes);
-    zTreeObj = $.fn.zTree.init($("#" + divId), setting, zNodes);
+    $.fn.zTree.init($("#" + divId), setting, zNodes);
 }
 
 var doublePackagesCloneShow = function(path1, path2, path1CloneRate, path2CloneRate, cloneRate, cochangeRate, clonePairs) {
     $("#package_clone_detail").html("");
     var html = "";
     html += "</table>";
-    html += "<table class='table table-bordered'>"
-        + "<tr><th>目录1</th><th>目录1克隆占比</th><th>目录2</th><th>目录2克隆占比</th><th>总克隆占比</th><th>包克隆CoChange占比</th><th>克隆文件对数</th></tr>";
+    html += "<table class='table table-bordered'>" + "<tr><th>目录1</th><th>目录1克隆占比</th><th>目录2</th><th>目录2克隆占比</th><th>总克隆占比</th><th>包克隆CoChange占比</th><th>克隆文件对数</th></tr>";
     html += "<tr>";
     html += "<td>";
     html += path1;
@@ -45,7 +42,6 @@ var doublePackagesCloneShow = function(path1, path2, path1CloneRate, path2CloneR
     html += "</td>";
     html += "</tr>";
     html += "</table>";
-
     $("#package_clone_detail").html(html);
 }
 
@@ -53,27 +49,26 @@ var doublePackagesCloneShow = function(path1, path2, path1CloneRate, path2CloneR
 /*
 跨包克隆包内详细信息展示
 */
-var doublePackagesCloneWithCoChange = function(pck1Id, pck2Id, index) {
+var doublePackagesCloneWithCoChange = function(pck1Id, pck2Id) {
     $("#package_files_clone").html("");
-
     $.ajax({
         type: "get",
         url: "/clone/package/double/cochange?package1=" + pck1Id + "&package2=" + pck2Id,
         success: function(result) {
             console.log("success");
-
             $.ajax({
                 type: "get",
                 url: "/clone/package/double/filetree?package1=" + pck1Id + "&package2=" + pck2Id,
                 success: function (result) {
                     var html_tree = "";
-                    html_tree += "    <div class = \"div_file1\">\n"
-                        + "        <ul id=\"tree_file1\" class=\"ztree\"></ul>\n"
-                        + "    </div>\n"
-                        + "    <div class=\"div_file2\">\n"
-                        + "        <ul id=\"tree_file2\" class=\"ztree\"></ul>\n"
-                        + "    </div>";
-
+                    html_tree += "<div class='div_file1'>";
+                    html_tree += "<ul id='tree_file1' class='ztree'>";
+                    html_tree += "</ul>";
+                    html_tree += "</div>";
+                    html_tree += "<div class='div_file2'>";
+                    html_tree += "<ul id='tree_file2' class='ztree'>"
+                    html_tree += "</ul>";
+                    html_tree += "</div>";
                     $("#package_files_tree").html(html_tree);
                     var data1 = result[pck1Id];
                     showtree("tree_file1", data1);
@@ -82,9 +77,7 @@ var doublePackagesCloneWithCoChange = function(pck1Id, pck2Id, index) {
                 }
             });
             var html = "";
-
-            html += "<table class='table table-bordered'>"
-                + "<tr><th>file1</th><th>file2</th><th>type</th><th>value</th><th>cochange</th></tr>";
+            html += "<table class='table table-bordered'>" + "<tr><th>file1</th><th>file2</th><th>type</th><th>value</th><th>cochange</th></tr>";
             var children = result.children;
             var num_type1 = 0;
             var num_type2 = 0;
@@ -135,14 +128,12 @@ var doublePackagesCloneWithCoChange = function(pck1Id, pck2Id, index) {
                 html += "<a target='_blank' href='/clone/compare?id1=" + children[i].file1.id + "&id2=" + children[i].file2.id +"'>" + children[i].fileClone.value + "</a>";
                 html += "</td>";
                 html += "<td>";
-                html += "<a class='cochangeTimes' target='_blank' href='/commit/cochange?cochangeId=" + cochangeId
-                    + "' index='" + i + "'>" + children[i].cochangeTimes + "</a>";
+                html += "<a class='cochangeTimes' target='_blank' href='/commit/cochange?cochangeId=" + cochangeId + "'>" + children[i].cochangeTimes + "</a>";
                 html += "</td>";
                 html += "</tr>";
             }
             html += "</table>";
-            html += "<table class='table table-bordered'>"
-                + "<tr><th>Type_1数量</th><th>Type_2数量</th><th>Type_3数量</th></tr>";
+            html += "<table class='table table-bordered'>" + "<tr><th>Type_1数量</th><th>Type_2数量</th><th>Type_3数量</th></tr>";
             html += "<td>";
             html += num_type1;
             html += "</td>";
