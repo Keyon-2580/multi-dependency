@@ -4,6 +4,10 @@ import json
 import os
 import re
 import difflib
+import queue
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import Lock
+
 
 measure_index_file = 'result/MeasureIndex.csv'
 clone_group_file = 'result/type123_method_group_result.csv'
@@ -57,7 +61,7 @@ def read_lines(file, start_line, end_line):
     """读取文件指定行"""
     lines = list()
     try:
-        if file.endswith('.java') or file.endswith('.JAVA'):
+        if file.lower().endswith('.java'):
             with open(file, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
         else:
@@ -71,6 +75,7 @@ def read_lines(file, start_line, end_line):
 
 def remove_comments(code):
     """移除java,c,c++代码里的注释，移除代码内的空格"""
+    global comment_pattern1, comment_pattern2, space_pattern
     tmp = comment_pattern1.sub('', code)
     tmp = comment_pattern2.sub('', tmp)
     tmp = space_pattern.sub('', tmp)
@@ -79,6 +84,7 @@ def remove_comments(code):
 
 def remove_comments_and_mull_string(code_lines):
     """移除java,c,c++代码里的注释，移除代码内的空行"""
+    global comment_pattern1, comment_pattern2, null_string_pattern, first_null_string_pattern
     tmp = comment_pattern1.sub('', code_lines)
     tmp = comment_pattern2.sub('', tmp)
     tmp = null_string_pattern.sub('\n', tmp)
@@ -197,78 +203,31 @@ def calc_cover_length(pairs):
     return total_size
 
 
-def calc_small_file_clone_similarity(measures, measure_indecies, state):
+def get_small_file_clone_group(measures, measure_indecies, state):
     token_size = 30
-    small_file_measure_indecies = dict()
     small_file_token_index = dict()
+
+    if state['lastProcessedFile'].lower().endswith('.java'):
+        min_token = 4
+    else:
+        min_token = 0
 
     for key, value in measure_indecies.items():
         measure = measures[key]
         measure_file_id, offset = calc_file_id(state, measure['start_token'])
         measure_file = '%s/allTokenCsv%d' % (token_data_folder, measure_file_id)
         tokens = read_tokens(measure_file, offset, measure['end_token'] - measure['start_token'])
-        if token_size > len(tokens) > 4:
-            small_file_measure_indecies[key] = value
+        if token_size > len(tokens) > min_token:
+            #small_file_measure_indecies[key] = value
             small_file_token_index[key] = tokens
 
     small_file_token_index_sorted = sorted(small_file_token_index.items(), key=lambda d: len(d[1]))
 
-    print('less than 30 token file clone, size: %d\n' % len(small_file_token_index_sorted))
-    small_file_clone_similarity = list()
-    cnt = 0
-    for i in range(0, len(small_file_token_index_sorted) - 1):
-        print('%.2f%%' % (i * 100.0 / len(small_file_token_index_sorted)))
-        token_i = small_file_token_index_sorted[i][1]
-        for j in range(i+1, len(small_file_token_index_sorted)):
-            token_j = small_file_token_index_sorted[j][1]
-            token_size_i = len(token_i)
-            token_size_j = len(token_j)
-            if token_size_j + token_size_i < 16 and token_size_j - token_size_i > 5:
-                break
-            if token_size_j - token_size_i > 10:
-                break
+    small_clone_group = list()
+    for token_value in small_file_token_index_sorted:
+        small_clone_group.append(token_value[0])
 
-            similarity = suffix_array_similarity(token_i, token_j)
-            if similarity < 0.7:
-                continue
-            key_i = small_file_token_index_sorted[i][0]
-            key_j = small_file_token_index_sorted[j][0]
-            m1 = measure_indecies[key_i]
-            m2 = measure_indecies[key_j]
-            lines1 = read_lines(m1[0], int(m1[1]), int(m1[2]))
-            lines2 = read_lines(m2[0], int(m2[1]), int(m2[2]))
-            code1 = remove_comments('\n'.join(lines1))
-            code2 = remove_comments('\n'.join(lines2))
-            str_similarity = get_equal_rate(code1, code2)
-            if str_similarity < 0.7:
-                continue
-
-            code_lines1 = remove_comments_and_mull_string('\n'.join(lines1))
-            code_lines2 = remove_comments_and_mull_string('\n'.join(lines2))
-            lines1_size = len(lines1) + 1
-            lines2_size = len(lines2) + 1
-            code_lines1_size = len(code_lines1)
-            code_lines2_size = len(code_lines2)
-
-            (key1, key2) = swap_clone_pair(key_i, key_j)
-
-            if 1 != int(similarity):
-                value = CloneSimilarityData(key1, key2, similarity, 3, lines1_size, lines2_size,
-                                            code_lines1_size, code_lines2_size)
-                small_file_clone_similarity.append(value)
-            else:
-                if len(lines1) == 0 or len(lines2) == 0:
-                    value = CloneSimilarityData(key1, key2, similarity, 2, lines1_size, lines2_size,
-                                                code_lines1_size, code_lines2_size)
-                    small_file_clone_similarity.append(value)
-                code_type = get_code_type(code1, code2)
-                value = CloneSimilarityData(key1, key2, similarity, code_type, lines1_size, lines2_size,
-                                            code_lines1_size, code_lines2_size)
-                small_file_clone_similarity.append(value)
-
-            cnt += 1
-
-    return small_file_clone_similarity
+    return small_clone_group
 
 def swap_clone_pair(key1, key2):
     if int(key1) <= int(key2):
@@ -276,9 +235,12 @@ def swap_clone_pair(key1, key2):
     else:
         return (key2, key1)
 
-def calc_clone_group_similarity_values(measures, measure_indecies, state, group):
-    clone_similarity_values = list()
+
+def calc_clone_group_similarity_values(measures, measure_indecies, state, is_small_file, group):
+    clone_group_similarity_value = list()
     for i in range(0, len(group) - 1):
+        if is_small_file:
+            print('cal_small_file_clone: %.2f%%' % (i * 100.0 / len(group)))
         measure1 = measures[group[i]]
         measure1_file_id, offset1 = calc_file_id(state, measure1['start_token'])
         measure1_file = '%s/allTokenCsv%d' % (token_data_folder, measure1_file_id)
@@ -286,7 +248,8 @@ def calc_clone_group_similarity_values(measures, measure_indecies, state, group)
         if len(tokens1) > 50000:
             print('clone file/method pass, token size: %d\n' % len(tokens1))
             continue
-        for j in range(i + 1, len(group)):
+
+        for j  in range(i + 1, len(group)):
             measure2 = measures[group[j]]
             measure2_file_id, offset2 = calc_file_id(state, measure2['start_token'])
             measure2_file = '%s/allTokenCsv%d' % (token_data_folder, measure2_file_id)
@@ -294,13 +257,31 @@ def calc_clone_group_similarity_values(measures, measure_indecies, state, group)
             if len(tokens2) > 50000:
                 print('clone file/method pass, token size: %d\n' % len(tokens2))
                 continue
+
+            """小文件组内循环token判断"""
+            if is_small_file:
+                if len(tokens1) + len(tokens2) < 16 and len(tokens2) - len(tokens1) > 5:
+                    continue
+                if len(tokens2) - len(tokens1) > 10:
+                    continue
+
             similarity = suffix_array_similarity(tokens1, tokens2)
             if similarity < 0.7:
                 continue
+
             m1 = measure_indecies[group[i]]
             m2 = measure_indecies[group[j]]
             lines1 = read_lines(m1[0], int(m1[1]), int(m1[2]))
             lines2 = read_lines(m2[0], int(m2[1]), int(m2[2]))
+
+            """小文件时，判断去除注释后的代码相似度，小于0.7返回"""
+            if is_small_file:
+                code1 = remove_comments('\n'.join(lines1))
+                code2 = remove_comments('\n'.join(lines2))
+                str_similarity = get_equal_rate(code1, code2)
+                if str_similarity < 0.7:
+                    continue
+
             code_lines1 = remove_comments_and_mull_string('\n'.join(lines1))
             code_lines2 = remove_comments_and_mull_string('\n'.join(lines2))
             lines1_size = len(lines1) + 1
@@ -308,23 +289,28 @@ def calc_clone_group_similarity_values(measures, measure_indecies, state, group)
             code_lines1_size = len(code_lines1)
             code_lines2_size = len(code_lines2)
 
+            (key1, key2) = swap_clone_pair(group[i], group[j])
+
             if 1 != int(similarity):
-                value = CloneSimilarityData(group[i], group[j], similarity, 3, lines1_size, lines2_size,
+                value = CloneSimilarityData(key1, key2, similarity, 3, lines1_size, lines2_size,
                                             code_lines1_size, code_lines2_size)
-                clone_similarity_values.append(value)
+                clone_group_similarity_value.append(value)
             else:
                 if len(lines1) == 0 or len(lines2) == 0:
-                    value = CloneSimilarityData(group[i], group[j], similarity, 2, lines1_size, lines2_size,
+                    value = CloneSimilarityData(key1, key2, similarity, 2, lines1_size, lines2_size,
                                                 code_lines1_size, code_lines2_size)
-                    clone_similarity_values.append(value)
-                code1 = remove_comments('\n'.join(lines1))
-                code2 = remove_comments('\n'.join(lines2))
-                code_type = get_code_type(code1, code2)
-                value = CloneSimilarityData(group[i], group[j], similarity, code_type, lines1_size, lines2_size,
-                                            code_lines1_size, code_lines2_size)
-                clone_similarity_values.append(value)
+                    clone_group_similarity_value.append(value)
+                else:
+                    code1 = remove_comments('\n'.join(lines1))
+                    code2 = remove_comments('\n'.join(lines2))
+                    code_type = get_code_type(code1, code2)
+                    value = CloneSimilarityData(key1, key2, similarity, code_type, lines1_size, lines2_size,
+                                                code_lines1_size, code_lines2_size)
+                    clone_group_similarity_value.append(value)
 
-    return clone_similarity_values
+    return clone_group_similarity_value
+
+
 
 
 def process():
@@ -334,30 +320,59 @@ def process():
     measure_indecies = init_measure_indecies()
     clone_groups = init_clone_groups()
     state = init_state()
-    clone_similarity_value = list()
 
-    print('less than 30 token file clone:\n')
-    clone_similarity_value += calc_small_file_clone_similarity(measures, measure_indecies, state)
+    print('calc clone_similarity for less than 30 token files:\n')
+    small_clone_group = get_small_file_clone_group(measures, measure_indecies, state)
 
-    value_test = CloneSimilarityData('0', '0', 0.0, 0, 0, 0, 0, 0)
-    clone_similarity_value.append(value_test)
+    clone_similarity_values = list()
+    is_small_file = True
+    print('cal_small_file_clonec, size: %d\n' % len(small_clone_group))
+    clone_similarity_values += calc_clone_group_similarity_values(measures, measure_indecies, state, is_small_file, small_clone_group)
+    print('cal_small_file_clone: Completed!')
+    # with ThreadPoolExecutor(max_workers=10) as executor:
+    #     threads = []
+    #     thread = executor.submit(calc_clone_group_similarity_values, measures, measure_indecies, state, is_small_file, small_clone_group)
+    #     threads.append(thread)
+    #
+    #     for res in as_completed(threads):
+    #         clone_similarity_values.append(res.result())
+    #         print('cal_small_file_clone: Completed!')
 
     size = len(clone_groups)
     cnt = 0
     print('clone group size: %d\n' % size)
+    is_small_file = False
+
     for group in clone_groups:
+            # 过滤掉克隆实例特别多的克隆组
+        if len(group) > 200:
+           print('clone group pass, id : %d, size: %d\n' % (cnt - 1, len(group)))
+           continue
+
+        clone_similarity_values += calc_clone_group_similarity_values(measures, measure_indecies, state, is_small_file, group)
         cnt += 1
         print('%.2f%%' % (cnt * 100.0 / size))
 
-        # 过滤掉克隆实例特别多的克隆组
-        if len(group) > 200:
-            print('clone group pass, id : %d, size: %d\n' % (cnt - 1, len(group)))
-            continue
-
-        clone_similarity_value += calc_clone_group_similarity_values(measures, measure_indecies, state, group)
+    # lock = Lock()
+    # with BoundedThreadPoolExecutor(ThreadPoolExecutor(max_workers=5)) as executor:
+    #     threads = []
+    #     for group in clone_groups:
+    #         # 过滤掉克隆实例特别多的克隆组
+    #         if len(group) > 200:
+    #            print('clone group pass, id : %d, size: %d\n' % (cnt - 1, len(group)))
+    #            continue
+    #
+    #         thread = executor.submit(calc_clone_group_similarity_values, measures, measure_indecies, state, is_small_file, group)
+    #         threads.append(thread)
+    #
+    #     for res in as_completed(threads):
+    #         #with lock:
+    #         clone_similarity_values.append(res.result())
+    #         cnt += 1
+    #         print('%.2f%%' % (cnt * 100.0 / size))
 
     with open(output_file, 'w') as f:
-        for data in clone_similarity_value:
+        for data in clone_similarity_values:
             f.write('%s,%s,%f,%d,%d,%d,%d,%d\n' %
                     (data.clone_unit1, data.clone_unit2, data.similarity, data.clone_type,
                      data.lines1_size, data.lines2_size, data.loc1, data.loc2))
@@ -453,6 +468,12 @@ def read_tokens(file, offset, size):
     for token in content:
         tokens.append(token)
     return tokens
+
+
+class BoundedThreadPoolExecutor(ThreadPoolExecutor):
+    def __init__(self, max_workers=None, thread_name_prefix=''):
+        super().__init__(max_workers, thread_name_prefix)
+        self._work_queue = queue.Queue(self._max_workers * 2) # 队列大小为最大线程数的两倍
 
 
 if __name__ == '__main__':
