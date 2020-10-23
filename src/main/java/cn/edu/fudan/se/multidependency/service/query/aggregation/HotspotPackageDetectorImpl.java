@@ -107,7 +107,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 			}
 		}
 
-		Map<String, HotspotPackage> parentSimilarPackges = new HashMap<>();
+		Map<String, HotspotPackage> parentSimilarPackages = new HashMap<>();
 		for (Map.Entry<String, HotspotPackage> entry : idToPackageRelation.entrySet()) {
 			String id = entry.getKey();
 			if (!isChild.get(id)) {
@@ -120,7 +120,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 					String parentPck1Path = pck1.lastPackageDirectoryPath();
 					String parentPck2Path = pck2.lastPackageDirectoryPath();
 					String parentId = String.join("_", parentPck1Path, parentPck2Path);
-					HotspotPackage parentSimilar = parentSimilarPackges.get(parentId);
+					HotspotPackage parentSimilar = parentSimilarPackages.get(parentId);
 					if (parentSimilar == null) {
 						parentPck1 = new Package();
 						parentPck1.setId(-1L);
@@ -135,7 +135,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 						parentPck2.setName(parentPck2Path);
 						parentPck1.setLanguage(pck2.getLanguage());
 						parentSimilar = new HotspotPackage(new RelationDataForDoubleNodes(parentPck1, parentPck2, parentId));
-						parentSimilarPackges.put(parentSimilar.getId(), parentSimilar);
+						parentSimilarPackages.put(parentSimilar.getId(), parentSimilar);
 					}
 					parentSimilar.addHotspotChild(value);
 					isChild.put(id, true);
@@ -145,7 +145,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 
 		List<HotspotPackage> result = new ArrayList<>();
 
-		for (HotspotPackage parentHotspotPackage : parentSimilarPackges.values()) {
+		for (HotspotPackage parentHotspotPackage : parentSimilarPackages.values()) {
 			result.add(parentHotspotPackage);
 		}
 
@@ -321,15 +321,34 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 
 	@Override
 	public void exportHotspotPackages(OutputStream stream) {
-		rowKey.set(0);
 		Workbook hwb = new XSSFWorkbook();
-		Collection<HotspotPackage> HotspotPackages = detectHotspotPackages();
-		Sheet sheet = hwb.createSheet(new StringBuilder().append("HotspotPackages").toString());
+		setSheetInformation(stream, hwb, "java");
+		setSheetInformation(stream, hwb, "cpp");
+		try {
+			hwb.write(stream);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			try {
+				stream.close();
+				hwb.close();
+			}
+			catch (IOException e) {
+			}
+		}
+	}
+
+	private void setSheetInformation(OutputStream stream, Workbook hwb, String language) {
+		rowKey.set(0);
+		Collection<HotspotPackage> hotspotPackages = detectHotspotPackagesByParentId(-1 ,-1, language);
+		Sheet sheet = hwb.createSheet(new StringBuilder().append(language).toString());
 		Row row = sheet.createRow(rowKey.get());
 		rowKey.set(rowKey.get()+1);
 		CellStyle style = hwb.createCellStyle();
 		style.setAlignment(HorizontalAlignment.CENTER);
-		Cell cell = null;
+		Cell cell;
 		cell = row.createCell(0);
 		cell.setCellValue("目录1");
 		cell.setCellStyle(style);
@@ -343,28 +362,19 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 		cell.setCellValue("目录2克隆占比");
 		cell.setCellStyle(style);
 		cell = row.createCell(4);
-		cell.setCellValue("克隆文件对数");
-		cell.setCellStyle(style);
-		cell = row.createCell(5);
 		cell.setCellValue("总克隆占比");
 		cell.setCellStyle(style);
-		for(HotspotPackage HotspotPackage:HotspotPackages){
-			printHotspotPackage(sheet, 0, HotspotPackage);
-		}
-		try {
-			hwb.write(stream);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				stream.close();
-				hwb.close();
-			} catch (IOException e) {
-			}
+		cell = row.createCell(5);
+		cell.setCellValue("包克隆CoChange占比");
+		cell = row.createCell(6);
+		cell.setCellValue("克隆文件对数");
+		cell.setCellStyle(style);
+		for(HotspotPackage hotspotPackage : hotspotPackages){
+			loadHotspotPackageResult(sheet, 0, hotspotPackage);
 		}
 	}
 
-	private void printHotspotPackage(Sheet sheet, int layer, HotspotPackage hotspotPackage){
+	private void loadHotspotPackageResult(Sheet sheet, int layer, HotspotPackage hotspotPackage){
 		String prefix = "";
 		for(int i = 0; i < layer; i++) {
 			prefix += "|---";
@@ -372,19 +382,25 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 		Row row = sheet.createRow(rowKey.get());
 		rowKey.set(rowKey.get()+1);
 		row.createCell(0).setCellValue(prefix + hotspotPackage.getPackage1().getDirectoryPath());
-		BigDecimal percent1 = BigDecimal.valueOf((hotspotPackage.getRelationNodes1() + 0.0) / hotspotPackage.getAllNodes1());
-		percent1 = percent1.setScale(2, RoundingMode.HALF_UP);
-		row.createCell(1).setCellValue(hotspotPackage.getRelationNodes1() + "/" + hotspotPackage.getAllNodes1() + "=" + percent1.toString());
+		BigDecimal clonePercent1 = BigDecimal.valueOf((hotspotPackage.getRelationNodes1() + 0.0) / hotspotPackage.getAllNodes1());
+		clonePercent1 = clonePercent1.setScale(2, RoundingMode.HALF_UP);
+		row.createCell(1).setCellValue(hotspotPackage.getRelationNodes1() + "/" + hotspotPackage.getAllNodes1() + "=" + clonePercent1.toString());
 		row.createCell(2).setCellValue(prefix + hotspotPackage.getPackage2().getDirectoryPath());
-		BigDecimal percent2 = BigDecimal.valueOf((hotspotPackage.getRelationNodes2() + 0.0) / hotspotPackage.getAllNodes2());
-		percent2 = percent2.setScale(2, RoundingMode.HALF_UP);
-		row.createCell(3).setCellValue(hotspotPackage.getRelationNodes2() + "/" + hotspotPackage.getAllNodes2() + "=" + percent2.toString());
-		row.createCell(4).setCellValue(hotspotPackage.getRelationPackages().sizeOfChildren());
-		BigDecimal percent = BigDecimal.valueOf((hotspotPackage.getRelationNodes1() + hotspotPackage.getRelationNodes2() + 0.0) / (hotspotPackage.getAllNodes1() + hotspotPackage.getAllNodes2()));
-		percent = percent.setScale(2, RoundingMode.HALF_UP);
-		row.createCell(5).setCellValue("(" + hotspotPackage.getRelationNodes1() + "+" + hotspotPackage.getRelationNodes2() + ")/(" + hotspotPackage.getAllNodes1() + "+" + hotspotPackage.getAllNodes2() + "=" + percent.toString());
+		BigDecimal clonePercent2 = BigDecimal.valueOf((hotspotPackage.getRelationNodes2() + 0.0) / hotspotPackage.getAllNodes2());
+		clonePercent2 = clonePercent2.setScale(2, RoundingMode.HALF_UP);
+		row.createCell(3).setCellValue(hotspotPackage.getRelationNodes2() + "/" + hotspotPackage.getAllNodes2() + "=" + clonePercent2.toString());
+		BigDecimal clonePercent = BigDecimal.valueOf((hotspotPackage.getRelationNodes1() + hotspotPackage.getRelationNodes2() + 0.0) / (hotspotPackage.getAllNodes1() + hotspotPackage.getAllNodes2()));
+		clonePercent = clonePercent.setScale(2, RoundingMode.HALF_UP);
+		row.createCell(4).setCellValue("(" + hotspotPackage.getRelationNodes1() + "+" + hotspotPackage.getRelationNodes2() + ")/(" + hotspotPackage.getAllNodes1() + "+" + hotspotPackage.getAllNodes2() + ")=" + clonePercent.toString());
+		BigDecimal cochangePercent = BigDecimal.valueOf(0);
+		if(hotspotPackage.getPackageCochangeTimes() != 0) {
+			cochangePercent = BigDecimal.valueOf((hotspotPackage.getPackageCloneCochangeTimes() + 0.0) / hotspotPackage.getPackageCochangeTimes());
+		}
+		cochangePercent = cochangePercent.setScale(2, RoundingMode.HALF_UP);
+		row.createCell(5).setCellValue(hotspotPackage.getPackageCloneCochangeTimes() + "/" + hotspotPackage.getPackageCochangeTimes() + "=" + cochangePercent.toString());
+		row.createCell(6).setCellValue(hotspotPackage.getClonePairs());
 		for (HotspotPackage hotspotPackageChild : hotspotPackage.getChildrenHotspotPackages()){
-			printHotspotPackage(sheet, layer + 1, hotspotPackageChild);
+			loadHotspotPackageResult(sheet, layer + 1, hotspotPackageChild);
 		}
 		for (Package packageChild1 : hotspotPackage.getChildrenOtherPackages1()){
 			printOtherPackage(sheet, -1, layer + 1, packageChild1);
@@ -407,6 +423,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 			row.createCell(3).setCellValue("");
 			row.createCell(4).setCellValue("");
 			row.createCell(5).setCellValue("");
+			row.createCell(6).setCellValue("");
 		}
 		if(index == 1) {
 			row.createCell(0).setCellValue("");
@@ -415,6 +432,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 			row.createCell(3).setCellValue("0/" + otherPackage.getAllNodes() + "=0.00");
 			row.createCell(4).setCellValue("");
 			row.createCell(5).setCellValue("");
+			row.createCell(6).setCellValue("");
 		}
 	}
 
