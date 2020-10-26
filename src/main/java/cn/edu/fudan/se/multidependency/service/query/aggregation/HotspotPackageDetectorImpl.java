@@ -322,8 +322,8 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 	@Override
 	public void exportHotspotPackages(OutputStream stream) {
 		Workbook hwb = new XSSFWorkbook();
-		setSheetInformation(stream, hwb, "java");
-		setSheetInformation(stream, hwb, "cpp");
+		setSheetInformation(hwb, "java");
+		setSheetInformation(hwb, "cpp");
 		try {
 			hwb.write(stream);
 		}
@@ -335,12 +335,12 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 				stream.close();
 				hwb.close();
 			}
-			catch (IOException e) {
+			catch (IOException ignored) {
 			}
 		}
 	}
 
-	private void setSheetInformation(OutputStream stream, Workbook hwb, String language) {
+	private void setSheetInformation(Workbook hwb, String language) {
 		rowKey.set(0);
 		Collection<HotspotPackage> hotspotPackages = detectHotspotPackagesByParentId(-1 ,-1, language);
 		Sheet sheet = hwb.createSheet(new StringBuilder().append(language).toString());
@@ -637,9 +637,11 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 			Collection<Package> childrenPackages1 = hasRelationService.findPackageHasPackages(hotspotPackage.getPackage1());
 			Collection<Package> childrenPackages2 = hasRelationService.findPackageHasPackages(hotspotPackage.getPackage2());
 			for(HotspotPackage childHotspotPackage : childrenHotspotPackages) {
-				hotspotPackage.addHotspotChild(childHotspotPackage);
-				childrenPackages1.remove(childHotspotPackage.getPackage1());
-				childrenPackages2.remove(childHotspotPackage.getPackage2());
+				if(childHotspotPackage.getSimilarityValue() > 0.5 || childrenPackages1.contains(childHotspotPackage.getPackage1()) || childrenPackages1.contains(childHotspotPackage.getPackage2())) {
+					hotspotPackage.addHotspotChild(childHotspotPackage);
+					childrenPackages1.remove(childHotspotPackage.getPackage1());
+					childrenPackages2.remove(childHotspotPackage.getPackage2());
+				}
 			}
 			for(Package childPackage1 : childrenPackages1) {
 				hotspotPackage.addOtherChild1(childPackage1);
