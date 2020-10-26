@@ -55,7 +55,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 			String parentDirectoryPath = currentPackage.lastPackageDirectoryPath();
 			Package parentPackage = this.getNodes().findPackageByDirectoryPath(parentDirectoryPath, currentProject);
 			while(parentPackage == null) {
-				if(emptyPackages.get(parentDirectoryPath) != null || parentDirectoryPath.equals(currentProject.getPath() + "/")) {
+				if(emptyPackages.get(parentDirectoryPath) != null || ("/").equals(parentDirectoryPath)) {
 					break;
 				}
 				parentPackage = new Package();
@@ -108,7 +108,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 				childPackages.put(parentPackage.getDirectoryPath(), childList);
 			}
 			while(parentPackage == null) {
-				if(parentDirectoryPath.equals(currentProject.getPath() + "/") || parentDirectoryPath.equals("/")) {
+				if(("/").equals(parentDirectoryPath)) {
 					break;
 				}
 				if(emptyPackages.get(parentDirectoryPath) != null ) {
@@ -164,7 +164,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 				}
 
 				String parentDirectoryPath = currentPck.lastPackageDirectoryPath();
-				if(parentDirectoryPath.equals(currentProject.getPath() + "/") || parentDirectoryPath.equals("/")) {
+				if( ("/").equals(parentDirectoryPath)) {
 					continue;
 				}
 
@@ -176,7 +176,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 
 				Package parentPck = parentChild.get(parentDirectoryPath);
 				while (parentPck == null){
-					if(parentDirectoryPath.equals(currentProject.getPath() + "/") || parentDirectoryPath.equals("/")) {
+					if(("/").equals(parentDirectoryPath)) {
 						break;
 					}
 					Map<String, Package> child = childPackages.get(parentDirectoryPath);
@@ -191,7 +191,7 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 					}
 					if(pck != null){
 						parentDirectoryPath = pck.lastPackageDirectoryPath();
-						if(parentDirectoryPath.equals(currentProject.getPath() + "/") || parentDirectoryPath.equals("/")) {
+						if(("/").equals(parentDirectoryPath)) {
 							break;
 						}
 						parentChild = childPackages.get(parentDirectoryPath);
