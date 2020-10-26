@@ -437,7 +437,7 @@ public class CloneController {
 	}
 
 	@GetMapping("/file/double")
-	public String DoubleFilesStructure(@RequestParam("file1Id") long file1Id, @RequestParam("file1Id") long file2Id,
+	public String DoubleFilesStructure(@RequestParam("file1Id") long file1Id, @RequestParam("file2Id") long file2Id,
 									   @RequestParam("cloneType") String cloneType, @RequestParam("linesSize1") int linesSize1,
 									   @RequestParam("linesSize2") int linesSize2, @RequestParam("loc1") int loc1,
 									   @RequestParam("loc2") int loc2, @RequestParam("value") double value,
@@ -453,7 +453,6 @@ public class CloneController {
 		request.setAttribute("value", value);
 		request.setAttribute("cochange", cochange);
 		request.setAttribute("cochangeId", cochangeId);
-//		return "/doublefilestructure?fileId1=" + file1Id + "&fileId2=" + file2Id;
 		return "doublefilestructure";
 	}
 
