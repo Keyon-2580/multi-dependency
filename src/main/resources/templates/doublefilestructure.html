@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>首页</title>
+    <title>Type</title>
     <script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
     <script type="text/javascript" th:src="@{/js/import/jquery.treeview.js}"></script>
     <script type="text/javascript" th:src="@{/js/import/popper-1.14.7.min.js}"></script>
@@ -19,21 +19,24 @@
     <link rel="stylesheet" th:href="@{/css/doublefile_tree.css}"></link>
     <link rel="stylesheet" th:href="@{/css/table_common.css}"></link>
 <body>
-<div class = "div_file_table" id = "file_table">
-</div>
-<div class="div_file_all" style="margin-bottom: 15px;">
-    <div class = "div_file1">
-        <ul id="tree_file1" class="ztree"></ul>
+<div th:include="nav.html::nav"></div>
+<div class="col-sm-12 row" style="margin-bottom: 15px;">
+    <div class = "col-sm-12" id = "file_table"></div>
+    <div class="div_file_all" style="margin-bottom: 15px;">
+        <div class = "div_file1">
+            <ul id="tree_file1" class="ztree"></ul>
+        </div>
+        <div class="div_file2">
+            <ul id="tree_file2" class="ztree"></ul>
+        </div>
     </div>
-    <div class="div_file2">
-        <ul id="tree_file2" class="ztree"></ul>
-    </div>
 </div>
+
 <script type="text/javascript">
     //<![CDATA[
     $(document).ready(function() {
-        var fileId1 = [[${file1Id}]];
-        var fileId2 = [[${file2Id}]];
+        var file1Id = [[${file1Id}]];
+        var file2Id = [[${file2Id}]];
         var URL = window.location.search;
         URL = URL.split('?')[1]; //获取参数列表
         var params = URL.split('&');
@@ -47,7 +50,7 @@
         var filePath1 = params[9].split('=')[1];
         var filePath2 = params[10].split('=')[1];
         var cochangeId = [[${cochangeId}]];
-        doublefile().init(fileId1,fileId2,cloneType,linesSize1,linesSize2,loc1,loc2,value,cochange,filePath1,filePath2,cochangeId);
+        doublefile().init(file1Id,file2Id,cloneType,linesSize1,linesSize2,loc1,loc2,value,cochange,filePath1,filePath2,cochangeId);
     });
     // ]]>
 </script>
