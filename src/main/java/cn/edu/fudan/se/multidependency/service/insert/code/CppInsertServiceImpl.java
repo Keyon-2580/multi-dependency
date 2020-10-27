@@ -230,6 +230,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 				}
 			}
 			processIdentifier(function);
+			function.setName(function.getIdentifierSimpleName());
 //			this.getNodes().addCodeNode(function);
 			while(!(parentEntity instanceof FileEntity)) {
 				// 找出方法所在的文件
