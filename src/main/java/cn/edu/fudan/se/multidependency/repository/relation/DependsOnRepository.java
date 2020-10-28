@@ -40,63 +40,91 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query("match p= (f1:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]-(f2:ProjectFile) where id(f1) = {file1Id} and id(f2) = {file2Id} return p")
 	List<DependsOn> findDependsOnInFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
 	
-	static final String TYPE_LEFT = "match p=(t1:Type)-[:CONTAIN*0..]->()-[r:";
-	static final String TYPE_RIGHT = "]->()<-[:CONTAIN*0..]-(t2:Type) where t1<>t2 create (t1)-[:DEPENDS_ON]->(t2)";
+	//static final String TYPE_LEFT = "match p=(t1:Type)-[:CONTAIN*0..]->()-[r:";
+	//static final String TYPE_RIGHT = "]->()<-[:CONTAIN*0..]-(t2:Type) where t1<>t2 create (t1)-[:DEPENDS_ON]->(t2)";
 	
-	@Query(TYPE_LEFT + RelationType.str_CALL + TYPE_RIGHT)
-	void createDependsOnWithCallInTypes();
-	@Query(TYPE_LEFT + RelationType.str_CREATE + TYPE_RIGHT)
-	void createDependsOnWithCreateInTypes();
-	@Query(TYPE_LEFT + RelationType.str_CAST + TYPE_RIGHT)
-	void createDependsOnWithCastInTypes();
-	@Query(TYPE_LEFT + RelationType.str_THROW + TYPE_RIGHT)
-	void createDependsOnWithThrowInTypes();
-	@Query(TYPE_LEFT + RelationType.str_PARAMETER + TYPE_RIGHT)
-	void createDependsOnWithParameterInTypes();
-	@Query(TYPE_LEFT + RelationType.str_VARIABLE_TYPE + TYPE_RIGHT)
-	void createDependsOnWithVariableTypeInTypes();
-	@Query(TYPE_LEFT + RelationType.str_ACCESS + TYPE_RIGHT)
-	void createDependsOnWithAccessInTypes();
-	@Query(TYPE_LEFT + RelationType.str_ANNOTATION + TYPE_RIGHT)
-	void createDependsOnWithAnnotationInTypes();
-	@Query("match (t1:Type)-[r:DEPENDS_ON]->(t2:Type) with t1,t2,count(r) as times create (t1)-[:DEPENDS_ON{times : times}]->(t2)")
-	void createDependsOnWithTimesInTypes();
-	@Query("match (:Type)-[r:DEPENDS_ON]->() where r.times is null delete r;")
-	void deleteNullTimesDependsOnInTypes();
+	//@Query(TYPE_LEFT + RelationType.str_CALL + TYPE_RIGHT)
+	//void createDependsOnWithCallInTypes();
+	//@Query(TYPE_LEFT + RelationType.str_CREATE + TYPE_RIGHT)
+	//void createDependsOnWithCreateInTypes();
+	//@Query(TYPE_LEFT + RelationType.str_CAST + TYPE_RIGHT)
+	//void createDependsOnWithCastInTypes();
+	//@Query(TYPE_LEFT + RelationType.str_THROW + TYPE_RIGHT)
+	//void createDependsOnWithThrowInTypes();
+	//@Query(TYPE_LEFT + RelationType.str_PARAMETER + TYPE_RIGHT)
+	//void createDependsOnWithParameterInTypes();
+	//@Query(TYPE_LEFT + RelationType.str_VARIABLE_TYPE + TYPE_RIGHT)
+	//void createDependsOnWithVariableTypeInTypes();
+	//@Query(TYPE_LEFT + RelationType.str_ACCESS + TYPE_RIGHT)
+	//void createDependsOnWithAccessInTypes();
+	//@Query(TYPE_LEFT + RelationType.str_ANNOTATION + TYPE_RIGHT)
+	//void createDependsOnWithAnnotationInTypes();
+	//@Query("match (t1:Type)-[r:DEPENDS_ON]->(t2:Type) with t1,t2,count(r) as times create (t1)-[:DEPENDS_ON{times : times}]->(t2)")
+	//void createDependsOnWithTimesInTypes();
+	//@Query("match (:Type)-[r:DEPENDS_ON]->() where r.times is null delete r;")
+	//void deleteNullTimesDependsOnInTypes();
+
+	final String FILE_TYPE_LEFT = "match (f1:ProjectFile)-[:CONTAIN*1..]->(:Type)-[r: ";
+	final String FILE_TYPE_MIDDLE = "]->(:Type)<-[:CONTAIN*1..]-(f2:ProjectFile) with f1,f2,r where f1 <> f2 " +
+			"create (f1)-[:DEPENDS_ON{dependsOnType: \"";
+	final String FILE_TYPE_MIDDLE2 = "\", times : ";
+	final String File_TYPE_RIGHT = "}]->(f2);";
 	
-	static final String FILE_LEFT = "match (f1:ProjectFile)-[:CONTAIN*1..]->()-[r:";
-	static final String FILE_RIGHT = "]->()<-[:CONTAIN*1..]-(f2:ProjectFile) with f1,f2 where f1 <> f2 create (f1)-[:DEPENDS_ON]->(f2);";
-	
-	@Query(FILE_LEFT + RelationType.str_EXTENDS + FILE_RIGHT)
+	@Query(FILE_TYPE_LEFT + RelationType.str_EXTENDS + FILE_TYPE_MIDDLE + RelationType.str_EXTENDS + FILE_TYPE_MIDDLE2 + "1" + File_TYPE_RIGHT)
 	void createDependsOnWithExtendsInFiles();
-	@Query(FILE_LEFT + RelationType.str_IMPLEMENTS + FILE_RIGHT)
+	@Query(FILE_TYPE_LEFT + RelationType.str_IMPLEMENTS + FILE_TYPE_MIDDLE + RelationType.str_IMPLEMENTS + FILE_TYPE_MIDDLE2 + "1" + File_TYPE_RIGHT)
 	void createDependsOnWithImplementsInFiles();
-	@Query(FILE_LEFT + RelationType.str_CALL + FILE_RIGHT)
-	void createDependsOnWithCallInFiles();
-	@Query(FILE_LEFT + RelationType.str_CREATE + FILE_RIGHT)
-	void createDependsOnWithCreateInFiles();
-	@Query(FILE_LEFT + RelationType.str_CAST + FILE_RIGHT)
-	void createDependsOnWithCastInFiles();
-	@Query(FILE_LEFT + RelationType.str_THROW + FILE_RIGHT)
-	void createDependsOnWithThrowInFiles();
-	@Query(FILE_LEFT + RelationType.str_PARAMETER + FILE_RIGHT)
-	void createDependsOnWithParameterInFiles();
-	@Query(FILE_LEFT + RelationType.str_VARIABLE_TYPE + FILE_RIGHT)
-	void createDependsOnWithVariableTypeInFiles();
-	@Query(FILE_LEFT + RelationType.str_ACCESS + FILE_RIGHT)
-	void createDependsOnWithAccessInFiles();
-	@Query(FILE_LEFT + RelationType.str_IMPLLINK + FILE_RIGHT)
-	void createDependsOnWithImpllinkInFiles();
-	@Query(FILE_LEFT + RelationType.str_ANNOTATION + FILE_RIGHT)
+	@Query(FILE_TYPE_LEFT + RelationType.str_DEPENDENCY + FILE_TYPE_MIDDLE + RelationType.str_DEPENDENCY + FILE_TYPE_MIDDLE2 + "r.times" + File_TYPE_RIGHT)
+	void createDependsOnWithDependencyInFiles();
+	@Query(FILE_TYPE_LEFT + RelationType.str_ASSOCIATION + FILE_TYPE_MIDDLE + RelationType.str_ASSOCIATION + FILE_TYPE_MIDDLE2 + "r.times" + File_TYPE_RIGHT)
+	void createDependsOnWithAssociationInFiles();
+	@Query(FILE_TYPE_LEFT + RelationType.str_ANNOTATION + FILE_TYPE_MIDDLE + RelationType.str_ASSOCIATION + FILE_TYPE_MIDDLE2 + "r.times" + File_TYPE_RIGHT)
 	void createDependsOnWithAnnotationInFiles();
-	@Query("match (f1:ProjectFile)-[r:DEPENDS_ON]->(f2:ProjectFile) with f1,f2,count(r) as times create (f1)-[:DEPENDS_ON{times : times}]->(f2)")
+
+	final String FILE_FUNCTION_LEFT = "match (f1:ProjectFile)-[:CONTAIN]->(:Function)-[r: ";
+	final String FILE_FUNCTION_MIDDLE = "]->(:Function)<-[:CONTAIN]-(f2:ProjectFile) with f1,f2,r where f1 <> f2 " +
+			"create (f1)-[:DEPENDS_ON{dependsOnType: \"";
+	final String FILE_FUNCTION_MIDDLE2 = "\", times : ";
+	final String File_FUNCTION_RIGHT = "}]->(f2);";
+
+	//@Query(FILE_LEFT + RelationType.str_CALL + FILE_RIGHT)
+	//void createDependsOnWithCallInFiles();
+	//@Query(FILE_LEFT + RelationType.str_CREATE + FILE_RIGHT)
+	//void createDependsOnWithCreateInFiles();
+	//@Query(FILE_LEFT + RelationType.str_CAST + FILE_RIGHT)
+	//void createDependsOnWithCastInFiles();
+	//@Query(FILE_LEFT + RelationType.str_THROW + FILE_RIGHT)
+	//void createDependsOnWithThrowInFiles();
+	//@Query(FILE_LEFT + RelationType.str_PARAMETER + FILE_RIGHT)
+	//void createDependsOnWithParameterInFiles();
+	//@Query(FILE_LEFT + RelationType.str_VARIABLE_TYPE + FILE_RIGHT)
+	//void createDependsOnWithVariableTypeInFiles();
+	//@Query(FILE_LEFT + RelationType.str_ACCESS + FILE_RIGHT)
+	//void createDependsOnWithAccessInFiles();
+	//@Query(FILE_LEFT + RelationType.str_IMPLLINK + FILE_RIGHT)
+	//void createDependsOnWithImpllinkInFiles();
+
+	@Query("match (f1:ProjectFile)-[r:DEPENDS_ON]->(f2:ProjectFile) " +
+			"with f1,f2,sum(r.times) as times, " +
+			"reduce(dependsType = \"\", tt in collect(distinct r.dependsOnType) | dependsType + (\"__\" + tt)) as dependsOnType " +
+			"create (f1)-[:DEPENDS_ON{times : times, dependsOnType : dependsOnType}]->(f2);")
 	void createDependsOnWithTimesInFiles();
-	@Query("match (:ProjectFile)-[r:DEPENDS_ON]->() where r.times is null delete r;")
-	void deleteNullTimesDependsOnInFiles();
-	@Query("match (p1:Package)-[:CONTAIN]->(:ProjectFile)-[:DEPENDS_ON]->(:ProjectFile)<-[:CONTAIN]-(p2:Package) with p1,p2 where p1<>p2 and not (p1)-[:DEPENDS_ON]->(p2) create (p1)-[:DEPENDS_ON]->(p2)")
+	@Query("match (:ProjectFile)-[r:DEPENDS_ON]->(:ProjectFile) " +
+			"where not r.dependsOnType starts with \"__\" " +
+			"delete r;")
+	void deleteNullAggregationDependsOnInFiles();
+
+	@Query("match (p1:Package)-[:CONTAIN]->(:ProjectFile)-[r:DEPENDS_ON]->(:ProjectFile)<-[:CONTAIN]-(p2:Package) " +
+			"where p1<>p2 " +
+			"with p1,p2,sum(r.times) as times, " +
+			"reduce(tmp = \"\", tt in collect(distinct r.dependsOnType) | tmp + tt) as dependsType " +
+			"with p1,p2,times," +
+			"reduce(tmp = \"\", tt in split(substring(dependsType, 2), \"__\") | " +
+			"case when tmp contains tt then tmp else tmp + (\"__\" + tt) end ) as dependsOnType " +
+			"create (p1)-[:DEPENDS_ON{times : times, dependsOnType : dependsOnType}]->(p2);")
 	void createDependsOnInPackages();
-	@Query("match (p1:Package)-[r:DEPENDS_ON]->(p2:Package) with p1,p2,count(r) as times create (p1)-[:DEPENDS_ON{times : times}]->(p2)")
-	void addTimesOnDependsOnInPackages();
-	@Query("match (:Package)-[r:DEPENDS_ON]->() where r.times is null delete r;")
-	void deleteNullTimesDependsOnInPackages();
+
+	@Query("match ()-[r:DEPENDS_ON]->() where r.dependsOnType = {dependsOnType} delete r;")
+	void deleteDependsOnByRelationType(String dependsOnType);
+
 }

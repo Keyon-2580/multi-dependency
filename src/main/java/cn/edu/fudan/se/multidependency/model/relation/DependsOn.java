@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_DEPENDS_ON)
 @EqualsAndHashCode
-public class DependsOn implements Relation {
+public class DependsOn implements Relation, RelationWithTimes{
 	
 	private static final long serialVersionUID = 6381791099417646137L;
 
@@ -33,11 +33,20 @@ public class DependsOn implements Relation {
 	private Node endNode;
 	
 	private int times;
+
+	private String dependsOnType;
 	
 	public DependsOn(Node startNode, Node endNode) {
 		this.startNode = startNode;
 		this.endNode = endNode;
+		this.dependsOnType = "";
 	}
+	public DependsOn(Node startNode, Node endNode, String dependsOnType) {
+		this.startNode = startNode;
+		this.endNode = endNode;
+		this.dependsOnType = dependsOnType;
+	}
+
 	
 	@Override
 	public Node getStartNode() {
@@ -58,7 +67,16 @@ public class DependsOn implements Relation {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("times", getTimes());
+		properties.put("dependsOnType", getDependsOnType());
 		return properties;
 	}
 
+	@Override
+	public void addTimes() {
+		this.times++;
+	}
+
+	public void adDependsOnType(String dependsOnType) {
+		this.dependsOnType +="__"+ dependsOnType;
+	}
 }

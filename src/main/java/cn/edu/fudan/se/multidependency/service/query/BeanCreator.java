@@ -87,34 +87,15 @@ public class BeanCreator {
 				LOGGER.info("创建Depends On关系...");
 				dependsOnRepository.deleteAll();
 
-				dependsOnRepository.createDependsOnWithCallInTypes();
-				dependsOnRepository.createDependsOnWithCreateInTypes();
-				dependsOnRepository.createDependsOnWithCastInTypes();
-				dependsOnRepository.createDependsOnWithThrowInTypes();
-				dependsOnRepository.createDependsOnWithParameterInTypes();
-				dependsOnRepository.createDependsOnWithVariableTypeInTypes();
-				dependsOnRepository.createDependsOnWithAccessInTypes();
-				dependsOnRepository.createDependsOnWithAnnotationInTypes();
-				dependsOnRepository.createDependsOnWithTimesInTypes();
-				dependsOnRepository.deleteNullTimesDependsOnInTypes();
-
 				dependsOnRepository.createDependsOnWithExtendsInFiles();
 				dependsOnRepository.createDependsOnWithImplementsInFiles();
-				dependsOnRepository.createDependsOnWithCallInFiles();
-				dependsOnRepository.createDependsOnWithCreateInFiles();
-				dependsOnRepository.createDependsOnWithCastInFiles();
-				dependsOnRepository.createDependsOnWithThrowInFiles();
-				dependsOnRepository.createDependsOnWithParameterInFiles();
-				dependsOnRepository.createDependsOnWithVariableTypeInFiles();
-				dependsOnRepository.createDependsOnWithAccessInFiles();
-				dependsOnRepository.createDependsOnWithImpllinkInFiles();
+				dependsOnRepository.createDependsOnWithDependencyInFiles();
+				dependsOnRepository.createDependsOnWithAssociationInFiles();
 				dependsOnRepository.createDependsOnWithAnnotationInFiles();
 				dependsOnRepository.createDependsOnWithTimesInFiles();
-				dependsOnRepository.deleteNullTimesDependsOnInFiles();
+				dependsOnRepository.deleteNullAggregationDependsOnInFiles();
 
 				dependsOnRepository.createDependsOnInPackages();
-				dependsOnRepository.addTimesOnDependsOnInPackages();
-				dependsOnRepository.deleteNullTimesDependsOnInPackages();
 
 				fileRepository.pageRank(20, 0.85);
 			}
