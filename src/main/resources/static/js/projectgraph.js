@@ -7,6 +7,7 @@ var diameter_global;
 var svg_global;
 var g_global;
 var projectList_global;
+var table_global;
 
 var projectgraph = function () {
     return {
@@ -33,15 +34,8 @@ var loaddata = function () {
                 projectlist.push(name_temp);
             }
 
-            // projectlist_guava.map((item,index) => {
-            //     if(item.name === "guava"){
-            //         guava_id = item.id;
-            //     }
-            // })
-
             var html = ""
-
-            html += "<select id = \"multipleProjectSelect\" class=\"selectpicker\" multiple>";
+            html += "<div id = \"ProjectSelect\"><select id = \"multipleProjectSelect\" class=\"selectpicker\" multiple>";
             for(var i = 0; i < projectlist.length; i++) {
                 if (i === 0) {
                     html += "<option selected=\"selected\" value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
@@ -50,13 +44,51 @@ var loaddata = function () {
                 }
             }
             html += "</select>";
-            html += "<button id = \"multipleProjectsButton\" type=\"button\" onclick= showMultipleButton()>加载项目</button>\n";
-            html += "<select id = \"relationTypeSelect\" class=\"selectpicker\">";
-            html += "<option selected=\"selected\" value=\"clone\">Clone</option>";
-            html += "<option value=\"cochange\">Cochange</option>";
-            html += "<option value=\"depedency\">Depedency</option>";
-            html += "</select>";
-            html += "<button class = \"showLineButton\" id = \"showLineId\" type=\"button\" onclick= showLine()>显示关系</button>";
+            html += "<br><button id = \"multipleProjectsButton\" type=\"button\" onclick= showMultipleButton()>加载项目</button></div>";
+
+            html += "<div id = \"AttributionSelect\">" +
+                "<form role=\"form\">" +
+                "<p><label class = \"AttributionSelectTitle\">" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" name=\"dependency\" value=\"dependson\">DependsOn：" +
+                "</label>" +
+                "<label class = \"AttributionSelectLabel\"> Times >= " +
+                "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput\" name=\"dependencytimes\" value=\"3\">" +
+                "</label></p>";
+
+            html += "<p><label class = \"AttributionSelectTitle\">" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone\" name=\"clone\" value=\"clone\">Clone：" +
+                "</label>" +
+
+                "<input  class = \"AttributionSelectInput\" name=\"similaritybelow\" value=\"0.7\">" +
+
+                "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectBelow\">" +
+                "<option value=\"<=\" selected = \"selected\"><=</option>" +
+                "<option value=\"<\"><</option></select>" +
+
+                "<label class = \"AttributionSelectLabel\"> &nbsp;Similarity</label>" +
+
+                "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectHigh\">" +
+                "<option value=\"<=\"><=</option>" +
+                "<option value=\"<\" selected = \"selected\"><</option></select>" +
+
+                "<input  class = \"AttributionSelectInput\" name=\"similarityhigh\" value=\"1\">" +
+
+                "<label class = \"AttributionSelectLabel\" style = \"margin-left: 80px\">CloneTime >=</label>" +
+                "<input  class = \"AttributionSelectInput\" name=\"clonetime\" value=\"3\">" +
+                "</p>";
+
+            html += "<p><label class = \"AttributionSelectTitle\">" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" name=\"dependency\" value=\"dependson\">Co-change：" +
+                "</label>" +
+                "<label class = \"AttributionSelectLabel\"> Times >= " +
+                "<input  id=\"cochangeTimes\" class = \"AttributionSelectInput\" name=\"cochangetimes\" value=\"3\">" +
+                "</label></p>";
+
+            html += "<p><div style=\"margin-top: 10px;\">" +
+                "<button class = \"showLineButton\" id = \"showLineId\" type=\"button\" onclick= showLine()>显示关系</button>" +
+                "</div></p>" +
+                "</form>" +
+                "</div>";
 
             // console.log(html)
             $("#projectToGraph_util").html(html);
@@ -70,25 +102,6 @@ var loaddata = function () {
             // Loop_ajax(0, projectlist);
         }
     })
-
-    //多项目加载（暂不需要）
-    // function Loop_ajax(index, projectlist) {
-    //     if (index < projectlist.length) {
-    //         $.ajax({
-    //             type : "GET",
-    //             url : mainUrl + "/has?projectId=" + projectlist[index] + "&showType=graph",
-    //             success : function(result) {
-    //                 resultjson = result;
-    //                 // console.log(projectlist[index])
-    //                 // console.log("projectToGraph_" + projectlist[index])
-    //                 projectToGraph(resultjson,"projectToGraph_" + projectlist[index]);
-    //                 if (index < projectlist.length) {
-    //                     Loop_ajax(index + 1, projectlist);
-    //                 }
-    //             }
-    //         })
-    //     }
-    // }
 }
 
 //调用接口请求数据
@@ -106,16 +119,6 @@ var projectGraphAjax = function(projectIds){
     projectList["projectIds"] = projectIds_array;
     projectList["showType"] = "graph";
 
-    // console.log(projectList);
-
-    // var projectList={
-    //     "projectIds": [
-    //         {
-    //             "id" : projectId
-    //         }
-    //     ],
-    //     "showType": "graph"
-    // }
     $.ajax({
         type:"POST",
         url : "/project/has",
@@ -123,10 +126,6 @@ var projectGraphAjax = function(projectIds){
         dataType:"json",
         data:JSON.stringify(projectList),
         success : function(result) {
-            // console.log(result);
-            // resultjson = result;
-            // console.log(projectlist[index])
-            // console.log("projectToGraph_" + projectlist[index])
             projectToGraph(result,"projectToGraphSvg");
         }
     })
@@ -137,25 +136,16 @@ var projectToGraph = function(result,divId){
     // console.log(result);
     var projectdata = result[0].result;
     var jsonLinks = result[1].links;
+    var table = result[2].table;
+    table_global = table;
 
-    // console.log(jsonLinks);
+    console.log(result);
 
     jsonLinks_global = jsonLinks;
-
-    // console.log(delete_index);
-    //
-    // if(typeof(jsonLinks) !== "undefined"){
-    //     // console.log(typeof(jsonLinks));
-    //     // console.log(jsonLinks);
-    //
-    // }
 
     var svg = d3.select("#" + divId)
             .attr("width", 1500)
             .attr("height", 1500),
-            // .call(d3.zoom().on("zoom", function () {
-            //     svg.attr("transform", d3.event.transform)
-            // })),
         margin = 20,
         diameter = +svg.attr("width"),
         g_remove = svg.selectAll("g").remove();
@@ -208,8 +198,6 @@ var projectToGraph = function(result,divId){
                 var ratio = getCloneRatioByName(projectdata,d.data.id)[1];
                 var id = getCloneRatioByName(projectdata,d.data.id)[0];
 
-                // console.log(ratio)
-                // console.log(id)
                 if(ratio === 0){
                     // console.log("white")
                     return null;
@@ -217,7 +205,6 @@ var projectToGraph = function(result,divId){
                     return color_clone(ratio);
                 }
             }
-            // return d.children ? color(d.depth/(d.depth+10))  : color_clone(getCloneRatioByName(projectdata,d.data.name));
         })
         .attr("id", function (d) {
             return d.data.id;
@@ -225,11 +212,6 @@ var projectToGraph = function(result,divId){
         .call(text => text.append("title").text(function(d) {
             return d.parent ? d.data.name + "\n所属包：" + d.parent.data.name  + "\nID：" + d.data.id : d.data.name;
         }));
-
-    //点击后缩放（暂不需要）
-    // .on("click", function(d) {
-    //         if (focus !== d) zoom(d), d3.event.stopPropagation();
-    //     })
 
     var text = g.selectAll("text")
         .data(nodes)
@@ -247,52 +229,8 @@ var projectToGraph = function(result,divId){
 
     var node = g.selectAll("circle,text");
 
-    // svg
-    //     .style("background", "#88f1ce")
-    //     .on("click", function() {
-    //         zoom(root);
-    //     });
-
-    // console.log(root);
     zoomTo([root.x, root.y, root.r * 2 + margin]);
 
-    //缩放函数（暂不需要）
-    // function zoom(d) {
-    //     g.selectAll("circle")
-    //         .style("stroke","")
-    //         .style("stroke-width","")
-    //     var svg1 = d3.select(".packageLink") .remove();
-    //     flag = true;
-    //
-    //     if(!d.children){
-    //         d = d.parent;
-    //     }
-    //     var focus0 = focus; focus = d;
-    //
-    //     var transition = d3.transition()
-    //         .duration(d3.event.altKey ? 7500 : 750)
-    //         .tween("zoom", function(d) {
-    //             var i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2 + margin]);
-    //             return function(t) {
-    //                 zoomTo(i(t));
-    //             };
-    //         });
-    //
-    //     transition.selectAll("text")
-    //         .filter(function(d) {
-    //             return d.parent === focus || this.style.display === "inline";
-    //         })
-    //         .style("fill-opacity", function(d) {
-    //             return d.parent === focus ? 1 : 0;
-    //         })
-    //         .on("start", function(d) {
-    //             if (d.parent === focus) this.style.display = "inline";
-    //         })
-    //         .on("end", function(d) {
-    //             if (d.parent !== focus) this.style.display = "none";
-    //         });
-    // }
-    //
     function zoomTo(v) {
         var k = diameter / v[2]; view = v;
         node.attr("transform", function(d) {
@@ -302,6 +240,8 @@ var projectToGraph = function(result,divId){
         circle.attr("r", function(d) {
             return d.r * k;
         });
+
+        drawCloneTableBelow(table_global, "project");
     }
 
     function getCloneRatioByName(data,id){
@@ -328,47 +268,6 @@ var projectToGraph = function(result,divId){
             }
         }
     }
-
-    // function getCloneDataByName(data,name){
-    //     var result = [];
-    //     for(var i = 0; i < data.length; i++){
-    //         var import_result = findNameInImports(data[i].imports,name);
-    //         if(data[i].name === name){
-    //             return data[i].imports;
-    //         }else if(import_result){
-    //             var temp = {};
-    //             temp["name"] = data[i].name;
-    //             temp["clone_type"] = import_result.clone_type;
-    //             result.push(temp);
-    //         }
-    //     }
-    //     return result;
-    // }
-
-    // function findNameInImports(data,name){
-    //     for(var i = 0; i < data.length; i++){
-    //         if(data[i].name === name){
-    //             return data[i];
-    //         }
-    //     }
-    //     return null;
-    // }
-    //
-    // function setCloneTitle(data){
-    //     if(data.length > 0){
-    //         var result = "\n克隆关系:";
-    //         for(var i = 0; i < data.length; i++){
-    //             result += "\n{\n克隆文件:";
-    //             result += data[i].name;
-    //             result += "\n克隆类型:";
-    //             result += data[i].clone_type;
-    //             result += "\n}";
-    //         }
-    //         return result;
-    //     }else{
-    //         return null;
-    //     }
-    // }
 }
 
 //绘制气泡图连线
@@ -400,6 +299,7 @@ var showLine = function(){
         }
     }
 
+    // console.log(jsonLinks_local);
     if(typeof(jsonLinks_local) !== "undefined" && (temp_delete_number !== jsonLinks_global.length)){
         if(flag){
             drawLink(jsonLinks_local);
@@ -413,7 +313,8 @@ var showLine = function(){
 
     // .attr("class", "packageLink")
 function drawLink(jsonLinks) {
-    console.log(jsonLinks);
+    var circleCoordinate = [];
+    // console.log(jsonLinks);
     var links = svg_global.append('g')
         .style('stroke', '#aaa')
         .attr("class", "packageLink")
@@ -421,7 +322,7 @@ function drawLink(jsonLinks) {
         .data(jsonLinks)
         .enter().append('line')
         .attr("stroke-dasharray", function (d){
-            console.log(d);
+            // console.log(d);
             return d.bottom_package ? "20,2" : null;
         })
         .attr("stroke", function (d){
@@ -439,46 +340,115 @@ function drawLink(jsonLinks) {
                 + "\nclonePairs: " + d.clonePairs;
         }));
 
-
-    function getTranslateX(translateText) {
-        var start = translateText.indexOf("(");
-        var comma = translateText.indexOf(",");
-        return parseFloat(translateText.slice(start + 1, comma));
-    }
-
-    function getTranslateY(translateText) {
-        var comma = translateText.indexOf(",");
-        var end = translateText.indexOf(")");
-        return parseFloat(translateText.slice(comma + 1, end));
-    }
-
-    function getCircleTransform(id, similarityValue) {
-        // return d3.select("#" + id.replace(/\./g, '\\.')).attr("transform");
-        // console.log(d3.select("#L1\\.M0\\.L1\\.M0").attr("transform"));
-        d3.select("#" + id)
-            .style("stroke",function (d){
-                return similarityValue === 1 ? "#c23616" : similarityValue >= 0.9 ? "#ff6b6b" : "#f3910c";
+    jsonLinks.forEach(function (d){
+        d3.select("#" + d.source_id)
+            .style("stroke",function (e){
+                return d.similarityValue === 1 ? "#c23616" : d.similarityValue >= 0.9 ? "#ff6b6b" : "#f3910c";
             })
             .style("stroke-width","1.5px")
-        return d3.select("#" + id).attr("transform");
+
+        d3.select("#" + d.target_id)
+            .style("stroke",function (e){
+                return d.similarityValue === 1 ? "#c23616" : d.similarityValue >= 0.9 ? "#ff6b6b" : "#f3910c";
+            })
+            .style("stroke-width","1.5px")
+
+        //获取两个圆的transform属性（包含坐标信息）和半径
+        var source_transform = d3.select("#" + d.source_id).attr("transform");
+        var target_transform = d3.select("#" + d.target_id).attr("transform");
+        var r1 = d3.select("#" + d.source_id).attr("r");
+        var r2 = d3.select("#" + d.target_id).attr("r");
+
+        //求初始情况下的两个圆心坐标
+        var x1 = parseFloat(source_transform.slice(source_transform.indexOf("(") + 1, source_transform.indexOf(",")));
+        var y1 = parseFloat(source_transform.slice(source_transform.indexOf(",") + 1, source_transform.indexOf(")")));
+        var x2 = parseFloat(target_transform.slice(target_transform.indexOf("(") + 1, target_transform.indexOf(",")));
+        var y2 = parseFloat(target_transform.slice(target_transform.indexOf(",") + 1, target_transform.indexOf(")")));
+
+        //求斜率(考虑斜率正无穷问题)
+        if(x1 !== x2){
+            var k = (y2 - y1) / (x2 - x1);
+        }else{
+            var k;
+        }
+
+        if(typeof(k) !== "undefined"){
+            //求偏移量
+            var x1_offset = Math.sqrt((r1 * r1) / (k * k + 1));
+            var y1_offset = Math.sqrt((r1 * r1) / (k * k + 1)) * k;
+            var x2_offset = Math.sqrt((r2 * r2) / (k * k + 1));
+            var y2_offset = Math.sqrt((r2 * r2) / (k * k + 1)) * k;
+            if(x1 > x2){
+                x1 -= x1_offset;
+                y1 -= y1_offset;
+                x2 += x2_offset;
+                y2 += y2_offset;
+            }else{
+                x1 += x1_offset;
+                y1 += y1_offset;
+                x2 -= x2_offset;
+                y2 -= y2_offset;
+            }
+        }else{
+            if(y1 > y2){
+                y1 -= r1;
+                y2 += r2;
+            }else if(y1 < y2){
+                y1 += r1;
+                y2 -= r2;
+            }
+        }
+
+        var temp_coordinate = {};
+        temp_coordinate["id"] = d.source_id + "_" + d.target_id;
+        temp_coordinate["x1"] = x1;
+        temp_coordinate["y1"] = y1;
+        temp_coordinate["x2"] = x2;
+        temp_coordinate["y2"] = y2;
+        console.log(temp_coordinate["x1"])
+        circleCoordinate.push(temp_coordinate);
+    })
+
+    function getTranslateX1(source_id, target_id){
+        var link_id = source_id + "_" + target_id;
+        // console.log(link_id);
+        // console.log(circleCoordinate.find((n) => n.id === link_id))
+        return circleCoordinate.find((n) => n.id === link_id).x1;
     }
+
+    function getTranslateY1(source_id, target_id){
+        var link_id = source_id + "_" + target_id;
+        return circleCoordinate.find((n) => n.id === link_id).y1;
+    }
+
+    function getTranslateX2(source_id, target_id){
+        var link_id = source_id + "_" + target_id;
+        return circleCoordinate.find((n) => n.id === link_id).x2;
+    }
+
+    function getTranslateY2(source_id, target_id){
+        var link_id = source_id + "_" + target_id;
+        return circleCoordinate.find((n) => n.id === link_id).y2;
+    }
+
     links.attr("x1", function (d) {
-        return getTranslateX(getCircleTransform(d.source_id, d.similarityValue)) + diameter_global / 2;
+        return getTranslateX1(d.source_id, d.target_id) + diameter_global / 2;
     })
         .attr("y1", function (d) {
-            return getTranslateY(getCircleTransform(d.source_id, d.similarityValue)) + diameter_global / 2;
+            return getTranslateY1(d.source_id, d.target_id) + diameter_global / 2;
         })
         .attr("x2", function (d) {
-            return getTranslateX(getCircleTransform(d.target_id, d.similarityValue)) + diameter_global / 2;
+            return getTranslateX2(d.source_id, d.target_id) + diameter_global / 2;
         })
         .attr("y2", function (d) {
-            return getTranslateY(getCircleTransform(d.target_id, d.similarityValue)) + diameter_global / 2;
+            return getTranslateY2(d.source_id, d.target_id) + diameter_global / 2;
         });
 
     flag = false;
 }
 
 function clearLink(){
+    drawCloneTableBelow(table_global, "project");
     g_global.selectAll("circle")
         .style("stroke","")
         .style("stroke-width","")
@@ -497,7 +467,7 @@ function drawChildrenLinks(package1Id, package2Id){
             if(result.children_graphlinks.length > 0){
                 clearLink();
                 drawLink(result.children_graphlinks);
-                drawCloneTableBelow(result.table);
+                drawCloneTableBelow(result.table,"package");
             }
         }
     });
@@ -515,8 +485,38 @@ var showMultipleButton = function(){
     projectGraphAjax(value);
 }
 
-function drawCloneTableBelow(tableData){
-    var table_clear = d3.selectAll("table").remove();
+function drawCloneTableBelow(tableData, type){
+    // console.log(tableData);
+    if(type === "project"){
+        var temp_delete_number = 0;
+
+        for(var i = tableData.clonefiles1.length; i > 0; i--){
+            var source_project = tableData.clonefiles1[i - 1].projectBelong;
+            var target_project = tableData.clonefiles2[i - 1].projectBelong;
+            var temp_flag_source = false;
+            var temp_flag_target = false;
+
+            for(var j = 0; j < projectList_global.length; j++){
+                // console.log(source_project);
+                // console.log(projectList_global[j]);
+                if(source_project === projectList_global[j]){
+                    temp_flag_source = true;
+                }
+            }
+
+            for(var k = 0; k < projectList_global.length; k++){
+                if(target_project === projectList_global[k] ){
+                    temp_flag_target = true;
+                }
+            }
+
+            if(temp_flag_source === false || temp_flag_target === false){
+                tableData.clonefiles1.splice(i - 1, 1);
+                tableData.clonefiles2.splice(i - 1, 1);
+                temp_delete_number++;
+            }
+        }
+    }
 
     var cleartable = d3.selectAll("table").remove();
     var clonefiles1 = tableData.clonefiles1;
@@ -526,6 +526,23 @@ function drawCloneTableBelow(tableData){
     let html = "";
     html += "<table class = \"gridtable\">"
         + "<tr><th>目录1</th><th>目录1克隆占比</th><th>目录2</th><th>目录2克隆占比</th><th>总克隆占比</th><th>包克隆Cochange占比</th><th>克隆文件对数</th></tr>";
+    if(type === "package"){
+        var parentCochangeRate = "";
+        if(tableData.packageCochangeTimes < 3){
+            parentCochangeRate = tableData.packageCloneCochangeTimes + "/" + tableData.packageCochangeTimes + "=0.00";
+        }else {
+            parentCochangeRate = tableData.packageCloneCochangeTimes  + "/" + tableData.packageCochangeTimes  + "=" + ((tableData.packageCloneCochangeTimes  + 0.0) / tableData.packageCochangeTimes ).toFixed(2);
+        }
+
+
+        html += "<tr><th>" + tableData.parentpackage1 + "</th><th>"
+            + tableData.relationNodes1 + "/" + tableData.allNodes1 + "=" + ((tableData.relationNodes1 + 0.0) / tableData.allNodes1).toFixed(2) + "</th><th>"
+            + tableData.parentpackage2 + "</th><th>"
+            + tableData.relationNodes2 + "/" + tableData.allNodes2 + "=" + ((tableData.relationNodes2 + 0.0) / tableData.allNodes2).toFixed(2) + "</th><th>"
+            + "(" + tableData.relationNodes1 + "+" + tableData.relationNodes2 + ")/(" + tableData.allNodes1 + "+" + tableData.allNodes2 + ")=" + tableData.similarityValue.toFixed(2) + "</th><th>"
+            + parentCochangeRate + "</th><th>"
+            + tableData.clonePairs + "</th></tr>";
+    }
 
     for(let i = 0; i < clonefiles1.length; i++){
         var packageCochangeTimes = clonefiles1[i].packageCochangeTimes;
@@ -542,7 +559,13 @@ function drawCloneTableBelow(tableData){
             cochangeRate = packageCloneCochangeTimes  + "/" + packageCochangeTimes  + "=" + ((packageCloneCochangeTimes  + 0.0) / packageCochangeTimes ).toFixed(2);
         }
 
-        html += "<tr><td>" + clonefiles1[i].name + "</td><td>" + path1CloneRate + "</td><td>" + clonefiles2[i].name + "</td><td>" + path2CloneRate + "</td><td>" + cloneRate + "</td>";
+        if(type === "package"){
+            html += "<tr><td>|---" + clonefiles1[i].name + "</td><td>" + path1CloneRate + "</td><td>|---" + clonefiles2[i].name + "</td>";
+        }else{
+            html += "<tr><td>" + clonefiles1[i].name + "</td><td>" + path1CloneRate + "</td><td>" + clonefiles2[i].name + "</td>";
+        }
+
+        html += "<td>" + path2CloneRate + "</td><td>" + cloneRate + "</td>";
         html += "<td>" + cochangeRate + "</td>";
         html += "<td>";
         if(clonePairs > 0) {
@@ -565,15 +588,17 @@ function drawCloneTableBelow(tableData){
         html += "</td></tr>";
     }
 
-    if(nonclonefiles1.length > 0){
-        for(let i = 0; i < nonclonefiles1.length; i++){
-            html += "<tr><td>" + nonclonefiles1[i].name + "</td><td> </td><td> </td><td> </td><td> </td><td> </td></tr>";
+    if(typeof(nonclonefiles1) !== "undefined"){
+        if(nonclonefiles1.length > 0){
+            for(let i = 0; i < nonclonefiles1.length; i++){
+                html += "<tr><td>" + nonclonefiles1[i].name + "</td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td></tr>";
+            }
         }
-    }
 
-    if(nonclonefiles2.length > 0){
-        for(let i = 0; i < nonclonefiles2.length; i++){
-            html += "<tr><td> </td><td> </td><td>" + nonclonefiles2[i].name + "</td><td> </td><td> </td><td> </td></tr>";
+        if(nonclonefiles2.length > 0){
+            for(let i = 0; i < nonclonefiles2.length; i++){
+                html += "<tr><td> </td><td> </td><td>" + nonclonefiles2[i].name + "</td><td> </td><td> </td><td> </td><td> </td></tr>";
+            }
         }
     }
 

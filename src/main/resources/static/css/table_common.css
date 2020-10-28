@@ -9,7 +9,6 @@ table.gridtable {
 table.gridtable th {
     border-width: 2px;
     padding: 8px;
-    width: 100px;
     border-style: solid;
     border-color: #666666;
     background-color: #dedede;
@@ -17,7 +16,6 @@ table.gridtable th {
 table.gridtable td {
     border-width: 2px;
     padding: 8px;
-    width: 100px;
     border-style: solid;
     border-color: #666666;
     background-color: #ffffff;

@@ -25,5 +25,5 @@ public interface ProjectService {
 
 	JSONObject cloneGraphAndTableOfChildrenPackages(long package1Id, long package2Id);
 
-	JSONArray getAllProjectsLinks();
+	JSONObject getAllProjectsLinks();
 }

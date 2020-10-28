@@ -4,12 +4,14 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+@NoArgsConstructor
 public class HotspotPackage {
 
 	@Getter
