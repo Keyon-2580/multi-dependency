@@ -70,15 +70,20 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	final String FILE_TYPE_MIDDLE2 = "\", times : ";
 	final String File_TYPE_RIGHT = "}]->(f2);";
 	
-	@Query(FILE_TYPE_LEFT + RelationType.str_EXTENDS + FILE_TYPE_MIDDLE + RelationType.str_EXTENDS + FILE_TYPE_MIDDLE2 + "1" + File_TYPE_RIGHT)
+	@Query(FILE_TYPE_LEFT + RelationType.str_EXTENDS + FILE_TYPE_MIDDLE + RelationType.str_EXTENDS +
+			FILE_TYPE_MIDDLE2 + "1" + File_TYPE_RIGHT)
 	void createDependsOnWithExtendsInFiles();
-	@Query(FILE_TYPE_LEFT + RelationType.str_IMPLEMENTS + FILE_TYPE_MIDDLE + RelationType.str_IMPLEMENTS + FILE_TYPE_MIDDLE2 + "1" + File_TYPE_RIGHT)
+	@Query(FILE_TYPE_LEFT + RelationType.str_IMPLEMENTS + FILE_TYPE_MIDDLE + RelationType.str_IMPLEMENTS +
+			FILE_TYPE_MIDDLE2 + "1" + File_TYPE_RIGHT)
 	void createDependsOnWithImplementsInFiles();
-	@Query(FILE_TYPE_LEFT + RelationType.str_DEPENDENCY + FILE_TYPE_MIDDLE + RelationType.str_DEPENDENCY + FILE_TYPE_MIDDLE2 + "r.times" + File_TYPE_RIGHT)
+	@Query(FILE_TYPE_LEFT + RelationType.str_DEPENDENCY + FILE_TYPE_MIDDLE + RelationType.str_DEPENDENCY +
+			FILE_TYPE_MIDDLE2 + "r.times" + File_TYPE_RIGHT)
 	void createDependsOnWithDependencyInFiles();
-	@Query(FILE_TYPE_LEFT + RelationType.str_ASSOCIATION + FILE_TYPE_MIDDLE + RelationType.str_ASSOCIATION + FILE_TYPE_MIDDLE2 + "r.times" + File_TYPE_RIGHT)
+	@Query(FILE_TYPE_LEFT + RelationType.str_ASSOCIATION + FILE_TYPE_MIDDLE + RelationType.str_ASSOCIATION +
+			FILE_TYPE_MIDDLE2 + "r.times" + File_TYPE_RIGHT)
 	void createDependsOnWithAssociationInFiles();
-	@Query(FILE_TYPE_LEFT + RelationType.str_ANNOTATION + FILE_TYPE_MIDDLE + RelationType.str_ASSOCIATION + FILE_TYPE_MIDDLE2 + "r.times" + File_TYPE_RIGHT)
+	@Query(FILE_TYPE_LEFT + RelationType.str_ANNOTATION + FILE_TYPE_MIDDLE + RelationType.str_ASSOCIATION +
+			FILE_TYPE_MIDDLE2 + "r.times" + File_TYPE_RIGHT)
 	void createDependsOnWithAnnotationInFiles();
 
 	final String FILE_FUNCTION_LEFT = "match (f1:ProjectFile)-[:CONTAIN]->(:Function)-[r: ";
@@ -86,6 +91,16 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 			"create (f1)-[:DEPENDS_ON{dependsOnType: \"";
 	final String FILE_FUNCTION_MIDDLE2 = "\", times : ";
 	final String File_FUNCTION_RIGHT = "}]->(f2);";
+	@Query(FILE_FUNCTION_LEFT + RelationType.str_CALL + FILE_TYPE_MIDDLE + RelationType.str_CALL +
+			FILE_FUNCTION_MIDDLE2 + "1" + File_FUNCTION_RIGHT)
+	void createDependsOnWithFunctionCallInFiles();
+	@Query(FILE_FUNCTION_LEFT + RelationType.str_IMPLLINK + FILE_TYPE_MIDDLE + RelationType.str_IMPLLINK +
+			FILE_FUNCTION_MIDDLE2 + "1" + File_FUNCTION_RIGHT)
+	void createDependsOnWithFunctionImpllinkInFiles();
+	@Query(FILE_FUNCTION_LEFT + RelationType.str_IMPLEMENTS + FILE_TYPE_MIDDLE + RelationType.str_IMPLEMENTS +
+			FILE_FUNCTION_MIDDLE2 + "1" + File_FUNCTION_RIGHT)
+	void createDependsOnWithFunctionImplementsInFiles();
+
 
 	//@Query(FILE_LEFT + RelationType.str_CALL + FILE_RIGHT)
 	//void createDependsOnWithCallInFiles();
@@ -101,8 +116,7 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	//void createDependsOnWithVariableTypeInFiles();
 	//@Query(FILE_LEFT + RelationType.str_ACCESS + FILE_RIGHT)
 	//void createDependsOnWithAccessInFiles();
-	//@Query(FILE_LEFT + RelationType.str_IMPLLINK + FILE_RIGHT)
-	//void createDependsOnWithImpllinkInFiles();
+
 
 	@Query("match (f1:ProjectFile)-[r:DEPENDS_ON]->(f2:ProjectFile) " +
 			"with f1,f2,sum(r.times) as times, " +

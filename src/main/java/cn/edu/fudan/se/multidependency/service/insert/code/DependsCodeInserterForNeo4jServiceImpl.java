@@ -336,8 +336,8 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 				if(type != null) {
 					VariableType variableIsType = new VariableType(variable, type);
 					addRelation(variableIsType);
+					Entity parentTypeEntity = varEntity.getParent();
 					if(!variable.isField()){
-						Entity parentTypeEntity = varEntity.getParent();
 						while (parentTypeEntity != null && parentTypeEntity.getClass() != TypeEntity.class){
 							parentTypeEntity = parentTypeEntity.getParent();
 						}
@@ -347,6 +347,10 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 								Dependency dependency = new Dependency(parentType,type, RelationType.str_VARIABLE_TYPE);
 								addRelation(dependency);
 							}
+						}
+					}else {
+						if (parentTypeEntity != null && parentTypeEntity.getClass() != FileEntity.class){
+							LOGGER.info("Global Var : " + variable.getName() + ":" + type.getName());
 						}
 					}
 				}

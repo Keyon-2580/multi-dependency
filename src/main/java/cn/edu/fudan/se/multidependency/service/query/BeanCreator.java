@@ -92,6 +92,11 @@ public class BeanCreator {
 				dependsOnRepository.createDependsOnWithDependencyInFiles();
 				dependsOnRepository.createDependsOnWithAssociationInFiles();
 				dependsOnRepository.createDependsOnWithAnnotationInFiles();
+
+				dependsOnRepository.createDependsOnWithFunctionCallInFiles();
+				dependsOnRepository.createDependsOnWithFunctionImpllinkInFiles();
+				dependsOnRepository.createDependsOnWithFunctionImplementsInFiles();
+
 				dependsOnRepository.createDependsOnWithTimesInFiles();
 				dependsOnRepository.deleteNullAggregationDependsOnInFiles();
 
