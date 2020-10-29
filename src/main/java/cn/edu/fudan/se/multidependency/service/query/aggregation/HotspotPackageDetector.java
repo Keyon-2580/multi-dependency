@@ -18,6 +18,10 @@ public interface HotspotPackageDetector {
 
 	Collection<HotspotPackage> detectHotspotPackagesByFileCoChangeTimes();
 
+	List<HotspotPackage> detectHotspotPackagesByDependsOnInProject(long projectId);
+
+	HotspotPackage detectHotspotPackagesWithDependsOnByPackageId(long pck1Id, long pck2Id);
+
 	HotspotPackage detectHotspotPackagesByPackageId(long pck1Id, long pck2Id, String language);
 
 	List<HotspotPackage> detectHotspotPackagesByParentId(long parent1Id, long parent2Id, String language);

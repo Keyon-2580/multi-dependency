@@ -30,8 +30,23 @@ public class RelationDataForDoubleNodes<N extends Node , R extends Relation> imp
 
 	private String id;
 
+	private String dependsOnTypes = "";
+
+	private String dependsByTypes = "";
+
+	private int dependsOnTimes = 0;
+
+	private int dependsByTimes = 0;
+
+
 	public RelationDataForDoubleNodes(N node1, N node2) {
 		this(node1, node2, String.join("_", node1.getId().toString(), node2.getId().toString()));
+	}
+
+	public RelationDataForDoubleNodes(N node1, N node2, String dependsOnTypes, String dependsByTypes) {
+		this(node1, node2, String.join("_", node1.getId().toString(), node2.getId().toString()));
+		this.dependsOnTypes = dependsOnTypes;
+		this.dependsByTypes = dependsByTypes;
 	}
 
 	public RelationDataForDoubleNodes(N node1, N node2, String id) {

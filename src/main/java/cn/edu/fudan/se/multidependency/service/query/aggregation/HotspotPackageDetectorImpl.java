@@ -3,11 +3,13 @@ package cn.edu.fudan.se.multidependency.service.query.aggregation;
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.model.relation.clone.ModuleClone;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.AggregationCloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.ModuleCloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
@@ -54,6 +56,9 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 
 	@Autowired
 	private ModuleCloneRepository moduleCloneRepository;
+
+	@Autowired
+	private DependsOnRepository dependsOnRepository;
 
 	private ThreadLocal<Integer> rowKey = new ThreadLocal<>();
 
@@ -318,6 +323,67 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 	public Collection<HotspotPackage> detectHotspotPackagesByFileCoChangeTimes() {
 		return null;
 	}
+
+	@Override
+	public List<HotspotPackage> detectHotspotPackagesByDependsOnInProject(long projectId) {
+		List<HotspotPackage> result = new ArrayList<>();
+		List<DependsOn> projectDependsOn = dependsOnRepository.findPackageDependsInProject(projectId);
+		if(projectDependsOn != null && !projectDependsOn.isEmpty()){
+			Map<Package, List<Package>> packageDependsPackage = new HashMap<>();
+			for (DependsOn dependsOn : projectDependsOn){
+				Package startNode = (Package) dependsOn.getStartNode();
+				Package endNode = (Package) dependsOn.getEndNode();
+				Package pck1 = startNode.getId() < endNode.getId() ? startNode : endNode;
+				Package pck2 = startNode.getId() < endNode.getId() ? endNode : startNode;
+				List<Package> dependsPackage = packageDependsPackage.getOrDefault(pck1, new ArrayList<>());
+				dependsPackage.add(pck2);
+				packageDependsPackage.put(pck1, dependsPackage);
+			}
+			for(Map.Entry<Package, List<Package>> entry : packageDependsPackage.entrySet()){
+				Package pck1 = entry.getKey();
+				List<Package> dependsPackage = entry.getValue();
+				dependsPackage.forEach(pck2 ->{
+					HotspotPackage hotspotPackage = detectHotspotPackagesWithDependsOnByPackageId(pck1.getId(), pck2.getId());
+					result.add(hotspotPackage);
+				});
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public HotspotPackage detectHotspotPackagesWithDependsOnByPackageId(long pck1Id, long pck2Id) {
+		List<DependsOn> packageDependsOnList = dependsOnRepository.findPackageDependsByPackageId(pck1Id, pck2Id);
+		HotspotPackage hotspotPackage = null;
+		if(packageDependsOnList != null && !packageDependsOnList.isEmpty()){
+			Package tmp1 = (Package) packageDependsOnList.get(0).getStartNode();
+			Package tmp2 = (Package) packageDependsOnList.get(0).getEndNode();
+			Package pck1 = tmp1.getId() == pck1Id ? tmp1 : tmp2;
+			Package pck2 = tmp2.getId() == pck2Id ? tmp2 : tmp1;
+
+			String dependsOnStr = "DependsOn: ";
+			String dependsByStr = "DependsOnBy: ";
+			int dependsOnTimes = 0;
+			int dependsByTimes = 0;
+			for (DependsOn dependsOn : packageDependsOnList){
+				if(dependsOn.getStartNode().getId() == pck1Id){
+					dependsOnStr += dependsOn.getDependsOnType();
+					dependsOnTimes += dependsOn.getTimes();
+				}else {
+					dependsByStr += dependsOn.getDependsOnType();
+					dependsByTimes += dependsOn.getTimes();
+				}
+			}
+			RelationDataForDoubleNodes<Node, Relation> dependsOnRelationDataForDoubleNodes = new RelationDataForDoubleNodes(pck1, pck2, dependsOnStr, dependsByStr);
+			dependsOnRelationDataForDoubleNodes.setDependsOnTimes(dependsOnTimes);
+			dependsOnRelationDataForDoubleNodes.setDependsByTimes(dependsByTimes);
+
+			hotspotPackage = new HotspotPackage(dependsOnRelationDataForDoubleNodes);
+		}
+
+		return hotspotPackage;
+	}
+
 
 	@Override
 	public void exportHotspotPackages(OutputStream stream) {

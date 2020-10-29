@@ -61,6 +61,14 @@ public class HotspotPackage {
 	@Getter
 	@Setter
 	private int packageCloneCochangeTimes = 0;
+
+	private String dependsOnTypes = "";
+
+	private String dependsByTypes = "";
+
+	private int dependsOnTimes = 0;
+
+	private int dependsByTimes = 0;
 	
 	public HotspotPackage(@NonNull RelationDataForDoubleNodes<Node, Relation> relationPackages) {
 		this.relationPackages = relationPackages;
@@ -75,6 +83,10 @@ public class HotspotPackage {
 		this.allNodes2 = 0;
 		this.relationNodes1 = 0;
 		this.relationNodes2 = 0;
+		this.dependsOnTypes = relationPackages.getDependsOnTypes();
+		this.dependsByTypes = relationPackages.getDependsByTypes();
+		this.dependsOnTimes = relationPackages.getDependsOnTimes();
+		this.dependsByTimes = relationPackages.getDependsByTimes();
 	}
 
 	public boolean addHotspotChild(HotspotPackage child) {
