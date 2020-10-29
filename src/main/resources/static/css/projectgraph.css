@@ -23,7 +23,7 @@
 }
 
 line {
-    stroke-width: 4px;
+    stroke-width: 3px;
     cursor:pointer;
 }
 
@@ -95,7 +95,7 @@ button {
 .AttributionSelectTitle{
     font-size: 18px;
     font-weight: 500;
-    margin-right: 40px;
+    margin-right: 100px;
 }
 
 .AttributionSelectLabel{

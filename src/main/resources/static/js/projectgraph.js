@@ -1,8 +1,9 @@
-var flag = true;
 var y = 0;
 
-var projectId;
-var jsonLinks_global;
+var cloneLinks_global = [];
+var dependsonLinks_global = [];
+var cochangeLinks_global = [];
+
 var diameter_global;
 var svg_global;
 var g_global;
@@ -12,13 +13,13 @@ var table_global;
 var projectgraph = function () {
     return {
         init : function() {
-            loaddata();
+            loadPageData();
         }
     }
 }
 
 //加载数据
-var loaddata = function () {
+var loadPageData = function () {
     var projectlist = [];
 
     $.ajax({
@@ -49,17 +50,19 @@ var loaddata = function () {
             html += "<div id = \"AttributionSelect\">" +
                 "<form role=\"form\">" +
                 "<p><label class = \"AttributionSelectTitle\">" +
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" name=\"dependency\" value=\"dependson\">DependsOn：" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" name=\"relationtype\" value=\"dependson\">DependsOn：" +
                 "</label>" +
-                "<label class = \"AttributionSelectLabel\"> Times >= " +
-                "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput\" name=\"dependencytimes\" value=\"3\">" +
+                "<label class = \"AttributionSelectLabel\">" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes\" name=\"dependsonTimes\" value=\"dependsontimes\"> Times >= " +
+                "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput\" id=\"dependencytimes\" value=\"3\">" +
                 "</label></p>";
 
             html += "<p><label class = \"AttributionSelectTitle\">" +
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone\" name=\"clone\" value=\"clone\">Clone：" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone\" name=\"relationtype\" value=\"clone\">Clone：" +
                 "</label>" +
 
-                "<input  class = \"AttributionSelectInput\" name=\"similaritybelow\" value=\"0.7\">" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneSimilarity\" name=\"cloneSimilarity\" value=\"clonesimilarity\">" +
+                "<input  class = \"AttributionSelectInput\" id=\"similaritybelow\" value=\"0.7\">" +
 
                 "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectBelow\">" +
                 "<option value=\"<=\" selected = \"selected\"><=</option>" +
@@ -71,21 +74,24 @@ var loaddata = function () {
                 "<option value=\"<=\"><=</option>" +
                 "<option value=\"<\" selected = \"selected\"><</option></select>" +
 
-                "<input  class = \"AttributionSelectInput\" name=\"similarityhigh\" value=\"1\">" +
+                "<input  class = \"AttributionSelectInput\" id=\"similarityhigh\" value=\"1\">" +
 
-                "<label class = \"AttributionSelectLabel\" style = \"margin-left: 80px\">CloneTime >=</label>" +
-                "<input  class = \"AttributionSelectInput\" name=\"clonetime\" value=\"3\">" +
+                "<label class = \"AttributionSelectLabel\" style = \"margin-left: 80px\">" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneTimes\" name=\"cloneTimes\" value=\"clonetimes\">CloneTimes >=</label>" +
+                "<input  class = \"AttributionSelectInput\" id=\"clonetimes\" value=\"3\">" +
                 "</p>";
 
             html += "<p><label class = \"AttributionSelectTitle\">" +
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" name=\"dependency\" value=\"dependson\">Co-change：" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"coChange\" name=\"relationtype\" value=\"cochange\">Co-change：" +
                 "</label>" +
-                "<label class = \"AttributionSelectLabel\"> Times >= " +
-                "<input  id=\"cochangeTimes\" class = \"AttributionSelectInput\" name=\"cochangetimes\" value=\"3\">" +
+                "<label class = \"AttributionSelectLabel\">" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cochangeTimes\" name=\"cochangeTimes\" value=\"cochangetimes\"> Times >= " +
+                "<input  id=\"cochangeTimes\" class = \"AttributionSelectInput\" id=\"cochangetimes\" value=\"3\">" +
                 "</label></p>";
 
             html += "<p><div style=\"margin-top: 10px;\">" +
-                "<button class = \"showLineButton\" id = \"showLineId\" type=\"button\" onclick= showLine()>显示关系</button>" +
+                "<button class = \"showLineButton\" id = \"showLineId\" type=\"button\" onclick= showLineButton()>显示关系</button>" +
+                "<button class = \"clearLineButton\" id = \"clearLineId\" type=\"button\" onclick= clearLink() style = \"margin-left: 30px\">隐藏关系</button>" +
                 "</div></p>" +
                 "</form>" +
                 "</div>";
@@ -135,13 +141,9 @@ var projectGraphAjax = function(projectIds){
 var projectToGraph = function(result,divId){
     // console.log(result);
     var projectdata = result[0].result;
-    var jsonLinks = result[1].links;
-    var table = result[2].table;
-    table_global = table;
-
-    console.log(result);
-
-    jsonLinks_global = jsonLinks;
+    var cloneLinks = result[1].links.clone_links;
+    table_global = result[2].table;
+    cloneLinks_global = cloneLinks;
 
     var svg = d3.select("#" + divId)
             .attr("width", 1500)
@@ -240,8 +242,6 @@ var projectToGraph = function(result,divId){
         circle.attr("r", function(d) {
             return d.r * k;
         });
-
-        drawCloneTableBelow(table_global, "project");
     }
 
     function getCloneRatioByName(data,id){
@@ -268,18 +268,36 @@ var projectToGraph = function(result,divId){
             }
         }
     }
+
+    drawCloneTableBelow(table_global, "project");
 }
 
-//绘制气泡图连线
-var showLine = function(){
-    var jsonLinks_local = jsonLinks_global.concat();
+//根据筛选规则绘制气泡图连线
+var showLine = function(links_local, type){
+    if(type === "project"){
+        if($("#dependsOn").prop("checked")){
+            links_local = links_local.concat(dependsonLinks_global);
+        }
+        if($("#clone").prop("checked")){
+            links_local = links_local.concat(cloneLinks_global);
+        }
+        if($("#coChange").prop("checked")){
+            links_local = links_local.concat(cochangeLinks_global);
+        }
+    }
+
+    console.log(links_local);
     var temp_delete_number = 0;
 
-    for(var i = jsonLinks_local.length; i > 0; i--){
-        var source_project = jsonLinks_local[i - 1].source_projectBelong.split("_")[1];
-        var target_project = jsonLinks_local[i - 1].target_projectBelong.split("_")[1];
+    for(var i = links_local.length; i > 0; i--){
+        var source_project = links_local[i - 1].source_projectBelong.split("_")[1];
+        var target_project = links_local[i - 1].target_projectBelong.split("_")[1];
+        var relation_type = links_local[i - 1].type;
+
         var temp_flag_source = false;
         var temp_flag_target = false;
+        var temp_flag_clonesimilarity = false;
+        var temp_flag_clonetimes = false;
 
         for(var j = 0; j < projectList_global.length; j++){
             if(source_project === projectList_global[j]){
@@ -293,26 +311,48 @@ var showLine = function(){
             }
         }
 
-        if(temp_flag_source === false || temp_flag_target === false){
-            jsonLinks_local.splice(i - 1, 1);
+        if(relation_type === "clone"){
+            if($("#cloneSimilarity").prop("checked")){
+                console.log($("#similaritybelow").attr("value"));
+                console.log($("#similaritybelow").val());
+                if($("#similarityCompareSelectBelow").val() === "<=" &&
+                    links_local[i - 1].similarityValue >= $("#similaritybelow").val()){
+                    if($("#similarityCompareSelectHigh").val() === "<=" &&
+                        links_local[i - 1].similarityValue <= $("#similarityhigh").val()){
+                        temp_flag_clonesimilarity = true;
+                    }else if($("#similarityCompareSelectHigh").val() === "<" &&
+                        links_local[i - 1].similarityValue < $("#similarityhigh").val()){
+                        temp_flag_clonesimilarity = true;
+                    }
+                }else if($("#similarityCompareSelectBelow").val() === "<" &&
+                    links_local[i - 1].similarityValue > $("#similaritybelow").val()){
+                    if($("#similarityCompareSelectHigh").val() === "<=" &&
+                        links_local[i - 1].similarityValue <= $("#similarityhigh").val()){
+                        temp_flag_clonesimilarity = true;
+                    }else if($("#similarityCompareSelectHigh").val() === "<" &&
+                        links_local[i - 1].similarityValue < $("#similarityhigh").val()){
+                        temp_flag_clonesimilarity = true;
+                    }
+                }
+            }
+
+            if($("#cloneTimes").prop("checked") && links_local[i - 1].similarityValue >= $("#clonetimes").val()){
+                temp_flag_clonetimes = true;
+            }
+        }
+
+        if(temp_flag_source === false || temp_flag_target === false
+            || temp_flag_clonesimilarity === false || temp_flag_clonetimes === false){
+            links_local.splice(i - 1, 1);
             temp_delete_number++;
         }
     }
-
-    // console.log(jsonLinks_local);
-    if(typeof(jsonLinks_local) !== "undefined" && (temp_delete_number !== jsonLinks_global.length)){
-        if(flag){
-            drawLink(jsonLinks_local);
-            document.getElementById("showLineId").innerHTML = "隐藏关系";
-        }else{
-            clearLink();
-            document.getElementById("showLineId").innerHTML = "显示关系";
-        }
-    }
+    drawLink(links_local);
 }
 
     // .attr("class", "packageLink")
 function drawLink(jsonLinks) {
+    var svg1 = d3.select(".packageLink") .remove();
     var circleCoordinate = [];
     // console.log(jsonLinks);
     var links = svg_global.append('g')
@@ -331,7 +371,7 @@ function drawLink(jsonLinks) {
         .attr("onclick", function(d){
             source_id = d.source_id.split("_")[1];
             target_id = d.target_id.split("_")[1];
-            return "drawChildrenLinks(\"" + source_id + "\", \"" + target_id + "\")";
+            return "drawChildrenCloneLinks(\"" + source_id + "\", \"" + target_id + "\")";
         })
         .call(text => text.append("title").text(function(d) {
             return "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\nsimilarityValue: " + d.similarityValue
@@ -405,7 +445,6 @@ function drawLink(jsonLinks) {
         temp_coordinate["y1"] = y1;
         temp_coordinate["x2"] = x2;
         temp_coordinate["y2"] = y2;
-        console.log(temp_coordinate["x1"])
         circleCoordinate.push(temp_coordinate);
     })
 
@@ -444,7 +483,7 @@ function drawLink(jsonLinks) {
             return getTranslateY2(d.source_id, d.target_id) + diameter_global / 2;
         });
 
-    flag = false;
+    // flag = false;
 }
 
 function clearLink(){
@@ -454,11 +493,11 @@ function clearLink(){
         .style("stroke-width","")
     var svg1 = d3.select(".packageLink") .remove();
 
-    flag = true;
+    // flag = true;
 }
 
 //点击连线，获取子包关系,绘制图下方表格
-function drawChildrenLinks(package1Id, package2Id){
+function drawChildrenCloneLinks(package1Id, package2Id){
     $.ajax({
         type : "GET",
         url : "/project/has/childrenlinks?package1Id=" + package1Id + "&package2Id=" + package2Id,
@@ -466,7 +505,7 @@ function drawChildrenLinks(package1Id, package2Id){
             console.log(result);
             if(result.children_graphlinks.length > 0){
                 clearLink();
-                drawLink(result.children_graphlinks);
+                showLine(result.children_graphlinks, "package");
                 drawCloneTableBelow(result.table,"package");
             }
         }
@@ -497,8 +536,6 @@ function drawCloneTableBelow(tableData, type){
             var temp_flag_target = false;
 
             for(var j = 0; j < projectList_global.length; j++){
-                // console.log(source_project);
-                // console.log(projectList_global[j]);
                 if(source_project === projectList_global[j]){
                     temp_flag_source = true;
                 }
@@ -606,6 +643,10 @@ function drawCloneTableBelow(tableData, type){
     $("#projectCloneTable").html(html);
 }
 
+var showLineButton = function(){
+    var temp_links = [];
+    showLine(temp_links,"project");
+}
 
 
 

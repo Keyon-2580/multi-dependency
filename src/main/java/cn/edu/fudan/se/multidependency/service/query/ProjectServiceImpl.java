@@ -83,9 +83,11 @@ public class ProjectServiceImpl implements ProjectService{
         result.add(nodeJSON2);
 
         if(showType.equals("graph")) {
-            JSONObject temp_allprojects = getAllProjectsLinks();
+            JSONObject temp_allprojects = getAllProjectsCloneLinks();
             JSONObject temp = new JSONObject();
-            nodeJSON4.put("links",temp_allprojects.getJSONArray("children_graphlinks"));
+            JSONObject clone_links = new JSONObject();
+            clone_links.put("clone_links",temp_allprojects.getJSONArray("children_graphlinks"));
+            nodeJSON4.put("links", clone_links);
             temp.put("table",temp_allprojects.getJSONObject("table"));
             result.add(nodeJSON4);
             result.add(temp);
@@ -180,10 +182,10 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
-    public JSONObject getAllProjectsLinks(){
+    public JSONObject getAllProjectsCloneLinks(){
         List<HotspotPackage> hotspotPackageList = hotspotPackageDetector.detectHotspotPackagesByParentId(-1, -1, "all");
         System.out.println("hotspotPackageList " + hotspotPackageList);
-        return hotspotPackagesToJson(hotspotPackageList,new HotspotPackage(), "project");
+        return hotspotPackagesToCloneJson(hotspotPackageList,new HotspotPackage(), "project");
     }
 
     @Override
@@ -193,11 +195,11 @@ public class ProjectServiceImpl implements ProjectService{
 //        Collection<HotspotPackage> childrenHotspotPackages2 = parentHotspotPackage.getChildrenHotspotPackages();
 //        System.out.println(childrenHotspotPackages2);
 //        System.out.println(parentHotspotPackage.getPackage2());
-        return hotspotPackagesToJson(childrenHotspotPackages, parentHotspotPackage, "package");
+        return hotspotPackagesToCloneJson(childrenHotspotPackages, parentHotspotPackage, "package");
     }
 
 
-    private JSONObject hotspotPackagesToJson(List<HotspotPackage> hotspotPackageList,HotspotPackage parentHotspotPackage, String type){
+    private JSONObject hotspotPackagesToCloneJson(List<HotspotPackage> hotspotPackageList, HotspotPackage parentHotspotPackage, String type){
         JSONObject result = new JSONObject();
 
         JSONArray graph_links = new JSONArray();
@@ -215,6 +217,7 @@ public class ProjectServiceImpl implements ProjectService{
             Project source_projectBelong = containRelationService.findPackageBelongToProject(hotspotPackage.getPackage1());
             Project target_projectBelong = containRelationService.findPackageBelongToProject(hotspotPackage.getPackage2());
 
+            link.put("type", "clone");
             link.put("source_id", "id_" + hotspotPackage.getPackage1().getId().toString());
             link.put("target_id", "id_" + hotspotPackage.getPackage2().getId().toString());
             link.put("source_name", hotspotPackage.getPackage1().getDirectoryPath());
