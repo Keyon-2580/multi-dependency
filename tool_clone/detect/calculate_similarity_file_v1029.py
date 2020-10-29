@@ -311,8 +311,6 @@ def calc_clone_group_similarity_values(measures, measure_indecies, state, is_sma
     return clone_group_similarity_value
 
 
-
-
 def process():
     """计算每个克隆组中每个克隆实例之间的相似度"""
     global token_data_folder, start_offset, measure_index_file
@@ -321,10 +319,10 @@ def process():
     clone_groups = init_clone_groups()
     state = init_state()
 
+    clone_similarity_values = list()
+
     print('calc clone_similarity for less than 30 token files:\n')
     small_clone_group = get_small_file_clone_group(measures, measure_indecies, state)
-
-    clone_similarity_values = list()
     is_small_file = True
     print('cal_small_file_clonec, size: %d\n' % len(small_clone_group))
     clone_similarity_values += calc_clone_group_similarity_values(measures, measure_indecies, state, is_small_file, small_clone_group)
