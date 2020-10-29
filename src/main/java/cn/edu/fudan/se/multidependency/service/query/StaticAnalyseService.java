@@ -120,9 +120,13 @@ public interface StaticAnalyseService {
 	boolean isDependsOn(ProjectFile file1, ProjectFile file2);
 	
 	Map<Package, List<DependsOn>> findPackageDependsOn(Project project);
+
+	Map<Package, List<DependsOn>> findPackageDependsOnBy(Project project);
 	
 	Map<ProjectFile, List<DependsOn>> findFileDependsOn(Project project);
-	
+
+	Map<ProjectFile, List<DependsOn>> findFileDependsOnBy(Project project);
+
 	Collection<DependsOn> findFileDependsOn(ProjectFile file);
 	
 	Collection<DependsOn> findFileDependedOnBy(ProjectFile file);
