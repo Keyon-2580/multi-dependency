@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.ar.Module;
 import cn.edu.fudan.se.multidependency.repository.as.ModuleRepository;
@@ -22,6 +23,15 @@ public class ModuleService {
 	@Autowired
 	private StaticAnalyseService staticAnalyseService;
 	
+	public Project findModuleBelongToProject(Module module) {
+		if(cache.findNodeBelongToNode(module, NodeLabelType.Project) != null) {
+			return (Project) cache.findNodeBelongToNode(module, NodeLabelType.Project);
+		}
+		Project result = moduleRepository.findModuleBelongToProject(module.getId());
+		cache.cacheNodeBelongToNode(module, result);
+		return result;
+	}
+	
 	public Module findFileBelongToModule(ProjectFile file) {
 		if(cache.findNodeBelongToNode(file, NodeLabelType.Module) != null) {
 			return (Module) cache.findNodeBelongToNode(file, NodeLabelType.Module);
@@ -36,9 +46,7 @@ public class ModuleService {
 	}
 	
 	public boolean isInDependence(ProjectFile file1, ProjectFile file2) {
-		Module module1 = findFileBelongToModule(file1);
-		Module module2 = findFileBelongToModule(file2);
-		if(module1.equals(module2)) {
+		if(!isInDifferentModule(file1, file2)) {
 			return false;
 		}
 		return !(staticAnalyseService.isDependsOn(file1, file2) || staticAnalyseService.isDependsOn(file2, file1));

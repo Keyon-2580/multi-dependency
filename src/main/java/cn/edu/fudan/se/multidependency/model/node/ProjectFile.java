@@ -39,6 +39,8 @@ public class ProjectFile extends CodeUnit {
 	private double score = -1;
     
     private String language;
+    
+    private double instability;
 	
 	public int getStartLine() {
 		return 1;

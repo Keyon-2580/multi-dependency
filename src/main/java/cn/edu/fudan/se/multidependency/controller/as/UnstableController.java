@@ -33,7 +33,7 @@ public class UnstableController {
 		request.setAttribute("projects", nodeService.allProjects());
 		request.setAttribute("filesUsingInstability", unstableDependencyDetectorUsingInstability.unstableFiles());
 		request.setAttribute("filesUsingHistory", unstableDependencyDetectorUsingHistory.unstableFiles());
-		request.setAttribute("packages", unstableDependencyDetectorUsingInstability.unstablePackages());
+//		request.setAttribute("packages", unstableDependencyDetectorUsingInstability.unstablePackages());
 		request.setAttribute("modules", unstableDependencyDetectorUsingInstability.unstableModules());
 		return "as/unstable";
 	}

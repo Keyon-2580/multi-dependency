@@ -29,7 +29,7 @@ public class HubLikeController {
 	public String hubLike(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
 		request.setAttribute("files", hubLikeComponentDetector.hubLikeFiles());
-		request.setAttribute("packages", hubLikeComponentDetector.hubLikePackages());
+		request.setAttribute("modules", hubLikeComponentDetector.hubLikeModules());
 		return "as/hublike";
 	}
 	
@@ -42,11 +42,11 @@ public class HubLikeController {
 			return result;
 		}
 		int[] minFileIO = hubLikeComponentDetector.getProjectMinFileFanIO(project);
-		int[] minPackageIO = hubLikeComponentDetector.getProjectMinPackageFanIO(project);
+		int[] minModuleIO = hubLikeComponentDetector.getProjectMinModuleFanIO(project);
 		result[0] = minFileIO[0];
 		result[1] = minFileIO[1];
-		result[2] = minPackageIO[0];
-		result[3] = minPackageIO[1];
+		result[2] = minModuleIO[0];
+		result[3] = minModuleIO[1];
 		return result;
 	}
 
@@ -54,13 +54,13 @@ public class HubLikeController {
 	@ResponseBody
 	public boolean hublike(@PathVariable("projectId") long projectId, 
 			@RequestParam("hubLikeMinFileFanIn") int hubLikeMinFileFanIn, @RequestParam("hubLikeMinFileFanOut") int hubLikeMinFileFanOut, 
-			@RequestParam("hubLikeMinPackageFanIn") int hubLikeMinPackageFanIn, @RequestParam("hubLikeMinPackageFanOut") int hubLikeMinPackageFanOut) {
+			@RequestParam("hubLikeMinModuleFanIn") int hubLikeMinModuleFanIn, @RequestParam("hubLikeMinModuleFanOut") int hubLikeMinModuleFanOut) {
 		Project project = nodeService.queryProject(projectId);
 		if(project == null) {
 			return false;
 		}
 		hubLikeComponentDetector.setProjectMinFileFanIO(project, hubLikeMinFileFanIn, hubLikeMinFileFanOut);
-		hubLikeComponentDetector.setProjectMinPackageFanIO(project, hubLikeMinPackageFanIn, hubLikeMinPackageFanOut);
+		hubLikeComponentDetector.setProjectMinModuleFanIO(project, hubLikeMinModuleFanIn, hubLikeMinModuleFanOut);
 		return true;
 	}
 	

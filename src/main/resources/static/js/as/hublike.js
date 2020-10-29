@@ -1,5 +1,5 @@
 var hublike = function(cytoscapeutil) {
-	var _hublike = function(projects, files, packages) {
+	var _hublike = function(projects, files, modules) {
 		var html = "";
 
 		for(var projectIndex in projects) {
@@ -22,19 +22,19 @@ var hublike = function(cytoscapeutil) {
 				html += "</tr>";
 			}
 			
-			var hubLikePackages = packages[project.id];
+			var hubLikeModules = modules[project.id];
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
-			html += "<th width='50%'>Package</th>";
+			html += "<th width='50%'>Module</th>";
 			html += "<th width='25%'>Ca（afferent couplings）</th>";
 			html += "<th width='25%'>Ce（efferent couplings）</th>";
 			html += "</tr>";
-			for(var packageIndex in hubLikePackages) {
-				var pck = hubLikePackages[packageIndex];
+			for(var moduleIndex in hubLikeModules) {
+				var module = hubLikeModules[moduleIndex];
 				html += "<tr>";
-				html += "<td>" + pck.pck.directoryPath + "</td>";
-				html += "<td>" + pck.fanIn + "</td>";
-				html += "<td>" + pck.fanOut + "</td>";
+				html += "<td>" + module.module.name + "</td>";
+				html += "<td>" + module.fanIn + "</td>";
+				html += "<td>" + module.fanOut + "</td>";
 				html += "</tr>";
 			}
 			html += "</table>";

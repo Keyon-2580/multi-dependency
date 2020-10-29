@@ -30,14 +30,20 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 			"RETURN pck, loc, lines, nof, nom, fanIn, fanOut order by(pck.directoryPath) desc;")
 	public List<PackageMetrics> calculatePackageMetrics();
 	
-	@Query("match (pck:Package)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) with pck, sum(file.loc) as loc set pck.loc = loc;")
+	/*@Query("match (pck:Package)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) with pck, sum(file.loc) as loc set pck.loc = loc;")
 	public void setPackageLoc();
 	
 	@Query("match (pck:Package)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) with pck, sum(file.endLine) as lines set pck.lines = lines;")
-	public void setPackageLines();
+	public void setPackageLines();*/
 	
-	@Query("match (pck:Package) where not (pck)-[:CONTAIN]->(:ProjectFile) set pck.loc = 0, pck.lines = 0;")
-	public void setEmptyPackageLocAndLines();
+	@Query("match (pck:Package)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) "
+			+ "with pck, sum(file.endLine) as lines , sum(file.loc) as loc set pck.lines = lines, pck.loc = loc "
+			+ "with pck, size((pck)-[:CONTAIN]->(:ProjectFile)) as size set pck.size = size;")
+	public void setPackageLocAndLinesAndSize();
+	
+	
+	@Query("match (pck:Package) where not (pck)-[:CONTAIN]->(:ProjectFile) set pck.loc = 0, pck.lines = 0, pck.size = 0;")
+	public void setEmptyPackageLocAndLinesAndSize();
 	
 	/**
 	 * 目录下有多少子包

@@ -4,32 +4,29 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
-import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
-import cn.edu.fudan.se.multidependency.repository.node.clone.CloneGroupRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.clone.AggregationCloneRepository;
-import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
-import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
-import org.apache.catalina.Host;
-import org.neo4j.cypher.internal.v3_4.expressions.Add;
-import org.springframework.stereotype.Component;
-import org.springframework.context.annotation.Bean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.config.PropertyConfig;
 import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
-import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.model.relation.clone.ModuleClone;
+import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.clone.CloneGroupRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.clone.AggregationCloneRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.clone.ModuleCloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.clone.ModuleCloneRepository;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.clone.CloneValueService;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueForDoubleNodes;
@@ -74,7 +71,7 @@ public class BeanCreator {
 	@Bean("createDependsOn")
 	public List<DependsOn> createDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, ProjectFileRepository fileRepository) {
 		if(propertyConfig.isCalculateDependsOn()) {
-			System.out.println("创建Depends On关系...");
+			System.out.println("分别创建Type、File和Package之间的Depends On关系...");
 			dependsOnRepository.deleteAll();
 			
 			dependsOnRepository.createDependsOnWithCallInTypes();
@@ -139,10 +136,9 @@ public class BeanCreator {
 	
 	@Bean
 	public boolean setPackageLoSc(PackageRepository packageRepository) {
-		System.out.println("计算Package总代码行...");
-		packageRepository.setEmptyPackageLocAndLines();
-		packageRepository.setPackageLoc();
-		packageRepository.setPackageLines();
+		System.out.println("计算Package内文件数、总行数与总代码行...");
+		packageRepository.setEmptyPackageLocAndLinesAndSize();
+		packageRepository.setPackageLocAndLinesAndSize();
 		return true;
 	}
 

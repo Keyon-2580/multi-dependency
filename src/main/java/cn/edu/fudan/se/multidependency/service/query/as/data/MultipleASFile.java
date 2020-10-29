@@ -30,6 +30,8 @@ public class MultipleASFile implements MultipleAS {
 //	private boolean god;
 	
 	private boolean unused;
+	
+	private boolean unutilized;
 
 	private static String toString(boolean b) {
 		return b ? "T" : "";
@@ -38,6 +40,9 @@ public class MultipleASFile implements MultipleAS {
 //	public String godToString() {
 //		return toString(this.god);
 //	}
+	public String unutilizedToString() {
+		return toString(this.unutilized);
+	}
 	
 	public String cycleToString() {
 		return toString(this.cycle);
@@ -90,6 +95,9 @@ public class MultipleASFile implements MultipleAS {
 			return true;
 		}
 		if(smell.isUnused() && isUnused()) {
+			return true;
+		}
+		if(smell.isUnutilized() && isUnutilized()) {
 			return true;
 		}
 		return false;

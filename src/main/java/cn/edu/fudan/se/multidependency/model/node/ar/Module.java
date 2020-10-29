@@ -23,7 +23,7 @@ public class Module implements Node {
     private Long id;
 
     private String name;
-
+    
     private Long entityId;
 
     @Override

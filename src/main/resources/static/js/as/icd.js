@@ -11,8 +11,8 @@ var icd = function(cytoscapeutil) {
 			var file = files[fileIndex];
 			console.log(file);
 			html += "<tr>";
-			html += "<td width='40%'><a href='/relation/file/" + file.file1.id + "' target='_blank'>" + file.file1.path + "</a></td>";
-			html += "<td width='40%'><a href='/relation/file/" + file.file2.id + "' target='_blank'>" + file.file2.path + "</a></td>";
+			html += "<td width='40%'><a href='/relation/file/" + file.node1.id + "' target='_blank'>" + file.node1.path + "</a></td>";
+			html += "<td width='40%'><a href='/relation/file/" + file.node2.id + "' target='_blank'>" + file.node2.path + "</a></td>";
 			html += "<td width='20%'>" + file.cochangeTimes + "</td>";
 			html += "</tr>";
 		}

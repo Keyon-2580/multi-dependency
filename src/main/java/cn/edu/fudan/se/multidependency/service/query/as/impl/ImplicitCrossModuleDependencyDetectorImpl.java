@@ -13,7 +13,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepositor
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.as.ImplicitCrossModuleDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.ModuleService;
-import cn.edu.fudan.se.multidependency.service.query.as.data.LogicCouplingFiles;
+import cn.edu.fudan.se.multidependency.service.query.as.data.LogicCouplingComponents;
 
 @Service
 public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossModuleDependencyDetector {
@@ -28,16 +28,17 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 	private ModuleService moduleService;
 
 	@Override
-	public Collection<LogicCouplingFiles> cochangesInDifferentModule() {
+	public Collection<LogicCouplingComponents<ProjectFile>> cochangesInDifferentModule() {
 		String key = "cochangesInDifferentModule";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
 		Collection<CoChange> cochangesWithOutDependsOn = cochangeRepository.findGreaterThanCountCoChanges(getMinCoChange());
-		List<LogicCouplingFiles> result = new ArrayList<>();
+		List<LogicCouplingComponents<ProjectFile>> result = new ArrayList<>();
 		for(CoChange cochange : cochangesWithOutDependsOn) {
+			// 两个文件在不同的模块，并且两个文件之间没有依赖关系
 			if(moduleService.isInDependence((ProjectFile) cochange.getNode1(), (ProjectFile) cochange.getNode2())) {
-				result.add(new LogicCouplingFiles((ProjectFile) cochange.getNode1(), (ProjectFile) cochange.getNode2(), cochange.getTimes()));
+				result.add(new LogicCouplingComponents<ProjectFile>((ProjectFile) cochange.getNode1(), (ProjectFile) cochange.getNode2(), cochange.getTimes()));
 			}
 		}
 		cache.cache(getClass(), key, result);

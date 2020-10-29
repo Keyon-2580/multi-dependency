@@ -81,7 +81,8 @@
 			var projects = [[${projects}]];
 			var cyclicFiles = [[${files}]];
 			var cyclicPackages = [[${packages}]];
-			cyclic(cytoscapeutil()).cyclic(projects, cyclicFiles, cyclicPackages);	
+			var cyclicModules = [[${modules}]];
+			cyclic(cytoscapeutil()).cyclic(projects, cyclicFiles, cyclicPackages, cyclicModules);	
 		});
 		// ]]>
 	</script>

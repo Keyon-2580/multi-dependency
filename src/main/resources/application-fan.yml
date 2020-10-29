@@ -18,6 +18,9 @@ config:
    starter:
       cochange: false
       depends_on: false
+      clone_group: false
+      module_clone: false
+      aggregation_clone: false
 
 data:
 #   project_config: src/main/resources/project/simpletest.json
@@ -28,17 +31,19 @@ data:
 #   project_config: src/main/resources/project/google_fdse_guava_fan.json
 #   project_config: src/main/resources/project/cassandra_fan.json
 #   project_config: src/main/resources/project/guava_version_fan_solo.json
-#   project_config: src/main/resources/project/fastjson_version_fan.json
+   project_config: src/main/resources/project/fan/fastjson_version_fan.json
+#   project_config: src/main/resources/project/fan/fastjson_fan.json
+#   project_config: src/main/resources/project/fan/halo_fan.json
 #   project_config: D:/git/multi-dependency/src/main/resources/project/fastjson-1.2.31.json
-   project_config: D:/git/multi-dependency/src/main/resources/project/multiple-dependency.json
+#   project_config: D:/git/multi-dependency/src/main/resources/project/multiple-dependency.json
 #   project_config: src/main/resources/project/fastjson_version_fan2.json
 #   project_config: src/main/resources/project/depends_fan.json
 #   project_config: src/main/resources/project/depends_fan2.json
    project_analyse_threads_count: 10
    dynamic_analyse: false
-   git_analyse: false
+   git_analyse: true
    lib_analyse: false
-   clone_analyse: false
+   clone_analyse: true
    neo4j:
       delete: true
       # batchInserter要插入的数据库
@@ -48,10 +53,10 @@ data:
 #      path: D:/neo4j-community-3.5.16/data/databases/multiple.dependency-fastjson.db
 #      path: D:/neo4j-community-3.5.16/data/databases/multiple.dependency.depends.versions.db
       
-#   serialize_path: D:/multiple-dependency-project/RepositoryService.txt
+   serialize_path: D:/multiple-dependency-project/RepositoryService.txt
 #   serialize_path: D:/multiple-dependency-project/RepositoryService-google.txt
 #   serialize_path: D:/multiple-dependency-project/RepositoryService-depends-versions.txt
 #   serialize_path: D:/multiple-dependency-project/RepositoryService-cassandra.txt
-   serialize_path: D:/multiple-dependency-project/RepositoryService-fastjson.txt
-    
+#   sericalize_path: D:/multiple-dependency-project/RepositoryService-fastjson.txt
+#    
    test: this property is for YamlUtilsTest

@@ -26,6 +26,10 @@ public class UnstableComponentByInstability<T extends Node> extends UnstableComp
 		this.badDependsOns.addAll(badDependsOns);
 	}
 	
+	public void addBadDependency(DependsOn badDependsOns) {
+		this.badDependsOns.add(badDependsOns);
+	}
+	
 	public void addAllTotalDependencies(Collection<DependsOn> totalDependsOns) {
 		this.totalDependsOns.addAll(totalDependsOns);
 	}

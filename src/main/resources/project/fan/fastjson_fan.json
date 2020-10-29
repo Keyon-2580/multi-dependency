@@ -1,14 +1,14 @@
 {
 	"projects": [{
-		"path": "D:\\git\\article\\fastjson-1.2.62",
+		"path": "D:\\git\\article\\fastjson-1.2.56",
 		"language": "java"
 	}],
 	"gits": [{
-		"path": "D:\\git\\fastjson-1.2.56",
+		"path": "D:\\git\\article\\fastjson-1.2.56",
 		"specify_commit_range": true,
 		"specify_by_commit_id": true,
-		"commit_id_from" : "00bbb28bf0bdc9bb39dc0f26c0da7fc5875573d1",
-		"commit_id_to" : "f164d8519ff061baac6f8d58a5a1b88c2afab00e",
+		"commit_id_from" : "03d77b6e629b6ff825a1c8cc3f7cbba7feb98395",
+		"commit_id_to" : "036012f292f9cb81e051551c3647d3ef83659d84",
 		"commit_id_current" : "e44c60347298924c588012c9cf158f3e3eb993f6",
 		"issues_directory" : "D:\\git\\multi-dependency\\src\\main\\resources\\git\\issues\\fastjson"
  	}],

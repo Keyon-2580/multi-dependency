@@ -1,5 +1,5 @@
 var unstable = function(cytoscapeutil) {
-	var _unstable = function(projects, filesUsingInstability, filesUsingHistory, packages) {
+	var _unstable = function(projects, filesUsingInstability, filesUsingHistory, modules) {
 		var html = "";
 
 		for(var projectIndex in projects) {
@@ -14,6 +14,7 @@ var unstable = function(cytoscapeutil) {
 			html += "<th>Instability</th>";
 			html += "<th>All Outgoing Dependencies</th>";
 			html += "<th>Bad Outgoing Dependencies</th>";
+			html += "<th></th>";
 			html += "</tr>";
 			for(var fileIndex in unstableFiles) {
 				var file = unstableFiles[fileIndex];
@@ -23,6 +24,14 @@ var unstable = function(cytoscapeutil) {
 				html += "<td>" + file.instability.toFixed(2) + "</td>";
 				html += "<td>" + file.allDependencies + "</td>";
 				html += "<td>" + file.badDependencies + "</td>";
+				
+				var allFilesIds = file.component.id;
+				console.log(file.badDependsOns);
+				for(var j = 0; j < file.badDependsOns.length; j++) {
+					allFilesIds += "," + file.badDependsOns[j].endNode.id;
+				}
+				
+				html += "<td>" + "<a target='_blank' href='/as/matrix?allFiles=" + allFilesIds + "&specifiedFiles=" + file.component.id + "&minCount=2'>commits</a>" + "</td>";
 				html += "</tr>";
 			}
 			html += "</table>";
@@ -33,7 +42,8 @@ var unstable = function(cytoscapeutil) {
 			html += "<th>File</th>";
 			html += "<th>Fan In</th>";
 			html += "<th>Co-change Files</th>";
-			html += "<th>Co-change Times</th>";
+//			html += "<th>Co-change Times</th>";
+			html += "<th>commits</th>";
 			html += "</tr>";
 			for(var fileIndex in unstableFiles) {
 				var file = unstableFiles[fileIndex];
@@ -46,16 +56,44 @@ var unstable = function(cytoscapeutil) {
 				html += "<td width='50%'><a target='_blank' href='/relation/file/" + file.component.id + "'>" + file.component.path + "</a></td>";
 				html += "<td width='20%'>" + file.fanIn + "</td>";
 				html += "<td width='10%'>" + file.cochangeFiles.length + "</td>";
-				html += "<td width='10%'>" + count + "</td>";
+//				html += "<td width='10%'>" + count + "</td>";
+				
+				var allFilesIds = file.component.id;
+				for(var j = 0; j < file.cochangeFiles.length; j++) {
+					allFilesIds += "," + file.cochangeFiles[j].id;
+				}
+				
+				html += "<td>" + "<a target='_blank' href='/as/matrix?allFiles=" + allFilesIds + "&specifiedFiles=" + file.component.id + "&minCount=2'>commits</a>" + "</td>";
+				
 				html += "</tr>";
 			}
 			html += "</table>";
 			
-			var unstablePackages = packages[project.id];
+			/*var unstablePackages = packages[project.id];
 			html += "<h5>Unstable Packages</h5>";
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
 			html += "<th>Package</th>";
+			html += "<th>Instability</th>";
+			html += "<th>All Outgoing Dependencies</th>";
+			html += "<th>Bad Outgoing Dependencies</th>";
+			html += "</tr>";
+			for(var pckIndex in unstablePackages) {
+				var pck = unstablePackages[pckIndex];
+				console.log(pck);
+				html += "<tr>";
+				html += "<td><a target='_blank' href='/relation/file/" + pck.component.id + "'>" + pck.component.name + "</a></td>";
+				html += "<td>" + pck.instability.toFixed(2) + "</td>";
+				html += "<td>" + pck.allDependencies + "</td>";
+				html += "<td>" + pck.badDependencies + "</td>";
+				html += "</tr>";
+			}
+			html += "</table>";*/
+			var unstablePackages = modules[project.id];
+			html += "<h5>Unstable Modules</h5>";
+			html += "<table class='table table-bordered'>";
+			html += "<tr>";
+			html += "<th>Module</th>";
 			html += "<th>Instability</th>";
 			html += "<th>All Outgoing Dependencies</th>";
 			html += "<th>Bad Outgoing Dependencies</th>";
@@ -167,8 +205,8 @@ var unstable = function(cytoscapeutil) {
 			_save();
 			_get();
 		},
-		unstable: function(projects, files, unstablePackages, packages) {
-			_unstable(projects, files, unstablePackages, packages);
+		unstable: function(projects, filesUsingInstability, filesUsingHistory, modules) {
+			_unstable(projects, filesUsingInstability, filesUsingHistory, modules);
 		}
 	}
 }

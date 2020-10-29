@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
+import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.as.ModuleService;
 import cn.edu.fudan.se.multidependency.service.query.as.SimilarComponentsDetector;
@@ -40,6 +42,9 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 	
 	@Autowired
 	private GitAnalyseService gitAnalyseService;
+	
+	@Autowired
+	private DependsOnRepository dependsOnRepository;
 	
 	@Autowired
 	private MetricCalculator metricCalculator;
@@ -72,6 +77,14 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 			temp.setModule1(moduleService.findFileBelongToModule(file1));
 			temp.setModule2(moduleService.findFileBelongToModule(file2));
 			temp.setCloneType(clone.getFileClone().getCloneType());
+			Collection<DependsOn> file1DependsOns = dependsOnRepository.findFileDependsOn(file1.getId());
+			Collection<DependsOn> file2DependsOns = dependsOnRepository.findFileDependsOn(file2.getId());
+			for(DependsOn file1DependsOn : file1DependsOns) {
+				temp.addNode1DependsOn(file1DependsOn.getEndNode());
+			}
+			for(DependsOn file2DependsOn : file2DependsOns) {
+				temp.addNode2DependsOn(file2DependsOn.getEndNode());
+			}
 			result.add(temp);
 		}
 		cache.cache(getClass(), key, result);

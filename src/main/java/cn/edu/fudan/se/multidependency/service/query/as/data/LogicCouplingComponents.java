@@ -1,16 +1,16 @@
 package cn.edu.fudan.se.multidependency.service.query.as.data;
 
-import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class LogicCouplingFiles {
+public class LogicCouplingComponents<T extends Node> {
 	
-	private ProjectFile file1;
+	private T node1;
 	
-	private ProjectFile file2;
+	private T node2;
 	
 	private int cochangeTimes;
 }

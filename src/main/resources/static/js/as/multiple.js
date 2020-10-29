@@ -8,6 +8,8 @@ var multiple = function(projects, files, cytoscapeutil) {
 //			hierarchy: false,
 //			godComponent: false,
 			unused: true
+			,
+			unutilized: false
 	}
 	
 	function paramToRequestParam() {
@@ -18,7 +20,8 @@ var multiple = function(projects, files, cytoscapeutil) {
 			"&unstable=" + param.unstable + 
 //			"&hierarchy=" + param.hierarchy + 
 //			"&godComponent=" + param.godComponent + 
-			"&unused=" + param.unused;
+			"&unused=" + param.unused + 
+			"&unutilized=" + param.unutilized;
 		return str;
 	}
 	
@@ -234,8 +237,9 @@ var multiple = function(projects, files, cytoscapeutil) {
 				html += "<th>simiar</th>";
 //				html += "<th>cyclic hierarchy</th>";
 //				html += "<th>god component</th>";
-//				html += "<th>unused component</th>";
-				html += "<th>page rank</th>";
+				html += "<th>unused</th>";
+				html += "<th>unutilized</th>";
+//				html += "<th>page rank</th>";
 				html += "</tr>";
 				for(var j = 0 ; j < files[project.id].length; j++) {
 					var value = files[project.id][j];
@@ -249,8 +253,9 @@ var multiple = function(projects, files, cytoscapeutil) {
 					html += "<td>" + (value.similar == true ? "T" : "") + "</td>";
 //					html += "<td>" + (value.cyclicHierarchy == true ? "T" : "") + "</td>";
 //					html += "<td>" + (value.god == true ? "T" : "") + "</td>";
-//					html += "<td>" + (value.unused == true ? "T" : "") + "</td>";
-					html += "<td>" + value.file.score + "</td>";
+					html += "<td>" + (value.unused == true ? "T" : "") + "</td>";
+					html += "<td>" + (value.unutilized == true ? "T" : "") + "</td>";
+//					html += "<td>" + value.file.score + "</td>";
 					html += "</tr>";
 				}
 				html += "</table>";

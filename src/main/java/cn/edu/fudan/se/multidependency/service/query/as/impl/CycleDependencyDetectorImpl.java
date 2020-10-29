@@ -12,7 +12,7 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.ar.Module;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
-import cn.edu.fudan.se.multidependency.repository.as.ASRepository;
+import cn.edu.fudan.se.multidependency.repository.as.CycleASRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.as.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.ModuleService;
@@ -24,7 +24,7 @@ import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationSe
 public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 
 	@Autowired
-	private ASRepository asRepository;
+	private CycleASRepository asRepository;
 	
 	@Autowired
 	private CacheService cache;
@@ -41,6 +41,10 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 	
 	private Collection<DependsOn> findCycleFileRelationsBySCC(CycleComponents<ProjectFile> cycle) {
 		return asRepository.cycleFilesBySCC(cycle.getPartition());
+	}
+	
+	private Collection<DependsOn> findCycleModuleRelationsBySCC(CycleComponents<Module> cycle) {
+		return asRepository.cycleModulesBySCC(cycle.getPartition());
 	}
 	
 	@Override
@@ -114,7 +118,23 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
+		Collection<CycleComponents<Module>> cycles = asRepository.moduleCycles();
 		Map<Long, Map<Integer, Cycle<Module>>> result = new HashMap<>();
+		for(CycleComponents<Module> cycle : cycles) {
+			Cycle<Module> cyclePackage = new Cycle<Module>(cycle);
+			cyclePackage.addAll(findCycleModuleRelationsBySCC(cycle));
+			boolean flag = false;
+			for(Module pck : cycle.getComponents()) {
+				cyclePackage.putComponentBelongToGroup(pck, pck);
+				if(!flag) {
+					Project project = moduleService.findModuleBelongToProject(pck);
+					Map<Integer, Cycle<Module>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+					temp.put(cyclePackage.getPartition(), cyclePackage);
+					result.put(project.getId(), temp);
+					flag = true;
+				}
+			}
+		}
 		cache.cache(getClass(), key, result);
 		return result;
 	}

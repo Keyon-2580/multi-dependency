@@ -13,10 +13,14 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.ar.Module;
-import cn.edu.fudan.se.multidependency.repository.as.ASRepository;
+import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
+import cn.edu.fudan.se.multidependency.repository.as.UnstableASRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.as.UnstableDependencyDetectorUsingInstability;
 import cn.edu.fudan.se.multidependency.service.query.as.data.UnstableComponentByInstability;
+import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculator;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Service
@@ -29,7 +33,13 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 	private NodeService nodeService;
 	
 	@Autowired
-	private ASRepository asRepository;
+	private UnstableASRepository asRepository;
+	
+	@Autowired
+	private DependsOnRepository dependsOnRepository;
+	
+	@Autowired
+	private MetricCalculator metricCalculator;
 	
 	public static final int DEFAULT_THRESHOLD_FILE_FANOUT = 15;
 	public static final int DEFAULT_THRESHOLD_MODULE_FANOUT = 1;
@@ -39,7 +49,7 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 	private Map<Project, Integer> projectToModuleFanOutThreshold = new ConcurrentHashMap<>();
 	private Map<Project, Double> projectToRatioThreshold = new ConcurrentHashMap<>();
 
-	@Override
+//	@Override
 	public Map<Long, List<UnstableComponentByInstability<Package>>> unstablePackages() {
 		String key = "unstablePackages";
 		if(cache.get(getClass(), key) != null) {
@@ -59,7 +69,19 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 	
 	@Override
 	public Map<Long, List<UnstableComponentByInstability<Module>>> unstableModules() {
-		return new HashMap<>();
+		String key = "unstableModules";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		Collection<Project> projects = nodeService.allProjects();
+		Map<Long, List<UnstableComponentByInstability<Module>>> result = new HashMap<>();
+		for(Project project : projects) {
+			List<UnstableComponentByInstability<Module>> temp = asRepository.unstableModulesByInstability(project.getId(), 1, 0.3);
+			result.put(project.getId(), temp);
+		}
+		
+		cache.cache(getClass(), key, result);
+		return result;
 	}
 
 	@Override
@@ -71,7 +93,23 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 		Collection<Project> projects = nodeService.allProjects();
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> result = new HashMap<>();
 		for(Project project : projects) {
-			List<UnstableComponentByInstability<ProjectFile>> temp = asRepository.unstableFilesByInstability(project.getId(), getFileFanOutThreshold(project), getRatioThreshold(project));
+			List<UnstableComponentByInstability<ProjectFile>> temp = 
+					asRepository.unstableFilesByInstability(project.getId(), getFileFanOutThreshold(project), getRatioThreshold(project));
+			for(UnstableComponentByInstability<ProjectFile> unstableFile : temp) {
+				ProjectFile file = unstableFile.getComponent();
+				List<DependsOn> dependsOns = dependsOnRepository.findFileDependsOn(file.getId());
+				unstableFile.addAllTotalDependencies(dependsOns);
+				for(DependsOn dependsOn : dependsOns) {
+					ProjectFile dependsOnFile = (ProjectFile) dependsOn.getEndNode();
+//					FileMetrics dependsOnMetric = metricCalculator.calculateFileMetric(dependsOnFile);
+//					if(unstableFile.getInstability() < ((double) (dependsOnMetric.getFanOut()) / (dependsOnMetric.getFanIn() + dependsOnMetric.getFanOut()))) {
+					if(unstableFile.getInstability() < dependsOnFile.getInstability()) {
+						unstableFile.addBadDependency(dependsOn);
+					}
+				}
+				System.out.println(unstableFile.getAllDependencies() + " " + unstableFile.getBadDependencies() + "-" + unstableFile.getTotalDependsOns().size() + " " + unstableFile.getBadDependsOns().size());
+				
+			}
 			result.put(project.getId(), temp);
 		}
 		

@@ -145,6 +145,7 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
         	}
         	
         	if(commit.getCommitId().equals(this.currentVersionCommitId)) {
+        		System.out.println(commit.getCommitId());
         		this.currentVersionCommit = commit;
         	}
         	
