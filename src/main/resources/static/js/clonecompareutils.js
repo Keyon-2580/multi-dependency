@@ -86,10 +86,10 @@ var doublePackagesCloneWithCoChange = function(pck1Id, pck2Id) {
                 var cochangeId = children[i].cochange == null ? -1 : children[i].cochange.id;
                 html += "<tr>";
                 html += "<td>";
-                html += "<span>" + children[i].file1.path + "</span><span> (" + children[i].file1.lines + ") </span>";
+                html += "<a target='_blank' href='/relation/file/" + children[i].file1.id + "'>" + children[i].file1.path + " (" + children[i].file1.lines + ")</a>";
                 html += "</td>";
                 html += "<td>";
-                html += "<span>" + children[i].file2.path + "</span><span> (" + children[i].file2.lines + ") </span>";
+                html += "<a target='_blank' href='/relation/file/" + children[i].file2.id + "'>" + children[i].file2.path + " (" + children[i].file2.lines + ")</a>";
                 html += "</td>";
                 html += "<td>";
                 var type = children[i].fileClone.cloneType;

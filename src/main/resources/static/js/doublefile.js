@@ -27,7 +27,7 @@ var doublefile = function() {
                 html += "<tr><th>ID</th><th>filePath</th><th>linesSize</th><th>loc</th><th>type</th><th>value</th><th>cochange</th></tr>"
                 html += "<tr>";
                 html += "<td>"+ file1Id + "</td>";
-                html += "<td>" + filePath1 + "</td>";
+                html += "<td>" + "<a target='_blank' href='/relation/file/" + file1Id + "'>" + filePath1 + "</a>" + "</td>";
                 html += "<td>" + linesSize1 +"</td>";
                 html += "<td>" + loc1 +"</td>";
                 html += "<td rowspan='2' style='vertical-align: middle'>" + cloneType + "</td>";
@@ -36,7 +36,7 @@ var doublefile = function() {
                 html += "</tr>"
                 html += "<tr>";
                 html += "<td>" + file2Id + "</td>";
-                html += "<td>" + filePath2 + "</td>"
+                html += "<td>" + "<a target='_blank' href='/relation/file/" + file2Id + "'>" + filePath2 + "</a>" + "</td>"
                 html += "<td>" + linesSize2 +"</td>";
                 html += "<td>" + loc2 +"</td>";
                 html += "</tr>";
