@@ -104,8 +104,9 @@ public class ProjectServiceImpl implements ProjectService{
         JSONObject result = new JSONObject();
         Project project = nodeService.queryProject(projectId);
         ProjectStructure projectStructure = hasRelationService.projectHasInitialize(project);
+        Package packageOfProject = projectStructure.getChildren().get(0).getPck();
 
-        List<PackageStructure> childrenPackages = hasRelationService.packageHasInitialize(projectStructure.getChildren().get(0).getPck()).getChildrenPackages();
+        List<PackageStructure> childrenPackages = hasRelationService.packageHasInitialize(packageOfProject).getChildrenPackages();
         List<PackageStructure> childrenPackagesnew = new ArrayList<>();
 
 
@@ -114,8 +115,8 @@ public class ProjectServiceImpl implements ProjectService{
             childrenPackagesnew.add(pcknew);
         }
 
-        result.put("name", project.getName());
-        result.put("id", "id_" + project.getId().toString());
+        result.put("name", packageOfProject.getName());
+        result.put("id", "id_" + packageOfProject.getId().toString());
         Collection<ProjectFile> clonefiles = basicCloneQueryService.findProjectContainCloneFiles(project);
         result.put("children",getHasJson(clonefiles,childrenPackagesnew, showType));
 

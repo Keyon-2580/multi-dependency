@@ -1,4 +1,27 @@
-var y = 0;
+const CLONE_LOW_COLOR = "#f16c6c";
+const CLONE_MEDIUM_COLOR = "#e90c0c";
+const CLONE_HIGH_COLOR = "#a52404";
+const DEPENDSON_COLOR = "#34ace0";
+const COCHANGE_COLOR = "";
+
+const LEGEND_DATA = [
+    {
+        "name" : "克隆相似度 = 1",
+        "color":CLONE_HIGH_COLOR
+    },
+    {
+        "name" : "0.9 <= 克隆相似度 < 1",
+        "color":CLONE_MEDIUM_COLOR
+    },
+    {
+        "name" : "克隆相似度 < 0.9",
+        "color" : CLONE_LOW_COLOR
+    },
+    {
+        "name" : "Depends On",
+        "color":DEPENDSON_COLOR
+    }
+];
 
 var cloneLinks_global = [];
 var dependsonLinks_global = [];
@@ -269,6 +292,29 @@ var projectToGraph = function(result,divId){
         }
     }
 
+    var legend = svg.selectAll(".legend")
+        // .data(["A", "B", "C", "D", "E"])
+        .data(LEGEND_DATA)
+        .enter().append("g")
+        .attr("class", "legend")
+        .attr("transform", function(d, i) { return "translate(-30," + (i * 20 + 30) + ")"; });
+
+    legend.append("rect")
+        .attr("x", (diameter / 160) * 157)
+        .attr("y", 7)
+        .attr("width", 40)
+        .attr("height", 4)
+        .style("fill", function(d){
+            return d.color;
+        });
+
+    legend.append("text")
+        .attr("x", (diameter / 40) * 39)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .style("text-anchor", "end")
+        .text(function(d) { return d.name;});
+
     drawCloneTableBelow(table_global, "project");
 }
 
@@ -377,7 +423,7 @@ function drawLink(jsonLinks) {
         .style("stroke-width","");
     var circleCoordinate = [];
 
-    console.log(jsonLinks);
+    // console.log(jsonLinks);
 
     var links = svg_global.append('g')
         .style('stroke', '#aaa')
@@ -687,14 +733,14 @@ var showLineButton = function(){
 
 var getTypeColor = function(d){
     if(d.type === "clone") {
-        return d.similarityValue === 1 ? "#a52404" : d.similarityValue >= 0.9 ? "#e90c0c" : "#f16c6c";
+        return d.similarityValue === 1 ? CLONE_HIGH_COLOR : d.similarityValue >= 0.9 ? CLONE_MEDIUM_COLOR : CLONE_LOW_COLOR;
     }else if(d.type === "dependson"){
-        return "#34ace0";
+        return DEPENDSON_COLOR;
     }
 }
 
 var CancelChildrenChecked = function(parent_name){
-    console.log(parent_name);
+    // console.log(parent_name);
     if(!$("#" + parent_name).is(":checked")){
         $("input[name = '" + parent_name + "_children" + "']").prop("checked", false);
     }
