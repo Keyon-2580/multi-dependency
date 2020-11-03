@@ -72,7 +72,6 @@ public class ProjectServiceImpl implements ProjectService{
         if(projectIds.size() == 1){
             projectJson = joinMultipleProjectsGraphJson(projectIds.getJSONObject(0).getLong("id"),showType);
         }else{
-
             projectJson.put("name", "default");
             projectJson.put("id", "id_default");
             JSONArray multipleProjectsJson = new JSONArray();
@@ -103,11 +102,10 @@ public class ProjectServiceImpl implements ProjectService{
 
     private JSONObject joinMultipleProjectsGraphJson(long projectId, String showType){
         JSONObject result = new JSONObject();
-
         Project project = nodeService.queryProject(projectId);
         ProjectStructure projectStructure = hasRelationService.projectHasInitialize(project);
 
-        List<PackageStructure> childrenPackages = projectStructure.getChildren();
+        List<PackageStructure> childrenPackages = hasRelationService.packageHasInitialize(projectStructure.getChildren().get(0).getPck()).getChildrenPackages();
         List<PackageStructure> childrenPackagesnew = new ArrayList<>();
 
 

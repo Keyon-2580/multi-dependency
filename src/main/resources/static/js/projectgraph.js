@@ -50,18 +50,18 @@ var loadPageData = function () {
             html += "<div id = \"AttributionSelect\">" +
                 "<form role=\"form\">" +
                 "<p><label class = \"AttributionSelectTitle\">" +
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\">DependsOn：" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" onclick=\"CancelChildrenChecked('dependsOn')\">DependsOn：" +
                 "</label>" +
                 "<label class = \"AttributionSelectLabel\">" +
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes\" > Times >= " +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes\" name = \"dependsOn_children\"> Times >= " +
                 "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput\" value=\"3\">" +
                 "</label></p>";
 
             html += "<p><label class = \"AttributionSelectTitle\">" +
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone\">Clone：" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone\" onclick=\"CancelChildrenChecked('clone')\">Clone：" +
                 "</label>" +
 
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneSimilarity\" >" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneSimilarity\" name = \"clone_children\">" +
                 "<input  class = \"AttributionSelectInput\" id=\"similaritybelow\" value=\"0.7\">" +
 
                 "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectBelow\">" +
@@ -77,15 +77,15 @@ var loadPageData = function () {
                 "<input  class = \"AttributionSelectInput\" id=\"similarityhigh\" value=\"1\">" +
 
                 "<label class = \"AttributionSelectLabel\" style = \"margin-left: 80px\">" +
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneTimes\">CloneTimes >=</label>" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneTimes\" name = \"clone_children\">CloneTimes >=</label>" +
                 "<input  class = \"AttributionSelectInput\" id=\"clonetimes\" value=\"3\">" +
                 "</p>";
 
             html += "<p><label class = \"AttributionSelectTitle\">" +
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"coChange\">Co-change：" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"coChange\" onclick=\"CancelChildrenChecked('coChange')\">Co-change：" +
                 "</label>" +
                 "<label class = \"AttributionSelectLabel\">" +
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cochangeTimes\"> Times >= " +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cochangeTimes\" name = \"coChange_children\"> Times >= " +
                 "<input  id=\"cochangeTimes\" class = \"AttributionSelectInput\" id=\"cochangetimes\" value=\"3\">" +
                 "</label></p>";
 
@@ -529,25 +529,22 @@ function clearLink(){
 
 //点击连线，获取子包关系,绘制图下方表格
 function drawChildrenCloneLinks(package1Id, package2Id, type){
-    $.ajax({
-        type : "GET",
-        url : "/project/has/childrenlinks?package1Id=" + package1Id + "&package2Id=" + package2Id,
-        success : function(result) {
-            // console.log(type);
-
-        clearLink();
-        if (type === "clone") {
-            console.log(result);
-            if(result.children_graphlinks.clone_links.length > 0){
-                showLine(result.children_graphlinks.clone_links, "package");
+    if (type === "clone") {
+        $.ajax({
+            type : "GET",
+            url : "/project/has/childrenlinks?package1Id=" + package1Id + "&package2Id=" + package2Id,
+            success : function(result) {
+                clearLink();
+                // console.log(result);
+                if(result.children_graphlinks.clone_links.length > 0){
+                    showLine(result.children_graphlinks.clone_links, "package");
+                }
+                drawCloneTableBelow(result.table, "package");
             }
-        } else if (type === "dependson") {
+        });
+    } else if (type === "dependson") {
 
-        }
-
-        drawCloneTableBelow(result.table, "package");
-        }
-    });
+    }
 }
 
 //多选下拉框，加载多项目
@@ -693,6 +690,13 @@ var getTypeColor = function(d){
         return d.similarityValue === 1 ? "#a52404" : d.similarityValue >= 0.9 ? "#e90c0c" : "#f16c6c";
     }else if(d.type === "dependson"){
         return "#34ace0";
+    }
+}
+
+var CancelChildrenChecked = function(parent_name){
+    console.log(parent_name);
+    if(!$("#" + parent_name).is(":checked")){
+        $("input[name = '" + parent_name + "_children" + "']").prop("checked", false);
     }
 }
 
