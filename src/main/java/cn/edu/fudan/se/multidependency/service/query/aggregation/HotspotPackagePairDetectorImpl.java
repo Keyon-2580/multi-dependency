@@ -5,6 +5,7 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
+import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.AggregationCloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.ModuleCloneRepository;
@@ -26,6 +27,9 @@ public class HotspotPackagePairDetectorImpl<ps> implements HotspotPackagePairDet
 
 	@Autowired
 	private DependsOnRepository dependsOnRepository;
+
+	@Autowired
+	private CoChangeRepository coChangeRepository;
 
 	@Autowired
 	private NodeService nodeService;
@@ -104,6 +108,66 @@ public class HotspotPackagePairDetectorImpl<ps> implements HotspotPackagePairDet
 		List<HotspotPackagePair> result = new ArrayList<>();
 		for(Project project : projects) {
 			result.addAll(detectHotspotPackagePairWithDependsOnByProjectId(project.getId()));
+		}
+		return result;
+	}
+
+	@Override
+	public List<HotspotPackagePair> detectHotspotPackagePairWithCoChangeByProjectId(long projectId) {
+		List<HotspotPackagePair> result = new ArrayList<>();
+		List<CoChange> projectCoChanges = coChangeRepository.findPackageCoChangeInProject(projectId);
+		if(projectCoChanges != null && !projectCoChanges.isEmpty()){
+			Map<Package, Map<Package, CoChange>> packageCoChangePackage = new HashMap<>();
+			for (CoChange coChange : projectCoChanges){
+				Package startNode = (Package) coChange.getStartNode();
+				Package endNode = (Package) coChange.getEndNode();
+				Package pck1 = startNode.getId() < endNode.getId() ? startNode : endNode;
+				Package pck2 = startNode.getId() < endNode.getId() ? endNode : startNode;
+				Map<Package, CoChange> coChangePackage = packageCoChangePackage.getOrDefault(pck1, new HashMap<>());
+				coChangePackage.put(pck2, coChange);
+				packageCoChangePackage.put(pck1, coChangePackage);
+			}
+			for(Map.Entry<Package, Map<Package, CoChange>> entry : packageCoChangePackage.entrySet()){
+				Package pck1 = entry.getKey();
+				Map<Package, CoChange> coChangePackage = entry.getValue();
+				for(Map.Entry<Package, CoChange> entryKey : coChangePackage.entrySet()){
+					Package pck2 = entryKey.getKey();
+					CoChange coChange = entryKey.getValue();
+					HotspotPackagePair hotspotPackagePair = createHotspotPackagePairWithCoChange(pck1, pck2, coChange);
+					result.add(hotspotPackagePair);
+				}
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public HotspotPackagePair detectHotspotPackagePairWithCoChangeByPackageId(long pck1Id, long pck2Id) {
+		CoChange packageCoChange = coChangeRepository.findPackageCoChange(pck1Id, pck2Id);
+		HotspotPackagePair hotspotPackagePair = null;
+		if(packageCoChange != null){
+			Package tmp1 = (Package) packageCoChange.getStartNode();
+			Package tmp2 = (Package) packageCoChange.getEndNode();
+			Package pck1 = tmp1.getId() == pck1Id ? tmp1 : tmp2;
+			Package pck2 = tmp2.getId() == pck2Id ? tmp2 : tmp1;
+			hotspotPackagePair = createHotspotPackagePairWithCoChange(pck1, pck2, packageCoChange);
+		}
+		return hotspotPackagePair;
+	}
+
+	private HotspotPackagePair createHotspotPackagePairWithCoChange(Package pck1, Package pck2, CoChange packageCoChange) {
+		CoChangeRelationDataForDoubleNodes<Node, Relation> coChangeRelationDataForDoubleNodes = new CoChangeRelationDataForDoubleNodes(pck1, pck2);
+		coChangeRelationDataForDoubleNodes.setCoChangeTimes(packageCoChange.getTimes());
+		HotspotPackagePair hotspotPackagePair = new HotspotPackagePair(pck1, pck2, coChangeRelationDataForDoubleNodes);
+		return hotspotPackagePair;
+	}
+
+	@Override
+	public List<HotspotPackagePair> detectHotspotPackagesByCoChangeInAllProjects() {
+		Collection<Project> projects = nodeService.allProjects();
+		List<HotspotPackagePair> result = new ArrayList<>();
+		for(Project project : projects) {
+			result.addAll(detectHotspotPackagePairWithCoChangeByProjectId(project.getId()));
 		}
 		return result;
 	}

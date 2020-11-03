@@ -13,4 +13,10 @@ public interface HotspotPackagePairDetector {
 
 	List<HotspotPackagePair> detectHotspotPackagesByDependsOnInAllProjects();
 
+	List<HotspotPackagePair> detectHotspotPackagePairWithCoChangeByProjectId(long projectId);
+
+	HotspotPackagePair detectHotspotPackagePairWithCoChangeByPackageId(long pck1Id, long pck2Id);
+
+	List<HotspotPackagePair> detectHotspotPackagesByCoChangeInAllProjects();
+
 }
