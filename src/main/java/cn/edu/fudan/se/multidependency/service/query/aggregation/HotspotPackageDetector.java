@@ -20,6 +20,8 @@ public interface HotspotPackageDetector {
 
 	List<HotspotPackage> detectHotspotPackagesByDependsOnInProject(long projectId);
 
+	List<HotspotPackage> detectHotspotPackagesByDependsOnInAllProjects();
+
 	HotspotPackage detectHotspotPackagesWithDependsOnByPackageId(long pck1Id, long pck2Id);
 
 	HotspotPackage detectHotspotPackagesByPackageId(long pck1Id, long pck2Id, String language);

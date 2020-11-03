@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.service.query.aggregation;
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
@@ -18,6 +19,7 @@ import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryServic
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
+import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -59,6 +61,9 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 
 	@Autowired
 	private DependsOnRepository dependsOnRepository;
+
+	@Autowired
+	private NodeService nodeService;
 
 	private ThreadLocal<Integer> rowKey = new ThreadLocal<>();
 
@@ -347,6 +352,16 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 					result.add(hotspotPackage);
 				});
 			}
+		}
+		return result;
+	}
+
+	@Override
+	public List<HotspotPackage> detectHotspotPackagesByDependsOnInAllProjects(){
+		Collection<Project> projects = nodeService.allProjects();
+		List<HotspotPackage> result = new ArrayList<>();
+		for(Project project : projects) {
+			result.addAll(detectHotspotPackagesByDependsOnInProject(project.getId()));
 		}
 		return result;
 	}

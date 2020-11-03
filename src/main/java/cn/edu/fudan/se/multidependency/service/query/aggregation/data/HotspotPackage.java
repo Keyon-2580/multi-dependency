@@ -3,63 +3,43 @@ package cn.edu.fudan.se.multidependency.service.query.aggregation.data;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+@Data
 @NoArgsConstructor
 public class HotspotPackage {
 
-	@Getter
 	private RelationDataForDoubleNodes<Node, Relation> relationPackages;
-	
-	@Getter
+
 	private Collection<HotspotPackage> childrenHotspotPackages;
 
-	@Getter
 	private Collection<Package> childrenOtherPackages1;
 
-	@Getter
 	private Collection<Package> childrenOtherPackages2;
-	
-	@Getter
+
 	private Package package1;
-	
-	@Getter
+
 	private Package package2;
 
-	@Getter
 	private int clonePairs;
 
-	@Getter
 	private int relationNodes1;
 
-	@Getter
 	private int relationNodes2;
 
-	@Getter
 	private int allNodes1;
 
-	@Getter
 	private int allNodes2;
-	
-	@Getter
+
 	private String id;
-	
-	@Getter
-	@Setter
+
 	private double similarityValue;
 
-	@Getter
-	@Setter
 	private int packageCochangeTimes = 0;
 
-	@Getter
-	@Setter
 	private int packageCloneCochangeTimes = 0;
 
 	private String dependsOnTypes = "";

@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.service.query.aggregation;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
@@ -13,6 +14,7 @@ import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryServic
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
+import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import org.sonatype.guice.bean.binders.ParameterKeys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,9 @@ public class HotspotPackagePairDetectorImpl<ps> implements HotspotPackagePairDet
 
 	@Autowired
 	private DependsOnRepository dependsOnRepository;
+
+	@Autowired
+	private NodeService nodeService;
 
 	@Override
 	public List<HotspotPackagePair> detectHotspotPackagePairWithDependsOnByProjectId(long projectId) {
@@ -91,6 +96,16 @@ public class HotspotPackagePairDetectorImpl<ps> implements HotspotPackagePairDet
 		dependsRelationDataForDoubleNodes.setDependsByTimes(dependsByTimes);
 		HotspotPackagePair hotspotPackagePair = new HotspotPackagePair(pck1, pck2, dependsRelationDataForDoubleNodes);
 		return hotspotPackagePair;
+	}
+
+	@Override
+	public List<HotspotPackagePair> detectHotspotPackagesByDependsOnInAllProjects(){
+		Collection<Project> projects = nodeService.allProjects();
+		List<HotspotPackagePair> result = new ArrayList<>();
+		for(Project project : projects) {
+			result.addAll(detectHotspotPackagePairWithDependsOnByProjectId(project.getId()));
+		}
+		return result;
 	}
 
 }

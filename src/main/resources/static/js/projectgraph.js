@@ -50,18 +50,18 @@ var loadPageData = function () {
             html += "<div id = \"AttributionSelect\">" +
                 "<form role=\"form\">" +
                 "<p><label class = \"AttributionSelectTitle\">" +
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" name=\"relationtype\" value=\"dependson\">DependsOn：" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\">DependsOn：" +
                 "</label>" +
                 "<label class = \"AttributionSelectLabel\">" +
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes\" name=\"dependsonTimes\" value=\"dependsontimes\"> Times >= " +
-                "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput\" id=\"dependencytimes\" value=\"3\">" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes\" > Times >= " +
+                "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput\" value=\"3\">" +
                 "</label></p>";
 
             html += "<p><label class = \"AttributionSelectTitle\">" +
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone\" name=\"relationtype\" value=\"clone\">Clone：" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone\">Clone：" +
                 "</label>" +
 
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneSimilarity\" name=\"cloneSimilarity\" value=\"clonesimilarity\">" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneSimilarity\" >" +
                 "<input  class = \"AttributionSelectInput\" id=\"similaritybelow\" value=\"0.7\">" +
 
                 "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectBelow\">" +
@@ -77,15 +77,15 @@ var loadPageData = function () {
                 "<input  class = \"AttributionSelectInput\" id=\"similarityhigh\" value=\"1\">" +
 
                 "<label class = \"AttributionSelectLabel\" style = \"margin-left: 80px\">" +
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneTimes\" name=\"cloneTimes\" value=\"clonetimes\">CloneTimes >=</label>" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneTimes\">CloneTimes >=</label>" +
                 "<input  class = \"AttributionSelectInput\" id=\"clonetimes\" value=\"3\">" +
                 "</p>";
 
             html += "<p><label class = \"AttributionSelectTitle\">" +
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"coChange\" name=\"relationtype\" value=\"cochange\">Co-change：" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"coChange\">Co-change：" +
                 "</label>" +
                 "<label class = \"AttributionSelectLabel\">" +
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cochangeTimes\" name=\"cochangeTimes\" value=\"cochangetimes\"> Times >= " +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cochangeTimes\"> Times >= " +
                 "<input  id=\"cochangeTimes\" class = \"AttributionSelectInput\" id=\"cochangetimes\" value=\"3\">" +
                 "</label></p>";
 
@@ -141,9 +141,9 @@ var projectGraphAjax = function(projectIds){
 var projectToGraph = function(result,divId){
     // console.log(result);
     var projectdata = result[0].result;
-    var cloneLinks = result[1].links.clone_links;
+    cloneLinks_global = result[1].links.clone_links;
+    dependsonLinks_global = result[1].links.dependson_links;
     table_global = result[2].table;
-    cloneLinks_global = cloneLinks;
 
     var svg = d3.select("#" + divId)
             .attr("width", 1500)
@@ -286,7 +286,7 @@ var showLine = function(links_local, type){
         }
     }
 
-    console.log(links_local);
+    // console.log(links_local);
     var temp_delete_number = 0;
 
     for(var i = links_local.length; i > 0; i--){
@@ -294,10 +294,9 @@ var showLine = function(links_local, type){
         var target_project = links_local[i - 1].target_projectBelong.split("_")[1];
         var relation_type = links_local[i - 1].type;
 
+        var flag_delete = false;
         var temp_flag_source = false;
         var temp_flag_target = false;
-        var temp_flag_clonesimilarity = false;
-        var temp_flag_clonetimes = false;
 
         for(var j = 0; j < projectList_global.length; j++){
             if(source_project === projectList_global[j]){
@@ -311,40 +310,60 @@ var showLine = function(links_local, type){
             }
         }
 
-        if(relation_type === "clone"){
+        if(temp_flag_source === false || temp_flag_target === false){
+            links_local.splice(i - 1, 1);
+            temp_delete_number++;
+            flag_delete = true;
+        }
+
+        if(relation_type === "clone" && flag_delete === false){
+            var similarityValue = links_local[i - 1].similarityValue.toFixed(2);
             if($("#cloneSimilarity").prop("checked")){
-                console.log($("#similaritybelow").attr("value"));
-                console.log($("#similaritybelow").val());
+                var temp_flag_clonesimilarity = false;
+
                 if($("#similarityCompareSelectBelow").val() === "<=" &&
-                    links_local[i - 1].similarityValue >= $("#similaritybelow").val()){
+                    similarityValue >= $("#similaritybelow").val()){
                     if($("#similarityCompareSelectHigh").val() === "<=" &&
-                        links_local[i - 1].similarityValue <= $("#similarityhigh").val()){
+                        similarityValue <= $("#similarityhigh").val()){
                         temp_flag_clonesimilarity = true;
                     }else if($("#similarityCompareSelectHigh").val() === "<" &&
-                        links_local[i - 1].similarityValue < $("#similarityhigh").val()){
+                        similarityValue < $("#similarityhigh").val()){
                         temp_flag_clonesimilarity = true;
                     }
                 }else if($("#similarityCompareSelectBelow").val() === "<" &&
-                    links_local[i - 1].similarityValue > $("#similaritybelow").val()){
+                    similarityValue > $("#similaritybelow").val()){
                     if($("#similarityCompareSelectHigh").val() === "<=" &&
-                        links_local[i - 1].similarityValue <= $("#similarityhigh").val()){
+                        similarityValue <= $("#similarityhigh").val()){
                         temp_flag_clonesimilarity = true;
                     }else if($("#similarityCompareSelectHigh").val() === "<" &&
-                        links_local[i - 1].similarityValue < $("#similarityhigh").val()){
+                        similarityValue < $("#similarityhigh").val()){
                         temp_flag_clonesimilarity = true;
                     }
                 }
+
+                if(temp_flag_clonesimilarity === false ){
+                    links_local.splice(i - 1, 1);
+                    temp_delete_number++;
+                    flag_delete = true;
+                }
             }
 
-            if($("#cloneTimes").prop("checked") && links_local[i - 1].similarityValue >= $("#clonetimes").val()){
-                temp_flag_clonetimes = true;
+            if($("#cloneTimes").prop("checked") && links_local[i - 1].cloneTimes >= $("#clonetimes").val()){
+                links_local.splice(i - 1, 1);
+                temp_delete_number++;
+                flag_delete = true;
             }
         }
 
-        if(temp_flag_source === false || temp_flag_target === false
-            || temp_flag_clonesimilarity === false || temp_flag_clonetimes === false){
-            links_local.splice(i - 1, 1);
-            temp_delete_number++;
+        if(relation_type === "dependson" && flag_delete === false){
+            if($("#dependsOnTimes").prop("checked")){
+                if($("#dependencyTimes").val() > links_local[i - 1].dependsOnTimes &&
+                    $("#dependencyTimes").val() > links_local[i - 1].dependsByTimes){
+                    links_local.splice(i - 1, 1);
+                    temp_delete_number++;
+                    flag_delete = true;
+                }
+            }
         }
     }
     drawLink(links_local);
@@ -353,8 +372,13 @@ var showLine = function(links_local, type){
     // .attr("class", "packageLink")
 function drawLink(jsonLinks) {
     var svg1 = d3.select(".packageLink") .remove();
+    g_global.selectAll("circle")
+        .style("stroke","")
+        .style("stroke-width","");
     var circleCoordinate = [];
-    // console.log(jsonLinks);
+
+    console.log(jsonLinks);
+
     var links = svg_global.append('g')
         .style('stroke', '#aaa')
         .attr("class", "packageLink")
@@ -366,30 +390,37 @@ function drawLink(jsonLinks) {
             return d.bottom_package ? "20,2" : null;
         })
         .attr("stroke", function (d){
-            return d.similarityValue === 1 ? "#c23616" : d.similarityValue >= 0.9 ? "#ff6b6b" : "#f3910c";
+            return getTypeColor(d);
         })
         .attr("onclick", function(d){
             source_id = d.source_id.split("_")[1];
             target_id = d.target_id.split("_")[1];
-            return "drawChildrenCloneLinks(\"" + source_id + "\", \"" + target_id + "\")";
+            return "drawChildrenCloneLinks(\"" + source_id + "\", \"" + target_id + "\", \"" + d.type + "\")";
         })
         .call(text => text.append("title").text(function(d) {
-            return "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\nsimilarityValue: " + d.similarityValue
-                + "\npackageCochangeTimes: " + d.packageCochangeTimes
-                + "\npackageCloneCochangeTimes: " + d.packageCloneCochangeTimes
-                + "\nclonePairs: " + d.clonePairs;
+            if(d.type === "clone"){
+                return "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\nsimilarityValue: " + d.similarityValue.toFixed(2)
+                    + "\npackageCochangeTimes: " + d.packageCochangeTimes
+                    + "\npackageCloneCochangeTimes: " + d.packageCloneCochangeTimes
+                    + "\nclonePairs: " + d.clonePairs;
+            }else if(d.type === "dependson"){
+                return "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\ndependsOnTypes: " + d.dependsOnTypes
+                    + "\ndependsByTypes: " + d.dependsByTypes
+                    + "\ndependsOnTimes: " + d.dependsOnTimes
+                    + "\ndependsByTimes: " + d.dependsByTimes;
+            }
         }));
 
     jsonLinks.forEach(function (d){
         d3.select("#" + d.source_id)
             .style("stroke",function (e){
-                return d.similarityValue === 1 ? "#c23616" : d.similarityValue >= 0.9 ? "#ff6b6b" : "#f3910c";
+                return getTypeColor(d);
             })
             .style("stroke-width","1.5px")
 
         d3.select("#" + d.target_id)
             .style("stroke",function (e){
-                return d.similarityValue === 1 ? "#c23616" : d.similarityValue >= 0.9 ? "#ff6b6b" : "#f3910c";
+                return getTypeColor(d);
             })
             .style("stroke-width","1.5px")
 
@@ -490,24 +521,31 @@ function clearLink(){
     drawCloneTableBelow(table_global, "project");
     g_global.selectAll("circle")
         .style("stroke","")
-        .style("stroke-width","")
+        .style("stroke-width","");
     var svg1 = d3.select(".packageLink") .remove();
 
     // flag = true;
 }
 
 //点击连线，获取子包关系,绘制图下方表格
-function drawChildrenCloneLinks(package1Id, package2Id){
+function drawChildrenCloneLinks(package1Id, package2Id, type){
     $.ajax({
         type : "GET",
         url : "/project/has/childrenlinks?package1Id=" + package1Id + "&package2Id=" + package2Id,
         success : function(result) {
+            // console.log(type);
+
+        clearLink();
+        if (type === "clone") {
             console.log(result);
-            if(result.children_graphlinks.length > 0){
-                clearLink();
-                showLine(result.children_graphlinks, "package");
-                drawCloneTableBelow(result.table,"package");
+            if(result.children_graphlinks.clone_links.length > 0){
+                showLine(result.children_graphlinks.clone_links, "package");
             }
+        } else if (type === "dependson") {
+
+        }
+
+        drawCloneTableBelow(result.table, "package");
         }
     });
 }
@@ -645,7 +683,17 @@ function drawCloneTableBelow(tableData, type){
 
 var showLineButton = function(){
     var temp_links = [];
+    // console.log(dependsonLinks_global);
+    // console.log(cloneLinks_global);
     showLine(temp_links,"project");
+}
+
+var getTypeColor = function(d){
+    if(d.type === "clone") {
+        return d.similarityValue === 1 ? "#a52404" : d.similarityValue >= 0.9 ? "#e90c0c" : "#f16c6c";
+    }else if(d.type === "dependson"){
+        return "#34ace0";
+    }
 }
 
 
