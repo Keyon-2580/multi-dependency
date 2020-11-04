@@ -1,7 +1,9 @@
 const CLONE_LOW_COLOR = "#f48989";
 const CLONE_MEDIUM_COLOR = "#e90c0c";
-const CLONE_HIGH_COLOR = "#a52404";
-const DEPENDSON_COLOR = "#34ace0";
+const CLONE_HIGH_COLOR = "#9a2002";
+const DEPENDSON_LOW_COLOR = "#73cef3";
+const DEPENDSON_MEDIUM_COLOR = "#056fc0";
+const DEPENDSON_HIGH_COLOR = "#033187";
 const COCHANGE_COLOR = "";
 
 const LEGEND_DATA = [
@@ -18,14 +20,24 @@ const LEGEND_DATA = [
         "color" : CLONE_LOW_COLOR
     },
     {
-        "name" : "Depends On",
-        "color":DEPENDSON_COLOR
+        "name" : "0.8 <= depends Intensity < 1",
+        "color":DEPENDSON_HIGH_COLOR
+    },
+    {
+        "name" : "0.5 <= depends Intensity < 0.8",
+        "color":DEPENDSON_MEDIUM_COLOR
+    },
+    {
+        "name" : "0 < depends Intensity < 0.5",
+        "color":DEPENDSON_LOW_COLOR
     }
 ];
 
 var cloneLinks_global = [];
 var dependsonLinks_global = [];
 var cochangeLinks_global = [];
+var linksCurrent_global = [];
+var linksCurrent_flag = true;
 
 var diameter_global;
 var svg_global;
@@ -72,10 +84,26 @@ var loadPageData = function () {
 
             html += "<div id = \"AttributionSelect\">" +
                 "<form role=\"form\">" +
-                "<p><label class = \"AttributionSelectTitle\">" +
-                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" onclick=\"CancelChildrenChecked('dependsOn')\">DependsOn：" +
+                "<p><label class = \"AttributionSelectTitle\" style = \"margin-right: 44px\">" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" onclick=\"CancelChildrenChecked('dependsOn')\">Dependency：" +
                 "</label>" +
-                "<label class = \"AttributionSelectLabel\">" +
+
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsIntensity\" name = \"dependsOn_children\">" +
+                "<input  class = \"AttributionSelectInput\" id=\"intensitybelow\" value=\"0.8\">" +
+
+                "<select class = \"AttributionSelectSingleSelect\" id=\"intensityCompareSelectBelow\">" +
+                "<option value=\"<=\" selected = \"selected\"><=</option>" +
+                "<option value=\"<\"><</option></select>" +
+
+                "<label class = \"AttributionSelectLabel\"> &nbsp;Similarity</label>" +
+
+                "<select class = \"AttributionSelectSingleSelect\" id=\"intensityCompareSelectHigh\">" +
+                "<option value=\"<=\"><=</option>" +
+                "<option value=\"<\" selected = \"selected\"><</option></select>" +
+
+                "<input  class = \"AttributionSelectInput\" id=\"intensityhigh\" value=\"1\">" +
+
+                "<label class = \"AttributionSelectLabel\" style = \"margin-left: 80px\">" +
                 "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes\" name = \"dependsOn_children\"> Times >= " +
                 "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput\" value=\"3\">" +
                 "</label></p>";
@@ -102,7 +130,7 @@ var loadPageData = function () {
                 "<label class = \"AttributionSelectLabel\" style = \"margin-left: 80px\">" +
                 "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneTimes\" name = \"clone_children\">CloneTimes >=</label>" +
                 "<input  class = \"AttributionSelectInput\" id=\"clonetimes\" value=\"3\">" +
-                "</p>";
+                "<button id = \"hideBottomPackageButton\" type=\"button\" style=\"margin-left: 30px\" onclick=HideBottomPackageButton() >仅显示聚合</button></p>";
 
             html += "<p><label class = \"AttributionSelectTitle\">" +
                 "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"coChange\" onclick=\"CancelChildrenChecked('coChange')\">Co-change：" +
@@ -320,6 +348,10 @@ var projectToGraph = function(result,divId){
 
 //根据筛选规则绘制气泡图连线
 var showLine = function(links_local, type){
+    linksCurrent_global = [];
+    linksCurrent_flag  = true;
+    document.getElementById("hideBottomPackageButton").innerHTML = "仅显示聚合";
+
     if(type === "project"){
         if($("#dependsOn").prop("checked")){
             links_local = links_local.concat(dependsonLinks_global);
@@ -412,6 +444,8 @@ var showLine = function(links_local, type){
             }
         }
     }
+
+    linksCurrent_global = links_local.concat();
     drawLink(links_local);
 }
 
@@ -737,16 +771,36 @@ var getTypeColor = function(d){
     if(d.type === "clone") {
         return d.similarityValue === 1 ? CLONE_HIGH_COLOR : d.similarityValue >= 0.9 ? CLONE_MEDIUM_COLOR : CLONE_LOW_COLOR;
     }else if(d.type === "dependson"){
-        return DEPENDSON_COLOR;
+        return DEPENDSON_MEDIUM_COLOR;
     }
 }
 
 var CancelChildrenChecked = function(parent_name){
-    // console.log(parent_name);
     if(!$("#" + parent_name).is(":checked")){
         $("input[name = '" + parent_name + "_children" + "']").prop("checked", false);
     }
 }
 
+var HideBottomPackageButton = function(){
+    if($("#clone").prop("checked")){
+        if(linksCurrent_flag){
+            var linksWithoutBottomPackages = linksCurrent_global.concat();
+            for(var i = linksWithoutBottomPackages.length; i > 0; i--){
+                if(linksWithoutBottomPackages[i - 1].hasOwnProperty("bottom_package") && linksWithoutBottomPackages[i - 1].bottom_package){
+                    linksWithoutBottomPackages.splice(i - 1, 1);
+                }
 
+                if(linksWithoutBottomPackages.length > 0){
+                    drawLink(linksWithoutBottomPackages);
+                }
+                linksCurrent_flag  = false;
+                document.getElementById("hideBottomPackageButton").innerHTML = "取消 仅显示聚合";
+            }
+        }else{
+            drawLink(linksCurrent_global);
+            linksCurrent_flag  = true;
+            document.getElementById("hideBottomPackageButton").innerHTML = "仅显示聚合";
+        }
+    }
+}
 
