@@ -1,4 +1,4 @@
-const CLONE_LOW_COLOR = "#f16c6c";
+const CLONE_LOW_COLOR = "#f48989";
 const CLONE_MEDIUM_COLOR = "#e90c0c";
 const CLONE_HIGH_COLOR = "#a52404";
 const DEPENDSON_COLOR = "#34ace0";
@@ -439,9 +439,11 @@ function drawLink(jsonLinks) {
             return getTypeColor(d);
         })
         .attr("onclick", function(d){
-            source_id = d.source_id.split("_")[1];
-            target_id = d.target_id.split("_")[1];
-            return "drawChildrenCloneLinks(\"" + source_id + "\", \"" + target_id + "\", \"" + d.type + "\")";
+            if(d.type === "clone" && !d.bottom_package){
+                source_id = d.source_id.split("_")[1];
+                target_id = d.target_id.split("_")[1];
+                return "drawChildrenCloneLinks(\"" + source_id + "\", \"" + target_id + "\", \"" + d.type + "\")";
+            }
         })
         .call(text => text.append("title").text(function(d) {
             if(d.type === "clone"){
