@@ -51,8 +51,39 @@ var doublefile = function() {
         })
     }
 
+    var depends = function(fileId,id) {
+        $.ajax({
+            type: "get",
+            url: "/relation/file/" + fileId + "/dependedBy",
+            success: function(result) {
+                console.log(result);
+                var html = "<ol>";
+                for(var i = 0; i < result.length; i++) {
+                    html += "<li><a target='_blank' href='/relation/file/" + result[i].startNode.id + "'>" + result[i].startNode.path + "</a></li>";
+                }
+                html += "</ol>";
+                $( "#" + "dependedBy_content" + id).html(html);
+            }
+        })
+        $.ajax({
+            type: "get",
+            url: "/relation/file/" + fileId + "/dependsOn",
+            success: function(result) {
+                console.log(result);
+                var html = "<ol>";
+                for(var i = 0; i < result.length; i++) {
+                    html += "<li><a target='_blank' href='/relation/file/" + result[i].endNode.id + "'>" + result[i].endNode.path + "</a></li>";
+                }
+                html += "</ol>";
+                $("#" + "dependsOn_content" + id).html(html);
+            }
+        });
+    }
+
     return {
         init : function(file1Id,file2Id,cloneType,linesSize1,linesSize2,loc1,loc2,value,cochange,filePath1,filePath2,cochangeId) {
+            depends(file1Id,1);
+            depends(file2Id,2);
             loaddata(file1Id,file2Id,cloneType,linesSize1,linesSize2,loc1,loc2,value,cochange,filePath1,filePath2,cochangeId);
         }
     }

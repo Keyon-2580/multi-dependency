@@ -22,6 +22,46 @@
 <div th:include="nav.html::nav"></div>
 <div class="col-sm-12 row" style="margin-bottom: 15px;">
     <div class = "col-sm-12" id = "file_table"></div>
+    <div class = "div_dependson_all">
+        <div class="div_depends1">
+            <div>
+                <h5>depends</h5>
+            </div>
+            <div class="col-sm-12">
+                <div>
+                    <h5>depended by</h5>
+                </div>
+                <div id="dependedBy_content1">
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div>
+                    <h5>depends on</h5>
+                </div>
+                <div id="dependsOn_content1">
+                </div>
+            </div>
+        </div>
+        <div class="div_depends2">
+            <div>
+                <h5>depends</h5>
+            </div>
+            <div class="col-sm-12">
+                <div>
+                    <h5>depended by</h5>
+                </div>
+                <div id="dependedBy_content2">
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div>
+                    <h5>depends on</h5>
+                </div>
+                <div id="dependsOn_content2">
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="div_file_all" style="margin-bottom: 15px;">
         <div class = "div_file1">
             <ul id="tree_file1" class="ztree"></ul>
