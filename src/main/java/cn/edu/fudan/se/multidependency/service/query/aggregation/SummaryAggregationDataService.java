@@ -6,7 +6,7 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
-import cn.edu.fudan.se.multidependency.service.query.aggregation.data.RelationDataForDoubleNodes;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.data.BasicDataForDoubleNodes;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChange;
 
 import java.util.*;
@@ -18,53 +18,14 @@ public interface SummaryAggregationDataService extends AggregationDataService{
      * @param fileClones
      * @return
      */
-    Map<Node, Map<Node, RelationDataForDoubleNodes<Node, Relation>>> queryPackageCloneFromFileClone(Collection<? extends Relation> fileClones);
+    Map<Node, Map<Node, BasicDataForDoubleNodes<Node, Relation>>> queryPackageCloneFromFileClone(Collection<? extends Relation> fileClones);
 
     /**
      * 根据文件间的克隆找出包间的克隆，排序
      * @param fileClones
      * @return
      */
-    Collection<RelationDataForDoubleNodes<Node, Relation>> queryPackageCloneFromFileCloneSort(Collection<? extends Relation> fileClones);
-
-//
-//    default Collection<RelationDataForDoubleNodes<Node, Relation>> queryPackageCloneFromFileClone(Collection<? extends Relation> fileClones, List<? extends Node> pcks) {
-//        if(pcks == null || pcks.isEmpty()) {
-//            return new ArrayList<>();
-//        }
-//        List<RelationDataForDoubleNodes<Node, Relation>> result = new ArrayList<>();
-//        for(int i = 0; i < pcks.size(); i++) {
-//            for(int j = i + 1; j < pcks.size(); j++) {
-//                RelationDataForDoubleNodes<Node, Relation> queryResult = queryPackageCloneFromFileCloneSort(fileClones, (Package)pcks.get(i), (Package)pcks.get(j));
-//                if(queryResult != null){
-//                    result.add(queryResult);
-//                }
-//            }
-//        }
-//
-//        return result;
-//    }
-
-//    /**
-//     * 两个包之间的文件级克隆的聚合，两个包之间不分先后顺序
-//     * @param fileClones
-//     * @param pck1
-//     * @param pck2
-//     * @return
-//     */
-//    default RelationDataForDoubleNodes<Node, Relation> queryPackageCloneFromFileCloneSort(Collection<? extends Relation> fileClones, Package pck1, Package pck2) {
-//        Map<Node, Map<Node, RelationDataForDoubleNodes<Node, Relation>>> packageClones = queryPackageCloneFromFileClone(fileClones);
-//        Map<Node, RelationDataForDoubleNodes<Node, Relation>> map = packageClones.getOrDefault(pck1, new HashMap<>());
-//        RelationDataForDoubleNodes<Node, Relation> result = map.get(pck2);
-//        if(result == null) {
-//            map = packageClones.getOrDefault(pck2, new HashMap<>());
-//            result = map.get(pck1);
-//        }
-//        if(result != null) {
-//            result.sortChildren();
-//        }
-//        return result;
-//    }
+    List<BasicDataForDoubleNodes<Node, Relation>> queryPackageCloneFromFileCloneSort(Collection<? extends Relation> fileClones);
 
     /**
      * 列出包克隆中，包中克隆文件的co-change情况
@@ -81,66 +42,23 @@ public interface SummaryAggregationDataService extends AggregationDataService{
      * @param fileCoChanges
      * @return
      */
-    Map<Node, Map<Node, RelationDataForDoubleNodes<Node, Relation>>> queryPackageCoChangeFromFileCoChange(Collection<? extends Relation> fileCoChanges);
+    Map<Node, Map<Node, BasicDataForDoubleNodes<Node, Relation>>> queryPackageCoChangeFromFileCoChange(Collection<? extends Relation> fileCoChanges);
 
     /**
      * 根据文件间的co-change找出包间的co-change，排序
      * @param fileCoChanges
      * @return
      */
-    Collection<RelationDataForDoubleNodes<Node, Relation>> queryPackageCoChangeFromFileCoChangeSort(Collection<? extends Relation> fileCoChanges);
+    Collection<BasicDataForDoubleNodes<Node, Relation>> queryPackageCoChangeFromFileCoChangeSort(Collection<? extends Relation> fileCoChanges);
 
-
-//    default Collection<RelationDataForDoubleNodes<Node, Relation>> queryPackageCoChangeFromFileCoChange(Collection<? extends Relation> fileCoChanges, List<Node> pcks) {
-//        if(pcks == null || pcks.isEmpty()) {
-//            return new ArrayList<>();
-//        }
-//        List<RelationDataForDoubleNodes<Node, Relation>> result = new ArrayList<>();
-//        for(int i = 0; i < pcks.size(); i++) {
-//            for(int j = i + 1; j < pcks.size(); j++) {
-//                RelationDataForDoubleNodes<Node, Relation> queryResult = queryPackageCoChangeFromFileCoChangeSort(fileCoChanges, pcks.get(i), pcks.get(j));
-//                if(queryResult != null){
-//                    result.add(queryResult);
-//                }
-//            }
-//        }
-//
-//        return result;
-//    }
-
-//    /**
-//     * 两个节点（包）之间的关系（cochange）聚合，两个节点之间不分先后顺序
-//     * @param fileCoChanges
-//     * @param pck1
-//     * @param pck2
-//     * @return
-//     */
-//    default RelationDataForDoubleNodes<Node, Relation> queryPackageCoChangeFromFileCoChangeSort(Collection<? extends Relation> fileCoChanges, Node pck1, Node pck2) {
-//        Map<Node, Map<Node, RelationDataForDoubleNodes<Node, Relation>>> packageClones = queryPackageCoChangeFromFileCoChange(fileCoChanges);
-//        Map<Node, RelationDataForDoubleNodes<Node, Relation>> map = packageClones.getOrDefault(pck1, new HashMap<>());
-//        RelationDataForDoubleNodes<Node, Relation> result = map.get(pck2);
-//        if(result == null) {
-//            map = packageClones.getOrDefault(pck2, new HashMap<>());
-//            result = map.get(pck1);
-//        }
-//        if(result != null) {
-//            result.sortChildren();
-//        }
-//        return result;
-//    }
-
-
-
-
-
-    default Collection<RelationDataForDoubleNodes<Node, Relation>> querySuperNodeRelationFromSubNodeRelation(Collection<? extends Relation> subNodeRelations, List<Node> pcks) {
+    default Collection<BasicDataForDoubleNodes<Node, Relation>> querySuperNodeRelationFromSubNodeRelation(Collection<? extends Relation> subNodeRelations, List<Node> pcks) {
         if(pcks == null || pcks.isEmpty()) {
             return new ArrayList<>();
         }
-        List<RelationDataForDoubleNodes<Node, Relation>> result = new ArrayList<>();
+        List<BasicDataForDoubleNodes<Node, Relation>> result = new ArrayList<>();
         for(int i = 0; i < pcks.size(); i++) {
             for(int j = i + 1; j < pcks.size(); j++) {
-                RelationDataForDoubleNodes<Node, Relation> queryResult = querySuperNodeRelationFromSubNodeRelationSort(subNodeRelations, pcks.get(i), pcks.get(j));
+                BasicDataForDoubleNodes<Node, Relation> queryResult = querySuperNodeRelationFromSubNodeRelationSort(subNodeRelations, pcks.get(i), pcks.get(j));
                 if(queryResult != null){
                     result.add(queryResult);
                 }
@@ -157,8 +75,8 @@ public interface SummaryAggregationDataService extends AggregationDataService{
      * @param pck2
      * @return
      */
-    default RelationDataForDoubleNodes<Node, Relation> querySuperNodeRelationFromSubNodeRelationSort(Collection<? extends Relation> subNodeRelations, Node pck1, Node pck2) {
-        Map<Node, Map<Node, RelationDataForDoubleNodes<Node, Relation>>> packageRelations = new HashMap<>();
+    default BasicDataForDoubleNodes<Node, Relation> querySuperNodeRelationFromSubNodeRelationSort(Collection<? extends Relation> subNodeRelations, Node pck1, Node pck2) {
+        Map<Node, Map<Node, BasicDataForDoubleNodes<Node, Relation>>> packageRelations = new HashMap<>();
         if(subNodeRelations == null || subNodeRelations.isEmpty())
             return null;
         if(((List<Relation>)subNodeRelations).get(0) instanceof Clone)
@@ -167,8 +85,8 @@ public interface SummaryAggregationDataService extends AggregationDataService{
             packageRelations = queryPackageCoChangeFromFileCoChange(subNodeRelations);
         }else
             return null;
-        Map<Node, RelationDataForDoubleNodes<Node, Relation>> map = packageRelations.getOrDefault(pck1, new HashMap<>());
-        RelationDataForDoubleNodes<Node, Relation> result = map.get(pck2);
+        Map<Node, BasicDataForDoubleNodes<Node, Relation>> map = packageRelations.getOrDefault(pck1, new HashMap<>());
+        BasicDataForDoubleNodes<Node, Relation> result = map.get(pck2);
         if(result == null) {
             map = packageRelations.getOrDefault(pck2, new HashMap<>());
             result = map.get(pck1);

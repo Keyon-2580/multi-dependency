@@ -29,22 +29,14 @@ public class HotspotPackagePair {
 	
 	private Package package2;
 
-	private int relationNodes1;
-
-	private int relationNodes2;
-
-	private int allNodes1;
-
-	private int allNodes2;
-
-	public HotspotPackagePair(@NonNull Package package1, Package package2, BasicDataForDoubleNodes<Node, Relation> packagePairRelationData) {
+	public HotspotPackagePair(@NonNull BasicDataForDoubleNodes<Node, Relation> packagePairRelationData) {
 		this.packagePairRelationData = packagePairRelationData;
 		this.hotspotRelationType = packagePairRelationData.getRelationDataType();
 		this.childrenHotspotPackagePairs = new ArrayList<>();
 		this.childrenOtherPackages1 = new ArrayList<>();
 		this.childrenOtherPackages2 = new ArrayList<>();
-		this.package1 = package1;
-		this.package2 = package2;
+		this.package1 = (Package) packagePairRelationData.node1;
+		this.package2 = (Package) packagePairRelationData.node2;
 		this.id = String.join("_", package1.getId().toString(), package2.getId().toString());
 	}
 
@@ -76,13 +68,6 @@ public class HotspotPackagePair {
 			this.childrenOtherPackages2.add(child);
 		}
 		return true;
-	}
-
-	public void setData(int allNodes1, int allNodes2, int relationNodes1, int relationNodes2) {
-		this.allNodes1 = allNodes1;
-		this.allNodes2 = allNodes2;
-		this.relationNodes1 = relationNodes1;
-		this.relationNodes2 = relationNodes2;
 	}
 
 	public void swapPackages() {

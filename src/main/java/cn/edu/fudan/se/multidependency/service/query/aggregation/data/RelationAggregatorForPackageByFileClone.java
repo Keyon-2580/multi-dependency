@@ -46,11 +46,12 @@ public class RelationAggregatorForPackageByFileClone implements RelationAggregat
 	}
 
 	@Override
-	public Boolean aggregate(RelationDataForDoubleNodes<? extends Node, ? extends Relation> doubleNodes) {
-		int allNodes1 = doubleNodes.getAllNodesCount1();
-		int allNodes2 = doubleNodes.getAllNodesCount2();
-		int cloneNodes1 = doubleNodes.getCloneNodesCount1();
-		int cloneNodes2 = doubleNodes.getCloneNodesCount2();
+	public Boolean aggregate(BasicDataForDoubleNodes<? extends Node, ? extends Relation> doubleNodes) {
+		CloneRelationDataForDoubleNodes<? extends Node, ? extends Relation> cloneRelationDataForDoubleNodes = (CloneRelationDataForDoubleNodes<? extends Node, ? extends Relation>) doubleNodes;
+		int allNodes1 = cloneRelationDataForDoubleNodes.getAllNodesCount1();
+		int allNodes2 = cloneRelationDataForDoubleNodes.getAllNodesCount2();
+		int cloneNodes1 = cloneRelationDataForDoubleNodes.getCloneNodesCount1();
+		int cloneNodes2 = cloneRelationDataForDoubleNodes.getCloneNodesCount2();
 		return ((cloneNodes1 + cloneNodes2 + 0.0) / (allNodes1 + allNodes2) > 0.5);
 	}
 }

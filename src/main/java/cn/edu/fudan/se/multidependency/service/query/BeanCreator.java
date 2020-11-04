@@ -4,17 +4,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
+import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.relation.Relation;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackagePairDetector;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.data.CloneRelationDataForDoubleNodes;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
 import cn.edu.fudan.se.multidependency.repository.node.clone.CloneGroupRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.AggregationCloneRepository;
-import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
-import org.apache.catalina.Host;
-import org.neo4j.cypher.internal.v3_4.expressions.Add;
 import org.springframework.stereotype.Component;
 import org.springframework.context.annotation.Bean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,6 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.model.relation.clone.ModuleClone;
 import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
-import cn.edu.fudan.se.multidependency.repository.node.clone.CloneGroupRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileRepository;
@@ -48,7 +48,7 @@ public class BeanCreator {
 	private BasicCloneQueryService basicCloneQueryService;
 
 	@Autowired
-	private HotspotPackageDetector hotspotPackageDetector;
+	private HotspotPackagePairDetector hotspotPackagePairDetector;
 
 	@Bean
 	public int setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository) {
@@ -178,8 +178,8 @@ public class BeanCreator {
 			else {
 				LOGGER.info("设置Aggregation Clone聚合结果...");
 				if(aggregationCloneRepository.getNumberOfAggregationClone() == 0) {
-					Collection<HotspotPackage> hotspotPackages = hotspotPackageDetector.detectHotspotPackages();
-					AddChildrenPackages(-1, -1, hotspotPackages, aggregationCloneRepository);
+					Collection<HotspotPackagePair> hotspotPackagePairs = hotspotPackagePairDetector.detectHotspotPackagePairs();
+					AddChildrenPackages(-1, -1, hotspotPackagePairs, aggregationCloneRepository);
 				}
 				aggregationClone = aggregationCloneRepository.getAllAggregationClone();
 			}
@@ -188,11 +188,12 @@ public class BeanCreator {
 		return new ArrayList<>();
 	}
 
-	public void AddChildrenPackages(long parent1Id, long parent2Id, Collection<HotspotPackage> hotspotPackages, AggregationCloneRepository aggregationCloneRepository) {
-		for(HotspotPackage hotspotPackage : hotspotPackages) {
-			Collection<HotspotPackage> childrenHotspotPackages = hotspotPackage.getChildrenHotspotPackages();
-			AddChildrenPackages(hotspotPackage.getPackage1().getId(), hotspotPackage.getPackage2().getId(), childrenHotspotPackages, aggregationCloneRepository);
-			aggregationCloneRepository.createAggregationClone(hotspotPackage.getPackage1().getId(), hotspotPackage.getPackage2().getId(), parent1Id, parent2Id, hotspotPackage.getRelationPackages().getChildren().size(), hotspotPackage.getAllNodes1(), hotspotPackage.getAllNodes2(), hotspotPackage.getRelationNodes1(), hotspotPackage.getRelationNodes2());
+	public void AddChildrenPackages(long parent1Id, long parent2Id, Collection<HotspotPackagePair> hotspotPackagePairs, AggregationCloneRepository aggregationCloneRepository) {
+		for(HotspotPackagePair hotspotPackagePair : hotspotPackagePairs) {
+			Collection<HotspotPackagePair> childrenHotspotPackagePairs = hotspotPackagePair.getChildrenHotspotPackagePairs();
+			AddChildrenPackages(hotspotPackagePair.getPackage1().getId(), hotspotPackagePair.getPackage2().getId(), childrenHotspotPackagePairs, aggregationCloneRepository);
+			CloneRelationDataForDoubleNodes<Node, Relation> packagePairCloneRelationData = (CloneRelationDataForDoubleNodes<Node, Relation>) hotspotPackagePair.getPackagePairRelationData();
+			aggregationCloneRepository.createAggregationClone(hotspotPackagePair.getPackage1().getId(), hotspotPackagePair.getPackage2().getId(), parent1Id, parent2Id, packagePairCloneRelationData.getClonePairs(), packagePairCloneRelationData.getAllNodesCount1(), packagePairCloneRelationData.getAllNodesCount2(), packagePairCloneRelationData.getCloneNodesCount1(), packagePairCloneRelationData.getCloneNodesCount2());
 		}
 	}
 }

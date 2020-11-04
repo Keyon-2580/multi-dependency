@@ -41,9 +41,8 @@ public class RelationAggregatorForPackageByFileClone2 implements RelationAggrega
 		this.countThreshold = DEFAULT_COUNT_THRESHOLD;
 		this.percentageThreshold = DEFAULT_PERCENTAGE_THRESHOLD;
 	}
-
 	@Override
-	public Boolean aggregate(RelationDataForDoubleNodes<? extends Node, ? extends Relation> doubleNodes) {
+	public Boolean aggregate(BasicDataForDoubleNodes<? extends Node, ? extends Relation> doubleNodes) {
 		Node node1 = doubleNodes.getNode1();
 		Node node2 = doubleNodes.getNode2();
 		if(!(node1 instanceof Package) || !(node2 instanceof Package)) {

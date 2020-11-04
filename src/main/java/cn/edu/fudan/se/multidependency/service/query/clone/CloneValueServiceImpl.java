@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.service.query.clone;
 
 import java.util.*;
 
+import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,9 +45,12 @@ public class CloneValueServiceImpl implements CloneValueService {
 	
     @Autowired
     BasicCloneQueryService basicCloneQueryService;
-    
-    @Autowired
-    GitAnalyseService gitAnalyseService;
+
+	@Autowired
+	GitAnalyseService gitAnalyseService;
+
+	@Autowired
+	NodeService nodeService;
 
 	@Override
 	public Collection<CloneValueForDoubleNodes<Package>> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones) {
@@ -65,6 +69,11 @@ public class CloneValueServiceImpl implements CloneValueService {
 	@Override
 	public PackageCloneValueWithFileCoChange queryPackageCloneWithFileCoChange(Collection<Clone> fileClones, Package pck1, Package pck2) throws Exception {
 		CloneValueForDoubleNodes<Package> temp = queryPackageCloneFromFileCloneSort(fileClones, pck1, pck2);
+		if(temp == null) {
+			Package OriginalPck1 = nodeService.queryPackage(pck1.getId());
+			Package OriginalPck2 = nodeService.queryPackage(pck2.getId());
+			temp = queryPackageCloneFromFileCloneSort(fileClones, OriginalPck1, OriginalPck2);
+		}
 		PackageCloneValueWithFileCoChange result = new PackageCloneValueWithFileCoChange();
 		result.setPck1(temp.getNode1());
 		result.setPck2(temp.getNode2());
@@ -88,7 +97,6 @@ public class CloneValueServiceImpl implements CloneValueService {
 		Set<ProjectFile> cloneFiles1 = result.getCloneFiles1();
 		Set<ProjectFile> cloneFiles2 = result.getCloneFiles2();
 		Set<ProjectFile> allFiles1 = result.getAllFiles1();
-		System.out.println(allFiles1);
 		Set<ProjectFile> allFiles2 = result.getAllFiles2();
 
 		Set<ProjectFile> noneCloneFiles1 = new HashSet();
@@ -123,7 +131,29 @@ public class CloneValueServiceImpl implements CloneValueService {
 //		}
 //		return allFiles;
 //	}
-    
+	/**
+	 * 两个包之间的文件级克隆的聚合，两个包之间不分先后顺序
+	 * @param fileClones
+	 * @param removeSameNode
+	 * @param pck1
+	 * @param pck2
+	 * @return
+	 */
+	@Override
+	public CloneValueForDoubleNodes<Package> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones, Package pck1, Package pck2) {
+		Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> packageClones = queryPackageCloneFromFileClone(fileClones);
+		Map<Package, CloneValueForDoubleNodes<Package>> map = packageClones.getOrDefault(pck1, new HashMap<>());
+		CloneValueForDoubleNodes<Package> result = map.get(pck2);
+		if(result == null) {
+			map = packageClones.getOrDefault(pck2, new HashMap<>());
+			result = map.get(pck1);
+		}
+		if(result != null) {
+			result.sortChildren();
+		}
+		return result;
+	}
+
     private Collection<CloneValueForDoubleNodes<Package>> removeSameNodeToCloneValuePackages = null;
     private Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> queryPackageCloneFromFileCloneCache = null;
 	public Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> queryPackageCloneFromFileClone(Collection<Clone> fileClones) {

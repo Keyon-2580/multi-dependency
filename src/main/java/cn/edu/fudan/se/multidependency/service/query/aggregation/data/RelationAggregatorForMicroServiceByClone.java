@@ -23,7 +23,7 @@ public class RelationAggregatorForMicroServiceByClone<CloneLevel extends Node> i
 	}
 
 	@Override
-	public String aggregate(RelationDataForDoubleNodes<? extends Node, ? extends Relation> doubleNodes) {
+	public String aggregate(BasicDataForDoubleNodes<? extends Node, ? extends Relation> doubleNodes) {
 		assert(doubleNodes.getNode1() instanceof MicroService && doubleNodes.getNode2() instanceof MicroService);
 		StringBuilder builder = new StringBuilder();
 		builder.append("(");

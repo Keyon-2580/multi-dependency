@@ -3,9 +3,12 @@ package cn.edu.fudan.se.multidependency.service.query.aggregation;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
 
+import java.io.OutputStream;
 import java.util.List;
 
 public interface HotspotPackagePairDetector {
+
+	List<HotspotPackagePair> detectHotspotPackagePairs();
 
 	List<HotspotPackagePair> detectHotspotPackagePairWithDependsOnByProjectId(long projectId);
 
@@ -19,4 +22,11 @@ public interface HotspotPackagePairDetector {
 
 	List<HotspotPackagePair> detectHotspotPackagesByCoChangeInAllProjects();
 
+	List<HotspotPackagePair> detectHotspotPackagePairWithFileClone();
+
+	HotspotPackagePair detectHotspotPackagePairWithFileCloneByPackageId(long pck1Id, long pck2Id, String language);
+
+	List<HotspotPackagePair> detectHotspotPackagePairWithFileCloneByParentId(long parent1Id, long parent2Id, String language);
+
+	void exportHotspotPackages(OutputStream stream);
 }

@@ -99,7 +99,8 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 			Package parentPackage1 = findParentPackage(directoryPathToParentPackage, currentPackage1);
 			Package parentPackage2 = findParentPackage(directoryPathToParentPackage, currentPackage2);
 			while (parentPackage1 != null && parentPackage2 != null) {
-				RelationDataForDoubleNodes<Node, Relation> parentPackageClone = summaryAggregationDataService.querySuperNodeRelationFromSubNodeRelationSort(subNodeRelations, parentPackage1, parentPackage2);
+//				RelationDataForDoubleNodes<Node, Relation> parentPackageClone = summaryAggregationDataService.querySuperNodeRelationFromSubNodeRelationSort(subNodeRelations, parentPackage1, parentPackage2);
+				RelationDataForDoubleNodes<Node, Relation> parentPackageClone = null;
 				if (parentPackageClone == null) {
 					break;
 				}
@@ -181,7 +182,8 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 		Map<String, Boolean> isChild = new HashMap<>();
 		Map<String, Boolean> isHotspot = new HashMap<>();
 		Collection<? extends Relation> fileClones = basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE);
-		List<RelationDataForDoubleNodes<Node, Relation>> packageClones = (List<RelationDataForDoubleNodes<Node, Relation>>) summaryAggregationDataService.queryPackageCloneFromFileCloneSort(fileClones);
+		//List<RelationDataForDoubleNodes<Node, Relation>> packageClones = (List<RelationDataForDoubleNodes<Node, Relation>>) summaryAggregationDataService.queryPackageCloneFromFileCloneSort(fileClones);
+		List<RelationDataForDoubleNodes<Node, Relation>> packageClones = null;
 		RelationAggregator<Boolean> aggregator = RelationAggregatorForPackageByFileClone.getInstance();
 
 		//预处理
@@ -319,7 +321,8 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 		Map<String, HotspotPackage> idToPackageRelation = new HashMap<>();
 		Map<String, Boolean> isChild = new HashMap<>();
 		Collection<CoChange> fileCoChanges = gitAnalyseService.calCntOfFileCoChange();
-		Collection<RelationDataForDoubleNodes<Node, Relation>> packageRelations = summaryAggregationDataService.queryPackageCoChangeFromFileCoChangeSort(fileCoChanges);
+//		Collection<RelationDataForDoubleNodes<Node, Relation>> packageRelations = summaryAggregationDataService.queryPackageCoChangeFromFileCoChangeSort(fileCoChanges);
+		List<RelationDataForDoubleNodes<Node, Relation>> packageRelations = null;
 		RelationAggregator<Boolean> aggregator = RelationAggregatorForPackageByCoChange.getInstance();
 		return aggregatePackageRelation(fileCoChanges,packageRelations,aggregator);
 	}
@@ -522,7 +525,8 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 		String key = String.join("_", pck1.getDirectoryPath(), pck2.getDirectoryPath());
 		if(!directoryPathToHotspotPackage.containsKey(key)) {
 			HotspotPackage hotspotPackage;
-			RelationDataForDoubleNodes<Node, Relation> packageClone = summaryAggregationDataService.querySuperNodeRelationFromSubNodeRelationSort(fileClones, pck1, pck2);
+//			RelationDataForDoubleNodes<Node, Relation> packageClone = summaryAggregationDataService.querySuperNodeRelationFromSubNodeRelationSort(fileClones, pck1, pck2);
+			RelationDataForDoubleNodes<Node, Relation> packageClone = null;
 			if(packageClone != null) {
 				hotspotPackage = new HotspotPackage(packageClone);
 				if(hotspotPackage.getPackage1().getDirectoryPath().equals(pck2.getDirectoryPath()) && hotspotPackage.getPackage2().getDirectoryPath().equals(pck1.getDirectoryPath())) {

@@ -65,28 +65,8 @@ public interface CloneValueService {
 		
 		return result;
 	}
-	
-	/**
-	 * 两个包之间的文件级克隆的聚合，两个包之间不分先后顺序
-	 * @param fileClones
-	 * @param removeSameNode
-	 * @param pck1
-	 * @param pck2
-	 * @return
-	 */
-	default CloneValueForDoubleNodes<Package> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones, Package pck1, Package pck2) {
-		Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> packageClones = queryPackageCloneFromFileClone(fileClones);
-		Map<Package, CloneValueForDoubleNodes<Package>> map = packageClones.getOrDefault(pck1, new HashMap<>());
-		CloneValueForDoubleNodes<Package> result = map.get(pck2);
-		if(result == null) {
-			map = packageClones.getOrDefault(pck2, new HashMap<>());
-			result = map.get(pck1);
-		}
-		if(result != null) {
-			result.sortChildren();
-		}
-		return result;
-	}
+
+	CloneValueForDoubleNodes<Package> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones, Package pck1, Package pck2);
 	
 	PackageCloneValueWithFileCoChange queryPackageCloneWithFileCoChange(Collection<Clone> fileClones, Package pck1, Package pck2) throws Exception;
 	

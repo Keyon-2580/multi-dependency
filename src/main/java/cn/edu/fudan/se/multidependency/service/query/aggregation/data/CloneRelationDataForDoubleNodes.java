@@ -24,17 +24,38 @@ public class CloneRelationDataForDoubleNodes<N extends Node, R extends Relation>
 
 	private int cloneNodesCount2 = 0;
 
+	private int allNodesCount1 = 0;
+
+	private int allNodesCount2 = 0;
+
+	private double similarityValue = 0.00;
+
 	private int cloneNodesCoChangeTimes = 0;
+
+	private int allNodesCoChangeTimes = 0;
 
 	public CloneRelationDataForDoubleNodes(N node1, N node2){
 		super(node1, node2);
 	}
 
-	public void setDate(int clonePairs, int cloneNodesCount1, int cloneNodesCount2, int cloneNodesCoChangeTimes) {
-		this.clonePairs = clonePairs;
+	public void setDate(int allNodesCount1, int allNodesCount2, int cloneNodesCount1, int cloneNodesCount2) {
+		this.allNodesCount1 = allNodesCount1;
+		this.allNodesCount2 = allNodesCount2;
 		this.cloneNodesCount1 = cloneNodesCount1;
 		this.cloneNodesCount2 = cloneNodesCount2;
+		similarityValue = (cloneNodesCount1 + cloneNodesCount2 + 0.0) / (allNodesCount1 + allNodesCount2);
+	}
+
+	public void setClonePairs(int clonePairs) {
+		this.clonePairs = clonePairs;
+	}
+
+	public void setCloneNodesCoChangeTimes(int cloneNodesCoChangeTimes) {
 		this.cloneNodesCoChangeTimes = cloneNodesCoChangeTimes;
+	}
+
+	public void setAllNodesCoChangeTimes(int allNodesCoChangeTimes) {
+		this.allNodesCoChangeTimes = allNodesCoChangeTimes;
 	}
 
 	@Override

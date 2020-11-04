@@ -3,10 +3,8 @@ package cn.edu.fudan.se.multidependency.controller;
 import java.io.OutputStream;
 import java.util.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
-import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackagePairDetector;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,9 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/cloneaggregation")
 public class CloneAggregationController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloneAggregationController.class);
     @Autowired
-    private HotspotPackageDetector hotspotPackageDetector;
+    private HotspotPackagePairDetector hotspotPackagePairDetector;
 
     @GetMapping(value = {""})
     public String graph() {
@@ -38,8 +35,8 @@ public class CloneAggregationController {
      */
     @GetMapping("/show/java")
     @ResponseBody
-    public Collection<HotspotPackage> showHotspotPackagesOfJava(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
-        return hotspotPackageDetector.detectHotspotPackagesByParentId(-1, -1, "java");
+    public List<HotspotPackagePair> showHotspotPackagesOfJava(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
+        return hotspotPackagePairDetector.detectHotspotPackagePairWithFileCloneByParentId(-1, -1, "java");
     }
 
     /**
@@ -50,8 +47,8 @@ public class CloneAggregationController {
      */
     @GetMapping("/show/cpp")
     @ResponseBody
-    public Collection<HotspotPackage> showHotspotPackagesOfCpp(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
-        return hotspotPackageDetector.detectHotspotPackagesByParentId(-1, -1, "cpp");
+    public List<HotspotPackagePair> showHotspotPackagesOfCpp(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
+        return hotspotPackagePairDetector.detectHotspotPackagePairWithFileCloneByParentId(-1, -1, "cpp");
     }
 
     @GetMapping("/package/export")
@@ -61,8 +58,7 @@ public class CloneAggregationController {
             response.addHeader("Content-Disposition", "attachment;filename=similar_packages.xlsx");
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             OutputStream stream = response.getOutputStream();
-
-            hotspotPackageDetector.exportHotspotPackages(stream);
+            hotspotPackagePairDetector.exportHotspotPackages(stream);
         } catch (Exception e) {
             e.printStackTrace();
         }

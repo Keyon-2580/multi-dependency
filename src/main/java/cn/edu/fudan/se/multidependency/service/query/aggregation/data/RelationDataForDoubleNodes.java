@@ -147,17 +147,6 @@ public class RelationDataForDoubleNodes<N extends Node , R extends Relation> imp
 		}
 	}
 
-	public void setDate3(int cloneNodesCount1, int cloneNodesCount2, int allNodesCount1, int allNodesCount2, int childrenPackagesCount1, int childrenPackagesCount2, int childrenHotspotPackageCount1, int childrenHotspotPackageCount2) {
-		this.cloneNodesCount1 = cloneNodesCount1;
-		this.cloneNodesCount2 = cloneNodesCount2;
-		this.allNodesCount1 = allNodesCount1;
-		this.allNodesCount2 = allNodesCount2;
-		this.childrenPackagesCount1 = childrenPackagesCount1;
-		this.childrenPackagesCount2 = childrenPackagesCount2;
-		this.childrenHotspotPackageCount1 = childrenHotspotPackageCount1;
-		this.childrenHotspotPackageCount2 = childrenHotspotPackageCount2;
-	}
-
 	public void setDate(int allNodesCount1, int allNodesCount2, int cloneNodesCount1, int cloneNodesCount2) {
 		this.allNodesCount1 = allNodesCount1;
 		this.allNodesCount2 = allNodesCount2;
