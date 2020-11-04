@@ -98,6 +98,7 @@ public class HotspotPackagePairDetectorImpl<ps> implements HotspotPackagePairDet
 		dependsRelationDataForDoubleNodes.setDependsByTypes(dependsByStr);
 		dependsRelationDataForDoubleNodes.setDependsOnTimes(dependsOnTimes);
 		dependsRelationDataForDoubleNodes.setDependsByTimes(dependsByTimes);
+		dependsRelationDataForDoubleNodes.calDependsIntensity();
 		HotspotPackagePair hotspotPackagePair = new HotspotPackagePair(pck1, pck2, dependsRelationDataForDoubleNodes);
 		return hotspotPackagePair;
 	}

@@ -33,7 +33,7 @@ public abstract class BasicDataForDoubleNodes<N extends Node , R extends Relatio
 
 	protected String id;
 
-	abstract protected RelationType getRelationDataType();
+	abstract public RelationType getRelationDataType();
 
 	public BasicDataForDoubleNodes(N node1, N node2) {
 		this(node1, node2, String.join("_", node1.getId().toString(), node2.getId().toString()));

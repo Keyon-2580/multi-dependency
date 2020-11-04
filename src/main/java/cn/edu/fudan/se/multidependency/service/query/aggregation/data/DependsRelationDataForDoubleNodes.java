@@ -26,6 +26,8 @@ public class DependsRelationDataForDoubleNodes<N extends Node, R extends Relatio
 
 	private int dependsByTimes = 0;
 
+	private double dependsIntensity = 0.0;
+
 	public DependsRelationDataForDoubleNodes(N node1, N node2){
 		super(node1, node2);
 	}
@@ -38,7 +40,14 @@ public class DependsRelationDataForDoubleNodes<N extends Node, R extends Relatio
 	}
 
 	@Override
-	protected RelationType getRelationDataType() {
+	public RelationType getRelationDataType() {
 		return RelationType.DEPENDS_ON;
+	}
+
+	public void calDependsIntensity(){
+		int dependsTimes = dependsOnTimes + dependsByTimes;
+		if(dependsTimes > 0){
+			dependsIntensity = dependsTimes / (dependsTimes + 5);
+		}
 	}
 }

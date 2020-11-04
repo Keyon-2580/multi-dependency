@@ -35,7 +35,7 @@ public class CoChangeRelationDataForDoubleNodes<N extends Node, R extends Relati
 	}
 
 	@Override
-	protected RelationType getRelationDataType() {
+	public RelationType getRelationDataType() {
 		return RelationType.CO_CHANGE;
 	}
 }

@@ -38,7 +38,7 @@ public class CloneRelationDataForDoubleNodes<N extends Node, R extends Relation>
 	}
 
 	@Override
-	protected RelationType getRelationDataType() {
+	public RelationType getRelationDataType() {
 		return RelationType.CLONE;
 	}
 }
