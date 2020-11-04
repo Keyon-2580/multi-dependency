@@ -80,8 +80,8 @@ public class HotspotPackagePairDetectorImpl<ps> implements HotspotPackagePairDet
 	}
 
 	private HotspotPackagePair createHotspotPackagePairWithDepends(Package pck1, Package pck2, List<DependsOn> packageDependsOnList) {
-		String dependsOnStr = "DependsOn: ";
-		String dependsByStr = "DependsBy: ";
+		String dependsOnStr = "";
+		String dependsByStr = "";
 		int dependsOnTimes = 0;
 		int dependsByTimes = 0;
 		for (DependsOn dependsOn : packageDependsOnList){
