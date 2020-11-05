@@ -20,16 +20,20 @@ const LEGEND_DATA = [
         "color" : CLONE_LOW_COLOR
     },
     {
-        "name" : "0.8 <= depends Intensity < 1",
+        "name" : "0.8 <= 依赖强度 < 1",
         "color":DEPENDSON_HIGH_COLOR
     },
     {
-        "name" : "0.5 <= depends Intensity < 0.8",
+        "name" : "0.5 <= 依赖强度 < 0.8",
         "color":DEPENDSON_MEDIUM_COLOR
     },
     {
-        "name" : "0 < depends Intensity < 0.5",
+        "name" : "0 < 依赖强度 < 0.5",
         "color":DEPENDSON_LOW_COLOR
+    },
+    {
+        "name" : "Co-Change",
+        "color":COCHANGE_COLOR
     }
 ];
 
@@ -95,7 +99,7 @@ var loadPageData = function () {
                 "<option value=\"<=\" selected = \"selected\"><=</option>" +
                 "<option value=\"<\"><</option></select>" +
 
-                "<label class = \"AttributionSelectLabel\"> &nbsp;Similarity</label>" +
+                "<label class = \"AttributionSelectLabel\"> &nbsp;Intensity</label>" +
 
                 "<select class = \"AttributionSelectSingleSelect\" id=\"intensityCompareSelectHigh\">" +
                 "<option value=\"<=\"><=</option>" +
@@ -137,7 +141,7 @@ var loadPageData = function () {
                 "</label>" +
                 "<label class = \"AttributionSelectLabel\">" +
                 "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cochangeTimes\" name = \"coChange_children\"> Times >= " +
-                "<input  id=\"cochangeTimes\" class = \"AttributionSelectInput\" id=\"cochangetimes\" value=\"3\">" +
+                "<input class = \"AttributionSelectInput\" id=\"cochangetimes\" value=\"10\">" +
                 "</label></p>";
 
             html += "<p><div style=\"margin-top: 10px;\">" +
@@ -366,7 +370,6 @@ var showLine = function(links_local, type){
     }
 
     // console.log(links_local);
-    var temp_delete_number = 0;
 
     for(var i = links_local.length; i > 0; i--){
         var source_project = links_local[i - 1].source_projectBelong.split("_")[1];
@@ -391,7 +394,6 @@ var showLine = function(links_local, type){
 
         if(temp_flag_source === false || temp_flag_target === false){
             links_local.splice(i - 1, 1);
-            temp_delete_number++;
             flag_delete = true;
         }
 
@@ -422,26 +424,64 @@ var showLine = function(links_local, type){
 
                 if(temp_flag_clonesimilarity === false ){
                     links_local.splice(i - 1, 1);
-                    temp_delete_number++;
                     flag_delete = true;
                 }
             }
 
             if($("#cloneTimes").prop("checked") && links_local[i - 1].cloneTimes >= $("#clonetimes").val()){
                 links_local.splice(i - 1, 1);
-                temp_delete_number++;
                 flag_delete = true;
             }
         }
 
-        if(relation_type === "dependson" && flag_delete === false){
-            if($("#dependsOnTimes").prop("checked")){
-                if($("#dependencyTimes").val() > links_local[i - 1].dependsOnTimes &&
-                    $("#dependencyTimes").val() > links_local[i - 1].dependsByTimes){
+        if(relation_type === "dependson" && flag_delete === false ){
+            var intensity = links_local[i - 1].dependsIntensity;
+            if($("#dependsIntensity").prop("checked")){
+                var temp_flag_intensity = false;
+
+                if($("#intensityCompareSelectBelow").val() === "<=" &&
+                    intensity >= $("#intensitybelow").val()){
+                    if($("#intensityCompareSelectHigh").val() === "<=" &&
+                        intensity <= $("#intensityhigh").val()){
+                        temp_flag_intensity = true;
+                    }else if($("#intensityCompareSelectHigh").val() === "<" &&
+                        intensity < $("#intensityhigh").val()){
+                        temp_flag_intensity = true;
+                    }
+                }else if($("#intensityCompareSelectBelow").val() === "<" &&
+                    intensity > $("#intensitybelow").val()){
+                    if($("#intensityCompareSelectHigh").val() === "<=" &&
+                        intensity <= $("#intensityhigh").val()){
+                        temp_flag_intensity = true;
+                    }else if($("#intensityCompareSelectHigh").val() === "<" &&
+                        intensity < $("#intensityhigh").val()){
+                        temp_flag_intensity = true;
+                    }
+                }
+
+                if(temp_flag_intensity === false ){
                     links_local.splice(i - 1, 1);
-                    temp_delete_number++;
                     flag_delete = true;
                 }
+            }
+
+            if($("#dependsOnTimes").prop("checked") &&
+                $("#dependencyTimes").val() > links_local[i - 1].dependsOnTimes &&
+                $("#dependencyTimes").val() > links_local[i - 1].dependsByTimes){
+                links_local.splice(i - 1, 1);
+                flag_delete = true;
+            }
+        }
+
+        if(relation_type === "cochange" && flag_delete === false && $("#cochangeTimes").prop("checked")){
+            if($("#cochangetimes").val() >= 10){
+                if(links_local[i - 1].coChangeTimes < $("#cochangetimes").val()){
+                    links_local.splice(i - 1, 1);
+                    flag_delete = true;
+                }
+            }else{
+                alert("Cochange Times 需大于等于 10！");
+                return;
             }
         }
     }
@@ -490,7 +530,8 @@ function drawLink(jsonLinks) {
                 return "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\ndependsOnTypes: " + d.dependsOnTypes
                     + "\ndependsByTypes: " + d.dependsByTypes
                     + "\ndependsOnTimes: " + d.dependsOnTimes
-                    + "\ndependsByTimes: " + d.dependsByTimes;
+                    + "\ndependsByTimes: " + d.dependsByTimes
+                    + "\ndependsIntensity: " + d.dependsIntensity;
             }else if(d.type === "cochange"){
                 return "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\ncoChangeTimes: " + d.coChangeTimes
                     + "\nnode1ChangeTimes: " + d.node1ChangeTimes
