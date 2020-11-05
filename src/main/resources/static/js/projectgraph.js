@@ -1,38 +1,45 @@
 const CLONE_LOW_COLOR = "#f48989";
 const CLONE_MEDIUM_COLOR = "#e90c0c";
 const CLONE_HIGH_COLOR = "#9a2002";
-const DEPENDSON_LOW_COLOR = "#73cef3";
-const DEPENDSON_MEDIUM_COLOR = "#056fc0";
-const DEPENDSON_HIGH_COLOR = "#033187";
+const DEPENDSON_LOW_COLOR = "#0799d4";
+const DEPENDSON_MEDIUM_COLOR = "#0566b0";
+const DEPENDSON_HIGH_COLOR = "#012c7b";
 const COCHANGE_COLOR = "#f88705";
 
 const LEGEND_DATA = [
     {
         "name" : "克隆相似度 = 1",
+        "id" : "clone_high",
         "color":CLONE_HIGH_COLOR
     },
     {
         "name" : "0.9 <= 克隆相似度 < 1",
+        "id" : "clone_medium",
         "color":CLONE_MEDIUM_COLOR
     },
     {
         "name" : "克隆相似度 < 0.9",
+        "id" : "clone_low",
         "color" : CLONE_LOW_COLOR
     },
     {
         "name" : "0.8 <= 依赖强度 < 1",
+        "id" : "dependson_high",
         "color":DEPENDSON_HIGH_COLOR
     },
     {
         "name" : "0.5 <= 依赖强度 < 0.8",
+        "id" : "dependson_medium",
         "color":DEPENDSON_MEDIUM_COLOR
     },
     {
         "name" : "0 < 依赖强度 < 0.5",
+        "id" : "dependson_low",
         "color":DEPENDSON_LOW_COLOR
     },
     {
         "name" : "Co-Change",
+        "id" : "cochange",
         "color":COCHANGE_COLOR
     }
 ];
@@ -123,7 +130,7 @@ var loadPageData = function () {
                 "<option value=\"<=\" selected = \"selected\"><=</option>" +
                 "<option value=\"<\"><</option></select>" +
 
-                "<label class = \"AttributionSelectLabel\"> &nbsp;Similarity</label>" +
+                "<label class = \"AttributionSelectLabel\"> &nbsp;Clone Files / All Files</label>" +
 
                 "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectHigh\">" +
                 "<option value=\"<=\"><=</option>" +
@@ -325,6 +332,24 @@ var projectToGraph = function(result,divId){
         }
     }
 
+    var defs = svg.append("defs");
+
+    LEGEND_DATA.forEach(function (item){
+        var path = (defs.append("marker")
+            .attr("id", item.id)
+            .attr("markerUnits", "strokeWidth")
+            .attr("markerWidth", "8")
+            .attr("markerHeight", "8")
+            .attr("viewBox", "0 0 8 8")
+            .attr("refX", "4")
+            .attr("refY", "4")
+            .attr("orient", "auto"))
+            .append("path")
+            // .attr("d", "M2,2 L10,6 L2,10 L6,6 L2,2")
+            .attr("d", "M2,2 L6,4 L2,6 L4,4 L2,2")
+            .style("fill", item.color);
+    })
+
     var legend = svg.selectAll(".legend")
         // .data(["A", "B", "C", "D", "E"])
         .data(LEGEND_DATA)
@@ -511,7 +536,7 @@ function drawLink(jsonLinks) {
             return d.bottom_package ? "20,2" : null;
         })
         .attr("stroke", function (d){
-            return getTypeColor(d);
+            return getTypeColor(d)[0];
         })
         .attr("onclick", function(d){
             if(d.type === "clone" && !d.bottom_package){
@@ -519,6 +544,9 @@ function drawLink(jsonLinks) {
                 target_id = d.target_id.split("_")[1];
                 return "drawChildrenCloneLinks(\"" + source_id + "\", \"" + target_id + "\", \"" + d.type + "\")";
             }
+        })
+        .attr("marker-end",function (d){
+            return "url(#" + getTypeColor(d)[1] + ")";
         })
         .call(text => text.append("title").text(function(d) {
             if(d.type === "clone"){
@@ -542,15 +570,16 @@ function drawLink(jsonLinks) {
     jsonLinks.forEach(function (d){
         var k;
         var k_flag;
+        var inner_flag;
         d3.select("#" + d.source_id)
             .style("stroke",function (e){
-                return getTypeColor(d);
+                return getTypeColor(d)[0];
             })
             .style("stroke-width","1.5px")
 
         d3.select("#" + d.target_id)
             .style("stroke",function (e){
-                return getTypeColor(d);
+                return getTypeColor(d)[0];
             })
             .style("stroke-width","1.5px")
 
@@ -574,30 +603,55 @@ function drawLink(jsonLinks) {
             k_flag = false;
         }
 
+        var r_max = Math.max(r1, r2);
+        if(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)) < r_max){
+            inner_flag = true;
+        }else{
+            inner_flag = false;
+        }
+
         if(k_flag){
             //求偏移量
             var x1_offset = Math.sqrt((r1 * r1) / (k * k + 1));
             var y1_offset = Math.sqrt((r1 * r1) / (k * k + 1)) * k;
             var x2_offset = Math.sqrt((r2 * r2) / (k * k + 1));
             var y2_offset = Math.sqrt((r2 * r2) / (k * k + 1)) * k;
-            if(x1 > x2){
+
+
+            if(x1 > x2 && inner_flag === false){
                 x1 -= x1_offset;
                 y1 -= y1_offset;
                 x2 += x2_offset;
                 y2 += y2_offset;
-            }else{
+            }else if (x1 < x2 && inner_flag === false){
                 x1 += x1_offset;
                 y1 += y1_offset;
                 x2 -= x2_offset;
                 y2 -= y2_offset;
+            }else if (x1 > x2 && inner_flag){
+                x1 -= x1_offset;
+                y1 -= y1_offset;
+                x2 -= x2_offset;
+                y2 -= y2_offset;
+            }else if (x1 < x2 && inner_flag){
+                x1 += x1_offset;
+                y1 += y1_offset;
+                x2 += x2_offset;
+                y2 += y2_offset;
             }
         }else{
-            if(y1 > y2){
+            if(y1 > y2 && inner_flag === false){
                 y1 -= r1;
                 y2 += r2;
-            }else if(y1 < y2){
+            }else if(y1 < y2 && inner_flag === false){
                 y1 += r1;
                 y2 -= r2;
+            }else if (y1 > y2 && inner_flag){
+                y1 -= r1;
+                y2 -= r2;
+            }else if (y1 < y2 && inner_flag){
+                y1 += r1;
+                y2 += r2;
             }
         }
 
@@ -818,11 +872,11 @@ var showLineButton = function(){
 
 var getTypeColor = function(d){
     if(d.type === "clone") {
-        return d.similarityValue === 1 ? CLONE_HIGH_COLOR : d.similarityValue >= 0.9 ? CLONE_MEDIUM_COLOR : CLONE_LOW_COLOR;
+        return d.similarityValue === 1 ? [CLONE_HIGH_COLOR, "clone_high"] : d.similarityValue >= 0.9 ? [CLONE_MEDIUM_COLOR, "clone_medium"] : [CLONE_LOW_COLOR, "clone_low"];
     }else if(d.type === "dependson"){
-        return DEPENDSON_MEDIUM_COLOR;
+        return d.dependsIntensity > 0.8 ? [DEPENDSON_HIGH_COLOR, "dependson_high"] : d.dependsIntensity >= 0.5 ? [DEPENDSON_MEDIUM_COLOR, "dependson_medium"] : [DEPENDSON_LOW_COLOR, "dependson_low"];
     }else if(d.type === "cochange"){
-        return COCHANGE_COLOR;
+        return [COCHANGE_COLOR, "cochange"];
     }
 }
 

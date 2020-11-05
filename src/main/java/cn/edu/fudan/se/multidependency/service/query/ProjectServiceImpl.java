@@ -269,7 +269,7 @@ public class ProjectServiceImpl implements ProjectService{
                 DependsRelationDataForDoubleNodes<Node, Relation> dependsRelationDataForDoubleNodes = (DependsRelationDataForDoubleNodes<Node, Relation>)hotspotPackagePair.getPackagePairRelationData();
 
                 link.put("type", "dependson");
-                link.put("dependsOnTypes", dependsRelationDataForDoubleNodes.getDependsOnTimes());
+                link.put("dependsOnTypes", dependsRelationDataForDoubleNodes.getDependsOnTypes());
                 link.put("dependsByTypes", dependsRelationDataForDoubleNodes.getDependsByTypes());
                 link.put("dependsOnTimes", dependsRelationDataForDoubleNodes.getDependsOnTimes());
                 link.put("dependsByTimes", dependsRelationDataForDoubleNodes.getDependsByTimes());
