@@ -60,7 +60,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 		file.setPath(filePath);
 		file.setSuffix(FileUtil.extractSuffix(entity.getQualifiedName()));
 		file.setEndLine(entity.getEndLine() == null ? -1 : entity.getEndLine());
-		file.setLoc(entity.getLoc()+1);
+		file.setLoc(entity.getLoc() == null ? -1 : entity.getLoc());
 		addNode(file, currentProject);
 		// 文件所在目录
 		String directoryPath = FileUtil.extractDirectoryFromFile(entity.getQualifiedName()) + "/";
@@ -103,12 +103,7 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 		String typeIdentify = ((VarEntity) entity).getRawType().getName();
 		List<GenericName> varArguments = ((VarEntity) entity).getRawName().getArguments();
 		if(varArguments != null && !varArguments.isEmpty()){
-			typeIdentify += "<";
-			for (GenericName arg : varArguments){
-				typeIdentify += arg.getName() + ",";
-			}
-			typeIdentify = typeIdentify.substring(0,typeIdentify.length()-1);
-			typeIdentify += ">";
+			typeIdentify += getTypeIdentifyOfVar(varArguments);
 		}
 		variable.setTypeIdentify(typeIdentify);
 		variable.setSimpleName(entity.getRawName().getName());
@@ -285,11 +280,11 @@ public class CppInsertServiceImpl extends DependsCodeInserterForNeo4jServiceImpl
 						addRelation(fileIncludeFile);
 					}
 				} else {
-//					System.out.println("getImprotedFiles: " + entity.getClass());
+//					System.out.println("File - getImportedFiles: " + entity.getClass());
 				}
 			});
 			fileEntity.getImportedTypes().forEach(entity -> {
-//				System.out.println("getImportedTypes: " + entity.getClass());
+//				System.out.println("File - getImportedTypes: " + entity.getClass());
 			});
 
 		});

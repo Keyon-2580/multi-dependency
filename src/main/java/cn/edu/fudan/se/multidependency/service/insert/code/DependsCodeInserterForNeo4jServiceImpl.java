@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.service.insert.code;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
@@ -348,12 +349,11 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 								addRelation(dependency);
 							}
 						}
-					}else {
-						if (parentTypeEntity != null && parentTypeEntity.getClass() != FileEntity.class){
-							LOGGER.info("Global Var : " + variable.getName() + ":" + type.getName());
-						}
+					}else if (parentTypeEntity != null && parentTypeEntity.getClass() == FileEntity.class){
+							LOGGER.info("Global Var: " + parentTypeEntity.getQualifiedName() + ": "+ variable.getName() + "(Type: " + type.getName() + ")");
 					}
 				}
+
 			}
 			Type typeParameter = null;
 			for(depends.relations.Relation relation : varEntity.getRelations()) {
@@ -581,4 +581,20 @@ public abstract class DependsCodeInserterForNeo4jServiceImpl extends BasicCodeIn
 		}
 	}
 
+	protected String getTypeIdentifyOfVar(List<GenericName> varArguments){
+		String typeIdentify = "";
+		typeIdentify += "<";
+		for (GenericName arg : varArguments){
+			typeIdentify += arg.getName();
+			List<GenericName> varArgs = arg.getArguments();
+			if (varArgs != null && !varArgs.isEmpty()){
+				typeIdentify += getTypeIdentifyOfVar(varArgs);
+			}
+			typeIdentify += ", ";
+		}
+		typeIdentify = typeIdentify.substring(0,typeIdentify.length()-2);
+		typeIdentify += ">";
+
+		return typeIdentify;
+	}
 }
