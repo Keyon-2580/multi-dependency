@@ -4,7 +4,7 @@ const CLONE_HIGH_COLOR = "#9a2002";
 const DEPENDSON_LOW_COLOR = "#73cef3";
 const DEPENDSON_MEDIUM_COLOR = "#056fc0";
 const DEPENDSON_HIGH_COLOR = "#033187";
-const COCHANGE_COLOR = "";
+const COCHANGE_COLOR = "#f88705";
 
 const LEGEND_DATA = [
     {
@@ -194,6 +194,7 @@ var projectToGraph = function(result,divId){
     var projectdata = result[0].result;
     cloneLinks_global = result[1].links.clone_links;
     dependsonLinks_global = result[1].links.dependson_links;
+    cochangeLinks_global = result[1].links.cochange_links;
     table_global = result[2].table;
 
     var svg = d3.select("#" + divId)
@@ -490,10 +491,16 @@ function drawLink(jsonLinks) {
                     + "\ndependsByTypes: " + d.dependsByTypes
                     + "\ndependsOnTimes: " + d.dependsOnTimes
                     + "\ndependsByTimes: " + d.dependsByTimes;
+            }else if(d.type === "cochange"){
+                return "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\ncoChangeTimes: " + d.coChangeTimes
+                    + "\nnode1ChangeTimes: " + d.node1ChangeTimes
+                    + "\nnode2ChangeTimes: " + d.node2ChangeTimes;
             }
         }));
 
     jsonLinks.forEach(function (d){
+        var k;
+        var k_flag;
         d3.select("#" + d.source_id)
             .style("stroke",function (e){
                 return getTypeColor(d);
@@ -520,12 +527,13 @@ function drawLink(jsonLinks) {
 
         //求斜率(考虑斜率正无穷问题)
         if(x1 !== x2){
-            var k = (y2 - y1) / (x2 - x1);
+            k = (y2 - y1) / (x2 - x1);
+            k_flag = true;
         }else{
-            var k;
+            k_flag = false;
         }
 
-        if(typeof(k) !== "undefined"){
+        if(k_flag){
             //求偏移量
             var x1_offset = Math.sqrt((r1 * r1) / (k * k + 1));
             var y1_offset = Math.sqrt((r1 * r1) / (k * k + 1)) * k;
@@ -772,6 +780,8 @@ var getTypeColor = function(d){
         return d.similarityValue === 1 ? CLONE_HIGH_COLOR : d.similarityValue >= 0.9 ? CLONE_MEDIUM_COLOR : CLONE_LOW_COLOR;
     }else if(d.type === "dependson"){
         return DEPENDSON_MEDIUM_COLOR;
+    }else if(d.type === "cochange"){
+        return COCHANGE_COLOR;
     }
 }
 

@@ -1,11 +1,13 @@
 package cn.edu.fudan.se.multidependency.service.query;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackagePairDetector;
-import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.data.*;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
 import cn.edu.fudan.se.multidependency.service.query.data.ProjectStructure;
@@ -91,6 +93,7 @@ public class ProjectServiceImpl implements ProjectService{
             JSONObject links = new JSONObject();
             links.put("clone_links",temp_allprojects.getJSONObject("children_graphlinks").getJSONArray("clone_links"));
             links.put("dependson_links",temp_allprojects.getJSONObject("children_graphlinks").getJSONArray("dependson_links"));
+            links.put("cochange_links",temp_allprojects.getJSONObject("children_graphlinks").getJSONArray("cochange_links"));
             nodeJSON4.put("links", links);
             temp.put("table",temp_allprojects.getJSONObject("table"));
             result.add(nodeJSON4);
@@ -187,100 +190,115 @@ public class ProjectServiceImpl implements ProjectService{
 
     @Override
     public JSONObject getAllProjectsCloneLinks(){
-        List<HotspotPackage> cloneHotspotPackageList = hotspotPackageDetector.detectHotspotPackagesByParentId(-1, -1, "all");
-        List<HotspotPackage> dependsonHotspotPackageList = hotspotPackageDetector.detectHotspotPackagesByDependsOnInAllProjects();
+        List<HotspotPackagePair> cloneHotspotPackageList = hotspotPackagePairDetector.detectHotspotPackagePairWithFileCloneByParentId(-1, -1, "all");
+        List<HotspotPackagePair> dependsonHotspotPackageList = hotspotPackagePairDetector.detectHotspotPackagesByDependsOnInAllProjects();
+        List<HotspotPackagePair> cochangeHotspotPackageList = hotspotPackagePairDetector.detectHotspotPackagesByCoChangeInAllProjects();
         cloneHotspotPackageList.addAll(dependsonHotspotPackageList);
-//        System.out.println("hotspotPackageList " + hotspotPackageList);
-        return hotspotPackagesToCloneJson(cloneHotspotPackageList,new HotspotPackage(), "project");
+        cloneHotspotPackageList.addAll(cochangeHotspotPackageList);
+        return hotspotPackagesToCloneJson(cloneHotspotPackageList,new HotspotPackagePair(), "project");
     }
 
     @Override
     public JSONObject cloneGraphAndTableOfChildrenPackages(long package1Id, long package2Id) {
-        HotspotPackage parentHotspotPackage = hotspotPackageDetector.detectHotspotPackagesByPackageId(package1Id, package2Id, "all");
-        List<HotspotPackage> childrenHotspotPackages = new ArrayList<>(parentHotspotPackage.getChildrenHotspotPackages());
-//        Collection<HotspotPackage> childrenHotspotPackages2 = parentHotspotPackage.getChildrenHotspotPackages();
-//        System.out.println(childrenHotspotPackages2);
-//        System.out.println(parentHotspotPackage.getPackage2());
-        return hotspotPackagesToCloneJson(childrenHotspotPackages, parentHotspotPackage, "package");
+        HotspotPackagePair parentHotspotPackage = hotspotPackagePairDetector.detectHotspotPackagePairWithFileCloneByPackageId(package1Id, package2Id, "all");
+        List<HotspotPackagePair> childrenHotspotPackages = parentHotspotPackage.getChildrenHotspotPackagePairs();
+        return hotspotPackagesToCloneJson(childrenHotspotPackages, parentHotspotPackage, "clone_package");
     }
 
 
-    private JSONObject hotspotPackagesToCloneJson(List<HotspotPackage> hotspotPackageList, HotspotPackage parentHotspotPackage, String type){
+    private JSONObject hotspotPackagesToCloneJson(List<HotspotPackagePair> hotspotPackagePairList, HotspotPackagePair parentHotspotPackagePair, String type){
+//    private JSONObject hotspotPackagesToCloneJson(List<HotspotPackage> hotspotPackageList, HotspotPackage parentHotspotPackage, String type){
         JSONObject result = new JSONObject();
 
         JSONArray clone_links = new JSONArray();
         JSONArray dependson_links = new JSONArray();
+        JSONArray cochange_links = new JSONArray();
         JSONObject table = new JSONObject();
         JSONArray cloneFiles1 = new JSONArray();
         JSONArray cloneFiles2 = new JSONArray();
 
-        for(HotspotPackage hotspotPackage: hotspotPackageList){
+        for(HotspotPackagePair hotspotPackagePair: hotspotPackagePairList){
             JSONObject link = new JSONObject();
 
             JSONObject temp_clonefile1 = new JSONObject();
             JSONObject temp_clonefile2 = new JSONObject();
 
-            Project source_projectBelong = containRelationService.findPackageBelongToProject(hotspotPackage.getPackage1());
-            Project target_projectBelong = containRelationService.findPackageBelongToProject(hotspotPackage.getPackage2());
+            Project source_projectBelong = containRelationService.findPackageBelongToProject(hotspotPackagePair.getPackage1());
+            Project target_projectBelong = containRelationService.findPackageBelongToProject(hotspotPackagePair.getPackage2());
 
-            link.put("source_id", "id_" + hotspotPackage.getPackage1().getId().toString());
-            link.put("target_id", "id_" + hotspotPackage.getPackage2().getId().toString());
-            link.put("source_name", hotspotPackage.getPackage1().getDirectoryPath());
-            link.put("target_name", hotspotPackage.getPackage2().getDirectoryPath());
+            link.put("source_id", "id_" + hotspotPackagePair.getPackage1().getId().toString());
+            link.put("target_id", "id_" + hotspotPackagePair.getPackage2().getId().toString());
+            link.put("source_name", hotspotPackagePair.getPackage1().getDirectoryPath());
+            link.put("target_name", hotspotPackagePair.getPackage2().getDirectoryPath());
             link.put("source_projectBelong", "id_" + source_projectBelong.getId());
             link.put("target_projectBelong", "id_" + target_projectBelong.getId());
 
-            if(hotspotPackage.getDependsByTypes().equals("")){
+            if(hotspotPackagePair.getHotspotRelationType().toString().equals("CLONE")){
+                CloneRelationDataForDoubleNodes<Node, Relation> cloneRelationDataForDoubleNodes = (CloneRelationDataForDoubleNodes<Node, Relation>)hotspotPackagePair.getPackagePairRelationData();
                 link.put("type", "clone");
-                link.put("packageCochangeTimes", hotspotPackage.getPackageCochangeTimes());
-                link.put("packageCloneCochangeTimes", hotspotPackage.getPackageCloneCochangeTimes());
-                link.put("clonePairs", hotspotPackage.getClonePairs());
+                link.put("packageCochangeTimes", cloneRelationDataForDoubleNodes.getAllNodesCoChangeTimes());
+                link.put("packageCloneCochangeTimes", cloneRelationDataForDoubleNodes.getCloneNodesCoChangeTimes());
+                link.put("clonePairs", cloneRelationDataForDoubleNodes.getClonePairs());
 
-                if(hotspotPackage.getClonePairs() == 0){
+                if(cloneRelationDataForDoubleNodes.getClonePairs() == 0){
                     link.put("bottom_package", false);
                 }else{
                     link.put("bottom_package", true);
                 }
+                link.put("similarityValue", cloneRelationDataForDoubleNodes.getSimilarityValue());
 
-                link.put("similarityValue", hotspotPackage.getSimilarityValue());
+                temp_clonefile1.put("id", hotspotPackagePair.getPackage1().getId().toString());
+                temp_clonefile2.put("id", hotspotPackagePair.getPackage2().getId().toString());
+                temp_clonefile1.put("projectBelong", source_projectBelong.getId().toString());
+                temp_clonefile2.put("projectBelong", target_projectBelong.getId().toString());
+                temp_clonefile1.put("name", hotspotPackagePair.getPackage1().getDirectoryPath());
+                temp_clonefile2.put("name", hotspotPackagePair.getPackage2().getDirectoryPath());
+                temp_clonefile1.put("relationNodes1", cloneRelationDataForDoubleNodes.getCloneNodesCount1());
+                temp_clonefile2.put("relationNodes2", cloneRelationDataForDoubleNodes.getCloneNodesCount2());
+                temp_clonefile1.put("allNodes1", cloneRelationDataForDoubleNodes.getAllNodesCount1());
+                temp_clonefile2.put("allNodes2", cloneRelationDataForDoubleNodes.getAllNodesCount2());
+                temp_clonefile1.put("packageCochangeTimes", cloneRelationDataForDoubleNodes.getAllNodesCoChangeTimes());
+                temp_clonefile1.put("packageCloneCochangeTimes", cloneRelationDataForDoubleNodes.getCloneNodesCoChangeTimes());
+                temp_clonefile1.put("clonePairs", cloneRelationDataForDoubleNodes.getClonePairs());
+
+                cloneFiles1.add(temp_clonefile1);
+                cloneFiles2.add(temp_clonefile2);
 
                 clone_links.add(link);
-            }else{
+            }else if(hotspotPackagePair.getHotspotRelationType().toString().equals("DEPENDS_ON")){
+                DependsRelationDataForDoubleNodes<Node, Relation> dependsRelationDataForDoubleNodes = (DependsRelationDataForDoubleNodes<Node, Relation>)hotspotPackagePair.getPackagePairRelationData();
+
                 link.put("type", "dependson");
-                link.put("dependsOnTypes", hotspotPackage.getDependsOnTypes());
-                link.put("dependsByTypes", hotspotPackage.getDependsByTypes());
-                link.put("dependsOnTimes", hotspotPackage.getDependsOnTimes());
-                link.put("dependsByTimes", hotspotPackage.getDependsByTimes());
+                link.put("dependsOnTypes", dependsRelationDataForDoubleNodes.getDependsOnTimes());
+                link.put("dependsByTypes", dependsRelationDataForDoubleNodes.getDependsByTypes());
+                link.put("dependsOnTimes", dependsRelationDataForDoubleNodes.getDependsOnTimes());
+                link.put("dependsByTimes", dependsRelationDataForDoubleNodes.getDependsByTimes());
+                link.put("dependsIntensity", dependsRelationDataForDoubleNodes.getDependsIntensity());
                 dependson_links.add(link);
+            }else if(hotspotPackagePair.getHotspotRelationType().toString().equals("CO_CHANGE")){
+                CoChangeRelationDataForDoubleNodes<Node, Relation> coChangeRelationDataForDoubleNodes = (CoChangeRelationDataForDoubleNodes<Node, Relation>)hotspotPackagePair.getPackagePairRelationData();
+
+                if(coChangeRelationDataForDoubleNodes.getCoChangeTimes() >= 10){
+                    link.put("type", "cochange");
+                    link.put("coChangeTimes", coChangeRelationDataForDoubleNodes.getCoChangeTimes());
+                    link.put("node1ChangeTimes", coChangeRelationDataForDoubleNodes.getNode1ChangeTimes());
+                    link.put("node2ChangeTimes", coChangeRelationDataForDoubleNodes.getNode2ChangeTimes());
+                    cochange_links.add(link);
+                }
             }
 
 //            link.put("similarityValue", decimalFormat.format(hotspotPackage.getSimilarityValue()));
 
 //            graph_links.add(link);
-
-            temp_clonefile1.put("id", hotspotPackage.getPackage1().getId().toString());
-            temp_clonefile2.put("id", hotspotPackage.getPackage2().getId().toString());
-            temp_clonefile1.put("projectBelong", source_projectBelong.getId().toString());
-            temp_clonefile2.put("projectBelong", target_projectBelong.getId().toString());
-            temp_clonefile1.put("name", hotspotPackage.getPackage1().getDirectoryPath());
-            temp_clonefile2.put("name", hotspotPackage.getPackage2().getDirectoryPath());
-            temp_clonefile1.put("relationNodes1", hotspotPackage.getRelationNodes1());
-            temp_clonefile2.put("relationNodes2", hotspotPackage.getRelationNodes2());
-            temp_clonefile1.put("allNodes1", hotspotPackage.getAllNodes1());
-            temp_clonefile2.put("allNodes2", hotspotPackage.getAllNodes2());
-            temp_clonefile1.put("packageCochangeTimes", hotspotPackage.getPackageCochangeTimes());
-            temp_clonefile1.put("packageCloneCochangeTimes", hotspotPackage.getPackageCloneCochangeTimes());
-            temp_clonefile1.put("clonePairs", hotspotPackage.getClonePairs());
-
-            cloneFiles1.add(temp_clonefile1);
-            cloneFiles2.add(temp_clonefile2);
         }
         table.put("clonefiles1", cloneFiles1);
         table.put("clonefiles2", cloneFiles2);
 
-        if(type.equals("package")){
-            Collection<Package> nonClonePacksges1 = parentHotspotPackage.getChildrenOtherPackages1();
-            Collection<Package> nonClonePacksges2 = parentHotspotPackage.getChildrenOtherPackages2();
+        if(type.equals("clone_package")){
+            CloneRelationDataForDoubleNodes<Node, Relation> cloneRelationDataForDoubleNodes = (CloneRelationDataForDoubleNodes<Node, Relation>)parentHotspotPackagePair.getPackagePairRelationData();
+
+            Collection<Package> nonClonePacksges1 = parentHotspotPackagePair.getChildrenOtherPackages1();
+            Collection<Package> nonClonePacksges2 = parentHotspotPackagePair.getChildrenOtherPackages2();
             JSONArray nonCloneFiles1 = new JSONArray();
             JSONArray nonCloneFiles2 = new JSONArray();
             JSONObject nonClone1 = new JSONObject();
@@ -298,21 +316,22 @@ public class ProjectServiceImpl implements ProjectService{
 
             table.put("nonclonefiles1", nonCloneFiles1);
             table.put("nonclonefiles2", nonCloneFiles2);
-            table.put("parentpackage1", parentHotspotPackage.getPackage1().getDirectoryPath());
-            table.put("parentpackage2", parentHotspotPackage.getPackage2().getDirectoryPath());
-            table.put("relationNodes1", parentHotspotPackage.getRelationNodes1());
-            table.put("relationNodes2", parentHotspotPackage.getRelationNodes2());
-            table.put("allNodes1", parentHotspotPackage.getAllNodes1());
-            table.put("allNodes2", parentHotspotPackage.getAllNodes2());
-            table.put("similarityValue", parentHotspotPackage.getSimilarityValue());
-            table.put("packageCochangeTimes", parentHotspotPackage.getPackageCochangeTimes());
-            table.put("packageCloneCochangeTimes", parentHotspotPackage.getPackageCloneCochangeTimes());
-            table.put("clonePairs", parentHotspotPackage.getClonePairs());
+            table.put("parentpackage1", parentHotspotPackagePair.getPackage1().getDirectoryPath());
+            table.put("parentpackage2", parentHotspotPackagePair.getPackage2().getDirectoryPath());
+            table.put("relationNodes1", cloneRelationDataForDoubleNodes.getCloneNodesCount1());
+            table.put("relationNodes2", cloneRelationDataForDoubleNodes.getCloneNodesCount2());
+            table.put("allNodes1", cloneRelationDataForDoubleNodes.getAllNodesCount1());
+            table.put("allNodes2", cloneRelationDataForDoubleNodes.getAllNodesCount2());
+            table.put("similarityValue", cloneRelationDataForDoubleNodes.getSimilarityValue());
+            table.put("packageCochangeTimes", cloneRelationDataForDoubleNodes.getAllNodesCoChangeTimes());
+            table.put("packageCloneCochangeTimes", cloneRelationDataForDoubleNodes.getCloneNodesCoChangeTimes());
+            table.put("clonePairs", cloneRelationDataForDoubleNodes.getClonePairs());
         }
 
         JSONObject temp_relation = new JSONObject();
         temp_relation.put("clone_links", clone_links);
         temp_relation.put("dependson_links", dependson_links);
+        temp_relation.put("cochange_links", cochange_links);
 
         result.put("children_graphlinks", temp_relation);
         result.put("table", table);
