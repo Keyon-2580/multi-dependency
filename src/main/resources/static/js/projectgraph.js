@@ -567,7 +567,7 @@ function drawLink(jsonLinks) {
         var y2 = parseFloat(target_transform.slice(target_transform.indexOf(",") + 1, target_transform.indexOf(")")));
 
         //求斜率(考虑斜率正无穷问题)
-        if(x1 !== x2){
+        if(x1.toFixed(6) !== x2.toFixed(6)){
             k = (y2 - y1) / (x2 - x1);
             k_flag = true;
         }else{
