@@ -13,7 +13,7 @@ var showAggregationResultOfJava = function() {
 	$.ajax({
 		type: "get",
 		url: "/cloneaggregation/show/java?threshold=10&percentage=0.8",
-		timeout: 10000,
+		timeout: 0,
 		success: function(result) {
 			console.log("success");
 			var html = "<table class='table table-bordered'>";
@@ -25,54 +25,60 @@ var showAggregationResultOfJava = function() {
 				}
 				switch (index) {
 					case 0:
+						var cloneNodesCount1 = duplicated.packagePairRelationData.cloneNodesCount1;
+						var cloneNodesCount2 = duplicated.packagePairRelationData.cloneNodesCount2;
+						var allNodesCount1 = duplicated.packagePairRelationData.allNodesCount1;
+						var allNodesCount2 = duplicated.packagePairRelationData.allNodesCount2;
+						var cloneNodesCoChangeTimes = duplicated.packagePairRelationData.cloneNodesCoChangeTimes;
+						var allNodesCoChangeTimes = duplicated.packagePairRelationData.allNodesCoChangeTimes;
+						var clonePairs = duplicated.packagePairRelationData.clonePairs;
 						html += "<tr>";
 						html += layer == 0 ? "<th>" : "<td>";
 						html += prefix + duplicated.package1.directoryPath;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
-						var path1CloneRate = duplicated.relationNodes1 + "/" + duplicated.allNodes1 + "=" + ((duplicated.relationNodes1 + 0.0) / duplicated.allNodes1).toFixed(2);
+						var path1CloneRate = cloneNodesCount1 + "/" + allNodesCount1 + "=" + ((cloneNodesCount1 + 0.0) / allNodesCount1).toFixed(2);
 						html += path1CloneRate;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
 						html += prefix + duplicated.package2.directoryPath;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
-						var path2CloneRate = duplicated.relationNodes2 + "/" + duplicated.allNodes2 + "=" + ((duplicated.relationNodes2 + 0.0) / duplicated.allNodes2).toFixed(2);
+						var path2CloneRate = cloneNodesCount2 + "/" + allNodesCount2 + "=" + ((cloneNodesCount2 + 0.0) / allNodesCount2).toFixed(2);
 						html += path2CloneRate;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
-						var cloneRate = "(" + duplicated.relationNodes1 + "+" + duplicated.relationNodes2 + ")/(" + duplicated.allNodes1 + "+" + duplicated.allNodes2 + ")=" + ((duplicated.relationNodes1 + duplicated.relationNodes2 + 0.0) / (duplicated.allNodes1 + duplicated.allNodes2)).toFixed(2);
+						var cloneRate = "(" + cloneNodesCount1 + "+" + cloneNodesCount2 + ")/(" + allNodesCount1 + "+" + allNodesCount2 + ")=" + ((cloneNodesCount1 + cloneNodesCount2 + 0.0) / (allNodesCount1 + allNodesCount2)).toFixed(2);
 						html += cloneRate;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th id='cochangeRateId'>" : "<td id='cochangeRateId'>";
 						var cochangeRate = "";
-						if(duplicated.packageCochangeTimes < 3){
-							cochangeRate = duplicated.packageCloneCochangeTimes + "/" + duplicated.packageCochangeTimes + "=0.00";
+						if(allNodesCoChangeTimes < 3){
+							cochangeRate = cloneNodesCoChangeTimes + "/" + allNodesCoChangeTimes + "=0.00";
 						}
 						else {
-							cochangeRate = duplicated.packageCloneCochangeTimes  + "/" + duplicated.packageCochangeTimes  + "=" + ((duplicated.packageCloneCochangeTimes  + 0.0) / duplicated.packageCochangeTimes).toFixed(2);
+							cochangeRate = cloneNodesCoChangeTimes  + "/" + allNodesCoChangeTimes  + "=" + ((cloneNodesCoChangeTimes  + 0.0) / allNodesCoChangeTimes).toFixed(2);
 						}
 						html += cochangeRate;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
-						var len = duplicated.clonePairs;
-						if(len > 0) {
+						if(clonePairs > 0) {
 							html += "<a target='_blank' class='package' href='/cloneaggregation/details" +
 								"?id1=" + duplicated.package1.id +
 								"&id2=" + duplicated.package2.id +
 								"&path1=" + duplicated.package1.directoryPath +
 								"&path2=" + duplicated.package2.directoryPath +
-								"&cloneNodes1=" + duplicated.relationNodes1 +
-								"&allNodes1=" + duplicated.allNodes1 +
-								"&cloneNodes2=" + duplicated.relationNodes2 +
-								"&allNodes2=" + duplicated.allNodes2 +
-								"&cloneCochangeTimes=" + duplicated.packageCloneCochangeTimes +
-								"&allCochangeTimes=" + duplicated.packageCochangeTimes +
-								"&clonePairs=" + len +
-								"'>" + len + "</a>";
+								"&cloneNodes1=" + cloneNodesCount1 +
+								"&allNodes1=" + allNodesCount1 +
+								"&cloneNodes2=" + cloneNodesCount2 +
+								"&allNodes2=" + allNodesCount2 +
+								"&cloneCochangeTimes=" + cloneNodesCoChangeTimes +
+								"&allCochangeTimes=" + allNodesCoChangeTimes +
+								"&clonePairs=" + clonePairs +
+								"'>" + clonePairs + "</a>";
 						}
 						else {
-							html += len;
+							html += clonePairs;
 						}
 						html += layer == 0 ? "</th>" : "</td>";
 						html += "</tr>";
@@ -119,8 +125,8 @@ var showAggregationResultOfJava = function() {
 						break;
 				}
 				if(index == 0) {
-					for(var key1 = 0; key1 < duplicated.childrenHotspotPackages.length; key1 ++) {
-						tr(0, layer + 1, duplicated.childrenHotspotPackages[key1]);
+					for(var key1 = 0; key1 < duplicated.childrenHotspotPackagePairs.length; key1 ++) {
+						tr(0, layer + 1, duplicated.childrenHotspotPackagePairs[key1]);
 					}
 
 					for(var key2 = 0; key2 < duplicated.childrenOtherPackages1.length; key2 ++) {
@@ -161,54 +167,60 @@ var showAggregationResultOfCpp = function() {
 				}
 				switch (index) {
 					case 0:
+						var cloneNodesCount1 = duplicated.packagePairRelationData.cloneNodesCount1;
+						var cloneNodesCount2 = duplicated.packagePairRelationData.cloneNodesCount2;
+						var allNodesCount1 = duplicated.packagePairRelationData.allNodesCount1;
+						var allNodesCount2 = duplicated.packagePairRelationData.allNodesCount2;
+						var cloneNodesCoChangeTimes = duplicated.packagePairRelationData.cloneNodesCoChangeTimes;
+						var allNodesCoChangeTimes = duplicated.packagePairRelationData.allNodesCoChangeTimes;
+						var clonePairs = duplicated.packagePairRelationData.clonePairs;
 						html += "<tr>";
 						html += layer == 0 ? "<th>" : "<td>";
 						html += prefix + duplicated.package1.directoryPath;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
-						var path1CloneRate = duplicated.relationNodes1 + "/" + duplicated.allNodes1 + "=" + ((duplicated.relationNodes1 + 0.0) / duplicated.allNodes1).toFixed(2);
+						var path1CloneRate = cloneNodesCount1 + "/" + allNodesCount1 + "=" + ((cloneNodesCount1 + 0.0) / allNodesCount1).toFixed(2);
 						html += path1CloneRate;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
 						html += prefix + duplicated.package2.directoryPath;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
-						var path2CloneRate = duplicated.relationNodes2 + "/" + duplicated.allNodes2 + "=" + ((duplicated.relationNodes2 + 0.0) / duplicated.allNodes2).toFixed(2);
+						var path2CloneRate = cloneNodesCount2 + "/" + allNodesCount2 + "=" + ((cloneNodesCount2 + 0.0) / allNodesCount2).toFixed(2);
 						html += path2CloneRate;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
-						var cloneRate = "(" + duplicated.relationNodes1 + "+" + duplicated.relationNodes2 + ")/(" + duplicated.allNodes1 + "+" + duplicated.allNodes2 + ")=" + ((duplicated.relationNodes1 + duplicated.relationNodes2 + 0.0) / (duplicated.allNodes1 + duplicated.allNodes2)).toFixed(2);
+						var cloneRate = "(" + cloneNodesCount1 + "+" + cloneNodesCount2 + ")/(" + allNodesCount1 + "+" + allNodesCount2 + ")=" + ((cloneNodesCount1 + cloneNodesCount2 + 0.0) / (allNodesCount1 + allNodesCount2)).toFixed(2);
 						html += cloneRate;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th id='cochangeRateId'>" : "<td id='cochangeRateId'>";
 						var cochangeRate = "";
-						if(duplicated.packageCochangeTimes < 3){
-							cochangeRate = duplicated.packageCloneCochangeTimes + "/" + duplicated.packageCochangeTimes + "=0.00";
+						if(allNodesCoChangeTimes < 3){
+							cochangeRate = cloneNodesCoChangeTimes + "/" + allNodesCoChangeTimes + "=0.00";
 						}
 						else {
-							cochangeRate = duplicated.packageCloneCochangeTimes  + "/" + duplicated.packageCochangeTimes  + "=" + ((duplicated.packageCloneCochangeTimes  + 0.0) / duplicated.packageCochangeTimes).toFixed(2);
+							cochangeRate = cloneNodesCoChangeTimes  + "/" + allNodesCoChangeTimes  + "=" + ((cloneNodesCoChangeTimes  + 0.0) / allNodesCoChangeTimes).toFixed(2);
 						}
 						html += cochangeRate;
 						html += layer == 0 ? "</th>" : "</td>";
 						html += layer == 0 ? "<th>" : "<td>";
-						var len = duplicated.clonePairs;
-						if(len > 0) {
+						if(clonePairs > 0) {
 							html += "<a target='_blank' class='package' href='/cloneaggregation/details" +
 								"?id1=" + duplicated.package1.id +
 								"&id2=" + duplicated.package2.id +
 								"&path1=" + duplicated.package1.directoryPath +
 								"&path2=" + duplicated.package2.directoryPath +
-								"&cloneNodes1=" + duplicated.relationNodes1 +
-								"&allNodes1=" + duplicated.allNodes1 +
-								"&cloneNodes2=" + duplicated.relationNodes2 +
-								"&allNodes2=" + duplicated.allNodes2 +
-								"&cloneCochangeTimes=" + duplicated.packageCloneCochangeTimes +
-								"&allCochangeTimes=" + duplicated.packageCochangeTimes +
-								"&clonePairs=" + len +
-								"'>" + len + "</a>";
+								"&cloneNodes1=" + cloneNodesCount1 +
+								"&allNodes1=" + allNodesCount1 +
+								"&cloneNodes2=" + cloneNodesCount2 +
+								"&allNodes2=" + allNodesCount2 +
+								"&cloneCochangeTimes=" + cloneNodesCoChangeTimes +
+								"&allCochangeTimes=" + allNodesCoChangeTimes +
+								"&clonePairs=" + clonePairs +
+								"'>" + clonePairs + "</a>";
 						}
 						else {
-							html += len;
+							html += clonePairs;
 						}
 						html += layer == 0 ? "</th>" : "</td>";
 						html += "</tr>";
@@ -255,8 +267,8 @@ var showAggregationResultOfCpp = function() {
 						break;
 				}
 				if(index == 0) {
-					for(var key1 = 0; key1 < duplicated.childrenHotspotPackages.length; key1 ++) {
-						tr(0, layer + 1, duplicated.childrenHotspotPackages[key1]);
+					for(var key1 = 0; key1 < duplicated.childrenHotspotPackagePairs.length; key1 ++) {
+						tr(0, layer + 1, duplicated.childrenHotspotPackagePairs[key1]);
 					}
 
 					for(var key2 = 0; key2 < duplicated.childrenOtherPackages1.length; key2 ++) {

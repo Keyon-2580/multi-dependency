@@ -14,7 +14,7 @@ import lombok.Data;
  * @param <N>
  */
 @Data
-public class CoChangeRelationDataForDoubleNodes<N extends Node, R extends Relation> extends BasicDataForDoubleNodes {
+public class CoChangeRelationDataForDoubleNodes<N extends Node, R extends Relation> extends BasicDataForDoubleNodes<N, R> {
 
 	private static final long serialVersionUID = 7974324881023147662L;
 
