@@ -276,7 +276,7 @@ public class HotspotPackagePairDetectorImpl<ps> implements HotspotPackagePairDet
 	private void setSheetInformation(Workbook hwb, String language) {
 		rowKey.set(0);
 		Collection<HotspotPackagePair> hotspotPackagePairs = detectHotspotPackagePairWithFileCloneByParentId(-1 ,-1, language);
-		Sheet sheet = hwb.createSheet(new StringBuilder().append(language).toString());
+		Sheet sheet = hwb.createSheet(language);
 		Row row = sheet.createRow(rowKey.get());
 		rowKey.set(rowKey.get()+1);
 		CellStyle style = hwb.createCellStyle();
@@ -308,9 +308,9 @@ public class HotspotPackagePairDetectorImpl<ps> implements HotspotPackagePairDet
 	}
 
 	private void loadHotspotPackageResult(Sheet sheet, int layer, HotspotPackagePair currentHotspotPackagePair){
-		String prefix = "";
+		StringBuilder prefix = new StringBuilder();
 		for(int i = 0; i < layer; i++) {
-			prefix += "|---";
+			prefix.append("|---");
 		}
 		CloneRelationDataForDoubleNodes<Node, Relation> currentPackagePairCloneRelationData = (CloneRelationDataForDoubleNodes<Node, Relation>) currentHotspotPackagePair.getPackagePairRelationData();
 
@@ -354,9 +354,9 @@ public class HotspotPackagePairDetectorImpl<ps> implements HotspotPackagePairDet
 		}
 	}
 	private void printOtherPackage(Sheet sheet, int index, int layer, Package otherPackage){
-		String prefix = "";
+		StringBuilder prefix = new StringBuilder();
 		for(int i = 0; i < layer; i++) {
-			prefix += "|---";
+			prefix.append("|---");
 		}
 		Row row = sheet.createRow(rowKey.get());
 		rowKey.set(rowKey.get()+1);
@@ -381,27 +381,26 @@ public class HotspotPackagePairDetectorImpl<ps> implements HotspotPackagePairDet
 	}
 
 	private HotspotPackagePair createHotspotPackagePairWithDepends(Package pck1, Package pck2, List<DependsOn> packageDependsOnList) {
-		String dependsOnStr = "";
-		String dependsByStr = "";
+		StringBuilder dependsOnStr = new StringBuilder();
+		StringBuilder dependsByStr = new StringBuilder();
 		int dependsOnTimes = 0;
 		int dependsByTimes = 0;
 		for (DependsOn dependsOn : packageDependsOnList){
-			if(dependsOn.getStartNode().getId() == pck1.getId()){
-				dependsOnStr += dependsOn.getDependsOnType();
+			if(dependsOn.getStartNode().getId().equals(pck1.getId())){
+				dependsOnStr.append(dependsOn.getDependsOnType());
 				dependsOnTimes += dependsOn.getTimes();
 			}else {
-				dependsByStr += dependsOn.getDependsOnType();
+				dependsByStr.append(dependsOn.getDependsOnType());
 				dependsByTimes += dependsOn.getTimes();
 			}
 		}
-		DependsRelationDataForDoubleNodes<Node, Relation> dependsRelationDataForDoubleNodes = new DependsRelationDataForDoubleNodes<Node, Relation>(pck1, pck2);
-		dependsRelationDataForDoubleNodes.setDependsOnTypes(dependsOnStr);
-		dependsRelationDataForDoubleNodes.setDependsByTypes(dependsByStr);
+		DependsRelationDataForDoubleNodes<Node, Relation> dependsRelationDataForDoubleNodes = new DependsRelationDataForDoubleNodes<>(pck1, pck2);
+		dependsRelationDataForDoubleNodes.setDependsOnTypes(dependsOnStr.toString());
+		dependsRelationDataForDoubleNodes.setDependsByTypes(dependsByStr.toString());
 		dependsRelationDataForDoubleNodes.setDependsOnTimes(dependsOnTimes);
 		dependsRelationDataForDoubleNodes.setDependsByTimes(dependsByTimes);
 		dependsRelationDataForDoubleNodes.calDependsIntensity();
-		HotspotPackagePair hotspotPackagePair = new HotspotPackagePair(dependsRelationDataForDoubleNodes);
-		return hotspotPackagePair;
+		return new HotspotPackagePair(dependsRelationDataForDoubleNodes);
 	}
 
 	//寻找HotspotPackage
@@ -417,7 +416,7 @@ public class HotspotPackagePairDetectorImpl<ps> implements HotspotPackagePairDet
 				}
 			}
 			else {
-				hotspotPackagePair = new HotspotPackagePair(new CloneRelationDataForDoubleNodes(pck1, pck2));
+				hotspotPackagePair = new HotspotPackagePair(new CloneRelationDataForDoubleNodes<>(pck1, pck2));
 			}
 			directoryPathToHotspotPackage.put(key, hotspotPackagePair);
 		}
@@ -444,23 +443,6 @@ public class HotspotPackagePairDetectorImpl<ps> implements HotspotPackagePairDet
 		childPackage.setName(childDirectoryPath);
 		childPackage.setLanguage(pck.getLanguage());
 		return childPackage;
-	}
-
-	//寻找父包
-	private Package findParentPackage(Map<String, Package> directoryPathToParentPackage, Package pck) {
-		directoryPathToParentPackage.put(pck.getDirectoryPath(), pck);
-		String parentDirectoryPath = pck.lastPackageDirectoryPath();
-		if (FileUtil.SLASH_LINUX.equals(parentDirectoryPath)) {
-			return null;
-		}
-		Package parent = directoryPathToParentPackage.get(parentDirectoryPath);
-		if (parent == null) {
-			parent = containRelationService.findPackageInPackage(pck);
-			if (parent != null) {
-				directoryPathToParentPackage.put(parentDirectoryPath, parent);
-			}
-		}
-		return parent;
 	}
 
 	//获取包下文件总数
@@ -542,7 +524,7 @@ public class HotspotPackagePairDetectorImpl<ps> implements HotspotPackagePairDet
 			packageCoChanges = coChangeRepository.findPackageCoChange(currentPackage1.getId(), currentPackage2.getId());
 			packageCloneCoChanges = moduleCloneRepository.findModuleClone(currentPackage1.getId(), currentPackage2.getId());
 		}
-		HotspotPackagePair currentHotspotPackagePair = new HotspotPackagePair(new CloneRelationDataForDoubleNodes(currentPackage1, currentPackage2));
+		HotspotPackagePair currentHotspotPackagePair = new HotspotPackagePair(new CloneRelationDataForDoubleNodes<>(currentPackage1, currentPackage2));
 		CloneRelationDataForDoubleNodes<Node, Relation> currentPackagePairCloneRelationData = (CloneRelationDataForDoubleNodes<Node, Relation>) currentHotspotPackagePair.getPackagePairRelationData();
 		currentPackagePairCloneRelationData.setClonePairs(aggregationClone.getClonePairs());
 		currentPackagePairCloneRelationData.setDate(aggregationClone.getAllNodesInNode1(), aggregationClone.getAllNodesInNode2(), aggregationClone.getNodesInNode1(), aggregationClone.getNodesInNode2());
@@ -573,7 +555,7 @@ public class HotspotPackagePairDetectorImpl<ps> implements HotspotPackagePairDet
 				Package childPackage1 = buildPackageForFiles(currentPackage1);
 				Package childPackage2 = buildPackageForFiles(currentPackage2);
 				if(moduleClone != null) {
-					HotspotPackagePair childHotspotPackagePair = new HotspotPackagePair(new CloneRelationDataForDoubleNodes(childPackage1, childPackage2));
+					HotspotPackagePair childHotspotPackagePair = new HotspotPackagePair(new CloneRelationDataForDoubleNodes<>(childPackage1, childPackage2));
 					CloneRelationDataForDoubleNodes<Node, Relation> childPackagePairCloneRelationData = (CloneRelationDataForDoubleNodes<Node, Relation>) childHotspotPackagePair.getPackagePairRelationData();
 					childPackagePairCloneRelationData.setDate(moduleClone.getAllNodesInNode1(), moduleClone.getAllNodesInNode2(), moduleClone.getNodesInNode1(), moduleClone.getNodesInNode2());
 					childPackagePairCloneRelationData.setClonePairs(moduleClone.getClonePairs());
@@ -707,10 +689,9 @@ public class HotspotPackagePairDetectorImpl<ps> implements HotspotPackagePairDet
 	}
 
 	private HotspotPackagePair createHotspotPackagePairWithCoChange(Package pck1, Package pck2, CoChange packageCoChange) {
-		CoChangeRelationDataForDoubleNodes<Node, Relation> coChangeRelationDataForDoubleNodes = new CoChangeRelationDataForDoubleNodes(pck1, pck2);
+		CoChangeRelationDataForDoubleNodes<Node, Relation> coChangeRelationDataForDoubleNodes = new CoChangeRelationDataForDoubleNodes<>(pck1, pck2);
 		coChangeRelationDataForDoubleNodes.setCoChangeTimes(packageCoChange.getTimes());
-		HotspotPackagePair hotspotPackagePair = new HotspotPackagePair(coChangeRelationDataForDoubleNodes);
-		return hotspotPackagePair;
+		return new HotspotPackagePair(coChangeRelationDataForDoubleNodes);
 	}
 
 	@Override

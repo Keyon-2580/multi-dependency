@@ -83,17 +83,17 @@ public abstract class BasicDataForDoubleNodes<N extends Node , R extends Relatio
 		});
 	}
 	
-	private transient RelationAggregator<?> aggregator;
-	
-	public Object aggregateValue(RelationAggregator<?> aggregator) {
-		if(aggregator != null) {
-			return aggregator.aggregate(this);
-		}
-		if(this.aggregator != null) {
-			return this.aggregator.aggregate(this);
-		}
-		return "relation: " + getValue();
-	}
+//	private RelationAggregator<?> aggregator;
+//
+//	public Object aggregateValue(RelationAggregator<?> aggregator) {
+//		if(aggregator != null) {
+//			return aggregator.aggregate(this);
+//		}
+//		if(this.aggregator != null) {
+//			return this.aggregator.aggregate(this);
+//		}
+//		return "relation: " + getValue();
+//	}
 	
 	public void addChild(R relation) {
 		this.children.add(relation);
