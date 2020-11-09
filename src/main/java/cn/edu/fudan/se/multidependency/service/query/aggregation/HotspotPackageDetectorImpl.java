@@ -663,7 +663,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 		RelationDataForDoubleNodes<Node, Relation> relationDataForDoubleNodes = new RelationDataForDoubleNodes<Node, Relation>(currentPackage1, currentPackage2);
 		HotspotPackage hotspotPackage = new HotspotPackage(relationDataForDoubleNodes);
 		hotspotPackage.setClonePairs(aggregationClone.getClonePairs());
-		hotspotPackage.setData(aggregationClone.getAllNodesInNode1(), aggregationClone.getAllNodesInNode2(), aggregationClone.getNodesInNode1(), aggregationClone.getNodesInNode2());
+		hotspotPackage.setData(aggregationClone.getAllNodesCount1(), aggregationClone.getAllNodesCount2(), aggregationClone.getCloneNodesCount1(), aggregationClone.getCloneNodesCount2());
 		if(packageCoChanges != null){
 			hotspotPackage.setPackageCochangeTimes(packageCoChanges.getTimes());
 		}

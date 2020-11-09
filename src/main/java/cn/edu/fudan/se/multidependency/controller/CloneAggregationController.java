@@ -65,7 +65,52 @@ public class CloneAggregationController {
     }
 
     @GetMapping("/details")
-    public String showDetails(@RequestParam("id1") long id1, @RequestParam("id2") long id2, @RequestParam("path1") String path1, @RequestParam("path2") String path2, @RequestParam("cloneNodes1") int cloneNodes1, @RequestParam("allNodes1") int allNodes1, @RequestParam("cloneNodes2") int cloneNodes2, @RequestParam("allNodes2") int allNodes2, @RequestParam("cloneCochangeTimes") int cloneCochangeTimes, @RequestParam("allCochangeTimes") int allCochangeTimes, @RequestParam("clonePairs") int clonePairs) {
+    public String showDetails(@RequestParam("id1") long id1,
+                              @RequestParam("id2") long id2,
+                              @RequestParam("path1") String path1,
+                              @RequestParam("path2") String path2,
+                              @RequestParam("clonePairs") int clonePairs,
+                              @RequestParam("cloneNodesCount1") int cloneNodesCount1,
+                              @RequestParam("cloneNodesCount2") int cloneNodesCount2,
+                              @RequestParam("allNodesCount1") int allNodesCount1,
+                              @RequestParam("allNodesCount2") int allNodesCount2,
+                              @RequestParam("cloneMatchRate") double cloneMatchRate,
+                              @RequestParam("cloneNodesLoc1") int cloneNodesLoc1,
+                              @RequestParam("cloneNodesLoc2") int cloneNodesLoc2,
+                              @RequestParam("allNodesLoc1") int allNodesLoc1,
+                              @RequestParam("allNodesLoc2") int allNodesLoc2,
+                              @RequestParam("cloneLocRate") double cloneLocRate,
+                              @RequestParam("cloneNodesCoChangeTimes") int cloneNodesCoChangeTimes,
+                              @RequestParam("allNodesCoChangeTimes") int allNodesCoChangeTimes,
+                              @RequestParam("cloneCoChangeRate") double cloneCoChangeRate,
+                              @RequestParam("cloneType1Count") int cloneType1Count,
+                              @RequestParam("cloneType2Count") int cloneType2Count,
+                              @RequestParam("cloneType3Count") int cloneType3Count,
+                              @RequestParam("cloneType") String cloneType,
+                              @RequestParam("cloneSimilarityValue") double cloneSimilarityValue,
+                              @RequestParam("cloneSimilarityRate") double cloneSimilarityRate,
+                              HttpServletRequest request) {
+        request.setAttribute("id1", id1);
+        request.setAttribute("id2", id2);
+        request.setAttribute("clonePairs", clonePairs);
+        request.setAttribute("cloneNodesCount1", cloneNodesCount1);
+        request.setAttribute("cloneNodesCount2", cloneNodesCount2);
+        request.setAttribute("allNodesCount1", allNodesCount1);
+        request.setAttribute("allNodesCount2", allNodesCount2);
+        request.setAttribute("cloneMatchRate", cloneMatchRate);
+        request.setAttribute("cloneNodesLoc1", cloneNodesLoc1);
+        request.setAttribute("cloneNodesLoc2", cloneNodesLoc2);
+        request.setAttribute("allNodesLoc1", allNodesLoc1);
+        request.setAttribute("allNodesLoc2", allNodesLoc2);
+        request.setAttribute("cloneLocRate", cloneLocRate);
+        request.setAttribute("cloneNodesCoChangeTimes", cloneNodesCoChangeTimes);
+        request.setAttribute("allNodesCoChangeTimes", allNodesCoChangeTimes);
+        request.setAttribute("cloneCoChangeRate", cloneCoChangeRate);
+        request.setAttribute("cloneType1Count", cloneType1Count);
+        request.setAttribute("cloneType2Count", cloneType2Count);
+        request.setAttribute("cloneType3Count", cloneType3Count);
+        request.setAttribute("cloneSimilarityValue", cloneSimilarityValue);
+        request.setAttribute("cloneSimilarityRate", cloneSimilarityRate);
         return "details";
     }
 }

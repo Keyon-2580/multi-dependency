@@ -13,32 +13,47 @@ var showtree = function(divId, zNodes) {
     $.fn.zTree.init($("#" + divId), setting, zNodes);
 }
 
-var doublePackagesCloneShow = function(path1, path2, path1CloneRate, path2CloneRate, cloneRate, cochangeRate, clonePairs) {
+var doublePackagesCloneShow = function(path1, path2, clonePairs, cloneNodesCount1, cloneNodesCount2, allNodesCount1, allNodesCount2, cloneMatchRate, cloneNodesLoc1, cloneNodesLoc2, allNodesLoc1, allNodesLoc2, cloneLocRate, cloneNodesCoChangeTimes, allNodesCoChangeTimes, cloneCoChangeRate, cloneType1Count, cloneType2Count, cloneType3Count, cloneType, cloneSimilarityValue, cloneSimilarityRate) {
     $("#package_clone_detail").html("");
     var html = "";
     html += "</table>";
-    html += "<table class='table table-bordered'>" + "<tr><th>目录1</th><th>目录1克隆占比</th><th>目录2</th><th>目录2克隆占比</th><th>总克隆占比</th><th>包克隆CoChange占比</th><th>克隆文件对数</th></tr>";
+    html += "<table class='table table-bordered'>";
+    html += "<tr><th>目录</th><th>克隆文件占比</th><th>克隆CoChange占比</th><th>克隆Loc占比</th><th>克隆相似度</th><th>type_1数量</th><th>type_2数量</th><th>type_3数量</th><th>type</th><th>克隆对数</th></tr>";
     html += "<tr>";
     html += "<td>";
     html += path1;
     html += "</td>";
-    html += "<td>";
-    html += path1CloneRate;
+    html += "<td rowspan='2' style='vertical-align: middle'>";
+    html += "(" + cloneNodesCount1 + "+" + cloneNodesCount2 + ")/(" + allNodesCount1 + "+" + allNodesCount2 + ")=" + cloneMatchRate.toFixed(2);;
     html += "</td>";
+    html += "<td rowspan='2' style='vertical-align: middle'>";
+    html += cloneNodesCoChangeTimes  + "/" + allNodesCoChangeTimes  + "=" + cloneCoChangeRate.toFixed(2);
+    html += "</td>";
+    html += "<td rowspan='2' style='vertical-align: middle'>";
+    html += "(" + cloneNodesLoc1 + "+" + cloneNodesLoc2 + ")/(" + allNodesLoc1 + "+" + allNodesLoc2 + ")=" + cloneLocRate.toFixed(2);
+    html += "</td>";
+    html += "<td rowspan='2' style='vertical-align: middle'>";
+    html += cloneSimilarityValue.toFixed(2) + "/(" + cloneType1Count + "+" + cloneType2Count + "+" + cloneType3Count + ")=" + cloneSimilarityRate.toFixed(2);
+    html += "</td>";
+    html += "<td rowspan='2' style='vertical-align: middle'>";
+    html += cloneType1Count;
+    html += "</td>";
+    html += "<td rowspan='2' style='vertical-align: middle'>";
+    html += cloneType2Count;
+    html += "</td>";
+    html += "<td rowspan='2' style='vertical-align: middle'>";
+    html += cloneType3Count;
+    html += "</td>";
+    html += "<td rowspan='2' style='vertical-align: middle'>";
+    html += cloneType;
+    html += "</td>";
+    html += "<td rowspan='2' style='vertical-align: middle'>";
+    html += clonePairs;
+    html += "</td>";
+    html += "</tr>";
+    html += "<tr>";
     html += "<td>";
     html += path2;
-    html += "</td>";
-    html += "<td>";
-    html += path2CloneRate;
-    html += "</td>";
-    html += "<td>";
-    html += cloneRate;
-    html += "</td>";
-    html += "<td>";
-    html += cochangeRate;
-    html += "</td>";
-    html += "<td>";
-    html += clonePairs;
     html += "</td>";
     html += "</tr>";
     html += "</table>";
@@ -98,17 +113,6 @@ var doublePackagesCloneWithCoChange = function(pck1Id, pck2Id) {
                 var loc1 = children[i].fileClone.loc1;
                 var loc2 = children[i].fileClone.loc2;
                 var value = children[i].fileClone.value;
-                switch (type){
-                    case 'type_1':
-                        num_type1++;
-                        break;
-                    case 'type_2':
-                        num_type2++;
-                        break;
-                    case 'type_3':
-                        num_type3++;
-                        break;
-                }
                 html += "<a target='_blank' href='/clone/file/double" +
                     "?file1Id=" + children[i].file1.id +
                     "&file2Id=" + children[i].file2.id +
@@ -132,17 +136,6 @@ var doublePackagesCloneWithCoChange = function(pck1Id, pck2Id) {
                 html += "</td>";
                 html += "</tr>";
             }
-            html += "</table>";
-            html += "<table class='table table-bordered'>" + "<tr><th>Type_1数量</th><th>Type_2数量</th><th>Type_3数量</th></tr>";
-            html += "<td>";
-            html += num_type1;
-            html += "</td>";
-            html += "<td>";
-            html += num_type2;
-            html += "</td>";
-            html += "<td>";
-            html += num_type3;
-            html += "</td>";
             html += "</table>";
             html += "<div id='fileClonesGraph'></div>"
             $("#package_files_clone").html(html);
@@ -198,11 +191,6 @@ var cloneGroupToGraph = function(result,divId) {
     //设置数组读取数据
     var nodes = cluster.nodes(packageHierarchy(clonedata)),
         links = packageImports(nodes);
-    // var nodes = cluster.nodes(packageClone(classes)),
-    //     links = packageCloneImports(nodes);
-
-    // console.log(nodes)
-
     link = link
         .data(bundle(links))
         .enter().append("path")
@@ -213,8 +201,6 @@ var cloneGroupToGraph = function(result,divId) {
     node = node
         .data(nodes.filter(function(n) { return !n.children; }))
         .enter().append("text")
-        // .style("fill", function (d) { if (checkChangeType(d.key, changes)== 3) { return '#b47500';}
-        //                               if (checkChangeType(d.key, changes)== 4) { return '#00b40a';}})
         .attr("class", "node")
         .attr("dy", ".31em")
         .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
@@ -223,52 +209,6 @@ var cloneGroupToGraph = function(result,divId) {
         .on("mouseover", mouseovered)
         .on("mouseout", mouseouted)
         .call(text => text.append("title").text(function(d) { return d.key; }));
-    // .call(text => text.append("title").text(d => `${node.data.name}
-    // ${d.outgoing.length} outgoing
-    // ${d.incoming.length} incoming`));
-
-
-    /*
-    *从json中读取数组
-     */
-    // d3.json("../data/link.json", function(error, classes) {
-    // d3.json("../static/data/link.json", function(error,  classes) {
-    // d3.json("../static/data/2.json", function(error, classes) {
-    // d3.json("../static/data/flare.json", function(error, classes) {
-    // d3.json("../static/data/testpackages.json", function(error, classes) {
-    //     if (error) throw error;
-    //
-    //     var nodes = cluster.nodes(packageHierarchy(classes)),
-    //         links = packageImports(nodes);
-    //     // var nodes = cluster.nodes(packageClone(classes)),
-    //     //     links = packageCloneImports(nodes);
-    //
-    //     console.log(nodes)
-    //
-    //     link = link
-    //         .data(bundle(links))
-    //         .enter().append("path")
-    //         .each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
-    //         .attr("class", "link")
-    //         .attr("d", line);
-    //
-    //     node = node
-    //         .data(nodes.filter(function(n) { return !n.children; }))
-    //         .enter().append("text")
-    //         // .style("fill", function (d) { if (checkChangeType(d.key, changes)== 3) { return '#b47500';}
-    //         //                               if (checkChangeType(d.key, changes)== 4) { return '#00b40a';}})
-    //         .attr("class", "node")
-    //         .attr("dy", ".31em")
-    //         .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
-    //         .style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
-    //         .text(function(d) { return d.key; })
-    //         .on("mouseover", mouseovered)
-    //         .on("mouseout", mouseouted)
-    //         .call(text => text.append("title").text(function(d) { return d.key; }));
-    //         // .call(text => text.append("title").text(d => `${node.data.name}
-    //         // ${d.outgoing.length} outgoing
-    //         // ${d.incoming.length} incoming`));
-    // });
 
     String.prototype.replaceAt=function(index, replacement) {
         return this.substr(0, index) + replacement+ this.substr(index + replacement.length);
@@ -279,19 +219,11 @@ var cloneGroupToGraph = function(result,divId) {
         return target.replace(new RegExp(search, 'g'), replacement);
     };
 
-
-    var width = 360;
-    var height = 360;
-    var radius = Math.min(width, height) / 2;
-    var donutWidth = 75;
     var legendRectSize = 18;
     var legendSpacing = 4;
-
     var legend = d3.select('svg')
         .append("g")
         .selectAll("g")
-        // .data(color.domain())
-        //.enter()
         .append('g')
         .attr('class', 'legend')
         .attr('transform', function(d, i) {
@@ -300,18 +232,12 @@ var cloneGroupToGraph = function(result,divId) {
             var y = (i+1) * height;
             return 'translate(' + x + ',' + y + ')';
         });
-
     d3.select('svg')
         .select("g:nth-child(0)").append('text').text("Component Colors:");
-    //.attr('transform', 'translate(0,0)');
-
 
     legend.append('rect')
         .attr('width', legendRectSize)
         .attr('height', legendRectSize)
-    // .style('fill', color)
-    // .style('stroke', color);
-
     legend.append('text')
         .attr('x', legendRectSize + legendSpacing)
         .attr('y', legendRectSize - legendSpacing)
@@ -320,19 +246,15 @@ var cloneGroupToGraph = function(result,divId) {
     function mouseovered(d) {
         node
             .each(function(n) { n.target = n.source = false; });
-
         link
             .classed("link--target", function(l) { if (l.target === d) return l.source.source = true; })
             .classed("link--source", function(l) { if (l.source === d) return l.target.target = true; })
             .filter(function(l) { return l.target === d || l.source === d; })
-            // .style("stroke", function (l) { if (checkOldLink(l, old_links)) { return '#b400ad';}})
             .style("stroke", "#e0230a")
             .each(function() { this.parentNode.appendChild(this); });
-
         node
             .classed("node--target", function(n) { return n.target; })
             .classed("node--source", function(n) { return n.source; });
-
     }
 
     function mouseouted(d) {
@@ -346,18 +268,14 @@ var cloneGroupToGraph = function(result,divId) {
             .classed("node--source", false);
 
     }
-
     d3.select(self.frameElement).style("height", diameter + "px");
 
-    // Lazily construct the package hierarchy from class names.
     function packageHierarchy(classes) {
         var map = {};
-
         function find(name, data) {
             var node = map[name], i;
             if (!node) {
                 node = map[name] = data || {name: name, children: []};
-                // console.log(node)
                 if (name.length) {
                     node.parent = find(name.substring(0, i = name.lastIndexOf("/")));
                     node.parent.children.push(node);
@@ -366,27 +284,19 @@ var cloneGroupToGraph = function(result,divId) {
             }
             return node;
         }
-
-        // classes.result.forEach(function(d) {
         classes.forEach(function(d) {
-            // console.log(d)
             find(d.name, d);
         });
 
         return map[""];
     }
 
-    // Return a list of imports for the given array of nodes.
     function packageImports(nodes) {
         var map = {},
             imports = [];
-
-        // Compute a map from name to node.
         nodes.forEach(function(d) {
             map[d.name] = d;
         });
-
-        // For each import, construct a link from the source to target node.
         nodes.forEach(function(d) {
             if (d.imports) d.imports.forEach(function(i) {
                 imports.push({source: map[d.name], target: map[i]});
@@ -1525,17 +1435,7 @@ var setFilesContext = function (file1AbsolutePath, file2AbsolutePath, decoder1, 
 /*
 显示跨包克隆聚合详细信息
 */
-var showDetails = function (id1, id2, path1, path2, cloneNodes1, allNodes1, cloneNodes2, allNodes2, cloneCochangeTimes, allCochangeTimes, clonePairs) {
-    var path1CloneRate = cloneNodes1 + "/" + allNodes1 + "=" + ((cloneNodes1 + 0.0) / allNodes1).toFixed(2);
-    var path2CloneRate = cloneNodes2 + "/" + allNodes2 + "=" + ((cloneNodes2 + 0.0) / allNodes2).toFixed(2);
-    var cloneRate = "(" + cloneNodes1 + "+" + cloneNodes2 + ")/(" + allNodes1 + "+" + allNodes2 + ")=" + ((cloneNodes1 + cloneNodes2 + 0.0) / (allNodes1 + allNodes2)).toFixed(2);
-    var cochangeRate = "";
-    if(allCochangeTimes < 3){
-        cochangeRate = cloneCochangeTimes + "/" + allCochangeTimes + "=0.00";
-    }
-    else {
-        cochangeRate = cloneCochangeTimes  + "/" + allCochangeTimes  + "=" + ((cloneCochangeTimes  + 0.0) / allCochangeTimes).toFixed(2);
-    }
-    doublePackagesCloneShow(path1, path2, path1CloneRate, path2CloneRate, cloneRate, cochangeRate, clonePairs);
+var showDetails = function (id1, id2, path1, path2, clonePairs, cloneNodesCount1, cloneNodesCount2, allNodesCount1, allNodesCount2, cloneMatchRate, cloneNodesLoc1, cloneNodesLoc2, allNodesLoc1, allNodesLoc2, cloneLocRate, cloneNodesCoChangeTimes, allNodesCoChangeTimes, cloneCoChangeRate, cloneType1Count, cloneType2Count, cloneType3Count, cloneType, cloneSimilarityValue, cloneSimilarityRate) {
+    doublePackagesCloneShow(path1, path2, clonePairs, cloneNodesCount1, cloneNodesCount2, allNodesCount1, allNodesCount2, cloneMatchRate, cloneNodesLoc1, cloneNodesLoc2, allNodesLoc1, allNodesLoc2, cloneLocRate, cloneNodesCoChangeTimes, allNodesCoChangeTimes, cloneCoChangeRate, cloneType1Count, cloneType2Count, cloneType3Count, cloneType, cloneSimilarityValue, cloneSimilarityRate);
     doublePackagesCloneWithCoChange(id1, id2);
 }

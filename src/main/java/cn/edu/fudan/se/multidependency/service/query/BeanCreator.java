@@ -193,7 +193,25 @@ public class BeanCreator {
 			Collection<HotspotPackagePair> childrenHotspotPackagePairs = hotspotPackagePair.getChildrenHotspotPackagePairs();
 			AddChildrenPackages(hotspotPackagePair.getPackage1().getId(), hotspotPackagePair.getPackage2().getId(), childrenHotspotPackagePairs, aggregationCloneRepository);
 			CloneRelationDataForDoubleNodes<Node, Relation> packagePairCloneRelationData = (CloneRelationDataForDoubleNodes<Node, Relation>) hotspotPackagePair.getPackagePairRelationData();
-			aggregationCloneRepository.createAggregationClone(hotspotPackagePair.getPackage1().getId(), hotspotPackagePair.getPackage2().getId(), parent1Id, parent2Id, packagePairCloneRelationData.getClonePairs(), packagePairCloneRelationData.getAllNodesCount1(), packagePairCloneRelationData.getAllNodesCount2(), packagePairCloneRelationData.getCloneNodesCount1(), packagePairCloneRelationData.getCloneNodesCount2());
+			aggregationCloneRepository.createAggregationClone(
+					hotspotPackagePair.getPackage1().getId(),
+					hotspotPackagePair.getPackage2().getId(),
+					parent1Id,
+					parent2Id,
+					packagePairCloneRelationData.getClonePairs(),
+					packagePairCloneRelationData.getCloneNodesCount1(),
+					packagePairCloneRelationData.getCloneNodesCount2(),
+					packagePairCloneRelationData.getAllNodesCount1(),
+					packagePairCloneRelationData.getAllNodesCount2(),
+					packagePairCloneRelationData.getCloneNodesLoc1(),
+					packagePairCloneRelationData.getCloneNodesLoc2(),
+					packagePairCloneRelationData.getAllNodesLoc1(),
+					packagePairCloneRelationData.getAllNodesLoc2(),
+					packagePairCloneRelationData.getCloneType1Count(),
+					packagePairCloneRelationData.getCloneType2Count(),
+					packagePairCloneRelationData.getCloneType3Count(),
+					packagePairCloneRelationData.getCloneSimilarityValue()
+					);
 		}
 	}
 }

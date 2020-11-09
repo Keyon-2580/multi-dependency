@@ -46,33 +46,35 @@
         <div class="col-sm-12" id="package_files_clone"></div>
     </div>
     <script type="text/javascript" th:inline="javascript">
-        var URL = window.location.search;
-        URL = URL.split('?id1=')[1];
-        var file1AbsolutePath = URL.split('&')[0];
-        var file2AbsolutePath = URL.split('rightFilePath=')[1];
-        var id1 = URL.split('&id2=')[0];
-        URL = URL.split('&id2=')[1];
-        var id2 = URL.split('&path1=')[0];
-        URL = URL.split('&path1=')[1];
-        var path1 = URL.split('&path2=')[0];
-        URL = URL.split('&path2=')[1];
-        var path2 = URL.split('&cloneNodes1=')[0];
-        URL = URL.split('&cloneNodes1=')[1];
-        var cloneNodes1 = parseFloat(URL.split('&allNodes1=')[0]);
-        URL = URL.split('&allNodes1=')[1];
-        var allNodes1 = parseFloat(URL.split('&cloneNodes2=')[0]);
-        URL = URL.split('&cloneNodes2=')[1];
-        var cloneNodes2 = parseFloat(URL.split('&allNodes2=')[0]);
-        URL = URL.split('&allNodes2=')[1];
-        var allNodes2 = parseFloat(URL.split('&cloneCochangeTimes=')[0]);
-        URL = URL.split('&cloneCochangeTimes=')[1];
-        var cloneCochangeTimes = parseFloat(URL.split('&allCochangeTimes=')[0]);
-        URL = URL.split('&allCochangeTimes=')[1];
-        var allCochangeTimes = parseFloat(URL.split('&clonePairs=')[0]);
-        URL = URL.split('&clonePairs=')[1];
-        var clonePairs = URL;
         $(document).ready(function () {
-            showDetails(id1, id2, path1, path2, cloneNodes1, allNodes1, cloneNodes2, allNodes2, cloneCochangeTimes, allCochangeTimes, clonePairs);
+            var URL = window.location.search;
+            URL = URL.split('?')[1];
+            var params = URL.split('&');
+            var id1 = [[${id1}]];
+            var id2 = [[${id2}]];
+            var path1 = params[2].split('=')[1];
+            var path2 = params[3].split('=')[1];
+            var clonePairs = [[${clonePairs}]];
+            var cloneNodesCount1 = [[${cloneNodesCount1}]];
+            var cloneNodesCount2 = [[${cloneNodesCount2}]];
+            var allNodesCount1 = [[${allNodesCount1}]];
+            var allNodesCount2 = [[${allNodesCount2}]];
+            var cloneMatchRate = [[${cloneMatchRate}]];
+            var cloneNodesLoc1 = [[${cloneNodesLoc1}]];
+            var cloneNodesLoc2 = [[${cloneNodesLoc2}]];
+            var allNodesLoc1 = [[${allNodesLoc1}]];
+            var allNodesLoc2 = [[${allNodesLoc2}]];
+            var cloneLocRate = [[${cloneLocRate}]];
+            var cloneNodesCoChangeTimes = [[${cloneNodesCoChangeTimes}]];
+            var allNodesCoChangeTimes = [[${allNodesCoChangeTimes}]];
+            var cloneCoChangeRate = [[${cloneCoChangeRate}]];
+            var cloneType1Count = [[${cloneType1Count}]];
+            var cloneType2Count = [[${cloneType2Count}]];
+            var cloneType3Count = [[${cloneType3Count}]];
+            var cloneType = params[21].split('=')[1];
+            var cloneSimilarityValue = [[${cloneSimilarityValue}]];
+            var cloneSimilarityRate = [[${cloneSimilarityRate}]];
+            showDetails(id1, id2, path1, path2, clonePairs, cloneNodesCount1, cloneNodesCount2, allNodesCount1, allNodesCount2, cloneMatchRate, cloneNodesLoc1, cloneNodesLoc2, allNodesLoc1, allNodesLoc2, cloneLocRate, cloneNodesCoChangeTimes, allNodesCoChangeTimes, cloneCoChangeRate, cloneType1Count, cloneType2Count, cloneType3Count, cloneType, cloneSimilarityValue, cloneSimilarityRate);
         });
     </script>
 </body>

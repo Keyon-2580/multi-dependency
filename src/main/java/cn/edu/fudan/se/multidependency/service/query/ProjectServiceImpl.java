@@ -19,7 +19,6 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -245,7 +244,7 @@ public class ProjectServiceImpl implements ProjectService{
                 }else{
                     link.put("bottom_package", true);
                 }
-                link.put("similarityValue", cloneRelationDataForDoubleNodes.getSimilarityValue());
+                link.put("similarityValue", cloneRelationDataForDoubleNodes.getCloneMatchRate());
 
                 temp_clonefile1.put("id", hotspotPackagePair.getPackage1().getId().toString());
                 temp_clonefile2.put("id", hotspotPackagePair.getPackage2().getId().toString());
@@ -322,7 +321,7 @@ public class ProjectServiceImpl implements ProjectService{
             table.put("relationNodes2", cloneRelationDataForDoubleNodes.getCloneNodesCount2());
             table.put("allNodes1", cloneRelationDataForDoubleNodes.getAllNodesCount1());
             table.put("allNodes2", cloneRelationDataForDoubleNodes.getAllNodesCount2());
-            table.put("similarityValue", cloneRelationDataForDoubleNodes.getSimilarityValue());
+            table.put("similarityValue", cloneRelationDataForDoubleNodes.getCloneMatchRate());
             table.put("packageCochangeTimes", cloneRelationDataForDoubleNodes.getAllNodesCoChangeTimes());
             table.put("packageCloneCochangeTimes", cloneRelationDataForDoubleNodes.getCloneNodesCoChangeTimes());
             table.put("clonePairs", cloneRelationDataForDoubleNodes.getClonePairs());
