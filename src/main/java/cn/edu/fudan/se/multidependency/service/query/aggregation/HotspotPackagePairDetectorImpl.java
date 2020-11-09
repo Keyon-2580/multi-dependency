@@ -356,20 +356,22 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		cell.setCellValue("目录1");
 		cell.setCellStyle(style);
 		cell = row.createCell(1);
-		cell.setCellValue("目录1克隆占比");
-		cell.setCellStyle(style);
-		cell = row.createCell(2);
 		cell.setCellValue("目录2");
 		cell.setCellStyle(style);
+		cell = row.createCell(2);
+		cell.setCellValue("克隆文件占比");
+		cell.setCellStyle(style);
 		cell = row.createCell(3);
-		cell.setCellValue("目录2克隆占比");
+		cell.setCellValue("克隆CoChange占比");
 		cell.setCellStyle(style);
 		cell = row.createCell(4);
-		cell.setCellValue("总克隆占比");
+		cell.setCellValue("克隆Loc占比");
 		cell.setCellStyle(style);
 		cell = row.createCell(5);
-		cell.setCellValue("包克隆CoChange占比");
+		cell.setCellValue("克隆相似度");
 		cell = row.createCell(6);
+		cell.setCellValue("type");
+		cell = row.createCell(7);
 		cell.setCellValue("克隆文件对数");
 		cell.setCellStyle(style);
 		for(HotspotPackagePair hotspotPackagePair : hotspotPackagePairs){
@@ -384,34 +386,37 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		}
 		CloneRelationDataForDoubleNodes<Node, Relation> currentPackagePairCloneRelationData = (CloneRelationDataForDoubleNodes<Node, Relation>) currentHotspotPackagePair.getPackagePairRelationData();
 
-		int allNodes1 = currentPackagePairCloneRelationData.getAllNodesCount1();
-		int cloneNodes1 = currentPackagePairCloneRelationData.getCloneNodesCount2();
-		int allNodes2 = currentPackagePairCloneRelationData.getAllNodesCount1();
-		int cloneNodes2 = currentPackagePairCloneRelationData.getCloneNodesCount2();
-		int cloneNodesCoChangeTimes = currentPackagePairCloneRelationData.getCloneNodesCoChangeTimes();
-		int allNodesCochangeTimes = currentPackagePairCloneRelationData.getAllNodesCoChangeTimes();
 		int clonePairs = currentPackagePairCloneRelationData.getClonePairs();
+		int cloneNodesCount1 = currentPackagePairCloneRelationData.getCloneNodesCount1();
+		int cloneNodesCount2 = currentPackagePairCloneRelationData.getCloneNodesCount2();
+		int allNodesCount1 = currentPackagePairCloneRelationData.getAllNodesCount1();
+		int allNodesCount2 = currentPackagePairCloneRelationData.getAllNodesCount2();
+		double cloneMatchRate = currentPackagePairCloneRelationData.getCloneMatchRate();
+		int cloneNodesLoc1 = currentPackagePairCloneRelationData.getCloneNodesLoc1();
+		int cloneNodesLoc2 = currentPackagePairCloneRelationData.getCloneNodesLoc2();
+		int allNodesLoc1 = currentPackagePairCloneRelationData.getAllNodesLoc1();
+		int allNodesLoc2 = currentPackagePairCloneRelationData.getAllNodesLoc2();
+		double cloneLocRate = currentPackagePairCloneRelationData.getCloneLocRate();
+		int cloneNodesCoChangeTimes = currentPackagePairCloneRelationData.getCloneNodesCoChangeTimes();
+		int allNodesCoChangeTimes = currentPackagePairCloneRelationData.getAllNodesCoChangeTimes();
+		double cloneCoChangeRate = currentPackagePairCloneRelationData.getCloneCoChangeRate();
+		int cloneType1Count = currentPackagePairCloneRelationData.getCloneType1Count();
+		int cloneType2Count = currentPackagePairCloneRelationData.getCloneType2Count();
+		int cloneType3Count = currentPackagePairCloneRelationData.getCloneType3Count();
+		String cloneType = currentPackagePairCloneRelationData.getCloneType();
+		double cloneSimilarityValue = currentPackagePairCloneRelationData.getCloneSimilarityValue();
+		double cloneSimilarityRate = currentPackagePairCloneRelationData.getCloneSimilarityRate();
 
 		Row row = sheet.createRow(rowKey.get());
 		rowKey.set(rowKey.get()+1);
 		row.createCell(0).setCellValue(prefix + currentHotspotPackagePair.getPackage1().getDirectoryPath());
-		BigDecimal clonePercent1 = BigDecimal.valueOf((cloneNodes1 + 0.0) / allNodes1);
-		clonePercent1 = clonePercent1.setScale(2, RoundingMode.HALF_UP);
-		row.createCell(1).setCellValue(cloneNodes1 + "/" + allNodes1 + "=" + clonePercent1.toString());
-		row.createCell(2).setCellValue(prefix + currentHotspotPackagePair.getPackage2().getDirectoryPath());
-		BigDecimal clonePercent2 = BigDecimal.valueOf((cloneNodes2 + 0.0) / allNodes2);
-		clonePercent2 = clonePercent2.setScale(2, RoundingMode.HALF_UP);
-		row.createCell(3).setCellValue(cloneNodes2 + "/" + allNodes2 + "=" + clonePercent2.toString());
-		BigDecimal clonePercent = BigDecimal.valueOf((cloneNodes1 + cloneNodes2 + 0.0) / (allNodes1 + allNodes2));
-		clonePercent = clonePercent.setScale(2, RoundingMode.HALF_UP);
-		row.createCell(4).setCellValue("(" + cloneNodes1 + "+" + cloneNodes2 + ")/(" + allNodes1 + "+" + allNodes2 + ")=" + clonePercent.toString());
-		BigDecimal cochangePercent = BigDecimal.valueOf(0);
-		if(allNodesCochangeTimes != 0) {
-			cochangePercent = BigDecimal.valueOf((cloneNodesCoChangeTimes + 0.0) / allNodesCochangeTimes);
-		}
-		cochangePercent = cochangePercent.setScale(2, RoundingMode.HALF_UP);
-		row.createCell(5).setCellValue(cloneNodesCoChangeTimes + "/" + allNodesCochangeTimes + "=" + cochangePercent.toString());
-		row.createCell(6).setCellValue(clonePairs);
+		row.createCell(1).setCellValue(prefix + currentHotspotPackagePair.getPackage2().getDirectoryPath());
+		row.createCell(2).setCellValue("(" + cloneNodesCount1 + "+" + cloneNodesCount2 + ")/(" + allNodesCount1 + "+" + allNodesCount2 + ")=" + String .format("%.2f", cloneMatchRate));
+		row.createCell(3).setCellValue(cloneNodesCoChangeTimes + "/" + allNodesCoChangeTimes + "=" + String .format("%.2f", cloneCoChangeRate));
+		row.createCell(4).setCellValue("(" + cloneNodesLoc1 + "+" + cloneNodesLoc2 + ")/(" + allNodesLoc1 + "+" + allNodesLoc2 + ")=" + String .format("%.2f", cloneLocRate));
+		row.createCell(5).setCellValue(String .format("%.2f", cloneSimilarityValue) + "/(" + cloneType1Count + "+" + cloneType2Count + "+" + cloneType3Count + ")=" + String .format("%.2f", cloneSimilarityRate));
+		row.createCell(6).setCellValue(cloneType);
+		row.createCell(7).setCellValue(clonePairs);
 
 		for (HotspotPackagePair childHotspotPackagePair : currentHotspotPackagePair.getChildrenHotspotPackagePairs()){
 			loadHotspotPackageResult(sheet, rowKey, layer + 1, childHotspotPackagePair);

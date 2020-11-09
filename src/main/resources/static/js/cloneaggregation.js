@@ -7,7 +7,7 @@ var showAggregationResult = function(language, id) {
 		success: function(result) {
 			console.log("success");
 			var html = "<table class='table table-bordered'>";
-			html += "<tr><th>目录1</th><th>目录2</th><th>克隆文件占比</th><th>克隆CoChange占比</th><th>克隆Loc占比</th><th>克隆相似度</th><th>Type</th><th>克隆对数</th></tr>";
+			html += "<tr><th>目录1</th><th>目录2</th><th>克隆文件占比</th><th>克隆CoChange占比</th><th>克隆Loc占比</th><th>克隆相似度</th><th>type</th><th>克隆对数</th></tr>";
 			var tr = function(index, layer, duplicated) {
 				var prefix = "";
 				for(var i = 0; i < layer; i++) {
