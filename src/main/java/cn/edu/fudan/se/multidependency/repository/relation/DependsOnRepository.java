@@ -35,6 +35,12 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	
 	@Query("match p=(:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(file:ProjectFile) where id(file)={id} return p")
 	List<DependsOn> findFileDependedOnBy(@Param("id") long fileId);
+
+	@Query("match p=(pck:Package)-[r:" + RelationType.str_DEPENDS_ON + "]->(:Package) where id(pck)={id} return p")
+	List<DependsOn> findPackageDependsOn(@Param("id") long packageId);
+
+	@Query("match p=(:Package)-[r:" + RelationType.str_DEPENDS_ON + "]->(pck:Package) where id(pck)={id} return p")
+	List<DependsOn> findPackageDependedOnBy(@Param("id") long packageId);
 	
 	/**
 	 * 两个文件之间的dependsOn
