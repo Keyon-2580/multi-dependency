@@ -51,6 +51,7 @@ var linksCurrent_global = [];
 var linksBefore_global = [];
 var linksCurrent_flag = true;
 var linksVisiable_flag = false;
+var linksOfCircleVisiable_flag = false;
 
 var diameter_global;
 var svg_global;
@@ -924,11 +925,12 @@ var HideBottomPackageButton = function(){
                     && linksWithoutBottomPackages[i - 1].bottom_package){
                     linksWithoutBottomPackages.splice(i - 1, 1);
                 }
-
-                if(linksWithoutBottomPackages.length > 0){
-                    loadLink(linksWithoutBottomPackages);
-                }
             }
+
+            if(linksWithoutBottomPackages.length > 0){
+                loadLink(linksWithoutBottomPackages);
+            }
+
             linksCurrent_flag  = false;
             document.getElementById("hideBottomPackageButton").innerHTML = "取消 仅显示聚合";
         }else{
@@ -958,18 +960,29 @@ var RecoverLink = function(){
     }
 }
 
-//点击气泡，隐藏与气泡无关连线
+//点击气泡，隐藏或显示与气泡无关连线
 var FocusOnCircleLinks = function(circleId){
     if(linksVisiable_flag){
-        var linksRelatedToCircle = linksCurrent_global.concat();
-        for(var i = linksRelatedToCircle.length; i > 0; i--){
-            if(linksRelatedToCircle[i - 1].source_id !== circleId
-                && linksRelatedToCircle[i - 1].target_id !== circleId ){
-                linksRelatedToCircle.splice(i - 1, 1);
+        if(linksOfCircleVisiable_flag){
+            loadLink(linksCurrent_global);
+            linksOfCircleVisiable_flag = false;
+        }else{
+            var linksRelatedToCircle = linksCurrent_global.concat();
+            for(var i = linksRelatedToCircle.length; i > 0; i--){
+                if(linksRelatedToCircle[i - 1].source_id !== circleId
+                    && linksRelatedToCircle[i - 1].target_id !== circleId ){
+                    linksRelatedToCircle.splice(i - 1, 1);
+                }
             }
+
             if(linksRelatedToCircle.length > 0){
                 loadLink(linksRelatedToCircle);
+            }else{
+                alert("没有与此节点相关连线！");
+                return;
             }
+
+            linksOfCircleVisiable_flag = true;
         }
     }
 }
