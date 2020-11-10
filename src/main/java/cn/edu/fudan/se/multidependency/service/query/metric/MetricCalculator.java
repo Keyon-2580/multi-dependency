@@ -123,6 +123,10 @@ public class MetricCalculator {
 		return fileMetrics;
 	}
 
+	public PackageMetrics calculatePackageMetric(Package pck){
+		return packageRepository.calculatePackageMetrics(pck.getId());
+	}
+
 	public Map<Long, ProjectMetrics> calculateProjectMetrics(boolean calculateModularityAndCommits) {
 		String key = "calculateProjectMetrics";
 		if(cache.get(getClass(), key) != null) {
