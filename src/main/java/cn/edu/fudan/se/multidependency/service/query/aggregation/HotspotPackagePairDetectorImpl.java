@@ -132,8 +132,6 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		for(BasicDataForDoubleNodes<Node, Relation> packageClone : packageClones) {
 			Package currentPackage1 = (Package) packageClone.getNode1();
 			Package currentPackage2 = (Package) packageClone.getNode2();
-			String path1 = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
-			String path2 = String.join("_", currentPackage2.getDirectoryPath(), currentPackage1.getDirectoryPath());
 			Package parentPackage1 = hasRelationService.findPackageInPackage(currentPackage1);
 			Package parentPackage2 = hasRelationService.findPackageInPackage(currentPackage2);
 			while(parentPackage1 != null && parentPackage2 != null && !parentPackage1.getId().equals(parentPackage2.getId())) {

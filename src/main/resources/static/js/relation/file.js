@@ -12,21 +12,21 @@ var rFile = function(fileId, cytoscapeutil) {
 			type: "get",
 			url: "/relation/file/" + fileId + "/commit/matrix",
 			success: function(result) {
-				console.log(result);
+				console.log("success");
 				var html = "<table class='table table-bordered'>";
 				html += "<tr>";
-				html += "<td width='20%'></td>";
-				for(var i = 0; i < result.files.length; i++) {
-					html += "<td>" + i + ":" + "<a target='_blank' href='/relation/file/" + result.files[i].id + "'>";
-					html += result.files[i].name;
-					html += "</a>(" + result.commitTimes[result.files[i].id] + ")</td>";
+				html += "<td></td>";
+				for(var k = 0; k < result.files.length; k++) {
+					html += "<td>" + k + ":" + "<a target='_blank' href='/relation/file/" + result.files[k].id + "'>";
+					html += result.files[k].name;
+					html += "</a>(" + result.commitTimes[result.files[k].id] + ")</td>";
 				}
 				html += "</tr>";
 				for(var i = 0; i < result.commits.length; i++) {
 					html += "<tr>";
 					html += "<td>" + (i + 1) + ":" + "<a target='_blank' href='/commit/" + result.commits[i].id + "'>" + result.commits[i].commitId + "(" + result.commits[i].commitFilesSize + ") </a></td>";
 					for(var j = 0; j < result.files.length; j++) {
-						if(result.update[i][j] == true) {
+						if(result.update[i][j] === true) {
 							html += "<td>T</td>";
 						} else {
 							html += "<td></td>";
@@ -34,11 +34,6 @@ var rFile = function(fileId, cytoscapeutil) {
 					}
 					html += "</tr>";
 				}
-				/*var html = "<ol>";
-				for(var i = 0; i < result.length; i++) {
-					html += "<li><a target='_blank' href='/commit/" + result[i].id + "'>" + result[i].commitId + "</a></li>";
-				}
-				html += "</ol>";*/
 				html += "</table>";
 				$("#commit_content").html(html);
 			}
@@ -98,14 +93,14 @@ var rFile = function(fileId, cytoscapeutil) {
 				console.log(result);
 				var html = "<table class='table table-bordered'>";
 				html += "<tr>";
-				html += "<td width='12.5%'>LOC</td>";
-				html += "<td width='12.5%'>NOM</td>";
-				html += "<td width='12.5%'>Fan In</td>";
-				html += "<td width='12.5%'>Fan Out</td>";
-				html += "<td width='12.5%'>change times</td>";
-				html += "<td width='12.5%'>cochange commit times</td>";
-				html += "<td width='12.5%'>instability</td>";
-				html += "<td width='12.5%'>score</td>";
+				html += "<td style='width: 12.5%'>LOC</td>";
+				html += "<td style='width: 12.5%'>NOM</td>";
+				html += "<td style='width: 12.5%'>Fan In</td>";
+				html += "<td style='width: 12.5%'>Fan Out</td>";
+				html += "<td style='width: 12.5%'>change times</td>";
+				html += "<td style='width: 12.5%'>cochange commit times</td>";
+				html += "<td style='width: 12.5%'>instability</td>";
+				html += "<td style='width: 12.5%'>score</td>";
 				html += "</tr>";
 				html += "<tr>";
 				html += "<td>" + result.loc + "</td>";

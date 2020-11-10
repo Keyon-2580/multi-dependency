@@ -2,6 +2,8 @@ package cn.edu.fudan.se.multidependency.service.query.clone;
 
 import java.util.*;
 
+import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
+import cn.edu.fudan.se.multidependency.service.query.clone.data.*;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,10 +20,6 @@ import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
-import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueCalculatorForMicroService;
-import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueForDoubleNodes;
-import cn.edu.fudan.se.multidependency.service.query.clone.data.FileCloneWithCoChange;
-import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChange;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 
@@ -123,6 +121,51 @@ public class CloneValueServiceImpl implements CloneValueService {
 		return result;
 	}
 
+	@Override
+	public PackageCloneValueWithFileCoChangeMatrix queryPackageCloneWithFileCoChangeMatrix(Collection<Clone> fileClones, Package pck1, Package pck2) {
+		try {
+			PackageCloneValueWithFileCoChange packageCloneValueWithFileCoChange = queryPackageCloneWithFileCoChange(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pck1, pck2);
+			Map<String, FileCloneWithCoChange> fileClone = new HashMap<>();
+			List<FileCloneWithCoChange> children = new ArrayList<>(packageCloneValueWithFileCoChange.getChildren());
+			LinkedHashSet<ProjectFile> cloneFiles1 = new LinkedHashSet<>();
+			LinkedHashSet<ProjectFile> cloneFiles2 = new LinkedHashSet<>();;
+			Set<ProjectFile> noneCloneFiles1 = new HashSet<>(packageCloneValueWithFileCoChange.getNoneCloneFiles1());
+			Set<ProjectFile> noneCloneFiles2 = new HashSet<>(packageCloneValueWithFileCoChange.getNoneCloneFiles2());
+			Map<Long, Integer> map = new HashMap<>();
+			int row = 0;
+			int col = 0;
+			for(FileCloneWithCoChange child : children) {
+				if(!map.containsKey(child.getFile1().getId())) {
+					map.put(child.getFile1().getId(), row);
+					cloneFiles1.add(child.getFile1());
+					row ++;
+				}
+				if(!map.containsKey(child.getFile2().getId())) {
+					map.put(child.getFile2().getId(), col);
+					cloneFiles2.add(child.getFile2());
+					col ++;
+				}
+			}
+			boolean[][] matrix = new boolean[row][col];
+			for(int i = 0; i < row; i ++) {
+				for(int j = 0; j < col; j ++) {
+					matrix[i][j] = false;
+				}
+			}
+			for(FileCloneWithCoChange child : children) {
+				int i = map.get(child.getFile1().getId());
+				int j = map.get(child.getFile2().getId());
+				matrix[i][j] = true;
+				String key = String.join("_", child.getFile1().getName(), child.getFile2().getName());
+				fileClone.put(key, child);
+			}
+			return new PackageCloneValueWithFileCoChangeMatrix(fileClone, cloneFiles1, cloneFiles2, noneCloneFiles1, noneCloneFiles2, matrix);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 //	private Set<ProjectFile> addNoneCloneFiles(Set<ProjectFile> cloneFiles, Set<ProjectFile> allFiles){
 //		for(ProjectFile projectFile: cloneFiles){
 //			if(allFiles.contains(projectFile)){
@@ -134,7 +177,6 @@ public class CloneValueServiceImpl implements CloneValueService {
 	/**
 	 * 两个包之间的文件级克隆的聚合，两个包之间不分先后顺序
 	 * @param fileClones
-	 * @param removeSameNode
 	 * @param pck1
 	 * @param pck2
 	 * @return

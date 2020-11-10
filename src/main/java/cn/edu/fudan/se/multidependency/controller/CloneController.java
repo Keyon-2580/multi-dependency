@@ -12,6 +12,7 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.ModuleClone;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
+import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChangeMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -282,6 +283,28 @@ public class CloneController {
 		}
 		try {
 			return cloneValueService.queryPackageCloneWithFileCoChange(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pck1, pck2);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	/**
+	 * 两个包之间的文件依赖加上cochange次数
+	 * @param package1Id
+	 * @param package2Id
+	 * @return
+	 */
+	@GetMapping("/package/double/matrix")
+	@ResponseBody
+	public PackageCloneValueWithFileCoChangeMatrix clonesInPackageWithMatrix(@RequestParam("package1") long package1Id, @RequestParam("package2") long package2Id) {
+		Package pck1 = nodeService.queryPackage(package1Id);
+		Package pck2 = nodeService.queryPackage(package2Id);
+		if(pck1 == null || pck2 == null) {
+			return null;
+		}
+		try {
+			return cloneValueService.queryPackageCloneWithFileCoChangeMatrix(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pck1, pck2);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

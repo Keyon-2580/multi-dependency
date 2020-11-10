@@ -13,8 +13,7 @@ var showtree = function(divId, zNodes) {
     $.fn.zTree.init($("#" + divId), setting, zNodes);
 }
 
-var doublePackagesCloneShow = function(path1, path2, clonePairs, cloneNodesCount1, cloneNodesCount2, allNodesCount1, allNodesCount2, cloneMatchRate, cloneNodesLoc1, cloneNodesLoc2, allNodesLoc1, allNodesLoc2, cloneLocRate, cloneNodesCoChangeTimes, allNodesCoChangeTimes, cloneCoChangeRate, cloneType1Count, cloneType2Count, cloneType3Count, cloneType, cloneSimilarityValue, cloneSimilarityRate) {
-    $("#package_clone_detail").html("");
+var doublePackagesCloneShowMain = function(path1, path2, clonePairs, cloneNodesCount1, cloneNodesCount2, allNodesCount1, allNodesCount2, cloneMatchRate, cloneNodesLoc1, cloneNodesLoc2, allNodesLoc1, allNodesLoc2, cloneLocRate, cloneNodesCoChangeTimes, allNodesCoChangeTimes, cloneCoChangeRate, cloneType1Count, cloneType2Count, cloneType3Count, cloneType, cloneSimilarityValue, cloneSimilarityRate) {
     var html = "";
     html += "</table>";
     html += "<table class='table table-bordered'>";
@@ -60,43 +59,104 @@ var doublePackagesCloneShow = function(path1, path2, clonePairs, cloneNodesCount
     $("#package_clone_detail").html(html);
 }
 
+/*
+采用矩阵形式展示跨包克隆包内详细信息
+*/
+var doublePackagesCloneShowMatrix = function (pck1Id, pck2Id) {
+    $.ajax({
+        type: "get",
+        url: "/clone/package/double/matrix?package1=" + pck1Id + "&package2=" + pck2Id,
+        success: function(result) {
+            console.log("success");
+            var fileClone = result.fileClone;
+            var cloneFiles1 = result.cloneFiles1;
+            var cloneFiles2 = result.cloneFiles2;
+            var matrix = result.matrix;
+            var row = cloneFiles1.length;
+            var col = cloneFiles2.length;
+            var html = "";
+            html += "<table class='table table-bordered'>";
+            html += "<tr>";
+            html += "<td></td>";
+            html += "<td>file2</td>";
+            for(var k = 1; k <= col; k++) {
+                html += "<td>";
+                html += k;
+                html += "</td>";
+            }
+            html += "</tr>";
+            html += "<tr>";
+            html += "<td>file1</td>";
+            html += "<td></td>";
+            for(var g = 0; g < col; g++) {
+                html += "<td>";
+                html += "<a target='_blank' href='/relation/file/" + cloneFiles2[g].id + "'>" + cloneFiles2[g].name + "</a>(" + cloneFiles2[g].lines + ")";
+                html += "</td>";
+            }
+            html += "</tr>";
+            for(var i = 0; i < row; i++) {
+                html += "<tr>";
+                for(var j = -2; j < col; j++) {
+                    html += "<td>";
+                    if(j === -2) {
+                        html += i + 1;
+                    }
+                    else if(j === -1) {
+                        html += "<a target='_blank' href='/relation/file/" + cloneFiles1[i].id + "'>" + cloneFiles1[i].name + "</a>(" + cloneFiles1[i].lines + ")";
+                    }
+                    else if(matrix[i][j] === true){
+                        var key = cloneFiles1[i].name + "_" + cloneFiles2[j].name;
+                        var type = fileClone[key].fileClone.cloneType;
+                        var value = fileClone[key].fileClone.value.toFixed(2);
+                        var cochangeId = fileClone[key].cochange == null ? -1 : fileClone[key].cochange.id;
+                        var cochangeTimes = cochangeId === -1 ? 0 : fileClone[key].cochange.times;
+                        var linesSize1 = fileClone[key].fileClone.linesSize1;
+                        var linesSize2 = fileClone[key].fileClone.linesSize2;
+                        var loc1 = fileClone[key].fileClone.loc1;
+                        var loc2 = fileClone[key].fileClone.loc2;
+                        html += "(";
+                        html += "<a target='_blank' href='/clone/file/double" +
+                            "?file1Id=" + cloneFiles1[i].id +
+                            "&file2Id=" + cloneFiles2[j].id +
+                            "&cloneType=" + type +
+                            "&linesSize1=" + linesSize1 +
+                            "&linesSize2=" + linesSize2 +
+                            "&loc1=" + loc1 +
+                            "&loc2=" + loc2 +
+                            "&value=" + value +
+                            "&cochange=" + cochangeTimes +
+                            "&filePath1=" + cloneFiles1[i].path +
+                            "&filePath2=" + cloneFiles2[j].path +
+                            "&cochangeId=" + cochangeId +
+                            "'>" + type + "</a>";
+                        html += ", ";
+                        html += "<a target='_blank' href='/clone/compare?id1=" + cloneFiles1[i].id + "&id2=" + cloneFiles2[j].id +"'>" + value + "</a>";
+                        html += ", ";
+                        html += "<a class='cochangeTimes' target='_blank' href='/commit/cochange?cochangeId=" + cochangeId + "'>" + cochangeTimes + "</a>";
+                        html += ")";
+                    }
+                    html += "</td>";
+                }
+                html += "</tr>";
+            }
+            html += "</table>";
+            $("#package_files_clone_matrix").html(html);
+        }
+    })
+}
 
 /*
 跨包克隆包内详细信息展示
 */
-var doublePackagesCloneWithCoChange = function(pck1Id, pck2Id) {
-    $("#package_files_clone").html("");
+var doublePackagesCloneShowDetail = function(pck1Id, pck2Id) {
     $.ajax({
         type: "get",
         url: "/clone/package/double/cochange?package1=" + pck1Id + "&package2=" + pck2Id,
         success: function(result) {
             console.log("success");
-            $.ajax({
-                type: "get",
-                url: "/clone/package/double/filetree?package1=" + pck1Id + "&package2=" + pck2Id,
-                success: function (result) {
-                    var html_tree = "";
-                    html_tree += "<div class='div_file1'>";
-                    html_tree += "<ul id='tree_file1' class='ztree'>";
-                    html_tree += "</ul>";
-                    html_tree += "</div>";
-                    html_tree += "<div class='div_file2'>";
-                    html_tree += "<ul id='tree_file2' class='ztree'>"
-                    html_tree += "</ul>";
-                    html_tree += "</div>";
-                    $("#package_files_tree").html(html_tree);
-                    var data1 = result[pck1Id];
-                    showtree("tree_file1", data1);
-                    var data2 = result[pck2Id];
-                    showtree("tree_file2", data2);
-                }
-            });
             var html = "";
             html += "<table class='table table-bordered'>" + "<tr><th>file1</th><th>file2</th><th>type</th><th>value</th><th>cochange</th></tr>";
             var children = result.children;
-            var num_type1 = 0;
-            var num_type2 = 0;
-            var num_type3 = 0;
             for(var i = 0; i < children.length; i++) {
                 var cochangeId = children[i].cochange == null ? -1 : children[i].cochange.id;
                 html += "<tr>";
@@ -137,25 +197,53 @@ var doublePackagesCloneWithCoChange = function(pck1Id, pck2Id) {
                 html += "</tr>";
             }
             html += "</table>";
-            html += "<div id='fileClonesGraph'></div>"
             $("#package_files_clone").html(html);
-            $(".cochangeTimes").click(function() {
-            });
-            $.ajax({
-                type: "get",
-                url: "/clone/package/double/graph?package1=" + pck1Id + "&package2=" + pck2Id,
-                success: function(result) {
-                    console.log("success");
-                    cloneGroupToGraph(result, "fileClonesGraph");
-                }
-            });
         }
     })
 }
+
+var doublePackagesCloneShowTree = function(pck1Id, pck2Id) {
+    $.ajax({
+        type: "get",
+        url: "/clone/package/double/filetree?package1=" + pck1Id + "&package2=" + pck2Id,
+        success: function (result) {
+            console.log("success");
+            var html = "";
+            html += "<div class='div_file1'>";
+            html += "<ul id='tree_file1' class='ztree'>";
+            html += "</ul>";
+            html += "</div>";
+            html += "<div class='div_file2'>";
+            html += "<ul id='tree_file2' class='ztree'>"
+            html += "</ul>";
+            html += "</div>";
+            $("#package_files_tree").html(html);
+            var data1 = result[pck1Id];
+            showtree("tree_file1", data1);
+            var data2 = result[pck2Id];
+            showtree("tree_file2", data2);
+        }
+    });
+}
+
+/*
+显示跨包克隆包内克隆文件圆形图对比
+*/
+var cloneGroupToGraphShowDetail = function (pck1Id, pck2Id) {
+    $.ajax({
+        type: "get",
+        url: "/clone/package/double/graph?package1=" + pck1Id + "&package2=" + pck2Id,
+        success: function(result) {
+            console.log("success");
+            cloneGroupToGraph(result, "fileClonesGraph");
+        }
+    });
+}
+
 /*
 跨包克隆包内克隆文件圆形图对比
 */
-var cloneGroupToGraph = function(result,divId) {
+var cloneGroupToGraph = function(result, divId) {
     //设置数组
     var clonedata = result
 
@@ -1436,6 +1524,9 @@ var setFilesContext = function (file1AbsolutePath, file2AbsolutePath, decoder1, 
 显示跨包克隆聚合详细信息
 */
 var showDetails = function (id1, id2, path1, path2, clonePairs, cloneNodesCount1, cloneNodesCount2, allNodesCount1, allNodesCount2, cloneMatchRate, cloneNodesLoc1, cloneNodesLoc2, allNodesLoc1, allNodesLoc2, cloneLocRate, cloneNodesCoChangeTimes, allNodesCoChangeTimes, cloneCoChangeRate, cloneType1Count, cloneType2Count, cloneType3Count, cloneType, cloneSimilarityValue, cloneSimilarityRate) {
-    doublePackagesCloneShow(path1, path2, clonePairs, cloneNodesCount1, cloneNodesCount2, allNodesCount1, allNodesCount2, cloneMatchRate, cloneNodesLoc1, cloneNodesLoc2, allNodesLoc1, allNodesLoc2, cloneLocRate, cloneNodesCoChangeTimes, allNodesCoChangeTimes, cloneCoChangeRate, cloneType1Count, cloneType2Count, cloneType3Count, cloneType, cloneSimilarityValue, cloneSimilarityRate);
-    doublePackagesCloneWithCoChange(id1, id2);
+    doublePackagesCloneShowMain(path1, path2, clonePairs, cloneNodesCount1, cloneNodesCount2, allNodesCount1, allNodesCount2, cloneMatchRate, cloneNodesLoc1, cloneNodesLoc2, allNodesLoc1, allNodesLoc2, cloneLocRate, cloneNodesCoChangeTimes, allNodesCoChangeTimes, cloneCoChangeRate, cloneType1Count, cloneType2Count, cloneType3Count, cloneType, cloneSimilarityValue, cloneSimilarityRate);
+    doublePackagesCloneShowDetail(id1, id2);
+    doublePackagesCloneShowTree(id1, id2);
+    // cloneGroupToGraphShowDetail(id1, id2);
+    doublePackagesCloneShowMatrix(id1, id2);
 }
