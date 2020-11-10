@@ -48,13 +48,14 @@ var cloneLinks_global = [];
 var dependsonLinks_global = [];
 var cochangeLinks_global = [];
 var linksCurrent_global = [];
+var linksBefore_global = [];
 var linksCurrent_flag = true;
+var linksVisiable_flag = false;
 
 var diameter_global;
 var svg_global;
 var g_global;
 var projectList_global;
-var table_global;
 
 var projectgraph = function () {
     return {
@@ -73,7 +74,6 @@ var loadPageData = function () {
         url : "/project/all/name",
         success : function(result) {
             for(var i = 0; i < result.length; i++){
-                // projectlist.push(x);
                 var name_temp = {};
                 // console.log(x);
                 name_temp["id"] = result[i].id;
@@ -152,8 +152,10 @@ var loadPageData = function () {
                 "</label></p>";
 
             html += "<p><div style=\"margin-top: 10px;\">" +
-                "<button class = \"showLineButton\" id = \"showLineId\" type=\"button\" onclick= showLineButton()>显示关系</button>" +
-                "<button class = \"clearLineButton\" id = \"clearLineId\" type=\"button\" onclick= clearLink() style = \"margin-left: 30px\">隐藏关系</button>" +
+                "<button id = \"showLineId\" type=\"button\" onclick= showLineButton()>加载连线</button>" +
+                "<button id = \"clearLineId\" type=\"button\" onclick= clearLink() style = \"margin-left: 30px\">删除连线</button>" +
+                "<button id = \"hideLineId\" type=\"button\" onclick= HideLink() style = \"margin-left: 30px\">隐藏连线</button>" +
+                "<button id = \"recoverLineId\" type=\"button\" onclick= RecoverLink() style = \"margin-left: 30px\">恢复连线</button>" +
                 "</div></p>" +
                 "</form>" +
                 "</div>";
@@ -166,8 +168,6 @@ var loadPageData = function () {
             temp_array.push(projectlist[0].id);
             projectList_global = temp_array.concat();
             projectGraphAjax(temp_array);
-
-            // Loop_ajax(0, projectlist);
         }
     })
 }
@@ -201,12 +201,10 @@ var projectGraphAjax = function(projectIds){
 
 //绘制气泡图
 var projectToGraph = function(result,divId){
-    // console.log(result);
     var projectdata = result[0].result;
     cloneLinks_global = result[1].links.clone_links;
     dependsonLinks_global = result[1].links.dependson_links;
     cochangeLinks_global = result[1].links.cochange_links;
-    table_global = result[2].table;
 
     var svg = d3.select("#" + divId)
             .attr("width", 1500)
@@ -238,23 +236,15 @@ var projectToGraph = function(result,divId){
         .sum(function(d) { return d.size; })
         .sort(function(a, b) { return b.value - a.value; });
 
-    var focus = root,
-        nodes = pack(root).descendants(),
+    var nodes = pack(root).descendants(),
         view;
-
-    //文件节点颜色计算及克隆数据（暂不需要）
-    // .style("fill", function(d) {
-    //     return d.children ? color(d.depth/(d.depth+5)) : (getCloneBooleanByName(projectdata,d.data.name) ? "\t#FFB6C1" : null);
-    // })
-    // .call(text => text.append("title").text(function(d) {
-    //     return d.parent ? d.data.name + "\n所属包：" + d.parent.data.name + setCloneTitle(getCloneDataByName(clonedata,d.data.long_name)): d.data.name;
-    // }));
 
     var circle = g.selectAll("circle")
         .data(nodes)
         .enter().append("circle")
         .attr("class", function(d) {
-            return d.parent ? d.children ? "circlepacking_node" : "circlepacking_node circlepacking_node--leaf" : "circlepacking_node circlepacking_node--root";
+            return d.parent ? d.children ? "circlepacking_node"
+                : "circlepacking_node circlepacking_node--leaf" : "circlepacking_node circlepacking_node--root";
         })
         .style("fill", function(d) {
             if(d.children){
@@ -262,9 +252,7 @@ var projectToGraph = function(result,divId){
             }else{
                 var ratio = getCloneRatioByName(projectdata,d.data.id)[1];
                 var id = getCloneRatioByName(projectdata,d.data.id)[0];
-
                 if(ratio === 0){
-                    // console.log("white")
                     return null;
                 }else{
                     return color_clone(ratio);
@@ -273,6 +261,9 @@ var projectToGraph = function(result,divId){
         })
         .attr("id", function (d) {
             return d.data.id;
+        })
+        .attr("onclick", function (d) {
+            return "FocusOnCircleLinks(\"" + d.data.id + "\")";
         })
         .call(text => text.append("title").text(function(d) {
             return d.parent ? d.data.name + "\n所属包：" + d.parent.data.name  + "\nID：" + d.data.id : d.data.name;
@@ -299,7 +290,6 @@ var projectToGraph = function(result,divId){
     function zoomTo(v) {
         var k = diameter / v[2]; view = v;
         node.attr("transform", function(d) {
-            // console.log("translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")");
             return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")";
         });
         circle.attr("r", function(d) {
@@ -315,9 +305,7 @@ var projectToGraph = function(result,divId){
         }else{
             if(data.children){
                 for(var i = 0; i < data.children.length; i++) {
-                    // console.log(d.name)
                     if (data.children[i].id === id) {
-                        // return data.children[i].clone_ratio;
                         result.push(data.children[i].id,data.children[i].clone_ratio);
                         return result;
                     } else {
@@ -327,7 +315,6 @@ var projectToGraph = function(result,divId){
                         }
                     }
                 }
-                // console.log(typeof(projectdata.children[2].children) != "undefined")
             }
         }
     }
@@ -372,8 +359,6 @@ var projectToGraph = function(result,divId){
         .attr("dy", ".35em")
         .style("text-anchor", "end")
         .text(function(d) { return d.name;});
-
-    drawCloneTableBelow(table_global, "project");
 }
 
 //根据筛选规则绘制气泡图连线
@@ -423,26 +408,26 @@ var showLine = function(links_local, type){
         }
 
         if(relation_type === "clone" && flag_delete === false){
-            var similarityValue = links_local[i - 1].similarityValue.toFixed(2);
+            var cloneMatchRate = links_local[i - 1].cloneMatchRate.toFixed(2);
             if($("#cloneSimilarity").prop("checked")){
                 var temp_flag_clonesimilarity = false;
 
                 if($("#similarityCompareSelectBelow").val() === "<=" &&
-                    similarityValue >= $("#similaritybelow").val()){
+                    cloneMatchRate >= $("#similaritybelow").val()){
                     if($("#similarityCompareSelectHigh").val() === "<=" &&
-                        similarityValue <= $("#similarityhigh").val()){
+                        cloneMatchRate <= $("#similarityhigh").val()){
                         temp_flag_clonesimilarity = true;
                     }else if($("#similarityCompareSelectHigh").val() === "<" &&
-                        similarityValue < $("#similarityhigh").val()){
+                        cloneMatchRate < $("#similarityhigh").val()){
                         temp_flag_clonesimilarity = true;
                     }
                 }else if($("#similarityCompareSelectBelow").val() === "<" &&
-                    similarityValue > $("#similaritybelow").val()){
+                    cloneMatchRate > $("#similaritybelow").val()){
                     if($("#similarityCompareSelectHigh").val() === "<=" &&
-                        similarityValue <= $("#similarityhigh").val()){
+                        cloneMatchRate <= $("#similarityhigh").val()){
                         temp_flag_clonesimilarity = true;
                     }else if($("#similarityCompareSelectHigh").val() === "<" &&
-                        similarityValue < $("#similarityhigh").val()){
+                        cloneMatchRate < $("#similarityhigh").val()){
                         temp_flag_clonesimilarity = true;
                     }
                 }
@@ -512,11 +497,12 @@ var showLine = function(links_local, type){
     }
 
     linksCurrent_global = links_local.concat();
-    drawLink(links_local);
+    loadLink(links_local);
+    drawCloneTableBelow("", "all");
 }
 
-    // .attr("class", "packageLink")
-function drawLink(jsonLinks) {
+//加载连线
+function loadLink(jsonLinks) {
     var svg1 = d3.select(".packageLink") .remove();
     g_global.selectAll("circle")
         .style("stroke","")
@@ -538,6 +524,12 @@ function drawLink(jsonLinks) {
         .attr("stroke", function (d){
             return getTypeColor(d)[0];
         })
+        .attr("type", function (d){
+            return d.type;
+        })
+        .attr("id", function (d){
+            return d.pair_id;
+        })
         .attr("onclick", function(d){
             if(d.type === "clone" && !d.bottom_package){
                 source_id = d.source_id.split("_")[1];
@@ -550,9 +542,14 @@ function drawLink(jsonLinks) {
         })
         .call(text => text.append("title").text(function(d) {
             if(d.type === "clone"){
-                return "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\nsimilarityValue: " + d.similarityValue.toFixed(2)
-                    + "\npackageCochangeTimes: " + d.packageCochangeTimes
-                    + "\npackageCloneCochangeTimes: " + d.packageCloneCochangeTimes
+                return "Package1: " + d.source_name + "\nPackage2: " + d.target_name
+                    + "\ncloneType: " + d.cloneType
+                    + "\ncloneMatchRate: " + d.cloneMatchRate.toFixed(2)
+                    + "\ncloneCoChangeRate: " + d.cloneCoChangeRate.toFixed(2)
+                    + "\ncloneLocRate: " + d.cloneLocRate.toFixed(2)
+                    + "\ncloneSimilarityRate: " + d.cloneSimilarityRate.toFixed(2)
+                    + "\nallNodesCoChangeTimes: " + d.allNodesCoChangeTimes
+                    + "\ncloneNodesCoChangeTimes: " + d.cloneNodesCoChangeTimes
                     + "\nclonePairs: " + d.clonePairs;
             }else if(d.type === "dependson"){
                 return "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\ndependsOnTypes: " + d.dependsOnTypes
@@ -699,17 +696,162 @@ function drawLink(jsonLinks) {
             return getTranslateY2(d.source_id, d.target_id) + diameter_global / 2;
         });
 
+    linksVisiable_flag = true;
     // flag = false;
 }
 
+//删除连线
 function clearLink(){
-    drawCloneTableBelow(table_global, "project");
+    // drawCloneTableBelow(clone_table_global, "project_clone");
     g_global.selectAll("circle")
         .style("stroke","")
         .style("stroke-width","");
-    var svg1 = d3.select(".packageLink") .remove();
+    var clearlink = d3.select(".packageLink") .remove();
+    var cleartable = d3.selectAll("table").remove();
+    linksCurrent_global = [];
+    linksVisiable_flag = false;
 
-    // flag = true;
+}
+
+//绘制下方表格
+function drawCloneTableBelow(link_id, type){
+    // console.log(link_id);
+    var cleartable = d3.selectAll("table").remove();
+    let html = "";
+
+    if(type === "all" || type === "clone"){
+        let html_clone_table_body = "";
+        let html_clone_table_parent = "";
+        let html_clone_table_head = "<table class = \"gridtable\">"
+            + "<tr><th>目录1</th><th>目录2</th>"
+            + "<th>克隆文件占比</th><th>克隆Cochange占比</th><th>克隆Loc占比</th><th>克隆相似度</th><th>type</th><th>克隆对数</th></tr>";
+
+        if(link_id !== ""){
+            linksBefore_global.forEach(function (item){
+                if(item.pair_id === link_id){
+                    html_clone_table_parent += "<tr>"
+                        + "<th>" + item.source_name + "</th>"
+                        + "<th>" + item.target_name + "</th>"
+                        + "<th>" + "(" + item.cloneNodesCount1 + "+" + item.cloneNodesCount2 + ")/(" + item.allNodesCount1 + "+"
+                        + item.allNodesCount2 + ")=" + item.cloneMatchRate.toFixed(2) + "</th>"
+                        + "<th>" + item.cloneNodesCoChangeTimes  + "/" + item.allNodesCoChangeTimes  + "=" + item.cloneCoChangeRate.toFixed(2) + "</th>"
+                        + "<th>" + "(" + item.cloneNodesLoc1 + "+" + item.cloneNodesLoc2 + ")/(" + item.allNodesLoc1 + "+" + item.allNodesLoc2 + ")=" + item.cloneLocRate.toFixed(2) + "</th>"
+                        + "<th>" + item.cloneSimilarityValue.toFixed(2) + "/(" + item.cloneType1Count + "+" + item.cloneType2Count + "+" + item.cloneType3Count + ")=" + item.cloneSimilarityRate.toFixed(2) + "</th>"
+                        + "<th>" + item.cloneType + "</th>"
+                        + "<th>" + item.clonePairs + "</th></tr>";
+                }
+            })
+        }
+
+        linksCurrent_global.forEach(function(item){
+            if(item.type === "clone"){
+                var allNodesCoChangeTimes = item.allNodesCoChangeTimes;
+                var cloneNodesCoChangeTimes = item.cloneNodesCoChangeTimes;
+                var clonePairs = item.clonePairs;
+                var cloneRate = "(" + item.cloneNodesCount1 + "+" + item.cloneNodesCount2 + ")/("
+                    + item.allNodesCount1 + "+" + item.allNodesCount2 + ")=" +
+                    ((item.cloneNodesCount1 + item.cloneNodesCount2 + 0.0)
+                        / (item.allNodesCount1 + item.allNodesCount2)).toFixed(2);
+
+                var cochangeRate = "";
+                if(allNodesCoChangeTimes < 3){
+                    cochangeRate = cloneNodesCoChangeTimes + "/" + allNodesCoChangeTimes + "=0.00";
+                }else {
+                    cochangeRate = cloneNodesCoChangeTimes  + "/" + allNodesCoChangeTimes  + "="
+                        + ((cloneNodesCoChangeTimes  + 0.0) / allNodesCoChangeTimes ).toFixed(2);
+                }
+
+                html_clone_table_body += "<tr><td>|---" + item.source_name + "</td>"
+                    + "<td>|---" + item.target_name + "</td>"
+                    + "<td>" + "(" + item.cloneNodesCount1 + "+" + item.cloneNodesCount2 + ")/(" + item.allNodesCount1 + "+"
+                    + item.allNodesCount2 + ")=" + item.cloneMatchRate.toFixed(2) + "</td>"
+                    + "<td>" + item.cloneNodesCoChangeTimes  + "/" + item.allNodesCoChangeTimes  + "=" + item.cloneCoChangeRate.toFixed(2) + "</td>"
+                    + "<td>" + "(" + item.cloneNodesLoc1 + "+" + item.cloneNodesLoc2 + ")/(" + item.allNodesLoc1 + "+" + item.allNodesLoc2 + ")=" + item.cloneLocRate.toFixed(2) + "</td>"
+                    + "<td>" + item.cloneSimilarityValue.toFixed(2) + "/(" + item.cloneType1Count + "+" + item.cloneType2Count + "+" + item.cloneType3Count + ")=" + item.cloneSimilarityRate.toFixed(2) + "</td>"
+                    + "<td>" + item.cloneType + "</td>"
+                    + "<td>";
+                if(clonePairs > 0) {
+                    html_clone_table_body += "<a target='_blank' class='package' href='/cloneaggregation/details" +
+                        "?id1=" + item.source_id.split("_")[1] +
+                        "&id2=" + item.target_id.split("_")[1] +
+                        "&path1=" + item.source_name +
+                        "&path2=" + item.target_name +
+                        "&clonePairs=" + clonePairs +
+                        "&cloneNodesCount1=" + item.cloneNodesCount1 +
+                        "&cloneNodesCount2=" + item.cloneNodesCount2 +
+                        "&allNodesCount1=" + item.allNodesCount1 +
+                        "&allNodesCount2=" + item.allNodesCount2 +
+                        "&cloneMatchRate=" + item.cloneMatchRate +
+                        "&cloneNodesLoc1=" + item.cloneNodesLoc1 +
+                        "&cloneNodesLoc2=" + item.cloneNodesLoc2 +
+                        "&allNodesLoc1=" + item.allNodesLoc1 +
+                        "&allNodesLoc2=" + item.allNodesLoc2 +
+                        "&cloneLocRate=" + item.cloneLocRate +
+                        "&cloneNodesCoChangeTimes=" + item.cloneNodesCoChangeTimes +
+                        "&allNodesCoChangeTimes=" + item.allNodesCoChangeTimes +
+                        "&cloneCoChangeRate=" + item.cloneCoChangeRate +
+                        "&cloneType1Count=" + item.cloneType1Count +
+                        "&cloneType2Count=" + item.cloneType2Count +
+                        "&cloneType3Count=" + item.cloneType3Count +
+                        "&cloneType=" + item.cloneType +
+                        "&cloneSimilarityValue=" + item.cloneSimilarityValue +
+                        "&cloneSimilarityRate=" + item.cloneSimilarityRate +
+                        "'>" + clonePairs + "</a>";
+                }else {
+                    html_clone_table_body += clonePairs;
+                }
+                html_clone_table_body += "</td></tr>";
+            }
+        })
+
+        html_clone_table_body += "</table>";
+        html += html_clone_table_head + html_clone_table_parent + html_clone_table_body;
+    }
+
+    if(type === "all" || type === "dependson"){
+        let html_dependson_table = "";
+
+        html_dependson_table += "<table class = \"gridtable\">"
+            + "<tr><th>目录1</th><th>目录1依赖类型(次数)</th><th>目录2</th><th>目录1依赖类型(次数)</th>"
+            + "<th>依赖强度</th></tr>";
+
+        linksCurrent_global.forEach(function(d){
+            if(d.type === "dependson"){
+                html_dependson_table += "<tr><td>" + d.source_name + "</td><td>"
+                    + (d.dependsOnTypes === "" ? ""
+                    : (d.dependsOnTypes + "(" + d.dependsOnTimes + ")")) + "</td><td>"
+                    + d.target_name + "</td><td>"
+                    + (d.dependsByTypes === "" ? ""
+                    : (d.dependsByTypes + "(" + d.dependsByTimes + ")")) + "</td><td>"
+                    + d.dependsIntensity.toFixed(2) + "</td></tr>";
+            }
+        })
+
+        html_dependson_table += "</table>"
+        html += html_dependson_table;
+    }
+    if(type === "all" || type === "cochange"){
+        let html_cochange_table = "";
+
+        html_cochange_table += "<table class = \"gridtable\">"
+            + "<tr><th>目录1</th><th>目录1更改次数</th><th>目录2</th><th>目录2更改次数</th>"
+            + "<th>CoChange Times</th></tr>";
+
+        linksCurrent_global.forEach(function(d){
+            if(d.type === "cochange"){
+                html_cochange_table += "<tr><td>" + d.source_name + "</td><td>"
+                    + d.node1ChangeTimes + "</td><td>"
+                    + d.target_name + "</td><td>"
+                    + d.node2ChangeTimes + "</td><td>"
+                    + d.coChangeTimes + "</td></tr>";
+            }
+        })
+
+        html_cochange_table += "</table>"
+        html += html_cochange_table;
+    }
+
+    $("#projectCloneTable").html(html);
 }
 
 //点击连线，获取子包关系,绘制图下方表格
@@ -722,9 +864,11 @@ function drawChildrenCloneLinks(package1Id, package2Id, type){
                 clearLink();
                 // console.log(result);
                 if(result.children_graphlinks.clone_links.length > 0){
-                    showLine(result.children_graphlinks.clone_links, "package");
+                    linksBefore_global = linksCurrent_global.concat();
+                    linksCurrent_global = result.children_graphlinks.clone_links;
+                    showLine(linksCurrent_global, "package");
                 }
-                drawCloneTableBelow(result.table, "package");
+                drawCloneTableBelow(package1Id + "_" + package2Id, "clone");
             }
         });
     } else if (type === "dependson") {
@@ -744,167 +888,88 @@ var showMultipleButton = function(){
     projectGraphAjax(value);
 }
 
-function drawCloneTableBelow(tableData, type){
-    // console.log(tableData);
-    if(type === "project"){
-        var temp_delete_number = 0;
-
-        for(var i = tableData.clonefiles1.length; i > 0; i--){
-            var source_project = tableData.clonefiles1[i - 1].projectBelong;
-            var target_project = tableData.clonefiles2[i - 1].projectBelong;
-            var temp_flag_source = false;
-            var temp_flag_target = false;
-
-            for(var j = 0; j < projectList_global.length; j++){
-                if(source_project === projectList_global[j]){
-                    temp_flag_source = true;
-                }
-            }
-
-            for(var k = 0; k < projectList_global.length; k++){
-                if(target_project === projectList_global[k] ){
-                    temp_flag_target = true;
-                }
-            }
-
-            if(temp_flag_source === false || temp_flag_target === false){
-                tableData.clonefiles1.splice(i - 1, 1);
-                tableData.clonefiles2.splice(i - 1, 1);
-                temp_delete_number++;
-            }
-        }
-    }
-
-    var cleartable = d3.selectAll("table").remove();
-    var clonefiles1 = tableData.clonefiles1;
-    var clonefiles2 = tableData.clonefiles2;
-    var nonclonefiles1 = tableData.nonclonefiles1;
-    var nonclonefiles2 = tableData.nonclonefiles2;
-    let html = "";
-    html += "<table class = \"gridtable\">"
-        + "<tr><th>目录1</th><th>目录1克隆占比</th><th>目录2</th><th>目录2克隆占比</th><th>总克隆占比</th><th>包克隆Cochange占比</th><th>克隆文件对数</th></tr>";
-    if(type === "package"){
-        var parentCochangeRate = "";
-        if(tableData.packageCochangeTimes < 3){
-            parentCochangeRate = tableData.packageCloneCochangeTimes + "/" + tableData.packageCochangeTimes + "=0.00";
-        }else {
-            parentCochangeRate = tableData.packageCloneCochangeTimes  + "/" + tableData.packageCochangeTimes  + "=" + ((tableData.packageCloneCochangeTimes  + 0.0) / tableData.packageCochangeTimes ).toFixed(2);
-        }
-
-
-        html += "<tr><th>" + tableData.parentpackage1 + "</th><th>"
-            + tableData.relationNodes1 + "/" + tableData.allNodes1 + "=" + ((tableData.relationNodes1 + 0.0) / tableData.allNodes1).toFixed(2) + "</th><th>"
-            + tableData.parentpackage2 + "</th><th>"
-            + tableData.relationNodes2 + "/" + tableData.allNodes2 + "=" + ((tableData.relationNodes2 + 0.0) / tableData.allNodes2).toFixed(2) + "</th><th>"
-            + "(" + tableData.relationNodes1 + "+" + tableData.relationNodes2 + ")/(" + tableData.allNodes1 + "+" + tableData.allNodes2 + ")=" + tableData.similarityValue.toFixed(2) + "</th><th>"
-            + parentCochangeRate + "</th><th>"
-            + tableData.clonePairs + "</th></tr>";
-    }
-
-    for(let i = 0; i < clonefiles1.length; i++){
-        var packageCochangeTimes = clonefiles1[i].packageCochangeTimes;
-        var packageCloneCochangeTimes = clonefiles1[i].packageCloneCochangeTimes;
-        var clonePairs = clonefiles1[i].clonePairs;
-        var path1CloneRate = clonefiles1[i].relationNodes1 + "/" + clonefiles1[i].allNodes1 + "=" + ((clonefiles1[i].relationNodes1 + 0.0) / clonefiles1[i].allNodes1).toFixed(2);
-        var path2CloneRate = clonefiles2[i].relationNodes2 + "/" + clonefiles2[i].allNodes2 + "=" + ((clonefiles2[i].relationNodes2 + 0.0) / clonefiles2[i].allNodes2).toFixed(2);
-        var cloneRate = "(" + clonefiles1[i].relationNodes1 + "+" + clonefiles2[i].relationNodes2 + ")/(" + clonefiles1[i].allNodes1 + "+" + clonefiles2[i].allNodes2 + ")=" + ((clonefiles1[i].relationNodes1 + clonefiles2[i].relationNodes2 + 0.0) / (clonefiles1[i].allNodes1 + clonefiles2[i].allNodes2)).toFixed(2);
-        var cochangeRate = "";
-
-        if(packageCochangeTimes < 3){
-            cochangeRate = packageCloneCochangeTimes + "/" + packageCochangeTimes + "=0.00";
-        }else {
-            cochangeRate = packageCloneCochangeTimes  + "/" + packageCochangeTimes  + "=" + ((packageCloneCochangeTimes  + 0.0) / packageCochangeTimes ).toFixed(2);
-        }
-
-        if(type === "package"){
-            html += "<tr><td>|---" + clonefiles1[i].name + "</td><td>" + path1CloneRate + "</td><td>|---" + clonefiles2[i].name + "</td>";
-        }else{
-            html += "<tr><td>" + clonefiles1[i].name + "</td><td>" + path1CloneRate + "</td><td>" + clonefiles2[i].name + "</td>";
-        }
-
-        html += "<td>" + path2CloneRate + "</td><td>" + cloneRate + "</td>";
-        html += "<td>" + cochangeRate + "</td>";
-        html += "<td>";
-        if(clonePairs > 0) {
-            html += "<a target='_blank' class='package' href='/cloneaggregation/details" +
-                "?id1=" + clonefiles1[i].id +
-                "&id2=" + clonefiles2[i].id +
-                "&path1=" + clonefiles1[i].name +
-                "&path2=" + clonefiles2[i].name +
-                "&cloneNodes1=" + clonefiles1[i].relationNodes1 +
-                "&allNodes1=" + clonefiles1[i].allNodes1 +
-                "&cloneNodes2=" + clonefiles2[i].relationNodes2 +
-                "&allNodes2=" + clonefiles2[i].allNodes2 +
-                "&cloneCochangeTimes=" + packageCloneCochangeTimes +
-                "&allCochangeTimes=" + packageCochangeTimes +
-                "&clonePairs=" + clonePairs +
-                "'>" + clonePairs + "</a>";
-        }else {
-            html += clonePairs;
-        }
-        html += "</td></tr>";
-    }
-
-    if(typeof(nonclonefiles1) !== "undefined"){
-        if(nonclonefiles1.length > 0){
-            for(let i = 0; i < nonclonefiles1.length; i++){
-                html += "<tr><td>" + nonclonefiles1[i].name + "</td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td></tr>";
-            }
-        }
-
-        if(nonclonefiles2.length > 0){
-            for(let i = 0; i < nonclonefiles2.length; i++){
-                html += "<tr><td> </td><td> </td><td>" + nonclonefiles2[i].name + "</td><td> </td><td> </td><td> </td><td> </td></tr>";
-            }
-        }
-    }
-
-    html += "</table>";
-    $("#projectCloneTable").html(html);
-}
-
+//显示连线
 var showLineButton = function(){
     var temp_links = [];
-    // console.log(dependsonLinks_global);
-    // console.log(cloneLinks_global);
     showLine(temp_links,"project");
 }
 
+//获取连线颜色
 var getTypeColor = function(d){
     if(d.type === "clone") {
-        return d.similarityValue === 1 ? [CLONE_HIGH_COLOR, "clone_high"] : d.similarityValue >= 0.9 ? [CLONE_MEDIUM_COLOR, "clone_medium"] : [CLONE_LOW_COLOR, "clone_low"];
+        return d.cloneMatchRate === 1 ? [CLONE_HIGH_COLOR, "clone_high"] : d.cloneMatchRate >= 0.9
+            ? [CLONE_MEDIUM_COLOR, "clone_medium"] : [CLONE_LOW_COLOR, "clone_low"];
     }else if(d.type === "dependson"){
-        return d.dependsIntensity > 0.8 ? [DEPENDSON_HIGH_COLOR, "dependson_high"] : d.dependsIntensity >= 0.5 ? [DEPENDSON_MEDIUM_COLOR, "dependson_medium"] : [DEPENDSON_LOW_COLOR, "dependson_low"];
+        return d.dependsIntensity > 0.8 ? [DEPENDSON_HIGH_COLOR, "dependson_high"] : d.dependsIntensity >= 0.5
+            ? [DEPENDSON_MEDIUM_COLOR, "dependson_medium"] : [DEPENDSON_LOW_COLOR, "dependson_low"];
     }else if(d.type === "cochange"){
         return [COCHANGE_COLOR, "cochange"];
     }
 }
 
+//筛选框子控件随着母控件一同取消点选
 var CancelChildrenChecked = function(parent_name){
     if(!$("#" + parent_name).is(":checked")){
         $("input[name = '" + parent_name + "_children" + "']").prop("checked", false);
     }
 }
 
+//取消显示底层包按钮
 var HideBottomPackageButton = function(){
     if($("#clone").prop("checked")){
         if(linksCurrent_flag){
             var linksWithoutBottomPackages = linksCurrent_global.concat();
             for(var i = linksWithoutBottomPackages.length; i > 0; i--){
-                if(linksWithoutBottomPackages[i - 1].hasOwnProperty("bottom_package") && linksWithoutBottomPackages[i - 1].bottom_package){
+                if(linksWithoutBottomPackages[i - 1].hasOwnProperty("bottom_package")
+                    && linksWithoutBottomPackages[i - 1].bottom_package){
                     linksWithoutBottomPackages.splice(i - 1, 1);
                 }
 
                 if(linksWithoutBottomPackages.length > 0){
-                    drawLink(linksWithoutBottomPackages);
+                    loadLink(linksWithoutBottomPackages);
                 }
-                linksCurrent_flag  = false;
-                document.getElementById("hideBottomPackageButton").innerHTML = "取消 仅显示聚合";
             }
+            linksCurrent_flag  = false;
+            document.getElementById("hideBottomPackageButton").innerHTML = "取消 仅显示聚合";
         }else{
-            drawLink(linksCurrent_global);
+            loadLink(linksCurrent_global);
             linksCurrent_flag  = true;
             document.getElementById("hideBottomPackageButton").innerHTML = "仅显示聚合";
+        }
+    }
+}
+
+//隐藏连线
+var HideLink = function(){
+    g_global.selectAll("circle")
+        .style("stroke","")
+        .style("stroke-width","");
+    var clearlink = d3.select(".packageLink") .remove();
+    linksVisiable_flag  = false;
+}
+
+//恢复连线
+var RecoverLink = function(){
+    if(linksCurrent_global.length > 0){
+        loadLink(linksCurrent_global);
+        linksVisiable_flag  = true;
+    }else{
+        alert("当前无连线数据！");
+    }
+}
+
+//点击气泡，隐藏与气泡无关连线
+var FocusOnCircleLinks = function(circleId){
+    if(linksVisiable_flag){
+        var linksRelatedToCircle = linksCurrent_global.concat();
+        for(var i = linksRelatedToCircle.length; i > 0; i--){
+            if(linksRelatedToCircle[i - 1].source_id !== circleId
+                && linksRelatedToCircle[i - 1].target_id !== circleId ){
+                linksRelatedToCircle.splice(i - 1, 1);
+            }
+            if(linksRelatedToCircle.length > 0){
+                loadLink(linksRelatedToCircle);
+            }
         }
     }
 }
