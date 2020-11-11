@@ -5,6 +5,9 @@ import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
  * 节点node1和node2不分方向
@@ -27,6 +30,10 @@ public class DependsRelationDataForDoubleNodes<N extends Node, R extends Relatio
 	private int dependsByTimes = 0;
 
 	private double dependsIntensity = 0.0;
+
+	private Map<String, Long> dependsOnTypesMap = new HashMap<>();
+
+	private Map<String, Long> dependsByTypesMap = new HashMap<>();
 
 	public DependsRelationDataForDoubleNodes(N node1, N node2){
 		super(node1, node2);

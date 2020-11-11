@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.repository.relation;
 
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -18,6 +19,9 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	
 	@Query("match p=(:Package)-[r:" + RelationType.str_DEPENDS_ON + "]->(:Package) return p")
 	List<DependsOn> findPackageDepends();
+
+	@Query("match (p:Package)-[r:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where id(file) = {fileId} return p")
+	Package findFileBelongPackageByFileId(@Param("fileId") long fileId);
 
 	@Query("match p=(p1:Package)-[:" + RelationType.str_DEPENDS_ON + "]-(p2:Package) " +
 			"where id(p1) = {pckId1} and id(p2) = {pckId2}" +
@@ -76,11 +80,11 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	//void deleteNullTimesDependsOnInTypes();
 
 	final String FILE_TYPE_LEFT = "match (f1:ProjectFile)-[:CONTAIN*1..]->(:Type)-[r: ";
-	final String FILE_TYPE_MIDDLE = "]->(:Type)<-[:CONTAIN*1..]-(f2:ProjectFile) with f1,f2,r where f1 <> f2 " +
-			"create (f1)-[:DEPENDS_ON{dependsOnType: \"";
+	final String FILE_TYPE_MIDDLE = "]->(:Type)<-[:CONTAIN*1..]-(f2:ProjectFile) where f1 <> f2 " +
+			"create (f1)-[:DEPENDS_ON{dependsOnType : \"";
 	final String FILE_TYPE_MIDDLE2 = "\", times : ";
 	final String File_TYPE_RIGHT = "}]->(f2);";
-	
+
 	@Query(FILE_TYPE_LEFT + RelationType.str_EXTENDS + FILE_TYPE_MIDDLE + RelationType.str_EXTENDS +
 			FILE_TYPE_MIDDLE2 + "1" + File_TYPE_RIGHT)
 	void createDependsOnWithExtendsInFiles();
@@ -97,9 +101,9 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 			FILE_TYPE_MIDDLE2 + "r.times" + File_TYPE_RIGHT)
 	void createDependsOnWithAnnotationInFiles();
 
-	final String FILE_FUNCTION_LEFT = "match (f1:ProjectFile)-[:CONTAIN]->(:Function)-[r: ";
-	final String FILE_FUNCTION_MIDDLE = "]->(:Function)<-[:CONTAIN]-(f2:ProjectFile) with f1,f2,r where f1 <> f2 " +
-			"create (f1)-[:DEPENDS_ON{dependsOnType: \"";
+	final String FILE_FUNCTION_LEFT = "match (f1:ProjectFile)-[:CONTAIN*1..]->(:Function)-[r: ";
+	final String FILE_FUNCTION_MIDDLE = "]->(:Function)<-[:CONTAIN*1..]-(f2:ProjectFile) where f1 <> f2 " +
+			"create (f1)-[:DEPENDS_ON{dependsOnType : \"";
 	final String FILE_FUNCTION_MIDDLE2 = "\", times : ";
 	final String File_FUNCTION_RIGHT = "}]->(f2);";
 	@Query(FILE_FUNCTION_LEFT + RelationType.str_CALL + FILE_TYPE_MIDDLE + RelationType.str_CALL +
@@ -108,13 +112,14 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query(FILE_FUNCTION_LEFT + RelationType.str_IMPLLINK + FILE_TYPE_MIDDLE + RelationType.str_IMPLLINK +
 			FILE_FUNCTION_MIDDLE2 + "1" + File_FUNCTION_RIGHT)
 	void createDependsOnWithFunctionImpllinkInFiles();
-	@Query(FILE_FUNCTION_LEFT + RelationType.str_IMPLEMENTS + FILE_TYPE_MIDDLE + RelationType.str_IMPLEMENTS +
+	@Query(FILE_FUNCTION_LEFT + RelationType.str_IMPLEMENTS + FILE_TYPE_MIDDLE + RelationType.str_IMPLEMENTS_C +
 			FILE_FUNCTION_MIDDLE2 + "1" + File_FUNCTION_RIGHT)
 	void createDependsOnWithFunctionImplementsInFiles();
 
 
-	//@Query(FILE_LEFT + RelationType.str_CALL + FILE_RIGHT)
-	//void createDependsOnWithCallInFiles();
+//	@Query(FILE_FUNCTION_LEFT + RelationType.str_CALL + FILE_TYPE_MIDDLE + RelationType.str_CALL +
+//			FILE_FUNCTION_MIDDLE2 + "1" + File_FUNCTION_RIGHT)
+//	void createDependsOnWithCallInFiles();
 	//@Query(FILE_LEFT + RelationType.str_CREATE + FILE_RIGHT)
 	//void createDependsOnWithCreateInFiles();
 	//@Query(FILE_LEFT + RelationType.str_CAST + FILE_RIGHT)
@@ -129,25 +134,26 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	//void createDependsOnWithAccessInFiles();
 
 
-	@Query("match (f1:ProjectFile)-[r:DEPENDS_ON]->(f2:ProjectFile) " +
-			"with f1,f2,sum(r.times) as times, " +
-			"reduce(dependsType = \"\", tt in collect(distinct r.dependsOnType) | dependsType + (\"__\" + tt)) as dependsOnType " +
-			"create (f1)-[:DEPENDS_ON{times : times, dependsOnType : dependsOnType}]->(f2);")
-	void createDependsOnWithTimesInFiles();
+//	@Query("match (f1:ProjectFile)-[r:DEPENDS]->(f2:ProjectFile) " +
+//			"with f1,f2, r.dependsType, sum(r.times) as times" +
+//			"reduce(dependsType = \"\", tt in collect(r.dependsType) | dependsType + (\"__\" + tt)) as dependsOnType " +
+//			"create (f1)-[:DEPENDS{times : times, dependsOnType : dependsOnType}]->(f2);")
+//	void createDependsWithTimesInFiles();
+
 	@Query("match (:ProjectFile)-[r:DEPENDS_ON]->(:ProjectFile) " +
-			"where not r.dependsOnType starts with \"__\" " +
+			"where r.dependsOnIntensity is null " +
 			"delete r;")
 	void deleteNullAggregationDependsOnInFiles();
 
 	@Query("match (p1:Package)-[:CONTAIN]->(:ProjectFile)-[r:DEPENDS_ON]->(:ProjectFile)<-[:CONTAIN]-(p2:Package) " +
 			"where p1<>p2 " +
-			"with p1,p2,sum(r.times) as times, " +
-			"reduce(tmp = \"\", tt in collect(distinct r.dependsOnType) | tmp + tt) as dependsType " +
-			"with p1,p2,times," +
-			"reduce(tmp = \"\", tt in split(substring(dependsType, 2), \"__\") | " +
-			"case when tmp contains tt then tmp else tmp + (\"__\" + tt) end ) as dependsOnType " +
-			"create (p1)-[:DEPENDS_ON{times : times, dependsOnType : dependsOnType}]->(p2);")
+			"create (p1)-[:DEPENDS_ON{dependsOnType : r.dependsOnType, times : r.times}]->(p2);")
 	void createDependsOnInPackages();
+
+	@Query("match (:Package)-[r:DEPENDS_ON]->(:Package) " +
+			"where r.dependsOnIntensity is null " +
+			"delete r;")
+	void deleteNullAggregationDependsOnInPackages();
 
 	@Query("match ()-[r:DEPENDS_ON]->() where r.dependsOnType = {dependsOnType} delete r;")
 	void deleteDependsOnByRelationType(String dependsOnType);

@@ -2,6 +2,9 @@ package cn.edu.fudan.se.multidependency.model.relation;
 
 import org.neo4j.graphdb.RelationshipType;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 public enum RelationType implements RelationshipType {
 	CONTAIN(RelationType.str_CONTAIN),
 	HAS(RelationType.str_HAS),
@@ -12,6 +15,7 @@ public enum RelationType implements RelationshipType {
 	CALL(RelationType.str_CALL),
 	CREATE(RelationType.str_CREATE),
 	IMPLEMENTS(RelationType.str_IMPLEMENTS),
+	IMPLEMENTS_C(RelationType.str_IMPLEMENTS_C),
 	IMPLLINK(RelationType.str_IMPLLINK),
 	PARAMETER(RelationType.str_PARAMETER),
 	RETURN(RelationType.str_RETURN),
@@ -55,6 +59,7 @@ public enum RelationType implements RelationshipType {
 	CLONE(RelationType.str_CLONE),
 
 	DEPENDS_ON(RelationType.str_DEPENDS_ON),
+	DEPENDS(RelationType.str_DEPENDS),
 
 	MODULE_CLONE(RelationType.str_MODULE_CLONE),
 	AGGREGATION_CLONE(RelationType.str_AGGREGATION_CLONE);
@@ -77,6 +82,7 @@ public enum RelationType implements RelationshipType {
 	public static final String str_CALL = "CALL";
 	public static final String str_CREATE = "CREATE";
 	public static final String str_IMPLEMENTS = "IMPLEMENTS";
+	public static final String str_IMPLEMENTS_C = "IMPLEMENTS_C";
 	public static final String str_IMPLLINK = "IMPLLINK";
 	public static final String str_PARAMETER = "PARAMETER";
 	public static final String str_CAST = "CAST";
@@ -118,13 +124,50 @@ public enum RelationType implements RelationshipType {
 	 */
 	
 	public static final String str_DEPENDS_ON = "DEPENDS_ON";
+	public static final String str_DEPENDS = "DEPENDS";
 	public static final String str_MODULE_CLONE = "MODULE_CLONE";
 	public static final String str_AGGREGATION_CLONE = "AGGREGATION_CLONE";
+
+	/**
+	 * 关系权重
+	 */
+	public static Map<RelationType, Double> relationWeights = new EnumMap<>(RelationType.class);
 	
 	private String name;
 
 	RelationType(String name) {
 		this.name = name;
+	}
+
+	static{
+		relationWeights.put(EXTENDS, 1.0);
+		relationWeights.put(IMPLEMENTS, 1.0);
+		relationWeights.put(ASSOCIATION, 0.5);
+		relationWeights.put(DEPENDENCY, 0.1);
+		relationWeights.put(IMPLEMENTS_C, 0.5);
+
+		relationWeights.put(ANNOTATION, 0.1);
+
+		relationWeights.put(IMPORT, 0.1);
+		relationWeights.put(INCLUDE, 0.1);
+
+		relationWeights.put(CALL, 0.2);
+		relationWeights.put(CREATE, 0.2);
+
+		relationWeights.put(PARAMETER, 0.1);
+		relationWeights.put(VARIABLE_TYPE, 0.1);
+		relationWeights.put(CAST, 0.1);
+		relationWeights.put(THROW, 0.1);
+		relationWeights.put(RETURN, 0.1);
+
+		relationWeights.put(IMPLLINK, 0.1);
+
+		relationWeights.put(CO_CHANGE, 0.1);
+		relationWeights.put(CLONE, 0.5);
+	}
+
+	public static void setRelationWeight(RelationType relationType, Double weight){
+		relationWeights.put(relationType, weight);
 	}
 
 	public String getName() {
