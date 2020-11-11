@@ -123,11 +123,8 @@ public class CloneController {
 			Package pck2 = (Package)moduleClone.getNode2();
 			CoChange moduleCoChange = coChangeRepository.findPackageCoChange(pck1.getId(),pck2.getId());
 			if(moduleCoChange != null){
-				moduleClone.setModuleCochangeTimes(moduleCoChange.getTimes());
-			}else {
-				moduleClone.setModuleCochangeTimes(0);
+				moduleClone.setAllNodesCoChangeTimes(moduleCoChange.getTimes());
 			}
-
 		});
 		result.sort((v1, v2) -> {
 			return v2.getClonePairs() - v1.getClonePairs();

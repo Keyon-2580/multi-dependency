@@ -7,7 +7,7 @@ var showAggregationResult = function(language, id) {
 		success: function(result) {
 			console.log("success");
 			var html = "<table class='table table-bordered'>";
-			html += "<tr><th>目录1</th><th>目录2</th><th>克隆文件占比</th><th>克隆CoChange占比</th><th>克隆Loc占比</th><th>克隆相似度</th><th>type</th><th>克隆对数</th></tr>";
+			html += "<tr><th>目录1</th><th>目录2</th><th>克隆文件占比</th><th>克隆Loc占比</th><th>克隆CoChange占比</th><th>克隆相似度</th><th>type</th><th>克隆对数</th></tr>";
 			var tr = function(index, layer, duplicated) {
 				var prefix = "";
 				for(var i = 0; i < layer; i++) {
@@ -46,16 +46,22 @@ var showAggregationResult = function(language, id) {
 						html += "(" + cloneNodesCount1 + "+" + cloneNodesCount2 + ")/(" + allNodesCount1 + "+" + allNodesCount2 + ")=" + cloneMatchRate.toFixed(2);
 						html += layer === 0 ? "</th>" : "</td>";
 						html += layer === 0 ? "<th>" : "<td>";
-						html += cloneNodesCoChangeTimes  + "/" + allNodesCoChangeTimes  + "=" + cloneCoChangeRate.toFixed(2);
-						html += layer === 0 ? "</th>" : "</td>";
-						html += layer === 0 ? "<th>" : "<td>";
 						html += "(" + cloneNodesLoc1 + "+" + cloneNodesLoc2 + ")/(" + allNodesLoc1 + "+" + allNodesLoc2 + ")=" + cloneLocRate.toFixed(2);
 						html += layer === 0 ? "</th>" : "</td>";
 						html += layer === 0 ? "<th>" : "<td>";
-						html += cloneSimilarityValue.toFixed(2) + "/(" + cloneType1Count + "+" + cloneType2Count + "+" + cloneType3Count + ")=" + cloneSimilarityRate.toFixed(2);
+						if(clonePairs > 0) {
+							html += cloneNodesCoChangeTimes  + "/" + allNodesCoChangeTimes  + "=" + cloneCoChangeRate.toFixed(2);
+						}
 						html += layer === 0 ? "</th>" : "</td>";
 						html += layer === 0 ? "<th>" : "<td>";
-						html += cloneType;
+						if(clonePairs > 0) {
+							html += cloneSimilarityValue.toFixed(2) + "/(" + cloneType1Count + "+" + cloneType2Count + "+" + cloneType3Count + ")=" + cloneSimilarityRate.toFixed(2);
+						}
+						html += layer === 0 ? "</th>" : "</td>";
+						html += layer === 0 ? "<th>" : "<td>";
+						if(clonePairs > 0) {
+							html += cloneType;
+						}
 						html += layer === 0 ? "</th>" : "</td>";
 						html += layer === 0 ? "<th>" : "<td>";
 						if(clonePairs > 0) {

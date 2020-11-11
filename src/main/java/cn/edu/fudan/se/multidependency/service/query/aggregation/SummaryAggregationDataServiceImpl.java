@@ -5,14 +5,18 @@ import cn.edu.fudan.se.multidependency.model.node.*;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.BasicDataForDoubleNodes;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.CloneRelationDataForDoubleNodes;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.CoChangeRelationDataForDoubleNodes;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
+import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.FileCloneWithCoChange;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChange;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
+import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,11 +26,16 @@ import java.util.*;
 public class SummaryAggregationDataServiceImpl implements SummaryAggregationDataService {
     
     @Autowired
-    ContainRelationService containRelationService;
+	private ContainRelationService containRelationService;
 
 	@Autowired
-	GitAnalyseService gitAnalyseService;
+	private GitAnalyseService gitAnalyseService;
 
+	@Autowired
+	private BasicCloneQueryService basicCloneQueryService;
+
+	@Autowired
+	private HasRelationService hasRelationService;
 
 	private List<BasicDataForDoubleNodes<Node, Relation>> removeSameNodeToCloneValuePackages = null;
     private Map<Node, Map<Node, BasicDataForDoubleNodes<Node, Relation>>> queryPackageCloneFromFileCloneCache = null;
@@ -86,10 +95,100 @@ public class SummaryAggregationDataServiceImpl implements SummaryAggregationData
 			cache = removeSameNodeToCloneValuePackages;
 		}
 		List<BasicDataForDoubleNodes<Node, Relation>> result = new ArrayList<>(cache);
+		setCloneRelationDataForDoubleNodes(result);
 		result.sort((v1, v2) -> {
 			return v2.getChildren().size() - v1.getChildren().size();
 		});
 		return result;
+	}
+
+	private void setCloneRelationDataForDoubleNodes(List<BasicDataForDoubleNodes<Node, Relation>> packageClones) {
+		Map<Long, Integer> directoryIdToAllLoc = new HashMap<>();
+		for(BasicDataForDoubleNodes<Node, Relation> packageClone : packageClones) {
+			Package currentPackage1 = (Package) packageClone.getNode1();
+			Package currentPackage2 = (Package) packageClone.getNode2();
+			int clonePairs = packageClone.sizeOfChildren();
+			int cloneNodesCount1 = packageClone.getNodesInNode1().size();
+			int cloneNodesCount2 = packageClone.getNodesInNode2().size();
+			int allNodesCount1 = packageClone.getAllNodesInNode1().size();
+			int allNodesCount2 = packageClone.getAllNodesInNode2().size();
+			int cloneNodesLoc1 = 0;
+			int cloneNodesLoc2 = 0;
+			int allNodesLoc1 = getAllFilesLoc(directoryIdToAllLoc, currentPackage1);
+			int allNodesLoc2 = getAllFilesLoc(directoryIdToAllLoc, currentPackage2);
+			int cloneType1Count = 0;
+			int cloneType2Count = 0;
+			int cloneType3Count = 0;
+			double cloneSimilarityValue = 0.00;
+			List<FileCloneWithCoChange> childrenClonePairs;
+			try {
+				childrenClonePairs = queryPackageCloneWithFileCoChange(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), currentPackage1, currentPackage2).getChildren();
+				childrenClonePairs.sort((d1, d2) -> {
+					double value1 = d1.getFileClone().getValue();
+					double value2 = d2.getFileClone().getValue();
+					if(value1 != value2) {
+						return Double.compare(value2, value1);
+					}
+					else {
+						String cloneType1 = d1.getFileClone().getCloneType();
+						String cloneType2 = d2.getFileClone().getCloneType();
+						return cloneType1.compareTo(cloneType2);
+					}
+				});
+				Set<ProjectFile> cloneChildrenFiles1 = new HashSet<>();
+				Set<ProjectFile> cloneChildrenFiles2 = new HashSet<>();
+				for(FileCloneWithCoChange childrenClonePair : childrenClonePairs) {
+					String cloneType = childrenClonePair.getFileClone().getCloneType();
+					switch (cloneType){
+						case "type_1":
+							cloneType1Count++;
+							break;
+						case "type_2":
+							cloneType2Count++;
+							break;
+						case "type_3":
+							cloneType3Count++;
+							break;
+					}
+					cloneSimilarityValue += childrenClonePair.getFileClone().getValue();
+					cloneChildrenFiles1.add(childrenClonePair.getFile1());
+					cloneChildrenFiles2.add(childrenClonePair.getFile2());
+				}
+				for(ProjectFile cloneChildFile1 : cloneChildrenFiles1) {
+					cloneNodesLoc1 += cloneChildFile1.getLoc();
+				}
+				for(ProjectFile cloneChildFile2 : cloneChildrenFiles2) {
+					cloneNodesLoc2 += cloneChildFile2.getLoc();
+				}
+			} catch (Exception e) {
+				System.out.println(e.toString());
+			}
+
+			//存储数据
+			CloneRelationDataForDoubleNodes<Node, Relation> currentPackagePairCloneRelationData = (CloneRelationDataForDoubleNodes<Node, Relation>) packageClone;
+			currentPackagePairCloneRelationData.setClonePairs(clonePairs);
+			currentPackagePairCloneRelationData.setCloneCountDate(cloneNodesCount1, cloneNodesCount2, allNodesCount1, allNodesCount2);
+			currentPackagePairCloneRelationData.setCloneTypeDate(cloneType1Count, cloneType2Count, cloneType3Count, cloneSimilarityValue);
+			currentPackagePairCloneRelationData.setCloneLocDate(cloneNodesLoc1, cloneNodesLoc2, allNodesLoc1, allNodesLoc2);
+		}
+	}
+
+	//获取包下文件代码行
+	private int getAllFilesLoc(Map<Long, Integer> directoryIdToAllLoc, Package pck) {
+		if(directoryIdToAllLoc.containsKey(pck.getId())) {
+			return directoryIdToAllLoc.get(pck.getId());
+		}
+		int Loc = 0;
+		Collection<ProjectFile> allChildrenFiles = new ArrayList<>(containRelationService.findPackageContainFiles(pck));
+		for(ProjectFile allChildFile : allChildrenFiles) {
+			Loc += allChildFile.getLoc();
+		}
+		Collection<Package> childrenPackages = hasRelationService.findPackageHasPackages(pck);
+		for(Package childPackage : childrenPackages) {
+			Loc += getAllFilesLoc(directoryIdToAllLoc, childPackage);
+		}
+		directoryIdToAllLoc.put(pck.getId(), Loc);
+		return Loc;
 	}
 
 	@Override

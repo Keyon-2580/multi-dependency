@@ -671,7 +671,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 			hotspotPackage.setPackageCochangeTimes(0);
 		}
 		if(packageCloneCoChanges != null){
-			hotspotPackage.setPackageCloneCochangeTimes(packageCloneCoChanges.getModuleCloneCochangeTimes());
+			hotspotPackage.setPackageCloneCochangeTimes(packageCloneCoChanges.getCloneNodesCoChangeTimes());
 		}
 		else {
 			hotspotPackage.setPackageCloneCochangeTimes(0);
@@ -692,7 +692,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 				Package childPackage2 = buildPackageForFiles(currentPackage2);
 				if(moduleClone != null) {
 					HotspotPackage childHotspotPackage = new HotspotPackage(new RelationDataForDoubleNodes<Node, Relation>(childPackage1, childPackage2));
-					childHotspotPackage.setData(moduleClone.getAllNodesInNode1(), moduleClone.getAllNodesInNode2(), moduleClone.getNodesInNode1(), moduleClone.getNodesInNode2());
+					childHotspotPackage.setData(moduleClone.getAllNodesCount1(), moduleClone.getAllNodesCount2(), moduleClone.getCloneNodesCount1(), moduleClone.getCloneNodesCount2());
 					childHotspotPackage.setClonePairs(moduleClone.getClonePairs());
 					if(packageCoChanges != null){
 						childHotspotPackage.setPackageCochangeTimes(packageCoChanges.getTimes());
@@ -701,7 +701,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 						childHotspotPackage.setPackageCochangeTimes(0);
 					}
 					if(packageCloneCoChanges != null){
-						childHotspotPackage.setPackageCloneCochangeTimes(packageCloneCoChanges.getModuleCloneCochangeTimes());
+						childHotspotPackage.setPackageCloneCochangeTimes(packageCloneCoChanges.getCloneNodesCoChangeTimes());
 					}
 					else {
 						childHotspotPackage.setPackageCloneCochangeTimes(0);

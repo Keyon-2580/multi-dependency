@@ -11,6 +11,8 @@ import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsRepository;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackagePairDetector;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.SummaryAggregationDataService;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.data.BasicDataForDoubleNodes;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.CloneRelationDataForDoubleNodes;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
 import org.slf4j.Logger;
@@ -52,6 +54,9 @@ public class BeanCreator {
 
 	@Autowired
 	private HotspotPackagePairDetector hotspotPackagePairDetector;
+
+	@Autowired
+	private SummaryAggregationDataService summaryAggregationDataService;
 
 	@Bean
 	public int setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository) {
@@ -305,13 +310,30 @@ public class BeanCreator {
 			else {
 				LOGGER.info("设置Module Clone基础信息...");
 				if(moduleCloneRepository.getNumberOfModuleClone() == 0) {
-					Collection<CloneValueForDoubleNodes<Package>> result = cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE));
-					for(CloneValueForDoubleNodes<Package> moduleClone : result) {
-						moduleCloneRepository.createModuleClone(moduleClone.getNode1().getId(), moduleClone.getNode2().getId(), moduleClone.getChildren().size(), moduleClone.getAllNodesInNode1().size(), moduleClone.getAllNodesInNode2().size(), moduleClone.getNodesInNode1().size(), moduleClone.getNodesInNode2().size());
+					List<BasicDataForDoubleNodes<Node, Relation>> clonePackagePairs = summaryAggregationDataService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE));
+					for(BasicDataForDoubleNodes<Node, Relation> clonePackagePair : clonePackagePairs) {
+						CloneRelationDataForDoubleNodes<Node, Relation> packagePairCloneRelationData = (CloneRelationDataForDoubleNodes<Node, Relation>) clonePackagePair;
+						moduleCloneRepository.createModuleClone(
+								clonePackagePair.getNode1().getId(),
+								clonePackagePair.getNode2().getId(),
+								packagePairCloneRelationData.getClonePairs(),
+								packagePairCloneRelationData.getCloneNodesCount1(),
+								packagePairCloneRelationData.getCloneNodesCount2(),
+								packagePairCloneRelationData.getAllNodesCount1(),
+								packagePairCloneRelationData.getAllNodesCount2(),
+								packagePairCloneRelationData.getCloneNodesLoc1(),
+								packagePairCloneRelationData.getCloneNodesLoc2(),
+								packagePairCloneRelationData.getAllNodesLoc1(),
+								packagePairCloneRelationData.getAllNodesLoc2(),
+								packagePairCloneRelationData.getCloneType1Count(),
+								packagePairCloneRelationData.getCloneType2Count(),
+								packagePairCloneRelationData.getCloneType3Count(),
+								packagePairCloneRelationData.getCloneSimilarityValue()
+						);
 					}
 				}
 				LOGGER.info("设置Module Clone基础信息(co-change)...");
-				moduleCloneRepository.setModuleCloneCochangeTimes(3);
+				moduleCloneRepository.setCloneNodesCoChangeTimes(3);
 				moduleClones = moduleCloneRepository.getAllModuleClone();
 			}
 			return moduleClones;

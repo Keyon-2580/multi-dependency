@@ -26,7 +26,6 @@ public interface CloneValueService {
 	/**
 	 * 根据文件间的克隆找出微服务间的克隆
 	 * @param fileClones
-	 * @param removeSameNode
 	 * @return
 	 */
 	Collection<CloneValueForDoubleNodes<MicroService>> findMicroServiceCloneFromFileClone(Collection<Clone> fileClones);
@@ -41,7 +40,6 @@ public interface CloneValueService {
 	/**
 	 * 根据文件间的克隆找出项目间的克隆
 	 * @param fileClones
-	 * @param removeSameNode
 	 * @return
 	 */
 	Collection<CloneValueForDoubleNodes<Project>> queryProjectCloneFromFileClone(Collection<Clone> fileClones);
