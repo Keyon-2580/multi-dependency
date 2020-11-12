@@ -134,4 +134,8 @@ public interface StaticAnalyseService {
 	Collection<DependsOn> findPackageDependsOn(Package pck);
 
 	Collection<DependsOn> findPackageDependedOnBy(Package pck);
+
+	Collection<ProjectFile> findFilesCommonDependsOn(ProjectFile file1, ProjectFile file2);
+
+	Collection<ProjectFile> findFilesCommonDependedOnBy(ProjectFile file1, ProjectFile file2);
 }

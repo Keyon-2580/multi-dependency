@@ -737,4 +737,28 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		cache.cache(getClass(), key, result);
 		return result;
 	}
+
+	@Override
+	public Collection<ProjectFile> findFilesCommonDependsOn(ProjectFile file1, ProjectFile file2){
+		String key = "findFilesCommonDependsOn_" + file1.getId() + file2.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<ProjectFile> result = dependsOnRepository.findFilesCommonDependsOn(file1.getId(),file2.getId());
+		result.sort(Comparator.comparing(ProjectFile::getPath));
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Collection<ProjectFile> findFilesCommonDependedOnBy(ProjectFile file1, ProjectFile file2){
+		String key = "findFilesCommonDependedOnBy_" + file1.getId() + file2.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<ProjectFile> result = dependsOnRepository.findFilesCommonDependedOnBy(file1.getId(),file2.getId());
+		result.sort(Comparator.comparing(ProjectFile::getPath));
+		cache.cache(getClass(), key, result);
+		return result;
+	}
 }
