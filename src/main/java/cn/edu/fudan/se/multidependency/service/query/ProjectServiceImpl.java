@@ -271,6 +271,31 @@ public class ProjectServiceImpl implements ProjectService{
                     link.put("dependsOnTimes", dependsRelationDataForDoubleNodes.getDependsOnTimes());
                     link.put("dependsByTimes", dependsRelationDataForDoubleNodes.getDependsByTimes());
                     link.put("dependsIntensity", dependsRelationDataForDoubleNodes.getDependsIntensity());
+
+                    Map<String, Long> dependsOnTypesMap = dependsRelationDataForDoubleNodes.getDependsOnTypesMap();
+                    Map<String, Long> dependsByTypesMap = dependsRelationDataForDoubleNodes.getDependsByTypesMap();
+                    JSONArray dependsOnTypesArray = new JSONArray();
+                    JSONArray dependsByTypesArray = new JSONArray();
+
+                    for(Map.Entry<String, Long> entry: dependsOnTypesMap.entrySet()){
+                        JSONObject temp_dependsOnType = new JSONObject();
+                        temp_dependsOnType.put("dependsOnType", entry.getKey());
+                        temp_dependsOnType.put("dependsOnTime", entry.getValue());
+
+                        dependsOnTypesArray.add(temp_dependsOnType);
+                    }
+
+                    for(Map.Entry<String, Long> entry: dependsByTypesMap.entrySet()){
+                        JSONObject temp_dependsByType = new JSONObject();
+                        temp_dependsByType.put("dependsByType", entry.getKey());
+                        temp_dependsByType.put("dependsByTime", entry.getValue());
+
+                        dependsByTypesArray.add(temp_dependsByType);
+                    }
+
+                    link.put("dependsOnTypesMap", dependsOnTypesArray);
+                    link.put("dependsByTypesMap", dependsByTypesArray);
+
                     dependson_links.add(JSONUtil.combineJSONObjectWithoutMerge(link, link_common));
 
                     break;
@@ -289,11 +314,36 @@ public class ProjectServiceImpl implements ProjectService{
         }
 
         JSONObject temp_relation = new JSONObject();
-        temp_relation.put("clone_links", clone_links);
-        temp_relation.put("dependson_links", dependson_links);
-        temp_relation.put("cochange_links", cochange_links);
-        result.put("children_graphlinks", temp_relation);
 
+        temp_relation.put("clone_links", clone_links);
+        if(type.equals("project")){
+            temp_relation.put("dependson_links", dependson_links);
+            temp_relation.put("cochange_links", cochange_links);
+        }
+
+        if(type.equals("clone_package_table")){
+            Collection<Package> nonClonePacksges1 = parentHotspotPackagePair.getChildrenOtherPackages1();
+            Collection<Package> nonClonePacksges2 = parentHotspotPackagePair.getChildrenOtherPackages2();
+            JSONArray nonCloneFiles1 = new JSONArray();
+            JSONArray nonCloneFiles2 = new JSONArray();
+
+            for(Package pck: nonClonePacksges1){
+                JSONObject nonClone1 = new JSONObject();
+                nonClone1.put("name", pck.getDirectoryPath());
+                nonCloneFiles1.add(nonClone1);
+            }
+
+            for(Package pck: nonClonePacksges2){
+                JSONObject nonClone2 = new JSONObject();
+                nonClone2.put("name", pck.getDirectoryPath());
+                nonCloneFiles2.add(nonClone2);
+            }
+
+            temp_relation.put("nonclonefiles1", nonCloneFiles1);
+            temp_relation.put("nonclonefiles2", nonCloneFiles2);
+        }
+
+        result.put("children_graphlinks", temp_relation);
         return result;
     }
 }

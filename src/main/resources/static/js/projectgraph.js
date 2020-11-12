@@ -92,7 +92,7 @@ var loadPageData = function () {
                 }
             }
             html += "</select>";
-            html += "<br><button id = \"multipleProjectsButton\" type=\"button\" onclick= showMultipleButton()>加载项目</button></div>";
+            html += "<br><button id = \"multipleProjectsButton\" type=\"button\" style='margin-top: 15px' onclick= showMultipleButton()>加载项目</button></div>";
 
             html += "<div id = \"AttributionSelect\">" +
                 "<form role=\"form\">" +
@@ -117,8 +117,30 @@ var loadPageData = function () {
 
                 "<label class = \"AttributionSelectLabel\" style = \"margin-left: 80px\">" +
                 "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes\" name = \"dependsOn_children\"> Times >= " +
-                "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput\" value=\"3\">" +
-                "</label></p>";
+                "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput\" style='margin-right: 80px' value=\"3\">" +
+                "</label>" +
+
+                "<label class = \"AttributionSelectLabel\" style = \"margin-right:10px;\">" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnType\" name = \"dependsOn_children\"> Dependency Type: " +
+                "</label>" +
+
+                "<select id = \"dependsTypeSelect\" class=\"selectpicker\" multiple>" +
+                "<option value=\"EXTENDS\">EXTENDS</option>" +
+                "<option value=\"IMPLEMENTS\">IMPLEMENTS</option>" +
+                "<option value=\"ASSOCIATION\">ASSOCIATION</option>" +
+                "<option value=\"IMPLEMENTS_C\">IMPLEMENTS_C</option>" +
+                "<option value=\"ANNOTATION\">ANNOTATION</option>" +
+                "<option value=\"IMPORT\">IMPORT</option>" +
+                "<option value=\"INCLUDE\">INCLUDE</option>" +
+                "<option value=\"CALL\">CALL</option>" +
+                "<option value=\"CREATE\">CREATE</option>" +
+                "<option value=\"PARAMETER\">PARAMETER</option>" +
+                "<option value=\"CAST\">CAST</option>" +
+                "<option value=\"THROW\">THROW</option>" +
+                "<option value=\"RETURN\">RETURN</option>" +
+                "<option value=\"IMPLLINK\">IMPLLINK</option>" +
+                "</select>" +
+                "</p>";
 
             html += "<p><label class = \"AttributionSelectTitle\">" +
                 "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone\" onclick=\"CancelChildrenChecked('clone')\">Clone：" +
@@ -394,12 +416,14 @@ var showLine = function(links_local, type){
         for(var j = 0; j < projectList_global.length; j++){
             if(source_project === projectList_global[j]){
                 temp_flag_source = true;
+                break;
             }
         }
 
         for(var k = 0; k < projectList_global.length; k++){
             if(target_project === projectList_global[k] ){
                 temp_flag_target = true;
+                break;
             }
         }
 
@@ -439,7 +463,7 @@ var showLine = function(links_local, type){
                 }
             }
 
-            if($("#cloneTimes").prop("checked") && links_local[i - 1].cloneTimes >= $("#clonetimes").val()){
+            if($("#cloneTimes").prop("checked") && links_local[i - 1].cloneNodesCoChangeTimes < $("#clonetimes").val() && flag_delete === false){
                 links_local.splice(i - 1, 1);
                 flag_delete = true;
             }
@@ -450,8 +474,7 @@ var showLine = function(links_local, type){
             if($("#dependsIntensity").prop("checked")){
                 var temp_flag_intensity = false;
 
-                if($("#intensityCompareSelectBelow").val() === "<=" &&
-                    intensity >= $("#intensitybelow").val()){
+                if($("#intensityCompareSelectBelow").val() === "<=" && intensity >= $("#intensitybelow").val()){
                     if($("#intensityCompareSelectHigh").val() === "<=" &&
                         intensity <= $("#intensityhigh").val()){
                         temp_flag_intensity = true;
@@ -459,8 +482,7 @@ var showLine = function(links_local, type){
                         intensity < $("#intensityhigh").val()){
                         temp_flag_intensity = true;
                     }
-                }else if($("#intensityCompareSelectBelow").val() === "<" &&
-                    intensity > $("#intensitybelow").val()){
+                }else if($("#intensityCompareSelectBelow").val() === "<" && intensity > $("#intensitybelow").val()){
                     if($("#intensityCompareSelectHigh").val() === "<=" &&
                         intensity <= $("#intensityhigh").val()){
                         temp_flag_intensity = true;
@@ -478,9 +500,45 @@ var showLine = function(links_local, type){
 
             if($("#dependsOnTimes").prop("checked") &&
                 $("#dependencyTimes").val() > links_local[i - 1].dependsOnTimes &&
-                $("#dependencyTimes").val() > links_local[i - 1].dependsByTimes){
+                $("#dependencyTimes").val() > links_local[i - 1].dependsByTimes && flag_delete === false){
                 links_local.splice(i - 1, 1);
                 flag_delete = true;
+            }
+
+            if($("#dependsOnType").prop("checked") && flag_delete === false){
+                var value = $('#dependsTypeSelect').val();
+                var dependsByTypesMap = links_local[i - 1].dependsByTypesMap;
+                var dependsOnTypesMap = links_local[i - 1].dependsOnTypesMap;
+                var temp_dependsType_flag = false;
+
+                for(var k = 0; k < value.length; k++){
+                    if(temp_dependsType_flag === true){
+                        break;
+                    }
+
+                    if(dependsByTypesMap.length > 0){
+                        for(var item1 in dependsByTypesMap){
+                            if(dependsByTypesMap[item1].dependsByType === value[k]){
+                                temp_dependsType_flag = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if(dependsOnTypesMap.length > 0){
+                        for(var item2 in dependsOnTypesMap){
+                            if(dependsOnTypesMap[item2].dependsOnType === value[k]){
+                                temp_dependsType_flag = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if(temp_dependsType_flag === false){
+                    links_local.splice(i - 1, 1);
+                    flag_delete = true;
+                }
             }
         }
 
@@ -499,7 +557,7 @@ var showLine = function(links_local, type){
 
     linksCurrent_global = links_local.concat();
     loadLink(links_local);
-    drawCloneTableBelow("", "all");
+    drawCloneTableBelow("", "all", {});
 }
 
 //加载连线
@@ -553,11 +611,31 @@ function loadLink(jsonLinks) {
                     + "\ncloneNodesCoChangeTimes: " + d.cloneNodesCoChangeTimes
                     + "\nclonePairs: " + d.clonePairs;
             }else if(d.type === "dependson"){
-                return "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\ndependsOnTypes: " + d.dependsOnTypes
+                var temp_title =  "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\ndependsOnTypes: " + d.dependsOnTypes
                     + "\ndependsByTypes: " + d.dependsByTypes
                     + "\ndependsOnTimes: " + d.dependsOnTimes
                     + "\ndependsByTimes: " + d.dependsByTimes
                     + "\ndependsIntensity: " + d.dependsIntensity;
+
+                if(d.dependsByTypesMap.length > 0){
+                    temp_title += "\ndependsByTypesMap: [";
+                    for(var index in d.dependsByTypesMap){
+                        temp_title += "\n\t{\n\t\tdependsByType: " + d.dependsByTypesMap[index].dependsByType;
+                        temp_title += "\n\t\tdependsByTime: " + d.dependsByTypesMap[index].dependsByTime + "\n\t}";
+                    }
+                    temp_title += "\n]";
+                }
+
+                if(d.dependsOnTypesMap.length > 0){
+                    temp_title += "\ndependsOnTypesMap: [";
+                    for(var index in d.dependsOnTypesMap){
+                        temp_title += "\n\t{\n\tdependsOnType: " + d.dependsOnTypesMap[index].dependsOnType;
+                        temp_title += "\n\tdependsOnTime: " + d.dependsOnTypesMap[index].dependsOnTime + "\n\t}";
+                    }
+                    temp_title += "\n]";
+                }
+
+                return temp_title;
             }else if(d.type === "cochange"){
                 return "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\ncoChangeTimes: " + d.coChangeTimes
                     + "\nnode1ChangeTimes: " + d.node1ChangeTimes
@@ -715,8 +793,8 @@ function clearLink(){
 }
 
 //绘制下方表格
-function drawCloneTableBelow(link_id, type){
-    // console.log(link_id);
+function drawCloneTableBelow(link_id, type, nonclonefiles){
+    // console.log(linksBefore_global);
     var cleartable = d3.selectAll("table").remove();
     let html = "";
 
@@ -805,6 +883,23 @@ function drawCloneTableBelow(link_id, type){
             }
         })
 
+        if(nonclonefiles.hasOwnProperty("nonclonefiles1")){
+            var nonclonefiles1 = nonclonefiles.nonclonefiles1;
+            var nonclonefiles2 = nonclonefiles.nonclonefiles2;
+
+            if(nonclonefiles1.length > 0){
+                nonclonefiles1.forEach(function (item){
+                    html_clone_table_body += "<tr><td>" + item.name + "</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
+                })
+            }
+
+            if(nonclonefiles2.length > 0){
+                nonclonefiles2.forEach(function (item){
+                    html_clone_table_body += "<tr><td></td><td>" + item.name + "</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
+                })
+            }
+        }
+
         html_clone_table_body += "</table>";
         html += html_clone_table_head + html_clone_table_parent + html_clone_table_body;
     }
@@ -862,14 +957,15 @@ function drawChildrenCloneLinks(package1Id, package2Id, type){
             type : "GET",
             url : "/project/has/childrenlinks?package1Id=" + package1Id + "&package2Id=" + package2Id,
             success : function(result) {
+                linksBefore_global = linksCurrent_global.concat();
                 clearLink();
                 // console.log(result);
                 if(result.children_graphlinks.clone_links.length > 0){
-                    linksBefore_global = linksCurrent_global.concat();
-                    linksCurrent_global = result.children_graphlinks.clone_links;
+                    // console.log(linksCurrent_global);
+                    linksCurrent_global = result.children_graphlinks.clone_links.concat();
                     showLine(linksCurrent_global, "package");
                 }
-                drawCloneTableBelow(package1Id + "_" + package2Id, "clone");
+                drawCloneTableBelow(package1Id + "_" + package2Id, "clone", result.children_graphlinks);
             }
         });
     } else if (type === "dependson") {
@@ -884,8 +980,6 @@ var showMultipleButton = function(){
     projectList_global = value;
     // console.log(projectList_global);
     var table_clear = d3.selectAll("table").remove();
-    document.getElementById("showLineId").innerHTML = "显示关系";
-    flag = true;
     projectGraphAjax(value);
 }
 
@@ -927,9 +1021,7 @@ var HideBottomPackageButton = function(){
                 }
             }
 
-            if(linksWithoutBottomPackages.length > 0){
-                loadLink(linksWithoutBottomPackages);
-            }
+            loadLink(linksWithoutBottomPackages);
 
             linksCurrent_flag  = false;
             document.getElementById("hideBottomPackageButton").innerHTML = "取消 仅显示聚合";
