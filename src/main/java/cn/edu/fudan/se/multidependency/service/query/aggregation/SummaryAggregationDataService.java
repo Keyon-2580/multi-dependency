@@ -8,6 +8,7 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.BasicDataForDoubleNodes;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChange;
+import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChangeMatrix;
 
 import java.util.*;
 
@@ -96,5 +97,14 @@ public interface SummaryAggregationDataService extends AggregationDataService{
         }
         return result;
     }
+
+    /**
+     * 两个节点（包）之间的关系克隆，矩阵形式展示
+     * @param fileClones
+     * @param pck1
+     * @param pck2
+     * @return
+     */
+    PackageCloneValueWithFileCoChangeMatrix queryPackageCloneWithFileCoChangeMatrix(Collection<Clone> fileClones, Package pck1, Package pck2);
 
 }

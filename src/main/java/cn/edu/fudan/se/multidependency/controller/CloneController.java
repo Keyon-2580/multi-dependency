@@ -12,6 +12,7 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.ModuleClone;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.SummaryAggregationDataService;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChangeMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +75,9 @@ public class CloneController {
 	@Autowired
 	private CoChangeRepository coChangeRepository;
 
+	@Autowired
+	private SummaryAggregationDataService summaryAggregationDataService;
+
 	@GetMapping("/packages")
 	public String graph() {
 		return "clonepackage";
@@ -107,12 +111,6 @@ public class CloneController {
 		
 		return result;
 	}
-
-//	@GetMapping("/package")
-//	@ResponseBody
-//	public Collection<CloneValueForDoubleNodes<Package>> cloneInPackages() {
-//		return cloneValueService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE));
-//	}
 
 	@GetMapping("/package")
 	@ResponseBody
@@ -203,7 +201,7 @@ public class CloneController {
 			return null;
 		}
 		try {
-			PackageCloneValueWithFileCoChange pckClone = cloneValueService.queryPackageCloneWithFileCoChange(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pck1, pck2);
+			PackageCloneValueWithFileCoChange pckClone = summaryAggregationDataService.queryPackageCloneWithFileCoChange(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pck1, pck2);
 
 			JSONArray cloneFiles1 = setCloneAndNoneCloneFiles(pckClone.getCloneFiles1());
 			JSONArray cloneFiles2 = setCloneAndNoneCloneFiles(pckClone.getCloneFiles2());
@@ -279,7 +277,7 @@ public class CloneController {
 			return null;
 		}
 		try {
-			return cloneValueService.queryPackageCloneWithFileCoChange(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pck1, pck2);
+			return summaryAggregationDataService.queryPackageCloneWithFileCoChange(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pck1, pck2);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -301,7 +299,7 @@ public class CloneController {
 			return null;
 		}
 		try {
-			return cloneValueService.queryPackageCloneWithFileCoChangeMatrix(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pck1, pck2);
+			return summaryAggregationDataService.queryPackageCloneWithFileCoChangeMatrix(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pck1, pck2);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -324,7 +322,6 @@ public class CloneController {
 			@RequestParam("package2") long package2Id) {
 		Package pck1 = nodeService.queryPackage(package1Id);
 		Package pck2 = nodeService.queryPackage(package2Id);
-		JSONObject result = new JSONObject();
 		if(pck1 == null || pck2 == null) {
 			return null;
 		}
@@ -424,7 +421,7 @@ public class CloneController {
 			context.put("file2", charBuffer2.toString());
 		}
 		catch (Exception e) {
-			System.out.println(e);
+			System.out.println(e.toString());
 		}
 		return context;
 	}

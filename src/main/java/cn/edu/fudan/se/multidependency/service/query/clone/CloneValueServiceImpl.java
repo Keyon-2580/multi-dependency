@@ -128,7 +128,7 @@ public class CloneValueServiceImpl implements CloneValueService {
 			Map<String, FileCloneWithCoChange> fileClone = new HashMap<>();
 			List<FileCloneWithCoChange> children = new ArrayList<>(packageCloneValueWithFileCoChange.getChildren());
 			LinkedHashSet<ProjectFile> cloneFiles1 = new LinkedHashSet<>();
-			LinkedHashSet<ProjectFile> cloneFiles2 = new LinkedHashSet<>();;
+			LinkedHashSet<ProjectFile> cloneFiles2 = new LinkedHashSet<>();
 			Set<ProjectFile> noneCloneFiles1 = new HashSet<>(packageCloneValueWithFileCoChange.getNoneCloneFiles1());
 			Set<ProjectFile> noneCloneFiles2 = new HashSet<>(packageCloneValueWithFileCoChange.getNoneCloneFiles2());
 			Map<Long, Integer> map = new HashMap<>();

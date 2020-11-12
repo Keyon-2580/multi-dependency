@@ -6,10 +6,8 @@ import java.util.*;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.relation.Depends;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.repository.relation.DependsRepository;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackagePairDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.SummaryAggregationDataService;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.BasicDataForDoubleNodes;
@@ -40,14 +38,11 @@ import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileR
 import cn.edu.fudan.se.multidependency.repository.relation.clone.ModuleCloneRepository;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.clone.CloneValueService;
-import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueForDoubleNodes;
 
 @Component
 public class BeanCreator {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BeanCreator.class);
-	@Autowired
-	private CloneValueService cloneValueService;
 
 	@Autowired
 	private BasicCloneQueryService basicCloneQueryService;

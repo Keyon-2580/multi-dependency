@@ -14,6 +14,7 @@ import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPac
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.FileCloneWithCoChange;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChange;
+import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChangeMatrix;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
@@ -279,5 +280,50 @@ public class SummaryAggregationDataServiceImpl implements SummaryAggregationData
 			return v2.getChildren().size() - v1.getChildren().size();
 		});
 		return result;
+	}
+
+	@Override
+	public PackageCloneValueWithFileCoChangeMatrix queryPackageCloneWithFileCoChangeMatrix(Collection<Clone> fileClones, Package pck1, Package pck2) {
+		try {
+			PackageCloneValueWithFileCoChange packageCloneValueWithFileCoChange = queryPackageCloneWithFileCoChange(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pck1, pck2);
+			Map<String, FileCloneWithCoChange> fileClone = new HashMap<>();
+			List<FileCloneWithCoChange> children = new ArrayList<>(packageCloneValueWithFileCoChange.getChildren());
+			LinkedHashSet<ProjectFile> cloneFiles1 = new LinkedHashSet<>();
+			LinkedHashSet<ProjectFile> cloneFiles2 = new LinkedHashSet<>();
+			Set<ProjectFile> noneCloneFiles1 = new HashSet<>(packageCloneValueWithFileCoChange.getNoneCloneFiles1());
+			Set<ProjectFile> noneCloneFiles2 = new HashSet<>(packageCloneValueWithFileCoChange.getNoneCloneFiles2());
+			Map<Long, Integer> map = new HashMap<>();
+			int row = 0;
+			int col = 0;
+			for(FileCloneWithCoChange child : children) {
+				if(!map.containsKey(child.getFile1().getId())) {
+					map.put(child.getFile1().getId(), row);
+					cloneFiles1.add(child.getFile1());
+					row ++;
+				}
+				if(!map.containsKey(child.getFile2().getId())) {
+					map.put(child.getFile2().getId(), col);
+					cloneFiles2.add(child.getFile2());
+					col ++;
+				}
+			}
+			boolean[][] matrix = new boolean[row][col];
+			for(int i = 0; i < row; i ++) {
+				for(int j = 0; j < col; j ++) {
+					matrix[i][j] = false;
+				}
+			}
+			for(FileCloneWithCoChange child : children) {
+				int i = map.get(child.getFile1().getId());
+				int j = map.get(child.getFile2().getId());
+				matrix[i][j] = true;
+				String key = String.join("_", child.getFile1().getName(), child.getFile2().getName());
+				fileClone.put(key, child);
+			}
+			return new PackageCloneValueWithFileCoChangeMatrix(fileClone, cloneFiles1, cloneFiles2, noneCloneFiles1, noneCloneFiles2, matrix);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }
