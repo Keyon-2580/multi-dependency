@@ -89,11 +89,11 @@ var doublefile = function() {
             url: "/relation/file/double/" + file1Id + "/" + file2Id + "/commonDependsOn",
             success: function(result) {
                 console.log(result);
-                var html = "<ol>";
+                var html = "<ul style='text-align: center'>";
                 for(var i = 0; i < result.length; i++) {
-                    html += "<li><a target='_blank' href='/relation/file/" + result[i].id + "'>" + result[i].path + "</a></li>";
+                    html += "<li>" + (i+1) + "." + "<a target='_blank' href='/relation/file/" + result[i].id + "'>" + result[i].path + "</a></li>";
                 }
-                html += "</ol>";
+                html += "</ul>";
                 $("#commonDependsOn").html(html);
             }
         })
@@ -128,11 +128,11 @@ var doublefile = function() {
             url: "/relation/file/double/" + file1Id + "/" + file2Id + "/commonDependedOnBy",
             success: function(result) {
                 console.log(result);
-                var html = "<ol>";
+                var html = "<ul style='text-align: center'>";
                 for(var i = 0; i < result.length; i++) {
-                    html += "<li><a target='_blank' href='/relation/file/" + result[i].id + "'>" + result[i].path + "</a></li>";
+                    html += "<li>" + (i+1) + "." +  "<a target='_blank' href='/relation/file/" + result[i].id + "'>" + result[i].path + "</a></li>";
                 }
-                html += "</ol>";
+                html += "</ul>";
                 $("#commonDependedBy").html(html);
             }
         });
