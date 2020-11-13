@@ -345,8 +345,21 @@ var projectToGraph = function(result,divId){
     var defs = svg.append("defs");
 
     LEGEND_DATA.forEach(function (item){
-        var path = (defs.append("marker")
-            .attr("id", item.id)
+        var path_start = (defs.append("marker")
+            .attr("id", item.id + "_start")
+            .attr("markerUnits", "strokeWidth")
+            .attr("markerWidth", "8")
+            .attr("markerHeight", "8")
+            .attr("viewBox", "0 0 8 8")
+            .attr("refX", "4")
+            .attr("refY", "4")
+            .attr("orient", "auto"))
+            .append("path")
+            .attr("d", "M6,2 L2,4 L6,6 L4,4 L6,2")
+            .style("fill", item.color);
+
+        var path_end = (defs.append("marker")
+            .attr("id", item.id + "_end")
             .attr("markerUnits", "strokeWidth")
             .attr("markerWidth", "8")
             .attr("markerHeight", "8")
@@ -470,7 +483,7 @@ var showLine = function(links_local, type){
         }
 
         if(relation_type === "dependson" && flag_delete === false ){
-            var intensity = (links_local[i - 1].dependsOnIntensity + links_local[i - 1].dependsByIntensity) / 2;
+            var intensity = Math.max(links_local[i - 1].dependsOnIntensity, links_local[i - 1].dependsByIntensity);
             if($("#dependsIntensity").prop("checked")){
                 var temp_flag_intensity = false;
 
@@ -601,11 +614,11 @@ function loadLink(jsonLinks) {
             }
         })
         .attr("marker-end",function (d){
-            return "url(#" + getTypeColor(d)[1] + ")";
+            return "url(#" + getTypeColor(d)[1] + "_end)";
         })
         .attr("marker-start",function (d){
             if(d.two_way){
-                return "url(#" + getTypeColor(d)[1] + ")";
+                return "url(#" + getTypeColor(d)[1] + "_start)";
             }else{
                 return null;
             }
@@ -1008,7 +1021,7 @@ var getTypeColor = function(d){
         return d.cloneMatchRate === 1 ? [CLONE_HIGH_COLOR, "clone_high"] : d.cloneMatchRate >= 0.9
             ? [CLONE_MEDIUM_COLOR, "clone_medium"] : [CLONE_LOW_COLOR, "clone_low"];
     }else if(d.type === "dependson"){
-        return ((d.dependsOnIntensity + d.dependsByIntensity) / 2)> 0.8 ? [DEPENDSON_HIGH_COLOR, "dependson_high"] : ((d.dependsOnIntensity + d.dependsByIntensity) / 2) >= 0.5
+        return Math.max(d.dependsOnIntensity, d.dependsByIntensity) > 0.8 ? [DEPENDSON_HIGH_COLOR, "dependson_high"] : Math.max(d.dependsOnIntensity, d.dependsByIntensity) >= 0.5
             ? [DEPENDSON_MEDIUM_COLOR, "dependson_medium"] : [DEPENDSON_LOW_COLOR, "dependson_low"];
     }else if(d.type === "cochange"){
         return [COCHANGE_COLOR, "cochange"];
