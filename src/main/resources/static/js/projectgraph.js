@@ -8,17 +8,17 @@ const COCHANGE_COLOR = "#f88705";
 
 const LEGEND_DATA = [
     {
-        "name" : "克隆相似度 = 1",
+        "name" : "文件匹配度 = 1",
         "id" : "clone_high",
         "color":CLONE_HIGH_COLOR
     },
     {
-        "name" : "0.9 <= 克隆相似度 < 1",
+        "name" : "0.9 <= 文件匹配度 < 1",
         "id" : "clone_medium",
         "color":CLONE_MEDIUM_COLOR
     },
     {
-        "name" : "克隆相似度 < 0.9",
+        "name" : "文件匹配度 < 0.9",
         "id" : "clone_low",
         "color" : CLONE_LOW_COLOR
     },
