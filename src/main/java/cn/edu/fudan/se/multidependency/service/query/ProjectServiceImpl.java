@@ -270,7 +270,15 @@ public class ProjectServiceImpl implements ProjectService{
                     link.put("dependsByTypes", dependsRelationDataForDoubleNodes.getDependsByTypes());
                     link.put("dependsOnTimes", dependsRelationDataForDoubleNodes.getDependsOnTimes());
                     link.put("dependsByTimes", dependsRelationDataForDoubleNodes.getDependsByTimes());
-                    link.put("dependsIntensity", dependsRelationDataForDoubleNodes.getDependsIntensity());
+                    link.put("dependsOnIntensity", dependsRelationDataForDoubleNodes.getDependsOnIntensity());
+                    link.put("dependsByIntensity", dependsRelationDataForDoubleNodes.getDependsByIntensity());
+
+                    if(dependsRelationDataForDoubleNodes.getDependsOnTypes().equals("") ||
+                            dependsRelationDataForDoubleNodes.getDependsByTypes().equals("")){
+                        link.put("two-way", false);
+                    }else{
+                        link.put("two-way", true);
+                    }
 
                     Map<String, Long> dependsOnTypesMap = dependsRelationDataForDoubleNodes.getDependsOnTypesMap();
                     Map<String, Long> dependsByTypesMap = dependsRelationDataForDoubleNodes.getDependsByTypesMap();

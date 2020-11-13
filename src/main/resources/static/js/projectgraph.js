@@ -470,7 +470,7 @@ var showLine = function(links_local, type){
         }
 
         if(relation_type === "dependson" && flag_delete === false ){
-            var intensity = links_local[i - 1].dependsIntensity;
+            var intensity = (links_local[i - 1].dependsOnIntensity + links_local[i - 1].dependsByIntensity) / 2;
             if($("#dependsIntensity").prop("checked")){
                 var temp_flag_intensity = false;
 
@@ -603,6 +603,13 @@ function loadLink(jsonLinks) {
         .attr("marker-end",function (d){
             return "url(#" + getTypeColor(d)[1] + ")";
         })
+        .attr("marker-start",function (d){
+            if(d.two-way){
+                return "url(#" + getTypeColor(d)[1] + ")";
+            }else{
+                return null;
+            }
+        })
         .call(text => text.append("title").text(function(d) {
             if(d.type === "clone"){
                 return "Package1: " + d.source_name + "\nPackage2: " + d.target_name
@@ -619,7 +626,8 @@ function loadLink(jsonLinks) {
                     + "\ndependsByTypes: " + d.dependsByTypes
                     + "\ndependsOnTimes: " + d.dependsOnTimes
                     + "\ndependsByTimes: " + d.dependsByTimes
-                    + "\ndependsIntensity: " + d.dependsIntensity;
+                    + "\ndependsOnIntensity: " + d.dependsOnIntensity;
+                    + "\ndependsByIntensity: " + d.dependsByIntensity;
 
                 if(d.dependsByTypesMap.length > 0){
                     temp_title += "\ndependsByTypesMap: [";
@@ -913,7 +921,7 @@ function drawCloneTableBelow(link_id, type, nonclonefiles){
 
         html_dependson_table += "<table class = \"gridtable\">"
             + "<tr><th>目录1</th><th>目录1依赖类型(次数)</th><th>目录2</th><th>目录1依赖类型(次数)</th>"
-            + "<th>依赖强度</th></tr>";
+            + "<th>依赖强度</th><th>被依赖强度</th></tr>";
 
         linksCurrent_global.forEach(function(d){
             if(d.type === "dependson"){
@@ -923,7 +931,8 @@ function drawCloneTableBelow(link_id, type, nonclonefiles){
                     + d.target_name + "</td><td>"
                     + (d.dependsByTypes === "" ? ""
                     : (d.dependsByTypes + "(" + d.dependsByTimes + ")")) + "</td><td>"
-                    + d.dependsIntensity.toFixed(2) + "</td></tr>";
+                    + d.dependsOnIntensity.toFixed(2) + "</td><td>"
+                    + d.dependsByIntensity.toFixed(2) + "</td></tr>";
             }
         })
 
@@ -999,7 +1008,7 @@ var getTypeColor = function(d){
         return d.cloneMatchRate === 1 ? [CLONE_HIGH_COLOR, "clone_high"] : d.cloneMatchRate >= 0.9
             ? [CLONE_MEDIUM_COLOR, "clone_medium"] : [CLONE_LOW_COLOR, "clone_low"];
     }else if(d.type === "dependson"){
-        return d.dependsIntensity > 0.8 ? [DEPENDSON_HIGH_COLOR, "dependson_high"] : d.dependsIntensity >= 0.5
+        return ((d.dependsOnIntensity + d.dependsByIntensity) / 2)> 0.8 ? [DEPENDSON_HIGH_COLOR, "dependson_high"] : ((d.dependsOnIntensity + d.dependsByIntensity) / 2) >= 0.5
             ? [DEPENDSON_MEDIUM_COLOR, "dependson_medium"] : [DEPENDSON_LOW_COLOR, "dependson_low"];
     }else if(d.type === "cochange"){
         return [COCHANGE_COLOR, "cochange"];
