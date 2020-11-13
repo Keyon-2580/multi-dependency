@@ -125,17 +125,17 @@ var loadPageData = function () {
                 "</label>" +
 
                 "<select id = \"dependsTypeSelect\" class=\"selectpicker\" multiple>" +
+                "<option value=\"IMPORT\">IMPORT</option>" +
+                "<option value=\"INCLUDE\">INCLUDE</option>" +
                 "<option value=\"EXTENDS\">EXTENDS</option>" +
                 "<option value=\"IMPLEMENTS\">IMPLEMENTS</option>" +
                 "<option value=\"ASSOCIATION\">ASSOCIATION</option>" +
-                "<option value=\"IMPLEMENTS_C\">IMPLEMENTS_C</option>" +
                 "<option value=\"ANNOTATION\">ANNOTATION</option>" +
-                "<option value=\"IMPORT\">IMPORT</option>" +
-                "<option value=\"INCLUDE\">INCLUDE</option>" +
                 "<option value=\"CALL\">CALL</option>" +
-                "<option value=\"CREATE\">CREATE</option>" +
-                "<option value=\"PARAMETER\">PARAMETER</option>" +
                 "<option value=\"CAST\">CAST</option>" +
+                "<option value=\"CREATE\">CREATE</option>" +
+                "<option value=\"USE\">USE</option>" +
+                "<option value=\"PARAMETER\">PARAMETER</option>" +
                 "<option value=\"THROW\">THROW</option>" +
                 "<option value=\"RETURN\">RETURN</option>" +
                 "<option value=\"IMPLLINK\">IMPLLINK</option>" +
@@ -507,6 +507,10 @@ var showLine = function(links_local, type){
 
             if($("#dependsOnType").prop("checked") && flag_delete === false){
                 var value = $('#dependsTypeSelect').val();
+                if(value.length === 0){
+                    alert("未选中任何类型！");
+                }
+
                 var dependsByTypesMap = links_local[i - 1].dependsByTypesMap;
                 var dependsOnTypesMap = links_local[i - 1].dependsOnTypesMap;
                 var temp_dependsType_flag = false;
