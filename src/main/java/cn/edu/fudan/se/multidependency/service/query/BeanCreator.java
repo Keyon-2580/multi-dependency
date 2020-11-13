@@ -78,7 +78,7 @@ public class BeanCreator {
 		return coChanges;
 	}
 
-	//@Bean("createDependsOn")
+	@Bean("createDependsOn")
 	public List<DependsOn> createDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, ProjectFileRepository fileRepository) {
 		List<DependsOn> dependsOns = new ArrayList<>();
 		if(propertyConfig.isCalculateDependsOn()) {
@@ -90,49 +90,24 @@ public class BeanCreator {
 				LOGGER.info("创建Depends On关系...");
 				dependsOnRepository.deleteAll();
 
-				dependsOnRepository.createDependsOnWithExtendsInFiles();
-				dependsOnRepository.createDependsOnWithImplementsInFiles();
-				dependsOnRepository.createDependsOnWithDependencyInFiles();
-				dependsOnRepository.createDependsOnWithAssociationInFiles();
-				dependsOnRepository.createDependsOnWithAnnotationInFiles();
-
-				dependsOnRepository.createDependsOnWithFunctionCallInFiles();
-				dependsOnRepository.createDependsOnWithFunctionImpllinkInFiles();
-				dependsOnRepository.createDependsOnWithFunctionImplementsInFiles();
-
-				//dependsOnRepository.createDependsOnWithTimesInFiles();
-				dependsOnRepository.deleteNullAggregationDependsOnInFiles();
-
-				dependsOnRepository.createDependsOnInPackages();
-
-				//fileRepository.pageRank(20, 0.85);
-			}
-
-		}
-		return dependsOns;
-	}
-
-	@Bean("createDependsOn")
-	public List<DependsOn> createDepends(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, ProjectFileRepository fileRepository) {
-		List<DependsOn> dependsOns = new ArrayList<>();
-		if(propertyConfig.isCalculateDependsOn()) {
-			dependsOns = dependsOnRepository.findFileDepends();
-			if(dependsOns != null && dependsOns.size() > 0){
-				LOGGER.info("已存在DependsOn关系" );
-				return dependsOns;
-			} else {
-				LOGGER.info("创建DependsOn关系...");
-				dependsOnRepository.deleteAll();
-
+				dependsOnRepository.createDependsOnWithImportInFiles();
+				dependsOnRepository.createDependsOnWithIncludeInFiles();
 				dependsOnRepository.createDependsOnWithExtendsInFiles();
 				dependsOnRepository.createDependsOnWithImplementsInFiles();
 				//dependsOnRepository.createDependsOnWithDependencyInFiles();
 				dependsOnRepository.createDependsOnWithAssociationInFiles();
 				dependsOnRepository.createDependsOnWithAnnotationInFiles();
 
-				dependsOnRepository.createDependsOnWithFunctionCallInFiles();
-				dependsOnRepository.createDependsOnWithFunctionImpllinkInFiles();
-				dependsOnRepository.createDependsOnWithFunctionImplementsInFiles();
+				dependsOnRepository.createDependsOnWithCallInFiles();
+				dependsOnRepository.createDependsOnWithImpllinkInFiles();
+				//dependsOnRepository.createDependsOnWithFunctionImplementsInFiles();
+				dependsOnRepository.createDependsOnWithCreateInFiles();
+				dependsOnRepository.createDependsOnWithCastInFiles();
+				dependsOnRepository.createDependsOnWithThrowInFiles();
+				dependsOnRepository.createDependsOnWithParameterInFiles();
+				dependsOnRepository.createDependsOnWithReturnInFiles();
+				dependsOnRepository.createDependsOnWithUseTypeInFiles();
+				//dependsOnRepository.createDependsOnWithAccessInFiles();
 
 				//dependsRepository.createDependsOnWithTimesInFiles();
 				Map<ProjectFile, Map<ProjectFile, DependsOn>> fileDependsOnFile = new HashMap<>();
@@ -255,6 +230,8 @@ public class BeanCreator {
 					}
 					dependsOnRepository.saveAll(dependsOnListTmp);
 				}
+
+				//fileRepository.pageRank(20, 0.85);
 			}
 		}
 		return dependsOns;

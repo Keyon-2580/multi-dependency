@@ -26,6 +26,7 @@ public enum RelationType implements RelationshipType {
 
 	DEPENDENCY(RelationType.str_DEPENDENCY),
 	ASSOCIATION(RelationType.str_ASSOCIATION),
+	USE(RelationType.str_USE),
 	
 	DYNAMIC_CALL(RelationType.str_DYNAMIC_CALL),
 	
@@ -79,6 +80,7 @@ public enum RelationType implements RelationshipType {
 	public static final String str_IMPORT = "IMPORT";
 	public static final String str_INCLUDE = "INCLUDE";
 	public static final String str_ACCESS = "ACCESS";
+	public static final String str_USE = "USE";
 	public static final String str_CALL = "CALL";
 	public static final String str_CREATE = "CREATE";
 	public static final String str_IMPLEMENTS = "IMPLEMENTS";
@@ -140,27 +142,29 @@ public enum RelationType implements RelationshipType {
 	}
 
 	static{
-		relationWeights.put(EXTENDS, 1.0);
-		relationWeights.put(IMPLEMENTS, 1.0);
-		relationWeights.put(ASSOCIATION, 0.5);
-		relationWeights.put(DEPENDENCY, 0.1);
-		relationWeights.put(IMPLEMENTS_C, 0.5);
-
-		relationWeights.put(ANNOTATION, 0.1);
-
 		relationWeights.put(IMPORT, 0.1);
 		relationWeights.put(INCLUDE, 0.1);
 
-		relationWeights.put(CALL, 0.2);
-		relationWeights.put(CREATE, 0.2);
+		relationWeights.put(EXTENDS, 1.0);
+		relationWeights.put(IMPLEMENTS, 1.0);
+		relationWeights.put(ASSOCIATION, 0.5);
 
-		relationWeights.put(PARAMETER, 0.1);
-		relationWeights.put(VARIABLE_TYPE, 0.1);
+		relationWeights.put(ANNOTATION, 0.1);
+
+		//relationWeights.put(ACCESS, 0.1);
+		relationWeights.put(CALL, 0.2);
 		relationWeights.put(CAST, 0.1);
+		relationWeights.put(CREATE, 0.2);
+		relationWeights.put(USE, 0.1);
+		relationWeights.put(PARAMETER, 0.1);
 		relationWeights.put(THROW, 0.1);
 		relationWeights.put(RETURN, 0.1);
 
 		relationWeights.put(IMPLLINK, 0.1);
+
+		relationWeights.put(VARIABLE_TYPE, 0.1);
+		relationWeights.put(IMPLEMENTS_C, 0.5);
+		relationWeights.put(DEPENDENCY, 0.1);
 
 		relationWeights.put(CO_CHANGE, 0.1);
 		relationWeights.put(CLONE, 0.5);

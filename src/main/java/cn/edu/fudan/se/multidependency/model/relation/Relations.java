@@ -81,7 +81,15 @@ public class Relations implements Serializable {
             } else {
                 relationWithTimes.addTimes();
                 if(relation instanceof Dependency){
-                    ((Dependency)relationWithTimes).addDependencyType(((Dependency) relation).getDependencyTypes());
+                    ((Dependency)relationWithTimes).minusTimes();
+                    Map<String, Long> dependencyTypesMap = ((Dependency) relation).getDependencyTypesMap();
+                    if(dependencyTypesMap != null && !dependencyTypesMap.isEmpty()){
+                        ((Dependency)relationWithTimes).getDependencyTypesMap().putAll(dependencyTypesMap);
+                        dependencyTypesMap.forEach( (key, value) ->{
+                            ((Dependency)relationWithTimes).addDependencyType(key);
+                            ((Dependency)relationWithTimes).addTimes(value.intValue());
+                        });
+                    }
                 }
             }
         } else {
