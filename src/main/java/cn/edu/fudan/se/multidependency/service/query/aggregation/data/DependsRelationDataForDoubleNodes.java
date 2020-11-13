@@ -29,7 +29,9 @@ public class DependsRelationDataForDoubleNodes<N extends Node, R extends Relatio
 
 	private int dependsByTimes = 0;
 
-	private double dependsIntensity = 0.0;
+	private double dependsOnIntensity = 0.0;
+
+	private double dependsByIntensity = 0.0;
 
 	private Map<String, Long> dependsOnTypesMap = new HashMap<>();
 
@@ -51,10 +53,17 @@ public class DependsRelationDataForDoubleNodes<N extends Node, R extends Relatio
 		return RelationType.DEPENDS_ON;
 	}
 
-	public void calDependsIntensity(){
-		int dependsTimes = dependsOnTimes + dependsByTimes;
+	public void calDependsOnIntensity(){
+		int dependsTimes = dependsOnTimes;
 		if(dependsTimes > 0){
-			dependsIntensity = dependsTimes / (dependsTimes + 5.0);
+			dependsOnIntensity = dependsTimes / (dependsTimes + 10.0);
+		}
+	}
+
+	public void calDependsByIntensity(){
+		int dependsTimes = dependsByTimes;
+		if(dependsTimes > 0){
+			dependsByIntensity = dependsTimes / (dependsTimes + 10.0);
 		}
 	}
 }
