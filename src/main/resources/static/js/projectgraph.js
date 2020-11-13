@@ -604,7 +604,7 @@ function loadLink(jsonLinks) {
             return "url(#" + getTypeColor(d)[1] + ")";
         })
         .attr("marker-start",function (d){
-            if(d.two-way){
+            if(d.two_way){
                 return "url(#" + getTypeColor(d)[1] + ")";
             }else{
                 return null;

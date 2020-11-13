@@ -275,9 +275,9 @@ public class ProjectServiceImpl implements ProjectService{
 
                     if(dependsRelationDataForDoubleNodes.getDependsOnTypes().equals("") ||
                             dependsRelationDataForDoubleNodes.getDependsByTypes().equals("")){
-                        link.put("two-way", false);
+                        link.put("two_way", false);
                     }else{
-                        link.put("two-way", true);
+                        link.put("two_way", true);
                     }
 
                     Map<String, Long> dependsOnTypesMap = dependsRelationDataForDoubleNodes.getDependsOnTypesMap();
