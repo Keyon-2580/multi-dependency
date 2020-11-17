@@ -90,8 +90,8 @@ public class BeanCreator {
 				LOGGER.info("创建Depends On关系...");
 				dependsOnRepository.deleteAll();
 
-				dependsOnRepository.createDependsOnWithImportInFiles();
-				dependsOnRepository.createDependsOnWithIncludeInFiles();
+				//dependsOnRepository.createDependsOnWithImportInFiles();
+				//dependsOnRepository.createDependsOnWithIncludeInFiles();
 				dependsOnRepository.createDependsOnWithExtendsInFiles();
 				dependsOnRepository.createDependsOnWithImplementsInFiles();
 				//dependsOnRepository.createDependsOnWithDependencyInFiles();
