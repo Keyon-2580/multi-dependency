@@ -214,6 +214,7 @@ public class SummaryAggregationDataServiceImpl implements SummaryAggregationData
 			CoChange cochange = gitAnalyseService.findCoChangeBetweenTwoFiles(file1, file2);
 			result.addChild(new FileCloneWithCoChange((Clone)clone, cochange));
 		}
+		result.calculateNoneClone();
 		result.sortChildren();
 		return result;
 	}
