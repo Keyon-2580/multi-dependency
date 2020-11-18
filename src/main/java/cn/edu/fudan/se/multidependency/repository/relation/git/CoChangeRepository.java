@@ -31,14 +31,20 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
     @Query("match p= (f1:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->(f2:ProjectFile) where id(f1)={file1Id} and id(f2)={file2Id} return p")
     CoChange findCoChangesBetweenTwoFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
     
-    @Query("match (c1:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
-            "]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c2:Commit) " +
+    @Query("match (f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
+            "]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile) " +
             "where id(f1) < id(f2) " +
-            "with f1,f2,count(c) as times,count(c1) as times1, count(c2) as times2 " +
+            "with f1,f2,count(c) as times " +
             "where times >= {minCoChangeTimes} " +
             "create p=(f1)-[:" + RelationType.str_CO_CHANGE
-    		+ "{times:times, node1ChangeTimes:times1, node2ChangeTimes:times2}]->(f2) with p return count(p)")
+    		+ "{times:times}]->(f2) with p return count(p)")
     int createCoChanges(@Param("minCoChangeTimes") int minCoChangeTimes);
+
+    @Query("match (c1:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f1:ProjectFile)-[co:CO_CHANGE]-> " +
+            "(f2:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c2:Commit) " +
+            "with f1, f2, co, count(distinct c1) as times1, count(distinct c2) as times2 " +
+            "set co.node1ChangeTimes = times1, co.node2ChangeTimes = times2 with co return count(co)")
+    int updateCoChangesForFile();
 
     @Query("match (p1:Package)-[:CONTAIN]->(f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile)<-[:CONTAIN]-(p2:Package) " +
             "where id(p1) < id(p2)  " +
