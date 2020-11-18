@@ -38,6 +38,10 @@ public class CoChange implements Relation, RelationWithTimes {
 	private int times = 1;
 
 	private String cochangeType = "";
+
+	private int node1ChangeTimes = 0;
+
+	private int node2ChangeTimes = 0;
 	
 	public CoChange(Node node1, Node node2) {
 		this.node1 = node1;
@@ -74,6 +78,8 @@ public class CoChange implements Relation, RelationWithTimes {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("times", getTimes());
 		properties.put("cochangeType", getCochangeType());
+		properties.put("node1ChangeTimes", getNode1ChangeTimes());
+		properties.put("node2ChangeTimes", getNode2ChangeTimes());
 		return properties;
 	}
 	

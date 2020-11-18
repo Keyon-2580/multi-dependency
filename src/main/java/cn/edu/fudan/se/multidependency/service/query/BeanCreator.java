@@ -70,9 +70,10 @@ public class BeanCreator {
 			} else {
 				LOGGER.info("创建cochange关系...");
 				cochangeRepository.deleteAll();
-				coChanges.addAll( cochangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE));
+				cochangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE);
 				LOGGER.info("创建module cochange关系");
-				coChanges.addAll(cochangeRepository.createCoChangesForModule(Constant.COUNT_OF_MIN_COCHANGE));
+				cochangeRepository.createCoChangesForModule(Constant.COUNT_OF_MIN_COCHANGE);
+				cochangeRepository.updateCoChangesForModule();
 			}
 		}
 		return coChanges;

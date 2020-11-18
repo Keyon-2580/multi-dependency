@@ -731,6 +731,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 	private HotspotPackagePair createHotspotPackagePairWithCoChange(Package pck1, Package pck2, CoChange packageCoChange) {
 		CoChangeRelationDataForDoubleNodes<Node, Relation> coChangeRelationDataForDoubleNodes = new CoChangeRelationDataForDoubleNodes<>(pck1, pck2);
 		coChangeRelationDataForDoubleNodes.setCoChangeTimes(packageCoChange.getTimes());
+		coChangeRelationDataForDoubleNodes.setNode1ChangeTimes(packageCoChange.getNode1ChangeTimes());
+		coChangeRelationDataForDoubleNodes.setNode2ChangeTimes(packageCoChange.getNode2ChangeTimes());
 		return new HotspotPackagePair(coChangeRelationDataForDoubleNodes);
 	}
 
