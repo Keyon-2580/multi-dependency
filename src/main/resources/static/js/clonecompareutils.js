@@ -13,14 +13,14 @@ var showtree = function(divId, zNodes) {
     $.fn.zTree.init($("#" + divId), setting, zNodes);
 }
 
-var doublePackagesCloneShowMain = function(path1, path2, clonePairs, cloneNodesCount1, cloneNodesCount2, allNodesCount1, allNodesCount2, cloneMatchRate, cloneNodesLoc1, cloneNodesLoc2, allNodesLoc1, allNodesLoc2, cloneLocRate, cloneNodesCoChangeTimes, allNodesCoChangeTimes, cloneCoChangeRate, cloneType1Count, cloneType2Count, cloneType3Count, cloneType, cloneSimilarityValue, cloneSimilarityRate) {
+var doublePackagesCloneShowMain = function(id1,id2,path1, path2, clonePairs, cloneNodesCount1, cloneNodesCount2, allNodesCount1, allNodesCount2, cloneMatchRate, cloneNodesLoc1, cloneNodesLoc2, allNodesLoc1, allNodesLoc2, cloneLocRate, cloneNodesCoChangeTimes, allNodesCoChangeTimes, cloneCoChangeRate, cloneType1Count, cloneType2Count, cloneType3Count, cloneType, cloneSimilarityValue, cloneSimilarityRate) {
     var html = "";
     html += "</table>";
     html += "<table class='table table-bordered'>";
     html += "<tr><th>目录</th><th>克隆文件占比</th><th>克隆CoChange占比</th><th>克隆Loc占比</th><th>克隆相似度</th><th>type_1数量</th><th>type_2数量</th><th>type_3数量</th><th>type</th><th>克隆对数</th></tr>";
     html += "<tr>";
     html += "<td>";
-    html += path1;
+    html += "<a target='_blank' href='/relation/package/" + id1 + "'>" + path1;
     html += "</td>";
     html += "<td rowspan='2' style='vertical-align: middle'>";
     html += "(" + cloneNodesCount1 + "+" + cloneNodesCount2 + ")/(" + allNodesCount1 + "+" + allNodesCount2 + ")=" + cloneMatchRate.toFixed(2);;
@@ -52,7 +52,7 @@ var doublePackagesCloneShowMain = function(path1, path2, clonePairs, cloneNodesC
     html += "</tr>";
     html += "<tr>";
     html += "<td>";
-    html += path2;
+    html += "<a target='_blank' href='/relation/package/" + id2 + "'>" + path2;
     html += "</td>";
     html += "</tr>";
     html += "</table>";
@@ -1524,7 +1524,7 @@ var setFilesContext = function (file1AbsolutePath, file2AbsolutePath, decoder1, 
 显示跨包克隆聚合详细信息
 */
 var showDetails = function (id1, id2, path1, path2, clonePairs, cloneNodesCount1, cloneNodesCount2, allNodesCount1, allNodesCount2, cloneMatchRate, cloneNodesLoc1, cloneNodesLoc2, allNodesLoc1, allNodesLoc2, cloneLocRate, cloneNodesCoChangeTimes, allNodesCoChangeTimes, cloneCoChangeRate, cloneType1Count, cloneType2Count, cloneType3Count, cloneType, cloneSimilarityValue, cloneSimilarityRate) {
-    doublePackagesCloneShowMain(path1, path2, clonePairs, cloneNodesCount1, cloneNodesCount2, allNodesCount1, allNodesCount2, cloneMatchRate, cloneNodesLoc1, cloneNodesLoc2, allNodesLoc1, allNodesLoc2, cloneLocRate, cloneNodesCoChangeTimes, allNodesCoChangeTimes, cloneCoChangeRate, cloneType1Count, cloneType2Count, cloneType3Count, cloneType, cloneSimilarityValue, cloneSimilarityRate);
+    doublePackagesCloneShowMain(id1,id2,path1, path2, clonePairs, cloneNodesCount1, cloneNodesCount2, allNodesCount1, allNodesCount2, cloneMatchRate, cloneNodesLoc1, cloneNodesLoc2, allNodesLoc1, allNodesLoc2, cloneLocRate, cloneNodesCoChangeTimes, allNodesCoChangeTimes, cloneCoChangeRate, cloneType1Count, cloneType2Count, cloneType3Count, cloneType, cloneSimilarityValue, cloneSimilarityRate);
     doublePackagesCloneShowDetail(id1, id2);
     doublePackagesCloneShowTree(id1, id2);
     // cloneGroupToGraphShowDetail(id1, id2);
