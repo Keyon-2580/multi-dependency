@@ -762,7 +762,7 @@ var clone = function(cytoscapeutil) {
 									var html = "";
 									html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn'>全屏</button>";
 									html += "<p></p></div>";
-									html += "<div class='col-sm-12'><h4>" + result.group.name + "</h4></div>"
+									html += "<div class='col-sm-12'><a target='_blank' href='/relation/clonegroup/" + result.group.name + "'><h4>" + result.group.name + "</h4></a></div>"
 									html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble">';
 									html += '<div class="div_cytoscape_treeview">';
 									html += '<ul id="node_ztree_num" class="ztree"></ul>';

@@ -7,60 +7,6 @@ var rPackage = function (packageId, cytoscapeutil) {
         // commits(packageId);
     };
 
-    // var commits = function(fileId) {
-    //     $.ajax({
-    //         type: "get",
-    //         url: "/relation/file/" + fileId + "/commit/matrix",
-    //         success: function(result) {
-    //             console.log(result);
-    //             var html = "<table class='table table-bordered'>";
-    //             html += "<tr>";
-    //             html += "<td width='20%'></td>";
-    //             for(var i = 0; i < result.files.length; i++) {
-    //                 html += "<td>" + i + ":" + "<a target='_blank' href='/relation/file/" + result.files[i].id + "'>";
-    //                 html += result.files[i].name;
-    //                 html += "</a>(" + result.commitTimes[result.files[i].id] + ")</td>";
-    //             }
-    //             html += "</tr>";
-    //             for(var i = 0; i < result.commits.length; i++) {
-    //                 html += "<tr>";
-    //                 html += "<td>" + (i + 1) + ":" + "<a target='_blank' href='/commit/" + result.commits[i].id + "'>" + result.commits[i].commitId + "(" + result.commits[i].commitFilesSize + ") </a></td>";
-    //                 for(var j = 0; j < result.files.length; j++) {
-    //                     if(result.update[i][j] == true) {
-    //                         html += "<td>T</td>";
-    //                     } else {
-    //                         html += "<td></td>";
-    //                     }
-    //                 }
-    //                 html += "</tr>";
-    //             }
-    //             /*var html = "<ol>";
-    //             for(var i = 0; i < result.length; i++) {
-    //                 html += "<li><a target='_blank' href='/commit/" + result[i].id + "'>" + result[i].commitId + "</a></li>";
-    //             }
-    //             html += "</ol>";*/
-    //             html += "</table>";
-    //             $("#commit_content").html(html);
-    //         }
-    //     })
-    // }
-    //
-    // var issues = function(fileId) {
-    //     $.ajax({
-    //         type: "get",
-    //         url: "/relation/file/" + fileId + "/issue",
-    //         success: function(result) {
-    //             console.log(result);
-    //             var html = "<ol>";
-    //             for(var i = 0; i < result.length; i++) {
-    //                 html += "<li><a target='_blank' href='/issue/" + result[i].id + "'>Issue: " + result[i].number + " " + result[i].title + "</a></li>";
-    //             }
-    //             html += "</ol>";
-    //             $("#issue_content").html(html);
-    //         }
-    //     })
-    // }
-    //
     var depends = function(packageId) {
         $.ajax({
             type: "get",
