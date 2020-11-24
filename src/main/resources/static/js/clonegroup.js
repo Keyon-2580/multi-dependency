@@ -408,7 +408,7 @@ var clone = function(cytoscapeutil) {
 			var size = result.groups.length;
 			var groupsName = "";
 			for(var i = 0; i < size; i++) {
-				groupsName += result.groups[i].name + " ; ";
+				groupsName += "<a target='_blank' href='/relation/clonegroup/" + result.groups[i].name + "'>" + result.groups[i].name + "</a>" +  " ; ";
 			}
 			var html = "";
 			html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='group'>全屏</button>";
@@ -431,7 +431,7 @@ var clone = function(cytoscapeutil) {
 			html = "";
 			for(var i = 0; i < size; i++) {
 				html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='" + i +"'>全屏</button>";
-				html += "<div><h4>" + result.groups[i].name + "</h4></div>"
+				html += "<div><a target='_blank' href='/relation/clonegroup/" + result.groups[i].name + "'><h4>" + result.groups[i].name + "</h4></a></div>"
 //				html += "<button class='btn btn-default save_top' name='" + i +"'>保存图片</button><p></p></div>";
 				html += "<p></p></div>";
 				html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble_' + i + '">';
