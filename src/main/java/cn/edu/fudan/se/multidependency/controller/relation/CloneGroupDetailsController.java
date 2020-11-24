@@ -8,6 +8,7 @@ import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.clone.CloneAnalyseService;
+import org.assertj.core.util.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,9 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -51,8 +50,19 @@ public class CloneGroupDetailsController {
     public JSONObject getDependsMatrix(@PathVariable("name") String name){
         CloneGroup cloneGroup = basicCloneQueryService.queryCloneGroup(name);
         cloneGroup = cloneAnalyse.addNodeAndRelationToCloneGroup(cloneGroup);
-        Set<CodeNode> nodes = cloneGroup.getNodes();
-        Set<Node> allNodes = new HashSet<>();
+        Set<CodeNode> nodes = new TreeSet<CodeNode>(new Comparator<CodeNode>() {
+            @Override
+            public int compare(CodeNode o1, CodeNode o2) {
+                return ((ProjectFile)o1).getPath().compareTo(((ProjectFile)o2).getPath());
+            }
+        });
+        nodes.addAll(cloneGroup.getNodes());
+        Set<Node> allNodes = new TreeSet<Node>(new Comparator<Node>() {
+            @Override
+            public int compare(Node o1, Node o2) {
+                return ((ProjectFile)o1).getPath().compareTo(((ProjectFile)o2).getPath());
+            }
+        });
         for (CodeNode node:
              nodes) {
             Collection<Node> endNodes = staticAnalyseService.findFileDependsOn( (ProjectFile)node).stream().map(DependsOn::getEndNode).collect(Collectors.toList());
@@ -87,8 +97,19 @@ public class CloneGroupDetailsController {
     public JSONObject getDependedMatrix(@PathVariable("name") String name){
         CloneGroup cloneGroup = basicCloneQueryService.queryCloneGroup(name);
         cloneGroup = cloneAnalyse.addNodeAndRelationToCloneGroup(cloneGroup);
-        Set<CodeNode> nodes = cloneGroup.getNodes();
-        Set<Node> allNodes = new HashSet<>();
+        Set<CodeNode> nodes = new TreeSet<CodeNode>(new Comparator<CodeNode>() {
+            @Override
+            public int compare(CodeNode o1, CodeNode o2) {
+                return ((ProjectFile)o1).getPath().compareTo(((ProjectFile)o2).getPath());
+            }
+        });
+        nodes.addAll(cloneGroup.getNodes());
+        Set<Node> allNodes = new TreeSet<Node>(new Comparator<Node>() {
+            @Override
+            public int compare(Node o1, Node o2) {
+                return ((ProjectFile)o1).getPath().compareTo(((ProjectFile)o2).getPath());
+            }
+        });
         for (CodeNode node:
                 nodes) {
             Collection<Node> startNodes = staticAnalyseService.findFileDependedOnBy( (ProjectFile)node).stream().map(DependsOn::getStartNode).collect(Collectors.toList());
@@ -118,17 +139,54 @@ public class CloneGroupDetailsController {
         return result;
     }
 
-    @GetMapping("/aldependsnodes")
+    @GetMapping("/alldependsonnodes")
     @ResponseBody
-    public Object getAllNodes(@PathVariable("name") String name){
+    public Object getAlldependsNodes(@PathVariable("name") String name){
         CloneGroup cloneGroup = basicCloneQueryService.queryCloneGroup(name);
         cloneGroup = cloneAnalyse.addNodeAndRelationToCloneGroup(cloneGroup);
-        Set<CodeNode> nodes = cloneGroup.getNodes();
-        Set<Node> allNodes = new HashSet<>();
+        Set<CodeNode> nodes = new TreeSet<CodeNode>(new Comparator<CodeNode>() {
+            @Override
+            public int compare(CodeNode o1, CodeNode o2) {
+                return ((ProjectFile)o1).getPath().compareTo(((ProjectFile)o2).getPath());
+            }
+        });
+        nodes.addAll(cloneGroup.getNodes());
+        Set<Node> allNodes = new TreeSet<Node>(new Comparator<Node>() {
+            @Override
+            public int compare(Node o1, Node o2) {
+                return ((ProjectFile)o1).getPath().compareTo(((ProjectFile)o2).getPath());
+            }
+        });
         for (CodeNode node:
                 nodes) {
             Collection<Node> endNodes = staticAnalyseService.findFileDependsOn( (ProjectFile)node).stream().map(DependsOn::getEndNode).collect(Collectors.toList());
             allNodes.addAll(endNodes);
+        }
+        return allNodes;
+    }
+
+    @GetMapping("/alldependednodes")
+    @ResponseBody
+    public Object getAlldependedNodes(@PathVariable("name") String name){
+        CloneGroup cloneGroup = basicCloneQueryService.queryCloneGroup(name);
+        cloneGroup = cloneAnalyse.addNodeAndRelationToCloneGroup(cloneGroup);
+        Set<CodeNode> nodes = new TreeSet<CodeNode>(new Comparator<CodeNode>() {
+            @Override
+            public int compare(CodeNode o1, CodeNode o2) {
+                return ((ProjectFile)o1).getPath().compareTo(((ProjectFile)o2).getPath());
+            }
+        });
+        nodes.addAll(cloneGroup.getNodes());
+        Set<Node> allNodes = new TreeSet<Node>(new Comparator<Node>() {
+            @Override
+            public int compare(Node o1, Node o2) {
+                return ((ProjectFile)o1).getPath().compareTo(((ProjectFile)o2).getPath());
+            }
+        });
+        for (CodeNode node:
+                nodes) {
+            Collection<Node> startNodes = staticAnalyseService.findFileDependedOnBy( (ProjectFile)node).stream().map(DependsOn::getStartNode).collect(Collectors.toList());
+            allNodes.addAll(startNodes);
         }
         return allNodes;
     }

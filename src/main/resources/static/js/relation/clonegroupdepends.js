@@ -6,7 +6,9 @@ var rclonegroupdepends = function (name, cytoscapeutil) {
 
         dependedmatrix(name);
 
-        filedetail(name);
+        dependfiledetail(name);
+
+        dependedfiledetail(name);
     };
 
     var dependsmatrix = function(name) {
@@ -17,14 +19,18 @@ var rclonegroupdepends = function (name, cytoscapeutil) {
                 var html = "<tr>";
                 html += "<td></td>";
                 for(var i = 0; i < result.dependsnodes.length; i++){
-                    html += "<td>" + result.dependsnodes[i].id + "</td>";
+                    html += "<td>" + (i + 1) + "</td>";
                 }
                 html += "</tr>";
                 for(var i = 0; i < result.nodes.length; i++){
                     html += "<tr>";
-                    html += "<td>" + result.nodes[i].path + "</td>";
+                    html += "<td><a target='_blank' href='/relation/file/" + result.nodes[i].id + "'>" + result.nodes[i].path + "</a></td>";
                     for(var j = 0;j < result.dependsnodes.length;j++){
-                        html += "<td>" + result.matrix[i][j] + "</td>";
+                        html += "<td>";
+                        if(result.matrix[i][j].toString() === "true"){
+                            html +=  "T";
+                        }
+                        html += "</td>";
                     }
                     html += "</tr>";
                 }
@@ -41,14 +47,18 @@ var rclonegroupdepends = function (name, cytoscapeutil) {
                 var html = "<tr>";
                 html += "<td></td>";
                 for(var i = 0; i < result.dependsnodes.length; i++){
-                    html += "<td>" + result.dependsnodes[i].id + "</td>";
+                    html += "<td>" + (i + 1) + "</td>";
                 }
                 html += "</tr>";
                 for(var i = 0; i < result.nodes.length; i++){
                     html += "<tr>";
-                    html += "<td>" + result.nodes[i].path + "</td>";
+                    html += "<td><a target='_blank' href='/relation/file/" + result.nodes[i].id + "'>" + result.nodes[i].path + "</a></td>";
                     for(var j = 0;j < result.dependsnodes.length;j++){
-                        html += "<td>" + result.matrix[i][j] + "</td>";
+                        html += "<td>";
+                        if(result.matrix[i][j].toString() === "true"){
+                            html +=  "T";
+                        }
+                        html += "</td>";
                     }
                     html += "</tr>";
                 }
@@ -57,19 +67,34 @@ var rclonegroupdepends = function (name, cytoscapeutil) {
         })
     }
 
-    var filedetail = function(name) {
+    var dependfiledetail = function(name) {
         $.ajax({
                 type: "GET",
-                url: "/relation/clonegroup/" + name + "/aldependsnodes",
+                url: "/relation/clonegroup/" + name + "/alldependsonnodes",
                 success: function(result) {
                     var html = "<ol>";
                     for(var i = 0;i < result.length;i++){
-                        html += "<li><a target='_blank' href='/relation/file/" + result[i].id + "'>" + + result[i].id + "." + result[i].path + "</a></li>";
+                        html += "<li><a target='_blank' href='/relation/file/" + result[i].id + "'>" + result[i].path + "</a></li>";
                     }
                     html += "</ol>";
-                    $("#filedetail").html(html);
+                    $("#dependfiledetail").html(html);
                 }
             })
+    }
+
+    var dependedfiledetail = function(name) {
+        $.ajax({
+            type: "GET",
+            url: "/relation/clonegroup/" + name + "/alldependednodes",
+            success: function(result) {
+                var html = "<ol>";
+                for(var i = 0;i < result.length;i++){
+                    html += "<li><a target='_blank' href='/relation/file/" + result[i].id + "'>" + result[i].path + "</a></li>";
+                }
+                html += "</ol>";
+                $("#dependedfiledetail").html(html);
+            }
+        })
     }
 
     return {
