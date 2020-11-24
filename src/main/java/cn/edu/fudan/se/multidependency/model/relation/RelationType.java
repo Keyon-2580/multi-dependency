@@ -134,7 +134,13 @@ public enum RelationType implements RelationshipType {
 	 * 关系权重
 	 */
 	public static Map<RelationType, Double> relationWeights = new EnumMap<>(RelationType.class);
-	
+
+	/**
+	 * 关系简称
+	 */
+	public static Map<RelationType, String> relationAbbreviation = new EnumMap<>(RelationType.class);
+
+
 	private String name;
 
 	RelationType(String name) {
@@ -168,6 +174,35 @@ public enum RelationType implements RelationshipType {
 
 		relationWeights.put(CO_CHANGE, 0.1);
 		relationWeights.put(CLONE, 0.5);
+	}
+
+	static{
+		relationAbbreviation.put(IMPORT, "IMPO");
+		relationAbbreviation.put(INCLUDE, "INC");
+
+		relationAbbreviation.put(EXTENDS, "EXT");
+		relationAbbreviation.put(IMPLEMENTS, "IMPL");
+		relationAbbreviation.put(ASSOCIATION, "ASS");
+
+		relationAbbreviation.put(ANNOTATION, "ANN");
+
+		//relationAbbreviation.put(ACCESS, 0.1);
+		relationAbbreviation.put(CALL, "CAL");
+		relationAbbreviation.put(CAST, "CAS");
+		relationAbbreviation.put(CREATE, "CRE");
+		relationAbbreviation.put(USE, "USE");
+		relationAbbreviation.put(PARAMETER, "PAR");
+		relationAbbreviation.put(THROW, "THR");
+		relationAbbreviation.put(RETURN, "RET");
+
+		relationAbbreviation.put(IMPLLINK, "IMLK");
+
+		relationAbbreviation.put(VARIABLE_TYPE, "VART");
+		relationAbbreviation.put(IMPLEMENTS_C, "IMPLC");
+		relationAbbreviation.put(DEPENDENCY, "DEP");
+
+		relationAbbreviation.put(CO_CHANGE, "COC");
+		relationAbbreviation.put(CLONE, "CLO");
 	}
 
 	public static void setRelationWeight(RelationType relationType, Double weight){
