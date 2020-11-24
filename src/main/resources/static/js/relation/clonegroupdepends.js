@@ -27,8 +27,8 @@ var rclonegroupdepends = function (name, cytoscapeutil) {
                     html += "<td><a target='_blank' href='/relation/file/" + result.nodes[i].id + "'>" + result.nodes[i].path + "</a></td>";
                     for(var j = 0;j < result.dependsnodes.length;j++){
                         html += "<td>";
-                        if(result.matrix[i][j].toString() === "true"){
-                            html +=  "T";
+                        if(result.matrix[i][j] != null){
+                            html +=  result.matrix[i][j];
                         }
                         html += "</td>";
                     }
@@ -55,8 +55,8 @@ var rclonegroupdepends = function (name, cytoscapeutil) {
                     html += "<td><a target='_blank' href='/relation/file/" + result.nodes[i].id + "'>" + result.nodes[i].path + "</a></td>";
                     for(var j = 0;j < result.dependsnodes.length;j++){
                         html += "<td>";
-                        if(result.matrix[i][j].toString() === "true"){
-                            html +=  "T";
+                        if(result.matrix[i][j] != null){
+                            html +=  result.matrix[i][j];
                         }
                         html += "</td>";
                     }

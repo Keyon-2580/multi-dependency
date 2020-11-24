@@ -29,8 +29,6 @@
     <script type="text/javascript" th:src="@{/js/import/d3-hsv.min.js}"></script>
     <script type="text/javascript" th:src="@{/js/windowUtil.js}"></script>
     <script type="text/javascript" th:src="@{/js/cytoscapeutils.js}"></script>
-    <script type="text/javascript" th:src="@{/js/clonegroup.js}"></script>
-    <script type="text/javascript" th:src="@{/js/clonecompareutils.js}"></script>
     <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
     <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
     <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
@@ -40,6 +38,10 @@
     <link rel="stylesheet" th:href="@{/css/import/ztree/zTreeStyle/zTreeStyle.css}"></link>
     <script type="text/javascript" th:src="@{/js/relation/clonegroupdepends.js}"></script>
     <style type="text/css">
+        td
+        {
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -48,11 +50,11 @@
     <h4>dependsOn</h4>
     <table  class = "table table-bordered" id="dependmatrix">
     </table>
+    <h4>dependfiledetail</h4>
+    <div id="dependfiledetail"></div>
     <h4>dependedBy</h4>
     <table  class = "table table-bordered" id="dependedmatrix">
     </table>
-    <h4>dependfiledetail</h4>
-    <div id="dependfiledetail"></div>
     <h4>dependedfiledetail</h4>
     <div id="dependedfiledetail"></div>
 </div>

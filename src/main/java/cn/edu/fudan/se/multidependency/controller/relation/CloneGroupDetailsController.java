@@ -5,6 +5,8 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
+import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.clone.CloneAnalyseService;
@@ -34,6 +36,9 @@ public class CloneGroupDetailsController {
 
     @Autowired
     private StaticAnalyseService staticAnalyseService;
+
+    @Autowired
+    private DependsOnRepository dependsOnRepository;
 
     @GetMapping("")
     public String index(HttpServletRequest request, @PathVariable("name") String name){
@@ -67,18 +72,25 @@ public class CloneGroupDetailsController {
             Collection<Node> endNodes = staticAnalyseService.findFileDependsOn( (ProjectFile)node).stream().map(DependsOn::getEndNode).collect(Collectors.toList());
             allNodes.addAll(endNodes);
         }
-        boolean[][] dependsonMatrix = new boolean[nodes.size()][allNodes.size()];
+        String[][] dependsonMatrix = new String[nodes.size()][allNodes.size()];
         int i = 0;
         for (CodeNode node:
              nodes) {
             int j = 0;
-            Collection<Node> endNodes = staticAnalyseService.findFileDependsOn( (ProjectFile)node).stream().map(DependsOn::getEndNode).collect(Collectors.toList());
             for (Node dependsNode :
                  allNodes) {
-                if(endNodes.contains(dependsNode)){
-                    dependsonMatrix[i][j] = true;
-                }else{
-                    dependsonMatrix[i][j] = false;
+                if(dependsOnRepository.findSureDependsOnInFiles(node.getId(),dependsNode.getId()) != null){
+                    Set<String> keyset = dependsOnRepository.findSureDependsOnInFiles(node.getId(),dependsNode.getId()).getDependsOnTypes().keySet();
+                    for (String key:
+                         keyset) {
+                        if(dependsonMatrix[i][j] == null){
+                            dependsonMatrix[i][j] = "";
+                        }
+                        if(!dependsonMatrix[i][j].equals("")){
+                            dependsonMatrix[i][j] += "/";
+                        }
+                        dependsonMatrix[i][j] += RelationType.relationAbbreviation.get(RelationType.valueOf(key));
+                    }
                 }
                 j++;
             }
@@ -114,18 +126,25 @@ public class CloneGroupDetailsController {
             Collection<Node> startNodes = staticAnalyseService.findFileDependedOnBy( (ProjectFile)node).stream().map(DependsOn::getStartNode).collect(Collectors.toList());
             allNodes.addAll(startNodes);
         }
-        boolean[][] dependedonMatrix = new boolean[nodes.size()][allNodes.size()];
+        String[][] dependedonMatrix = new String[nodes.size()][allNodes.size()];
         int i = 0;
         for (CodeNode node:
                 nodes) {
             int j = 0;
-            Collection<Node> startNodes = staticAnalyseService.findFileDependedOnBy( (ProjectFile)node).stream().map(DependsOn::getStartNode).collect(Collectors.toList());
             for (Node dependsNode :
                     allNodes) {
-                if(startNodes.contains(dependsNode)){
-                    dependedonMatrix[i][j] = true;
-                }else{
-                    dependedonMatrix[i][j] = false;
+                if(dependsOnRepository.findSureDependsOnInFiles(dependsNode.getId(),node.getId()) != null){
+                    Set<String> keyset = dependsOnRepository.findSureDependsOnInFiles(dependsNode.getId(),node.getId()).getDependsOnTypes().keySet();
+                    for (String key:
+                            keyset) {
+                        if(dependedonMatrix[i][j] == null){
+                            dependedonMatrix[i][j] = "";
+                        }
+                        if(!dependedonMatrix[i][j].equals("")){
+                            dependedonMatrix[i][j] += "/";
+                        }
+                        dependedonMatrix[i][j] += RelationType.relationAbbreviation.get(RelationType.valueOf(key));
+                    }
                 }
                 j++;
             }
