@@ -80,7 +80,8 @@ public class CloneGroupDetailsController {
             for (Node dependsNode :
                  allNodes) {
                 if(dependsOnRepository.findSureDependsOnInFiles(node.getId(),dependsNode.getId()) != null){
-                    Set<String> keyset = dependsOnRepository.findSureDependsOnInFiles(node.getId(),dependsNode.getId()).getDependsOnTypes().keySet();
+                    Map<String, Long> dependson = dependsOnRepository.findSureDependsOnInFiles(node.getId(),dependsNode.getId()).getDependsOnTypes();
+                    Set<String> keyset = dependson.keySet();
                     for (String key:
                          keyset) {
                         if(dependsonMatrix[i][j] == null){
@@ -90,6 +91,7 @@ public class CloneGroupDetailsController {
                             dependsonMatrix[i][j] += "/";
                         }
                         dependsonMatrix[i][j] += RelationType.relationAbbreviation.get(RelationType.valueOf(key));
+                        dependsonMatrix[i][j] += "(" + dependson.get(key).toString() + ")";
                     }
                 }
                 j++;
@@ -134,7 +136,8 @@ public class CloneGroupDetailsController {
             for (Node dependsNode :
                     allNodes) {
                 if(dependsOnRepository.findSureDependsOnInFiles(dependsNode.getId(),node.getId()) != null){
-                    Set<String> keyset = dependsOnRepository.findSureDependsOnInFiles(dependsNode.getId(),node.getId()).getDependsOnTypes().keySet();
+                    Map<String, Long> dependson = dependsOnRepository.findSureDependsOnInFiles(dependsNode.getId(),node.getId()).getDependsOnTypes();
+                    Set<String> keyset = dependson.keySet();
                     for (String key:
                             keyset) {
                         if(dependedonMatrix[i][j] == null){
@@ -144,6 +147,7 @@ public class CloneGroupDetailsController {
                             dependedonMatrix[i][j] += "/";
                         }
                         dependedonMatrix[i][j] += RelationType.relationAbbreviation.get(RelationType.valueOf(key));
+                        dependedonMatrix[i][j] += "(" + dependson.get(key).toString() + ")";
                     }
                 }
                 j++;
