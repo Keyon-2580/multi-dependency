@@ -75,29 +75,30 @@ var doublePackagesCloneShowMatrix = function (pck1Id, pck2Id) {
             var row = cloneFiles1.length;
             var col = cloneFiles2.length;
             var html = "";
-            html += "<table class='table table-bordered'>";
+            html += "<div  style='overflow: auto;' width='100%' id='matrix'>";
+            html += "<table class='table table-bordered' id='matrix_2'>";
             html += "<tr>";
-            html += "<td></td>";
-            html += "<td>file2</td>";
+            html += "<th style='background-color: #FFFFFF;'></th>";
+            html += "<th style='background-color: #FFFFFF;'>file2</th>";
             for(var k = 1; k <= col; k++) {
-                html += "<td>";
+                html += "<th style='background-color: #FFFFFF;'>";
                 html += k;
-                html += "</td>";
+                html += "</th>";
             }
             html += "</tr>";
             html += "<tr>";
-            html += "<td>file1</td>";
-            html += "<td></td>";
+            html += "<th style='background-color: #FFFFFF;'>file1</th>";
+            html += "<th style='background-color: #FFFFFF;'></th>";
             for(var g = 0; g < col; g++) {
-                html += "<td>";
+                html += "<th style='background-color: #FFFFFF;'>";
                 html += "<a target='_blank' href='/relation/file/" + cloneFiles2[g].id + "'>" + cloneFiles2[g].name + "</a>(" + cloneFiles2[g].lines + ")";
-                html += "</td>";
+                html += "</th>";
             }
             html += "</tr>";
             for(var i = 0; i < row; i++) {
                 html += "<tr>";
                 for(var j = -2; j < col; j++) {
-                    html += "<td>";
+                    html += "<td style='background-color: #FFFFFF;'>";
                     if(j === -2) {
                         html += i + 1;
                     }
@@ -140,7 +141,15 @@ var doublePackagesCloneShowMatrix = function (pck1Id, pck2Id) {
                 html += "</tr>";
             }
             html += "</table>";
+            html += "</div>";
             $("#package_files_clone_matrix").html(html);
+            $("#matrix").scroll(function(){
+                $("#matrix tr th").css({"position":"relative","top":$("#matrix").scrollTop(),"z-index":"2","border":"1"});
+                $("#matrix tr td:nth-child(1)").css({"position":"relative","left":$("#matrix").scrollLeft(),"z-index":"1","border":"1"});
+                $("#matrix tr td:nth-child(2)").css({"position":"relative","left":$("#matrix").scrollLeft(),"z-index":"1","border":"1"});
+                $("#matrix tr th:nth-child(1)").css({"position":"relative","top":$("#matrix").scrollTop(),"left":$("#matrix").scrollLeft(),"z-index":"3","border":"1"});
+                $("#matrix tr th:nth-child(2)").css({"position":"relative","top":$("#matrix").scrollTop(),"left":$("#matrix").scrollLeft(),"z-index":"3","border":"1"});
+            });
         }
     })
 }

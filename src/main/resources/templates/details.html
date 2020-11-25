@@ -37,15 +37,21 @@
     <link rel="stylesheet" th:href="@{/css/import/ztree/zTreeStyle/zTreeStyle.css}"></link>
     <link rel="stylesheet" th:href="@{/css/circlechart.css}"></link>
     <link rel="stylesheet" th:href="@{/css/doublefile_tree.css}"></link>
+
+    <style type="text/css">
+        #table thead, #table body{
+            width: calc(100% - 1em)
+        }
+    </style>
 </head>
 <body>
     <div th:include="nav.html::nav"></div>
-    <div class="col-sm-12 row" style="margin-bottom: 15px;">
-        <div class="col-sm-12" id="package_clone_detail"></div>
-        <div class="col-sm-12" id="package_files_tree"></div>
-        <div class="col-sm-12" id="package_files_clone"></div>
+    <div class="col-sm-12">
+        <div id="package_clone_detail"></div>
+        <div id="package_files_tree"></div>
+        <div id="package_files_clone"></div>
 <!--        <div class="col-sm-12" id="fileClonesGraph"></div>-->
-        <div class="col-sm-12" id="package_files_clone_matrix"></div>
+        <div id="package_files_clone_matrix"></div>
     </div>
     <script type="text/javascript" th:inline="javascript">
         $(document).ready(function () {
