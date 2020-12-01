@@ -3,11 +3,7 @@ package cn.edu.fudan.se.multidependency.model.relation;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.RelationshipEntity;
-import org.neo4j.ogm.annotation.StartNode;
+import org.neo4j.ogm.annotation.*;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import lombok.Data;
@@ -18,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_DEPENDS_ON)
 @EqualsAndHashCode
-public class DependsOn implements Relation {
+public class DependsOn implements Relation, RelationWithTimes{
 	
 	private static final long serialVersionUID = 6381791099417646137L;
 
@@ -32,12 +28,26 @@ public class DependsOn implements Relation {
     @EndNode
 	private Node endNode;
 	
-	private int times;
-	
+	private int times = 0;
+
+	private String dependsOnType = "";
+
+	@Properties(allowCast = true)
+	private Map<String, Long> dependsOnTypes = new HashMap<>();
+
+	private double dependsOnIntensity;
+
 	public DependsOn(Node startNode, Node endNode) {
 		this.startNode = startNode;
 		this.endNode = endNode;
+		this.dependsOnType = "";
 	}
+	public DependsOn(Node startNode, Node endNode, String dependsOnType) {
+		this.startNode = startNode;
+		this.endNode = endNode;
+		this.dependsOnType = dependsOnType;
+	}
+
 	
 	@Override
 	public Node getStartNode() {
@@ -58,7 +68,36 @@ public class DependsOn implements Relation {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("times", getTimes());
+		properties.put("dependsOnType", getDependsOnType());
 		return properties;
 	}
 
+	@Override
+	public void addTimes() {
+		this.times++;
+	}
+
+	public void addDependsOnIntensity(double intensity) {
+		this.dependsOnIntensity += intensity;
+	}
+
+	public void addDependsTypes(Relation relation){
+		int times = 0;
+		if(relation instanceof RelationWithTimes){
+			times += ((RelationWithTimes) relation).getTimes();
+		}else {
+			times += 1;
+		}
+
+		Long dependsTimes = dependsOnTypes.get(relation.getRelationType().toString());
+		if (dependsTimes != null){
+			dependsTimes += Long.valueOf(times);
+			dependsOnTypes.put(relation.getRelationType().toString(), dependsTimes);
+		} else {
+			dependsOnTypes.put(relation.getRelationType().toString(), Long.valueOf(times));
+		}
+
+		Double weight = RelationType.relationWeights.get(relation.getRelationType());
+		dependsOnIntensity += ( weight != null ? times * weight : 0 ) ;
+	}
 }

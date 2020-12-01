@@ -3,15 +3,8 @@ package cn.edu.fudan.se.multidependency.controller;
 import java.io.OutputStream;
 import java.util.*;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.Package;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
-import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
-import cn.edu.fudan.se.multidependency.repository.relation.clone.AggregationCloneRepository;
-import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
-import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
-import cn.edu.fudan.se.multidependency.service.query.aggregation.data.RelationDataForDoubleNodes;
-import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackagePairDetector;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,93 +20,37 @@ import javax.servlet.http.HttpServletResponse;
 public class CloneAggregationController {
 
     @Autowired
-    private HotspotPackageDetector hotspotPackageDetector;
-
-    @Autowired
-    private AggregationCloneRepository aggregationCloneRepository;
-
-    @Autowired
-    private HasRelationService hasRelationService;
+    private HotspotPackagePairDetector hotspotPackagePairDetector;
 
     @GetMapping(value = {""})
     public String graph() {
         return "cloneaggregation";
     }
 
-//    /**
-//     * 两个包之间的克隆聚合
-//     * @param threshold
-//     * @param percentage
-//     * @return
-//     */
-//    @GetMapping("/analysis")
-//    @ResponseBody
-//    public int analysisHotspotPackages(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
-//        Collection<HotspotPackage> result = hotspotPackageDetector.detectHotspotPackages();
-//        return result.size();
-//    }
-
     /**
-     * 两个包之间的克隆聚合
+     * java项目两个包之间的克隆聚合
      * @param threshold
      * @param percentage
      * @return
      */
-//    @GetMapping("/show")
-//    @ResponseBody
-//    public Collection<HotspotPackage> showHotspotPackages(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
-//        return hotspotPackageDetector.detectHotspotPackages();
-//    }
-    @GetMapping("/show")
+    @GetMapping("/show/java")
     @ResponseBody
-    public List<HotspotPackage> showHotspotPackages(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
-        List<HotspotPackage> result = getHotspotPackages(-1, -1);
-        result.sort((d1, d2) -> {
-            int allNodes1 = d1.getAllNodes1() + d1.getAllNodes2();
-            int cloneNodes1 = d1.getRelationNodes1() + d1.getRelationNodes2();
-            double percentageThreshold1 = (cloneNodes1 + 0.0) / allNodes1;
-            int allNodes2 = d2.getAllNodes1() + d2.getAllNodes2();
-            int cloneNodes2 = d2.getRelationNodes1() + d2.getRelationNodes2();
-            double percentageThreshold2 = (cloneNodes2 + 0.0) / allNodes2;
-            if(percentageThreshold1 < percentageThreshold2) {
-                return 1;
-            }
-            else if(percentageThreshold1 == percentageThreshold2) {
-                return Integer.compare(cloneNodes2, cloneNodes1);
-            }
-            else {
-                return -1;
-            }
-        });
-        return result;
+    public List<HotspotPackagePair> showHotspotPackagesOfJava(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
+        return hotspotPackagePairDetector.detectHotspotPackagePairWithFileCloneByParentId(-1, -1, "java");
     }
 
-    public List<HotspotPackage> getHotspotPackages(long parent1Id, long parent2Id) {
-        List<HotspotPackage> result = new ArrayList<>();
-        List<AggregationClone> aggregationClones = aggregationCloneRepository.findAggregationClone(parent1Id, parent2Id);
-        for(AggregationClone aggregationClone : aggregationClones) {
-            List<HotspotPackage> childrenHotspotPackages = getHotspotPackages(aggregationClone.getNode1().getId(), aggregationClone.getNode2().getId());
-            RelationDataForDoubleNodes<Node, Relation> relationDataForDoubleNodes = new RelationDataForDoubleNodes<Node, Relation>(aggregationClone.getNode1(), aggregationClone.getNode2());
-            HotspotPackage hotspotPackage = new HotspotPackage(relationDataForDoubleNodes);
-            hotspotPackage.setClonePairs(aggregationClone.getClonePairs());
-            hotspotPackage.setData(aggregationClone.getAllNodesInNode1(), aggregationClone.getAllNodesInNode2(), aggregationClone.getNodesInNode1(), aggregationClone.getNodesInNode2());
-            Collection<Package> childrenPackage1 = hasRelationService.findPackageHasPackages(hotspotPackage.getPackage1());
-            Collection<Package> childrenPackage2 = hasRelationService.findPackageHasPackages(hotspotPackage.getPackage2());
-            for(HotspotPackage childHotspotPackage : childrenHotspotPackages) {
-                hotspotPackage.addHotspotChild(childHotspotPackage);
-                childrenPackage1.remove(childHotspotPackage.getPackage1());
-                childrenPackage2.remove(childHotspotPackage.getPackage2());
-            }
-            for(Package childPackage1 : childrenPackage1) {
-                hotspotPackage.addOtherChild1(childPackage1);
-            }
-            for(Package childPackage2 : childrenPackage2) {
-                hotspotPackage.addOtherChild2(childPackage2);
-            }
-            result.add(hotspotPackage);
-        }
-        return result;
+    /**
+     * cpp项目两个包之间的克隆聚合
+     * @param threshold
+     * @param percentage
+     * @return
+     */
+    @GetMapping("/show/cpp")
+    @ResponseBody
+    public List<HotspotPackagePair> showHotspotPackagesOfCpp(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
+        return hotspotPackagePairDetector.detectHotspotPackagePairWithFileCloneByParentId(-1, -1, "cpp");
     }
+
     @GetMapping("/package/export")
     @ResponseBody
     public void exportSimilarPackages(HttpServletRequest request, HttpServletResponse response) {
@@ -121,10 +58,59 @@ public class CloneAggregationController {
             response.addHeader("Content-Disposition", "attachment;filename=similar_packages.xlsx");
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             OutputStream stream = response.getOutputStream();
-
-            hotspotPackageDetector.exportHotspotPackages(stream);
+            hotspotPackagePairDetector.exportHotspotPackages(stream);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @GetMapping("/details")
+    public String showDetails(@RequestParam("id1") long id1,
+                              @RequestParam("id2") long id2,
+                              @RequestParam("path1") String path1,
+                              @RequestParam("path2") String path2,
+                              @RequestParam("clonePairs") int clonePairs,
+                              @RequestParam("cloneNodesCount1") int cloneNodesCount1,
+                              @RequestParam("cloneNodesCount2") int cloneNodesCount2,
+                              @RequestParam("allNodesCount1") int allNodesCount1,
+                              @RequestParam("allNodesCount2") int allNodesCount2,
+                              @RequestParam("cloneMatchRate") double cloneMatchRate,
+                              @RequestParam("cloneNodesLoc1") int cloneNodesLoc1,
+                              @RequestParam("cloneNodesLoc2") int cloneNodesLoc2,
+                              @RequestParam("allNodesLoc1") int allNodesLoc1,
+                              @RequestParam("allNodesLoc2") int allNodesLoc2,
+                              @RequestParam("cloneLocRate") double cloneLocRate,
+                              @RequestParam("cloneNodesCoChangeTimes") int cloneNodesCoChangeTimes,
+                              @RequestParam("allNodesCoChangeTimes") int allNodesCoChangeTimes,
+                              @RequestParam("cloneCoChangeRate") double cloneCoChangeRate,
+                              @RequestParam("cloneType1Count") int cloneType1Count,
+                              @RequestParam("cloneType2Count") int cloneType2Count,
+                              @RequestParam("cloneType3Count") int cloneType3Count,
+                              @RequestParam("cloneType") String cloneType,
+                              @RequestParam("cloneSimilarityValue") double cloneSimilarityValue,
+                              @RequestParam("cloneSimilarityRate") double cloneSimilarityRate,
+                              HttpServletRequest request) {
+        request.setAttribute("id1", id1);
+        request.setAttribute("id2", id2);
+        request.setAttribute("clonePairs", clonePairs);
+        request.setAttribute("cloneNodesCount1", cloneNodesCount1);
+        request.setAttribute("cloneNodesCount2", cloneNodesCount2);
+        request.setAttribute("allNodesCount1", allNodesCount1);
+        request.setAttribute("allNodesCount2", allNodesCount2);
+        request.setAttribute("cloneMatchRate", cloneMatchRate);
+        request.setAttribute("cloneNodesLoc1", cloneNodesLoc1);
+        request.setAttribute("cloneNodesLoc2", cloneNodesLoc2);
+        request.setAttribute("allNodesLoc1", allNodesLoc1);
+        request.setAttribute("allNodesLoc2", allNodesLoc2);
+        request.setAttribute("cloneLocRate", cloneLocRate);
+        request.setAttribute("cloneNodesCoChangeTimes", cloneNodesCoChangeTimes);
+        request.setAttribute("allNodesCoChangeTimes", allNodesCoChangeTimes);
+        request.setAttribute("cloneCoChangeRate", cloneCoChangeRate);
+        request.setAttribute("cloneType1Count", cloneType1Count);
+        request.setAttribute("cloneType2Count", cloneType2Count);
+        request.setAttribute("cloneType3Count", cloneType3Count);
+        request.setAttribute("cloneSimilarityValue", cloneSimilarityValue);
+        request.setAttribute("cloneSimilarityRate", cloneSimilarityRate);
+        return "details";
     }
 }

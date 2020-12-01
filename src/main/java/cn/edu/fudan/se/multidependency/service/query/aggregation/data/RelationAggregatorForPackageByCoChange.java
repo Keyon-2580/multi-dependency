@@ -11,7 +11,7 @@ import lombok.Setter;
  * @author fan
  *
  */
-public class RelationAggregatorForPackageByCoChange<CoChangeLevel extends Node> implements RelationAggregator<Boolean> {
+public class RelationAggregatorForPackageByCoChange<N extends Node> implements RelationAggregator<Boolean> {
 	
 	public static final int DEFAULT_COUNT_THRESHOLD = 10;
 	public static final double DEFAULT_PERCENTAGE_THRESHOLD = 0.5;
@@ -20,7 +20,7 @@ public class RelationAggregatorForPackageByCoChange<CoChangeLevel extends Node> 
 		initThreshold();
 	}
 	
-	private static RelationAggregatorForPackageByCoChange instance = new RelationAggregatorForPackageByCoChange();
+	private static RelationAggregatorForPackageByCoChange<Node> instance = new RelationAggregatorForPackageByCoChange<>();
 	
 	/**
 	 * 若两个包内的有co-change关系的文件总数大于等于此值，则认为这两个包之间co-change度过高
@@ -33,7 +33,7 @@ public class RelationAggregatorForPackageByCoChange<CoChangeLevel extends Node> 
 	@Getter
 	private double percentageThreshold = DEFAULT_PERCENTAGE_THRESHOLD;
 	
-	public static RelationAggregatorForPackageByCoChange getInstance() {
+	public static RelationAggregatorForPackageByCoChange<Node> getInstance() {
 		return instance;
 	}
 	
@@ -43,7 +43,7 @@ public class RelationAggregatorForPackageByCoChange<CoChangeLevel extends Node> 
 	}
 
 	@Override
-	public Boolean aggregate(RelationDataForDoubleNodes<? extends Node, ? extends Relation> doubleNodes) {
+	public Boolean aggregate(BasicDataForDoubleNodes<? extends Node, ? extends Relation> doubleNodes) {
 		Node node1 = doubleNodes.getNode1();
 		Node node2 = doubleNodes.getNode2();
 		if(!(node1 instanceof Package) || !(node2 instanceof Package)) {

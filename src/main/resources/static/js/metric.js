@@ -82,7 +82,7 @@ var metric = function() {
 						html += "<tr>";
 						html += "<td>" + (i + 1) + "</td>";
 						html += "<td>" + metrics[i].pck.id + "</td>";
-						html += "<td>" + metrics[i].pck.directoryPath + "</td>";
+						html += "<td><a target='_blank' href='/relation/package/" + metrics[i].pck.id + "'>" + metrics[i].pck.directoryPath + "</a></td>";
 						html += "<td>" + metrics[i].nof + "</td>";
 						html += "<td>" + metrics[i].nom + "</td>";
 						html += "<td>" + metrics[i].loc + "</td>";

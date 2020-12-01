@@ -19,4 +19,7 @@ public interface HasRepository extends Neo4jRepository<Has, Long> {
 
     @Query("Match (pck:Package)-[:" + RelationType.str_HAS + "]->(children:Package) where id(pck)={packageId} return children")
     public List<Package> findPackageHasPackages(@Param("packageId") Long packageId);
+
+    @Query("Match (parent:Package)-[:" + RelationType.str_HAS + "]->(pck:Package) where id(pck)={packageId} return parent")
+    public Package findPackageInPackage(@Param("packageId") Long packageId);
 }

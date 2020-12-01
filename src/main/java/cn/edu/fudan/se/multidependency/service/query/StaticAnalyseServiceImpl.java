@@ -614,6 +614,24 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
+	public Map<Package, List<DependsOn>> findPackageDependsOnBy(Project project) {
+		String key = "findPackageDependsOnBy_" + project.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<DependsOn> dependsOns = dependsOnRepository.findPackageDependsInProject(project.getId());
+		Map<Package, List<DependsOn>> result = new HashMap<>();
+		for(DependsOn dependsOn : dependsOns) {
+			Package end = (Package) dependsOn.getEndNode();
+			List<DependsOn> temp = result.getOrDefault(end, new ArrayList<>());
+			temp.add(dependsOn);
+			result.put(end, temp);
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
 	public Map<ProjectFile, List<DependsOn>> findFileDependsOn(Project project) {
 		String key = "findFileDependsOn_" + project.getId();
 		if(cache.get(getClass(), key) != null) {
@@ -626,6 +644,24 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			List<DependsOn> temp = result.getOrDefault(start, new ArrayList<>());
 			temp.add(dependsOn);
 			result.put(start, temp);
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<ProjectFile, List<DependsOn>> findFileDependsOnBy(Project project) {
+		String key = "findFileDependsOnBy_" + project.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<DependsOn> dependsOns = dependsOnRepository.findFileDependsInProject(project.getId());
+		Map<ProjectFile, List<DependsOn>> result = new HashMap<>();
+		for(DependsOn dependsOn : dependsOns) {
+			ProjectFile end = (ProjectFile) dependsOn.getEndNode();
+			List<DependsOn> temp = result.getOrDefault(end, new ArrayList<>());
+			temp.add(dependsOn);
+			result.put(end, temp);
 		}
 		cache.cache(getClass(), key, result);
 		return result;
@@ -663,4 +699,59 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		return result;
 	}
 
+	@Override
+	public Collection<DependsOn> findPackageDependsOn(Package pck) {
+		String key = "findPackageDependsOn_" + pck.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<DependsOn> result = dependsOnRepository.findPackageDependsOn(pck.getId());
+		result.sort((d1, d2) -> {
+			Package pck1 = (Package) d1.getEndNode();
+			Package pck2 = (Package) d2.getEndNode();
+			return pck1.getDirectoryPath().compareTo(pck2.getDirectoryPath());
+		});
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Collection<DependsOn> findPackageDependedOnBy(Package pck) {
+		String key = "findPackageDependedOnBy_" + pck.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<DependsOn> result = dependsOnRepository.findPackageDependedOnBy(pck.getId());
+		result.sort((d1, d2) -> {
+			Package pck1 = (Package) d1.getEndNode();
+			Package pck2 = (Package) d2.getEndNode();
+			return pck1.getDirectoryPath().compareTo(pck2.getDirectoryPath());
+		});
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Collection<ProjectFile> findFilesCommonDependsOn(ProjectFile file1, ProjectFile file2){
+		String key = "findFilesCommonDependsOn_" + file1.getId() + file2.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<ProjectFile> result = dependsOnRepository.findFilesCommonDependsOn(file1.getId(),file2.getId());
+		result.sort(Comparator.comparing(ProjectFile::getPath));
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Collection<ProjectFile> findFilesCommonDependedOnBy(ProjectFile file1, ProjectFile file2){
+		String key = "findFilesCommonDependedOnBy_" + file1.getId() + file2.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<ProjectFile> result = dependsOnRepository.findFilesCommonDependedOnBy(file1.getId(),file2.getId());
+		result.sort(Comparator.comparing(ProjectFile::getPath));
+		cache.cache(getClass(), key, result);
+		return result;
+	}
 }

@@ -408,7 +408,7 @@ var clone = function(cytoscapeutil) {
 			var size = result.groups.length;
 			var groupsName = "";
 			for(var i = 0; i < size; i++) {
-				groupsName += result.groups[i].name + " ; ";
+				groupsName += "<a target='_blank' href='/relation/clonegroup/" + result.groups[i].name + "'>" + result.groups[i].name + "</a>" +  " ; ";
 			}
 			var html = "";
 			html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='group'>全屏</button>";
@@ -431,7 +431,7 @@ var clone = function(cytoscapeutil) {
 			html = "";
 			for(var i = 0; i < size; i++) {
 				html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn_top' name='" + i +"'>全屏</button>";
-				html += "<div><h4>" + result.groups[i].name + "</h4></div>"
+				html += "<div><a target='_blank' href='/relation/clonegroup/" + result.groups[i].name + "'><h4>" + result.groups[i].name + "</h4></a></div>"
 //				html += "<button class='btn btn-default save_top' name='" + i +"'>保存图片</button><p></p></div>";
 				html += "<p></p></div>";
 				html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble_' + i + '">';
@@ -625,17 +625,37 @@ var clone = function(cytoscapeutil) {
 			for(var i = 0; i < clonesWithCoChange.length; i++) {
 				var cochangeId = clonesWithCoChange[i].cochange == null ? -1 : clonesWithCoChange[i].cochange.id;
 				html += "<tr>";
-				html += "<td>" + clonesWithCoChange[i].file1.path;
+				var linesSize1 = clonesWithCoChange[i].fileClone.linesSize1;
+                var linesSize2 = clonesWithCoChange[i].fileClone.linesSize2;
+				html += "<td>" + clonesWithCoChange[i].file1.path + "(" + linesSize1 + ")";
 				html += "</td>";
-				html += "<td>" + clonesWithCoChange[i].file2.path;
+				html += "<td>" + clonesWithCoChange[i].file2.path + "(" + linesSize2 + ")";
 				html += "</td>";
-				html += "<td>" + clonesWithCoChange[i].fileClone.cloneType;
+				html += "<td>" ;
+				var type = clonesWithCoChange[i].fileClone.cloneType;
+				var loc1 = clonesWithCoChange[i].fileClone.loc1;
+				var loc2 = clonesWithCoChange[i].fileClone.loc2;
+				var value = clonesWithCoChange[i].fileClone.value;
+				html += "<a target='_blank' href='/clone/file/double" +
+					"?file1Id=" + clonesWithCoChange[i].file1.id +
+					"&file2Id=" + clonesWithCoChange[i].file2.id +
+					"&cloneType=" + type +
+					"&linesSize1=" + linesSize1 +
+					"&linesSize2=" + linesSize2 +
+					"&loc1=" + loc1 +
+					"&loc2=" + loc2 +
+					"&value=" + value +
+					"&cochange=" + clonesWithCoChange[i].cochangeTimes +
+					"&filePath1=" + clonesWithCoChange[i].file1.path +
+					"&filePath2=" + clonesWithCoChange[i].file2.path +
+					"&cochangeId=" + cochangeId +
+					"'>" + type + "</a>";
 				html += "</td>";
 				html += "<td>" ;
 				html += "<a target='_blank' href='/clone/compare?id1=" + clonesWithCoChange[i].file1.id + "&id2=" + clonesWithCoChange[i].file2.id + "'>" + clonesWithCoChange[i].fileClone.value + "</a>";
 				html += "</td>";
 				html += "<td>" ;
-				html += "<a class='cochangeTimes' target='_blank' href='/git/cochange/commits?cochangeId=" + cochangeId + "' index='" + i + "'>" + clonesWithCoChange[i].cochangeTimes + "</a>";
+				html += "<a class='cochangeTimes' target='_blank' href='/commit/cochange?cochangeId=" + cochangeId + "'>" + clonesWithCoChange[i].cochangeTimes + "</a>";
 				html += "</td>";
 				html += "</tr>";
 			}
@@ -704,10 +724,10 @@ var clone = function(cytoscapeutil) {
 			        	    xAxis: [{
 			        	            type: 'category',
 			        	            data: xAxisData,
-			        	            axisLabel: {  
-			        	                interval:0,  
-			        	                rotate:40  
-			        	            }  
+			        	            axisLabel: {
+			        	                interval:0,
+			        	                rotate:40
+			        	            }
 			        	        }
 			        	    ],
 			        	    yAxis: [{
@@ -742,7 +762,7 @@ var clone = function(cytoscapeutil) {
 									var html = "";
 									html += "<div class='col-sm-12'><button class='btn btn-default fullscreen_btn'>全屏</button>";
 									html += "<p></p></div>";
-									html += "<div><h4>" + result.group.name + "</h4></div>"
+									html += "<div class='col-sm-12'><a target='_blank' href='/relation/clonegroup/" + result.group.name + "'><h4>" + result.group.name + "</h4></a></div>"
 									html += '<div class="col-sm-12 div_cytoscape_div" id="fullscreenAble">';
 									html += '<div class="div_cytoscape_treeview">';
 									html += '<ul id="node_ztree_num" class="ztree"></ul>';

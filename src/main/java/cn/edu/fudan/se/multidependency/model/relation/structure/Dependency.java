@@ -1,7 +1,7 @@
 package cn.edu.fudan.se.multidependency.model.relation.structure;
 
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
-import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import cn.edu.fudan.se.multidependency.model.relation.StructureRelation;
@@ -27,24 +27,27 @@ public class Dependency implements RelationWithTimes, StructureRelation {
 	@EndNode
 	private CodeNode endCodeNode;
 
-	private int times = 1;
+	private int times = 0;
 
-	private String dependencyTypes;
+	private String dependencyType = "";
+
+	@Properties(allowCast = true)
+	private Map<String, Long> dependencyTypesMap = new HashMap<>();
 
 	public Dependency(CodeNode startCodeNode, CodeNode endCodeNode) {
 		super();
 		this.startCodeNode = startCodeNode;
 		this.endCodeNode = endCodeNode;
-		this.times = 1;
-		dependencyTypes = "";
+		this.times = 0;
+		this.dependencyType = "";
 	}
 
-	public Dependency(CodeNode startCodeNode, CodeNode endCodeNode, String dependencyTypes) {
+	public Dependency(CodeNode startCodeNode, CodeNode endCodeNode, String dependencyType) {
 		super();
 		this.startCodeNode = startCodeNode;
 		this.endCodeNode = endCodeNode;
-		this.times = 1;
-		this.dependencyTypes = dependencyTypes;
+		this.times = 0;
+		this.dependencyType = dependencyType;
 	}
 
 	@Id
@@ -64,8 +67,38 @@ public class Dependency implements RelationWithTimes, StructureRelation {
 	public void addTimes() {
 		this.times++;
 	}
+
+	public void addTimes(int times) {
+		this.times += times;
+	}
+
+	public void minusTimes() {
+		this.times--;
+	}
 	public void addDependencyType(String dependencyType) {
-		this.dependencyTypes +="__"+ dependencyType;
+		if(!this.dependencyType.contains("__" + dependencyType)){
+			this.dependencyType += "__" + dependencyType;
+		}
+	}
+
+	public void addDependencyTypeWithRelation(Relation relation){
+		int timesTmp = 0;
+		if(relation instanceof RelationWithTimes){
+			timesTmp += ((RelationWithTimes) relation).getTimes();
+		}else {
+			timesTmp += 1;
+		}
+
+		Long dependsTimes = dependencyTypesMap.get(relation.getRelationType().toString());
+		if (dependsTimes != null){
+			dependsTimes += Long.valueOf(timesTmp);
+			dependencyTypesMap.put(relation.getRelationType().toString(), dependsTimes);
+		} else {
+			dependencyTypesMap.put(relation.getRelationType().toString(), Long.valueOf(timesTmp));
+		}
+
+		addDependencyType(relation.getRelationType().toString());
+		addTimes(timesTmp);
 	}
 
 	@Override
@@ -77,7 +110,8 @@ public class Dependency implements RelationWithTimes, StructureRelation {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("times", getTimes());
-		properties.put("dependencyTypes", getDependencyTypes());
+		properties.put("dependencyTypes", getDependencyType());
+		properties.putAll(dependencyTypesMap);
 		return properties;
 	}
 }

@@ -60,7 +60,7 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 		file.setPath(filePath);
 		file.setSuffix(FileUtil.extractSuffix(entity.getQualifiedName()));
 		file.setEndLine(entity.getEndLine() == null ? -1 : entity.getEndLine());
-		file.setLoc(entity.getLoc()+1);
+		file.setLoc(entity.getLoc() == null ? -1 : entity.getLoc());
 		addNode(file, currentProject);
 		// 文件所在目录
 		String directoryPath = FileUtil.extractDirectoryFromFile(entity.getQualifiedName()) + "/";
@@ -71,6 +71,7 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 //			pck.setEntityId(entityRepo.generateId().longValue());
 			pck.setEntityId(generateEntityId());
 			pck.setName(directoryPath);
+			pck.setLanguage(Language.cpp.name());
 			pck.setDirectoryPath(directoryPath);
 			addNode(pck, currentProject);
 			Contain projectContainsPackage = new Contain(currentProject, pck);
@@ -102,12 +103,7 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 		String typeIdentify = ((VarEntity) entity).getRawType().getName();
 		List<GenericName> varArguments = ((VarEntity) entity).getRawName().getArguments();
 		if(varArguments != null && !varArguments.isEmpty()){
-			typeIdentify += "<";
-			for (GenericName arg : varArguments){
-				typeIdentify += arg.getName() + ",";
-			}
-			typeIdentify = typeIdentify.substring(0,typeIdentify.length()-1);
-			typeIdentify += ">";
+			typeIdentify += getTypeIdentifyOfVar(varArguments);
 		}
 		variable.setTypeIdentify(typeIdentify);
 		variable.setSimpleName(entity.getRawName().getName());
@@ -163,8 +159,9 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 			} else {
 			}
 		});
-		
-		addEmptyPackages();
+
+//		addEmptyPackages();
+		addCommonParentEmptyPackages();
 		
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Namespace, currentProject).forEach((entityId, node) -> {
 			Namespace namespace = (Namespace) node;
@@ -228,6 +225,7 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 				}
 			}
 			processIdentifier(function);
+			function.setName(function.getIdentifierSimpleName());
 //			this.getNodes().addCodeNode(function);
 			while(!(parentEntity instanceof FileEntity)) {
 				// 找出方法所在的文件
@@ -282,11 +280,11 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 						addRelation(fileIncludeFile);
 					}
 				} else {
-//					System.out.println("getImprotedFiles: " + entity.getClass());
+//					System.out.println("File - getImportedFiles: " + entity.getClass());
 				}
 			});
 			fileEntity.getImportedTypes().forEach(entity -> {
-//				System.out.println("getImportedTypes: " + entity.getClass());
+//				System.out.println("File - getImportedTypes: " + entity.getClass());
 			});
 
 		});

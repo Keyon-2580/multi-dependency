@@ -32,15 +32,44 @@ public class ModuleClone implements Relation {
 
 	private double value = 0;
 
+	//克隆文件对数
 	private int clonePairs = 0;
 
-	private int nodesInNode1 = 0;
+	//包1下克隆文件个数
+	private int cloneNodesCount1 = 0;
 
-	private int nodesInNode2 = 0;
+	//包2下克隆文件个数
+	private int cloneNodesCount2 = 0;
 
-	private int allNodesInNode1 = 0;
+	//包1下全部文件个数
+	private int allNodesCount1 = 0;
 
-	private int allNodesInNode2 = 0;
+	//包2下全部文件个数
+	private int allNodesCount2 = 0;
+
+	//包1下克隆文件代码行数
+	private int cloneNodesLoc1 = 0;
+
+	//包2下克隆文件代码行数
+	private int cloneNodesLoc2 = 0;
+
+	//包1下全部文件代码行数
+	private int allNodesLoc1 = 0;
+
+	//包2下全部文件代码行数
+	private int allNodesLoc2 = 0;
+
+	//克隆包对下克隆文件Type1个数
+	private int cloneType1Count = 0;
+
+	//克隆包对下克隆文件Type2个数
+	private int cloneType2Count = 0;
+
+	//克隆包对下克隆文件Type3个数
+	private int cloneType3Count = 0;
+
+	//克隆包相似值=克隆包对下克隆文件Type1的value+克隆包对下克隆文件Type2的value+克隆包对下克隆文件Type3的value
+	private double cloneSimilarityValue = 0.00;
 	
 	/**
 	 * 克隆关系类型：文件间克隆，方法间克隆等
@@ -51,6 +80,17 @@ public class ModuleClone implements Relation {
 	 * 克隆类型，type1，type2等
 	 */
 	private String cloneType;
+
+	/**
+	 * 克隆包间clone文件的co-change数量
+	 */
+	private int cloneNodesCoChangeTimes = 0;
+
+	/**
+	 * 克隆包间的co-change数量
+	 */
+	@Transient
+	private int allNodesCoChangeTimes = 0;
 
 	@Override
 	public Node getStartNode() {

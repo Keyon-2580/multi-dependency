@@ -43,7 +43,7 @@ public class JavaExtractorServiceImpl extends DependsCodeExtractorForNeo4jServic
 		file.setPath(filePath);
 		file.setSuffix(FileUtil.extractSuffix(entity.getQualifiedName()));
 		file.setEndLine(entity.getEndLine() == null ? -1 : entity.getEndLine());
-		file.setLoc(entity.getLoc()+1);
+		file.setLoc(entity.getLoc() == null ? -1 : entity.getLoc());
 		addNode(file, currentProject);
 		
 		// 文件所在目录
@@ -53,6 +53,7 @@ public class JavaExtractorServiceImpl extends DependsCodeExtractorForNeo4jServic
 		if (pck == null) {
 			pck = new Package();
 			pck.setName(directoryPath);
+			pck.setLanguage(Language.java.name());
 			pck.setDirectoryPath(directoryPath);
 			Entity parentEntity = entity.getParent();
 			if(parentEntity == null) {
@@ -100,13 +101,8 @@ public class JavaExtractorServiceImpl extends DependsCodeExtractorForNeo4jServic
 		variable.setEntityId(entity.getId().longValue());
 		String typeIdentify = ((VarEntity) entity).getRawType().getName();
 		List<GenericName> varArguments = ((VarEntity) entity).getRawName().getArguments();
-		if(varArguments != null && !varArguments.isEmpty()){
-			typeIdentify += "<";
-			for (GenericName arg : varArguments){
-				typeIdentify += arg.getName() + ",";
-			}
-			typeIdentify = typeIdentify.substring(0,typeIdentify.length()-1);
-			typeIdentify += ">";
+		if (varArguments != null && !varArguments.isEmpty()){
+			typeIdentify += getTypeIdentifyOfVar(varArguments);
 		}
 		variable.setTypeIdentify(typeIdentify);
 		variable.setName(entity.getQualifiedName());
@@ -114,6 +110,7 @@ public class JavaExtractorServiceImpl extends DependsCodeExtractorForNeo4jServic
 		addNode(variable, currentProject);
 		return variable;
 	}
+
 	
 	private Type process(TypeEntity entity) {
 		Type type = new Type();
@@ -142,8 +139,9 @@ public class JavaExtractorServiceImpl extends DependsCodeExtractorForNeo4jServic
 				process((TypeEntity) entity);
 			}
 		});
-		
-		addEmptyPackages();
+
+//		addEmptyPackages();
+		addCommonParentEmptyPackages();
 		
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject).forEach((entityId, node) -> {
 			Type type = (Type) node;
@@ -317,7 +315,7 @@ public class JavaExtractorServiceImpl extends DependsCodeExtractorForNeo4jServic
 					}
 				} else {
 					// MultiDeclareEntities
-					System.out.println("extractRelationsFromFiles() " + fileEntity + " " + entity.getClass() + " " + entity.toString());
+					//System.out.println("extractRelationsFromFiles() " + fileEntity + " " + entity.getClass() + " " + entity.toString());
 				}
 			});
 		});

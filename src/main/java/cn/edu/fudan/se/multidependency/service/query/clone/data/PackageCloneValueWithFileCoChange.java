@@ -71,6 +71,24 @@ public class PackageCloneValueWithFileCoChange implements Serializable {
 			return clone2.getCochangeTimes() - clone1.getCochangeTimes();
 		});
 	}
+
+	public void calculateNoneClone() {
+		Set<ProjectFile> cloneFiles1 = this.getCloneFiles1();
+		Set<ProjectFile> cloneFiles2 = this.getCloneFiles2();
+		Set<ProjectFile> allFiles1 = this.getAllFiles1();
+		Set<ProjectFile> allFiles2 = this.getAllFiles2();
+		allFiles1.removeAll(cloneFiles1);
+		allFiles2.removeAll(cloneFiles2);
+
+		for(ProjectFile projectFile: allFiles1){
+			noneCloneFiles1.add(projectFile);
+		}
+
+		for(ProjectFile projectFile: allFiles2){
+			noneCloneFiles2.add(projectFile);
+		}
+
+	}
 	
 	public void addChild(FileCloneWithCoChange child) {
 		this.children.add(child);

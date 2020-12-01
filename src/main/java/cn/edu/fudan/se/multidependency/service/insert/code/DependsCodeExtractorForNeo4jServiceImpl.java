@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.service.insert.code;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
@@ -55,11 +56,12 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 			String parentDirectoryPath = currentPackage.lastPackageDirectoryPath();
 			Package parentPackage = this.getNodes().findPackageByDirectoryPath(parentDirectoryPath, currentProject);
 			while(parentPackage == null) {
-				if(emptyPackages.get(parentDirectoryPath) != null || parentDirectoryPath.equals(currentProject.getPath() + "/")) {
+				if(emptyPackages.get(parentDirectoryPath) != null || ("/").equals(parentDirectoryPath)) {
 					break;
 				}
 				parentPackage = new Package();
 				parentPackage.setEntityId(generateEntityId());
+				parentPackage.setLanguage(currentPackage.getLanguage());
 //				parentPackage.setEntityId(this.entityRepo.generateId().longValue());
 				parentPackage.setDirectoryPath(parentDirectoryPath);
 				parentPackage.setLines(0);
@@ -88,7 +90,131 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 		});
 		
 	}
-	
+
+	protected void addCommonParentEmptyPackages() {
+		Map<String, Package> emptyPackages = new HashMap<>();
+		Map<String, Map<String, Package>> childPackages = new HashMap<>();
+		this.getNodes().findPackagesInProject(currentProject).forEach((path, node) -> {
+			Package currentPackage = (Package) node;
+			String parentDirectoryPath = currentPackage.lastPackageDirectoryPath();
+			Package parentPackage = this.getNodes().findPackageByDirectoryPath(parentDirectoryPath, currentProject);
+
+			Map<String, Package> leafChildList = childPackages.getOrDefault(currentPackage.getDirectoryPath(), new HashMap<>());
+			leafChildList.put(currentPackage.getDirectoryPath(), currentPackage);
+			childPackages.put(currentPackage.getDirectoryPath(), leafChildList);
+
+			if(parentPackage != null){
+				Map<String, Package> childList = childPackages.getOrDefault(parentPackage.getDirectoryPath(), new HashMap<>());
+				childList.put(currentPackage.getDirectoryPath(), currentPackage);
+				childPackages.put(parentPackage.getDirectoryPath(), childList);
+			}
+			while(parentPackage == null) {
+				if(("/").equals(parentDirectoryPath)) {
+					break;
+				}
+				if(emptyPackages.get(parentDirectoryPath) != null ) {
+					parentPackage = emptyPackages.get(parentDirectoryPath);
+					Map<String, Package> childList = childPackages.getOrDefault(parentPackage.getDirectoryPath(), new HashMap<>());
+					childList.put(currentPackage.getDirectoryPath(), currentPackage);
+					childPackages.put(parentPackage.getDirectoryPath(), childList);
+					break;
+				}
+
+				parentPackage = new Package();
+				parentPackage.setEntityId(generateEntityId());
+				parentPackage.setLanguage(currentPackage.getLanguage());
+//				parentPackage.setEntityId(this.entityRepo.generateId().longValue());
+				parentPackage.setDirectoryPath(parentDirectoryPath);
+				parentPackage.setLines(0);
+				parentPackage.setLoc(0);
+				if(!currentPackage.getName().contains("/") && currentPackage.getName().contains(".")) {
+					parentPackage.setName(currentPackage.getName().substring(0, currentPackage.getName().lastIndexOf(".")));
+				} else {
+					parentPackage.setName(parentDirectoryPath);
+				}
+				emptyPackages.put(parentDirectoryPath, parentPackage);
+
+				Map<String, Package>  childList = childPackages.getOrDefault(parentPackage.getDirectoryPath(), new HashMap<>());
+				childList.put(currentPackage.getDirectoryPath(), currentPackage);
+				childPackages.put(parentPackage.getDirectoryPath(), childList);
+
+				currentPackage = parentPackage;
+				parentDirectoryPath = parentPackage.lastPackageDirectoryPath();
+				parentPackage = this.getNodes().findPackageByDirectoryPath(parentDirectoryPath, currentProject);
+			}
+		});
+
+		for(Map.Entry<String, Map<String, Package>> entry : childPackages.entrySet()){
+			String currentDirectoryPath = entry.getKey();
+			Map<String, Package> childPck = entry.getValue();
+
+			Package emptyPck = emptyPackages.get(currentDirectoryPath);
+			if(emptyPck !=  null && childPck.size() > 1){
+				this.addNode(emptyPck, currentProject);
+				this.addRelation(new Contain(currentProject, emptyPck));
+			}
+
+			Package currentPck = childPck.get(currentDirectoryPath);
+			if(currentPck != null || childPck.size() > 1){
+				if (currentPck == null){
+					currentPck = emptyPackages.get(currentDirectoryPath);
+				}
+				if (currentPck == null){
+					LOGGER.error("Empty Package Finding Error.");
+					continue;
+				}
+
+				String parentDirectoryPath = currentPck.lastPackageDirectoryPath();
+				if( ("/").equals(parentDirectoryPath)) {
+					continue;
+				}
+
+				Map<String, Package> parentChild = childPackages.get(parentDirectoryPath);
+				if(parentChild == null){
+					LOGGER.error("Empty Package Finding Error: " + currentPck.getDirectoryPath() + " -- " + parentDirectoryPath);
+					continue;
+				}
+
+				Package parentPck = parentChild.get(parentDirectoryPath);
+				while (parentPck == null){
+					if(("/").equals(parentDirectoryPath)) {
+						break;
+					}
+					Map<String, Package> child = childPackages.get(parentDirectoryPath);
+					if(child == null){
+						LOGGER.error("Empty Package Finding Error: " + currentPck.getDirectoryPath() + " -- " + parentDirectoryPath);
+						continue;
+					}
+					Package pck = emptyPackages.get(parentDirectoryPath);
+					if(child != null && child.size() > 1 && pck != null){
+						addRelation(new Has(pck, currentPck));
+						break;
+					}
+					if(pck != null){
+						parentDirectoryPath = pck.lastPackageDirectoryPath();
+						if(("/").equals(parentDirectoryPath)) {
+							break;
+						}
+						parentChild = childPackages.get(parentDirectoryPath);
+						if(parentChild == null){
+							LOGGER.error("Empty Package Finding Error: " + currentPck.getDirectoryPath() + " -- " + parentDirectoryPath);
+							break;
+						}
+						parentPck = parentChild.get(parentDirectoryPath);
+
+					}else {
+						System.out.println("Empty Package Finding Error, too.");
+						break;
+					}
+				}
+
+				if (parentPck != null){
+					addRelation(new Has(parentPck, currentPck));
+				}
+			}
+		}
+	}
+
 	protected void extractRelationsFromTypes() {
 		Map<Long, ? extends Node> types = this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject);
 		types.forEach((id, node) -> {
@@ -124,7 +250,7 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					if(relation.getEntity().getClass() == TypeEntity.class && relation.getEntity().getId() != -1) {
 						// 关联的type，即成员变量的类型，此处仅指代类型直接定义的成员变量，不包含通过List<？>、Set<？>等基本数据类型中参数类型（此种情况将在变量的参数类型中处理）
 						Type other = (Type) getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, relation.getEntity().getId().longValue(), currentProject);
-						if(other != null && other != type) {
+						if(other != null) {
 							Association association = new Association(type, other);
 							addRelation(association);
 						}
@@ -132,47 +258,38 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					break;
 				case DependencyType.CALL:
 					if( relation.getEntity().getClass() == FunctionEntity.class ) {
-						// call其它类的方法，即成员变量赋值时，调用其他类的方法赋值。定义为对其他类的依赖
-						Entity parentEntityType = relation.getEntity().getParent();
-						if(parentEntityType != null && parentEntityType.getClass() == TypeEntity.class){
-							Type parentType = (Type) types.get(parentEntityType.getId().longValue());
-							if(parentType != null && parentType != type){
-								Dependency dependency = new Dependency(type, parentType, RelationType.str_CALL);
-								addRelation(dependency);
-							}
+						Function other = (Function) getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, relation.getEntity().getId().longValue(), currentProject);
+						if(other != null) {
+							Call call = new Call(type, other);
+							addRelation(call);
 						}
-//						Function other = (Function) getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, relation.getEntity().getId().longValue(), currentProject);
+					}
+//					else if(relation.getEntity().getClass() == TypeEntity.class){
+//						Type other = (Type) types.get(relation.getEntity().getId().longValue());
 //						if(other != null) {
 //							Call call = new Call(type, other);
 //							addRelation(call);
 //						}
-//					}else if(relation.getEntity().getClass() == TypeEntity.class){
-//						Type other = (Type) types.get(relation.getEntity().getId().longValue());
-//						if(other != null && other != type) {
-//							Dependency dependency = new Dependency(type, other, RelationType.str_CALL);
-//							addRelation(dependency);
-//						}
-					}
+//					}
 					break;
 				case DependencyType.CREATE:
 					if(relation.getEntity().getClass() == TypeEntity.class) {
 						Type other = (Type) types.get(relation.getEntity().getId().longValue());
-						if(other != null && other != type) {
-							Dependency dependency = new Dependency(type, other, RelationType.str_CREATE);
-							addRelation(dependency);
+						if(other != null) {
+							Create create = new Create(type, other);
+							addRelation(create);
 						}
 					} 
 					break;
 				case DependencyType.CAST:
 					Type castType = (Type) types.get(relation.getEntity().getId().longValue());
-					if(castType != null && castType != type) {
-						Dependency dependency = new Dependency(type,castType, RelationType.str_CAST);
-						//Cast functionCastType = new Cast(type, castType);
-						addRelation(dependency);
+					if(castType != null) {
+						Cast cast = new Cast(type, castType);
+						addRelation(cast);
 					}
 					break;
 				case DependencyType.THROW:
-//					LOGGER.info(typeEntity + " " + relation.getType() + " " + relation.getEntity().getClass() + " " + relation.getEntity());
+					LOGGER.info(typeEntity + " " + relation.getType() + " " + relation.getEntity().getClass() + " " + relation.getEntity());
 					break;
 				case DependencyType.USE:
 					Entity relationEntity = relation.getEntity();
@@ -188,9 +305,9 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 						}
 					}else if(relation.getEntity().getClass() == TypeEntity.class && relation.getEntity().getId() != -1){
 						Type other = (Type) types.get(relation.getEntity().getId().longValue());
-						if(other != null && other != type) {
-							Dependency dependency = new Dependency(type, other,RelationType.str_PARAMETER);
-							addRelation(dependency);
+						if(other != null) {
+							Use use = new Use(type, other);
+							addRelation(use);
 						}
 					}
 					break;
@@ -211,49 +328,34 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 				if(type != null) {
 					VariableType variableIsType = new VariableType(variable, type);
 					addRelation(variableIsType);
-					if(!variable.isField()){
-						Entity parentTypeEntity = varEntity.getParent();
-						while (parentTypeEntity != null && parentTypeEntity.getClass() != TypeEntity.class){
-							parentTypeEntity = parentTypeEntity.getParent();
-						}
-						if(parentTypeEntity != null){
-							Type parentType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentTypeEntity.getId().longValue(), currentProject);
-							if(parentType != null && parentType != type){
-								Dependency dependency = new Dependency(parentType,type, RelationType.str_VARIABLE_TYPE);
-								addRelation(dependency);
-							}
-						}
-					}
 				}
 			}
-			Type typeParameter = null;
 			for(depends.relations.Relation relation : varEntity.getRelations()) {
 				switch(relation.getType()) {
 				case DependencyType.PARAMETER:
 					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, relation.getEntity().getId().longValue(), currentProject);
-					if(type != null && typeParameter != type) {
+					if(type != null) {
 						Parameter variableTypeParameterType = new Parameter(variable, type);
 						addRelation(variableTypeParameterType);
-						Entity parentTypeEntity = varEntity.getParent();
-						if(!variable.isField()){
+					}
+					break;
+				case DependencyType.USE:
+					Type useType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, relation.getEntity().getId().longValue(), currentProject);
+					if(useType != null){
+						if(variable.isField()){
+							Entity parentTypeEntity = varEntity.getParent();
 							while (parentTypeEntity != null && parentTypeEntity.getClass() != TypeEntity.class){
 								parentTypeEntity = parentTypeEntity.getParent();
 							}
-							if(parentTypeEntity != null){
-								Type parentType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentTypeEntity.getId().longValue(), currentProject);
-								if(parentType != null && parentType != type){
-									Dependency dependency = new Dependency(parentType,type,RelationType.str_VARIABLE_TYPE);
-									addRelation(dependency);
-								}
-							}
-						}else if (parentTypeEntity != null && parentTypeEntity.getClass() != TypeEntity.class){
 							Type parentType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentTypeEntity.getId().longValue(), currentProject);
-							if(parentType != null && parentType != type){
-								Association association = new Association(parentType,type);
+							if(parentType != null && parentType != useType){
+								Association association = new Association(parentType, useType);
 								addRelation(association);
 							}
+						} else {
+							Use use = new Use(variable, useType);
+							addRelation(use);
 						}
-						typeParameter = type;
 					}
 					break;
 				case DependencyType.ANNOTATION:
@@ -262,6 +364,7 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 						Annotation typeAnnotationType = new Annotation(variable, annotationType);
 						addRelation(typeAnnotationType);
 					}
+					break;
 				default:
 					break;
 				}
@@ -290,6 +393,13 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 							addRelation(call);
 						}
 					}
+//					else if(relation.getEntity().getClass() == TypeEntity.class){
+//						Type other = (Type) types.get(relation.getEntity().getId().longValue());
+//						if(other != null) {
+//							Call call = new Call(function, other);
+//							addRelation(call);
+//						}
+//					}
 					break;
 				case DependencyType.CREATE:
 					if(relation.getEntity().getClass() == TypeEntity.class) {
@@ -297,10 +407,6 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 						if(other != null) {
 							Create create = new Create(function, other);
 							addRelation(create);
-							if(functionParentType != null && functionParentType != other){
-								Dependency dependency = new Dependency(functionParentType, other, RelationType.str_CREATE);
-								addRelation(dependency);
-							}
 						}
 					}
 					break;
@@ -309,10 +415,6 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					if(returnType != null) {
 						Return functionReturnType = new Return(function, returnType);
 						addRelation(functionReturnType);
-						if(functionParentType != null && functionParentType != returnType){
-							Dependency dependency = new Dependency(functionParentType, returnType, RelationType.str_RETURN);
-							addRelation(dependency);
-						}
 					}
 					break;
 				case DependencyType.PARAMETER:
@@ -320,10 +422,6 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					if(parameterType != null) {
 						Parameter functionParameterType = new Parameter(function, parameterType);
 						addRelation(functionParameterType);
-						if(functionParentType != null && functionParentType != parameterType){
-							Dependency dependency = new Dependency(functionParentType, parameterType, RelationType.str_PARAMETER);
-							addRelation(dependency);
-						}
 					}
 					break;
 				case DependencyType.THROW:
@@ -331,10 +429,6 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					if(throwType != null) {
 						Throw functionThrowType = new Throw(function, throwType);
 						addRelation(functionThrowType);
-						if(functionParentType != null && functionParentType != throwType){
-							Dependency dependency = new Dependency(functionParentType, throwType, RelationType.str_THROW);
-							addRelation(dependency);
-						}
 					}
 					break;
 				case DependencyType.ANNOTATION:
@@ -342,10 +436,6 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					if(annotationType != null) {
 						Annotation functionAnnotationType = new Annotation(function, annotationType);
 						addRelation(functionAnnotationType);
-						if(functionParentType != null && functionParentType != annotationType){
-							Dependency dependency = new Dependency(functionParentType, annotationType, RelationType.str_ANNOTATION);
-							addRelation(dependency);
-						}
 					}
 					break;
 				case DependencyType.CAST:
@@ -353,10 +443,6 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					if(castType != null) {
 						Cast functionCastType = new Cast(function, castType);
 						addRelation(functionCastType);
-						if(functionParentType != null && functionParentType != castType){
-							Dependency dependency = new Dependency(functionParentType, castType, RelationType.str_CAST);
-							addRelation(dependency);
-						}
 					}
 					break;
 				case DependencyType.IMPLEMENT:
@@ -389,17 +475,17 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 						}
 					} else if(relation.getEntity().getClass() == TypeEntity.class){
 						Type useType = (Type) types.get(relation.getEntity().getId().longValue());
-						if(useType != null && functionParentType !=null && functionParentType != useType) {
-							Dependency dependency = new Dependency(functionParentType, useType, RelationType.str_CALL);
-							addRelation(dependency);
+						if(useType != null) {
+							Use use = new Use(function, useType);
+							addRelation(use);
 					    }
 				    }
 					break;
 				case DependencyType.CONTAIN:
 					Type containType = (Type) types.get(relation.getEntity().getId().longValue());
-					if(containType != null && functionParentType !=null && functionParentType != containType) {
-						Dependency dependency = new Dependency(functionParentType, containType, RelationType.str_VARIABLE_TYPE);
-						addRelation(dependency);
+					if(containType != null) {
+						Use use = new Use(function, containType);
+						addRelation(use);
 					}
 					break;
 				default:
@@ -446,4 +532,20 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 		}
 	}
 
+	protected String getTypeIdentifyOfVar(List<GenericName> varArguments){
+		String typeIdentify = "";
+		typeIdentify += "<";
+		for (GenericName arg : varArguments){
+			typeIdentify += arg.getName();
+			List<GenericName> varArgs = arg.getArguments();
+			if (varArgs != null && !varArgs.isEmpty()){
+				typeIdentify += getTypeIdentifyOfVar(varArgs);
+			}
+			typeIdentify += ", ";
+		}
+		typeIdentify = typeIdentify.substring(0,typeIdentify.length()-2);
+		typeIdentify += ">";
+
+		return typeIdentify;
+	}
 }

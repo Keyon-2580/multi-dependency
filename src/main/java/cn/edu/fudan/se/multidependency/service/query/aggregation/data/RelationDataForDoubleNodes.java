@@ -30,8 +30,23 @@ public class RelationDataForDoubleNodes<N extends Node , R extends Relation> imp
 
 	private String id;
 
+	private String dependsOnTypes = "";
+
+	private String dependsByTypes = "";
+
+	private int dependsOnTimes = 0;
+
+	private int dependsByTimes = 0;
+
+
 	public RelationDataForDoubleNodes(N node1, N node2) {
 		this(node1, node2, String.join("_", node1.getId().toString(), node2.getId().toString()));
+	}
+
+	public RelationDataForDoubleNodes(N node1, N node2, String dependsOnTypes, String dependsByTypes) {
+		this(node1, node2, String.join("_", node1.getId().toString(), node2.getId().toString()));
+		this.dependsOnTypes = dependsOnTypes;
+		this.dependsByTypes = dependsByTypes;
 	}
 
 	public RelationDataForDoubleNodes(N node1, N node2, String id) {
@@ -132,14 +147,10 @@ public class RelationDataForDoubleNodes<N extends Node , R extends Relation> imp
 		}
 	}
 
-	public void setDate(int cloneNodesCount1, int cloneNodesCount2, int allNodesCount1, int allNodesCount2, int childrenPackagesCount1, int childrenPackagesCount2, int childrenHotspotPackageCount1, int childrenHotspotPackageCount2) {
-		this.cloneNodesCount1 = cloneNodesCount1;
-		this.cloneNodesCount2 = cloneNodesCount2;
+	public void setDate(int allNodesCount1, int allNodesCount2, int cloneNodesCount1, int cloneNodesCount2) {
 		this.allNodesCount1 = allNodesCount1;
 		this.allNodesCount2 = allNodesCount2;
-		this.childrenPackagesCount1 = childrenPackagesCount1;
-		this.childrenPackagesCount2 = childrenPackagesCount2;
-		this.childrenHotspotPackageCount1 = childrenHotspotPackageCount1;
-		this.childrenHotspotPackageCount2 = childrenHotspotPackageCount2;
+		this.cloneNodesCount1 = cloneNodesCount1;
+		this.cloneNodesCount2 = cloneNodesCount2;
 	}
 }

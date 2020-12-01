@@ -2,6 +2,9 @@ package cn.edu.fudan.se.multidependency.service.query.clone;
 
 import java.util.*;
 
+import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
+import cn.edu.fudan.se.multidependency.service.query.clone.data.*;
+import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,10 +20,6 @@ import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.MicroserviceService;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
-import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueCalculatorForMicroService;
-import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueForDoubleNodes;
-import cn.edu.fudan.se.multidependency.service.query.clone.data.FileCloneWithCoChange;
-import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChange;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 
@@ -44,9 +43,12 @@ public class CloneValueServiceImpl implements CloneValueService {
 	
     @Autowired
     BasicCloneQueryService basicCloneQueryService;
-    
-    @Autowired
-    GitAnalyseService gitAnalyseService;
+
+	@Autowired
+	GitAnalyseService gitAnalyseService;
+
+	@Autowired
+	NodeService nodeService;
 
 	@Override
 	public Collection<CloneValueForDoubleNodes<Package>> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones) {
@@ -65,6 +67,11 @@ public class CloneValueServiceImpl implements CloneValueService {
 	@Override
 	public PackageCloneValueWithFileCoChange queryPackageCloneWithFileCoChange(Collection<Clone> fileClones, Package pck1, Package pck2) throws Exception {
 		CloneValueForDoubleNodes<Package> temp = queryPackageCloneFromFileCloneSort(fileClones, pck1, pck2);
+		if(temp == null) {
+			Package OriginalPck1 = nodeService.queryPackage(pck1.getId());
+			Package OriginalPck2 = nodeService.queryPackage(pck2.getId());
+			temp = queryPackageCloneFromFileCloneSort(fileClones, OriginalPck1, OriginalPck2);
+		}
 		PackageCloneValueWithFileCoChange result = new PackageCloneValueWithFileCoChange();
 		result.setPck1(temp.getNode1());
 		result.setPck2(temp.getNode2());
@@ -88,7 +95,6 @@ public class CloneValueServiceImpl implements CloneValueService {
 		Set<ProjectFile> cloneFiles1 = result.getCloneFiles1();
 		Set<ProjectFile> cloneFiles2 = result.getCloneFiles2();
 		Set<ProjectFile> allFiles1 = result.getAllFiles1();
-		System.out.println(allFiles1);
 		Set<ProjectFile> allFiles2 = result.getAllFiles2();
 
 		Set<ProjectFile> noneCloneFiles1 = new HashSet();
@@ -115,6 +121,51 @@ public class CloneValueServiceImpl implements CloneValueService {
 		return result;
 	}
 
+	@Override
+	public PackageCloneValueWithFileCoChangeMatrix queryPackageCloneWithFileCoChangeMatrix(Collection<Clone> fileClones, Package pck1, Package pck2) {
+		try {
+			PackageCloneValueWithFileCoChange packageCloneValueWithFileCoChange = queryPackageCloneWithFileCoChange(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE), pck1, pck2);
+			Map<String, FileCloneWithCoChange> fileClone = new HashMap<>();
+			List<FileCloneWithCoChange> children = new ArrayList<>(packageCloneValueWithFileCoChange.getChildren());
+			LinkedHashSet<ProjectFile> cloneFiles1 = new LinkedHashSet<>();
+			LinkedHashSet<ProjectFile> cloneFiles2 = new LinkedHashSet<>();
+			Set<ProjectFile> noneCloneFiles1 = new HashSet<>(packageCloneValueWithFileCoChange.getNoneCloneFiles1());
+			Set<ProjectFile> noneCloneFiles2 = new HashSet<>(packageCloneValueWithFileCoChange.getNoneCloneFiles2());
+			Map<Long, Integer> map = new HashMap<>();
+			int row = 0;
+			int col = 0;
+			for(FileCloneWithCoChange child : children) {
+				if(!map.containsKey(child.getFile1().getId())) {
+					map.put(child.getFile1().getId(), row);
+					cloneFiles1.add(child.getFile1());
+					row ++;
+				}
+				if(!map.containsKey(child.getFile2().getId())) {
+					map.put(child.getFile2().getId(), col);
+					cloneFiles2.add(child.getFile2());
+					col ++;
+				}
+			}
+			boolean[][] matrix = new boolean[row][col];
+			for(int i = 0; i < row; i ++) {
+				for(int j = 0; j < col; j ++) {
+					matrix[i][j] = false;
+				}
+			}
+			for(FileCloneWithCoChange child : children) {
+				int i = map.get(child.getFile1().getId());
+				int j = map.get(child.getFile2().getId());
+				matrix[i][j] = true;
+				String key = String.join("_", child.getFile1().getName(), child.getFile2().getName());
+				fileClone.put(key, child);
+			}
+			return new PackageCloneValueWithFileCoChangeMatrix(fileClone, cloneFiles1, cloneFiles2, noneCloneFiles1, noneCloneFiles2, matrix);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 //	private Set<ProjectFile> addNoneCloneFiles(Set<ProjectFile> cloneFiles, Set<ProjectFile> allFiles){
 //		for(ProjectFile projectFile: cloneFiles){
 //			if(allFiles.contains(projectFile)){
@@ -123,7 +174,28 @@ public class CloneValueServiceImpl implements CloneValueService {
 //		}
 //		return allFiles;
 //	}
-    
+	/**
+	 * 两个包之间的文件级克隆的聚合，两个包之间不分先后顺序
+	 * @param fileClones
+	 * @param pck1
+	 * @param pck2
+	 * @return
+	 */
+	@Override
+	public CloneValueForDoubleNodes<Package> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones, Package pck1, Package pck2) {
+		Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> packageClones = queryPackageCloneFromFileClone(fileClones);
+		Map<Package, CloneValueForDoubleNodes<Package>> map = packageClones.getOrDefault(pck1, new HashMap<>());
+		CloneValueForDoubleNodes<Package> result = map.get(pck2);
+		if(result == null) {
+			map = packageClones.getOrDefault(pck2, new HashMap<>());
+			result = map.get(pck1);
+		}
+		if(result != null) {
+			result.sortChildren();
+		}
+		return result;
+	}
+
     private Collection<CloneValueForDoubleNodes<Package>> removeSameNodeToCloneValuePackages = null;
     private Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> queryPackageCloneFromFileCloneCache = null;
 	public Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> queryPackageCloneFromFileClone(Collection<Clone> fileClones) {

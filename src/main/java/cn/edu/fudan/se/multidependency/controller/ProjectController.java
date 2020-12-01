@@ -3,11 +3,7 @@ package cn.edu.fudan.se.multidependency.controller;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -15,9 +11,7 @@ import java.util.concurrent.FutureTask;
 
 import javax.servlet.http.HttpServletRequest;
 
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
-import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
 import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
@@ -80,7 +74,7 @@ public class ProjectController {
 	private NodeService nodeService;
 
 	@Autowired
-	private HasRepository hasRepository;
+	private ProjectService projectService;
 
 
 	@Autowired
@@ -91,9 +85,6 @@ public class ProjectController {
 	
 	@Autowired
 	private BasicCloneQueryService basicCloneQueryService;
-	
-	@Autowired
-	private ProjectService projectService;
 
 	@Autowired
 	private HotspotPackageDetector hotspotPackageDetector;
@@ -126,6 +117,23 @@ public class ProjectController {
 		Map<Long, Project> result = new HashMap<>();
 		for(Project project : projects) {
 			result.put(project.getId(), project);
+		}
+		return result;
+	}
+
+	@GetMapping("/all/name")
+	@ResponseBody
+	public JSONArray allProjectsNames() {
+		JSONArray result = new JSONArray();
+		List<Project> projects = new ArrayList<>(nodeService.allProjects());
+
+		projects.sort(Comparator.comparing(Project::getName));
+
+		for(Project project : projects) {
+			JSONObject temp_project = new JSONObject();
+			temp_project.put("id", project.getId().toString());
+			temp_project.put("name", project.getName() + "(" + project.getLanguage() + ")");
+			result.add(temp_project);
 		}
 		return result;
 	}
@@ -590,101 +598,19 @@ public class ProjectController {
 		return result;
 	}
 
-	@GetMapping("/has")
+	@PostMapping("/has")
 	@ResponseBody
-	public JSONArray projectHas(@RequestParam("projectId") long projectId, @RequestParam("showType") String showType) {
-		JSONArray result = new JSONArray();
-		JSONArray clone = new JSONArray();
-		JSONArray links = new JSONArray();
-
-		Project project = nodeService.queryProject(projectId);
-		ProjectStructure projectStructure = hasRelationService.projectHasInitialize(project);
-
-		List<PackageStructure> childrenPackages = projectStructure.getChildren();
-		List<PackageStructure> childrenPackagesnew = new ArrayList<>();
-		JSONObject nodeJSON = new JSONObject();
-		JSONObject nodeJSON2 = new JSONObject();
-		JSONObject nodeJSON3 = new JSONObject();
-		JSONObject nodeJSON4 = new JSONObject();
-
-		for(PackageStructure pckstru : childrenPackages){
-			PackageStructure pcknew = hasRelationService.packageHasInitialize(pckstru.getPck());
-			childrenPackagesnew.add(pcknew);
-		}
-
-		nodeJSON.put("name", project.getName());
-		nodeJSON.put("id", "id_" + project.getId().toString());
-		Collection<ProjectFile> clonefiles = basicCloneQueryService.findProjectContainCloneFiles(project);
-		Collection<Clone> cloneList = basicCloneQueryService.findClonesInProject(project);
-		clone = basicCloneQueryService.ClonesInProject(cloneList);
-		nodeJSON.put("children",getHasJson(clonefiles,childrenPackagesnew, showType));
-
-		nodeJSON2.put("result",nodeJSON);
-		nodeJSON3.put("clone",clone);
-
-		result.add(nodeJSON2);
-		result.add(nodeJSON3);
-
-		if(showType.equals("graph")) {
-			Collection<HotspotPackage> hotspotPackages = hotspotPackageDetector.detectHotspotPackages();
-			for (HotspotPackage hotspotPackage : hotspotPackages) {
-				JSONObject link = new JSONObject();
-				link.put("source_id", "id_" + hotspotPackage.getPackage1().getId().toString());
-				link.put("target_id", "id_" + hotspotPackage.getPackage2().getId().toString());
-				link.put("source_projectBelong", "id_" + containRelationService.findPackageBelongToProject(hotspotPackage.getPackage1()).getId());
-				link.put("target_projectBelong", "id_" + containRelationService.findPackageBelongToProject(hotspotPackage.getPackage2()).getId());
-				links.add(link);
-			}
-			nodeJSON4.put("links",links);
-			result.add(nodeJSON4);
-		}
-
-		return result;
+	public JSONArray projectHas(@RequestBody JSONObject requestBody) {
+		return projectService.getMultipleProjectsGraphJson(requestBody);
 	}
 
 	/**
-	 * 递归遍历项目中所有package的包含关系
-	 */
-	public JSONArray getHasJson(Collection<ProjectFile> clonefiles,List<PackageStructure> childrenPackages, String showType){
-		JSONArray rtJA = new JSONArray();
-		for(PackageStructure pckstru :childrenPackages){
-			List<PackageStructure> pckList = pckstru.getChildrenPackages();
-			List<ProjectFile> fileList = pckstru.getChildrenFiles();
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("name",pckstru.getPck().getName());
-			jsonObject.put("id","id_" + pckstru.getPck().getId().toString());
-			JSONArray jsonArray = new JSONArray();
-			if(fileList.size() > 0){
-				for(ProjectFile profile : fileList){
-					JSONObject jsonObject2 = new JSONObject();
-					jsonObject2.put("size",1000);
-					jsonObject2.put("long_name",profile.getPath());
-					if(clonefiles.contains(profile)){
-						jsonObject2.put("clone",true);
-					}else{
-						jsonObject2.put("clone",false);
-					}
-					jsonObject2.put("name",profile.getName());
-					jsonObject2.put("id","id_" + profile.getId().toString());
-					jsonArray.add(jsonObject2);
-				}
-			}
-
-			if(jsonArray.size() > 0){
-				if(showType.equals("graph")){
-					jsonObject.put("children",jsonArray);
-				}else{
-					jsonObject.put("collapse_children",jsonArray);
-				}
-			}
-
-			if(pckList.size()>0){//如果该属性还有子属性,继续做查询,直到该属性没有孩子,也就是最后一个节点
-				jsonObject.put("children", getHasJson(clonefiles,pckList, showType));
-			}
-//			System.out.println(pckList.size());
-			rtJA.add(jsonObject);
-		}
-		return rtJA;
+	* 返回气泡图不同关系的连线数据
+	 * */
+	@GetMapping("/has/childrenlinks")
+	@ResponseBody
+	public JSONObject getProjectGraphCloneLink(@RequestParam("package1Id") long package1Id, @RequestParam("package2Id") long package2Id) {
+		return projectService.cloneGraphAndTableOfChildrenPackages(package1Id, package2Id);
 	}
 
 	@GetMapping("/has/echarts")
@@ -736,8 +662,8 @@ public class ProjectController {
 		result.put("clone",clone);
 
 
-		Collection<HotspotPackage> hotspotPackages = hotspotPackageDetector.detectHotspotPackages();
-		for (HotspotPackage hotspotPackage : hotspotPackages) {
+		List<HotspotPackage> hotspotPackageList = hotspotPackageDetector.detectHotspotPackagesByParentId(-1, -1, "all");
+		for (HotspotPackage hotspotPackage : hotspotPackageList) {
 			JSONObject link = new JSONObject();
 			link.put("source", hotspotPackage.getPackage1().getId().toString());
 			link.put("target", hotspotPackage.getPackage2().getId().toString());
