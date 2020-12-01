@@ -2,7 +2,7 @@ var rFile = function(fileId, cytoscapeutil) {
 	var _file = function() {
 		containType(fileId);
 		metric(fileId);
-		depends(fileId);
+		// depends(fileId);
 		issues(fileId);
 		commits(fileId);
 	};
@@ -54,35 +54,6 @@ var rFile = function(fileId, cytoscapeutil) {
 				$("#issue_content").html(html);
 			}
 		})
-	}
-	
-	var depends = function(fileId) {
-		$.ajax({
-			type: "get",
-			url: "/relation/file/" + fileId + "/dependedBy",
-			success: function(result) {
-				console.log(result);
-				var html = "<ol>";
-				for(var i = 0; i < result.length; i++) {
-					html += "<li><a target='_blank' href='/relation/file/" + result[i].startNode.id + "'>" + result[i].startNode.path + "</a></li>";
-				}
-				html += "</ol>";
-				$("#dependedBy_content").html(html);
-			}
-		})
-		$.ajax({
-			type: "get",
-			url: "/relation/file/" + fileId + "/dependsOn",
-			success: function(result) {
-				console.log(result);
-				var html = "<ol>";
-				for(var i = 0; i < result.length; i++) {
-					html += "<li><a target='_blank' href='/relation/file/" + result[i].endNode.id + "'>" + result[i].endNode.path + "</a></li>";
-				}
-				html += "</ol>";
-				$("#dependsOn_content").html(html);
-			}
-		});
 	}
 	
 	var metric = function(fileId) {

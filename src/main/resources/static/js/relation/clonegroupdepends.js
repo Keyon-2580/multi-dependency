@@ -14,7 +14,7 @@ var rclonegroupdepends = function (name, cytoscapeutil) {
     var dependsmatrix = function(name) {
         $.ajax({
             type: "GET",
-            url: "/relation/clonegroup/" + name + "/dependsmatrix",
+            url: "/relation/dependsdetail/" + name + "/dependsmatrix",
             success: function(result) {
                 var html = "";
                 html += "<div  style='overflow: auto;' width='100%' id='matrix_1'>";
@@ -52,7 +52,7 @@ var rclonegroupdepends = function (name, cytoscapeutil) {
     var dependedmatrix = function(name) {
         $.ajax({
             type: "GET",
-            url: "/relation/clonegroup/" + name + "/dependedmatrix",
+            url: "/relation/dependsdetail/" + name + "/dependedmatrix",
             success: function(result) {
                 var html = "";
                 html += "<div  style='overflow: auto;' width='100%' id='matrix_2'>";
@@ -90,7 +90,7 @@ var rclonegroupdepends = function (name, cytoscapeutil) {
     var dependfiledetail = function(name) {
         $.ajax({
                 type: "GET",
-                url: "/relation/clonegroup/" + name + "/alldependsonnodes",
+                url: "/relation/dependsdetail/" + name + "/alldependsonnodes",
                 success: function(result) {
                     var html = "<ol>";
                     for(var i = 0;i < result.length;i++){
@@ -105,7 +105,7 @@ var rclonegroupdepends = function (name, cytoscapeutil) {
     var dependedfiledetail = function(name) {
         $.ajax({
             type: "GET",
-            url: "/relation/clonegroup/" + name + "/alldependednodes",
+            url: "/relation/dependsdetail/" + name + "/alldependednodes",
             success: function(result) {
                 var html = "<ol>";
                 for(var i = 0;i < result.length;i++){

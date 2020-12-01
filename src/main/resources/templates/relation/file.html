@@ -70,6 +70,7 @@
 		<div class="col-sm-12">
 			<div>
 				<h4 style="margin-top: 0px;" th:text="${file.id + ' ' + file.path}"></h4>
+				<button id="dependson" type="button" class="btn btn-default" onclick="depends()">dependson</button>
 			</div>
 		</div>
 		<div class="col-sm-12">
@@ -100,25 +101,6 @@
 			<div id="issue_content">
 			</div>
 		</div>
-		<div class="col-sm-12">
-			<div>
-				<h5>depends</h5>
-			</div>
-			<div class="col-sm-12">
-				<div>
-					<h5>depended by</h5>
-				</div>
-				<div id="dependedBy_content">
-				</div>
-			</div>
-			<div class="col-sm-12">
-				<div>
-					<h5>depends on</h5>
-				</div>
-				<div id="dependsOn_content">
-				</div>
-			</div>
-		</div>
 	</div>
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
@@ -126,6 +108,9 @@
 			 rFile([[${file}]].id, cytoscapeutil()).init();
 		});
 		// ]]>
+		function depends() {
+			window.open("/relation/dependsdetail/" + [[${file}]].id);
+		}
 	</script>
 </body>
 </html>
