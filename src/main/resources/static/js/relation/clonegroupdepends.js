@@ -27,7 +27,7 @@ var rclonegroupdepends = function (name, cytoscapeutil) {
                 html += "</tr>";
                 for(var i = 0; i < result.nodes.length; i++){
                     html += "<tr>";
-                    html += "<td style='background-color: #FFFFFF;'><a target='_blank' href='/relation/file/" + result.nodes[i].id + "'>" + result.nodes[i].path + "</a></td>";
+                    html += "<td style='background-color: #FFFFFF;'><a target='_blank' href='/relation/file/" + result.nodes[i].id + "'>" + result.nodes[i].path + "(" + result.nodes[i].loc + ")" + "</a></td>";
                     for(var j = 0;j < result.dependsnodes.length;j++){
                         html += "<td style='background-color: #FFFFFF;'>";
                         if(result.matrix[i][j] != null){
@@ -65,7 +65,7 @@ var rclonegroupdepends = function (name, cytoscapeutil) {
                 html += "</tr>";
                 for(var i = 0; i < result.nodes.length; i++){
                     html += "<tr>";
-                    html += "<td style='background-color: #FFFFFF;'><a target='_blank' href='/relation/file/" + result.nodes[i].id + "'>" + result.nodes[i].path + "</a></td>";
+                    html += "<td style='background-color: #FFFFFF;'><a target='_blank' href='/relation/file/" + result.nodes[i].id + "'>" + result.nodes[i].path + "(" + result.nodes[i].loc + ")" + "</a></td>";
                     for(var j = 0;j < result.dependsnodes.length;j++){
                         html += "<td style='background-color: #FFFFFF;'>";
                         if(result.matrix[i][j] != null){
@@ -94,7 +94,7 @@ var rclonegroupdepends = function (name, cytoscapeutil) {
                 success: function(result) {
                     var html = "<ol>";
                     for(var i = 0;i < result.length;i++){
-                        html += "<li><a target='_blank' href='/relation/file/" + result[i].id + "'>" + result[i].path + "</a></li>";
+                        html += "<li><a target='_blank' href='/relation/file/" + result[i].id + "'>" + result[i].path + "(" + result[i].loc + ")" + "</a></li>";
                     }
                     html += "</ol>";
                     $("#dependfiledetail").html(html);
@@ -109,7 +109,7 @@ var rclonegroupdepends = function (name, cytoscapeutil) {
             success: function(result) {
                 var html = "<ol>";
                 for(var i = 0;i < result.length;i++){
-                    html += "<li><a target='_blank' href='/relation/file/" + result[i].id + "'>" + result[i].path + "</a></li>";
+                    html += "<li><a target='_blank' href='/relation/file/" + result[i].id + "'>" + result[i].path + "(" + result[i].loc + ")" + "</a></li>";
                 }
                 html += "</ol>";
                 $("#dependedfiledetail").html(html);
