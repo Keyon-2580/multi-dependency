@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.repository.node.clone;
 
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -30,9 +31,11 @@ public interface CloneGroupRepository extends Neo4jRepository<CloneGroup, Long> 
 	@Query("match (n:CloneGroup) delete n;")
 	void deleteCloneGroupRelations();
 
-	@Query("CALL algo.unionFind.stream(\"ProjectFile\", \"CLONE\")\n" +
-			"YIELD nodeId,setId\n" +
-			"with setId, collect(algo.getNodeById(nodeId)) AS files\n" +
+	@Query("CALL gds.wcc.stream({" +
+			"nodeProjection: \'ProjectFile\', " +
+			"relationshipProjection: \'" + RelationType.str_CLONE + "\'}) " +
+			"YIELD nodeId, componentId " +
+			"with componentId as setId, collect(gds.util.asNode(nodeId)) AS files\n" +
 			"where size(files) > 1\n" +
 			"match (file:ProjectFile) where file in files set file.cloneGroupId = \"file_group_\" + setId;")
 	void setFileGroup();
