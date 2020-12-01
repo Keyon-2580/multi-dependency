@@ -27,5 +27,9 @@ public class PropertyConfig {
 	@Getter
 	@Value("${config.starter.aggregation_clone}")
 	private boolean setAggregationClone;
+	
+	@Getter
+	@Value("${config.starter.smell}")
+	private boolean detectAS;
 
 }

@@ -16,11 +16,13 @@ server:
 
 config:
    starter:
-      cochange: false
-      depends_on: false
+      cochange: true
+      depends_on: true
       clone_group: false
       module_clone: false
       aggregation_clone: false
+      
+      smell: true
 
 data:
 #   project_config: src/main/resources/project/simpletest.json

@@ -40,8 +40,9 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"     size((file)-[:CONTAIN*1..3]->(:Function)) as nom,\r\n" + 
 			"     size((file)-[:CO_CHANGE]-(:ProjectFile)) as cochangeFileCount,\r\n" + 
 			"     file.endLine as loc,\r\n" + 
+			"     file.instability as instability,\r\n" + 
 			"     file\r\n" + 
-			"RETURN  file,fanIn,fanOut,changeTimes,nom,loc,cochangeFileCount order by(file.path) desc;")
+			"RETURN  file,fanIn,fanOut,changeTimes,nom,loc,instability,cochangeFileCount order by(file.path) desc;")
 	public FileMetrics calculateFileMetrics(@Param("fileId") long fileId);
 	
 //	@Query("match (file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) where id(file) = {fileId} with c where size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 return c")

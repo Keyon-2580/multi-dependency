@@ -56,5 +56,50 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 			+ "where eCount+iCount > 0 and eCount+iCount = fanIn return t")
 	public List<Type> unutilizedTypes();
 	
+	@Query("match (n:Module) with n limit 1 return (count(n) = 1)")
+	public boolean existModule();
+	
+	@Query("match (pck:Package) "
+			+ "create (module:Module{name: pck.directoryPath, size: pck.size}) "
+			+ "with pck, module "
+			+ "match (pck)-[:CONTAIN]->(file:ProjectFile) "
+			+ "with module, file "
+			+ "create (module)-[:CONTAIN]->(file) return module, count(file);")
+	public void createModule();
+	
+	
+	@Query("match (pck1:Package)-[r:DEPENDS_ON]->(pck2:Package) "
+			+ "with pck1, r, pck2 match(m1:Module), (m2:Module) "
+			+ "where m1.name = pck1.directoryPath and m2.name = pck2.directoryPath "
+			+ "create(m1)-[:DEPENDS_ON{times: r.times}]->(m2);")
+	public void createModuleDependsOn();
+	
+	@Query("match (pck1:Package)-[r:HAS]->(pck2:Package) "
+			+ "with pck1, r, pck2 match(m1:Module), (m2:Module) "
+			+ "where m1.name = pck1.directoryPath and m2.name = pck2.directoryPath "
+			+ "create(m1)-[:HAS]->(m2);")
+	public void createModuleHas();
+	
+	@Query("match (project:Project)-[:CONTAIN]->(pck:Package) "
+			+ "with project, pck "
+			+ "match (module:Module) where module.name = pck.directoryPath "
+			+ "create (project)-[:CONTAIN]->(module);")
+	public void createProjectContainsModule();
+	
+	@Query("match (n:Module) with n "
+			+ "with "
+			+ "size ((:Module) - [:DEPENDS_ON] -> (n)) as fanIn, "
+			+ "size ( (n)-[:DEPENDS_ON]->(:Module) ) as fanOut, n "
+			+ "set n.fanIn = fanIn, n.fanOut = fanOut "
+			+ "with n "
+			+ "match (n) where (n.fanIn + n.fanOut) <> 0 "
+			+ "set n.instability = n.fanOut / (n.fanIn + n.fanOut + 0.0);")
+	public void setModuleInstability();
+	
+	@Query("match (n:ProjectFile) with n with size ((:ProjectFile) - [:DEPENDS_ON] -> (n)) as fanIn, size ( (n)-[:DEPENDS_ON]->(:ProjectFile) ) as fanOut, n set n.fanIn = fanIn, n.fanOut = fanOut with n match (n) where (n.fanIn + n.fanOut) <> 0 set n.instability = n.fanOut / (n.fanIn + n.fanOut + 0.0);")
+	public void setFileInstability();
+	
+	@Query("match (n:Package) with n with size ((:Package) - [:DEPENDS_ON] -> (n)) as fanIn, size ( (n)-[:DEPENDS_ON]->(:Package) ) as fanOut, n set n.fanIn = fanIn, n.fanOut = fanOut with n match (n) where (n.fanIn + n.fanOut) <> 0 set n.instability = n.fanOut / (n.fanIn + n.fanOut + 0.0);")
+	public void setPackageInstability();
 }
 
