@@ -249,7 +249,7 @@ public class BeanCreator {
 				dependsOnRepository.saveAll(dependsOnListTmp);
 			}
 			
-			//fileRepository.pageRank(20, 0.85);
+			fileRepository.pageRank(20, 0.85);
 		}
 		configSmellDetect(propertyConfig, asRepository);
 		return dependsOns;

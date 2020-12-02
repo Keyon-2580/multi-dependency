@@ -68,9 +68,13 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"RETURN  file,fanIn,fanOut,changeTimes,cochangeCommitTimes,nom,loc,score,cochangeFileCount order by(file.path);")
 	public List<FileMetrics> calculateFileMetricsWithCoChangeCommitTimes();
 	
-	@Query("CALL algo.pageRank.stream('ProjectFile', '" + RelationType.str_DEPENDS_ON + "', {iterations:{iterations}, dampingFactor:{dampingFactor}})\r\n" + 
+	@Query("CALL gds.pageRank.stream({" +
+			"nodeProjection:\'ProjectFile\', " +
+			"relationshipProjection: \'" + RelationType.str_DEPENDS_ON + "\', " +
+			"maxIterations: {iterations}, " +
+			"dampingFactor: {dampingFactor}}) \r\n" +
 			"YIELD nodeId, score\r\n" + 
-			"with algo.getNodeById(nodeId) AS file, score \r\n" + 
+			"with gds.util.asNode(nodeId) AS file, score \r\n" +
 			"set file.score=score\r\n" + 
 			"RETURN file\r\n" + 
 			"ORDER BY score DESC")
