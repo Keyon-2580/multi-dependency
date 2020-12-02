@@ -18,6 +18,7 @@ public enum RelationType implements RelationshipType {
 	IMPLEMENTS_C(RelationType.str_IMPLEMENTS_C),
 	IMPLLINK(RelationType.str_IMPLLINK),
 	PARAMETER(RelationType.str_PARAMETER),
+	GENERIC_PARAMETER(RelationType.str_GENERIC_PARAMETER),
 	RETURN(RelationType.str_RETURN),
 	THROW(RelationType.str_THROW),
 	CAST(RelationType.str_CAST),
@@ -87,6 +88,7 @@ public enum RelationType implements RelationshipType {
 	public static final String str_IMPLEMENTS_C = "IMPLEMENTS_C";
 	public static final String str_IMPLLINK = "IMPLLINK";
 	public static final String str_PARAMETER = "PARAMETER";
+	public static final String str_GENERIC_PARAMETER = "GENERIC_PARAMETER";
 	public static final String str_CAST = "CAST";
 	public static final String str_RETURN = "RETURN";
 	public static final String str_VARIABLE_TYPE = "VARIABLE_TYPE";
@@ -160,7 +162,7 @@ public enum RelationType implements RelationshipType {
 		//relationWeights.put(ACCESS, 0.1);
 		relationWeights.put(CALL, 0.2);
 		relationWeights.put(CAST, 0.1);
-		relationWeights.put(CREATE, 0.2);
+		relationWeights.put(CREATE, 0.1);
 		relationWeights.put(USE, 0.1);
 		relationWeights.put(PARAMETER, 0.1);
 		relationWeights.put(THROW, 0.1);
@@ -173,7 +175,7 @@ public enum RelationType implements RelationshipType {
 		relationWeights.put(DEPENDENCY, 0.1);
 
 		relationWeights.put(CO_CHANGE, 0.1);
-		relationWeights.put(CLONE, 0.5);
+		relationWeights.put(CLONE, 0.2);
 	}
 
 	static{
@@ -192,6 +194,7 @@ public enum RelationType implements RelationshipType {
 		relationAbbreviation.put(CREATE, "CRE");
 		relationAbbreviation.put(USE, "USE");
 		relationAbbreviation.put(PARAMETER, "PAR");
+		relationAbbreviation.put(GENERIC_PARAMETER, "GPAR");
 		relationAbbreviation.put(THROW, "THR");
 		relationAbbreviation.put(RETURN, "RET");
 

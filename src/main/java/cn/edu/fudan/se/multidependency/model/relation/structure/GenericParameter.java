@@ -1,14 +1,5 @@
 package cn.edu.fudan.se.multidependency.model.relation.structure;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.RelationshipEntity;
-import org.neo4j.ogm.annotation.StartNode;
-
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
@@ -16,35 +7,39 @@ import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import cn.edu.fudan.se.multidependency.model.relation.StructureRelation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.neo4j.ogm.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * 方法以类型作为方法参数的关系
- * @author fan
+ * 变量以类型作为类型参数的关系
+ * @author zdh
  *
  */
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_PARAMETER)
-public class Parameter implements RelationWithTimes, StructureRelation {
+@RelationshipEntity(RelationType.str_GENERIC_PARAMETER)
+public class GenericParameter implements RelationWithTimes, StructureRelation {
 
-	private static final long serialVersionUID = -8796616144049338126L;
-	
+	private static final long serialVersionUID = -2364382655805821358L;
+
 	@Id
     @GeneratedValue
     private Long id;
-	
+
 	@StartNode
 	private CodeNode codeNode;
-	
+
 	@EndNode
-	private Type parameterType;
-	
+	private Type genericParameterType;
+
 	private int times = 1;
 
-	public Parameter(CodeNode codeNode, Type parameterType) {
+	public GenericParameter(CodeNode codeNode, Type genericParameterType) {
 		super();
 		this.codeNode = codeNode;
-		this.parameterType = parameterType;
+		this.genericParameterType = genericParameterType;
 	}
 
 	@Override
@@ -54,12 +49,12 @@ public class Parameter implements RelationWithTimes, StructureRelation {
 
 	@Override
 	public CodeNode getEndCodeNode() {
-		return parameterType;
+		return genericParameterType;
 	}
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.PARAMETER;
+		return RelationType.GENERIC_PARAMETER;
 	}
 
 	@Override
