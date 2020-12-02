@@ -101,9 +101,9 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 				unstableFile.addAllTotalDependencies(dependsOns);
 				for(DependsOn dependsOn : dependsOns) {
 					ProjectFile dependsOnFile = (ProjectFile) dependsOn.getEndNode();
-//					FileMetrics dependsOnMetric = metricCalculator.calculateFileMetric(dependsOnFile);
+					FileMetrics dependsOnMetric = metricCalculator.calculateFileMetric(dependsOnFile);
 //					if(unstableFile.getInstability() < ((double) (dependsOnMetric.getFanOut()) / (dependsOnMetric.getFanIn() + dependsOnMetric.getFanOut()))) {
-					if(unstableFile.getInstability() < dependsOnFile.getInstability()) {
+					if(unstableFile.getInstability() < dependsOnFile.getInstability() && dependsOnMetric.getFanOut() >= getFileFanOutThreshold(project)) {
 						unstableFile.addBadDependency(dependsOn);
 					}
 				}
