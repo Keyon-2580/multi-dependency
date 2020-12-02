@@ -335,8 +335,8 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 				case DependencyType.PARAMETER:
 					Type type = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, relation.getEntity().getId().longValue(), currentProject);
 					if(type != null) {
-						Parameter variableTypeParameterType = new Parameter(variable, type);
-						addRelation(variableTypeParameterType);
+						GenericParameter variableGenericParameterType = new GenericParameter(variable, type);
+						addRelation(variableGenericParameterType);
 					}
 					break;
 				case DependencyType.USE:
