@@ -71,6 +71,7 @@
 			<div>
 				<h4 style="margin-top: 0px;" th:text="${file.id + ' ' + file.path}"></h4>
 				<button id="dependson" type="button" class="btn btn-default" onclick="depends()">dependson</button>
+				<button id="code" type="button" class="btn btn-default" onclick="code()">code</button>
 			</div>
 		</div>
 		<div class="col-sm-12">
@@ -110,6 +111,9 @@
 		// ]]>
 		function depends() {
 			window.open("/relation/dependsdetail/" + [[${file}]].id);
+		}
+		function code() {
+			window.open("/clone/compare?id1=" + [[${file}]].id + "&id2=" + [[${file}]].id);
 		}
 	</script>
 </body>
