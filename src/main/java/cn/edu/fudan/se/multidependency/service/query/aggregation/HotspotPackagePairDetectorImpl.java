@@ -405,16 +405,20 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		StringBuilder dependsByStr = new StringBuilder();
 		int dependsOnTimes = 0;
 		int dependsByTimes = 0;
+		double dependsOnIntensity = 0.0;
+		double dependsByIntensity = 0.0;
 		Map<String, Long> dependsOnTypesMap = new HashMap<>();
 		Map<String, Long> dependsByTypesMap = new HashMap<>();
 		for (DependsOn dependsOn : packageDependsOnList){
 			if(dependsOn.getStartNode().getId().equals(pck1.getId())){
 				dependsOnStr.append(dependsOn.getDependsOnType());
 				dependsOnTimes += dependsOn.getTimes();
+				dependsOnIntensity += dependsOn.getDependsOnIntensity();
 				dependsOnTypesMap.putAll(dependsOn.getDependsOnTypes());
 			}else {
 				dependsByStr.append(dependsOn.getDependsOnType());
 				dependsByTimes += dependsOn.getTimes();
+				dependsByIntensity += dependsOn.getDependsOnIntensity();
 				dependsByTypesMap.putAll(dependsOn.getDependsOnTypes());
 			}
 		}
@@ -425,6 +429,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		dependsRelationDataForDoubleNodes.setDependsByTimes(dependsByTimes);
 		dependsRelationDataForDoubleNodes.setDependsOnTypesMap(dependsOnTypesMap);
 		dependsRelationDataForDoubleNodes.setDependsByTypesMap(dependsByTypesMap);
+		dependsRelationDataForDoubleNodes.setDependsOnIntensity(dependsOnIntensity);
+		dependsRelationDataForDoubleNodes.setDependsByIntensity(dependsByIntensity);
 		dependsRelationDataForDoubleNodes.calDependsOnIntensity();
 		dependsRelationDataForDoubleNodes.calDependsByIntensity();
 		return new HotspotPackagePair(dependsRelationDataForDoubleNodes);
