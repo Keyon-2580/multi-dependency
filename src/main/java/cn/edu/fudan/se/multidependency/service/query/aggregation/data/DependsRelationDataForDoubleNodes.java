@@ -54,14 +54,14 @@ public class DependsRelationDataForDoubleNodes<N extends Node, R extends Relatio
 	}
 
 	public void calDependsOnIntensity(){
-		int dependsTimes = dependsOnTimes;
+		double dependsTimes = dependsOnIntensity;
 		if(dependsTimes > 0){
 			dependsOnIntensity = dependsTimes / (dependsTimes + 10.0);
 		}
 	}
 
 	public void calDependsByIntensity(){
-		int dependsTimes = dependsByTimes;
+		double dependsTimes = dependsByIntensity;
 		if(dependsTimes > 0){
 			dependsByIntensity = dependsTimes / (dependsTimes + 10.0);
 		}
