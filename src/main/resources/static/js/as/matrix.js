@@ -13,7 +13,7 @@ var matrix = function() {
 		html += "</tr>";
 		for(var i = 0; i < matrixForCommits.commits.length; i++) {
 			html += "<tr>";
-			html += "<td><a target='_blank' href='/commit/" + matrixForCommits.commits[i].id + "'>" + matrixForCommits.commits[i].commitId + "</a></td>";
+			html += "<td>" + (i + 1) +":<a target='_blank' href='/commit/" + matrixForCommits.commits[i].id + "'>" + matrixForCommits.commits[i].commitId + "</a></td>";
 			for(var j = 0; j < matrixForCommits.files.length; j++) {
 				html += "<td>";
 				if(matrixForCommits.update[i][j] == true) {
