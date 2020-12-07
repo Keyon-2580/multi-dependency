@@ -53,7 +53,6 @@ public class MatrixController {
 		Project project = containRelationService.findFileBelongToProject(allFiles.get(0));
 		CommitsInFileMatrix matrixForCommits = service.findFilesCommits(allFiles, specifiedFiles, minCount, project);
 		IssuesInFileMatrix matrixForIssues = service.findFilesIssues(allFiles, specifiedFiles, minCount, project);
-		matrixForCommits.sortCommitByTime();
 		request.setAttribute("matrixForCommits", matrixForCommits);
 		request.setAttribute("matrixForIssues", matrixForIssues);
 		return "as/matrix";

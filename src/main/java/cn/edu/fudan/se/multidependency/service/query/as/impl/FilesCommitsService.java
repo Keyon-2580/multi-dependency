@@ -52,9 +52,9 @@ public class FilesCommitsService {
 				commits.add(commit);
 			}
 		}
-//		commits.sort((c1, c2) -> {
-//			return c1.getCommitTime() - c2.getCommitTime();
-//		});
+		commits.sort((c1, c2) -> {
+			return c1.getAuthoredDate().compareTo(c2.getAuthoredDate());
+		});
 		System.out.println("CommitsInFileMatrix " + commits.size());
 		boolean[][] updates = new boolean[commits.size()][files.size()];
 		for(int i = 0; i < commits.size(); i++) {
