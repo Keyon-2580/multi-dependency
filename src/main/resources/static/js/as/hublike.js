@@ -8,17 +8,23 @@ var hublike = function(cytoscapeutil) {
 			var hubLikeFiles = files[project.id];
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
-			html += "<th width='80%'>File</th>";
-			html += "<th width='10%'>Fan In</th>";
-			html += "<th width='10%'>Fan Out</th>";
+			html += "<th>Index</th>";
+			html += "<th>File</th>";
+			html += "<th>Fan In</th>";
+			html += "<th>Fan Out</th>";
+			html += "<th>Score</th>";
 			html += "</tr>";
+			var index = 0;
 			for(var fileIndex in hubLikeFiles) {
-				var file = hubLikeFiles[fileIndex];
-				console.log(file);
+				var hubLikeFile = hubLikeFiles[fileIndex];
+				console.log(fileIndex);
+				index ++;
 				html += "<tr>";
-				html += "<td><a target='_blank' href='/relation/file/" + file.file.id + "'>" + file.file.path + "</a></td>";
-				html += "<td>" + file.fanIn + "</td>";
-				html += "<td>" + file.fanOut + "</td>";
+				html += "<td>" + index + "</td>";
+				html += "<td><a target='_blank' href='/relation/file/" + hubLikeFile.file.id + "'>" + hubLikeFile.file.path + "</a></td>";
+				html += "<td>" + hubLikeFile.fanIn + "</td>";
+				html += "<td>" + hubLikeFile.fanOut + "</td>";
+				html += "<td>" + hubLikeFile.file.score + "</td>";
 				html += "</tr>";
 			}
 			
