@@ -128,6 +128,20 @@
             "lhs": "",
             "rhs": "",
         };
+
+        function getCookie(strCookie, key){
+            var value;
+            var arrCookie = strCookie.split(";");
+            for(var i=0; i<arrCookie.length; i++){
+                var arr = arrCookie[i].split("=");
+                if(key === arr[0]){
+                    value = arr[1];
+                    break;
+                }
+            }
+            return value;
+        }
+
         var URL = window.location.search;
         URL = URL.split('leftFilePath=')[1];
         var file1AbsolutePath = URL.split('&')[0];
@@ -135,41 +149,40 @@
         $(document).ready(function () {
             var lhsDecoder = document.getElementById("lhs_decode").value;
             var rhsDecoder = document.getElementById("rhs_decode").value;
-            if(document.cookie) {
-                lhsDecoder = document.cookie.split('&')[0];
-                rhsDecoder = document.cookie.split('&')[1];
-                switch (lhsDecoder) {
-                    case "GBK":
-                        lhs_decode.selectedIndex=1;
-                        break;
-                    case "GB2312":
-                        lhs_decode.selectedIndex=2;
-                        break;
-                    case "GB18030":
-                        lhs_decode.selectedIndex=3;
-                        break;
-                    case "ISO-8859-2":
-                        lhs_decode.selectedIndex=4;
-                        break;
-                    default:
-                        lhs_decode.selectedIndex=0;
-                }
-                switch (rhsDecoder) {
-                    case "GBK":
-                        rhs_decode.selectedIndex=1;
-                        break;
-                    case "GB2312":
-                        rhs_decode.selectedIndex=2;
-                        break;
-                    case "GB18030":
-                        rhs_decode.selectedIndex=3;
-                        break;
-                    case "ISO-8859-2":
-                        rhs_decode.selectedIndex=4;
-                        break;
-                    default:
-                        rhs_decode.selectedIndex=0;
-                }
+            var strCookie = document.cookie;
+            lhsDecoder = getCookie(strCookie, "lhs_decode");
+            rhsDecoder = getCookie(strCookie, "rhs_decode");
+            switch (lhsDecoder) {
+                case "GBK":
+                    lhs_decode.selectedIndex=1;
+                    break;
+                case "GB2312":
+                    lhs_decode.selectedIndex=2;
+                    break;
+                case "GB18030":
+                    lhs_decode.selectedIndex=3;
+                    break;
+                case "ISO-8859-2":
+                    lhs_decode.selectedIndex=4;
+                    break;
+                default:
+                    lhs_decode.selectedIndex=0;
+            }
+            switch (rhsDecoder) {
+                case "GBK":
+                    rhs_decode.selectedIndex=1;
+                    break;
+                case "GB2312":
+                    rhs_decode.selectedIndex=2;
+                    break;
+                case "GB18030":
+                    rhs_decode.selectedIndex=3;
+                    break;
+                case "ISO-8859-2":
+                    rhs_decode.selectedIndex=4;
+                    break;
+                default:
+                    rhs_decode.selectedIndex=0;
             }
             setFilesContext(file1AbsolutePath, file2AbsolutePath, lhsDecoder, rhsDecoder);
             window.filesInfo = function (files, target) {
@@ -196,7 +209,8 @@
                 $("#path-" + side).html(fileName);
                 sidefileName[side] = fileName;
             }
-            document.cookie = document.getElementById("lhs_decode").value + "&" + document.getElementById("rhs_decode").value;
+            document.cookie = "lhs_decode=" + document.getElementById("lhs_decode").value;
+            document.cookie = "rhs_decode=" + document.getElementById("rhs_decode").value;
         });
         let myFiles;
         function setFile(files, side) {
@@ -220,7 +234,8 @@
         }
 
         function setContext() {
-            document.cookie = document.getElementById("lhs_decode").value + "&" + document.getElementById("rhs_decode").value;
+            document.cookie = "lhs_decode=" + document.getElementById("lhs_decode").value;
+            document.cookie = "rhs_decode=" + document.getElementById("rhs_decode").value;
             location.reload();
         }
         function copyToClip(content) {
