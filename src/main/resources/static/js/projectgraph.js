@@ -687,8 +687,8 @@ function loadLink(jsonLinks) {
         //获取两个圆的transform属性（包含坐标信息）和半径
         var source_transform = d3.select("#" + d.source_id).attr("transform");
         var target_transform = d3.select("#" + d.target_id).attr("transform");
-        var r1 = d3.select("#" + d.source_id).attr("r");
-        var r2 = d3.select("#" + d.target_id).attr("r");
+        var r1 = parseFloat(d3.select("#" + d.source_id).attr("r"));
+        var r2 = parseFloat(d3.select("#" + d.target_id).attr("r"));
 
         //求初始情况下的两个圆心坐标
         var x1 = parseFloat(source_transform.slice(source_transform.indexOf("(") + 1, source_transform.indexOf(",")));
