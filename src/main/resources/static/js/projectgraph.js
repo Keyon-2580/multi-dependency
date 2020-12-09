@@ -933,17 +933,17 @@ function drawCloneTableBelow(link_id, type, nonclonefiles){
         let html_dependson_table = "";
 
         html_dependson_table += "<table class = \"gridtable\">"
-            + "<tr><th>目录1</th><th>目录1依赖类型(次数)</th><th>目录2</th><th>目录1依赖类型(次数)</th>"
+            + "<tr><th>目录1</th><th>目录1依赖类型(次数)</th><th>目录2</th><th>目录2依赖类型(次数)</th>"
             + "<th>依赖强度</th><th>被依赖强度</th></tr>";
 
         linksCurrent_global.forEach(function(d){
             if(d.type === "dependson"){
                 html_dependson_table += "<tr><td>" + d.source_name + "</td><td>"
                     + (d.dependsOnTypes === "" ? ""
-                    : (d.dependsOnTypes + "(" + d.dependsOnTimes + ")")) + "</td><td>"
+                    : (d.dependsOnTypes + "(" + d.dependsOnTimes + "," + d.dependsOnWeightedTimes.toFixed(2) + ")")) + "</td><td>"
                     + d.target_name + "</td><td>"
                     + (d.dependsByTypes === "" ? ""
-                    : (d.dependsByTypes + "(" + d.dependsByTimes + ")")) + "</td><td>"
+                    : (d.dependsByTypes + "(" + d.dependsByTimes + "," + d.dependsByWeightedTimes.toFixed(2) + ")")) + "</td><td>"
                     + d.dependsOnIntensity.toFixed(2) + "</td><td>"
                     + d.dependsByIntensity.toFixed(2) + "</td></tr>";
             }

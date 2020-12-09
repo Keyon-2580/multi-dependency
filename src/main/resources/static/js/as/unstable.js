@@ -12,6 +12,7 @@ var unstable = function(cytoscapeutil) {
 			html += "<tr>";
 			html += "<th>File</th>";
 			html += "<th>Instability</th>";
+			html += "<th>Score</th>";
 			html += "<th>All Outgoing Dependencies</th>";
 			html += "<th>Bad Outgoing Dependencies</th>";
 			html += "<th></th>";
@@ -21,7 +22,8 @@ var unstable = function(cytoscapeutil) {
 				console.log(file);
 				html += "<tr>";
 				html += "<td><a target='_blank' href='/relation/file/" + file.component.id + "'>" + file.component.path + "</a></td>";
-				html += "<td>" + file.instability.toFixed(2) + "</td>";
+				html += "<td>" + file.component.instability + "</td>";
+				html += "<td>" + file.component.score + "</td>";
 				html += "<td>" + file.allDependencies + "</td>";
 				html += "<td>" + file.badDependencies + "</td>";
 				
@@ -40,8 +42,11 @@ var unstable = function(cytoscapeutil) {
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
 			html += "<th>File</th>";
-			html += "<th>Fan In</th>";
+			html += "<th>Instability</th>";
+			html += "<th>Score</th>";
+			html += "<th>Fan In </th>";
 			html += "<th>Co-change Files</th>";
+			html += "<th>FanIn/Co-changeFiles</th>";
 //			html += "<th>Co-change Times</th>";
 			html += "<th>commits</th>";
 			html += "</tr>";
@@ -53,9 +58,12 @@ var unstable = function(cytoscapeutil) {
 				}
 				console.log(file);
 				html += "<tr>";
-				html += "<td width='50%'><a target='_blank' href='/relation/file/" + file.component.id + "'>" + file.component.path + "</a></td>";
-				html += "<td width='20%'>" + file.fanIn + "</td>";
-				html += "<td width='10%'>" + file.cochangeFiles.length + "</td>";
+				html += "<td><a target='_blank' href='/relation/file/" + file.component.id + "'>" + file.component.path + "</a></td>";
+				html += "<td>" + file.component.instability + "</td>";
+				html += "<td>" + file.component.score + "</td>";
+				html += "<td>" + file.fanIn + "</td>";
+				html += "<td>" + file.cochangeFiles.length + "</td>";
+				html += "<td>" + (file.cochangeFiles.length / file.fanIn).toFixed(2) + "</td>";
 //				html += "<td width='10%'>" + count + "</td>";
 				
 				var allFilesIds = file.component.id;
@@ -95,6 +103,7 @@ var unstable = function(cytoscapeutil) {
 			html += "<tr>";
 			html += "<th>Module</th>";
 			html += "<th>Instability</th>";
+			html += "<th>Score</th>";
 			html += "<th>All Outgoing Dependencies</th>";
 			html += "<th>Bad Outgoing Dependencies</th>";
 			html += "</tr>";
@@ -103,7 +112,8 @@ var unstable = function(cytoscapeutil) {
 				console.log(pck);
 				html += "<tr>";
 				html += "<td><a target='_blank' href='/relation/file/" + pck.component.id + "'>" + pck.component.name + "</a></td>";
-				html += "<td>" + pck.instability.toFixed(2) + "</td>";
+				html += "<td>" + pck.component.instability + "</td>";
+				html += "<td>" + pck.component.score + "</td>";
 				html += "<td>" + pck.allDependencies + "</td>";
 				html += "<td>" + pck.badDependencies + "</td>";
 				html += "</tr>";
