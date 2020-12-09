@@ -29,9 +29,9 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 	private Map<Project, Integer> projectToCoChangeTimesThreshold = new ConcurrentHashMap<>();
 	private Map<Project, Integer> projectToCoChangeFilesThreshold = new ConcurrentHashMap<>();
 	
-	public static final int DEFAULT_THRESHOLD_FAN_IN = 20;
-	public static final int DEFAULT_THRESHOLD_COCHANGE_TIMES = 4;
-	public static final int DEFAULT_THRESHOLD_COCHANGE_FILES = 10;
+	public static final int DEFAULT_THRESHOLD_FAN_IN = 10;
+	public static final int DEFAULT_THRESHOLD_COCHANGE_TIMES = 3;
+	public static final int DEFAULT_THRESHOLD_COCHANGE_FILES = 5;
 	
 	public void setFanInThreshold(Project project, int threshold) {
 		this.projectToFanInThreshold.put(project, threshold);

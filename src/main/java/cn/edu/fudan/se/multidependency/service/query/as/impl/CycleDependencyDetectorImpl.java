@@ -80,35 +80,35 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-		Collection<CycleComponents<ProjectFile>> cycles = asRepository.fileCycles();
+//		Collection<CycleComponents<ProjectFile>> cycles = asRepository.fileCycles();
 		Map<Long, Map<Integer, Cycle<ProjectFile>>> result = new HashMap<>();
-		for(CycleComponents<ProjectFile> cycle : cycles) {
-			Cycle<ProjectFile> cycleFile = new Cycle<ProjectFile>(cycle);
-			cycleFile.addAll(findCycleFileRelationsBySCC(cycle));
-			boolean flag = false;
-			Project project = null;
-			boolean crossModule = false;
-			Module lastModule = null;
-			for(ProjectFile file : cycle.getComponents()) {
-				Module fileBelongToModule = moduleService.findFileBelongToModule(file);
-				if(lastModule == null) {
-					lastModule = fileBelongToModule;
-				} else if(!lastModule.equals(fileBelongToModule)) {
-					crossModule = true;
-				}
-				cycleFile.putComponentBelongToGroup(file, fileBelongToModule);
-				if(!flag) {
-					project = containRelationService.findFileBelongToProject(file);
-					flag = true;
-				}
-			}
-			if(crossModule) {
-				Map<Integer, Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new HashMap<>());
-				temp.put(cycleFile.getPartition(), cycleFile);
-				result.put(project.getId(), temp);
-			}
-		}
-		cache.cache(getClass(), key, result);
+//		for(CycleComponents<ProjectFile> cycle : cycles) {
+//			Cycle<ProjectFile> cycleFile = new Cycle<ProjectFile>(cycle);
+//			cycleFile.addAll(findCycleFileRelationsBySCC(cycle));
+//			boolean flag = false;
+//			Project project = null;
+//			boolean crossModule = false;
+//			Module lastModule = null;
+//			for(ProjectFile file : cycle.getComponents()) {
+//				Module fileBelongToModule = moduleService.findFileBelongToModule(file);
+//				if(lastModule == null) {
+//					lastModule = fileBelongToModule;
+//				} else if(!lastModule.equals(fileBelongToModule)) {
+//					crossModule = true;
+//				}
+//				cycleFile.putComponentBelongToGroup(file, fileBelongToModule);
+//				if(!flag) {
+//					project = containRelationService.findFileBelongToProject(file);
+//					flag = true;
+//				}
+//			}
+//			if(crossModule) {
+//				Map<Integer, Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+//				temp.put(cycleFile.getPartition(), cycleFile);
+//				result.put(project.getId(), temp);
+//			}
+//		}
+//		cache.cache(getClass(), key, result);
 		return result;
 	}
 

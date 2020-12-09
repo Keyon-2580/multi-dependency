@@ -175,7 +175,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		}
 //		return FanIOMetric.calculateFanInUpperQuartile(metricCalculator.calculateFileMetrics().get(project.getId()));
 //		return metricCalculator.calculateProjectMetrics(false).get(project.getId()).getNof() / 5;
-		return 20;
+		return 10;
 	}
 
 	private double defaultFileMinFanOut(Project project) {
@@ -184,6 +184,6 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		}
 //		return FanIOMetric.calculateFanOutUpperQuartile(metricCalculator.calculateFileMetrics().get(project.getId()));
 //		return metricCalculator.calculateProjectMetrics(false).get(project.getId()).getNof() / 5;
-		return 20;
+		return 10;
 	}
 }
