@@ -10,8 +10,12 @@ var hublike = function(cytoscapeutil) {
 			html += "<tr>";
 			html += "<th>Index</th>";
 			html += "<th>File</th>";
-			html += "<th>Fan In</th>";
-			html += "<th>Fan Out</th>";
+			html += "<th>FanIn</th>";
+			html += "<th>Co-changeFilesIn/FanIn</th>";
+			html += "<th>FanOut</th>";
+			html += "<th>Co-changeFilesOut/FanOut</th>";
+			html += "<th>Co-changeFilesAll/(FanIn+FinOut)</th>";
+			html += "<th>Co-changeCommits</th>";
 			html += "<th>Score</th>";
 			html += "</tr>";
 			var index = 0;
@@ -23,8 +27,26 @@ var hublike = function(cytoscapeutil) {
 				html += "<td>" + index + "</td>";
 				html += "<td><a target='_blank' href='/relation/file/" + hubLikeFile.file.id + "'>" + hubLikeFile.file.path + "</a></td>";
 				html += "<td>" + hubLikeFile.fanIn + "</td>";
+				var inRatio = (hubLikeFile.coChangeFilesIn.length / hubLikeFile.fanIn).toFixed(2);
+				html += "<td>" + hubLikeFile.coChangeFilesIn.length + "/" + hubLikeFile.fanIn + "=" + inRatio + "</td>";
 				html += "<td>" + hubLikeFile.fanOut + "</td>";
-				html += "<td>" + hubLikeFile.file.score + "</td>";
+				var outRatio = (hubLikeFile.coChangeFilesOut.length / hubLikeFile.fanOut).toFixed(2);
+                html += "<td>" + hubLikeFile.coChangeFilesOut.length + "/" + hubLikeFile.fanOut + "=" + outRatio + "</td>";
+                var allIORatio = ((hubLikeFile.coChangeFilesIn.length + hubLikeFile.coChangeFilesOut.length) / (hubLikeFile.fanIn + hubLikeFile.fanOut)).toFixed(2);
+                html += "<td>(" + hubLikeFile.coChangeFilesIn.length + "+" + hubLikeFile.coChangeFilesOut.length + ")/(" ;
+				html += hubLikeFile.fanIn + "+" + hubLikeFile.fanOut + ")=" + allIORatio + "</td>";
+
+				var allFilesIds = hubLikeFile.file.id;
+                for(var j = 0; j < hubLikeFile.coChangeFilesIn.length; j++) {
+                    allFilesIds += "," + hubLikeFile.coChangeFilesIn[j].id;
+                }
+                for(var j = 0; j < hubLikeFile.coChangeFilesOut.length; j++) {
+                    allFilesIds += "," + hubLikeFile.coChangeFilesOut[j].id;
+                }
+
+                html += "<td>" + "<a target='_blank' href='/as/matrix?allFiles=" + allFilesIds + "&specifiedFiles=" + hubLikeFile.file.id + "&minCount=2'>commits</a>" + "</td>";
+
+				html += "<td>" + (hubLikeFile.file.score).toFixed(2) + "</td>";
 				html += "</tr>";
 			}
 			
