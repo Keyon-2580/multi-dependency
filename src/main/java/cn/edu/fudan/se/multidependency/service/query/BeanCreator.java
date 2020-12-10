@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,9 +84,10 @@ public class BeanCreator {
 		}
 		return coChanges;
 	}
-	
+
 	private void configSmellDetect(PropertyConfig propertyConfig, ASRepository asRepository) {
 		if(propertyConfig.isDetectAS() && !asRepository.existModule()) {
+			LOGGER.info("异味检测配置");
 			asRepository.createModule();
 			asRepository.createModuleDependsOn();
 			asRepository.createModuleHas();
@@ -112,78 +114,21 @@ public class BeanCreator {
 			//dependsOnRepository.createDependsOnWithIncludeInFiles();
 			dependsOnRepository.createDependsOnWithExtendsInFiles();
 			dependsOnRepository.createDependsOnWithImplementsInFiles();
-			//dependsOnRepository.createDependsOnWithDependencyInFiles();
 			dependsOnRepository.createDependsOnWithAssociationInFiles();
 			dependsOnRepository.createDependsOnWithAnnotationInFiles();
 			
 			dependsOnRepository.createDependsOnWithCallInFiles();
 			dependsOnRepository.createDependsOnWithImpllinkInFiles();
-			//dependsOnRepository.createDependsOnWithFunctionImplementsInFiles();
 			dependsOnRepository.createDependsOnWithCreateInFiles();
 			dependsOnRepository.createDependsOnWithCastInFiles();
 			dependsOnRepository.createDependsOnWithThrowInFiles();
 			dependsOnRepository.createDependsOnWithParameterInFiles();
 			dependsOnRepository.createDependsOnWithReturnInFiles();
 			dependsOnRepository.createDependsOnWithUseTypeInFiles();
-			//dependsOnRepository.createDependsOnWithAccessInFiles();
 			
 			//dependsRepository.createDependsOnWithTimesInFiles();
-			Map<ProjectFile, Map<ProjectFile, DependsOn>> fileDependsOnFile = new HashMap<>();
-			for (DependsOn dependsOn : dependsOnRepository.findFileDepends()){
-				if(dependsOn.getDependsOnType() != null){
-					ProjectFile file1 = (ProjectFile) dependsOn.getStartNode();
-					ProjectFile file2 = (ProjectFile) dependsOn.getEndNode();
-					Map<ProjectFile, DependsOn> dependsOnMap = fileDependsOnFile.getOrDefault(file1, new HashMap<>());
-					DependsOn fileDependsOn = dependsOnMap.get(file2);
-					if (fileDependsOn != null ){
-						if ( fileDependsOn.getDependsOnTypes().containsKey(dependsOn.getDependsOnType()) ) {
-							Long times = fileDependsOn.getDependsOnTypes().get(dependsOn.getDependsOnType());
-							times += Long.valueOf(dependsOn.getTimes());
-							fileDependsOn.getDependsOnTypes().put(dependsOn.getDependsOnType(), times);
-						}else {
-							fileDependsOn.getDependsOnTypes().put(dependsOn.getDependsOnType(), Long.valueOf(dependsOn.getTimes()));
-							String dTypes = fileDependsOn.getDependsOnType();
-							fileDependsOn.setDependsOnType(dTypes + "__" + dependsOn.getDependsOnType());
-						}
-						int timesTmp = fileDependsOn.getTimes() + dependsOn.getTimes();
-						fileDependsOn.setTimes(timesTmp);
-						dependsOnMap.put(file2, fileDependsOn);
-					} else {
-						DependsOn newDepends = new DependsOn(file1, file2);
-						newDepends.getDependsOnTypes().put(dependsOn.getDependsOnType(), Long.valueOf(dependsOn.getTimes()));
-						newDepends.setDependsOnType(dependsOn.getDependsOnType());
-						newDepends.setTimes(dependsOn.getTimes());
-						dependsOnMap.put(file2, newDepends);
-					}
-					
-					fileDependsOnFile.put(file1, dependsOnMap);
-				}
-			}
-			
-			for (Map.Entry<ProjectFile, Map<ProjectFile, DependsOn>> entry : fileDependsOnFile.entrySet()){
-				ProjectFile file1 = entry.getKey();
-				List<DependsOn> dependsOnListTmp = new ArrayList<>();
-				int size = 0;
-				for (DependsOn fDependsOn : fileDependsOnFile.get(file1).values()){
-					fDependsOn.getDependsOnTypes().forEach( (key, value) -> {
-						Double weight = RelationType.relationWeights.get(RelationType.valueOf(key));
-						if(weight != null){
-							BigDecimal intensity  =  new BigDecimal( value * weight);
-							fDependsOn.addDependsOnIntensity(intensity.setScale(2, RoundingMode.HALF_UP).doubleValue());
-						} else {
-							LOGGER.info("关系权重未定义：" + key);
-						}
-					});
-					dependsOnListTmp.add(fDependsOn);
-					if(size++ > 500){
-						dependsOnRepository.saveAll(dependsOnListTmp);
-						dependsOnListTmp.clear();
-						size = 0;
-					}
-				}
-				dependsOnRepository.saveAll(dependsOnListTmp);
-			}
-			
+			dependsOnRepository.createDependsOnWithTimesInNode(NodeLabelType.ProjectFile);
+
 			dependsOnRepository.deleteNullAggregationDependsOnInFiles();
 			
 			//dependsRepository.createDependsInPackages();
@@ -233,8 +178,8 @@ public class BeanCreator {
 					pckDependsOn.getDependsOnTypes().forEach( (key, value) -> {
 						Double weight = RelationType.relationWeights.get(RelationType.valueOf(key));
 						if(weight != null){
-							BigDecimal intensity  =  new BigDecimal( value * weight);
-							pckDependsOn.addDependsOnIntensity(intensity.setScale(2, RoundingMode.HALF_UP).doubleValue());
+							BigDecimal weightedTimes  =  new BigDecimal( value * weight);
+							pckDependsOn.addWeightedTimes(weightedTimes.setScale(2, RoundingMode.HALF_UP).doubleValue());
 						} else {
 							LOGGER.info("关系权重未定义：" + key);
 						}

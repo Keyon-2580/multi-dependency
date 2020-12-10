@@ -35,7 +35,7 @@ public class DependsOn implements Relation, RelationWithTimes{
 	@Properties(allowCast = true)
 	private Map<String, Long> dependsOnTypes = new HashMap<>();
 
-	private double dependsOnIntensity;
+	private double weightedTimes;
 
 	public DependsOn(Node startNode, Node endNode) {
 		this.startNode = startNode;
@@ -77,8 +77,8 @@ public class DependsOn implements Relation, RelationWithTimes{
 		this.times++;
 	}
 
-	public void addDependsOnIntensity(double intensity) {
-		this.dependsOnIntensity += intensity;
+	public void addWeightedTimes(double weightedTimes) {
+		this.weightedTimes += weightedTimes;
 	}
 
 	public void addDependsTypes(Relation relation){
@@ -91,13 +91,13 @@ public class DependsOn implements Relation, RelationWithTimes{
 
 		Long dependsTimes = dependsOnTypes.get(relation.getRelationType().toString());
 		if (dependsTimes != null){
-			dependsTimes += Long.valueOf(times);
+			dependsTimes += times;
 			dependsOnTypes.put(relation.getRelationType().toString(), dependsTimes);
 		} else {
 			dependsOnTypes.put(relation.getRelationType().toString(), Long.valueOf(times));
 		}
 
 		Double weight = RelationType.relationWeights.get(relation.getRelationType());
-		dependsOnIntensity += ( weight != null ? times * weight : 0 ) ;
+		weightedTimes += ( weight != null ? times * weight : 0 ) ;
 	}
 }

@@ -17,7 +17,6 @@ import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepositor
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.*;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.clone.CloneValueService;
-import cn.edu.fudan.se.multidependency.service.query.clone.data.FileCloneWithCoChange;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
@@ -28,8 +27,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 
 @Service
@@ -405,20 +402,20 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		StringBuilder dependsByStr = new StringBuilder();
 		int dependsOnTimes = 0;
 		int dependsByTimes = 0;
-		double dependsOnIntensity = 0.0;
-		double dependsByIntensity = 0.0;
+		double dependsOnWeightedTimes = 0.0;
+		double dependsByWeightedTimes = 0.0;
 		Map<String, Long> dependsOnTypesMap = new HashMap<>();
 		Map<String, Long> dependsByTypesMap = new HashMap<>();
 		for (DependsOn dependsOn : packageDependsOnList){
 			if(dependsOn.getStartNode().getId().equals(pck1.getId())){
 				dependsOnStr.append(dependsOn.getDependsOnType());
 				dependsOnTimes += dependsOn.getTimes();
-				dependsOnIntensity += dependsOn.getDependsOnIntensity();
+				dependsOnWeightedTimes += dependsOn.getWeightedTimes();
 				dependsOnTypesMap.putAll(dependsOn.getDependsOnTypes());
 			}else {
 				dependsByStr.append(dependsOn.getDependsOnType());
 				dependsByTimes += dependsOn.getTimes();
-				dependsByIntensity += dependsOn.getDependsOnIntensity();
+				dependsByWeightedTimes += dependsOn.getWeightedTimes();
 				dependsByTypesMap.putAll(dependsOn.getDependsOnTypes());
 			}
 		}
@@ -429,8 +426,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		dependsRelationDataForDoubleNodes.setDependsByTimes(dependsByTimes);
 		dependsRelationDataForDoubleNodes.setDependsOnTypesMap(dependsOnTypesMap);
 		dependsRelationDataForDoubleNodes.setDependsByTypesMap(dependsByTypesMap);
-		dependsRelationDataForDoubleNodes.setDependsOnIntensity(dependsOnIntensity);
-		dependsRelationDataForDoubleNodes.setDependsByIntensity(dependsByIntensity);
+		dependsRelationDataForDoubleNodes.setDependsOnWeightedTimes(dependsOnWeightedTimes);
+		dependsRelationDataForDoubleNodes.setDependsByWeightedTimes(dependsByWeightedTimes);
 		dependsRelationDataForDoubleNodes.calDependsOnIntensity();
 		dependsRelationDataForDoubleNodes.calDependsByIntensity();
 		return new HotspotPackagePair(dependsRelationDataForDoubleNodes);

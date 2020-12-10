@@ -20,7 +20,6 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -270,8 +269,10 @@ public class ProjectServiceImpl implements ProjectService{
                     link.put("dependsByTypes", dependsRelationDataForDoubleNodes.getDependsByTypes());
                     link.put("dependsOnTimes", dependsRelationDataForDoubleNodes.getDependsOnTimes());
                     link.put("dependsByTimes", dependsRelationDataForDoubleNodes.getDependsByTimes());
-                    link.put("dependsOnIntensity", dependsRelationDataForDoubleNodes.getDependsOnIntensity());
-                    link.put("dependsByIntensity", dependsRelationDataForDoubleNodes.getDependsByIntensity());
+                    link.put("dependsOnWeightedTimes", dependsRelationDataForDoubleNodes.getDependsOnWeightedTimes());
+                    link.put("dependsByWeightedTimes", dependsRelationDataForDoubleNodes.getDependsByWeightedTimes());
+                    link.put("dependsOnIntensity", dependsRelationDataForDoubleNodes.getDependsOnInstability());
+                    link.put("dependsByIntensity", dependsRelationDataForDoubleNodes.getDependsByInstability());
 
                     if(dependsRelationDataForDoubleNodes.getDependsOnTypes().equals("") ||
                             dependsRelationDataForDoubleNodes.getDependsByTypes().equals("")){
