@@ -22,8 +22,8 @@ var unstable = function(cytoscapeutil) {
 				console.log(file);
 				html += "<tr>";
 				html += "<td><a target='_blank' href='/relation/file/" + file.component.id + "'>" + file.component.path + "</a></td>";
-				html += "<td>" + file.component.instability + "</td>";
-				html += "<td>" + file.component.score + "</td>";
+				html += "<td>" + (file.component.instability).toFixed(2) + "</td>";
+				html += "<td>" + (file.component.score).toFixed(2) + "</td>";
 				html += "<td>" + file.allDependencies + "</td>";
 				html += "<td>" + file.badDependencies + "</td>";
 				
@@ -59,8 +59,8 @@ var unstable = function(cytoscapeutil) {
 				console.log(file);
 				html += "<tr>";
 				html += "<td><a target='_blank' href='/relation/file/" + file.component.id + "'>" + file.component.path + "</a></td>";
-				html += "<td>" + file.component.instability + "</td>";
-				html += "<td>" + file.component.score + "</td>";
+				html += "<td>" + (file.component.instability).toFixed(2) + "</td>";
+				html += "<td>" + (file.component.score).toFixed(2) + "</td>";
 				html += "<td>" + file.fanIn + "</td>";
 				html += "<td>" + file.cochangeFiles.length + "</td>";
 				html += "<td>" + (file.cochangeFiles.length / file.fanIn).toFixed(2) + "</td>";
@@ -112,8 +112,10 @@ var unstable = function(cytoscapeutil) {
 				console.log(pck);
 				html += "<tr>";
 				html += "<td><a target='_blank' href='/relation/file/" + pck.component.id + "'>" + pck.component.name + "</a></td>";
-				html += "<td>" + pck.component.instability + "</td>";
-				html += "<td>" + pck.component.score + "</td>";
+				var pck_instability = pck.component.instability != null ? (pck.component.instability).toFixed(2) : "NULL"
+				html += "<td>" + pck_instability  + "</td>";
+				var pck_score = pck.component.score != null ? (pck.component.score).toFixed(2) : "NULL"
+				html += "<td>" + pck_score + "</td>";
 				html += "<td>" + pck.allDependencies + "</td>";
 				html += "<td>" + pck.badDependencies + "</td>";
 				html += "</tr>";

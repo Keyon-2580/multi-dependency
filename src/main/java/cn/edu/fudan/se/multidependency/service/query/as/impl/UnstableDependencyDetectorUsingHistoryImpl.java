@@ -127,12 +127,14 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 		ProjectFile file = metrics.getFile();
 		Collection<ProjectFile> fanInFiles = fileRepository.calculateFanIn(file.getId());
 		List<CoChange> cochanges = new ArrayList<>();
-		for(ProjectFile dependedOnFile : fanInFiles) {
-			// 遍历每个依赖File的文件，搜索协同修改次数
-			CoChange cochange = gitAnalyseService.findCoChangeBetweenTwoFiles(file, dependedOnFile);
-			if(cochange != null && cochange.getTimes() >= coChangeTimesThreshold) {
-				coChangeFilesCount++;
-				cochanges.add(cochange);
+		if(fanInFiles != null){
+			for(ProjectFile dependedOnFile : fanInFiles) {
+				// 遍历每个依赖File的文件，搜索协同修改次数
+				CoChange cochange = gitAnalyseService.findCoChangeBetweenTwoFiles(file, dependedOnFile);
+				if(cochange != null && cochange.getTimes() >= coChangeTimesThreshold) {
+					coChangeFilesCount++;
+					cochanges.add(cochange);
+				}
 			}
 		}
 		UnstableFileInHistory result = null;

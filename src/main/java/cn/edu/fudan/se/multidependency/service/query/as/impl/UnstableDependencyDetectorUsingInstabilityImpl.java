@@ -41,7 +41,7 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 	@Autowired
 	private MetricCalculator metricCalculator;
 	
-	public static final int DEFAULT_THRESHOLD_FILE_FANOUT = 15;
+	public static final int DEFAULT_THRESHOLD_FILE_FANOUT = 10;
 	public static final int DEFAULT_THRESHOLD_MODULE_FANOUT = 1;
 	public static final double DEFAULT_THRESHOLD_RATIO = 0.3;
 	
