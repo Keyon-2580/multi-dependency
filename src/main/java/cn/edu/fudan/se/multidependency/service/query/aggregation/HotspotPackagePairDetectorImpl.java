@@ -629,6 +629,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 					childPackagePairCloneRelationData.setCoChangeTimesData(cloneNodesCoChangeTimes, allNodesCoChangeTimes);
 					childHotspotPackagePair.setPackagePairRelationData(childPackagePairCloneRelationData);
 					childrenHotspotPackagePairs.add(childHotspotPackagePair);
+					currentPackagePairCloneRelationData.setClonePairs(0);
 				}
 				else {
 					childPackage1.setAllNodes(containRelationService.findPackageContainFiles(currentPackage1).size());
