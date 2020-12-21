@@ -185,7 +185,12 @@ var loadPageData = function () {
 
             // console.log(html)
             $("#projectToGraph_util").html(html);
-            $('.selectpicker').selectpicker();
+            $(".selectpicker").selectpicker({
+                actionsBox:true,
+                countSelectedText:"已选中{0}项",
+                selectedTextFormat:"count > 2"
+            })
+            // $('.selectpicker').selectpicker();
 
             var temp_array = [];
             temp_array.push(projectlist[0].id);
@@ -447,25 +452,27 @@ var showLine = function(links_local, type){
 
         if(relation_type === "clone" && flag_delete === false){
             var cloneMatchRate = links_local[i - 1].cloneMatchRate.toFixed(2);
+            var similarityhigh = parseInt($("#similarityhigh").val()).toFixed(2)
+            var similaritybelow = parseInt($("#similaritybelow").val()).toFixed(2)
             if($("#cloneSimilarity").prop("checked")){
                 var temp_flag_clonesimilarity = false;
 
                 if($("#similarityCompareSelectBelow").val() === "<=" &&
-                    cloneMatchRate >= $("#similaritybelow").val()){
+                    cloneMatchRate >= similaritybelow){
                     if($("#similarityCompareSelectHigh").val() === "<=" &&
-                        cloneMatchRate <= $("#similarityhigh").val()){
+                        cloneMatchRate <= similarityhigh){
                         temp_flag_clonesimilarity = true;
                     }else if($("#similarityCompareSelectHigh").val() === "<" &&
-                        cloneMatchRate < $("#similarityhigh").val()){
+                        cloneMatchRate < similarityhigh){
                         temp_flag_clonesimilarity = true;
                     }
                 }else if($("#similarityCompareSelectBelow").val() === "<" &&
-                    cloneMatchRate > $("#similaritybelow").val()){
+                    cloneMatchRate > similaritybelow){
                     if($("#similarityCompareSelectHigh").val() === "<=" &&
-                        cloneMatchRate <= $("#similarityhigh").val()){
+                        cloneMatchRate <= similarityhigh){
                         temp_flag_clonesimilarity = true;
                     }else if($("#similarityCompareSelectHigh").val() === "<" &&
-                        cloneMatchRate < $("#similarityhigh").val()){
+                        cloneMatchRate < similarityhigh){
                         temp_flag_clonesimilarity = true;
                     }
                 }
@@ -914,13 +921,13 @@ function drawCloneTableBelow(link_id, type, nonclonefiles){
 
             if(nonclonefiles1.length > 0){
                 nonclonefiles1.forEach(function (item){
-                    html_clone_table_body += "<tr><td>" + item.name + "</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
+                    html_clone_table_body += "<tr><td>|---" + item.name + "</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
                 })
             }
 
             if(nonclonefiles2.length > 0){
                 nonclonefiles2.forEach(function (item){
-                    html_clone_table_body += "<tr><td></td><td>" + item.name + "</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
+                    html_clone_table_body += "<tr><td></td><td>|---" + item.name + "</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
                 })
             }
         }

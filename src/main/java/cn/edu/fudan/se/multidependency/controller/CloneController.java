@@ -425,17 +425,6 @@ public class CloneController {
 		}
 		return context;
 	}
-	/**
-	 * 查询一个project中所有的包克隆关系
-	 * @return
-	 */
-	@GetMapping("/project/all")
-	@ResponseBody
-	public JSONArray clonesInPackageWithCoChange(@RequestParam("project") long projectId) {
-		Project project = nodeService.queryProject(projectId);
-		Collection<Clone> cloneList = basicCloneQueryService.findClonesInProject(project);
-		return basicCloneQueryService.ClonesInProject(cloneList);
-	}
 
 	/**
 	 * 查询一个project中所有的包克隆关系

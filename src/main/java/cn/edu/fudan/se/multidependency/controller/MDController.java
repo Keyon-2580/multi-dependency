@@ -21,5 +21,10 @@ public class MDController {
 		request.setAttribute("projects", nodeService.allProjects());
 		return "index";
 	}
+
+	@GetMapping(value= {"/overview"})
+	public String overview() {
+		return "overview";
+	}
 	
 }

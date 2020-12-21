@@ -163,14 +163,6 @@ public class BasicCloneQueryServiceImpl implements BasicCloneQueryService {
 		return result;
 	}
 
-	Map<Project, Collection<Clone>> ClonesInProjectCache = new ConcurrentHashMap<>();
-	@Override
-	public Collection<Clone> findClonesInProject(Project project) {
-		cloneRepository.setProjectClone();
-		Collection<Clone> result = ClonesInProjectCache.getOrDefault(project, cloneRepository.findClonesInProject(project.getId()));
-		return result;
-	}
-
 	@Override
 	public JSONArray ClonesInProject(Collection<Clone> clones) {
 		Map<CodeNode, Map<CodeNode, Clone>> values = new HashMap<>();

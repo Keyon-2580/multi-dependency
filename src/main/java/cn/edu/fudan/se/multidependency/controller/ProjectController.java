@@ -613,73 +613,73 @@ public class ProjectController {
 		return projectService.cloneGraphAndTableOfChildrenPackages(package1Id, package2Id);
 	}
 
-	@GetMapping("/has/echarts")
-	@ResponseBody
-	public JSONObject projectHasForEcharts(@RequestParam("projectId") long projectId) {
-		if(nodesInPackagesForEcharts.size() > 0){
-			nodesInPackagesForEcharts.clear();
-		}
-
-		if(linksForEcharts.size() > 0){
-			linksForEcharts.clear();
-		}
-
-		JSONObject result = new JSONObject();
-		JSONArray nodes = new JSONArray();
-		JSONArray clone = new JSONArray();
-		JSONArray links_package = new JSONArray();
-
-		Project project = nodeService.queryProject(projectId);
-		ProjectStructure projectStructure = hasRelationService.projectHasInitialize(project);
-
-		List<PackageStructure> childrenPackages = projectStructure.getChildren();
-		List<PackageStructure> childrenPackagesnew = new ArrayList<>();
-		JSONObject nodeJSON = new JSONObject();
-
-		for(PackageStructure pckstru : childrenPackages){
-			JSONObject linkBetweenProjectAndPackage = new JSONObject();
-			linkBetweenProjectAndPackage.put("source", project.getId().toString());
-			linkBetweenProjectAndPackage.put("target", pckstru.getPck().getId().toString());
-			linksForEcharts.add(linkBetweenProjectAndPackage);
-			PackageStructure pcknew = hasRelationService.packageHasInitialize(pckstru.getPck());
-			childrenPackagesnew.add(pcknew);
-		}
-
-		nodeJSON.put("name", project.getName());
-		nodeJSON.put("id", project.getId().toString());
-		JSONObject modularity_class = new JSONObject();
-		modularity_class.put("modularity_class", 0);
-		nodeJSON.put("attributes", modularity_class);
-//		Collection<ProjectFile> clonefiles = basicCloneQueryService.findProjectContainCloneFiles(project);
-		getHasJsonForEcharts(childrenPackagesnew);
-		nodesInPackagesForEcharts.add(nodeJSON);
-		result.put("nodes",nodesInPackagesForEcharts);
-		result.put("links",linksForEcharts);
-
-
-		Collection<Clone> cloneList = basicCloneQueryService.findClonesInProject(project);
-		clone = basicCloneQueryService.ClonesInProject(cloneList);
-		result.put("clone",clone);
-
-
-		List<HotspotPackage> hotspotPackageList = hotspotPackageDetector.detectHotspotPackagesByParentId(-1, -1, "all");
-		for (HotspotPackage hotspotPackage : hotspotPackageList) {
-			JSONObject link = new JSONObject();
-			link.put("source", hotspotPackage.getPackage1().getId().toString());
-			link.put("target", hotspotPackage.getPackage2().getId().toString());
-			JSONObject lineStyle = new JSONObject();
-			lineStyle.put("color", "#f50000");
-			lineStyle.put("width", 3);
-			lineStyle.put("opacity", 1);
-			link.put("lineStyle", lineStyle);
-			link.put("source_projectBelong", containRelationService.findPackageBelongToProject(hotspotPackage.getPackage1()).getId());
-			link.put("target_projectBelong", containRelationService.findPackageBelongToProject(hotspotPackage.getPackage2()).getId());
-			links_package.add(link);
-		}
-		result.put("links_package",links_package);
-
-		return result;
-	}
+//	@GetMapping("/has/echarts")
+//	@ResponseBody
+//	public JSONObject projectHasForEcharts(@RequestParam("projectId") long projectId) {
+//		if(nodesInPackagesForEcharts.size() > 0){
+//			nodesInPackagesForEcharts.clear();
+//		}
+//
+//		if(linksForEcharts.size() > 0){
+//			linksForEcharts.clear();
+//		}
+//
+//		JSONObject result = new JSONObject();
+//		JSONArray nodes = new JSONArray();
+//		JSONArray clone = new JSONArray();
+//		JSONArray links_package = new JSONArray();
+//
+//		Project project = nodeService.queryProject(projectId);
+//		ProjectStructure projectStructure = hasRelationService.projectHasInitialize(project);
+//
+//		List<PackageStructure> childrenPackages = projectStructure.getChildren();
+//		List<PackageStructure> childrenPackagesnew = new ArrayList<>();
+//		JSONObject nodeJSON = new JSONObject();
+//
+//		for(PackageStructure pckstru : childrenPackages){
+//			JSONObject linkBetweenProjectAndPackage = new JSONObject();
+//			linkBetweenProjectAndPackage.put("source", project.getId().toString());
+//			linkBetweenProjectAndPackage.put("target", pckstru.getPck().getId().toString());
+//			linksForEcharts.add(linkBetweenProjectAndPackage);
+//			PackageStructure pcknew = hasRelationService.packageHasInitialize(pckstru.getPck());
+//			childrenPackagesnew.add(pcknew);
+//		}
+//
+//		nodeJSON.put("name", project.getName());
+//		nodeJSON.put("id", project.getId().toString());
+//		JSONObject modularity_class = new JSONObject();
+//		modularity_class.put("modularity_class", 0);
+//		nodeJSON.put("attributes", modularity_class);
+////		Collection<ProjectFile> clonefiles = basicCloneQueryService.findProjectContainCloneFiles(project);
+//		getHasJsonForEcharts(childrenPackagesnew);
+//		nodesInPackagesForEcharts.add(nodeJSON);
+//		result.put("nodes",nodesInPackagesForEcharts);
+//		result.put("links",linksForEcharts);
+//
+//
+//		Collection<Clone> cloneList = basicCloneQueryService.findClonesInProject(project);
+//		clone = basicCloneQueryService.ClonesInProject(cloneList);
+//		result.put("clone",clone);
+//
+//
+//		List<HotspotPackage> hotspotPackageList = hotspotPackageDetector.detectHotspotPackagesByParentId(-1, -1, "all");
+//		for (HotspotPackage hotspotPackage : hotspotPackageList) {
+//			JSONObject link = new JSONObject();
+//			link.put("source", hotspotPackage.getPackage1().getId().toString());
+//			link.put("target", hotspotPackage.getPackage2().getId().toString());
+//			JSONObject lineStyle = new JSONObject();
+//			lineStyle.put("color", "#f50000");
+//			lineStyle.put("width", 3);
+//			lineStyle.put("opacity", 1);
+//			link.put("lineStyle", lineStyle);
+//			link.put("source_projectBelong", containRelationService.findPackageBelongToProject(hotspotPackage.getPackage1()).getId());
+//			link.put("target_projectBelong", containRelationService.findPackageBelongToProject(hotspotPackage.getPackage2()).getId());
+//			links_package.add(link);
+//		}
+//		result.put("links_package",links_package);
+//
+//		return result;
+//	}
 
 	/**
 	 * 递归遍历项目中所有package的包含关系

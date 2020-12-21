@@ -30,47 +30,9 @@
 <div id = "projectFileCloneTable"></div>
     <script type="text/javascript" th:src="@{/js/projectgraph.js}"></script>
     <script type="text/javascript" th:inline="javascript">
-        // var divId = "#projectToGraph";
-        //
-        // window.onload=function(){
-        //     initEvent()
-        //     //计算是宽度优先的还是高度优先的
-        //     initScale()
-        // }
-        // function initScale(){
-        //     var initScale = 1;
-        //     if($(window).width()/$(divId).width()<$(window).height()/$(divId).height()){
-        //         initScale=$(window).width()/$(divId).width();
-        //     }else{
-        //         initScale=$(window).height()/$(divId).height();
-        //     }
-        //     console.log(initScale)
-        //     $(divId).css("transform","scale("+initScale+")")
-        // }
-        // function initEvent(){
-        //     //滚轮效果
-        //     var params={}
-        //     $('body').on('mousewheel',function(e){
-        //         params.zoomVal+=event.wheelDelta/1200;
-        //         var o=e.target;
-        //         if (params.zoomVal >= 0.2) {
-        //             $(divId).css("transform","scale("+params.zoomVal+")")
-        //         } else {
-        //             params.zoomVal=0.2;//不让其一直无限缩小
-        //             $(divId).css("transform","scale("+params.zoomVal+")")
-        //             return false;
-        //         }
-        //     })
-        //     $(window).on("resize",function(){
-        //         initScale()
-        //     })
-        // }
-
-        //<![CDATA[
         $(document).ready(function() {
             projectgraph().init();
         });
-        // ]]>
     </script>
 </body>
 </html>
