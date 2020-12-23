@@ -101,4 +101,17 @@ public class DependsOn implements Relation, RelationWithTimes{
 		Double weight = RelationType.relationWeights.get(relation.getRelationType());
 		weightedTimes += ( weight != null ? times * weight : 0 ) ;
 	}
+
+	public String printDependsOnTypes(){
+		StringBuilder result = new StringBuilder("");
+		for (String key:
+				dependsOnTypes.keySet()) {
+			if(!result.equals("")){
+				result.append("/");
+			}
+			result.append(RelationType.relationAbbreviation.get(RelationType.valueOf(key)));
+			result.append("(" + dependsOnTypes.get(key).toString() + ")");
+		}
+		return result.toString();
+	}
 }

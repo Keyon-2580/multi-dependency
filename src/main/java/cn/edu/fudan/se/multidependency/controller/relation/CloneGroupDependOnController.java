@@ -11,7 +11,6 @@ import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.clone.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +26,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/relation/dependsdetail/{name}")
-public class DependsDetailController {
+public class CloneGroupDependOnController {
 
     @Autowired
     private NodeService nodeService;

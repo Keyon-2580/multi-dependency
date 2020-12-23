@@ -941,7 +941,7 @@ function drawCloneTableBelow(link_id, type, nonclonefiles){
 
         html_dependson_table += "<table class = \"gridtable\">"
             + "<tr><th>目录1</th><th>目录1依赖类型(次数)</th><th>目录2</th><th>目录2依赖类型(次数)</th>"
-            + "<th>依赖强度</th><th>被依赖强度</th></tr>";
+            + "<th>依赖强度</th><th>被依赖强度</th><th>详细信息</th></tr>";
 
         linksCurrent_global.forEach(function(d){
             if(d.type === "dependson"){
@@ -952,7 +952,9 @@ function drawCloneTableBelow(link_id, type, nonclonefiles){
                     + (d.dependsByTypes === "" ? ""
                     : (d.dependsByTypes + "(" + d.dependsByTimes + "," + d.dependsByWeightedTimes.toFixed(2) + ")")) + "</td><td>"
                     + d.dependsOnIntensity.toFixed(2) + "</td><td>"
-                    + d.dependsByIntensity.toFixed(2) + "</td></tr>";
+                    + d.dependsByIntensity.toFixed(2) + "</td><td>"
+                    + "<a target='_blank' href='/dependon?pck1=" + d.source_id.split("_")[1] + "&pck2=" + d.target_id.split("_")[1]
+                    + "&dependsOnIntensity=" + d.dependsOnIntensity.toFixed(2) + "&dependsByIntensity=" + d.dependsByIntensity.toFixed(2) + "'>detail</a></td></tr>";
             }
         })
 
