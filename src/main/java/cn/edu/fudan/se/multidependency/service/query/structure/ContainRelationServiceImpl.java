@@ -95,11 +95,16 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		return result;
 	}
 
-	Map<Package, Collection<ProjectFile>> packageContainFilesCache = new ConcurrentHashMap<>();
+//	Map<Package, Collection<ProjectFile>> packageContainFilesCache = new ConcurrentHashMap<>();
 	@Override
 	public Collection<ProjectFile> findPackageContainFiles(Package pck) {
-		Collection<ProjectFile> result = packageContainFilesCache.getOrDefault(pck, containRepository.findPackageContainFiles(pck.getId()));
-		packageContainFilesCache.put(pck, result);
+		Collection<ProjectFile> result = new ArrayList<ProjectFile>();
+//		if(packageContainFilesCache.get(pck) != null){
+//			result = packageContainFilesCache.get(pck);
+//		}else{
+			result = containRepository.findPackageContainFiles(pck.getId());
+		//}
+//		packageContainFilesCache.put(pck, result);
 		result.forEach(file -> {
 			cache.cacheNodeBelongToNode(file, pck);
 		});

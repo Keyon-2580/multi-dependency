@@ -66,7 +66,7 @@ public class DependOnDetailController {
                     }
                 }
                 if (dependsOnRepository.findSureDependsOnInFiles(file2.getId(), file1.getId()) != null) {
-                    DependsOn dependOn = dependsOnRepository.findSureDependsOnInFiles(file1.getId(), file2.getId());
+                    DependsOn dependOn = dependsOnRepository.findSureDependsOnInFiles(file2.getId(), file1.getId());
                     Map<String,Long> dependOn2Types = dependOn.getDependsOnTypes();
                     for (String key:
                             dependOn2Types.keySet()) {
