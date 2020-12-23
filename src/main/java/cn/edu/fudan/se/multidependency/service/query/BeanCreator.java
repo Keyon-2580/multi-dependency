@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
-import cn.edu.fudan.se.multidependency.service.query.aggregation.DependsOnPackagePairDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,6 @@ import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.config.PropertyConfig;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
-import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
@@ -55,9 +53,6 @@ public class BeanCreator {
 
 	@Autowired
 	private HotspotPackagePairDetector hotspotPackagePairDetector;
-
-	@Autowired
-	private DependsOnPackagePairDetector dependsOnPackagePairDetector;
 
 	@Autowired
 	private SummaryAggregationDataService summaryAggregationDataService;
@@ -173,7 +168,7 @@ public class BeanCreator {
 //					packageDependsOnPackage.put(pck1, dependsOnMap);
 //				}
 //			}
-			Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = new HashMap<>(dependsOnPackagePairDetector.detectDependsOnPackagePairs());
+			Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = new HashMap<>(hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOn());
 			
 			for (Map.Entry<Package, Map<Package, DependsOn>> entry : packageDependsOnPackage.entrySet()){
 				Package pck1 = entry.getKey();

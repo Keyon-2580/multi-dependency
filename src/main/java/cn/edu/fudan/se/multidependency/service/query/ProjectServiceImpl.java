@@ -190,9 +190,9 @@ public class ProjectServiceImpl implements ProjectService{
 
     @Override
     public JSONObject getAllProjectsCloneLinks(){
-        List<HotspotPackagePair> cloneHotspotPackageList = hotspotPackagePairDetector.detectHotspotPackagePairWithFileCloneByParentId(-1, -1, "all");
-        List<HotspotPackagePair> dependsonHotspotPackageList = hotspotPackagePairDetector.detectHotspotPackagesByDependsOnInAllProjects();
-        List<HotspotPackagePair> cochangeHotspotPackageList = hotspotPackagePairDetector.detectHotspotPackagesByCoChangeInAllProjects();
+        List<HotspotPackagePair> cloneHotspotPackageList = hotspotPackagePairDetector.getHotspotPackagePairWithFileCloneByParentId(-1, -1, "all");
+        List<HotspotPackagePair> dependsonHotspotPackageList = hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOnInAllProjects();
+        List<HotspotPackagePair> cochangeHotspotPackageList = hotspotPackagePairDetector.detectHotspotPackagePairWithCoChangeInAllProjects();
         cloneHotspotPackageList.addAll(dependsonHotspotPackageList);
         cloneHotspotPackageList.addAll(cochangeHotspotPackageList);
         return hotspotPackagesToCloneJson(cloneHotspotPackageList,new HotspotPackagePair(), "project");
@@ -200,7 +200,7 @@ public class ProjectServiceImpl implements ProjectService{
 
     @Override
     public JSONObject cloneGraphAndTableOfChildrenPackages(long package1Id, long package2Id) {
-        HotspotPackagePair parentHotspotPackage = hotspotPackagePairDetector.detectHotspotPackagePairWithFileCloneByPackageId(package1Id, package2Id, "all");
+        HotspotPackagePair parentHotspotPackage = hotspotPackagePairDetector.getHotspotPackagePairWithFileCloneByPackageId(package1Id, package2Id, "all");
         List<HotspotPackagePair> childrenHotspotPackages = parentHotspotPackage.getChildrenHotspotPackagePairs();
         return hotspotPackagesToCloneJson(childrenHotspotPackages, parentHotspotPackage, "clone_package_table");
     }

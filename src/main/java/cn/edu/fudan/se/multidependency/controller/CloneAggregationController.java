@@ -36,7 +36,7 @@ public class CloneAggregationController {
     @GetMapping("/show/java")
     @ResponseBody
     public List<HotspotPackagePair> showHotspotPackagesOfJava(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
-        return hotspotPackagePairDetector.detectHotspotPackagePairWithFileCloneByParentId(-1, -1, "java");
+        return hotspotPackagePairDetector.getHotspotPackagePairWithFileCloneByParentId(-1, -1, "java");
     }
 
     /**
@@ -48,7 +48,7 @@ public class CloneAggregationController {
     @GetMapping("/show/cpp")
     @ResponseBody
     public List<HotspotPackagePair> showHotspotPackagesOfCpp(@RequestParam("threshold") int threshold, @RequestParam("percentage") double percentage) {
-        return hotspotPackagePairDetector.detectHotspotPackagePairWithFileCloneByParentId(-1, -1, "cpp");
+        return hotspotPackagePairDetector.getHotspotPackagePairWithFileCloneByParentId(-1, -1, "cpp");
     }
 
     @GetMapping("/package/export")
