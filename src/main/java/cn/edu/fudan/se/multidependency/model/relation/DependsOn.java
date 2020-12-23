@@ -27,10 +27,12 @@ public class DependsOn implements Relation, RelationWithTimes{
 
     @EndNode
 	private Node endNode;
-	
+
 	private int times = 0;
 
 	private String dependsOnType = "";
+
+	private boolean isAggregatePackagePair = false;
 
 	@Properties(allowCast = true)
 	private Map<String, Long> dependsOnTypes = new HashMap<>();
@@ -48,7 +50,6 @@ public class DependsOn implements Relation, RelationWithTimes{
 		this.dependsOnType = dependsOnType;
 	}
 
-	
 	@Override
 	public Node getStartNode() {
 		return startNode;

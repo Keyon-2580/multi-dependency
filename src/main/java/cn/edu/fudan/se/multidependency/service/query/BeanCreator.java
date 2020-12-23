@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.DependsOnPackagePairDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,9 @@ public class BeanCreator {
 
 	@Autowired
 	private HotspotPackagePairDetector hotspotPackagePairDetector;
+
+	@Autowired
+	private DependsOnPackagePairDetector dependsOnPackagePairDetector;
 
 	@Autowired
 	private SummaryAggregationDataService summaryAggregationDataService;
@@ -116,7 +120,7 @@ public class BeanCreator {
 			dependsOnRepository.createDependsOnWithImplementsInFiles();
 			dependsOnRepository.createDependsOnWithAssociationInFiles();
 			dependsOnRepository.createDependsOnWithAnnotationInFiles();
-			
+
 			dependsOnRepository.createDependsOnWithCallInFiles();
 			dependsOnRepository.createDependsOnWithImpllinkInFiles();
 			dependsOnRepository.createDependsOnWithCreateInFiles();
@@ -133,42 +137,43 @@ public class BeanCreator {
 			
 			//dependsRepository.createDependsInPackages();
 			
-			Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = new HashMap<>();
-			for (DependsOn dependOn : dependsOnRepository.findFileDepends()){
-				Package pck1 = dependsOnRepository.findFileBelongPackageByFileId(dependOn.getStartNode().getId());
-				Package pck2 = dependsOnRepository.findFileBelongPackageByFileId(dependOn.getEndNode().getId());
-				
-				if(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId()) && dependOn.getDependsOnTypes() != null && !dependOn.getDependsOnTypes().isEmpty()){
-					Map<Package, DependsOn> dependsOnMap = packageDependsOnPackage.getOrDefault(pck1, new HashMap<>());
-					DependsOn pckDependsOn = dependsOnMap.get(pck2);
-					if (pckDependsOn != null ){
-						for(Map.Entry<String, Long> entry : dependOn.getDependsOnTypes().entrySet()){
-							String dependsOnKey = entry.getKey();
-							Long typeTimes = entry.getValue();
-							if ( pckDependsOn.getDependsOnTypes().containsKey(dependsOnKey) ) {
-								Long times = pckDependsOn.getDependsOnTypes().get(dependsOnKey);
-								times += typeTimes;
-								pckDependsOn.getDependsOnTypes().put(dependsOnKey, times);
-							}else {
-								pckDependsOn.getDependsOnTypes().put(dependsOnKey, typeTimes);
-								String dTypes = pckDependsOn.getDependsOnType();
-								pckDependsOn.setDependsOnType(dTypes + "__" + dependsOnKey);
-							}
-							int timesTmp = pckDependsOn.getTimes() + typeTimes.intValue();
-							pckDependsOn.setTimes(timesTmp);
-							dependsOnMap.put(pck2, pckDependsOn);
-						}
-					} else {
-						DependsOn newDependsOn = new DependsOn(pck1, pck2);
-						newDependsOn.getDependsOnTypes().putAll(dependOn.getDependsOnTypes());
-						newDependsOn.setDependsOnType(dependOn.getDependsOnType());
-						newDependsOn.setTimes(dependOn.getTimes());
-						dependsOnMap.put(pck2, newDependsOn);
-					}
-					
-					packageDependsOnPackage.put(pck1, dependsOnMap);
-				}
-			}
+//			Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = new HashMap<>();
+//			for (DependsOn dependsOn : dependsOnRepository.findFileDepends()){
+//				Package pck1 = dependsOnRepository.findFileBelongPackageByFileId(dependsOn.getStartNode().getId());
+//				Package pck2 = dependsOnRepository.findFileBelongPackageByFileId(dependsOn.getEndNode().getId());
+//
+//				if(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId()) && dependsOn.getDependsOnTypes() != null && !dependsOn.getDependsOnTypes().isEmpty()){
+//					Map<Package, DependsOn> dependsOnMap = packageDependsOnPackage.getOrDefault(pck1, new HashMap<>());
+//					DependsOn pckDependsOn = dependsOnMap.get(pck2);
+//					if (pckDependsOn != null ){
+//						for(Map.Entry<String, Long> entry : dependsOn.getDependsOnTypes().entrySet()){
+//							String dependsOnKey = entry.getKey();
+//							Long typeTimes = entry.getValue();
+//							if ( pckDependsOn.getDependsOnTypes().containsKey(dependsOnKey) ) {
+//								Long times = pckDependsOn.getDependsOnTypes().get(dependsOnKey);
+//								times += typeTimes;
+//								pckDependsOn.getDependsOnTypes().put(dependsOnKey, times);
+//							}else {
+//								pckDependsOn.getDependsOnTypes().put(dependsOnKey, typeTimes);
+//								String dTypes = pckDependsOn.getDependsOnType();
+//								pckDependsOn.setDependsOnType(dTypes + "__" + dependsOnKey);
+//							}
+//							int timesTmp = pckDependsOn.getTimes() + typeTimes.intValue();
+//							pckDependsOn.setTimes(timesTmp);
+//							dependsOnMap.put(pck2, pckDependsOn);
+//						}
+//					} else {
+//						DependsOn newDependsOn = new DependsOn(pck1, pck2);
+//						newDependsOn.getDependsOnTypes().putAll(dependsOn.getDependsOnTypes());
+//						newDependsOn.setDependsOnType(dependsOn.getDependsOnType());
+//						newDependsOn.setTimes(dependsOn.getTimes());
+//						dependsOnMap.put(pck2, newDependsOn);
+//					}
+//
+//					packageDependsOnPackage.put(pck1, dependsOnMap);
+//				}
+//			}
+			Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = new HashMap<>(dependsOnPackagePairDetector.detectDependsOnPackagePairs());
 			
 			for (Map.Entry<Package, Map<Package, DependsOn>> entry : packageDependsOnPackage.entrySet()){
 				Package pck1 = entry.getKey();
