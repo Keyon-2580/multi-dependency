@@ -32,10 +32,11 @@ public class DependOnDetailController {
     private DependsOnRepository dependsOnRepository;
 
     @GetMapping("")
-    public String index(HttpServletRequest request, @RequestParam("pck1")Long id1, @RequestParam("pck2")Long id2, @RequestParam("dependsOnIntensity")Double dependsOnIntensity){
+    public String index(HttpServletRequest request, @RequestParam("pck1")Long id1, @RequestParam("pck2")Long id2, @RequestParam("dependsOnIntensity")Double dependsOnIntensity, @RequestParam("dependsOnIntensity")Double dependsByIntensity){
         request.setAttribute("pck1", id1);
         request.setAttribute("pck2", id2);
         request.setAttribute("dependsOnIntensity", dependsOnIntensity);
+        request.setAttribute("dependsByIntensity", dependsByIntensity);
         return"/relation/dependonpair";
     }
 
@@ -70,7 +71,7 @@ public class DependOnDetailController {
                     Map<String,Long> dependOn2Types = dependOn.getDependsOnTypes();
                     for (String key:
                             dependOn2Types.keySet()) {
-                        if(dependon1.containsKey(key)){
+                        if(dependon2.containsKey(key)){
                             dependon2.put(key, dependon2.get(key) + dependOn2Types.get(key));
                         }else{
                             dependon2.put(key, dependOn2Types.get(key));
@@ -87,8 +88,8 @@ public class DependOnDetailController {
         result.put("loc2", pck2.getLoc());
         result.put("pck1num", Files1.size());
         result.put("pck2num", Files2.size());
-        result.put("dependon1types", dependon1.toString());
-        result.put("dependon2types", dependon2.toString());
+        result.put("dependon1types", printDependsOnTypes(dependon1));
+        result.put("dependon2types", printDependsOnTypes(dependon2));
         return result;
     }
 
@@ -128,6 +129,19 @@ public class DependOnDetailController {
         result.put("allfiles",allFiles);
         result.put("numofpck1",numOfFile1);
         result.put("matrix",dependsOnMatrix);
+        return result;
+    }
+
+    private String printDependsOnTypes(Map<String, Long> dependsOnTypes){
+        String result = new String("");
+        for (String key:
+                dependsOnTypes.keySet()) {
+            if(!result.equals("")){
+                result += "/";
+            }
+            result += RelationType.relationAbbreviation.get(RelationType.valueOf(key));
+            result += "(" + dependsOnTypes.get(key).toString() + ")";
+        }
         return result;
     }
 }

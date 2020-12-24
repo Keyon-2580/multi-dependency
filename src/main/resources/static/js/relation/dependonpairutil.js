@@ -25,7 +25,7 @@ var showMetrics = function (id1, id2, dependsOnIntensity, dependsByIntensity) {
             html += result.dependon1types;
             html += "</td>";
             html += "<td>";
-            html += dependsOnIntensity;
+            html += dependsOnIntensity.toFixed(2);
             html += "</td>";
             html += "<td>";
             html += "</td>";
@@ -44,7 +44,7 @@ var showMetrics = function (id1, id2, dependsOnIntensity, dependsByIntensity) {
             html += result.dependon2types;
             html += "</td>";
             html += "<td>";
-            html += dependsByIntensity;
+            html += dependsByIntensity.toFixed(2);
             html += "</td>";
             html += "<td>";
             html += "</td>";
@@ -67,10 +67,10 @@ var showMatrix = function (id1, id2) {
             html += "<tr>";
             html += "<th  style='background-color: #FFFFFF;'></th>";
             for(var i = 0; i < result.numofpck1; i++){
-                html += "<th style='background-color: #FFFFFF;'>P1." + (i + 1) + "</th>";
+                html += "<th style='background-color: #FFFFFF;'>P1.F" + (i + 1) + "</th>";
             }
             for(var i = result.numofpck1; i < result.allfiles.length; i++){
-                html += "<th style='background-color: #FFFFFF;'>P2." + (i+1-result.numofpck1) + "</th>";
+                html += "<th style='background-color: #FFFFFF;'>P2.F" + (i+1-result.numofpck1) + "</th>";
             }
             html += "</tr>";
             for(var i = 0; i < result.allfiles.length; i++){
@@ -97,7 +97,7 @@ var showMatrix = function (id1, id2) {
             var html1 = "";
             html1 += "<div><ul>";
             for(var i = 0; i < result.numofpck1; i++){
-                html1 += "<li>P1." + (i+1) + " <a target='_blank' href='/relation/file/" + result.allfiles[i].id + "'>" + result.allfiles[i].path + "(" + result.allfiles[i].loc + ")" + "</a></li>";
+                html1 += "<li>P1.F" + (i+1) + " <a target='_blank' href='/relation/file/" + result.allfiles[i].id + "'>" + result.allfiles[i].path + "(" + result.allfiles[i].loc + ")" + "</a></li>";
             }
             html1 += "</ul></div>";
             $("#package1_files").html(html1);
@@ -105,7 +105,7 @@ var showMatrix = function (id1, id2) {
             var html2 ="";
             html2 += "<div><ul>";
             for(var i = result.numofpck1; i < result.allfiles.length; i++){
-                html2 += "<li>P2." + (i+1-result.numofpck1) + " <a target='_blank' href='/relation/file/" + result.allfiles[i].id + "'>" + result.allfiles[i].path + "(" + result.allfiles[i].loc + ")" + "</a></li>";
+                html2 += "<li>P2.F" + (i+1-result.numofpck1) + " <a target='_blank' href='/relation/file/" + result.allfiles[i].id + "'>" + result.allfiles[i].path + "(" + result.allfiles[i].loc + ")" + "</a></li>";
             }
             html2 += "</ul></div>";
             $("#package2_files").html(html2);
