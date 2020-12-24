@@ -75,4 +75,8 @@ public class HotspotPackagePair {
 		this.package1 = this.package2;
 		this.package2 = pck;
 	}
+
+	public boolean hasChildrenHotspotPackagePairs(){
+		return !childrenHotspotPackagePairs.isEmpty();
+	}
 }

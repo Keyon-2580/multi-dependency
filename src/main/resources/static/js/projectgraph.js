@@ -49,6 +49,8 @@ var dependsonLinks_global = [];
 var cochangeLinks_global = [];
 var linksCurrent_global = [];
 var linksBefore_global = [];
+var pairIdBefore_global;
+var typeBefore_global;
 var linksCurrent_flag = true;
 var linksVisiable_flag = false;
 var linksOfCircleVisiable_flag = false;
@@ -175,10 +177,12 @@ var loadPageData = function () {
                 "</label></p>";
 
             html += "<p><div style=\"margin-top: 10px;\">" +
-                "<button id = \"showLineId\" type=\"button\" onclick= showLineButton()>加载连线</button>" +
-                "<button id = \"clearLineId\" type=\"button\" onclick= clearLink() style = \"margin-left: 30px\">删除连线</button>" +
-                "<button id = \"hideLineId\" type=\"button\" onclick= HideLink() style = \"margin-left: 30px\">隐藏连线</button>" +
-                "<button id = \"recoverLineId\" type=\"button\" onclick= RecoverLink() style = \"margin-left: 30px\">恢复连线</button>" +
+                "<button type=\"button\" onclick= showLineButton()>加载连线</button>" +
+                "<button type=\"button\" onclick= extractLink() style = \"margin-left: 30px\">筛选连线</button>" +
+                "<button type=\"button\" onclick= clearLink() style = \"margin-left: 30px\">删除连线</button>" +
+                "<button type=\"button\" onclick= HideLink() style = \"margin-left: 30px\">隐藏连线</button>" +
+                "<button type=\"button\" onclick= RecoverLink() style = \"margin-left: 30px\">恢复连线</button>" +
+                "<button type=\"button\" onclick= reDo() style = \"margin-left: 30px\">撤销操作</button>" +
                 "</div></p>" +
                 "</form>" +
                 "</div>";
@@ -213,12 +217,11 @@ var projectGraphAjax = function(projectIds){
     }
 
     projectList["projectIds"] = projectIds_array;
-    projectList["showType"] = "graph";
 
     $.ajax({
         type:"POST",
         url : "/project/has",
-        contentType: "application/json", //必须这样写
+        contentType: "application/json",
         dataType:"json",
         data:JSON.stringify(projectList),
         success : function(result) {
@@ -404,11 +407,10 @@ var projectToGraph = function(result,divId){
 
 //根据筛选规则绘制气泡图连线
 var showLine = function(links_local, type){
-    linksCurrent_global = [];
-    linksCurrent_flag  = true;
-    document.getElementById("hideBottomPackageButton").innerHTML = "仅显示聚合";
+    if(type === "load"){
+        linksCurrent_flag  = true;
+        document.getElementById("hideBottomPackageButton").innerHTML = "仅显示聚合";
 
-    if(type === "project"){
         if($("#dependsOn").prop("checked")){
             links_local = links_local.concat(dependsonLinks_global);
         }
@@ -418,170 +420,170 @@ var showLine = function(links_local, type){
         if($("#coChange").prop("checked")){
             links_local = links_local.concat(cochangeLinks_global);
         }
-    }
 
-    // console.log(links_local);
+        // console.log(links_local);
 
-    for(var i = links_local.length; i > 0; i--){
-        var source_project = links_local[i - 1].source_projectBelong.split("_")[1];
-        var target_project = links_local[i - 1].target_projectBelong.split("_")[1];
-        var relation_type = links_local[i - 1].type;
+        for(var i = links_local.length; i > 0; i--){
+            var source_project = links_local[i - 1].source_projectBelong.split("_")[1];
+            var target_project = links_local[i - 1].target_projectBelong.split("_")[1];
+            var relation_type = links_local[i - 1].type;
 
-        var flag_delete = false;
-        var temp_flag_source = false;
-        var temp_flag_target = false;
+            var flag_delete = false;
+            var temp_flag_source = false;
+            var temp_flag_target = false;
 
-        for(var j = 0; j < projectList_global.length; j++){
-            if(source_project === projectList_global[j]){
-                temp_flag_source = true;
-                break;
-            }
-        }
-
-        for(var k = 0; k < projectList_global.length; k++){
-            if(target_project === projectList_global[k] ){
-                temp_flag_target = true;
-                break;
-            }
-        }
-
-        if(temp_flag_source === false || temp_flag_target === false){
-            links_local.splice(i - 1, 1);
-            flag_delete = true;
-        }
-
-        if(relation_type === "clone" && flag_delete === false){
-            var cloneMatchRate = links_local[i - 1].cloneMatchRate.toFixed(2);
-            var similarityhigh = parseInt($("#similarityhigh").val()).toFixed(2)
-            var similaritybelow = parseInt($("#similaritybelow").val()).toFixed(2)
-            if($("#cloneSimilarity").prop("checked")){
-                var temp_flag_clonesimilarity = false;
-
-                if($("#similarityCompareSelectBelow").val() === "<=" &&
-                    cloneMatchRate >= similaritybelow){
-                    if($("#similarityCompareSelectHigh").val() === "<=" &&
-                        cloneMatchRate <= similarityhigh){
-                        temp_flag_clonesimilarity = true;
-                    }else if($("#similarityCompareSelectHigh").val() === "<" &&
-                        cloneMatchRate < similarityhigh){
-                        temp_flag_clonesimilarity = true;
-                    }
-                }else if($("#similarityCompareSelectBelow").val() === "<" &&
-                    cloneMatchRate > similaritybelow){
-                    if($("#similarityCompareSelectHigh").val() === "<=" &&
-                        cloneMatchRate <= similarityhigh){
-                        temp_flag_clonesimilarity = true;
-                    }else if($("#similarityCompareSelectHigh").val() === "<" &&
-                        cloneMatchRate < similarityhigh){
-                        temp_flag_clonesimilarity = true;
-                    }
-                }
-
-                if(temp_flag_clonesimilarity === false ){
-                    links_local.splice(i - 1, 1);
-                    flag_delete = true;
+            for(var j = 0; j < projectList_global.length; j++){
+                if(source_project === projectList_global[j]){
+                    temp_flag_source = true;
+                    break;
                 }
             }
 
-            if($("#cloneTimes").prop("checked") && links_local[i - 1].cloneNodesCoChangeTimes < $("#clonetimes").val() && flag_delete === false){
-                links_local.splice(i - 1, 1);
-                flag_delete = true;
-            }
-        }
-
-        if(relation_type === "dependson" && flag_delete === false ){
-            var intensity = Math.max(links_local[i - 1].dependsOnIntensity, links_local[i - 1].dependsByIntensity);
-            if($("#dependsIntensity").prop("checked")){
-                var temp_flag_intensity = false;
-
-                if($("#intensityCompareSelectBelow").val() === "<=" && intensity >= $("#intensitybelow").val()){
-                    if($("#intensityCompareSelectHigh").val() === "<=" &&
-                        intensity <= $("#intensityhigh").val()){
-                        temp_flag_intensity = true;
-                    }else if($("#intensityCompareSelectHigh").val() === "<" &&
-                        intensity < $("#intensityhigh").val()){
-                        temp_flag_intensity = true;
-                    }
-                }else if($("#intensityCompareSelectBelow").val() === "<" && intensity > $("#intensitybelow").val()){
-                    if($("#intensityCompareSelectHigh").val() === "<=" &&
-                        intensity <= $("#intensityhigh").val()){
-                        temp_flag_intensity = true;
-                    }else if($("#intensityCompareSelectHigh").val() === "<" &&
-                        intensity < $("#intensityhigh").val()){
-                        temp_flag_intensity = true;
-                    }
-                }
-
-                if(temp_flag_intensity === false ){
-                    links_local.splice(i - 1, 1);
-                    flag_delete = true;
+            for(var k = 0; k < projectList_global.length; k++){
+                if(target_project === projectList_global[k] ){
+                    temp_flag_target = true;
+                    break;
                 }
             }
 
-            if($("#dependsOnTimes").prop("checked") &&
-                $("#dependencyTimes").val() > links_local[i - 1].dependsOnTimes &&
-                $("#dependencyTimes").val() > links_local[i - 1].dependsByTimes && flag_delete === false){
+            if(temp_flag_source === false || temp_flag_target === false || links_local[i - 1].parent_pair_id !== "default"){
                 links_local.splice(i - 1, 1);
                 flag_delete = true;
             }
 
-            if($("#dependsOnType").prop("checked") && flag_delete === false){
-                var value = $('#dependsTypeSelect').val();
-                if(value.length === 0){
-                    alert("未选中任何类型！");
-                }
+            if(relation_type === "clone" && flag_delete === false){
+                var cloneMatchRate = links_local[i - 1].cloneMatchRate.toFixed(2);
+                var similarityhigh = parseInt($("#similarityhigh").val()).toFixed(2)
+                var similaritybelow = parseInt($("#similaritybelow").val()).toFixed(2)
+                if($("#cloneSimilarity").prop("checked")){
+                    var temp_flag_clonesimilarity = false;
 
-                var dependsByTypesMap = links_local[i - 1].dependsByTypesMap;
-                var dependsOnTypesMap = links_local[i - 1].dependsOnTypesMap;
-                var temp_dependsType_flag = false;
-
-                for(var k = 0; k < value.length; k++){
-                    if(temp_dependsType_flag === true){
-                        break;
-                    }
-
-                    if(dependsByTypesMap.length > 0){
-                        for(var item1 in dependsByTypesMap){
-                            if(dependsByTypesMap[item1].dependsByType === value[k]){
-                                temp_dependsType_flag = true;
-                                break;
-                            }
+                    if($("#similarityCompareSelectBelow").val() === "<=" &&
+                        cloneMatchRate >= similaritybelow){
+                        if($("#similarityCompareSelectHigh").val() === "<=" &&
+                            cloneMatchRate <= similarityhigh){
+                            temp_flag_clonesimilarity = true;
+                        }else if($("#similarityCompareSelectHigh").val() === "<" &&
+                            cloneMatchRate < similarityhigh){
+                            temp_flag_clonesimilarity = true;
+                        }
+                    }else if($("#similarityCompareSelectBelow").val() === "<" &&
+                        cloneMatchRate > similaritybelow){
+                        if($("#similarityCompareSelectHigh").val() === "<=" &&
+                            cloneMatchRate <= similarityhigh){
+                            temp_flag_clonesimilarity = true;
+                        }else if($("#similarityCompareSelectHigh").val() === "<" &&
+                            cloneMatchRate < similarityhigh){
+                            temp_flag_clonesimilarity = true;
                         }
                     }
 
-                    if(dependsOnTypesMap.length > 0){
-                        for(var item2 in dependsOnTypesMap){
-                            if(dependsOnTypesMap[item2].dependsOnType === value[k]){
-                                temp_dependsType_flag = true;
-                                break;
-                            }
-                        }
+                    if(temp_flag_clonesimilarity === false ){
+                        links_local.splice(i - 1, 1);
+                        flag_delete = true;
                     }
                 }
 
-                if(temp_dependsType_flag === false){
+                if($("#cloneTimes").prop("checked") && links_local[i - 1].cloneNodesCoChangeTimes < $("#clonetimes").val() && flag_delete === false){
                     links_local.splice(i - 1, 1);
                     flag_delete = true;
                 }
             }
-        }
 
-        if(relation_type === "cochange" && flag_delete === false && $("#cochangeTimes").prop("checked")){
-            if($("#cochangetimes").val() >= 10){
-                if(links_local[i - 1].coChangeTimes < $("#cochangetimes").val()){
+            if(relation_type === "dependson" && flag_delete === false ){
+                var intensity = Math.max(links_local[i - 1].dependsOnIntensity, links_local[i - 1].dependsByIntensity);
+                if($("#dependsIntensity").prop("checked")){
+                    var temp_flag_intensity = false;
+
+                    if($("#intensityCompareSelectBelow").val() === "<=" && intensity >= $("#intensitybelow").val()){
+                        if($("#intensityCompareSelectHigh").val() === "<=" &&
+                            intensity <= $("#intensityhigh").val()){
+                            temp_flag_intensity = true;
+                        }else if($("#intensityCompareSelectHigh").val() === "<" &&
+                            intensity < $("#intensityhigh").val()){
+                            temp_flag_intensity = true;
+                        }
+                    }else if($("#intensityCompareSelectBelow").val() === "<" && intensity > $("#intensitybelow").val()){
+                        if($("#intensityCompareSelectHigh").val() === "<=" &&
+                            intensity <= $("#intensityhigh").val()){
+                            temp_flag_intensity = true;
+                        }else if($("#intensityCompareSelectHigh").val() === "<" &&
+                            intensity < $("#intensityhigh").val()){
+                            temp_flag_intensity = true;
+                        }
+                    }
+
+                    if(temp_flag_intensity === false ){
+                        links_local.splice(i - 1, 1);
+                        flag_delete = true;
+                    }
+                }
+
+                if($("#dependsOnTimes").prop("checked") &&
+                    $("#dependencyTimes").val() > links_local[i - 1].dependsOnTimes &&
+                    $("#dependencyTimes").val() > links_local[i - 1].dependsByTimes && flag_delete === false){
                     links_local.splice(i - 1, 1);
                     flag_delete = true;
                 }
-            }else{
-                alert("Cochange Times 需大于等于 10！");
-                return;
+
+                if($("#dependsOnType").prop("checked") && flag_delete === false){
+                    var value = $('#dependsTypeSelect').val();
+                    if(value.length === 0){
+                        alert("未选中任何类型！");
+                    }
+
+                    var dependsByTypesMap = links_local[i - 1].dependsByTypesMap;
+                    var dependsOnTypesMap = links_local[i - 1].dependsOnTypesMap;
+                    var temp_dependsType_flag = false;
+
+                    for(var k = 0; k < value.length; k++){
+                        if(temp_dependsType_flag === true){
+                            break;
+                        }
+
+                        if(dependsByTypesMap.length > 0){
+                            for(var item1 in dependsByTypesMap){
+                                if(dependsByTypesMap[item1].dependsByType === value[k]){
+                                    temp_dependsType_flag = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if(dependsOnTypesMap.length > 0){
+                            for(var item2 in dependsOnTypesMap){
+                                if(dependsOnTypesMap[item2].dependsOnType === value[k]){
+                                    temp_dependsType_flag = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if(temp_dependsType_flag === false){
+                        links_local.splice(i - 1, 1);
+                        flag_delete = true;
+                    }
+                }
+            }
+
+            if(relation_type === "cochange" && flag_delete === false && $("#cochangeTimes").prop("checked")){
+                if($("#cochangetimes").val() >= 10){
+                    if(links_local[i - 1].coChangeTimes < $("#cochangetimes").val()){
+                        links_local.splice(i - 1, 1);
+                        flag_delete = true;
+                    }
+                }else{
+                    alert("Cochange Times 需大于等于 10！");
+                    return;
+                }
             }
         }
+
+        linksCurrent_global = links_local.concat();
+        drawCloneTableBelow("", "all");
     }
-
-    linksCurrent_global = links_local.concat();
     loadLink(links_local);
-    drawCloneTableBelow("", "all", {});
 }
 
 //加载连线
@@ -615,9 +617,7 @@ function loadLink(jsonLinks) {
         })
         .attr("onclick", function(d){
             if(d.type === "clone" && !d.bottom_package){
-                source_id = d.source_id.split("_")[1];
-                target_id = d.target_id.split("_")[1];
-                return "drawChildrenCloneLinks(\"" + source_id + "\", \"" + target_id + "\", \"" + d.type + "\")";
+                return "drawChildrenCloneLinks(\"" + d.pair_id + "\", \"" + d.type + "\")";
             }
         })
         .attr("marker-end",function (d){
@@ -646,7 +646,7 @@ function loadLink(jsonLinks) {
                     + "\ndependsByTypes: " + d.dependsByTypes
                     + "\ndependsOnTimes: " + d.dependsOnTimes
                     + "\ndependsByTimes: " + d.dependsByTimes
-                    + "\ndependsOnIntensity: " + d.dependsOnIntensity;
+                    + "\ndependsOnIntensity: " + d.dependsOnIntensity
                     + "\ndependsByIntensity: " + d.dependsByIntensity;
 
                 if(d.dependsByTypesMap.length > 0){
@@ -825,7 +825,7 @@ function clearLink(){
 }
 
 //绘制下方表格
-function drawCloneTableBelow(link_id, type, nonclonefiles){
+function drawCloneTableBelow(link_id, type){
     // console.log(linksBefore_global);
     var cleartable = d3.selectAll("table").remove();
     let html = "";
@@ -837,8 +837,8 @@ function drawCloneTableBelow(link_id, type, nonclonefiles){
             + "<tr><th>目录1</th><th>目录2</th>"
             + "<th>克隆文件占比</th><th>克隆Cochange占比</th><th>克隆Loc占比</th><th>克隆相似度</th><th>type</th><th>克隆对数</th></tr>";
 
-        if(link_id !== ""){
-            linksBefore_global.forEach(function (item){
+        if(link_id !== "default"){
+            cloneLinks_global.forEach(function (item){
                 if(item.pair_id === link_id){
                     html_clone_table_parent += "<tr>"
                         + "<th>" + item.source_name + "</th>"
@@ -915,22 +915,22 @@ function drawCloneTableBelow(link_id, type, nonclonefiles){
             }
         })
 
-        if(nonclonefiles.hasOwnProperty("nonclonefiles1")){
-            var nonclonefiles1 = nonclonefiles.nonclonefiles1;
-            var nonclonefiles2 = nonclonefiles.nonclonefiles2;
-
-            if(nonclonefiles1.length > 0){
-                nonclonefiles1.forEach(function (item){
-                    html_clone_table_body += "<tr><td>|---" + item.name + "</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
-                })
-            }
-
-            if(nonclonefiles2.length > 0){
-                nonclonefiles2.forEach(function (item){
-                    html_clone_table_body += "<tr><td></td><td>|---" + item.name + "</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
-                })
-            }
-        }
+        // if(nonclonefiles.hasOwnProperty("nonclonefiles1")){
+        //     var nonclonefiles1 = nonclonefiles.nonclonefiles1;
+        //     var nonclonefiles2 = nonclonefiles.nonclonefiles2;
+        //
+        //     if(nonclonefiles1.length > 0){
+        //         nonclonefiles1.forEach(function (item){
+        //             html_clone_table_body += "<tr><td>|---" + item.name + "</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
+        //         })
+        //     }
+        //
+        //     if(nonclonefiles2.length > 0){
+        //         nonclonefiles2.forEach(function (item){
+        //             html_clone_table_body += "<tr><td></td><td>|---" + item.name + "</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
+        //         })
+        //     }
+        // }
 
         html_clone_table_body += "</table>";
         html += html_clone_table_head + html_clone_table_parent + html_clone_table_body;
@@ -986,26 +986,37 @@ function drawCloneTableBelow(link_id, type, nonclonefiles){
 }
 
 //点击连线，获取子包关系,绘制图下方表格
-function drawChildrenCloneLinks(package1Id, package2Id, type){
-    if (type === "clone") {
-        $.ajax({
-            type : "GET",
-            url : "/project/has/childrenlinks?package1Id=" + package1Id + "&package2Id=" + package2Id,
-            success : function(result) {
-                linksBefore_global = linksCurrent_global.concat();
-                clearLink();
-                // console.log(result);
-                if(result.children_graphlinks.clone_links.length > 0){
-                    // console.log(linksCurrent_global);
-                    linksCurrent_global = result.children_graphlinks.clone_links.concat();
-                    showLine(linksCurrent_global, "package");
-                }
-                drawCloneTableBelow(package1Id + "_" + package2Id, "clone", result.children_graphlinks);
-            }
-        });
-    } else if (type === "dependson") {
-
+function drawChildrenCloneLinks(pair_id, type){
+    linksBefore_global = linksCurrent_global.concat();
+    var temp_links_all = []
+    var temp_links = []
+    clearLink();
+    // console.log(result);
+    switch (type){
+        case "clone":
+            temp_links_all = cloneLinks_global.concat();
+            break;
+        case "dependson":
+            temp_links_all = dependsonLinks_global.concat();
+            break;
+        case "cochange":
+            temp_links_all = cochangeLinks_global.concat();
+            break;
     }
+
+    for(var i = temp_links_all.length; i > 0; i--){
+        if(temp_links_all[i - 1].parent_pair_id === pair_id){
+            temp_links.push(temp_links_all[i - 1])
+        }
+    }
+
+    // console.log(temp_links)
+
+    linksCurrent_global = temp_links.concat();
+    showLine(linksCurrent_global, "extract");
+    pairIdBefore_global = pair_id;
+    typeBefore_global = type;
+    drawCloneTableBelow(pair_id, type);
 }
 
 //多选下拉框，加载多项目
@@ -1021,7 +1032,7 @@ var showMultipleButton = function(){
 //显示连线
 var showLineButton = function(){
     var temp_links = [];
-    showLine(temp_links,"project");
+    showLine(temp_links, "load");
 }
 
 //获取连线颜色
@@ -1084,6 +1095,25 @@ var RecoverLink = function(){
         linksVisiable_flag  = true;
     }else{
         alert("当前无连线数据！");
+    }
+}
+
+//筛选连线
+var extractLink = function(){
+}
+
+//撤销操作
+var reDo = function(){
+    if(linksBefore_global.length > 0){
+        linksCurrent_global = [];
+        linksCurrent_global = linksBefore_global.concat();
+        showLine(linksCurrent_global, "");
+        drawCloneTableBelow(pairIdBefore_global, typeBefore_global);
+        pairIdBefore_global = "";
+        typeBefore_global = "";
+        linksBefore_global = [];
+    }else{
+        alert("无法撤销！")
     }
 }
 

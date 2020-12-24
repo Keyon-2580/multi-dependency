@@ -607,11 +607,11 @@ public class ProjectController {
 	/**
 	* 返回气泡图不同关系的连线数据
 	 * */
-	@GetMapping("/has/childrenlinks")
-	@ResponseBody
-	public JSONObject getProjectGraphCloneLink(@RequestParam("package1Id") long package1Id, @RequestParam("package2Id") long package2Id) {
-		return projectService.cloneGraphAndTableOfChildrenPackages(package1Id, package2Id);
-	}
+//	@GetMapping("/has/childrenlinks")
+//	@ResponseBody
+//	public JSONObject getProjectGraphCloneLink(@RequestParam("package1Id") long package1Id, @RequestParam("package2Id") long package2Id) {
+//		return projectService.cloneGraphAndTableOfChildrenPackages(package1Id, package2Id);
+//	}
 
 //	@GetMapping("/has/echarts")
 //	@ResponseBody
