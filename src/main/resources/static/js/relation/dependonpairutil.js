@@ -74,7 +74,13 @@ var showMatrix = function (id1, id2) {
             html += "</tr>";
             for(var i = 0; i < result.allfiles.length; i++){
                 html += "<tr>";
-                html += "<td style='background-color: #FFFFFF;'><a target='_blank' href='/relation/file/" + result.allfiles[i].id + "'>" + result.allfiles[i].name + "(" + result.allfiles[i].loc + ")" + "</a></td>";
+                html += "<td style='background-color: #FFFFFF;'>";
+                if(i < result.numofpck1){
+                    html += "P1.F" + (i+1) + ": ";
+                }else{
+                    html += "P2.F" + (i-result.numofpck1+1) + ": ";
+                }
+                html += "<a target='_blank' href='/relation/file/" + result.allfiles[i].id + "'>" + result.allfiles[i].name + "(" + result.allfiles[i].loc + ")" + "</a></td>";
                 for(var j = 0; j < result.allfiles.length; j++){
                     html += "<td style='background-color: #FFFFFF;'>";
                     if(result.matrix[i][j] != null){
@@ -96,7 +102,7 @@ var showMatrix = function (id1, id2) {
             var html1 = "";
             html1 += "<div><ul>";
             for(var i = 0; i < result.numofpck1; i++){
-                html1 += "<li>P1.F" + (i+1) + " <a target='_blank' href='/relation/file/" + result.allfiles[i].id + "'>" + result.allfiles[i].path + "(" + result.allfiles[i].loc + ")" + "</a></li>";
+                html1 += "<li>P1.F" + (i+1) + ": <a target='_blank' href='/relation/file/" + result.allfiles[i].id + "'>" + result.allfiles[i].path + "(" + result.allfiles[i].loc + ")" + "</a></li>";
             }
             html1 += "</ul></div>";
             $("#package1_files").html(html1);
@@ -104,7 +110,7 @@ var showMatrix = function (id1, id2) {
             var html2 ="";
             html2 += "<div><ul>";
             for(var i = result.numofpck1; i < result.allfiles.length; i++){
-                html2 += "<li>P2.F" + (i+1-result.numofpck1) + " <a target='_blank' href='/relation/file/" + result.allfiles[i].id + "'>" + result.allfiles[i].path + "(" + result.allfiles[i].loc + ")" + "</a></li>";
+                html2 += "<li>P2.F" + (i+1-result.numofpck1) + ": <a target='_blank' href='/relation/file/" + result.allfiles[i].id + "'>" + result.allfiles[i].path + "(" + result.allfiles[i].loc + ")" + "</a></li>";
             }
             html2 += "</ul></div>";
             $("#package2_files").html(html2);
