@@ -6,6 +6,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import cn.edu.fudan.se.multidependency.service.insert.dynamic.FeatureAndTestCaseFromJSONFileForMicroserviceInserter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,7 +155,7 @@ public class ThreadService {
 			}
 			
 			LOGGER.info("引入特性与测试用例，对应到trace");
-//			new FeatureAndTestCaseFromJSONFileForMicroserviceInserter(dynamicConfig.getFeaturesPath()).addNodesAndRelations();
+			new FeatureAndTestCaseFromJSONFileForMicroserviceInserter(dynamicConfig.getFeaturesPath()).addNodesAndRelations();
 		} catch (Exception e) {
 			e.printStackTrace();
 			LOGGER.error("Error: dynamicAnalyse " + e.getMessage());

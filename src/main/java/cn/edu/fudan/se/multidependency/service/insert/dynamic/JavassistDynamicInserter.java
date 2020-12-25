@@ -44,8 +44,8 @@ public class JavassistDynamicInserter extends DynamicInserterForNeo4jService {
 	@Override
 	protected void extractNodesAndRelations() throws Exception {
 		javaExecutionsGroupByProject = executionsGroupByLanguageAndProject.get(Language.java);
-//		LOGGER.info("提取微服务间的调用");
-//		extractMicroServiceCall();
+		LOGGER.info("提取微服务间的调用");
+		extractMicroServiceCall();
 		LOGGER.info("提取函数调用");
 		extractDynamicFunctionCalls();
 	}
