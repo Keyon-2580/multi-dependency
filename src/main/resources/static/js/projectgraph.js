@@ -49,8 +49,10 @@ var dependsonLinks_global = [];
 var cochangeLinks_global = [];
 var linksCurrent_global = [];
 var linksBefore_global = [];
-var pairIdBefore_global;
+var pairIdBefore_global = "";
 var typeBefore_global;
+var pairIdCurrent_global = "";
+var typeCurrent_global;
 var linksCurrent_flag = true;
 var linksVisiable_flag = false;
 var linksOfCircleVisiable_flag = false;
@@ -599,9 +601,9 @@ function loadLink(jsonLinks) {
     var links = svg_global.append('g')
         .style('stroke', '#aaa')
         .attr("class", "packageLink")
-        .selectAll('line')
+        .selectAll('path')
         .data(jsonLinks)
-        .enter().append('line')
+        .enter().append('path')
         .attr("stroke-dasharray", function (d){
             // console.log(d);
             return d.bottom_package ? "20,2" : null;
@@ -609,6 +611,7 @@ function loadLink(jsonLinks) {
         .attr("stroke", function (d){
             return getTypeColor(d)[0];
         })
+        .attr("fill", "none")
         .attr("type", function (d){
             return d.type;
         })
@@ -794,18 +797,30 @@ function loadLink(jsonLinks) {
         return circleCoordinate.find((n) => n.id === link_id).y2;
     }
 
-    links.attr("x1", function (d) {
-        return getTranslateX1(d.source_id, d.target_id) + diameter_global / 2;
+    // links.attr("x1", function (d) {
+    //     return getTranslateX1(d.source_id, d.target_id) + diameter_global / 2;
+    // })
+    //     .attr("y1", function (d) {
+    //         return getTranslateY1(d.source_id, d.target_id) + diameter_global / 2;
+    //     })
+    //     .attr("x2", function (d) {
+    //         return getTranslateX2(d.source_id, d.target_id) + diameter_global / 2;
+    //     })
+    //     .attr("y2", function (d) {
+    //         return getTranslateY2(d.source_id, d.target_id) + diameter_global / 2;
+    //     });
+
+    links.attr("d", function (d) {
+        var x1 = getTranslateX1(d.source_id, d.target_id) + diameter_global / 2;
+        var y1 = getTranslateY1(d.source_id, d.target_id) + diameter_global / 2;
+        var x2 = getTranslateX2(d.source_id, d.target_id) + diameter_global / 2;
+        var y2 = getTranslateY2(d.source_id, d.target_id) + diameter_global / 2;
+        // return ("M" + x1 + " " + y1 +
+        //     " Q" + ((3 * x1) / 4 + x2 / 4) + " " + (y1 / 4 + (3 * y2) /4)
+        //     + " " + x2 + " " + y2);
+        return ("M" + x1 + " " + y1 +
+            " L" + x2 + " " + y2);
     })
-        .attr("y1", function (d) {
-            return getTranslateY1(d.source_id, d.target_id) + diameter_global / 2;
-        })
-        .attr("x2", function (d) {
-            return getTranslateX2(d.source_id, d.target_id) + diameter_global / 2;
-        })
-        .attr("y2", function (d) {
-            return getTranslateY2(d.source_id, d.target_id) + diameter_global / 2;
-        });
 
     linksVisiable_flag = true;
     // flag = false;
@@ -821,6 +836,10 @@ function clearLink(){
     var cleartable = d3.selectAll("table").remove();
     linksCurrent_global = [];
     linksVisiable_flag = false;
+
+}
+
+function checkDuplicateLink(links, source_id, target_id){
 
 }
 
@@ -1014,8 +1033,10 @@ function drawChildrenCloneLinks(pair_id, type){
 
     linksCurrent_global = temp_links.concat();
     showLine(linksCurrent_global, "extract");
-    pairIdBefore_global = pair_id;
-    typeBefore_global = type;
+    pairIdBefore_global = pairIdCurrent_global;
+    typeBefore_global = typeCurrent_global;
+    pairIdCurrent_global = pair_id;
+    typeCurrent_global = type;
     drawCloneTableBelow(pair_id, type);
 }
 
@@ -1033,6 +1054,8 @@ var showMultipleButton = function(){
 var showLineButton = function(){
     var temp_links = [];
     showLine(temp_links, "load");
+    pairIdCurrent_global = "";
+    pairIdBefore_global = "";
 }
 
 //获取连线颜色
@@ -1121,19 +1144,27 @@ var reDo = function(){
 var FocusOnCircleLinks = function(circleId){
     if(linksVisiable_flag){
         if(linksOfCircleVisiable_flag){
-            loadLink(linksCurrent_global);
+            linksCurrent_global = linksBefore_global.concat();
+            linksBefore_global = [];
+            showLine(linksCurrent_global, "");
+            var temp_pair = pairIdCurrent_global;
+            drawCloneTableBelow(temp_pair, "all");
             linksOfCircleVisiable_flag = false;
         }else{
-            var linksRelatedToCircle = linksCurrent_global.concat();
-            for(var i = linksRelatedToCircle.length; i > 0; i--){
-                if(linksRelatedToCircle[i - 1].source_id !== circleId
-                    && linksRelatedToCircle[i - 1].target_id !== circleId ){
-                    linksRelatedToCircle.splice(i - 1, 1);
+            // console.log(linksCurrent_global);
+            linksBefore_global = linksCurrent_global.concat();
+            var temp_links = linksCurrent_global.concat();
+            for(var i = temp_links.length; i > 0; i--){
+                if(temp_links[i - 1].source_id !== circleId
+                    && temp_links[i - 1].target_id !== circleId ){
+                    temp_links.splice(i - 1, 1);
                 }
             }
 
-            if(linksRelatedToCircle.length > 0){
-                loadLink(linksRelatedToCircle);
+            if(temp_links.length > 0){
+                linksCurrent_global = temp_links.concat();
+                showLine(linksCurrent_global, "");
+                drawCloneTableBelow("", "all");
             }else{
                 alert("没有与此节点相关连线！");
                 return;

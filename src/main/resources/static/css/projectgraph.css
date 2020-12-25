@@ -22,7 +22,7 @@
     pointer-events: none;
 }
 
-line {
+path {
     stroke-width: 3px;
     cursor:pointer;
 }
