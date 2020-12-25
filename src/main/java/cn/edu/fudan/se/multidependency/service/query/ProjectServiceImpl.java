@@ -439,7 +439,7 @@ public class ProjectServiceImpl implements ProjectService{
                 case "CO_CHANGE":
                     CoChangeRelationDataForDoubleNodes<Node, Relation> coChangeRelationDataForDoubleNodes = (CoChangeRelationDataForDoubleNodes<Node, Relation>) hotspotPackagePair.getPackagePairRelationData();
 
-                    if (coChangeRelationDataForDoubleNodes.getCoChangeTimes() >= 10) {
+                    if (coChangeRelationDataForDoubleNodes.getCoChangeTimes() >= 3) {
                         link.put("type", "cochange");
                         link.put("coChangeTimes", coChangeRelationDataForDoubleNodes.getCoChangeTimes());
                         link.put("node1ChangeTimes", coChangeRelationDataForDoubleNodes.getNode1ChangeTimes());
