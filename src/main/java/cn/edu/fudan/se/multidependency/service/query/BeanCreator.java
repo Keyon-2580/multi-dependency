@@ -124,51 +124,14 @@ public class BeanCreator {
 			dependsOnRepository.createDependsOnWithParameterInFiles();
 			dependsOnRepository.createDependsOnWithReturnInFiles();
 			dependsOnRepository.createDependsOnWithUseTypeInFiles();
-			
-			//dependsRepository.createDependsOnWithTimesInFiles();
+
 			dependsOnRepository.createDependsOnWithTimesInNode(NodeLabelType.ProjectFile);
 
 			dependsOnRepository.deleteNullAggregationDependsOnInFiles();
-			
-			//dependsRepository.createDependsInPackages();
-			
-//			Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = new HashMap<>();
-//			for (DependsOn dependsOn : dependsOnRepository.findFileDepends()){
-//				Package pck1 = dependsOnRepository.findFileBelongPackageByFileId(dependsOn.getStartNode().getId());
-//				Package pck2 = dependsOnRepository.findFileBelongPackageByFileId(dependsOn.getEndNode().getId());
-//
-//				if(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId()) && dependsOn.getDependsOnTypes() != null && !dependsOn.getDependsOnTypes().isEmpty()){
-//					Map<Package, DependsOn> dependsOnMap = packageDependsOnPackage.getOrDefault(pck1, new HashMap<>());
-//					DependsOn pckDependsOn = dependsOnMap.get(pck2);
-//					if (pckDependsOn != null ){
-//						for(Map.Entry<String, Long> entry : dependsOn.getDependsOnTypes().entrySet()){
-//							String dependsOnKey = entry.getKey();
-//							Long typeTimes = entry.getValue();
-//							if ( pckDependsOn.getDependsOnTypes().containsKey(dependsOnKey) ) {
-//								Long times = pckDependsOn.getDependsOnTypes().get(dependsOnKey);
-//								times += typeTimes;
-//								pckDependsOn.getDependsOnTypes().put(dependsOnKey, times);
-//							}else {
-//								pckDependsOn.getDependsOnTypes().put(dependsOnKey, typeTimes);
-//								String dTypes = pckDependsOn.getDependsOnType();
-//								pckDependsOn.setDependsOnType(dTypes + "__" + dependsOnKey);
-//							}
-//							int timesTmp = pckDependsOn.getTimes() + typeTimes.intValue();
-//							pckDependsOn.setTimes(timesTmp);
-//							dependsOnMap.put(pck2, pckDependsOn);
-//						}
-//					} else {
-//						DependsOn newDependsOn = new DependsOn(pck1, pck2);
-//						newDependsOn.getDependsOnTypes().putAll(dependsOn.getDependsOnTypes());
-//						newDependsOn.setDependsOnType(dependsOn.getDependsOnType());
-//						newDependsOn.setTimes(dependsOn.getTimes());
-//						dependsOnMap.put(pck2, newDependsOn);
-//					}
-//
-//					packageDependsOnPackage.put(pck1, dependsOnMap);
-//				}
-//			}
-			Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = new HashMap<>(hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOn());
+
+			//创建包间dependsOn
+			Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = createPackageDependsOn(dependsOnRepository);
+//			Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = new HashMap<>(hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOn());
 			
 			for (Map.Entry<Package, Map<Package, DependsOn>> entry : packageDependsOnPackage.entrySet()){
 				Package pck1 = entry.getKey();
@@ -198,6 +161,46 @@ public class BeanCreator {
 		}
 		configSmellDetect(propertyConfig, asRepository);
 		return dependsOns;
+	}
+
+	private Map<Package, Map<Package, DependsOn>> createPackageDependsOn(DependsOnRepository dependsOnRepository){
+		Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = new HashMap<>();
+		for (DependsOn dependsOn : dependsOnRepository.findFileDepends()){
+			Package pck1 = dependsOnRepository.findFileBelongPackageByFileId(dependsOn.getStartNode().getId());
+			Package pck2 = dependsOnRepository.findFileBelongPackageByFileId(dependsOn.getEndNode().getId());
+
+			if(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId()) && dependsOn.getDependsOnTypes() != null && !dependsOn.getDependsOnTypes().isEmpty()){
+				Map<Package, DependsOn> dependsOnMap = packageDependsOnPackage.getOrDefault(pck1, new HashMap<>());
+				DependsOn pckDependsOn = dependsOnMap.get(pck2);
+				if (pckDependsOn != null ){
+					for(Map.Entry<String, Long> entry : dependsOn.getDependsOnTypes().entrySet()){
+						String dependsOnKey = entry.getKey();
+						Long typeTimes = entry.getValue();
+						if ( pckDependsOn.getDependsOnTypes().containsKey(dependsOnKey) ) {
+							Long times = pckDependsOn.getDependsOnTypes().get(dependsOnKey);
+							times += typeTimes;
+							pckDependsOn.getDependsOnTypes().put(dependsOnKey, times);
+						}else {
+							pckDependsOn.getDependsOnTypes().put(dependsOnKey, typeTimes);
+							String dTypes = pckDependsOn.getDependsOnType();
+							pckDependsOn.setDependsOnType(dTypes + "__" + dependsOnKey);
+						}
+						int timesTmp = pckDependsOn.getTimes() + typeTimes.intValue();
+						pckDependsOn.setTimes(timesTmp);
+						dependsOnMap.put(pck2, pckDependsOn);
+					}
+				} else {
+					DependsOn newDependsOn = new DependsOn(pck1, pck2);
+					newDependsOn.getDependsOnTypes().putAll(dependsOn.getDependsOnTypes());
+					newDependsOn.setDependsOnType(dependsOn.getDependsOnType());
+					newDependsOn.setTimes(dependsOn.getTimes());
+					dependsOnMap.put(pck2, newDependsOn);
+				}
+
+				packageDependsOnPackage.put(pck1, dependsOnMap);
+			}
+		}
+		return packageDependsOnPackage;
 	}
 
 	@Bean("createCloneGroup")

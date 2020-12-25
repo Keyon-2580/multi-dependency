@@ -175,7 +175,7 @@ var loadPageData = function () {
                 "</label>" +
                 "<label class = \"AttributionSelectLabel\">" +
                 "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cochangeTimes\" name = \"coChange_children\"> Times >= " +
-                "<input class = \"AttributionSelectInput\" id=\"cochangetimes\" value=\"10\">" +
+                "<input class = \"AttributionSelectInput\" id=\"cochangetimes\" value=\"3\">" +
                 "</label></p>";
 
             html += "<p><div style=\"margin-top: 10px;\">" +
@@ -570,13 +570,13 @@ var showLine = function(links_local, type){
             }
 
             if(relation_type === "cochange" && flag_delete === false && $("#cochangeTimes").prop("checked")){
-                if($("#cochangetimes").val() >= 10){
+                if($("#cochangetimes").val() >= 3){
                     if(links_local[i - 1].coChangeTimes < $("#cochangetimes").val()){
                         links_local.splice(i - 1, 1);
                         flag_delete = true;
                     }
                 }else{
-                    alert("Cochange Times 需大于等于 10！");
+                    alert("Cochange Times 需大于等于 3！");
                     return;
                 }
             }
