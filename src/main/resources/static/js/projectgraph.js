@@ -585,7 +585,9 @@ var showLine = function(links_local, type){
         linksCurrent_global = links_local.concat();
         drawCloneTableBelow("", "all");
     }
-    loadLink(links_local);
+    checkDuplicateLink();
+    // console.log(linksCurrent_global)
+    loadLink(linksCurrent_global);
 }
 
 //加载连线
@@ -815,11 +817,78 @@ function loadLink(jsonLinks) {
         var y1 = getTranslateY1(d.source_id, d.target_id) + diameter_global / 2;
         var x2 = getTranslateX2(d.source_id, d.target_id) + diameter_global / 2;
         var y2 = getTranslateY2(d.source_id, d.target_id) + diameter_global / 2;
+        var length = Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
+
+        // if(length > 650){
+        //     // var ratio = length / 650;
+        //     var ratio = 2;
+        // }else{
+        //     var ratio = 2;
+        // }
+        var ratio = 2;
+        // console.log(d.duplicate_all)
+        switch(d.duplicate_all){
+            case 1:
+                return "M" + x1 + " " + y1 + " L" + x2 + " " + y2;
+            case 2:
+                switch(d.duplicate_num){
+                    case 1:
+                        return ("M" + x1 + " " + y1 +
+                        " Q" + (((ratio + 1) / (ratio * 2)) * x1 + ((ratio - 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio - 1) / (ratio * 2)) * y1 + ((ratio + 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                    case 2:
+                        return ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                }
+            case 3:
+                switch(d.duplicate_num){
+                    case 1:
+                        return ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio + 1) / (ratio * 2)) * x1 + ((ratio - 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio - 1) / (ratio * 2)) * y1 + ((ratio + 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                    case 2:
+                        return "M" + x1 + " " + y1 + " L" + x2 + " " + y2;
+                    case 3:
+                        return ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                }
+            case 4:
+                switch(d.duplicate_num){
+                    case 1:
+                        return ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio + 1) / (ratio * 2)) * x1 + ((ratio - 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio - 1) / (ratio * 2)) * y1 + ((ratio + 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                    case 2:
+                        return ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                    case 3:
+                        ratio = ratio * 2;
+                        return ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                    case 4:
+                        ratio = ratio * 2;
+                        return ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                }
+        }
         // return ("M" + x1 + " " + y1 +
         //     " Q" + ((3 * x1) / 4 + x2 / 4) + " " + (y1 / 4 + (3 * y2) /4)
         //     + " " + x2 + " " + y2);
-        return ("M" + x1 + " " + y1 +
-            " L" + x2 + " " + y2);
+        // return ("M" + x1 + " " + y1 +
+        //     " L" + x2 + " " + y2);
     })
 
     linksVisiable_flag = true;
@@ -839,8 +908,26 @@ function clearLink(){
 
 }
 
-function checkDuplicateLink(links, source_id, target_id){
+function checkDuplicateLink(){
+    linksCurrent_global.forEach(function(item, index){
+        if(!item.hasOwnProperty("deplicate_num")){
+            var num = 1;
+            var index_list = [];
+            linksCurrent_global.forEach(function(item2, index2){
+                if(item2.pair_id === item.source_id.split("_")[1] + "_" + item.target_id.split("_")[1] ||
+                    item2.pair_id === item.target_id.split("_")[1] + "_" + item.source_id.split("_")[1]){
+                    item2["duplicate_num"] = num;
+                    num++;
+                    index_list.push(index2);
+                }
+            });
 
+            index_list.forEach(function(d){
+                linksCurrent_global[d]["duplicate_all"] = num - 1;
+            });
+            // console.log(num);
+        }
+    });
 }
 
 //绘制下方表格
