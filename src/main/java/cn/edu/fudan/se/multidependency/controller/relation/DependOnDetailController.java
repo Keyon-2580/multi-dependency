@@ -5,6 +5,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import com.alibaba.fastjson.JSONObject;
@@ -30,6 +31,9 @@ public class DependOnDetailController {
 
     @Autowired
     private DependsOnRepository dependsOnRepository;
+
+    @Autowired
+    private CoChangeRepository coChangeRepository;
 
     @GetMapping("")
     public String index(HttpServletRequest request, @RequestParam("pck1")Long id1, @RequestParam("pck2")Long id2, @RequestParam("dependsOnIntensity")Double dependsOnIntensity, @RequestParam("dependsByIntensity")Double dependsByIntensity){
@@ -90,6 +94,7 @@ public class DependOnDetailController {
         result.put("pck2num", Files2.size());
         result.put("dependon1types", printDependsOnTypes(dependon1));
         result.put("dependon2types", printDependsOnTypes(dependon2));
+        result.put("cochange", coChangeRepository.findPackageCoChange(id1, id2).getTimes());
         return result;
     }
 
