@@ -23,6 +23,7 @@ import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationServic
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.neo4j.register.Register;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -184,14 +185,14 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			Map<String, Map<Boolean, Integer>> hotspotPackagePairMap = new HashMap<>();
 			Map<Package, Map<Package, List<DependsOn>>> packageDependsOnMap = new HashMap<>();
 			List<String> keyList = new ArrayList<>();
-			for(DependsOn moduleDependsOn : packageDependsOnList){
-				Package startNode = (Package) moduleDependsOn.getStartNode();
-				Package endNode = (Package) moduleDependsOn.getEndNode();
+			for(DependsOn packageDependsOn : packageDependsOnList){
+				Package startNode = (Package) packageDependsOn.getStartNode();
+				Package endNode = (Package) packageDependsOn.getEndNode();
 				Package pck1 = startNode.getId() < endNode.getId() ? startNode : endNode;
 				Package pck2 = startNode.getId() < endNode.getId() ? endNode : startNode;
 				Map<Package, List<DependsOn>> dependsOnMap = packageDependsOnMap.getOrDefault(pck1, new HashMap<>());
 				List<DependsOn> dependsOnList = dependsOnMap.getOrDefault(pck2, new ArrayList<>());
-				dependsOnList.add(moduleDependsOn);
+				dependsOnList.add(packageDependsOn);
 				dependsOnMap.put(pck2, dependsOnList);
 				packageDependsOnMap.put(pck1, dependsOnMap);
 			}
@@ -221,7 +222,6 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 					}
 				}
 			}
-			resultSortHotspotPackagePairWithDependsOn(allHotspotPackagePair);
 			int index = 0;
 			for(HotspotPackagePair hotspotPackagePair : allHotspotPackagePair) {
 				Package pck1 = hotspotPackagePair.getPackage1();
@@ -326,11 +326,11 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		Map<String, Boolean> isChild = new HashMap<>();
 		Map<String, Boolean> isHotspot = new HashMap<>();
 		Collection<? extends Relation> fileClones = basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE);
-		List<BasicDataForDoubleNodes<Node, Relation>> packageClones = summaryAggregationDataService.queryPackageCloneFromFileCloneSort(fileClones);
+		List<BasicDataForDoubleNodes<Node, Relation>> packageCloneList = summaryAggregationDataService.queryPackageCloneFromFileCloneSort(fileClones);
 		RelationAggregator<Boolean> aggregator = RelationAggregatorForPackageByFileClone.getInstance();
 
 		//预处理
-		for(BasicDataForDoubleNodes<Node, Relation> packageClone : packageClones) {
+		for(BasicDataForDoubleNodes<Node, Relation> packageClone : packageCloneList) {
 			Package currentPackage1 = (Package) packageClone.getNode1();
 			Package currentPackage2 = (Package) packageClone.getNode2();
 			Package parentPackage1 = hasRelationService.findPackageInPackage(currentPackage1);
@@ -355,7 +355,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		}
 
 		//检测
-		for(BasicDataForDoubleNodes<Node, Relation> packageClone : packageClones) {
+		for(BasicDataForDoubleNodes<Node, Relation> packageClone : packageCloneList) {
 			Package currentPackage1 = (Package) packageClone.getNode1();
 			Package currentPackage2 = (Package) packageClone.getNode2();
 			String currentPackages = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
@@ -899,38 +899,42 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		Map<Package, Map<Package, List<CoChange>>> packageCoChangeMap = new HashMap<>();
 		List<CoChange> fileCoChangeList = coChangeRepository.findFileCoChange();
 		if(fileCoChangeList != null && !fileCoChangeList.isEmpty()){
-			Map<Package, Set<Commit>> packageOriginalCommitMap = new HashMap<>();
-			Map<Package, Set<Commit>> packagesAggregateCommitMap = new HashMap<>();
-			List<Package> packageList = new ArrayList<>();
-			List<String> packagesList = new ArrayList<>();
+			Map<Package, Map<Package, Set<Commit>>> packageOriginalCommitMap = new HashMap<>();
+			Map<Package, Map<Package, Set<Commit>>> packagesAggregateCommitMap = new HashMap<>();
+			List<String> keyList = new ArrayList<>();
 			for(CoChange fileCoChange : fileCoChangeList) {
-				Package currentPackage1 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getStartNode().getId());
-				Package currentPackage2 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getEndNode().getId());
-				if(!packageList.contains(currentPackage1)) {
-					packageList.add(currentPackage1);
-					Set<Commit> currentPackage1OriginalCommitSet = new HashSet<>(commitUpdateFileRepository.findCommitInPackageByPackageId(currentPackage1.getId()));
-					packageOriginalCommitMap.put(currentPackage1, currentPackage1OriginalCommitSet);
-					Package parentPackage1 = currentPackage1;
-					while(parentPackage1 != null) {
-						Set<Commit> parentPackage1AggregateCommitSet = packagesAggregateCommitMap.getOrDefault(parentPackage1, new HashSet<>());
-						parentPackage1AggregateCommitSet.addAll(currentPackage1OriginalCommitSet);
-						packagesAggregateCommitMap.put(parentPackage1, parentPackage1AggregateCommitSet);
-						parentPackage1 = hasRelationService.findPackageInPackage(parentPackage1);
-					}
-				}
-				if(!packageList.contains(currentPackage2)) {
-					packageList.add(currentPackage2);
-					Set<Commit> currentPackage2OriginalCommitSet = new HashSet<>(commitUpdateFileRepository.findCommitInPackageByPackageId(currentPackage2.getId()));
-					packageOriginalCommitMap.put(currentPackage2, currentPackage2OriginalCommitSet);
-					Package parentPackage2 = currentPackage2;
-					while(parentPackage2 != null) {
-						Set<Commit> parentPackage2AggregateCommitSet = packagesAggregateCommitMap.getOrDefault(parentPackage2, new HashSet<>());
-						parentPackage2AggregateCommitSet.addAll(currentPackage2OriginalCommitSet);
-						packagesAggregateCommitMap.put(parentPackage2, parentPackage2AggregateCommitSet);
-						parentPackage2 = hasRelationService.findPackageInPackage(parentPackage2);
+				Package pck1 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getStartNode().getId());
+				Package pck2 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getEndNode().getId());
+				String key = String.join("_", pck1.getDirectoryPath(), pck2.getDirectoryPath());
+				if(!keyList.contains(key)) {
+					keyList.add(key);
+					Set<Commit> pck1OriginalCommitSet = new HashSet<>(commitUpdateFileRepository.findCommitInPackageByPackageId(pck1.getId()));
+					Set<Commit> pck2OriginalCommitSet = new HashSet<>(commitUpdateFileRepository.findCommitInPackageByPackageId(pck2.getId()));
+					Map<Package, Set<Commit>> pck1OriginalCommitMat = packageOriginalCommitMap.getOrDefault(pck1, new HashMap<>());
+					Map<Package, Set<Commit>> pck2OriginalCommitMat = packageOriginalCommitMap.getOrDefault(pck2, new HashMap<>());
+					pck1OriginalCommitMat.put(pck2, pck1OriginalCommitSet);
+					pck2OriginalCommitMat.put(pck1, pck2OriginalCommitSet);
+					packageOriginalCommitMap.put(pck1, pck1OriginalCommitMat);
+					packageOriginalCommitMap.put(pck2, pck2OriginalCommitMat);
+					while(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
+						Package currentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
+						Package currentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
+						Map<Package, Set<Commit>> pck1AggregateCommitMat = packagesAggregateCommitMap.getOrDefault(currentPackage1, new HashMap<>());
+						Map<Package, Set<Commit>> pck2AggregateCommitMat = packagesAggregateCommitMap.getOrDefault(currentPackage2, new HashMap<>());
+						Set<Commit> pck1AggregateCommitSet = pck1AggregateCommitMat.getOrDefault(currentPackage2, new HashSet<>());
+						Set<Commit> pck2AggregateCommitSet = pck2AggregateCommitMat.getOrDefault(currentPackage1, new HashSet<>());
+						pck1AggregateCommitSet.addAll(pck1OriginalCommitSet);
+						pck2AggregateCommitSet.addAll(pck2OriginalCommitSet);
+						pck1AggregateCommitMat.put(currentPackage2, pck1AggregateCommitSet);
+						pck2AggregateCommitMat.put(currentPackage1, pck2AggregateCommitSet);
+						packagesAggregateCommitMap.put(currentPackage1, pck1AggregateCommitMat);
+						packagesAggregateCommitMap.put(currentPackage2, pck2AggregateCommitMat);
+						pck1 = hasRelationService.findPackageInPackage(currentPackage1);
+						pck2 = hasRelationService.findPackageInPackage(currentPackage2);
 					}
 				}
 			}
+			keyList.clear();
 			for(CoChange fileCoChange : fileCoChangeList) {
 				Package pck1 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getStartNode().getId());
 				Package pck2 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getEndNode().getId());
@@ -938,14 +942,14 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 					Package currentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
 					Package currentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
 					String key = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
-					if(!packagesList.contains(key)) {
-						packagesList.add(key);
+					if(!keyList.contains(key)) {
+						keyList.add(key);
 						Map<Package, List<CoChange>> coChangeMap = packageCoChangeMap.getOrDefault(currentPackage1, new HashMap<>());
 						List<CoChange> packageCoChangeList = new ArrayList<>();
-						Set<Commit> currentPackage1OriginalCommitSet = packageOriginalCommitMap.getOrDefault(currentPackage1, new HashSet<>());
-						Set<Commit> currentPackage2OriginalCommitSet = packageOriginalCommitMap.getOrDefault(currentPackage2, new HashSet<>());
-						Set<Commit> currentPackage1AggregateCommitSet = packagesAggregateCommitMap.getOrDefault(currentPackage1, new HashSet<>());
-						Set<Commit> currentPackage2AggregateCommitSet = packagesAggregateCommitMap.getOrDefault(currentPackage2, new HashSet<>());
+						Set<Commit> currentPackage1OriginalCommitSet = packageOriginalCommitMap.getOrDefault(currentPackage1, new HashMap<>()).getOrDefault(currentPackage2, new HashSet<>());
+						Set<Commit> currentPackage2OriginalCommitSet = packageOriginalCommitMap.getOrDefault(currentPackage2, new HashMap<>()).getOrDefault(currentPackage1, new HashSet<>());
+						Set<Commit> currentPackage1AggregateCommitSet = packagesAggregateCommitMap.getOrDefault(currentPackage1, new HashMap<>()).getOrDefault(currentPackage2, new HashSet<>());
+						Set<Commit> currentPackage2AggregateCommitSet = packagesAggregateCommitMap.getOrDefault(currentPackage2, new HashMap<>()).getOrDefault(currentPackage1, new HashSet<>());
 						Set<Commit> currentPackagesOriginalCommitSet = new HashSet<>(currentPackage1OriginalCommitSet);
 						currentPackagesOriginalCommitSet.retainAll(currentPackage2OriginalCommitSet);
 						Set<Commit> currentPackagesAggregateCommitSet = new HashSet<>(currentPackage1AggregateCommitSet);
@@ -978,6 +982,72 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			}
 		}
 		return packageCoChangeMap;
+	}
+
+	@Override
+	public List<HotspotPackagePair> getHotspotPackagePairWithCoChange() {
+		List<HotspotPackagePair> result = new ArrayList<>();
+		List<CoChange> packageCoChangeList = coChangeRepository.findModuleCoChange();
+		if(packageCoChangeList != null && !packageCoChangeList.isEmpty()){
+			List<HotspotPackagePair> allHotspotPackagePair = new ArrayList<>();
+			Map<String, Map<Boolean, Integer>> hotspotPackagePairMap = new HashMap<>();
+			List<String> keyList = new ArrayList<>();
+			for(CoChange packageCoChange : packageCoChangeList){
+				Package startNode = (Package) packageCoChange.getStartNode();
+				Package endNode = (Package) packageCoChange.getEndNode();
+				Package pck1 = startNode.getId() < endNode.getId() ? startNode : endNode;
+				Package pck2 = startNode.getId() < endNode.getId() ? endNode : startNode;
+				allHotspotPackagePair.add(createHotspotPackagePairWithCoChange(pck1, pck2, packageCoChange));
+			}
+			int index = 0;
+			for(HotspotPackagePair hotspotPackagePair : allHotspotPackagePair) {
+				Package pck1 = hotspotPackagePair.getPackage1();
+				Package pck2 = hotspotPackagePair.getPackage2();
+				String key = String.join("_", pck1.getDirectoryPath(), pck2.getDirectoryPath());
+				Map<Boolean, Integer> booleanMap = hotspotPackagePairMap.getOrDefault(key, new HashMap<>());
+				if(hotspotPackagePair.isAggregatePackagePair()) {
+					booleanMap.put(true, index);
+				}
+				else {
+					booleanMap.put(false, index);
+				}
+				hotspotPackagePairMap.put(key, booleanMap);
+				index ++;
+			}
+			for(HotspotPackagePair currentHotspotPackagePair : allHotspotPackagePair) {
+				Package currentPackage1 = currentHotspotPackagePair.getPackage1();
+				Package currentPackage2 = currentHotspotPackagePair.getPackage2();
+				String currentKey = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
+				if(keyList.contains(currentKey)) {
+					continue;
+				}
+				HotspotPackagePair hotspotPackagePair = currentHotspotPackagePair;
+				Map<Boolean, Integer> booleanMap = hotspotPackagePairMap.get(currentKey);
+				if(booleanMap.containsKey(true)) {
+					if(booleanMap.containsKey(false)) {
+						allHotspotPackagePair.get(booleanMap.get(true)).addHotspotChild(allHotspotPackagePair.get(booleanMap.get(false)));
+					}
+					hotspotPackagePair = allHotspotPackagePair.get(booleanMap.get(true));
+				}
+				Package pck1 = hasRelationService.findPackageInPackage(currentPackage1);
+				Package pck2 = hasRelationService.findPackageInPackage(currentPackage2);
+				if(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
+					Package parentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
+					Package parentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
+					String parentKey = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
+					if(hotspotPackagePairMap.containsKey(parentKey)) {
+						if(hotspotPackagePairMap.get(parentKey).containsKey(true)) {
+							allHotspotPackagePair.get(hotspotPackagePairMap.get(parentKey).get(true)).addHotspotChild(hotspotPackagePair);
+						}
+					}
+				}
+				else {
+					result.add(currentHotspotPackagePair);
+				}
+				keyList.add(currentKey);
+			}
+		}
+		return result;
 	}
 
 	@Override
@@ -1028,7 +1098,9 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		coChangeRelationDataForDoubleNodes.setCoChangeTimes(packageCoChange.getTimes());
 		coChangeRelationDataForDoubleNodes.setNode1ChangeTimes(packageCoChange.getNode1ChangeTimes());
 		coChangeRelationDataForDoubleNodes.setNode2ChangeTimes(packageCoChange.getNode2ChangeTimes());
-		return new HotspotPackagePair(coChangeRelationDataForDoubleNodes);
+		HotspotPackagePair result = new HotspotPackagePair(coChangeRelationDataForDoubleNodes);
+		result.setAggregatePackagePair(packageCoChange.isAggregatePackagePair());
+		return result;
 	}
 
 	@Override
@@ -1060,19 +1132,6 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			else {
 				return Integer.compare(cloneNodes2, cloneNodes1);
 			}
-		});
-	}
-
-	private void resultSortHotspotPackagePairWithDependsOn(List<HotspotPackagePair> result) {
-		result.sort((hotspotPackagePair1, hotspotPackagePair2) -> {
-			Package package1_1 = hotspotPackagePair1.getPackage1();
-			Package package1_2 = hotspotPackagePair1.getPackage2();
-			Package package2_1 = hotspotPackagePair2.getPackage1();
-			Package package2_2 = hotspotPackagePair2.getPackage2();
-			if(package1_1.getDirectoryPath().equals(package2_1.getDirectoryPath())) {
-				return package2_2.getDirectoryPath().compareTo(package1_2.getDirectoryPath());
-			}
-			return package2_1.getDirectoryPath().compareTo(package1_1.getDirectoryPath());
 		});
 	}
 }

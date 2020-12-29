@@ -25,6 +25,8 @@ public interface HotspotPackagePairDetector {
 
 	Map<Package, Map<Package, List<CoChange>>> detectHotspotPackagePairWithCoChange();
 
+	List<HotspotPackagePair> getHotspotPackagePairWithCoChange();
+
 	List<HotspotPackagePair> detectHotspotPackagePairWithCoChangeByProjectId(long projectId);
 
 	HotspotPackagePair detectHotspotPackagePairWithCoChangeByPackageId(long pck1Id, long pck2Id);
