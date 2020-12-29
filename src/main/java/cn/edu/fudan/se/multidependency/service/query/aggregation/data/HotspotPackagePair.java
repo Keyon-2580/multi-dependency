@@ -29,6 +29,8 @@ public class HotspotPackagePair {
 	
 	private Package package2;
 
+	private boolean isAggregatePackagePair = false;
+
 	public HotspotPackagePair(@NonNull BasicDataForDoubleNodes<Node, Relation> packagePairRelationData) {
 		this.packagePairRelationData = packagePairRelationData;
 		this.hotspotRelationType = packagePairRelationData.getRelationDataType();

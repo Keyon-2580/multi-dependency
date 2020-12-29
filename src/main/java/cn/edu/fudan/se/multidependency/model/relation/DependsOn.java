@@ -39,6 +39,15 @@ public class DependsOn implements Relation, RelationWithTimes{
 
 	private double weightedTimes;
 
+	public DependsOn(DependsOn d) {
+		this.startNode = d.getStartNode();
+		this.endNode = d.getEndNode();
+		this.times = d.getTimes();
+		this.dependsOnType = d.getDependsOnType();
+		this.isAggregatePackagePair = d.isAggregatePackagePair();
+		this.dependsOnTypes.putAll(d.getDependsOnTypes());
+	}
+
 	public DependsOn(Node startNode, Node endNode) {
 		this.startNode = startNode;
 		this.endNode = endNode;

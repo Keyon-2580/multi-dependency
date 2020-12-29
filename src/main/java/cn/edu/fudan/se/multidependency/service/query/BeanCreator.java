@@ -59,7 +59,7 @@ public class BeanCreator {
 
 	@Bean
 	public int setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository) {
-		LOGGER.info("设置commit update文件数...");
+		LOGGER.info("设置Commit Update文件数...");
 		return commitUpdateFileRepository.setCommitFilesSize();
 	}
     
@@ -69,14 +69,14 @@ public class BeanCreator {
 		if(propertyConfig.isCalculateCoChange()) {
 			coChanges = cochangeRepository.findCoChangesLimit();
 			if ( coChanges != null && coChanges.size() > 0){
-				LOGGER.info("已存在cochange关系" );
+				LOGGER.info("已存在CoChange关系" );
 				return coChanges;
 			} else {
-				LOGGER.info("创建cochange关系...");
+				LOGGER.info("创建CoChange关系...");
 				cochangeRepository.deleteAll();
 				cochangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE);
 				cochangeRepository.updateCoChangesForFile();
-				LOGGER.info("创建module cochange关系");
+				LOGGER.info("创建Module CoChange关系");
 				cochangeRepository.createCoChangesForModule(Constant.COUNT_OF_MIN_COCHANGE);
 				cochangeRepository.updateCoChangesForModule();
 			}
@@ -130,28 +130,30 @@ public class BeanCreator {
 			dependsOnRepository.deleteNullAggregationDependsOnInFiles();
 
 			//创建包间dependsOn
-			Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = createPackageDependsOn(dependsOnRepository);
-//			Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = new HashMap<>(hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOn());
-			
-			for (Map.Entry<Package, Map<Package, DependsOn>> entry : packageDependsOnPackage.entrySet()){
+//			Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = createPackageDependsOn(dependsOnRepository);
+			Map<Package, Map<Package, List<DependsOn>>> packageDependsOnPackage = new HashMap<>(hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOn());
+
+			for (Map.Entry<Package, Map<Package, List<DependsOn>>> entry : packageDependsOnPackage.entrySet()){
 				Package pck1 = entry.getKey();
 				List<DependsOn> dependsOnListTmp = new ArrayList<>();
 				int size = 0;
-				for (DependsOn pckDependsOn : packageDependsOnPackage.get(pck1).values()){
-					pckDependsOn.getDependsOnTypes().forEach( (key, value) -> {
-						Double weight = RelationType.relationWeights.get(RelationType.valueOf(key));
-						if(weight != null){
-							BigDecimal weightedTimes  =  new BigDecimal( value * weight);
-							pckDependsOn.addWeightedTimes(weightedTimes.setScale(2, RoundingMode.HALF_UP).doubleValue());
-						} else {
-							LOGGER.info("关系权重未定义：" + key);
+				for (List<DependsOn> pckDependsOnList : packageDependsOnPackage.get(pck1).values()){
+					for(DependsOn pckDependsOn : pckDependsOnList) {
+						pckDependsOn.getDependsOnTypes().forEach( (key, value) -> {
+							Double weight = RelationType.relationWeights.get(RelationType.valueOf(key));
+							if(weight != null){
+								BigDecimal weightedTimes  =  new BigDecimal( value * weight);
+								pckDependsOn.addWeightedTimes(weightedTimes.setScale(2, RoundingMode.HALF_UP).doubleValue());
+							} else {
+								LOGGER.info("关系权重未定义：" + key);
+							}
+						});
+						dependsOnListTmp.add(pckDependsOn);
+						if(size++ > 500){
+							dependsOnRepository.saveAll(dependsOnListTmp);
+							dependsOnListTmp.clear();
+							size = 0;
 						}
-					});
-					dependsOnListTmp.add(pckDependsOn);
-					if(size++ > 500){
-						dependsOnRepository.saveAll(dependsOnListTmp);
-						dependsOnListTmp.clear();
-						size = 0;
 					}
 				}
 				dependsOnRepository.saveAll(dependsOnListTmp);

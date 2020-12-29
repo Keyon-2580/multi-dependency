@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.service.query.aggregation;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
+import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
 
 import java.io.OutputStream;
@@ -12,7 +13,7 @@ public interface HotspotPackagePairDetector {
 
 	List<HotspotPackagePair> detectHotspotPackagePairs();
 
-	Map<Package, Map<Package, DependsOn>> detectHotspotPackagePairWithDependsOn();
+	Map<Package, Map<Package, List<DependsOn>>> detectHotspotPackagePairWithDependsOn();
 
 	List<HotspotPackagePair> getHotspotPackagePairWithDependsOn();
 
@@ -21,6 +22,8 @@ public interface HotspotPackagePairDetector {
 	HotspotPackagePair detectHotspotPackagePairWithDependsOnByPackageId(long pck1Id, long pck2Id);
 
 	List<HotspotPackagePair> detectHotspotPackagePairWithDependsOnInAllProjects();
+
+	Map<Package, Map<Package, CoChange>> detectHotspotPackagePairWithCoChange();
 
 	List<HotspotPackagePair> detectHotspotPackagePairWithCoChangeByProjectId(long projectId);
 

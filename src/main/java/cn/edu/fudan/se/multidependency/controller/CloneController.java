@@ -119,7 +119,7 @@ public class CloneController {
 		result.forEach( moduleClone -> {
 			Package pck1 = (Package)moduleClone.getNode1();
 			Package pck2 = (Package)moduleClone.getNode2();
-			CoChange moduleCoChange = coChangeRepository.findPackageCoChange(pck1.getId(),pck2.getId());
+			CoChange moduleCoChange = coChangeRepository.findPackageCoChangeByPackageId(pck1.getId(),pck2.getId());
 			if(moduleCoChange != null){
 				moduleClone.setAllNodesCoChangeTimes(moduleCoChange.getTimes());
 			}
@@ -460,5 +460,4 @@ public class CloneController {
 		request.setAttribute("cochangeId", cochangeId);
 		return "doublefilestructure";
 	}
-
 }
