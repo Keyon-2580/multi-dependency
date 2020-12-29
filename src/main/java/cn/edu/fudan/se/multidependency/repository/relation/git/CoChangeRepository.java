@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.repository.relation.git;
 
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -30,9 +31,7 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
      */
     @Query("match p= (f1:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->(f2:ProjectFile) where id(f1)={file1Id} and id(f2)={file2Id} return p")
     CoChange findCoChangesBetweenTwoFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
-    
-//    @Query("match (f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile) where id(f1) < id(f2) and (c.merge=false or c.merge is null) and c.usingForIssue=false with f1,f2,count(c) as times where times >= {minCoChangeTimes} create p=(f1)-[:" + RelationType.str_CO_CHANGE 
-//    		+ "{times:times}]->(f2) with p return count(p)")
+
     @Query("match (f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
     		"]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile) " + 
     		"where id(f1) < id(f2) " + 
@@ -86,14 +85,20 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
     List<CoChange> findCoChangesLimit();
 
     @Query("match p= (:Package)-[r:" + RelationType.str_CO_CHANGE + "]->(:Package) return p")
-    List<CoChange> getAllModuleCoChange();
+    List<CoChange> findFileCoChange();
+
+    @Query("match p= (:Package)-[r:" + RelationType.str_CO_CHANGE + "]->(:Package) return p")
+    List<CoChange> getModuleCoChange();
 
     @Query("match p= (p1:Package)-[r:" + RelationType.str_CO_CHANGE + "]-(p2:Package) where id(p1) = {pckId1} and id(p2) = {pckId2} return r")
-    CoChange findPackageCoChange(@Param("pckId1") long pckId1, @Param("pckId2") long pckId2);
+    CoChange findPackageCoChangeByPackageId(@Param("pckId1") long pckId1, @Param("pckId2") long pckId2);
 
     @Query("match p=(project:Project)-[:" + RelationType.str_CONTAIN + "*2]->(:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->(:ProjectFile)<-[:" + RelationType.str_CONTAIN + "*2]-(project) where id(project)={id} return p")
     List<CoChange> findFileCoChangeInProject(@Param("id") long projectId);
 
     @Query("match p=(project:Project)-[:" + RelationType.str_CONTAIN + "]->(:Package)-[r:" + RelationType.str_CO_CHANGE + "]->(:Package)<-[:" + RelationType.str_CONTAIN + "]-(project) where id(project)={id} return p")
     List<CoChange> findPackageCoChangeInProject(@Param("id") long projectId);
+
+    @Query("match (p:Package)-[r:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where id(file) = {fileId} return p")
+    Package findFileBelongPackageByFileId(@Param("fileId") long fileId);
 }
