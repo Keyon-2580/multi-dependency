@@ -11,7 +11,6 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import lombok.Data;
@@ -42,6 +41,8 @@ public class CoChange implements Relation, RelationWithTimes {
 	private int node1ChangeTimes = 0;
 
 	private int node2ChangeTimes = 0;
+
+	private boolean isAggregatePackagePair = false;
 	
 	public CoChange(Node node1, Node node2) {
 		this.node1 = node1;
@@ -82,7 +83,4 @@ public class CoChange implements Relation, RelationWithTimes {
 		properties.put("node2ChangeTimes", getNode2ChangeTimes());
 		return properties;
 	}
-	
-	
-	
 }

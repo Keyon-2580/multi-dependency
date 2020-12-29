@@ -657,7 +657,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 		CoChange packageCoChanges = null;
 		ModuleClone packageCloneCoChanges = null;
 		if(parent1Id > -1 && parent2Id > -1){
-			packageCoChanges = coChangeRepository.findPackageCoChange(currentPackage1.getId(), currentPackage2.getId());
+			packageCoChanges = coChangeRepository.findPackageCoChangeByPackageId(currentPackage1.getId(), currentPackage2.getId());
 			packageCloneCoChanges = moduleCloneRepository.findModuleClone(currentPackage1.getId(), currentPackage2.getId());
 		}
 		RelationDataForDoubleNodes<Node, Relation> relationDataForDoubleNodes = new RelationDataForDoubleNodes<Node, Relation>(currentPackage1, currentPackage2);

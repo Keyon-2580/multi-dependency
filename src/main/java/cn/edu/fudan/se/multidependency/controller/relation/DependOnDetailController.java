@@ -94,8 +94,8 @@ public class DependOnDetailController {
         result.put("pck2num", Files2.size());
         result.put("dependon1types", printDependsOnTypes(dependon1));
         result.put("dependon2types", printDependsOnTypes(dependon2));
-        if(coChangeRepository.findPackageCoChange(id1, id2) != null){
-            result.put("cochange", coChangeRepository.findPackageCoChange(id1, id2).getTimes());
+        if(coChangeRepository.findPackageCoChangeByPackageId(id1, id2) != null){
+            result.put("cochange", coChangeRepository.findPackageCoChangeByPackageId(id1, id2).getTimes());
         }
         return result;
     }
