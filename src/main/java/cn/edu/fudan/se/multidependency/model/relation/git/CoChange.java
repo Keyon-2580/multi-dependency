@@ -33,10 +33,10 @@ public class CoChange implements Relation, RelationWithTimes {
 	
 	@EndNode
 	private Node node2;
-	
+
 	private int times = 1;
 
-	private String cochangeType = "";
+	private String coChangeType = "";
 
 	private int node1ChangeTimes = 0;
 
@@ -49,10 +49,10 @@ public class CoChange implements Relation, RelationWithTimes {
 		this.node2 = node2;
 	}
 
-	public CoChange(Node node1, Node node2, String cochangeType) {
+	public CoChange(Node node1, Node node2, String coChangeType) {
 		this.node1 = node1;
 		this.node2 = node2;
-		this.cochangeType = cochangeType;
+		this.coChangeType = coChangeType;
 	}
 	
 	public void addTimes() {
@@ -77,8 +77,8 @@ public class CoChange implements Relation, RelationWithTimes {
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("times", getTimes());
-		properties.put("cochangeType", getCochangeType());
+		properties.put("times", this.getTimes());
+		properties.put("cochangeType", getCoChangeType());
 		properties.put("node1ChangeTimes", getNode1ChangeTimes());
 		properties.put("node2ChangeTimes", getNode2ChangeTimes());
 		return properties;

@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface CommitUpdateFileRepository extends Neo4jRepository<CommitUpdateFile, Long> {
@@ -24,7 +25,7 @@ public interface CommitUpdateFileRepository extends Neo4jRepository<CommitUpdate
     int setCommitFilesSize();
 
     @Query("match (c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f:ProjectFile)<-[:" + RelationType.str_CONTAIN + "]-(p:Package) where id(p)={packageId} return distinct c;")
-    List<Commit> findCommitInPackageByPackageId(@Param("packageId") long packageId);
+    Set<Commit> findCommitInPackageByPackageId(@Param("packageId") long packageId);
 
     @Query("match (p1:Package)-[:" + RelationType.str_CONTAIN + "]->(f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile)<-[:" + RelationType.str_CONTAIN + "]-(p2:Package) " +
             "where id(p1)={package1Id} and id(p2)={package2Id} " +

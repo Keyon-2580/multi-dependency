@@ -895,83 +895,89 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 	}
 
 	@Override
-	public Map<Package, Map<Package, CoChange>> detectHotspotPackagePairWithCoChange() {
-//		Map<Package, Map<Package, CoChange>> packageCoChangeMap = new HashMap<>();
-//		List<CoChange> fileCoChangeList = coChangeRepository.findFileCoChange();
-//		if(fileCoChangeList != null && !fileCoChangeList.isEmpty()){
-//			Map<String, List<Commit>> packageCommitMap = new HashMap<>();
-//			Map<String, List<Commit>> packagesCommitMap = new HashMap<>();
-//			List<String> flag = new ArrayList<>();
-//			for(CoChange fileCoChange : fileCoChangeList) {
-//				Package pck1 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getStartNode().getId());
-//				Package pck2 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getEndNode().getId());
-//				Package currentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
-//				Package currentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
-//				String key = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
-//				if(flag.contains(key)) {
-//					continue;
-//				}
-//				flag.add(key);
-//				List<Commit> currentPackage1CommitList = packageCommitMap.getOrDefault(currentPackage1.getDirectoryPath(), new ArrayList<>());
-//				List<Commit> currentPackage2CommitList = packageCommitMap.getOrDefault(currentPackage2.getDirectoryPath(), new ArrayList<>());
-//				List<Commit> currentPackagesCommitList = packagesCommitMap.getOrDefault(key, new ArrayList<>());
-//				currentPackage1CommitList.addAll(commitUpdateFileRepository.findCommitInPackageByPackageId(currentPackage1.getId()));
-//				currentPackage2CommitList.addAll(commitUpdateFileRepository.findCommitInPackageByPackageId(currentPackage2.getId()));
-//				currentPackagesCommitList.addAll(commitUpdateFileRepository.findCommitBetweenPackagesByPackageId(currentPackage1.getId(), currentPackage2.getId()));
-//				packageCommitMap.put(currentPackage1.getDirectoryPath(), currentPackage1CommitList);
-//				packageCommitMap.put(currentPackage2.getDirectoryPath(), currentPackage2CommitList);
-//				packagesCommitMap.put(key, currentPackagesCommitList);
-//				CoChange currentCoChange = fileCoChange;
-//				boolean isAggregatePackagePair = false;
-//				while(currentPackage1 != null && currentPackage2 != null && !currentPackage1.getId().equals(currentPackage2.getId())) {
-//					Map<Package, CoChange> coChangeMap = packageCoChangeMap.getOrDefault(currentPackage1, new HashMap<>());
-//					CoChange coChange = coChangeMap.get(currentPackage2);
-//					int times = fileCoChange.getTimes();
-//					int node1ChangeTimes = fileCoChange.getNode1ChangeTimes();
-//					int node2ChangeTimes = fileCoChange.getNode2ChangeTimes();
-//					if(coChange != null ){
-//						times += coChange.getTimes();
-//						node1ChangeTimes += coChange.getNode1ChangeTimes();
-//						node2ChangeTimes += coChange.getNode2ChangeTimes();
-//						coChange.setTimes(times);
-//						coChange.setNode1ChangeTimes(node1ChangeTimes);
-//						coChange.setNode2ChangeTimes(node2ChangeTimes);
-//
-//						int currentDependsOnPairTimes = coChange.getTimes();
-//						for(Map.Entry<String, Long> entry : currentCoChange.getDependsOnTypes().entrySet()) {
-//							String dependsOnKey = entry.getKey();
-//							Long typeTimes = entry.getValue();
-//							if(coChange.getDependsOnTypes().containsKey(dependsOnKey)) {
-//								Long currentDependsOnPairTypeTimes = coChange.getDependsOnTypes().get(dependsOnKey);
-//								currentDependsOnPairTypeTimes += typeTimes;
-//								coChange.getDependsOnTypes().put(dependsOnKey, currentDependsOnPairTypeTimes);
-//							}
-//							else {
-//								coChange.getDependsOnTypes().put(dependsOnKey, typeTimes);
-//								String dependsOnType = coChange.getDependsOnType();
-//								coChange.setDependsOnType(dependsOnType + "__" + dependsOnKey);
-//							}
-//							currentDependsOnPairTimes += typeTimes.intValue();
-//						}
-//						dependsOn.setTimes(currentDependsOnPairTimes);
-//					}
-//					else {
-//						dependsOn = new DependsOn(currentPackage1, currentPackage2);
-//						dependsOn.getDependsOnTypes().putAll(currentDependsOn.getDependsOnTypes());
-//						dependsOn.setDependsOnType(currentDependsOn.getDependsOnType());
-//						dependsOn.setTimes(currentDependsOn.getTimes());
-//					}
-//					dependsOn.setAggregatePackagePair(isAggregatePackagePair);
-//					dependsOnMap.put(currentPackage2, dependsOn);
-//					packageDependsOnMap.put(currentPackage1, dependsOnMap);
-//					currentPackage1 = hasRelationService.findPackageInPackage(currentPackage1);
-//					currentPackage2 = hasRelationService.findPackageInPackage(currentPackage2);
-//					currentDependsOn = dependsOn;
-//					isAggregatePackagePair = true;
-//				}
-//			}
-//		}
-		return null;
+	public Map<Package, Map<Package, List<CoChange>>> detectHotspotPackagePairWithCoChange() {
+		Map<Package, Map<Package, List<CoChange>>> packageCoChangeMap = new HashMap<>();
+		List<CoChange> fileCoChangeList = coChangeRepository.findFileCoChange();
+		if(fileCoChangeList != null && !fileCoChangeList.isEmpty()){
+			Map<Package, Set<Commit>> packageOriginalCommitMap = new HashMap<>();
+			Map<Package, Set<Commit>> packagesAggregateCommitMap = new HashMap<>();
+			List<Package> packageList = new ArrayList<>();
+			List<String> packagesList = new ArrayList<>();
+			for(CoChange fileCoChange : fileCoChangeList) {
+				Package currentPackage1 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getStartNode().getId());
+				Package currentPackage2 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getEndNode().getId());
+				if(!packageList.contains(currentPackage1)) {
+					packageList.add(currentPackage1);
+					Set<Commit> currentPackage1OriginalCommitSet = new HashSet<>(commitUpdateFileRepository.findCommitInPackageByPackageId(currentPackage1.getId()));
+					packageOriginalCommitMap.put(currentPackage1, currentPackage1OriginalCommitSet);
+					Package parentPackage1 = currentPackage1;
+					while(parentPackage1 != null) {
+						Set<Commit> parentPackage1AggregateCommitSet = packagesAggregateCommitMap.getOrDefault(parentPackage1, new HashSet<>());
+						parentPackage1AggregateCommitSet.addAll(currentPackage1OriginalCommitSet);
+						packagesAggregateCommitMap.put(parentPackage1, parentPackage1AggregateCommitSet);
+						parentPackage1 = hasRelationService.findPackageInPackage(parentPackage1);
+					}
+				}
+				if(!packageList.contains(currentPackage2)) {
+					packageList.add(currentPackage2);
+					Set<Commit> currentPackage2OriginalCommitSet = new HashSet<>(commitUpdateFileRepository.findCommitInPackageByPackageId(currentPackage2.getId()));
+					packageOriginalCommitMap.put(currentPackage2, currentPackage2OriginalCommitSet);
+					Package parentPackage2 = currentPackage2;
+					while(parentPackage2 != null) {
+						Set<Commit> parentPackage2AggregateCommitSet = packagesAggregateCommitMap.getOrDefault(parentPackage2, new HashSet<>());
+						parentPackage2AggregateCommitSet.addAll(currentPackage2OriginalCommitSet);
+						packagesAggregateCommitMap.put(parentPackage2, parentPackage2AggregateCommitSet);
+						parentPackage2 = hasRelationService.findPackageInPackage(parentPackage2);
+					}
+				}
+			}
+			for(CoChange fileCoChange : fileCoChangeList) {
+				Package pck1 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getStartNode().getId());
+				Package pck2 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getEndNode().getId());
+				while(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
+					Package currentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
+					Package currentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
+					String key = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
+					if(!packagesList.contains(key)) {
+						packagesList.add(key);
+						Map<Package, List<CoChange>> coChangeMap = packageCoChangeMap.getOrDefault(currentPackage1, new HashMap<>());
+						List<CoChange> packageCoChangeList = new ArrayList<>();
+						Set<Commit> currentPackage1OriginalCommitSet = packageOriginalCommitMap.getOrDefault(currentPackage1, new HashSet<>());
+						Set<Commit> currentPackage2OriginalCommitSet = packageOriginalCommitMap.getOrDefault(currentPackage2, new HashSet<>());
+						Set<Commit> currentPackage1AggregateCommitSet = packagesAggregateCommitMap.getOrDefault(currentPackage1, new HashSet<>());
+						Set<Commit> currentPackage2AggregateCommitSet = packagesAggregateCommitMap.getOrDefault(currentPackage2, new HashSet<>());
+						Set<Commit> currentPackagesOriginalCommitSet = new HashSet<>(currentPackage1OriginalCommitSet);
+						currentPackagesOriginalCommitSet.retainAll(currentPackage2OriginalCommitSet);
+						Set<Commit> currentPackagesAggregateCommitSet = new HashSet<>(currentPackage1AggregateCommitSet);
+						currentPackagesAggregateCommitSet.retainAll(currentPackage2AggregateCommitSet);
+						if(currentPackagesOriginalCommitSet.size() > 0) {
+							CoChange packageOriginalCoChange = new CoChange(currentPackage1, currentPackage2);
+							packageOriginalCoChange.setTimes(currentPackagesOriginalCommitSet.size());
+							packageOriginalCoChange.setNode1ChangeTimes(currentPackage1AggregateCommitSet.size());
+							packageOriginalCoChange.setNode2ChangeTimes(currentPackage2AggregateCommitSet.size());
+							packageOriginalCoChange.setAggregatePackagePair(false);
+							packageCoChangeList.add(packageOriginalCoChange);
+						}
+						if(currentPackagesAggregateCommitSet.size() > 0 && currentPackagesAggregateCommitSet.size() != currentPackagesOriginalCommitSet.size()) {
+							CoChange packageAggregateCoChange = new CoChange(currentPackage1, currentPackage2);
+							packageAggregateCoChange.setTimes(currentPackagesAggregateCommitSet.size());
+							packageAggregateCoChange.setNode1ChangeTimes(currentPackage1AggregateCommitSet.size());
+							packageAggregateCoChange.setNode2ChangeTimes(currentPackage2AggregateCommitSet.size());
+							packageAggregateCoChange.setAggregatePackagePair(true);
+							packageCoChangeList.add(packageAggregateCoChange);
+						}
+						coChangeMap.put(currentPackage2, packageCoChangeList);
+						packageCoChangeMap.put(currentPackage1, coChangeMap);
+						pck1 = hasRelationService.findPackageInPackage(currentPackage1);
+						pck2 = hasRelationService.findPackageInPackage(currentPackage2);
+					}
+					else {
+						break;
+					}
+				}
+			}
+		}
+		return packageCoChangeMap;
 	}
 
 	@Override

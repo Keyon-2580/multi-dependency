@@ -71,14 +71,33 @@ public class BeanCreator {
 			if ( coChanges != null && coChanges.size() > 0){
 				LOGGER.info("已存在CoChange关系" );
 				return coChanges;
-			} else {
+			}
+			else {
 				LOGGER.info("创建CoChange关系...");
 				cochangeRepository.deleteAll();
 				cochangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE);
 				cochangeRepository.updateCoChangesForFile();
 				LOGGER.info("创建Module CoChange关系");
-				cochangeRepository.createCoChangesForModule(Constant.COUNT_OF_MIN_COCHANGE);
-				cochangeRepository.updateCoChangesForModule();
+//				cochangeRepository.createCoChangesForModule(Constant.COUNT_OF_MIN_COCHANGE);
+//				cochangeRepository.updateCoChangesForModule();
+
+				Map<Package, Map<Package, List<CoChange>>> packageCoChangePackage = new HashMap<>(hotspotPackagePairDetector.detectHotspotPackagePairWithCoChange());
+				for(Map.Entry<Package, Map<Package, List<CoChange>>> entry : packageCoChangePackage.entrySet()){
+					Package pck1 = entry.getKey();
+					List<CoChange> coChangeListTmp = new ArrayList<>();
+					int size = 0;
+					for(List<CoChange> packageCoChangeList : packageCoChangePackage.get(pck1).values()){
+						for(CoChange packageCoChange : packageCoChangeList) {
+							coChangeListTmp.add(packageCoChange);
+							if(++size > 500){
+								cochangeRepository.saveAll(coChangeListTmp);
+								coChangeListTmp.clear();
+								size = 0;
+							}
+						}
+					}
+					cochangeRepository.saveAll(coChangeListTmp);
+				}
 			}
 		}
 		return coChanges;
@@ -115,7 +134,6 @@ public class BeanCreator {
 			dependsOnRepository.createDependsOnWithImplementsInFiles();
 			dependsOnRepository.createDependsOnWithAssociationInFiles();
 			dependsOnRepository.createDependsOnWithAnnotationInFiles();
-
 			dependsOnRepository.createDependsOnWithCallInFiles();
 			dependsOnRepository.createDependsOnWithImpllinkInFiles();
 			dependsOnRepository.createDependsOnWithCreateInFiles();
@@ -124,32 +142,30 @@ public class BeanCreator {
 			dependsOnRepository.createDependsOnWithParameterInFiles();
 			dependsOnRepository.createDependsOnWithReturnInFiles();
 			dependsOnRepository.createDependsOnWithUseTypeInFiles();
-
 			dependsOnRepository.createDependsOnWithTimesInNode(NodeLabelType.ProjectFile);
-
 			dependsOnRepository.deleteNullAggregationDependsOnInFiles();
 
 			//创建包间dependsOn
 //			Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = createPackageDependsOn(dependsOnRepository);
 			Map<Package, Map<Package, List<DependsOn>>> packageDependsOnPackage = new HashMap<>(hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOn());
-
-			for (Map.Entry<Package, Map<Package, List<DependsOn>>> entry : packageDependsOnPackage.entrySet()){
+			for(Map.Entry<Package, Map<Package, List<DependsOn>>> entry : packageDependsOnPackage.entrySet()){
 				Package pck1 = entry.getKey();
 				List<DependsOn> dependsOnListTmp = new ArrayList<>();
 				int size = 0;
-				for (List<DependsOn> pckDependsOnList : packageDependsOnPackage.get(pck1).values()){
+				for(List<DependsOn> pckDependsOnList : packageDependsOnPackage.get(pck1).values()){
 					for(DependsOn pckDependsOn : pckDependsOnList) {
-						pckDependsOn.getDependsOnTypes().forEach( (key, value) -> {
+						pckDependsOn.getDependsOnTypes().forEach((key, value) -> {
 							Double weight = RelationType.relationWeights.get(RelationType.valueOf(key));
 							if(weight != null){
-								BigDecimal weightedTimes  =  new BigDecimal( value * weight);
+								BigDecimal weightedTimes  =  new BigDecimal(value * weight);
 								pckDependsOn.addWeightedTimes(weightedTimes.setScale(2, RoundingMode.HALF_UP).doubleValue());
-							} else {
+							}
+							else {
 								LOGGER.info("关系权重未定义：" + key);
 							}
 						});
 						dependsOnListTmp.add(pckDependsOn);
-						if(size++ > 500){
+						if(++size > 500){
 							dependsOnRepository.saveAll(dependsOnListTmp);
 							dependsOnListTmp.clear();
 							size = 0;
@@ -158,7 +174,6 @@ public class BeanCreator {
 				}
 				dependsOnRepository.saveAll(dependsOnListTmp);
 			}
-			
 			fileRepository.pageRank(20, 0.85);
 		}
 		configSmellDetect(propertyConfig, asRepository);

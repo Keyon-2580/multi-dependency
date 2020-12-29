@@ -23,7 +23,7 @@ public interface HotspotPackagePairDetector {
 
 	List<HotspotPackagePair> detectHotspotPackagePairWithDependsOnInAllProjects();
 
-	Map<Package, Map<Package, CoChange>> detectHotspotPackagePairWithCoChange();
+	Map<Package, Map<Package, List<CoChange>>> detectHotspotPackagePairWithCoChange();
 
 	List<HotspotPackagePair> detectHotspotPackagePairWithCoChangeByProjectId(long projectId);
 

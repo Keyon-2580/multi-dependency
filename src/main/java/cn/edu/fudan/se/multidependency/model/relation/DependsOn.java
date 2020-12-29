@@ -110,6 +110,4 @@ public class DependsOn implements Relation, RelationWithTimes{
 		Double weight = RelationType.relationWeights.get(relation.getRelationType());
 		weightedTimes += ( weight != null ? times * weight : 0 ) ;
 	}
-
-
 }
