@@ -9,6 +9,7 @@ import cn.edu.fudan.se.multidependency.model.relation.AggregationDependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.model.relation.git.AggregationCoChange;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
@@ -17,6 +18,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.AggregationDependsOnR
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.AggregationCloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.ModuleCloneRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.git.AggregationCoChangeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileRepository;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.*;
@@ -61,6 +63,9 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 
 	@Autowired
 	private CoChangeRepository coChangeRepository;
+
+	@Autowired
+	private AggregationCoChangeRepository aggregationCoChangeRepository;
 
 	@Autowired
 	private ModuleCloneRepository moduleCloneRepository;
@@ -954,9 +959,11 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 	}
 
 	@Override
-	public Map<Package, Map<Package, List<CoChange>>> detectHotspotPackagePairWithCoChange() {
-		Map<Package, Map<Package, List<CoChange>>> packageCoChangeMap = new HashMap<>();
+	public Map<String, List<CoChange>> detectHotspotPackagePairWithCoChange() {
+		Map<String, List<CoChange>> result = new HashMap<>();
 		List<CoChange> fileCoChangeList = coChangeRepository.findFileCoChange();
+		List<CoChange> moduleCoChangeList = new ArrayList<>();
+		List<CoChange> aggregationCoChangeList = new ArrayList<>();
 		if(fileCoChangeList != null && !fileCoChangeList.isEmpty()){
 			Map<Package, Map<Package, Set<Commit>>> packageOriginalCommitMap = new HashMap<>();
 			Map<Package, Map<Package, Set<Commit>>> packagesAggregateCommitMap = new HashMap<>();
@@ -1003,8 +1010,6 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 					String key = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
 					if(!keyList.contains(key)) {
 						keyList.add(key);
-						Map<Package, List<CoChange>> coChangeMap = packageCoChangeMap.getOrDefault(currentPackage1, new HashMap<>());
-						List<CoChange> packageCoChangeList = new ArrayList<>();
 						Set<Commit> currentPackage1OriginalCommitSet = packageOriginalCommitMap.getOrDefault(currentPackage1, new HashMap<>()).getOrDefault(currentPackage2, new HashSet<>());
 						Set<Commit> currentPackage2OriginalCommitSet = packageOriginalCommitMap.getOrDefault(currentPackage2, new HashMap<>()).getOrDefault(currentPackage1, new HashSet<>());
 						Set<Commit> currentPackage1AggregateCommitSet = packagesAggregateCommitMap.getOrDefault(currentPackage1, new HashMap<>()).getOrDefault(currentPackage2, new HashSet<>());
@@ -1014,23 +1019,19 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 						Set<Commit> currentPackagesAggregateCommitSet = new HashSet<>(currentPackage1AggregateCommitSet);
 						currentPackagesAggregateCommitSet.retainAll(currentPackage2AggregateCommitSet);
 						if(currentPackagesOriginalCommitSet.size() > 0) {
-							CoChange packageOriginalCoChange = new CoChange(currentPackage1, currentPackage2);
-							packageOriginalCoChange.setTimes(currentPackagesOriginalCommitSet.size());
-							packageOriginalCoChange.setNode1ChangeTimes(currentPackage1AggregateCommitSet.size());
-							packageOriginalCoChange.setNode2ChangeTimes(currentPackage2AggregateCommitSet.size());
-							packageOriginalCoChange.setAggregatePackagePair(false);
-							packageCoChangeList.add(packageOriginalCoChange);
+							CoChange moduleCoChange = new CoChange(currentPackage1, currentPackage2);
+							moduleCoChange.setTimes(currentPackagesOriginalCommitSet.size());
+							moduleCoChange.setNode1ChangeTimes(currentPackage1AggregateCommitSet.size());
+							moduleCoChange.setNode2ChangeTimes(currentPackage2AggregateCommitSet.size());
+							moduleCoChangeList.add(moduleCoChange);
 						}
 						if(currentPackagesAggregateCommitSet.size() > 0 && currentPackagesAggregateCommitSet.size() != currentPackagesOriginalCommitSet.size()) {
-							CoChange packageAggregateCoChange = new CoChange(currentPackage1, currentPackage2);
-							packageAggregateCoChange.setTimes(currentPackagesAggregateCommitSet.size());
-							packageAggregateCoChange.setNode1ChangeTimes(currentPackage1AggregateCommitSet.size());
-							packageAggregateCoChange.setNode2ChangeTimes(currentPackage2AggregateCommitSet.size());
-							packageAggregateCoChange.setAggregatePackagePair(true);
-							packageCoChangeList.add(packageAggregateCoChange);
+							CoChange aggregationCoChange = new CoChange(currentPackage1, currentPackage2);
+							aggregationCoChange.setTimes(currentPackagesAggregateCommitSet.size());
+							aggregationCoChange.setNode1ChangeTimes(currentPackage1AggregateCommitSet.size());
+							aggregationCoChange.setNode2ChangeTimes(currentPackage2AggregateCommitSet.size());
+							aggregationCoChangeList.add(aggregationCoChange);
 						}
-						coChangeMap.put(currentPackage2, packageCoChangeList);
-						packageCoChangeMap.put(currentPackage1, coChangeMap);
 						pck1 = hasRelationService.findPackageInPackage(currentPackage1);
 						pck2 = hasRelationService.findPackageInPackage(currentPackage2);
 					}
@@ -1040,71 +1041,83 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				}
 			}
 		}
-		return packageCoChangeMap;
+		result.put(RelationType.str_CO_CHANGE, moduleCoChangeList);
+		result.put(RelationType.str_AGGREGATION_CO_CHANGE, aggregationCoChangeList);
+		return result;
 	}
 
 	@Override
 	public List<HotspotPackagePair> getHotspotPackagePairWithCoChange() {
 		List<HotspotPackagePair> result = new ArrayList<>();
-		List<CoChange> packageCoChangeList = coChangeRepository.findModuleCoChange();
-		if(packageCoChangeList != null && !packageCoChangeList.isEmpty()){
-			List<HotspotPackagePair> allHotspotPackagePair = new ArrayList<>();
-			Map<String, Map<Boolean, Integer>> hotspotPackagePairMap = new HashMap<>();
-			List<String> keyList = new ArrayList<>();
-			for(CoChange packageCoChange : packageCoChangeList){
-				Package startNode = (Package) packageCoChange.getStartNode();
-				Package endNode = (Package) packageCoChange.getEndNode();
+		List<HotspotPackagePair> allHotspotPackagePair = new ArrayList<>();
+		List<String> keyList = new ArrayList<>();
+		Map<String, Map<Boolean, Integer>> hotspotPackagePairMap = new HashMap<>();
+		List<CoChange> moduleCoChangeList = coChangeRepository.findModuleCoChange();
+		List<AggregationCoChange> aggregationCoChangeList = aggregationCoChangeRepository.findAggregationCoChange();
+		if(moduleCoChangeList != null && !moduleCoChangeList.isEmpty()){
+			for(CoChange moduleCoChange : moduleCoChangeList){
+				Package startNode = (Package) moduleCoChange.getStartNode();
+				Package endNode = (Package) moduleCoChange.getEndNode();
 				Package pck1 = startNode.getId() < endNode.getId() ? startNode : endNode;
 				Package pck2 = startNode.getId() < endNode.getId() ? endNode : startNode;
-				allHotspotPackagePair.add(createHotspotPackagePairWithCoChange(pck1, pck2, packageCoChange));
+				allHotspotPackagePair.add(createHotspotPackagePairWithCoChange(pck1, pck2, moduleCoChange, null));
 			}
-			int index = 0;
-			for(HotspotPackagePair hotspotPackagePair : allHotspotPackagePair) {
-				Package pck1 = hotspotPackagePair.getPackage1();
-				Package pck2 = hotspotPackagePair.getPackage2();
-				String key = String.join("_", pck1.getDirectoryPath(), pck2.getDirectoryPath());
-				Map<Boolean, Integer> booleanMap = hotspotPackagePairMap.getOrDefault(key, new HashMap<>());
-				if(hotspotPackagePair.isAggregatePackagePair()) {
-					booleanMap.put(true, index);
-				}
-				else {
-					booleanMap.put(false, index);
-				}
-				hotspotPackagePairMap.put(key, booleanMap);
-				index ++;
+		}
+		if(aggregationCoChangeList != null && !aggregationCoChangeList.isEmpty()){
+			for(AggregationCoChange aggregationCoChange : aggregationCoChangeList){
+				Package startNode = (Package) aggregationCoChange.getStartNode();
+				Package endNode = (Package) aggregationCoChange.getEndNode();
+				Package pck1 = startNode.getId() < endNode.getId() ? startNode : endNode;
+				Package pck2 = startNode.getId() < endNode.getId() ? endNode : startNode;
+				allHotspotPackagePair.add(createHotspotPackagePairWithCoChange(pck1, pck2, null, aggregationCoChange));
 			}
-			for(HotspotPackagePair currentHotspotPackagePair : allHotspotPackagePair) {
-				Package currentPackage1 = currentHotspotPackagePair.getPackage1();
-				Package currentPackage2 = currentHotspotPackagePair.getPackage2();
-				String currentKey = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
-				if(keyList.contains(currentKey)) {
-					continue;
+		}
+		int index = 0;
+		for(HotspotPackagePair hotspotPackagePair : allHotspotPackagePair) {
+			Package pck1 = hotspotPackagePair.getPackage1();
+			Package pck2 = hotspotPackagePair.getPackage2();
+			String key = String.join("_", pck1.getDirectoryPath(), pck2.getDirectoryPath());
+			Map<Boolean, Integer> booleanMap = hotspotPackagePairMap.getOrDefault(key, new HashMap<>());
+			if(hotspotPackagePair.isAggregatePackagePair()) {
+				booleanMap.put(true, index);
+			}
+			else {
+				booleanMap.put(false, index);
+			}
+			hotspotPackagePairMap.put(key, booleanMap);
+			index ++;
+		}
+		for(HotspotPackagePair currentHotspotPackagePair : allHotspotPackagePair) {
+			Package currentPackage1 = currentHotspotPackagePair.getPackage1();
+			Package currentPackage2 = currentHotspotPackagePair.getPackage2();
+			String currentKey = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
+			if(keyList.contains(currentKey)) {
+				continue;
+			}
+			HotspotPackagePair hotspotPackagePair = currentHotspotPackagePair;
+			Map<Boolean, Integer> booleanMap = hotspotPackagePairMap.get(currentKey);
+			if(booleanMap.containsKey(true)) {
+				if(booleanMap.containsKey(false)) {
+					allHotspotPackagePair.get(booleanMap.get(true)).addHotspotChild(allHotspotPackagePair.get(booleanMap.get(false)));
 				}
-				HotspotPackagePair hotspotPackagePair = currentHotspotPackagePair;
-				Map<Boolean, Integer> booleanMap = hotspotPackagePairMap.get(currentKey);
-				if(booleanMap.containsKey(true)) {
-					if(booleanMap.containsKey(false)) {
-						allHotspotPackagePair.get(booleanMap.get(true)).addHotspotChild(allHotspotPackagePair.get(booleanMap.get(false)));
+				hotspotPackagePair = allHotspotPackagePair.get(booleanMap.get(true));
+			}
+			Package pck1 = hasRelationService.findPackageInPackage(currentPackage1);
+			Package pck2 = hasRelationService.findPackageInPackage(currentPackage2);
+			if(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
+				Package parentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
+				Package parentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
+				String parentKey = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
+				if(hotspotPackagePairMap.containsKey(parentKey)) {
+					if(hotspotPackagePairMap.get(parentKey).containsKey(true)) {
+						allHotspotPackagePair.get(hotspotPackagePairMap.get(parentKey).get(true)).addHotspotChild(hotspotPackagePair);
 					}
-					hotspotPackagePair = allHotspotPackagePair.get(booleanMap.get(true));
 				}
-				Package pck1 = hasRelationService.findPackageInPackage(currentPackage1);
-				Package pck2 = hasRelationService.findPackageInPackage(currentPackage2);
-				if(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
-					Package parentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
-					Package parentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
-					String parentKey = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
-					if(hotspotPackagePairMap.containsKey(parentKey)) {
-						if(hotspotPackagePairMap.get(parentKey).containsKey(true)) {
-							allHotspotPackagePair.get(hotspotPackagePairMap.get(parentKey).get(true)).addHotspotChild(hotspotPackagePair);
-						}
-					}
-				}
-				else {
-					result.add(currentHotspotPackagePair);
-				}
-				keyList.add(currentKey);
 			}
+			else {
+				result.add(currentHotspotPackagePair);
+			}
+			keyList.add(currentKey);
 		}
 		return result;
 	}
@@ -1130,7 +1143,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				for(Map.Entry<Package, CoChange> entryKey : coChangePackage.entrySet()){
 					Package pck2 = entryKey.getKey();
 					CoChange coChange = entryKey.getValue();
-					HotspotPackagePair hotspotPackagePair = createHotspotPackagePairWithCoChange(pck1, pck2, coChange);
+					HotspotPackagePair hotspotPackagePair = createHotspotPackagePairWithCoChange(pck1, pck2, coChange, null);
 					result.add(hotspotPackagePair);
 				}
 			}
@@ -1147,18 +1160,30 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			Package tmp2 = (Package) packageCoChange.getEndNode();
 			Package pck1 = tmp1.getId() == pck1Id ? tmp1 : tmp2;
 			Package pck2 = tmp2.getId() == pck2Id ? tmp2 : tmp1;
-			hotspotPackagePair = createHotspotPackagePairWithCoChange(pck1, pck2, packageCoChange);
+			hotspotPackagePair = createHotspotPackagePairWithCoChange(pck1, pck2, packageCoChange, null);
 		}
 		return hotspotPackagePair;
 	}
 
-	private HotspotPackagePair createHotspotPackagePairWithCoChange(Package pck1, Package pck2, CoChange packageCoChange) {
+	private HotspotPackagePair createHotspotPackagePairWithCoChange(Package pck1, Package pck2, CoChange moduleCoChange, AggregationCoChange aggregationCoChange) {
 		CoChangeRelationDataForDoubleNodes<Node, Relation> coChangeRelationDataForDoubleNodes = new CoChangeRelationDataForDoubleNodes<>(pck1, pck2);
-		coChangeRelationDataForDoubleNodes.setCoChangeTimes(packageCoChange.getTimes());
-		coChangeRelationDataForDoubleNodes.setNode1ChangeTimes(packageCoChange.getNode1ChangeTimes());
-		coChangeRelationDataForDoubleNodes.setNode2ChangeTimes(packageCoChange.getNode2ChangeTimes());
+		if(moduleCoChange != null) {
+			coChangeRelationDataForDoubleNodes.setCoChangeTimes(moduleCoChange.getTimes());
+			coChangeRelationDataForDoubleNodes.setNode1ChangeTimes(moduleCoChange.getNode1ChangeTimes());
+			coChangeRelationDataForDoubleNodes.setNode2ChangeTimes(moduleCoChange.getNode2ChangeTimes());
+		}
+		else if(aggregationCoChange != null) {
+			coChangeRelationDataForDoubleNodes.setCoChangeTimes(aggregationCoChange.getTimes());
+			coChangeRelationDataForDoubleNodes.setNode1ChangeTimes(aggregationCoChange.getNode1ChangeTimes());
+			coChangeRelationDataForDoubleNodes.setNode2ChangeTimes(aggregationCoChange.getNode2ChangeTimes());
+		}
 		HotspotPackagePair result = new HotspotPackagePair(coChangeRelationDataForDoubleNodes);
-		result.setAggregatePackagePair(packageCoChange.isAggregatePackagePair());
+		if(moduleCoChange != null) {
+			result.setAggregatePackagePair(false);
+		}
+		else if(aggregationCoChange != null) {
+			result.setAggregatePackagePair(true);
+		}
 		return result;
 	}
 

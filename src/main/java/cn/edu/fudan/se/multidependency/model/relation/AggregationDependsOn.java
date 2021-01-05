@@ -57,7 +57,7 @@ public class AggregationDependsOn implements Relation, RelationWithTimes{
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.DEPENDS_ON;
+		return RelationType.AGGREGATION_DEPENDS_ON;
 	}
 
 	@Override
