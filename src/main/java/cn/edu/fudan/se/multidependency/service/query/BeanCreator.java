@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
+import cn.edu.fudan.se.multidependency.model.relation.AggregationDependsOn;
+import cn.edu.fudan.se.multidependency.repository.relation.AggregationDependsOnRepository;
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,19 +120,17 @@ public class BeanCreator {
 	}
 
 	@Bean("createDependsOn")
-	public List<DependsOn> createDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, ProjectFileRepository fileRepository, ASRepository asRepository) {
+	public List<DependsOn> createDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, AggregationDependsOnRepository aggregationDependsOnRepository, ProjectFileRepository fileRepository, ASRepository asRepository) {
 		if(!propertyConfig.isCalculateDependsOn()) {
 			return new ArrayList<>();
 		}
 		List<DependsOn> dependsOns = dependsOnRepository.findFileDepends();
 		if(dependsOns != null && dependsOns.size() > 0){
 			LOGGER.info("已存在Depends On关系" );
-		} else {
+		}
+		else {
 			LOGGER.info("创建Depends On关系...");
 			dependsOnRepository.deleteAll();
-			
-			//dependsOnRepository.createDependsOnWithImportInFiles();
-			//dependsOnRepository.createDependsOnWithIncludeInFiles();
 			dependsOnRepository.createDependsOnWithExtendsInFiles();
 			dependsOnRepository.createDependsOnWithImplementsInFiles();
 			dependsOnRepository.createDependsOnWithAssociationInFiles();
@@ -145,79 +146,39 @@ public class BeanCreator {
 			dependsOnRepository.createDependsOnWithTimesInNode(NodeLabelType.ProjectFile);
 			dependsOnRepository.deleteNullAggregationDependsOnInFiles();
 
+			LOGGER.info("创建Aggregation Depends On关系...");
 			//创建包间dependsOn
 //			Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = createPackageDependsOn(dependsOnRepository);
-			Map<Package, Map<Package, List<DependsOn>>> packageDependsOnPackage = new HashMap<>(hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOn());
-			for(Map.Entry<Package, Map<Package, List<DependsOn>>> entry : packageDependsOnPackage.entrySet()){
-				Package pck1 = entry.getKey();
-				List<DependsOn> dependsOnListTmp = new ArrayList<>();
-				int size = 0;
-				for(List<DependsOn> pckDependsOnList : packageDependsOnPackage.get(pck1).values()){
-					for(DependsOn pckDependsOn : pckDependsOnList) {
-						pckDependsOn.getDependsOnTypes().forEach((key, value) -> {
-							Double weight = RelationType.relationWeights.get(RelationType.valueOf(key));
-							if(weight != null){
-								BigDecimal weightedTimes  =  new BigDecimal(value * weight);
-								pckDependsOn.addWeightedTimes(weightedTimes.setScale(2, RoundingMode.HALF_UP).doubleValue());
-							}
-							else {
-								LOGGER.info("关系权重未定义：" + key);
-							}
-						});
-						dependsOnListTmp.add(pckDependsOn);
-						if(++size > 500){
-							dependsOnRepository.saveAll(dependsOnListTmp);
-							dependsOnListTmp.clear();
-							size = 0;
-						}
-					}
+//			Map<Package, Map<Package, List<DependsOn>>> packageDependsOnPackage = new HashMap<>(hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOn());
+			Map<String, List<DependsOn>> dependsOnMap = hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOn();
+			List<DependsOn> moduleDependsOnList = new ArrayList<>(dependsOnMap.get(RelationType.str_DEPENDS_ON));
+			List<DependsOn> aggregationDependsOnList = new ArrayList<>(dependsOnMap.get(RelationType.str_AGGREGATION_DEPENDS_ON));
+			List<DependsOn> moduleDependsOnListTmp = new ArrayList<>();
+			List<AggregationDependsOn> aggregationDependsOnListTmp = new ArrayList<>();
+			int size = 0;
+			for(DependsOn dependsOn : moduleDependsOnList) {
+				moduleDependsOnListTmp.add(dependsOn);
+				if(++size > 500){
+					dependsOnRepository.saveAll(moduleDependsOnListTmp);
+					moduleDependsOnListTmp.clear();
+					size = 0;
 				}
-				dependsOnRepository.saveAll(dependsOnListTmp);
 			}
+			dependsOnRepository.saveAll(moduleDependsOnListTmp);
+			size = 0;
+			for(DependsOn dependsOn : aggregationDependsOnList) {
+				aggregationDependsOnListTmp.add(new AggregationDependsOn(dependsOn));
+				if(++size > 500){
+					aggregationDependsOnRepository.saveAll(aggregationDependsOnListTmp);
+					aggregationDependsOnListTmp.clear();
+					size = 0;
+				}
+			}
+			aggregationDependsOnRepository.saveAll(aggregationDependsOnListTmp);
 			fileRepository.pageRank(20, 0.85);
 		}
 		configSmellDetect(propertyConfig, asRepository);
 		return dependsOns;
-	}
-
-	private Map<Package, Map<Package, DependsOn>> createPackageDependsOn(DependsOnRepository dependsOnRepository){
-		Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = new HashMap<>();
-		for (DependsOn dependsOn : dependsOnRepository.findFileDepends()){
-			Package pck1 = dependsOnRepository.findFileBelongPackageByFileId(dependsOn.getStartNode().getId());
-			Package pck2 = dependsOnRepository.findFileBelongPackageByFileId(dependsOn.getEndNode().getId());
-
-			if(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId()) && dependsOn.getDependsOnTypes() != null && !dependsOn.getDependsOnTypes().isEmpty()){
-				Map<Package, DependsOn> dependsOnMap = packageDependsOnPackage.getOrDefault(pck1, new HashMap<>());
-				DependsOn pckDependsOn = dependsOnMap.get(pck2);
-				if (pckDependsOn != null ){
-					for(Map.Entry<String, Long> entry : dependsOn.getDependsOnTypes().entrySet()){
-						String dependsOnKey = entry.getKey();
-						Long typeTimes = entry.getValue();
-						if ( pckDependsOn.getDependsOnTypes().containsKey(dependsOnKey) ) {
-							Long times = pckDependsOn.getDependsOnTypes().get(dependsOnKey);
-							times += typeTimes;
-							pckDependsOn.getDependsOnTypes().put(dependsOnKey, times);
-						}else {
-							pckDependsOn.getDependsOnTypes().put(dependsOnKey, typeTimes);
-							String dTypes = pckDependsOn.getDependsOnType();
-							pckDependsOn.setDependsOnType(dTypes + "__" + dependsOnKey);
-						}
-						int timesTmp = pckDependsOn.getTimes() + typeTimes.intValue();
-						pckDependsOn.setTimes(timesTmp);
-						dependsOnMap.put(pck2, pckDependsOn);
-					}
-				} else {
-					DependsOn newDependsOn = new DependsOn(pck1, pck2);
-					newDependsOn.getDependsOnTypes().putAll(dependsOn.getDependsOnTypes());
-					newDependsOn.setDependsOnType(dependsOn.getDependsOnType());
-					newDependsOn.setTimes(dependsOn.getTimes());
-					dependsOnMap.put(pck2, newDependsOn);
-				}
-
-				packageDependsOnPackage.put(pck1, dependsOnMap);
-			}
-		}
-		return packageDependsOnPackage;
 	}
 
 	@Bean("createCloneGroup")

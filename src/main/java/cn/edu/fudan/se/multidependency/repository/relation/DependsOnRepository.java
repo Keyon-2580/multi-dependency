@@ -26,7 +26,7 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	List<DependsOn> findFileDepends();	
 	
 	@Query("match p=(:Package)-[r:" + RelationType.str_DEPENDS_ON + "]->(:Package) return p")
-	List<DependsOn> findPackageDepends();
+	List<DependsOn> findPackageDependsOn();
 
 	@Query("match p=(:Type)-[r:" + RelationType.str_DEPENDS_ON + "]->(:Type) return p")
 	List<DependsOn> findTypeDepends();

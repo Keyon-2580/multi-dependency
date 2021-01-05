@@ -32,6 +32,7 @@ public class DependsOn implements Relation, RelationWithTimes{
 
 	private String dependsOnType = "";
 
+	@Transient
 	private boolean isAggregatePackagePair = false;
 
 	@Properties(allowCast = true)
@@ -44,8 +45,9 @@ public class DependsOn implements Relation, RelationWithTimes{
 		this.endNode = d.getEndNode();
 		this.times = d.getTimes();
 		this.dependsOnType = d.getDependsOnType();
-		this.isAggregatePackagePair = d.isAggregatePackagePair();
 		this.dependsOnTypes.putAll(d.getDependsOnTypes());
+		this.isAggregatePackagePair = d.isAggregatePackagePair();
+		this.weightedTimes = d.getWeightedTimes();
 	}
 
 	public DependsOn(Node startNode, Node endNode) {

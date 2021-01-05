@@ -5,12 +5,15 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
+import cn.edu.fudan.se.multidependency.model.relation.AggregationDependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
+import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.model.relation.clone.ModuleClone;
+import cn.edu.fudan.se.multidependency.repository.relation.AggregationDependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.AggregationCloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.ModuleCloneRepository;
@@ -23,12 +26,13 @@ import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationServic
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.neo4j.register.Register;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 @Service
@@ -36,6 +40,9 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 
 	@Autowired
 	private DependsOnRepository dependsOnRepository;
+
+	@Autowired
+	private AggregationDependsOnRepository aggregationDependsOnRepository;
 
 	@Autowired
 	private BasicCloneQueryService basicCloneQueryService;
@@ -70,9 +77,12 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 	}
 
 	@Override
-	public Map<Package, Map<Package, List<DependsOn>>> detectHotspotPackagePairWithDependsOn() {
+	public Map<String, List<DependsOn>> detectHotspotPackagePairWithDependsOn() {
+		Map<String, List<DependsOn>> result = new HashMap<>();
 		Map<Package, Map<Package, List<DependsOn>>> packageDependsOnMap = new HashMap<>();
 		List<DependsOn> fileDependsOnList = dependsOnRepository.findFileDepends();
+		List<DependsOn> moduleDependsOnList = new ArrayList<>();
+		List<DependsOn> aggregationDependsOnList = new ArrayList<>();
 		//加载，每个结点都有聚合和非聚合两种依赖
 		for(DependsOn fileDependsOn : fileDependsOnList){
 			if(fileDependsOn.getDependsOnTypes() != null && !fileDependsOn.getDependsOnTypes().isEmpty()) {
@@ -127,7 +137,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				}
 			}
 		}
-		//删除叶子结点的聚合依赖
+		//删除叶子结点的聚合依赖，并计算关系权重
 		for(Map.Entry<Package, Map<Package, List<DependsOn>>> entry : packageDependsOnMap.entrySet()) {
 			Package pck1 = entry.getKey();
 			Map<Package, List<DependsOn>> dependsOnMap1 = entry.getValue();
@@ -171,102 +181,128 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 						}
 					}
 				}
+				for(DependsOn dependsOn : dependsOnList1) {
+					dependsOn.getDependsOnTypes().forEach((key, value) -> {
+						Double weight = RelationType.relationWeights.get(RelationType.valueOf(key));
+						if(weight != null){
+							BigDecimal weightedTimes  =  new BigDecimal(value * weight);
+							dependsOn.addWeightedTimes(weightedTimes.setScale(2, RoundingMode.HALF_UP).doubleValue());
+						}
+					});
+					if(!dependsOn.isAggregatePackagePair()) {
+						moduleDependsOnList.add(dependsOn);
+					}
+					else {
+						aggregationDependsOnList.add(dependsOn);
+					}
+				}
 			}
 		}
-		return packageDependsOnMap;
+		result.put(RelationType.str_DEPENDS_ON, moduleDependsOnList);
+		result.put(RelationType.str_AGGREGATION_DEPENDS_ON, aggregationDependsOnList);
+		return result;
 	}
 
 	@Override
 	public List<HotspotPackagePair> getHotspotPackagePairWithDependsOn() {
 		List<HotspotPackagePair> result = new ArrayList<>();
-		List<DependsOn> packageDependsOnList = dependsOnRepository.findPackageDepends();
-		if(packageDependsOnList != null && !packageDependsOnList.isEmpty()){
-			List<HotspotPackagePair> allHotspotPackagePair = new ArrayList<>();
-			Map<String, Map<Boolean, Integer>> hotspotPackagePairMap = new HashMap<>();
-			Map<Package, Map<Package, List<DependsOn>>> packageDependsOnMap = new HashMap<>();
-			List<String> keyList = new ArrayList<>();
-			for(DependsOn packageDependsOn : packageDependsOnList){
-				Package startNode = (Package) packageDependsOn.getStartNode();
-				Package endNode = (Package) packageDependsOn.getEndNode();
+		List<HotspotPackagePair> allHotspotPackagePair = new ArrayList<>();
+		Map<String, Map<Boolean, Integer>> hotspotPackagePairMap = new HashMap<>();
+		List<String> keyList = new ArrayList<>();
+		List<DependsOn> moduleDependsOnList = dependsOnRepository.findPackageDependsOn();
+		List<AggregationDependsOn> aggregationDependsOnList = aggregationDependsOnRepository.findAggregationDependsOn();
+		if(moduleDependsOnList != null && !moduleDependsOnList.isEmpty()) {
+			Map<Package, Map<Package, List<DependsOn>>> moduleDependsOnMap = new HashMap<>();
+			for(DependsOn moduleDependsOn : moduleDependsOnList){
+				Package startNode = (Package) moduleDependsOn.getStartNode();
+				Package endNode = (Package) moduleDependsOn.getEndNode();
 				Package pck1 = startNode.getId() < endNode.getId() ? startNode : endNode;
 				Package pck2 = startNode.getId() < endNode.getId() ? endNode : startNode;
-				Map<Package, List<DependsOn>> dependsOnMap = packageDependsOnMap.getOrDefault(pck1, new HashMap<>());
+				Map<Package, List<DependsOn>> dependsOnMap = moduleDependsOnMap.getOrDefault(pck1, new HashMap<>());
 				List<DependsOn> dependsOnList = dependsOnMap.getOrDefault(pck2, new ArrayList<>());
-				dependsOnList.add(packageDependsOn);
+				dependsOnList.add(moduleDependsOn);
 				dependsOnMap.put(pck2, dependsOnList);
-				packageDependsOnMap.put(pck1, dependsOnMap);
+				moduleDependsOnMap.put(pck1, dependsOnMap);
 			}
-			for(Map.Entry<Package, Map<Package, List<DependsOn>>> entry : packageDependsOnMap.entrySet()){
+			for(Map.Entry<Package, Map<Package, List<DependsOn>>> entry : moduleDependsOnMap.entrySet()){
 				Package pck1 = entry.getKey();
 				Map<Package, List<DependsOn>> dependsOnMap = entry.getValue();
 				for(Map.Entry<Package, List<DependsOn>> entryKey : dependsOnMap.entrySet()){
 					Package pck2 = entryKey.getKey();
 					List<DependsOn> dependsOnList = dependsOnMap.getOrDefault(pck2, new ArrayList<>());
-					List<DependsOn> dependsOnListForFalse = new ArrayList<>();
-					List<DependsOn> dependsOnListForTrue = new ArrayList<>();
-					for(DependsOn dependsOn : dependsOnList) {
-						if(dependsOn.isAggregatePackagePair()) {
-							dependsOnListForTrue.add(dependsOn);
-						}
-						else {
-							dependsOnListForFalse.add(dependsOn);
-						}
-					}
-					if(dependsOnListForFalse.size() > 0) {
-						HotspotPackagePair hotspotPackagePair = createHotspotPackagePairWithDependsOn(pck1, pck2, dependsOnListForFalse);
-						allHotspotPackagePair.add(hotspotPackagePair);
-					}
-					if(dependsOnListForTrue.size() > 0) {
-						HotspotPackagePair hotspotPackagePair = createHotspotPackagePairWithDependsOn(pck1, pck2, dependsOnListForTrue);
-						allHotspotPackagePair.add(hotspotPackagePair);
-					}
+					HotspotPackagePair hotspotPackagePair = createHotspotPackagePairWithDependsOn(pck1, pck2, dependsOnList, new ArrayList<>());
+					allHotspotPackagePair.add(hotspotPackagePair);
 				}
 			}
-			int index = 0;
-			for(HotspotPackagePair hotspotPackagePair : allHotspotPackagePair) {
-				Package pck1 = hotspotPackagePair.getPackage1();
-				Package pck2 = hotspotPackagePair.getPackage2();
-				String key = String.join("_", pck1.getDirectoryPath(), pck2.getDirectoryPath());
-				Map<Boolean, Integer> booleanMap = hotspotPackagePairMap.getOrDefault(key, new HashMap<>());
-				if(hotspotPackagePair.isAggregatePackagePair()) {
-					booleanMap.put(true, index);
-				}
-				else {
-					booleanMap.put(false, index);
-				}
-				hotspotPackagePairMap.put(key, booleanMap);
-				index ++;
+		}
+		if(aggregationDependsOnList != null && !aggregationDependsOnList.isEmpty()) {
+			Map<Package, Map<Package, List<AggregationDependsOn>>> aggregationDependsOnMap = new HashMap<>();
+			for(AggregationDependsOn aggregationDependsOn : aggregationDependsOnList){
+				Package startNode = (Package) aggregationDependsOn.getStartNode();
+				Package endNode = (Package) aggregationDependsOn.getEndNode();
+				Package pck1 = startNode.getId() < endNode.getId() ? startNode : endNode;
+				Package pck2 = startNode.getId() < endNode.getId() ? endNode : startNode;
+				Map<Package, List<AggregationDependsOn>> dependsOnMap = aggregationDependsOnMap.getOrDefault(pck1, new HashMap<>());
+				List<AggregationDependsOn> dependsOnList = dependsOnMap.getOrDefault(pck2, new ArrayList<>());
+				dependsOnList.add(aggregationDependsOn);
+				dependsOnMap.put(pck2, dependsOnList);
+				aggregationDependsOnMap.put(pck1, dependsOnMap);
 			}
-			for(HotspotPackagePair currentHotspotPackagePair : allHotspotPackagePair) {
-				Package currentPackage1 = currentHotspotPackagePair.getPackage1();
-				Package currentPackage2 = currentHotspotPackagePair.getPackage2();
-				String currentKey = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
-				if(keyList.contains(currentKey)) {
-					continue;
+			for(Map.Entry<Package, Map<Package, List<AggregationDependsOn>>> entry : aggregationDependsOnMap.entrySet()){
+				Package pck1 = entry.getKey();
+				Map<Package, List<AggregationDependsOn>> dependsOnMap = entry.getValue();
+				for(Map.Entry<Package, List<AggregationDependsOn>> entryKey : dependsOnMap.entrySet()){
+					Package pck2 = entryKey.getKey();
+					List<AggregationDependsOn> dependsOnList = dependsOnMap.getOrDefault(pck2, new ArrayList<>());
+					HotspotPackagePair hotspotPackagePair = createHotspotPackagePairWithDependsOn(pck1, pck2, new ArrayList<>(), dependsOnList);
+					allHotspotPackagePair.add(hotspotPackagePair);
 				}
-				HotspotPackagePair hotspotPackagePair = currentHotspotPackagePair;
-				Map<Boolean, Integer> booleanMap = hotspotPackagePairMap.get(currentKey);
-				if(booleanMap.containsKey(true)) {
-					if(booleanMap.containsKey(false)) {
-						allHotspotPackagePair.get(booleanMap.get(true)).addHotspotChild(allHotspotPackagePair.get(booleanMap.get(false)));
-					}
-					hotspotPackagePair = allHotspotPackagePair.get(booleanMap.get(true));
-				}
-				Package pck1 = hasRelationService.findPackageInPackage(currentPackage1);
-				Package pck2 = hasRelationService.findPackageInPackage(currentPackage2);
-				if(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
-					Package parentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
-					Package parentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
-					String parentKey = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
-					if(hotspotPackagePairMap.containsKey(parentKey)) {
-						allHotspotPackagePair.get(hotspotPackagePairMap.get(parentKey).get(true)).addHotspotChild(hotspotPackagePair);
-					}
-				}
-				else {
-					result.add(currentHotspotPackagePair);
-				}
-				keyList.add(currentKey);
 			}
+		}
+		int index = 0;
+		for(HotspotPackagePair hotspotPackagePair : allHotspotPackagePair) {
+			Package pck1 = hotspotPackagePair.getPackage1();
+			Package pck2 = hotspotPackagePair.getPackage2();
+			String key = String.join("_", pck1.getDirectoryPath(), pck2.getDirectoryPath());
+			Map<Boolean, Integer> booleanMap = hotspotPackagePairMap.getOrDefault(key, new HashMap<>());
+			if(hotspotPackagePair.isAggregatePackagePair()) {
+				booleanMap.put(true, index);
+			}
+			else {
+				booleanMap.put(false, index);
+			}
+			hotspotPackagePairMap.put(key, booleanMap);
+			index ++;
+		}
+		for(HotspotPackagePair currentHotspotPackagePair : allHotspotPackagePair) {
+			Package currentPackage1 = currentHotspotPackagePair.getPackage1();
+			Package currentPackage2 = currentHotspotPackagePair.getPackage2();
+			String currentKey = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
+			if(keyList.contains(currentKey)) {
+				continue;
+			}
+			HotspotPackagePair hotspotPackagePair = currentHotspotPackagePair;
+			Map<Boolean, Integer> booleanMap = hotspotPackagePairMap.get(currentKey);
+			if(booleanMap.containsKey(true)) {
+				if(booleanMap.containsKey(false)) {
+					allHotspotPackagePair.get(booleanMap.get(true)).addHotspotChild(allHotspotPackagePair.get(booleanMap.get(false)));
+				}
+				hotspotPackagePair = allHotspotPackagePair.get(booleanMap.get(true));
+			}
+			Package pck1 = hasRelationService.findPackageInPackage(currentPackage1);
+			Package pck2 = hasRelationService.findPackageInPackage(currentPackage2);
+			if(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
+				Package parentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
+				Package parentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
+				String parentKey = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
+				if(hotspotPackagePairMap.containsKey(parentKey)) {
+					allHotspotPackagePair.get(hotspotPackagePairMap.get(parentKey).get(true)).addHotspotChild(hotspotPackagePair);
+				}
+			}
+			else {
+				result.add(currentHotspotPackagePair);
+			}
+			keyList.add(currentKey);
 		}
 		return result;
 	}
@@ -294,7 +330,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				for(Map.Entry<Package, List<DependsOn>> entryKey : dependsPackage.entrySet()){
 					Package pck2 = entryKey.getKey();
 					List<DependsOn> dependsOns = dependsPackage.getOrDefault(pck2, new ArrayList<>());
-					HotspotPackagePair hotspotPackagePair = createHotspotPackagePairWithDependsOn(pck1, pck2, dependsOns);
+					HotspotPackagePair hotspotPackagePair = createHotspotPackagePairWithDependsOn(pck1, pck2, dependsOns, new ArrayList<>());
 					result.add(hotspotPackagePair);
 				}
 			}
@@ -311,7 +347,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			Package tmp2 = (Package) packageDependsOnList.get(0).getEndNode();
 			Package pck1 = tmp1.getId() == pck1Id ? tmp1 : tmp2;
 			Package pck2 = tmp2.getId() == pck2Id ? tmp2 : tmp1;
-			hotspotPackagePair = createHotspotPackagePairWithDependsOn(pck1, pck2, packageDependsOnList);
+			hotspotPackagePair = createHotspotPackagePairWithDependsOn(pck1, pck2, packageDependsOnList, new ArrayList<>());
 		}
 		return hotspotPackagePair;
 	}
@@ -599,7 +635,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		}
 	}
 
-	private HotspotPackagePair createHotspotPackagePairWithDependsOn(Package pck1, Package pck2, List<DependsOn> packageDependsOnList) {
+	private HotspotPackagePair createHotspotPackagePairWithDependsOn(Package pck1, Package pck2, List<DependsOn> moduleDependsOnList, List<AggregationDependsOn> aggregationDependsOnList) {
 		StringBuilder dependsOnStr = new StringBuilder();
 		StringBuilder dependsByStr = new StringBuilder();
 		int dependsOnTimes = 0;
@@ -608,18 +644,36 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		double dependsByWeightedTimes = 0.0;
 		Map<String, Long> dependsOnTypesMap = new HashMap<>();
 		Map<String, Long> dependsByTypesMap = new HashMap<>();
-		for(DependsOn dependsOn : packageDependsOnList){
-			if(dependsOn.getStartNode().getId().equals(pck1.getId())){
-				dependsOnStr.append(dependsOn.getDependsOnType());
-				dependsOnTimes += dependsOn.getTimes();
-				dependsOnWeightedTimes += dependsOn.getWeightedTimes();
-				dependsOnTypesMap.putAll(dependsOn.getDependsOnTypes());
+		if(!moduleDependsOnList.isEmpty()) {
+			for(DependsOn dependsOn : moduleDependsOnList){
+				if(dependsOn.getStartNode().getId().equals(pck1.getId())){
+					dependsOnStr.append(dependsOn.getDependsOnType());
+					dependsOnTimes += dependsOn.getTimes();
+					dependsOnWeightedTimes += dependsOn.getWeightedTimes();
+					dependsOnTypesMap.putAll(dependsOn.getDependsOnTypes());
+				}
+				else {
+					dependsByStr.append(dependsOn.getDependsOnType());
+					dependsByTimes += dependsOn.getTimes();
+					dependsByWeightedTimes += dependsOn.getWeightedTimes();
+					dependsByTypesMap.putAll(dependsOn.getDependsOnTypes());
+				}
 			}
-			else {
-				dependsByStr.append(dependsOn.getDependsOnType());
-				dependsByTimes += dependsOn.getTimes();
-				dependsByWeightedTimes += dependsOn.getWeightedTimes();
-				dependsByTypesMap.putAll(dependsOn.getDependsOnTypes());
+		}
+		else if(!aggregationDependsOnList.isEmpty()) {
+			for(AggregationDependsOn aggregationDependsOn : aggregationDependsOnList){
+				if(aggregationDependsOn.getStartNode().getId().equals(pck1.getId())){
+					dependsOnStr.append(aggregationDependsOn.getDependsOnType());
+					dependsOnTimes += aggregationDependsOn.getTimes();
+					dependsOnWeightedTimes += aggregationDependsOn.getWeightedTimes();
+					dependsOnTypesMap.putAll(aggregationDependsOn.getDependsOnTypes());
+				}
+				else {
+					dependsByStr.append(aggregationDependsOn.getDependsOnType());
+					dependsByTimes += aggregationDependsOn.getTimes();
+					dependsByWeightedTimes += aggregationDependsOn.getWeightedTimes();
+					dependsByTypesMap.putAll(aggregationDependsOn.getDependsOnTypes());
+				}
 			}
 		}
 		DependsRelationDataForDoubleNodes<Node, Relation> dependsRelationDataForDoubleNodes = new DependsRelationDataForDoubleNodes<>(pck1, pck2);
@@ -634,7 +688,12 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		dependsRelationDataForDoubleNodes.calDependsOnIntensity();
 		dependsRelationDataForDoubleNodes.calDependsByIntensity();
 		HotspotPackagePair result = new HotspotPackagePair(dependsRelationDataForDoubleNodes);
-		result.setAggregatePackagePair(packageDependsOnList.get(0).isAggregatePackagePair());
+		if(!moduleDependsOnList.isEmpty()) {
+			result.setAggregatePackagePair(false);
+		}
+		else if(!aggregationDependsOnList.isEmpty()) {
+			result.setAggregatePackagePair(true);
+		}
 		return result;
 	}
 
