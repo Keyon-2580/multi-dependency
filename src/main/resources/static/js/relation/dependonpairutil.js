@@ -61,20 +61,19 @@ var showMatrix = function (id1, id2) {
         url: "/dependon/packagepair/matrix?id1=" + id1 + "&id2=" + id2,
         success: function (result) {
             var html = "";
-            html += "<div  style='overflow: auto;' width='100%' id='matrix_2'>";
-            html += "<table  class = 'table table-bordered'>"
+            html += "<table border='1' id='matrix_1'>"
             html += "<tr>";
-            html += "<th  style='background-color: #FFFFFF;'></th>";
+            html += "<th>文件编号</th>";
             for(var i = 0; i < result.numofpck1; i++){
-                html += "<th style='background-color: #FFFFFF;'>P1.F" + (i + 1) + "</th>";
+                html += "<th>P1.F" + (i + 1) + "</th>";
             }
             for(var i = result.numofpck1; i < result.allfiles.length; i++){
-                html += "<th style='background-color: #FFFFFF;'>P2.F" + (i+1-result.numofpck1) + "</th>";
+                html += "<th>P2.F" + (i+1-result.numofpck1) + "</th>";
             }
             html += "</tr>";
             for(var i = 0; i < result.allfiles.length; i++){
                 html += "<tr>";
-                html += "<td style='background-color: #FFFFFF;'>";
+                html += "<td>";
                 if(i < result.numofpck1){
                     html += "P1.F" + (i+1) + ": ";
                 }else{
@@ -82,7 +81,7 @@ var showMatrix = function (id1, id2) {
                 }
                 html += "<a target='_blank' href='/relation/file/" + result.allfiles[i].id + "'>" + result.allfiles[i].name + "(" + result.allfiles[i].loc + ")" + "</a></td>";
                 for(var j = 0; j < result.allfiles.length; j++){
-                    html += "<td style='background-color: #FFFFFF;'>";
+                    html += "<td>";
                     if(result.matrix[i][j] != null){
                         html +=  result.matrix[i][j];
                     }
@@ -91,12 +90,11 @@ var showMatrix = function (id1, id2) {
                 html += "</tr>";
             }
             html += "</table>";
-            html += "</div>";
-            $("#package_files_dependon_matrix").html(html);
-            $("#matrix_2").scroll(function(){
-                $("#matrix_2 tr th").css({"position":"relative","top":$("#matrix_2").scrollTop(),"z-index":"2"});
-                $("#matrix_2 tr td:nth-child(1)").css({"position":"relative","left":$("#matrix_2").scrollLeft(),"z-index":"1"});
-                $("#matrix_2 tr th:nth-child(1)").css({"position":"relative","top":$("#matrix_2").scrollTop(),"left":$("#matrix_2").scrollLeft(),"z-index":"3"});
+            $("#matrix").html(html);
+            $("#matrix").scroll(function(){
+                $("#matrix tr th").css({"position":"relative","top":$("#matrix").scrollTop(),"z-index":"2"});
+                $("#matrix tr td:nth-child(1)").css({"position":"relative","left":$("#matrix").scrollLeft(),"z-index":"1"});
+                $("#matrix tr th:nth-child(1)").css({"position":"relative","left":$("#matrix").scrollLeft(),"z-index":"3"});
             });
 
             var html1 = "";

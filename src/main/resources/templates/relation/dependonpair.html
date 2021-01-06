@@ -39,8 +39,22 @@
     <link rel="stylesheet" th:href="@{/css/doublefile_tree.css}"></link>
 
     <style type="text/css">
-        #table thead, #table body{
-            width: calc(100% - 1em)
+        #matrix {
+            width: 100%;
+            border: 1px solid #000000;
+            height: 700px;
+            display: block;
+            overflow-y: auto;
+            background-color: #FFFFFF;
+        }
+
+        #matrix tr {
+            background-color: #FFFFFF;
+        }
+        #matrix tr th, #matrix tr td {
+            background-color: #FFFFFF;
+            text-align: center;
+            padding: 10px;
         }
     </style>
     <style>ul{list-style-type:none;margin:5px;}</style>
@@ -50,7 +64,7 @@
     <div class="col-sm-12">
         <div id="package_dependon_detail"></div>
         <h4>DependOnMatrix</h4>
-        <div id="package_files_dependon_matrix"></div>
+        <div id="matrix"></div>
         <h4>FileListOfPackage1</h4>
         <div id="package1_files"></div>
         <h4>FileListOfPackage2</h4>
