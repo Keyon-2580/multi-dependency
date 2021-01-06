@@ -34,13 +34,19 @@ public class ProjectFile extends CodeUnit {
 	
 	private int endLine = -1;
 
-	private int loc = 0;
+	private int noc;
+
+	private int nom;
+
+	private int loc = -1;
+
+	private int lines = -1;
 	
 	private double score = -1;
     
     private String language;
     
-    private double instability;
+    private double instability = -1;
 	
 	public int getStartLine() {
 		return 1;
@@ -66,6 +72,7 @@ public class ProjectFile extends CodeUnit {
 		properties.put("loc", getLoc());
 		properties.put("score", getScore());
 		properties.put("language", getLanguage() == null ? "" : getLanguage());
+		properties.put("instability", getInstability());
 		return properties;
 	}
 

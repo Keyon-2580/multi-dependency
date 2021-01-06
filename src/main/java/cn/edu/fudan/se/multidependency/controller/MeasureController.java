@@ -83,7 +83,7 @@ public class MeasureController {
     @GetMapping("/project")
     @ResponseBody
     public Collection<ProjectMetrics> calculateProjectMetrics() {
-    	return metricCalculator.calculateProjectMetrics(false).values();
+    	return metricCalculator.calculateProjectMetrics().values();
     }
     
     @GetMapping("/project/modularity")

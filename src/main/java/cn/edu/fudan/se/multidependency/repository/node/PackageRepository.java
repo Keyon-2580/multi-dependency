@@ -20,8 +20,8 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 	
 	
 	@Query("MATCH (pck:Package) where pck.lines > 0\r\n" + 
-			"WITH size((pck)-[:" + RelationType.str_CONTAIN + "]->(:ProjectFile)) as nof, \r\n" + 
-			"     size((pck)-[:" + RelationType.str_CONTAIN + "*2..4]-(:Function)) as nom,\r\n" + 
+			"WITH pck.nof as nof, \r\n" +
+			"     pck.nom as nom, \r\n" +
 			"     size((pck)-[:" + RelationType.str_DEPENDS_ON + "]->()) as fanOut, \r\n" + 
 			"     size((pck)<-[:" + RelationType.str_DEPENDS_ON + "]-()) as fanIn,\r\n" + 
 			"     pck.loc as loc,\r\n" + 
@@ -31,8 +31,8 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 	public List<PackageMetrics> calculatePackageMetrics();
 
 	@Query("MATCH (pck:Package) where id(pck) = {packageId}\r\n" +
-			"WITH size((pck)-[:" + RelationType.str_CONTAIN + "]->(:ProjectFile)) as nof, \r\n" +
-			"     size((pck)-[:" + RelationType.str_CONTAIN + "*2..4]-(:Function)) as nom,\r\n" +
+			"WITH pck.nof as nof, \r\n" +
+			"     pck.nom as nom, \r\n" +
 			"     size((pck)-[:" + RelationType.str_DEPENDS_ON + "]->()) as fanOut, \r\n" +
 			"     size((pck)<-[:" + RelationType.str_DEPENDS_ON + "]-()) as fanIn,\r\n" +
 			"     pck.loc as loc,\r\n" +
@@ -46,15 +46,20 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 	
 	@Query("match (pck:Package)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) with pck, sum(file.endLine) as lines set pck.lines = lines;")
 	public void setPackageLines();*/
-	
-	@Query("match (pck:Package)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) "
-			+ "with pck, sum(file.endLine) as lines , sum(file.loc) as loc set pck.lines = lines, pck.loc = loc "
-			+ "with pck, size((pck)-[:CONTAIN]->(:ProjectFile)) as size set pck.size = size;")
-	public void setPackageLocAndLinesAndSize();
-	
-	
-	@Query("match (pck:Package) where not (pck)-[:CONTAIN]->(:ProjectFile) set pck.loc = 0, pck.lines = 0, pck.size = 0;")
-	public void setEmptyPackageLocAndLinesAndSize();
+
+	@Query("MATCH (package:Package)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)-[:" +
+			RelationType.str_CONTAIN + "]->(type:Type)-[:" +
+			RelationType.str_CONTAIN + "]->(function:Function) \r\n" +
+			"WITH package, count(distinct file) as nof, " +
+			"     count(distinct type) as noc, count(distinct function) as nom," +
+			"     reduce(tmp = 0, f in collect(distinct file) | tmp + f.loc) as loc, " +
+			"     reduce(tmp = 0, f in collect(distinct file) | tmp + f.endLine) as lines\r\n" +
+			"SET package += {nof: nof, noc: noc, nom: nom, loc: loc, lines: lines};")
+	public void setPackageMetrics();
+
+	@Query("match (pck:Package) where not (pck)-[:CONTAIN]->(:ProjectFile) " +
+			"set pck += {nof: 0, noc: 0, nom: 0, loc: 0, lines: 0};")
+	public void setEmptyPackageMetrics();
 	
 	/**
 	 * 目录下有多少子包

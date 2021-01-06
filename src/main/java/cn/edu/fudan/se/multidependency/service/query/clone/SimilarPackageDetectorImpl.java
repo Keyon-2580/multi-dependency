@@ -419,7 +419,7 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 			}
 			else {
 				if(!rootSimilarPackage.isContainOtherChild1(childPackage1)) {
-					childPackage1.setAllNodes(getAllFilesNum(childPackage1));
+					childPackage1.setNof(getAllFilesNum(childPackage1));
 					rootSimilarPackage.addOtherChild1(childPackage1);
 				}
 			}
@@ -488,7 +488,7 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 			}
 			if(!flag) {
 				if(!rootSimilarPackage.isContainOtherChild2(childPackage2)) {
-					childPackage2.setAllNodes(getAllFilesNum(childPackage2));
+					childPackage2.setNof(getAllFilesNum(childPackage2));
 					rootSimilarPackage.addOtherChild2(childPackage2);
 				}
 			}

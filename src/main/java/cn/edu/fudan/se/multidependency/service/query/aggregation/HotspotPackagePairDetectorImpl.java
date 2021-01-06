@@ -622,7 +622,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		rowKey.set(rowKey.get()+1);
 		if(index == -1) {
 			row.createCell(0).setCellValue(prefix + otherPackage.getDirectoryPath());
-			row.createCell(1).setCellValue("0/" + otherPackage.getAllNodes() + "=0.00");
+			row.createCell(1).setCellValue("0/" + otherPackage.getNof() + "=0.00");
 			row.createCell(2).setCellValue("");
 			row.createCell(3).setCellValue("");
 			row.createCell(4).setCellValue("");
@@ -633,7 +633,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			row.createCell(0).setCellValue("");
 			row.createCell(1).setCellValue("");
 			row.createCell(2).setCellValue(prefix + otherPackage.getDirectoryPath());
-			row.createCell(3).setCellValue("0/" + otherPackage.getAllNodes() + "=0.00");
+			row.createCell(3).setCellValue("0/" + otherPackage.getNof() + "=0.00");
 			row.createCell(4).setCellValue("");
 			row.createCell(5).setCellValue("");
 			row.createCell(6).setCellValue("");
@@ -901,8 +901,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 					currentPackagePairCloneRelationData.setClonePairs(0);
 				}
 				else {
-					childPackage1.setAllNodes(containRelationService.findPackageContainFiles(currentPackage1).size());
-					childPackage2.setAllNodes(containRelationService.findPackageContainFiles(currentPackage2).size());
+					childPackage1.setNof(containRelationService.findPackageContainFiles(currentPackage1).size());
+					childPackage2.setNof(containRelationService.findPackageContainFiles(currentPackage2).size());
 					childrenPackages1.add(childPackage1);
 					childrenPackages2.add(childPackage2);
 				}

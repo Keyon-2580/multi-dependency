@@ -18,8 +18,18 @@ public interface CommitRepository extends Neo4jRepository<Commit, Long> {
     		+ "]-(c) where id(f1)={file1Id} and id(f2)={file2Id} return c")
 	List<Commit> findCommitsInTwoFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
 	
-    @Query("match (project:Project)-[:" + RelationType.str_CONTAIN + "*2]->(:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(commit:Commit) where id(project)={projectId} and (commit.merge=false or commit.merge is null) return distinct commit;")
+    @Query("match (project:Project)-[:" + RelationType.str_CONTAIN + "*2]->(:ProjectFile)<-[:"
+            + RelationType.str_COMMIT_UPDATE_FILE + "]-(commit:Commit) " +
+            "where id(project)={projectId} and (commit.merge=false or commit.merge is null) " +
+            "return distinct commit;")
     List<Commit> queryCommitsInProject(@Param("projectId") long projectId);
+
+    @Query("match (project:Project)-[:" + RelationType.str_CONTAIN + "*2]->(:ProjectFile)<-[:"
+            + RelationType.str_COMMIT_UPDATE_FILE + "]-(commit:Commit) " +
+            "where commit.merge=false or commit.merge is null " +
+            "with project, count(distinct commit) as commits " +
+            "set project.commits = commits;")
+    void setCommitsForAllProject();
     
     @Query("match (c:Commit) where (c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-() return c order by c.authoredDate desc;")
     List<Commit> queryAllCommits();

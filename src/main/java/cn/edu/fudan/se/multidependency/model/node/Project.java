@@ -3,10 +3,7 @@ package cn.edu.fudan.se.multidependency.model.node;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Transient;
+import org.neo4j.ogm.annotation.*;
 
 import cn.edu.fudan.se.multidependency.model.Language;
 import lombok.Data;
@@ -35,7 +32,23 @@ public class Project implements Node {
 	private String microserviceName;
 
 	private Long entityId;
-	
+
+	private int nop;
+
+	private int nof;
+
+	private int noc;
+
+	private int nom;
+
+	private long loc;
+
+	private long lines;
+
+	private int commits;
+
+	private double modularity;
+
 	public Project(String name, String path, Language language) {
 		super();
 		this.name = name;
@@ -49,7 +62,6 @@ public class Project implements Node {
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		properties.put("name", getName() == null ? "" : getName());
-		properties.put("path", getPath() == null ? "" : getPath());
 		return properties;
 	}
 

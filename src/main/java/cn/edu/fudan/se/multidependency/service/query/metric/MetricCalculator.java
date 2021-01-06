@@ -128,43 +128,33 @@ public class MetricCalculator {
 		return packageRepository.calculatePackageMetrics(pck.getId());
 	}
 
-	public Map<Long, ProjectMetrics> calculateProjectMetrics(boolean calculateModularityAndCommits) {
+	public Map<Long, ProjectMetrics> calculateProjectMetrics() {
 		String key = "calculateProjectMetrics";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
 		Map<Long, ProjectMetrics> result = new HashMap<>();
-		for(ProjectMetrics projectMetric : projectRepository.calculateProjectMetrics()) {
-			if(calculateModularityAndCommits) {
-				projectMetric.setCommitTimes(calculateProjectCommits(projectMetric.getProject()));
-				projectMetric.setModularity(calculateProjectModularity(projectMetric.getProject()));
-			}
+		for(ProjectMetrics projectMetric : projectRepository.getProjectMetrics()) {
 			result.put(projectMetric.getProject().getId(), projectMetric);
 		}
-		if(calculateModularityAndCommits) {
-			cache.cache(getClass(), key, result);
-		}
+
+		cache.cache(getClass(), key, result);
+
 		return result;
 	}
 
-	public Map<Long, ProjectMetrics> calculateProjectMetricsByGitRepository(boolean calculateModularityAndCommits, GitRepository gitRepository) {
+	public Map<Long, ProjectMetrics> calculateProjectMetricsByGitRepository(GitRepository gitRepository) {
 		String key = "calculateProjectMetricsByGitRepository";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
 		Map<Long, ProjectMetrics> result = new HashMap<>();
-		for(ProjectMetrics projectMetric : projectRepository.calculateProjectMetrics()) {
-			if(calculateModularityAndCommits) {
-				projectMetric.setCommitTimes(calculateProjectCommits(projectMetric.getProject()));
-				projectMetric.setModularity(calculateProjectModularity(projectMetric.getProject()));
-			}
+		for(ProjectMetrics projectMetric : projectRepository.getProjectMetrics()) {
 			if(gitRepository.getName().equals(projectMetric.getProject().getName())) {
 				result.put(projectMetric.getProject().getId(), projectMetric);
 			}
 		}
-		if(calculateModularityAndCommits) {
-			cache.cache(getClass(), key, result);
-		}
+		cache.cache(getClass(), key, result);
 		return result;
 	}
 	

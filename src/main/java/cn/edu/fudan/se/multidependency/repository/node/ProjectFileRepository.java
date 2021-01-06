@@ -17,6 +17,12 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	
 	@Query("match (f:ProjectFile) where f.path={filePath} return f")
 	public ProjectFile findFileByPath(@Param("filePath") String filePath);
+
+	@Query("MATCH (file:ProjectFile)-[:" + RelationType.str_CONTAIN + "]->(type:Type)-[:" +
+			RelationType.str_CONTAIN + "]->(function:Function) \r\n" +
+			"WITH file, count(distinct type) as noc, count(distinct function) as nom\r\n" +
+			"SET file += {noc: noc, nom: nom};")
+	public void setFileMetrics();
 	
 	/**
 	 * 所有文件的指标

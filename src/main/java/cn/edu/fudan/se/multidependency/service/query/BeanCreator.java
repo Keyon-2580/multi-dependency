@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
+import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
+import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +46,8 @@ import cn.edu.fudan.se.multidependency.service.query.aggregation.data.CloneRelat
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 
+import javax.annotation.Resource;
+
 @Component
 public class BeanCreator {
 
@@ -57,10 +62,31 @@ public class BeanCreator {
 	@Autowired
 	private SummaryAggregationDataService summaryAggregationDataService;
 
+	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
+	private ModularityCalculator modularityCalculator;
+
 	@Bean
-	public int setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository) {
+	public boolean setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository, CommitRepository commitRepository) {
 		LOGGER.info("设置Commit Update文件数...");
-		return commitUpdateFileRepository.setCommitFilesSize();
+		commitUpdateFileRepository.setCommitFilesSize();
+		LOGGER.info("设置Project Commits数...");
+		commitRepository.setCommitsForAllProject();
+		return true;
+	}
+
+	@Bean
+	public boolean setProjectMetrics(ProjectRepository projectRepository, PackageRepository packageRepository, ProjectFileRepository projectFileRepository) {
+		LOGGER.info("计算Project/Package/ProjectFile基本度量值...");
+		projectRepository.setProjectMetrics();
+		packageRepository.setPackageMetrics();
+		packageRepository.setEmptyPackageMetrics();
+		projectFileRepository.setFileMetrics();
+		LOGGER.info("计算Project模块性度量值...");
+		projectRepository.queryAllProjects().forEach( (project) ->{
+			double value = modularityCalculator.calculate(project).getValue();
+			projectRepository.setModularityMetricsForProject(project.getId(), value);
+		});
+		return true;
 	}
 
 	@Bean("createCoChanges")
@@ -209,14 +235,7 @@ public class BeanCreator {
 		}
 		return new ArrayList<>();
 	}
-	
-	@Bean
-	public boolean setPackageLoSc(PackageRepository packageRepository) {
-		LOGGER.info("计算Package内文件数、总行数与总代码行...");
-		packageRepository.setEmptyPackageLocAndLinesAndSize();
-		packageRepository.setPackageLocAndLinesAndSize();
-		return true;
-	}
+
 
 	@Bean("setModuleClone")
 	public List<ModuleClone> setModuleClone(PropertyConfig propertyConfig, ModuleCloneRepository moduleCloneRepository) {

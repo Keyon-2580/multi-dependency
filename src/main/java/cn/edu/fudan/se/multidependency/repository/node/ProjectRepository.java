@@ -33,14 +33,26 @@ public interface ProjectRepository extends Neo4jRepository<Project, Long> {
 	@Query("match (n) where id(n) = {id} return n")
 	Node queryNodeById(@Param("id") long id);
 	
-	@Query("MATCH (project:Project)-[:" + RelationType.str_CONTAIN + "*2]->(file:ProjectFile)\r\n" + 
-			"WITH project, sum(file.loc) as loc, sum(file.endLine) as lines\r\n" +
-			"WITH size((project)-[:" + RelationType.str_CONTAIN + "]->(:Package)) as nop, \r\n" + 
-			"     size((project)-[:" + RelationType.str_CONTAIN + "*2]->(:ProjectFile)) as nof,\r\n" + 
-			"     size((project)-[:" + RelationType.str_CONTAIN + "*3..5]-(:Function)) as nom,\r\n" + 
-			"     loc,\r\n" + 
-			"     lines,\r\n" + 
-			"     project\r\n" + 
-			"RETURN project, nop, nof, nom, loc, lines order by(project.name) desc;")
-	public List<ProjectMetrics> calculateProjectMetrics();
+	@Query("MATCH (project:Project)" +
+			"RETURN project, project.nop as nop, project.nof as nof, project.nom as nom, " +
+			"project.loc as loc, project.lines as lines," +
+			"project.commits as commits, project.modularity as modularity " +
+			"order by(project.name) desc;")
+	public List<ProjectMetrics> getProjectMetrics();
+
+	@Query("MATCH (project:Project)-[:" + RelationType.str_CONTAIN + "]->(package:Package)-[:" +
+				RelationType.str_CONTAIN + "]->(file:ProjectFile)-[:" +
+				RelationType.str_CONTAIN + "]->(type:Type)-[:" +
+				RelationType.str_CONTAIN + "]->(function:Function) \r\n" +
+			"WITH project, count(distinct package) as nop, count(distinct file) as nof, " +
+			"     count(distinct type) as noc, count(distinct function) as nom," +
+			"     reduce(tmp = 0, f in collect(distinct file) | tmp + f.loc) as loc, " +
+			"     reduce(tmp = 0, f in collect(distinct file) | tmp + f.endLine) as lines\r\n" +
+			"SET project += {nop: nop, nof: nof, noc: noc, nom: nom, loc: loc, lines: lines};")
+	public void setProjectMetrics();
+
+	@Query("MATCH (project:Project) " +
+			"where id(project) = {id} " +
+			"SET project.modularity = {modularity};")
+	public void setModularityMetricsForProject(@Param("id") long id, @Param("modularity") double modularity);
 }
