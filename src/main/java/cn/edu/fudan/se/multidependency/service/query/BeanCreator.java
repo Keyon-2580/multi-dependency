@@ -1,27 +1,22 @@
 package cn.edu.fudan.se.multidependency.service.query;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
-import cn.edu.fudan.se.multidependency.model.relation.AggregationDependsOn;
-import cn.edu.fudan.se.multidependency.repository.relation.AggregationDependsOnRepository;
-import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
+import cn.edu.fudan.se.multidependency.model.relation.AggregationDependsOn;
+import cn.edu.fudan.se.multidependency.model.relation.git.AggregationCoChange;
 import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.config.PropertyConfig;
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
@@ -39,6 +34,8 @@ import cn.edu.fudan.se.multidependency.repository.relation.clone.AggregationClon
 import cn.edu.fudan.se.multidependency.repository.relation.clone.ModuleCloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.AggregationDependsOnRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.git.AggregationCoChangeRepository;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackagePairDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.SummaryAggregationDataService;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.BasicDataForDoubleNodes;
@@ -65,9 +62,9 @@ public class BeanCreator {
 		LOGGER.info("设置Commit Update文件数...");
 		return commitUpdateFileRepository.setCommitFilesSize();
 	}
-    
+
 	@Bean("createCoChanges")
-	public List<CoChange> createCoChanges(PropertyConfig propertyConfig, CoChangeRepository cochangeRepository) {
+	public List<CoChange> createCoChanges(PropertyConfig propertyConfig, CoChangeRepository cochangeRepository, AggregationCoChangeRepository aggregationCoChangeRepository) {
 		List<CoChange> coChanges = new ArrayList<>();
 		if(propertyConfig.isCalculateCoChange()) {
 			coChanges = cochangeRepository.findCoChangesLimit();
@@ -80,27 +77,35 @@ public class BeanCreator {
 				cochangeRepository.deleteAll();
 				cochangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE);
 				cochangeRepository.updateCoChangesForFile();
-				LOGGER.info("创建Module CoChange关系");
-//				cochangeRepository.createCoChangesForModule(Constant.COUNT_OF_MIN_COCHANGE);
-//				cochangeRepository.updateCoChangesForModule();
 
-				Map<Package, Map<Package, List<CoChange>>> packageCoChangePackage = new HashMap<>(hotspotPackagePairDetector.detectHotspotPackagePairWithCoChange());
-				for(Map.Entry<Package, Map<Package, List<CoChange>>> entry : packageCoChangePackage.entrySet()){
-					Package pck1 = entry.getKey();
-					List<CoChange> coChangeListTmp = new ArrayList<>();
-					int size = 0;
-					for(List<CoChange> packageCoChangeList : packageCoChangePackage.get(pck1).values()){
-						for(CoChange packageCoChange : packageCoChangeList) {
-							coChangeListTmp.add(packageCoChange);
-							if(++size > 500){
-								cochangeRepository.saveAll(coChangeListTmp);
-								coChangeListTmp.clear();
-								size = 0;
-							}
-						}
+				LOGGER.info("创建Module CoChange关系...");
+				Map<String, List<CoChange>> coChangeMap = hotspotPackagePairDetector.detectHotspotPackagePairWithCoChange();
+				List<CoChange> moduleCoChangeList = new ArrayList<>(coChangeMap.get(RelationType.str_CO_CHANGE));
+				List<CoChange> aggregationCoChangeList = new ArrayList<>(coChangeMap.get(RelationType.str_AGGREGATION_CO_CHANGE));
+				List<CoChange> moduleCoChangeListTmp = new ArrayList<>();
+				List<AggregationCoChange> aggregationCoChangeListTmp = new ArrayList<>();
+				int size = 0;
+				for(CoChange coChange : moduleCoChangeList) {
+					moduleCoChangeListTmp.add(coChange);
+					if(++size > 500){
+						cochangeRepository.saveAll(moduleCoChangeListTmp);
+						moduleCoChangeListTmp.clear();
+						size = 0;
 					}
-					cochangeRepository.saveAll(coChangeListTmp);
 				}
+				cochangeRepository.saveAll(moduleCoChangeListTmp);
+
+				LOGGER.info("创建Aggregation CoChange关系...");
+				size = 0;
+				for(CoChange coChange : aggregationCoChangeList) {
+					aggregationCoChangeListTmp.add(new AggregationCoChange(coChange));
+					if(++size > 500){
+						aggregationCoChangeRepository.saveAll(aggregationCoChangeListTmp);
+						aggregationCoChangeListTmp.clear();
+						size = 0;
+					}
+				}
+				aggregationCoChangeRepository.saveAll(aggregationCoChangeListTmp);
 			}
 		}
 		return coChanges;
@@ -146,10 +151,7 @@ public class BeanCreator {
 			dependsOnRepository.createDependsOnWithTimesInNode(NodeLabelType.ProjectFile);
 			dependsOnRepository.deleteNullAggregationDependsOnInFiles();
 
-			LOGGER.info("创建Aggregation Depends On关系...");
-			//创建包间dependsOn
-//			Map<Package, Map<Package, DependsOn>> packageDependsOnPackage = createPackageDependsOn(dependsOnRepository);
-//			Map<Package, Map<Package, List<DependsOn>>> packageDependsOnPackage = new HashMap<>(hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOn());
+			LOGGER.info("创建Module Depends On关系...");
 			Map<String, List<DependsOn>> dependsOnMap = hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOn();
 			List<DependsOn> moduleDependsOnList = new ArrayList<>(dependsOnMap.get(RelationType.str_DEPENDS_ON));
 			List<DependsOn> aggregationDependsOnList = new ArrayList<>(dependsOnMap.get(RelationType.str_AGGREGATION_DEPENDS_ON));
@@ -165,6 +167,8 @@ public class BeanCreator {
 				}
 			}
 			dependsOnRepository.saveAll(moduleDependsOnListTmp);
+
+			LOGGER.info("创建Aggregation Depends On关系...");
 			size = 0;
 			for(DependsOn dependsOn : aggregationDependsOnList) {
 				aggregationDependsOnListTmp.add(new AggregationDependsOn(dependsOn));
@@ -195,7 +199,6 @@ public class BeanCreator {
 				cloneGroupRepository.setCppLanguageBySuffix();
 				cloneGroupRepository.deleteCloneGroupContainRelations();
 				cloneGroupRepository.deleteCloneGroupRelations();
-
 				cloneGroupRepository.setFileGroup();
 				cloneGroupRepository.createCloneGroupRelations();
 				cloneGroupRepository.createCloneGroupContainRelations();

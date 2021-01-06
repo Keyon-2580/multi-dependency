@@ -1,22 +1,21 @@
 package cn.edu.fudan.se.multidependency.model.relation.git;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
-import org.neo4j.ogm.annotation.*;
-
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.neo4j.ogm.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_CO_CHANGE)
-public class CoChange implements Relation, RelationWithTimes {
+@RelationshipEntity(RelationType.str_AGGREGATION_CO_CHANGE)
+public class AggregationCoChange implements Relation, RelationWithTimes {
 
 	private static final long serialVersionUID = -8677714146194368352L;
 
@@ -38,15 +37,13 @@ public class CoChange implements Relation, RelationWithTimes {
 
 	private int node2ChangeTimes = 0;
 
-	public CoChange(Node node1, Node node2) {
-		this.node1 = node1;
-		this.node2 = node2;
-	}
-
-	public CoChange(Node node1, Node node2, String coChangeType) {
-		this.node1 = node1;
-		this.node2 = node2;
-		this.coChangeType = coChangeType;
+	public AggregationCoChange(CoChange c) {
+		this.node1 = c.getNode1();
+		this.node2 = c.getNode2();
+		this.times = c.getTimes();
+		this.coChangeType = c.getCoChangeType();
+		this.node1ChangeTimes = c.getNode1ChangeTimes();
+		this.node2ChangeTimes = c.getNode2ChangeTimes();
 	}
 
 	@Override
@@ -66,7 +63,7 @@ public class CoChange implements Relation, RelationWithTimes {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.CO_CHANGE;
+		return RelationType.AGGREGATION_CO_CHANGE;
 	}
 
 	@Override
