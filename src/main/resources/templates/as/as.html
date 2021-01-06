@@ -123,32 +123,62 @@
 					</div>
 				</div>
 				<div class="col-sm-12 row">
-					<div class="col-sm-4 form-group">
-						<label for="hubLikeMinFileFanIn">File-Level Fan In Threshold: </label>
-						<input class="form-control" placeholder="File-Level Fan In Threshold" id="hubLikeMinFileFanIn" type="number" />
+					<div class="col-sm-6">
+						<div class="col-sm-12 row">
+							<div class="col-sm-6 form-group">
+								<label for="hubLikeMinFileFanIn">File-Level Fan In Threshold: </label>
+								<input class="form-control" placeholder="File-Level Fan In Threshold" id="hubLikeMinFileFanIn" type="number" />
+							</div>
+						</div>
+						<div class="col-sm-12 row">
+							<div class="col-sm-6 form-group">
+								<label for="hubLikeMinFileFanOut" class="control-label">File-Level Fan Out Threshold: </label>
+								<input class="form-control" placeholder="File-Level Fan Out Threshold" id="hubLikeMinFileFanOut" type="number" />
+							</div>
+						</div>
+						<div class="col-sm-12 row">
+							<div class="col-sm-6 form-group">
+								<label for="hubLikeFileCoChangeFilesThreshold">Co-Change Files Count Threshold: </label>
+								<input id="hubLikeFileCoChangeFilesThreshold" type="number" class="form-control"/>
+							</div>
+						</div>
+						<div class="col-sm-12 row">
+							<div class="col-sm-6 form-group">
+								<label for="hubLikeFileCoChangeTimesThreshold">Co-Change Times Threshold: </label>
+								<input id="hubLikeFileCoChangeTimesThreshold" type="number" class="form-control"/>
+							</div>
+						</div>
 					</div>
-				</div>
-				<div class="col-sm-12 row">
-					<div class="col-sm-4 form-group">
-						<label for="hubLikeMinFileFanOut" class="control-label">File-Level Fan Out Threshold: </label>
-						<input class="form-control" placeholder="File-Level Fan Out Threshold" id="hubLikeMinFileFanOut" type="number" />
+					<div class="col-sm-6">
+						<div class="col-sm-12 row">
+							<div class="col-sm-6 form-group">
+								<label for="hubLikeMinPackageFanIn">Module-Level Fan In Threshold: </label>
+								<input class="form-control" placeholder="Module-Level Fan In Threshold" id="hubLikeMinPackageFanIn" type="number" />
+							</div>
+						</div>
+						<div class="col-sm-12 row">
+							<div class="col-sm-6 form-group">
+								<label for="hubLikeMinPackageFanOut">Module-Level Fan Out Threshold: </label>
+								<input class="form-control" placeholder="Module-Level Fan Out Threshold" id="hubLikeMinPackageFanOut" type="number" />
+							</div>
+						</div>
+						<div class="col-sm-12 row">
+							<div class="col-sm-6 form-group">
+								<label for="hubLikePackageCoChangeFilesThreshold">Co-Change Files Count Threshold: </label>
+								<input id="hubLikePackageCoChangeFilesThreshold" type="number" class="form-control"/>
+							</div>
+						</div>
+						<div class="col-sm-12 row">
+							<div class="col-sm-6 form-group">
+								<label for="hubLikePackageCoChangeTimesThreshold">Co-Change Times Threshold: </label>
+								<input id="hubLikePackageCoChangeTimesThreshold" type="number" class="form-control"/>
+							</div>
+						</div>
 					</div>
-				</div>
-				<div class="col-sm-12 row">
-					<div class="col-sm-4 form-group">
-						<label for="hubLikeMinPackageFanIn">Module-Level Fan In Threshold: </label>
-						<input class="form-control" placeholder="Module-Level Fan In Threshold" id="hubLikeMinPackageFanIn" type="number" />
+					<div class="col-sm-12">
+						<button id="hubLikeMinFanIOSave" class="btn btn-default">Save</button>
+						<a href="/as/hublike" target="_blank" class="btn btn-default">Detect</a>
 					</div>
-				</div>
-				<div class="col-sm-12 row">
-					<div class="col-sm-4 form-group">
-						<label for="hubLikeMinPackageFanOut">Module-Level Fan Out Threshold: </label>
-						<input class="form-control" placeholder="Module-Level Fan Out Threshold" id="hubLikeMinPackageFanOut" type="number" />
-					</div>
-				</div>
-				<div class="col-sm-12">
-					<button id="hubLikeMinFanIOSave" class="btn btn-default">Save</button>
-					<a href="/as/hublike" target="_blank" class="btn btn-default">Detect</a>
 				</div>
 			</div>
 			<div class="col-sm-12">
@@ -237,8 +267,8 @@
 			<div class="form col-sm-12">
 				<div class="col-sm-12 row">
 					<div class="col-sm-4 form-group">
-						<label for="unstableDependencyProjects">Project: </label>
-						<select id="unstableDependencyProjects" class="projectSelect form-control">
+						<label for="logicalCouplingProjects">Project: </label>
+						<select id="logicalCouplingProjects" class="projectSelect form-control">
 							<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
 						</select>
 					</div>
@@ -304,8 +334,8 @@
 			</div>
 			<div class="col-sm-12 row">
 				<div class="col-sm-4 form-group">
-					<label for="unstableDependencyProjects">Project: </label>
-					<select id="unstableDependencyProjects" class="projectSelect form-control">
+					<label for="similarComponentsProjects">Project: </label>
+					<select id="similarComponentsProjects" class="projectSelect form-control">
 						<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
 					</select>
 				</div>
