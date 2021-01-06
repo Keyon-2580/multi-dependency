@@ -146,7 +146,7 @@ public class ProjectServiceImpl implements ProjectService{
 //			if(fileList.size() > 0){
 //				for(ProjectFile profile : fileList){
 //					JSONObject jsonObject2 = new JSONObject();
-//					jsonObject2.put("size",1000);
+//					jsonObject2.put("value",profile.getLoc());
 //					jsonObject2.put("long_name",profile.getPath());
 //					if(clonefiles.contains(profile)){
 //						jsonObject2.put("clone",true);
@@ -158,13 +158,9 @@ public class ProjectServiceImpl implements ProjectService{
 //					jsonArray.add(jsonObject2);
 //				}
 //			}
-
+//
 //			if(jsonArray.size() > 0){
-//				if(showType.equals("graph")){
-//					jsonObject.put("children",jsonArray);
-//				}else{
-//					jsonObject.put("collapse_children",jsonArray);
-//				}
+//                jsonObject.put("children",jsonArray);
 //			}
 
             if(pckList.size()>0){
@@ -179,7 +175,7 @@ public class ProjectServiceImpl implements ProjectService{
     @Override
     public JSONObject getAllProjectsLinks(){
         List<HotspotPackagePair> cloneHotspotPackageList = hotspotPackagePairDetector.getHotspotPackagePairWithFileCloneByParentId(-1, -1, "all");
-        List<HotspotPackagePair> dependsonHotspotPackageList = hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOnInAllProjects();
+        List<HotspotPackagePair> dependsonHotspotPackageList = hotspotPackagePairDetector.getHotspotPackagePairWithDependsOn();
         List<HotspotPackagePair> cochangeHotspotPackageList = hotspotPackagePairDetector.detectHotspotPackagePairWithCoChangeInAllProjects();
         return hotspotPackagesToCloneJson(cloneHotspotPackageList, dependsonHotspotPackageList, cochangeHotspotPackageList);
     }
@@ -401,6 +397,7 @@ public class ProjectServiceImpl implements ProjectService{
                     link.put("dependsByWeightedTimes", dependsRelationDataForDoubleNodes.getDependsByWeightedTimes());
                     link.put("dependsOnIntensity", dependsRelationDataForDoubleNodes.getDependsOnInstability());
                     link.put("dependsByIntensity", dependsRelationDataForDoubleNodes.getDependsByInstability());
+                    link.put("bottom_package", !hotspotPackagePair.isAggregatePackagePair());
 
                     if(dependsRelationDataForDoubleNodes.getDependsOnTypes().equals("") ||
                             dependsRelationDataForDoubleNodes.getDependsByTypes().equals("")){
@@ -444,12 +441,14 @@ public class ProjectServiceImpl implements ProjectService{
                         link.put("coChangeTimes", coChangeRelationDataForDoubleNodes.getCoChangeTimes());
                         link.put("node1ChangeTimes", coChangeRelationDataForDoubleNodes.getNode1ChangeTimes());
                         link.put("node2ChangeTimes", coChangeRelationDataForDoubleNodes.getNode2ChangeTimes());
+                        link.put("bottom_package", false);
                         result.add(JSONUtil.combineJSONObjectWithoutMerge(link, link_common));
                     }
                     break;
             }
 
             if(hotspotPackagePair.hasChildrenHotspotPackagePairs()){
+                System.out.println(hotspotPackagePair.getHotspotRelationType());
                 result.addAll(getLinksJson(hotspotPackagePair.getChildrenHotspotPackagePairs(), linkType, hotspotPackagePair.getPackage1().getId().toString() + "_" + hotspotPackagePair.getPackage2().getId().toString()));
             }
         }
