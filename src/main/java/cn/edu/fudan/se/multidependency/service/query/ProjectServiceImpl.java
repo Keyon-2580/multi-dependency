@@ -448,7 +448,7 @@ public class ProjectServiceImpl implements ProjectService{
             }
 
             if(hotspotPackagePair.hasChildrenHotspotPackagePairs()){
-                System.out.println(hotspotPackagePair.getHotspotRelationType());
+//                System.out.println(hotspotPackagePair.getHotspotRelationType());
                 result.addAll(getLinksJson(hotspotPackagePair.getChildrenHotspotPackagePairs(), linkType, hotspotPackagePair.getPackage1().getId().toString() + "_" + hotspotPackagePair.getPackage2().getId().toString()));
             }
         }
