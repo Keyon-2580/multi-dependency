@@ -621,7 +621,7 @@ function loadLink(jsonLinks) {
             return d.pair_id;
         })
         .attr("onclick", function(d){
-            if(d.type === "clone" && !d.bottom_package){
+            if(!d.bottom_package){
                 return "drawChildrenCloneLinks(\"" + d.pair_id + "\", \"" + d.type + "\")";
             }
         })
@@ -817,7 +817,7 @@ function loadLink(jsonLinks) {
         var y1 = getTranslateY1(d.source_id, d.target_id) + diameter_global / 2;
         var x2 = getTranslateX2(d.source_id, d.target_id) + diameter_global / 2;
         var y2 = getTranslateY2(d.source_id, d.target_id) + diameter_global / 2;
-        var length = Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
+        // var length = Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
 
         // if(length > 650){
         //     // var ratio = length / 650;
@@ -1116,7 +1116,7 @@ function drawChildrenCloneLinks(pair_id, type){
         }
     }
 
-    // console.log(temp_links)
+    console.log(temp_links)
 
     linksCurrent_global = temp_links.concat();
     showLine(linksCurrent_global, "extract");
