@@ -94,7 +94,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				Package currentPackage1 = dependsOnRepository.findFileBelongPackageByFileId(fileDependsOn.getStartNode().getId());
 				Package currentPackage2 = dependsOnRepository.findFileBelongPackageByFileId(fileDependsOn.getEndNode().getId());
 				boolean isAggregatePackagePair = false;
-				while(currentPackage1 != null && currentPackage2 != null && !currentPackage1.getId().equals(currentPackage2.getId())){
+				while(isParentPackages(currentPackage1, currentPackage2)){
 					Map<Package, List<DependsOn>> dependsOnMap = packageDependsOnMap.getOrDefault(currentPackage1, new HashMap<>());
 					List<DependsOn> dependsOnList = dependsOnMap.getOrDefault(currentPackage2, new ArrayList<>());
 					DependsOn dependsOn = null;
@@ -296,7 +296,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			}
 			Package pck1 = hasRelationService.findPackageInPackage(currentPackage1);
 			Package pck2 = hasRelationService.findPackageInPackage(currentPackage2);
-			if(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
+			if(isParentPackages(pck1, pck2)) {
 				Package parentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
 				Package parentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
 				String parentKey = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
@@ -982,7 +982,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 					pck2OriginalCommitMat.put(pck1, pck2OriginalCommitSet);
 					packageOriginalCommitMap.put(pck1, pck1OriginalCommitMat);
 					packageOriginalCommitMap.put(pck2, pck2OriginalCommitMat);
-					while(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
+					while(isParentPackages(pck1, pck2)) {
 						Package currentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
 						Package currentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
 						Map<Package, Set<Commit>> pck1AggregateCommitMat = packagesAggregateCommitMap.getOrDefault(currentPackage1, new HashMap<>());
@@ -1004,7 +1004,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			for(CoChange fileCoChange : fileCoChangeList) {
 				Package pck1 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getStartNode().getId());
 				Package pck2 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getEndNode().getId());
-				while(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
+				while(isParentPackages(pck1, pck2)) {
 					Package currentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
 					Package currentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
 					String key = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
@@ -1104,7 +1104,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			}
 			Package pck1 = hasRelationService.findPackageInPackage(currentPackage1);
 			Package pck2 = hasRelationService.findPackageInPackage(currentPackage2);
-			if(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
+			if(isParentPackages(pck1, pck2)) {
 				Package parentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
 				Package parentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
 				String parentKey = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
@@ -1217,5 +1217,10 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				return Integer.compare(cloneNodes2, cloneNodes1);
 			}
 		});
+	}
+	private boolean isParentPackages(Package pck1, Package pck2) {
+		String rootPackageDirectoryPath1 = "/" + pck1.getDirectoryPath().split("/")[1] + "/";
+		String rootPackageDirectoryPath2 = "/" + pck2.getDirectoryPath().split("/")[1] + "/";
+		return !pck1.getDirectoryPath().equals(rootPackageDirectoryPath1) && !pck2.getDirectoryPath().equals(rootPackageDirectoryPath2) && !pck1.getId().equals(pck2.getId());
 	}
 }
