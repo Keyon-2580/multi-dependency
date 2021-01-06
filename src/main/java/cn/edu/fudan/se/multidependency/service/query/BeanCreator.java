@@ -83,8 +83,10 @@ public class BeanCreator {
 		projectFileRepository.setFileMetrics();
 		LOGGER.info("计算Project模块性度量值...");
 		projectRepository.queryAllProjects().forEach( (project) ->{
-			double value = modularityCalculator.calculate(project).getValue();
-			projectRepository.setModularityMetricsForProject(project.getId(), value);
+			if(project.getModularity() <= 0.0){
+				double value = modularityCalculator.calculate(project).getValue();
+				projectRepository.setModularityMetricsForProject(project.getId(), value);
+			}
 		});
 		return true;
 	}

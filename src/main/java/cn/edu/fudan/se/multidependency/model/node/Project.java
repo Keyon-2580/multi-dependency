@@ -45,9 +45,9 @@ public class Project implements Node {
 
 	private long lines;
 
-	private int commits;
+	private int commits = -1;
 
-	private double modularity;
+	private double modularity = -1.0;
 
 	public Project(String name, String path, Language language) {
 		super();
