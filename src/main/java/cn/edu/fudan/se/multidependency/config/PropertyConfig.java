@@ -32,4 +32,7 @@ public class PropertyConfig {
 	@Value("${config.starter.smell}")
 	private boolean detectAS;
 
+	@Getter
+	@Value("${config.starter.modularity}")
+	private boolean calModularity;
 }

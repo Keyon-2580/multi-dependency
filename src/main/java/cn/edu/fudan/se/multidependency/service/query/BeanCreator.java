@@ -75,19 +75,21 @@ public class BeanCreator {
 	}
 
 	@Bean
-	public boolean setProjectMetrics(ProjectRepository projectRepository, PackageRepository packageRepository, ProjectFileRepository projectFileRepository) {
+	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository, PackageRepository packageRepository, ProjectFileRepository projectFileRepository) {
 		LOGGER.info("计算Project/Package/ProjectFile基本度量值...");
 		projectRepository.setProjectMetrics();
 		packageRepository.setPackageMetrics();
 		packageRepository.setEmptyPackageMetrics();
 		projectFileRepository.setFileMetrics();
-		LOGGER.info("计算Project模块性度量值...");
-		projectRepository.queryAllProjects().forEach( (project) ->{
-			if(project.getModularity() <= 0.0){
-				double value = modularityCalculator.calculate(project).getValue();
-				projectRepository.setModularityMetricsForProject(project.getId(), value);
-			}
-		});
+		if(propertyConfig.isCalModularity()){
+			LOGGER.info("计算Project模块性度量值...");
+			projectRepository.queryAllProjects().forEach( (project) ->{
+				if(project.getModularity() <= 0.0){
+					double value = modularityCalculator.calculate(project).getValue();
+					projectRepository.setModularityMetricsForProject(project.getId(), value);
+				}
+			});
+		}
 		return true;
 	}
 
