@@ -11,6 +11,7 @@ import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -67,15 +68,15 @@ public class HasRelationServiceImpl implements HasRelationService {
         }
         PackageStructure result = new PackageStructure(pck);
 
-        Collection<ProjectFile> files = containRelationService.findPackageContainFiles(pck); // contain关系的file
+        Collection<ProjectFile> files = new ArrayList<>(containRelationService.findPackageContainFiles(pck)); // contain关系的file
 //        result.addAllFiles(files);
 
-        Collection<Package> childrenPackage = findPackageHasPackages(pck); // has关系的package
+        Collection<Package> childrenPackage = new ArrayList<>(findPackageHasPackages(pck)); // has关系的package
         for(Package child : childrenPackage) {
             result.addChildPackage(packageHasInitialize(child));
         }
 
-        if(childrenPackage.size() >1 && files.size() > 1){
+        if(childrenPackage.size() >0 && files.size() > 0){
             Package tmpPck = new Package();
             tmpPck.setId(0 - pck.getId());
             tmpPck.setEntityId(pck.getEntityId());
