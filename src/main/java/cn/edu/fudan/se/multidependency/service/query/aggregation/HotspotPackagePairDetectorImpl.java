@@ -93,6 +93,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			if(fileDependsOn.getDependsOnTypes() != null && !fileDependsOn.getDependsOnTypes().isEmpty()) {
 				Package currentPackage1 = dependsOnRepository.findFileBelongPackageByFileId(fileDependsOn.getStartNode().getId());
 				Package currentPackage2 = dependsOnRepository.findFileBelongPackageByFileId(fileDependsOn.getEndNode().getId());
+				Package childPackage1 = null;
+				Package childPackage2 = null;
 				boolean isAggregatePackagePair = false;
 				while(isParentPackages(currentPackage1, currentPackage2)){
 					Map<Package, List<DependsOn>> dependsOnMap = packageDependsOnMap.getOrDefault(currentPackage1, new HashMap<>());
@@ -135,8 +137,17 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 					dependsOnMap.put(currentPackage2, dependsOnList);
 					packageDependsOnMap.put(currentPackage1, dependsOnMap);
 					if(isAggregatePackagePair) {
+						childPackage1 = currentPackage1;
+						childPackage2 = currentPackage2;
 						currentPackage1 = hasRelationService.findPackageInPackage(currentPackage1);
 						currentPackage2 = hasRelationService.findPackageInPackage(currentPackage2);
+						//错位
+						if(!currentPackage1.getDirectoryPath().equals(currentPackage2.getDirectoryPath()) && currentPackage1.getDirectoryPath().contains(currentPackage2.getDirectoryPath())) {
+							currentPackage2 = childPackage2;
+						}
+						else if(!currentPackage2.getDirectoryPath().equals(currentPackage1.getDirectoryPath()) && currentPackage2.getDirectoryPath().contains(currentPackage1.getDirectoryPath())) {
+							currentPackage1 = childPackage1;
+						}
 					}
 					isAggregatePackagePair = true;
 				}
@@ -216,6 +227,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		List<String> keyList = new ArrayList<>();
 		List<DependsOn> moduleDependsOnList = dependsOnRepository.findPackageDependsOn();
 		List<AggregationDependsOn> aggregationDependsOnList = aggregationDependsOnRepository.findAggregationDependsOn();
+		//将DependsOn原始数据转化为HotspotPackagePair
 		if(moduleDependsOnList != null && !moduleDependsOnList.isEmpty()) {
 			Map<Package, Map<Package, List<DependsOn>>> moduleDependsOnMap = new HashMap<>();
 			for(DependsOn moduleDependsOn : moduleDependsOnList){
@@ -240,6 +252,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				}
 			}
 		}
+		//将DependsOn聚合数据转化为HotspotPackagePair
 		if(aggregationDependsOnList != null && !aggregationDependsOnList.isEmpty()) {
 			Map<Package, Map<Package, List<AggregationDependsOn>>> aggregationDependsOnMap = new HashMap<>();
 			for(AggregationDependsOn aggregationDependsOn : aggregationDependsOnList){
@@ -264,6 +277,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				}
 			}
 		}
+		//制作索引
 		int index = 0;
 		for(HotspotPackagePair hotspotPackagePair : allHotspotPackagePair) {
 			Package pck1 = hotspotPackagePair.getPackage1();
@@ -279,6 +293,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			hotspotPackagePairMap.put(key, booleanMap);
 			index ++;
 		}
+		//加载父子关系
 		for(HotspotPackagePair currentHotspotPackagePair : allHotspotPackagePair) {
 			Package currentPackage1 = currentHotspotPackagePair.getPackage1();
 			Package currentPackage2 = currentHotspotPackagePair.getPackage2();
@@ -297,6 +312,13 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			Package pck1 = hasRelationService.findPackageInPackage(currentPackage1);
 			Package pck2 = hasRelationService.findPackageInPackage(currentPackage2);
 			if(isParentPackages(pck1, pck2)) {
+				//错位
+				if(pck1.getDirectoryPath().contains(pck2.getDirectoryPath())) {
+					pck2 = currentPackage2;
+				}
+				else if(pck2.getDirectoryPath().contains(pck1.getDirectoryPath())) {
+					pck1 = currentPackage1;
+				}
 				Package parentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
 				Package parentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
 				String parentKey = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
@@ -1219,8 +1241,13 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		});
 	}
 	private boolean isParentPackages(Package pck1, Package pck2) {
-		String rootPackageDirectoryPath1 = "/" + pck1.getDirectoryPath().split("/")[1] + "/";
-		String rootPackageDirectoryPath2 = "/" + pck2.getDirectoryPath().split("/")[1] + "/";
-		return !pck1.getDirectoryPath().equals(rootPackageDirectoryPath1) && !pck2.getDirectoryPath().equals(rootPackageDirectoryPath2) && !pck1.getId().equals(pck2.getId());
+		if(pck1 == null || pck2 == null) {
+			return false;
+		}
+		else {
+			String rootPackageDirectoryPath1 = "/" + pck1.getDirectoryPath().split("/")[1] + "/";
+			String rootPackageDirectoryPath2 = "/" + pck2.getDirectoryPath().split("/")[1] + "/";
+			return !pck1.getDirectoryPath().equals(rootPackageDirectoryPath1) && !pck2.getDirectoryPath().equals(rootPackageDirectoryPath2) && !pck1.getId().equals(pck2.getId());
+		}
 	}
 }
