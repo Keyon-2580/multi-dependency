@@ -47,7 +47,7 @@ var rPackage = function (packageId, cytoscapeutil) {
                 html += "<td width='12.5%'>NOF（文件数）</td>";
                 html += "<td width='12.5%'>NOM（方法数）</td>";
                 html += "<td width='12.5%'>LOC（代码行）</td>";
-                html += "<td width='12.5%'>lines（文件总行数）</td>";
+                html += "<td width='12.5%'>Lines（文件总行数）</td>";
                 html += "<td width='12.5%'>Ca（afferent couplings）</td>";
                 html += "<td width='12.5%'>Ce（efferent couplings）</td>";
                 html += "<td width='12.5%'>instability</td>";
