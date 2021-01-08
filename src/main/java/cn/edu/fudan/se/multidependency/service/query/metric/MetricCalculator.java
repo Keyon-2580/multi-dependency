@@ -143,16 +143,16 @@ public class MetricCalculator {
 		return result;
 	}
 
-	public Map<Long, ProjectMetrics> calculateProjectMetricsByGitRepository(GitRepository gitRepository) {
+	public Map<String, List<ProjectMetrics>> calculateProjectMetricsByGitRepository() {
 		String key = "calculateProjectMetricsByGitRepository";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-		Map<Long, ProjectMetrics> result = new HashMap<>();
+		Map<String, List<ProjectMetrics>> result = new HashMap<>();
 		for(ProjectMetrics projectMetric : projectRepository.getProjectMetrics()) {
-			if(gitRepository.getName().equals(projectMetric.getProject().getName())) {
-				result.put(projectMetric.getProject().getId(), projectMetric);
-			}
+			List<ProjectMetrics> projectMetricsList = result.getOrDefault(projectMetric.getProject().getName(), new ArrayList<>());
+			projectMetricsList.add(projectMetric);
+			result.put(projectMetric.getProject().getName() , projectMetricsList);
 		}
 		cache.cache(getClass(), key, result);
 		return result;

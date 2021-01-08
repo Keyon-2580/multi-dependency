@@ -74,11 +74,11 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 			return cache.get(getClass(), key);
 		}
 		Map<Long, GitRepoMetric> result = new HashMap<>();
+		Map<String, List<ProjectMetrics>> projectMetricsMap = new HashMap<>(metricCalculator.calculateProjectMetricsByGitRepository());
 		for(GitRepository gitRepository : gitRepoRepository.findAll()) {
 			GitRepoMetric gitRepoMetric = new GitRepoMetric();
 			gitRepoMetric.setGitRepository(gitRepository);
-			Collection<ProjectMetrics> ProjectMetricList = metricCalculator.calculateProjectMetricsByGitRepository(gitRepository).values();
-			gitRepoMetric.setProjectMetricsList(ProjectMetricList);
+			gitRepoMetric.setProjectMetricsList(projectMetricsMap.get(gitRepository.getName()));
 			gitRepoMetric.setNumOfCommits(calculateGitRepoCommits(gitRepository));
 			gitRepoMetric.setNumOfIssues(0);
 			result.put(gitRepository.getId(), gitRepoMetric);
