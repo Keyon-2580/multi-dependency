@@ -1051,10 +1051,10 @@ function drawCloneTableBelow(link_id, type){
 
         linksCurrent_global.forEach(function(d){
             if(d.type === "dependson"){
-                html_dependson_table += "<tr><td>" + d.source_name + "</td><td>"
+                html_dependson_table += "<tr><td><a target='_blank' href='/relation/package/" + d.source_id.split("_")[1] + "'>" + d.source_name + "</a></td><td>"
                     + (d.dependsOnTypes === "" ? ""
                     : (d.dependsOnTypes + "(" + d.dependsOnTimes + "," + d.dependsOnWeightedTimes.toFixed(2) + ")")) + "</td><td>"
-                    + d.target_name + "</td><td>"
+                    + "<a target='_blank' href='/relation/package/" + d.target_id.split("_")[1] + "'>" +  d.target_name + "</td><td>"
                     + (d.dependsByTypes === "" ? ""
                     : (d.dependsByTypes + "(" + d.dependsByTimes + "," + d.dependsByWeightedTimes.toFixed(2) + ")")) + "</td><td>"
                     + d.dependsOnIntensity.toFixed(2) + "</td><td>"
