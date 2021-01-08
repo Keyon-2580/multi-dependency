@@ -82,8 +82,8 @@ public class HasRelationServiceImpl implements HasRelationService {
             tmpPck.setEntityId(pck.getEntityId());
             tmpPck.setLanguage(pck.getLanguage());
             tmpPck.setDirectoryPath(pck.getDirectoryPath());
-            tmpPck.setLines(0);
-            tmpPck.setLoc(0);
+            tmpPck.setLines(pck.getLines());
+            tmpPck.setLoc(pck.getLoc());
             tmpPck.setName(pck.getName());
             PackageStructure resultTmp = new PackageStructure(tmpPck);
             resultTmp.addAllFiles(files);
