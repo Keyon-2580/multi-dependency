@@ -30,7 +30,7 @@ public interface HasRepository extends Neo4jRepository<Has, Long> {
 
     @Query("Match (parent:Package)-[:" + RelationType.str_HAS + "]->(pck:Package) " +
             "where id(parent)={parentPackageId} " +
-            "with pck " +
+            "with parent, pck " +
             "set pck.depth = parent.depth + 1; ")
     public boolean setChildPackageDepth(@Param("parentPackageId") Long parentPackageId);
 }
