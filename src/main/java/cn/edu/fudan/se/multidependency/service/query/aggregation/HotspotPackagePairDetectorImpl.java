@@ -311,7 +311,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			}
 			Package pck1 = hasRelationService.findPackageInPackage(currentPackage1);
 			Package pck2 = hasRelationService.findPackageInPackage(currentPackage2);
-			if(isParentPackages(pck1, pck2)) {
+			if(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
 				//错位
 				if(pck1.getDirectoryPath().contains(pck2.getDirectoryPath())) {
 					pck2 = currentPackage2;
