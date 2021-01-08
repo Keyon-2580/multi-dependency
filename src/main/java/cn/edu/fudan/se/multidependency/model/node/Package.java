@@ -48,6 +48,8 @@ public class Package implements Node {
 
 	private long lines = -1;
 
+	private int depth = 0;
+
 	private static final long serialVersionUID = -4892461872164624064L;
 	
 	public static final String JAVA_PACKAGE_DEFAULT = "default";
