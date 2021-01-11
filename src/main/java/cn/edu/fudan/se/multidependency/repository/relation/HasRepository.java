@@ -32,5 +32,5 @@ public interface HasRepository extends Neo4jRepository<Has, Long> {
             "where id(parent)={parentPackageId} " +
             "with parent, pck " +
             "set pck.depth = parent.depth + 1; ")
-    public boolean setChildPackageDepth(@Param("parentPackageId") Long parentPackageId);
+    public Boolean setChildPackageDepth(@Param("parentPackageId") Long parentPackageId);
 }

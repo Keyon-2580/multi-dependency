@@ -3,7 +3,6 @@ package cn.edu.fudan.se.multidependency.model.node;
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.Language;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -64,6 +63,7 @@ public class Package implements Node {
 		properties.put("nof", getNof());
 		properties.put("loc", getLoc());
 		properties.put("lines", getLines());
+		properties.put("depth", getDepth());
 		return properties;
 	}
 

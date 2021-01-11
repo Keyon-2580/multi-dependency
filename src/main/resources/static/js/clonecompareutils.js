@@ -75,7 +75,7 @@ var doublePackagesCloneShowMatrix = function (pck1Id, pck2Id) {
             var row = cloneFiles1.length;
             var col = cloneFiles2.length;
             var html = "";
-            html += "<div  style='overflow: auto;' width='100%' id='matrix'>";
+            html += "<div style='overflow: auto;' width='100%' id='matrix'>";
             html += "<table class='table table-bordered' id='matrix_2'>";
             html += "<tr>";
             html += "<th style='background-color: #FFFFFF;'></th>";

@@ -1,12 +1,12 @@
 package cn.edu.fudan.se.multidependency.service.query;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,12 +93,31 @@ public class BeanCreator {
 		return true;
 	}
 
+	@Bean
+	public boolean setPackageDepth(ProjectRepository projectRepository, HasRepository hasRepository) {
+		LOGGER.info("设置Package深度值...");
+		List<Project> projectList = projectRepository.queryAllProjects();
+		for(Project project : projectList) {
+			List<Package> rootPackageList = hasRepository.findProjectHasPackages(project.getId());
+			for(Package rootPackage : rootPackageList) {
+				Queue<Package> packageQueue = new LinkedList<>();
+				packageQueue.offer(rootPackage);
+				while(!packageQueue.isEmpty()) {
+					Package pck = packageQueue.poll();
+					hasRepository.setChildPackageDepth(pck.getId());
+					packageQueue.addAll(hasRepository.findPackagesWithChildPackagesForParentPackage(pck.getId()));
+				}
+			}
+		}
+		return true;
+	}
+
 	@Bean("createCoChanges")
 	public List<CoChange> createCoChanges(PropertyConfig propertyConfig, CoChangeRepository cochangeRepository, AggregationCoChangeRepository aggregationCoChangeRepository) {
 		List<CoChange> coChanges = new ArrayList<>();
 		if(propertyConfig.isCalculateCoChange()) {
 			coChanges = cochangeRepository.findCoChangesLimit();
-			if ( coChanges != null && coChanges.size() > 0){
+			if(coChanges != null && coChanges.size() > 0){
 				LOGGER.info("已存在CoChange关系" );
 				return coChanges;
 			}
