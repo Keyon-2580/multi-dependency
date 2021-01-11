@@ -311,7 +311,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			}
 			Package pck1 = hasRelationService.findPackageInPackage(currentPackage1);
 			Package pck2 = hasRelationService.findPackageInPackage(currentPackage2);
-			if(pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
+			if(!currentPackage1.getDirectoryPath().contains(currentPackage2.getDirectoryPath()) && !currentPackage2.getDirectoryPath().contains(currentPackage1.getDirectoryPath()) && pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
 				//错位
 				if(pck1.getDirectoryPath().contains(pck2.getDirectoryPath())) {
 					pck2 = currentPackage2;
@@ -327,7 +327,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				}
 			}
 			else {
-				result.add(currentHotspotPackagePair);
+				result.add(hotspotPackagePair);
 			}
 			keyList.add(currentKey);
 		}
@@ -986,15 +986,17 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		List<CoChange> fileCoChangeList = coChangeRepository.findFileCoChange();
 		List<CoChange> moduleCoChangeList = new ArrayList<>();
 		List<CoChange> aggregationCoChangeList = new ArrayList<>();
+		Map<String, Boolean> isAggregationMap = new HashMap<>();
 		if(fileCoChangeList != null && !fileCoChangeList.isEmpty()){
 			Map<Package, Map<Package, Set<Commit>>> packageOriginalCommitMap = new HashMap<>();
 			Map<Package, Map<Package, Set<Commit>>> packagesAggregateCommitMap = new HashMap<>();
 			List<String> keyList = new ArrayList<>();
+			//获取发生CoChange包以及其祖先包下的Commit列表
 			for(CoChange fileCoChange : fileCoChangeList) {
 				Package pck1 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getStartNode().getId());
 				Package pck2 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getEndNode().getId());
 				String key = String.join("_", pck1.getDirectoryPath(), pck2.getDirectoryPath());
-				if(!keyList.contains(key)) {
+				if(!keyList.contains(key) && isParentPackages(pck1, pck2)) {
 					keyList.add(key);
 					Set<Commit> pck1OriginalCommitSet = new HashSet<>(commitUpdateFileRepository.findCommitInPackageByPackageId(pck1.getId()));
 					Set<Commit> pck2OriginalCommitSet = new HashSet<>(commitUpdateFileRepository.findCommitInPackageByPackageId(pck2.getId()));
@@ -1004,9 +1006,14 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 					pck2OriginalCommitMat.put(pck1, pck2OriginalCommitSet);
 					packageOriginalCommitMap.put(pck1, pck1OriginalCommitMat);
 					packageOriginalCommitMap.put(pck2, pck2OriginalCommitMat);
+					boolean isAggregation = false;
 					while(isParentPackages(pck1, pck2)) {
 						Package currentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
 						Package currentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
+						String currentKey = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
+						if(!isAggregationMap.containsKey(key) || (isAggregationMap.containsKey(key) && !isAggregationMap.get(key))) {
+							isAggregationMap.put(currentKey, isAggregation);
+						}
 						Map<Package, Set<Commit>> pck1AggregateCommitMat = packagesAggregateCommitMap.getOrDefault(currentPackage1, new HashMap<>());
 						Map<Package, Set<Commit>> pck2AggregateCommitMat = packagesAggregateCommitMap.getOrDefault(currentPackage2, new HashMap<>());
 						Set<Commit> pck1AggregateCommitSet = pck1AggregateCommitMat.getOrDefault(currentPackage2, new HashSet<>());
@@ -1019,10 +1026,19 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 						packagesAggregateCommitMap.put(currentPackage2, pck2AggregateCommitMat);
 						pck1 = hasRelationService.findPackageInPackage(currentPackage1);
 						pck2 = hasRelationService.findPackageInPackage(currentPackage2);
+						//错位
+						if(!pck1.getDirectoryPath().equals(pck2.getDirectoryPath()) && pck1.getDirectoryPath().contains(pck2.getDirectoryPath())) {
+							pck2 = currentPackage2;
+						}
+						else if(!pck2.getDirectoryPath().equals(pck1.getDirectoryPath()) && pck2.getDirectoryPath().contains(pck1.getDirectoryPath())) {
+							pck1 = currentPackage1;
+						}
+						isAggregation = true;
 					}
 				}
 			}
 			keyList.clear();
+			//基于包的Commit列表，创建CoChange关系
 			for(CoChange fileCoChange : fileCoChangeList) {
 				Package pck1 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getStartNode().getId());
 				Package pck2 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getEndNode().getId());
@@ -1047,7 +1063,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 							moduleCoChange.setNode2ChangeTimes(currentPackage2AggregateCommitSet.size());
 							moduleCoChangeList.add(moduleCoChange);
 						}
-						if(currentPackagesAggregateCommitSet.size() > 0 && currentPackagesAggregateCommitSet.size() != currentPackagesOriginalCommitSet.size()) {
+						if(isAggregationMap.get(key) && currentPackagesAggregateCommitSet.size() > 0) {
 							CoChange aggregationCoChange = new CoChange(currentPackage1, currentPackage2);
 							aggregationCoChange.setTimes(currentPackagesAggregateCommitSet.size());
 							aggregationCoChange.setNode1ChangeTimes(currentPackage1AggregateCommitSet.size());
@@ -1056,6 +1072,13 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 						}
 						pck1 = hasRelationService.findPackageInPackage(currentPackage1);
 						pck2 = hasRelationService.findPackageInPackage(currentPackage2);
+						//错位
+						if(!pck1.getDirectoryPath().equals(pck2.getDirectoryPath()) && pck1.getDirectoryPath().contains(pck2.getDirectoryPath())) {
+							pck2 = currentPackage2;
+						}
+						else if(!pck2.getDirectoryPath().equals(pck1.getDirectoryPath()) && pck2.getDirectoryPath().contains(pck1.getDirectoryPath())) {
+							pck1 = currentPackage1;
+						}
 					}
 					else {
 						break;
@@ -1076,6 +1099,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		Map<String, Map<Boolean, Integer>> hotspotPackagePairMap = new HashMap<>();
 		List<CoChange> moduleCoChangeList = coChangeRepository.findModuleCoChange();
 		List<AggregationCoChange> aggregationCoChangeList = aggregationCoChangeRepository.findAggregationCoChange();
+		//将CoChange原始数据转化为HotspotPackagePair
 		if(moduleCoChangeList != null && !moduleCoChangeList.isEmpty()){
 			for(CoChange moduleCoChange : moduleCoChangeList){
 				Package startNode = (Package) moduleCoChange.getStartNode();
@@ -1085,6 +1109,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				allHotspotPackagePair.add(createHotspotPackagePairWithCoChange(pck1, pck2, moduleCoChange, null));
 			}
 		}
+		//将CoChange聚合数据转化为HotspotPackagePair
 		if(aggregationCoChangeList != null && !aggregationCoChangeList.isEmpty()){
 			for(AggregationCoChange aggregationCoChange : aggregationCoChangeList){
 				Package startNode = (Package) aggregationCoChange.getStartNode();
@@ -1094,6 +1119,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				allHotspotPackagePair.add(createHotspotPackagePairWithCoChange(pck1, pck2, null, aggregationCoChange));
 			}
 		}
+		//制作索引
 		int index = 0;
 		for(HotspotPackagePair hotspotPackagePair : allHotspotPackagePair) {
 			Package pck1 = hotspotPackagePair.getPackage1();
@@ -1109,6 +1135,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			hotspotPackagePairMap.put(key, booleanMap);
 			index ++;
 		}
+		//加载父子关系
 		for(HotspotPackagePair currentHotspotPackagePair : allHotspotPackagePair) {
 			Package currentPackage1 = currentHotspotPackagePair.getPackage1();
 			Package currentPackage2 = currentHotspotPackagePair.getPackage2();
@@ -1126,18 +1153,23 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			}
 			Package pck1 = hasRelationService.findPackageInPackage(currentPackage1);
 			Package pck2 = hasRelationService.findPackageInPackage(currentPackage2);
-			if(isParentPackages(pck1, pck2)) {
+			if(!currentPackage1.getDirectoryPath().contains(currentPackage2.getDirectoryPath()) && !currentPackage2.getDirectoryPath().contains(currentPackage1.getDirectoryPath()) && pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
+				//错位
+				if(pck1.getDirectoryPath().contains(pck2.getDirectoryPath())) {
+					pck2 = currentPackage2;
+				}
+				else if(pck2.getDirectoryPath().contains(pck1.getDirectoryPath())) {
+					pck1 = currentPackage1;
+				}
 				Package parentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
 				Package parentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
 				String parentKey = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
 				if(hotspotPackagePairMap.containsKey(parentKey)) {
-					if(hotspotPackagePairMap.get(parentKey).containsKey(true)) {
-						allHotspotPackagePair.get(hotspotPackagePairMap.get(parentKey).get(true)).addHotspotChild(hotspotPackagePair);
-					}
+					allHotspotPackagePair.get(hotspotPackagePairMap.get(parentKey).get(true)).addHotspotChild(hotspotPackagePair);
 				}
 			}
 			else {
-				result.add(currentHotspotPackagePair);
+				result.add(hotspotPackagePair);
 			}
 			keyList.add(currentKey);
 		}
