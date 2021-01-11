@@ -24,7 +24,10 @@ public interface CommitUpdateFileRepository extends Neo4jRepository<CommitUpdate
     @Query("match (c:Commit) with c, size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) as size set c.commitFilesSize = size return count(c);")
     int setCommitFilesSize();
 
-    @Query("match (c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f:ProjectFile)<-[:" + RelationType.str_CONTAIN + "]-(p:Package) where id(p)={packageId} return distinct c;")
+    @Query("match (commit:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f:ProjectFile)" +
+            "<-[:" + RelationType.str_CONTAIN + "]-(p:Package)" +
+            " where id(p)={packageId}  and (commit.merge=false or commit.merge is null)" +
+            " return distinct commit;")
     Set<Commit> findCommitInPackageByPackageId(@Param("packageId") long packageId);
 
     @Query("match (p1:Package)-[:" + RelationType.str_CONTAIN + "]->(f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile)<-[:" + RelationType.str_CONTAIN + "]-(p2:Package) " +

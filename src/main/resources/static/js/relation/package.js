@@ -3,6 +3,7 @@ var rPackage = function (packageId, cytoscapeutil) {
         containFile(packageId);
         metric(packageId);
         depends(packageId);
+        developer(packageId);
         // issues(packageId);
         // commits(packageId);
     };
@@ -81,6 +82,27 @@ var rPackage = function (packageId, cytoscapeutil) {
                 }
                 html += "</ul>";
                 $("#contain_file_content").html(html);
+            }
+        });
+    }
+
+    var developer = function(packageId) {
+        $.ajax({
+           type: "get",
+            url: "/relation/package/" + packageId + "/developerstimes",
+            success: function (result) {
+               var html = "";
+               console.log(result);
+               if(result.length == 0){
+                   html += "No Developer For This Package!"
+               }else{
+                   html += "<ul>";
+                   for(let i = 0; i < result.length; i++){
+                       html += "<li>" + result[i].developer.name + " (" + result[i].times + ")</li>"
+                   }
+                   html += "</ul>";
+               }
+                $("#developerstimes").html(html);
             }
         });
     }
