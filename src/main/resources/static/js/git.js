@@ -207,9 +207,39 @@ var gitRepoMetric = function() {
 			}
 		});
 	}
+
+	var developerMetric = function () {
+		$.ajax({
+			type : "get",
+			url : "/developer/developers",
+			success : function (result) {
+				console.log(result);
+				var html = "";
+				html += "<table id='developerTable' class='table table-bordered'>";
+				html += "<tr>";
+				html += "<th>Index</th>";
+				html += "<th>Id</th>";
+				html += "<th>Name</th>";
+				html += "<th>CommitTimes</th>";
+				html += "</tr>";
+				for(let i = 0;i < result.developer.length; i++){
+					html += "<tr>";
+					html += "<td>" + (i + 1) + "</td>";
+					html += "<td>" + result.developer[i].id + "</td>";
+					html += "<td>" + result.developer[i].name + "</td>";
+					html += "<td><a target='_blank' href='/developer/detail?developerId=" + result.developer[i].id + "'>" + result.committime[i] + "</a></td>";
+					html += "</tr>";
+				}
+				html += "</table>";
+				$("#gitDeveloperInfo").html(html);
+			}
+		});
+	}
+
 	return {
 		init: function() {
 			repoMetric();
+			developerMetric();
 		}
 	}
 }
