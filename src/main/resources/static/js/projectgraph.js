@@ -74,6 +74,20 @@ var projectgraph = function () {
 var loadPageData = function () {
     var projectlist = [];
 
+    $( "#projectToGraph_slider" ).slider({
+        range: true,
+        min: 1,
+        max: 15,
+        values: [ 1, 15 ],
+        slide: function( event, ui ) {
+            $( "#slider_range" ).val( ui.values[0] + " - " + ui.values[1] );
+            Change_Depth(ui.values[0], ui.values[1]);
+            console.log(1)
+        }
+    });
+    $( "#slider_range" ).val($( "#projectToGraph_slider" ).slider( "values", 0 ) +
+        " - " + $( "#projectToGraph_slider" ).slider( "values", 1 ) );
+
     $.ajax({
         type : "GET",
         url : "/project/all/name",
@@ -626,11 +640,23 @@ function loadLink(jsonLinks) {
             }
         })
         .attr("marker-end",function (d){
-            return "url(#" + getTypeColor(d)[1] + "_end)";
+            if(d.type === "dependson"){
+                if(d.dependsOnTimes === 0){
+                    return null;
+                }else{
+                    return "url(#" + getTypeColor(d)[1] + "_end)";
+                }
+            }else{
+                return "url(#" + getTypeColor(d)[1] + "_end)";
+            }
         })
         .attr("marker-start",function (d){
-            if(d.two_way){
-                return "url(#" + getTypeColor(d)[1] + "_start)";
+            if(d.type === "dependson") {
+                if (d.two_way || d.dependsOnTimes === 0) {
+                    return "url(#" + getTypeColor(d)[1] + "_start)";
+                } else {
+                    return null;
+                }
             }else{
                 return null;
             }
@@ -905,7 +931,17 @@ function clearLink(){
     var cleartable = d3.selectAll("table").remove();
     linksCurrent_global = [];
     linksVisiable_flag = false;
+}
 
+//隐藏连线
+function hideLink(){
+    // drawCloneTableBelow(clone_table_global, "project_clone");
+    g_global.selectAll("circle")
+        .style("stroke","")
+        .style("stroke-width","");
+    var clearlink = d3.select(".packageLink") .remove();
+    var cleartable = d3.selectAll("table").remove();
+    linksVisiable_flag = false;
 }
 
 function checkDuplicateLink(){
@@ -1258,6 +1294,26 @@ var FocusOnCircleLinks = function(circleId){
             }
 
             linksOfCircleVisiable_flag = true;
+        }
+    }
+}
+
+var Change_Depth = function(left, right){
+    console.log(2)
+    if(linksCurrent_global.length === 0){
+        alert("当前无连线！")
+    }else{
+        hideLink();
+        var linksInDepthRange = linksCurrent_global.concat();
+        for(var i = linksInDepthRange.length; i > 0; i--) {
+            if (linksInDepthRange[i - 1].source_depth < left || linksInDepthRange[i - 1].source_depth > right ||
+                linksInDepthRange[i - 1].target_depth < left || linksInDepthRange[i - 1].target_depth > right) {
+                linksInDepthRange.splice(i - 1, 1);
+            }
+
+            if (linksInDepthRange.length > 0) {
+                loadLink(linksInDepthRange);
+            }
         }
     }
 }
