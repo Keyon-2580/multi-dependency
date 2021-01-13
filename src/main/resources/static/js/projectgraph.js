@@ -48,6 +48,7 @@ var cloneLinks_global = [];
 var dependsonLinks_global = [];
 var cochangeLinks_global = [];
 var linksCurrent_global = [];
+var linksCurrentAfterExtract_global = [];
 var linksBefore_global = [];
 var pairIdBefore_global = "";
 var typeBefore_global;
@@ -319,7 +320,7 @@ var projectToGraph = function(result,divId){
             return "FocusOnCircleLinks(\"" + d.data.id + "\")";
         })
         .call(text => text.append("title").text(function(d) {
-            return d.parent ? d.data.name + "\n所属包：" + d.parent.data.name  + "\nID：" + d.data.id : d.data.name;
+            return d.parent ? d.data.name + "\n所属包：" + d.parent.data.name  + "\nID：" + d.data.id : d.data.name + "\nDepth：" + d.data.depth;
         }));
 
     var text = g.selectAll("text")
@@ -670,6 +671,7 @@ function loadLink(jsonLinks) {
         .call(text => text.append("title").text(function(d) {
             if(d.type === "clone"){
                 return "Package1: " + d.source_name + "\nPackage2: " + d.target_name
+                    + "\ndepth: " + d.depth
                     + "\ncloneType: " + d.cloneType
                     + "\ncloneMatchRate: " + d.cloneMatchRate.toFixed(2)
                     + "\ncloneCoChangeRate: " + d.cloneCoChangeRate.toFixed(2)
@@ -679,7 +681,9 @@ function loadLink(jsonLinks) {
                     + "\ncloneNodesCoChangeTimes: " + d.cloneNodesCoChangeTimes
                     + "\nclonePairs: " + d.clonePairs;
             }else if(d.type === "dependson"){
-                var temp_title =  "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\ndependsOnTypes: " + d.dependsOnTypes
+                var temp_title =  "Package1: " + d.source_name + "\nPackage2: " + d.target_name
+                    + "\ndepth: " + d.depth
+                    + "\ndependsOnTypes: " + d.dependsOnTypes
                     + "\ndependsByTypes: " + d.dependsByTypes
                     + "\ndependsOnTimes: " + d.dependsOnTimes
                     + "\ndependsByTimes: " + d.dependsByTimes
@@ -706,7 +710,9 @@ function loadLink(jsonLinks) {
 
                 return temp_title;
             }else if(d.type === "cochange"){
-                return "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\ncoChangeTimes: " + d.coChangeTimes
+                return "Package1: " + d.source_name + "\nPackage2: " + d.target_name
+                    + "\ndepth: " + d.depth
+                    + "\ncoChangeTimes: " + d.coChangeTimes
                     + "\nnode1ChangeTimes: " + d.node1ChangeTimes
                     + "\nnode2ChangeTimes: " + d.node2ChangeTimes;
             }
@@ -978,7 +984,13 @@ function drawCloneTableBelow(link_id, type){
     var cleartable = d3.selectAll("table").remove();
     let html = "";
 
-    if(type === "all" || type === "clone"){
+    if(type === "all" || type === "clone" || type === "dependson" || type === "cochange"){
+        var links_local = linksCurrent_global.concat();
+    }else{
+        var links_local = linksCurrentAfterExtract_global.concat();
+    }
+
+    if(type === "all" || type === "clone" || type === "extract"){
         let html_clone_table_body = "";
         let html_clone_table_parent = "";
         let html_clone_table_head = "<table class = \"gridtable\">"
@@ -1002,7 +1014,7 @@ function drawCloneTableBelow(link_id, type){
             })
         }
 
-        linksCurrent_global.forEach(function(item){
+        links_local.forEach(function(item){
             if(item.type === "clone"){
                 var allNodesCoChangeTimes = item.allNodesCoChangeTimes;
                 var cloneNodesCoChangeTimes = item.cloneNodesCoChangeTimes;
@@ -1084,14 +1096,14 @@ function drawCloneTableBelow(link_id, type){
         html += html_clone_table_head + html_clone_table_parent + html_clone_table_body;
     }
 
-    if(type === "all" || type === "dependson"){
+    if(type === "all" || type === "dependson" || type === "extract"){
         let html_dependson_table = "";
 
         html_dependson_table += "<table class = \"gridtable\">"
             + "<tr><th>目录1</th><th>目录1依赖类型(次数)</th><th>目录2</th><th>目录2依赖类型(次数)</th>"
             + "<th>依赖强度</th><th>被依赖强度</th><th>详细信息</th></tr>";
 
-        linksCurrent_global.forEach(function(d){
+        links_local.forEach(function(d){
             if(d.type === "dependson"){
                 html_dependson_table += "<tr><td><a target='_blank' href='/relation/package/" + d.source_id.split("_")[1] + "'>" + d.source_name + "</a></td><td>"
                     + (d.dependsOnTypes === "" ? ""
@@ -1109,14 +1121,14 @@ function drawCloneTableBelow(link_id, type){
         html_dependson_table += "</table>"
         html += html_dependson_table;
     }
-    if(type === "all" || type === "cochange"){
+    if(type === "all" || type === "cochange" || type === "extract"){
         let html_cochange_table = "";
 
         html_cochange_table += "<table class = \"gridtable\">"
             + "<tr><th>目录1</th><th>目录1更改次数</th><th>目录2</th><th>目录2更改次数</th>"
             + "<th>CoChange Times</th></tr>";
 
-        linksCurrent_global.forEach(function(d){
+        links_local.forEach(function(d){
             if(d.type === "cochange"){
                 html_cochange_table += "<tr><td>" + d.source_name + "</td><td>"
                     + d.node1ChangeTimes + "</td><td>"
@@ -1257,15 +1269,16 @@ var extractLink = function(){
     }else{
         hideLink();
         console.log()
-        var linksInDepthRange = linksCurrent_global.concat();
-        for(var i = linksInDepthRange.length; i > 0; i--) {
-            if (linksInDepthRange[i - 1].depth > $( "#projectToGraph_slider" ).slider( "value")) {
-                linksInDepthRange.splice(i - 1, 1);
+        linksCurrentAfterExtract_global = linksCurrent_global.concat();
+        for(var i = linksCurrentAfterExtract_global.length; i > 0; i--) {
+            if (linksCurrentAfterExtract_global[i - 1].depth > $( "#projectToGraph_slider" ).slider( "value")) {
+                linksCurrentAfterExtract_global.splice(i - 1, 1);
             }
         }
 
-        if (linksInDepthRange.length > 0) {
-            loadLink(linksInDepthRange);
+        if (linksCurrentAfterExtract_global.length > 0) {
+            loadLink(linksCurrentAfterExtract_global);
+            drawCloneTableBelow("default", "extract")
         }
     }
 }
