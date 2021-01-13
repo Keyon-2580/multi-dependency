@@ -426,6 +426,8 @@ var projectToGraph = function(result,divId){
         .attr("dy", ".35em")
         .style("text-anchor", "end")
         .text(function(d) { return d.name;});
+
+    $('#multipleProjectsButton').css('background-color', '#efefef');
 }
 
 //根据筛选规则绘制气泡图连线
@@ -1184,6 +1186,7 @@ function drawChildrenCloneLinks(pair_id, type){
 //多选下拉框，加载多项目
 var showMultipleButton = function(){
     var value = $('#multipleProjectSelect').val();
+    $('#multipleProjectsButton').css('background-color', '#e27575');
     projectList_global = [];
     projectList_global = value;
     // console.log(projectList_global);
