@@ -48,6 +48,7 @@ var cloneLinks_global = [];
 var dependsonLinks_global = [];
 var cochangeLinks_global = [];
 var linksCurrent_global = [];
+var linksCurrentAfterExtract_global = [];
 var linksBefore_global = [];
 var pairIdBefore_global = "";
 var typeBefore_global;
@@ -178,6 +179,13 @@ var loadPageData = function () {
                 "<input class = \"AttributionSelectInput\" id=\"cochangetimes\" value=\"3\">" +
                 "</label></p>";
 
+            html += "<p>" +
+                "<label for=\"slider_range\" style=\"font-size: 18px; margin-left: 22px; margin-right: 30px; font-weight: 500;\">Depth Range：</label>\n" +
+                "<input type=\"text\" id=\"slider_range\" style=\"border:0; color:#f6931f; font-weight:bold; font-size: 18px; margin-left: 30px; margin-right: 30px\">\n" +
+                "</p>" +
+                "<div id = projectToGraph_slider style=\"margin-left: 30px; margin-right: 30px\">" +
+                "</div>";
+
             html += "<p><div style=\"margin-top: 10px;\">" +
                 "<button type=\"button\" onclick= showLineButton()>加载连线</button>" +
                 "<button type=\"button\" onclick= extractLink() style = \"margin-left: 30px\">筛选连线</button>" +
@@ -198,10 +206,23 @@ var loadPageData = function () {
             })
             // $('.selectpicker').selectpicker();
 
-            var temp_array = [];
-            temp_array.push(projectlist[0].id);
-            projectList_global = temp_array.concat();
-            projectGraphAjax(temp_array);
+            $( "#projectToGraph_slider" ).slider({
+                range: "min",
+                min: 1,
+                max: 5,
+                value: 5,
+                slide: function( event, ui ) {
+                    $( "#slider_range" ).val("1 - " + ui.value );
+                    // Change_Depth(ui.value);
+                    // console.log("slider")
+                }
+            });
+            $( "#slider_range" ).val("1 - " + $( "#projectToGraph_slider" ).slider( "value") );
+
+            // var temp_array = [];
+            // temp_array.push(projectlist[0].id);
+            // projectList_global = temp_array.concat();
+            // projectGraphAjax(temp_array);
         }
     })
 }
@@ -299,7 +320,7 @@ var projectToGraph = function(result,divId){
             return "FocusOnCircleLinks(\"" + d.data.id + "\")";
         })
         .call(text => text.append("title").text(function(d) {
-            return d.parent ? d.data.name + "\n所属包：" + d.parent.data.name  + "\nID：" + d.data.id : d.data.name;
+            return d.parent ? d.data.name + "\n所属包：" + d.parent.data.name  + "\nID：" + d.data.id : d.data.name + "\nDepth：" + d.data.depth;
         }));
 
     var text = g.selectAll("text")
@@ -626,11 +647,23 @@ function loadLink(jsonLinks) {
             }
         })
         .attr("marker-end",function (d){
-            return "url(#" + getTypeColor(d)[1] + "_end)";
+            if(d.type === "dependson"){
+                if(d.dependsOnTimes === 0){
+                    return null;
+                }else{
+                    return "url(#" + getTypeColor(d)[1] + "_end)";
+                }
+            }else{
+                return "url(#" + getTypeColor(d)[1] + "_end)";
+            }
         })
         .attr("marker-start",function (d){
-            if(d.two_way){
-                return "url(#" + getTypeColor(d)[1] + "_start)";
+            if(d.type === "dependson") {
+                if (d.two_way || d.dependsOnTimes === 0) {
+                    return "url(#" + getTypeColor(d)[1] + "_start)";
+                } else {
+                    return null;
+                }
             }else{
                 return null;
             }
@@ -638,6 +671,7 @@ function loadLink(jsonLinks) {
         .call(text => text.append("title").text(function(d) {
             if(d.type === "clone"){
                 return "Package1: " + d.source_name + "\nPackage2: " + d.target_name
+                    + "\ndepth: " + d.depth
                     + "\ncloneType: " + d.cloneType
                     + "\ncloneMatchRate: " + d.cloneMatchRate.toFixed(2)
                     + "\ncloneCoChangeRate: " + d.cloneCoChangeRate.toFixed(2)
@@ -647,7 +681,9 @@ function loadLink(jsonLinks) {
                     + "\ncloneNodesCoChangeTimes: " + d.cloneNodesCoChangeTimes
                     + "\nclonePairs: " + d.clonePairs;
             }else if(d.type === "dependson"){
-                var temp_title =  "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\ndependsOnTypes: " + d.dependsOnTypes
+                var temp_title =  "Package1: " + d.source_name + "\nPackage2: " + d.target_name
+                    + "\ndepth: " + d.depth
+                    + "\ndependsOnTypes: " + d.dependsOnTypes
                     + "\ndependsByTypes: " + d.dependsByTypes
                     + "\ndependsOnTimes: " + d.dependsOnTimes
                     + "\ndependsByTimes: " + d.dependsByTimes
@@ -674,7 +710,9 @@ function loadLink(jsonLinks) {
 
                 return temp_title;
             }else if(d.type === "cochange"){
-                return "Package1: " + d.source_name + "\nPackage2: " + d.target_name + "\ncoChangeTimes: " + d.coChangeTimes
+                return "Package1: " + d.source_name + "\nPackage2: " + d.target_name
+                    + "\ndepth: " + d.depth
+                    + "\ncoChangeTimes: " + d.coChangeTimes
                     + "\nnode1ChangeTimes: " + d.node1ChangeTimes
                     + "\nnode2ChangeTimes: " + d.node2ChangeTimes;
             }
@@ -905,7 +943,17 @@ function clearLink(){
     var cleartable = d3.selectAll("table").remove();
     linksCurrent_global = [];
     linksVisiable_flag = false;
+}
 
+//隐藏连线
+function hideLink(){
+    // drawCloneTableBelow(clone_table_global, "project_clone");
+    g_global.selectAll("circle")
+        .style("stroke","")
+        .style("stroke-width","");
+    var clearlink = d3.select(".packageLink") .remove();
+    var cleartable = d3.selectAll("table").remove();
+    linksVisiable_flag = false;
 }
 
 function checkDuplicateLink(){
@@ -936,7 +984,13 @@ function drawCloneTableBelow(link_id, type){
     var cleartable = d3.selectAll("table").remove();
     let html = "";
 
-    if(type === "all" || type === "clone"){
+    if(type === "all" || type === "clone" || type === "dependson" || type === "cochange"){
+        var links_local = linksCurrent_global.concat();
+    }else{
+        var links_local = linksCurrentAfterExtract_global.concat();
+    }
+
+    if(type === "all" || type === "clone" || type === "extract"){
         let html_clone_table_body = "";
         let html_clone_table_parent = "";
         let html_clone_table_head = "<table class = \"gridtable\">"
@@ -960,7 +1014,7 @@ function drawCloneTableBelow(link_id, type){
             })
         }
 
-        linksCurrent_global.forEach(function(item){
+        links_local.forEach(function(item){
             if(item.type === "clone"){
                 var allNodesCoChangeTimes = item.allNodesCoChangeTimes;
                 var cloneNodesCoChangeTimes = item.cloneNodesCoChangeTimes;
@@ -1042,14 +1096,14 @@ function drawCloneTableBelow(link_id, type){
         html += html_clone_table_head + html_clone_table_parent + html_clone_table_body;
     }
 
-    if(type === "all" || type === "dependson"){
+    if(type === "all" || type === "dependson" || type === "extract"){
         let html_dependson_table = "";
 
         html_dependson_table += "<table class = \"gridtable\">"
             + "<tr><th>目录1</th><th>目录1依赖类型(次数)</th><th>目录2</th><th>目录2依赖类型(次数)</th>"
             + "<th>依赖强度</th><th>被依赖强度</th><th>详细信息</th></tr>";
 
-        linksCurrent_global.forEach(function(d){
+        links_local.forEach(function(d){
             if(d.type === "dependson"){
                 html_dependson_table += "<tr><td><a target='_blank' href='/relation/package/" + d.source_id.split("_")[1] + "'>" + d.source_name + "</a></td><td>"
                     + (d.dependsOnTypes === "" ? ""
@@ -1067,14 +1121,14 @@ function drawCloneTableBelow(link_id, type){
         html_dependson_table += "</table>"
         html += html_dependson_table;
     }
-    if(type === "all" || type === "cochange"){
+    if(type === "all" || type === "cochange" || type === "extract"){
         let html_cochange_table = "";
 
         html_cochange_table += "<table class = \"gridtable\">"
             + "<tr><th>目录1</th><th>目录1更改次数</th><th>目录2</th><th>目录2更改次数</th>"
             + "<th>CoChange Times</th></tr>";
 
-        linksCurrent_global.forEach(function(d){
+        links_local.forEach(function(d){
             if(d.type === "cochange"){
                 html_cochange_table += "<tr><td>" + d.source_name + "</td><td>"
                     + d.node1ChangeTimes + "</td><td>"
@@ -1210,6 +1264,23 @@ var RecoverLink = function(){
 
 //筛选连线
 var extractLink = function(){
+    if(linksCurrent_global.length === 0){
+        alert("当前无连线！")
+    }else{
+        hideLink();
+        console.log()
+        linksCurrentAfterExtract_global = linksCurrent_global.concat();
+        for(var i = linksCurrentAfterExtract_global.length; i > 0; i--) {
+            if (linksCurrentAfterExtract_global[i - 1].depth > $( "#projectToGraph_slider" ).slider( "value")) {
+                linksCurrentAfterExtract_global.splice(i - 1, 1);
+            }
+        }
+
+        if (linksCurrentAfterExtract_global.length > 0) {
+            loadLink(linksCurrentAfterExtract_global);
+            drawCloneTableBelow("default", "extract")
+        }
+    }
 }
 
 //撤销操作
@@ -1258,6 +1329,27 @@ var FocusOnCircleLinks = function(circleId){
             }
 
             linksOfCircleVisiable_flag = true;
+        }
+    }
+}
+
+var Change_Depth = function(value){
+    console.log("Change_Depth")
+    if(linksCurrent_global.length === 0){
+        alert("当前无连线！")
+    }else{
+        hideLink();
+        console.log(linksCurrent_global.length)
+        var linksInDepthRange = linksCurrent_global.concat();
+        for(var i = linksInDepthRange.length; i > 0; i--) {
+            if (linksInDepthRange[i - 1].depth > value) {
+                console.log("delete")
+                linksInDepthRange.splice(i - 1, 1);
+            }
+        }
+
+        if (linksInDepthRange.length > 0) {
+            loadLink(linksInDepthRange);
         }
     }
 }

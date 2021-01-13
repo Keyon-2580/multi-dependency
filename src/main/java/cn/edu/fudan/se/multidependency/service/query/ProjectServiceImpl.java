@@ -128,6 +128,7 @@ public class ProjectServiceImpl implements ProjectService{
             jsonObject.put("name",pckstru.getPck().getDirectoryPath());
 //			jsonObject.put("long_name",pckstru.getPck().getDirectoryPath());
             jsonObject.put("size",fileList.size());
+            jsonObject.put("depth",pckstru.getPck().getDepth());
             jsonObject.put("id","id_" + pckstru.getPck().getId().toString());
             float cloneFilesInAllFiles = 0;
             if(fileList.size() > 0){
@@ -344,7 +345,8 @@ public class ProjectServiceImpl implements ProjectService{
             Project target_projectBelong = containRelationService.findPackageBelongToProject(hotspotPackagePair.getPackage2());
 
             link_common.put("source_id", "id_" + hotspotPackagePair.getPackage1().getId().toString());
-            link_common.put("target_id", "id_" + hotspotPackagePair.getPackage2().getId().toString() );
+            link_common.put("target_id", "id_" + hotspotPackagePair.getPackage2().getId().toString());
+            link_common.put("depth", Math.max(hotspotPackagePair.getPackage1().getDepth(), hotspotPackagePair.getPackage2().getDepth()));
             link_common.put("pair_id", hotspotPackagePair.getPackage1().getId().toString() + "_" + hotspotPackagePair.getPackage2().getId().toString());
             link_common.put("parent_pair_id", parentPairId);
             link_common.put("source_name", hotspotPackagePair.getPackage1().getDirectoryPath());
