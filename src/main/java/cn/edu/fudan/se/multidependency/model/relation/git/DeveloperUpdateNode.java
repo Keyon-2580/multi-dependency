@@ -24,5 +24,10 @@ public class DeveloperUpdateNode<T extends Node> implements Serializable {
 	public void addTimes(int time){
 		this.setTimes(this.getTimes() + time);
 	}
+
+	public DeveloperUpdateNode(T node, int time){
+		this.node = node;
+		this.times = time;
+	}
 	
 }

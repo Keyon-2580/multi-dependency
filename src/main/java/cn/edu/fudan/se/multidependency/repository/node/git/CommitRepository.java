@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.repository.node.git;
 
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -37,4 +38,10 @@ public interface CommitRepository extends Neo4jRepository<Commit, Long> {
     		+ RelationType.str_COMMIT_UPDATE_FILE 
     		+ "]->(file:ProjectFile) where id(file)={fileId} and (c.merge=false or c.merge is null) return c order by c.authoredDate desc;")
     List<Commit> queryUpdatedByCommits(@Param("fileId") long fileId);
+
+    @Query("match (c:Commit) -[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(file:ProjectFile)" +
+            " <-[:" + RelationType.str_CONTAIN + "]- (pck:Package)" +
+            " where id(c)={commitId}" +
+            " return pck;")
+    List<Package> queryUpdatedPackageByCommit(@Param("commitId") long commitId);
 }

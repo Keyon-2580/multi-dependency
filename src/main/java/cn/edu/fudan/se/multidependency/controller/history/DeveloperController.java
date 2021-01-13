@@ -1,8 +1,12 @@
 package cn.edu.fudan.se.multidependency.controller.history;
 
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
+import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
+import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.DeveloperRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,6 +22,12 @@ import java.util.List;
 @Controller
 @RequestMapping("/developer")
 public class DeveloperController {
+
+    @Autowired
+    private ContainRepository containRepository;
+
+    @Autowired
+    private CommitRepository commitRepository;
 
     @Autowired
     private DeveloperRepository developerRepository;
@@ -43,4 +53,27 @@ public class DeveloperController {
         return "history/commits";
     }
 
+    @GetMapping("/packages")
+    public String getPakcageChanged(HttpServletRequest request, @RequestParam("developerId") long developerId){
+        List<Commit> commits = developerRepository.queryCommitByDeveloper(developerId);
+        List<Package> packageSet = new ArrayList<>();
+        List<Integer> timeSet = new ArrayList<>();
+        List<DeveloperUpdateNode<Package>> packageChangedTime = new ArrayList<>();
+        for(Commit commit : commits){
+            List<Package> pcks = commitRepository.queryUpdatedPackageByCommit(commit.getId());
+            for(Package pck : pcks){
+                if(!packageSet.contains(pck)){
+                    packageSet.add(pck);
+                    timeSet.add(1);
+                    continue;
+                }
+                timeSet.set(packageSet.indexOf(pck), timeSet.get(packageSet.indexOf(pck)) + 1);
+            }
+        }
+        for(int i = 0;i < packageSet.size(); i++){
+            packageChangedTime.add(new DeveloperUpdateNode<>(packageSet.get(i), timeSet.get(i)));
+        }
+        request.setAttribute("packagetimes", packageChangedTime);
+        return "relation/packages";
+    }
 }

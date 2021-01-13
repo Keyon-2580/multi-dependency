@@ -226,7 +226,7 @@ var gitRepoMetric = function() {
 					html += "<tr>";
 					html += "<td>" + (i + 1) + "</td>";
 					html += "<td>" + result.developer[i].id + "</td>";
-					html += "<td>" + result.developer[i].name + "</td>";
+					html += "<td><a target='_blank' href='/developer/packages?developerId=" + result.developer[i].id + "'>" + result.developer[i].name + "</a></td>";
 					html += "<td><a target='_blank' href='/developer/detail?developerId=" + result.developer[i].id + "'>" + result.committime[i] + "</a></td>";
 					html += "</tr>";
 				}
