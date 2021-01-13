@@ -346,7 +346,7 @@ public class ProjectServiceImpl implements ProjectService{
 
             link_common.put("source_id", "id_" + hotspotPackagePair.getPackage1().getId().toString());
             link_common.put("target_id", "id_" + hotspotPackagePair.getPackage2().getId().toString());
-            link_common.put("depth", Math.min(hotspotPackagePair.getPackage1().getDepth(), hotspotPackagePair.getPackage2().getDepth()));
+            link_common.put("depth", Math.max(hotspotPackagePair.getPackage1().getDepth(), hotspotPackagePair.getPackage2().getDepth()));
             link_common.put("pair_id", hotspotPackagePair.getPackage1().getId().toString() + "_" + hotspotPackagePair.getPackage2().getId().toString());
             link_common.put("parent_pair_id", parentPairId);
             link_common.put("source_name", hotspotPackagePair.getPackage1().getDirectoryPath());
