@@ -219,10 +219,10 @@ var loadPageData = function () {
             });
             $( "#slider_range" ).val("1 - " + $( "#projectToGraph_slider" ).slider( "value") );
 
-            var temp_array = [];
-            temp_array.push(projectlist[0].id);
-            projectList_global = temp_array.concat();
-            projectGraphAjax(temp_array);
+            // var temp_array = [];
+            // temp_array.push(projectlist[0].id);
+            // projectList_global = temp_array.concat();
+            // projectGraphAjax(temp_array);
         }
     })
 }
