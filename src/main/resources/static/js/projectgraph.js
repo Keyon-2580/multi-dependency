@@ -74,19 +74,6 @@ var projectgraph = function () {
 var loadPageData = function () {
     var projectlist = [];
 
-    $( "#projectToGraph_slider" ).slider({
-        range: "min",
-        min: 1,
-        max: 5,
-        value: 5,
-        slide: function( event, ui ) {
-            $( "#slider_range" ).val("1 - " + ui.value );
-            Change_Depth(ui.value);
-            console.log("slider")
-        }
-    });
-    $( "#slider_range" ).val("1 - " + $( "#projectToGraph_slider" ).slider( "value") );
-
     $.ajax({
         type : "GET",
         url : "/project/all/name",
@@ -191,6 +178,13 @@ var loadPageData = function () {
                 "<input class = \"AttributionSelectInput\" id=\"cochangetimes\" value=\"3\">" +
                 "</label></p>";
 
+            html += "<p>" +
+                "<label for=\"slider_range\" style=\"font-size: 18px; margin-left: 22px; margin-right: 30px; font-weight: 500;\">Depth Range：</label>\n" +
+                "<input type=\"text\" id=\"slider_range\" style=\"border:0; color:#f6931f; font-weight:bold; font-size: 18px; margin-left: 30px; margin-right: 30px\">\n" +
+                "</p>" +
+                "<div id = projectToGraph_slider style=\"margin-left: 30px; margin-right: 30px\">" +
+                "</div>";
+
             html += "<p><div style=\"margin-top: 10px;\">" +
                 "<button type=\"button\" onclick= showLineButton()>加载连线</button>" +
                 "<button type=\"button\" onclick= extractLink() style = \"margin-left: 30px\">筛选连线</button>" +
@@ -210,6 +204,19 @@ var loadPageData = function () {
                 selectedTextFormat:"count > 2"
             })
             // $('.selectpicker').selectpicker();
+
+            $( "#projectToGraph_slider" ).slider({
+                range: "min",
+                min: 1,
+                max: 5,
+                value: 5,
+                slide: function( event, ui ) {
+                    $( "#slider_range" ).val("1 - " + ui.value );
+                    // Change_Depth(ui.value);
+                    // console.log("slider")
+                }
+            });
+            $( "#slider_range" ).val("1 - " + $( "#projectToGraph_slider" ).slider( "value") );
 
             var temp_array = [];
             temp_array.push(projectlist[0].id);
@@ -1245,6 +1252,22 @@ var RecoverLink = function(){
 
 //筛选连线
 var extractLink = function(){
+    if(linksCurrent_global.length === 0){
+        alert("当前无连线！")
+    }else{
+        hideLink();
+        console.log()
+        var linksInDepthRange = linksCurrent_global.concat();
+        for(var i = linksInDepthRange.length; i > 0; i--) {
+            if (linksInDepthRange[i - 1].depth > $( "#projectToGraph_slider" ).slider( "value")) {
+                linksInDepthRange.splice(i - 1, 1);
+            }
+        }
+
+        if (linksInDepthRange.length > 0) {
+            loadLink(linksInDepthRange);
+        }
+    }
 }
 
 //撤销操作
