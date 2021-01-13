@@ -75,18 +75,17 @@ var loadPageData = function () {
     var projectlist = [];
 
     $( "#projectToGraph_slider" ).slider({
-        range: true,
+        range: "min",
         min: 1,
-        max: 15,
-        values: [ 1, 15 ],
+        max: 5,
+        value: 5,
         slide: function( event, ui ) {
-            $( "#slider_range" ).val( ui.values[0] + " - " + ui.values[1] );
-            Change_Depth(ui.values[0], ui.values[1]);
-            console.log(1)
+            $( "#slider_range" ).val("1 - " + ui.value );
+            Change_Depth(ui.value);
+            console.log("slider")
         }
     });
-    $( "#slider_range" ).val($( "#projectToGraph_slider" ).slider( "values", 0 ) +
-        " - " + $( "#projectToGraph_slider" ).slider( "values", 1 ) );
+    $( "#slider_range" ).val("1 - " + $( "#projectToGraph_slider" ).slider( "value") );
 
     $.ajax({
         type : "GET",
@@ -1298,22 +1297,23 @@ var FocusOnCircleLinks = function(circleId){
     }
 }
 
-var Change_Depth = function(left, right){
-    console.log(2)
+var Change_Depth = function(value){
+    console.log("Change_Depth")
     if(linksCurrent_global.length === 0){
         alert("当前无连线！")
     }else{
         hideLink();
+        console.log(linksCurrent_global.length)
         var linksInDepthRange = linksCurrent_global.concat();
         for(var i = linksInDepthRange.length; i > 0; i--) {
-            if (linksInDepthRange[i - 1].source_depth < left || linksInDepthRange[i - 1].source_depth > right ||
-                linksInDepthRange[i - 1].target_depth < left || linksInDepthRange[i - 1].target_depth > right) {
+            if (linksInDepthRange[i - 1].depth > value) {
+                console.log("delete")
                 linksInDepthRange.splice(i - 1, 1);
             }
+        }
 
-            if (linksInDepthRange.length > 0) {
-                loadLink(linksInDepthRange);
-            }
+        if (linksInDepthRange.length > 0) {
+            loadLink(linksInDepthRange);
         }
     }
 }
