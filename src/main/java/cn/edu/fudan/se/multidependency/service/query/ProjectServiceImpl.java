@@ -177,7 +177,7 @@ public class ProjectServiceImpl implements ProjectService{
     public JSONObject getAllProjectsLinks(){
         List<HotspotPackagePair> cloneHotspotPackageList = hotspotPackagePairDetector.getHotspotPackagePairWithFileCloneByParentId(-1, -1, "all");
         List<HotspotPackagePair> dependsonHotspotPackageList = hotspotPackagePairDetector.getHotspotPackagePairWithDependsOn();
-        List<HotspotPackagePair> cochangeHotspotPackageList = hotspotPackagePairDetector.detectHotspotPackagePairWithCoChangeInAllProjects();
+        List<HotspotPackagePair> cochangeHotspotPackageList = hotspotPackagePairDetector.getHotspotPackagePairWithCoChange();
         return hotspotPackagesToCloneJson(cloneHotspotPackageList, dependsonHotspotPackageList, cochangeHotspotPackageList);
     }
 
@@ -443,7 +443,7 @@ public class ProjectServiceImpl implements ProjectService{
                         link.put("coChangeTimes", coChangeRelationDataForDoubleNodes.getCoChangeTimes());
                         link.put("node1ChangeTimes", coChangeRelationDataForDoubleNodes.getNode1ChangeTimes());
                         link.put("node2ChangeTimes", coChangeRelationDataForDoubleNodes.getNode2ChangeTimes());
-                        link.put("bottom_package", false);
+                        link.put("bottom_package", !hotspotPackagePair.isAggregatePackagePair());
                         result.add(JSONUtil.combineJSONObjectWithoutMerge(link, link_common));
                     }
                     break;

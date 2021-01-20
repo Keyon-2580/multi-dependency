@@ -47,6 +47,10 @@ const LEGEND_DATA = [
 var cloneLinks_global = [];
 var dependsonLinks_global = [];
 var cochangeLinks_global = [];
+var allLinks_global = [];
+
+var filter_global = {};
+
 var linksCurrent_global = [];
 var linksCurrentAfterExtract_global = [];
 var linksBefore_global = [];
@@ -187,8 +191,8 @@ var loadPageData = function () {
                 "</div>";
 
             html += "<p><div style=\"margin-top: 10px;\">" +
-                "<button type=\"button\" onclick= showLineButton()>加载连线</button>" +
-                "<button type=\"button\" onclick= extractLink() style = \"margin-left: 30px\">筛选连线</button>" +
+                // "<button type=\"button\" onclick= showLineButton()>加载连线</button>" +
+                "<button type=\"button\" onclick= FilterLinks() style = \"margin-left: 30px\">筛选连线</button>" +
                 "<button type=\"button\" onclick= clearLink() style = \"margin-left: 30px\">删除连线</button>" +
                 "<button type=\"button\" onclick= HideLink() style = \"margin-left: 30px\">隐藏连线</button>" +
                 "<button type=\"button\" onclick= RecoverLink() style = \"margin-left: 30px\">恢复连线</button>" +
@@ -259,6 +263,9 @@ var projectToGraph = function(result,divId){
     cloneLinks_global = result[1].links.clone_links;
     dependsonLinks_global = result[1].links.dependson_links;
     cochangeLinks_global = result[1].links.cochange_links;
+    allLinks_global = allLinks_global.concat(cloneLinks_global);
+    allLinks_global = allLinks_global.concat(dependsonLinks_global);
+    allLinks_global = allLinks_global.concat(cochangeLinks_global);
 
     var svg = d3.select("#" + divId)
             .attr("width", 1500)
@@ -432,184 +439,7 @@ var projectToGraph = function(result,divId){
 
 //根据筛选规则绘制气泡图连线
 var showLine = function(links_local, type){
-    if(type === "load"){
-        linksCurrent_flag  = true;
-        document.getElementById("hideBottomPackageButton").innerHTML = "仅显示聚合";
-
-        if($("#dependsOn").prop("checked")){
-            links_local = links_local.concat(dependsonLinks_global);
-        }
-        if($("#clone").prop("checked")){
-            links_local = links_local.concat(cloneLinks_global);
-        }
-        if($("#coChange").prop("checked")){
-            links_local = links_local.concat(cochangeLinks_global);
-        }
-
-        // console.log(links_local);
-
-        for(var i = links_local.length; i > 0; i--){
-            var source_project = links_local[i - 1].source_projectBelong.split("_")[1];
-            var target_project = links_local[i - 1].target_projectBelong.split("_")[1];
-            var relation_type = links_local[i - 1].type;
-
-            var flag_delete = false;
-            var temp_flag_source = false;
-            var temp_flag_target = false;
-
-            for(var j = 0; j < projectList_global.length; j++){
-                if(source_project === projectList_global[j]){
-                    temp_flag_source = true;
-                    break;
-                }
-            }
-
-            for(var k = 0; k < projectList_global.length; k++){
-                if(target_project === projectList_global[k] ){
-                    temp_flag_target = true;
-                    break;
-                }
-            }
-
-            if(temp_flag_source === false || temp_flag_target === false || links_local[i - 1].parent_pair_id !== "default"){
-                links_local.splice(i - 1, 1);
-                flag_delete = true;
-            }
-
-            if(relation_type === "clone" && flag_delete === false){
-                var cloneMatchRate = links_local[i - 1].cloneMatchRate.toFixed(2);
-                var similarityhigh = parseInt($("#similarityhigh").val()).toFixed(2)
-                var similaritybelow = parseInt($("#similaritybelow").val()).toFixed(2)
-                if($("#cloneSimilarity").prop("checked")){
-                    var temp_flag_clonesimilarity = false;
-
-                    if($("#similarityCompareSelectBelow").val() === "<=" &&
-                        cloneMatchRate >= similaritybelow){
-                        if($("#similarityCompareSelectHigh").val() === "<=" &&
-                            cloneMatchRate <= similarityhigh){
-                            temp_flag_clonesimilarity = true;
-                        }else if($("#similarityCompareSelectHigh").val() === "<" &&
-                            cloneMatchRate < similarityhigh){
-                            temp_flag_clonesimilarity = true;
-                        }
-                    }else if($("#similarityCompareSelectBelow").val() === "<" &&
-                        cloneMatchRate > similaritybelow){
-                        if($("#similarityCompareSelectHigh").val() === "<=" &&
-                            cloneMatchRate <= similarityhigh){
-                            temp_flag_clonesimilarity = true;
-                        }else if($("#similarityCompareSelectHigh").val() === "<" &&
-                            cloneMatchRate < similarityhigh){
-                            temp_flag_clonesimilarity = true;
-                        }
-                    }
-
-                    if(temp_flag_clonesimilarity === false ){
-                        links_local.splice(i - 1, 1);
-                        flag_delete = true;
-                    }
-                }
-
-                if($("#cloneTimes").prop("checked") && links_local[i - 1].cloneNodesCoChangeTimes < $("#clonetimes").val() && flag_delete === false){
-                    links_local.splice(i - 1, 1);
-                    flag_delete = true;
-                }
-            }
-
-            if(relation_type === "dependson" && flag_delete === false ){
-                var intensity = Math.max(links_local[i - 1].dependsOnIntensity, links_local[i - 1].dependsByIntensity);
-                if($("#dependsIntensity").prop("checked")){
-                    var temp_flag_intensity = false;
-
-                    if($("#intensityCompareSelectBelow").val() === "<=" && intensity >= $("#intensitybelow").val()){
-                        if($("#intensityCompareSelectHigh").val() === "<=" &&
-                            intensity <= $("#intensityhigh").val()){
-                            temp_flag_intensity = true;
-                        }else if($("#intensityCompareSelectHigh").val() === "<" &&
-                            intensity < $("#intensityhigh").val()){
-                            temp_flag_intensity = true;
-                        }
-                    }else if($("#intensityCompareSelectBelow").val() === "<" && intensity > $("#intensitybelow").val()){
-                        if($("#intensityCompareSelectHigh").val() === "<=" &&
-                            intensity <= $("#intensityhigh").val()){
-                            temp_flag_intensity = true;
-                        }else if($("#intensityCompareSelectHigh").val() === "<" &&
-                            intensity < $("#intensityhigh").val()){
-                            temp_flag_intensity = true;
-                        }
-                    }
-
-                    if(temp_flag_intensity === false ){
-                        links_local.splice(i - 1, 1);
-                        flag_delete = true;
-                    }
-                }
-
-                if($("#dependsOnTimes").prop("checked") &&
-                    $("#dependencyTimes").val() > links_local[i - 1].dependsOnTimes &&
-                    $("#dependencyTimes").val() > links_local[i - 1].dependsByTimes && flag_delete === false){
-                    links_local.splice(i - 1, 1);
-                    flag_delete = true;
-                }
-
-                if($("#dependsOnType").prop("checked") && flag_delete === false){
-                    var value = $('#dependsTypeSelect').val();
-                    if(value.length === 0){
-                        alert("未选中任何类型！");
-                    }
-
-                    var dependsByTypesMap = links_local[i - 1].dependsByTypesMap;
-                    var dependsOnTypesMap = links_local[i - 1].dependsOnTypesMap;
-                    var temp_dependsType_flag = false;
-
-                    for(var k = 0; k < value.length; k++){
-                        if(temp_dependsType_flag === true){
-                            break;
-                        }
-
-                        if(dependsByTypesMap.length > 0){
-                            for(var item1 in dependsByTypesMap){
-                                if(dependsByTypesMap[item1].dependsByType === value[k]){
-                                    temp_dependsType_flag = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if(dependsOnTypesMap.length > 0){
-                            for(var item2 in dependsOnTypesMap){
-                                if(dependsOnTypesMap[item2].dependsOnType === value[k]){
-                                    temp_dependsType_flag = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    if(temp_dependsType_flag === false){
-                        links_local.splice(i - 1, 1);
-                        flag_delete = true;
-                    }
-                }
-            }
-
-            if(relation_type === "cochange" && flag_delete === false && $("#cochangeTimes").prop("checked")){
-                if($("#cochangetimes").val() >= 3){
-                    if(links_local[i - 1].coChangeTimes < $("#cochangetimes").val()){
-                        links_local.splice(i - 1, 1);
-                        flag_delete = true;
-                    }
-                }else{
-                    alert("Cochange Times 需大于等于 3！");
-                    return;
-                }
-            }
-        }
-
-        linksCurrent_global = links_local.concat();
-        drawCloneTableBelow("", "all");
-    }
     checkDuplicateLink();
-    // console.log(linksCurrent_global)
     loadLink(linksCurrent_global);
 }
 
@@ -645,7 +475,8 @@ function loadLink(jsonLinks) {
         })
         .attr("onclick", function(d){
             if(!d.bottom_package){
-                return "drawChildrenCloneLinks(\"" + d.pair_id + "\", \"" + d.type + "\")";
+                // return "drawChildrenLinks(\"" + d.pair_id + "\", \"" + d.type + "\")";
+                return "drawChildrenLinks(\"" + d.pair_id + "\")";
             }
         })
         .attr("marker-end",function (d){
@@ -873,62 +704,81 @@ function loadLink(jsonLinks) {
             case 2:
                 switch(d.duplicate_num){
                     case 1:
-                        return ("M" + x1 + " " + y1 +
+                        return d.line_direction ? ("M" + x1 + " " + y1 +
                         " Q" + (((ratio + 1) / (ratio * 2)) * x1 + ((ratio - 1) / (ratio * 2)) * x2)
                             + " " + (((ratio - 1) / (ratio * 2)) * y1 + ((ratio + 1) / (ratio * 2)) * y2)
-                            + " " + x2 + " " + y2);
-                    case 2:
-                        return ("M" + x1 + " " + y1 +
+                            + " " + x2 + " " + y2) : ("M" + x1 + " " + y1 +
                             " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
                             + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                    case 2:
+                        return d.line_direction ? ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2) : ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio + 1) / (ratio * 2)) * x1 + ((ratio - 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio - 1) / (ratio * 2)) * y1 + ((ratio + 1) / (ratio * 2)) * y2)
                             + " " + x2 + " " + y2);
                 }
             case 3:
                 switch(d.duplicate_num){
                     case 1:
-                        return ("M" + x1 + " " + y1 +
+                        return d.line_direction ? ("M" + x1 + " " + y1 +
                             " Q" + (((ratio + 1) / (ratio * 2)) * x1 + ((ratio - 1) / (ratio * 2)) * x2)
                             + " " + (((ratio - 1) / (ratio * 2)) * y1 + ((ratio + 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2) : ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
                             + " " + x2 + " " + y2);
                     case 2:
                         return "M" + x1 + " " + y1 + " L" + x2 + " " + y2;
                     case 3:
-                        return ("M" + x1 + " " + y1 +
+                        return d.line_direction ? ("M" + x1 + " " + y1 +
                             " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
                             + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2) : ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio + 1) / (ratio * 2)) * x1 + ((ratio - 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio - 1) / (ratio * 2)) * y1 + ((ratio + 1) / (ratio * 2)) * y2)
                             + " " + x2 + " " + y2);
                 }
             case 4:
                 switch(d.duplicate_num){
                     case 1:
-                        return ("M" + x1 + " " + y1 +
+                        return d.line_direction ? ("M" + x1 + " " + y1 +
                             " Q" + (((ratio + 1) / (ratio * 2)) * x1 + ((ratio - 1) / (ratio * 2)) * x2)
                             + " " + (((ratio - 1) / (ratio * 2)) * y1 + ((ratio + 1) / (ratio * 2)) * y2)
-                            + " " + x2 + " " + y2);
-                    case 2:
-                        return ("M" + x1 + " " + y1 +
+                            + " " + x2 + " " + y2) : ("M" + x1 + " " + y1 +
                             " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
                             + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
                             + " " + x2 + " " + y2);
+                    case 2:
+                        return d.line_direction ? ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2) : ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio + 1) / (ratio * 2)) * x1 + ((ratio - 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio - 1) / (ratio * 2)) * y1 + ((ratio + 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
                     case 3:
                         ratio = ratio * 2;
-                        return ("M" + x1 + " " + y1 +
+                        return d.line_direction ? ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2) : ("M" + x1 + " " + y1 +
                             " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
                             + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
                             + " " + x2 + " " + y2);
                     case 4:
                         ratio = ratio * 2;
-                        return ("M" + x1 + " " + y1 +
+                        return d.line_direction ? ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2) : ("M" + x1 + " " + y1 +
                             " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
                             + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
                             + " " + x2 + " " + y2);
                 }
         }
-        // return ("M" + x1 + " " + y1 +
-        //     " Q" + ((3 * x1) / 4 + x2 / 4) + " " + (y1 / 4 + (3 * y2) /4)
-        //     + " " + x2 + " " + y2);
-        // return ("M" + x1 + " " + y1 +
-        //     " L" + x2 + " " + y2);
     })
 
     linksVisiable_flag = true;
@@ -937,7 +787,7 @@ function loadLink(jsonLinks) {
 
 //删除连线
 function clearLink(){
-    // drawCloneTableBelow(clone_table_global, "project_clone");
+    // drawTableBelow(clone_table_global, "project_clone");
     g_global.selectAll("circle")
         .style("stroke","")
         .style("stroke-width","");
@@ -949,7 +799,7 @@ function clearLink(){
 
 //隐藏连线
 function hideLink(){
-    // drawCloneTableBelow(clone_table_global, "project_clone");
+    // drawTableBelow(clone_table_global, "project_clone");
     g_global.selectAll("circle")
         .style("stroke","")
         .style("stroke-width","");
@@ -958,15 +808,21 @@ function hideLink(){
     linksVisiable_flag = false;
 }
 
+//检查重复连线，以便做弧线处理
 function checkDuplicateLink(){
     linksCurrent_global.forEach(function(item, index){
         if(!item.hasOwnProperty("deplicate_num")){
             var num = 1;
             var index_list = [];
             linksCurrent_global.forEach(function(item2, index2){
-                if(item2.pair_id === item.source_id.split("_")[1] + "_" + item.target_id.split("_")[1] ||
-                    item2.pair_id === item.target_id.split("_")[1] + "_" + item.source_id.split("_")[1]){
+                if(item2.pair_id === item.source_id.split("_")[1] + "_" + item.target_id.split("_")[1]){
                     item2["duplicate_num"] = num;
+                    item2["line_direction"] = true;
+                    num++;
+                    index_list.push(index2);
+                }else if(item2.pair_id === item.target_id.split("_")[1] + "_" + item.source_id.split("_")[1]){
+                    item2["duplicate_num"] = num;
+                    item2["line_direction"] = false;
                     num++;
                     index_list.push(index2);
                 }
@@ -981,7 +837,7 @@ function checkDuplicateLink(){
 }
 
 //绘制下方表格
-function drawCloneTableBelow(link_id, type){
+function drawTableBelow(link_id, type){
     // console.log(linksBefore_global);
     var cleartable = d3.selectAll("table").remove();
     let html = "";
@@ -1148,23 +1004,25 @@ function drawCloneTableBelow(link_id, type){
 }
 
 //点击连线，获取子包关系,绘制图下方表格
-function drawChildrenCloneLinks(pair_id, type){
+function drawChildrenLinks(pair_id, type){
     linksBefore_global = linksCurrent_global.concat();
     var temp_links_all = []
     var temp_links = []
     clearLink();
     // console.log(result);
-    switch (type){
-        case "clone":
-            temp_links_all = cloneLinks_global.concat();
-            break;
-        case "dependson":
-            temp_links_all = dependsonLinks_global.concat();
-            break;
-        case "cochange":
-            temp_links_all = cochangeLinks_global.concat();
-            break;
-    }
+    // switch (type){
+    //     case "clone":
+    //         temp_links_all = cloneLinks_global.concat();
+    //         break;
+    //     case "dependson":
+    //         temp_links_all = dependsonLinks_global.concat();
+    //         break;
+    //     case "cochange":
+    //         temp_links_all = cochangeLinks_global.concat();
+    //         break;
+    // }
+
+    temp_links_all = allLinks_global.concat();
 
     for(var i = temp_links_all.length; i > 0; i--){
         if(temp_links_all[i - 1].parent_pair_id === pair_id){
@@ -1172,15 +1030,16 @@ function drawChildrenCloneLinks(pair_id, type){
         }
     }
 
-    console.log(temp_links)
+    // console.log(temp_links)
 
     linksCurrent_global = temp_links.concat();
-    showLine(linksCurrent_global, "extract");
+    checkDuplicateLink();
+    loadLink(linksCurrent_global);
     pairIdBefore_global = pairIdCurrent_global;
     typeBefore_global = typeCurrent_global;
     pairIdCurrent_global = pair_id;
     typeCurrent_global = type;
-    drawCloneTableBelow(pair_id, type);
+    drawTableBelow(pair_id, "all");
 }
 
 //多选下拉框，加载多项目
@@ -1192,14 +1051,6 @@ var showMultipleButton = function(){
     // console.log(projectList_global);
     var table_clear = d3.selectAll("table").remove();
     projectGraphAjax(value);
-}
-
-//显示连线
-var showLineButton = function(){
-    var temp_links = [];
-    showLine(temp_links, "load");
-    pairIdCurrent_global = "";
-    pairIdBefore_global = "";
 }
 
 //获取连线颜色
@@ -1281,7 +1132,7 @@ var extractLink = function(){
 
         if (linksCurrentAfterExtract_global.length > 0) {
             loadLink(linksCurrentAfterExtract_global);
-            drawCloneTableBelow("default", "extract")
+            drawTableBelow("default", "extract")
         }
     }
 }
@@ -1291,8 +1142,9 @@ var reDo = function(){
     if(linksBefore_global.length > 0){
         linksCurrent_global = [];
         linksCurrent_global = linksBefore_global.concat();
-        showLine(linksCurrent_global, "");
-        drawCloneTableBelow(pairIdBefore_global, typeBefore_global);
+        checkDuplicateLink();
+        loadLink(linksCurrent_global);
+        drawTableBelow(pairIdBefore_global, typeBefore_global);
         pairIdBefore_global = "";
         typeBefore_global = "";
         linksBefore_global = [];
@@ -1303,39 +1155,40 @@ var reDo = function(){
 
 //点击气泡，隐藏或显示与气泡无关连线
 var FocusOnCircleLinks = function(circleId){
-    if(linksVisiable_flag){
-        if(linksOfCircleVisiable_flag){
-            linksCurrent_global = linksBefore_global.concat();
-            linksBefore_global = [];
-            showLine(linksCurrent_global, "");
-            var temp_pair = pairIdCurrent_global;
-            drawCloneTableBelow(temp_pair, "all");
-            linksOfCircleVisiable_flag = false;
-        }else{
-            // console.log(linksCurrent_global);
-            linksBefore_global = linksCurrent_global.concat();
-            var temp_links = linksCurrent_global.concat();
-            for(var i = temp_links.length; i > 0; i--){
-                if(temp_links[i - 1].source_id !== circleId
-                    && temp_links[i - 1].target_id !== circleId ){
-                    temp_links.splice(i - 1, 1);
-                }
+    if(linksOfCircleVisiable_flag){
+        linksCurrent_global = linksBefore_global.concat();
+        linksBefore_global = [];
+        checkDuplicateLink();
+        loadLink(linksCurrent_global);
+        var temp_pair = pairIdCurrent_global;
+        drawTableBelow(temp_pair, "all");
+        linksOfCircleVisiable_flag = false;
+    }else{
+        // console.log(linksCurrent_global);
+        linksBefore_global = linksCurrent_global.concat();
+        var temp_links = linksCurrent_global.concat();
+        for(var i = temp_links.length; i > 0; i--){
+            if(temp_links[i - 1].source_id !== circleId
+                && temp_links[i - 1].target_id !== circleId ){
+                temp_links.splice(i - 1, 1);
             }
-
-            if(temp_links.length > 0){
-                linksCurrent_global = temp_links.concat();
-                showLine(linksCurrent_global, "");
-                drawCloneTableBelow("", "all");
-            }else{
-                alert("没有与此节点相关连线！");
-                return;
-            }
-
-            linksOfCircleVisiable_flag = true;
         }
+
+        if(temp_links.length > 0){
+            linksCurrent_global = temp_links.concat();
+            checkDuplicateLink();
+            loadLink(linksCurrent_global);
+            drawTableBelow("", "all");
+        }else{
+            alert("没有与此节点相关连线！");
+            return;
+        }
+
+        linksOfCircleVisiable_flag = true;
     }
 }
 
+//滑块筛选深度
 var Change_Depth = function(value){
     console.log("Change_Depth")
     if(linksCurrent_global.length === 0){
@@ -1346,7 +1199,6 @@ var Change_Depth = function(value){
         var linksInDepthRange = linksCurrent_global.concat();
         for(var i = linksInDepthRange.length; i > 0; i--) {
             if (linksInDepthRange[i - 1].depth > value) {
-                console.log("delete")
                 linksInDepthRange.splice(i - 1, 1);
             }
         }
@@ -1356,4 +1208,279 @@ var Change_Depth = function(value){
         }
     }
 }
+
+//获取当前筛选条件
+var GetFilterCondition = function(){
+    var filter = {}
+    var temp_dependson = {}
+    var temp_clone = {}
+    var temp_cochange = {}
+
+    temp_dependson["checked"] = $("#dependsOn").prop("checked") ? 1 : 0;
+    temp_clone["checked"] = $("#clone").prop("checked") ? 1 : 0;
+    temp_cochange["checked"] = $("#coChange").prop("checked") ? 1 : 0;
+
+    temp_dependson["dependsIntensity"] = $("#dependsIntensity").prop("checked") ? 1 : 0;
+    temp_dependson["intensityCompareSelectBelow"] = $("#intensityCompareSelectBelow").val();
+    temp_dependson["intensityCompareSelectHigh"] = $("#intensityCompareSelectHigh").val();
+    temp_dependson["intensitybelow"] = $("#intensitybelow").val();
+    temp_dependson["intensityhigh"] = $("#intensityhigh").val();
+
+    temp_dependson["dependsOnTimes"] = $("#dependsOnTimes").prop("checked") ? 1 : 0;
+    temp_dependson["dependencyTimes"] = $("#dependencyTimes").val();
+
+    temp_dependson["dependsOnType"] = $("#dependsOnType").prop("checked") ? 1 : 0;
+    temp_dependson["dependsTypeSelect"] = $("#dependsTypeSelect").val();
+
+    temp_clone["cloneSimilarity"] = $("#cloneSimilarity").prop("checked") ? 1 : 0;
+    temp_clone["similarityCompareSelectBelow"] = $("#similarityCompareSelectBelow").val();
+    temp_clone["similarityCompareSelectHigh"] = $("#similarityCompareSelectHigh").val();
+    temp_clone["similarityhigh"] = $("#similarityhigh").val();
+    temp_clone["similaritybelow"] = $("#similaritybelow").val();
+
+    temp_clone["cloneTimes"] = $("#cloneTimes").prop("checked") ? 1 : 0;
+    temp_clone["clonetimes"] = $("#clonetimes").val();
+
+    temp_cochange["cochangeTimes"] = $("#cochangeTimes").prop("checked") ? 1 : 0;
+    temp_cochange["cochangetimes"] = $("#cochangetimes").val();
+
+    filter["dependson"] = temp_dependson;
+    filter["clone"] = temp_clone;
+    filter["cochange"] = temp_cochange;
+
+    filter["depth"] = $( "#projectToGraph_slider" ).slider( "value");
+
+    return filter;
+}
+
+//根据筛选条件筛选连线
+var FilterLinks = function() {
+    var filter = GetFilterCondition();
+    pairIdCurrent_global = "";
+    pairIdBefore_global = "";
+
+    var links_local = [];
+    linksCurrent_flag = true;
+    document.getElementById("hideBottomPackageButton").innerHTML = "仅显示聚合";
+    clearLink();
+
+    if (filter["dependson"]["checked"]) {
+        links_local = links_local.concat(dependsonLinks_global);
+    }
+    if (filter["clone"]["checked"]) {
+        links_local = links_local.concat(cloneLinks_global);
+    }
+    if (filter["cochange"]["checked"]) {
+        links_local = links_local.concat(cochangeLinks_global);
+    }
+
+    for (var i = links_local.length; i > 0; i--) {
+        var source_project = links_local[i - 1].source_projectBelong.split("_")[1];
+        var target_project = links_local[i - 1].target_projectBelong.split("_")[1];
+        var relation_type = links_local[i - 1].type;
+
+        var flag_delete = false;
+        var temp_flag_source = false;
+        var temp_flag_target = false;
+
+        for (var j = 0; j < projectList_global.length; j++) {
+            if (source_project === projectList_global[j]) {
+                temp_flag_source = true;
+                break;
+            }
+        }
+
+        for (var k = 0; k < projectList_global.length; k++) {
+            if (target_project === projectList_global[k]) {
+                temp_flag_target = true;
+                break;
+            }
+        }
+
+        if (temp_flag_source === false || temp_flag_target === false || links_local[i - 1].parent_pair_id !== "default") {
+            links_local.splice(i - 1, 1);
+            flag_delete = true;
+        }
+
+        if (relation_type === "clone" && flag_delete === false) {
+            var cloneMatchRate = links_local[i - 1].cloneMatchRate.toFixed(2);
+            var similarityhigh = parseInt(filter["clone"]["similarityhigh"]).toFixed(2)
+            var similaritybelow = parseInt(filter["clone"]["similaritybelow"]).toFixed(2)
+            if (filter["clone"]["cloneSimilarity"]) {
+                var temp_flag_clonesimilarity = false;
+
+                if (filter["clone"]["similarityCompareSelectBelow"] === "<=" &&
+                    cloneMatchRate >= similaritybelow) {
+                    if (filter["clone"]["similarityCompareSelectHigh"] === "<=" &&
+                        cloneMatchRate <= similarityhigh) {
+                        temp_flag_clonesimilarity = true;
+                    } else if (filter["clone"]["similarityCompareSelectHigh"] === "<" &&
+                        cloneMatchRate < similarityhigh) {
+                        temp_flag_clonesimilarity = true;
+                    }
+                } else if (filter["clone"]["similarityCompareSelectBelow"] === "<" &&
+                    cloneMatchRate > similaritybelow) {
+                    if (filter["clone"]["similarityCompareSelectHigh"] === "<=" &&
+                        cloneMatchRate <= similarityhigh) {
+                        temp_flag_clonesimilarity = true;
+                    } else if (filter["clone"]["similarityCompareSelectHigh"] === "<" &&
+                        cloneMatchRate < similarityhigh) {
+                        temp_flag_clonesimilarity = true;
+                    }
+                }
+
+                if (temp_flag_clonesimilarity === false) {
+                    links_local.splice(i - 1, 1);
+                    flag_delete = true;
+                }
+            }
+
+            if (filter["clone"]["cloneTimes"] && links_local[i - 1].cloneNodesCoChangeTimes < filter["clone"]["clonetimes"] && flag_delete === false) {
+                links_local.splice(i - 1, 1);
+                flag_delete = true;
+            }
+        }
+
+        if (relation_type === "dependson" && flag_delete === false) {
+            var intensity = Math.max(links_local[i - 1].dependsOnIntensity, links_local[i - 1].dependsByIntensity);
+            if (filter["dependson"]["dependsIntensity"]) {
+                var temp_flag_intensity = false;
+
+                if (filter["dependson"]["intensityCompareSelectBelow"] === "<=" && intensity >= filter["dependson"]["intensitybelow"]) {
+                    if (filter["dependson"]["intensityCompareSelectHigh"] === "<=" &&
+                        intensity <= filter["dependson"]["intensityhigh"]) {
+                        temp_flag_intensity = true;
+                    } else if (filter["dependson"]["intensityCompareSelectHigh"] === "<" &&
+                        intensity < filter["dependson"]["intensityhigh"]) {
+                        temp_flag_intensity = true;
+                    }
+                } else if (filter["dependson"]["intensityCompareSelectBelow"] === "<" && intensity > filter["dependson"]["intensitybelow"]) {
+                    if (filter["dependson"]["intensityCompareSelectHigh"] === "<=" &&
+                        intensity <= filter["dependson"]["intensityhigh"]) {
+                        temp_flag_intensity = true;
+                    } else if (filter["dependson"]["intensityCompareSelectHigh"] === "<" &&
+                        intensity < filter["dependson"]["intensityhigh"]) {
+                        temp_flag_intensity = true;
+                    }
+                }
+
+                if (temp_flag_intensity === false) {
+                    links_local.splice(i - 1, 1);
+                    flag_delete = true;
+                }
+            }
+
+            if (filter["dependson"]["dependsOnTimes"] &&
+                filter["dependson"]["dependencyTimes"] > links_local[i - 1].dependsOnTimes &&
+                filter["dependson"]["dependencyTimes"] > links_local[i - 1].dependsByTimes && flag_delete === false) {
+                links_local.splice(i - 1, 1);
+                flag_delete = true;
+            }
+
+            if (filter["dependson"]["dependsOnType"] && flag_delete === false) {
+                var value = filter["dependson"]["dependsTypeSelect"];
+                if (value.length === 0) {
+                    alert("未选中任何类型！");
+                }
+
+                var dependsByTypesMap = links_local[i - 1].dependsByTypesMap;
+                var dependsOnTypesMap = links_local[i - 1].dependsOnTypesMap;
+                var temp_dependsType_flag = false;
+
+                for (var k = 0; k < value.length; k++) {
+                    if (temp_dependsType_flag === true) {
+                        break;
+                    }
+
+                    if (dependsByTypesMap.length > 0) {
+                        for (var item1 in dependsByTypesMap) {
+                            if (dependsByTypesMap[item1].dependsByType === value[k]) {
+                                temp_dependsType_flag = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (dependsOnTypesMap.length > 0) {
+                        for (var item2 in dependsOnTypesMap) {
+                            if (dependsOnTypesMap[item2].dependsOnType === value[k]) {
+                                temp_dependsType_flag = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (temp_dependsType_flag === false) {
+                    links_local.splice(i - 1, 1);
+                    flag_delete = true;
+                }
+            }
+        }
+
+        if (relation_type === "cochange" && flag_delete === false && filter["cochange"]["cochangeTimes"]) {
+            if (filter["cochange"]["cochangetimes"] >= 3) {
+                if (links_local[i - 1].coChangeTimes < filter["cochange"]["cochangetimes"]) {
+                    links_local.splice(i - 1, 1);
+                    flag_delete = true;
+                }
+            } else {
+                alert("Cochange Times 需大于等于 3！");
+                return;
+            }
+        }
+    }
+
+    filter_global = filter;
+    linksCurrent_global = links_local.concat();
+    checkDuplicateLink();
+    // console.log(linksCurrent_global)
+    loadLink(linksCurrent_global);
+    drawTableBelow("", "all");
+
+    if(filter["depth"] !== 5){
+        hideLink();
+        linksCurrentAfterExtract_global = linksCurrent_global.concat();
+
+        for (var i = linksCurrentAfterExtract_global.length; i > 0; i--) {
+            if (linksCurrentAfterExtract_global[i - 1].depth > filter["depth"]) {
+                linksCurrentAfterExtract_global.splice(i - 1, 1);
+            }
+        }
+
+        if (linksCurrentAfterExtract_global.length > 0) {
+            loadLink(linksCurrentAfterExtract_global);
+            drawTableBelow("default", "extract")
+        }
+    }
+}
+
+//判断两个对象是否相等
+var cmp = function (x, y) {
+
+    for (var p in x) {
+        if (x.hasOwnProperty(p)) {
+            if (!y.hasOwnProperty(p)) {
+                return false;
+            }
+
+            if (x[p] === y[p]) {
+                continue;
+            }
+
+            if (x[p] !== y[p]) {
+                return false;
+            }
+        }
+    }
+
+    for (p in y) {
+        // allows x[ p ] to be set to undefined
+        if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 
