@@ -8,7 +8,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCallFunctionByTestCase;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Dependency;
 
 public class Relations implements Serializable {
 
@@ -80,17 +79,6 @@ public class Relations implements Serializable {
                 addRelationDirectly(relation);
             } else {
                 relationWithTimes.addTimes();
-                if(relation instanceof Dependency){
-                    ((Dependency)relationWithTimes).minusTimes();
-                    Map<String, Long> dependencyTypesMap = ((Dependency) relation).getDependencyTypesMap();
-                    if(dependencyTypesMap != null && !dependencyTypesMap.isEmpty()){
-                        ((Dependency)relationWithTimes).getDependencyTypesMap().putAll(dependencyTypesMap);
-                        dependencyTypesMap.forEach( (key, value) ->{
-                            ((Dependency)relationWithTimes).addDependencyType(key);
-                            ((Dependency)relationWithTimes).addTimes(value.intValue());
-                        });
-                    }
-                }
             }
         } else {
             addRelationDirectly(relation);

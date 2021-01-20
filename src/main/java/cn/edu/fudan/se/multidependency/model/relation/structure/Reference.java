@@ -14,9 +14,9 @@ import java.util.Map;
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_USE)
+@RelationshipEntity(RelationType.str_REFERENCE)
 @EqualsAndHashCode
-public class Use implements RelationWithTimes, StructureRelation {
+public class Reference implements RelationWithTimes, StructureRelation {
 
 	private static final long serialVersionUID = -4490099061857994012L;
 
@@ -28,22 +28,11 @@ public class Use implements RelationWithTimes, StructureRelation {
 
 	private int times = 1;
 
-	private String useType = "";
-
-	public Use(CodeNode startCodeNode, CodeNode endCodeNode) {
+	public Reference(CodeNode startCodeNode, CodeNode endCodeNode) {
 		super();
 		this.startCodeNode = startCodeNode;
 		this.endCodeNode = endCodeNode;
 		this.times = 1;
-		this.useType = "";
-	}
-
-	public Use(CodeNode startCodeNode, CodeNode endCodeNode, String useType) {
-		super();
-		this.startCodeNode = startCodeNode;
-		this.endCodeNode = endCodeNode;
-		this.times = 1;
-		this.useType = useType;
 	}
 
 	@Id
@@ -74,14 +63,13 @@ public class Use implements RelationWithTimes, StructureRelation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.USE;
+		return RelationType.REFERENCE;
 	}
 
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("times", getTimes());
-		properties.put("useType", getUseType());
 		return properties;
 	}
 }

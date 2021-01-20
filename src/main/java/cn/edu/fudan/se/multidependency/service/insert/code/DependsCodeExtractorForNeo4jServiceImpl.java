@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.*;
 import depends.entity.*;
 import org.slf4j.Logger;
@@ -251,8 +250,8 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 						// 关联的type，即成员变量的类型，此处仅指代类型直接定义的成员变量，不包含通过List<？>、Set<？>等基本数据类型中参数类型（此种情况将在变量的参数类型中处理）
 						Type other = (Type) getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, relation.getEntity().getId().longValue(), currentProject);
 						if(other != null) {
-							Association association = new Association(type, other);
-							addRelation(association);
+							GlobalVariable globalVariable = new GlobalVariable(type, other);
+							addRelation(globalVariable);
 						}
 					}
 					break;
@@ -306,8 +305,8 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					}else if(relation.getEntity().getClass() == TypeEntity.class && relation.getEntity().getId() != -1){
 						Type other = (Type) types.get(relation.getEntity().getId().longValue());
 						if(other != null) {
-							Use use = new Use(type, other);
-							addRelation(use);
+							Reference reference = new Reference(type, other);
+							addRelation(reference);
 						}
 					}
 					break;
@@ -349,12 +348,12 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 							}
 							Type parentType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentTypeEntity.getId().longValue(), currentProject);
 							if(parentType != null && parentType != useType){
-								Association association = new Association(parentType, useType);
-								addRelation(association);
+								GlobalVariable globalVariable = new GlobalVariable(parentType, useType);
+								addRelation(globalVariable);
 							}
 						} else {
-							Use use = new Use(variable, useType);
-							addRelation(use);
+							LocalVariable localVariable = new LocalVariable(variable, useType);
+							addRelation(localVariable);
 						}
 					}
 					break;
@@ -474,18 +473,18 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 							}
 						}
 					} else if(relation.getEntity().getClass() == TypeEntity.class){
-						Type useType = (Type) types.get(relation.getEntity().getId().longValue());
-						if(useType != null) {
-							Use use = new Use(function, useType);
-							addRelation(use);
+						Type referenceType = (Type) types.get(relation.getEntity().getId().longValue());
+						if(referenceType != null) {
+							Reference reference = new Reference(function, referenceType);
+							addRelation(reference);
 					    }
 				    }
 					break;
 				case DependencyType.CONTAIN:
 					Type containType = (Type) types.get(relation.getEntity().getId().longValue());
 					if(containType != null) {
-						Use use = new Use(function, containType);
-						addRelation(use);
+						LocalVariable localVariable = new LocalVariable(function, containType);
+						addRelation(localVariable);
 					}
 					break;
 				default:

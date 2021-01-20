@@ -104,15 +104,18 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query(TYPE_LEFT + RelationType.str_RETURN + TYPE_MIDDLE + RelationType.str_RETURN +
 			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
 	void createDependsOnWithReturnInTypes();
-	@Query(TYPE_LEFT + RelationType.str_USE + TYPE_MIDDLE + RelationType.str_USE +
+	@Query(TYPE_LEFT + RelationType.str_REFERENCE + TYPE_MIDDLE + RelationType.str_REFERENCE +
 			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
-	void createDependsOnWithUseTypeInTypes();
+	void createDependsOnWithReferenceTypeInTypes();
 	@Query(TYPE_LEFT + RelationType.str_ACCESS + TYPE_MIDDLE + RelationType.str_ACCESS +
 			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
 	void createDependsOnWithAccessInTypes();
-	@Query(TYPE_LEFT + RelationType.str_ASSOCIATION + TYPE_MIDDLE + RelationType.str_ASSOCIATION +
+	@Query(TYPE_LEFT + RelationType.str_GLOBAL_VARIABLE + TYPE_MIDDLE + RelationType.str_GLOBAL_VARIABLE +
 			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
-	void createDependsOnWithAssociationInTypes();
+	void createDependsOnWithGlobalVariableInTypes();
+	@Query(TYPE_LEFT + RelationType.str_LOCAL_VARIABLE + TYPE_MIDDLE + RelationType.str_LOCAL_VARIABLE +
+			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
+	void createDependsOnWithLocalVariableInTypes();
 	@Query(TYPE_LEFT + RelationType.str_ANNOTATION + TYPE_MIDDLE + RelationType.str_ANNOTATION +
 			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
 	void createDependsOnWithAnnotationInTypes();
@@ -148,12 +151,12 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query(FILE_LEFT + RelationType.str_IMPLEMENTS + FILE_MIDDLE + RelationType.str_IMPLEMENTS +
 			FILE_MIDDLE2 + "1" + FILE_RIGHT)
 	void createDependsOnWithImplementsInFiles();
-//	@Query(FILE_LEFT + RelationType.str_DEPENDENCY + FILE_MIDDLE + RelationType.str_DEPENDENCY +
-//			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
-//	void createDependsOnWithDependencyInFiles();
-	@Query(FILE_LEFT + RelationType.str_ASSOCIATION + FILE_MIDDLE + RelationType.str_ASSOCIATION +
+	@Query(FILE_LEFT + RelationType.str_GLOBAL_VARIABLE + FILE_MIDDLE + RelationType.str_GLOBAL_VARIABLE +
 			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
-	void createDependsOnWithAssociationInFiles();
+	void createDependsOnWithGlobalVariableInFiles();
+	@Query(FILE_LEFT + RelationType.str_LOCAL_VARIABLE + FILE_MIDDLE + RelationType.str_LOCAL_VARIABLE +
+			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
+	void createDependsOnWithLocalVariableInFiles();
 	@Query(FILE_LEFT + RelationType.str_ANNOTATION + FILE_MIDDLE + RelationType.str_ANNOTATION +
 			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
 	void createDependsOnWithAnnotationInFiles();
@@ -181,9 +184,9 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query(FILE_LEFT + RelationType.str_RETURN + FILE_MIDDLE + RelationType.str_RETURN +
 			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
 	void createDependsOnWithReturnInFiles();
-	@Query(FILE_LEFT + RelationType.str_USE + FILE_MIDDLE + RelationType.str_USE +
+	@Query(FILE_LEFT + RelationType.str_REFERENCE + FILE_MIDDLE + RelationType.str_REFERENCE +
 			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
-	void createDependsOnWithUseTypeInFiles();
+	void createDependsOnWithReferenceTypeInFiles();
 //	@Query(FILE_LEFT + RelationType.str_ACCESS + FILE_MIDDLE + RelationType.str_ACCESS +
 //			FILE_MIDDLE2 + "1" + FILE_RIGHT)
 //	void createDependsOnWithAccessInFiles();

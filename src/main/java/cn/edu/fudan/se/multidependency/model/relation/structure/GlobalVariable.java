@@ -14,9 +14,9 @@ import java.util.Map;
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_ASSOCIATION)
+@RelationshipEntity(RelationType.str_GLOBAL_VARIABLE)
 @EqualsAndHashCode
-public class Association implements RelationWithTimes, StructureRelation {
+public class GlobalVariable implements RelationWithTimes, StructureRelation {
 
 	private static final long serialVersionUID = 4817542014996635446L;
 
@@ -28,7 +28,7 @@ public class Association implements RelationWithTimes, StructureRelation {
 
 	private int times = 1;
 
-	public Association(CodeNode startCodeNode, CodeNode endCodeNode) {
+	public GlobalVariable(CodeNode startCodeNode, CodeNode endCodeNode) {
 		super();
 		this.startCodeNode = startCodeNode;
 		this.endCodeNode = endCodeNode;
@@ -55,7 +55,7 @@ public class Association implements RelationWithTimes, StructureRelation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.ASSOCIATION;
+		return RelationType.GLOBAL_VARIABLE;
 	}
 
 	@Override

@@ -187,7 +187,8 @@ public class BeanCreator {
 			dependsOnRepository.deleteAll();
 			dependsOnRepository.createDependsOnWithExtendsInFiles();
 			dependsOnRepository.createDependsOnWithImplementsInFiles();
-			dependsOnRepository.createDependsOnWithAssociationInFiles();
+			dependsOnRepository.createDependsOnWithGlobalVariableInFiles();
+			dependsOnRepository.createDependsOnWithLocalVariableInFiles();
 			dependsOnRepository.createDependsOnWithAnnotationInFiles();
 			dependsOnRepository.createDependsOnWithCallInFiles();
 			dependsOnRepository.createDependsOnWithImpllinkInFiles();
@@ -196,7 +197,7 @@ public class BeanCreator {
 			dependsOnRepository.createDependsOnWithThrowInFiles();
 			dependsOnRepository.createDependsOnWithParameterInFiles();
 			dependsOnRepository.createDependsOnWithReturnInFiles();
-			dependsOnRepository.createDependsOnWithUseTypeInFiles();
+			dependsOnRepository.createDependsOnWithReferenceTypeInFiles();
 			dependsOnRepository.createDependsOnWithTimesInNode(NodeLabelType.ProjectFile);
 			dependsOnRepository.deleteNullAggregationDependsOnInFiles();
 
