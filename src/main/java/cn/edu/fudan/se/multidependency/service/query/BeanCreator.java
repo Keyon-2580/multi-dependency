@@ -7,6 +7,7 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
+import cn.edu.fudan.se.multidependency.service.query.as.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,7 @@ import cn.edu.fudan.se.multidependency.service.query.aggregation.data.CloneRelat
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
 @Component
@@ -61,6 +63,9 @@ public class BeanCreator {
 
 	@Autowired
 	private SummaryAggregationDataService summaryAggregationDataService;
+
+	@Autowired
+	private CyclicDependencyDetector cyclicDependencyDetector;
 
 	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
 	private ModularityCalculator modularityCalculator;
@@ -362,7 +367,18 @@ public class BeanCreator {
 					packagePairCloneRelationData.getCloneType2Count(),
 					packagePairCloneRelationData.getCloneType3Count(),
 					packagePairCloneRelationData.getCloneSimilarityValue()
-					);
+			);
 		}
+	}
+
+	@Bean
+	public boolean exportCyclicDependency(PropertyConfig propertyConfig) {
+		if (propertyConfig.isExportCyclicDependency()) {
+			LOGGER.info("export cyclic dependency...");
+			cyclicDependencyDetector.exportCycleDependency();
+			System.exit(0);
+			return true;
+		}
+		return false;
 	}
 }

@@ -35,4 +35,8 @@ public class PropertyConfig {
 	@Getter
 	@Value("${config.starter.modularity}")
 	private boolean calModularity;
+
+	@Getter
+	@Value("${config.starter.export_cyclic_dependency}")
+	private boolean exportCyclicDependency;
 }
