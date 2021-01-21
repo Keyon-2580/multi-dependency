@@ -22,4 +22,6 @@ public interface CyclicDependencyDetector {
 	 * @return
 	 */
 	Map<Long, Map<Integer, Cycle<ProjectFile>>> cycleFiles();
+
+	void exportCycleDependency();
 }
