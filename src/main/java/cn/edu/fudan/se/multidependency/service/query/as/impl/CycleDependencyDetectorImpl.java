@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +42,10 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 	
 	private Collection<DependsOn> findCycleFileRelationsBySCC(CycleComponents<ProjectFile> cycle) {
 		return asRepository.cycleFilesBySCC(cycle.getPartition());
+	}
+
+	private Collection<DependsOn> findCycleTypeRelationsBySCC(CycleComponents<Type> cycle) {
+		return asRepository.cycleTypesBySCC(cycle.getPartition());
 	}
 	
 	private Collection<DependsOn> findCycleModuleRelationsBySCC(CycleComponents<Module> cycle) {
@@ -80,35 +85,73 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-//		Collection<CycleComponents<ProjectFile>> cycles = asRepository.fileCycles();
+		Collection<CycleComponents<ProjectFile>> cycles = asRepository.fileCycles();
 		Map<Long, Map<Integer, Cycle<ProjectFile>>> result = new HashMap<>();
-//		for(CycleComponents<ProjectFile> cycle : cycles) {
-//			Cycle<ProjectFile> cycleFile = new Cycle<ProjectFile>(cycle);
-//			cycleFile.addAll(findCycleFileRelationsBySCC(cycle));
-//			boolean flag = false;
-//			Project project = null;
-//			boolean crossModule = false;
-//			Module lastModule = null;
-//			for(ProjectFile file : cycle.getComponents()) {
-//				Module fileBelongToModule = moduleService.findFileBelongToModule(file);
+		for(CycleComponents<ProjectFile> cycle : cycles) {
+			Cycle<ProjectFile> cycleFile = new Cycle<ProjectFile>(cycle);
+			cycleFile.addAll(findCycleFileRelationsBySCC(cycle));
+			boolean flag = false;
+			Project project = null;
+			boolean crossModule = false;
+			Module lastModule = null;
+			for(ProjectFile file : cycle.getComponents()) {
+				Module fileBelongToModule = moduleService.findFileBelongToModule(file);
+				if(lastModule == null) {
+					lastModule = fileBelongToModule;
+				} else if(!lastModule.equals(fileBelongToModule)) {
+					crossModule = true;
+				}
+				cycleFile.putComponentBelongToGroup(file, fileBelongToModule);
+				if(!flag) {
+					project = containRelationService.findFileBelongToProject(file);
+					flag = true;
+				}
+			}
+//			if(crossModule) {
+				Map<Integer, Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+				temp.put(cycleFile.getPartition(), cycleFile);
+				result.put(project.getId(), temp);
+//			}
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, Map<Integer, Cycle<Type>>> cycleTypes() {
+		String key = "cycleTypes";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		Collection<CycleComponents<Type>> cycles = asRepository.typeCycles();
+		Map<Long, Map<Integer, Cycle<Type>>> result = new HashMap<>();
+		for(CycleComponents<Type> cycle : cycles) {
+			Cycle<Type> cycleType = new Cycle<Type>(cycle);
+			cycleType.addAll(findCycleTypeRelationsBySCC(cycle));
+			boolean flag = false;
+			Project project = null;
+			boolean crossModule = false;
+			Module lastModule = null;
+			for(Type type : cycle.getComponents()) {
+//				Module fileBelongToModule = moduleService.findFileBelongToModule(type);
 //				if(lastModule == null) {
 //					lastModule = fileBelongToModule;
 //				} else if(!lastModule.equals(fileBelongToModule)) {
 //					crossModule = true;
 //				}
-//				cycleFile.putComponentBelongToGroup(file, fileBelongToModule);
-//				if(!flag) {
-//					project = containRelationService.findFileBelongToProject(file);
-//					flag = true;
-//				}
-//			}
+//				cycleType.putComponentBelongToGroup(type, fileBelongToModule);
+				if(!flag) {
+					project = containRelationService.findTypeBelongToProject(type);
+					flag = true;
+				}
+			}
 //			if(crossModule) {
-//				Map<Integer, Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new HashMap<>());
-//				temp.put(cycleFile.getPartition(), cycleFile);
-//				result.put(project.getId(), temp);
+				Map<Integer, Cycle<Type>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+				temp.put(cycleType.getPartition(), cycleType);
+				result.put(project.getId(), temp);
 //			}
-//		}
-//		cache.cache(getClass(), key, result);
+		}
+		cache.cache(getClass(), key, result);
 		return result;
 	}
 

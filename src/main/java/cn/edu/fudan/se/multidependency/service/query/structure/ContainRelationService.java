@@ -62,8 +62,12 @@ public interface ContainRelationService {
 	ProjectFile findCodeNodeBelongToFile(CodeNode node);
 	
 	Package findFileBelongToPackage(ProjectFile file);
+
+	Package findTypeBelongToPackage(Type type);
 	
 	Project findFileBelongToProject(ProjectFile file);
+
+	Project findTypeBelongToProject(Type type);
 	
 	Type findFunctionBelongToType(Function function);
 

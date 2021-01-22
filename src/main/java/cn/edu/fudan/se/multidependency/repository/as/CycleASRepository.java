@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.repository.as;
 
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -46,6 +47,16 @@ public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
 			"return partition, components " + 
 			"ORDER BY size(components) DESC")
 	public List<CycleComponents<ProjectFile>> fileCycles();
+
+	@Query("CALL gds.alpha.scc.stream({" +
+			"nodeProjection:\'Type\', " +
+			"relationshipProjection: \'" + RelationType.str_DEPENDS_ON + "\'}) " +
+			"YIELD nodeId, componentId " +
+			"with componentId as partition, collect(gds.util.asNode(nodeId)) AS components " +
+			"where size(components) >= 2 " +
+			"return partition, components " +
+			"ORDER BY size(components) DESC")
+	public List<CycleComponents<Type>> typeCycles();
 	
 	@Query("CALL gds.alpha.scc.stream({" +
 			"nodeProjection: \'Package\', " +
@@ -64,6 +75,15 @@ public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
 			"match result=(a:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(b:ProjectFile) "
 					+ "where partition = {partition} and a in files and b in files return result")
 	public List<DependsOn> cycleFilesBySCC(@Param("partition") int partition);
+
+	@Query("CALL gds.alpha.scc.stream({" +
+			"nodeProjection:\'Type\', " +
+			"relationshipProjection: \'" + RelationType.str_DEPENDS_ON + "\'}) " +
+			"YIELD nodeId, componentId " +
+			"with componentId as partition, collect(gds.util.asNode(nodeId)) AS types " +
+			"match result=(a:Type)-[r:" + RelationType.str_DEPENDS_ON + "]->(b:Type) "
+			+ "where partition = {partition} and a in types and b in types return result")
+	public List<DependsOn> cycleTypesBySCC(@Param("partition") int partition);
 	
 	@Query("CALL gds.alpha.scc.stream({" +
 			"nodeProjection: \'Module\', " +

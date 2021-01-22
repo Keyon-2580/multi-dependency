@@ -185,6 +185,23 @@ public class BeanCreator {
 		else {
 			LOGGER.info("创建Depends On关系...");
 			dependsOnRepository.deleteAll();
+
+			dependsOnRepository.createDependsOnWithExtendsInTypes();
+			dependsOnRepository.createDependsOnWithImplementsInTypes();
+			dependsOnRepository.createDependsOnWithGlobalVariableInTypes();
+			dependsOnRepository.createDependsOnWithLocalVariableInTypes();
+			dependsOnRepository.createDependsOnWithAnnotationInTypes();
+			dependsOnRepository.createDependsOnWithCallInTypes();
+			dependsOnRepository.createDependsOnWithImplinkInTypes();
+			dependsOnRepository.createDependsOnWithCreateInTypes();
+			dependsOnRepository.createDependsOnWithCastInTypes();
+			dependsOnRepository.createDependsOnWithThrowInTypes();
+			dependsOnRepository.createDependsOnWithParameterInTypes();
+			dependsOnRepository.createDependsOnWithReturnInTypes();
+			dependsOnRepository.createDependsOnWithReferenceTypeInTypes();
+			dependsOnRepository.createDependsOnWithTimesInNode(NodeLabelType.Type);
+			dependsOnRepository.deleteNullAggregationDependsOnInTypes();
+
 			dependsOnRepository.createDependsOnWithExtendsInFiles();
 			dependsOnRepository.createDependsOnWithImplementsInFiles();
 			dependsOnRepository.createDependsOnWithGlobalVariableInFiles();

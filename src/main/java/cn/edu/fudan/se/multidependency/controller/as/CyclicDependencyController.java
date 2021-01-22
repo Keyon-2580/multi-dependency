@@ -23,6 +23,7 @@ public class CyclicDependencyController {
 	@GetMapping("")
 	public String cyclicHierarchy(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
+		request.setAttribute("types", cyclicDependencyDetector.cycleTypes());
 		request.setAttribute("files", cyclicDependencyDetector.cycleFiles());
 		request.setAttribute("packages", cyclicDependencyDetector.cyclePackages());
 		request.setAttribute("modules", cyclicDependencyDetector.cycleModules());

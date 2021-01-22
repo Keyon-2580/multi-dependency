@@ -238,6 +238,12 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	}
 
 	@Override
+	public Project findTypeBelongToProject(Type type) {
+		Package pck = findTypeBelongToPackage(type);
+		return pck == null ? null : findPackageBelongToProject(pck);
+	}
+
+	@Override
 	public Collection<Type> findNamespaceDirectlyContainTypes(Namespace namespace) {
 		return (Collection<Type>) findNamespaceDirectlyContainNodes(namespace, NodeLabelType.Variable);
 	}
@@ -333,6 +339,14 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		Node belongToNode = cache.findNodeBelongToNode(file, NodeLabelType.Package);
 		Package result = belongToNode == null ? containRepository.findFileBelongToPackage(file.getId()) : (Package) belongToNode;
 		cache.cacheNodeBelongToNode(file, result);
+		return result;
+	}
+
+	@Override
+	public Package findTypeBelongToPackage(Type type) {
+		Node belongToNode = cache.findNodeBelongToNode(type, NodeLabelType.Package);
+		Package result = belongToNode == null ? containRepository.findFileBelongToPackage(type.getId()) : (Package) belongToNode;
+		cache.cacheNodeBelongToNode(type, result);
 		return result;
 	}
 

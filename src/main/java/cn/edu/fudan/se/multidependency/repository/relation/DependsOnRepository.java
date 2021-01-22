@@ -85,7 +85,13 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 			"create (t1)-[:DEPENDS_ON{dependsOnType : \"";
 	String TYPE_MIDDLE2 = "\", times : ";
 	String TYPE_RIGHT = "}]->(t2);";
-	
+
+	@Query(TYPE_LEFT + RelationType.str_EXTENDS + TYPE_MIDDLE + RelationType.str_EXTENDS +
+			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
+	void createDependsOnWithExtendsInTypes();
+	@Query(TYPE_LEFT + RelationType.str_IMPLEMENTS + TYPE_MIDDLE + RelationType.str_IMPLEMENTS +
+			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
+	void createDependsOnWithImplementsInTypes();
 	@Query(TYPE_LEFT + RelationType.str_CALL + TYPE_MIDDLE + RelationType.str_CALL +
 			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
 	void createDependsOnWithCallInTypes();
@@ -272,6 +278,11 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 			"where r.weightedTimes is null " +
 			"delete r;")
 	void deleteNullAggregationDependsOnInFiles();
+
+	@Query("match (:Type)-[r:DEPENDS_ON]->(:Type) " +
+			"where r.weightedTimes is null " +
+			"delete r;")
+	void deleteNullAggregationDependsOnInTypes();
 
 //	@Query("match (p1:Package)-[:CONTAIN]->(:ProjectFile)-[r:DEPENDS_ON]->(:ProjectFile)<-[:CONTAIN]-(p2:Package) " +
 //			"where p1<>p2 " +
