@@ -1,15 +1,12 @@
 package cn.edu.fudan.se.multidependency.service.query.as.impl;
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -184,19 +181,21 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 	@Override
 	public void exportCycleDependency() {
 		Collection<Project> projects = nodeService.allProjects();
+		Map<Long, Map<Integer, Cycle<Type>>> cycleTypes = cycleTypes();
 		Map<Long, Map<Integer, Cycle<ProjectFile>>> cycleFiles = cycleFiles();
 		Map<Long, Map<Integer, Cycle<Module>>> cycleModules = cycleModules();
 		for (Project project : projects) {
 			try {
-				exportPackageCycleDependency(project, cycleFiles.get(project.getId()), cycleModules.get(project.getId()));
+				exportPackageCycleDependency(project, cycleTypes.get(project.getId()), cycleFiles.get(project.getId()), cycleModules.get(project.getId()));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public void exportPackageCycleDependency(Project project, Map<Integer, Cycle<ProjectFile>> cycleFiles, Map<Integer, Cycle<Module>> cycleModules) {
+	public void exportPackageCycleDependency(Project project, Map<Integer, Cycle<Type>> cycleTypes, Map<Integer, Cycle<ProjectFile>> cycleFiles, Map<Integer, Cycle<Module>> cycleModules) {
 		Workbook workbook = new XSSFWorkbook();
+		exportTypeCycleDependency(workbook, cycleTypes);
 		exportFileCycleDependency(workbook, cycleFiles);
 		exportModuleCycleDependency(workbook, cycleModules);
 		OutputStream outputStream = null;
@@ -219,6 +218,48 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	public void exportTypeCycleDependency(Workbook workbook, Map<Integer, Cycle<Type>> cycleTypes) {
+		Sheet sheet = workbook.createSheet("Types");
+		ThreadLocal<Integer> rowKey = new ThreadLocal<>();
+		rowKey.set(0);
+		Row row = sheet.createRow(rowKey.get());
+		CellStyle style = workbook.createCellStyle();
+		style.setAlignment(HorizontalAlignment.CENTER);
+		Cell cell;
+		cell = row.createCell(0);
+		cell.setCellValue("Partition");
+		cell.setCellStyle(style);
+		cell = row.createCell(1);
+		cell.setCellValue("Types");
+		cell.setCellStyle(style);
+		int startRow;
+		int endRow;
+		int startCol;
+		int endCol;
+		for (Map.Entry<Integer, Cycle<Type>> entry : cycleTypes.entrySet()) {
+			startRow = rowKey.get() + 1;
+			Cycle<Type> cycleType = entry.getValue();
+			Collection<Type> types = cycleType.getComponents();
+			for (Type type : types) {
+				rowKey.set(rowKey.get() + 1);
+				row = sheet.createRow(rowKey.get());
+				cell = row.createCell(0);
+				cell.setCellValue(cycleType.getPartition());
+				style.setAlignment(HorizontalAlignment.CENTER);
+				cell.setCellStyle(style);
+				cell = row.createCell(1);
+				cell.setCellValue(type.getName());
+				style.setAlignment(HorizontalAlignment.LEFT);
+				cell.setCellStyle(style);
+			}
+			endRow = rowKey.get();
+			startCol = 0;
+			endCol = 0;
+			CellRangeAddress region = new CellRangeAddress(startRow, endRow, startCol, endCol);
+			sheet.addMergedRegion(region);
 		}
 	}
 
