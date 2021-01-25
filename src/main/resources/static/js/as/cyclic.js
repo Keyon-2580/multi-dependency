@@ -1,14 +1,35 @@
 var cyclic = function(cytoscapeutil) {
 	var charts = echarts.init(document.getElementById('cycleGraph'));
-	var showTable = function(projects, files, packages, modules) {
-		console.log(files);
-		console.log(packages);
-		console.log(modules);
+	var showTable = function(projects, types, files, packages, modules) {
+		console.log("types");
+		console.log("files");
+		console.log("modules");
 		var html = "";
-
 		for(var projectIndex in projects) {
 			var project = projects[projectIndex];
 			html += "<h4>" + project.name + " (" + project.language + ")</h4>";
+
+			var cyclicTypes = types[project.id];
+			html += "<table class='table table-bordered'>";
+			html += "<tr>";
+			html += "<th>Partition</th>";
+			html += "<th>Types</th>";
+			html += "</tr>";
+			for(var typeIndex in cyclicTypes) {
+				var cycle = cyclicTypes[typeIndex];
+				html += "<tr>";
+				html += "<td><a href='#cycleGraph' class='cycleTypes' project='" +
+					project.id + "' partition='" + cycle.partition + "'>" + cycle.partition + "</a></td>";
+//				html += "<td>" + cycle.partition + "</td>";
+				html += "<td>";
+				for(var i = 0; i < cycle.components.length; i++) {
+					html += cycle.components[i].name + "<br/>";
+				}
+				html += "</td>";
+				html += "</tr>";
+			}
+			html += "</table>";
+
 			var cyclicFiles = files[project.id];
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
@@ -19,8 +40,6 @@ var cyclic = function(cytoscapeutil) {
 			for(var cycleIndex in cyclicFiles) {
 				var cycle = cyclicFiles[cycleIndex];
 				var index = cycleIndex;
-				console.log(cycleIndex);
-				console.log(cycle);
 				html += "<tr>";
 				html += "<td><a href='#cycleGraph' class='cycleFiles' project='" + project.id + "' partition='" + cycle.partition + "'>" + cycle.partition + "</a></td>";
 				html += "<td>";
@@ -77,10 +96,7 @@ var cyclic = function(cytoscapeutil) {
 		
 		$(".cycleCommits").click(function() {
 			var projectId = $(this).attr("project");
-			console.log(projectId);
 			var cycleIndex = $(this).attr("name");
-			console.log(files);
-			console.log(files[projectId]);
 			var cycle = files[projectId][cycleIndex];
 			var ids = [];
 			for(var i = 0; i < cycle.components.length; i++) {
@@ -88,24 +104,27 @@ var cyclic = function(cytoscapeutil) {
 				ids[ids.length] = id;
 			}
 			ids = ids.join(",");
-			console.log(ids);
 			window.location.href = "/as/matrix?allFiles=" + ids + "&specifiedFiles=&minCount=3";
 		});
 	}
-	var _cyclic = function(projects, files, packages, modules) {
-		showTable(projects, files, packages, modules);
+	var _cyclic = function(projects, types, files, packages, modules) {
+		showTable(projects, types, files, packages, modules);
+		$(".cycleTypes").click(function() {
+			var partition = $(this).attr("partition");
+			var projectId = $(this).attr("project");
+			var cycleTypes = types[projectId][partition];
+			showGraphForModules(cycleTypes);
+		});
 		$(".cycleFiles").click(function() {
 			var partition = $(this).attr("partition");
 			var projectId = $(this).attr("project");
 			var cycleFiles = files[projectId][partition];
-			console.log(cycleFiles);
 			showGraph(cycleFiles);
 		});
 		$(".cycleModules").click(function() {
 			var partition = $(this).attr("partition");
 			var projectId = $(this).attr("project");
 			var cycleModules = modules[projectId][partition];
-			console.log(cycleModules);
 			showGraphForModules(cycleModules);
 		});
 	}
@@ -174,7 +193,6 @@ var cyclic = function(cytoscapeutil) {
 	}
 	
 	var showGraph = function(cycleFiles) {
-		console.log(cycleFiles);
 		var categories = [];
 		for(var i = 0; i < cycleFiles.groups.length; i++) {
 			categories[i] = {
@@ -191,7 +209,6 @@ var cyclic = function(cytoscapeutil) {
 				draggable: true
 			}
 		}
-		console.log(nodes);
 		var links = [];
 		for(var i = 0; i < cycleFiles.relations.length; i++) {
 			var relation = cycleFiles.relations[i];
@@ -202,7 +219,6 @@ var cyclic = function(cytoscapeutil) {
 				name: "dependsOn"
 			}
 		}
-		console.log(links);
 		var option = {
 				title: {
 					text: 'cycle files',
@@ -237,8 +253,8 @@ var cyclic = function(cytoscapeutil) {
 	}
 	
 	return {
-		cyclic: function(projects, files, packages, modules) {
-			_cyclic(projects, files, packages, modules);
+		cyclic: function(projects, types, files, packages, modules) {
+			_cyclic(projects, types, files, packages, modules);
 		}
 	}
 }

@@ -213,6 +213,7 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 				break;
 			case Type:
 				dependsOnList = this.findTypeDepends();
+
 				break;
 			default:
 				dependsOnList = new ArrayList<>();

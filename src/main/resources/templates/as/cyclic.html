@@ -79,10 +79,11 @@
 		//<![CDATA[
 		 $(document).ready(function() {
 			var projects = [[${projects}]];
+			var cyclicTypes = [[${types}]];
 			var cyclicFiles = [[${files}]];
 			var cyclicPackages = [[${packages}]];
 			var cyclicModules = [[${modules}]];
-			cyclic(cytoscapeutil()).cyclic(projects, cyclicFiles, cyclicPackages, cyclicModules);	
+			cyclic(cytoscapeutil()).cyclic(projects, cyclicTypes, cyclicFiles, cyclicPackages, cyclicModules);
 		});
 		// ]]>
 	</script>

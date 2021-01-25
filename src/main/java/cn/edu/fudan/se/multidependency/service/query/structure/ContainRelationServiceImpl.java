@@ -217,7 +217,6 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		Collection<LibraryAPI> result = libContainApisCache.getOrDefault(lib, containRepository.findLibraryContainLibraryAPIs(lib.getId()));
 		libContainApisCache.put(lib, result);
 		result.forEach(api -> {
-//			nodeBelongToLibraryCache.put(api, lib);
 			cache.cacheNodeBelongToNode(api, lib);
 		});
 		return result;
@@ -239,7 +238,8 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
 	@Override
 	public Project findTypeBelongToProject(Type type) {
-		Package pck = findTypeBelongToPackage(type);
+		ProjectFile file = findTypeBelongToFile(type);
+		Package pck = file == null ? null : findFileBelongToPackage(file);
 		return pck == null ? null : findPackageBelongToProject(pck);
 	}
 
@@ -339,14 +339,6 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		Node belongToNode = cache.findNodeBelongToNode(file, NodeLabelType.Package);
 		Package result = belongToNode == null ? containRepository.findFileBelongToPackage(file.getId()) : (Package) belongToNode;
 		cache.cacheNodeBelongToNode(file, result);
-		return result;
-	}
-
-	@Override
-	public Package findTypeBelongToPackage(Type type) {
-		Node belongToNode = cache.findNodeBelongToNode(type, NodeLabelType.Package);
-		Package result = belongToNode == null ? containRepository.findFileBelongToPackage(type.getId()) : (Package) belongToNode;
-		cache.cacheNodeBelongToNode(type, result);
 		return result;
 	}
 
