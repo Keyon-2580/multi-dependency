@@ -1,14 +1,5 @@
 package cn.edu.fudan.se.multidependency.model.relation.structure;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.RelationshipEntity;
-import org.neo4j.ogm.annotation.StartNode;
-
 import cn.edu.fudan.se.multidependency.model.node.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.CodeUnit;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
@@ -16,32 +7,36 @@ import cn.edu.fudan.se.multidependency.model.relation.StructureRelation;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.neo4j.ogm.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_IMPLEMENTS)
+@RelationshipEntity(RelationType.str_IMPLEMENTS_C)
 @EqualsAndHashCode
-public class Implements implements StructureRelation {
-	
-	private static final long serialVersionUID = 7582417525375943056L;
+public class ImplementsC implements StructureRelation {
+
+	private static final long serialVersionUID = -2276258703466523731L;
 
 	@Id
     @GeneratedValue
     private Long id;
-	
-	public Implements(CodeUnit codeUnit, CodeUnit implementsCodeUnit) {
+
+	public ImplementsC(CodeUnit codeUnit, CodeUnit implementsCodeUnit) {
 		this.startNode = codeUnit;
 		this.endNode = implementsCodeUnit;
 	}
 	
 	/**
-	 * Type
+	 * Function
 	 */
 	@StartNode
 	private CodeUnit startNode;
 	
 	/**
-	 * Type
+	 * Function
 	 */
 	@EndNode
 	private CodeUnit endNode;
@@ -58,7 +53,7 @@ public class Implements implements StructureRelation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.IMPLEMENTS;
+		return RelationType.IMPLEMENTS_C;
 	}
 
 	@Override

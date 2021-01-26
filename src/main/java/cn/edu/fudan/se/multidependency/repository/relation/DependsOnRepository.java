@@ -110,9 +110,9 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query(TYPE_LEFT + RelationType.str_RETURN + TYPE_MIDDLE + RelationType.str_RETURN +
 			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
 	void createDependsOnWithReturnInTypes();
-	@Query(TYPE_LEFT + RelationType.str_REFERENCE + TYPE_MIDDLE + RelationType.str_REFERENCE +
+	@Query(TYPE_LEFT + RelationType.str_USE + TYPE_MIDDLE + RelationType.str_USE +
 			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
-	void createDependsOnWithReferenceTypeInTypes();
+	void createDependsOnWithUseTypeInTypes();
 	@Query(TYPE_LEFT + RelationType.str_ACCESS + TYPE_MIDDLE + RelationType.str_ACCESS +
 			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
 	void createDependsOnWithAccessInTypes();
@@ -128,7 +128,7 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query(TYPE_LEFT + RelationType.str_IMPLLINK + TYPE_MIDDLE + RelationType.str_IMPLLINK +
 			TYPE_MIDDLE2 + "1" + TYPE_RIGHT)
 	void createDependsOnWithImplinkInTypes();
-	@Query(TYPE_LEFT + RelationType.str_IMPLEMENTS + TYPE_MIDDLE + RelationType.str_IMPLEMENTS_C +
+	@Query(TYPE_LEFT + RelationType.str_IMPLEMENTS_C + TYPE_MIDDLE + RelationType.str_IMPLEMENTS_C +
 			TYPE_MIDDLE2 + "1" + TYPE_RIGHT)
 	void createDependsOnWithImplementsCInTypes();
 
@@ -172,7 +172,7 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query(FILE_LEFT + RelationType.str_IMPLLINK + FILE_MIDDLE + RelationType.str_IMPLLINK +
 			FILE_MIDDLE2 + "1" + FILE_RIGHT)
 	void createDependsOnWithImpllinkInFiles();
-	@Query(FILE_LEFT + RelationType.str_IMPLEMENTS + FILE_MIDDLE + RelationType.str_IMPLEMENTS_C +
+	@Query(FILE_LEFT + RelationType.str_IMPLEMENTS_C + FILE_MIDDLE + RelationType.str_IMPLEMENTS_C +
 			FILE_MIDDLE2 + "1" + FILE_RIGHT)
 	void createDependsOnWithFunctionImplementsInFiles();
 	@Query(FILE_LEFT + RelationType.str_CREATE + FILE_MIDDLE + RelationType.str_CREATE +
@@ -190,9 +190,9 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query(FILE_LEFT + RelationType.str_RETURN + FILE_MIDDLE + RelationType.str_RETURN +
 			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
 	void createDependsOnWithReturnInFiles();
-	@Query(FILE_LEFT + RelationType.str_REFERENCE + FILE_MIDDLE + RelationType.str_REFERENCE +
+	@Query(FILE_LEFT + RelationType.str_USE + FILE_MIDDLE + RelationType.str_USE +
 			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
-	void createDependsOnWithReferenceTypeInFiles();
+	void createDependsOnWithUseTypeInFiles();
 //	@Query(FILE_LEFT + RelationType.str_ACCESS + FILE_MIDDLE + RelationType.str_ACCESS +
 //			FILE_MIDDLE2 + "1" + FILE_RIGHT)
 //	void createDependsOnWithAccessInFiles();
