@@ -27,8 +27,7 @@ public enum RelationType implements RelationshipType {
 //	DEPENDENCY(RelationType.str_DEPENDENCY),
 	GLOBAL_VARIABLE(RelationType.str_GLOBAL_VARIABLE),
 	LOCAL_VARIABLE(RelationType.str_LOCAL_VARIABLE),
-//	USE(RelationType.str_USE),
-    REFERENCE(RelationType.str_REFERENCE),
+	USE(RelationType.str_USE),
 	DYNAMIC_CALL(RelationType.str_DYNAMIC_CALL),
 	TESTCASE_EXECUTE_FEATURE(RelationType.str_TESTCASE_EXECUTE_FEATURE),
 	TESTCASE_RUN_TRACE(RelationType.str_TESTCASE_RUN_TRACE),
@@ -72,8 +71,7 @@ public enum RelationType implements RelationshipType {
 	public static final String str_IMPORT = "IMPORT";
 	public static final String str_INCLUDE = "INCLUDE";
 	public static final String str_ACCESS = "ACCESS";
-//	public static final String str_USE = "USE";
-	public static final String str_REFERENCE = "REFERENCE";
+	public static final String str_USE = "USE";
 	public static final String str_LOCAL_VARIABLE = "LOCAL_VARIABLE";
 	public static final String str_CALL = "CALL";
 	public static final String str_CREATE = "CREATE";
@@ -146,7 +144,7 @@ public enum RelationType implements RelationshipType {
 		relationWeights.put(CALL, 0.2);
 		relationWeights.put(CAST, 0.1);
 		relationWeights.put(CREATE, 0.1);
-		relationWeights.put(REFERENCE, 0.1);
+		relationWeights.put(USE, 0.1);
 		relationWeights.put(PARAMETER, 0.1);
 		relationWeights.put(THROW, 0.1);
 		relationWeights.put(RETURN, 0.1);
@@ -169,7 +167,7 @@ public enum RelationType implements RelationshipType {
 		relationAbbreviation.put(CALL, "CAL");
 		relationAbbreviation.put(CAST, "CAS");
 		relationAbbreviation.put(CREATE, "CRE");
-		relationAbbreviation.put(REFERENCE, "REF");
+		relationAbbreviation.put(USE, "USE");
 		relationAbbreviation.put(PARAMETER, "PAR");
 		relationAbbreviation.put(GENERIC_PARAMETER, "GPAR");
 		relationAbbreviation.put(THROW, "THR");
