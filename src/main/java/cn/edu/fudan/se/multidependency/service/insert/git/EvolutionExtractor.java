@@ -38,6 +38,8 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
 
     private Map<Integer, Issue> issues;
 
+    private Map<String, Set<Issue>> commitToIssues;
+
     private static final String[] SUFFIX = new String[]{".java", ".c", ".cpp", ".cc", ".h"};
 
     private GitConfig gitConfig;
@@ -71,12 +73,14 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
 
         LOGGER.info(gitExtractor.getGitPath() + " " + gitExtractor.getRepositoryPath() + " " + gitExtractor.getRepositoryName() + " " + gitRepository.getPath());
         
-        addIssues();
-        
+//        addIssues();
+        addJiraIssues();
+
         if(!gitConfig.getBranches().isEmpty()) {
         	addSpecificBranches();
         } else {
-        	addAllBranches();
+            addHeadsBranch();
+//            addAllBranches();
         }
         
         close();
@@ -97,6 +101,19 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
     		addCommitsAndRelations(branchNode);
     	}
     }
+
+    private void addHeadsBranch() throws Exception {
+        Ref branch = gitExtractor.getCurrentBranch();
+        if(branch != null) {
+            Branch branchNode = new Branch(generateEntityId(), branch.getObjectId().toString(), branch.getName());
+            addNode(branchNode, null);
+            addRelation(new Contain(gitRepository, branchNode));
+            addCommitsAndRelations(branchNode);
+        }else {
+            LOGGER.error("Get HeadsBranch Error");
+        }
+    }
+
     
     private void addCommitsAndRelations(Branch branch) throws Exception {
         List<RevCommit> commits = null;
@@ -202,6 +219,15 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
                         addRelation(new CommitAddressIssue(commit, issues.get(issueNum)));
                     }
                 }
+
+                //通过issueLink 进行关联
+                Set<Issue> issueSet = commitToIssues.get(commit.getCommitId());
+                if(issueSet != null && issueSet.size() > 0){
+                    Commit finalCommit = commit;
+                    issueSet.forEach( (issue ->{
+                        addRelation(new CommitAddressIssue(finalCommit, issue));
+                    }));
+                }
             }
         }
         System.out.println(gitRepository.getName() + " " + beforeReleaseCommits + ", " + afterReleaseCommits);
@@ -248,6 +274,29 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
     		}
     		addRelation(new DeveloperReportIssue(developer, issue));
     	}
+    }
+
+    private void addJiraIssues() throws Exception {
+        //添加issue节点和gitRepository到issue的包含关系
+        JiraIssueExtractor issueExtractor = new JiraIssueExtractor(gitConfig.getIssueFilePathes());
+        issues = issueExtractor.extract();
+        commitToIssues = issueExtractor.getCommitToIssues();
+        Map<Integer, Issue> newIssues = issueExtractor.newIssues();
+        System.out.println("newIssues size: " + newIssues.size());
+//    	for (Issue issue : issues.values()) {
+        for (Issue issue : newIssues.values()) {
+            issue.setEntityId(generateEntityId());
+            addNode(issue, null);
+            addRelation(new Contain(gitRepository, issue));
+
+            //添加developer节点和developer到issue的关系
+            Developer developer = this.getNodes().findDeveloperByName(issue.getReporter());
+            if (developer == null) {
+                developer = new Developer(generateEntityId(), issue.getDeveloperName());
+                addNode(developer, null);
+            }
+            addRelation(new DeveloperReportIssue(developer, issue));
+        }
     }
     
     private void close() {

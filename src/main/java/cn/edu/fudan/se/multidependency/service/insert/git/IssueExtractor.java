@@ -57,7 +57,7 @@ public class IssueExtractor {
                 continue;
             }
             issue.setDeveloperName(user.getString("login"));
-            result.put(issue.getNumber(),issue);
+            result.put(issue.getIssueId(),issue);
         }
         return result;
     }

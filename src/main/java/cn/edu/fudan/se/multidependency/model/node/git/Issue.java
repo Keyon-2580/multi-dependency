@@ -28,13 +28,25 @@ public class Issue implements Node {
 
 	private Long entityId;
 
-	private int number;
-	
+	private int issueId;
+
+	private String issueKey;
+
+	private String issueUrl;
+
+	private String type;
+
 	private String title;
 	
-	private String state;
+	private String status;
 
-	private String htmlUrl;
+	private String resolution;
+
+	private String priority;
+
+	private String commitLinkUrl;
+
+	private String commitLinkId;
 
 	private String createTime;
 	
@@ -42,35 +54,47 @@ public class Issue implements Node {
 	
 	private String closeTime;
 
+	private String reporter;
+
+	private String issueLinks;
+
 	@Transient
-	private String body;
+	private String description;
 
 	@Transient
 	private String developerName;
 
-	public Issue(int number, String title, String state, String htmlUrl,
-				 String createTime, String updateTime, String closeTime, String body) {
-		this.number = number;
+	public Issue(int issueId, String title, String status, String commitLinkUrl,
+				 String createTime, String updateTime, String closeTime, String description) {
+		this.issueId = issueId;
 		this.title = title;
-		this.state = state;
-		this.htmlUrl = htmlUrl;
+		this.status = status;
+		this.commitLinkUrl = commitLinkUrl;
 		this.createTime = createTime;
 		this.updateTime = updateTime;
 		this.closeTime = closeTime;
-		this.body = body;
+		this.description = description;
 	}
 
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
-		properties.put("number", getNumber());
+		properties.put("issueId", getIssueId());
+		properties.put("issueKey", getIssueKey() == null ? "" : getIssueKey());
+		properties.put("issueUrl", getIssueUrl() == null ? "" : getIssueUrl());
+		properties.put("type", getType() == null ? "" : getType());
 		properties.put("title", getTitle() == null ? "" : getTitle());
-		properties.put("state", getState() == null ? "" : getState());
-		properties.put("htmlUrl", getHtmlUrl() == null ? "" : getHtmlUrl());
+		properties.put("status", getStatus() == null ? "" : getStatus());
+		properties.put("resolution", getResolution() == null ? "" : getResolution());
+		properties.put("priority", getPriority() == null ? "" : getPriority());
+		properties.put("commitLinkUrl", getCommitLinkUrl() == null ? "" : getCommitLinkUrl());
+		properties.put("commitLinkId", getCommitLinkId() == null ? "" : getCommitLinkId());
 		properties.put("createTime", getCreateTime() == null ? "" : getCreateTime());
 		properties.put("updateTime", getUpdateTime() == null ? "" : getUpdateTime());
 		properties.put("closeTime", getCloseTime() == null ? "" : getCloseTime());
+		properties.put("reporter", getReporter() == null ? "" : getReporter());
+		properties.put("issueLinks", getIssueLinks() == null ? "" : getIssueLinks());
 		return properties;
 	}
 

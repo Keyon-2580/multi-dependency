@@ -12,10 +12,10 @@ import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 @Repository
 public interface IssueRepository extends Neo4jRepository<Issue, Long> {
 
-	@Query("match (issue:Issue) return issue order by issue.number desc;")
+	@Query("match (issue:Issue) return issue order by issue.issueId desc;")
 	List<Issue> queryAllIssues();
 	
-	@Query("match (issue:Issue)<-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE + "]-(:Commit) return issue order by issue.number desc;")
+	@Query("match (issue:Issue)<-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE + "]-(:Commit) return issue order by issue.issueId desc;")
 	List<Issue> queryIssueAddressedByCommit();
 	
 }
