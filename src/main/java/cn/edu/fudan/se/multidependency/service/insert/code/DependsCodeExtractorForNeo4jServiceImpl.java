@@ -305,8 +305,8 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					}else if(relation.getEntity().getClass() == TypeEntity.class && relation.getEntity().getId() != -1){
 						Type other = (Type) types.get(relation.getEntity().getId().longValue());
 						if(other != null) {
-							Reference reference = new Reference(type, other);
-							addRelation(reference);
+							Use use = new Use(type, other);
+							addRelation(use);
 						}
 					}
 					break;
@@ -352,7 +352,12 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 								addRelation(globalVariable);
 							}
 						} else {
-							LocalVariable localVariable = new LocalVariable(variable, useType);
+							Entity parentFunctionEntity = varEntity.getParent();
+							while (parentFunctionEntity != null && parentFunctionEntity.getClass() != FunctionEntity.class){
+								parentFunctionEntity = parentFunctionEntity.getParent();
+							}
+							Function parentFunction = (Function) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, parentFunctionEntity.getId().longValue(), currentProject);
+							LocalVariable localVariable = new LocalVariable(parentFunction, useType);
 							addRelation(localVariable);
 						}
 					}
@@ -448,7 +453,7 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					Node implementNode = this.getNodes().findNodeByEntityIdInProject(relation.getEntity().getId().longValue(), currentProject);
 					if(implementNode != null && implementNode instanceof Function) {
 						Function implementFunction = (Function) implementNode;
-						Implements functionImplementFunction = new Implements(function, implementFunction);
+						ImplementsC functionImplementFunction = new ImplementsC(function, implementFunction);
 						addRelation(functionImplementFunction);
 					}
 					break;
@@ -473,10 +478,10 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 							}
 						}
 					} else if(relation.getEntity().getClass() == TypeEntity.class){
-						Type referenceType = (Type) types.get(relation.getEntity().getId().longValue());
-						if(referenceType != null) {
-							Reference reference = new Reference(function, referenceType);
-							addRelation(reference);
+						Type useType = (Type) types.get(relation.getEntity().getId().longValue());
+						if(useType != null) {
+							Use use = new Use(function, useType);
+							addRelation(use);
 					    }
 				    }
 					break;
