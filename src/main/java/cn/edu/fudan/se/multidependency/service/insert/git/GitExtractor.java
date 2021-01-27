@@ -78,7 +78,7 @@ public class GitExtractor implements Closeable {
 
     public Ref getCurrentBranch() {
         try {
-            return repository.exactRef("HEAD");
+            return repository.exactRef(org.eclipse.jgit.lib.Constants.HEAD);
         } catch ( IOException e) {
             e.printStackTrace();
         }
