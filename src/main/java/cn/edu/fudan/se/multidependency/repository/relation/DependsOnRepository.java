@@ -87,10 +87,10 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	String TYPE_RIGHT = "}]->(t2);";
 
 	@Query(TYPE_LEFT + RelationType.str_EXTENDS + TYPE_MIDDLE + RelationType.str_EXTENDS +
-			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
+			TYPE_MIDDLE2 + "1" + TYPE_RIGHT)
 	void createDependsOnWithExtendsInTypes();
 	@Query(TYPE_LEFT + RelationType.str_IMPLEMENTS + TYPE_MIDDLE + RelationType.str_IMPLEMENTS +
-			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
+			TYPE_MIDDLE2 + "1" + TYPE_RIGHT)
 	void createDependsOnWithImplementsInTypes();
 	@Query(TYPE_LEFT + RelationType.str_CALL + TYPE_MIDDLE + RelationType.str_CALL +
 			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
