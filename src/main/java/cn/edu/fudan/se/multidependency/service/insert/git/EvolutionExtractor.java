@@ -76,7 +76,10 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
         if(!gitConfig.getBranches().isEmpty()) {
         	addSpecificBranches();
         } else {
-        	addAllBranches();
+            //插入当前repo目录下已checkout过的所有branch
+//        	addAllBranches();
+            //插入当前repo目录下当前checkout的branch，即Head branch
+        	addHeadsBranch();
         }
         
         close();
@@ -96,6 +99,18 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
     		addRelation(new Contain(gitRepository, branchNode));
     		addCommitsAndRelations(branchNode);
     	}
+    }
+
+    private void addHeadsBranch() throws Exception {
+        Ref branch = gitExtractor.getCurrentBranch();
+        if(branch != null) {
+            Branch branchNode = new Branch(generateEntityId(), branch.getObjectId().toString(), branch.getName());
+            addNode(branchNode, null);
+            addRelation(new Contain(gitRepository, branchNode));
+            addCommitsAndRelations(branchNode);
+        }else {
+            LOGGER.error("Get HeadsBranch Error");
+        }
     }
     
     private void addCommitsAndRelations(Branch branch) throws Exception {
@@ -218,6 +233,7 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
     }
 
     private void addAllBranches() throws Exception {
+        //插入当前repo目录下已checkout过的所有branch
         //添加branch节点和gitRepository到branch的包含关系
         List<Ref> branches = gitExtractor.getBranches();
         for (Ref branch : branches) {

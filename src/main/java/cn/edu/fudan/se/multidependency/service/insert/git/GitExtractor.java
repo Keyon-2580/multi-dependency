@@ -76,6 +76,15 @@ public class GitExtractor implements Closeable {
         return new ArrayList<>();
     }
 
+    public Ref getCurrentBranch() {
+        try {
+            return repository.exactRef(org.eclipse.jgit.lib.Constants.HEAD);
+        } catch ( IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public String getRepositoryName() {
         return FileUtil.extractFileName(gitProjectPath);
     }
