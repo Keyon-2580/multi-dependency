@@ -98,12 +98,12 @@ public class CloneInserterForFileWithLoc extends CloneExtractor {
 				file2 = this.getNodes().findFileByPathRecursion(filePath2.getFilePath());
 			}
 			if(file1 == null) {
-				LOGGER.error("file1 is null " + filePath1.getLineId() + " " + filePath1.getFilePath());
+				LOGGER.warn("file1 is null " + filePath1.getLineId() + " " + filePath1.getFilePath());
 				continue;
 			}
 			cloneFileIdToCodeNode.put(filePath1.getLineId(), file1);
 			if(file2 == null) {
-				LOGGER.error("file2 is null " + filePath2.getLineId() + " " + filePath2.getFilePath());
+				LOGGER.warn("file2 is null " + filePath2.getLineId() + " " + filePath2.getFilePath());
 				continue;
 			}
 			cloneFileIdToCodeNode.put(filePath2.getLineId(), file2);

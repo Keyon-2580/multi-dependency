@@ -83,11 +83,11 @@ public class CloneExtractorForMethod extends CloneExtractor {
 			ProjectFile file1 = this.getNodes().findFileByPathRecursion(filePath1.getFilePath());
 			ProjectFile file2 = this.getNodes().findFileByPathRecursion(filePath2.getFilePath());
 			if(file1 == null) {
-				LOGGER.error("file1 is null " + filePath1.getLineId() + " " + filePath1.getFilePath());
+				LOGGER.warn("file1 is null " + filePath1.getLineId() + " " + filePath1.getFilePath());
 				continue;
 			}
 			if(file2 == null) {
-				LOGGER.error("file2 is null " + filePath2.getLineId() + " " + filePath2.getFilePath());
+				LOGGER.warn("file2 is null " + filePath2.getLineId() + " " + filePath2.getFilePath());
 				continue;
 			}
 			CodeNode node1 = this.cloneNodeIdToCodeNode.get(filePath1.getLineId());
