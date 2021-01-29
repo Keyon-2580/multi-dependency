@@ -4,12 +4,16 @@ import cn.edu.fudan.se.multidependency.model.node.git.Issue;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class JiraIssueExtractor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JiraIssueExtractor.class);
 
     private Collection<String> issueFilePathes;
 
@@ -24,7 +28,7 @@ public class JiraIssueExtractor {
     }
 
     public static void main(String[] args) {
-        String issueFilePath = "D:\\workspace\\multiple-dependency-project\\multi-dependency\\src\\main\\resources\\git\\issues\\cassandra\\CASSANDRA_Bug_0.json";
+        String issueFilePath = "D:\\workspace\\archdebt\\issues\\CASSANDRA_Bug_1000.json";
         Collection<String> issueFilePathes = new ArrayList<>();
         issueFilePathes.add(issueFilePath);
         JiraIssueExtractor jiraIssueExtractor = new JiraIssueExtractor(issueFilePathes);
@@ -77,8 +81,19 @@ public class JiraIssueExtractor {
             JSONObject issueJson = issues.getJSONObject(i);
             JSONObject fields = issueJson.getJSONObject("fields");
             Issue issue = new Issue();
-            issue.setIssueId(issueJson.getInteger("id"));
-            issue.setIssueKey(issueJson.getString("key"));
+            String issueKey = issueJson.getString("key");
+            issue.setIssueKey(issueKey);
+            String key = "-1";
+            if(issue != null){
+                try {
+                    key = issueKey.substring(issueKey.lastIndexOf("-") + 1);
+                    issue.setIssueId(Integer.parseInt(key));
+                }catch (Exception e){
+                    e.printStackTrace();
+                    LOGGER.error("Jira issue key parsing error, the key is " + issueKey);
+                }
+            }
+
             issue.setIssueUrl(issueJson.getString("self"));
 
             JSONObject issueTypeObject =  fields.getJSONObject("issuetype");

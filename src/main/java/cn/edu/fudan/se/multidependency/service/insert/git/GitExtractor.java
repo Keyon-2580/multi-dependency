@@ -206,6 +206,25 @@ public class GitExtractor implements Closeable {
         return result;
     }
 
+    public Set<Integer> getRelationBtwCommitAndJiraIssue(RevCommit commit) {
+        String issueNumRegex = "[\\w]*-[1-9][0-9]*";
+        Set<Integer> issueNumFromShort = getMatcherForJira(issueNumRegex, commit.getShortMessage());
+        Set<Integer> issueNumFromFull = getMatcherForJira(issueNumRegex, commit.getFullMessage());
+        issueNumFromShort.addAll(issueNumFromFull);
+        return issueNumFromShort;
+    }
+
+    public Set<Integer> getMatcherForJira(String regex, String source) {
+        Set<Integer> result = new HashSet<>();
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(source);
+        while (matcher.find()) {
+            String tmp = matcher.group();
+            result.add(Integer.parseInt(tmp.substring(tmp.lastIndexOf("-") + 1)));
+        }
+        return result;
+    }
+
     public void close() {
     	if(git != null) {
     		git.close();

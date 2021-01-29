@@ -72,14 +72,14 @@
 				<table class="table table-bordered">
 					<tr>
 						<th>id</th>
-						<th>number</th>
+						<th>issueKey</th>
 						<th>title</th>
 						<th>createTime</th>
 						<th>updateTime</th>
 					</tr>
 					<tr th:each="issue : ${issues}">
 						<td th:text="${issue.id}"></td>
-						<td th:text="${issue.number}"></td>
+						<td th:text="${issue.issueKey}"></td>
 						<td><a th:href="${'/issue/' + issue.id}" target="_blank" th:text="${issue.title}"></a></td>
 						<td th:text="${issue.createTime}"></td>
 						<td th:text="${issue.updateTime}"></td>

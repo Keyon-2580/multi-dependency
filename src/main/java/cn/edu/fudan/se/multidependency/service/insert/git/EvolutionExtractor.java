@@ -1,10 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.insert.git;
 
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -72,9 +69,15 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
         }
 
         LOGGER.info(gitExtractor.getGitPath() + " " + gitExtractor.getRepositoryPath() + " " + gitExtractor.getRepositoryName() + " " + gitRepository.getPath());
-        
-//        addIssues();
-        addJiraIssues();
+
+        if(!gitConfig.getIssueFrom().isEmpty()){
+            String issueFrom = gitConfig.getIssueFrom().toLowerCase();
+            if("jira".equals(issueFrom)){
+                addJiraIssues();
+            }else if("github".equals(issueFrom)){
+                addIssues();
+            }
+        }
 
         if(!gitConfig.getBranches().isEmpty()) {
         	addSpecificBranches();
@@ -212,22 +215,35 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
             }
             
             //添加Commit到Issue的关系
-            if (issues != null && commit.isUsingForIssue() && !commit.isMerge()) {
-                Collection<Integer> issuesNum = gitExtractor.getRelationBtwCommitAndIssue(revCommit);
-                for (Integer issueNum : issuesNum) {
-                    if (issues.containsKey(issueNum)) {
-                        addRelation(new CommitAddressIssue(commit, issues.get(issueNum)));
+            if (issues != null && !issues.isEmpty() && commit.isUsingForIssue() && !commit.isMerge()) {
+                if("github".equals(gitConfig.getIssueFrom().toLowerCase())){
+                    Collection<Integer> issuesNum = gitExtractor.getRelationBtwCommitAndIssue(revCommit);
+                    for (Integer issueNum : issuesNum) {
+                        if (issues.containsKey(issueNum)) {
+                            addRelation(new CommitAddressIssue(commit, issues.get(issueNum)));
+                        }
                     }
                 }
 
-                //通过issueLink 进行关联
-                Set<Issue> issueSet = commitToIssues.get(commit.getCommitId());
-                if(issueSet != null && issueSet.size() > 0){
-                    Commit finalCommit = commit;
-                    issueSet.forEach( (issue ->{
-                        addRelation(new CommitAddressIssue(finalCommit, issue));
-                    }));
+                if("jira".equals(gitConfig.getIssueFrom().toLowerCase())){
+                    //通过issueLink 进行关联
+                    Set<Issue> issueSet = commitToIssues.get(commit.getCommitId());
+                    if(issueSet != null && issueSet.size() > 0){
+                        Commit finalCommit = commit;
+                        issueSet.forEach( (issue ->{
+                            addRelation(new CommitAddressIssue(finalCommit, issue));
+                        }));
+                    }
+
+                    //通过commit中的 issueKey进行关联
+                    Collection<Integer> issuesNum = gitExtractor.getRelationBtwCommitAndJiraIssue(revCommit);
+                    for (Integer issueNum : issuesNum) {
+                        if (issues.containsKey(issueNum)) {
+                            addRelation(new CommitAddressIssue(commit, issues.get(issueNum)));
+                        }
+                    }
                 }
+
             }
         }
         System.out.println(gitRepository.getName() + " " + beforeReleaseCommits + ", " + afterReleaseCommits);

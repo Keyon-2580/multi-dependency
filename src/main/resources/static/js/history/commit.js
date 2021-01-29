@@ -13,7 +13,7 @@ var commit = function(commitId, cytoscapeutil) {
 				console.log(result);
 				for(var i = 0; i < result.length; i++) {
 					html += "<li><a target='_blank' href='/issue/" + result[i].id + "' >";
-					html += result[i].number + " " + result[i].title;
+					html += result[i].issueKey + ": " + result[i].title;
 					html += "</a></li>";
 				}
 				html += "</ol>";
