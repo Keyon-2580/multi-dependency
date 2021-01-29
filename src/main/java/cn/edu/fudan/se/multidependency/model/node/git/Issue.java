@@ -58,7 +58,6 @@ public class Issue implements Node {
 
 	private String issueLinks;
 
-	@Transient
 	private String description;
 
 	@Transient
@@ -95,6 +94,7 @@ public class Issue implements Node {
 		properties.put("closeTime", getCloseTime() == null ? "" : getCloseTime());
 		properties.put("reporter", getReporter() == null ? "" : getReporter());
 		properties.put("issueLinks", getIssueLinks() == null ? "" : getIssueLinks());
+		properties.put("description", getDescription() == null ? "" : getDescription());
 		return properties;
 	}
 

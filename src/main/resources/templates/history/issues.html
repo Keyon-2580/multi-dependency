@@ -71,18 +71,22 @@
 			<div id="issueDiv">
 				<table class="table table-bordered">
 					<tr>
-						<th>id</th>
-						<th>issueKey</th>
-						<th>title</th>
-						<th>createTime</th>
-						<th>updateTime</th>
+						<th width="5%">id</th>
+						<th width="15%">issueKey</th>
+						<th width="5%">type</th>
+						<th width="30%">title</th>
+						<th width="15%">reporter</th>
+						<th width="15%">createTime</th>
+						<th width="15%">closeTime</th>
 					</tr>
 					<tr th:each="issue : ${issues}">
 						<td th:text="${issue.id}"></td>
-						<td th:text="${issue.issueKey}"></td>
-						<td><a th:href="${'/issue/' + issue.id}" target="_blank" th:text="${issue.title}"></a></td>
+						<td><a th:href="${'/issue/' + issue.id}" target="_blank" th:text="${issue.issueKey}"></a></td>
+						<td th:text="${issue.type}"></td>
+						<td th:text="${issue.title}"></td>
+						<td th:text="${issue.reporter}"></td>
 						<td th:text="${issue.createTime}"></td>
-						<td th:text="${issue.updateTime}"></td>
+						<td th:text="${issue.closeTime}"></td>
 					</tr>
 				</table>
 			</div>

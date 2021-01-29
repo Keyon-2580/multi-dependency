@@ -32,7 +32,6 @@ public class Commit implements Node {
 
     private String shortMessage;
 
-    @Transient
     private String fullMessage;
 
 	private String authoredDate;
@@ -64,6 +63,7 @@ public class Commit implements Node {
 		properties.put("entityId", getEntityId() == null ? "" : getEntityId());
 	    properties.put("commitId", getCommitId() == null ? "" : getCommitId());
 	    properties.put("shortMessage", getShortMessage() == null ? "" : getShortMessage());
+	    properties.put("fullMessage", getFullMessage() == null ? "" : getFullMessage());
 		properties.put("authoredDate", getAuthoredDate() == null ? "" : getAuthoredDate());
 		properties.put("commitFilesSize", getCommitFilesSize());
 		properties.put("usingForIssue", isUsingForIssue());

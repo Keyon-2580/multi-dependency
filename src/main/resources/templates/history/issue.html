@@ -80,8 +80,36 @@
 						<td th:text="${issue.issueKey}"></td>
 					</tr>
 					<tr>
+						<td align="right"><b>type：</b></td>
+						<td th:text="${issue.type}"></td>
+					</tr>
+					<tr>
 						<td align="right"><b>title：</b></td>
 						<td th:text="${issue.title}"></td>
+					</tr>
+					<tr>
+						<td align="right"><b>description：</b></td>
+						<td th:text="${issue.description}"></td>
+					</tr>
+					<tr>
+						<td align="right"><b>status：</b></td>
+						<td th:text="${issue.status}"></td>
+					</tr>
+					<tr>
+						<td align="right"><b>resolution：</b></td>
+						<td th:text="${issue.resolution}"></td>
+					</tr>
+					<tr>
+						<td align="right"><b>priority：</b></td>
+						<td th:text="${issue.priority}"></td>
+					</tr>
+					<tr>
+						<td align="right"><b>commitLinkUrl：</b></td>
+						<td th:text="${issue.commitLinkUrl}"></td>
+					</tr>
+					<tr>
+						<td align="right"><b>reporter：</b></td>
+						<td th:text="${issue.reporter}"></td>
 					</tr>
 					<tr>
 						<td align="right"><b>createTime：</b></td>
@@ -95,6 +123,7 @@
 						<td align="right"><b>closeTime：</b></td>
 						<td th:text="${issue.updateTime}"></td>
 					</tr>
+
 				</table>
 			</div>
 			<div>
