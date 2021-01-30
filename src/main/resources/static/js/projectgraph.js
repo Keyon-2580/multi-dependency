@@ -54,9 +54,12 @@ var filter_global = {};
 var linksCurrent_global = [];
 var linksCurrentAfterExtract_global = [];
 var linksBefore_global = [];
-var pairIdBefore_global = "";
-var typeBefore_global;
+
+var pairIdBefore_global = "";  //存放当前连线的母线ID
 var pairIdCurrent_global = "";
+var circleId_global = "";
+
+var typeBefore_global;
 var typeCurrent_global;
 var linksCurrent_flag = true;
 var linksVisiable_flag = false;
@@ -311,13 +314,14 @@ var projectToGraph = function(result,divId){
             if(d.children){
                 return color(d.depth/(d.depth+10));
             }else{
-                var ratio = getCloneRatioByName(projectdata,d.data.id)[1];
-                var id = getCloneRatioByName(projectdata,d.data.id)[0];
-                if(ratio === 0){
-                    return null;
-                }else{
-                    return color_clone(ratio);
-                }
+                // var ratio = getCloneRatioByName(projectdata,d.data.id)[1];
+                // var id = getCloneRatioByName(projectdata,d.data.id)[0];
+                // if(ratio === 0){
+                //     return null;
+                // }else{
+                //     return color_clone(ratio);
+                // }
+                return null;
             }
         })
         .attr("id", function (d) {
@@ -837,10 +841,14 @@ function checkDuplicateLink(){
 }
 
 //绘制下方表格
-function drawTableBelow(link_id, type){
+function drawTableBelow(link_id, linksdata, type){
     // console.log(linksBefore_global);
     var cleartable = d3.selectAll("table").remove();
     let html = "";
+
+    if(type === "single"){
+        var links_local = linksdata.concat();
+    }
 
     if(type === "all" || type === "clone" || type === "dependson" || type === "cochange"){
         var links_local = linksCurrent_global.concat();
@@ -1023,10 +1031,15 @@ function drawChildrenLinks(pair_id, type){
     // }
 
     temp_links_all = allLinks_global.concat();
+    var filter = GetFilterCondition();
 
     for(var i = temp_links_all.length; i > 0; i--){
         if(temp_links_all[i - 1].parent_pair_id === pair_id){
-            temp_links.push(temp_links_all[i - 1])
+            if((temp_links_all[i - 1].type === "dependson" && filter["dependson"]["checked"] === 1) ||
+                (temp_links_all[i - 1].type === "clone" && filter["clone"]["checked"] === 1) ||
+                (temp_links_all[i - 1].type === "cochange" && filter["cochange"]["checked"] === 1)){
+                temp_links.push(temp_links_all[i - 1])
+            }
         }
     }
 
@@ -1039,7 +1052,7 @@ function drawChildrenLinks(pair_id, type){
     typeBefore_global = typeCurrent_global;
     pairIdCurrent_global = pair_id;
     typeCurrent_global = type;
-    drawTableBelow(pair_id, "all");
+    drawTableBelow(pair_id, [], "all");
 }
 
 //多选下拉框，加载多项目
@@ -1132,7 +1145,7 @@ var extractLink = function(){
 
         if (linksCurrentAfterExtract_global.length > 0) {
             loadLink(linksCurrentAfterExtract_global);
-            drawTableBelow("default", "extract")
+            drawTableBelow("default", [], "extract")
         }
     }
 }
@@ -1144,7 +1157,7 @@ var reDo = function(){
         linksCurrent_global = linksBefore_global.concat();
         checkDuplicateLink();
         loadLink(linksCurrent_global);
-        drawTableBelow(pairIdBefore_global, typeBefore_global);
+        drawTableBelow(pairIdBefore_global, [], typeBefore_global);
         pairIdBefore_global = "";
         typeBefore_global = "";
         linksBefore_global = [];
@@ -1155,18 +1168,12 @@ var reDo = function(){
 
 //点击气泡，隐藏或显示与气泡无关连线
 var FocusOnCircleLinks = function(circleId){
-    if(linksOfCircleVisiable_flag){
-        linksCurrent_global = linksBefore_global.concat();
-        linksBefore_global = [];
-        checkDuplicateLink();
-        loadLink(linksCurrent_global);
-        var temp_pair = pairIdCurrent_global;
-        drawTableBelow(temp_pair, "all");
-        linksOfCircleVisiable_flag = false;
-    }else{
-        // console.log(linksCurrent_global);
-        linksBefore_global = linksCurrent_global.concat();
+    if(!linksOfCircleVisiable_flag || circleId !== circleId_global){
         var temp_links = linksCurrent_global.concat();
+        // console.log(linksCurrent_global);
+        circleId_global = circleId;
+        linksOfCircleVisiable_flag = true;
+
         for(var i = temp_links.length; i > 0; i--){
             if(temp_links[i - 1].source_id !== circleId
                 && temp_links[i - 1].target_id !== circleId ){
@@ -1175,22 +1182,28 @@ var FocusOnCircleLinks = function(circleId){
         }
 
         if(temp_links.length > 0){
-            linksCurrent_global = temp_links.concat();
             checkDuplicateLink();
-            loadLink(linksCurrent_global);
-            drawTableBelow("", "all");
+            loadLink(temp_links);
+            drawTableBelow("", temp_links, "single");
         }else{
             alert("没有与此节点相关连线！");
             return;
         }
 
-        linksOfCircleVisiable_flag = true;
+    }else{
+        // linksCurrent_global = linksBefore_global.concat();
+        // linksBefore_global = [];
+        checkDuplicateLink();
+        loadLink(linksCurrent_global);
+        var temp_pair = pairIdCurrent_global;
+        drawTableBelow(temp_pair, [], "all");
+        linksOfCircleVisiable_flag = false;
     }
 }
 
 //滑块筛选深度
 var Change_Depth = function(value){
-    console.log("Change_Depth")
+    // console.log("Change_Depth")
     if(linksCurrent_global.length === 0){
         alert("当前无连线！")
     }else{
@@ -1256,6 +1269,7 @@ var GetFilterCondition = function(){
 //根据筛选条件筛选连线
 var FilterLinks = function() {
     var filter = GetFilterCondition();
+    // cmp(filter,filter_global);
     pairIdCurrent_global = "";
     pairIdBefore_global = "";
 
@@ -1436,7 +1450,7 @@ var FilterLinks = function() {
     checkDuplicateLink();
     // console.log(linksCurrent_global)
     loadLink(linksCurrent_global);
-    drawTableBelow("", "all");
+    drawTableBelow("", [], "all");
 
     if(filter["depth"] !== 5){
         hideLink();
@@ -1450,15 +1464,15 @@ var FilterLinks = function() {
 
         if (linksCurrentAfterExtract_global.length > 0) {
             loadLink(linksCurrentAfterExtract_global);
-            drawTableBelow("default", "extract")
+            drawTableBelow("default", [], "extract")
         }
     }
 }
 
 //判断两个对象是否相等
 var cmp = function (x, y) {
-
     for (var p in x) {
+        console.log(p)
         if (x.hasOwnProperty(p)) {
             if (!y.hasOwnProperty(p)) {
                 return false;
@@ -1474,9 +1488,10 @@ var cmp = function (x, y) {
         }
     }
 
-    for (p in y) {
+    for (var k in y) {
+        console.log(k)
         // allows x[ p ] to be set to undefined
-        if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) {
+        if (y.hasOwnProperty(k) && !x.hasOwnProperty(k)) {
             return false;
         }
     }
