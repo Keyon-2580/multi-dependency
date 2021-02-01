@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.relation.structure.*;
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import depends.entity.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,7 +92,15 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 	}
 
 	protected void addCommonParentEmptyPackages() {
+		//存储所有的空包（当前目录下没有文件的包，只含有目录）
 		Map<String, Package> emptyPackages = new HashMap<>();
+
+		/**
+		 * 存储所有包（包括空包）的子包：
+		 * 1）对于叶子节点（仅含有文件的包），存其本身；
+		 * 2）对于既含子包和文件，存其本身及其子包
+		 * 3）对于不含文件的包，即为空包，存储其子包
+		 */
 		Map<String, Map<String, Package>> childPackages = new HashMap<>();
 		this.getNodes().findPackagesInProject(currentProject).forEach((path, node) -> {
 			Package currentPackage = (Package) node;
@@ -148,12 +157,19 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 			Map<String, Package> childPck = entry.getValue();
 
 			Package emptyPck = emptyPackages.get(currentDirectoryPath);
-			if(emptyPck !=  null && childPck.size() > 1){
+			String parentPath =  FileUtil.extractDirectoryFromFile(FileUtil.extractDirectoryFromFile(currentDirectoryPath)) + "/";
+			if(emptyPck !=  null && (childPck.size() > 1 || ("/").equals(parentPath))){
 				this.addNode(emptyPck, currentProject);
 				this.addRelation(new Contain(currentProject, emptyPck));
 			}
 
+			//根目录包，不处理（那怕是根目录下有文件的情况，不用找根目录的父亲，建立has关系）
+			if(("/").equals(parentPath)){
+				continue;
+			}
+
 			Package currentPck = childPck.get(currentDirectoryPath);
+			//三种情况：1）currentPck有文件的情况； 2）当前包有2个以上（含两个）的子包；
 			if(currentPck != null || childPck.size() > 1){
 				if (currentPck == null){
 					currentPck = emptyPackages.get(currentDirectoryPath);
@@ -164,10 +180,6 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 				}
 
 				String parentDirectoryPath = currentPck.lastPackageDirectoryPath();
-				if( ("/").equals(parentDirectoryPath)) {
-					continue;
-				}
-
 				Map<String, Package> parentChild = childPackages.get(parentDirectoryPath);
 				if(parentChild == null){
 					LOGGER.error("Empty Package Finding Error: " + currentPck.getDirectoryPath() + " -- " + parentDirectoryPath);
@@ -176,16 +188,18 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 
 				Package parentPck = parentChild.get(parentDirectoryPath);
 				while (parentPck == null){
-					if(("/").equals(parentDirectoryPath)) {
-						break;
-					}
+//					if(("/").equals(parentDirectoryPath)) {
+//						Package rootPck = emptyPackages.get(parentDirectoryPath);
+//						addRelation(new Has(rootPck, currentPck));
+//						break;
+//					}
 					Map<String, Package> child = childPackages.get(parentDirectoryPath);
 					if(child == null){
 						LOGGER.error("Empty Package Finding Error: " + currentPck.getDirectoryPath() + " -- " + parentDirectoryPath);
 						continue;
 					}
 					Package pck = emptyPackages.get(parentDirectoryPath);
-					if(child != null && child.size() > 1 && pck != null){
+					if(child != null  && pck != null && (child.size() > 1 || ("/").equals(pck.lastPackageDirectoryPath()))){
 						addRelation(new Has(pck, currentPck));
 						break;
 					}
@@ -207,6 +221,7 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					}
 				}
 
+				//当parentPck不为空（但要排除当前包为根目录且有文件的情况），可创建包含关系
 				if (parentPck != null){
 					addRelation(new Has(parentPck, currentPck));
 				}
