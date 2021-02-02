@@ -115,15 +115,26 @@ public interface StaticAnalyseService {
 	
 	boolean isDataFile(ProjectFile file);
 	
-	boolean isInDifferentModule(ProjectFile file1, ProjectFile file2);
-	
 	boolean isDependsOn(ProjectFile file1, ProjectFile file2);
+
 	
 	Map<Package, List<DependsOn>> findPackageDependsOn(Project project);
+
+	Map<Package, List<DependsOn>> findPackageDependsOnBy(Project project);
 	
 	Map<ProjectFile, List<DependsOn>> findFileDependsOn(Project project);
-	
+
+	Map<ProjectFile, List<DependsOn>> findFileDependsOnBy(Project project);
+
 	Collection<DependsOn> findFileDependsOn(ProjectFile file);
 	
 	Collection<DependsOn> findFileDependedOnBy(ProjectFile file);
+
+	Collection<DependsOn> findPackageDependsOn(Package pck);
+
+	Collection<DependsOn> findPackageDependedOnBy(Package pck);
+
+	Collection<ProjectFile> findFilesCommonDependsOn(ProjectFile file1, ProjectFile file2);
+
+	Collection<ProjectFile> findFilesCommonDependedOnBy(ProjectFile file1, ProjectFile file2);
 }

@@ -41,8 +41,6 @@ public interface BasicCloneQueryService {
 
 	Collection<ProjectFile> findProjectContainCloneFiles(Project project);
 
-	Collection<Clone> findClonesInProject(Project project);
-
 	JSONArray ClonesInProject(Collection<Clone> clones);
 
 }

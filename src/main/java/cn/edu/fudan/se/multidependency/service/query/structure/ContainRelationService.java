@@ -25,34 +25,44 @@ import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Import;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Include;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 public interface ContainRelationService {
 	
 	Collection<Package> findProjectContainPackages(Project project);
+
 	Collection<Function> findProjectContainAllFunctions(Project project);
-//	Collection<Variable> findProjectContainAllFields(Project project);
+
 	Collection<ProjectFile> findProjectContainAllFiles(Project project);
 	
 	Collection<ProjectFile> findPackageContainFiles(Package pck);
 	
 	Collection<Namespace> findFileContainNamespaces(ProjectFile file);
+
 	Collection<Type> findFileDirectlyContainTypes(ProjectFile file);
+
 	Collection<Function> findFileDirectlyContainFunctions(ProjectFile file);
+
 	Collection<Variable> findFileDirectlyContainVariables(ProjectFile file);
 
 	Collection<Type> findFileDirectlyImportTypes(ProjectFile file);
+
 	Collection<Function> findFileDirectlyImportFunctions(ProjectFile file);
+
 	Collection<Variable> findFileDirectlyImportVariables(ProjectFile file);
+
 	Collection<Import> findFileDirectlyImports(ProjectFile file);
+
 	Collection<Include> findFileDirectlyIncludes(ProjectFile file);
 	
 	Collection<Type> findNamespaceDirectlyContainTypes(Namespace namespace);
+
 	Collection<Function> findNamespaceDirectlyContainFunctions(Namespace namespace);
+
 	Collection<Variable> findNamespaceDirectlyContainVariables(Namespace namespace);
 	
 	Collection<Function> findTypeDirectlyContainFunctions(Type type);
+
 	Collection<Variable> findTypeDirectlyContainFields(Type type);
 	
 	Collection<Variable> findFunctionDirectlyContainVariables(Function function);
@@ -64,6 +74,8 @@ public interface ContainRelationService {
 	Package findFileBelongToPackage(ProjectFile file);
 	
 	Project findFileBelongToProject(ProjectFile file);
+
+	Project findTypeBelongToProject(Type type);
 	
 	Type findFunctionBelongToType(Function function);
 
@@ -118,6 +130,7 @@ public interface ContainRelationService {
 	Collection<Project> findGitRepositoryContainProject(GitRepository gitRepository);
 
 	Collection<Call> findFunctionContainCalls (Function function);
+
 	JSONObject doubleFileStructure(List<ProjectFile> fileList);
 	
 	/**

@@ -1,7 +1,16 @@
 package cn.edu.fudan.se.multidependency.repository.relation;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
+import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -17,7 +26,18 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	List<DependsOn> findFileDepends();	
 	
 	@Query("match p=(:Package)-[r:" + RelationType.str_DEPENDS_ON + "]->(:Package) return p")
-	List<DependsOn> findPackageDepends();	
+	List<DependsOn> findPackageDependsOn();
+
+	@Query("match p=(:Type)-[r:" + RelationType.str_DEPENDS_ON + "]->(:Type) return p")
+	List<DependsOn> findTypeDepends();
+
+	@Query("match (p:Package)-[r:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where id(file) = {fileId} return p")
+	Package findFileBelongPackageByFileId(@Param("fileId") long fileId);
+
+	@Query("match p=(p1:Package)-[:" + RelationType.str_DEPENDS_ON + "]-(p2:Package) " +
+			"where id(p1) = {pckId1} and id(p2) = {pckId2}" +
+			"return p;")
+	List<DependsOn> findPackageDependsByPackageId(@Param("pckId1") long pckId1, @Param("pckId2") long pckId2);
 	
 	@Query("match p=(project:Project)-[:" + RelationType.str_CONTAIN + "*2]->(:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(:ProjectFile)<-[:" + RelationType.str_CONTAIN + "*2]-(project) where id(project)={id} return p")
 	List<DependsOn> findFileDependsInProject(@Param("id") long projectId);	
@@ -31,6 +51,22 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query("match p=(:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(file:ProjectFile) where id(file)={id} return p")
 	List<DependsOn> findFileDependedOnBy(@Param("id") long fileId);
 	
+	@Query("MATCH (f1:ProjectFile),(f2:ProjectFile) where id(f1) = {f1Id} and id(f2) = {f2Id} "
+			+ "match p = shortestpath((f1)-[:" + RelationType.str_DEPENDS_ON + "*..]->(f2)) return count(p) > 0")
+	boolean isFileDependsOnFile(@Param("f1Id") long file1Id, @Param("f2Id") long file2Id);
+	
+
+	@Query("match p=(pck:Package)-[r:" + RelationType.str_DEPENDS_ON + "]->(:Package) where id(pck)={id} return p")
+	List<DependsOn> findPackageDependsOn(@Param("id") long packageId);
+
+	@Query("match p=(:Package)-[r:" + RelationType.str_DEPENDS_ON + "]->(pck:Package) where id(pck)={id} return p")
+	List<DependsOn> findPackageDependedOnBy(@Param("id") long packageId);
+
+	@Query("match p=(file1:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(file3:ProjectFile)<-[:" + RelationType.str_DEPENDS_ON + "]-(file2:ProjectFile) where id(file1)={id1} and id(file2)={id2} return file3")
+	List<ProjectFile> findFilesCommonDependsOn(@Param("id1") long fileId1,@Param("id2") long fileId2);
+
+	@Query("match p=(file1:ProjectFile)<-[:" + RelationType.str_DEPENDS_ON + "]-(file3:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(file2:ProjectFile) where id(file1)={id1} and id(file2)={id2} return file3")
+	List<ProjectFile> findFilesCommonDependedOnBy(@Param("id1") long fileId1,@Param("id2") long fileId2);
 	/**
 	 * 两个文件之间的dependsOn
 	 * @param file1Id
@@ -39,64 +75,227 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	 */
 	@Query("match p= (f1:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]-(f2:ProjectFile) where id(f1) = {file1Id} and id(f2) = {file2Id} return p")
 	List<DependsOn> findDependsOnInFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
-	
-	static final String TYPE_LEFT = "match p=(t1:Type)-[:CONTAIN*0..]->()-[r:";
-	static final String TYPE_RIGHT = "]->()<-[:CONTAIN*0..]-(t2:Type) where t1<>t2 create (t1)-[:DEPENDS_ON]->(t2)";
-	
-	@Query(TYPE_LEFT + RelationType.str_CALL + TYPE_RIGHT)
+
+	@Query("match p= (f1:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(f2:ProjectFile) where id(f1) = {file1Id} and id(f2) = {file2Id} return p")
+	DependsOn findSureDependsOnInFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
+
+
+	String TYPE_LEFT = "match p=(t1:Type)-[:CONTAIN*0..]->()-[r:";
+	String TYPE_MIDDLE = "]->()<-[:CONTAIN*0..]-(t2:Type) where t1<>t2 " +
+			"create (t1)-[:DEPENDS_ON{dependsOnType : \"";
+	String TYPE_MIDDLE2 = "\", times : ";
+	String TYPE_RIGHT = "}]->(t2);";
+
+	@Query(TYPE_LEFT + RelationType.str_EXTENDS + TYPE_MIDDLE + RelationType.str_EXTENDS +
+			TYPE_MIDDLE2 + "1" + TYPE_RIGHT)
+	void createDependsOnWithExtendsInTypes();
+	@Query(TYPE_LEFT + RelationType.str_IMPLEMENTS + TYPE_MIDDLE + RelationType.str_IMPLEMENTS +
+			TYPE_MIDDLE2 + "1" + TYPE_RIGHT)
+	void createDependsOnWithImplementsInTypes();
+	@Query(TYPE_LEFT + RelationType.str_CALL + TYPE_MIDDLE + RelationType.str_CALL +
+			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
 	void createDependsOnWithCallInTypes();
-	@Query(TYPE_LEFT + RelationType.str_CREATE + TYPE_RIGHT)
+	@Query(TYPE_LEFT + RelationType.str_CREATE + TYPE_MIDDLE + RelationType.str_CREATE +
+			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
 	void createDependsOnWithCreateInTypes();
-	@Query(TYPE_LEFT + RelationType.str_CAST + TYPE_RIGHT)
+	@Query(TYPE_LEFT + RelationType.str_CAST + TYPE_MIDDLE + RelationType.str_CAST +
+			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
 	void createDependsOnWithCastInTypes();
-	@Query(TYPE_LEFT + RelationType.str_THROW + TYPE_RIGHT)
+	@Query(TYPE_LEFT + RelationType.str_THROW + TYPE_MIDDLE + RelationType.str_THROW +
+			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
 	void createDependsOnWithThrowInTypes();
-	@Query(TYPE_LEFT + RelationType.str_PARAMETER + TYPE_RIGHT)
+	@Query(TYPE_LEFT + RelationType.str_PARAMETER + TYPE_MIDDLE + RelationType.str_PARAMETER +
+			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
 	void createDependsOnWithParameterInTypes();
-	@Query(TYPE_LEFT + RelationType.str_VARIABLE_TYPE + TYPE_RIGHT)
-	void createDependsOnWithVariableTypeInTypes();
-	@Query(TYPE_LEFT + RelationType.str_ACCESS + TYPE_RIGHT)
+	@Query(TYPE_LEFT + RelationType.str_RETURN + TYPE_MIDDLE + RelationType.str_RETURN +
+			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
+	void createDependsOnWithReturnInTypes();
+	@Query(TYPE_LEFT + RelationType.str_USE + TYPE_MIDDLE + RelationType.str_USE +
+			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
+	void createDependsOnWithUseTypeInTypes();
+	@Query(TYPE_LEFT + RelationType.str_ACCESS + TYPE_MIDDLE + RelationType.str_ACCESS +
+			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
 	void createDependsOnWithAccessInTypes();
-	@Query(TYPE_LEFT + RelationType.str_ANNOTATION + TYPE_RIGHT)
+	@Query(TYPE_LEFT + RelationType.str_GLOBAL_VARIABLE + TYPE_MIDDLE + RelationType.str_GLOBAL_VARIABLE +
+			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
+	void createDependsOnWithGlobalVariableInTypes();
+	@Query(TYPE_LEFT + RelationType.str_LOCAL_VARIABLE + TYPE_MIDDLE + RelationType.str_LOCAL_VARIABLE +
+			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
+	void createDependsOnWithLocalVariableInTypes();
+	@Query(TYPE_LEFT + RelationType.str_ANNOTATION + TYPE_MIDDLE + RelationType.str_ANNOTATION +
+			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
 	void createDependsOnWithAnnotationInTypes();
-	@Query("match (t1:Type)-[r:DEPENDS_ON]->(t2:Type) with t1,t2,count(r) as times create (t1)-[:DEPENDS_ON{times : times}]->(t2)")
-	void createDependsOnWithTimesInTypes();
-	@Query("match (:Type)-[r:DEPENDS_ON]->() where r.times is null delete r;")
+	@Query(TYPE_LEFT + RelationType.str_IMPLLINK + TYPE_MIDDLE + RelationType.str_IMPLLINK +
+			TYPE_MIDDLE2 + "1" + TYPE_RIGHT)
+	void createDependsOnWithImplinkInTypes();
+	@Query(TYPE_LEFT + RelationType.str_IMPLEMENTS_C + TYPE_MIDDLE + RelationType.str_IMPLEMENTS_C +
+			TYPE_MIDDLE2 + "1" + TYPE_RIGHT)
+	void createDependsOnWithImplementsCInTypes();
+
+//	@Query("match (t1:Type)-[r:DEPENDS_ON]->(t2:Type) " +
+//			"with t1,t2,count(r) as times " +
+//			"create (t1)-[:DEPENDS_ON{times : times, weightedTimes : 0.0}]->(t2)")
+//	void createDependsOnWithTimesInTypes();
+	@Query("match (:Type)-[r:DEPENDS_ON]->() where r.weightedTimes is null delete r;")
 	void deleteNullTimesDependsOnInTypes();
-	
-	static final String FILE_LEFT = "match (f1:ProjectFile)-[:CONTAIN*1..]->()-[r:";
-	static final String FILE_RIGHT = "]->()<-[:CONTAIN*1..]-(f2:ProjectFile) with f1,f2 where f1 <> f2 create (f1)-[:DEPENDS_ON]->(f2);";
-	
-	@Query(FILE_LEFT + RelationType.str_EXTENDS + FILE_RIGHT)
+
+	String FILE_LEFT = "match (f1:ProjectFile)-[:CONTAIN*0..]->()-[r: ";
+	String FILE_MIDDLE = "]->()<-[:CONTAIN*0..]-(f2:ProjectFile) where f1 <> f2 " +
+			"create (f1)-[:DEPENDS_ON{dependsOnType : \"";
+	String FILE_MIDDLE2 = "\", times : ";
+	String FILE_RIGHT = "}]->(f2);";
+
+	@Query(FILE_LEFT + RelationType.str_IMPORT + FILE_MIDDLE + RelationType.str_IMPORT +
+			FILE_MIDDLE2 + "1" + FILE_RIGHT)
+	void createDependsOnWithImportInFiles();
+	@Query(FILE_LEFT + RelationType.str_INCLUDE + FILE_MIDDLE + RelationType.str_INCLUDE +
+			FILE_MIDDLE2 + "1" + FILE_RIGHT)
+	void createDependsOnWithIncludeInFiles();
+	@Query(FILE_LEFT + RelationType.str_EXTENDS + FILE_MIDDLE + RelationType.str_EXTENDS +
+			FILE_MIDDLE2 + "1" + FILE_RIGHT)
 	void createDependsOnWithExtendsInFiles();
-	@Query(FILE_LEFT + RelationType.str_IMPLEMENTS + FILE_RIGHT)
+	@Query(FILE_LEFT + RelationType.str_IMPLEMENTS + FILE_MIDDLE + RelationType.str_IMPLEMENTS +
+			FILE_MIDDLE2 + "1" + FILE_RIGHT)
 	void createDependsOnWithImplementsInFiles();
-	@Query(FILE_LEFT + RelationType.str_CALL + FILE_RIGHT)
-	void createDependsOnWithCallInFiles();
-	@Query(FILE_LEFT + RelationType.str_CREATE + FILE_RIGHT)
-	void createDependsOnWithCreateInFiles();
-	@Query(FILE_LEFT + RelationType.str_CAST + FILE_RIGHT)
-	void createDependsOnWithCastInFiles();
-	@Query(FILE_LEFT + RelationType.str_THROW + FILE_RIGHT)
-	void createDependsOnWithThrowInFiles();
-	@Query(FILE_LEFT + RelationType.str_PARAMETER + FILE_RIGHT)
-	void createDependsOnWithParameterInFiles();
-	@Query(FILE_LEFT + RelationType.str_VARIABLE_TYPE + FILE_RIGHT)
-	void createDependsOnWithVariableTypeInFiles();
-	@Query(FILE_LEFT + RelationType.str_ACCESS + FILE_RIGHT)
-	void createDependsOnWithAccessInFiles();
-	@Query(FILE_LEFT + RelationType.str_IMPLLINK + FILE_RIGHT)
-	void createDependsOnWithImpllinkInFiles();
-	@Query(FILE_LEFT + RelationType.str_ANNOTATION + FILE_RIGHT)
+	@Query(FILE_LEFT + RelationType.str_GLOBAL_VARIABLE + FILE_MIDDLE + RelationType.str_GLOBAL_VARIABLE +
+			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
+	void createDependsOnWithGlobalVariableInFiles();
+	@Query(FILE_LEFT + RelationType.str_LOCAL_VARIABLE + FILE_MIDDLE + RelationType.str_LOCAL_VARIABLE +
+			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
+	void createDependsOnWithLocalVariableInFiles();
+	@Query(FILE_LEFT + RelationType.str_ANNOTATION + FILE_MIDDLE + RelationType.str_ANNOTATION +
+			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
 	void createDependsOnWithAnnotationInFiles();
-	@Query("match (f1:ProjectFile)-[r:DEPENDS_ON]->(f2:ProjectFile) with f1,f2,count(r) as times create (f1)-[:DEPENDS_ON{times : times}]->(f2)")
-	void createDependsOnWithTimesInFiles();
-	@Query("match (:ProjectFile)-[r:DEPENDS_ON]->() where r.times is null delete r;")
-	void deleteNullTimesDependsOnInFiles();
-	@Query("match (p1:Package)-[:CONTAIN]->(:ProjectFile)-[:DEPENDS_ON]->(:ProjectFile)<-[:CONTAIN]-(p2:Package) with p1,p2 where p1<>p2 and not (p1)-[:DEPENDS_ON]->(p2) create (p1)-[:DEPENDS_ON]->(p2)")
-	void createDependsOnInPackages();
-	@Query("match (p1:Package)-[r:DEPENDS_ON]->(p2:Package) with p1,p2,count(r) as times create (p1)-[:DEPENDS_ON{times : times}]->(p2)")
-	void addTimesOnDependsOnInPackages();
-	@Query("match (:Package)-[r:DEPENDS_ON]->() where r.times is null delete r;")
-	void deleteNullTimesDependsOnInPackages();
+	@Query(FILE_LEFT + RelationType.str_CALL + FILE_MIDDLE + RelationType.str_CALL +
+			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
+	void createDependsOnWithCallInFiles();
+	@Query(FILE_LEFT + RelationType.str_IMPLLINK + FILE_MIDDLE + RelationType.str_IMPLLINK +
+			FILE_MIDDLE2 + "1" + FILE_RIGHT)
+	void createDependsOnWithImpllinkInFiles();
+	@Query(FILE_LEFT + RelationType.str_IMPLEMENTS_C + FILE_MIDDLE + RelationType.str_IMPLEMENTS_C +
+			FILE_MIDDLE2 + "1" + FILE_RIGHT)
+	void createDependsOnWithFunctionImplementsInFiles();
+	@Query(FILE_LEFT + RelationType.str_CREATE + FILE_MIDDLE + RelationType.str_CREATE +
+			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
+	void createDependsOnWithCreateInFiles();
+	@Query(FILE_LEFT + RelationType.str_CAST + FILE_MIDDLE + RelationType.str_CAST +
+			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
+	void createDependsOnWithCastInFiles();
+	@Query(FILE_LEFT + RelationType.str_THROW + FILE_MIDDLE + RelationType.str_THROW +
+			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
+	void createDependsOnWithThrowInFiles();
+	@Query(FILE_LEFT + RelationType.str_PARAMETER + FILE_MIDDLE + RelationType.str_PARAMETER +
+			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
+	void createDependsOnWithParameterInFiles();
+	@Query(FILE_LEFT + RelationType.str_RETURN + FILE_MIDDLE + RelationType.str_RETURN +
+			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
+	void createDependsOnWithReturnInFiles();
+	@Query(FILE_LEFT + RelationType.str_USE + FILE_MIDDLE + RelationType.str_USE +
+			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
+	void createDependsOnWithUseTypeInFiles();
+//	@Query(FILE_LEFT + RelationType.str_ACCESS + FILE_MIDDLE + RelationType.str_ACCESS +
+//			FILE_MIDDLE2 + "1" + FILE_RIGHT)
+//	void createDependsOnWithAccessInFiles();
+
+
+//	@Query("match (f1:ProjectFile)-[r:DEPENDS]->(f2:ProjectFile) " +
+//			"with f1,f2, r.dependsType, sum(r.times) as times" +
+//			"reduce(dependsType = \"\", tt in collect(r.dependsType) | dependsType + (\"__\" + tt)) as dependsOnType " +
+//			"create (f1)-[:DEPENDS{times : times, dependsOnType : dependsOnType}]->(f2);")
+//	void createDependsWithTimesInFiles();
+
+	default void createDependsOnWithTimesInNode(NodeLabelType nodeLabelType){
+		Map<Node, Map<Node, DependsOn>> nodeDependsOnNode = new HashMap<>();
+		List<DependsOn> dependsOnList;
+		switch (nodeLabelType){
+			case ProjectFile:
+				dependsOnList = this.findFileDepends();
+				break;
+			case Type:
+				dependsOnList = this.findTypeDepends();
+
+				break;
+			default:
+				dependsOnList = new ArrayList<>();
+				break;
+		}
+
+		for (DependsOn dependsOn : dependsOnList){
+			if(dependsOn.getDependsOnType() != null){
+				Node node1 = dependsOn.getStartNode();
+				Node node2 = dependsOn.getEndNode();
+				Map<Node, DependsOn> dependsOnMap = nodeDependsOnNode.getOrDefault(node1, new HashMap<>());
+				DependsOn nodeDependsOn = dependsOnMap.get(node2);
+				if (nodeDependsOn != null ){
+					if ( nodeDependsOn.getDependsOnTypes().containsKey(dependsOn.getDependsOnType()) ) {
+						Long times = nodeDependsOn.getDependsOnTypes().get(dependsOn.getDependsOnType());
+						times += Long.valueOf(dependsOn.getTimes());
+						nodeDependsOn.getDependsOnTypes().put(dependsOn.getDependsOnType(), times);
+					}else {
+						nodeDependsOn.getDependsOnTypes().put(dependsOn.getDependsOnType(), Long.valueOf(dependsOn.getTimes()));
+						String dTypes = nodeDependsOn.getDependsOnType();
+						nodeDependsOn.setDependsOnType(dTypes + "__" + dependsOn.getDependsOnType());
+					}
+					int timesTmp = nodeDependsOn.getTimes() + dependsOn.getTimes();
+					nodeDependsOn.setTimes(timesTmp);
+					dependsOnMap.put(node2, nodeDependsOn);
+				} else {
+					DependsOn newDepends = new DependsOn(node1, node2);
+					newDepends.getDependsOnTypes().put(dependsOn.getDependsOnType(), Long.valueOf(dependsOn.getTimes()));
+					newDepends.setDependsOnType(dependsOn.getDependsOnType());
+					newDepends.setTimes(dependsOn.getTimes());
+					dependsOnMap.put(node2, newDepends);
+				}
+				nodeDependsOnNode.put(node1, dependsOnMap);
+			}
+		}
+
+		for (Map.Entry<Node, Map<Node, DependsOn>> entry : nodeDependsOnNode.entrySet()){
+			Node node1 = entry.getKey();
+			List<DependsOn> dependsOnListTmp = new ArrayList<>();
+			int size = 0;
+			for (DependsOn nDependsOn : nodeDependsOnNode.get(node1).values()){
+				nDependsOn.getDependsOnTypes().forEach( (key, value) -> {
+					Double weight = RelationType.relationWeights.get(RelationType.valueOf(key));
+					if(weight != null){
+						BigDecimal weightedTimes  =  new BigDecimal( value * weight);
+						nDependsOn.addWeightedTimes(weightedTimes.setScale(2, RoundingMode.HALF_UP).doubleValue());
+					} else {
+						System.out.println("关系权重未定义：" + key);
+					}
+				});
+				dependsOnListTmp.add(nDependsOn);
+				if(size++ > 500){
+					this.saveAll(dependsOnListTmp);
+					dependsOnListTmp.clear();
+					size = 0;
+				}
+			}
+			this.saveAll(dependsOnListTmp);
+		}
+	}
+
+	@Query("match (:ProjectFile)-[r:DEPENDS_ON]->(:ProjectFile) " +
+			"where r.weightedTimes is null " +
+			"delete r;")
+	void deleteNullAggregationDependsOnInFiles();
+
+	@Query("match (:Type)-[r:DEPENDS_ON]->(:Type) " +
+			"where r.weightedTimes is null " +
+			"delete r;")
+	void deleteNullAggregationDependsOnInTypes();
+
+//	@Query("match (p1:Package)-[:CONTAIN]->(:ProjectFile)-[r:DEPENDS_ON]->(:ProjectFile)<-[:CONTAIN]-(p2:Package) " +
+//			"where p1<>p2 " +
+//			"create (p1)-[:DEPENDS_ON{dependsOnType : r.dependsOnType, times : r.times}]->(p2);")
+//	void createDependsOnInPackages();
+
+	@Query("match (:Package)-[r:DEPENDS_ON]->(:Package) " +
+			"where r.weightedTimes is null " +
+			"delete r;")
+	void deleteNullAggregationDependsOnInPackages();
+
+	@Query("match ()-[r:DEPENDS_ON]->() where r.dependsOnType = {dependsOnType} delete r;")
+	void deleteDependsOnByRelationType(String dependsOnType);
+
 }

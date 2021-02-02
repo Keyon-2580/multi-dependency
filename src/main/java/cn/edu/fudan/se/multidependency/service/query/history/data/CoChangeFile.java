@@ -11,10 +11,10 @@ public class CoChangeFile {
 		this.mainFile = mainFile;
 		this.cochange = cochange;
 		this.times = cochange.getTimes();
-		if(cochange.getFile1().equals(mainFile)) {
-			otherFile = cochange.getFile2();
+		if(cochange.getNode1().equals(mainFile)) {
+			otherFile = (ProjectFile)cochange.getNode2();
 		} else {
-			otherFile = cochange.getFile1();
+			otherFile = (ProjectFile)cochange.getNode1();
 		}
 	}
 	

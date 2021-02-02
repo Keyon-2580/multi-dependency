@@ -24,9 +24,9 @@ import cn.edu.fudan.se.multidependency.utils.clone.data.CloneResultWithLocFromCs
 import cn.edu.fudan.se.multidependency.utils.clone.data.FilePathFromCsv;
 import cn.edu.fudan.se.multidependency.utils.clone.data.Group;
 
-public class CloneInserterForFileWithLoc extends CloneInserter {
+public class CloneInserterForFileWithLoc extends CloneExtractor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CloneInserterForFile.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CloneExtractorForFile.class);
 	private String namePath;
 	private String resultPath;
 //	private String groupPath;

@@ -35,13 +35,13 @@ public class Implements implements StructureRelation {
 	}
 	
 	/**
-	 * 可以是Function或Type
+	 * Type
 	 */
 	@StartNode
 	private CodeUnit startNode;
 	
 	/**
-	 * 可以是Function或Type
+	 * Type
 	 */
 	@EndNode
 	private CodeUnit endNode;

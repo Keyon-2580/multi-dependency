@@ -53,7 +53,9 @@ public class FileMetrics extends FanIOMetric {
 	 * PageRank Score
 	 */
 	private double score;
-
+	
+	private double instability;
+	
 	@Override
 	public Node getComponent() {
 		return file;

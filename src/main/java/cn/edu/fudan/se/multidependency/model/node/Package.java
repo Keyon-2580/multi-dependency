@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @NodeEntity
 @NoArgsConstructor
 @EqualsAndHashCode
-public class Package implements Node, Module {
+public class Package implements Node {
 
     @Id
     @GeneratedValue
@@ -32,14 +32,22 @@ public class Package implements Node, Module {
     private String directoryPath;
 	
     private String name;
+    
+	private String language;
 
     private Long entityId;
-    
-    private long loc = -1;
 
-    private int allNodes = 0;
-    
-    private long lines = -1;
+	private int nof = -1;
+
+	private int noc;
+
+	private int nom;
+
+	private long loc = -1;
+
+	private long lines = -1;
+
+	private int depth = 0;
 
 	private static final long serialVersionUID = -4892461872164624064L;
 	
@@ -51,6 +59,11 @@ public class Package implements Node, Module {
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("directoryPath", getDirectoryPath() == null ? "" : getDirectoryPath());
 		properties.put("name", getName() == null ? "" : getName());
+		properties.put("language", getLanguage() == null ? "" : getLanguage());
+		properties.put("nof", getNof());
+		properties.put("loc", getLoc());
+		properties.put("lines", getLines());
+		properties.put("depth", getDepth());
 		return properties;
 	}
 

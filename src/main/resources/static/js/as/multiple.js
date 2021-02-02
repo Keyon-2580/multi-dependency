@@ -3,11 +3,13 @@ var multiple = function(projects, files, cytoscapeutil) {
 			cycle: true,
 			hublike: true,
 			logicCoupling: true,
-			similar: false,
-			unstable: false,
-			hierarchy: true,
-			godComponent: false,
+			similar: true,
+			unstable: true,
+//			hierarchy: false,
+//			godComponent: false,
 			unused: true
+			,
+			unutilized: false
 	}
 	
 	function paramToRequestParam() {
@@ -16,9 +18,10 @@ var multiple = function(projects, files, cytoscapeutil) {
 			"&logicCoupling=" + param.logicCoupling + 
 			"&similar=" + param.similar + 
 			"&unstable=" + param.unstable + 
-			"&hierarchy=" + param.hierarchy + 
-			"&godComponent=" + param.godComponent + 
-			"&unused=" + param.unused;
+//			"&hierarchy=" + param.hierarchy + 
+//			"&godComponent=" + param.godComponent + 
+			"&unused=" + param.unused + 
+			"&unutilized=" + param.unutilized;
 		return str;
 	}
 	
@@ -41,7 +44,7 @@ var multiple = function(projects, files, cytoscapeutil) {
         	        }
         	    },
         	    legend: {
-        	        data: ["所有文件数", 'smell文件数', 'issue文件数']
+        	        data: ["All Files", 'Smell Files', 'Issue Files']
         	    },
         	    grid: {
         	        left: '3%',
@@ -63,17 +66,17 @@ var multiple = function(projects, files, cytoscapeutil) {
         	        }
         	    ],
         	    series: [{
-        	            name: "所有文件数",
+        	            name: "All Files",
         	            type: 'bar',
         	            stack: 'allFiles',
         	            data: data.allFiles
         	        },{
-        	            name: 'smell文件数',
+        	            name: 'Smell Files',
         	            type: 'bar',
         	            stack: 'smellFiles',
         	            data: data.smellFiles
         	        },{
-        	        	name: 'issue文件数',
+        	        	name: 'Issue Files',
         	        	type: 'bar',
         	        	stack: 'issueFiles',
         	        	data: data.issueFiles
@@ -83,9 +86,46 @@ var multiple = function(projects, files, cytoscapeutil) {
 		histogramChart.setOption(option);
 	}
 	
-	var _pie = function(project, pies, allFilesPieDivId, smellAndIssueFilesPieDivId) {
+	var _pie = function(project, pies, allFilesPieDivId, smellAndIssueFilesPieDivId, issuesDivId) {
+		console.log(pies);
+		var issuesPie = echarts.init(document.getElementById(issuesDivId));
 		var allFilesPie = echarts.init(document.getElementById(allFilesPieDivId));
 		var smellAndIssueFilesPie = echarts.init(document.getElementById(smellAndIssueFilesPieDivId));
+		var issuesPieOption = {
+				title: {
+					text: 'Issues占比',
+					left: 'center'
+				},
+				tooltip: {
+					trigger: 'item',
+					formatter: '{a} <br/>{b} : {c} ({d}%)'
+				},
+				legend: {
+					orient: 'vertical',
+					left: 'left',
+					data: ['无Smell Files关联的Issues', '有Smell File关联的Issues']
+				},
+				series: [
+					{
+						name: '文件',
+						type: 'pie',
+						radius: '55%',
+						center: ['50%', '60%'],
+						data: [
+							{value: (pies.allIssues.length - pies.smellIssues.length), name: '无Smell Files关联的Issues'},
+							{value: pies.smellIssues.length, name: '有Smell File关联的Issues'}
+							],
+							emphasis: {
+								itemStyle: {
+									shadowBlur: 10,
+									shadowOffsetX: 0,
+									shadowColor: 'rgba(0, 0, 0, 0.5)'
+								}
+							}
+					}
+					]
+		}
+		issuesPie.setOption(issuesPieOption);
 		var allFilesOption = {
 				title: {
 					text: '文件占比',
@@ -172,11 +212,14 @@ var multiple = function(projects, files, cytoscapeutil) {
 				html += "<h4><a target='_blank' href='/as/multiple/project/" + project.id + paramToRequestParam() + "'>" + project.name + " (" + project.language + ") </h4></a>";
 				html += "</div>";
 				html += "<div class='col-sm-12 row'>";
-					html += "<div class='col-sm-6'>";
+					html += "<div class='col-sm-4'>";
 					html += "<div id='allFilesPie_" + project.id + "' style='height: 400px;'></div>";
 					html += "</div>";
-					html += "<div class='col-sm-6'>";
+					html += "<div class='col-sm-4'>";
 					html += "<div id='issueFilesPie_" + project.id + "' style='height: 400px;'></div>";
+					html += "</div>";
+					html += "<div class='col-sm-4'>";
+					html += "<div id='issuesPie_" + project.id + "' style='height: 400px;'></div>";
 					html += "</div>";
 				html += "</div>";
 				html += "<div class=''>";
@@ -185,30 +228,34 @@ var multiple = function(projects, files, cytoscapeutil) {
 				html += "<div>";
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
-				html += "<th>文件</th>";
+				html += "<th>id</th>";
+				html += "<th>File</th>";
 				html += "<th>cycle</th>";
 				html += "<th>hublike</th>";
 				html += "<th>unstable</th>";
 				html += "<th>logic coupling</th>";
 				html += "<th>simiar</th>";
-				html += "<th>cyclic hierarchy</th>";
-				html += "<th>god component</th>";
-				html += "<th>unused component</th>";
-				html += "<th>page rank</th>";
+//				html += "<th>cyclic hierarchy</th>";
+//				html += "<th>god component</th>";
+				html += "<th>unused</th>";
+				html += "<th>unutilized</th>";
+//				html += "<th>page rank</th>";
 				html += "</tr>";
 				for(var j = 0 ; j < files[project.id].length; j++) {
 					var value = files[project.id][j];
 					html += "<tr>";
+					html += "<td>" + value.file.id + "</td>";
 					html += "<td><a target='_blank' href='/relation/file/" + value.file.id + "'>" + value.file.path + "</a></td>";
 					html += "<td>" + (value.cycle == true ? "T" : "") + "</td>";
 					html += "<td>" + (value.hublike == true ? "T" : "") + "</td>";
 					html += "<td>" + (value.unstable == true ? "T" : "") + "</td>";
 					html += "<td>" + (value.logicCoupling == true ? "T" : "") + "</td>";
 					html += "<td>" + (value.similar == true ? "T" : "") + "</td>";
-					html += "<td>" + (value.cyclicHierarchy == true ? "T" : "") + "</td>";
-					html += "<td>" + (value.god == true ? "T" : "") + "</td>";
+//					html += "<td>" + (value.cyclicHierarchy == true ? "T" : "") + "</td>";
+//					html += "<td>" + (value.god == true ? "T" : "") + "</td>";
 					html += "<td>" + (value.unused == true ? "T" : "") + "</td>";
-					html += "<td>" + value.file.score + "</td>";
+					html += "<td>" + (value.unutilized == true ? "T" : "") + "</td>";
+//					html += "<td>" + value.file.score + "</td>";
 					html += "</tr>";
 				}
 				html += "</table>";
@@ -262,7 +309,7 @@ var multiple = function(projects, files, cytoscapeutil) {
 				console.log(result);
 				for(var i = 0; i < projects.length; i++) {
 					var project = projects[i];
-					_pie(project, result[project.id], "allFilesPie_" + project.id, "issueFilesPie_" + project.id);
+					_pie(project, result[project.id], "allFilesPie_" + project.id, "issueFilesPie_" + project.id, "issuesPie_" + project.id);
 				}
 			}
 		});

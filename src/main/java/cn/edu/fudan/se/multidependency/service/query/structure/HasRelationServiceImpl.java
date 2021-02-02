@@ -11,6 +11,7 @@ import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,11 @@ public class HasRelationServiceImpl implements HasRelationService {
     }
 
     @Override
+    public Package findPackageInPackage(Package pck) {
+        return hasRepository.findPackageInPackage(pck.getId());
+    }
+
+    @Override
     public ProjectStructure projectHasInitialize(Project project) {
         ProjectStructure result = new ProjectStructure(project);
 //        System.out.println(hasRepository.findProjectHasPackages(project.getId()));
@@ -62,12 +68,28 @@ public class HasRelationServiceImpl implements HasRelationService {
         }
         PackageStructure result = new PackageStructure(pck);
 
-        Collection<ProjectFile> files = containRelationService.findPackageContainFiles(pck); // contain关系的file
-        result.addAllFiles(files);
+        Collection<ProjectFile> files = new ArrayList<>(containRelationService.findPackageContainFiles(pck)); // contain关系的file
+//        result.addAllFiles(files);
 
-        Collection<Package> childrenPackage = findPackageHasPackages(pck); // has关系的package
+        Collection<Package> childrenPackage = new ArrayList<>(findPackageHasPackages(pck)); // has关系的package
         for(Package child : childrenPackage) {
             result.addChildPackage(packageHasInitialize(child));
+        }
+
+        if(childrenPackage.size() >0 && files.size() > 0){
+            Package tmpPck = new Package();
+            tmpPck.setId(0 - pck.getId());
+            tmpPck.setEntityId(pck.getEntityId());
+            tmpPck.setLanguage(pck.getLanguage());
+            tmpPck.setDirectoryPath(pck.getDirectoryPath());
+            tmpPck.setLines(pck.getLines());
+            tmpPck.setLoc(pck.getLoc());
+            tmpPck.setName(pck.getName());
+            PackageStructure resultTmp = new PackageStructure(tmpPck);
+            resultTmp.addAllFiles(files);
+            result.addChildPackage(resultTmp);
+        } else {
+            result.addAllFiles(files);
         }
 
         return result;

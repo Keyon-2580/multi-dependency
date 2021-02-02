@@ -1,7 +1,7 @@
 {
   "projects": [
     {
-      "path": "D:\\my_data\\SDTeam\\depends_\\edited-to-jar\\fork\\depends",
+      "path": "D:\\my_data\\Dissertation\\depends-0.9.6b",
       "project": "depends",
       "language": "java",
       "isMicroservice": false,
@@ -15,19 +15,30 @@
   },
   "gits": [
     {
-      "path": "D:\\my_data\\SDTeam\\multi_dependencies\\projects_to_be_analyzed\\guava",
-      "specify_commit_range": true,
+      "path": "D:\\my_data\\Dissertation\\depends-0.9.6b",
+      "specify_commit_range": false,
       "specify_by_commit_id": true,
-      "commit_id_from": "8bd5686c5c80005168863f600eee319c0df41ce6",
-      "commit_id_to": "82b94ae8ca03ed4491dcace001b50f5a35da39d1",
-      "commit_time_since": "2020-01-03 18:32:31",
-      "commit_time_until": "2020-07-01 20:05:19",
+      "commit_id_from": "",
+      "commit_id_to": "",
+      "commit_time_since": "",
+      "commit_time_until": "",
       "issues_path": "",
       "calculate_cochange": false
     }
   ],
   "libs": [
   ],
-  "clones": [
-  ]
+  "clones": [{
+    "language"   : "java",
+    "granularity": "file",
+    "name_path"  : "src/main/resources/clone/file/depends-huang/0.9.6b/result/MeasureIndex.csv",
+    "result_path": "src/main/resources/clone/file/depends-huang/0.9.6b/similarity.csv",
+    "group_path" : "src/main/resources/clone/file/depends-huang/0.9.6b/result/type123_method_group_result.csv"
+  }, {
+    "language"   : "java",
+    "granularity": "function",
+    "name_path"  : "src/main/resources/clone/function/depends-huang/0.9.6b/result/MeasureIndex.csv",
+    "result_path": "src/main/resources/clone/function/depends-huang/0.9.6b/similarity.csv",
+    "group_path" : "src/main/resources/clone/function/depends-huang/0.9.6b/result/type123_method_group_result.csv"
+  }]
 }

@@ -68,6 +68,7 @@ public class MetricCalculator {
 		Map<Long, List<FileMetrics>> result = new HashMap<>();
 		Map<ProjectFile, FileMetrics> commitFileMetricsCache = calculateCommitFileMetrics();
 		for(FileMetrics fileMetrics : fileRepository.calculateFileMetrics()) {
+			fileMetrics.setInstability((fileMetrics.getFanIn() + fileMetrics.getFanOut()) == 0 ? -1 : (fileMetrics.getFanOut() + 0.0) / (fileMetrics.getFanIn() + fileMetrics.getFanOut()));
 			ProjectFile file = fileMetrics.getFile();
 			if(commitFileMetricsCache.get(file) != null) {
 				fileMetrics.setCochangeCommitTimes(commitFileMetricsCache.get(file).getCochangeCommitTimes());
@@ -123,43 +124,37 @@ public class MetricCalculator {
 		return fileMetrics;
 	}
 
-	public Map<Long, ProjectMetrics> calculateProjectMetrics(boolean calculateModularityAndCommits) {
+	public PackageMetrics calculatePackageMetric(Package pck){
+		return packageRepository.calculatePackageMetrics(pck.getId());
+	}
+
+	public Map<Long, ProjectMetrics> calculateProjectMetrics() {
 		String key = "calculateProjectMetrics";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
 		Map<Long, ProjectMetrics> result = new HashMap<>();
-		for(ProjectMetrics projectMetric : projectRepository.calculateProjectMetrics()) {
-			if(calculateModularityAndCommits) {
-				projectMetric.setCommitTimes(calculateProjectCommits(projectMetric.getProject()));
-				projectMetric.setModularity(calculateProjectModularity(projectMetric.getProject()));
-			}
+		for(ProjectMetrics projectMetric : projectRepository.getProjectMetrics()) {
 			result.put(projectMetric.getProject().getId(), projectMetric);
 		}
-		if(calculateModularityAndCommits) {
-			cache.cache(getClass(), key, result);
-		}
+
+		cache.cache(getClass(), key, result);
+
 		return result;
 	}
 
-	public Map<Long, ProjectMetrics> calculateProjectMetricsByGitRepository(boolean calculateModularityAndCommits, GitRepository gitRepository) {
+	public Map<String, List<ProjectMetrics>> calculateProjectMetricsByGitRepository() {
 		String key = "calculateProjectMetricsByGitRepository";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-		Map<Long, ProjectMetrics> result = new HashMap<>();
-		for(ProjectMetrics projectMetric : projectRepository.calculateProjectMetrics()) {
-			if(calculateModularityAndCommits) {
-				projectMetric.setCommitTimes(calculateProjectCommits(projectMetric.getProject()));
-				projectMetric.setModularity(calculateProjectModularity(projectMetric.getProject()));
-			}
-			if(gitRepository.getName().equals(projectMetric.getProject().getName())) {
-				result.put(projectMetric.getProject().getId(), projectMetric);
-			}
+		Map<String, List<ProjectMetrics>> result = new HashMap<>();
+		for(ProjectMetrics projectMetric : projectRepository.getProjectMetrics()) {
+			List<ProjectMetrics> projectMetricsList = result.getOrDefault(projectMetric.getProject().getName(), new ArrayList<>());
+			projectMetricsList.add(projectMetric);
+			result.put(projectMetric.getProject().getName() , projectMetricsList);
 		}
-		if(calculateModularityAndCommits) {
-			cache.cache(getClass(), key, result);
-		}
+		cache.cache(getClass(), key, result);
 		return result;
 	}
 	

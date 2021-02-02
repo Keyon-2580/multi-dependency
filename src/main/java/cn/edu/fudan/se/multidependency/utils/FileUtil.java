@@ -417,4 +417,18 @@ public class FileUtil {
 			return obj;
 		}
 	}
+	
+	public static void exportToFile(String filePath, String str) {
+		File file = new File(filePath);
+		try {
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
+				bw.write(str);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

@@ -39,6 +39,11 @@ public class MeasureController {
     
     @Autowired
     NodeService nodeService;
+
+    @GetMapping(value= {"", "/", "/index"})
+    public String index() {
+        return "metric";
+    }
     
     @GetMapping("/excel/package")
     @ResponseBody
@@ -68,11 +73,6 @@ public class MeasureController {
 		}
 	}
     
-    @GetMapping(value= {"", "/", "/index"})
-    public String index() {
-    	return "metric";
-    }
-    
     
     @GetMapping("/file")
     @ResponseBody
@@ -83,7 +83,7 @@ public class MeasureController {
     @GetMapping("/project")
     @ResponseBody
     public Collection<ProjectMetrics> calculateProjectMetrics() {
-    	return metricCalculator.calculateProjectMetrics(false).values();
+    	return metricCalculator.calculateProjectMetrics().values();
     }
     
     @GetMapping("/project/modularity")

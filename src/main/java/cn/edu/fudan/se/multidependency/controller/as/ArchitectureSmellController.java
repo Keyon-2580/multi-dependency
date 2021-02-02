@@ -60,7 +60,8 @@ public class ArchitectureSmellController {
 			@RequestParam(name="unstable", required=false, defaultValue="true") boolean unstable,
 			@RequestParam(name="hierarchy", required=false, defaultValue="true") boolean hierarchy,
 			@RequestParam(name="godComponent", required=false, defaultValue="true") boolean godComponent,
-			@RequestParam(name="unused", required=false, defaultValue="true") boolean unused) {
+			@RequestParam(name="unused", required=false, defaultValue="true") boolean unused,
+			@RequestParam(name="unutilized", required=false, defaultValue="true") boolean unutilized) {
 		Project project = nodeService.queryProject(projectId);
 		request.setAttribute("project", project);
 		Map<Long, List<CirclePacking>> circlePackings = detector.circlePacking(new MultipleAS() {
@@ -84,17 +85,21 @@ public class ArchitectureSmellController {
 			public boolean isUnstable() {
 				return unstable;
 			}
-			@Override
+			/*@Override
 			public boolean isCyclicHierarchy() {
 				return hierarchy;
 			}
 			@Override
 			public boolean isGod() {
 				return godComponent;
-			}
+			}*/
 			@Override
 			public boolean isUnused() {
 				return unused;
+			}
+			@Override
+			public boolean isUnutilized() {
+				return unutilized;
 			}
 		});
 		List<CirclePacking> circlePacking = circlePackings.getOrDefault(project.getId(), new ArrayList<>());
@@ -112,7 +117,8 @@ public class ArchitectureSmellController {
 			@RequestParam(name="unstable", required=false, defaultValue="true") boolean unstable,
 			@RequestParam(name="hierarchy", required=false, defaultValue="true") boolean hierarchy,
 			@RequestParam(name="godComponent", required=false, defaultValue="true") boolean godComponent,
-			@RequestParam(name="unused", required=false, defaultValue="true") boolean unused) {
+			@RequestParam(name="unused", required=false, defaultValue="true") boolean unused,
+			@RequestParam(name="unutilized", required=false, defaultValue="true") boolean unutilized) {
 		return detector.circlePacking(new MultipleAS() {
 			@Override
 			public boolean isCycle() {
@@ -134,17 +140,21 @@ public class ArchitectureSmellController {
 			public boolean isUnstable() {
 				return unstable;
 			}
-			@Override
+			/*@Override
 			public boolean isCyclicHierarchy() {
 				return hierarchy;
 			}
 			@Override
 			public boolean isGod() {
 				return godComponent;
-			}
+			}*/
 			@Override
 			public boolean isUnused() {
 				return unused;
+			}
+			@Override
+			public boolean isUnutilized() {
+				return unutilized;
 			}
 		});
 	}
@@ -159,7 +169,8 @@ public class ArchitectureSmellController {
 			@RequestParam(name="unstable", required=false, defaultValue="true") boolean unstable,
 			@RequestParam(name="hierarchy", required=false, defaultValue="true") boolean hierarchy,
 			@RequestParam(name="godComponent", required=false, defaultValue="true") boolean godComponent,
-			@RequestParam(name="unused", required=false, defaultValue="true") boolean unused) {
+			@RequestParam(name="unused", required=false, defaultValue="true") boolean unused,
+			@RequestParam(name="unutilized", required=false, defaultValue="true") boolean unutilized) {
 		return detector.smellAndIssueFiles(new MultipleAS() {
 			@Override
 			public boolean isCycle() {
@@ -181,17 +192,21 @@ public class ArchitectureSmellController {
 			public boolean isUnstable() {
 				return unstable;
 			}
-			@Override
+			/*@Override
 			public boolean isCyclicHierarchy() {
 				return hierarchy;
 			}
 			@Override
 			public boolean isGod() {
 				return godComponent;
-			}
+			}*/
 			@Override
 			public boolean isUnused() {
 				return unused;
+			}
+			@Override
+			public boolean isUnutilized() {
+				return unutilized;
 			}
 		});
 	}

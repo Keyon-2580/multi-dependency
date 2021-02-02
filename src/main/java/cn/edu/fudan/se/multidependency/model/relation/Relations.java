@@ -8,7 +8,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCallFunctionByTestCase;
-import cn.edu.fudan.se.multidependency.model.relation.structure.Dependency;
 
 public class Relations implements Serializable {
 
@@ -80,12 +79,37 @@ public class Relations implements Serializable {
                 addRelationDirectly(relation);
             } else {
                 relationWithTimes.addTimes();
-                if(relation instanceof Dependency){
-                    ((Dependency)relationWithTimes).addDependencyType(((Dependency) relation).getDependencyTypes());
-                }
             }
         } else {
             addRelationDirectly(relation);
+        }
+
+    }
+
+    /**
+     * 尚需测试
+     * @TODO
+     * @param relation
+     */
+    public synchronized void deleteRelation(Relation relation) {
+
+        if (relation instanceof DynamicCallFunctionByTestCase) {
+            DynamicCallFunctionByTestCase call = (DynamicCallFunctionByTestCase) relation;
+            if (call.getTraceId() == null) {
+                return;
+            }
+            List<DynamicCallFunctionByTestCase> calls = traceIdToDynamicCallFunctions.getOrDefault(call.getTraceId(), new CopyOnWriteArrayList<>());
+            if(calls.contains(relation)){
+                calls.remove(relation);
+                traceIdToDynamicCallFunctions.put(call.getTraceId(), calls);
+            }
+
+        }
+
+        if (relation instanceof RelationWithTimes) {
+            return;
+        } else {
+            deleteRelationDirectly(relation);
         }
 
     }
@@ -94,6 +118,14 @@ public class Relations implements Serializable {
         List<Relation> relations = allRelations.getOrDefault(relation.getRelationType(), new CopyOnWriteArrayList<>());
         relations.add(relation);
         allRelations.put(relation.getRelationType(), relations);
+    }
+
+    private void deleteRelationDirectly(Relation relation) {
+        List<Relation> relations = allRelations.getOrDefault(relation.getRelationType(), new CopyOnWriteArrayList<>());
+        if(relations.contains(relation)){
+            relations.remove(relation);
+            allRelations.put(relation.getRelationType(), relations);
+        }
     }
 
     public List<DynamicCallFunctionByTestCase> findDynamicCallFunctionsByTraceId(String traceId) {

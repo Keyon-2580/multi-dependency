@@ -31,9 +31,11 @@ public interface CloneGroupRepository extends Neo4jRepository<CloneGroup, Long> 
 	@Query("match (n:CloneGroup) delete n;")
 	void deleteCloneGroupRelations();
 
-	@Query("CALL algo.unionFind.stream(\"ProjectFile\", \"CLONE\")\n" +
-			"YIELD nodeId,setId\n" +
-			"with setId, collect(algo.getNodeById(nodeId)) AS files\n" +
+	@Query("CALL gds.wcc.stream({" +
+			"nodeProjection: \'ProjectFile\', " +
+			"relationshipProjection: \'" + RelationType.str_CLONE + "\'}) " +
+			"YIELD nodeId, componentId " +
+			"with componentId as setId, collect(gds.util.asNode(nodeId)) AS files\n" +
 			"where size(files) > 1\n" +
 			"match (file:ProjectFile) where file in files set file.cloneGroupId = \"file_group_\" + setId;")
 	void setFileGroup();
@@ -49,4 +51,12 @@ public interface CloneGroupRepository extends Neo4jRepository<CloneGroup, Long> 
 
 	@Query("MATCH (n:CloneGroup)-[:CONTAIN]->(file:ProjectFile) where n.language is null with n, file set n.language = file.language;\n")
 	void setCloneGroupLanguage();
+
+	/**
+	 * 判断是否存在co-change关系
+	 * @param
+	 * @return
+	 */
+	@Query("match (n:CloneGroup) return n limit 10")
+	List<CloneGroup> findCoChangesLimit();
 }

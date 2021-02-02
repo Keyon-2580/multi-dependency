@@ -95,11 +95,16 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		return result;
 	}
 
-	Map<Package, Collection<ProjectFile>> packageContainFilesCache = new ConcurrentHashMap<>();
+//	Map<Package, Collection<ProjectFile>> packageContainFilesCache = new ConcurrentHashMap<>();
 	@Override
 	public Collection<ProjectFile> findPackageContainFiles(Package pck) {
-		Collection<ProjectFile> result = packageContainFilesCache.getOrDefault(pck, containRepository.findPackageContainFiles(pck.getId()));
-		packageContainFilesCache.put(pck, result);
+		Collection<ProjectFile> result = new ArrayList<ProjectFile>();
+//		if(packageContainFilesCache.get(pck) != null){
+//			result = packageContainFilesCache.get(pck);
+//		}else{
+			result = containRepository.findPackageContainFiles(pck.getId());
+		//}
+//		packageContainFilesCache.put(pck, result);
 		result.forEach(file -> {
 			cache.cacheNodeBelongToNode(file, pck);
 		});
@@ -212,7 +217,6 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		Collection<LibraryAPI> result = libContainApisCache.getOrDefault(lib, containRepository.findLibraryContainLibraryAPIs(lib.getId()));
 		libContainApisCache.put(lib, result);
 		result.forEach(api -> {
-//			nodeBelongToLibraryCache.put(api, lib);
 			cache.cacheNodeBelongToNode(api, lib);
 		});
 		return result;
@@ -229,6 +233,13 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	@Override
 	public Project findFileBelongToProject(ProjectFile file) {
 		Package pck = findFileBelongToPackage(file);
+		return pck == null ? null : findPackageBelongToProject(pck);
+	}
+
+	@Override
+	public Project findTypeBelongToProject(Type type) {
+		ProjectFile file = findTypeBelongToFile(type);
+		Package pck = file == null ? null : findFileBelongToPackage(file);
 		return pck == null ? null : findPackageBelongToProject(pck);
 	}
 
@@ -546,12 +557,16 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
 	@Override
 	public Package findPackageInPackage(Package pck) {
-		return nodeService.queryPackage(pck.lastPackageDirectoryPath());
+		return nodeService.queryPackage(pck.lastPackageDirectoryPath(), pck.getLanguage());
 	}
 
 	@Override
 	public Collection<Package> findPackageContainSubPackages(Package pck) {
-		return packageRepository.findPackageContainSubPackages(pck.getDirectoryPath());
+		String language = pck.getLanguage();
+		if (language == null ){
+			language = containRepository.findPackageBelongToProject(pck.getId()).getLanguage();
+		}
+		return packageRepository.findPackageContainSubPackages(pck.getDirectoryPath(), language);
 	}
 
 	@Override
@@ -610,6 +625,9 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 			List<Import> fileImports = (List<Import>)findFileDirectlyImports(file);
 			List<Include> fileIncludes = (List<Include>)findFileDirectlyIncludes(file);
 			List<Type> containTypes = (List<Type>)findFileDirectlyContainTypes(file);
+			List<Namespace> containNamespaces = (List<Namespace>)findFileContainNamespaces(file);
+			List<Function> containFunctions = (List<Function>)findFileDirectlyContainFunctions(file);
+			List<Variable> containVariables = (List<Variable>)findFileDirectlyContainVariables(file);
 
 			if(fileImports != null && fileImports.size() > 0){
 				fileImports.sort( (o1, o2) -> {
@@ -653,92 +671,143 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 				arraytemp1.add(temp2);
 			}
 
-			if(containTypes != null && containTypes.size() > 0){
-				containTypes.sort((o1,o2) -> {
-					return  o1.getName().compareTo(o2.getName());
-				});
-
+			if( (containTypes != null && containTypes.size() > 0) ||
+					(containNamespaces != null && containNamespaces.size() > 0) ||
+					(containFunctions != null && containFunctions.size() > 0) ||
+					(containVariables != null && containVariables.size() > 0) )
+			{
 				JSONObject temp2 = new JSONObject();
-				temp2.put("name", "#R: CONTAIN(" + containTypes.size() + ")");
+				temp2.put("name", "#R: CONTAIN(" + (containTypes.size() + containNamespaces.size() + containFunctions.size() + containVariables.size()) + ")");
 				temp2.put("open",true);
 				JSONArray arraytemp2 = new JSONArray();
-				int typeIndex = 0;
-				for(Type type: containTypes){
-					JSONObject temp3 = new JSONObject();
-					temp3.put("name", "#T" + typeIndex++ + ": " + type.getName());
-					temp3.put("open",true);
-					JSONArray arraytemp3 = new JSONArray();
 
-					List<Variable> containVariables = (List<Variable>)findTypeDirectlyContainFields(type);
-					if(containVariables != null && containVariables.size() > 0){
-						containVariables.sort((o1,o2) -> {
-							return  o1.getName().compareTo(o2.getName());
-						});
-						JSONObject temp4 = new JSONObject();
-						temp4.put("name", "#R: CONTAIN(" + containVariables.size() + ")");
-						temp4.put("open",true);
-						JSONArray arraytemp4 = new JSONArray();
-						int varIndex = 0;
-						for(Variable variable: containVariables){
-							JSONObject temp5 = new JSONObject();
-							temp5.put("name","#V" + varIndex++ + ": "+ variable.getName());
-							arraytemp4.add(temp5);
-						}
-						temp4.put("children",arraytemp4);
-						arraytemp3.add(temp4);
-					}
-					List<Function> containFunctions = (List<Function>)findTypeDirectlyContainFunctions(type);
-					if(containFunctions != null && containFunctions.size() > 0){
-						containFunctions.sort((o1,o2) -> {
-							return  o1.getName().compareTo(o2.getName());
-						});
-						JSONObject temp4 = new JSONObject();
-						temp4.put("name", "#R: CONTAIN(" + containFunctions.size() + ")");
-						temp4.put("open",true);
-						JSONArray arraytemp4 = new JSONArray();
-						int functionIndex = 0;
-						for(Function function: containFunctions){
-							JSONObject temp5 = new JSONObject();
-							temp5.put("name","#M" + functionIndex++ + ": " + function.getName());
-							arraytemp4.add(temp5);
-						}
-						temp4.put("children",arraytemp4);
-						arraytemp3.add(temp4);
-					}
-					Map<RelationType, Collection<Relation>> dependencyRelations = findTypeStructureDependencyRelations(type);
-					Set<RelationType> relationTypeList = dependencyRelations.keySet();
-					if(relationTypeList != null && !relationTypeList.isEmpty()){
-						int relationTypeIndex = 0;
-						for(RelationType relationType : relationTypeList){
+				if(containTypes != null && containTypes.size() > 0){
+					containTypes.sort((o1,o2) -> {
+						return  o1.getName().compareTo(o2.getName());
+					});
+					int typeIndex = 0;
+					for(Type type: containTypes){
+						JSONObject temp3 = new JSONObject();
+						temp3.put("name", "#T" + typeIndex++ + ": " + (type.getName().length() == 0 ? type.getAliasName() : type.getName()) );
+						temp3.put("open",true);
+						JSONArray arraytemp3 = new JSONArray();
+
+						List<Variable> typeContainVariables = (List<Variable>)findTypeDirectlyContainFields(type);
+						if(typeContainVariables != null && typeContainVariables.size() > 0){
+							typeContainVariables.sort((o1,o2) -> {
+								return  o1.getName().compareTo(o2.getName());
+							});
 							JSONObject temp4 = new JSONObject();
-							temp4.put("name", "#R" + relationTypeIndex++ + ": " + relationType + "(" + dependencyRelations.get(relationType).size() + ")");
+							temp4.put("name", "#R: CONTAIN(" + typeContainVariables.size() + ")");
 							temp4.put("open",true);
 							JSONArray arraytemp4 = new JSONArray();
-
-							List<Relation> relationList = (List<Relation>)dependencyRelations.get(relationType);
-							relationList.sort( (o1,o2) -> {
-								int typeBool = o1.getEndNode().getNodeType().compareTo(o2.getEndNode().getNodeType());
-								int nameBool = o1.getEndNode().getName().compareTo(o2.getEndNode().getName());
-								return  typeBool != 0 ? typeBool : nameBool;
-							});
-
-							int relationIndex = 0;
-							for(Relation relation : relationList){
+							int varIndex = 0;
+							for(Variable variable: typeContainVariables){
 								JSONObject temp5 = new JSONObject();
-								temp5.put("name","#" + relation.getEndNode().getNodeType().toString().substring(0,1) + relationIndex++ + ": "+ relation.getEndNode().getName());
+								temp5.put("name","#V" + varIndex++ + ": "+ variable.getName());
 								arraytemp4.add(temp5);
 							}
 							temp4.put("children",arraytemp4);
 							arraytemp3.add(temp4);
 						}
+						List<Function> typeContainFunctions = (List<Function>)findTypeDirectlyContainFunctions(type);
+						if(typeContainFunctions != null && typeContainFunctions.size() > 0){
+							typeContainFunctions.sort((o1,o2) -> {
+								return  o1.getName().compareTo(o2.getName());
+							});
+							JSONObject temp4 = new JSONObject();
+							temp4.put("name", "#R: CONTAIN(" + typeContainFunctions.size() + ")");
+							temp4.put("open",true);
+							JSONArray arraytemp4 = new JSONArray();
+							int functionIndex = 0;
+							for(Function function: typeContainFunctions){
+								JSONObject temp5 = new JSONObject();
+								temp5.put("name","#M" + functionIndex++ + ": " + function.getName());
+								arraytemp4.add(temp5);
+							}
+							temp4.put("children",arraytemp4);
+							arraytemp3.add(temp4);
+						}
+						Map<RelationType, Collection<Relation>> dependencyRelations = findTypeStructureDependencyRelations(type);
+						Set<RelationType> relationTypeList = dependencyRelations.keySet();
+						if(relationTypeList != null && !relationTypeList.isEmpty()){
+							int relationTypeIndex = 0;
+							for(RelationType relationType : relationTypeList){
+								JSONObject temp4 = new JSONObject();
+								temp4.put("name", "#R" + relationTypeIndex++ + ": " + relationType + "(" + dependencyRelations.get(relationType).size() + ")");
+								temp4.put("open",true);
+								JSONArray arraytemp4 = new JSONArray();
+
+								List<Relation> relationList = (List<Relation>)dependencyRelations.get(relationType);
+								relationList.sort( (o1,o2) -> {
+									int typeBool = o1.getEndNode().getNodeType().compareTo(o2.getEndNode().getNodeType());
+									int nameBool = o1.getEndNode().getName().compareTo(o2.getEndNode().getName());
+									return  typeBool != 0 ? typeBool : nameBool;
+								});
+
+								int relationIndex = 0;
+								for(Relation relation : relationList){
+									JSONObject temp5 = new JSONObject();
+									if(relation.getEndNode() instanceof Type && relation.getEndNode().getName().length() == 0){
+										temp5.put("name","#" + relation.getEndNode().getNodeType().toString().substring(0,1) + relationIndex++ + ": "+ ((Type) relation.getEndNode()).getAliasName());
+									}else{
+										temp5.put("name","#" + relation.getEndNode().getNodeType().toString().substring(0,1) + relationIndex++ + ": "+ relation.getEndNode().getName());
+										arraytemp4.add(temp5);
+									}
+								}
+								temp4.put("children",arraytemp4);
+								arraytemp3.add(temp4);
+							}
+						}
+						temp3.put("children",arraytemp3);
+						arraytemp2.add(temp3);
 					}
-					temp3.put("children",arraytemp3);
-					arraytemp2.add(temp3);
+				}
+
+				if(containNamespaces != null && containNamespaces.size() > 0){
+					containNamespaces.sort((o1,o2) -> {
+						return  o1.getName().compareTo(o2.getName());
+					});
+					JSONArray nsArraytemp2 = new JSONArray();
+					int namespaceIndex = 0;
+					for(Namespace namespace : containNamespaces){
+						JSONObject temp3 = new JSONObject();
+						temp3.put("name", "#N" + namespaceIndex++ + ": " + namespace.getName());
+						temp3.put("open",true);
+						arraytemp2.add(temp3);
+					}
+				}
+
+				if(containFunctions != null && containFunctions.size() > 0){
+					containFunctions.sort((o1,o2) -> {
+						return  o1.getName().compareTo(o2.getName());
+					});
+					JSONArray FuncArraytemp2 = new JSONArray();
+					int functionIndex = 0;
+					for(Function function : containFunctions){
+						JSONObject temp3 = new JSONObject();
+						temp3.put("name", "#F" + functionIndex++ + ": " + function.getName());
+						temp3.put("open",true);
+						arraytemp2.add(temp3);
+					}
+				}
+
+				if(containVariables != null && containVariables.size() > 0){
+					containVariables.sort((o1,o2) -> {
+						return  o1.getName().compareTo(o2.getName());
+					});
+					JSONArray VarArraytemp2 = new JSONArray();
+					int variableIndex = 0;
+					for(Variable variable : containVariables){
+						JSONObject temp3 = new JSONObject();
+						temp3.put("name", "#V" + variableIndex++ + ": " + variable.getName());
+						temp3.put("open",true);
+						arraytemp2.add(temp3);
+					}
 				}
 				temp2.put("children", arraytemp2);
 				arraytemp1.add(temp2);
 			}
-
 			temp1.put("children",arraytemp1);
 			result1.add(temp1);
 			result.put(file.getId().toString(),result1);

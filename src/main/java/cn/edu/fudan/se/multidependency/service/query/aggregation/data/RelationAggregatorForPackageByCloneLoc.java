@@ -38,24 +38,24 @@ public class RelationAggregatorForPackageByCloneLoc implements RelationAggregato
 	}
 
 	@Override
-	public Boolean aggregate(RelationDataForDoubleNodes<? extends Node, ? extends Relation> doubleNodes){
+	public Boolean aggregate(BasicDataForDoubleNodes<? extends Node, ? extends Relation> doubleNodes){
 		Node node1 = doubleNodes.getNode1();
 		Node node2 = doubleNodes.getNode2();
 		if(!(node1 instanceof Package) || !(node2 instanceof Package)) {
 			return false;
 		}
 		try {
-			Collection<CodeNode> nodesInPackage1 = doubleNodes.getNodesInNode1();
-			Collection<CodeNode> nodesInPackage2 = doubleNodes.getNodesInNode2();
+			Collection<Node> nodesInPackage1 = doubleNodes.getNodesInNode1();
+			Collection<Node> nodesInPackage2 = doubleNodes.getNodesInNode2();
 			
 			long cloneFilesLOC = 0;
-			for(CodeNode node : nodesInPackage1) {
+			for(Node node : nodesInPackage1) {
 				if(!(node instanceof ProjectFile)) {
 					throw new Exception("clone节点不为file类型");
 				}
 				cloneFilesLOC += ((ProjectFile) node).getLoc();
 			}
-			for(CodeNode node : nodesInPackage2) {
+			for(Node node : nodesInPackage2) {
 				if(!(node instanceof ProjectFile)) {
 					throw new Exception("clone节点不为file类型");
 				}

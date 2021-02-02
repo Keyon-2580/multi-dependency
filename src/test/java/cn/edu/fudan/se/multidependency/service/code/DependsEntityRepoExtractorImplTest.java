@@ -1,17 +1,15 @@
 package cn.edu.fudan.se.multidependency.service.code;
 
-import org.junit.Test;
-
 import cn.edu.fudan.se.multidependency.model.Language;
+import cn.edu.fudan.se.multidependency.service.insert.code.Depends096Extractor;
 import cn.edu.fudan.se.multidependency.service.insert.code.DependsEntityRepoExtractor;
-import cn.edu.fudan.se.multidependency.service.insert.code.DependsEntityRepoExtractorImpl;
 import depends.entity.repo.EntityRepo;
 
 public class DependsEntityRepoExtractorImplTest {
 
 //	@Test
 	public void test() {
-		DependsEntityRepoExtractor extractor = DependsEntityRepoExtractorImpl.getInstance();
+		DependsEntityRepoExtractor extractor = new Depends096Extractor();
 		extractor.setLanguage(Language.java);
 		extractor.setProjectPath("D:\\git\\SimpleTest");
 		try {

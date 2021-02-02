@@ -70,6 +70,8 @@ public class MultipleDependencyApp {
 			}
 		}
 	}
-	
+//	java -jar multi-dependency-1.3.5.jar -s D:\git\multi-dependency\src\main\resources\application-fan.yml
+//	java -jar multi-dependency-1.3.5.jar -o D:\git\multi-dependency\src\main\resources\application-fan.yml
+//	java -jar multi-dependency-1.3.5.jar -m D:\git\multi-dependency\src\main\resources\application-fan.yml
 
 }

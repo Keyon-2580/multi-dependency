@@ -1,5 +1,5 @@
 .circlepacking_node {
-    cursor: pointer;
+    /*cursor: pointer;*/
 }
 
 .circlepacking_node:hover {
@@ -22,15 +22,14 @@
     pointer-events: none;
 }
 
-line {
-    stroke-width: 4px;
-    stroke: #d62728;
+path {
+    stroke-width: 3px;
+    cursor:pointer;
 }
 
-.showLineButton {
-    float: right;
-    margin-right: 50px;
-    margin-top: 50px;
+button {
+    /*margin-right: 50px;*/
+    /*margin-top: 50px;*/
     color: black;
     font-family:Arial;
     padding: 10px 10px;
@@ -40,4 +39,71 @@ line {
     font-size: 12px;
     border-radius: 3px;
     cursor: pointer;
+}
+
+.dropdown{
+    margin-left: 20px;
+    margin-bottom: 5px;
+    margin-right: 20px;
+}
+
+#projectToGraph {
+    margin-top: 30px;
+    margin-left: 20px;
+    border-radius: 10px;
+}
+
+#projectToGraph_util{
+    margin-left: 20px;
+}
+
+#AttributionSelect, #ProjectSelect{
+    border: 2px solid black;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 30px;
+}
+
+#multipleProjectSelect{
+    margin-top: 45px;
+    margin-left: 20px;
+}
+
+#projectCloneTable{
+    padding: 20px;
+}
+
+.control-label{
+    padding: 6px;
+    text-align: center;
+}
+
+.div-inline{
+    margin-top: 15px;
+}
+
+.label{
+    font-size: 18px;
+}
+
+.AttributionSelectInput{
+    width:50px;
+    height: 25px;
+    margin-left: 10px;
+}
+
+.AttributionSelectTitle{
+    font-size: 18px;
+    font-weight: 500;
+    margin-right: 100px;
+}
+
+.AttributionSelectLabel{
+    font-weight: 400;
+    font-size: 15px;
+}
+
+.AttributionSelectSingleSelect{
+    margin-left: 10px;
+    height: 25px;
 }

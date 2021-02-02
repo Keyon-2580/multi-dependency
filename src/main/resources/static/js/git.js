@@ -62,16 +62,16 @@ var gitRepoMetric = function() {
 					html += "<div><button name='packageTable_" + id + "' class='btn btn-primary package_excel_button'>输出 excel</button></div>";
 					html += "<div><table id='packageTable_" + i + "' class='table table-bordered'>";
 					html += "<tr>";
-					html += "<th>index</th>";
-					html += "<th>id</th>";
-					html += "<th>目录</th>";
+					html += "<th>Index</th>";
+					html += "<th>Id</th>";
+					html += "<th>Directory（目录）</th>";
 					html += "<th>NOF（文件数）</th>";
 					html += "<th>NOM（方法数）</th>";
 					html += "<th>LOC（代码行）</th>";
-					html += "<th>lines（文件总行数）</th>";
+					html += "<th>Lines（文件总行数）</th>";
 					html += "<th>Ca（afferent couplings）</th>";
 					html += "<th>Ce（efferent couplings）</th>";
-					html += "<th>instability</th>";
+					html += "<th>Instability</th>";
 					html += "</tr>";
 					var metrics = result[id];
 					console.log(metrics);
@@ -127,14 +127,14 @@ var gitRepoMetric = function() {
 				console.log(result);
 				var html = "<table id='projectTable' class='table table-bordered'>";
 				html += "<tr>";
-				html += "<th>index</th>";
-				html += "<th>id</th>";
-				html += "<th>项目</th>";
+				html += "<th>Index</th>";
+				html += "<th>Id</th>";
+				html += "<th>Project</th>";
 				html += "<th>NOP（包数）</th>";
 				html += "<th>NOF（文件数）</th>";
 				html += "<th>NOM（方法数）</th>";
 				html += "<th>LOC（代码行）</th>";
-				html += "<th>lines（文件总行数）</th>";
+				html += "<th>Lines（文件总行数）</th>";
 				html += "<th>Commit次数</th>";
 				html += "<th>Modularity（模块度）</th>";
 				html += "</tr>";
@@ -171,15 +171,15 @@ var gitRepoMetric = function() {
 				console.log(result);
 				var html = "<table id='repoTable' class='table table-bordered'>";
 				html += "<tr>";
-				html += "<th>index</th>";
-				html += "<th>id</th>";
+				html += "<th>Index</th>";
+				html += "<th>Id</th>";
 				html += "<th>Repo</th>";
 				html += "<th>Language</th>";
 				html += "<th>NOP（包数）</th>";
 				html += "<th>NOF（文件数）</th>";
 				html += "<th>NOM（方法数）</th>";
 				html += "<th>LOC（代码行）</th>";
-				html += "<th>lines（文件总行数）</th>";
+				html += "<th>Lines（文件总行数）</th>";
 				html += "<th>Commits</th>";
 				html += "<th>Issues</th>";
 				html += "</tr>";
@@ -207,9 +207,39 @@ var gitRepoMetric = function() {
 			}
 		});
 	}
+
+	var developerMetric = function () {
+		$.ajax({
+			type : "get",
+			url : "/developer/developers",
+			success : function (result) {
+				console.log(result);
+				var html = "";
+				html += "<table id='developerTable' class='table table-bordered'>";
+				html += "<tr>";
+				html += "<th>Index</th>";
+				html += "<th>Id</th>";
+				html += "<th>Name</th>";
+				html += "<th>CommitTimes</th>";
+				html += "</tr>";
+				for(let i = 0;i < result.developer.length; i++){
+					html += "<tr>";
+					html += "<td>" + (i + 1) + "</td>";
+					html += "<td>" + result.developer[i].id + "</td>";
+					html += "<td><a target='_blank' href='/developer/packages?developerId=" + result.developer[i].id + "'>" + result.developer[i].name + "</a></td>";
+					html += "<td><a target='_blank' href='/developer/detail?developerId=" + result.developer[i].id + "'>" + result.committime[i] + "</a></td>";
+					html += "</tr>";
+				}
+				html += "</table>";
+				$("#gitDeveloperInfo").html(html);
+			}
+		});
+	}
+
 	return {
 		init: function() {
 			repoMetric();
+			developerMetric();
 		}
 	}
 }

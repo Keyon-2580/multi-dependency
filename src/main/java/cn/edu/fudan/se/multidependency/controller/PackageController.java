@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.controller;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import cn.edu.fudan.se.multidependency.model.Language;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,8 +32,9 @@ public class PackageController {
 		if(pck == null) {
 			return new ArrayList<>();
 		}
-		pck = new Package();
-		pck.setDirectoryPath("/guava/src/com/google/common/");
+//		pck = new Package();
+//		pck.setLanguage(Language.java.name());
+//		pck.setDirectoryPath("/guava/src/com/google/common/");
 		return containRelationService.findPackageContainSubPackages(pck);
 	}
 	

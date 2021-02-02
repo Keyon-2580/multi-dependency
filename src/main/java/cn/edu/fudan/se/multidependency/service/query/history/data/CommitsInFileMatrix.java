@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.query.history.data;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -21,5 +22,5 @@ public class CommitsInFileMatrix {
 	boolean[][] update;
 	
 	Map<Long, Integer> commitTimes;
-	
+
 }

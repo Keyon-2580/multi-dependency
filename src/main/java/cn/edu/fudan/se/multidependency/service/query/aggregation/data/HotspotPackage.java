@@ -3,58 +3,52 @@ package cn.edu.fudan.se.multidependency.service.query.aggregation.data;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
-import cn.edu.fudan.se.multidependency.service.query.clone.data.SimilarPackage;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+@Data
+@NoArgsConstructor
 public class HotspotPackage {
 
-	@Getter
 	private RelationDataForDoubleNodes<Node, Relation> relationPackages;
-	
-	@Getter
+
 	private Collection<HotspotPackage> childrenHotspotPackages;
 
-	@Getter
 	private Collection<Package> childrenOtherPackages1;
 
-	@Getter
 	private Collection<Package> childrenOtherPackages2;
-	
-	@Getter
+
 	private Package package1;
-	
-	@Getter
+
 	private Package package2;
 
-	@Getter
+	private int clonePairs;
+
 	private int relationNodes1;
 
-	@Getter
 	private int relationNodes2;
 
-	@Getter
 	private int allNodes1;
 
-	@Getter
 	private int allNodes2;
-	
-	@Getter
+
 	private String id;
-	
-	@Getter
-	@Setter
-	private double value;
-	
-	private void swapPackage() {
-		Package pck = package1;
-		package1 = package2;
-		package2 = pck;
-	}
+
+	private double similarityValue;
+
+	private int packageCochangeTimes = 0;
+
+	private int packageCloneCochangeTimes = 0;
+
+	private String dependsOnTypes = "";
+
+	private String dependsByTypes = "";
+
+	private int dependsOnTimes = 0;
+
+	private int dependsByTimes = 0;
 	
 	public HotspotPackage(@NonNull RelationDataForDoubleNodes<Node, Relation> relationPackages) {
 		this.relationPackages = relationPackages;
@@ -63,31 +57,46 @@ public class HotspotPackage {
 		this.childrenOtherPackages2 = new ArrayList<>();
 		this.package1 = (Package) relationPackages.getNode1();
 		this.package2 = (Package) relationPackages.getNode2();
-//		if(package1.getDirectoryPath().compareTo(package2.getDirectoryPath()) > 0) {
-//			swapPackage();
-//		}
 		this.id = relationPackages.getId();
+		this.clonePairs = relationPackages.getChildren().size();
+		this.allNodes1 = 0;
+		this.allNodes2 = 0;
+		this.relationNodes1 = 0;
+		this.relationNodes2 = 0;
+		this.dependsOnTypes = relationPackages.getDependsOnTypes();
+		this.dependsByTypes = relationPackages.getDependsByTypes();
+		this.dependsOnTimes = relationPackages.getDependsOnTimes();
+		this.dependsByTimes = relationPackages.getDependsByTimes();
 	}
 
-	public void addHotspotChild(HotspotPackage child) {
+	public boolean addHotspotChild(HotspotPackage child) {
 		if(childrenHotspotPackages == null) {
-			return ;
+			return false;
 		}
-		this.childrenHotspotPackages.add(child);
+		if(!this.childrenHotspotPackages.contains(child)) {
+			this.childrenHotspotPackages.add(child);
+		}
+		return true;
 	}
 
-	public void addOtherChild1(Package child) {
+	public boolean addOtherChild1(Package child) {
 		if(childrenOtherPackages1 == null) {
-			return ;
+			return false;
 		}
-		this.childrenOtherPackages1.add(child);
+		if(!this.childrenOtherPackages1.contains(child)) {
+			this.childrenOtherPackages1.add(child);
+		}
+		return true;
 	}
 
-	public void addOtherChild2(Package child) {
+	public boolean addOtherChild2(Package child) {
 		if(childrenOtherPackages2 == null) {
-			return ;
+			return false;
 		}
-		this.childrenOtherPackages2.add(child);
+		if(!this.childrenOtherPackages2.contains(child)) {
+			this.childrenOtherPackages2.add(child);
+		}
+		return true;
 	}
 
 	public void setData(int allNodes1, int allNodes2, int relationNodes1, int relationNodes2) {
@@ -95,18 +104,15 @@ public class HotspotPackage {
 		this.allNodes2 = allNodes2;
 		this.relationNodes1 = relationNodes1;
 		this.relationNodes2 = relationNodes2;
+		this.similarityValue = (relationNodes1 + relationNodes2 + 0.0) / (allNodes1 + allNodes2);
 	}
 
-	public boolean isContainHotspotChild(HotspotPackage p) {
-		return this.childrenHotspotPackages.contains(p);
+	public void setClonePairs(int clonePairs) {
+		this.clonePairs = clonePairs;
 	}
-
-	public boolean isContainOtherChild1(Package p) {
-		return this.childrenOtherPackages1.contains(p);
+	public void swapPackages() {
+		Package pck = this.package1;
+		this.package1 = this.package2;
+		this.package2 = pck;
 	}
-
-	public boolean isContainOtherChild2(Package p) {
-		return this.childrenOtherPackages2.contains(p);
-	}
-
 }

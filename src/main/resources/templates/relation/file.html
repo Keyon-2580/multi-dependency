@@ -70,9 +70,10 @@
 		<div class="col-sm-12">
 			<div>
 				<h4 style="margin-top: 0px;" th:text="${file.id + ' ' + file.path}"></h4>
+				<button id="dependson" type="button" class="btn btn-default" onclick="depends()">dependson</button>
+				<button id="code" type="button" class="btn btn-default" onclick="code()">code</button>
 			</div>
 		</div>
-		<hr/>
 		<div class="col-sm-12">
 			<div>
 				<h5>metric</h5>
@@ -80,7 +81,6 @@
 			<div id="metric_content">
 			</div>
 		</div>
-		<hr/>
 		<div class="col-sm-12">
 			<div>
 				<h5>type</h5>
@@ -88,7 +88,6 @@
 			<div id="contain_type_content">
 			</div>
 		</div>
-		<hr/>
 		<div class="col-sm-12">
 			<div>
 				<h5>commits</h5>
@@ -96,7 +95,6 @@
 			<div id="commit_content">
 			</div>
 		</div>
-		<hr/>
 		<div class="col-sm-12">
 			<div>
 				<h5>issues</h5>
@@ -104,27 +102,6 @@
 			<div id="issue_content">
 			</div>
 		</div>
-		<hr/>
-		<div class="col-sm-12">
-			<div>
-				<h5>depends</h5>
-			</div>
-			<div class="col-sm-6">
-				<div>
-					<h5>depended by</h5>
-				</div>
-				<div id="dependedBy_content">
-				</div>
-			</div>
-			<div class="col-sm-6">
-				<div>
-					<h5>depends on</h5>
-				</div>
-				<div id="dependsOn_content">
-				</div>
-			</div>
-		</div>
-		<hr/>
 	</div>
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
@@ -132,6 +109,12 @@
 			 rFile([[${file}]].id, cytoscapeutil()).init();
 		});
 		// ]]>
+		function depends() {
+			window.open("/relation/dependsdetail/" + [[${file}]].id);
+		}
+		function code() {
+			window.open("/clone/compare?id1=" + [[${file}]].id + "&id2=" + [[${file}]].id);
+		}
 	</script>
 </body>
 </html>

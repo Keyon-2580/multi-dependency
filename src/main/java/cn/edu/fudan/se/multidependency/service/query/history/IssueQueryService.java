@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Issue;
@@ -16,6 +17,8 @@ public interface IssueQueryService {
 
 	Collection<Issue> queryAllIssues();
 	
+	Collection<Issue> queryIssues(Project project);
+
 	/**
 	 * 有commit提交的issue
 	 * @return

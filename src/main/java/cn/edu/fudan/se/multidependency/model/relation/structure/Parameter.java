@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 
 /**
  * 方法以类型作为方法参数的关系
- * 变量以类型作为类型参数的关系
  * @author fan
  *
  */

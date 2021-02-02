@@ -6,21 +6,21 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import cn.edu.fudan.se.multidependency.service.insert.dynamic.FeatureAndTestCaseFromJSONFileForMicroserviceInserter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.edu.fudan.se.multidependency.model.Language;
+import cn.edu.fudan.se.multidependency.service.insert.clone.CloneExtractorForMethod;
 import cn.edu.fudan.se.multidependency.service.insert.clone.CloneInserterForFileWithLoc;
-import cn.edu.fudan.se.multidependency.service.insert.clone.CloneInserterForMethod;
 import cn.edu.fudan.se.multidependency.service.insert.code.Depends096Extractor;
-import cn.edu.fudan.se.multidependency.service.insert.code.DependsCodeInserterForNeo4jServiceImpl;
+import cn.edu.fudan.se.multidependency.service.insert.code.DependsCodeExtractorForNeo4jServiceImpl;
 import cn.edu.fudan.se.multidependency.service.insert.code.DependsEntityRepoExtractor;
 import cn.edu.fudan.se.multidependency.service.insert.code.RestfulAPIFileExtractor;
 import cn.edu.fudan.se.multidependency.service.insert.code.RestfulAPIFileExtractorImpl;
 import cn.edu.fudan.se.multidependency.service.insert.code.SwaggerJSON;
-import cn.edu.fudan.se.multidependency.service.insert.dynamic.FeatureAndTestCaseFromJSONFileForMicroserviceInserter;
 import cn.edu.fudan.se.multidependency.service.insert.dynamic.TraceStartExtractor;
-import cn.edu.fudan.se.multidependency.service.insert.git.GitInserter;
+import cn.edu.fudan.se.multidependency.service.insert.git.EvolutionExtractor;
 import cn.edu.fudan.se.multidependency.service.insert.lib.LibraryInserter;
 import cn.edu.fudan.se.multidependency.service.insert.structure.MicroServiceArchitectureInserter;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
@@ -90,7 +90,7 @@ public class ThreadService {
 		extractor.setLanguage(projectConfig.getLanguage());
 		extractor.setProjectPath(projectConfig.getPath());
 		extractor.setAutoInclude(projectConfig.isAutoInclude());
-		DependsCodeInserterForNeo4jServiceImpl inserter = InserterForNeo4jServiceFactory.getInstance()
+		DependsCodeExtractorForNeo4jServiceImpl inserter = InserterForNeo4jServiceFactory.getInstance()
 				.createCodeInserterService(extractor.extractEntityRepo(), projectConfig);
 		RestfulAPIConfig apiConfig = projectConfig.getApiConfig();
 		if (apiConfig != null && RestfulAPIConfig.FRAMEWORK_SWAGGER.equals(projectConfig.getApiConfig().getFramework())) {
@@ -184,7 +184,7 @@ public class ThreadService {
 					executorForGit.execute(() -> {
 						try {
 							LOGGER.info(gitConfig.getPath());
-							new GitInserter(gitConfig).addNodesAndRelations();
+							new EvolutionExtractor(gitConfig).addNodesAndRelations();
 						} catch (Exception e) {
 							LOGGER.error(gitConfig.getPath() + " " + e.getMessage());
 						} finally {
@@ -218,7 +218,7 @@ public class ThreadService {
 			for (CloneConfig cloneConfig : config.getClonesConfig()) {
 				switch (cloneConfig.getGranularity()) {
 				case function:
-					new CloneInserterForMethod(cloneConfig.getNamePath(), cloneConfig.getResultPath(), cloneConfig.getLanguage()).addNodesAndRelations();
+					new CloneExtractorForMethod(cloneConfig.getNamePath(), cloneConfig.getResultPath(), cloneConfig.getGroupPath(), cloneConfig.getLanguage()).addNodesAndRelations();
 					break;
 				case file:
 //					new CloneInserterForFile(cloneConfig.getNamePath(), cloneConfig.getResultPath(), cloneConfig.getGroupPath(), cloneConfig.getLanguage()).addNodesAndRelations();

@@ -12,6 +12,7 @@ import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.CloneValueForDoubleNodes;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChange;
+import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChangeMatrix;
 
 public interface CloneValueService {
 	
@@ -25,7 +26,6 @@ public interface CloneValueService {
 	/**
 	 * 根据文件间的克隆找出微服务间的克隆
 	 * @param fileClones
-	 * @param removeSameNode
 	 * @return
 	 */
 	Collection<CloneValueForDoubleNodes<MicroService>> findMicroServiceCloneFromFileClone(Collection<Clone> fileClones);
@@ -40,7 +40,6 @@ public interface CloneValueService {
 	/**
 	 * 根据文件间的克隆找出项目间的克隆
 	 * @param fileClones
-	 * @param removeSameNode
 	 * @return
 	 */
 	Collection<CloneValueForDoubleNodes<Project>> queryProjectCloneFromFileClone(Collection<Clone> fileClones);
@@ -65,29 +64,11 @@ public interface CloneValueService {
 		
 		return result;
 	}
-	
-	/**
-	 * 两个包之间的文件级克隆的聚合，两个包之间不分先后顺序
-	 * @param fileClones
-	 * @param removeSameNode
-	 * @param pck1
-	 * @param pck2
-	 * @return
-	 */
-	default CloneValueForDoubleNodes<Package> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones, Package pck1, Package pck2) {
-		Map<Package, Map<Package, CloneValueForDoubleNodes<Package>>> packageClones = queryPackageCloneFromFileClone(fileClones);
-		Map<Package, CloneValueForDoubleNodes<Package>> map = packageClones.getOrDefault(pck1, new HashMap<>());
-		CloneValueForDoubleNodes<Package> result = map.get(pck2);
-		if(result == null) {
-			map = packageClones.getOrDefault(pck2, new HashMap<>());
-			result = map.get(pck1);
-		}
-		if(result != null) {
-			result.sortChildren();
-		}
-		return result;
-	}
+
+	CloneValueForDoubleNodes<Package> queryPackageCloneFromFileCloneSort(Collection<Clone> fileClones, Package pck1, Package pck2);
 	
 	PackageCloneValueWithFileCoChange queryPackageCloneWithFileCoChange(Collection<Clone> fileClones, Package pck1, Package pck2) throws Exception;
+
+	PackageCloneValueWithFileCoChangeMatrix queryPackageCloneWithFileCoChangeMatrix(Collection<Clone> fileClones, Package pck1, Package pck2);
 	
 }

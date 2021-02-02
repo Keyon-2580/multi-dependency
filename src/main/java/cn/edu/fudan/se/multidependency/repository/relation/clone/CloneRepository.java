@@ -76,11 +76,4 @@ public interface CloneRepository extends Neo4jRepository<Clone, Long> {
 	@Query("match (project:Project)-[:CONTAIN*2..4]->(node:CodeUnit) set node.projectId = id(project);")
 	void setProjectClone();
 
-	/**
-	 * 根据项目的id找出项目内所有克隆关系
-	 * @param projectId
-	 * @return
-	 */
-	@Query("match p=(node1:CodeUnit)-[:CLONE]->(node2:CodeUnit) where node1.projectId={projectId}  and node2.projectId={projectId} return p;")
-	public List<Clone> findClonesInProject(@Param("projectId") long projectId);
 }

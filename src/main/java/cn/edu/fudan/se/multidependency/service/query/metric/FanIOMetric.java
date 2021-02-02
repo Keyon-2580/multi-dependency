@@ -95,6 +95,6 @@ public abstract class FanIOMetric {
 	}
 
 	public double getInstability() {
-		return getFanOut() / (getFanOut() + getFanIn() + 0.0);
+		return getFanOut() + getFanIn() == 0 ? -1 : getFanOut() / (getFanOut() + getFanIn() + 0.0);
 	}
 }

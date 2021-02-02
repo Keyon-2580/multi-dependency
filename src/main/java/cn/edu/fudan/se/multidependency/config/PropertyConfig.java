@@ -19,5 +19,24 @@ public class PropertyConfig {
 	@Getter
 	@Value("${config.starter.clone_group}")
 	private boolean calculateCloneGroup;
+
+	@Getter
+	@Value("${config.starter.module_clone}")
+	private boolean setModuleClone;
+
+	@Getter
+	@Value("${config.starter.aggregation_clone}")
+	private boolean setAggregationClone;
 	
+	@Getter
+	@Value("${config.starter.smell}")
+	private boolean detectAS;
+
+	@Getter
+	@Value("${config.starter.modularity}")
+	private boolean calModularity;
+
+	@Getter
+	@Value("${config.starter.export_cyclic_dependency}")
+	private boolean exportCyclicDependency;
 }
