@@ -21,16 +21,16 @@ public interface ProjectRepository extends Neo4jRepository<Project, Long> {
     @Query("match (n) delete n")
     void clearNode();
     
-	@Query("match (project:Project) where project.name={name} and project.language={language} return project")
+	@Query("match (project:Project) where project.name=$name and project.language=$language return project")
 	Project queryProjectByNameAndLanguage(@Param("name") String name, @Param("language") String language);
 	
-	@Query("match (project:Project) where project.language={language} return project")
+	@Query("match (project:Project) where project.language=$language return project")
 	List<Project> queryProjectsByLanguage(@Param("language") String language);
 
 	@Query("match (project:Project) return project")
 	List<Project> queryAllProjects();
 	
-	@Query("match (n) where id(n) = {id} return n")
+	@Query("match (n) where id(n) = $id return n")
 	Node queryNodeById(@Param("id") long id);
 	
 	@Query("MATCH (project:Project)" +
@@ -52,7 +52,7 @@ public interface ProjectRepository extends Neo4jRepository<Project, Long> {
 	public void setProjectMetrics();
 
 	@Query("MATCH (project:Project) " +
-			"where id(project) = {id} " +
-			"SET project.modularity = {modularity};")
+			"where id(project) = $id " +
+			"SET project.modularity = $modularity;")
 	public void setModularityMetricsForProject(@Param("id") long id, @Param("modularity") double modularity);
 }

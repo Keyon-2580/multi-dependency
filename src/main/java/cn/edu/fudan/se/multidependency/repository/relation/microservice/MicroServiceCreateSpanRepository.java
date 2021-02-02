@@ -18,11 +18,11 @@ public interface MicroServiceCreateSpanRepository extends Neo4jRepository<MicroS
 	 * @param spanId
 	 * @return
 	 */
-	@Query("MATCH n = (m:MicroService)-[r:" + RelationType.str_MICRO_SERVICE_CREATE_SPAN + "]->(s:Span{spanId:{spanId}}) return n")
+	@Query("MATCH n = (m:MicroService)-[r:" + RelationType.str_MICRO_SERVICE_CREATE_SPAN + "]->(s:Span{spanId:$spanId}) return n")
 	public MicroServiceCreateSpan findMicroServiceCreateSpan(@Param("spanId") String spanId);
 	
 
-	@Query("match p = (m:MicroService)-[r:" + RelationType.str_MICRO_SERVICE_CREATE_SPAN + "]->(s:Span) where id(m) = {microserviceId} and s.traceId = {traceId} return p")
+	@Query("match p = (m:MicroService)-[r:" + RelationType.str_MICRO_SERVICE_CREATE_SPAN + "]->(s:Span) where id(m) = $microserviceId and s.traceId = $traceId return p")
 	public List<MicroServiceCreateSpan> findMicroServiceCreateSpansInTrace(@Param("microserviceId") Long microserviceId, @Param("traceId") String traceId);
 
 }

@@ -17,9 +17,9 @@ import java.util.List;
 public interface GitRepoRepository extends Neo4jRepository<GitRepository, Long> {
 	
     @Query("match p = (git:GitRepository)-[:" + RelationType.str_CONTAIN + "]->(b:Branch)-[:" 
-    		+ RelationType.str_CONTAIN + "]->(c:Commit) where id(c)={commitId} return git")
+    		+ RelationType.str_CONTAIN + "]->(c:Commit) where id(c)=$commitId return git")
 	GitRepository findCommitBelongToGitRepository(@Param("commitId") long commitId);
 
-	@Query("match (gitRepo:GitRepository)-[:" + RelationType.str_CONTAIN + "*2]->(commit:Commit) where id(gitRepo)={gitRepoId} return distinct commit;")
+	@Query("match (gitRepo:GitRepository)-[:" + RelationType.str_CONTAIN + "*2]->(commit:Commit) where id(gitRepo)=$gitRepoId return distinct commit;")
 	List<Commit> queryCommitsInGitRepo(@Param("gitRepoId") long gitRepoId);
 }

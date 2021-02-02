@@ -10,7 +10,7 @@ import cn.edu.fudan.se.multidependency.model.node.testcase.Feature;
 @Repository
 public interface FeatureRepository extends Neo4jRepository<Feature, Long> {
 	
-	@Query("MATCH (f:Feature{featureName:{featureName}}) RETURN f")
+	@Query("MATCH (f:Feature{featureName:$featureName}) RETURN f")
 	public Feature findByFeatureName(@Param("featureName") String featureName);
 	
 }

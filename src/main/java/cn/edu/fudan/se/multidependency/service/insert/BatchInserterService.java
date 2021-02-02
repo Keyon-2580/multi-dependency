@@ -2,15 +2,17 @@ package cn.edu.fudan.se.multidependency.service.insert;
 
 import java.io.Closeable;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.neo4j.batchinsert.BatchInserter;
+import org.neo4j.batchinsert.BatchInserters;
 import org.neo4j.graphdb.ConstraintViolationException;
 import org.neo4j.graphdb.Label;
-import org.neo4j.unsafe.batchinsert.BatchInserter;
-import org.neo4j.unsafe.batchinsert.BatchInserters;
+import org.neo4j.io.layout.DatabaseLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +42,9 @@ public class BatchInserterService implements Closeable {
 		if(initDatabase) {
 			FileUtil.delFile(directory);
 		}
-		inserter = BatchInserters.inserter(directory);
+		Path path = directory.toPath();
+		DatabaseLayout databaseLayout = DatabaseLayout.ofFlat(path);
+		inserter = BatchInserters.inserter(databaseLayout);
 		for(NodeLabelType nodeType : NodeLabelType.values()) {
 			List<Label> labels = new ArrayList<>();
 			for(String labelStr : nodeType.labels()) {

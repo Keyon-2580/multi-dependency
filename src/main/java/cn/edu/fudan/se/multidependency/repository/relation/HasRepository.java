@@ -14,22 +14,22 @@ import java.util.List;
 @Repository
 public interface HasRepository extends Neo4jRepository<Has, Long> {
 
-    @Query("match (project:Project)-[r:" + RelationType.str_CONTAIN + "]->(pck:Package) where not (pck)<-[:" + RelationType.str_HAS + "]-(:Package) and id(project)={projectId} return pck")
+    @Query("match (project:Project)-[r:" + RelationType.str_CONTAIN + "]->(pck:Package) where not (pck)<-[:" + RelationType.str_HAS + "]-(:Package) and id(project)=$projectId return pck")
     public List<Package> findProjectHasPackages(@Param("projectId") Long projectId);
 
-    @Query("Match (pck:Package)-[:" + RelationType.str_HAS + "]->(children:Package) where id(pck)={packageId} return children")
+    @Query("Match (pck:Package)-[:" + RelationType.str_HAS + "]->(children:Package) where id(pck)=$packageId return children")
     public List<Package> findPackageHasPackages(@Param("packageId") Long packageId);
 
-    @Query("Match (parent:Package)-[:" + RelationType.str_HAS + "]->(pck:Package) where id(pck)={packageId} return parent")
+    @Query("Match (parent:Package)-[:" + RelationType.str_HAS + "]->(pck:Package) where id(pck)=$packageId return parent")
     public Package findPackageInPackage(@Param("packageId") Long packageId);
 
     @Query("Match (pck:Package)-[:" + RelationType.str_HAS + "]->(children:Package)-[:" + RelationType.str_HAS + "]->(:Package) " +
-            "where id(pck)={parentPackageId} " +
+            "where id(pck)=$parentPackageId " +
             "return children;")
     public List<Package> findPackagesWithChildPackagesForParentPackage(@Param("parentPackageId") Long parentPackageId);
 
     @Query("Match (parent:Package)-[:" + RelationType.str_HAS + "]->(pck:Package) " +
-            "where id(parent)={parentPackageId} " +
+            "where id(parent)=$parentPackageId " +
             "with parent, pck " +
             "set pck.depth = parent.depth + 1; ")
     public Boolean setChildPackageDepth(@Param("parentPackageId") Long parentPackageId);

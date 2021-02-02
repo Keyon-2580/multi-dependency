@@ -21,19 +21,19 @@ import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikeModule;
 @Repository
 public interface ASRepository extends Neo4jRepository<Project, Long> {
 	
-	@Query("match (c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(file:ProjectFile) where id(file) = {id} and c.usingForIssue=true return c")
+	@Query("match (c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(file:ProjectFile) where id(file) = $id and c.usingForIssue=true return c")
 	public List<Commit> findCommitsUsingForIssue(@Param("id") long fileId);
 	
-	@Query("match (project:Project)-[:CONTAIN*2]->(file:ProjectFile) where id(project)={id} "
+	@Query("match (project:Project)-[:CONTAIN*2]->(file:ProjectFile) where id(project)=$id "
 			+ "with file, size((file)-[:DEPENDS_ON]->()) as fanOut, size((file)<-[:DEPENDS_ON]-()) as fanIn "
-			+ "where fanOut >= {fanOut} and fanIn >= {fanIn} return file, fanIn, fanOut "
+			+ "where fanOut >= $fanOut and fanIn >= $fanIn return file, fanIn, fanOut "
 			+ "order by fanIn + fanOut desc;")
 	public List<HubLikeFile> findHubLikeFiles(@Param("id") long projectId, @Param("fanIn") int fanIn, @Param("fanOut") int fanOut);
 	
-	@Query("match (project:Project)-[:CONTAIN]->(module:Module) where id(project) = {id} "
+	@Query("match (project:Project)-[:CONTAIN]->(module:Module) where id(project) = $id "
 			+ "with module, size((module)-[:DEPENDS_ON]->(:Module)) as fanOut, "
 			+ "size((module)<-[:DEPENDS_ON]-(:Module)) as fanIn "
-			+ "where fanOut >= {fanOut} and fanIn >= {fanIn} return module, fanOut, fanIn;")
+			+ "where fanOut >= $fanOut and fanIn >= $fanIn return module, fanOut, fanIn;")
 	public List<HubLikeModule> findHubLikeModules(@Param("id") long projectId, @Param("fanIn") int fanIn, @Param("fanOut") int fanOut);
 	
 	@Query("match (p:Package) where not (p)-[:" + RelationType.str_DEPENDS_ON + "]-() return p")
@@ -42,7 +42,7 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 	@Query("match (f:ProjectFile) where not (f)-[:" + RelationType.str_DEPENDS_ON + "]-() return f")
 	public List<ProjectFile> unusedFiles();
 	
-	@Query("match p= (file1:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->(file2:ProjectFile) where r.times >= {count} and not (file1)-[:"
+	@Query("match p= (file1:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->(file2:ProjectFile) where r.times >= $count and not (file1)-[:"
 			+ RelationType.str_DEPENDS_ON + "]-(file2) return p")
 	public List<CoChange> cochangeFilesWithoutDependsOn(@Param("count") int minCoChangeCount);
 	

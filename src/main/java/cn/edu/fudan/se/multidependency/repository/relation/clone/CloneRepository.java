@@ -20,7 +20,7 @@ public interface CloneRepository extends Neo4jRepository<Clone, Long> {
 	 * @param cloneType
 	 * @return
 	 */
-	@Query("match p= ()-[:" + RelationType.str_CLONE + "]->() where r.cloneRelationType={cloneRelationType} return p")
+	@Query("match p= ()-[:" + RelationType.str_CLONE + "]->() where r.cloneRelationType=$cloneRelationType return p")
 	public List<Clone> findAllClonesByCloneType(@Param("cloneRelationType") String cloneRelationType);
 	
 	@Query("match p= (:ProjectFile)-[:" + RelationType.str_CLONE + "]->(:ProjectFile) return p")
@@ -41,7 +41,7 @@ public interface CloneRepository extends Neo4jRepository<Clone, Long> {
 	 * @return
 	 */
 	@Deprecated
-	@Query("match p= (g:CloneGroup)-[:" + RelationType.str_CONTAIN + "]->()-[r:" + RelationType.str_CLONE + "]->()<-[:" + RelationType.str_CONTAIN + "]-(g) where r.cloneRelationType={cloneRelationType} return g")
+	@Query("match p= (g:CloneGroup)-[:" + RelationType.str_CONTAIN + "]->()-[r:" + RelationType.str_CLONE + "]->()<-[:" + RelationType.str_CONTAIN + "]-(g) where r.cloneRelationType=$cloneRelationType return g")
 	public List<CloneGroup> findGroupsByCloneType(@Param("cloneRelationType") String cloneRelationType);
 	
 	/*@Query("match p= (g:CloneGroup)-[:" + RelationType.str_CONTAIN + "]->(:ProjectFile)-[r:" + RelationType.str_CLONE + "]->(:ProjectFile)<-[:" + RelationType.str_CONTAIN + "]-(g) return g")
@@ -62,7 +62,7 @@ public interface CloneRepository extends Neo4jRepository<Clone, Long> {
 	 * @param groupId
 	 * @return
 	 */
-	@Query("match p= (g:CloneGroup)-[:" + RelationType.str_CONTAIN + "]->()-[:" + RelationType.str_CLONE + "]->()<-[:" + RelationType.str_CONTAIN + "]-(g) where id(g)={groupId} return p")
+	@Query("match p= (g:CloneGroup)-[:" + RelationType.str_CONTAIN + "]->()-[:" + RelationType.str_CLONE + "]->()<-[:" + RelationType.str_CONTAIN + "]-(g) where id(g)=$groupId return p")
 	public List<Clone> findCloneGroupContainClones(@Param("groupId") long groupId);
 
 	/**
@@ -70,7 +70,7 @@ public interface CloneRepository extends Neo4jRepository<Clone, Long> {
 	 * @param projectId
 	 * @return
 	 */
-	@Query("match (project:Project)-[:CONTAIN*2]->(file:ProjectFile)-[:CLONE]-() where id(project)={projectId} return file;")
+	@Query("match (project:Project)-[:CONTAIN*2]->(file:ProjectFile)-[:CLONE]-() where id(project)=$projectId return file;")
 	public List<ProjectFile> findProjectContainCloneFiles(@Param("projectId") long projectId);
 
 	@Query("match (project:Project)-[:CONTAIN*2..4]->(node:CodeUnit) set node.projectId = id(project);")

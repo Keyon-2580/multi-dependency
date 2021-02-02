@@ -15,7 +15,7 @@ public interface TraceRepository extends Neo4jRepository<Trace, Long>  {
 	@Query("MATCH (n:Trace) RETURN n")
 	public List<Trace> findAllTrace();
 	
-	@Query("Match (t:Trace) where t.traceId={traceId} return t")
+	@Query("Match (t:Trace) where t.traceId=$traceId return t")
 	public Trace findTraceByTraceId(@Param("traceId") String traceId);
 
 }

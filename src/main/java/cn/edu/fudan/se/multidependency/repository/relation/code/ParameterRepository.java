@@ -13,13 +13,13 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.Parameter;
 @Repository
 public interface ParameterRepository extends Neo4jRepository<Parameter, Long>{
 
-	@Query("MATCH result=()-[r:" + RelationType.str_PARAMETER + "]->(type:Type) with type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)={projectId} RETURN result")
+	@Query("MATCH result=()-[r:" + RelationType.str_PARAMETER + "]->(type:Type) with type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)=$projectId RETURN result")
 	List<Parameter> findProjectContainParameterRelations(@Param("projectId") Long projectId);
 	
-	@Query("MATCH result=(function:Function)-[r:" + RelationType.str_PARAMETER + "]->(type:Type) with function,type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)={projectId} RETURN result")
+	@Query("MATCH result=(function:Function)-[r:" + RelationType.str_PARAMETER + "]->(type:Type) with function,type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)=$projectId RETURN result")
 	List<Parameter> findProjectContainFunctionParameterTypeRelations(@Param("projectId") Long projectId);
 	
-	@Query("MATCH result=(variable:Variable)-[r:" + RelationType.str_PARAMETER + "]->(type:Type) with variable,type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)={projectId} RETURN result")
+	@Query("MATCH result=(variable:Variable)-[r:" + RelationType.str_PARAMETER + "]->(type:Type) with variable,type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)=$projectId RETURN result")
 	List<Parameter> findProjectContainVariableTypeParameterTypeRelations(@Param("projectId") Long projectId);
 
 }

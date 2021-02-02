@@ -13,6 +13,6 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.Cast;
 @Repository
 public interface CastRepository extends Neo4jRepository<Cast, Long> {
 
-	@Query("MATCH result=(function:Function)-[r:" + RelationType.str_CAST + "]->(type:Type) with function,type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)={projectId} RETURN result")
+	@Query("MATCH result=(function:Function)-[r:" + RelationType.str_CAST + "]->(type:Type) with function,type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)=$projectId RETURN result")
 	List<Cast> findProjectContainFunctionCastTypeRelations(@Param("projectId") Long projectId);
 }

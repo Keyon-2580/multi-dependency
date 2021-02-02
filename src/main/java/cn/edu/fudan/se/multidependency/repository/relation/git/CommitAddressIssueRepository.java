@@ -21,18 +21,18 @@ public interface CommitAddressIssueRepository extends Neo4jRepository<CommitAddr
 	List<CommitAddressIssue> queryAllCommitAddressIssues();
 	
 	@Query("match (commit:Commit)-[r:" + RelationType.str_COMMIT_ADDRESS_ISSUE 
-			+ "]->(issue:Issue) where id(commit)={id} return issue;")
+			+ "]->(issue:Issue) where id(commit)=$id return issue;")
 	List<Issue> queryIssuesAddressedByCommit(@Param("id") long commitId);
 	
 	@Query("match (issue:Issue)<-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE 
-			+ "]-(commit:Commit) where id(issue)={id} return commit;")
+			+ "]-(commit:Commit) where id(issue)=$id return commit;")
 	List<Commit> queryRelatedCommitsOnIssue(@Param("id") long issueId);
 	
 	@Query("match (issue:Issue)<-[:" 
 			+ RelationType.str_COMMIT_ADDRESS_ISSUE 
 			+ "]-(commit:Commit)-[:" 
 			+ RelationType.str_COMMIT_UPDATE_FILE
-			+ "]->(file:ProjectFile) where id(issue)={id} return file;")
+			+ "]->(file:ProjectFile) where id(issue)=$id return file;")
 	List<ProjectFile> queryRelatedFilesOnIssue(@Param("id") long issueId);
 
 	@Query("match (issue:Issue)<-[:" 
@@ -44,7 +44,7 @@ public interface CommitAddressIssueRepository extends Neo4jRepository<CommitAddr
 
 	@Query("match (file:ProjectFile)<-[:" 
 			+ RelationType.str_COMMIT_UPDATE_FILE 
-			+ "]-(commit:Commit) where id(file) = {id} with commit "
+			+ "]-(commit:Commit) where id(file) = $id with commit "
 			+ "match (commit)-[:" 
 			+ RelationType.str_COMMIT_ADDRESS_ISSUE 
 			+ "]->(issue:Issue) return issue;")

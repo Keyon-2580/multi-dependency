@@ -15,7 +15,7 @@ import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
 @Repository
 public interface PackageRepository extends Neo4jRepository<Package, Long> {
     
-	@Query("match (p:Package) where p.directoryPath={directoryPath} and p.language = {language} return p")
+	@Query("match (p:Package) where p.directoryPath=$directoryPath and p.language = $language return p")
 	public Package queryPackage(@Param("directoryPath") String directoryPath, @Param("language") String language);
 	
 	
@@ -30,7 +30,7 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 			"RETURN pck, loc, lines, nof, nom, fanIn, fanOut order by(pck.directoryPath) desc;")
 	public List<PackageMetrics> calculatePackageMetrics();
 
-	@Query("MATCH (pck:Package) where id(pck) = {packageId}\r\n" +
+	@Query("MATCH (pck:Package) where id(pck) = $packageId\r\n" +
 			"WITH pck.nof as nof, \r\n" +
 			"     pck.nom as nom, \r\n" +
 			"     size((pck)-[:" + RelationType.str_DEPENDS_ON + "]->()) as fanOut, \r\n" +
@@ -66,6 +66,6 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 	 * @param directoryPath
 	 * @return
 	 */
-	@Query("match (n:Package) where n.language = {language} and n.directoryPath =~ ({directoryPath} + \"[^/]*/\") return n")
+	@Query("match (n:Package) where n.language = $language and n.directoryPath =~ ($directoryPath + \"[^/]*/\") return n")
 	public Collection<Package> findPackageContainSubPackages(@Param("directoryPath") String directoryPath, @Param("language")String language);
 }

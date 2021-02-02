@@ -15,7 +15,7 @@ public interface SpanRepository extends Neo4jRepository<Span, Long>  {
 	@Query("MATCH (n:Span) RETURN n")
 	public List<Span> findAllSpans();
 	
-	@Query("MATCH (n:Span{traceId:{traceId}}) RETURN n")
+	@Query("MATCH (n:Span{traceId:$traceId}) RETURN n")
 	public List<Span> findSpansByTraceId(@Param("traceId") String traceId);
 	
 }

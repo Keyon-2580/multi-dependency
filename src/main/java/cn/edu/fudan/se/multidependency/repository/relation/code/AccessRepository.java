@@ -11,10 +11,10 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.Access;
 
 public interface AccessRepository extends Neo4jRepository<Access, Long> {
 	
-	@Query("MATCH result=(function:Function)-[r:" + RelationType.str_ACCESS + "]->(field:Variable) with function,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..5]->(function) where id(project)={projectId} RETURN result")
+	@Query("MATCH result=(function:Function)-[r:" + RelationType.str_ACCESS + "]->(field:Variable) with function,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..5]->(function) where id(project)=$projectId RETURN result")
 	List<Access> findProjectContainFunctionAccessFieldRelations(@Param("projectId") Long projectId);
 
-	@Query("MATCH result=(function:Function)-[r:" + RelationType.str_ACCESS + "]->(field:Variable) where id(function)={functionId} RETURN result")
+	@Query("MATCH result=(function:Function)-[r:" + RelationType.str_ACCESS + "]->(field:Variable) where id(function)=$functionId RETURN result")
 	List<Access> findFunctionAccessFields(@Param("functionId") long functionId);
 	
 }

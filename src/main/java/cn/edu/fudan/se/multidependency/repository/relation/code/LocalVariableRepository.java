@@ -13,6 +13,6 @@ import java.util.List;
 @Repository
 public interface LocalVariableRepository extends Neo4jRepository<LocalVariable, Long> {
 
-	@Query("match (a:Type)-[:" + RelationType.str_LOCAL_VARIABLE + "]->(b:Type) where id(a) = {id} return b")
+	@Query("match (a:Type)-[:" + RelationType.str_LOCAL_VARIABLE + "]->(b:Type) where id(a) = $id return b")
 	List<Type> queryLocalVariableTypes(@Param("id") long typeId);
 }
