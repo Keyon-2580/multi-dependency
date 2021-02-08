@@ -27,7 +27,10 @@ public final class RepositoryService implements InserterForNeo4j, Serializable {
     private static RepositoryService repository = new RepositoryService();
 
     @Setter
-    private String databasePath;
+    private String dataPath;
+
+    @Setter
+    private String databaseName;
 
     @Setter
     private boolean delete;
@@ -54,7 +57,7 @@ public final class RepositoryService implements InserterForNeo4j, Serializable {
         LOGGER.info("总计节点数：" + nodes.size());
         LOGGER.info("总计关系数：" + relations.size());
         LOGGER.info("初始化数据库：" + sdf.format(new Timestamp(System.currentTimeMillis())));
-        batchInserterService.init(databasePath, delete);
+        batchInserterService.init(dataPath, databaseName, delete);
         LOGGER.info("初始化数据库结束：" + sdf.format(new Timestamp(System.currentTimeMillis())));
         LOGGER.info("插入节点：" + sdf.format(new Timestamp(System.currentTimeMillis())));
         batchInserterService.insertNodes(nodes);
