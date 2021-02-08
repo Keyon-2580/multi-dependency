@@ -14,16 +14,16 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.Extends;
 @Repository
 public interface ExtendsRepository extends Neo4jRepository<Extends, Long> {
 	
-	@Query("match (a:Type)-[r:" + RelationType.str_EXTENDS + "]->(b:Type) where id(b) = {id} return a")
+	@Query("match (a:Type)-[r:" + RelationType.str_EXTENDS + "]->(b:Type) where id(b) = $id return a")
     List<Type> querySubTypes(@Param("id") long typeId);
 	
-	@Query("match (a:Type)-[r:" + RelationType.str_EXTENDS + "]->(b:Type) where id(a) = {id} return b")
+	@Query("match (a:Type)-[r:" + RelationType.str_EXTENDS + "]->(b:Type) where id(a) = $id return b")
     List<Type> querySuperTypes(@Param("id") long typeId);
 	
-	@Query("MATCH result=(type1:Type)-[r:" + RelationType.str_EXTENDS + "]->(type2:Type) with type1,type2,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type1) where id(project)={projectId} RETURN result")
+	@Query("MATCH result=(type1:Type)-[r:" + RelationType.str_EXTENDS + "]->(type2:Type) with type1,type2,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type1) where id(project)=$projectId RETURN result")
 	List<Extends> findProjectContainTypeExtendsTypeRelations(@Param("projectId") long projectId);
 
-	@Query("match p=(a:Type)-[r:" + RelationType.str_EXTENDS + "*1..]->(b:Type) where id(a)={subTypeId} and id(b)={superTypeId} return b;")
+	@Query("match p=(a:Type)-[r:" + RelationType.str_EXTENDS + "*1..]->(b:Type) where id(a)=$subTypeId and id(b)=$superTypeId return b;")
 	Type findIsTypeExtendsType(@Param("subTypeId") long subTypeId, @Param("superTypeId") long superTypeId);
 	
 }

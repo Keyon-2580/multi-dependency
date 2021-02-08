@@ -13,9 +13,9 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.Include;
 @Repository
 public interface IncludeRepository extends Neo4jRepository<Include, Long> {
 
-	@Query("MATCH result=(file:ProjectFile)-[r:" + RelationType.str_INCLUDE + "]->(:ProjectFile) with file,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*2]->(file) where id(project)={projectId} RETURN result")
+	@Query("MATCH result=(file:ProjectFile)-[r:" + RelationType.str_INCLUDE + "]->(:ProjectFile) with file,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*2]->(file) where id(project)=$projectId RETURN result")
 	List<Include> findProjectContainFileIncludeFileRelations(@Param("projectId") Long projectId);
 
-	@Query("MATCH result=(file:ProjectFile)-[:" + RelationType.str_INCLUDE + "]->() where id(file) = {fileId} RETURN result")
+	@Query("MATCH result=(file:ProjectFile)-[:" + RelationType.str_INCLUDE + "]->() where id(file) = $fileId RETURN result")
 	List<Include> findFileIncludes(@Param("fileId") Long fileId);
 }

@@ -2,15 +2,20 @@ package cn.edu.fudan.se.multidependency.service.insert;
 
 import java.io.Closeable;
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.neo4j.batchinsert.BatchInserter;
+import org.neo4j.batchinsert.BatchInserters;
+import org.neo4j.configuration.Config;
+import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.configuration.connectors.BoltConnector;
 import org.neo4j.graphdb.ConstraintViolationException;
 import org.neo4j.graphdb.Label;
-import org.neo4j.unsafe.batchinsert.BatchInserter;
-import org.neo4j.unsafe.batchinsert.BatchInserters;
+import org.neo4j.io.layout.DatabaseLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,15 +37,30 @@ public class BatchInserterService implements Closeable {
 	}
 	
 	private BatchInserter inserter = null;
-	
+
     private Map<NodeLabelType, List<Label>> mapLabels = new HashMap<>();
-    
-	public void init(String databasePath, boolean initDatabase) throws Exception {
-		File directory = new File(databasePath);
+
+	public void init(String dataPath, String databaseName, boolean initDatabase) throws Exception {
+		String databasesPath = dataPath + "/" + GraphDatabaseSettings.DEFAULT_DATABASES_ROOT_DIR_NAME + "/" + databaseName;
+		String transactionsPath = dataPath + "/" + GraphDatabaseSettings.DEFAULT_TX_LOGS_ROOT_DIR_NAME + "/" + databaseName;
+
+		File databasesDir = new File(databasesPath);
+		File transactionsDir = new File(transactionsPath);
+
 		if(initDatabase) {
-			FileUtil.delFile(directory);
+			FileUtil.delFile(databasesDir);
+			FileUtil.delFile(transactionsDir);
 		}
-		inserter = BatchInserters.inserter(directory);
+
+		Config config = Config.newBuilder()
+				.set( GraphDatabaseSettings.data_directory, Paths.get(dataPath) )
+				.set( GraphDatabaseSettings.default_database, databaseName )
+				.set(BoltConnector.enabled, true)
+				.build();
+
+		DatabaseLayout databaseLayout = DatabaseLayout.of(config);
+		inserter = BatchInserters.inserter(databaseLayout);
+
 		for(NodeLabelType nodeType : NodeLabelType.values()) {
 			List<Label> labels = new ArrayList<>();
 			for(String labelStr : nodeType.labels()) {

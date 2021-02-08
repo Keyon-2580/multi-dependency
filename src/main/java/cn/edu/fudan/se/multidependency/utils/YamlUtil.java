@@ -43,8 +43,10 @@ public class YamlUtil {
 		yaml = (Map<?, ?>) Yaml.load(file);
 		String forTest = (String) ((Map<?, ?>) yaml.get("data")).get("test");
 		result.setForTest(forTest);
-		String databasePath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("neo4j")).get("path");
-		result.setNeo4jDatabasePath(databasePath);
+		String neo4jDataPath = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("neo4j")).get("data_path");
+		result.setNeo4jDataPath(neo4jDataPath);
+		String databaseName = (String) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("neo4j")).get("database_name");
+		result.setNeo4jDatabaseName(databaseName);
 		boolean delete = (boolean) ((Map<?, ?>) ((Map<?, ?>) yaml.get("data")).get("neo4j")).get("delete");
 		result.setDeleteDatabase(delete);
 		String projectsConfig = (String) ((Map<?, ?>) yaml.get("data")).get("project_config");
@@ -72,7 +74,8 @@ public class YamlUtil {
 		private String forTest;
 
 		private boolean deleteDatabase;
-		private String neo4jDatabasePath;
+		private String neo4jDataPath;
+		private String neo4jDatabaseName;
 
 		private String serializePath;
 

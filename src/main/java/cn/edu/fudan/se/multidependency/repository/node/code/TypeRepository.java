@@ -13,6 +13,6 @@ import java.util.List;
 @Repository
 public interface TypeRepository extends Neo4jRepository<Type, Long> {
 
-    @Query("MATCH p=(t:Type)-->(:Type) where id(t) = {typeId} RETURN p")
+    @Query("MATCH p=(t:Type)-->(:Type) where id(t) = $typeId RETURN p")
     List<Relation> findTypeStructureDependencyRelations(@Param("typeId") Long typeId);
 }

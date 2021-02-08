@@ -13,10 +13,10 @@ import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
 @Repository
 public interface CloneGroupRepository extends Neo4jRepository<CloneGroup, Long> {
 
-	@Query("match p= (g:CloneGroup) where g.cloneLevel = {cloneLevel} return g")
+	@Query("match p= (g:CloneGroup) where g.cloneLevel = $cloneLevel return g")
 	public List<CloneGroup> findGroups(@Param("cloneLevel") String cloneLevel);
 	
-	@Query("match (group:CloneGroup) where group.name={name} return group")
+	@Query("match (group:CloneGroup) where group.name=$name return group")
 	CloneGroup queryCloneGroup(@Param("name") String groupName);
 
 	@Query("match (n:ProjectFile) where n.suffix=\".java\" set n.language = \"java\";")

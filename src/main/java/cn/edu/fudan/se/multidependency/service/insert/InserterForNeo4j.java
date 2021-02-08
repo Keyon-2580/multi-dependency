@@ -10,8 +10,9 @@ public interface InserterForNeo4j {
 
 	public void insertToNeo4jDataBase() throws Exception ;
 
-	public void setDatabasePath(String databasePath);
-	
+	public void setDataPath(String databasePath);
+	public void setDatabaseName(String databaseName);
+
 	public void setDelete(boolean delete);
 	
 	/**

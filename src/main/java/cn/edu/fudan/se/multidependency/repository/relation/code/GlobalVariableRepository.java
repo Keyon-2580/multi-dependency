@@ -13,6 +13,6 @@ import java.util.List;
 @Repository
 public interface GlobalVariableRepository extends Neo4jRepository<GlobalVariable, Long> {
 
-	@Query("match (a:Type)-[:" + RelationType.str_GLOBAL_VARIABLE + "]->(b:Type) where id(a) = {id} return b")
+	@Query("match (a:Type)-[:" + RelationType.str_GLOBAL_VARIABLE + "]->(b:Type) where id(a) = $id return b")
 	List<Type> queryGlobalVariableTypes(@Param("id") long typeId);
 }

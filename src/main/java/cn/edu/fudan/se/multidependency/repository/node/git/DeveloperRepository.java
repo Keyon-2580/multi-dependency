@@ -22,13 +22,13 @@ public interface DeveloperRepository extends Neo4jRepository<Developer, Long> {
 
     @Query("match (developer : Developer)-[:" + RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]" +
             "->(commit : Commit) " +
-            "where id(developer)={developerId} " +
+            "where id(developer)=$developerId " +
             "return commit")
     List<Commit> queryCommitByDeveloper(@Param("developerId") long developerId);
 
     @Query("match (developer : Developer)-[:" + RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]->(: Commit)" +
             "-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(file:ProjectFile)" +
-            " where id(developer)={developerId}" +
+            " where id(developer)=$developerId" +
             " return file")
     List<ProjectFile> queryFileChangedByDeveloper(@Param("developerId") long developerId);
 }

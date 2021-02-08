@@ -35,7 +35,8 @@ public class InsertOtherData {
             ts.othersAnalyse();
             
             InserterForNeo4j repository = RepositoryService.getInstance();
-            repository.setDatabasePath(yaml.getNeo4jDatabasePath());
+            repository.setDataPath(yaml.getNeo4jDataPath());
+            repository.setDatabaseName(yaml.getNeo4jDatabaseName());
             repository.setDelete(yaml.isDeleteDatabase());
             repository.insertToNeo4jDataBase();
         } catch (Exception e) {
