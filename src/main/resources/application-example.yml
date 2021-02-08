@@ -2,8 +2,11 @@ spring:
   data:
     neo4j:
       username: neo4j
-      password: 123456
+      password: admin
       uri: bolt://localhost:7687
+      #uri: bolt://10.176.34.86:9687
+      #uri: bolt://10.176.34.83:7687
+
   thymeleaf:
     cache: false
     prefix: classpath:/templates/
@@ -15,19 +18,26 @@ config:
   starter:
     cochange: true
     depends_on: true
+    clone_group: true
+    module_clone: true
+    aggregation_clone: true
+    smell: true
+    modularity: false
+    export_cyclic_dependency : false
+
 data:
-  project_config: src/main/resources/project/template.json
-  project_analyse_threads_count: 3
-  dynamic_analyse: true
+  project_analyse_threads_count: -1
+  project_config: src/main/resources/project/source-test.json
+  dynamic_analyse: false
   git_analyse: true
-  lib_analyse: true
+  lib_analyse: false
   clone_analyse: true
 
   neo4j:
     delete: true
-    # batchInserter要插入的数据库
-    path: D:/neo4j-community-3.5.16/data/databases/multiple.dependency.db
+    data_path: C:\\LocalProgram\\neo4j\\neo4j-community-4.2.3\\data
+    database_name: multi.dependency.db
 
-  serialize_path: C:/Users/SongJee/Desktop/serializePath/RepositoryService.txt
+  serialize_path: D:\\workspace\\multiple-dependency-project\\RepositoryService-source.txt
 
   test: this property is for YamlUtilsTest
