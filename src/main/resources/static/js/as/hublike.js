@@ -80,8 +80,8 @@ var hublike = function(cytoscapeutil) {
 				url: "/as/hublike/fanio/" + projectId
 					+ "?hubLikeMinFileFanIn=" + hubLikeMinFileFanIn
 					+ "&hubLikeMinFileFanOut=" + hubLikeMinFileFanOut
-					+ "&hubLikeMinPackageFanIn=" + hubLikeMinPackageFanIn
-					+ "&hubLikeMinPackageFanOut=" + hubLikeMinPackageFanOut,
+					+ "&hubLikeMinModuleFanIn=" + hubLikeMinPackageFanIn
+					+ "&hubLikeMinModuleFanOut=" + hubLikeMinPackageFanOut,
 				success: function(result) {
 					if(result == true) {
 						alert("修改成功");
