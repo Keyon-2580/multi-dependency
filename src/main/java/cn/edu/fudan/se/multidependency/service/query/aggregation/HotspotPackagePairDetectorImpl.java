@@ -24,7 +24,6 @@ import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileR
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.*;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
-import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -51,9 +50,6 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 
 	@Autowired
 	private SummaryAggregationDataService summaryAggregationDataService;
-
-	@Autowired
-	private HasRelationService hasRelationService;
 
 	@Autowired
 	private ContainRelationService containRelationService;
@@ -139,8 +135,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 					if(isAggregatePackagePair) {
 						childPackage1 = currentPackage1;
 						childPackage2 = currentPackage2;
-						currentPackage1 = hasRelationService.findPackageInPackage(currentPackage1);
-						currentPackage2 = hasRelationService.findPackageInPackage(currentPackage2);
+						currentPackage1 = containRelationService.findPackageInPackage(currentPackage1);
+						currentPackage2 = containRelationService.findPackageInPackage(currentPackage2);
 						//错位
 						if(!currentPackage1.getDirectoryPath().equals(currentPackage2.getDirectoryPath()) && currentPackage1.getDirectoryPath().contains(currentPackage2.getDirectoryPath())) {
 							currentPackage2 = childPackage2;
@@ -309,8 +305,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				}
 				hotspotPackagePair = allHotspotPackagePair.get(booleanMap.get(true));
 			}
-			Package pck1 = hasRelationService.findPackageInPackage(currentPackage1);
-			Package pck2 = hasRelationService.findPackageInPackage(currentPackage2);
+			Package pck1 = containRelationService.findPackageInPackage(currentPackage1);
+			Package pck2 = containRelationService.findPackageInPackage(currentPackage2);
 			if(!currentPackage1.getDirectoryPath().contains(currentPackage2.getDirectoryPath()) && !currentPackage2.getDirectoryPath().contains(currentPackage1.getDirectoryPath()) && pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
 				//错位
 				if(pck1.getDirectoryPath().contains(pck2.getDirectoryPath())) {
@@ -396,8 +392,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		for(BasicDataForDoubleNodes<Node, Relation> packageClone : packageCloneList) {
 			Package currentPackage1 = (Package) packageClone.getNode1();
 			Package currentPackage2 = (Package) packageClone.getNode2();
-			Package parentPackage1 = hasRelationService.findPackageInPackage(currentPackage1);
-			Package parentPackage2 = hasRelationService.findPackageInPackage(currentPackage2);
+			Package parentPackage1 = containRelationService.findPackageInPackage(currentPackage1);
+			Package parentPackage2 = containRelationService.findPackageInPackage(currentPackage2);
 			while(parentPackage1 != null && parentPackage2 != null && !parentPackage1.getId().equals(parentPackage2.getId())) {
 				String currentPackages = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
 				String parentPackages = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
@@ -412,8 +408,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				cloneChildren.add(currentPackages);
 				currentPackage1 = parentPackage1;
 				currentPackage2 = parentPackage2;
-				parentPackage1 = hasRelationService.findPackageInPackage(currentPackage1);
-				parentPackage2 = hasRelationService.findPackageInPackage(currentPackage2);
+				parentPackage1 = containRelationService.findPackageInPackage(currentPackage1);
+				parentPackage2 = containRelationService.findPackageInPackage(currentPackage2);
 			}
 		}
 
@@ -449,8 +445,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			if(!cloneChildren.isEmpty()) {
 				continue;
 			}
-			Package parentPackage1 = hasRelationService.findPackageInPackage(currentPackage1);
-			Package parentPackage2 = hasRelationService.findPackageInPackage(currentPackage2);
+			Package parentPackage1 = containRelationService.findPackageInPackage(currentPackage1);
+			Package parentPackage2 = containRelationService.findPackageInPackage(currentPackage2);
 			isHotspot.put(currentPackages, isHotspotPackagePairWithFileClone(aggregator, directoryIdToAllNodes, directoryIdToAllLoc, directoryPathToAllCloneChildrenPackages, currentHotspotPackagePair));
 			isChild.put(currentPackages, false);
 			String parentPackages;
@@ -479,8 +475,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				isChild.put(parentPackages, false);
 				currentPackage1 = parentPackage1;
 				currentPackage2 = parentPackage2;
-				parentPackage1 = hasRelationService.findPackageInPackage(currentPackage1);
-				parentPackage2 = hasRelationService.findPackageInPackage(currentPackage2);
+				parentPackage1 = containRelationService.findPackageInPackage(currentPackage1);
+				parentPackage2 = containRelationService.findPackageInPackage(currentPackage2);
 			}
 		}
 
@@ -492,8 +488,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			Package currentPackage1 = hotspotPackagePair.getPackage1();
 			Package currentPackage2 = hotspotPackagePair.getPackage2();
 			if((!isChild.get(currentPackages) && isHotspot.get(currentPackages))) {
-				Package parentPackage1 = hasRelationService.findPackageInPackage(currentPackage1);
-				Package parentPackage2 = hasRelationService.findPackageInPackage(currentPackage2);
+				Package parentPackage1 = containRelationService.findPackageInPackage(currentPackage1);
+				Package parentPackage2 = containRelationService.findPackageInPackage(currentPackage2);
 				if(parentPackage1 != null && parentPackage2 != null && !parentPackage1.getId().equals(parentPackage2.getId())) {
 					String parentPackages = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
 					if((isHotspot.containsKey(parentPackages) && isHotspot.get(parentPackages))) {
@@ -746,12 +742,12 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 
 	//判断是否为包含文件的分支结点
 	private boolean isBranchPackageWithFiles(Package pck) {
-		return hasRelationService.findPackageHasPackages(pck).size() > 0 && containRelationService.findPackageContainFiles(pck).size() > 0;
+		return containRelationService.findPackageContainPackages(pck).size() > 0 && containRelationService.findPackageContainFiles(pck).size() > 0;
 	}
 
 	//判断是否为叶子结点
 	private boolean isLeafPackage(Package pck) {
-		return hasRelationService.findPackageHasPackages(pck).size() == 0;
+		return containRelationService.findPackageContainPackages(pck).size() == 0;
 	}
 
 	//包下有文件也有包时，为包下文件创建一个包
@@ -772,7 +768,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			return directoryIdToAllNodes.get(pck.getId());
 		}
 		int number = containRelationService.findPackageContainFiles(pck).size();
-		Collection<Package> childrenPackages = hasRelationService.findPackageHasPackages(pck);
+		Collection<Package> childrenPackages = containRelationService.findPackageContainPackages(pck);
 		for(Package childPackage : childrenPackages) {
 			number += getAllFilesNum(directoryIdToAllNodes, childPackage);
 		}
@@ -790,7 +786,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		for(ProjectFile allChildFile : allChildrenFiles) {
 			Loc += allChildFile.getLoc();
 		}
-		Collection<Package> childrenPackages = hasRelationService.findPackageHasPackages(pck);
+		Collection<Package> childrenPackages = containRelationService.findPackageContainPackages(pck);
 		for(Package childPackage : childrenPackages) {
 			Loc += getAllFilesLoc(directoryIdToAllLoc, childPackage);
 		}
@@ -824,8 +820,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		}
 		//遍历包下子包
 		Collection<HotspotPackagePair> childrenHotspotPackagePairs = currentHotspotPackagePair.getChildrenHotspotPackagePairs();
-		Collection<Package> childrenPackage1 = hasRelationService.findPackageHasPackages(currentPackage1);
-		Collection<Package> childrenPackage2 = hasRelationService.findPackageHasPackages(currentPackage2);
+		Collection<Package> childrenPackage1 = containRelationService.findPackageContainPackages(currentPackage1);
+		Collection<Package> childrenPackage2 = containRelationService.findPackageContainPackages(currentPackage2);
 		for(HotspotPackagePair childHotspotPackagePair : childrenHotspotPackagePairs) {
 			Package childPackage1 = childHotspotPackagePair.getPackage1();
 			Package childPackage2 = childHotspotPackagePair.getPackage2();
@@ -902,8 +898,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 
 		//当克隆包下存在基础的克隆子包时才做展示，否则，将克隆包认为是基础的克隆包，不展示包下的非克隆子包
 		if(childrenHotspotPackagePairs.size() > 0) {
-			Collection<Package> childrenPackages1 = hasRelationService.findPackageHasPackages(currentHotspotPackagePair.getPackage1());
-			Collection<Package> childrenPackages2 = hasRelationService.findPackageHasPackages(currentHotspotPackagePair.getPackage2());
+			Collection<Package> childrenPackages1 = containRelationService.findPackageContainPackages(currentHotspotPackagePair.getPackage1());
+			Collection<Package> childrenPackages2 = containRelationService.findPackageContainPackages(currentHotspotPackagePair.getPackage2());
 
 			//将有子包的包下文件打包
 			if(isBranchPackageWithFiles(currentPackage1) && isBranchPackageWithFiles(currentPackage2)) {
@@ -1024,8 +1020,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 						pck2AggregateCommitMat.put(currentPackage1, pck2AggregateCommitSet);
 						packagesAggregateCommitMap.put(currentPackage1, pck1AggregateCommitMat);
 						packagesAggregateCommitMap.put(currentPackage2, pck2AggregateCommitMat);
-						pck1 = hasRelationService.findPackageInPackage(currentPackage1);
-						pck2 = hasRelationService.findPackageInPackage(currentPackage2);
+						pck1 = containRelationService.findPackageInPackage(currentPackage1);
+						pck2 = containRelationService.findPackageInPackage(currentPackage2);
 						//错位
 						if(!pck1.getDirectoryPath().equals(pck2.getDirectoryPath()) && pck1.getDirectoryPath().contains(pck2.getDirectoryPath())) {
 							pck2 = currentPackage2;
@@ -1070,8 +1066,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 							aggregationCoChange.setNode2ChangeTimes(currentPackage2AggregateCommitSet.size());
 							aggregationCoChangeList.add(aggregationCoChange);
 						}
-						pck1 = hasRelationService.findPackageInPackage(currentPackage1);
-						pck2 = hasRelationService.findPackageInPackage(currentPackage2);
+						pck1 = containRelationService.findPackageInPackage(currentPackage1);
+						pck2 = containRelationService.findPackageInPackage(currentPackage2);
 						//错位
 						if(!pck1.getDirectoryPath().equals(pck2.getDirectoryPath()) && pck1.getDirectoryPath().contains(pck2.getDirectoryPath())) {
 							pck2 = currentPackage2;
@@ -1151,8 +1147,8 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				}
 				hotspotPackagePair = allHotspotPackagePair.get(booleanMap.get(true));
 			}
-			Package pck1 = hasRelationService.findPackageInPackage(currentPackage1);
-			Package pck2 = hasRelationService.findPackageInPackage(currentPackage2);
+			Package pck1 = containRelationService.findPackageInPackage(currentPackage1);
+			Package pck2 = containRelationService.findPackageInPackage(currentPackage2);
 			if(!currentPackage1.getDirectoryPath().contains(currentPackage2.getDirectoryPath()) && !currentPackage2.getDirectoryPath().contains(currentPackage1.getDirectoryPath()) && pck1 != null && pck2 != null && !pck1.getId().equals(pck2.getId())) {
 				//错位
 				if(pck1.getDirectoryPath().contains(pck2.getDirectoryPath())) {

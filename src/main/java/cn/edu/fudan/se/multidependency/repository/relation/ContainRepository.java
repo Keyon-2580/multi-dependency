@@ -130,4 +130,31 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	@Query("match (gitRepo:GitRepository)-[r:" + RelationType.str_CONTAIN + "]->(project:Project) where id(gitRepo)=$gitRepoId return project")
 	public List<Project> findGitRepositoryContainProjects(@Param("gitRepoId") long gitRepoId);
 
+	/**
+	 * 包之间的关系
+	 */
+	@Query("match (project:Project)-[r:" + RelationType.str_CONTAIN + "]->(pck:Package) where not (pck)<-[:" + RelationType.str_CONTAIN + "]-(:Package) and id(project)=$projectId return pck")
+	public List<Package> findProjectRootPackages(@Param("projectId") Long projectId);
+
+	@Query("Match (pck:Package)-[:" + RelationType.str_CONTAIN + "]->(children:Package) where id(pck)=$packageId return children")
+	public List<Package> findPackageContainPackages(@Param("packageId") Long packageId);
+
+	@Query("Match (pck:Package)-[:" + RelationType.str_CONTAIN + "]->(children:Package) where id(pck)=$packageId " +
+			"and children.language = $language return children")
+	public List<Package> findPackageContainPackagesWithLanguage(@Param("packageId") Long packageId, String language);
+
+	@Query("Match (parent:Package)-[:" + RelationType.str_CONTAIN + "]->(pck:Package) where id(pck)=$packageId return parent")
+	public Package findPackageInPackage(@Param("packageId") Long packageId);
+
+	@Query("Match (pck:Package)-[:" + RelationType.str_CONTAIN + "]->(children:Package)-[:" + RelationType.str_CONTAIN + "]->(:Package) " +
+			"where id(pck)=$parentPackageId " +
+			"return children;")
+	public List<Package> findPackagesWithChildPackagesForParentPackage(@Param("parentPackageId") Long parentPackageId);
+
+	@Query("Match (parent:Package)-[:" + RelationType.str_CONTAIN + "]->(pck:Package) " +
+			"where id(parent)=$parentPackageId " +
+			"with parent, pck " +
+			"set pck.depth = parent.depth + 1; ")
+	public Boolean setChildPackageDepth(@Param("parentPackageId") Long parentPackageId);
+
 }

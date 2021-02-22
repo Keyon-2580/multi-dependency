@@ -6,7 +6,7 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.service.query.as.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
 import org.slf4j.Logger;
@@ -47,7 +47,6 @@ import cn.edu.fudan.se.multidependency.service.query.aggregation.data.CloneRelat
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 
-import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
 @Component
@@ -99,18 +98,18 @@ public class BeanCreator {
 	}
 
 	@Bean
-	public boolean setPackageDepth(ProjectRepository projectRepository, HasRepository hasRepository) {
+	public boolean setPackageDepth(ProjectRepository projectRepository, ContainRepository containRepository) {
 		LOGGER.info("设置Package深度值...");
 		List<Project> projectList = projectRepository.queryAllProjects();
 		for(Project project : projectList) {
-			List<Package> rootPackageList = hasRepository.findProjectHasPackages(project.getId());
+			List<Package> rootPackageList = containRepository.findProjectRootPackages(project.getId());
 			for(Package rootPackage : rootPackageList) {
 				Queue<Package> packageQueue = new LinkedList<>();
 				packageQueue.offer(rootPackage);
 				while(!packageQueue.isEmpty()) {
 					Package pck = packageQueue.poll();
-					hasRepository.setChildPackageDepth(pck.getId());
-					packageQueue.addAll(hasRepository.findPackagesWithChildPackagesForParentPackage(pck.getId()));
+					containRepository.setChildPackageDepth(pck.getId());
+					packageQueue.addAll(containRepository.findPackagesWithChildPackagesForParentPackage(pck.getId()));
 				}
 			}
 		}

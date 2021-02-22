@@ -11,12 +11,8 @@ import java.util.concurrent.FutureTask;
 
 import javax.servlet.http.HttpServletRequest;
 
-import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
-import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
 import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
-import cn.edu.fudan.se.multidependency.service.query.data.ProjectStructure;
-import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,10 +71,6 @@ public class ProjectController {
 
 	@Autowired
 	private ProjectService projectService;
-
-
-	@Autowired
-	private HasRelationService hasRelationService;
 
 	@Autowired
 	private MultipleService multipleService;

@@ -1,6 +1,5 @@
 package cn.edu.fudan.se.multidependency.service.insert.code;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +20,6 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
-import cn.edu.fudan.se.multidependency.model.relation.Has;
 import cn.edu.fudan.se.multidependency.utils.config.ProjectConfig;
 import depends.deptypes.DependencyType;
 import depends.entity.repo.EntityRepo;
@@ -85,7 +83,7 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 			Package currentPackage = (Package) node;
 			Package parentPackage = this.getNodes().findPackageByDirectoryPath(currentPackage.lastPackageDirectoryPath(), currentProject);
 			if(parentPackage != null) {
-				addRelation(new Has(parentPackage, currentPackage));
+				addRelation(new Contain(parentPackage, currentPackage));
 			}
 		});
 		
@@ -200,7 +198,7 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					}
 					Package pck = emptyPackages.get(parentDirectoryPath);
 					if(child != null  && pck != null && (child.size() > 1 || ("/").equals(pck.lastPackageDirectoryPath()))){
-						addRelation(new Has(pck, currentPck));
+						addRelation(new Contain(pck, currentPck));
 						break;
 					}
 					if(pck != null){
@@ -223,7 +221,7 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 
 				//当parentPck不为空（但要排除当前包为根目录且有文件的情况），可创建包含关系
 				if (parentPck != null){
-					addRelation(new Has(parentPck, currentPck));
+					addRelation(new Contain(parentPck, currentPck));
 				}
 			}
 		}

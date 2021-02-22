@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,9 +35,6 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 
 	@Autowired
 	private ContainRelationService containRelationService;
-
-	@Autowired
-	private HasRelationService hasRelationService;
 
 	private final Map<Long, Integer> allNodesOfPackage = new HashMap<>();
 	private final Map<Collection<Long>, Integer> cloneNodesOfPackages = new HashMap<>();
@@ -72,7 +68,7 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 			return allNodesOfPackage.get(pck.getId());
 		}
 		int number = containRelationService.findPackageContainFiles(pck).size();
-		Collection<Package> childrenPackages = hasRelationService.findPackageHasPackages(pck);
+		Collection<Package> childrenPackages = containRelationService.findPackageContainPackages(pck);
 		for(Package childPackage : childrenPackages) {
 			number += getAllFilesNum(childPackage);
 		}
@@ -100,8 +96,8 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 			cloneNodes2 = cloneNodesOfPackages2.get(similarPackage2);
 		}
 		//遍历包下文件或子包，函数待改进
-		Collection<Package> childrenPackages1 = hasRelationService.findPackageHasPackages(pck1);
-		Collection<Package> childrenPackages2 = hasRelationService.findPackageHasPackages(pck2);
+		Collection<Package> childrenPackages1 = containRelationService.findPackageContainPackages(pck1);
+		Collection<Package> childrenPackages2 = containRelationService.findPackageContainPackages(pck2);
 		int childrenSimilarPackages1 = 0;
 		int childrenSimilarPackages2 = 0;
 		for(Package childPackage1 : childrenPackages1) {
@@ -296,8 +292,8 @@ public class SimilarPackageDetectorImpl implements SimilarPackageDetector {
 	public void AddChildrenPackages(SimilarPackage rootSimilarPackage, Collection<Clone> fileClones, Map<String, SimilarPackage> idToPackageClone) {
 		Package package1 = rootSimilarPackage.getPackage1();
 		Package package2 = rootSimilarPackage.getPackage2();
-		Collection<Package> childrenPackages1 = hasRelationService.findPackageHasPackages(package1);
-		Collection<Package> childrenPackages2 = hasRelationService.findPackageHasPackages(package2);
+		Collection<Package> childrenPackages1 = containRelationService.findPackageContainPackages(package1);
+		Collection<Package> childrenPackages2 = containRelationService.findPackageContainPackages(package2);
 		for(Package childPackage1 : childrenPackages1) {
 			int index = 0;
 			boolean flag = false;

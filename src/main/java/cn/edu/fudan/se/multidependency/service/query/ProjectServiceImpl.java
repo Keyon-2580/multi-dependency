@@ -12,7 +12,6 @@ import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryServic
 import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
 import cn.edu.fudan.se.multidependency.service.query.data.ProjectStructure;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
-import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -30,9 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ProjectServiceImpl implements ProjectService{
     @Autowired
     private BasicCloneQueryService basicCloneQueryService;
-
-    @Autowired
-    private HasRelationService hasRelationService;
 
     @Autowired
     private HotspotPackageDetector hotspotPackageDetector;
@@ -95,21 +91,21 @@ public class ProjectServiceImpl implements ProjectService{
     private JSONObject joinMultipleProjectsGraphJson(long projectId){
         JSONObject result = new JSONObject();
         Project project = nodeService.queryProject(projectId);
-        ProjectStructure projectStructure = hasRelationService.projectHasInitialize(project);
+        ProjectStructure projectStructure = containRelationService.projectStructureInitialize(project);
         Package packageOfProject = projectStructure.getChildren().get(0).getPck();
 
-        List<PackageStructure> childrenPackages = hasRelationService.packageHasInitialize(packageOfProject).getChildrenPackages();
+        List<PackageStructure> childrenPackages = containRelationService.packageStructureInitialize(packageOfProject).getChildrenPackages();
         List<PackageStructure> childrenPackagesnew = new ArrayList<>();
 
         for(PackageStructure pckstru : childrenPackages){
-            PackageStructure pcknew = hasRelationService.packageHasInitialize(pckstru.getPck());
+            PackageStructure pcknew = containRelationService.packageStructureInitialize(pckstru.getPck());
             childrenPackagesnew.add(pcknew);
         }
 
         result.put("name", packageOfProject.getName());
         result.put("id", "id_" + packageOfProject.getId().toString());
         Collection<ProjectFile> clonefiles = basicCloneQueryService.findProjectContainCloneFiles(project);
-        result.put("children",getHasJson(clonefiles,childrenPackagesnew));
+        result.put("children", getPackageContainJson(clonefiles,childrenPackagesnew));
 
         return result;
     }
@@ -118,7 +114,7 @@ public class ProjectServiceImpl implements ProjectService{
     /**
      * 递归遍历项目中所有package的包含关系
      */
-    public JSONArray getHasJson(Collection<ProjectFile> clonefiles, List<PackageStructure> childrenPackages){
+    public JSONArray getPackageContainJson(Collection<ProjectFile> clonefiles, List<PackageStructure> childrenPackages){
         JSONArray result = new JSONArray();
         for(PackageStructure pckstru :childrenPackages){
             List<PackageStructure> pckList = pckstru.getChildrenPackages();
@@ -166,7 +162,7 @@ public class ProjectServiceImpl implements ProjectService{
 
             if(pckList.size()>0){
                 //如果该属性还有子属性,继续做查询,直到该属性没有孩子,也就是最后一个节点
-                jsonObject.put("children", getHasJson(clonefiles,pckList));
+                jsonObject.put("children", getPackageContainJson(clonefiles,pckList));
             }
             result.add(jsonObject);
         }

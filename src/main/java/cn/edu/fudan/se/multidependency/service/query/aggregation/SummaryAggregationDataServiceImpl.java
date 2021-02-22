@@ -3,21 +3,18 @@ package cn.edu.fudan.se.multidependency.service.query.aggregation;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.*;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
-import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.BasicDataForDoubleNodes;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.CloneRelationDataForDoubleNodes;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.CoChangeRelationDataForDoubleNodes;
-import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.FileCloneWithCoChange;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChange;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.PackageCloneValueWithFileCoChangeMatrix;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
-import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,9 +31,6 @@ public class SummaryAggregationDataServiceImpl implements SummaryAggregationData
 
 	@Autowired
 	private BasicCloneQueryService basicCloneQueryService;
-
-	@Autowired
-	private HasRelationService hasRelationService;
 
 	private List<BasicDataForDoubleNodes<Node, Relation>> removeSameNodeToCloneValuePackages = null;
     private Map<Node, Map<Node, BasicDataForDoubleNodes<Node, Relation>>> queryPackageCloneFromFileCloneCache = null;
@@ -184,7 +178,7 @@ public class SummaryAggregationDataServiceImpl implements SummaryAggregationData
 		for(ProjectFile allChildFile : allChildrenFiles) {
 			Loc += allChildFile.getLoc();
 		}
-		Collection<Package> childrenPackages = hasRelationService.findPackageHasPackages(pck);
+		Collection<Package> childrenPackages = containRelationService.findPackageContainPackages(pck);
 		for(Package childPackage : childrenPackages) {
 			Loc += getAllFilesLoc(directoryIdToAllLoc, childPackage);
 		}

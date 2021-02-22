@@ -60,12 +60,4 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 	@Query("match (pck:Package) where not (pck)-[:CONTAIN]->(:ProjectFile) " +
 			"set pck += {nof: 0, noc: 0, nom: 0, loc: 0, lines: 0};")
 	public void setEmptyPackageMetrics();
-	
-	/**
-	 * 目录下有多少子包
-	 * @param directoryPath
-	 * @return
-	 */
-	@Query("match (n:Package) where n.language = $language and n.directoryPath =~ ($directoryPath + \"[^/]*/\") return n")
-	public Collection<Package> findPackageContainSubPackages(@Param("directoryPath") String directoryPath, @Param("language")String language);
 }

@@ -11,6 +11,8 @@ import cn.edu.fudan.se.multidependency.repository.node.code.TypeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.CallRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.ImportRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.code.IncludeRepository;
+import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
+import cn.edu.fudan.se.multidependency.service.query.data.ProjectStructure;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
@@ -72,6 +74,81 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
 	@Autowired
 	TypeRepository typeRepository;
+
+	@Override
+	public ProjectStructure projectStructureInitialize(Project project) {
+		ProjectStructure result = new ProjectStructure(project);
+//        System.out.println(hasRepository.findProjectHasPackages(project.getId()));
+		List<Package> projectRootPackages = containRepository.findProjectRootPackages(project.getId());
+		for(Package pck : projectRootPackages) {
+			result.addChild(new PackageStructure(pck));
+		}
+		return result;
+	}
+
+	@Override
+	public PackageStructure packageStructureInitialize(Package pck) {
+		if(pck == null) {
+			return null;
+		}
+		PackageStructure result = new PackageStructure(pck);
+
+		Collection<ProjectFile> files = new ArrayList<>(findPackageContainFiles(pck)); // contain关系的file
+//        result.addAllFiles(files);
+
+		Collection<Package> childrenPackage = new ArrayList<>(findPackageContainPackages(pck)); // contain关系的package
+		for(Package child : childrenPackage) {
+			result.addChildPackage(packageStructureInitialize(child));
+		}
+
+		if(childrenPackage.size() >0 && files.size() > 0){
+			Package tmpPck = new Package();
+			tmpPck.setId(0 - pck.getId());
+			tmpPck.setEntityId(pck.getEntityId());
+			tmpPck.setLanguage(pck.getLanguage());
+			tmpPck.setDirectoryPath(pck.getDirectoryPath());
+			tmpPck.setLines(pck.getLines());
+			tmpPck.setLoc(pck.getLoc());
+			tmpPck.setName(pck.getName());
+			PackageStructure resultTmp = new PackageStructure(tmpPck);
+			resultTmp.addAllFiles(files);
+			result.addChildPackage(resultTmp);
+		} else {
+			result.addAllFiles(files);
+		}
+
+		return result;
+
+	}
+
+	Map<Project, Collection<Package>> projectRootPackagesCache = new ConcurrentHashMap<>();
+	@Override
+	public Collection<Package> findProjectRootPackages(Project project) {
+		Collection<Package> result = projectRootPackagesCache.getOrDefault(project, containRepository.findProjectRootPackages(project.getId()));
+
+		return result;
+	}
+
+	Map<Package, Collection<Package>> packageContainPackagesCache = new ConcurrentHashMap<>();
+	@Override
+	public Collection<Package> findPackageContainPackages(Package pck) {
+		Collection<Package> result = packageContainPackagesCache.getOrDefault(pck, containRepository.findPackageContainPackages(pck.getId()));
+		return result;
+	}
+
+	@Override
+	public Collection<Package> findPackageContainPackagesWithLanguage(Package pck) {
+		String language = pck.getLanguage();
+		if (language == null ){
+			language = containRepository.findPackageBelongToProject(pck.getId()).getLanguage();
+		}
+		return containRepository.findPackageContainPackagesWithLanguage(pck.getId(), language);
+	}
+
+	@Override
+	public Package findPackageInPackage(Package pck) {
+		return containRepository.findPackageInPackage(pck.getId());
+	}
     
 	Map<Project, Collection<ProjectFile>> projectContainFilesCache = new ConcurrentHashMap<>();
 	@Override
@@ -84,11 +161,11 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		return result;
 	}
 	
-	Map<Project, Collection<Package>> projectContainPakcagesCache = new ConcurrentHashMap<>();
+	Map<Project, Collection<Package>> projectContainPackagesCache = new ConcurrentHashMap<>();
 	@Override
 	public Collection<Package> findProjectContainPackages(Project project) {
-		Collection<Package> result = projectContainPakcagesCache.getOrDefault(project, containRepository.findProjectContainPackages(project.getId()));
-		projectContainPakcagesCache.put(project, result);
+		Collection<Package> result = projectContainPackagesCache.getOrDefault(project, containRepository.findProjectContainPackages(project.getId()));
+		projectContainPackagesCache.put(project, result);
 		result.forEach(pck -> {
 			cache.cacheNodeBelongToNode(pck, project);
 		});
@@ -555,19 +632,9 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		return containRepository.findGitRepositoryContainProjects(gitRepository.getId());
 	}
 
-	@Override
-	public Package findPackageInPackage(Package pck) {
-		return nodeService.queryPackage(pck.lastPackageDirectoryPath(), pck.getLanguage());
-	}
 
-	@Override
-	public Collection<Package> findPackageContainSubPackages(Package pck) {
-		String language = pck.getLanguage();
-		if (language == null ){
-			language = containRepository.findPackageBelongToProject(pck.getId()).getLanguage();
-		}
-		return packageRepository.findPackageContainSubPackages(pck.getDirectoryPath(), language);
-	}
+
+
 
 	@Override
 	public Collection<Call> findFunctionContainCalls(Function function) {
