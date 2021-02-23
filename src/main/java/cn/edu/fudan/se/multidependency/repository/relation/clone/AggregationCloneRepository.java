@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface AggregationCloneRepository extends Neo4jRepository<AggregationClone, Long> {
-    @Query("match p=()-[r:" + RelationType.str_AGGREGATION_CLONE + "]->() return count(p)")
+    @Query("match p=()-[:" + RelationType.str_AGGREGATION_CLONE + "]->() return count(p)")
     int getNumberOfAggregationClone();
 
     @Query("match (p1:Package), (p2:Package) " +
@@ -23,9 +23,9 @@ public interface AggregationCloneRepository extends Neo4jRepository<AggregationC
     @Query("match p= (p1:Package)-[r:" + RelationType.str_AGGREGATION_CLONE + "]->(p2:Package) where r.parent1Id=$parent1Id and r.parent2Id=$parent2Id and p1.language=$language and p2.language=$language return p")
     List<AggregationClone> findAggregationCloneByParentId(@Param("parent1Id") long parent1Id, @Param("parent2Id") long parent2Id, @Param("language") String language);
 
-    @Query("match p= (p1:Package)-[r:" + RelationType.str_AGGREGATION_CLONE + "]->(p2:Package) where id(p1) = $pck1Id and id(p2) = $pck2Id return p")
+    @Query("match p= (p1:Package)-[:" + RelationType.str_AGGREGATION_CLONE + "]->(p2:Package) where id(p1) = $pck1Id and id(p2) = $pck2Id return p")
     AggregationClone findAggregationCloneByPackageId(@Param("pck1Id") long pck1Id, @Param("pck2Id") long pck2Id);
 
-    @Query("match p= ()-[r:" + RelationType.str_AGGREGATION_CLONE + "]->() return p")
+    @Query("match p= ()-[:" + RelationType.str_AGGREGATION_CLONE + "]->() return p")
     List<AggregationClone> getAllAggregationClone();
 }

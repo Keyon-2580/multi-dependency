@@ -25,7 +25,7 @@ public interface CloneGroupRepository extends Neo4jRepository<CloneGroup, Long> 
 	@Query("match (n:ProjectFile) where n.suffix<>\".java\" set n.language = \"cpp\";")
 	void setCppLanguageBySuffix();
 
-	@Query("match (n:CloneGroup)-[r:CONTAIN]-() delete r;")
+	@Query("match p = (n:CloneGroup)-[r:CONTAIN]-() delete r;")
 	void deleteCloneGroupContainRelations();
 
 	@Query("match (n:CloneGroup) delete n;")

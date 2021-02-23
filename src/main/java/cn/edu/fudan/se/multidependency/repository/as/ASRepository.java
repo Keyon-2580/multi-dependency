@@ -46,7 +46,7 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 			+ RelationType.str_DEPENDS_ON + "]-(file2) return p")
 	public List<CoChange> cochangeFilesWithoutDependsOn(@Param("count") int minCoChangeCount);
 	
-	@Query("MATCH p=(a:Type)-[r:" + RelationType.str_DEPENDS_ON + "]->(b:Type) where (a)<-[:" + RelationType.str_EXTENDS + "*1..]-(b) or (a)<-[:" + RelationType.str_IMPLEMENTS + "*1..]-(b) RETURN p")
+	@Query("MATCH p=(a:Type)-[:" + RelationType.str_DEPENDS_ON + "]->(b:Type) where (a)<-[:" + RelationType.str_EXTENDS + "*1..]-(b) or (a)<-[:" + RelationType.str_IMPLEMENTS + "*1..]-(b) RETURN p")
 	public List<DependsOn> cyclicHierarchyDepends();
 	
 	@Query("match (t:Type) with t, "
@@ -68,13 +68,13 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 	public void createModule();
 	
 	
-	@Query("match (pck1:Package)-[r:DEPENDS_ON]->(pck2:Package) "
+	@Query("match p=(pck1:Package)-[r:DEPENDS_ON]->(pck2:Package) "
 			+ "with pck1, r, pck2 match(m1:Module), (m2:Module) "
 			+ "where m1.name = pck1.directoryPath and m2.name = pck2.directoryPath "
 			+ "create(m1)-[:DEPENDS_ON{times: r.times}]->(m2);")
 	public void createModuleDependsOn();
 	
-	@Query("match (pck1:Package)-[r:HAS]->(pck2:Package) "
+	@Query("match p=(pck1:Package)-[r:HAS]->(pck2:Package) "
 			+ "with pck1, r, pck2 match(m1:Module), (m2:Module) "
 			+ "where m1.name = pck1.directoryPath and m2.name = pck2.directoryPath "
 			+ "create(m1)-[:HAS]->(m2);")

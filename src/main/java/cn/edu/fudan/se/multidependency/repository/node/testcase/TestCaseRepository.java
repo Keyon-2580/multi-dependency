@@ -13,7 +13,7 @@ import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 @Repository
 public interface TestCaseRepository extends Neo4jRepository<TestCase, Long> {
 	
-	@Query("MATCH (a:TestCase)-[r:" + RelationType.str_TESTCASE_EXECUTE_FEATURE + "]->(n:Feature{featureName:$featureName}) RETURN a")
+	@Query("MATCH (a:TestCase)-[:" + RelationType.str_TESTCASE_EXECUTE_FEATURE + "]->(n:Feature{featureName:$featureName}) RETURN a")
 	public List<TestCase> findTestCasesByFeatureName(@Param("featureName") String featureName);
 	
 }

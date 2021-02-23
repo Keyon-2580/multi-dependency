@@ -22,16 +22,16 @@ import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 @Repository
 public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 
-	@Query("match p=(:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(:ProjectFile) return p")
+	@Query("match p=(:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(:ProjectFile) return p")
 	List<DependsOn> findFileDepends();	
 	
-	@Query("match p=(:Package)-[r:" + RelationType.str_DEPENDS_ON + "]->(:Package) return p")
+	@Query("match p=(:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(:Package) return p")
 	List<DependsOn> findPackageDependsOn();
 
-	@Query("match p=(:Type)-[r:" + RelationType.str_DEPENDS_ON + "]->(:Type) return p")
+	@Query("match p=(:Type)-[:" + RelationType.str_DEPENDS_ON + "]->(:Type) return p")
 	List<DependsOn> findTypeDepends();
 
-	@Query("match (p:Package)-[r:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where id(file) = $fileId return p")
+	@Query("match (p:Package)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where id(file) = $fileId return p")
 	Package findFileBelongPackageByFileId(@Param("fileId") long fileId);
 
 	@Query("match p=(p1:Package)-[:" + RelationType.str_DEPENDS_ON + "]-(p2:Package) " +
@@ -39,16 +39,16 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 			"return p;")
 	List<DependsOn> findPackageDependsByPackageId(@Param("pckId1") long pckId1, @Param("pckId2") long pckId2);
 	
-	@Query("match p=(project:Project)-[:" + RelationType.str_CONTAIN + "*2]->(:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(:ProjectFile)<-[:" + RelationType.str_CONTAIN + "*2]-(project) where id(project)=$id return p")
+	@Query("match p=(project:Project)-[:" + RelationType.str_CONTAIN + "*2]->(:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(:ProjectFile)<-[:" + RelationType.str_CONTAIN + "*2]-(project) where id(project)=$id return p")
 	List<DependsOn> findFileDependsInProject(@Param("id") long projectId);	
 	
-	@Query("match p=(project:Project)-[:" + RelationType.str_CONTAIN + "]->(:Package)-[r:" + RelationType.str_DEPENDS_ON + "]->(:Package)<-[:" + RelationType.str_CONTAIN + "]-(project) where id(project)=$id return p")
+	@Query("match p=(project:Project)-[:" + RelationType.str_CONTAIN + "]->(:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(:Package)<-[:" + RelationType.str_CONTAIN + "]-(project) where id(project)=$id return p")
 	List<DependsOn> findPackageDependsInProject(@Param("id") long projectId);	
 	
-	@Query("match p=(file:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(:ProjectFile) where id(file)=$id return p")
+	@Query("match p=(file:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(:ProjectFile) where id(file)=$id return p")
 	List<DependsOn> findFileDependsOn(@Param("id") long fileId);
 	
-	@Query("match p=(:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(file:ProjectFile) where id(file)=$id return p")
+	@Query("match p=(:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(file:ProjectFile) where id(file)=$id return p")
 	List<DependsOn> findFileDependedOnBy(@Param("id") long fileId);
 	
 	@Query("MATCH (f1:ProjectFile),(f2:ProjectFile) where id(f1) = $f1Id and id(f2) = $f2Id "
@@ -56,10 +56,10 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	boolean isFileDependsOnFile(@Param("f1Id") long file1Id, @Param("f2Id") long file2Id);
 	
 
-	@Query("match p=(pck:Package)-[r:" + RelationType.str_DEPENDS_ON + "]->(:Package) where id(pck)=$id return p")
+	@Query("match p=(pck:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(:Package) where id(pck)=$id return p")
 	List<DependsOn> findPackageDependsOn(@Param("id") long packageId);
 
-	@Query("match p=(:Package)-[r:" + RelationType.str_DEPENDS_ON + "]->(pck:Package) where id(pck)=$id return p")
+	@Query("match p=(:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(pck:Package) where id(pck)=$id return p")
 	List<DependsOn> findPackageDependedOnBy(@Param("id") long packageId);
 
 	@Query("match p=(file1:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(file3:ProjectFile)<-[:" + RelationType.str_DEPENDS_ON + "]-(file2:ProjectFile) where id(file1)=$id1 and id(file2)=$id2 return file3")
@@ -136,10 +136,10 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 //			"with t1,t2,count(r) as times " +
 //			"create (t1)-[:DEPENDS_ON{times : times, weightedTimes : 0.0}]->(t2)")
 //	void createDependsOnWithTimesInTypes();
-	@Query("match (:Type)-[r:DEPENDS_ON]->() where r.weightedTimes is null delete r;")
+	@Query("match p=(:Type)-[r:DEPENDS_ON]->() where r.weightedTimes is null delete r;")
 	void deleteNullTimesDependsOnInTypes();
 
-	String FILE_LEFT = "match (f1:ProjectFile)-[:CONTAIN*0..]->()-[r: ";
+	String FILE_LEFT = "match p=(f1:ProjectFile)-[:CONTAIN*0..]->()-[r: ";
 	String FILE_MIDDLE = "]->()<-[:CONTAIN*0..]-(f2:ProjectFile) where f1 <> f2 " +
 			"create (f1)-[:DEPENDS_ON{dependsOnType : \"";
 	String FILE_MIDDLE2 = "\", times : ";
@@ -275,12 +275,12 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 		}
 	}
 
-	@Query("match (:ProjectFile)-[r:DEPENDS_ON]->(:ProjectFile) " +
+	@Query("match p=(:ProjectFile)-[r:DEPENDS_ON]->(:ProjectFile) " +
 			"where r.weightedTimes is null " +
 			"delete r;")
 	void deleteNullAggregationDependsOnInFiles();
 
-	@Query("match (:Type)-[r:DEPENDS_ON]->(:Type) " +
+	@Query("match p=(:Type)-[r:DEPENDS_ON]->(:Type) " +
 			"where r.weightedTimes is null " +
 			"delete r;")
 	void deleteNullAggregationDependsOnInTypes();
@@ -290,12 +290,12 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 //			"create (p1)-[:DEPENDS_ON{dependsOnType : r.dependsOnType, times : r.times}]->(p2);")
 //	void createDependsOnInPackages();
 
-	@Query("match (:Package)-[r:DEPENDS_ON]->(:Package) " +
+	@Query("match p=(:Package)-[r:DEPENDS_ON]->(:Package) " +
 			"where r.weightedTimes is null " +
 			"delete r;")
 	void deleteNullAggregationDependsOnInPackages();
 
-	@Query("match ()-[r:DEPENDS_ON]->() where r.dependsOnType = $dependsOnType delete r;")
+	@Query("match p=()-[r:DEPENDS_ON]->() where r.dependsOnType = $dependsOnType delete r;")
 	void deleteDependsOnByRelationType(String dependsOnType);
 
 }

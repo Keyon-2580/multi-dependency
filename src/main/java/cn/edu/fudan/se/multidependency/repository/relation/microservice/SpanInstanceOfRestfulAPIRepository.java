@@ -11,7 +11,7 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanI
 @Repository
 public interface SpanInstanceOfRestfulAPIRepository extends Neo4jRepository<SpanInstanceOfRestfulAPI, Long>{
 
-	@Query("match p=(s:Span)-[r:" + RelationType.str_SPAN_INSTANCE_OF_RESTFUL_API + "]->(api:RestfulAPI) where s.spanId = $spanId return p")
+	@Query("match p=(s:Span)-[:" + RelationType.str_SPAN_INSTANCE_OF_RESTFUL_API + "]->(api:RestfulAPI) where s.spanId = $spanId return p")
 	public SpanInstanceOfRestfulAPI findSpanBelongToAPI(@Param("spanId") String spanId);
 	
 }

@@ -11,6 +11,6 @@ import java.util.List;
 @Repository
 public interface AggregationCoChangeRepository extends Neo4jRepository<AggregationCoChange, Long> {
 
-    @Query("match p = (:Package)-[r:" + RelationType.str_AGGREGATION_CO_CHANGE + "]->(:Package) return p")
+    @Query("match p = (:Package)-[:" + RelationType.str_AGGREGATION_CO_CHANGE + "]->(:Package) return p")
     List<AggregationCoChange> findAggregationCoChange();
 }

@@ -11,6 +11,6 @@ import java.util.List;
 @Repository
 public interface AggregationDependsOnRepository extends Neo4jRepository<AggregationDependsOn, Long> {
 	
-	@Query("match p=(:Package)-[r:" + RelationType.str_AGGREGATION_DEPENDS_ON + "]->(:Package) return p")
+	@Query("match p=(:Package)-[:" + RelationType.str_AGGREGATION_DEPENDS_ON + "]->(:Package) return p")
 	List<AggregationDependsOn> findAggregationDependsOn();
 }

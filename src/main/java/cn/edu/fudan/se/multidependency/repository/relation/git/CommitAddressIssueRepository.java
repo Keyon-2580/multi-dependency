@@ -17,32 +17,32 @@ import cn.edu.fudan.se.multidependency.model.relation.git.CommitAddressIssue;
 @Repository
 public interface CommitAddressIssueRepository extends Neo4jRepository<CommitAddressIssue, Long> {
 
-	@Query("match p= (:commit)-[r:" + RelationType.str_COMMIT_ADDRESS_ISSUE + "]->(:Issue) return p")
+	@Query("match p= (:commit)-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE + "]->(:Issue) return p")
 	List<CommitAddressIssue> queryAllCommitAddressIssues();
 	
-	@Query("match (commit:Commit)-[r:" + RelationType.str_COMMIT_ADDRESS_ISSUE 
+	@Query("match p = (commit:Commit)-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE
 			+ "]->(issue:Issue) where id(commit)=$id return issue;")
 	List<Issue> queryIssuesAddressedByCommit(@Param("id") long commitId);
 	
-	@Query("match (issue:Issue)<-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE 
+	@Query("match p = (issue:Issue)<-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE
 			+ "]-(commit:Commit) where id(issue)=$id return commit;")
 	List<Commit> queryRelatedCommitsOnIssue(@Param("id") long issueId);
 	
-	@Query("match (issue:Issue)<-[:" 
+	@Query("match p = (issue:Issue)<-[:"
 			+ RelationType.str_COMMIT_ADDRESS_ISSUE 
 			+ "]-(commit:Commit)-[:" 
 			+ RelationType.str_COMMIT_UPDATE_FILE
 			+ "]->(file:ProjectFile) where id(issue)=$id return file;")
 	List<ProjectFile> queryRelatedFilesOnIssue(@Param("id") long issueId);
 
-	@Query("match (issue:Issue)<-[:" 
+	@Query("match p = (issue:Issue)<-[:"
 			+ RelationType.str_COMMIT_ADDRESS_ISSUE 
 			+ "]-(commit:Commit)-[:" 
 			+ RelationType.str_COMMIT_UPDATE_FILE
 			+ "]->(file:ProjectFile) return file order by file.path;")
 	Set<ProjectFile> queryRelatedFilesOnAllIssues();
 
-	@Query("match (file:ProjectFile)<-[:" 
+	@Query("match p = (file:ProjectFile)<-[:"
 			+ RelationType.str_COMMIT_UPDATE_FILE 
 			+ "]-(commit:Commit) where id(file) = $id with commit "
 			+ "match (commit)-[:" 
