@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculator;
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricShowService;
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculatorImplForFieldMethodLevel;
 import cn.edu.fudan.se.multidependency.service.query.metric.ProjectMetrics;
@@ -32,7 +32,7 @@ public class MeasureController {
     ModularityCalculatorImplForFieldMethodLevel modularityCalculator;
 
     @Autowired
-    MetricCalculator metricCalculator;
+    MetricCalculatorService metricCalculatorService;
     
     @Autowired
     MetricShowService metricShowService;
@@ -77,13 +77,13 @@ public class MeasureController {
     @GetMapping("/file")
     @ResponseBody
     public Object calculateFileMetrics() {
-    	return metricCalculator.calculateFileMetrics();
+    	return metricCalculatorService.calculateFileMetricsWithProjectIdIndex();
     }
     
     @GetMapping("/project")
     @ResponseBody
     public Collection<ProjectMetrics> calculateProjectMetrics() {
-    	return metricCalculator.calculateProjectMetrics().values();
+    	return metricCalculatorService.calculateProjectMetrics().values();
     }
     
     @GetMapping("/project/modularity")
@@ -93,7 +93,7 @@ public class MeasureController {
     	if(project == null) {
     		return -1;
     	}
-    	return metricCalculator.calculateProjectModularity(project);
+    	return metricCalculatorService.calculateProjectModularity(project);
     }
     
     @GetMapping("/project/commitTimes")
@@ -103,13 +103,13 @@ public class MeasureController {
     	if(project == null) {
     		return -1;
     	}
-    	return metricCalculator.calculateProjectCommits(project);
+    	return metricCalculatorService.calculateProjectCommits(project);
     }
     
     @GetMapping("/package")
     @ResponseBody
     public Object calculatePackageMetrics() {
-    	return metricCalculator.calculatePackageMetrics();
+    	return metricCalculatorService.calculatePackageMetrics();
     }
 
     @GetMapping("/modularityMetricQ")

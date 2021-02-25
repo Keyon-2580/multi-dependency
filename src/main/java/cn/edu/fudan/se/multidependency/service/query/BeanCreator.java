@@ -8,6 +8,7 @@ import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.service.query.as.CyclicDependencyDetector;
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,59 +70,15 @@ public class BeanCreator {
 	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
 	private ModularityCalculator modularityCalculator;
 
-	@Bean
-	public boolean setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository, CommitRepository commitRepository) {
-		LOGGER.info("设置Commit Update文件数...");
-		commitUpdateFileRepository.setCommitFilesSize();
-		LOGGER.info("设置Project Commits数...");
-		commitRepository.setCommitsForAllProject();
-		return true;
-	}
-
-	@Bean
-	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository, PackageRepository packageRepository, ProjectFileRepository projectFileRepository) {
-		LOGGER.info("计算Project/Package/ProjectFile基本度量值...");
-		projectRepository.setProjectMetrics();
-		packageRepository.setPackageMetrics();
-		packageRepository.setEmptyPackageMetrics();
-		projectFileRepository.setFileMetrics();
-		if(propertyConfig.isCalModularity()){
-			LOGGER.info("计算Project模块性度量值...");
-			projectRepository.queryAllProjects().forEach( (project) ->{
-				if(project.getModularity() <= 0.0){
-					double value = modularityCalculator.calculate(project).getValue();
-					projectRepository.setModularityMetricsForProject(project.getId(), value);
-				}
-			});
-		}
-		return true;
-	}
-
-	@Bean
-	public boolean setPackageDepth(ProjectRepository projectRepository, ContainRepository containRepository) {
-		LOGGER.info("设置Package深度值...");
-		List<Project> projectList = projectRepository.queryAllProjects();
-		for(Project project : projectList) {
-			List<Package> rootPackageList = containRepository.findProjectRootPackages(project.getId());
-			for(Package rootPackage : rootPackageList) {
-				Queue<Package> packageQueue = new LinkedList<>();
-				packageQueue.offer(rootPackage);
-				while(!packageQueue.isEmpty()) {
-					Package pck = packageQueue.poll();
-					containRepository.setChildPackageDepth(pck.getId());
-					packageQueue.addAll(containRepository.findPackagesWithChildPackagesForParentPackage(pck.getId()));
-				}
-			}
-		}
-		return true;
-	}
+	@Autowired
+	private MetricCalculatorService metricCalculatorService;
 
 	@Bean("createCoChanges")
 	public List<CoChange> createCoChanges(PropertyConfig propertyConfig, CoChangeRepository cochangeRepository, AggregationCoChangeRepository aggregationCoChangeRepository) {
 		List<CoChange> coChanges = new ArrayList<>();
 		if(propertyConfig.isCalculateCoChange()) {
 			coChanges = cochangeRepository.findCoChangesLimit();
-			if(coChanges != null && coChanges.size() > 0){
+			if(coChanges != null && !coChanges.isEmpty()){
 				LOGGER.info("已存在CoChange关系" );
 				return coChanges;
 			}
@@ -164,26 +121,14 @@ public class BeanCreator {
 		return coChanges;
 	}
 
-	private void configSmellDetect(PropertyConfig propertyConfig, ASRepository asRepository) {
-		if(propertyConfig.isDetectAS() && !asRepository.existModule()) {
-			LOGGER.info("异味检测配置");
-			asRepository.createModule();
-			asRepository.createModuleDependsOn();
-			asRepository.createModuleHas();
-			asRepository.createProjectContainsModule();
-			asRepository.setModuleInstability();
-			asRepository.setFileInstability();
-			asRepository.setPackageInstability();
-		}
-	}
 
 	@Bean("createDependsOn")
 	public List<DependsOn> createDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, AggregationDependsOnRepository aggregationDependsOnRepository, ProjectFileRepository fileRepository, ASRepository asRepository) {
 		if(!propertyConfig.isCalculateDependsOn()) {
 			return new ArrayList<>();
 		}
-		List<DependsOn> dependsOns = dependsOnRepository.findFileDepends();
-		if(dependsOns != null && dependsOns.size() > 0){
+		List<DependsOn> dependsOns = dependsOnRepository.findFileDependsWithLimit(10);
+		if(dependsOns != null && !dependsOns.isEmpty()){
 			LOGGER.info("已存在Depends On关系" );
 		}
 		else {
@@ -222,7 +167,15 @@ public class BeanCreator {
 			dependsOnRepository.createDependsOnWithTimesInNode(NodeLabelType.ProjectFile);
 			dependsOnRepository.deleteNullAggregationDependsOnInFiles();
 
-			LOGGER.info("创建Module Depends On关系...");
+			//计算文件的依赖PageRank值
+			fileRepository.pageRank(20, 0.85);
+		}
+
+		LOGGER.info("创建Module Depends On关系...");
+		List<DependsOn> moduleDependsOns = dependsOnRepository.findPackageDependsOnWithLimit(10);
+		if(moduleDependsOns != null && !moduleDependsOns.isEmpty()){
+			LOGGER.info("已存在Module Depends On关系" );
+		}else {
 			Map<String, List<DependsOn>> dependsOnMap = hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOn();
 			List<DependsOn> moduleDependsOnList = new ArrayList<>(dependsOnMap.get(RelationType.str_DEPENDS_ON));
 			List<DependsOn> aggregationDependsOnList = new ArrayList<>(dependsOnMap.get(RelationType.str_AGGREGATION_DEPENDS_ON));
@@ -250,17 +203,31 @@ public class BeanCreator {
 				}
 			}
 			aggregationDependsOnRepository.saveAll(aggregationDependsOnListTmp);
-			fileRepository.pageRank(20, 0.85);
+
 		}
+
 		configSmellDetect(propertyConfig, asRepository);
 		return dependsOns;
+	}
+
+	private void configSmellDetect(PropertyConfig propertyConfig, ASRepository asRepository) {
+		if(propertyConfig.isDetectAS() && !asRepository.existModule()) {
+			LOGGER.info("异味检测配置");
+			asRepository.createModule();
+			asRepository.createModuleDependsOn();
+			asRepository.createModuleContain();
+			asRepository.createProjectContainsModule();
+			asRepository.setModuleInstability();
+			asRepository.setFileInstability();
+			asRepository.setPackageInstability();
+		}
 	}
 
 	@Bean("createCloneGroup")
 	public List<CloneGroup> createCloneGroup(PropertyConfig propertyConfig, CloneGroupRepository cloneGroupRepository) {
 		if(propertyConfig.isCalculateCloneGroup()) {
-			List<CloneGroup> cloneGroups = cloneGroupRepository.findCoChangesLimit();
-			if ( cloneGroups != null && cloneGroups.size() > 0){
+			List<CloneGroup> cloneGroups = cloneGroupRepository.findCloneGroupWithLimit();
+			if ( cloneGroups != null && !cloneGroups.isEmpty()){
 				LOGGER.info("已存在Clone Group关系");
 				return cloneGroups;
 			} else {
@@ -275,6 +242,7 @@ public class BeanCreator {
 				cloneGroupRepository.createCloneGroupContainRelations();
 				cloneGroupRepository.setCloneGroupContainSize();
 				cloneGroupRepository.setCloneGroupLanguage();
+				LOGGER.info("创建Clone Group关系完成！！！");
 			}
 
 		}
@@ -285,7 +253,7 @@ public class BeanCreator {
 	@Bean("setModuleClone")
 	public List<ModuleClone> setModuleClone(PropertyConfig propertyConfig, ModuleCloneRepository moduleCloneRepository) {
 		if(propertyConfig.isSetModuleClone()) {
-			List<ModuleClone> moduleClones = moduleCloneRepository.getAllModuleClone();
+			List<ModuleClone> moduleClones = moduleCloneRepository.getAllModuleCloneWithLimit();
 			if(moduleClones != null &&moduleClones.size() > 0) {
 				LOGGER.info("已存在Module Clone基础信息...");
 			}
@@ -368,6 +336,53 @@ public class BeanCreator {
 					packagePairCloneRelationData.getCloneSimilarityValue()
 			);
 		}
+	}
+
+	@Bean
+	public boolean setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository, CommitRepository commitRepository) {
+		LOGGER.info("设置Commit Update文件数...");
+		commitUpdateFileRepository.setCommitFilesSize();
+		LOGGER.info("设置Project Commits数...");
+		commitRepository.setCommitsForAllProject();
+		return true;
+	}
+
+	@Bean
+	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository, PackageRepository packageRepository, ProjectFileRepository projectFileRepository) {
+		LOGGER.info("计算Project/Package/ProjectFile基本度量值...");
+		projectRepository.setProjectMetrics();
+		packageRepository.setPackageMetrics();
+		packageRepository.setEmptyPackageMetrics();
+		projectFileRepository.setFileMetrics();
+		if(propertyConfig.isCalModularity()){
+			LOGGER.info("计算Project模块性度量值...");
+			projectRepository.queryAllProjects().forEach( (project) ->{
+				if(project.getModularity() <= 0.0){
+					double value = modularityCalculator.calculate(project).getValue();
+					projectRepository.setModularityMetricsForProject(project.getId(), value);
+				}
+			});
+		}
+		return true;
+	}
+
+	@Bean
+	public boolean setPackageDepth(ProjectRepository projectRepository, ContainRepository containRepository) {
+		LOGGER.info("设置Package深度值...");
+		List<Project> projectList = projectRepository.queryAllProjects();
+		for(Project project : projectList) {
+			List<Package> rootPackageList = containRepository.findProjectRootPackages(project.getId());
+			for(Package rootPackage : rootPackageList) {
+				Queue<Package> packageQueue = new LinkedList<>();
+				packageQueue.offer(rootPackage);
+				while(!packageQueue.isEmpty()) {
+					Package pck = packageQueue.poll();
+					containRepository.setChildPackageDepth(pck.getId());
+					packageQueue.addAll(containRepository.findPackagesWithChildPackagesForParentPackage(pck.getId()));
+				}
+			}
+		}
+		return true;
 	}
 
 	@Bean

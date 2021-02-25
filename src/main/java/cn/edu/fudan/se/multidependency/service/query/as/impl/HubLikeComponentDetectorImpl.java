@@ -22,14 +22,14 @@ import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikeFile;
 import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikeModule;
 import cn.edu.fudan.se.multidependency.service.query.metric.FanIOMetric;
 import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
-import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculator;
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Service
 public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 	
 	@Autowired
-	private MetricCalculator metricCalculator;
+	private MetricCalculatorService metricCalculatorService;
 	
 	@Autowired
 	private NodeService nodeService;
@@ -102,7 +102,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		if(project == null) {
 			return result;
 		}
-		List<FileMetrics> fileMetrics = metricCalculator.calculateFileMetrics().get(project.getId());
+		List<FileMetrics> fileMetrics = metricCalculatorService.calculateFileMetricsWithProjectIdIndex().get(project.getId());
 		for(FileMetrics metric : fileMetrics) {
 			if(isHubLikeComponent(metric, minFanIn, minFanOut)) {
 				HubLikeFile hubLikeFile = new HubLikeFile(metric.getFile(), metric.getFanIn(), metric.getFanOut());

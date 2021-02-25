@@ -28,28 +28,48 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	 * 所有文件的指标
 	 * @return
 	 */
-	@Query("MATCH (file:ProjectFile)\r\n" + 
-			"WITH size((file)-[:DEPENDS_ON]->()) as fanOut, \r\n" + 
-			"     size((file)<-[:DEPENDS_ON]-()) as fanIn,\r\n" + 
-			"     size((file)<-[:COMMIT_UPDATE_FILE]-()) as changeTimes,\r\n" + 
-			"     size((file)-[:CONTAIN*1..3]->(:Function)) as nom,\r\n" + 
-			"     size((file)-[:CO_CHANGE]-(:ProjectFile)) as cochangeFileCount,\r\n" + 
-			"     file.endLine as loc,\r\n" + 
-			"     file\r\n" + 
-			"RETURN  file,fanIn,fanOut,changeTimes,nom,loc,cochangeFileCount order by(file.path) desc;")
-	public List<FileMetrics> calculateFileMetrics();
+	@Query("MATCH (file:ProjectFile)-[:" + RelationType.str_CONTAIN + "]->(type:Type)-[:" + RelationType.str_CONTAIN +
+			"]->(function:Function) \r\n" +
+			"WITH file, count(distinct type) as noc, count(distinct function) as nom, " +
+			"     file.endLine as loc, " +
+			"     size((file)-[:"+ RelationType.str_DEPENDS_ON + "]->()) as fanOut, " +
+			"     size((file)<-[:"+ RelationType.str_DEPENDS_ON + "]-()) as fanIn \r\n" +
+			"RETURN  file,noc,nom,loc,fanOut,fanIn order by(file.path) desc;")
+	public List<FileMetrics.StructureMetric> calculateFileStructureMetrics();
 	
-	@Query("MATCH (file:ProjectFile) where id(file)=$fileId \r\n" +
-			"WITH size((file)-[:DEPENDS_ON]->()) as fanOut, \r\n" +
-			"     size((file)<-[:DEPENDS_ON]-()) as fanIn,\r\n" +
-			"     size((file)<-[:COMMIT_UPDATE_FILE]-()) as changeTimes,\r\n" +
-			"     size((file)-[:CONTAIN*1..3]->(:Function)) as nom,\r\n" +
-			"     size((file)-[:CO_CHANGE]-(:ProjectFile)) as cochangeFileCount,\r\n" +
-			"     file.endLine as loc,\r\n" +
-			"     file.instability as instability,\r\n" +
-			"     file\r\n" +
-			"RETURN  file,fanIn,fanOut,changeTimes,nom,loc,instability,cochangeFileCount order by(file.path) desc;")
-	public FileMetrics calculateFileMetrics(@Param("fileId") long fileId);
+	@Query("MATCH (file:ProjectFile)-[:" + RelationType.str_CONTAIN + "]->(type:Type)-[:" + RelationType.str_CONTAIN +
+			"]->(function:Function) \r\n" +
+            "where id(file)= $fileId \r\n" +
+			"WITH file, count(distinct type) as noc, count(distinct function) as nom, " +
+			"     file.endLine as loc, " +
+			"     size((file)-[:"+ RelationType.str_DEPENDS_ON + "]->()) as fanOut, " +
+			"     size((file)<-[:"+ RelationType.str_DEPENDS_ON + "]-()) as fanIn \r\n" +
+			"RETURN  file,noc,nom,loc,fanOut,fanIn order by(file.path) desc;")
+	public FileMetrics.StructureMetric calculateFileStructureMetrics(@Param("fileId") long fileId);
+
+	/**
+	 * 所有文件的指标
+	 * @return
+	 */
+	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) \r\n" +
+			"where id(file)= $fileId \r\n" +
+			"WITH file,count(distinct c) as changeTimes, c \r\n" +
+			"WITH file, changeTimes, c \r\n" +
+			"where size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 \r\n" +
+			"with file, changeTimes, count(c) as coChangeCommitTimes, " +
+			"     size((file)-[:" + RelationType.str_CO_CHANGE +"]-(:ProjectFile)) as coChangeFileCount \r\n" +
+			"RETURN  file,changeTimes,coChangeFileCount,coChangeCommitTimes order by(file.path) desc;")
+	public List<FileMetrics.EvolutionMetric> calculateFileEvolutionMetrics();
+
+	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) \r\n" +
+			"where id(file)= $fileId \r\n" +
+			"WITH file,count(distinct c) as changeTimes, c \r\n" +
+			"WITH file, changeTimes, c \r\n" +
+			"where size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 \r\n" +
+			"with file, changeTimes, count(c) as coChangeCommitTimes, " +
+			"     size((file)-[:" + RelationType.str_CO_CHANGE +"]-(:ProjectFile)) as coChangeFileCount \r\n" +
+			"RETURN  file,changeTimes,coChangeFileCount,coChangeCommitTimes order by(file.path) desc;")
+	public FileMetrics.EvolutionMetric calculateFileEvolutionMetrics(@Param("fileId") long fileId);
 	
 //	@Query("match (file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) where id(file) = $fileId with c where size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 return c")
 //	public List<Commit> cochangeCommitsWithFile(@Param("fileId") long fileId);
@@ -60,8 +80,9 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	 */
 	@Query("MATCH (file:ProjectFile)\r\n" + 
 			"with file\r\n" +
-			"match (file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) with file, c where size((c)-[:" 
-				+ RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 with file, count(c) as cochangeCommitTimes\r\n" + 
+			"match (file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) \r\n" +
+			"with file, c \r\n" +
+			"where size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 with file, count(c) as cochangeCommitTimes\r\n" +
 			"WITH size((file)-[:" + RelationType.str_DEPENDS_ON + "]->()) as fanOut, \r\n" + 
 			"     size((file)<-[:" + RelationType.str_DEPENDS_ON + "]-()) as fanIn,\r\n" + 
 			"     size((file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-()) as changeTimes,\r\n" + 
@@ -71,7 +92,7 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"     file.score as score,\r\n" + 
 			"     cochangeCommitTimes,\r\n" + 
 			"     file\r\n" + 
-			"RETURN  file,fanIn,fanOut,changeTimes,cochangeCommitTimes,nom,loc,score,cochangeFileCount order by(file.path);")
+			"RETURN  file,fanIn,fanOut,changeTimes,cochangeCommitTimes,nom,loc,score,cochangeFileCount order by(file.path) desc;")
 	public List<FileMetrics> calculateFileMetricsWithCoChangeCommitTimes();
 	
 	@Query("CALL gds.pageRank.stream({" +

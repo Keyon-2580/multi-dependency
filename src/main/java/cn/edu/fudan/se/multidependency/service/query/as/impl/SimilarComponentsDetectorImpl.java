@@ -23,7 +23,7 @@ import cn.edu.fudan.se.multidependency.service.query.clone.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.FileCloneWithCoChange;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
-import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculator;
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 
 @Service
 public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector {
@@ -47,7 +47,7 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 	private DependsOnRepository dependsOnRepository;
 	
 	@Autowired
-	private MetricCalculator metricCalculator;
+	private MetricCalculatorService metricCalculatorService;
 	
 	@Override
 	public Collection<SimilarComponents<ProjectFile>> similarFiles() {
@@ -63,7 +63,7 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 		} catch (Exception e) {
 			clonesWithCoChange = new ArrayList<>();
 		}
-		Map<ProjectFile, FileMetrics>fileMetrics = metricCalculator.calculateCommitFileMetrics();
+		Map<ProjectFile, FileMetrics>fileMetrics = metricCalculatorService.calculateFileMetrics();
 		for(FileCloneWithCoChange clone : clonesWithCoChange) {
 			ProjectFile file1 = clone.getFile1();
 			ProjectFile file2 = clone.getFile2();

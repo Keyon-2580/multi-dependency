@@ -40,10 +40,16 @@ public interface CloneGroupRepository extends Neo4jRepository<CloneGroup, Long> 
 			"match (file:ProjectFile) where file in files set file.cloneGroupId = \"file_group_\" + setId;")
 	void setFileGroup();
 
-	@Query("match (file:ProjectFile) where file.cloneGroupId is not null with file.cloneGroupId as cloneGroupId, count(file) as count with cloneGroupId create (:CloneGroup{name: cloneGroupId, cloneLevel: \"file\", entityId: -1});\n")
+	@Query("match (file:ProjectFile) " +
+			"where file.cloneGroupId is not null " +
+			"with file.cloneGroupId as cloneGroupId, count(file) as count " +
+			"with cloneGroupId " +
+			"create (:CloneGroup{name: cloneGroupId, cloneLevel: \"file\", entityId: -1});\n")
 	void createCloneGroupRelations();
 
-	@Query("MATCH (n:CloneGroup) with n match (file:ProjectFile) where file.cloneGroupId = n.name create (n)-[:CONTAIN]->(file);\n")
+	@Query("MATCH (n:CloneGroup) with n match (file:ProjectFile) " +
+			"where file.cloneGroupId = n.name " +
+			"create (n)-[:CONTAIN]->(file);\n")
 	void createCloneGroupContainRelations();
 
 	@Query("MATCH (n:CloneGroup) with n set n.size = size((n)-[:CONTAIN]->());\n")
@@ -58,5 +64,5 @@ public interface CloneGroupRepository extends Neo4jRepository<CloneGroup, Long> 
 	 * @return
 	 */
 	@Query("match (n:CloneGroup) return n limit 10")
-	List<CloneGroup> findCoChangesLimit();
+	List<CloneGroup> findCloneGroupWithLimit();
 }

@@ -19,7 +19,7 @@ import cn.edu.fudan.se.multidependency.service.query.as.UnstableDependencyDetect
 import cn.edu.fudan.se.multidependency.service.query.as.data.UnstableFileInHistory;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
-import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculator;
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Service
@@ -75,7 +75,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 	}
 	
 	@Autowired
-	private MetricCalculator metricCalculator;
+	private MetricCalculatorService metricCalculatorService;
 	
 	@Autowired
 	private NodeService nodeService;
@@ -105,7 +105,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 	}
 	
 	public List<UnstableFileInHistory> unstableFiles(Project project) {
-		List<FileMetrics> fileMetrics = metricCalculator.calculateFileMetrics().get(project.getId());
+		List<FileMetrics> fileMetrics = metricCalculatorService.calculateFileMetricsWithProjectIdIndex().get(project.getId());
 		List<UnstableFileInHistory> result = new ArrayList<>();
 		for(FileMetrics metrics : fileMetrics) {
 			UnstableFileInHistory unstableFile = isUnstableFile(project, metrics);

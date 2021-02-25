@@ -20,7 +20,7 @@ import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.as.UnstableDependencyDetectorUsingInstability;
 import cn.edu.fudan.se.multidependency.service.query.as.data.UnstableComponentByInstability;
 import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
-import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculator;
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Service
@@ -39,7 +39,7 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 	private DependsOnRepository dependsOnRepository;
 	
 	@Autowired
-	private MetricCalculator metricCalculator;
+	private MetricCalculatorService metricCalculatorService;
 	
 	public static final int DEFAULT_THRESHOLD_FILE_FANOUT = 10;
 	public static final int DEFAULT_THRESHOLD_MODULE_FANOUT = 1;
@@ -101,7 +101,7 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 				unstableFile.addAllTotalDependencies(dependsOns);
 				for(DependsOn dependsOn : dependsOns) {
 					ProjectFile dependsOnFile = (ProjectFile) dependsOn.getEndNode();
-					FileMetrics dependsOnMetric = metricCalculator.calculateFileMetric(dependsOnFile);
+					FileMetrics dependsOnMetric = metricCalculatorService.calculateFileMetric(dependsOnFile);
 //					if(unstableFile.getInstability() < ((double) (dependsOnMetric.getFanOut()) / (dependsOnMetric.getFanIn() + dependsOnMetric.getFanOut()))) {
 					if(unstableFile.getInstability() < dependsOnFile.getInstability() && dependsOnMetric.getFanOut() >= getFileFanOutThreshold(project)) {
 						unstableFile.addBadDependency(dependsOn);

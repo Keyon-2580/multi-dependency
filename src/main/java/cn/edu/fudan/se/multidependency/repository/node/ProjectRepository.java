@@ -51,6 +51,17 @@ public interface ProjectRepository extends Neo4jRepository<Project, Long> {
 			"SET project += {nop: nop, nof: nof, noc: noc, nom: nom, loc: loc, lines: lines};")
 	public void setProjectMetrics();
 
+	@Query("MATCH (project:Project)-[:" + RelationType.str_CONTAIN + "]->(package:Package)-[:" +
+			RelationType.str_CONTAIN + "]->(file:ProjectFile)-[:" +
+			RelationType.str_CONTAIN + "]->(type:Type)-[:" +
+			RelationType.str_CONTAIN + "]->(function:Function) \r\n" +
+			"WITH project, count(distinct package) as nop, count(distinct file) as nof, " +
+			"     count(distinct type) as noc, count(distinct function) as nom," +
+			"     reduce(tmp = 0, f in collect(distinct file) | tmp + f.loc) as loc, " +
+			"     reduce(tmp = 0, f in collect(distinct file) | tmp + f.endLine) as lines\r\n" +
+			"return project, nop, nof, noc, nom, loc, lines order by(project.path);")
+	public List<ProjectMetrics> calculateProjectMetrics();
+
 	@Query("MATCH (project:Project) " +
 			"where id(project) = $id " +
 			"SET project.modularity = $modularity;")

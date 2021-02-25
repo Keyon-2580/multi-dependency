@@ -8,7 +8,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import cn.edu.fudan.se.multidependency.model.node.git.GitRepository;
+import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +23,7 @@ import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 
 @Service
-public class MetricCalculator {
+public class MetricCalculatorService {
 
 	@Autowired
 	private ProjectFileRepository fileRepository;
@@ -42,48 +42,64 @@ public class MetricCalculator {
 	
 	@Autowired
 	private CacheService cache;
+
+	@Autowired
+	private MetricRepository metricRepository;
 	
 	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
 	private ModularityCalculator modularityCalculator;
 	
-	public Map<ProjectFile, FileMetrics> calculateCommitFileMetrics() {
-		String key = "calculateCommitFileMetrics";
-		if(cache.get(getClass(), key) != null) {
-			return cache.get(getClass(), key);
-		}
-		Map<ProjectFile, FileMetrics> result = new HashMap<>();
-		List<FileMetrics> metrics = fileRepository.calculateFileMetricsWithCoChangeCommitTimes();
-		for(FileMetrics metric : metrics) {
-			result.put(metric.getFile(), metric);
-		}
-		cache.cache(getClass(), key, result);
-		return result;
-	}
-	
-	public Map<Long, List<FileMetrics>> calculateFileMetrics() {
+	public Map<ProjectFile, FileMetrics> calculateFileMetrics() {
 		String key = "calculateFileMetrics";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-		Map<Long, List<FileMetrics>> result = new HashMap<>();
-		Map<ProjectFile, FileMetrics> commitFileMetricsCache = calculateCommitFileMetrics();
-		for(FileMetrics fileMetrics : fileRepository.calculateFileMetrics()) {
-			fileMetrics.setInstability((fileMetrics.getFanIn() + fileMetrics.getFanOut()) == 0 ? -1 : (fileMetrics.getFanOut() + 0.0) / (fileMetrics.getFanIn() + fileMetrics.getFanOut()));
-			ProjectFile file = fileMetrics.getFile();
-			if(commitFileMetricsCache.get(file) != null) {
-				fileMetrics.setCochangeCommitTimes(commitFileMetricsCache.get(file).getCochangeCommitTimes());
-			}
-			Project project = containRelationService.findFileBelongToProject(file);
-			List<FileMetrics> temp = result.getOrDefault(project.getId(), new ArrayList<>());
-			temp.add(fileMetrics);
-			result.put(project.getId(), temp);
+
+		Map<ProjectFile, FileMetrics> result = new HashMap<>();
+		List<FileMetrics.StructureMetric> fileStructureMetricsList = fileRepository.calculateFileStructureMetrics();
+		if(fileStructureMetricsList != null && !fileStructureMetricsList.isEmpty()){
+			fileStructureMetricsList.forEach(structureMetric -> {
+				ProjectFile file = structureMetric.getFile();
+				FileMetrics.EvolutionMetric fileEvolutionMetrics = fileRepository.calculateFileEvolutionMetrics(file.getId());
+
+				FileMetrics fileMetrics = new FileMetrics();
+				fileMetrics.setStructureMetric(structureMetric);
+				fileMetrics.setEvolutionMetric(fileEvolutionMetrics);
+				//计算不稳定度
+				double instability = (structureMetric.getFanIn() + structureMetric.getFanOut()) == 0 ? -1 : (structureMetric.getFanOut() + 0.0) / (structureMetric.getFanIn() + structureMetric.getFanOut());
+				fileMetrics.setInstability(instability);
+				fileMetrics.setScore(file.getScore());
+				result.put(file, fileMetrics);
+			});
+			cache.cache(getClass(), key, result);
 		}
-		cache.cache(getClass(), key, result);
+
+		return result;
+	}
+	
+	public Map<Long, List<FileMetrics>> calculateFileMetricsWithProjectIdIndex() {
+		String key = "calculateFileMetricsWithProjectIdIndex";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		Map<Long, List<FileMetrics>> result = new HashMap<>();
+		Map<ProjectFile, FileMetrics> fileMetricsCache = new HashMap<>(calculateFileMetrics());
+		if(fileMetricsCache != null && !fileMetricsCache.isEmpty()){
+			fileMetricsCache.forEach((file,fileMetrics)->{
+				Project project = containRelationService.findFileBelongToProject(file);
+				List<FileMetrics> temp = result.getOrDefault(project.getId(), new ArrayList<>());
+				temp.add(fileMetrics);
+				result.put(project.getId(), temp);
+			});
+			cache.cache(getClass(), key, result);
+		}
+
 		return result;
 	}
 	
 	public Collection<FileMetrics> calculateFileMetrics(Project project) {
-		return calculateFileMetrics().get(project.getId());
+		return calculateFileMetricsWithProjectIdIndex().get(project.getId());
 	}
 	
 	public Collection<PackageMetrics> calculatePackageMetrics(Project project) {
@@ -114,13 +130,13 @@ public class MetricCalculator {
 	public Collection<ProjectFile> calculateFanOut(ProjectFile file) {
 		return fileRepository.calculateFanOut(file.getId());
 	}
-	
+
 	public FileMetrics calculateFileMetric(ProjectFile file) {
-		FileMetrics fileMetrics = fileRepository.calculateFileMetrics(file.getId());
-		Map<ProjectFile, FileMetrics> commitFileMetricsCache = calculateCommitFileMetrics();
-		if(commitFileMetricsCache.get(file) != null) {
-			fileMetrics.setCochangeCommitTimes(commitFileMetricsCache.get(file).getCochangeCommitTimes());
-		}
+		FileMetrics fileMetrics = new FileMetrics();
+		FileMetrics.StructureMetric fileStructureMetrics = fileRepository.calculateFileStructureMetrics(file.getId());
+		FileMetrics.EvolutionMetric fileEvolutionMetrics = fileRepository.calculateFileEvolutionMetrics(file.getId());
+		fileMetrics.setStructureMetric(fileStructureMetrics);
+		fileMetrics.setEvolutionMetric(fileEvolutionMetrics);
 		return fileMetrics;
 	}
 
@@ -134,11 +150,16 @@ public class MetricCalculator {
 			return cache.get(getClass(), key);
 		}
 		Map<Long, ProjectMetrics> result = new HashMap<>();
-		for(ProjectMetrics projectMetric : projectRepository.getProjectMetrics()) {
-			result.put(projectMetric.getProject().getId(), projectMetric);
+		List<ProjectMetrics> projectMetricsList = projectRepository.calculateProjectMetrics();
+		if(projectMetricsList != null && !projectMetricsList.isEmpty()) {
+			projectMetricsList.forEach(projectMetrics -> {
+				Project project = projectMetrics.getProject();
+				int commitTimes = calculateProjectCommits(project);
+				projectMetrics.setCommitTimes(commitTimes);
+				result.put(project.getId(), projectMetrics);
+			});
+			cache.cache(getClass(), key, result);
 		}
-
-		cache.cache(getClass(), key, result);
 
 		return result;
 	}
@@ -149,12 +170,16 @@ public class MetricCalculator {
 			return cache.get(getClass(), key);
 		}
 		Map<String, List<ProjectMetrics>> result = new HashMap<>();
-		for(ProjectMetrics projectMetric : projectRepository.getProjectMetrics()) {
-			List<ProjectMetrics> projectMetricsList = result.getOrDefault(projectMetric.getProject().getName(), new ArrayList<>());
-			projectMetricsList.add(projectMetric);
-			result.put(projectMetric.getProject().getName() , projectMetricsList);
+		List<ProjectMetrics> projectMetricsList = projectRepository.calculateProjectMetrics();
+		if(projectMetricsList != null && !projectMetricsList.isEmpty()) {
+			projectMetricsList.forEach(projectMetrics -> {
+				List<ProjectMetrics> projectMetricsTmp = result.getOrDefault(projectMetrics.getProject().getName(), new ArrayList<>());
+				projectMetricsTmp.add(projectMetrics);
+				result.put(projectMetrics.getProject().getName() , projectMetricsTmp);
+			});
+			cache.cache(getClass(), key, result);
 		}
-		cache.cache(getClass(), key, result);
+
 		return result;
 	}
 	

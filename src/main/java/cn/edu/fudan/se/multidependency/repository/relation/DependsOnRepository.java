@@ -22,16 +22,22 @@ import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 @Repository
 public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 
-	@Query("match p=(:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(:ProjectFile) return p")
-	List<DependsOn> findFileDepends();	
-	
+	@Query("match p=(:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(:ProjectFile) return p;")
+	List<DependsOn> findFileDepends();
+
+	@Query("match p=(:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(:ProjectFile) return p limit $limitNum;")
+	List<DependsOn> findFileDependsWithLimit(@Param("limitNum") int limitNum);
+
 	@Query("match p=(:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(:Package) return p")
 	List<DependsOn> findPackageDependsOn();
 
-	@Query("match p=(:Type)-[:" + RelationType.str_DEPENDS_ON + "]->(:Type) return p")
+	@Query("match p=(:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(:Package) return p limit $limitNum;")
+	List<DependsOn> findPackageDependsOnWithLimit(@Param("limitNum") int limitNum);
+
+	@Query("match p=(:Type)-[:" + RelationType.str_DEPENDS_ON + "]->(:Type) return p;")
 	List<DependsOn> findTypeDepends();
 
-	@Query("match (p:Package)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where id(file) = $fileId return p")
+	@Query("match (p:Package)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where id(file) = $fileId return p;")
 	Package findFileBelongPackageByFileId(@Param("fileId") long fileId);
 
 	@Query("match p=(p1:Package)-[:" + RelationType.str_DEPENDS_ON + "]-(p2:Package) " +

@@ -32,7 +32,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.git.DeveloperSubmitCo
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.history.data.CoChangeFile;
 import cn.edu.fudan.se.multidependency.service.query.history.data.GitRepoMetric;
-import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculator;
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.metric.ProjectMetrics;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 
@@ -58,7 +58,7 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
     private CoChangeRepository cochangeRepository;
 
 	@Autowired
-	MetricCalculator metricCalculator;
+    MetricCalculatorService metricCalculatorService;
     
     @Autowired
     private CacheService cache;
@@ -74,7 +74,7 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 			return cache.get(getClass(), key);
 		}
 		Map<Long, GitRepoMetric> result = new HashMap<>();
-		Map<String, List<ProjectMetrics>> projectMetricsMap = new HashMap<>(metricCalculator.calculateProjectMetricsByGitRepository());
+		Map<String, List<ProjectMetrics>> projectMetricsMap = new HashMap<>(metricCalculatorService.calculateProjectMetricsByGitRepository());
 		for(GitRepository gitRepository : gitRepoRepository.findAll()) {
 			GitRepoMetric gitRepoMetric = new GitRepoMetric();
 			gitRepoMetric.setGitRepository(gitRepository);

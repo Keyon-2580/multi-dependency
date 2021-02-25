@@ -68,17 +68,19 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 	public void createModule();
 	
 	
-	@Query("match p=(pck1:Package)-[r:DEPENDS_ON]->(pck2:Package) "
-			+ "with pck1, r, pck2 match(m1:Module), (m2:Module) "
-			+ "where m1.name = pck1.directoryPath and m2.name = pck2.directoryPath "
-			+ "create(m1)-[:DEPENDS_ON{times: r.times}]->(m2);")
+	@Query("match p=(pck1:Package)-[r:DEPENDS_ON]->(pck2:Package) " +
+			"with pck1, r, pck2 " +
+			"match(m1:Module) where m1.name = pck1.directoryPath " +
+			"optional match (m2:Module) where m2.name = pck2.directoryPath " +
+			"create(m1)-[:DEPENDS_ON{times: r.times}]->(m2);")
 	public void createModuleDependsOn();
 	
-	@Query("match p=(pck1:Package)-[r:HAS]->(pck2:Package) "
-			+ "with pck1, r, pck2 match(m1:Module), (m2:Module) "
-			+ "where m1.name = pck1.directoryPath and m2.name = pck2.directoryPath "
-			+ "create(m1)-[:HAS]->(m2);")
-	public void createModuleHas();
+	@Query("match p=(pck1:Package)-[r:CONTAIN]->(pck2:Package) " +
+			"with pck1, r, pck2 " +
+			"match(m1:Module) where m1.name = pck1.directoryPath " +
+			"optional match (m2:Module) where m2.name = pck2.directoryPath " +
+			"create(m1)-[:CONTAIN]->(m2);")
+	public void createModuleContain();
 	
 	@Query("match (project:Project)-[:CONTAIN]->(pck:Package) "
 			+ "with project, pck "

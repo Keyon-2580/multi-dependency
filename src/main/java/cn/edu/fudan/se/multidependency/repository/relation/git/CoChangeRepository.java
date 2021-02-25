@@ -90,7 +90,8 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
     @Query("match p = (:Package)-[:" + RelationType.str_CO_CHANGE + "]->(:Package) return p")
     List<CoChange> findModuleCoChange();
 
-    @Query("match p = (p1:Package)-[:" + RelationType.str_CO_CHANGE + "]-(p2:Package) where id(p1) = $pckId1 and id(p2) = $pckId2 return r")
+    @Query("match p = (p1:Package)-[:" + RelationType.str_CO_CHANGE + "]-(p2:Package) " +
+            "where id(p1) = $pckId1 and id(p2) = $pckId2 return p")
     CoChange findPackageCoChangeByPackageId(@Param("pckId1") long pckId1, @Param("pckId2") long pckId2);
 
     @Query("match p = (project:Project)-[:" + RelationType.str_CONTAIN + "*2]->(:ProjectFile)-[:" + RelationType.str_CO_CHANGE + "]->(:ProjectFile)<-[:" + RelationType.str_CONTAIN + "*2]-(project) where id(project)=$id return p")
