@@ -846,17 +846,15 @@ function drawTableBelow(link_id, linksdata, type){
     var cleartable = d3.selectAll("table").remove();
     let html = "";
 
-    if(type === "single"){
-        var links_local = linksdata.concat();
-    }
-
     if(type === "all" || type === "clone" || type === "dependson" || type === "cochange"){
         var links_local = linksCurrent_global.concat();
+    }else if(type === "single"){
+        var links_local = linksdata.concat();
     }else{
         var links_local = linksCurrentAfterExtract_global.concat();
     }
 
-    if(type === "all" || type === "clone" || type === "extract"){
+    if(type === "all" || type === "single" || type === "clone" || type === "extract"){
         let html_clone_table_body = "";
         let html_clone_table_parent = "";
         let html_clone_table_head = "<table class = \"gridtable\">"
@@ -962,7 +960,7 @@ function drawTableBelow(link_id, linksdata, type){
         html += html_clone_table_head + html_clone_table_parent + html_clone_table_body;
     }
 
-    if(type === "all" || type === "dependson" || type === "extract"){
+    if(type === "all" || type === "single" || type === "dependson" || type === "extract"){
         let html_dependson_table = "";
 
         html_dependson_table += "<table class = \"gridtable\">"
@@ -987,7 +985,7 @@ function drawTableBelow(link_id, linksdata, type){
         html_dependson_table += "</table>"
         html += html_dependson_table;
     }
-    if(type === "all" || type === "cochange" || type === "extract"){
+    if(type === "all" || type === "single" || type === "cochange" || type === "extract"){
         let html_cochange_table = "";
 
         html_cochange_table += "<table class = \"gridtable\">"
