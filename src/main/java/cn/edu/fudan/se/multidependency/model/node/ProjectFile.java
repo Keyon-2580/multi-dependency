@@ -39,8 +39,6 @@ public class ProjectFile extends CodeUnit {
 	private int nom;
 
 	private int loc = -1;
-
-	private int lines = -1;
 	
 	private double score = -1;
     

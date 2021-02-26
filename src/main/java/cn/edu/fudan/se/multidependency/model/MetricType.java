@@ -10,10 +10,10 @@ public enum MetricType {
 	FAN_IN(MetricType.str_FAN_IN),
 	FAN_OUT(MetricType.str_FAN_OUT),
 	INSTABILITY(MetricType.str_INSTABILITY),
-	PAGERANK_SCORE(MetricType.str_PAGERANK_SCORE),
+	PAGE_RANK_SCORE(MetricType.str_PAGE_RANK_SCORE),
 	MODULARITY(MetricType.str_MODULARITY),
 
-	COMMITS(MetricType.str_COMMITS),
+	COMMIT_TIMES(MetricType.str_COMMIT_TIMES),
 	CHANGE_TIMES(MetricType.str_CHANGE_TIMES),
 	CO_CHANGE_FILE_COUNT(MetricType.str_CO_CHANGE_FILE_COUNT),
 	CO_CHANGE_COMMIT_TIMES(MetricType.str_CO_CHANGE_COMMIT_TIMES),
@@ -47,33 +47,33 @@ public enum MetricType {
 	/**
 	 * 代码总规模， 包括空行和注释
 	 */
-	public static final String str_LINES = "Lines";
+	public static final String str_LINES = "LINES";
 	/**
 	 * 扇出依赖
 	 * 也叫Efferent  Couplings，依赖出度数
 	 */
-	public static final String str_FAN_OUT = "FanOut";
+	public static final String str_FAN_OUT = "FAN_OUT";
 	/**
 	 * 扇入依赖
 	 * 也叫Afferent Couplings，依赖入度数
 	 */
-	public static final String str_FAN_IN = "FanIn";
+	public static final String str_FAN_IN = "FAN_IN";
 	/**
 	 * 不稳定度
 	 * Instability = Ce / (Ce + Ca)
 	 * 即Instability = FanOut / (FanOut + FanIn)
 	 */
-	public static final String str_INSTABILITY = "Instability";
+	public static final String str_INSTABILITY = "INSTABILITY";
 	/**
 	 * 根据依赖情况，衡量节点的重要程度
 	 * PageRank
 	 */
-	public static final String str_PAGERANK_SCORE = "PageRankScore";
+	public static final String str_PAGE_RANK_SCORE = "PAGE_RANK_SCORE";
 	/**
 	 * 衡量项目的模块性
 	 * Modularity
 	 */
-	public static final String str_MODULARITY = "Modularity";
+	public static final String str_MODULARITY = "MODULARITY";
 
 	/**
 	 * --------------------------------演化性度量值------------------------------------------
@@ -82,19 +82,19 @@ public enum MetricType {
 	/**
 	 * 提交数， Commits
 	 */
-	public static final String str_COMMITS = "Commits";
+	public static final String str_COMMIT_TIMES = "COMMIT_TIMES";
 	/**
 	 * 变更数
 	 */
-	public static final String str_CHANGE_TIMES = "ChangeTimes";
+	public static final String str_CHANGE_TIMES = "CHANGE_TIMES";
 	/**
 	 * 共变文件数coChangeFileCount
 	 */
-	public static final String str_CO_CHANGE_FILE_COUNT = "coChangeFileCount";
+	public static final String str_CO_CHANGE_FILE_COUNT = "CO_CHANGE_FILE_COUNT";
 	/**
 	 * 共变文件数coChangeFileCount
 	 */
-	public static final String str_CO_CHANGE_COMMIT_TIMES = "coChangeCommitTimes";
+	public static final String str_CO_CHANGE_COMMIT_TIMES = "CO_CHANGE_COMMIT_TIMES";
 
 
 
@@ -104,7 +104,7 @@ public enum MetricType {
 	 */
 
 
-	public static final String str_DEFAULT = "default";
+	public static final String str_DEFAULT = "DEFAULT";
 
 	private String name;
 

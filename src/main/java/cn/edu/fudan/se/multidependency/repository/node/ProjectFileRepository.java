@@ -18,9 +18,10 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	@Query("match (f:ProjectFile) where f.path=$filePath return f")
 	public ProjectFile findFileByPath(@Param("filePath") String filePath);
 
-	@Query("MATCH (file:ProjectFile)-[:" + RelationType.str_CONTAIN + "]->(type:Type)-[:" +
-			RelationType.str_CONTAIN + "]->(function:Function) \r\n" +
-			"WITH file, count(distinct type) as noc, count(distinct function) as nom\r\n" +
+	@Query("MATCH (file:ProjectFile)\r\n" +
+			"WITH file, " +
+			"     size((file)-[:" + RelationType.str_CONTAIN + "]->(:Type)) as noc, " +
+			"     size((file)-[:" + RelationType.str_CONTAIN + "*2..3]->(:Function)) as nom \r\n" +
 			"SET file += {noc: noc, nom: nom};")
 	public void setFileMetrics();
 	
@@ -28,20 +29,22 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	 * 所有文件的指标
 	 * @return
 	 */
-	@Query("MATCH (file:ProjectFile)-[:" + RelationType.str_CONTAIN + "]->(type:Type)-[:" + RelationType.str_CONTAIN +
-			"]->(function:Function) \r\n" +
-			"WITH file, count(distinct type) as noc, count(distinct function) as nom, " +
-			"     file.endLine as loc, " +
+	@Query("MATCH (file:ProjectFile)\r\n" +
+			"WITH file, " +
+			"     size((file)-[:" + RelationType.str_CONTAIN + "]->(:Type)) as noc, " +
+			"     size((file)-[:" + RelationType.str_CONTAIN + "*2..3]->(:Function)) as nom, " +
+			"     file.loc as loc, " +
 			"     size((file)-[:"+ RelationType.str_DEPENDS_ON + "]->()) as fanOut, " +
 			"     size((file)<-[:"+ RelationType.str_DEPENDS_ON + "]-()) as fanIn \r\n" +
 			"RETURN  file,noc,nom,loc,fanOut,fanIn order by(file.path) desc;")
 	public List<FileMetrics.StructureMetric> calculateFileStructureMetrics();
 	
-	@Query("MATCH (file:ProjectFile)-[:" + RelationType.str_CONTAIN + "]->(type:Type)-[:" + RelationType.str_CONTAIN +
-			"]->(function:Function) \r\n" +
+	@Query("MATCH (file:ProjectFile) \r\n" +
             "where id(file)= $fileId \r\n" +
-			"WITH file, count(distinct type) as noc, count(distinct function) as nom, " +
-			"     file.endLine as loc, " +
+			"WITH file, " +
+			"     size((file)-[:" + RelationType.str_CONTAIN + "]->(:Type)) as noc, " +
+			"     size((file)-[:" + RelationType.str_CONTAIN + "*2..3]->(:Function)) as nom, " +
+			"     file.loc as loc, " +
 			"     size((file)-[:"+ RelationType.str_DEPENDS_ON + "]->()) as fanOut, " +
 			"     size((file)<-[:"+ RelationType.str_DEPENDS_ON + "]-()) as fanIn \r\n" +
 			"RETURN  file,noc,nom,loc,fanOut,fanIn order by(file.path) desc;")

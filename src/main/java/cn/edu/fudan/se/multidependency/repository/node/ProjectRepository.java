@@ -40,25 +40,27 @@ public interface ProjectRepository extends Neo4jRepository<Project, Long> {
 			"order by(project.name) desc;")
 	public List<ProjectMetrics> getProjectMetrics();
 
-	@Query("MATCH (project:Project)-[:" + RelationType.str_CONTAIN + "]->(package:Package)-[:" +
-				RelationType.str_CONTAIN + "]->(file:ProjectFile)-[:" +
-				RelationType.str_CONTAIN + "]->(type:Type)-[:" +
-				RelationType.str_CONTAIN + "]->(function:Function) \r\n" +
-			"WITH project, count(distinct package) as nop, count(distinct file) as nof, " +
-			"     count(distinct type) as noc, count(distinct function) as nom," +
-			"     reduce(tmp = 0, f in collect(distinct file) | tmp + f.loc) as loc, " +
-			"     reduce(tmp = 0, f in collect(distinct file) | tmp + f.endLine) as lines\r\n" +
+	@Query("MATCH (project:Project)-[:" + RelationType.str_CONTAIN + "]->(package:Package) \r\n" +
+			"where package.nof > 0 \r\n" +
+			"WITH project, " +
+			"     count(distinct package) as nop, " +
+			"     sum(package.nof) as nof, " +
+			"     sum(package.noc) as noc, " +
+			"     sum(package.nom) as nom, " +
+			"     sum(package.loc) as loc, " +
+			"     sum(package.lines) as lines\r\n" +
 			"SET project += {nop: nop, nof: nof, noc: noc, nom: nom, loc: loc, lines: lines};")
 	public void setProjectMetrics();
 
-	@Query("MATCH (project:Project)-[:" + RelationType.str_CONTAIN + "]->(package:Package)-[:" +
-			RelationType.str_CONTAIN + "]->(file:ProjectFile)-[:" +
-			RelationType.str_CONTAIN + "]->(type:Type)-[:" +
-			RelationType.str_CONTAIN + "]->(function:Function) \r\n" +
-			"WITH project, count(distinct package) as nop, count(distinct file) as nof, " +
-			"     count(distinct type) as noc, count(distinct function) as nom," +
-			"     reduce(tmp = 0, f in collect(distinct file) | tmp + f.loc) as loc, " +
-			"     reduce(tmp = 0, f in collect(distinct file) | tmp + f.endLine) as lines\r\n" +
+	@Query("MATCH (project:Project)-[:" + RelationType.str_CONTAIN + "]->(package:Package) \r\n" +
+			"where package.nof > 0 \r\n" +
+			"WITH project, " +
+			"     count(distinct package) as nop, " +
+			"     sum(package.nof) as nof, " +
+			"     sum(package.noc) as noc, " +
+			"     sum(package.nom) as nom, " +
+			"     sum(package.loc) as loc, " +
+			"     sum(package.lines) as lines\r\n" +
 			"return project, nop, nof, noc, nom, loc, lines order by(project.path);")
 	public List<ProjectMetrics> calculateProjectMetrics();
 

@@ -79,17 +79,17 @@ public class GodComponentDetectorImpl implements GodComponentDetector {
 			}
 		}
 		result.sort((f1, f2) -> {
-			return f2.getMetrics().getLoc() - f1.getMetrics().getLoc();
+			return f2.getMetrics().getStructureMetric().getLoc() - f1.getMetrics().getStructureMetric().getLoc();
 		});
 		return result;
 	}
 	
 	protected boolean isGodFile(Project project, FileMetrics metrics) {
-		return metrics.getLoc() >= getProjectMinFileLoc(project);
+		return metrics.getStructureMetric().getLoc() >= getProjectMinFileLoc(project);
 	}
 	
 	private List<GodPackage> godPackages(Project project) {
-		Collection<PackageMetrics> metrics = metricCalculatorService.calculatePackageMetrics(project);
+		Collection<PackageMetrics> metrics = metricCalculatorService.calculateProjectPackageMetrics(project);
 		List<GodPackage> result = new ArrayList<>();
 		for(PackageMetrics metric : metrics) {
 			if(isGodPackage(project, metric)) {

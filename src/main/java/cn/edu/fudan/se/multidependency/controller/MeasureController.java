@@ -77,7 +77,7 @@ public class MeasureController {
     @GetMapping("/file")
     @ResponseBody
     public Object calculateFileMetrics() {
-    	return metricCalculatorService.calculateFileMetricsWithProjectIdIndex();
+    	return metricCalculatorService.calculateProjectFileMetrics();
     }
     
     @GetMapping("/project")
@@ -109,7 +109,7 @@ public class MeasureController {
     @GetMapping("/package")
     @ResponseBody
     public Object calculatePackageMetrics() {
-    	return metricCalculatorService.calculatePackageMetrics();
+    	return metricCalculatorService.calculateProjectPackageMetrics();
     }
 
     @GetMapping("/modularityMetricQ")

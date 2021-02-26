@@ -2,11 +2,14 @@ package cn.edu.fudan.se.multidependency.service.query;
 
 import java.util.*;
 
+import cn.edu.fudan.se.multidependency.model.node.*;
 import cn.edu.fudan.se.multidependency.model.node.Package;
-import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.model.relation.*;
+import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
 import cn.edu.fudan.se.multidependency.service.query.as.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
@@ -16,16 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
-import cn.edu.fudan.se.multidependency.model.relation.AggregationDependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.git.AggregationCoChange;
 import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.config.PropertyConfig;
-import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
-import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
-import cn.edu.fudan.se.multidependency.model.relation.Relation;
-import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.model.relation.clone.ModuleClone;
@@ -72,6 +69,7 @@ public class BeanCreator {
 
 	@Autowired
 	private MetricCalculatorService metricCalculatorService;
+
 
 	@Bean("createCoChanges")
 	public List<CoChange> createCoChanges(PropertyConfig propertyConfig, CoChangeRepository cochangeRepository, AggregationCoChangeRepository aggregationCoChangeRepository) {
@@ -348,12 +346,15 @@ public class BeanCreator {
 	}
 
 	@Bean
-	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository, PackageRepository packageRepository, ProjectFileRepository projectFileRepository) {
+	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository,
+									 PackageRepository packageRepository, ProjectFileRepository projectFileRepository,
+									 MetricRepository metricRepository, HasRepository hasRepository) {
 		LOGGER.info("计算Project/Package/ProjectFile基本度量值...");
-		projectRepository.setProjectMetrics();
-		packageRepository.setPackageMetrics();
-		packageRepository.setEmptyPackageMetrics();
 		projectFileRepository.setFileMetrics();
+		packageRepository.setEmptyPackageMetrics();
+		packageRepository.setPackageMetrics();
+		projectRepository.setProjectMetrics();
+
 		if(propertyConfig.isCalModularity()){
 			LOGGER.info("计算Project模块性度量值...");
 			projectRepository.queryAllProjects().forEach( (project) ->{
@@ -363,8 +364,64 @@ public class BeanCreator {
 				}
 			});
 		}
+
+		LOGGER.info("创建File Metric度量值节点和关系...");
+		hasRepository.clearHasMetricRelation();
+		metricRepository.deleteAll();
+
+		Map<ProjectFile, Metric> fileMetricNodesMap = metricCalculatorService.generateFileMetricNodes();
+		if(fileMetricNodesMap != null && !fileMetricNodesMap.isEmpty()){
+			Collection<Metric> fileMetricNodes = fileMetricNodesMap.values();
+			metricRepository.saveAll(fileMetricNodes);
+
+			Collection<Has> hasMetrics = new ArrayList<>();
+			int size = 0;
+			for(Map.Entry<ProjectFile, Metric> entry : fileMetricNodesMap.entrySet()){
+				Has has = new Has(entry.getKey(), entry.getValue());
+				hasMetrics.add(has);
+				if(++size > 500){
+					hasRepository.saveAll(hasMetrics);
+					hasMetrics.clear();
+					size = 0;
+				}
+			}
+			hasRepository.saveAll(hasMetrics);
+		}
+
+		Map<Package, Metric> packageMetricNodesMap = metricCalculatorService.generatePackageMetricNodes();
+		if(packageMetricNodesMap != null && !packageMetricNodesMap.isEmpty()){
+			Collection<Metric> pckMetricNodes = packageMetricNodesMap.values();
+			metricRepository.saveAll(pckMetricNodes);
+
+			Collection<Has> hasMetrics = new ArrayList<>();
+			int size = 0;
+			for(Map.Entry<Package, Metric> entry : packageMetricNodesMap.entrySet()){
+				Has has = new Has(entry.getKey(), entry.getValue());
+				hasMetrics.add(has);
+				if(++size > 500){
+					hasRepository.saveAll(hasMetrics);
+					hasMetrics.clear();
+					size = 0;
+				}
+			}
+			hasRepository.saveAll(hasMetrics);
+		}
+
+		Map<Project, Metric> projectMetricNodesMap = metricCalculatorService.generateProjectMetricNodes();
+		if(projectMetricNodesMap != null && !projectMetricNodesMap.isEmpty()){
+			Collection<Metric> projectMetricNodes = projectMetricNodesMap.values();
+			metricRepository.saveAll(projectMetricNodes);
+
+			Collection<Has> hasMetrics = new ArrayList<>();
+			for(Map.Entry<Project, Metric> entry : projectMetricNodesMap.entrySet()){
+				Has has = new Has(entry.getKey(), entry.getValue());
+				hasMetrics.add(has);
+			}
+			hasRepository.saveAll(hasMetrics);
+		}
 		return true;
 	}
+
 
 	@Bean
 	public boolean setPackageDepth(ProjectRepository projectRepository, ContainRepository containRepository) {

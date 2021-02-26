@@ -105,7 +105,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 	}
 	
 	public List<UnstableFileInHistory> unstableFiles(Project project) {
-		List<FileMetrics> fileMetrics = metricCalculatorService.calculateFileMetricsWithProjectIdIndex().get(project.getId());
+		List<FileMetrics> fileMetrics = metricCalculatorService.calculateProjectFileMetrics().get(project.getId());
 		List<UnstableFileInHistory> result = new ArrayList<>();
 		for(FileMetrics metrics : fileMetrics) {
 			UnstableFileInHistory unstableFile = isUnstableFile(project, metrics);

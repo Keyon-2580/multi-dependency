@@ -8,6 +8,8 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import cn.edu.fudan.se.multidependency.model.MetricType;
+import cn.edu.fudan.se.multidependency.model.node.Metric;
 import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,97 @@ public class MetricCalculatorService {
 	
 	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
 	private ModularityCalculator modularityCalculator;
+
+	public Map<ProjectFile, Metric> generateFileMetricNodes(){
+		Map<ProjectFile, Metric> result = new HashMap<>();
+		Map<ProjectFile, FileMetrics> fileFileMetricsMap = calculateFileMetrics();
+		if(fileFileMetricsMap != null && !fileFileMetricsMap.isEmpty()){
+			fileFileMetricsMap.forEach((file, fileMetrics) ->{
+				Metric metric = new Metric();
+				metric.setEntityId((long) -1);
+				metric.setLanguage(file.getLanguage());
+				metric.setName(file.getName());
+				metric.setNodeType(file.getNodeType());
+
+				Map<MetricType, Object> metricValues =  new HashMap<>();
+				metricValues.put(MetricType.NOC, fileMetrics.getStructureMetric().getNoc());
+				metricValues.put(MetricType.NOM, fileMetrics.getStructureMetric().getNom());
+				metricValues.put(MetricType.LOC, fileMetrics.getStructureMetric().getLoc());
+				metricValues.put(MetricType.FAN_OUT, fileMetrics.getStructureMetric().getFanOut());
+				metricValues.put(MetricType.FAN_IN, fileMetrics.getStructureMetric().getFanIn());
+
+				FileMetrics.EvolutionMetric evolutionMetric = fileMetrics.getEvolutionMetric();
+				if (evolutionMetric != null){
+					metricValues.put(MetricType.CHANGE_TIMES, evolutionMetric.getChangeTimes());
+					metricValues.put(MetricType.CO_CHANGE_FILE_COUNT, evolutionMetric.getCoChangeFileCount());
+					metricValues.put(MetricType.CO_CHANGE_COMMIT_TIMES, evolutionMetric.getCoChangeCommitTimes());
+				}
+
+				metric.setMetricValues(metricValues);
+				result.put(file, metric);
+			});
+		}
+
+		return result;
+	}
+
+	public Map<Package, Metric> generatePackageMetricNodes(){
+		Map<Package, Metric> result = new HashMap<>();
+		Map<Package, PackageMetrics> packageMetricsMap = calculatePackageMetrics();
+		if(packageMetricsMap != null && !packageMetricsMap.isEmpty()){
+			packageMetricsMap.forEach((pck, packageMetrics) ->{
+				Metric metric = new Metric();
+				metric.setEntityId((long) -1);
+				metric.setLanguage(pck.getLanguage());
+				metric.setName(pck.getName());
+				metric.setNodeType(pck.getNodeType());
+
+				Map<MetricType, Object> metricValues =  new HashMap<>();
+				metricValues.put(MetricType.NOF, packageMetrics.getNof());
+				metricValues.put(MetricType.NOC, packageMetrics.getNoc());
+				metricValues.put(MetricType.NOM, packageMetrics.getNom());
+				metricValues.put(MetricType.LOC, packageMetrics.getLoc());
+				metricValues.put(MetricType.FAN_OUT, packageMetrics.getFanOut());
+				metricValues.put(MetricType.FAN_IN, packageMetrics.getFanIn());
+				metricValues.put(MetricType.LINES, packageMetrics.getLines());
+				metric.setMetricValues(metricValues);
+
+				result.put(pck, metric);
+			});
+		}
+
+		return result;
+	}
+
+	public Map<Project, Metric> generateProjectMetricNodes(){
+		Map<Project, Metric> result = new HashMap<>();
+		Map<Long, ProjectMetrics> projectMetricsMap = calculateProjectMetrics();
+		if(projectMetricsMap != null && !projectMetricsMap.isEmpty()){
+			projectMetricsMap.forEach((pck, projectMetrics) ->{
+				Metric metric = new Metric();
+				metric.setEntityId((long) -1);
+				metric.setLanguage(projectMetrics.getProject().getLanguage());
+				metric.setName(projectMetrics.getProject().getName());
+				metric.setNodeType(projectMetrics.getProject().getNodeType());
+
+				Map<MetricType, Object> metricValues =  new HashMap<>();
+				metricValues.put(MetricType.NOP, projectMetrics.getNop());
+				metricValues.put(MetricType.NOF, projectMetrics.getNof());
+				metricValues.put(MetricType.NOC, projectMetrics.getNoc());
+				metricValues.put(MetricType.NOM, projectMetrics.getNom());
+				metricValues.put(MetricType.LOC, projectMetrics.getLoc());
+				metricValues.put(MetricType.LINES, projectMetrics.getLines());
+				metricValues.put(MetricType.COMMIT_TIMES, projectMetrics.getCommitTimes());
+				metricValues.put(MetricType.MODULARITY, projectMetrics.getModularity());
+
+				metric.setMetricValues(metricValues);
+
+				result.put(projectMetrics.getProject(), metric);
+			});
+		}
+
+		return result;
+	}
 	
 	public Map<ProjectFile, FileMetrics> calculateFileMetrics() {
 		String key = "calculateFileMetrics";
@@ -59,16 +152,21 @@ public class MetricCalculatorService {
 		List<FileMetrics.StructureMetric> fileStructureMetricsList = fileRepository.calculateFileStructureMetrics();
 		if(fileStructureMetricsList != null && !fileStructureMetricsList.isEmpty()){
 			fileStructureMetricsList.forEach(structureMetric -> {
+				FileMetrics fileMetrics = new FileMetrics();
+
 				ProjectFile file = structureMetric.getFile();
+				fileMetrics.setFile(file);
 				FileMetrics.EvolutionMetric fileEvolutionMetrics = fileRepository.calculateFileEvolutionMetrics(file.getId());
 
-				FileMetrics fileMetrics = new FileMetrics();
 				fileMetrics.setStructureMetric(structureMetric);
 				fileMetrics.setEvolutionMetric(fileEvolutionMetrics);
+
+				fileMetrics.setFanIn(structureMetric.getFanIn());
+				fileMetrics.setFanOut(structureMetric.getFanOut());
 				//计算不稳定度
 				double instability = (structureMetric.getFanIn() + structureMetric.getFanOut()) == 0 ? -1 : (structureMetric.getFanOut() + 0.0) / (structureMetric.getFanIn() + structureMetric.getFanOut());
 				fileMetrics.setInstability(instability);
-				fileMetrics.setScore(file.getScore());
+				fileMetrics.setPageRankScore(file.getScore());
 				result.put(file, fileMetrics);
 			});
 			cache.cache(getClass(), key, result);
@@ -77,7 +175,7 @@ public class MetricCalculatorService {
 		return result;
 	}
 	
-	public Map<Long, List<FileMetrics>> calculateFileMetricsWithProjectIdIndex() {
+	public Map<Long, List<FileMetrics>> calculateProjectFileMetrics() {
 		String key = "calculateFileMetricsWithProjectIdIndex";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
@@ -99,30 +197,44 @@ public class MetricCalculatorService {
 	}
 	
 	public Collection<FileMetrics> calculateFileMetrics(Project project) {
-		return calculateFileMetricsWithProjectIdIndex().get(project.getId());
+		return calculateProjectFileMetrics().get(project.getId());
 	}
-	
-	public Collection<PackageMetrics> calculatePackageMetrics(Project project) {
-		return calculatePackageMetrics().get(project.getId());
-	}
-	
-	public Map<Long, List<PackageMetrics>> calculatePackageMetrics() {
+
+	public Map<Package,PackageMetrics> calculatePackageMetrics() {
 		String key = "calculatePackageMetrics";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-		Map<Long, List<PackageMetrics>> result = new HashMap<>();
+		Map<Package, PackageMetrics> result = new HashMap<>();
 		for(PackageMetrics pckMetrics : packageRepository.calculatePackageMetrics()) {
 			Package pck = pckMetrics.getPck();
-			Project project = containRelationService.findPackageBelongToProject(pck);
-			List<PackageMetrics> temp = result.getOrDefault(project.getId(), new ArrayList<>());
-			temp.add(pckMetrics);
-			result.put(project.getId(), temp);
+			result.put(pck, pckMetrics);
 		}
 		cache.cache(getClass(), key, result);
 		return result;
 	}
+
+	public Map<Long, List<PackageMetrics>> calculateProjectPackageMetrics() {
+		String key = "calculateProjectPackageMetrics";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		Map<Long, List<PackageMetrics>> result = new HashMap<>();
+		Map<Package, PackageMetrics> packageMetricsCache = new HashMap<>(calculatePackageMetrics());
+		packageMetricsCache.forEach((pck, packageMetrics)->{
+			Project project = containRelationService.findPackageBelongToProject(pck);
+			List<PackageMetrics> temp = result.getOrDefault(project.getId(), new ArrayList<>());
+			temp.add(packageMetrics);
+			result.put(project.getId(), temp);
+		});
+		cache.cache(getClass(), key, result);
+		return result;
+	}
 	
+	public Collection<PackageMetrics> calculateProjectPackageMetrics(Project project) {
+		return calculateProjectPackageMetrics().get(project.getId());
+	}
+
 	public Collection<ProjectFile> calculateFanIn(ProjectFile file) {
 		return fileRepository.calculateFanIn(file.getId());
 	}

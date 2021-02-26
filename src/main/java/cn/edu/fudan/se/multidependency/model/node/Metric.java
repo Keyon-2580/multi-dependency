@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.model.node;
 
+import cn.edu.fudan.se.multidependency.model.MetricType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -26,8 +27,10 @@ public class Metric implements Node {
 
 	private String name;
 
+	private NodeLabelType nodeType;
+
 	@Properties(allowCast = true)
-	private Map<String, Long> metric = new HashMap<>();
+	private Map<MetricType, Object> metricValues = new HashMap<>();
 
 	public Metric(String name) {
 		super();
@@ -40,6 +43,7 @@ public class Metric implements Node {
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		properties.put("name", getName() == null ? "" : getName());
+		properties.put("nodeType", getNodeType() == null ? "" : getNodeType());
 		return properties;
 	}
 

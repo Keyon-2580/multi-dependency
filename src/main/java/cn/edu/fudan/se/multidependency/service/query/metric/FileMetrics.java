@@ -1,11 +1,15 @@
 package cn.edu.fudan.se.multidependency.service.query.metric;
 
+import cn.edu.fudan.se.multidependency.model.MetricType;
 import org.springframework.data.neo4j.annotation.QueryResult;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @EqualsAndHashCode(callSuper=false)
@@ -19,35 +23,36 @@ public class FileMetrics extends FanIOMetric {
 	 */
 	private int fanIn;
 
+
 	/**
 	 * fanOut
 	 */
 	private int fanOut;
-
-	/**
-	 * 修改次数
-	 */
-	private int changeTimes;
-
-	/**
-	 * 协同修改次数，与其它文件共同修改的commit次数
-	 */
-	private int cochangeCommitTimes;
-
-	/**
-	 * 与该文件协同修改的文件数量
-	 */
-	private int cochangeFileCount;
-
-	/**
-	 * 方法数
-	 */
-	private int nom;
-
-	/**
-	 * 代码行
-	 */
-	private int loc;
+//
+//	/**
+//	 * 修改次数
+//	 */
+//	private int changeTimes;
+//
+//	/**
+//	 * 协同修改次数，与其它文件共同修改的commit次数
+//	 */
+//	private int cochangeCommitTimes;
+//
+//	/**
+//	 * 与该文件协同修改的文件数量
+//	 */
+//	private int cochangeFileCount;
+//
+//	/**
+//	 * 方法数
+//	 */
+//	private int nom;
+//
+//	/**
+//	 * 代码行
+//	 */
+//	private int loc;
 
 	/**
 	 * 结构性度量指标
@@ -73,13 +78,14 @@ public class FileMetrics extends FanIOMetric {
 	/**
 	 * PageRank Score
 	 */
-	private double score;
+	private double pageRankScore;
 
 
 	@Override
 	public Node getComponent() {
 		return file;
 	}
+
 
 	@Data
 	@EqualsAndHashCode(callSuper=false)
