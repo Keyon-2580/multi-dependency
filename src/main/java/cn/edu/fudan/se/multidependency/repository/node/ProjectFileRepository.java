@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.repository.node;
 
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.model.IssueType;
 import cn.edu.fudan.se.multidependency.service.query.ar.DependencyPair;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -47,25 +48,48 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"     file.loc as loc, " +
 			"     size((file)-[:"+ RelationType.str_DEPENDS_ON + "]->()) as fanOut, " +
 			"     size((file)<-[:"+ RelationType.str_DEPENDS_ON + "]-()) as fanIn \r\n" +
-			"RETURN  file,noc,nom,loc,fanOut,fanIn order by(file.path) desc;")
+			"RETURN  file,noc,nom,loc,fanOut,fanIn;")
 	public FileMetrics.StructureMetric calculateFileStructureMetrics(@Param("fileId") long fileId);
 
 	/**
 	 * 所有文件的指标
 	 * @return
 	 */
-	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) \r\n" +
-			"with file, count(distinct c) as changeTimes, " +
+	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)<-[:" +
+			RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]- (d:Developer) \r\n" +
+			"with file, count(distinct c) as changeTimes, count(distinct d) as developers," +
 			"     size((file)-[:" + RelationType.str_CO_CHANGE +"]-(:ProjectFile)) as coChangeFileCount \r\n" +
-			"RETURN  file,changeTimes,coChangeFileCount order by(file.path) desc;")
+			"RETURN  file,developers,changeTimes,coChangeFileCount order by(file.path) desc;")
 	public List<FileMetrics.EvolutionMetric> calculateFileEvolutionMetrics();
 
-	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) \r\n" +
+	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)<-[:" +
+			RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]- (d:Developer) \r\n" +
 			"where id(file)= $fileId \r\n" +
-			"with file, count(c) as changeTimes," +
+			"with file, count(c) as changeTimes,count(distinct d) as developers," +
 			"     size((file)-[:" + RelationType.str_CO_CHANGE +"]-(:ProjectFile)) as coChangeFileCount \r\n" +
-			"RETURN  file,changeTimes,coChangeFileCount order by(file.path) desc;")
+			"RETURN  file,changeTimes,developers,coChangeFileCount;")
 	public FileMetrics.EvolutionMetric calculateFileEvolutionMetrics(@Param("fileId") long fileId);
+
+	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(:Commit)-[:" +
+			RelationType.str_COMMIT_ADDRESS_ISSUE + "]-> (issue:Issue) \r\n" +
+			"with file, collect(distinct issue) as issueList \r\n" +
+			"with file, size(issueList) as issues," +
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.str_Bug + "\' then 1 else 0 end)) as bugIssues," +
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.str_Improvement + "\' then 1 else 0 end)) as newFeatureIssues," +
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.str_Improvement + "\' then 1 else 0 end)) as improvementIssues \r\n" +
+			"RETURN  file,issues,bugIssues,newFeatureIssues,improvementIssues order by(file.path) desc;")
+	public List<FileMetrics.DebtMetric> calculateFileDebtMetrics();
+
+	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(:Commit)-[:" +
+			RelationType.str_COMMIT_ADDRESS_ISSUE + "]-> (issue:Issue) \r\n" +
+			"where id(file)= $fileId \r\n" +
+			"with file, collect(distinct issue) as issueList \r\n" +
+			"with file, size(issueList) as issues," +
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.str_Bug + "\' then 1 else 0 end)) as bugIssues," +
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.str_New_Feature + "\' then 1 else 0 end)) as newFeatureIssues," +
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.str_Improvement + "\' then 1 else 0 end)) as improvementIssues \r\n" +
+			"RETURN  file,issues,bugIssues,newFeatureIssues,improvementIssues;")
+	public FileMetrics.DebtMetric calculateFileDebtMetrics(@Param("fileId") long fileId);
 	
 //	@Query("match (file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) where id(file) = $fileId with c where size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 return c")
 //	public List<Commit> cochangeCommitsWithFile(@Param("fileId") long fileId);

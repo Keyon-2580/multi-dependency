@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.model.node.git;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.IssueType;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -34,7 +35,7 @@ public class Issue implements Node {
 
 	private String issueUrl;
 
-	private String type;
+	private IssueType type;
 
 	private String title;
 	

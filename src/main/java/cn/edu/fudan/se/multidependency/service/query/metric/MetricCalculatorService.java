@@ -72,8 +72,17 @@ public class MetricCalculatorService {
 				FileMetrics.EvolutionMetric evolutionMetric = fileMetrics.getEvolutionMetric();
 				if (evolutionMetric != null){
 					metricValues.put(MetricType.CHANGE_TIMES, evolutionMetric.getChangeTimes());
+					metricValues.put(MetricType.DEVELOPERS, evolutionMetric.getDevelopers());
 					metricValues.put(MetricType.CO_CHANGE_FILE_COUNT, evolutionMetric.getCoChangeFileCount());
 //					metricValues.put(MetricType.CO_CHANGE_COMMIT_TIMES, evolutionMetric.getCoChangeCommitTimes());
+				}
+
+				FileMetrics.DebtMetric detMetric = fileMetrics.getDebtMetric();
+				if(detMetric != null){
+					metricValues.put(MetricType.ISSUES, detMetric.getIssues());
+					metricValues.put(MetricType.BUG_ISSUES, detMetric.getBugIssues());
+					metricValues.put(MetricType.NEW_FEATURE_ISSUES, detMetric.getNewFeatureIssues());
+					metricValues.put(MetricType.IMPROVEMENT_ISSUES, detMetric.getImprovementIssues());
 				}
 
 				metric.setMetricValues(metricValues);
@@ -157,9 +166,11 @@ public class MetricCalculatorService {
 				ProjectFile file = structureMetric.getFile();
 				fileMetrics.setFile(file);
 				FileMetrics.EvolutionMetric fileEvolutionMetrics = fileRepository.calculateFileEvolutionMetrics(file.getId());
+				FileMetrics.DebtMetric fileDebtMetrics = fileRepository.calculateFileDebtMetrics(file.getId());
 
 				fileMetrics.setStructureMetric(structureMetric);
 				fileMetrics.setEvolutionMetric(fileEvolutionMetrics);
+				fileMetrics.setDebtMetric(fileDebtMetrics);
 
 				fileMetrics.setFanIn(structureMetric.getFanIn());
 				fileMetrics.setFanOut(structureMetric.getFanOut());
@@ -247,8 +258,10 @@ public class MetricCalculatorService {
 		FileMetrics fileMetrics = new FileMetrics();
 		FileMetrics.StructureMetric fileStructureMetrics = fileRepository.calculateFileStructureMetrics(file.getId());
 		FileMetrics.EvolutionMetric fileEvolutionMetrics = fileRepository.calculateFileEvolutionMetrics(file.getId());
+		FileMetrics.DebtMetric fileDebtMetrics = fileRepository.calculateFileDebtMetrics(file.getId());
 		fileMetrics.setStructureMetric(fileStructureMetrics);
 		fileMetrics.setEvolutionMetric(fileEvolutionMetrics);
+		fileMetrics.setDebtMetric(fileDebtMetrics);
 		return fileMetrics;
 	}
 

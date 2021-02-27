@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.insert.git;
 
+import cn.edu.fudan.se.multidependency.model.IssueType;
 import cn.edu.fudan.se.multidependency.model.node.git.Issue;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -98,7 +99,7 @@ public class JiraIssueExtractor {
 
             JSONObject issueTypeObject =  fields.getJSONObject("issuetype");
             String type = issueTypeObject == null ? "" : issueTypeObject.getString("name");
-            issue.setType(type);
+            issue.setType(IssueType.valueOfIssue(type));
 
             String summary = fields.getString("summary");
             summary = summary == null ? "" : summary;

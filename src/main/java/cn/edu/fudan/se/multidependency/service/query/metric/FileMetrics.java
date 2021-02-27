@@ -129,6 +129,11 @@ public class FileMetrics extends FanIOMetric {
 		private int changeTimes;
 
 		/**
+		 * 修改次数
+		 */
+		private int developers;
+
+		/**
 		 * 与该文件协同修改的文件数量
 		 */
 		private int coChangeFileCount;
@@ -144,6 +149,23 @@ public class FileMetrics extends FanIOMetric {
 	@QueryResult
 	public class DebtMetric{
 		private ProjectFile file;
+
+		/**
+		 * Issue总数数量
+		 */
+		private int issues;
+		/**
+		 * Bug Issue总数数量
+		 */
+		private int bugIssues;
+		/**
+		 * New feature Issue总数数量
+		 */
+		private int newFeatureIssues;
+		/**
+		 * Improvement feature Issue总数数量
+		 */
+		private int improvementIssues;
 	}
 
 }

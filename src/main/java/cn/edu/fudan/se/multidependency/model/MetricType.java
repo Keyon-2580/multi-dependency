@@ -17,6 +17,11 @@ public enum MetricType {
 	CHANGE_TIMES(MetricType.str_CHANGE_TIMES),
 	CO_CHANGE_FILE_COUNT(MetricType.str_CO_CHANGE_FILE_COUNT),
 	CO_CHANGE_COMMIT_TIMES(MetricType.str_CO_CHANGE_COMMIT_TIMES),
+	DEVELOPERS(MetricType.str_DEVELOPERS),
+	ISSUES(MetricType.str_ISSUES),
+	BUG_ISSUES(MetricType.str_BUG_ISSUES),
+	NEW_FEATURE_ISSUES(MetricType.str_NEW_FEATURE_ISSUES),
+	IMPROVEMENT_ISSUES(MetricType.str_IMPROVEMENT_ISSUES),
 
 	DEFAULT(MetricType.str_DEFAULT);
 
@@ -95,8 +100,30 @@ public enum MetricType {
 	 * 共变文件数coChangeFileCount
 	 */
 	public static final String str_CO_CHANGE_COMMIT_TIMES = "CO_CHANGE_COMMIT_TIMES";
+	/**
+	 * 开发者数
+	 */
+	public static final String str_DEVELOPERS = "DEVELOPERS";
 
+	/**
+	 * Issue总数数量
+	 */
+	public static final String str_ISSUES = "ISSUES";
 
+	/**
+	 * Bug Issue总数数量
+	 */
+	public static final String str_BUG_ISSUES = "BUG_ISSUES";
+
+	/**
+	 * New feature Issue总数数量
+	 */
+	public static final String str_NEW_FEATURE_ISSUES = "NEW_FEATURE_ISSUES";
+
+	/**
+	 * Improvement feature Issue总数数量
+	 */
+	public static final String str_IMPROVEMENT_ISSUES = "IMPROVEMENT_ISSUES";
 
 
 	/**
