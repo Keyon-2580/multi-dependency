@@ -25,16 +25,35 @@ import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Import;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Include;
+import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
+import cn.edu.fudan.se.multidependency.service.query.data.ProjectStructure;
 import com.alibaba.fastjson.JSONObject;
 
 public interface ContainRelationService {
+
+	ProjectStructure projectStructureInitialize(Project project);
+
+	PackageStructure packageStructureInitialize(Package pck);
+
+	Collection<Package> findProjectRootPackages(Project project);
+
+	Collection<Package> findPackageContainPackages(Package pck);
+
+	Collection<Package> findPackageContainPackagesWithLanguage(Package pck);
+
+	/**
+	 * 包的上一级包
+	 * @param pck
+	 * @return
+	 */
+	Package findPackageInPackage(Package pck);
 	
 	Collection<Package> findProjectContainPackages(Project project);
 
 	Collection<Function> findProjectContainAllFunctions(Project project);
 
 	Collection<ProjectFile> findProjectContainAllFiles(Project project);
-	
+
 	Collection<ProjectFile> findPackageContainFiles(Package pck);
 	
 	Collection<Namespace> findFileContainNamespaces(ProjectFile file);
@@ -132,15 +151,6 @@ public interface ContainRelationService {
 	Collection<Call> findFunctionContainCalls (Function function);
 
 	JSONObject doubleFileStructure(List<ProjectFile> fileList);
-	
-	/**
-	 * 包的上一级包
-	 * @param pck
-	 * @return
-	 */
-	Package findPackageInPackage(Package pck);
-	
-	Collection<Package> findPackageContainSubPackages(Package pck);
 	
 	/**
 	 * child是否在parent下

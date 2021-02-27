@@ -17,8 +17,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_HAS)
 public class Has implements Relation {
-	
-	private static final long serialVersionUID = -2319110749116615008L;
+
+	private static final long serialVersionUID = -483821275966593371L;
 
 	@Id
     @GeneratedValue

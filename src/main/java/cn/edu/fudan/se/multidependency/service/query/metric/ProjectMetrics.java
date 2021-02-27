@@ -20,6 +20,11 @@ public class ProjectMetrics {
 	 * 文件数
 	 */
 	private int nof;
+
+	/**
+	 * 类数
+	 */
+	private int noc;
 	
 	/**
 	 * 方法数

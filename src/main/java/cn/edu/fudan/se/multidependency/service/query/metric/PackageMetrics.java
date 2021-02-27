@@ -22,6 +22,11 @@ public class PackageMetrics extends FanIOMetric implements Serializable {
 	 * 包内文件数
 	 */
 	private int nof;
+
+	/**
+	 * 包内文件数
+	 */
+	private int noc;
 	
 	/**
 	 * 包内方法数

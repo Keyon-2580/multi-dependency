@@ -20,7 +20,7 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
 	 * @param count
 	 * @return
 	 */
-    @Query("match p= (:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->() where r.times >= $count return p")
+    @Query("match p=(:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->() where r.times >= $count return p")
     List<CoChange> findGreaterThanCountCoChanges(@Param("count") int count);
     
     /**
@@ -29,7 +29,7 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
      * @param file2Id
      * @return
      */
-    @Query("match p= (f1:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->(f2:ProjectFile) where id(f1)=$file1Id and id(f2)=$file2Id return p")
+    @Query("match p= (f1:ProjectFile)-[:" + RelationType.str_CO_CHANGE + "]->(f2:ProjectFile) where id(f1)=$file1Id and id(f2)=$file2Id return p")
     CoChange findCoChangesBetweenTwoFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
 
     @Query("match (f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
@@ -70,10 +70,10 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
             "set co.node1ChangeTimes = times1, co.node2ChangeTimes = times2 with co return count(co)")
     int updateCoChangesForModule();
     
-    @Query("match p= (f:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->(:ProjectFile) where id(f)=$fileId return p")
+    @Query("match p= (f:ProjectFile)-[:" + RelationType.str_CO_CHANGE + "]->(:ProjectFile) where id(f)=$fileId return p")
     List<CoChange> cochangesRight(@Param("fileId") long fileId);
     
-    @Query("match p= (:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->(f:ProjectFile) where id(f)=$fileId return p")
+    @Query("match p= (:ProjectFile)-[:" + RelationType.str_CO_CHANGE + "]->(f:ProjectFile) where id(f)=$fileId return p")
     List<CoChange> cochangesLeft(@Param("fileId") long fileId);
 
     /**
@@ -84,21 +84,22 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
     @Query("match p = ()-[:" + RelationType.str_CO_CHANGE + "]->() return p limit 10")
     List<CoChange> findCoChangesLimit();
 
-    @Query("match p = (:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->(:ProjectFile) return p")
+    @Query("match p = (:ProjectFile)-[:" + RelationType.str_CO_CHANGE + "]->(:ProjectFile) return p")
     List<CoChange> findFileCoChange();
 
-    @Query("match p = (:Package)-[r:" + RelationType.str_CO_CHANGE + "]->(:Package) return p")
+    @Query("match p = (:Package)-[:" + RelationType.str_CO_CHANGE + "]->(:Package) return p")
     List<CoChange> findModuleCoChange();
 
-    @Query("match p = (p1:Package)-[r:" + RelationType.str_CO_CHANGE + "]-(p2:Package) where id(p1) = $pckId1 and id(p2) = $pckId2 return r")
+    @Query("match p = (p1:Package)-[:" + RelationType.str_CO_CHANGE + "]-(p2:Package) " +
+            "where id(p1) = $pckId1 and id(p2) = $pckId2 return p")
     CoChange findPackageCoChangeByPackageId(@Param("pckId1") long pckId1, @Param("pckId2") long pckId2);
 
-    @Query("match p = (project:Project)-[:" + RelationType.str_CONTAIN + "*2]->(:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->(:ProjectFile)<-[:" + RelationType.str_CONTAIN + "*2]-(project) where id(project)=$id return p")
+    @Query("match p = (project:Project)-[:" + RelationType.str_CONTAIN + "*2]->(:ProjectFile)-[:" + RelationType.str_CO_CHANGE + "]->(:ProjectFile)<-[:" + RelationType.str_CONTAIN + "*2]-(project) where id(project)=$id return p")
     List<CoChange> findFileCoChangeInProject(@Param("id") long projectId);
 
-    @Query("match p = (project:Project)-[:" + RelationType.str_CONTAIN + "]->(:Package)-[r:" + RelationType.str_CO_CHANGE + "]->(:Package)<-[:" + RelationType.str_CONTAIN + "]-(project) where id(project)=$id return p")
+    @Query("match p = (project:Project)-[:" + RelationType.str_CONTAIN + "]->(:Package)-[:" + RelationType.str_CO_CHANGE + "]->(:Package)<-[:" + RelationType.str_CONTAIN + "]-(project) where id(project)=$id return p")
     List<CoChange> findPackageCoChangeInProject(@Param("id") long projectId);
 
-    @Query("match (p:Package)-[r:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where id(file) = $fileId return p")
+    @Query("match (p:Package)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where id(file) = $fileId return p")
     Package findFileBelongPackageByFileId(@Param("fileId") long fileId);
 }

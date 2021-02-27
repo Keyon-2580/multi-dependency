@@ -13,9 +13,9 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.Extends;
 
 @Repository
 public interface ImplementsRepository extends Neo4jRepository<Extends, Long> {
-	@Query("match (a:Type)-[r:" + RelationType.str_IMPLEMENTS + "]->(b:Type) where id(b) = $id return a")
+	@Query("match p = (a:Type)-[:" + RelationType.str_IMPLEMENTS + "]->(b:Type) where id(b) = $id return a")
     List<Type> querySubTypes(@Param("id") long typeId);
 	
-	@Query("match (a:Type)-[r:" + RelationType.str_IMPLEMENTS + "]->(b:Type) where id(a) = $id return b")
+	@Query("match p = (a:Type)-[:" + RelationType.str_IMPLEMENTS + "]->(b:Type) where id(a) = $id return b")
     List<Type> querySuperTypes(@Param("id") long typeId);
 }

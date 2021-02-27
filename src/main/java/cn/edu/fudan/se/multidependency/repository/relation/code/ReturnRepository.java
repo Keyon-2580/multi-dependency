@@ -13,7 +13,7 @@ import cn.edu.fudan.se.multidependency.model.relation.structure.Return;
 @Repository
 public interface ReturnRepository extends Neo4jRepository<Return, Long> {
 
-	@Query("MATCH result=(function:Function)-[r:" + RelationType.str_RETURN + "]->(type:Type) with function,type,result match (project:Project)-[r2:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)=$projectId RETURN result")
+	@Query("MATCH result=(function:Function)-[:" + RelationType.str_RETURN + "]->(type:Type) with function,type,result match (project:Project)-[:" + RelationType.str_CONTAIN + "*3..4]->(type) where id(project)=$projectId RETURN result")
 	List<Return> findProjectContainFunctionReturnTypeRelations(@Param("projectId") Long projectId);
 
 }

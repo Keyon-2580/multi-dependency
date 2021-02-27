@@ -12,7 +12,6 @@ import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryServic
 import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
 import cn.edu.fudan.se.multidependency.service.query.data.ProjectStructure;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
-import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -30,9 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ProjectServiceImpl implements ProjectService{
     @Autowired
     private BasicCloneQueryService basicCloneQueryService;
-
-    @Autowired
-    private HasRelationService hasRelationService;
 
     @Autowired
     private HotspotPackageDetector hotspotPackageDetector;
@@ -62,7 +58,7 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
-    public JSONArray getMultipleProjectsGraphJson(JSONObject dataList) {
+    public JSONArray getMultipleProjectsGraphJson(JSONObject dataList, String type) {
         JSONArray projectIds = dataList.getJSONArray("projectIds");
         JSONArray result = new JSONArray();
         JSONObject nodeJSON2 = new JSONObject();
@@ -70,13 +66,13 @@ public class ProjectServiceImpl implements ProjectService{
 
         JSONObject projectJson = new JSONObject();
         if(projectIds.size() == 1){
-            projectJson = joinMultipleProjectsGraphJson(projectIds.getJSONObject(0).getLong("id"));
+            projectJson = joinMultipleProjectsGraphJson(projectIds.getJSONObject(0).getLong("id"), type);
         }else{
             projectJson.put("name", "default");
             projectJson.put("id", "id_default");
             JSONArray multipleProjectsJson = new JSONArray();
             for(int i = 0; i < projectIds.size(); i++){
-                multipleProjectsJson.add(joinMultipleProjectsGraphJson(projectIds.getJSONObject(i).getLong("id")));
+                multipleProjectsJson.add(joinMultipleProjectsGraphJson(projectIds.getJSONObject(i).getLong("id"), type));
             }
             projectJson.put("children",multipleProjectsJson);
         }
@@ -92,24 +88,24 @@ public class ProjectServiceImpl implements ProjectService{
         return result;
     }
 
-    private JSONObject joinMultipleProjectsGraphJson(long projectId){
+    private JSONObject joinMultipleProjectsGraphJson(long projectId, String type){
         JSONObject result = new JSONObject();
         Project project = nodeService.queryProject(projectId);
-        ProjectStructure projectStructure = hasRelationService.projectHasInitialize(project);
+        ProjectStructure projectStructure = containRelationService.projectStructureInitialize(project);
         Package packageOfProject = projectStructure.getChildren().get(0).getPck();
 
-        List<PackageStructure> childrenPackages = hasRelationService.packageHasInitialize(packageOfProject).getChildrenPackages();
+        List<PackageStructure> childrenPackages = containRelationService.packageStructureInitialize(packageOfProject).getChildrenPackages();
         List<PackageStructure> childrenPackagesnew = new ArrayList<>();
 
         for(PackageStructure pckstru : childrenPackages){
-            PackageStructure pcknew = hasRelationService.packageHasInitialize(pckstru.getPck());
+            PackageStructure pcknew = containRelationService.packageStructureInitialize(pckstru.getPck());
             childrenPackagesnew.add(pcknew);
         }
 
         result.put("name", packageOfProject.getName());
         result.put("id", "id_" + packageOfProject.getId().toString());
         Collection<ProjectFile> clonefiles = basicCloneQueryService.findProjectContainCloneFiles(project);
-        result.put("children",getHasJson(clonefiles,childrenPackagesnew));
+        result.put("children", getPackageContainJson(clonefiles,childrenPackagesnew,type));
 
         return result;
     }
@@ -118,7 +114,7 @@ public class ProjectServiceImpl implements ProjectService{
     /**
      * 递归遍历项目中所有package的包含关系
      */
-    public JSONArray getHasJson(Collection<ProjectFile> clonefiles, List<PackageStructure> childrenPackages){
+    public JSONArray getPackageContainJson(Collection<ProjectFile> clonefiles, List<PackageStructure> childrenPackages,String type){
         JSONArray result = new JSONArray();
         for(PackageStructure pckstru :childrenPackages){
             List<PackageStructure> pckList = pckstru.getChildrenPackages();
@@ -143,30 +139,34 @@ public class ProjectServiceImpl implements ProjectService{
             }else{
                 jsonObject.put("clone_ratio", 0);
             }
-//			JSONArray jsonArray = new JSONArray();
-//			if(fileList.size() > 0){
-//				for(ProjectFile profile : fileList){
-//					JSONObject jsonObject2 = new JSONObject();
+
+            if(type.equals("treemap")){
+                JSONArray jsonArray = new JSONArray();
+                if(fileList.size() > 0){
+                    for(ProjectFile profile : fileList){
+                        JSONObject jsonObject2 = new JSONObject();
+                        jsonObject2.put("size",profile.getLoc());
 //					jsonObject2.put("value",profile.getLoc());
-//					jsonObject2.put("long_name",profile.getPath());
-//					if(clonefiles.contains(profile)){
-//						jsonObject2.put("clone",true);
-//					}else{
-//						jsonObject2.put("clone",false);
-//					}
-//					jsonObject2.put("name",profile.getName());
-//					jsonObject2.put("id","id_" + profile.getId().toString());
-//					jsonArray.add(jsonObject2);
-//				}
-//			}
-//
-//			if(jsonArray.size() > 0){
-//                jsonObject.put("children",jsonArray);
-//			}
+                        jsonObject2.put("long_name",profile.getPath());
+                        if(clonefiles.contains(profile)){
+                            jsonObject2.put("clone",true);
+                        }else{
+                            jsonObject2.put("clone",false);
+                        }
+                        jsonObject2.put("name",profile.getName());
+                        jsonObject2.put("id","id_" + profile.getId().toString());
+                        jsonArray.add(jsonObject2);
+                    }
+                }
+
+                if(jsonArray.size() > 0){
+                    jsonObject.put("children",jsonArray);
+                }
+            }
 
             if(pckList.size()>0){
                 //如果该属性还有子属性,继续做查询,直到该属性没有孩子,也就是最后一个节点
-                jsonObject.put("children", getHasJson(clonefiles,pckList));
+                jsonObject.put("children", getPackageContainJson(clonefiles,pckList,type));
             }
             result.add(jsonObject);
         }

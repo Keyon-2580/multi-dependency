@@ -63,7 +63,7 @@ public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
 			"relationshipProjection: \'" + RelationType.str_DEPENDS_ON + "\'}) " +
 			"YIELD nodeId, componentId " +
 			"with componentId as partition, collect(gds.util.asNode(nodeId)) AS packages " +
-			"match result=(a:Package)-[r:" + RelationType.str_DEPENDS_ON + "]->(b:Package) "
+			"match result=(a:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(b:Package) "
 					+ "where partition = $partition and a in packages and b in packages return result")
 	public List<DependsOn> cyclePackagesBySCC(@Param("partition") int partition);
 	
@@ -72,7 +72,7 @@ public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
 			"relationshipProjection: \'" + RelationType.str_DEPENDS_ON + "\'}) " +
 			"YIELD nodeId, componentId " +
 			"with componentId as partition, collect(gds.util.asNode(nodeId)) AS files " +
-			"match result=(a:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(b:ProjectFile) "
+			"match result=(a:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(b:ProjectFile) "
 					+ "where partition = $partition and a in files and b in files return result")
 	public List<DependsOn> cycleFilesBySCC(@Param("partition") int partition);
 
@@ -81,7 +81,7 @@ public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
 			"relationshipProjection: \'" + RelationType.str_DEPENDS_ON + "\'}) " +
 			"YIELD nodeId, componentId " +
 			"with componentId as partition, collect(gds.util.asNode(nodeId)) AS types " +
-			"match result=(a:Type)-[r:" + RelationType.str_DEPENDS_ON + "]->(b:Type) "
+			"match result=(a:Type)-[:" + RelationType.str_DEPENDS_ON + "]->(b:Type) "
 			+ "where partition = $partition and a in types and b in types return result")
 	public List<DependsOn> cycleTypesBySCC(@Param("partition") int partition);
 	
@@ -90,7 +90,7 @@ public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
 			"relationshipProjection: \'" + RelationType.str_DEPENDS_ON + "\'}) " +
 			"YIELD nodeId, componentId " +
 			"with componentId as partition, collect(gds.util.asNode(nodeId)) AS modules " +
-			"match result=(a:Module)-[r:" + RelationType.str_DEPENDS_ON + "]->(b:Module) "
+			"match result=(a:Module)-[:" + RelationType.str_DEPENDS_ON + "]->(b:Module) "
 					+ "where partition = $partition and a in modules and b in modules return result")
 	public List<DependsOn> cycleModulesBySCC(@Param("partition") int partition);
 	

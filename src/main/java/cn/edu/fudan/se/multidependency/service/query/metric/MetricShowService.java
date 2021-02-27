@@ -26,11 +26,11 @@ public class MetricShowService {
 	private NodeService nodeService;
 	
 	@Autowired
-	private MetricCalculator metricCalculator;
+	private MetricCalculatorService metricCalculatorService;
 	
 	public void printPackageMetricExcel(OutputStream stream) {
 		Workbook hwb = new XSSFWorkbook();
-		Map<Long, List<PackageMetrics>> allPackageMetrics = metricCalculator.calculatePackageMetrics();
+		Map<Long, List<PackageMetrics>> allPackageMetrics = metricCalculatorService.calculateProjectPackageMetrics();
 		Collection<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
 			Sheet sheet = hwb.createSheet(new StringBuilder().append(project.getName()).append("(").append(project.getLanguage()).append(")").toString());
@@ -101,7 +101,7 @@ public class MetricShowService {
 
 	public void printFileMetricExcel(OutputStream stream) {
 		Workbook hwb = new XSSFWorkbook();
-		Map<Long, List<FileMetrics>> allFileMetrics = metricCalculator.calculateFileMetrics();
+		Map<Long, List<FileMetrics>> allFileMetrics = metricCalculatorService.calculateProjectFileMetrics();
 		Collection<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
 			Sheet sheet = hwb.createSheet(new StringBuilder().append(project.getName()).append("(").append(project.getLanguage()).append(")").toString());
@@ -159,14 +159,14 @@ public class MetricShowService {
 				row = sheet.createRow(i + 1);
 				row.createCell(0).setCellValue(fileMetric.getFile().getId());
 				row.createCell(1).setCellValue(fileMetric.getFile().getPath());
-				row.createCell(2).setCellValue(fileMetric.getLoc());
-				row.createCell(3).setCellValue(fileMetric.getNom());
+				row.createCell(2).setCellValue(fileMetric.getStructureMetric().getLoc());
+				row.createCell(3).setCellValue(fileMetric.getStructureMetric().getNom());
 				row.createCell(4).setCellValue(fileMetric.getFanIn());
 				row.createCell(5).setCellValue(fileMetric.getFanOut());
-				row.createCell(6).setCellValue(fileMetric.getChangeTimes());
-				row.createCell(7).setCellValue(fileMetric.getCochangeCommitTimes());
-				row.createCell(8).setCellValue(fileMetric.getCochangeFileCount());
-				row.createCell(9).setCellValue(fileMetric.getFile().getScore());
+				row.createCell(6).setCellValue(fileMetric.getEvolutionMetric().getChangeTimes());
+//				row.createCell(7).setCellValue(fileMetric.getEvolutionMetric().getCoChangeCommitTimes());
+				row.createCell(8).setCellValue(fileMetric.getEvolutionMetric().getCoChangeFileCount());
+				row.createCell(9).setCellValue(fileMetric.getPageRankScore());
 			}			
 		}
 		try {

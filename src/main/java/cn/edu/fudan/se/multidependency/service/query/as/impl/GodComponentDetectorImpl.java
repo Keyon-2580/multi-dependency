@@ -19,7 +19,7 @@ import cn.edu.fudan.se.multidependency.service.query.as.GodComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.data.GodFile;
 import cn.edu.fudan.se.multidependency.service.query.as.data.GodPackage;
 import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
-import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculator;
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
@@ -31,7 +31,7 @@ public class GodComponentDetectorImpl implements GodComponentDetector {
 	private NodeService nodeService;
 	
 	@Autowired
-	private MetricCalculator metricCalculator;
+	private MetricCalculatorService metricCalculatorService;
 	
 	@Autowired
 	private CacheService cache;
@@ -71,7 +71,7 @@ public class GodComponentDetectorImpl implements GodComponentDetector {
 	private Map<Project, Integer> projectToMinFileCountInPackage = new ConcurrentHashMap<>();
 	
 	private List<GodFile> godFiles(Project project) {
-		Collection<FileMetrics> metrics = metricCalculator.calculateFileMetrics(project);
+		Collection<FileMetrics> metrics = metricCalculatorService.calculateFileMetrics(project);
 		List<GodFile> result = new ArrayList<>();
 		for(FileMetrics metric : metrics) {
 			if(isGodFile(project, metric)) {
@@ -79,17 +79,17 @@ public class GodComponentDetectorImpl implements GodComponentDetector {
 			}
 		}
 		result.sort((f1, f2) -> {
-			return f2.getMetrics().getLoc() - f1.getMetrics().getLoc();
+			return f2.getMetrics().getStructureMetric().getLoc() - f1.getMetrics().getStructureMetric().getLoc();
 		});
 		return result;
 	}
 	
 	protected boolean isGodFile(Project project, FileMetrics metrics) {
-		return metrics.getLoc() >= getProjectMinFileLoc(project);
+		return metrics.getStructureMetric().getLoc() >= getProjectMinFileLoc(project);
 	}
 	
 	private List<GodPackage> godPackages(Project project) {
-		Collection<PackageMetrics> metrics = metricCalculator.calculatePackageMetrics(project);
+		Collection<PackageMetrics> metrics = metricCalculatorService.calculateProjectPackageMetrics(project);
 		List<GodPackage> result = new ArrayList<>();
 		for(PackageMetrics metric : metrics) {
 			if(isGodPackage(project, metric)) {

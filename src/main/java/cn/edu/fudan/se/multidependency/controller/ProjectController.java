@@ -11,12 +11,8 @@ import java.util.concurrent.FutureTask;
 
 import javax.servlet.http.HttpServletRequest;
 
-import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
-import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackage;
 import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
-import cn.edu.fudan.se.multidependency.service.query.data.ProjectStructure;
-import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,10 +72,6 @@ public class ProjectController {
 	@Autowired
 	private ProjectService projectService;
 
-
-	@Autowired
-	private HasRelationService hasRelationService;
-
 	@Autowired
 	private MultipleService multipleService;
 	
@@ -94,10 +86,12 @@ public class ProjectController {
 
 	@GetMapping("/graph")
 	public String index() {
-//		request.setAttribute("cloneRelationTypes", CloneRelationType.values());
-//		request.setAttribute("cloneLevels", CloneLevel.values());
-//		request.setAttribute("search", false);
 		return "projectgraph";
+	}
+
+	@GetMapping("/treemap")
+	public String treemap() {
+		return "treemap";
 	}
 
 	@GetMapping("/tree")
@@ -601,7 +595,13 @@ public class ProjectController {
 	@PostMapping("/has")
 	@ResponseBody
 	public JSONArray projectHas(@RequestBody JSONObject requestBody) {
-		return projectService.getMultipleProjectsGraphJson(requestBody);
+		return projectService.getMultipleProjectsGraphJson(requestBody, "projectgraph");
+	}
+
+	@PostMapping("/has/treemap")
+	@ResponseBody
+	public JSONArray projectHasTreeMap(@RequestBody JSONObject requestBody) {
+		return projectService.getMultipleProjectsGraphJson(requestBody, "treemap");
 	}
 
 	/**

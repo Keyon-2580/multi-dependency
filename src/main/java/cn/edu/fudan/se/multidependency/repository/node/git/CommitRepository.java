@@ -14,7 +14,7 @@ import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 @Repository
 public interface CommitRepository extends Neo4jRepository<Commit, Long> {
 
-    @Query("match p = (c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f1:ProjectFile)-[r:" 
+    @Query("match p = (c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f1:ProjectFile)-[:"
     		+ RelationType.str_CO_CHANGE + "]->(f2:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE 
     		+ "]-(c) where id(f1)=$file1Id and id(f2)=$file2Id return c")
 	List<Commit> findCommitsInTwoFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);

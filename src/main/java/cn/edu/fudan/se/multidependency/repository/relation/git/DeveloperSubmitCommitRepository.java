@@ -12,6 +12,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DeveloperSubmitCommitRepository extends Neo4jRepository<DeveloperSubmitCommit, Long> {
 
-    @Query("match (d:Developer)-[r:" + RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]->(c:Commit) where id(c)=$cId return d")
+    @Query("match (d:Developer)-[:" + RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]->(c:Commit) where id(c)=$cId return d")
     Developer findDeveloperByCommitId(@Param("cId") Long commitId);
 }

@@ -14,7 +14,7 @@ import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.history.CommitQueryService;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.history.IssueQueryService;
-import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculator;
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.relation.FileRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
@@ -36,7 +36,7 @@ public class FileRelationController {
 	private GitAnalyseService gitAnalyseService;
 	
 	@Autowired
-	private MetricCalculator metricCalculator;
+	private MetricCalculatorService metricCalculatorService;
 	
 	@Autowired
 	private FileRelationService fileRelationService;
@@ -60,7 +60,7 @@ public class FileRelationController {
 	@ResponseBody
 	public Object metric(@PathVariable("fileId") long id) {
 		ProjectFile file = nodeService.queryFile(id);
-		return metricCalculator.calculateFileMetric(file);
+		return metricCalculatorService.calculateFileMetric(file);
 	}
 	
 	@GetMapping("/contain/type")

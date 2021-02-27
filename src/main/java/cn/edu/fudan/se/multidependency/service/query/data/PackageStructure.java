@@ -3,7 +3,6 @@ package cn.edu.fudan.se.multidependency.service.query.data;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
-import cn.edu.fudan.se.multidependency.service.query.structure.HasRelationService;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +15,6 @@ public class PackageStructure {
 
     @Autowired
     ContainRelationService containRelationService;
-
-    @Autowired
-    HasRelationService hasRelationService;
 
     @Setter
     @Getter

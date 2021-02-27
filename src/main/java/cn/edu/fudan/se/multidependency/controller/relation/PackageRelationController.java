@@ -1,6 +1,5 @@
 package cn.edu.fudan.se.multidependency.controller.relation;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
@@ -9,10 +8,9 @@ import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileR
 import cn.edu.fudan.se.multidependency.repository.relation.git.DeveloperSubmitCommitRepository;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
-import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculator;
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
-import org.bouncycastle.util.Pack;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +20,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/relation/package/{packageId}")
@@ -35,7 +32,7 @@ public class PackageRelationController {
     private ContainRelationService containRelationService;
 
     @Autowired
-    private MetricCalculator metricCalculator;
+    private MetricCalculatorService metricCalculatorService;
 
     @Autowired
     private StaticAnalyseService staticAnalyseService;
@@ -61,7 +58,7 @@ public class PackageRelationController {
     @ResponseBody
     public Object metric(@PathVariable("packageId") long id) {
         Package pck = nodeService.queryPackage(id);
-        return metricCalculator.calculatePackageMetric(pck);
+        return metricCalculatorService.calculatePackageMetric(pck);
     }
 
     @GetMapping("/contain/file")

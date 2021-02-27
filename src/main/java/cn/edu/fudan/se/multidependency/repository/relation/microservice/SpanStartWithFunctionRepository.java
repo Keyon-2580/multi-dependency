@@ -12,7 +12,7 @@ import cn.edu.fudan.se.multidependency.model.relation.dynamic.microservice.SpanS
 public interface SpanStartWithFunctionRepository extends Neo4jRepository<SpanStartWithFunction, Long> {
 
 	
-	@Query("match p = (s:Span)-[r:" + RelationType.str_SPAN_START_WITH_FUNCTION + "]->(f:Function) where s.traceId = $traceId and s.spanId = $spanId return p;")
+	@Query("match p = (s:Span)-[:" + RelationType.str_SPAN_START_WITH_FUNCTION + "]->(f:Function) where s.traceId = $traceId and s.spanId = $spanId return p;")
 	SpanStartWithFunction findSpanStartWIthFunctionByTraceIdAndSpanId(@Param("traceId") String traceId, @Param("spanId") String spanId);
 	
 }

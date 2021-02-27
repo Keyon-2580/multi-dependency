@@ -5,14 +5,14 @@ public enum CloneType {
 	
 	public static CloneType getCloneType(String type) {
 		switch(type) {
-		case "1":
-			return type_1;
-		case "2":
-			return type_2;
-		case "3":
-			return type_3;
-		default:
-			return null;
+			case "1":
+				return type_1;
+			case "2":
+				return type_2;
+			case "3":
+				return type_3;
+			default:
+				return null;
 		}
 	}
 }

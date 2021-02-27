@@ -19,9 +19,9 @@ public interface ProjectService {
 
 	void setAbsolutePath(Project project, String path);
 
-	JSONArray getHasJson(Collection<ProjectFile> clonefiles, List<PackageStructure> childrenPackages);
+	JSONArray getPackageContainJson(Collection<ProjectFile> clonefiles, List<PackageStructure> childrenPackages,String type);
 
-	JSONArray getMultipleProjectsGraphJson(JSONObject dataList);
+	JSONArray getMultipleProjectsGraphJson(JSONObject dataList, String type);
 
 //	JSONObject cloneGraphAndTableOfChildrenPackages(long package1Id, long package2Id);
 
