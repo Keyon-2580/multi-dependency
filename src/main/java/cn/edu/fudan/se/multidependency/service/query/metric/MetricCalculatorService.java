@@ -73,7 +73,7 @@ public class MetricCalculatorService {
 				if (evolutionMetric != null){
 					metricValues.put(MetricType.CHANGE_TIMES, evolutionMetric.getChangeTimes());
 					metricValues.put(MetricType.CO_CHANGE_FILE_COUNT, evolutionMetric.getCoChangeFileCount());
-					metricValues.put(MetricType.CO_CHANGE_COMMIT_TIMES, evolutionMetric.getCoChangeCommitTimes());
+//					metricValues.put(MetricType.CO_CHANGE_COMMIT_TIMES, evolutionMetric.getCoChangeCommitTimes());
 				}
 
 				metric.setMetricValues(metricValues);
@@ -176,7 +176,7 @@ public class MetricCalculatorService {
 	}
 	
 	public Map<Long, List<FileMetrics>> calculateProjectFileMetrics() {
-		String key = "calculateFileMetricsWithProjectIdIndex";
+		String key = "calculateProjectFileMetrics";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}

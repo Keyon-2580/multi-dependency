@@ -55,23 +55,16 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	 * @return
 	 */
 	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) \r\n" +
-			"where id(file)= $fileId \r\n" +
-			"WITH file,count(distinct c) as changeTimes, c \r\n" +
-			"WITH file, changeTimes, c \r\n" +
-			"where size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 \r\n" +
-			"with file, changeTimes, count(c) as coChangeCommitTimes, " +
+			"with file, count(distinct c) as changeTimes, " +
 			"     size((file)-[:" + RelationType.str_CO_CHANGE +"]-(:ProjectFile)) as coChangeFileCount \r\n" +
-			"RETURN  file,changeTimes,coChangeFileCount,coChangeCommitTimes order by(file.path) desc;")
+			"RETURN  file,changeTimes,coChangeFileCount order by(file.path) desc;")
 	public List<FileMetrics.EvolutionMetric> calculateFileEvolutionMetrics();
 
 	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) \r\n" +
 			"where id(file)= $fileId \r\n" +
-			"WITH file,count(distinct c) as changeTimes, c \r\n" +
-			"WITH file, changeTimes, c \r\n" +
-			"where size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 \r\n" +
-			"with file, changeTimes, count(c) as coChangeCommitTimes, " +
+			"with file, count(c) as changeTimes," +
 			"     size((file)-[:" + RelationType.str_CO_CHANGE +"]-(:ProjectFile)) as coChangeFileCount \r\n" +
-			"RETURN  file,changeTimes,coChangeFileCount,coChangeCommitTimes order by(file.path) desc;")
+			"RETURN  file,changeTimes,coChangeFileCount order by(file.path) desc;")
 	public FileMetrics.EvolutionMetric calculateFileEvolutionMetrics(@Param("fileId") long fileId);
 	
 //	@Query("match (file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) where id(file) = $fileId with c where size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 return c")
@@ -85,7 +78,8 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"with file\r\n" +
 			"match (file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) \r\n" +
 			"with file, c \r\n" +
-			"where size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 with file, count(c) as cochangeCommitTimes\r\n" +
+			"where size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 " +
+			"with file, count(c) as cochangeCommitTimes\r\n" +
 			"WITH size((file)-[:" + RelationType.str_DEPENDS_ON + "]->()) as fanOut, \r\n" + 
 			"     size((file)<-[:" + RelationType.str_DEPENDS_ON + "]-()) as fanIn,\r\n" + 
 			"     size((file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-()) as changeTimes,\r\n" + 

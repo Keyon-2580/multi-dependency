@@ -387,7 +387,7 @@ public class BeanCreator {
 			}
 			hasRepository.saveAll(hasMetrics);
 		}
-
+		LOGGER.info("创建Package Metric度量值节点和关系...");
 		Map<Package, Metric> packageMetricNodesMap = metricCalculatorService.generatePackageMetricNodes();
 		if(packageMetricNodesMap != null && !packageMetricNodesMap.isEmpty()){
 			Collection<Metric> pckMetricNodes = packageMetricNodesMap.values();
@@ -406,7 +406,7 @@ public class BeanCreator {
 			}
 			hasRepository.saveAll(hasMetrics);
 		}
-
+		LOGGER.info("创建Project Metric度量值节点和关系...");
 		Map<Project, Metric> projectMetricNodesMap = metricCalculatorService.generateProjectMetricNodes();
 		if(projectMetricNodesMap != null && !projectMetricNodesMap.isEmpty()){
 			Collection<Metric> projectMetricNodes = projectMetricNodesMap.values();

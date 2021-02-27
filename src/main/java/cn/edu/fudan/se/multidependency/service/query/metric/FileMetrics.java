@@ -1,15 +1,11 @@
 package cn.edu.fudan.se.multidependency.service.query.metric;
 
-import cn.edu.fudan.se.multidependency.model.MetricType;
 import org.springframework.data.neo4j.annotation.QueryResult;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Data
 @EqualsAndHashCode(callSuper=false)
@@ -57,17 +53,17 @@ public class FileMetrics extends FanIOMetric {
 	/**
 	 * 结构性度量指标
 	 */
-	StructureMetric structureMetric;
+	private StructureMetric structureMetric;
 
 	/**
 	 * 演化性度量指标
 	 */
-	EvolutionMetric evolutionMetric;
+	private EvolutionMetric evolutionMetric;
 
 	/**
 	 * 债务性度量指标
 	 */
-	DebtMetric debtMetric;
+	private DebtMetric debtMetric;
 
 	/**
 	 * 不稳定度
@@ -140,7 +136,7 @@ public class FileMetrics extends FanIOMetric {
 		/**
 		 * 协同修改次数，与其它文件共同修改的commit次数
 		 */
-		private int coChangeCommitTimes;
+//		private int coChangeCommitTimes;
 	}
 
 	@Data
