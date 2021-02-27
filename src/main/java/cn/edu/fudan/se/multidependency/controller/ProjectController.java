@@ -86,10 +86,12 @@ public class ProjectController {
 
 	@GetMapping("/graph")
 	public String index() {
-//		request.setAttribute("cloneRelationTypes", CloneRelationType.values());
-//		request.setAttribute("cloneLevels", CloneLevel.values());
-//		request.setAttribute("search", false);
 		return "projectgraph";
+	}
+
+	@GetMapping("/treemap")
+	public String treemap() {
+		return "treemap";
 	}
 
 	@GetMapping("/tree")
@@ -593,7 +595,13 @@ public class ProjectController {
 	@PostMapping("/has")
 	@ResponseBody
 	public JSONArray projectHas(@RequestBody JSONObject requestBody) {
-		return projectService.getMultipleProjectsGraphJson(requestBody);
+		return projectService.getMultipleProjectsGraphJson(requestBody, "projectgraph");
+	}
+
+	@PostMapping("/has/treemap")
+	@ResponseBody
+	public JSONArray projectHasTreeMap(@RequestBody JSONObject requestBody) {
+		return projectService.getMultipleProjectsGraphJson(requestBody, "treemap");
 	}
 
 	/**
