@@ -11,11 +11,13 @@ public enum NodeLabelType {
 	Scenario, TestCase, Feature, Trace, Bug,
 	GitRepository, Branch, Commit, Issue, Label, Developer,
 	CloneGroup, CodeUnit,
-	Module;
+	Module,
+	Metric;
 	
 	public List<String> labels() {
 		List<String> result = new ArrayList<>();
 		switch(this) {
+			case Metric:
 			case Module:
 			case ProjectFile:
 			case Namespace:
