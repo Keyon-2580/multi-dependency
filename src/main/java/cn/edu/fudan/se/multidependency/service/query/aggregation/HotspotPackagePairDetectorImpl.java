@@ -29,6 +29,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import scala.language;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -319,7 +320,9 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				Package parentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
 				String parentKey = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
 				if(hotspotPackagePairMap.containsKey(parentKey)) {
-					allHotspotPackagePair.get(hotspotPackagePairMap.get(parentKey).get(true)).addHotspotChild(hotspotPackagePair);
+					if (hotspotPackagePairMap.get(parentKey).containsKey(true)) {
+						allHotspotPackagePair.get(hotspotPackagePairMap.get(parentKey).get(true)).addHotspotChild(hotspotPackagePair);
+					}
 				}
 			}
 			else {
@@ -1161,7 +1164,9 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				Package parentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
 				String parentKey = String.join("_", parentPackage1.getDirectoryPath(), parentPackage2.getDirectoryPath());
 				if(hotspotPackagePairMap.containsKey(parentKey)) {
-					allHotspotPackagePair.get(hotspotPackagePairMap.get(parentKey).get(true)).addHotspotChild(hotspotPackagePair);
+					if (hotspotPackagePairMap.get(parentKey).containsKey(true)) {
+						allHotspotPackagePair.get(hotspotPackagePairMap.get(parentKey).get(true)).addHotspotChild(hotspotPackagePair);
+					}
 				}
 			}
 			else {

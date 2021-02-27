@@ -19,7 +19,7 @@ public interface ProjectService {
 
 	void setAbsolutePath(Project project, String path);
 
-	JSONArray getPackageContainJson(Collection<ProjectFile> clonefiles, List<PackageStructure> childrenPackages);
+	JSONArray getPackageContainJson(Collection<ProjectFile> clonefiles, List<PackageStructure> childrenPackages,String type);
 
 	JSONArray getMultipleProjectsGraphJson(JSONObject dataList, String type);
 
