@@ -12,12 +12,13 @@ public enum NodeLabelType {
 	GitRepository, Branch, Commit, Issue, Label, Developer,
 	CloneGroup, CodeUnit,
 	Module,
-	Metric;
+	Metric,Smell;
 	
 	public List<String> labels() {
 		List<String> result = new ArrayList<>();
 		switch(this) {
 			case Metric:
+			case Smell:
 			case Module:
 			case ProjectFile:
 			case Namespace:

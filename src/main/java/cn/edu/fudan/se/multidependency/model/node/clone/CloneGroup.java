@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -37,6 +38,8 @@ public class CloneGroup implements Node {
 	private String language;
 	
 	private String cloneLevel;
+
+	private SmellType type;
 	
 	public CloneGroup(String name) {
 		this.name = name;
@@ -52,6 +55,7 @@ public class CloneGroup implements Node {
 		properties.put("size", getSize());
 		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		properties.put("cloneLevel", getCloneLevel() == null ? "" : getCloneLevel());
+		properties.put("type", getType() == null ? "" : getType());
 		return properties;
 	}
 

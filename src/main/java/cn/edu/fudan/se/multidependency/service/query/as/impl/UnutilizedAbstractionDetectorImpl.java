@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
-import cn.edu.fudan.se.multidependency.repository.as.ASRepository;
+import cn.edu.fudan.se.multidependency.repository.smell.ASRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.as.UnutilizedAbstractionDetector;
 import cn.edu.fudan.se.multidependency.service.query.as.data.UnutilizedAbstraction;

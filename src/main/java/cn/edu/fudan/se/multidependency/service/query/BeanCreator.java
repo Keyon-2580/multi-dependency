@@ -27,7 +27,7 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.AggregationClone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.model.relation.clone.ModuleClone;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
-import cn.edu.fudan.se.multidependency.repository.as.ASRepository;
+import cn.edu.fudan.se.multidependency.repository.smell.ASRepository;
 import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.clone.CloneGroupRepository;

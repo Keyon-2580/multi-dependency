@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.controller.as;
+package cn.edu.fudan.se.multidependency.controller.smell;
 
 import java.util.ArrayList;
 import java.util.List;

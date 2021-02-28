@@ -7,7 +7,7 @@ import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.ar.Module;
-import cn.edu.fudan.se.multidependency.repository.as.ModuleRepository;
+import cn.edu.fudan.se.multidependency.repository.smell.ModuleRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 

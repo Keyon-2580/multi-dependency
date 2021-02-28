@@ -14,7 +14,7 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.ar.Module;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
-import cn.edu.fudan.se.multidependency.repository.as.UnstableASRepository;
+import cn.edu.fudan.se.multidependency.repository.smell.UnstableASRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.as.UnstableDependencyDetectorUsingInstability;

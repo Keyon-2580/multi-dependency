@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.repository.as;
+package cn.edu.fudan.se.multidependency.repository.smell;
 
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;

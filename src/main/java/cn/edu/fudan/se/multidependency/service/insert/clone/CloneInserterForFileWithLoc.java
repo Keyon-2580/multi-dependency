@@ -10,11 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.model.node.CodeNode;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
-import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
-import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.model.relation.clone.CloneType;
@@ -22,7 +18,6 @@ import cn.edu.fudan.se.multidependency.utils.clone.CloneUtil;
 import cn.edu.fudan.se.multidependency.utils.clone.data.CloneResultFromCsv;
 import cn.edu.fudan.se.multidependency.utils.clone.data.CloneResultWithLocFromCsv;
 import cn.edu.fudan.se.multidependency.utils.clone.data.FilePathFromCsv;
-import cn.edu.fudan.se.multidependency.utils.clone.data.Group;
 
 public class CloneInserterForFileWithLoc extends CloneExtractor {
 

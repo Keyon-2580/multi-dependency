@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.repository.as;
+package cn.edu.fudan.se.multidependency.repository.smell;
 
 import java.util.List;
 

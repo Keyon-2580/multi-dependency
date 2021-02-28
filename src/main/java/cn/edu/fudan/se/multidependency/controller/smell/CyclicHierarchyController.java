@@ -1,4 +1,4 @@
-package cn.edu.fudan.se.multidependency.controller.as;
+package cn.edu.fudan.se.multidependency.controller.smell;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -7,25 +7,24 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import cn.edu.fudan.se.multidependency.service.query.as.SimilarComponentsDetector;
+import cn.edu.fudan.se.multidependency.service.query.as.CyclicHierarchyDetector;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller
-@RequestMapping("/as/similar")
-public class SimilarComponentController {
-
+@RequestMapping("/as/cylic/hierarchy")
+public class CyclicHierarchyController {
+	
 	@Autowired
-	private SimilarComponentsDetector similarComponentsDetector;
+	private CyclicHierarchyDetector cyclicHierarchyDetector;
 	
 	@Autowired
 	private NodeService nodeService;
 	
 	@GetMapping("")
-	public String similar(HttpServletRequest request) {
+	public String cyclicHierarchy(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("files", similarComponentsDetector.similarFiles());
-		request.setAttribute("packages", similarComponentsDetector.similarPackages());
-		return "as/similar";
+		request.setAttribute("types", cyclicHierarchyDetector.cyclicHierarchies());
+		return "as/hierarchy";
 	}
-	
+
 }

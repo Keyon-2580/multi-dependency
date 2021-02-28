@@ -3,7 +3,6 @@ package cn.edu.fudan.se.multidependency.service.query.clone;
 import java.util.*;
 
 import cn.edu.fudan.se.multidependency.model.node.*;
-import cn.edu.fudan.se.multidependency.model.node.Package;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
