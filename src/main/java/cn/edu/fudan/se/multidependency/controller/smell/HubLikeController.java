@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.service.query.as.HubLikeComponentDetector;
+import cn.edu.fudan.se.multidependency.service.query.smell.HubLikeComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller

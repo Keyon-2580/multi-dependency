@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.service.query.as.impl.FilesCommitsService;
+import cn.edu.fudan.se.multidependency.service.query.smell.impl.FilesCommitsService;
 import cn.edu.fudan.se.multidependency.service.query.history.data.CommitsInFileMatrix;
 import cn.edu.fudan.se.multidependency.service.query.history.data.IssuesInFileMatrix;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;

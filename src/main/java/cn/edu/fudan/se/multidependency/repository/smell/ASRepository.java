@@ -15,8 +15,8 @@ import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
-import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikeFile;
-import cn.edu.fudan.se.multidependency.service.query.as.data.HubLikeModule;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.HubLikeFile;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.HubLikeModule;
 
 @Repository
 public interface ASRepository extends Neo4jRepository<Project, Long> {

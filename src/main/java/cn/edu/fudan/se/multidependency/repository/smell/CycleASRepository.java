@@ -13,7 +13,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.ar.Module;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.service.query.as.data.CycleComponents;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.CycleComponents;
 
 @Repository
 public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
