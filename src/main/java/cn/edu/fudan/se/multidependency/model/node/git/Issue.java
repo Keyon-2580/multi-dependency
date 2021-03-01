@@ -35,7 +35,7 @@ public class Issue implements Node {
 
 	private String issueUrl;
 
-	private IssueType type;
+	private String type;
 
 	private String title;
 	

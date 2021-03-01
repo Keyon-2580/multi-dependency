@@ -99,7 +99,7 @@ public class JiraIssueExtractor {
 
             JSONObject issueTypeObject =  fields.getJSONObject("issuetype");
             String type = issueTypeObject == null ? "" : issueTypeObject.getString("name");
-            issue.setType(IssueType.valueOfIssue(type));
+            issue.setType(IssueType.typeOfIssue(type));
 
             String summary = fields.getString("summary");
             summary = summary == null ? "" : summary;

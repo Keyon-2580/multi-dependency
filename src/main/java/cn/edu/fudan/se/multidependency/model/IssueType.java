@@ -1,18 +1,21 @@
 package cn.edu.fudan.se.multidependency.model;
 
 public enum IssueType {
-	Bug, Improvement, NewFeature,DefaultIssue;
+	Bug(IssueType.str_Bug),
+	Improvement(IssueType.str_Improvement),
+	NewFeature(IssueType.str_New_Feature),
+	DefaultIssue(IssueType.str_Default_Issue);
 
-	public static IssueType valueOfIssue(String type) {
+	public static String typeOfIssue(String type) {
 		switch(type) {
 			case "Bug":
-				return Bug;
+				return str_Bug;
 			case "Improvement":
-				return Improvement;
+				return str_Improvement;
 			case "New Feature":
-				return NewFeature;
+				return str_New_Feature;
 		}
-		return DefaultIssue;
+		return str_Default_Issue;
 	}
 
 	/**
@@ -23,4 +26,19 @@ public enum IssueType {
 	public static final String str_New_Feature = "NewFeature";
 	public static final String str_Default_Issue = "DefaultIssue";
 
+	public static final String str_DEFAULT = "DEFAULT";
+
+	private String name;
+
+	IssueType(String name) {
+		this.name = name;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String toString() {
+		return getName();
+	}
 }
