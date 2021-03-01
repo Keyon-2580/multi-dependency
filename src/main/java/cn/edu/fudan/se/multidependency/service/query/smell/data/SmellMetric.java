@@ -1,28 +1,15 @@
-package cn.edu.fudan.se.multidependency.service.query.metric;
+package cn.edu.fudan.se.multidependency.service.query.smell.data;
 
-import org.springframework.data.neo4j.annotation.QueryResult;
-
-import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.data.neo4j.annotation.QueryResult;
 
 @Data
 @EqualsAndHashCode(callSuper=false)
-@QueryResult
-public class FileMetrics extends FanIOMetric {
+public class SmellMetric {
 
-	private ProjectFile file;
-
-	/**
-	 * fanIn
-	 */
-	private int fanIn;
-
-	/**
-	 * fanOut
-	 */
-	private int fanOut;
+	private Smell smell;
 
 	/**
 	 * 结构性度量指标
@@ -35,35 +22,22 @@ public class FileMetrics extends FanIOMetric {
 	private EvolutionMetric evolutionMetric;
 
 	/**
+	 * 演化性度量指标
+	 */
+	private CoChangeMetric coChangeMetric;
+
+	/**
 	 * 债务性度量指标
 	 */
 	private DebtMetric debtMetric;
-
-	/**
-	 * 不稳定度
-	 * Instability = Ce / (Ce + Ca)
-	 */
-	private double instability;
-
-	/**
-	 * PageRank Score
-	 */
-	private double pageRankScore;
-
-
-	@Override
-	public Node getComponent() {
-		return file;
-	}
-
 
 	@Data
 	@EqualsAndHashCode(callSuper=false)
 	@QueryResult
 	public class StructureMetric {
+		private Smell smell;
 
-		private ProjectFile file;
-
+		private int size;
 		/**
 		 * 类数
 		 */
@@ -78,16 +52,6 @@ public class FileMetrics extends FanIOMetric {
 		 * 代码行
 		 */
 		private int loc;
-
-		/**
-		 * fanOut
-		 */
-		private int fanOut;
-
-		/**
-		 * fanIn
-		 */
-		private int fanIn;
 	}
 
 	@Data
@@ -95,34 +59,46 @@ public class FileMetrics extends FanIOMetric {
 	@QueryResult
 	public class EvolutionMetric{
 
-		private ProjectFile file;
-
+		private Smell smell;
 		/**
 		 * 修改次数
 		 */
 		private int commits;
 
 		/**
-		 * 修改次数
+		 * 开发者数
 		 */
 		private int developers;
 
+//		/**
+//		 * 协同修改的文件数量
+//		 */
+//		private int coChangeFileCount;
+	}
+
+	@Data
+	@EqualsAndHashCode(callSuper=false)
+	@QueryResult
+	public class CoChangeMetric{
+
+		private Smell smell;
 		/**
-		 * 与该文件协同修改的文件数量
+		 * 修改次数
 		 */
-		private int coChangeFileCount;
+		private int coChangeCommits;
 
 		/**
-		 * 协同修改次数，与其它文件共同修改的commit次数
+		 * 协同修改的文件数量
 		 */
-//		private int coChangeCommitTimes;
+		private int coChangeFileCount;
 	}
 
 	@Data
 	@EqualsAndHashCode(callSuper=false)
 	@QueryResult
 	public class DebtMetric{
-		private ProjectFile file;
+
+		private Smell smell;
 
 		/**
 		 * Issue总数数量
@@ -141,5 +117,4 @@ public class FileMetrics extends FanIOMetric {
 		 */
 		private int improvementIssues;
 	}
-
 }

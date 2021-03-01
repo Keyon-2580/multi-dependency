@@ -56,19 +56,19 @@ var metric = function() {
 						html += "<td>" + fanIn + "</td>";
 						html += "<td>" + fanOut + "</td>";
 //						html += "<td>" + metrics[i].instability.toFixed(2) + "</td>";
-                        var changeTimes = 0;
+                        var commits = 0;
                         var developers = 0;
-//                        var coChangeCommitTimes = 0;
+//                        var coChangeCommits = 0;
                         var coChangeFileCount = 0;
                         if(metrics[i].evolutionMetric != null){
-                             changeTimes = metrics[i].evolutionMetric.changeTimes;
+                             commits = metrics[i].evolutionMetric.commits;
                              developers = metrics[i].evolutionMetric.developers;
-//                             coChangeCommitTimes = metrics[i].evolutionMetric.coChangeCommitTimes;
+//                             coChangeCommits = metrics[i].evolutionMetric.coChangeCommits;
                              coChangeFileCount = metrics[i].evolutionMetric.coChangeFileCount;
                         }
-						html += "<td>" + changeTimes + "</td>";
+						html += "<td>" + commits + "</td>";
 						html += "<td>" + developers + "</td>";
-//						html += "<td>" + coChangeCommitTimes + "</td>";
+//						html += "<td>" + coChangeCommits + "</td>";
 						html += "<td>" + coChangeFileCount + "</td>";
 						var issues = 0;
                         var bugIssues = 0;
@@ -96,7 +96,7 @@ var metric = function() {
 			}
 		})
 	}
-	
+
 	var packageMetric = function(projects) {
 		$.ajax({
 			type: "get",

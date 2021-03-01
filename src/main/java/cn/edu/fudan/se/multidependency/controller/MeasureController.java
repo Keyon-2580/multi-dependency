@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cn.edu.fudan.se.multidependency.service.query.smell.SmellMetricCalculatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +34,10 @@ public class MeasureController {
 
     @Autowired
     MetricCalculatorService metricCalculatorService;
-    
+
+    @Autowired
+    SmellMetricCalculatorService smellMetricCalculatorService;
+
     @Autowired
     MetricShowService metricShowService;
     
@@ -43,6 +47,11 @@ public class MeasureController {
     @GetMapping(value= {"", "/", "/index"})
     public String index() {
         return "metric";
+    }
+
+    @GetMapping(value= {"/smell"})
+    public String smellmetric() {
+        return "smellmetric";
     }
     
     @GetMapping("/excel/package")
@@ -110,6 +119,12 @@ public class MeasureController {
     @ResponseBody
     public Object calculatePackageMetrics() {
     	return metricCalculatorService.calculateProjectPackageMetrics();
+    }
+
+    @GetMapping("/smellMetric")
+    @ResponseBody
+    public Object calculateSmellMetric() {
+        return smellMetricCalculatorService.calculateProjectSmellMetricsInFileLevel();
     }
 
     @GetMapping("/modularityMetricQ")

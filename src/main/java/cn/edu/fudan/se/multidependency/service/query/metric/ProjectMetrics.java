@@ -44,7 +44,7 @@ public class ProjectMetrics {
 	/**
 	 * 与该项目相关的commit次数
 	 */
-	private int commitTimes = -1;
+	private int commits = -1;
 	
 	/**
 	 * 模块度

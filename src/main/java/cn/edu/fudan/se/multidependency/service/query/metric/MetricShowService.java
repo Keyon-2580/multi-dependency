@@ -163,7 +163,7 @@ public class MetricShowService {
 				row.createCell(3).setCellValue(fileMetric.getStructureMetric().getNom());
 				row.createCell(4).setCellValue(fileMetric.getFanIn());
 				row.createCell(5).setCellValue(fileMetric.getFanOut());
-				row.createCell(6).setCellValue(fileMetric.getEvolutionMetric().getChangeTimes());
+				row.createCell(6).setCellValue(fileMetric.getEvolutionMetric().getCommits());
 //				row.createCell(7).setCellValue(fileMetric.getEvolutionMetric().getCoChangeCommitTimes());
 				row.createCell(8).setCellValue(fileMetric.getEvolutionMetric().getCoChangeFileCount());
 				row.createCell(9).setCellValue(fileMetric.getPageRankScore());

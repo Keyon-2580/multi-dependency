@@ -32,7 +32,9 @@ public class CloneGroup implements Node {
 	private String name;
 
 	private Long entityId;
-	
+
+	private String project;
+
 	private int size;
 	
 	private String language;
@@ -52,6 +54,7 @@ public class CloneGroup implements Node {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("name", getName() == null ? "" : getName());
+		properties.put("project", getProject() == null ? "" : getProject());
 		properties.put("size", getSize());
 		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		properties.put("cloneLevel", getCloneLevel() == null ? "" : getCloneLevel());

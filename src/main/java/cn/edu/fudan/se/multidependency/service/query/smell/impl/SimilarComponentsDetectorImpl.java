@@ -74,8 +74,8 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 				continue;
 			}
 			SimilarComponents<ProjectFile> temp = new SimilarComponents<ProjectFile>(file1, file2,
-					clone.getFileClone().getValue(), fileMetrics.get(file1).getEvolutionMetric().getChangeTimes(),
-					fileMetrics.get(file2).getEvolutionMetric().getChangeTimes(), clone.getCochangeTimes());
+					clone.getFileClone().getValue(), fileMetrics.get(file1).getEvolutionMetric().getCommits(),
+					fileMetrics.get(file2).getEvolutionMetric().getCommits(), clone.getCochangeTimes());
 			temp.setModule1(moduleService.findFileBelongToModule(file1));
 			temp.setModule2(moduleService.findFileBelongToModule(file2));
 			temp.setCloneType(clone.getFileClone().getCloneType());

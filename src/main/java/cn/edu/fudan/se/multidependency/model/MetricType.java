@@ -12,11 +12,11 @@ public enum MetricType {
 	INSTABILITY(MetricType.str_INSTABILITY),
 	PAGE_RANK_SCORE(MetricType.str_PAGE_RANK_SCORE),
 	MODULARITY(MetricType.str_MODULARITY),
+	SIZE(MetricType.str_SIZE),
 
-	COMMIT_TIMES(MetricType.str_COMMIT_TIMES),
-	CHANGE_TIMES(MetricType.str_CHANGE_TIMES),
+	COMMITS(MetricType.str_COMMITS),
 	CO_CHANGE_FILE_COUNT(MetricType.str_CO_CHANGE_FILE_COUNT),
-	CO_CHANGE_COMMIT_TIMES(MetricType.str_CO_CHANGE_COMMIT_TIMES),
+	CO_CHANGE_COMMITS(MetricType.str_CO_CHANGE_COMMITS),
 	DEVELOPERS(MetricType.str_DEVELOPERS),
 	ISSUES(MetricType.str_ISSUES),
 	BUG_ISSUES(MetricType.str_BUG_ISSUES),
@@ -81,17 +81,19 @@ public enum MetricType {
 	public static final String str_MODULARITY = "MODULARITY";
 
 	/**
+	 * 衡量项目的模块性
+	 * Modularity
+	 */
+	public static final String str_SIZE = "SIZE";
+
+	/**
 	 * --------------------------------演化性度量值------------------------------------------
 	 */
 
 	/**
 	 * 提交数， Commits
 	 */
-	public static final String str_COMMIT_TIMES = "COMMIT_TIMES";
-	/**
-	 * 变更数
-	 */
-	public static final String str_CHANGE_TIMES = "CHANGE_TIMES";
+	public static final String str_COMMITS = "COMMITS";
 	/**
 	 * 共变文件数coChangeFileCount
 	 */
@@ -99,7 +101,7 @@ public enum MetricType {
 	/**
 	 * 共变文件数coChangeFileCount
 	 */
-	public static final String str_CO_CHANGE_COMMIT_TIMES = "CO_CHANGE_COMMIT_TIMES";
+	public static final String str_CO_CHANGE_COMMITS = "CO_CHANGE_COMMITS";
 	/**
 	 * 开发者数
 	 */

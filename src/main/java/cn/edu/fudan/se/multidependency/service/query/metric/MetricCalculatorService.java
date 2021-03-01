@@ -71,7 +71,7 @@ public class MetricCalculatorService {
 
 				FileMetrics.EvolutionMetric evolutionMetric = fileMetrics.getEvolutionMetric();
 				if (evolutionMetric != null){
-					metricValues.put(MetricType.CHANGE_TIMES, evolutionMetric.getChangeTimes());
+					metricValues.put(MetricType.COMMITS, evolutionMetric.getCommits());
 					metricValues.put(MetricType.DEVELOPERS, evolutionMetric.getDevelopers());
 					metricValues.put(MetricType.CO_CHANGE_FILE_COUNT, evolutionMetric.getCoChangeFileCount());
 //					metricValues.put(MetricType.CO_CHANGE_COMMIT_TIMES, evolutionMetric.getCoChangeCommitTimes());
@@ -139,7 +139,7 @@ public class MetricCalculatorService {
 				metricValues.put(MetricType.NOM, projectMetrics.getNom());
 				metricValues.put(MetricType.LOC, projectMetrics.getLoc());
 				metricValues.put(MetricType.LINES, projectMetrics.getLines());
-				metricValues.put(MetricType.COMMIT_TIMES, projectMetrics.getCommitTimes());
+				metricValues.put(MetricType.COMMITS, projectMetrics.getCommits());
 				metricValues.put(MetricType.MODULARITY, projectMetrics.getModularity());
 
 				metric.setMetricValues(metricValues);
@@ -280,7 +280,7 @@ public class MetricCalculatorService {
 			projectMetricsList.forEach(projectMetrics -> {
 				Project project = projectMetrics.getProject();
 				int commitTimes = calculateProjectCommits(project);
-				projectMetrics.setCommitTimes(commitTimes);
+				projectMetrics.setCommits(commitTimes);
 				result.put(project.getId(), projectMetrics);
 			});
 			cache.cache(getClass(), key, result);

@@ -20,6 +20,8 @@ import java.util.Set;
 @NoArgsConstructor
 public class Smell implements Node {
 
+	private static final long serialVersionUID = -3704443856176521283L;
+
 	@Id
     @GeneratedValue
     private Long id;
@@ -28,13 +30,17 @@ public class Smell implements Node {
 
 	private Long entityId;
 
+	private Long projectId;
+
+	private String projectName;
+
 	private int size;
 
 	private String language;
 
-	private NodeLabelType level;
+	private String level;
 
-	private SmellType type;
+	private String type;
 
 	public Smell(String name) {
 		this.name = name;
@@ -47,6 +53,8 @@ public class Smell implements Node {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("name", getName() == null ? "" : getName());
+		properties.put("projectId", getProjectId() == null ? "" : getProjectId());
+		properties.put("projectName", getProjectName() == null ? "" : getProjectName());
 		properties.put("size", getSize());
 		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		properties.put("level", getLevel() == null ? "" : getLevel());

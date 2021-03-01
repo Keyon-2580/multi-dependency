@@ -4,15 +4,19 @@ import java.util.*;
 
 import cn.edu.fudan.se.multidependency.model.node.*;
 import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.relation.*;
 import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
+import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.smell.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
+import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
+import cn.edu.fudan.se.multidependency.service.query.smell.SmellMetricCalculatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +73,12 @@ public class BeanCreator {
 
 	@Autowired
 	private MetricCalculatorService metricCalculatorService;
+
+	@Autowired
+	private SmellMetricCalculatorService smellMetricCalculatorService;
+
+	@Autowired
+	private SmellDetectorService smellDetectorService;
 
 
 	@Bean("createCoChanges")
@@ -222,12 +232,13 @@ public class BeanCreator {
 	}
 
 	@Bean("createCloneGroup")
-	public List<CloneGroup> createCloneGroup(PropertyConfig propertyConfig, CloneGroupRepository cloneGroupRepository) {
+	public List<CloneGroup> createCloneGroup(PropertyConfig propertyConfig,
+											 CloneGroupRepository cloneGroupRepository,
+											 SmellRepository smellRepository) {
 		if(propertyConfig.isCalculateCloneGroup()) {
 			List<CloneGroup> cloneGroups = cloneGroupRepository.findCloneGroupWithLimit();
 			if ( cloneGroups != null && !cloneGroups.isEmpty()){
 				LOGGER.info("已存在Clone Group关系");
-				return cloneGroups;
 			} else {
 				LOGGER.info("创建Clone Group关系...");
 				cloneGroupRepository.deleteAll();
@@ -241,8 +252,20 @@ public class BeanCreator {
 				cloneGroupRepository.setCloneGroupContainSize();
 				cloneGroupRepository.setCloneGroupLanguage();
 				LOGGER.info("创建Clone Group关系完成！！！");
-			}
+//				smellDetectorService.createCloneSmells();
 
+			}
+			List<Smell> smells = smellRepository.findSmellWithLimit();
+
+			smellRepository.deleteSmellContainRelations();
+			smellRepository.deleteSmellHasMetricRelation();
+			smellRepository.deleteSmells();
+			smellRepository.createCloneSmells();
+			smellRepository.createSmellContains();
+			smellRepository.setSmellProject();
+			LOGGER.info("创建Smell节点关系完成！！！");
+
+			return cloneGroups;
 		}
 		return new ArrayList<>();
 	}
@@ -416,6 +439,27 @@ public class BeanCreator {
 			for(Map.Entry<Project, Metric> entry : projectMetricNodesMap.entrySet()){
 				Has has = new Has(entry.getKey(), entry.getValue());
 				hasMetrics.add(has);
+			}
+			hasRepository.saveAll(hasMetrics);
+		}
+
+		LOGGER.info("创建Smell Metric度量值节点和关系...");
+//		smellMetricCalculatorService.createSmellMetricNodesInFileLevel();
+		Map<Smell, Metric> smellMetricMap = smellMetricCalculatorService.generateSmellMetricNodesInFileLevel();
+		if(smellMetricMap != null && !smellMetricMap.isEmpty()){
+			Collection<Metric> fileMetricNodes = smellMetricMap.values();
+			metricRepository.saveAll(fileMetricNodes);
+
+			Collection<Has> hasMetrics = new ArrayList<>();
+			int size = 0;
+			for(Map.Entry<Smell, Metric> entry : smellMetricMap.entrySet()){
+				Has has = new Has(entry.getKey(), entry.getValue());
+				hasMetrics.add(has);
+				if(++size > 500){
+					hasRepository.saveAll(hasMetrics);
+					hasMetrics.clear();
+					size = 0;
+				}
 			}
 			hasRepository.saveAll(hasMetrics);
 		}

@@ -57,17 +57,17 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	 */
 	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)<-[:" +
 			RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]- (d:Developer) \r\n" +
-			"with file, count(distinct c) as changeTimes, count(distinct d) as developers," +
+			"with file, count(distinct c) as commits, count(distinct d) as developers," +
 			"     size((file)-[:" + RelationType.str_CO_CHANGE +"]-(:ProjectFile)) as coChangeFileCount \r\n" +
-			"RETURN  file,developers,changeTimes,coChangeFileCount order by(file.path) desc;")
+			"RETURN  file,developers,commits,coChangeFileCount order by(file.path) desc;")
 	public List<FileMetrics.EvolutionMetric> calculateFileEvolutionMetrics();
 
 	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)<-[:" +
 			RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]- (d:Developer) \r\n" +
 			"where id(file)= $fileId \r\n" +
-			"with file, count(c) as changeTimes,count(distinct d) as developers," +
+			"with file, count(c) as commits,count(distinct d) as developers," +
 			"     size((file)-[:" + RelationType.str_CO_CHANGE +"]-(:ProjectFile)) as coChangeFileCount \r\n" +
-			"RETURN  file,changeTimes,developers,coChangeFileCount;")
+			"RETURN  file,commits,developers,coChangeFileCount;")
 	public FileMetrics.EvolutionMetric calculateFileEvolutionMetrics(@Param("fileId") long fileId);
 
 	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(:Commit)-[:" +
@@ -106,14 +106,14 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"with file, count(c) as cochangeCommitTimes\r\n" +
 			"WITH size((file)-[:" + RelationType.str_DEPENDS_ON + "]->()) as fanOut, \r\n" + 
 			"     size((file)<-[:" + RelationType.str_DEPENDS_ON + "]-()) as fanIn,\r\n" + 
-			"     size((file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-()) as changeTimes,\r\n" + 
+			"     size((file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-()) as commits,\r\n" +
 			"     size((file)-[:" + RelationType.str_CONTAIN + "*1..3]->(:Function)) as nom,\r\n" + 
 			"     size((file)-[:" + RelationType.str_CO_CHANGE + "]-(:ProjectFile)) as cochangeFileCount,\r\n" + 
 			"     file.endLine as loc,\r\n" + 
 			"     file.score as score,\r\n" + 
 			"     cochangeCommitTimes,\r\n" + 
 			"     file\r\n" + 
-			"RETURN  file,fanIn,fanOut,changeTimes,cochangeCommitTimes,nom,loc,score,cochangeFileCount order by(file.path) desc;")
+			"RETURN  file,fanIn,fanOut,commits,cochangeCommitTimes,nom,loc,score,cochangeFileCount order by(file.path) desc;")
 	public List<FileMetrics> calculateFileMetricsWithCoChangeCommitTimes();
 	
 	@Query("CALL gds.pageRank.stream({" +
