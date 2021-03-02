@@ -6,7 +6,7 @@ html, body {
     overflow: hidden;
 }
 svg {
-    width: 100%;
+    width: 70%;
     height: 100%;
     background: #ffffff;
 }
@@ -14,7 +14,7 @@ svg {
     stroke-width: 0;
 }
 rect:hover{
-    fill: #ec3621;
+    fill: #af5247;
 }
 .leaf {
     stroke-width: 1;
@@ -25,4 +25,10 @@ rect:hover{
     font-size: 8px;
     fill: white;
     pointer-events: none;
+}
+
+#treemap_util {
+    float: left;
+    padding-top: 30px;
+    padding-left: 30px;
 }

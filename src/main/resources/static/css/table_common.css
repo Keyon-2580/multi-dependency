@@ -127,3 +127,15 @@ li {
 .my_common_list_a:hover{
     color: red;
 }
+
+.common_button{
+    color: black;
+    font-family:Arial;
+    padding: 10px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    border-radius: 3px;
+    cursor: pointer;
+}

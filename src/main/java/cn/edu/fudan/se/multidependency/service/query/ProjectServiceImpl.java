@@ -11,6 +11,7 @@ import cn.edu.fudan.se.multidependency.service.query.aggregation.data.*;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
 import cn.edu.fudan.se.multidependency.service.query.data.ProjectStructure;
+import cn.edu.fudan.se.multidependency.service.query.smell.BasicSmellQueryService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
@@ -31,9 +32,6 @@ public class ProjectServiceImpl implements ProjectService{
     private BasicCloneQueryService basicCloneQueryService;
 
     @Autowired
-    private HotspotPackageDetector hotspotPackageDetector;
-
-    @Autowired
     private HotspotPackagePairDetector hotspotPackagePairDetector;
 
     @Autowired
@@ -41,6 +39,9 @@ public class ProjectServiceImpl implements ProjectService{
 
     @Autowired
     private NodeService nodeService;
+
+    @Autowired
+    private BasicSmellQueryService basicSmellQueryService;
 
     private Map<Project, String> projectToAbsolutePath = new ConcurrentHashMap<>();
 
@@ -63,6 +64,7 @@ public class ProjectServiceImpl implements ProjectService{
         JSONArray result = new JSONArray();
         JSONObject nodeJSON2 = new JSONObject();
         JSONObject nodeJSON4 = new JSONObject();
+        JSONObject nodeJSON5 = new JSONObject();
 
         JSONObject projectJson = new JSONObject();
         if(projectIds.size() == 1){
@@ -78,12 +80,16 @@ public class ProjectServiceImpl implements ProjectService{
         }
 
         nodeJSON2.put("result",projectJson);
-
         result.add(nodeJSON2);
 
-        JSONObject temp_allprojects = getAllProjectsLinks();
-        nodeJSON4.put("links", temp_allprojects);
-        result.add(nodeJSON4);
+        if(type.equals("projectgraph")){
+            JSONObject temp_allprojects = getAllProjectsLinks();
+            nodeJSON4.put("links", temp_allprojects);
+            result.add(nodeJSON4);
+        }else if(type.equals("treemap")){
+            nodeJSON5.put("smell", basicSmellQueryService.smellsToTreemap());
+            result.add(nodeJSON5);
+        }
 
         return result;
     }
