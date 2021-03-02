@@ -90,7 +90,7 @@ public class SmellMetric {
 		/**
 		 * 协同修改的文件数量
 		 */
-		private int coChangeFileCount;
+		private int coChangeFiles;
 	}
 
 	@Data

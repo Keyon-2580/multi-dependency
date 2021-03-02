@@ -44,7 +44,7 @@ public class SmellMetricCalculatorService {
 				metric.setName(smell.getName());
 				metric.setNodeType(smell.getNodeType());
 
-				Map<MetricType, Object> metricValues =  new HashMap<>();
+				Map<String, Object> metricValues =  new HashMap<>();
 				metricValues.put(MetricType.SIZE, smellMetric.getStructureMetric().getSize());
 				metricValues.put(MetricType.NOC, smellMetric.getStructureMetric().getNoc());
 				metricValues.put(MetricType.NOM, smellMetric.getStructureMetric().getNom());
@@ -59,7 +59,7 @@ public class SmellMetricCalculatorService {
 				SmellMetric.CoChangeMetric coChangeMetric = smellMetric.getCoChangeMetric();
 				if (coChangeMetric != null){
 					metricValues.put(MetricType.CO_CHANGE_COMMITS, coChangeMetric.getCoChangeCommits());
-					metricValues.put(MetricType.CO_CHANGE_FILE_COUNT, coChangeMetric.getCoChangeFileCount());
+					metricValues.put(MetricType.CO_CHANGE_FILES, coChangeMetric.getCoChangeFiles());
 				}
 
 				SmellMetric.DebtMetric detMetric = smellMetric.getDebtMetric();

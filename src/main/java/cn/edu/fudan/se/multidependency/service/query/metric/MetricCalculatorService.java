@@ -62,7 +62,7 @@ public class MetricCalculatorService {
 				metric.setName(file.getName());
 				metric.setNodeType(file.getNodeType());
 
-				Map<MetricType, Object> metricValues =  new HashMap<>();
+				Map<String, Object> metricValues =  new HashMap<>();
 				metricValues.put(MetricType.NOC, fileMetrics.getStructureMetric().getNoc());
 				metricValues.put(MetricType.NOM, fileMetrics.getStructureMetric().getNom());
 				metricValues.put(MetricType.LOC, fileMetrics.getStructureMetric().getLoc());
@@ -73,7 +73,7 @@ public class MetricCalculatorService {
 				if (evolutionMetric != null){
 					metricValues.put(MetricType.COMMITS, evolutionMetric.getCommits());
 					metricValues.put(MetricType.DEVELOPERS, evolutionMetric.getDevelopers());
-					metricValues.put(MetricType.CO_CHANGE_FILE_COUNT, evolutionMetric.getCoChangeFileCount());
+					metricValues.put(MetricType.CO_CHANGE_FILES, evolutionMetric.getCoChangeFiles());
 //					metricValues.put(MetricType.CO_CHANGE_COMMIT_TIMES, evolutionMetric.getCoChangeCommitTimes());
 				}
 
@@ -104,7 +104,7 @@ public class MetricCalculatorService {
 				metric.setName(pck.getName());
 				metric.setNodeType(pck.getNodeType());
 
-				Map<MetricType, Object> metricValues =  new HashMap<>();
+				Map<String, Object> metricValues =  new HashMap<>();
 				metricValues.put(MetricType.NOF, packageMetrics.getNof());
 				metricValues.put(MetricType.NOC, packageMetrics.getNoc());
 				metricValues.put(MetricType.NOM, packageMetrics.getNom());
@@ -132,7 +132,7 @@ public class MetricCalculatorService {
 				metric.setName(projectMetrics.getProject().getName());
 				metric.setNodeType(projectMetrics.getProject().getNodeType());
 
-				Map<MetricType, Object> metricValues =  new HashMap<>();
+				Map<String, Object> metricValues =  new HashMap<>();
 				metricValues.put(MetricType.NOP, projectMetrics.getNop());
 				metricValues.put(MetricType.NOF, projectMetrics.getNof());
 				metricValues.put(MetricType.NOC, projectMetrics.getNoc());

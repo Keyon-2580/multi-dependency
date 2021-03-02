@@ -30,7 +30,7 @@ public class Metric implements Node {
 	private NodeLabelType nodeType;
 
 	@Properties(allowCast = true)
-	private Map<MetricType, Object> metricValues = new HashMap<>();
+	private Map<String, Object> metricValues = new HashMap<>();
 
 	public Metric(String name) {
 		super();

@@ -74,7 +74,7 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 
 	@Query("match (cloneGroup:CloneGroup) \r\n" +
 			"create (:Smell{name: cloneGroup.name, size: cloneGroup.size,language:cloneGroup.language,level:\'" +
-			SmellLevel.str_File + "\', type:\'" + SmellType.str_CLONE + "\',entityId: -1});\n")
+			SmellLevel.FILE + "\', type:\'" + SmellType.CLONE + "\',entityId: -1});\n")
 	void createCloneSmells();
 
 	@Query("MATCH (smell:Smell) with smell \r\n" +
@@ -121,8 +121,8 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 			"where id(smell)= $smellId\r\n" +
 			"WITH smell, count(distinct c) as coChangeCommits,collect(distinct file1) as coFiles1,collect(distinct file2) as coFiles2\r\n" +
 			"WITH smell,coChangeCommits," +
-			"     reduce(tmp=size(coFiles1), file in coFiles2 | tmp + (case when file in coFiles1 then 0 else 1 end)) as coChangeFileCount\r\n" +
-			"RETURN  smell,coChangeCommits,coChangeFileCount;")
+			"     reduce(tmp=size(coFiles1), file in coFiles2 | tmp + (case when file in coFiles1 then 0 else 1 end)) as coChangeFiles\r\n" +
+			"RETURN  smell,coChangeCommits,coChangeFiles;")
 	public SmellMetric.CoChangeMetric calculateSmellCoChangeMetricInFileLevel(@Param("smellId") long smellId);
 
 	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
@@ -130,9 +130,9 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 			"where id(smell)= $smellId\r\n" +
 			"WITH smell, collect(distinct issue) as issueList \r\n" +
 			"with smell, size(issueList) as issues," +
-			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.str_Bug + "\' then 1 else 0 end)) as bugIssues," +
-			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.str_New_Feature + "\' then 1 else 0 end)) as newFeatureIssues," +
-			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.str_Improvement + "\' then 1 else 0 end)) as improvementIssues \r\n" +
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.BUG + "\' then 1 else 0 end)) as bugIssues," +
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.NEW_FEATURE + "\' then 1 else 0 end)) as newFeatureIssues," +
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.IMPROVEMENT + "\' then 1 else 0 end)) as improvementIssues \r\n" +
 			"RETURN  smell,issues,bugIssues,newFeatureIssues,improvementIssues;")
 	public SmellMetric.DebtMetric calculateSmellDebtMetricInFileLevel(@Param("smellId") long smellId);
 }

@@ -58,25 +58,25 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)<-[:" +
 			RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]- (d:Developer) \r\n" +
 			"with file, count(distinct c) as commits, count(distinct d) as developers," +
-			"     size((file)-[:" + RelationType.str_CO_CHANGE +"]-(:ProjectFile)) as coChangeFileCount \r\n" +
-			"RETURN  file,developers,commits,coChangeFileCount order by(file.path) desc;")
+			"     size((file)-[:" + RelationType.str_CO_CHANGE +"]-(:ProjectFile)) as coChangeFiles \r\n" +
+			"RETURN  file,developers,commits,coChangeFiles order by(file.path) desc;")
 	public List<FileMetrics.EvolutionMetric> calculateFileEvolutionMetrics();
 
 	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)<-[:" +
 			RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]- (d:Developer) \r\n" +
 			"where id(file)= $fileId \r\n" +
 			"with file, count(c) as commits,count(distinct d) as developers," +
-			"     size((file)-[:" + RelationType.str_CO_CHANGE +"]-(:ProjectFile)) as coChangeFileCount \r\n" +
-			"RETURN  file,commits,developers,coChangeFileCount;")
+			"     size((file)-[:" + RelationType.str_CO_CHANGE +"]-(:ProjectFile)) as coChangeFiles \r\n" +
+			"RETURN  file,commits,developers,coChangeFiles;")
 	public FileMetrics.EvolutionMetric calculateFileEvolutionMetrics(@Param("fileId") long fileId);
 
 	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(:Commit)-[:" +
 			RelationType.str_COMMIT_ADDRESS_ISSUE + "]-> (issue:Issue) \r\n" +
 			"with file, collect(distinct issue) as issueList \r\n" +
 			"with file, size(issueList) as issues," +
-			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.str_Bug + "\' then 1 else 0 end)) as bugIssues," +
-			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.str_Improvement + "\' then 1 else 0 end)) as newFeatureIssues," +
-			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.str_Improvement + "\' then 1 else 0 end)) as improvementIssues \r\n" +
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.BUG + "\' then 1 else 0 end)) as bugIssues," +
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.NEW_FEATURE + "\' then 1 else 0 end)) as newFeatureIssues," +
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.IMPROVEMENT + "\' then 1 else 0 end)) as improvementIssues \r\n" +
 			"RETURN  file,issues,bugIssues,newFeatureIssues,improvementIssues order by(file.path) desc;")
 	public List<FileMetrics.DebtMetric> calculateFileDebtMetrics();
 
@@ -85,9 +85,9 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"where id(file)= $fileId \r\n" +
 			"with file, collect(distinct issue) as issueList \r\n" +
 			"with file, size(issueList) as issues," +
-			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.str_Bug + "\' then 1 else 0 end)) as bugIssues," +
-			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.str_New_Feature + "\' then 1 else 0 end)) as newFeatureIssues," +
-			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.str_Improvement + "\' then 1 else 0 end)) as improvementIssues \r\n" +
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.BUG + "\' then 1 else 0 end)) as bugIssues," +
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.NEW_FEATURE + "\' then 1 else 0 end)) as newFeatureIssues," +
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.IMPROVEMENT + "\' then 1 else 0 end)) as improvementIssues \r\n" +
 			"RETURN  file,issues,bugIssues,newFeatureIssues,improvementIssues;")
 	public FileMetrics.DebtMetric calculateFileDebtMetrics(@Param("fileId") long fileId);
 	
@@ -108,12 +108,12 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"     size((file)<-[:" + RelationType.str_DEPENDS_ON + "]-()) as fanIn,\r\n" + 
 			"     size((file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-()) as commits,\r\n" +
 			"     size((file)-[:" + RelationType.str_CONTAIN + "*1..3]->(:Function)) as nom,\r\n" + 
-			"     size((file)-[:" + RelationType.str_CO_CHANGE + "]-(:ProjectFile)) as cochangeFileCount,\r\n" + 
+			"     size((file)-[:" + RelationType.str_CO_CHANGE + "]-(:ProjectFile)) as coChangeFile,\r\n" +
 			"     file.endLine as loc,\r\n" + 
 			"     file.score as score,\r\n" + 
 			"     cochangeCommitTimes,\r\n" + 
 			"     file\r\n" + 
-			"RETURN  file,fanIn,fanOut,commits,cochangeCommitTimes,nom,loc,score,cochangeFileCount order by(file.path) desc;")
+			"RETURN  file,fanIn,fanOut,commits,cochangeCommitTimes,nom,loc,score,coChangeFiles order by(file.path) desc;")
 	public List<FileMetrics> calculateFileMetricsWithCoChangeCommitTimes();
 	
 	@Query("CALL gds.pageRank.stream({" +

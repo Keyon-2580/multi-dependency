@@ -7,50 +7,29 @@ import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Snippet;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 
-public enum SmellLevel {
-	Module(SmellLevel.str_Module),
-	Package(SmellLevel.str_Package),
-	File(SmellLevel.str_File),
-	Function(SmellLevel.str_Function),
-	Type(SmellLevel.str_Type),
-	Snippet(SmellLevel.str_Snippet),
-	MultipleLevel(SmellLevel.str_MultipleLevel);
-	
-	public static SmellLevel getNodeSmellLevel(Node node) {
+public final class SmellLevel {
+
+	public static String getNodeSmellLevel(Node node) {
 		if(node instanceof ProjectFile) {
-			return File;
+			return FILE;
 		} else if(node instanceof Function) {
-			return Function;
+			return FUNCTION;
 		} else if(node instanceof Type) {
-			return Type;
+			return TYPE;
 		} else if(node instanceof Snippet) {
-			return Snippet;
+			return SNIPPET;
 		}else if(node instanceof Package) {
-			return Package;
+			return PACKAGE;
 		}
 		return null;
 	}
 
-	public static final String str_Module = "Module";
-	public static final String str_Package = "Package";
-	public static final String str_File = "File";
-	public static final String str_Function = "Function";
-	public static final String str_Type = "Type";
-	public static final String str_Snippet = "Snippet";
-	public static final String str_MultipleLevel = "MultipleLevel";
-
-	private String name;
-
-	SmellLevel(String name) {
-		this.name = name;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String toString() {
-		return getName();
-	}
+	public static final String MODULE = "Module";
+	public static final String PACKAGE = "Package";
+	public static final String FILE = "File";
+	public static final String FUNCTION = "Function";
+	public static final String TYPE = "Type";
+	public static final String SNIPPET = "Snippet";
+	public static final String MULTIPLE_LEVEL = "MultipleLevel";
 
 }

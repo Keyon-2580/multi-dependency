@@ -56,16 +56,16 @@ var smellMetric = function() {
                                  commits = metrics[i].evolutionMetric.commits;
                                  developers = metrics[i].evolutionMetric.developers;
                             }
-                            var coCommits = 0;
-                            var CoFiles = 0;
+                            var coChangeCommits = 0;
+                            var coChangeFiles = 0;
                             if(metrics[i].coChangeMetric != null){
-                                 coCommits = metrics[i].coChangeMetric.coChangeCommits;
-                                 CoFiles = metrics[i].coChangeMetric.coChangeFileCount;
+                                 coChangeCommits = metrics[i].coChangeMetric.coChangeCommits;
+                                 coChangeFiles = metrics[i].coChangeMetric.coChangeFiles;
                             }
     						html += "<td>" + commits + "</td>";
     						html += "<td>" + developers + "</td>";
-    						html += "<td>" + coCommits + "</td>";
-    						html += "<td>" + CoFiles + "</td>";
+    						html += "<td>" + coChangeCommits + "</td>";
+    						html += "<td>" + coChangeFiles + "</td>";
     						var issues = 0;
                             var bugIssues = 0;
                             var newFeatureIssues = 0;

@@ -1,30 +1,6 @@
 package cn.edu.fudan.se.multidependency.model;
 
-public enum MetricType {
-	NOP(MetricType.str_NOP),
-	NOF(MetricType.str_NOF),
-	NOC(MetricType.str_NOC),
-	NOM(MetricType.str_NOM),
-	LOC(MetricType.str_LOC),
-	LINES(MetricType.str_LINES),
-	FAN_IN(MetricType.str_FAN_IN),
-	FAN_OUT(MetricType.str_FAN_OUT),
-	INSTABILITY(MetricType.str_INSTABILITY),
-	PAGE_RANK_SCORE(MetricType.str_PAGE_RANK_SCORE),
-	MODULARITY(MetricType.str_MODULARITY),
-	SIZE(MetricType.str_SIZE),
-
-	COMMITS(MetricType.str_COMMITS),
-	CO_CHANGE_FILE_COUNT(MetricType.str_CO_CHANGE_FILE_COUNT),
-	CO_CHANGE_COMMITS(MetricType.str_CO_CHANGE_COMMITS),
-	DEVELOPERS(MetricType.str_DEVELOPERS),
-	ISSUES(MetricType.str_ISSUES),
-	BUG_ISSUES(MetricType.str_BUG_ISSUES),
-	NEW_FEATURE_ISSUES(MetricType.str_NEW_FEATURE_ISSUES),
-	IMPROVEMENT_ISSUES(MetricType.str_IMPROVEMENT_ISSUES),
-
-	DEFAULT(MetricType.str_DEFAULT);
-
+public final class MetricType {
 	/**
 	 * -------------------------------结构性度量值-----------------------------------
 	 */
@@ -32,59 +8,59 @@ public enum MetricType {
 	/**
 	 * 包数, Number of Packages
 	 */
-	public static final String str_NOP = "NOP";
+	public static final String NOP = "NOP";
 	/**
 	 * 文件数, Number of Files
 	 */
-	public static final String str_NOF = "NOF";
+	public static final String NOF = "NOF";
 	/**
 	 * 类的个数, Number of Classes
 	 */
-	public static final String str_NOC = "NOC";
+	public static final String NOC = "NOC";
 	/**
 	 * 函数个数, Number of Methods
 	 */
-	public static final String str_NOM = "NOM";
+	public static final String NOM = "NOM";
 	/**
 	 * 代码行，去除空行和注释
 	 */
-	public static final String str_LOC = "LOC";
+	public static final String LOC = "LOC";
 	/**
 	 * 代码总规模， 包括空行和注释
 	 */
-	public static final String str_LINES = "LINES";
+	public static final String LINES = "Lines";
 	/**
 	 * 扇出依赖
 	 * 也叫Efferent  Couplings，依赖出度数
 	 */
-	public static final String str_FAN_OUT = "FAN_OUT";
+	public static final String FAN_OUT = "FanOut";
 	/**
 	 * 扇入依赖
 	 * 也叫Afferent Couplings，依赖入度数
 	 */
-	public static final String str_FAN_IN = "FAN_IN";
+	public static final String FAN_IN = "FanIn";
 	/**
 	 * 不稳定度
 	 * Instability = Ce / (Ce + Ca)
 	 * 即Instability = FanOut / (FanOut + FanIn)
 	 */
-	public static final String str_INSTABILITY = "INSTABILITY";
+	public static final String INSTABILITY = "Instability";
 	/**
 	 * 根据依赖情况，衡量节点的重要程度
 	 * PageRank
 	 */
-	public static final String str_PAGE_RANK_SCORE = "PAGE_RANK_SCORE";
+	public static final String PAGE_RANK_SCORE = "PageRankScore";
 	/**
 	 * 衡量项目的模块性
 	 * Modularity
 	 */
-	public static final String str_MODULARITY = "MODULARITY";
+	public static final String MODULARITY = "Modularity";
 
 	/**
 	 * 衡量项目的模块性
 	 * Modularity
 	 */
-	public static final String str_SIZE = "SIZE";
+	public static final String SIZE = "Size";
 
 	/**
 	 * --------------------------------演化性度量值------------------------------------------
@@ -93,39 +69,39 @@ public enum MetricType {
 	/**
 	 * 提交数， Commits
 	 */
-	public static final String str_COMMITS = "COMMITS";
+	public static final String COMMITS = "Commits";
 	/**
 	 * 共变文件数coChangeFileCount
 	 */
-	public static final String str_CO_CHANGE_FILE_COUNT = "CO_CHANGE_FILE_COUNT";
+	public static final String CO_CHANGE_FILES = "CoChangeFiles";
 	/**
 	 * 共变文件数coChangeFileCount
 	 */
-	public static final String str_CO_CHANGE_COMMITS = "CO_CHANGE_COMMITS";
+	public static final String CO_CHANGE_COMMITS = "CoChangeCommits";
 	/**
 	 * 开发者数
 	 */
-	public static final String str_DEVELOPERS = "DEVELOPERS";
+	public static final String DEVELOPERS = "Developers";
 
 	/**
 	 * Issue总数数量
 	 */
-	public static final String str_ISSUES = "ISSUES";
+	public static final String ISSUES = "Issues";
 
 	/**
 	 * Bug Issue总数数量
 	 */
-	public static final String str_BUG_ISSUES = "BUG_ISSUES";
+	public static final String BUG_ISSUES = "BugIssues";
 
 	/**
 	 * New feature Issue总数数量
 	 */
-	public static final String str_NEW_FEATURE_ISSUES = "NEW_FEATURE_ISSUES";
+	public static final String NEW_FEATURE_ISSUES = "NewFeatureIssues";
 
 	/**
 	 * Improvement feature Issue总数数量
 	 */
-	public static final String str_IMPROVEMENT_ISSUES = "IMPROVEMENT_ISSUES";
+	public static final String IMPROVEMENT_ISSUES = "ImprovementIssues";
 
 
 	/**
@@ -133,19 +109,6 @@ public enum MetricType {
 	 */
 
 
-	public static final String str_DEFAULT = "DEFAULT";
+	public static final String DEFAULT = "Default";
 
-	private String name;
-
-	MetricType(String name) {
-		this.name = name;
-	}
-
-	public String getName() {
-		return name;
-	}
-	
-	public String toString() {
-		return getName();
-	}
 }

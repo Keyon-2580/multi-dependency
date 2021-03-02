@@ -110,7 +110,7 @@ public class FileMetrics extends FanIOMetric {
 		/**
 		 * 与该文件协同修改的文件数量
 		 */
-		private int coChangeFileCount;
+		private int coChangeFiles;
 
 		/**
 		 * 协同修改次数，与其它文件共同修改的commit次数

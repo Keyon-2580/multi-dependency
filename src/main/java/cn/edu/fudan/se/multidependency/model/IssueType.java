@@ -1,44 +1,26 @@
 package cn.edu.fudan.se.multidependency.model;
 
-public enum IssueType {
-	Bug(IssueType.str_Bug),
-	Improvement(IssueType.str_Improvement),
-	NewFeature(IssueType.str_New_Feature),
-	DefaultIssue(IssueType.str_Default_Issue);
-
+public final class IssueType {
 	public static String typeOfIssue(String type) {
 		switch(type) {
 			case "Bug":
-				return str_Bug;
+				return BUG;
 			case "Improvement":
-				return str_Improvement;
+				return IMPROVEMENT;
 			case "New Feature":
-				return str_New_Feature;
+				return NEW_FEATURE;
 		}
-		return str_Default_Issue;
+		return DEFAULT_ISSUE;
 	}
 
 	/**
 	 * 代码总规模， 包括空行和注释
 	 */
-	public static final String str_Bug = "Bug";
-	public static final String str_Improvement = "Improvement";
-	public static final String str_New_Feature = "NewFeature";
-	public static final String str_Default_Issue = "DefaultIssue";
+	public static final String BUG = "Bug";
+	public static final String IMPROVEMENT = "Improvement";
+	public static final String NEW_FEATURE = "NewFeature";
+	public static final String TASK = "Task";
+	public static final String CUSTOM_ISSUE = "CustomIssue";
+	public static final String DEFAULT_ISSUE = "DefaultIssue";
 
-	public static final String str_DEFAULT = "DEFAULT";
-
-	private String name;
-
-	IssueType(String name) {
-		this.name = name;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String toString() {
-		return getName();
-	}
 }
