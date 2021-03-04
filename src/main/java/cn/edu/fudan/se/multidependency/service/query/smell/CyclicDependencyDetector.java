@@ -14,25 +14,25 @@ public interface CyclicDependencyDetector {
 	 * 包的循环依赖的检测
 	 * @return
 	 */
-	Map<Long, Map<Integer, Cycle<Package>>> cyclePackages();
+	Map<Long, Map<Integer, Cycle<Package>>> packageCycles();
 
 	/**
 	 * 模块的循环依赖的检测
 	 * @return
 	 */
-	Map<Long, Map<Integer, Cycle<Module>>> cycleModules();
+	Map<Long, Map<Integer, Cycle<Module>>> moduleCycles();
 	
 	/**
 	 * 文件的循环依赖的检测
 	 * @return
 	 */
-	Map<Long, Map<Integer, Cycle<ProjectFile>>> cycleFiles();
+	Map<Long, Map<Integer, Cycle<ProjectFile>>> fileCycles();
 
 	/**
 	 * 类的循环依赖的检测
 	 * @return
 	 */
-	Map<Long, Map<Integer, Cycle<Type>>> cycleTypes();
+	Map<Long, Map<Integer, Cycle<Type>>> typeCycles();
 
 	void exportCycleDependency();
 }

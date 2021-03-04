@@ -73,7 +73,7 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 	void setSmellLanguage();
 
 	@Query("match (cloneGroup:CloneGroup) \r\n" +
-			"create (:Smell{name: cloneGroup.name, size: cloneGroup.size,language:cloneGroup.language,level:\'" +
+			"create (:Smell{name: cloneGroup.name, size: cloneGroup.size,language: cloneGroup.language,level: \'" +
 			SmellLevel.FILE + "\', type:\'" + SmellType.CLONE + "\',entityId: -1});\n")
 	void createCloneSmells();
 
@@ -81,13 +81,26 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 			"match (cloneGroup:CloneGroup)-[:" + RelationType.str_CONTAIN + "]-(file:ProjectFile)\r\n" +
 			"where cloneGroup.name = smell.name " +
 			"create (smell)-[:" + RelationType.str_CONTAIN + "]->(file);\n")
-	void createSmellContains();
+	void createCloneSmellContains();
 
 	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)<-[:" +
 			RelationType.str_CONTAIN + "*2]-(p:Project)\r\n" +
 			"with smell, p \r\n" +
 			"set smell += {projectId : id(p), projectName : p.name};\n")
 	void setSmellProject();
+
+	@Query("MATCH (project:Project) with project " +
+			"where id(project) = $projectId " +
+			"create (smell:Smell{name: $name, size: $size, language: $language, projectId: id(project), projectName: project.name, level: \'" +
+			SmellLevel.FILE + "\', type:\'" + SmellType.CYCLIC_DEPENDENCY + "\', entityId: -1}) " +
+			"return smell;")
+	Smell createFileCyclicDependencySmell(@Param("name") String name, @Param("size") int size, @Param("language") String language, @Param("projectId") long projectId);
+
+	@Query("MATCH (smell:Smell) with smell " +
+			"match (file:ProjectFile) " +
+			"where id(smell) = $smellId and id(file) = $fileId " +
+			"create (smell)-[:" + RelationType.str_CONTAIN + "]->(file);")
+	void createFileCyclicDependencySmellContains(@Param("smellId") long smellId, @Param("fileId") long fileId);
 
 	/**
 	 * 判断是否存在co-change关系
