@@ -15,7 +15,11 @@ public interface CyclicDependencyDetector {
 	 * @return
 	 */
 	Map<Long, Map<Integer, Cycle<Package>>> cyclePackages();
-	
+
+	/**
+	 * 模块的循环依赖的检测
+	 * @return
+	 */
 	Map<Long, Map<Integer, Cycle<Module>>> cycleModules();
 	
 	/**
