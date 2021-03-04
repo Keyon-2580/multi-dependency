@@ -15,7 +15,6 @@ import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.smell.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
-import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellMetricCalculatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +75,9 @@ public class BeanCreator {
 
 	@Autowired
 	private SmellMetricCalculatorService smellMetricCalculatorService;
+
+//	@Autowired
+//	private SmellDetectorService smellDetectorService;
 
 	@Bean("createCoChanges")
 	public List<CoChange> createCoChanges(PropertyConfig propertyConfig, CoChangeRepository cochangeRepository, AggregationCoChangeRepository aggregationCoChangeRepository) {
@@ -141,33 +143,33 @@ public class BeanCreator {
 
 			dependsOnRepository.createDependsOnWithExtendsInTypes();
 			dependsOnRepository.createDependsOnWithImplementsInTypes();
-//			dependsOnRepository.createDependsOnWithGlobalVariableInTypes();
-//			dependsOnRepository.createDependsOnWithLocalVariableInTypes();
-//			dependsOnRepository.createDependsOnWithAnnotationInTypes();
+			dependsOnRepository.createDependsOnWithGlobalVariableInTypes();
+			dependsOnRepository.createDependsOnWithLocalVariableInTypes();
+			dependsOnRepository.createDependsOnWithAnnotationInTypes();
 			dependsOnRepository.createDependsOnWithCallInTypes();
-//			dependsOnRepository.createDependsOnWithImplinkInTypes();
-//			dependsOnRepository.createDependsOnWithCreateInTypes();
-//			dependsOnRepository.createDependsOnWithCastInTypes();
-//			dependsOnRepository.createDependsOnWithThrowInTypes();
-//			dependsOnRepository.createDependsOnWithParameterInTypes();
-//			dependsOnRepository.createDependsOnWithReturnInTypes();
-//			dependsOnRepository.createDependsOnWithUseTypeInTypes();
+			dependsOnRepository.createDependsOnWithImplinkInTypes();
+			dependsOnRepository.createDependsOnWithCreateInTypes();
+			dependsOnRepository.createDependsOnWithCastInTypes();
+			dependsOnRepository.createDependsOnWithThrowInTypes();
+			dependsOnRepository.createDependsOnWithParameterInTypes();
+			dependsOnRepository.createDependsOnWithReturnInTypes();
+			dependsOnRepository.createDependsOnWithUseTypeInTypes();
 			dependsOnRepository.createDependsOnWithTimesInNode(NodeLabelType.Type);
 			dependsOnRepository.deleteNullAggregationDependsOnInTypes();
 
 			dependsOnRepository.createDependsOnWithExtendsInFiles();
 			dependsOnRepository.createDependsOnWithImplementsInFiles();
-//			dependsOnRepository.createDependsOnWithGlobalVariableInFiles();
-//			dependsOnRepository.createDependsOnWithLocalVariableInFiles();
-//			dependsOnRepository.createDependsOnWithAnnotationInFiles();
+			dependsOnRepository.createDependsOnWithGlobalVariableInFiles();
+			dependsOnRepository.createDependsOnWithLocalVariableInFiles();
+			dependsOnRepository.createDependsOnWithAnnotationInFiles();
 			dependsOnRepository.createDependsOnWithCallInFiles();
-//			dependsOnRepository.createDependsOnWithImpllinkInFiles();
-//			dependsOnRepository.createDependsOnWithCreateInFiles();
-//			dependsOnRepository.createDependsOnWithCastInFiles();
-//			dependsOnRepository.createDependsOnWithThrowInFiles();
-//			dependsOnRepository.createDependsOnWithParameterInFiles();
-//			dependsOnRepository.createDependsOnWithReturnInFiles();
-//			dependsOnRepository.createDependsOnWithUseTypeInFiles();
+			dependsOnRepository.createDependsOnWithImpllinkInFiles();
+			dependsOnRepository.createDependsOnWithCreateInFiles();
+			dependsOnRepository.createDependsOnWithCastInFiles();
+			dependsOnRepository.createDependsOnWithThrowInFiles();
+			dependsOnRepository.createDependsOnWithParameterInFiles();
+			dependsOnRepository.createDependsOnWithReturnInFiles();
+			dependsOnRepository.createDependsOnWithUseTypeInFiles();
 			dependsOnRepository.createDependsOnWithTimesInNode(NodeLabelType.ProjectFile);
 			dependsOnRepository.deleteNullAggregationDependsOnInFiles();
 
@@ -257,7 +259,7 @@ public class BeanCreator {
 			smellRepository.deleteSmellHasMetricRelation();
 			smellRepository.deleteSmells();
 			smellRepository.createCloneSmells();
-			smellRepository.createSmellContains();
+			smellRepository.createCloneSmellContains();
 			smellRepository.setSmellProject();
 			LOGGER.info("创建Smell节点关系完成！！！");
 

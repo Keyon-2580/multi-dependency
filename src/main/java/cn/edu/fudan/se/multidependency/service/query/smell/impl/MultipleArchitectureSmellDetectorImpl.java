@@ -200,7 +200,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 	@Override
 	public Map<Long, List<MultipleASFile>> multipleASFiles(boolean removeNoASFile) {
 		Map<ProjectFile, MultipleASFile> map = new HashMap<>();
-		Map<Long, Map<Integer, Cycle<ProjectFile>>> cycleFiles = cycleASDetector.cycleFiles();
+		Map<Long, Map<Integer, Cycle<ProjectFile>>> cycleFiles = cycleASDetector.fileCycles();
 		Map<Long, List<HubLikeFile>> hubLikeFiles = hubLikeComponentDetector.hubLikeFiles();
 		Map<Long, List<UnstableFileInHistory>> unstableFilesInHistory = unstableDependencyDetectorUsingHistory.unstableFiles();
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> unstableFilesUsingInstability = unstableDependencyDetectorUsingInstability.unstableFiles();

@@ -25,7 +25,7 @@ import cn.edu.fudan.se.multidependency.service.query.smell.ModuleService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 
 @Service
-public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
+public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 
 	@Autowired
 	private CycleASRepository asRepository;
@@ -62,7 +62,7 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 	}
 
 	@Override
-	public Map<Long, Map<Integer, Cycle<Package>>> cyclePackages() {
+	public Map<Long, Map<Integer, Cycle<Package>>> packageCycles() {
 		String key = "cyclePackages";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
@@ -129,7 +129,7 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 	}
 
 	@Override
-	public Map<Long, Map<Integer, Cycle<Module>>> cycleModules() {
+	public Map<Long, Map<Integer, Cycle<Module>>> moduleCycles() {
 		String key = "cycleModules";
 		if (cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
@@ -196,7 +196,7 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 	}
 
 	@Override
-	public Map<Long, Map<Integer, Cycle<ProjectFile>>> cycleFiles() {
+	public Map<Long, Map<Integer, Cycle<ProjectFile>>> fileCycles() {
 		String key = "cycleFiles";
 		if (cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
@@ -263,7 +263,7 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 	}
 
 	@Override
-	public Map<Long, Map<Integer, Cycle<Type>>> cycleTypes() {
+	public Map<Long, Map<Integer, Cycle<Type>>> typeCycles() {
 		String key = "cycleTypes";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
@@ -332,9 +332,9 @@ public class CycleDependencyDetectorImpl implements CyclicDependencyDetector {
 	@Override
 	public void exportCycleDependency() {
 		Collection<Project> projects = nodeService.allProjects();
-		Map<Long, Map<Integer, Cycle<Type>>> cycleTypes = cycleTypes();
-		Map<Long, Map<Integer, Cycle<ProjectFile>>> cycleFiles = cycleFiles();
-		Map<Long, Map<Integer, Cycle<Module>>> cycleModules = cycleModules();
+		Map<Long, Map<Integer, Cycle<Type>>> cycleTypes = typeCycles();
+		Map<Long, Map<Integer, Cycle<ProjectFile>>> cycleFiles = fileCycles();
+		Map<Long, Map<Integer, Cycle<Module>>> cycleModules = moduleCycles();
 		for (Project project : projects) {
 			try {
 				exportPackageCycleDependency(project, cycleTypes.get(project.getId()), cycleFiles.get(project.getId()), cycleModules.get(project.getId()));
