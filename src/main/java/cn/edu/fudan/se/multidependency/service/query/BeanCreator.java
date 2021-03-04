@@ -77,10 +77,6 @@ public class BeanCreator {
 	@Autowired
 	private SmellMetricCalculatorService smellMetricCalculatorService;
 
-	@Autowired
-	private SmellDetectorService smellDetectorService;
-
-
 	@Bean("createCoChanges")
 	public List<CoChange> createCoChanges(PropertyConfig propertyConfig, CoChangeRepository cochangeRepository, AggregationCoChangeRepository aggregationCoChangeRepository) {
 		List<CoChange> coChanges = new ArrayList<>();
@@ -145,33 +141,33 @@ public class BeanCreator {
 
 			dependsOnRepository.createDependsOnWithExtendsInTypes();
 			dependsOnRepository.createDependsOnWithImplementsInTypes();
-			dependsOnRepository.createDependsOnWithGlobalVariableInTypes();
-			dependsOnRepository.createDependsOnWithLocalVariableInTypes();
-			dependsOnRepository.createDependsOnWithAnnotationInTypes();
+//			dependsOnRepository.createDependsOnWithGlobalVariableInTypes();
+//			dependsOnRepository.createDependsOnWithLocalVariableInTypes();
+//			dependsOnRepository.createDependsOnWithAnnotationInTypes();
 			dependsOnRepository.createDependsOnWithCallInTypes();
-			dependsOnRepository.createDependsOnWithImplinkInTypes();
-			dependsOnRepository.createDependsOnWithCreateInTypes();
-			dependsOnRepository.createDependsOnWithCastInTypes();
-			dependsOnRepository.createDependsOnWithThrowInTypes();
-			dependsOnRepository.createDependsOnWithParameterInTypes();
-			dependsOnRepository.createDependsOnWithReturnInTypes();
-			dependsOnRepository.createDependsOnWithUseTypeInTypes();
+//			dependsOnRepository.createDependsOnWithImplinkInTypes();
+//			dependsOnRepository.createDependsOnWithCreateInTypes();
+//			dependsOnRepository.createDependsOnWithCastInTypes();
+//			dependsOnRepository.createDependsOnWithThrowInTypes();
+//			dependsOnRepository.createDependsOnWithParameterInTypes();
+//			dependsOnRepository.createDependsOnWithReturnInTypes();
+//			dependsOnRepository.createDependsOnWithUseTypeInTypes();
 			dependsOnRepository.createDependsOnWithTimesInNode(NodeLabelType.Type);
 			dependsOnRepository.deleteNullAggregationDependsOnInTypes();
 
 			dependsOnRepository.createDependsOnWithExtendsInFiles();
 			dependsOnRepository.createDependsOnWithImplementsInFiles();
-			dependsOnRepository.createDependsOnWithGlobalVariableInFiles();
-			dependsOnRepository.createDependsOnWithLocalVariableInFiles();
-			dependsOnRepository.createDependsOnWithAnnotationInFiles();
+//			dependsOnRepository.createDependsOnWithGlobalVariableInFiles();
+//			dependsOnRepository.createDependsOnWithLocalVariableInFiles();
+//			dependsOnRepository.createDependsOnWithAnnotationInFiles();
 			dependsOnRepository.createDependsOnWithCallInFiles();
-			dependsOnRepository.createDependsOnWithImpllinkInFiles();
-			dependsOnRepository.createDependsOnWithCreateInFiles();
-			dependsOnRepository.createDependsOnWithCastInFiles();
-			dependsOnRepository.createDependsOnWithThrowInFiles();
-			dependsOnRepository.createDependsOnWithParameterInFiles();
-			dependsOnRepository.createDependsOnWithReturnInFiles();
-			dependsOnRepository.createDependsOnWithUseTypeInFiles();
+//			dependsOnRepository.createDependsOnWithImpllinkInFiles();
+//			dependsOnRepository.createDependsOnWithCreateInFiles();
+//			dependsOnRepository.createDependsOnWithCastInFiles();
+//			dependsOnRepository.createDependsOnWithThrowInFiles();
+//			dependsOnRepository.createDependsOnWithParameterInFiles();
+//			dependsOnRepository.createDependsOnWithReturnInFiles();
+//			dependsOnRepository.createDependsOnWithUseTypeInFiles();
 			dependsOnRepository.createDependsOnWithTimesInNode(NodeLabelType.ProjectFile);
 			dependsOnRepository.deleteNullAggregationDependsOnInFiles();
 

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cn.edu.fudan.se.multidependency.service.query.smell.data.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
@@ -34,18 +35,6 @@ import cn.edu.fudan.se.multidependency.service.query.smell.UnstableDependencyDet
 import cn.edu.fudan.se.multidependency.service.query.smell.UnstableDependencyDetectorUsingInstability;
 import cn.edu.fudan.se.multidependency.service.query.smell.UnusedComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.smell.UnutilizedAbstractionDetector;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.CirclePacking;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.HistogramAS;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.HubLikeFile;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.LogicCouplingComponents;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.MultipleAS;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.MultipleASFile;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.PieFilesData;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.SimilarComponents;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.UnstableComponentByInstability;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.UnstableFileInHistory;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.UnutilizedAbstraction;
 import cn.edu.fudan.se.multidependency.service.query.history.IssueQueryService;
 import cn.edu.fudan.se.multidependency.service.query.history.data.IssueFile;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
@@ -71,12 +60,6 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 	
 	@Autowired
 	private UnstableDependencyDetectorUsingInstability unstableDependencyDetectorUsingInstability;
-	
-//	@Autowired
-//	private CyclicHierarchyDetector cyclicHierarchyDetector;
-	
-//	@Autowired
-//	private GodComponentDetector godComponentDetector;
 	
 	@Autowired
 	private UnusedComponentDetector unusedComponentDetector;

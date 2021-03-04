@@ -76,7 +76,7 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 		Collection<Project> projects = nodeService.allProjects();
 		Map<Long, List<UnstableComponentByInstability<Module>>> result = new HashMap<>();
 		for(Project project : projects) {
-			List<UnstableComponentByInstability<Module>> temp = asRepository.unstableModulesByInstability(project.getId(), 1, 0.3);
+			List<UnstableComponentByInstability<Module>> temp = asRepository.unstableModulesByInstability(project.getId(), getModuleFanOutThreshold(project), getRatioThreshold(project));
 			result.put(project.getId(), temp);
 		}
 		
