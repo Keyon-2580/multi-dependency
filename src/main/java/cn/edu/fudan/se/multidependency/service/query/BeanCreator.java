@@ -1,5 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.query;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 import cn.edu.fudan.se.multidependency.model.node.*;
@@ -15,6 +17,7 @@ import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.smell.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
+import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellMetricCalculatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,8 +79,8 @@ public class BeanCreator {
 	@Autowired
 	private SmellMetricCalculatorService smellMetricCalculatorService;
 
-//	@Autowired
-//	private SmellDetectorService smellDetectorService;
+	@Autowired
+	private SmellDetectorService smellDetectorService;
 
 	@Bean("createCoChanges")
 	public List<CoChange> createCoChanges(PropertyConfig propertyConfig, CoChangeRepository cochangeRepository, AggregationCoChangeRepository aggregationCoChangeRepository) {
@@ -154,7 +157,7 @@ public class BeanCreator {
 			dependsOnRepository.createDependsOnWithParameterInTypes();
 			dependsOnRepository.createDependsOnWithReturnInTypes();
 			dependsOnRepository.createDependsOnWithUseTypeInTypes();
-			dependsOnRepository.createDependsOnWithTimesInNode(NodeLabelType.Type);
+			createDependsOnWithTimesInNode(dependsOnRepository,NodeLabelType.Type);
 			dependsOnRepository.deleteNullAggregationDependsOnInTypes();
 
 			dependsOnRepository.createDependsOnWithExtendsInFiles();
@@ -170,7 +173,7 @@ public class BeanCreator {
 			dependsOnRepository.createDependsOnWithParameterInFiles();
 			dependsOnRepository.createDependsOnWithReturnInFiles();
 			dependsOnRepository.createDependsOnWithUseTypeInFiles();
-			dependsOnRepository.createDependsOnWithTimesInNode(NodeLabelType.ProjectFile);
+			createDependsOnWithTimesInNode(dependsOnRepository,NodeLabelType.ProjectFile);
 			dependsOnRepository.deleteNullAggregationDependsOnInFiles();
 
 			//计算文件的依赖PageRank值
@@ -212,22 +215,80 @@ public class BeanCreator {
 
 		}
 
-		configSmellDetect(propertyConfig, asRepository);
+//		configSmellDetect(propertyConfig, asRepository);
 		return dependsOns;
 	}
 
-	private void configSmellDetect(PropertyConfig propertyConfig, ASRepository asRepository) {
-		if(propertyConfig.isDetectAS() && !asRepository.existModule()) {
-			LOGGER.info("异味检测配置");
-			asRepository.createModule();
-			asRepository.createModuleDependsOn();
-			asRepository.createModuleContain();
-			asRepository.createProjectContainsModule();
-			asRepository.setModuleInstability();
-			asRepository.setFileInstability();
-			asRepository.setPackageInstability();
+	private void createDependsOnWithTimesInNode(DependsOnRepository dependsOnRepository,NodeLabelType nodeLabelType){
+		Map<Node, Map<Node, DependsOn>> nodeDependsOnNode = new HashMap<>();
+		List<DependsOn> dependsOnList;
+		switch (nodeLabelType){
+			case ProjectFile:
+				dependsOnList = dependsOnRepository.findFileDepends();
+				break;
+			case Type:
+				dependsOnList = dependsOnRepository.findTypeDepends();
+				break;
+			default:
+				dependsOnList = new ArrayList<>();
+				break;
+		}
+
+		for (DependsOn dependsOn : dependsOnList){
+			if(dependsOn.getDependsOnType() != null){
+				Node node1 = dependsOn.getStartNode();
+				Node node2 = dependsOn.getEndNode();
+				Map<Node, DependsOn> dependsOnMap = nodeDependsOnNode.getOrDefault(node1, new HashMap<>());
+				DependsOn nodeDependsOn = dependsOnMap.get(node2);
+				if (nodeDependsOn != null ){
+					if ( nodeDependsOn.getDependsOnTypes().containsKey(dependsOn.getDependsOnType()) ) {
+						Long times = nodeDependsOn.getDependsOnTypes().get(dependsOn.getDependsOnType());
+						times += Long.valueOf(dependsOn.getTimes());
+						nodeDependsOn.getDependsOnTypes().put(dependsOn.getDependsOnType(), times);
+					}else {
+						nodeDependsOn.getDependsOnTypes().put(dependsOn.getDependsOnType(), Long.valueOf(dependsOn.getTimes()));
+						String dTypes = nodeDependsOn.getDependsOnType();
+						nodeDependsOn.setDependsOnType(dTypes + "__" + dependsOn.getDependsOnType());
+					}
+					int timesTmp = nodeDependsOn.getTimes() + dependsOn.getTimes();
+					nodeDependsOn.setTimes(timesTmp);
+					dependsOnMap.put(node2, nodeDependsOn);
+				} else {
+					DependsOn newDepends = new DependsOn(node1, node2);
+					newDepends.getDependsOnTypes().put(dependsOn.getDependsOnType(), Long.valueOf(dependsOn.getTimes()));
+					newDepends.setDependsOnType(dependsOn.getDependsOnType());
+					newDepends.setTimes(dependsOn.getTimes());
+					dependsOnMap.put(node2, newDepends);
+				}
+				nodeDependsOnNode.put(node1, dependsOnMap);
+			}
+		}
+
+		for (Map.Entry<Node, Map<Node, DependsOn>> entry : nodeDependsOnNode.entrySet()){
+			Node node1 = entry.getKey();
+			List<DependsOn> dependsOnListTmp = new ArrayList<>();
+			int size = 0;
+			for (DependsOn nDependsOn : nodeDependsOnNode.get(node1).values()){
+				nDependsOn.getDependsOnTypes().forEach( (key, value) -> {
+					Double weight = RelationType.relationWeights.get(RelationType.valueOf(key));
+					if(weight != null){
+						BigDecimal weightedTimes  =  new BigDecimal( value * weight);
+						nDependsOn.addWeightedTimes(weightedTimes.setScale(2, RoundingMode.HALF_UP).doubleValue());
+					} else {
+						System.out.println("关系权重未定义：" + key);
+					}
+				});
+				dependsOnListTmp.add(nDependsOn);
+				if(size++ > 500){
+					dependsOnRepository.saveAll(dependsOnListTmp);
+					dependsOnListTmp.clear();
+					size = 0;
+				}
+			}
+			dependsOnRepository.saveAll(dependsOnListTmp);
 		}
 	}
+
 
 	@Bean("createCloneGroup")
 	public List<CloneGroup> createCloneGroup(PropertyConfig propertyConfig,
@@ -255,13 +316,13 @@ public class BeanCreator {
 			}
 			List<Smell> smells = smellRepository.findSmellWithLimit();
 
-			smellRepository.deleteSmellContainRelations();
-			smellRepository.deleteSmellHasMetricRelation();
-			smellRepository.deleteSmells();
-			smellRepository.createCloneSmells();
-			smellRepository.createCloneSmellContains();
-			smellRepository.setSmellProject();
-			LOGGER.info("创建Smell节点关系完成！！！");
+//			smellRepository.deleteSmellContainRelations();
+//			smellRepository.deleteSmellHasMetricRelation();
+//			smellRepository.deleteSmells();
+//			smellRepository.createCloneSmells();
+//			smellRepository.createCloneSmellContains();
+//			smellRepository.setSmellProject();
+//			LOGGER.info("创建Smell节点关系完成！！！");
 
 			return cloneGroups;
 		}
@@ -355,6 +416,25 @@ public class BeanCreator {
 					packagePairCloneRelationData.getCloneSimilarityValue()
 			);
 		}
+	}
+
+	@Bean("smell")
+	public boolean configSmellDetect(PropertyConfig propertyConfig, ASRepository asRepository) {
+		if(propertyConfig.isDetectAS() && !asRepository.existModule()) {
+			LOGGER.info("异味检测配置");
+			asRepository.createModule();
+			asRepository.createModuleDependsOn();
+			asRepository.createModuleContain();
+			asRepository.createProjectContainsModule();
+			asRepository.setModuleInstability();
+			asRepository.setFileInstability();
+			asRepository.setPackageInstability();
+		}
+		LOGGER.info("创建Clone Smell节点关系！！！");
+		smellDetectorService.createCloneSmells();
+		LOGGER.info("创建Cycle Smell节点关系！！！");
+		smellDetectorService.createCycleDependencySmells();
+		return true;
 	}
 
 	@Bean

@@ -72,7 +72,8 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 			"with pck1, r, pck2 " +
 			"match(m1:Module) where m1.name = pck1.directoryPath " +
 			"optional match (m2:Module) where m2.name = pck2.directoryPath " +
-			"create(m1)-[:DEPENDS_ON{times: r.times}]->(m2);")
+			"create(m1)-[r2:DEPENDS_ON]->(m2)" +
+			"set r2 += properties(r);")
 	public void createModuleDependsOn();
 	
 	@Query("match p=(pck1:Package)-[r:CONTAIN]->(pck2:Package) " +

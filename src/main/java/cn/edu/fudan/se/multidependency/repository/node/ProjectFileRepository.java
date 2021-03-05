@@ -120,11 +120,11 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"nodeProjection:\'ProjectFile\', " +
 			"relationshipProjection: \'" + RelationType.str_DEPENDS_ON + "\', " +
 			"maxIterations: $iterations, " +
-			"dampingFactor: $dampingFactor}) \r\n" +
-			"YIELD nodeId, score\r\n" + 
-			"with gds.util.asNode(nodeId) AS file, score \r\n" +
-			"set file.score=score\r\n" + 
-			"RETURN file\r\n" + 
+			"dampingFactor: $dampingFactor}) " +
+			"YIELD nodeId, score " +
+			"with gds.util.asNode(nodeId) AS file, score " +
+			"set file.score=score " +
+			"RETURN file " +
 			"ORDER BY score DESC")
 	public List<ProjectFile> pageRank(@Param("iterations") int iterations, @Param("dampingFactor") double dampingFactor);
 	
