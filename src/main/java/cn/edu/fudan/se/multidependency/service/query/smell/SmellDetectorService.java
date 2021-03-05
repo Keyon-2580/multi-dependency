@@ -12,12 +12,9 @@ import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.ModuleRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.SimilarComponents;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.FileHubLike;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.UnstableComponentByInstability;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +46,9 @@ public class SmellDetectorService {
 
 	@Autowired
 	private UnstableDependencyDetectorUsingInstability unstableDependencyDetectorUsingInstability;
+
+	@Autowired
+	private ImplicitCrossModuleDependencyDetector implicitCrossModuleDependencyDetector;
 
 	@Autowired
 	private SimilarComponentsDetector similarComponentsDetector;
@@ -89,7 +89,7 @@ public class SmellDetectorService {
 		smellRepository.deleteSmellHasMetricRelation(SmellType.CYCLIC_DEPENDENCY);
 		smellRepository.deleteSmells(SmellType.CYCLIC_DEPENDENCY);
 		Map<Long, Map<Integer, Cycle<ProjectFile>>> fileCyclicDependencies = new HashMap<>(cyclicDependencyDetector.fileCycles());
-		String name = "file_cycle_";
+		String name = "file_cycle-dependency_";
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
 		for (Map.Entry<Long, Map<Integer, Cycle<ProjectFile>>> fileCyclicDependency : fileCyclicDependencies.entrySet()){
@@ -131,7 +131,7 @@ public class SmellDetectorService {
 		smellRepository.deleteSmellHasMetricRelation(SmellType.HUBLIKE_DEPENDENCY);
 		smellRepository.deleteSmells(SmellType.HUBLIKE_DEPENDENCY);
 		Map<Long, List<FileHubLike>> fileHubLikes = hubLikeComponentDetector.fileHubLikes();
-		String name = "file_hub-like_";
+		String name = "file_hub-like-dependency_";
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
 		int index = 1;
@@ -172,7 +172,7 @@ public class SmellDetectorService {
 		smellRepository.deleteSmellHasMetricRelation(SmellType.UNSTABLE_DEPENDENCY);
 		smellRepository.deleteSmells(SmellType.UNSTABLE_DEPENDENCY);
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstables = unstableDependencyDetectorUsingInstability.fileUnstables();
-		String name = "file_unstable_";
+		String name = "file_unstable-dependency_";
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
 		int index = 1;
@@ -213,7 +213,7 @@ public class SmellDetectorService {
 		smellRepository.deleteSmellHasMetricRelation(SmellType.SIMILAR_COMPONENTS);
 		smellRepository.deleteSmells(SmellType.SIMILAR_COMPONENTS);
 		Collection<SimilarComponents<ProjectFile>> fileSimilars = similarComponentsDetector.fileSimilars();
-		String name = "file_similar_";
+		String name = "file_similar-components_";
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
 		int index = 1;
@@ -224,7 +224,7 @@ public class SmellDetectorService {
 			Project project2 = containRepository.findPackageBelongToProject(pck2.getId());
 			Smell smell = new Smell();
 			smell.setName(name + index);
-			smell.setSize(1);
+			smell.setSize(2);
 			if (project1.getId().equals(project2.getId())) {
 				smell.setLanguage(project1.getLanguage());
 				smell.setProjectId(project1.getId());
@@ -240,6 +240,46 @@ public class SmellDetectorService {
 			smells.add(smell);
 			Contain contain1 = new Contain(smell, fileSimilar.getNode1());
 			Contain contain2 = new Contain(smell, fileSimilar.getNode2());
+			smellContains.add(contain1);
+			smellContains.add(contain2);
+			index ++;
+		}
+		smellRepository.saveAll(smells);
+		containRepository.saveAll(smellContains);
+	}
+
+	public void createLogicalCouplingSmell(boolean isRecreate) {
+		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.LOGICAL_COUPLING);
+		if(smellsTmp != null && !smellsTmp.isEmpty()){
+			LOGGER.info("已存在Logical Coupling Smell");
+			if(!isRecreate){
+				LOGGER.info("不重新创建");
+				return;
+			}
+			LOGGER.info("重新创建...");
+		}
+		smellRepository.deleteSmellContainRelations(SmellType.LOGICAL_COUPLING);
+		smellRepository.deleteSmellHasMetricRelation(SmellType.LOGICAL_COUPLING);
+		smellRepository.deleteSmells(SmellType.LOGICAL_COUPLING);
+		Collection<LogicCouplingComponents<ProjectFile>> fileLogicals = implicitCrossModuleDependencyDetector.cochangesInDifferentModule();
+		String name = "file_logical-coupling_";
+		List<Smell> smells = new ArrayList<>();
+		List<Contain> smellContains = new ArrayList<>();
+		int index = 1;
+		for (LogicCouplingComponents<ProjectFile> fileLogical : fileLogicals) {
+			Package pck = containRepository.findFileBelongToPackage(fileLogical.getNode1().getId());
+			Project project = containRepository.findPackageBelongToProject(pck.getId());
+			Smell smell = new Smell();
+			smell.setName(name + index);
+			smell.setSize(2);
+			smell.setLanguage(project.getLanguage());
+			smell.setProjectId(project.getId());
+			smell.setProjectName(project.getName());
+			smell.setType(SmellType.LOGICAL_COUPLING);
+			smell.setLevel(SmellLevel.FILE);
+			smells.add(smell);
+			Contain contain1 = new Contain(smell, fileLogical.getNode1());
+			Contain contain2 = new Contain(smell, fileLogical.getNode2());
 			smellContains.add(contain1);
 			smellContains.add(contain2);
 			index ++;

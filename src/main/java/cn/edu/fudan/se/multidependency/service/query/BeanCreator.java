@@ -450,6 +450,10 @@ public class BeanCreator {
 		smellDetectorService.createSimilarComponentsSmell(false);
 		LOGGER.info("创建Similar Components Smell节点关系完成");
 
+		LOGGER.info("创建Logical Coupling Smell节点关系...");
+		smellDetectorService.createLogicalCouplingSmell(false);
+		LOGGER.info("创建Logical Coupling Smell节点关系完成");
+
 		return true;
 	}
 
