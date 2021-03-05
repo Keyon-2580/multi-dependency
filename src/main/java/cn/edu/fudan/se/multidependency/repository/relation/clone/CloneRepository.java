@@ -17,7 +17,7 @@ public interface CloneRepository extends Neo4jRepository<Clone, Long> {
 	
 	/**
 	 * 根据克隆类型找出克隆关系
-	 * @param cloneType
+	 * @param cloneRelationType
 	 * @return
 	 */
 	@Query("match p= ()-[:" + RelationType.str_CLONE + "]->() where r.cloneRelationType=$cloneRelationType return p")

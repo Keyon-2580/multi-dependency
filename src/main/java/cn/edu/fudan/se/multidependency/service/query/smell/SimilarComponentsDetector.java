@@ -8,7 +8,7 @@ import cn.edu.fudan.se.multidependency.service.query.smell.data.SimilarComponent
 
 public interface SimilarComponentsDetector {
 
-	Collection<SimilarComponents<ProjectFile>> similarFiles();	
+	Collection<SimilarComponents<ProjectFile>> fileSimilars();
 	
-	Collection<SimilarComponents<Package>> similarPackages();	
+	Collection<SimilarComponents<Package>> packageSimilars();
 }

@@ -23,8 +23,8 @@ public class SimilarComponentController {
 	@GetMapping("")
 	public String similar(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("files", similarComponentsDetector.similarFiles());
-		request.setAttribute("packages", similarComponentsDetector.similarPackages());
+		request.setAttribute("files", similarComponentsDetector.fileSimilars());
+		request.setAttribute("packages", similarComponentsDetector.packageSimilars());
 		return "as/similar";
 	}
 	

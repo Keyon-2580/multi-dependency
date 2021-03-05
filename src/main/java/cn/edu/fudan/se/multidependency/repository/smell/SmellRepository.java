@@ -104,19 +104,6 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 			"set smell += {projectId : id(p), projectName : p.name};\n")
 	void setSmellProject();
 
-	@Query("MATCH (project:Project) with project " +
-			"where id(project) = $projectId " +
-			"create (smell:Smell{name: $name, size: $size, language: $language, projectId: id(project), projectName: project.name, level: \'" +
-			SmellLevel.FILE + "\', type:\'" + SmellType.CYCLIC_DEPENDENCY + "\', entityId: -1}) " +
-			"return smell;")
-	Smell createFileCyclicDependencySmell(@Param("name") String name, @Param("size") int size, @Param("language") String language, @Param("projectId") long projectId);
-
-	@Query("MATCH (smell:Smell) with smell " +
-			"match (file:ProjectFile) " +
-			"where id(smell) = $smellId and id(file) = $fileId " +
-			"create (smell)-[:" + RelationType.str_CONTAIN + "]->(file);")
-	void createFileCyclicDependencySmellContains(@Param("smellId") long smellId, @Param("fileId") long fileId);
-
 	/**
 	 * 判断是否存在co-change关系
 	 * @param

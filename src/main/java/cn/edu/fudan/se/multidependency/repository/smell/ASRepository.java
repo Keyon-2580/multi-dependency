@@ -15,8 +15,8 @@ import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.HubLikeFile;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.HubLikeModule;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.FileHubLike;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.ModuleHubLike;
 
 @Repository
 public interface ASRepository extends Neo4jRepository<Project, Long> {
@@ -28,13 +28,13 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 			+ "with file, size((file)-[:DEPENDS_ON]->()) as fanOut, size((file)<-[:DEPENDS_ON]-()) as fanIn "
 			+ "where fanOut >= $fanOut and fanIn >= $fanIn return file, fanIn, fanOut "
 			+ "order by fanIn + fanOut desc;")
-	public List<HubLikeFile> findHubLikeFiles(@Param("id") long projectId, @Param("fanIn") int fanIn, @Param("fanOut") int fanOut);
+	public List<FileHubLike> findHubLikeFiles(@Param("id") long projectId, @Param("fanIn") int fanIn, @Param("fanOut") int fanOut);
 	
 	@Query("match (project:Project)-[:CONTAIN]->(module:Module) where id(project) = $id "
 			+ "with module, size((module)-[:DEPENDS_ON]->(:Module)) as fanOut, "
 			+ "size((module)<-[:DEPENDS_ON]-(:Module)) as fanIn "
 			+ "where fanOut >= $fanOut and fanIn >= $fanIn return module, fanOut, fanIn;")
-	public List<HubLikeModule> findHubLikeModules(@Param("id") long projectId, @Param("fanIn") int fanIn, @Param("fanOut") int fanOut);
+	public List<ModuleHubLike> findHubLikeModules(@Param("id") long projectId, @Param("fanIn") int fanIn, @Param("fanOut") int fanOut);
 	
 	@Query("match (p:Package) where not (p)-[:" + RelationType.str_DEPENDS_ON + "]-() return p")
 	public List<Package> unusedPackages();

@@ -5,8 +5,8 @@ var unstable = function(cytoscapeutil) {
 		for(var projectIndex in projects) {
 			var project = projects[projectIndex];
 			html += "<h4>" + project.name + " (" + project.language + ")</h4>";
-			var unstableFiles = filesUsingInstability[project.id];
-			console.log(unstableFiles);
+			var fileUnstables = filesUsingInstability[project.id];
+			console.log(fileUnstables);
 			html += "<h5>Instability</h5>";
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
@@ -17,8 +17,8 @@ var unstable = function(cytoscapeutil) {
 			html += "<th>Bad Outgoing Dependencies</th>";
 			html += "<th></th>";
 			html += "</tr>";
-			for(var fileIndex in unstableFiles) {
-				var file = unstableFiles[fileIndex];
+			for(var fileIndex in fileUnstables) {
+				var file = fileUnstables[fileIndex];
 				console.log(file);
 				html += "<tr>";
 				html += "<td><a target='_blank' href='/relation/file/" + file.component.id + "'>" + file.component.path + "</a></td>";
@@ -37,7 +37,7 @@ var unstable = function(cytoscapeutil) {
 				html += "</tr>";
 			}
 			html += "</table>";
-			unstableFiles = filesUsingHistory[project.id];
+			fileUnstables = filesUsingHistory[project.id];
 			html += "<h5>History</h5>";
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
@@ -47,11 +47,10 @@ var unstable = function(cytoscapeutil) {
 			html += "<th>Fan In </th>";
 			html += "<th>Co-change Files</th>";
 			html += "<th>Co-changeFiles/FanIn</th>";
-//			html += "<th>Co-change Times</th>";
 			html += "<th>commits</th>";
 			html += "</tr>";
-			for(var fileIndex in unstableFiles) {
-				var file = unstableFiles[fileIndex];
+			for(var fileIndex in fileUnstables) {
+				var file = fileUnstables[fileIndex];
 				var count = 0;
 				for(var i in file.cochangeTimesWithFile) {
 					count++;
@@ -64,7 +63,6 @@ var unstable = function(cytoscapeutil) {
 				html += "<td>" + file.fanIn + "</td>";
 				html += "<td>" + file.cochangeFiles.length + "</td>";
 				html += "<td>" + (file.cochangeFiles.length / file.fanIn).toFixed(2) + "</td>";
-//				html += "<td width='10%'>" + count + "</td>";
 				
 				var allFilesIds = file.component.id;
 				for(var j = 0; j < file.cochangeFiles.length; j++) {
@@ -76,28 +74,8 @@ var unstable = function(cytoscapeutil) {
 				html += "</tr>";
 			}
 			html += "</table>";
-			
-			/*var unstablePackages = packages[project.id];
-			html += "<h5>Unstable Packages</h5>";
-			html += "<table class='table table-bordered'>";
-			html += "<tr>";
-			html += "<th>Package</th>";
-			html += "<th>Instability</th>";
-			html += "<th>All Outgoing Dependencies</th>";
-			html += "<th>Bad Outgoing Dependencies</th>";
-			html += "</tr>";
-			for(var pckIndex in unstablePackages) {
-				var pck = unstablePackages[pckIndex];
-				console.log(pck);
-				html += "<tr>";
-				html += "<td><a target='_blank' href='/relation/file/" + pck.component.id + "'>" + pck.component.name + "</a></td>";
-				html += "<td>" + pck.instability.toFixed(2) + "</td>";
-				html += "<td>" + pck.allDependencies + "</td>";
-				html += "<td>" + pck.badDependencies + "</td>";
-				html += "</tr>";
-			}
-			html += "</table>";*/
-			var unstablePackages = modules[project.id];
+
+			var moduleUnstables = modules[project.id];
 			html += "<h5>Unstable Modules</h5>";
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
@@ -107,17 +85,17 @@ var unstable = function(cytoscapeutil) {
 			html += "<th>All Outgoing Dependencies</th>";
 			html += "<th>Bad Outgoing Dependencies</th>";
 			html += "</tr>";
-			for(var pckIndex in unstablePackages) {
-				var pck = unstablePackages[pckIndex];
-				console.log(pck);
+			for(var moduleIndex in moduleUnstables) {
+				var module = moduleUnstables[moduleIndex];
+				console.log(module);
 				html += "<tr>";
-				html += "<td><a target='_blank' href='/relation/file/" + pck.component.id + "'>" + pck.component.name + "</a></td>";
-				var pck_instability = pck.component.instability != null ? (pck.component.instability).toFixed(2) : "NULL"
+				html += "<td><a target='_blank' href='/relation/file/" + module.component.id + "'>" + module.component.name + "</a></td>";
+				var pck_instability = module.component.instability != null ? (module.component.instability).toFixed(2) : "NULL"
 				html += "<td>" + pck_instability  + "</td>";
-				var pck_score = pck.component.score != null ? (pck.component.score).toFixed(2) : "NULL"
+				var pck_score = module.component.score != null ? (module.component.score).toFixed(2) : "NULL"
 				html += "<td>" + pck_score + "</td>";
-				html += "<td>" + pck.allDependencies + "</td>";
-				html += "<td>" + pck.badDependencies + "</td>";
+				html += "<td>" + module.allDependencies + "</td>";
+				html += "<td>" + module.badDependencies + "</td>";
 				html += "</tr>";
 			}
 			html += "</table>";

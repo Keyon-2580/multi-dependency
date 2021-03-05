@@ -45,6 +45,14 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 	public static final int DEFAULT_THRESHOLD_LONGEST_PATH = 3;
 	public static final double DEFAULT_THRESHOLD_MINIMUM_RATE = 0.5;
 
+	private Collection<DependsOn> findCycleTypeRelationsBySCC(Cycle<Type> cycle) {
+		return asRepository.cycleTypesBySCC(cycle.getPartition());
+	}
+
+	private Collection<DependsOn> findCycleFileRelationsBySCC(Cycle<ProjectFile> cycle) {
+		return asRepository.cycleFilesBySCC(cycle.getPartition());
+	}
+
 	private Collection<DependsOn> findCyclePackageRelationsBySCC(Cycle<Package> cycle) {
 		return asRepository.cyclePackagesBySCC(cycle.getPartition());
 	}
@@ -53,17 +61,143 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		return asRepository.cycleModulesBySCC(cycle.getPartition());
 	}
 
-	private Collection<DependsOn> findCycleFileRelationsBySCC(Cycle<ProjectFile> cycle) {
-		return asRepository.cycleFilesBySCC(cycle.getPartition());
+	@Override
+	public Map<Long, Map<Integer, Cycle<Type>>> typeCycles() {
+		String key = "typeCycles";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		Map<Long, Map<Integer, Cycle<Type>>> result = new HashMap<>();
+		Collection<Cycle<Type>> cycles = asRepository.typeCycles();
+		Collection<Cycle<Type>> typeCycles = new ArrayList<>();
+		int partition = 1;
+		for (Cycle<Type> cycle : cycles) {
+			List<Type> types = new ArrayList<>(cycle.getComponents());
+			List<DependsOn> relations = new ArrayList<>(findCycleTypeRelationsBySCC(cycle));
+			Map<Type, Integer> indexMap = new HashMap<>();
+
+			//将节点映射为数字
+			int index = 0;
+			for (Type type : types) {
+				indexMap.put(type, index);
+				index++;
+			}
+
+			//最短路径初始化
+			int number = index;
+			int[][] distanceMap = new int[number][number];
+			for (int i = 0; i < number; i++) {
+				for (int j = 0; j < number; j++) {
+					distanceMap[i][j] = -1;
+				}
+				distanceMap[i][i] = 0;
+			}
+
+			//沿途节点初始化
+			Map<String, Set<Integer>> pathMap = new HashMap<>();
+			for (DependsOn relation : relations) {
+				int sourceIndex = indexMap.get((Type) relation.getStartNode());
+				int targetIndex = indexMap.get((Type) relation.getEndNode());
+				distanceMap[sourceIndex][targetIndex] = 1;
+				String pathKey = String.join("_", String.valueOf(sourceIndex), String.valueOf(targetIndex));
+				Set<Integer> path = new HashSet<>();
+				path.add(sourceIndex);
+				path.add(targetIndex);
+				pathMap.put(pathKey, path);
+			}
+
+			//获取结果
+			List<Set<Integer>> indexCycles = new ArrayList<>(ShortestPathCycleFilter(distanceMap, pathMap, number, DEFAULT_THRESHOLD_LONGEST_PATH, DEFAULT_THRESHOLD_MINIMUM_RATE));
+			for (Set<Integer> indexCycle : indexCycles) {
+				List<Type> components = new ArrayList<>();
+				for(Integer i : indexCycle) {
+					components.add(types.get(i));
+				}
+				Cycle<Type> typeCycle = new Cycle<>(partition, components);
+				Project project = containRelationService.findTypeBelongToProject(components.get(0));
+				if (project != null) {
+					Map<Integer, Cycle<Type>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+					temp.put(typeCycle.getPartition(), typeCycle);
+					result.put(project.getId(), temp);
+				}
+				partition ++;
+			}
+		}
+		cache.cache(getClass(), key, result);
+		return result;
 	}
 
-	private Collection<DependsOn> findCycleTypeRelationsBySCC(Cycle<Type> cycle) {
-		return asRepository.cycleTypesBySCC(cycle.getPartition());
+	@Override
+	public Map<Long, Map<Integer, Cycle<ProjectFile>>> fileCycles() {
+		String key = "fileCycles";
+		if (cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		Map<Long, Map<Integer, Cycle<ProjectFile>>> result = new HashMap<>();
+		Collection<Cycle<ProjectFile>> cycles = asRepository.fileCycles();
+		Collection<Cycle<ProjectFile>> fileCycles = new ArrayList<>();
+		int partition = 1;
+		for (Cycle<ProjectFile> cycle : cycles) {
+			List<ProjectFile> files = new ArrayList<>(cycle.getComponents());
+			List<DependsOn> relations = new ArrayList<>(findCycleFileRelationsBySCC(cycle));
+			Map<ProjectFile, Integer> indexMap = new HashMap<>();
+
+			//将节点映射为数字
+			int index = 0;
+			for (ProjectFile file : files) {
+				indexMap.put(file, index);
+				index++;
+			}
+
+			//最短路径初始化
+			int number = index;
+			int[][] distanceMap = new int[number][number];
+			for (int i = 0; i < number; i++) {
+				for (int j = 0; j < number; j++) {
+					distanceMap[i][j] = -1;
+				}
+				distanceMap[i][i] = 0;
+			}
+
+			//沿途节点初始化
+			Map<String, Set<Integer>> pathMap = new HashMap<>();
+			for (DependsOn relation : relations) {
+				int sourceIndex = indexMap.get((ProjectFile) relation.getStartNode());
+				int targetIndex = indexMap.get((ProjectFile) relation.getEndNode());
+				distanceMap[sourceIndex][targetIndex] = 1;
+				String pathKey = String.join("_", String.valueOf(sourceIndex), String.valueOf(targetIndex));
+				Set<Integer> path = new HashSet<>();
+				path.add(sourceIndex);
+				path.add(targetIndex);
+				pathMap.put(pathKey, path);
+			}
+
+			//获取结果
+			List<Set<Integer>> indexCycles = new ArrayList<>(ShortestPathCycleFilter(distanceMap, pathMap, number, DEFAULT_THRESHOLD_LONGEST_PATH, DEFAULT_THRESHOLD_MINIMUM_RATE));
+			for (Set<Integer> indexCycle : indexCycles) {
+				List<ProjectFile> components = new ArrayList<>();
+				for(Integer i : indexCycle) {
+					components.add(files.get(i));
+				}
+				Cycle<ProjectFile> fileCycle = new Cycle<>(partition, components);
+				Project project = containRelationService.findFileBelongToProject(components.get(0));
+				if (project != null) {
+					Map<Integer, Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+					temp.put(fileCycle.getPartition(), fileCycle);
+					result.put(project.getId(), temp);
+				}
+				partition ++;
+			}
+		}
+		cache.cache(getClass(), key, result);
+		return result;
 	}
 
 	@Override
 	public Map<Long, Map<Integer, Cycle<Package>>> packageCycles() {
-		String key = "cyclePackages";
+		String key = "packageCycles";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
@@ -130,7 +264,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 
 	@Override
 	public Map<Long, Map<Integer, Cycle<Module>>> moduleCycles() {
-		String key = "cycleModules";
+		String key = "moduleCycles";
 		if (cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
@@ -186,140 +320,6 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 				if (project != null) {
 					Map<Integer, Cycle<Module>> temp = result.getOrDefault(project.getId(), new HashMap<>());
 					temp.put(moduleCycle.getPartition(), moduleCycle);
-					result.put(project.getId(), temp);
-				}
-				partition ++;
-			}
-		}
-		cache.cache(getClass(), key, result);
-		return result;
-	}
-
-	@Override
-	public Map<Long, Map<Integer, Cycle<ProjectFile>>> fileCycles() {
-		String key = "cycleFiles";
-		if (cache.get(getClass(), key) != null) {
-			return cache.get(getClass(), key);
-		}
-
-		Map<Long, Map<Integer, Cycle<ProjectFile>>> result = new HashMap<>();
-		Collection<Cycle<ProjectFile>> cycles = asRepository.fileCycles();
-		Collection<Cycle<ProjectFile>> fileCycles = new ArrayList<>();
-		int partition = 1;
-		for (Cycle<ProjectFile> cycle : cycles) {
-			List<ProjectFile> files = new ArrayList<>(cycle.getComponents());
-			List<DependsOn> relations = new ArrayList<>(findCycleFileRelationsBySCC(cycle));
-			Map<ProjectFile, Integer> indexMap = new HashMap<>();
-
-			//将节点映射为数字
-			int index = 0;
-			for (ProjectFile file : files) {
-				indexMap.put(file, index);
-				index++;
-			}
-
-			//最短路径初始化
-			int number = index;
-			int[][] distanceMap = new int[number][number];
-			for (int i = 0; i < number; i++) {
-				for (int j = 0; j < number; j++) {
-					distanceMap[i][j] = -1;
-				}
-				distanceMap[i][i] = 0;
-			}
-
-			//沿途节点初始化
-			Map<String, Set<Integer>> pathMap = new HashMap<>();
-			for (DependsOn relation : relations) {
-				int sourceIndex = indexMap.get((ProjectFile) relation.getStartNode());
-				int targetIndex = indexMap.get((ProjectFile) relation.getEndNode());
-				distanceMap[sourceIndex][targetIndex] = 1;
-				String pathKey = String.join("_", String.valueOf(sourceIndex), String.valueOf(targetIndex));
-				Set<Integer> path = new HashSet<>();
-				path.add(sourceIndex);
-				path.add(targetIndex);
-				pathMap.put(pathKey, path);
-			}
-
-			//获取结果
-			List<Set<Integer>> indexCycles = new ArrayList<>(ShortestPathCycleFilter(distanceMap, pathMap, number, DEFAULT_THRESHOLD_LONGEST_PATH, DEFAULT_THRESHOLD_MINIMUM_RATE));
-			for (Set<Integer> indexCycle : indexCycles) {
-				List<ProjectFile> components = new ArrayList<>();
-				for(Integer i : indexCycle) {
-					components.add(files.get(i));
-				}
-				Cycle<ProjectFile> fileCycle = new Cycle<>(partition, components);
-				Project project = containRelationService.findFileBelongToProject(components.get(0));
-				if (project != null) {
-					Map<Integer, Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new HashMap<>());
-					temp.put(fileCycle.getPartition(), fileCycle);
-					result.put(project.getId(), temp);
-				}
-				partition ++;
-			}
-		}
-		cache.cache(getClass(), key, result);
-		return result;
-	}
-
-	@Override
-	public Map<Long, Map<Integer, Cycle<Type>>> typeCycles() {
-		String key = "cycleTypes";
-		if(cache.get(getClass(), key) != null) {
-			return cache.get(getClass(), key);
-		}
-
-		Map<Long, Map<Integer, Cycle<Type>>> result = new HashMap<>();
-		Collection<Cycle<Type>> cycles = asRepository.typeCycles();
-		Collection<Cycle<Type>> typeCycles = new ArrayList<>();
-		int partition = 1;
-		for (Cycle<Type> cycle : cycles) {
-			List<Type> types = new ArrayList<>(cycle.getComponents());
-			List<DependsOn> relations = new ArrayList<>(findCycleTypeRelationsBySCC(cycle));
-			Map<Type, Integer> indexMap = new HashMap<>();
-
-			//将节点映射为数字
-			int index = 0;
-			for (Type type : types) {
-				indexMap.put(type, index);
-				index++;
-			}
-
-			//最短路径初始化
-			int number = index;
-			int[][] distanceMap = new int[number][number];
-			for (int i = 0; i < number; i++) {
-				for (int j = 0; j < number; j++) {
-					distanceMap[i][j] = -1;
-				}
-				distanceMap[i][i] = 0;
-			}
-
-			//沿途节点初始化
-			Map<String, Set<Integer>> pathMap = new HashMap<>();
-			for (DependsOn relation : relations) {
-				int sourceIndex = indexMap.get((Type) relation.getStartNode());
-				int targetIndex = indexMap.get((Type) relation.getEndNode());
-				distanceMap[sourceIndex][targetIndex] = 1;
-				String pathKey = String.join("_", String.valueOf(sourceIndex), String.valueOf(targetIndex));
-				Set<Integer> path = new HashSet<>();
-				path.add(sourceIndex);
-				path.add(targetIndex);
-				pathMap.put(pathKey, path);
-			}
-
-			//获取结果
-			List<Set<Integer>> indexCycles = new ArrayList<>(ShortestPathCycleFilter(distanceMap, pathMap, number, DEFAULT_THRESHOLD_LONGEST_PATH, DEFAULT_THRESHOLD_MINIMUM_RATE));
-			for (Set<Integer> indexCycle : indexCycles) {
-				List<Type> components = new ArrayList<>();
-				for(Integer i : indexCycle) {
-					components.add(types.get(i));
-				}
-				Cycle<Type> typeCycle = new Cycle<>(partition, components);
-				Project project = containRelationService.findTypeBelongToProject(components.get(0));
-				if (project != null) {
-					Map<Integer, Cycle<Type>> temp = result.getOrDefault(project.getId(), new HashMap<>());
-					temp.put(typeCycle.getPartition(), typeCycle);
 					result.put(project.getId(), temp);
 				}
 				partition ++;

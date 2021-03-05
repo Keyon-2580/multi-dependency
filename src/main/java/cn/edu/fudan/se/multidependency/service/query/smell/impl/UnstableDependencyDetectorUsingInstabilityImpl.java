@@ -49,8 +49,38 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 	private Map<Project, Integer> projectToModuleFanOutThreshold = new ConcurrentHashMap<>();
 	private Map<Project, Double> projectToRatioThreshold = new ConcurrentHashMap<>();
 
-//	@Override
-	public Map<Long, List<UnstableComponentByInstability<Package>>> unstablePackages() {
+	@Override
+	public Map<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstables() {
+		String key = "unstableFiles";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		Collection<Project> projects = nodeService.allProjects();
+		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> result = new HashMap<>();
+		for(Project project : projects) {
+			List<UnstableComponentByInstability<ProjectFile>> temp =
+					asRepository.unstableFilesByInstability(project.getId(), getFileFanOutThreshold(project), getRatioThreshold(project));
+			for(UnstableComponentByInstability<ProjectFile> unstableFile : temp) {
+				ProjectFile file = unstableFile.getComponent();
+				List<DependsOn> dependsOns = dependsOnRepository.findFileDependsOn(file.getId());
+				unstableFile.addAllTotalDependencies(dependsOns);
+				for(DependsOn dependsOn : dependsOns) {
+					ProjectFile dependsOnFile = (ProjectFile) dependsOn.getEndNode();
+					FileMetrics dependsOnMetric = metricCalculatorService.calculateFileMetric(dependsOnFile);
+					if(unstableFile.getInstability() < dependsOnFile.getInstability() && dependsOnMetric.getFanOut() >= getFileFanOutThreshold(project)) {
+						unstableFile.addBadDependency(dependsOn);
+					}
+				}
+			}
+			result.put(project.getId(), temp);
+		}
+
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	//	@Override
+	public Map<Long, List<UnstableComponentByInstability<Package>>> packageUntables() {
 		String key = "unstablePackages";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
@@ -68,7 +98,7 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 
 	
 	@Override
-	public Map<Long, List<UnstableComponentByInstability<Module>>> unstableModules() {
+	public Map<Long, List<UnstableComponentByInstability<Module>>> moduleUnstables() {
 		String key = "unstableModules";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
@@ -84,39 +114,6 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 		return result;
 	}
 
-	@Override
-	public Map<Long, List<UnstableComponentByInstability<ProjectFile>>> unstableFiles() {
-		String key = "unstableFiles";
-		if(cache.get(getClass(), key) != null) {
-			return cache.get(getClass(), key);
-		}
-		Collection<Project> projects = nodeService.allProjects();
-		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> result = new HashMap<>();
-		for(Project project : projects) {
-			List<UnstableComponentByInstability<ProjectFile>> temp = 
-					asRepository.unstableFilesByInstability(project.getId(), getFileFanOutThreshold(project), getRatioThreshold(project));
-			for(UnstableComponentByInstability<ProjectFile> unstableFile : temp) {
-				ProjectFile file = unstableFile.getComponent();
-				List<DependsOn> dependsOns = dependsOnRepository.findFileDependsOn(file.getId());
-				unstableFile.addAllTotalDependencies(dependsOns);
-				for(DependsOn dependsOn : dependsOns) {
-					ProjectFile dependsOnFile = (ProjectFile) dependsOn.getEndNode();
-					FileMetrics dependsOnMetric = metricCalculatorService.calculateFileMetric(dependsOnFile);
-//					if(unstableFile.getInstability() < ((double) (dependsOnMetric.getFanOut()) / (dependsOnMetric.getFanIn() + dependsOnMetric.getFanOut()))) {
-					if(unstableFile.getInstability() < dependsOnFile.getInstability() && dependsOnMetric.getFanOut() >= getFileFanOutThreshold(project)) {
-						unstableFile.addBadDependency(dependsOn);
-					}
-				}
-				System.out.println(unstableFile.getAllDependencies() + " " + unstableFile.getBadDependencies() + "-" + unstableFile.getTotalDependsOns().size() + " " + unstableFile.getBadDependsOns().size());
-				
-			}
-			result.put(project.getId(), temp);
-		}
-		
-		cache.cache(getClass(), key, result);
-		return result;
-	}
-	
 	public void setRatio(Project project, double threshold) {
 		this.projectToRatioThreshold.put(project, threshold);
 		cache.remove(getClass());

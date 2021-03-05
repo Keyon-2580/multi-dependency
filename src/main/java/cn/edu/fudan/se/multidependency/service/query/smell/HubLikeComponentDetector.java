@@ -4,14 +4,14 @@ import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.HubLikeFile;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.HubLikeModule;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.FileHubLike;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.ModuleHubLike;
 
 public interface HubLikeComponentDetector {
 	
-	Map<Long, List<HubLikeFile>> hubLikeFiles();
+	Map<Long, List<FileHubLike>> fileHubLikes();
 	
-	Map<Long, List<HubLikeModule>> hubLikeModules();
+	Map<Long, List<ModuleHubLike>> moduleHubLikes();
 	
 	int[] getProjectMinFileFanIO(Project project);
 	

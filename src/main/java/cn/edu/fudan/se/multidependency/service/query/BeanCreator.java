@@ -430,13 +430,30 @@ public class BeanCreator {
 			asRepository.setFileInstability();
 			asRepository.setPackageInstability();
 		}
-		LOGGER.info("创建Clone Smell节点关系");
+		LOGGER.info("创建Clone Smell节点关系...");
 		smellDetectorService.createCloneSmells(false);
 		LOGGER.info("创建Clone Smell节点关系完成");
 
-		LOGGER.info("创建Cycle Smell节点关系");
+		LOGGER.info("创建Cycle Dependency Smell节点关系...");
 		smellDetectorService.createCycleDependencySmells(false);
-		LOGGER.info("创建Cycle Smell节点关系完成");
+		LOGGER.info("创建Cycle Dependency Smell节点关系完成");
+
+		LOGGER.info("创建Hub-Like Dependency Smell节点关系...");
+		smellDetectorService.createHubLikeDependencySmells(false);
+		LOGGER.info("创建Hub-Like Dependency Smell节点关系完成");
+
+		LOGGER.info("创建Unstable Dependency Smell节点关系...");
+		smellDetectorService.createUnstableDependencySmells(false);
+		LOGGER.info("创建Unstable Dependency Smell节点关系完成");
+
+		LOGGER.info("创建Similar Components Smell节点关系...");
+		smellDetectorService.createSimilarComponentsSmell(false);
+		LOGGER.info("创建Similar Components Smell节点关系完成");
+
+		LOGGER.info("创建Logical Coupling Smell节点关系...");
+		smellDetectorService.createLogicalCouplingSmell(false);
+		LOGGER.info("创建Logical Coupling Smell节点关系完成");
+
 		return true;
 	}
 

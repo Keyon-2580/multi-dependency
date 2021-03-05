@@ -10,9 +10,10 @@ var smellMetric = function() {
     				for(var id in projects) {
                         html += "<div><h4>" + projects[id].name + " (" + projects[id].language + ")" + "</h4></div>";
                         html += "<div><button name='fileTable_" + id + "' class='btn btn-primary file_excel_button'>输出 excel</button></div>";
-                        html += "<div><table id='fileTable_" + id + "' class='table table-bordered'>";
+    				    var typeIndex = 0;
     				    for(var type in result[id]) {
-                            html += "<div><h5>" + type  + "</h5></div>";
+    				        html += "<div><table id='fileTable_" + id + "_" + type + "' class='table table-bordered'>";
+                            html += "<div><h5>" + typeIndex++ + ". " + type  + "</h5></div>";
                             html += "<tr>";
                             html += "<th>Index</th>";
                             html += "<th>Project</th>";
