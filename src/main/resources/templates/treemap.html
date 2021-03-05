@@ -23,13 +23,22 @@
 </head>
 <body style="background-color: rgba(204,204,204,0.23)">
 <div th:include="nav.html::nav"></div>
-<div id = projectToGraph_util>
-</div>
 
-<!--<svg style="height: 1000px; width: 1800px"></svg>-->
-<div class="overview_div" style="width: 95%; height: 70%">
-    <svg id="treemap" style="float: left"></svg>
-    <div id="treemap_util"></div>
+<!--<div class="tabs" style="background-color: white">-->
+<!--    <div class="tab-2">-->
+<!--        <label for="tab2-1">CyclicDependency</label>-->
+<!--        <input id="tab2-1" name="tabs-two" type="radio" checked="checked">-->
+<!--        <div>-->
+<!--            <h4>第一个标签页</h4>-->
+<!--            <p></p>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<div id = "treemap_util"></div>
+
+<div class="overview_div" style="width: 95%; height: 1200px; padding: 0; margin-top: 30px">
+    <svg id="treemap" ></svg>
 </div>
 <script type="text/javascript" th:src="@{/js/treemap.js}"></script>
 <script type="text/javascript" th:inline="javascript">

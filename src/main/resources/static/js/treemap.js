@@ -166,6 +166,7 @@ var TreeMap = function (data_list) {
         .attr("id", function (d) {
             return d.id;
         })
+        .attr("onmouseover", "showSmellGroupOnMouseOver(-1)")
         .classed('leaf', function(d) {
         return (d.children == null) || d.children.length === 0;
         })
@@ -232,7 +233,7 @@ var loadPageData = function () {
                 projectlist.push(name_temp);
 
                 var html = ""
-                html += "<select id = \"multipleProjectSelect\" class=\"selectpicker\" multiple>";
+                html += "<div class = \"treemap_div\"><select id = \"multipleProjectSelect\" class=\"selectpicker\" multiple>";
                 for(var i = 0; i < projectlist.length; i++) {
                     if (i === 0) {
                         html += "<option selected=\"selected\" value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
@@ -241,7 +242,69 @@ var loadPageData = function () {
                     }
                 }
                 html += "</select>";
-                html += "<br><button id = \"multipleProjectsButton\" type=\"button\" class='common_button' style='margin-top: 15px' onclick= showMultipleButton()>加载项目</button>";
+                html += "<br><button id = \"multipleProjectsButton\" type=\"button\" class='common_button' style='margin-top: 15px' onclick= showMultipleButton()>加载项目</button></div>";
+
+                html += "<div class = \"treemap_div\">"+
+                    "<form role=\"form\">" +
+
+                    "<p><label class = \"treemap_title\" style = \"margin-right: 30px\">Smell ：</label>" +
+
+                    "<label class = \"treemap_label\" >" +
+                    "<input name=\"smell_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_Clone\"> Clone " +
+                    "</label>" +
+
+                    "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_CyclicDependency\"> Cyclic Dependency " +
+                    "</label>" +
+
+                    "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_HublikeDependency\"> Hublike Dependency " +
+                    "</label>" +
+
+                    "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_UnstableDependency\"> Unstable Dependency " +
+                    "</label>" +
+
+                    "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_UnusedComponent\"> Unused Component " +
+                    "</label>" +
+
+                    "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_ImplicitCrossModuleDependency\"> Implicit Cross Module Dependency " +
+                    "</label>" +
+
+                    "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_GodComponent\"> God Component " +
+                    "</label>" +
+
+                    "</p>";
+
+                html += "<p><label class = \"treemap_title\" style = \"margin-right: 30px\">Level ：</label>" +
+
+                    "<label class = \"treemap_label\" >" +
+                    "<input name=\"level_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_Module\"> Module " +
+                    "</label>" +
+
+                    "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"level_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_\"> Package " +
+                    "</label>" +
+
+                    "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"level_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_\"> File " +
+                    "</label>" +
+
+                    "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"level_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_\"> Type " +
+                    "</label>" +
+
+                    "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"level_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_Snippet\"> Snippet " +
+                    "</label>" +
+
+                    "</p>";
+
+                html += "</form>" +
+                    "</div>";
 
                 $("#treemap_util").html(html);
                 $(".selectpicker").selectpicker({
@@ -292,5 +355,7 @@ var projectGraphAjax = function(projectIds){
 //鼠标悬停时，显示属于同一组的文件
 var showSmellGroupOnMouseOver = function (smellId){
     $("rect[smell=1]").css("fill", "#ea7d5f");
-    $("rect[smellId=" + smellId + "]").css("fill", "#af5247");
+    if(smellId > 0){
+        $("rect[smellId=" + smellId + "]").css("fill", "#af5247");
+    }
 }
