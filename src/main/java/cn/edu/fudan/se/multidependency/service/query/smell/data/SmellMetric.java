@@ -22,7 +22,7 @@ public class SmellMetric {
 	private EvolutionMetric evolutionMetric;
 
 	/**
-	 * 演化性度量指标
+	 * 共变性度量指标
 	 */
 	private CoChangeMetric coChangeMetric;
 
@@ -61,19 +61,24 @@ public class SmellMetric {
 
 		private Smell smell;
 		/**
-		 * 修改次数
+		 * 修改次数（去重）
 		 */
 		private int commits;
 
 		/**
-		 * 开发者数
+		 * 总的修改次数（不去重）
+		 */
+		private int totalCommits;
+
+		/**
+		 * 开发者数（去重）
 		 */
 		private int developers;
 
-//		/**
-//		 * 协同修改的文件数量
-//		 */
-//		private int coChangeFileCount;
+		/**
+		 * 开发者数(不去重）
+		 */
+		private int totalDevelopers;
 	}
 
 	@Data
@@ -83,12 +88,17 @@ public class SmellMetric {
 
 		private Smell smell;
 		/**
-		 * 修改次数
+		 * 出现共变的提交次数（去重）
 		 */
 		private int coChangeCommits;
 
 		/**
-		 * 协同修改的文件数量
+		 * 总的共变的提交次数（不去重）
+		 */
+		private int totalCoChangeCommits;
+
+		/**
+		 * 共变的文件数量
 		 */
 		private int coChangeFiles;
 	}

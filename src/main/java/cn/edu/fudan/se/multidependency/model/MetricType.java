@@ -67,17 +67,25 @@ public final class MetricType {
 	 */
 
 	/**
-	 * 提交数， Commits
+	 * 提交数， Commits（去重）
 	 */
 	public static final String COMMITS = "Commits";
 	/**
-	 * 共变文件数coChangeFileCount
+	 * 总提交数， Commits（不去重）
+	 */
+	public static final String TOTAL_COMMITS = "TotalCommits";
+	/**
+	 * 共变文件数
 	 */
 	public static final String CO_CHANGE_FILES = "CoChangeFiles";
 	/**
-	 * 共变文件数coChangeFileCount
+	 * 共变文件数共变次数（去重）
 	 */
 	public static final String CO_CHANGE_COMMITS = "CoChangeCommits";
+	/**
+	 * 共变文件数共变次数（不去重）
+	 */
+	public static final String TOTAL_CO_CHANGE_COMMITS = "TotalCoChangeCommits";
 	/**
 	 * 开发者数
 	 */

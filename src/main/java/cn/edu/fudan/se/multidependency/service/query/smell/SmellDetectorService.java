@@ -10,9 +10,12 @@ import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.ModuleRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
+import cn.edu.fudan.se.multidependency.service.query.BeanCreator;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.FileHubLike;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.UnstableComponentByInstability;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +28,9 @@ import java.util.Map;
 
 @Service
 public class SmellDetectorService {
-	
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SmellDetectorService.class);
+
 	@Autowired
 	private ModuleRepository moduleRepository;
 	
@@ -51,7 +56,16 @@ public class SmellDetectorService {
 	@Autowired
 	private SmellRepository smellRepository;
 
-	public void createCloneSmells(){
+	public void createCloneSmells(boolean isRecreate){
+		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.CLONE);
+		if(smellsTmp != null && !smellsTmp.isEmpty()){
+			LOGGER.info("已存在Clone Smell");
+			if(!isRecreate){
+				LOGGER.info("不重新创建");
+				return;
+			}
+			LOGGER.info("重新创建...");
+		}
         smellRepository.deleteSmellContainRelations(SmellType.CLONE);
         smellRepository.deleteSmellHasMetricRelation(SmellType.CLONE);
         smellRepository.deleteSmells(SmellType.CLONE);
@@ -61,7 +75,16 @@ public class SmellDetectorService {
 		smellRepository.setSmellProject();
 	}
 
-	public void createCycleDependencySmells(){
+	public void createCycleDependencySmells(boolean isRecreate){
+		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.CYCLIC_DEPENDENCY);
+		if(smellsTmp != null && !smellsTmp.isEmpty()){
+			LOGGER.info("已存在Cycle Dependency");
+			if(!isRecreate){
+				LOGGER.info("不重新创建");
+				return;
+			}
+			LOGGER.info("重新创建...");
+		}
 		smellRepository.deleteSmellContainRelations(SmellType.CYCLIC_DEPENDENCY);
 		smellRepository.deleteSmellHasMetricRelation(SmellType.CYCLIC_DEPENDENCY);
 		smellRepository.deleteSmells(SmellType.CYCLIC_DEPENDENCY);
