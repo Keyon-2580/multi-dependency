@@ -53,12 +53,14 @@ public class SmellMetricCalculatorService {
 				SmellMetric.EvolutionMetric evolutionMetric = smellMetric.getEvolutionMetric();
 				if (evolutionMetric != null){
 					metricValues.put(MetricType.COMMITS, evolutionMetric.getCommits());
+					metricValues.put(MetricType.TOTAL_COMMITS, evolutionMetric.getTotalCommits());
 					metricValues.put(MetricType.DEVELOPERS, evolutionMetric.getDevelopers());
 				}
 
 				SmellMetric.CoChangeMetric coChangeMetric = smellMetric.getCoChangeMetric();
 				if (coChangeMetric != null){
 					metricValues.put(MetricType.CO_CHANGE_COMMITS, coChangeMetric.getCoChangeCommits());
+					metricValues.put(MetricType.TOTAL_CO_CHANGE_COMMITS, coChangeMetric.getTotalCoChangeCommits());
 					metricValues.put(MetricType.CO_CHANGE_FILES, coChangeMetric.getCoChangeFiles());
 				}
 
@@ -140,21 +142,24 @@ public class SmellMetricCalculatorService {
 		return result;
 	}
 
-	public Map<Long, List<SmellMetric>> calculateProjectSmellMetricsInFileLevel() {
+	public Map<Long, Map<String, List<SmellMetric>>> calculateProjectSmellMetricsInFileLevel() {
 		String key = "calculateProjectSmellMetricsInFileLevel";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
 
-		Map<Long, List<SmellMetric>> result = new HashMap<>();
-		Map<Smell, SmellMetric> smellMetricsCache = new HashMap<>(calculateSmellMetricInFileLevel());
-		if(smellMetricsCache != null && !smellMetricsCache.isEmpty()){
-			smellMetricsCache.forEach((smell,smellMetrics)->{
+		Map<Long, Map<String, List<SmellMetric>>> result = new HashMap<>();
+		Map<Smell, SmellMetric> smellMetricCache = new HashMap<>(calculateSmellMetricInFileLevel());
+		if(smellMetricCache != null && !smellMetricCache.isEmpty()){
+			smellMetricCache.forEach((smell,smellMetric)->{
 				Long projectId = smell.getProjectId();
 				if (projectId != null){
-					List<SmellMetric> temp = result.getOrDefault(projectId, new ArrayList<>());
-					temp.add(smellMetrics);
-					result.put(projectId, temp);
+					Map<String, List<SmellMetric>> smellTypeMetricMap = result.getOrDefault(projectId, new HashMap<>());
+					String type = smell.getType();
+					List<SmellMetric> metricList = smellTypeMetricMap.getOrDefault(type,new ArrayList<>());
+					metricList.add(smellMetric);
+					smellTypeMetricMap.put(type, metricList);
+					result.put(projectId, smellTypeMetricMap);
 				}
 			});
 			cache.cache(getClass(), key, result);

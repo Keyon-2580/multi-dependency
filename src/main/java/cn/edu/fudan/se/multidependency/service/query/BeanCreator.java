@@ -430,10 +430,13 @@ public class BeanCreator {
 			asRepository.setFileInstability();
 			asRepository.setPackageInstability();
 		}
-		LOGGER.info("创建Clone Smell节点关系！！！");
-		smellDetectorService.createCloneSmells();
-		LOGGER.info("创建Cycle Smell节点关系！！！");
-		smellDetectorService.createCycleDependencySmells();
+		LOGGER.info("创建Clone Smell节点关系");
+		smellDetectorService.createCloneSmells(false);
+		LOGGER.info("创建Clone Smell节点关系完成");
+
+		LOGGER.info("创建Cycle Smell节点关系");
+		smellDetectorService.createCycleDependencySmells(false);
+		LOGGER.info("创建Cycle Smell节点关系完成");
 		return true;
 	}
 
