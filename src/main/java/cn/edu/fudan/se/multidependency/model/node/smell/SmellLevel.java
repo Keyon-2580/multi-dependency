@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.model.node.smell;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.ar.Module;
 import cn.edu.fudan.se.multidependency.model.node.code.Function;
 import cn.edu.fudan.se.multidependency.model.node.code.Snippet;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
@@ -20,6 +21,8 @@ public final class SmellLevel {
 			return SNIPPET;
 		}else if(node instanceof Package) {
 			return PACKAGE;
+		}else if(node instanceof Module) {
+			return MODULE;
 		}
 		return null;
 	}
