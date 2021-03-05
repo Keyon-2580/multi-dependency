@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.query.smell;
 
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
@@ -10,10 +11,9 @@ import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.ModuleRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
-import cn.edu.fudan.se.multidependency.service.query.BeanCreator;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
-import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.SimilarComponents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.FileHubLike;
@@ -21,10 +21,7 @@ import cn.edu.fudan.se.multidependency.service.query.smell.data.UnstableComponen
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class SmellDetectorService {
@@ -54,6 +51,9 @@ public class SmellDetectorService {
 	private UnstableDependencyDetectorUsingInstability unstableDependencyDetectorUsingInstability;
 
 	@Autowired
+	private SimilarComponentsDetector similarComponentsDetector;
+
+	@Autowired
 	private SmellRepository smellRepository;
 
 	public void createCloneSmells(boolean isRecreate){
@@ -78,7 +78,7 @@ public class SmellDetectorService {
 	public void createCycleDependencySmells(boolean isRecreate){
 		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.CYCLIC_DEPENDENCY);
 		if(smellsTmp != null && !smellsTmp.isEmpty()){
-			LOGGER.info("已存在Cycle Dependency");
+			LOGGER.info("已存在Cycle Dependency Smell");
 			if(!isRecreate){
 				LOGGER.info("不重新创建");
 				return;
@@ -117,7 +117,16 @@ public class SmellDetectorService {
 		containRepository.saveAll(smellContains);
 	}
 
-	public void createHubLikeDependencySmells() {
+	public void createHubLikeDependencySmells(boolean isRecreate) {
+		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.HUBLIKE_DEPENDENCY);
+		if(smellsTmp != null && !smellsTmp.isEmpty()){
+			LOGGER.info("已存在Hub-Like Dependency Smell");
+			if(!isRecreate){
+				LOGGER.info("不重新创建");
+				return;
+			}
+			LOGGER.info("重新创建...");
+		}
 		smellRepository.deleteSmellContainRelations(SmellType.HUBLIKE_DEPENDENCY);
 		smellRepository.deleteSmellHasMetricRelation(SmellType.HUBLIKE_DEPENDENCY);
 		smellRepository.deleteSmells(SmellType.HUBLIKE_DEPENDENCY);
@@ -149,7 +158,16 @@ public class SmellDetectorService {
 		containRepository.saveAll(smellContains);
 	}
 
-	public void createUnstableDependencySmells() {
+	public void createUnstableDependencySmells(boolean isRecreate) {
+		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.UNSTABLE_DEPENDENCY);
+		if(smellsTmp != null && !smellsTmp.isEmpty()){
+			LOGGER.info("已存在Unstable Dependency Smell");
+			if(!isRecreate){
+				LOGGER.info("不重新创建");
+				return;
+			}
+			LOGGER.info("重新创建...");
+		}
 		smellRepository.deleteSmellContainRelations(SmellType.UNSTABLE_DEPENDENCY);
 		smellRepository.deleteSmellHasMetricRelation(SmellType.UNSTABLE_DEPENDENCY);
 		smellRepository.deleteSmells(SmellType.UNSTABLE_DEPENDENCY);
@@ -176,6 +194,55 @@ public class SmellDetectorService {
 				smellContains.add(contain);
 				index ++;
 			}
+		}
+		smellRepository.saveAll(smells);
+		containRepository.saveAll(smellContains);
+	}
+
+	public void createSimilarComponentsSmell(boolean isRecreate) {
+		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.SIMILAR_COMPONENTS);
+		if(smellsTmp != null && !smellsTmp.isEmpty()){
+			LOGGER.info("已存在Similar Components Smell");
+			if(!isRecreate){
+				LOGGER.info("不重新创建");
+				return;
+			}
+			LOGGER.info("重新创建...");
+		}
+		smellRepository.deleteSmellContainRelations(SmellType.SIMILAR_COMPONENTS);
+		smellRepository.deleteSmellHasMetricRelation(SmellType.SIMILAR_COMPONENTS);
+		smellRepository.deleteSmells(SmellType.SIMILAR_COMPONENTS);
+		Collection<SimilarComponents<ProjectFile>> fileSimilars = similarComponentsDetector.fileSimilars();
+		String name = "file_similar_";
+		List<Smell> smells = new ArrayList<>();
+		List<Contain> smellContains = new ArrayList<>();
+		int index = 1;
+		for (SimilarComponents<ProjectFile> fileSimilar : fileSimilars) {
+			Package pck1 = containRepository.findFileBelongToPackage(fileSimilar.getNode1().getId());
+			Package pck2 = containRepository.findFileBelongToPackage(fileSimilar.getNode2().getId());
+			Project project1 = containRepository.findPackageBelongToProject(pck1.getId());
+			Project project2 = containRepository.findPackageBelongToProject(pck2.getId());
+			Smell smell = new Smell();
+			smell.setName(name + index);
+			smell.setSize(1);
+			if (project1.getId().equals(project2.getId())) {
+				smell.setLanguage(project1.getLanguage());
+				smell.setProjectId(project1.getId());
+				smell.setProjectName(project1.getName());
+			}
+			else {
+				smell.setLanguage(project1.getLanguage());
+				smell.setProjectId(project1.getId());
+				smell.setProjectName(project1.getName() + "+" + project2.getName());
+			}
+			smell.setType(SmellType.SIMILAR_COMPONENTS);
+			smell.setLevel(SmellLevel.FILE);
+			smells.add(smell);
+			Contain contain1 = new Contain(smell, fileSimilar.getNode1());
+			Contain contain2 = new Contain(smell, fileSimilar.getNode2());
+			smellContains.add(contain1);
+			smellContains.add(contain2);
+			index ++;
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);

@@ -71,8 +71,6 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 						unstableFile.addBadDependency(dependsOn);
 					}
 				}
-				System.out.println(unstableFile.getAllDependencies() + " " + unstableFile.getBadDependencies() + "-" + unstableFile.getTotalDependsOns().size() + " " + unstableFile.getBadDependsOns().size());
-
 			}
 			result.put(project.getId(), temp);
 		}

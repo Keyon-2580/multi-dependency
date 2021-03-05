@@ -21,7 +21,6 @@ import cn.edu.fudan.se.multidependency.service.query.smell.data.SimilarComponent
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.clone.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.FileCloneWithCoChange;
-import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 
@@ -41,17 +40,14 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 	private CacheService cache;
 	
 	@Autowired
-	private GitAnalyseService gitAnalyseService;
-	
-	@Autowired
 	private DependsOnRepository dependsOnRepository;
 	
 	@Autowired
 	private MetricCalculatorService metricCalculatorService;
 	
 	@Override
-	public Collection<SimilarComponents<ProjectFile>> similarFiles() {
-		String key = "similarFiles";
+	public Collection<SimilarComponents<ProjectFile>> fileSimilars() {
+		String key = "fileSimilars";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
@@ -94,7 +90,7 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 	}
 
 	@Override
-	public Collection<SimilarComponents<Package>> similarPackages() {
+	public Collection<SimilarComponents<Package>> packageSimilars() {
 		List<SimilarComponents<Package>> result = new ArrayList<>();
 		return result;
 	}

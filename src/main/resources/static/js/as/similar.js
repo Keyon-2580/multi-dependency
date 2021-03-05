@@ -41,8 +41,6 @@ var similar = function(cytoscapeutil, files) {
 	return {
 		init : function() {
 			_similar();
-//			_save();
-//			_get();
 		}
 	}
 }
