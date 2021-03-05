@@ -11,4 +11,8 @@ public final class SmellType {
 	public static final String IMPLICIT_CROSS_MODULE_DEPENDENCY = "ImplicitCrossModuleDependency";
 	public static final String GOD_COMPONENT = "GodComponent";
 
+	public static final String MULTIPLE_SMELLS = "MultipleSmells";
+
+	public static final String DUPLICATE_FUNCTIONALITY = "DuplicateFunctionality";
+	public static final String AMBIGUOUS_INTERFACE = "AmbiguousInterface";
 }
