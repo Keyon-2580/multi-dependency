@@ -14,6 +14,7 @@ import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.FileHubLike;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.UnstableComponentByInstability;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +44,9 @@ public class SmellDetectorService {
 
 	@Autowired
 	private HubLikeComponentDetector hubLikeComponentDetector;
+
+	@Autowired
+	private UnstableDependencyDetectorUsingInstability unstableDependencyDetectorUsingInstability;
 
 	@Autowired
 	private SmellRepository smellRepository;
@@ -103,20 +107,52 @@ public class SmellDetectorService {
 			long projectId = fileHubLike.getKey();
 			Project project = (Project) projectRepository.queryNodeById(projectId);
 			List<FileHubLike> files = fileHubLike.getValue();
-			Smell smell = new Smell();
-			smell.setName(name + index);
-			smell.setSize(files.size());
-			smell.setLanguage(project.getLanguage());
-			smell.setProjectId(projectId);
-			smell.setProjectName(project.getName());
-			smell.setType(SmellType.HUBLIKE_DEPENDENCY);
-			smell.setLevel(SmellLevel.FILE);
-			smells.add(smell);
 			for (FileHubLike file : files) {
+				Smell smell = new Smell();
+				smell.setName(name + index);
+				smell.setSize(1);
+				smell.setLanguage(project.getLanguage());
+				smell.setProjectId(projectId);
+				smell.setProjectName(project.getName());
+				smell.setType(SmellType.HUBLIKE_DEPENDENCY);
+				smell.setLevel(SmellLevel.FILE);
+				smells.add(smell);
 				Contain contain = new Contain(smell, file.getFile());
 				smellContains.add(contain);
+				index ++;
 			}
-			index ++;
+		}
+		smellRepository.saveAll(smells);
+		containRepository.saveAll(smellContains);
+	}
+
+	public void createUnstableDependencySmells() {
+		smellRepository.deleteSmellContainRelations(SmellType.UNSTABLE_DEPENDENCY);
+		smellRepository.deleteSmellHasMetricRelation(SmellType.UNSTABLE_DEPENDENCY);
+		smellRepository.deleteSmells(SmellType.UNSTABLE_DEPENDENCY);
+		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstables = unstableDependencyDetectorUsingInstability.fileUnstables();
+		String name = "file_unstable_";
+		List<Smell> smells = new ArrayList<>();
+		List<Contain> smellContains = new ArrayList<>();
+		int index = 1;
+		for (Map.Entry<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstable : fileUnstables.entrySet()) {
+			long projectId = fileUnstable.getKey();
+			Project project = (Project) projectRepository.queryNodeById(projectId);
+			List<UnstableComponentByInstability<ProjectFile>> files = fileUnstable.getValue();
+			for (UnstableComponentByInstability<ProjectFile> file : files) {
+				Smell smell = new Smell();
+				smell.setName(name + index);
+				smell.setSize(1);
+				smell.setLanguage(project.getLanguage());
+				smell.setProjectId(projectId);
+				smell.setProjectName(project.getName());
+				smell.setType(SmellType.UNSTABLE_DEPENDENCY);
+				smell.setLevel(SmellLevel.FILE);
+				smells.add(smell);
+				Contain contain = new Contain(smell, file.getComponent());
+				smellContains.add(contain);
+				index ++;
+			}
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);

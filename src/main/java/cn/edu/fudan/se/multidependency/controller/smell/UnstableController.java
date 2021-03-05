@@ -31,10 +31,10 @@ public class UnstableController {
 	@GetMapping("")
 	public String unstableLike(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("filesUsingInstability", unstableDependencyDetectorUsingInstability.unstableFiles());
+		request.setAttribute("filesUsingInstability", unstableDependencyDetectorUsingInstability.fileUnstables());
 		request.setAttribute("filesUsingHistory", unstableDependencyDetectorUsingHistory.unstableFiles());
 //		request.setAttribute("packages", unstableDependencyDetectorUsingInstability.unstablePackages());
-		request.setAttribute("modules", unstableDependencyDetectorUsingInstability.unstableModules());
+		request.setAttribute("modules", unstableDependencyDetectorUsingInstability.moduleUnstables());
 		return "as/unstable";
 	}
 	

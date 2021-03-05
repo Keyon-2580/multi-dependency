@@ -203,7 +203,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 		Map<Long, Map<Integer, Cycle<ProjectFile>>> cycleFiles = cycleASDetector.fileCycles();
 		Map<Long, List<FileHubLike>> hubLikeFiles = hubLikeComponentDetector.fileHubLikes();
 		Map<Long, List<UnstableFileInHistory>> unstableFilesInHistory = unstableDependencyDetectorUsingHistory.unstableFiles();
-		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> unstableFilesUsingInstability = unstableDependencyDetectorUsingInstability.unstableFiles();
+		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> unstableFilesUsingInstability = unstableDependencyDetectorUsingInstability.fileUnstables();
 //		Map<Long, List<CyclicHierarchy>> cyclicHierarchies = cyclicHierarchyDetector.cyclicHierarchies();
 //		Map<Long, List<GodFile>> godFiles = godComponentDetector.godFiles();
 		Map<Long, List<ProjectFile>> unusedFiles = unusedComponentDetector.unusedFiles();
