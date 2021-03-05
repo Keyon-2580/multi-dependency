@@ -11,6 +11,18 @@ import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
 public interface CyclicDependencyDetector {
 
 	/**
+	 * 类的循环依赖的检测
+	 * @return
+	 */
+	Map<Long, Map<Integer, Cycle<Type>>> typeCycles();
+
+	/**
+	 * 文件的循环依赖的检测
+	 * @return
+	 */
+	Map<Long, Map<Integer, Cycle<ProjectFile>>> fileCycles();
+
+	/**
 	 * 包的循环依赖的检测
 	 * @return
 	 */
@@ -21,18 +33,6 @@ public interface CyclicDependencyDetector {
 	 * @return
 	 */
 	Map<Long, Map<Integer, Cycle<Module>>> moduleCycles();
-	
-	/**
-	 * 文件的循环依赖的检测
-	 * @return
-	 */
-	Map<Long, Map<Integer, Cycle<ProjectFile>>> fileCycles();
-
-	/**
-	 * 类的循环依赖的检测
-	 * @return
-	 */
-	Map<Long, Map<Integer, Cycle<Type>>> typeCycles();
 
 	void exportCycleDependency();
 }
