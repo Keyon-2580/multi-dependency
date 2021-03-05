@@ -10,7 +10,7 @@ import java.util.*;
 
 @Data
 @QueryResult
-public class HubLikeFile {
+public class FileHubLike {
 
 	private ProjectFile file;
 	
@@ -26,7 +26,7 @@ public class HubLikeFile {
 
 	private Map<Long, CoChange> coChangeTimesWithFileOut = new HashMap<>();
 	
-	public HubLikeFile(ProjectFile file, int fanIn, int fanOut) {
+	public FileHubLike(ProjectFile file, int fanIn, int fanOut) {
 		this.file = file;
 		this.fanIn = fanIn;
 		this.fanOut = fanOut;

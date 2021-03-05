@@ -434,6 +434,8 @@ public class BeanCreator {
 		smellDetectorService.createCloneSmells();
 		LOGGER.info("创建Cycle Smell节点关系！！！");
 		smellDetectorService.createCycleDependencySmells();
+		LOGGER.info("创建Hub-Like Smell节点关系！！！");
+		smellDetectorService.createHubLikeDependencySmells();
 		return true;
 	}
 

@@ -201,7 +201,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 	public Map<Long, List<MultipleASFile>> multipleASFiles(boolean removeNoASFile) {
 		Map<ProjectFile, MultipleASFile> map = new HashMap<>();
 		Map<Long, Map<Integer, Cycle<ProjectFile>>> cycleFiles = cycleASDetector.fileCycles();
-		Map<Long, List<HubLikeFile>> hubLikeFiles = hubLikeComponentDetector.hubLikeFiles();
+		Map<Long, List<FileHubLike>> hubLikeFiles = hubLikeComponentDetector.fileHubLikes();
 		Map<Long, List<UnstableFileInHistory>> unstableFilesInHistory = unstableDependencyDetectorUsingHistory.unstableFiles();
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> unstableFilesUsingInstability = unstableDependencyDetectorUsingInstability.unstableFiles();
 //		Map<Long, List<CyclicHierarchy>> cyclicHierarchies = cyclicHierarchyDetector.cyclicHierarchies();
@@ -245,8 +245,8 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 			}
 		}*/
 		
-		for(List<HubLikeFile> hubLikeFilesGroup : hubLikeFiles.values()) {
-			for(HubLikeFile file : hubLikeFilesGroup) {
+		for(List<FileHubLike> fileHubLikeGroup : hubLikeFiles.values()) {
+			for(FileHubLike file : fileHubLikeGroup) {
 				MultipleASFile mas = map.getOrDefault(file.getFile(), new MultipleASFile(file.getFile()));
 				mas.setHublike(true);
 				map.put(file.getFile(), mas);

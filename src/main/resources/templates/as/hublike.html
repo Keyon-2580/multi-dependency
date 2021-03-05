@@ -76,9 +76,9 @@
 		//<![CDATA[
 		 $(document).ready(function() {
 			var projects = [[${projects}]];
-			var hubLikeFiles = [[${files}]];
-			var hubLikeModules = [[${modules}]];
-			hublike(cytoscapeutil()).hublike(projects, hubLikeFiles, hubLikeModules);	
+			var fileHubLikes = [[${files}]];
+			var moduleHubLikes = [[${modules}]];
+			hublike(cytoscapeutil()).hublike(projects, fileHubLikes, moduleHubLikes);
 		});
 		// ]]>
 	</script>

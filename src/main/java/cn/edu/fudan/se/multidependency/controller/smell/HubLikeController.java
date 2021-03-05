@@ -28,8 +28,8 @@ public class HubLikeController {
 	@GetMapping("")
 	public String hubLike(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("files", hubLikeComponentDetector.hubLikeFiles());
-		request.setAttribute("modules", hubLikeComponentDetector.hubLikeModules());
+		request.setAttribute("files", hubLikeComponentDetector.fileHubLikes());
+		request.setAttribute("modules", hubLikeComponentDetector.moduleHubLikes());
 		return "as/hublike";
 	}
 	

@@ -13,6 +13,7 @@ import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.FileHubLike;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +42,9 @@ public class SmellDetectorService {
 	private CyclicDependencyDetector cyclicDependencyDetector;
 
 	@Autowired
+	private HubLikeComponentDetector hubLikeComponentDetector;
+
+	@Autowired
 	private SmellRepository smellRepository;
 
 	public void createCloneSmells(){
@@ -63,26 +67,56 @@ public class SmellDetectorService {
 		List<Contain> smellContains = new ArrayList<>();
 		for (Map.Entry<Long, Map<Integer, Cycle<ProjectFile>>> fileCyclicDependency : fileCyclicDependencies.entrySet()){
 			long projectId = fileCyclicDependency.getKey();
-			Project project = (Project)projectRepository.queryNodeById(projectId);
+			Project project = (Project) projectRepository.queryNodeById(projectId);
 			Map<Integer, Cycle<ProjectFile>> fileCycles = fileCyclicDependency.getValue();
 			for (Map.Entry<Integer, Cycle<ProjectFile>> fileCycle : fileCycles.entrySet()){
 				List<ProjectFile> files = fileCycle.getValue().getComponents();
 				Smell smell = new Smell();
 				smell.setName(name + fileCycle.getKey().toString());
 				smell.setSize(files.size());
-				smell.setLanguage(files.get(0).getLanguage());
+				smell.setLanguage(project.getLanguage());
 				smell.setProjectId(projectId);
 				smell.setProjectName(project.getName());
 				smell.setType(SmellType.CYCLIC_DEPENDENCY);
 				smell.setLevel(SmellLevel.FILE);
-//				Smell smell = smellRepository.createFileCyclicDependencySmell(, files.get(0).getLanguage(), projectId);
 				smells.add(smell);
 				for (ProjectFile file : files) {
-					Contain contain = new Contain(smell,file);
+					Contain contain = new Contain(smell, file);
 					smellContains.add(contain);
-//					smellRepository.createFileCyclicDependencySmellContains(smell.getId(), file.getId());
 				}
 			}
+		}
+		smellRepository.saveAll(smells);
+		containRepository.saveAll(smellContains);
+	}
+
+	public void createHubLikeDependencySmells() {
+		smellRepository.deleteSmellContainRelations(SmellType.HUBLIKE_DEPENDENCY);
+		smellRepository.deleteSmellHasMetricRelation(SmellType.HUBLIKE_DEPENDENCY);
+		smellRepository.deleteSmells(SmellType.HUBLIKE_DEPENDENCY);
+		Map<Long, List<FileHubLike>> fileHubLikes = hubLikeComponentDetector.fileHubLikes();
+		String name = "file_hub-like_";
+		List<Smell> smells = new ArrayList<>();
+		List<Contain> smellContains = new ArrayList<>();
+		int index = 1;
+		for (Map.Entry<Long, List<FileHubLike>> fileHubLike : fileHubLikes.entrySet()) {
+			long projectId = fileHubLike.getKey();
+			Project project = (Project) projectRepository.queryNodeById(projectId);
+			List<FileHubLike> files = fileHubLike.getValue();
+			Smell smell = new Smell();
+			smell.setName(name + index);
+			smell.setSize(files.size());
+			smell.setLanguage(project.getLanguage());
+			smell.setProjectId(projectId);
+			smell.setProjectName(project.getName());
+			smell.setType(SmellType.HUBLIKE_DEPENDENCY);
+			smell.setLevel(SmellLevel.FILE);
+			smells.add(smell);
+			for (FileHubLike file : files) {
+				Contain contain = new Contain(smell, file.getFile());
+				smellContains.add(contain);
+			}
+			index ++;
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);

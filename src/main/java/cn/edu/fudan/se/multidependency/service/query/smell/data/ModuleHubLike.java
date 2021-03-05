@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @QueryResult
-public class HubLikeModule {
+public class ModuleHubLike {
 	
 	private Module module;
 	

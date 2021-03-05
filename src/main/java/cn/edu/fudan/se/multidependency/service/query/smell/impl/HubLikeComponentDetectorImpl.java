@@ -18,8 +18,8 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.repository.smell.ASRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.smell.HubLikeComponentDetector;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.HubLikeFile;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.HubLikeModule;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.FileHubLike;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.ModuleHubLike;
 import cn.edu.fudan.se.multidependency.service.query.metric.FanIOMetric;
 import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
@@ -54,58 +54,58 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 
 	public static final int DEFAULT_THRESHOLD_FAN_IN = 10;
 	public static final int DEFAULT_THRESHOLD_FAN_OUT = 10;
-	public static final int DEFAULT_THRESHOLD_COCHANGE_TIMES = 3;
-	public static final int DEFAULT_THRESHOLD_COCHANGE_FILES = 5;
+	public static final int DEFAULT_THRESHOLD_COCHANGE_TIMES = -1;
+	public static final int DEFAULT_THRESHOLD_COCHANGE_FILES = -1;
 
 	@Override
-	public Map<Long, List<HubLikeFile>> hubLikeFiles() {
-		String key = "hubLikeFiles";
+	public Map<Long, List<FileHubLike>> fileHubLikes() {
+		String key = "fileHubLikes";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
 		Collection<Project> projects = nodeService.allProjects();
-		Map<Long, List<HubLikeFile>> result = new HashMap<>();
+		Map<Long, List<FileHubLike>> result = new HashMap<>();
 		for(Project project : projects) {
-			result.put(project.getId(), hubLikeFiles(project));
+			result.put(project.getId(), fileHubLikes(project));
 		}
 		cache.cache(getClass(), key, result);
 		return result;
 	}
 
 	@Override
-	public Map<Long, List<HubLikeModule>> hubLikeModules() {
-		String key = "hubLikeModules";
+	public Map<Long, List<ModuleHubLike>> moduleHubLikes() {
+		String key = "moduleHubLikes";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
 		Collection<Project> projects = nodeService.allProjects();
-		Map<Long, List<HubLikeModule>> result = new HashMap<>();
+		Map<Long, List<ModuleHubLike>> result = new HashMap<>();
 		for(Project project : projects) {
-			result.put(project.getId(), hubLikeModules(project));
+			result.put(project.getId(), moduleHubLikes(project));
 		}
 		cache.cache(getClass(), key, result);
 		return result;
 	}
 
-	public List<HubLikeFile> hubLikeFiles(Project project) {
-		return hubLikeFiles(project, getProjectMinFileFanIO(project)[0], getProjectMinFileFanIO(project)[1],
+	public List<FileHubLike> fileHubLikes(Project project) {
+		return fileHubLikes(project, getProjectMinFileFanIO(project)[0], getProjectMinFileFanIO(project)[1],
 				getProjectMinFileCoChangeFilesAndTimesThreshold(project)[0], getProjectMinFileCoChangeFilesAndTimesThreshold(project)[1]);
 	}
 
-	public List<HubLikeModule> hubLikeModules(Project project) {
-		return hubLikeModules(project, getProjectMinModuleFanIO(project)[0], getProjectMinModuleFanIO(project)[1],
+	public List<ModuleHubLike> moduleHubLikes(Project project) {
+		return moduleHubLikes(project, getProjectMinModuleFanIO(project)[0], getProjectMinModuleFanIO(project)[1],
 				getProjectMinModuleCoChangeFilesAndTimesThreshold(project)[0], getProjectMinModuleCoChangeFilesAndTimesThreshold(project)[1]);
 	}
 
-	public List<HubLikeFile> hubLikeFiles(Project project, int minFanIn, int minFanOut, int coChangeFilesThreshold, int coChangeTimesThreshold) {
-		List<HubLikeFile> result = new ArrayList<>();
+	public List<FileHubLike> fileHubLikes(Project project, int minFanIn, int minFanOut, int coChangeFilesThreshold, int coChangeTimesThreshold) {
+		List<FileHubLike> result = new ArrayList<>();
 		if(project == null) {
 			return result;
 		}
 		List<FileMetrics> fileMetrics = metricCalculatorService.calculateProjectFileMetrics().get(project.getId());
 		for(FileMetrics metric : fileMetrics) {
 			if(isHubLikeComponent(metric, minFanIn, minFanOut)) {
-				HubLikeFile hubLikeFile = new HubLikeFile(metric.getFile(), metric.getFanIn(), metric.getFanOut());
+				FileHubLike fileHubLike = new FileHubLike(metric.getFile(), metric.getFanIn(), metric.getFanOut());
 				Collection<ProjectFile> fanInFiles = fileRepository.calculateFanIn(metric.getFile().getId());
 				int inCoChangeFilesCount = 0;
 				List<CoChange> inCoChanges = new ArrayList<>();
@@ -119,7 +119,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 						}
 					}
 				}
-				hubLikeFile.addAllCoChangesWithFanIn(inCoChanges);
+				fileHubLike.addAllCoChangesWithFanIn(inCoChanges);
 
 				Collection<ProjectFile> fanOutFiles = fileRepository.calculateFanOut(metric.getFile().getId());
 				int outCoChangeFilesCount = 0;
@@ -134,10 +134,10 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 						}
 					}
 				}
-				hubLikeFile.addAllCoChangesWithFanOut(outCoChanges);
+				fileHubLike.addAllCoChangesWithFanOut(outCoChanges);
 
 				if((inCoChangeFilesCount + outCoChangeFilesCount) >= coChangeFilesThreshold){
-					result.add(hubLikeFile);
+					result.add(fileHubLike);
 				}
 			}
 		}
@@ -148,11 +148,11 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		/*return asRepository.findHubLikeFiles(project.getId(), minFanIn, minFanOut);*/
 	}
 	
-	public List<HubLikeModule> hubLikeModules(Project project, int minFanIn, int minFanOut, int coChangeFilesThreshold, int coChangeTimesThreshold) {
+	public List<ModuleHubLike> moduleHubLikes(Project project, int minFanIn, int minFanOut, int coChangeFilesThreshold, int coChangeTimesThreshold) {
 		if(project == null) {
 			return new ArrayList<>();
 		}
-		List<HubLikeModule> result = asRepository.findHubLikeModules(project.getId(), minFanIn, minFanOut);
+		List<ModuleHubLike> result = asRepository.findHubLikeModules(project.getId(), minFanIn, minFanOut);
 		result.sort((p1, p2) -> {
 			return (int) ((p2.getFanIn() + p2.getFanOut()) - (p1.getFanIn() + p1.getFanOut()));
 		});
