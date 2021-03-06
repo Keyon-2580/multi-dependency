@@ -595,13 +595,13 @@ public class ProjectController {
 	@PostMapping("/has")
 	@ResponseBody
 	public JSONArray projectHas(@RequestBody JSONObject requestBody) {
-		return projectService.getMultipleProjectsGraphJson(requestBody, "projectgraph");
+		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_CIRCLE_PACKING);
 	}
 
 	@PostMapping("/has/treemap")
 	@ResponseBody
 	public JSONArray projectHasTreeMap(@RequestBody JSONObject requestBody) {
-		return projectService.getMultipleProjectsGraphJson(requestBody, "treemap");
+		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_TREEMAP);
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.query;
 
+import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
@@ -82,11 +83,11 @@ public class ProjectServiceImpl implements ProjectService{
         nodeJSON2.put("result",projectJson);
         result.add(nodeJSON2);
 
-        if(type.equals("projectgraph")){
+        if(Constant.PROJECT_STRUCTURE_CIRCLE_PACKING.equals(type)){
             JSONObject temp_allprojects = getAllProjectsLinks();
             nodeJSON4.put("links", temp_allprojects);
             result.add(nodeJSON4);
-        }else if(type.equals("treemap")){
+        }else if(Constant.PROJECT_STRUCTURE_TREEMAP.equals(type)){
             nodeJSON5.put("smell", basicSmellQueryService.smellsToTreemap());
             result.add(nodeJSON5);
         }
@@ -100,11 +101,11 @@ public class ProjectServiceImpl implements ProjectService{
         ProjectStructure projectStructure = containRelationService.projectStructureInitialize(project);
         Package packageOfProject = projectStructure.getChildren().get(0).getPck();
 
-        List<PackageStructure> childrenPackages = containRelationService.packageStructureInitialize(packageOfProject).getChildrenPackages();
+        List<PackageStructure> childrenPackages = containRelationService.packageStructureInitialize(packageOfProject,type).getChildrenPackages();
         List<PackageStructure> childrenPackagesnew = new ArrayList<>();
 
         for(PackageStructure pckstru : childrenPackages){
-            PackageStructure pcknew = containRelationService.packageStructureInitialize(pckstru.getPck());
+            PackageStructure pcknew = containRelationService.packageStructureInitialize(pckstru.getPck(),type);
             childrenPackagesnew.add(pcknew);
         }
 
@@ -146,7 +147,7 @@ public class ProjectServiceImpl implements ProjectService{
                 jsonObject.put("clone_ratio", 0);
             }
 
-            if(type.equals("treemap")){
+            if(Constant.PROJECT_STRUCTURE_TREEMAP.equals(type)){
                 JSONArray jsonArray = new JSONArray();
                 if(fileList.size() > 0){
                     for(ProjectFile profile : fileList){

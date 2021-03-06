@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.service.query.structure;
 
 import java.util.*;
 
+import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.structure.Call;
@@ -87,7 +88,7 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 	}
 
 	@Override
-	public PackageStructure packageStructureInitialize(Package pck) {
+	public PackageStructure packageStructureInitialize(Package pck, String type) {
 		if(pck == null) {
 			return null;
 		}
@@ -98,10 +99,10 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
 		Collection<Package> childrenPackage = new ArrayList<>(findPackageContainPackages(pck)); // contain关系的package
 		for(Package child : childrenPackage) {
-			result.addChildPackage(packageStructureInitialize(child));
+			result.addChildPackage(packageStructureInitialize(child, type));
 		}
 
-		if(childrenPackage.size() >0 && files.size() > 0){
+		if(childrenPackage.size() >0 && files.size() > 0 && (Constant.PROJECT_STRUCTURE_CIRCLE_PACKING).equals(type)){
 			Package tmpPck = new Package();
 			tmpPck.setId(0 - pck.getId());
 			tmpPck.setEntityId(pck.getEntityId());

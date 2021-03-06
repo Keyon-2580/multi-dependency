@@ -33,7 +33,7 @@ public interface ContainRelationService {
 
 	ProjectStructure projectStructureInitialize(Project project);
 
-	PackageStructure packageStructureInitialize(Package pck);
+	PackageStructure packageStructureInitialize(Package pck, String type);
 
 	Collection<Package> findProjectRootPackages(Project project);
 

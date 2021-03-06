@@ -10,7 +10,10 @@ public class Constant {
 	public static final int SIZE_OF_PAGE = 15;
 	
 	public static final int COUNT_OF_MIN_COCHANGE = 3;
-    
+
+	public static final String PROJECT_STRUCTURE_TREEMAP = "PROJECT_STRUCTURE_TREEMAP";
+	public static final String PROJECT_STRUCTURE_CIRCLE_PACKING = "PROJECT_STRUCTURE_CIRCLE_PACKING";
+
     public static final String CODE_NODE_IDENTIFIER_SUFFIX_FILE = "#F";
     public static final String CODE_NODE_IDENTIFIER_SUFFIX_NAMESPACE = "#N";
     public static final String CODE_NODE_IDENTIFIER_SUFFIX_TYPE = "#T";
