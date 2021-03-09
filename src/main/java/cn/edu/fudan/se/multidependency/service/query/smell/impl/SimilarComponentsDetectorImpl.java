@@ -59,7 +59,7 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 		} catch (Exception e) {
 			clonesWithCoChange = new ArrayList<>();
 		}
-		Map<ProjectFile, FileMetrics>fileMetrics = metricCalculatorService.calculateFileMetrics();
+		Map<Long, FileMetrics> fileMetrics = metricCalculatorService.calculateFileMetrics();
 		for(FileCloneWithCoChange clone : clonesWithCoChange) {
 			ProjectFile file1 = clone.getFile1();
 			ProjectFile file2 = clone.getFile2();
@@ -69,9 +69,7 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 			if(!moduleService.isInDifferentModule(file1, file2)) {
 				continue;
 			}
-			SimilarComponents<ProjectFile> temp = new SimilarComponents<ProjectFile>(file1, file2,
-					clone.getFileClone().getValue(), fileMetrics.get(file1).getEvolutionMetric().getCommits(),
-					fileMetrics.get(file2).getEvolutionMetric().getCommits(), clone.getCochangeTimes());
+			SimilarComponents<ProjectFile> temp = new SimilarComponents<ProjectFile>(file1, file2, clone.getFileClone().getValue(), fileMetrics.get(file1.getId()).getEvolutionMetric().getCommits(), fileMetrics.get(file2.getId()).getEvolutionMetric().getCommits(), clone.getCochangeTimes());
 			temp.setModule1(moduleService.findFileBelongToModule(file1));
 			temp.setModule2(moduleService.findFileBelongToModule(file2));
 			temp.setCloneType(clone.getFileClone().getCloneType());

@@ -490,15 +490,16 @@ public class BeanCreator {
 		hasRepository.clearHasMetricRelation();
 		metricRepository.deleteAll();
 
-		Map<ProjectFile, Metric> fileMetricNodesMap = metricCalculatorService.generateFileMetricNodes();
+		Map<Long, Metric> fileMetricNodesMap = metricCalculatorService.generateFileMetricNodes();
 		if(fileMetricNodesMap != null && !fileMetricNodesMap.isEmpty()){
 			Collection<Metric> fileMetricNodes = fileMetricNodesMap.values();
 			metricRepository.saveAll(fileMetricNodes);
 
 			Collection<Has> hasMetrics = new ArrayList<>();
 			int size = 0;
-			for(Map.Entry<ProjectFile, Metric> entry : fileMetricNodesMap.entrySet()){
-				Has has = new Has(entry.getKey(), entry.getValue());
+			for(Map.Entry<Long, Metric> entry : fileMetricNodesMap.entrySet()){
+				ProjectFile file = projectFileRepository.findFileById(entry.getKey());
+				Has has = new Has(file, entry.getValue());
 				hasMetrics.add(has);
 				if(++size > 500){
 					hasRepository.saveAll(hasMetrics);
@@ -509,15 +510,16 @@ public class BeanCreator {
 			hasRepository.saveAll(hasMetrics);
 		}
 		LOGGER.info("创建Package Metric度量值节点和关系...");
-		Map<Package, Metric> packageMetricNodesMap = metricCalculatorService.generatePackageMetricNodes();
+		Map<Long, Metric> packageMetricNodesMap = metricCalculatorService.generatePackageMetricNodes();
 		if(packageMetricNodesMap != null && !packageMetricNodesMap.isEmpty()){
 			Collection<Metric> pckMetricNodes = packageMetricNodesMap.values();
 			metricRepository.saveAll(pckMetricNodes);
 
 			Collection<Has> hasMetrics = new ArrayList<>();
 			int size = 0;
-			for(Map.Entry<Package, Metric> entry : packageMetricNodesMap.entrySet()){
-				Has has = new Has(entry.getKey(), entry.getValue());
+			for(Map.Entry<Long, Metric> entry : packageMetricNodesMap.entrySet()){
+				Package pck = packageRepository.findPackageById(entry.getKey());
+				Has has = new Has(pck, entry.getValue());
 				hasMetrics.add(has);
 				if(++size > 500){
 					hasRepository.saveAll(hasMetrics);
@@ -528,14 +530,15 @@ public class BeanCreator {
 			hasRepository.saveAll(hasMetrics);
 		}
 		LOGGER.info("创建Project Metric度量值节点和关系...");
-		Map<Project, Metric> projectMetricNodesMap = metricCalculatorService.generateProjectMetricNodes();
+		Map<Long, Metric> projectMetricNodesMap = metricCalculatorService.generateProjectMetricNodes();
 		if(projectMetricNodesMap != null && !projectMetricNodesMap.isEmpty()){
 			Collection<Metric> projectMetricNodes = projectMetricNodesMap.values();
 			metricRepository.saveAll(projectMetricNodes);
 
 			Collection<Has> hasMetrics = new ArrayList<>();
-			for(Map.Entry<Project, Metric> entry : projectMetricNodesMap.entrySet()){
-				Has has = new Has(entry.getKey(), entry.getValue());
+			for(Map.Entry<Long, Metric> entry : projectMetricNodesMap.entrySet()){
+				Project project = projectRepository.findProjectById(entry.getKey());
+				Has has = new Has(project, entry.getValue());
 				hasMetrics.add(has);
 			}
 			hasRepository.saveAll(hasMetrics);

@@ -1,6 +1,5 @@
 package cn.edu.fudan.se.multidependency.repository.node;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.neo4j.annotation.Query;
@@ -17,6 +16,9 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
     
 	@Query("match (p:Package) where p.directoryPath=$directoryPath and p.language = $language return p")
 	public Package queryPackage(@Param("directoryPath") String directoryPath, @Param("language") String language);
+
+	@Query("match (p:Package) where id(p) = $pckId return p")
+	public Package findPackageById(@Param("pckId") long pckId);
 	
 	
 	@Query("MATCH (pck:Package) where pck.lines > 0\r\n" + 
