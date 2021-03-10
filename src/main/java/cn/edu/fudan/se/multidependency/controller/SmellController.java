@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.controller;
 
+import cn.edu.fudan.se.multidependency.model.node.Metric;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
@@ -9,9 +10,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 
@@ -25,6 +24,12 @@ public class SmellController {
     @ResponseBody
     public JSONArray  smellsToTreemap() {
         return basicSmellQueryService.smellsToTreemap();
+    }
+
+    @GetMapping("/get_metric")
+    @ResponseBody
+    public Metric cytoscape(@RequestParam("smellId") long smellId) {
+        return basicSmellQueryService.findMetricBySmellId(smellId);
     }
 
 }

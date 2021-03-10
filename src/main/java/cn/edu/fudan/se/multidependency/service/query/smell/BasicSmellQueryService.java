@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.query.smell;
 
+import cn.edu.fudan.se.multidependency.model.node.Metric;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.clone.CloneGroup;
@@ -19,4 +20,5 @@ public interface BasicSmellQueryService {
 
 	JSONArray smellsToTreemap();
 
+	Metric findMetricBySmellId(long smellId);
 }

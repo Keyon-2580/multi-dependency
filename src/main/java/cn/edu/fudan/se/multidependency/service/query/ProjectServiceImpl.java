@@ -83,13 +83,13 @@ public class ProjectServiceImpl implements ProjectService{
         nodeJSON2.put("result",projectJson);
         result.add(nodeJSON2);
 
-        if(Constant.PROJECT_STRUCTURE_CIRCLE_PACKING.equals(type)){
-            JSONObject temp_allprojects = getAllProjectsLinks();
-            nodeJSON4.put("links", temp_allprojects);
-            result.add(nodeJSON4);
-        }else if(Constant.PROJECT_STRUCTURE_TREEMAP.equals(type)){
-            nodeJSON5.put("smell", basicSmellQueryService.smellsToTreemap());
-            result.add(nodeJSON5);
+        JSONObject temp_allprojects = getAllProjectsLinks();
+        nodeJSON4.put("links", temp_allprojects);
+        result.add(nodeJSON4);
+
+        if(Constant.PROJECT_STRUCTURE_TREEMAP.equals(type)){
+        nodeJSON5.put("smell", basicSmellQueryService.smellsToTreemap());
+        result.add(nodeJSON5);
         }
 
         return result;
@@ -127,6 +127,7 @@ public class ProjectServiceImpl implements ProjectService{
             List<PackageStructure> pckList = pckstru.getChildrenPackages();
             List<ProjectFile> fileList = pckstru.getChildrenFiles();
             JSONObject jsonObject = new JSONObject();
+//
 //            jsonObject.put("name",pckstru.getPck().getName());
             jsonObject.put("name",pckstru.getPck().getDirectoryPath());
 //			jsonObject.put("long_name",pckstru.getPck().getDirectoryPath());

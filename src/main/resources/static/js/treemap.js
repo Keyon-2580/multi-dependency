@@ -1,21 +1,83 @@
-var projectList_global;
+var FILE_NO_SMELL_COLOR = "#fcfdbf";
+var FILE_SMELL_COLOR = "#ee9576";
+var FILE_CHOSEN_COLOR = "#af5247";
+
+const CLONE_LOW_COLOR = "#f48989";
+const CLONE_MEDIUM_COLOR = "#e90c0c";
+const CLONE_HIGH_COLOR = "#9a2002";
+const DEPENDSON_LOW_COLOR = "#0799d4";
+const DEPENDSON_MEDIUM_COLOR = "#0566b0";
+const DEPENDSON_HIGH_COLOR = "#012c7b";
+const COCHANGE_COLOR = "#1bbb51";
+
+const LEGEND_DATA = [
+    {
+        "name" : "文件匹配度 = 1",
+        "id" : "clone_high",
+        "color":CLONE_HIGH_COLOR
+    },
+    {
+        "name" : "0.9 <= 文件匹配度 < 1",
+        "id" : "clone_medium",
+        "color":CLONE_MEDIUM_COLOR
+    },
+    {
+        "name" : "文件匹配度 < 0.9",
+        "id" : "clone_low",
+        "color" : CLONE_LOW_COLOR
+    },
+    {
+        "name" : "0.8 <= 依赖强度 < 1",
+        "id" : "dependson_high",
+        "color":DEPENDSON_HIGH_COLOR
+    },
+    {
+        "name" : "0.5 <= 依赖强度 < 0.8",
+        "id" : "dependson_medium",
+        "color":DEPENDSON_MEDIUM_COLOR
+    },
+    {
+        "name" : "0 < 依赖强度 < 0.5",
+        "id" : "dependson_low",
+        "color":DEPENDSON_LOW_COLOR
+    },
+    {
+        "name" : "Co-Change",
+        "id" : "cochange",
+        "color":COCHANGE_COLOR
+    }
+];
+
+var svg_global;
+var projectList_global; //存放选定项目列表
+var links_global; //存放所有连线数据
+var linksCurrent_global; //存放当前显示连线数组
+var fileIdCurrent_click; //存放当前点击文件ID
+var fileSmellCurrent_click;  //存放当前点击文件smellID
+var fileFlag_click = 0; //存放是否有被点击文件的flag
+var smell_global; //存放所有smell数据
+var smell_type_global; //存放smell筛选条件
+var smell_level_global; //存放smell筛选条件
+var vis_global; //存放d3画布
+var link_condition_global = {}; //存放连线筛选条件
 
 var TreeMap = function (data_list) {
     var result = data_list[0].result;
-    var smell = data_list[1].smell;
-    var HEADER, OFFSET, color, h, height, svg, treemap, vis, w, width, zoom, zoomable_layer;
+    links_global = data_list[1].links;
+    smell_global = data_list[2].smell;
+    var HEADER, OFFSET, h, height, treemap, w, width, zoom, zoomable_layer;
 
     OFFSET = 1;
 
     HEADER = 8;
 
-    svg = d3.select("#treemap");
+    svg_global = d3.select("#treemap");
 
-    width = svg
+    width = svg_global
         .node()
         .getBoundingClientRect().width;
 
-    height = svg
+    height = svg_global
         .node()
         .getBoundingClientRect().height;
 
@@ -36,11 +98,11 @@ var TreeMap = function (data_list) {
             return h;
         });
 
-    svg.attr({
+    svg_global.attr({
         viewBox: (-width / 2) + " " + (-height / 2) + " " + width + " " + height
     });
 
-    zoomable_layer = svg.append('g');
+    zoomable_layer = svg_global.append('g');
 
     zoom = d3.behavior
         .zoom()
@@ -51,17 +113,11 @@ var TreeMap = function (data_list) {
         });
     });
 
-    svg.call(zoom);
+    svg_global.call(zoom);
 
-    vis = zoomable_layer.append('g').attr({
+    vis_global = zoomable_layer.append('g').attr({
         transform: "translate(" + (-w / 2) + "," + (-h / 2) + ")"
     });
-
-    color = d3.scale
-        .linear()
-        .domain([0, 7])
-        .range([d3.rgb("#b73779"), d3.rgb("#fcfdbf")])
-        .interpolate(d3.interpolateHcl);
 
 // .range([d3.hcl(320, 0, 20), d3.hcl(200, 70, 80)])
 
@@ -133,7 +189,7 @@ var TreeMap = function (data_list) {
         return d3.ascending(a.depth, b.depth);
     });
 
-    cells = vis.selectAll('.cell').data(data);
+    cells = vis_global.selectAll('.cell').data(data);
 
     cells.enter().append('rect')
         .attr({
@@ -154,44 +210,77 @@ var TreeMap = function (data_list) {
             },
             fill: function(d) {
                 // return d.hasOwnProperty("children") ? color(d.depth) : d.clone ? "#ea7d5f" : "#fcfdbf";
-                return d.hasOwnProperty("children") ? color(d.depth) : "#fcfdbf";
+                return d.hasOwnProperty("children") ? colorTreemap(d.depth) : FILE_NO_SMELL_COLOR;
+            },
+            bottom: function (d) {
+                return d.hasOwnProperty("children") ? 0 : 1;
             },
             stroke: function(d) {
                 // console.log(d.children.length);
                 // console.log(d.children);
                 // return "#fcfdbf";
-                return color(6.1);
+                return colorTreemap(6.1);
             }
         })
         .attr("id", function (d) {
             return d.id;
         })
-        .attr("onmouseover", "showSmellGroupOnMouseOver(-1)")
+        .attr("onmouseover", "showSmellGroupOnMouseOver(-1, \"\", \"\")")
+        .attr("onclick", function (d) {
+            return "showSmellGroupOnClick(\"" + d.id + "\", -1, \"\", \"\")";
+        })
         .classed('leaf', function(d) {
-        return (d.children == null) || d.children.length === 0;
+            return (d.children == null) || d.children.length === 0;
         })
         .call(text => text.append("title").text(function(d) {
             return d.hasOwnProperty("children") ? "ID：" + d.id.split("_")[1] + "\nPath：" + d.name + "\nDepth：" + d.depth
                 : "ID：" + d.id.split("_")[1] + "\nPath：" + d.long_name + "\nDepth：" + d.depth;
         }));
 
-    labels = vis.selectAll('.label').data(data.filter(function(d) {
+    labels = vis_global.selectAll('.label').data(data.filter(function(d) {
         return (d.children != null) && d.children.length > 0;
     }));
 
-    smell.forEach(function (item){
-        var nodes = item.nodes;
-        nodes.forEach(function (node){
-            var smell = d3.select("#" + node.id)
-                .attr("fill", "#ea7d5f")
-                .attr("smell", 1)
-                .attr("smellId", item.id)
-                .attr("onmouseover", "showSmellGroupOnMouseOver(" + item.id + ")")
-                .attr("smellGroup", item.name);
-        });
-    });
-
     $('#multipleProjectsButton').css('background-color', '#efefef');
+
+    var defs = svg_global.append("defs");
+
+    LEGEND_DATA.forEach(function (item){
+        var path_start = (defs.append("marker")
+            .attr("id", item.id + "_start")
+            .attr("markerUnits", "strokeWidth")
+            .attr("markerWidth", "8")
+            .attr("markerHeight", "8")
+            .attr("viewBox", "0 0 8 8")
+            .attr("refX", "4")
+            .attr("refY", "4")
+            .attr("orient", "auto"))
+            .append("path")
+            .attr("d", "M6,2 L2,4 L6,6 L4,4 L6,2")
+            .style("fill", item.color);
+
+        var path_end = (defs.append("marker")
+            .attr("id", item.id + "_end")
+            .attr("markerUnits", "strokeWidth")
+            .attr("markerWidth", "8")
+            .attr("markerHeight", "8")
+            .attr("viewBox", "0 0 8 8")
+            .attr("refX", "4")
+            .attr("refY", "4")
+            .attr("orient", "auto"))
+            .append("path")
+            // .attr("d", "M2,2 L10,6 L2,10 L6,6 L2,2")
+            .attr("d", "M2,2 L6,4 L2,6 L4,4 L2,2")
+            .style("fill", item.color);
+    })
+
+    vis_global.append("line")
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", 55)
+        .attr("y2", 47)
+        .attr("stroke", "black")
+        .attr("stroke-width", "2px");
 
     return labels.enter().append('text').text(function(d) {
         return ((d.dx - 2 * OFFSET * d.height_r) >= 30 && (d.dy - 2 * OFFSET * d.height_b) >= 8) ? d.name.split("/")[d.name.split("/").length - 2] : null;
@@ -250,31 +339,31 @@ var loadPageData = function () {
                     "<p><label class = \"treemap_title\" style = \"margin-right: 30px\">Smell ：</label>" +
 
                     "<label class = \"treemap_label\" >" +
-                    "<input name=\"smell_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_Clone\"> Clone " +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_Clone\" value='Clone'> Clone " +
                     "</label>" +
 
                     "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_CyclicDependency\"> Cyclic Dependency " +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_CyclicDependency\" value='CyclicDependency'> Cyclic Dependency " +
                     "</label>" +
 
                     "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_HublikeDependency\"> Hublike Dependency " +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_HublikeDependency\" value='HubLikeDependency'> Hublike Dependency " +
                     "</label>" +
 
                     "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_UnstableDependency\"> Unstable Dependency " +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_UnstableDependency\" value='UnstableDependency'> Unstable Dependency " +
                     "</label>" +
 
                     "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_UnusedComponent\"> Unused Component " +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_UnusedComponent\" value='UnusedComponent'> Unused Component " +
                     "</label>" +
 
                     "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_ImplicitCrossModuleDependency\"> Implicit Cross Module Dependency " +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_ImplicitCrossModuleDependency\" value='ImplicitCrossModuleDependency'> Implicit Cross Module Dependency " +
                     "</label>" +
 
                     "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_GodComponent\"> God Component " +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_GodComponent\" value='GodComponent'> God Component " +
                     "</label>" +
 
                     "</p>";
@@ -282,26 +371,49 @@ var loadPageData = function () {
                 html += "<p><label class = \"treemap_title\" style = \"margin-right: 30px\">Level ：</label>" +
 
                     "<label class = \"treemap_label\" >" +
-                    "<input name=\"level_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_Module\"> Module " +
+                    "<input name=\"level_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_Module\" value='Module'> Module " +
                     "</label>" +
 
                     "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"level_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_\"> Package " +
+                    "<input name=\"level_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_Package\" value='Package'> Package " +
                     "</label>" +
 
                     "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"level_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_\"> File " +
+                    "<input name=\"level_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_File\" value='File'> File " +
                     "</label>" +
 
                     "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"level_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_\"> Type " +
+                    "<input name=\"level_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_\" value='Type'> Type " +
                     "</label>" +
 
-                    "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"level_ratio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_Snippet\"> Snippet " +
+                    // "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+                    // "<input name=\"level_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_Function\" value='Function'> Function " +
+                    // "</label>" +
+                    // "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+                    // "<input name=\"level_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_Snippet\" value='Snippet'> Snippet " +
+                    // "</label>" +
+
+                    "</p>";
+
+                html += "<p><label class = \"treemap_title\" style = \"margin-right: 30px\">Dependency ：</label>" +
+
+                    "<label class = \"treemap_label\" >" +
+                    "<input style = \"margin-right:4px; \" type=\"checkbox\" id=\"checkbox_dependency_dependson\"> Depends On " +
+                    "</label>" +
+
+                    "<label class = \"treemap_label\" >" +
+                    "<input style = \"margin-right:4px; margin-left: 40px;\" type=\"checkbox\" id=\"checkbox_dependency_clone\"> Clone " +
+                    "</label>" +
+
+                    "<label class = \"treemap_label\" >" +
+                    "<input style = \"margin-right:4px; margin-left: 40px;\" type=\"checkbox\" id=\"checkbox_dependency_cochange\"> Co-change " +
                     "</label>" +
 
                     "</p>";
+
+                html += "<p><div style=\"margin-top: 10px;\">" +
+                    "<button class = \"common_button\" type=\"button\" onclick= loadSmell() >加载异味</button>" +
+                    "</div></p>";
 
                 html += "</form>" +
                     "</div>";
@@ -353,9 +465,480 @@ var projectGraphAjax = function(projectIds){
 }
 
 //鼠标悬停时，显示属于同一组的文件
-var showSmellGroupOnMouseOver = function (smellId){
-    $("rect[smell=1]").css("fill", "#ea7d5f");
+var showSmellGroupOnMouseOver = function (smellId, type, level){
+    if((smell_level_global === level && smell_type_global === type) || smellId < 0){
+        if(fileFlag_click){
+            $("rect[smell=1]").not("[smellId=" + fileSmellCurrent_click + "]").css("fill", FILE_SMELL_COLOR);
+        }else{
+            $("rect[smell=1]").css("fill", FILE_SMELL_COLOR);
+        }
+    }
     if(smellId > 0){
-        $("rect[smellId=" + smellId + "]").css("fill", "#af5247");
+        $("rect[smellId=" + smellId + "]").css("fill", FILE_CHOSEN_COLOR);
+    }
+}
+
+//鼠标点击方块时，显示属于同一组的文件，并加载连线
+var showSmellGroupOnClick = function (fileId, smellId, type, level){
+    if(fileFlag_click){
+        if(fileIdCurrent_click === fileId){
+            if(smellId > 0){
+                $("rect[smellId=" + smellId + "]").css("fill", FILE_SMELL_COLOR);
+            }else if(smellId < 0){
+                $("rect[id=\"" + fileId + "\"]").css("fill", FILE_NO_SMELL_COLOR);
+            }
+            fileIdCurrent_click = "";
+            fileSmellCurrent_click = 0;
+            fileFlag_click = 0;
+        }else{
+            if(fileSmellCurrent_click > 0){
+                $("rect[smellId=" + fileSmellCurrent_click + "]").css("fill", FILE_SMELL_COLOR);
+            }else if(fileSmellCurrent_click < 0){
+                $("rect[id=\"" + fileIdCurrent_click + "\"]").css("fill", FILE_NO_SMELL_COLOR);
+            }
+
+            if(smellId > 0){
+                $("rect[smellId=" + smellId + "]").css("fill", FILE_CHOSEN_COLOR);
+            }else if(smellId < 0){
+                $("rect[id=\"" + fileId + "\"]").css("fill", FILE_CHOSEN_COLOR);
+            }
+
+            fileSmellCurrent_click = smellId;
+            fileIdCurrent_click = fileId;
+        }
+    }else{
+        if(smellId > 0){
+            $("rect[smellId=" + smellId + "]").css("fill", FILE_CHOSEN_COLOR);
+        }else if(smellId < 0){
+            $("rect[id=\"" + fileId + "\"]").css("fill", FILE_CHOSEN_COLOR);
+        }
+
+        fileFlag_click = 1;
+        fileIdCurrent_click = fileId;
+        fileSmellCurrent_click = smellId;
+    }
+}
+
+//点击按钮，加载smell方块以及连线
+var loadSmell = function (){
+    smell_type_global = $("input[name='smell_radio']:checked").val();
+    smell_level_global = $("input[name='level_radio']:checked").val();
+
+    link_condition_global["dependson"] = $("#checkbox_dependency_dependson").prop("checked") ? 1 : 0;
+    link_condition_global["clone"] = $("#checkbox_dependency_clone").prop("checked") ? 1 : 0;
+    link_condition_global["cochange"] = $("#checkbox_dependency_cochange").prop("checked") ? 1 : 0;
+
+    // $('rect[bottom=1]').css('fill', '#fcfdbf');
+    refreshTreemap();
+
+    smell_global.forEach(function (item){
+        if(item.smell_type === smell_type_global && item.smell_level === smell_level_global){
+            var nodes = item.nodes;
+            nodes.forEach(function (node){
+                var smell = d3.select("#" + node.id)
+                    .attr("fill", FILE_SMELL_COLOR)
+                    .attr("smell", 1)
+                    .attr("smellId", item.id)
+                    .attr("smell_type", item.smell_type)
+                    .attr("smell_level", item.smell_level)
+                    .attr("onmouseover", "showSmellGroupOnMouseOver(" + item.id + ", \"" + item.smell_type + "\", \"" + item.smell_level + "\")")
+                    .attr("onclick", "showSmellGroupOnClick(\"" + node.id + "\", " + item.id + ", \"" + item.smell_type + "\", \"" + item.smell_level + "\")")
+                    .attr("smellGroup", item.name);
+            });
+        }
+    });
+
+    loadLink();
+}
+
+//刷新treemap样式
+var refreshTreemap = function (){
+    var refresh = d3.selectAll("rect")
+        .attr("fill", function (d){
+            return d.hasOwnProperty("children") ? colorTreemap(d.depth) : FILE_NO_SMELL_COLOR;
+        });
+}
+
+//treemap颜色方法
+var colorTreemap = function (depth) {
+    var color = d3.scale
+        .linear()
+        .domain([0, 7])
+        .range([d3.rgb("#b73779"), d3.rgb("#fcfdbf")])
+        .interpolate(d3.interpolateHcl);
+
+    return color(depth);
+}
+
+//加载连线
+var loadLink = function (){
+    var local_links = [];
+    if (link_condition_global["dependson"] === 1){
+        local_links = links_global["dependson_links"].concat();
+    }
+    if(link_condition_global["clone"] === 1){
+        local_links = list_concat(local_links, links_global["clone_links"]);
+    }
+    if(link_condition_global["cochange"] === 1){
+        local_links = list_concat(local_links, links_global["cochange_links"]);
+    }
+
+    var svg1 = d3.select(".packageLink") .remove();
+    vis_global.selectAll("rect")
+        .style("stroke",colorTreemap(6.1));
+    var circleCoordinate = [];
+
+    var links = svg_global.append('g')
+        .style('stroke', '#aaa')
+        .attr("class", "packageLink")
+        .selectAll('path')
+        .data(local_links)
+        .enter().append('path')
+        .attr("stroke", function (d){
+            return getTypeColor(d)[0];
+        })
+        .attr("fill", "none")
+        .attr("type", function (d){
+            return d.type;
+        })
+        .attr("id", function (d){
+            return d.pair_id;
+        })
+        .attr("onclick", function(d){
+            if(!d.bottom_package){
+                // return "drawChildrenLinks(\"" + d.pair_id + "\", \"" + d.type + "\")";
+                return "drawChildrenLinks(\"" + d.pair_id + "\")";
+            }
+        })
+        .attr("marker-end",function (d){
+            if(d.type === "dependson"){
+                if(d.dependsOnTimes === 0){
+                    return null;
+                }else{
+                    return "url(#" + getTypeColor(d)[1] + "_end)";
+                }
+            }else{
+                return "url(#" + getTypeColor(d)[1] + "_end)";
+            }
+        })
+        .attr("marker-start",function (d){
+            if(d.type === "dependson") {
+                if (d.two_way || d.dependsOnTimes === 0) {
+                    return "url(#" + getTypeColor(d)[1] + "_start)";
+                } else {
+                    return null;
+                }
+            }else{
+                return null;
+            }
+        })
+        .call(text => text.append("title").text(function(d) {
+            if(d.type === "clone"){
+                return "Package1: " + d.source_name + "\nPackage2: " + d.target_name
+                    + "\ndepth: " + d.depth
+                    + "\ncloneType: " + d.cloneType
+                    + "\ncloneMatchRate: " + d.cloneMatchRate.toFixed(2)
+                    + "\ncloneCoChangeRate: " + d.cloneCoChangeRate.toFixed(2)
+                    + "\ncloneLocRate: " + d.cloneLocRate.toFixed(2)
+                    + "\ncloneSimilarityRate: " + d.cloneSimilarityRate.toFixed(2)
+                    + "\nallNodesCoChangeTimes: " + d.allNodesCoChangeTimes
+                    + "\ncloneNodesCoChangeTimes: " + d.cloneNodesCoChangeTimes
+                    + "\nclonePairs: " + d.clonePairs;
+            }else if(d.type === "dependson"){
+                var temp_title =  "Package1: " + d.source_name + "\nPackage2: " + d.target_name
+                    + "\ndepth: " + d.depth
+                    + "\ndependsOnTypes: " + d.dependsOnTypes
+                    + "\ndependsByTypes: " + d.dependsByTypes
+                    + "\ndependsOnTimes: " + d.dependsOnTimes
+                    + "\ndependsByTimes: " + d.dependsByTimes
+                    + "\ndependsOnIntensity: " + d.dependsOnIntensity
+                    + "\ndependsByIntensity: " + d.dependsByIntensity;
+
+                if(d.dependsByTypesMap.length > 0){
+                    temp_title += "\ndependsByTypesMap: [";
+                    for(var index in d.dependsByTypesMap){
+                        temp_title += "\n\t{\n\t\tdependsByType: " + d.dependsByTypesMap[index].dependsByType;
+                        temp_title += "\n\t\tdependsByTime: " + d.dependsByTypesMap[index].dependsByTime + "\n\t}";
+                    }
+                    temp_title += "\n]";
+                }
+
+                if(d.dependsOnTypesMap.length > 0){
+                    temp_title += "\ndependsOnTypesMap: [";
+                    for(var index in d.dependsOnTypesMap){
+                        temp_title += "\n\t{\n\tdependsOnType: " + d.dependsOnTypesMap[index].dependsOnType;
+                        temp_title += "\n\tdependsOnTime: " + d.dependsOnTypesMap[index].dependsOnTime + "\n\t}";
+                    }
+                    temp_title += "\n]";
+                }
+
+                return temp_title;
+            }else if(d.type === "cochange"){
+                return "Package1: " + d.source_name + "\nPackage2: " + d.target_name
+                    + "\ndepth: " + d.depth
+                    + "\ncoChangeTimes: " + d.coChangeTimes
+                    + "\nnode1ChangeTimes: " + d.node1ChangeTimes
+                    + "\nnode2ChangeTimes: " + d.node2ChangeTimes;
+            }
+        }));
+
+    jsonLinks.forEach(function (d){
+        var k;
+        var k_flag;
+        var inner_flag;
+        d3.select("#" + d.source_id)
+            .style("stroke",function (e){
+                return getTypeColor(d)[0];
+            })
+            .style("stroke-width","1.5px")
+
+        d3.select("#" + d.target_id)
+            .style("stroke",function (e){
+                return getTypeColor(d)[0];
+            })
+            .style("stroke-width","1.5px")
+
+        //获取两个圆的transform属性（包含坐标信息）和半径
+        var source_transform = d3.select("#" + d.source_id).attr("transform");
+        var target_transform = d3.select("#" + d.target_id).attr("transform");
+        var r1 = parseFloat(d3.select("#" + d.source_id).attr("r"));
+        var r2 = parseFloat(d3.select("#" + d.target_id).attr("r"));
+
+        //求初始情况下的两个圆心坐标
+        var x1 = parseFloat(source_transform.slice(source_transform.indexOf("(") + 1, source_transform.indexOf(",")));
+        var y1 = parseFloat(source_transform.slice(source_transform.indexOf(",") + 1, source_transform.indexOf(")")));
+        var x2 = parseFloat(target_transform.slice(target_transform.indexOf("(") + 1, target_transform.indexOf(",")));
+        var y2 = parseFloat(target_transform.slice(target_transform.indexOf(",") + 1, target_transform.indexOf(")")));
+
+        //求斜率(考虑斜率正无穷问题)
+        if(x1.toFixed(6) !== x2.toFixed(6)){
+            k = (y2 - y1) / (x2 - x1);
+            k_flag = true;
+        }else{
+            k_flag = false;
+        }
+
+        var r_max = Math.max(r1, r2);
+        if(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)) < r_max){
+            inner_flag = true;
+        }else{
+            inner_flag = false;
+        }
+
+        if(k_flag){
+            //求偏移量
+            var x1_offset = Math.sqrt((r1 * r1) / (k * k + 1));
+            var y1_offset = Math.sqrt((r1 * r1) / (k * k + 1)) * k;
+            var x2_offset = Math.sqrt((r2 * r2) / (k * k + 1));
+            var y2_offset = Math.sqrt((r2 * r2) / (k * k + 1)) * k;
+
+
+            if(x1 > x2 && inner_flag === false){
+                x1 -= x1_offset;
+                y1 -= y1_offset;
+                x2 += x2_offset;
+                y2 += y2_offset;
+            }else if (x1 < x2 && inner_flag === false){
+                x1 += x1_offset;
+                y1 += y1_offset;
+                x2 -= x2_offset;
+                y2 -= y2_offset;
+            }else if (x1 > x2 && inner_flag){
+                x1 -= x1_offset;
+                y1 -= y1_offset;
+                x2 -= x2_offset;
+                y2 -= y2_offset;
+            }else if (x1 < x2 && inner_flag){
+                x1 += x1_offset;
+                y1 += y1_offset;
+                x2 += x2_offset;
+                y2 += y2_offset;
+            }
+        }else{
+            if(y1 > y2 && inner_flag === false){
+                y1 -= r1;
+                y2 += r2;
+            }else if(y1 < y2 && inner_flag === false){
+                y1 += r1;
+                y2 -= r2;
+            }else if (y1 > y2 && inner_flag){
+                y1 -= r1;
+                y2 -= r2;
+            }else if (y1 < y2 && inner_flag){
+                y1 += r1;
+                y2 += r2;
+            }
+        }
+
+        var temp_coordinate = {};
+        temp_coordinate["id"] = d.source_id + "_" + d.target_id;
+        temp_coordinate["x1"] = x1;
+        temp_coordinate["y1"] = y1;
+        temp_coordinate["x2"] = x2;
+        temp_coordinate["y2"] = y2;
+        circleCoordinate.push(temp_coordinate);
+    })
+
+    function getTranslateX1(source_id, target_id){
+        var link_id = source_id + "_" + target_id;
+        // console.log(link_id);
+        // console.log(circleCoordinate.find((n) => n.id === link_id))
+        return circleCoordinate.find((n) => n.id === link_id).x1;
+    }
+
+    function getTranslateY1(source_id, target_id){
+        var link_id = source_id + "_" + target_id;
+        return circleCoordinate.find((n) => n.id === link_id).y1;
+    }
+
+    function getTranslateX2(source_id, target_id){
+        var link_id = source_id + "_" + target_id;
+        return circleCoordinate.find((n) => n.id === link_id).x2;
+    }
+
+    function getTranslateY2(source_id, target_id){
+        var link_id = source_id + "_" + target_id;
+        return circleCoordinate.find((n) => n.id === link_id).y2;
+    }
+
+    // links.attr("x1", function (d) {
+    //     return getTranslateX1(d.source_id, d.target_id) + diameter_global / 2;
+    // })
+    //     .attr("y1", function (d) {
+    //         return getTranslateY1(d.source_id, d.target_id) + diameter_global / 2;
+    //     })
+    //     .attr("x2", function (d) {
+    //         return getTranslateX2(d.source_id, d.target_id) + diameter_global / 2;
+    //     })
+    //     .attr("y2", function (d) {
+    //         return getTranslateY2(d.source_id, d.target_id) + diameter_global / 2;
+    //     });
+
+    links.attr("d", function (d) {
+        var x1 = getTranslateX1(d.source_id, d.target_id) + diameter_global / 2;
+        var y1 = getTranslateY1(d.source_id, d.target_id) + diameter_global / 2;
+        var x2 = getTranslateX2(d.source_id, d.target_id) + diameter_global / 2;
+        var y2 = getTranslateY2(d.source_id, d.target_id) + diameter_global / 2;
+        // var length = Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
+
+        // if(length > 650){
+        //     // var ratio = length / 650;
+        //     var ratio = 2;
+        // }else{
+        //     var ratio = 2;
+        // }
+        var ratio = 2;
+        // console.log(d.duplicate_all)
+        switch(d.duplicate_all){
+            case 1:
+                return "M" + x1 + " " + y1 + " L" + x2 + " " + y2;
+            case 2:
+                switch(d.duplicate_num){
+                    case 1:
+                        return d.line_direction ? ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio + 1) / (ratio * 2)) * x1 + ((ratio - 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio - 1) / (ratio * 2)) * y1 + ((ratio + 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2) : ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                    case 2:
+                        return d.line_direction ? ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2) : ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio + 1) / (ratio * 2)) * x1 + ((ratio - 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio - 1) / (ratio * 2)) * y1 + ((ratio + 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                }
+            case 3:
+                switch(d.duplicate_num){
+                    case 1:
+                        return d.line_direction ? ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio + 1) / (ratio * 2)) * x1 + ((ratio - 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio - 1) / (ratio * 2)) * y1 + ((ratio + 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2) : ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                    case 2:
+                        return "M" + x1 + " " + y1 + " L" + x2 + " " + y2;
+                    case 3:
+                        return d.line_direction ? ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2) : ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio + 1) / (ratio * 2)) * x1 + ((ratio - 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio - 1) / (ratio * 2)) * y1 + ((ratio + 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                }
+            case 4:
+                switch(d.duplicate_num){
+                    case 1:
+                        return d.line_direction ? ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio + 1) / (ratio * 2)) * x1 + ((ratio - 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio - 1) / (ratio * 2)) * y1 + ((ratio + 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2) : ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                    case 2:
+                        return d.line_direction ? ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2) : ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio + 1) / (ratio * 2)) * x1 + ((ratio - 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio - 1) / (ratio * 2)) * y1 + ((ratio + 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                    case 3:
+                        ratio = ratio * 2;
+                        return d.line_direction ? ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2) : ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                    case 4:
+                        ratio = ratio * 2;
+                        return d.line_direction ? ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2) : ("M" + x1 + " " + y1 +
+                            " Q" + (((ratio - 1) / (ratio * 2)) * x1 + ((ratio + 1) / (ratio * 2)) * x2)
+                            + " " + (((ratio + 1) / (ratio * 2)) * y1 + ((ratio - 1) / (ratio * 2)) * y2)
+                            + " " + x2 + " " + y2);
+                }
+        }
+    })
+
+    linksVisiable_flag = true;
+}
+
+//工具方法，合并两个数组
+var list_concat = function (arr1, arr2){
+    var arr3 = [];
+
+    for (var i = 0; i < arr1.length; i++) {
+        arr3.push(arr1[i]);
+    }
+
+    for (var j = 0; j < arr2.length; j++) {
+        arr3.push(arr2[j]);
+    }
+
+    return arr3;
+}
+
+//获取连线颜色
+var getTypeColor = function(d){
+    if(d.type === "clone") {
+        return d.cloneMatchRate === 1 ? [CLONE_HIGH_COLOR, "clone_high"] : d.cloneMatchRate >= 0.9
+            ? [CLONE_MEDIUM_COLOR, "clone_medium"] : [CLONE_LOW_COLOR, "clone_low"];
+    }else if(d.type === "dependson"){
+        return Math.max(d.dependsOnIntensity, d.dependsByIntensity) > 0.8 ? [DEPENDSON_HIGH_COLOR, "dependson_high"] : Math.max(d.dependsOnIntensity, d.dependsByIntensity) >= 0.5
+            ? [DEPENDSON_MEDIUM_COLOR, "dependson_medium"] : [DEPENDSON_LOW_COLOR, "dependson_low"];
+    }else if(d.type === "cochange"){
+        return [COCHANGE_COLOR, "cochange"];
     }
 }

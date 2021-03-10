@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.query.smell;
 
+import cn.edu.fudan.se.multidependency.model.node.Metric;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
@@ -43,6 +44,8 @@ public class BasicSmellQueryServiceImpl implements BasicSmellQueryService {
 				JSONArray temp_nodes = new JSONArray();
 				temp_smell.put("name", smell.getName());
 				temp_smell.put("id", smell.getId());
+				temp_smell.put("smell_type", smell.getType());
+				temp_smell.put("smell_level", smell.getLevel());
 
 				for(Node node : smell.getNodes()){
 					ProjectFile file = (ProjectFile)node;
@@ -61,5 +64,10 @@ public class BasicSmellQueryServiceImpl implements BasicSmellQueryService {
 			e.printStackTrace();
 		}
 		return smellArray;
+	}
+
+	@Override
+	public Metric findMetricBySmellId(long smellId){
+		return smellRepository.findMetricBySmellId(smellId);
 	}
 }

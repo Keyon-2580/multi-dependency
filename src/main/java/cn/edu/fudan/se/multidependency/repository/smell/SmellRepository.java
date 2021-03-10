@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.repository.smell;
 
 import cn.edu.fudan.se.multidependency.model.IssueType;
+import cn.edu.fudan.se.multidependency.model.node.Metric;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
@@ -151,4 +152,7 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.IMPROVEMENT + "\' then 1 else 0 end)) as improvementIssues \r\n" +
 			"RETURN  smell,issues,bugIssues,newFeatureIssues,improvementIssues;")
 	public SmellMetric.DebtMetric calculateSmellDebtMetricInFileLevel(@Param("smellId") long smellId);
+
+	@Query("match (smell:Smell) -[:" + RelationType.str_HAS + "]->(n:Metric) where id(smell)=$smellId return n;")
+	public Metric findMetricBySmellId(@Param("smellId") long smellId);
 }
