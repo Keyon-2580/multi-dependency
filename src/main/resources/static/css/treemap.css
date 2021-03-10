@@ -6,6 +6,7 @@ html, body {
     overflow: auto;
 }
 svg {
+    float:left;
     width: 70%;
     height: 100%;
     background: #ffffff;
@@ -54,13 +55,23 @@ rect:hover{
     margin-left: 20px;
 }
 
-.treemap_title {
+.treemap_title, .treemap_information_title{
     font-size: 18px;
     font-weight: 500;
     margin-right: 100px;
 }
 
-.treemap_label {
+.treemap_label, .treemap_information_label{
     font-weight: 400;
     font-size: 15px;
+}
+
+.treemap_information_title{
+    font-size: 25px;
+    font-weight: 500;
+    margin-right: 100px;
+}
+
+.treemap_information_label{
+    width: 10%;
 }

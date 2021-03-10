@@ -517,6 +517,8 @@ var showSmellGroupOnClick = function (fileId, smellId, type, level){
         fileIdCurrent_click = fileId;
         fileSmellCurrent_click = smellId;
     }
+
+    showSideInformation(smellId);
 }
 
 //点击按钮，加载smell方块以及连线
@@ -941,4 +943,176 @@ var getTypeColor = function(d){
     }else if(d.type === "cochange"){
         return [COCHANGE_COLOR, "cochange"];
     }
+}
+
+//加载右侧信息栏
+var showSideInformation = function (smellId){
+    $.ajax({
+        type : "GET",
+        url : "/smell/get_metric?smellId=" + smellId,
+        success : function(result) {
+            var metricValues = result["metricValues"];
+
+            var html = "";
+
+            html += "<p><label class = \"treemap_information_title\" style = \"margin-right: 30px\">" + result.name + "</label></p>" +
+
+                    "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 40%\">LOC : " +
+                    "</label>" +
+
+                    "<label class = \"treemap_information_label\" style = \"margin-left: 40px\">" + metricValues.LOC +
+                    "</label></p>" +
+
+                    "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 40%\">Commits : " +
+                    "</label>" +
+
+                    "<label class = \"treemap_information_label\" style = \"margin-left: 40px\">" + metricValues.Commits +
+                    "</label></p>" +
+
+                    "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 40%\">NOC : " +
+                    "</label>" +
+
+                    "<label class = \"treemap_information_label\" style = \"margin-left: 40px\">" + metricValues.NOC +
+                    "</label></p>" +
+
+                    "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 40%\">Developers : " +
+                    "</label>" +
+
+                    "<label class = \"treemap_information_label\" style = \"margin-left: 40px\">" + metricValues.Developers +
+                    "</label></p>" +
+
+                    "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 40%\">Size : " +
+                    "</label>" +
+
+                    "<label class = \"treemap_information_label\" style = \"margin-left: 40px\">" + metricValues.Size +
+                    "</label></p>" +
+
+                    "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 40%\">NOM : " +
+                    "</label>" +
+
+                    "<label class = \"treemap_information_label\" style = \"margin-left: 40px\">" + metricValues.NOM +
+                    "</label></p>" +
+
+                    "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 40%\">TotalCommits : " +
+                    "</label>" +
+
+                    "<label class = \"treemap_information_label\" style = \"margin-left: 40px\">" + metricValues.TotalCommits +
+                    "</label></p>";
+
+            $("#side_information").html(html);
+
+            // for(var i = 0; i < result.length; i++){
+            //     var name_temp = {};
+            //     // console.log(x);
+            //     name_temp["id"] = result[i].id;
+            //     name_temp["name"] = result[i].name;
+            //     projectlist.push(name_temp);
+            //
+            //     var html = ""
+            //     html += "<div class = \"treemap_div\"><select id = \"multipleProjectSelect\" class=\"selectpicker\" multiple>";
+            //     for(var i = 0; i < projectlist.length; i++) {
+            //         if (i === 0) {
+            //             html += "<option selected=\"selected\" value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
+            //         } else {
+            //             html += "<option value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
+            //         }
+            //     }
+            //     html += "</select>";
+            //     html += "<br><button id = \"multipleProjectsButton\" type=\"button\" class='common_button' style='margin-top: 15px' onclick= showMultipleButton()>加载项目</button></div>";
+            //
+            //     html += "<div class = \"treemap_div\">"+
+            //         "<form role=\"form\">" +
+            //
+            //         "<p><label class = \"treemap_title\" style = \"margin-right: 30px\">Smell ：</label>" +
+            //
+            //         "<label class = \"treemap_label\" >" +
+            //         "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_Clone\" value='Clone'> Clone " +
+            //         "</label>" +
+            //
+            //         "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+            //         "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_CyclicDependency\" value='CyclicDependency'> Cyclic Dependency " +
+            //         "</label>" +
+            //
+            //         "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+            //         "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_HublikeDependency\" value='HubLikeDependency'> Hublike Dependency " +
+            //         "</label>" +
+            //
+            //         "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+            //         "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_UnstableDependency\" value='UnstableDependency'> Unstable Dependency " +
+            //         "</label>" +
+            //
+            //         "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+            //         "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_UnusedComponent\" value='UnusedComponent'> Unused Component " +
+            //         "</label>" +
+            //
+            //         "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+            //         "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_ImplicitCrossModuleDependency\" value='ImplicitCrossModuleDependency'> Implicit Cross Module Dependency " +
+            //         "</label>" +
+            //
+            //         "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+            //         "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_GodComponent\" value='GodComponent'> God Component " +
+            //         "</label>" +
+            //
+            //         "</p>";
+            //
+            //     html += "<p><label class = \"treemap_title\" style = \"margin-right: 30px\">Level ：</label>" +
+            //
+            //         "<label class = \"treemap_label\" >" +
+            //         "<input name=\"level_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_Module\" value='Module'> Module " +
+            //         "</label>" +
+            //
+            //         "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+            //         "<input name=\"level_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_Package\" value='Package'> Package " +
+            //         "</label>" +
+            //
+            //         "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+            //         "<input name=\"level_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_File\" value='File'> File " +
+            //         "</label>" +
+            //
+            //         "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+            //         "<input name=\"level_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_\" value='Type'> Type " +
+            //         "</label>" +
+            //
+            //         // "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+            //         // "<input name=\"level_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_Function\" value='Function'> Function " +
+            //         // "</label>" +
+            //         // "<label class = \"treemap_label\" style = \"margin-left: 40px\">" +
+            //         // "<input name=\"level_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_level_Snippet\" value='Snippet'> Snippet " +
+            //         // "</label>" +
+            //
+            //         "</p>";
+            //
+            //     html += "<p><label class = \"treemap_title\" style = \"margin-right: 30px\">Dependency ：</label>" +
+            //
+            //         "<label class = \"treemap_label\" >" +
+            //         "<input style = \"margin-right:4px; \" type=\"checkbox\" id=\"checkbox_dependency_dependson\"> Depends On " +
+            //         "</label>" +
+            //
+            //         "<label class = \"treemap_label\" >" +
+            //         "<input style = \"margin-right:4px; margin-left: 40px;\" type=\"checkbox\" id=\"checkbox_dependency_clone\"> Clone " +
+            //         "</label>" +
+            //
+            //         "<label class = \"treemap_label\" >" +
+            //         "<input style = \"margin-right:4px; margin-left: 40px;\" type=\"checkbox\" id=\"checkbox_dependency_cochange\"> Co-change " +
+            //         "</label>" +
+            //
+            //         "</p>";
+            //
+            //     html += "<p><div style=\"margin-top: 10px;\">" +
+            //         "<button class = \"common_button\" type=\"button\" onclick= loadSmell() >加载异味</button>" +
+            //         "</div></p>";
+            //
+            //     html += "</form>" +
+            //         "</div>";
+            //
+            //     $("#treemap_util").html(html);
+            //     $(".selectpicker").selectpicker({
+            //         actionsBox:true,
+            //         countSelectedText:"已选中{0}项",
+            //         selectedTextFormat:"count > 2"
+            //     })
+            // }
+        }
+    })
+
 }
