@@ -2,15 +2,22 @@ package cn.edu.fudan.se.multidependency.service.query.smell;
 
 import java.util.Collection;
 
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.LogicCouplingComponents;
 
 public interface ImplicitCrossModuleDependencyDetector {
 	
-	void setMinCoChange(int minCoChange);
+	void setFileMinCoChange(int minCoChange);
 	
-	int getMinCoChange();
+	int getFileMinCoChange();
 
-	Collection<LogicCouplingComponents<ProjectFile>> cochangesInDifferentModule();
-	
+	void setPackageMinCoChange(int minCoChange);
+
+	int getPackageMinCoChange();
+
+	Collection<LogicCouplingComponents<ProjectFile>> cochangesInDifferentFile();
+
+	Collection<LogicCouplingComponents<Package>> cochangesInDifferentPackage();
+
 }

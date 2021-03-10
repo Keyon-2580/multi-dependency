@@ -79,8 +79,8 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 		return result;
 	}
 
-	//	@Override
-	public Map<Long, List<UnstableComponentByInstability<Package>>> packageUntables() {
+	@Override
+	public Map<Long, List<UnstableComponentByInstability<Package>>> packageUnstables() {
 		String key = "unstablePackages";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
@@ -88,7 +88,7 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 		Collection<Project> projects = nodeService.allProjects();
 		Map<Long, List<UnstableComponentByInstability<Package>>> result = new HashMap<>();
 		for(Project project : projects) {
-			List<UnstableComponentByInstability<Package>> temp = asRepository.unstablePackagesByInstability(project.getId(), 1, 0.3);
+			List<UnstableComponentByInstability<Package>> temp = asRepository.unstablePackagesByInstability(project.getId(), getModuleFanOutThreshold(project), getRatioThreshold(project));
 			result.put(project.getId(), temp);
 		}
 		

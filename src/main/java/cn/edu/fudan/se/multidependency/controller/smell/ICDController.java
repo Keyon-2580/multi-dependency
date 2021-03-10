@@ -21,20 +21,20 @@ public class ICDController {
 	
 	@GetMapping("")
 	public String icd(HttpServletRequest request) {
-		request.setAttribute("files", icdDetector.cochangesInDifferentModule());
+		request.setAttribute("files", icdDetector.cochangesInDifferentFile());
 		return "as/icd";
 	}
 	
 	@GetMapping("/cochange")
 	@ResponseBody
 	public int setMinCoChange() {
-		return icdDetector.getMinCoChange();
+		return icdDetector.getFileMinCoChange();
 	}
 	
 	@PostMapping("/cochange")
 	@ResponseBody
 	public boolean setMinCoChange(@RequestParam("minCoChange") int minCoChange) {
-		icdDetector.setMinCoChange(minCoChange);
+		icdDetector.setFileMinCoChange(minCoChange);
 		return true;
 	}
 	

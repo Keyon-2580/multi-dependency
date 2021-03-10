@@ -11,6 +11,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.PackageHubLike;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,15 +48,17 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 	private GitAnalyseService gitAnalyseService;
 
 	Map<Project, int[]> projectMinFileFanIOs = new ConcurrentHashMap<>();
+	Map<Project, int[]> projectMinPackageFanIOs = new ConcurrentHashMap<>();
 	Map<Project, int[]> projectMinModuleFanIOs = new ConcurrentHashMap<>();
 
 	private Map<Project, int[]> projectMinFileCoChangeFilesAndTimesThresholds = new ConcurrentHashMap<>();
+	private Map<Project, int[]> projectMinPackageCoChangeFilesAndTimesThresholds = new ConcurrentHashMap<>();
 	private Map<Project, int[]> projectMinModuleCoChangeFilesAndTimesThresholds = new ConcurrentHashMap<>();
 
 	public static final int DEFAULT_THRESHOLD_FAN_IN = 10;
 	public static final int DEFAULT_THRESHOLD_FAN_OUT = 10;
-	public static final int DEFAULT_THRESHOLD_COCHANGE_TIMES = -1;
-	public static final int DEFAULT_THRESHOLD_COCHANGE_FILES = -1;
+	public static final int DEFAULT_THRESHOLD_COCHANGE_TIMES = 3;
+	public static final int DEFAULT_THRESHOLD_COCHANGE_FILES = 5;
 
 	@Override
 	public Map<Long, List<FileHubLike>> fileHubLikes() {
@@ -67,6 +70,21 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		Map<Long, List<FileHubLike>> result = new HashMap<>();
 		for(Project project : projects) {
 			result.put(project.getId(), fileHubLikes(project));
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, List<PackageHubLike>> packageHubLikes() {
+		String key = "packageHubLikes";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		Collection<Project> projects = nodeService.allProjects();
+		Map<Long, List<PackageHubLike>> result = new HashMap<>();
+		for(Project project : projects) {
+			result.put(project.getId(), packageHubLikes(project));
 		}
 		cache.cache(getClass(), key, result);
 		return result;
@@ -90,6 +108,11 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 	public List<FileHubLike> fileHubLikes(Project project) {
 		return fileHubLikes(project, getProjectMinFileFanIO(project)[0], getProjectMinFileFanIO(project)[1],
 				getProjectMinFileCoChangeFilesAndTimesThreshold(project)[0], getProjectMinFileCoChangeFilesAndTimesThreshold(project)[1]);
+	}
+
+	public List<PackageHubLike> packageHubLikes(Project project) {
+		return packageHubLikes(project, getProjectMinPackageFanIO(project)[0], getProjectMinPackageFanIO(project)[1],
+				getProjectMinPackageCoChangeFilesAndTimesThreshold(project)[0], getProjectMinPackageCoChangeFilesAndTimesThreshold(project)[1]);
 	}
 
 	public List<ModuleHubLike> moduleHubLikes(Project project) {
@@ -145,14 +168,24 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 			return (f2.getFanIn() + f2.getFanOut()) - (f1.getFanIn() + f1.getFanOut());
 		});
 		return result;
-		/*return asRepository.findHubLikeFiles(project.getId(), minFanIn, minFanOut);*/
 	}
-	
+
+	public List<PackageHubLike> packageHubLikes(Project project, int minFanIn, int minFanOut, int coChangeFilesThreshold, int coChangeTimesThreshold) {
+		if(project == null) {
+			return new ArrayList<>();
+		}
+		List<PackageHubLike> result = asRepository.findPackageHubLikes(project.getId(), minFanIn, minFanOut);
+		result.sort((p1, p2) -> {
+			return (int) ((p2.getFanIn() + p2.getFanOut()) - (p1.getFanIn() + p1.getFanOut()));
+		});
+		return result;
+	}
+
 	public List<ModuleHubLike> moduleHubLikes(Project project, int minFanIn, int minFanOut, int coChangeFilesThreshold, int coChangeTimesThreshold) {
 		if(project == null) {
 			return new ArrayList<>();
 		}
-		List<ModuleHubLike> result = asRepository.findHubLikeModules(project.getId(), minFanIn, minFanOut);
+		List<ModuleHubLike> result = asRepository.findModuleHubLikes(project.getId(), minFanIn, minFanOut);
 		result.sort((p1, p2) -> {
 			return (int) ((p2.getFanIn() + p2.getFanOut()) - (p1.getFanIn() + p1.getFanOut()));
 		});
@@ -176,6 +209,35 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		return result;
 	}
 
+	@Override
+	public void setProjectMinFileFanIO(Project project, int minFanIn, int minFanOut) {
+		int[] result = new int[2];
+		result[0] = minFanIn;
+		result[1] = minFanOut;
+		projectMinFileFanIOs.put(project, result);
+		cache.remove(getClass());
+	}
+
+	@Override
+	public int[] getProjectMinPackageFanIO(Project project) {
+		int[] result = projectMinPackageFanIOs.get(project);
+		if(result == null) {
+			result = new int[2];
+			result[0] = (int) defaultPackageMinFanIn(project);
+			result[1] = (int) defaultPackageMinFanOut(project);
+			projectMinPackageFanIOs.put(project, result);
+		}
+		return result;
+	}
+
+	@Override
+	public void setProjectMinPackageFanIO(Project project, int minFanIn, int minFanOut) {
+		int[] result = new int[2];
+		result[0] = minFanIn;
+		result[1] = minFanOut;
+		projectMinPackageFanIOs.put(project, result);
+		cache.remove(getClass());
+	}
 
 	@Override
 	public int[] getProjectMinModuleFanIO(Project project) {
@@ -187,15 +249,6 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 			projectMinModuleFanIOs.put(project, result);
 		}
 		return result;
-	}
-
-	@Override
-	public void setProjectMinFileFanIO(Project project, int minFanIn, int minFanOut) {
-		int[] result = new int[2];
-		result[0] = minFanIn;
-		result[1] = minFanOut;
-		projectMinFileFanIOs.put(project, result);
-		cache.remove(getClass());
 	}
 
 	@Override
@@ -229,6 +282,27 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 	}
 
 	@Override
+	public int[] getProjectMinPackageCoChangeFilesAndTimesThreshold(Project project) {
+		int[] result = projectMinPackageCoChangeFilesAndTimesThresholds.get(project);
+		if(result == null) {
+			result = new int[2];
+			result[0] = DEFAULT_THRESHOLD_COCHANGE_FILES;
+			result[1] = DEFAULT_THRESHOLD_COCHANGE_TIMES;
+			projectMinPackageCoChangeFilesAndTimesThresholds.put(project, result);
+		}
+		return result;
+	}
+
+	@Override
+	public void setProjectMinPackageCoChangeFilesAndTimesThreshold(Project project, int coChangeFilesThreshold, int coChangeTimesThreshold) {
+		int[] result = new int[2];
+		result[0] = coChangeFilesThreshold;
+		result[1] = coChangeTimesThreshold;
+		projectMinPackageCoChangeFilesAndTimesThresholds.put(project, result);
+		cache.remove(getClass());
+	}
+
+	@Override
 	public int[] getProjectMinModuleCoChangeFilesAndTimesThreshold(Project project) {
 		int[] result = projectMinModuleCoChangeFilesAndTimesThresholds.get(project);
 		if(result == null) {
@@ -249,30 +323,10 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		cache.remove(getClass());
 	}
 
-	private double defaultModuleMinFanIn(Project project) {
-		if(project == null) {
-			return Integer.MAX_VALUE;
-		}
-//		return FanIOMetric.calculateFanInUpperQuartile(metricCalculator.calculatePackageMetrics().get(project.getId()));
-//		return metricCalculator.calculateProjectMetrics(false).get(project).getNop() / 5;
-		return DEFAULT_THRESHOLD_FAN_IN/2.0;
-	}
-
-	private double defaultModuleMinFanOut(Project project) {
-		if(project == null) {
-			return Integer.MAX_VALUE;
-		}
-//		return FanIOMetric.calculateFanOutUpperQuartile(metricCalculator.calculatePackageMetrics().get(project.getId()));
-//		return metricCalculator.calculateProjectMetrics(false).get(project).getNop() / 5;
-		return DEFAULT_THRESHOLD_FAN_OUT/2.0;
-	}
-
 	private double defaultFileMinFanIn(Project project) {
 		if(project == null) {
 			return Integer.MAX_VALUE;
 		}
-//		return FanIOMetric.calculateFanInUpperQuartile(metricCalculator.calculateFileMetrics().get(project.getId()));
-//		return metricCalculator.calculateProjectMetrics(false).get(project.getId()).getNof() / 5;
 		return DEFAULT_THRESHOLD_FAN_IN;
 	}
 
@@ -280,8 +334,34 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		if(project == null) {
 			return Integer.MAX_VALUE;
 		}
-//		return FanIOMetric.calculateFanOutUpperQuartile(metricCalculator.calculateFileMetrics().get(project.getId()));
-//		return metricCalculator.calculateProjectMetrics(false).get(project.getId()).getNof() / 5;
 		return DEFAULT_THRESHOLD_FAN_OUT;
+	}
+
+	private double defaultPackageMinFanIn(Project project) {
+		if(project == null) {
+			return Integer.MAX_VALUE;
+		}
+		return DEFAULT_THRESHOLD_FAN_IN;
+	}
+
+	private double defaultPackageMinFanOut(Project project) {
+		if(project == null) {
+			return Integer.MAX_VALUE;
+		}
+		return DEFAULT_THRESHOLD_FAN_OUT;
+	}
+
+	private double defaultModuleMinFanIn(Project project) {
+		if(project == null) {
+			return Integer.MAX_VALUE;
+		}
+		return DEFAULT_THRESHOLD_FAN_IN/2.0;
+	}
+
+	private double defaultModuleMinFanOut(Project project) {
+		if(project == null) {
+			return Integer.MAX_VALUE;
+		}
+		return DEFAULT_THRESHOLD_FAN_OUT/2.0;
 	}
 }

@@ -22,6 +22,9 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	@Query("match (f:ProjectFile) where id(f)=$fileId return f")
 	public ProjectFile findFileById(@Param("fileId") long fileId);
 
+	@Query("match (p:Package)-[:" + RelationType.str_CONTAIN + "]->(f:ProjectFile) where id(p) = $packageId return count(distinct f);")
+	public int getFilesNumberByPackageId(@Param("packageId") long packageId);
+
 	@Query("MATCH (file:ProjectFile)\r\n" +
 			"WITH file, " +
 			"     size((file)-[:" + RelationType.str_CONTAIN + "]->(:Type)) as noc, " +
