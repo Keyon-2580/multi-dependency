@@ -19,8 +19,16 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 
 	@Query("match (p:Package) where id(p) = $pckId return p")
 	public Package findPackageById(@Param("pckId") long pckId);
-	
-	
+
+	@Query("match (project:Project)-[:" + RelationType.str_CONTAIN + "]->(package:Package) where id(project) = $projectId return package;")
+	public List<Package> getPackageByProjectId(@Param("projectId") long projectId);
+
+	@Query("match (p1:Package)-[:CONTAIN]->(f1:ProjectFile)-[:" + RelationType.str_CO_CHANGE + "]-(f2:ProjectFile)<-[:CONTAIN]-(p2:Package) where id(p1) = $package1Id and id(p2) = $package2Id return count(distinct f1) + count(distinct f2);")
+	public int getCoChangeFileNumberByPackagesId(@Param("package1Id") long package1Id, @Param("package2Id") long package2Id);
+
+	@Query("match (p1:Package)-[:CONTAIN]->(f1:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]-(f2:ProjectFile)<-[:CONTAIN]-(p2:Package) where id(p1) = $package1Id and id(p2) = $package2Id return count(distinct f1) + count(distinct f2);")
+	public int getDependOnFileNumberByPackagesId(@Param("package1Id") long package1Id, @Param("package2Id") long package2Id);
+
 	@Query("MATCH (pck:Package) where pck.lines > 0\r\n" + 
 			"WITH pck,pck.nof as nof, \r\n" +
 			"     pck.noc as noc, \r\n" +

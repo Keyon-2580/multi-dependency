@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.service.query.smell;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
@@ -36,7 +37,6 @@ public class SmellDetectorService {
 
 	@Autowired
 	private ContainRepository containRepository;
-
 
 	@Autowired
 	private CyclicDependencyDetector cyclicDependencyDetector;
@@ -88,10 +88,39 @@ public class SmellDetectorService {
 		smellRepository.deleteSmellContainRelations(SmellType.CYCLIC_DEPENDENCY);
 		smellRepository.deleteSmellHasMetricRelation(SmellType.CYCLIC_DEPENDENCY);
 		smellRepository.deleteSmells(SmellType.CYCLIC_DEPENDENCY);
-		Map<Long, Map<Integer, Cycle<ProjectFile>>> fileCyclicDependencies = new HashMap<>(cyclicDependencyDetector.fileCycles());
-		String name = "file_cycle-dependency_";
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
+
+		Map<Long, Map<Integer, Cycle<Type>>> typeCyclicDependencies = new HashMap<>(cyclicDependencyDetector.typeCycles());
+		String typeSmellName = "type_cycle-dependency_";
+		for (Map.Entry<Long, Map<Integer, Cycle<Type>>> typeCyclicDependency : typeCyclicDependencies.entrySet()){
+			long projectId = typeCyclicDependency.getKey();
+			Project project = (Project) projectRepository.queryNodeById(projectId);
+			Map<Integer, Cycle<Type>> typeCycles = typeCyclicDependency.getValue();
+			for (Map.Entry<Integer, Cycle<Type>> typeCycle : typeCycles.entrySet()){
+				List<Type> types = typeCycle.getValue().getComponents();
+				Smell smell = new Smell();
+				smell.setName(typeSmellName + typeCycle.getKey().toString());
+				smell.setSize(types.size());
+				smell.setLanguage(project.getLanguage());
+				smell.setProjectId(projectId);
+				smell.setProjectName(project.getName());
+				smell.setType(SmellType.CYCLIC_DEPENDENCY);
+				smell.setLevel(SmellLevel.TYPE);
+				smells.add(smell);
+				for (Type type : types) {
+					Contain contain = new Contain(smell, type);
+					smellContains.add(contain);
+				}
+			}
+		}
+		smellRepository.saveAll(smells);
+		containRepository.saveAll(smellContains);
+
+		smells.clear();
+		smellContains.clear();
+		Map<Long, Map<Integer, Cycle<ProjectFile>>> fileCyclicDependencies = new HashMap<>(cyclicDependencyDetector.fileCycles());
+		String fileSmellName = "file_cycle-dependency_";
 		for (Map.Entry<Long, Map<Integer, Cycle<ProjectFile>>> fileCyclicDependency : fileCyclicDependencies.entrySet()){
 			long projectId = fileCyclicDependency.getKey();
 			Project project = (Project) projectRepository.queryNodeById(projectId);
@@ -99,7 +128,7 @@ public class SmellDetectorService {
 			for (Map.Entry<Integer, Cycle<ProjectFile>> fileCycle : fileCycles.entrySet()){
 				List<ProjectFile> files = fileCycle.getValue().getComponents();
 				Smell smell = new Smell();
-				smell.setName(name + fileCycle.getKey().toString());
+				smell.setName(fileSmellName + fileCycle.getKey().toString());
 				smell.setSize(files.size());
 				smell.setLanguage(project.getLanguage());
 				smell.setProjectId(projectId);
@@ -109,6 +138,34 @@ public class SmellDetectorService {
 				smells.add(smell);
 				for (ProjectFile file : files) {
 					Contain contain = new Contain(smell, file);
+					smellContains.add(contain);
+				}
+			}
+		}
+		smellRepository.saveAll(smells);
+		containRepository.saveAll(smellContains);
+
+		smells.clear();
+		smellContains.clear();
+		Map<Long, Map<Integer, Cycle<Package>>> packageCyclicDependencies = new HashMap<>(cyclicDependencyDetector.packageCycles());
+		String packageSmellName = "package_cycle-dependency_";
+		for (Map.Entry<Long, Map<Integer, Cycle<Package>>> packageCyclicDependency : packageCyclicDependencies.entrySet()){
+			long projectId = packageCyclicDependency.getKey();
+			Project project = (Project) projectRepository.queryNodeById(projectId);
+			Map<Integer, Cycle<Package>> packageCycles = packageCyclicDependency.getValue();
+			for (Map.Entry<Integer, Cycle<Package>> packageCycle : packageCycles.entrySet()){
+				List<Package> packages = packageCycle.getValue().getComponents();
+				Smell smell = new Smell();
+				smell.setName(packageSmellName + packageCycle.getKey().toString());
+				smell.setSize(packages.size());
+				smell.setLanguage(project.getLanguage());
+				smell.setProjectId(projectId);
+				smell.setProjectName(project.getName());
+				smell.setType(SmellType.CYCLIC_DEPENDENCY);
+				smell.setLevel(SmellLevel.PACKAGE);
+				smells.add(smell);
+				for (Package pck : packages) {
+					Contain contain = new Contain(smell, pck);
 					smellContains.add(contain);
 				}
 			}
@@ -130,18 +187,19 @@ public class SmellDetectorService {
 		smellRepository.deleteSmellContainRelations(SmellType.HUBLIKE_DEPENDENCY);
 		smellRepository.deleteSmellHasMetricRelation(SmellType.HUBLIKE_DEPENDENCY);
 		smellRepository.deleteSmells(SmellType.HUBLIKE_DEPENDENCY);
-		Map<Long, List<FileHubLike>> fileHubLikes = hubLikeComponentDetector.fileHubLikes();
-		String name = "file_hub-like-dependency_";
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
-		int index = 1;
+
+		Map<Long, List<FileHubLike>> fileHubLikes = hubLikeComponentDetector.fileHubLikes();
+		String fileSmellName = "file_hub-like-dependency_";
+		int fileSmellIndex = 1;
 		for (Map.Entry<Long, List<FileHubLike>> fileHubLike : fileHubLikes.entrySet()) {
 			long projectId = fileHubLike.getKey();
 			Project project = (Project) projectRepository.queryNodeById(projectId);
 			List<FileHubLike> files = fileHubLike.getValue();
 			for (FileHubLike file : files) {
 				Smell smell = new Smell();
-				smell.setName(name + index);
+				smell.setName(fileSmellName + fileSmellIndex);
 				smell.setSize(1);
 				smell.setLanguage(project.getLanguage());
 				smell.setProjectId(projectId);
@@ -151,7 +209,34 @@ public class SmellDetectorService {
 				smells.add(smell);
 				Contain contain = new Contain(smell, file.getFile());
 				smellContains.add(contain);
-				index ++;
+				fileSmellIndex ++;
+			}
+		}
+		smellRepository.saveAll(smells);
+		containRepository.saveAll(smellContains);
+
+		smells.clear();
+		smellContains.clear();
+		Map<Long, List<PackageHubLike>> packageHubLikes = hubLikeComponentDetector.packageHubLikes();
+		String packageSmellName = "package_hub-like-dependency_";
+		int packageSmellIndex = 1;
+		for (Map.Entry<Long, List<PackageHubLike>> packageHubLike : packageHubLikes.entrySet()) {
+			long projectId = packageHubLike.getKey();
+			Project project = (Project) projectRepository.queryNodeById(projectId);
+			List<PackageHubLike> packages = packageHubLike.getValue();
+			for (PackageHubLike pck : packages) {
+				Smell smell = new Smell();
+				smell.setName(packageSmellName + packageSmellIndex);
+				smell.setSize(1);
+				smell.setLanguage(project.getLanguage());
+				smell.setProjectId(projectId);
+				smell.setProjectName(project.getName());
+				smell.setType(SmellType.HUBLIKE_DEPENDENCY);
+				smell.setLevel(SmellLevel.FILE);
+				smells.add(smell);
+				Contain contain = new Contain(smell, pck.getPck());
+				smellContains.add(contain);
+				packageSmellIndex ++;
 			}
 		}
 		smellRepository.saveAll(smells);
@@ -171,18 +256,19 @@ public class SmellDetectorService {
 		smellRepository.deleteSmellContainRelations(SmellType.UNSTABLE_DEPENDENCY);
 		smellRepository.deleteSmellHasMetricRelation(SmellType.UNSTABLE_DEPENDENCY);
 		smellRepository.deleteSmells(SmellType.UNSTABLE_DEPENDENCY);
-		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstables = unstableDependencyDetectorUsingInstability.fileUnstables();
-		String name = "file_unstable-dependency_";
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
-		int index = 1;
+
+		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstables = unstableDependencyDetectorUsingInstability.fileUnstables();
+		String fileSmellname = "file_unstable-dependency_";
+		int fileSmellIndex = 1;
 		for (Map.Entry<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstable : fileUnstables.entrySet()) {
 			long projectId = fileUnstable.getKey();
 			Project project = (Project) projectRepository.queryNodeById(projectId);
 			List<UnstableComponentByInstability<ProjectFile>> files = fileUnstable.getValue();
 			for (UnstableComponentByInstability<ProjectFile> file : files) {
 				Smell smell = new Smell();
-				smell.setName(name + index);
+				smell.setName(fileSmellname + fileSmellIndex);
 				smell.setSize(1);
 				smell.setLanguage(project.getLanguage());
 				smell.setProjectId(projectId);
@@ -192,7 +278,34 @@ public class SmellDetectorService {
 				smells.add(smell);
 				Contain contain = new Contain(smell, file.getComponent());
 				smellContains.add(contain);
-				index ++;
+				fileSmellIndex ++;
+			}
+		}
+		smellRepository.saveAll(smells);
+		containRepository.saveAll(smellContains);
+
+		smells.clear();
+		smellContains.clear();
+		Map<Long, List<UnstableComponentByInstability<Package>>> packageUnstables = unstableDependencyDetectorUsingInstability.packageUnstables();
+		String packageSmellname = "package_unstable-dependency_";
+		int packageSmellIndex = 1;
+		for (Map.Entry<Long, List<UnstableComponentByInstability<Package>>> packageUnstable : packageUnstables.entrySet()) {
+			long projectId = packageUnstable.getKey();
+			Project project = (Project) projectRepository.queryNodeById(projectId);
+			List<UnstableComponentByInstability<Package>> packages = packageUnstable.getValue();
+			for (UnstableComponentByInstability<Package> pck : packages) {
+				Smell smell = new Smell();
+				smell.setName(packageSmellname + packageSmellIndex);
+				smell.setSize(1);
+				smell.setLanguage(project.getLanguage());
+				smell.setProjectId(projectId);
+				smell.setProjectName(project.getName());
+				smell.setType(SmellType.UNSTABLE_DEPENDENCY);
+				smell.setLevel(SmellLevel.PACKAGE);
+				smells.add(smell);
+				Contain contain = new Contain(smell, pck.getComponent());
+				smellContains.add(contain);
+				packageSmellIndex ++;
 			}
 		}
 		smellRepository.saveAll(smells);
@@ -212,18 +325,19 @@ public class SmellDetectorService {
 		smellRepository.deleteSmellContainRelations(SmellType.SIMILAR_COMPONENTS);
 		smellRepository.deleteSmellHasMetricRelation(SmellType.SIMILAR_COMPONENTS);
 		smellRepository.deleteSmells(SmellType.SIMILAR_COMPONENTS);
-		Collection<SimilarComponents<ProjectFile>> fileSimilars = similarComponentsDetector.fileSimilars();
-		String name = "file_similar-components_";
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
-		int index = 1;
+
+		Collection<SimilarComponents<ProjectFile>> fileSimilars = similarComponentsDetector.fileSimilars();
+		String fileSmellName = "file_similar-components_";
+		int fileSmellIndex = 1;
 		for (SimilarComponents<ProjectFile> fileSimilar : fileSimilars) {
 			Package pck1 = containRepository.findFileBelongToPackage(fileSimilar.getNode1().getId());
 			Package pck2 = containRepository.findFileBelongToPackage(fileSimilar.getNode2().getId());
 			Project project1 = containRepository.findPackageBelongToProject(pck1.getId());
 			Project project2 = containRepository.findPackageBelongToProject(pck2.getId());
 			Smell smell = new Smell();
-			smell.setName(name + index);
+			smell.setName(fileSmellName + fileSmellIndex);
 			smell.setSize(2);
 			if (project1.getId().equals(project2.getId())) {
 				smell.setLanguage(project1.getLanguage());
@@ -242,7 +356,42 @@ public class SmellDetectorService {
 			Contain contain2 = new Contain(smell, fileSimilar.getNode2());
 			smellContains.add(contain1);
 			smellContains.add(contain2);
-			index ++;
+			fileSmellIndex ++;
+		}
+		smellRepository.saveAll(smells);
+		containRepository.saveAll(smellContains);
+
+		smells.clear();
+		smellContains.clear();
+		Collection<SimilarComponents<Package>> packageSimilars = similarComponentsDetector.packageSimilars();
+		String packageSmellName = "package_similar-components_";
+		int packageSmellIndex = 1;
+		for (SimilarComponents<Package> packageSimilar : packageSimilars) {
+			Package pck1 = packageSimilar.getNode1();
+			Package pck2 = packageSimilar.getNode2();
+			Project project1 = containRepository.findPackageBelongToProject(pck1.getId());
+			Project project2 = containRepository.findPackageBelongToProject(pck2.getId());
+			Smell smell = new Smell();
+			smell.setName(packageSmellName + packageSmellIndex);
+			smell.setSize(2);
+			if (project1.getId().equals(project2.getId())) {
+				smell.setLanguage(project1.getLanguage());
+				smell.setProjectId(project1.getId());
+				smell.setProjectName(project1.getName());
+			}
+			else {
+				smell.setLanguage(project1.getLanguage());
+				smell.setProjectId(project1.getId());
+				smell.setProjectName(project1.getName() + "+" + project2.getName());
+			}
+			smell.setType(SmellType.SIMILAR_COMPONENTS);
+			smell.setLevel(SmellLevel.FILE);
+			smells.add(smell);
+			Contain contain1 = new Contain(smell, packageSimilar.getNode1());
+			Contain contain2 = new Contain(smell, packageSimilar.getNode2());
+			smellContains.add(contain1);
+			smellContains.add(contain2);
+			packageSmellIndex ++;
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
@@ -261,16 +410,17 @@ public class SmellDetectorService {
 		smellRepository.deleteSmellContainRelations(SmellType.LOGICAL_COUPLING);
 		smellRepository.deleteSmellHasMetricRelation(SmellType.LOGICAL_COUPLING);
 		smellRepository.deleteSmells(SmellType.LOGICAL_COUPLING);
-		Collection<LogicCouplingComponents<ProjectFile>> fileLogicals = implicitCrossModuleDependencyDetector.cochangesInDifferentModule();
-		String name = "file_logical-coupling_";
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
-		int index = 1;
+
+		Collection<LogicCouplingComponents<ProjectFile>> fileLogicals = implicitCrossModuleDependencyDetector.cochangesInDifferentFile();
+		String fileSmellName = "file_logical-coupling_";
+		int fileSmellIndex = 1;
 		for (LogicCouplingComponents<ProjectFile> fileLogical : fileLogicals) {
 			Package pck = containRepository.findFileBelongToPackage(fileLogical.getNode1().getId());
 			Project project = containRepository.findPackageBelongToProject(pck.getId());
 			Smell smell = new Smell();
-			smell.setName(name + index);
+			smell.setName(fileSmellName + fileSmellIndex);
 			smell.setSize(2);
 			smell.setLanguage(project.getLanguage());
 			smell.setProjectId(project.getId());
@@ -282,7 +432,32 @@ public class SmellDetectorService {
 			Contain contain2 = new Contain(smell, fileLogical.getNode2());
 			smellContains.add(contain1);
 			smellContains.add(contain2);
-			index ++;
+			fileSmellIndex ++;
+		}
+		smellRepository.saveAll(smells);
+		containRepository.saveAll(smellContains);
+
+		smells.clear();
+		smellContains.clear();
+		Collection<LogicCouplingComponents<Package>> packageLogicals = implicitCrossModuleDependencyDetector.cochangesInDifferentPackage();
+		String packageSmellName = "package_logical-coupling_";
+		int packageSmellIndex = 1;
+		for (LogicCouplingComponents<Package> packageLogical : packageLogicals) {
+			Project project = containRepository.findPackageBelongToProject(packageLogical.getNode1().getId());
+			Smell smell = new Smell();
+			smell.setName(packageSmellName + packageSmellIndex);
+			smell.setSize(2);
+			smell.setLanguage(project.getLanguage());
+			smell.setProjectId(project.getId());
+			smell.setProjectName(project.getName());
+			smell.setType(SmellType.LOGICAL_COUPLING);
+			smell.setLevel(SmellLevel.PACKAGE);
+			smells.add(smell);
+			Contain contain1 = new Contain(smell, packageLogical.getNode1());
+			Contain contain2 = new Contain(smell, packageLogical.getNode2());
+			smellContains.add(contain1);
+			smellContains.add(contain2);
+			packageSmellIndex ++;
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);

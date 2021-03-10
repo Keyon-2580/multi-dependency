@@ -10,15 +10,6 @@ import lombok.Data;
 @Data
 public class SimilarComponents<T extends Node> {
 
-	public SimilarComponents(T node1, T node2, double value, int node1ChangeTimes, int node2ChangeTimes, int cochangeTimes) {
-		this.node1 = node1;
-		this.node2 = node2;
-		this.value = value;
-		this.node1ChangeTimes = node1ChangeTimes;
-		this.node2ChangeTimes = node2ChangeTimes;
-		this.cochangeTimes = cochangeTimes;
-	}
-	
 	private T node1;
 	
 	private T node2;
@@ -36,10 +27,21 @@ public class SimilarComponents<T extends Node> {
 	private int node2ChangeTimes;
 	
 	private int cochangeTimes;
-	
+
+	private Double sameDependsOnRatio = null;
+
 	private Set<Node> node1DependsOn = new HashSet<>();
-	
+
 	private Set<Node> node2DependsOn = new HashSet<>();
+
+	public SimilarComponents(T node1, T node2, double value, int node1ChangeTimes, int node2ChangeTimes, int cochangeTimes) {
+		this.node1 = node1;
+		this.node2 = node2;
+		this.value = value;
+		this.node1ChangeTimes = node1ChangeTimes;
+		this.node2ChangeTimes = node2ChangeTimes;
+		this.cochangeTimes = cochangeTimes;
+	}
 	
 	public void addNode1DependsOn(Node node) {
 		node1DependsOn.add(node);
@@ -48,8 +50,6 @@ public class SimilarComponents<T extends Node> {
 	public void addNode2DependsOn(Node node) {
 		node2DependsOn.add(node);
 	}
-	
-	private Double sameDependsOnRatio = null;
 	
 	public double getSameDependsOnRatio() {
 		if(sameDependsOnRatio != null) {

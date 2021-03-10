@@ -209,7 +209,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 		Map<Long, List<ProjectFile>> unusedFiles = unusedComponentDetector.unusedFiles();
 		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> unutilizedFiles = unutilizedAbstractionDetector.unutilizedFiles();
 		
-		Collection<LogicCouplingComponents<ProjectFile>> logicCouplingFiles = icdDependencyDetector.cochangesInDifferentModule();
+		Collection<LogicCouplingComponents<ProjectFile>> logicCouplingFiles = icdDependencyDetector.cochangesInDifferentFile();
 		Collection<SimilarComponents<ProjectFile>> similarFiles = similarComponentsDetector.fileSimilars();
 		
 		List<ProjectFile> allFiles = nodeService.queryAllFiles();

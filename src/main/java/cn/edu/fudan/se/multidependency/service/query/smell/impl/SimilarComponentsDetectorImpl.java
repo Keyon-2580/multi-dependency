@@ -1,10 +1,12 @@
 package cn.edu.fudan.se.multidependency.service.query.smell.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import cn.edu.fudan.se.multidependency.model.node.git.Commit;
+import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileRepository;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackagePairDetector;
+import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
+import org.neo4j.kernel.api.exceptions.index.IndexProxyAlreadyClosedKernelException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +46,12 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 	
 	@Autowired
 	private MetricCalculatorService metricCalculatorService;
+
+	@Autowired
+	private HotspotPackagePairDetector hotspotPackagePairDetector;
+
+	@Autowired
+	private CommitUpdateFileRepository commitUpdateFileRepository;
 	
 	@Override
 	public Collection<SimilarComponents<ProjectFile>> fileSimilars() {
@@ -89,7 +97,23 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 
 	@Override
 	public Collection<SimilarComponents<Package>> packageSimilars() {
+		List<HotspotPackagePair> hotspotPackagePairs = hotspotPackagePairDetector.detectHotspotPackagePairWithFileClone();
+		return getPackageSimilars(hotspotPackagePairs);
+	}
+
+	public Collection<SimilarComponents<Package>> getPackageSimilars(List<HotspotPackagePair> hotspotPackagePairs) {
 		List<SimilarComponents<Package>> result = new ArrayList<>();
+		for (HotspotPackagePair hotspotPackagePair : hotspotPackagePairs) {
+			Package pck1 = hotspotPackagePair.getPackage1();
+			Package pck2 = hotspotPackagePair.getPackage2();
+			Set<Commit> pck1CommitSet = new HashSet<>(commitUpdateFileRepository.findCommitInPackageByPackageId(pck1.getId()));
+			Set<Commit> pck2CommitSet = new HashSet<>(commitUpdateFileRepository.findCommitInPackageByPackageId(pck2.getId()));
+			Set<Commit> pckCommitSet = new HashSet<>(pck1CommitSet);
+			pckCommitSet.retainAll(pck2CommitSet);
+			SimilarComponents<Package> similarComponents = new SimilarComponents<>(pck1, pck2, hotspotPackagePair.getPackagePairRelationData().getValue(), pck1CommitSet.size(), pck2CommitSet.size(), pckCommitSet.size());
+			result.add(similarComponents);
+			result.addAll(getPackageSimilars(hotspotPackagePair.getChildrenHotspotPackagePairs()));
+		}
 		return result;
 	}
 	
