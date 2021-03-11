@@ -72,7 +72,7 @@ public class SmellDetectorService {
 
 		smellRepository.createCloneSmells();
 		smellRepository.createCloneSmellContains();
-		smellRepository.setSmellProject();
+		smellRepository.setCloneSmellProject();
 	}
 
 	public void createCycleDependencySmells(boolean isRecreate){

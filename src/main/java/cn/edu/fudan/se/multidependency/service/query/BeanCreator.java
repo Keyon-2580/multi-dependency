@@ -420,40 +420,51 @@ public class BeanCreator {
 
 	@Bean("smell")
 	public boolean configSmellDetect(PropertyConfig propertyConfig, ASRepository asRepository) {
-		if(propertyConfig.isDetectAS() && !asRepository.existModule()) {
+		if(propertyConfig.isDetectAS()) {
 			LOGGER.info("异味检测配置");
-			asRepository.createModule();
-			asRepository.createModuleDependsOn();
-			asRepository.createModuleContain();
-			asRepository.createProjectContainsModule();
-			asRepository.setModuleInstability();
+			if(!asRepository.existModule()){
+				asRepository.createModule();
+				asRepository.createModuleDependsOn();
+				asRepository.createModuleContain();
+				asRepository.createProjectContainsModule();
+				asRepository.setModuleInstability();
+			}
 			asRepository.setFileInstability();
 			asRepository.setPackageInstability();
+
+			if(propertyConfig.isCalculateDependsOn()) {
+				LOGGER.info("创建Cycle Dependency Smell节点关系...");
+				smellDetectorService.createCycleDependencySmells(false);
+				LOGGER.info("创建Cycle Dependency Smell节点关系完成");
+
+				LOGGER.info("创建Hub-Like Dependency Smell节点关系...");
+				smellDetectorService.createHubLikeDependencySmells(false);
+				LOGGER.info("创建Hub-Like Dependency Smell节点关系完成");
+
+				LOGGER.info("创建Unstable Dependency Smell节点关系...");
+				smellDetectorService.createUnstableDependencySmells(false);
+				LOGGER.info("创建Unstable Dependency Smell节点关系完成");
+			}
+
+			if(propertyConfig.isCalculateCloneGroup()){
+				LOGGER.info("创建Clone Smell节点关系...");
+				smellDetectorService.createCloneSmells(false);
+				LOGGER.info("创建Clone Smell节点关系完成");
+			}
+
+			if(propertyConfig.isCalculateCloneGroup() && propertyConfig.isCalculateCloneGroup()){
+				LOGGER.info("创建Similar Components Smell节点关系...");
+				smellDetectorService.createSimilarComponentsSmell(false);
+				LOGGER.info("创建Similar Components Smell节点关系完成");
+			}
+
+
+			if(propertyConfig.isCalculateCoChange()){
+				LOGGER.info("创建Logical Coupling Smell节点关系...");
+				smellDetectorService.createLogicalCouplingSmell(false);
+				LOGGER.info("创建Logical Coupling Smell节点关系完成");
+			}
 		}
-		LOGGER.info("创建Clone Smell节点关系...");
-		smellDetectorService.createCloneSmells(false);
-		LOGGER.info("创建Clone Smell节点关系完成");
-
-		LOGGER.info("创建Cycle Dependency Smell节点关系...");
-		smellDetectorService.createCycleDependencySmells(false);
-		LOGGER.info("创建Cycle Dependency Smell节点关系完成");
-
-		LOGGER.info("创建Hub-Like Dependency Smell节点关系...");
-		smellDetectorService.createHubLikeDependencySmells(false);
-		LOGGER.info("创建Hub-Like Dependency Smell节点关系完成");
-
-		LOGGER.info("创建Unstable Dependency Smell节点关系...");
-		smellDetectorService.createUnstableDependencySmells(false);
-		LOGGER.info("创建Unstable Dependency Smell节点关系完成");
-
-		LOGGER.info("创建Similar Components Smell节点关系...");
-		smellDetectorService.createSimilarComponentsSmell(false);
-		LOGGER.info("创建Similar Components Smell节点关系完成");
-
-		LOGGER.info("创建Logical Coupling Smell节点关系...");
-		smellDetectorService.createLogicalCouplingSmell(true);
-		LOGGER.info("创建Logical Coupling Smell节点关系完成");
-
 		return true;
 	}
 
