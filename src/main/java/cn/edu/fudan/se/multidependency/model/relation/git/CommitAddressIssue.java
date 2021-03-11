@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.model.relation.git;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.relation.RelationWithTimes;
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
@@ -20,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @RelationshipEntity(RelationType.str_COMMIT_ADDRESS_ISSUE)
-public class CommitAddressIssue implements Relation {
+public class CommitAddressIssue implements Relation, RelationWithTimes {
 
 	private static final long serialVersionUID = -3568010370559045060L;
 
@@ -33,6 +34,8 @@ public class CommitAddressIssue implements Relation {
 	
 	@EndNode
 	private Issue issue;
+
+	private int times = 1;
 
 	public CommitAddressIssue(Commit commit, Issue issue) {
 		this.commit = commit;
@@ -59,4 +62,8 @@ public class CommitAddressIssue implements Relation {
 		return RelationType.COMMIT_ADDRESS_ISSUE;
 	}
 
+	@Override
+	public void addTimes() {
+		times = 1;
+	}
 }

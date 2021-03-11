@@ -102,7 +102,7 @@ public class JiraIssueExtractor {
             issue.setType(IssueType.typeOfIssue(type));
 
             String summary = fields.getString("summary");
-            summary = summary == null ? "" : summary;
+            summary = (summary == null ? "" : summary.replaceAll("\\s"," "));;
             issue.setTitle(summary);
 
             JSONObject statusObject =  fields.getJSONObject("status");
@@ -121,7 +121,6 @@ public class JiraIssueExtractor {
             commitLinkUrl = commitLinkUrl == null ? "" : commitLinkUrl;
             issue.setCommitLinkUrl(commitLinkUrl);
 
-
             issue.setCreateTime(fields.getString("created"));
             issue.setUpdateTime(fields.getString("updated"));
             issue.setCloseTime(fields.getString("resolutiondate"));
@@ -134,7 +133,9 @@ public class JiraIssueExtractor {
             String issuelinks = (issuelinksArray == null || issuelinksArray.size() < 1 ) ? "" : issuelinksArray.getJSONObject(0).getString("displayName");
             issue.setIssueLinks(issuelinks);
 
-            issue.setDescription(fields.getString("description"));
+            String issueDescription = fields.getString("description");
+            issueDescription = (issueDescription == null ? "" : issueDescription.replaceAll("\\s"," "));
+            issue.setDescription(issueDescription);
 
             issue.setDeveloperName(reporter);
 

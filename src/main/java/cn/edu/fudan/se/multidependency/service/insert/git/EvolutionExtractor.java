@@ -144,6 +144,7 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
             }
         });
 
+        LOGGER.info("根据Git库当前文件，获取所有文件的变更历史索引（记录开始时间)...");
         Map<String, Set<String>> file2FormerPathMap = new HashMap<>();
         Map<String, Set<String>> former2filePathMap = new HashMap<>();
         List<File> files = new ArrayList<>();
@@ -173,12 +174,16 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
                 commitId2ChangeFiles.put(commitId, filePaths);
             });
         });
+        LOGGER.info("根据Git库当前文件，获取所有文件的变更历史索引(记录结束时间)");
 
         for (RevCommit revCommit : commits) {
-//        	System.out.println(revCommit.getName());
         	String authoredDate = new SimpleDateFormat(Constant.TIMESTAMP).format(revCommit.getAuthorIdent().getWhen());
         	boolean merge = revCommit.getParentCount() > 1;
         	Commit commit = null;
+            String shortMessage = revCommit.getShortMessage();
+            String fullMessage = revCommit.getFullMessage();
+            fullMessage = (fullMessage == null ? "" : fullMessage.replaceAll("\\s"," "));
+
         	if(branch != null) {
         		commit = this.getNodes().findCommitByCommitId(revCommit.getName());
         		if(commit != null) {
@@ -186,13 +191,14 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
         			continue;
         		} 
         		//添加commit节点
-        		commit = new Commit(generateEntityId(), revCommit.getName(), revCommit.getShortMessage(),
-        				revCommit.getFullMessage(), authoredDate, merge, revCommit.getCommitTime());
+
+        		commit = new Commit(generateEntityId(), revCommit.getName(), shortMessage,
+                        fullMessage, authoredDate, merge, revCommit.getCommitTime());
         		addNode(commit, null);
         		addRelation(new Contain(branch, commit));
         	} else {
-        		commit = new Commit(generateEntityId(), revCommit.getName(), revCommit.getShortMessage(),
-        				revCommit.getFullMessage(), authoredDate, merge, revCommit.getCommitTime());
+        		commit = new Commit(generateEntityId(), revCommit.getName(), shortMessage,
+                        fullMessage, authoredDate, merge, revCommit.getCommitTime());
         		addNode(commit, null);
         		//添加branch到commit的包含关系
         		List<Ref> branchesOfCommit = gitExtractor.getBranchesByCommitId(revCommit);
@@ -439,7 +445,6 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
     	issues = issueExtractor.extract();
     	Map<Integer, Issue> newIssues = issueExtractor.newIssues();
     	System.out.println("newIssues size: " + newIssues.size());
-//    	for (Issue issue : issues.values()) {
     	for (Issue issue : newIssues.values()) {
     		issue.setEntityId(generateEntityId());
     		addNode(issue, null);
@@ -462,7 +467,6 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
         commitToIssues = issueExtractor.getCommitToIssues();
         Map<Integer, Issue> newIssues = issueExtractor.newIssues();
         System.out.println("newIssues size: " + newIssues.size());
-//    	for (Issue issue : issues.values()) {
         for (Issue issue : newIssues.values()) {
             issue.setEntityId(generateEntityId());
             addNode(issue, null);

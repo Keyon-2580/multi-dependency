@@ -348,11 +348,20 @@ public class GitExtractor implements Closeable {
     }
 
     public Set<Integer> getRelationBtwCommitAndJiraIssue(RevCommit commit) {
-        String issueNumRegex = "[\\w]*-[1-9][0-9]*";
-        Set<Integer> issueNumFromShort = getMatcherForJira(issueNumRegex, commit.getShortMessage());
-        Set<Integer> issueNumFromFull = getMatcherForJira(issueNumRegex, commit.getFullMessage());
-        issueNumFromShort.addAll(issueNumFromFull);
-        return issueNumFromShort;
+        String shortMessage = commit.getShortMessage();
+        String fullMessage = commit.getFullMessage();
+        shortMessage = (shortMessage == null ? "" : shortMessage.replaceAll("\\s"," "));
+        fullMessage = (fullMessage == null ? "" : fullMessage.replaceAll("\\s"," "));
+
+        String issueNumRegex = "[^\\[\\s][A-Za-z_][\\w]*-[1-9][0-9]*[\\]\\s$]";
+//        Set<Integer> issueNumFromShort = getMatcherForJira(issueNumRegex, shortMessage);
+        Set<Integer> issueNumFromFull = getMatcherForJira(issueNumRegex, fullMessage);
+//        issueNumFromShort.addAll(issueNumFromFull);
+        String newIssueNumRegex = "^(\\[)[1-9][0-9]*(\\])(\\s)";
+        Set<Integer> newIssueNumFromShort = getMatcherForJiraNew(newIssueNumRegex, shortMessage);
+        issueNumFromFull.addAll(newIssueNumFromShort);
+        return issueNumFromFull;
+
     }
 
     public Set<Integer> getMatcherForJira(String regex, String source) {
@@ -361,7 +370,22 @@ public class GitExtractor implements Closeable {
         Matcher matcher = pattern.matcher(source);
         while (matcher.find()) {
             String tmp = matcher.group();
-            result.add(Integer.parseInt(tmp.substring(tmp.lastIndexOf("-") + 1)));
+            int endIndex = tmp.length();
+            if(tmp.endsWith("]") || tmp.endsWith(" ")){
+                endIndex = endIndex - 1;
+            }
+            result.add(Integer.parseInt(tmp.substring(tmp.lastIndexOf("-") + 1, endIndex)));
+        }
+        return result;
+    }
+
+    public Set<Integer> getMatcherForJiraNew(String regex, String source) {
+        Set<Integer> result = new HashSet<>();
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(source);
+        while (matcher.find()) {
+            String tmp = matcher.group();
+            result.add(Integer.parseInt(tmp.substring(tmp.lastIndexOf("[") + 1, tmp.lastIndexOf("]"))));
         }
         return result;
     }
