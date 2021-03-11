@@ -116,15 +116,15 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 	@Query("match (n:Smell) return n limit 10")
 	List<Smell> findSmellWithLimit();
 
-	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) " +
-			"WITH smell, count(file) as size, sum(file.noc) as noc, sum(file.nom) as nom, sum(file.loc) as loc " +
-			"RETURN  smell,size,noc,nom,loc;")
+	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)<-[:" + RelationType.str_CONTAIN  + "]-(p:Package) " +
+			"WITH smell,count(distinct p) as nop, count(distinct file) as nof, sum(file.noc) as noc, sum(file.nom) as nom, sum(file.loc) as loc " +
+			"RETURN  smell,nop,nof,noc,nom,loc;")
 	public List<SmellMetric.StructureMetric> calculateSmellStructureMetricInFileLevel();
 
-	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) " +
+	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)<-[:" + RelationType.str_CONTAIN  + "]-(p:Package) " +
 			"where id(smell)= $smellId " +
-			"WITH smell, count(file) as size, sum(file.noc) as noc, sum(file.nom) as nom, sum(file.loc) as loc " +
-			"RETURN  smell,size,noc,nom,loc;")
+			"WITH smell,count(distinct p) as nop, count(distinct file) as nof, sum(file.noc) as noc, sum(file.nom) as nom, sum(file.loc) as loc " +
+			"RETURN  smell,nop,nof,noc,nom,loc;")
 	public SmellMetric.StructureMetric calculateSmellStructureMetricInFileLevel(@Param("smellId") long smellId);
 
 	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +

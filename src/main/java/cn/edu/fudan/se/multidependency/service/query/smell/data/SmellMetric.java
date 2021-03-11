@@ -37,7 +37,16 @@ public class SmellMetric {
 	public class StructureMetric {
 		private Smell smell;
 
-		private int size;
+		/**
+		 * 包数
+		 */
+		private int nop;
+
+		/**
+		 * 文件数
+		 */
+		private int nof;
+
 		/**
 		 * 类数
 		 */

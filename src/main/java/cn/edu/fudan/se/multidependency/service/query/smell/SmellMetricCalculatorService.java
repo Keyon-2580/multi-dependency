@@ -45,7 +45,8 @@ public class SmellMetricCalculatorService {
 				metric.setNodeType(smell.getNodeType());
 
 				Map<String, Object> metricValues =  new HashMap<>();
-				metricValues.put(MetricType.SIZE, smellMetric.getStructureMetric().getSize());
+				metricValues.put(MetricType.NOF, smellMetric.getStructureMetric().getNof());
+				metricValues.put(MetricType.NOP, smellMetric.getStructureMetric().getNop());
 				metricValues.put(MetricType.NOC, smellMetric.getStructureMetric().getNoc());
 				metricValues.put(MetricType.NOM, smellMetric.getStructureMetric().getNom());
 				metricValues.put(MetricType.LOC, smellMetric.getStructureMetric().getLoc());
