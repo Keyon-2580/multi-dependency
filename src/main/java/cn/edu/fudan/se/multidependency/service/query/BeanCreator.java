@@ -556,9 +556,12 @@ public class BeanCreator {
 		}
 
 		LOGGER.info("创建Smell Metric度量值节点和关系...");
-//		smellMetricCalculatorService.createSmellMetricNodesInFileLevel();
-		Map<Smell, Metric> smellMetricMap = smellMetricCalculatorService.generateSmellMetricNodesInFileLevel();
-		if(smellMetricMap != null && !smellMetricMap.isEmpty()){
+		Map<Smell, Metric> smellMetricMap = new HashMap<>();
+		Map<Smell, Metric> fileSmellMetricMap = smellMetricCalculatorService.generateSmellMetricNodesInFileLevel();
+		Map<Smell, Metric> packageSmellMetricMap = smellMetricCalculatorService.generateSmellMetricNodesInPackageLevel();
+		smellMetricMap.putAll(fileSmellMetricMap);
+		smellMetricMap.putAll(packageSmellMetricMap);
+		if(!smellMetricMap.isEmpty()){
 			Collection<Metric> fileMetricNodes = smellMetricMap.values();
 			metricRepository.saveAll(fileMetricNodes);
 
