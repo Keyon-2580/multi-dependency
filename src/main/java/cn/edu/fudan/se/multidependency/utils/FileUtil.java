@@ -79,6 +79,25 @@ public class FileUtil {
 		return filePath;
 	}
 
+	/**
+	 * 输入：D:\\multiple-dependency-project\\depends-update\\depends\\src\\main\\java\\depends\\format\\AbstractFormatDependencyDumper.java
+	 * 输出：src/main/java/depends/format/AbstractFormatDependencyDumper.java
+	 * @param fileFullPath
+	 * @param projectFullPath
+	 * @return
+	 */
+	public static String extractRelativePath(String fileFullPath, String projectFullPath) {
+		String filePath = fileFullPath;
+		filePath = filePath.replace(SLASH_WINDOWS, SLASH_LINUX);
+		String projectPath = projectFullPath;
+		projectPath = projectPath.replace(SLASH_WINDOWS, SLASH_LINUX);
+		if(projectPath.endsWith(SLASH_LINUX)){
+			projectPath.substring(0,projectPath.length()-1);
+		}
+		filePath = filePath.substring(projectPath.length() + 1);
+		return filePath;
+	}
+
 	public static void main(String[] args) {
 //		String filePath = "D:\\multiple-dependency-project\\depends-update\\depends\\src\\main\\java\\depends\\format\\AbstractFormatDependencyDumper.java";
 //		System.out.println(extractFilePath(filePath, "/depends"));

@@ -11,6 +11,11 @@ public class Constant {
 	
 	public static final int COUNT_OF_MIN_COCHANGE = 3;
 
+	public static final String ISSUE_FROM_JIRA = "jira";
+	public static final String ISSUE_FROM_GITHUB = "github";
+
+	public static final String[] FILE_SUFFIX = new String[]{".java", ".c", ".cpp", ".cc", ".h",".JAVA", ".C", ".CPP", ".CC", ".H"};
+
 	public static final String PROJECT_STRUCTURE_TREEMAP = "PROJECT_STRUCTURE_TREEMAP";
 	public static final String PROJECT_STRUCTURE_CIRCLE_PACKING = "PROJECT_STRUCTURE_CIRCLE_PACKING";
 

@@ -3,24 +3,29 @@ package cn.edu.fudan.se.multidependency.service.insert.git;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+import cn.edu.fudan.se.multidependency.service.insert.InserterForNeo4j;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.LogCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.diff.DiffAlgorithm;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectReader;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.RawTextComparator;
+import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.errors.CorruptObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.lib.*;
+import org.eclipse.jgit.patch.FileHeader;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -36,10 +41,13 @@ import com.google.common.collect.Lists;
 
 import cn.edu.fudan.se.multidependency.config.Constant;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
+import org.eclipse.jgit.util.io.DisabledOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GitExtractor implements Closeable {
 	
-//	private static final Logger LOGGER = LoggerFactory.getLogger(GitExtractor.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(GitExtractor.class);
 
     private String gitProjectPath;
 
@@ -97,12 +105,31 @@ public class GitExtractor implements Closeable {
     	return gitProjectPath;
     }
 
+    public Repository getRepository() {
+        return repository;
+    }
+
     public List<RevCommit> getAllCommits() {
         try{
+            ObjectId lastCommitId = git.getRepository().resolve(org.eclipse.jgit.lib.Constants.HEAD);
+            RevWalk rw = new RevWalk(git.getRepository());
+            RevCommit latestCommit = rw.parseCommit(lastCommitId);
+            if(latestCommit.getParentCount() > 1){
+                LOGGER.error("Commit时间设定错误，最新的commit类型不能为Merge！！！");
+                return new ArrayList<>();
+            }
+
             Iterable<RevCommit> commits = git.log().setRevFilter(RevFilter.NO_MERGES).call();
-//            Iterable<RevCommit> commits = git.log().call();
             return Lists.newArrayList(commits.iterator());
         }catch (GitAPIException e){
+            e.printStackTrace();
+        } catch (IncorrectObjectTypeException e) {
+            e.printStackTrace();
+        } catch (AmbiguousObjectException e) {
+            e.printStackTrace();
+        } catch (MissingObjectException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return new ArrayList<>();
@@ -127,12 +154,35 @@ public class GitExtractor implements Closeable {
         try {
             Date sinceDate = simpleDateFormat.parse(since);
             Date untilDate = simpleDateFormat.parse(until);
+
+            ObjectId lastCommitId = git.getRepository().resolve(org.eclipse.jgit.lib.Constants.HEAD);
+            RevWalk rw = new RevWalk(git.getRepository());
+            RevCommit latestCommit = rw.parseCommit(lastCommitId);
+            if(latestCommit.getParentCount() > 1){
+                LOGGER.error("Commit时间设定错误，最新的commit类型不能为Merge！！！");
+                return new ArrayList<>();
+            }
+
+            Date latestCommitTime = latestCommit.getAuthorIdent().getWhen();
+            if(latestCommitTime.after(untilDate)){
+                LOGGER.error("Commit时间设定错误，当前最新的commit时间晚于设定最新时间，请推后设定最新时间！！！");
+                return new ArrayList<>();
+            }
+
             RevFilter between = CommitTimeRevFilter.between(sinceDate, untilDate);
             RevFilter filter = removeMerge ? AndRevFilter.create(between, RevFilter.NO_MERGES) : between;
             Iterable<RevCommit> commits = git.log().setRevFilter(filter).call();
 //            Iterable<RevCommit> commits = git.log().setRevFilter(between).call();
             return Lists.newArrayList(commits.iterator());
         } catch (ParseException | GitAPIException e) {
+            e.printStackTrace();
+        } catch (IncorrectObjectTypeException e) {
+            e.printStackTrace();
+        } catch (AmbiguousObjectException e) {
+            e.printStackTrace();
+        } catch (MissingObjectException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return new ArrayList<>();
@@ -150,12 +200,103 @@ public class GitExtractor implements Closeable {
     public List<DiffEntry> getDiffBetweenCommits(RevCommit revCommit, RevCommit parentRevCommit) {
         AbstractTreeIterator currentTreeParser = prepareTreeParser(revCommit.getName());
         AbstractTreeIterator prevTreeParser = prepareTreeParser(parentRevCommit.getName());
-        try {
-        	return git.diff().setNewTree(currentTreeParser).setOldTree(prevTreeParser).call();
-        } catch (GitAPIException e) {
+        OutputStream outputStream = DisabledOutputStream.INSTANCE;
+        try(DiffFormatter formatter = new DiffFormatter(outputStream)){
+            formatter.setRepository(git.getRepository());
+            formatter.setDetectRenames(true);
+            formatter.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);
+            formatter.setDiffAlgorithm(DiffAlgorithm.getAlgorithm(DiffAlgorithm.SupportedAlgorithm.HISTOGRAM));
+        	return formatter.scan( prevTreeParser,currentTreeParser);
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return new ArrayList<>();
+    }
+
+    public Map<DiffEntry, FileHeader> getDiffBetweenCommitsWithFileHeader(RevCommit revCommit, RevCommit parentRevCommit) {
+        AbstractTreeIterator currentTreeParser = prepareTreeParser(revCommit.getName());
+        AbstractTreeIterator prevTreeParser = prepareTreeParser(parentRevCommit.getName());
+        OutputStream outputStream = DisabledOutputStream.INSTANCE;
+        DiffFormatter formatter = null;
+        List<DiffEntry> diffs = new ArrayList<>();
+        try{
+            formatter = new DiffFormatter(outputStream);
+            formatter.setRepository(git.getRepository());
+            formatter.setDetectRenames(true);
+            formatter.setDiffComparator(RawTextComparator.WS_IGNORE_ALL);
+            formatter.setDiffAlgorithm(DiffAlgorithm.getAlgorithm(DiffAlgorithm.SupportedAlgorithm.HISTOGRAM));
+            diffs = formatter.scan( prevTreeParser,currentTreeParser);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Map<DiffEntry, FileHeader> result = new HashMap<>();
+        for (DiffEntry diff : diffs) {
+            String newPath = diff.getNewPath();
+            String oldPath = diff.getOldPath();
+            String changeType = diff.getChangeType().name();
+            String currentPath = DiffEntry.ChangeType.DELETE.name().equals(changeType) ? oldPath : newPath;
+
+            if (FileUtil.isFiltered(currentPath, Constant.FILE_SUFFIX)) {
+                continue;
+            }
+
+            try {
+                FileHeader fileHeader = formatter.toFileHeader(diff);
+                result.put(diff,fileHeader);
+            }catch (CorruptObjectException e) {
+                e.printStackTrace();
+            } catch (MissingObjectException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+        return result;
+    }
+
+    public List<String> getRepoFilePath(InserterForNeo4j neo4jRepository){
+        List<String> filePaths = new ArrayList<>();
+        List<File> files = new ArrayList<>();
+        FileUtil.listFiles(repository.getWorkTree(), files);
+        for (File file : files) {
+            String filePath1 = file.getPath();
+            if (FileUtil.isFiltered(filePath1, Constant.FILE_SUFFIX))
+                continue;
+            String filePath = FileUtil.extractRelativePath(filePath1, gitProjectPath);
+            String databaseFilePath = "/" + getRepositoryName() + "/" + filePath;
+            if(neo4jRepository.getNodes().findFileByPathRecursion(databaseFilePath) != null){
+                filePaths.add(filePath);
+            }
+        }
+        return filePaths;
+    }
+
+    public List<String> getProjectFileChangeCommitIds(String gitFilePath) {
+        List<String> commitIds = new ArrayList<>();
+        try {
+            LogCommand log = git.log();
+            log.addPath(gitFilePath);
+
+            Iterable<RevCommit> logMsgs = log.setRevFilter(RevFilter.NO_MERGES).call();
+            List<RevCommit> commits = Lists.newArrayList(logMsgs.iterator());
+            Collections.sort(commits, new Comparator<RevCommit>() {
+                @Override
+                public int compare(RevCommit o1, RevCommit o2) {
+                    return o2.getCommitTime()-o1.getCommitTime();
+                }
+            });
+
+            commits.forEach(revCommit -> {
+                commitIds.add(revCommit.getName());
+            });
+        } catch (NoHeadException e) {
+            e.printStackTrace();
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+        }
+
+        return commitIds;
     }
 
     private CanonicalTreeParser prepareTreeParser(String objectId) {

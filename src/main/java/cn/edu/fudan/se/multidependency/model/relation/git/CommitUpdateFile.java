@@ -36,6 +36,9 @@ public class CommitUpdateFile implements Relation {
 
 	private String updateType;
 
+	private int addLines = 0;
+
+	private int subLines = 0;
 
 	public CommitUpdateFile(Commit commit, ProjectFile file, String updateType){
 		this.commit = commit;
@@ -62,6 +65,8 @@ public class CommitUpdateFile implements Relation {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("updateType", getUpdateType() == null ? "" : getUpdateType());
+		properties.put("addLines", getAddLines());
+		properties.put("subLines", getSubLines());
 		return properties;
 	}
 

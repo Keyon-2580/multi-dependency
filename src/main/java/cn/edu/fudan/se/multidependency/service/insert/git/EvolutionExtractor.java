@@ -1,11 +1,16 @@
 package cn.edu.fudan.se.multidependency.service.insert.git;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.diff.Edit;
+import org.eclipse.jgit.diff.EditList;
+import org.eclipse.jgit.lib.Ref;;
+import org.eclipse.jgit.patch.FileHeader;
+import org.eclipse.jgit.patch.HunkHeader;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +41,6 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
     private Map<Integer, Issue> issues;
 
     private Map<String, Set<Issue>> commitToIssues;
-
-    private static final String[] SUFFIX = new String[]{".java", ".c", ".cpp", ".cc", ".h"};
 
     private GitConfig gitConfig;
     
@@ -70,11 +73,11 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
 
         LOGGER.info(gitExtractor.getGitPath() + " " + gitExtractor.getRepositoryPath() + " " + gitExtractor.getRepositoryName() + " " + gitRepository.getPath());
 
-        if(!gitConfig.getIssueFrom().isEmpty()){
+        if(gitConfig.getIssueFrom() != null && !gitConfig.getIssueFrom().isEmpty()){
             String issueFrom = gitConfig.getIssueFrom().toLowerCase();
-            if("jira".equals(issueFrom)){
+            if(Constant.ISSUE_FROM_JIRA.equals(issueFrom)){
                 addJiraIssues();
-            }else if("github".equals(issueFrom)){
+            }else if(Constant.ISSUE_FROM_GITHUB.equals(issueFrom)){
                 addIssues();
             }
         }
@@ -133,6 +136,44 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
         int afterReleaseCommits = 0;
         LOGGER.info(gitRepository.getName() + ", commit 数量：" + commits.size());
 //      Collections.reverse(commits);
+
+        Collections.sort(commits, new Comparator<RevCommit>() {
+            @Override
+            public int compare(RevCommit o1, RevCommit o2) {
+                return o2.getCommitTime()-o1.getCommitTime();
+            }
+        });
+
+        Map<String, Set<String>> file2FormerPathMap = new HashMap<>();
+        Map<String, Set<String>> former2filePathMap = new HashMap<>();
+        List<File> files = new ArrayList<>();
+        FileUtil.listFiles(gitExtractor.getRepository().getWorkTree(), files);
+        for (File file : files) {
+            String gitFilePath = file.getPath();
+            if (FileUtil.isFiltered(gitFilePath, Constant.FILE_SUFFIX))
+                continue;
+            String filePath = FileUtil.extractRelativePath(gitFilePath, gitConfig.getPath());
+            String databaseFilePath = "/" + gitExtractor.getRepositoryName() + "/" + filePath;
+            ProjectFile projectFile = this.getNodes().findFileByPathRecursion(databaseFilePath);
+            if(projectFile != null){
+                file2FormerPathMap.put(filePath, new HashSet<>());
+            }
+        }
+
+        Map<String, List<String>> file2CommitIds = new HashMap<>();
+        for (String path : file2FormerPathMap.keySet()){
+            file2CommitIds.put(path,gitExtractor.getProjectFileChangeCommitIds(path));
+        }
+
+        Map<String, List<String>> commitId2ChangeFiles = new HashMap<>();
+        file2CommitIds.forEach((path,commitIds)->{
+            commitIds.forEach(commitId ->{
+                List<String> filePaths =  commitId2ChangeFiles.getOrDefault(commitId, new ArrayList<>());
+                filePaths.add(path);
+                commitId2ChangeFiles.put(commitId, filePaths);
+            });
+        });
+
         for (RevCommit revCommit : commits) {
 //        	System.out.println(revCommit.getName());
         	String authoredDate = new SimpleDateFormat(Constant.TIMESTAMP).format(revCommit.getAuthorIdent().getWhen());
@@ -184,39 +225,160 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
             }
             addRelation(new DeveloperSubmitCommit(developer, commit));
 
+            List<String> changeFiles = commitId2ChangeFiles.get(revCommit.getName());
+            Map<String, CommitUpdateFile> fileToCommitUpdateFileRelations = new HashMap<>();
+            //添加changeFiles到commit的关系
+            if(changeFiles != null && !changeFiles.isEmpty()) {
+                for (String changeFile : changeFiles) {
+                    String relationFilePath = "/" + gitExtractor.getRepositoryName() + "/" + changeFile;
+                    CommitUpdateFile update = createCommitUpdateFileRelation(relationFilePath, commit, "", 0, 0);
+                    fileToCommitUpdateFileRelations.put(changeFile, update);
+                }
+            }
+
             //添加commit到commit的继承关系
-            if (revCommit.getParentCount() > 0) {
+            if(revCommit.getParentCount() > 0){
                 RevCommit[] parentRevCommits = revCommit.getParents();
                 for (RevCommit parentRevCommit : parentRevCommits) {
-                	Commit parentCommit = this.getNodes().findCommitByCommitId(parentRevCommit.getName());
-                	if (parentCommit != null) {
-                		addRelation(new CommitInheritCommit(commit, parentCommit));
-                	}
-                	
-                	//添加commit到file的更新关系
-                	for (DiffEntry diff : gitExtractor.getDiffBetweenCommits(revCommit, parentRevCommit)) {
-                		String newPath = "/" + gitExtractor.getRepositoryName() + "/" + diff.getNewPath();
-                		String oldPath = "/" + gitExtractor.getRepositoryName() + "/" + diff.getOldPath();
-                		String changeType = diff.getChangeType().name();
-                		String path = DiffEntry.ChangeType.DELETE.name().equals(changeType) ? oldPath : newPath;
-                		if (FileUtil.isFiltered(newPath, SUFFIX)) {
-                			continue;
-                		}
-                		addCommitUpdateFileRelation(path, commit, changeType);
-                	}
+//                	Commit parentCommit = this.getNodes().findCommitByCommitId(parentRevCommit.getName());
+//                	if (parentCommit != null) {
+//                		addRelation(new CommitInheritCommit(commit, parentCommit));
+//                	}
+
+                	//当commit为Merge，或者当前commit不关联目标分析文件时，跳过
+                    if(changeFiles == null || revCommit.getParentCount() > 1){
+                        continue;
+                    }
+                    //添加commit到file的更新关系
+                    Map<DiffEntry, FileHeader> diffs = gitExtractor.getDiffBetweenCommitsWithFileHeader(revCommit, parentRevCommit);
+                    for(Map.Entry<DiffEntry, FileHeader> entry : diffs.entrySet()) {
+                        DiffEntry diff = entry.getKey();
+                        String changeType = diff.getChangeType().name();
+                        String diffFilePath = DiffEntry.ChangeType.DELETE.name().equals(changeType) ? diff.getOldPath() : diff.getNewPath();
+
+                        String projectFilePath = diffFilePath;
+                        Set<String> formerPaths = file2FormerPathMap.get(diffFilePath);
+                        Set<String> filePaths = former2filePathMap.get(diffFilePath);
+                        if (formerPaths == null && filePaths == null) {
+                            continue;
+                        } else if (filePaths != null && !filePaths.isEmpty()) {
+                            boolean isUse = false;
+                            for (String filePath : filePaths) {
+                                if (changeFiles.contains(filePath)) {
+                                    projectFilePath = filePath;
+                                    isUse = true;
+                                    break;
+                                }
+                            }
+                            if (!isUse){
+                                continue;
+                            }
+                        }
+
+                        String finalProjectFilePath = projectFilePath;
+                        List<String> commitIds = file2CommitIds.get(finalProjectFilePath);
+                        CommitUpdateFile update = fileToCommitUpdateFileRelations.get(finalProjectFilePath);
+
+                        if(commitIds != null && !commitIds.isEmpty() && update !=null && commitIds.contains(revCommit.getName())){
+                            commitIds.removeIf(value -> value.equals(revCommit.getName()));
+                            file2CommitIds.put(finalProjectFilePath, commitIds);
+                            changeFiles.removeIf(value -> value.equals(finalProjectFilePath));
+
+                            FileHeader fileHeader = entry.getValue();
+                            List<HunkHeader> hunks = (List<HunkHeader>) fileHeader.getHunks();
+                            int addSize = 0;
+                            int subSize = 0;
+                            for(HunkHeader hunkHeader:hunks){
+                                EditList editList = hunkHeader.toEditList();
+                                for(Edit edit : editList){
+                                    subSize += edit.getEndA()-edit.getBeginA();
+                                    addSize += edit.getEndB()-edit.getBeginB();
+                                }
+                            }
+                            update.setAddLines(addSize);
+                            update.setSubLines(subSize);
+                            update.setUpdateType(changeType);
+                            fileToCommitUpdateFileRelations.put(finalProjectFilePath,update);
+
+                            if(commitIds.isEmpty()){
+                                file2FormerPathMap.keySet().removeIf(key -> key.equals(finalProjectFilePath));
+                                file2CommitIds.keySet().removeIf(value -> value.equals(finalProjectFilePath));
+                                continue;
+                            }
+
+                            if(DiffEntry.ChangeType.RENAME.name().equals(changeType) || DiffEntry.ChangeType.COPY.name().equals(changeType)){
+                                if(!(diff.getNewPath().equals(diff.getOldPath())) && !finalProjectFilePath.equals(diff.getOldPath())){
+                                    Set<String> newFormerPaths = file2FormerPathMap.get(finalProjectFilePath);
+                                    newFormerPaths.add(diff.getOldPath());
+                                    file2FormerPathMap.put(finalProjectFilePath, newFormerPaths);
+                                    Set<String> newPjFilePaths = former2filePathMap.getOrDefault(diff.getOldPath(),new HashSet<>());
+                                    newPjFilePaths.add(finalProjectFilePath);
+                                    former2filePathMap.put(diff.getOldPath(),newPjFilePaths);
+                                }
+                            }
+                        }else {
+                            continue;
+                        }
+                    }
+
+
                 }
             } else {
                 List<String> filesPath = gitExtractor.getCommitFilesPath(revCommit);
                 for (String path : filesPath) {
-                    if (FileUtil.isFiltered(path, SUFFIX)) continue;
-                    path = "/" + gitExtractor.getRepositoryName() + "/" + path;
-                    addCommitUpdateFileRelation(path, commit, DiffEntry.ChangeType.ADD.name());
+                    if (FileUtil.isFiltered(path, Constant.FILE_SUFFIX)) continue;
+
+                    String projectFilePath = path;
+                    Set<String> formerPaths = file2FormerPathMap.get(path);
+                    Set<String> filePaths = former2filePathMap.get(path);
+                    if (formerPaths == null && filePaths == null) {
+                        continue;
+                    } else if (filePaths != null && !filePaths.isEmpty()) {
+                        boolean isUse = false;
+                        for (String filePath : filePaths) {
+                            if (changeFiles.contains(filePath)) {
+                                projectFilePath = filePath;
+                                isUse = true;
+                                break;
+                            }
+                        }
+                        if (!isUse){
+                            continue;
+                        }
+                    }
+
+                    String finalProjectFilePath = projectFilePath;
+                    List<String> commitIds = file2CommitIds.get(finalProjectFilePath);
+                    CommitUpdateFile update = fileToCommitUpdateFileRelations.get(finalProjectFilePath);
+
+                    if(commitIds != null && !commitIds.isEmpty() && update != null && commitIds.contains(revCommit.getName())){
+                        update.setUpdateType(DiffEntry.ChangeType.ADD.name());
+                        changeFiles.removeIf(value -> value.equals(finalProjectFilePath));
+                    }
                 }
+            }
+
+            //插入CommitUpdateFile关系到关系库中
+            fileToCommitUpdateFileRelations.forEach((file, update) ->{
+                addRelation(update);
+            });
+
+
+            if(changeFiles != null && !changeFiles.isEmpty()){
+                LOGGER.warn("Commit update file分析不准确，commitid is：" + revCommit.getName());
+                changeFiles.forEach( changeFile -> {
+                    List<String> commitIds = file2CommitIds.get(changeFile);
+                    if(commitIds != null){
+                        commitIds.removeIf(value -> value.equals(revCommit.getName()));
+                        file2CommitIds.put(changeFile, commitIds);
+                    }
+                    LOGGER.warn("影响文件为: " + changeFile);
+                });
             }
             
             //添加Commit到Issue的关系
             if (issues != null && !issues.isEmpty() && commit.isUsingForIssue() && !commit.isMerge()) {
-                if("github".equals(gitConfig.getIssueFrom().toLowerCase())){
+                if(Constant.ISSUE_FROM_GITHUB.equals(gitConfig.getIssueFrom().toLowerCase())){
                     Collection<Integer> issuesNum = gitExtractor.getRelationBtwCommitAndIssue(revCommit);
                     for (Integer issueNum : issuesNum) {
                         if (issues.containsKey(issueNum)) {
@@ -225,7 +387,7 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
                     }
                 }
 
-                if("jira".equals(gitConfig.getIssueFrom().toLowerCase())){
+                if(Constant.ISSUE_FROM_JIRA.equals(gitConfig.getIssueFrom().toLowerCase())){
                     //通过issueLink 进行关联
                     Set<Issue> issueSet = commitToIssues.get(commit.getCommitId());
                     if(issueSet != null && issueSet.size() > 0){
@@ -249,12 +411,13 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
         System.out.println(gitRepository.getName() + " " + beforeReleaseCommits + ", " + afterReleaseCommits);
     }
     
-    private CommitUpdateFile addCommitUpdateFileRelation(String filePath, Commit commit, String updateType) {
+    private CommitUpdateFile createCommitUpdateFileRelation(String filePath, Commit commit, String updateType,int addLines, int subLines) {
         ProjectFile file = this.getNodes().findFileByPathRecursion(filePath);
         CommitUpdateFile update = null;
         if (file != null) {
         	update = new CommitUpdateFile(commit, file, updateType);
-            addRelation(update);
+            update.setAddLines(addLines);
+            update.setSubLines(subLines);
         }
         return update;
     }

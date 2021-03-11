@@ -21,7 +21,7 @@ public interface CommitRepository extends Neo4jRepository<Commit, Long> {
 	
     @Query("match (project:Project)-[:" + RelationType.str_CONTAIN + "*2]->(:ProjectFile)<-[:"
             + RelationType.str_COMMIT_UPDATE_FILE + "]-(commit:Commit) " +
-            "where id(project)=$projectId and (commit.merge=false or commit.merge is null) " +
+            "where id(project)=$projectId " +
             "return distinct commit;")
     List<Commit> queryCommitsInProject(@Param("projectId") long projectId);
 

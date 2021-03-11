@@ -65,8 +65,8 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 			"nodeProjection: \'ProjectFile\', " +
 			"relationshipProjection: \'" + RelationType.str_CLONE + "\'}) " +
 			"YIELD nodeId, componentId " +
-			"with componentId as setId, collect(gds.util.asNode(nodeId)) AS files\n" +
-			"where size(files) > 1\n" +
+			"with componentId as setId, collect(gds.util.asNode(nodeId)) AS files " +
+			"where size(files) > 1 " +
 			"match (file:ProjectFile) where file in files set file.cloneGroupId = \"file_group_\" + setId;")
 	void setFileGroup();
 
@@ -88,22 +88,25 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 	@Query("MATCH (n:Smell)-[:CONTAIN]->(file:ProjectFile) where n.language is null with n, file set n.language = file.language;\n")
 	void setSmellLanguage();
 
-	@Query("match (cloneGroup:CloneGroup) \r\n" +
+	@Query("match (cloneGroup:CloneGroup) " +
 			"create (:Smell{name: cloneGroup.name, size: cloneGroup.size,language: cloneGroup.language,level: \'" +
 			SmellLevel.FILE + "\', type:\'" + SmellType.CLONE + "\',entityId: -1});\n")
 	void createCloneSmells();
 
-	@Query("MATCH (smell:Smell) with smell \r\n" +
-			"match (cloneGroup:CloneGroup)-[:" + RelationType.str_CONTAIN + "]-(file:ProjectFile)\r\n" +
+	@Query("MATCH (smell:Smell) with smell " +
+			"match (cloneGroup:CloneGroup)-[:" + RelationType.str_CONTAIN + "]-(file:ProjectFile) " +
 			"where cloneGroup.name = smell.name " +
 			"create (smell)-[:" + RelationType.str_CONTAIN + "]->(file);\n")
 	void createCloneSmellContains();
 
 	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)<-[:" +
-			RelationType.str_CONTAIN + "*2]-(p:Project)\r\n" +
-			"with smell, p \r\n" +
-			"set smell += {projectId : id(p), projectName : p.name};\n")
-	void setSmellProject();
+			RelationType.str_CONTAIN + "*2]-(p:Project) " +
+			"where smell.type = \'" + SmellType.CLONE + "\' " +
+			"with smell, " +
+			"  reduce(tmp = \'\', pj in collect(distinct p) | tmp + (pj.name + \'_\'))  as name, " +
+			"  head(collect(distinct p))  as pj " +
+			"set smell += {projectId : id(pj), projectName : name};\n")
+	void setCloneSmellProject();
 
 	/**
 	 * 判断是否存在co-change关系
@@ -113,43 +116,43 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 	@Query("match (n:Smell) return n limit 10")
 	List<Smell> findSmellWithLimit();
 
-	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) \r\n" +
-			"WITH smell, count(file) as size, sum(file.noc) as noc, sum(file.nom) as nom, sum(file.loc) as loc \r\n" +
+	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) " +
+			"WITH smell, count(file) as size, sum(file.noc) as noc, sum(file.nom) as nom, sum(file.loc) as loc " +
 			"RETURN  smell,size,noc,nom,loc;")
 	public List<SmellMetric.StructureMetric> calculateSmellStructureMetricInFileLevel();
 
-	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) \r\n" +
-			"where id(smell)= $smellId\r\n" +
-			"WITH smell, count(file) as size, sum(file.noc) as noc, sum(file.nom) as nom, sum(file.loc) as loc \r\n" +
+	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) " +
+			"where id(smell)= $smellId " +
+			"WITH smell, count(file) as size, sum(file.noc) as noc, sum(file.nom) as nom, sum(file.loc) as loc " +
 			"RETURN  smell,size,noc,nom,loc;")
 	public SmellMetric.StructureMetric calculateSmellStructureMetricInFileLevel(@Param("smellId") long smellId);
 
 	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
-			"]-(c:Commit)<-[:" + RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]-(d:Developer) \r\n" +
-			"where id(smell)= $smellId\r\n" +
-			"WITH smell, count(distinct c) as commits,count(c) as totalCommits,count(distinct d) as developers,count(d) as totalDevelopers \r\n" +
+			"]-(c:Commit)<-[:" + RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]-(d:Developer) " +
+			"where id(smell)= $smellId " +
+			"WITH smell, count(distinct c) as commits,count(c) as totalCommits,count(distinct d) as developers,count(d) as totalDevelopers " +
 			"RETURN  smell,commits,totalCommits,developers,totalDevelopers;")
 	public SmellMetric.EvolutionMetric calculateSmellEvolutionMetricInFileLevel(@Param("smellId") long smellId);
 
 	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
 			"]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(file2:ProjectFile)<- [:" +
-			RelationType.str_CONTAIN + "]-(smell) \r\n" +
-			"where id(smell)= $smellId and id(file1) < id(file2) and size((file1)-[:" + RelationType.str_CO_CHANGE +"]-(file2)) > 0 \r\n" +
+			RelationType.str_CONTAIN + "]-(smell) " +
+			"where id(smell)= $smellId and id(file1) < id(file2) and size((file1)-[:" + RelationType.str_CO_CHANGE +"]-(file2)) > 0 " +
 			"WITH smell, count(distinct c) as coChangeCommits,count(c) as totalCoChangeCommits,collect(distinct file1) as coFiles1," +
-			"     collect(distinct file2) as coFiles2\r\n" +
+			"     collect(distinct file2) as coFiles2 " +
 			"WITH smell,coChangeCommits,totalCoChangeCommits," +
-			"     reduce(tmp=size(coFiles1), file in coFiles2 | tmp + (case when file in coFiles1 then 0 else 1 end)) as coChangeFiles\r\n" +
+			"     reduce(tmp=size(coFiles1), file in coFiles2 | tmp + (case when file in coFiles1 then 0 else 1 end)) as coChangeFiles " +
 			"RETURN  smell,coChangeCommits,totalCoChangeCommits,coChangeFiles;")
 	public SmellMetric.CoChangeMetric calculateSmellCoChangeMetricInFileLevel(@Param("smellId") long smellId);
 
 	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
-			"]-(c:Commit)-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE + "]->(issue:Issue) \r\n" +
-			"where id(smell)= $smellId\r\n" +
-			"WITH smell, collect(distinct issue) as issueList \r\n" +
+			"]-(c:Commit)-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE + "]->(issue:Issue) " +
+			"where id(smell)= $smellId " +
+			"WITH smell, collect(distinct issue) as issueList " +
 			"with smell, size(issueList) as issues," +
 			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.BUG + "\' then 1 else 0 end)) as bugIssues," +
 			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.NEW_FEATURE + "\' then 1 else 0 end)) as newFeatureIssues," +
-			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.IMPROVEMENT + "\' then 1 else 0 end)) as improvementIssues \r\n" +
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.IMPROVEMENT + "\' then 1 else 0 end)) as improvementIssues " +
 			"RETURN  smell,issues,bugIssues,newFeatureIssues,improvementIssues;")
 	public SmellMetric.DebtMetric calculateSmellDebtMetricInFileLevel(@Param("smellId") long smellId);
 
