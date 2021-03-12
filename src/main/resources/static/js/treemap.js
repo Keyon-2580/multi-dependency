@@ -243,7 +243,7 @@ var TreeMap = function (data_list) {
 
     $('#multipleProjectsButton').css('background-color', '#efefef');
 
-    var defs = svg_global.append("defs");
+    var defs = vis_global.append("defs");
 
     LEGEND_DATA.forEach(function (item){
         var path_start = (defs.append("marker")
@@ -518,6 +518,8 @@ var showSmellGroupOnClick = function (fileId, smellId, type, level, smell_flag){
         fileSmellCurrent_click = smellId;
     }
 
+    // loadLink();
+
     if(smell_flag === 1){
         showSideInformation(smellId);
     }else{
@@ -598,12 +600,39 @@ var loadLink = function (){
         local_links = list_concat(local_links, links_global["cochange_links"]);
     }
 
+    local_links.forEach(function(item, index){
+        if(!item.hasOwnProperty("deplicate_num")){
+            var num = 1;
+            var index_list = [];
+            local_links.forEach(function(item2, index2){
+                if(item2.pair_id === item.source_id.split("_")[1] + "_" + item.target_id.split("_")[1]){
+                    item2["duplicate_num"] = num;
+                    item2["line_direction"] = true;
+                    num++;
+                    index_list.push(index2);
+                }else if(item2.pair_id === item.target_id.split("_")[1] + "_" + item.source_id.split("_")[1]){
+                    item2["duplicate_num"] = num;
+                    item2["line_direction"] = false;
+                    num++;
+                    index_list.push(index2);
+                }
+            });
+
+            index_list.forEach(function(d){
+                local_links[d]["duplicate_all"] = num - 1;
+            });
+            // console.log(num);
+        }
+    });
+
     var svg1 = d3.select(".packageLink") .remove();
     vis_global.selectAll("rect")
         .style("stroke",colorTreemap(6.1));
     var circleCoordinate = [];
 
-    var links = svg_global.append('g')
+    console.log(local_links);
+
+    var links = vis_global.append('g')
         .style('stroke', '#aaa')
         .attr("class", "packageLink")
         .selectAll('path')
@@ -697,7 +726,7 @@ var loadLink = function (){
             }
         }));
 
-    jsonLinks.forEach(function (d){
+    local_links.forEach(function (d){
         var k;
         var k_flag;
         var inner_flag;
@@ -713,84 +742,23 @@ var loadLink = function (){
             })
             .style("stroke-width","1.5px")
 
-        //获取两个圆的transform属性（包含坐标信息）和半径
-        var source_transform = d3.select("#" + d.source_id).attr("transform");
-        var target_transform = d3.select("#" + d.target_id).attr("transform");
-        var r1 = parseFloat(d3.select("#" + d.source_id).attr("r"));
-        var r2 = parseFloat(d3.select("#" + d.target_id).attr("r"));
+        //获取两个rect的坐标 及长宽
+        var x1 = parseFloat(d3.select("#" + d.source_id).attr("x"));
+        var y1 = parseFloat(d3.select("#" + d.source_id).attr("y"));
+        var x2 = parseFloat(d3.select("#" + d.target_id).attr("x"));
+        var y2 = parseFloat(d3.select("#" + d.target_id).attr("y"));
 
-        //求初始情况下的两个圆心坐标
-        var x1 = parseFloat(source_transform.slice(source_transform.indexOf("(") + 1, source_transform.indexOf(",")));
-        var y1 = parseFloat(source_transform.slice(source_transform.indexOf(",") + 1, source_transform.indexOf(")")));
-        var x2 = parseFloat(target_transform.slice(target_transform.indexOf("(") + 1, target_transform.indexOf(",")));
-        var y2 = parseFloat(target_transform.slice(target_transform.indexOf(",") + 1, target_transform.indexOf(")")));
-
-        //求斜率(考虑斜率正无穷问题)
-        if(x1.toFixed(6) !== x2.toFixed(6)){
-            k = (y2 - y1) / (x2 - x1);
-            k_flag = true;
-        }else{
-            k_flag = false;
-        }
-
-        var r_max = Math.max(r1, r2);
-        if(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)) < r_max){
-            inner_flag = true;
-        }else{
-            inner_flag = false;
-        }
-
-        if(k_flag){
-            //求偏移量
-            var x1_offset = Math.sqrt((r1 * r1) / (k * k + 1));
-            var y1_offset = Math.sqrt((r1 * r1) / (k * k + 1)) * k;
-            var x2_offset = Math.sqrt((r2 * r2) / (k * k + 1));
-            var y2_offset = Math.sqrt((r2 * r2) / (k * k + 1)) * k;
-
-
-            if(x1 > x2 && inner_flag === false){
-                x1 -= x1_offset;
-                y1 -= y1_offset;
-                x2 += x2_offset;
-                y2 += y2_offset;
-            }else if (x1 < x2 && inner_flag === false){
-                x1 += x1_offset;
-                y1 += y1_offset;
-                x2 -= x2_offset;
-                y2 -= y2_offset;
-            }else if (x1 > x2 && inner_flag){
-                x1 -= x1_offset;
-                y1 -= y1_offset;
-                x2 -= x2_offset;
-                y2 -= y2_offset;
-            }else if (x1 < x2 && inner_flag){
-                x1 += x1_offset;
-                y1 += y1_offset;
-                x2 += x2_offset;
-                y2 += y2_offset;
-            }
-        }else{
-            if(y1 > y2 && inner_flag === false){
-                y1 -= r1;
-                y2 += r2;
-            }else if(y1 < y2 && inner_flag === false){
-                y1 += r1;
-                y2 -= r2;
-            }else if (y1 > y2 && inner_flag){
-                y1 -= r1;
-                y2 -= r2;
-            }else if (y1 < y2 && inner_flag){
-                y1 += r1;
-                y2 += r2;
-            }
-        }
+        var width_1 = parseFloat(d3.select("#" + d.source_id).attr("width"));
+        var height_1 = parseFloat(d3.select("#" + d.source_id).attr("height"));
+        var width_2 = parseFloat(d3.select("#" + d.target_id).attr("width"));
+        var height_2 = parseFloat(d3.select("#" + d.target_id).attr("height"));
 
         var temp_coordinate = {};
         temp_coordinate["id"] = d.source_id + "_" + d.target_id;
-        temp_coordinate["x1"] = x1;
-        temp_coordinate["y1"] = y1;
-        temp_coordinate["x2"] = x2;
-        temp_coordinate["y2"] = y2;
+        temp_coordinate["x1"] = x1 + width_1 / 2;
+        temp_coordinate["y1"] = y1 + height_1 / 2;
+        temp_coordinate["x2"] = x2 + width_2 / 2;
+        temp_coordinate["y2"] = y2 + height_2 / 2;
         circleCoordinate.push(temp_coordinate);
     })
 
@@ -830,10 +798,10 @@ var loadLink = function (){
     //     });
 
     links.attr("d", function (d) {
-        var x1 = getTranslateX1(d.source_id, d.target_id) + diameter_global / 2;
-        var y1 = getTranslateY1(d.source_id, d.target_id) + diameter_global / 2;
-        var x2 = getTranslateX2(d.source_id, d.target_id) + diameter_global / 2;
-        var y2 = getTranslateY2(d.source_id, d.target_id) + diameter_global / 2;
+        var x1 = getTranslateX1(d.source_id, d.target_id);
+        var y1 = getTranslateY1(d.source_id, d.target_id);
+        var x2 = getTranslateX2(d.source_id, d.target_id);
+        var y2 = getTranslateY2(d.source_id, d.target_id);
         // var length = Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
 
         // if(length > 650){
@@ -926,8 +894,6 @@ var loadLink = function (){
                 }
         }
     })
-
-    linksVisiable_flag = true;
 }
 
 //工具方法，合并两个数组
@@ -970,7 +936,7 @@ var showSideInformation = function (smellId){
             html += "<p><label class = \"treemap_information_title\" style = \"margin-right: 30px\">" + result.name + "</label></p>";
 
             for(var key in metricValues){
-                html += "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 50%\">" + key + " : " +
+                html += "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 60%\">" + key + " : " +
                     "</label>" +
 
                     "<label class = \"treemap_information_label\" style = \"margin-left: 40px\">" + metricValues[key] +
