@@ -92,6 +92,16 @@ public final class MetricType {
 	public static final String DEVELOPERS = "Developers";
 
 	/**
+	 * addLines
+	 */
+	public static final String ADD_LINES = "AddLines";
+
+	/**
+	 * subLines
+	 */
+	public static final String SUB_LINES = "SubLines";
+
+	/**
 	 * Issue总数数量
 	 */
 	public static final String ISSUES = "Issues";

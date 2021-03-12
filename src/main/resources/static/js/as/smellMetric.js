@@ -29,8 +29,15 @@ var smellMetric = function() {
                             html += "<th>CoCommits</th>";
                             html += "<th>CoFiles</th>";
                             html += "<th>Avg(Developers)</th>";
+                            html += "<th>Avg(#D)</th>";
                             html += "<th>Avg(Commits)</th>";
+                            html += "<th>Avg(#C)</th>";
                             html += "<th>Avg(CoCommits)</th>";
+                            html += "<th>Avg(#CoC)</th>";
+                            html += "<th>AddLines</th>";
+                            html += "<th>Avg(#AddLines)</th>";
+                            html += "<th>SubLines</th>";
+                            html += "<th>Avg(#SubLines)</th>";
                             html += "<th>Issues</th>";
                             html += "<th>Bugs</th>";
                             html += "<th>NewFeatures</th>";
@@ -67,11 +74,15 @@ var smellMetric = function() {
                                 var totalCommits = 0;
                                 var developers = 0;
                                 var totalDevelopers = 0;
+                                var addLines = 0;
+                                var subLines = 0;
                                 if(metrics[i].evolutionMetric != null){
                                      commits = metrics[i].evolutionMetric.commits;
                                      totalCommits = metrics[i].evolutionMetric.totalCommits;
                                      developers = metrics[i].evolutionMetric.developers;
                                      totalDevelopers = metrics[i].evolutionMetric.totalDevelopers;
+                                     addLines = metrics[i].evolutionMetric.addLines;
+                                     subLines = metrics[i].evolutionMetric.subLines;
                                 }
                                 var coChangeCommits = 0;
                                 var totalCoChangeCommits = 0;
@@ -87,9 +98,18 @@ var smellMetric = function() {
                                 html += "<td>" + coChangeCommits + "</td>";
                                 html += "<td>" + coChangeFiles + "</td>";
                                 html += "<td>" + developers + "/" + size + "=" + (developers/size).toFixed(2) + "</td>";
+                                html += "<td>" + (developers/size).toFixed(2) + "</td>";
                                 html += "<td>" + totalCommits + "/" + size + "=" + (totalCommits/size).toFixed(2) + "</td>";
+                                html += "<td>" + (totalCommits/size).toFixed(2) + "</td>";
                                 html += "<td>" + totalCoChangeCommits + "/" + totalCommits + "="
                                 + (totalCommits > 0 ? (totalCoChangeCommits/totalCommits).toFixed(2) : 0)+ "</td>";
+                                html += "<td>" + (totalCommits > 0 ? (totalCoChangeCommits/totalCommits).toFixed(2) : 0)+ "</td>";
+
+                                html += "<td>" + addLines + "</td>";
+                                html += "<td>" + (addLines/size).toFixed(2) + "</td>";
+                                html += "<td>" + subLines + "</td>";
+                                html += "<td>" + (subLines/size).toFixed(2) + "</td>";
+
                                 var issues = 0;
                                 var bugIssues = 0;
                                 var newFeatureIssues = 0;

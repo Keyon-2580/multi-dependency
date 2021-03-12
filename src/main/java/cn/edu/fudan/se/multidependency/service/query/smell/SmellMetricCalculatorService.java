@@ -57,6 +57,8 @@ public class SmellMetricCalculatorService {
 					metricValues.put(MetricType.COMMITS, evolutionMetric.getCommits());
 					metricValues.put(MetricType.TOTAL_COMMITS, evolutionMetric.getTotalCommits());
 					metricValues.put(MetricType.DEVELOPERS, evolutionMetric.getDevelopers());
+					metricValues.put(MetricType.ADD_LINES, evolutionMetric.getAddLines());
+					metricValues.put(MetricType.SUB_LINES, evolutionMetric.getSubLines());
 				}
 
 				SmellMetric.CoChangeMetric coChangeMetric = smellMetric.getCoChangeMetric();
@@ -109,6 +111,8 @@ public class SmellMetricCalculatorService {
 					metricValues.put(MetricType.COMMITS, evolutionMetric.getCommits());
 					metricValues.put(MetricType.TOTAL_COMMITS, evolutionMetric.getTotalCommits());
 					metricValues.put(MetricType.DEVELOPERS, evolutionMetric.getDevelopers());
+					metricValues.put(MetricType.ADD_LINES, evolutionMetric.getAddLines());
+					metricValues.put(MetricType.SUB_LINES, evolutionMetric.getSubLines());
 				}
 
 				SmellMetric.CoChangeMetric coChangeMetric = smellMetric.getCoChangeMetric();

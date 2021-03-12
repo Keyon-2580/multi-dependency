@@ -88,6 +88,16 @@ public class SmellMetric {
 		 * 开发者数(不去重）
 		 */
 		private int totalDevelopers;
+
+		/**
+		 * 增加代码行
+		 */
+		private int addLines;
+
+		/**
+		 * 删除代码行
+		 */
+		private int subLines;
 	}
 
 	@Data
