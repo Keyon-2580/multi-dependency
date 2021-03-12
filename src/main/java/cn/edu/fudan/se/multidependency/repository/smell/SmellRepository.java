@@ -127,11 +127,12 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 			"RETURN  smell,nop,nof,noc,nom,loc;")
 	public SmellMetric.StructureMetric calculateSmellStructureMetricInFileLevel(@Param("smellId") long smellId);
 
-	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
+	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)<-[r:" + RelationType.str_COMMIT_UPDATE_FILE +
 			"]-(c:Commit)<-[:" + RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]-(d:Developer) " +
 			"where id(smell)= $smellId " +
-			"WITH smell, count(distinct c) as commits, count(c) as totalCommits, count(distinct d) as developers, count(d) as totalDevelopers " +
-			"RETURN  smell,commits,totalCommits,developers,totalDevelopers;")
+			"WITH smell, count(distinct c) as commits, count(c) as totalCommits, count(distinct d) as developers, count(d) as totalDevelopers, " +
+			"  sum(r.addLines) as addLines, sum(r.subLines) as subLines " +
+			"RETURN  smell,commits,totalCommits,developers,totalDevelopers,addLines,subLines;")
 	public SmellMetric.EvolutionMetric calculateSmellEvolutionMetricInFileLevel(@Param("smellId") long smellId);
 
 	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
@@ -165,11 +166,12 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 			"RETURN  smell,nop,nof,noc,nom,loc;")
 	public SmellMetric.StructureMetric calculateSmellStructureMetricInPackageLevel(@Param("smellId") long smellId);
 
-	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "*2]->(file:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
+	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "*2]->(file:ProjectFile)<-[r:" + RelationType.str_COMMIT_UPDATE_FILE +
 			"]-(c:Commit)<-[:" + RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]-(d:Developer) " +
 			"where id(smell)= $smellId " +
-			"WITH smell, count(distinct c) as commits, count(c) as totalCommits, count(distinct d) as developers, count(d) as totalDevelopers " +
-			"RETURN  smell,commits,totalCommits,developers,totalDevelopers;")
+			"WITH smell, count(distinct c) as commits, count(c) as totalCommits, count(distinct d) as developers, count(d) as totalDevelopers, " +
+			"  sum(r.addLines) as addLines, sum(r.subLines) as subLines " +
+			"RETURN  smell,commits,totalCommits,developers,totalDevelopers,addLines,subLines;")
 	public SmellMetric.EvolutionMetric calculateSmellEvolutionMetricInPackageLevel(@Param("smellId") long smellId);
 
 	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "*2]->(file1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
