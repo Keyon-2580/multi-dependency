@@ -227,7 +227,7 @@ var TreeMap = function (data_list) {
         })
         .attr("onmouseover", "showSmellGroupOnMouseOver(-1, \"\", \"\")")
         .attr("onclick", function (d) {
-            return "showSmellGroupOnClick(\"" + d.id + "\", -1, \"\", \"\")";
+            return "showSmellGroupOnClick(\"" + d.id + "\", -1, \"\", \"\", 0)";
         })
         .classed('leaf', function(d) {
             return (d.children == null) || d.children.length === 0;
@@ -468,39 +468,39 @@ var projectGraphAjax = function(projectIds){
 var showSmellGroupOnMouseOver = function (smellId, type, level){
     if((smell_level_global === level && smell_type_global === type) || smellId < 0){
         if(fileFlag_click){
-            $("rect[smell=1]").not("[smellId=" + fileSmellCurrent_click + "]").css("fill", FILE_SMELL_COLOR);
+            $("rect[smell=1]").not("[smellId=" + fileSmellCurrent_click + "]").attr("fill", FILE_SMELL_COLOR);
         }else{
-            $("rect[smell=1]").css("fill", FILE_SMELL_COLOR);
+            $("rect[smell=1]").attr("fill", FILE_SMELL_COLOR);
         }
     }
     if(smellId > 0){
-        $("rect[smellId=" + smellId + "]").css("fill", FILE_CHOSEN_COLOR);
+        $("rect[smellId=" + smellId + "]").attr("fill", FILE_CHOSEN_COLOR);
     }
 }
 
 //鼠标点击方块时，显示属于同一组的文件，并加载连线
-var showSmellGroupOnClick = function (fileId, smellId, type, level){
+var showSmellGroupOnClick = function (fileId, smellId, type, level, smell_flag){
     if(fileFlag_click){
         if(fileIdCurrent_click === fileId){
             if(smellId > 0){
-                $("rect[smellId=" + smellId + "]").css("fill", FILE_SMELL_COLOR);
+                $("rect[smellId=" + smellId + "]").attr("fill", FILE_SMELL_COLOR);
             }else if(smellId < 0){
-                $("rect[id=\"" + fileId + "\"]").css("fill", FILE_NO_SMELL_COLOR);
+                $("rect[id=\"" + fileId + "\"]").attr("fill", FILE_NO_SMELL_COLOR);
             }
             fileIdCurrent_click = "";
             fileSmellCurrent_click = 0;
             fileFlag_click = 0;
         }else{
             if(fileSmellCurrent_click > 0){
-                $("rect[smellId=" + fileSmellCurrent_click + "]").css("fill", FILE_SMELL_COLOR);
+                $("rect[smellId=" + fileSmellCurrent_click + "]").attr("fill", FILE_SMELL_COLOR);
             }else if(fileSmellCurrent_click < 0){
-                $("rect[id=\"" + fileIdCurrent_click + "\"]").css("fill", FILE_NO_SMELL_COLOR);
+                $("rect[id=\"" + fileIdCurrent_click + "\"]").attr("fill", FILE_NO_SMELL_COLOR);
             }
 
             if(smellId > 0){
-                $("rect[smellId=" + smellId + "]").css("fill", FILE_CHOSEN_COLOR);
+                $("rect[smellId=" + smellId + "]").attr("fill", FILE_CHOSEN_COLOR);
             }else if(smellId < 0){
-                $("rect[id=\"" + fileId + "\"]").css("fill", FILE_CHOSEN_COLOR);
+                $("rect[id=\"" + fileId + "\"]").attr("fill", FILE_CHOSEN_COLOR);
             }
 
             fileSmellCurrent_click = smellId;
@@ -508,9 +508,9 @@ var showSmellGroupOnClick = function (fileId, smellId, type, level){
         }
     }else{
         if(smellId > 0){
-            $("rect[smellId=" + smellId + "]").css("fill", FILE_CHOSEN_COLOR);
+            $("rect[smellId=" + smellId + "]").attr("fill", FILE_CHOSEN_COLOR);
         }else if(smellId < 0){
-            $("rect[id=\"" + fileId + "\"]").css("fill", FILE_CHOSEN_COLOR);
+            $("rect[id=\"" + fileId + "\"]").attr("fill", FILE_CHOSEN_COLOR);
         }
 
         fileFlag_click = 1;
@@ -518,7 +518,11 @@ var showSmellGroupOnClick = function (fileId, smellId, type, level){
         fileSmellCurrent_click = smellId;
     }
 
-    showSideInformation(smellId);
+    if(smell_flag === 1){
+        showSideInformation(smellId);
+    }else{
+        $("#side_information").html("");
+    }
 }
 
 //点击按钮，加载smell方块以及连线
@@ -530,7 +534,7 @@ var loadSmell = function (){
     link_condition_global["clone"] = $("#checkbox_dependency_clone").prop("checked") ? 1 : 0;
     link_condition_global["cochange"] = $("#checkbox_dependency_cochange").prop("checked") ? 1 : 0;
 
-    // $('rect[bottom=1]').css('fill', '#fcfdbf');
+    // $('rect[bottom=1]').css('fill', FILE_NO_SMELL_COLOR);
     refreshTreemap();
 
     smell_global.forEach(function (item){
@@ -544,13 +548,13 @@ var loadSmell = function (){
                     .attr("smell_type", item.smell_type)
                     .attr("smell_level", item.smell_level)
                     .attr("onmouseover", "showSmellGroupOnMouseOver(" + item.id + ", \"" + item.smell_type + "\", \"" + item.smell_level + "\")")
-                    .attr("onclick", "showSmellGroupOnClick(\"" + node.id + "\", " + item.id + ", \"" + item.smell_type + "\", \"" + item.smell_level + "\")")
+                    .attr("onclick", "showSmellGroupOnClick(\"" + node.id + "\", " + item.id + ", \"" + item.smell_type + "\", \"" + item.smell_level + "\", 1)")
                     .attr("smellGroup", item.name);
             });
         }
     });
 
-    loadLink();
+    // loadLink();
 }
 
 //刷新treemap样式
@@ -558,7 +562,16 @@ var refreshTreemap = function (){
     var refresh = d3.selectAll("rect")
         .attr("fill", function (d){
             return d.hasOwnProperty("children") ? colorTreemap(d.depth) : FILE_NO_SMELL_COLOR;
-        });
+        })
+        .attr("smell", 0)
+        .attr("smellId", "")
+        .attr("smell_type", "")
+        .attr("smell_level", "")
+        .attr("onmouseover", "showSmellGroupOnMouseOver(-1, \"\", \"\")")
+        .attr("onclick", function (d){
+            return "showSmellGroupOnClick(\"" + d.id + "\", -1, \"\", \"\", 0)";
+        })
+        .attr("smellGroup", "");
 }
 
 //treemap颜色方法
@@ -952,52 +965,17 @@ var showSideInformation = function (smellId){
         url : "/smell/get_metric?smellId=" + smellId,
         success : function(result) {
             var metricValues = result["metricValues"];
-
             var html = "";
 
-            html += "<p><label class = \"treemap_information_title\" style = \"margin-right: 30px\">" + result.name + "</label></p>" +
+            html += "<p><label class = \"treemap_information_title\" style = \"margin-right: 30px\">" + result.name + "</label></p>";
 
-                    "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 40%\">LOC : " +
+            for(var key in metricValues){
+                html += "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 50%\">" + key + " : " +
                     "</label>" +
 
-                    "<label class = \"treemap_information_label\" style = \"margin-left: 40px\">" + metricValues.LOC +
-                    "</label></p>" +
-
-                    "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 40%\">Commits : " +
-                    "</label>" +
-
-                    "<label class = \"treemap_information_label\" style = \"margin-left: 40px\">" + metricValues.Commits +
-                    "</label></p>" +
-
-                    "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 40%\">NOC : " +
-                    "</label>" +
-
-                    "<label class = \"treemap_information_label\" style = \"margin-left: 40px\">" + metricValues.NOC +
-                    "</label></p>" +
-
-                    "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 40%\">Developers : " +
-                    "</label>" +
-
-                    "<label class = \"treemap_information_label\" style = \"margin-left: 40px\">" + metricValues.Developers +
-                    "</label></p>" +
-
-                    "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 40%\">Size : " +
-                    "</label>" +
-
-                    "<label class = \"treemap_information_label\" style = \"margin-left: 40px\">" + metricValues.Size +
-                    "</label></p>" +
-
-                    "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 40%\">NOM : " +
-                    "</label>" +
-
-                    "<label class = \"treemap_information_label\" style = \"margin-left: 40px\">" + metricValues.NOM +
-                    "</label></p>" +
-
-                    "<p><label class = \"treemap_title\" style = \"margin-right: 20px; width: 40%\">TotalCommits : " +
-                    "</label>" +
-
-                    "<label class = \"treemap_information_label\" style = \"margin-left: 40px\">" + metricValues.TotalCommits +
+                    "<label class = \"treemap_information_label\" style = \"margin-left: 40px\">" + metricValues[key] +
                     "</label></p>";
+            }
 
             $("#side_information").html(html);
 
