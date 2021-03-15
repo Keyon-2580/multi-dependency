@@ -466,8 +466,14 @@ public class BeanCreator {
 
 			if(propertyConfig.isCalculateCoChange()){
 				LOGGER.info("创建God Component Smell节点关系...");
-				smellDetectorService.createGodComponentSmell(true);
+				smellDetectorService.createGodComponentSmell(false);
 				LOGGER.info("创建God Component Smell节点关系完成");
+			}
+
+			if(propertyConfig.isCalculateCoChange()){
+				LOGGER.info("创建Unutilized Abstraction Smell节点关系...");
+				smellDetectorService.createUnutilizedAbstractionSmell(true);
+				LOGGER.info("创建Unutilized Abstraction Smell节点关系完成");
 			}
 		}
 		return true;

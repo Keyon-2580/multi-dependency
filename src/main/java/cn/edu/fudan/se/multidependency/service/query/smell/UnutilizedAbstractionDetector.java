@@ -9,8 +9,8 @@ import cn.edu.fudan.se.multidependency.service.query.smell.data.UnutilizedAbstra
 
 public interface UnutilizedAbstractionDetector {
 
-	Map<Long, List<UnutilizedAbstraction<Type>>> unutilizedTypes();
+	Map<Long, List<UnutilizedAbstraction<Type>>> typeUnutilizeds();
 	
-	Map<Long, List<UnutilizedAbstraction<ProjectFile>>> unutilizedFiles();
+	Map<Long, List<UnutilizedAbstraction<ProjectFile>>> fileUnutilizeds();
 	
 }

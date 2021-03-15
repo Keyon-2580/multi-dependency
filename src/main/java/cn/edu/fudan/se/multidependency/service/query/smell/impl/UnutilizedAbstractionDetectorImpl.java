@@ -37,8 +37,8 @@ public class UnutilizedAbstractionDetectorImpl implements UnutilizedAbstractionD
 	private ContainRelationService containRelationService;
 
 	@Override
-	public Map<Long, List<UnutilizedAbstraction<Type>>> unutilizedTypes() {
-		String key = "unutilizedTypes";
+	public Map<Long, List<UnutilizedAbstraction<Type>>> typeUnutilizeds() {
+		String key = "typeUnutilizeds";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
@@ -54,19 +54,18 @@ public class UnutilizedAbstractionDetectorImpl implements UnutilizedAbstractionD
 			Project project = containRelationService.findCodeNodeBelongToProject(type);
 			result.get(project.getId()).add(new UnutilizedAbstraction<>(type));
 		}
-		System.out.println("unutilizedTypes: " + types.size());
 		cache.cache(getClass(), key, result);
 		return result;
 	}
 
 	@Override
-	public Map<Long, List<UnutilizedAbstraction<ProjectFile>>> unutilizedFiles() {
-		String key = "unutilizedFiles";
+	public Map<Long, List<UnutilizedAbstraction<ProjectFile>>> fileUnutilizeds() {
+		String key = "fileUnutilizeds";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
 		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> result = new HashMap<>();
-		Map<Long, List<UnutilizedAbstraction<Type>>> types = unutilizedTypes();
+		Map<Long, List<UnutilizedAbstraction<Type>>> types = typeUnutilizeds();
 		for(Map.Entry<Long, List<UnutilizedAbstraction<Type>>> entry : types.entrySet()) {
 			long projectId = entry.getKey();
 			Set<ProjectFile> files = new HashSet<>();
@@ -80,7 +79,6 @@ public class UnutilizedAbstractionDetectorImpl implements UnutilizedAbstractionD
 			}
 			result.put(projectId, unutilizedFiles);
 		}
-		
 		cache.cache(getClass(), key, result);
 		return result;
 	}

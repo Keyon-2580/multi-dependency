@@ -207,7 +207,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 //		Map<Long, List<CyclicHierarchy>> cyclicHierarchies = cyclicHierarchyDetector.cyclicHierarchies();
 //		Map<Long, List<GodFile>> godFiles = godComponentDetector.godFiles();
 		Map<Long, List<ProjectFile>> unusedFiles = unusedComponentDetector.unusedFiles();
-		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> unutilizedFiles = unutilizedAbstractionDetector.unutilizedFiles();
+		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> unutilizedFiles = unutilizedAbstractionDetector.fileUnutilizeds();
 		
 		Collection<LogicCouplingComponents<ProjectFile>> logicCouplingFiles = icdDependencyDetector.cochangesInDifferentFile();
 		Collection<SimilarComponents<ProjectFile>> similarFiles = similarComponentsDetector.fileSimilars();

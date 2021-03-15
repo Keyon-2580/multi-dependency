@@ -52,6 +52,9 @@ public class SmellDetectorService {
 	private GodComponentDetectorImpl godComponentDetector;
 
 	@Autowired
+	private UnutilizedAbstractionDetector unutilizedAbstractionDetector;
+
+	@Autowired
 	private SmellRepository smellRepository;
 
 	public void createCloneSmells(boolean isRecreate){
@@ -495,6 +498,48 @@ public class SmellDetectorService {
 				smell.setLevel(SmellLevel.FILE);
 				smells.add(smell);
 				Contain contain = new Contain(smell, file.getFile());
+				smellContains.add(contain);
+				fileSmellIndex ++;
+			}
+		}
+		smellRepository.saveAll(smells);
+		containRepository.saveAll(smellContains);
+	}
+
+	public void createUnutilizedAbstractionSmell(boolean isRecreate) {
+		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.UNTILIZED_ABSTRACTION);
+		if(smellsTmp != null && !smellsTmp.isEmpty()){
+			LOGGER.info("已存在Unutilized Abstraction Smell");
+			if(!isRecreate){
+				LOGGER.info("不重新创建");
+				return;
+			}
+			LOGGER.info("重新创建...");
+		}
+		smellRepository.deleteSmellContainRelations(SmellType.UNTILIZED_ABSTRACTION);
+		smellRepository.deleteSmellHasMetricRelation(SmellType.UNTILIZED_ABSTRACTION);
+		smellRepository.deleteSmells(SmellType.UNTILIZED_ABSTRACTION);
+		List<Smell> smells = new ArrayList<>();
+		List<Contain> smellContains = new ArrayList<>();
+
+		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> fileUnutilizeds = unutilizedAbstractionDetector.fileUnutilizeds();
+		String fileSmellName = "file_unutilized-abstraction_";
+		int fileSmellIndex = 1;
+		for (Map.Entry<Long, List<UnutilizedAbstraction<ProjectFile>>> fileUnutilized : fileUnutilizeds.entrySet()) {
+			long projectId = fileUnutilized.getKey();
+			Project project = (Project) projectRepository.queryNodeById(projectId);
+			List<UnutilizedAbstraction<ProjectFile>> files = fileUnutilized.getValue();
+			for (UnutilizedAbstraction<ProjectFile> file : files) {
+				Smell smell = new Smell();
+				smell.setName(fileSmellName + fileSmellIndex);
+				smell.setSize(1);
+				smell.setLanguage(project.getLanguage());
+				smell.setProjectId(projectId);
+				smell.setProjectName(project.getName());
+				smell.setType(SmellType.UNTILIZED_ABSTRACTION);
+				smell.setLevel(SmellLevel.FILE);
+				smells.add(smell);
+				Contain contain = new Contain(smell, file.getComponent());
 				smellContains.add(contain);
 				fileSmellIndex ++;
 			}

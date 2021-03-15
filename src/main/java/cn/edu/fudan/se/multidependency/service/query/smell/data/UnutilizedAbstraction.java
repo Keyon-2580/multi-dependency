@@ -13,10 +13,6 @@ import lombok.Setter;
 public class UnutilizedAbstraction<N extends Node> implements Serializable {
 
 	private static final long serialVersionUID = 12632676208103334L;
-
-	public UnutilizedAbstraction(N component) {
-		this.component = component;
-	}
 	
 	@Getter
 	@Setter
@@ -25,6 +21,7 @@ public class UnutilizedAbstraction<N extends Node> implements Serializable {
 	@Getter
 	private List<Node> caller = new ArrayList<>();
 
-	
-	
+	public UnutilizedAbstraction(N component) {
+		this.component = component;
+	}
 }
