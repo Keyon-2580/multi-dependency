@@ -472,7 +472,7 @@ public class BeanCreator {
 
 			if(propertyConfig.isCalculateCoChange()){
 				LOGGER.info("创建Unutilized Abstraction Smell节点关系...");
-				smellDetectorService.createUnutilizedAbstractionSmell(true);
+				smellDetectorService.createUnutilizedAbstractionSmell(false);
 				LOGGER.info("创建Unutilized Abstraction Smell节点关系完成");
 			}
 		}
