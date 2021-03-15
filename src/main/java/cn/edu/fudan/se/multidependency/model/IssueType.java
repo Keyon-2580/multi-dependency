@@ -9,6 +9,10 @@ public final class IssueType {
 				return IMPROVEMENT;
 			case "New Feature":
 				return NEW_FEATURE;
+			case "Task":
+				return TASK;
+			case "Custom Issue":
+				return CUSTOM_ISSUE;
 		}
 		return DEFAULT_ISSUE;
 	}
