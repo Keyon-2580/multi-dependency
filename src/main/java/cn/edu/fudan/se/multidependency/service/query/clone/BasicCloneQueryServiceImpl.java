@@ -73,7 +73,7 @@ public class BasicCloneQueryServiceImpl implements BasicCloneQueryService {
 	public Collection<CloneGroup> findGroupsContainCloneTypeRelation(CloneLevel level) {
 		Collection<CloneGroup> result = cloneLevelToGroups.get(level);
 		if(result == null) {
-			level = level == null ? CloneLevel.file : level;
+			level = level == null ? CloneLevel.File : level;
 			result = cloneGroupRepository.findGroups(level.toString());
 			cloneLevelToGroups.put(level, result);
 		}
@@ -89,16 +89,16 @@ public class BasicCloneQueryServiceImpl implements BasicCloneQueryService {
 		if(result == null) {
 			switch(cloneType) {
 			case FILE_CLONE_FILE:
-				result = cloneGroupRepository.findGroups(CloneLevel.file.toString());
+				result = cloneGroupRepository.findGroups(CloneLevel.File.toString());
 				break;
 			case FUNCTION_CLONE_FUNCTION:
-				result = cloneGroupRepository.findGroups(CloneLevel.function.toString());
+				result = cloneGroupRepository.findGroups(CloneLevel.Function.toString());
 				break;
 			case TYPE_CLONE_TYPE:
-				result = cloneGroupRepository.findGroups(CloneLevel.type.toString());
+				result = cloneGroupRepository.findGroups(CloneLevel.Type.toString());
 				break;
 			case SNIPPET_CLONE_SNIPPET:
-				result = cloneGroupRepository.findGroups(CloneLevel.snippet.toString());
+				result = cloneGroupRepository.findGroups(CloneLevel.Snippet.toString());
 				break;
 			case FUNCTION_CLONE_SNIPPET:
 			case TYPE_CLONE_FUNCTION:

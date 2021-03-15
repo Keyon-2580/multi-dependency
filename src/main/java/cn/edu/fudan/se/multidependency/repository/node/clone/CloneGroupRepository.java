@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.repository.node.clone;
 
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.model.node.clone.CloneLevel;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -53,28 +54,28 @@ public interface CloneGroupRepository extends Neo4jRepository<CloneGroup, Long> 
 			"where file.cloneGroupId is not null " +
 			"with file.cloneGroupId as cloneGroupId, count(file) as count " +
 			"with cloneGroupId " +
-			"create (:CloneGroup{name: cloneGroupId, cloneLevel: \"file\", entityId: -1});\n")
+			"create (:CloneGroup{name: cloneGroupId, cloneLevel: \'" + CloneLevel.FILE + "\', entityId: -1});\n")
 	void createCloneGroupRelations();
 
 	@Query("match (file:ProjectFile) " +
 			"where file.cloneGroupId is not null " +
 			"with file.cloneGroupId as cloneGroupId, count(file) as count " +
 			"with cloneGroupId " +
-			"create (:CloneGroup{name: cloneGroupId, cloneLevel: \"File\", entityId: -1});\n")
+			"create (:CloneGroup{name: cloneGroupId, cloneLevel: \'" + CloneLevel.FILE + "\',entityId: -1});\n")
 	void createFileCloneGroupRelations();
 
 	@Query("match (type:Type) " +
 			"where type.cloneGroupId is not null " +
 			"with type.cloneGroupId as cloneGroupId, count(type) as count " +
 			"with cloneGroupId " +
-			"create (:CloneGroup{name: cloneGroupId, cloneLevel: \"Type\", entityId: -1});\n")
+			"create (:CloneGroup{name: cloneGroupId, cloneLevel: \'" + CloneLevel.TYPE + "\', entityId: -1});\n")
 	void createTypeCloneGroupRelations();
 
 	@Query("match (func:Function) " +
 			"where func.cloneGroupId is not null " +
 			"with func.cloneGroupId as cloneGroupId, count(func) as count " +
 			"with cloneGroupId " +
-			"create (:CloneGroup{name: cloneGroupId, cloneLevel: \"Function\", entityId: -1});\n")
+			"create (:CloneGroup{name: cloneGroupId, cloneLevel: \'" + CloneLevel.FUNCTION + "\', entityId: -1});\n")
 	void createFunctionCloneGroupRelations();
 
 	@Query("MATCH (n:CloneGroup) with n match (code) " +

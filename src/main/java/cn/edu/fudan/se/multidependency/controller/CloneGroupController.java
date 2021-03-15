@@ -9,10 +9,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
-import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
-import cn.edu.fudan.se.multidependency.service.query.smell.BasicSmellQueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -152,7 +148,7 @@ public class CloneGroupController {
 //		cloneRelationType = cloneRelationType == null ? CloneRelationType.FILE_CLONE_FILE : cloneRelationType;
 //		System.out.println(cloneRelationTypes.get(0));
 		CloneLevel cloneLevel = CloneLevel.valueOf(cloneRelationTypes.get(0));
-		cloneLevel = cloneLevel == null ? CloneLevel.file : cloneLevel;
+		cloneLevel = cloneLevel == null ? CloneLevel.File : cloneLevel;
 		PredicateForCloneGroup predicate = new PredicateForCloneGroup();
 		
 		if(languages.size() == 1) {
