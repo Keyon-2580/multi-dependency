@@ -305,8 +305,10 @@ public class BeanCreator {
 				cloneGroupRepository.setCppLanguageBySuffix();
 				cloneGroupRepository.deleteCloneGroupContainRelations();
 				cloneGroupRepository.deleteCloneGroupRelations();
-				cloneGroupRepository.setFileGroup();
-				cloneGroupRepository.createCloneGroupRelations();
+				cloneGroupRepository.setNodeGroup();
+				cloneGroupRepository.createFileCloneGroupRelations();
+				cloneGroupRepository.createTypeCloneGroupRelations();
+				cloneGroupRepository.createFunctionCloneGroupRelations();
 				cloneGroupRepository.createCloneGroupContainRelations();
 				cloneGroupRepository.setCloneGroupContainSize();
 				cloneGroupRepository.setCloneGroupLanguage();

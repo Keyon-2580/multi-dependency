@@ -89,18 +89,18 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 	void setSmellLanguage();
 
 	@Query("match (cloneGroup:CloneGroup) " +
-			"create (:Smell{name: cloneGroup.name, size: cloneGroup.size,language: cloneGroup.language,level: \'" +
-			SmellLevel.FILE + "\', type:\'" + SmellType.CLONE + "\',entityId: -1});\n")
+			"create (:Smell{name: cloneGroup.name, size: cloneGroup.size,language: cloneGroup.language,level: cloneGroup.cloneLevel," +
+			"type:\'" + SmellType.CLONE + "\',entityId: -1});\n")
 	void createCloneSmells();
 
 	@Query("MATCH (smell:Smell) with smell " +
-			"match (cloneGroup:CloneGroup)-[:" + RelationType.str_CONTAIN + "]-(file:ProjectFile) " +
+			"match (cloneGroup:CloneGroup)-[:" + RelationType.str_CONTAIN + "]-(code) " +
 			"where cloneGroup.name = smell.name " +
-			"create (smell)-[:" + RelationType.str_CONTAIN + "]->(file);\n")
+			"create (smell)-[:" + RelationType.str_CONTAIN + "]->(code);\n")
 	void createCloneSmellContains();
 
-	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)<-[:" +
-			RelationType.str_CONTAIN + "*2]-(p:Project) " +
+	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(code)<-[:" +
+			RelationType.str_CONTAIN + "*]-(p:Project) " +
 			"where smell.type = \'" + SmellType.CLONE + "\' " +
 			"with smell, " +
 			"  reduce(tmp = \'\', pj in collect(distinct p) | tmp + (pj.name + \'_\'))  as name, " +

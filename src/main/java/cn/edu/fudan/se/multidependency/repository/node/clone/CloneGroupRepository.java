@@ -40,6 +40,15 @@ public interface CloneGroupRepository extends Neo4jRepository<CloneGroup, Long> 
 			"match (file:ProjectFile) where file in files set file.cloneGroupId = \"file_group_\" + setId;")
 	void setFileGroup();
 
+	@Query("CALL gds.wcc.stream({" +
+			"nodeProjection: [\'ProjectFile\',\'Type\',\'Function\'], " +
+			"relationshipProjection: \'" + RelationType.str_CLONE + "\'}) " +
+			"YIELD nodeId, componentId " +
+			"with componentId as setId, collect(gds.util.asNode(nodeId)) AS codes\n" +
+			"where size(codes) > 1\n" +
+			"match (code) where code in codes set code.cloneGroupId = \"clone_group_\" + setId;")
+	void setNodeGroup();
+
 	@Query("match (file:ProjectFile) " +
 			"where file.cloneGroupId is not null " +
 			"with file.cloneGroupId as cloneGroupId, count(file) as count " +
@@ -47,15 +56,36 @@ public interface CloneGroupRepository extends Neo4jRepository<CloneGroup, Long> 
 			"create (:CloneGroup{name: cloneGroupId, cloneLevel: \"file\", entityId: -1});\n")
 	void createCloneGroupRelations();
 
-	@Query("MATCH (n:CloneGroup) with n match (file:ProjectFile) " +
-			"where file.cloneGroupId = n.name " +
-			"create (n)-[:CONTAIN]->(file);\n")
+	@Query("match (file:ProjectFile) " +
+			"where file.cloneGroupId is not null " +
+			"with file.cloneGroupId as cloneGroupId, count(file) as count " +
+			"with cloneGroupId " +
+			"create (:CloneGroup{name: cloneGroupId, cloneLevel: \"File\", entityId: -1});\n")
+	void createFileCloneGroupRelations();
+
+	@Query("match (type:Type) " +
+			"where type.cloneGroupId is not null " +
+			"with type.cloneGroupId as cloneGroupId, count(type) as count " +
+			"with cloneGroupId " +
+			"create (:CloneGroup{name: cloneGroupId, cloneLevel: \"Type\", entityId: -1});\n")
+	void createTypeCloneGroupRelations();
+
+	@Query("match (func:Function) " +
+			"where func.cloneGroupId is not null " +
+			"with func.cloneGroupId as cloneGroupId, count(func) as count " +
+			"with cloneGroupId " +
+			"create (:CloneGroup{name: cloneGroupId, cloneLevel: \"Function\", entityId: -1});\n")
+	void createFunctionCloneGroupRelations();
+
+	@Query("MATCH (n:CloneGroup) with n match (code) " +
+			"where code.cloneGroupId = n.name " +
+			"create (n)-[:CONTAIN]->(code);\n")
 	void createCloneGroupContainRelations();
 
 	@Query("MATCH (n:CloneGroup) with n set n.size = size((n)-[:CONTAIN]->());\n")
 	void setCloneGroupContainSize();
 
-	@Query("MATCH (n:CloneGroup)-[:CONTAIN]->(file:ProjectFile) where n.language is null with n, file set n.language = file.language;\n")
+	@Query("MATCH (n:CloneGroup)-[:CONTAIN]->(code) where n.language is null with n, code set n.language = code.language;\n")
 	void setCloneGroupLanguage();
 
 	/**
