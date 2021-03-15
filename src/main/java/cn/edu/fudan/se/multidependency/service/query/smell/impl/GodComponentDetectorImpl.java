@@ -16,15 +16,14 @@ import org.springframework.web.context.WebApplicationContext;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.smell.GodComponentDetector;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.GodFile;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.GodPackage;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.FileGod;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.PackageGod;
 import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Service
-@Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class GodComponentDetectorImpl implements GodComponentDetector {
 	
 	@Autowired
@@ -37,30 +36,30 @@ public class GodComponentDetectorImpl implements GodComponentDetector {
 	private CacheService cache;
 
 	@Override
-	public Map<Long, List<GodFile>> godFiles() {
-		String key = "godFiles";
+	public Map<Long, List<FileGod>> fileGodComponents() {
+		String key = "fileGodComponents";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
 		Collection<Project> projects = nodeService.allProjects();
-		Map<Long, List<GodFile>> result = new HashMap<>();
+		Map<Long, List<FileGod>> result = new HashMap<>();
 		for(Project project : projects) {
-			result.put(project.getId(), godFiles(project));
+			result.put(project.getId(), fileGods(project));
 		}
 		cache.cache(getClass(), key, result);
 		return result;
 	}
 
 	@Override
-	public Map<Long, List<GodPackage>> godPackages() {
-		String key = "godPackages";
+	public Map<Long, List<PackageGod>> packageGodComponents() {
+		String key = "packageGodComponents";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
 		Collection<Project> projects = nodeService.allProjects();
-		Map<Long, List<GodPackage>> result = new HashMap<>();
+		Map<Long, List<PackageGod>> result = new HashMap<>();
 		for(Project project : projects) {
-			result.put(project.getId(), godPackages(project));
+			result.put(project.getId(), packageGod(project));
 		}
 		cache.cache(getClass(), key, result);
 		return result;
@@ -70,12 +69,12 @@ public class GodComponentDetectorImpl implements GodComponentDetector {
 	
 	private Map<Project, Integer> projectToMinFileCountInPackage = new ConcurrentHashMap<>();
 	
-	private List<GodFile> godFiles(Project project) {
+	private List<FileGod> fileGods(Project project) {
 		Collection<FileMetrics> metrics = metricCalculatorService.calculateFileMetrics(project);
-		List<GodFile> result = new ArrayList<>();
+		List<FileGod> result = new ArrayList<>();
 		for(FileMetrics metric : metrics) {
-			if(isGodFile(project, metric)) {
-				result.add(new GodFile(metric.getFile(), metric));
+			if(isFileGod(project, metric)) {
+				result.add(new FileGod(metric.getFile(), metric));
 			}
 		}
 		result.sort((f1, f2) -> {
@@ -84,16 +83,16 @@ public class GodComponentDetectorImpl implements GodComponentDetector {
 		return result;
 	}
 	
-	protected boolean isGodFile(Project project, FileMetrics metrics) {
+	protected boolean isFileGod(Project project, FileMetrics metrics) {
 		return metrics.getStructureMetric().getLoc() >= getProjectMinFileLoc(project);
 	}
 	
-	private List<GodPackage> godPackages(Project project) {
+	private List<PackageGod> packageGod(Project project) {
 		Collection<PackageMetrics> metrics = metricCalculatorService.calculateProjectPackageMetrics(project);
-		List<GodPackage> result = new ArrayList<>();
+		List<PackageGod> result = new ArrayList<>();
 		for(PackageMetrics metric : metrics) {
-			if(isGodPackage(project, metric)) {
-				result.add(new GodPackage(metric.getPck(), metric));
+			if(isPackageGod(project, metric)) {
+				result.add(new PackageGod(metric.getPck(), metric));
 			}
 		}
 		result.sort((p1, p2) -> {
@@ -102,7 +101,7 @@ public class GodComponentDetectorImpl implements GodComponentDetector {
 		return result;
 	}
 	
-	protected boolean isGodPackage(Project project, PackageMetrics metrics) {
+	protected boolean isPackageGod(Project project, PackageMetrics metrics) {
 		return metrics.getNof() >= getProjectMinFileCountInPackage(project);
 	}
 	

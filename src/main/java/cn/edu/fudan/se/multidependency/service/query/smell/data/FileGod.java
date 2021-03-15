@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class GodFile {
+public class FileGod {
 
 	private ProjectFile file;
 	

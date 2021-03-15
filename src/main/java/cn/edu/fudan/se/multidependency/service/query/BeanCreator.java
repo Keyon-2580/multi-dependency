@@ -458,11 +458,16 @@ public class BeanCreator {
 				LOGGER.info("创建Similar Components Smell节点关系完成");
 			}
 
-
 			if(propertyConfig.isCalculateCoChange()){
 				LOGGER.info("创建Logical Coupling Smell节点关系...");
 				smellDetectorService.createLogicalCouplingSmell(false);
 				LOGGER.info("创建Logical Coupling Smell节点关系完成");
+			}
+
+			if(propertyConfig.isCalculateCoChange()){
+				LOGGER.info("创建God Component Smell节点关系...");
+				smellDetectorService.createGodComponentSmell(true);
+				LOGGER.info("创建God Component Smell节点关系完成");
 			}
 		}
 		return true;

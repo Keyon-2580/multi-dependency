@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class GodPackage {
+public class PackageGod {
 
 	private Package pck;
 	

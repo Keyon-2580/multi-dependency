@@ -14,6 +14,7 @@ import cn.edu.fudan.se.multidependency.repository.smell.ModuleRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.*;
+import cn.edu.fudan.se.multidependency.service.query.smell.impl.GodComponentDetectorImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +26,6 @@ import java.util.*;
 public class SmellDetectorService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SmellDetectorService.class);
-
-	@Autowired
-	private ModuleRepository moduleRepository;
-	
-	@Autowired
-	private CacheService cache;
 
 	@Autowired
 	private ProjectRepository projectRepository;
@@ -52,6 +47,9 @@ public class SmellDetectorService {
 
 	@Autowired
 	private SimilarComponentsDetector similarComponentsDetector;
+
+	@Autowired
+	private GodComponentDetectorImpl godComponentDetector;
 
 	@Autowired
 	private SmellRepository smellRepository;
@@ -458,6 +456,48 @@ public class SmellDetectorService {
 			smellContains.add(contain1);
 			smellContains.add(contain2);
 			packageSmellIndex ++;
+		}
+		smellRepository.saveAll(smells);
+		containRepository.saveAll(smellContains);
+	}
+
+	public void createGodComponentSmell(boolean isRecreate) {
+		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.GOD_COMPONENT);
+		if(smellsTmp != null && !smellsTmp.isEmpty()){
+			LOGGER.info("已存在God Component Smell");
+			if(!isRecreate){
+				LOGGER.info("不重新创建");
+				return;
+			}
+			LOGGER.info("重新创建...");
+		}
+		smellRepository.deleteSmellContainRelations(SmellType.GOD_COMPONENT);
+		smellRepository.deleteSmellHasMetricRelation(SmellType.GOD_COMPONENT);
+		smellRepository.deleteSmells(SmellType.GOD_COMPONENT);
+		List<Smell> smells = new ArrayList<>();
+		List<Contain> smellContains = new ArrayList<>();
+
+  		Map<Long, List<FileGod>> fileGodComponents = godComponentDetector.fileGodComponents();
+		String fileSmellName = "file_god-component_";
+		int fileSmellIndex = 1;
+		for (Map.Entry<Long, List<FileGod>> fileGodComponent : fileGodComponents.entrySet()) {
+			long projectId = fileGodComponent.getKey();
+			Project project = (Project) projectRepository.queryNodeById(projectId);
+			List<FileGod> files = fileGodComponent.getValue();
+			for (FileGod file : files) {
+				Smell smell = new Smell();
+				smell.setName(fileSmellName + fileSmellIndex);
+				smell.setSize(1);
+				smell.setLanguage(project.getLanguage());
+				smell.setProjectId(projectId);
+				smell.setProjectName(project.getName());
+				smell.setType(SmellType.GOD_COMPONENT);
+				smell.setLevel(SmellLevel.FILE);
+				smells.add(smell);
+				Contain contain = new Contain(smell, file.getFile());
+				smellContains.add(contain);
+				fileSmellIndex ++;
+			}
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);

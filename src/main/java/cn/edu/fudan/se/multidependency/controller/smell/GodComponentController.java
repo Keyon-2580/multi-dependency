@@ -28,8 +28,8 @@ public class GodComponentController {
 	@GetMapping("")
 	public String godComponent(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("files", godComponentDetector.godFiles());
-		request.setAttribute("packages", godComponentDetector.godPackages());
+		request.setAttribute("files", godComponentDetector.fileGodComponents());
+		request.setAttribute("packages", godComponentDetector.packageGodComponents());
 		return "as/godComponents";
 	}
 
