@@ -113,9 +113,14 @@ public class FileMetrics extends FanIOMetric {
 		private int coChangeFiles;
 
 		/**
-		 * 协同修改次数，与其它文件共同修改的commit次数
+		 * 增加代码行
 		 */
-//		private int coChangeCommitTimes;
+		private int addLines;
+
+		/**
+		 * 删除代码行
+		 */
+		private int subLines;
 	}
 
 	@Data

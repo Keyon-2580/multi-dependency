@@ -75,6 +75,8 @@ public class MetricCalculatorService {
 					metricValues.put(MetricType.COMMITS, evolutionMetric.getCommits());
 					metricValues.put(MetricType.DEVELOPERS, evolutionMetric.getDevelopers());
 					metricValues.put(MetricType.CO_CHANGE_FILES, evolutionMetric.getCoChangeFiles());
+					metricValues.put(MetricType.ADD_LINES, evolutionMetric.getAddLines());
+					metricValues.put(MetricType.SUB_LINES, evolutionMetric.getSubLines());
 //					metricValues.put(MetricType.CO_CHANGE_COMMIT_TIMES, evolutionMetric.getCoChangeCommitTimes());
 				}
 

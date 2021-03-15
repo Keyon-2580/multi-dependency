@@ -48,7 +48,7 @@ var rFile = function(fileId, cytoscapeutil) {
 				console.log(result);
 				var html = "<ol>";
 				for(var i = 0; i < result.length; i++) {
-					html += "<li><a target='_blank' href='/issue/" + result[i].id + "'>Issue: " + result[i].number + " " + result[i].title + "</a></li>";
+					html += "<li><a target='_blank' href='/issue/" + result[i].id + "'>" + result[i].issueKey + "(" + result[i].type + "): " + result[i].title + "</a></li>";
 				}
 				html += "</ol>";
 				$("#issue_content").html(html);
