@@ -16,7 +16,10 @@ var rPackage = function (packageId, cytoscapeutil) {
                 console.log(result);
                 var html = "<ol>";
                 for(var i = 0; i < result.length; i++) {
-                    html += "<li><a target='_blank' href='/relation/package/" + result[i].startNode.id + "'>" + result[i].startNode.directoryPath+ "</a></li>";
+                    html += "<li><a target='_blank' href='/relation/package/" + result[i].startNode.id + "'>"
+                        + result[i].startNode.directoryPath
+                        + ":  " + result[i].dependsOnType + "(" + + result[i].times + ", " + (result[i].weightedTimes).toFixed(2) + ")"
+                        + "</a></li>";
                 }
                 html += "</ol>";
                 $("#dependedBy_content").html(html);
@@ -29,7 +32,10 @@ var rPackage = function (packageId, cytoscapeutil) {
                 console.log(result);
                 var html = "<ol>";
                 for(var i = 0; i < result.length; i++) {
-                    html += "<li><a target='_blank' href='/relation/package/" + result[i].endNode.id + "'>" + result[i].endNode.directoryPath + "</a></li>";
+                    html += "<li><a target='_blank' href='/relation/package/" + result[i].endNode.id + "'>"
+                        + result[i].endNode.directoryPath
+                        + ":  " + result[i].dependsOnType + "(" + + result[i].times + ", " + (result[i].weightedTimes).toFixed(2) + ")"
+                        + "</a></li>";
                 }
                 html += "</ol>";
                 $("#dependsOn_content").html(html);

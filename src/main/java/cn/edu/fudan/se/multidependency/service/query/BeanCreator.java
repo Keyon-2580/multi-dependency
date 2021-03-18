@@ -313,19 +313,7 @@ public class BeanCreator {
 				cloneGroupRepository.setCloneGroupContainSize();
 				cloneGroupRepository.setCloneGroupLanguage();
 				LOGGER.info("创建Clone Group关系完成！！！");
-//				smellDetectorService.createCloneSmells();
-
 			}
-			List<Smell> smells = smellRepository.findSmellWithLimit();
-
-//			smellRepository.deleteSmellContainRelations();
-//			smellRepository.deleteSmellHasMetricRelation();
-//			smellRepository.deleteSmells();
-//			smellRepository.createCloneSmells();
-//			smellRepository.createCloneSmellContains();
-//			smellRepository.setSmellProject();
-//			LOGGER.info("创建Smell节点关系完成！！！");
-
 			return cloneGroups;
 		}
 		return new ArrayList<>();

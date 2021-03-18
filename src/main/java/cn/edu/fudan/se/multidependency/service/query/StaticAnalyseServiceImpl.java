@@ -1,11 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.query;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -706,7 +701,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			return cache.get(getClass(), key);
 		}
 		List<DependsOn> result = dependsOnRepository.findPackageDependsOn(pck.getId());
-		result.sort((d1, d2) -> {
+		result.sort((d1, d2)->{
 			Package pck1 = (Package) d1.getEndNode();
 			Package pck2 = (Package) d2.getEndNode();
 			return pck1.getDirectoryPath().compareTo(pck2.getDirectoryPath());
@@ -722,9 +717,9 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 			return cache.get(getClass(), key);
 		}
 		List<DependsOn> result = dependsOnRepository.findPackageDependedOnBy(pck.getId());
-		result.sort((d1, d2) -> {
-			Package pck1 = (Package) d1.getEndNode();
-			Package pck2 = (Package) d2.getEndNode();
+		result.sort((d1, d2)->{
+			Package pck1 = (Package) d1.getStartNode();
+			Package pck2 = (Package) d2.getStartNode();
 			return pck1.getDirectoryPath().compareTo(pck2.getDirectoryPath());
 		});
 		cache.cache(getClass(), key, result);
