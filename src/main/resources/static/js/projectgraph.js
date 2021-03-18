@@ -978,7 +978,7 @@ function drawTableBelow(link_id, linksdata, type){
                     + d.dependsOnIntensity.toFixed(2) + "</td><td>"
                     + d.dependsByIntensity.toFixed(2) + "</td><td>"
                     + "<a target='_blank' href='/dependon?pck1=" + d.source_id.split("_")[1] + "&pck2=" + d.target_id.split("_")[1]
-                    + "&dependsOnIntensity=" + d.dependsOnIntensity.toFixed(2) + "&dependsByIntensity=" + d.dependsByIntensity.toFixed(2) + "'>detail</a></td></tr>";
+                    + "'>detail</a></td></tr>";
             }
         })
 

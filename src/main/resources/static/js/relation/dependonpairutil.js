@@ -1,9 +1,9 @@
-var showDependOnDetails = function (id1, id2, dependsOnIntensity, dependsByIntensity) {
-    showMetrics(id1, id2, dependsOnIntensity, dependsByIntensity);
+var showDependOnDetails = function (id1, id2) {
+    showMetrics(id1, id2);
     showMatrix(id1, id2);
 }
 
-var showMetrics = function (id1, id2, dependsOnIntensity, dependsByIntensity) {
+var showMetrics = function (id1, id2) {
     $.ajax({
         type: "GET",
         url: "/dependon/packagepair/metrics?id1=" + id1 + "&id2=" + id2,
@@ -25,7 +25,7 @@ var showMetrics = function (id1, id2, dependsOnIntensity, dependsByIntensity) {
             html += result.dependon1types;
             html += "</td>";
             html += "<td>";
-            html += dependsOnIntensity.toFixed(2);
+            html += 0;
             html += "</td>";
             html += "<td rowspan='2' style='vertical-align: middle'>";
             html += result.cochange;
@@ -45,7 +45,7 @@ var showMetrics = function (id1, id2, dependsOnIntensity, dependsByIntensity) {
             html += result.dependon2types;
             html += "</td>";
             html += "<td>";
-            html += dependsByIntensity.toFixed(2);
+            html += 0;
             html += "</td>";
             html += "</tr>";
             html += "</table>";

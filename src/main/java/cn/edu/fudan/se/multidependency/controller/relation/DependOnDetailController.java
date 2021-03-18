@@ -36,11 +36,9 @@ public class DependOnDetailController {
     private CoChangeRepository coChangeRepository;
 
     @GetMapping("")
-    public String index(HttpServletRequest request, @RequestParam("pck1")Long id1, @RequestParam("pck2")Long id2, @RequestParam("dependsOnIntensity")Double dependsOnIntensity, @RequestParam("dependsByIntensity")Double dependsByIntensity){
+    public String index(HttpServletRequest request, @RequestParam("pck1")Long id1, @RequestParam("pck2")Long id2){
         request.setAttribute("pck1", id1);
         request.setAttribute("pck2", id2);
-        request.setAttribute("dependsOnIntensity", dependsOnIntensity);
-        request.setAttribute("dependsByIntensity", dependsByIntensity);
         return"/relation/dependonpair";
     }
 

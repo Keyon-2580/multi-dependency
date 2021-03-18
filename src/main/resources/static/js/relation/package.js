@@ -17,8 +17,9 @@ var rPackage = function (packageId, cytoscapeutil) {
                 var html = "<ol>";
                 for(var i = 0; i < result.length; i++) {
                     html += "<li><a target='_blank' href='/relation/package/" + result[i].startNode.id + "'>"
-                        + result[i].startNode.directoryPath
-                        + ":  " + result[i].dependsOnType + "(" + + result[i].times + ", " + (result[i].weightedTimes).toFixed(2) + ")"
+                        + result[i].startNode.directoryPath + ":  " + "</a>"
+                        + "<a target='_blank' href='/dependon?pck1=" + result[i].endNode.id + "&pck2=" + result[i].startNode.id + "'>"
+                        + result[i].dependsOnType + "(" + + result[i].times + ", " + (result[i].weightedTimes).toFixed(2) + ")"
                         + "</a></li>";
                 }
                 html += "</ol>";
@@ -33,8 +34,9 @@ var rPackage = function (packageId, cytoscapeutil) {
                 var html = "<ol>";
                 for(var i = 0; i < result.length; i++) {
                     html += "<li><a target='_blank' href='/relation/package/" + result[i].endNode.id + "'>"
-                        + result[i].endNode.directoryPath
-                        + ":  " + result[i].dependsOnType + "(" + + result[i].times + ", " + (result[i].weightedTimes).toFixed(2) + ")"
+                        + result[i].endNode.directoryPath + ":  " + "</a>"
+                        + "<a target='_blank' href='/dependon?pck1=" + result[i].startNode.id + "&pck2=" + result[i].endNode.id + "'>"
+                        + result[i].dependsOnType + "(" + + result[i].times + ", " + (result[i].weightedTimes).toFixed(2) + ")"
                         + "</a></li>";
                 }
                 html += "</ol>";
