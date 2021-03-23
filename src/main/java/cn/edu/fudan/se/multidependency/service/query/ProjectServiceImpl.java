@@ -7,12 +7,12 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
+import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
-import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackagePairDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.*;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
@@ -95,12 +95,13 @@ public class ProjectServiceImpl implements ProjectService{
         nodeJSON2.put("result",projectJson);
         result.add(nodeJSON2);
 
-//        JSONObject temp_allprojects = getAllProjectsLinks();
-//        nodeJSON4.put("links", temp_allprojects);
-//        result.add(nodeJSON4);
-
-        JSONArray temp_allprojects = getAllProjectsLinks2();
-        nodeJSON4.put("links", temp_allprojects);
+        if(Constant.PROJECT_STRUCTURE_COMBO.equals(type)){
+            JSONArray temp_allprojects = getAllProjectsLinksCombo();
+            nodeJSON4.put("links", temp_allprojects);
+        }else{
+            JSONObject temp_allprojects = getAllProjectsLinks();
+            nodeJSON4.put("links", temp_allprojects);
+        }
         result.add(nodeJSON4);
 
         if(Constant.PROJECT_STRUCTURE_TREEMAP.equals(type)){
@@ -124,48 +125,45 @@ public class ProjectServiceImpl implements ProjectService{
             PackageStructure pcknew = containRelationService.packageStructureInitialize(pckstru.getPck(),type);
             childrenPackagesnew.add(pcknew);
         }
+        if(!Constant.PROJECT_STRUCTURE_COMBO.equals(type)) {
+            result.put("name", packageOfProject.getName());
+            result.put("id", "id_" + packageOfProject.getId().toString());
+//            Collection<ProjectFile> clonefiles = basicCloneQueryService.findProjectContainCloneFiles(project);
+            result.put("children", getPackageContainJson(childrenPackagesnew, type));
+        }else{
 
-//        result.put("name", packageOfProject.getName());
-//        result.put("id", "id_" + packageOfProject.getId().toString());
-//        Collection<ProjectFile> clonefiles = basicCloneQueryService.findProjectContainCloneFiles(project);
-//        result.put("children", getPackageContainJson(clonefiles,childrenPackagesnew,type));
+            JSONArray combo = new JSONArray();
 
-        JSONArray combo = new JSONArray();
+            for(PackageStructure pckstru2 : childrenPackagesnew.get(0).getChildrenPackages()){
+                JSONObject temp = new JSONObject();
+                List<PackageStructure> pckList = pckstru2.getChildrenPackages();
+                JSONArray temp_children = new JSONArray();
+                temp.put("name",pckstru2.getPck().getDirectoryPath());
+                temp.put("depth",pckstru2.getPck().getDepth());
+                temp.put("id","id_" + pckstru2.getPck().getId().toString());
 
-        for(PackageStructure pckstru2 : childrenPackagesnew.get(0).getChildrenPackages()){
-            JSONObject temp = new JSONObject();
-            List<PackageStructure> pckList = pckstru2.getChildrenPackages();
-            JSONArray temp_children = new JSONArray();
-            temp.put("name",pckstru2.getPck().getDirectoryPath());
-            temp.put("depth",pckstru2.getPck().getDepth());
-            temp.put("id","id_" + pckstru2.getPck().getId().toString());
-
-            List<ProjectFile> fileList = pckstru2.getChildrenFiles();
-            if(fileList.size() > 0){
-                for(ProjectFile profile : fileList){
-                    JSONObject jsonObject2 = new JSONObject();
-                    jsonObject2.put("size",profile.getLoc());
-//					jsonObject2.put("value",profile.getLoc());
-                    jsonObject2.put("long_name",profile.getPath());
-//                        if(clonefiles.contains(profile)){
-//                            jsonObject2.put("clone",true);
-//                        }else{
-//                            jsonObject2.put("clone",false);
-//                        }
-                    jsonObject2.put("name",profile.getName());
-                    jsonObject2.put("id","id_" + profile.getId().toString());
-                    temp_children.add(jsonObject2);
+                List<ProjectFile> fileList = pckstru2.getChildrenFiles();
+                if(fileList.size() > 0){
+                    for(ProjectFile profile : fileList){
+                        JSONObject jsonObject2 = new JSONObject();
+                        jsonObject2.put("size",profile.getLoc());
+                        jsonObject2.put("long_name",profile.getPath());
+                        jsonObject2.put("name",profile.getName());
+                        jsonObject2.put("id","id_" + profile.getId().toString());
+                        temp_children.add(jsonObject2);
+                    }
                 }
+
+                JSONArray children = getPackageContainJsonCombo(pckList);
+                temp_children.addAll(children);
+                temp.put("children", temp_children);
+
+
+                combo.add(temp);
             }
 
-            JSONArray children = getPackageContainJson2(pckList);
-            temp_children.addAll(children);
-            temp.put("children", temp_children);
-
-            combo.add(temp);
+            result.put("result", combo);
         }
-
-        result.put("result", combo);
 
         return result;
     }
@@ -174,7 +172,7 @@ public class ProjectServiceImpl implements ProjectService{
     /**
      * 递归遍历项目中所有package的包含关系
      */
-    public JSONArray getPackageContainJson(Collection<ProjectFile> clonefiles, List<PackageStructure> childrenPackages,String type){
+    public JSONArray getPackageContainJson(List<PackageStructure> childrenPackages,String type){
         JSONArray result = new JSONArray();
         for(PackageStructure pckstru :childrenPackages){
             List<PackageStructure> pckList = pckstru.getChildrenPackages();
@@ -188,18 +186,18 @@ public class ProjectServiceImpl implements ProjectService{
             jsonObject.put("depth",pckstru.getPck().getDepth());
             jsonObject.put("id","id_" + pckstru.getPck().getId().toString());
             float cloneFilesInAllFiles = 0;
-            if(fileList.size() > 0){
-                for(ProjectFile profile : fileList){
-                    if(clonefiles.contains(profile)){
-                        cloneFilesInAllFiles += 1;
-                    }
-                }
-            }
-            if(fileList.size() > 0){
-                jsonObject.put("clone_ratio",cloneFilesInAllFiles / (float)(fileList.size()));
-            }else{
-                jsonObject.put("clone_ratio", 0);
-            }
+//            if(fileList.size() > 0){
+//                for(ProjectFile profile : fileList){
+//                    if(clonefiles.contains(profile)){
+//                        cloneFilesInAllFiles += 1;
+//                    }
+//                }
+//            }
+//            if(fileList.size() > 0){
+//                jsonObject.put("clone_ratio",cloneFilesInAllFiles / (float)(fileList.size()));
+//            }else{
+//                jsonObject.put("clone_ratio", 0);
+//            }
 
             if(Constant.PROJECT_STRUCTURE_TREEMAP.equals(type)){
                 JSONArray jsonArray = new JSONArray();
@@ -209,11 +207,11 @@ public class ProjectServiceImpl implements ProjectService{
                         jsonObject2.put("size",profile.getLoc());
 //					jsonObject2.put("value",profile.getLoc());
                         jsonObject2.put("long_name",profile.getPath());
-                        if(clonefiles.contains(profile)){
-                            jsonObject2.put("clone",true);
-                        }else{
-                            jsonObject2.put("clone",false);
-                        }
+//                        if(clonefiles.contains(profile)){
+//                            jsonObject2.put("clone",true);
+//                        }else{
+//                            jsonObject2.put("clone",false);
+//                        }
                         jsonObject2.put("name",profile.getName());
                         jsonObject2.put("id","id_" + profile.getId().toString());
                         jsonArray.add(jsonObject2);
@@ -227,7 +225,7 @@ public class ProjectServiceImpl implements ProjectService{
 
             if(pckList.size()>0){
                 //如果该属性还有子属性,继续做查询,直到该属性没有孩子,也就是最后一个节点
-                jsonObject.put("children", getPackageContainJson(clonefiles,pckList,type));
+                jsonObject.put("children", getPackageContainJson(pckList,type));
             }
             result.add(jsonObject);
         }
@@ -235,7 +233,7 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
-    public JSONArray getPackageContainJson2(List<PackageStructure> childrenPackages){
+    public JSONArray getPackageContainJsonCombo(List<PackageStructure> childrenPackages){
         JSONArray result = new JSONArray();
         for(PackageStructure pckstru :childrenPackages){
             List<PackageStructure> pckList = pckstru.getChildrenPackages();
@@ -261,7 +259,7 @@ public class ProjectServiceImpl implements ProjectService{
 
             if(pckList.size()>0){
                 //如果该属性还有子属性,继续做查询,直到该属性没有孩子,也就是最后一个节点
-                JSONArray temp_children = getPackageContainJson2(pckList);
+                JSONArray temp_children = getPackageContainJsonCombo(pckList);
                 result.addAll(temp_children);
             }
         }
@@ -277,15 +275,19 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
-    public JSONArray getAllProjectsLinks2(){
+    public JSONArray getAllProjectsLinksCombo(){
         JSONArray result = new JSONArray();
 
-        List<DependsOn> dependsOnList= dependsOnRepository.findFileDependsInProject(582);
+        Set<Long> proList = nodeService.allProjectsById().keySet();
+        List<DependsOn> dependsOnList= dependsOnRepository.findFileDependsInProject(proList.iterator().next());
         List<Clone> cloneList= cloneRepository.findAllFileClones();
         List<CoChange> coChangeList= coChangeRepository.findFileCoChange();
 
         for(DependsOn dependsOn : dependsOnList){
             JSONObject temp1 = new JSONObject();
+            if(dependsOn.getDependsOnType().contains(RelationType.str_CALL) ||
+                    dependsOn.getDependsOnType().contains(RelationType.str_EXTENDS) ||
+                    dependsOn.getDependsOnType().contains(RelationType.str_IMPLEMENTS))
             temp1.put("type", "dependson");
             temp1.put("source_id", "id_" + dependsOn.getStartNode().getId());
             temp1.put("target_id", "id_" + dependsOn.getEndNode().getId());

@@ -18,6 +18,7 @@ public class Constant {
 
 	public static final String PROJECT_STRUCTURE_TREEMAP = "PROJECT_STRUCTURE_TREEMAP";
 	public static final String PROJECT_STRUCTURE_CIRCLE_PACKING = "PROJECT_STRUCTURE_CIRCLE_PACKING";
+	public static final String PROJECT_STRUCTURE_COMBO = "PROJECT_STRUCTURE_COMBO";
 
     public static final String CODE_NODE_IDENTIFIER_SUFFIX_FILE = "#F";
     public static final String CODE_NODE_IDENTIFIER_SUFFIX_NAMESPACE = "#N";

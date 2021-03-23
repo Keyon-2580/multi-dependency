@@ -609,6 +609,14 @@ public class ProjectController {
 		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_TREEMAP);
 	}
 
+	@PostMapping("/has/combo")
+	@ResponseBody
+	public JSONArray projectHasCombo(@RequestBody JSONObject requestBody) {
+		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_COMBO);
+	}
+
+
+
 	/**
 	* 返回气泡图不同关系的连线数据
 	 * */
