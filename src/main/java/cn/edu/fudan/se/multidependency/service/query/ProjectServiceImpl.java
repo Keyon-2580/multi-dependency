@@ -287,15 +287,16 @@ public class ProjectServiceImpl implements ProjectService{
             JSONObject temp1 = new JSONObject();
             if(dependsOn.getDependsOnType().contains(RelationType.str_CALL) ||
                     dependsOn.getDependsOnType().contains(RelationType.str_EXTENDS) ||
-                    dependsOn.getDependsOnType().contains(RelationType.str_IMPLEMENTS))
-            temp1.put("type", "dependson");
-            temp1.put("source_id", "id_" + dependsOn.getStartNode().getId());
-            temp1.put("target_id", "id_" + dependsOn.getEndNode().getId());
-            temp1.put("source_name", dependsOn.getEndNode().getName());
-            temp1.put("target_name", dependsOn.getEndNode().getName());
-            temp1.put("pair_id", dependsOn.getStartNode().getId() + "_" + dependsOn.getEndNode().getId());
-            temp1.put("dependsOnTypes", dependsOn.getDependsOnType());
-            result.add(temp1);
+                    dependsOn.getDependsOnType().contains(RelationType.str_IMPLEMENTS)) {
+                temp1.put("type", "dependson");
+                temp1.put("source_id", "id_" + dependsOn.getStartNode().getId());
+                temp1.put("target_id", "id_" + dependsOn.getEndNode().getId());
+                temp1.put("source_name", dependsOn.getEndNode().getName());
+                temp1.put("target_name", dependsOn.getEndNode().getName());
+                temp1.put("pair_id", dependsOn.getStartNode().getId() + "_" + dependsOn.getEndNode().getId());
+                temp1.put("dependsOnTypes", dependsOn.getDependsOnType());
+                result.add(temp1);
+            }
         }
 
         for(Clone clone : cloneList){
