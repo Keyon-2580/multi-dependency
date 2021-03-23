@@ -21,6 +21,8 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -79,7 +81,7 @@ public class CloneGroupDependOnController {
             Collection<Node> endNodes = staticAnalyseService.findFileDependsOn( (ProjectFile)node).stream().map(DependsOn::getEndNode).collect(Collectors.toList());
             allNodes.addAll(endNodes);
         }
-        String[][] dependsonMatrix = new String[nodes.size()][allNodes.size()];
+        String[][] dependsOnMatrix = new String[nodes.size()][allNodes.size()];
         int i = 0;
         for (CodeNode node:
              nodes) {
@@ -87,18 +89,23 @@ public class CloneGroupDependOnController {
             for (Node dependsNode :
                  allNodes) {
                 if(dependsOnRepository.findSureDependsOnInFiles(node.getId(),dependsNode.getId()) != null){
-                    Map<String, Long> dependson = dependsOnRepository.findSureDependsOnInFiles(node.getId(),dependsNode.getId()).getDependsOnTypes();
-                    Set<String> keyset = dependson.keySet();
-                    for (String key:
-                         keyset) {
-                        if(dependsonMatrix[i][j] == null){
-                            dependsonMatrix[i][j] = "";
+                    DependsOn dependsOn = dependsOnRepository.findSureDependsOnInFiles(node.getId(), dependsNode.getId());
+                    Map<String, Long> dependsOnTypes =  dependsOn.getDependsOnTypes();
+                    for (String key: dependsOnTypes.keySet()) {
+                        if(dependsOnMatrix[i][j] == null){
+                            dependsOnMatrix[i][j] = "";
                         }
-                        if(!dependsonMatrix[i][j].equals("")){
-                            dependsonMatrix[i][j] += "/";
+                        if(!dependsOnMatrix[i][j].equals("")){
+                            dependsOnMatrix[i][j] += "/";
                         }
-                        dependsonMatrix[i][j] += RelationType.relationAbbreviation.get(RelationType.valueOf(key));
-                        dependsonMatrix[i][j] += "(" + dependson.get(key).toString() + ")";
+                        dependsOnMatrix[i][j] += RelationType.relationAbbreviation.get(RelationType.valueOf(key));
+                        dependsOnMatrix[i][j] += "(" + dependsOnTypes.get(key).toString() + ")";
+                    }
+                    if(dependsOnMatrix[i][j] != null && !"".equals(dependsOnMatrix[i][j])){
+                        double weightedTimes = dependsOn.getWeightedTimes() ;
+                        BigDecimal newWeightedTimes  =  new BigDecimal(weightedTimes);
+                        newWeightedTimes = newWeightedTimes.setScale(2, RoundingMode.HALF_UP);
+                        dependsOnMatrix[i][j] = "(" +  dependsOn.getTimes() + ", " + newWeightedTimes.doubleValue() + "): " + dependsOnMatrix[i][j];
                     }
                 }
                 j++;
@@ -108,7 +115,7 @@ public class CloneGroupDependOnController {
         JSONObject result = new JSONObject();
         result.put("nodes",nodes);
         result.put("dependsnodes",allNodes);
-        result.put("matrix",dependsonMatrix);
+        result.put("matrix",dependsOnMatrix);
         return result;
     }
 

@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 @Controller
@@ -124,6 +126,12 @@ public class DependOnDetailController {
                         }
                         dependsOnMatrix[i][j] += RelationType.relationAbbreviation.get(RelationType.valueOf(key));
                         dependsOnMatrix[i][j] += "(" + dependsOnTypes.get(key).toString() + ")";
+                    }
+                    if(dependsOnMatrix[i][j] != null && !"".equals(dependsOnMatrix[i][j])){
+                        double weightedTimes = dependsOn.getWeightedTimes() ;
+                        BigDecimal newWeightedTimes  =  new BigDecimal(weightedTimes);
+                        newWeightedTimes = newWeightedTimes.setScale(2, RoundingMode.HALF_UP);
+                        dependsOnMatrix[i][j] = "(" +  dependsOn.getTimes() + ", " + newWeightedTimes.doubleValue() + "): " + dependsOnMatrix[i][j];
                     }
                 }
                 j++;
