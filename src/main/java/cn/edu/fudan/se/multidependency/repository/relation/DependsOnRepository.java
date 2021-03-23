@@ -234,4 +234,6 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query("match p=()-[r:DEPENDS_ON]->() where r.dependsOnType = $dependsOnType delete r;")
 	void deleteDependsOnByRelationType(String dependsOnType);
 
+	@Query("match p = (f1:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(f2:ProjectFile) where id(f1) = $fileId1 and id(f2) = $fileId2 return p;")
+	List<DependsOn> judgeDependsOnByFileId(@Param("fileId1") long fileId1, @Param("fileId2") long fileId2);
 }

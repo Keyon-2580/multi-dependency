@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.repository.relation.clone;
 import java.util.List;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -75,5 +76,8 @@ public interface CloneRepository extends Neo4jRepository<Clone, Long> {
 
 	@Query("match (project:Project)-[:CONTAIN*2..4]->(node:CodeUnit) set node.projectId = id(project);")
 	void setProjectClone();
+
+	@Query("match p = (f1:ProjectFile)-[r:" + RelationType.str_CLONE + "]->(f2:ProjectFile) where id(f1) = $fileId1 and id(f2) = $fileId2 return p;")
+	List<Clone> judgeCloneByFileId(@Param("fileId1") long fileId1, @Param("fileId2") long fileId2);
 
 }

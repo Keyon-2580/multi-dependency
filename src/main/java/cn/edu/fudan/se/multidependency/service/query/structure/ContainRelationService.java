@@ -35,6 +35,8 @@ public interface ContainRelationService {
 
 	PackageStructure packageStructureInitialize(Package pck, String type);
 
+	PackageStructure packageStructureInitializeWithNoSubPackages(Package pck, String type);
+
 	Collection<Package> findProjectRootPackages(Project project);
 
 	Collection<Package> findPackageContainPackages(Package pck);

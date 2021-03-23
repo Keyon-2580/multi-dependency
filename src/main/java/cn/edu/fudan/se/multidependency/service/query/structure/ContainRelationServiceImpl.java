@@ -122,6 +122,34 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 
 	}
 
+	@Override
+	public PackageStructure packageStructureInitializeWithNoSubPackages(Package pck, String type) {
+		if(pck == null) {
+			return null;
+		}
+		PackageStructure result = new PackageStructure(pck);
+
+		Collection<ProjectFile> files = new ArrayList<>(findPackageContainFiles(pck)); // contain关系的file
+
+		if(files.size() > 0 && (Constant.PROJECT_STRUCTURE_CIRCLE_PACKING).equals(type)){
+			Package tmpPck = new Package();
+			tmpPck.setId(0 - pck.getId());
+			tmpPck.setEntityId(pck.getEntityId());
+			tmpPck.setLanguage(pck.getLanguage());
+			tmpPck.setDirectoryPath(pck.getDirectoryPath());
+			tmpPck.setLines(pck.getLines());
+			tmpPck.setLoc(pck.getLoc());
+			tmpPck.setName(pck.getName());
+			PackageStructure resultTmp = new PackageStructure(tmpPck);
+			resultTmp.addAllFiles(files);
+			result.addChildPackage(resultTmp);
+		} else {
+			result.addAllFiles(files);
+		}
+
+		return result;
+	}
+
 	Map<Project, Collection<Package>> projectRootPackagesCache = new ConcurrentHashMap<>();
 	@Override
 	public Collection<Package> findProjectRootPackages(Project project) {
