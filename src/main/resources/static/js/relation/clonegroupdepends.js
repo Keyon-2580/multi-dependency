@@ -94,7 +94,8 @@ var rclonegroupdepends = function (name, cytoscapeutil) {
                 success: function(result) {
                     var html = "<ol>";
                     for(var i = 0;i < result.length;i++){
-                        html += "<li><a target='_blank' href='/relation/file/" + result[i].id + "'>" + result[i].path + "(" + result[i].loc + ")" + "</a></li>";
+                        html += "<li><a target='_blank' href='/relation/file/" + result[i].id + "'>"
+                            + "(Score: " + (result[i].score).toFixed(2) + "): " +result[i].path + "(" + result[i].loc + ")" + "</a></li>";
                     }
                     html += "</ol>";
                     $("#dependfiledetail").html(html);
@@ -109,7 +110,8 @@ var rclonegroupdepends = function (name, cytoscapeutil) {
             success: function(result) {
                 var html = "<ol>";
                 for(var i = 0;i < result.length;i++){
-                    html += "<li><a target='_blank' href='/relation/file/" + result[i].id + "'>" + result[i].path + "(" + result[i].loc + ")" + "</a></li>";
+                    html += "<li><a target='_blank' href='/relation/file/" + result[i].id + "'>"
+                        + "(Score: " + (result[i].score).toFixed(2) + "): " +result[i].path + "(" + result[i].loc + ")" + "</a></li>";
                 }
                 html += "</ol>";
                 $("#dependedfiledetail").html(html);

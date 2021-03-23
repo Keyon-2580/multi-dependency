@@ -100,7 +100,9 @@ var showMatrix = function (id1, id2) {
             var html1 = "";
             html1 += "<div><ul>";
             for(var i = 0; i < result.numofpck1; i++){
-                html1 += "<li>P1.F" + (i+1) + ": <a target='_blank' href='/relation/file/" + result.allfiles[i].id + "'>" + result.allfiles[i].path + "(" + result.allfiles[i].loc + ")" + "</a></li>";
+                html1 += "<li>P1.F" + (i+1) + ": <a target='_blank' href='/relation/file/" + result.allfiles[i].id + "'>"
+                    + "(Score: " + (result.allfiles[i].score).toFixed(2) + "): "
+                    + result.allfiles[i].path + "(" + result.allfiles[i].loc + ")" + "</a></li>";
             }
             html1 += "</ul></div>";
             $("#package1_files").html(html1);
@@ -108,7 +110,9 @@ var showMatrix = function (id1, id2) {
             var html2 ="";
             html2 += "<div><ul>";
             for(var i = result.numofpck1; i < result.allfiles.length; i++){
-                html2 += "<li>P2.F" + (i+1-result.numofpck1) + ": <a target='_blank' href='/relation/file/" + result.allfiles[i].id + "'>" + result.allfiles[i].path + "(" + result.allfiles[i].loc + ")" + "</a></li>";
+                html2 += "<li>P2.F" + (i+1-result.numofpck1) + ": <a target='_blank' href='/relation/file/" + result.allfiles[i].id + "'>"
+                    + "(Score: " + (result.allfiles[i].score).toFixed(2) + "): "
+                    + result.allfiles[i].path + "(" + result.allfiles[i].loc + ")" + "</a></li>";
             }
             html2 += "</ul></div>";
             $("#package2_files").html(html2);

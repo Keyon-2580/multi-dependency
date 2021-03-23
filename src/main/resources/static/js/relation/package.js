@@ -85,6 +85,7 @@ var rPackage = function (packageId, cytoscapeutil) {
                 console.log(result);
                 for(var i = 0; i < result.length; i++) {
                     html += "<li><a target='_blank' href='/relation/file/" + result[i].id + "' >";
+                    html += "(Score: " + (result[i].score).toFixed(2) + "): ";
                     html += result[i].name;
                     html += "</a></li>";
                 }
