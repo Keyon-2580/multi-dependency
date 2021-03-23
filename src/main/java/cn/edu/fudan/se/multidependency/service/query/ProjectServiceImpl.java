@@ -5,7 +5,13 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackagePairDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.*;
@@ -21,10 +27,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -40,6 +43,15 @@ public class ProjectServiceImpl implements ProjectService{
 
     @Autowired
     private NodeService nodeService;
+
+    @Autowired
+    private DependsOnRepository dependsOnRepository;
+
+    @Autowired
+    private CloneRepository cloneRepository;
+
+    @Autowired
+    private CoChangeRepository coChangeRepository;
 
     @Autowired
     private BasicSmellQueryService basicSmellQueryService;
@@ -83,7 +95,11 @@ public class ProjectServiceImpl implements ProjectService{
         nodeJSON2.put("result",projectJson);
         result.add(nodeJSON2);
 
-        JSONObject temp_allprojects = getAllProjectsLinks();
+//        JSONObject temp_allprojects = getAllProjectsLinks();
+//        nodeJSON4.put("links", temp_allprojects);
+//        result.add(nodeJSON4);
+
+        JSONArray temp_allprojects = getAllProjectsLinks2();
         nodeJSON4.put("links", temp_allprojects);
         result.add(nodeJSON4);
 
@@ -109,10 +125,47 @@ public class ProjectServiceImpl implements ProjectService{
             childrenPackagesnew.add(pcknew);
         }
 
-        result.put("name", packageOfProject.getName());
-        result.put("id", "id_" + packageOfProject.getId().toString());
-        Collection<ProjectFile> clonefiles = basicCloneQueryService.findProjectContainCloneFiles(project);
-        result.put("children", getPackageContainJson(clonefiles,childrenPackagesnew,type));
+//        result.put("name", packageOfProject.getName());
+//        result.put("id", "id_" + packageOfProject.getId().toString());
+//        Collection<ProjectFile> clonefiles = basicCloneQueryService.findProjectContainCloneFiles(project);
+//        result.put("children", getPackageContainJson(clonefiles,childrenPackagesnew,type));
+
+        JSONArray combo = new JSONArray();
+
+        for(PackageStructure pckstru2 : childrenPackagesnew.get(0).getChildrenPackages()){
+            JSONObject temp = new JSONObject();
+            List<PackageStructure> pckList = pckstru2.getChildrenPackages();
+            JSONArray temp_children = new JSONArray();
+            temp.put("name",pckstru2.getPck().getDirectoryPath());
+            temp.put("depth",pckstru2.getPck().getDepth());
+            temp.put("id","id_" + pckstru2.getPck().getId().toString());
+
+            List<ProjectFile> fileList = pckstru2.getChildrenFiles();
+            if(fileList.size() > 0){
+                for(ProjectFile profile : fileList){
+                    JSONObject jsonObject2 = new JSONObject();
+                    jsonObject2.put("size",profile.getLoc());
+//					jsonObject2.put("value",profile.getLoc());
+                    jsonObject2.put("long_name",profile.getPath());
+//                        if(clonefiles.contains(profile)){
+//                            jsonObject2.put("clone",true);
+//                        }else{
+//                            jsonObject2.put("clone",false);
+//                        }
+                    jsonObject2.put("name",profile.getName());
+                    jsonObject2.put("id","id_" + profile.getId().toString());
+                    temp_children.add(jsonObject2);
+                }
+            }
+
+            JSONArray children = getPackageContainJson2(pckList);
+            temp_children.addAll(children);
+            temp.put("children", temp_children);
+
+            combo.add(temp);
+        }
+
+        result.put("result", combo);
 
         return result;
     }
@@ -182,11 +235,91 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
+    public JSONArray getPackageContainJson2(List<PackageStructure> childrenPackages){
+        JSONArray result = new JSONArray();
+        for(PackageStructure pckstru :childrenPackages){
+            List<PackageStructure> pckList = pckstru.getChildrenPackages();
+            List<ProjectFile> fileList = pckstru.getChildrenFiles();
+//            JSONObject jsonObject = new JSONObject();
+//
+//            jsonObject.put("name",pckstru.getPck().getName());
+//            jsonObject.put("path",pckstru.getPck().getDirectoryPath());
+//            jsonObject.put("depth",pckstru.getPck().getDepth());
+//            jsonObject.put("id","id_" + pckstru.getPck().getId().toString());
+            float cloneFilesInAllFiles = 0;
+
+            if(fileList.size() > 0){
+                for(ProjectFile profile : fileList){
+                    JSONObject jsonObject2 = new JSONObject();
+                    jsonObject2.put("size",profile.getLoc());
+                    jsonObject2.put("long_name",profile.getPath());
+                    jsonObject2.put("name",profile.getName());
+                    jsonObject2.put("id","id_" + profile.getId().toString());
+                    result.add(jsonObject2);
+                }
+            }
+
+            if(pckList.size()>0){
+                //如果该属性还有子属性,继续做查询,直到该属性没有孩子,也就是最后一个节点
+                JSONArray temp_children = getPackageContainJson2(pckList);
+                result.addAll(temp_children);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public JSONObject getAllProjectsLinks(){
         List<HotspotPackagePair> cloneHotspotPackageList = hotspotPackagePairDetector.getHotspotPackagePairWithFileCloneByParentId(-1, -1, "all");
         List<HotspotPackagePair> dependsonHotspotPackageList = hotspotPackagePairDetector.getHotspotPackagePairWithDependsOn();
         List<HotspotPackagePair> cochangeHotspotPackageList = hotspotPackagePairDetector.getHotspotPackagePairWithCoChange();
         return hotspotPackagesToCloneJson(cloneHotspotPackageList, dependsonHotspotPackageList, cochangeHotspotPackageList);
+    }
+
+    @Override
+    public JSONArray getAllProjectsLinks2(){
+        JSONArray result = new JSONArray();
+
+        List<DependsOn> dependsOnList= dependsOnRepository.findFileDependsInProject(582);
+        List<Clone> cloneList= cloneRepository.findAllFileClones();
+        List<CoChange> coChangeList= coChangeRepository.findFileCoChange();
+
+        for(DependsOn dependsOn : dependsOnList){
+            JSONObject temp1 = new JSONObject();
+            temp1.put("type", "dependson");
+            temp1.put("source_id", "id_" + dependsOn.getStartNode().getId());
+            temp1.put("target_id", "id_" + dependsOn.getEndNode().getId());
+            temp1.put("source_name", dependsOn.getEndNode().getName());
+            temp1.put("target_name", dependsOn.getEndNode().getName());
+            temp1.put("pair_id", dependsOn.getStartNode().getId() + "_" + dependsOn.getEndNode().getId());
+            temp1.put("dependsOnTypes", dependsOn.getDependsOnType());
+            result.add(temp1);
+        }
+
+        for(Clone clone : cloneList){
+            JSONObject temp2 = new JSONObject();
+            temp2.put("type", "clone");
+            temp2.put("source_id", "id_" + clone.getCodeNode1().getId());
+            temp2.put("target_id", "id_" + clone.getCodeNode2().getId());
+            temp2.put("source_name", clone.getCodeNode1().getName());
+            temp2.put("target_name", clone.getCodeNode2().getName());
+            temp2.put("pair_id", clone.getCodeNode1().getId() + "_" + clone.getCodeNode2().getId());
+            result.add(temp2);
+        }
+
+        for(CoChange coChange : coChangeList){
+            if(coChange.getTimes() > 20){
+                JSONObject temp3 = new JSONObject();
+                temp3.put("type", "cochange");
+                temp3.put("source_id", "id_" + coChange.getNode1().getId());
+                temp3.put("target_id", "id_" + coChange.getNode2().getId());
+                temp3.put("source_name", coChange.getNode1().getName());
+                temp3.put("target_name", coChange.getNode2().getName());
+                temp3.put("pair_id", coChange.getNode1().getId() + "_" + coChange.getNode2().getId());
+                result.add(temp3);
+            }
+        }
+        return result;
     }
 
 //    @Override
@@ -195,7 +328,6 @@ public class ProjectServiceImpl implements ProjectService{
 //        List<HotspotPackagePair> childrenHotspotPackages = parentHotspotPackage.getChildrenHotspotPackagePairs();
 //        return hotspotPackagesToCloneJson(childrenHotspotPackages, parentHotspotPackage, "clone_package_table");
 //    }
-
 
     private JSONObject hotspotPackagesToCloneJson(List<HotspotPackagePair> cloneHotspotPackageList, List<HotspotPackagePair> dependsonHotspotPackageList, List<HotspotPackagePair> cochangeHotspotPackageList){
         JSONObject result = new JSONObject();

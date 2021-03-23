@@ -21,9 +21,13 @@ public interface ProjectService {
 
 	JSONArray getPackageContainJson(Collection<ProjectFile> clonefiles, List<PackageStructure> childrenPackages,String type);
 
+	JSONArray getPackageContainJson2(List<PackageStructure> childrenPackages);
+
 	JSONArray getMultipleProjectsGraphJson(JSONObject dataList, String type);
 
 //	JSONObject cloneGraphAndTableOfChildrenPackages(long package1Id, long package2Id);
 
 	JSONObject getAllProjectsLinks();
+
+	JSONArray getAllProjectsLinks2();
 }

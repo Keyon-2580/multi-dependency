@@ -94,6 +94,11 @@ public class ProjectController {
 		return "treemap";
 	}
 
+	@GetMapping("/combo_chart")
+	public String combo() {
+		return "combo_chart";
+	}
+
 	@GetMapping("/tree")
 	public String tree() {
 		return "projecttree";
