@@ -10,6 +10,7 @@ import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository;
@@ -60,6 +61,9 @@ public class ProjectServiceImpl implements ProjectService{
     @Autowired
     private ContainRepository containRepository;
 
+    @Autowired
+    private PackageRepository packageRepository;
+
     private Map<Project, String> projectToAbsolutePath = new ConcurrentHashMap<>();
 
     @Override
@@ -83,15 +87,11 @@ public class ProjectServiceImpl implements ProjectService{
         JSONObject nodeJSON4 = new JSONObject();
         JSONObject nodeJSON5 = new JSONObject();
 
-        boolean isFilter = false;
+        boolean isFilter = true;
 
         JSONObject projectJson = new JSONObject();
-        Map<String, Boolean> selectedPcks = ComboPcks.listOfPcks();
-        List<Package> pckList = new ArrayList<>();
-        for(String pckPath : selectedPcks.keySet()){
-            Package pck = nodeService.queryPackage(pckPath, "java");
-            pckList.add(pck);
-        }
+        Map<String, Boolean> selectedPcks = ComboPcks.listOfPcksForAtlas();
+//        Map<String, Boolean> selectedPcks = ComboPcks.listOfPcks();
         if(projectIds.size() == 1){
             if(!isFilter){
                 projectJson = joinMultipleProjectsGraphJson(projectIds.getJSONObject(0).getLong("id"), type);
@@ -100,7 +100,7 @@ public class ProjectServiceImpl implements ProjectService{
             }
         }else{
             projectJson.put("name", "default");
-            projectJson.put("id", "id_default");
+            projectJson.put("id", "default");
             JSONArray multipleProjectsJson = new JSONArray();
             for(int i = 0; i < projectIds.size(); i++){
                 multipleProjectsJson.add(joinMultipleProjectsGraphJson(projectIds.getJSONObject(i).getLong("id"), type));
@@ -116,7 +116,7 @@ public class ProjectServiceImpl implements ProjectService{
                 JSONArray temp_allprojects = getAllProjectsLinksCombo();
                 nodeJSON4.put("links", temp_allprojects);
             }else{
-                nodeJSON4.put("links", getSelectedPackageLinks(pckList));
+                nodeJSON4.put("links", getSelectedPackageLinks(selectedPcks));
             }
         }else{
             JSONObject temp_allprojects = getAllProjectsLinks();
@@ -129,6 +129,7 @@ public class ProjectServiceImpl implements ProjectService{
         result.add(nodeJSON5);
         }
 
+        System.out.println(result);
         return result;
     }
 
@@ -139,11 +140,18 @@ public class ProjectServiceImpl implements ProjectService{
         Package packageOfProject = projectStructure.getChildren().get(0).getPck();
         List<PackageStructure> childrenPackagesnew = new ArrayList<>();
         for(String pckPath : selectedPcks.keySet()){
-            Package pck = nodeService.queryPackage(pckPath, "java");
-            if(selectedPcks.get(pckPath)){
-                childrenPackagesnew.add(containRelationService.packageStructureInitialize(pck,type));
-            }else{
-                childrenPackagesnew.add(containRelationService.packageStructureInitializeWithNoSubPackages(pck,type));
+            try {
+                Package pck = packageRepository.queryPackage(pckPath, "java");
+                if (pck != null) {
+                    if(selectedPcks.get(pckPath)){
+                        childrenPackagesnew.add(containRelationService.packageStructureInitialize(pck,type));
+                    }else{
+                        childrenPackagesnew.add(containRelationService.packageStructureInitializeWithNoSubPackages(pck,type));
+                    }
+                }
+            }
+            catch (Exception e) {
+                System.out.println(pckPath);
             }
         }
 
@@ -205,7 +213,7 @@ public class ProjectServiceImpl implements ProjectService{
         }
         if(!Constant.PROJECT_STRUCTURE_COMBO.equals(type)) {
             result.put("name", packageOfProject.getName());
-            result.put("id", "id_" + packageOfProject.getId().toString());
+            result.put("id", packageOfProject.getId().toString());
 //            Collection<ProjectFile> clonefiles = basicCloneQueryService.findProjectContainCloneFiles(project);
             result.put("children", getPackageContainJson(childrenPackagesnew, type));
         }else{
@@ -218,7 +226,7 @@ public class ProjectServiceImpl implements ProjectService{
                 JSONArray temp_children = new JSONArray();
                 temp.put("name",pckstru2.getPck().getDirectoryPath());
                 temp.put("depth",pckstru2.getPck().getDepth());
-                temp.put("id","id_" + pckstru2.getPck().getId().toString());
+                temp.put("id",pckstru2.getPck().getId().toString());
 
                 List<ProjectFile> fileList = pckstru2.getChildrenFiles();
                 if(fileList.size() > 0){
@@ -227,7 +235,7 @@ public class ProjectServiceImpl implements ProjectService{
                         jsonObject2.put("size",profile.getLoc());
                         jsonObject2.put("long_name",profile.getPath());
                         jsonObject2.put("name",profile.getName());
-                        jsonObject2.put("id","id_" + profile.getId().toString());
+                        jsonObject2.put("id", profile.getId().toString());
                         temp_children.add(jsonObject2);
                     }
                 }
@@ -262,7 +270,7 @@ public class ProjectServiceImpl implements ProjectService{
 //			jsonObject.put("long_name",pckstru.getPck().getDirectoryPath());
             jsonObject.put("size",fileList.size());
             jsonObject.put("depth",pckstru.getPck().getDepth());
-            jsonObject.put("id","id_" + pckstru.getPck().getId().toString());
+            jsonObject.put("id",pckstru.getPck().getId().toString());
             float cloneFilesInAllFiles = 0;
 //            if(fileList.size() > 0){
 //                for(ProjectFile profile : fileList){
@@ -291,7 +299,7 @@ public class ProjectServiceImpl implements ProjectService{
 //                            jsonObject2.put("clone",false);
 //                        }
                         jsonObject2.put("name",profile.getName());
-                        jsonObject2.put("id","id_" + profile.getId().toString());
+                        jsonObject2.put("id", profile.getId().toString());
                         jsonArray.add(jsonObject2);
                     }
                 }
@@ -330,7 +338,7 @@ public class ProjectServiceImpl implements ProjectService{
                     jsonObject2.put("size",profile.getLoc());
                     jsonObject2.put("long_name",profile.getPath());
                     jsonObject2.put("name",profile.getName());
-                    jsonObject2.put("id","id_" + profile.getId().toString());
+                    jsonObject2.put("id", profile.getId().toString());
                     result.add(jsonObject2);
                 }
             }
@@ -367,8 +375,8 @@ public class ProjectServiceImpl implements ProjectService{
                     dependsOn.getDependsOnType().contains(RelationType.str_EXTENDS) ||
                     dependsOn.getDependsOnType().contains(RelationType.str_IMPLEMENTS)) {
                 temp1.put("type", "dependson");
-                temp1.put("source_id", "id_" + dependsOn.getStartNode().getId());
-                temp1.put("target_id", "id_" + dependsOn.getEndNode().getId());
+                temp1.put("source_id", dependsOn.getStartNode().getId().toString());
+                temp1.put("target_id", dependsOn.getEndNode().getId().toString());
                 temp1.put("source_name", dependsOn.getEndNode().getName());
                 temp1.put("target_name", dependsOn.getEndNode().getName());
                 temp1.put("pair_id", dependsOn.getStartNode().getId() + "_" + dependsOn.getEndNode().getId());
@@ -380,8 +388,8 @@ public class ProjectServiceImpl implements ProjectService{
         for(Clone clone : cloneList){
             JSONObject temp2 = new JSONObject();
             temp2.put("type", "clone");
-            temp2.put("source_id", "id_" + clone.getCodeNode1().getId());
-            temp2.put("target_id", "id_" + clone.getCodeNode2().getId());
+            temp2.put("source_id", clone.getCodeNode1().getId().toString());
+            temp2.put("target_id", clone.getCodeNode2().getId().toString());
             temp2.put("source_name", clone.getCodeNode1().getName());
             temp2.put("target_name", clone.getCodeNode2().getName());
             temp2.put("pair_id", clone.getCodeNode1().getId() + "_" + clone.getCodeNode2().getId());
@@ -392,8 +400,8 @@ public class ProjectServiceImpl implements ProjectService{
             if(coChange.getTimes() > 20){
                 JSONObject temp3 = new JSONObject();
                 temp3.put("type", "cochange");
-                temp3.put("source_id", "id_" + coChange.getNode1().getId());
-                temp3.put("target_id", "id_" + coChange.getNode2().getId());
+                temp3.put("source_id", coChange.getNode1().getId().toString());
+                temp3.put("target_id", coChange.getNode2().getId().toString());
                 temp3.put("source_name", coChange.getNode1().getName());
                 temp3.put("target_name", coChange.getNode2().getName());
                 temp3.put("pair_id", coChange.getNode1().getId() + "_" + coChange.getNode2().getId());
@@ -403,26 +411,26 @@ public class ProjectServiceImpl implements ProjectService{
         return result;
     }
 
-    public JSONArray getSelectedPackageLinks(List<Package> packages) {
-        JSONArray links = new JSONArray();
-        Set<ProjectFile> files = new HashSet<>();
-        for (Package pck : packages) {
-            files.addAll(containRepository.findPackageContainFiles(pck.getId()));
+    public JSONArray getSelectedPackageLinks(Map<String, Boolean> selectedPcks) {
+        if (selectedPcks == null) {
+            return new JSONArray();
         }
-        packages.clear();
-        Map<Long, Set<JSONObject>> childrenMap = new HashMap<>();
+        Set<ProjectFile> files = new HashSet<>();
+        for (Map.Entry<String, Boolean> entry : selectedPcks.entrySet()) {
+            String packagePath = entry.getKey();
+            Package selectedPck = packageRepository.queryPackage(packagePath, "java");
+            if (selectedPck != null) {
+                if (entry.getValue()) {
+                    files.addAll(containRepository.findPackageAllContainFiles(selectedPck.getId()));
+                }
+                else {
+                    files.addAll(containRepository.findPackageContainFiles(selectedPck.getId()));
+                }
+            }
+        }
+        JSONArray links = new JSONArray();
         for (ProjectFile rowFile : files) {
-            Package pck = containRepository.findFileBelongToPackage(rowFile.getId());
-            packages.add(pck);
-            JSONObject fileObject = new JSONObject();
-            fileObject.put("id", rowFile.getId().toString());
-            fileObject.put("name", rowFile.getName());
-            fileObject.put("path", rowFile.getPath());
-            Set<JSONObject> children = childrenMap.getOrDefault(pck.getId(), new HashSet<>());
-            children.add(fileObject);
-            childrenMap.put(pck.getId(), children);
             for (ProjectFile colFile : files) {
-
                 List<DependsOn> dependsOns = dependsOnRepository.judgeDependsOnByFileId(rowFile.getId(), colFile.getId());
                 if (dependsOns.size() > 0) {
                     JSONObject dependsOnObject = new JSONObject();
@@ -462,6 +470,101 @@ public class ProjectServiceImpl implements ProjectService{
             }
         }
         return links;
+    }
+
+    public JSONObject getSelectedPackageLinks() {
+        Map<String, Boolean> selectedPcks = new HashMap<>();
+        selectedPcks.put("/atlas/addons/", true);
+        selectedPcks.put("/atlas/authorization/src/main/java/org/apache/atlas/authorize/", true);
+        selectedPcks.put("/atlas/client/", true);
+        selectedPcks.put("/atlas/common/src/main/java/org/apache/atlas/", true);
+        selectedPcks.put("/atlas/graphdb/", true);
+        selectedPcks.put("/atlas/intg/src/main/java/org/apache/atlas/", true);
+        selectedPcks.put("/atlas/notification/src/main/java/org/apache/atlas/", true);
+        selectedPcks.put("/atlas/plugin-classloader/src/main/java/org/apache/atlas/plugin/classloader/", true);
+        selectedPcks.put("/atlas/repository/src/main/java/org/apache/atlas/", true);
+        selectedPcks.put("/atlas/server-api/src/main/java/org/apache/atlas/", true);
+        selectedPcks.put("/atlas/tools/", true);
+        selectedPcks.put("/atlas/webapp/src/main/java/org/apache/atlas/", true);
+
+        Set<Package> packages = new HashSet<>();
+        for (Map.Entry<String, Boolean> pck : selectedPcks.entrySet()) {
+            String pckPath = pck.getKey();
+            if (pck.getValue()) {
+                packages.add(packageRepository.queryPackage(pckPath, "java"));
+            }
+        }
+        JSONObject packageData = new JSONObject();
+        JSONArray packageObjects = new JSONArray();
+        JSONArray linkObjects = new JSONArray();
+        Set<ProjectFile> files = new HashSet<>();
+        for (Package pck : packages) {
+            files.addAll(containRepository.findPackageContainFiles(pck.getId()));
+        }
+        packages.clear();
+        Map<Long, JSONArray> childrenMap = new HashMap<>();
+        for (ProjectFile rowFile : files) {
+            Package pck = containRepository.findFileBelongToPackage(rowFile.getId());
+            packages.add(pck);
+            JSONObject fileObject = new JSONObject();
+            fileObject.put("id", rowFile.getId().toString());
+            fileObject.put("name", rowFile.getName());
+            fileObject.put("path", rowFile.getPath());
+            JSONArray children = childrenMap.getOrDefault(pck.getId(), new JSONArray());
+            children.add(fileObject);
+            childrenMap.put(pck.getId(), children);
+            for (ProjectFile colFile : files) {
+
+                List<DependsOn> dependsOns = dependsOnRepository.judgeDependsOnByFileId(rowFile.getId(), colFile.getId());
+                if (dependsOns.size() > 0) {
+                    JSONObject dependsOnObject = new JSONObject();
+                    dependsOnObject.put("source_name", rowFile.getName());
+                    dependsOnObject.put("target_name", colFile.getName());
+                    dependsOnObject.put("source_id", rowFile.getId().toString());
+                    dependsOnObject.put("target_id", colFile.getId().toString());
+                    dependsOnObject.put("pair_id", rowFile.getId().toString() + "_" + colFile.getId().toString());
+                    dependsOnObject.put("dependsOnTypes", dependsOns.get(0).getDependsOnType());
+                    dependsOnObject.put("type", "dependson");
+                    linkObjects.add(dependsOnObject);
+                }
+
+                List<Clone> clones = cloneRepository.judgeCloneByFileId(rowFile.getId(), colFile.getId());
+                if (clones.size() > 0) {
+                    JSONObject cloneObject = new JSONObject();
+                    cloneObject.put("source_name", rowFile.getName());
+                    cloneObject.put("target_name", colFile.getName());
+                    cloneObject.put("source_id", rowFile.getId().toString());
+                    cloneObject.put("target_id", colFile.getId().toString());
+                    cloneObject.put("pair_id", rowFile.getId().toString() + "_" + colFile.getId().toString());
+                    cloneObject.put("type", "clone");
+                    linkObjects.add(cloneObject);
+                }
+
+                CoChange coChange = coChangeRepository.findCoChangesBetweenTwoFiles(rowFile.getId(), colFile.getId());
+                if (coChange != null) {
+                    JSONObject coChangeObject = new JSONObject();
+                    coChangeObject.put("source_name", rowFile.getName());
+                    coChangeObject.put("target_name", colFile.getName());
+                    coChangeObject.put("source_id", rowFile.getId().toString());
+                    coChangeObject.put("target_id", colFile.getId().toString());
+                    coChangeObject.put("pair_id", rowFile.getId().toString() + "_" + colFile.getId().toString());
+                    coChangeObject.put("type", "cochange");
+                    linkObjects.add(coChangeObject);
+                }
+            }
+        }
+        for (Package pck : packages) {
+            JSONObject packageObject = new JSONObject();
+            packageObject.put("id", pck.getId().toString());
+            packageObject.put("name", pck.getName());
+            packageObject.put("depth", pck.getDepth());
+            packageObject.put("children", childrenMap.getOrDefault(pck.getId(), new JSONArray()));
+            packageObjects.add(packageObject);
+        }
+        packageData.put("nodes", packageObjects);
+        packageData.put("links", linkObjects);
+        System.out.println(packageData);
+        return packageData;
     }
 
 //    @Override
@@ -626,15 +729,15 @@ public class ProjectServiceImpl implements ProjectService{
             Project source_projectBelong = containRelationService.findPackageBelongToProject(hotspotPackagePair.getPackage1());
             Project target_projectBelong = containRelationService.findPackageBelongToProject(hotspotPackagePair.getPackage2());
 
-            link_common.put("source_id", "id_" + hotspotPackagePair.getPackage1().getId().toString());
-            link_common.put("target_id", "id_" + hotspotPackagePair.getPackage2().getId().toString());
+            link_common.put("source_id", hotspotPackagePair.getPackage1().getId().toString());
+            link_common.put("target_id", hotspotPackagePair.getPackage2().getId().toString());
             link_common.put("depth", Math.max(hotspotPackagePair.getPackage1().getDepth(), hotspotPackagePair.getPackage2().getDepth()));
             link_common.put("pair_id", hotspotPackagePair.getPackage1().getId().toString() + "_" + hotspotPackagePair.getPackage2().getId().toString());
             link_common.put("parent_pair_id", parentPairId);
             link_common.put("source_name", hotspotPackagePair.getPackage1().getDirectoryPath());
             link_common.put("target_name", hotspotPackagePair.getPackage2().getDirectoryPath());
-            link_common.put("source_projectBelong", "id_" + source_projectBelong.getId());
-            link_common.put("target_projectBelong", "id_" + target_projectBelong.getId());
+            link_common.put("source_projectBelong", source_projectBelong.getId().toString());
+            link_common.put("target_projectBelong", target_projectBelong.getId().toString());
 
             switch (linkType) {
                 case "CLONE":

@@ -13,9 +13,12 @@ import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
 
 @Repository
 public interface PackageRepository extends Neo4jRepository<Package, Long> {
-    
+
 	@Query("match (p:Package) where p.directoryPath=$directoryPath and p.language = $language return p")
 	public Package queryPackage(@Param("directoryPath") String directoryPath, @Param("language") String language);
+
+	@Query("match (p:Package) return p")
+	public List<Package> queryAllPackage();
 
 	@Query("match (p:Package) where id(p) = $pckId return p")
 	public Package findPackageById(@Param("pckId") long pckId);

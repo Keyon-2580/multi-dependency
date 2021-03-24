@@ -106,7 +106,8 @@ public class CacheService {
 		packageMap.put(directory, pck);
 		this.directoryToPackage.put(language, packageMap);
 	}
-	
+
+	@Deprecated
 	public Package findPackageByDirectoryPath(String directoryPath, String language) {
 		return this.directoryToPackage.get(language).get(directoryPath);
 	}
