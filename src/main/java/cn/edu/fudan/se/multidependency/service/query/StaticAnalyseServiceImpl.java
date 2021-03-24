@@ -727,6 +727,32 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 	}
 
 	@Override
+	public DependsOn findDependsOnBetweenFiles(ProjectFile file1, ProjectFile file2){
+		String key = "findDependsOnBetweenFiles" + file1.getId() + file2.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		DependsOn result = dependsOnRepository.findDependsOnBetweenFiles(file1.getId(),file2.getId());
+		if(result != null){
+			cache.cache(getClass(), key, result);
+		}
+		return result;
+	}
+
+	@Override
+	public Collection<DependsOn> findAllDependsOnsBetweenFiles(ProjectFile file1, ProjectFile file2){
+		String key = "findAllDependsOnsBetweenFiles" + file1.getId() + file2.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<DependsOn> result = dependsOnRepository.findAllDependsOnsBetweenFiles(file1.getId(),file2.getId());
+		if(result != null){
+			cache.cache(getClass(), key, result);
+		}
+		return result;
+	}
+
+	@Override
 	public Collection<ProjectFile> findFilesCommonDependsOn(ProjectFile file1, ProjectFile file2){
 		String key = "findFilesCommonDependsOn_" + file1.getId() + file2.getId();
 		if(cache.get(getClass(), key) != null) {

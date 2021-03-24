@@ -57,6 +57,8 @@ public interface ContainRelationService {
 	Collection<ProjectFile> findProjectContainAllFiles(Project project);
 
 	Collection<ProjectFile> findPackageContainFiles(Package pck);
+
+	Collection<ProjectFile> findPackageContainAllFiles(Package pck);
 	
 	Collection<Namespace> findFileContainNamespaces(ProjectFile file);
 

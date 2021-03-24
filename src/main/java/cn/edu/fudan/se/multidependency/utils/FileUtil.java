@@ -38,6 +38,29 @@ public class FileUtil {
 	}
 
 	/**
+	 * 判断文件或目录是否包含特殊目錄，比如 /src/test
+	 * @param filePath
+	 * @param key
+	 * @return
+	 */
+	public static boolean isFilePathContainExcludeKey(String filePath, String key) {
+		if(filePath == null)
+			return false;
+
+		try {
+			String newFilePath = filePath.replace(SLASH_WINDOWS, SLASH_LINUX);
+			String newKey = key.replace(SLASH_WINDOWS, SLASH_LINUX);
+			if(newFilePath.contains(newKey))
+				return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		return false;
+	}
+
+	/**
 	 * D:\a\a.java -> D:/a/a.java -> /a.java
 	 * /a/a/a.java -> /a/a.java
 	 * @param filePath

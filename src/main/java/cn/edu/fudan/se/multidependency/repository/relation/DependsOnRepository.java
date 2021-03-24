@@ -81,11 +81,10 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	 * @return
 	 */
 	@Query("match p= (f1:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]-(f2:ProjectFile) where id(f1) = $file1Id and id(f2) = $file2Id return p")
-	List<DependsOn> findDependsOnInFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
+	List<DependsOn> findAllDependsOnsBetweenFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
 
 	@Query("match p= (f1:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(f2:ProjectFile) where id(f1) = $file1Id and id(f2) = $file2Id return p")
-	DependsOn findSureDependsOnInFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
-
+	DependsOn findDependsOnBetweenFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
 
 	String TYPE_LEFT = "match p=(t1:Type)-[:CONTAIN*0..]->()-[r:";
 	String TYPE_MIDDLE = "]->()<-[:CONTAIN*0..]-(t2:Type) where t1<>t2 " +
@@ -233,7 +232,4 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 
 	@Query("match p=()-[r:DEPENDS_ON]->() where r.dependsOnType = $dependsOnType delete r;")
 	void deleteDependsOnByRelationType(String dependsOnType);
-
-	@Query("match p = (f1:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(f2:ProjectFile) where id(f1) = $fileId1 and id(f2) = $fileId2 return p;")
-	List<DependsOn> judgeDependsOnByFileId(@Param("fileId1") long fileId1, @Param("fileId2") long fileId2);
 }

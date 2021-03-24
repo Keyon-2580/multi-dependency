@@ -58,8 +58,8 @@ public class DependOnDetailController {
         for(ProjectFile file1 : Files1){
             int j = 0;
             for(ProjectFile file2 : Files2) {
-                if (dependsOnRepository.findSureDependsOnInFiles(file1.getId(), file2.getId()) != null) {
-                    DependsOn dependOn = dependsOnRepository.findSureDependsOnInFiles(file1.getId(), file2.getId());
+                if (dependsOnRepository.findDependsOnBetweenFiles(file1.getId(), file2.getId()) != null) {
+                    DependsOn dependOn = dependsOnRepository.findDependsOnBetweenFiles(file1.getId(), file2.getId());
                     Map<String,Long> dependOn1Types = dependOn.getDependsOnTypes();
                     for (String key:
                             dependOn1Types.keySet()) {
@@ -70,8 +70,8 @@ public class DependOnDetailController {
                         }
                     }
                 }
-                if (dependsOnRepository.findSureDependsOnInFiles(file2.getId(), file1.getId()) != null) {
-                    DependsOn dependOn = dependsOnRepository.findSureDependsOnInFiles(file2.getId(), file1.getId());
+                if (dependsOnRepository.findDependsOnBetweenFiles(file2.getId(), file1.getId()) != null) {
+                    DependsOn dependOn = dependsOnRepository.findDependsOnBetweenFiles(file2.getId(), file1.getId());
                     Map<String,Long> dependOn2Types = dependOn.getDependsOnTypes();
                     for (String key:
                             dependOn2Types.keySet()) {
@@ -113,8 +113,8 @@ public class DependOnDetailController {
         for(ProjectFile file1 : allFiles){
             int j = 0;
             for(ProjectFile file2 : allFiles) {
-                if (dependsOnRepository.findSureDependsOnInFiles(file1.getId(), file2.getId()) != null) {
-                    DependsOn dependsOn = dependsOnRepository.findSureDependsOnInFiles(file1.getId(), file2.getId());
+                if (dependsOnRepository.findDependsOnBetweenFiles(file1.getId(), file2.getId()) != null) {
+                    DependsOn dependsOn = dependsOnRepository.findDependsOnBetweenFiles(file1.getId(), file2.getId());
                     Map<String, Long> dependsOnTypes = dependsOn.getDependsOnTypes();
                     for (String key:
                             dependsOnTypes.keySet()) {

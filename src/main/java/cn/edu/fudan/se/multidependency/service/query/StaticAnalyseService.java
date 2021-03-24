@@ -134,6 +134,10 @@ public interface StaticAnalyseService {
 
 	Collection<DependsOn> findPackageDependedOnBy(Package pck);
 
+	DependsOn findDependsOnBetweenFiles(ProjectFile file1, ProjectFile file2);
+
+	Collection<DependsOn> findAllDependsOnsBetweenFiles(ProjectFile file1, ProjectFile file2);
+
 	Collection<ProjectFile> findFilesCommonDependsOn(ProjectFile file1, ProjectFile file2);
 
 	Collection<ProjectFile> findFilesCommonDependedOnBy(ProjectFile file1, ProjectFile file2);

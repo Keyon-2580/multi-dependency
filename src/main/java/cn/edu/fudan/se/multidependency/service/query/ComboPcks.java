@@ -1,11 +1,35 @@
 package cn.edu.fudan.se.multidependency.service.query;
 
+import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
+import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ComboPcks {
 
-    public static Map<String, Boolean> listOfPcks(){
+    public static List<String> listOfSelectedDependsOnRelations(){
+        List<String> selectedDependsOnRelations = new ArrayList<>();
+        selectedDependsOnRelations.add(RelationType.str_CALL);
+        selectedDependsOnRelations.add(RelationType.str_EXTENDS);
+        selectedDependsOnRelations.add(RelationType.str_IMPLEMENTS);
+        return selectedDependsOnRelations;
+    }
+
+    public static boolean isContainSelectedRelations(DependsOn dependsOn){
+        boolean isSelected = false;
+        for (String relation : listOfSelectedDependsOnRelations()){
+            if(dependsOn.getDependsOnType().contains(relation)){
+                isSelected = true;
+                break;
+            }
+        }
+        return isSelected;
+    }
+
+    public static Map<String, Boolean> listOfPackagesForCassandra(){
         Map<String, Boolean> selectedPcks = new HashMap<>();
         selectedPcks.put("/cassandra/src/java/org/apache/cassandra/service/", true);
         selectedPcks.put("/cassandra/src/java/org/apache/cassandra/cql3/", false);
@@ -14,7 +38,7 @@ public class ComboPcks {
         return selectedPcks;
     }
 
-    public static Map<String, Boolean> listOfPcksForAtlas(){
+    public static Map<String, Boolean> listOfPackagesForAtlas(){
         Map<String, Boolean> selectedPcks = new HashMap<>();
         selectedPcks.put("/atlas/addons/", true);
         selectedPcks.put("/atlas/authorization/src/main/java/org/apache/atlas/authorize/", true);

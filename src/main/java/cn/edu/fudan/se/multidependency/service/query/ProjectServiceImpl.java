@@ -10,8 +10,6 @@ import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
-import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
@@ -58,12 +56,6 @@ public class ProjectServiceImpl implements ProjectService{
     @Autowired
     private BasicSmellQueryService basicSmellQueryService;
 
-    @Autowired
-    private ContainRepository containRepository;
-
-    @Autowired
-    private PackageRepository packageRepository;
-
     private Map<Project, String> projectToAbsolutePath = new ConcurrentHashMap<>();
 
     @Override
@@ -90,8 +82,8 @@ public class ProjectServiceImpl implements ProjectService{
         boolean isFilter = true;
 
         JSONObject projectJson = new JSONObject();
-        Map<String, Boolean> selectedPcks = ComboPcks.listOfPcksForAtlas();
-//        Map<String, Boolean> selectedPcks = ComboPcks.listOfPcks();
+        Map<String, Boolean> selectedPcks = ComboPcks.listOfPackagesForAtlas();
+//        Map<String, Boolean> selectedPcks = ComboPcks.listOfPackagesForCassandra();
         if(projectIds.size() == 1){
             if(!isFilter){
                 projectJson = joinMultipleProjectsGraphJson(projectIds.getJSONObject(0).getLong("id"), type);
@@ -129,7 +121,6 @@ public class ProjectServiceImpl implements ProjectService{
         result.add(nodeJSON5);
         }
 
-        System.out.println(result);
         return result;
     }
 
@@ -140,18 +131,13 @@ public class ProjectServiceImpl implements ProjectService{
         Package packageOfProject = projectStructure.getChildren().get(0).getPck();
         List<PackageStructure> childrenPackagesnew = new ArrayList<>();
         for(String pckPath : selectedPcks.keySet()){
-            try {
-                Package pck = packageRepository.queryPackage(pckPath, "java");
-                if (pck != null) {
-                    if(selectedPcks.get(pckPath)){
-                        childrenPackagesnew.add(containRelationService.packageStructureInitialize(pck,type));
-                    }else{
-                        childrenPackagesnew.add(containRelationService.packageStructureInitializeWithNoSubPackages(pck,type));
-                    }
+            Package pck = nodeService.queryPackage(pckPath, "java");
+            if (pck != null) {
+                if(selectedPcks.get(pckPath)){
+                    childrenPackagesnew.add(containRelationService.packageStructureInitialize(pck,type));
+                }else{
+                    childrenPackagesnew.add(containRelationService.packageStructureInitializeWithNoSubPackages(pck,type));
                 }
-            }
-            catch (Exception e) {
-                System.out.println(pckPath);
             }
         }
 
@@ -187,7 +173,6 @@ public class ProjectServiceImpl implements ProjectService{
                 JSONArray children = getPackageContainJsonCombo(pckList);
                 temp_children.addAll(children);
                 temp.put("children", temp_children);
-
 
                 combo.add(temp);
             }
@@ -371,9 +356,7 @@ public class ProjectServiceImpl implements ProjectService{
 
         for(DependsOn dependsOn : dependsOnList){
             JSONObject temp1 = new JSONObject();
-            if(dependsOn.getDependsOnType().contains(RelationType.str_CALL) ||
-                    dependsOn.getDependsOnType().contains(RelationType.str_EXTENDS) ||
-                    dependsOn.getDependsOnType().contains(RelationType.str_IMPLEMENTS)) {
+            if(ComboPcks.isContainSelectedRelations(dependsOn)) {
                 temp1.put("type", "dependson");
                 temp1.put("source_id", dependsOn.getStartNode().getId().toString());
                 temp1.put("target_id", dependsOn.getEndNode().getId().toString());
@@ -418,30 +401,33 @@ public class ProjectServiceImpl implements ProjectService{
         Set<ProjectFile> files = new HashSet<>();
         for (Map.Entry<String, Boolean> entry : selectedPcks.entrySet()) {
             String packagePath = entry.getKey();
-            Package selectedPck = packageRepository.queryPackage(packagePath, "java");
+            Package selectedPck = nodeService.queryPackage(packagePath, "java");
             if (selectedPck != null) {
+                Collection<ProjectFile> result = new ArrayList<>();
                 if (entry.getValue()) {
-                    files.addAll(containRepository.findPackageAllContainFiles(selectedPck.getId()));
+                    result = containRelationService.findPackageContainAllFiles(selectedPck);
+                } else {
+                    result = containRelationService.findPackageContainFiles(selectedPck);
                 }
-                else {
-                    files.addAll(containRepository.findPackageContainFiles(selectedPck.getId()));
-                }
+                files.addAll(result);
             }
         }
         JSONArray links = new JSONArray();
         for (ProjectFile rowFile : files) {
             for (ProjectFile colFile : files) {
-                List<DependsOn> dependsOns = dependsOnRepository.judgeDependsOnByFileId(rowFile.getId(), colFile.getId());
-                if (dependsOns.size() > 0) {
-                    JSONObject dependsOnObject = new JSONObject();
-                    dependsOnObject.put("source_name", rowFile.getName());
-                    dependsOnObject.put("target_name", colFile.getName());
-                    dependsOnObject.put("source_id", rowFile.getId().toString());
-                    dependsOnObject.put("target_id", colFile.getId().toString());
-                    dependsOnObject.put("pair_id", rowFile.getId().toString() + "_" + colFile.getId().toString());
-                    dependsOnObject.put("dependsOnTypes", dependsOns.get(0).getDependsOnType());
-                    dependsOnObject.put("type", "dependson");
-                    links.add(dependsOnObject);
+                DependsOn dependsOn = dependsOnRepository.findDependsOnBetweenFiles(rowFile.getId(), colFile.getId());
+                if (dependsOn != null) {
+                    if(ComboPcks.isContainSelectedRelations(dependsOn)){
+                        JSONObject dependsOnObject = new JSONObject();
+                        dependsOnObject.put("source_name", rowFile.getName());
+                        dependsOnObject.put("target_name", colFile.getName());
+                        dependsOnObject.put("source_id", rowFile.getId().toString());
+                        dependsOnObject.put("target_id", colFile.getId().toString());
+                        dependsOnObject.put("pair_id", rowFile.getId().toString() + "_" + colFile.getId().toString());
+                        dependsOnObject.put("dependsOnTypes", dependsOn.getDependsOnType());
+                        dependsOnObject.put("type", "dependson");
+                        links.add(dependsOnObject);
+                    }
                 }
 
                 List<Clone> clones = cloneRepository.judgeCloneByFileId(rowFile.getId(), colFile.getId());
@@ -491,7 +477,7 @@ public class ProjectServiceImpl implements ProjectService{
         for (Map.Entry<String, Boolean> pck : selectedPcks.entrySet()) {
             String pckPath = pck.getKey();
             if (pck.getValue()) {
-                packages.add(packageRepository.queryPackage(pckPath, "java"));
+                packages.add(nodeService.queryPackage(pckPath, "java"));
             }
         }
         JSONObject packageData = new JSONObject();
@@ -499,12 +485,12 @@ public class ProjectServiceImpl implements ProjectService{
         JSONArray linkObjects = new JSONArray();
         Set<ProjectFile> files = new HashSet<>();
         for (Package pck : packages) {
-            files.addAll(containRepository.findPackageContainFiles(pck.getId()));
+            files.addAll(containRelationService.findPackageContainFiles(pck));
         }
         packages.clear();
         Map<Long, JSONArray> childrenMap = new HashMap<>();
         for (ProjectFile rowFile : files) {
-            Package pck = containRepository.findFileBelongToPackage(rowFile.getId());
+            Package pck = containRelationService.findFileBelongToPackage(rowFile);
             packages.add(pck);
             JSONObject fileObject = new JSONObject();
             fileObject.put("id", rowFile.getId().toString());
@@ -515,17 +501,19 @@ public class ProjectServiceImpl implements ProjectService{
             childrenMap.put(pck.getId(), children);
             for (ProjectFile colFile : files) {
 
-                List<DependsOn> dependsOns = dependsOnRepository.judgeDependsOnByFileId(rowFile.getId(), colFile.getId());
-                if (dependsOns.size() > 0) {
-                    JSONObject dependsOnObject = new JSONObject();
-                    dependsOnObject.put("source_name", rowFile.getName());
-                    dependsOnObject.put("target_name", colFile.getName());
-                    dependsOnObject.put("source_id", rowFile.getId().toString());
-                    dependsOnObject.put("target_id", colFile.getId().toString());
-                    dependsOnObject.put("pair_id", rowFile.getId().toString() + "_" + colFile.getId().toString());
-                    dependsOnObject.put("dependsOnTypes", dependsOns.get(0).getDependsOnType());
-                    dependsOnObject.put("type", "dependson");
-                    linkObjects.add(dependsOnObject);
+                DependsOn dependsOn = dependsOnRepository.findDependsOnBetweenFiles(rowFile.getId(), colFile.getId());
+                if (dependsOn != null) {
+                    if(ComboPcks.isContainSelectedRelations(dependsOn)) {
+                        JSONObject dependsOnObject = new JSONObject();
+                        dependsOnObject.put("source_name", rowFile.getName());
+                        dependsOnObject.put("target_name", colFile.getName());
+                        dependsOnObject.put("source_id", rowFile.getId().toString());
+                        dependsOnObject.put("target_id", colFile.getId().toString());
+                        dependsOnObject.put("pair_id", rowFile.getId().toString() + "_" + colFile.getId().toString());
+                        dependsOnObject.put("dependsOnTypes", dependsOn.getDependsOnType());
+                        dependsOnObject.put("type", "dependson");
+                        linkObjects.add(dependsOnObject);
+                    }
                 }
 
                 List<Clone> clones = cloneRepository.judgeCloneByFileId(rowFile.getId(), colFile.getId());

@@ -201,22 +201,41 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		return result;
 	}
 
-//	Map<Package, Collection<ProjectFile>> packageContainFilesCache = new ConcurrentHashMap<>();
+	Map<Package, Collection<ProjectFile>> packageContainFilesCache = new ConcurrentHashMap<>();
 	@Override
 	public Collection<ProjectFile> findPackageContainFiles(Package pck) {
 		Collection<ProjectFile> result = new ArrayList<ProjectFile>();
-//		if(packageContainFilesCache.get(pck) != null){
-//			result = packageContainFilesCache.get(pck);
-//		}else{
-			result = containRepository.findPackageContainFiles(pck.getId());
-		//}
-//		packageContainFilesCache.put(pck, result);
-		result.forEach(file -> {
-			cache.cacheNodeBelongToNode(file, pck);
-		});
+		if(packageContainFilesCache.get(pck) != null){
+			result = packageContainFilesCache.get(pck);
+		}else{
+			Collection<ProjectFile> allFiles = containRepository.findPackageContainFiles(pck.getId());
+			if(allFiles != null){
+				packageContainFilesCache.put(pck, allFiles);
+				allFiles.forEach(file -> {
+					cache.cacheNodeBelongToNode(file, pck);
+				});
+				result = allFiles;
+			}
+		}
 		return result;
 	}
-	
+
+	Map<Package, Collection<ProjectFile>> packageContainAllFilesCache = new ConcurrentHashMap<>();
+	@Override
+	public Collection<ProjectFile> findPackageContainAllFiles(Package pck) {
+		Collection<ProjectFile> result = new ArrayList<ProjectFile>();
+		if(packageContainAllFilesCache.get(pck) != null){
+			result = packageContainAllFilesCache.get(pck);
+		}else{
+			Collection<ProjectFile> allFiles = containRepository.findPackageContainAllFiles(pck.getId());
+			if(allFiles != null){
+				packageContainAllFilesCache.put(pck, allFiles);
+				result = allFiles;
+			}
+		}
+		return result;
+	}
+
 	Map<ProjectFile, Map<NodeLabelType, Collection<? extends Node>>> fileDirectlyContainNodesCache = new ConcurrentHashMap<>();
 	private Collection<? extends Node> findFileDirectlyContainNodes(ProjectFile file, NodeLabelType nodeLabelType) {
 		Map<NodeLabelType, Collection<? extends Node>> temp = fileDirectlyContainNodesCache.getOrDefault(file, new ConcurrentHashMap<>());

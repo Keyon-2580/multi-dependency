@@ -88,8 +88,8 @@ public class CloneGroupDependOnController {
             int j = 0;
             for (Node dependsNode :
                  allNodes) {
-                if(dependsOnRepository.findSureDependsOnInFiles(node.getId(),dependsNode.getId()) != null){
-                    DependsOn dependsOn = dependsOnRepository.findSureDependsOnInFiles(node.getId(), dependsNode.getId());
+                if(dependsOnRepository.findDependsOnBetweenFiles(node.getId(),dependsNode.getId()) != null){
+                    DependsOn dependsOn = dependsOnRepository.findDependsOnBetweenFiles(node.getId(), dependsNode.getId());
                     Map<String, Long> dependsOnTypes =  dependsOn.getDependsOnTypes();
                     for (String key: dependsOnTypes.keySet()) {
                         if(dependsOnMatrix[i][j] == null){
@@ -156,8 +156,8 @@ public class CloneGroupDependOnController {
             int j = 0;
             for (Node dependsNode :
                     allNodes) {
-                if(dependsOnRepository.findSureDependsOnInFiles(dependsNode.getId(),node.getId()) != null){
-                    Map<String, Long> dependson = dependsOnRepository.findSureDependsOnInFiles(dependsNode.getId(),node.getId()).getDependsOnTypes();
+                if(dependsOnRepository.findDependsOnBetweenFiles(dependsNode.getId(),node.getId()) != null){
+                    Map<String, Long> dependson = dependsOnRepository.findDependsOnBetweenFiles(dependsNode.getId(),node.getId()).getDependsOnTypes();
                     Set<String> keyset = dependson.keySet();
                     for (String key:
                             keyset) {
