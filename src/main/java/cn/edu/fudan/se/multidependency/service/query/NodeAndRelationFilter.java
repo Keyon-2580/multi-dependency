@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ComboPcks {
+public class NodeAndRelationFilter {
 
     public static List<String> listOfSelectedDependsOnRelations(){
         List<String> selectedDependsOnRelations = new ArrayList<>();

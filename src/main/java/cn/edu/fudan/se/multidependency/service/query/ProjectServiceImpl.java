@@ -7,7 +7,6 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
-import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
@@ -79,10 +78,10 @@ public class ProjectServiceImpl implements ProjectService{
         JSONObject nodeJSON4 = new JSONObject();
         JSONObject nodeJSON5 = new JSONObject();
 
-        boolean isFilter = true;
+        boolean isFilter = false;
 
         JSONObject projectJson = new JSONObject();
-        Map<String, Boolean> selectedPcks = ComboPcks.listOfPackagesForAtlas();
+        Map<String, Boolean> selectedPcks = NodeAndRelationFilter.listOfPackagesForAtlas();
 //        Map<String, Boolean> selectedPcks = ComboPcks.listOfPackagesForCassandra();
         if(projectIds.size() == 1){
             if(!isFilter){
@@ -356,7 +355,7 @@ public class ProjectServiceImpl implements ProjectService{
 
         for(DependsOn dependsOn : dependsOnList){
             JSONObject temp1 = new JSONObject();
-            if(ComboPcks.isContainSelectedRelations(dependsOn)) {
+            if(NodeAndRelationFilter.isContainSelectedRelations(dependsOn)) {
                 temp1.put("type", "dependson");
                 temp1.put("source_id", dependsOn.getStartNode().getId().toString());
                 temp1.put("target_id", dependsOn.getEndNode().getId().toString());
@@ -417,7 +416,7 @@ public class ProjectServiceImpl implements ProjectService{
             for (ProjectFile colFile : files) {
                 DependsOn dependsOn = dependsOnRepository.findDependsOnBetweenFiles(rowFile.getId(), colFile.getId());
                 if (dependsOn != null) {
-                    if(ComboPcks.isContainSelectedRelations(dependsOn)){
+                    if(NodeAndRelationFilter.isContainSelectedRelations(dependsOn)){
                         JSONObject dependsOnObject = new JSONObject();
                         dependsOnObject.put("source_name", rowFile.getName());
                         dependsOnObject.put("target_name", colFile.getName());
@@ -503,7 +502,7 @@ public class ProjectServiceImpl implements ProjectService{
 
                 DependsOn dependsOn = dependsOnRepository.findDependsOnBetweenFiles(rowFile.getId(), colFile.getId());
                 if (dependsOn != null) {
-                    if(ComboPcks.isContainSelectedRelations(dependsOn)) {
+                    if(NodeAndRelationFilter.isContainSelectedRelations(dependsOn)) {
                         JSONObject dependsOnObject = new JSONObject();
                         dependsOnObject.put("source_name", rowFile.getName());
                         dependsOnObject.put("target_name", colFile.getName());
