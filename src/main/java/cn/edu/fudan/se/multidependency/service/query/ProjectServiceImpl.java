@@ -71,23 +71,35 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
-    public JSONArray getMultipleProjectsGraphJson(JSONObject dataList, String type) {
-        JSONArray projectIds = dataList.getJSONArray("projectIds");
+    public JSONArray getMultipleProjectsGraphJson(JSONObject dataList, String type, boolean isFilter) {
+        Map<String, Boolean> selectedPcks = new HashMap<>();
+        JSONArray projectIds = new JSONArray();
+        if (isFilter) {
+            JSONObject requestBody = new JSONObject();
+            JSONObject idObject = new JSONObject();
+            idObject.put("id", "30335");
+            JSONArray ids = new JSONArray();
+            ids.add(idObject);
+            requestBody.put("projectIds", ids);
+            projectIds = requestBody.getJSONArray("projectIds");;
+            selectedPcks = NodeAndRelationFilter.listOfPackagesForAtlas();
+//            selectedPcks = NodeAndRelationFilter.listOfPackagesForCassandra();
+        } else{
+            projectIds =  dataList.getJSONArray("projectIds");
+        }
+
         JSONArray result = new JSONArray();
         JSONObject nodeJSON2 = new JSONObject();
         JSONObject nodeJSON4 = new JSONObject();
         JSONObject nodeJSON5 = new JSONObject();
 
-        boolean isFilter = false;
-
         JSONObject projectJson = new JSONObject();
-        Map<String, Boolean> selectedPcks = NodeAndRelationFilter.listOfPackagesForAtlas();
-//        Map<String, Boolean> selectedPcks = ComboPcks.listOfPackagesForCassandra();
+
         if(projectIds.size() == 1){
-            if(!isFilter){
-                projectJson = joinMultipleProjectsGraphJson(projectIds.getJSONObject(0).getLong("id"), type);
-            }else{
+            if(isFilter){
                 projectJson = joinMultipleProjectsGraphJson(projectIds.getJSONObject(0).getLong("id"), type, selectedPcks);
+            }else{
+                projectJson = joinMultipleProjectsGraphJson(projectIds.getJSONObject(0).getLong("id"), type);
             }
         }else{
             projectJson.put("name", "default");
@@ -103,11 +115,11 @@ public class ProjectServiceImpl implements ProjectService{
         result.add(nodeJSON2);
 
         if(Constant.PROJECT_STRUCTURE_COMBO.equals(type)){
-            if(!isFilter){
+            if(isFilter){
+                nodeJSON4.put("links", getSelectedPackageLinks(selectedPcks));
+            }else{
                 JSONArray temp_allprojects = getAllProjectsLinksCombo();
                 nodeJSON4.put("links", temp_allprojects);
-            }else{
-                nodeJSON4.put("links", getSelectedPackageLinks(selectedPcks));
             }
         }else{
             JSONObject temp_allprojects = getAllProjectsLinks();
@@ -161,7 +173,8 @@ public class ProjectServiceImpl implements ProjectService{
                 if(fileList.size() > 0){
                     for(ProjectFile profile : fileList){
                         JSONObject jsonObject2 = new JSONObject();
-                        jsonObject2.put("size",profile.getLoc());
+//                        jsonObject2.put("size",profile.getLoc());
+                        jsonObject2.put("size", profile.getLoc() <= 500 ? 40 : (profile.getLoc() <= 1000 ? 50 : (profile.getLoc() <= 2000 ? 60 : 70)));
                         jsonObject2.put("long_name",profile.getPath());
                         jsonObject2.put("name",profile.getName());
                         jsonObject2.put("id", profile.getId().toString());
@@ -217,8 +230,7 @@ public class ProjectServiceImpl implements ProjectService{
                     for(ProjectFile profile : fileList){
                         JSONObject jsonObject2 = new JSONObject();
 //                        jsonObject2.put("size",profile.getLoc());
-                        jsonObject2.put("size",profile.getLoc() <= 500 ? 40 : profile.getLoc() <= 1000 ? 50 :
-                                profile.getLoc() <= 2000 ? 60 : 70);
+                        jsonObject2.put("size", profile.getLoc() <= 500 ? 40 : (profile.getLoc() <= 1000 ? 50 : (profile.getLoc() <= 2000 ? 60 : 70)));
                         jsonObject2.put("long_name",profile.getPath());
                         jsonObject2.put("name",profile.getName());
                         jsonObject2.put("id", profile.getId().toString());

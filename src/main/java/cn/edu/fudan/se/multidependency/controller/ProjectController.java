@@ -11,19 +11,14 @@ import java.util.concurrent.FutureTask;
 
 import javax.servlet.http.HttpServletRequest;
 
+import cn.edu.fudan.se.multidependency.service.query.*;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
 import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -37,10 +32,6 @@ import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCall;
-import cn.edu.fudan.se.multidependency.service.query.DependencyOrganizationService;
-import cn.edu.fudan.se.multidependency.service.query.MultipleService;
-import cn.edu.fudan.se.multidependency.service.query.ProjectService;
-import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.dynamic.DynamicAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.metric.Fan_IO;
@@ -600,21 +591,27 @@ public class ProjectController {
 	@PostMapping("/has")
 	@ResponseBody
 	public JSONArray projectHas(@RequestBody JSONObject requestBody) {
-		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_CIRCLE_PACKING);
+		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_CIRCLE_PACKING, false);
 	}
 
 	@PostMapping("/has/treemap")
 	@ResponseBody
 	public JSONArray projectHasTreeMap(@RequestBody JSONObject requestBody) {
-		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_TREEMAP);
+		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_TREEMAP, false);
 	}
 
 	@PostMapping("/has/combo")
 	@ResponseBody
 	public JSONArray projectHasCombo(@RequestBody JSONObject requestBody) {
-		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_COMBO);
+		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_COMBO, false);
 	}
 
+	@GetMapping("/has/combo_json/{isFilter}")
+	@ResponseBody
+	public JSONArray projectHasCombo(@PathVariable("isFilter") boolean isFilter) {
+		JSONObject requestBody = new JSONObject();
+		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_COMBO, isFilter);
+	}
 
 
 	/**

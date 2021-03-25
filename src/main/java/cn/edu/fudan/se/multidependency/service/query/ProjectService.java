@@ -23,7 +23,7 @@ public interface ProjectService {
 
 	JSONArray getPackageContainJsonCombo(List<PackageStructure> childrenPackages);
 
-	JSONArray getMultipleProjectsGraphJson(JSONObject dataList, String type);
+	JSONArray getMultipleProjectsGraphJson(JSONObject dataList, String type, boolean isFilter);
 
 //	JSONObject cloneGraphAndTableOfChildrenPackages(long package1Id, long package2Id);
 
