@@ -115,12 +115,8 @@ public class ProjectServiceImpl implements ProjectService{
         result.add(nodeJSON2);
 
         if(Constant.PROJECT_STRUCTURE_COMBO.equals(type)){
-            if(isFilter){
-                nodeJSON4.put("links", getSelectedPackageLinks(selectedPcks));
-            }else{
-                JSONArray temp_allprojects = getAllProjectsLinksCombo();
-                nodeJSON4.put("links", temp_allprojects);
-            }
+            JSONArray temp_allprojects = getAllProjectsLinksCombo();
+            nodeJSON4.put("links", temp_allprojects);
         }else{
             JSONObject temp_allprojects = getAllProjectsLinks();
             nodeJSON4.put("links", temp_allprojects);
@@ -189,7 +185,7 @@ public class ProjectServiceImpl implements ProjectService{
                 combo.add(temp);
             }
 
-            result.put("result", combo);
+            result.put("nodes", combo);
         }
 
         return result;
@@ -246,7 +242,7 @@ public class ProjectServiceImpl implements ProjectService{
                 combo.add(temp);
             }
 
-            result.put("result", combo);
+            result.put("nodes", combo);
         }
 
         return result;
