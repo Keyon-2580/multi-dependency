@@ -77,17 +77,17 @@ public class ProjectController {
 
 	@GetMapping("/graph")
 	public String index() {
-		return "projectgraph";
+		return "dependency_graph/projectgraph";
 	}
 
 	@GetMapping("/treemap")
 	public String treemap() {
-		return "treemap";
+		return "dependency_graph/treemap";
 	}
 
 	@GetMapping("/combo_chart")
 	public String combo() {
-		return "combo_chart";
+		return "dependency_graph/combo_chart";
 	}
 
 	@GetMapping("/tree")
@@ -610,28 +610,20 @@ public class ProjectController {
 	@PostMapping("/has")
 	@ResponseBody
 	public JSONArray projectHas(@RequestBody JSONObject requestBody) {
-		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_CIRCLE_PACKING, false);
+		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_CIRCLE_PACKING);
 	}
 
 	@PostMapping("/has/treemap")
 	@ResponseBody
 	public JSONArray projectHasTreeMap(@RequestBody JSONObject requestBody) {
-		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_TREEMAP, false);
+		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_TREEMAP);
 	}
 
 	@PostMapping("/has/combo")
 	@ResponseBody
 	public JSONArray projectHasCombo(@RequestBody JSONObject requestBody) {
-		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_COMBO, false);
+		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_COMBO);
 	}
-
-	@GetMapping("/has/combo_json/{isFilter}")
-	@ResponseBody
-	public JSONArray projectHasCombo(@PathVariable("isFilter") boolean isFilter) {
-		JSONObject requestBody = new JSONObject();
-		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_COMBO, isFilter);
-	}
-
 
 	/**
 	* 返回气泡图不同关系的连线数据

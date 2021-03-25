@@ -13,8 +13,8 @@ public class NodeAndRelationFilter {
     public static List<String> listOfSelectedDependsOnRelations(){
         List<String> selectedDependsOnRelations = new ArrayList<>();
         selectedDependsOnRelations.add(RelationType.str_CALL);
-        selectedDependsOnRelations.add(RelationType.str_EXTENDS);
-        selectedDependsOnRelations.add(RelationType.str_IMPLEMENTS);
+//        selectedDependsOnRelations.add(RelationType.str_EXTENDS);
+//        selectedDependsOnRelations.add(RelationType.str_IMPLEMENTS);
         return selectedDependsOnRelations;
     }
 

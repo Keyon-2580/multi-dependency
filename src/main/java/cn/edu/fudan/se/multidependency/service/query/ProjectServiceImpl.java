@@ -71,21 +71,14 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
-    public JSONArray getMultipleProjectsGraphJson(JSONObject dataList, String type, boolean isFilter) {
+    public JSONArray getMultipleProjectsGraphJson(JSONObject dataList, String type) {
         Map<String, Boolean> selectedPcks = new HashMap<>();
-        JSONArray projectIds = new JSONArray();
+        JSONArray projectIds = dataList.getJSONArray("projectIds");
+
+        boolean isFilter = false;
         if (isFilter) {
-            JSONObject requestBody = new JSONObject();
-            JSONObject idObject = new JSONObject();
-            idObject.put("id", "30335");
-            JSONArray ids = new JSONArray();
-            ids.add(idObject);
-            requestBody.put("projectIds", ids);
-            projectIds = requestBody.getJSONArray("projectIds");;
             selectedPcks = NodeAndRelationFilter.listOfPackagesForAtlas();
 //            selectedPcks = NodeAndRelationFilter.listOfPackagesForCassandra();
-        } else{
-            projectIds =  dataList.getJSONArray("projectIds");
         }
 
         JSONArray result = new JSONArray();
