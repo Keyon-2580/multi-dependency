@@ -216,7 +216,9 @@ public class ProjectServiceImpl implements ProjectService{
                 if(fileList.size() > 0){
                     for(ProjectFile profile : fileList){
                         JSONObject jsonObject2 = new JSONObject();
-                        jsonObject2.put("size",profile.getLoc());
+//                        jsonObject2.put("size",profile.getLoc());
+                        jsonObject2.put("size",profile.getLoc() <= 500 ? 40 : profile.getLoc() <= 1000 ? 50 :
+                                profile.getLoc() <= 2000 ? 60 : 70);
                         jsonObject2.put("long_name",profile.getPath());
                         jsonObject2.put("name",profile.getName());
                         jsonObject2.put("id", profile.getId().toString());
@@ -319,7 +321,9 @@ public class ProjectServiceImpl implements ProjectService{
             if(fileList.size() > 0){
                 for(ProjectFile profile : fileList){
                     JSONObject jsonObject2 = new JSONObject();
-                    jsonObject2.put("size",profile.getLoc());
+//                    jsonObject2.put("size",profile.getLoc());
+                    jsonObject2.put("size",profile.getLoc() <= 500 ? 40 : profile.getLoc() <= 1000 ? 50 :
+                            profile.getLoc() <= 2000 ? 60 : 70);
                     jsonObject2.put("long_name",profile.getPath());
                     jsonObject2.put("name",profile.getName());
                     jsonObject2.put("id", profile.getId().toString());
