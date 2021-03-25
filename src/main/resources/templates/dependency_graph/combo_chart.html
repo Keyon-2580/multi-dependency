@@ -23,11 +23,14 @@
 <div th:include="nav.html::nav"></div>
 
 <!--<div class="overview_div" style="width: 95%; height: 1000px; padding-left: 50px; margin-top: 30px;">-->
-<div class="overview_div" style="width: 95%; height: 1000px;">
-    <div style="float: left; width: 50px; height: 1000px"></div>
-    <div id="combo_chart" ></div>
-    <div id="side_information" style="width: 25%; padding-top: 20px; padding-left: 20px;float:left;"></div>
-</div>
+<!--<div class="overview_div" style="width: 95%; height: 1000px;">-->
+<!--    <div style="float: left; width: 50px; height: 1000px"></div>-->
+<!--    <div id="combo_chart" ></div>-->
+<!--    <div id="side_information" style="width: 25%; padding-top: 20px; padding-left: 20px;float:left;"></div>-->
+<!--</div>-->
+
+<div id="combo_chart" style="width: 1800px;height: 800px;"></div>
+
 <script>/*Fixing iframe window.innerHeight 0 issue in Safari*/document.body.clientHeight;</script>
 <script type="text/javascript" th:src="@{/js/import/g6.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/dependency_graph/combo_chart.js}"></script>

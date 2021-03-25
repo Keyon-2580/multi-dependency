@@ -182,24 +182,24 @@ G6.registerNode('pie-node', {
 
 //鼠标悬停提示项
 const tooltip = new G6.Tooltip({
-    offsetX: 10,
-    offsetY: 20,
+    offsetX: 20,
+    offsetY: 40,
     getContent(e) {
         const outDiv = document.createElement('div');
         outDiv.style.width = '180px';
         outDiv.innerHTML = e.item.getModel().group_type === 'combo' ?
-            `<h4>${e.item.getModel().name}</h4>
+            `<b class="combo_label">${e.item.getModel().name}</b>
           <ul>
             <li>ID: ${e.item.getModel().id}</li>
           </ul>`
 
             : e.item.getModel().group_type === 'node' ?
-                `<h4>${e.item.getModel().name}</h4>
+                `<b class="combo_label">${e.item.getModel().name}</b>
           <ul>
             <li>ID: ${e.item.getModel().id}</li>
           </ul>` :
 
-                `<h4>${e.item.getModel().source}  ${e.item.getModel().target}</h4>`
+                `<b class="combo_label">${e.item.getModel().source}  ${e.item.getModel().target}</b>`
         // <ul>
         //   <li>source: ${e.item.getModel().source_name}</li>
         //   <li>target: ${e.item.getModel().target_name}</li>
