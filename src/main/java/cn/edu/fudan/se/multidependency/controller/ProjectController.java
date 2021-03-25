@@ -127,6 +127,25 @@ public class ProjectController {
 		}
 		return result;
 	}
+
+	@GetMapping("/all/id")
+	@ResponseBody
+	public JSONObject allProjectsIds() {
+		JSONObject result = new JSONObject();
+		JSONArray pjlist = new JSONArray();
+		List<Project> projects = new ArrayList<>(nodeService.allProjects());
+
+		projects.sort(Comparator.comparing(Project::getName));
+
+		for(Project project : projects) {
+			JSONObject temp_project = new JSONObject();
+			temp_project.put("id", project.getId().toString());
+			pjlist.add(temp_project);
+		}
+
+		result.put("projectIds", pjlist);
+		return result;
+	}
 	
 	@GetMapping(value = "/fanIO/file/{projectId}")
 	@ResponseBody

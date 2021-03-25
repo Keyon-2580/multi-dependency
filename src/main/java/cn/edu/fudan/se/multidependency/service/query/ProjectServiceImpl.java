@@ -246,7 +246,7 @@ public class ProjectServiceImpl implements ProjectService{
                 combo.add(temp);
             }
 
-            result.put("result", combo);
+            result.put("nodes", combo);
         }
 
         return result;
