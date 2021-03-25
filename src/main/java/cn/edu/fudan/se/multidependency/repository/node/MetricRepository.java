@@ -13,26 +13,50 @@ import java.util.List;
 public interface MetricRepository extends Neo4jRepository<Metric, Long> {
 
     @Query("MATCH p=(t:Type)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(t) = $typeId RETURN m")
-    Metric findTypeMetrics(@Param("typeId") Long typeId);
+    Metric findTypeMetric(@Param("typeId") Long typeId);
 
-    @Query("MATCH p=(t:Type)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m")
-    List<Metric> findTypeMetrics();
+    @Query("MATCH p=(:Type)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m")
+    List<Metric> findTypeMetric();
 
-    @Query("MATCH p=(t:ProjectFile)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(t) = $fileId RETURN m")
-    Metric findFileMetrics(@Param("fileId") Long fileId);
+    @Query("MATCH p=(file:ProjectFile)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(file) = $fileId RETURN m;")
+    Metric findFileMetric(@Param("fileId") Long fileId);
 
-    @Query("MATCH p=(t:ProjectFile)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m")
-    List<Metric> findFileMetrics();
+    @Query("MATCH p=(:ProjectFile)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m;")
+    List<Metric> findFileMetric();
 
-    @Query("MATCH p=(t:Project)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(t) = $projectId RETURN m")
-    Metric findProjectMetrics(@Param("projectId") Long projectId);
+    @Query("MATCH p=(:ProjectFile)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m limit 10;")
+    List<Metric> findFileMetricsWithLimit();
 
-    @Query("MATCH p=(t:Project)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m")
-    List<Metric> findProjectMetrics();
+    @Query("MATCH p=(:ProjectFile)-[r:" + RelationType.str_HAS + "]->(m:Metric) delete r, m;")
+    void deleteAllFileMetric();
 
-    @Query("MATCH p=(t:Commit)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(t) = $commitId RETURN m")
-    Metric findCommitMetrics(@Param("commitId") Long commitId);
+    @Query("MATCH p=(pck:Package)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(pckId) = $pckId RETURN m;")
+    Metric findPackageMetric(@Param("pckId") Long pckId);
 
-    @Query("MATCH p=(t:Commit)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m")
-    List<Metric> findCommitMetrics();
+    @Query("MATCH p=(:Package)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m;")
+    List<Metric> findPackageMetric();
+
+    @Query("MATCH p=(:Package)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m limit 10;")
+    List<Metric> findPackageMetricsWithLimit();
+
+    @Query("MATCH p=(:Package)-[r:" + RelationType.str_HAS + "]->(m:Metric) delete r, m;")
+    void deleteAllPackageMetric();
+
+    @Query("MATCH p=(project:Project)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(project) = $projectId RETURN m")
+    Metric findProjectMetric(@Param("projectId") Long projectId);
+
+    @Query("MATCH p=(:Project)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m")
+    List<Metric> findProjectMetric();
+
+    @Query("MATCH p=(:Project)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m limit 10;")
+    List<Metric> findProjectMetricsWithLimit();
+
+    @Query("MATCH p=(:Project)-[r:" + RelationType.str_HAS + "]->(m:Metric) delete r, m;")
+    void deleteAllProjectMetric();
+
+    @Query("MATCH p=(commit:Commit)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(commit) = $commitId RETURN m")
+    Metric findCommitMetric(@Param("commitId") Long commitId);
+
+    @Query("MATCH p=(:Commit)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m")
+    List<Metric> findCommitMetric();
 }

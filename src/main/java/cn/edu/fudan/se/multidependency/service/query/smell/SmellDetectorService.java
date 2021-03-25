@@ -10,9 +10,7 @@ import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
-import cn.edu.fudan.se.multidependency.repository.smell.ModuleRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
-import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.*;
 import cn.edu.fudan.se.multidependency.service.query.smell.impl.GodComponentDetectorImpl;
 import org.slf4j.Logger;
@@ -57,6 +55,7 @@ public class SmellDetectorService {
 	@Autowired
 	private SmellRepository smellRepository;
 
+
 	public void createCloneSmells(boolean isRecreate){
 		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.CLONE);
 		if(smellsTmp != null && !smellsTmp.isEmpty()){
@@ -74,6 +73,7 @@ public class SmellDetectorService {
 		smellRepository.createCloneSmells();
 		smellRepository.createCloneSmellContains();
 		smellRepository.setCloneSmellProject();
+		LOGGER.info("创建Clone Smell节点关系完成");
 	}
 
 	public void createCycleDependencySmells(boolean isRecreate){
@@ -173,6 +173,7 @@ public class SmellDetectorService {
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
+		LOGGER.info("创建Cycle Dependency Smell节点关系完成");
 	}
 
 	public void createHubLikeDependencySmells(boolean isRecreate) {
@@ -242,6 +243,7 @@ public class SmellDetectorService {
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
+		LOGGER.info("创建Hub-Like Dependency Smell节点关系完成");
 	}
 
 	public void createUnstableDependencySmells(boolean isRecreate) {
@@ -311,6 +313,7 @@ public class SmellDetectorService {
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
+		LOGGER.info("创建Unstable Dependency Smell节点关系完成");
 	}
 
 	public void createSimilarComponentsSmell(boolean isRecreate) {
@@ -396,6 +399,7 @@ public class SmellDetectorService {
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
+		LOGGER.info("创建Similar Components Smell节点关系完成");
 	}
 
 	public void createLogicalCouplingSmell(boolean isRecreate) {
@@ -462,6 +466,7 @@ public class SmellDetectorService {
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
+		LOGGER.info("创建Logical Coupling Smell节点关系完成");
 	}
 
 	public void createGodComponentSmell(boolean isRecreate) {
@@ -504,6 +509,7 @@ public class SmellDetectorService {
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
+		LOGGER.info("创建God Component Smell节点关系完成");
 	}
 
 	public void createUnutilizedAbstractionSmell(boolean isRecreate) {
@@ -546,5 +552,6 @@ public class SmellDetectorService {
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
+		LOGGER.info("创建Unutilized Abstraction Smell节点关系完成");
 	}
 }

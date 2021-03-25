@@ -10,7 +10,11 @@ import javax.annotation.Resource;
 
 import cn.edu.fudan.se.multidependency.model.MetricType;
 import cn.edu.fudan.se.multidependency.model.node.Metric;
+import cn.edu.fudan.se.multidependency.model.relation.Has;
 import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +30,8 @@ import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationSe
 
 @Service
 public class MetricCalculatorService {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(MetricCalculatorService.class);
 
 	@Autowired
 	private ProjectFileRepository fileRepository;
@@ -46,10 +52,146 @@ public class MetricCalculatorService {
 	private CacheService cache;
 
 	@Autowired
+	private HasRepository hasRepository;
+
+	@Autowired
 	private MetricRepository metricRepository;
 	
 	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
 	private ModularityCalculator modularityCalculator;
+
+	public void setBasicMetric(boolean isRecreate) {
+		List<Metric> metricsTmp = metricRepository.findFileMetricsWithLimit();
+		if(metricsTmp != null && !metricsTmp.isEmpty()){
+			LOGGER.info("已存在File Metric度量值节点和关系");
+			if(!isRecreate){
+				LOGGER.info("不重新创建");
+				return;
+			}
+			LOGGER.info("重新创建...");
+		}
+
+		metricRepository.deleteAllFileMetric();
+		Map<Long, Metric> fileMetricNodesMap = generateFileMetricNodes();
+		if(fileMetricNodesMap != null && !fileMetricNodesMap.isEmpty()){
+			Collection<Metric> fileMetricNodes = fileMetricNodesMap.values();
+			metricRepository.saveAll(fileMetricNodes);
+
+			Collection<Has> hasMetrics = new ArrayList<>();
+			int size = 0;
+			for(Map.Entry<Long, Metric> entry : fileMetricNodesMap.entrySet()){
+				ProjectFile file = fileRepository.findFileById(entry.getKey());
+				Has has = new Has(file, entry.getValue());
+				hasMetrics.add(has);
+				if(++size > 500){
+					hasRepository.saveAll(hasMetrics);
+					hasMetrics.clear();
+					size = 0;
+				}
+			}
+			hasRepository.saveAll(hasMetrics);
+		}
+	}
+
+	public void createFileMetric(boolean isRecreate) {
+		List<Metric> metricsTmp = metricRepository.findFileMetricsWithLimit();
+		if(metricsTmp != null && !metricsTmp.isEmpty()){
+			LOGGER.info("已存在File Metric度量值节点和关系");
+			if(!isRecreate){
+				LOGGER.info("不重新创建");
+				return;
+			}
+			LOGGER.info("重新创建...");
+		}
+
+		metricRepository.deleteAllFileMetric();
+
+		LOGGER.info("计算Project/Package/ProjectFile基本度量值...");
+		fileRepository.setFileMetrics();
+		packageRepository.setEmptyPackageMetrics();
+		packageRepository.setPackageMetrics();
+		projectRepository.setProjectMetrics();
+
+		Map<Long, Metric> fileMetricNodesMap = generateFileMetricNodes();
+		if(fileMetricNodesMap != null && !fileMetricNodesMap.isEmpty()){
+			Collection<Metric> fileMetricNodes = fileMetricNodesMap.values();
+			metricRepository.saveAll(fileMetricNodes);
+
+			Collection<Has> hasMetrics = new ArrayList<>();
+			int size = 0;
+			for(Map.Entry<Long, Metric> entry : fileMetricNodesMap.entrySet()){
+				ProjectFile file = fileRepository.findFileById(entry.getKey());
+				Has has = new Has(file, entry.getValue());
+				hasMetrics.add(has);
+				if(++size > 500){
+					hasRepository.saveAll(hasMetrics);
+					hasMetrics.clear();
+					size = 0;
+				}
+			}
+			hasRepository.saveAll(hasMetrics);
+		}
+	}
+
+	public void createPackageMetric(boolean isRecreate) {
+		List<Metric> metricsTmp = metricRepository.findPackageMetricsWithLimit();
+		if(metricsTmp != null && !metricsTmp.isEmpty()){
+			LOGGER.info("已存在Package Metric度量值节点和关系");
+			if(!isRecreate){
+				LOGGER.info("不重新创建");
+				return;
+			}
+			LOGGER.info("重新创建...");
+		}
+
+		metricRepository.deleteAllPackageMetric();
+		Map<Long, Metric> packageMetricNodesMap = generatePackageMetricNodes();
+		if(packageMetricNodesMap != null && !packageMetricNodesMap.isEmpty()){
+			Collection<Metric> pckMetricNodes = packageMetricNodesMap.values();
+			metricRepository.saveAll(pckMetricNodes);
+
+			Collection<Has> hasMetrics = new ArrayList<>();
+			int size = 0;
+			for(Map.Entry<Long, Metric> entry : packageMetricNodesMap.entrySet()){
+				Package pck = packageRepository.findPackageById(entry.getKey());
+				Has has = new Has(pck, entry.getValue());
+				hasMetrics.add(has);
+				if(++size > 500){
+					hasRepository.saveAll(hasMetrics);
+					hasMetrics.clear();
+					size = 0;
+				}
+			}
+			hasRepository.saveAll(hasMetrics);
+		}
+	}
+
+	public void createProjectMetric(boolean isRecreate) {
+		List<Metric> metricsTmp = metricRepository.findProjectMetricsWithLimit();
+		if(metricsTmp != null && !metricsTmp.isEmpty()){
+			LOGGER.info("已存在Project Metric度量值节点和关系");
+			if(!isRecreate){
+				LOGGER.info("不重新创建");
+				return;
+			}
+			LOGGER.info("重新创建...");
+		}
+
+		metricRepository.deleteAllProjectMetric();
+		Map<Long, Metric> projectMetricNodesMap = generateProjectMetricNodes();
+		if(projectMetricNodesMap != null && !projectMetricNodesMap.isEmpty()){
+			Collection<Metric> projectMetricNodes = projectMetricNodesMap.values();
+			metricRepository.saveAll(projectMetricNodes);
+
+			Collection<Has> hasMetrics = new ArrayList<>();
+			for(Map.Entry<Long, Metric> entry : projectMetricNodesMap.entrySet()){
+				Project project = projectRepository.findProjectById(entry.getKey());
+				Has has = new Has(project, entry.getValue());
+				hasMetrics.add(has);
+			}
+			hasRepository.saveAll(hasMetrics);
+		}
+	}
 
 	public Map<Long, Metric> generateFileMetricNodes(){
 		Map<Long, Metric> result = new HashMap<>();

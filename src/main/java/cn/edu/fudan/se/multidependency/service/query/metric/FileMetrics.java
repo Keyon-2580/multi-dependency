@@ -103,7 +103,7 @@ public class FileMetrics extends FanIOMetric {
 		private int commits;
 
 		/**
-		 * 修改次数
+		 * 开发总数
 		 */
 		private int developers;
 

@@ -194,6 +194,15 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 			"RETURN  smell,issues,bugIssues,newFeatureIssues,improvementIssues;")
 	public SmellMetric.DebtMetric calculateSmellDebtMetricInPackageLevel(@Param("smellId") long smellId);
 
-	@Query("match (smell:Smell) -[:" + RelationType.str_HAS + "]->(n:Metric) where id(smell)=$smellId return n;")
-	public Metric findMetricBySmellId(@Param("smellId") long smellId);
+	@Query("MATCH p=(smell:Smell)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(smell) = $projectId RETURN m")
+	Metric findSmellMetric(@Param("smellId") long smellId);
+
+	@Query("MATCH p=(:Smell)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m")
+	List<Metric> findSmellMetric();
+
+	@Query("MATCH p=(:Smell)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m limit 10;")
+	List<Metric> findSmellMetricWithLimit();
+
+	@Query("MATCH p=(:Smell)-[r:" + RelationType.str_HAS + "]->(m:Metric) delete r, m;")
+	void deleteAllSmellMetric();
 }

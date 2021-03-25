@@ -6,13 +6,10 @@ import java.util.*;
 
 import cn.edu.fudan.se.multidependency.model.node.*;
 import cn.edu.fudan.se.multidependency.model.node.Package;
-import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.relation.*;
-import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.smell.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
@@ -34,7 +31,6 @@ import cn.edu.fudan.se.multidependency.model.relation.clone.CloneRelationType;
 import cn.edu.fudan.se.multidependency.model.relation.clone.ModuleClone;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.smell.ASRepository;
-import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.clone.CloneGroupRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
@@ -425,45 +421,37 @@ public class BeanCreator {
 			if(propertyConfig.isCalculateDependsOn()) {
 				LOGGER.info("创建Cycle Dependency Smell节点关系...");
 				smellDetectorService.createCycleDependencySmells(false);
-				LOGGER.info("创建Cycle Dependency Smell节点关系完成");
 
 				LOGGER.info("创建Hub-Like Dependency Smell节点关系...");
 				smellDetectorService.createHubLikeDependencySmells(false);
-				LOGGER.info("创建Hub-Like Dependency Smell节点关系完成");
 
 				LOGGER.info("创建Unstable Dependency Smell节点关系...");
 				smellDetectorService.createUnstableDependencySmells(false);
-				LOGGER.info("创建Unstable Dependency Smell节点关系完成");
 			}
 
 			if(propertyConfig.isCalculateCloneGroup()){
 				LOGGER.info("创建Clone Smell节点关系...");
 				smellDetectorService.createCloneSmells(false);
-				LOGGER.info("创建Clone Smell节点关系完成");
 			}
 
 			if(propertyConfig.isCalculateCloneGroup() && propertyConfig.isCalculateCloneGroup()){
 				LOGGER.info("创建Similar Components Smell节点关系...");
 				smellDetectorService.createSimilarComponentsSmell(false);
-				LOGGER.info("创建Similar Components Smell节点关系完成");
 			}
 
 			if(propertyConfig.isCalculateCoChange()){
 				LOGGER.info("创建Logical Coupling Smell节点关系...");
 				smellDetectorService.createLogicalCouplingSmell(false);
-				LOGGER.info("创建Logical Coupling Smell节点关系完成");
 			}
 
 			if(propertyConfig.isCalculateCoChange()){
 				LOGGER.info("创建God Component Smell节点关系...");
 				smellDetectorService.createGodComponentSmell(false);
-				LOGGER.info("创建God Component Smell节点关系完成");
 			}
 
 			if(propertyConfig.isCalculateCoChange()){
 				LOGGER.info("创建Unutilized Abstraction Smell节点关系...");
 				smellDetectorService.createUnutilizedAbstractionSmell(false);
-				LOGGER.info("创建Unutilized Abstraction Smell节点关系完成");
 			}
 		}
 		return true;
@@ -479,14 +467,15 @@ public class BeanCreator {
 	}
 
 	@Bean
-	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository,
-									 PackageRepository packageRepository, ProjectFileRepository projectFileRepository,
-									 MetricRepository metricRepository, HasRepository hasRepository) {
-		LOGGER.info("计算Project/Package/ProjectFile基本度量值...");
-		projectFileRepository.setFileMetrics();
-		packageRepository.setEmptyPackageMetrics();
-		packageRepository.setPackageMetrics();
-		projectRepository.setProjectMetrics();
+	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository) {
+		LOGGER.info("创建File Metric度量值节点和关系...");
+		metricCalculatorService.createFileMetric(false);
+
+		LOGGER.info("创建Package Metric度量值节点和关系...");
+		metricCalculatorService.createPackageMetric(false);
+
+		LOGGER.info("创建Project Metric度量值节点和关系...");
+		metricCalculatorService.createProjectMetric(false);
 
 		if(propertyConfig.isCalModularity()){
 			LOGGER.info("计算Project模块性度量值...");
@@ -498,87 +487,9 @@ public class BeanCreator {
 			});
 		}
 
-		LOGGER.info("创建File Metric度量值节点和关系...");
-		hasRepository.clearHasMetricRelation();
-		metricRepository.deleteAll();
-
-		Map<Long, Metric> fileMetricNodesMap = metricCalculatorService.generateFileMetricNodes();
-		if(fileMetricNodesMap != null && !fileMetricNodesMap.isEmpty()){
-			Collection<Metric> fileMetricNodes = fileMetricNodesMap.values();
-			metricRepository.saveAll(fileMetricNodes);
-
-			Collection<Has> hasMetrics = new ArrayList<>();
-			int size = 0;
-			for(Map.Entry<Long, Metric> entry : fileMetricNodesMap.entrySet()){
-				ProjectFile file = projectFileRepository.findFileById(entry.getKey());
-				Has has = new Has(file, entry.getValue());
-				hasMetrics.add(has);
-				if(++size > 500){
-					hasRepository.saveAll(hasMetrics);
-					hasMetrics.clear();
-					size = 0;
-				}
-			}
-			hasRepository.saveAll(hasMetrics);
-		}
-		LOGGER.info("创建Package Metric度量值节点和关系...");
-		Map<Long, Metric> packageMetricNodesMap = metricCalculatorService.generatePackageMetricNodes();
-		if(packageMetricNodesMap != null && !packageMetricNodesMap.isEmpty()){
-			Collection<Metric> pckMetricNodes = packageMetricNodesMap.values();
-			metricRepository.saveAll(pckMetricNodes);
-
-			Collection<Has> hasMetrics = new ArrayList<>();
-			int size = 0;
-			for(Map.Entry<Long, Metric> entry : packageMetricNodesMap.entrySet()){
-				Package pck = packageRepository.findPackageById(entry.getKey());
-				Has has = new Has(pck, entry.getValue());
-				hasMetrics.add(has);
-				if(++size > 500){
-					hasRepository.saveAll(hasMetrics);
-					hasMetrics.clear();
-					size = 0;
-				}
-			}
-			hasRepository.saveAll(hasMetrics);
-		}
-		LOGGER.info("创建Project Metric度量值节点和关系...");
-		Map<Long, Metric> projectMetricNodesMap = metricCalculatorService.generateProjectMetricNodes();
-		if(projectMetricNodesMap != null && !projectMetricNodesMap.isEmpty()){
-			Collection<Metric> projectMetricNodes = projectMetricNodesMap.values();
-			metricRepository.saveAll(projectMetricNodes);
-
-			Collection<Has> hasMetrics = new ArrayList<>();
-			for(Map.Entry<Long, Metric> entry : projectMetricNodesMap.entrySet()){
-				Project project = projectRepository.findProjectById(entry.getKey());
-				Has has = new Has(project, entry.getValue());
-				hasMetrics.add(has);
-			}
-			hasRepository.saveAll(hasMetrics);
-		}
-
 		LOGGER.info("创建Smell Metric度量值节点和关系...");
-		Map<Smell, Metric> smellMetricMap = new HashMap<>();
-		Map<Smell, Metric> fileSmellMetricMap = smellMetricCalculatorService.generateSmellMetricNodesInFileLevel();
-		Map<Smell, Metric> packageSmellMetricMap = smellMetricCalculatorService.generateSmellMetricNodesInPackageLevel();
-		smellMetricMap.putAll(fileSmellMetricMap);
-		smellMetricMap.putAll(packageSmellMetricMap);
-		if(!smellMetricMap.isEmpty()){
-			Collection<Metric> fileMetricNodes = smellMetricMap.values();
-			metricRepository.saveAll(fileMetricNodes);
+		smellMetricCalculatorService.createSmellMetric(false);
 
-			Collection<Has> hasMetrics = new ArrayList<>();
-			int size = 0;
-			for(Map.Entry<Smell, Metric> entry : smellMetricMap.entrySet()){
-				Has has = new Has(entry.getKey(), entry.getValue());
-				hasMetrics.add(has);
-				if(++size > 500){
-					hasRepository.saveAll(hasMetrics);
-					hasMetrics.clear();
-					size = 0;
-				}
-			}
-			hasRepository.saveAll(hasMetrics);
-		}
 		return true;
 	}
 

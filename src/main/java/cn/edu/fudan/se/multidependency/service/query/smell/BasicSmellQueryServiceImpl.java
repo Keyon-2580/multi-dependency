@@ -68,6 +68,6 @@ public class BasicSmellQueryServiceImpl implements BasicSmellQueryService {
 
 	@Override
 	public Metric findMetricBySmellId(long smellId){
-		return smellRepository.findMetricBySmellId(smellId);
+		return smellRepository.findSmellMetric(smellId);
 	}
 }

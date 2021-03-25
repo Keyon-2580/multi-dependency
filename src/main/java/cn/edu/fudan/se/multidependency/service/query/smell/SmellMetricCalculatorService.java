@@ -9,7 +9,8 @@ import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.SmellMetric;
-import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,8 @@ import java.util.*;
 
 @Service
 public class SmellMetricCalculatorService {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SmellMetricCalculatorService.class);
 
 	@Autowired
 	private CacheService cache;
@@ -29,6 +32,42 @@ public class SmellMetricCalculatorService {
 
 	@Autowired
 	private HasRepository hasRepository;
+
+	public void createSmellMetric(boolean isRecreate) {
+		List<Metric> metricsTmp = smellRepository.findSmellMetricWithLimit();
+		if(metricsTmp != null && !metricsTmp.isEmpty()){
+			LOGGER.info("已存在Smell Metric度量值节点和关系");
+			if(!isRecreate){
+				LOGGER.info("不重新创建");
+				return;
+			}
+			LOGGER.info("重新创建...");
+		}
+
+		smellRepository.deleteAllSmellMetric();
+		Map<Smell, Metric> smellMetricMap = new HashMap<>();
+		Map<Smell, Metric> fileSmellMetricMap = generateSmellMetricNodesInFileLevel();
+		Map<Smell, Metric> packageSmellMetricMap = generateSmellMetricNodesInPackageLevel();
+		smellMetricMap.putAll(fileSmellMetricMap);
+		smellMetricMap.putAll(packageSmellMetricMap);
+		if(!smellMetricMap.isEmpty()){
+			Collection<Metric> fileMetricNodes = smellMetricMap.values();
+			metricRepository.saveAll(fileMetricNodes);
+
+			Collection<Has> hasMetrics = new ArrayList<>();
+			int size = 0;
+			for(Map.Entry<Smell, Metric> entry : smellMetricMap.entrySet()){
+				Has has = new Has(entry.getKey(), entry.getValue());
+				hasMetrics.add(has);
+				if(++size > 500){
+					hasRepository.saveAll(hasMetrics);
+					hasMetrics.clear();
+					size = 0;
+				}
+			}
+			hasRepository.saveAll(hasMetrics);
+		}
+	}
 
 	public Map<Smell, Metric> generateSmellMetricNodesInFileLevel(){
 		Map<Smell, Metric> result = new HashMap<>();
