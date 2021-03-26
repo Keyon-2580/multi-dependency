@@ -166,12 +166,12 @@ public class FileMetrics extends FanIOMetric {
 		/**
 		 * git历史中文件的最后操作者名称
 		 */
-		private String lastUpdateBy;
+		private String lastUpdator;
 
 		/**
 		 * git历史中更改文件次数最多的开发者名称
 		 */
-		private String mostUpdateBy;
+		private String mostUpdator;
 	}
 
 

@@ -129,12 +129,12 @@ public final class MetricType {
 	/**
 	 * git历史中文件的最后操作者名称
 	 */
-	public static final String LAST_UPDATE_BY = "LastUpdateBy";
+	public static final String LAST_UPDATOR = "LastUpdator";
 
 	/**
 	 * git历史中更改文件次数最多的开发者名称
 	 */
-	public static final String MOST_UPDATE_BY = "MostUpdateBy";
+	public static final String MOST_UPDATOR = "MostUpdator";
 
 	/**
 	 * --------------------------------债务性度量值------------------------------------------

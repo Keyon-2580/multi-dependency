@@ -243,8 +243,8 @@ public class MetricCalculatorService {
 				FileMetrics.DeveloperMetric developerMetric = fileMetrics.getDeveloperMetric();
 				if(developerMetric != null){
 					metricValues.put(MetricType.CREATOR, developerMetric.getCreator());
-					metricValues.put(MetricType.LAST_UPDATE_BY, developerMetric.getLastUpdateBy());
-					metricValues.put(MetricType.MOST_UPDATE_BY, developerMetric.getMostUpdateBy());
+					metricValues.put(MetricType.LAST_UPDATOR, developerMetric.getLastUpdator());
+					metricValues.put(MetricType.MOST_UPDATOR, developerMetric.getMostUpdator());
 				}
 				metric.setMetricValues(metricValues);
 				result.put(file.getId(), metric);
@@ -493,8 +493,8 @@ public class MetricCalculatorService {
 		}
 		if(commits.size() > 0){
 			Developer creator = developerSubmitCommitRepository.findDeveloperByCommitId(commits.get(commits.size() - 1).getId());
-			Developer lastUpdateBy = developerSubmitCommitRepository.findDeveloperByCommitId(commits.get(0).getId());
-			Developer mostUpdateBy = new Developer();
+			Developer lastUpdator = developerSubmitCommitRepository.findDeveloperByCommitId(commits.get(0).getId());
+			Developer mostUpdator = new Developer();
 			Map<Developer, Integer> updateTimes= new HashMap<>();
 			int mostUpdateTime = 0;
 			for (Commit commit:
@@ -502,14 +502,14 @@ public class MetricCalculatorService {
 				Developer developer = developerSubmitCommitRepository.findDeveloperByCommitId(commit.getId());
 				updateTimes.put(developer, updateTimes.getOrDefault(developer, 0) + 1);
 				if(updateTimes.get(developer) >= mostUpdateTime){
-					mostUpdateBy = developer;
+					mostUpdator = developer;
 					mostUpdateTime = updateTimes.get(developer);
 				}
 			}
 			developerMetric.setFile(file);
 			developerMetric.setCreator(creator.getName());
-			developerMetric.setMostUpdateBy(mostUpdateBy.getName());
-			developerMetric.setLastUpdateBy(lastUpdateBy.getName());
+			developerMetric.setMostUpdator(mostUpdator.getName());
+			developerMetric.setLastUpdator(lastUpdator.getName());
 		}
 		return developerMetric;
 	}
