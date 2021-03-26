@@ -121,6 +121,20 @@ public final class MetricType {
 	 */
 	public static final String IMPROVEMENT_ISSUES = "ImprovementIssues";
 
+	/**
+	 * git历史中文件的创建者名称
+	 */
+	public static final String CREATOR =  "Creator";
+
+	/**
+	 * git历史中文件的最后操作者名称
+	 */
+	public static final String LAST_UPDATE_BY = "LastUpdateBy";
+
+	/**
+	 * git历史中更改文件次数最多的开发者名称
+	 */
+	public static final String MOST_UPDATE_BY = "MostUpdateBy";
 
 	/**
 	 * --------------------------------债务性度量值------------------------------------------

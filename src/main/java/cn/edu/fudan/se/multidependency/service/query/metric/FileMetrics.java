@@ -40,6 +40,11 @@ public class FileMetrics extends FanIOMetric {
 	private DebtMetric debtMetric;
 
 	/**
+	 *  开发者度量指标
+	 */
+	private DeveloperMetric developerMetric;
+
+	/**
 	 * 不稳定度
 	 * Instability = Ce / (Ce + Ca)
 	 */
@@ -146,5 +151,28 @@ public class FileMetrics extends FanIOMetric {
 		 */
 		private int improvementIssues;
 	}
+
+	@Data
+	@EqualsAndHashCode(callSuper=false)
+	@QueryResult
+	public class DeveloperMetric{
+		private ProjectFile file;
+
+		/**
+		 * git历史中文件的创建者名称
+		 */
+		private String creator;
+
+		/**
+		 * git历史中文件的最后操作者名称
+		 */
+		private String lastUpdateBy;
+
+		/**
+		 * git历史中更改文件次数最多的开发者名称
+		 */
+		private String mostUpdateBy;
+	}
+
 
 }
