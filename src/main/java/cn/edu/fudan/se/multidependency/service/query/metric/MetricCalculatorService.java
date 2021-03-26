@@ -488,9 +488,6 @@ public class MetricCalculatorService {
 		long fileId = file.getId();
 		FileMetrics.DeveloperMetric developerMetric = new FileMetrics().new DeveloperMetric();
 		List<Commit> commits = commitRepository.queryUpdatedByCommits(fileId);
-		if(commits.size() == 0){
-			System.out.println(123);
-		}
 		if(commits.size() > 0){
 			Developer creator = developerSubmitCommitRepository.findDeveloperByCommitId(commits.get(commits.size() - 1).getId());
 			Developer lastUpdator = developerSubmitCommitRepository.findDeveloperByCommitId(commits.get(0).getId());
