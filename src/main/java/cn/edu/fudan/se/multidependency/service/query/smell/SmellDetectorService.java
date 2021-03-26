@@ -67,7 +67,7 @@ public class SmellDetectorService {
 			LOGGER.info("重新创建...");
 		}
         smellRepository.deleteSmellContainRelations(SmellType.CLONE);
-        smellRepository.deleteSmellHasMetricRelation(SmellType.CLONE);
+        smellRepository.deleteSmellMetric(SmellType.CLONE);
         smellRepository.deleteSmells(SmellType.CLONE);
 
 		smellRepository.createCloneSmells();
@@ -87,7 +87,7 @@ public class SmellDetectorService {
 			LOGGER.info("重新创建...");
 		}
 		smellRepository.deleteSmellContainRelations(SmellType.CYCLIC_DEPENDENCY);
-		smellRepository.deleteSmellHasMetricRelation(SmellType.CYCLIC_DEPENDENCY);
+		smellRepository.deleteSmellMetric(SmellType.CYCLIC_DEPENDENCY);
 		smellRepository.deleteSmells(SmellType.CYCLIC_DEPENDENCY);
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
@@ -187,7 +187,7 @@ public class SmellDetectorService {
 			LOGGER.info("重新创建...");
 		}
 		smellRepository.deleteSmellContainRelations(SmellType.HUBLIKE_DEPENDENCY);
-		smellRepository.deleteSmellHasMetricRelation(SmellType.HUBLIKE_DEPENDENCY);
+		smellRepository.deleteSmellMetric(SmellType.HUBLIKE_DEPENDENCY);
 		smellRepository.deleteSmells(SmellType.HUBLIKE_DEPENDENCY);
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
@@ -257,7 +257,7 @@ public class SmellDetectorService {
 			LOGGER.info("重新创建...");
 		}
 		smellRepository.deleteSmellContainRelations(SmellType.UNSTABLE_DEPENDENCY);
-		smellRepository.deleteSmellHasMetricRelation(SmellType.UNSTABLE_DEPENDENCY);
+		smellRepository.deleteSmellMetric(SmellType.UNSTABLE_DEPENDENCY);
 		smellRepository.deleteSmells(SmellType.UNSTABLE_DEPENDENCY);
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
@@ -327,7 +327,7 @@ public class SmellDetectorService {
 			LOGGER.info("重新创建...");
 		}
 		smellRepository.deleteSmellContainRelations(SmellType.SIMILAR_COMPONENTS);
-		smellRepository.deleteSmellHasMetricRelation(SmellType.SIMILAR_COMPONENTS);
+		smellRepository.deleteSmellMetric(SmellType.SIMILAR_COMPONENTS);
 		smellRepository.deleteSmells(SmellType.SIMILAR_COMPONENTS);
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
@@ -413,7 +413,7 @@ public class SmellDetectorService {
 			LOGGER.info("重新创建...");
 		}
 		smellRepository.deleteSmellContainRelations(SmellType.LOGICAL_COUPLING);
-		smellRepository.deleteSmellHasMetricRelation(SmellType.LOGICAL_COUPLING);
+		smellRepository.deleteSmellMetric(SmellType.LOGICAL_COUPLING);
 		smellRepository.deleteSmells(SmellType.LOGICAL_COUPLING);
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
@@ -480,7 +480,7 @@ public class SmellDetectorService {
 			LOGGER.info("重新创建...");
 		}
 		smellRepository.deleteSmellContainRelations(SmellType.GOD_COMPONENT);
-		smellRepository.deleteSmellHasMetricRelation(SmellType.GOD_COMPONENT);
+		smellRepository.deleteSmellMetric(SmellType.GOD_COMPONENT);
 		smellRepository.deleteSmells(SmellType.GOD_COMPONENT);
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
@@ -523,7 +523,7 @@ public class SmellDetectorService {
 			LOGGER.info("重新创建...");
 		}
 		smellRepository.deleteSmellContainRelations(SmellType.UNTILIZED_ABSTRACTION);
-		smellRepository.deleteSmellHasMetricRelation(SmellType.UNTILIZED_ABSTRACTION);
+		smellRepository.deleteSmellMetric(SmellType.UNTILIZED_ABSTRACTION);
 		smellRepository.deleteSmells(SmellType.UNTILIZED_ABSTRACTION);
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
