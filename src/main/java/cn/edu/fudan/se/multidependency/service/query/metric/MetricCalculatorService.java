@@ -11,10 +11,14 @@ import javax.annotation.Resource;
 import cn.edu.fudan.se.multidependency.model.MetricType;
 import cn.edu.fudan.se.multidependency.model.node.Metric;
 import cn.edu.fudan.se.multidependency.model.relation.Has;
+import cn.edu.fudan.se.multidependency.model.node.git.Commit;
+import cn.edu.fudan.se.multidependency.model.node.git.Developer;
 import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.git.DeveloperSubmitCommitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +45,13 @@ public class MetricCalculatorService {
 	
 	@Autowired
 	private PackageRepository packageRepository;
-	
+
+	@Autowired
+	private CommitRepository commitRepository;
+
+	@Autowired
+	private DeveloperSubmitCommitRepository developerSubmitCommitRepository;
+
 	@Autowired
 	private GitAnalyseService gitAnalyseService;
 	
@@ -230,6 +240,12 @@ public class MetricCalculatorService {
 					metricValues.put(MetricType.IMPROVEMENT_ISSUES, detMetric.getImprovementIssues());
 				}
 
+				FileMetrics.DeveloperMetric developerMetric = fileMetrics.getDeveloperMetric();
+				if(developerMetric != null){
+					metricValues.put(MetricType.CREATOR, developerMetric.getCreator());
+					metricValues.put(MetricType.LAST_UPDATOR, developerMetric.getLastUpdator());
+					metricValues.put(MetricType.MOST_UPDATOR, developerMetric.getMostUpdator());
+				}
 				metric.setMetricValues(metricValues);
 				result.put(file.getId(), metric);
 			});
@@ -313,10 +329,12 @@ public class MetricCalculatorService {
 				fileMetrics.setFile(file);
 				FileMetrics.EvolutionMetric fileEvolutionMetrics = fileRepository.calculateFileEvolutionMetrics(file.getId());
 				FileMetrics.DebtMetric fileDebtMetrics = fileRepository.calculateFileDebtMetrics(file.getId());
+				FileMetrics.DeveloperMetric developerMetric = calculateFileDeveloperMetrics(file);
 
 				fileMetrics.setStructureMetric(structureMetric);
 				fileMetrics.setEvolutionMetric(fileEvolutionMetrics);
 				fileMetrics.setDebtMetric(fileDebtMetrics);
+				fileMetrics.setDeveloperMetric(developerMetric);
 
 				fileMetrics.setFanIn(structureMetric.getFanIn());
 				fileMetrics.setFanOut(structureMetric.getFanOut());
@@ -407,9 +425,11 @@ public class MetricCalculatorService {
 		FileMetrics.StructureMetric fileStructureMetrics = fileRepository.calculateFileStructureMetrics(file.getId());
 		FileMetrics.EvolutionMetric fileEvolutionMetrics = fileRepository.calculateFileEvolutionMetrics(file.getId());
 		FileMetrics.DebtMetric fileDebtMetrics = fileRepository.calculateFileDebtMetrics(file.getId());
+		FileMetrics.DeveloperMetric fileDeveloperMetrics = calculateFileDeveloperMetrics(file);
 		fileMetrics.setStructureMetric(fileStructureMetrics);
 		fileMetrics.setEvolutionMetric(fileEvolutionMetrics);
 		fileMetrics.setDebtMetric(fileDebtMetrics);
+		fileMetrics.setDeveloperMetric(fileDeveloperMetrics);
 		return fileMetrics;
 	}
 
@@ -462,5 +482,32 @@ public class MetricCalculatorService {
 	
 	public int calculateProjectCommits(Project project) {
 		return gitAnalyseService.findCommitsInProject(project).size();
+	}
+
+	private FileMetrics.DeveloperMetric calculateFileDeveloperMetrics(ProjectFile file){
+		long fileId = file.getId();
+		FileMetrics.DeveloperMetric developerMetric = new FileMetrics().new DeveloperMetric();
+		List<Commit> commits = commitRepository.queryUpdatedByCommits(fileId);
+		if(commits.size() > 0){
+			Developer creator = developerSubmitCommitRepository.findDeveloperByCommitId(commits.get(commits.size() - 1).getId());
+			Developer lastUpdator = developerSubmitCommitRepository.findDeveloperByCommitId(commits.get(0).getId());
+			Developer mostUpdator = new Developer();
+			Map<Developer, Integer> updateTimes= new HashMap<>();
+			int mostUpdateTime = 0;
+			for (Commit commit:
+					commits) {
+				Developer developer = developerSubmitCommitRepository.findDeveloperByCommitId(commit.getId());
+				updateTimes.put(developer, updateTimes.getOrDefault(developer, 0) + 1);
+				if(updateTimes.get(developer) >= mostUpdateTime){
+					mostUpdator = developer;
+					mostUpdateTime = updateTimes.get(developer);
+				}
+			}
+			developerMetric.setFile(file);
+			developerMetric.setCreator(creator.getName());
+			developerMetric.setMostUpdator(mostUpdator.getName());
+			developerMetric.setLastUpdator(lastUpdator.getName());
+		}
+		return developerMetric;
 	}
 }

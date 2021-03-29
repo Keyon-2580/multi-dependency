@@ -49,17 +49,26 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 	@Query("match p = (smell:Smell)-[r:CONTAIN]-() where smell.type = $smellType delete r;")
 	void deleteSmellContainRelations(@Param("smellType") String smellType);
 
-	@Query("match p = (:Smell)-[r:" + RelationType.str_HAS + "] -> (:Metric) delete r;")
-	void deleteSmellHasMetricRelation();
-
-	@Query("match p = (smell:Smell)-[r:" + RelationType.str_HAS + "] -> (:Metric) where smell.type = $smellType delete r;")
-	void deleteSmellHasMetricRelation(@Param("smellType") String smellType);
+	@Query("match p = (smell:Smell)-[r:" + RelationType.str_HAS + "] -> (m:Metric) where smell.type = $smellType delete r, m;")
+	void deleteSmellMetric(@Param("smellType") String smellType);
 
 	@Query("match (n:Smell) delete n;")
 	void deleteSmells();
 
 	@Query("match (n:Smell) where n.type = $smellType delete n;")
 	void deleteSmells(@Param("smellType") String smellType);
+
+	@Query("MATCH p=(smell:Smell)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(smell) = $projectId RETURN m")
+	Metric findSmellMetric(@Param("smellId") long smellId);
+
+	@Query("MATCH p=(:Smell)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m")
+	List<Metric> findSmellMetric();
+
+	@Query("MATCH p=(:Smell)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m limit 10;")
+	List<Metric> findSmellMetricWithLimit();
+
+	@Query("MATCH p=(:Smell)-[r:" + RelationType.str_HAS + "]->(m:Metric) delete r, m;")
+	void deleteAllSmellMetric();
 
 	@Query("CALL gds.wcc.stream({" +
 			"nodeProjection: \'ProjectFile\', " +
@@ -194,15 +203,4 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 			"RETURN  smell,issues,bugIssues,newFeatureIssues,improvementIssues;")
 	public SmellMetric.DebtMetric calculateSmellDebtMetricInPackageLevel(@Param("smellId") long smellId);
 
-	@Query("MATCH p=(smell:Smell)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(smell) = $projectId RETURN m")
-	Metric findSmellMetric(@Param("smellId") long smellId);
-
-	@Query("MATCH p=(:Smell)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m")
-	List<Metric> findSmellMetric();
-
-	@Query("MATCH p=(:Smell)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m limit 10;")
-	List<Metric> findSmellMetricWithLimit();
-
-	@Query("MATCH p=(:Smell)-[r:" + RelationType.str_HAS + "]->(m:Metric) delete r, m;")
-	void deleteAllSmellMetric();
 }
