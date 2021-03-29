@@ -436,7 +436,7 @@ public class BeanCreator {
 
 			if(propertyConfig.isCalculateCloneGroup() && propertyConfig.isCalculateCloneGroup()){
 				LOGGER.info("创建Similar Components Smell节点关系...");
-				smellDetectorService.createSimilarComponentsSmell(false);
+//				smellDetectorService.createSimilarComponentsSmell(false);
 			}
 
 			if(propertyConfig.isCalculateCoChange()){
