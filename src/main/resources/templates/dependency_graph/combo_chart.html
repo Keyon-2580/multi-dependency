@@ -16,7 +16,7 @@
     <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}">
     <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-select.min.css}">
     <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
-<!--    <link rel="stylesheet" th:href="@{/css/table_common.css}"/>-->
+    <link rel="stylesheet" th:href="@{/css/table_common.css}"/>
     <link rel="stylesheet" th:href="@{/css/combo_chart.css}"/>
 </head>
 <body >
@@ -29,7 +29,11 @@
 <!--    <div id="side_information" style="width: 25%; padding-top: 20px; padding-left: 20px;float:left;"></div>-->
 <!--</div>-->
 
-<div id="combo_chart" style="width: 1800px;height: 800px;"></div>
+<div id = "combo_util"></div>
+
+<div class="overview_div" style="width: 95%; height: 1000px; padding: 0; margin-top: 30px; border: 2px solid black; border-radius: 10px;">
+    <div id="combo_chart" style="width: 1800px;height: 1000px;"></div>
+</div>
 
 <script>/*Fixing iframe window.innerHeight 0 issue in Safari*/document.body.clientHeight;</script>
 <script type="text/javascript" th:src="@{/js/import/g6.min.js}"></script>

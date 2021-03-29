@@ -1,4 +1,5 @@
 let data = {};
+var projectList_global; //存放选定项目列表
 
 const COLOR_DEPENDSON = 'rgb(119, 243, 252)';
 const COLOR_CLONE = 'rgb(176,66,6)';
@@ -199,7 +200,7 @@ const tooltip = new G6.Tooltip({
             <li>ID: ${e.item.getModel().id}</li>
           </ul>` :
 
-                `<b class="combo_label">${e.item.getModel().source}  ${e.item.getModel().target}</b>`
+                `<b class="combo_label">${e.item.getModel().id}</b>`
         // <ul>
         //   <li>source: ${e.item.getModel().source_name}</li>
         //   <li>target: ${e.item.getModel().target_name}</li>
@@ -217,6 +218,8 @@ container.appendChild(descriptionDiv);
 const width = container.scrollWidth;
 const height = container.scrollHeight || 500;
 const grid = new G6.Grid();
+let in_out_list = [] //存放出度入度节点
+let actual_edges = [] //存放原有的线以及拆分后的线ID
 
 const graph = new G6.Graph({
     container: 'combo_chart',
@@ -235,7 +238,7 @@ const graph = new G6.Graph({
     groupByTypes: false,
     modes: {
         // default: ['drag-canvas', 'drag-combo', 'drag-node', 'collapse-expand-combo', 'zoom-canvas'],
-        default: ['drag-canvas', 'drag-combo', 'drag-node','collapse-expand-combo', 'zoom-canvas'],
+        default: ['drag-canvas', 'drag-combo', 'collapse-expand-combo', 'zoom-canvas'],
     },
     // layout: {
     //     type: 'comboForce',
@@ -274,8 +277,8 @@ const graph = new G6.Graph({
         }
     },
     defaultEdge: {
-        type: 'quadratic',
-        // type: 'cubic-vertical',
+        // type: 'quadratic',
+        type: 'cubic-vertical',
         size: 1,
         labelCfg: {
             style: {
@@ -295,7 +298,7 @@ const graph = new G6.Graph({
             // ... 其他样式属性
         },
     },
-    plugins: [tooltip, grid],
+    plugins: [tooltip],
     minZoom: 0.1,
     /* styles for different states, there are built-in styles for states: active, inactive, selected, highlight, disable */
     /* you can extend it or override it as you want */
@@ -316,6 +319,7 @@ function DrawComboChart(json_data){
     let temp_nodes = [];
     let temp_combos = [];
     let temp_edges = [];
+    let temp_actual_edges = []
 
     console.log(package_data);
 
@@ -353,16 +357,20 @@ function DrawComboChart(json_data){
         temp_link["target"] = link.target_id;
         temp_link["source_name"] = link.source_name;
         temp_link["target_name"] = link.target_name;
-        temp_link["curveOffset"] = 50;
-        temp_link["index"] = 1;
+        // temp_link["curveOffset"] = 50;
+        // temp_link["index"] = 1;
         temp_link["link_type"] = link.type;
         temp_link["group_type"] = 'edge';
+        temp_link["inner_edge"] = 0;
         temp_link["visible"] = link.type === "dependson";
         // temp_link["visible"] = false;
         temp_link["label"] = link.type === "dependson" ? link.dependsOnTypes : "";
 
         const source_node = temp_nodes.find((n) => n.id === link.source_id);
         const target_node = temp_nodes.find((n) => n.id === link.target_id);
+
+        temp_link["source_comboId"] = source_node.comboId;
+        temp_link["target_comboId"] = target_node.comboId;
 
         // console.log(typeof(source_node));
         // console.log(typeof(target_node));
@@ -377,7 +385,7 @@ function DrawComboChart(json_data){
             }else if(source_node["comboId"] === target_node["comboId"]){
                 temp_link["inner_edge"] = 1;
             }
-            temp_edges.push(temp_link);
+            temp_actual_edges.push(temp_link);
         }
     })
 
@@ -392,7 +400,8 @@ function DrawComboChart(json_data){
     // });
 
     data["nodes"] = temp_nodes;
-    data["edges"] = temp_edges;
+    // data["actual_edges"] = temp_edges;
+    // data["edges"] = temp_edges;
     data["combos"] = temp_combos;
     console.log(data);
 
@@ -429,18 +438,193 @@ function DrawComboChart(json_data){
 // };
 
     autoLayout();
-    G6.Util.processParallelEdges(data["edges"]);
+
+    temp_actual_edges.forEach(edge =>{
+        if(edge.inner_edge === 0){
+            let out_edge = temp_edges.find(n =>n.id === edge.source + "_" + edge.source_comboId + "_out");
+            let in_edge = temp_edges.find(n =>n.id === edge.target_comboId + "_in" + "_" + edge.target);
+            if(typeof(out_edge) === "undefined"){
+                temp_edges.push({
+                    source: edge.source,
+                    target: edge.source_comboId + "_out",
+                    id: edge.source + "_" + edge.source_comboId + "_out",
+                    children: [
+                        {
+                            edge_id: edge.source + "_" + edge.target + "_" + edge.link_type,
+                            source_name: edge.source_name,
+                            target_name: edge.target_name,
+                            link_type: edge.link_type,
+                            group_type: edge.group_type,
+                            inner_edge: edge.inner_edge,
+                            visible: edge.visible,
+                            label: edge.label,
+                            source_comboId: edge.source_comboId,
+                            target_comboId: edge.target_comboId,
+                            split_edges: [
+                                {
+                                    id: edge.target_comboId + "_in" + "_" + edge.target,
+                                    source: edge.target_comboId + "_in",
+                                    target: edge.target,
+                                },
+                                {
+                                    id: edge.source + "_" + edge.source_comboId + "_out",
+                                    source: edge.source,
+                                    target: edge.source_comboId + "_out",
+                                },
+                                {
+                                    id: edge["source_comboId"] + "_out" + "_" + edge["target_comboId"] + "_in",
+                                    source: edge["source_comboId"] + "_out",
+                                    target: edge["target_comboId"] + "_in",
+                                }
+                            ]
+                        }
+                    ],
+                });
+            }else{
+                out_edge.children.push({
+                    edge_id: edge.source + "_" + edge.target + "_" + edge.link_type,
+                    source_name: edge.source_name,
+                    target_name: edge.target_name,
+                    link_type: edge.link_type,
+                    group_type: edge.group_type,
+                    inner_edge: edge.inner_edge,
+                    visible: edge.visible,
+                    label: edge.label,
+                    source_comboId: edge.source_comboId,
+                    target_comboId: edge.target_comboId,
+                    split_edges: [
+                        {
+                            id: edge.target_comboId + "_in" + "_" + edge.target,
+                            source: edge.target_comboId + "_in",
+                            target: edge.target,
+                        },
+                        {
+                            id: edge.source + "_" + edge.source_comboId + "_out",
+                            source: edge.source,
+                            target: edge.source_comboId + "_out",
+                        },
+                        {
+                            id: edge["source_comboId"] + "_out" + "_" + edge["target_comboId"] + "_in",
+                            source: edge["source_comboId"] + "_out",
+                            target: edge["target_comboId"] + "_in",
+                        }
+                    ]
+                });
+            }
+
+            if(typeof(in_edge) === "undefined"){
+                temp_edges.push({
+                    source: edge.target_comboId + "_in",
+                    target: edge.target,
+                    id: edge.target_comboId + "_in" + "_" + edge.target,
+                    children: [{
+                        edge_id: edge.source + "_" + edge.target + "_" + edge.link_type,
+                        source_name: edge.source_name,
+                        target_name: edge.target_name,
+                        link_type: edge.link_type,
+                        group_type: edge.group_type,
+                        inner_edge: edge.inner_edge,
+                        visible: edge.visible,
+                        label: edge.label,
+                        source_comboId: edge.source_comboId,
+                        target_comboId: edge.target_comboId,
+                        split_edges: [
+                            {
+                                id: edge.target_comboId + "_in" + "_" + edge.target,
+                                source: edge.target_comboId + "_in",
+                                target: edge.target,
+                            },
+                            {
+                                id: edge.source + "_" + edge.source_comboId + "_out",
+                                source: edge.source,
+                                target: edge.source_comboId + "_out",
+                            },
+                            {
+                                id: edge["source_comboId"] + "_out" + "_" + edge["target_comboId"] + "_in",
+                                source: edge["source_comboId"] + "_out",
+                                target: edge["target_comboId"] + "_in",
+                            }
+                        ]
+                    }],
+                });
+            }else{
+                in_edge.children.push({
+                    edge_id: edge.source + "_" + edge.target + "_" + edge.link_type,
+                    source_name: edge.source_name,
+                    target_name: edge.target_name,
+                    link_type: edge.link_type,
+                    group_type: edge.group_type,
+                    inner_edge: edge.inner_edge,
+                    visible: edge.visible,
+                    label: edge.label,
+                    source_comboId: edge.source_comboId,
+                    target_comboId: edge.target_comboId,
+                    split_edges: [
+                        {
+                            id: edge.target_comboId + "_in" + "_" + edge.target,
+                            source: edge.target_comboId + "_in",
+                            target: edge.target,
+                        },
+                        {
+                            id: edge.source + "_" + edge.source_comboId + "_out",
+                            source: edge.source,
+                            target: edge.source_comboId + "_out",
+                        },
+                        {
+                            id: edge["source_comboId"] + "_out" + "_" + edge["target_comboId"] + "_in",
+                            source: edge["source_comboId"] + "_out",
+                            target: edge["target_comboId"] + "_in",
+                        }
+                    ]
+                });
+            }
+
+
+
+            // let temp_actual_edge = {};
+            // temp_actual_edge["edge_id"] = edge.source + "_" + edge.target + "_" + edge.link_type;
+            // temp_actual_edge["split_edges"] = [
+            //     {
+            //         id: edge.target_comboId + "_in" + "_" + edge.target,
+            //         source: edge.target_comboId + "_in",
+            //         target: edge.target,
+            //     },
+            //     {
+            //         id: edge.source + "_" + edge.source_comboId + "_out",
+            //         source: edge.source,
+            //         target: edge.source_comboId + "_out",
+            //     },
+            //     {
+            //         id: edge["source_comboId"] + "_out" + "_" + edge["target_comboId"] + "_in",
+            //         source: edge["source_comboId"] + "_out",
+            //         target: edge["target_comboId"] + "_in",
+            //     }
+            // ];
+            // actual_edges.push(temp_actual_edge);
+
+            if(typeof(temp_edges.find((n) => (n.target === (edge.target_comboId + "_in")
+                && (n.source === edge.source_comboId + "_out")))) === "undefined"){
+                let temp_edge = {};
+                temp_edge["id"] = edge["source_comboId"] + "_out" + "_" + edge["target_comboId"] + "_in";
+                temp_edge["source"] = edge["source_comboId"] + "_out";
+                temp_edge["target"] = edge["target_comboId"] + "_in";
+                temp_edge["style"] = {
+                    lineWidth: 4
+                };
+                temp_edges.push(temp_edge);
+            }
+        }else{
+            temp_edges.push(edge);
+        }
+    })
+
+    console.log(temp_edges);
+    // G6.Util.processParallelEdges(data["edges"]);
+
+    data["edges"] = temp_edges;
 
     graph.data(data);
     graph.render();
-
-    const nodes = graph.getNodes();
-    // 遍历节点实例，将所有节点提前。
-    nodes.forEach((node) => {
-        node.toFront();
-    });
-    // 更改层级后需要重新绘制图
-    graph.paint();
 
     const edge_list = graph.getEdges();
 
@@ -449,6 +633,21 @@ function DrawComboChart(json_data){
             graph.updateItem(item, EDGE_INNER_MODEL);
         }
     });
+
+    // in_out_list.forEach(item =>{
+    //     graph.addItem('node', item);
+    // })
+
+    const nodes = graph.getNodes();
+    // 遍历节点实例，将所有节点提前。
+    nodes.forEach((node) => {
+        node.toFront();
+    });
+
+    // 更改层级后需要重新绘制图
+    graph.paint();
+
+    $('#multipleProjectsButton').css('background-color', '#efefef');
 
     graph.on('combo:mouseenter', (evt) => {
         const { item } = evt;
@@ -477,19 +676,39 @@ function DrawComboChart(json_data){
         if(last_click_node === ""){
             let neighbors = item.getNeighbors();
 
-            neighbors.forEach(function (d){
-                const model = {
-                    type: 'pie-node',
-                };
-                // console.log(d);
-                d.update(model);
-            });
+            // neighbors.forEach(function (d){
+            //     const model = {
+            //         type: 'pie-node',
+            //     };
+            //     // console.log(d);
+            //     d.update(model);
+            // });
             graph.setItemState(item, 'selected', true);
 
             const node_edges = item.getEdges();
 
             node_edges.forEach(function (item2){
-                graph.updateItem(item2, EDGE_CLICK_MODEL);
+                console.log(item2);
+                if(item2._cfg.model.inner_edge === 1){
+                    graph.updateItem(item2, EDGE_CLICK_MODEL);
+                }else{
+                    item2._cfg.model.children.forEach(link => {
+                        link.split_edges.forEach(n => {
+                            console.log(n.id);
+                            graph.updateItem(n.id, EDGE_CLICK_MODEL);
+                        })
+                    })
+                    // let split_edges = actual_edges.find(n => n["edge_id"]
+                    //     === item2._cfg.model.formal_source + "_"
+                    //     + item2._cfg.model.formal_target + "_"
+                    //     + item2._cfg.model.link_type).split_edges;
+                    //
+                    // split_edges.forEach(edge =>{
+                    //     console.log(edge.id);
+                    //     console.log(graph.findById(edge.id));
+                    //     graph.updateItem(edge.id, EDGE_CLICK_MODEL);
+                    // })
+                }
             });
 
             last_click_node = item._cfg.id;
@@ -568,23 +787,182 @@ function DrawComboChart(json_data){
 
 //加载数据
 var loadPageData = function () {
+    var projectlist = [];
+    var projectIds = [];
+
     $.ajax({
-        type: "GET",
-        url: "/project/all/id",
-        success: function (result) {
-            projectGraphAjax(result);
+        type : "GET",
+        url : "/project/all/name",
+        success : function(result) {
+            for(var i = 0; i < result.length; i++){
+                var name_temp = {};
+                // console.log(x);
+                name_temp["id"] = result[i].id;
+                name_temp["name"] = result[i].name;
+                projectlist.push(name_temp);
+
+                var html = ""
+                html += "<div class = \"combo_div\"><select id = \"multipleProjectSelect\" class=\"selectpicker\" multiple>";
+                for(var i = 0; i < projectlist.length; i++) {
+                    if (i === 0) {
+                        html += "<option selected=\"selected\" value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
+                    } else {
+                        html += "<option value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
+                    }
+                }
+                html += "</select>";
+                html += "<br><button id = \"multipleProjectsButton\" type=\"button\" class='common_button' style='margin-top: 15px' onclick= showMultipleButton()>加载项目</button></div>";
+
+                html += "<div class = \"combo_div\">"+
+                    "<form role=\"form\">" +
+
+                    "<p><label class = \"AttributionSelectTitle\" style = \"margin-right: 44px\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" onclick=\"CancelChildrenChecked('dependsOn')\">Dependency：" +
+                    "</label>" +
+
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsIntensity\" name = \"dependsOn_children\">" +
+                    "<input  class = \"AttributionSelectInput\" id=\"intensitybelow\" value=\"0.8\">" +
+
+                    "<select class = \"AttributionSelectSingleSelect\" id=\"intensityCompareSelectBelow\">" +
+                    "<option value=\"<=\" selected = \"selected\"><=</option>" +
+                    "<option value=\"<\"><</option></select>" +
+
+                    "<label class = \"AttributionSelectLabel\"> &nbsp;Intensity</label>" +
+
+                    "<select class = \"AttributionSelectSingleSelect\" id=\"intensityCompareSelectHigh\">" +
+                    "<option value=\"<=\"><=</option>" +
+                    "<option value=\"<\" selected = \"selected\"><</option></select>" +
+
+                    "<input  class = \"AttributionSelectInput\" id=\"intensityhigh\" value=\"1\">" +
+
+                    "<label class = \"AttributionSelectLabel\" style = \"margin-left: 80px\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes\" name = \"dependsOn_children\"> Times >= " +
+                    "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput\" style='margin-right: 80px' value=\"3\">" +
+                    "</label>" +
+
+                    "<label class = \"AttributionSelectLabel\" style = \"margin-right:10px;\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnType\" name = \"dependsOn_children\"> Dependency Type: " +
+                    "</label>" +
+
+                    "<select id = \"dependsTypeSelect\" class=\"selectpicker\" multiple>" +
+                    "<option value=\"IMPORT\">IMPORT</option>" +
+                    "<option value=\"INCLUDE\">INCLUDE</option>" +
+                    "<option value=\"EXTENDS\">EXTENDS</option>" +
+                    "<option value=\"IMPLEMENTS\">IMPLEMENTS</option>" +
+                    "<option value=\"ASSOCIATION\">ASSOCIATION</option>" +
+                    "<option value=\"ANNOTATION\">ANNOTATION</option>" +
+                    "<option value=\"CALL\">CALL</option>" +
+                    "<option value=\"CAST\">CAST</option>" +
+                    "<option value=\"CREATE\">CREATE</option>" +
+                    "<option value=\"USE\">USE</option>" +
+                    "<option value=\"PARAMETER\">PARAMETER</option>" +
+                    "<option value=\"THROW\">THROW</option>" +
+                    "<option value=\"RETURN\">RETURN</option>" +
+                    "<option value=\"IMPLLINK\">IMPLLINK</option>" +
+                    "</select>" +
+                    "</p>";
+
+                html += "<p><label class = \"AttributionSelectTitle\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone\" onclick=\"CancelChildrenChecked('clone')\">Clone：" +
+                    "</label>" +
+
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneSimilarity\" name = \"clone_children\">" +
+                    "<input  class = \"AttributionSelectInput\" id=\"similaritybelow\" value=\"0.7\">" +
+
+                    "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectBelow\">" +
+                    "<option value=\"<=\" selected = \"selected\"><=</option>" +
+                    "<option value=\"<\"><</option></select>" +
+
+                    "<label class = \"AttributionSelectLabel\"> &nbsp;Clone Files / All Files</label>" +
+
+                    "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectHigh\">" +
+                    "<option value=\"<=\"><=</option>" +
+                    "<option value=\"<\" selected = \"selected\"><</option></select>" +
+
+                    "<input  class = \"AttributionSelectInput\" id=\"similarityhigh\" value=\"1\">" +
+
+                    "<label class = \"AttributionSelectLabel\" style = \"margin-left: 80px\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneTimes\" name = \"clone_children\">CloneTimes >=</label>" +
+                    "<input  class = \"AttributionSelectInput\" id=\"clonetimes\" value=\"3\">" +
+                    "<button id = \"hideBottomPackageButton\" type=\"button\" style=\"margin-left: 30px\" onclick=HideBottomPackageButton() >仅显示聚合</button></p>";
+
+                html += "<p><label class = \"AttributionSelectTitle\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"coChange\" onclick=\"CancelChildrenChecked('coChange')\">Co-change：" +
+                    "</label>" +
+                    "<label class = \"AttributionSelectLabel\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cochangeTimes\" name = \"coChange_children\"> Times >= " +
+                    "<input class = \"AttributionSelectInput\" id=\"cochangetimes\" value=\"3\">" +
+                    "</label></p>";
+
+                html += "<p><label class = \"combo_title\" style = \"margin-right: 30px\">Smell ：</label>" +
+
+                    "<label class = \"combo_label\" >" +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_Clone\" value='Clone'> Clone " +
+                    "</label>" +
+
+                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_CyclicDependency\" value='CyclicDependency'> Cyclic Dependency " +
+                    "</label>" +
+
+                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_HublikeDependency\" value='HubLikeDependency'> Hublike Dependency " +
+                    "</label>" +
+
+                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_UnstableDependency\" value='UnstableDependency'> Unstable Dependency " +
+                    "</label>" +
+
+                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_UnusedComponent\" value='UnusedComponent'> Unused Component " +
+                    "</label>" +
+
+                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_ImplicitCrossModuleDependency\" value='ImplicitCrossModuleDependency'> Implicit Cross Module Dependency " +
+                    "</label>" +
+
+                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_GodComponent\" value='GodComponent'> God Component " +
+                    "</label>" +
+
+                    "</p>";
+
+                html += "<p><div style=\"margin-top: 10px;\">" +
+                    "<button class = \"common_button\" type=\"button\" onclick= loadSmell() >加载异味</button>" +
+                    "</div></p>";
+
+                html += "</form>" +
+                    "</div>";
+
+                $("#combo_util").html(html);
+                $(".selectpicker").selectpicker({
+                    actionsBox:true,
+                    countSelectedText:"已选中{0}项",
+                    selectedTextFormat:"count > 2"
+                })
+            }
         }
-    });
+    })
 }
 
 //调用接口请求数据
 var projectGraphAjax = function(projectIds){
+    var projectList = {};
+    var projectIds_array = [];
+
+    for(var i = 0; i < projectIds.length; i++){
+        var tempId = {};
+        tempId["id"] = projectIds[i];
+        projectIds_array.push(tempId);
+    }
+
+    projectList["projectIds"] = projectIds_array;
+
     $.ajax({
         type:"POST",
         url : "/project/has/combo",
         contentType: "application/json",
         dataType:"json",
-        data:JSON.stringify(projectIds),
+        data:JSON.stringify(projectList),
         success : function(result) {
             DrawComboChart(result);
         }
@@ -633,7 +1011,7 @@ function autoLayout(){
         let innerNodeLineIndex = 1;
         let line_node_num = parseInt(Math.sqrt(item.node_num) * 1.5);
         let combo_width = 75 * line_node_num;
-        let combo_height = 75 * line_node_num * (1 / 3);
+        let combo_height = 75 * line_node_num;
 
         if(index !== combo_num){
             combo_cord = [radius * Math.cos((index / combo_num) * Math.PI * 2) - combo_width * 0.5 + cord,
@@ -650,16 +1028,54 @@ function autoLayout(){
             // console.log(outerLineIndex);
             if(temp_node.outerNode === 0){
                 temp_node["x"] = combo_cord[0] + 75 * (innerNodeLineIndex % line_node_num);
-                temp_node["y"] = combo_cord[1] + 75 * innerLineIndex + combo_height;
+                temp_node["y"] = combo_cord[1] + 75 * innerLineIndex;
                 innerNodeLineIndex++;
             }else{
                 temp_node["x"] = combo_cord[0] + 75 * (outerNodeLineIndex % line_node_num);
-                temp_node["y"] = combo_cord[1] + 75 * outerLineIndex;
+                temp_node["y"] = combo_cord[1] - 75 * outerLineIndex + combo_height;
                 outerNodeLineIndex++;
             }
             node_index++;
         }
+
+        let model1 = {
+            id: item.id + "_in",
+            size: 30,
+            comboId: item.id,
+            x: combo_cord[0] + combo_width * 0.5,
+            y: combo_cord[1] + combo_height + 50,
+            style: {
+                fill: "#f18c6f",
+                stroke: "#f3623a"
+            }
+        }
+
+        let model2 = {
+            id: item.id + "_out",
+            size: 30,
+            comboId: item.id,
+            x: combo_cord[0] - 50,
+            y: combo_cord[1] + combo_height * (2 / 3),
+            style: {
+                fill: "#f18c6f",
+                stroke: "#f3623a"
+            }
+        }
+
+        node_list.push(model1);
+        node_list.push(model2);
+        //
+        // graph.addItem('node', model1);
+        // graph.addItem('node', model2);
     })
+}
+
+function showMultipleButton(){
+    var value = $('#multipleProjectSelect').val();
+    $('#multipleProjectsButton').css('background-color', '#f84634');
+    projectList_global = [];
+    projectList_global = value;
+    projectGraphAjax(value);
 }
 
 if (typeof window !== 'undefined')
