@@ -346,6 +346,7 @@ function DrawComboChart(json_data){
             temp_node["cloneDegree"] = 0;
             temp_node["cochangeDegree"] = 0;
             temp_node["outerNode"] = 0;
+            temp_node["pienode"] = [];
             temp_nodes.push(temp_node);
         });
     });
@@ -405,38 +406,6 @@ function DrawComboChart(json_data){
     data["combos"] = temp_combos;
     console.log(data);
 
-//     data = {
-//     nodes: [
-//         { id: 'node', comboId: 'combo1', x: 0, y: 0, path:"1234", size: 50, dependsonDegree: 1, cloneDegree: 1, cochangeDegree: 1},
-//         { id: 'node1', comboId: 'combo1', x: 50, y: 50, path:"1234", size: 50, dependsonDegree: 1, cloneDegree: 1, cochangeDegree: 1},
-//         { id: 'node2', comboId: 'combo1', x: 50, y: 100, path:"1234", size: 50, dependsonDegree: 1, cloneDegree: 1, cochangeDegree: 0},
-//         { id: 'node3', comboId: 'combo3', x: 50, y: 400, path:"1234", size: 50, dependsonDegree: 1, cloneDegree: 1, cochangeDegree: 1},
-//         { id: 'node4', comboId: 'combo2', x: 150, y: 150, path:"1234", size: 50, dependsonDegree: 1, cloneDegree: 1, cochangeDegree: 0},
-//         { id: 'node5', comboId: 'combo2', x: 200, y: 150, path:"1234", size: 50, dependsonDegree: 1, cloneDegree: 1, cochangeDegree: 1},
-//         { id: 'node6', comboId: 'combo2', x: 200, y: 200, path:"1234", size: 50, dependsonDegree: 1, cloneDegree: 0, cochangeDegree: 1},
-//         // { id: 'node1', comboId: 'combo1', path:"1234", size: 15, inDegree: 80, degree: 160},
-//         // { id: 'node2', comboId: 'combo1', path:"1234", size: 15, inDegree: 80, degree: 160},
-//         // { id: 'node3', comboId: 'combo3', path:"1234", size: 15, inDegree: 80, degree: 160},
-//         // { id: 'node4', comboId: 'combo2', path:"1234", size: 15, inDegree: 80, degree: 160},
-//         // { id: 'node5', comboId: 'combo2', path:"1234", size: 15, inDegree: 80, degree: 160},
-//         // { id: 'node6', comboId: 'combo2', path:"1234", size: 15, inDegree: 80, degree: 160},
-//     ],
-//     edges: [
-//         // { source: 'node1', target: 'node2', visible: true},
-//         // { source: 'node1', target: 'node3', visible: true},
-//         { source: 'node', target: 'node1', visible: true},
-//         // { source: 'node3', target: 'node2', visible: true},
-//         // { source: 'node5', target: 'node3', visible: true},
-//         // { source: 'combo1', target: 'combo2', visible: true},
-//         // { source: 'combo1', target: 'node2', visible: true},
-//     ],
-//     // combos: [
-//     //     { id: 'combo1', label: 'Combo 1'},
-//     //     { id: 'combo2', label: 'Combo 2'},
-//     //     { id: 'combo3', label: 'Combo 3'},
-//     // ],
-// };
-
     autoLayout();
 
     temp_actual_edges.forEach(edge =>{
@@ -451,6 +420,8 @@ function DrawComboChart(json_data){
                     children: [
                         {
                             edge_id: edge.source + "_" + edge.target + "_" + edge.link_type,
+                            source_id: edge.source,
+                            target_id: edge.target,
                             source_name: edge.source_name,
                             target_name: edge.target_name,
                             link_type: edge.link_type,
@@ -483,6 +454,8 @@ function DrawComboChart(json_data){
             }else{
                 out_edge.children.push({
                     edge_id: edge.source + "_" + edge.target + "_" + edge.link_type,
+                    source_id: edge.source,
+                    target_id: edge.target,
                     source_name: edge.source_name,
                     target_name: edge.target_name,
                     link_type: edge.link_type,
@@ -519,6 +492,8 @@ function DrawComboChart(json_data){
                     id: edge.target_comboId + "_in" + "_" + edge.target,
                     children: [{
                         edge_id: edge.source + "_" + edge.target + "_" + edge.link_type,
+                        source_id: edge.source,
+                        target_id: edge.target,
                         source_name: edge.source_name,
                         target_name: edge.target_name,
                         link_type: edge.link_type,
@@ -550,6 +525,8 @@ function DrawComboChart(json_data){
             }else{
                 in_edge.children.push({
                     edge_id: edge.source + "_" + edge.target + "_" + edge.link_type,
+                    source_id: edge.source,
+                    target_id: edge.target,
                     source_name: edge.source_name,
                     target_name: edge.target_name,
                     link_type: edge.link_type,
@@ -674,7 +651,11 @@ function DrawComboChart(json_data){
     graph.on('node:click', (evt) => {
         const { item } = evt;
         if(last_click_node === ""){
+            console.log(item);
             let neighbors = item.getNeighbors();
+            const model = {
+                type: 'pie-node',
+            };
 
             // neighbors.forEach(function (d){
             //     const model = {
@@ -690,24 +671,21 @@ function DrawComboChart(json_data){
             node_edges.forEach(function (item2){
                 console.log(item2);
                 if(item2._cfg.model.inner_edge === 1){
+                    const source_node = graph.findById(item2._cfg.model.source);
+                    const target_node = graph.findById(item2._cfg.model.target);
+
+                    // console.log(source_node);
+                    // console.log(target_node);
+
+                    // source_node.update(model);
+                    // target_node.update(model);
                     graph.updateItem(item2, EDGE_CLICK_MODEL);
                 }else{
                     item2._cfg.model.children.forEach(link => {
                         link.split_edges.forEach(n => {
-                            console.log(n.id);
                             graph.updateItem(n.id, EDGE_CLICK_MODEL);
                         })
                     })
-                    // let split_edges = actual_edges.find(n => n["edge_id"]
-                    //     === item2._cfg.model.formal_source + "_"
-                    //     + item2._cfg.model.formal_target + "_"
-                    //     + item2._cfg.model.link_type).split_edges;
-                    //
-                    // split_edges.forEach(edge =>{
-                    //     console.log(edge.id);
-                    //     console.log(graph.findById(edge.id));
-                    //     graph.updateItem(edge.id, EDGE_CLICK_MODEL);
-                    // })
                 }
             });
 
@@ -732,7 +710,11 @@ function DrawComboChart(json_data){
                 if(item._cfg.model.inner_edge === 1){
                     graph.updateItem(item, EDGE_INNER_MODEL);
                 }else{
-                    graph.updateItem(item, EDGE_NORMAL_MODEL);
+                    item._cfg.model.children.forEach(link => {
+                        link.split_edges.forEach(n => {
+                            graph.updateItem(n.id, EDGE_NORMAL_MODEL);
+                        })
+                    })
                 }
             });
 
@@ -742,40 +724,66 @@ function DrawComboChart(json_data){
                 return node.get('currentShape') === "pie-node";
             });
 
-            nodes.forEach(function (d){
-                const model = {
-                    type: 'circle',
-                };
-                // console.log(d);
-                d.update(model);
+            const node_edges_formal = graph.findById(last_click_node).getEdges();
 
-                const node_edges = d.getEdges();
-
-                node_edges.forEach(function (item){
-                    if(item._cfg.model.inner_edge === 1){
-                        graph.updateItem(item, EDGE_INNER_MODEL);
-                    }else{
-                        graph.updateItem(item, EDGE_NORMAL_MODEL);
-                    }
-                });
+            node_edges_formal.forEach(function (item){
+                if(item._cfg.model.inner_edge === 1){
+                    graph.updateItem(item, EDGE_INNER_MODEL);
+                }else{
+                    item._cfg.model.children.forEach(link => {
+                        link.split_edges.forEach(n => {
+                            graph.updateItem(n.id, EDGE_NORMAL_MODEL);
+                        })
+                    })
+                }
             });
+
+            // nodes.forEach(function (d){
+            //     const model = {
+            //         type: 'circle',
+            //     };
+            //     // console.log(d);
+            //     d.update(model);
+            //
+            //     const node_edges = d.getEdges();
+            //
+            //     node_edges.forEach(function (item){
+            //         if(item._cfg.model.inner_edge === 1){
+            //             graph.updateItem(item, EDGE_INNER_MODEL);
+            //         }else{
+            //             item._cfg.model.children.forEach(link => {
+            //                 link.split_edges.forEach(n => {
+            //                     graph.updateItem(n.id, EDGE_NORMAL_MODEL);
+            //                 })
+            //             })
+            //         }
+            //     });
+            // });
 
             let neighbors = item.getNeighbors();
 
-            neighbors.forEach(function (d){
-                const model = {
-                    type: 'pie-node',
-                };
-                // console.log(d);
-                d.update(model);
-            });
+            // neighbors.forEach(function (d){
+            //     const model = {
+            //         type: 'pie-node',
+            //     };
+            //     // console.log(d);
+            //     d.update(model);
+            // });
             graph.setItemState(graph.findById(last_click_node), 'selected', false);
             graph.setItemState(item, 'selected', true);
 
             const node_edges = item.getEdges();
 
             node_edges.forEach(function (item2){
-                graph.updateItem(item2, EDGE_CLICK_MODEL);
+                if(item2._cfg.model.inner_edge === 1){
+                    graph.updateItem(item2, EDGE_CLICK_MODEL);
+                }else{
+                    item2._cfg.model.children.forEach(link => {
+                        link.split_edges.forEach(n => {
+                            graph.updateItem(n.id, EDGE_CLICK_MODEL);
+                        })
+                    })
+                }
             });
 
             last_click_node = item._cfg.id;
