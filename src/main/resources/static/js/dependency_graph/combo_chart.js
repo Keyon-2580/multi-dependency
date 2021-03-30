@@ -51,19 +51,55 @@ G6.registerNode('pie-node', {
     draw: (cfg, group) => {
         let linkTypeNum = [];
 
-        if(cfg.dependsonDegree === 1){
-            linkTypeNum.push(COLOR_DEPENDSON);
-        }
-        if(cfg.cloneDegree === 1){
-            linkTypeNum.push(COLOR_CLONE);
-        }
-        if(cfg.cochangeDegree === 1){
-            linkTypeNum.push(COLOR_COCHANGE);
-        }
+        cfg.pienode.forEach(item => {
+            if(item.source === last_click_node || item.target === last_click_node){
+                // console.log(item);
+                for(let key in item.dependency){
+                    switch (key){
+                        // case "dependsonDegree":
+                        //     if(typeof(linkTypeNum.find(n => n === COLOR_DEPENDSON)) === "undefined"){
+                        //         linkTypeNum.push(COLOR_DEPENDSON);
+                        //     }
+                        //     break;
+                        case "cloneDegree":
+                            if(typeof(linkTypeNum.find(n => n === COLOR_CLONE)) === "undefined"){
+                                linkTypeNum.push(COLOR_CLONE);
+                            }
+                            break;
+                        case "cochangeDegree":
+                            if(typeof(linkTypeNum.find(n => n === COLOR_COCHANGE)) === "undefined"){
+                                linkTypeNum.push(COLOR_COCHANGE);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        })
 
-        const radius = cfg.size / 2; // node radius
+        const radius = cfg.size / 2 - 2; // node radius
 
+        group.addShape('circle', {
+            attrs: {
+                "r": radius + 2,
+                "lineWidth": 6,
+                "stroke": '#5f95ff',
+                "fill": '#ffffff',
+            }
+        });
+
+        if(typeof linkTypeNum)
         switch (linkTypeNum.length) {
+            case 0:
+                return group.addShape('circle', {
+                    attrs: {
+                        "r": radius + 2,
+                        "lineWidth": 6,
+                        "stroke": '#5f95ff',
+                        "fill": '#ffffff',
+                    }
+                });
             case 1:
                 return group.addShape('path', {
                     attrs: {
@@ -74,7 +110,7 @@ G6.registerNode('pie-node', {
                             ['Z'],
                         ],
                         lineWidth: 0,
-                        fill: linkTypeNum[0],
+                        fill: linkTypeNum[Object.keys(linkTypeNum)[0]],
                         cursor: "pointer",
                     },
                     name: 'in-fan-shape',
@@ -93,7 +129,7 @@ G6.registerNode('pie-node', {
                             ['Z'],
                         ],
                         lineWidth: 0,
-                        fill: linkTypeNum[0],
+                        fill: linkTypeNum[Object.keys(linkTypeNum)[0]],
                         cursor: "pointer",
                     },
                     name: 'in-fan-shape',
@@ -108,7 +144,7 @@ G6.registerNode('pie-node', {
                             ['Z'],
                         ],
                         lineWidth: 0,
-                        fill: linkTypeNum[1],
+                        fill: linkTypeNum[Object.keys(linkTypeNum)[1]],
                         cursor: "pointer",
                     },
                     name: 'out-fan-shape',
@@ -140,7 +176,7 @@ G6.registerNode('pie-node', {
                             ['Z'],
                         ],
                         lineWidth: 0,
-                        fill: linkTypeNum[0],
+                        fill: linkTypeNum[Object.keys(linkTypeNum)[0]],
                         cursor: "pointer",
                     },
                     name: 'in-fan-shape-1',
@@ -155,7 +191,7 @@ G6.registerNode('pie-node', {
                             ['Z'],
                         ],
                         lineWidth: 0,
-                        fill: linkTypeNum[1],
+                        fill: linkTypeNum[Object.keys(linkTypeNum)[1]],
                         cursor: "pointer",
                     },
                     name: 'in-fan-shape-1',
@@ -170,7 +206,7 @@ G6.registerNode('pie-node', {
                             ['Z'],
                         ],
                         lineWidth: 0,
-                        fill: linkTypeNum[2],
+                        fill: linkTypeNum[Object.keys(linkTypeNum)[2]],
                         cursor: "pointer",
                     },
                     name: 'out-fan-shape',
@@ -237,39 +273,13 @@ const graph = new G6.Graph({
     },
     groupByTypes: false,
     modes: {
-        // default: ['drag-canvas', 'drag-combo', 'drag-node', 'collapse-expand-combo', 'zoom-canvas'],
         default: ['drag-canvas', 'drag-combo', 'collapse-expand-combo', 'zoom-canvas'],
     },
-    // layout: {
-    //     type: 'comboForce',
-    //     nodeSpacing: (d) => 8,
-    //     comboSpacing: 50,
-    //     preventOverlap: true,
-    //     // gravity: 20
-    // },
-    // layout: {
-    //     type: 'fruchterman',
-    //     gravity: 2,
-    //     speed: 10,
-    //     relayout: false,
-    // },
     defaultCombo: {
         type: 'rect',
-        /* The minimum size of the combo. combo 最小大小 */
         size: [50, 50],
-        /* style for the keyShape */
-        // style: {
-        //   lineWidth: 1,
-        // },
         labelCfg: {
-            /* label's offset to the keyShape */
-            // refY: 10,
-            /* label's position, options: center, top, bottom, left, right */
             position: 'top',
-            /* label's style */
-            // style: {
-            //   fontSize: 18,
-            // },
         },
         style: {
             lineWidth : 2,
@@ -300,14 +310,6 @@ const graph = new G6.Graph({
     },
     plugins: [tooltip],
     minZoom: 0.1,
-    /* styles for different states, there are built-in styles for states: active, inactive, selected, highlight, disable */
-    /* you can extend it or override it as you want */
-    // comboStateStyles: {
-    //   active: {
-    //     fill: '#f00',
-    //     opacity: 0.5
-    //   },
-    // },
 });
 
 let nodeId = 1;
@@ -342,9 +344,9 @@ function DrawComboChart(json_data){
             temp_node["inDegree"] = 80;
             temp_node["degree"] = 160;
             temp_node["index"] = 2;
-            temp_node["dependsonDegree"] = 0;
-            temp_node["cloneDegree"] = 0;
-            temp_node["cochangeDegree"] = 0;
+            // temp_node["dependsonDegree"] = 0;
+            // temp_node["cloneDegree"] = 0;
+            // temp_node["cochangeDegree"] = 0;
             temp_node["outerNode"] = 0;
             temp_node["pienode"] = [];
             temp_nodes.push(temp_node);
@@ -377,8 +379,8 @@ function DrawComboChart(json_data){
         // console.log(typeof(target_node));
 
         if(typeof(source_node) !== "undefined" && typeof(target_node) !== "undefined"){
-            source_node[link.type + "Degree"] = 1;
-            target_node[link.type + "Degree"] = 1;
+            // source_node[link.type + "Degree"] = 1;
+            // target_node[link.type + "Degree"] = 1;
 
             if((source_node["outerNode"] === 0 || target_node["outerNode"] === 0) && source_node["comboId"] !== target_node["comboId"]){
                 source_node["outerNode"] = 1;
@@ -390,16 +392,6 @@ function DrawComboChart(json_data){
         }
     })
 
-    //
-    // temp_edges.forEach(function (item){
-    //     const source_node = temp_nodes.find((n) => n.id === item.source);
-    //     const target_node = temp_nodes.find((n) => n.id === item.target);
-    //
-    //     if(typeof(source_node) === "undefined" || typeof(target_node) === "undefined"){
-    //         temp_edges.splice(temp_edges.indexOf(item), 1);
-    //     }
-    // });
-
     data["nodes"] = temp_nodes;
     // data["actual_edges"] = temp_edges;
     // data["edges"] = temp_edges;
@@ -409,6 +401,47 @@ function DrawComboChart(json_data){
     autoLayout();
 
     temp_actual_edges.forEach(edge =>{
+        const source_node = temp_nodes.find((n) => n.id === edge.source);
+        const target_node = temp_nodes.find((n) => n.id === edge.target);
+
+        let source_pienode = source_node["pienode"];
+        let target_pienode = target_node["pienode"];
+
+        let temp_source_pienode = source_pienode.find(n => (n.source === edge.source && n.target === edge.target));
+        let temp_target_pienode = target_pienode.find(n => (n.source === edge.source && n.target === edge.target));
+
+        if(typeof(temp_source_pienode) === "undefined"){
+            let temp = {
+                source: edge.source,
+                target: edge.target,
+                dependency: {}
+            };
+
+            if(edge.link_type !== "dependson"){
+                temp.dependency[edge.link_type + "Degree"] = 1;
+            }
+
+            source_pienode.push(temp);
+        }else{
+            if(edge.link_type !== "dependson") {
+                temp_source_pienode.dependency[edge.link_type + "Degree"] = 1;
+            }
+        }
+
+        if(typeof(temp_target_pienode) === "undefined"){
+            let temp = {
+                source: edge.source,
+                target: edge.target,
+                dependency: {}
+            };
+
+            temp.dependency[edge.link_type + "Degree"] = 1;
+
+            target_pienode.push(temp);
+        }else{
+            temp_target_pienode.dependency[edge.link_type + "Degree"] = 1;
+        }
+
         if(edge.inner_edge === 0){
             let out_edge = temp_edges.find(n =>n.id === edge.source + "_" + edge.source_comboId + "_out");
             let in_edge = temp_edges.find(n =>n.id === edge.target_comboId + "_in" + "_" + edge.target);
@@ -417,11 +450,12 @@ function DrawComboChart(json_data){
                     source: edge.source,
                     target: edge.source_comboId + "_out",
                     id: edge.source + "_" + edge.source_comboId + "_out",
+                    inner_edge: edge.inner_edge,
                     children: [
                         {
                             edge_id: edge.source + "_" + edge.target + "_" + edge.link_type,
-                            source_id: edge.source,
-                            target_id: edge.target,
+                            source: edge.source,
+                            target: edge.target,
                             source_name: edge.source_name,
                             target_name: edge.target_name,
                             link_type: edge.link_type,
@@ -454,8 +488,8 @@ function DrawComboChart(json_data){
             }else{
                 out_edge.children.push({
                     edge_id: edge.source + "_" + edge.target + "_" + edge.link_type,
-                    source_id: edge.source,
-                    target_id: edge.target,
+                    source: edge.source,
+                    target: edge.target,
                     source_name: edge.source_name,
                     target_name: edge.target_name,
                     link_type: edge.link_type,
@@ -490,10 +524,11 @@ function DrawComboChart(json_data){
                     source: edge.target_comboId + "_in",
                     target: edge.target,
                     id: edge.target_comboId + "_in" + "_" + edge.target,
+                    inner_edge: edge.inner_edge,
                     children: [{
                         edge_id: edge.source + "_" + edge.target + "_" + edge.link_type,
-                        source_id: edge.source,
-                        target_id: edge.target,
+                        source: edge.source,
+                        target: edge.target,
                         source_name: edge.source_name,
                         target_name: edge.target_name,
                         link_type: edge.link_type,
@@ -525,8 +560,8 @@ function DrawComboChart(json_data){
             }else{
                 in_edge.children.push({
                     edge_id: edge.source + "_" + edge.target + "_" + edge.link_type,
-                    source_id: edge.source,
-                    target_id: edge.target,
+                    source: edge.source,
+                    target: edge.target,
                     source_name: edge.source_name,
                     target_name: edge.target_name,
                     link_type: edge.link_type,
@@ -628,12 +663,12 @@ function DrawComboChart(json_data){
 
     graph.on('combo:mouseenter', (evt) => {
         const { item } = evt;
-        graph.setItemState(item, 'active', true);
+        graph.setItemState(item, 'hover', true);
     });
 
     graph.on('combo:mouseleave', (evt) => {
         const { item } = evt;
-        graph.setItemState(item, 'active', false);
+        graph.setItemState(item, 'hover', false);
     });
 
 // graph.on('combo:click', (evt) => {
@@ -649,88 +684,71 @@ function DrawComboChart(json_data){
 
     //节点点击函数
     graph.on('node:click', (evt) => {
-        const { item } = evt;
+        const { item: node_click } = evt;
+        let node;
         if(last_click_node === ""){
-            console.log(item);
-            let neighbors = item.getNeighbors();
-            const model = {
-                type: 'pie-node',
-            };
+            last_click_node = node_click._cfg.id;
+            graph.setItemState(node_click, 'selected', true);
 
-            // neighbors.forEach(function (d){
-            //     const model = {
-            //         type: 'pie-node',
-            //     };
-            //     // console.log(d);
-            //     d.update(model);
-            // });
-            graph.setItemState(item, 'selected', true);
+            const node_edges = node_click.getEdges();
 
-            const node_edges = item.getEdges();
-
-            node_edges.forEach(function (item2){
-                console.log(item2);
-                if(item2._cfg.model.inner_edge === 1){
-                    const source_node = graph.findById(item2._cfg.model.source);
-                    const target_node = graph.findById(item2._cfg.model.target);
-
-                    // console.log(source_node);
-                    // console.log(target_node);
-
-                    // source_node.update(model);
-                    // target_node.update(model);
-                    graph.updateItem(item2, EDGE_CLICK_MODEL);
+            node_edges.forEach(function (edge){
+                if(edge._cfg.model.inner_edge === 1){
+                    node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
+                    updatePieNode(node);
+                    graph.setItemState(node, 'selected', true);
+                    graph.updateItem(edge, EDGE_CLICK_MODEL);
                 }else{
-                    item2._cfg.model.children.forEach(link => {
+                    // console.log(item2);
+                    edge._cfg.model.children.forEach(link => {
+                        node = getOtherEndNode(link, node_click._cfg.id);
+                        graph.setItemState(node, 'selected', true);
+                        updatePieNode(node);
                         link.split_edges.forEach(n => {
                             graph.updateItem(n.id, EDGE_CLICK_MODEL);
                         })
                     })
                 }
             });
-
-            last_click_node = item._cfg.id;
-        }else if(last_click_node === item._cfg.id){
-            let nodes = graph.findAll('node', (node) => {
-                return node.get('currentShape') === "pie-node";
-            });
-
-            nodes.forEach(function (d){
-                const model = {
-                    type: 'circle',
-                };
-                // console.log(d);
-                d.update(model);
-            });
-            graph.setItemState(item, 'selected', false);
-
-            const node_edges = item.getEdges();
-
-            node_edges.forEach(function (item){
-                if(item._cfg.model.inner_edge === 1){
-                    graph.updateItem(item, EDGE_INNER_MODEL);
-                }else{
-                    item._cfg.model.children.forEach(link => {
-                        link.split_edges.forEach(n => {
-                            graph.updateItem(n.id, EDGE_NORMAL_MODEL);
-                        })
-                    })
-                }
-            });
-
+        }else if(last_click_node === node_click._cfg.id){
             last_click_node = "";
-        }else{
-            let nodes = graph.findAll('node', (node) => {
-                return node.get('currentShape') === "pie-node";
-            });
+            graph.setItemState(node_click, 'selected', false);
 
-            const node_edges_formal = graph.findById(last_click_node).getEdges();
+            const node_edges = node_click.getEdges();
 
-            node_edges_formal.forEach(function (item){
-                if(item._cfg.model.inner_edge === 1){
-                    graph.updateItem(item, EDGE_INNER_MODEL);
+            node_edges.forEach(function (edge){
+                if(edge._cfg.model.inner_edge === 1){
+                    node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
+                    graph.setItemState(node, 'selected', false);
+                    deletePieNode(node);
+                    graph.updateItem(edge, EDGE_INNER_MODEL);
                 }else{
-                    item._cfg.model.children.forEach(link => {
+                    edge._cfg.model.children.forEach(link => {
+                        node = getOtherEndNode(link, node_click._cfg.id);
+                        graph.setItemState(node, 'selected', false);
+                        deletePieNode(node);
+                        link.split_edges.forEach(n => {
+                            graph.updateItem(n.id, EDGE_NORMAL_MODEL);
+                        })
+                    })
+                }
+            });
+        }else{
+            const lastClickNode = graph.findById(last_click_node);
+            graph.setItemState(lastClickNode, 'selected', false);
+            const node_edges_formal = lastClickNode.getEdges();
+
+            node_edges_formal.forEach(function (edge){
+                if(edge._cfg.model.inner_edge === 1){
+                    node = getOtherEndNode(edge._cfg.model, last_click_node);
+                    graph.setItemState(node, 'selected', false);
+                    deletePieNode(node);
+                    graph.updateItem(edge, EDGE_INNER_MODEL);
+                }else{
+                    edge._cfg.model.children.forEach(link => {
+                        node = getOtherEndNode(link, last_click_node);
+                        graph.setItemState(node, 'selected', false);
+                        deletePieNode(node);
                         link.split_edges.forEach(n => {
                             graph.updateItem(n.id, EDGE_NORMAL_MODEL);
                         })
@@ -738,47 +756,23 @@ function DrawComboChart(json_data){
                 }
             });
 
-            // nodes.forEach(function (d){
-            //     const model = {
-            //         type: 'circle',
-            //     };
-            //     // console.log(d);
-            //     d.update(model);
-            //
-            //     const node_edges = d.getEdges();
-            //
-            //     node_edges.forEach(function (item){
-            //         if(item._cfg.model.inner_edge === 1){
-            //             graph.updateItem(item, EDGE_INNER_MODEL);
-            //         }else{
-            //             item._cfg.model.children.forEach(link => {
-            //                 link.split_edges.forEach(n => {
-            //                     graph.updateItem(n.id, EDGE_NORMAL_MODEL);
-            //                 })
-            //             })
-            //         }
-            //     });
-            // });
+            last_click_node = node_click._cfg.id;
 
-            let neighbors = item.getNeighbors();
+            graph.setItemState(node_click, 'selected', true);
 
-            // neighbors.forEach(function (d){
-            //     const model = {
-            //         type: 'pie-node',
-            //     };
-            //     // console.log(d);
-            //     d.update(model);
-            // });
-            graph.setItemState(graph.findById(last_click_node), 'selected', false);
-            graph.setItemState(item, 'selected', true);
+            const node_edges = node_click.getEdges();
 
-            const node_edges = item.getEdges();
-
-            node_edges.forEach(function (item2){
-                if(item2._cfg.model.inner_edge === 1){
-                    graph.updateItem(item2, EDGE_CLICK_MODEL);
+            node_edges.forEach(function (edge){
+                if(edge._cfg.model.inner_edge === 1){
+                    node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
+                    graph.setItemState(node, 'selected', true);
+                    updatePieNode(node);
+                    graph.updateItem(edge, EDGE_CLICK_MODEL);
                 }else{
-                    item2._cfg.model.children.forEach(link => {
+                    edge._cfg.model.children.forEach(link => {
+                        node = getOtherEndNode(link, node_click._cfg.id);
+                        graph.setItemState(node, 'selected', true);
+                        updatePieNode(node);
                         link.split_edges.forEach(n => {
                             graph.updateItem(n.id, EDGE_CLICK_MODEL);
                         })
@@ -786,11 +780,37 @@ function DrawComboChart(json_data){
                 }
             });
 
-            last_click_node = item._cfg.id;
         }
 
-        // graph.setItemState(item, 'active', true);
+        // graph.setItemState(node_click, 'active', true);
     });
+}
+
+function getOtherEndNode(model, id){
+    let node;
+    if(model.source === id){
+        node = graph.findById(model.target);
+    }else{
+        node = graph.findById(model.source);
+    }
+
+    return node;
+}
+
+function updatePieNode(node){
+    const model = {
+        type: 'pie-node',
+    };
+
+    node.update(model);
+}
+
+function deletePieNode(node){
+    const model = {
+        type: 'node',
+    };
+
+    node.update(model);
 }
 
 //加载数据
