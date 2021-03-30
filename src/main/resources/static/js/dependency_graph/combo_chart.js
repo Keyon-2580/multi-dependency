@@ -51,32 +51,34 @@ G6.registerNode('pie-node', {
     draw: (cfg, group) => {
         let linkTypeNum = [];
 
-        cfg.pienode.forEach(item => {
-            if(item.source === last_click_node || item.target === last_click_node){
-                // console.log(item);
-                for(let key in item.dependency){
-                    switch (key){
-                        // case "dependsonDegree":
-                        //     if(typeof(linkTypeNum.find(n => n === COLOR_DEPENDSON)) === "undefined"){
-                        //         linkTypeNum.push(COLOR_DEPENDSON);
-                        //     }
-                        //     break;
-                        case "cloneDegree":
-                            if(typeof(linkTypeNum.find(n => n === COLOR_CLONE)) === "undefined"){
-                                linkTypeNum.push(COLOR_CLONE);
-                            }
-                            break;
-                        case "cochangeDegree":
-                            if(typeof(linkTypeNum.find(n => n === COLOR_COCHANGE)) === "undefined"){
-                                linkTypeNum.push(COLOR_COCHANGE);
-                            }
-                            break;
-                        default:
-                            break;
+        if(cfg.hasOwnProperty("pienode")){
+            cfg.pienode.forEach(item => {
+                if(item.source === last_click_node || item.target === last_click_node){
+                    // console.log(item);
+                    for(let key in item.dependency){
+                        switch (key){
+                            // case "dependsonDegree":
+                            //     if(typeof(linkTypeNum.find(n => n === COLOR_DEPENDSON)) === "undefined"){
+                            //         linkTypeNum.push(COLOR_DEPENDSON);
+                            //     }
+                            //     break;
+                            case "cloneDegree":
+                                if(typeof(linkTypeNum.find(n => n === COLOR_CLONE)) === "undefined"){
+                                    linkTypeNum.push(COLOR_CLONE);
+                                }
+                                break;
+                            case "cochangeDegree":
+                                if(typeof(linkTypeNum.find(n => n === COLOR_COCHANGE)) === "undefined"){
+                                    linkTypeNum.push(COLOR_COCHANGE);
+                                }
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
-            }
-        })
+            })
+        }
 
         const radius = cfg.size / 2 - 2; // node radius
 
@@ -339,6 +341,7 @@ function DrawComboChart(json_data){
             temp_node["id"] = d.id;
             temp_node["name"] = d.name;
             temp_node["size"] = d.size;
+            temp_node["inOutNode"] = 0;
             temp_node["group_type"] = 'node';
             temp_node["comboId"] = item.id;
             temp_node["inDegree"] = 80;
@@ -693,7 +696,7 @@ function DrawComboChart(json_data){
             const node_edges = node_click.getEdges();
 
             node_edges.forEach(function (edge){
-                if(edge._cfg.model.inner_edge === 1){
+                if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
                     node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
                     updatePieNode(node);
                     graph.setItemState(node, 'selected', true);
@@ -717,11 +720,16 @@ function DrawComboChart(json_data){
             const node_edges = node_click.getEdges();
 
             node_edges.forEach(function (edge){
-                if(edge._cfg.model.inner_edge === 1){
+                if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
                     node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
                     graph.setItemState(node, 'selected', false);
                     deletePieNode(node);
-                    graph.updateItem(edge, EDGE_INNER_MODEL);
+                    if(node_click._cfg.model.inOutNode === 1){
+                        graph.updateItem(edge, EDGE_NORMAL_MODEL);
+                    }else{
+                        graph.updateItem(edge, EDGE_INNER_MODEL);
+                    }
+
                 }else{
                     edge._cfg.model.children.forEach(link => {
                         node = getOtherEndNode(link, node_click._cfg.id);
@@ -739,11 +747,15 @@ function DrawComboChart(json_data){
             const node_edges_formal = lastClickNode.getEdges();
 
             node_edges_formal.forEach(function (edge){
-                if(edge._cfg.model.inner_edge === 1){
+                if(edge._cfg.model.inner_edge === 1 || lastClickNode._cfg.model.inOutNode === 1){
                     node = getOtherEndNode(edge._cfg.model, last_click_node);
                     graph.setItemState(node, 'selected', false);
                     deletePieNode(node);
-                    graph.updateItem(edge, EDGE_INNER_MODEL);
+                    if(node_click._cfg.model.inOutNode === 1){
+                        graph.updateItem(edge, EDGE_NORMAL_MODEL);
+                    }else{
+                        graph.updateItem(edge, EDGE_INNER_MODEL);
+                    }
                 }else{
                     edge._cfg.model.children.forEach(link => {
                         node = getOtherEndNode(link, last_click_node);
@@ -763,7 +775,7 @@ function DrawComboChart(json_data){
             const node_edges = node_click.getEdges();
 
             node_edges.forEach(function (edge){
-                if(edge._cfg.model.inner_edge === 1){
+                if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
                     node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
                     graph.setItemState(node, 'selected', true);
                     updatePieNode(node);
@@ -1069,6 +1081,7 @@ function autoLayout(){
         let model1 = {
             id: item.id + "_in",
             size: 30,
+            inOutNode: 1,
             comboId: item.id,
             x: combo_cord[0] + combo_width * 0.5,
             y: combo_cord[1] + combo_height + 50,
@@ -1081,6 +1094,7 @@ function autoLayout(){
         let model2 = {
             id: item.id + "_out",
             size: 30,
+            inOutNode: 1,
             comboId: item.id,
             x: combo_cord[0] - 50,
             y: combo_cord[1] + combo_height * (2 / 3),
