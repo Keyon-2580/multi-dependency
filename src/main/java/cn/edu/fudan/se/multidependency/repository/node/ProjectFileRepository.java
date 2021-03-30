@@ -203,4 +203,28 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	@Query("match p=(f1:ProjectFile)-[r:CO_CHANGE]->(f2:ProjectFile) where id(f1)=$fileId return f2 as projectFile, r.times as count")
 	List<DependencyPair> getCoChangeFiles(@Param("fileId") long fileId);
 
+	/**
+	 * 按照特定codeveloper属性查找节点
+	 */
+	@Query("match (f:ProjectFile) -[:" + RelationType.str_HAS + "]-> (m:Metric) where m.`metricValues.Creator` = $name return f")
+	List<ProjectFile> findFilesByCreatorName(@Param("name") String name);
+
+	@Query("match (f:ProjectFile) -[:" + RelationType.str_HAS + "]-> (m:Metric) where m.`metricValues.LastUpdator` = $name return f")
+	List<ProjectFile> findFilesByLastUpdatorName(@Param("name") String name);
+
+	@Query("match (f:ProjectFile) -[:" + RelationType.str_HAS + "]-> (m:Metric) where m.`metricValues.MostUpdator` = $name return f")
+	List<ProjectFile> findFilesByMostUpdatorName(@Param("name") String name);
+
+	@Query("match (f:ProjectFile) -[:" + RelationType.str_HAS + "]-> (m:Metric) where id(f) = $fileId with m.`metricValues.Creator` as developer\n" +
+			"match (f:ProjectFile) -[:HAS]-> (m:Metric) where m.`metricValues.Creator` = developer return f")
+	List<ProjectFile> findCoCreatorFileList(@Param("fileId")Long fileId);
+
+	@Query("match (f:ProjectFile) -[:" + RelationType.str_HAS + "]-> (m:Metric) where id(f) = $fileId with m.`metricValues.LastUpdator` as developer\n" +
+			"match (f:ProjectFile) -[:HAS]-> (m:Metric) where m.`metricValues.Creator` = developer return f")
+	List<ProjectFile> findCoLastUpdatorFileList(@Param("fileId")Long fileId);
+
+	@Query("match (f:ProjectFile) -[:" + RelationType.str_HAS + "]-> (m:Metric) where id(f) = $fileId with m.`metricValues.MostUpdator` as developer\n" +
+			"match (f:ProjectFile) -[:HAS]-> (m:Metric) where m.`metricValues.Creator` = developer return f")
+	List<ProjectFile> findCoMostUpdatorFileList(@Param("fileId")Long fileId);
+
 }
