@@ -1,16 +1,20 @@
 let data = {};
-var projectList_global; //存放选定项目列表
+let projectList_global; //存放选定项目列表
+let in_out_list = [] //存放出度入度节点
+let actual_edges = [] //存放原有的线以及拆分后的线ID
+let smell_data_global = [] //存放异味信息
+let smell_hover_nodes = [] //存放当前鼠标悬停异味节点数组
+let nodeId = 1;
+let last_click_node = "";
 
-const COLOR_DEPENDSON = 'rgb(119, 243, 252)';
-const COLOR_CLONE = 'rgb(176,66,6)';
-const COLOR_COCHANGE = 'rgb(255,165,0)';
+const COLOR_DEPENDSON = '#FFA500';
+const COLOR_CLONE = '#B04206';
+const COLOR_COCHANGE = '#77F3FC';
 const COLOR_LINK_NORMAL = '#f7c8ca';
 const COLOR_LINK_INNER = '#d8d5d5';
 const COLOR_LINK_CLICK = '#bd0303';
-let last_click_node = "";
-// let data_path = "../data/package_data.json"
-// let data_path = "../data/atlas_0325.json"
-let data_path = "../data/atlas_0325_original.json"
+const COLOR_SMELL_NORMAL = '#f19083';
+const COLOR_SMELL_CLICK = '#bd0303';
 
 const EDGE_CLICK_MODEL = {
     style: {
@@ -23,7 +27,6 @@ const EDGE_CLICK_MODEL = {
         },
     },
 };
-
 const EDGE_NORMAL_MODEL = {
     style: {
         stroke: COLOR_LINK_NORMAL,
@@ -34,7 +37,6 @@ const EDGE_NORMAL_MODEL = {
         },
     },
 };
-
 const EDGE_INNER_MODEL = {
     style: {
         stroke: COLOR_LINK_INNER,
@@ -219,13 +221,12 @@ G6.registerNode('pie-node', {
     },
 });
 
-//鼠标悬停提示项
+const grid = new G6.Grid();
 const tooltip = new G6.Tooltip({
-    offsetX: 20,
-    offsetY: 40,
+    fixToNode: [1.5, 0],
     getContent(e) {
         const outDiv = document.createElement('div');
-        outDiv.style.width = '180px';
+        outDiv.style.width = '500px';
         outDiv.innerHTML = e.item.getModel().group_type === 'combo' ?
             `<b class="combo_label">${e.item.getModel().name}</b>
           <ul>
@@ -238,32 +239,24 @@ const tooltip = new G6.Tooltip({
             <li>ID: ${e.item.getModel().id}</li>
           </ul>` :
 
-                `<b class="combo_label">${e.item.getModel().id}</b>`
-        // <ul>
-        //   <li>source: ${e.item.getModel().source_name}</li>
-        //   <li>target: ${e.item.getModel().target_name}</li>
-        // </ul>
+                `<b class="combo_label">${e.item.getModel().id}</b>
+            <ul>
+              <li>source: ${e.item.getModel().source_name}</li>
+              <li>target: ${e.item.getModel().target_name}</li>
+            </ul>`
         return outDiv
     },
     itemTypes: ['node', 'combo', 'edge']
-});
-
-const descriptionDiv = document.createElement('div');
-descriptionDiv.innerHTML = "";
-
+});  //鼠标悬停提示项
 const container = document.getElementById('combo_chart');
-container.appendChild(descriptionDiv);
 const width = container.scrollWidth;
 const height = container.scrollHeight || 500;
-const grid = new G6.Grid();
-let in_out_list = [] //存放出度入度节点
-let actual_edges = [] //存放原有的线以及拆分后的线ID
-
 const graph = new G6.Graph({
     container: 'combo_chart',
     width,
     height,
     fitCenter: true,
+    fitView: true,
     defaultNode: {
         type: 'circle',
         size: 50,
@@ -271,6 +264,28 @@ const graph = new G6.Graph({
             cursor: "pointer",
             fill: "#cce9f8",
             stroke: "#a0d6f4",
+        },
+    },
+    nodeStateStyles: {
+        smell_normal: {
+            fill: "#ffffff",
+            lineWidth: 4,
+            shadowBlur: 10,
+            shadowColor: COLOR_SMELL_NORMAL,
+            stroke: COLOR_SMELL_NORMAL,
+            "text-shape": {
+                fontWeight: 500
+            }
+        },
+        smell_hover: {
+            fill: "#e6714f",
+            lineWidth: 4,
+            shadowBlur: 10,
+            shadowColor: COLOR_SMELL_CLICK,
+            stroke: COLOR_SMELL_CLICK,
+            "text-shape": {
+                fontWeight: 500
+            }
         },
     },
     groupByTypes: false,
@@ -304,28 +319,21 @@ const graph = new G6.Graph({
                 path: G6.Arrow.vee(5, 8, 3),
                 d: 3,
                 fill: COLOR_LINK_NORMAL,
-                // lineWidth: 3,
             },
             cursor: "pointer"
-            // ... 其他样式属性
         },
     },
     plugins: [tooltip],
     minZoom: 0.1,
 });
 
-let nodeId = 1;
-
 function DrawComboChart(json_data){
     let package_data = json_data[0]["result"]["nodes"];
     let link_data = json_data[1]["links"];
+    smell_data_global = json_data[2]["smell"];
 
     let temp_nodes = [];
     let temp_combos = [];
-    let temp_edges = [];
-    let temp_actual_edges = []
-
-    console.log(package_data);
 
     package_data.forEach(function (item){
         let temp_combo = {};
@@ -347,30 +355,44 @@ function DrawComboChart(json_data){
             temp_node["inDegree"] = 80;
             temp_node["degree"] = 160;
             temp_node["index"] = 2;
-            // temp_node["dependsonDegree"] = 0;
-            // temp_node["cloneDegree"] = 0;
-            // temp_node["cochangeDegree"] = 0;
             temp_node["outerNode"] = 0;
             temp_node["pienode"] = [];
+            temp_node["smellId"] = 0;
             temp_nodes.push(temp_node);
         });
     });
 
-    let splice_index = 0;
     link_data.forEach(function (link){
         let temp_link = {};
         temp_link["source"] = link.source_id;
         temp_link["target"] = link.target_id;
         temp_link["source_name"] = link.source_name;
         temp_link["target_name"] = link.target_name;
-        // temp_link["curveOffset"] = 50;
-        // temp_link["index"] = 1;
         temp_link["link_type"] = link.type;
         temp_link["group_type"] = 'edge';
         temp_link["inner_edge"] = 0;
         temp_link["visible"] = link.type === "dependson";
-        // temp_link["visible"] = false;
         temp_link["label"] = link.type === "dependson" ? link.dependsOnTypes : "";
+
+        switch (link.type){
+            case "dependson":
+                temp_link["dependsOnTypes"] = link.dependsOnTypes;
+                temp_link["dependsOnTimes"] = link.dependsOnTimes;
+                temp_link["dependsOnWeightedTimes"] = link.dependsOnWeightedTimes;
+                break;
+            case "clone":
+                temp_link["value"] = link.value;
+                temp_link["cloneRelationType"] = link.cloneRelationType;
+                temp_link["cloneType"] = link.cloneType;
+                break;
+            case "cochange":
+                temp_link["coChangeTimes"] = link.coChangeTimes;
+                temp_link["node1ChangeTimes"] = link.node1ChangeTimes;
+                temp_link["node2ChangeTimes"] = link.node2ChangeTimes;
+                break;
+            default:
+                break;
+        }
 
         const source_node = temp_nodes.find((n) => n.id === link.source_id);
         const target_node = temp_nodes.find((n) => n.id === link.target_id);
@@ -378,32 +400,338 @@ function DrawComboChart(json_data){
         temp_link["source_comboId"] = source_node.comboId;
         temp_link["target_comboId"] = target_node.comboId;
 
-        // console.log(typeof(source_node));
-        // console.log(typeof(target_node));
-
         if(typeof(source_node) !== "undefined" && typeof(target_node) !== "undefined"){
-            // source_node[link.type + "Degree"] = 1;
-            // target_node[link.type + "Degree"] = 1;
-
             if((source_node["outerNode"] === 0 || target_node["outerNode"] === 0) && source_node["comboId"] !== target_node["comboId"]){
                 source_node["outerNode"] = 1;
                 target_node["outerNode"] = 1;
             }else if(source_node["comboId"] === target_node["comboId"]){
                 temp_link["inner_edge"] = 1;
             }
-            temp_actual_edges.push(temp_link);
+            actual_edges.push(temp_link);
         }
     })
 
     data["nodes"] = temp_nodes;
-    // data["actual_edges"] = temp_edges;
-    // data["edges"] = temp_edges;
     data["combos"] = temp_combos;
     console.log(data);
 
     autoLayout();
 
-    temp_actual_edges.forEach(edge =>{
+    data["edges"] = splitLinks(actual_edges);
+    graph.data(data);
+    graph.render();
+
+    const edge_list = graph.getEdges();
+    edge_list.forEach(function (item){
+        if(item._cfg.model.inner_edge === 1){
+            graph.updateItem(item, EDGE_INNER_MODEL);
+        }
+    });
+
+    const nodes = graph.getNodes();
+    nodes.forEach((node) => {
+        node.toFront();
+    });
+    graph.paint();
+
+    $('#multipleProjectsButton').css('background-color', '#efefef');
+
+    graph.on('node:mouseenter', (evt) => {
+        const { item } = evt;
+        const smellId = item._cfg.model.smellId;
+
+        if(smellId !== 0){
+            smell_data_global.forEach(smell => {
+                if(smell.id === smellId){
+                    smell.nodes.forEach(node_data => {
+                        const node = graph.findById(node_data.id.split("_")[1]);
+                        smell_hover_nodes.push(node);
+                        graph.setItemState(node, 'smell_hover', true);
+                    })
+                }
+            })
+        }
+    });
+
+    graph.on('node:mouseleave', (evt) => {
+        const { item } = evt;
+
+        const smellId = item._cfg.model.smellId;
+
+        if(smellId !== 0) {
+            smell_hover_nodes.forEach(node => {
+                graph.setItemState(node, 'smell_hover', false);
+            })
+
+            smell_hover_nodes = [];
+        }
+    });
+
+    graph.on('canvas:click', (evt) => {
+        graph.getCombos().forEach((combo) => {
+            graph.clearItemStates(combo);
+        });
+    });
+
+    //节点点击函数
+    graph.on('node:click', (evt) => {
+        const { item: node_click } = evt;
+        let node;
+        if(last_click_node === ""){
+            last_click_node = node_click._cfg.id;
+            graph.setItemState(node_click, 'selected', true);
+
+            const node_edges = node_click.getEdges();
+
+            node_edges.forEach(function (edge){
+                if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
+                    node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
+                    updatePieNode(node);
+                    graph.setItemState(node, 'selected', true);
+                    graph.updateItem(edge, EDGE_CLICK_MODEL);
+                }else{
+                    // console.log(item2);
+                    edge._cfg.model.children.forEach(link => {
+                        node = getOtherEndNode(link, node_click._cfg.id);
+                        graph.setItemState(node, 'selected', true);
+                        updatePieNode(node);
+                        link.split_edges.forEach(n => {
+                            graph.updateItem(n.id, EDGE_CLICK_MODEL);
+                        })
+                    })
+                }
+            });
+        }else if(last_click_node === node_click._cfg.id){
+            last_click_node = "";
+            graph.setItemState(node_click, 'selected', false);
+
+            const node_edges = node_click.getEdges();
+
+            node_edges.forEach(function (edge){
+                if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
+                    node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
+                    graph.setItemState(node, 'selected', false);
+                    deletePieNode(node);
+                    if(node_click._cfg.model.inOutNode === 1){
+                        graph.updateItem(edge, EDGE_NORMAL_MODEL);
+                    }else{
+                        graph.updateItem(edge, EDGE_INNER_MODEL);
+                    }
+
+                }else{
+                    edge._cfg.model.children.forEach(link => {
+                        node = getOtherEndNode(link, node_click._cfg.id);
+                        graph.setItemState(node, 'selected', false);
+                        deletePieNode(node);
+                        link.split_edges.forEach(n => {
+                            graph.updateItem(n.id, EDGE_NORMAL_MODEL);
+                        })
+                    })
+                }
+            });
+        }else{
+            const lastClickNode = graph.findById(last_click_node);
+            graph.setItemState(lastClickNode, 'selected', false);
+            const node_edges_formal = lastClickNode.getEdges();
+
+            node_edges_formal.forEach(function (edge){
+                if(edge._cfg.model.inner_edge === 1 || lastClickNode._cfg.model.inOutNode === 1){
+                    node = getOtherEndNode(edge._cfg.model, last_click_node);
+                    graph.setItemState(node, 'selected', false);
+                    deletePieNode(node);
+                    if(node_click._cfg.model.inOutNode === 1){
+                        graph.updateItem(edge, EDGE_NORMAL_MODEL);
+                    }else{
+                        graph.updateItem(edge, EDGE_INNER_MODEL);
+                    }
+                }else{
+                    edge._cfg.model.children.forEach(link => {
+                        node = getOtherEndNode(link, last_click_node);
+                        graph.setItemState(node, 'selected', false);
+                        deletePieNode(node);
+                        link.split_edges.forEach(n => {
+                            graph.updateItem(n.id, EDGE_NORMAL_MODEL);
+                        })
+                    })
+                }
+            });
+
+            last_click_node = node_click._cfg.id;
+
+            graph.setItemState(node_click, 'selected', true);
+
+            const node_edges = node_click.getEdges();
+
+            node_edges.forEach(function (edge){
+                if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
+                    node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
+                    graph.setItemState(node, 'selected', true);
+                    updatePieNode(node);
+                    graph.updateItem(edge, EDGE_CLICK_MODEL);
+                }else{
+                    edge._cfg.model.children.forEach(link => {
+                        node = getOtherEndNode(link, node_click._cfg.id);
+                        graph.setItemState(node, 'selected', true);
+                        updatePieNode(node);
+                        link.split_edges.forEach(n => {
+                            graph.updateItem(n.id, EDGE_CLICK_MODEL);
+                        })
+                    })
+                }
+            });
+
+        }
+
+        // graph.setItemState(node_click, 'active', true);
+    });
+}
+
+function getOtherEndNode(model, id){
+    let node;
+    if(model.source === id){
+        node = graph.findById(model.target);
+    }else{
+        node = graph.findById(model.source);
+    }
+
+    return node;
+}
+
+function filterLinks(){
+    let filter = GetFilterCondition();
+    let temp_edges = [];
+    actual_edges.forEach(edge =>{
+        if (filter["dependson"]["checked"] && edge.link_type ==="dependson") {
+            let dependson_flag = true;
+            if (filter["dependson"]["dependsIntensity"]) {
+                let intensityhigh = parseFloat(filter["dependson"]["intensityhigh"]).toFixed(2);
+                let intensitybelow = parseFloat(filter["dependson"]["intensitybelow"]).toFixed(2);
+                let intensity = edge.dependsOnWeightedTimes/ (edge.dependsOnWeightedTimes + 10.0);
+                let temp_flag_intensity = false;
+
+                if (filter["dependson"]["intensityCompareSelectBelow"] === "<=" && intensity >= intensitybelow) {
+                    if (filter["dependson"]["intensityCompareSelectHigh"] === "<=" &&
+                        intensity <= intensityhigh) {
+                        temp_flag_intensity = true;
+                    } else if (filter["dependson"]["intensityCompareSelectHigh"] === "<" &&
+                        intensity < intensityhigh) {
+                        temp_flag_intensity = true;
+                    }
+                } else if (filter["dependson"]["intensityCompareSelectBelow"] === "<" && intensity > intensitybelow) {
+                    if (filter["dependson"]["intensityCompareSelectHigh"] === "<=" &&
+                        intensity <= intensityhigh) {
+                        temp_flag_intensity = true;
+                    } else if (filter["dependson"]["intensityCompareSelectHigh"] === "<" &&
+                        intensity < intensityhigh) {
+                        temp_flag_intensity = true;
+                    }
+                }
+
+                if (temp_flag_intensity === false) {
+                    dependson_flag = false;
+                }
+            }
+
+            if (filter["dependson"]["dependsOnTimes"] &&
+                filter["dependson"]["dependencyTimes"] > edge.dependsOnTimes &&
+                dependson_flag === true) {
+                dependson_flag = false;
+            }
+
+            if (filter["dependson"]["dependsOnType"] && dependson_flag === true) {
+                let value = filter["dependson"]["dependsTypeSelect"];
+                let type_list = edge.dependsOnTypes.split("__");
+                let temp_dependsType_flag = false;
+
+                if (value.length === 0) {
+                    alert("未选中任何类型！");
+                }else{
+                    value.forEach(type1 => {
+                        type_list.forEach(type2 =>{
+                            if(type1 === type2){
+                                temp_dependsType_flag = true;
+                            }
+                        })
+                    })
+                }
+
+                if (temp_dependsType_flag === false) {
+                    dependson_flag = false;
+                }
+            }
+
+            if(dependson_flag === true){
+                temp_edges.push(edge);
+            }
+        }else if (filter["clone"]["checked"] && edge.link_type ==="clone") {
+            let clone_flag = true;
+            if (filter["clone"]["cloneSimilarity"]) {
+                let temp_flag_clonesimilarity = false;
+                let cloneValue = edge.value;
+                let similarityhigh = parseFloat(filter["clone"]["similarityhigh"]).toFixed(2);
+                let similaritybelow = parseFloat(filter["clone"]["similaritybelow"]).toFixed(2);
+
+                if (filter["clone"]["similarityCompareSelectBelow"] === "<=" &&
+                    cloneValue >= similaritybelow) {
+                    if (filter["clone"]["similarityCompareSelectHigh"] === "<=" &&
+                        cloneValue <= similarityhigh) {
+                        temp_flag_clonesimilarity = true;
+                    } else if (filter["clone"]["similarityCompareSelectHigh"] === "<" &&
+                        cloneValue < similarityhigh) {
+                        temp_flag_clonesimilarity = true;
+                    }
+                } else if (filter["clone"]["similarityCompareSelectBelow"] === "<" &&
+                    cloneValue > similaritybelow) {
+                    if (filter["clone"]["similarityCompareSelectHigh"] === "<=" &&
+                        cloneValue <= similarityhigh) {
+                        temp_flag_clonesimilarity = true;
+                    } else if (filter["clone"]["similarityCompareSelectHigh"] === "<" &&
+                        cloneValue < similarityhigh) {
+                        temp_flag_clonesimilarity = true;
+                    }
+                }
+
+                if (temp_flag_clonesimilarity === false) {
+                    clone_flag = false;
+                }
+            }
+
+            if(clone_flag === true){
+                temp_edges.push(edge);
+            }
+        }else if (filter["cochange"]["checked"] && edge.link_type ==="cochange") {
+            if (filter["cochange"]["cochangetimes"] >= 3) {
+                if (edge.coChangeTimes >= filter["cochange"]["cochangetimes"]) {
+                    temp_edges.push(edge);
+                }
+            } else {
+                alert("Cochange Times 需大于等于 3！");
+            }
+        }
+    });
+    data["edges"] = splitLinks(temp_edges);
+    graph.data(data);
+    graph.render();
+
+    const edge_list = graph.getEdges();
+    edge_list.forEach(function (item){
+        if(item._cfg.model.inner_edge === 1){
+            graph.updateItem(item, EDGE_INNER_MODEL);
+        }
+    });
+
+    const nodes = graph.getNodes();
+    nodes.forEach((node) => {
+        node.toFront();
+    });
+    graph.paint();
+}
+
+//拆分连线为三段
+function splitLinks(links_data){
+    let temp_nodes = data["nodes"];
+    let temp_edges = [];
+    links_data.forEach(edge =>{
         const source_node = temp_nodes.find((n) => n.id === edge.source);
         const target_node = temp_nodes.find((n) => n.id === edge.target);
 
@@ -632,181 +960,76 @@ function DrawComboChart(json_data){
             temp_edges.push(edge);
         }
     })
+    return temp_edges;
+}
 
-    console.log(temp_edges);
-    // G6.Util.processParallelEdges(data["edges"]);
+function loadSmell(){
+    deleteSmell();
 
-    data["edges"] = temp_edges;
-
-    graph.data(data);
-    graph.render();
-
-    const edge_list = graph.getEdges();
-
-    edge_list.forEach(function (item){
-        if(item._cfg.model.inner_edge === 1){
-            graph.updateItem(item, EDGE_INNER_MODEL);
+    let smell_type_filter = $("input[name='smell_radio']:checked").val();
+    smell_data_global.forEach(smell => {
+        if(smell.smell_type === smell_type_filter) {
+            smell.nodes.forEach(node_data => {
+                const node = graph.findById(node_data.id.split("_")[1]);
+                node._cfg.model.smellId = smell.id;
+                graph.setItemState(node, 'smell_normal', true);
+            })
         }
-    });
+    })
+}
 
-    // in_out_list.forEach(item =>{
-    //     graph.addItem('node', item);
-    // })
-
-    const nodes = graph.getNodes();
-    // 遍历节点实例，将所有节点提前。
+function deleteSmell(){
+    const nodes = graph.findAllByState('node', 'smell_normal');
     nodes.forEach((node) => {
-        node.toFront();
-    });
-
-    // 更改层级后需要重新绘制图
-    graph.paint();
-
-    $('#multipleProjectsButton').css('background-color', '#efefef');
-
-    graph.on('combo:mouseenter', (evt) => {
-        const { item } = evt;
-        graph.setItemState(item, 'hover', true);
-    });
-
-    graph.on('combo:mouseleave', (evt) => {
-        const { item } = evt;
-        graph.setItemState(item, 'hover', false);
-    });
-
-// graph.on('combo:click', (evt) => {
-//     const { item } = evt;
-//     graph.setItemState(item, 'selected', true);
-// });
-
-    graph.on('canvas:click', (evt) => {
-        graph.getCombos().forEach((combo) => {
-            graph.clearItemStates(combo);
-        });
-    });
-
-    //节点点击函数
-    graph.on('node:click', (evt) => {
-        const { item: node_click } = evt;
-        let node;
-        if(last_click_node === ""){
-            last_click_node = node_click._cfg.id;
-            graph.setItemState(node_click, 'selected', true);
-
-            const node_edges = node_click.getEdges();
-
-            node_edges.forEach(function (edge){
-                if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
-                    node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
-                    updatePieNode(node);
-                    graph.setItemState(node, 'selected', true);
-                    graph.updateItem(edge, EDGE_CLICK_MODEL);
-                }else{
-                    // console.log(item2);
-                    edge._cfg.model.children.forEach(link => {
-                        node = getOtherEndNode(link, node_click._cfg.id);
-                        graph.setItemState(node, 'selected', true);
-                        updatePieNode(node);
-                        link.split_edges.forEach(n => {
-                            graph.updateItem(n.id, EDGE_CLICK_MODEL);
-                        })
-                    })
-                }
-            });
-        }else if(last_click_node === node_click._cfg.id){
-            last_click_node = "";
-            graph.setItemState(node_click, 'selected', false);
-
-            const node_edges = node_click.getEdges();
-
-            node_edges.forEach(function (edge){
-                if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
-                    node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
-                    graph.setItemState(node, 'selected', false);
-                    deletePieNode(node);
-                    if(node_click._cfg.model.inOutNode === 1){
-                        graph.updateItem(edge, EDGE_NORMAL_MODEL);
-                    }else{
-                        graph.updateItem(edge, EDGE_INNER_MODEL);
-                    }
-
-                }else{
-                    edge._cfg.model.children.forEach(link => {
-                        node = getOtherEndNode(link, node_click._cfg.id);
-                        graph.setItemState(node, 'selected', false);
-                        deletePieNode(node);
-                        link.split_edges.forEach(n => {
-                            graph.updateItem(n.id, EDGE_NORMAL_MODEL);
-                        })
-                    })
-                }
-            });
-        }else{
-            const lastClickNode = graph.findById(last_click_node);
-            graph.setItemState(lastClickNode, 'selected', false);
-            const node_edges_formal = lastClickNode.getEdges();
-
-            node_edges_formal.forEach(function (edge){
-                if(edge._cfg.model.inner_edge === 1 || lastClickNode._cfg.model.inOutNode === 1){
-                    node = getOtherEndNode(edge._cfg.model, last_click_node);
-                    graph.setItemState(node, 'selected', false);
-                    deletePieNode(node);
-                    if(node_click._cfg.model.inOutNode === 1){
-                        graph.updateItem(edge, EDGE_NORMAL_MODEL);
-                    }else{
-                        graph.updateItem(edge, EDGE_INNER_MODEL);
-                    }
-                }else{
-                    edge._cfg.model.children.forEach(link => {
-                        node = getOtherEndNode(link, last_click_node);
-                        graph.setItemState(node, 'selected', false);
-                        deletePieNode(node);
-                        link.split_edges.forEach(n => {
-                            graph.updateItem(n.id, EDGE_NORMAL_MODEL);
-                        })
-                    })
-                }
-            });
-
-            last_click_node = node_click._cfg.id;
-
-            graph.setItemState(node_click, 'selected', true);
-
-            const node_edges = node_click.getEdges();
-
-            node_edges.forEach(function (edge){
-                if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
-                    node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
-                    graph.setItemState(node, 'selected', true);
-                    updatePieNode(node);
-                    graph.updateItem(edge, EDGE_CLICK_MODEL);
-                }else{
-                    edge._cfg.model.children.forEach(link => {
-                        node = getOtherEndNode(link, node_click._cfg.id);
-                        graph.setItemState(node, 'selected', true);
-                        updatePieNode(node);
-                        link.split_edges.forEach(n => {
-                            graph.updateItem(n.id, EDGE_CLICK_MODEL);
-                        })
-                    })
-                }
-            });
-
-        }
-
-        // graph.setItemState(node_click, 'active', true);
+        node._cfg.model.smellId = 0;
+        graph.setItemState(node, 'smell_normal', false);
     });
 }
 
-function getOtherEndNode(model, id){
-    let node;
-    if(model.source === id){
-        node = graph.findById(model.target);
-    }else{
-        node = graph.findById(model.source);
-    }
+//获取当前连线筛选条件
+var GetFilterCondition = function(){
+    var filter = {}
+    var temp_dependson = {}
+    var temp_clone = {}
+    var temp_cochange = {}
 
-    return node;
+    temp_dependson["checked"] = $("#dependsOn").prop("checked") ? 1 : 0;
+    temp_clone["checked"] = $("#clone").prop("checked") ? 1 : 0;
+    temp_cochange["checked"] = $("#coChange").prop("checked") ? 1 : 0;
+
+    temp_dependson["dependsIntensity"] = $("#dependsIntensity").prop("checked") ? 1 : 0;
+    temp_dependson["intensityCompareSelectBelow"] = $("#intensityCompareSelectBelow").val();
+    temp_dependson["intensityCompareSelectHigh"] = $("#intensityCompareSelectHigh").val();
+    temp_dependson["intensitybelow"] = $("#intensitybelow").val();
+    temp_dependson["intensityhigh"] = $("#intensityhigh").val();
+
+    temp_dependson["dependsOnTimes"] = $("#dependsOnTimes").prop("checked") ? 1 : 0;
+    temp_dependson["dependencyTimes"] = $("#dependencyTimes").val();
+
+    temp_dependson["dependsOnType"] = $("#dependsOnType").prop("checked") ? 1 : 0;
+    let value = $("#dependsTypeSelect").val();
+    if(value[0] === "IMPORT"){
+        value.push("INCLUDE");
+    }
+    temp_dependson["dependsTypeSelect"] = value;
+
+    temp_clone["cloneSimilarity"] = $("#cloneSimilarity").prop("checked") ? 1 : 0;
+    temp_clone["similarityCompareSelectBelow"] = $("#similarityCompareSelectBelow").val();
+    temp_clone["similarityCompareSelectHigh"] = $("#similarityCompareSelectHigh").val();
+    temp_clone["similarityhigh"] = $("#similarityhigh").val();
+    temp_clone["similaritybelow"] = $("#similaritybelow").val();
+
+    temp_clone["cloneTimes"] = $("#cloneTimes").prop("checked") ? 1 : 0;
+    temp_clone["clonetimes"] = $("#clonetimes").val();
+
+    temp_cochange["cochangeTimes"] = $("#cochangeTimes").prop("checked") ? 1 : 0;
+    temp_cochange["cochangetimes"] = $("#cochangetimes").val();
+
+    filter["dependson"] = temp_dependson;
+    filter["clone"] = temp_clone;
+    filter["cochange"] = temp_cochange;
+
+    return filter;
 }
 
 function updatePieNode(node){
@@ -885,11 +1108,11 @@ var loadPageData = function () {
                     "</label>" +
 
                     "<select id = \"dependsTypeSelect\" class=\"selectpicker\" multiple>" +
-                    "<option value=\"IMPORT\">IMPORT</option>" +
-                    "<option value=\"INCLUDE\">INCLUDE</option>" +
+                    "<option value=\"IMPORT\">IMPORT/INCLUDE</option>" +
                     "<option value=\"EXTENDS\">EXTENDS</option>" +
                     "<option value=\"IMPLEMENTS\">IMPLEMENTS</option>" +
-                    "<option value=\"ASSOCIATION\">ASSOCIATION</option>" +
+                    "<option value=\"GLOBAL_VARIABLE\">GLOBAL_VARIABLE</option>" +
+                    "<option value=\"LOCAL_VARIABLE\">LOCAL_VARIABLE</option>" +
                     "<option value=\"ANNOTATION\">ANNOTATION</option>" +
                     "<option value=\"CALL\">CALL</option>" +
                     "<option value=\"CAST\">CAST</option>" +
@@ -913,18 +1136,13 @@ var loadPageData = function () {
                     "<option value=\"<=\" selected = \"selected\"><=</option>" +
                     "<option value=\"<\"><</option></select>" +
 
-                    "<label class = \"AttributionSelectLabel\"> &nbsp;Clone Files / All Files</label>" +
+                    "<label class = \"AttributionSelectLabel\"> &nbsp;Clone Value</label>" +
 
                     "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectHigh\">" +
                     "<option value=\"<=\"><=</option>" +
                     "<option value=\"<\" selected = \"selected\"><</option></select>" +
 
-                    "<input  class = \"AttributionSelectInput\" id=\"similarityhigh\" value=\"1\">" +
-
-                    "<label class = \"AttributionSelectLabel\" style = \"margin-left: 80px\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneTimes\" name = \"clone_children\">CloneTimes >=</label>" +
-                    "<input  class = \"AttributionSelectInput\" id=\"clonetimes\" value=\"3\">" +
-                    "<button id = \"hideBottomPackageButton\" type=\"button\" style=\"margin-left: 30px\" onclick=HideBottomPackageButton() >仅显示聚合</button></p>";
+                    "<input  class = \"AttributionSelectInput\" id=\"similarityhigh\" value=\"1\"></p>";
 
                 html += "<p><label class = \"AttributionSelectTitle\">" +
                     "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"coChange\" onclick=\"CancelChildrenChecked('coChange')\">Co-change：" +
@@ -967,7 +1185,9 @@ var loadPageData = function () {
                     "</p>";
 
                 html += "<p><div style=\"margin-top: 10px;\">" +
-                    "<button class = \"common_button\" type=\"button\" onclick= loadSmell() >加载异味</button>" +
+                    "<button class = \"common_button\" type=\"button\" onclick= filterLinks() >筛选连线</button>" +
+                    "<button class = \"common_button\" type=\"button\" onclick= loadSmell() style = \"margin-left: 30px\">加载异味</button>" +
+                    "<button class = \"common_button\" type=\"button\" onclick= deleteSmell() style = \"margin-left: 30px\">删除异味</button>" +
                     "</div></p>";
 
                 html += "</form>" +
@@ -1016,23 +1236,6 @@ var main = function () {
         }
     }
 }
-
-// const int=self.setInterval(function(){
-//     addComboItem();
-// },150);
-
-// function addComboItem(){
-//     const temp_node = { id: 'nodess' + nodeId, comboId: 'combo1', size: 15, dependsonDegree: 1, cloneDegree: 0, cochangeDegree: 1}
-//     data['nodes'].push(temp_node);
-//     descriptionDiv.innerHTML = 'nodess' + nodeId;
-//
-//     graph.data(data);
-//     graph.render();
-//
-//     const temp_combo = graph.findById('combo1')
-//     console.log(temp_combo.getNodes());
-//     nodeId += 1;
-// }
 
 //自动布局
 function autoLayout(){
@@ -1118,6 +1321,13 @@ function showMultipleButton(){
     projectList_global = [];
     projectList_global = value;
     projectGraphAjax(value);
+}
+
+//筛选框子控件随着母控件一同取消点选
+function CancelChildrenChecked(parent_name){
+    if(!$("#" + parent_name).is(":checked")){
+        $("input[name = '" + parent_name + "_children" + "']").prop("checked", false);
+    }
 }
 
 if (typeof window !== 'undefined')

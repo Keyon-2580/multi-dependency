@@ -116,7 +116,7 @@ public class ProjectServiceImpl implements ProjectService{
         }
         result.add(nodeJSON4);
 
-        if(Constant.PROJECT_STRUCTURE_TREEMAP.equals(type)){
+        if(Constant.PROJECT_STRUCTURE_TREEMAP.equals(type) || Constant.PROJECT_STRUCTURE_COMBO.equals(type)){
         nodeJSON5.put("smell", basicSmellQueryService.smellsToTreemap());
         result.add(nodeJSON5);
         }
@@ -359,40 +359,51 @@ public class ProjectServiceImpl implements ProjectService{
         List<CoChange> coChangeList= coChangeRepository.findFileCoChange();
 
         for(DependsOn dependsOn : dependsOnList){
-            JSONObject temp1 = new JSONObject();
+            JSONObject link = new JSONObject();
             if(NodeAndRelationFilter.isContainSelectedRelations(dependsOn)) {
-                temp1.put("type", "dependson");
-                temp1.put("source_id", dependsOn.getStartNode().getId().toString());
-                temp1.put("target_id", dependsOn.getEndNode().getId().toString());
-                temp1.put("source_name", dependsOn.getEndNode().getName());
-                temp1.put("target_name", dependsOn.getEndNode().getName());
-                temp1.put("pair_id", dependsOn.getStartNode().getId() + "_" + dependsOn.getEndNode().getId());
-                temp1.put("dependsOnTypes", dependsOn.getDependsOnType());
-                result.add(temp1);
+                link.put("type", "dependson");
+                link.put("source_id", dependsOn.getStartNode().getId().toString());
+                link.put("target_id", dependsOn.getEndNode().getId().toString());
+                link.put("source_name", dependsOn.getEndNode().getName());
+                link.put("target_name", dependsOn.getEndNode().getName());
+                link.put("pair_id", dependsOn.getStartNode().getId() + "_" + dependsOn.getEndNode().getId());
+
+                link.put("dependsOnTypes", dependsOn.getDependsOnType());
+                link.put("dependsOnTimes", dependsOn.getTimes());
+                link.put("dependsOnWeightedTimes", dependsOn.getWeightedTimes());
+                result.add(link);
             }
         }
 
         for(Clone clone : cloneList){
-            JSONObject temp2 = new JSONObject();
-            temp2.put("type", "clone");
-            temp2.put("source_id", clone.getCodeNode1().getId().toString());
-            temp2.put("target_id", clone.getCodeNode2().getId().toString());
-            temp2.put("source_name", clone.getCodeNode1().getName());
-            temp2.put("target_name", clone.getCodeNode2().getName());
-            temp2.put("pair_id", clone.getCodeNode1().getId() + "_" + clone.getCodeNode2().getId());
-            result.add(temp2);
+            JSONObject link = new JSONObject();
+            link.put("type", "clone");
+            link.put("source_id", clone.getCodeNode1().getId().toString());
+            link.put("target_id", clone.getCodeNode2().getId().toString());
+            link.put("source_name", clone.getCodeNode1().getName());
+            link.put("target_name", clone.getCodeNode2().getName());
+            link.put("pair_id", clone.getCodeNode1().getId() + "_" + clone.getCodeNode2().getId());
+
+            link.put("value", clone.getValue());
+            link.put("cloneRelationType", clone.getCloneRelationType());
+            link.put("cloneType", clone.getCloneType());
+            result.add(link);
         }
 
         for(CoChange coChange : coChangeList){
             if(coChange.getTimes() > 20){
-                JSONObject temp3 = new JSONObject();
-                temp3.put("type", "cochange");
-                temp3.put("source_id", coChange.getNode1().getId().toString());
-                temp3.put("target_id", coChange.getNode2().getId().toString());
-                temp3.put("source_name", coChange.getNode1().getName());
-                temp3.put("target_name", coChange.getNode2().getName());
-                temp3.put("pair_id", coChange.getNode1().getId() + "_" + coChange.getNode2().getId());
-                result.add(temp3);
+                JSONObject link = new JSONObject();
+                link.put("type", "cochange");
+                link.put("source_id", coChange.getNode1().getId().toString());
+                link.put("target_id", coChange.getNode2().getId().toString());
+                link.put("source_name", coChange.getNode1().getName());
+                link.put("target_name", coChange.getNode2().getName());
+                link.put("pair_id", coChange.getNode1().getId() + "_" + coChange.getNode2().getId());
+
+                link.put("coChangeTimes", coChange.getTimes());
+                link.put("node1ChangeTimes", coChange.getNode1ChangeTimes());
+                link.put("node2ChangeTimes", coChange.getNode2ChangeTimes());
+                result.add(link);
             }
         }
         return result;
