@@ -98,10 +98,10 @@ G6.registerNode('pie-node', {
             case 0:
                 return group.addShape('circle', {
                     attrs: {
-                        "r": radius + 2,
+                        "r": radius + 5,
                         "lineWidth": 6,
-                        "stroke": '#5f95ff',
-                        "fill": '#ffffff',
+                        "stroke": 'rgb(218,70,63)',
+                        "fill": 'rgb(225,111,107)',
                     }
                 });
             case 1:
@@ -262,8 +262,11 @@ const graph = new G6.Graph({
         size: 50,
         style: {
             cursor: "pointer",
-            fill: "#cce9f8",
-            stroke: "#a0d6f4",
+            // fill: "#cce9f8",
+            // stroke: "#a0d6f4",
+            fill: "rgb(226,230,239)",
+            stroke: "rgb(113,151,234)",
+
         },
     },
     nodeStateStyles: {
@@ -300,7 +303,7 @@ const graph = new G6.Graph({
         },
         style: {
             lineWidth : 2,
-            stroke : '#a0d6f4'
+            stroke : '#2d3436'
         }
     },
     defaultEdge: {
