@@ -234,7 +234,7 @@ public class SmellDetectorService {
 				smell.setProjectId(projectId);
 				smell.setProjectName(project.getName());
 				smell.setType(SmellType.HUBLIKE_DEPENDENCY);
-				smell.setLevel(SmellLevel.FILE);
+				smell.setLevel(SmellLevel.PACKAGE);
 				smells.add(smell);
 				Contain contain = new Contain(smell, pck.getPck());
 				smellContains.add(contain);
