@@ -100,8 +100,8 @@ G6.registerNode('pie-node', {
                     attrs: {
                         "r": radius + 5,
                         "lineWidth": 6,
-                        "stroke": 'rgb(218,70,63)',
-                        "fill": 'rgb(225,111,107)',
+                        "stroke": '#5f95ff',
+                        "fill": '#ffffff',
                     }
                 });
             case 1:
@@ -769,11 +769,15 @@ function splitLinks(links_data){
                 dependency: {}
             };
 
-            temp.dependency[edge.link_type + "Degree"] = 1;
+            if(edge.link_type !== "dependson") {
+                temp.dependency[edge.link_type + "Degree"] = 1;
+            }
 
             target_pienode.push(temp);
         }else{
-            temp_target_pienode.dependency[edge.link_type + "Degree"] = 1;
+            if(edge.link_type !== "dependson") {
+                temp_target_pienode.dependency[edge.link_type + "Degree"] = 1;
+            }
         }
 
         if(edge.inner_edge === 0){
