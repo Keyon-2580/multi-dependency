@@ -399,18 +399,19 @@ function DrawComboChart(json_data){
 
         const source_node = temp_nodes.find((n) => n.id === link.source_id);
         const target_node = temp_nodes.find((n) => n.id === link.target_id);
+        if(source_node != null && target_node != null) {
+            temp_link["source_comboId"] = source_node.comboId;
+            temp_link["target_comboId"] = target_node.comboId;
 
-        temp_link["source_comboId"] = source_node.comboId;
-        temp_link["target_comboId"] = target_node.comboId;
-
-        if(typeof(source_node) !== "undefined" && typeof(target_node) !== "undefined"){
-            if((source_node["outerNode"] === 0 || target_node["outerNode"] === 0) && source_node["comboId"] !== target_node["comboId"]){
-                source_node["outerNode"] = 1;
-                target_node["outerNode"] = 1;
-            }else if(source_node["comboId"] === target_node["comboId"]){
-                temp_link["inner_edge"] = 1;
+            if(typeof(source_node) !== "undefined" && typeof(target_node) !== "undefined"){
+                if((source_node["outerNode"] === 0 || target_node["outerNode"] === 0) && source_node["comboId"] !== target_node["comboId"]){
+                    source_node["outerNode"] = 1;
+                    target_node["outerNode"] = 1;
+                }else if(source_node["comboId"] === target_node["comboId"]){
+                    temp_link["inner_edge"] = 1;
+                }
+                actual_edges.push(temp_link);
             }
-            actual_edges.push(temp_link);
         }
     })
 
