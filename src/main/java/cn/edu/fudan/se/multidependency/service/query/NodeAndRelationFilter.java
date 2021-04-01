@@ -59,8 +59,8 @@ public class NodeAndRelationFilter {
         return selectedPcks;
     }
 
-    public static void setSelectedPcks(Map<String, Boolean> selectedPcks) {
-        selectedPcks = selectedPcks;
+    public static void setSelectedPcks(Map<String, Boolean> pcks) {
+        selectedPcks = pcks;
     }
 
     private static Map<String, Boolean> selectedPcks = new HashMap<>();

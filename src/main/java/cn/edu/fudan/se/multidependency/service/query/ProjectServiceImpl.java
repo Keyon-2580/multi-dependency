@@ -80,8 +80,10 @@ public class ProjectServiceImpl implements ProjectService{
 
         boolean isFilter = false;
         if (NodeAndRelationFilter.getSelectedPcks().size() != 0) {
-//            selectedPcks = NodeAndRelationFilter.listOfPackagesForAtlas();
             selectedPcks = NodeAndRelationFilter.getSelectedPcks();
+            isFilter = true;
+        }else{
+            isFilter = false;
         }
 
         JSONArray result = new JSONArray();
