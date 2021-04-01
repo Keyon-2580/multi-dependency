@@ -163,6 +163,9 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query(FILE_LEFT + RelationType.str_IMPLEMENTS + FILE_MIDDLE + RelationType.str_IMPLEMENTS +
 			FILE_MIDDLE2 + "1" + FILE_RIGHT)
 	void createDependsOnWithImplementsInFiles();
+	@Query(FILE_LEFT + RelationType.str_IMPLEMENTS_C + FILE_MIDDLE + RelationType.str_IMPLEMENTS_C +
+			FILE_MIDDLE2 + "1" + FILE_RIGHT)
+	void createDependsOnWithImplementsCInFiles();
 	@Query(FILE_LEFT + RelationType.str_GLOBAL_VARIABLE + FILE_MIDDLE + RelationType.str_GLOBAL_VARIABLE +
 			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
 	void createDependsOnWithGlobalVariableInFiles();

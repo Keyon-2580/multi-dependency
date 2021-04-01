@@ -158,6 +158,7 @@ public class BeanCreator {
 
 			dependsOnRepository.createDependsOnWithExtendsInFiles();
 			dependsOnRepository.createDependsOnWithImplementsInFiles();
+			dependsOnRepository.createDependsOnWithImplementsCInFiles();
 			dependsOnRepository.createDependsOnWithGlobalVariableInFiles();
 			dependsOnRepository.createDependsOnWithLocalVariableInFiles();
 			dependsOnRepository.createDependsOnWithAnnotationInFiles();
