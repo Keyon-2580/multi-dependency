@@ -55,6 +55,9 @@ public class ProjectServiceImpl implements ProjectService{
     @Autowired
     private BasicSmellQueryService basicSmellQueryService;
 
+    @Autowired
+    private CoDeveloperService coDeveloperService;
+
     private Map<Project, String> projectToAbsolutePath = new ConcurrentHashMap<>();
 
     @Override
@@ -76,9 +79,9 @@ public class ProjectServiceImpl implements ProjectService{
         JSONArray projectIds = dataList.getJSONArray("projectIds");
 
         boolean isFilter = false;
-        if (isFilter) {
+        if (NodeAndRelationFilter.getSelectedPcks().size() != 0) {
 //            selectedPcks = NodeAndRelationFilter.listOfPackagesForAtlas();
-            selectedPcks = NodeAndRelationFilter.listOfPackagesForCassandra();
+            selectedPcks = NodeAndRelationFilter.getSelectedPcks();
         }
 
         JSONArray result = new JSONArray();

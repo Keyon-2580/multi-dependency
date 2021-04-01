@@ -158,10 +158,10 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		return result;
 	}
 
-	Map<Package, Collection<Package>> packageContainPackagesCache = new ConcurrentHashMap<>();
+	Map<Package, List<Package>> packageContainPackagesCache = new ConcurrentHashMap<>();
 	@Override
-	public Collection<Package> findPackageContainPackages(Package pck) {
-		Collection<Package> result = packageContainPackagesCache.getOrDefault(pck, containRepository.findPackageContainPackages(pck.getId()));
+	public List<Package> findPackageContainPackages(Package pck) {
+		List<Package> result = packageContainPackagesCache.getOrDefault(pck, containRepository.findPackageContainPackages(pck.getId()));
 		return result;
 	}
 

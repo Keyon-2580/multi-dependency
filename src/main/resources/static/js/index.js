@@ -3,6 +3,13 @@ var index = function(cytoscapeutil) {
 	var showZTree = function(nodes, container = $("#ztree")) {
 		console.log(nodes);
 		var setting = {
+			check: {
+				enable: true,
+				chkStyle: "checkbox",
+				chkboxType: {
+					"Y":"","N":"s"
+				}
+			},
 			data: {
 				keep: {
 					parent: true
@@ -298,6 +305,43 @@ var index = function(cytoscapeutil) {
 						alert("设置成功 " + j.toString() + " 个路径！");
 					}
 					else {
+						alert("设置失败！");
+					}
+				}
+			});
+		})
+
+		//筛选文件目录按钮
+		$("#buttonPackageFilter").click(function() {
+			var projectZTreeObj = $.fn.zTree.getZTreeObj("treeProjects");
+			var checkCount = projectZTreeObj.getCheckedNodes(true);
+			var ids = [];
+			var j = 0;
+			for (var i = 0; i < checkCount.length; i++) {
+				if (checkCount[i].type == "Package") {
+					ids[j++] = {
+						type: "pck",
+						id: checkCount[i].id
+					};
+				} else if (checkCount[i].type == "ProjectFile") {
+					ids[j++] = {
+						type: "file",
+						id: checkCount[i].id
+					};
+				}
+			}
+			console.log(ids);
+			$.ajax({
+				url: "/project/pckfilter",
+				type: "POST",
+				contentType: "application/json",
+				dataType: "json",
+				data: JSON.stringify(ids),
+				success: function (result) {
+					if (result.result === "success") {
+						alert("设置成功 " + result.length + " 个路径！\n" +
+							"分别为：" + result.path);
+					} else {
 						alert("设置失败！");
 					}
 				}

@@ -54,4 +54,19 @@ public class NodeAndRelationFilter {
         selectedPcks.put("/atlas/webapp/src/main/java/org/apache/atlas/", true);
         return selectedPcks;
     }
+
+    public static Map<String, Boolean> getSelectedPcks() {
+        return selectedPcks;
+    }
+
+    public static void setSelectedPcks(Map<String, Boolean> selectedPcks) {
+        selectedPcks = selectedPcks;
+    }
+
+    private static Map<String, Boolean> selectedPcks = new HashMap<>();
+
+    public static boolean clearSelectedPcks(){
+        selectedPcks.clear();
+        return true;
+    }
 }

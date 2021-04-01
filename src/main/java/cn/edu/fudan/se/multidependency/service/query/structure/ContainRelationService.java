@@ -39,7 +39,7 @@ public interface ContainRelationService {
 
 	Collection<Package> findProjectRootPackages(Project project);
 
-	Collection<Package> findPackageContainPackages(Package pck);
+	List<Package> findPackageContainPackages(Package pck);
 
 	Collection<Package> findPackageContainPackagesWithLanguage(Package pck);
 

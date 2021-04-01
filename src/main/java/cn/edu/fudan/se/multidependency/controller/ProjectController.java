@@ -39,6 +39,9 @@ import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationSe
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import cn.edu.fudan.se.multidependency.utils.query.ZTreeUtil.ZTreeNode;
 
+import static cn.edu.fudan.se.multidependency.service.query.NodeAndRelationFilter.clearSelectedPcks;
+import static cn.edu.fudan.se.multidependency.service.query.NodeAndRelationFilter.setSelectedPcks;
+
 @Controller
 @RequestMapping("/project")
 public class ProjectController {
@@ -383,8 +386,15 @@ public class ProjectController {
 				ZTreeNode node = new ZTreeNode(file, true);
 				filesNodes.addChild(node);
 			}
+			List<Package> pcks = containRelationService.findPackageContainPackages(pck);
+			ZTreeNode pcksnodes = new ZTreeNode("包 (" + pcks.size() + ")", true);
+			for(Package pck1 : pcks) {
+				ZTreeNode node = new ZTreeNode(pck1.getId(), pck1.getDirectoryPath(), false, pck1.getNodeType().toString(), true);
+				pcksnodes.addChild(node);
+			}
 			JSONArray values = new JSONArray();
 			values.add(filesNodes.toJSON());
+			values.add(pcksnodes.toJSON());
 			result.put("result", "success");
 			result.put("value", values);
 		} catch (Exception e) {
@@ -403,15 +413,13 @@ public class ProjectController {
 			if(project == null) {
 				throw new Exception("project is null, projectId: " + projectId);
 			}
-			Collection<Package> pcks = containRelationService.findProjectContainPackages(project);
-			ZTreeNode pckNodes = new ZTreeNode("目录 / 包 (" + pcks.size() + ")", true);
-			for(Package pck : pcks) {
-				String name = pck.getName().equals(pck.getDirectoryPath()) ? pck.getDirectoryPath() : String.join(":", pck.getName(), pck.getDirectoryPath());
-				ZTreeNode node = new ZTreeNode(pck.getId(), name, false, pck.getNodeType().toString(), true);
-				pckNodes.addChild(node);
-			}
+			Collection<Package> rootPackage = containRelationService.findProjectRootPackages(project);
 			JSONArray values = new JSONArray();
-			values.add(pckNodes.toJSON());
+			for(Package pck : rootPackage){
+				String name = pck.getName().equals(pck.getDirectoryPath()) ? pck.getDirectoryPath() : String.join(":", pck.getName(), pck.getDirectoryPath());
+				ZTreeNode pckNodes = new ZTreeNode(pck.getId(), name, false, pck.getNodeType().toString(), true);
+				values.add(pckNodes.toJSON());
+			}
 			result.put("result", "success");
 			result.put("value", values);
 		} catch (Exception e) {
@@ -535,6 +543,45 @@ public class ProjectController {
 		result.put("result", "success");
 		result.put("project", project);
 		result.put("path", projectService.getAbsolutePath(project));
+		return result;
+	}
+
+	@PostMapping("/pckfilter")
+	@ResponseBody
+	public JSONObject setFilterPck(@RequestBody Map<String, Object>[] ids) {
+		int len = ids.length;
+		JSONObject result = new JSONObject();
+		Map<String, Boolean> filterList = new HashMap<>();
+		for(int i = 0; i < len; i ++) {
+			long id = Long.parseLong(ids[i].get("id").toString());
+			if(ids[i].get("type").equals("pck")){
+				Package pck = nodeService.queryPackage(id);
+				filterList.put(pck.getDirectoryPath(), true);
+			}else if(ids[i].get("type").equals("file")){
+				ProjectFile file = nodeService.queryFile(id);
+				Package pck = containRelationService.findFileBelongToPackage(file);
+				filterList.put(pck.getDirectoryPath(), false);
+			}
+		}
+		setSelectedPcks(filterList);
+		if(filterList.keySet().size() >0){
+			result.put("result", "success");
+			result.put("length", filterList.keySet().size());
+			result.put("path", filterList.keySet());
+		}
+		return result;
+	}
+
+	@GetMapping("/clearfilter")
+	@ResponseBody
+	public JSONObject clearfilter() {
+		JSONObject result = new JSONObject();
+		clearSelectedPcks();
+		if(NodeAndRelationFilter.getSelectedPcks().size() == 0){
+			result.put("result", "success");
+		}else{
+			result.put("result", "fail");
+		}
 		return result;
 	}
 	

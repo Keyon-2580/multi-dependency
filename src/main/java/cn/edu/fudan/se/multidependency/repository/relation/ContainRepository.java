@@ -139,7 +139,7 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	@Query("match p = (project:Project)-[:" + RelationType.str_CONTAIN + "]->(pck:Package) where not (pck)<-[:" + RelationType.str_CONTAIN + "]-(:Package) and id(project)=$projectId return pck")
 	public List<Package> findProjectRootPackages(@Param("projectId") Long projectId);
 
-	@Query("Match p = (pck:Package)-[:" + RelationType.str_CONTAIN + "]->(children:Package) where id(pck)=$packageId return children")
+	@Query("Match p = (pck:Package)-[:" + RelationType.str_CONTAIN + "]->(children:Package) where id(pck)=$packageId return children order by children.directoryPath")
 	public List<Package> findPackageContainPackages(@Param("packageId") Long packageId);
 
 	@Query("Match p = (pck:Package)-[:" + RelationType.str_CONTAIN + "]->(children:Package) where id(pck)=$packageId " +
