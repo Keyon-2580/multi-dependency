@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.service.insert.ThreadService;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.Edit;
 import org.eclipse.jgit.diff.EditList;
@@ -123,13 +124,19 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
     
     private void addCommitsAndRelations(Branch branch) throws Exception {
         List<RevCommit> commits = null;
+        String commitTimeSince = "";
         if (!gitConfig.isSpecifyCommitRange()) {
             commits = gitExtractor.getAllCommits();
         } else {
             if (gitConfig.isSpecifyByCommitId()) {
                 commits = gitExtractor.getARangeCommitsById(gitConfig.getCommitIdFrom(), gitConfig.getCommitIdTo(), true);
+                RevCommit commitIdFrom = gitExtractor.getCommitByCommitId(gitConfig.getCommitIdFrom());
+                Date revTime =new Date((long)commitIdFrom.getCommitTime()*1000);
+                SimpleDateFormat time = new SimpleDateFormat(Constant.TIMESTAMP);
+                commitTimeSince = time.format(revTime);
             } else {
                 commits = gitExtractor.getARangeCommitsByTime(gitConfig.getCommitTimeSince(), gitConfig.getCommitTimeUntil(), true);
+                commitTimeSince = gitConfig.getCommitTimeSince();
             }
         }
         int beforeReleaseCommits = 0;
@@ -161,10 +168,11 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
             }
         }
 
-        Map<String, List<String>> file2CommitIds = new HashMap<>();
-        for (String path : file2FormerPathMap.keySet()){
-            file2CommitIds.put(path,gitExtractor.getProjectFileChangeCommitIds(path));
-        }
+        ThreadService threadService = new ThreadService();
+        Map<String, List<String>> file2CommitIds = new HashMap<>(threadService.fileChangeCommitsAnalyse(file2FormerPathMap.keySet(),gitExtractor,commitTimeSince));
+//        for (String path : file2FormerPathMap.keySet()){
+//            file2CommitIds.put(path,gitExtractor.getProjectFileChangeCommitIds(path, commitTimeSince));
+//        }
 
         Map<String, List<String>> commitId2ChangeFiles = new HashMap<>();
         file2CommitIds.forEach((path,commitIds)->{

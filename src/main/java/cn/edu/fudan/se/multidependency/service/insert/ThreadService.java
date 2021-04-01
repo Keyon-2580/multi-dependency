@@ -2,11 +2,16 @@ package cn.edu.fudan.se.multidependency.service.insert;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import cn.edu.fudan.se.multidependency.service.insert.dynamic.FeatureAndTestCaseFromJSONFileForMicroserviceInserter;
+import cn.edu.fudan.se.multidependency.service.insert.git.GitExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +53,8 @@ public class ThreadService {
 	public ThreadService(YamlUtil.YamlObject yaml) throws Exception {
 		this.yaml = yaml;
 		this.config = ProjectConfigUtil.extract(JSONUtil.extractJSONObject(new File(yaml.getProjectsConfig())));
+	}
+	public ThreadService() {
 	}
 
 	public void staticAnalyse() throws Exception {
@@ -266,6 +273,33 @@ public class ThreadService {
 			}
 			latchOfOthers.countDown();
 		}
+	}
+
+	public Map<String, List<String>> fileChangeCommitsAnalyse(Set<String> paths, GitExtractor gitExtractor, String commitTimeSince) throws Exception {
+		LOGGER.info("文件大小：" + paths.size());
+		int threadPoolSize = paths.size() <= 50 ? paths.size() : 50;
+		ExecutorService executorForStructure = Executors.newFixedThreadPool(threadPoolSize);
+		Map<String, List<String>> file2CommitIds = new ConcurrentHashMap<>();
+		try {
+			CountDownLatch latchOPaths = new CountDownLatch(paths.size());
+			for (String path : paths) {
+				executorForStructure.execute(() -> {
+					try {
+						file2CommitIds.put(path, gitExtractor.getProjectFileChangeCommitIds(path, commitTimeSince));
+					} catch (Exception e) {
+						LOGGER.error(path + " " + e.getMessage());
+						e.printStackTrace();
+					} finally {
+						latchOPaths.countDown();
+					}
+				});
+			}
+			// 待所有文件解析完成
+			latchOPaths.await();
+		} finally {
+			executorForStructure.shutdown();
+		}
+		return  file2CommitIds;
 	}
 	
 	private void logEndOfOtherAnalyse(String start) {

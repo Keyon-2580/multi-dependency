@@ -12,10 +12,10 @@ import java.util.List;
 @Repository
 public interface MetricRepository extends Neo4jRepository<Metric, Long> {
 
-    @Query("MATCH p=(t:Type)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(t) = $typeId RETURN m")
+    @Query("MATCH p=(t:Type)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(t) = $typeId RETURN m;")
     Metric findTypeMetric(@Param("typeId") Long typeId);
 
-    @Query("MATCH p=(:Type)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m")
+    @Query("MATCH p=(:Type)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m;")
     List<Metric> findTypeMetric();
 
     @Query("MATCH p=(file:ProjectFile)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(file) = $fileId RETURN m;")
@@ -45,7 +45,7 @@ public interface MetricRepository extends Neo4jRepository<Metric, Long> {
     @Query("MATCH p=(project:Project)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(project) = $projectId RETURN m")
     Metric findProjectMetric(@Param("projectId") Long projectId);
 
-    @Query("MATCH p=(:Project)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m")
+    @Query("MATCH p=(:Project)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m;")
     List<Metric> findProjectMetric();
 
     @Query("MATCH p=(:Project)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m limit 10;")
@@ -54,9 +54,9 @@ public interface MetricRepository extends Neo4jRepository<Metric, Long> {
     @Query("MATCH p=(:Project)-[r:" + RelationType.str_HAS + "]->(m:Metric) delete r, m;")
     void deleteAllProjectMetric();
 
-    @Query("MATCH p=(commit:Commit)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(commit) = $commitId RETURN m")
+    @Query("MATCH p=(commit:Commit)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(commit) = $commitId RETURN m;")
     Metric findCommitMetric(@Param("commitId") Long commitId);
 
-    @Query("MATCH p=(:Commit)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m")
+    @Query("MATCH p=(:Commit)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m;")
     List<Metric> findCommitMetric();
 }
