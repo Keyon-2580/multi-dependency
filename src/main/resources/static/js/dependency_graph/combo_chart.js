@@ -223,7 +223,7 @@ G6.registerNode('pie-node', {
 
 const grid = new G6.Grid();
 const tooltip = new G6.Tooltip({
-    fixToNode: [1.5, 0],
+    fixToNode: [1.5, 2],
     getContent(e) {
         const outDiv = document.createElement('div');
         outDiv.style.width = '500px';
@@ -482,111 +482,74 @@ function DrawComboChart(json_data){
         const { item: node_click } = evt;
         let node;
         if(last_click_node === ""){
-            last_click_node = node_click._cfg.id;
-            graph.setItemState(node_click, 'selected', true);
-
-            const node_edges = node_click.getEdges();
-
-            node_edges.forEach(function (edge){
-                if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
-                    node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
-                    updatePieNode(node);
-                    graph.setItemState(node, 'selected', true);
-                    graph.updateItem(edge, EDGE_CLICK_MODEL);
-                }else{
-                    // console.log(item2);
-                    edge._cfg.model.children.forEach(link => {
-                        node = getOtherEndNode(link, node_click._cfg.id);
-                        graph.setItemState(node, 'selected', true);
-                        updatePieNode(node);
-                        link.split_edges.forEach(n => {
-                            graph.updateItem(n.id, EDGE_CLICK_MODEL);
-                        })
-                    })
-                }
-            });
+            showRelevantNodeAndEdge(node_click);
         }else if(last_click_node === node_click._cfg.id){
             last_click_node = "";
-            graph.setItemState(node_click, 'selected', false);
-
-            const node_edges = node_click.getEdges();
-
-            node_edges.forEach(function (edge){
-                if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
-                    node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
-                    graph.setItemState(node, 'selected', false);
-                    deletePieNode(node);
-                    if(node_click._cfg.model.inOutNode === 1){
-                        graph.updateItem(edge, EDGE_NORMAL_MODEL);
-                    }else{
-                        graph.updateItem(edge, EDGE_INNER_MODEL);
-                    }
-
-                }else{
-                    edge._cfg.model.children.forEach(link => {
-                        node = getOtherEndNode(link, node_click._cfg.id);
-                        graph.setItemState(node, 'selected', false);
-                        deletePieNode(node);
-                        link.split_edges.forEach(n => {
-                            graph.updateItem(n.id, EDGE_NORMAL_MODEL);
-                        })
-                    })
-                }
-            });
+            deleteRelevantNodeAndEdge(node_click);
         }else{
             const lastClickNode = graph.findById(last_click_node);
-            graph.setItemState(lastClickNode, 'selected', false);
-            const node_edges_formal = lastClickNode.getEdges();
 
-            node_edges_formal.forEach(function (edge){
-                if(edge._cfg.model.inner_edge === 1 || lastClickNode._cfg.model.inOutNode === 1){
-                    node = getOtherEndNode(edge._cfg.model, last_click_node);
-                    graph.setItemState(node, 'selected', false);
-                    deletePieNode(node);
-                    if(node_click._cfg.model.inOutNode === 1){
-                        graph.updateItem(edge, EDGE_NORMAL_MODEL);
-                    }else{
-                        graph.updateItem(edge, EDGE_INNER_MODEL);
-                    }
-                }else{
-                    edge._cfg.model.children.forEach(link => {
-                        node = getOtherEndNode(link, last_click_node);
-                        graph.setItemState(node, 'selected', false);
-                        deletePieNode(node);
-                        link.split_edges.forEach(n => {
-                            graph.updateItem(n.id, EDGE_NORMAL_MODEL);
-                        })
-                    })
-                }
-            });
-
-            last_click_node = node_click._cfg.id;
-
-            graph.setItemState(node_click, 'selected', true);
-
-            const node_edges = node_click.getEdges();
-
-            node_edges.forEach(function (edge){
-                if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
-                    node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
-                    graph.setItemState(node, 'selected', true);
-                    updatePieNode(node);
-                    graph.updateItem(edge, EDGE_CLICK_MODEL);
-                }else{
-                    edge._cfg.model.children.forEach(link => {
-                        node = getOtherEndNode(link, node_click._cfg.id);
-                        graph.setItemState(node, 'selected', true);
-                        updatePieNode(node);
-                        link.split_edges.forEach(n => {
-                            graph.updateItem(n.id, EDGE_CLICK_MODEL);
-                        })
-                    })
-                }
-            });
-
+            deleteRelevantNodeAndEdge(lastClickNode);
+            showRelevantNodeAndEdge(node_click);
         }
 
         // graph.setItemState(node_click, 'active', true);
+    });
+}
+
+//显示与该节点相关的连线和节点
+function showRelevantNodeAndEdge(node_click){
+    last_click_node = node_click._cfg.id;
+    graph.setItemState(node_click, 'selected', true);
+
+    const node_edges = node_click.getEdges();
+
+    node_edges.forEach(function (edge){
+        if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
+            node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
+            updatePieNode(node);
+            graph.setItemState(node, 'selected', true);
+            graph.updateItem(edge, EDGE_CLICK_MODEL);
+        }else{
+            // console.log(item2);
+            edge._cfg.model.children.forEach(link => {
+                node = getOtherEndNode(link, node_click._cfg.id);
+                graph.setItemState(node, 'selected', true);
+                updatePieNode(node);
+                link.split_edges.forEach(n => {
+                    graph.updateItem(n.id, EDGE_CLICK_MODEL);
+                })
+            })
+        }
+    });
+}
+
+//删除与该节点相关的连线和节点
+function deleteRelevantNodeAndEdge(node_click){
+    graph.setItemState(node_click, 'selected', false);
+    const node_edges = node_click.getEdges();
+
+    node_edges.forEach(function (edge){
+        if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
+            node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
+            graph.setItemState(node, 'selected', false);
+            deletePieNode(node);
+            if(node_click._cfg.model.inOutNode === 1){
+                graph.updateItem(edge, EDGE_NORMAL_MODEL);
+            }else{
+                graph.updateItem(edge, EDGE_INNER_MODEL);
+            }
+
+        }else{
+            edge._cfg.model.children.forEach(link => {
+                node = getOtherEndNode(link, node_click._cfg.id);
+                graph.setItemState(node, 'selected', false);
+                deletePieNode(node);
+                link.split_edges.forEach(n => {
+                    graph.updateItem(n.id, EDGE_NORMAL_MODEL);
+                })
+            })
+        }
     });
 }
 
@@ -602,6 +565,11 @@ function getOtherEndNode(model, id){
 }
 
 function filterLinks(){
+    if(last_click_node !== ""){
+        const lastClickNode = graph.findById(last_click_node);
+        deleteRelevantNodeAndEdge(lastClickNode);
+    }
+
     let filter = GetFilterCondition();
     let temp_edges = [];
     actual_edges.forEach(edge =>{
@@ -1065,16 +1033,16 @@ var loadPageData = function () {
         type : "GET",
         url : "/project/all/name",
         success : function(result) {
-            for(var i = 0; i < result.length; i++){
-                var name_temp = {};
+            for(let i = 0; i < result.length; i++){
+                let name_temp = {};
                 // console.log(x);
                 name_temp["id"] = result[i].id;
                 name_temp["name"] = result[i].name;
                 projectlist.push(name_temp);
 
-                var html = ""
+                let html = ""
                 html += "<div class = \"combo_div\"><select id = \"multipleProjectSelect\" class=\"selectpicker\" multiple>";
-                for(var i = 0; i < projectlist.length; i++) {
+                for(let i = 0; i < projectlist.length; i++) {
                     if (i === 0) {
                         html += "<option selected=\"selected\" value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
                     } else {
