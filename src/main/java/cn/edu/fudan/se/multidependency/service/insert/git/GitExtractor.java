@@ -272,14 +272,23 @@ public class GitExtractor implements Closeable {
         return filePaths;
     }
 
-    public List<String> getProjectFileChangeCommitIds(String gitFilePath) {
+    public List<String> getProjectFileChangeCommitIds(String gitFilePath, String since) {
         List<String> commitIds = new ArrayList<>();
         try {
             LogCommand log = git.log();
             log.addPath(gitFilePath);
+            RevFilter filter = RevFilter.NO_MERGES;
 
-            Iterable<RevCommit> logMsgs = log.setRevFilter(RevFilter.NO_MERGES).call();
+            if(!"".equals(since)){
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constant.TIMESTAMP);
+                Date sinceDate = simpleDateFormat.parse(since);
+
+                RevFilter after = CommitTimeRevFilter.after(sinceDate);
+                filter = AndRevFilter.create(filter, after);
+            }
+            Iterable<RevCommit> logMsgs = log.setRevFilter(filter).call();
             List<RevCommit> commits = Lists.newArrayList(logMsgs.iterator());
+
             Collections.sort(commits, new Comparator<RevCommit>() {
                 @Override
                 public int compare(RevCommit o1, RevCommit o2) {
@@ -293,6 +302,8 @@ public class GitExtractor implements Closeable {
         } catch (NoHeadException e) {
             e.printStackTrace();
         } catch (GitAPIException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
             e.printStackTrace();
         }
 
@@ -311,6 +322,17 @@ public class GitExtractor implements Closeable {
             e.printStackTrace();
         }
         return treeParser;
+    }
+
+    public RevCommit getCommitByCommitId(String objectId) {
+        RevCommit commit = null;
+        try (RevWalk revWalk = new RevWalk(repository)) {
+            commit = revWalk.parseCommit(ObjectId.fromString(objectId));
+            revWalk.dispose();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return commit;
     }
 
     public List<String> getCommitFilesPath(RevCommit commit) {

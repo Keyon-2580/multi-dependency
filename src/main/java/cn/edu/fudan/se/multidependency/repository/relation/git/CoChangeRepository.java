@@ -38,37 +38,35 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
     		"and (c.merge=false or c.merge is null) " + 
     		"with f1,f2,count(c) as times " + 
     		"where times >= $minCoChangeTimes " +
-    		"create p=(f1)-[:" + RelationType.str_CO_CHANGE 
-    		+ "{times:times}]->(f2) with p return count(p)")
-    int createCoChangesRemoveMerge(@Param("minCoChangeTimes") int minCoChangeTimes);
+    		"create p=(f1)-[:" + RelationType.str_CO_CHANGE + "{times:times}]->(f2);")
+    void createCoChangesRemoveMerge(@Param("minCoChangeTimes") int minCoChangeTimes);
 
     @Query("match (f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
     		"]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile) " + 
     		"where id(f1) < id(f2) " + 
     		"with f1,f2,count(c) as times " + 
     		"where times >= $minCoChangeTimes " +
-    		"create p=(f1)-[:" + RelationType.str_CO_CHANGE 
-    		+ "{times:times}]->(f2) with p return count(p)")
-    int createCoChanges(@Param("minCoChangeTimes") int minCoChangeTimes);
+    		"create (f1)-[:" + RelationType.str_CO_CHANGE + "{times:times}]->(f2);")
+    void createCoChanges(@Param("minCoChangeTimes") int minCoChangeTimes);
     
     @Query("match (c1:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f1:ProjectFile)-[co:CO_CHANGE]-> " +
             "(f2:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c2:Commit) " +
             "with f1, f2, co, count(distinct c1) as times1, count(distinct c2) as times2 " +
-            "set co.node1ChangeTimes = times1, co.node2ChangeTimes = times2 with co return count(co)")
-    int updateCoChangesForFile();
+            "set co.node1ChangeTimes = times1, co.node2ChangeTimes = times2;")
+    void updateCoChangesForFile();
 
     @Query("match (p1:Package)-[:CONTAIN]->(f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile)<-[:CONTAIN]-(p2:Package) " +
             "where id(p1) < id(p2)  " +
             "with p1, p2, count(distinct c) as moduleCoChangeTimes " +
             "where moduleCoChangeTimes >= $minCoChangeTimes " +
-            "create p = (p1) - [:CO_CHANGE{times: moduleCoChangeTimes } ] -> (p2) with p return count(p)")
-    int createCoChangesForModule(@Param("minCoChangeTimes") int minCoChangeTimes);
+            "create (p1) - [:CO_CHANGE{times: moduleCoChangeTimes } ] -> (p2);")
+    void createCoChangesForModule(@Param("minCoChangeTimes") int minCoChangeTimes);
 
     @Query("match (c1:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f1:ProjectFile)<-[:CONTAIN]-(p1:Package)-[co:CO_CHANGE]-> " +
             "(p2:Package)-[:CONTAIN]->(f2:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c2:Commit) " +
             "with p1, p2, co, count(distinct c1) as times1, count(distinct c2) as times2 " +
-            "set co.node1ChangeTimes = times1, co.node2ChangeTimes = times2 with co return count(co)")
-    int updateCoChangesForModule();
+            "set co.node1ChangeTimes = times1, co.node2ChangeTimes = times2;")
+    void updateCoChangesForModule();
     
     @Query("match p= (f:ProjectFile)-[:" + RelationType.str_CO_CHANGE + "]->(:ProjectFile) where id(f)=$fileId return p")
     List<CoChange> cochangesRight(@Param("fileId") long fileId);
