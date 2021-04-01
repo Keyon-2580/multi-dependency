@@ -77,8 +77,8 @@ public class ProjectServiceImpl implements ProjectService{
 
         boolean isFilter = false;
         if (isFilter) {
-            selectedPcks = NodeAndRelationFilter.listOfPackagesForAtlas();
-//            selectedPcks = NodeAndRelationFilter.listOfPackagesForCassandra();
+//            selectedPcks = NodeAndRelationFilter.listOfPackagesForAtlas();
+            selectedPcks = NodeAndRelationFilter.listOfPackagesForCassandra();
         }
 
         JSONArray result = new JSONArray();
@@ -206,7 +206,7 @@ public class ProjectServiceImpl implements ProjectService{
 
             JSONArray combo = new JSONArray();
 
-            for(PackageStructure pckstru2 : childrenPackagesnew.get(0).getChildrenPackages()){
+            for(PackageStructure pckstru2 : childrenPackagesnew){
                 JSONObject temp = new JSONObject();
                 List<PackageStructure> pckList = pckstru2.getChildrenPackages();
                 JSONArray temp_children = new JSONArray();
@@ -360,19 +360,17 @@ public class ProjectServiceImpl implements ProjectService{
 
         for(DependsOn dependsOn : dependsOnList){
             JSONObject link = new JSONObject();
-            if(NodeAndRelationFilter.isContainSelectedRelations(dependsOn)) {
-                link.put("type", "dependson");
-                link.put("source_id", dependsOn.getStartNode().getId().toString());
-                link.put("target_id", dependsOn.getEndNode().getId().toString());
-                link.put("source_name", dependsOn.getEndNode().getName());
-                link.put("target_name", dependsOn.getEndNode().getName());
-                link.put("pair_id", dependsOn.getStartNode().getId() + "_" + dependsOn.getEndNode().getId());
+            link.put("type", "dependson");
+            link.put("source_id", dependsOn.getStartNode().getId().toString());
+            link.put("target_id", dependsOn.getEndNode().getId().toString());
+            link.put("source_name", dependsOn.getEndNode().getName());
+            link.put("target_name", dependsOn.getEndNode().getName());
+            link.put("pair_id", dependsOn.getStartNode().getId() + "_" + dependsOn.getEndNode().getId());
 
-                link.put("dependsOnTypes", dependsOn.getDependsOnType());
-                link.put("dependsOnTimes", dependsOn.getTimes());
-                link.put("dependsOnWeightedTimes", dependsOn.getWeightedTimes());
-                result.add(link);
-            }
+            link.put("dependsOnTypes", dependsOn.getDependsOnType());
+            link.put("dependsOnTimes", dependsOn.getTimes());
+            link.put("dependsOnWeightedTimes", dependsOn.getWeightedTimes());
+            result.add(link);
         }
 
         for(Clone clone : cloneList){
@@ -391,7 +389,7 @@ public class ProjectServiceImpl implements ProjectService{
         }
 
         for(CoChange coChange : coChangeList){
-            if(coChange.getTimes() > 20){
+            if(coChange.getTimes() > 4){
                 JSONObject link = new JSONObject();
                 link.put("type", "cochange");
                 link.put("source_id", coChange.getNode1().getId().toString());
@@ -432,17 +430,15 @@ public class ProjectServiceImpl implements ProjectService{
             for (ProjectFile colFile : files) {
                 DependsOn dependsOn = dependsOnRepository.findDependsOnBetweenFiles(rowFile.getId(), colFile.getId());
                 if (dependsOn != null) {
-                    if(NodeAndRelationFilter.isContainSelectedRelations(dependsOn)){
-                        JSONObject dependsOnObject = new JSONObject();
-                        dependsOnObject.put("source_name", rowFile.getName());
-                        dependsOnObject.put("target_name", colFile.getName());
-                        dependsOnObject.put("source_id", rowFile.getId().toString());
-                        dependsOnObject.put("target_id", colFile.getId().toString());
-                        dependsOnObject.put("pair_id", rowFile.getId().toString() + "_" + colFile.getId().toString());
-                        dependsOnObject.put("dependsOnTypes", dependsOn.getDependsOnType());
-                        dependsOnObject.put("type", "dependson");
-                        links.add(dependsOnObject);
-                    }
+                    JSONObject dependsOnObject = new JSONObject();
+                    dependsOnObject.put("source_name", rowFile.getName());
+                    dependsOnObject.put("target_name", colFile.getName());
+                    dependsOnObject.put("source_id", rowFile.getId().toString());
+                    dependsOnObject.put("target_id", colFile.getId().toString());
+                    dependsOnObject.put("pair_id", rowFile.getId().toString() + "_" + colFile.getId().toString());
+                    dependsOnObject.put("dependsOnTypes", dependsOn.getDependsOnType());
+                    dependsOnObject.put("type", "dependson");
+                    links.add(dependsOnObject);
                 }
 
                 List<Clone> clones = cloneRepository.judgeCloneByFileId(rowFile.getId(), colFile.getId());

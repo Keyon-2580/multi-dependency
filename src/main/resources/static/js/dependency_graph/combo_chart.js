@@ -9,7 +9,7 @@ let last_click_node = "";
 
 const COLOR_DEPENDSON = '#FFA500';
 const COLOR_CLONE = '#B04206';
-const COLOR_COCHANGE = '#77F3FC';
+const COLOR_COCHANGE = '#a29bfe';
 const COLOR_LINK_NORMAL = '#f7c8ca';
 const COLOR_LINK_INNER = '#d8d5d5';
 const COLOR_LINK_CLICK = '#bd0303';
@@ -264,7 +264,7 @@ const graph = new G6.Graph({
             cursor: "pointer",
             // fill: "#cce9f8",
             // stroke: "#a0d6f4",
-            fill: "rgb(226,230,239)",
+            fill: "rgb(129,236,236)",
             stroke: "rgb(113,151,234)",
 
         },

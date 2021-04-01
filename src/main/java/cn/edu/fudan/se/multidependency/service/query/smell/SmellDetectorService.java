@@ -389,7 +389,7 @@ public class SmellDetectorService {
 				smell.setProjectName(project1.getName() + "+" + project2.getName());
 			}
 			smell.setType(SmellType.SIMILAR_COMPONENTS);
-			smell.setLevel(SmellLevel.FILE);
+			smell.setLevel(SmellLevel.PACKAGE);
 			smells.add(smell);
 			Contain contain1 = new Contain(smell, packageSimilar.getNode1());
 			Contain contain2 = new Contain(smell, packageSimilar.getNode2());
