@@ -59,11 +59,11 @@ G6.registerNode('pie-node', {
                     // console.log(item);
                     for(let key in item.dependency){
                         switch (key){
-                            // case "dependsonDegree":
-                            //     if(typeof(linkTypeNum.find(n => n === COLOR_DEPENDSON)) === "undefined"){
-                            //         linkTypeNum.push(COLOR_DEPENDSON);
-                            //     }
-                            //     break;
+                            case "dependsonDegree":
+                                if(typeof(linkTypeNum.find(n => n === COLOR_DEPENDSON)) === "undefined"){
+                                    linkTypeNum.push(COLOR_DEPENDSON);
+                                }
+                                break;
                             case "cloneDegree":
                                 if(typeof(linkTypeNum.find(n => n === COLOR_CLONE)) === "undefined"){
                                     linkTypeNum.push(COLOR_CLONE);
@@ -720,15 +720,17 @@ function splitLinks(links_data){
                 dependency: {}
             };
 
-            if(edge.link_type !== "dependson"){
-                temp.dependency[edge.link_type + "Degree"] = 1;
-            }
+            temp.dependency[edge.link_type + "Degree"] = 1;
+            // if(edge.link_type !== "dependson"){
+            //     temp.dependency[edge.link_type + "Degree"] = 1;
+            // }
 
             source_pienode.push(temp);
         }else{
-            if(edge.link_type !== "dependson") {
-                temp_source_pienode.dependency[edge.link_type + "Degree"] = 1;
-            }
+            temp_source_pienode.dependency[edge.link_type + "Degree"] = 1;
+            // if(edge.link_type !== "dependson") {
+            //     temp_source_pienode.dependency[edge.link_type + "Degree"] = 1;
+            // }
         }
 
         if(typeof(temp_target_pienode) === "undefined"){
@@ -738,15 +740,17 @@ function splitLinks(links_data){
                 dependency: {}
             };
 
-            if(edge.link_type !== "dependson") {
-                temp.dependency[edge.link_type + "Degree"] = 1;
-            }
+            temp.dependency[edge.link_type + "Degree"] = 1;
+            // if(edge.link_type !== "dependson") {
+            //     temp.dependency[edge.link_type + "Degree"] = 1;
+            // }
 
             target_pienode.push(temp);
         }else{
-            if(edge.link_type !== "dependson") {
-                temp_target_pienode.dependency[edge.link_type + "Degree"] = 1;
-            }
+            temp_target_pienode.dependency[edge.link_type + "Degree"] = 1;
+            // if(edge.link_type !== "dependson") {
+            //     temp_target_pienode.dependency[edge.link_type + "Degree"] = 1;
+            // }
         }
 
         if(edge.inner_edge === 0){
