@@ -243,7 +243,9 @@ const tooltip = new G6.Tooltip({
                 `<b class="combo_label">${e.item.getModel().id}</b>
             <ul>
               <li>source: ${e.item.getModel().source_name}</li>
+              <li>source_id: ${e.item.getModel().source}</li>
               <li>target: ${e.item.getModel().target_name}</li>
+              <li>target_id: ${e.item.getModel().target}</li>
             </ul>`
         return outDiv
     },
@@ -372,6 +374,7 @@ function DrawComboChart(json_data){
 
     link_data.forEach(function (link){
         let temp_link = {};
+        temp_link["id"] = link.source_id + "_" + link.target_id + "_" + link.type;
         temp_link["source"] = link.source_id;
         temp_link["target"] = link.target_id;
         temp_link["source_name"] = link.source_name;
@@ -1000,7 +1003,7 @@ var GetFilterCondition = function(){
     // if(value[0] === "IMPORT"){
     //     value.push("INCLUDE");
     // }
-    temp_dependson["dependsTypeSelect"] = value;
+    temp_dependson["dependsTypeSelect"] = $("#dependsTypeSelect").val();
 
     temp_clone["cloneSimilarity"] = $("#cloneSimilarity").prop("checked") ? 1 : 0;
     temp_clone["similarityCompareSelectBelow"] = $("#similarityCompareSelectBelow").val();
