@@ -6,6 +6,7 @@ let smell_data_global = [] //存放异味信息
 let smell_hover_nodes = [] //存放当前鼠标悬停异味节点数组
 let nodeId = 1;
 let last_click_node = "";
+let repaint_flag = false; //判断是否为重新绘制
 
 const COLOR_DEPENDSON = '#FFA500';
 const COLOR_CLONE = '#B04206';
@@ -331,6 +332,10 @@ const graph = new G6.Graph({
 });
 
 function DrawComboChart(json_data){
+    data = {};
+    smell_data_global = [];
+    in_out_list = [];
+    actual_edges = [];
     let package_data = json_data[0]["result"]["nodes"];
     let link_data = json_data[1]["links"];
     smell_data_global = json_data[2]["smell"];
@@ -440,61 +445,65 @@ function DrawComboChart(json_data){
 
     $('#multipleProjectsButton').css('background-color', '#efefef');
 
-    graph.on('node:mouseenter', (evt) => {
-        const { item } = evt;
-        const smellId = item._cfg.model.smellId;
+    if(repaint_flag === false){
+        graph.on('node:mouseenter', (evt) => {
+            const { item } = evt;
+            const smellId = item._cfg.model.smellId;
 
-        if(smellId !== 0){
-            smell_data_global.forEach(smell => {
-                if(smell.id === smellId){
-                    smell.nodes.forEach(node_data => {
-                        const node = graph.findById(node_data.id.split("_")[1]);
-                        smell_hover_nodes.push(node);
-                        graph.setItemState(node, 'smell_hover', true);
-                    })
-                }
-            })
-        }
-    });
-
-    graph.on('node:mouseleave', (evt) => {
-        const { item } = evt;
-
-        const smellId = item._cfg.model.smellId;
-
-        if(smellId !== 0) {
-            smell_hover_nodes.forEach(node => {
-                graph.setItemState(node, 'smell_hover', false);
-            })
-
-            smell_hover_nodes = [];
-        }
-    });
-
-    graph.on('canvas:click', (evt) => {
-        graph.getCombos().forEach((combo) => {
-            graph.clearItemStates(combo);
+            if(smellId !== 0){
+                smell_data_global.forEach(smell => {
+                    if(smell.id === smellId){
+                        smell.nodes.forEach(node_data => {
+                            const node = graph.findById(node_data.id.split("_")[1]);
+                            smell_hover_nodes.push(node);
+                            graph.setItemState(node, 'smell_hover', true);
+                        })
+                    }
+                })
+            }
         });
-    });
 
-    //节点点击函数
-    graph.on('node:click', (evt) => {
-        const { item: node_click } = evt;
-        let node;
-        if(last_click_node === ""){
-            showRelevantNodeAndEdge(node_click);
-        }else if(last_click_node === node_click._cfg.id){
-            last_click_node = "";
-            deleteRelevantNodeAndEdge(node_click);
-        }else{
-            const lastClickNode = graph.findById(last_click_node);
+        graph.on('node:mouseleave', (evt) => {
+            const { item } = evt;
 
-            deleteRelevantNodeAndEdge(lastClickNode);
-            showRelevantNodeAndEdge(node_click);
-        }
+            const smellId = item._cfg.model.smellId;
 
-        // graph.setItemState(node_click, 'active', true);
-    });
+            if(smellId !== 0) {
+                smell_hover_nodes.forEach(node => {
+                    graph.setItemState(node, 'smell_hover', false);
+                })
+
+                smell_hover_nodes = [];
+            }
+        });
+
+        graph.on('canvas:click', (evt) => {
+            graph.getCombos().forEach((combo) => {
+                graph.clearItemStates(combo);
+            });
+        });
+
+        //节点点击函数
+        graph.on('node:click', (evt) => {
+            const { item: node_click } = evt;
+            let node;
+            if(last_click_node === ""){
+                showRelevantNodeAndEdge(node_click);
+            }else if(last_click_node === node_click._cfg.id){
+                last_click_node = "";
+                deleteRelevantNodeAndEdge(node_click);
+            }else{
+                const lastClickNode = graph.findById(last_click_node);
+
+                deleteRelevantNodeAndEdge(lastClickNode);
+                showRelevantNodeAndEdge(node_click);
+            }
+
+            // graph.setItemState(node_click, 'active', true);
+        });
+
+        repaint_flag = true;
+    }
 }
 
 //显示与该节点相关的连线和节点
@@ -987,10 +996,10 @@ var GetFilterCondition = function(){
     temp_dependson["dependencyTimes"] = $("#dependencyTimes").val();
 
     temp_dependson["dependsOnType"] = $("#dependsOnType").prop("checked") ? 1 : 0;
-    let value = $("#dependsTypeSelect").val();
-    if(value[0] === "IMPORT"){
-        value.push("INCLUDE");
-    }
+    // let value = $("#dependsTypeSelect").val();
+    // if(value[0] === "IMPORT"){
+    //     value.push("INCLUDE");
+    // }
     temp_dependson["dependsTypeSelect"] = value;
 
     temp_clone["cloneSimilarity"] = $("#cloneSimilarity").prop("checked") ? 1 : 0;
@@ -1366,7 +1375,6 @@ function showFilterWindow(){
                 };
             }
         }
-        console.log(ids);
         $.ajax({
             url: "/project/pckfilter",
             type: "POST",
@@ -1390,8 +1398,7 @@ function showFilterWindow(){
 }
 
 //筛选项目框内项目树结构
-var showZTree = function(nodes, container = $("#ztree")) {
-    console.log(nodes);
+function showZTree(nodes, container = $("#ztree")) {
     var setting = {
         check: {
             enable: true,
@@ -1408,19 +1415,15 @@ var showZTree = function(nodes, container = $("#ztree")) {
         callback: {
             onClick: function(event, treeId, treeNode) {
                 var id = treeNode.id;
-                console.log(id);
                 if(id <= 0) {
                     return ;
                 }
                 var type = treeNode.type;
-                console.log(type);
                 if(type == "Project") {
                     window.open("/project/index?id=" + id);
                 }
             },
             onExpand: function(event, treeId, treeNode) {
-                console.log(treeNode);
-                console.log(treeNode.type);
                 var id = treeNode.id;
                 var isParent =  treeNode.isParent;
                 var children = treeNode.children;
@@ -1525,7 +1528,6 @@ var showZTree = function(nodes, container = $("#ztree")) {
                             if(result.result == "success") {
                                 var projectZTreeObj = $.fn.zTree.getZTreeObj("treeProjects");
                                 var selectedNode = projectZTreeObj.getNodeByParam("id", id);
-                                console.log(result.value);
                                 var newNodes = projectZTreeObj.addNodes(selectedNode, result.value);
                                 projectZTreeObj.expandNode(selectedNode, true, false, true, true);
                                 $("#iconProject").text("");
@@ -1546,7 +1548,6 @@ var showZTree = function(nodes, container = $("#ztree")) {
                                 var projectZTreeObj = $.fn.zTree.getZTreeObj("treeProjects");
                                 var selectedNode = projectZTreeObj.getNodeByParam("id", id);
 //										var newNodes = projectZTreeObj.addNodes(selectedNode, [{name:"eee"}, {name:"eee"}]);
-                                console.log(result.value);
                                 var newNodes = projectZTreeObj.addNodes(selectedNode, result.value);
                                 projectZTreeObj.expandNode(selectedNode, true, false, true, true);
                                 $("#iconProject").text("");
@@ -1562,14 +1563,13 @@ var showZTree = function(nodes, container = $("#ztree")) {
     var zTreeObj = $.fn.zTree.init(container, setting, zNodes);
 }
 //项目树结构
-var _project = function() {
+function _project() {
     var showProjectZTree = function(page) {
         $("#iconProject").text("搜索中...");
         $.ajax({
             type: 'GET',
             url: "/project/all/ztree/project/" + page,
             success: function(result) {
-                console.log(result);
                 if(result.result == "success") {
                     showZTree(result.values, $("#treeProjects"));
                     $("#iconProject").text("");
@@ -1582,7 +1582,6 @@ var _project = function() {
         type: 'GET',
         url: "/project/pages/count",
         success: function(result) {
-            console.log(result);
             html = "";
             for(var i = 0; i < result; i++) {
                 html += "<a class='treeProjectsPage_a page_a' name='" + i + "'>" + (i + 1) + "</a>&nbsp;";
