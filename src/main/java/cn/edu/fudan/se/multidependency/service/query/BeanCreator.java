@@ -156,6 +156,8 @@ public class BeanCreator {
 			createDependsOnWithTimesInNode(dependsOnRepository,NodeLabelType.Type);
 			dependsOnRepository.deleteNullAggregationDependsOnInTypes();
 
+//			dependsOnRepository.createDependsOnWithImportInFiles();
+			dependsOnRepository.createDependsOnWithIncludeInFiles();
 			dependsOnRepository.createDependsOnWithExtendsInFiles();
 			dependsOnRepository.createDependsOnWithImplementsInFiles();
 			dependsOnRepository.createDependsOnWithImplementsCInFiles();
@@ -163,7 +165,7 @@ public class BeanCreator {
 			dependsOnRepository.createDependsOnWithLocalVariableInFiles();
 			dependsOnRepository.createDependsOnWithAnnotationInFiles();
 			dependsOnRepository.createDependsOnWithCallInFiles();
-			dependsOnRepository.createDependsOnWithImpllinkInFiles();
+//			dependsOnRepository.createDependsOnWithImpllinkInFiles();
 			dependsOnRepository.createDependsOnWithCreateInFiles();
 			dependsOnRepository.createDependsOnWithCastInFiles();
 			dependsOnRepository.createDependsOnWithThrowInFiles();

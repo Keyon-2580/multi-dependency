@@ -145,18 +145,25 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query("match p=(:Type)-[r:DEPENDS_ON]->() where r.weightedTimes is null delete r;")
 	void deleteNullTimesDependsOnInTypes();
 
+	String FILE_LEFT_NEW = "match p=(f1:ProjectFile)-[: ";
+	String FILE_MIDDLE_NEW = "]->()<-[:CONTAIN*0..]-(f2:ProjectFile) where f1 <> f2 " +
+			"create (f1)-[:DEPENDS_ON{dependsOnType : \"";
+	String FILE_MIDDLE2_NEW = "\", times : ";
+	String FILE_RIGHT_NEW = "}]->(f2);";
+
+	@Query(FILE_LEFT_NEW + RelationType.str_IMPORT + FILE_MIDDLE_NEW + RelationType.str_IMPORT +
+			FILE_MIDDLE2_NEW + "1" + FILE_RIGHT_NEW)
+	void createDependsOnWithImportInFiles();
+
+	@Query("match p=(f1:ProjectFile)-[:" + RelationType.str_INCLUDE + "]->(f2:ProjectFile) where f1 <> f2 " +
+			"create (f1)-[:DEPENDS_ON{dependsOnType : \'" + RelationType.str_INCLUDE +"\', times : 1 }]->(f2);")
+	void createDependsOnWithIncludeInFiles();
+
 	String FILE_LEFT = "match p=(f1:ProjectFile)-[:CONTAIN*0..]->()-[r: ";
 	String FILE_MIDDLE = "]->()<-[:CONTAIN*0..]-(f2:ProjectFile) where f1 <> f2 " +
 			"create (f1)-[:DEPENDS_ON{dependsOnType : \"";
 	String FILE_MIDDLE2 = "\", times : ";
 	String FILE_RIGHT = "}]->(f2);";
-
-	@Query(FILE_LEFT + RelationType.str_IMPORT + FILE_MIDDLE + RelationType.str_IMPORT +
-			FILE_MIDDLE2 + "1" + FILE_RIGHT)
-	void createDependsOnWithImportInFiles();
-	@Query(FILE_LEFT + RelationType.str_INCLUDE + FILE_MIDDLE + RelationType.str_INCLUDE +
-			FILE_MIDDLE2 + "1" + FILE_RIGHT)
-	void createDependsOnWithIncludeInFiles();
 	@Query(FILE_LEFT + RelationType.str_EXTENDS + FILE_MIDDLE + RelationType.str_EXTENDS +
 			FILE_MIDDLE2 + "1" + FILE_RIGHT)
 	void createDependsOnWithExtendsInFiles();

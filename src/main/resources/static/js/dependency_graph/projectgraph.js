@@ -141,15 +141,17 @@ var loadPageData = function () {
                 "<option value=\"INCLUDE\">INCLUDE</option>" +
                 "<option value=\"EXTENDS\">EXTENDS</option>" +
                 "<option value=\"IMPLEMENTS\">IMPLEMENTS</option>" +
-                "<option value=\"ASSOCIATION\">ASSOCIATION</option>" +
-                "<option value=\"ANNOTATION\">ANNOTATION</option>" +
+                "<option value=\"GLOBAL_VARIABLE\">GLOBAL_VARIABLE</option>" +
+                "<option value=\"LOCAL_VARIABLE\">LOCAL_VARIABLE</option>" +
                 "<option value=\"CALL\">CALL</option>" +
+                "<option value=\"ANNOTATION\">ANNOTATION</option>" +
                 "<option value=\"CAST\">CAST</option>" +
                 "<option value=\"CREATE\">CREATE</option>" +
                 "<option value=\"USE\">USE</option>" +
                 "<option value=\"PARAMETER\">PARAMETER</option>" +
                 "<option value=\"THROW\">THROW</option>" +
                 "<option value=\"RETURN\">RETURN</option>" +
+                "<option value=\"IMPLEMENTS_C\">IMPLEMENTS_C</option>" +
                 "<option value=\"IMPLLINK\">IMPLLINK</option>" +
                 "</select>" +
                 "</p>";
