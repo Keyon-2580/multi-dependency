@@ -519,17 +519,15 @@ public class ProjectServiceImpl implements ProjectService{
 
                 DependsOn dependsOn = dependsOnRepository.findDependsOnBetweenFiles(rowFile.getId(), colFile.getId());
                 if (dependsOn != null) {
-                    if(NodeAndRelationFilter.isContainSelectedRelations(dependsOn)) {
-                        JSONObject dependsOnObject = new JSONObject();
-                        dependsOnObject.put("source_name", rowFile.getName());
-                        dependsOnObject.put("target_name", colFile.getName());
-                        dependsOnObject.put("source_id", rowFile.getId().toString());
-                        dependsOnObject.put("target_id", colFile.getId().toString());
-                        dependsOnObject.put("pair_id", rowFile.getId().toString() + "_" + colFile.getId().toString());
-                        dependsOnObject.put("dependsOnTypes", dependsOn.getDependsOnType());
-                        dependsOnObject.put("type", "dependson");
-                        linkObjects.add(dependsOnObject);
-                    }
+                    JSONObject dependsOnObject = new JSONObject();
+                    dependsOnObject.put("source_name", rowFile.getName());
+                    dependsOnObject.put("target_name", colFile.getName());
+                    dependsOnObject.put("source_id", rowFile.getId().toString());
+                    dependsOnObject.put("target_id", colFile.getId().toString());
+                    dependsOnObject.put("pair_id", rowFile.getId().toString() + "_" + colFile.getId().toString());
+                    dependsOnObject.put("dependsOnTypes", dependsOn.getDependsOnType());
+                    dependsOnObject.put("type", "dependson");
+                    linkObjects.add(dependsOnObject);
                 }
 
                 List<Clone> clones = cloneRepository.judgeCloneByFileId(rowFile.getId(), colFile.getId());
