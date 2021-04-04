@@ -4,6 +4,16 @@ let in_out_list = [] //存放出度入度节点
 let actual_edges = [] //存放原有的线以及拆分后的线ID
 let smell_data_global = [] //存放异味信息
 let smell_hover_nodes = [] //存放当前鼠标悬停异味节点数组
+let reliable_dependency_list = [];//存放可确定依赖关系
+let unreliable_dependency_list = [];//存放不可信依赖关系
+reliable_dependency_list = [{
+    node1: "194",
+    node2: "198",
+}];
+unreliable_dependency_list = [{
+    node1: "527",
+    node2: "197",
+}];
 let nodeId = 1;
 let last_click_node = "";
 let repaint_flag = false; //判断是否为重新绘制
@@ -293,6 +303,13 @@ const graph = new G6.Graph({
                 fontWeight: 500
             }
         },
+        unreliable: {
+            fill: "#ffffff",
+            lineWidth: 4,
+            shadowBlur: 10,
+            shadowColor: "#df0e23",
+            stroke: "#df0e23",
+        },
     },
     groupByTypes: false,
     modes: {
@@ -458,8 +475,10 @@ function DrawComboChart(json_data){
                     if(smell.id === smellId){
                         smell.nodes.forEach(node_data => {
                             const node = graph.findById(node_data.id.split("_")[1]);
-                            smell_hover_nodes.push(node);
-                            graph.setItemState(node, 'smell_hover', true);
+                            if(typeof(node) !== "undefined"){
+                                smell_hover_nodes.push(node);
+                                graph.setItemState(node, 'smell_hover', true);
+                            }
                         })
                     }
                 })
@@ -577,6 +596,7 @@ function getOtherEndNode(model, id){
 }
 
 function filterLinks(){
+    let unreliable_nodes = [];
     if(last_click_node !== ""){
         const lastClickNode = graph.findById(last_click_node);
         deleteRelevantNodeAndEdge(lastClickNode);
@@ -585,6 +605,25 @@ function filterLinks(){
     let filter = GetFilterCondition();
     let temp_edges = [];
     actual_edges.forEach(edge =>{
+        reliable_dependency_list.forEach(item => {
+            if((edge.source === item.node1 && edge.target === item.node2) ||
+                (edge.source === item.node2 && edge.target === item.node1)){
+                edge.visible = false;
+            }
+        })
+
+        unreliable_dependency_list.forEach(item => {
+            if((edge.source === item.node1 && edge.target === item.node2) ||
+                (edge.source === item.node2 && edge.target === item.node1)){
+                const node1 = graph.findById(item.node1);
+                const node2 = graph.findById(item.node2);
+                unreliable_nodes.push(node1);
+                unreliable_nodes.push(node2);
+                // graph.setItemState(node1, 'unreliable', true);
+                // graph.setItemState(node2, 'unreliable', true);
+            }
+        })
+
         if (filter["dependson"]["checked"] && edge.link_type ==="dependson") {
             let dependson_flag = true;
             if (filter["dependson"]["dependsIntensity"]) {
@@ -709,6 +748,10 @@ function filterLinks(){
         node.toFront();
     });
     graph.paint();
+
+    unreliable_nodes.forEach(item =>{
+        graph.setItemState(item, 'unreliable', true);
+    })
 }
 
 //拆分连线为三段
@@ -963,8 +1006,10 @@ function loadSmell(){
         if(smell.smell_type === smell_type_filter) {
             smell.nodes.forEach(node_data => {
                 const node = graph.findById(node_data.id.split("_")[1]);
-                node._cfg.model.smellId = smell.id;
-                graph.setItemState(node, 'smell_normal', true);
+                if(typeof(node) !== "undefined"){
+                    node._cfg.model.smellId = smell.id;
+                    graph.setItemState(node, 'smell_normal', true);
+                }
             })
         }
     })
