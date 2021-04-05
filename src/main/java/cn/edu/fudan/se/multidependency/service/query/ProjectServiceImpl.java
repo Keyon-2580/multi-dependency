@@ -132,11 +132,12 @@ public class ProjectServiceImpl implements ProjectService{
     private JSONObject joinMultipleProjectsGraphJson(long projectId, String type, Map<String, Boolean> selectedPcks){
         JSONObject result = new JSONObject();
         Project project = nodeService.queryProject(projectId);
+        String language = project.getLanguage();
         ProjectStructure projectStructure = containRelationService.projectStructureInitialize(project);
         Package packageOfProject = projectStructure.getChildren().get(0).getPck();
         List<PackageStructure> childrenPackagesnew = new ArrayList<>();
         for(String pckPath : selectedPcks.keySet()){
-            Package pck = nodeService.queryPackage(pckPath, "java");
+            Package pck = nodeService.queryPackage(pckPath, language);
             if (pck != null) {
                 if(selectedPcks.get(pckPath)){
                     childrenPackagesnew.add(containRelationService.packageStructureInitialize(pck,type));
