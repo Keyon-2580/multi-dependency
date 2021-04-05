@@ -141,13 +141,13 @@ var showCyclicDependencyDetail = function (smells) {
         let files = smell.files;
         let len = files.length + 1;
         html += "<tr>";
-        html += "<td rowspan='" + len + "'>" + index + "</td>";
-        html += "<td rowspan='" + len + "'>" + smell.name + "</td>";
+        html += "<td rowspan='" + len + "' style='vertical-align: middle'>" + index + "</td>";
+        html += "<td rowspan='" + len + "' style='vertical-align: middle'>" + smell.name + "</td>";
         html += "</tr>";
         files.forEach(function (file){
             html += "<tr>";
-            html += "<td>" + file.index + "</td>";
-            html += "<td>" + file.path + "</td>";
+            html += "<td style='vertical-align: middle'>" + file.index + "</td>";
+            html += "<td style='vertical-align: middle'>" + file.path + "</td>";
             html += "</tr>";
         });
         index ++;
