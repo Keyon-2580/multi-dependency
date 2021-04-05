@@ -194,7 +194,7 @@ public class SummaryAggregationDataServiceImpl implements SummaryAggregationData
 		result.setPck2((Package)temp.getNode2());
 		result.addFile1(containRelationService.findPackageContainFiles(pck1));
 		result.addFile2(containRelationService.findPackageContainFiles(pck2));
-		List<Relation> children = temp.getChildren();
+		List<Relation> children = new ArrayList<>(temp.getChildren());
 		for(Relation clone : children) {
 			ProjectFile file1 = (ProjectFile) clone.getStartNode();
 			ProjectFile file2 = (ProjectFile) clone.getEndNode();
