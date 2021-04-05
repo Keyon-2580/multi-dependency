@@ -4,8 +4,12 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.*;
 
+import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
+import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -24,6 +28,8 @@ import cn.edu.fudan.se.multidependency.service.query.smell.CyclicDependencyDetec
 import cn.edu.fudan.se.multidependency.service.query.smell.ModuleService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 
+import javax.json.JsonObject;
+
 @Service
 public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 
@@ -41,6 +47,9 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 
 	@Autowired
 	private NodeService nodeService;
+
+	@Autowired
+	private DependsOnRepository dependsOnRepository;
 
 	public static final int DEFAULT_THRESHOLD_LONGEST_PATH = 3;
 	public static final double DEFAULT_THRESHOLD_MINIMUM_RATE = 0.5;
@@ -70,7 +79,6 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 
 		Map<Long, Map<Integer, Cycle<Type>>> result = new HashMap<>();
 		Collection<Cycle<Type>> cycles = asRepository.typeCycles();
-		Collection<Cycle<Type>> typeCycles = new ArrayList<>();
 		int partition = 1;
 		for (Cycle<Type> cycle : cycles) {
 			List<Type> types = new ArrayList<>(cycle.getComponents());
@@ -137,7 +145,6 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 
 		Map<Long, Map<Integer, Cycle<ProjectFile>>> result = new HashMap<>();
 		Collection<Cycle<ProjectFile>> cycles = asRepository.fileCycles();
-		Collection<Cycle<ProjectFile>> fileCycles = new ArrayList<>();
 		int partition = 1;
 		for (Cycle<ProjectFile> cycle : cycles) {
 			List<ProjectFile> files = new ArrayList<>(cycle.getComponents());
@@ -204,7 +211,6 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 
 		Map<Long, Map<Integer, Cycle<Package>>> result = new HashMap<>();
 		Collection<Cycle<Package>> cycles = asRepository.packageCycles();
-		Collection<Cycle<Package>> packageCycles = new ArrayList<>();
 		int partition = 1;
 		for (Cycle<Package> cycle : cycles) {
 			List<Package> files = new ArrayList<>(cycle.getComponents());
@@ -271,7 +277,6 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 
 		Map<Long, Map<Integer, Cycle<Module>>> result = new HashMap<>();
 		Collection<Cycle<Module>> cycles = asRepository.moduleCycles();
-		Collection<Cycle<Module>> moduleCycles = new ArrayList<>();
 		int partition = 1;
 		for (Cycle<Module> cycle : cycles) {
 			List<Module> modules = new ArrayList<>(cycle.getComponents());
@@ -327,6 +332,85 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		}
 		cache.cache(getClass(), key, result);
 		return result;
+	}
+
+	@Override
+	public JSONObject getFileCycleJson(Long fileId) {
+		JSONObject result = new JSONObject();
+		JSONArray nodesJson = new JSONArray();
+		JSONArray edgesJson = new JSONArray();
+		JSONArray smellsJson = new JSONArray();
+		List<Smell> smells = new ArrayList<>(asRepository.getSmellsByFileId(fileId));
+		List<ProjectFile> files = new ArrayList<>();
+		for (Smell smell : smells) {
+			JSONObject smellJson = new JSONObject();
+			smellJson.put("name", smell.getName());
+			List<ProjectFile> smellFiles = new ArrayList<>(asRepository.getFilesBySmellName(smell.getName()));
+			JSONArray smellFilesJson = new JSONArray();
+			for (ProjectFile smellFile : smellFiles) {
+				if (!files.contains(smellFile)) {
+					files.add(smellFile);
+				}
+				JSONObject smellFileJson = new JSONObject();
+				smellFileJson.put("index", files.indexOf(smellFile) + 1);
+				smellFileJson.put("path", smellFile.getPath());
+				smellFilesJson.add(smellFileJson);
+			}
+			smellJson.put("files", smellFilesJson);
+			smellsJson.add(smellJson);
+		}
+		int length = files.size();
+		for (int i = 0; i < length; i ++) {
+			ProjectFile sourceFile = files.get(i);
+			JSONObject nodeJson = new JSONObject();
+			nodeJson.put("id", sourceFile.getId().toString());
+			nodeJson.put("name", sourceFile.getName());
+			nodeJson.put("path", sourceFile.getPath());
+			nodeJson.put("label", i + 1);
+			nodeJson.put("size", getSizeOfFileByLoc(sourceFile.getLoc()));
+			nodesJson.add(nodeJson);
+			for (int j = 0 ; j < length; j ++) {
+				ProjectFile targetFile = files.get(j);
+				if (i != j) {
+					DependsOn dependsOn = dependsOnRepository.findDependsOnBetweenFiles(sourceFile.getId(), targetFile.getId());
+					if (dependsOn != null) {
+						JSONObject edgeJson = new JSONObject();
+						edgeJson.put("id", dependsOn.getId().toString());
+						edgeJson.put("source", sourceFile.getId().toString());
+						edgeJson.put("target", targetFile.getId().toString());
+						edgeJson.put("source_name", sourceFile.getName());
+						edgeJson.put("target_name", targetFile.getName());
+						edgeJson.put("source_label", i + 1);
+						edgeJson.put("target_label", j + 1);
+						edgeJson.put("times", dependsOn.getTimes());
+						edgeJson.put("dependsOnTypes", dependsOn.getDependsOnTypes());
+						edgesJson.add(edgeJson);
+					}
+				}
+			}
+		}
+		result.put("currentFile", fileId.toString());
+		result.put("nodes", nodesJson);
+		result.put("edges", edgesJson);
+		result.put("smells", smellsJson);
+		return result;
+	}
+
+	private int getSizeOfFileByLoc(int loc) {
+		int size;
+		if (loc <= 500) {
+			size = 40;
+		}
+		else if (loc <= 1000) {
+			size = 50;
+		}
+		else if (loc <= 2000) {
+			size = 60;
+		}
+		else {
+			size = 70;
+		}
+		return size;
 	}
 
 	@Override

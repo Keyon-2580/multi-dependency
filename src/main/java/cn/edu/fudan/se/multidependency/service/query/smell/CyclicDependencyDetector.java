@@ -7,6 +7,7 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.ar.Module;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
+import com.alibaba.fastjson.JSONObject;
 
 public interface CyclicDependencyDetector {
 
@@ -33,6 +34,12 @@ public interface CyclicDependencyDetector {
 	 * @return
 	 */
 	Map<Long, Map<Integer, Cycle<Module>>> moduleCycles();
+
+	/**
+	 * 根据smell的name生成文件的循环依赖的json格式信息
+	 * @return
+	 */
+	JSONObject getFileCycleJson(Long fileId);
 
 	void exportCycleDependency();
 }

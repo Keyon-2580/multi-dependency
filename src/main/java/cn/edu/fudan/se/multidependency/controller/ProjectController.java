@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import cn.edu.fudan.se.multidependency.service.query.*;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackageDetector;
 import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
+import cn.edu.fudan.se.multidependency.service.query.smell.CyclicDependencyDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +69,9 @@ public class ProjectController {
 
 	@Autowired
 	private MultipleService multipleService;
+
+	@Autowired
+	private CyclicDependencyDetector cyclicDependencyDetector;
 	
 	@Autowired
 	private BasicCloneQueryService basicCloneQueryService;
@@ -670,6 +674,12 @@ public class ProjectController {
 	@ResponseBody
 	public JSONArray projectHasCombo(@RequestBody JSONObject requestBody) {
 		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_COMBO);
+	}
+
+	@GetMapping("/has/cyclicDependencyGraph/{fileId}")
+	public String cyclicHierarchy(HttpServletRequest request, @PathVariable("fileId") Long fileId) {
+		request.setAttribute("json_data", cyclicDependencyDetector.getFileCycleJson(fileId));
+		return "dependency_graph/cyclicDependencyGraph";
 	}
 
 	/**

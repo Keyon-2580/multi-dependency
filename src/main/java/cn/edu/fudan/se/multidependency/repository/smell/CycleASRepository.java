@@ -3,6 +3,9 @@ package cn.edu.fudan.se.multidependency.repository.smell;
 import java.util.List;
 
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
+import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
+import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
+import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -125,4 +128,10 @@ public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
 			"match result=(a:Type)-[:" + RelationType.str_DEPENDS_ON + "]->(b:Type) "
 			+ "where partition = $partition and a in types and b in types return result")
 	public List<DependsOn> cycleTypesBySCC(@Param("partition") int partition);
+
+	@Query("match (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where smell.name = $smellName return file;")
+	public List<ProjectFile> getFilesBySmellName(@Param("smellName") String smellName);
+
+	@Query("match (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where id(file) = $fileId and smell.level = \'" + SmellLevel.FILE + "\' and smell.type = \'" + SmellType.CYCLIC_DEPENDENCY + "\' return smell;")
+	public List<Smell> getSmellsByFileId(@Param("fileId") Long fileId);
 }
