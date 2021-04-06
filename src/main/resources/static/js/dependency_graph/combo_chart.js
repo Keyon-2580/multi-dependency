@@ -21,16 +21,18 @@ let repaint_flag = false; //判断是否为重新绘制
 const COLOR_DEPENDSON = '#FFA500';
 const COLOR_CLONE = '#B04206';
 const COLOR_COCHANGE = '#a29bfe';
-const COLOR_LINK_NORMAL = '#f7c8ca';
+// const COLOR_LINK_NORMAL = '#f7c8ca';
+const COLOR_LINK_NORMAL = '#9aa6d2';
 const COLOR_LINK_INNER = '#d8d5d5';
-const COLOR_LINK_CLICK = '#bd0303';
+// const COLOR_LINK_CLICK = '#bd0303';
+const COLOR_LINK_CLICK = '#1515ff';
 const COLOR_SMELL_NORMAL = '#f19083';
 const COLOR_SMELL_CLICK = '#bd0303';
 
 const EDGE_CLICK_MODEL = {
     style: {
         stroke: COLOR_LINK_CLICK,
-        lineWidth: 3,
+        lineWidth: 4,
         endArrow: {
             path: G6.Arrow.vee(5, 8, 3),
             d: 3,
@@ -1324,7 +1326,7 @@ function autoLayout(){
 
         let model1 = {
             id: item.id + "_in",
-            size: 30,
+            size: 15,
             inOutNode: 1,
             comboId: item.id,
             x: combo_cord[0] + combo_width * 0.5,
@@ -1337,7 +1339,7 @@ function autoLayout(){
 
         let model2 = {
             id: item.id + "_out",
-            size: 30,
+            size: 15,
             inOutNode: 1,
             comboId: item.id,
             x: combo_cord[0] - 50,
