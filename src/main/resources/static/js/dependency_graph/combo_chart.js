@@ -6,6 +6,7 @@ let smell_data_global = [] //存放异味信息
 let smell_hover_nodes = [] //存放当前鼠标悬停异味节点数组
 let reliable_dependency_list = [];//存放可确定依赖关系
 let unreliable_dependency_list = [];//存放不可信依赖关系
+let evt_global; //存放当前的鼠标点击事件
 reliable_dependency_list = [{
     node1: "194",
     node2: "198",
@@ -236,8 +237,10 @@ G6.registerNode('pie-node', {
 
 const grid = new G6.Grid();
 const tooltip = new G6.Tooltip({
-    fixToNode: [1.5, 2],
+    offsetX: 70,
+    offsetY: 150,
     getContent(e) {
+        $(".g6-component-tooltip").css({"left": e.clientX + 20 + "px", "top": e.clientY + 20 + "px"});
         const outDiv = document.createElement('div');
         outDiv.style.width = '500px';
         outDiv.innerHTML = e.item.getModel().group_type === 'combo' ?
@@ -266,6 +269,23 @@ const tooltip = new G6.Tooltip({
 const container = document.getElementById('combo_chart');
 const width = container.scrollWidth;
 const height = container.scrollHeight || 500;
+
+const contextMenu = new G6.Menu({
+    getContent(evt) {
+        let item = evt.item._cfg;
+        let html = `<ul class="combo_ul">${item.model.id}_${item.model.name}</ul>`;
+        if(item.model.smellType === "CyclicDependency"){
+            html += `<ul class="combo_li">
+            <a class="combo_a" href="/project/has/cyclicDependencyGraph/${item.model.id}" target="_blank">打开异味详情</a>
+            </ul>`;
+        }
+        return html;
+    },
+    offsetX: 0,
+    offsetY: 0,
+    itemTypes: ['node'],
+});
+
 const graph = new G6.Graph({
     container: 'combo_chart',
     width,
@@ -348,7 +368,7 @@ const graph = new G6.Graph({
             cursor: "pointer"
         },
     },
-    plugins: [tooltip],
+    plugins: [tooltip, contextMenu],
     minZoom: 0.1,
 });
 
@@ -387,6 +407,7 @@ function DrawComboChart(json_data){
             temp_node["outerNode"] = 0;
             temp_node["pienode"] = [];
             temp_node["smellId"] = 0;
+            temp_node["smellType"] = "";
             temp_nodes.push(temp_node);
         });
     });
@@ -501,6 +522,10 @@ function DrawComboChart(json_data){
             }
         });
 
+        graph.on('node:contextmenu', (evt) => {
+            $(".g6-component-contextmenu").css({"left": evt.clientX + 20 + "px", "top": evt.clientY + 20 + "px"});
+        });
+
         graph.on('canvas:click', (evt) => {
             graph.getCombos().forEach((combo) => {
                 graph.clearItemStates(combo);
@@ -510,7 +535,7 @@ function DrawComboChart(json_data){
         //节点点击函数
         graph.on('node:click', (evt) => {
             const { item: node_click } = evt;
-            let node;
+            console.log(node_click);
             if(last_click_node === ""){
                 showRelevantNodeAndEdge(node_click);
             }else if(last_click_node === node_click._cfg.id){
@@ -522,6 +547,12 @@ function DrawComboChart(json_data){
                 deleteRelevantNodeAndEdge(lastClickNode);
                 showRelevantNodeAndEdge(node_click);
             }
+
+            // graph.setItemState(node_click, 'active', true);
+        });
+        graph.on('edge:click', (evt) => {
+            const { item: edge_click } = evt;
+            console.log(edge_click);
 
             // graph.setItemState(node_click, 'active', true);
         });
@@ -681,7 +712,7 @@ function filterLinks(){
                 }
 
                 if (temp_dependsType_flag === false) {
-                    dependson_flag = false;
+                    flag = false;
                 }
             }
 
@@ -736,7 +767,7 @@ function filterLinks(){
     });
     data["edges"] = splitLinks(temp_edges);
     graph.data(data);
-    graph.render();
+    // graph.render();
 
     const edge_list = graph.getEdges();
     edge_list.forEach(function (item){
@@ -749,7 +780,7 @@ function filterLinks(){
     nodes.forEach((node) => {
         node.toFront();
     });
-    graph.paint();
+    graph.refresh();
 
     unreliable_nodes.forEach(item =>{
         graph.setItemState(item, 'unreliable', true);
@@ -1010,6 +1041,7 @@ function loadSmell(){
                 const node = graph.findById(node_data.id.split("_")[1]);
                 if(typeof(node) !== "undefined"){
                     node._cfg.model.smellId = smell.id;
+                    node._cfg.model.smellType = smell.smell_type;
                     graph.setItemState(node, 'smell_normal', true);
                 }
             })
@@ -1021,6 +1053,7 @@ function deleteSmell(){
     const nodes = graph.findAllByState('node', 'smell_normal');
     nodes.forEach((node) => {
         node._cfg.model.smellId = 0;
+        node._cfg.model.smellType = "";
         graph.setItemState(node, 'smell_normal', false);
     });
 }
