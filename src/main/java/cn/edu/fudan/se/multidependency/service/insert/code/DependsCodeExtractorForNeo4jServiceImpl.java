@@ -373,19 +373,25 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 							while (parentTypeEntity != null && parentTypeEntity.getClass() != TypeEntity.class){
 								parentTypeEntity = parentTypeEntity.getParent();
 							}
-							Type parentType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentTypeEntity.getId().longValue(), currentProject);
-							if(parentType != null && parentType != useType){
-								GlobalVariable globalVariable = new GlobalVariable(parentType, useType);
-								addRelation(globalVariable);
+							if(parentTypeEntity != null){
+								Type parentType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentTypeEntity.getId().longValue(), currentProject);
+								if(parentType != null && parentType != useType){
+									GlobalVariable globalVariable = new GlobalVariable(parentType, useType);
+									addRelation(globalVariable);
+								}
 							}
 						} else {
 							Entity parentFunctionEntity = varEntity.getParent();
 							while (parentFunctionEntity != null && parentFunctionEntity.getClass() != FunctionEntity.class){
 								parentFunctionEntity = parentFunctionEntity.getParent();
 							}
-							Function parentFunction = (Function) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, parentFunctionEntity.getId().longValue(), currentProject);
-							LocalVariable localVariable = new LocalVariable(parentFunction, useType);
-							addRelation(localVariable);
+							if(parentFunctionEntity != null){
+								Function parentFunction = (Function) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, parentFunctionEntity.getId().longValue(), currentProject);
+								if(parentFunction != null){
+									LocalVariable localVariable = new LocalVariable(parentFunction, useType);
+									addRelation(localVariable);
+								}
+							}
 						}
 					}
 					break;
