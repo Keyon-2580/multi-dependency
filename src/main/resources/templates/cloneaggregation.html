@@ -28,36 +28,36 @@
 	<script type="text/javascript" th:src="@{/js/cytoscapeutils.js}"></script>
 	<script type="text/javascript" th:src="@{/js/cloneaggregation.js}"></script>
 	<script type="text/javascript" th:src="@{/js/clonecompareutils.js}"></script>
-	<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"></link>
-	<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"></link>
-	<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"></link>
-	<link rel="stylesheet" th:href="@{/css/import/cytoscape.js-panzoom.css}"></link>
-	<link rel="stylesheet" th:href="@{/css/import/cytoscape.js-navigator.css}"></link>
-	<link rel="stylesheet" th:href="@{/css/import/jquery.jqplot.css}"></link>
-	<link rel="stylesheet" th:href="@{/css/import/ztree/zTreeStyle/zTreeStyle.css}"></link>
-	<link rel="stylesheet" th:href="@{/css/circlechart.css}"></link>
-	<link rel="stylesheet" th:href="@{/css/doublefile_tree.css}"></link>
+	<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"/>
+	<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"/>
+	<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"/>
+	<link rel="stylesheet" th:href="@{/css/import/cytoscape.js-panzoom.css}"/>
+	<link rel="stylesheet" th:href="@{/css/import/cytoscape.js-navigator.css}"/>
+	<link rel="stylesheet" th:href="@{/css/import/jquery.jqplot.css}"/>
+	<link rel="stylesheet" th:href="@{/css/import/ztree/zTreeStyle/zTreeStyle.css}"/>
+	<link rel="stylesheet" th:href="@{/css/circlechart.css}"/>
+	<link rel="stylesheet" th:href="@{/css/doublefile_tree.css}"/>
 </head>
 <body>
 	<div th:include="nav.html::nav"></div>
-	<div class="col-sm-12 row" style="margin-bottom: 15px;">
-		<div class="col-sm-12">
+	<div class="col-sm-12" style="margin-bottom: 20px;">
+		<div style="width: 100%">
 			<ul>
 				<li><a href="#cpp">cpp项目</a></li>
 				<li><a href="#java">java项目</a></li>
 			</ul>
 		</div>
-		<div class="col-sm-12" id="cpp">
-			<div class="col-sm-12">
+		<div style="width: 100%" id="cpp">
+			<div style="width: 100%">
 				<h3>cpp项目</h3>
 			</div>
-			<div class="col-sm-12" id="aggregation_cpp"></div>
+			<div style="width: 100%" id="aggregation_cpp"></div>
 		</div>
-		<div class="col-sm-12" id="java">
-			<div class="col-sm-12">
+		<div style="width: 100%" id="java">
+			<div style="width: 100%">
 				<h3>java项目</h3>
 			</div>
-			<div class="col-sm-12" id="aggregation_java"></div>
+			<div style="width: 100%" id="aggregation_java"></div>
 		</div>
 	</div>
 	<script type="text/javascript" th:inline="javascript">
