@@ -473,13 +473,13 @@ public class BeanCreator {
 	@Bean
 	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository) {
 		LOGGER.info("创建File Metric度量值节点和关系...");
-		metricCalculatorService.createFileMetric(true);
+		metricCalculatorService.createFileMetric(false);
 
 		LOGGER.info("创建Package Metric度量值节点和关系...");
-		metricCalculatorService.createPackageMetric(true);
+		metricCalculatorService.createPackageMetric(false);
 
 		LOGGER.info("创建Project Metric度量值节点和关系...");
-		metricCalculatorService.createProjectMetric(true);
+		metricCalculatorService.createProjectMetric(false);
 
 		if(propertyConfig.isCalModularity()){
 			LOGGER.info("计算Project模块性度量值...");
@@ -492,7 +492,7 @@ public class BeanCreator {
 		}
 
 		LOGGER.info("创建Smell Metric度量值节点和关系...");
-		smellMetricCalculatorService.createSmellMetric(true);
+		smellMetricCalculatorService.createSmellMetric(false);
 
 		return true;
 	}
