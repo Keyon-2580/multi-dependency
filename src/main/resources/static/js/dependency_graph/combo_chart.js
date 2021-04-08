@@ -329,7 +329,10 @@ const graph = new G6.Graph({
     },
     groupByTypes: false,
     modes: {
-        default: ['drag-canvas', 'drag-combo', 'collapse-expand-combo', 'zoom-canvas'],
+        default: [{
+            type: 'drag-combo',
+            enableDelegate: true,
+        }, 'drag-canvas', 'collapse-expand-combo', 'zoom-canvas'],
     },
     defaultCombo: {
         type: 'rect',
@@ -528,6 +531,15 @@ function DrawComboChart(json_data){
             });
         });
 
+        graph.on('drag', (evt) => {
+            const nodes = graph.getNodes();
+            nodes.forEach((node) => {
+                node.toFront();
+            });
+            graph.paint();
+        });
+
+
         //节点点击函数
         graph.on('node:click', (evt) => {
             const { item: node_click } = evt;
@@ -709,7 +721,7 @@ function filterLinks(){
                 }
 
                 if (temp_dependsType_flag === false) {
-                    flag = false;
+                    dependson_flag = false;
                 }
             }
 
@@ -764,7 +776,7 @@ function filterLinks(){
     });
     data["edges"] = splitLinks(temp_edges);
     graph.data(data);
-    // graph.render();
+    graph.render();
 
     const edge_list = graph.getEdges();
     edge_list.forEach(function (item){
@@ -777,7 +789,7 @@ function filterLinks(){
     nodes.forEach((node) => {
         node.toFront();
     });
-    graph.refresh();
+    graph.paint();
 
     unreliable_nodes.forEach(item =>{
         graph.setItemState(item, 'unreliable', true);
@@ -1336,7 +1348,7 @@ function autoLayout(){
             combo_cord = [radius * Math.cos((index / combo_num) * Math.PI * 2) - combo_width * 0.5 + cord,
                 (-radius) * Math.sin((index / combo_num) * Math.PI * 2) - combo_height * 0.5 + cord];
         }else{
-            combo_cord = [radius - combo_width * 0.5 + cord,  -(combo_height * 0.5) + cord];
+            combo_cord = [(radius - combo_width * 0.5 + cord) * (4 / 5),  (-(combo_height * 0.5) + cord) * (4 / 5)];
         }
 
         for(let i = 0; i < item.node_num; i++){
