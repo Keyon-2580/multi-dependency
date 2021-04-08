@@ -16,6 +16,7 @@ import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorServ
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellMetricCalculatorService;
+import cn.edu.fudan.se.multidependency.service.query.smell.UnusedIncludeDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +78,9 @@ public class BeanCreator {
 
 	@Autowired
 	private SmellDetectorService smellDetectorService;
+
+	@Autowired
+	private UnusedIncludeDetector unusedIncludeDetector;
 
 	@Bean("createCoChanges")
 	public List<CoChange> createCoChanges(PropertyConfig propertyConfig, CoChangeRepository cochangeRepository, AggregationCoChangeRepository aggregationCoChangeRepository) {
@@ -431,6 +435,9 @@ public class BeanCreator {
 
 				LOGGER.info("创建Unstable Dependency Smell节点关系...");
 				smellDetectorService.createUnstableDependencySmells(false);
+
+				LOGGER.info("创建Unused Include Smell节点关系...");
+				smellDetectorService.createUnusedIncludeSmells(false);
 			}
 
 			if(propertyConfig.isCalculateCloneGroup()){
@@ -440,7 +447,7 @@ public class BeanCreator {
 
 			if(propertyConfig.isCalculateCloneGroup() && propertyConfig.isCalculateCloneGroup()){
 				LOGGER.info("创建Similar Components Smell节点关系...");
-//				smellDetectorService.createSimilarComponentsSmell(false);
+				smellDetectorService.createSimilarComponentsSmells(false);
 			}
 
 			if(propertyConfig.isCalculateCoChange()){
@@ -450,12 +457,12 @@ public class BeanCreator {
 
 			if(propertyConfig.isCalculateCoChange()){
 				LOGGER.info("创建God Component Smell节点关系...");
-				smellDetectorService.createGodComponentSmell(false);
+				smellDetectorService.createGodComponentSmells(false);
 			}
 
 			if(propertyConfig.isCalculateCoChange()){
 				LOGGER.info("创建Unutilized Abstraction Smell节点关系...");
-				smellDetectorService.createUnutilizedAbstractionSmell(false);
+				smellDetectorService.createUnutilizedAbstractionSmells(false);
 			}
 		}
 		return true;

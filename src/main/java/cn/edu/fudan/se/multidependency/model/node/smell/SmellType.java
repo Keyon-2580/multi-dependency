@@ -16,4 +16,5 @@ public final class SmellType {
 	public static final String MULTIPLE_SMELLS = "MultipleSmells";
 	public static final String DUPLICATE_FUNCTIONALITY = "DuplicateFunctionality";
 	public static final String AMBIGUOUS_INTERFACE = "AmbiguousInterface";
+	public static final String UNUSED_INCLUDE = "UnusedInclude";
 }

@@ -4,17 +4,18 @@ import cn.edu.fudan.se.multidependency.model.IssueType;
 import cn.edu.fudan.se.multidependency.model.node.Metric;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
-import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
 import cn.edu.fudan.se.multidependency.service.query.metric.NodeMetric;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.SmellMetric;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.UnusedInclude;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface SmellRepository extends Neo4jRepository<Smell, Long> {
@@ -35,8 +36,8 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 	Smell querySmell(@Param("name") String name);
 
 	@Query("match (smell:Smell) -[:" + RelationType.str_CONTAIN + "]-(node) " +
-			"where id(smell)=$smellId return node;")
-	List<Node> findSmellContains(@Param("smellId") long smellId);
+			"where id(smell)=$smellId return distinct node;")
+	Set<Node> findSmellContains(@Param("smellId") long smellId);
 
 	@Query("match (n:ProjectFile) where n.suffix=\".java\" set n.language = \"java\";")
 	void setJavaLanguageBySuffix();
@@ -207,4 +208,11 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 			"RETURN  smell,issues,bugIssues,newFeatureIssues,improvementIssues;")
 	public SmellMetric.DebtMetric calculateSmellDebtMetricInPackageLevel(@Param("smellId") long smellId);
 
+	@Query("match (smell:Smell)-[" + RelationType.str_CONTAIN + "]->(file:ProjectFile) " +
+			"where id(smell) = $smellId " +
+			"with smell, collect(distinct file) as unusedIncludeFiles " +
+			"match (coreFile:ProjectFile) " +
+			"where id(coreFile) = smell.coreNodeId " +
+			"return coreFile, unusedIncludeFiles;")
+	public UnusedInclude getUnusedIncludeBySmellId(@Param("smellId") long smellId);
 }

@@ -26,8 +26,7 @@ public class BasicSmellQueryServiceImpl implements BasicSmellQueryService {
 	public Collection<Smell> findSmellsByLevel(String level) {
 		Collection<Smell> result = smellRepository.findSmells(level);
 		for(Smell smell : result){
-			List<Node> nodes = smellRepository.findSmellContains(smell.getId());
-			Set<Node> set = new HashSet<>(nodes);
+			Set<Node> set = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
 			smell.setNodes(set);
 		}
 		return result;
