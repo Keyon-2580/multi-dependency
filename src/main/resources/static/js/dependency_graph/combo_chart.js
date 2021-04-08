@@ -7,14 +7,8 @@ let smell_hover_nodes = [] //存放当前鼠标悬停异味节点数组
 let reliable_dependency_list = [];//存放可确定依赖关系
 let unreliable_dependency_list = [];//存放不可信依赖关系
 let evt_global; //存放当前的鼠标点击事件
-reliable_dependency_list = [{
-    node1: "194",
-    node2: "198",
-}];
-unreliable_dependency_list = [{
-    node1: "527",
-    node2: "197",
-}];
+reliable_dependency_list = [];
+unreliable_dependency_list = [];
 let nodeId = 1;
 let last_click_node = "";
 let repaint_flag = false; //判断是否为重新绘制
@@ -419,6 +413,8 @@ function DrawComboChart(json_data){
         temp_link["target"] = link.target_id;
         temp_link["source_name"] = link.source_name;
         temp_link["target_name"] = link.target_name;
+        temp_link["source_path"] = link.source_path;
+        temp_link["target_path"] = link.target_path;
         temp_link["link_type"] = link.type;
         temp_link["group_type"] = 'edge';
         temp_link["inner_edge"] = 0;
@@ -638,18 +634,19 @@ function filterLinks(){
     let filter = GetFilterCondition();
     let temp_edges = [];
     actual_edges.forEach(edge =>{
-        reliable_dependency_list.forEach(item => {
-            if((edge.source === item.node1 && edge.target === item.node2) ||
-                (edge.source === item.node2 && edge.target === item.node1)){
-                edge.visible = false;
-            }
-        })
+        // reliable_dependency_list.forEach(item => {
+        //     if((edge.source === item.node1 && edge.target === item.node2) ||
+        //         (edge.source === item.node2 && edge.target === item.node1)){
+        //         edge.visible = false;
+        //     }
+        // })
 
         unreliable_dependency_list.forEach(item => {
-            if((edge.source === item.node1 && edge.target === item.node2) ||
-                (edge.source === item.node2 && edge.target === item.node1)){
-                const node1 = graph.findById(item.node1);
-                const node2 = graph.findById(item.node2);
+            if((edge.source_path === item.node1 && edge.target_path === item.node2) ||
+                (edge.source_path === item.node2 && edge.target_path === item.node1)){
+                console.log(item);
+                const node1 = graph.findById(edge.source);
+                const node2 = graph.findById(edge.target);
                 unreliable_nodes.push(node1);
                 unreliable_nodes.push(node2);
                 // graph.setItemState(node1, 'unreliable', true);
@@ -1265,6 +1262,8 @@ var loadPageData = function () {
                     "<button class = \"common_button\" type=\"button\" onclick= filterLinks() >筛选连线</button>" +
                     "<button class = \"common_button\" type=\"button\" onclick= loadSmell() style = \"margin-left: 30px\">加载异味</button>" +
                     "<button class = \"common_button\" type=\"button\" onclick= deleteSmell() style = \"margin-left: 30px\">删除异味</button>" +
+                    "<button id = \"unreliableDependencyFile\"class = \"common_button\" type=\"button\" onclick= loadUnreliableDependency() style = \"margin-left: 30px\">加载不可依赖关系</button>" +
+                    "<input type=\"file\" id=\"unreliable_dependency_file\" onchange='setUnreliableDependency()' style=\"display:none\">" +
                     "</div></p>";
 
                 html += "</form>" +
@@ -1481,6 +1480,25 @@ function showFilterWindow(){
     })
 }
 
+//加载不可依赖关系
+function loadUnreliableDependency(){
+    document.getElementById("unreliable_dependency_file").click();
+}
+
+//设置不可依赖关系
+function setUnreliableDependency(){
+    let resultFile = $('#unreliable_dependency_file')[0].files[0];
+    let reader = new FileReader();
+    reader.readAsText(resultFile, "utf8");
+    reader.onload = function(){
+        let temp_list = JSON.parse(this.result);
+        temp_list.forEach(function (item){
+            unreliable_dependency_list.push(item);
+        });
+        console.log(unreliable_dependency_list);
+    }
+}
+
 //筛选项目框内项目树结构
 function showZTree(nodes, container = $("#ztree")) {
     var setting = {
@@ -1685,9 +1703,22 @@ function CancelChildrenChecked(parent_name){
     }
 }
 
-if (typeof window !== 'undefined')
+if (typeof window !== 'undefined'){
     window.onresize = () => {
         if (!graph || graph.get('destroyed')) return;
         if (!container || !container.scrollWidth || !container.scrollHeight) return;
         graph.changeSize(container.scrollWidth, container.scrollHeight);
     };
+}
+
+// $('#unreliable_dependency_file').onchange = function(){
+//     let resultFile = this.files[0];
+//     console.log('文件信息---',resultFile)
+//     // if (resultFile[0]) {
+//     //     let reader = new FileReader();
+//     //     reader.readAsDataURL(resultFile[0]);
+//     //     reader.onload = function (e) {
+//     //         $('.previewImg').attr('src',this.result);
+//     //     }
+//     // }
+// };

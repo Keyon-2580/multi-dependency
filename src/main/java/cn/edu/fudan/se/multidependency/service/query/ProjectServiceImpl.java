@@ -369,6 +369,8 @@ public class ProjectServiceImpl implements ProjectService{
             link.put("type", "dependson");
             link.put("source_id", dependsOn.getStartNode().getId().toString());
             link.put("target_id", dependsOn.getEndNode().getId().toString());
+            link.put("source_path", ((ProjectFile)dependsOn.getStartNode()).getPath());
+            link.put("target_path", ((ProjectFile)dependsOn.getEndNode()).getPath());
             link.put("source_name", dependsOn.getEndNode().getName());
             link.put("target_name", dependsOn.getEndNode().getName());
             link.put("pair_id", dependsOn.getStartNode().getId() + "_" + dependsOn.getEndNode().getId());
