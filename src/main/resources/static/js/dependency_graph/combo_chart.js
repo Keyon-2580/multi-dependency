@@ -1263,7 +1263,7 @@ var loadPageData = function () {
                     "<button class = \"common_button\" type=\"button\" onclick= loadSmell() style = \"margin-left: 30px\">加载异味</button>" +
                     "<button class = \"common_button\" type=\"button\" onclick= deleteSmell() style = \"margin-left: 30px\">删除异味</button>" +
                     "<button id = \"unreliableDependencyFile\"class = \"common_button\" type=\"button\" onclick= loadUnreliableDependency() style = \"margin-left: 30px\">加载不可依赖关系</button>" +
-                    "<input type=\"file\" id=\"unreliable_dependency_file\" onchange='setUnreliableDependency()' style=\"display:none\">" +
+                    "<input type=\"file\" accept=\".json\" id=\"unreliable_dependency_file\" onchange='setUnreliableDependency()' style=\"display:none\">" +
                     "</div></p>";
 
                 html += "</form>" +
