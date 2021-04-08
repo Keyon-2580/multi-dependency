@@ -452,7 +452,7 @@ public class BeanCreator {
 
 			if(propertyConfig.isCalculateCoChange()){
 				LOGGER.info("创建Logical Coupling Smell节点关系...");
-				smellDetectorService.createLogicalCouplingSmell(false);
+				smellDetectorService.createLogicalCouplingSmells(false);
 			}
 
 			if(propertyConfig.isCalculateCoChange()){
