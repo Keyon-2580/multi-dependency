@@ -2,10 +2,17 @@ package cn.edu.fudan.se.multidependency.service.query.metric;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import cn.edu.fudan.se.multidependency.model.node.Metric;
+import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
+import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
+import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
+import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
+import cn.edu.fudan.se.multidependency.service.query.CacheService;
+import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
@@ -24,10 +31,166 @@ public class MetricShowService {
 	
 	@Autowired
 	private NodeService nodeService;
+
+	@Autowired
+	private ContainRelationService containRelationService;
 	
 	@Autowired
 	private MetricCalculatorService metricCalculatorService;
-	
+
+	@Autowired
+	private SmellRepository smellRepository;
+
+	@Autowired
+	private MetricRepository metricRepository;
+
+	@Autowired
+	private CacheService cache;
+
+	public List<NodeMetric> getFileMetrics(){
+		List<NodeMetric> metricList = new ArrayList<>(metricRepository.findFileMetricData());
+		return metricList;
+	}
+
+	public Metric getFileMetric(ProjectFile file){
+		Metric metric = metricRepository.findFileMetric(file.getId());
+		if(metric == null){
+			return new Metric();
+		}
+		return metric;
+	}
+
+	public Map<Long, List<NodeMetric>> getProjectFileMetrics(){
+		Map<Long,List<NodeMetric>> result = new HashMap<>();
+		Collection<ProjectFile> projectFiles = new ArrayList<>(nodeService.queryAllFiles());
+		projectFiles.forEach(projectFile -> {
+			Project project = containRelationService.findFileBelongToProject(projectFile);
+			List<NodeMetric> temp = result.getOrDefault(project.getId(), new ArrayList<>());
+			Metric metric = metricRepository.findFileMetric(projectFile.getId());
+			if(metric != null){
+				NodeMetric nodeMetric = new NodeMetric();
+				nodeMetric.setNode(projectFile);
+				nodeMetric.setMetric(metric);
+				temp.add(nodeMetric);
+				result.put(project.getId(), temp);
+			}
+		});
+		return result;
+	}
+
+	public List<Metric> getPackageMetrics(){
+		List<Metric> metricList = new ArrayList<>(metricRepository.findPackageMetric());
+		return metricList;
+	}
+
+	public Metric getPackageMetric(Package pck){
+		Metric metric = metricRepository.findPackageMetric(pck.getId());
+		if(metric == null){
+			return new Metric();
+		}
+		return metric;
+	}
+
+	public Map<Long, List<NodeMetric>> getProjectPackageMetrics(){
+		Map<Long,List<NodeMetric>> result = new HashMap<>();
+		Map<Long, Package> projectPackages = new HashMap<>(nodeService.queryAllPackages());
+		projectPackages.values().forEach(packageEntry -> {
+			Project project = containRelationService.findPackageBelongToProject(packageEntry);
+			List<NodeMetric> temp = result.getOrDefault(project.getId(), new ArrayList<>());
+			Metric metric = metricRepository.findPackageMetric(packageEntry.getId());
+			if(metric != null){
+				NodeMetric nodeMetric = new NodeMetric();
+				nodeMetric.setNode(packageEntry);
+				nodeMetric.setMetric(metric);
+				temp.add(nodeMetric);
+				result.put(project.getId(), temp);
+			}
+		});
+		return result;
+	}
+
+	public List<NodeMetric> getProjectMetrics(){
+		List<NodeMetric> metricList = new ArrayList<>(metricRepository.findProjectMetricData());
+		return metricList;
+	}
+
+	public Metric getProjectMetric(Project project){
+		Metric metric = metricRepository.findProjectMetric(project.getId());
+		return metric;
+	}
+
+	public List<Metric> getSmellMetrics(){
+		List<Metric> metricList = new ArrayList<>(smellRepository.findSmellMetric());
+		return metricList;
+	}
+
+	public Metric getSmellMetric(Smell smell){
+		Metric metric = smellRepository.findSmellMetric(smell.getId());
+		return metric;
+	}
+
+	public Map<Long, Map<String, List<NodeMetric>>>  getProjectSmellMetricsInFileLevel(){
+		String key = "getProjectSmellMetricsInFileLevel";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.FILE));
+		Map<Long, Map<String, List<NodeMetric>>> result = new HashMap<>();
+		if(!smells.isEmpty()){
+			smells.forEach(smell ->{
+				Long projectId = smell.getProjectId();
+				if (projectId != null){
+					Map<String, List<NodeMetric>> smellTypeMetricMap = result.getOrDefault(projectId, new HashMap<>());
+					String type = smell.getType();
+					List<NodeMetric> metricList = smellTypeMetricMap.getOrDefault(type,new ArrayList<>());
+					Metric metric = smellRepository.findSmellMetric(smell.getId());
+					if(metric != null){
+						NodeMetric nodeMetric = new NodeMetric();
+						nodeMetric.setNode(smell);
+						nodeMetric.setMetric(metric);
+						metricList.add(nodeMetric);
+						smellTypeMetricMap.put(type, metricList);
+						result.put(projectId, smellTypeMetricMap);
+					}
+				}
+			});
+			cache.cache(getClass(), key, result);
+		}
+		return result;
+	}
+
+	public Map<Long, Map<String, List<NodeMetric>>>  getProjectSmellMetricsInPackageLevel(){
+		String key = "getProjectSmellMetricsInPackageLevel";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.PACKAGE));
+		Map<Long, Map<String, List<NodeMetric>>> result = new HashMap<>();
+		if(!smells.isEmpty()){
+			smells.forEach(smell ->{
+				Long projectId = smell.getProjectId();
+				if (projectId != null){
+					Map<String, List<NodeMetric>> smellTypeMetricMap = result.getOrDefault(projectId, new HashMap<>());
+					String type = smell.getType();
+					List<NodeMetric> metricList = smellTypeMetricMap.getOrDefault(type,new ArrayList<>());
+					Metric metric = smellRepository.findSmellMetric(smell.getId());
+					if(metric != null){
+						NodeMetric nodeMetric = new NodeMetric();
+						nodeMetric.setNode(smell);
+						nodeMetric.setMetric(metric);
+						metricList.add(nodeMetric);
+						smellTypeMetricMap.put(type, metricList);
+						result.put(projectId, smellTypeMetricMap);
+					}
+				}
+			});
+			cache.cache(getClass(), key, result);
+		}
+		return result;
+	}
+
 	public void printPackageMetricExcel(OutputStream stream) {
 		Workbook hwb = new XSSFWorkbook();
 		Map<Long, List<PackageMetrics>> allPackageMetrics = metricCalculatorService.calculateProjectPackageMetrics();

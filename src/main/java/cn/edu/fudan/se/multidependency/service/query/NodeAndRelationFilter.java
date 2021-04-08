@@ -10,33 +10,42 @@ import java.util.Map;
 
 public class NodeAndRelationFilter {
 
-    public static List<String> listOfSelectedDependsOnRelations(){
-        List<String> selectedDependsOnRelations = new ArrayList<>();
-        selectedDependsOnRelations.add(RelationType.str_CALL);
-//        selectedDependsOnRelations.add(RelationType.str_EXTENDS);
-//        selectedDependsOnRelations.add(RelationType.str_IMPLEMENTS);
-        return selectedDependsOnRelations;
-    }
-
-    public static boolean isContainSelectedRelations(DependsOn dependsOn){
-        boolean isSelected = false;
-        for (String relation : listOfSelectedDependsOnRelations()){
-            if(dependsOn.getDependsOnType().contains(relation)){
-                isSelected = true;
-                break;
-            }
-        }
-        return isSelected;
-    }
-
     public static Map<String, Boolean> listOfPackagesForCassandra(){
         Map<String, Boolean> selectedPcks = new HashMap<>();
-        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/service/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/auth/", true);
+        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/cache/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/cli/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/client/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/concurrent/", true);
+        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/config/", true);
+        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/cql/", true);
         selectedPcks.put("/cassandra/src/java/org/apache/cassandra/cql3/", false);
-        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/cql3/functions/", true);
-        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/cql3/statements/", true);
+        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/db/", true);
+        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/dht/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/exceptions/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/gms/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/hadoop/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/io/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/locator/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/metrics/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/net/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/notifications/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/repair/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/scheduler/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/security/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/serializers/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/service/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/sink/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/streaming/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/thrift/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/tools/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/tracing/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/transport/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/triggers/", true);
+//        selectedPcks.put("/cassandra/src/java/org/apache/cassandra/utils/", true);
         return selectedPcks;
     }
+
 
     public static Map<String, Boolean> listOfPackagesForAtlas(){
         Map<String, Boolean> selectedPcks = new HashMap<>();

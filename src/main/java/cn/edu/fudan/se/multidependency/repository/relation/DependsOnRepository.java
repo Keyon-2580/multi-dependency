@@ -122,9 +122,9 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query(TYPE_LEFT + RelationType.str_ACCESS + TYPE_MIDDLE + RelationType.str_ACCESS +
 			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
 	void createDependsOnWithAccessInTypes();
-	@Query(TYPE_LEFT + RelationType.str_GLOBAL_VARIABLE + TYPE_MIDDLE + RelationType.str_GLOBAL_VARIABLE +
+	@Query(TYPE_LEFT + RelationType.str_MEMBER_VARIABLE + TYPE_MIDDLE + RelationType.str_MEMBER_VARIABLE +
 			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
-	void createDependsOnWithGlobalVariableInTypes();
+	void createDependsOnWithMemberVariableInTypes();
 	@Query(TYPE_LEFT + RelationType.str_LOCAL_VARIABLE + TYPE_MIDDLE + RelationType.str_LOCAL_VARIABLE +
 			TYPE_MIDDLE2 + "r.times" + TYPE_RIGHT)
 	void createDependsOnWithLocalVariableInTypes();
@@ -173,7 +173,10 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query(FILE_LEFT + RelationType.str_IMPLEMENTS_C + FILE_MIDDLE + RelationType.str_IMPLEMENTS_C +
 			FILE_MIDDLE2 + "1" + FILE_RIGHT)
 	void createDependsOnWithImplementsCInFiles();
-	@Query(FILE_LEFT + RelationType.str_GLOBAL_VARIABLE + FILE_MIDDLE + RelationType.str_GLOBAL_VARIABLE +
+	@Query(FILE_LEFT + RelationType.str_MEMBER_VARIABLE + FILE_MIDDLE + RelationType.str_MEMBER_VARIABLE +
+			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
+	void createDependsOnWithMemberVariableInFiles();
+	@Query(FILE_LEFT + RelationType.str_GLOBAL_VARIABLE + FILE_MIDDLE + RelationType.str_GLOBAL_VARIABLE+
 			FILE_MIDDLE2 + "r.times" + FILE_RIGHT)
 	void createDependsOnWithGlobalVariableInFiles();
 	@Query(FILE_LEFT + RelationType.str_LOCAL_VARIABLE + FILE_MIDDLE + RelationType.str_LOCAL_VARIABLE +

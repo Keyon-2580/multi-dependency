@@ -248,7 +248,8 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 			result = containRepository.findFileDirectlyContainNamespaces(file.getId());
 			break;
 		case Type:
-			result = containRepository.findFileDirectlyContainTypes(file.getId());
+//			result = containRepository.findFileDirectlyContainTypes(file.getId());
+			result = containRepository.findFileContainAllTypes(file.getId());
 			break;
 		case Function:
 			result = containRepository.findFileDirectlyContainFunctions(file.getId());

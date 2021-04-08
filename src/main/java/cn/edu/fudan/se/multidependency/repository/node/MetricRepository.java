@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.repository.node;
 
 import cn.edu.fudan.se.multidependency.model.node.Metric;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.service.query.metric.NodeMetric;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -24,17 +25,28 @@ public interface MetricRepository extends Neo4jRepository<Metric, Long> {
     @Query("MATCH p=(:ProjectFile)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m;")
     List<Metric> findFileMetric();
 
+    @Query("MATCH p=(node:ProjectFile)-[:" + RelationType.str_HAS + "]->(metric:Metric) RETURN node,metric;")
+    List<NodeMetric> findFileMetricData();
+
+    @Query("MATCH p=(pj:Project) -[:" + RelationType.str_CONTAIN + "]-> (:ProjectFile)-[:" + RelationType.str_HAS + "]->(m:Metric) " +
+            "where id(pj) = $projectId " +
+            "RETURN m;")
+    List<Metric> findFileMetricByProject(@Param("projectId") Long projectId);
+
     @Query("MATCH p=(:ProjectFile)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m limit 10;")
     List<Metric> findFileMetricsWithLimit();
 
     @Query("MATCH p=(:ProjectFile)-[r:" + RelationType.str_HAS + "]->(m:Metric) delete r, m;")
     void deleteAllFileMetric();
 
-    @Query("MATCH p=(pck:Package)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(pckId) = $pckId RETURN m;")
+    @Query("MATCH p=(pck:Package)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(pck) = $pckId RETURN m;")
     Metric findPackageMetric(@Param("pckId") Long pckId);
 
     @Query("MATCH p=(:Package)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m;")
     List<Metric> findPackageMetric();
+
+    @Query("MATCH p=(node:Package)-[:" + RelationType.str_HAS + "]->(metric:Metric) RETURN node,metric;")
+    List<NodeMetric> findPackageMetricData();
 
     @Query("MATCH p=(:Package)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m limit 10;")
     List<Metric> findPackageMetricsWithLimit();
@@ -44,6 +56,9 @@ public interface MetricRepository extends Neo4jRepository<Metric, Long> {
 
     @Query("MATCH p=(project:Project)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(project) = $projectId RETURN m")
     Metric findProjectMetric(@Param("projectId") Long projectId);
+
+    @Query("MATCH p=(node:Project)-[:" + RelationType.str_HAS + "]->(metric:Metric) RETURN node,metric;")
+    List<NodeMetric> findProjectMetricData();
 
     @Query("MATCH p=(:Project)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m;")
     List<Metric> findProjectMetric();

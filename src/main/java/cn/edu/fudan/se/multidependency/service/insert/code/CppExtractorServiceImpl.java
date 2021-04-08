@@ -190,7 +190,7 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 			processIdentifier(type);
 //			this.getNodes().addCodeNode(type);
 			while(!(parentEntity instanceof FileEntity)) {
-				// 找出方法所在的文件
+				// 找出Type所在的文件
 				parentEntity = parentEntity.getParent();
 			}
 			ProjectFile file = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(parentEntity.getId().longValue(), currentProject);

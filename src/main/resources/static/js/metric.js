@@ -4,7 +4,7 @@ var metric = function() {
 			type: "get",
 			url: "/metric/file",
 			success: function(result) {
-				console.log(result);
+				// console.log(result);
 				var html = "";
 				for(var id in projects) {
 					html += "<div><h4>" + projects[id].name + " (" + projects[id].language + ")" + "</h4></div>";
@@ -19,7 +19,7 @@ var metric = function() {
 					html += "<th>NOM</th>";
 					html += "<th>FanIn</th>";
 					html += "<th>FanOut</th>";
-//					html += "<th>Instability</th>";
+					html += "<th>Instability</th>";
 					html += "<th>Commits</th>";
 					html += "<th>Developers</th>";
 //					html += "<th>CoChanges</th>";
@@ -31,60 +31,46 @@ var metric = function() {
 					html += "<th>PageRank</th>";
 					html += "</tr>";
 					var metrics = result[id];
-					console.log(metrics);
+					// console.log(metrics);
 					for(var i = 0; i < metrics.length; i++) {
-						console.log(metrics[i]);
+						// console.log(metrics[i]);
 						html += "<tr>";
 						html += "<td>" + (i + 1) + "</td>";
-						html += "<td>" + metrics[i].file.id + "</td>";
-						html += "<td><a target='_blank' href='/relation/file/" + metrics[i].file.id + "'>" + metrics[i].file.path + "</a></td>";
-                        var loc = 0;
-                        var noc = 0;
-                        var nom = 0;
-                        var fanIn = 0;
-                        var fanOut = 0;
-						if(metrics[i].structureMetric != null){
-						    loc = metrics[i].structureMetric.loc;
-						    noc = metrics[i].structureMetric.noc;
-						    nom = metrics[i].structureMetric.nom;
-						    fanIn = metrics[i].structureMetric.fanIn;
-						    fanOut = metrics[i].structureMetric.fanOut;
-						}
-						html += "<td>" + loc + "</td>";
-						html += "<td>" + noc + "</td>";
-						html += "<td>" + nom + "</td>";
-						html += "<td>" + fanIn + "</td>";
-						html += "<td>" + fanOut + "</td>";
-//						html += "<td>" + metrics[i].instability.toFixed(2) + "</td>";
-                        var commits = 0;
-                        var developers = 0;
-//                        var coChanges = 0;
-                        var coChangeFiles = 0;
-                        if(metrics[i].evolutionMetric != null){
-                             commits = metrics[i].evolutionMetric.commits;
-                             developers = metrics[i].evolutionMetric.developers;
-//                             coChanges = metrics[i].evolutionMetric.coChanges;
-                             coChangeFiles = metrics[i].evolutionMetric.coChangeFiles;
-                        }
-						html += "<td>" + commits + "</td>";
-						html += "<td>" + developers + "</td>";
-//						html += "<td>" + coChanges + "</td>";
-						html += "<td>" + coChangeFiles + "</td>";
-						var issues = 0;
-                        var bugIssues = 0;
-                        var newFeatureIssues = 0;
-                        var improvementIssues = 0;
-                        if(metrics[i].debtMetric != null){
-                             issues = metrics[i].debtMetric.issues;
-                             bugIssues = metrics[i].debtMetric.bugIssues;
-                             newFeatureIssues = metrics[i].debtMetric.newFeatureIssues;
-                             improvementIssues = metrics[i].debtMetric.improvementIssues;
-                        }
-                        html += "<td>" + issues + "</td>";
-						html += "<td>" + bugIssues + "</td>";
-						html += "<td>" + newFeatureIssues + "</td>";
-						html += "<td>" + improvementIssues + "</td>";
-						html += "<td>" + metrics[i].file.score.toFixed(2) + "</td>";
+						html += "<td>" + metrics[i].node.id + "</td>";
+						html += "<td><a target='_blank' href='/relation/file/" + metrics[i].node.id + "'>" + metrics[i].node.path + "</a></td>";
+
+						let loc = metrics[i].metric.metricValues.LOC;
+						let noc = metrics[i].metric.metricValues.NOC;
+						let nom = metrics[i].metric.metricValues.NOM;
+						let fanIn = metrics[i].metric.metricValues.FanIn;
+						let fanOut = metrics[i].metric.metricValues.FanOut;
+						let instability = metrics[i].metric.metricValues.Instability;
+						html += "<td>" + (loc > 0 ? loc : 0)  + "</td>";
+						html += "<td>" + (noc > 0 ? noc : 0)  + "</td>";
+						html += "<td>" + (nom > 0 ? nom : 0)  + "</td>";
+						html += "<td>" + (fanIn > 0 ? fanIn : 0)  + "</td>";
+						html += "<td>" + (fanOut > 0 ? fanOut : 0)  + "</td>";
+						html += "<td>" + (instability > 0 ? instability.toFixed(2) : 0.0)  + "</td>";
+
+						let  commits = metrics[i].metric.metricValues.Commits;
+						let  developers = metrics[i].metric.metricValues.Developers;
+//                         let    coChanges = metrics[i].metric.metricValues.coChanges;
+						let coChangeFiles = metrics[i].metric.metricValues.CoChangeFiles;
+						html += "<td>" + (commits > 0 ? commits : 0)  + "</td>";
+						html += "<td>" + (developers > 0 ? developers : 0)  + "</td>";
+						// html += "<td>" + (coChanges > 0 ? coChanges : 0)  + "</td>";
+						html += "<td>" + (coChangeFiles > 0 ? coChangeFiles : 0)  + "</td>";
+
+						let issues = metrics[i].metric.metricValues.Issues;
+						let bugIssues = metrics[i].metric.metricValues.BugIssues;
+						let newFeatureIssues = metrics[i].metric.metricValues.NewFeatureIssues;
+						let improvementIssues = metrics[i].metric.metricValues.ImprovementIssues;
+						let pageRankScore = metrics[i].metric.metricValues.PageRankScore;
+                        html += "<td>" + (issues > 0 ? issues : 0) + "</td>";
+						html += "<td>" + (bugIssues > 0 ? bugIssues : 0) + "</td>";
+						html += "<td>" + (newFeatureIssues > 0 ? newFeatureIssues : 0) + "</td>";
+						html += "<td>" + (improvementIssues > 0 ? improvementIssues : 0) + "</td>";
+						html += "<td>" + (pageRankScore > 0 ? pageRankScore.toFixed(2) : 0.0) + "</td>";
 						html += "</tr>";
 					}
 					html += "</table></div>";
@@ -102,7 +88,7 @@ var metric = function() {
 			type: "get",
 			url: "/metric/package",
 			success: function(result) {
-				console.log(result);
+				// console.log(result);
 				var html = "";
 				for(var id in projects) {
 					html += "<div><h4>" + projects[id].name + " (" + projects[id].language + ")" + "</h4></div>";
@@ -113,6 +99,7 @@ var metric = function() {
 					html += "<th>Id</th>";
 					html += "<th>Package/Directory</th>";
 					html += "<th>NOF</th>";
+					html += "<th>NOC</th>";
 					html += "<th>NOM</th>";
 					html += "<th>LOC</th>";
 					html += "<th>Lines</th>";
@@ -121,19 +108,28 @@ var metric = function() {
 					html += "<th>Instability</th>";
 					html += "</tr>";
 					var metrics = result[id];
-					console.log(metrics);
+					// console.log(metrics);
 					for(var i = 0; i < metrics.length; i++) {
 						html += "<tr>";
 						html += "<td>" + (i + 1) + "</td>";
-						html += "<td>" + metrics[i].pck.id + "</td>";
-						html += "<td><a target='_blank' href='/relation/package/" + metrics[i].pck.id + "'>" + metrics[i].pck.directoryPath + "</a></td>";
-						html += "<td>" + metrics[i].nof + "</td>";
-						html += "<td>" + metrics[i].nom + "</td>";
-						html += "<td>" + metrics[i].loc + "</td>";
-						html += "<td>" + metrics[i].lines + "</td>";
-						html += "<td>" + metrics[i].fanIn + "</td>";
-						html += "<td>" + metrics[i].fanOut + "</td>";
-						html += "<td>" + (metrics[i].fanOut / (metrics[i].fanIn + metrics[i].fanOut)).toFixed(2) + "</td>";
+						html += "<td>" + metrics[i].node.id + "</td>";
+						html += "<td><a target='_blank' href='/relation/package/" + metrics[i].node.id + "'>" + metrics[i].node.directoryPath + "</a></td>";
+						let nof = metrics[i].metric.metricValues.NOF;
+						let noc = metrics[i].metric.metricValues.NOC;
+						let nom = metrics[i].metric.metricValues.NOM;
+						let loc = metrics[i].metric.metricValues.LOC;
+						let lines = metrics[i].metric.metricValues.Lines;
+						let fanIn = metrics[i].metric.metricValues.FanIn;
+						let fanOut = metrics[i].metric.metricValues.FanOut;
+						let instability = metrics[i].metric.metricValues.Instability;
+						html += "<td>" + (nof > 0 ? nof : 0) + "</td>";
+						html += "<td>" + (noc > 0 ? noc : 0) + "</td>";
+						html += "<td>" + (nom > 0 ? nom : 0) + "</td>";
+						html += "<td>" + (loc > 0 ? loc : 0) + "</td>";
+						html += "<td>" + (lines > 0 ? lines : 0) + "</td>";
+						html += "<td>" + (fanIn > 0 ? fanIn : 0) + "</td>";
+						html += "<td>" + (fanOut > 0 ? fanOut : 0) + "</td>";
+						html += "<td>" + (instability > 0 ? (instability).toFixed(2) : 0.0) + "</td>";
 						html += "</tr>";
 					}
 					html += "</table></div>";
@@ -171,7 +167,7 @@ var metric = function() {
 			type: "get",
 			url: "/metric/project",
 			success: function(result) {
-				console.log(result);
+				// console.log(result);
 				var html = "<table id='projectTable' class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th>Index</th>";
@@ -179,6 +175,7 @@ var metric = function() {
 				html += "<th>Project</th>";
 				html += "<th>NOP</th>";
 				html += "<th>NOF</th>";
+				html += "<th>NOC</th>";
 				html += "<th>NOM</th>";
 				html += "<th>LOC</th>";
 				html += "<th>Lines</th>";
@@ -188,23 +185,32 @@ var metric = function() {
 				for(var i = 0; i < result.length; i++) {
 					html += "<tr>";
 					html += "<td>" + (i + 1) + "</td>";
-					html += "<td>" + result[i].project.id + "</td>";
-					html += "<td>" + result[i].project.name + " (" + result[i].project.language + ") " + "</td>";
-					html += "<td>" + result[i].nop + "</td>";
-					html += "<td>" + result[i].nof + "</td>";
-					html += "<td>" + result[i].nom + "</td>";
-					html += "<td>" + result[i].loc + "</td>";
-					html += "<td>" + result[i].lines + "</td>";
-					html += "<td id='commitTimes_" + result[i].project.id + "'>" + (result[i].commitTimes < 0 ? "计算中..." : result[i].commitTimes) + "</td>";
-					html += "<td id='modularity_" + result[i].project.id + "'>" + (result[i].modularity < 0 ? "计算中..." : result[i].modularity.toFixed(2)) + "</td>";
+					html += "<td>" + result[i].node.id + "</td>";
+					html += "<td>" + result[i].node.name + " (" + result[i].node.language + ") " + "</td>";
+					let nop = result[i].metric.metricValues.NOP;
+					let nof = result[i].metric.metricValues.NOF;
+					let noc = result[i].metric.metricValues.NOC;
+					let nom = result[i].metric.metricValues.NOM;
+					let loc = result[i].metric.metricValues.LOC;
+					let lines = result[i].metric.metricValues.Lines;
+					let commits = result[i].metric.metricValues.Commits;
+					let modularity = result[i].metric.metricValues.MODULARITY;
+					html += "<td>" + (nop > 0 ? nop : 0) + "</td>";
+					html += "<td>" + (nof > 0 ? nof : 0) + "</td>";
+					html += "<td>" + (noc > 0 ? noc : 0) + "</td>";
+					html += "<td>" + (nom > 0 ? nom : 0)+ "</td>";
+					html += "<td>" + (loc > 0 ? loc : 0) + "</td>";
+					html += "<td>" + (lines > 0 ? lines : 0) + "</td>";
+					html += "<td>" + (commits > 0 ? commits : 0) + "</td>";
+					html += "<td>" + (modularity > 0 ? modularity : 0) + "</td>";
 					html += "</tr>";
 				}
 				html += "</table>";
 				$("#projectMetrics").html(html);
 				for(var i = 0; i < result.length; i++) {
-					var projectId = result[i].project.id;
-					showModularity($("#modularity_" + result[i].project.id), result[i].project.id);
-					showCommitTimes($("#commitTimes_" + result[i].project.id), result[i].project.id);
+					var projectId = result[i].node.id;
+					showModularity($("#modularity_" + projectId), projectId);
+					showCommitTimes($("#commitTimes_" + projectId), projectId);
 				}
 			}
 		});

@@ -9,6 +9,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.git.DeveloperSubmitCo
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricShowService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class PackageRelationController {
     private ContainRelationService containRelationService;
 
     @Autowired
-    private MetricCalculatorService metricCalculatorService;
+    private MetricShowService metricShowService;
 
     @Autowired
     private StaticAnalyseService staticAnalyseService;
@@ -58,7 +59,7 @@ public class PackageRelationController {
     @ResponseBody
     public Object metric(@PathVariable("packageId") long id) {
         Package pck = nodeService.queryPackage(id);
-        return metricCalculatorService.calculatePackageMetric(pck);
+        return metricShowService.getPackageMetric(pck);
     }
 
     @GetMapping("/contain/file")

@@ -14,11 +14,11 @@ import java.util.Map;
 
 @Data
 @NoArgsConstructor
-@RelationshipEntity(RelationType.str_GLOBAL_VARIABLE)
+@RelationshipEntity(RelationType.str_MEMBER_VARIABLE)
 @EqualsAndHashCode
-public class GlobalVariable implements RelationWithTimes, StructureRelation {
+public class MemberVariable implements RelationWithTimes, StructureRelation {
 
-	private static final long serialVersionUID = -8330458844230314572L;
+	private static final long serialVersionUID = 4817542014996635446L;
 
 	@StartNode
 	private CodeNode startCodeNode;
@@ -28,7 +28,7 @@ public class GlobalVariable implements RelationWithTimes, StructureRelation {
 
 	private int times = 1;
 
-	public GlobalVariable(CodeNode startCodeNode, CodeNode endCodeNode) {
+	public MemberVariable(CodeNode startCodeNode, CodeNode endCodeNode) {
 		super();
 		this.startCodeNode = startCodeNode;
 		this.endCodeNode = endCodeNode;
@@ -55,7 +55,7 @@ public class GlobalVariable implements RelationWithTimes, StructureRelation {
 
 	@Override
 	public RelationType getRelationType() {
-		return RelationType.GLOBAL_VARIABLE;
+		return RelationType.MEMBER_VARIABLE;
 	}
 
 	@Override

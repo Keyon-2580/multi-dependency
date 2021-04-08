@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.Language;
+import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.relation.structure.*;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import depends.entity.*;
@@ -277,13 +279,13 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 						// 关联的type，即成员变量的类型，此处仅指代类型直接定义的成员变量，不包含通过List<？>、Set<？>等基本数据类型中参数类型（此种情况将在变量的参数类型中处理）
 						Type other = (Type) getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, relation.getEntity().getId().longValue(), currentProject);
 						if(other != null) {
-							GlobalVariable globalVariable = new GlobalVariable(type, other);
-							addRelation(globalVariable);
+							MemberVariable memberVariable = new MemberVariable(type, other);
+							addRelation(memberVariable);
 						}
 					}
 					break;
 				case DependencyType.CALL:
-					if( relation.getEntity().getClass() == FunctionEntity.class ) {
+					if( relation.getEntity() instanceof FunctionEntity ) {
 						Function other = (Function) getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, relation.getEntity().getId().longValue(), currentProject);
 						if(other != null) {
 							Call call = new Call(type, other);
@@ -376,20 +378,41 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 							if(parentTypeEntity != null){
 								Type parentType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentTypeEntity.getId().longValue(), currentProject);
 								if(parentType != null && parentType != useType){
-									GlobalVariable globalVariable = new GlobalVariable(parentType, useType);
-									addRelation(globalVariable);
+									MemberVariable memberVariable = new MemberVariable(parentType, useType);
+									addRelation(memberVariable);
 								}
 							}
 						} else {
-							Entity parentFunctionEntity = varEntity.getParent();
-							while (parentFunctionEntity != null && parentFunctionEntity.getClass() != FunctionEntity.class){
-								parentFunctionEntity = parentFunctionEntity.getParent();
+							Entity parentEntity = varEntity.getParent();
+							while (parentEntity != null){
+								if(parentEntity instanceof FunctionEntity || parentEntity.getClass() == PackageEntity.class || parentEntity.getClass() == FileEntity.class){
+									break;
+								}
+								parentEntity = parentEntity.getParent();
 							}
-							if(parentFunctionEntity != null){
-								Function parentFunction = (Function) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, parentFunctionEntity.getId().longValue(), currentProject);
-								if(parentFunction != null){
-									LocalVariable localVariable = new LocalVariable(parentFunction, useType);
-									addRelation(localVariable);
+							if(parentEntity != null){
+								if(parentEntity instanceof FunctionEntity){
+									Function parentFunction = (Function) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, parentEntity.getId().longValue(), currentProject);
+									if(parentFunction != null){
+										LocalVariable localVariable = new LocalVariable(parentFunction, useType);
+										addRelation(localVariable);
+									}
+								}else if(parentEntity.getClass() == PackageEntity.class){
+									if(Language.cpp.name().equals(variable.getLanguage())){
+										Namespace parentNamespace = (Namespace) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Namespace, parentEntity.getId().longValue(), currentProject);
+										if(parentNamespace != null){
+											MemberVariable memberVariable = new MemberVariable(parentNamespace, useType);
+											addRelation(memberVariable);
+										}
+									}
+								}else if(parentEntity.getClass() == FileEntity.class){
+									if(Language.cpp.name().equals(variable.getLanguage())){
+										ProjectFile parentFile = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.ProjectFile, parentEntity.getId().longValue(), currentProject);
+										if(parentFile != null){
+											GlobalVariable globalVariable = new GlobalVariable(parentFile, useType);
+											addRelation(globalVariable);
+										}
+									}
 								}
 							}
 						}

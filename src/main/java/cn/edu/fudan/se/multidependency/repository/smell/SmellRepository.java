@@ -7,6 +7,7 @@ import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
+import cn.edu.fudan.se.multidependency.service.query.metric.NodeMetric;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.SmellMetric;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -58,11 +59,14 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 	@Query("match (n:Smell) where n.type = $smellType delete n;")
 	void deleteSmells(@Param("smellType") String smellType);
 
-	@Query("MATCH p=(smell:Smell)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(smell) = $projectId RETURN m")
+	@Query("MATCH p=(smell:Smell)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(smell) = $smellId RETURN m")
 	Metric findSmellMetric(@Param("smellId") long smellId);
 
 	@Query("MATCH p=(:Smell)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m")
 	List<Metric> findSmellMetric();
+
+	@Query("MATCH p=(node:Smell)-[:" + RelationType.str_HAS + "]->(metric:Metric) RETURN node,metric")
+	List<NodeMetric<Smell>> findSmellMetricData();
 
 	@Query("MATCH p=(:Smell)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m limit 10;")
 	List<Metric> findSmellMetricWithLimit();

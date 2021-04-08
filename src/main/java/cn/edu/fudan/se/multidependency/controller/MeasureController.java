@@ -8,6 +8,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cn.edu.fudan.se.multidependency.model.node.Metric;
+import cn.edu.fudan.se.multidependency.service.query.metric.*;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellMetricCalculatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,10 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
-import cn.edu.fudan.se.multidependency.service.query.metric.MetricShowService;
-import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculatorImplForFieldMethodLevel;
-import cn.edu.fudan.se.multidependency.service.query.metric.ProjectMetrics;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller
@@ -85,14 +83,14 @@ public class MeasureController {
     
     @GetMapping("/file")
     @ResponseBody
-    public Object calculateFileMetrics() {
-    	return metricCalculatorService.calculateProjectFileMetrics();
+    public Object getFileMetrics() {
+    	return metricShowService.getProjectFileMetrics();
     }
     
     @GetMapping("/project")
     @ResponseBody
-    public Collection<ProjectMetrics> calculateProjectMetrics() {
-    	return metricCalculatorService.calculateProjectMetrics().values();
+    public Collection<NodeMetric> getProjectMetrics() {
+    	return metricShowService.getProjectMetrics();
     }
     
     @GetMapping("/project/modularity")
@@ -117,14 +115,14 @@ public class MeasureController {
     
     @GetMapping("/package")
     @ResponseBody
-    public Object calculatePackageMetrics() {
-    	return metricCalculatorService.calculateProjectPackageMetrics();
+    public Object getPackageMetrics() {
+    	return metricShowService.getProjectPackageMetrics();
     }
 
     @GetMapping("/smellMetric")
     @ResponseBody
     public Object calculateSmellMetric() {
-        return smellMetricCalculatorService.calculateProjectSmellMetricsInFileLevel();
+        return metricShowService.getProjectSmellMetricsInFileLevel();
     }
 
     @GetMapping("/modularityMetricQ")

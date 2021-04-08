@@ -142,7 +142,7 @@ public class BeanCreator {
 
 			dependsOnRepository.createDependsOnWithExtendsInTypes();
 			dependsOnRepository.createDependsOnWithImplementsInTypes();
-			dependsOnRepository.createDependsOnWithGlobalVariableInTypes();
+			dependsOnRepository.createDependsOnWithMemberVariableInTypes();
 			dependsOnRepository.createDependsOnWithLocalVariableInTypes();
 			dependsOnRepository.createDependsOnWithAnnotationInTypes();
 			dependsOnRepository.createDependsOnWithCallInTypes();
@@ -161,6 +161,7 @@ public class BeanCreator {
 			dependsOnRepository.createDependsOnWithExtendsInFiles();
 			dependsOnRepository.createDependsOnWithImplementsInFiles();
 			dependsOnRepository.createDependsOnWithImplementsCInFiles();
+			dependsOnRepository.createDependsOnWithMemberVariableInFiles();
 			dependsOnRepository.createDependsOnWithGlobalVariableInFiles();
 			dependsOnRepository.createDependsOnWithLocalVariableInFiles();
 			dependsOnRepository.createDependsOnWithAnnotationInFiles();
@@ -472,13 +473,13 @@ public class BeanCreator {
 	@Bean
 	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository) {
 		LOGGER.info("创建File Metric度量值节点和关系...");
-		metricCalculatorService.createFileMetric(false);
+		metricCalculatorService.createFileMetric(true);
 
 		LOGGER.info("创建Package Metric度量值节点和关系...");
-		metricCalculatorService.createPackageMetric(false);
+		metricCalculatorService.createPackageMetric(true);
 
 		LOGGER.info("创建Project Metric度量值节点和关系...");
-		metricCalculatorService.createProjectMetric(false);
+		metricCalculatorService.createProjectMetric(true);
 
 		if(propertyConfig.isCalModularity()){
 			LOGGER.info("计算Project模块性度量值...");
@@ -491,7 +492,7 @@ public class BeanCreator {
 		}
 
 		LOGGER.info("创建Smell Metric度量值节点和关系...");
-		smellMetricCalculatorService.createSmellMetric(false);
+		smellMetricCalculatorService.createSmellMetric(true);
 
 		return true;
 	}

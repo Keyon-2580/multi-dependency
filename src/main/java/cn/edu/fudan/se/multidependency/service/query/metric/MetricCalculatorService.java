@@ -221,7 +221,9 @@ public class MetricCalculatorService {
 				metricValues.put(MetricType.LOC, fileMetrics.getStructureMetric().getLoc());
 				metricValues.put(MetricType.FAN_OUT, fileMetrics.getStructureMetric().getFanOut());
 				metricValues.put(MetricType.FAN_IN, fileMetrics.getStructureMetric().getFanIn());
-
+				int fanInOut = fileMetrics.getStructureMetric().getFanOut() + fileMetrics.getStructureMetric().getFanIn();
+				double instability  = (fanInOut > 0 ? (double) (fileMetrics.getStructureMetric().getFanOut()) / fanInOut : 0.0);
+				metricValues.put(MetricType.INSTABILITY, instability);
 				FileMetrics.EvolutionMetric evolutionMetric = fileMetrics.getEvolutionMetric();
 				if (evolutionMetric != null){
 					metricValues.put(MetricType.COMMITS, evolutionMetric.getCommits());
@@ -274,6 +276,9 @@ public class MetricCalculatorService {
 				metricValues.put(MetricType.FAN_OUT, packageMetrics.getFanOut());
 				metricValues.put(MetricType.FAN_IN, packageMetrics.getFanIn());
 				metricValues.put(MetricType.LINES, packageMetrics.getLines());
+				int fanInOut = packageMetrics.getFanOut() + packageMetrics.getFanIn();
+				double instability  = (fanInOut > 0 ? (double)(packageMetrics.getFanOut())/fanInOut : 0.0);
+				metricValues.put(MetricType.INSTABILITY, instability);
 				metric.setMetricValues(metricValues);
 
 				result.put(pck.getId(), metric);

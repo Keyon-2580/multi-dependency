@@ -27,8 +27,8 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 
 	@Query("MATCH (file:ProjectFile) " +
 			"WITH file, " +
-			"     size((file)-[:" + RelationType.str_CONTAIN + "]->(:Type)) as noc, " +
-			"     size((file)-[:" + RelationType.str_CONTAIN + "*2..3]->(:Function)) as nom  " +
+			"     size((file)-[:" + RelationType.str_CONTAIN + "*1..5]->(:Type)) as noc, " +
+			"     size((file)-[:" + RelationType.str_CONTAIN + "*1..5]->(:Function)) as nom  " +
 			"SET file += {noc: noc, nom: nom};")
 	public void setFileMetrics();
 	
@@ -38,8 +38,8 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	 */
 	@Query("MATCH (file:ProjectFile) " +
 			"WITH file, " +
-			"     size((file)-[:" + RelationType.str_CONTAIN + "]->(:Type)) as noc, " +
-			"     size((file)-[:" + RelationType.str_CONTAIN + "*2..3]->(:Function)) as nom, " +
+			"     size((file)-[:" + RelationType.str_CONTAIN + "*1..5]->(:Type)) as noc, " +
+			"     size((file)-[:" + RelationType.str_CONTAIN + "*1..5]->(:Function)) as nom, " +
 			"     file.loc as loc, " +
 			"     size((file)-[:"+ RelationType.str_DEPENDS_ON + "]->()) as fanOut, " +
 			"     size((file)<-[:"+ RelationType.str_DEPENDS_ON + "]-()) as fanIn  " +
@@ -49,8 +49,8 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	@Query("MATCH (file:ProjectFile)  " +
             "where id(file)= $fileId  " +
 			"WITH file, " +
-			"     size((file)-[:" + RelationType.str_CONTAIN + "]->(:Type)) as noc, " +
-			"     size((file)-[:" + RelationType.str_CONTAIN + "*2..3]->(:Function)) as nom, " +
+			"     size((file)-[:" + RelationType.str_CONTAIN + "*1..5]->(:Type)) as noc, " +
+			"     size((file)-[:" + RelationType.str_CONTAIN + "*1..5]->(:Function)) as nom, " +
 			"     file.loc as loc, " +
 			"     size((file)-[:"+ RelationType.str_DEPENDS_ON + "]->()) as fanOut, " +
 			"     size((file)<-[:"+ RelationType.str_DEPENDS_ON + "]-()) as fanIn  " +

@@ -26,6 +26,7 @@ public enum RelationType implements RelationshipType {
 	ANNOTATION(RelationType.str_ANNOTATION),
 //	DEPENDENCY(RelationType.str_DEPENDENCY),
 	GLOBAL_VARIABLE(RelationType.str_GLOBAL_VARIABLE),
+	MEMBER_VARIABLE(RelationType.str_MEMBER_VARIABLE),
 	LOCAL_VARIABLE(RelationType.str_LOCAL_VARIABLE),
 	USE(RelationType.str_USE),
 	DYNAMIC_CALL(RelationType.str_DYNAMIC_CALL),
@@ -64,6 +65,7 @@ public enum RelationType implements RelationshipType {
 //	public static final String str_DEPENDENCY = "DEPENDENCY";
 //	public static final String str_ASSOCIATION = "ASSOCIATION";
 	public static final String str_GLOBAL_VARIABLE = "GLOBAL_VARIABLE";
+	public static final String str_MEMBER_VARIABLE = "MEMBER_VARIABLE";
 
 	/**
 	 * 依赖关系
@@ -139,7 +141,8 @@ public enum RelationType implements RelationshipType {
 		relationWeights.put(INCLUDE, 0.1);
 		relationWeights.put(EXTENDS, 1.0);
 		relationWeights.put(IMPLEMENTS, 1.0);
-		relationWeights.put(GLOBAL_VARIABLE, 0.5);
+		relationWeights.put(MEMBER_VARIABLE, 0.5);
+		relationWeights.put(GLOBAL_VARIABLE, 0.2);
 		relationWeights.put(LOCAL_VARIABLE, 0.2);
 		relationWeights.put(ANNOTATION, 0.1);
 		relationWeights.put(CALL, 0.5);
@@ -163,6 +166,7 @@ public enum RelationType implements RelationshipType {
 		relationAbbreviation.put(EXTENDS, "EXT");
 		relationAbbreviation.put(IMPLEMENTS, "IMPL");
 		relationAbbreviation.put(GLOBAL_VARIABLE, "GVAR");
+		relationAbbreviation.put(MEMBER_VARIABLE, "MVAR");
 		relationAbbreviation.put(LOCAL_VARIABLE, "LVAR");
 		relationAbbreviation.put(ANNOTATION, "ANN");
 		relationAbbreviation.put(CALL, "CAL");

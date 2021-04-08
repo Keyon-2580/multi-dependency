@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.controller.relation;
 
 import javax.servlet.http.HttpServletRequest;
 
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricShowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,7 +37,7 @@ public class FileRelationController {
 	private GitAnalyseService gitAnalyseService;
 	
 	@Autowired
-	private MetricCalculatorService metricCalculatorService;
+	private MetricShowService metricShowService;
 	
 	@Autowired
 	private FileRelationService fileRelationService;
@@ -60,14 +61,35 @@ public class FileRelationController {
 	@ResponseBody
 	public Object metric(@PathVariable("fileId") long id) {
 		ProjectFile file = nodeService.queryFile(id);
-		return metricCalculatorService.calculateFileMetric(file);
+		return metricShowService.getFileMetric(file);
 	}
 	
 	@GetMapping("/contain/type")
 	@ResponseBody
-	public Object contain(@PathVariable("fileId") long id) {
+	public Object containType(@PathVariable("fileId") long id) {
 		ProjectFile file = nodeService.queryFile(id);
 		return containRelationService.findFileDirectlyContainTypes(file);
+	}
+
+	@GetMapping("/contain/namespace")
+	@ResponseBody
+	public Object containNamespace(@PathVariable("fileId") long id) {
+		ProjectFile file = nodeService.queryFile(id);
+		return containRelationService.findFileContainNamespaces(file);
+	}
+
+	@GetMapping("/contain/variable")
+	@ResponseBody
+	public Object containVariable(@PathVariable("fileId") long id) {
+		ProjectFile file = nodeService.queryFile(id);
+		return containRelationService.findFileDirectlyContainVariables(file);
+	}
+
+	@GetMapping("/contain/function")
+	@ResponseBody
+	public Object containFunction(@PathVariable("fileId") long id) {
+		ProjectFile file = nodeService.queryFile(id);
+		return containRelationService.findFileDirectlyContainFunctions(file);
 	}
 	
 	@GetMapping("/import/type")
