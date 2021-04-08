@@ -42,6 +42,10 @@ public class Smell implements Node {
 
 	private String type;
 
+	private String coreNodePath;
+
+	private Long coreNodeId;
+
 	public Smell(String name) {
 		this.name = name;
 		this.size = 0;
@@ -59,6 +63,8 @@ public class Smell implements Node {
 		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		properties.put("level", getLevel() == null ? "" : getLevel());
 		properties.put("type", getType() == null ? "" : getType());
+		properties.put("coreNodePath", getCoreNodePath() == null ? "" : getCoreNodePath());
+		properties.put("coreNodeId", getCoreNodeId() == null ? -1 : getCoreNodeId());
 		return properties;
 	}
 

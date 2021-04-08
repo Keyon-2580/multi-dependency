@@ -8,6 +8,7 @@ import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
+import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
@@ -55,6 +56,11 @@ public class SmellDetectorService {
 	@Autowired
 	private SmellRepository smellRepository;
 
+	@Autowired
+	private UnusedIncludeDetector unusedIncludeDetector;
+
+	@Autowired
+	private ProjectFileRepository projectFileRepository;
 
 	public void createCloneSmells(boolean isRecreate){
 		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.CLONE);
@@ -316,7 +322,7 @@ public class SmellDetectorService {
 		LOGGER.info("创建Unstable Dependency Smell节点关系完成");
 	}
 
-	public void createSimilarComponentsSmell(boolean isRecreate) {
+	public void createSimilarComponentsSmells(boolean isRecreate) {
 		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.SIMILAR_COMPONENTS);
 		if(smellsTmp != null && !smellsTmp.isEmpty()){
 			LOGGER.info("已存在Similar Components Smell");
@@ -402,7 +408,7 @@ public class SmellDetectorService {
 		LOGGER.info("创建Similar Components Smell节点关系完成");
 	}
 
-	public void createLogicalCouplingSmell(boolean isRecreate) {
+	public void createLogicalCouplingSmells(boolean isRecreate) {
 		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.LOGICAL_COUPLING);
 		if(smellsTmp != null && !smellsTmp.isEmpty()){
 			LOGGER.info("已存在Logical Coupling Smell");
@@ -469,7 +475,7 @@ public class SmellDetectorService {
 		LOGGER.info("创建Logical Coupling Smell节点关系完成");
 	}
 
-	public void createGodComponentSmell(boolean isRecreate) {
+	public void createGodComponentSmells(boolean isRecreate) {
 		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.GOD_COMPONENT);
 		if(smellsTmp != null && !smellsTmp.isEmpty()){
 			LOGGER.info("已存在God Component Smell");
@@ -512,7 +518,7 @@ public class SmellDetectorService {
 		LOGGER.info("创建God Component Smell节点关系完成");
 	}
 
-	public void createUnutilizedAbstractionSmell(boolean isRecreate) {
+	public void createUnutilizedAbstractionSmells(boolean isRecreate) {
 		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.UNTILIZED_ABSTRACTION);
 		if(smellsTmp != null && !smellsTmp.isEmpty()){
 			LOGGER.info("已存在Unutilized Abstraction Smell");
@@ -553,5 +559,54 @@ public class SmellDetectorService {
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
 		LOGGER.info("创建Unutilized Abstraction Smell节点关系完成");
+	}
+
+	public void createUnusedIncludeSmells(boolean isRecreate) {
+		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.UNUSED_INCLUDE);
+		if(smellsTmp != null && !smellsTmp.isEmpty()){
+			LOGGER.info("已存在Unused Include Smell");
+			if(!isRecreate){
+				LOGGER.info("不重新创建");
+				return;
+			}
+			LOGGER.info("重新创建...");
+		}
+		smellRepository.deleteSmellContainRelations(SmellType.UNUSED_INCLUDE);
+		smellRepository.deleteSmellMetric(SmellType.UNUSED_INCLUDE);
+		smellRepository.deleteSmells(SmellType.UNUSED_INCLUDE);
+		List<Smell> smells = new ArrayList<>();
+		List<Contain> smellContains = new ArrayList<>();
+
+		Map<Long, List<UnusedInclude>> unusedIncludeMap = unusedIncludeDetector.detectUnusedInclude();
+		String fileSmellName = "file_unused-include_";
+		int fileSmellIndex = 1;
+		for (Map.Entry<Long, List<UnusedInclude>> entry : unusedIncludeMap.entrySet()) {
+			long projectId = entry.getKey();
+			Project project = (Project) projectRepository.queryNodeById(projectId);
+			List<UnusedInclude> unusedIncludeList = entry.getValue();
+			for (UnusedInclude unusedInclude : unusedIncludeList) {
+				ProjectFile coreFile = unusedInclude.getCoreFile();
+				Set<ProjectFile> unusedIncludeFiles = unusedInclude.getUnusedIncludeFiles();
+				Smell smell = new Smell();
+				smell.setName(fileSmellName + fileSmellIndex);
+				smell.setSize(unusedIncludeFiles.size());
+				smell.setLanguage(project.getLanguage());
+				smell.setProjectId(projectId);
+				smell.setProjectName(project.getName());
+				smell.setType(SmellType.UNUSED_INCLUDE);
+				smell.setLevel(SmellLevel.FILE);
+				smell.setCoreNodePath(coreFile.getPath());
+				smell.setCoreNodeId(coreFile.getId());
+				smells.add(smell);
+				for (ProjectFile unusedIncludeFile : unusedIncludeFiles) {
+					Contain contain = new Contain(smell, unusedIncludeFile);
+					smellContains.add(contain);
+				}
+				fileSmellIndex ++;
+			}
+		}
+		smellRepository.saveAll(smells);
+		containRepository.saveAll(smellContains);
+		LOGGER.info("创建Unused Include Smell节点关系完成");
 	}
 }
