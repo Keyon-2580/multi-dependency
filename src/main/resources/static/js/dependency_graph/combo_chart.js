@@ -569,6 +569,8 @@ function DrawComboChart(json_data){
 
         repaint_flag = true;
     }
+
+    $("#loading_div").html("");
 }
 
 //显示与该节点相关的连线和节点
@@ -1481,6 +1483,10 @@ function showMultipleButton(){
     $('#multipleProjectsButton').css('background-color', '#f84634');
     projectList_global = [];
     projectList_global = value;
+    let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
+        "<div class='loading_window' id='Id_loading_window' style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">调用数据接口...</div>" +
+        "</div>";
+    $("#loading_div").html(html);
     projectGraphAjax(value);
 }
 

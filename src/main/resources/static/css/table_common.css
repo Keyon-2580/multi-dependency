@@ -207,3 +207,17 @@ li {
     margin-left: 100%; }
 .tabs .tab-2:last-child [type="radio"]:checked + div {
     margin-left: -100%; }
+
+.loading_window{
+    opacity: 1;
+    position: absolute;
+    width: auto;
+    height: 57px;
+    line-height: 57px;
+    padding-left: 8px;
+    padding-right: 8px;
+    background: #fff no-repeat scroll 5px 10px;
+    border: 2px solid #95B8E7;
+    color: #464646;
+    font-family: "Microsoft YaHei", serif;
+}

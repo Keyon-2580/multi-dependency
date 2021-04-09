@@ -9,6 +9,7 @@ import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
@@ -23,6 +24,8 @@ import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,9 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class ProjectServiceImpl implements ProjectService{
-    @Autowired
-    private BasicCloneQueryService basicCloneQueryService;
-
     @Autowired
     private HotspotPackagePairDetector hotspotPackagePairDetector;
 
@@ -54,9 +54,6 @@ public class ProjectServiceImpl implements ProjectService{
 
     @Autowired
     private BasicSmellQueryService basicSmellQueryService;
-
-    @Autowired
-    private CoDeveloperService coDeveloperService;
 
     private Map<Project, String> projectToAbsolutePath = new ConcurrentHashMap<>();
 
@@ -378,8 +375,7 @@ public class ProjectServiceImpl implements ProjectService{
     public JSONArray getAllProjectsLinksCombo(){
         JSONArray result = new JSONArray();
 
-        Set<Long> proList = nodeService.allProjectsById().keySet();
-        List<DependsOn> dependsOnList= dependsOnRepository.findFileDependsInProject(proList.iterator().next());
+        List<DependsOn> dependsOnList= dependsOnRepository.findFileDepends();
         List<Clone> cloneList= cloneRepository.findAllFileClones();
         List<CoChange> coChangeList= coChangeRepository.findFileCoChange();
 
