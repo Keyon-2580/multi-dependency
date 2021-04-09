@@ -241,6 +241,8 @@ const tooltip = new G6.Tooltip({
             `<b class="combo_label">${e.item.getModel().name}</b>
           <ul>
             <li>ID: ${e.item.getModel().id}</li>
+            <li>x: ${e.item.getModel().x}</li>
+            <li>y: ${e.item.getModel().y}</li>
           </ul>`
 
             : e.item.getModel().group_type === 'node' ?
@@ -1343,12 +1345,20 @@ function autoLayout(){
         let line_node_num = parseInt(Math.sqrt(item.node_num) * 1.5);
         let combo_width = 75 * line_node_num;
         let combo_height = 75 * line_node_num;
+        let combo_radio = index / combo_num; //当前combo处于总布局圆圈的比例
+        let model1x, model1y, model2x, model2y;
 
         if(index !== combo_num){
-            combo_cord = [radius * Math.cos((index / combo_num) * Math.PI * 2) - combo_width * 0.5 + cord,
-                (-radius) * Math.sin((index / combo_num) * Math.PI * 2) - combo_height * 0.5 + cord];
+            let stretch_radio;
+            if(combo_radio < 0.5){
+                stretch_radio = (0.25 - combo_radio) / 0.25;
+            }else{
+                stretch_radio = (combo_radio - 0.75) / 0.25;
+            }
+            combo_cord = [radius * Math.cos(combo_radio * Math.PI * 2) - combo_width * 0.5 + (1 + stretch_radio * 1.6) * cord,
+                (-radius) * Math.sin(combo_radio * Math.PI * 2) - combo_height * 0.5 + cord];
         }else{
-            combo_cord = [(radius - combo_width * 0.5 + cord) * (4 / 5),  (-(combo_height * 0.5) + cord) * (4 / 5)];
+            combo_cord = [radius - combo_width * 0.5 + cord,  -(combo_height * 0.5) + cord];
         }
 
         for(let i = 0; i < item.node_num; i++){
@@ -1357,16 +1367,79 @@ function autoLayout(){
             let outerLineIndex = Math.ceil(outerNodeLineIndex / line_node_num);
             // console.log(innerLineIndex);
             // console.log(outerLineIndex);
-            if(temp_node.outerNode === 0){
-                temp_node["x"] = combo_cord[0] + 75 * (innerNodeLineIndex % line_node_num);
-                temp_node["y"] = combo_cord[1] + 75 * innerLineIndex;
-                innerNodeLineIndex++;
-            }else{
-                temp_node["x"] = combo_cord[0] + 75 * (outerNodeLineIndex % line_node_num);
-                temp_node["y"] = combo_cord[1] - 75 * outerLineIndex + combo_height;
-                outerNodeLineIndex++;
+            if(temp_node.outerNode === 0){ //内部节点
+                if(combo_radio <= 0.5){//放置在上面
+                    if(combo_radio <= 0.25){
+                        temp_node["x"] = combo_cord[0] + 75 * (innerNodeLineIndex % line_node_num);
+                        temp_node["y"] = combo_cord[1] + 75 * innerLineIndex - combo_height;
+                        innerNodeLineIndex++;
+                    }else{
+                        temp_node["x"] = combo_cord[0] - 75 * (innerNodeLineIndex % line_node_num);
+                        temp_node["y"] = combo_cord[1] + 75 * innerLineIndex - combo_height;
+                        innerNodeLineIndex++;
+                    }
+                }else{
+                    if(combo_radio <= 0.75){
+                        temp_node["x"] = combo_cord[0] - 75 * (innerNodeLineIndex % line_node_num);
+                        temp_node["y"] = combo_cord[1] - 75 * innerLineIndex + combo_height;
+                        innerNodeLineIndex++;
+                    }else{
+                        temp_node["x"] = combo_cord[0] + 75 * (innerNodeLineIndex % line_node_num);
+                        temp_node["y"] = combo_cord[1] - 75 * innerLineIndex + combo_height;
+                        innerNodeLineIndex++;
+                    }
+
+                }
+            }else{ //外部节点
+                if(combo_radio <= 0.5) {
+                    if(combo_radio <= 0.25) {
+                        temp_node["x"] = combo_cord[0] + 75 * (outerNodeLineIndex % line_node_num);
+                        temp_node["y"] = combo_cord[1] - 75 * outerLineIndex;
+                        outerNodeLineIndex++;
+                    }else{
+                        temp_node["x"] = combo_cord[0] - 75 * (outerNodeLineIndex % line_node_num);
+                        temp_node["y"] = combo_cord[1] - 75 * outerLineIndex;
+                        outerNodeLineIndex++;
+                    }
+                }else{
+                    if(combo_radio <= 0.75) {
+                        temp_node["x"] = combo_cord[0] - 75 * (outerNodeLineIndex % line_node_num);
+                        temp_node["y"] = combo_cord[1] + 75 * outerLineIndex;
+                        outerNodeLineIndex++;
+                    }else{
+                        temp_node["x"] = combo_cord[0] + 75 * (outerNodeLineIndex % line_node_num);
+                        temp_node["y"] = combo_cord[1] + 75 * outerLineIndex;
+                        outerNodeLineIndex++;
+                    }
+                }
             }
             node_index++;
+        }
+
+        if(combo_radio <= 0.5){
+            if(combo_radio <= 0.25){
+                model1x = combo_cord[0] + combo_width * 0.5;
+                model1y = combo_cord[1] + 50;
+                model2x = combo_cord[0] - 50;
+                model2y = combo_cord[1] - combo_height * 0.6;
+            }else{
+                model1x = combo_cord[0] - combo_width * 0.5;
+                model1y = combo_cord[1] + 50;
+                model2x = combo_cord[0] + 50;
+                model2y = combo_cord[1] - combo_height * 0.6;
+            }
+        }else{
+            if(combo_radio <= 0.75){
+                model1x = combo_cord[0] - combo_width * 0.5;
+                model1y = combo_cord[1] - 50;
+                model2x = combo_cord[0] + 50;
+                model2y = combo_cord[1] + combo_height * (1 / 3);
+            }else{
+                model1x = combo_cord[0] + combo_width * 0.5;
+                model1y = combo_cord[1] - 50;
+                model2x = combo_cord[0] - 50;
+                model2y = combo_cord[1] + combo_height * (1 / 3);
+            }
         }
 
         let model1 = {
@@ -1374,8 +1447,8 @@ function autoLayout(){
             size: 15,
             inOutNode: 1,
             comboId: item.id,
-            x: combo_cord[0] + combo_width * 0.5,
-            y: combo_cord[1] + combo_height + 50,
+            x: model1x,
+            y: model1y,
             style: {
                 fill: "#f18c6f",
                 stroke: "#f3623a"
@@ -1387,8 +1460,8 @@ function autoLayout(){
             size: 15,
             inOutNode: 1,
             comboId: item.id,
-            x: combo_cord[0] - 50,
-            y: combo_cord[1] + combo_height * (2 / 3),
+            x: model2x,
+            y: model2y,
             style: {
                 fill: "#f18c6f",
                 stroke: "#f3623a"

@@ -30,4 +30,10 @@ public interface ProjectService {
 	JSONObject getAllProjectsLinks();
 
 	JSONArray getAllProjectsLinksCombo();
+
+	Map<String, Boolean> getSelectedPcks();
+
+	void setSelectedPcks(Map<String, Boolean> pcks);
+
+	boolean clearSelectedPcks();
 }

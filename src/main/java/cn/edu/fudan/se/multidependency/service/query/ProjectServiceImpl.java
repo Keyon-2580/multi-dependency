@@ -60,6 +60,25 @@ public class ProjectServiceImpl implements ProjectService{
 
     private Map<Project, String> projectToAbsolutePath = new ConcurrentHashMap<>();
 
+
+    @Override
+    public Map<String, Boolean> getSelectedPcks() {
+        return selectedPcks;
+    }
+
+    @Override
+    public void setSelectedPcks(Map<String, Boolean> pcks) {
+        selectedPcks = pcks;
+    }
+
+    private Map<String, Boolean> selectedPcks = new HashMap<>();
+
+    @Override
+    public boolean clearSelectedPcks(){
+        selectedPcks.clear();
+        return true;
+    }
+
     @Override
     public String getAbsolutePath(Project project) {
         if(project == null) {
@@ -79,8 +98,8 @@ public class ProjectServiceImpl implements ProjectService{
         JSONArray projectIds = dataList.getJSONArray("projectIds");
 
         boolean isFilter = false;
-        if (NodeAndRelationFilter.getSelectedPcks().size() != 0) {
-            selectedPcks = NodeAndRelationFilter.getSelectedPcks();
+        if (getSelectedPcks().size() != 0) {
+            selectedPcks = getSelectedPcks();
             isFilter = true;
         }else{
             isFilter = false;

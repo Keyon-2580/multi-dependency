@@ -64,18 +64,4 @@ public class NodeAndRelationFilter {
         return selectedPcks;
     }
 
-    public static Map<String, Boolean> getSelectedPcks() {
-        return selectedPcks;
-    }
-
-    public static void setSelectedPcks(Map<String, Boolean> pcks) {
-        selectedPcks = pcks;
-    }
-
-    private static Map<String, Boolean> selectedPcks = new HashMap<>();
-
-    public static boolean clearSelectedPcks(){
-        selectedPcks.clear();
-        return true;
-    }
 }
