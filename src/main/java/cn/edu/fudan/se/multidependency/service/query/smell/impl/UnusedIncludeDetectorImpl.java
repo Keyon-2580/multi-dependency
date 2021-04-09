@@ -31,11 +31,11 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
         Map<Long, List<UnusedInclude>> result = new HashMap<>();
         Set<UnusedInclude> headFileUnusedIncludeSet = new HashSet<>();
         Set<UnusedInclude> codeFileUnusedIncludeSet = new HashSet<>();
-        headFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findFileWithUnusedIncludeBySuffix(".h"));
-        headFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findFileWithUnusedIncludeBySuffix(".hpp"));
-        codeFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findFileWithUnusedIncludeBySuffix(".c"));
-        codeFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findFileWithUnusedIncludeBySuffix(".cc"));
-        codeFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findFileWithUnusedIncludeBySuffix(".cpp"));
+        headFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findUnusedIncludeWithSuffix(".h"));
+        headFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findUnusedIncludeWithSuffix(".hpp"));
+        codeFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findUnusedIncludeWithSuffix(".c"));
+        codeFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findUnusedIncludeWithSuffix(".cc"));
+        codeFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findUnusedIncludeWithSuffix(".cpp"));
         for (UnusedInclude headFileUnusedInclude : headFileUnusedIncludeSet) {
             ProjectFile headFile = headFileUnusedInclude.getCoreFile();
             //无后缀名的头文件名
@@ -90,7 +90,7 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
             for (Smell smell : smells) {
                 long projectId = smell.getProjectId();
                 List<UnusedInclude> unusedIncludeList = result.getOrDefault(projectId, new ArrayList<>());
-                unusedIncludeList.add(smellRepository.getUnusedIncludeBySmellId(smell.getId()));
+                unusedIncludeList.add(smellRepository.getUnusedIncludeWithSmellId(smell.getId()));
                 result.put(projectId, unusedIncludeList);
             }
         }

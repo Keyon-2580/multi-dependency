@@ -17,7 +17,7 @@ public interface UnusedIncludeASRepository extends Neo4jRepository<ProjectFile, 
 			"where file1.suffix = $suffix and r.times - r.`dependsOnTypes.INCLUDE` <= 0 " +
 			"with file1 as coreFile, collect(distinct file2) as unusedIncludeFiles " +
 			"return coreFile, unusedIncludeFiles;")
-	public Set<UnusedInclude> findFileWithUnusedIncludeBySuffix(@Param("suffix") String suffix);
+	public Set<UnusedInclude> findUnusedIncludeWithSuffix(@Param("suffix") String suffix);
 
 	@Query("MATCH (file1:ProjectFile)-[:" + RelationType.str_INCLUDE + "]->(file2:ProjectFile) where id(file2) = $fileId return collect(distinct file1);")
 	public Set<ProjectFile> findFileByHeadFileId(@Param("fileId") Long fileId);

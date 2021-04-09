@@ -214,5 +214,5 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 			"match (coreFile:ProjectFile) " +
 			"where id(coreFile) = smell.coreNodeId " +
 			"return coreFile, unusedIncludeFiles;")
-	public UnusedInclude getUnusedIncludeBySmellId(@Param("smellId") long smellId);
+	public UnusedInclude getUnusedIncludeWithSmellId(@Param("smellId") long smellId);
 }
