@@ -47,7 +47,8 @@ public class ZTreeUtil {
 		private String type;
 		private boolean open;
 		private boolean parent;
-		private boolean checked = true;
+		private boolean checked = false;
+		private boolean nocheck = false;
 		
 		private List<ZTreeNode> children = new ArrayList<>();
 		

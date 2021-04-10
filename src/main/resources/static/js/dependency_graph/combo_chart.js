@@ -1479,7 +1479,7 @@ function autoLayout(){
 }
 
 function showMultipleButton(){
-    var value = $('#multipleProjectSelect').val();
+    let value = $('#multipleProjectSelect').val();
     $('#multipleProjectsButton').css('background-color', '#f84634');
     projectList_global = [];
     projectList_global = value;
@@ -1507,7 +1507,7 @@ function clearFilter(){
 
 //筛选项目
 function showFilterWindow(){
-    var html = "<div class=\"div_treeview\">" +
+    let html = "<div class=\"div_treeview\">" +
         "<h4>项目结构</h4><button class=\"btn pull-right\" id=\"buttonPackageFilter\">设置</button>" +
         "<p><i id='iconProject'></i></p>" +
         "<div class=\"div_treeview_content\">" +
@@ -1518,7 +1518,7 @@ function showFilterWindow(){
         "</div>" +
         "</div>";
 
-    var win = new Window({
+    let win = new Window({
 
         width: 800, //宽度
         height: 600, //高度
@@ -1532,20 +1532,25 @@ function showFilterWindow(){
 
     //筛选文件目录按钮
     $("#buttonPackageFilter").click(function() {
-        var projectZTreeObj = $.fn.zTree.getZTreeObj("treeProjects");
-        var checkCount = projectZTreeObj.getCheckedNodes(true);
-        var ids = [];
-        var j = 0;
-        for (var i = 0; i < checkCount.length; i++) {
+        let projectZTreeObj = $.fn.zTree.getZTreeObj("treeProjects");
+        let checkCount = projectZTreeObj.getCheckedNodes(true);
+        let ids = [];
+        let j = 0;
+        for (let i = 0; i < checkCount.length; i++) {
             if (checkCount[i].type == "Package") {
                 ids[j++] = {
                     type: "pck",
                     id: checkCount[i].id
                 };
-            } else if (checkCount[i].type == "ProjectFile") {
+            } else if (checkCount[i].type == "FileList") {
                 ids[j++] = {
-                    type: "file",
-                    id: checkCount[i].id
+                    type: "FileList",
+                    id: checkCount[i].getParentNode().id
+                };
+            }else if(checkCount[i].type == "PckList"){
+                ids[j++] = {
+                    type: "PckList",
+                    id: checkCount[i].getParentNode().id
                 };
             }
         }
@@ -1557,8 +1562,8 @@ function showFilterWindow(){
             data: JSON.stringify(ids),
             success: function (result) {
                 if (result.result === "success") {
-                    var paths = "";
-                    for(var i = 0; i < result.length; i ++) {
+                    let paths = "";
+                    for(let i = 0; i < result.length; i ++) {
                         paths += (i+1) + "." + result.path[i] + '\n';
                     }
                     alert("设置成功 " + result.length + " 个路径！\n" +
@@ -1592,7 +1597,7 @@ function setUnreliableDependency(){
 
 //筛选项目框内项目树结构
 function showZTree(nodes, container = $("#ztree")) {
-    var setting = {
+    let setting = {
         check: {
             enable: true,
             chkStyle: "checkbox",
@@ -1607,157 +1612,111 @@ function showZTree(nodes, container = $("#ztree")) {
         },
         callback: {
             onClick: function(event, treeId, treeNode) {
-                var id = treeNode.id;
+                let id = treeNode.id;
                 if(id <= 0) {
                     return ;
                 }
-                var type = treeNode.type;
+                let type = treeNode.type;
                 if(type == "Project") {
                     window.open("/project/index?id=" + id);
                 }
             },
-            onExpand: function(event, treeId, treeNode) {
-                var id = treeNode.id;
-                var isParent =  treeNode.isParent;
-                var children = treeNode.children;
-                if(treeNode.type == "Function") {
-                    if(children != null && children.length > 0) {
-                        return ;
+            onCheck: function(event, treeId, treeNode) {
+                let type = treeNode.type;
+                if(treeNode.checked == true){
+                    if(type == "Package"){
+                        let treeObj = $.fn.zTree.getZTreeObj("treeProjects");
+                        let children = treeNode.children;
+                        children.forEach(child =>{
+                            treeObj.setChkDisabled(child, true, false, true);
+                        })
+                        let pckList = treeNode.getParentNode();
+                        if(pckList.getParentNode() != null){
+                            treeObj.setChkDisabled(pckList.getParentNode(), true, true, false);
+                        }
+                    }else if(type == "PckList"){
+                        let treeObj = $.fn.zTree.getZTreeObj("treeProjects");
+                        treeObj.setChkDisabled(treeNode.getParentNode(), true, true, false);
+                        let children = treeNode.children;
+                        children.forEach(child =>{
+                            treeObj.checkNode(child, true, true, true);
+                        })
+                    }else if(type == "FileList"){
+                        let treeObj = $.fn.zTree.getZTreeObj("treeProjects");
+                        treeObj.setChkDisabled(treeNode.getParentNode(), true, true, false);
+                        let children = treeNode.children;
+                        children.forEach(child =>{
+                            treeObj.checkNode(child, true, true, false);
+                        })
                     }
-                    $("#iconProject").text("搜索中...");
-                    $.ajax({
-                        type: 'GET',
-                        url: "/project/ztree/function/variable?functionId=" + id,
-                        success: function(result) {
-                            if(result.result == "success") {
-                                var projectZTreeObj = $.fn.zTree.getZTreeObj("treeProjects");
-                                var selectedNode = projectZTreeObj.getNodeByParam("id", id);
-                                console.log(result.value);
-                                var newNodes = projectZTreeObj.addNodes(selectedNode, result.value);
-                                projectZTreeObj.expandNode(selectedNode, true, false, true, true);
-                                $("#iconProject").text("");
-                            }
+                }else{
+                    if(type == "Package"){
+                    let treeObj = $.fn.zTree.getZTreeObj("treeProjects");
+                    let children = treeNode.children;
+                    children.forEach(child =>{
+                        treeObj.setChkDisabled(child, false, false, true);
+                    });
+                    let noCheckedChildren = true;
+                    let cousins = treeNode.getParentNode().children;
+                    cousins.forEach(cousin =>{
+                        if(cousin.checked == true){
+                            noCheckedChildren = false;
                         }
                     });
-                }
-                if(treeNode.type == "Type") {
-                    if(children != null && children.length > 0) {
-                        return ;
+                    if(noCheckedChildren == true){
+                        treeObj.setChkDisabled(treeNode.getParentNode(), false, true, false);
                     }
-                    $("#iconProject").text("搜索中...");
-                    var nodeTypes = ["function", "variable"];
-                    for(var i = 0; i < nodeTypes.length; i++) {
-                        $.ajax({
-                            type: 'GET',
-                            url: "/project/ztree/type/" + nodeTypes[i] + "?typeId=" + id,
-                            success: function(result) {
-                                if(result.result == "success") {
-                                    var projectZTreeObj = $.fn.zTree.getZTreeObj("treeProjects");
-                                    var selectedNode = projectZTreeObj.getNodeByParam("id", id);
-                                    console.log(result.value);
-                                    var newNodes = projectZTreeObj.addNodes(selectedNode, result.value);
-                                    projectZTreeObj.expandNode(selectedNode, true, false, true, true);
-                                    $("#iconProject").text("");
-                                }
-                            }
-                        });
+                    let pckListNode = treeNode.getParentNode();
+                    if(pckListNode != null){
+                        if(pckListNode.checked == true){
+                            treeObj.checkNode(pckListNode, false, false, false);
+                        }
                     }
-                }
-                if(treeNode.type == "Namespace") {
-                    if(children != null && children.length > 0) {
-                        return ;
-                    }
-                    $("#iconProject").text("搜索中...");
-                    var nodeTypes = ["type", "function", "variable"];
-                    for(var i = 0; i < nodeTypes.length; i++) {
-                        $.ajax({
-                            type: 'GET',
-                            url: "/project/ztree/namespace/" + nodeTypes[i] + "?namespaceId=" + id,
-                            success: function(result) {
-                                if(result.result == "success") {
-                                    var projectZTreeObj = $.fn.zTree.getZTreeObj("treeProjects");
-                                    var selectedNode = projectZTreeObj.getNodeByParam("id", id);
-                                    console.log(result.value);
-                                    var newNodes = projectZTreeObj.addNodes(selectedNode, result.value);
-                                    projectZTreeObj.expandNode(selectedNode, true, false, true, true);
-                                    $("#iconProject").text("");
-                                }
-                            }
-                        });
-                    }
-                }
-                if(treeNode.type == "ProjectFile") {
-                    if(children != null && children.length > 0) {
-                        return ;
-                    }
-                    $("#iconProject").text("搜索中...");
-                    var nodeTypes = ["namespace", "type", "function", "variable"];
-                    for(var i = 0; i < nodeTypes.length; i++) {
-                        $.ajax({
-                            type: 'GET',
-                            url: "/project/ztree/file/" + nodeTypes[i] + "?fileId=" + id,
-                            success: function(result) {
-                                if(result.result == "success") {
-                                    var projectZTreeObj = $.fn.zTree.getZTreeObj("treeProjects");
-                                    var selectedNode = projectZTreeObj.getNodeByParam("id", id);
-                                    console.log(result.value);
-                                    var newNodes = projectZTreeObj.addNodes(selectedNode, result.value);
-                                    projectZTreeObj.expandNode(selectedNode, true, false, true, true);
-                                    $("#iconProject").text("");
-                                }
-                            }
-                        });
-                    }
-                }
-                if(treeNode.type == "Package") {
-                    if(children != null && children.length > 0) {
-                        return ;
-                    }
-                    $("#iconProject").text("搜索中...");
-                    $.ajax({
-                        type: 'GET',
-                        url: "/project/ztree/file?packageId=" + id,
-                        success: function(result) {
-                            if(result.result == "success") {
-                                var projectZTreeObj = $.fn.zTree.getZTreeObj("treeProjects");
-                                var selectedNode = projectZTreeObj.getNodeByParam("id", id);
-                                var newNodes = projectZTreeObj.addNodes(selectedNode, result.value);
-                                projectZTreeObj.expandNode(selectedNode, true, false, true, true);
-                                $("#iconProject").text("");
-                            }
+                }else if(type == "PckList"){
+                    let treeObj = $.fn.zTree.getZTreeObj("treeProjects");
+                    let children = treeNode.children;
+                    children.forEach(child =>{
+                        treeObj.checkNode(child, false, true, true);
+                    });
+                    let noCheckedChildren = true;
+                    let cousins = treeNode.getParentNode().children;
+                    cousins.forEach(cousin =>{
+                        if(cousin.checked == true){
+                            noCheckedChildren = false;
                         }
                     });
-                }
-                if(treeNode.type == "Project") {
-                    if(children != null && children.length > 0) {
-                        return ;
+                    if(noCheckedChildren == true){
+                        treeObj.setChkDisabled(treeNode.getParentNode(), false, true, false);
                     }
-                    $("#iconProject").text("搜索中...");
-                    $.ajax({
-                        type: 'GET',
-                        url: "/project/ztree/package?projectId=" + id,
-                        success: function(result) {
-                            if(result.result == "success") {
-                                var projectZTreeObj = $.fn.zTree.getZTreeObj("treeProjects");
-                                var selectedNode = projectZTreeObj.getNodeByParam("id", id);
-//										var newNodes = projectZTreeObj.addNodes(selectedNode, [{name:"eee"}, {name:"eee"}]);
-                                var newNodes = projectZTreeObj.addNodes(selectedNode, result.value);
-                                projectZTreeObj.expandNode(selectedNode, true, false, true, true);
-                                $("#iconProject").text("");
+                }else if(type == "FileList"){
+                        let treeObj = $.fn.zTree.getZTreeObj("treeProjects");
+                        let children = treeNode.children;
+                        children.forEach(child =>{
+                            treeObj.checkNode(child, false, true, true);
+                        })
+                        let noCheckedChildren = true;
+                        let cousins = treeNode.getParentNode().children;
+                        cousins.forEach(cousin =>{
+                            if(cousin.checked == true){
+                                noCheckedChildren = false;
                             }
+                        });
+                        if(noCheckedChildren == true){
+                            treeObj.setChkDisabled(treeNode.getParentNode(), false, true, false);
                         }
-                    });
+                    }
                 }
+
             }
         }
 
     };
-    var zNodes = nodes;
-    var zTreeObj = $.fn.zTree.init(container, setting, zNodes);
+    let zNodes = nodes;
+    $.fn.zTree.init(container, setting, zNodes);
 }
 //项目树结构
 function _project() {
-    var showProjectZTree = function(page) {
+    let showProjectZTree = function(page) {
         $("#iconProject").text("搜索中...");
         $.ajax({
             type: 'GET',
@@ -1776,7 +1735,7 @@ function _project() {
         url: "/project/pages/count",
         success: function(result) {
             html = "";
-            for(var i = 0; i < result; i++) {
+            for(let i = 0; i < result; i++) {
                 html += "<a class='treeProjectsPage_a page_a' name='" + i + "'>" + (i + 1) + "</a>&nbsp;";
             }
             $("#treeProjectsPage").html(html);

@@ -382,13 +382,14 @@ public class ProjectController {
 				throw new Exception("package is null, pckId: " + id);
 			}
 			Collection<ProjectFile> files = containRelationService.findPackageContainFiles(pck);
-			ZTreeNode filesNodes = new ZTreeNode("文件 (" + files.size() + ")", true);
+			ZTreeNode filesNodes = new ZTreeNode(-1, "文件 (" + files.size() + ")", false, "FileList", true);
 			for(ProjectFile file : files) {
 				ZTreeNode node = new ZTreeNode(file, true);
+				node.setNocheck(true);
 				filesNodes.addChild(node);
 			}
 			List<Package> pcks = containRelationService.findPackageContainPackages(pck);
-			ZTreeNode pcksnodes = new ZTreeNode("包 (" + pcks.size() + ")", true);
+			ZTreeNode pcksnodes = new ZTreeNode(-1, "包 (" + pcks.size() + ")", false, "PckList", true);
 			for(Package pck1 : pcks) {
 				ZTreeNode node = new ZTreeNode(pck1.getId(), pck1.getDirectoryPath(), false, pck1.getNodeType().toString(), true);
 				pcksnodes.addChild(node);
@@ -429,17 +430,19 @@ public class ProjectController {
 		}
 		return result;
     }
-    
-    @GetMapping(value = "/all/ztree/project/{page}")
-    @ResponseBody
-    public JSONObject allProjectsByPageToZtree(@PathVariable("page") int page) {
-    	JSONObject result = new JSONObject();
+
+	@GetMapping(value = "/all/ztree/project/{page}")
+	@ResponseBody
+	public JSONObject allProjectsByPageToZtree(@PathVariable("page") int page) {
+		JSONObject result = new JSONObject();
 		try {
 			Collection<Project> projects = staticAnalyseService.queryAllProjectsByPage(page, Constant.SIZE_OF_PAGE, "name");
-			JSONArray values = new JSONArray();
+			Collection values = new ArrayList();
 			for(Project project : projects) {
 				ZTreeNode node = new ZTreeNode(project, true);
-				values.add(node.toJSON());
+				node.setNocheck(true);
+				ztreeNodeInitializer(node);
+				values.add(node);
 			}
 			System.out.println(values);
 			result.put("result", "success");
@@ -449,7 +452,42 @@ public class ProjectController {
 			result.put("msg", e.getMessage());
 		}
 		return result;
-    }
+	}
+
+    private void ztreeNodeInitializer(ZTreeNode node){
+		long nodeId = node.getId();
+    	switch(node.getType()){
+			case "Package":
+				Package pck = nodeService.queryPackage(nodeId);
+				Collection<ProjectFile> files = containRelationService.findPackageContainFiles(pck);
+				ZTreeNode filesNodes = new ZTreeNode(-1, "文件 (" + files.size() + ")", false, "FileList", true);
+				for(ProjectFile file : files) {
+					ZTreeNode fileNode = new ZTreeNode(file, false);
+					fileNode.setNocheck(true);
+					filesNodes.addChild(fileNode);
+				}
+				List<Package> pcks = containRelationService.findPackageContainPackages(pck);
+				ZTreeNode pcksnodes = new ZTreeNode(-1, "包 (" + pcks.size() + ")", false, "PckList", true);
+				for(Package pck1 : pcks) {
+					ZTreeNode pckNode = new ZTreeNode(pck1.getId(), pck1.getDirectoryPath(), false, pck1.getNodeType().toString(), true);
+					ztreeNodeInitializer(pckNode);
+					pcksnodes.addChild(pckNode);
+				}
+				node.addChild(filesNodes);
+				node.addChild(pcksnodes);
+				break;
+			case "Project":
+				Project project = nodeService.queryProject(nodeId);
+				Collection<Package> rootPackage = containRelationService.findProjectRootPackages(project);
+				for(Package pck2 : rootPackage){
+					String name = pck2.getName().equals(pck2.getDirectoryPath()) ? pck2.getDirectoryPath() : String.join(":", pck2.getName(), pck2.getDirectoryPath());
+					ZTreeNode pckNodes = new ZTreeNode(pck2.getId(), name, false, pck2.getNodeType().toString(), true);
+					ztreeNodeInitializer(pckNodes);
+					node.addChild(pckNodes);
+				}
+    	}
+    	return ;
+	}
     
 	@GetMapping(value = "/all/ztree/structure/{page}")
 	@ResponseBody
@@ -558,10 +596,15 @@ public class ProjectController {
 			if(ids[i].get("type").equals("pck")){
 				Package pck = nodeService.queryPackage(id);
 				filterList.put(pck.getDirectoryPath(), true);
-			}else if(ids[i].get("type").equals("file")){
-				ProjectFile file = nodeService.queryFile(id);
-				Package pck = containRelationService.findFileBelongToPackage(file);
+			}else if(ids[i].get("type").equals("FileList")){
+				Package pck = nodeService.queryPackage(id);
 				filterList.put(pck.getDirectoryPath(), false);
+			}else{
+				Package pck = nodeService.queryPackage(id);
+				List<Package> subPckList = containRelationService.findPackageContainPackages(pck);
+				for(Package subPck : subPckList){
+					filterList.put(subPck.getDirectoryPath(), true);
+				}
 			}
 		}
 		projectService.setSelectedPcks(filterList);
