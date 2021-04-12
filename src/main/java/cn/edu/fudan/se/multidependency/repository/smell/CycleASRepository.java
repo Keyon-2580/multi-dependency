@@ -128,10 +128,4 @@ public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
 			"match result=(a:Type)-[:" + RelationType.str_DEPENDS_ON + "]->(b:Type) "
 			+ "where partition = $partition and a in types and b in types return result")
 	public List<DependsOn> cycleTypesBySCC(@Param("partition") int partition);
-
-	@Query("match (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where smell.name = $smellName return file;")
-	public List<ProjectFile> getFilesBySmellName(@Param("smellName") String smellName);
-
-	@Query("match (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where id(file) = $fileId and smell.level = \'" + SmellLevel.FILE + "\' and smell.type = \'" + SmellType.CYCLIC_DEPENDENCY + "\' return smell;")
-	public List<Smell> getSmellsByFileId(@Param("fileId") Long fileId);
 }

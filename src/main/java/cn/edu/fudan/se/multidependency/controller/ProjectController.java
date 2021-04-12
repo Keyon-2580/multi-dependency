@@ -68,9 +68,6 @@ public class ProjectController {
 	private MultipleService multipleService;
 
 	@Autowired
-	private CyclicDependencyDetector cyclicDependencyDetector;
-	
-	@Autowired
 	private BasicCloneQueryService basicCloneQueryService;
 
 	@Autowired
@@ -713,12 +710,6 @@ public class ProjectController {
 	@ResponseBody
 	public JSONArray projectHasCombo(@RequestBody JSONObject requestBody) {
 		return projectService.getMultipleProjectsGraphJson(requestBody, Constant.PROJECT_STRUCTURE_COMBO);
-	}
-
-	@GetMapping("/has/cyclicDependencyGraph/{fileId}")
-	public String cyclicHierarchy(HttpServletRequest request, @PathVariable("fileId") Long fileId) {
-		request.setAttribute("json_data", cyclicDependencyDetector.getFileCycleJson(fileId));
-		return "dependency_graph/cyclicDependencyGraph";
 	}
 
 	/**

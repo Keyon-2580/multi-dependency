@@ -36,10 +36,10 @@ public interface CyclicDependencyDetector {
 	Map<Long, Map<Integer, Cycle<Module>>> moduleCycles();
 
 	/**
-	 * 根据smell的name生成文件的循环依赖的json格式信息
+	 * 根据file的Id生成文件所在的循环依赖的json格式信息
 	 * @return
 	 */
-	JSONObject getFileCycleJson(Long fileId);
+	JSONObject getCyclicDependencyJson(Long fileId);
 
 	void exportCycleDependency();
 }

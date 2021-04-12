@@ -5,7 +5,9 @@ import java.io.OutputStream;
 import java.util.*;
 
 import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
+import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
+import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import com.alibaba.fastjson.JSONArray;
@@ -28,13 +30,11 @@ import cn.edu.fudan.se.multidependency.service.query.smell.CyclicDependencyDetec
 import cn.edu.fudan.se.multidependency.service.query.smell.ModuleService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 
-import javax.json.JsonObject;
-
 @Service
 public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 
 	@Autowired
-	private CycleASRepository asRepository;
+	private CycleASRepository cycleASRepository;
 
 	@Autowired
 	private CacheService cache;
@@ -51,23 +51,26 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 	@Autowired
 	private DependsOnRepository dependsOnRepository;
 
+	@Autowired
+	private SmellRepository smellRepository;
+
 	public static final int DEFAULT_THRESHOLD_LONGEST_PATH = 3;
 	public static final double DEFAULT_THRESHOLD_MINIMUM_RATE = 0.5;
 
 	private Collection<DependsOn> findCycleTypeRelationsBySCC(Cycle<Type> cycle) {
-		return asRepository.cycleTypesBySCC(cycle.getPartition());
+		return cycleASRepository.cycleTypesBySCC(cycle.getPartition());
 	}
 
 	private Collection<DependsOn> findCycleFileRelationsBySCC(Cycle<ProjectFile> cycle) {
-		return asRepository.cycleFilesBySCC(cycle.getPartition());
+		return cycleASRepository.cycleFilesBySCC(cycle.getPartition());
 	}
 
 	private Collection<DependsOn> findCyclePackageRelationsBySCC(Cycle<Package> cycle) {
-		return asRepository.cyclePackagesBySCC(cycle.getPartition());
+		return cycleASRepository.cyclePackagesBySCC(cycle.getPartition());
 	}
 
 	private Collection<DependsOn> findCycleModuleRelationsBySCC(Cycle<Module> cycle) {
-		return asRepository.cycleModulesBySCC(cycle.getPartition());
+		return cycleASRepository.cycleModulesBySCC(cycle.getPartition());
 	}
 
 	@Override
@@ -78,7 +81,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		}
 
 		Map<Long, Map<Integer, Cycle<Type>>> result = new HashMap<>();
-		Collection<Cycle<Type>> cycles = asRepository.typeCycles();
+		Collection<Cycle<Type>> cycles = cycleASRepository.typeCycles();
 		int partition = 1;
 		for (Cycle<Type> cycle : cycles) {
 			List<Type> types = new ArrayList<>(cycle.getComponents());
@@ -144,7 +147,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		}
 
 		Map<Long, Map<Integer, Cycle<ProjectFile>>> result = new HashMap<>();
-		Collection<Cycle<ProjectFile>> cycles = asRepository.fileCycles();
+		Collection<Cycle<ProjectFile>> cycles = cycleASRepository.fileCycles();
 		int partition = 1;
 		for (Cycle<ProjectFile> cycle : cycles) {
 			List<ProjectFile> files = new ArrayList<>(cycle.getComponents());
@@ -210,7 +213,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		}
 
 		Map<Long, Map<Integer, Cycle<Package>>> result = new HashMap<>();
-		Collection<Cycle<Package>> cycles = asRepository.packageCycles();
+		Collection<Cycle<Package>> cycles = cycleASRepository.packageCycles();
 		int partition = 1;
 		for (Cycle<Package> cycle : cycles) {
 			List<Package> files = new ArrayList<>(cycle.getComponents());
@@ -276,7 +279,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		}
 
 		Map<Long, Map<Integer, Cycle<Module>>> result = new HashMap<>();
-		Collection<Cycle<Module>> cycles = asRepository.moduleCycles();
+		Collection<Cycle<Module>> cycles = cycleASRepository.moduleCycles();
 		int partition = 1;
 		for (Cycle<Module> cycle : cycles) {
 			List<Module> modules = new ArrayList<>(cycle.getComponents());
@@ -335,17 +338,17 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 	}
 
 	@Override
-	public JSONObject getFileCycleJson(Long fileId) {
+	public JSONObject getCyclicDependencyJson(Long fileId) {
 		JSONObject result = new JSONObject();
 		JSONArray nodesJson = new JSONArray();
 		JSONArray edgesJson = new JSONArray();
 		JSONArray smellsJson = new JSONArray();
-		List<Smell> smells = new ArrayList<>(asRepository.getSmellsByFileId(fileId));
+		List<Smell> smells = new ArrayList<>(smellRepository.getSmellsWithFileId(fileId));
 		List<ProjectFile> files = new ArrayList<>();
 		for (Smell smell : smells) {
 			JSONObject smellJson = new JSONObject();
 			smellJson.put("name", smell.getName());
-			List<ProjectFile> smellFiles = new ArrayList<>(asRepository.getFilesBySmellName(smell.getName()));
+			List<ProjectFile> smellFiles = new ArrayList<>(smellRepository.getFilesWithSmellName(smell.getName()));
 			JSONArray smellFilesJson = new JSONArray();
 			for (ProjectFile smellFile : smellFiles) {
 				if (!files.contains(smellFile)) {
@@ -389,6 +392,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 				}
 			}
 		}
+		result.put("smellType", SmellType.CYCLIC_DEPENDENCY);
 		result.put("currentFile", fileId.toString());
 		result.put("nodes", nodesJson);
 		result.put("edges", edgesJson);

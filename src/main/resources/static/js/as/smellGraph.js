@@ -1,5 +1,8 @@
-var drawCyclicDependencyGraph = function (json_data) {
+var drawSmellGraph = function (json_data) {
+    const CYCLIC_DEPENDENCY = "CyclicDependency";
+    const UNUSED_INCLUDE = "UnusedInclude";
     const data = {};
+    let smellType = json_data["smellType"];
     const nodeTip = new G6.Tooltip({
         offsetX: 10,
         offsetY: 0,
@@ -23,25 +26,36 @@ var drawCyclicDependencyGraph = function (json_data) {
         itemTypes: ['edge'],
         getContent: (e) => {
             const outDiv = document.createElement('div');
-            let dependsOnTypes = e.item.getModel().dependsOnTypes;
-            let str = ``;
-            for(let key in dependsOnTypes){
-                str += `<ul><li>${key}: ${dependsOnTypes[key]}</li></ul>`;
+            switch (smellType) {
+                case CYCLIC_DEPENDENCY:
+                    let dependsOnTypes = e.item.getModel().dependsOnTypes;
+                    let str = ``;
+                    for(let key in dependsOnTypes){
+                        str += `<ul><li>${key}: ${dependsOnTypes[key]}</li></ul>`;
+                    }
+                    outDiv.style.width = 'fit-content';
+                    outDiv.innerHTML = `
+                        <h4>source: (${e.item.getModel().source_label})${e.item.getModel().source_name}</h4>
+                        <h4>target: (${e.item.getModel().target_label})${e.item.getModel().target_name}</h4>
+                        <h4>times: ${e.item.getModel().times}</h4>
+                        <h4>dependsOnTypes: </h4>` + str;
+                    break;
+                case UNUSED_INCLUDE:
+                    outDiv.style.width = 'fit-content';
+                    outDiv.innerHTML = `
+                        <h4>include</h4>`;
+                    break;
+                default:
+                    break;
             }
-            outDiv.style.width = 'fit-content';
-            outDiv.innerHTML = `
-            <h4>source: (${e.item.getModel().source_label})${e.item.getModel().source_name}</h4>
-            <h4>target: (${e.item.getModel().target_label})${e.item.getModel().target_name}</h4>
-            <h4>times: ${e.item.getModel().times}</h4>
-            <h4>dependsOnTypes: </h4>` + str;
             return outDiv;
         },
     });
-    const container = document.getElementById('cyclicDependencyGraph');
+    const container = document.getElementById('smellGraph');
     const width = container.scrollWidth;
     const height = container.scrollHeight || 500;
     const graph = new G6.Graph({
-        container: 'cyclicDependencyGraph',
+        container: 'smellGraph',
         width,
         height,
         modes: {
@@ -108,7 +122,16 @@ var drawCyclicDependencyGraph = function (json_data) {
         }
     });
 
-    showCyclicDependencyDetail(json_data["smells"])
+    switch (smellType) {
+        case CYCLIC_DEPENDENCY:
+            showCyclicDependencyDetail(json_data["smells"]);
+            break;
+        case UNUSED_INCLUDE:
+            showUnusedIncludeDetail(json_data["smells"]);
+            break;
+        default:
+            break;
+    }
 
     graph.on('node:mouseenter', (e) => {
         graph.setItemState(e.item, 'active', true);
@@ -153,5 +176,30 @@ var showCyclicDependencyDetail = function (smells) {
         index ++;
     });
     html += "</table>";
-    $("#cyclicDependencyDetail").html(html);
+    $("#smellDetail").html(html);
+}
+
+var showUnusedIncludeDetail = function (smells) {
+    var html = "";
+    html += "<table class='table table-bordered'>";
+    html += "<tr><th>SmellIndex</th><th>SmellName</th><th>CoreFilePath</th><th>FileIndex</th><th>FilePath</th></tr>";
+    let index = 1;
+    smells.forEach(function (smell){
+        let files = smell.files;
+        let len = files.length + 1;
+        html += "<tr>";
+        html += "<td rowspan='" + len + "' style='vertical-align: middle'>" + index + "</td>";
+        html += "<td rowspan='" + len + "' style='vertical-align: middle'>" + smell.name + "</td>";
+        html += "<td rowspan='" + len + "' style='vertical-align: middle'>" + smell.coreFilePath + "</td>";
+        html += "</tr>";
+        files.forEach(function (file){
+            html += "<tr>";
+            html += "<td style='vertical-align: middle'>" + file.index + "</td>";
+            html += "<td style='vertical-align: middle'>" + file.path + "</td>";
+            html += "</tr>";
+        });
+        index ++;
+    });
+    html += "</table>";
+    $("#smellDetail").html(html);
 }
