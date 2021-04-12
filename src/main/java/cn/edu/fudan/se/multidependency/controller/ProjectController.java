@@ -434,8 +434,33 @@ public class ProjectController {
 		JSONObject result = new JSONObject();
 		try {
 			Collection<Project> projects = staticAnalyseService.queryAllProjectsByPage(page, Constant.SIZE_OF_PAGE, "name");
-			Collection values = new ArrayList();
+			JSONArray values = new JSONArray();
 			for(Project project : projects) {
+				ZTreeNode node = new ZTreeNode(project, true);
+				values.add(node.toJSON());
+			}
+			System.out.println(values);
+			result.put("result", "success");
+			result.put("values", values);
+		} catch (Exception e) {
+			result.put("result", "fail");
+			result.put("msg", e.getMessage());
+		}
+		return result;
+	}
+
+	@PostMapping(value = "/all/ztree/project")
+	@ResponseBody
+	public JSONObject selectProjectsToZtree(@RequestBody String[] params) {
+		JSONObject result = new JSONObject();
+		try {
+			Collection values = new ArrayList();
+			int len = params.length;
+			long projectId;
+			int i;
+			for(i = 0; i < len; i ++) {
+				projectId = Long.parseLong(params[i]);
+				Project project = nodeService.queryProject(projectId);
 				ZTreeNode node = new ZTreeNode(project, true);
 				node.setNocheck(true);
 				ztreeNodeInitializer(node);

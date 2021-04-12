@@ -1716,12 +1716,17 @@ function showZTree(nodes, container = $("#ztree")) {
 }
 //项目树结构
 function _project() {
-    let showProjectZTree = function(page) {
+
+    let showProjectZTree = function(projectIds) {
         $("#iconProject").text("搜索中...");
+
         $.ajax({
-            type: 'GET',
-            url: "/project/all/ztree/project/" + page,
-            success: function(result) {
+            type:"POST",
+            url : "/project/all/ztree/project",
+            contentType: "application/json",
+            dataType:"json",
+            data:JSON.stringify(projectIds),
+            success : function(result) {
                 if(result.result == "success") {
                     showZTree(result.values, $("#treeProjects"));
                     $("#iconProject").text("");
@@ -1729,21 +1734,9 @@ function _project() {
             }
         });
     }
-    showProjectZTree(0);
-    $.ajax({
-        type: 'GET',
-        url: "/project/pages/count",
-        success: function(result) {
-            html = "";
-            for(let i = 0; i < result; i++) {
-                html += "<a class='treeProjectsPage_a page_a' name='" + i + "'>" + (i + 1) + "</a>&nbsp;";
-            }
-            $("#treeProjectsPage").html(html);
-            $(".treeProjectsPage_a").click(function() {
-                showProjectZTree($(this).attr("name"));
-            });
-        }
-    });
+
+    let value = $('#multipleProjectSelect').val();
+    showProjectZTree(value);
 }
 
 //筛选框子控件随着母控件一同取消点选
