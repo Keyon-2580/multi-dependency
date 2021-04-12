@@ -1343,7 +1343,7 @@ function autoLayout(){
     let combo_list = data["combos"];
     let node_list = data["nodes"];
     let combo_num = combo_list.length;
-    let radius = node_list.length * REGULAR_NODE_SIZE / 6.28 * 0.8;
+    let radius = node_list.length * REGULAR_NODE_SIZE / 6.28 * 0.5;
     let cord = radius * 0.5;
     let left = [], right = [];
     let node_index = 0;
