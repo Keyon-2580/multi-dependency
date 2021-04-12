@@ -444,7 +444,6 @@ public class ProjectController {
 				ztreeNodeInitializer(node);
 				values.add(node);
 			}
-			System.out.println(values);
 			result.put("result", "success");
 			result.put("values", values);
 		} catch (Exception e) {
