@@ -122,16 +122,7 @@ var drawSmellGraph = function (json_data) {
         }
     });
 
-    switch (smellType) {
-        case CYCLIC_DEPENDENCY:
-            showCyclicDependencyDetail(json_data["smells"]);
-            break;
-        case UNUSED_INCLUDE:
-            showUnusedIncludeDetail(json_data["smells"]);
-            break;
-        default:
-            break;
-    }
+    showSmellDetail(json_data["smells"]);
 
     graph.on('node:mouseenter', (e) => {
         graph.setItemState(e.item, 'active', true);
@@ -155,7 +146,7 @@ var drawSmellGraph = function (json_data) {
     }
 }
 
-var showCyclicDependencyDetail = function (smells) {
+var showSmellDetail = function (smells) {
     var html = "";
     html += "<table class='table table-bordered'>";
     html += "<tr><th>SmellIndex</th><th>SmellName</th><th>FileIndex</th><th>FilePath</th></tr>";
@@ -166,31 +157,6 @@ var showCyclicDependencyDetail = function (smells) {
         html += "<tr>";
         html += "<td rowspan='" + len + "' style='vertical-align: middle'>" + index + "</td>";
         html += "<td rowspan='" + len + "' style='vertical-align: middle'>" + smell.name + "</td>";
-        html += "</tr>";
-        files.forEach(function (file){
-            html += "<tr>";
-            html += "<td style='vertical-align: middle'>" + file.index + "</td>";
-            html += "<td style='vertical-align: middle'>" + file.path + "</td>";
-            html += "</tr>";
-        });
-        index ++;
-    });
-    html += "</table>";
-    $("#smellDetail").html(html);
-}
-
-var showUnusedIncludeDetail = function (smells) {
-    var html = "";
-    html += "<table class='table table-bordered'>";
-    html += "<tr><th>SmellIndex</th><th>SmellName</th><th>CoreFilePath</th><th>FileIndex</th><th>FilePath</th></tr>";
-    let index = 1;
-    smells.forEach(function (smell){
-        let files = smell.files;
-        let len = files.length + 1;
-        html += "<tr>";
-        html += "<td rowspan='" + len + "' style='vertical-align: middle'>" + index + "</td>";
-        html += "<td rowspan='" + len + "' style='vertical-align: middle'>" + smell.name + "</td>";
-        html += "<td rowspan='" + len + "' style='vertical-align: middle'>" + smell.coreFilePath + "</td>";
         html += "</tr>";
         files.forEach(function (file){
             html += "<tr>";
