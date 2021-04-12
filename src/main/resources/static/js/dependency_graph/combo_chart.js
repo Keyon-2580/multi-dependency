@@ -13,6 +13,8 @@ let nodeId = 1;
 let last_click_node = "";
 let repaint_flag = false; //判断是否为重新绘制
 
+const REGULAR_NODE_SIZE = 25;
+const loading_div = $("#loading_div");
 const COLOR_DEPENDSON = '#FFA500';
 const COLOR_CLONE = '#B04206';
 const COLOR_COCHANGE = '#a29bfe';
@@ -27,7 +29,7 @@ const COLOR_SMELL_CLICK = '#bd0303';
 const EDGE_CLICK_MODEL = {
     style: {
         stroke: COLOR_LINK_CLICK,
-        lineWidth: 4,
+        lineWidth: 2,
         endArrow: {
             path: G6.Arrow.vee(5, 8, 3),
             d: 3,
@@ -290,7 +292,7 @@ const graph = new G6.Graph({
     fitView: true,
     defaultNode: {
         type: 'circle',
-        size: 50,
+        size: 10,
         style: {
             cursor: "pointer",
             // fill: "#cce9f8",
@@ -343,7 +345,7 @@ const graph = new G6.Graph({
             position: 'top',
         },
         style: {
-            lineWidth : 2,
+            lineWidth : 1,
             stroke : '#2d3436'
         }
     },
@@ -353,12 +355,12 @@ const graph = new G6.Graph({
         size: 1,
         labelCfg: {
             style: {
-                fontSize: 8,
+                fontSize: 5,
             },
         },
         style: {
             stroke: COLOR_LINK_NORMAL,
-            lineWidth: 1.5,
+            lineWidth: 1.15,
             endArrow: {
                 path: G6.Arrow.vee(5, 8, 3),
                 d: 3,
@@ -368,7 +370,7 @@ const graph = new G6.Graph({
         },
     },
     plugins: [tooltip, contextMenu],
-    minZoom: 0.1,
+    minZoom: 0.05,
 });
 
 function DrawComboChart(json_data){
@@ -388,6 +390,8 @@ function DrawComboChart(json_data){
         temp_combo["id"] = item.id;
         temp_combo["label"] = item.name;
         temp_combo["name"] = item.name;
+        temp_combo["fanIn"] = 0;
+        temp_combo["fanOut"] = 0;
         temp_combo["node_num"] = item.children.length;
         temp_combo["group_type"] = 'combo';
         temp_combos.push(temp_combo);
@@ -468,9 +472,8 @@ function DrawComboChart(json_data){
     data["combos"] = temp_combos;
     console.log(data);
 
-    autoLayout();
-
     data["edges"] = splitLinks(actual_edges);
+    autoLayout();
     graph.data(data);
     graph.render();
 
@@ -567,10 +570,15 @@ function DrawComboChart(json_data){
             // graph.setItemState(node_click, 'active', true);
         });
 
+        graph.on('combo:click', (evt) => {
+            const { item: item } = evt;
+            console.log(item);
+        });
+
         repaint_flag = true;
     }
 
-    $("#loading_div").html("");
+    loading_div.html("");
 }
 
 //显示与该节点相关的连线和节点
@@ -641,6 +649,11 @@ function getOtherEndNode(model, id){
 }
 
 function filterLinks(){
+    let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
+        "<div class='loading_window' id='Id_loading_window' style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">筛选连线中...</div>" +
+        "</div>";
+    loading_div.html(html);
+
     let unreliable_nodes = [];
     if(last_click_node !== ""){
         const lastClickNode = graph.findById(last_click_node);
@@ -798,11 +811,14 @@ function filterLinks(){
     unreliable_nodes.forEach(item =>{
         graph.setItemState(item, 'unreliable', true);
     })
+
+    loading_div.html("");
 }
 
 //拆分连线为三段
 function splitLinks(links_data){
     let temp_nodes = data["nodes"];
+    let temp_combos = data["combos"];
     let temp_edges = [];
     links_data.forEach(edge =>{
         const source_node = temp_nodes.find((n) => n.id === edge.source);
@@ -822,16 +838,9 @@ function splitLinks(links_data){
             };
 
             temp.dependency[edge.link_type + "Degree"] = 1;
-            // if(edge.link_type !== "dependson"){
-            //     temp.dependency[edge.link_type + "Degree"] = 1;
-            // }
-
             source_pienode.push(temp);
         }else{
             temp_source_pienode.dependency[edge.link_type + "Degree"] = 1;
-            // if(edge.link_type !== "dependson") {
-            //     temp_source_pienode.dependency[edge.link_type + "Degree"] = 1;
-            // }
         }
 
         if(typeof(temp_target_pienode) === "undefined"){
@@ -842,27 +851,30 @@ function splitLinks(links_data){
             };
 
             temp.dependency[edge.link_type + "Degree"] = 1;
-            // if(edge.link_type !== "dependson") {
-            //     temp.dependency[edge.link_type + "Degree"] = 1;
-            // }
-
             target_pienode.push(temp);
         }else{
             temp_target_pienode.dependency[edge.link_type + "Degree"] = 1;
-            // if(edge.link_type !== "dependson") {
-            //     temp_target_pienode.dependency[edge.link_type + "Degree"] = 1;
-            // }
         }
 
         if(edge.inner_edge === 0){
             let out_edge = temp_edges.find(n =>n.id === edge.source + "_" + edge.source_comboId + "_out");
             let in_edge = temp_edges.find(n =>n.id === edge.target_comboId + "_in" + "_" + edge.target);
+            let in_combo = temp_combos.find((n) => n.id === edge.target_comboId);
+            let out_combo = temp_combos.find((n) => n.id === edge.source_comboId);
+
+            in_combo.fanIn += 1;
+            out_combo.fanOut += 1;
+
             if(typeof(out_edge) === "undefined"){
-                temp_edges.push({
+                let out_edge_model = {
                     source: edge.source,
                     target: edge.source_comboId + "_out",
                     id: edge.source + "_" + edge.source_comboId + "_out",
                     inner_edge: edge.inner_edge,
+                    visible: false,
+                    style: {
+                        endArrow: false,
+                    },
                     children: [
                         {
                             edge_id: edge.source + "_" + edge.target + "_" + edge.link_type,
@@ -896,7 +908,13 @@ function splitLinks(links_data){
                             ]
                         }
                     ],
-                });
+                };
+
+                if(edge.visible){
+                    out_edge_model.visible = true;
+                }
+
+                temp_edges.push(out_edge_model);
             }else{
                 out_edge.children.push({
                     edge_id: edge.source + "_" + edge.target + "_" + edge.link_type,
@@ -932,11 +950,12 @@ function splitLinks(links_data){
             }
 
             if(typeof(in_edge) === "undefined"){
-                temp_edges.push({
+                let in_edge_model = {
                     source: edge.target_comboId + "_in",
                     target: edge.target,
                     id: edge.target_comboId + "_in" + "_" + edge.target,
                     inner_edge: edge.inner_edge,
+                    visible: false,
                     children: [{
                         edge_id: edge.source + "_" + edge.target + "_" + edge.link_type,
                         source: edge.source,
@@ -968,7 +987,15 @@ function splitLinks(links_data){
                             }
                         ]
                     }],
-                });
+                };
+
+                if(edge.visible){
+                    in_edge_model.visible = true;
+                }
+
+                temp_edges.push(in_edge_model);
+
+                temp_edges.push();
             }else{
                 in_edge.children.push({
                     edge_id: edge.source + "_" + edge.target + "_" + edge.link_type,
@@ -1003,44 +1030,28 @@ function splitLinks(links_data){
                 });
             }
 
-
-
-            // let temp_actual_edge = {};
-            // temp_actual_edge["edge_id"] = edge.source + "_" + edge.target + "_" + edge.link_type;
-            // temp_actual_edge["split_edges"] = [
-            //     {
-            //         id: edge.target_comboId + "_in" + "_" + edge.target,
-            //         source: edge.target_comboId + "_in",
-            //         target: edge.target,
-            //     },
-            //     {
-            //         id: edge.source + "_" + edge.source_comboId + "_out",
-            //         source: edge.source,
-            //         target: edge.source_comboId + "_out",
-            //     },
-            //     {
-            //         id: edge["source_comboId"] + "_out" + "_" + edge["target_comboId"] + "_in",
-            //         source: edge["source_comboId"] + "_out",
-            //         target: edge["target_comboId"] + "_in",
-            //     }
-            // ];
-            // actual_edges.push(temp_actual_edge);
-
             if(typeof(temp_edges.find((n) => (n.target === (edge.target_comboId + "_in")
                 && (n.source === edge.source_comboId + "_out")))) === "undefined"){
                 let temp_edge = {};
                 temp_edge["id"] = edge["source_comboId"] + "_out" + "_" + edge["target_comboId"] + "_in";
                 temp_edge["source"] = edge["source_comboId"] + "_out";
                 temp_edge["target"] = edge["target_comboId"] + "_in";
+                temp_edge["visible"] = false;
                 temp_edge["style"] = {
                     lineWidth: 4
                 };
+
+                if(edge.visible){
+                    temp_edge.visible = true;
+                }
+
                 temp_edges.push(temp_edge);
             }
         }else{
             temp_edges.push(edge);
         }
     })
+
     return temp_edges;
 }
 
@@ -1136,7 +1147,6 @@ function deletePieNode(node){
 //加载数据
 var loadPageData = function () {
     var projectlist = [];
-    var projectIds = [];
 
     $.ajax({
         type : "GET",
@@ -1144,7 +1154,6 @@ var loadPageData = function () {
         success : function(result) {
             for(let i = 0; i < result.length; i++){
                 let name_temp = {};
-                // console.log(x);
                 name_temp["id"] = result[i].id;
                 name_temp["name"] = result[i].name;
                 projectlist.push(name_temp);
@@ -1170,7 +1179,7 @@ var loadPageData = function () {
                     "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" onclick=\"CancelChildrenChecked('dependsOn')\">Dependency：" +
                     "</label>" +
 
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsIntensity\" name = \"dependsOn_children\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsIntensity\" onclick=\"setParentChecked('dependsOn', 'dependsIntensity')\" name = \"dependsOn_children\">" +
                     "<input  class = \"AttributionSelectInput\" id=\"intensitybelow\" value=\"0.8\">" +
 
                     "<select class = \"AttributionSelectSingleSelect\" id=\"intensityCompareSelectBelow\">" +
@@ -1186,12 +1195,12 @@ var loadPageData = function () {
                     "<input  class = \"AttributionSelectInput\" id=\"intensityhigh\" value=\"1\">" +
 
                     "<label class = \"AttributionSelectLabel\" style = \"margin-left: 80px\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes\" name = \"dependsOn_children\"> Times >= " +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes\" onclick=\"setParentChecked('dependsOn', 'dependsOnTimes')\" name = \"dependsOn_children\"> Times >= " +
                     "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput\" style='margin-right: 80px' value=\"3\">" +
                     "</label>" +
 
                     "<label class = \"AttributionSelectLabel\" style = \"margin-right:10px;\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnType\" name = \"dependsOn_children\"> Dependency Type: " +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnType\" onclick=\"setParentChecked('dependsOn', 'dependsOnType')\" name = \"dependsOn_children\"> Dependency Type: " +
                     "</label>" +
 
                     "<select id = \"dependsTypeSelect\" class=\"selectpicker\" multiple>" +
@@ -1219,7 +1228,7 @@ var loadPageData = function () {
                     "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone\" onclick=\"CancelChildrenChecked('clone')\">Clone：" +
                     "</label>" +
 
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneSimilarity\" name = \"clone_children\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneSimilarity\" onclick=\"setParentChecked('clone', 'cloneSimilarity')\" name = \"clone_children\">" +
                     "<input  class = \"AttributionSelectInput\" id=\"similaritybelow\" value=\"0.7\">" +
 
                     "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectBelow\">" +
@@ -1238,7 +1247,7 @@ var loadPageData = function () {
                     "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"coChange\" onclick=\"CancelChildrenChecked('coChange')\">Co-change：" +
                     "</label>" +
                     "<label class = \"AttributionSelectLabel\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cochangeTimes\" name = \"coChange_children\"> Times >= " +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cochangeTimes\" onclick=\"setParentChecked('coChange', 'cochangeTimes')\" name = \"coChange_children\"> Times >= " +
                     "<input class = \"AttributionSelectInput\" id=\"cochangetimes\" value=\"3\">" +
                     "</label></p>";
 
@@ -1334,19 +1343,37 @@ function autoLayout(){
     let combo_list = data["combos"];
     let node_list = data["nodes"];
     let combo_num = combo_list.length;
-    let radius = node_list.length * 50 / 6.28 * 0.5;
+    let radius = node_list.length * REGULAR_NODE_SIZE / 6.28 * 0.8;
     let cord = radius * 0.5;
-    // console.log(radius);
-
+    let left = [], right = [];
     let node_index = 0;
 
     combo_list.forEach((item, index) => {
-        let combo_cord = [];
+        if(index < combo_list.length / 2){
+            left.push(item);
+        }else{
+            right.push(item);
+        }
+    })
+
+    left.sort(function(a,b){
+        return a.fanOut / (a.fanIn + a.fanOut) - b.fanOut / (b.fanIn + b.fanOut);
+    });
+    right.sort(function(a,b){
+        return b.fanOut / (b.fanIn + b.fanOut) - a.fanOut / (a.fanIn + a.fanOut);
+    });
+
+    let combo_list_sort = left.concat(right);
+    data["combos"] = combo_list_sort;
+    // console.log(combo_list_sort);
+
+    combo_list.forEach((item, index) => {
+        let combo_cord;
         let outerNodeLineIndex = 1;
         let innerNodeLineIndex = 1;
         let line_node_num = parseInt(Math.sqrt(item.node_num) * 1.5);
-        let combo_width = 75 * line_node_num;
-        let combo_height = 75 * line_node_num;
+        let combo_width = REGULAR_NODE_SIZE * 1.5 * line_node_num;
+        let combo_height = REGULAR_NODE_SIZE * 1.5 * line_node_num;
         let combo_radio = index / combo_num; //当前combo处于总布局圆圈的比例
         let model1x, model1y, model2x, model2y;
 
@@ -1364,6 +1391,7 @@ function autoLayout(){
         }
 
         for(let i = 0; i < item.node_num; i++){
+            // if(node_list[node_index].comboId === item.id){
             let temp_node = node_list[node_index];
             let innerLineIndex = Math.ceil(innerNodeLineIndex / line_node_num);
             let outerLineIndex = Math.ceil(outerNodeLineIndex / line_node_num);
@@ -1372,22 +1400,22 @@ function autoLayout(){
             if(temp_node.outerNode === 0){ //内部节点
                 if(combo_radio <= 0.5){//放置在上面
                     if(combo_radio <= 0.25){
-                        temp_node["x"] = combo_cord[0] + 75 * (innerNodeLineIndex % line_node_num);
-                        temp_node["y"] = combo_cord[1] + 75 * innerLineIndex - combo_height;
+                        temp_node["x"] = combo_cord[0] + REGULAR_NODE_SIZE * 1.5 * (innerNodeLineIndex % line_node_num);
+                        temp_node["y"] = combo_cord[1] + REGULAR_NODE_SIZE * 1.5 * innerLineIndex - combo_height;
                         innerNodeLineIndex++;
                     }else{
-                        temp_node["x"] = combo_cord[0] - 75 * (innerNodeLineIndex % line_node_num);
-                        temp_node["y"] = combo_cord[1] + 75 * innerLineIndex - combo_height;
+                        temp_node["x"] = combo_cord[0] - REGULAR_NODE_SIZE * 1.5 * (innerNodeLineIndex % line_node_num);
+                        temp_node["y"] = combo_cord[1] + REGULAR_NODE_SIZE * 1.5 * innerLineIndex - combo_height;
                         innerNodeLineIndex++;
                     }
                 }else{
                     if(combo_radio <= 0.75){
-                        temp_node["x"] = combo_cord[0] - 75 * (innerNodeLineIndex % line_node_num);
-                        temp_node["y"] = combo_cord[1] - 75 * innerLineIndex + combo_height;
+                        temp_node["x"] = combo_cord[0] - REGULAR_NODE_SIZE * 1.5 * (innerNodeLineIndex % line_node_num);
+                        temp_node["y"] = combo_cord[1] - REGULAR_NODE_SIZE * 1.5 * innerLineIndex + combo_height;
                         innerNodeLineIndex++;
                     }else{
-                        temp_node["x"] = combo_cord[0] + 75 * (innerNodeLineIndex % line_node_num);
-                        temp_node["y"] = combo_cord[1] - 75 * innerLineIndex + combo_height;
+                        temp_node["x"] = combo_cord[0] + REGULAR_NODE_SIZE * 1.5 * (innerNodeLineIndex % line_node_num);
+                        temp_node["y"] = combo_cord[1] - REGULAR_NODE_SIZE * 1.5 * innerLineIndex + combo_height;
                         innerNodeLineIndex++;
                     }
 
@@ -1395,58 +1423,59 @@ function autoLayout(){
             }else{ //外部节点
                 if(combo_radio <= 0.5) {
                     if(combo_radio <= 0.25) {
-                        temp_node["x"] = combo_cord[0] + 75 * (outerNodeLineIndex % line_node_num);
-                        temp_node["y"] = combo_cord[1] - 75 * outerLineIndex;
+                        temp_node["x"] = combo_cord[0] + REGULAR_NODE_SIZE * 1.5 * (outerNodeLineIndex % line_node_num);
+                        temp_node["y"] = combo_cord[1] - REGULAR_NODE_SIZE * 1.5 * outerLineIndex;
                         outerNodeLineIndex++;
                     }else{
-                        temp_node["x"] = combo_cord[0] - 75 * (outerNodeLineIndex % line_node_num);
-                        temp_node["y"] = combo_cord[1] - 75 * outerLineIndex;
+                        temp_node["x"] = combo_cord[0] - REGULAR_NODE_SIZE * 1.5 * (outerNodeLineIndex % line_node_num);
+                        temp_node["y"] = combo_cord[1] - REGULAR_NODE_SIZE * 1.5 * outerLineIndex;
                         outerNodeLineIndex++;
                     }
                 }else{
                     if(combo_radio <= 0.75) {
-                        temp_node["x"] = combo_cord[0] - 75 * (outerNodeLineIndex % line_node_num);
-                        temp_node["y"] = combo_cord[1] + 75 * outerLineIndex;
+                        temp_node["x"] = combo_cord[0] - REGULAR_NODE_SIZE * 1.5 * (outerNodeLineIndex % line_node_num);
+                        temp_node["y"] = combo_cord[1] + REGULAR_NODE_SIZE * 1.5 * outerLineIndex;
                         outerNodeLineIndex++;
                     }else{
-                        temp_node["x"] = combo_cord[0] + 75 * (outerNodeLineIndex % line_node_num);
-                        temp_node["y"] = combo_cord[1] + 75 * outerLineIndex;
+                        temp_node["x"] = combo_cord[0] + REGULAR_NODE_SIZE * 1.5 * (outerNodeLineIndex % line_node_num);
+                        temp_node["y"] = combo_cord[1] + REGULAR_NODE_SIZE * 1.5 * outerLineIndex;
                         outerNodeLineIndex++;
                     }
                 }
             }
             node_index++;
+            // }
         }
 
         if(combo_radio <= 0.5){
             if(combo_radio <= 0.25){
                 model1x = combo_cord[0] + combo_width * 0.5;
-                model1y = combo_cord[1] + 50;
-                model2x = combo_cord[0] - 50;
-                model2y = combo_cord[1] - combo_height * 0.6;
+                model1y = combo_cord[1] + REGULAR_NODE_SIZE;
+                model2x = combo_cord[0] - REGULAR_NODE_SIZE;
+                model2y = combo_cord[1] - combo_height * 0.3;
             }else{
                 model1x = combo_cord[0] - combo_width * 0.5;
-                model1y = combo_cord[1] + 50;
-                model2x = combo_cord[0] + 50;
-                model2y = combo_cord[1] - combo_height * 0.6;
+                model1y = combo_cord[1] + REGULAR_NODE_SIZE;
+                model2x = combo_cord[0] + REGULAR_NODE_SIZE;
+                model2y = combo_cord[1] - combo_height * 0.3;
             }
         }else{
             if(combo_radio <= 0.75){
                 model1x = combo_cord[0] - combo_width * 0.5;
-                model1y = combo_cord[1] - 50;
-                model2x = combo_cord[0] + 50;
+                model1y = combo_cord[1] - REGULAR_NODE_SIZE;
+                model2x = combo_cord[0] + REGULAR_NODE_SIZE;
                 model2y = combo_cord[1] + combo_height * (1 / 3);
             }else{
                 model1x = combo_cord[0] + combo_width * 0.5;
-                model1y = combo_cord[1] - 50;
-                model2x = combo_cord[0] - 50;
+                model1y = combo_cord[1] - REGULAR_NODE_SIZE;
+                model2x = combo_cord[0] - REGULAR_NODE_SIZE;
                 model2y = combo_cord[1] + combo_height * (1 / 3);
             }
         }
 
         let model1 = {
             id: item.id + "_in",
-            size: 15,
+            size: REGULAR_NODE_SIZE / 3,
             inOutNode: 1,
             comboId: item.id,
             x: model1x,
@@ -1459,7 +1488,7 @@ function autoLayout(){
 
         let model2 = {
             id: item.id + "_out",
-            size: 15,
+            size: REGULAR_NODE_SIZE / 3,
             inOutNode: 1,
             comboId: item.id,
             x: model2x,
@@ -1486,7 +1515,7 @@ function showMultipleButton(){
     let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
         "<div class='loading_window' id='Id_loading_window' style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">调用数据接口...</div>" +
         "</div>";
-    $("#loading_div").html(html);
+    loading_div.html(html);
     projectGraphAjax(value);
 }
 
@@ -1743,6 +1772,13 @@ function _project() {
 function CancelChildrenChecked(parent_name){
     if(!$("#" + parent_name).is(":checked")){
         $("input[name = '" + parent_name + "_children" + "']").prop("checked", false);
+    }
+}
+
+//筛选框母控件随着子控件一同点选
+function setParentChecked(parent_name, children_id){
+    if($("#" + children_id).is(":checked") && !$("#" + parent_name).is(":checked")){
+        $("#" + parent_name).prop("checked", true);
     }
 }
 

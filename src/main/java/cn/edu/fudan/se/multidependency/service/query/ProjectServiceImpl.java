@@ -94,7 +94,7 @@ public class ProjectServiceImpl implements ProjectService{
         Map<String, Boolean> selectedPcks = new HashMap<>();
         JSONArray projectIds = dataList.getJSONArray("projectIds");
 
-        boolean isFilter = false;
+        boolean isFilter;
         if (getSelectedPcks().size() != 0) {
             selectedPcks = getSelectedPcks();
             isFilter = true;
@@ -120,9 +120,17 @@ public class ProjectServiceImpl implements ProjectService{
             projectJson.put("id", "default");
             JSONArray multipleProjectsJson = new JSONArray();
             for(int i = 0; i < projectIds.size(); i++){
-                multipleProjectsJson.add(joinMultipleProjectsGraphJson(projectIds.getJSONObject(i).getLong("id"), type));
+                JSONArray temp_array;
+                if(isFilter) {
+                    temp_array = joinMultipleProjectsGraphJson(projectIds.getJSONObject(i).getLong("id"), type, selectedPcks).getJSONArray("nodes");
+                }else{
+                    temp_array = joinMultipleProjectsGraphJson(projectIds.getJSONObject(i).getLong("id"), type).getJSONArray("nodes");
+                }
+                for(int j = 0; j < temp_array.size(); j++){
+                    multipleProjectsJson.add(temp_array.getJSONObject(j));
+                }
             }
-            projectJson.put("children",multipleProjectsJson);
+            projectJson.put("nodes",multipleProjectsJson);
         }
 
         nodeJSON2.put("result",projectJson);
@@ -185,7 +193,7 @@ public class ProjectServiceImpl implements ProjectService{
                     for(ProjectFile profile : fileList){
                         JSONObject jsonObject2 = new JSONObject();
 //                        jsonObject2.put("size",profile.getLoc());
-                        jsonObject2.put("size", profile.getLoc() <= 500 ? 40 : (profile.getLoc() <= 1000 ? 50 : (profile.getLoc() <= 2000 ? 60 : 70)));
+                        jsonObject2.put("size", profile.getLoc() <= 500 ? 20 : (profile.getLoc() <= 1000 ? 25 : (profile.getLoc() <= 2000 ? 30 : 35)));
                         jsonObject2.put("long_name",profile.getPath());
                         jsonObject2.put("name",profile.getName());
                         jsonObject2.put("id", profile.getId().toString());
@@ -241,7 +249,7 @@ public class ProjectServiceImpl implements ProjectService{
                     for(ProjectFile profile : fileList){
                         JSONObject jsonObject2 = new JSONObject();
 //                        jsonObject2.put("size",profile.getLoc());
-                        jsonObject2.put("size", profile.getLoc() <= 500 ? 40 : (profile.getLoc() <= 1000 ? 50 : (profile.getLoc() <= 2000 ? 60 : 70)));
+                        jsonObject2.put("size", profile.getLoc() <= 500 ? 20 : (profile.getLoc() <= 1000 ? 25 : (profile.getLoc() <= 2000 ? 30 : 35)));
                         jsonObject2.put("long_name",profile.getPath());
                         jsonObject2.put("name",profile.getName());
                         jsonObject2.put("id", profile.getId().toString());
@@ -345,8 +353,7 @@ public class ProjectServiceImpl implements ProjectService{
                 for(ProjectFile profile : fileList){
                     JSONObject jsonObject2 = new JSONObject();
 //                    jsonObject2.put("size",profile.getLoc());
-                    jsonObject2.put("size",profile.getLoc() <= 500 ? 40 : profile.getLoc() <= 1000 ? 50 :
-                            profile.getLoc() <= 2000 ? 60 : 70);
+                    jsonObject2.put("size", profile.getLoc() <= 500 ? 20 : (profile.getLoc() <= 1000 ? 25 : (profile.getLoc() <= 2000 ? 30 : 35)));
                     jsonObject2.put("long_name",profile.getPath());
                     jsonObject2.put("name",profile.getName());
                     jsonObject2.put("id", profile.getId().toString());
