@@ -26,6 +26,8 @@ public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
 			"relationshipQuery: \'MATCH p=(p1:Package)-[r:" + RelationType.str_DEPENDS_ON + "]->(p2:Package) " +
 			"where (r.dependsOnType contains \\\'" + RelationType.str_EXTENDS + "\\\' or " +
 			"       r.dependsOnType contains \\\'" + RelationType.str_IMPLEMENTS + "\\\' or " +
+			"       r.dependsOnType contains \\\'" + RelationType.str_INCLUDE + "\\\' or " +
+			"       r.dependsOnType contains \\\'" + RelationType.str_IMPLEMENTS_C + "\\\' or " +
 			"       r.dependsOnType contains \\\'" + RelationType.str_CALL + "\\\') " +
 			"RETURN id(p1) AS source, id(p2) AS target\' }) " +
 			"YIELD nodeId, componentId " +
@@ -40,6 +42,8 @@ public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
 			"relationshipQuery: \'MATCH p=(p1:Module)-[r:" + RelationType.str_DEPENDS_ON + "]->(p2:Module) " +
 			"where (r.dependsOnType contains \\\'" + RelationType.str_EXTENDS + "\\\' or " +
 			"       r.dependsOnType contains \\\'" + RelationType.str_IMPLEMENTS + "\\\' or " +
+			"       r.dependsOnType contains \\\'" + RelationType.str_INCLUDE + "\\\' or " +
+			"       r.dependsOnType contains \\\'" + RelationType.str_IMPLEMENTS_C + "\\\' or " +
 			"       r.dependsOnType contains \\\'" + RelationType.str_CALL + "\\\') " +
 			"RETURN id(p1) AS source, id(p2) AS target\' }) " +
 			"YIELD nodeId, componentId " +
@@ -54,6 +58,8 @@ public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
 			"relationshipQuery: \'MATCH p=(f1:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(f2:ProjectFile) " +
 			"where (r.dependsOnType contains \\\'" + RelationType.str_EXTENDS + "\\\' or " +
 			"       r.dependsOnType contains \\\'" + RelationType.str_IMPLEMENTS + "\\\' or " +
+			"       r.dependsOnType contains \\\'" + RelationType.str_INCLUDE + "\\\' or " +
+			"       r.dependsOnType contains \\\'" + RelationType.str_IMPLEMENTS_C + "\\\' or " +
 			"       r.dependsOnType contains \\\'" + RelationType.str_CALL + "\\\') " +
 			"RETURN id(f1) AS source, id(f2) AS target\' }) " +
 			"YIELD nodeId, componentId " +
@@ -68,6 +74,8 @@ public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
 			"relationshipQuery: \'MATCH p=(t1:Type)-[r:" + RelationType.str_DEPENDS_ON + "]->(t2:Type) " +
 			"where (r.dependsOnType contains \\\'" + RelationType.str_EXTENDS + "\\\' or " +
 			"       r.dependsOnType contains \\\'" + RelationType.str_IMPLEMENTS + "\\\' or " +
+			"       r.dependsOnType contains \\\'" + RelationType.str_INCLUDE + "\\\' or " +
+			"       r.dependsOnType contains \\\'" + RelationType.str_IMPLEMENTS_C + "\\\' or " +
 			"       r.dependsOnType contains \\\'" + RelationType.str_CALL + "\\\') " +
 			"RETURN id(t1) AS source, id(t2) AS target\' }) " +
 			"YIELD nodeId, componentId " +
@@ -82,6 +90,8 @@ public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
 			"relationshipQuery: \'MATCH p=(p1:Package)-[r:" + RelationType.str_DEPENDS_ON + "]->(p2:Package) " +
 			"where (r.dependsOnType contains \\\'" + RelationType.str_EXTENDS + "\\\' or " +
 			"       r.dependsOnType contains \\\'" + RelationType.str_IMPLEMENTS + "\\\' or " +
+			"       r.dependsOnType contains \\\'" + RelationType.str_INCLUDE + "\\\' or " +
+			"       r.dependsOnType contains \\\'" + RelationType.str_IMPLEMENTS_C + "\\\' or " +
 			"       r.dependsOnType contains \\\'" + RelationType.str_CALL + "\\\') " +
 			"RETURN id(p1) AS source, id(p2) AS target\' }) " +
 			"YIELD nodeId, componentId " +
@@ -95,6 +105,8 @@ public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
 			"relationshipQuery: \'MATCH p=(p1:Module)-[r:" + RelationType.str_DEPENDS_ON + "]->(p2:Module) " +
 			"where (r.dependsOnType contains \\\'" + RelationType.str_EXTENDS + "\\\' or " +
 			"       r.dependsOnType contains \\\'" + RelationType.str_IMPLEMENTS + "\\\' or " +
+			"       r.dependsOnType contains \\\'" + RelationType.str_INCLUDE + "\\\' or " +
+			"       r.dependsOnType contains \\\'" + RelationType.str_IMPLEMENTS_C + "\\\' or " +
 			"       r.dependsOnType contains \\\'" + RelationType.str_CALL + "\\\') " +
 			"RETURN id(p1) AS source, id(p2) AS target\' }) " +
 			"YIELD nodeId, componentId " +
@@ -108,6 +120,8 @@ public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
 			"relationshipQuery: \'MATCH p=(f1:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(f2:ProjectFile) " +
 			"where (r.dependsOnType contains \\\'" + RelationType.str_EXTENDS + "\\\' or " +
 			"       r.dependsOnType contains \\\'" + RelationType.str_IMPLEMENTS + "\\\' or " +
+			"       r.dependsOnType contains \\\'" + RelationType.str_INCLUDE + "\\\' or " +
+			"       r.dependsOnType contains \\\'" + RelationType.str_IMPLEMENTS_C + "\\\' or " +
 			"       r.dependsOnType contains \\\'" + RelationType.str_CALL + "\\\') " +
 			"RETURN id(f1) AS source, id(f2) AS target\' }) " +
 			"YIELD nodeId, componentId " +
@@ -121,6 +135,8 @@ public interface CycleASRepository extends Neo4jRepository<ProjectFile, Long> {
 			"relationshipQuery: \'MATCH p=(t1:Type)-[r:" + RelationType.str_DEPENDS_ON + "]->(t2:Type) " +
 			"where (r.dependsOnType contains \\\'" + RelationType.str_EXTENDS + "\\\' or " +
 			"       r.dependsOnType contains \\\'" + RelationType.str_IMPLEMENTS + "\\\' or " +
+			"       r.dependsOnType contains \\\'" + RelationType.str_INCLUDE + "\\\' or " +
+			"       r.dependsOnType contains \\\'" + RelationType.str_IMPLEMENTS_C + "\\\' or " +
 			"       r.dependsOnType contains \\\'" + RelationType.str_CALL + "\\\') " +
 			"RETURN id(t1) AS source, id(t2) AS target\' }) " +
 			"YIELD nodeId, componentId " +

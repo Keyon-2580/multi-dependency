@@ -469,10 +469,15 @@ public class BeanCreator {
 	}
 
 	@Bean
-	public boolean setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository, CommitRepository commitRepository) {
+	public boolean setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository, CommitRepository commitRepository,ProjectRepository projectRepository) {
 		LOGGER.info("设置Commit Update文件数...");
 		commitUpdateFileRepository.setCommitFilesSize();
 		LOGGER.info("设置Project Commits数...");
+		Project project = projectRepository.queryProjectWithLimitOne();
+		if(project != null && project.getCommits() > 0){
+			LOGGER.info("已存在Project Commits数");
+			return true;
+		}
 		commitRepository.setCommitsForAllProject();
 		return true;
 	}

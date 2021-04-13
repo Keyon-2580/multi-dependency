@@ -32,6 +32,9 @@ public interface ProjectRepository extends Neo4jRepository<Project, Long> {
 
 	@Query("match (project:Project) return project")
 	List<Project> queryAllProjects();
+
+	@Query("match (project:Project) return project limit 1;")
+	Project queryProjectWithLimitOne();
 	
 	@Query("match (n) where id(n) = $id return n")
 	Node queryNodeById(@Param("id") long id);

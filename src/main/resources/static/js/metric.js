@@ -8,7 +8,7 @@ var metric = function() {
 				var html = "";
 				for(var id in projects) {
 					html += "<div><h4>" + projects[id].name + " (" + projects[id].language + ")" + "</h4></div>";
-					html += "<div><button name='fileTable_" + id + "' class='btn btn-primary file_excel_button'>输出 excel</button></div>";
+					// html += "<div><button name='fileTable_" + id + "' class='btn btn-primary file_excel_button'>输出 excel</button></div>";
 					html += "<div><table id='fileTable_" + id + "' class='table table-bordered'>";
 					html += "<tr>";
 					html += "<th>Index</th>";
@@ -76,9 +76,9 @@ var metric = function() {
 					html += "</table></div>";
 				}
 				$("#fileMetrics").html(html);
-				$(".file_excel_button").click(function() {
-					tableToExcel($(this).attr("name"), "fileMetrics");
-				});
+				// $(".file_excel_button").click(function() {
+				// 	tableToExcel($(this).attr("name"), "fileMetrics");
+				// });
 			}
 		})
 	}
@@ -92,7 +92,7 @@ var metric = function() {
 				var html = "";
 				for(var id in projects) {
 					html += "<div><h4>" + projects[id].name + " (" + projects[id].language + ")" + "</h4></div>";
-					html += "<div><button name='packageTable_" + id + "' class='btn btn-primary package_excel_button'>输出 excel</button></div>";
+					// html += "<div><button name='packageTable_" + id + "' class='btn btn-primary package_excel_button'>输出 excel</button></div>";
 					html += "<div><table id='packageTable_" + i + "' class='table table-bordered'>";
 					html += "<tr>";
 					html += "<th>Index</th>";
@@ -135,9 +135,9 @@ var metric = function() {
 					html += "</table></div>";
 				}
 				$("#packageMetrics").html(html);
-				$(".package_excel_button").click(function() {
-					tableToExcel($(this).attr("name"), "packageMetrics");
-				});
+				// $(".package_excel_button").click(function() {
+				// 	tableToExcel($(this).attr("name"), "packageMetrics");
+				// });
 			}
 		});
 	}
@@ -227,16 +227,16 @@ var metric = function() {
 					fileMetric(result);
 				}
 			});
-			$("#projectButton").click(function() {
-				tableToExcel("projectTable", "projectMetrics");
-			});
-			$("#fileButton").click(function() {
-//				window.href="/";
-				$.ajax({
-					type: "get",
-					url: "/metric/excel/file"
-				});
-			});
+			// $("#projectButton").click(function() {
+			// 	tableToExcel("projectTable", "projectMetrics");
+			// });
+// 			$("#fileButton").click(function() {
+// //				window.href="/";
+// 				$.ajax({
+// 					type: "get",
+// 					url: "/metric/excel/file"
+// 				});
+// 			});
 		}
 	}
 }
