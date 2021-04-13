@@ -92,12 +92,12 @@ G6.registerNode('pie-node', {
             })
         }
 
-        const radius = cfg.size / 2 - 2; // node radius
+        const radius = cfg.size / 2 - 1; // node radius
 
         group.addShape('circle', {
             attrs: {
-                "r": radius + 2,
-                "lineWidth": 6,
+                "r": radius + 0.5,
+                "lineWidth": 4,
                 "stroke": '#5f95ff',
                 "fill": '#ffffff',
             }
@@ -108,8 +108,8 @@ G6.registerNode('pie-node', {
             case 0:
                 return group.addShape('circle', {
                     attrs: {
-                        "r": radius + 5,
-                        "lineWidth": 6,
+                        "r": radius + 2.5,
+                        "lineWidth": 4,
                         "stroke": '#5f95ff',
                         "fill": '#ffffff',
                     }
@@ -305,7 +305,7 @@ const graph = new G6.Graph({
     nodeStateStyles: {
         smell_normal: {
             fill: "#ffffff",
-            lineWidth: 4,
+            lineWidth: 2.5,
             shadowBlur: 10,
             shadowColor: COLOR_SMELL_NORMAL,
             stroke: COLOR_SMELL_NORMAL,
@@ -315,7 +315,7 @@ const graph = new G6.Graph({
         },
         smell_hover: {
             fill: "#e6714f",
-            lineWidth: 4,
+            lineWidth: 2.5,
             shadowBlur: 10,
             shadowColor: COLOR_SMELL_CLICK,
             stroke: COLOR_SMELL_CLICK,
@@ -325,11 +325,18 @@ const graph = new G6.Graph({
         },
         unreliable: {
             fill: "#ffffff",
-            lineWidth: 4,
+            lineWidth: 2.5,
             shadowBlur: 10,
             shadowColor: "#df0e23",
             stroke: "#df0e23",
         },
+        selected: {
+            fill: "#ffffff",
+            lineWidth: 2.5,
+            shadowBlur: 10,
+            shadowColor: "#5F95FF",
+            stroke: "#5F95FF",
+        }
     },
     groupByTypes: false,
     modes: {
@@ -1279,6 +1286,10 @@ var loadPageData = function () {
 
                     "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
                     "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_GodComponent\" value='GodComponent'> God Component " +
+                    "</label>" +
+
+                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_UnusedInclude\" value='UnusedInclude'> Unused Include " +
                     "</label>" +
 
                     "</p>";
