@@ -110,7 +110,7 @@ public class ProjectServiceImpl implements ProjectService{
         JSONObject projectJson = new JSONObject();
 
         if(projectIds.size() == 1){
-            if(isFilter){
+            if(isFilter && Constant.PROJECT_STRUCTURE_COMBO.equals(type)){
                 projectJson = joinMultipleProjectsGraphJson(projectIds.getJSONObject(0).getLong("id"), type, selectedPcks);
             }else{
                 projectJson = joinMultipleProjectsGraphJson(projectIds.getJSONObject(0).getLong("id"), type);
@@ -120,17 +120,24 @@ public class ProjectServiceImpl implements ProjectService{
             projectJson.put("id", "default");
             JSONArray multipleProjectsJson = new JSONArray();
             for(int i = 0; i < projectIds.size(); i++){
-                JSONArray temp_array;
-                if(isFilter) {
+                JSONArray temp_array = new JSONArray();
+                if(isFilter && Constant.PROJECT_STRUCTURE_COMBO.equals(type)) {
                     temp_array = joinMultipleProjectsGraphJson(projectIds.getJSONObject(i).getLong("id"), type, selectedPcks).getJSONArray("nodes");
+                    for(int j = 0; j < temp_array.size(); j++){
+                        multipleProjectsJson.add(temp_array.getJSONObject(j));
+                    }
                 }else{
-                    temp_array = joinMultipleProjectsGraphJson(projectIds.getJSONObject(i).getLong("id"), type).getJSONArray("nodes");
+                    JSONObject temp = joinMultipleProjectsGraphJson(projectIds.getJSONObject(i).getLong("id"), type);
+
+                    multipleProjectsJson.add(temp);
                 }
-                for(int j = 0; j < temp_array.size(); j++){
-                    multipleProjectsJson.add(temp_array.getJSONObject(j));
-                }
+
             }
-            projectJson.put("nodes",multipleProjectsJson);
+            if(isFilter && Constant.PROJECT_STRUCTURE_COMBO.equals(type)) {
+                projectJson.put("nodes", multipleProjectsJson);
+            }else{
+                projectJson.put("children", multipleProjectsJson);
+            }
         }
 
         nodeJSON2.put("result",projectJson);
@@ -242,7 +249,7 @@ public class ProjectServiceImpl implements ProjectService{
                 JSONArray temp_children = new JSONArray();
                 temp.put("name",pckstru2.getPck().getDirectoryPath());
                 temp.put("depth",pckstru2.getPck().getDepth());
-                temp.put("id",pckstru2.getPck().getId().toString());
+                temp.put("id", pckstru2.getPck().getId().toString());
 
                 List<ProjectFile> fileList = pckstru2.getChildrenFiles();
                 if(fileList.size() > 0){
@@ -287,7 +294,7 @@ public class ProjectServiceImpl implements ProjectService{
 //			jsonObject.put("long_name",pckstru.getPck().getDirectoryPath());
             jsonObject.put("size",fileList.size());
             jsonObject.put("depth",pckstru.getPck().getDepth());
-            jsonObject.put("id",pckstru.getPck().getId().toString());
+            jsonObject.put("id","id_" + pckstru.getPck().getId().toString());
             float cloneFilesInAllFiles = 0;
 //            if(fileList.size() > 0){
 //                for(ProjectFile profile : fileList){

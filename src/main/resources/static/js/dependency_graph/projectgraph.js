@@ -223,16 +223,11 @@ var loadPageData = function () {
                 value: 5,
                 slide: function( event, ui ) {
                     $( "#slider_range" ).val("1 - " + ui.value );
-                    // Change_Depth(ui.value);
+                    Change_Depth(ui.value);
                     // console.log("slider")
                 }
             });
             $( "#slider_range" ).val("1 - " + $( "#projectToGraph_slider" ).slider( "value") );
-
-            // var temp_array = [];
-            // temp_array.push(projectlist[0].id);
-            // projectList_global = temp_array.concat();
-            // projectGraphAjax(temp_array);
         }
     })
 }
@@ -478,12 +473,12 @@ function loadLink(jsonLinks) {
             return d.type;
         })
         .attr("id", function (d){
-            return d.pair_id;
+            return "id_" + d.pair_id;
         })
         .attr("onclick", function(d){
             if(!d.bottom_package){
                 // return "drawChildrenLinks(\"" + d.pair_id + "\", \"" + d.type + "\")";
-                return "drawChildrenLinks(\"" + d.pair_id + "\")";
+                return "drawChildrenLinks(\"id_" + d.pair_id + "\")";
             }
         })
         .attr("marker-end",function (d){
@@ -562,23 +557,23 @@ function loadLink(jsonLinks) {
         var k;
         var k_flag;
         var inner_flag;
-        d3.select("#" + d.source_id)
+        d3.select("#id_" +  d.source_id)
             .style("stroke",function (e){
                 return getTypeColor(d)[0];
             })
             .style("stroke-width","1.5px")
 
-        d3.select("#" + d.target_id)
+        d3.select("#id_" +  d.target_id)
             .style("stroke",function (e){
                 return getTypeColor(d)[0];
             })
             .style("stroke-width","1.5px")
 
         //获取两个圆的transform属性（包含坐标信息）和半径
-        var source_transform = d3.select("#" + d.source_id).attr("transform");
-        var target_transform = d3.select("#" + d.target_id).attr("transform");
-        var r1 = parseFloat(d3.select("#" + d.source_id).attr("r"));
-        var r2 = parseFloat(d3.select("#" + d.target_id).attr("r"));
+        var source_transform = d3.select("#id_" +  d.source_id).attr("transform");
+        var target_transform = d3.select("#id_" +  d.target_id).attr("transform");
+        var r1 = parseFloat(d3.select("#id_" +  d.source_id).attr("r"));
+        var r2 = parseFloat(d3.select("#id_" +  d.target_id).attr("r"));
 
         //求初始情况下的两个圆心坐标
         var x1 = parseFloat(source_transform.slice(source_transform.indexOf("(") + 1, source_transform.indexOf(",")));
@@ -647,7 +642,7 @@ function loadLink(jsonLinks) {
         }
 
         var temp_coordinate = {};
-        temp_coordinate["id"] = d.source_id + "_" + d.target_id;
+        temp_coordinate["id"] = "id_" + d.source_id + "_id_" + d.target_id;
         temp_coordinate["x1"] = x1;
         temp_coordinate["y1"] = y1;
         temp_coordinate["x2"] = x2;
@@ -656,24 +651,24 @@ function loadLink(jsonLinks) {
     })
 
     function getTranslateX1(source_id, target_id){
-        var link_id = source_id + "_" + target_id;
+        var link_id = "id_" + source_id + "_" + "id_" +  target_id;
         // console.log(link_id);
         // console.log(circleCoordinate.find((n) => n.id === link_id))
         return circleCoordinate.find((n) => n.id === link_id).x1;
     }
 
     function getTranslateY1(source_id, target_id){
-        var link_id = source_id + "_" + target_id;
+        var link_id = "id_" + source_id + "_" + "id_" + target_id;
         return circleCoordinate.find((n) => n.id === link_id).y1;
     }
 
     function getTranslateX2(source_id, target_id){
-        var link_id = source_id + "_" + target_id;
+        var link_id = "id_" + source_id + "_" + "id_" + target_id;
         return circleCoordinate.find((n) => n.id === link_id).x2;
     }
 
     function getTranslateY2(source_id, target_id){
-        var link_id = source_id + "_" + target_id;
+        var link_id = "id_" + source_id + "_" + "id_" + target_id;
         return circleCoordinate.find((n) => n.id === link_id).y2;
     }
 
@@ -822,12 +817,12 @@ function checkDuplicateLink(){
             var num = 1;
             var index_list = [];
             linksCurrent_global.forEach(function(item2, index2){
-                if(item2.pair_id === item.source_id.split("_")[1] + "_" + item.target_id.split("_")[1]){
+                if(item2.pair_id === item.source_id + "_" + item.target_id){
                     item2["duplicate_num"] = num;
                     item2["line_direction"] = true;
                     num++;
                     index_list.push(index2);
-                }else if(item2.pair_id === item.target_id.split("_")[1] + "_" + item.source_id.split("_")[1]){
+                }else if(item2.pair_id === item.target_id + "_" + item.source_id){
                     item2["duplicate_num"] = num;
                     item2["line_direction"] = false;
                     num++;
@@ -910,8 +905,8 @@ function drawTableBelow(link_id, linksdata, type){
                     + "<td>";
                 if(clonePairs > 0) {
                     html_clone_table_body += "<a target='_blank' class='package' href='/cloneaggregation/details" +
-                        "?id1=" + item.source_id.split("_")[1] +
-                        "&id2=" + item.target_id.split("_")[1] +
+                        "?id1=" + item.source_id +
+                        "&id2=" + item.target_id +
                         "&path1=" + item.source_name +
                         "&path2=" + item.target_name +
                         "&clonePairs=" + clonePairs +
@@ -972,15 +967,15 @@ function drawTableBelow(link_id, linksdata, type){
 
         links_local.forEach(function(d){
             if(d.type === "dependson"){
-                html_dependson_table += "<tr><td><a target='_blank' href='/relation/package/" + d.source_id.split("_")[1] + "'>" + d.source_name + "</a></td><td>"
+                html_dependson_table += "<tr><td><a target='_blank' href='/relation/package/" + d.source_id + "'>" + d.source_name + "</a></td><td>"
                     + (d.dependsOnTypes === "" ? ""
                     : (d.dependsOnTypes + "(" + d.dependsOnTimes + "," + d.dependsOnWeightedTimes.toFixed(2) + ")")) + "</td><td>"
-                    + "<a target='_blank' href='/relation/package/" + d.target_id.split("_")[1] + "'>" +  d.target_name + "</td><td>"
+                    + "<a target='_blank' href='/relation/package/" + d.target_id + "'>" +  d.target_name + "</td><td>"
                     + (d.dependsByTypes === "" ? ""
                     : (d.dependsByTypes + "(" + d.dependsByTimes + "," + d.dependsByWeightedTimes.toFixed(2) + ")")) + "</td><td>"
                     + d.dependsOnIntensity.toFixed(2) + "</td><td>"
                     + d.dependsByIntensity.toFixed(2) + "</td><td>"
-                    + "<a target='_blank' href='/dependon?pck1=" + d.source_id.split("_")[1] + "&pck2=" + d.target_id.split("_")[1]
+                    + "<a target='_blank' href='/dependon?pck1=" + d.source_id + "&pck2=" + d.target_id
                     + "'>detail</a></td></tr>";
             }
         })
@@ -1176,8 +1171,8 @@ var FocusOnCircleLinks = function(circleId){
         linksOfCircleVisiable_flag = true;
 
         for(var i = temp_links.length; i > 0; i--){
-            if(temp_links[i - 1].source_id !== circleId
-                && temp_links[i - 1].target_id !== circleId ){
+            if("id_" + temp_links[i - 1].source_id !== circleId
+                && "id_" + temp_links[i - 1].target_id !== circleId ){
                 temp_links.splice(i - 1, 1);
             }
         }
@@ -1279,6 +1274,10 @@ var FilterLinks = function() {
     document.getElementById("hideBottomPackageButton").innerHTML = "仅显示聚合";
     clearLink();
 
+    console.log(filter["dependson"]["checked"]);
+    console.log(filter["clone"]["checked"]);
+    console.log(filter["cochange"]["checked"]);
+
     if (filter["dependson"]["checked"]) {
         links_local = links_local.concat(dependsonLinks_global);
     }
@@ -1290,8 +1289,8 @@ var FilterLinks = function() {
     }
 
     for (var i = links_local.length; i > 0; i--) {
-        var source_project = links_local[i - 1].source_projectBelong.split("_")[1];
-        var target_project = links_local[i - 1].target_projectBelong.split("_")[1];
+        var source_project = links_local[i - 1].source_projectBelong;
+        var target_project = links_local[i - 1].target_projectBelong;
         var relation_type = links_local[i - 1].type;
 
         var flag_delete = false;
