@@ -1277,7 +1277,7 @@ var loadPageData = function () {
                     "</label>" +
 
                     "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_UnusedComponent\" value='UnusedComponent'> Unused Component " +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_UnutilizedAbstraction \" value='UnutilizedAbstraction'> Unutilized Abstraction " +
                     "</label>" +
 
                     "<label class = \"combo_label\" style = \"margin-left: 40px\">" +

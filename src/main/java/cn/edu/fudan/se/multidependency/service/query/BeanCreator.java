@@ -451,8 +451,8 @@ public class BeanCreator {
 			}
 
 			if(propertyConfig.isCalculateCoChange()){
-				LOGGER.info("创建Logical Coupling Smell节点关系...");
-				smellDetectorService.createLogicalCouplingSmells(false);
+				LOGGER.info("创建Implicit Cross Module Dependency Smell节点关系...");
+				smellDetectorService.createImplicitCrossModuleDependencySmells(false);
 			}
 
 			if(propertyConfig.isCalculateCoChange()){

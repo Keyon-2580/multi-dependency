@@ -85,7 +85,7 @@ public class SmellDetectorService {
 	public void createCycleDependencySmells(boolean isRecreate){
 		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.CYCLIC_DEPENDENCY);
 		if(smellsTmp != null && !smellsTmp.isEmpty()){
-			LOGGER.info("已存在Cycle Dependency Smell");
+			LOGGER.info("已存在Cyclic Dependency Smell");
 			if(!isRecreate){
 				LOGGER.info("不重新创建");
 				return;
@@ -99,7 +99,7 @@ public class SmellDetectorService {
 		List<Contain> smellContains = new ArrayList<>();
 
 		Map<Long, Map<Integer, Cycle<Type>>> typeCyclicDependencies = new HashMap<>(cyclicDependencyDetector.typeCycles());
-		String typeSmellName = "type_cycle-dependency_";
+		String typeSmellName = SmellLevel.TYPE + "_" + SmellType.CYCLIC_DEPENDENCY + "_";
 		for (Map.Entry<Long, Map<Integer, Cycle<Type>>> typeCyclicDependency : typeCyclicDependencies.entrySet()){
 			long projectId = typeCyclicDependency.getKey();
 			Project project = (Project) projectRepository.queryNodeById(projectId);
@@ -127,7 +127,7 @@ public class SmellDetectorService {
 		smells.clear();
 		smellContains.clear();
 		Map<Long, Map<Integer, Cycle<ProjectFile>>> fileCyclicDependencies = new HashMap<>(cyclicDependencyDetector.fileCycles());
-		String fileSmellName = "file_cycle-dependency_";
+		String fileSmellName = SmellLevel.FILE + "_" + SmellType.CYCLIC_DEPENDENCY + "_";
 		for (Map.Entry<Long, Map<Integer, Cycle<ProjectFile>>> fileCyclicDependency : fileCyclicDependencies.entrySet()){
 			long projectId = fileCyclicDependency.getKey();
 			Project project = (Project) projectRepository.queryNodeById(projectId);
@@ -155,7 +155,7 @@ public class SmellDetectorService {
 		smells.clear();
 		smellContains.clear();
 		Map<Long, Map<Integer, Cycle<Package>>> packageCyclicDependencies = new HashMap<>(cyclicDependencyDetector.packageCycles());
-		String packageSmellName = "package_cycle-dependency_";
+		String packageSmellName = SmellLevel.PACKAGE + "_" + SmellType.CYCLIC_DEPENDENCY + "_";
 		for (Map.Entry<Long, Map<Integer, Cycle<Package>>> packageCyclicDependency : packageCyclicDependencies.entrySet()){
 			long projectId = packageCyclicDependency.getKey();
 			Project project = (Project) projectRepository.queryNodeById(projectId);
@@ -199,7 +199,7 @@ public class SmellDetectorService {
 		List<Contain> smellContains = new ArrayList<>();
 
 		Map<Long, List<FileHubLike>> fileHubLikes = hubLikeComponentDetector.fileHubLikes();
-		String fileSmellName = "file_hub-like-dependency_";
+		String fileSmellName = SmellLevel.FILE + "_" + SmellType.HUBLIKE_DEPENDENCY + "_";
 		int fileSmellIndex = 1;
 		for (Map.Entry<Long, List<FileHubLike>> fileHubLike : fileHubLikes.entrySet()) {
 			long projectId = fileHubLike.getKey();
@@ -226,7 +226,7 @@ public class SmellDetectorService {
 		smells.clear();
 		smellContains.clear();
 		Map<Long, List<PackageHubLike>> packageHubLikes = hubLikeComponentDetector.packageHubLikes();
-		String packageSmellName = "package_hub-like-dependency_";
+		String packageSmellName = SmellLevel.PACKAGE + "_" + SmellType.HUBLIKE_DEPENDENCY + "_";
 		int packageSmellIndex = 1;
 		for (Map.Entry<Long, List<PackageHubLike>> packageHubLike : packageHubLikes.entrySet()) {
 			long projectId = packageHubLike.getKey();
@@ -269,7 +269,7 @@ public class SmellDetectorService {
 		List<Contain> smellContains = new ArrayList<>();
 
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstables = unstableDependencyDetectorUsingInstability.fileUnstables();
-		String fileSmellname = "file_unstable-dependency_";
+		String fileSmellname = SmellLevel.FILE + "_" + SmellType.UNSTABLE_DEPENDENCY + "_";
 		int fileSmellIndex = 1;
 		for (Map.Entry<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstable : fileUnstables.entrySet()) {
 			long projectId = fileUnstable.getKey();
@@ -296,7 +296,7 @@ public class SmellDetectorService {
 		smells.clear();
 		smellContains.clear();
 		Map<Long, List<UnstableComponentByInstability<Package>>> packageUnstables = unstableDependencyDetectorUsingInstability.packageUnstables();
-		String packageSmellname = "package_unstable-dependency_";
+		String packageSmellname = SmellLevel.PACKAGE + "_" + SmellType.UNSTABLE_DEPENDENCY + "_";
 		int packageSmellIndex = 1;
 		for (Map.Entry<Long, List<UnstableComponentByInstability<Package>>> packageUnstable : packageUnstables.entrySet()) {
 			long projectId = packageUnstable.getKey();
@@ -339,7 +339,7 @@ public class SmellDetectorService {
 		List<Contain> smellContains = new ArrayList<>();
 
 		Collection<SimilarComponents<ProjectFile>> fileSimilars = similarComponentsDetector.fileSimilars();
-		String fileSmellName = "file_similar-components_";
+		String fileSmellName = SmellLevel.FILE + "_" + SmellType.SIMILAR_COMPONENTS + "_";
 		int fileSmellIndex = 1;
 		for (SimilarComponents<ProjectFile> fileSimilar : fileSimilars) {
 			Package pck1 = containRepository.findFileBelongToPackage(fileSimilar.getNode1().getId());
@@ -374,7 +374,7 @@ public class SmellDetectorService {
 		smells.clear();
 		smellContains.clear();
 		Collection<SimilarComponents<Package>> packageSimilars = similarComponentsDetector.packageSimilars();
-		String packageSmellName = "package_similar-components_";
+		String packageSmellName = SmellLevel.PACKAGE + "_" + SmellType.SIMILAR_COMPONENTS + "_";
 		int packageSmellIndex = 1;
 		for (SimilarComponents<Package> packageSimilar : packageSimilars) {
 			Package pck1 = packageSimilar.getNode1();
@@ -408,24 +408,24 @@ public class SmellDetectorService {
 		LOGGER.info("创建Similar Components Smell节点关系完成");
 	}
 
-	public void createLogicalCouplingSmells(boolean isRecreate) {
-		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.LOGICAL_COUPLING);
+	public void createImplicitCrossModuleDependencySmells(boolean isRecreate) {
+		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY);
 		if(smellsTmp != null && !smellsTmp.isEmpty()){
-			LOGGER.info("已存在Logical Coupling Smell");
+			LOGGER.info("已存在Implicit CrossModule Dependency Smell");
 			if(!isRecreate){
 				LOGGER.info("不重新创建");
 				return;
 			}
 			LOGGER.info("重新创建...");
 		}
-		smellRepository.deleteSmellContainRelations(SmellType.LOGICAL_COUPLING);
-		smellRepository.deleteSmellMetric(SmellType.LOGICAL_COUPLING);
-		smellRepository.deleteSmells(SmellType.LOGICAL_COUPLING);
+		smellRepository.deleteSmellContainRelations(SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY);
+		smellRepository.deleteSmellMetric(SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY);
+		smellRepository.deleteSmells(SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY);
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
 
 		Collection<LogicCouplingComponents<ProjectFile>> fileLogicals = implicitCrossModuleDependencyDetector.cochangesInDifferentFile();
-		String fileSmellName = "file_logical-coupling_";
+		String fileSmellName = SmellLevel.FILE + "_" + SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY + "_";
 		int fileSmellIndex = 1;
 		for (LogicCouplingComponents<ProjectFile> fileLogical : fileLogicals) {
 			Package pck = containRepository.findFileBelongToPackage(fileLogical.getNode1().getId());
@@ -436,7 +436,7 @@ public class SmellDetectorService {
 			smell.setLanguage(project.getLanguage());
 			smell.setProjectId(project.getId());
 			smell.setProjectName(project.getName());
-			smell.setType(SmellType.LOGICAL_COUPLING);
+			smell.setType(SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY);
 			smell.setLevel(SmellLevel.FILE);
 			smells.add(smell);
 			Contain contain1 = new Contain(smell, fileLogical.getNode1());
@@ -451,7 +451,7 @@ public class SmellDetectorService {
 		smells.clear();
 		smellContains.clear();
 		Collection<LogicCouplingComponents<Package>> packageLogicals = implicitCrossModuleDependencyDetector.cochangesInDifferentPackage();
-		String packageSmellName = "package_logical-coupling_";
+		String packageSmellName = SmellLevel.PACKAGE + "_" + SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY + "_";
 		int packageSmellIndex = 1;
 		for (LogicCouplingComponents<Package> packageLogical : packageLogicals) {
 			Project project = containRepository.findPackageBelongToProject(packageLogical.getNode1().getId());
@@ -461,7 +461,7 @@ public class SmellDetectorService {
 			smell.setLanguage(project.getLanguage());
 			smell.setProjectId(project.getId());
 			smell.setProjectName(project.getName());
-			smell.setType(SmellType.LOGICAL_COUPLING);
+			smell.setType(SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY);
 			smell.setLevel(SmellLevel.PACKAGE);
 			smells.add(smell);
 			Contain contain1 = new Contain(smell, packageLogical.getNode1());
@@ -472,7 +472,7 @@ public class SmellDetectorService {
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
-		LOGGER.info("创建Logical Coupling Smell节点关系完成");
+		LOGGER.info("创建Implicit CrossModule Dependency Smell节点关系完成");
 	}
 
 	public void createGodComponentSmells(boolean isRecreate) {
@@ -492,7 +492,7 @@ public class SmellDetectorService {
 		List<Contain> smellContains = new ArrayList<>();
 
   		Map<Long, List<FileGod>> fileGodComponents = godComponentDetector.fileGodComponents();
-		String fileSmellName = "file_god-component_";
+		String fileSmellName = SmellLevel.FILE + "_" + SmellType.GOD_COMPONENT + "_";
 		int fileSmellIndex = 1;
 		for (Map.Entry<Long, List<FileGod>> fileGodComponent : fileGodComponents.entrySet()) {
 			long projectId = fileGodComponent.getKey();
@@ -519,7 +519,7 @@ public class SmellDetectorService {
 	}
 
 	public void createUnutilizedAbstractionSmells(boolean isRecreate) {
-		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.UNTILIZED_ABSTRACTION);
+		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.UNUTILIZED_ABSTRACTION);
 		if(smellsTmp != null && !smellsTmp.isEmpty()){
 			LOGGER.info("已存在Unutilized Abstraction Smell");
 			if(!isRecreate){
@@ -528,14 +528,14 @@ public class SmellDetectorService {
 			}
 			LOGGER.info("重新创建...");
 		}
-		smellRepository.deleteSmellContainRelations(SmellType.UNTILIZED_ABSTRACTION);
-		smellRepository.deleteSmellMetric(SmellType.UNTILIZED_ABSTRACTION);
-		smellRepository.deleteSmells(SmellType.UNTILIZED_ABSTRACTION);
+		smellRepository.deleteSmellContainRelations(SmellType.UNUTILIZED_ABSTRACTION);
+		smellRepository.deleteSmellMetric(SmellType.UNUTILIZED_ABSTRACTION);
+		smellRepository.deleteSmells(SmellType.UNUTILIZED_ABSTRACTION);
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
 
 		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> fileUnutilizeds = unutilizedAbstractionDetector.fileUnutilizeds();
-		String fileSmellName = "file_unutilized-abstraction_";
+		String fileSmellName = SmellLevel.FILE + "_" + SmellType.UNUTILIZED_ABSTRACTION + "_";
 		int fileSmellIndex = 1;
 		for (Map.Entry<Long, List<UnutilizedAbstraction<ProjectFile>>> fileUnutilized : fileUnutilizeds.entrySet()) {
 			long projectId = fileUnutilized.getKey();
@@ -548,7 +548,7 @@ public class SmellDetectorService {
 				smell.setLanguage(project.getLanguage());
 				smell.setProjectId(projectId);
 				smell.setProjectName(project.getName());
-				smell.setType(SmellType.UNTILIZED_ABSTRACTION);
+				smell.setType(SmellType.UNUTILIZED_ABSTRACTION);
 				smell.setLevel(SmellLevel.FILE);
 				smells.add(smell);
 				Contain contain = new Contain(smell, file.getComponent());
@@ -578,7 +578,7 @@ public class SmellDetectorService {
 		List<Contain> smellContains = new ArrayList<>();
 
 		Map<Long, List<UnusedInclude>> unusedIncludeMap = unusedIncludeDetector.detectUnusedInclude();
-		String fileSmellName = "file_unused-include_";
+		String fileSmellName = SmellLevel.FILE + "_" + SmellType.UNUSED_INCLUDE + "_";
 		int fileSmellIndex = 1;
 		for (Map.Entry<Long, List<UnusedInclude>> entry : unusedIncludeMap.entrySet()) {
 			long projectId = entry.getKey();
