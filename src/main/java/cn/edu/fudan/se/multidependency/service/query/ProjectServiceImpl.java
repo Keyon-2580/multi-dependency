@@ -203,6 +203,10 @@ public class ProjectServiceImpl implements ProjectService{
                         jsonObject2.put("size", profile.getLoc() <= 500 ? 20 : (profile.getLoc() <= 1000 ? 25 : (profile.getLoc() <= 2000 ? 30 : 35)));
                         jsonObject2.put("long_name",profile.getPath());
                         jsonObject2.put("name",profile.getName());
+                        jsonObject2.put("noc",profile.getNoc());
+                        jsonObject2.put("nom",profile.getNom());
+                        jsonObject2.put("loc",profile.getLoc());
+                        jsonObject2.put("score",profile.getScore());
                         jsonObject2.put("id", profile.getId().toString());
                         temp_children.add(jsonObject2);
                     }
@@ -259,6 +263,10 @@ public class ProjectServiceImpl implements ProjectService{
                         jsonObject2.put("size", profile.getLoc() <= 500 ? 20 : (profile.getLoc() <= 1000 ? 25 : (profile.getLoc() <= 2000 ? 30 : 35)));
                         jsonObject2.put("long_name",profile.getPath());
                         jsonObject2.put("name",profile.getName());
+                        jsonObject2.put("noc",profile.getNoc());
+                        jsonObject2.put("nom",profile.getNom());
+                        jsonObject2.put("loc",profile.getLoc());
+                        jsonObject2.put("score",profile.getScore());
                         jsonObject2.put("id", profile.getId().toString());
                         temp_children.add(jsonObject2);
                     }
@@ -363,6 +371,10 @@ public class ProjectServiceImpl implements ProjectService{
                     jsonObject2.put("size", profile.getLoc() <= 500 ? 20 : (profile.getLoc() <= 1000 ? 25 : (profile.getLoc() <= 2000 ? 30 : 35)));
                     jsonObject2.put("long_name",profile.getPath());
                     jsonObject2.put("name",profile.getName());
+                    jsonObject2.put("noc",profile.getNoc());
+                    jsonObject2.put("nom",profile.getNom());
+                    jsonObject2.put("loc",profile.getLoc());
+                    jsonObject2.put("score",profile.getScore());
                     jsonObject2.put("id", profile.getId().toString());
                     result.add(jsonObject2);
                 }

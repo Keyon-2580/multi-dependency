@@ -249,17 +249,22 @@ const tooltip = new G6.Tooltip({
 
             : e.item.getModel().group_type === 'node' ?
                 `<b class="combo_label">${e.item.getModel().name}</b>
-          <ul>
-            <li>ID: ${e.item.getModel().id}</li>
-          </ul>` :
+                  <ul>
+                    <li>ID: ${e.item.getModel().id}</li>
+                    <li>Path: ${e.item.getModel().long_name}</li>
+                    <li>NOC: ${e.item.getModel().noc}</li>
+                    <li>NOM: ${e.item.getModel().nom}</li>
+                    <li>LOC: ${e.item.getModel().loc}</li>
+                    <li>Score: ${e.item.getModel().score}</li>
+                  </ul>` :
 
                 `<b class="combo_label">${e.item.getModel().id}</b>
-            <ul>
-              <li>source: ${e.item.getModel().source_name}</li>
-              <li>source_id: ${e.item.getModel().source}</li>
-              <li>target: ${e.item.getModel().target_name}</li>
-              <li>target_id: ${e.item.getModel().target}</li>
-            </ul>`
+                <ul>
+                  <li>source: ${e.item.getModel().source_name}</li>
+                  <li>source_id: ${e.item.getModel().source}</li>
+                  <li>target: ${e.item.getModel().target_name}</li>
+                  <li>target_id: ${e.item.getModel().target}</li>
+                </ul>`
         return outDiv
     },
     itemTypes: ['node', 'combo', 'edge']
@@ -274,7 +279,7 @@ const contextMenu = new G6.Menu({
         let html = `<ul class="combo_ul">${item.model.id}_${item.model.name}</ul>`;
         if(item.model.smellType === "CyclicDependency"){
             html += `<ul class="combo_li">
-            <a class="combo_a" href="/project/has/cyclicDependencyGraph/${item.model.id}" target="_blank">打开异味详情</a>
+            <a class="combo_a" href="/smellGraph?smellType=CyclicDependency&fileId=${item.model.id}" target="_blank">打开异味详情</a>
             </ul>`;
         }
         return html;
@@ -407,6 +412,11 @@ function DrawComboChart(json_data){
             let temp_node = {};
             temp_node["id"] = d.id;
             temp_node["name"] = d.name;
+            temp_node["long_name"] = d.long_name;
+            temp_node["noc"] = d.noc;
+            temp_node["nom"] = d.nom;
+            temp_node["loc"] = d.loc;
+            temp_node["score"] = d.score;
             temp_node["size"] = d.size;
             temp_node["inOutNode"] = 0;
             temp_node["group_type"] = 'node';
@@ -477,115 +487,134 @@ function DrawComboChart(json_data){
 
     data["nodes"] = temp_nodes;
     data["combos"] = temp_combos;
+    data["edges"] = splitLinks(actual_edges);
     console.log(data);
 
-    data["edges"] = splitLinks(actual_edges);
-    autoLayout();
-    graph.data(data);
-    graph.render();
+    let sum = data["nodes"].length + data["combos"].length + data["edges"].length;
 
-    const edge_list = graph.getEdges();
-    edge_list.forEach(function (item){
-        if(item._cfg.model.inner_edge === 1){
-            graph.updateItem(item, EDGE_INNER_MODEL);
+    if(sum >= 15000){
+        if(confirm("当前已选中包 " + data["combos"].length + " 个，"
+            + "节点 " + data["nodes"].length + " 个，"
+            + "边 " + data["edges"].length + " 条，"
+            + "总计 " + sum + "个。\n"
+            + "建议总数不超过15，000，请减少节点数。")){
+            $('#multipleProjectsButton').css('background-color', '#efefef');
+            loading_div.html("");
+            showFilterWindow();
+        }else{
+            $('#multipleProjectsButton').css('background-color', '#efefef');
+            loading_div.html("");
+            showFilterWindow();
         }
-    });
+    }else{
+        autoLayout();
+        graph.data(data);
+        graph.render();
 
-    const nodes = graph.getNodes();
-    nodes.forEach((node) => {
-        node.toFront();
-    });
-    graph.paint();
 
-    $('#multipleProjectsButton').css('background-color', '#efefef');
-
-    if(repaint_flag === false){
-        graph.on('node:mouseenter', (evt) => {
-            const { item } = evt;
-            const smellId = item._cfg.model.smellId;
-
-            if(smellId !== 0){
-                smell_data_global.forEach(smell => {
-                    if(smell.id === smellId){
-                        smell.nodes.forEach(node_data => {
-                            const node = graph.findById(node_data.id.split("_")[1]);
-                            if(typeof(node) !== "undefined"){
-                                smell_hover_nodes.push(node);
-                                graph.setItemState(node, 'smell_hover', true);
-                            }
-                        })
-                    }
-                })
+        const edge_list = graph.getEdges();
+        edge_list.forEach(function (item){
+            if(item._cfg.model.inner_edge === 1){
+                graph.updateItem(item, EDGE_INNER_MODEL);
             }
         });
 
-        graph.on('node:mouseleave', (evt) => {
-            const { item } = evt;
-
-            const smellId = item._cfg.model.smellId;
-
-            if(smellId !== 0) {
-                smell_hover_nodes.forEach(node => {
-                    graph.setItemState(node, 'smell_hover', false);
-                })
-
-                smell_hover_nodes = [];
-            }
+        const nodes = graph.getNodes();
+        nodes.forEach((node) => {
+            node.toFront();
         });
+        graph.paint();
 
-        graph.on('node:contextmenu', (evt) => {
-            $(".g6-component-contextmenu").css({"left": evt.clientX + 20 + "px", "top": evt.clientY + 20 + "px"});
-        });
+        $('#multipleProjectsButton').css('background-color', '#efefef');
 
-        graph.on('canvas:click', (evt) => {
-            graph.getCombos().forEach((combo) => {
-                graph.clearItemStates(combo);
+        if(repaint_flag === false){
+            graph.on('node:mouseenter', (evt) => {
+                const { item } = evt;
+                const smellId = item._cfg.model.smellId;
+
+                if(smellId !== 0){
+                    smell_data_global.forEach(smell => {
+                        if(smell.id === smellId){
+                            smell.nodes.forEach(node_data => {
+                                const node = graph.findById(node_data.id.split("_")[1]);
+                                if(typeof(node) !== "undefined"){
+                                    smell_hover_nodes.push(node);
+                                    graph.setItemState(node, 'smell_hover', true);
+                                }
+                            })
+                        }
+                    })
+                }
             });
-        });
 
-        graph.on('drag', (evt) => {
-            const nodes = graph.getNodes();
-            nodes.forEach((node) => {
-                node.toFront();
+            graph.on('node:mouseleave', (evt) => {
+                const { item } = evt;
+
+                const smellId = item._cfg.model.smellId;
+
+                if(smellId !== 0) {
+                    smell_hover_nodes.forEach(node => {
+                        graph.setItemState(node, 'smell_hover', false);
+                    })
+
+                    smell_hover_nodes = [];
+                }
             });
-            graph.paint();
-        });
+
+            graph.on('node:contextmenu', (evt) => {
+                $(".g6-component-contextmenu").css({"left": evt.clientX + 20 + "px", "top": evt.clientY + 20 + "px"});
+            });
+
+            graph.on('canvas:click', (evt) => {
+                graph.getCombos().forEach((combo) => {
+                    graph.clearItemStates(combo);
+                });
+            });
+
+            graph.on('drag', (evt) => {
+                const nodes = graph.getNodes();
+                nodes.forEach((node) => {
+                    node.toFront();
+                });
+                graph.paint();
+            });
 
 
-        //节点点击函数
-        graph.on('node:click', (evt) => {
-            const { item: node_click } = evt;
-            console.log(node_click);
-            if(last_click_node === ""){
-                showRelevantNodeAndEdge(node_click);
-            }else if(last_click_node === node_click._cfg.id){
-                last_click_node = "";
-                deleteRelevantNodeAndEdge(node_click);
-            }else{
-                const lastClickNode = graph.findById(last_click_node);
+            //节点点击函数
+            graph.on('node:click', (evt) => {
+                const { item: node_click } = evt;
+                console.log(node_click);
+                if(last_click_node === ""){
+                    showRelevantNodeAndEdge(node_click);
+                }else if(last_click_node === node_click._cfg.id){
+                    last_click_node = "";
+                    deleteRelevantNodeAndEdge(node_click);
+                }else{
+                    const lastClickNode = graph.findById(last_click_node);
 
-                deleteRelevantNodeAndEdge(lastClickNode);
-                showRelevantNodeAndEdge(node_click);
-            }
+                    deleteRelevantNodeAndEdge(lastClickNode);
+                    showRelevantNodeAndEdge(node_click);
+                }
 
-            // graph.setItemState(node_click, 'active', true);
-        });
-        graph.on('edge:click', (evt) => {
-            const { item: edge_click } = evt;
-            console.log(edge_click);
+                // graph.setItemState(node_click, 'active', true);
+            });
+            graph.on('edge:click', (evt) => {
+                const { item: edge_click } = evt;
+                console.log(edge_click);
 
-            // graph.setItemState(node_click, 'active', true);
-        });
+                // graph.setItemState(node_click, 'active', true);
+            });
 
-        graph.on('combo:click', (evt) => {
-            const { item: item } = evt;
-            console.log(item);
-        });
+            graph.on('combo:click', (evt) => {
+                const { item: item } = evt;
+                console.log(item);
+            });
 
-        repaint_flag = true;
+            repaint_flag = true;
+        }
+
+        loading_div.html("");
     }
-
-    loading_div.html("");
 }
 
 //显示与该节点相关的连线和节点
@@ -1175,18 +1204,26 @@ var loadPageData = function () {
                     }
                 }
                 html += "</select>";
-                html += "<br><button id = \"pckFilterButton\" type=\"button\" class='common_button' style='margin-top: 15px' onclick= showFilterWindow()>筛选项目</button>" +
-                    "<button id = \"multipleProjectsButton\" type=\"button\" class='common_button' style='margin-top: 15px; margin-left: 30px' onclick= showMultipleButton()>加载项目</button>" +
-                    "<button id = \"clearFilterButton\" type=\"button\" class='common_button' style='margin-top: 15px; margin-left: 30px' onclick= clearFilter()>重置筛选</button></div>";
+                html += "<br><button id = \"pckFilterButton\" type=\"button\" class='common_button' " +
+                    "style='margin-top: 15px' onclick= showFilterWindow()>筛选项目</button>" +
+
+                    "<button id = \"multipleProjectsButton\" type=\"button\" class='common_button' " +
+                    "style='margin-top: 15px; margin-left: 30px' onclick= showMultipleButton()>加载项目</button>" +
+
+                    "<button id = \"clearFilterButton\" type=\"button\" class='common_button' " +
+                    "style='margin-top: 15px; margin-left: 30px' onclick= clearFilter()>重置筛选</button></div>";
 
                 html += "<div class = \"combo_div\">"+
                     "<form role=\"form\">" +
 
                     "<p><label class = \"AttributionSelectTitle\" style = \"margin-right: 44px\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" onclick=\"CancelChildrenChecked('dependsOn')\">Dependency：" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" " +
+                    "onclick=\"CancelChildrenChecked('dependsOn')\">Dependency：" +
                     "</label>" +
 
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsIntensity\" onclick=\"setParentChecked('dependsOn', 'dependsIntensity')\" name = \"dependsOn_children\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsIntensity\" " +
+                    "onclick=\"setParentChecked('dependsOn', 'dependsIntensity')\" name = \"dependsOn_children\">" +
+
                     "<input  class = \"AttributionSelectInput\" id=\"intensitybelow\" value=\"0.8\">" +
 
                     "<select class = \"AttributionSelectSingleSelect\" id=\"intensityCompareSelectBelow\">" +
@@ -1202,12 +1239,14 @@ var loadPageData = function () {
                     "<input  class = \"AttributionSelectInput\" id=\"intensityhigh\" value=\"1\">" +
 
                     "<label class = \"AttributionSelectLabel\" style = \"margin-left: 80px\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes\" onclick=\"setParentChecked('dependsOn', 'dependsOnTimes')\" name = \"dependsOn_children\"> Times >= " +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes\" " +
+                    "onclick=\"setParentChecked('dependsOn', 'dependsOnTimes')\" name = \"dependsOn_children\"> Times >= " +
                     "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput\" style='margin-right: 80px' value=\"3\">" +
                     "</label>" +
 
                     "<label class = \"AttributionSelectLabel\" style = \"margin-right:10px;\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnType\" onclick=\"setParentChecked('dependsOn', 'dependsOnType')\" name = \"dependsOn_children\"> Dependency Type: " +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnType\" " +
+                    "onclick=\"setParentChecked('dependsOn', 'dependsOnType')\" name = \"dependsOn_children\"> Dependency Type: " +
                     "</label>" +
 
                     "<select id = \"dependsTypeSelect\" class=\"selectpicker\" multiple>" +
@@ -1232,10 +1271,12 @@ var loadPageData = function () {
                     "</p>";
 
                 html += "<p><label class = \"AttributionSelectTitle\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone\" onclick=\"CancelChildrenChecked('clone')\">Clone：" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone\" " +
+                    "onclick=\"CancelChildrenChecked('clone')\">Clone：" +
                     "</label>" +
 
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneSimilarity\" onclick=\"setParentChecked('clone', 'cloneSimilarity')\" name = \"clone_children\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneSimilarity\" " +
+                    "onclick=\"setParentChecked('clone', 'cloneSimilarity')\" name = \"clone_children\">" +
                     "<input  class = \"AttributionSelectInput\" id=\"similaritybelow\" value=\"0.7\">" +
 
                     "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectBelow\">" +
@@ -1251,45 +1292,55 @@ var loadPageData = function () {
                     "<input  class = \"AttributionSelectInput\" id=\"similarityhigh\" value=\"1\"></p>";
 
                 html += "<p><label class = \"AttributionSelectTitle\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"coChange\" onclick=\"CancelChildrenChecked('coChange')\">Co-change：" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"coChange\" " +
+                    "onclick=\"CancelChildrenChecked('coChange')\">Co-change：" +
                     "</label>" +
                     "<label class = \"AttributionSelectLabel\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cochangeTimes\" onclick=\"setParentChecked('coChange', 'cochangeTimes')\" name = \"coChange_children\"> Times >= " +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cochangeTimes\" " +
+                    "onclick=\"setParentChecked('coChange', 'cochangeTimes')\" name = \"coChange_children\"> Times >= " +
                     "<input class = \"AttributionSelectInput\" id=\"cochangetimes\" value=\"3\">" +
                     "</label></p>";
 
                 html += "<p><label class = \"combo_title\" style = \"margin-right: 30px\">Smell ：</label>" +
 
                     "<label class = \"combo_label\" >" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_Clone\" value='Clone'> Clone " +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    "id=\"checkbox_Clone\" value='Clone'> Clone " +
                     "</label>" +
 
                     "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_CyclicDependency\" value='CyclicDependency'> Cyclic Dependency " +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    "id=\"checkbox_CyclicDependency\" value='CyclicDependency'> Cyclic Dependency " +
                     "</label>" +
 
                     "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_HublikeDependency\" value='HubLikeDependency'> Hublike Dependency " +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    "id=\"checkbox_HublikeDependency\" value='HubLikeDependency'> Hublike Dependency " +
                     "</label>" +
 
                     "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_UnstableDependency\" value='UnstableDependency'> Unstable Dependency " +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    "id=\"checkbox_UnstableDependency\" value='UnstableDependency'> Unstable Dependency " +
                     "</label>" +
 
                     "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_UnusedComponent\" value='UnusedComponent'> Unused Component " +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    "id=\"checkbox_UnusedComponent\" value='UnusedComponent'> Unused Component " +
                     "</label>" +
 
                     "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_ImplicitCrossModuleDependency\" value='ImplicitCrossModuleDependency'> Implicit Cross Module Dependency " +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    "id=\"checkbox_ImplicitCrossModuleDependency\" value='ImplicitCrossModuleDependency'> Implicit Cross Module Dependency " +
                     "</label>" +
 
                     "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_GodComponent\" value='GodComponent'> God Component " +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    "id=\"checkbox_GodComponent\" value='GodComponent'> God Component " +
                     "</label>" +
 
                     "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" id=\"checkbox_UnusedInclude\" value='UnusedInclude'> Unused Include " +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    "id=\"checkbox_UnusedInclude\" value='UnusedInclude'> Unused Include " +
                     "</label>" +
 
                     "</p>";
@@ -1298,8 +1349,10 @@ var loadPageData = function () {
                     "<button class = \"common_button\" type=\"button\" onclick= filterLinks() >筛选连线</button>" +
                     "<button class = \"common_button\" type=\"button\" onclick= loadSmell() style = \"margin-left: 30px\">加载异味</button>" +
                     "<button class = \"common_button\" type=\"button\" onclick= deleteSmell() style = \"margin-left: 30px\">删除异味</button>" +
-                    "<button id = \"unreliableDependencyFile\"class = \"common_button\" type=\"button\" onclick= loadUnreliableDependency() style = \"margin-left: 30px\">加载不可依赖关系</button>" +
-                    "<input type=\"file\" accept=\".json\" id=\"unreliable_dependency_file\" onchange='setUnreliableDependency()' style=\"display:none\">" +
+                    "<button id = \"unreliableDependencyFile\" class = \"common_button\" type=\"button\" " +
+                    "onclick= loadUnreliableDependency() style = \"margin-left: 30px\">加载不可依赖关系</button>" +
+                    "<input type=\"file\" accept=\".json\" id=\"unreliable_dependency_file\" " +
+                    "onchange='setUnreliableDependency()' style=\"display:none\">" +
                     "</div></p>";
 
                 html += "</form>" +
@@ -1528,6 +1581,7 @@ function showMultipleButton(){
         "</div>";
     loading_div.html(html);
     projectGraphAjax(value);
+
 }
 
 //重置筛选
