@@ -493,11 +493,11 @@ function DrawComboChart(json_data){
     let sum = data["nodes"].length + data["combos"].length + data["edges"].length;
 
     if(sum >= 15000){
-        if(confirm("当前已选中包 " + data["combos"].length + " 个，"
-            + "节点 " + data["nodes"].length + " 个，"
-            + "边 " + data["edges"].length + " 条，"
-            + "总计 " + sum + "个。\n"
-            + "建议总数不超过15，000，请减少节点数。")){
+        if(confirm("当前已选中顶层目录 " + data["combos"].length + " 个，"
+            + "文件 " + data["nodes"].length + " 个，"
+            + "关系 " + data["edges"].length + " 条，"
+            + "元素总计 " + sum + " 个。\n"
+            + "建议总元素不超过15,000个，请减少选中目录数！")){
             $('#multipleProjectsButton').css('background-color', '#efefef');
             loading_div.html("");
             showFilterWindow();
