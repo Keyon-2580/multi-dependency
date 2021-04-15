@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 
 @Controller
-@RequestMapping("/smellGraph")
+@RequestMapping("/smellgraph")
 public class SmellGraphController {
 
 	@Autowired
@@ -20,7 +20,7 @@ public class SmellGraphController {
 	private UnusedIncludeDetector unusedIncludeDetector;
 
 	@GetMapping("")
-	public String cyclicHierarchy(HttpServletRequest request, @RequestParam("smellType") String smellType, @RequestParam("fileId") long fileId) {
+	public String cyclicHierarchy(HttpServletRequest request, @RequestParam("smelltype") String smellType, @RequestParam("fileid") long fileId) {
 		switch (smellType){
 			case SmellType.CYCLIC_DEPENDENCY:
 				request.setAttribute("json_data", cyclicDependencyDetector.getCyclicDependencyJson(fileId));
@@ -31,6 +31,6 @@ public class SmellGraphController {
 			default:
 				break;
 		}
-		return "as/smellGraph";
+		return "as/smellgraph";
 	}
 }

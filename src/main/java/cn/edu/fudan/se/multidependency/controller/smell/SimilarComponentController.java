@@ -11,7 +11,7 @@ import cn.edu.fudan.se.multidependency.service.query.smell.SimilarComponentsDete
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller
-@RequestMapping("/as/similar")
+@RequestMapping("/as/similarcomponents")
 public class SimilarComponentController {
 
 	@Autowired

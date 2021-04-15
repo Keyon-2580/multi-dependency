@@ -278,7 +278,7 @@ const contextMenu = new G6.Menu({
         let html = `<ul class="combo_ul">${item.model.id}_${item.model.name}</ul>`;
         if(item.model.smellType === "CyclicDependency"){
             html += `<ul class="combo_li">
-            <a class="combo_a" href="/smellGraph?smellType=CyclicDependency&fileId=${item.model.id}" target="_blank">打开异味详情</a>
+            <a class="combo_a" href="/smellgraph?smelltype=CyclicDependency&fileid=${item.model.id}" target="_blank">打开异味详情</a>
             </ul>`;
         }
         return html;

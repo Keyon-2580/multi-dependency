@@ -1,4 +1,4 @@
-var smellMetric = function() {
+var smellmetric = function() {
 	var allSmellMetric = function(projects) {
     		$.ajax({
     			type: "get",
@@ -109,7 +109,7 @@ var smellMetric = function() {
                             html += "</table></div>";
                         }
                     }
-    				$("#smellMetric").html(html);
+    				$("#smellmetric").html(html);
 //    				$(".smell_excel_button").click(function() {
 //    					tableToExcel($(this).attr("name"), "allSmellMetric");
 //    				});

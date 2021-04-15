@@ -104,7 +104,7 @@ public class ArchitectureSmellController {
 		});
 		List<CirclePacking> circlePacking = circlePackings.getOrDefault(project.getId(), new ArrayList<>());
 		request.setAttribute("circlePacking", circlePacking);
-		return "as/multiple_project";
+		return "as/multipleproject";
 	}
 
 	@GetMapping("/issue/circle")

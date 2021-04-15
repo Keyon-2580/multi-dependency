@@ -8,13 +8,18 @@ import java.util.Map;
 
 public interface UnusedIncludeDetector {
 
-    Map<Long, List<UnusedInclude>> detectUnusedInclude();
+    /**
+     * 获取未使用引入
+     */
+    Map<Long, List<UnusedInclude>> getFileUnusedInclude();
 
-    Map<Long, List<UnusedInclude>> getUnusedIncludeFromSmell();
+    /**
+     * 检测未使用引入
+     */
+    Map<Long, List<UnusedInclude>> detectFileUnusedInclude();
 
     /**
      * 根据file的Id生成文件所在的Unused Include的json格式信息
-     * @return
      */
     JSONObject getUnusedIncludeJson(Long fileId);
 }

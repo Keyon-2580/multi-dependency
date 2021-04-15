@@ -1,4 +1,4 @@
-var multipleProject = function(project, circlePacking, cytoscapeutil) {
+var multipleproject = function(project, circlePacking, cytoscapeutil) {
 	console.log(project);
 	console.log(circlePacking);
 	var _multiple = function() {

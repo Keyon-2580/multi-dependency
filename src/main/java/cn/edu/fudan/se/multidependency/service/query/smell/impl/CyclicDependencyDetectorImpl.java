@@ -76,6 +76,117 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 	}
 
 	@Override
+	public Map<Long, Map<Integer, Cycle<Type>>> getTypeCyclicDependency() {
+		String key = "typeCycles";
+		if (cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		Map<Long, Map<Integer, Cycle<Type>>> result = new HashMap<>();
+		List<Smell> smells = smellRepository.findSmells(SmellLevel.TYPE, SmellType.CYCLIC_DEPENDENCY);
+		List<Cycle<Type>> typeCycles = new ArrayList<>();
+		for (Smell smell : smells) {
+			List<String> namePart = Arrays.asList(smell.getName().split("_"));
+			int partition = Integer.parseInt(namePart.get(namePart.size() - 1));
+			List<Type> components = new ArrayList<>();
+			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
+			for (Node contain : contains) {
+				components.add((Type) contain);
+			}
+			typeCycles.add(new Cycle<>(partition, components));
+		}
+		typeCycles.sort(Comparator.comparingInt(Cycle::getPartition));
+		for(Cycle<Type> typeCycle : typeCycles) {
+			Project project = containRelationService.findTypeBelongToProject(typeCycle.getComponents().get(0));
+			if (project != null) {
+				Map<Integer, Cycle<Type>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+				temp.put(typeCycle.getPartition(), typeCycle);
+				result.put(project.getId(), temp);
+			}
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, Map<Integer, Cycle<ProjectFile>>> getFileCyclicDependency() {
+		String key = "fileCycles";
+		if (cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		Map<Long, Map<Integer, Cycle<ProjectFile>>> result = new HashMap<>();
+		List<Smell> smells = smellRepository.findSmells(SmellLevel.FILE, SmellType.CYCLIC_DEPENDENCY);
+		List<Cycle<ProjectFile>> fileCycles = new ArrayList<>();
+		for (Smell smell : smells) {
+			List<String> namePart = Arrays.asList(smell.getName().split("_"));
+			int partition = Integer.parseInt(namePart.get(namePart.size() - 1));
+			List<ProjectFile> components = new ArrayList<>();
+			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
+			for (Node contain : contains) {
+				components.add((ProjectFile) contain);
+			}
+			fileCycles.add(new Cycle<>(partition, components));
+		}
+		fileCycles.sort(Comparator.comparingInt(Cycle::getPartition));
+		for(Cycle<ProjectFile> fileCycle : fileCycles) {
+			Project project = containRelationService.findFileBelongToProject(fileCycle.getComponents().get(0));
+			if (project != null) {
+				Map<Integer, Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+				temp.put(fileCycle.getPartition(), fileCycle);
+				result.put(project.getId(), temp);
+			}
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, Map<Integer, Cycle<Package>>> getPackageCyclicDependency() {
+		String key = "packageCycles";
+		if (cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		Map<Long, Map<Integer, Cycle<Package>>> result = new HashMap<>();
+		List<Smell> smells = smellRepository.findSmells(SmellLevel.PACKAGE, SmellType.CYCLIC_DEPENDENCY);
+		List<Cycle<Package>> packageCycles = new ArrayList<>();
+		for (Smell smell : smells) {
+			List<String> namePart = Arrays.asList(smell.getName().split("_"));
+			int partition = Integer.parseInt(namePart.get(namePart.size() - 1));
+			List<Package> components = new ArrayList<>();
+			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
+			for (Node contain : contains) {
+				components.add((Package) contain);
+			}
+			packageCycles.add(new Cycle<>(partition, components));
+		}
+		packageCycles.sort(Comparator.comparingInt(Cycle::getPartition));
+		for(Cycle<Package> packageCycle : packageCycles) {
+			Project project = containRelationService.findPackageBelongToProject(packageCycle.getComponents().get(0));
+			if (project != null) {
+				Map<Integer, Cycle<Package>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+				temp.put(packageCycle.getPartition(), packageCycle);
+				result.put(project.getId(), temp);
+			}
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, Map<Integer, Cycle<Module>>> getModuleCyclicDependency() {
+		String key = "moduleCycles";
+		if (cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		Map<Long, Map<Integer, Cycle<Module>>> result = new HashMap<>();
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
 	public Map<Long, Map<Integer, Cycle<Type>>> detectTypeCyclicDependency() {
 		Map<Long, Map<Integer, Cycle<Type>>> result = new HashMap<>();
 		Collection<Cycle<Type>> cycles = cycleASRepository.typeCycles();
@@ -340,117 +451,6 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 			}
 			partition ++;
 		}
-		return result;
-	}
-
-	@Override
-	public Map<Long, Map<Integer, Cycle<Type>>> getTypeCyclicDependency() {
-		String key = "typeCycles";
-		if (cache.get(getClass(), key) != null) {
-			return cache.get(getClass(), key);
-		}
-
-		Map<Long, Map<Integer, Cycle<Type>>> result = new HashMap<>();
-		List<Smell> smells = smellRepository.findSmells(SmellLevel.TYPE, SmellType.CYCLIC_DEPENDENCY);
-		List<Cycle<Type>> typeCycles = new ArrayList<>();
-		for (Smell smell : smells) {
-			List<String> namePart = Arrays.asList(smell.getName().split("_"));
-			int partition = Integer.parseInt(namePart.get(namePart.size() - 1));
-			List<Type> components = new ArrayList<>();
-			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
-			for (Node contain : contains) {
-				components.add((Type) contain);
-			}
-			typeCycles.add(new Cycle<>(partition, components));
-		}
-		typeCycles.sort(Comparator.comparingInt(Cycle::getPartition));
-		for(Cycle<Type> typeCycle : typeCycles) {
-			Project project = containRelationService.findTypeBelongToProject(typeCycle.getComponents().get(0));
-			if (project != null) {
-				Map<Integer, Cycle<Type>> temp = result.getOrDefault(project.getId(), new HashMap<>());
-				temp.put(typeCycle.getPartition(), typeCycle);
-				result.put(project.getId(), temp);
-			}
-		}
-		cache.cache(getClass(), key, result);
-		return result;
-	}
-
-	@Override
-	public Map<Long, Map<Integer, Cycle<ProjectFile>>> getFileCyclicDependency() {
-		String key = "fileCycles";
-		if (cache.get(getClass(), key) != null) {
-			return cache.get(getClass(), key);
-		}
-
-		Map<Long, Map<Integer, Cycle<ProjectFile>>> result = new HashMap<>();
-		List<Smell> smells = smellRepository.findSmells(SmellLevel.FILE, SmellType.CYCLIC_DEPENDENCY);
-		List<Cycle<ProjectFile>> fileCycles = new ArrayList<>();
-		for (Smell smell : smells) {
-			List<String> namePart = Arrays.asList(smell.getName().split("_"));
-			int partition = Integer.parseInt(namePart.get(namePart.size() - 1));
-			List<ProjectFile> components = new ArrayList<>();
-			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
-			for (Node contain : contains) {
-				components.add((ProjectFile) contain);
-			}
-			fileCycles.add(new Cycle<>(partition, components));
-		}
-		fileCycles.sort(Comparator.comparingInt(Cycle::getPartition));
-		for(Cycle<ProjectFile> fileCycle : fileCycles) {
-			Project project = containRelationService.findFileBelongToProject(fileCycle.getComponents().get(0));
-			if (project != null) {
-				Map<Integer, Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new HashMap<>());
-				temp.put(fileCycle.getPartition(), fileCycle);
-				result.put(project.getId(), temp);
-			}
-		}
-		cache.cache(getClass(), key, result);
-		return result;
-	}
-
-	@Override
-	public Map<Long, Map<Integer, Cycle<Package>>> getPackageCyclicDependency() {
-		String key = "packageCycles";
-		if (cache.get(getClass(), key) != null) {
-			return cache.get(getClass(), key);
-		}
-
-		Map<Long, Map<Integer, Cycle<Package>>> result = new HashMap<>();
-		List<Smell> smells = smellRepository.findSmells(SmellLevel.PACKAGE, SmellType.CYCLIC_DEPENDENCY);
-		List<Cycle<Package>> packageCycles = new ArrayList<>();
-		for (Smell smell : smells) {
-			List<String> namePart = Arrays.asList(smell.getName().split("_"));
-			int partition = Integer.parseInt(namePart.get(namePart.size() - 1));
-			List<Package> components = new ArrayList<>();
-			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
-			for (Node contain : contains) {
-				components.add((Package) contain);
-			}
-			packageCycles.add(new Cycle<>(partition, components));
-		}
-		packageCycles.sort(Comparator.comparingInt(Cycle::getPartition));
-		for(Cycle<Package> packageCycle : packageCycles) {
-			Project project = containRelationService.findPackageBelongToProject(packageCycle.getComponents().get(0));
-			if (project != null) {
-				Map<Integer, Cycle<Package>> temp = result.getOrDefault(project.getId(), new HashMap<>());
-				temp.put(packageCycle.getPartition(), packageCycle);
-				result.put(project.getId(), temp);
-			}
-		}
-		cache.cache(getClass(), key, result);
-		return result;
-	}
-
-	@Override
-	public Map<Long, Map<Integer, Cycle<Module>>> getModuleCyclicDependency() {
-		String key = "moduleCycles";
-		if (cache.get(getClass(), key) != null) {
-			return cache.get(getClass(), key);
-		}
-
-		Map<Long, Map<Integer, Cycle<Module>>> result = new HashMap<>();
-		cache.cache(getClass(), key, result);
 		return result;
 	}
 

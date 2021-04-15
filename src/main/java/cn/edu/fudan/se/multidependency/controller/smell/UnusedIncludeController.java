@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import javax.servlet.http.HttpServletRequest;
 
 @Controller
-@RequestMapping("/as/unusedInclude")
+@RequestMapping("/as/unusedinclude")
 public class UnusedIncludeController {
 
 	@Autowired
@@ -19,10 +19,17 @@ public class UnusedIncludeController {
 	@Autowired
 	private NodeService nodeService;
 
-	@GetMapping("")
-	public String showUnusedInclude(HttpServletRequest request) {
+	@GetMapping("/query")
+	public String queryUnusedInclude(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("unusedIncludeMap", unusedIncludeDetector.getUnusedIncludeFromSmell());
-		return "as/unusedInclude";
+		request.setAttribute("unusedIncludeMap", unusedIncludeDetector.getFileUnusedInclude());
+		return "as/unusedinclude";
+	}
+
+	@GetMapping("/detect")
+	public String detectUnusedInclude(HttpServletRequest request) {
+		request.setAttribute("projects", nodeService.allProjects());
+		request.setAttribute("unusedIncludeMap", unusedIncludeDetector.detectFileUnusedInclude());
+		return "as/unusedinclude";
 	}
 }
