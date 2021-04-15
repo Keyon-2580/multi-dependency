@@ -253,17 +253,17 @@ public class SmellMetricCalculatorService {
 //	}
 
 //	public SmellMetric calculateSmellMetricInFileLevel(Smell smell) {
-//		SmellMetric smellMetric = new SmellMetric();
+//		SmellMetric smellmetric = new SmellMetric();
 //		SmellMetric.StructureMetric structureMetric = smellRepository.calculateSmellStructureMetricInFileLevel(smell.getId());
 //		SmellMetric.EvolutionMetric evolutionMetric = smellRepository.calculateSmellEvolutionMetricInFileLevel(smell.getId());
 //		SmellMetric.CoChangeMetric coChangeMetric = smellRepository.calculateSmellCoChangeMetricInFileLevel(smell.getId());
 //		SmellMetric.DebtMetric smellDebtMetrics = smellRepository.calculateSmellDebtMetricInFileLevel(smell.getId());
 //
-//		smellMetric.setStructureMetric(structureMetric);
-//		smellMetric.setEvolutionMetric(evolutionMetric);
-//		smellMetric.setCoChangeMetric(coChangeMetric);
-//		smellMetric.setDebtMetric(smellDebtMetrics);
-//		return smellMetric;
+//		smellmetric.setStructureMetric(structureMetric);
+//		smellmetric.setEvolutionMetric(evolutionMetric);
+//		smellmetric.setCoChangeMetric(coChangeMetric);
+//		smellmetric.setDebtMetric(smellDebtMetrics);
+//		return smellmetric;
 //	}
 
 	public Map<Long, Map<String, List<SmellMetric>>> calculateProjectSmellMetricsInFileLevel() {

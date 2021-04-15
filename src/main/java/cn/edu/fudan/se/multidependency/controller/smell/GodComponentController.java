@@ -30,7 +30,7 @@ public class GodComponentController {
 		request.setAttribute("projects", nodeService.allProjects());
 		request.setAttribute("files", godComponentDetector.fileGodComponents());
 		request.setAttribute("packages", godComponentDetector.packageGodComponents());
-		return "as/godComponents";
+		return "godcomponents";
 	}
 
 	@GetMapping("/threshold/{projectId}")
