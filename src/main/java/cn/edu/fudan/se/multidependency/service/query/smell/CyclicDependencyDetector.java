@@ -12,26 +12,6 @@ import com.alibaba.fastjson.JSONObject;
 public interface CyclicDependencyDetector {
 
 	/**
-	 * 检测类的循环依赖
-	 */
-	Map<Long, Map<Integer, Cycle<Type>>> detectTypeCyclicDependency();
-
-	/**
-	 * 检测文件的循环依赖
-	 */
-	Map<Long, Map<Integer, Cycle<ProjectFile>>> detectFileCyclicDependency();
-
-	/**
-	 * 检测包的循环依赖
-	 */
-	Map<Long, Map<Integer, Cycle<Package>>> detectPackageCyclicDependency();
-
-	/**
-	 * 检测模块的循环依赖
-	 */
-	Map<Long, Map<Integer, Cycle<Module>>> detectModuleCyclicDependency();
-
-	/**
 	 * 获取类的循环依赖
 	 */
 	Map<Long, Map<Integer, Cycle<Type>>> getTypeCyclicDependency();
@@ -50,6 +30,26 @@ public interface CyclicDependencyDetector {
 	 * 获取模块的循环依赖
 	 */
 	Map<Long, Map<Integer, Cycle<Module>>> getModuleCyclicDependency();
+
+	/**
+	 * 检测类的循环依赖
+	 */
+	Map<Long, Map<Integer, Cycle<Type>>> detectTypeCyclicDependency();
+
+	/**
+	 * 检测文件的循环依赖
+	 */
+	Map<Long, Map<Integer, Cycle<ProjectFile>>> detectFileCyclicDependency();
+
+	/**
+	 * 检测包的循环依赖
+	 */
+	Map<Long, Map<Integer, Cycle<Package>>> detectPackageCyclicDependency();
+
+	/**
+	 * 检测模块的循环依赖
+	 */
+	Map<Long, Map<Integer, Cycle<Module>>> detectModuleCyclicDependency();
 
 	/**
 	 * 根据file的Id生成文件所在的循环依赖的json格式信息

@@ -19,10 +19,17 @@ public class UnusedIncludeController {
 	@Autowired
 	private NodeService nodeService;
 
-	@GetMapping("")
-	public String showUnusedInclude(HttpServletRequest request) {
+	@GetMapping("/query")
+	public String queryUnusedInclude(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("unusedIncludeMap", unusedIncludeDetector.getUnusedIncludeFromSmell());
+		request.setAttribute("unusedIncludeMap", unusedIncludeDetector.getFileUnusedInclude());
+		return "as/unusedInclude";
+	}
+
+	@GetMapping("/detect")
+	public String detectUnusedInclude(HttpServletRequest request) {
+		request.setAttribute("projects", nodeService.allProjects());
+		request.setAttribute("unusedIncludeMap", unusedIncludeDetector.detectFileUnusedInclude());
 		return "as/unusedInclude";
 	}
 }

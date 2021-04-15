@@ -16,10 +16,11 @@ var cyclic = function(cytoscapeutil) {
 			html += "<th style='text-align: center; vertical-align: middle'>Number</th>";
 			html += "<th>Types</th>";
 			html += "</tr>";
+			let index = 1;
 			for(var typeIndex in typeCycles) {
 				var cycle = typeCycles[typeIndex];
 				html += "<tr>";
-				html += "<td style='text-align: center; vertical-align: middle'>" + cycle.partition + "</td>";
+				html += "<td style='text-align: center; vertical-align: middle'>" + index + "</td>";
 				html += "<td style='text-align: center; vertical-align: middle'>" + cycle.components.length + "</td>";
 				html += "<td>";
 				for(var i = 0; i < cycle.components.length; i++) {
@@ -27,6 +28,7 @@ var cyclic = function(cytoscapeutil) {
 				}
 				html += "</td>";
 				html += "</tr>";
+				index ++;
 			}
 			html += "</table>";
 
@@ -37,10 +39,11 @@ var cyclic = function(cytoscapeutil) {
 			html += "<th style='text-align: center; vertical-align: middle'>Number</th>";
 			html += "<th>Files</th>";
 			html += "</tr>";
+			index = 1;
 			for(var cycleIndex in fileCycles) {
 				var cycle = fileCycles[cycleIndex];
 				html += "<tr>";
-				html += "<td style='text-align: center; vertical-align: middle'>" + cycle.partition + "</td>";
+				html += "<td style='text-align: center; vertical-align: middle'>" + index + "</td>";
 				html += "<td style='text-align: center; vertical-align: middle'>" + cycle.components.length + "</td>";
 				html += "<td>";
 				for(var i = 0; i < cycle.components.length; i++) {
@@ -48,6 +51,7 @@ var cyclic = function(cytoscapeutil) {
 				}
 				html += "</td>";
 				html += "</tr>";
+				index ++;
 			}
 
 			var cyclicPackages = packages[project.id];
@@ -57,10 +61,11 @@ var cyclic = function(cytoscapeutil) {
 			html += "<th style='text-align: center; vertical-align: middle'>Number</th>";
 			html += "<th>Packages</th>";
 			html += "</tr>";
+			index = 1;
 			for(var packageIndex in cyclicPackages) {
 				var cycle = cyclicPackages[packageIndex];
 				html += "<tr>";
-				html += "<td style='text-align: center; vertical-align: middle'>" + cycle.partition + "</td>";
+				html += "<td style='text-align: center; vertical-align: middle'>" + index + "</td>";
 				html += "<td style='text-align: center; vertical-align: middle'>" + cycle.components.length + "</td>";
 				html += "<td>";
 				for(var i = 0; i < cycle.components.length; i++) {
@@ -68,6 +73,7 @@ var cyclic = function(cytoscapeutil) {
 				}
 				html += "</td>";
 				html += "</tr>";
+				index ++;
 			}
 
 			var moduleCycles = modules[project.id];
@@ -77,10 +83,11 @@ var cyclic = function(cytoscapeutil) {
 			html += "<th style='text-align: center; vertical-align: middle'>Number</th>";
 			html += "<th>Modules</th>";
 			html += "</tr>";
+			index = 1;
 			for(var moduleIndex in moduleCycles) {
 				var cycle = moduleCycles[moduleIndex];
 				html += "<tr>";
-				html += "<td style='text-align: center; vertical-align: middle'>" + cycle.partition + "</td>";
+				html += "<td style='text-align: center; vertical-align: middle'>" + index + "</td>";
 				html += "<td style='text-align: center; vertical-align: middle'>" + cycle.components.length + "</td>";
 				html += "<td>";
 				for(var i = 0; i < cycle.components.length; i++) {
@@ -88,6 +95,7 @@ var cyclic = function(cytoscapeutil) {
 				}
 				html += "</td>";
 				html += "</tr>";
+				index ++;
 			}
 			html += "</table>";
 		}

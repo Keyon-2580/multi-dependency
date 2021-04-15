@@ -2,13 +2,16 @@ package cn.edu.fudan.se.multidependency.service.query.smell.impl;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.ar.Module;
 import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.UnusedIncludeASRepository;
+import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.smell.UnusedIncludeDetector;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.UnusedInclude;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import com.alibaba.fastjson.JSONArray;
@@ -20,6 +23,9 @@ import java.util.*;
 
 @Service
 public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
+
+    @Autowired
+    private CacheService cache;
 
     @Autowired
     private UnusedIncludeASRepository unusedIncludeASRepository;
@@ -34,7 +40,34 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
     private ProjectFileRepository projectFileRepository;
 
     @Override
-    public Map<Long, List<UnusedInclude>> detectUnusedInclude() {
+    public Map<Long, List<UnusedInclude>> getFileUnusedInclude() {
+        String key = "fileUnusedInclude";
+        if (cache.get(getClass(), key) != null) {
+            return cache.get(getClass(), key);
+        }
+
+        Map<Long, List<UnusedInclude>> result = new HashMap<>();
+        List<Smell> smells = smellRepository.findSmellsByType(SmellType.UNUSED_INCLUDE);
+        if (smells != null) {
+            for (Smell smell : smells) {
+                long projectId = smell.getProjectId();
+                List<UnusedInclude> unusedIncludeList = result.getOrDefault(projectId, new ArrayList<>());
+                unusedIncludeList.add(smellRepository.getUnusedIncludeWithSmellId(smell.getId()));
+                result.put(projectId, unusedIncludeList);
+            }
+        }
+        for (Map.Entry<Long, List<UnusedInclude>> entry : result.entrySet()) {
+            long projectId = entry.getKey();
+            List<UnusedInclude> unusedIncludeList = result.getOrDefault(projectId, new ArrayList<>());
+            unusedIncludeList.sort((u1, u2) -> Integer.compare(u2.getUnusedIncludeFiles().size(), u1.getUnusedIncludeFiles().size()));
+            result.put(projectId, unusedIncludeList);
+        }
+        cache.cache(getClass(), key, result);
+        return result;
+    }
+
+    @Override
+    public Map<Long, List<UnusedInclude>> detectFileUnusedInclude() {
         Map<Long, List<UnusedInclude>> result = new HashMap<>();
         Set<UnusedInclude> headFileUnusedIncludeSet = new HashSet<>();
         Set<UnusedInclude> codeFileUnusedIncludeSet = new HashSet<>();
@@ -83,31 +116,9 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
             if (project != null) {
                 List<UnusedInclude> unusedIncludeList = result.getOrDefault(project.getId(), new ArrayList<>());
                 unusedIncludeList.add(codeUnusedInclude);
+                unusedIncludeList.sort((u1, u2) -> Integer.compare(u2.getUnusedIncludeFiles().size(), u1.getUnusedIncludeFiles().size()));
                 result.put(project.getId(), unusedIncludeList);
             }
-        }
-        return result;
-    }
-
-    @Override
-    public Map<Long, List<UnusedInclude>> getUnusedIncludeFromSmell() {
-        Map<Long, List<UnusedInclude>> result = new HashMap<>();
-        List<Smell> smells = smellRepository.findSmellsByType(SmellType.UNUSED_INCLUDE);
-        if (smells != null) {
-            for (Smell smell : smells) {
-                long projectId = smell.getProjectId();
-                List<UnusedInclude> unusedIncludeList = result.getOrDefault(projectId, new ArrayList<>());
-                unusedIncludeList.add(smellRepository.getUnusedIncludeWithSmellId(smell.getId()));
-                result.put(projectId, unusedIncludeList);
-            }
-        }
-        for (Map.Entry<Long, List<UnusedInclude>> entry : result.entrySet()) {
-            long projectId = entry.getKey();
-            List<UnusedInclude> unusedIncludeList = result.getOrDefault(projectId, new ArrayList<>());
-            unusedIncludeList.sort((u1, u2) ->{
-                return Integer.compare(u2.getUnusedIncludeFiles().size(), u1.getUnusedIncludeFiles().size());
-            });
-            result.put(projectId, unusedIncludeList);
         }
         return result;
     }
