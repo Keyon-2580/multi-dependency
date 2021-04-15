@@ -44,7 +44,7 @@ var cyclic = function(cytoscapeutil) {
 				html += "<td style='text-align: center; vertical-align: middle'>" + cycle.components.length + "</td>";
 				html += "<td>";
 				for(var i = 0; i < cycle.components.length; i++) {
-					html += cycle.components[i].name + "<br/>";
+					html += cycle.components[i].path + "<br/>";
 				}
 				html += "</td>";
 				html += "</tr>";

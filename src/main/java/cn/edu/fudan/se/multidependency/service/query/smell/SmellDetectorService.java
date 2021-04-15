@@ -8,7 +8,6 @@ import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
-import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
@@ -59,9 +58,6 @@ public class SmellDetectorService {
 	@Autowired
 	private UnusedIncludeDetector unusedIncludeDetector;
 
-	@Autowired
-	private ProjectFileRepository projectFileRepository;
-
 	public void createCloneSmells(boolean isRecreate){
 		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.CLONE);
 		if(smellsTmp != null && !smellsTmp.isEmpty()){
@@ -98,7 +94,7 @@ public class SmellDetectorService {
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
 
-		Map<Long, Map<Integer, Cycle<Type>>> typeCyclicDependencies = new HashMap<>(cyclicDependencyDetector.typeCycles());
+		Map<Long, Map<Integer, Cycle<Type>>> typeCyclicDependencies = new HashMap<>(cyclicDependencyDetector.detectTypeCyclicDependency());
 		String typeSmellName = SmellLevel.TYPE + "_" + SmellType.CYCLIC_DEPENDENCY + "_";
 		for (Map.Entry<Long, Map<Integer, Cycle<Type>>> typeCyclicDependency : typeCyclicDependencies.entrySet()){
 			long projectId = typeCyclicDependency.getKey();
@@ -126,7 +122,7 @@ public class SmellDetectorService {
 
 		smells.clear();
 		smellContains.clear();
-		Map<Long, Map<Integer, Cycle<ProjectFile>>> fileCyclicDependencies = new HashMap<>(cyclicDependencyDetector.fileCycles());
+		Map<Long, Map<Integer, Cycle<ProjectFile>>> fileCyclicDependencies = new HashMap<>(cyclicDependencyDetector.detectFileCyclicDependency());
 		String fileSmellName = SmellLevel.FILE + "_" + SmellType.CYCLIC_DEPENDENCY + "_";
 		for (Map.Entry<Long, Map<Integer, Cycle<ProjectFile>>> fileCyclicDependency : fileCyclicDependencies.entrySet()){
 			long projectId = fileCyclicDependency.getKey();
@@ -154,7 +150,7 @@ public class SmellDetectorService {
 
 		smells.clear();
 		smellContains.clear();
-		Map<Long, Map<Integer, Cycle<Package>>> packageCyclicDependencies = new HashMap<>(cyclicDependencyDetector.packageCycles());
+		Map<Long, Map<Integer, Cycle<Package>>> packageCyclicDependencies = new HashMap<>(cyclicDependencyDetector.detectPackageCyclicDependency());
 		String packageSmellName = SmellLevel.PACKAGE + "_" + SmellType.CYCLIC_DEPENDENCY + "_";
 		for (Map.Entry<Long, Map<Integer, Cycle<Package>>> packageCyclicDependency : packageCyclicDependencies.entrySet()){
 			long projectId = packageCyclicDependency.getKey();
@@ -179,7 +175,7 @@ public class SmellDetectorService {
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
-		LOGGER.info("创建Cycle Dependency Smell节点关系完成");
+		LOGGER.info("创建Cyclic Dependency Smell节点关系完成");
 	}
 
 	public void createHubLikeDependencySmells(boolean isRecreate) {

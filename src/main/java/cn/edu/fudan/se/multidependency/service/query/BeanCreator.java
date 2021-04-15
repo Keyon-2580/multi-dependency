@@ -427,7 +427,7 @@ public class BeanCreator {
 			asRepository.setPackageInstability();
 
 			if(propertyConfig.isCalculateDependsOn()) {
-				LOGGER.info("创建Cycle Dependency Smell节点关系...");
+				LOGGER.info("创建Cyclic Dependency Smell节点关系...");
 				smellDetectorService.createCycleDependencySmells(false);
 
 				LOGGER.info("创建Hub-Like Dependency Smell节点关系...");

@@ -24,15 +24,23 @@ public class CyclicDependencyController {
 	@Autowired
 	SmellDetectorService smellDetectorService;
 
-	@GetMapping("")
-	public String cyclicHierarchy(HttpServletRequest request) {
+	@GetMapping("/re-detect")
+	public String reDetectCyclicDependency(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("types", cyclicDependencyDetector.typeCycles());
-		request.setAttribute("files", cyclicDependencyDetector.fileCycles());
-		request.setAttribute("packages", cyclicDependencyDetector.packageCycles());
-		request.setAttribute("modules", cyclicDependencyDetector.moduleCycles());
+		request.setAttribute("types", cyclicDependencyDetector.detectTypeCyclicDependency());
+		request.setAttribute("files", cyclicDependencyDetector.detectFileCyclicDependency());
+		request.setAttribute("packages", cyclicDependencyDetector.detectPackageCyclicDependency());
+		request.setAttribute("modules", cyclicDependencyDetector.detectModuleCyclicDependency());
 		return "as/cyclic";
 	}
-	
-	
+
+	@GetMapping("/query")
+	public String queryCyclicDependency(HttpServletRequest request) {
+		request.setAttribute("projects", nodeService.allProjects());
+		request.setAttribute("types", cyclicDependencyDetector.getTypeCyclicDependency());
+		request.setAttribute("files", cyclicDependencyDetector.getFileCyclicDependency());
+		request.setAttribute("packages", cyclicDependencyDetector.getPackageCyclicDependency());
+		request.setAttribute("modules", cyclicDependencyDetector.getModuleCyclicDependency());
+		return "as/cyclic";
+	}
 }

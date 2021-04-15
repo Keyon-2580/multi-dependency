@@ -4,7 +4,9 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.*;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
+import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
@@ -74,15 +76,10 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 	}
 
 	@Override
-	public Map<Long, Map<Integer, Cycle<Type>>> typeCycles() {
-		String key = "typeCycles";
-		if(cache.get(getClass(), key) != null) {
-			return cache.get(getClass(), key);
-		}
-
+	public Map<Long, Map<Integer, Cycle<Type>>> detectTypeCyclicDependency() {
 		Map<Long, Map<Integer, Cycle<Type>>> result = new HashMap<>();
 		Collection<Cycle<Type>> cycles = cycleASRepository.typeCycles();
-		int partition = 1;
+		List<List<Type>> componentsList = new ArrayList<>();
 		for (Cycle<Type> cycle : cycles) {
 			List<Type> types = new ArrayList<>(cycle.getComponents());
 			List<DependsOn> relations = new ArrayList<>(findCycleTypeRelationsBySCC(cycle));
@@ -125,30 +122,31 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 				for(Integer i : indexCycle) {
 					components.add(types.get(i));
 				}
-				Cycle<Type> typeCycle = new Cycle<>(partition, components);
-				Project project = containRelationService.findTypeBelongToProject(components.get(0));
-				if (project != null) {
-					Map<Integer, Cycle<Type>> temp = result.getOrDefault(project.getId(), new HashMap<>());
-					temp.put(typeCycle.getPartition(), typeCycle);
-					result.put(project.getId(), temp);
-				}
-				partition ++;
+				componentsList.add(components);
 			}
 		}
-		cache.cache(getClass(), key, result);
+
+		//生成结果
+		componentsList.sort((c1, c2) -> Integer.compare(c2.size(), c1.size()));
+		int partition = 1;
+		for (List<Type> components : componentsList) {
+			Cycle<Type> typeCycle = new Cycle<>(partition, components);
+			Project project = containRelationService.findTypeBelongToProject(components.get(0));
+			if (project != null) {
+				Map<Integer, Cycle<Type>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+				temp.put(typeCycle.getPartition(), typeCycle);
+				result.put(project.getId(), temp);
+			}
+			partition ++;
+		}
 		return result;
 	}
 
 	@Override
-	public Map<Long, Map<Integer, Cycle<ProjectFile>>> fileCycles() {
-		String key = "fileCycles";
-		if (cache.get(getClass(), key) != null) {
-			return cache.get(getClass(), key);
-		}
-
+	public Map<Long, Map<Integer, Cycle<ProjectFile>>> detectFileCyclicDependency() {
 		Map<Long, Map<Integer, Cycle<ProjectFile>>> result = new HashMap<>();
 		Collection<Cycle<ProjectFile>> cycles = cycleASRepository.fileCycles();
-		int partition = 1;
+		List<List<ProjectFile>> componentsList = new ArrayList<>();
 		for (Cycle<ProjectFile> cycle : cycles) {
 			List<ProjectFile> files = new ArrayList<>(cycle.getComponents());
 			List<DependsOn> relations = new ArrayList<>(findCycleFileRelationsBySCC(cycle));
@@ -191,30 +189,31 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 				for(Integer i : indexCycle) {
 					components.add(files.get(i));
 				}
-				Cycle<ProjectFile> fileCycle = new Cycle<>(partition, components);
-				Project project = containRelationService.findFileBelongToProject(components.get(0));
-				if (project != null) {
-					Map<Integer, Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new HashMap<>());
-					temp.put(fileCycle.getPartition(), fileCycle);
-					result.put(project.getId(), temp);
-				}
-				partition ++;
+				componentsList.add(components);
 			}
 		}
-		cache.cache(getClass(), key, result);
+
+		//生成结果
+		componentsList.sort((c1, c2) -> Integer.compare(c2.size(), c1.size()));
+		int partition = 1;
+		for (List<ProjectFile> components : componentsList) {
+			Cycle<ProjectFile> fileCycle = new Cycle<>(partition, components);
+			Project project = containRelationService.findFileBelongToProject(components.get(0));
+			if (project != null) {
+				Map<Integer, Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+				temp.put(fileCycle.getPartition(), fileCycle);
+				result.put(project.getId(), temp);
+			}
+			partition ++;
+		}
 		return result;
 	}
 
 	@Override
-	public Map<Long, Map<Integer, Cycle<Package>>> packageCycles() {
-		String key = "packageCycles";
-		if(cache.get(getClass(), key) != null) {
-			return cache.get(getClass(), key);
-		}
-
+	public Map<Long, Map<Integer, Cycle<Package>>> detectPackageCyclicDependency() {
 		Map<Long, Map<Integer, Cycle<Package>>> result = new HashMap<>();
 		Collection<Cycle<Package>> cycles = cycleASRepository.packageCycles();
-		int partition = 1;
+		List<List<Package>> componentsList = new ArrayList<>();
 		for (Cycle<Package> cycle : cycles) {
 			List<Package> files = new ArrayList<>(cycle.getComponents());
 			List<DependsOn> relations = new ArrayList<>(findCyclePackageRelationsBySCC(cycle));
@@ -257,30 +256,31 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 				for(Integer i : indexCycle) {
 					components.add(files.get(i));
 				}
-				Cycle<Package> packageCycle = new Cycle<>(partition, components);
-				Project project = containRelationService.findPackageBelongToProject(components.get(0));
-				if (project != null) {
-					Map<Integer, Cycle<Package>> temp = result.getOrDefault(project.getId(), new HashMap<>());
-					temp.put(packageCycle.getPartition(), packageCycle);
-					result.put(project.getId(), temp);
-				}
-				partition ++;
+				componentsList.add(components);
 			}
 		}
-		cache.cache(getClass(), key, result);
+
+		//生成结果
+		componentsList.sort((c1, c2) -> Integer.compare(c2.size(), c1.size()));
+		int partition = 1;
+		for (List<Package> components : componentsList) {
+			Cycle<Package> packageCycle = new Cycle<>(partition, components);
+			Project project = containRelationService.findPackageBelongToProject(components.get(0));
+			if (project != null) {
+				Map<Integer, Cycle<Package>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+				temp.put(packageCycle.getPartition(), packageCycle);
+				result.put(project.getId(), temp);
+			}
+			partition ++;
+		}
 		return result;
 	}
 
 	@Override
-	public Map<Long, Map<Integer, Cycle<Module>>> moduleCycles() {
-		String key = "moduleCycles";
-		if (cache.get(getClass(), key) != null) {
-			return cache.get(getClass(), key);
-		}
-
+	public Map<Long, Map<Integer, Cycle<Module>>> detectModuleCyclicDependency() {
 		Map<Long, Map<Integer, Cycle<Module>>> result = new HashMap<>();
 		Collection<Cycle<Module>> cycles = cycleASRepository.moduleCycles();
-		int partition = 1;
+		List<List<Module>> componentsList = new ArrayList<>();
 		for (Cycle<Module> cycle : cycles) {
 			List<Module> modules = new ArrayList<>(cycle.getComponents());
 			List<DependsOn> relations = new ArrayList<>(findCycleModuleRelationsBySCC(cycle));
@@ -323,16 +323,133 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 				for(Integer i : indexCycle) {
 					components.add(modules.get(i));
 				}
-				Cycle<Module> moduleCycle = new Cycle<>(partition, components);
-				Project project = moduleService.findModuleBelongToProject(components.get(0));
-				if (project != null) {
-					Map<Integer, Cycle<Module>> temp = result.getOrDefault(project.getId(), new HashMap<>());
-					temp.put(moduleCycle.getPartition(), moduleCycle);
-					result.put(project.getId(), temp);
-				}
-				partition ++;
+				componentsList.add(components);
 			}
 		}
+
+		//生成结果
+		componentsList.sort((c1, c2) -> Integer.compare(c2.size(), c1.size()));
+		int partition = 1;
+		for(List<Module> components : componentsList) {
+			Cycle<Module> moduleCycle = new Cycle<>(partition, components);
+			Project project = moduleService.findModuleBelongToProject(components.get(0));
+			if (project != null) {
+				Map<Integer, Cycle<Module>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+				temp.put(moduleCycle.getPartition(), moduleCycle);
+				result.put(project.getId(), temp);
+			}
+			partition ++;
+		}
+		return result;
+	}
+
+	@Override
+	public Map<Long, Map<Integer, Cycle<Type>>> getTypeCyclicDependency() {
+		String key = "typeCycles";
+		if (cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		Map<Long, Map<Integer, Cycle<Type>>> result = new HashMap<>();
+		List<Smell> smells = smellRepository.findSmells(SmellLevel.TYPE, SmellType.CYCLIC_DEPENDENCY);
+		List<Cycle<Type>> typeCycles = new ArrayList<>();
+		for (Smell smell : smells) {
+			List<String> namePart = Arrays.asList(smell.getName().split("_"));
+			int partition = Integer.parseInt(namePart.get(namePart.size() - 1));
+			List<Type> components = new ArrayList<>();
+			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
+			for (Node contain : contains) {
+				components.add((Type) contain);
+			}
+			typeCycles.add(new Cycle<>(partition, components));
+		}
+		typeCycles.sort(Comparator.comparingInt(Cycle::getPartition));
+		for(Cycle<Type> typeCycle : typeCycles) {
+			Project project = containRelationService.findTypeBelongToProject(typeCycle.getComponents().get(0));
+			if (project != null) {
+				Map<Integer, Cycle<Type>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+				temp.put(typeCycle.getPartition(), typeCycle);
+				result.put(project.getId(), temp);
+			}
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, Map<Integer, Cycle<ProjectFile>>> getFileCyclicDependency() {
+		String key = "fileCycles";
+		if (cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		Map<Long, Map<Integer, Cycle<ProjectFile>>> result = new HashMap<>();
+		List<Smell> smells = smellRepository.findSmells(SmellLevel.FILE, SmellType.CYCLIC_DEPENDENCY);
+		List<Cycle<ProjectFile>> fileCycles = new ArrayList<>();
+		for (Smell smell : smells) {
+			List<String> namePart = Arrays.asList(smell.getName().split("_"));
+			int partition = Integer.parseInt(namePart.get(namePart.size() - 1));
+			List<ProjectFile> components = new ArrayList<>();
+			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
+			for (Node contain : contains) {
+				components.add((ProjectFile) contain);
+			}
+			fileCycles.add(new Cycle<>(partition, components));
+		}
+		fileCycles.sort(Comparator.comparingInt(Cycle::getPartition));
+		for(Cycle<ProjectFile> fileCycle : fileCycles) {
+			Project project = containRelationService.findFileBelongToProject(fileCycle.getComponents().get(0));
+			if (project != null) {
+				Map<Integer, Cycle<ProjectFile>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+				temp.put(fileCycle.getPartition(), fileCycle);
+				result.put(project.getId(), temp);
+			}
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, Map<Integer, Cycle<Package>>> getPackageCyclicDependency() {
+		String key = "packageCycles";
+		if (cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		Map<Long, Map<Integer, Cycle<Package>>> result = new HashMap<>();
+		List<Smell> smells = smellRepository.findSmells(SmellLevel.PACKAGE, SmellType.CYCLIC_DEPENDENCY);
+		List<Cycle<Package>> packageCycles = new ArrayList<>();
+		for (Smell smell : smells) {
+			List<String> namePart = Arrays.asList(smell.getName().split("_"));
+			int partition = Integer.parseInt(namePart.get(namePart.size() - 1));
+			List<Package> components = new ArrayList<>();
+			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
+			for (Node contain : contains) {
+				components.add((Package) contain);
+			}
+			packageCycles.add(new Cycle<>(partition, components));
+		}
+		packageCycles.sort(Comparator.comparingInt(Cycle::getPartition));
+		for(Cycle<Package> packageCycle : packageCycles) {
+			Project project = containRelationService.findPackageBelongToProject(packageCycle.getComponents().get(0));
+			if (project != null) {
+				Map<Integer, Cycle<Package>> temp = result.getOrDefault(project.getId(), new HashMap<>());
+				temp.put(packageCycle.getPartition(), packageCycle);
+				result.put(project.getId(), temp);
+			}
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, Map<Integer, Cycle<Module>>> getModuleCyclicDependency() {
+		String key = "moduleCycles";
+		if (cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		Map<Long, Map<Integer, Cycle<Module>>> result = new HashMap<>();
 		cache.cache(getClass(), key, result);
 		return result;
 	}
@@ -420,9 +537,9 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 	@Override
 	public void exportCycleDependency() {
 		Collection<Project> projects = nodeService.allProjects();
-		Map<Long, Map<Integer, Cycle<Type>>> cycleTypes = typeCycles();
-		Map<Long, Map<Integer, Cycle<ProjectFile>>> cycleFiles = fileCycles();
-		Map<Long, Map<Integer, Cycle<Module>>> cycleModules = moduleCycles();
+		Map<Long, Map<Integer, Cycle<Type>>> cycleTypes = detectTypeCyclicDependency();
+		Map<Long, Map<Integer, Cycle<ProjectFile>>> cycleFiles = detectFileCyclicDependency();
+		Map<Long, Map<Integer, Cycle<Module>>> cycleModules = detectModuleCyclicDependency();
 		for (Project project : projects) {
 			try {
 				exportPackageCycleDependency(project, cycleTypes.get(project.getId()), cycleFiles.get(project.getId()), cycleModules.get(project.getId()));
@@ -587,7 +704,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 	}
 
 	//计算最短路径，并记录沿途节点，对结果进行合并，以此得到Cycles
-	public List<Set<Integer>> ShortestPathCycleFilter(int[][] distanceMap, Map<String, Set<Integer>> pathMap, int number, int longestPath, double minimumRate) {
+	private List<Set<Integer>> ShortestPathCycleFilter(int[][] distanceMap, Map<String, Set<Integer>> pathMap, int number, int longestPath, double minimumRate) {
 		List<Set<Integer>> result = new ArrayList<>();
 		List<Set<Integer>> indexCycles = new ArrayList<>();
 
@@ -665,9 +782,6 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 			result.add(indexCycle);
 		}
 
-		result.sort((c1, c2) -> {
-			return Integer.compare(c2.size(), c1.size());
-		});
 		return result;
 	}
 }
