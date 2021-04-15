@@ -281,6 +281,9 @@ const contextMenu = new G6.Menu({
             <a class="combo_a" href="/smellgraph?smelltype=CyclicDependency&fileid=${item.model.id}" target="_blank">打开异味详情</a>
             </ul>`;
         }
+        html += `<ul class="combo_li">
+            <a class="combo_a" href="/relation/file/${item.model.id}" target="_blank">打开文件详情</a>
+            </ul>`;
         return html;
     },
     offsetX: 0,
