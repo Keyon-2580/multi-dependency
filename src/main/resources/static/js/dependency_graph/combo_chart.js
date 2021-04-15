@@ -9,7 +9,6 @@ let unreliable_dependency_list = [];//存放不可信依赖关系
 let evt_global; //存放当前的鼠标点击事件
 reliable_dependency_list = [];
 unreliable_dependency_list = [];
-let nodeId = 1;
 let last_click_node = "";
 let repaint_flag = false; //判断是否为重新绘制
 
@@ -388,6 +387,7 @@ const graph = new G6.Graph({
 function DrawComboChart(json_data){
     data = {};
     smell_data_global = [];
+    last_click_node = "";
     in_out_list = [];
     actual_edges = [];
     let package_data = json_data[0]["result"]["nodes"];
