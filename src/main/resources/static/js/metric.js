@@ -141,13 +141,23 @@ var metric = function() {
 			}
 		});
 	}
+
+	var showResults = function(container, projectId) {
+		$.ajax({
+			type: "get",
+			url: "/metric/project/modularity?projectId=" + projectId,
+			success: function(modularity) {
+				container.text(modularity);
+			}
+		});
+	}
 	
 	var showModularity = function(container, projectId) {
 		$.ajax({
 			type: "get",
 			url: "/metric/project/modularity?projectId=" + projectId,
 			success: function(modularity) {
-				container.text(modularity);
+				container.text(modularity.toFixed(2));
 			}
 		});
 	}
@@ -202,7 +212,7 @@ var metric = function() {
 					html += "<td>" + (loc > 0 ? loc : 0) + "</td>";
 					html += "<td>" + (lines > 0 ? lines : 0) + "</td>";
 					html += "<td>" + (commits > 0 ? commits : 0) + "</td>";
-					html += "<td>" + (modularity > 0 ? modularity : 0) + "</td>";
+					html += "<td id='modularity_" + result[i].node.id + "'>" + (modularity > 0 ? modularity.toFixed(2) : "计算中...") + "</td>";
 					html += "</tr>";
 				}
 				html += "</table>";
@@ -210,19 +220,24 @@ var metric = function() {
 				for(var i = 0; i < result.length; i++) {
 					var projectId = result[i].node.id;
 					showModularity($("#modularity_" + projectId), projectId);
-					showCommitTimes($("#commitTimes_" + projectId), projectId);
+					// showCommitTimes($("#commitTimes_" + projectId), projectId);
 				}
 			}
 		});
 	}
 	return {
 		init: function() {
+			var info = "<p>获取中...</p>"
+			$("#projectMetrics").html(info);
 			projectMetric();
 			$.ajax({
 				type: "get",
 				url: "/project/all",
 				success: function(result) {
 					console.log(result);
+					var info = "<p>获取中...</p>"
+					$("#packageMetrics").html(info);
+					$("#fileMetrics").html(info);
 					packageMetric(result);
 					fileMetric(result);
 				}
