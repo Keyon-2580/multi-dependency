@@ -109,7 +109,7 @@ var smellmetric = function() {
                             html += "</table></div>";
                         }
                     }
-    				$("#smellmetric").html(html);
+    				$("#smellMetric").html(html);
 //    				$(".smell_excel_button").click(function() {
 //    					tableToExcel($(this).attr("name"), "allSmellMetric");
 //    				});
@@ -123,6 +123,8 @@ var smellmetric = function() {
 				url: "/project/all",
 				success: function(result) {
 					console.log(result);
+                    var info = "<p>获取中...</p>"
+                    $("#smellMetric").html(info);
 					allSmellMetric(result);
 				}
 			});
