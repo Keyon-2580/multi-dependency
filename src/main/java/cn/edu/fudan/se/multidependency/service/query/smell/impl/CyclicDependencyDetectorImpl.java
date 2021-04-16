@@ -84,16 +84,17 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 
 		Map<Long, Map<Integer, Cycle<Type>>> result = new HashMap<>();
 		List<Smell> smells = smellRepository.findSmells(SmellLevel.TYPE, SmellType.CYCLIC_DEPENDENCY);
+		smells.sort(Comparator.comparing(Smell::getName));
 		List<Cycle<Type>> typeCycles = new ArrayList<>();
+		int partition = 1;
 		for (Smell smell : smells) {
-			List<String> namePart = Arrays.asList(smell.getName().split("_"));
-			int partition = Integer.parseInt(namePart.get(namePart.size() - 1));
 			List<Type> components = new ArrayList<>();
 			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
 			for (Node contain : contains) {
 				components.add((Type) contain);
 			}
 			typeCycles.add(new Cycle<>(partition, components));
+			partition ++;
 		}
 		typeCycles.sort(Comparator.comparingInt(Cycle::getPartition));
 		for(Cycle<Type> typeCycle : typeCycles) {

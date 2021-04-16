@@ -204,16 +204,11 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 		Map<Long, List<FileHubLike>> hubLikeFiles = hubLikeComponentDetector.fileHubLikes();
 		Map<Long, List<UnstableFileInHistory>> unstableFilesInHistory = unstableDependencyDetectorUsingHistory.unstableFiles();
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> unstableFilesUsingInstability = unstableDependencyDetectorUsingInstability.fileUnstables();
-//		Map<Long, List<CyclicHierarchy>> cyclicHierarchies = cyclicHierarchyDetector.cyclicHierarchies();
-//		Map<Long, List<GodFile>> godFiles = godComponentDetector.godFiles();
 		Map<Long, List<ProjectFile>> unusedFiles = unusedComponentDetector.unusedFiles();
 		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> unutilizedFiles = unutilizedAbstractionDetector.fileUnutilizeds();
-		
 		Collection<LogicCouplingComponents<ProjectFile>> logicCouplingFiles = icdDependencyDetector.cochangesInDifferentFile();
-		Collection<SimilarComponents<ProjectFile>> similarFiles = similarComponentsDetector.fileSimilars();
-		
+		Map<Long, List<SimilarComponents<ProjectFile>>> similarFiles = similarComponentsDetector.detectFileSimilarComponents();
 		List<ProjectFile> allFiles = nodeService.queryAllFiles();
-		
 		for(Map<Integer, Cycle<ProjectFile>> cycleFilesGroup : cycleFiles.values()) {
 			for(Cycle<ProjectFile> files : cycleFilesGroup.values()) {
 				for(ProjectFile file : files.getComponents()) {
@@ -283,17 +278,20 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 			allFiles.remove(files.getNode2());
 		}
 		
-		for(SimilarComponents<ProjectFile> similarFilesGroup : similarFiles) {
-			ProjectFile file1 = similarFilesGroup.getNode1();
-			ProjectFile file2 = similarFilesGroup.getNode2();
-			MultipleASFile mas = map.getOrDefault(file1, new MultipleASFile(file1));
-			mas.setSimilar(true);
-			map.put(file1, mas);
-			allFiles.remove(file1);
-			mas = map.getOrDefault(file2, new MultipleASFile(file2));
-			mas.setSimilar(true);
-			map.put(file2, mas);
-			allFiles.remove(file2);
+
+		for(Map.Entry<Long, List<SimilarComponents<ProjectFile>>> entry : similarFiles.entrySet()) {
+			for(SimilarComponents<ProjectFile> similarFilesGroup : entry.getValue()) {
+				ProjectFile file1 = similarFilesGroup.getNode1();
+				ProjectFile file2 = similarFilesGroup.getNode2();
+				MultipleASFile mas = map.getOrDefault(file1, new MultipleASFile(file1));
+				mas.setSimilar(true);
+				map.put(file1, mas);
+				allFiles.remove(file1);
+				mas = map.getOrDefault(file2, new MultipleASFile(file2));
+				mas.setSimilar(true);
+				map.put(file2, mas);
+				allFiles.remove(file2);
+			}
 		}
 		
 		for(List<ProjectFile> files : unusedFiles.values()) {

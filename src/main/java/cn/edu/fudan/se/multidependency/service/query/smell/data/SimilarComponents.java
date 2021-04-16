@@ -51,27 +51,22 @@ public class SimilarComponents<T extends Node> {
 		node2DependsOn.add(node);
 	}
 	
-	public double getSameDependsOnRatio() {
-		if(sameDependsOnRatio != null) {
-			return sameDependsOnRatio;
-		}
+	public void setSameDependsOnRatio() {
 		int sum = node1DependsOn.size() + node2DependsOn.size();
 		if(sum == 0) {
 			System.out.println("相似的组件依赖项目中的外部代码单元的数量为0");
-			return sameDependsOnRatio = 1.0;
+			sameDependsOnRatio = 1.0;
 		}
 		Set<Node> sameDependsOn = new HashSet<>();
-		Set<Node> allDependsOn = new HashSet<>();
-		for(Node node : node1DependsOn) {
-			allDependsOn.add(node);
-		}
+		Set<Node> allDependsOn = new HashSet<>(node1DependsOn);
 		for(Node node : node2DependsOn) {
-			if(allDependsOn.contains(node)) {
+			if (allDependsOn.contains(node)) {
 				sameDependsOn.add(node);
-			} else {
+			}
+			else {
 				allDependsOn.add(node);
 			}
 		}
-		return sameDependsOnRatio = ((sameDependsOn.size() + 0.0) / allDependsOn.size());
+		sameDependsOnRatio = ((sameDependsOn.size() + 0.0) / allDependsOn.size());
 	}
 }

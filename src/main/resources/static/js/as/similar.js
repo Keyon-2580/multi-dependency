@@ -1,40 +1,85 @@
-var similar = function(cytoscapeutil, files) {
+var similar = function(cytoscapeutil, projects, files) {
 	var _similar = function() {
-		console.log(files);
+		console.log("projects");
+		console.log("files");
 		var html = "";
-		html += "<table class='table table-bordered'>";
-		html += "<tr>";
-		html += "<th>File1</th>";
-		html += "<th>Module1</th>";
-		html += "<th>File2</th>";
-		html += "<th>Module2</th>";
-		html += "<th>Clone Type</th>";
-		html += "<th>Clone Value</th>";
-		html += "<th>Node1 Change Times</th>";
-		html += "<th>Node2 Change Times</th>";
-		html += "<th>Co-Change Times</th>";
-		html += "<th>Ratio of Depends-On</th>";
-		html += "<th></th>";
-		html += "</tr>";
-		for(var fileIndex in files) {
-			var file = files[fileIndex];
-			console.log(file);
+		for(var projectIndex in projects) {
+			var project = projects[projectIndex];
+			html += "<h4>" + project.name + " (" + project.language + ")</h4>";
+			var fileSimilarComponentsList = files[project.id];
+			html += "<table class='table table-bordered'>";
 			html += "<tr>";
-			html += "<td><a target='_blank' href='/relation/file/" + file.node1.id + "'>" + file.node1.path + "</a></td>";
-			html += "<td>" + "module_" + file.module1.id + "</td>";
-			html += "<td><a target='_blank' href='/relation/file/" + file.node2.id + "'>" + file.node2.path + "</a></td>";
-			html += "<td>" + "module_" + file.module2.id + "</td>";
-			html += "<td>" + file.cloneType + "</td>";
-			html += "<td>" + file.value + "</td>";
-			html += "<td>" + file.node1ChangeTimes + "</td>";
-			html += "<td>" + file.node2ChangeTimes + "</td>";
-			html += "<td>" + file.cochangeTimes + "</td>";
-			html += "<td>" + file.sameDependsOnRatio + "</td>";
-			html += "<td><a target='_blank' href='/as/matrix?allFiles=" + file.node1.id + "," + file.node2.id + "&specifiedFiles=" + file.node1.id + "," + file.node2.id + "&minCount=2" + "'" + fileIndex + "'>commits</a></td>";
+			html += "<th>Index</th>";
+			html += "<th>File</th>";
+			html += "<th>Module</th>";
+			html += "<th>Clone Type</th>";
+			html += "<th>Clone Value</th>";
+			html += "<th>Change Times</th>";
+			html += "<th>Co-Change Times</th>";
+			html += "<th>Ratio of Depends-On</th>";
+			html += "<th>Commits</th>";
 			html += "</tr>";
+			let index = 1;
+			for (var fileIndex in fileSimilarComponentsList) {
+				var fileSimilarComponents = fileSimilarComponentsList[fileIndex];
+				html += "<tr>";
+				html += "<td rowspan='2' style='vertical-align: middle'>" + index + "</td>";
+				html += "<td style='vertical-align: middle'><a target='_blank' href='/relation/file/" + fileSimilarComponents.node1.id + "'>" + fileSimilarComponents.node1.path + "</a></td>";
+				html += "<td style='vertical-align: middle'>" + "module_" + fileSimilarComponents.module1.id + "</td>";
+				html += "<td rowspan='2' style='vertical-align: middle'>" + fileSimilarComponents.cloneType + "</td>";
+				html += "<td rowspan='2' style='vertical-align: middle'>" + fileSimilarComponents.value.toFixed(2) + "</td>";
+				html += "<td style='vertical-align: middle'>" + fileSimilarComponents.node1ChangeTimes + "</td>";
+				html += "<td rowspan='2' style='vertical-align: middle'>" + fileSimilarComponents.cochangeTimes + "</td>";
+				html += "<td rowspan='2' style='vertical-align: middle'>" + fileSimilarComponents.sameDependsOnRatio.toFixed(2) + "</td>";
+				html += "<td rowspan='2' style='vertical-align: middle'><a target='_blank' href='/as/matrix?allFiles=" + fileSimilarComponents.node1.id + "," + fileSimilarComponents.node2.id + "&specifiedFiles=" + fileSimilarComponents.node1.id + "," + fileSimilarComponents.node2.id + "&minCount=2" + "'" + fileIndex + "'>commits</a></td>";
+				html += "</tr>";
+				html += "<tr>";
+				html += "<td style='vertical-align: middle'><a target='_blank' href='/relation/file/" + fileSimilarComponents.node2.id + "'>" + fileSimilarComponents.node2.path + "</a></td>";
+				html += "<td style='vertical-align: middle'>" + "module_" + fileSimilarComponents.module2.id + "</td>";
+				html += "<td style='vertical-align: middle'>" + fileSimilarComponents.node2ChangeTimes + "</td>";
+				html += "</tr>";
+				index++;
+			}
+			html += "</table>";
 		}
-		html += "</table>";
-		
+		if (files[-1] != null) {
+			html += "<h4>Other</h4>";
+			var fileSimilarComponentsList = files[-1];
+			html += "<table class='table table-bordered'>";
+			html += "<tr>";
+			html += "<th>Index</th>";
+			html += "<th>File</th>";
+			html += "<th>Module</th>";
+			html += "<th>Clone Type</th>";
+			html += "<th>Clone Value</th>";
+			html += "<th>Change Times</th>";
+			html += "<th>Co-Change Times</th>";
+			html += "<th>Ratio of Depends-On</th>";
+			html += "<th>Commits</th>";
+			html += "</tr>";
+			let index = 1;
+			for (var fileIndex in fileSimilarComponentsList) {
+				var fileSimilarComponents = fileSimilarComponentsList[fileIndex];
+				html += "<tr>";
+				html += "<td rowspan='2' style='vertical-align: middle'>" + index + "</td>";
+				html += "<td style='vertical-align: middle'><a target='_blank' href='/relation/file/" + fileSimilarComponents.node1.id + "'>" + fileSimilarComponents.node1.path + "</a></td>";
+				html += "<td style='vertical-align: middle'>" + "module_" + fileSimilarComponents.module1.id + "</td>";
+				html += "<td rowspan='2' style='vertical-align: middle'>" + fileSimilarComponents.cloneType + "</td>";
+				html += "<td rowspan='2' style='vertical-align: middle'>" + fileSimilarComponents.value.toFixed(2) + "</td>";
+				html += "<td style='vertical-align: middle'>" + fileSimilarComponents.node1ChangeTimes + "</td>";
+				html += "<td rowspan='2' style='vertical-align: middle'>" + fileSimilarComponents.cochangeTimes + "</td>";
+				html += "<td rowspan='2' style='vertical-align: middle'>" + fileSimilarComponents.sameDependsOnRatio.toFixed(2) + "</td>";
+				html += "<td rowspan='2' style='vertical-align: middle'><a target='_blank' href='/as/matrix?allFiles=" + fileSimilarComponents.node1.id + "," + fileSimilarComponents.node2.id + "&specifiedFiles=" + fileSimilarComponents.node1.id + "," + fileSimilarComponents.node2.id + "&minCount=2" + "'" + fileIndex + "'>commits</a></td>";
+				html += "</tr>";
+				html += "<tr>";
+				html += "<td style='vertical-align: middle'><a target='_blank' href='/relation/file/" + fileSimilarComponents.node2.id + "'>" + fileSimilarComponents.node2.path + "</a></td>";
+				html += "<td style='vertical-align: middle'>" + "module_" + fileSimilarComponents.module2.id + "</td>";
+				html += "<td style='vertical-align: middle'>" + fileSimilarComponents.node2ChangeTimes + "</td>";
+				html += "</tr>";
+				index++;
+			}
+			html += "</table>";
+		}
 		$("#content").html(html);
 	}
 	

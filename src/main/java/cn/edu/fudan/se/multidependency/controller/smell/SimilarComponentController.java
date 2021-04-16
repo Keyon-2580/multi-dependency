@@ -20,12 +20,19 @@ public class SimilarComponentController {
 	@Autowired
 	private NodeService nodeService;
 	
-	@GetMapping("")
-	public String similar(HttpServletRequest request) {
+	@GetMapping("/query")
+	public String querySimilarComponents(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("files", similarComponentsDetector.fileSimilars());
-		request.setAttribute("packages", similarComponentsDetector.packageSimilars());
+		request.setAttribute("files", similarComponentsDetector.getFileSimilarComponents());
+//		request.setAttribute("packages", similarComponentsDetector.getPackageSimilarComponents());
 		return "as/similar";
 	}
-	
+
+	@GetMapping("/detect")
+	public String detectSimilarComponents(HttpServletRequest request) {
+		request.setAttribute("projects", nodeService.allProjects());
+		request.setAttribute("files", similarComponentsDetector.detectFileSimilarComponents());
+//		request.setAttribute("packages", similarComponentsDetector.detectPackageSimilarComponents());
+		return "as/similar";
+	}
 }

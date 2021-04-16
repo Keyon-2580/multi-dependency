@@ -334,70 +334,74 @@ public class SmellDetectorService {
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
 
-		Collection<SimilarComponents<ProjectFile>> fileSimilars = similarComponentsDetector.fileSimilars();
+		Map<Long, List<SimilarComponents<ProjectFile>>> fileSimilars = similarComponentsDetector.detectFileSimilarComponents();
 		String fileSmellName = SmellLevel.FILE + "_" + SmellType.SIMILAR_COMPONENTS + "_";
 		int fileSmellIndex = 1;
-		for (SimilarComponents<ProjectFile> fileSimilar : fileSimilars) {
-			Package pck1 = containRepository.findFileBelongToPackage(fileSimilar.getNode1().getId());
-			Package pck2 = containRepository.findFileBelongToPackage(fileSimilar.getNode2().getId());
-			Project project1 = containRepository.findPackageBelongToProject(pck1.getId());
-			Project project2 = containRepository.findPackageBelongToProject(pck2.getId());
-			Smell smell = new Smell();
-			smell.setName(fileSmellName + fileSmellIndex);
-			smell.setSize(2);
-			if (project1.getId().equals(project2.getId())) {
-				smell.setLanguage(project1.getLanguage());
-				smell.setProjectId(project1.getId());
-				smell.setProjectName(project1.getName());
+		for (Map.Entry<Long, List<SimilarComponents<ProjectFile>>> entry : fileSimilars.entrySet()) {
+			for (SimilarComponents<ProjectFile> fileSimilarComponents : entry.getValue()) {
+				Smell smell = new Smell();
+				Package pck1 = containRepository.findFileBelongToPackage(fileSimilarComponents.getNode1().getId());
+				Package pck2 = containRepository.findFileBelongToPackage(fileSimilarComponents.getNode2().getId());
+				Project project1 = containRepository.findPackageBelongToProject(pck1.getId());
+				Project project2 = containRepository.findPackageBelongToProject(pck2.getId());
+				smell.setName(fileSmellName + fileSmellIndex);
+				smell.setSize(2);
+				if (project1.getId().equals(project2.getId())) {
+					smell.setLanguage(project1.getLanguage());
+					smell.setProjectId(project1.getId());
+					smell.setProjectName(project1.getName());
+				}
+				else {
+					smell.setLanguage(project1.getLanguage());
+					smell.setProjectId(project1.getId());
+					smell.setProjectName(project1.getName() + "+" + project2.getName());
+				}
+				smell.setType(SmellType.SIMILAR_COMPONENTS);
+				smell.setLevel(SmellLevel.FILE);
+				smells.add(smell);
+				Contain contain1 = new Contain(smell, fileSimilarComponents.getNode1());
+				Contain contain2 = new Contain(smell, fileSimilarComponents.getNode2());
+				smellContains.add(contain1);
+				smellContains.add(contain2);
+				fileSmellIndex ++;
 			}
-			else {
-				smell.setLanguage(project1.getLanguage());
-				smell.setProjectId(project1.getId());
-				smell.setProjectName(project1.getName() + "+" + project2.getName());
-			}
-			smell.setType(SmellType.SIMILAR_COMPONENTS);
-			smell.setLevel(SmellLevel.FILE);
-			smells.add(smell);
-			Contain contain1 = new Contain(smell, fileSimilar.getNode1());
-			Contain contain2 = new Contain(smell, fileSimilar.getNode2());
-			smellContains.add(contain1);
-			smellContains.add(contain2);
-			fileSmellIndex ++;
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
 
 		smells.clear();
 		smellContains.clear();
-		Collection<SimilarComponents<Package>> packageSimilars = similarComponentsDetector.packageSimilars();
+		Map<Long, List<SimilarComponents<Package>>> packageSimilars = similarComponentsDetector.detectPackageSimilarComponents();
 		String packageSmellName = SmellLevel.PACKAGE + "_" + SmellType.SIMILAR_COMPONENTS + "_";
 		int packageSmellIndex = 1;
-		for (SimilarComponents<Package> packageSimilar : packageSimilars) {
-			Package pck1 = packageSimilar.getNode1();
-			Package pck2 = packageSimilar.getNode2();
-			Project project1 = containRepository.findPackageBelongToProject(pck1.getId());
-			Project project2 = containRepository.findPackageBelongToProject(pck2.getId());
-			Smell smell = new Smell();
-			smell.setName(packageSmellName + packageSmellIndex);
-			smell.setSize(2);
-			if (project1.getId().equals(project2.getId())) {
-				smell.setLanguage(project1.getLanguage());
-				smell.setProjectId(project1.getId());
-				smell.setProjectName(project1.getName());
+		for (Map.Entry<Long, List<SimilarComponents<Package>>> entry : packageSimilars.entrySet()) {
+			for (SimilarComponents<Package> packageSimilar : entry.getValue()) {
+				Package pck1 = packageSimilar.getNode1();
+				Package pck2 = packageSimilar.getNode2();
+				Project project1 = containRepository.findPackageBelongToProject(pck1.getId());
+				Project project2 = containRepository.findPackageBelongToProject(pck2.getId());
+				Smell smell = new Smell();
+				smell.setName(packageSmellName + packageSmellIndex);
+				smell.setSize(2);
+				if (project1.getId().equals(project2.getId())) {
+					smell.setLanguage(project1.getLanguage());
+					smell.setProjectId(project1.getId());
+					smell.setProjectName(project1.getName());
+				}
+				else {
+					smell.setLanguage(project1.getLanguage());
+					smell.setProjectId(project1.getId());
+					smell.setProjectName(project1.getName() + "+" + project2.getName());
+				}
+				smell.setType(SmellType.SIMILAR_COMPONENTS);
+				smell.setLevel(SmellLevel.PACKAGE);
+				smells.add(smell);
+				Contain contain1 = new Contain(smell, packageSimilar.getNode1());
+				Contain contain2 = new Contain(smell, packageSimilar.getNode2());
+				smellContains.add(contain1);
+				smellContains.add(contain2);
+				packageSmellIndex ++;
 			}
-			else {
-				smell.setLanguage(project1.getLanguage());
-				smell.setProjectId(project1.getId());
-				smell.setProjectName(project1.getName() + "+" + project2.getName());
-			}
-			smell.setType(SmellType.SIMILAR_COMPONENTS);
-			smell.setLevel(SmellLevel.PACKAGE);
-			smells.add(smell);
-			Contain contain1 = new Contain(smell, packageSimilar.getNode1());
-			Contain contain2 = new Contain(smell, packageSimilar.getNode2());
-			smellContains.add(contain1);
-			smellContains.add(contain2);
-			packageSmellIndex ++;
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
