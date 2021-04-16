@@ -30,11 +30,18 @@ public class CommitQueryServiceImpl implements CommitQueryService {
 	
 	@Override
 	public Commit queryCommit(long id) {
-		if(cache.findNodeById(id) != null) {
-			return (Commit) cache.findNodeById(id);
-		}
 		Commit result = commitRepository.findById(id).get();
-		cache.cacheNodeById(result);
+		return result;
+	}
+
+	@Override
+	public Collection<Commit> queryCommitsByGitRepoId(Long gitRepoId) {
+		String key = "queryCommitsByGitRepoId_" + gitRepoId;
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		Collection<Commit> result = commitRepository.queryCommitsByGitRepoId(gitRepoId);
+		cache.cache(getClass(), key, result);
 		return result;
 	}
 

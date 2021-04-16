@@ -65,7 +65,7 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
         //添加gitRepository节点和gitRepository到project的包含关系
         gitRepository = new GitRepository(generateEntityId(), gitExtractor.getRepositoryName(), gitExtractor.getGitPath(), gitExtractor.getRepositoryPath());
         addNode(gitRepository, null);
-        List<Project> projectList = this.getNodes().findProject(gitConfig.getProject());
+        List<Project> projectList = this.getNodes().findProject(gitExtractor.getRepositoryName());
         if(!projectList.isEmpty()) {
             projectList.forEach( project -> {
                 addRelation(new Contain(gitRepository , project));
@@ -477,6 +477,7 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
         System.out.println("newIssues size: " + newIssues.size());
         for (Issue issue : newIssues.values()) {
             issue.setEntityId(generateEntityId());
+            issue.setRepoBelongName(gitExtractor.getRepositoryName());
             addNode(issue, null);
             addRelation(new Contain(gitRepository, issue));
 

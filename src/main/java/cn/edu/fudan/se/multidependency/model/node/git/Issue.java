@@ -3,7 +3,6 @@ package cn.edu.fudan.se.multidependency.model.node.git;
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.IssueType;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -28,6 +27,8 @@ public class Issue implements Node {
 	private Long id;
 
 	private Long entityId;
+
+	private String repoBelongName;
 
 	private int issueId;
 
@@ -81,6 +82,7 @@ public class Issue implements Node {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("issueId", getIssueId());
+		properties.put("repoBelongName", getRepoBelongName() == null ? "" : getRepoBelongName());
 		properties.put("issueKey", getIssueKey() == null ? "" : getIssueKey());
 		properties.put("issueUrl", getIssueUrl() == null ? "" : getIssueUrl());
 		properties.put("type", getType() == null ? "" : getType());

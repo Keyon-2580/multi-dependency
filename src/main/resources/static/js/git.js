@@ -197,8 +197,8 @@ var gitRepoMetric = function() {
 						html += "<td>" + projectMetricTmp.loc + "</td>";
 						html += "<td>" + projectMetricTmp.lines + "</td>";
 						target='_blank'
-						html += "<td id='numOfCommits_" + result[i].gitRepository.id + "'>" + "<a target='_blank' href='/commit'>" +  (result[i].numOfCommits < 0 ? "计算中..." : result[i].numOfCommits) + "</a>" + "</td>";
-						html += "<td id='numOfIssues_" + result[i].gitRepository.id + "'>" + "<a target='_blank' href='/issue'>" + (result[i].numOfIssues < 0 ? "计算中..." : result[i].numOfIssues) + "</a>" + "</td>";
+						html += "<td id='numOfCommits_" + result[i].gitRepository.id + "'>" + "<a target='_blank' href='/commit/gitRepo/" + result[i].gitRepository.id + "'>" +  result[i].numOfCommits + "</a>" + "</td>";
+						html += "<td id='numOfIssues_" + result[i].gitRepository.id + "'>" + "<a target='_blank' href='/issue/gitRepo/" + result[i].gitRepository.id + "'>" + result[i].numOfIssues + "</a>" + "</td>";
 						html += "</tr>";
 					}
 				}
@@ -238,6 +238,9 @@ var gitRepoMetric = function() {
 
 	return {
 		init: function() {
+			var info = "<p>获取中...</p>"
+			$("#gitRepoMetric").html(info);
+			$("#gitDeveloperInfo").html(info);
 			repoMetric();
 			developerMetric();
 		}

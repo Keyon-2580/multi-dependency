@@ -51,10 +51,10 @@ public class CommitController {
 		return "history/commits";
 	}
 
-	@GetMapping("/{commitGraphId}")
-	public String commitIndex(HttpServletRequest request, @PathVariable("commitGraphId") long id) {
-		request.setAttribute("commit", commitService.queryCommit(id));
-		return "history/commit";
+	@GetMapping("/gitRepo/{gitRepoId}")
+	public String commitIndex(HttpServletRequest request, @PathVariable("gitRepoId") long gitRepoId) {
+		request.setAttribute("commits", commitService.queryCommitsByGitRepoId(gitRepoId));
+		return "history/commits";
 	}
 	
 	@GetMapping("/{commitGraphId}/files")

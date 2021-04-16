@@ -319,11 +319,19 @@ public class FileUtil {
 	public static String extractFilePathName(String filePath) {
 //		LOGGER.info("extractFileName " + filePath);
 		String newPath = filePath;
-		newPath = newPath.replace(SLASH_WINDOWS, SLASH_LINUX);
-		if(newPath.endsWith(SLASH_LINUX)){
-			newPath.substring(0, newPath.length()-1);
+		if(newPath.contains(SLASH_WINDOWS)) {
+			if(newPath.endsWith(SLASH_WINDOWS)){
+				newPath = newPath.substring(0, newPath.length()-1);
+			}
+			return newPath.substring(newPath.lastIndexOf(SLASH_WINDOWS) + 1);
+		} else if(newPath.contains(SLASH_LINUX)) {
+			if(newPath.endsWith(SLASH_LINUX)){
+				newPath = newPath.substring(0, newPath.length()-1);
+			}
+			return newPath.substring(newPath.lastIndexOf(SLASH_LINUX) + 1);
+		} else {
+			return newPath;
 		}
-		return filePath.substring(filePath.lastIndexOf(SLASH_LINUX) + 1);
 	}
 
 	/**

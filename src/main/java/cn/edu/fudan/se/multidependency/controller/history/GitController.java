@@ -1,10 +1,8 @@
 package cn.edu.fudan.se.multidependency.controller.history;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import cn.edu.fudan.se.multidependency.service.query.history.data.GitRepoMetric;
-import cn.edu.fudan.se.multidependency.service.query.metric.ProjectMetrics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

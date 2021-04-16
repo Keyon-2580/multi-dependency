@@ -9,8 +9,10 @@ import cn.edu.fudan.se.multidependency.service.query.history.data.CommitsInFileM
 public interface CommitQueryService {
 
 	Commit queryCommit(long id);
-	
+
 	Collection<Commit> queryAllCommits();
+
+	Collection<Commit> queryCommitsByGitRepoId(Long gitRepoId);
 	
 	Collection<Commit> queryUpdatedByCommits(ProjectFile file);
 	

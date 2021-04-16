@@ -2,6 +2,8 @@ package cn.edu.fudan.se.multidependency.controller.history;
 
 import javax.servlet.http.HttpServletRequest;
 
+import cn.edu.fudan.se.multidependency.model.node.Project;
+import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +37,12 @@ public class IssueController {
 	public String issue(HttpServletRequest request, @PathVariable("issueId") long issueId) {
 		request.setAttribute("issue", issueService.queryIssue(issueId));
 		return "history/issue";
+	}
+
+	@GetMapping("/gitRepo/{gitRepoId}")
+	public String getIssuesByGitRepoId(HttpServletRequest request, @PathVariable("gitRepoId") long gitRepoId) {
+		request.setAttribute("issues", issueService.queryIssuesByGitRepoId(gitRepoId));
+		return "history/issues";
 	}
 	
 	@GetMapping("/{issueId}/files")

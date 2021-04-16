@@ -19,6 +19,8 @@ public interface IssueQueryService {
 	
 	Collection<Issue> queryIssues(Project project);
 
+	Collection<Issue> queryIssuesByGitRepoId(Long repoId);
+
 	/**
 	 * 有commit提交的issue
 	 * @return

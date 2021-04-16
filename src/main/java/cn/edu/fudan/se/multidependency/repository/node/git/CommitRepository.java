@@ -33,6 +33,11 @@ public interface CommitRepository extends Neo4jRepository<Commit, Long> {
     
     @Query("match (c:Commit) where (c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-() return c order by c.authoredDate desc;")
     List<Commit> queryAllCommits();
+
+    @Query("match (gitRepo:GitRepository)-[:" + RelationType.str_CONTAIN + "*2]->(commit:Commit) " +
+            "where id(gitRepo)=$gitRepoId " +
+            "return distinct commit order by commit.commitTime desc;")
+    List<Commit> queryCommitsByGitRepoId(@Param("gitRepoId") long gitRepoId);
     
     @Query("match (c:Commit)-[:" 
     		+ RelationType.str_COMMIT_UPDATE_FILE 

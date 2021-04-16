@@ -45,6 +45,9 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
     @Autowired
     private CommitRepository commitRepository;
 
+	@Autowired
+    private IssueQueryService issueQueryService;
+
     @Autowired
     private CommitUpdateFileRepository commitUpdateFileRepository;
 
@@ -80,7 +83,7 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 			gitRepoMetric.setGitRepository(gitRepository);
 			gitRepoMetric.setProjectMetricsList(projectMetricsMap.get(gitRepository.getName()));
 			gitRepoMetric.setNumOfCommits(calculateGitRepoCommits(gitRepository));
-			gitRepoMetric.setNumOfIssues(0);
+			gitRepoMetric.setNumOfIssues(issueQueryService.queryIssuesByGitRepoId(gitRepository.getId()).size());
 			result.put(gitRepository.getId(), gitRepoMetric);
 		}
 		cache.cache(getClass(), key, result);
@@ -88,7 +91,7 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 	}
 
 	public int calculateGitRepoCommits(GitRepository gitRepository) {
-		return gitRepoRepository.queryCommitsInGitRepo(gitRepository.getId()).size();
+		return gitRepoRepository.queryCommitsByGitRepoId(gitRepository.getId()).size();
 	}
     
     @Override

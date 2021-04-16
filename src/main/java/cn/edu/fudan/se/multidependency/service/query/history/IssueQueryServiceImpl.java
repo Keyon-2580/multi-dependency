@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cn.edu.fudan.se.multidependency.model.node.git.GitRepository;
+import cn.edu.fudan.se.multidependency.repository.node.git.GitRepoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,9 @@ public class IssueQueryServiceImpl implements IssueQueryService {
 	
 	@Autowired
 	private IssueRepository issueRepository;
+
+	@Autowired
+	private GitRepoRepository gitRepoRepository;
 	
 	@Autowired
 	private CommitAddressIssueRepository commitAddressIssueRepository;
@@ -52,6 +57,21 @@ public class IssueQueryServiceImpl implements IssueQueryService {
 			issues.addAll(issueFile.getIssues());
 		}
 		cache.cache(getClass(), key, issues);
+		return issues;
+	}
+
+	@Override
+	public Collection<Issue> queryIssuesByGitRepoId(Long gitRepoId) {
+		String key = "queryIssuesByGitRepoId_" + gitRepoId;
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		GitRepository gitRepository = gitRepoRepository.findById(gitRepoId).get();
+		Collection<Issue> issues = new ArrayList<>();
+		if(gitRepository != null){
+			issues = issueRepository.queryIssuesByGitRepoName(gitRepository.getName());
+			cache.cache(getClass(), key, issues);
+		}
 		return issues;
 	}
 
