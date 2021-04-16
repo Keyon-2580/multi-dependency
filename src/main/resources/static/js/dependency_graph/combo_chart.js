@@ -1,5 +1,6 @@
 let data = {};
 let projectList_global; //存放选定项目列表
+let projectList_filter; //存放正在筛选的项目列表
 let in_out_list = [] //存放出度入度节点
 let actual_edges = [] //存放原有的线以及拆分后的线ID
 let smell_data_global = [] //存放异味信息
@@ -1614,6 +1615,7 @@ function clearFilter(){
         success: function (result) {
             if (result.result === "success") {
                 alert("重置成功");
+                projectList_filter = [];
             } else {
                 alert("重置失败！");
             }
@@ -1684,6 +1686,7 @@ function showFilterWindow(){
                     }
                     alert("设置成功 " + result.length + " 个路径！\n" +
                         "分别为：\n" + paths);
+                    projectList_filter = $('#multipleProjectSelect').val();
                 } else {
                     alert("设置失败！");
                 }
