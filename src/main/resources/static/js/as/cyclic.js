@@ -1,9 +1,8 @@
 var cyclic = function(cytoscapeutil) {
-	var showTable = function(projects, types, files, packages, modules) {
+	var showTable = function(projects, types, files, packages) {
 		console.log("types");
 		console.log("files");
 		console.log("packages");
-		console.log("modules");
 		var html = "";
 		for(var projectIndex in projects) {
 			var project = projects[projectIndex];
@@ -75,40 +74,17 @@ var cyclic = function(cytoscapeutil) {
 				html += "</tr>";
 				index ++;
 			}
-
-			var moduleCycles = modules[project.id];
-			html += "<table class='table table-bordered'>";
-			html += "<tr>";
-			html += "<th style='text-align: center; vertical-align: middle'>Partition</th>";
-			html += "<th style='text-align: center; vertical-align: middle'>Number</th>";
-			html += "<th>Modules</th>";
-			html += "</tr>";
-			index = 1;
-			for(var moduleIndex in moduleCycles) {
-				var cycle = moduleCycles[moduleIndex];
-				html += "<tr>";
-				html += "<td style='text-align: center; vertical-align: middle'>" + index + "</td>";
-				html += "<td style='text-align: center; vertical-align: middle'>" + cycle.components.length + "</td>";
-				html += "<td>";
-				for(var i = 0; i < cycle.components.length; i++) {
-					html += cycle.components[i].name + "<br/>";
-				}
-				html += "</td>";
-				html += "</tr>";
-				index ++;
-			}
-			html += "</table>";
 		}
 		
 		$("#content").html(html);
 	}
-	var _cyclic = function(projects, types, files, packages, modules) {
-		showTable(projects, types, files, packages, modules);
+	var _cyclic = function(projects, types, files, packages) {
+		showTable(projects, types, files, packages);
 	}
 	
 	return {
-		cyclic: function(projects, types, files, packages, modules) {
-			_cyclic(projects, types, files, packages, modules);
+		cyclic: function(projects, types, files, packages) {
+			_cyclic(projects, types, files, packages);
 		}
 	}
 }

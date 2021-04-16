@@ -2,16 +2,13 @@ package cn.edu.fudan.se.multidependency.service.query.smell.impl;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.node.ar.Module;
 import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
-import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.UnusedIncludeASRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.smell.UnusedIncludeDetector;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.UnusedInclude;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import com.alibaba.fastjson.JSONArray;
@@ -47,19 +44,23 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
         }
 
         Map<Long, List<UnusedInclude>> result = new HashMap<>();
-        List<Smell> smells = smellRepository.findSmellsByType(SmellType.UNUSED_INCLUDE);
-        if (smells != null) {
-            for (Smell smell : smells) {
-                long projectId = smell.getProjectId();
-                List<UnusedInclude> unusedIncludeList = result.getOrDefault(projectId, new ArrayList<>());
-                unusedIncludeList.add(smellRepository.getUnusedIncludeWithSmellId(smell.getId()));
-                result.put(projectId, unusedIncludeList);
-            }
+        List<Smell> smells = new ArrayList<>(smellRepository.findSmellsByType(SmellType.UNUSED_INCLUDE));
+        smells.sort((smell1, smell2) -> {
+            List<String> namePart1 = Arrays.asList(smell1.getName().split("_"));
+            List<String> namePart2 = Arrays.asList(smell2.getName().split("_"));
+            int partition1 = Integer.parseInt(namePart1.get(namePart1.size() - 1));
+            int partition2 = Integer.parseInt(namePart2.get(namePart2.size() - 1));
+            return Integer.compare(partition1, partition2);
+        });
+        for (Smell smell : smells) {
+            long projectId = smell.getProjectId();
+            List<UnusedInclude> unusedIncludeList = result.getOrDefault(projectId, new ArrayList<>());
+            unusedIncludeList.add(smellRepository.getUnusedIncludeWithSmellId(smell.getId()));
+            result.put(projectId, unusedIncludeList);
         }
         for (Map.Entry<Long, List<UnusedInclude>> entry : result.entrySet()) {
             long projectId = entry.getKey();
             List<UnusedInclude> unusedIncludeList = result.getOrDefault(projectId, new ArrayList<>());
-            unusedIncludeList.sort((u1, u2) -> Integer.compare(u2.getUnusedIncludeFiles().size(), u1.getUnusedIncludeFiles().size()));
             result.put(projectId, unusedIncludeList);
         }
         cache.cache(getClass(), key, result);
@@ -111,12 +112,13 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
                 codeFileUnusedIncludeSet.add(new UnusedInclude(codeFile, codeFileUnusedIncludeFileSet));
             }
         }
-        for (UnusedInclude codeUnusedInclude : codeFileUnusedIncludeSet) {
+        List<UnusedInclude> codeFileUnusedIncludeList = new ArrayList<>(codeFileUnusedIncludeSet);
+        codeFileUnusedIncludeList.sort((u1, u2) -> Integer.compare(u2.getUnusedIncludeFiles().size(), u1.getUnusedIncludeFiles().size()));
+        for (UnusedInclude codeUnusedInclude : codeFileUnusedIncludeList) {
             Project project = containRelationService.findFileBelongToProject(codeUnusedInclude.getCoreFile());
             if (project != null) {
                 List<UnusedInclude> unusedIncludeList = result.getOrDefault(project.getId(), new ArrayList<>());
                 unusedIncludeList.add(codeUnusedInclude);
-                unusedIncludeList.sort((u1, u2) -> Integer.compare(u2.getUnusedIncludeFiles().size(), u1.getUnusedIncludeFiles().size()));
                 result.put(project.getId(), unusedIncludeList);
             }
         }

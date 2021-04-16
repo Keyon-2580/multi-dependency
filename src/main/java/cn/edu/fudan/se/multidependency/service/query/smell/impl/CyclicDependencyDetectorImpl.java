@@ -83,8 +83,14 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		}
 
 		Map<Long, Map<Integer, Cycle<Type>>> result = new HashMap<>();
-		List<Smell> smells = smellRepository.findSmells(SmellLevel.TYPE, SmellType.CYCLIC_DEPENDENCY);
-		smells.sort(Comparator.comparing(Smell::getName));
+		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.TYPE, SmellType.CYCLIC_DEPENDENCY));
+		smells.sort((smell1, smell2) -> {
+			List<String> namePart1 = Arrays.asList(smell1.getName().split("_"));
+			List<String> namePart2 = Arrays.asList(smell2.getName().split("_"));
+			int partition1 = Integer.parseInt(namePart1.get(namePart1.size() - 1));
+			int partition2 = Integer.parseInt(namePart2.get(namePart2.size() - 1));
+			return Integer.compare(partition1, partition2);
+		});
 		List<Cycle<Type>> typeCycles = new ArrayList<>();
 		int partition = 1;
 		for (Smell smell : smells) {
@@ -96,7 +102,6 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 			typeCycles.add(new Cycle<>(partition, components));
 			partition ++;
 		}
-		typeCycles.sort(Comparator.comparingInt(Cycle::getPartition));
 		for(Cycle<Type> typeCycle : typeCycles) {
 			Project project = containRelationService.findTypeBelongToProject(typeCycle.getComponents().get(0));
 			if (project != null) {
@@ -117,19 +122,25 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		}
 
 		Map<Long, Map<Integer, Cycle<ProjectFile>>> result = new HashMap<>();
-		List<Smell> smells = smellRepository.findSmells(SmellLevel.FILE, SmellType.CYCLIC_DEPENDENCY);
+		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.FILE, SmellType.CYCLIC_DEPENDENCY));
+		smells.sort((smell1, smell2) -> {
+			List<String> namePart1 = Arrays.asList(smell1.getName().split("_"));
+			List<String> namePart2 = Arrays.asList(smell2.getName().split("_"));
+			int partition1 = Integer.parseInt(namePart1.get(namePart1.size() - 1));
+			int partition2 = Integer.parseInt(namePart2.get(namePart2.size() - 1));
+			return Integer.compare(partition1, partition2);
+		});
 		List<Cycle<ProjectFile>> fileCycles = new ArrayList<>();
+		int partition = 1;
 		for (Smell smell : smells) {
-			List<String> namePart = Arrays.asList(smell.getName().split("_"));
-			int partition = Integer.parseInt(namePart.get(namePart.size() - 1));
 			List<ProjectFile> components = new ArrayList<>();
 			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
 			for (Node contain : contains) {
 				components.add((ProjectFile) contain);
 			}
 			fileCycles.add(new Cycle<>(partition, components));
+			partition ++;
 		}
-		fileCycles.sort(Comparator.comparingInt(Cycle::getPartition));
 		for(Cycle<ProjectFile> fileCycle : fileCycles) {
 			Project project = containRelationService.findFileBelongToProject(fileCycle.getComponents().get(0));
 			if (project != null) {
@@ -150,19 +161,25 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		}
 
 		Map<Long, Map<Integer, Cycle<Package>>> result = new HashMap<>();
-		List<Smell> smells = smellRepository.findSmells(SmellLevel.PACKAGE, SmellType.CYCLIC_DEPENDENCY);
+		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.PACKAGE, SmellType.CYCLIC_DEPENDENCY));
+		smells.sort((smell1, smell2) -> {
+			List<String> namePart1 = Arrays.asList(smell1.getName().split("_"));
+			List<String> namePart2 = Arrays.asList(smell2.getName().split("_"));
+			int partition1 = Integer.parseInt(namePart1.get(namePart1.size() - 1));
+			int partition2 = Integer.parseInt(namePart2.get(namePart2.size() - 1));
+			return Integer.compare(partition1, partition2);
+		});
 		List<Cycle<Package>> packageCycles = new ArrayList<>();
+		int partition = 1;
 		for (Smell smell : smells) {
-			List<String> namePart = Arrays.asList(smell.getName().split("_"));
-			int partition = Integer.parseInt(namePart.get(namePart.size() - 1));
 			List<Package> components = new ArrayList<>();
 			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
 			for (Node contain : contains) {
 				components.add((Package) contain);
 			}
 			packageCycles.add(new Cycle<>(partition, components));
+			partition ++;
 		}
-		packageCycles.sort(Comparator.comparingInt(Cycle::getPartition));
 		for(Cycle<Package> packageCycle : packageCycles) {
 			Project project = containRelationService.findPackageBelongToProject(packageCycle.getComponents().get(0));
 			if (project != null) {

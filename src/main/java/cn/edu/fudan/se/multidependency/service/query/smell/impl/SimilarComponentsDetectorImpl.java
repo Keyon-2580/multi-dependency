@@ -85,8 +85,14 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 		}
 
 		Map<Long, List<SimilarComponents<ProjectFile>>> result = new HashMap<>();
-		List<Smell> smells = smellRepository.findSmells(SmellLevel.FILE, SmellType.SIMILAR_COMPONENTS);
-		smells.sort(Comparator.comparing(Smell::getName));
+		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.FILE, SmellType.SIMILAR_COMPONENTS));
+		smells.sort((smell1, smell2) -> {
+			List<String> namePart1 = Arrays.asList(smell1.getName().split("_"));
+			List<String> namePart2 = Arrays.asList(smell2.getName().split("_"));
+			int partition1 = Integer.parseInt(namePart1.get(namePart1.size() - 1));
+			int partition2 = Integer.parseInt(namePart2.get(namePart2.size() - 1));
+			return Integer.compare(partition1, partition2);
+		});
 		List<SimilarComponents<ProjectFile>> similarComponentsList = new ArrayList<>();
 		for (Smell smell : smells) {
 			List<Node> files = new ArrayList<>(smellRepository.findSmellContains(smell.getId()));

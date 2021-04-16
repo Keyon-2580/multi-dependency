@@ -30,7 +30,7 @@ public class CyclicDependencyController {
 		request.setAttribute("types", cyclicDependencyDetector.getTypeCyclicDependency());
 		request.setAttribute("files", cyclicDependencyDetector.getFileCyclicDependency());
 		request.setAttribute("packages", cyclicDependencyDetector.getPackageCyclicDependency());
-		request.setAttribute("modules", cyclicDependencyDetector.getModuleCyclicDependency());
+//		request.setAttribute("modules", cyclicDependencyDetector.getModuleCyclicDependency());
 		return "as/cyclic";
 	}
 
@@ -40,7 +40,7 @@ public class CyclicDependencyController {
 		request.setAttribute("types", cyclicDependencyDetector.detectTypeCyclicDependency());
 		request.setAttribute("files", cyclicDependencyDetector.detectFileCyclicDependency());
 		request.setAttribute("packages", cyclicDependencyDetector.detectPackageCyclicDependency());
-		request.setAttribute("modules", cyclicDependencyDetector.detectModuleCyclicDependency());
+//		request.setAttribute("modules", cyclicDependencyDetector.detectModuleCyclicDependency());
 		return "as/cyclic";
 	}
 }
