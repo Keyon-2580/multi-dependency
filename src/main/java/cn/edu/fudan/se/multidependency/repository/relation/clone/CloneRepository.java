@@ -80,4 +80,7 @@ public interface CloneRepository extends Neo4jRepository<Clone, Long> {
 	@Query("match p = (f1:ProjectFile)-[r:" + RelationType.str_CLONE + "]->(f2:ProjectFile) where id(f1) = $fileId1 and id(f2) = $fileId2 return p;")
 	List<Clone> judgeCloneByFileId(@Param("fileId1") long fileId1, @Param("fileId2") long fileId2);
 
+	@Query("match p = (p1:ProjectFile)-[:" + RelationType.str_CLONE + "]->(p2:ProjectFile) where p1.projectBelongPath = $projectBelongPath and p1.language = $language and p2.projectBelongPath = $projectBelongPath and p2.language = $language return p")
+	List<Clone> findFileClonesInProjectByPathAndLanguage(@Param("projectBelongPath") String projectBelongPath, @Param("language") String language);
+
 }

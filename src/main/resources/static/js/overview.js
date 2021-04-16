@@ -89,13 +89,13 @@ var loadPageData = function (){
             for(var i = 0; i < result.length; i++) {
                 html += "<li class=\"my_common_list_li\">";
                 html += "<label  class=\"my_common_list_td\">" + (i + 1) + "</label>";
-                html += "<label  class=\"my_common_list_td\">" + result[i].project.id + "</label>";
-                html += "<a class=\"my_common_list_a\" href=\"\" target=\"_blank\">" + result[i].project.name + " (" + result[i].project.language + ") " + "</a>";
-                html += "<label  class=\"my_common_list_td\">" + result[i].nop + "</label>";
-                html += "<label  class=\"my_common_list_td\">" + result[i].nof + "</label>";
-                html += "<label  class=\"my_common_list_td\">" + result[i].nom + "</label>";
-                html += "<label  class=\"my_common_list_td\">" + result[i].loc + "</label>";
-                html += "<label  class=\"my_common_list_td\">" + result[i].lines + "</label>";
+                html += "<label  class=\"my_common_list_td\">" + result[i].node.id + "</label>";
+                html += "<a class=\"my_common_list_a\" href=\"\" target=\"_blank\">" + result[i].node.name + " (" + result[i].node.language + ") " + "</a>";
+                html += "<label  class=\"my_common_list_td\">" + result[i].metric.metricValues.NOP + "</label>";
+                html += "<label  class=\"my_common_list_td\">" + result[i].metric.metricValues.NOF + "</label>";
+                html += "<label  class=\"my_common_list_td\">" + result[i].metric.metricValues.NOM + "</label>";
+                html += "<label  class=\"my_common_list_td\">" + result[i].metric.metricValues.LOC + "</label>";
+                html += "<label  class=\"my_common_list_td\">" + result[i].metric.metricValues.Lines + "</label>";
                 html += "</li>";
             }
 
@@ -107,10 +107,10 @@ var loadPageData = function (){
             var loc_name_list = [];
             for(var j = 0; j < result.length; j++) {
                 var temp_loc = {};
-                temp_loc["name"] = result[j]["project"]["name"];
-                temp_loc["value"] = result[j]["loc"];
+                temp_loc["name"] = result[j]["node"]["name"];
+                temp_loc["value"] = result[j]["metric"]["metricValues"]["LOC"];
                 loc_list.push(temp_loc);
-                loc_name_list.push(result[j]["project"]["name"]);
+                loc_name_list.push(result[j]["node"]["name"]);
             }
 
             loadLOCChart(loc_name_list,loc_list)

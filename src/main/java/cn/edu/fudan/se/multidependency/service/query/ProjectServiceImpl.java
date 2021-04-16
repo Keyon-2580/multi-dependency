@@ -9,13 +9,11 @@ import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
-import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackagePairDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.*;
-import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.data.PackageStructure;
 import cn.edu.fudan.se.multidependency.service.query.data.ProjectStructure;
 import cn.edu.fudan.se.multidependency.service.query.smell.BasicSmellQueryService;
@@ -24,8 +22,6 @@ import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -144,7 +140,7 @@ public class ProjectServiceImpl implements ProjectService{
         result.add(nodeJSON2);
 
         if(Constant.PROJECT_STRUCTURE_COMBO.equals(type)){
-            JSONArray temp_allprojects = getAllProjectsLinksCombo();
+            JSONArray temp_allprojects = getAllProjectsLinksCombo(projectIds);
             nodeJSON4.put("links", temp_allprojects);
         }else{
             JSONObject temp_allprojects = getAllProjectsLinks();
@@ -153,7 +149,7 @@ public class ProjectServiceImpl implements ProjectService{
         result.add(nodeJSON4);
 
         if(Constant.PROJECT_STRUCTURE_TREEMAP.equals(type) || Constant.PROJECT_STRUCTURE_COMBO.equals(type)){
-        nodeJSON5.put("smell", basicSmellQueryService.smellsToTreemap());
+        nodeJSON5.put("smell", basicSmellQueryService.smellsToGraph());
         result.add(nodeJSON5);
         }
 
@@ -394,16 +390,26 @@ public class ProjectServiceImpl implements ProjectService{
         List<HotspotPackagePair> cloneHotspotPackageList = hotspotPackagePairDetector.getHotspotPackagePairWithFileCloneByParentId(-1, -1, "all");
         List<HotspotPackagePair> dependsonHotspotPackageList = hotspotPackagePairDetector.getHotspotPackagePairWithDependsOn();
         List<HotspotPackagePair> cochangeHotspotPackageList = hotspotPackagePairDetector.getHotspotPackagePairWithCoChange();
-        return hotspotPackagesToCloneJson(cloneHotspotPackageList, dependsonHotspotPackageList, cochangeHotspotPackageList);
+        return hotspotPackagesToJson(cloneHotspotPackageList, dependsonHotspotPackageList, cochangeHotspotPackageList);
     }
 
     @Override
-    public JSONArray getAllProjectsLinksCombo(){
+    public JSONArray getAllProjectsLinksCombo(JSONArray projectIds){
         JSONArray result = new JSONArray();
+        List<DependsOn> dependsOnList= new ArrayList<>();
+        List<Clone> cloneList= new ArrayList<>();
+        List<CoChange> coChangeList= new ArrayList<>();
 
-        List<DependsOn> dependsOnList= dependsOnRepository.findFileDepends();
-        List<Clone> cloneList= cloneRepository.findAllFileClones();
-        List<CoChange> coChangeList= coChangeRepository.findFileCoChange();
+        for(int i=0; i<projectIds.size(); i++){
+            Project project = nodeService.queryProject(projectIds.getJSONObject(i).getLong("id"));
+            cloneList.addAll(cloneRepository.findFileClonesInProjectByPathAndLanguage(project.getPath(), project.getLanguage()));
+            coChangeList.addAll(coChangeRepository.findFileCoChangeInProjectByPathAndLanguage(project.getPath(), project.getLanguage()));
+            dependsOnList.addAll(dependsOnRepository.findFileDependsInProjectByPathAndLanguage(project.getPath(), project.getLanguage()));
+        }
+
+//        List<DependsOn> dependsOnList= dependsOnRepository.findFileDepends();
+//        List<Clone> cloneList= cloneRepository.findAllFileClones();
+//        List<CoChange> coChangeList= coChangeRepository.findFileCoChange();
 
         for(DependsOn dependsOn : dependsOnList){
             JSONObject link = new JSONObject();
@@ -419,6 +425,19 @@ public class ProjectServiceImpl implements ProjectService{
             link.put("dependsOnTypes", dependsOn.getDependsOnType());
             link.put("dependsOnTimes", dependsOn.getTimes());
             link.put("dependsOnWeightedTimes", dependsOn.getWeightedTimes());
+
+            JSONArray dependsOnTypesArray = new JSONArray();
+            Map<String, Long> dependsOnTypesMap = dependsOn.getDependsOnTypes();
+            for(Map.Entry<String, Long> entry: dependsOnTypesMap.entrySet()){
+                JSONObject temp_dependsOnType = new JSONObject();
+                temp_dependsOnType.put("dependsOnType", entry.getKey());
+                temp_dependsOnType.put("dependsOnTime", entry.getValue());
+
+                dependsOnTypesArray.add(temp_dependsOnType);
+            }
+
+            link.put("dependsOnTypesMap", dependsOnTypesArray);
+
             result.add(link);
         }
 
@@ -613,156 +632,12 @@ public class ProjectServiceImpl implements ProjectService{
         return packageData;
     }
 
-//    @Override
-//    public JSONObject cloneGraphAndTableOfChildrenPackages(long package1Id, long package2Id) {
-//        HotspotPackagePair parentHotspotPackage = hotspotPackagePairDetector.getHotspotPackagePairWithFileCloneByPackageId(package1Id, package2Id, "all");
-//        List<HotspotPackagePair> childrenHotspotPackages = parentHotspotPackage.getChildrenHotspotPackagePairs();
-//        return hotspotPackagesToCloneJson(childrenHotspotPackages, parentHotspotPackage, "clone_package_table");
-//    }
-
-    private JSONObject hotspotPackagesToCloneJson(List<HotspotPackagePair> cloneHotspotPackageList, List<HotspotPackagePair> dependsonHotspotPackageList, List<HotspotPackagePair> cochangeHotspotPackageList){
+    private JSONObject hotspotPackagesToJson(List<HotspotPackagePair> cloneHotspotPackageList, List<HotspotPackagePair> dependsonHotspotPackageList, List<HotspotPackagePair> cochangeHotspotPackageList){
         JSONObject result = new JSONObject();
-
-        JSONArray clone_links = new JSONArray();
-        JSONArray dependson_links = new JSONArray();
-        JSONArray cochange_links = new JSONArray();
-
-//        for(HotspotPackagePair hotspotPackagePair: hotspotPackagePairList){
-//            JSONObject link = new JSONObject();
-//            JSONObject link_common = new JSONObject();
-//
-//            Project source_projectBelong = containRelationService.findPackageBelongToProject(hotspotPackagePair.getPackage1());
-//            Project target_projectBelong = containRelationService.findPackageBelongToProject(hotspotPackagePair.getPackage2());
-//
-//            link_common.put("source_id", "id_" + hotspotPackagePair.getPackage1().getId().toString());
-//            link_common.put("target_id", "id_" + hotspotPackagePair.getPackage2().getId().toString() );
-//            link_common.put("pair_id", hotspotPackagePair.getPackage1().getId().toString() + "_" + hotspotPackagePair.getPackage2().getId().toString());
-//            link_common.put("source_name", hotspotPackagePair.getPackage1().getDirectoryPath());
-//            link_common.put("target_name", hotspotPackagePair.getPackage2().getDirectoryPath());
-//            link_common.put("source_projectBelong", "id_" + source_projectBelong.getId());
-//            link_common.put("target_projectBelong", "id_" + target_projectBelong.getId());
-//
-//            switch (hotspotPackagePair.getHotspotRelationType().toString()) {
-//                case "CLONE":
-//                    CloneRelationDataForDoubleNodes<Node, Relation> cloneRelationDataForDoubleNodes = (CloneRelationDataForDoubleNodes<Node, Relation>) hotspotPackagePair.getPackagePairRelationData();
-//
-//                    link.put("type", "clone");
-//                    link.put("clonePairs", cloneRelationDataForDoubleNodes.getClonePairs());
-//                    link.put("cloneNodesCount1", cloneRelationDataForDoubleNodes.getCloneNodesCount1());
-//                    link.put("cloneNodesCount2", cloneRelationDataForDoubleNodes.getCloneNodesCount2());
-//                    link.put("allNodesCount1", cloneRelationDataForDoubleNodes.getAllNodesCount1());
-//                    link.put("allNodesCount2", cloneRelationDataForDoubleNodes.getAllNodesCount2());
-//                    link.put("cloneMatchRate", cloneRelationDataForDoubleNodes.getCloneMatchRate());
-//                    link.put("cloneNodesLoc1", cloneRelationDataForDoubleNodes.getCloneNodesLoc1());
-//                    link.put("cloneNodesLoc2", cloneRelationDataForDoubleNodes.getCloneNodesLoc2());
-//                    link.put("allNodesLoc1", cloneRelationDataForDoubleNodes.getAllNodesLoc1());
-//                    link.put("allNodesLoc2", cloneRelationDataForDoubleNodes.getAllNodesLoc2());
-//                    link.put("cloneLocRate", cloneRelationDataForDoubleNodes.getCloneLocRate());
-//                    link.put("cloneNodesCoChangeTimes", cloneRelationDataForDoubleNodes.getCloneNodesCoChangeTimes());
-//                    link.put("allNodesCoChangeTimes", cloneRelationDataForDoubleNodes.getAllNodesCoChangeTimes());
-//                    link.put("cloneCoChangeRate", cloneRelationDataForDoubleNodes.getCloneCoChangeRate());
-//                    link.put("cloneType1Count", cloneRelationDataForDoubleNodes.getCloneType1Count());
-//                    link.put("cloneType2Count", cloneRelationDataForDoubleNodes.getCloneType2Count());
-//                    link.put("cloneType3Count", cloneRelationDataForDoubleNodes.getCloneType3Count());
-//                    link.put("cloneType", cloneRelationDataForDoubleNodes.getCloneType());
-//                    link.put("cloneSimilarityValue", cloneRelationDataForDoubleNodes.getCloneSimilarityValue());
-//                    link.put("cloneSimilarityRate", cloneRelationDataForDoubleNodes.getCloneSimilarityRate());
-//                    if (cloneRelationDataForDoubleNodes.getClonePairs() == 0) {
-//                        link.put("bottom_package", false);
-//                    } else {
-//                        link.put("bottom_package", true);
-//                    }
-//
-//                    clone_links.add(JSONUtil.combineJSONObjectWithoutMerge(link, link_common));
-//                    break;
-//                case "DEPENDS_ON":
-//                    DependsRelationDataForDoubleNodes<Node, Relation> dependsRelationDataForDoubleNodes = (DependsRelationDataForDoubleNodes<Node, Relation>) hotspotPackagePair.getPackagePairRelationData();
-//
-//                    link.put("type", "dependson");
-//                    link.put("dependsOnTypes", dependsRelationDataForDoubleNodes.getDependsOnTypes());
-//                    link.put("dependsByTypes", dependsRelationDataForDoubleNodes.getDependsByTypes());
-//                    link.put("dependsOnTimes", dependsRelationDataForDoubleNodes.getDependsOnTimes());
-//                    link.put("dependsByTimes", dependsRelationDataForDoubleNodes.getDependsByTimes());
-//                    link.put("dependsOnWeightedTimes", dependsRelationDataForDoubleNodes.getDependsOnWeightedTimes());
-//                    link.put("dependsByWeightedTimes", dependsRelationDataForDoubleNodes.getDependsByWeightedTimes());
-//                    link.put("dependsOnIntensity", dependsRelationDataForDoubleNodes.getDependsOnInstability());
-//                    link.put("dependsByIntensity", dependsRelationDataForDoubleNodes.getDependsByInstability());
-//
-//                    if(dependsRelationDataForDoubleNodes.getDependsOnTypes().equals("") ||
-//                            dependsRelationDataForDoubleNodes.getDependsByTypes().equals("")){
-//                        link.put("two_way", false);
-//                    }else{
-//                        link.put("two_way", true);
-//                    }
-//
-//                    Map<String, Long> dependsOnTypesMap = dependsRelationDataForDoubleNodes.getDependsOnTypesMap();
-//                    Map<String, Long> dependsByTypesMap = dependsRelationDataForDoubleNodes.getDependsByTypesMap();
-//                    JSONArray dependsOnTypesArray = new JSONArray();
-//                    JSONArray dependsByTypesArray = new JSONArray();
-//
-//                    for(Map.Entry<String, Long> entry: dependsOnTypesMap.entrySet()){
-//                        JSONObject temp_dependsOnType = new JSONObject();
-//                        temp_dependsOnType.put("dependsOnType", entry.getKey());
-//                        temp_dependsOnType.put("dependsOnTime", entry.getValue());
-//
-//                        dependsOnTypesArray.add(temp_dependsOnType);
-//                    }
-//
-//                    for(Map.Entry<String, Long> entry: dependsByTypesMap.entrySet()){
-//                        JSONObject temp_dependsByType = new JSONObject();
-//                        temp_dependsByType.put("dependsByType", entry.getKey());
-//                        temp_dependsByType.put("dependsByTime", entry.getValue());
-//
-//                        dependsByTypesArray.add(temp_dependsByType);
-//                    }
-//
-//                    link.put("dependsOnTypesMap", dependsOnTypesArray);
-//                    link.put("dependsByTypesMap", dependsByTypesArray);
-//
-//                    dependson_links.add(JSONUtil.combineJSONObjectWithoutMerge(link, link_common));
-//
-//                    break;
-//                case "CO_CHANGE":
-//                    CoChangeRelationDataForDoubleNodes<Node, Relation> coChangeRelationDataForDoubleNodes = (CoChangeRelationDataForDoubleNodes<Node, Relation>) hotspotPackagePair.getPackagePairRelationData();
-//
-//                    if (coChangeRelationDataForDoubleNodes.getCoChangeTimes() >= 10) {
-//                        link.put("type", "cochange");
-//                        link.put("coChangeTimes", coChangeRelationDataForDoubleNodes.getCoChangeTimes());
-//                        link.put("node1ChangeTimes", coChangeRelationDataForDoubleNodes.getNode1ChangeTimes());
-//                        link.put("node2ChangeTimes", coChangeRelationDataForDoubleNodes.getNode2ChangeTimes());
-//                        cochange_links.add(JSONUtil.combineJSONObjectWithoutMerge(link, link_common));
-//                    }
-//                    break;
-//            }
-//        }
 
         result.put("clone_links", getLinksJson(cloneHotspotPackageList, "CLONE", "default"));
         result.put("dependson_links", getLinksJson(dependsonHotspotPackageList, "DEPENDS_ON", "default"));
         result.put("cochange_links", getLinksJson(cochangeHotspotPackageList, "CO_CHANGE", "default"));
-
-//        if(type.equals("clone_package_table")){
-//            Collection<Package> nonClonePacksges1 = parentHotspotPackagePair.getChildrenOtherPackages1();
-//            Collection<Package> nonClonePacksges2 = parentHotspotPackagePair.getChildrenOtherPackages2();
-//            JSONArray nonCloneFiles1 = new JSONArray();
-//            JSONArray nonCloneFiles2 = new JSONArray();
-//
-//            for(Package pck: nonClonePacksges1){
-//                JSONObject nonClone1 = new JSONObject();
-//                nonClone1.put("name", pck.getDirectoryPath());
-//                nonCloneFiles1.add(nonClone1);
-//            }
-//
-//            for(Package pck: nonClonePacksges2){
-//                JSONObject nonClone2 = new JSONObject();
-//                nonClone2.put("name", pck.getDirectoryPath());
-//                nonCloneFiles2.add(nonClone2);
-//            }
-//
-//            temp_relation.put("nonclonefiles1", nonCloneFiles1);
-//            temp_relation.put("nonclonefiles2", nonCloneFiles2);
-//        }
-
-//        result.put("children_graphlinks", temp_relation);
         return result;
     }
 

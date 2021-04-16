@@ -33,7 +33,7 @@ public class BasicSmellQueryServiceImpl implements BasicSmellQueryService {
 	}
 
 	@Override
-	public JSONArray smellsToTreemap(){
+	public JSONArray smellsToGraph(){
 		JSONArray smellArray = new JSONArray();
 		try {
 			Collection<Smell> smellGroups = findSmellsByLevel(SmellLevel.FILE);

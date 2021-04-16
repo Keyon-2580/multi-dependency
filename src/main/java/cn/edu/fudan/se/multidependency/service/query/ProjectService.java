@@ -29,7 +29,7 @@ public interface ProjectService {
 
 	JSONObject getAllProjectsLinks();
 
-	JSONArray getAllProjectsLinksCombo();
+	JSONArray getAllProjectsLinksCombo(JSONArray projectIds);
 
 	Map<String, Boolean> getSelectedPcks();
 

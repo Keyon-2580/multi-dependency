@@ -238,32 +238,50 @@ const tooltip = new G6.Tooltip({
         $(".g6-component-tooltip").css({"left": e.clientX + 20 + "px", "top": e.clientY + 20 + "px"});
         const outDiv = document.createElement('div');
         outDiv.style.width = '500px';
-        outDiv.innerHTML = e.item.getModel().group_type === 'combo' ?
-            `<b class="combo_label">${e.item.getModel().name}</b>
-          <ul>
-            <li>ID: ${e.item.getModel().id}</li>
-            <li>x: ${e.item.getModel().x}</li>
-            <li>y: ${e.item.getModel().y}</li>
-          </ul>`
-
-            : e.item.getModel().group_type === 'node' ?
-                `<b class="combo_label">${e.item.getModel().name}</b>
+        let tooltip_html = ``;
+        let group = e.item.getModel().group_type;
+        let model = e.item.getModel();
+        if(group === 'combo'){
+            tooltip_html =
+                `<b class="combo_label">${model.name}</b>
                   <ul>
-                    <li>ID: ${e.item.getModel().id}</li>
-                    <li>Path: ${e.item.getModel().long_name}</li>
-                    <li>NOC: ${e.item.getModel().noc}</li>
-                    <li>NOM: ${e.item.getModel().nom}</li>
-                    <li>LOC: ${e.item.getModel().loc}</li>
-                    <li>Score: ${e.item.getModel().score}</li>
-                  </ul>` :
-
-                `<b class="combo_label">${e.item.getModel().id}</b>
+                    <li>ID: ${model.id}</li>
+                    <li>x: ${model.x}</li>
+                    <li>y: ${model.y}</li>
+                  </ul>`;
+        }else if(group === 'node'){
+            tooltip_html =
+                `<b class="combo_label">${model.name}</b>
+                  <ul>
+                    <li>ID: ${model.id}</li>
+                    <li>Path: ${model.long_name}</li>
+                    <li>NOC: ${model.noc}</li>
+                    <li>NOM: ${model.nom}</li>
+                    <li>LOC: ${model.loc}</li>
+                    <li>Score: ${model.score}</li>
+                  </ul>`;
+        }else{
+            tooltip_html =
+                `<b class="combo_label">${model.id}</b>
                 <ul>
-                  <li>source: ${e.item.getModel().source_name}</li>
-                  <li>source_id: ${e.item.getModel().source}</li>
-                  <li>target: ${e.item.getModel().target_name}</li>
-                  <li>target_id: ${e.item.getModel().target}</li>
-                </ul>`
+                  <li>source: ${model.source_name}</li>
+                  <li>source_id: ${model.source}</li>
+                  <li>target: ${model.target_name}</li>
+                  <li>target_id: ${model.target}</li></ul>`;
+
+            if(model.inner_edge === 1){
+                tooltip_html += `<ul>dependsOnTypesMap:`;
+                model.dependsOnTypesMap.forEach(item =>{
+                    tooltip_html += `<ul>{</ul>
+                                     <ul>    dependsOnType: ` + item.dependsOnType + `</ul>`;
+                    tooltip_html += `<ul>    dependsOnTime: ` + item.dependsOnTime + `</ul><ul>}</ul>`;
+                })
+                tooltip_html += `</ul>`;
+            }
+
+        }
+
+        outDiv.innerHTML = tooltip_html;
         return outDiv
     },
     itemTypes: ['node', 'combo', 'edge']
@@ -444,6 +462,7 @@ function DrawComboChart(json_data){
         temp_link["target_name"] = link.target_name;
         temp_link["source_path"] = link.source_path;
         temp_link["target_path"] = link.target_path;
+        temp_link["dependsOnTypesMap"] = link.dependsOnTypesMap;
         temp_link["link_type"] = link.type;
         temp_link["group_type"] = 'edge';
         temp_link["inner_edge"] = 0;
