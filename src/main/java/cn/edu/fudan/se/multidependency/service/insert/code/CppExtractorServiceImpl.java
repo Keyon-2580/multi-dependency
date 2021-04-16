@@ -61,6 +61,7 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 		file.setSuffix(FileUtil.extractSuffix(entity.getQualifiedName()));
 		file.setEndLine(entity.getEndLine() == null ? -1 : entity.getEndLine());
 		file.setLoc(entity.getLoc() == null ? -1 : entity.getLoc());
+		file.setProjectBelongId(currentProject.getId());
 		addNode(file, currentProject);
 		// 文件所在目录
 		String directoryPath = FileUtil.extractDirectoryFromFile(entity.getQualifiedName()) + "/";
