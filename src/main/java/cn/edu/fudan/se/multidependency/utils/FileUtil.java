@@ -316,7 +316,7 @@ public class FileUtil {
 	 * @param filePath
 	 * @return
 	 */
-	public static String extractFileName(String filePath) {
+	public static String extractFilePathName(String filePath) {
 //		LOGGER.info("extractFileName " + filePath);
 		String newPath = filePath;
 		newPath = newPath.replace(SLASH_WINDOWS, SLASH_LINUX);

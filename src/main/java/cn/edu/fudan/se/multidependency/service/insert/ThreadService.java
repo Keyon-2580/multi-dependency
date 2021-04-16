@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 
 import cn.edu.fudan.se.multidependency.service.insert.dynamic.FeatureAndTestCaseFromJSONFileForMicroserviceInserter;
 import cn.edu.fudan.se.multidependency.service.insert.git.GitExtractor;
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +75,7 @@ public class ThreadService {
 					} finally {
 						synchronized (latchOfProjects) {
 							LOGGER.info(new StringBuilder().append("解析项目 ")
-									.append(projectConfig.getProject())
+									.append(FileUtil.extractFilePathName(projectConfig.getPath()))
 									.append("(").append(projectConfig.getLanguage()).append(")")
 									.append(" 结束，线程- 1：").append((latchOfProjects.getCount() - 1)).toString());
 						}
@@ -90,7 +91,7 @@ public class ThreadService {
 	}
 
 	private void staticAnalyseCore(ProjectConfig projectConfig) throws Exception {
-		LOGGER.info(projectConfig.getProject() + " " + projectConfig.getLanguage());
+		LOGGER.info(FileUtil.extractFilePathName(projectConfig.getPath()) + " " + projectConfig.getLanguage());
 		DependsEntityRepoExtractor extractor = new Depends096Extractor();
 		extractor.setIncludeDirs(projectConfig.includeDirsArray());
 		extractor.setExcludes(projectConfig.getExcludes());

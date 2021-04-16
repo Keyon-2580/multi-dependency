@@ -64,7 +64,7 @@ public class ClusterServiceImpl implements ClusterService {
             for(String path : cluster) {
                 JSONObject jsonObject2 = new JSONObject();
                 jsonObject2.put("size", 1);
-                jsonObject2.put("name", FileUtil.extractFileName(path));
+                jsonObject2.put("name", FileUtil.extractFilePathName(path));
 //                jsonObject2.put("name", path);
                 jsonArray2.add(jsonObject2);
             }

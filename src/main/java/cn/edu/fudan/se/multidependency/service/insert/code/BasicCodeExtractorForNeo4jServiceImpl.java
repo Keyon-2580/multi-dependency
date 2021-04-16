@@ -26,10 +26,10 @@ public abstract class BasicCodeExtractorForNeo4jServiceImpl extends ExtractorFor
 		super();
 		this.isMicroservice = projectConfig.isMicroService();
 		this.serviceGroupName = projectConfig.getServiceGroupName();
-		this.currentProject = new Project(projectConfig.getProject(), "/" + FileUtil.extractFileName(projectConfig.getPath()), projectConfig.getLanguage());
+		this.currentProject = new Project(FileUtil.extractFilePathName(projectConfig.getPath()), "/" + FileUtil.extractFilePathName(projectConfig.getPath()), projectConfig.getLanguage());
 		this.microserviceName = projectConfig.getMicroserviceName();
 		if(StringUtils.isBlank(microserviceName)) {
-			this.microserviceName = projectConfig.getProject();
+			this.microserviceName = FileUtil.extractFilePathName(projectConfig.getPath());
 		}
 		this.currentProject.setMicroserviceName(microserviceName);
 	}

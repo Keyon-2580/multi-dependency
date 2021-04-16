@@ -38,7 +38,7 @@ public class JavaExtractorServiceImpl extends DependsCodeExtractorForNeo4jServic
 		file.setLanguage(Language.java.name());
 		file.setEntityId(entity.getId().longValue());
 		String filePath = entity.getQualifiedName();
-		file.setName(FileUtil.extractFileName(filePath));
+		file.setName(FileUtil.extractFilePathName(filePath));
 		filePath = FileUtil.extractFilePath(filePath, projectPath);
 		file.setPath(filePath);
 		file.setSuffix(FileUtil.extractSuffix(entity.getQualifiedName()));

@@ -94,7 +94,7 @@ public class GitExtractor implements Closeable {
     }
 
     public String getRepositoryName() {
-        return FileUtil.extractFileName(gitProjectPath);
+        return FileUtil.extractFilePathName(gitProjectPath);
     }
     
     public String getGitPath() {
