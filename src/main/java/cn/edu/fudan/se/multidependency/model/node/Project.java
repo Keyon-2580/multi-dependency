@@ -60,6 +60,7 @@ public class Project implements Node {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
+		properties.put("path", getPath() == null ? "" : getPath());
 		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		properties.put("name", getName() == null ? "" : getName());
 		return properties;

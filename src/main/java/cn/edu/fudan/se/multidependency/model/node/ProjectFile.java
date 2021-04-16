@@ -26,7 +26,7 @@ public class ProjectFile extends CodeUnit {
     
     private Long entityId;
 
-	private Long projectBelongId;
+	private String projectBelongPath;
 
 	private String name;
 	
@@ -66,7 +66,7 @@ public class ProjectFile extends CodeUnit {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("name", getName() == null ? "" : getName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
-		properties.put("projectBelongId", getProjectBelongId() == null ? -1 : getProjectBelongId());
+		properties.put("projectBelongPath", getProjectBelongPath() == null ? "" : getProjectBelongPath());
 		properties.put("path", getPath() == null ? "" : getPath());
 		properties.put("suffix", getSuffix() == null ? "" : getSuffix());
 		properties.put("endLine", getEndLine());

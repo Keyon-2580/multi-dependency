@@ -318,13 +318,12 @@ public class FileUtil {
 	 */
 	public static String extractFileName(String filePath) {
 //		LOGGER.info("extractFileName " + filePath);
-		if(filePath.contains(SLASH_WINDOWS)) {
-			return filePath.substring(filePath.lastIndexOf(SLASH_WINDOWS) + 1);
-		} else if(filePath.contains(SLASH_LINUX)) {
-			return filePath.substring(filePath.lastIndexOf(SLASH_LINUX) + 1);
-		} else {
-			return filePath;
+		String newPath = filePath;
+		newPath = newPath.replace(SLASH_WINDOWS, SLASH_LINUX);
+		if(newPath.endsWith(SLASH_LINUX)){
+			newPath.substring(0, newPath.length()-1);
 		}
+		return filePath.substring(filePath.lastIndexOf(SLASH_LINUX) + 1);
 	}
 
 	/**

@@ -44,7 +44,7 @@ public class JavaExtractorServiceImpl extends DependsCodeExtractorForNeo4jServic
 		file.setSuffix(FileUtil.extractSuffix(entity.getQualifiedName()));
 		file.setEndLine(entity.getEndLine() == null ? -1 : entity.getEndLine());
 		file.setLoc(entity.getLoc() == null ? -1 : entity.getLoc());
-		file.setProjectBelongId(currentProject.getId());
+		file.setProjectBelongPath(projectPath);
 		addNode(file, currentProject);
 		
 		// 文件所在目录
