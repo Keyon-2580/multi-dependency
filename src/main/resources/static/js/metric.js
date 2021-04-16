@@ -141,16 +141,6 @@ var metric = function() {
 			}
 		});
 	}
-
-	var showResults = function(container, projectId) {
-		$.ajax({
-			type: "get",
-			url: "/metric/project/modularity?projectId=" + projectId,
-			success: function(modularity) {
-				container.text(modularity);
-			}
-		});
-	}
 	
 	var showModularity = function(container, projectId) {
 		$.ajax({
