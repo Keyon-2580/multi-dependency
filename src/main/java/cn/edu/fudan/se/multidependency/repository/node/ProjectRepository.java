@@ -66,8 +66,9 @@ public interface ProjectRepository extends Neo4jRepository<Project, Long> {
 			"     sum(package.noc) as noc, " +
 			"     sum(package.nom) as nom, " +
 			"     sum(package.loc) as loc, " +
-			"     sum(package.lines) as lines\r\n" +
-			"return project, nop, nof, noc, nom, loc, lines order by(project.path);")
+			"     sum(package.lines) as lines, " +
+			"     project.commits as commits " +
+			"return project, nop, nof, noc, nom, loc, lines, commits order by(project.path);")
 	public List<ProjectMetrics> calculateProjectMetrics();
 
 	@Query("MATCH (project:Project) " +

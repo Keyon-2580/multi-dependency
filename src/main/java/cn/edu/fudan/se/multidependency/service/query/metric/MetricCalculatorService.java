@@ -452,8 +452,8 @@ public class MetricCalculatorService {
 		if(projectMetricsList != null && !projectMetricsList.isEmpty()) {
 			projectMetricsList.forEach(projectMetrics -> {
 				Project project = projectMetrics.getProject();
-				int commitTimes = calculateProjectCommits(project);
-				projectMetrics.setCommits(commitTimes);
+//				int commitTimes = calculateProjectCommits(project);
+//				projectMetrics.setCommits(commitTimes);
 				result.put(project.getId(), projectMetrics);
 			});
 			cache.cache(getClass(), key, result);
