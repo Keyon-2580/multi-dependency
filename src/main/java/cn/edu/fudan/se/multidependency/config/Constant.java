@@ -14,7 +14,8 @@ public class Constant {
 	public static final String ISSUE_FROM_JIRA = "jira";
 	public static final String ISSUE_FROM_GITHUB = "github";
 
-	public static final String[] FILE_SUFFIX = new String[]{".java", ".c", ".cpp", ".cc", ".h",".JAVA", ".C", ".CPP", ".CC", ".H"};
+	public static final String[] FILE_SUFFIX =
+			new String[]{".java",".cpp", ".cc", ".c", ".c++", ".h", ".hpp", ".hh", ".cxx", ".hxx"};
 
 	public static final String PROJECT_STRUCTURE_TREEMAP = "PROJECT_STRUCTURE_TREEMAP";
 	public static final String PROJECT_STRUCTURE_CIRCLE_PACKING = "PROJECT_STRUCTURE_CIRCLE_PACKING";

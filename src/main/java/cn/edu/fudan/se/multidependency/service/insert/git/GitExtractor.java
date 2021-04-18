@@ -111,25 +111,9 @@ public class GitExtractor implements Closeable {
 
     public List<RevCommit> getAllCommits() {
         try{
-            ObjectId lastCommitId = git.getRepository().resolve(org.eclipse.jgit.lib.Constants.HEAD);
-            RevWalk rw = new RevWalk(git.getRepository());
-            RevCommit latestCommit = rw.parseCommit(lastCommitId);
-            if(latestCommit.getParentCount() > 1){
-                LOGGER.error("Commit时间设定错误，最新的commit类型不能为Merge！！！");
-                return new ArrayList<>();
-            }
-
             Iterable<RevCommit> commits = git.log().setRevFilter(RevFilter.NO_MERGES).call();
             return Lists.newArrayList(commits.iterator());
         }catch (GitAPIException e){
-            e.printStackTrace();
-        } catch (IncorrectObjectTypeException e) {
-            e.printStackTrace();
-        } catch (AmbiguousObjectException e) {
-            e.printStackTrace();
-        } catch (MissingObjectException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
             e.printStackTrace();
         }
         return new ArrayList<>();
@@ -153,36 +137,27 @@ public class GitExtractor implements Closeable {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constant.TIMESTAMP);
         try {
             Date sinceDate = simpleDateFormat.parse(since);
-            Date untilDate = simpleDateFormat.parse(until);
+//            Date untilDate = simpleDateFormat.parse(until);
 
-            ObjectId lastCommitId = git.getRepository().resolve(org.eclipse.jgit.lib.Constants.HEAD);
-            RevWalk rw = new RevWalk(git.getRepository());
-            RevCommit latestCommit = rw.parseCommit(lastCommitId);
-            if(latestCommit.getParentCount() > 1){
-                LOGGER.error("Commit时间设定错误，最新的commit类型不能为Merge！！！");
-                return new ArrayList<>();
-            }
+//            ObjectId lastCommitId = git.getRepository().resolve(org.eclipse.jgit.lib.Constants.HEAD);
+//            RevWalk rw = new RevWalk(git.getRepository());
+//            RevCommit latestCommit = rw.parseCommit(lastCommitId);
+//            if(latestCommit.getParentCount() > 1){
+//                LOGGER.error("Commit时间设定错误，最新的commit类型不能为Merge！！！");
+//                return new ArrayList<>();
+//            }
 
-            Date latestCommitTime = latestCommit.getAuthorIdent().getWhen();
-            if(latestCommitTime.after(untilDate)){
-                LOGGER.error("Commit时间设定错误，当前最新的commit时间晚于设定最新时间，请推后设定最新时间！！！");
-                return new ArrayList<>();
-            }
+//            Date latestCommitTime = latestCommit.getAuthorIdent().getWhen();
+//            if(latestCommitTime.after(untilDate)){
+//                LOGGER.error("Commit时间设定错误，当前最新的commit时间晚于设定最新时间，请推后设定最新时间！！！");
+//                return new ArrayList<>();
+//            }
 
-            RevFilter between = CommitTimeRevFilter.between(sinceDate, untilDate);
+            RevFilter between = CommitTimeRevFilter.after(sinceDate);
             RevFilter filter = removeMerge ? AndRevFilter.create(between, RevFilter.NO_MERGES) : between;
             Iterable<RevCommit> commits = git.log().setRevFilter(filter).call();
-//            Iterable<RevCommit> commits = git.log().setRevFilter(between).call();
             return Lists.newArrayList(commits.iterator());
         } catch (ParseException | GitAPIException e) {
-            e.printStackTrace();
-        } catch (IncorrectObjectTypeException e) {
-            e.printStackTrace();
-        } catch (AmbiguousObjectException e) {
-            e.printStackTrace();
-        } catch (MissingObjectException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
             e.printStackTrace();
         }
         return new ArrayList<>();
