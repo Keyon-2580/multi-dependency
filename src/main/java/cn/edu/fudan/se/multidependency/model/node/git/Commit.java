@@ -35,6 +35,8 @@ public class Commit implements Node {
     private String fullMessage;
 
 	private String authoredDate;
+
+	private String commitDate;
 	
 	private int commitTime;
 	
@@ -45,13 +47,14 @@ public class Commit implements Node {
 	private boolean usingForIssue;
 
 	public Commit(Long entityId, String commitId, String shortMessage, 
-			String fullMessage, String authoredDate, boolean merge,
-			int commitTime){
+			String fullMessage, String authoredDate, String commitDate,
+				  int commitTime, boolean merge){
 		this.entityId = entityId;
 		this.commitId = commitId;
 		this.shortMessage = shortMessage;
 		this.fullMessage = fullMessage;
 		this.authoredDate = authoredDate;
+		this.commitDate = commitDate;
 		this.commitTime = commitTime;
 		this.merge = merge;
 		this.usingForIssue = true;
@@ -65,6 +68,7 @@ public class Commit implements Node {
 	    properties.put("shortMessage", getShortMessage() == null ? "" : getShortMessage());
 	    properties.put("fullMessage", getFullMessage() == null ? "" : getFullMessage());
 		properties.put("authoredDate", getAuthoredDate() == null ? "" : getAuthoredDate());
+		properties.put("commitDate", getCommitDate() == null ? "" : getCommitDate());
 		properties.put("commitTime", getCommitTime());
 		properties.put("commitFilesSize", getCommitFilesSize());
 		properties.put("usingForIssue", isUsingForIssue());

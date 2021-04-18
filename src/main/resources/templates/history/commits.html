@@ -74,7 +74,7 @@
 						<th width="20%">commitId</th>
 						<th width="20%">shortMessage</th>
 						<th width="40%">fullMessage</th>
-						<th width="10%">authoredDate</th>
+						<th width="10%">commitDate</th>
 						<th width="5%">commitFilesSize</th>
 					</tr>
 					<tr th:each="commit : ${commits}">
@@ -82,7 +82,7 @@
 						<td><a target="_blank" th:href="${'/commit/' + commit.id}"><span th:text="${commit.commitId}"></span></a></td>
 						<td th:text="${commit.shortMessage}"></td>
 						<td th:text="${commit.fullMessage}"></td>
-						<td th:text="${commit.authoredDate}"></td>
+						<td th:text="${commit.commitDate}"></td>
 						<td th:text="${commit.commitFilesSize}"></td>
 					</tr>
 				</table>

@@ -186,6 +186,9 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
 
         for (RevCommit revCommit : commits) {
         	String authoredDate = new SimpleDateFormat(Constant.TIMESTAMP).format(revCommit.getAuthorIdent().getWhen());
+            Date revDate = new Date((long)revCommit.getCommitTime()*1000);
+            String commitDate = new SimpleDateFormat(Constant.TIMESTAMP).format(revDate);
+
         	boolean merge = revCommit.getParentCount() > 1;
         	Commit commit = null;
             String shortMessage = revCommit.getShortMessage();
@@ -201,12 +204,12 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
         		//添加commit节点
 
         		commit = new Commit(generateEntityId(), revCommit.getName(), shortMessage,
-                        fullMessage, authoredDate, merge, revCommit.getCommitTime());
+                        fullMessage, authoredDate, commitDate, revCommit.getCommitTime(), merge);
         		addNode(commit, null);
         		addRelation(new Contain(branch, commit));
         	} else {
         		commit = new Commit(generateEntityId(), revCommit.getName(), shortMessage,
-                        fullMessage, authoredDate, merge, revCommit.getCommitTime());
+                        fullMessage, authoredDate, commitDate, revCommit.getCommitTime(), merge);
         		addNode(commit, null);
         		//添加branch到commit的包含关系
         		List<Ref> branchesOfCommit = gitExtractor.getBranchesByCommitId(revCommit);
