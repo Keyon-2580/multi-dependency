@@ -5,7 +5,7 @@
 
 	<groupId>cn.edu.fudan.se</groupId>
 	<artifactId>multi-dependency</artifactId>
-	<version>1.5.0</version>
+	<version>1.5.6</version>
 	<packaging>jar</packaging>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -89,7 +89,7 @@
 		<dependency>
 			<groupId>cn.emergentdesign.se</groupId>
 			<artifactId>depends</artifactId>
-			<version>0.9.6v</version>
+			<version>0.9.6w</version>
 			<scope>system</scope>
 			<systemPath>${pom.basedir}/lib/depends-0.9.6w-jar-with-dependencies.jar</systemPath>
 			<!-- <systemPath>${project.basedir}/lib/depends.jar</systemPath> -->
