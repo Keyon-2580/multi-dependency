@@ -91,7 +91,7 @@
 			<artifactId>depends</artifactId>
 			<version>0.9.6v</version>
 			<scope>system</scope>
-			<systemPath>${pom.basedir}/lib/depends-0.9.6v-jar-with-dependencies.jar</systemPath>
+			<systemPath>${pom.basedir}/lib/depends-0.9.6w-jar-with-dependencies.jar</systemPath>
 			<!-- <systemPath>${project.basedir}/lib/depends.jar</systemPath> -->
 			<!-- <exclusions>
 				<exclusion>
