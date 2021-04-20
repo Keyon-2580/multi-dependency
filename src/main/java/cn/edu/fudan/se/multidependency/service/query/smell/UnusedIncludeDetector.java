@@ -11,7 +11,7 @@ public interface UnusedIncludeDetector {
     /**
      * 获取未使用引入
      */
-    Map<Long, List<UnusedInclude>> getFileUnusedInclude();
+    Map<Long, List<UnusedInclude>> queryFileUnusedInclude();
 
     /**
      * 检测未使用引入

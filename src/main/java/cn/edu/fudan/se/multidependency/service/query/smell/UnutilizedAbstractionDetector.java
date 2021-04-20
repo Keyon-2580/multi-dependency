@@ -11,12 +11,12 @@ public interface UnutilizedAbstractionDetector {
 	/**
 	 * 获取类的Unutilized Abstraction
 	 */
-	Map<Long, List<UnutilizedAbstraction<Type>>> getTypeUnutilizedAbstraction();
+	Map<Long, List<UnutilizedAbstraction<Type>>> queryTypeUnutilizedAbstraction();
 
 	/**
 	 * 获取文件的Unutilized Abstraction
 	 */
-	Map<Long, List<UnutilizedAbstraction<ProjectFile>>> getFileUnutilizedAbstraction();
+	Map<Long, List<UnutilizedAbstraction<ProjectFile>>> queryFileUnutilizedAbstraction();
 
 	/**
 	 * 检测类的Unutilized Abstraction

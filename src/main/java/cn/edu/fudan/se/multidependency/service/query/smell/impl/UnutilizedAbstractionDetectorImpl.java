@@ -39,7 +39,7 @@ public class UnutilizedAbstractionDetectorImpl implements UnutilizedAbstractionD
 	private SmellRepository smellRepository;
 
 	@Override
-	public Map<Long, List<UnutilizedAbstraction<Type>>> getTypeUnutilizedAbstraction() {
+	public Map<Long, List<UnutilizedAbstraction<Type>>> queryTypeUnutilizedAbstraction() {
 		String key = "typeUnutilizedAbstraction";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
@@ -51,7 +51,7 @@ public class UnutilizedAbstractionDetectorImpl implements UnutilizedAbstractionD
 	}
 
 	@Override
-	public Map<Long, List<UnutilizedAbstraction<ProjectFile>>> getFileUnutilizedAbstraction() {
+	public Map<Long, List<UnutilizedAbstraction<ProjectFile>>> queryFileUnutilizedAbstraction() {
 		String key = "fileUnutilizedAbstraction";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);

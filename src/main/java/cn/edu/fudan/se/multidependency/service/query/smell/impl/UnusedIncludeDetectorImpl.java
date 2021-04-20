@@ -37,7 +37,7 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
     private ProjectFileRepository projectFileRepository;
 
     @Override
-    public Map<Long, List<UnusedInclude>> getFileUnusedInclude() {
+    public Map<Long, List<UnusedInclude>> queryFileUnusedInclude() {
         String key = "fileUnusedInclude";
         if (cache.get(getClass(), key) != null) {
             return cache.get(getClass(), key);

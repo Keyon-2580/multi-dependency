@@ -10,11 +10,17 @@ import cn.edu.fudan.se.multidependency.service.query.smell.data.PackageHubLike;
 
 public interface HubLikeComponentDetector {
 	
-	Map<Long, List<FileHubLike>> fileHubLikes();
+	Map<Long, List<FileHubLike>> queryFileHubLike();
 
-	Map<Long, List<PackageHubLike>> packageHubLikes();
+	Map<Long, List<PackageHubLike>> queryPackageHubLike();
 
-	Map<Long, List<ModuleHubLike>> moduleHubLikes();
+	Map<Long, List<ModuleHubLike>> queryModuleHubLike();
+
+	Map<Long, List<FileHubLike>> detectFileHubLike();
+
+	Map<Long, List<PackageHubLike>> detectPackageHubLike();
+
+	Map<Long, List<ModuleHubLike>> detectModuleHubLike();
 	
 	int[] getProjectMinFileFanIO(Project project);
 	

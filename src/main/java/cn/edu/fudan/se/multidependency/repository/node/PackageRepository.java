@@ -72,4 +72,10 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 	@Query("match (pck:Package) where not (pck)-[:" + RelationType.str_CONTAIN + "]->(:ProjectFile) " +
 			"set pck += {nof: 0, noc: 0, nom: 0, loc: 0, lines: 0};")
 	public void setEmptyPackageMetrics();
+
+	@Query("match (p1:Package)-[:DEPENDS_ON]->(p2:Package) where id(p2)=packageId return count(distinct p1)")
+	int getFanIn(@Param("packageId") long packageId);
+
+	@Query("match (p1:Package)-[:DEPENDS_ON]->(p2:Package) where id(p1)=packageId return count(distinct p2)")
+	int getFanOut(@Param("packageId") long packageId);
 }

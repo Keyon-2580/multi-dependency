@@ -76,8 +76,8 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 	}
 
 	@Override
-	public Map<Long, Map<Integer, Cycle<Type>>> getTypeCyclicDependency() {
-		String key = "typeCycles";
+	public Map<Long, Map<Integer, Cycle<Type>>> queryTypeCyclicDependency() {
+		String key = "typeCyclicDependency";
 		if (cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
@@ -115,8 +115,8 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 	}
 
 	@Override
-	public Map<Long, Map<Integer, Cycle<ProjectFile>>> getFileCyclicDependency() {
-		String key = "fileCycles";
+	public Map<Long, Map<Integer, Cycle<ProjectFile>>> queryFileCyclicDependency() {
+		String key = "fileCyclicDependency";
 		if (cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
@@ -154,8 +154,8 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 	}
 
 	@Override
-	public Map<Long, Map<Integer, Cycle<Package>>> getPackageCyclicDependency() {
-		String key = "packageCycles";
+	public Map<Long, Map<Integer, Cycle<Package>>> queryPackageCyclicDependency() {
+		String key = "packageCyclicDependency";
 		if (cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
@@ -193,8 +193,8 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 	}
 
 	@Override
-	public Map<Long, Map<Integer, Cycle<Module>>> getModuleCyclicDependency() {
-		String key = "moduleCycles";
+	public Map<Long, Map<Integer, Cycle<Module>>> queryModuleCyclicDependency() {
+		String key = "moduleCyclicDependency";
 		if (cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}

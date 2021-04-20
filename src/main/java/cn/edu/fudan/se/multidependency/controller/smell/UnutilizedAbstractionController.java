@@ -22,7 +22,7 @@ public class UnutilizedAbstractionController {
 	@GetMapping("/query")
 	public String queryUnusedInclude(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("unutilizedAbstractionMap", unutilizedAbstractionDetector.getFileUnutilizedAbstraction());
+		request.setAttribute("unutilizedAbstractionMap", unutilizedAbstractionDetector.queryFileUnutilizedAbstraction());
 		return "as/unutilizedabstraction";
 	}
 

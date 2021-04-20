@@ -27,15 +27,15 @@ public class CyclicDependencyController {
 	@GetMapping("/query")
 	public String queryCyclicDependency(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("types", cyclicDependencyDetector.getTypeCyclicDependency());
-		request.setAttribute("files", cyclicDependencyDetector.getFileCyclicDependency());
-		request.setAttribute("packages", cyclicDependencyDetector.getPackageCyclicDependency());
+		request.setAttribute("types", cyclicDependencyDetector.queryTypeCyclicDependency());
+		request.setAttribute("files", cyclicDependencyDetector.queryFileCyclicDependency());
+		request.setAttribute("packages", cyclicDependencyDetector.queryPackageCyclicDependency());
 //		request.setAttribute("modules", cyclicDependencyDetector.getModuleCyclicDependency());
 		return "as/cyclic";
 	}
 
 	@GetMapping("/detect")
-	public String reDetectCyclicDependency(HttpServletRequest request) {
+	public String detectCyclicDependency(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
 		request.setAttribute("types", cyclicDependencyDetector.detectTypeCyclicDependency());
 		request.setAttribute("files", cyclicDependencyDetector.detectFileCyclicDependency());

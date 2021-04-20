@@ -78,7 +78,7 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 	private static final int minCoChange = 10;
 
 	@Override
-	public Map<Long, List<SimilarComponents<ProjectFile>>> getFileSimilarComponents() {
+	public Map<Long, List<SimilarComponents<ProjectFile>>> queryFileSimilarComponents() {
 		String key = "fileSimilarComponents";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
@@ -152,8 +152,8 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 	}
 
 	@Override
-	public Map<Long, List<SimilarComponents<Package>>> getPackageSimilarComponents() {
-		String key = "fileSimilarComponents";
+	public Map<Long, List<SimilarComponents<Package>>> queryPackageSimilarComponents() {
+		String key = "packageSimilarComponents";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}

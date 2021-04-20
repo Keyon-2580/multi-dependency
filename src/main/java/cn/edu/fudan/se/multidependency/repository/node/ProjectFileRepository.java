@@ -143,6 +143,12 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	
 	@Query("match (f1:ProjectFile)-[:DEPENDS_ON]->(f2:ProjectFile) where id(f1)=$fileId return f2")
 	public List<ProjectFile> calculateFanOut(@Param("fileId") long fileId);
+
+	@Query("match (f1:ProjectFile)-[:DEPENDS_ON]->(f2:ProjectFile) where id(f2)=$fileId return count(distinct f1)")
+	int getFanIn(@Param("fileId") long fileId);
+
+	@Query("match (f1:ProjectFile)-[:DEPENDS_ON]->(f2:ProjectFile) where id(f1)=$fileId return count(distinct f2)")
+	int getFanOut(@Param("fileId") long fileId);
 	
 	@Query("match (f1:ProjectFile)-[:IMPORT]->(:Type)<-[:CONTAIN*1..2]-(f2:ProjectFile) where id(f1)=$fileId and f1 <> f2 return f2 as projectFile, count(r) as count")
 	List<DependencyPair> getImportBtwFile(@Param("fileId") long fileId);

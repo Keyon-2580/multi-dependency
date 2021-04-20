@@ -14,22 +14,22 @@ public interface CyclicDependencyDetector {
 	/**
 	 * 获取类的循环依赖
 	 */
-	Map<Long, Map<Integer, Cycle<Type>>> getTypeCyclicDependency();
+	Map<Long, Map<Integer, Cycle<Type>>> queryTypeCyclicDependency();
 
 	/**
 	 * 获取文件的循环依赖
 	 */
-	Map<Long, Map<Integer, Cycle<ProjectFile>>> getFileCyclicDependency();
+	Map<Long, Map<Integer, Cycle<ProjectFile>>> queryFileCyclicDependency();
 
 	/**
 	 * 获取包的循环依赖
 	 */
-	Map<Long, Map<Integer, Cycle<Package>>> getPackageCyclicDependency();
+	Map<Long, Map<Integer, Cycle<Package>>> queryPackageCyclicDependency();
 
 	/**
 	 * 获取模块的循环依赖
 	 */
-	Map<Long, Map<Integer, Cycle<Module>>> getModuleCyclicDependency();
+	Map<Long, Map<Integer, Cycle<Module>>> queryModuleCyclicDependency();
 
 	/**
 	 * 检测类的循环依赖
