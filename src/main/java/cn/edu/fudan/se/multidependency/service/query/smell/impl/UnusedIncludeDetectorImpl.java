@@ -91,13 +91,14 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
                 }
             }
             if (!codeFiles.isEmpty()) {
-                //任取一个元素做为该头文件的对应源文件
+                //任取一个元素做为该头文件的对应源文件，【待改】
                 ProjectFile codeFile = codeFiles.iterator().next();
                 Set<ProjectFile> headFileUnusedIncludeFileSet = new HashSet<>(headFileUnusedInclude.getUnusedIncludeFiles());
                 Set<ProjectFile> codeFileUnusedIncludeFileSet = new HashSet<>();
                 //获取该头文件无效引用中在源文件依旧无效的引用
                 for (ProjectFile headFileUnusedIncludeFile : headFileUnusedIncludeFileSet) {
-                    if (!unusedIncludeASRepository.isUsedInclude(codeFile.getId(), headFileUnusedIncludeFile.getId())) {
+                    Boolean isUsedFile = unusedIncludeASRepository.isUsedFile(codeFile.getId(), headFileUnusedIncludeFile.getId());
+                    if (isUsedFile == null || !isUsedFile) {
                         codeFileUnusedIncludeFileSet.add(headFileUnusedIncludeFile);
                     }
                 }
@@ -109,7 +110,9 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
                         break;
                     }
                 }
-                codeFileUnusedIncludeSet.add(new UnusedInclude(codeFile, codeFileUnusedIncludeFileSet));
+                if (codeFileUnusedIncludeFileSet.size() > 0) {
+                    codeFileUnusedIncludeSet.add(new UnusedInclude(codeFile, codeFileUnusedIncludeFileSet));
+                }
             }
         }
         List<UnusedInclude> codeFileUnusedIncludeList = new ArrayList<>(codeFileUnusedIncludeSet);

@@ -22,8 +22,8 @@ public interface UnusedIncludeASRepository extends Neo4jRepository<ProjectFile, 
 	@Query("MATCH (file1:ProjectFile)-[:" + RelationType.str_INCLUDE + "]->(file2:ProjectFile) where id(file2) = $fileId return collect(distinct file1);")
 	public Set<ProjectFile> findFileByHeadFileId(@Param("fileId") Long fileId);
 
-	@Query("MATCH (file1:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(file2:ProjectFile) where id(file1) = $file1Id and id(file2) = $file2Id return r.times - r.`dependsOnTypes.INCLUDE` > 0;")
-	public default boolean isUsedInclude(@Param("file1Id") Long file1Id, @Param("file2Id") Long file2Id) {
-		return false;
-	}
+	@Query("MATCH (file1:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(file2:ProjectFile) where id(file1) = $file1Id and id(file2) = $file2Id " +
+			"with r.times as allTimes, r.`dependsOnTypes.INCLUDE` as includeTimes " +
+			"return (case includeTimes when null then allTimes else (allTimes-includeTimes) end) > 0;")
+	public Boolean isUsedFile(@Param("file1Id") Long file1Id, @Param("file2Id") Long file2Id);
 }
