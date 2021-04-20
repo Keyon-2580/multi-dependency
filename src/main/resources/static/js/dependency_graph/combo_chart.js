@@ -1097,7 +1097,7 @@ function splitLinks(links_data){
                 temp_edge["target"] = edge["target_comboId"] + "_in";
                 temp_edge["visible"] = false;
                 temp_edge["style"] = {
-                    lineWidth: 4
+                    lineWidth: 2
                 };
 
                 if(edge.visible){
@@ -1451,10 +1451,11 @@ function autoLayout(){
     });
 
     let combo_list_sort = left.concat(right);
+    console.log(combo_list_sort);
     data["combos"] = combo_list_sort;
     // console.log(combo_list_sort);
 
-    combo_list.forEach((item, index) => {
+    combo_list_sort.forEach((item, index) => {
         let combo_cord;
         let outerNodeLineIndex = 1;
         let innerNodeLineIndex = 1;
@@ -1477,62 +1478,117 @@ function autoLayout(){
             combo_cord = [radius - combo_width * 0.5 + cord,  -(combo_height * 0.5) + cord];
         }
 
-        for(let i = 0; i < item.node_num; i++){
-            // if(node_list[node_index].comboId === item.id){
-            let temp_node = node_list[node_index];
-            let innerLineIndex = Math.ceil(innerNodeLineIndex / line_node_num);
-            let outerLineIndex = Math.ceil(outerNodeLineIndex / line_node_num);
-            // console.log(innerLineIndex);
-            // console.log(outerLineIndex);
-            if(temp_node.outerNode === 0){ //内部节点
-                if(combo_radio <= 0.5){//放置在上面
-                    if(combo_radio <= 0.25){
-                        temp_node["x"] = combo_cord[0] + REGULAR_NODE_SIZE * 1.5 * (innerNodeLineIndex % line_node_num);
-                        temp_node["y"] = combo_cord[1] + REGULAR_NODE_SIZE * 1.5 * innerLineIndex - combo_height;
-                        innerNodeLineIndex++;
+        node_list.forEach(node =>{
+            if(node.comboId === item.id){
+                let innerLineIndex = Math.ceil(innerNodeLineIndex / line_node_num);
+                let outerLineIndex = Math.ceil(outerNodeLineIndex / line_node_num);
+                // console.log(innerLineIndex);
+                // console.log(outerLineIndex);
+                if(node.outerNode === 0){ //内部节点
+                    if(combo_radio <= 0.5){//放置在上面
+                        if(combo_radio <= 0.25){
+                            node["x"] = combo_cord[0] + REGULAR_NODE_SIZE * 1.5 * (innerNodeLineIndex % line_node_num);
+                            node["y"] = combo_cord[1] + REGULAR_NODE_SIZE * 1.5 * innerLineIndex - combo_height;
+                            innerNodeLineIndex++;
+                        }else{
+                            node["x"] = combo_cord[0] - REGULAR_NODE_SIZE * 1.5 * (innerNodeLineIndex % line_node_num);
+                            node["y"] = combo_cord[1] + REGULAR_NODE_SIZE * 1.5 * innerLineIndex - combo_height;
+                            innerNodeLineIndex++;
+                        }
                     }else{
-                        temp_node["x"] = combo_cord[0] - REGULAR_NODE_SIZE * 1.5 * (innerNodeLineIndex % line_node_num);
-                        temp_node["y"] = combo_cord[1] + REGULAR_NODE_SIZE * 1.5 * innerLineIndex - combo_height;
-                        innerNodeLineIndex++;
-                    }
-                }else{
-                    if(combo_radio <= 0.75){
-                        temp_node["x"] = combo_cord[0] - REGULAR_NODE_SIZE * 1.5 * (innerNodeLineIndex % line_node_num);
-                        temp_node["y"] = combo_cord[1] - REGULAR_NODE_SIZE * 1.5 * innerLineIndex + combo_height;
-                        innerNodeLineIndex++;
-                    }else{
-                        temp_node["x"] = combo_cord[0] + REGULAR_NODE_SIZE * 1.5 * (innerNodeLineIndex % line_node_num);
-                        temp_node["y"] = combo_cord[1] - REGULAR_NODE_SIZE * 1.5 * innerLineIndex + combo_height;
-                        innerNodeLineIndex++;
-                    }
+                        if(combo_radio <= 0.75){
+                            node["x"] = combo_cord[0] - REGULAR_NODE_SIZE * 1.5 * (innerNodeLineIndex % line_node_num);
+                            node["y"] = combo_cord[1] - REGULAR_NODE_SIZE * 1.5 * innerLineIndex + combo_height;
+                            innerNodeLineIndex++;
+                        }else{
+                            node["x"] = combo_cord[0] + REGULAR_NODE_SIZE * 1.5 * (innerNodeLineIndex % line_node_num);
+                            node["y"] = combo_cord[1] - REGULAR_NODE_SIZE * 1.5 * innerLineIndex + combo_height;
+                            innerNodeLineIndex++;
+                        }
 
-                }
-            }else{ //外部节点
-                if(combo_radio <= 0.5) {
-                    if(combo_radio <= 0.25) {
-                        temp_node["x"] = combo_cord[0] + REGULAR_NODE_SIZE * 1.5 * (outerNodeLineIndex % line_node_num);
-                        temp_node["y"] = combo_cord[1] - REGULAR_NODE_SIZE * 1.5 * outerLineIndex;
-                        outerNodeLineIndex++;
-                    }else{
-                        temp_node["x"] = combo_cord[0] - REGULAR_NODE_SIZE * 1.5 * (outerNodeLineIndex % line_node_num);
-                        temp_node["y"] = combo_cord[1] - REGULAR_NODE_SIZE * 1.5 * outerLineIndex;
-                        outerNodeLineIndex++;
                     }
-                }else{
-                    if(combo_radio <= 0.75) {
-                        temp_node["x"] = combo_cord[0] - REGULAR_NODE_SIZE * 1.5 * (outerNodeLineIndex % line_node_num);
-                        temp_node["y"] = combo_cord[1] + REGULAR_NODE_SIZE * 1.5 * outerLineIndex;
-                        outerNodeLineIndex++;
+                }else{ //外部节点
+                    if(combo_radio <= 0.5) {
+                        if(combo_radio <= 0.25) {
+                            node["x"] = combo_cord[0] + REGULAR_NODE_SIZE * 1.5 * (outerNodeLineIndex % line_node_num);
+                            node["y"] = combo_cord[1] - REGULAR_NODE_SIZE * 1.5 * outerLineIndex;
+                            outerNodeLineIndex++;
+                        }else{
+                            node["x"] = combo_cord[0] - REGULAR_NODE_SIZE * 1.5 * (outerNodeLineIndex % line_node_num);
+                            node["y"] = combo_cord[1] - REGULAR_NODE_SIZE * 1.5 * outerLineIndex;
+                            outerNodeLineIndex++;
+                        }
                     }else{
-                        temp_node["x"] = combo_cord[0] + REGULAR_NODE_SIZE * 1.5 * (outerNodeLineIndex % line_node_num);
-                        temp_node["y"] = combo_cord[1] + REGULAR_NODE_SIZE * 1.5 * outerLineIndex;
-                        outerNodeLineIndex++;
+                        if(combo_radio <= 0.75) {
+                            node["x"] = combo_cord[0] - REGULAR_NODE_SIZE * 1.5 * (outerNodeLineIndex % line_node_num);
+                            node["y"] = combo_cord[1] + REGULAR_NODE_SIZE * 1.5 * outerLineIndex;
+                            outerNodeLineIndex++;
+                        }else{
+                            node["x"] = combo_cord[0] + REGULAR_NODE_SIZE * 1.5 * (outerNodeLineIndex % line_node_num);
+                            node["y"] = combo_cord[1] + REGULAR_NODE_SIZE * 1.5 * outerLineIndex;
+                            outerNodeLineIndex++;
+                        }
                     }
                 }
             }
-            node_index++;
-            // }
-        }
+        })
+
+        // for(let i = 0; i < item.node_num; i++){
+        //     // if(node_list[node_index].comboId === item.id){
+        //     let temp_node = node_list[node_index];
+        //     let innerLineIndex = Math.ceil(innerNodeLineIndex / line_node_num);
+        //     let outerLineIndex = Math.ceil(outerNodeLineIndex / line_node_num);
+        //     // console.log(innerLineIndex);
+        //     // console.log(outerLineIndex);
+        //     if(temp_node.outerNode === 0){ //内部节点
+        //         if(combo_radio <= 0.5){//放置在上面
+        //             if(combo_radio <= 0.25){
+        //                 temp_node["x"] = combo_cord[0] + REGULAR_NODE_SIZE * 1.5 * (innerNodeLineIndex % line_node_num);
+        //                 temp_node["y"] = combo_cord[1] + REGULAR_NODE_SIZE * 1.5 * innerLineIndex - combo_height;
+        //                 innerNodeLineIndex++;
+        //             }else{
+        //                 temp_node["x"] = combo_cord[0] - REGULAR_NODE_SIZE * 1.5 * (innerNodeLineIndex % line_node_num);
+        //                 temp_node["y"] = combo_cord[1] + REGULAR_NODE_SIZE * 1.5 * innerLineIndex - combo_height;
+        //                 innerNodeLineIndex++;
+        //             }
+        //         }else{
+        //             if(combo_radio <= 0.75){
+        //                 temp_node["x"] = combo_cord[0] - REGULAR_NODE_SIZE * 1.5 * (innerNodeLineIndex % line_node_num);
+        //                 temp_node["y"] = combo_cord[1] - REGULAR_NODE_SIZE * 1.5 * innerLineIndex + combo_height;
+        //                 innerNodeLineIndex++;
+        //             }else{
+        //                 temp_node["x"] = combo_cord[0] + REGULAR_NODE_SIZE * 1.5 * (innerNodeLineIndex % line_node_num);
+        //                 temp_node["y"] = combo_cord[1] - REGULAR_NODE_SIZE * 1.5 * innerLineIndex + combo_height;
+        //                 innerNodeLineIndex++;
+        //             }
+        //
+        //         }
+        //     }else{ //外部节点
+        //         if(combo_radio <= 0.5) {
+        //             if(combo_radio <= 0.25) {
+        //                 temp_node["x"] = combo_cord[0] + REGULAR_NODE_SIZE * 1.5 * (outerNodeLineIndex % line_node_num);
+        //                 temp_node["y"] = combo_cord[1] - REGULAR_NODE_SIZE * 1.5 * outerLineIndex;
+        //                 outerNodeLineIndex++;
+        //             }else{
+        //                 temp_node["x"] = combo_cord[0] - REGULAR_NODE_SIZE * 1.5 * (outerNodeLineIndex % line_node_num);
+        //                 temp_node["y"] = combo_cord[1] - REGULAR_NODE_SIZE * 1.5 * outerLineIndex;
+        //                 outerNodeLineIndex++;
+        //             }
+        //         }else{
+        //             if(combo_radio <= 0.75) {
+        //                 temp_node["x"] = combo_cord[0] - REGULAR_NODE_SIZE * 1.5 * (outerNodeLineIndex % line_node_num);
+        //                 temp_node["y"] = combo_cord[1] + REGULAR_NODE_SIZE * 1.5 * outerLineIndex;
+        //                 outerNodeLineIndex++;
+        //             }else{
+        //                 temp_node["x"] = combo_cord[0] + REGULAR_NODE_SIZE * 1.5 * (outerNodeLineIndex % line_node_num);
+        //                 temp_node["y"] = combo_cord[1] + REGULAR_NODE_SIZE * 1.5 * outerLineIndex;
+        //                 outerNodeLineIndex++;
+        //             }
+        //         }
+        //     }
+        //     node_index++;
+        //     // }
+        // }
 
         if(combo_radio <= 0.5){
             if(combo_radio <= 0.25){
