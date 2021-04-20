@@ -227,4 +227,17 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"match (f:ProjectFile) -[:HAS]-> (m:Metric) where m.`metricValues.Creator` = developer return f")
 	List<ProjectFile> findCoMostUpdatorFileList(@Param("fileId")Long fileId);
 
+	@Query("MATCH (project:Project)-[:" + RelationType.str_CONTAIN + "*]->(file:ProjectFile)-[:" + RelationType.str_HAS + "]->(metric:Metric) " +
+			"where id(project) = $projectId " +
+			"with distinct metric, metric.`metricValues.FanIn` as fanIn " +
+			"where fanIn > 0 " +
+			"RETURN fanIn order by fanIn;")
+	List<Integer> findFileFanInByProjectId(@Param("projectId") Long projectId);
+
+	@Query("MATCH (project:Project)-[:" + RelationType.str_CONTAIN + "*]->(file:ProjectFile)-[:" + RelationType.str_HAS + "]->(metric:Metric) " +
+			"where id(project) = $projectId " +
+			"with distinct metric, metric.`metricValues.FanOut` as fanOut " +
+			"where fanOut > 0 " +
+			"RETURN fanOut order by fanOut;")
+	List<Integer> findFileFanOutByProjectId(@Param("projectId") Long projectId);
 }

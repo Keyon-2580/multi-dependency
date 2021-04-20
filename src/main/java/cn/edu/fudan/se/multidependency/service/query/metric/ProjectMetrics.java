@@ -50,6 +50,14 @@ public class ProjectMetrics {
 	 * 模块度
 	 */
 	private double modularity = -1;
-	
-	
+
+	/**
+	 * 该项目所有文件入度中位数
+	 */
+	private int fanIn = -1;
+
+	/**
+	 * 该项目所有文件出度中位数
+	 */
+	private int fanOut = -1;
 }

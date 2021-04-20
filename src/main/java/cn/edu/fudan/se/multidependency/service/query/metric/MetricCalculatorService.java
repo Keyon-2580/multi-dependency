@@ -308,6 +308,8 @@ public class MetricCalculatorService {
 				metricValues.put(MetricType.LINES, projectMetrics.getLines());
 				metricValues.put(MetricType.COMMITS, projectMetrics.getCommits());
 				metricValues.put(MetricType.MODULARITY, projectMetrics.getModularity());
+				metricValues.put(MetricType.FAN_IN, projectMetrics.getFanIn());
+				metricValues.put(MetricType.FAN_OUT, projectMetrics.getFanOut());
 
 				metric.setMetricValues(metricValues);
 
@@ -452,8 +454,30 @@ public class MetricCalculatorService {
 		if(projectMetricsList != null && !projectMetricsList.isEmpty()) {
 			projectMetricsList.forEach(projectMetrics -> {
 				Project project = projectMetrics.getProject();
-//				int commitTimes = calculateProjectCommits(project);
-//				projectMetrics.setCommits(commitTimes);
+				List<Integer> fileFanInList = new ArrayList<>(fileRepository.findFileFanInByProjectId(project.getId()));
+				List<Integer> fileFanOutList = new ArrayList<>(fileRepository.findFileFanOutByProjectId(project.getId()));
+				int midFanIn = 0;
+				int midFanOut = 0;
+				int fileFanInListSize = fileFanInList.size();
+				int fileFanOutListSize = fileFanOutList.size();
+				if (fileFanInListSize > 0) {
+					if (fileFanInListSize % 2 == 0) {
+						midFanIn = (fileFanInList.get((fileFanInListSize / 2) - 1) + fileFanInList.get(fileFanInListSize / 2)) / 2;
+					}
+					else {
+						midFanIn = fileFanInList.get(fileFanInListSize / 2);
+					}
+				}
+				if (fileFanOutListSize > 0) {
+					if (fileFanOutListSize % 2 == 0) {
+						midFanOut = (fileFanOutList.get((fileFanOutListSize / 2) - 1) + fileFanOutList.get(fileFanOutListSize / 2)) / 2;
+					}
+					else {
+						midFanOut = fileFanOutList.get(fileFanOutListSize / 2);
+					}
+				}
+				projectMetrics.setFanIn(midFanIn);
+				projectMetrics.setFanOut(midFanOut);
 				result.put(project.getId(), projectMetrics);
 			});
 			cache.cache(getClass(), key, result);

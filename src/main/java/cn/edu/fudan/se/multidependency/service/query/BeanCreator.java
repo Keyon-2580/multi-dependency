@@ -10,13 +10,11 @@ import cn.edu.fudan.se.multidependency.model.relation.*;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
-import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.smell.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellMetricCalculatorService;
-import cn.edu.fudan.se.multidependency.service.query.smell.UnusedIncludeDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,9 +77,6 @@ public class BeanCreator {
 	@Autowired
 	private SmellDetectorService smellDetectorService;
 
-	@Autowired
-	private UnusedIncludeDetector unusedIncludeDetector;
-
 	@Bean("createCoChanges")
 	public List<CoChange> createCoChanges(PropertyConfig propertyConfig, CoChangeRepository cochangeRepository, AggregationCoChangeRepository aggregationCoChangeRepository) {
 		List<CoChange> coChanges = new ArrayList<>();
@@ -132,7 +127,7 @@ public class BeanCreator {
 
 
 	@Bean("createDependsOn")
-	public List<DependsOn> createDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, AggregationDependsOnRepository aggregationDependsOnRepository, ProjectFileRepository fileRepository, ASRepository asRepository) {
+	public List<DependsOn> createDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, AggregationDependsOnRepository aggregationDependsOnRepository, ProjectFileRepository fileRepository) {
 		if(!propertyConfig.isCalculateDependsOn()) {
 			return new ArrayList<>();
 		}
@@ -247,10 +242,10 @@ public class BeanCreator {
 				if (nodeDependsOn != null ){
 					if ( nodeDependsOn.getDependsOnTypes().containsKey(dependsOn.getDependsOnType()) ) {
 						Long times = nodeDependsOn.getDependsOnTypes().get(dependsOn.getDependsOnType());
-						times += Long.valueOf(dependsOn.getTimes());
+						times += (long) dependsOn.getTimes();
 						nodeDependsOn.getDependsOnTypes().put(dependsOn.getDependsOnType(), times);
 					}else {
-						nodeDependsOn.getDependsOnTypes().put(dependsOn.getDependsOnType(), Long.valueOf(dependsOn.getTimes()));
+						nodeDependsOn.getDependsOnTypes().put(dependsOn.getDependsOnType(), (long) dependsOn.getTimes());
 						String dTypes = nodeDependsOn.getDependsOnType();
 						nodeDependsOn.setDependsOnType(dTypes + "__" + dependsOn.getDependsOnType());
 					}
@@ -259,7 +254,7 @@ public class BeanCreator {
 					dependsOnMap.put(node2, nodeDependsOn);
 				} else {
 					DependsOn newDepends = new DependsOn(node1, node2);
-					newDepends.getDependsOnTypes().put(dependsOn.getDependsOnType(), Long.valueOf(dependsOn.getTimes()));
+					newDepends.getDependsOnTypes().put(dependsOn.getDependsOnType(), (long) dependsOn.getTimes());
 					newDepends.setDependsOnType(dependsOn.getDependsOnType());
 					newDepends.setTimes(dependsOn.getTimes());
 					dependsOnMap.put(node2, newDepends);
@@ -295,9 +290,7 @@ public class BeanCreator {
 
 
 	@Bean("createCloneGroup")
-	public List<CloneGroup> createCloneGroup(PropertyConfig propertyConfig,
-											 CloneGroupRepository cloneGroupRepository,
-											 SmellRepository smellRepository) {
+	public List<CloneGroup> createCloneGroup(PropertyConfig propertyConfig, CloneGroupRepository cloneGroupRepository) {
 		if(propertyConfig.isCalculateCloneGroup()) {
 			List<CloneGroup> cloneGroups = cloneGroupRepository.findCloneGroupWithLimit();
 			if ( cloneGroups != null && !cloneGroups.isEmpty()){
@@ -412,6 +405,62 @@ public class BeanCreator {
 		}
 	}
 
+	@Bean
+	public boolean setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository, CommitRepository commitRepository,ProjectRepository projectRepository) {
+		LOGGER.info("设置Commit Update文件数...");
+		commitUpdateFileRepository.setCommitFilesSize();
+		LOGGER.info("设置Project Commits数...");
+		Project project = projectRepository.queryProjectWithLimitOne();
+		if(project != null && project.getCommits() > 0){
+			LOGGER.info("已存在Project Commits数");
+			return true;
+		}
+		commitRepository.setCommitsForAllProject();
+		return true;
+	}
+
+	@Bean
+	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository) {
+		LOGGER.info("创建File Metric度量值节点和关系...");
+		metricCalculatorService.createFileMetric(false);
+
+		LOGGER.info("创建Package Metric度量值节点和关系...");
+		metricCalculatorService.createPackageMetric(false);
+
+		LOGGER.info("创建Project Metric度量值节点和关系...");
+		metricCalculatorService.createProjectMetric(false);
+
+		if(propertyConfig.isCalModularity()){
+			LOGGER.info("计算Project模块性度量值...");
+			projectRepository.queryAllProjects().forEach( (project) ->{
+				if(project.getModularity() <= 0.0){
+					double value = modularityCalculator.calculate(project).getValue();
+					projectRepository.setModularityMetricsForProject(project.getId(), value);
+				}
+			});
+		}
+		return true;
+	}
+
+	@Bean
+	public boolean setPackageDepth(ProjectRepository projectRepository, ContainRepository containRepository) {
+		LOGGER.info("设置Package深度值...");
+		List<Project> projectList = projectRepository.queryAllProjects();
+		for(Project project : projectList) {
+			List<Package> rootPackageList = containRepository.findProjectRootPackages(project.getId());
+			for(Package rootPackage : rootPackageList) {
+				Queue<Package> packageQueue = new LinkedList<>();
+				packageQueue.offer(rootPackage);
+				while(!packageQueue.isEmpty()) {
+					Package pck = packageQueue.poll();
+					containRepository.setChildPackageDepth(pck.getId());
+					packageQueue.addAll(containRepository.findPackagesWithChildPackagesForParentPackage(pck.getId()));
+				}
+			}
+		}
+		return true;
+	}
+
 	@Bean("smell")
 	public boolean configSmellDetect(PropertyConfig propertyConfig, ASRepository asRepository) {
 		if(propertyConfig.isDetectAS()) {
@@ -469,63 +518,9 @@ public class BeanCreator {
 	}
 
 	@Bean
-	public boolean setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository, CommitRepository commitRepository,ProjectRepository projectRepository) {
-		LOGGER.info("设置Commit Update文件数...");
-		commitUpdateFileRepository.setCommitFilesSize();
-		LOGGER.info("设置Project Commits数...");
-		Project project = projectRepository.queryProjectWithLimitOne();
-		if(project != null && project.getCommits() > 0){
-			LOGGER.info("已存在Project Commits数");
-			return true;
-		}
-		commitRepository.setCommitsForAllProject();
-		return true;
-	}
-
-	@Bean
-	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository) {
-		LOGGER.info("创建File Metric度量值节点和关系...");
-		metricCalculatorService.createFileMetric(false);
-
-		LOGGER.info("创建Package Metric度量值节点和关系...");
-		metricCalculatorService.createPackageMetric(false);
-
-		LOGGER.info("创建Project Metric度量值节点和关系...");
-		metricCalculatorService.createProjectMetric(true);
-
-		if(propertyConfig.isCalModularity()){
-			LOGGER.info("计算Project模块性度量值...");
-			projectRepository.queryAllProjects().forEach( (project) ->{
-				if(project.getModularity() <= 0.0){
-					double value = modularityCalculator.calculate(project).getValue();
-					projectRepository.setModularityMetricsForProject(project.getId(), value);
-				}
-			});
-		}
-
+	public boolean setSmellMetrics() {
 		LOGGER.info("创建Smell Metric度量值节点和关系...");
 		smellMetricCalculatorService.createSmellMetric(false);
-
-		return true;
-	}
-
-
-	@Bean
-	public boolean setPackageDepth(ProjectRepository projectRepository, ContainRepository containRepository) {
-		LOGGER.info("设置Package深度值...");
-		List<Project> projectList = projectRepository.queryAllProjects();
-		for(Project project : projectList) {
-			List<Package> rootPackageList = containRepository.findProjectRootPackages(project.getId());
-			for(Package rootPackage : rootPackageList) {
-				Queue<Package> packageQueue = new LinkedList<>();
-				packageQueue.offer(rootPackage);
-				while(!packageQueue.isEmpty()) {
-					Package pck = packageQueue.poll();
-					containRepository.setChildPackageDepth(pck.getId());
-					packageQueue.addAll(containRepository.findPackagesWithChildPackagesForParentPackage(pck.getId()));
-				}
-			}
-		}
 		return true;
 	}
 

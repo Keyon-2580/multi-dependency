@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.PackageHubLike;
@@ -47,13 +48,16 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 	@Autowired
 	private GitAnalyseService gitAnalyseService;
 
+	@Autowired
+	private MetricRepository metricRepository;
+
 	Map<Project, int[]> projectMinFileFanIOs = new ConcurrentHashMap<>();
 	Map<Project, int[]> projectMinPackageFanIOs = new ConcurrentHashMap<>();
 	Map<Project, int[]> projectMinModuleFanIOs = new ConcurrentHashMap<>();
 
-	private Map<Project, int[]> projectMinFileCoChangeFilesAndTimesThresholds = new ConcurrentHashMap<>();
-	private Map<Project, int[]> projectMinPackageCoChangeFilesAndTimesThresholds = new ConcurrentHashMap<>();
-	private Map<Project, int[]> projectMinModuleCoChangeFilesAndTimesThresholds = new ConcurrentHashMap<>();
+	Map<Project, int[]> projectMinFileCoChangeFilesAndTimesThresholds = new ConcurrentHashMap<>();
+	Map<Project, int[]> projectMinPackageCoChangeFilesAndTimesThresholds = new ConcurrentHashMap<>();
+	Map<Project, int[]> projectMinModuleCoChangeFilesAndTimesThresholds = new ConcurrentHashMap<>();
 
 	public static final int DEFAULT_THRESHOLD_FAN_IN = 10;
 	public static final int DEFAULT_THRESHOLD_FAN_OUT = 10;
@@ -164,9 +168,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 				}
 			}
 		}
-		result.sort((f1, f2) -> {
-			return (f2.getFanIn() + f2.getFanOut()) - (f1.getFanIn() + f1.getFanOut());
-		});
+		result.sort((f1, f2) -> (f2.getFanIn() + f2.getFanOut()) - (f1.getFanIn() + f1.getFanOut()));
 		return result;
 	}
 
@@ -175,9 +177,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 			return new ArrayList<>();
 		}
 		List<PackageHubLike> result = asRepository.findPackageHubLikes(project.getId(), minFanIn, minFanOut);
-		result.sort((p1, p2) -> {
-			return (int) ((p2.getFanIn() + p2.getFanOut()) - (p1.getFanIn() + p1.getFanOut()));
-		});
+		result.sort((p1, p2) -> (int) ((p2.getFanIn() + p2.getFanOut()) - (p1.getFanIn() + p1.getFanOut())));
 		return result;
 	}
 
@@ -186,9 +186,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 			return new ArrayList<>();
 		}
 		List<ModuleHubLike> result = asRepository.findModuleHubLikes(project.getId(), minFanIn, minFanOut);
-		result.sort((p1, p2) -> {
-			return (int) ((p2.getFanIn() + p2.getFanOut()) - (p1.getFanIn() + p1.getFanOut()));
-		});
+		result.sort((p1, p2) -> (int) ((p2.getFanIn() + p2.getFanOut()) - (p1.getFanIn() + p1.getFanOut())));
 		return result;
 	}
 	
@@ -202,8 +200,10 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		int[] result = projectMinFileFanIOs.get(project);
 		if(result == null) {
 			result = new int[2];
-			result[0] = (int) defaultFileMinFanIn(project);
-			result[1] = (int) defaultFileMinFanOut(project);
+//			result[0] = (int) defaultFileMinFanIn(project);
+//			result[1] = (int) defaultFileMinFanOut(project);
+			result[0] = metricRepository.getProjectMinFanInByProjectId(project.getId());
+			result[1] = metricRepository.getProjectMinFanOutByProjectId(project.getId());
 			projectMinFileFanIOs.put(project, result);
 		}
 		return result;

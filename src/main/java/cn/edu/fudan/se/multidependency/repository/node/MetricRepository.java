@@ -74,4 +74,10 @@ public interface MetricRepository extends Neo4jRepository<Metric, Long> {
 
     @Query("MATCH p=(:Commit)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m;")
     List<Metric> findCommitMetric();
+
+    @Query("MATCH (project:Project)-[:" + RelationType.str_HAS + "]->(metric:Metric) where id(project) = $projectId RETURN metric.`metricValues.FanIn`;")
+    int getProjectMinFanInByProjectId(@Param("projectId") Long projectId);
+
+    @Query("MATCH (project:Project)-[:" + RelationType.str_HAS + "]->(metric:Metric) where id(project) = $projectId RETURN metric.`metricValues.FanOut`;")
+    int getProjectMinFanOutByProjectId(@Param("projectId") Long projectId);
 }
