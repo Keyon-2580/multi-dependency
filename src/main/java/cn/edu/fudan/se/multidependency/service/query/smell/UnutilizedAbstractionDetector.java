@@ -8,9 +8,24 @@ import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.UnutilizedAbstraction;
 
 public interface UnutilizedAbstractionDetector {
+	/**
+	 * 获取类的Unutilized Abstraction
+	 */
+	Map<Long, List<UnutilizedAbstraction<Type>>> getTypeUnutilizedAbstraction();
 
-	Map<Long, List<UnutilizedAbstraction<Type>>> typeUnutilizeds();
-	
-	Map<Long, List<UnutilizedAbstraction<ProjectFile>>> fileUnutilizeds();
+	/**
+	 * 获取文件的Unutilized Abstraction
+	 */
+	Map<Long, List<UnutilizedAbstraction<ProjectFile>>> getFileUnutilizedAbstraction();
+
+	/**
+	 * 检测类的Unutilized Abstraction
+	 */
+	Map<Long, List<UnutilizedAbstraction<Type>>> detectTypeUnutilizedAbstraction();
+
+	/**
+	 * 检测文件的Unutilized Abstraction
+	 */
+	Map<Long, List<UnutilizedAbstraction<ProjectFile>>> detectFileUnutilizedAbstraction();
 	
 }

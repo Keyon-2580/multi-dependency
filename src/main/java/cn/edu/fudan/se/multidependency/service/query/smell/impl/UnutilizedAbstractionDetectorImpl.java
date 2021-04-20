@@ -1,13 +1,12 @@
 package cn.edu.fudan.se.multidependency.service.query.smell.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
+import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
+import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
+import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,12 +35,59 @@ public class UnutilizedAbstractionDetectorImpl implements UnutilizedAbstractionD
 	@Autowired
 	private ContainRelationService containRelationService;
 
+	@Autowired
+	private SmellRepository smellRepository;
+
 	@Override
-	public Map<Long, List<UnutilizedAbstraction<Type>>> typeUnutilizeds() {
-		String key = "typeUnutilizeds";
+	public Map<Long, List<UnutilizedAbstraction<Type>>> getTypeUnutilizedAbstraction() {
+		String key = "typeUnutilizedAbstraction";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
+
+		Map<Long, List<UnutilizedAbstraction<Type>>> result = new HashMap<>();
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, List<UnutilizedAbstraction<ProjectFile>>> getFileUnutilizedAbstraction() {
+		String key = "fileUnutilizedAbstraction";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> result = new HashMap<>();
+		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.FILE, SmellType.UNUTILIZED_ABSTRACTION));
+		smells.sort((smell1, smell2) -> {
+			List<String> namePart1 = Arrays.asList(smell1.getName().split("_"));
+			List<String> namePart2 = Arrays.asList(smell2.getName().split("_"));
+			int partition1 = Integer.parseInt(namePart1.get(namePart1.size() - 1));
+			int partition2 = Integer.parseInt(namePart2.get(namePart2.size() - 1));
+			return Integer.compare(partition1, partition2);
+		});
+		List<UnutilizedAbstraction<ProjectFile>> fileUnutilizedAbstractions = new ArrayList<>();
+		for (Smell smell : smells) {
+			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
+			if (contains.iterator().hasNext()) {
+				ProjectFile component = (ProjectFile) contains.iterator().next();
+				fileUnutilizedAbstractions.add(new UnutilizedAbstraction<>(component));
+			}
+		}
+		for(UnutilizedAbstraction<ProjectFile> fileUnutilizedAbstraction : fileUnutilizedAbstractions) {
+			Project project = containRelationService.findFileBelongToProject(fileUnutilizedAbstraction.getComponent());
+			if (project != null) {
+				List<UnutilizedAbstraction<ProjectFile>> temp = result.getOrDefault(project.getId(), new ArrayList<>());
+				temp.add(fileUnutilizedAbstraction);
+				result.put(project.getId(), temp);
+			}
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, List<UnutilizedAbstraction<Type>>> detectTypeUnutilizedAbstraction() {
 		Map<Long, List<UnutilizedAbstraction<Type>>> result = new HashMap<>();
 		List<Type> types = asRepository.unutilizedTypes();
 		Collection<Project> projects = nodeService.allProjects();
@@ -54,18 +100,13 @@ public class UnutilizedAbstractionDetectorImpl implements UnutilizedAbstractionD
 			Project project = containRelationService.findCodeNodeBelongToProject(type);
 			result.get(project.getId()).add(new UnutilizedAbstraction<>(type));
 		}
-		cache.cache(getClass(), key, result);
 		return result;
 	}
 
 	@Override
-	public Map<Long, List<UnutilizedAbstraction<ProjectFile>>> fileUnutilizeds() {
-		String key = "fileUnutilizeds";
-		if(cache.get(getClass(), key) != null) {
-			return cache.get(getClass(), key);
-		}
+	public Map<Long, List<UnutilizedAbstraction<ProjectFile>>> detectFileUnutilizedAbstraction() {
 		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> result = new HashMap<>();
-		Map<Long, List<UnutilizedAbstraction<Type>>> types = typeUnutilizeds();
+		Map<Long, List<UnutilizedAbstraction<Type>>> types = detectTypeUnutilizedAbstraction();
 		for(Map.Entry<Long, List<UnutilizedAbstraction<Type>>> entry : types.entrySet()) {
 			long projectId = entry.getKey();
 			Set<ProjectFile> files = new HashSet<>();
@@ -75,12 +116,10 @@ public class UnutilizedAbstractionDetectorImpl implements UnutilizedAbstractionD
 			}
 			List<UnutilizedAbstraction<ProjectFile>> unutilizedFiles = new ArrayList<>();
 			for(ProjectFile file : files) {
-				unutilizedFiles.add(new UnutilizedAbstraction<ProjectFile>(file));
+				unutilizedFiles.add(new UnutilizedAbstraction<>(file));
 			}
 			result.put(projectId, unutilizedFiles);
 		}
-		cache.cache(getClass(), key, result);
 		return result;
 	}
-
 }

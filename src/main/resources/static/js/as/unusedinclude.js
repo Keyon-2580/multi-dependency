@@ -1,4 +1,4 @@
-var cyclic = function(cytoscapeutil) {
+var unusedInclude = function(cytoscapeutil) {
 	var showTable = function(projects, unusedIncludeMap) {
 		console.log("projects");
 		console.log("unusedIncludes");

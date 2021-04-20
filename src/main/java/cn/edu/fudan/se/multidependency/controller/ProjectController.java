@@ -439,7 +439,6 @@ public class ProjectController {
 				ZTreeNode node = new ZTreeNode(project, true);
 				values.add(node.toJSON());
 			}
-			System.out.println(values);
 			result.put("result", "success");
 			result.put("values", values);
 		} catch (Exception e) {

@@ -534,7 +534,7 @@ public class SmellDetectorService {
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
 
-		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> fileUnutilizeds = unutilizedAbstractionDetector.fileUnutilizeds();
+		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> fileUnutilizeds = unutilizedAbstractionDetector.detectFileUnutilizedAbstraction();
 		String fileSmellName = SmellLevel.FILE + "_" + SmellType.UNUTILIZED_ABSTRACTION + "_";
 		int fileSmellIndex = 1;
 		for (Map.Entry<Long, List<UnutilizedAbstraction<ProjectFile>>> fileUnutilized : fileUnutilizeds.entrySet()) {
