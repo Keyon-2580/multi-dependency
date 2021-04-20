@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.insert.code;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -442,6 +443,9 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(id.intValue());
 			Entity functionParentTypeEntity = functionEntity.getParent();
 			Type functionParentType = (Type) types.get(functionParentTypeEntity.getId().longValue());
+			if(functionEntity.getQualifiedName().equals("singa.OpenclDevice.BuildPrograms")){
+				System.out.println(123);
+			}
 			functionEntity.getRelations().forEach(relation -> {
 				switch(relation.getType()) {
 				case DependencyType.CALL:
@@ -531,6 +535,13 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 							if(var.isField()) {
 								Access accessField = new Access(function, var);
 								addRelation(accessField);
+							}else{
+								Entity varFile = relationEntity.getAncestorOfType(FileEntity.class);
+								Entity funcFile = functionEntity.getAncestorOfType(FileEntity.class);
+								if(varFile != null && funcFile != null && !(varFile.getId().equals(funcFile.getId()))){
+									Use use = new Use(function, var);
+									addRelation(use);
+								}
 							}
 						}
 					} else if(relation.getEntity().getClass() == TypeEntity.class){
