@@ -443,9 +443,6 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(id.intValue());
 			Entity functionParentTypeEntity = functionEntity.getParent();
 			Type functionParentType = (Type) types.get(functionParentTypeEntity.getId().longValue());
-			if(functionEntity.getQualifiedName().equals("singa.OpenclDevice.BuildPrograms")){
-				System.out.println(123);
-			}
 			functionEntity.getRelations().forEach(relation -> {
 				switch(relation.getType()) {
 				case DependencyType.CALL:
