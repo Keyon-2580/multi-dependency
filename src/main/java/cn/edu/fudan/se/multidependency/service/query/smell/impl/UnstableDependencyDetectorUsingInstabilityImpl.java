@@ -1,11 +1,18 @@
 package cn.edu.fudan.se.multidependency.service.query.smell.impl;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
+import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
+import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
+import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
+import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
+import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
+import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
+import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
+import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +26,6 @@ import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.smell.UnstableDependencyDetectorUsingInstability;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.UnstableComponentByInstability;
-import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
-import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Service
@@ -36,81 +41,171 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 	private UnstableASRepository asRepository;
 	
 	@Autowired
-	private DependsOnRepository dependsOnRepository;
-	
+	private SmellRepository smellRepository;
+
 	@Autowired
-	private MetricCalculatorService metricCalculatorService;
+	private SmellDetectorService smellDetectorService;
+
+	@Autowired
+	private MetricRepository metricRepository;
+
+	@Autowired
+	private ContainRelationService containRelationService;
+
+	@Autowired
+	private DependsOnRepository dependsOnRepository;
+
+	@Autowired
+	private ProjectFileRepository projectFileRepository;
+
+	@Autowired
+	private PackageRepository packageRepository;
 	
-	public static final int DEFAULT_THRESHOLD_FILE_FANOUT = 10;
-	public static final int DEFAULT_THRESHOLD_MODULE_FANOUT = 1;
+	public static final int DEFAULT_THRESHOLD_FILE_FAN_OUT = 10;
+	public static final int DEFAULT_THRESHOLD_PACKAGE_FAN_OUT = 10;
+	public static final int DEFAULT_THRESHOLD_MODULE_FAN_OUT = 10;
 	public static final double DEFAULT_THRESHOLD_RATIO = 0.3;
 	
 	private Map<Project, Integer> projectToFileFanOutThreshold = new ConcurrentHashMap<>();
+	private Map<Project, Integer> projectToPackageFanOutThreshold = new ConcurrentHashMap<>();
 	private Map<Project, Integer> projectToModuleFanOutThreshold = new ConcurrentHashMap<>();
 	private Map<Project, Double> projectToRatioThreshold = new ConcurrentHashMap<>();
 
 	@Override
-	public Map<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstables() {
-		String key = "unstableFiles";
+	public Map<Long, List<UnstableComponentByInstability<ProjectFile>>> queryFileUnstableDependency() {
+		String key = "fileUnstableDependency";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-		Collection<Project> projects = nodeService.allProjects();
+
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> result = new HashMap<>();
-		for(Project project : projects) {
-			List<UnstableComponentByInstability<ProjectFile>> temp =
-					asRepository.unstableFilesByInstability(project.getId(), getFileFanOutThreshold(project), getRatioThreshold(project));
-			for(UnstableComponentByInstability<ProjectFile> unstableFile : temp) {
-				ProjectFile file = unstableFile.getComponent();
-				List<DependsOn> dependsOns = dependsOnRepository.findFileDependsOn(file.getId());
-				unstableFile.addAllTotalDependencies(dependsOns);
+		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.FILE, SmellType.UNSTABLE_DEPENDENCY));
+		smellDetectorService.sortSmellByName(smells);
+		List<UnstableComponentByInstability<ProjectFile>> fileUnstableDependencyList = new ArrayList<>();
+		for (Smell smell : smells) {
+			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
+			if (contains.iterator().hasNext()) {
+				ProjectFile component = (ProjectFile) contains.iterator().next();
+				UnstableComponentByInstability<ProjectFile> fileUnstableDependency = new UnstableComponentByInstability<>();
+				fileUnstableDependency.setComponent(component);
+				List<DependsOn> dependsOns = dependsOnRepository.findFileDependsOn(component.getId());
+				fileUnstableDependency.addAllTotalDependencies(dependsOns);
 				for(DependsOn dependsOn : dependsOns) {
 					ProjectFile dependsOnFile = (ProjectFile) dependsOn.getEndNode();
-					FileMetrics dependsOnMetric = metricCalculatorService.calculateFileMetric(dependsOnFile);
-					if(unstableFile.getInstability() < dependsOnFile.getInstability() && dependsOnMetric.getFanOut() >= getFileFanOutThreshold(project)) {
-						unstableFile.addBadDependency(dependsOn);
+					int dependsOnFileFanOut = 0;
+					Integer fanOut = projectFileRepository.getFileFanOutByFileId(dependsOnFile.getId());
+					if (fanOut != null) {
+						dependsOnFileFanOut = fanOut;
+					}
+					Project project = containRelationService.findFileBelongToProject(fileUnstableDependency.getComponent());
+					if(component.getInstability() < dependsOnFile.getInstability() && dependsOnFileFanOut >= getFileFanOutThreshold(project)) {
+						fileUnstableDependency.addBadDependency(dependsOn);
 					}
 				}
+				fileUnstableDependencyList.add(fileUnstableDependency);
 			}
-			result.put(project.getId(), temp);
 		}
-
+		for (UnstableComponentByInstability<ProjectFile> fileUnstableDependency : fileUnstableDependencyList) {
+			Project project = containRelationService.findFileBelongToProject(fileUnstableDependency.getComponent());
+			if (project != null) {
+				List<UnstableComponentByInstability<ProjectFile>> temp = result.getOrDefault(project.getId(), new ArrayList<>());
+				temp.add(fileUnstableDependency);
+				result.put(project.getId(), temp);
+			}
+		}
 		cache.cache(getClass(), key, result);
 		return result;
 	}
 
 	@Override
-	public Map<Long, List<UnstableComponentByInstability<Package>>> packageUnstables() {
-		String key = "unstablePackages";
+	public Map<Long, List<UnstableComponentByInstability<Package>>> queryPackageUnstableDependency() {
+		String key = "packageUnstableDependency";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-		Collection<Project> projects = nodeService.allProjects();
+
 		Map<Long, List<UnstableComponentByInstability<Package>>> result = new HashMap<>();
+		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.PACKAGE, SmellType.UNSTABLE_DEPENDENCY));
+		smellDetectorService.sortSmellByName(smells);
+		List<UnstableComponentByInstability<Package>> fileUnstableDependencyList = new ArrayList<>();
+		for (Smell smell : smells) {
+			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
+			if (contains.iterator().hasNext()) {
+				Package component = (Package) contains.iterator().next();
+				UnstableComponentByInstability<Package> packageUnstableDependency = new UnstableComponentByInstability<>();
+				packageUnstableDependency.setComponent(component);
+				List<DependsOn> dependsOns = dependsOnRepository.findPackageDependsOn(component.getId());
+				packageUnstableDependency.addAllTotalDependencies(dependsOns);
+				for(DependsOn dependsOn : dependsOns) {
+					Package dependsOnPackage = (Package) dependsOn.getEndNode();
+					int dependsOnPackageFanOut = 0;
+					Integer fanOut = packageRepository.getPackageFanOutByFileId(dependsOnPackage.getId());
+					if (fanOut != null) {
+						dependsOnPackageFanOut = fanOut;
+					}
+					Project project = containRelationService.findPackageBelongToProject(packageUnstableDependency.getComponent());
+					if(component.getInstability() < dependsOnPackage.getInstability() && dependsOnPackageFanOut >= getFileFanOutThreshold(project)) {
+						packageUnstableDependency.addBadDependency(dependsOn);
+					}
+				}
+				fileUnstableDependencyList.add(packageUnstableDependency);
+			}
+		}
+		for (UnstableComponentByInstability<Package> fileUnstableDependency : fileUnstableDependencyList) {
+			Project project = containRelationService.findPackageBelongToProject(fileUnstableDependency.getComponent());
+			if (project != null) {
+				List<UnstableComponentByInstability<Package>> temp = result.getOrDefault(project.getId(), new ArrayList<>());
+				temp.add(fileUnstableDependency);
+				result.put(project.getId(), temp);
+			}
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, List<UnstableComponentByInstability<Module>>> queryModuleUnstableDependency() {
+		String key = "moduleUnstableDependency";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		Map<Long, List<UnstableComponentByInstability<Module>>> result = new HashMap<>();
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, List<UnstableComponentByInstability<ProjectFile>>> detectFileUnstableDependency() {
+		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> result = new HashMap<>();
+		Collection<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
-			List<UnstableComponentByInstability<Package>> temp = asRepository.unstablePackagesByInstability(project.getId(), getModuleFanOutThreshold(project), getRatioThreshold(project));
+			List<UnstableComponentByInstability<ProjectFile>> temp = asRepository.unstableFilesByInstability(project.getId(), getFileFanOutThreshold(project), getRatioThreshold(project));
 			result.put(project.getId(), temp);
 		}
-		
-		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, List<UnstableComponentByInstability<Package>>> detectPackageUnstableDependency() {
+		Map<Long, List<UnstableComponentByInstability<Package>>> result = new HashMap<>();
+		Collection<Project> projects = nodeService.allProjects();
+		for(Project project : projects) {
+			List<UnstableComponentByInstability<Package>> temp = asRepository.unstablePackagesByInstability(project.getId(), getPackageFanOutThreshold(project), getRatioThreshold(project));
+			result.put(project.getId(), temp);
+		}
 		return result;
 	}
 
 	
 	@Override
-	public Map<Long, List<UnstableComponentByInstability<Module>>> moduleUnstables() {
-		String key = "unstableModules";
-		if(cache.get(getClass(), key) != null) {
-			return cache.get(getClass(), key);
-		}
-		Collection<Project> projects = nodeService.allProjects();
+	public Map<Long, List<UnstableComponentByInstability<Module>>> detectModuleUnstableDependency() {
 		Map<Long, List<UnstableComponentByInstability<Module>>> result = new HashMap<>();
+		Collection<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
 			List<UnstableComponentByInstability<Module>> temp = asRepository.unstableModulesByInstability(project.getId(), getModuleFanOutThreshold(project), getRatioThreshold(project));
 			result.put(project.getId(), temp);
 		}
-		
-		cache.cache(getClass(), key, result);
 		return result;
 	}
 
@@ -124,27 +219,42 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 		cache.remove(getClass());
 	}
 	
+	public void setPackageFanOutThreshold(Project project, int threshold) {
+		this.projectToPackageFanOutThreshold.put(project, threshold);
+		cache.remove(getClass());
+	}
+
 	public void setModuleFanOutThreshold(Project project, int threshold) {
 		this.projectToModuleFanOutThreshold.put(project, threshold);
 		cache.remove(getClass());
 	}
 	
 	public int getFileFanOutThreshold(Project project) {
-		if(projectToFileFanOutThreshold.get(project) == null) {
-			projectToFileFanOutThreshold.put(project, DEFAULT_THRESHOLD_FILE_FANOUT);
+		if (!projectToFileFanOutThreshold.containsKey(project)) {
+//			projectToFileFanOutThreshold.put(project, DEFAULT_THRESHOLD_FILE_FAN_OUT);
+			projectToFileFanOutThreshold.put(project, metricRepository.getMedFileFanOutByProjectId(project.getId()));
 		}
 		return projectToFileFanOutThreshold.get(project);
 	}
 	
+	public int getPackageFanOutThreshold(Project project) {
+		if (!projectToPackageFanOutThreshold.containsKey(project)) {
+//			projectToPackageFanOutThreshold.put(project, DEFAULT_THRESHOLD_PACKAGE_FAN_OUT);
+			projectToPackageFanOutThreshold.put(project, metricRepository.getMedPackageFanOutByProjectId(project.getId()));
+		}
+		return projectToPackageFanOutThreshold.get(project);
+	}
+
 	public int getModuleFanOutThreshold(Project project) {
-		if(projectToModuleFanOutThreshold.get(project) == null) {
-			projectToModuleFanOutThreshold.put(project, DEFAULT_THRESHOLD_MODULE_FANOUT);
+		if (!projectToModuleFanOutThreshold.containsKey(project)) {
+			projectToModuleFanOutThreshold.put(project, DEFAULT_THRESHOLD_MODULE_FAN_OUT);
+//			projectToPackageFanOutThreshold.put(project, metricRepository.getMedPackageFanOutByProjectId(project.getId()));
 		}
 		return projectToModuleFanOutThreshold.get(project);
 	}
 	
 	public double getRatioThreshold(Project project) {
-		if(projectToRatioThreshold.get(project) == null) {
+		if (!projectToRatioThreshold.containsKey(project)) {
 			projectToRatioThreshold.put(project, DEFAULT_THRESHOLD_RATIO);
 		}
 		return projectToRatioThreshold.get(project);

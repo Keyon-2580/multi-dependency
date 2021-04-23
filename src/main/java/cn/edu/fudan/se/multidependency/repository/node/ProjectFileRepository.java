@@ -246,4 +246,7 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"where fanOut > 0 " +
 			"RETURN fanOut order by fanOut;")
 	List<Integer> findFileFanOutByProjectId(@Param("projectId") Long projectId);
+
+	@Query("MATCH (file:ProjectFile) where id(file) = $fileId return file.fanOut;")
+	Integer getFileFanOutByFileId(@Param("fileId") Long fileId);
 }

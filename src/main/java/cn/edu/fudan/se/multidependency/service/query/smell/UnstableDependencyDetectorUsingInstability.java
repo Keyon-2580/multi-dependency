@@ -11,11 +11,17 @@ import cn.edu.fudan.se.multidependency.service.query.smell.data.UnstableComponen
 
 public interface UnstableDependencyDetectorUsingInstability {
 
-	Map<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstables();
+	Map<Long, List<UnstableComponentByInstability<ProjectFile>>> queryFileUnstableDependency();
 
-	Map<Long, List<UnstableComponentByInstability<Package>>> packageUnstables();
+	Map<Long, List<UnstableComponentByInstability<Package>>> queryPackageUnstableDependency();
 	
-	Map<Long, List<UnstableComponentByInstability<Module>>> moduleUnstables();
+	Map<Long, List<UnstableComponentByInstability<Module>>> queryModuleUnstableDependency();
+
+	Map<Long, List<UnstableComponentByInstability<ProjectFile>>> detectFileUnstableDependency();
+
+	Map<Long, List<UnstableComponentByInstability<Package>>> detectPackageUnstableDependency();
+
+	Map<Long, List<UnstableComponentByInstability<Module>>> detectModuleUnstableDependency();
 	
 	void setRatio(Project project, double threshold);
 	

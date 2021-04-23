@@ -28,13 +28,18 @@ public class UnstableController {
 	@Autowired
 	private UnstableDependencyDetectorUsingInstability unstableDependencyDetectorUsingInstability;
 	
-	@GetMapping("")
-	public String unstableLike(HttpServletRequest request) {
+	@GetMapping("/query")
+	public String queryUntableDependency(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("filesUsingInstability", unstableDependencyDetectorUsingInstability.fileUnstables());
-		request.setAttribute("filesUsingHistory", unstableDependencyDetectorUsingHistory.unstableFiles());
-//		request.setAttribute("packages", unstableDependencyDetectorUsingInstability.unstablePackages());
-		request.setAttribute("modules", unstableDependencyDetectorUsingInstability.moduleUnstables());
+		request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryFileUnstableDependency());
+		request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryPackageUnstableDependency());
+		return "as/unstable";
+	}
+	@GetMapping("/detect")
+	public String detectUnstableDependency(HttpServletRequest request) {
+		request.setAttribute("projects", nodeService.allProjects());
+		request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingInstability.detectFileUnstableDependency());
+		request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.detectPackageUnstableDependency());
 		return "as/unstable";
 	}
 	

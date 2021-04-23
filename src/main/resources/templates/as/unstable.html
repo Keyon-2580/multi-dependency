@@ -18,10 +18,9 @@
 		//<![CDATA[
 		 $(document).ready(function() {
 			var projects = [[${projects}]];
-			var filesUsingInstability = [[${filesUsingInstability}]];
-			var filesUsingHistory = [[${filesUsingHistory}]];
-			var modules = [[${modules}]];
-			unstable(cytoscapeutil()).unstable(projects, filesUsingInstability, filesUsingHistory, modules);	
+			var fileUnstableDependencyMap = [[${fileUnstableDependencyMap}]];
+			var packageUnstableDependencyMap = [[${packageUnstableDependencyMap}]];
+			unstable(cytoscapeutil()).unstable(projects, fileUnstableDependencyMap, packageUnstableDependencyMap);
 		});
 		// ]]>
 	</script>

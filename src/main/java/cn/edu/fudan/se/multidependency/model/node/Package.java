@@ -49,6 +49,8 @@ public class Package implements Node {
 
 	private int depth = 0;
 
+	private double instability = -1;
+
 	private static final long serialVersionUID = -4892461872164624064L;
 	
 	public static final String JAVA_PACKAGE_DEFAULT = "default";
@@ -64,6 +66,7 @@ public class Package implements Node {
 		properties.put("loc", getLoc());
 		properties.put("lines", getLines());
 		properties.put("depth", getDepth());
+		properties.put("instability", getInstability());
 		return properties;
 	}
 

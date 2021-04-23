@@ -32,16 +32,16 @@ import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Service
 public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
-	
+
 	@Autowired
 	private MetricCalculatorService metricCalculatorService;
-	
+
 	@Autowired
 	private NodeService nodeService;
-	
+
 	@Autowired
 	private CacheService cache;
-	
+
 	@Autowired
 	private ASRepository asRepository;
 
@@ -66,9 +66,16 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 	@Autowired
 	private SmellDetectorService smellDetectorService;
 
-	Map<Project, int[]> projectMinFileFanIOs = new ConcurrentHashMap<>();
-	Map<Project, int[]> projectMinPackageFanIOs = new ConcurrentHashMap<>();
-	Map<Project, int[]> projectMinModuleFanIOs = new ConcurrentHashMap<>();
+	public static final int DEFAULT_THRESHOLD_FILE_FAN_IN = 10;
+	public static final int DEFAULT_THRESHOLD_FILE_FAN_OUT = 10;
+	public static final int DEFAULT_THRESHOLD_PACKAGE_FAN_IN = 10;
+	public static final int DEFAULT_THRESHOLD_PACKAGE_FAN_OUT = 10;
+	public static final int DEFAULT_THRESHOLD_MODULE_FAN_IN = 10;
+	public static final int DEFAULT_THRESHOLD_MODULE_FAN_OUT = 10;
+
+	private Map<Project, int[]> projectMinFileFanIOs = new ConcurrentHashMap<>();
+	private Map<Project, int[]> projectMinPackageFanIOs = new ConcurrentHashMap<>();
+	private Map<Project, int[]> projectMinModuleFanIOs = new ConcurrentHashMap<>();
 
 	@Override
 	public Map<Long, List<FileHubLike>> queryFileHubLike() {
@@ -135,13 +142,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 
 		Map<Long, List<PackageHubLike>> result = new HashMap<>();
 		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.PACKAGE, SmellType.HUBLIKE_DEPENDENCY));
-		smells.sort((smell1, smell2) -> {
-			List<String> namePart1 = Arrays.asList(smell1.getName().split("_"));
-			List<String> namePart2 = Arrays.asList(smell2.getName().split("_"));
-			int partition1 = Integer.parseInt(namePart1.get(namePart1.size() - 1));
-			int partition2 = Integer.parseInt(namePart2.get(namePart2.size() - 1));
-			return Integer.compare(partition1, partition2);
-		});
+		smellDetectorService.sortSmellByName(smells);
 		List<PackageHubLike> packageHubLikes = new ArrayList<>();
 		for (Smell smell : smells) {
 			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
@@ -298,6 +299,8 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		int[] result = projectMinFileFanIOs.get(project);
 		if(result == null) {
 			result = new int[2];
+//			result[0] = DEFAULT_THRESHOLD_FILE_FAN_IN;
+//			result[1] = DEFAULT_THRESHOLD_FILE_FAN_OUT;
 			result[0] = metricRepository.getMedFileFanInByProjectId(project.getId());
 			result[1] = metricRepository.getMedFileFanOutByProjectId(project.getId());
 			projectMinFileFanIOs.put(project, result);
@@ -319,6 +322,8 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		int[] result = projectMinPackageFanIOs.get(project);
 		if(result == null) {
 			result = new int[2];
+//			result[0] = DEFAULT_THRESHOLD_PACKAGE_FAN_IN;
+//			result[1] = DEFAULT_THRESHOLD_PACKAGE_FAN_OUT;
 			result[0] = metricRepository.getMedPackageFanInByProjectId(project.getId());
 			result[1] = metricRepository.getMedPackageFanOutByProjectId(project.getId());
 			projectMinPackageFanIOs.put(project, result);
@@ -340,8 +345,10 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		int[] result = projectMinModuleFanIOs.get(project);
 		if(result == null) {
 			result = new int[2];
-			result[0] = metricRepository.getMedPackageFanInByProjectId(project.getId());
-			result[1] = metricRepository.getMedPackageFanOutByProjectId(project.getId());
+			result[0] = DEFAULT_THRESHOLD_MODULE_FAN_IN;
+			result[1] = DEFAULT_THRESHOLD_MODULE_FAN_OUT;
+//			result[0] = metricRepository.getMedPackageFanInByProjectId(project.getId());
+//			result[1] = metricRepository.getMedPackageFanOutByProjectId(project.getId());
 			projectMinModuleFanIOs.put(project, result);
 		}
 		return result;

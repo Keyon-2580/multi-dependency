@@ -264,7 +264,7 @@ public class SmellDetectorService {
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
 
-		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstables = unstableDependencyDetectorUsingInstability.fileUnstables();
+		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstables = unstableDependencyDetectorUsingInstability.detectFileUnstableDependency();
 		String fileSmellname = SmellLevel.FILE + "_" + SmellType.UNSTABLE_DEPENDENCY + "_";
 		int fileSmellIndex = 1;
 		for (Map.Entry<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstable : fileUnstables.entrySet()) {
@@ -291,7 +291,7 @@ public class SmellDetectorService {
 
 		smells.clear();
 		smellContains.clear();
-		Map<Long, List<UnstableComponentByInstability<Package>>> packageUnstables = unstableDependencyDetectorUsingInstability.packageUnstables();
+		Map<Long, List<UnstableComponentByInstability<Package>>> packageUnstables = unstableDependencyDetectorUsingInstability.detectPackageUnstableDependency();
 		String packageSmellname = SmellLevel.PACKAGE + "_" + SmellType.UNSTABLE_DEPENDENCY + "_";
 		int packageSmellIndex = 1;
 		for (Map.Entry<Long, List<UnstableComponentByInstability<Package>>> packageUnstable : packageUnstables.entrySet()) {

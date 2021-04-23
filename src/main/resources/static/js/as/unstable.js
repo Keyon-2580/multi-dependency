@@ -1,102 +1,66 @@
 var unstable = function(cytoscapeutil) {
-	var _unstable = function(projects, filesUsingInstability, filesUsingHistory, modules) {
+	var _unstable = function(projects, fileUnstableDependencyMap, packageUnstableDependencyMap) {
 		var html = "";
 
 		for(var projectIndex in projects) {
 			var project = projects[projectIndex];
 			html += "<h4>" + project.name + " (" + project.language + ")</h4>";
-			var fileUnstables = filesUsingInstability[project.id];
-			console.log(fileUnstables);
-			html += "<h5>Instability</h5>";
+			var fileUnstableDependencyList = fileUnstableDependencyMap[project.id];
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
+			html += "<th>Index</th>";
 			html += "<th>File</th>";
 			html += "<th>Instability</th>";
 			html += "<th>Score</th>";
 			html += "<th>All Outgoing Dependencies</th>";
 			html += "<th>Bad Outgoing Dependencies</th>";
-			html += "<th></th>";
+			html += "<th>Commits</th>";
 			html += "</tr>";
-			for(var fileIndex in fileUnstables) {
-				var file = fileUnstables[fileIndex];
-				console.log(file);
+			let index = 1;
+			for(var fileIndex in fileUnstableDependencyList) {
+				var fileUnstableDependency = fileUnstableDependencyList[fileIndex];
 				html += "<tr>";
-				html += "<td><a target='_blank' href='/relation/file/" + file.component.id + "'>" + file.component.path + "</a></td>";
-				html += "<td>" + (file.component.instability).toFixed(2) + "</td>";
-				html += "<td>" + (file.component.score).toFixed(2) + "</td>";
-				html += "<td>" + file.allDependencies + "</td>";
-				html += "<td>" + file.badDependencies + "</td>";
+				html += "<td>" + index + "</td>";
+				html += "<td><a target='_blank' href='/relation/file/" + fileUnstableDependency.component.id + "'>" + fileUnstableDependency.component.path + "</a></td>";
+				html += "<td>" + (fileUnstableDependency.component.instability).toFixed(2) + "</td>";
+				html += "<td>" + (fileUnstableDependency.component.score).toFixed(2) + "</td>";
+				html += "<td>" + fileUnstableDependency.allDependencies + "</td>";
+				html += "<td>" + fileUnstableDependency.badDependencies + "</td>";
 				
-				var allFilesIds = file.component.id;
-				console.log(file.badDependsOns);
-				for(var j = 0; j < file.badDependsOns.length; j++) {
-					allFilesIds += "," + file.badDependsOns[j].endNode.id;
+				var allFilesIds = fileUnstableDependency.component.id;
+				for(var j = 0; j < fileUnstableDependency.badDependsOns.length; j++) {
+					allFilesIds += "," + fileUnstableDependency.badDependsOns[j].endNode.id;
 				}
 				
-				html += "<td>" + "<a target='_blank' href='/as/matrix?allFiles=" + allFilesIds + "&specifiedFiles=" + file.component.id + "&minCount=2'>commits</a>" + "</td>";
+				html += "<td>" + "<a target='_blank' href='/as/matrix?allFiles=" + allFilesIds + "&specifiedFiles=" + fileUnstableDependency.component.id + "&minCount=2'>commits</a>" + "</td>";
 				html += "</tr>";
+				index ++;
 			}
-			html += "</table>";
-			fileUnstables = filesUsingHistory[project.id];
-			html += "<h5>History</h5>";
-			html += "<table class='table table-bordered'>";
-			html += "<tr>";
-			html += "<th>File</th>";
-			html += "<th>Instability</th>";
-			html += "<th>Score</th>";
-			html += "<th>Fan In </th>";
-			html += "<th>Co-change Files</th>";
-			html += "<th>Co-changeFiles/FanIn</th>";
-			html += "<th>commits</th>";
-			html += "</tr>";
-			for(var fileIndex in fileUnstables) {
-				var file = fileUnstables[fileIndex];
-				var count = 0;
-				for(var i in file.cochangeTimesWithFile) {
-					count++;
-				}
-				console.log(file);
-				html += "<tr>";
-				html += "<td><a target='_blank' href='/relation/file/" + file.component.id + "'>" + file.component.path + "</a></td>";
-				html += "<td>" + (file.component.instability).toFixed(2) + "</td>";
-				html += "<td>" + (file.component.score).toFixed(2) + "</td>";
-				html += "<td>" + file.fanIn + "</td>";
-				html += "<td>" + file.cochangeFiles.length + "</td>";
-				html += "<td>" + (file.cochangeFiles.length / file.fanIn).toFixed(2) + "</td>";
-				
-				var allFilesIds = file.component.id;
-				for(var j = 0; j < file.cochangeFiles.length; j++) {
-					allFilesIds += "," + file.cochangeFiles[j].id;
-				}
-				
-				html += "<td>" + "<a target='_blank' href='/as/matrix?allFiles=" + allFilesIds + "&specifiedFiles=" + file.component.id + "&minCount=2'>commits</a>" + "</td>";
-				
-				html += "</tr>";
-			}
-			html += "</table>";
 
-			var moduleUnstables = modules[project.id];
-			html += "<h5>Unstable Modules</h5>";
+			var packageUnstableDependencyList = packageUnstableDependencyMap[project.id];
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
-			html += "<th>Module</th>";
+			html += "<th>Index</th>";
+			html += "<th>Package</th>";
 			html += "<th>Instability</th>";
 			html += "<th>Score</th>";
 			html += "<th>All Outgoing Dependencies</th>";
 			html += "<th>Bad Outgoing Dependencies</th>";
 			html += "</tr>";
-			for(var moduleIndex in moduleUnstables) {
-				var module = moduleUnstables[moduleIndex];
-				console.log(module);
+			index = 1;
+			for(var packageIndex in packageUnstableDependencyList) {
+				var packageUnstableDependency = packageUnstableDependencyList[packageIndex];
 				html += "<tr>";
-				html += "<td><a target='_blank' href='/relation/file/" + module.component.id + "'>" + module.component.name + "</a></td>";
-				var pck_instability = module.component.instability != null ? (module.component.instability).toFixed(2) : "NULL"
+				html += "<td>" + index + "</td>";
+				html += "<td><a target='_blank' href='/relation/file/" + packageUnstableDependency.component.id + "'>" + packageUnstableDependency.component.name + "</a></td>";
+				var pck_instability = packageUnstableDependency.component.instability != null ? (packageUnstableDependency.component.instability).toFixed(2) : "NULL"
 				html += "<td>" + pck_instability  + "</td>";
-				var pck_score = module.component.score != null ? (module.component.score).toFixed(2) : "NULL"
+				var pck_score = packageUnstableDependency.component.score != null ? (packageUnstableDependency.component.score).toFixed(2) : "NULL"
 				html += "<td>" + pck_score + "</td>";
-				html += "<td>" + module.allDependencies + "</td>";
-				html += "<td>" + module.badDependencies + "</td>";
+				html += "<td>" + packageUnstableDependency.allDependencies + "</td>";
+				html += "<td>" + packageUnstableDependency.badDependencies + "</td>";
 				html += "</tr>";
+				index ++;
 			}
 			html += "</table>";
 		}
@@ -195,8 +159,8 @@ var unstable = function(cytoscapeutil) {
 			_save();
 			_get();
 		},
-		unstable: function(projects, filesUsingInstability, filesUsingHistory, modules) {
-			_unstable(projects, filesUsingInstability, filesUsingHistory, modules);
+		unstable: function(projects, fileUnstableDependencyMap, packageUnstableDependencyMap) {
+			_unstable(projects, fileUnstableDependencyMap, packageUnstableDependencyMap);
 		}
 	}
 }
