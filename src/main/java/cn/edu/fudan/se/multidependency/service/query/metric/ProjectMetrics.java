@@ -54,10 +54,30 @@ public class ProjectMetrics {
 	/**
 	 * 该项目所有文件入度中位数
 	 */
-	private int fanIn = -1;
+	private int medFileFanIn = -1;
 
 	/**
 	 * 该项目所有文件出度中位数
 	 */
-	private int fanOut = -1;
+	private int medFileFanOut = -1;
+
+	/**
+	 * 该项目所有包入度中位数
+	 */
+	private int medPackageFanIn = -1;
+
+	/**
+	 * 该项目所有包出度中位数
+	 */
+	private int medPackageFanOut = -1;
+
+	/**
+	 * 该项目所有文件共变中位数
+	 */
+	private int medFileCoChange = -1;
+
+	/**
+	 * 该项目所有包共变中位数
+	 */
+	private int medPackageCoChange = -1;
 }

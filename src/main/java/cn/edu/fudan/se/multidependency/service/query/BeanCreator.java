@@ -428,7 +428,7 @@ public class BeanCreator {
 		metricCalculatorService.createPackageMetric(false);
 
 		LOGGER.info("创建Project Metric度量值节点和关系...");
-		metricCalculatorService.createProjectMetric(false);
+		metricCalculatorService.createProjectMetric(true);
 
 		if(propertyConfig.isCalModularity()){
 			LOGGER.info("计算Project模块性度量值...");

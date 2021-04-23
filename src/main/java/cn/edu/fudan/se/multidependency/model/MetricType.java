@@ -40,6 +40,22 @@ public final class MetricType {
 	 */
 	public static final String FAN_IN = "FanIn";
 	/**
+	 * 文件扇出依赖中位数
+	 */
+	public static final String MED_FILE_FAN_OUT = "MedFileFanOut";
+	/**
+	 * 文件扇入依赖中位数
+	 */
+	public static final String MED_FILE_FAN_IN = "MedFileFanIn";
+	/**
+	 * 包扇出依赖中位数
+	 */
+	public static final String MED_PACKAGE_FAN_OUT = "MedPackageFanOut";
+	/**
+	 * 包扇入依赖中位数
+	 */
+	public static final String MED_PACKAGE_FAN_IN = "MedPackageFanIn";
+	/**
 	 * 不稳定度
 	 * Instability = Ce / (Ce + Ca)
 	 * 即Instability = FanOut / (FanOut + FanIn)
@@ -135,6 +151,16 @@ public final class MetricType {
 	 * git历史中更改文件次数最多的开发者名称
 	 */
 	public static final String MOST_UPDATOR = "MostUpdator";
+
+	/**
+	 * 共变文件中位数
+	 */
+	public static final String MED_FILE_CO_CHANGE = "MedFileCoChange";
+
+	/**
+	 * 共变包中位数
+	 */
+	public static final String MED_PACKAGE_CO_CHANGE = "MedPackageCoChange";
 
 	/**
 	 * --------------------------------债务性度量值------------------------------------------

@@ -78,4 +78,18 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 
 	@Query("match (p1:Package)-[:DEPENDS_ON]->(p2:Package) where id(p1)=packageId return count(distinct p2)")
 	int getFanOut(@Param("packageId") long packageId);
+
+	@Query("MATCH (project:Project)-[:" + RelationType.str_CONTAIN + "]->(package:Package)-[:" + RelationType.str_HAS + "]->(metric:Metric) " +
+			"where id(project) = $projectId " +
+			"with distinct metric, metric.`metricValues.FanIn` as fanIn " +
+			"where fanIn > 0 " +
+			"RETURN fanIn order by fanIn;")
+	List<Integer> findPackageFanInByProjectId(@Param("projectId") Long projectId);
+
+	@Query("MATCH (project:Project)-[:" + RelationType.str_CONTAIN + "]->(package:Package)-[:" + RelationType.str_HAS + "]->(metric:Metric) " +
+			"where id(project) = $projectId " +
+			"with distinct metric, metric.`metricValues.FanOut` as fanOut " +
+			"where fanOut > 0 " +
+			"RETURN fanOut order by fanOut;")
+	List<Integer> findPackageFanOutByProjectId(@Param("projectId") Long projectId);
 }

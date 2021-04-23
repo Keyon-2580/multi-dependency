@@ -15,6 +15,7 @@ import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
 import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
@@ -66,6 +67,9 @@ public class MetricCalculatorService {
 
 	@Autowired
 	private MetricRepository metricRepository;
+
+	@Autowired
+	private CoChangeRepository coChangeRepository;
 	
 	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
 	private ModularityCalculator modularityCalculator;
@@ -298,7 +302,6 @@ public class MetricCalculatorService {
 				metric.setLanguage(projectMetrics.getProject().getLanguage());
 				metric.setName(projectMetrics.getProject().getName());
 				metric.setNodeType(projectMetrics.getProject().getNodeType());
-
 				Map<String, Object> metricValues =  new HashMap<>();
 				metricValues.put(MetricType.NOP, projectMetrics.getNop());
 				metricValues.put(MetricType.NOF, projectMetrics.getNof());
@@ -308,11 +311,13 @@ public class MetricCalculatorService {
 				metricValues.put(MetricType.LINES, projectMetrics.getLines());
 				metricValues.put(MetricType.COMMITS, projectMetrics.getCommits());
 				metricValues.put(MetricType.MODULARITY, projectMetrics.getModularity());
-				metricValues.put(MetricType.FAN_IN, projectMetrics.getFanIn());
-				metricValues.put(MetricType.FAN_OUT, projectMetrics.getFanOut());
-
+				metricValues.put(MetricType.MED_FILE_FAN_IN, projectMetrics.getMedFileFanIn());
+				metricValues.put(MetricType.MED_FILE_FAN_OUT, projectMetrics.getMedFileFanOut());
+				metricValues.put(MetricType.MED_PACKAGE_FAN_IN, projectMetrics.getMedPackageFanIn());
+				metricValues.put(MetricType.MED_PACKAGE_FAN_OUT, projectMetrics.getMedPackageFanOut());
+				metricValues.put(MetricType.MED_FILE_CO_CHANGE, projectMetrics.getMedFileCoChange());
+				metricValues.put(MetricType.MED_PACKAGE_CO_CHANGE, projectMetrics.getMedPackageCoChange());
 				metric.setMetricValues(metricValues);
-
 				result.put(projectMetrics.getProject().getId(), metric);
 			});
 		}
@@ -454,30 +459,12 @@ public class MetricCalculatorService {
 		if(projectMetricsList != null && !projectMetricsList.isEmpty()) {
 			projectMetricsList.forEach(projectMetrics -> {
 				Project project = projectMetrics.getProject();
-				List<Integer> fileFanInList = new ArrayList<>(fileRepository.findFileFanInByProjectId(project.getId()));
-				List<Integer> fileFanOutList = new ArrayList<>(fileRepository.findFileFanOutByProjectId(project.getId()));
-				int midFanIn = 0;
-				int midFanOut = 0;
-				int fileFanInListSize = fileFanInList.size();
-				int fileFanOutListSize = fileFanOutList.size();
-				if (fileFanInListSize > 0) {
-					if (fileFanInListSize % 2 == 0) {
-						midFanIn = (fileFanInList.get((fileFanInListSize / 2) - 1) + fileFanInList.get(fileFanInListSize / 2)) / 2;
-					}
-					else {
-						midFanIn = fileFanInList.get(fileFanInListSize / 2);
-					}
-				}
-				if (fileFanOutListSize > 0) {
-					if (fileFanOutListSize % 2 == 0) {
-						midFanOut = (fileFanOutList.get((fileFanOutListSize / 2) - 1) + fileFanOutList.get(fileFanOutListSize / 2)) / 2;
-					}
-					else {
-						midFanOut = fileFanOutList.get(fileFanOutListSize / 2);
-					}
-				}
-				projectMetrics.setFanIn(midFanIn);
-				projectMetrics.setFanOut(midFanOut);
+				projectMetrics.setMedFileFanIn(calculateMedFileFanIn(project.getId()));
+				projectMetrics.setMedFileFanOut(calculateMedFileFanOut(project.getId()));
+				projectMetrics.setMedPackageFanIn(calculateMedPackageFanIn(project.getId()));
+				projectMetrics.setMedPackageFanOut(calculateMedPackageFanOut(project.getId()));
+				projectMetrics.setMedFileCoChange(calculateMedFileCoChange(project.getId()));
+				projectMetrics.setMedPackageCoChange(calculateMedPackageCoChange(project.getId()));
 				result.put(project.getId(), projectMetrics);
 			});
 			cache.cache(getClass(), key, result);
@@ -538,5 +525,49 @@ public class MetricCalculatorService {
 			developerMetric.setLastUpdator(lastUpdator.getName());
 		}
 		return developerMetric;
+	}
+
+	private int calculateMedian(List<Integer> list) {
+		int median = 0;
+		int size = list.size();
+		if (size > 0) {
+			if (size % 2 == 0) {
+				median = (list.get((size / 2) - 1) + list.get(size / 2)) / 2;
+			}
+			else {
+				median = list.get(size / 2);
+			}
+		}
+		return median;
+	}
+
+	private int calculateMedFileFanIn(long projectId) {
+		List<Integer> fileFanInList = new ArrayList<>(fileRepository.findFileFanInByProjectId(projectId));
+		return calculateMedian(fileFanInList);
+	}
+
+	private int calculateMedFileFanOut(long projectId) {
+		List<Integer> fileFanOutList = new ArrayList<>(fileRepository.findFileFanOutByProjectId(projectId));
+		return calculateMedian(fileFanOutList);
+	}
+
+	private int calculateMedPackageFanIn(long projectId) {
+		List<Integer> packageFanInList = new ArrayList<>(packageRepository.findPackageFanInByProjectId(projectId));
+		return calculateMedian(packageFanInList);
+	}
+
+	private int calculateMedPackageFanOut(long projectId) {
+		List<Integer> packageFanOutList = new ArrayList<>(packageRepository.findPackageFanOutByProjectId(projectId));
+		return calculateMedian(packageFanOutList);
+	}
+
+	private int calculateMedFileCoChange(long projectId) {
+		List<Integer> fileCoChangeList = new ArrayList<>(coChangeRepository.findFileCoChangeByProjectId(projectId));
+		return calculateMedian(fileCoChangeList);
+	}
+
+	private int calculateMedPackageCoChange(long projectId) {
+		List<Integer> packageCoChangeList = new ArrayList<>(coChangeRepository.findPackageCoChangeByProjectId(projectId));
+		return calculateMedian(packageCoChangeList);
 	}
 }

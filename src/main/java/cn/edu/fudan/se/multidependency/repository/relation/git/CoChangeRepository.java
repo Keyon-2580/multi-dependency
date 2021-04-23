@@ -103,4 +103,22 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
 
     @Query("match (p:Package)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where id(file) = $fileId return p")
     Package findFileBelongPackageByFileId(@Param("fileId") long fileId);
+
+    @Query("MATCH (project:Project) " +
+            "where id(project) = $projectId " +
+            "match (file1:ProjectFile)-[coChange:" + RelationType.str_CO_CHANGE + "]->(file2:ProjectFile) " +
+            "where (project)-[:" + RelationType.str_CONTAIN + "*2]->(file1) " +
+            "and (project)-[:" + RelationType.str_CONTAIN + "*2]->(file2) " +
+            "with distinct coChange, coChange.times as times " +
+            "RETURN times order by times;")
+    List<Integer> findFileCoChangeByProjectId(@Param("projectId") Long projectId);
+
+    @Query("MATCH (project:Project) " +
+            "where id(project) = $projectId " +
+            "match (package1:Package)-[coChange:" + RelationType.str_CO_CHANGE + "]->(package2:Package) " +
+            "where (project)-[:" + RelationType.str_CONTAIN + "]->(package1) " +
+            "and (project)-[:" + RelationType.str_CONTAIN + "]->(package2) " +
+            "with distinct coChange, coChange.times as times " +
+            "RETURN times order by times;")
+    List<Integer> findPackageCoChangeByProjectId(@Param("projectId") Long projectId);
 }
