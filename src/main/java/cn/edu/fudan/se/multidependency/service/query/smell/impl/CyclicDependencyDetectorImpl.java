@@ -10,6 +10,7 @@ import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
+import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import com.alibaba.fastjson.JSONArray;
@@ -56,6 +57,9 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 	@Autowired
 	private SmellRepository smellRepository;
 
+	@Autowired
+	private SmellDetectorService smellDetectorService;
+
 	public static final int DEFAULT_THRESHOLD_LONGEST_PATH = 3;
 	public static final double DEFAULT_THRESHOLD_MINIMUM_RATE = 0.5;
 
@@ -84,13 +88,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 
 		Map<Long, Map<Integer, Cycle<Type>>> result = new HashMap<>();
 		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.TYPE, SmellType.CYCLIC_DEPENDENCY));
-		smells.sort((smell1, smell2) -> {
-			List<String> namePart1 = Arrays.asList(smell1.getName().split("_"));
-			List<String> namePart2 = Arrays.asList(smell2.getName().split("_"));
-			int partition1 = Integer.parseInt(namePart1.get(namePart1.size() - 1));
-			int partition2 = Integer.parseInt(namePart2.get(namePart2.size() - 1));
-			return Integer.compare(partition1, partition2);
-		});
+		smellDetectorService.sortSmellByName(smells);
 		List<Cycle<Type>> typeCycles = new ArrayList<>();
 		int partition = 1;
 		for (Smell smell : smells) {
@@ -123,13 +121,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 
 		Map<Long, Map<Integer, Cycle<ProjectFile>>> result = new HashMap<>();
 		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.FILE, SmellType.CYCLIC_DEPENDENCY));
-		smells.sort((smell1, smell2) -> {
-			List<String> namePart1 = Arrays.asList(smell1.getName().split("_"));
-			List<String> namePart2 = Arrays.asList(smell2.getName().split("_"));
-			int partition1 = Integer.parseInt(namePart1.get(namePart1.size() - 1));
-			int partition2 = Integer.parseInt(namePart2.get(namePart2.size() - 1));
-			return Integer.compare(partition1, partition2);
-		});
+		smellDetectorService.sortSmellByName(smells);
 		List<Cycle<ProjectFile>> fileCycles = new ArrayList<>();
 		int partition = 1;
 		for (Smell smell : smells) {
@@ -162,13 +154,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 
 		Map<Long, Map<Integer, Cycle<Package>>> result = new HashMap<>();
 		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.PACKAGE, SmellType.CYCLIC_DEPENDENCY));
-		smells.sort((smell1, smell2) -> {
-			List<String> namePart1 = Arrays.asList(smell1.getName().split("_"));
-			List<String> namePart2 = Arrays.asList(smell2.getName().split("_"));
-			int partition1 = Integer.parseInt(namePart1.get(namePart1.size() - 1));
-			int partition2 = Integer.parseInt(namePart2.get(namePart2.size() - 1));
-			return Integer.compare(partition1, partition2);
-		});
+		smellDetectorService.sortSmellByName(smells);
 		List<Cycle<Package>> packageCycles = new ArrayList<>();
 		int partition = 1;
 		for (Smell smell : smells) {

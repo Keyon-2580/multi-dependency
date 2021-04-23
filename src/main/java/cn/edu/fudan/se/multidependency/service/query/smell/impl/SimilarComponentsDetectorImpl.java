@@ -15,6 +15,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileR
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackagePairDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
+import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +76,9 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 	@Autowired
 	private CoChangeRepository coChangeRepository;
 
+	@Autowired
+	private SmellDetectorService smellDetectorService;
+
 	private static final int minCoChange = 10;
 
 	@Override
@@ -86,13 +90,7 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 
 		Map<Long, List<SimilarComponents<ProjectFile>>> result = new HashMap<>();
 		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.FILE, SmellType.SIMILAR_COMPONENTS));
-		smells.sort((smell1, smell2) -> {
-			List<String> namePart1 = Arrays.asList(smell1.getName().split("_"));
-			List<String> namePart2 = Arrays.asList(smell2.getName().split("_"));
-			int partition1 = Integer.parseInt(namePart1.get(namePart1.size() - 1));
-			int partition2 = Integer.parseInt(namePart2.get(namePart2.size() - 1));
-			return Integer.compare(partition1, partition2);
-		});
+		smellDetectorService.sortSmellByName(smells);
 		List<SimilarComponents<ProjectFile>> similarComponentsList = new ArrayList<>();
 		for (Smell smell : smells) {
 			List<Node> files = new ArrayList<>(smellRepository.findSmellContains(smell.getId()));

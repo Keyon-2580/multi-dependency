@@ -33,17 +33,4 @@ public interface HubLikeComponentDetector {
 	int[] getProjectMinModuleFanIO(Project project);
 	
 	void setProjectMinModuleFanIO(Project project, int minFanIn, int minFanOut);
-
-	int[] getProjectMinFileCoChangeFilesAndTimesThreshold(Project project);
-
-	void setProjectMinFileCoChangeFilesAndTimesThreshold(Project project, int coChangeFilesThreshold, int coChangeTimesThreshold);
-
-	int[] getProjectMinPackageCoChangeFilesAndTimesThreshold(Project project);
-
-	void setProjectMinPackageCoChangeFilesAndTimesThreshold(Project project, int coChangeFilesThreshold, int coChangeTimesThreshold);
-
-	int[] getProjectMinModuleCoChangeFilesAndTimesThreshold(Project project);
-
-	void setProjectMinModuleCoChangeFilesAndTimesThreshold(Project project, int coChangeFilesThreshold, int coChangeTimesThreshold);
-
 }

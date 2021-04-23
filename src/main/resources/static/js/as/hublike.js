@@ -1,11 +1,11 @@
 var hublike = function(cytoscapeutil) {
-	var _hublike = function(projects, files, modules) {
+	var _hublike = function(projects, fileHubLikes, packageHubLikes) {
 		var html = "";
 
 		for(var projectIndex in projects) {
 			var project = projects[projectIndex];
 			html += "<h4>" + project.name + " (" + project.language + ")</h4>";
-			var fileHubLikes = files[project.id];
+			var fileHubLikeList = fileHubLikes[project.id];
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
 			html += "<th>Index</th>";
@@ -19,8 +19,8 @@ var hublike = function(cytoscapeutil) {
 			html += "<th>Score</th>";
 			html += "</tr>";
 			var index = 0;
-			for(var fileIndex in fileHubLikes) {
-				var fileHubLike = fileHubLikes[fileIndex];
+			for(var fileIndex in fileHubLikeList) {
+				var fileHubLike = fileHubLikeList[fileIndex];
 				console.log(fileIndex);
 				index ++;
 				html += "<tr>";
@@ -50,19 +50,19 @@ var hublike = function(cytoscapeutil) {
 				html += "</tr>";
 			}
 			
-			var moduleHubLikes = modules[project.id];
+			var packageHubLikeList = packageHubLikes[project.id];
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
-			html += "<th width='50%'>Module</th>";
+			html += "<th width='50%'>Package</th>";
 			html += "<th width='25%'>Ca（afferent couplings）</th>";
 			html += "<th width='25%'>Ce（efferent couplings）</th>";
 			html += "</tr>";
-			for(var moduleIndex in moduleHubLikes) {
-				var moduleHubLike = moduleHubLikes[moduleIndex];
+			for(var packageIndex in packageHubLikeList) {
+				var packageHubLike = packageHubLikeList[packageIndex];
 				html += "<tr>";
-				html += "<td>" + moduleHubLike.module.name + "</td>";
-				html += "<td>" + moduleHubLike.fanIn + "</td>";
-				html += "<td>" + moduleHubLike.fanOut + "</td>";
+				html += "<td>" + packageHubLike.pck.name + "</td>";
+				html += "<td>" + packageHubLike.fanIn + "</td>";
+				html += "<td>" + packageHubLike.fanOut + "</td>";
 				html += "</tr>";
 			}
 			html += "</table>";
@@ -80,8 +80,8 @@ var hublike = function(cytoscapeutil) {
 				url: "/as/hublike/fanio/" + projectId
 					+ "?hubLikeMinFileFanIn=" + hubLikeMinFileFanIn
 					+ "&hubLikeMinFileFanOut=" + hubLikeMinFileFanOut
-					+ "&hubLikeMinModuleFanIn=" + hubLikeMinPackageFanIn
-					+ "&hubLikeMinModuleFanOut=" + hubLikeMinPackageFanOut,
+					+ "&hubLikeMinPackageFanIn=" + hubLikeMinPackageFanIn
+					+ "&hubLikeMinPackageFanOut=" + hubLikeMinPackageFanOut,
 				success: function(result) {
 					if(result == true) {
 						alert("修改成功");
@@ -97,9 +97,7 @@ var hublike = function(cytoscapeutil) {
 			var hubLikeMinFileFanOut = $("#hubLikeMinFileFanOut").val();
 			var hubLikeMinPackageFanIn = $("#hubLikeMinPackageFanIn").val();
 			var hubLikeMinPackageFanOut = $("#hubLikeMinPackageFanOut").val();
-			setMinFanIO(projectId, 
-					hubLikeMinFileFanIn, hubLikeMinFileFanOut,
-					hubLikeMinPackageFanIn, hubLikeMinPackageFanOut)
+			setMinFanIO(projectId, hubLikeMinFileFanIn, hubLikeMinFileFanOut, hubLikeMinPackageFanIn, hubLikeMinPackageFanOut)
 		});
 	}
 	
@@ -131,8 +129,8 @@ var hublike = function(cytoscapeutil) {
 			_save();
 			_get();
 		},
-		hublike: function(projects, files, packages) {
-			_hublike(projects, files, packages);
+		hublike: function(projects, fileHubLikes, packageHubLikes) {
+			_hublike(projects, fileHubLikes, packageHubLikes);
 		}
 	}
 }

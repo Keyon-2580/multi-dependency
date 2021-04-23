@@ -235,7 +235,6 @@ public class MetricCalculatorService {
 					metricValues.put(MetricType.CO_CHANGE_FILES, evolutionMetric.getCoChangeFiles());
 					metricValues.put(MetricType.ADD_LINES, evolutionMetric.getAddLines());
 					metricValues.put(MetricType.SUB_LINES, evolutionMetric.getSubLines());
-//					metricValues.put(MetricType.CO_CHANGE_COMMIT_TIMES, evolutionMetric.getCoChangeCommitTimes());
 				}
 
 				FileMetrics.DebtMetric detMetric = fileMetrics.getDebtMetric();
@@ -370,7 +369,7 @@ public class MetricCalculatorService {
 
 		Map<Long, List<FileMetrics>> result = new HashMap<>();
 		Map<Long, FileMetrics> fileMetricsCache = new HashMap<>(calculateFileMetrics());
-		if(fileMetricsCache != null && !fileMetricsCache.isEmpty()){
+		if(!fileMetricsCache.isEmpty()){
 			fileMetricsCache.forEach((fileId, fileMetrics)->{
 				ProjectFile file = fileRepository.findFileById(fileId);
 				Project project = containRelationService.findFileBelongToProject(file);

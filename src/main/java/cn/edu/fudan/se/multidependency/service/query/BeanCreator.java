@@ -428,7 +428,7 @@ public class BeanCreator {
 		metricCalculatorService.createPackageMetric(false);
 
 		LOGGER.info("创建Project Metric度量值节点和关系...");
-		metricCalculatorService.createProjectMetric(true);
+		metricCalculatorService.createProjectMetric(false);
 
 		if(propertyConfig.isCalModularity()){
 			LOGGER.info("计算Project模块性度量值...");
@@ -480,7 +480,7 @@ public class BeanCreator {
 				smellDetectorService.createCycleDependencySmells(false);
 
 				LOGGER.info("创建Hub-Like Dependency Smell节点关系...");
-				smellDetectorService.createHubLikeDependencySmells(false);
+				smellDetectorService.createHubLikeDependencySmells(true);
 
 				LOGGER.info("创建Unstable Dependency Smell节点关系...");
 				smellDetectorService.createUnstableDependencySmells(false);
