@@ -1,12 +1,12 @@
-var similar = function(cytoscapeutil, projects, files) {
-	var _similar = function() {
+let similar = function(cytoscapeutil, projects, files) {
+	let _similar = function() {
 		console.log("projects");
 		console.log("files");
-		var html = "";
-		for(var projectIndex in projects) {
-			var project = projects[projectIndex];
+		let html = "";
+		for(let projectIndex in projects) {
+			let project = projects[projectIndex];
 			html += "<h4>" + project.name + " (" + project.language + ")</h4>";
-			var fileSimilarComponentsList = files[project.id];
+			let fileSimilarComponentsList = files[project.id];
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
 			html += "<th>Index</th>";
@@ -20,8 +20,8 @@ var similar = function(cytoscapeutil, projects, files) {
 			html += "<th>Commits</th>";
 			html += "</tr>";
 			let index = 1;
-			for (var fileIndex in fileSimilarComponentsList) {
-				var fileSimilarComponents = fileSimilarComponentsList[fileIndex];
+			for (let fileIndex in fileSimilarComponentsList) {
+				let fileSimilarComponents = fileSimilarComponentsList[fileIndex];
 				html += "<tr>";
 				html += "<td rowspan='2' style='vertical-align: middle'>" + index + "</td>";
 				html += "<td style='vertical-align: middle'><a target='_blank' href='/relation/file/" + fileSimilarComponents.node1.id + "'>" + fileSimilarComponents.node1.path + "</a></td>";
@@ -44,7 +44,7 @@ var similar = function(cytoscapeutil, projects, files) {
 		}
 		if (files[-1] != null) {
 			html += "<h4>Other</h4>";
-			var fileSimilarComponentsList = files[-1];
+			let fileSimilarComponentsList = files[-1];
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
 			html += "<th>Index</th>";
@@ -58,8 +58,8 @@ var similar = function(cytoscapeutil, projects, files) {
 			html += "<th>Commits</th>";
 			html += "</tr>";
 			let index = 1;
-			for (var fileIndex in fileSimilarComponentsList) {
-				var fileSimilarComponents = fileSimilarComponentsList[fileIndex];
+			for (let fileIndex in fileSimilarComponentsList) {
+				let fileSimilarComponents = fileSimilarComponentsList[fileIndex];
 				html += "<tr>";
 				html += "<td rowspan='2' style='vertical-align: middle'>" + index + "</td>";
 				html += "<td style='vertical-align: middle'><a target='_blank' href='/relation/file/" + fileSimilarComponents.node1.id + "'>" + fileSimilarComponents.node1.path + "</a></td>";

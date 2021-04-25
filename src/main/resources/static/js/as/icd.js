@@ -1,12 +1,12 @@
-var icd = function(cytoscapeutil) {
-	var _icd = function(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap) {
-		var html = "";
-		for (var projectIndex in projects) {
+let icd = function(cytoscapeutil) {
+	let _icd = function(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap) {
+		let html = "";
+		for (let projectIndex in projects) {
 			if (projects.hasOwnProperty(projectIndex)) {
-				var project = projects[projectIndex];
+				let project = projects[projectIndex];
 				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
 
-				var fileImplicitCrossModuleDependencyList = fileImplicitCrossModuleDependencyMap[project.id];
+				let fileImplicitCrossModuleDependencyList = fileImplicitCrossModuleDependencyMap[project.id];
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th>Index</th>";
@@ -14,10 +14,10 @@ var icd = function(cytoscapeutil) {
 				html += "<th>File2</th>";
 				html += "<th>Co-Change Times</th>";
 				html += "</tr>";
-				var index = 1;
-				for(var fileIndex in fileImplicitCrossModuleDependencyList) {
+				let index = 1;
+				for(let fileIndex in fileImplicitCrossModuleDependencyList) {
 					if (fileImplicitCrossModuleDependencyList.hasOwnProperty(fileIndex)) {
-						var fileImplicitCrossModuleDependency = fileImplicitCrossModuleDependencyList[fileIndex];
+						let fileImplicitCrossModuleDependency = fileImplicitCrossModuleDependencyList[fileIndex];
 						html += "<tr>";
 						html += "<td>" + index + "</td>";
 						html += "<td><a href='/relation/file/" + fileImplicitCrossModuleDependency.node1.id + "' target='_blank'>" + fileImplicitCrossModuleDependency.node1.path + "</a></td>";
@@ -29,7 +29,7 @@ var icd = function(cytoscapeutil) {
 				}
 				html += "</table>";
 
-				var packageImplicitCrossModuleDependencyList = packageImplicitCrossModuleDependencyMap[project.id];
+				let packageImplicitCrossModuleDependencyList = packageImplicitCrossModuleDependencyMap[project.id];
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th>Index</th>";
@@ -38,9 +38,9 @@ var icd = function(cytoscapeutil) {
 				html += "<th>Co-Change Times</th>";
 				html += "</tr>";
 				index = 1;
-				for(var packageIndex in packageImplicitCrossModuleDependencyList) {
+				for(let packageIndex in packageImplicitCrossModuleDependencyList) {
 					if (packageImplicitCrossModuleDependencyList.hasOwnProperty(packageIndex)) {
-						var packageImplicitCrossModuleDependency = packageImplicitCrossModuleDependencyList[packageIndex];
+						let packageImplicitCrossModuleDependency = packageImplicitCrossModuleDependencyList[packageIndex];
 						html += "<tr>";
 						html += "<td>" + index + "</td>";
 						html += "<td>" + packageImplicitCrossModuleDependency.node1.directoryPath + "</td>";
@@ -56,8 +56,8 @@ var icd = function(cytoscapeutil) {
 		$("#content").html(html);
 	}
 	
-	var _save = function() {
-		var set = function(projectId, icdMinFileCoChange, icdMinPackageCoChange) {
+	let _save = function() {
+		let set = function(projectId, icdMinFileCoChange, icdMinPackageCoChange) {
 			$.ajax({
 				type: "post",
 				url: "/as/icd/cochange" + projectId
@@ -73,15 +73,15 @@ var icd = function(cytoscapeutil) {
 			})
 		}
 		$("#icdMinCoChangeSave").click(function() {
-			var projectId;
+			let projectId;
 			$("#logicalCouplingProjects").change(function() {
 				projectId = $(this).val();
 			})
 			if($("#logicalCouplingProjects").val() != null) {
 				projectId = $("#logicalCouplingProjects").val();
 			}
-			var icdMinFileCoChange = $("#icdMinFileCoChange").val();
-			var icdMinPackageCoChange = $("#icdMinPackageCoChange").val();
+			let icdMinFileCoChange = $("#icdMinFileCoChange").val();
+			let icdMinPackageCoChange = $("#icdMinPackageCoChange").val();
 			set(projectId, icdMinFileCoChange, icdMinPackageCoChange);
 		})
 	}

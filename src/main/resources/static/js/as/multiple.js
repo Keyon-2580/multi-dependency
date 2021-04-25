@@ -1,5 +1,5 @@
-var multiple = function(projects, files, cytoscapeutil) {
-	var param = {
+let multiple = function(projects, files, cytoscapeutil) {
+	let param = {
 			cycle: true,
 			hublike: true,
 			logicCoupling: true,
@@ -13,7 +13,7 @@ var multiple = function(projects, files, cytoscapeutil) {
 	}
 	
 	function paramToRequestParam() {
-		var str = "?cycle=" + param.cycle + 
+		let str = "?cycle=" + param.cycle + 
 			"&hublike=" + param.hublike + 
 			"&logicCoupling=" + param.logicCoupling + 
 			"&similar=" + param.similar + 
@@ -25,9 +25,9 @@ var multiple = function(projects, files, cytoscapeutil) {
 		return str;
 	}
 	
-	var _histogram = function(data, divId) {
-		var histogramChart = echarts.init(document.getElementById(divId));
-		var option = {
+	let _histogram = function(data, divId) {
+		let histogramChart = echarts.init(document.getElementById(divId));
+		let option = {
 				dataZoom: [{
 					type: 'slider',
 					show: true,
@@ -86,12 +86,12 @@ var multiple = function(projects, files, cytoscapeutil) {
 		histogramChart.setOption(option);
 	}
 	
-	var _pie = function(project, pies, allFilesPieDivId, smellAndIssueFilesPieDivId, issuesDivId) {
+	let _pie = function(project, pies, allFilesPieDivId, smellAndIssueFilesPieDivId, issuesDivId) {
 		console.log(pies);
-		var issuesPie = echarts.init(document.getElementById(issuesDivId));
-		var allFilesPie = echarts.init(document.getElementById(allFilesPieDivId));
-		var smellAndIssueFilesPie = echarts.init(document.getElementById(smellAndIssueFilesPieDivId));
-		var issuesPieOption = {
+		let issuesPie = echarts.init(document.getElementById(issuesDivId));
+		let allFilesPie = echarts.init(document.getElementById(allFilesPieDivId));
+		let smellAndIssueFilesPie = echarts.init(document.getElementById(smellAndIssueFilesPieDivId));
+		let issuesPieOption = {
 				title: {
 					text: 'Issues占比',
 					left: 'center'
@@ -126,7 +126,7 @@ var multiple = function(projects, files, cytoscapeutil) {
 					]
 		}
 		issuesPie.setOption(issuesPieOption);
-		var allFilesOption = {
+		let allFilesOption = {
 				title: {
 					text: '文件占比',
 					left: 'center'
@@ -164,7 +164,7 @@ var multiple = function(projects, files, cytoscapeutil) {
 		};
 		allFilesPie.setOption(allFilesOption);
 		
-		var warnFilesOption = {
+		let warnFilesOption = {
 				title: {
 					text: '文件占比',
 					left: 'center'
@@ -202,11 +202,11 @@ var multiple = function(projects, files, cytoscapeutil) {
 		smellAndIssueFilesPie.setOption(warnFilesOption);
 	}
 	
-	var _multiple = function() {
-		var html = "";
+	let _multiple = function() {
+		let html = "";
 		console.log(projects);
-		for(var i = 0; i < projects.length; i++) {
-			var project = projects[i];
+		for(let i = 0; i < projects.length; i++) {
+			let project = projects[i];
 			html += "<div>";
 				html += "<div>";
 				html += "<h4><a target='_blank' href='/as/multiple/project/" + project.id + paramToRequestParam() + "'>" + project.name + " (" + project.language + ") </h4></a>";
@@ -241,8 +241,8 @@ var multiple = function(projects, files, cytoscapeutil) {
 				html += "<th>unutilized</th>";
 //				html += "<th>page rank</th>";
 				html += "</tr>";
-				for(var j = 0 ; j < files[project.id].length; j++) {
-					var value = files[project.id][j];
+				for(let j = 0 ; j < files[project.id].length; j++) {
+					let value = files[project.id][j];
 					html += "<tr>";
 					html += "<td>" + value.file.id + "</td>";
 					html += "<td><a target='_blank' href='/relation/file/" + value.file.id + "'>" + value.file.path + "</a></td>";
@@ -263,7 +263,7 @@ var multiple = function(projects, files, cytoscapeutil) {
 			html += "</div>";
 		}
 		$("#table").html(html);
-		var data = {
+		let data = {
 				"children": [{
 					"children": [{
 							"size": 1000,
@@ -289,13 +289,13 @@ var multiple = function(projects, files, cytoscapeutil) {
 			data: param,
 			success: function(result) {
 				console.log(result);
-				for(var i = 0; i < projects.length; i++) {
-					var data = {};
-					var project = projects[i];
-					var minIssueSize = 0;
-					var maxIssueSize = 0;
-					var circles = result[project.id];
-					for(var j = 0; j < circles.length; j++) {
+				for(let i = 0; i < projects.length; i++) {
+					let data = {};
+					let project = projects[i];
+					let minIssueSize = 0;
+					let maxIssueSize = 0;
+					let circles = result[project.id];
+					for(let j = 0; j < circles.length; j++) {
 					}
 					
 				}
@@ -307,8 +307,8 @@ var multiple = function(projects, files, cytoscapeutil) {
 			data : param,
 			success: function(result) {
 				console.log(result);
-				for(var i = 0; i < projects.length; i++) {
-					var project = projects[i];
+				for(let i = 0; i < projects.length; i++) {
+					let project = projects[i];
 					_pie(project, result[project.id], "allFilesPie_" + project.id, "issueFilesPie_" + project.id, "issuesPie_" + project.id);
 				}
 			}
@@ -318,18 +318,18 @@ var multiple = function(projects, files, cytoscapeutil) {
 			url: "/as/multiple/histogram",
 			success: function(result) {
 				console.log(result);
-				var allFiles = [];
-				var smellFiles = [];
-				var issueFiles = [];
-				var projectsName = [];
-				for(var i = 0; i < projects.length; i++) {
-					var project = projects[i];
+				let allFiles = [];
+				let smellFiles = [];
+				let issueFiles = [];
+				let projectsName = [];
+				for(let i = 0; i < projects.length; i++) {
+					let project = projects[i];
 					allFiles[i] = result[project.id].allFilesCount;
 					smellFiles[i] = result[project.id].smellFilesCount;
 					issueFiles[i] = result[project.id].issueFilesCount;
 					projectsName[i] = project.name;
 				}
-				var data = {
+				let data = {
 					projects: projectsName,
 					allFiles: allFiles,
 					smellFiles: smellFiles,

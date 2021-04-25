@@ -1,18 +1,18 @@
-var smellmetric = function() {
-	var allSmellMetric = function(projects) {
+let smellmetric = function() {
+	let allSmellMetric = function(projects) {
     		$.ajax({
     			type: "get",
     			url: "/metric/smellMetric",
     			success: function(result) {
-    			    var myObj = {size : result.length };
+    			    let myObj = {size : result.length };
     				console.log(myObj);
-    				var html = "";
+    				let html = "";
                     let commits;
-                    for (var id in projects) {
+                    for (let id in projects) {
                         html += "<div><h4>" + projects[id].name + " (" + projects[id].language + ")" + "</h4></div>";
                         // html += "<div><button name='fileTable_" + id + "' class='btn btn-primary file_excel_button'>输出 excel</button></div>";
-                        var typeIndex = 0;
-                        for (var type in result[id]) {
+                        let typeIndex = 0;
+                        for (let type in result[id]) {
                             html += "<div><table id='fileTable_" + id + "_" + type + "' class='table table-bordered'>";
                             html += "<div><h5>" + typeIndex++ + ". " + type + "</h5></div>";
                             html += "<tr>";
@@ -44,9 +44,9 @@ var smellmetric = function() {
                             html += "<th>NewFeatures</th>";
                             html += "<th>Improvements</th>";
                             html += "</tr>";
-                            var metrics = result[id][type];
+                            let metrics = result[id][type];
                             // console.log(metrics);
-                            for (var i = 0; i < metrics.length; i++) {
+                            for (let i = 0; i < metrics.length; i++) {
                                 console.log(metrics[i]);
                                 html += "<tr>";
                                 html += "<td>" + (i + 1) + "</td>";
@@ -123,7 +123,7 @@ var smellmetric = function() {
 				url: "/project/all",
 				success: function(result) {
 					console.log(result);
-                    var info = "<p>获取中...</p>"
+                    let info = "<p>获取中...</p>"
                     $("#smellMetric").html(info);
 					allSmellMetric(result);
 				}
