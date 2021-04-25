@@ -30,7 +30,7 @@ public class CyclicDependencyController {
 		request.setAttribute("typeCyclicDependencyMap", cyclicDependencyDetector.queryTypeCyclicDependency());
 		request.setAttribute("fileCyclicDependencyMap", cyclicDependencyDetector.queryFileCyclicDependency());
 		request.setAttribute("packageCyclicDependencyMap", cyclicDependencyDetector.queryPackageCyclicDependency());
-		return "as/cyclic";
+		return "as/cyclicdependency";
 	}
 
 	@GetMapping("/detect")
@@ -39,6 +39,6 @@ public class CyclicDependencyController {
 		request.setAttribute("typeCyclicDependencyMap", cyclicDependencyDetector.detectTypeCyclicDependency());
 		request.setAttribute("fileCyclicDependencyMap", cyclicDependencyDetector.detectFileCyclicDependency());
 		request.setAttribute("packageCyclicDependencyMap", cyclicDependencyDetector.detectPackageCyclicDependency());
-		return "as/cyclic";
+		return "as/cyclicdependency";
 	}
 }

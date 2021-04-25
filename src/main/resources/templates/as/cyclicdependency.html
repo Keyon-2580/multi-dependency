@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>HubLike Components</title>
+<title>Cyclic Dependency</title>
 	<script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
 	<script type="text/javascript" th:src="@{/js/cytoscapeutils.js}"></script>
-	<script type="text/javascript" th:src="@{/js/as/hublike.js}"></script>
+	<script type="text/javascript" th:src="@{/js/as/cyclicdependency.js}"></script>
 	<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"/>
 </head>
 <body>
@@ -18,9 +18,10 @@
 		//<![CDATA[
 		 $(document).ready(function() {
 			var projects = [[${projects}]];
-			var fileHubLikeDependencyMap = [[${fileHubLikeDependencyMap}]];
-			var packageHubLikeDependencyMap = [[${packageHubLikeDependencyMap}]];
-			hubLikeDependency().hubLikeDependency(projects, fileHubLikeDependencyMap, packageHubLikeDependencyMap);
+			var typeCyclicDependencyMap = [[${typeCyclicDependencyMap}]];
+			var fileCyclicDependencyMap = [[${fileCyclicDependencyMap}]];
+			var packageCyclicDependencyMap = [[${packageCyclicDependencyMap}]];
+			cyclicDependency().cyclicDependency(projects, typeCyclicDependencyMap, fileCyclicDependencyMap, packageCyclicDependencyMap);
 		});
 		// ]]>
 	</script>

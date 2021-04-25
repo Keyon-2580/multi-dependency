@@ -65,9 +65,6 @@ public class BeanCreator {
 	@Autowired
 	private CyclicDependencyDetector cyclicDependencyDetector;
 
-	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
-	private ModularityCalculator modularityCalculator;
-
 	@Autowired
 	private MetricCalculatorService metricCalculatorService;
 
@@ -76,6 +73,9 @@ public class BeanCreator {
 
 	@Autowired
 	private SmellDetectorService smellDetectorService;
+
+	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
+	private ModularityCalculator modularityCalculator;
 
 	@Bean("createCoChanges")
 	public List<CoChange> createCoChanges(PropertyConfig propertyConfig, CoChangeRepository cochangeRepository, AggregationCoChangeRepository aggregationCoChangeRepository) {
@@ -422,13 +422,13 @@ public class BeanCreator {
 	@Bean
 	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository) {
 		LOGGER.info("创建File Metric度量值节点和关系...");
-		metricCalculatorService.createFileMetric(true);
+		metricCalculatorService.createFileMetric(false);
 
 		LOGGER.info("创建Package Metric度量值节点和关系...");
-		metricCalculatorService.createPackageMetric(true);
+		metricCalculatorService.createPackageMetric(false);
 
 		LOGGER.info("创建Project Metric度量值节点和关系...");
-		metricCalculatorService.createProjectMetric(true);
+		metricCalculatorService.createProjectMetric(false);
 
 		if(propertyConfig.isCalModularity()){
 			LOGGER.info("计算Project模块性度量值...");
@@ -477,41 +477,41 @@ public class BeanCreator {
 
 			if(propertyConfig.isCalculateDependsOn()) {
 				LOGGER.info("创建Cyclic Dependency Smell节点关系...");
-				smellDetectorService.createCycleDependencySmells(true);
+				smellDetectorService.createCycleDependencySmells(false);
 
 				LOGGER.info("创建Hub-Like Dependency Smell节点关系...");
-				smellDetectorService.createHubLikeDependencySmells(true);
+				smellDetectorService.createHubLikeDependencySmells(false);
 
 				LOGGER.info("创建Unstable Dependency Smell节点关系...");
 				smellDetectorService.createUnstableDependencySmells(true);
 
 				LOGGER.info("创建Unused Include Smell节点关系...");
-				smellDetectorService.createUnusedIncludeSmells(true);
+				smellDetectorService.createUnusedIncludeSmells(false);
 			}
 
 			if(propertyConfig.isCalculateCloneGroup()){
 				LOGGER.info("创建Clone Smell节点关系...");
-				smellDetectorService.createCloneSmells(true);
+				smellDetectorService.createCloneSmells(false);
 			}
 
 			if(propertyConfig.isCalculateCloneGroup() && propertyConfig.isCalculateCloneGroup()){
 				LOGGER.info("创建Similar Components Smell节点关系...");
-				smellDetectorService.createSimilarComponentsSmells(true);
+				smellDetectorService.createSimilarComponentsSmells(false);
 			}
 
 			if(propertyConfig.isCalculateCoChange()){
 				LOGGER.info("创建Implicit Cross Module Dependency Smell节点关系...");
-				smellDetectorService.createImplicitCrossModuleDependencySmells(true);
+				smellDetectorService.createImplicitCrossModuleDependencySmells(false);
 			}
 
 			if(propertyConfig.isCalculateCoChange()){
 				LOGGER.info("创建God Component Smell节点关系...");
-				smellDetectorService.createGodComponentSmells(true);
+				smellDetectorService.createGodComponentSmells(false);
 			}
 
 			if(propertyConfig.isCalculateCoChange()){
 				LOGGER.info("创建Unutilized Abstraction Smell节点关系...");
-				smellDetectorService.createUnutilizedAbstractionSmells(true);
+				smellDetectorService.createUnutilizedAbstractionSmells(false);
 			}
 		}
 		return true;
@@ -520,7 +520,7 @@ public class BeanCreator {
 	@Bean
 	public boolean setSmellMetrics() {
 		LOGGER.info("创建Smell Metric度量值节点和关系...");
-		smellMetricCalculatorService.createSmellMetric(true);
+		smellMetricCalculatorService.createSmellMetric(false);
 		return true;
 	}
 

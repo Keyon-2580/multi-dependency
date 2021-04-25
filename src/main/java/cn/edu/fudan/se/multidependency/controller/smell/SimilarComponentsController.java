@@ -12,7 +12,7 @@ import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller
 @RequestMapping("/as/similarcomponents")
-public class SimilarComponentController {
+public class SimilarComponentsController {
 
 	@Autowired
 	private SimilarComponentsDetector similarComponentsDetector;
@@ -24,13 +24,13 @@ public class SimilarComponentController {
 	public String querySimilarComponents(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
 		request.setAttribute("fileSimilarComponentsMap", similarComponentsDetector.queryFileSimilarComponents());
-		return "as/similar";
+		return "as/similarcomponents";
 	}
 
 	@GetMapping("/detect")
 	public String detectSimilarComponents(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
 		request.setAttribute("fileSimilarComponentsMap", similarComponentsDetector.detectFileSimilarComponents());
-		return "as/similar";
+		return "as/similarcomponents";
 	}
 }

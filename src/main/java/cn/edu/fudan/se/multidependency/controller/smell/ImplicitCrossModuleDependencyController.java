@@ -11,7 +11,7 @@ import cn.edu.fudan.se.multidependency.service.query.smell.ImplicitCrossModuleDe
 
 @Controller
 @RequestMapping("/as/icd")
-public class ICDController {
+public class ImplicitCrossModuleDependencyController {
 
 	@Autowired
 	private ImplicitCrossModuleDependencyDetector icdDetector;
@@ -24,7 +24,7 @@ public class ICDController {
 		request.setAttribute("projects", nodeService.allProjects());
 		request.setAttribute("fileImplicitCrossModuleDependencyMap", icdDetector.queryFileImplicitCrossModuleDependency());
 		request.setAttribute("packageImplicitCrossModuleDependencyMap", icdDetector.queryPackageImplicitCrossModuleDependency());
-		return "as/icd";
+		return "as/implicitcrossmoduledependency";
 	}
 
 	@GetMapping("/detect")
@@ -32,7 +32,7 @@ public class ICDController {
 		request.setAttribute("projects", nodeService.allProjects());
 		request.setAttribute("fileImplicitCrossModuleDependencyMap", icdDetector.detectFileImplicitCrossModuleDependency());
 		request.setAttribute("packageImplicitCrossModuleDependencyMap", icdDetector.detectPackageImplicitCrossModuleDependency());
-		return "as/icd";
+		return "as/implicitcrossmoduledependency";
 	}
 	
 	@GetMapping("/cochange/{projectId}")

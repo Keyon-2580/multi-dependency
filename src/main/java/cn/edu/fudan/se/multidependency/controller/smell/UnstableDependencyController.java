@@ -18,7 +18,7 @@ import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller
 @RequestMapping("/as/unstable")
-public class UnstableController {
+public class UnstableDependencyController {
 	@Autowired
 	private NodeService nodeService;
 	
@@ -33,14 +33,14 @@ public class UnstableController {
 		request.setAttribute("projects", nodeService.allProjects());
 		request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryFileUnstableDependency());
 		request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryPackageUnstableDependency());
-		return "as/unstable";
+		return "as/unstabledependency";
 	}
 	@GetMapping("/detect")
 	public String detectUnstableDependency(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
 		request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingInstability.detectFileUnstableDependency());
 		request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.detectPackageUnstableDependency());
-		return "as/unstable";
+		return "as/unstabledependency";
 	}
 	
 	@GetMapping("/threshold/instability/{projectId}")

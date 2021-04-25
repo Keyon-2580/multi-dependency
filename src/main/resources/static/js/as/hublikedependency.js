@@ -62,6 +62,7 @@ let hubLikeDependency = function() {
 					if (packageHubLikeDependencyList.hasOwnProperty(packageIndex)) {
 						let packageHubLikeDependency = packageHubLikeDependencyList[packageIndex];
 						html += "<tr>";
+						html += "<td>" + index + "</td>";
 						html += "<td>" + packageHubLikeDependency.pck.name + "</td>";
 						html += "<td>" + packageHubLikeDependency.fanIn + "</td>";
 						html += "<td>" + packageHubLikeDependency.fanOut + "</td>";

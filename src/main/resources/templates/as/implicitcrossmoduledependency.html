@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Unstable Dependency</title>
+<title>Implicit Cross-Module Dependency</title>
 	<script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>
 	<script type="text/javascript" th:src="@{/js/cytoscapeutils.js}"></script>
-	<script type="text/javascript" th:src="@{/js/as/unstable.js}"></script>
+	<script type="text/javascript" th:src="@{/js/as/implicitcrossmoduledependency.js}"></script>
 	<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"/>
 </head>
 <body>
@@ -18,9 +18,9 @@
 		//<![CDATA[
 		 $(document).ready(function() {
 			var projects = [[${projects}]];
-			var fileUnstableDependencyMap = [[${fileUnstableDependencyMap}]];
-			var packageUnstableDependencyMap = [[${packageUnstableDependencyMap}]];
-			unstableDependency().unstableDependency(projects, fileUnstableDependencyMap, packageUnstableDependencyMap);
+			var fileImplicitCrossModuleDependencyMap = [[${fileImplicitCrossModuleDependencyMap}]];
+			var packageImplicitCrossModuleDependencyMap = [[${packageImplicitCrossModuleDependencyMap}]];
+			implicitCrossModuleDependency().implicitCrossModuleDependency(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap);
 		});
 		// ]]>
 	</script>

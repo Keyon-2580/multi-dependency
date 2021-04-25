@@ -1,11 +1,11 @@
 let similarComponents = function() {
-	let _similarComponents = function() {
+	let _similarComponents = function(projects, fileSimilarComponentsMap) {
 		let html = "";
 		for(let projectIndex in projects) {
 			if (projects.hasOwnProperty(projectIndex)) {
 				let project = projects[projectIndex];
 				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
-				let fileSimilarComponentsList = files[project.id];
+				let fileSimilarComponentsList = fileSimilarComponentsMap[project.id];
 
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
@@ -45,9 +45,9 @@ let similarComponents = function() {
 				html += "</table>";
 			}
 		}
-		if (files[-1] != null) {
+		if (fileSimilarComponentsMap[-1] != null) {
 			html += "<h4>Other</h4>";
-			let fileSimilarComponentsList = files[-1];
+			let fileSimilarComponentsList = fileSimilarComponentsMap[-1];
 
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";

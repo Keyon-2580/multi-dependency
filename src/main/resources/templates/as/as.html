@@ -28,12 +28,12 @@
 	<script type="text/javascript" th:src="@{/js/import/echarts-4.7.0/dist/echarts.js}"></script>
 	<script type="text/javascript" th:src="@{/js/windowUtil.js}"></script>
 	<script type="text/javascript" th:src="@{/js/cytoscapeutils.js}"></script>
-	<script type="text/javascript" th:src="@{/js/as/hublike.js}"></script>
-	<script type="text/javascript" th:src="@{/js/as/unstable.js}"></script>
-	<script type="text/javascript" th:src="@{/js/as/cyclic.js}"></script>
-	<script type="text/javascript" th:src="@{/js/as/similar.js}"></script>
+	<script type="text/javascript" th:src="@{/js/as/hublikedependency.js}"></script>
+	<script type="text/javascript" th:src="@{/js/as/unstabledependency.js}"></script>
+	<script type="text/javascript" th:src="@{/js/as/cyclicdependency.js}"></script>
+	<script type="text/javascript" th:src="@{/js/as/similarcomponents.js}"></script>
 	<script type="text/javascript" th:src="@{/js/as/unused.js}"></script>
-	<script type="text/javascript" th:src="@{/js/as/icd.js}"></script>
+	<script type="text/javascript" th:src="@{/js/as/implicitcrossmoduledependency.js}"></script>
 	<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"/>
 	<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"/>
 	<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"/>
@@ -334,10 +334,9 @@
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-			hublike(cytoscapeutil()).init();
-			unstable(cytoscapeutil()).init();
-			icd(cytoscapeutil()).init();
-		//	god(cytoscapeutil()).init();
+			hubLikeDependency(cytoscapeutil()).init();
+			unstableDependency(cytoscapeutil()).init();
+			implicitCrossModuleDependency(cytoscapeutil()).init();
 		});
 		// ]]>
 	</script>

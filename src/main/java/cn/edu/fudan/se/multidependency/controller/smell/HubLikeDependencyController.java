@@ -17,7 +17,7 @@ import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller
 @RequestMapping("/as/hublike")
-public class HubLikeController {
+public class HubLikeDependencyController {
 	
 	@Autowired
 	private NodeService nodeService;
@@ -30,7 +30,7 @@ public class HubLikeController {
 		request.setAttribute("projects", nodeService.allProjects());
 		request.setAttribute("fileHubLikeDependencyMap", hubLikeComponentDetector.queryFileHubLike());
 		request.setAttribute("packageHubLikeDependencyMap", hubLikeComponentDetector.queryPackageHubLike());
-		return "as/hublike";
+		return "as/hublikedependency";
 	}
 
 	@GetMapping("/detect")
@@ -38,7 +38,7 @@ public class HubLikeController {
 		request.setAttribute("projects", nodeService.allProjects());
 		request.setAttribute("fileHubLikeDependencyMap", hubLikeComponentDetector.detectFileHubLike());
 		request.setAttribute("packageHubLikeDependencyMap", hubLikeComponentDetector.detectPackageHubLike());
-		return "as/hublike";
+		return "as/hublikedependency";
 	}
 	
 	@GetMapping("/fanio/{projectId}")
