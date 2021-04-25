@@ -54,16 +54,16 @@ public class UnstableComponentByInstability<T extends Node> extends UnstableComp
 		return badDependencies;
 	}
 
-	public void setBadDependencies(int badDependencies) {
-		this.badDependencies = badDependencies;
+	public void setBadDependencies() {
+		this.badDependencies = this.badDependsOns.size();
 	}
 
 	public int getAllDependencies() {
 		return allDependencies;
 	}
 
-	public void setAllDependencies(int allDependencies) {
-		this.allDependencies = allDependencies;
+	public void setAllDependencies() {
+		this.allDependencies = this.totalDependsOns.size();
 	}
 	
 }

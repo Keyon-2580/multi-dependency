@@ -103,6 +103,8 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 						fileUnstableDependency.addBadDependency(dependsOn);
 					}
 				}
+				fileUnstableDependency.setAllDependencies();
+				fileUnstableDependency.setBadDependencies();
 				fileUnstableDependencyList.add(fileUnstableDependency);
 			}
 		}
@@ -150,6 +152,8 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 						packageUnstableDependency.addBadDependency(dependsOn);
 					}
 				}
+				packageUnstableDependency.setAllDependencies();
+				packageUnstableDependency.setBadDependencies();
 				fileUnstableDependencyList.add(packageUnstableDependency);
 			}
 		}
