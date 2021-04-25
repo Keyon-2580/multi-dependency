@@ -31,7 +31,6 @@ import cn.edu.fudan.se.multidependency.service.query.smell.HubLikeComponentDetec
 import cn.edu.fudan.se.multidependency.service.query.smell.ImplicitCrossModuleDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.smell.MultipleArchitectureSmellDetector;
 import cn.edu.fudan.se.multidependency.service.query.smell.SimilarComponentsDetector;
-import cn.edu.fudan.se.multidependency.service.query.smell.UnstableDependencyDetectorUsingHistory;
 import cn.edu.fudan.se.multidependency.service.query.smell.UnstableDependencyDetectorUsingInstability;
 import cn.edu.fudan.se.multidependency.service.query.smell.UnusedComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.smell.UnutilizedAbstractionDetector;
@@ -54,9 +53,6 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 	
 	@Autowired
 	private SimilarComponentsDetector similarComponentsDetector;
-	
-	@Autowired
-	private UnstableDependencyDetectorUsingHistory unstableDependencyDetectorUsingHistory;
 	
 	@Autowired
 	private UnstableDependencyDetectorUsingInstability unstableDependencyDetectorUsingInstability;
@@ -95,7 +91,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 	@Override
 	public Map<Long, List<CirclePacking>> circlePacking(MultipleAS multipleAS) {
 		Map<Long, List<CirclePacking>> result = new HashMap<>();
-		Map<Long, List<MultipleASFile>> multipleASFiles = multipleASFiles(true);
+		Map<Long, List<MultipleASFile>> multipleASFiles = detectMultipleSmellASFiles(true);
 		Map<Long, List<IssueFile>> issueFilesGroupByProject = issueQueryService.queryRelatedFilesOnAllIssuesGroupByProject();
 		
 		Collection<Project> projects = nodeService.allProjects();
@@ -141,10 +137,10 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 		
 		return result;
 	}
-	
+
 	@Override
 	public Map<Long, PieFilesData> smellAndIssueFiles(MultipleAS multipleAS) {
-		Map<Long, List<MultipleASFile>> multipleASFiles = multipleASFiles(true);
+		Map<Long, List<MultipleASFile>> multipleASFiles = detectMultipleSmellASFiles(true);
 		Map<Long, List<IssueFile>> issueFilesGroupByProject = issueQueryService.queryRelatedFilesOnAllIssuesGroupByProject();
 		
 		Map<Long, PieFilesData> result = new HashMap<>();
@@ -195,19 +191,40 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 		}
 		return result;
 	}
-	
+
+	@Override
+	public Map<Long, List<MultipleASFile>> queryMultipleSmellASFiles(boolean removeNoASFile) {
+		Map<Long, List<Cycle<ProjectFile>>> cycleFiles = cycleASDetector.queryFileCyclicDependency();
+		Map<Long, List<FileHubLike>> hubLikeFiles = hubLikeComponentDetector.queryFileHubLike();
+		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> unstableFilesUsingInstability = unstableDependencyDetectorUsingInstability.queryFileUnstableDependency();
+		Map<Long, List<ProjectFile>> unusedFiles = unusedComponentDetector.unusedFiles();
+		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> unutilizedFiles = unutilizedAbstractionDetector.queryFileUnutilizedAbstraction();
+		Map<Long, List<LogicCouplingComponents<ProjectFile>>> logicCouplingFiles = icdDependencyDetector.queryFileImplicitCrossModuleDependency();
+		Map<Long, List<SimilarComponents<ProjectFile>>> similarFiles = similarComponentsDetector.queryFileSimilarComponents();
+		return calculateMultipleSmellASFiles(removeNoASFile, cycleFiles, hubLikeFiles, unstableFilesUsingInstability, unusedFiles, unutilizedFiles, logicCouplingFiles, similarFiles);
+	}
 	
 	@Override
-	public Map<Long, List<MultipleASFile>> multipleASFiles(boolean removeNoASFile) {
-		Map<ProjectFile, MultipleASFile> map = new HashMap<>();
+	public Map<Long, List<MultipleASFile>> detectMultipleSmellASFiles(boolean removeNoASFile) {
 		Map<Long, List<Cycle<ProjectFile>>> cycleFiles = cycleASDetector.detectFileCyclicDependency();
 		Map<Long, List<FileHubLike>> hubLikeFiles = hubLikeComponentDetector.detectFileHubLike();
-		Map<Long, List<UnstableFileInHistory>> unstableFilesInHistory = unstableDependencyDetectorUsingHistory.unstableFiles();
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> unstableFilesUsingInstability = unstableDependencyDetectorUsingInstability.detectFileUnstableDependency();
 		Map<Long, List<ProjectFile>> unusedFiles = unusedComponentDetector.unusedFiles();
 		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> unutilizedFiles = unutilizedAbstractionDetector.detectFileUnutilizedAbstraction();
 		Map<Long, List<LogicCouplingComponents<ProjectFile>>> logicCouplingFiles = icdDependencyDetector.detectFileImplicitCrossModuleDependency();
 		Map<Long, List<SimilarComponents<ProjectFile>>> similarFiles = similarComponentsDetector.detectFileSimilarComponents();
+		return calculateMultipleSmellASFiles(removeNoASFile, cycleFiles, hubLikeFiles, unstableFilesUsingInstability, unusedFiles, unutilizedFiles, logicCouplingFiles, similarFiles);
+	}
+
+	private Map<Long, List<MultipleASFile>> calculateMultipleSmellASFiles(boolean removeNoASFile,
+																		  Map<Long, List<Cycle<ProjectFile>>> cycleFiles,
+																		  Map<Long, List<FileHubLike>> hubLikeFiles,
+																		  Map<Long, List<UnstableComponentByInstability<ProjectFile>>> unstableFilesUsingInstability,
+																		  Map<Long, List<ProjectFile>> unusedFiles,
+																		  Map<Long, List<UnutilizedAbstraction<ProjectFile>>> unutilizedFiles,
+																		  Map<Long, List<LogicCouplingComponents<ProjectFile>>> logicCouplingFiles,
+																		  Map<Long, List<SimilarComponents<ProjectFile>>> similarFiles) {
+		Map<ProjectFile, MultipleASFile> map = new HashMap<>();
 		List<ProjectFile> allFiles = nodeService.queryAllFiles();
 		for (List<Cycle<ProjectFile>> cycleFilesGroup : cycleFiles.values()) {
 			for (Cycle<ProjectFile> files : cycleFilesGroup) {
@@ -219,27 +236,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 				}
 			}
 		}
-		
-		/*for(List<GodFile> files : godFiles.values()) {
-			for(GodFile file : files) {
-				MultipleASFile mas = map.getOrDefault(file.getFile(), new MultipleASFile(file.getFile()));
-				mas.setGod(true);
-				map.put(file.getFile(), mas);
-				allFiles.remove(file.getFile());
-			}
-		}
-		
-		for(Map.Entry<Long, List<CyclicHierarchy>> entry : cyclicHierarchies.entrySet()) {
-			for(CyclicHierarchy cyclicHierarchy : entry.getValue()) {
-				Type superType = cyclicHierarchy.getSuperType();
-				ProjectFile file = containRelationService.findTypeBelongToFile(superType);
-				MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
-				mas.setCyclicHierarchy(true);
-				map.put(file, mas);
-				allFiles.remove(file);
-			}
-		}*/
-		
+
 		for (List<FileHubLike> fileHubLikeGroup : hubLikeFiles.values()) {
 			for (FileHubLike file : fileHubLikeGroup) {
 				MultipleASFile mas = map.getOrDefault(file.getFile(), new MultipleASFile(file.getFile()));
@@ -248,16 +245,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 				allFiles.remove(file.getFile());
 			}
 		}
-		
-		for (List<UnstableFileInHistory> unstableFilesGroup : unstableFilesInHistory.values()) {
-			for (UnstableFileInHistory file : unstableFilesGroup) {
-				MultipleASFile mas = map.getOrDefault(file.getComponent(), new MultipleASFile(file.getComponent()));
-				mas.setUnstable(true);
-				map.put(file.getComponent(), mas);
-				allFiles.remove(file.getComponent());
-			}
-		}
-		
+
 		for (List<UnstableComponentByInstability<ProjectFile>> unstableFilesGroup : unstableFilesUsingInstability.values()) {
 			for (UnstableComponentByInstability<ProjectFile> file : unstableFilesGroup) {
 				MultipleASFile mas = map.getOrDefault(file.getComponent(), new MultipleASFile(file.getComponent()));
@@ -294,7 +282,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 				allFiles.remove(file2);
 			}
 		}
-		
+
 		for(List<ProjectFile> files : unusedFiles.values()) {
 			for(ProjectFile file : files) {
 				MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
@@ -303,7 +291,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 				allFiles.remove(file);
 			}
 		}
-		
+
 		for(List<UnutilizedAbstraction<ProjectFile>> files : unutilizedFiles.values()) {
 			for(UnutilizedAbstraction<ProjectFile> file : files) {
 				MultipleASFile mas = map.getOrDefault(file.getComponent(), new MultipleASFile(file.getComponent()));
@@ -312,14 +300,43 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 				allFiles.remove(file.getComponent());
 			}
 		}
-		
+
+		/*for(List<GodFile> files : godFiles.values()) {
+			for(GodFile file : files) {
+				MultipleASFile mas = map.getOrDefault(file.getFile(), new MultipleASFile(file.getFile()));
+				mas.setGod(true);
+				map.put(file.getFile(), mas);
+				allFiles.remove(file.getFile());
+			}
+		}
+
+		for(Map.Entry<Long, List<CyclicHierarchy>> entry : cyclicHierarchies.entrySet()) {
+			for(CyclicHierarchy cyclicHierarchy : entry.getValue()) {
+				Type superType = cyclicHierarchy.getSuperType();
+				ProjectFile file = containRelationService.findTypeBelongToFile(superType);
+				MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
+				mas.setCyclicHierarchy(true);
+				map.put(file, mas);
+				allFiles.remove(file);
+			}
+		}
+
+		for (List<UnstableFileInHistory> unstableFilesGroup : unstableFilesInHistory.values()) {
+			for (UnstableFileInHistory file : unstableFilesGroup) {
+				MultipleASFile mas = map.getOrDefault(file.getComponent(), new MultipleASFile(file.getComponent()));
+				mas.setUnstable(true);
+				map.put(file.getComponent(), mas);
+				allFiles.remove(file.getComponent());
+			}
+		}*/
+
 		if(!removeNoASFile) {
 			for(ProjectFile file : allFiles) {
 				MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
 				map.put(file, mas);
 			}
 		}
-		
+
 		Map<Long, List<MultipleASFile>> result = new HashMap<>();
 		for(Map.Entry<ProjectFile, MultipleASFile> entry : map.entrySet()) {
 			ProjectFile file = entry.getKey();
@@ -330,23 +347,17 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 			temp.add(value);
 			result.put(project.getId(), temp);
 		}
-		
+
 		for(Map.Entry<Long, List<MultipleASFile>> entry : result.entrySet()) {
-			entry.getValue().sort((m1, m2) -> {
-//				if(m2.smellCount() == m1.smellCount()) {
-//					return m2.getFile().getScore() > m1.getFile().getScore() ? 1 : -1;
-//				}
-				return m2.getSmellCount() - m1.getSmellCount();
-			});
+			entry.getValue().sort((m1, m2) -> m2.getSmellCount() - m1.getSmellCount());
 		}
-		
 		return result;
 	}
 
 	@Override
 	public void printMultipleASFiles(OutputStream stream) {
 		Workbook hwb = new XSSFWorkbook();
-		Map<Long, List<MultipleASFile>> multiple = multipleASFiles(false);
+		Map<Long, List<MultipleASFile>> multiple = detectMultipleSmellASFiles(false);
 		Collection<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
 			Sheet sheet = hwb.createSheet(new StringBuilder().append(project.getName()).append("(").append(project.getLanguage()).append(")").toString());
@@ -424,7 +435,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 	@Override
 	public Map<Long, HistogramAS> projectHistogramOnVersion() {
 		Map<Long, HistogramAS> result = new HashMap<>();
-		Map<Long, List<MultipleASFile>> multipleASFiles = multipleASFiles(true);
+		Map<Long, List<MultipleASFile>> multipleASFiles = detectMultipleSmellASFiles(true);
 		Map<Long, List<IssueFile>> issueFiles = issueQueryService.queryRelatedFilesOnAllIssuesGroupByProject();
 		
 		Collection<Project> projects = nodeService.allProjects();

@@ -269,26 +269,26 @@
 		</div>
 
 <!--		Unused Components-->
-		<div style="width: 100%">
-			<div>
-				<h4>Unused Components</h4>
-			</div>
-			<div style="width: 100%">
-				<div class="form-group" style="width: 15%">
-					<label for="unusedComponentsProjects">Project: </label>
-					<select id="unusedComponentsProjects" class="projectSelect form-control">
-						<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
-					</select>
-				</div>
-			</div>
-			<div style="width: 100%">
-				<a href="/as/unused" target="_blank" class="btn btn-default">Detect</a>
-			</div>
-		</div>
+<!--		<div style="width: 100%">-->
+<!--			<div>-->
+<!--				<h4>Unused Components</h4>-->
+<!--			</div>-->
+<!--			<div style="width: 100%">-->
+<!--				<div class="form-group" style="width: 15%">-->
+<!--					<label for="unusedComponentsProjects">Project: </label>-->
+<!--					<select id="unusedComponentsProjects" class="projectSelect form-control">-->
+<!--						<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>-->
+<!--					</select>-->
+<!--				</div>-->
+<!--			</div>-->
+<!--			<div style="width: 100%">-->
+<!--				<a href="/as/unused" target="_blank" class="btn btn-default">Detect</a>-->
+<!--			</div>-->
+<!--		</div>-->
 
-		<div style="width: 100%">
-			<hr/>
-		</div>
+<!--		<div style="width: 100%">-->
+<!--			<hr/>-->
+<!--		</div>-->
 
 <!--		Unutilized Abstraction-->
 		<div style="width: 100%">
@@ -326,7 +326,8 @@
 				<h4>Multiple Smells</h4>
 			</div>
 			<div style="width: 100%">
-				<a href="/as/multiple" target="_blank" class="btn btn-default">Detect</a>
+				<a href="/as/multiple/query" target="_blank" class="btn btn-default">Query</a>
+				<a href="/as/multiple/detect" target="_blank" class="btn btn-default">Re-detect</a>
 			</div>
 		</div>
 	</div>

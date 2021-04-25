@@ -16,8 +16,10 @@ public interface MultipleArchitectureSmellDetector {
 	
 	Map<Long, List<CirclePacking>> circlePacking(MultipleAS multipleAS);
 	
-	Map<Long, List<MultipleASFile>> multipleASFiles(boolean removeNoASFile);
-	
+	Map<Long, List<MultipleASFile>> queryMultipleSmellASFiles(boolean removeNoASFile);
+
+	Map<Long, List<MultipleASFile>> detectMultipleSmellASFiles(boolean removeNoASFile);
+
 	Map<Long, PieFilesData> smellAndIssueFiles(MultipleAS multipleAS);
 	
 	void printMultipleASFiles(OutputStream stream);

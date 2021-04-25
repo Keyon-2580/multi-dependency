@@ -38,10 +38,17 @@ public class ArchitectureSmellController {
 		return "as/as";
 	}
 	
-	@GetMapping("/multiple")
-	public String multiple(HttpServletRequest request) {
+	@GetMapping("/multiple/query")
+	public String queryMultipleSmell(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("files", detector.multipleASFiles(false));
+		request.setAttribute("files", detector.queryMultipleSmellASFiles(false));
+		return "as/multiple";
+	}
+
+	@GetMapping("/multiple/detect")
+	public String detectMultipleSmell(HttpServletRequest request) {
+		request.setAttribute("projects", nodeService.allProjects());
+		request.setAttribute("files", detector.detectMultipleSmellASFiles(false));
 		return "as/multiple";
 	}
 	
