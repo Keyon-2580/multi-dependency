@@ -246,15 +246,15 @@ let multiple = function(projects, files, cytoscapeutil) {
 					html += "<tr>";
 					html += "<td>" + value.file.id + "</td>";
 					html += "<td><a target='_blank' href='/relation/file/" + value.file.id + "'>" + value.file.path + "</a></td>";
-					html += "<td>" + (value.cycle == true ? "T" : "") + "</td>";
-					html += "<td>" + (value.hublike == true ? "T" : "") + "</td>";
-					html += "<td>" + (value.unstable == true ? "T" : "") + "</td>";
-					html += "<td>" + (value.logicCoupling == true ? "T" : "") + "</td>";
-					html += "<td>" + (value.similar == true ? "T" : "") + "</td>";
+					html += "<td>" + (value.cycle === true ? "T" : "") + "</td>";
+					html += "<td>" + (value.hublike === true ? "T" : "") + "</td>";
+					html += "<td>" + (value.unstable === true ? "T" : "") + "</td>";
+					html += "<td>" + (value.logicCoupling === true ? "T" : "") + "</td>";
+					html += "<td>" + (value.similar === true ? "T" : "") + "</td>";
 //					html += "<td>" + (value.cyclicHierarchy == true ? "T" : "") + "</td>";
 //					html += "<td>" + (value.god == true ? "T" : "") + "</td>";
-					html += "<td>" + (value.unused == true ? "T" : "") + "</td>";
-					html += "<td>" + (value.unutilized == true ? "T" : "") + "</td>";
+					html += "<td>" + (value.unused === true ? "T" : "") + "</td>";
+					html += "<td>" + (value.unutilized === true ? "T" : "") + "</td>";
 //					html += "<td>" + value.file.score + "</td>";
 					html += "</tr>";
 				}

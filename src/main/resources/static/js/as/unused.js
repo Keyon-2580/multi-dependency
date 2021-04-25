@@ -3,22 +3,25 @@ let unused = function(cytoscapeutil) {
 		let html = "";
 
 		for(let projectIndex in projects) {
-			let project = projects[projectIndex];
-			html += "<h4>" + project.name + " (" + project.language + ")</h4>";
-			let unusedPackages = packages[project.id];
-			html += "<table class='table table-bordered'>";
-			html += "<tr>";
-			html += "<th>Package</th>";
-			html += "</tr>";
-			for(let pckIndex in unusedPackages) {
-				let pck = unusedPackages[pckIndex];
-				console.log(pck);
+			if (projects.hasOwnProperty(projectIndex)) {
+				let project = projects[projectIndex];
+				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
+				let unusedPackages = packages[project.id];
+				html += "<table class='table table-bordered'>";
 				html += "<tr>";
-				html += "<td width='50%'>" + pck.directoryPath + "</td>";
+				html += "<th>Package</th>";
 				html += "</tr>";
+				for(let packageIndex in unusedPackages) {
+					if (unusedPackages.hasOwnProperty(packageIndex)) {
+						let pck = unusedPackages[packageIndex];
+						console.log(pck);
+						html += "<tr>";
+						html += "<td width='50%'>" + pck.directoryPath + "</td>";
+						html += "</tr>";
+					}
+				}
+				html += "</table>";
 			}
-			
-			html += "</table>";
 		}
 		
 		$("#content").html(html);
