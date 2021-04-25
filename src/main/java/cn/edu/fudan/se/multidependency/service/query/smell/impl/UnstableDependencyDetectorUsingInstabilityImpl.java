@@ -84,8 +84,9 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 		List<UnstableComponentByInstability<ProjectFile>> fileUnstableDependencyList = new ArrayList<>();
 		for (Smell smell : smells) {
 			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
-			if (contains.iterator().hasNext()) {
-				ProjectFile component = (ProjectFile) contains.iterator().next();
+			Iterator<Node> iterator = contains.iterator();
+			if (iterator.hasNext()) {
+				ProjectFile component = (ProjectFile) iterator.next();
 				UnstableComponentByInstability<ProjectFile> fileUnstableDependency = new UnstableComponentByInstability<>();
 				fileUnstableDependency.setComponent(component);
 				List<DependsOn> dependsOns = dependsOnRepository.findFileDependsOn(component.getId());
@@ -130,8 +131,9 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 		List<UnstableComponentByInstability<Package>> fileUnstableDependencyList = new ArrayList<>();
 		for (Smell smell : smells) {
 			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
-			if (contains.iterator().hasNext()) {
-				Package component = (Package) contains.iterator().next();
+			Iterator<Node> iterator = contains.iterator();
+			if (iterator.hasNext()) {
+				Package component = (Package) iterator.next();
 				UnstableComponentByInstability<Package> packageUnstableDependency = new UnstableComponentByInstability<>();
 				packageUnstableDependency.setComponent(component);
 				List<DependsOn> dependsOns = dependsOnRepository.findPackageDependsOn(component.getId());

@@ -411,7 +411,7 @@ public class SmellDetectorService {
 	public void createImplicitCrossModuleDependencySmells(boolean isRecreate) {
 		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY);
 		if(smellsTmp != null && !smellsTmp.isEmpty()){
-			LOGGER.info("已存在Implicit CrossModule Dependency Smell");
+			LOGGER.info("已存在Implicit Cross Module Dependency Smell");
 			if(!isRecreate){
 				LOGGER.info("不重新创建");
 				return;
@@ -424,51 +424,55 @@ public class SmellDetectorService {
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
 
-		Collection<LogicCouplingComponents<ProjectFile>> fileLogicals = implicitCrossModuleDependencyDetector.cochangesInDifferentFile();
+		Map<Long, List<LogicCouplingComponents<ProjectFile>>> fileLogicals = implicitCrossModuleDependencyDetector.detectFileImplicitCrossModuleDependency();
 		String fileSmellName = SmellLevel.FILE + "_" + SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY + "_";
 		int fileSmellIndex = 1;
-		for (LogicCouplingComponents<ProjectFile> fileLogical : fileLogicals) {
-			Package pck = containRepository.findFileBelongToPackage(fileLogical.getNode1().getId());
-			Project project = containRepository.findPackageBelongToProject(pck.getId());
-			Smell smell = new Smell();
-			smell.setName(fileSmellName + fileSmellIndex);
-			smell.setSize(2);
-			smell.setLanguage(project.getLanguage());
-			smell.setProjectId(project.getId());
-			smell.setProjectName(project.getName());
-			smell.setType(SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY);
-			smell.setLevel(SmellLevel.FILE);
-			smells.add(smell);
-			Contain contain1 = new Contain(smell, fileLogical.getNode1());
-			Contain contain2 = new Contain(smell, fileLogical.getNode2());
-			smellContains.add(contain1);
-			smellContains.add(contain2);
-			fileSmellIndex ++;
+		for (Map.Entry<Long, List<LogicCouplingComponents<ProjectFile>>> entry : fileLogicals.entrySet()) {
+			for (LogicCouplingComponents<ProjectFile> fileLogical : entry.getValue()) {
+				Package pck = containRepository.findFileBelongToPackage(fileLogical.getNode1().getId());
+				Project project = containRepository.findPackageBelongToProject(pck.getId());
+				Smell smell = new Smell();
+				smell.setName(fileSmellName + fileSmellIndex);
+				smell.setSize(2);
+				smell.setLanguage(project.getLanguage());
+				smell.setProjectId(project.getId());
+				smell.setProjectName(project.getName());
+				smell.setType(SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY);
+				smell.setLevel(SmellLevel.FILE);
+				smells.add(smell);
+				Contain contain1 = new Contain(smell, fileLogical.getNode1());
+				Contain contain2 = new Contain(smell, fileLogical.getNode2());
+				smellContains.add(contain1);
+				smellContains.add(contain2);
+				fileSmellIndex ++;
+			}
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
 
 		smells.clear();
 		smellContains.clear();
-		Collection<LogicCouplingComponents<Package>> packageLogicals = implicitCrossModuleDependencyDetector.cochangesInDifferentPackage();
+		Map<Long, List<LogicCouplingComponents<Package>>> packageLogicals = implicitCrossModuleDependencyDetector.detectPackageImplicitCrossModuleDependency();
 		String packageSmellName = SmellLevel.PACKAGE + "_" + SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY + "_";
 		int packageSmellIndex = 1;
-		for (LogicCouplingComponents<Package> packageLogical : packageLogicals) {
-			Project project = containRepository.findPackageBelongToProject(packageLogical.getNode1().getId());
-			Smell smell = new Smell();
-			smell.setName(packageSmellName + packageSmellIndex);
-			smell.setSize(2);
-			smell.setLanguage(project.getLanguage());
-			smell.setProjectId(project.getId());
-			smell.setProjectName(project.getName());
-			smell.setType(SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY);
-			smell.setLevel(SmellLevel.PACKAGE);
-			smells.add(smell);
-			Contain contain1 = new Contain(smell, packageLogical.getNode1());
-			Contain contain2 = new Contain(smell, packageLogical.getNode2());
-			smellContains.add(contain1);
-			smellContains.add(contain2);
-			packageSmellIndex ++;
+		for (Map.Entry<Long, List<LogicCouplingComponents<Package>>> entry : packageLogicals.entrySet()) {
+			for (LogicCouplingComponents<Package> packageLogical : entry.getValue()) {
+				Project project = containRepository.findPackageBelongToProject(packageLogical.getNode1().getId());
+				Smell smell = new Smell();
+				smell.setName(packageSmellName + packageSmellIndex);
+				smell.setSize(2);
+				smell.setLanguage(project.getLanguage());
+				smell.setProjectId(project.getId());
+				smell.setProjectName(project.getName());
+				smell.setType(SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY);
+				smell.setLevel(SmellLevel.PACKAGE);
+				smells.add(smell);
+				Contain contain1 = new Contain(smell, packageLogical.getNode1());
+				Contain contain2 = new Contain(smell, packageLogical.getNode2());
+				smellContains.add(contain1);
+				smellContains.add(contain2);
+				packageSmellIndex ++;
+			}
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);

@@ -22,6 +22,15 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
 	 */
     @Query("match p=(:ProjectFile)-[r:" + RelationType.str_CO_CHANGE + "]->() where r.times >= $count return p")
     List<CoChange> findGreaterThanCountCoChanges(@Param("count") int count);
+
+    @Query("MATCH (project:Project) " +
+            "where id(project) = $projectId " +
+            "match p=(file1:ProjectFile)-[coChange:" + RelationType.str_CO_CHANGE + "]->(file2:ProjectFile) " +
+            "where (project)-[:" + RelationType.str_CONTAIN + "*2]->(file1) " +
+            "and (project)-[:" + RelationType.str_CONTAIN + "*2]->(file2) " +
+            "and coChange.times >= $count " +
+            "return distinct p")
+    List<CoChange> findProjectGreaterThanCountCoChanges(@Param("projectId") long projectId, @Param("count") int count);
     
     /**
      * 找出两个指定文件的cochange关系
@@ -29,8 +38,14 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
      * @param file2Id
      * @return
      */
-    @Query("match p= (f1:ProjectFile)-[:" + RelationType.str_CO_CHANGE + "]->(f2:ProjectFile) where id(f1)=$file1Id and id(f2)=$file2Id return p")
+    @Query("match p=(f1:ProjectFile)-[:" + RelationType.str_CO_CHANGE + "]->(f2:ProjectFile) where id(f1)=$file1Id and id(f2)=$file2Id return p")
     CoChange findCoChangesBetweenTwoFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
+
+    @Query("match p=(f1:ProjectFile)-[:" + RelationType.str_CO_CHANGE + "]-(f2:ProjectFile) where id(f1)=$file1Id and id(f2)=$file2Id return distinct p")
+    CoChange findCoChangesBetweenTwoFilesWithoutDirection(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
+
+    @Query("match p=(p1:Package)-[:" + RelationType.str_CO_CHANGE + "]-(p2:Package) where id(p1)=$package1Id and id(p2)=$package2Id return distinct p")
+    CoChange findCoChangesBetweenTwoPackagesWithoutDirection(@Param("package1Id") long package1Id, @Param("package2Id") long package2Id);
 
     @Query("match (f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
     		"]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile) " + 

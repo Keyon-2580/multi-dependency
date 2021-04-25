@@ -90,8 +90,9 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		List<FileHubLike> fileHubLikes = new ArrayList<>();
 		for (Smell smell : smells) {
 			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
-			if (contains.iterator().hasNext()) {
-				ProjectFile component = (ProjectFile) contains.iterator().next();
+			Iterator<Node> iterator = contains.iterator();
+			if (iterator.hasNext()) {
+				ProjectFile component = (ProjectFile) iterator.next();
 				FileHubLike fileHubLike = new FileHubLike(component, fileRepository.getFanIn(component.getId()), fileRepository.getFanOut(component.getId()));
 //				Collection<ProjectFile> fanInFiles = fileRepository.calculateFanIn(component.getId());
 //				List<CoChange> inCoChanges = new ArrayList<>();
@@ -146,8 +147,9 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		List<PackageHubLike> packageHubLikes = new ArrayList<>();
 		for (Smell smell : smells) {
 			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
-			if (contains.iterator().hasNext()) {
-				Package component = (Package) contains.iterator().next();
+			Iterator<Node> iterator = contains.iterator();
+			if (iterator.hasNext()) {
+				Package component = (Package) iterator.next();
 				PackageHubLike packageHubLike = new PackageHubLike(component, packageRepository.getFanIn(component.getId()), packageRepository.getFanOut(component.getId()));
 				packageHubLikes.add(packageHubLike);
 			}

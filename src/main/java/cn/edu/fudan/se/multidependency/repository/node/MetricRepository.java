@@ -76,14 +76,20 @@ public interface MetricRepository extends Neo4jRepository<Metric, Long> {
     List<Metric> findCommitMetric();
 
     @Query("MATCH (project:Project)-[:" + RelationType.str_HAS + "]->(metric:Metric) where id(project) = $projectId RETURN metric.`metricValues.MedFileFanIn`;")
-    int getMedFileFanInByProjectId(@Param("projectId") Long projectId);
+    Integer getMedFileFanInByProjectId(@Param("projectId") Long projectId);
 
     @Query("MATCH (project:Project)-[:" + RelationType.str_HAS + "]->(metric:Metric) where id(project) = $projectId RETURN metric.`metricValues.MedFileFanOut`;")
-    int getMedFileFanOutByProjectId(@Param("projectId") Long projectId);
+    Integer getMedFileFanOutByProjectId(@Param("projectId") Long projectId);
 
     @Query("MATCH (project:Project)-[:" + RelationType.str_HAS + "]->(metric:Metric) where id(project) = $projectId RETURN metric.`metricValues.MedPackageFanIn`;")
-    int getMedPackageFanInByProjectId(@Param("projectId") Long projectId);
+    Integer getMedPackageFanInByProjectId(@Param("projectId") Long projectId);
 
     @Query("MATCH (project:Project)-[:" + RelationType.str_HAS + "]->(metric:Metric) where id(project) = $projectId RETURN metric.`metricValues.MedPackageFanOut`;")
-    int getMedPackageFanOutByProjectId(@Param("projectId") Long projectId);
+    Integer getMedPackageFanOutByProjectId(@Param("projectId") Long projectId);
+
+    @Query("MATCH (project:Project)-[:" + RelationType.str_HAS + "]->(metric:Metric) where id(project) = $projectId RETURN metric.`metricValues.MedFileCoChange`;")
+    Integer getMedFileCoChangeByProjectId(@Param("projectId") Long projectId);
+
+    @Query("MATCH (project:Project)-[:" + RelationType.str_HAS + "]->(metric:Metric) where id(project) = $projectId RETURN metric.`metricValues.MedPackageCoChange`;")
+    Integer getMedPackageCoChangeByProjectId(@Param("projectId") Long projectId);
 }

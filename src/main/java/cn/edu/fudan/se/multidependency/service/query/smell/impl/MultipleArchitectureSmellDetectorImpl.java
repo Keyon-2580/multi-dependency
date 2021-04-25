@@ -206,7 +206,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> unstableFilesUsingInstability = unstableDependencyDetectorUsingInstability.detectFileUnstableDependency();
 		Map<Long, List<ProjectFile>> unusedFiles = unusedComponentDetector.unusedFiles();
 		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> unutilizedFiles = unutilizedAbstractionDetector.detectFileUnutilizedAbstraction();
-		Collection<LogicCouplingComponents<ProjectFile>> logicCouplingFiles = icdDependencyDetector.cochangesInDifferentFile();
+		Map<Long, List<LogicCouplingComponents<ProjectFile>>> logicCouplingFiles = icdDependencyDetector.detectFileImplicitCrossModuleDependency();
 		Map<Long, List<SimilarComponents<ProjectFile>>> similarFiles = similarComponentsDetector.detectFileSimilarComponents();
 		List<ProjectFile> allFiles = nodeService.queryAllFiles();
 		for(Map<Integer, Cycle<ProjectFile>> cycleFilesGroup : cycleFiles.values()) {
@@ -266,18 +266,19 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 				allFiles.remove(file.getComponent());
 			}
 		}
-		
-		for(LogicCouplingComponents<ProjectFile> files : logicCouplingFiles) {
-			MultipleASFile mas = map.getOrDefault(files.getNode1(), new MultipleASFile(files.getNode1()));
-			mas.setLogicCoupling(true);
-			map.put(files.getNode1(), mas);
-			mas = map.getOrDefault(files.getNode2(), new MultipleASFile(files.getNode2()));
-			mas.setLogicCoupling(true);
-			map.put(files.getNode2(), mas);
-			allFiles.remove(files.getNode1());
-			allFiles.remove(files.getNode2());
+
+		for (Map.Entry<Long, List<LogicCouplingComponents<ProjectFile>>> entry : logicCouplingFiles.entrySet()) {
+			for(LogicCouplingComponents<ProjectFile> files : entry.getValue()) {
+				MultipleASFile mas = map.getOrDefault(files.getNode1(), new MultipleASFile(files.getNode1()));
+				mas.setLogicCoupling(true);
+				map.put(files.getNode1(), mas);
+				mas = map.getOrDefault(files.getNode2(), new MultipleASFile(files.getNode2()));
+				mas.setLogicCoupling(true);
+				map.put(files.getNode2(), mas);
+				allFiles.remove(files.getNode1());
+				allFiles.remove(files.getNode2());
+			}
 		}
-		
 
 		for(Map.Entry<Long, List<SimilarComponents<ProjectFile>>> entry : similarFiles.entrySet()) {
 			for(SimilarComponents<ProjectFile> similarFilesGroup : entry.getValue()) {

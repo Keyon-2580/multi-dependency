@@ -17,8 +17,10 @@
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-			var icdFiles = [[${files}]];
-			icd(cytoscapeutil()).icd(icdFiles);	
+			var projects = [[${projects}]];
+			var fileImplicitCrossModuleDependencyMap = [[${fileImplicitCrossModuleDependencyMap}]];
+			var packageImplicitCrossModuleDependencyMap = [[${packageImplicitCrossModuleDependencyMap}]];
+			icd(cytoscapeutil()).icd(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap);
 		});
 		// ]]>
 	</script>
