@@ -200,7 +200,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 	@Override
 	public Map<Long, List<MultipleASFile>> multipleASFiles(boolean removeNoASFile) {
 		Map<ProjectFile, MultipleASFile> map = new HashMap<>();
-		Map<Long, Map<Integer, Cycle<ProjectFile>>> cycleFiles = cycleASDetector.detectFileCyclicDependency();
+		Map<Long, List<Cycle<ProjectFile>>> cycleFiles = cycleASDetector.detectFileCyclicDependency();
 		Map<Long, List<FileHubLike>> hubLikeFiles = hubLikeComponentDetector.detectFileHubLike();
 		Map<Long, List<UnstableFileInHistory>> unstableFilesInHistory = unstableDependencyDetectorUsingHistory.unstableFiles();
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> unstableFilesUsingInstability = unstableDependencyDetectorUsingInstability.detectFileUnstableDependency();
@@ -209,9 +209,9 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 		Map<Long, List<LogicCouplingComponents<ProjectFile>>> logicCouplingFiles = icdDependencyDetector.detectFileImplicitCrossModuleDependency();
 		Map<Long, List<SimilarComponents<ProjectFile>>> similarFiles = similarComponentsDetector.detectFileSimilarComponents();
 		List<ProjectFile> allFiles = nodeService.queryAllFiles();
-		for(Map<Integer, Cycle<ProjectFile>> cycleFilesGroup : cycleFiles.values()) {
-			for(Cycle<ProjectFile> files : cycleFilesGroup.values()) {
-				for(ProjectFile file : files.getComponents()) {
+		for (List<Cycle<ProjectFile>> cycleFilesGroup : cycleFiles.values()) {
+			for (Cycle<ProjectFile> files : cycleFilesGroup) {
+				for (ProjectFile file : files.getComponents()) {
 					MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
 					mas.setCycle(true);
 					map.put(file, mas);
@@ -240,8 +240,8 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 			}
 		}*/
 		
-		for(List<FileHubLike> fileHubLikeGroup : hubLikeFiles.values()) {
-			for(FileHubLike file : fileHubLikeGroup) {
+		for (List<FileHubLike> fileHubLikeGroup : hubLikeFiles.values()) {
+			for (FileHubLike file : fileHubLikeGroup) {
 				MultipleASFile mas = map.getOrDefault(file.getFile(), new MultipleASFile(file.getFile()));
 				mas.setHublike(true);
 				map.put(file.getFile(), mas);
@@ -249,8 +249,8 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 			}
 		}
 		
-		for(List<UnstableFileInHistory> unstableFilesGroup : unstableFilesInHistory.values()) {
-			for(UnstableFileInHistory file : unstableFilesGroup) {
+		for (List<UnstableFileInHistory> unstableFilesGroup : unstableFilesInHistory.values()) {
+			for (UnstableFileInHistory file : unstableFilesGroup) {
 				MultipleASFile mas = map.getOrDefault(file.getComponent(), new MultipleASFile(file.getComponent()));
 				mas.setUnstable(true);
 				map.put(file.getComponent(), mas);
@@ -258,8 +258,8 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 			}
 		}
 		
-		for(List<UnstableComponentByInstability<ProjectFile>> unstableFilesGroup : unstableFilesUsingInstability.values()) {
-			for(UnstableComponentByInstability<ProjectFile> file : unstableFilesGroup) {
+		for (List<UnstableComponentByInstability<ProjectFile>> unstableFilesGroup : unstableFilesUsingInstability.values()) {
+			for (UnstableComponentByInstability<ProjectFile> file : unstableFilesGroup) {
 				MultipleASFile mas = map.getOrDefault(file.getComponent(), new MultipleASFile(file.getComponent()));
 				mas.setUnstable(true);
 				map.put(file.getComponent(), mas);
@@ -267,8 +267,8 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 			}
 		}
 
-		for (Map.Entry<Long, List<LogicCouplingComponents<ProjectFile>>> entry : logicCouplingFiles.entrySet()) {
-			for(LogicCouplingComponents<ProjectFile> files : entry.getValue()) {
+		for (List<LogicCouplingComponents<ProjectFile>> logicCouplingFile : logicCouplingFiles.values()) {
+			for (LogicCouplingComponents<ProjectFile> files : logicCouplingFile) {
 				MultipleASFile mas = map.getOrDefault(files.getNode1(), new MultipleASFile(files.getNode1()));
 				mas.setLogicCoupling(true);
 				map.put(files.getNode1(), mas);
@@ -280,8 +280,8 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 			}
 		}
 
-		for(Map.Entry<Long, List<SimilarComponents<ProjectFile>>> entry : similarFiles.entrySet()) {
-			for(SimilarComponents<ProjectFile> similarFilesGroup : entry.getValue()) {
+		for (List<SimilarComponents<ProjectFile>> similarFile : similarFiles.values()) {
+			for (SimilarComponents<ProjectFile> similarFilesGroup : similarFile) {
 				ProjectFile file1 = similarFilesGroup.getNode1();
 				ProjectFile file2 = similarFilesGroup.getNode2();
 				MultipleASFile mas = map.getOrDefault(file1, new MultipleASFile(file1));

@@ -94,16 +94,17 @@ public class SmellDetectorService {
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
 
-		Map<Long, Map<Integer, Cycle<Type>>> typeCyclicDependencies = new HashMap<>(cyclicDependencyDetector.detectTypeCyclicDependency());
+		Map<Long, List<Cycle<Type>>> typeCyclicDependencies = new HashMap<>(cyclicDependencyDetector.detectTypeCyclicDependency());
 		String typeSmellName = SmellLevel.TYPE + "_" + SmellType.CYCLIC_DEPENDENCY + "_";
-		for (Map.Entry<Long, Map<Integer, Cycle<Type>>> typeCyclicDependency : typeCyclicDependencies.entrySet()){
+		int typeSmellIndex = 1;
+		for (Map.Entry<Long, List<Cycle<Type>>> typeCyclicDependency : typeCyclicDependencies.entrySet()){
 			long projectId = typeCyclicDependency.getKey();
 			Project project = (Project) projectRepository.queryNodeById(projectId);
-			Map<Integer, Cycle<Type>> typeCycles = typeCyclicDependency.getValue();
-			for (Map.Entry<Integer, Cycle<Type>> typeCycle : typeCycles.entrySet()){
-				List<Type> types = typeCycle.getValue().getComponents();
+			List<Cycle<Type>> typeCycles = typeCyclicDependency.getValue();
+			for (Cycle<Type> typeCycle : typeCycles){
+				List<Type> types = typeCycle.getComponents();
 				Smell smell = new Smell();
-				smell.setName(typeSmellName + typeCycle.getKey().toString());
+				smell.setName(typeSmellName + typeSmellIndex);
 				smell.setSize(types.size());
 				smell.setLanguage(project.getLanguage());
 				smell.setProjectId(projectId);
@@ -115,6 +116,7 @@ public class SmellDetectorService {
 					Contain contain = new Contain(smell, type);
 					smellContains.add(contain);
 				}
+				typeSmellIndex ++;
 			}
 		}
 		smellRepository.saveAll(smells);
@@ -122,16 +124,17 @@ public class SmellDetectorService {
 
 		smells.clear();
 		smellContains.clear();
-		Map<Long, Map<Integer, Cycle<ProjectFile>>> fileCyclicDependencies = new HashMap<>(cyclicDependencyDetector.detectFileCyclicDependency());
+		Map<Long, List<Cycle<ProjectFile>>> fileCyclicDependencies = new HashMap<>(cyclicDependencyDetector.detectFileCyclicDependency());
 		String fileSmellName = SmellLevel.FILE + "_" + SmellType.CYCLIC_DEPENDENCY + "_";
-		for (Map.Entry<Long, Map<Integer, Cycle<ProjectFile>>> fileCyclicDependency : fileCyclicDependencies.entrySet()){
+		int fileSmellIndex = 1;
+		for (Map.Entry<Long, List<Cycle<ProjectFile>>> fileCyclicDependency : fileCyclicDependencies.entrySet()){
 			long projectId = fileCyclicDependency.getKey();
 			Project project = (Project) projectRepository.queryNodeById(projectId);
-			Map<Integer, Cycle<ProjectFile>> fileCycles = fileCyclicDependency.getValue();
-			for (Map.Entry<Integer, Cycle<ProjectFile>> fileCycle : fileCycles.entrySet()){
-				List<ProjectFile> files = fileCycle.getValue().getComponents();
+			List<Cycle<ProjectFile>> fileCycles = fileCyclicDependency.getValue();
+			for (Cycle<ProjectFile> fileCycle : fileCycles){
+				List<ProjectFile> files = fileCycle.getComponents();
 				Smell smell = new Smell();
-				smell.setName(fileSmellName + fileCycle.getKey().toString());
+				smell.setName(fileSmellName + fileSmellIndex);
 				smell.setSize(files.size());
 				smell.setLanguage(project.getLanguage());
 				smell.setProjectId(projectId);
@@ -143,6 +146,7 @@ public class SmellDetectorService {
 					Contain contain = new Contain(smell, file);
 					smellContains.add(contain);
 				}
+				fileSmellIndex ++;
 			}
 		}
 		smellRepository.saveAll(smells);
@@ -150,16 +154,17 @@ public class SmellDetectorService {
 
 		smells.clear();
 		smellContains.clear();
-		Map<Long, Map<Integer, Cycle<Package>>> packageCyclicDependencies = new HashMap<>(cyclicDependencyDetector.detectPackageCyclicDependency());
+		Map<Long, List<Cycle<Package>>> packageCyclicDependencies = new HashMap<>(cyclicDependencyDetector.detectPackageCyclicDependency());
 		String packageSmellName = SmellLevel.PACKAGE + "_" + SmellType.CYCLIC_DEPENDENCY + "_";
-		for (Map.Entry<Long, Map<Integer, Cycle<Package>>> packageCyclicDependency : packageCyclicDependencies.entrySet()){
+		int packageSmellIndex = 1;
+		for (Map.Entry<Long, List<Cycle<Package>>> packageCyclicDependency : packageCyclicDependencies.entrySet()){
 			long projectId = packageCyclicDependency.getKey();
 			Project project = (Project) projectRepository.queryNodeById(projectId);
-			Map<Integer, Cycle<Package>> packageCycles = packageCyclicDependency.getValue();
-			for (Map.Entry<Integer, Cycle<Package>> packageCycle : packageCycles.entrySet()){
-				List<Package> packages = packageCycle.getValue().getComponents();
+			List<Cycle<Package>> packageCycles = packageCyclicDependency.getValue();
+			for (Cycle<Package> packageCycle : packageCycles){
+				List<Package> packages = packageCycle.getComponents();
 				Smell smell = new Smell();
-				smell.setName(packageSmellName + packageCycle.getKey().toString());
+				smell.setName(packageSmellName + packageSmellIndex);
 				smell.setSize(packages.size());
 				smell.setLanguage(project.getLanguage());
 				smell.setProjectId(projectId);
@@ -171,6 +176,7 @@ public class SmellDetectorService {
 					Contain contain = new Contain(smell, pck);
 					smellContains.add(contain);
 				}
+				packageSmellIndex ++;
 			}
 		}
 		smellRepository.saveAll(smells);
