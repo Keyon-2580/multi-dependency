@@ -6,6 +6,7 @@ let hublike = function(cytoscapeutil) {
 			if (projects.hasOwnProperty(projectIndex)) {
 				let project = projects[projectIndex];
 				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
+
 				let fileHubLikeList = fileHubLikes[project.id];
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
@@ -72,7 +73,6 @@ let hublike = function(cytoscapeutil) {
 				html += "</table>";
 			}
 		}
-		
 		$("#content").html(html);
 	}
 	
@@ -111,7 +111,6 @@ let hublike = function(cytoscapeutil) {
 				type: "get",
 				url: "/as/hublike/fanio/" + projectId,
 				success: function(result) {
-					console.log(result);
 					$("#hubLikeMinFileFanIn").val(result[0]);
 					$("#hubLikeMinFileFanOut").val(result[1]);
 					$("#hubLikeMinPackageFanIn").val(result[2]);

@@ -6,6 +6,7 @@ let unstable = function(cytoscapeutil) {
 			if (projects.hasOwnProperty(projectIndex)) {
 				let project = projects[projectIndex];
 				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
+
 				let fileUnstableDependencyList = fileUnstableDependencyMap[project.id];
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
@@ -70,28 +71,10 @@ let unstable = function(cytoscapeutil) {
 				html += "</table>";
 			}
 		}
-		
 		$("#content").html(html);
 	}
 	
 	let _save = function() {
-		// let setHistoryThreshold = function(projectId, fanInThreshold, cochangeTimesThreshold, cochangeFilesThreshold) {
-		// 	$.ajax({
-		// 		type: "post",
-		// 		url: "/as/unstable/threshold/history/" + projectId 
-		// 			+ "?fanInThreshold=" + fanInThreshold
-		// 			+ "&cochangeTimesThreshold=" + cochangeTimesThreshold
-		// 			+ "&cochangeFilesThreshold=" + cochangeFilesThreshold,
-		// 		success: function(result) {
-		// 			if (result === true) {
-		// 				alert("修改成功");
-		// 			}
-		// 			else {
-		// 				alert("修改失败");
-		// 			}
-		// 		}
-		// 	});
-		// };
 		let setInstabilityThreshold = function(projectId, unstableFileFanOutThreshold, unstableModuleFanOutThreshold, unstableRatioThreshold) {
 			$.ajax({
 				type: "post",
@@ -109,14 +92,6 @@ let unstable = function(cytoscapeutil) {
 				}
 			});
 		};
-		// $("#unstableHistoryThresholdSave").click(function() {
-		// 	let fanInThreshold = $("#unstableFanInThreshold").val();
-		// 	let cochangeTimesThreshold = $("#unstableCoChangeTimesThreshold").val();
-		// 	let cochangeFilesThreshold = $("#unstableCoChangeFilesThreshold").val();
-		// 	let projectId = $("#unstableDependencyProjects").val();
-		// 	setHistoryThreshold(projectId, fanInThreshold, cochangeTimesThreshold, cochangeFilesThreshold);
-		// });
-		
 		$("#unstableInstabilityThresholdSave").click(function() {
 			let unstableFileFanOutThreshold = $("#unstableFileFanOutThreshold").val();
 			let unstableModuleFanOutThreshold = $("#unstableModuleFanOutThreshold").val();
@@ -132,7 +107,6 @@ let unstable = function(cytoscapeutil) {
 				type: "get",
 				url: "/as/unstable/threshold/history/" + projectId,
 				success: function(result) {
-					console.log(result);
 					$("#unstableFanInThreshold").val(result[0]);
 					$("#unstableCoChangeTimesThreshold").val(result[1]);
 					$("#unstableCoChangeFilesThreshold").val(result[2]);
@@ -144,7 +118,6 @@ let unstable = function(cytoscapeutil) {
 				type: "get",
 				url: "/as/unstable/threshold/instability/" + projectId,
 				success: function(result) {
-					console.log(result);
 					$("#unstableFileFanOutThreshold").val(result[0]);
 					$("#unstableModuleFanOutThreshold").val(result[1]);
 					$("#unstableRatioThreshold").val(result[2]);

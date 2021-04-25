@@ -5,7 +5,6 @@ let smellmetric = function() {
     			url: "/metric/smellMetric",
     			success: function(result) {
     			    let myObj = {size : result.length };
-    				console.log(myObj);
     				let html = "";
                     let commits;
                     for (let id in projects) {
@@ -45,9 +44,7 @@ let smellmetric = function() {
                             html += "<th>Improvements</th>";
                             html += "</tr>";
                             let metrics = result[id][type];
-                            // console.log(metrics);
                             for (let i = 0; i < metrics.length; i++) {
-                                console.log(metrics[i]);
                                 html += "<tr>";
                                 html += "<td>" + (i + 1) + "</td>";
                                 html += "<td>" + metrics[i].node.projectName + "</td>";
@@ -122,7 +119,6 @@ let smellmetric = function() {
 				type: "get",
 				url: "/project/all",
 				success: function(result) {
-					console.log(result);
                     let info = "<p>获取中...</p>"
                     $("#smellMetric").html(info);
 					allSmellMetric(result);

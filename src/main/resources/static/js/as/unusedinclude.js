@@ -1,7 +1,5 @@
 let unusedInclude = function(cytoscapeutil) {
 	let showTable = function(projects, unusedIncludeMap) {
-		console.log("projects");
-		console.log("unusedIncludes");
 		let html = "";
 		for(let projectIndex in projects) {
 			if (projects.hasOwnProperty(projectIndex)) {
@@ -36,7 +34,6 @@ let unusedInclude = function(cytoscapeutil) {
 				html += "</table>";
 			}
 		}
-		
 		$("#unusedIncludeTable").html(html);
 	}
 

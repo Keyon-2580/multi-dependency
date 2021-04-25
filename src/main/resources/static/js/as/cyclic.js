@@ -80,7 +80,6 @@ let cyclic = function(cytoscapeutil) {
 				}
 			}
 		}
-		
 		$("#content").html(html);
 	}
 	let _cyclic = function(projects, types, files, packages) {

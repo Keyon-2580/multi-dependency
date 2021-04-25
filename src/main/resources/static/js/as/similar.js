@@ -1,7 +1,5 @@
 let similar = function(cytoscapeutil, projects, files) {
 	let _similar = function() {
-		console.log("projects");
-		console.log("files");
 		let html = "";
 		for(let projectIndex in projects) {
 			if (projects.hasOwnProperty(projectIndex)) {

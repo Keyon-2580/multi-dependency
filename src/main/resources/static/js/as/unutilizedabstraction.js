@@ -1,7 +1,5 @@
 let unutilizedabstraction = function(cytoscapeutil) {
 	let showTable = function(projects, unutilizedAbstractionMap) {
-		console.log("projects");
-		console.log("unutilizedAbstractionMap");
 		let html = "";
 		for(let projectIndex in projects) {
 			if (projects.hasOwnProperty(projectIndex)) {
@@ -28,7 +26,6 @@ let unutilizedabstraction = function(cytoscapeutil) {
 				html += "</table>";
 			}
 		}
-		
 		$("#unutilizedAbstraction").html(html);
 	}
 

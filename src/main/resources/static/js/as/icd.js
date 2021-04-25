@@ -55,7 +55,7 @@ let icd = function(cytoscapeutil) {
 		}
 		$("#content").html(html);
 	}
-	
+
 	let _save = function() {
 		let set = function(projectId, icdMinFileCoChange, icdMinPackageCoChange) {
 			$.ajax({
@@ -92,7 +92,6 @@ let icd = function(cytoscapeutil) {
 				type: "get",
 				url: "/as/icd/cochange/" + projectId,
 				success: function(result) {
-					console.log(result);
 					$("#icdMinFileCoChange").val(result[0]);
 					$("#icdMinPackageCoChange").val(result[1]);
 				}

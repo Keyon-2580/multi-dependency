@@ -87,7 +87,6 @@ let multiple = function(projects, files, cytoscapeutil) {
 	}
 	
 	let _pie = function(project, pies, allFilesPieDivId, smellAndIssueFilesPieDivId, issuesDivId) {
-		console.log(pies);
 		let issuesPie = echarts.init(document.getElementById(issuesDivId));
 		let allFilesPie = echarts.init(document.getElementById(allFilesPieDivId));
 		let smellAndIssueFilesPie = echarts.init(document.getElementById(smellAndIssueFilesPieDivId));
@@ -204,7 +203,6 @@ let multiple = function(projects, files, cytoscapeutil) {
 	
 	let _multiple = function() {
 		let html = "";
-		console.log(projects);
 		for(let i = 0; i < projects.length; i++) {
 			let project = projects[i];
 			html += "<div>";
@@ -288,7 +286,6 @@ let multiple = function(projects, files, cytoscapeutil) {
 			url: "/as/issue/circle",
 			data: param,
 			success: function(result) {
-				console.log(result);
 				for(let i = 0; i < projects.length; i++) {
 					let data = {};
 					let project = projects[i];
@@ -306,7 +303,6 @@ let multiple = function(projects, files, cytoscapeutil) {
 			url: "/as/issue/pie",
 			data : param,
 			success: function(result) {
-				console.log(result);
 				for(let i = 0; i < projects.length; i++) {
 					let project = projects[i];
 					_pie(project, result[project.id], "allFilesPie_" + project.id, "issueFilesPie_" + project.id, "issuesPie_" + project.id);
@@ -317,7 +313,6 @@ let multiple = function(projects, files, cytoscapeutil) {
 			type: "get",
 			url: "/as/multiple/histogram",
 			success: function(result) {
-				console.log(result);
 				let allFiles = [];
 				let smellFiles = [];
 				let issueFiles = [];
