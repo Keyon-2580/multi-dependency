@@ -1,12 +1,12 @@
-let unusedInclude = function(cytoscapeutil) {
-	let showTable = function(projects, unusedIncludeMap) {
+let unusedInclude = function() {
+	let _unusedInclude = function(projects, fileUnusedIncludeMap) {
 		let html = "";
 		for(let projectIndex in projects) {
 			if (projects.hasOwnProperty(projectIndex)) {
 				let project = projects[projectIndex];
 				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
 
-				let unusedIncludeList = unusedIncludeMap[project.id];
+				let fileUnusedIncludeList = fileUnusedIncludeMap[project.id];
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th style='text-align: center; vertical-align: middle'>Index</th>";
@@ -15,16 +15,16 @@ let unusedInclude = function(cytoscapeutil) {
 				html += "<th style='vertical-align: middle'>UnusedIncludeFiles</th>";
 				html += "</tr>";
 				let index = 1;
-				for(let fileIndex in unusedIncludeList) {
-					if (unusedIncludeList.hasOwnProperty(fileIndex)) {
-						let unusedInclude = unusedIncludeList[fileIndex];
+				for(let fileIndex in fileUnusedIncludeList) {
+					if (fileUnusedIncludeList.hasOwnProperty(fileIndex)) {
+						let fileUnusedInclude = fileUnusedIncludeList[fileIndex];
 						html += "<tr>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + index + "</td>";
-						html += "<td style='vertical-align: middle'>" + unusedInclude.coreFile.path + "</td>";
-						html += "<td style='text-align: center; vertical-align: middle'>" + unusedInclude.unusedIncludeFiles.length + "</td>";
+						html += "<td style='vertical-align: middle'>" + fileUnusedInclude.coreFile.path + "</td>";
+						html += "<td style='text-align: center; vertical-align: middle'>" + fileUnusedInclude.unusedIncludeFiles.length + "</td>";
 						html += "<td style='vertical-align: middle'>";
-						for(let i = 0; i < unusedInclude.unusedIncludeFiles.length; i++) {
-							html += unusedInclude.unusedIncludeFiles[i].path + "<br/>";
+						for(let i = 0; i < fileUnusedInclude.unusedIncludeFiles.length; i++) {
+							html += fileUnusedInclude.unusedIncludeFiles[i].path + "<br/>";
 						}
 						html += "</td>";
 						html += "</tr>";
@@ -34,12 +34,12 @@ let unusedInclude = function(cytoscapeutil) {
 				html += "</table>";
 			}
 		}
-		$("#unusedIncludeTable").html(html);
+		$("#content").html(html);
 	}
 
 	return {
-		include: function(projects, unusedIncludeMap) {
-			showTable(projects, unusedIncludeMap);
+		unusedInclude: function(projects, fileUnusedIncludeMap) {
+			_unusedInclude(projects, fileUnusedIncludeMap);
 		}
 	}
 }

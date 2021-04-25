@@ -1,13 +1,12 @@
-let hublike = function(cytoscapeutil) {
-	let _hublike = function(projects, fileHubLikes, packageHubLikes) {
+let hubLikeDependency = function() {
+	let _hubLikeDependency = function(projects, fileHubLikeDependencyMap, packageHubLikeDependencyMap) {
 		let html = "";
-
 		for (let projectIndex in projects) {
 			if (projects.hasOwnProperty(projectIndex)) {
 				let project = projects[projectIndex];
 				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
 
-				let fileHubLikeList = fileHubLikes[project.id];
+				let fileHubLikeDependencyList = fileHubLikeDependencyMap[project.id];
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th>Index</th>";
@@ -20,54 +19,54 @@ let hublike = function(cytoscapeutil) {
 				html += "<th>Co-changeCommits</th>";
 				html += "<th>Score</th>";
 				html += "</tr>";
-				let index = 0;
-				for (let fileIndex in fileHubLikeList) {
-					if (fileHubLikeList.hasOwnProperty(fileIndex)) {
-						let fileHubLike = fileHubLikeList[fileIndex];
-						index ++;
+				let index = 1;
+				for (let fileIndex in fileHubLikeDependencyList) {
+					if (fileHubLikeDependencyList.hasOwnProperty(fileIndex)) {
+						let fileHubLikeDependency = fileHubLikeDependencyList[fileIndex];
 						html += "<tr>";
 						html += "<td>" + index + "</td>";
-						html += "<td><a target='_blank' href='/relation/file/" + fileHubLike.file.id + "'>" + fileHubLike.file.path + "</a></td>";
-						html += "<td>" + fileHubLike.fanIn + "</td>";
-						let inRatio = (fileHubLike.coChangeFilesIn.length / fileHubLike.fanIn).toFixed(2);
-						html += "<td>" + fileHubLike.coChangeFilesIn.length + "/" + fileHubLike.fanIn + "=" + inRatio + "</td>";
-						html += "<td>" + fileHubLike.fanOut + "</td>";
-						let outRatio = (fileHubLike.coChangeFilesOut.length / fileHubLike.fanOut).toFixed(2);
-						html += "<td>" + fileHubLike.coChangeFilesOut.length + "/" + fileHubLike.fanOut + "=" + outRatio + "</td>";
-						let allIORatio = ((fileHubLike.coChangeFilesIn.length + fileHubLike.coChangeFilesOut.length) / (fileHubLike.fanIn + fileHubLike.fanOut)).toFixed(2);
-						html += "<td>(" + fileHubLike.coChangeFilesIn.length + "+" + fileHubLike.coChangeFilesOut.length + ")/(" ;
-						html += fileHubLike.fanIn + "+" + fileHubLike.fanOut + ")=" + allIORatio + "</td>";
-
-						let allFilesIds = fileHubLike.file.id;
-						for (let j = 0; j < fileHubLike.coChangeFilesIn.length; j++) {
-							allFilesIds += "," + fileHubLike.coChangeFilesIn[j].id;
+						html += "<td><a target='_blank' href='/relation/file/" + fileHubLikeDependency.file.id + "'>" + fileHubLikeDependency.file.path + "</a></td>";
+						html += "<td>" + fileHubLikeDependency.fanIn + "</td>";
+						let inRatio = (fileHubLikeDependency.coChangeFilesIn.length / fileHubLikeDependency.fanIn).toFixed(2);
+						html += "<td>" + fileHubLikeDependency.coChangeFilesIn.length + "/" + fileHubLikeDependency.fanIn + "=" + inRatio + "</td>";
+						html += "<td>" + fileHubLikeDependency.fanOut + "</td>";
+						let outRatio = (fileHubLikeDependency.coChangeFilesOut.length / fileHubLikeDependency.fanOut).toFixed(2);
+						html += "<td>" + fileHubLikeDependency.coChangeFilesOut.length + "/" + fileHubLikeDependency.fanOut + "=" + outRatio + "</td>";
+						let allIORatio = ((fileHubLikeDependency.coChangeFilesIn.length + fileHubLikeDependency.coChangeFilesOut.length) / (fileHubLikeDependency.fanIn + fileHubLikeDependency.fanOut)).toFixed(2);
+						html += "<td>(" + fileHubLikeDependency.coChangeFilesIn.length + "+" + fileHubLikeDependency.coChangeFilesOut.length + ")/(" ;
+						html += fileHubLikeDependency.fanIn + "+" + fileHubLikeDependency.fanOut + ")=" + allIORatio + "</td>";
+						let allFilesIds = fileHubLikeDependency.file.id;
+						for (let j = 0; j < fileHubLikeDependency.coChangeFilesIn.length; j++) {
+							allFilesIds += "," + fileHubLikeDependency.coChangeFilesIn[j].id;
 						}
-						for (let j = 0; j < fileHubLike.coChangeFilesOut.length; j++) {
-							allFilesIds += "," + fileHubLike.coChangeFilesOut[j].id;
+						for (let j = 0; j < fileHubLikeDependency.coChangeFilesOut.length; j++) {
+							allFilesIds += "," + fileHubLikeDependency.coChangeFilesOut[j].id;
 						}
-
-						html += "<td>" + "<a target='_blank' href='/as/matrix?allFiles=" + allFilesIds + "&specifiedFiles=" + fileHubLike.file.id + "&minCount=2'>commits</a>" + "</td>";
-
-						html += "<td>" + (fileHubLike.file.score).toFixed(2) + "</td>";
+						html += "<td>" + "<a target='_blank' href='/as/matrix?allFiles=" + allFilesIds + "&specifiedFiles=" + fileHubLikeDependency.file.id + "&minCount=2'>commits</a>" + "</td>";
+						html += "<td>" + (fileHubLikeDependency.file.score).toFixed(2) + "</td>";
 						html += "</tr>";
+						index ++;
 					}
 				}
 
-				let packageHubLikeList = packageHubLikes[project.id];
+				let packageHubLikeDependencyList = packageHubLikeDependencyMap[project.id];
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
+				html += "<th>Index</th>";
 				html += "<th>Package</th>";
 				html += "<th>Ca（afferent couplings）</th>";
 				html += "<th>Ce（efferent couplings）</th>";
 				html += "</tr>";
-				for (let packageIndex in packageHubLikeList) {
-					if (packageHubLikeList.hasOwnProperty(packageIndex)) {
-						let packageHubLike = packageHubLikeList[packageIndex];
+				index = 1;
+				for (let packageIndex in packageHubLikeDependencyList) {
+					if (packageHubLikeDependencyList.hasOwnProperty(packageIndex)) {
+						let packageHubLikeDependency = packageHubLikeDependencyList[packageIndex];
 						html += "<tr>";
-						html += "<td>" + packageHubLike.pck.name + "</td>";
-						html += "<td>" + packageHubLike.fanIn + "</td>";
-						html += "<td>" + packageHubLike.fanOut + "</td>";
+						html += "<td>" + packageHubLikeDependency.pck.name + "</td>";
+						html += "<td>" + packageHubLikeDependency.fanIn + "</td>";
+						html += "<td>" + packageHubLikeDependency.fanOut + "</td>";
 						html += "</tr>";
+						index ++;
 					}
 				}
 				html += "</table>";
@@ -131,8 +130,8 @@ let hublike = function(cytoscapeutil) {
 			_save();
 			_get();
 		},
-		hublike: function(projects, fileHubLikes, packageHubLikes) {
-			_hublike(projects, fileHubLikes, packageHubLikes);
+		hubLikeDependency: function(projects, fileHubLikeDependencyMap, packageHubLikeDependencyMap) {
+			_hubLikeDependency(projects, fileHubLikeDependencyMap, packageHubLikeDependencyMap);
 		}
 	}
 }

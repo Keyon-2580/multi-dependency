@@ -26,5 +26,4 @@ public class UnusedComponentController {
 		request.setAttribute("packages", unusedComponentDetector.unusedPackages());
 		return "as/unused";
 	}
-	
 }

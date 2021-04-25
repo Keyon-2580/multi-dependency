@@ -18,10 +18,10 @@
 		//<![CDATA[
 		 $(document).ready(function() {
 			var projects = [[${projects}]];
-			var cyclicTypes = [[${types}]];
-			var cyclicFiles = [[${files}]];
-			var cyclicPackages = [[${packages}]];
-			cyclic(cytoscapeutil()).cyclic(projects, cyclicTypes, cyclicFiles, cyclicPackages);
+			var typeCyclicDependencyMap = [[${typeCyclicDependencyMap}]];
+			var fileCyclicDependencyMap = [[${fileCyclicDependencyMap}]];
+			var packageCyclicDependencyMap = [[${packageCyclicDependencyMap}]];
+			cyclicDependency().cyclicDependency(projects, typeCyclicDependencyMap, fileCyclicDependencyMap, packageCyclicDependencyMap);
 		});
 		// ]]>
 	</script>

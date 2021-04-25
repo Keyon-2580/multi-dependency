@@ -27,20 +27,18 @@ public class CyclicDependencyController {
 	@GetMapping("/query")
 	public String queryCyclicDependency(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("types", cyclicDependencyDetector.queryTypeCyclicDependency());
-		request.setAttribute("files", cyclicDependencyDetector.queryFileCyclicDependency());
-		request.setAttribute("packages", cyclicDependencyDetector.queryPackageCyclicDependency());
-//		request.setAttribute("modules", cyclicDependencyDetector.getModuleCyclicDependency());
+		request.setAttribute("typeCyclicDependencyMap", cyclicDependencyDetector.queryTypeCyclicDependency());
+		request.setAttribute("fileCyclicDependencyMap", cyclicDependencyDetector.queryFileCyclicDependency());
+		request.setAttribute("packageCyclicDependencyMap", cyclicDependencyDetector.queryPackageCyclicDependency());
 		return "as/cyclic";
 	}
 
 	@GetMapping("/detect")
 	public String detectCyclicDependency(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("types", cyclicDependencyDetector.detectTypeCyclicDependency());
-		request.setAttribute("files", cyclicDependencyDetector.detectFileCyclicDependency());
-		request.setAttribute("packages", cyclicDependencyDetector.detectPackageCyclicDependency());
-//		request.setAttribute("modules", cyclicDependencyDetector.detectModuleCyclicDependency());
+		request.setAttribute("typeCyclicDependencyMap", cyclicDependencyDetector.detectTypeCyclicDependency());
+		request.setAttribute("fileCyclicDependencyMap", cyclicDependencyDetector.detectFileCyclicDependency());
+		request.setAttribute("packageCyclicDependencyMap", cyclicDependencyDetector.detectPackageCyclicDependency());
 		return "as/cyclic";
 	}
 }

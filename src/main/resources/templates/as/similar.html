@@ -12,14 +12,14 @@
 <body>
 	<div th:include="nav.html::nav"></div>
 	<div class="col-sm-12">
-		<div style="width: 100%;" id="content"></div>
+		<div id="content" style="width: 100%;"></div>
 	</div>
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
 		 	var projects = [[${projects}]];
-		 	var files = [[${files}]];
-			similar(cytoscapeutil(), projects, files).init();
+		 	var fileSimilarComponentsMap = [[${fileSimilarComponentsMap}]];
+			 similarComponents().similarComponents(projects, fileSimilarComponentsMap);
 		});
 		// ]]>
 	</script>

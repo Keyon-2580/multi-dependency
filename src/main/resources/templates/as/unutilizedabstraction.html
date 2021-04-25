@@ -11,15 +11,15 @@
 </head>
 <body>
 	<div th:include="nav.html::nav"></div>
-	<div class="col-sm-12" style="margin-bottom: 15px;">
-		<div style="width: 100%" id="unutilizedAbstraction"></div>
+	<div class="col-sm-12">
+		<div id="content" style="width: 100%"></div>
 	</div>
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
 		 	var projects = [[${projects}]];
-			var unutilizedAbstractionMap = [[${unutilizedAbstractionMap}]];
-			 unutilizedabstraction(cytoscapeutil()).abstraction(projects, unutilizedAbstractionMap);
+			var fileUnutilizedAbstractionMap = [[${fileUnutilizedAbstractionMap}]];
+			 unutilizedAbstraction().unutilizedAbstraction(projects, fileUnutilizedAbstractionMap);
 		});
 		// ]]>
 	</script>

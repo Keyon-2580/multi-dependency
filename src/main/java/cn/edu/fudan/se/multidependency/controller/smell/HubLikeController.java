@@ -28,16 +28,16 @@ public class HubLikeController {
 	@GetMapping("/query")
 	public String queryHubLike(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("files", hubLikeComponentDetector.queryFileHubLike());
-		request.setAttribute("packages", hubLikeComponentDetector.queryPackageHubLike());
+		request.setAttribute("fileHubLikeDependencyMap", hubLikeComponentDetector.queryFileHubLike());
+		request.setAttribute("packageHubLikeDependencyMap", hubLikeComponentDetector.queryPackageHubLike());
 		return "as/hublike";
 	}
 
 	@GetMapping("/detect")
 	public String detectHubLike(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("files", hubLikeComponentDetector.detectFileHubLike());
-		request.setAttribute("packages", hubLikeComponentDetector.detectPackageHubLike());
+		request.setAttribute("fileHubLikeDependencyMap", hubLikeComponentDetector.detectFileHubLike());
+		request.setAttribute("packageHubLikeDependencyMap", hubLikeComponentDetector.detectPackageHubLike());
 		return "as/hublike";
 	}
 	

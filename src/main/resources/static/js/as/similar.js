@@ -1,11 +1,12 @@
-let similar = function(cytoscapeutil, projects, files) {
-	let _similar = function() {
+let similarComponents = function() {
+	let _similarComponents = function() {
 		let html = "";
 		for(let projectIndex in projects) {
 			if (projects.hasOwnProperty(projectIndex)) {
 				let project = projects[projectIndex];
 				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
 				let fileSimilarComponentsList = files[project.id];
+
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th>Index</th>";
@@ -47,6 +48,7 @@ let similar = function(cytoscapeutil, projects, files) {
 		if (files[-1] != null) {
 			html += "<h4>Other</h4>";
 			let fileSimilarComponentsList = files[-1];
+
 			html += "<table class='table table-bordered'>";
 			html += "<tr>";
 			html += "<th>Index</th>";
@@ -88,8 +90,8 @@ let similar = function(cytoscapeutil, projects, files) {
 	}
 	
 	return {
-		init : function() {
-			_similar();
+		similarComponents : function(projects, fileSimilarComponentsMap) {
+			_similarComponents(projects, fileSimilarComponentsMap);
 		}
 	}
 }

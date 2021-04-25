@@ -22,14 +22,14 @@ public class UnusedIncludeController {
 	@GetMapping("/query")
 	public String queryUnusedInclude(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("unusedIncludeMap", unusedIncludeDetector.queryFileUnusedInclude());
+		request.setAttribute("fileUnusedIncludeMap", unusedIncludeDetector.queryFileUnusedInclude());
 		return "as/unusedinclude";
 	}
 
 	@GetMapping("/detect")
 	public String detectUnusedInclude(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("unusedIncludeMap", unusedIncludeDetector.detectFileUnusedInclude());
+		request.setAttribute("fileUnusedIncludeMap", unusedIncludeDetector.detectFileUnusedInclude());
 		return "as/unusedinclude";
 	}
 }

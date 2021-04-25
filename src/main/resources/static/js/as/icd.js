@@ -1,5 +1,5 @@
-let icd = function(cytoscapeutil) {
-	let _icd = function(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap) {
+let implicitCrossModuleDependency = function() {
+	let _implicitCrossModuleDependency = function(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap) {
 		let html = "";
 		for (let projectIndex in projects) {
 			if (projects.hasOwnProperty(projectIndex)) {
@@ -110,8 +110,8 @@ let icd = function(cytoscapeutil) {
 			_save();
 			_get();
 		},
-		icd: function(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap) {
-			_icd(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap);
+		implicitCrossModuleDependency: function(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap) {
+			_implicitCrossModuleDependency(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap);
 		}
 	}
 }

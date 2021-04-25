@@ -1,5 +1,5 @@
-let unstable = function(cytoscapeutil) {
-	let _unstable = function(projects, fileUnstableDependencyMap, packageUnstableDependencyMap) {
+let unstableDependency = function() {
+	let _unstableDependency = function(projects, fileUnstableDependencyMap, packageUnstableDependencyMap) {
 		let html = "";
 
 		for(let projectIndex in projects) {
@@ -140,8 +140,8 @@ let unstable = function(cytoscapeutil) {
 			_save();
 			_get();
 		},
-		unstable: function(projects, fileUnstableDependencyMap, packageUnstableDependencyMap) {
-			_unstable(projects, fileUnstableDependencyMap, packageUnstableDependencyMap);
+		unstableDependency: function(projects, fileUnstableDependencyMap, packageUnstableDependencyMap) {
+			_unstableDependency(projects, fileUnstableDependencyMap, packageUnstableDependencyMap);
 		}
 	}
 }

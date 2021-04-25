@@ -22,14 +22,14 @@ public class UnutilizedAbstractionController {
 	@GetMapping("/query")
 	public String queryUnusedInclude(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("unutilizedAbstractionMap", unutilizedAbstractionDetector.queryFileUnutilizedAbstraction());
+		request.setAttribute("fileUnutilizedAbstractionMap", unutilizedAbstractionDetector.queryFileUnutilizedAbstraction());
 		return "as/unutilizedabstraction";
 	}
 
 	@GetMapping("/detect")
 	public String detectUnusedInclude(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("unutilizedAbstractionMap", unutilizedAbstractionDetector.detectFileUnutilizedAbstraction());
+		request.setAttribute("fileUnutilizedAbstractionMap", unutilizedAbstractionDetector.detectFileUnutilizedAbstraction());
 		return "as/unutilizedabstraction";
 	}
 }
