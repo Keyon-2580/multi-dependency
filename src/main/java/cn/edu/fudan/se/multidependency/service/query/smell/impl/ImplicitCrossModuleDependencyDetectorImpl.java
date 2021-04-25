@@ -162,11 +162,11 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 		List<LogicCouplingComponents<ProjectFile>> fileImplicitCrossModuleDependencyList = new ArrayList<>();
 		Collection<Project> projects = nodeService.allProjects();
 		for (Project project : projects) {
-			Collection<CoChange> cochangesWithOutDependsOn = cochangeRepository.findProjectGreaterThanCountCoChanges(project.getId(), getFileMinCoChange(project.getId()));
-			for(CoChange cochange : cochangesWithOutDependsOn) {
+			List<CoChange> fileCoChangeList = cochangeRepository.findProjectFileCoChangeGreaterThanCount(project.getId(), getFileMinCoChange(project.getId()));
+			for(CoChange fileCoChange : fileCoChangeList) {
 				// 两个文件在不同的模块，并且两个文件之间没有依赖关系
-				if(moduleService.isInDependence((ProjectFile) cochange.getNode1(), (ProjectFile) cochange.getNode2())) {
-					fileImplicitCrossModuleDependencyList.add(new LogicCouplingComponents<>((ProjectFile) cochange.getNode1(), (ProjectFile) cochange.getNode2(), cochange.getTimes()));
+				if(moduleService.isInDependence((ProjectFile) fileCoChange.getNode1(), (ProjectFile) fileCoChange.getNode2())) {
+					fileImplicitCrossModuleDependencyList.add(new LogicCouplingComponents<>((ProjectFile) fileCoChange.getNode1(), (ProjectFile) fileCoChange.getNode2(), fileCoChange.getTimes()));
 				}
 			}
 		}
@@ -188,20 +188,16 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 		List<LogicCouplingComponents<Package>> packageImplicitCrossModuleDependencyList = new ArrayList<>();
 		List<Project> projects = projectRepository.queryAllProjects();
 		for (Project project : projects) {
-			List<Package> packages = packageRepository.getPackageByProjectId(project.getId());
-			int length = packages.size();
-			for (int i = 0; i < length; i ++) {
-				long pckId1 = packages.get(i).getId();
+			Collection<CoChange> packageCoChangeList = cochangeRepository.findProjectPackageCoChangeGreaterThanCount(project.getId(), getPackageMinCoChange(project.getId()));
+			for (CoChange packageCoChange : packageCoChangeList) {
+				long pckId1 = packageCoChange.getNode1().getId();
+				long pckId2 = packageCoChange.getNode2().getId();
 				int fileNumber1 = projectFileRepository.getFilesNumberByPackageId(pckId1);
-				for (int j = i + 1; j < length; j ++) {
-					long pckId2 = packages.get(j).getId();
-					int fileNumber2 = projectFileRepository.getFilesNumberByPackageId(pckId2);
-					int fileCoChangeNumber = packageRepository.getCoChangeFileNumberByPackagesId(pckId1, pckId2);
-					int fileDependOnNumber = packageRepository.getDependOnFileNumberByPackagesId(pckId1, pckId2);
-					CoChange coChange = cochangeRepository.findPackageCoChangeByPackageId(pckId1, pckId2);
-					if (coChange != null && coChange.getTimes() >= getPackageMinCoChange(project.getId()) && (fileCoChangeNumber) / (fileNumber1 + fileNumber2 + 0.0) > 0.5 && (coChange.getTimes() / (fileNumber1 + fileNumber2 + 0.0)) >= 1.5 && fileDependOnNumber == 0) {
-						packageImplicitCrossModuleDependencyList.add(new LogicCouplingComponents<>(packages.get(i), packages.get(j), coChange.getTimes()));
-					}
+				int fileNumber2 = projectFileRepository.getFilesNumberByPackageId(pckId2);
+				int fileCoChangeNumber = packageRepository.getCoChangeFileNumberByPackagesId(pckId1, pckId2);
+				int fileDependOnNumber = packageRepository.getDependOnFileNumberByPackagesId(pckId1, pckId2);
+				if (packageCoChange.getTimes() >= getPackageMinCoChange(project.getId()) && fileCoChangeNumber / (fileNumber1 + fileNumber2 + 0.0) > 0.5 && packageCoChange.getTimes() / (fileNumber1 + fileNumber2 + 0.0) >= 1.5 && fileDependOnNumber == 0) {
+					packageImplicitCrossModuleDependencyList.add(new LogicCouplingComponents<>((Package) packageCoChange.getNode1(), (Package) packageCoChange.getNode2(), packageCoChange.getTimes()));
 				}
 			}
 		}

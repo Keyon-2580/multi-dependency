@@ -30,7 +30,16 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
             "and (project)-[:" + RelationType.str_CONTAIN + "*2]->(file2) " +
             "and coChange.times >= $count " +
             "return distinct p")
-    List<CoChange> findProjectGreaterThanCountCoChanges(@Param("projectId") long projectId, @Param("count") int count);
+    List<CoChange> findProjectFileCoChangeGreaterThanCount(@Param("projectId") long projectId, @Param("count") int count);
+
+    @Query("MATCH (project:Project) " +
+            "where id(project) = $projectId " +
+            "match p=(package1:Package)-[coChange:" + RelationType.str_CO_CHANGE + "]->(package2:Package) " +
+            "where (project)-[:" + RelationType.str_CONTAIN + "]->(package1) " +
+            "and (project)-[:" + RelationType.str_CONTAIN + "]->(package2) " +
+            "and coChange.times >= $count " +
+            "return distinct p")
+    List<CoChange> findProjectPackageCoChangeGreaterThanCount(@Param("projectId") long projectId, @Param("count") int count);
     
     /**
      * 找出两个指定文件的cochange关系
