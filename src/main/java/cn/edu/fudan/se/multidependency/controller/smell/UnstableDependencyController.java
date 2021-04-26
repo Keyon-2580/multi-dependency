@@ -29,7 +29,7 @@ public class UnstableDependencyController {
 	private UnstableDependencyDetectorUsingInstability unstableDependencyDetectorUsingInstability;
 	
 	@GetMapping("/query")
-	public String queryUntableDependency(HttpServletRequest request) {
+	public String queryUnstableDependency(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
 		request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryFileUnstableDependency());
 		request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryPackageUnstableDependency());
@@ -45,32 +45,31 @@ public class UnstableDependencyController {
 	
 	@GetMapping("/threshold/instability/{projectId}")
 	@ResponseBody
-	public double[] setInstability(@PathVariable("projectId") long projectId) {
+	public Double[] getProjectMinFanOutInstability(@PathVariable("projectId") long projectId) {
+		Double[] result = new Double[3];
 		Project project = nodeService.queryProject(projectId);
-		double[] result = new double[3];
-		if(project == null) {
-			return result;
+		if(project != null) {
+			result[0] = Double.valueOf(unstableDependencyDetectorUsingInstability.getProjectMinFileFanOut(projectId));
+			result[1] = Double.valueOf(unstableDependencyDetectorUsingInstability.getProjectMinPackageFanOut(projectId));
+			result[2] = unstableDependencyDetectorUsingInstability.getProjectMinRatio(projectId);
 		}
-		result[0] = unstableDependencyDetectorUsingInstability.getFileFanOutThreshold(project);
-		result[1] = unstableDependencyDetectorUsingInstability.getModuleFanOutThreshold(project);
-		result[2] = unstableDependencyDetectorUsingInstability.getRatioThreshold(project);
 		return result;
 	}
 	
 	@PostMapping("/threshold/instability/{projectId}")
 	@ResponseBody
-	public boolean getInstability(@PathVariable("projectId") long projectId, 
-			@RequestParam("fileFanOutThreshold") int fileFanOutThreshold,
-			@RequestParam("moduleFanOutThreshold") int moduleFanOutThreshold,
-			@RequestParam("ratioThreshold") double ratioThreshold) {
+	public boolean setProjectMinFanOutInstability(@PathVariable("projectId") Long projectId,
+												 @RequestParam("minFileFanOut") Integer minFileFanOut,
+												 @RequestParam("minPackageFanOut") Integer minPackageFanOut,
+												 @RequestParam("minRatio") Double minRatio) {
 		Project project = nodeService.queryProject(projectId);
-		if(project == null) {
-			return false;
+		if(project != null) {
+			unstableDependencyDetectorUsingInstability.setProjectMinFileFanOut(project.getId(), minFileFanOut);
+			unstableDependencyDetectorUsingInstability.setProjectMinPackageFanOut(project.getId(), minPackageFanOut);
+			unstableDependencyDetectorUsingInstability.setProjectMinRatio(project.getId(), minRatio);
+			return true;
 		}
-		unstableDependencyDetectorUsingInstability.setFileFanOutThreshold(project, fileFanOutThreshold);
-		unstableDependencyDetectorUsingInstability.setModuleFanOutThreshold(project, moduleFanOutThreshold);
-		unstableDependencyDetectorUsingInstability.setRatio(project, ratioThreshold);
-		return true;
+		return false;
 	}
 	
 	@GetMapping("/threshold/history/{projectId}")

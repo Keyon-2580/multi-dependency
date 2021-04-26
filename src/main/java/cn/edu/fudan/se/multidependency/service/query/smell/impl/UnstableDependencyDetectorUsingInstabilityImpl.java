@@ -61,15 +61,15 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 	@Autowired
 	private PackageRepository packageRepository;
 	
-	public static final int DEFAULT_THRESHOLD_FILE_FAN_OUT = 10;
-	public static final int DEFAULT_THRESHOLD_PACKAGE_FAN_OUT = 10;
-	public static final int DEFAULT_THRESHOLD_MODULE_FAN_OUT = 10;
-	public static final double DEFAULT_THRESHOLD_RATIO = 0.3;
+	public static final int DEFAULT_MIN_FILE_FAN_OUT = 10;
+	public static final int DEFAULT_MIN_PACKAGE_FAN_OUT = 10;
+	public static final int DEFAULT_MIN_MODULE_FAN_OUT = 10;
+	public static final double DEFAULT_MIN_RATIO = 0.3;
 	
-	private Map<Project, Integer> projectToFileFanOutThreshold = new ConcurrentHashMap<>();
-	private Map<Project, Integer> projectToPackageFanOutThreshold = new ConcurrentHashMap<>();
-	private Map<Project, Integer> projectToModuleFanOutThreshold = new ConcurrentHashMap<>();
-	private Map<Project, Double> projectToRatioThreshold = new ConcurrentHashMap<>();
+	private final Map<Long, Integer> projectToMinFileFanOutMap = new ConcurrentHashMap<>();
+	private final Map<Long, Integer> projectToMinPackageFanOutMap = new ConcurrentHashMap<>();
+	private final Map<Long, Integer> projectToMinModuleFanOutMap = new ConcurrentHashMap<>();
+	private final Map<Long, Double> projectToMinRatioMap = new ConcurrentHashMap<>();
 
 	@Override
 	public Map<Long, List<UnstableComponentByInstability<ProjectFile>>> queryFileUnstableDependency() {
@@ -99,7 +99,7 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 						dependsOnFileFanOut = fanOut;
 					}
 					Project project = containRelationService.findFileBelongToProject(fileUnstableDependency.getComponent());
-					if(component.getInstability() < dependsOnFile.getInstability() && dependsOnFileFanOut >= getFileFanOutThreshold(project)) {
+					if(component.getInstability() < dependsOnFile.getInstability() && dependsOnFileFanOut >= getProjectMinFileFanOut(project.getId())) {
 						fileUnstableDependency.addBadDependency(dependsOn);
 					}
 				}
@@ -148,7 +148,7 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 						dependsOnPackageFanOut = fanOut;
 					}
 					Project project = containRelationService.findPackageBelongToProject(packageUnstableDependency.getComponent());
-					if(component.getInstability() < dependsOnPackage.getInstability() && dependsOnPackageFanOut >= getFileFanOutThreshold(project)) {
+					if(component.getInstability() < dependsOnPackage.getInstability() && dependsOnPackageFanOut >= getProjectMinFileFanOut(project.getId())) {
 						packageUnstableDependency.addBadDependency(dependsOn);
 					}
 				}
@@ -186,7 +186,7 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> result = new HashMap<>();
 		Collection<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
-			List<UnstableComponentByInstability<ProjectFile>> temp = asRepository.unstableFilesByInstability(project.getId(), getFileFanOutThreshold(project), getRatioThreshold(project));
+			List<UnstableComponentByInstability<ProjectFile>> temp = asRepository.unstableFilesByInstability(project.getId(), getProjectMinFileFanOut(project.getId()), getProjectMinRatio(project.getId()));
 			result.put(project.getId(), temp);
 		}
 		return result;
@@ -197,72 +197,94 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 		Map<Long, List<UnstableComponentByInstability<Package>>> result = new HashMap<>();
 		Collection<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
-			List<UnstableComponentByInstability<Package>> temp = asRepository.unstablePackagesByInstability(project.getId(), getPackageFanOutThreshold(project), getRatioThreshold(project));
+			List<UnstableComponentByInstability<Package>> temp = asRepository.unstablePackagesByInstability(project.getId(), getProjectMinPackageFanOut(project.getId()), getProjectMinRatio(project.getId()));
 			result.put(project.getId(), temp);
 		}
 		return result;
 	}
 
-	
 	@Override
 	public Map<Long, List<UnstableComponentByInstability<Module>>> detectModuleUnstableDependency() {
 		Map<Long, List<UnstableComponentByInstability<Module>>> result = new HashMap<>();
 		Collection<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
-			List<UnstableComponentByInstability<Module>> temp = asRepository.unstableModulesByInstability(project.getId(), getModuleFanOutThreshold(project), getRatioThreshold(project));
+			List<UnstableComponentByInstability<Module>> temp = asRepository.unstableModulesByInstability(project.getId(), getProjectMinModuleFanOut(project.getId()), getProjectMinRatio(project.getId()));
 			result.put(project.getId(), temp);
 		}
 		return result;
 	}
 
-	public void setRatio(Project project, double threshold) {
-		this.projectToRatioThreshold.put(project, threshold);
-		cache.remove(getClass());
-	}
-	
-	public void setFileFanOutThreshold(Project project, int threshold) {
-		this.projectToFileFanOutThreshold.put(project, threshold);
-		cache.remove(getClass());
-	}
-	
-	public void setPackageFanOutThreshold(Project project, int threshold) {
-		this.projectToPackageFanOutThreshold.put(project, threshold);
+	@Override
+	public void setProjectMinFileFanOut(Long projectId, Integer minFileFanOut) {
+		this.projectToMinFileFanOutMap.put(projectId, minFileFanOut);
 		cache.remove(getClass());
 	}
 
-	public void setModuleFanOutThreshold(Project project, int threshold) {
-		this.projectToModuleFanOutThreshold.put(project, threshold);
+	@Override
+	public void setProjectMinPackageFanOut(Long projectId, Integer minPackageFanOut) {
+		this.projectToMinPackageFanOutMap.put(projectId, minPackageFanOut);
 		cache.remove(getClass());
 	}
-	
-	public int getFileFanOutThreshold(Project project) {
-		if (!projectToFileFanOutThreshold.containsKey(project)) {
-//			projectToFileFanOutThreshold.put(project, DEFAULT_THRESHOLD_FILE_FAN_OUT);
-			projectToFileFanOutThreshold.put(project, metricRepository.getMedFileFanOutByProjectId(project.getId()));
-		}
-		return projectToFileFanOutThreshold.get(project);
-	}
-	
-	public int getPackageFanOutThreshold(Project project) {
-		if (!projectToPackageFanOutThreshold.containsKey(project)) {
-//			projectToPackageFanOutThreshold.put(project, DEFAULT_THRESHOLD_PACKAGE_FAN_OUT);
-			projectToPackageFanOutThreshold.put(project, metricRepository.getMedPackageFanOutByProjectId(project.getId()));
-		}
-		return projectToPackageFanOutThreshold.get(project);
+
+	@Override
+	public void setProjectMinModuleFanOut(Long projectId, Integer minModuleFanOut) {
+		this.projectToMinModuleFanOutMap.put(projectId, minModuleFanOut);
+		cache.remove(getClass());
 	}
 
-	public int getModuleFanOutThreshold(Project project) {
-		if (!projectToModuleFanOutThreshold.containsKey(project)) {
-			projectToModuleFanOutThreshold.put(project, DEFAULT_THRESHOLD_MODULE_FAN_OUT);
-//			projectToPackageFanOutThreshold.put(project, metricRepository.getMedPackageFanOutByProjectId(project.getId()));
-		}
-		return projectToModuleFanOutThreshold.get(project);
+	@Override
+	public void setProjectMinRatio(Long projectId, Double minRatio) {
+		this.projectToMinRatioMap.put(projectId, minRatio);
+		cache.remove(getClass());
 	}
-	
-	public double getRatioThreshold(Project project) {
-		if (!projectToRatioThreshold.containsKey(project)) {
-			projectToRatioThreshold.put(project, DEFAULT_THRESHOLD_RATIO);
+
+	@Override
+	public Integer getProjectMinFileFanOut(Long projectId) {
+		if (!projectToMinFileFanOutMap.containsKey(projectId)) {
+			Integer medFileFanOut = metricRepository.getMedFileFanOutByProjectId(projectId);
+			if (medFileFanOut != null) {
+				projectToMinFileFanOutMap.put(projectId, medFileFanOut);
+			}
+			else {
+				projectToMinFileFanOutMap.put(projectId, DEFAULT_MIN_FILE_FAN_OUT);
+			}
 		}
-		return projectToRatioThreshold.get(project);
+		return projectToMinFileFanOutMap.get(projectId);
+	}
+
+	@Override
+	public Integer getProjectMinPackageFanOut(Long projectId) {
+		if (!projectToMinPackageFanOutMap.containsKey(projectId)) {
+			Integer medPackageFanOut = metricRepository.getMedPackageFanOutByProjectId(projectId);
+			if (medPackageFanOut != null) {
+				projectToMinPackageFanOutMap.put(projectId, medPackageFanOut);
+			}
+			else {
+				projectToMinPackageFanOutMap.put(projectId, DEFAULT_MIN_PACKAGE_FAN_OUT);
+			}
+		}
+		return projectToMinPackageFanOutMap.get(projectId);
+	}
+
+	@Override
+	public Integer getProjectMinModuleFanOut(Long projectId) {
+		if (!projectToMinModuleFanOutMap.containsKey(projectId)) {
+			Integer medModuleFanOut = metricRepository.getMedPackageFanOutByProjectId(projectId);
+			if (medModuleFanOut != null) {
+				projectToMinModuleFanOutMap.put(projectId, medModuleFanOut);
+			}
+			else {
+				projectToMinModuleFanOutMap.put(projectId, DEFAULT_MIN_MODULE_FAN_OUT);
+			}
+		}
+		return projectToMinModuleFanOutMap.get(projectId);
+	}
+
+	@Override
+	public Double getProjectMinRatio(Long projectId) {
+		if (!projectToMinRatioMap.containsKey(projectId)) {
+			projectToMinRatioMap.put(projectId, DEFAULT_MIN_RATIO);
+		}
+		return projectToMinRatioMap.get(projectId);
 	}
 }

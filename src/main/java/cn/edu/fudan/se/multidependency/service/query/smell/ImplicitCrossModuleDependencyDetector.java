@@ -18,10 +18,10 @@ public interface ImplicitCrossModuleDependencyDetector {
 	Map<Long, List<LogicCouplingComponents<Package>>> detectPackageImplicitCrossModuleDependency();
 
 	void setProjectFileMinCoChange(Long projectId, int minFileCoChange);
-	
-	Integer getFileMinCoChange(Long projectId);
 
 	void setProjectPackageMinCoChange(Long projectId, int minPackageCoChange);
+	
+	Integer getFileMinCoChange(Long projectId);
 
 	Integer getPackageMinCoChange(Long projectId);
 

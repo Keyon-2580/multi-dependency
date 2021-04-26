@@ -64,11 +64,11 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 	@Autowired
 	private MetricRepository metricRepository;
 
-	private static final int MIN_FILE_CO_CHANGE = 10;
-	private static final int MIN_PACKAGE_CO_CHANGE = 10;
+	private static final int DEFAULT_MIN_FILE_CO_CHANGE = 10;
+	private static final int DEFAULT_MIN_PACKAGE_CO_CHANGE = 10;
 
-	private Map<Long, Integer> projectMinFileCoChange = new ConcurrentHashMap<>();
-	private Map<Long, Integer> projectMinPackageCoChange = new ConcurrentHashMap<>();
+	private final Map<Long, Integer> projectToMinFileCoChangeMap = new ConcurrentHashMap<>();
+	private final Map<Long, Integer> projectToMinPackageCoChangeMap = new ConcurrentHashMap<>();
 
 	@Override
 	public Map<Long, List<LogicCouplingComponents<ProjectFile>>> queryFileImplicitCrossModuleDependency() {
@@ -215,39 +215,39 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 
 	@Override
 	public void setProjectFileMinCoChange(Long projectId, int minFileCoChange) {
-		projectMinFileCoChange.put(projectId, minFileCoChange);
-	}
-	
-	@Override
-	public Integer getFileMinCoChange(Long projectId) {
-		if (!projectMinFileCoChange.containsKey(projectId)) {
-			Integer medFileCoChange = metricRepository.getMedFileCoChangeByProjectId(projectId);
-			if (medFileCoChange != null) {
-				projectMinFileCoChange.put(projectId, medFileCoChange);
-			}
-			else {
-				projectMinFileCoChange.put(projectId, MIN_FILE_CO_CHANGE);
-			}
-		}
-		return projectMinFileCoChange.get(projectId);
+		projectToMinFileCoChangeMap.put(projectId, minFileCoChange);
 	}
 
 	@Override
 	public void setProjectPackageMinCoChange(Long projectId, int minPackageCoChange) {
-		projectMinPackageCoChange.put(projectId, minPackageCoChange);
+		projectToMinPackageCoChangeMap.put(projectId, minPackageCoChange);
+	}
+	
+	@Override
+	public Integer getFileMinCoChange(Long projectId) {
+		if (!projectToMinFileCoChangeMap.containsKey(projectId)) {
+			Integer medFileCoChange = metricRepository.getMedFileCoChangeByProjectId(projectId);
+			if (medFileCoChange != null) {
+				projectToMinFileCoChangeMap.put(projectId, medFileCoChange);
+			}
+			else {
+				projectToMinFileCoChangeMap.put(projectId, DEFAULT_MIN_FILE_CO_CHANGE);
+			}
+		}
+		return projectToMinFileCoChangeMap.get(projectId);
 	}
 
 	@Override
 	public Integer getPackageMinCoChange(Long projectId) {
-		if (!projectMinPackageCoChange.containsKey(projectId)) {
+		if (!projectToMinPackageCoChangeMap.containsKey(projectId)) {
 			Integer medPackageCoChange = metricRepository.getMedPackageCoChangeByProjectId(projectId);
 			if (medPackageCoChange != null) {
-				projectMinPackageCoChange.put(projectId, medPackageCoChange);
+				projectToMinPackageCoChangeMap.put(projectId, medPackageCoChange);
 			}
 			else {
-				projectMinPackageCoChange.put(projectId, MIN_PACKAGE_CO_CHANGE);
+				projectToMinPackageCoChangeMap.put(projectId, DEFAULT_MIN_PACKAGE_CO_CHANGE);
 			}
 		}
-		return projectMinPackageCoChange.get(projectId);
+		return projectToMinPackageCoChangeMap.get(projectId);
 	}
 }

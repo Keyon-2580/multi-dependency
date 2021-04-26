@@ -77,14 +77,14 @@ let hubLikeDependency = function() {
 	}
 	
 	let _save = function() {
-		let setMinFanIO = function(projectId, hubLikeMinFileFanIn, hubLikeMinFileFanOut, hubLikeMinPackageFanIn, hubLikeMinPackageFanOut) {
+		let setProjectMinFanIO = function(projectId, minFileFanIn, minFileFanOut, minPackageFanIn, minPackageFanOut) {
 			$.ajax({
 				type: "post",
 				url: "/as/hublike/fanio/" + projectId
-					+ "?hubLikeMinFileFanIn=" + hubLikeMinFileFanIn
-					+ "&hubLikeMinFileFanOut=" + hubLikeMinFileFanOut
-					+ "&hubLikeMinPackageFanIn=" + hubLikeMinPackageFanIn
-					+ "&hubLikeMinPackageFanOut=" + hubLikeMinPackageFanOut,
+					+ "?minFileFanIn=" + minFileFanIn
+					+ "&minFileFanOut=" + minFileFanOut
+					+ "&minPackageFanIn=" + minPackageFanIn
+					+ "&minPackageFanOut=" + minPackageFanOut,
 				success: function(result) {
 					if (result === true) {
 						alert("修改成功");
@@ -97,16 +97,16 @@ let hubLikeDependency = function() {
 		}
 		$("#hubLikeMinFanIOSave").click(function() {
 			let projectId = $("#hubLikeDependencyProjects").val();
-			let hubLikeMinFileFanIn = $("#hubLikeMinFileFanIn").val();
-			let hubLikeMinFileFanOut = $("#hubLikeMinFileFanOut").val();
-			let hubLikeMinPackageFanIn = $("#hubLikeMinPackageFanIn").val();
-			let hubLikeMinPackageFanOut = $("#hubLikeMinPackageFanOut").val();
-			setMinFanIO(projectId, hubLikeMinFileFanIn, hubLikeMinFileFanOut, hubLikeMinPackageFanIn, hubLikeMinPackageFanOut)
+			let minFileFanIn = $("#hubLikeMinFileFanIn").val();
+			let minFileFanOut = $("#hubLikeMinFileFanOut").val();
+			let minPackageFanIn = $("#hubLikeMinPackageFanIn").val();
+			let minPackageFanOut = $("#hubLikeMinPackageFanOut").val();
+			setProjectMinFanIO(projectId, minFileFanIn, minFileFanOut, minPackageFanIn, minPackageFanOut)
 		});
 	}
 	
 	let _get = function() {
-		let getMinFanIO = function(projectId) {
+		let getProjectMinFanIO = function(projectId) {
 			$.ajax({
 				type: "get",
 				url: "/as/hublike/fanio/" + projectId,
@@ -119,10 +119,10 @@ let hubLikeDependency = function() {
 			})
 		}
 		$("#hubLikeDependencyProjects").change(function() {
-			getMinFanIO($(this).val())
+			getProjectMinFanIO($(this).val())
 		})
 		if($("#hubLikeDependencyProjects").val() != null) {
-			getMinFanIO($("#hubLikeDependencyProjects").val());
+			getProjectMinFanIO($("#hubLikeDependencyProjects").val());
 		}
 	}
 	

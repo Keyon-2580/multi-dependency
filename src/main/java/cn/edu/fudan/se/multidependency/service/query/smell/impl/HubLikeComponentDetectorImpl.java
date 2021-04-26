@@ -9,7 +9,6 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
-import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
 import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
@@ -26,7 +25,6 @@ import cn.edu.fudan.se.multidependency.repository.smell.ASRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.smell.HubLikeComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.metric.FanIOMetric;
-import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
@@ -66,20 +64,20 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 	@Autowired
 	private SmellDetectorService smellDetectorService;
 
-	public static final int DEFAULT_THRESHOLD_FILE_FAN_IN = 10;
-	public static final int DEFAULT_THRESHOLD_FILE_FAN_OUT = 10;
-	public static final int DEFAULT_THRESHOLD_PACKAGE_FAN_IN = 10;
-	public static final int DEFAULT_THRESHOLD_PACKAGE_FAN_OUT = 10;
-	public static final int DEFAULT_THRESHOLD_MODULE_FAN_IN = 10;
-	public static final int DEFAULT_THRESHOLD_MODULE_FAN_OUT = 10;
+	public static final int DEFAULT_MIN_FILE_FAN_IN = 10;
+	public static final int DEFAULT_MIN_FILE_FAN_OUT = 10;
+	public static final int DEFAULT_MIN_PACKAGE_FAN_IN = 10;
+	public static final int DEFAULT_MIN_PACKAGE_FAN_OUT = 10;
+	public static final int DEFAULT_MIN_MODULE_FAN_IN = 10;
+	public static final int DEFAULT_MIN_MODULE_FAN_OUT = 10;
 
-	private Map<Project, int[]> projectMinFileFanIOs = new ConcurrentHashMap<>();
-	private Map<Project, int[]> projectMinPackageFanIOs = new ConcurrentHashMap<>();
-	private Map<Project, int[]> projectMinModuleFanIOs = new ConcurrentHashMap<>();
+	private final Map<Long, Integer[]> projectToMinFileFanIOMap = new ConcurrentHashMap<>();
+	private final Map<Long, Integer[]> projectToMinPackageFanIOMap = new ConcurrentHashMap<>();
+	private final Map<Long, Integer[]> projectToMinModuleFanIOMap = new ConcurrentHashMap<>();
 
 	@Override
-	public Map<Long, List<FileHubLike>> queryFileHubLike() {
-		String key = "fileHubLike";
+	public Map<Long, List<FileHubLike>> queryFileHubLikeDependency() {
+		String key = "fileHubLikeDependency";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
@@ -135,8 +133,8 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 	}
 
 	@Override
-	public Map<Long, List<PackageHubLike>> queryPackageHubLike() {
-		String key = "packageHubLike";
+	public Map<Long, List<PackageHubLike>> queryPackageHubLikeDependency() {
+		String key = "packageHubLikeDependency";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
@@ -167,8 +165,8 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 	}
 
 	@Override
-	public Map<Long, List<ModuleHubLike>> queryModuleHubLike() {
-		String key = "moduleHubLike";
+	public Map<Long, List<ModuleHubLike>> queryModuleHubLikeDependency() {
+		String key = "moduleHubLikeDependency";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
@@ -179,7 +177,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 	}
 
 	@Override
-	public Map<Long, List<FileHubLike>> detectFileHubLike() {
+	public Map<Long, List<FileHubLike>> detectFileHubLikeDependency() {
 		Collection<Project> projects = nodeService.allProjects();
 		Map<Long, List<FileHubLike>> result = new HashMap<>();
 		for(Project project : projects) {
@@ -189,7 +187,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 	}
 
 	@Override
-	public Map<Long, List<PackageHubLike>> detectPackageHubLike() {
+	public Map<Long, List<PackageHubLike>> detectPackageHubLikeDependency() {
 		Collection<Project> projects = nodeService.allProjects();
 		Map<Long, List<PackageHubLike>> result = new HashMap<>();
 		for(Project project : projects) {
@@ -199,7 +197,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 	}
 
 	@Override
-	public Map<Long, List<ModuleHubLike>> detectModuleHubLike() {
+	public Map<Long, List<ModuleHubLike>> detectModuleHubLikeDependency() {
 		Collection<Project> projects = nodeService.allProjects();
 		Map<Long, List<ModuleHubLike>> result = new HashMap<>();
 		for(Project project : projects) {
@@ -209,15 +207,15 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 	}
 
 	public List<FileHubLike> fileHubLikes(Project project) {
-		return fileHubLikes(project, getProjectMinFileFanIO(project)[0], getProjectMinFileFanIO(project)[1]);
+		return fileHubLikes(project, getProjectMinFileFanIO(project.getId())[0], getProjectMinFileFanIO(project.getId())[1]);
 	}
 
 	public List<PackageHubLike> packageHubLikes(Project project) {
-		return packageHubLikes(project, getProjectMinPackageFanIO(project)[0], getProjectMinPackageFanIO(project)[1]);
+		return packageHubLikes(project, getProjectMinPackageFanIO(project.getId())[0], getProjectMinPackageFanIO(project.getId())[1]);
 	}
 
 	public List<ModuleHubLike> moduleHubLikes(Project project) {
-		return moduleHubLikes(project, getProjectMinModuleFanIO(project)[0], getProjectMinModuleFanIO(project)[1]);
+		return moduleHubLikes(project, getProjectMinModuleFanIO(project.getId())[0], getProjectMinModuleFanIO(project.getId())[1]);
 	}
 
 	public List<FileHubLike> fileHubLikes(Project project, int minFanIn, int minFanOut) {
@@ -225,7 +223,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 			return new ArrayList<>();
 		}
 		List<FileHubLike> result = asRepository.findFileHubLikes(project.getId(), minFanIn, minFanOut);
-		result.sort((p1, p2) -> (int) ((p2.getFanIn() + p2.getFanOut()) - (p1.getFanIn() + p1.getFanOut())));
+		result.sort((p1, p2) -> (p2.getFanIn() + p2.getFanOut()) - (p1.getFanIn() + p1.getFanOut()));
 		return result;
 //		List<FileHubLike> result = new ArrayList<>();
 //		if(project == null) {
@@ -294,74 +292,88 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 	private boolean isHubLikeComponent(FanIOMetric metric, int minFanIn, int minFanOut) {
 		return metric.getFanIn() >= minFanIn && metric.getFanOut() >= minFanOut;
 	}
-	
 
 	@Override
-	public int[] getProjectMinFileFanIO(Project project) {
-		int[] result = projectMinFileFanIOs.get(project);
-		if(result == null) {
-			result = new int[2];
-//			result[0] = DEFAULT_THRESHOLD_FILE_FAN_IN;
-//			result[1] = DEFAULT_THRESHOLD_FILE_FAN_OUT;
-			result[0] = metricRepository.getMedFileFanInByProjectId(project.getId());
-			result[1] = metricRepository.getMedFileFanOutByProjectId(project.getId());
-			projectMinFileFanIOs.put(project, result);
-		}
-		return result;
-	}
-
-	@Override
-	public void setProjectMinFileFanIO(Project project, int minFanIn, int minFanOut) {
-		int[] result = new int[2];
-		result[0] = minFanIn;
-		result[1] = minFanOut;
-		projectMinFileFanIOs.put(project, result);
+	public void setProjectMinFileFanIO(Long projectId, Integer minFileFanIn, Integer minFileFanOut) {
+		Integer[] result = new Integer[2];
+		result[0] = minFileFanIn;
+		result[1] = minFileFanOut;
+		projectToMinFileFanIOMap.put(projectId, result);
 		cache.remove(getClass());
 	}
 
 	@Override
-	public int[] getProjectMinPackageFanIO(Project project) {
-		int[] result = projectMinPackageFanIOs.get(project);
-		if(result == null) {
-			result = new int[2];
-//			result[0] = DEFAULT_THRESHOLD_PACKAGE_FAN_IN;
-//			result[1] = DEFAULT_THRESHOLD_PACKAGE_FAN_OUT;
-			result[0] = metricRepository.getMedPackageFanInByProjectId(project.getId());
-			result[1] = metricRepository.getMedPackageFanOutByProjectId(project.getId());
-			projectMinPackageFanIOs.put(project, result);
-		}
-		return result;
-	}
-
-	@Override
-	public void setProjectMinPackageFanIO(Project project, int minFanIn, int minFanOut) {
-		int[] result = new int[2];
-		result[0] = minFanIn;
-		result[1] = minFanOut;
-		projectMinPackageFanIOs.put(project, result);
+	public void setProjectMinPackageFanIO(Long projectId, Integer minPackageFanIn, Integer minPackageFanOut) {
+		Integer[] result = new Integer[2];
+		result[0] = minPackageFanIn;
+		result[1] = minPackageFanOut;
+		projectToMinPackageFanIOMap.put(projectId, result);
 		cache.remove(getClass());
 	}
 
 	@Override
-	public int[] getProjectMinModuleFanIO(Project project) {
-		int[] result = projectMinModuleFanIOs.get(project);
-		if(result == null) {
-			result = new int[2];
-			result[0] = DEFAULT_THRESHOLD_MODULE_FAN_IN;
-			result[1] = DEFAULT_THRESHOLD_MODULE_FAN_OUT;
-//			result[0] = metricRepository.getMedPackageFanInByProjectId(project.getId());
-//			result[1] = metricRepository.getMedPackageFanOutByProjectId(project.getId());
-			projectMinModuleFanIOs.put(project, result);
-		}
-		return result;
+	public void setProjectMinModuleFanIO(Long projectId, Integer minModuleFanIn, Integer minModuleFanOut) {
+		Integer[] result = new Integer[2];
+		result[0] = minModuleFanIn;
+		result[1] = minModuleFanOut;
+		projectToMinModuleFanIOMap.put(projectId, result);
+		cache.remove(getClass());
 	}
 
 	@Override
-	public void setProjectMinModuleFanIO(Project project, int minFanIn, int minFanOut) {
-		int[] result = new int[2];
-		result[0] = minFanIn;
-		result[1] = minFanOut;
-		projectMinModuleFanIOs.put(project, result);
-		cache.remove(getClass());
+	public Integer[] getProjectMinFileFanIO(Long projectId) {
+		if (!projectToMinFileFanIOMap.containsKey(projectId)) {
+			Integer[] result = new Integer[2];
+			Integer medFileFanIn = metricRepository.getMedFileFanInByProjectId(projectId);
+			Integer medFileFanOut = metricRepository.getMedFileFanOutByProjectId(projectId);
+			if(medFileFanIn != null && medFileFanOut != null) {
+				result[0] = medFileFanIn;
+				result[1] = medFileFanOut;
+			}
+			else {
+				result[0] = DEFAULT_MIN_FILE_FAN_IN;
+				result[1] = DEFAULT_MIN_FILE_FAN_OUT;
+			}
+			projectToMinFileFanIOMap.put(projectId, result);
+		}
+		return projectToMinFileFanIOMap.get(projectId);
+	}
+
+	@Override
+	public Integer[] getProjectMinPackageFanIO(Long projectId) {
+		if (!projectToMinPackageFanIOMap.containsKey(projectId)) {
+			Integer[] result = new Integer[2];
+			Integer medPackageFanIn = metricRepository.getMedPackageFanInByProjectId(projectId);
+			Integer medPackageFanOut = metricRepository.getMedPackageFanOutByProjectId(projectId);
+			if(medPackageFanIn != null && medPackageFanOut != null) {
+				result[0] = medPackageFanIn;
+				result[1] = medPackageFanOut;
+			}
+			else {
+				result[0] = DEFAULT_MIN_PACKAGE_FAN_IN;
+				result[1] = DEFAULT_MIN_PACKAGE_FAN_OUT;
+			}
+			projectToMinPackageFanIOMap.put(projectId, result);
+		}
+		return projectToMinPackageFanIOMap.get(projectId);
+	}
+
+	@Override
+	public Integer[] getProjectMinModuleFanIO(Long projectId) {
+		if (!projectToMinModuleFanIOMap.containsKey(projectId)) {
+			Integer[] result = new Integer[2];
+			Integer medPackageFanIn = metricRepository.getMedPackageFanInByProjectId(projectId);
+			Integer medPackageFanOut = metricRepository.getMedPackageFanOutByProjectId(projectId);
+			if(medPackageFanIn != null && medPackageFanOut != null) {
+				result[0] = medPackageFanIn;
+				result[1] = medPackageFanOut;
+			}
+			else {
+				result[0] = DEFAULT_MIN_MODULE_FAN_IN;
+				result[1] = DEFAULT_MIN_MODULE_FAN_OUT;
+			}
+			projectToMinModuleFanIOMap.put(projectId, result);
+		}
+		return projectToMinModuleFanIOMap.get(projectId);
 	}
 }

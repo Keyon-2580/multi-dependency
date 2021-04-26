@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
-import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.ar.Module;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.UnstableComponentByInstability;
@@ -23,15 +22,19 @@ public interface UnstableDependencyDetectorUsingInstability {
 
 	Map<Long, List<UnstableComponentByInstability<Module>>> detectModuleUnstableDependency();
 	
-	void setRatio(Project project, double threshold);
+	void setProjectMinFileFanOut(Long projectId, Integer minFileFanOut);
 	
-	void setFileFanOutThreshold(Project project, int threshold);
+	void setProjectMinPackageFanOut(Long projectId, Integer minPackageFanOut);
+
+	void setProjectMinModuleFanOut(Long projectId, Integer minModuleFanOut);
+
+	void setProjectMinRatio(Long projectId, Double minRatio);
 	
-	void setModuleFanOutThreshold(Project project, int threshold);
+	Integer getProjectMinFileFanOut(Long projectId);
+
+	Integer getProjectMinPackageFanOut(Long projectId);
+
+	Integer getProjectMinModuleFanOut(Long projectId);
 	
-	int getFileFanOutThreshold(Project project);
-	
-	int getModuleFanOutThreshold(Project project);
-	
-	double getRatioThreshold(Project project);
+	Double getProjectMinRatio(Long projectId);
 }

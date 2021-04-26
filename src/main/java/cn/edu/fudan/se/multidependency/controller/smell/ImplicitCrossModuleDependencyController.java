@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.controller.smell;
 
 import javax.servlet.http.HttpServletRequest;
 
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -37,21 +38,25 @@ public class ImplicitCrossModuleDependencyController {
 	
 	@GetMapping("/cochange/{projectId}")
 	@ResponseBody
-	public int[] getMinCoChange(@PathVariable("projectId") Long projectId) {
-		int[] result = new int[2];
-		Integer minFileCoChange = icdDetector.getFileMinCoChange(projectId);
-		Integer minPackageCpChange = icdDetector.getPackageMinCoChange(projectId);
-		result[0] = minFileCoChange;
-		result[1] = minPackageCpChange;
+	public Integer[] getProjectMinCoChange(@PathVariable("projectId") Long projectId) {
+		Integer[] result = new Integer[2];
+		Project project = nodeService.queryProject(projectId);
+		if(project != null) {
+			result[0] = icdDetector.getFileMinCoChange(projectId);
+			result[1] = icdDetector.getPackageMinCoChange(projectId);
+		}
 		return result;
 	}
 	
 	@PostMapping("/cochange/{projectId}")
 	@ResponseBody
-	public boolean setMinCoChange(@PathVariable("projectId") Long projectId, @RequestParam("icdMinFileCoChange") int minFileCoChange, @RequestParam("icdMinPackageCoChange") int minPackageCoChange) {
-		icdDetector.setProjectFileMinCoChange(projectId, minFileCoChange);
-		icdDetector.setProjectPackageMinCoChange(projectId, minPackageCoChange);
-		return true;
+	public boolean setProjectMinCoChange(@PathVariable("projectId") Long projectId, @RequestParam("minFileCoChange") int minFileCoChange, @RequestParam("minPackageCoChange") int minPackageCoChange) {
+		Project project = nodeService.queryProject(projectId);
+		if(project != null) {
+			icdDetector.setProjectFileMinCoChange(projectId, minFileCoChange);
+			icdDetector.setProjectPackageMinCoChange(projectId, minPackageCoChange);
+			return true;
+		}
+		return false;
 	}
-	
 }

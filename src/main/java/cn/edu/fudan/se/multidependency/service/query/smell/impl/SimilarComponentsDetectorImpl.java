@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.query.smell.impl;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
@@ -9,6 +10,7 @@ import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileRepository;
@@ -16,7 +18,6 @@ import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackagePairDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -79,7 +80,12 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 	@Autowired
 	private SmellDetectorService smellDetectorService;
 
-	private static final int minCoChange = 10;
+	@Autowired
+	private MetricRepository metricRepository;
+
+	private static final int DEFAULT_MIN_FILE_CO_CHANGE = 10;
+
+	private final Map<Long, Integer> projectToMinFileCoChangeMap = new ConcurrentHashMap<>();
 
 	@Override
 	public Map<Long, List<SimilarComponents<ProjectFile>>> queryFileSimilarComponents() {
@@ -176,26 +182,30 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 		for(FileCloneWithCoChange clone : clonesWithCoChange) {
 			ProjectFile file1 = clone.getFile1();
 			ProjectFile file2 = clone.getFile2();
-			if(clone.getCochangeTimes() < minCoChange) {
-				continue;
+			Project project1 = containRelationService.findFileBelongToProject(file1);
+			Project project2 = containRelationService.findFileBelongToProject(file2);
+			if (project1 != null && project2 != null && project1.getId().equals(project2.getId())) {
+				if(clone.getCochangeTimes() < getProjectMinFileCoChange(project1.getId())) {
+					continue;
+				}
+				if(!moduleService.isInDifferentModule(file1, file2)) {
+					continue;
+				}
+				SimilarComponents<ProjectFile> temp = new SimilarComponents<>(file1, file2, clone.getFileClone().getValue(), fileMetrics.get(file1.getId()).getEvolutionMetric().getCommits(), fileMetrics.get(file2.getId()).getEvolutionMetric().getCommits(), clone.getCochangeTimes());
+				temp.setModule1(moduleService.findFileBelongToModule(file1));
+				temp.setModule2(moduleService.findFileBelongToModule(file2));
+				temp.setCloneType(clone.getFileClone().getCloneType());
+				Collection<DependsOn> file1DependsOns = dependsOnRepository.findFileDependsOn(file1.getId());
+				Collection<DependsOn> file2DependsOns = dependsOnRepository.findFileDependsOn(file2.getId());
+				for(DependsOn file1DependsOn : file1DependsOns) {
+					temp.addNode1DependsOn(file1DependsOn.getEndNode());
+				}
+				for(DependsOn file2DependsOn : file2DependsOns) {
+					temp.addNode2DependsOn(file2DependsOn.getEndNode());
+				}
+				temp.setSameDependsOnRatio();
+				similarComponentsList.add(temp);
 			}
-			if(!moduleService.isInDifferentModule(file1, file2)) {
-				continue;
-			}
-			SimilarComponents<ProjectFile> temp = new SimilarComponents<>(file1, file2, clone.getFileClone().getValue(), fileMetrics.get(file1.getId()).getEvolutionMetric().getCommits(), fileMetrics.get(file2.getId()).getEvolutionMetric().getCommits(), clone.getCochangeTimes());
-			temp.setModule1(moduleService.findFileBelongToModule(file1));
-			temp.setModule2(moduleService.findFileBelongToModule(file2));
-			temp.setCloneType(clone.getFileClone().getCloneType());
-			Collection<DependsOn> file1DependsOns = dependsOnRepository.findFileDependsOn(file1.getId());
-			Collection<DependsOn> file2DependsOns = dependsOnRepository.findFileDependsOn(file2.getId());
-			for(DependsOn file1DependsOn : file1DependsOns) {
-				temp.addNode1DependsOn(file1DependsOn.getEndNode());
-			}
-			for(DependsOn file2DependsOn : file2DependsOns) {
-				temp.addNode2DependsOn(file2DependsOn.getEndNode());
-			}
-			temp.setSameDependsOnRatio();
-			similarComponentsList.add(temp);
 		}
 		for(SimilarComponents<ProjectFile> similarComponents : similarComponentsList) {
 			Project project1 = containRelationService.findFileBelongToProject(similarComponents.getNode1());
@@ -259,5 +269,18 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 			result.addAll(getPackageSimilars(hotspotPackagePair.getChildrenHotspotPackagePairs()));
 		}
 		return result;
+	}
+
+	public int getProjectMinFileCoChange(Long projectId) {
+		if (!projectToMinFileCoChangeMap.containsKey(projectId)) {
+			Integer medFileCoChange = metricRepository.getMedFileCoChangeByProjectId(projectId);
+			if (medFileCoChange != null) {
+				projectToMinFileCoChangeMap.put(projectId, medFileCoChange);
+			}
+			else {
+				projectToMinFileCoChangeMap.put(projectId, DEFAULT_MIN_FILE_CO_CHANGE);
+			}
+		}
+		return projectToMinFileCoChangeMap.get(projectId);
 	}
 }

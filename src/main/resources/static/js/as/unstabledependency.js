@@ -75,13 +75,13 @@ let unstableDependency = function() {
 	}
 	
 	let _save = function() {
-		let setInstabilityThreshold = function(projectId, unstableFileFanOutThreshold, unstableModuleFanOutThreshold, unstableRatioThreshold) {
+		let setProjectMinFanOutInstability = function(projectId, minFileFanOut, minPackageFanOut, minRatio) {
 			$.ajax({
 				type: "post",
 				url: "/as/unstable/threshold/instability/" + projectId 
-					+ "?fileFanOutThreshold=" + unstableFileFanOutThreshold
-					+ "&moduleFanOutThreshold=" + unstableModuleFanOutThreshold
-					+ "&ratioThreshold=" + unstableRatioThreshold,
+					+ "?minFileFanOut=" + minFileFanOut
+					+ "&minPackageFanOut=" + minPackageFanOut
+					+ "&minRatio=" + minRatio,
 				success: function(result) {
 					if (result === true) {
 						alert("修改成功");
@@ -93,44 +93,31 @@ let unstableDependency = function() {
 			});
 		};
 		$("#unstableInstabilityThresholdSave").click(function() {
-			let unstableFileFanOutThreshold = $("#unstableFileFanOutThreshold").val();
-			let unstableModuleFanOutThreshold = $("#unstableModuleFanOutThreshold").val();
-			let unstableRatioThreshold = $("#unstableRatioThreshold").val();
 			let projectId = $("#unstableDependencyProjects").val();
-			setInstabilityThreshold(projectId, unstableFileFanOutThreshold, unstableModuleFanOutThreshold, unstableRatioThreshold);
+			let minFileFanOut = $("#unstableMinFileFanOut").val();
+			let minPackageFanOut = $("#unstableMinPackageFanOut").val();
+			let minRatio = $("#unstableMinRatio").val();
+			setProjectMinFanOutInstability(projectId, minFileFanOut, minPackageFanOut, minRatio);
 		})
 	}
 	
 	let _get = function() {
-		let getHistoryThreshold = function(projectId) {
-			$.ajax({
-				type: "get",
-				url: "/as/unstable/threshold/history/" + projectId,
-				success: function(result) {
-					$("#unstableFanInThreshold").val(result[0]);
-					$("#unstableCoChangeTimesThreshold").val(result[1]);
-					$("#unstableCoChangeFilesThreshold").val(result[2]);
-				}
-			})
-		};
-		let getInstabilityThreshold = function(projectId) {
+		let getProjectMinFanOutInstability = function(projectId) {
 			$.ajax({
 				type: "get",
 				url: "/as/unstable/threshold/instability/" + projectId,
 				success: function(result) {
-					$("#unstableFileFanOutThreshold").val(result[0]);
-					$("#unstableModuleFanOutThreshold").val(result[1]);
-					$("#unstableRatioThreshold").val(result[2]);
+					$("#unstableMinFileFanOut").val(result[0]);
+					$("#unstableMinPackageFanOut").val(result[1]);
+					$("#unstableMinRatio").val(result[2]);
 				}
 			})
 		};
 		$("#unstableDependencyProjects").change(function() {
-			getHistoryThreshold($(this).val())
-			getInstabilityThreshold($(this).val());
+			getProjectMinFanOutInstability($(this).val());
 		})
 		if($("#unstableDependencyProjects").val() != null) {
-			getHistoryThreshold($("#unstableDependencyProjects").val());
-			getInstabilityThreshold($("#unstableDependencyProjects").val());
+			getProjectMinFanOutInstability($("#unstableDependencyProjects").val());
 		}
 		
 	}

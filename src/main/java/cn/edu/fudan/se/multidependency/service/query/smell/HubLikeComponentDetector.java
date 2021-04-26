@@ -10,27 +10,27 @@ import cn.edu.fudan.se.multidependency.service.query.smell.data.PackageHubLike;
 
 public interface HubLikeComponentDetector {
 	
-	Map<Long, List<FileHubLike>> queryFileHubLike();
+	Map<Long, List<FileHubLike>> queryFileHubLikeDependency();
 
-	Map<Long, List<PackageHubLike>> queryPackageHubLike();
+	Map<Long, List<PackageHubLike>> queryPackageHubLikeDependency();
 
-	Map<Long, List<ModuleHubLike>> queryModuleHubLike();
+	Map<Long, List<ModuleHubLike>> queryModuleHubLikeDependency();
 
-	Map<Long, List<FileHubLike>> detectFileHubLike();
+	Map<Long, List<FileHubLike>> detectFileHubLikeDependency();
 
-	Map<Long, List<PackageHubLike>> detectPackageHubLike();
+	Map<Long, List<PackageHubLike>> detectPackageHubLikeDependency();
 
-	Map<Long, List<ModuleHubLike>> detectModuleHubLike();
-	
-	int[] getProjectMinFileFanIO(Project project);
-	
-	void setProjectMinFileFanIO(Project project, int minFanIn, int minFanOut);
+	Map<Long, List<ModuleHubLike>> detectModuleHubLikeDependency();
 
-	int[] getProjectMinPackageFanIO(Project project);
+	void setProjectMinFileFanIO(Long projectId, Integer minFileFanIn, Integer minFileFanOut);
 
-	void setProjectMinPackageFanIO(Project project, int minFanIn, int minFanOut);
-	
-	int[] getProjectMinModuleFanIO(Project project);
-	
-	void setProjectMinModuleFanIO(Project project, int minFanIn, int minFanOut);
+	void setProjectMinPackageFanIO(Long projectId, Integer minPackageFanIn, Integer minPackageFanOut);
+
+	void setProjectMinModuleFanIO(Long projectId, Integer minModuleFanIn, Integer minModuleFanOut);
+
+	Integer[] getProjectMinFileFanIO(Long projectId);
+
+	Integer[] getProjectMinPackageFanIO(Long projectId);
+
+	Integer[] getProjectMinModuleFanIO(Long projectId);
 }

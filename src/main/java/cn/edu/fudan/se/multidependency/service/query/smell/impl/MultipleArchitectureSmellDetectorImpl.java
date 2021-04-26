@@ -195,7 +195,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 	@Override
 	public Map<Long, List<MultipleASFile>> queryMultipleSmellASFiles(boolean removeNoASFile) {
 		Map<Long, List<Cycle<ProjectFile>>> cycleFiles = cycleASDetector.queryFileCyclicDependency();
-		Map<Long, List<FileHubLike>> hubLikeFiles = hubLikeComponentDetector.queryFileHubLike();
+		Map<Long, List<FileHubLike>> hubLikeFiles = hubLikeComponentDetector.queryFileHubLikeDependency();
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> unstableFilesUsingInstability = unstableDependencyDetectorUsingInstability.queryFileUnstableDependency();
 		Map<Long, List<ProjectFile>> unusedFiles = unusedComponentDetector.unusedFiles();
 		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> unutilizedFiles = unutilizedAbstractionDetector.queryFileUnutilizedAbstraction();
@@ -207,7 +207,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 	@Override
 	public Map<Long, List<MultipleASFile>> detectMultipleSmellASFiles(boolean removeNoASFile) {
 		Map<Long, List<Cycle<ProjectFile>>> cycleFiles = cycleASDetector.detectFileCyclicDependency();
-		Map<Long, List<FileHubLike>> hubLikeFiles = hubLikeComponentDetector.detectFileHubLike();
+		Map<Long, List<FileHubLike>> hubLikeFiles = hubLikeComponentDetector.detectFileHubLikeDependency();
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> unstableFilesUsingInstability = unstableDependencyDetectorUsingInstability.detectFileUnstableDependency();
 		Map<Long, List<ProjectFile>> unusedFiles = unusedComponentDetector.unusedFiles();
 		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> unutilizedFiles = unutilizedAbstractionDetector.detectFileUnutilizedAbstraction();

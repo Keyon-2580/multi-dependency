@@ -57,12 +57,12 @@ let implicitCrossModuleDependency = function() {
 	}
 
 	let _save = function() {
-		let set = function(projectId, icdMinFileCoChange, icdMinPackageCoChange) {
+		let setProjectMinCoChange = function(projectId, minFileCoChange, minPackageCoChange) {
 			$.ajax({
 				type: "post",
-				url: "/as/icd/cochange" + projectId
-					+ "?icdMinFileCoChange=" + icdMinFileCoChange
-					+ "?icdMinPackageCoChange=" + icdMinPackageCoChange,
+				url: "/as/icd/cochange/" + projectId
+					+ "?minFileCoChange=" + minFileCoChange
+					+ "&minPackageCoChange=" + minPackageCoChange,
 				success: function(result) {
 					if(result === true) {
 						alert("修改成功");
@@ -80,14 +80,14 @@ let implicitCrossModuleDependency = function() {
 			if($("#logicalCouplingProjects").val() != null) {
 				projectId = $("#logicalCouplingProjects").val();
 			}
-			let icdMinFileCoChange = $("#icdMinFileCoChange").val();
-			let icdMinPackageCoChange = $("#icdMinPackageCoChange").val();
-			set(projectId, icdMinFileCoChange, icdMinPackageCoChange);
+			let minFileCoChange = $("#icdMinFileCoChange").val();
+			let minPackageCoChange = $("#icdMinPackageCoChange").val();
+			setProjectMinCoChange(projectId, minFileCoChange, minPackageCoChange);
 		})
 	}
 
 	let _get = function() {
-		let getMinCoChange = function(projectId) {
+		let getProjectMinCoChange = function(projectId) {
 			$.ajax({
 				type: "get",
 				url: "/as/icd/cochange/" + projectId,
@@ -98,10 +98,10 @@ let implicitCrossModuleDependency = function() {
 			})
 		}
 		$("#logicalCouplingProjects").change(function() {
-			getMinCoChange($(this).val());
+			getProjectMinCoChange($(this).val());
 		})
 		if($("#logicalCouplingProjects").val() != null) {
-			getMinCoChange($("#logicalCouplingProjects").val());
+			getProjectMinCoChange($("#logicalCouplingProjects").val());
 		}
 	}
 	
