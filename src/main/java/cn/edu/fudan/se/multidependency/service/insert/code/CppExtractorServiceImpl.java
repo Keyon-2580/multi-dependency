@@ -133,7 +133,7 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 	private Type process(AliasEntity entity) {
 		AliasEntity aliasEntity = (AliasEntity) entity;
 		TypeEntity typeEntity = aliasEntity.getType();
-		if (typeEntity != null && typeEntity.getParent() != null) {
+		if (typeEntity != null && typeEntity.getParent() != null && typeEntity.getClass() == TypeEntity.class) {
 			Type type = process(typeEntity);
 			type.setAliasName(entity.getQualifiedName());
 			return type;
