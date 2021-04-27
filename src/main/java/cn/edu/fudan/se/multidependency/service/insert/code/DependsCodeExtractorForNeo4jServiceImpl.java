@@ -1,12 +1,9 @@
 package cn.edu.fudan.se.multidependency.service.insert.code;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.model.Language;
-import cn.edu.fudan.se.multidependency.model.node.code.Namespace;
 import cn.edu.fudan.se.multidependency.model.relation.structure.*;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import depends.entity.*;
@@ -232,10 +229,10 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 
 	protected void extractRelationsFromTypes() {
 		Map<Long, ? extends Node> types = this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject);
-		types.forEach((id, node) -> {
+		types.forEach((entityId, node) -> {
 			Type type = (Type) node;
 			// 继承与实现
-			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(id.intValue());
+			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(entityId.intValue());
 //			Collection<TypeEntity> inherits = typeEntity.getInheritedTypes();
 //			inherits.forEach(inherit -> {
 //				Type other = (Type) types.get(inherit.getId().longValue());
@@ -255,12 +252,12 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 			typeEntity.getRelations().forEach(relation -> {
 				switch(relation.getType()) {
 				case DependencyType.INHERIT:
-						Type extendsType = (Type) types.get(relation.getEntity().getId().longValue());
-						if(extendsType != null){
-							Extends typeExtends = new Extends(type, extendsType);
-							addRelation(typeExtends);
-						}
-						break;
+					Type extendsType = (Type) types.get(relation.getEntity().getId().longValue());
+					if(extendsType != null){
+						Extends typeExtends = new Extends(type, extendsType);
+						addRelation(typeExtends);
+					}
+					break;
 				case DependencyType.IMPLEMENT:
 					Type implementsType = (Type) types.get(relation.getEntity().getId().longValue());
 					if(implementsType != null){
@@ -276,22 +273,18 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					}
 					break;
 				case DependencyType.CONTAIN:
-					if(relation.getEntity().getClass() == TypeEntity.class && relation.getEntity().getId() != -1) {
-						// 关联的type，即成员变量的类型，此处仅指代类型直接定义的成员变量，不包含通过List<？>、Set<？>等基本数据类型中参数类型（此种情况将在变量的参数类型中处理）
-						Type other = (Type) getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, relation.getEntity().getId().longValue(), currentProject);
-						if(other != null) {
-							MemberVariable memberVariable = new MemberVariable(type, other);
-							addRelation(memberVariable);
-						}
+					// 关联的type，即成员变量的类型，此处仅指代类型直接定义的成员变量，不包含通过List<？>、Set<？>等基本数据类型中参数类型（此种情况将在变量的参数类型中处理）
+					Type memberType = (Type) getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, relation.getEntity().getId().longValue(), currentProject);
+					if(memberType != null) {
+						MemberVariable memberVariable = new MemberVariable(type, memberType);
+						addRelation(memberVariable);
 					}
 					break;
 				case DependencyType.CALL:
-					if( relation.getEntity() instanceof FunctionEntity ) {
-						Function other = (Function) getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, relation.getEntity().getId().longValue(), currentProject);
-						if(other != null) {
-							Call call = new Call(type, other);
-							addRelation(call);
-						}
+					Function calledType = (Function) getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, relation.getEntity().getId().longValue(), currentProject);
+					if(calledType != null) {
+						Call call = new Call(type, calledType);
+						addRelation(call);
 					}
 //					else if(relation.getEntity().getClass() == TypeEntity.class){
 //						Type other = (Type) types.get(relation.getEntity().getId().longValue());
@@ -302,13 +295,11 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 //					}
 					break;
 				case DependencyType.CREATE:
-					if(relation.getEntity().getClass() == TypeEntity.class) {
-						Type other = (Type) types.get(relation.getEntity().getId().longValue());
-						if(other != null) {
-							Create create = new Create(type, other);
-							addRelation(create);
-						}
-					} 
+					Type createType = (Type) types.get(relation.getEntity().getId().longValue());
+					if(createType != null) {
+						Create create = new Create(type, createType);
+						addRelation(create);
+					}
 					break;
 				case DependencyType.CAST:
 					Type castType = (Type) types.get(relation.getEntity().getId().longValue());
@@ -322,25 +313,29 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					break;
 				case DependencyType.USE:
 					Entity relationEntity = relation.getEntity();
-					if(relation.getEntity() instanceof VarEntity) {
-						Node relationNode = this.getNodes().findNodeByEntityIdInProject(relationEntity.getId().longValue(), currentProject);
-						if(relationNode != null) {
-							assert(relationNode instanceof Variable);
+					Node relationNode = this.getNodes().findNodeByEntityIdInProject(relationEntity.getId().longValue(), currentProject);
+					if(relationNode != null){
+						if(relationNode instanceof Variable) {
 							Variable var = (Variable) relationNode;
-							if(var.isField()) {
+							Entity relationParentEntity = relationEntity.getParent();
+							if(var.isMemberVariable() && relationParentEntity != null && typeEntity.getClass() == relationParentEntity.getClass()) {
 								Access accessField = new Access(type, var);
 								addRelation(accessField);
+							}else{
+								Use use = new Use(type, var);
+								addRelation(use);
 							}
-						}
-					}else if(relation.getEntity().getClass() == TypeEntity.class && relation.getEntity().getId() != -1){
-						Type other = (Type) types.get(relation.getEntity().getId().longValue());
-						if(other != null) {
+						}else if(relationNode instanceof Type){
+							Type other = (Type) relationNode;
 							Use use = new Use(type, other);
 							addRelation(use);
 						}
 					}
 					break;
 				default:
+					String typeStr = relation.getEntity().getQualifiedName();
+					if("built-in".equals(typeStr)) break;
+					LOGGER.info(type.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName() + "(" + relation.getEntity().getClass().toString() + ")");
 					break;
 				}
 			});
@@ -369,53 +364,39 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					}
 					break;
 				case DependencyType.USE:
-					Type useType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, relation.getEntity().getId().longValue(), currentProject);
-					if(useType != null){
-						if(variable.isField()){
-							Entity parentTypeEntity = varEntity.getParent();
-							while (parentTypeEntity != null && parentTypeEntity.getClass() != TypeEntity.class){
-								parentTypeEntity = parentTypeEntity.getParent();
+					Entity relationEntity = relation.getEntity();
+					Node relationNode = this.getNodes().findNodeByEntityIdInProject(relationEntity.getId().longValue(), currentProject);
+					if(relationNode != null){
+						if(relationNode instanceof Variable) {
+							Variable var = (Variable) relationNode;
+							Entity varParent = varEntity.getParent();
+							Entity relationParent = relationEntity.getParent();
+							if(var.isMemberVariable() && varParent != null && relationParent != null && varParent.getClass() == relationParent.getClass()) {
+								Access accessField = new Access(variable, var);
+								addRelation(accessField);
+							}else{
+								Use use = new Use(variable, var);
+								addRelation(use);
 							}
-							if(parentTypeEntity != null){
-								Type parentType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentTypeEntity.getId().longValue(), currentProject);
-								if(parentType != null && parentType != useType){
-									MemberVariable memberVariable = new MemberVariable(parentType, useType);
-									addRelation(memberVariable);
+
+						}else if(relationNode instanceof Type){
+							Type useType = (Type) relationNode;
+							if(variable.isMemberVariable()){
+								Entity parentTypeEntity = varEntity.getParent();
+								while (parentTypeEntity != null && parentTypeEntity.getClass() != TypeEntity.class){
+									parentTypeEntity = parentTypeEntity.getParent();
 								}
-							}
-						} else {
-							Entity parentEntity = varEntity.getParent();
-							while (parentEntity != null){
-								if(parentEntity instanceof FunctionEntity || parentEntity.getClass() == PackageEntity.class || parentEntity.getClass() == FileEntity.class){
-									break;
-								}
-								parentEntity = parentEntity.getParent();
-							}
-							if(parentEntity != null){
-								if(parentEntity instanceof FunctionEntity){
-									Function parentFunction = (Function) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, parentEntity.getId().longValue(), currentProject);
-									if(parentFunction != null){
-										LocalVariable localVariable = new LocalVariable(parentFunction, useType);
-										addRelation(localVariable);
-									}
-								}else if(parentEntity.getClass() == PackageEntity.class){
-									if(Language.cpp.name().equals(variable.getLanguage())){
-										Namespace parentNamespace = (Namespace) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Namespace, parentEntity.getId().longValue(), currentProject);
-										if(parentNamespace != null){
-											MemberVariable memberVariable = new MemberVariable(parentNamespace, useType);
-											addRelation(memberVariable);
-										}
-									}
-								}else if(parentEntity.getClass() == FileEntity.class){
-									if(Language.cpp.name().equals(variable.getLanguage())){
-										ProjectFile parentFile = (ProjectFile) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.ProjectFile, parentEntity.getId().longValue(), currentProject);
-										if(parentFile != null){
-											GlobalVariable globalVariable = new GlobalVariable(parentFile, useType);
-											addRelation(globalVariable);
-										}
+								if(parentTypeEntity != null){
+									Type parentType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentTypeEntity.getId().longValue(), currentProject);
+									if(parentType != null && parentType != useType){
+										MemberVariable memberVariable = new MemberVariable(parentType, useType);
+										addRelation(memberVariable);
+										break;
 									}
 								}
 							}
+							Use use = new Use(variable, useType);
+							addRelation(use);
 						}
 					}
 					break;
@@ -427,6 +408,9 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					}
 					break;
 				default:
+					String typeStr = relation.getEntity().getQualifiedName();
+					if("built-in".equals(typeStr)) break;
+					LOGGER.info(variable.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName() + "(" + relation.getEntity().getClass().toString() + ")");
 					break;
 				}
 			}
@@ -441,18 +425,14 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 			String functionFullName = function.getParameters().toString().replace('[', '(').replace(']', ')');
 			// 函数调用
 			FunctionEntity functionEntity = (FunctionEntity) entityRepo.getEntity(id.intValue());
-			Entity functionParentTypeEntity = functionEntity.getParent();
-			Type functionParentType = (Type) types.get(functionParentTypeEntity.getId().longValue());
 			functionEntity.getRelations().forEach(relation -> {
 				switch(relation.getType()) {
 				case DependencyType.CALL:
-					if(relation.getEntity() instanceof FunctionEntity) {
-						// call其它方法
-						Function other = (Function) functions.get(relation.getEntity().getId().longValue());
-						if(other != null) {
-							Call call = new Call(function, other);
-							addRelation(call);
-						}
+					// call其它方法
+					Function callFun = (Function) functions.get(relation.getEntity().getId().longValue());
+					if(callFun != null) {
+						Call call = new Call(function, callFun);
+						addRelation(call);
 					}
 //					else if(relation.getEntity().getClass() == TypeEntity.class){
 //						Type other = (Type) types.get(relation.getEntity().getId().longValue());
@@ -463,12 +443,10 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 //					}
 					break;
 				case DependencyType.CREATE:
-					if(relation.getEntity().getClass() == TypeEntity.class) {
-						Type other = (Type) types.get(relation.getEntity().getId().longValue());
-						if(other != null) {
-							Create create = new Create(function, other);
-							addRelation(create);
-						}
+					Type createType = (Type) types.get(relation.getEntity().getId().longValue());
+					if(createType != null) {
+						Create create = new Create(function, createType);
+						addRelation(create);
 					}
 					break;
 				case DependencyType.RETURN:
@@ -507,47 +485,40 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					}
 					break;
 				case DependencyType.IMPLEMENT:
-					Node implementNode = this.getNodes().findNodeByEntityIdInProject(relation.getEntity().getId().longValue(), currentProject);
-					if(implementNode != null && implementNode instanceof Function) {
-						Function implementFunction = (Function) implementNode;
+					Function implementFunction = (Function) functions.get(relation.getEntity().getId().longValue());
+					if(implementFunction != null ) {
 						ImplementsC functionImplementFunction = new ImplementsC(function, implementFunction);
 						addRelation(functionImplementFunction);
 					}
 					break;
 				case DependencyType.IMPLLINK:
-					Node impllinkNode = this.getNodes().findNodeByEntityIdInProject(relation.getEntity().getId().longValue(), currentProject);
-					if(impllinkNode != null && impllinkNode instanceof Function) {
-						Function implLinkFunction = (Function) impllinkNode;
+					Function implLinkFunction = (Function) functions.get(relation.getEntity().getId().longValue());
+					if(implLinkFunction != null ) {
 						ImplLink functionImplLinkFunction = new ImplLink(function, implLinkFunction);
 						addRelation(functionImplLinkFunction);
 					}
 					break;
 				case DependencyType.USE:
 					Entity relationEntity = relation.getEntity();
-					if(relation.getEntity() instanceof VarEntity) {
-						Node relationNode = this.getNodes().findNodeByEntityIdInProject(relationEntity.getId().longValue(), currentProject);
-						if(relationNode != null) {
-							assert(relationNode instanceof Variable);
+					Node relationNode = this.getNodes().findNodeByEntityIdInProject(relationEntity.getId().longValue(), currentProject);
+					if(relationNode != null){
+						if(relationNode instanceof Variable) {
 							Variable var = (Variable) relationNode;
-							if(var.isField()) {
+							Entity functionParent = functionEntity.getParent();
+							Entity relationParent = relationEntity.getParent();
+							if(var.isMemberVariable() && functionParent != null && relationParent != null && functionParent.getClass() == relationParent.getClass()) {
 								Access accessField = new Access(function, var);
 								addRelation(accessField);
 							}else{
-								Entity varFile = relationEntity.getAncestorOfType(FileEntity.class);
-								Entity funcFile = functionEntity.getAncestorOfType(FileEntity.class);
-								if(varFile != null && funcFile != null && !(varFile.getId().equals(funcFile.getId()))){
-									Use use = new Use(function, var);
-									addRelation(use);
-								}
+								Use use = new Use(function, var);
+								addRelation(use);
 							}
-						}
-					} else if(relation.getEntity().getClass() == TypeEntity.class){
-						Type useType = (Type) types.get(relation.getEntity().getId().longValue());
-						if(useType != null) {
-							Use use = new Use(function, useType);
+						}else if(relationNode instanceof Type){
+							Type other = (Type) relationNode;
+							Use use = new Use(function, other);
 							addRelation(use);
-					    }
-				    }
+						}
+					}
 					break;
 				case DependencyType.CONTAIN:
 					Type containType = (Type) types.get(relation.getEntity().getId().longValue());
@@ -557,7 +528,9 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					}
 					break;
 				default:
-					LOGGER.info(function.getName() + functionFullName + " " + relation.getType() + " " + relation.getEntity().getClass().toString() + " " + relation.getEntity().getQualifiedName());
+					String typeStr = relation.getEntity().getQualifiedName();
+					if("built-in".equals(typeStr)) break;
+					LOGGER.info(function.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName() + "(" + relation.getEntity().getClass().toString() + ")");
 					break;
 				}
 			});

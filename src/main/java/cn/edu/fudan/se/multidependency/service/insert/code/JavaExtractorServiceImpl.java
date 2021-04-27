@@ -220,7 +220,7 @@ public class JavaExtractorServiceImpl extends DependsCodeExtractorForNeo4jServic
 			}
 			Node parentNode = findNodeByEntityIdInProject(parentEntity);
 			if(parentNode instanceof Type) { 
-				((Variable) node).setField(true);
+				((Variable) node).setMemberVariable(true);
 			}
 			Contain contain = new Contain(parentNode, node);
 			addRelation(contain);

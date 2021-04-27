@@ -41,9 +41,14 @@ public class Variable implements CodeNode {
 	private int endLine = -1;
 	
 	/**
-	 * 是否为类的属性
+	 * 是否为类的成员变量
 	 */
-	private boolean field;
+	private boolean isMemberVariable;
+
+	/**
+	 * 是否为文件下的变量，定义为全局变量
+	 */
+	private boolean isGlobalVariable;
     
     private String language;
     
@@ -54,7 +59,8 @@ public class Variable implements CodeNode {
 		properties.put("simpleName", getSimpleName() == null ? "" : getSimpleName());
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("typeIdentify", getTypeIdentify() == null ? "" : getTypeIdentify());
-		properties.put("field", isField());
+		properties.put("isMemberVariable", isMemberVariable());
+		properties.put("isGlobalVariable", isGlobalVariable());
 		properties.put("identifier", getIdentifier() == null ? "" : getIdentifier());
 		properties.put("startLine", getStartLine());
 		properties.put("endLine", getEndLine());
