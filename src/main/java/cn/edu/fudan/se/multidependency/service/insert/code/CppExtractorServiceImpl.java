@@ -331,11 +331,8 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 						if(relationNode != null){
 							if(relationNode instanceof Variable) {
 								Variable var = (Variable) relationNode;
-								Entity relationParentEntity = relationEntity.getParent();
-								if(relationParentEntity != null && fileEntity.getClass() != relationParentEntity.getClass()) {
-									Use use = new Use(file, var);
-									addRelation(use);
-								}
+								Use use = new Use(file, var);
+								addRelation(use);
 							}else if(relationNode instanceof Type){
 								Type other = (Type) relationNode;
 								Use use = new Use(file, other);
