@@ -28,13 +28,13 @@ public class ImplLink implements StructureRelation {
     @GeneratedValue
     private Long id;
 	
-	public ImplLink(Function function, Function impllinkFunction) {
+	public ImplLink(CodeNode function, Function impllinkFunction) {
 		this.function = function;
 		this.impllinkFunction = impllinkFunction;
 	}
 	
 	@StartNode
-	private Function function;
+	private CodeNode function;
 	
 	@EndNode
 	private Function impllinkFunction;

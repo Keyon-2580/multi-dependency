@@ -325,14 +325,28 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 							addRelation(functionCastType);
 						}
 						break;
+					case DependencyType.IMPLLINK:
+						/**
+						 * 主要正对c/c++项目中，由于预编译或语法解析错误导致（方法 - IMPLLINK-方法）识别错误
+						 * 可能出现 File - IMPLLINK - Function情况，为保证文件级正确，建立此种关系
+						 */
+						Function implLinkFunction = (Function) functions.get(relation.getEntity().getId().longValue());
+						if(implLinkFunction != null ) {
+							ImplLink functionImplLinkFunction = new ImplLink(file, implLinkFunction);
+							addRelation(functionImplLinkFunction);
+						}
+						break;
 					case DependencyType.USE:
 						Entity relationEntity = relation.getEntity();
 						Node relationNode = this.getNodes().findNodeByEntityIdInProject(relationEntity.getId().longValue(), currentProject);
 						if(relationNode != null){
 							if(relationNode instanceof Variable) {
 								Variable var = (Variable) relationNode;
-								Use use = new Use(file, var);
-								addRelation(use);
+								Entity relationParentEntity = relationEntity.getAncestorOfType(FileEntity.class);
+								if(relationParentEntity != null && fileEntity != relationParentEntity) {
+									Use use = new Use(file, var);
+									addRelation(use);
+								}
 							}else if(relationNode instanceof Type){
 								Type other = (Type) relationNode;
 								Use use = new Use(file, other);
@@ -340,11 +354,14 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 							}
 						}
 						break;
+					case DependencyType.IMPORT:
+						break;
 					default:
 						String typeStr = relation.getEntity().getQualifiedName();
 						if("built-in".equals(typeStr)) break;
 
-						LOGGER.info(file.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName() + "(" + relation.getEntity().getClass().toString() + ")");
+						LOGGER.info(file.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName()
+								+ "(" + relation.getEntity().getClass().toString() + "): Line " + relation.getStartLine());
 						break;
 				}
 			});
@@ -393,14 +410,25 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 							addRelation(functionCastType);
 						}
 						break;
+					case DependencyType.IMPLLINK:
+						/**
+						 * 主要正对c/c++项目中，由于预编译或语法解析错误导致（方法 - IMPLLINK-方法）识别错误
+						 * 可能出现 Namespace - IMPLLINK - Function情况，为保证文件级正确，建立此种关系
+						 */
+						Function implLinkFunction = (Function) functions.get(relation.getEntity().getId().longValue());
+						if(implLinkFunction != null ) {
+							ImplLink functionImplLinkFunction = new ImplLink(namespace, implLinkFunction);
+							addRelation(functionImplLinkFunction);
+						}
+						break;
 					case DependencyType.USE:
 						Entity relationEntity = relation.getEntity();
 						Node relationNode = this.getNodes().findNodeByEntityIdInProject(relationEntity.getId().longValue(), currentProject);
 						if(relationNode != null){
 							if(relationNode instanceof Variable) {
 								Variable var = (Variable) relationNode;
-								Entity relationParentEntity = relationEntity.getParent();
-								if(relationParentEntity != null && namespaceEntity.getClass() != relationParentEntity.getClass()) {
+								Entity relationParentEntity = relationEntity.getAncestorOfType(PackageEntity.class);
+								if(relationParentEntity != null && namespaceEntity != relationParentEntity) {
 									Use use = new Use(namespace, var);
 									addRelation(use);
 								}
@@ -415,7 +443,8 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 						String typeStr = relation.getEntity().getQualifiedName();
 						if("built-in".equals(typeStr)) break;
 
-						LOGGER.info(namespace.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName() + "(" + relation.getEntity().getClass().toString() + ")");
+						LOGGER.info(namespace.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName()
+								+ "(" + relation.getEntity().getClass().toString() + "): Line " + relation.getStartLine());
 						break;
 				}
 			});

@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.edu.fudan.se.multidependency.model.node.*;
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.structure.*;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import depends.entity.*;
@@ -274,7 +276,7 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 					break;
 				case DependencyType.CONTAIN:
 					// 关联的type，即成员变量的类型，此处仅指代类型直接定义的成员变量，不包含通过List<？>、Set<？>等基本数据类型中参数类型（此种情况将在变量的参数类型中处理）
-					Type memberType = (Type) getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, relation.getEntity().getId().longValue(), currentProject);
+					Type memberType = (Type) types.get(relation.getEntity().getId().longValue());
 					if(memberType != null) {
 						MemberVariable memberVariable = new MemberVariable(type, memberType);
 						addRelation(memberVariable);
@@ -286,13 +288,6 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 						Call call = new Call(type, calledType);
 						addRelation(call);
 					}
-//					else if(relation.getEntity().getClass() == TypeEntity.class){
-//						Type other = (Type) types.get(relation.getEntity().getId().longValue());
-//						if(other != null) {
-//							Call call = new Call(type, other);
-//							addRelation(call);
-//						}
-//					}
 					break;
 				case DependencyType.CREATE:
 					Type createType = (Type) types.get(relation.getEntity().getId().longValue());
@@ -308,8 +303,16 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 						addRelation(cast);
 					}
 					break;
-				case DependencyType.THROW:
-					LOGGER.info(typeEntity + " " + relation.getType() + " " + relation.getEntity().getClass() + " " + relation.getEntity());
+				case DependencyType.IMPLLINK:
+					/**
+					 * 主要正对c/c++项目中，由于预编译或语法解析错误导致（方法 - IMPLLINK-方法）识别错误
+					 * 可能出现 Namespace - IMPLLINK - Function情况，为保证文件级正确，建立此种关系
+					 */
+					Function implLinkFunction = (Function) getNodes().findNodeByEntityIdInProject(NodeLabelType.Function, relation.getEntity().getId().longValue(), currentProject);
+					if(implLinkFunction != null ) {
+						ImplLink functionImplLinkFunction = new ImplLink(type, implLinkFunction);
+						addRelation(functionImplLinkFunction);
+					}
 					break;
 				case DependencyType.USE:
 					Entity relationEntity = relation.getEntity();
@@ -318,7 +321,7 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 						if(relationNode instanceof Variable) {
 							Variable var = (Variable) relationNode;
 							Entity relationParentEntity = relationEntity.getParent();
-							if(var.isMemberVariable() && relationParentEntity != null && typeEntity.getClass() == relationParentEntity.getClass()) {
+							if(var.isMemberVariable() && relationParentEntity != null && typeEntity == relationParentEntity) {
 								Access accessField = new Access(type, var);
 								addRelation(accessField);
 							}else{
@@ -332,10 +335,12 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 						}
 					}
 					break;
+				case DependencyType.THROW:
 				default:
 					String typeStr = relation.getEntity().getQualifiedName();
 					if("built-in".equals(typeStr)) break;
-					LOGGER.info(type.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName() + "(" + relation.getEntity().getClass().toString() + ")");
+					LOGGER.info(type.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName()
+							+ "(" + relation.getEntity().getClass().toString() + "): Line " + relation.getStartLine());
 					break;
 				}
 			});
@@ -371,21 +376,18 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 							Variable var = (Variable) relationNode;
 							Entity varParent = varEntity.getParent();
 							Entity relationParent = relationEntity.getParent();
-							if(var.isMemberVariable() && varParent != null && relationParent != null && varParent.getClass() == relationParent.getClass()) {
+							if(var.isMemberVariable() && varParent != null && relationParent != null
+									&& varParent.getClass() == TypeEntity.class && varParent == relationParent) {
 								Access accessField = new Access(variable, var);
 								addRelation(accessField);
 							}else{
 								Use use = new Use(variable, var);
 								addRelation(use);
 							}
-
 						}else if(relationNode instanceof Type){
 							Type useType = (Type) relationNode;
 							if(variable.isMemberVariable()){
-								Entity parentTypeEntity = varEntity.getParent();
-								while (parentTypeEntity != null && parentTypeEntity.getClass() != TypeEntity.class){
-									parentTypeEntity = parentTypeEntity.getParent();
-								}
+								Entity parentTypeEntity = varEntity.getAncestorOfType(TypeEntity.class);
 								if(parentTypeEntity != null){
 									Type parentType = (Type) this.getNodes().findNodeByEntityIdInProject(NodeLabelType.Type, parentTypeEntity.getId().longValue(), currentProject);
 									if(parentType != null && parentType != useType){
@@ -410,7 +412,8 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 				default:
 					String typeStr = relation.getEntity().getQualifiedName();
 					if("built-in".equals(typeStr)) break;
-					LOGGER.info(variable.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName() + "(" + relation.getEntity().getClass().toString() + ")");
+					LOGGER.info(variable.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName()
+							+ "(" + relation.getEntity().getClass().toString() + "): Line " + relation.getStartLine());
 					break;
 				}
 			}
@@ -506,7 +509,7 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 							Variable var = (Variable) relationNode;
 							Entity functionParent = functionEntity.getParent();
 							Entity relationParent = relationEntity.getParent();
-							if(var.isMemberVariable() && functionParent != null && relationParent != null && functionParent.getClass() == relationParent.getClass()) {
+							if(var.isMemberVariable() && functionParent != null && relationParent != null && functionParent == relationParent) {
 								Access accessField = new Access(function, var);
 								addRelation(accessField);
 							}else{
@@ -530,7 +533,8 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 				default:
 					String typeStr = relation.getEntity().getQualifiedName();
 					if("built-in".equals(typeStr)) break;
-					LOGGER.info(function.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName() + "(" + relation.getEntity().getClass().toString() + ")");
+					LOGGER.info(function.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName()
+							+ "(" + relation.getEntity().getClass().toString() + "): Line " + relation.getStartLine());
 					break;
 				}
 			});
