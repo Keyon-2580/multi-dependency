@@ -5,9 +5,13 @@ let unstableDependency = function() {
 		for(let projectIndex in projects) {
 			if (projects.hasOwnProperty(projectIndex)) {
 				let project = projects[projectIndex];
+				html += "<div>";
+				html += "<div>";
 				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
+				html += "</div>";
 
 				let fileUnstableDependencyList = fileUnstableDependencyMap[project.id];
+				html += "<div>";
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th style='text-align: center; vertical-align: middle'>Index</th>";
@@ -40,8 +44,11 @@ let unstableDependency = function() {
 						index ++;
 					}
 				}
+				html += "</table>";
+				html += "</div>";
 
 				let packageUnstableDependencyList = packageUnstableDependencyMap[project.id];
+				html += "<div>";
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th style='text-align: center; vertical-align: middle'>Index</th>";
@@ -69,6 +76,8 @@ let unstableDependency = function() {
 					}
 				}
 				html += "</table>";
+				html += "</div>";
+				html += "</div>";
 			}
 		}
 		$("#content").html(html);

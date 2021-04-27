@@ -4,9 +4,13 @@ let implicitCrossModuleDependency = function() {
 		for (let projectIndex in projects) {
 			if (projects.hasOwnProperty(projectIndex)) {
 				let project = projects[projectIndex];
+				html += "<div>";
+				html += "<div>";
 				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
+				html += "</div>";
 
 				let fileImplicitCrossModuleDependencyList = fileImplicitCrossModuleDependencyMap[project.id];
+				html += "<div>";
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th style='text-align: center; vertical-align: middle'>Index</th>";
@@ -28,8 +32,10 @@ let implicitCrossModuleDependency = function() {
 					}
 				}
 				html += "</table>";
+				html += "</div>";
 
 				let packageImplicitCrossModuleDependencyList = packageImplicitCrossModuleDependencyMap[project.id];
+				html += "<div>";
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th style='text-align: center; vertical-align: middle'>Index</th>";
@@ -51,6 +57,8 @@ let implicitCrossModuleDependency = function() {
 					}
 				}
 				html += "</table>";
+				html += "</div>";
+				html += "</div>";
 			}
 		}
 		$("#content").html(html);

@@ -82,8 +82,8 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 		smellDetectorService.sortSmellByName(smells);
 		List<LogicCouplingComponents<ProjectFile>> fileImplicitCrossModuleDependencyList = new ArrayList<>();
 		for (Smell smell : smells) {
-			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
-			Iterator<Node> iterator = contains.iterator();
+			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
+			Iterator<Node> iterator = containedNodes.iterator();
 			ProjectFile file1 = null;
 			ProjectFile file2 = null;
 			if (iterator.hasNext()) {
@@ -125,8 +125,8 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 		smellDetectorService.sortSmellByName(smells);
 		List<LogicCouplingComponents<Package>> packageImplicitCrossModuleDependencyList = new ArrayList<>();
 		for (Smell smell : smells) {
-			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
-			Iterator<Node> iterator = contains.iterator();
+			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
+			Iterator<Node> iterator = containedNodes.iterator();
 			Package package1 = null;
 			Package package2 = null;
 			if (iterator.hasNext()) {

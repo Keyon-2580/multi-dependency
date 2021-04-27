@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,7 +25,7 @@ public class BasicSmellQueryServiceImpl implements BasicSmellQueryService {
 	public Collection<Smell> findSmellsByLevel(String level) {
 		Collection<Smell> result = smellRepository.findSmells(level);
 		for(Smell smell : result){
-			Set<Node> set = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
+			Set<Node> set = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
 			smell.setNodes(set);
 		}
 		return result;

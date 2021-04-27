@@ -99,40 +99,49 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 		smellDetectorService.sortSmellByName(smells);
 		List<SimilarComponents<ProjectFile>> similarComponentsList = new ArrayList<>();
 		for (Smell smell : smells) {
-			List<Node> files = new ArrayList<>(smellRepository.findSmellContains(smell.getId()));
-			ProjectFile file1 = (ProjectFile) files.get(0);
-			ProjectFile file2 = (ProjectFile) files.get(1);
-			List<Clone> clones = new ArrayList<>(cloneRepository.judgeCloneByFileId(file1.getId(), file2.getId()));
-			if (clones.size() == 0) {
-				clones = new ArrayList<>(cloneRepository.judgeCloneByFileId(file2.getId(), file1.getId()));
+			List<Node> containedNodes = new ArrayList<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
+			Iterator<Node> iterator = containedNodes.iterator();
+			ProjectFile file1 = null;
+			ProjectFile file2 = null;
+			if (iterator.hasNext()) {
+				file1 = (ProjectFile) iterator.next();
 			}
-			Clone clone = clones.get(0);
-			int node1ChangeTimes;
-			int node2ChangeTimes;
-			CoChange coChange = coChangeRepository.findCoChangesBetweenTwoFiles(file1.getId(), file2.getId());
-			if (coChange != null) {
-				node1ChangeTimes = coChange.getNode1ChangeTimes();
-				node2ChangeTimes = coChange.getNode2ChangeTimes();
+			if (iterator.hasNext()) {
+				file2 = (ProjectFile) iterator.next();
 			}
-			else {
-				coChange = coChangeRepository.findCoChangesBetweenTwoFiles(file2.getId(), file1.getId());
-				node2ChangeTimes = coChange.getNode1ChangeTimes();
-				node1ChangeTimes = coChange.getNode2ChangeTimes();
+			if (file1 != null && file2 != null) {
+				List<Clone> clones = new ArrayList<>(cloneRepository.judgeCloneByFileId(file1.getId(), file2.getId()));
+				if (clones.size() == 0) {
+					clones = new ArrayList<>(cloneRepository.judgeCloneByFileId(file2.getId(), file1.getId()));
+				}
+				Clone clone = clones.get(0);
+				int node1ChangeTimes;
+				int node2ChangeTimes;
+				CoChange coChange = coChangeRepository.findCoChangesBetweenTwoFiles(file1.getId(), file2.getId());
+				if (coChange != null) {
+					node1ChangeTimes = coChange.getNode1ChangeTimes();
+					node2ChangeTimes = coChange.getNode2ChangeTimes();
+				}
+				else {
+					coChange = coChangeRepository.findCoChangesBetweenTwoFiles(file2.getId(), file1.getId());
+					node2ChangeTimes = coChange.getNode1ChangeTimes();
+					node1ChangeTimes = coChange.getNode2ChangeTimes();
+				}
+				SimilarComponents<ProjectFile> temp = new SimilarComponents<>(file1, file2, clone.getValue(), node1ChangeTimes, node2ChangeTimes, coChange.getTimes());
+				temp.setModule1(moduleService.findFileBelongToModule(file1));
+				temp.setModule2(moduleService.findFileBelongToModule(file2));
+				temp.setCloneType(clone.getCloneType());
+				Collection<DependsOn> file1DependsOns = dependsOnRepository.findFileDependsOn(file1.getId());
+				Collection<DependsOn> file2DependsOns = dependsOnRepository.findFileDependsOn(file2.getId());
+				for(DependsOn file1DependsOn : file1DependsOns) {
+					temp.addNode1DependsOn(file1DependsOn.getEndNode());
+				}
+				for(DependsOn file2DependsOn : file2DependsOns) {
+					temp.addNode2DependsOn(file2DependsOn.getEndNode());
+				}
+				temp.setSameDependsOnRatio();
+				similarComponentsList.add(temp);
 			}
-			SimilarComponents<ProjectFile> temp = new SimilarComponents<>(file1, file2, clone.getValue(), node1ChangeTimes, node2ChangeTimes, coChange.getTimes());
-			temp.setModule1(moduleService.findFileBelongToModule(file1));
-			temp.setModule2(moduleService.findFileBelongToModule(file2));
-			temp.setCloneType(clone.getCloneType());
-			Collection<DependsOn> file1DependsOns = dependsOnRepository.findFileDependsOn(file1.getId());
-			Collection<DependsOn> file2DependsOns = dependsOnRepository.findFileDependsOn(file2.getId());
-			for(DependsOn file1DependsOn : file1DependsOns) {
-				temp.addNode1DependsOn(file1DependsOn.getEndNode());
-			}
-			for(DependsOn file2DependsOn : file2DependsOns) {
-				temp.addNode2DependsOn(file2DependsOn.getEndNode());
-			}
-			temp.setSameDependsOnRatio();
-			similarComponentsList.add(temp);
 		}
 		for(SimilarComponents<ProjectFile> similarComponents : similarComponentsList) {
 			Project project1 = containRelationService.findFileBelongToProject(similarComponents.getNode1());

@@ -39,9 +39,9 @@
 </head>
 <body>
 	<div th:include="nav.html::nav"></div>
-	<div class="col-sm-12 row" style="margin-bottom: 15px;">
-		<div class="col-sm-12">
-			<div class="form-group">
+	<div class="col-sm-12">
+		<div style="width: 100%">
+			<div class="form-group" style="width: 100%">
 			    <label class="checkbox-inline">
 					<input type="checkbox"  value="cycle" />cycle
 			    </label>
@@ -54,27 +54,27 @@
 			    <label class="checkbox-inline">
 				    <input type="checkbox"  value="unstable"/>unstable
 			    </label>
-			</div>
-			<div class="form-group">
-			    <label class="checkbox-inline">
+				<label class="checkbox-inline">
 					<input type="checkbox"  value="logicCoupling"/>logic coupling
-			    </label>
-			    <label class="checkbox-inline">
+				</label>
+				<label class="checkbox-inline">
 					<input type="checkbox"  value="similar"/>similar
-			    </label>
-			    <label class="checkbox-inline">
-				    <input type="checkbox"  value="godComponent"/>god component
-			    </label>
-			    <label class="checkbox-inline">
-				    <input type="checkbox"  value="unused"/>unused
-			    </label>
+				</label>
+				<label class="checkbox-inline">
+					<input type="checkbox"  value="godComponent"/>god component
+				</label>
+				<label class="checkbox-inline">
+					<input type="checkbox"  value="unused"/>unused
+				</label>
 			</div>
+<!--			<div class="form-group" style="width: 100%">-->
+<!--			</div>-->
 		</div>
-		<div class="col-sm-12">
-			<div id='graph_version' style='height: 400px;width: 800px;'></div>
+		<div style="width: 100%">
+			<div id='graph_version' style='height: 400px; width: 100%;'></div>
 		</div>
-		<div class="col-sm-12">
-			<div id="table">
+		<div  style="width: 100%">
+			<div id="table" style="width: 100%">
 			</div>
 		</div>
 	</div>

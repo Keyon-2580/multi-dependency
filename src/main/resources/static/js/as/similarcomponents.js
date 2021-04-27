@@ -4,9 +4,13 @@ let similarComponents = function() {
 		for(let projectIndex in projects) {
 			if (projects.hasOwnProperty(projectIndex)) {
 				let project = projects[projectIndex];
+				html += "<div>";
+				html += "<div>";
 				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
-				let fileSimilarComponentsList = fileSimilarComponentsMap[project.id];
+				html += "</div>";
 
+				let fileSimilarComponentsList = fileSimilarComponentsMap[project.id];
+				html += "<div>";
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th>Index</th>";
@@ -43,6 +47,8 @@ let similarComponents = function() {
 					}
 				}
 				html += "</table>";
+				html += "</div>";
+				html += "</div>";
 			}
 		}
 		if (fileSimilarComponentsMap[-1] != null) {

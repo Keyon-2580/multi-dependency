@@ -1,12 +1,20 @@
 let cyclicDependency = function() {
+	const smellType = "CyclicDependency";
+	const smellTypeLevel = "Type";
+	const smellFileLevel = "File";
+	const smellPackageLevel = "Package";
 	let _cyclicDependency = function(projects, typeCyclicDependencyMap, fileCyclicDependencyMap, packageCyclicDependencyMap) {
 		let html = "";
 		for(let projectIndex in projects) {
 			if (projects.hasOwnProperty(projectIndex)) {
 				let project = projects[projectIndex];
+				html += "<div>";
+				html += "<div>";
 				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
+				html += "</div>";
 
 				let typeCyclicDependencyList = typeCyclicDependencyMap[project.id];
+				html += "<div>";
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th style='text-align: center; vertical-align: middle'>Index</th>";
@@ -18,7 +26,9 @@ let cyclicDependency = function() {
 					if (typeCyclicDependencyList.hasOwnProperty(typeIndex)) {
 						let typeCyclicDependency = typeCyclicDependencyList[typeIndex];
 						html += "<tr>";
-						html += "<td style='text-align: center; vertical-align: middle'>" + index + "</td>";
+						html += "<td style='text-align: center; vertical-align: middle'>" +
+							"<a target='_blank' href='/as/smellgraph/" + project.id + "?smelltype=" + smellType + "&smelllevel=" + smellTypeLevel + "&smellindex=" + index + "'>" + index + "</a>" +
+							"</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + typeCyclicDependency.components.length + "</td>";
 						html += "<td>";
 						for(let i = 0; i < typeCyclicDependency.components.length; i++) {
@@ -30,8 +40,10 @@ let cyclicDependency = function() {
 					}
 				}
 				html += "</table>";
+				html += "</div>";
 
 				let fileCyclicDependencyList = fileCyclicDependencyMap[project.id];
+				html += "<div>";
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th style='text-align: center; vertical-align: middle'>Index</th>";
@@ -43,7 +55,9 @@ let cyclicDependency = function() {
 					if (fileCyclicDependencyList.hasOwnProperty(fileIndex)) {
 						let fileCyclicDependency = fileCyclicDependencyList[fileIndex];
 						html += "<tr>";
-						html += "<td style='text-align: center; vertical-align: middle'>" + index + "</td>";
+						html += "<td style='text-align: center; vertical-align: middle'>" +
+							"<a target='_blank' href='/as/smellgraph/" + project.id + "?smelltype=" + smellType + "&smelllevel=" + smellFileLevel + "&smellindex=" + index + "'>" + index + "</a>" +
+							"</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + fileCyclicDependency.components.length + "</td>";
 						html += "<td>";
 						for(let i = 0; i < fileCyclicDependency.components.length; i++) {
@@ -54,8 +68,11 @@ let cyclicDependency = function() {
 						index ++;
 					}
 				}
+				html += "</table>";
+				html += "</div>";
 
 				let packageCyclicDependencyList = packageCyclicDependencyMap[project.id];
+				html += "<div>";
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th style='text-align: center; vertical-align: middle'>Index</th>";
@@ -67,7 +84,9 @@ let cyclicDependency = function() {
 					if (packageCyclicDependencyList.hasOwnProperty(packageIndex)) {
 						let packageCyclicDependency = packageCyclicDependencyList[packageIndex];
 						html += "<tr>";
-						html += "<td style='text-align: center; vertical-align: middle'>" + index + "</td>";
+						html += "<td style='text-align: center; vertical-align: middle'>" +
+							"<a target='_blank' href='/as/smellgraph/" + project.id + "?smelltype=" + smellType + "&smelllevel=" + smellPackageLevel + "&smellindex=" + index + "'>" + index + "</a>" +
+							"</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + packageCyclicDependency.components.length + "</td>";
 						html += "<td>";
 						for(let i = 0; i < packageCyclicDependency.components.length; i++) {
@@ -78,6 +97,9 @@ let cyclicDependency = function() {
 						index ++;
 					}
 				}
+				html += "</table>";
+				html += "</div>";
+				html += "</div>";
 			}
 		}
 		$("#content").html(html);
