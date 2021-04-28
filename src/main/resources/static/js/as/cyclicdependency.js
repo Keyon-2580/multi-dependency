@@ -1,8 +1,8 @@
 let cyclicDependency = function() {
-	const smellType = "CyclicDependency";
-	const smellTypeLevel = "Type";
-	const smellFileLevel = "File";
-	const smellPackageLevel = "Package";
+	const SMELL_TYPE = "CyclicDependency";
+	const SMELL_TYPE_LEVEL = "Type";
+	const SMELL_FILE_LEVEL = "File";
+	const SMELL_PACKAGE_LEVEL = "Package";
 	let _cyclicDependency = function(projects, typeCyclicDependencyMap, fileCyclicDependencyMap, packageCyclicDependencyMap) {
 		let html = "";
 		for(let projectIndex in projects) {
@@ -27,7 +27,7 @@ let cyclicDependency = function() {
 						let typeCyclicDependency = typeCyclicDependencyList[typeIndex];
 						html += "<tr>";
 						html += "<td style='text-align: center; vertical-align: middle'>" +
-							"<a target='_blank' href='/as/smellgraph/" + project.id + "?smelltype=" + smellType + "&smelllevel=" + smellTypeLevel + "&smellindex=" + index + "'>" + index + "</a>" +
+							"<a target='_blank' href='/as/smellgraph/" + project.id + "?smelltype=" + SMELL_TYPE + "&smelllevel=" + SMELL_TYPE_LEVEL + "&smellindex=" + index + "'>" + index + "</a>" +
 							"</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + typeCyclicDependency.components.length + "</td>";
 						html += "<td>";
@@ -56,7 +56,7 @@ let cyclicDependency = function() {
 						let fileCyclicDependency = fileCyclicDependencyList[fileIndex];
 						html += "<tr>";
 						html += "<td style='text-align: center; vertical-align: middle'>" +
-							"<a target='_blank' href='/as/smellgraph/" + project.id + "?smelltype=" + smellType + "&smelllevel=" + smellFileLevel + "&smellindex=" + index + "'>" + index + "</a>" +
+							"<a target='_blank' href='/as/smellgraph/" + project.id + "?smelltype=" + SMELL_TYPE + "&smelllevel=" + SMELL_FILE_LEVEL + "&smellindex=" + index + "'>" + index + "</a>" +
 							"</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + fileCyclicDependency.components.length + "</td>";
 						html += "<td>";
@@ -85,7 +85,7 @@ let cyclicDependency = function() {
 						let packageCyclicDependency = packageCyclicDependencyList[packageIndex];
 						html += "<tr>";
 						html += "<td style='text-align: center; vertical-align: middle'>" +
-							"<a target='_blank' href='/as/smellgraph/" + project.id + "?smelltype=" + smellType + "&smelllevel=" + smellPackageLevel + "&smellindex=" + index + "'>" + index + "</a>" +
+							"<a target='_blank' href='/as/smellgraph/" + project.id + "?smelltype=" + SMELL_TYPE + "&smelllevel=" + SMELL_PACKAGE_LEVEL + "&smellindex=" + index + "'>" + index + "</a>" +
 							"</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + packageCyclicDependency.components.length + "</td>";
 						html += "<td>";

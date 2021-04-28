@@ -1,6 +1,6 @@
 let unusedInclude = function() {
-	const smellType = "UnusedInclude";
-	const smellFileLevel = "File";
+	const SMELL_TYPE = "UnusedInclude";
+	const SMELL_FILE_LEVEL = "File";
 	let _unusedInclude = function(projects, fileUnusedIncludeMap) {
 		let html = "";
 		for(let projectIndex in projects) {
@@ -26,7 +26,7 @@ let unusedInclude = function() {
 						let fileUnusedInclude = fileUnusedIncludeList[fileIndex];
 						html += "<tr>";
 						html += "<td style='text-align: center; vertical-align: middle'>" +
-							"<a target='_blank' href='/as/smellgraph/" + project.id + "?smelltype=" + smellType + "&smelllevel=" + smellFileLevel + "&smellindex=" + index + "'>" + index + "</a>" +
+							"<a target='_blank' href='/as/smellgraph/" + project.id + "?smelltype=" + SMELL_TYPE + "&smelllevel=" + SMELL_FILE_LEVEL + "&smellindex=" + index + "'>" + index + "</a>" +
 							"</td>";
 						html += "<td style='vertical-align: middle'>" + fileUnusedInclude.coreFile.path + "</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + fileUnusedInclude.unusedIncludeFiles.length + "</td>";
