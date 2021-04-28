@@ -270,13 +270,15 @@ public class CloneAnalyseServiceImpl implements CloneAnalyseService {
 			ProjectFile cloneFile1 = (ProjectFile) fileClone.getCodeNode1();
 			ProjectFile cloneFile2 = (ProjectFile) fileClone.getCodeNode2();
 			CoChange coChange = gitAnalyseService.findCoChangeBetweenTwoFiles(cloneFile1, cloneFile2);
-			FileCloneWithCoChange fileCloneWithCoChange = null;
-			try {
-				fileCloneWithCoChange = new FileCloneWithCoChange(fileClone, coChange);
-			} catch (Exception e) {
-				e.printStackTrace();
+			if (coChange != null) {
+				FileCloneWithCoChange fileCloneWithCoChange = null;
+				try {
+					fileCloneWithCoChange = new FileCloneWithCoChange(fileClone, coChange);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				fileCloneWithCoChanges.add(fileCloneWithCoChange);
 			}
-			fileCloneWithCoChanges.add(fileCloneWithCoChange);
 		}
 		return fileCloneWithCoChanges;
 	}

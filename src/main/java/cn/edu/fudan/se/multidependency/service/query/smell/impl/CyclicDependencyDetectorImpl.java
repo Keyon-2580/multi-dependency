@@ -228,7 +228,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 			Project project = containRelationService.findTypeBelongToProject(components.get(0));
 			if (project != null) {
 				List<Cycle<Type>> temp = result.getOrDefault(project.getId(), new ArrayList<>());
-				temp.add(typeCycle.getPartition(), typeCycle);
+				temp.add(typeCycle);
 				result.put(project.getId(), temp);
 			}
 			partition ++;

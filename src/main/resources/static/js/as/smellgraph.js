@@ -13,8 +13,8 @@ let drawSmellGraph = function (json_data) {
             const outDiv = document.createElement('div');
             outDiv.style.width = 'fit-content';
             outDiv.innerHTML = `
-            <h4>name: ${e.item.getModel().name}</h4>
-            <h4>path: ${e.item.getModel().path}</h4>`;
+            <h5>name: ${e.item.getModel().name}</h5>
+            <h5>path: ${e.item.getModel().path}</h5>`;
             return outDiv;
         },
     });
@@ -35,16 +35,16 @@ let drawSmellGraph = function (json_data) {
                     }
                     outDiv.style.width = 'fit-content';
                     outDiv.innerHTML = `
-                        <h6>Source: (${e.item.getModel().source_label})${e.item.getModel().source_name}</h6>
-                        <h6>Target: (${e.item.getModel().target_label})${e.item.getModel().target_name}</h6>
-                        <h6>Relation: DependsOn(${e.item.getModel().times}): </h6>` + str;
+                        <h5>Source: (${e.item.getModel().source_label})${e.item.getModel().source_name}</h5>
+                        <h5>Target: (${e.item.getModel().target_label})${e.item.getModel().target_name}</h5>
+                        <h5>Relation: DependsOn(${e.item.getModel().times})</h5>` + str;
                     break;
                 case UNUSED_INCLUDE:
                     outDiv.style.width = 'fit-content';
                     outDiv.innerHTML = `
-                        <h6>Source: (${e.item.getModel().source_label})${e.item.getModel().source_name}</h6>
-                        <h6>Target: (${e.item.getModel().target_label})${e.item.getModel().target_name}</h6>
-                        <h6>Relation: Include</h6>`;
+                        <h5>Source: (${e.item.getModel().source_label})${e.item.getModel().source_name}</h5>
+                        <h5>Target: (${e.item.getModel().target_label})${e.item.getModel().target_name}</h5>
+                        <h5>Relation: Include</h5>`;
                     break;
                 default:
                     break;
