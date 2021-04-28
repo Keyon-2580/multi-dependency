@@ -219,7 +219,6 @@ public class MicroserviceServiceImpl implements MicroserviceService {
 
 	@Override
 	public void saveMicroServiceCallMicroService(MicroServiceCallMicroService call) {
-		LOGGER.info("saveMicroServiceCallMicroServic");
 		microServiceCallMicroServiceRepository.save(call);
 	}
 	

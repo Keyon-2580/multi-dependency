@@ -73,6 +73,12 @@ public class CloneGroupController {
 		request.setAttribute("search", false);
 		return "clonegroup";
 	}
+
+	@GetMapping(value = {"/detail"})
+	public String cloneGroupDetail(@RequestParam("clonegroupName") String name, HttpServletRequest request) {
+		request.setAttribute("clonegroupName", name);
+		return "clonegroupdetail";
+	}
 	
 	@PostMapping("/projects")
 	@ResponseBody

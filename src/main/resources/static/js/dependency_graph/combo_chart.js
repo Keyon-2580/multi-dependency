@@ -299,6 +299,10 @@ const contextMenu = new G6.Menu({
             html += `<ul class="combo_li">
             <a class="combo_a" href="/smellgraph?smelltype=CyclicDependency&fileid=${item.model.id}" target="_blank">打开异味详情</a>
             </ul>`;
+        }else if(item.model.smellType === "Clone"){
+            html += `<ul class="combo_li">
+            <a class="combo_a" href="/clonegroup/detail?clonegroupName=${item.model.smellName}" target="_blank">打开克隆组详情</a>
+            </ul>`;
         }
         html += `<ul class="combo_li">
             <a class="combo_a" href="/relation/file/${item.model.id}" target="_blank">打开文件详情</a>
@@ -405,6 +409,248 @@ const graph = new G6.Graph({
     plugins: [tooltip, contextMenu],
     minZoom: 0.05,
 });
+
+function main(projectId) {
+    return {
+        init : function() {
+            if(projectId !== ""){
+                projectGraphAjax(projectId);
+            }
+
+            loadPageData();
+        }
+    }
+}
+
+//加载数据
+function loadPageData() {
+    var projectlist = [];
+
+    $.ajax({
+        type : "GET",
+        url : "/project/all/name",
+        success : function(result) {
+            for(let i = 0; i < result.length; i++){
+                let name_temp = {};
+                name_temp["id"] = result[i].id;
+                name_temp["name"] = result[i].name;
+                projectlist.push(name_temp);
+
+                let html = ""
+                html += "<div class = \"combo_div\"><select id = \"multipleProjectSelect\" class=\"selectpicker\">";
+                for(let i = 0; i < projectlist.length; i++) {
+                    if (i === 0) {
+                        html += "<option selected=\"selected\" value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
+                    } else {
+                        html += "<option value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
+                    }
+                }
+                html += "</select>";
+                html += "<br><button id = \"pckFilterButton\" type=\"button\" class='common_button' " +
+                    "style='margin-top: 15px' onclick= showFilterWindow()>筛选项目</button>" +
+
+                    "<button id = \"multipleProjectsButton\" type=\"button\" class='common_button' " +
+                    "style='margin-top: 15px; margin-left: 30px' onclick= showMultipleButton()>加载项目</button>" +
+
+                    "<button id = \"clearFilterButton\" type=\"button\" class='common_button' " +
+                    "style='margin-top: 15px; margin-left: 30px' onclick= clearFilter()>重置筛选</button></div>";
+
+                html += "<div class = \"combo_div\">"+
+                    "<form role=\"form\">" +
+
+                    "<p><label class = \"AttributionSelectTitle\" style = \"margin-right: 44px\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" " +
+                    "onclick=\"CancelChildrenChecked('dependsOn')\">Dependency：" +
+                    "</label>" +
+
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsIntensity\" " +
+                    "onclick=\"setParentChecked('dependsOn', 'dependsIntensity')\" name = \"dependsOn_children\">" +
+
+                    "<input  class = \"AttributionSelectInput\" id=\"intensitybelow\" value=\"0.8\">" +
+
+                    "<select class = \"AttributionSelectSingleSelect\" id=\"intensityCompareSelectBelow\">" +
+                    "<option value=\"<=\" selected = \"selected\"><=</option>" +
+                    "<option value=\"<\"><</option></select>" +
+
+                    "<label class = \"AttributionSelectLabel\"> &nbsp;Intensity</label>" +
+
+                    "<select class = \"AttributionSelectSingleSelect\" id=\"intensityCompareSelectHigh\">" +
+                    "<option value=\"<=\"><=</option>" +
+                    "<option value=\"<\" selected = \"selected\"><</option></select>" +
+
+                    "<input  class = \"AttributionSelectInput\" id=\"intensityhigh\" value=\"1\">" +
+
+                    "<label class = \"AttributionSelectLabel\" style = \"margin-left: 80px\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes\" " +
+                    "onclick=\"setParentChecked('dependsOn', 'dependsOnTimes')\" name = \"dependsOn_children\"> Times >= " +
+                    "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput\" style='margin-right: 80px' value=\"3\">" +
+                    "</label>" +
+
+                    "<label class = \"AttributionSelectLabel\" style = \"margin-right:10px;\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnType\" " +
+                    "onclick=\"setParentChecked('dependsOn', 'dependsOnType')\" name = \"dependsOn_children\"> Dependency Type: " +
+                    "</label>" +
+
+                    "<select id = \"dependsTypeSelect\" class=\"selectpicker\" multiple>" +
+                    "<option value=\"IMPORT\">IMPORT</option>" +
+                    "<option value=\"INCLUDE\">INCLUDE</option>" +
+                    "<option value=\"EXTENDS\">EXTENDS</option>" +
+                    "<option value=\"IMPLEMENTS\">IMPLEMENTS</option>" +
+                    "<option value=\"GLOBAL_VARIABLE\">GLOBAL_VARIABLE</option>" +
+                    "<option value=\"MEMBER_VARIABLE\">MEMBER_VARIABLE</option>" +
+                    "<option value=\"LOCAL_VARIABLE\">LOCAL_VARIABLE</option>" +
+                    "<option value=\"CALL\">CALL</option>" +
+                    "<option value=\"ANNOTATION\">ANNOTATION</option>" +
+                    "<option value=\"CAST\">CAST</option>" +
+                    "<option value=\"CREATE\">CREATE</option>" +
+                    "<option value=\"USE\">USE</option>" +
+                    "<option value=\"PARAMETER\">PARAMETER</option>" +
+                    "<option value=\"THROW\">THROW</option>" +
+                    "<option value=\"RETURN\">RETURN</option>" +
+                    "<option value=\"IMPLEMENTS_C\">IMPLEMENTS_C</option>" +
+                    "<option value=\"IMPLLINK\">IMPLLINK</option>" +
+                    "</select>" +
+                    "</p>";
+
+                html += "<p><label class = \"AttributionSelectTitle\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone\" " +
+                    "onclick=\"CancelChildrenChecked('clone')\">Clone：" +
+                    "</label>" +
+
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneSimilarity\" " +
+                    "onclick=\"setParentChecked('clone', 'cloneSimilarity')\" name = \"clone_children\">" +
+                    "<input  class = \"AttributionSelectInput\" id=\"similaritybelow\" value=\"0.7\">" +
+
+                    "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectBelow\">" +
+                    "<option value=\"<=\" selected = \"selected\"><=</option>" +
+                    "<option value=\"<\"><</option></select>" +
+
+                    "<label class = \"AttributionSelectLabel\"> &nbsp;Clone Value</label>" +
+
+                    "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectHigh\">" +
+                    "<option value=\"<=\"><=</option>" +
+                    "<option value=\"<\" selected = \"selected\"><</option></select>" +
+
+                    "<input  class = \"AttributionSelectInput\" id=\"similarityhigh\" value=\"1\"></p>";
+
+                html += "<p><label class = \"AttributionSelectTitle\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"coChange\" " +
+                    "onclick=\"CancelChildrenChecked('coChange')\">Co-change：" +
+                    "</label>" +
+                    "<label class = \"AttributionSelectLabel\">" +
+                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cochangeTimes\" " +
+                    "onclick=\"setParentChecked('coChange', 'cochangeTimes')\" name = \"coChange_children\"> Times >= " +
+                    "<input class = \"AttributionSelectInput\" id=\"cochangetimes\" value=\"3\">" +
+                    "</label></p>";
+
+                html += "<p><label class = \"combo_title\" style = \"margin-right: 30px\">Smell ：</label>" +
+
+                    "<label class = \"combo_label\" >" +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    "id=\"checkbox_Clone\" value='Clone'> Clone " +
+                    "</label>" +
+
+                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    "id=\"checkbox_CyclicDependency\" value='CyclicDependency'> Cyclic Dependency " +
+                    "</label>" +
+
+                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    "id=\"checkbox_HublikeDependency\" value='HubLikeDependency'> Hublike Dependency " +
+                    "</label>" +
+
+                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    "id=\"checkbox_UnstableDependency\" value='UnstableDependency'> Unstable Dependency " +
+                    "</label>" +
+
+                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    "id=\"checkbox_UnutilizedAbstraction\" value='UnutilizedAbstraction'> Unutilized Abstraction " +
+                    "</label>" +
+
+                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    "id=\"checkbox_ImplicitCrossModuleDependency\" value='ImplicitCrossModuleDependency'> Implicit Cross Module Dependency " +
+                    "</label>" +
+
+                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    "id=\"checkbox_GodComponent\" value='GodComponent'> God Component " +
+                    "</label>" +
+
+                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    "id=\"checkbox_UnusedInclude\" value='UnusedInclude'> Unused Include " +
+                    "</label>" +
+
+                    "</p>";
+
+                html += "<p><div style=\"margin-top: 10px;\">" +
+                    "<button class = \"common_button\" type=\"button\" onclick= filterLinks() >筛选连线</button>" +
+                    "<button class = \"common_button\" type=\"button\" onclick= loadSmell() style = \"margin-left: 30px\">加载异味</button>" +
+                    "<button class = \"common_button\" type=\"button\" onclick= deleteSmell() style = \"margin-left: 30px\">删除异味</button>" +
+                    "<button id = \"unreliableDependencyFile\" class = \"common_button\" type=\"button\" " +
+                    "onclick= loadUnreliableDependency() style = \"margin-left: 30px\">加载不可依赖关系</button>" +
+                    "<input type=\"file\" accept=\".json\" id=\"unreliable_dependency_file\" " +
+                    "onchange='setUnreliableDependency()' style=\"display:none\">" +
+                    "</div></p>";
+
+                html += "</form>" +
+                    "</div>";
+
+                $("#combo_util").html(html);
+                $(".selectpicker").selectpicker({
+                    actionsBox:true,
+                    countSelectedText:"已选中{0}项",
+                    selectedTextFormat:"count > 2"
+                })
+            }
+        }
+    })
+}
+
+//调用接口请求数据
+function projectGraphAjax(projectIds){
+    let projectList = {};
+    let projectIds_array = [];
+    let tempId = {};
+    tempId["id"] = projectIds;
+    projectIds_array.push(tempId);
+
+    // for(let i = 0; i < projectIds.length; i++){
+    //     let tempId = {};
+    //     tempId["id"] = projectIds[i];
+    //     projectIds_array.push(tempId);
+    // }
+
+    projectList["projectIds"] = projectIds_array;
+
+    $.ajax({
+        type:"POST",
+        url : "/project/has/combo",
+        contentType: "application/json",
+        dataType:"json",
+        data:JSON.stringify(projectList),
+        success : function(result) {
+            DrawComboChart(result);
+        }
+    });
+}
+
+function showMultipleButton(){
+    let value = $('#multipleProjectSelect').val();
+    $('#multipleProjectsButton').css('background-color', '#f84634');
+    projectList_global = [];
+    projectList_global = value;
+    let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
+        "<div class='loading_window' id='Id_loading_window' style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">调用数据接口...</div>" +
+        "</div>";
+    loading_div.html(html);
+    projectGraphAjax(value);
+
+}
 
 function DrawComboChart(json_data){
     data = {};
@@ -1125,6 +1371,7 @@ function loadSmell(){
                 if(typeof(node) !== "undefined"){
                     node._cfg.model.smellId = smell.id;
                     node._cfg.model.smellType = smell.smell_type;
+                    node._cfg.model.smellName = smell.name;
                     graph.setItemState(node, 'smell_normal', true);
                 }
             })
@@ -1137,6 +1384,7 @@ function deleteSmell(){
     nodes.forEach((node) => {
         node._cfg.model.smellId = 0;
         node._cfg.model.smellType = "";
+        ode._cfg.model.smellName = "";
         graph.setItemState(node, 'smell_normal', false);
     });
 }
@@ -1203,228 +1451,6 @@ function deletePieNode(node){
     node.update(model);
 }
 
-//加载数据
-var loadPageData = function () {
-    var projectlist = [];
-
-    $.ajax({
-        type : "GET",
-        url : "/project/all/name",
-        success : function(result) {
-            for(let i = 0; i < result.length; i++){
-                let name_temp = {};
-                name_temp["id"] = result[i].id;
-                name_temp["name"] = result[i].name;
-                projectlist.push(name_temp);
-
-                let html = ""
-                html += "<div class = \"combo_div\"><select id = \"multipleProjectSelect\" class=\"selectpicker\" multiple>";
-                for(let i = 0; i < projectlist.length; i++) {
-                    if (i === 0) {
-                        html += "<option selected=\"selected\" value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
-                    } else {
-                        html += "<option value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
-                    }
-                }
-                html += "</select>";
-                html += "<br><button id = \"pckFilterButton\" type=\"button\" class='common_button' " +
-                    "style='margin-top: 15px' onclick= showFilterWindow()>筛选项目</button>" +
-
-                    "<button id = \"multipleProjectsButton\" type=\"button\" class='common_button' " +
-                    "style='margin-top: 15px; margin-left: 30px' onclick= showMultipleButton()>加载项目</button>" +
-
-                    "<button id = \"clearFilterButton\" type=\"button\" class='common_button' " +
-                    "style='margin-top: 15px; margin-left: 30px' onclick= clearFilter()>重置筛选</button></div>";
-
-                html += "<div class = \"combo_div\">"+
-                    "<form role=\"form\">" +
-
-                    "<p><label class = \"AttributionSelectTitle\" style = \"margin-right: 44px\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" " +
-                    "onclick=\"CancelChildrenChecked('dependsOn')\">Dependency：" +
-                    "</label>" +
-
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsIntensity\" " +
-                    "onclick=\"setParentChecked('dependsOn', 'dependsIntensity')\" name = \"dependsOn_children\">" +
-
-                    "<input  class = \"AttributionSelectInput\" id=\"intensitybelow\" value=\"0.8\">" +
-
-                    "<select class = \"AttributionSelectSingleSelect\" id=\"intensityCompareSelectBelow\">" +
-                    "<option value=\"<=\" selected = \"selected\"><=</option>" +
-                    "<option value=\"<\"><</option></select>" +
-
-                    "<label class = \"AttributionSelectLabel\"> &nbsp;Intensity</label>" +
-
-                    "<select class = \"AttributionSelectSingleSelect\" id=\"intensityCompareSelectHigh\">" +
-                    "<option value=\"<=\"><=</option>" +
-                    "<option value=\"<\" selected = \"selected\"><</option></select>" +
-
-                    "<input  class = \"AttributionSelectInput\" id=\"intensityhigh\" value=\"1\">" +
-
-                    "<label class = \"AttributionSelectLabel\" style = \"margin-left: 80px\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes\" " +
-                    "onclick=\"setParentChecked('dependsOn', 'dependsOnTimes')\" name = \"dependsOn_children\"> Times >= " +
-                    "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput\" style='margin-right: 80px' value=\"3\">" +
-                    "</label>" +
-
-                    "<label class = \"AttributionSelectLabel\" style = \"margin-right:10px;\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnType\" " +
-                    "onclick=\"setParentChecked('dependsOn', 'dependsOnType')\" name = \"dependsOn_children\"> Dependency Type: " +
-                    "</label>" +
-
-                    "<select id = \"dependsTypeSelect\" class=\"selectpicker\" multiple>" +
-                    "<option value=\"IMPORT\">IMPORT</option>" +
-                    "<option value=\"INCLUDE\">INCLUDE</option>" +
-                    "<option value=\"EXTENDS\">EXTENDS</option>" +
-                    "<option value=\"IMPLEMENTS\">IMPLEMENTS</option>" +
-                    "<option value=\"GLOBAL_VARIABLE\">GLOBAL_VARIABLE</option>" +
-                    "<option value=\"MEMBER_VARIABLE\">MEMBER_VARIABLE</option>" +
-                    "<option value=\"LOCAL_VARIABLE\">LOCAL_VARIABLE</option>" +
-                    "<option value=\"CALL\">CALL</option>" +
-                    "<option value=\"ANNOTATION\">ANNOTATION</option>" +
-                    "<option value=\"CAST\">CAST</option>" +
-                    "<option value=\"CREATE\">CREATE</option>" +
-                    "<option value=\"USE\">USE</option>" +
-                    "<option value=\"PARAMETER\">PARAMETER</option>" +
-                    "<option value=\"THROW\">THROW</option>" +
-                    "<option value=\"RETURN\">RETURN</option>" +
-                    "<option value=\"IMPLEMENTS_C\">IMPLEMENTS_C</option>" +
-                    "<option value=\"IMPLLINK\">IMPLLINK</option>" +
-                    "</select>" +
-                    "</p>";
-
-                html += "<p><label class = \"AttributionSelectTitle\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone\" " +
-                    "onclick=\"CancelChildrenChecked('clone')\">Clone：" +
-                    "</label>" +
-
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneSimilarity\" " +
-                    "onclick=\"setParentChecked('clone', 'cloneSimilarity')\" name = \"clone_children\">" +
-                    "<input  class = \"AttributionSelectInput\" id=\"similaritybelow\" value=\"0.7\">" +
-
-                    "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectBelow\">" +
-                    "<option value=\"<=\" selected = \"selected\"><=</option>" +
-                    "<option value=\"<\"><</option></select>" +
-
-                    "<label class = \"AttributionSelectLabel\"> &nbsp;Clone Value</label>" +
-
-                    "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectHigh\">" +
-                    "<option value=\"<=\"><=</option>" +
-                    "<option value=\"<\" selected = \"selected\"><</option></select>" +
-
-                    "<input  class = \"AttributionSelectInput\" id=\"similarityhigh\" value=\"1\"></p>";
-
-                html += "<p><label class = \"AttributionSelectTitle\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"coChange\" " +
-                    "onclick=\"CancelChildrenChecked('coChange')\">Co-change：" +
-                    "</label>" +
-                    "<label class = \"AttributionSelectLabel\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cochangeTimes\" " +
-                    "onclick=\"setParentChecked('coChange', 'cochangeTimes')\" name = \"coChange_children\"> Times >= " +
-                    "<input class = \"AttributionSelectInput\" id=\"cochangetimes\" value=\"3\">" +
-                    "</label></p>";
-
-                html += "<p><label class = \"combo_title\" style = \"margin-right: 30px\">Smell ：</label>" +
-
-                    "<label class = \"combo_label\" >" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    "id=\"checkbox_Clone\" value='Clone'> Clone " +
-                    "</label>" +
-
-                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    "id=\"checkbox_CyclicDependency\" value='CyclicDependency'> Cyclic Dependency " +
-                    "</label>" +
-
-                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    "id=\"checkbox_HublikeDependency\" value='HubLikeDependency'> Hublike Dependency " +
-                    "</label>" +
-
-                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    "id=\"checkbox_UnstableDependency\" value='UnstableDependency'> Unstable Dependency " +
-                    "</label>" +
-
-                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    "id=\"checkbox_UnutilizedAbstraction\" value='UnutilizedAbstraction'> Unutilized Abstraction " +
-                    "</label>" +
-
-                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    "id=\"checkbox_ImplicitCrossModuleDependency\" value='ImplicitCrossModuleDependency'> Implicit Cross Module Dependency " +
-                    "</label>" +
-
-                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    "id=\"checkbox_GodComponent\" value='GodComponent'> God Component " +
-                    "</label>" +
-
-                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    "id=\"checkbox_UnusedInclude\" value='UnusedInclude'> Unused Include " +
-                    "</label>" +
-
-                    "</p>";
-
-                html += "<p><div style=\"margin-top: 10px;\">" +
-                    "<button class = \"common_button\" type=\"button\" onclick= filterLinks() >筛选连线</button>" +
-                    "<button class = \"common_button\" type=\"button\" onclick= loadSmell() style = \"margin-left: 30px\">加载异味</button>" +
-                    "<button class = \"common_button\" type=\"button\" onclick= deleteSmell() style = \"margin-left: 30px\">删除异味</button>" +
-                    "<button id = \"unreliableDependencyFile\" class = \"common_button\" type=\"button\" " +
-                    "onclick= loadUnreliableDependency() style = \"margin-left: 30px\">加载不可依赖关系</button>" +
-                    "<input type=\"file\" accept=\".json\" id=\"unreliable_dependency_file\" " +
-                    "onchange='setUnreliableDependency()' style=\"display:none\">" +
-                    "</div></p>";
-
-                html += "</form>" +
-                    "</div>";
-
-                $("#combo_util").html(html);
-                $(".selectpicker").selectpicker({
-                    actionsBox:true,
-                    countSelectedText:"已选中{0}项",
-                    selectedTextFormat:"count > 2"
-                })
-            }
-        }
-    })
-}
-
-//调用接口请求数据
-var projectGraphAjax = function(projectIds){
-    var projectList = {};
-    var projectIds_array = [];
-
-    for(var i = 0; i < projectIds.length; i++){
-        var tempId = {};
-        tempId["id"] = projectIds[i];
-        projectIds_array.push(tempId);
-    }
-
-    projectList["projectIds"] = projectIds_array;
-
-    $.ajax({
-        type:"POST",
-        url : "/project/has/combo",
-        contentType: "application/json",
-        dataType:"json",
-        data:JSON.stringify(projectList),
-        success : function(result) {
-            DrawComboChart(result);
-        }
-    });
-}
-
-var main = function () {
-    return {
-        init : function() {
-            loadPageData();
-        }
-    }
-}
-
 //自动布局
 function autoLayout(){
     let combo_list = data["combos"];
@@ -1451,9 +1477,7 @@ function autoLayout(){
     });
 
     let combo_list_sort = left.concat(right);
-    console.log(combo_list_sort);
     data["combos"] = combo_list_sort;
-    // console.log(combo_list_sort);
 
     combo_list_sort.forEach((item, index) => {
         let combo_cord;
@@ -1648,19 +1672,6 @@ function autoLayout(){
         // graph.addItem('node', model1);
         // graph.addItem('node', model2);
     })
-}
-
-function showMultipleButton(){
-    let value = $('#multipleProjectSelect').val();
-    $('#multipleProjectsButton').css('background-color', '#f84634');
-    projectList_global = [];
-    projectList_global = value;
-    let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
-        "<div class='loading_window' id='Id_loading_window' style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">调用数据接口...</div>" +
-        "</div>";
-    loading_div.html(html);
-    projectGraphAjax(value);
-
 }
 
 //重置筛选

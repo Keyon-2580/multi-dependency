@@ -48,6 +48,7 @@ public class RelationInserterService {
 		microserviceService.deleteAllMicroServiceCallMicroService();
 		Map<MicroService, Map<MicroService, MicroServiceCallMicroService>> calls 
 			= featureOrganizationService.findMsCallMsByTraces(featureOrganizationService.allTraces()).getCalls();
+		LOGGER.info("saveMicroServiceCallMicroServic");
 		for(MicroService ms : calls.keySet()) {
 			for(MicroService callMs : calls.get(ms).keySet()) {
 				MicroServiceCallMicroService call = calls.get(ms).get(callMs);

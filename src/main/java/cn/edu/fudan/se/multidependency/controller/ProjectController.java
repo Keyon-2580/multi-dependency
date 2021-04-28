@@ -87,7 +87,8 @@ public class ProjectController {
 	}
 
 	@GetMapping("/combo_chart")
-	public String combo() {
+	public String combo(@RequestParam(defaultValue = "-1",required = false) String projectId, HttpServletRequest request) {
+		request.setAttribute("projectId", projectId);
 		return "dependency_graph/combo_chart";
 	}
 

@@ -21,7 +21,11 @@ public class Fan_IO<T extends Node> extends FanIOMetric implements Serializable 
 	private List<T> fanIn = new ArrayList<>();
 	
 	private List<T> fanOut = new ArrayList<>();
-	
+
+	private int fanInSize;
+
+	private int fanOutSize;
+
 	private Collection<Relation> fanInRelations = new ArrayList<>();
 	
 	private Collection<Relation> fanOutRelations = new ArrayList<>();
@@ -52,10 +56,12 @@ public class Fan_IO<T extends Node> extends FanIOMetric implements Serializable 
 	
 	public void addFanIn(T in) {
 		this.fanIn.add(in);
+		this.fanInSize = this.fanIn.size();
 	}
 	
 	public void addFanOut(T out) {
 		this.fanOut.add(out);
+		this.fanOutSize = this.fanOut.size();
 	}
 	
 	public Fan_IO(T node) {
@@ -76,6 +82,5 @@ public class Fan_IO<T extends Node> extends FanIOMetric implements Serializable 
 	public int getFanOut() {
 		return getFanOutRelations().size();
 	}
-	
 	
 }

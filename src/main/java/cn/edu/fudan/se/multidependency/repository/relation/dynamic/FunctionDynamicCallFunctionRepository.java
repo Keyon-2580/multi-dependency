@@ -47,13 +47,13 @@ public interface FunctionDynamicCallFunctionRepository extends Neo4jRepository<D
 	@Query("MATCH result=(function1:Function)-[:" + RelationType.str_DYNAMIC_CALL + "]->(function2:Function) where id(function1)=$functionId return result")
 	public List<DynamicCall> findDynamicCallsByCallerId(@Param("functionId") Long callerFunctionId);
 	
-	@Query("MATCH result=(function1:Function)-[:" + RelationType.str_DYNAMIC_CALL + "]->(function2:Function) where id(function1)=$functionId and r.testCaseId=$testCaseId return result")
+	@Query("MATCH result=(function1:Function)-[r:" + RelationType.str_DYNAMIC_CALL + "]->(function2:Function) where id(function1)=$functionId and r.testCaseId=$testCaseId return result")
 	public List<DynamicCall> findDynamicCallsByCallerIdAndTestCaseId(@Param("functionId") Long callerFunctionId, @Param("testCaseId") Integer testCaseId);
 	
 	@Query("MATCH result=(function1:Function)-[:" + RelationType.str_DYNAMIC_CALL + "]->(function2:Function) where id(function1)=$callerId1 and id(function2)=$calledId return result")
 	public List<DynamicCall> findDynamicCallsByCallerIdAndCalledId(@Param("callerId") Long functionCallerId, @Param("calledId") Long functionCalledId);
 	
-	@Query("MATCH result=(function1:Function)-[:" + RelationType.str_DYNAMIC_CALL + "]->(function2:Function) where id(function1)=$callerId1 and id(function2)=$calledId and r.testCaseId=$testCaseId return result")
+	@Query("MATCH result=(function1:Function)-[r:" + RelationType.str_DYNAMIC_CALL + "]->(function2:Function) where id(function1)=$callerId1 and id(function2)=$calledId and r.testCaseId=$testCaseId return result")
 	public List<DynamicCall> findDynamicCallsByCallerIdAndCalledIdAndTestCaseId(@Param("callerId") Long functionCallerId, @Param("calledId") Long functionCalledId, @Param("testCaseId") Integer testCaseId);
 	
 }

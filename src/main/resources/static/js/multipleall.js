@@ -405,17 +405,18 @@ var multiple_microservice_all = function(cytoscapeutil) {
 			type : "GET",
 			url : "/microservice/fanIO",
 			success : function(result) {
-				console.log(result);
+				// console.log(result);
 				var xAxisData = [];
 				var fanInData = [];
 				var fanOutData = [];
-				console.log(result.length);
+				// console.log(result.length);
 				for(var i = 0; i < result.length; i++) {
 					xAxisData[i] = result[i].node.name;
-					console.log(xAxisData[i]);
-					fanInData[i] = result[i].fanIn.length == 0 ? null : result[i].fanIn.length;
-					fanOutData[i] = result[i].fanOut.length == 0 ? null : result[i].fanOut.length;
+					// console.log(xAxisData[i]);
+					fanInData[i] = result[i].fanInSize;
+					fanOutData[i] = result[i].fanOutSize;
 				}
+
 				var option = {
 		        	    tooltip: {
 		        	        trigger: 'axis',

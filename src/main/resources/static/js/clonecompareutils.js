@@ -578,9 +578,6 @@ svg text::selection {
         data.ids = ids(_nodes2);
         data.IDsByName = IDsByName(data.ids);
         data.tree = tree(ptree, data.IDsByName);
-        console.log(_links2)
-        console.log(_nodes2)
-        console.log(ptree)
 
         // data.IDsByName = nametoid;
 

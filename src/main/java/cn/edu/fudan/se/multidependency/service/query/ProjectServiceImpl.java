@@ -117,8 +117,12 @@ public class ProjectServiceImpl implements ProjectService{
             JSONArray multipleProjectsJson = new JSONArray();
             for(int i = 0; i < projectIds.size(); i++){
                 JSONArray temp_array = new JSONArray();
-                if(isFilter && Constant.PROJECT_STRUCTURE_COMBO.equals(type)) {
-                    temp_array = joinMultipleProjectsGraphJson(projectIds.getJSONObject(i).getLong("id"), type, selectedPcks).getJSONArray("nodes");
+                if(isFilter || Constant.PROJECT_STRUCTURE_COMBO.equals(type)) {
+                    if(!isFilter){
+                        temp_array = joinMultipleProjectsGraphJson(projectIds.getJSONObject(i).getLong("id"), type).getJSONArray("nodes");
+                    }else{
+                        temp_array = joinMultipleProjectsGraphJson(projectIds.getJSONObject(i).getLong("id"), type, selectedPcks).getJSONArray("nodes");
+                    }
                     for(int j = 0; j < temp_array.size(); j++){
                         multipleProjectsJson.add(temp_array.getJSONObject(j));
                     }
@@ -129,7 +133,7 @@ public class ProjectServiceImpl implements ProjectService{
                 }
 
             }
-            if(isFilter && Constant.PROJECT_STRUCTURE_COMBO.equals(type)) {
+            if(isFilter || Constant.PROJECT_STRUCTURE_COMBO.equals(type)) {
                 projectJson.put("nodes", multipleProjectsJson);
             }else{
                 projectJson.put("children", multipleProjectsJson);

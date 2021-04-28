@@ -20,12 +20,6 @@ var loadLOCChart = function(loc_name_list, loc_list){
             trigger: 'item',
             formatter: 'project: {b}<br/>loc: {c} ({d}%)'
         },
-        legend: {
-            orient: 'vertical',
-            right: 5,
-            top:5,
-            data: loc_name_list
-        },
         series: [
             {
                 name: 'LOC',
@@ -68,11 +62,11 @@ var loadPageData = function (){
                 "<div>" +
                 "<ul  class=\"my_common_list\">" +
                 "<li class=\"my_common_list_li\">" +
-                "<label  class=\"my_common_list_th\"> index" +
+                "<label  class=\"my_common_list_th\" style='width: 8%'> index" +
                 "</label>" +
-                "<label  class=\"my_common_list_th\"> ID" +
+                "<label  class=\"my_common_list_th\" style='width: 8%'> ID" +
                 "</label>" +
-                "<label  class=\"my_common_list_th\"> Project" +
+                "<label  class=\"my_common_list_th\" style='width: 20%'> Project" +
                 "</label>" +
                 "<label  class=\"my_common_list_th\"> NOP" +
                 "</label>" +
@@ -87,10 +81,11 @@ var loadPageData = function (){
                 "</li>";
 
             for(var i = 0; i < result.length; i++) {
+                let combo_url = '/project/combo_chart?projectId=' + result[i].node.id;
                 html += "<li class=\"my_common_list_li\">";
-                html += "<label  class=\"my_common_list_td\">" + (i + 1) + "</label>";
-                html += "<label  class=\"my_common_list_td\">" + result[i].node.id + "</label>";
-                html += "<a class=\"my_common_list_a\" href=\"\" target=\"_blank\">" + result[i].node.name + " (" + result[i].node.language + ") " + "</a>";
+                html += "<label  class=\"my_common_list_td\" style='width: 8%'>" + (i + 1) + "</label>";
+                html += "<label  class=\"my_common_list_td\" style='width: 8%'>" + result[i].node.id + "</label>";
+                html += "<a class=\"my_common_list_a\" style='width: 20%' href='" + combo_url + "' target='_blank' >" + result[i].node.name + " (" + result[i].node.language + ") " + "</a>";
                 html += "<label  class=\"my_common_list_td\">" + result[i].metric.metricValues.NOP + "</label>";
                 html += "<label  class=\"my_common_list_td\">" + result[i].metric.metricValues.NOF + "</label>";
                 html += "<label  class=\"my_common_list_td\">" + result[i].metric.metricValues.NOM + "</label>";

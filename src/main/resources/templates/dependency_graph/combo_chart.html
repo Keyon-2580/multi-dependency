@@ -46,7 +46,12 @@
 <script type="text/javascript" th:src="@{/js/dependency_graph/combo_chart.js}"></script>
 <script type="text/javascript" th:inline="javascript">
     $(document).ready(function() {
-        main().init();
+        let projectId = [[${projectId}]];
+        if(projectId !== "-1"){
+            main(projectId).init();
+        }else{
+            main("").init();
+        }
     });
 </script>
 </body>
