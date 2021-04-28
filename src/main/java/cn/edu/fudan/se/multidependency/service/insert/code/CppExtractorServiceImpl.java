@@ -275,6 +275,8 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 	 */
 	protected void extractRelationsFromFiles() {
 		LOGGER.info("{} {} file extractRelationsFromFiles", this.currentProject.getName(), this.currentProject.getLanguage());
+		Map<Long, ? extends Node> functions = this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Function, currentProject);
+		Map<Long, ? extends Node> types = this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject);
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.ProjectFile, currentProject).forEach((entityId, node) -> {
 			ProjectFile file = (ProjectFile) node;
 			FileEntity fileEntity = (FileEntity) entityRepo.getEntity(entityId.intValue());
@@ -289,16 +291,68 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 //					System.out.println("File - getImportedFiles: " + entity.getClass());
 				}
 			});
-			fileEntity.getImportedTypes().forEach(entity -> {
-//				System.out.println("File - getImportedTypes: " + entity.getClass());
-			});
 
 			fileEntity.getRelations().forEach(relation -> {
 				switch(relation.getType()) {
 					case DependencyType.CONTAIN:
-						String typeStrtmp = relation.getEntity().getQualifiedName();
-						if("built-in".equals(typeStrtmp)) break;
-						LOGGER.info(file.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName() + "(" + relation.getEntity().getClass().toString() + ")");
+						// 包含的type，即namespace的成员变量的类型，此处仅指代类型直接定义的成员变量，不包含通过List<？>、Set<？>等基本数据类型中参数类型（此种情况将在变量的参数类型中处理）
+						Type containUseType = (Type) types.get(relation.getEntity().getId().longValue());
+						if(containUseType != null) {
+							Use use = new Use(file, containUseType);
+							addRelation(use);
+						}
+						break;
+					case DependencyType.CALL:
+						if( relation.getEntity() instanceof FunctionEntity ) {
+							Function calledFun = (Function) functions.get(relation.getEntity().getId().longValue());
+							if(calledFun != null) {
+								Call call = new Call(file, calledFun);
+								addRelation(call);
+							}
+						}
+						break;
+					case DependencyType.CREATE:
+						Type createType = (Type) types.get(relation.getEntity().getId().longValue());
+						if(createType != null) {
+							Create create = new Create(file, createType);
+							addRelation(create);
+						}
+						break;
+					case DependencyType.CAST:
+						Type castType = (Type) types.get(relation.getEntity().getId().longValue());
+						if(castType != null) {
+							Cast functionCastType = new Cast(file, castType);
+							addRelation(functionCastType);
+						}
+						break;
+					case DependencyType.IMPLLINK:
+						/**
+						 * 主要正对c/c++项目中，由于预编译或语法解析错误导致（方法 - IMPLLINK-方法）识别错误
+						 * 可能出现 File - IMPLLINK - Function情况，为保证文件级正确，建立此种关系
+						 */
+						Function implLinkFunction = (Function) functions.get(relation.getEntity().getId().longValue());
+						if(implLinkFunction != null ) {
+							ImplLink functionImplLinkFunction = new ImplLink(file, implLinkFunction);
+							addRelation(functionImplLinkFunction);
+						}
+						break;
+					case DependencyType.USE:
+						Entity relationEntity = relation.getEntity();
+						Node relationNode = this.getNodes().findNodeByEntityIdInProject(relationEntity.getId().longValue(), currentProject);
+						if(relationNode != null){
+							if(relationNode instanceof Variable) {
+								Variable var = (Variable) relationNode;
+								Entity relationParentEntity = relationEntity.getAncestorOfType(FileEntity.class);
+								if(relationParentEntity != null && fileEntity != relationParentEntity) {
+									Use use = new Use(file, var);
+									addRelation(use);
+								}
+							}else if(relationNode instanceof Type){
+								Type other = (Type) relationNode;
+								Use use = new Use(file, other);
+								addRelation(use);
+							}
+						}
 						break;
 					case DependencyType.IMPORT:
 						break;
@@ -306,7 +360,8 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 						String typeStr = relation.getEntity().getQualifiedName();
 						if("built-in".equals(typeStr)) break;
 
-						LOGGER.info(file.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName() + "(" + relation.getEntity().getClass().toString() + ")");
+						LOGGER.info(file.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName()
+								+ "(" + relation.getEntity().getClass().toString() + "): Line " + relation.getStartLine());
 						break;
 				}
 			});
@@ -355,14 +410,25 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 							addRelation(functionCastType);
 						}
 						break;
+					case DependencyType.IMPLLINK:
+						/**
+						 * 主要正对c/c++项目中，由于预编译或语法解析错误导致（方法 - IMPLLINK-方法）识别错误
+						 * 可能出现 Namespace - IMPLLINK - Function情况，为保证文件级正确，建立此种关系
+						 */
+						Function implLinkFunction = (Function) functions.get(relation.getEntity().getId().longValue());
+						if(implLinkFunction != null ) {
+							ImplLink functionImplLinkFunction = new ImplLink(namespace, implLinkFunction);
+							addRelation(functionImplLinkFunction);
+						}
+						break;
 					case DependencyType.USE:
 						Entity relationEntity = relation.getEntity();
 						Node relationNode = this.getNodes().findNodeByEntityIdInProject(relationEntity.getId().longValue(), currentProject);
 						if(relationNode != null){
 							if(relationNode instanceof Variable) {
 								Variable var = (Variable) relationNode;
-								Entity relationParentEntity = relationEntity.getParent();
-								if(relationParentEntity != null && namespaceEntity.getClass() != relationParentEntity.getClass()) {
+								Entity relationParentEntity = relationEntity.getAncestorOfType(PackageEntity.class);
+								if(relationParentEntity != null && namespaceEntity != relationParentEntity) {
 									Use use = new Use(namespace, var);
 									addRelation(use);
 								}
@@ -377,7 +443,8 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 						String typeStr = relation.getEntity().getQualifiedName();
 						if("built-in".equals(typeStr)) break;
 
-						LOGGER.info(namespace.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName() + "(" + relation.getEntity().getClass().toString() + ")");
+						LOGGER.info(namespace.getIdentifier() + "---" + relation.getType() + "----" + relation.getEntity().getQualifiedName()
+								+ "(" + relation.getEntity().getClass().toString() + "): Line " + relation.getStartLine());
 						break;
 				}
 			});

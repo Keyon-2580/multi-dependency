@@ -38,20 +38,6 @@ public class ArchitectureSmellController {
 		return "as/as";
 	}
 	
-	@GetMapping("/multiple/query")
-	public String queryMultipleSmell(HttpServletRequest request) {
-		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("files", detector.queryMultipleSmellASFiles(false));
-		return "as/multiple";
-	}
-
-	@GetMapping("/multiple/detect")
-	public String detectMultipleSmell(HttpServletRequest request) {
-		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("files", detector.detectMultipleSmellASFiles(false));
-		return "as/multiple";
-	}
-	
 	@GetMapping("/multiple/histogram")
 	@ResponseBody
 	public Object histogram() {
@@ -231,5 +217,4 @@ public class ArchitectureSmellController {
 			e.printStackTrace();
 		}
 	}
-
 }

@@ -66,8 +66,8 @@ public class UnutilizedAbstractionDetectorImpl implements UnutilizedAbstractionD
 		smellDetectorService.sortSmellByName(smells);
 		List<UnutilizedAbstraction<ProjectFile>> fileUnutilizedAbstractions = new ArrayList<>();
 		for (Smell smell : smells) {
-			Set<Node> contains = new HashSet<>(smellRepository.findSmellContains(smell.getId()));
-			Iterator<Node> iterator = contains.iterator();
+			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
+			Iterator<Node> iterator = containedNodes.iterator();
 			if (iterator.hasNext()) {
 				ProjectFile component = (ProjectFile) iterator.next();
 				fileUnutilizedAbstractions.add(new UnutilizedAbstraction<>(component));

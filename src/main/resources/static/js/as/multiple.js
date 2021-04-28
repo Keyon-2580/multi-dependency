@@ -7,8 +7,7 @@ let multiple = function(projects, files, cytoscapeutil) {
 			unstable: true,
 //			hierarchy: false,
 //			godComponent: false,
-			unused: true
-			,
+			unused: true,
 			unutilized: false
 	}
 	
@@ -209,7 +208,7 @@ let multiple = function(projects, files, cytoscapeutil) {
 				html += "<div>";
 				html += "<h4><a target='_blank' href='/as/multiple/project/" + project.id + paramToRequestParam() + "'>" + project.name + " (" + project.language + ") </h4></a>";
 				html += "</div>";
-				html += "<div class='col-sm-12 row'>";
+				html += "<div  style='width: 100%'>";
 					html += "<div class='col-sm-4'>";
 					html += "<div id='allFilesPie_" + project.id + "' style='height: 400px;'></div>";
 					html += "</div>";
@@ -220,7 +219,7 @@ let multiple = function(projects, files, cytoscapeutil) {
 					html += "<div id='issuesPie_" + project.id + "' style='height: 400px;'></div>";
 					html += "</div>";
 				html += "</div>";
-				html += "<div class=''>";
+				html += "<div style='width: 100%'>";
 				html += "<div id='circle_" + project.id + "'></div>";
 				html += "</div>";
 				html += "<div>";

@@ -86,8 +86,14 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query("match p= (f1:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]-(f2:ProjectFile) where id(f1) = $file1Id and id(f2) = $file2Id return p")
 	List<DependsOn> findAllDependsOnsBetweenFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
 
+	@Query("match p= (t1:Type)-[:" + RelationType.str_DEPENDS_ON + "]->(t2:Type) where id(t1) = $type1Id and id(t2) = $type2Id return p")
+	DependsOn findDependsOnBetweenTypes(@Param("type1Id") long type1Id, @Param("type2Id") long type2Id);
+
 	@Query("match p= (f1:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(f2:ProjectFile) where id(f1) = $file1Id and id(f2) = $file2Id return p")
 	DependsOn findDependsOnBetweenFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
+
+	@Query("match p= (p1:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(p2:Package) where id(p1) = $package1Id and id(p2) = $package2Id return p")
+	DependsOn findDependsOnBetweenPackages(@Param("package1Id") long package1Id, @Param("package2Id") long package2Id);
 
 	String TYPE_LEFT = "match p=(t1:Type)-[:CONTAIN*0..]->()-[r:";
 	String TYPE_MIDDLE = "]->()<-[:CONTAIN*0..]-(t2:Type) where t1<>t2 " +

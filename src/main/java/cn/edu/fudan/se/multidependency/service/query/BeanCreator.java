@@ -165,7 +165,7 @@ public class BeanCreator {
 			dependsOnRepository.createDependsOnWithLocalVariableInFiles();
 			dependsOnRepository.createDependsOnWithAnnotationInFiles();
 			dependsOnRepository.createDependsOnWithCallInFiles();
-//			dependsOnRepository.createDependsOnWithImpllinkInFiles();
+			dependsOnRepository.createDependsOnWithImpllinkInFiles();
 			dependsOnRepository.createDependsOnWithCreateInFiles();
 			dependsOnRepository.createDependsOnWithCastInFiles();
 			dependsOnRepository.createDependsOnWithThrowInFiles();

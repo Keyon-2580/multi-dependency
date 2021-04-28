@@ -5,7 +5,6 @@ import java.util.Map;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.model.node.ar.Module;
 import cn.edu.fudan.se.multidependency.model.node.code.Type;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.Cycle;
 import com.alibaba.fastjson.JSONObject;
@@ -28,11 +27,6 @@ public interface CyclicDependencyDetector {
 	Map<Long, List<Cycle<Package>>> queryPackageCyclicDependency();
 
 	/**
-	 * 获取模块的循环依赖
-	 */
-	Map<Long, List<Cycle<Module>>> queryModuleCyclicDependency();
-
-	/**
 	 * 检测类的循环依赖
 	 */
 	Map<Long, List<Cycle<Type>>> detectTypeCyclicDependency();
@@ -48,14 +42,24 @@ public interface CyclicDependencyDetector {
 	Map<Long, List<Cycle<Package>>> detectPackageCyclicDependency();
 
 	/**
-	 * 检测模块的循环依赖
+	 * 根据smellName生成类的循环依赖的json格式信息
 	 */
-	Map<Long, List<Cycle<Module>>> detectModuleCyclicDependency();
+	JSONObject getTypeCyclicDependencyJson(Long projectId, String smellName);
+
+	/**
+	 * 根据smellName生成文件的循环依赖的json格式信息
+	 */
+	JSONObject getFileCyclicDependencyJson(Long projectId, String smellName);
+
+	/**
+	 * 根据smellName生成包的循环依赖的json格式信息
+	 */
+	JSONObject getPackageCyclicDependencyJson(Long projectId, String smellName);
 
 	/**
 	 * 根据file的Id生成文件所在的循环依赖的json格式信息
 	 */
-	JSONObject getCyclicDependencyJson(Long fileId);
+	JSONObject getFileCyclicDependencyJson(Long fileId);
 
 	void exportCycleDependency();
 }

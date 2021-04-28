@@ -1,4 +1,4 @@
-var drawSmellGraph = function (json_data) {
+let drawSmellGraph = function (json_data) {
     const CYCLIC_DEPENDENCY = "CyclicDependency";
     const UNUSED_INCLUDE = "UnusedInclude";
     const data = {};
@@ -35,15 +35,16 @@ var drawSmellGraph = function (json_data) {
                     }
                     outDiv.style.width = 'fit-content';
                     outDiv.innerHTML = `
-                        <h4>source: (${e.item.getModel().source_label})${e.item.getModel().source_name}</h4>
-                        <h4>target: (${e.item.getModel().target_label})${e.item.getModel().target_name}</h4>
-                        <h4>times: ${e.item.getModel().times}</h4>
-                        <h4>dependsOnTypes: </h4>` + str;
+                        <h6>Source: (${e.item.getModel().source_label})${e.item.getModel().source_name}</h6>
+                        <h6>Target: (${e.item.getModel().target_label})${e.item.getModel().target_name}</h6>
+                        <h6>Relation: DependsOn(${e.item.getModel().times}): </h6>` + str;
                     break;
                 case UNUSED_INCLUDE:
                     outDiv.style.width = 'fit-content';
                     outDiv.innerHTML = `
-                        <h4>include</h4>`;
+                        <h6>Source: (${e.item.getModel().source_label})${e.item.getModel().source_name}</h6>
+                        <h6>Target: (${e.item.getModel().target_label})${e.item.getModel().target_name}</h6>
+                        <h6>Relation: Include</h6>`;
                     break;
                 default:
                     break;
@@ -91,14 +92,14 @@ var drawSmellGraph = function (json_data) {
             preventOverlap: true,
         },
         nodeStateStyles: {
-            currentNode: {
+            coreNode: {
                 lineWidth: 2,
                 stroke: '#DC143C',
                 fill: '#FFC0CB',
             },
         },
     });
-    let fileId = json_data["currentFile"];
+    let coreNodeId = json_data["coreNode"];
     let links = json_data["edges"];
     let edges = [];
     links.forEach(function (link){
@@ -117,8 +118,8 @@ var drawSmellGraph = function (json_data) {
 
     const node_list = graph.getNodes();
     node_list.forEach(function (item){
-        if(item._cfg.model.id === fileId){
-            graph.setItemState(item, 'currentNode', true);
+        if(item._cfg.model.id === coreNodeId){
+            graph.setItemState(item, 'coreNode', true);
         }
     });
 
@@ -146,24 +147,35 @@ var drawSmellGraph = function (json_data) {
     }
 }
 
-var showSmellDetail = function (smells) {
-    var html = "";
+let showSmellDetail = function (smells) {
+    let html = "";
     html += "<table class='table table-bordered'>";
-    html += "<tr><th>SmellIndex</th><th>SmellName</th><th>FileIndex</th><th>FilePath</th></tr>";
+    html += "<tr>";
+    html += "<th style='text-align: center; vertical-align: middle'>SmellIndex</th>";
+    html += "<th style='text-align: center; vertical-align: middle'>SmellName</th>";
+    html += "<th style='text-align: center; vertical-align: middle'>NodeNumber</th>";
+    html += "<th style='text-align: center; vertical-align: middle'>NodeIndex</th>";
+    html += "<th style='vertical-align: middle'>NodePath</th>";
+    html += "</tr>";
     let index = 1;
     smells.forEach(function (smell){
-        let files = smell.files;
-        let len = files.length + 1;
+        let nodes = smell.nodes;
+        let len = nodes.length;
         html += "<tr>";
-        html += "<td rowspan='" + len + "' style='vertical-align: middle'>" + index + "</td>";
-        html += "<td rowspan='" + len + "' style='vertical-align: middle'>" + smell.name + "</td>";
-        html += "</tr>";
-        files.forEach(function (file){
-            html += "<tr>";
-            html += "<td style='vertical-align: middle'>" + file.index + "</td>";
-            html += "<td style='vertical-align: middle'>" + file.path + "</td>";
-            html += "</tr>";
-        });
+        html += "<td rowspan='" + len + "' style='text-align: center; vertical-align: middle'>" + index + "</td>";
+        html += "<td rowspan='" + len + "' style='text-align: center; vertical-align: middle'>" + smell.name + "</td>";
+        html += "<td rowspan='" + len + "' style='text-align: center; vertical-align: middle'>" + nodes.length + "</td>";
+        for (let nodeIndex in nodes) {
+            if (nodes.hasOwnProperty(nodeIndex)) {
+                let node = nodes[nodeIndex];
+                if (nodeIndex > 0) {
+                    html += "<tr>";
+                }
+                html += "<td style='text-align: center; vertical-align: middle'>" + node.index + "</td>";
+                html += "<td style='vertical-align: middle'>" + node.path + "</td>";
+                html += "</tr>";
+            }
+        }
         index ++;
     });
     html += "</table>";

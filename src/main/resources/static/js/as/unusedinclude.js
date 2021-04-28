@@ -1,12 +1,18 @@
 let unusedInclude = function() {
+	const SMELL_TYPE = "UnusedInclude";
+	const SMELL_FILE_LEVEL = "File";
 	let _unusedInclude = function(projects, fileUnusedIncludeMap) {
 		let html = "";
 		for(let projectIndex in projects) {
 			if (projects.hasOwnProperty(projectIndex)) {
 				let project = projects[projectIndex];
+				html += "<div>";
+				html += "<div>";
 				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
+				html += "</div>";
 
 				let fileUnusedIncludeList = fileUnusedIncludeMap[project.id];
+				html += "<div>";
 				html += "<table class='table table-bordered'>";
 				html += "<tr>";
 				html += "<th style='text-align: center; vertical-align: middle'>Index</th>";
@@ -19,7 +25,9 @@ let unusedInclude = function() {
 					if (fileUnusedIncludeList.hasOwnProperty(fileIndex)) {
 						let fileUnusedInclude = fileUnusedIncludeList[fileIndex];
 						html += "<tr>";
-						html += "<td style='text-align: center; vertical-align: middle'>" + index + "</td>";
+						html += "<td style='text-align: center; vertical-align: middle'>" +
+							"<a target='_blank' href='/as/smellgraph/" + project.id + "?smelltype=" + SMELL_TYPE + "&smelllevel=" + SMELL_FILE_LEVEL + "&smellindex=" + index + "'>" + index + "</a>" +
+							"</td>";
 						html += "<td style='vertical-align: middle'>" + fileUnusedInclude.coreFile.path + "</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + fileUnusedInclude.unusedIncludeFiles.length + "</td>";
 						html += "<td style='vertical-align: middle'>";
@@ -32,6 +40,8 @@ let unusedInclude = function() {
 					}
 				}
 				html += "</table>";
+				html += "</div>";
+				html += "</div>";
 			}
 		}
 		$("#content").html(html);

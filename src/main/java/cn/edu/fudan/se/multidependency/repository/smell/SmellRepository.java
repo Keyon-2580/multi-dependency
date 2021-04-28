@@ -21,14 +21,17 @@ import java.util.Set;
 @Repository
 public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 
-	@Query("match p= (smell:Smell) where smell.level = $level return smell")
+	@Query("match p = (smell:Smell) where smell.level = $level return smell")
 	List<Smell> findSmells(@Param("level") String level);
 
-	@Query("match p= (smell:Smell) where smell.level = $level and smell.type = $type return smell")
+	@Query("match p = (smell:Smell) where smell.level = $level and smell.type = $type return smell")
 	List<Smell> findSmells(@Param("level") String level, @Param("type") String type);
 
-	@Query("match p= (smell:Smell) where smell.type = $type return smell")
+	@Query("match p = (smell:Smell) where smell.type = $type return smell")
 	List<Smell> findSmellsByType(@Param("type") String type);
+
+	@Query("match p = (smell:Smell) where smell.projectId = $projectId and smell.name = $name return smell")
+	List<Smell> findProjectSmellsByName(@Param("projectId") Long projectId, @Param("name") String name);
 
 	@Query("match p= (smell:Smell) where smell.type = $type return smell limit 10;")
 	List<Smell> findSmellsByTypeWithLimit(@Param("type") String type);
@@ -37,8 +40,8 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 	Smell querySmell(@Param("name") String name);
 
 	@Query("match (smell:Smell) -[:" + RelationType.str_CONTAIN + "]-(node) " +
-			"where id(smell)=$smellId return distinct node;")
-	Set<Node> findSmellContains(@Param("smellId") long smellId);
+			"where id(smell) = $smellId return distinct node;")
+	Set<Node> findContainedNodesBySmellId(@Param("smellId") Long smellId);
 
 	@Query("match (n:ProjectFile) where n.suffix=\".java\" set n.language = \"java\";")
 	void setJavaLanguageBySuffix();
@@ -217,7 +220,4 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 
 	@Query("match (smell:Smell) where smell.coreNodeId = $fileId and smell.level = '" + SmellLevel.FILE + "' and smell.type = '" + SmellType.UNUSED_INCLUDE + "' return smell;")
 	Smell getSmellWithCoreFileId(@Param("fileId") Long fileId);
-
-	@Query("match (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) where smell.name = $smellName return file;")
-	List<ProjectFile> getFilesWithSmellName(@Param("smellName") String smellName);
 }
