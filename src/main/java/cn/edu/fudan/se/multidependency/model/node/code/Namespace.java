@@ -27,6 +27,8 @@ public class Namespace extends CodeUnit {
     private Long id;
     
     private String name;
+
+	private String aliasName;
     
     private Long entityId;
     
@@ -40,16 +42,20 @@ public class Namespace extends CodeUnit {
     
     private String language;
 
+	private boolean isAlias = false;
+
 	@Override
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("name", getName() == null ? "" : getName());
 		properties.put("identifier", getIdentifier() == null ? "" : getIdentifier());
+		properties.put("aliasName", getAliasName() == null ? "" : getAliasName());
 		properties.put("simpleName", getSimpleName() == null ? "" : getSimpleName());
 		properties.put("startLine", getStartLine());
 		properties.put("endLine", getEndLine());
 		properties.put("language", getLanguage() == null ? "" : getLanguage());
+		properties.put("isAlias", isAlias());
 		return properties;
 	}
 

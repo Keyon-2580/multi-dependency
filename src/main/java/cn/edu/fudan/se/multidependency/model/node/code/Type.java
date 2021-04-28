@@ -41,6 +41,8 @@ public class Type extends CodeUnit {
 	private int endLine = -1;
     
     private String language;
+
+	private boolean isAlias = false;
 	
 	@Override
 	public Map<String, Object> getProperties() {
@@ -53,6 +55,7 @@ public class Type extends CodeUnit {
 		properties.put("startLine", getStartLine());
 		properties.put("endLine", getEndLine());
 		properties.put("language", getLanguage() == null ? "" : getLanguage());
+		properties.put("isAlias", isAlias());
 		return properties;
 	}
 	
