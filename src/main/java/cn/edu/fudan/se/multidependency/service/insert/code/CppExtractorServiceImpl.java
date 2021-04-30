@@ -141,32 +141,32 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 	private void process(AliasEntity entity) {
 		AliasEntity aliasEntity = (AliasEntity) entity;
 		TypeEntity typeEntity = aliasEntity.getType();
-		if (typeEntity != null && typeEntity.getParent() != null) {
-			if(typeEntity.getClass() == TypeEntity.class){
+		if(typeEntity.getClass() == TypeEntity.class){
+			if (typeEntity != null && typeEntity.getParent() != null) {
 				Type type = process(typeEntity);
 				type.setAliasName(entity.getQualifiedName());
-
-				Type aliasType = new Type();
-				aliasType.setLanguage(Language.cpp.name());
-				aliasType.setEntityId(entity.getId().longValue());
-				aliasType.setName(entity.getQualifiedName());
-				aliasType.setSimpleName(entity.getRawName().getName());
-				aliasType.setStartLine(entity.getStartLine() == null ? -1 :entity.getStartLine());
-				aliasType.setEndLine(entity.getEndLine() == null ? -1 :entity.getEndLine());
-				aliasType.setAlias(true);
-				addNode(aliasType, currentProject);
-			}else if(typeEntity.getClass() == PackageEntity.class){
-				Namespace namespace = process((PackageEntity)typeEntity);
-				namespace.setAliasName(entity.getQualifiedName());
-
-				Namespace aliasNamespace = new Namespace();
-				aliasNamespace.setLanguage(Language.cpp.name());
-				aliasNamespace.setName(entity.getQualifiedName());
-				aliasNamespace.setEntityId(entity.getId().longValue());
-				aliasNamespace.setSimpleName(entity.getRawName().getName());
-				aliasNamespace.setAlias(true);
-				addNode(aliasNamespace, currentProject);
 			}
+
+			Type aliasType = new Type();
+			aliasType.setLanguage(Language.cpp.name());
+			aliasType.setEntityId(entity.getId().longValue());
+			aliasType.setName(entity.getQualifiedName());
+			aliasType.setSimpleName(entity.getRawName().getName());
+			aliasType.setStartLine(entity.getStartLine() == null ? -1 :entity.getStartLine());
+			aliasType.setEndLine(entity.getEndLine() == null ? -1 :entity.getEndLine());
+			aliasType.setAlias(true);
+			addNode(aliasType, currentProject);
+		}else if(typeEntity.getClass() == PackageEntity.class){
+			Namespace namespace = process((PackageEntity)typeEntity);
+			namespace.setAliasName(entity.getQualifiedName());
+
+			Namespace aliasNamespace = new Namespace();
+			aliasNamespace.setLanguage(Language.cpp.name());
+			aliasNamespace.setName(entity.getQualifiedName());
+			aliasNamespace.setEntityId(entity.getId().longValue());
+			aliasNamespace.setSimpleName(entity.getRawName().getName());
+			aliasNamespace.setAlias(true);
+			addNode(aliasNamespace, currentProject);
 		}
 	}
 	
@@ -195,7 +195,7 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 		
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Namespace, currentProject).forEach((entityId, node) -> {
 			Namespace namespace = (Namespace) node;
-			PackageEntity packageEntity = (PackageEntity) entityRepo.getEntity(entityId.intValue());
+			Entity packageEntity = entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = packageEntity.getParent();
 			while (parentEntity != null && !(parentEntity instanceof FileEntity)) {
 				parentEntity = parentEntity.getParent();
@@ -208,7 +208,7 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 		});
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject).forEach((entityId, node) -> {
 			Type type = (Type) node;
-			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(entityId.intValue());
+			Entity typeEntity =  entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = typeEntity.getParent();
 			while (parentEntity != null && !(parentEntity instanceof FileEntity || parentEntity instanceof PackageEntity)) {
 				/// FIXME 内部类的情况暂不考虑
@@ -403,7 +403,7 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 		Map<Long, ? extends Node> namespaces = this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Namespace, currentProject);
 		namespaces.forEach((entityId, node) -> {
 			Namespace namespace = (Namespace) node;
-			PackageEntity namespaceEntity = (PackageEntity) entityRepo.getEntity(entityId.intValue());
+			Entity namespaceEntity = entityRepo.getEntity(entityId.intValue());
 			namespaceEntity.getRelations().forEach(relation -> {
 				switch(relation.getType()) {
 					case DependencyType.CONTAIN:
