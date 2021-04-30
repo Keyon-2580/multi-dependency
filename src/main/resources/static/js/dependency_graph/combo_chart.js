@@ -1384,7 +1384,7 @@ function deleteSmell(){
     nodes.forEach((node) => {
         node._cfg.model.smellId = 0;
         node._cfg.model.smellType = "";
-        ode._cfg.model.smellName = "";
+        node._cfg.model.smellName = "";
         graph.setItemState(node, 'smell_normal', false);
     });
 }
