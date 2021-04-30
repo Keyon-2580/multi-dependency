@@ -234,7 +234,7 @@ public abstract class DependsCodeExtractorForNeo4jServiceImpl extends BasicCodeE
 		types.forEach((entityId, node) -> {
 			Type type = (Type) node;
 			// 继承与实现
-			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(entityId.intValue());
+			Entity typeEntity = entityRepo.getEntity(entityId.intValue());
 //			Collection<TypeEntity> inherits = typeEntity.getInheritedTypes();
 //			inherits.forEach(inherit -> {
 //				Type other = (Type) types.get(inherit.getId().longValue());

@@ -141,10 +141,12 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 	private void process(AliasEntity entity) {
 		AliasEntity aliasEntity = (AliasEntity) entity;
 		TypeEntity typeEntity = aliasEntity.getType();
-		if (typeEntity != null && typeEntity.getParent() != null) {
+		if(typeEntity != null){
 			if(typeEntity.getClass() == TypeEntity.class){
-				Type type = process(typeEntity);
-				type.setAliasName(entity.getQualifiedName());
+				if (typeEntity.getParent() != null) {
+					Type type = process(typeEntity);
+					type.setAliasName(entity.getQualifiedName());
+				}
 
 				Type aliasType = new Type();
 				aliasType.setLanguage(Language.cpp.name());
@@ -168,6 +170,7 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 				addNode(aliasNamespace, currentProject);
 			}
 		}
+
 	}
 	
 	@Override
@@ -195,7 +198,7 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 		
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Namespace, currentProject).forEach((entityId, node) -> {
 			Namespace namespace = (Namespace) node;
-			PackageEntity packageEntity = (PackageEntity) entityRepo.getEntity(entityId.intValue());
+			Entity packageEntity = entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = packageEntity.getParent();
 			while (parentEntity != null && !(parentEntity instanceof FileEntity)) {
 				parentEntity = parentEntity.getParent();
@@ -208,7 +211,7 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 		});
 		this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Type, currentProject).forEach((entityId, node) -> {
 			Type type = (Type) node;
-			TypeEntity typeEntity = (TypeEntity) entityRepo.getEntity(entityId.intValue());
+			Entity typeEntity =  entityRepo.getEntity(entityId.intValue());
 			Entity parentEntity = typeEntity.getParent();
 			while (parentEntity != null && !(parentEntity instanceof FileEntity || parentEntity instanceof PackageEntity)) {
 				/// FIXME 内部类的情况暂不考虑
@@ -403,7 +406,7 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 		Map<Long, ? extends Node> namespaces = this.getNodes().findNodesByNodeTypeInProject(NodeLabelType.Namespace, currentProject);
 		namespaces.forEach((entityId, node) -> {
 			Namespace namespace = (Namespace) node;
-			PackageEntity namespaceEntity = (PackageEntity) entityRepo.getEntity(entityId.intValue());
+			Entity namespaceEntity = entityRepo.getEntity(entityId.intValue());
 			namespaceEntity.getRelations().forEach(relation -> {
 				switch(relation.getType()) {
 					case DependencyType.CONTAIN:
