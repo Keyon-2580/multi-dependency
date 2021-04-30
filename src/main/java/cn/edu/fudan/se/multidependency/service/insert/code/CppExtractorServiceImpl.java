@@ -141,33 +141,36 @@ public class CppExtractorServiceImpl extends DependsCodeExtractorForNeo4jService
 	private void process(AliasEntity entity) {
 		AliasEntity aliasEntity = (AliasEntity) entity;
 		TypeEntity typeEntity = aliasEntity.getType();
-		if(typeEntity.getClass() == TypeEntity.class){
-			if (typeEntity != null && typeEntity.getParent() != null) {
-				Type type = process(typeEntity);
-				type.setAliasName(entity.getQualifiedName());
+		if(typeEntity != null){
+			if(typeEntity.getClass() == TypeEntity.class){
+				if (typeEntity.getParent() != null) {
+					Type type = process(typeEntity);
+					type.setAliasName(entity.getQualifiedName());
+				}
+
+				Type aliasType = new Type();
+				aliasType.setLanguage(Language.cpp.name());
+				aliasType.setEntityId(entity.getId().longValue());
+				aliasType.setName(entity.getQualifiedName());
+				aliasType.setSimpleName(entity.getRawName().getName());
+				aliasType.setStartLine(entity.getStartLine() == null ? -1 :entity.getStartLine());
+				aliasType.setEndLine(entity.getEndLine() == null ? -1 :entity.getEndLine());
+				aliasType.setAlias(true);
+				addNode(aliasType, currentProject);
+			}else if(typeEntity.getClass() == PackageEntity.class){
+				Namespace namespace = process((PackageEntity)typeEntity);
+				namespace.setAliasName(entity.getQualifiedName());
+
+				Namespace aliasNamespace = new Namespace();
+				aliasNamespace.setLanguage(Language.cpp.name());
+				aliasNamespace.setName(entity.getQualifiedName());
+				aliasNamespace.setEntityId(entity.getId().longValue());
+				aliasNamespace.setSimpleName(entity.getRawName().getName());
+				aliasNamespace.setAlias(true);
+				addNode(aliasNamespace, currentProject);
 			}
-
-			Type aliasType = new Type();
-			aliasType.setLanguage(Language.cpp.name());
-			aliasType.setEntityId(entity.getId().longValue());
-			aliasType.setName(entity.getQualifiedName());
-			aliasType.setSimpleName(entity.getRawName().getName());
-			aliasType.setStartLine(entity.getStartLine() == null ? -1 :entity.getStartLine());
-			aliasType.setEndLine(entity.getEndLine() == null ? -1 :entity.getEndLine());
-			aliasType.setAlias(true);
-			addNode(aliasType, currentProject);
-		}else if(typeEntity.getClass() == PackageEntity.class){
-			Namespace namespace = process((PackageEntity)typeEntity);
-			namespace.setAliasName(entity.getQualifiedName());
-
-			Namespace aliasNamespace = new Namespace();
-			aliasNamespace.setLanguage(Language.cpp.name());
-			aliasNamespace.setName(entity.getQualifiedName());
-			aliasNamespace.setEntityId(entity.getId().longValue());
-			aliasNamespace.setSimpleName(entity.getRawName().getName());
-			aliasNamespace.setAlias(true);
-			addNode(aliasNamespace, currentProject);
 		}
+
 	}
 	
 	@Override
