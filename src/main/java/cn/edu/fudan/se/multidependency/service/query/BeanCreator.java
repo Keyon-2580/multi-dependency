@@ -271,7 +271,8 @@ public class BeanCreator {
 				nDependsOn.getDependsOnTypes().forEach( (key, value) -> {
 					Double weight = RelationType.relationWeights.get(RelationType.valueOf(key));
 					if(weight != null){
-						BigDecimal weightedTimes  =  new BigDecimal( value * weight);
+						double weight_value = value * weight > 1 ? 1.0 : value * weight;
+						BigDecimal weightedTimes  =  new BigDecimal(weight_value );
 						nDependsOn.addWeightedTimes(weightedTimes.setScale(2, RoundingMode.HALF_UP).doubleValue());
 					} else {
 						System.out.println("关系权重未定义：" + key);

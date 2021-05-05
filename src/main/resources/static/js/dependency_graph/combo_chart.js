@@ -496,7 +496,7 @@ function loadPageData() {
                     "<option value=\"INCLUDE\">INCLUDE</option>" +
                     "<option value=\"EXTENDS\">EXTENDS</option>" +
                     "<option value=\"IMPLEMENTS\">IMPLEMENTS</option>" +
-                    "<option value=\"GLOBAL_VARIABLE\">GLOBAL_VARIABLE</option>" +
+                    // "<option value=\"GLOBAL_VARIABLE\">GLOBAL_VARIABLE</option>" +
                     "<option value=\"MEMBER_VARIABLE\">MEMBER_VARIABLE</option>" +
                     "<option value=\"LOCAL_VARIABLE\">LOCAL_VARIABLE</option>" +
                     "<option value=\"CALL\">CALL</option>" +
