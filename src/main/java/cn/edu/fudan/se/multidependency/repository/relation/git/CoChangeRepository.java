@@ -60,7 +60,7 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
     		"]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile) " + 
     		"where id(f1) < id(f2) " + 
     		"and (c.merge=false or c.merge is null) " + 
-    		"with f1,f2,count(c) as times " + 
+    		"with f1,f2,count(distinct c) as times " +
     		"where times >= $minCoChangeTimes " +
     		"create p=(f1)-[:" + RelationType.str_CO_CHANGE + "{times:times}]->(f2);")
     void createCoChangesRemoveMerge(@Param("minCoChangeTimes") int minCoChangeTimes);
@@ -68,7 +68,7 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
     @Query("match (f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
     		"]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile) " + 
     		"where id(f1) < id(f2) " + 
-    		"with f1,f2,count(c) as times " + 
+    		"with f1,f2,count(distinct c) as times " +
     		"where times >= $minCoChangeTimes " +
     		"create (f1)-[:" + RelationType.str_CO_CHANGE + "{times:times}]->(f2);")
     void createCoChanges(@Param("minCoChangeTimes") int minCoChangeTimes);
@@ -130,7 +130,7 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
 
     @Query("MATCH (project:Project) " +
             "where id(project) = $projectId " +
-            "match (file1:ProjectFile)-[coChange:" + RelationType.str_CO_CHANGE + "]->(file2:ProjectFile) " +
+            "optional match (file1:ProjectFile)-[coChange:" + RelationType.str_CO_CHANGE + "]->(file2:ProjectFile) " +
             "where (project)-[:" + RelationType.str_CONTAIN + "*2]->(file1) " +
             "and (project)-[:" + RelationType.str_CONTAIN + "*2]->(file2) " +
             "with distinct coChange, coChange.times as times " +
@@ -139,7 +139,7 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
 
     @Query("MATCH (project:Project) " +
             "where id(project) = $projectId " +
-            "match (package1:Package)-[coChange:" + RelationType.str_CO_CHANGE + "]->(package2:Package) " +
+            "optional match (package1:Package)-[coChange:" + RelationType.str_CO_CHANGE + "]->(package2:Package) " +
             "where (project)-[:" + RelationType.str_CONTAIN + "]->(package1) " +
             "and (project)-[:" + RelationType.str_CONTAIN + "]->(package2) " +
             "with distinct coChange, coChange.times as times " +
