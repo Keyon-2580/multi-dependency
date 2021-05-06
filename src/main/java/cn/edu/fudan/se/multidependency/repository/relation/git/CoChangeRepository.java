@@ -25,7 +25,7 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
 
     @Query("MATCH (project:Project) " +
             "where id(project) = $projectId " +
-            "match p=(file1:ProjectFile)-[coChange:" + RelationType.str_CO_CHANGE + "]->(file2:ProjectFile) " +
+            "optional match p=(file1:ProjectFile)-[coChange:" + RelationType.str_CO_CHANGE + "]->(file2:ProjectFile) " +
             "where (project)-[:" + RelationType.str_CONTAIN + "*2]->(file1) " +
             "and (project)-[:" + RelationType.str_CONTAIN + "*2]->(file2) " +
             "and coChange.times >= $count " +
@@ -34,7 +34,7 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
 
     @Query("MATCH (project:Project) " +
             "where id(project) = $projectId " +
-            "match p=(package1:Package)-[coChange:" + RelationType.str_CO_CHANGE + "]->(package2:Package) " +
+            "optional match p=(package1:Package)-[coChange:" + RelationType.str_CO_CHANGE + "]->(package2:Package) " +
             "where (project)-[:" + RelationType.str_CONTAIN + "]->(package1) " +
             "and (project)-[:" + RelationType.str_CONTAIN + "]->(package2) " +
             "and coChange.times >= $count " +
@@ -67,7 +67,7 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
 
     @Query("match (f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
     		"]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile) " + 
-    		"where id(f1) < id(f2) " + 
+    		"where id(f1) < id(f2) and c.commitFilesSize <= 30  " +
     		"with f1,f2,count(distinct c) as times " +
     		"where times >= $minCoChangeTimes " +
     		"create (f1)-[:" + RelationType.str_CO_CHANGE + "{times:times}]->(f2);")
