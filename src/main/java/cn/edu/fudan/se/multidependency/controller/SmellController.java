@@ -16,7 +16,7 @@ public class SmellController {
     @PostMapping("/treemap")
     @ResponseBody
     public JSONArray  smellsToTreemap() {
-        return basicSmellQueryService.smellsToGraph();
+        return basicSmellQueryService.smellDataToGraph();
     }
 
     @GetMapping("/get_metric")

@@ -4,7 +4,7 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgb(243, 243, 243) !important;
+    /*background-color: rgb(243, 243, 243) !important;*/
 
 }
 
@@ -62,7 +62,7 @@ html, body {
 
 .combo_title, .combo_information_title{
     font-size: 18px;
-    font-weight: 500;
+    font-weight: 400;
     margin-right: 100px;
 }
 
@@ -90,13 +90,16 @@ html, body {
 
 .AttributionSelectInput{
     width:50px;
-    height: 25px;
+    height: 28px !important;
     margin-left: 10px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
 .AttributionSelectTitle{
     font-size: 18px;
-    font-weight: 500;
+    font-weight: 400;
     margin-right: 100px;
 }
 
@@ -107,7 +110,9 @@ html, body {
 
 .AttributionSelectSingleSelect{
     margin-left: 10px;
-    height: 25px;
+    height: 28px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
 /*canvas区域背景颜色*/
@@ -167,7 +172,8 @@ html, body {
 }
 
 .combo_a{
-    text-decoration:none
+    text-decoration:none;
+    color: #2272f1;
 }
 
 /*.g6-component-contextmenu .combo_li {*/
@@ -186,4 +192,16 @@ html, body {
 .g6-component-contextmenu .combo_li:hover {
     background:#E6EDF6;
     border: 1px solid #B4D2F6;
+}
+
+.combo_button {
+    font-size: 13px; !important;
+    padding: 0 10px; !important;
+    border-radius: 4px; !important;
+    margin-right: 15px;
+}
+
+
+.combo_p {
+    margin-top: 10px;
 }
