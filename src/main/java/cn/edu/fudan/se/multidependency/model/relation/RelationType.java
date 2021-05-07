@@ -139,13 +139,13 @@ public enum RelationType implements RelationshipType {
 	static{
 		relationWeights.put(IMPORT, 0.1);
 		relationWeights.put(INCLUDE, 0.1);
-		relationWeights.put(EXTENDS, 1.0);
+		relationWeights.put(EXTENDS, 0.9);
 		relationWeights.put(IMPLEMENTS, 1.0);
-		relationWeights.put(MEMBER_VARIABLE, 0.5);
-		relationWeights.put(GLOBAL_VARIABLE, 0.2);
-		relationWeights.put(LOCAL_VARIABLE, 0.2);
+		relationWeights.put(MEMBER_VARIABLE, 0.1);
+		relationWeights.put(GLOBAL_VARIABLE, 0.1);
+		relationWeights.put(LOCAL_VARIABLE, 0.1);
 		relationWeights.put(ANNOTATION, 0.1);
-		relationWeights.put(CALL, 0.5);
+		relationWeights.put(CALL, 0.1);
 		relationWeights.put(CAST, 0.1);
 		relationWeights.put(CREATE, 0.1);
 		relationWeights.put(USE, 0.1);
@@ -154,10 +154,10 @@ public enum RelationType implements RelationshipType {
 		relationWeights.put(RETURN, 0.1);
 		relationWeights.put(IMPLLINK, 0.1);
 		relationWeights.put(VARIABLE_TYPE, 0.1);
-		relationWeights.put(IMPLEMENTS_C, 0.5);
+		relationWeights.put(IMPLEMENTS_C, 0.1);
 //		relationWeights.put(DEPENDENCY, 0.1);
-		relationWeights.put(CO_CHANGE, 0.2);
-		relationWeights.put(CLONE, 0.2);
+		relationWeights.put(CO_CHANGE, 0.1);
+		relationWeights.put(CLONE, 0.1);
 	}
 
 	static{

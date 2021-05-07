@@ -153,8 +153,18 @@ public class ProjectServiceImpl implements ProjectService{
         result.add(nodeJSON4);
 
         if(Constant.PROJECT_STRUCTURE_TREEMAP.equals(type) || Constant.PROJECT_STRUCTURE_COMBO.equals(type)){
-        nodeJSON5.put("smell", basicSmellQueryService.smellsToGraph());
-        result.add(nodeJSON5);
+            JSONArray smellInfos = new JSONArray();
+            for(int i = 0; i < projectIds.size(); i++){
+                JSONObject smellInfo = new JSONObject();
+                long projectId = projectIds.getJSONObject(i).getLong("id");
+                smellInfo.put("projectId", projectId);
+                smellInfo.put("project_smell_info", basicSmellQueryService.smellInfoToGraph(projectId));
+
+                smellInfos.add(smellInfo);
+            }
+            nodeJSON5.put("smell_data", basicSmellQueryService.smellDataToGraph());
+            nodeJSON5.put("smell_info", smellInfos);
+            result.add(nodeJSON5);
         }
 
         return result;

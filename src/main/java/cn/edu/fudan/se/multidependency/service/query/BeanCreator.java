@@ -77,6 +77,20 @@ public class BeanCreator {
 	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
 	private ModularityCalculator modularityCalculator;
 
+	@Bean
+	public boolean setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository, CommitRepository commitRepository,ProjectRepository projectRepository) {
+		LOGGER.info("设置Commit Update文件数...");
+		commitUpdateFileRepository.setCommitFilesSize();
+		LOGGER.info("设置Project Commits数...");
+		Project project = projectRepository.queryProjectWithLimitOne();
+		if(project != null && project.getCommits() > 0){
+			LOGGER.info("已存在Project Commits数");
+			return true;
+		}
+		commitRepository.setCommitsForAllProject();
+		return true;
+	}
+
 	@Bean("createCoChanges")
 	public List<CoChange> createCoChanges(PropertyConfig propertyConfig, CoChangeRepository cochangeRepository, AggregationCoChangeRepository aggregationCoChangeRepository) {
 		List<CoChange> coChanges = new ArrayList<>();
@@ -271,7 +285,8 @@ public class BeanCreator {
 				nDependsOn.getDependsOnTypes().forEach( (key, value) -> {
 					Double weight = RelationType.relationWeights.get(RelationType.valueOf(key));
 					if(weight != null){
-						BigDecimal weightedTimes  =  new BigDecimal( value * weight);
+						double weight_value = value * weight > 1 ? 1.0 : value * weight;
+						BigDecimal weightedTimes  =  new BigDecimal(weight_value );
 						nDependsOn.addWeightedTimes(weightedTimes.setScale(2, RoundingMode.HALF_UP).doubleValue());
 					} else {
 						System.out.println("关系权重未定义：" + key);
@@ -405,19 +420,6 @@ public class BeanCreator {
 		}
 	}
 
-	@Bean
-	public boolean setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository, CommitRepository commitRepository,ProjectRepository projectRepository) {
-		LOGGER.info("设置Commit Update文件数...");
-		commitUpdateFileRepository.setCommitFilesSize();
-		LOGGER.info("设置Project Commits数...");
-		Project project = projectRepository.queryProjectWithLimitOne();
-		if(project != null && project.getCommits() > 0){
-			LOGGER.info("已存在Project Commits数");
-			return true;
-		}
-		commitRepository.setCommitsForAllProject();
-		return true;
-	}
 
 	@Bean
 	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository) {

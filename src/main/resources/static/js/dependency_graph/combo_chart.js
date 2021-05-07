@@ -1,9 +1,11 @@
 let data = {};
 let projectList_global; //存放选定项目列表
 let projectList_filter; //存放正在筛选的项目列表
+let projectId; //存放当前展示的项目的ID
 let in_out_list = [] //存放出度入度节点
 let actual_edges = [] //存放原有的线以及拆分后的线ID
 let smell_data_global = [] //存放异味信息
+let smell_info_global = [] //存放异味统计信息
 let smell_hover_nodes = [] //存放当前鼠标悬停异味节点数组
 let reliable_dependency_list = [];//存放可确定依赖关系
 let unreliable_dependency_list = [];//存放不可信依赖关系
@@ -238,7 +240,7 @@ const tooltip = new G6.Tooltip({
     getContent(e) {
         $(".g6-component-tooltip").css({"left": e.clientX + 20 + "px", "top": e.clientY + 20 + "px"});
         const outDiv = document.createElement('div');
-        outDiv.style.width = '500px';
+        outDiv.style.width = '100%';
         let tooltip_html = ``;
         let group = e.item.getModel().group_type;
         let model = e.item.getModel();
@@ -247,8 +249,6 @@ const tooltip = new G6.Tooltip({
                 `<b class="combo_label">${model.name}</b>
                   <ul>
                     <li>ID: ${model.id}</li>
-                    <li>x: ${model.x}</li>
-                    <li>y: ${model.y}</li>
                   </ul>`;
         }else if(group === 'node'){
             tooltip_html =
@@ -259,7 +259,7 @@ const tooltip = new G6.Tooltip({
                     <li>NOC: ${model.noc}</li>
                     <li>NOM: ${model.nom}</li>
                     <li>LOC: ${model.loc}</li>
-                    <li>Score: ${model.score}</li>
+                    <li>Score: ${model.score.toFixed(2)}</li>
                   </ul>`;
         }else{
             tooltip_html =
@@ -436,57 +436,59 @@ function loadPageData() {
                 name_temp["name"] = result[i].name;
                 projectlist.push(name_temp);
 
-                let html = ""
-                html += "<div class = \"combo_div\"><select id = \"multipleProjectSelect\" class=\"selectpicker\">";
+                let html_loadproject = "";
+                html_loadproject += "<div>项目：<select id = \"multipleProjectSelect\" class=\"selectpicker\">";
                 for(let i = 0; i < projectlist.length; i++) {
                     if (i === 0) {
-                        html += "<option selected=\"selected\" value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
+                        html_loadproject += "<option selected=\"selected\" value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
                     } else {
-                        html += "<option value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
+                        html_loadproject += "<option value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
                     }
                 }
-                html += "</select>";
-                html += "<br><button id = \"pckFilterButton\" type=\"button\" class='common_button' " +
+                html_loadproject += "</select>";
+                html_loadproject += "<br><button id = \"multipleProjectsButton\" type=\"button\" class='combo_button layui-btn layui-btn-primary' " +
+                    "style='margin-top: 15px;' onclick= showMultipleButton()>加载项目</button>" +
+
+                    "<button id = \"pckFilterButton\" type=\"button\" class='combo_button layui-btn layui-btn-primary' " +
                     "style='margin-top: 15px' onclick= showFilterWindow()>筛选项目</button>" +
 
-                    "<button id = \"multipleProjectsButton\" type=\"button\" class='common_button' " +
-                    "style='margin-top: 15px; margin-left: 30px' onclick= showMultipleButton()>加载项目</button>" +
+                    "<button id = \"clearFilterButton\" type=\"button\" class='combo_button layui-btn layui-btn-primary' " +
+                    "style='margin-top: 15px;' onclick= clearFilter()>重置筛选</button></div>";
 
-                    "<button id = \"clearFilterButton\" type=\"button\" class='common_button' " +
-                    "style='margin-top: 15px; margin-left: 30px' onclick= clearFilter()>重置筛选</button></div>";
+                let html_loadlink = "";
 
-                html += "<div class = \"combo_div\">"+
+                html_loadlink += "<div>" +
                     "<form role=\"form\">" +
 
-                    "<p><label class = \"AttributionSelectTitle\" style = \"margin-right: 44px\">" +
+                    "<p class='combo_p'><label class = \"AttributionSelectTitle\">" +
                     "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" " +
                     "onclick=\"CancelChildrenChecked('dependsOn')\">Dependency：" +
-                    "</label>" +
+                    "</label></p>" +
 
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsIntensity\" " +
+                    "<p class='combo_p'><input style = \"margin-left:25px;\" type=\"checkbox\" id=\"dependsIntensity\" " +
                     "onclick=\"setParentChecked('dependsOn', 'dependsIntensity')\" name = \"dependsOn_children\">" +
 
-                    "<input  class = \"AttributionSelectInput\" id=\"intensitybelow\" value=\"0.8\">" +
+                    "<input  class = \"AttributionSelectInput layui-input-block\" id=\"intensitybelow\" value=\"0.8\">" +
 
-                    "<select class = \"AttributionSelectSingleSelect\" id=\"intensityCompareSelectBelow\">" +
+                    "<select class = \"AttributionSelectSingleSelect layui-input-block\" id=\"intensityCompareSelectBelow\">" +
                     "<option value=\"<=\" selected = \"selected\"><=</option>" +
                     "<option value=\"<\"><</option></select>" +
 
                     "<label class = \"AttributionSelectLabel\"> &nbsp;Intensity</label>" +
 
-                    "<select class = \"AttributionSelectSingleSelect\" id=\"intensityCompareSelectHigh\">" +
+                    "<select class = \"AttributionSelectSingleSelect layui-input-block\" id=\"intensityCompareSelectHigh\">" +
                     "<option value=\"<=\"><=</option>" +
                     "<option value=\"<\" selected = \"selected\"><</option></select>" +
 
-                    "<input  class = \"AttributionSelectInput\" id=\"intensityhigh\" value=\"1\">" +
+                    "<input  class = \"AttributionSelectInput layui-input-block\" id=\"intensityhigh\" value=\"1\"></p>" +
 
-                    "<label class = \"AttributionSelectLabel\" style = \"margin-left: 80px\">" +
+                    "<p class='combo_p'><label class = \"AttributionSelectLabel\" style = \"margin-left:25px\">" +
                     "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes\" " +
                     "onclick=\"setParentChecked('dependsOn', 'dependsOnTimes')\" name = \"dependsOn_children\"> Times >= " +
-                    "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput\" style='margin-right: 80px' value=\"3\">" +
-                    "</label>" +
+                    "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput layui-input-block\" style='margin-right: 80px' value=\"3\">" +
+                    "</label></p>" +
 
-                    "<label class = \"AttributionSelectLabel\" style = \"margin-right:10px;\">" +
+                    "<p class='combo_p'><label class = \"AttributionSelectLabel\" style = \"margin-left:25px; margin-right:20px;\">" +
                     "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnType\" " +
                     "onclick=\"setParentChecked('dependsOn', 'dependsOnType')\" name = \"dependsOn_children\"> Dependency Type: " +
                     "</label>" +
@@ -496,7 +498,7 @@ function loadPageData() {
                     "<option value=\"INCLUDE\">INCLUDE</option>" +
                     "<option value=\"EXTENDS\">EXTENDS</option>" +
                     "<option value=\"IMPLEMENTS\">IMPLEMENTS</option>" +
-                    "<option value=\"GLOBAL_VARIABLE\">GLOBAL_VARIABLE</option>" +
+                    // "<option value=\"GLOBAL_VARIABLE\">GLOBAL_VARIABLE</option>" +
                     "<option value=\"MEMBER_VARIABLE\">MEMBER_VARIABLE</option>" +
                     "<option value=\"LOCAL_VARIABLE\">LOCAL_VARIABLE</option>" +
                     "<option value=\"CALL\">CALL</option>" +
@@ -512,12 +514,12 @@ function loadPageData() {
                     "</select>" +
                     "</p>";
 
-                html += "<p><label class = \"AttributionSelectTitle\">" +
+                html_loadlink += "<p class='combo_p'><label class = \"AttributionSelectTitle\">" +
                     "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone\" " +
                     "onclick=\"CancelChildrenChecked('clone')\">Clone：" +
-                    "</label>" +
+                    "</label></p>" +
 
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cloneSimilarity\" " +
+                    "<p class='combo_p'><input style = \"margin-right:10px; margin-left:25px; \" type=\"checkbox\" id=\"cloneSimilarity\" " +
                     "onclick=\"setParentChecked('clone', 'cloneSimilarity')\" name = \"clone_children\">" +
                     "<input  class = \"AttributionSelectInput\" id=\"similaritybelow\" value=\"0.7\">" +
 
@@ -533,74 +535,91 @@ function loadPageData() {
 
                     "<input  class = \"AttributionSelectInput\" id=\"similarityhigh\" value=\"1\"></p>";
 
-                html += "<p><label class = \"AttributionSelectTitle\">" +
+                html_loadlink += "<p class='combo_p'><label class = \"AttributionSelectTitle\">" +
                     "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"coChange\" " +
                     "onclick=\"CancelChildrenChecked('coChange')\">Co-change：" +
-                    "</label>" +
-                    "<label class = \"AttributionSelectLabel\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"cochangeTimes\" " +
+                    "</label></p>" +
+
+                    "<p class='combo_p'><label class = \"AttributionSelectLabel\">" +
+                    "<input style = \"margin-right:10px; margin-left:25px;\" type=\"checkbox\" id=\"cochangeTimes\" " +
                     "onclick=\"setParentChecked('coChange', 'cochangeTimes')\" name = \"coChange_children\"> Times >= " +
                     "<input class = \"AttributionSelectInput\" id=\"cochangetimes\" value=\"3\">" +
                     "</label></p>";
 
-                html += "<p><label class = \"combo_title\" style = \"margin-right: 30px\">Smell ：</label>" +
-
-                    "<label class = \"combo_label\" >" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    "id=\"checkbox_Clone\" value='Clone'> Clone " +
-                    "</label>" +
-
-                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    "id=\"checkbox_CyclicDependency\" value='CyclicDependency'> Cyclic Dependency " +
-                    "</label>" +
-
-                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    "id=\"checkbox_HublikeDependency\" value='HubLikeDependency'> Hublike Dependency " +
-                    "</label>" +
-
-                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    "id=\"checkbox_UnstableDependency\" value='UnstableDependency'> Unstable Dependency " +
-                    "</label>" +
-
-                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    "id=\"checkbox_UnutilizedAbstraction\" value='UnutilizedAbstraction'> Unutilized Abstraction " +
-                    "</label>" +
-
-                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    "id=\"checkbox_ImplicitCrossModuleDependency\" value='ImplicitCrossModuleDependency'> Implicit Cross Module Dependency " +
-                    "</label>" +
-
-                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    "id=\"checkbox_GodComponent\" value='GodComponent'> God Component " +
-                    "</label>" +
-
-                    "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    "id=\"checkbox_UnusedInclude\" value='UnusedInclude'> Unused Include " +
-                    "</label>" +
-
-                    "</p>";
-
-                html += "<p><div style=\"margin-top: 10px;\">" +
-                    "<button class = \"common_button\" type=\"button\" onclick= filterLinks() >筛选连线</button>" +
-                    "<button class = \"common_button\" type=\"button\" onclick= loadSmell() style = \"margin-left: 30px\">加载异味</button>" +
-                    "<button class = \"common_button\" type=\"button\" onclick= deleteSmell() style = \"margin-left: 30px\">删除异味</button>" +
-                    "<button id = \"unreliableDependencyFile\" class = \"common_button\" type=\"button\" " +
-                    "onclick= loadUnreliableDependency() style = \"margin-left: 30px\">加载不可依赖关系</button>" +
+                html_loadlink += "<p><div style=\"margin-top: 10px;\">" +
+                    "<button class = \"combo_button layui-btn layui-btn-primary\" type=\"button\" onclick= filterLinks() >筛选连线</button>" +
+                    "<button id = \"unreliableDependencyFile\" class = \"combo_button layui-btn layui-btn-primary\" type=\"button\" " +
+                    "onclick= loadUnreliableDependency()>加载不可依赖关系</button>" +
                     "<input type=\"file\" accept=\".json\" id=\"unreliable_dependency_file\" " +
                     "onchange='setUnreliableDependency()' style=\"display:none\">" +
                     "</div></p>";
 
-                html += "</form>" +
+                html_loadlink += "</form>" +
                     "</div>";
 
-                $("#combo_util").html(html);
+                let html_loadsmell = "";
+
+                html_loadsmell += "<p class='combo_p'><label class = \"combo_title\" style = \"margin-right: 10px\">Smell Type：</label>";
+
+                    // "<label class = \"combo_label\" >" +
+                    // "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    // "id=\"checkbox_Clone\" value='Clone'> Clone " +
+                    // "</label>" +
+                    //
+                    // "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    // "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    // "id=\"checkbox_CyclicDependency\" value='CyclicDependency'> Cyclic Dependency " +
+                    // "</label>" +
+                    //
+                    // "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    // "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    // "id=\"checkbox_HublikeDependency\" value='HubLikeDependency'> Hublike Dependency " +
+                    // "</label>" +
+                    //
+                    // "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    // "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    // "id=\"checkbox_UnstableDependency\" value='UnstableDependency'> Unstable Dependency " +
+                    // "</label>" +
+                    //
+                    // "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    // "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    // "id=\"checkbox_UnutilizedAbstraction\" value='UnutilizedAbstraction'> Unutilized Abstraction " +
+                    // "</label>" +
+                    //
+                    // "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    // "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    // "id=\"checkbox_ImplicitCrossModuleDependency\" value='ImplicitCrossModuleDependency'> Implicit Cross Module Dependency " +
+                    // "</label>" +
+                    //
+                    // "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    // "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    // "id=\"checkbox_GodComponent\" value='GodComponent'> God Component " +
+                    // "</label>" +
+                    //
+                    // "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
+                    // "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
+                    // "id=\"checkbox_UnusedInclude\" value='UnusedInclude'> Unused Include " +
+                    // "</label>" +
+                    //
+                    // "</p>";
+
+                html_loadsmell += "<select id = \"smellTypeSelect\" class=\"selectpicker\">";
+                html_loadsmell += "<option value=\"Clone\">Clone</option>";
+                html_loadsmell += "<option value=\"CyclicDependency\">Cyclic Dependency</option>";
+                html_loadsmell += "<option value=\"HubLikeDependency\">Hublike Dependency</option>";
+                html_loadsmell += "<option value=\"UnstableDependency\">Unstable Dependency</option>";
+                html_loadsmell += "<option value=\"UnutilizedAbstraction\">Unutilized Abstraction</option>";
+                html_loadsmell += "<option value=\"ImplicitCrossModuleDependency\">Implicit Cross Module Dependency</option>";
+                html_loadsmell += "<option value=\"GodComponent\">God Component</option>";
+                html_loadsmell += "<option value=\"UnusedInclude\">Unused Include</option>";
+                html_loadsmell += "</select></p>";
+
+                html_loadsmell += "<p class='combo_p'><button class = \"combo_button layui-btn layui-btn-primary\" type=\"button\" onclick= loadSmellByButton()>加载异味</button>" +
+                    "<button class = \"combo_button layui-btn layui-btn-primary\" type=\"button\" onclick= deleteSmell()>删除异味</button></p>";
+
+                $("#load_dependencylink").html(html_loadlink);
+                $("#load_project").html(html_loadproject);
+                $("#analyse_smell").html(html_loadsmell);
                 $(".selectpicker").selectpicker({
                     actionsBox:true,
                     countSelectedText:"已选中{0}项",
@@ -640,15 +659,15 @@ function projectGraphAjax(projectIds){
 }
 
 function showMultipleButton(){
-    let value = $('#multipleProjectSelect').val();
+    projectId = $('#multipleProjectSelect').val();
     $('#multipleProjectsButton').css('background-color', '#f84634');
     projectList_global = [];
-    projectList_global = value;
+    projectList_global = projectId;
     let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
         "<div class='loading_window' id='Id_loading_window' style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">调用数据接口...</div>" +
         "</div>";
     loading_div.html(html);
-    projectGraphAjax(value);
+    projectGraphAjax(projectId);
 
 }
 
@@ -660,7 +679,8 @@ function DrawComboChart(json_data){
     actual_edges = [];
     let package_data = json_data[0]["result"]["nodes"];
     let link_data = json_data[1]["links"];
-    smell_data_global = json_data[2]["smell"];
+    smell_data_global = json_data[2]["smell_data"];
+    smell_info_global = json_data[2]["smell_info"];
 
     let temp_nodes = [];
     let temp_combos = [];
@@ -883,6 +903,23 @@ function DrawComboChart(json_data){
         }
 
         loading_div.html("");
+
+        smell_info_global.forEach(smell_info => {
+            if(smell_info.projectId.toString() === projectId){
+                let data = {};
+                let xAxis = [];
+                let yAxis = [];
+
+                smell_info.project_smell_info.forEach(item => {
+                    xAxis.push(item.smell_type);
+                    yAxis.push(item.smell_num);
+                })
+
+                data.xAxis = xAxis;
+                data.yAxis = yAxis;
+                _histogram(data, "histogram_smell");
+            }
+        })
     }
 }
 
@@ -1360,22 +1397,33 @@ function splitLinks(links_data){
     return temp_edges;
 }
 
-function loadSmell(){
-    deleteSmell();
+function loadSmellByButton(){
+    let smell_data = [];
 
-    let smell_type_filter = $("input[name='smell_radio']:checked").val();
+    let smell_type_filter = $('#smellTypeSelect').val();
     smell_data_global.forEach(smell => {
         if(smell.smell_type === smell_type_filter) {
-            smell.nodes.forEach(node_data => {
-                const node = graph.findById(node_data.id.split("_")[1]);
-                if(typeof(node) !== "undefined"){
-                    node._cfg.model.smellId = smell.id;
-                    node._cfg.model.smellType = smell.smell_type;
-                    node._cfg.model.smellName = smell.name;
-                    graph.setItemState(node, 'smell_normal', true);
-                }
-            })
+            smell_data.push(smell);
         }
+    })
+
+    loadSmell(smell_data);
+}
+
+function loadSmell(smell_data){
+    deleteSmell();
+
+    smell_data.forEach(smell => {
+        smell.nodes.forEach(node_data => {
+            const node = graph.findById(node_data.id.split("_")[1]);
+            if(typeof(node) !== "undefined"){
+                let node_model = node._cfg.model;
+                node_model.smellId = smell.id;
+                node_model.smellType = smell.smell_type;
+                node_model.smellName = smell.name;
+                graph.setItemState(node, 'smell_normal', true);
+            }
+        })
     })
 }
 
@@ -1384,8 +1432,46 @@ function deleteSmell(){
     nodes.forEach((node) => {
         node._cfg.model.smellId = 0;
         node._cfg.model.smellType = "";
-        ode._cfg.model.smellName = "";
+        node._cfg.model.smellName = "";
         graph.setItemState(node, 'smell_normal', false);
+    });
+}
+
+function loadSmellTable(smell_data){
+    let table_data = [];
+
+    smell_data.forEach(smell => {
+        let tmp = {};
+        tmp.smellId = smell.id;
+        tmp.smellInfo = "\"" + smell.nodes[0].name + "\"等 " + smell.nodes.length + " 个文件";
+        table_data.push(tmp);
+    })
+
+    layui.use('table', function(){
+        let table = layui.table;
+
+        table.render({
+            elem: '#table_smell',
+            height: 500,
+            data: table_data,
+            page: true,
+            cols: [[
+                {field: 'smellId', title: 'Smell ID', width:100, sort: true, fixed: 'left'},
+                {field: 'smellInfo', title: 'Smell Info', width:300}]]
+        });
+
+        table.on('row(table_smell)', function(obj){
+            let smell_data_single = [];
+            // console.log(obj.data) //得到当前行数据
+            smell_data_global.forEach(smell => {
+                if(smell.id === obj.data.smellId){
+                    smell_data_single.push(smell);
+                }
+            })
+
+            loadSmell(smell_data_single);
+        });
+
     });
 }
 
@@ -1939,6 +2025,68 @@ function setParentChecked(parent_name, children_id){
     }
 }
 
+function _histogram(data, divId) {
+    let histogramChart = echarts.init(document.getElementById(divId));
+    let option = {
+        dataZoom: [{
+            type: 'slider',
+            show: true,
+            xAxisIndex: [0],
+            left: '9%',
+            bottom: -5,
+            start: 0,
+            end: 100
+        }],
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            }
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis: [{
+            name: "Smell Type",
+            type: 'category',
+            data: data.xAxis,
+            axisLabel: {
+                interval:0,
+                rotate:40
+            }
+        }
+        ],
+        yAxis: [{
+            type: 'value'
+        }
+        ],
+        series: [{
+            name: "Smell Files",
+            type: 'bar',
+            stack: 'smellFiles',
+            data: data.yAxis
+        }
+        ]
+    };
+    histogramChart.setOption(option);
+    histogramChart.off('click');
+    histogramChart.on('click', function(params) {
+        let smell_data = [];
+
+        smell_data_global.forEach(smell => {
+            if(smell.smell_type === params.name && smell.project_belong.toString() === projectId){
+                smell_data.push(smell);
+            }
+        })
+
+        loadSmell(smell_data);
+        loadSmellTable(smell_data);
+    });
+}
+
 if (typeof window !== 'undefined'){
     window.onresize = () => {
         if (!graph || graph.get('destroyed')) return;
@@ -1947,14 +2095,3 @@ if (typeof window !== 'undefined'){
     };
 }
 
-// $('#unreliable_dependency_file').onchange = function(){
-//     let resultFile = this.files[0];
-//     console.log('文件信息---',resultFile)
-//     // if (resultFile[0]) {
-//     //     let reader = new FileReader();
-//     //     reader.readAsDataURL(resultFile[0]);
-//     //     reader.onload = function (e) {
-//     //         $('.previewImg').attr('src',this.result);
-//     //     }
-//     // }
-// };

@@ -119,9 +119,9 @@ var clone = function(cytoscapeutil) {
 				}
 				html += "</table>";
 				$("#packages_clone").html(html);
-				$(".package").click(function() {
-					doublePackagesCloneWithCoChange($(this).attr("id1"), $(this).attr("id2"), $(this).attr("index"));
-				});
+				// $(".package").click(function() {
+				// 	doublePackagesCloneWithCoChange($(this).attr("id1"), $(this).attr("id2"), $(this).attr("index"));
+				// });
 			}
 		});
 	}

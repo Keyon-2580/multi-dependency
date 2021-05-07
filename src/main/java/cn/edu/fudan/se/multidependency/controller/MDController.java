@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import cn.edu.fudan.se.multidependency.service.query.smell.MultipleArchitectureSmellDetector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
@@ -12,7 +13,9 @@ import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller
 public class MDController {
-	
+	@Autowired
+	private MultipleArchitectureSmellDetector detector;
+
 	@Autowired
 	private NodeService nodeService;
 	

@@ -18,7 +18,9 @@ public interface BasicSmellQueryService {
 
 	Collection<Smell> findSmellsByLevel(String level);
 
-	JSONArray smellsToGraph();
+	JSONArray smellDataToGraph();
+
+	JSONArray smellInfoToGraph(long projectId);
 
 	Metric findMetricBySmellId(long smellId);
 }

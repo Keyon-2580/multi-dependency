@@ -11,9 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class BasicSmellQueryServiceImpl implements BasicSmellQueryService {
@@ -32,18 +30,20 @@ public class BasicSmellQueryServiceImpl implements BasicSmellQueryService {
 	}
 
 	@Override
-	public JSONArray smellsToGraph(){
-		JSONArray smellArray = new JSONArray();
+	public JSONArray smellDataToGraph(){
+		JSONArray smellDataArray = new JSONArray();
 		try {
 			Collection<Smell> smellGroups = findSmellsByLevel(SmellLevel.FILE);
 
 			for(Smell smell : smellGroups){
+
 				JSONObject temp_smell = new JSONObject();
 				JSONArray temp_nodes = new JSONArray();
 				temp_smell.put("name", smell.getName());
 				temp_smell.put("id", smell.getId());
 				temp_smell.put("smell_type", smell.getType());
 				temp_smell.put("smell_level", smell.getLevel());
+				temp_smell.put("project_belong", smell.getProjectId());
 
 				for(Node node : smell.getNodes()){
 					ProjectFile file = (ProjectFile)node;
@@ -56,12 +56,38 @@ public class BasicSmellQueryServiceImpl implements BasicSmellQueryService {
 				}
 
 				temp_smell.put("nodes", temp_nodes);
-				smellArray.add(temp_smell);
+				smellDataArray.add(temp_smell);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return smellArray;
+
+		return smellDataArray;
+	}
+
+	@Override
+	public JSONArray smellInfoToGraph(long projectId){
+		JSONArray smellInfoArray = new JSONArray();
+
+		try {
+			Collection<Smell> smellGroups = findSmellsByLevel(SmellLevel.FILE);
+			List<String> smellTypeList = new ArrayList<>();
+
+			for(Smell smell : smellGroups) {
+				if (!smellTypeList.contains(smell.getType()) && smell.getProjectId().equals(projectId)) {
+					smellTypeList.add(smell.getType());
+					JSONObject smellTypeInfo = new JSONObject();
+					smellTypeInfo.put("smell_type", smell.getType());
+					smellTypeInfo.put("smell_num", smellRepository.findSmellsCount(smell.getLevel(), smell.getType()));
+
+					smellInfoArray.add(smellTypeInfo);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return smellInfoArray;
 	}
 
 	@Override
