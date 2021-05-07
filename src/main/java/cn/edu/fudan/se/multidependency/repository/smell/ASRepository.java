@@ -26,15 +26,15 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 	public List<Commit> findCommitsUsingForIssue(@Param("id") long fileId);
 	
 	@Query("match (project:Project)-[:CONTAIN*2]->(file:ProjectFile) where id(project)=$id "
-			+ "with file, size((file)-[:DEPENDS_ON]->()) as fanOut, size((file)<-[:DEPENDS_ON]-()) as fanIn "
+			+ "with distinct file, size((file)-[:DEPENDS_ON]->(:ProjectFile)) as fanOut, size((file)<-[:DEPENDS_ON]-(:ProjectFile)) as fanIn "
 			+ "where fanOut >= $fanOut and fanIn >= $fanIn return file, fanIn, fanOut "
 			+ "order by fanIn + fanOut desc;")
 	public List<FileHubLike> findFileHubLikes(@Param("id") long projectId, @Param("fanIn") int fanIn, @Param("fanOut") int fanOut);
 
 	@Query("match (project:Project)-[:CONTAIN]->(pck:Package) where id(project) = $id "
-			+ "with pck, size((pck)-[:DEPENDS_ON]->(:Package)) as fanOut, "
-			+ "size((pck)<-[:DEPENDS_ON]-(:Package)) as fanIn "
-			+ "where fanOut >= $fanOut and fanIn >= $fanIn return pck, fanOut, fanIn;")
+			+ "with pck, size((pck)-[:DEPENDS_ON]->(:Package)) as fanOut, size((pck)<-[:DEPENDS_ON]-(:Package)) as fanIn "
+			+ "where fanOut >= $fanOut and fanIn >= $fanIn return pck, fanOut, fanIn "
+			+ "order by fanIn + fanOut desc;")
 	public List<PackageHubLike> findPackageHubLikes(@Param("id") long projectId, @Param("fanIn") int fanIn, @Param("fanOut") int fanOut);
 
 	@Query("match (project:Project)-[:CONTAIN]->(module:Module) where id(project) = $id "

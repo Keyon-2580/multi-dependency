@@ -222,9 +222,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		if(project == null) {
 			return new ArrayList<>();
 		}
-		List<FileHubLike> result = asRepository.findFileHubLikes(project.getId(), minFanIn, minFanOut);
-		result.sort((p1, p2) -> (p2.getFanIn() + p2.getFanOut()) - (p1.getFanIn() + p1.getFanOut()));
-		return result;
+		return asRepository.findFileHubLikes(project.getId(), minFanIn, minFanOut);
 //		List<FileHubLike> result = new ArrayList<>();
 //		if(project == null) {
 //			return result;
@@ -275,9 +273,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 		if(project == null) {
 			return new ArrayList<>();
 		}
-		List<PackageHubLike> result = asRepository.findPackageHubLikes(project.getId(), minFanIn, minFanOut);
-		result.sort((p1, p2) -> (int) ((p2.getFanIn() + p2.getFanOut()) - (p1.getFanIn() + p1.getFanOut())));
-		return result;
+		return asRepository.findPackageHubLikes(project.getId(), minFanIn, minFanOut);
 	}
 
 	public List<ModuleHubLike> moduleHubLikes(Project project, int minFanIn, int minFanOut) {
