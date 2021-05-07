@@ -26,7 +26,7 @@ let unusedInclude = function() {
 						let fileUnusedInclude = fileUnusedIncludeList[fileIndex];
 						html += "<tr>";
 						html += "<td style='text-align: center; vertical-align: middle'>" +
-							"<a target='_blank' href='/as/smellgraph/" + project.id + "?smelltype=" + SMELL_TYPE + "&smelllevel=" + SMELL_FILE_LEVEL + "&smellindex=" + index + "'>" + index + "</a>" +
+							"<a target='_blank' href='/as/smellgraph" + "?projectid=" + project.id + "&smelltype=" + SMELL_TYPE + "&smelllevel=" + SMELL_FILE_LEVEL + "&smellindex=" + index + "'>" + index + "</a>" +
 							"</td>";
 						html += "<td style='vertical-align: middle'>" + fileUnusedInclude.coreFile.path + "</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + fileUnusedInclude.unusedIncludeFiles.length + "</td>";

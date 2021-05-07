@@ -376,9 +376,9 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		JSONArray nodesJson = new JSONArray();
 		JSONArray edgesJson = new JSONArray();
 		JSONArray smellsJson = new JSONArray();
-		List<Smell> smells = new ArrayList<>(smellRepository.findProjectSmellsByName(projectId, smellName));
+		Smell smell = smellRepository.findProjectSmellsByName(projectId, smellName);
 		List<Type> types = new ArrayList<>();
-		for (Smell smell : smells) {
+		if (smell != null) {
 			JSONObject smellJson = new JSONObject();
 			smellJson.put("name", smell.getName());
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
@@ -439,69 +439,8 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 
 	@Override
 	public JSONObject getFileCyclicDependencyJson(Long projectId, String smellName) {
-		JSONObject result = new JSONObject();
-		JSONArray nodesJson = new JSONArray();
-		JSONArray edgesJson = new JSONArray();
-		JSONArray smellsJson = new JSONArray();
-		List<Smell> smells = new ArrayList<>(smellRepository.findProjectSmellsByName(projectId, smellName));
-		List<ProjectFile> files = new ArrayList<>();
-		for (Smell smell : smells) {
-			JSONObject smellJson = new JSONObject();
-			smellJson.put("name", smell.getName());
-			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
-			List<ProjectFile> smellFiles = new ArrayList<>();
-			for (Node containedNode : containedNodes) {
-				smellFiles.add((ProjectFile) containedNode);
-			}
-			JSONArray smellNodesJson = new JSONArray();
-			for (ProjectFile smellFile : smellFiles) {
-				if (!files.contains(smellFile)) {
-					files.add(smellFile);
-				}
-				JSONObject smellNodeJson = new JSONObject();
-				smellNodeJson.put("index", files.indexOf(smellFile) + 1);
-				smellNodeJson.put("path", smellFile.getPath());
-				smellNodesJson.add(smellNodeJson);
-			}
-			smellJson.put("nodes", smellNodesJson);
-			smellsJson.add(smellJson);
-		}
-		int length = files.size();
-		for (int i = 0; i < length; i ++) {
-			ProjectFile sourceFile = files.get(i);
-			JSONObject nodeJson = new JSONObject();
-			nodeJson.put("id", sourceFile.getId().toString());
-			nodeJson.put("name", sourceFile.getName());
-			nodeJson.put("path", sourceFile.getPath());
-			nodeJson.put("label", i + 1);
-			nodeJson.put("size", getSizeOfFileByLoc(sourceFile.getLoc()));
-			nodesJson.add(nodeJson);
-			for (int j = 0 ; j < length; j ++) {
-				ProjectFile targetFile = files.get(j);
-				if (i != j) {
-					DependsOn dependsOn = dependsOnRepository.findDependsOnBetweenFiles(sourceFile.getId(), targetFile.getId());
-					if (dependsOn != null) {
-						JSONObject edgeJson = new JSONObject();
-						edgeJson.put("id", dependsOn.getId().toString());
-						edgeJson.put("source", sourceFile.getId().toString());
-						edgeJson.put("target", targetFile.getId().toString());
-						edgeJson.put("source_name", sourceFile.getName());
-						edgeJson.put("target_name", targetFile.getName());
-						edgeJson.put("source_label", i + 1);
-						edgeJson.put("target_label", j + 1);
-						edgeJson.put("times", dependsOn.getTimes());
-						edgeJson.put("dependsOnTypes", dependsOn.getDependsOnTypes());
-						edgesJson.add(edgeJson);
-					}
-				}
-			}
-		}
-		result.put("smellType", SmellType.CYCLIC_DEPENDENCY);
-		result.put("coreNode", "0");
-		result.put("nodes", nodesJson);
-		result.put("edges", edgesJson);
-		result.put("smells", smellsJson);
-		return result;
+		Smell smell = smellRepository.findProjectSmellsByName(projectId, smellName);
+		return getFileCyclicDependencyJson(smell);
 	}
 
 	@Override
@@ -510,9 +449,9 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		JSONArray nodesJson = new JSONArray();
 		JSONArray edgesJson = new JSONArray();
 		JSONArray smellsJson = new JSONArray();
-		List<Smell> smells = new ArrayList<>(smellRepository.findProjectSmellsByName(projectId, smellName));
+		Smell smell = smellRepository.findProjectSmellsByName(projectId, smellName);
 		List<Package> packages = new ArrayList<>();
-		for (Smell smell : smells) {
+		if (smell != null) {
 			JSONObject smellJson = new JSONObject();
 			smellJson.put("name", smell.getName());
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
@@ -572,14 +511,18 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 	}
 
 	@Override
-	public JSONObject getFileCyclicDependencyJson(Long fileId) {
+	public JSONObject getFileCyclicDependencyJson(Long smellId) {
+		Smell smell = smellRepository.findSmell(smellId);
+		return getFileCyclicDependencyJson(smell);
+	}
+
+	public JSONObject getFileCyclicDependencyJson(Smell smell) {
 		JSONObject result = new JSONObject();
 		JSONArray nodesJson = new JSONArray();
 		JSONArray edgesJson = new JSONArray();
 		JSONArray smellsJson = new JSONArray();
-		List<Smell> smells = new ArrayList<>(smellRepository.getSmellsWithFileId(fileId));
 		List<ProjectFile> files = new ArrayList<>();
-		for (Smell smell : smells) {
+		if (smell != null) {
 			JSONObject smellJson = new JSONObject();
 			smellJson.put("name", smell.getName());
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
@@ -631,7 +574,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 			}
 		}
 		result.put("smellType", SmellType.CYCLIC_DEPENDENCY);
-		result.put("coreNode", fileId.toString());
+		result.put("coreNode", "0");
 		result.put("nodes", nodesJson);
 		result.put("edges", edgesJson);
 		result.put("smells", smellsJson);

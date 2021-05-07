@@ -59,7 +59,7 @@ public interface CyclicDependencyDetector {
 	/**
 	 * 根据file的Id生成文件所在的循环依赖的json格式信息
 	 */
-	JSONObject getFileCyclicDependencyJson(Long fileId);
+	JSONObject getFileCyclicDependencyJson(Long smellId);
 
 	void exportCycleDependency();
 }

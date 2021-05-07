@@ -485,7 +485,7 @@ public class BeanCreator {
 				smellDetectorService.createHubLikeDependencySmells(false);
 
 				LOGGER.info("创建Unstable Dependency Smell节点关系...");
-				smellDetectorService.createUnstableDependencySmells(true);
+				smellDetectorService.createUnstableDependencySmells(false);
 
 				LOGGER.info("创建Unused Include Smell节点关系...");
 				smellDetectorService.createUnusedIncludeSmells(false);
