@@ -90,7 +90,7 @@ var loadPageData = function (){
                 html += "<li class=\"my_common_list_li\">";
                 html += "<label  class=\"my_common_list_td\" style='width: 6%'>" + (i + 1) + "</label>";
                 html += "<label  class=\"my_common_list_td\" style='width: 6%'>" + projectMetricsList.project.id + "</label>";
-                html += "<a class=\"my_common_list_a\" style='width: 20%' href='" + combo_url + "' target='_blank' >" + projectMetricsList.project.name + " (" + projectMetricsList.project.language + ") " + "</a>";
+                html += "<a class=\"my_common_list_a\" style='width: 20%' href='" + combo_url + "' target='_blank'>" + projectMetricsList.project.name + " (" + projectMetricsList.project.language + ") " + "</a>";
                 html += "<label  class=\"my_common_list_td\">" + projectMetricsList.nop + "</label>";
                 html += "<label  class=\"my_common_list_td\">" + projectMetricsList.nof + "</label>";
                 html += "<label  class=\"my_common_list_td\">" + projectMetricsList.nom + "</label>";
