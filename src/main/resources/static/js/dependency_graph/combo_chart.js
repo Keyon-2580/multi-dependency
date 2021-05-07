@@ -1,7 +1,7 @@
 let data = {};
 let projectList_global; //存放选定项目列表
 let projectList_filter; //存放正在筛选的项目列表
-let projectId; //存放当前展示的项目的ID
+let projectId_global = ""; //存放当前展示的项目的ID
 let in_out_list = [] //存放出度入度节点
 let actual_edges = [] //存放原有的线以及拆分后的线ID
 let smell_data_global = [] //存放异味信息
@@ -414,6 +414,13 @@ function main(projectId) {
     return {
         init : function() {
             if(projectId !== ""){
+                projectId_global = projectId;
+                $(".selectpicker").selectpicker('val', projectId_global);
+                $('#multipleProjectsButton').css('background-color', '#f84634');
+                let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
+                    "<div class='loading_window' id='Id_loading_window' style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">调用数据接口...</div>" +
+                    "</div>";
+                loading_div.html(html);
                 projectGraphAjax(projectId);
             }
 
@@ -439,10 +446,18 @@ function loadPageData() {
                 let html_loadproject = "";
                 html_loadproject += "<div>项目：<select id = \"multipleProjectSelect\" class=\"selectpicker\">";
                 for(let i = 0; i < projectlist.length; i++) {
-                    if (i === 0) {
-                        html_loadproject += "<option selected=\"selected\" value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
-                    } else {
-                        html_loadproject += "<option value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
+                    if(projectId_global === ""){
+                        if (i === 0) {
+                            html_loadproject += "<option selected=\"selected\" value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
+                        } else {
+                            html_loadproject += "<option value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
+                        }
+                    }else{
+                        if(projectlist[i].id.toString() === projectId_global){
+                            html_loadproject += "<option selected=\"selected\" value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
+                        }else{
+                            html_loadproject += "<option value=\"" + projectlist[i].id + "\"> " + projectlist[i].name + "</option>";
+                        }
                     }
                 }
                 html_loadproject += "</select>";
@@ -559,49 +574,7 @@ function loadPageData() {
 
                 let html_loadsmell = "";
 
-                html_loadsmell += "<p class='combo_p'><label class = \"combo_title\" style = \"margin-right: 10px\">Smell Type：</label>";
-
-                    // "<label class = \"combo_label\" >" +
-                    // "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    // "id=\"checkbox_Clone\" value='Clone'> Clone " +
-                    // "</label>" +
-                    //
-                    // "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    // "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    // "id=\"checkbox_CyclicDependency\" value='CyclicDependency'> Cyclic Dependency " +
-                    // "</label>" +
-                    //
-                    // "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    // "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    // "id=\"checkbox_HublikeDependency\" value='HubLikeDependency'> Hublike Dependency " +
-                    // "</label>" +
-                    //
-                    // "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    // "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    // "id=\"checkbox_UnstableDependency\" value='UnstableDependency'> Unstable Dependency " +
-                    // "</label>" +
-                    //
-                    // "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    // "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    // "id=\"checkbox_UnutilizedAbstraction\" value='UnutilizedAbstraction'> Unutilized Abstraction " +
-                    // "</label>" +
-                    //
-                    // "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    // "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    // "id=\"checkbox_ImplicitCrossModuleDependency\" value='ImplicitCrossModuleDependency'> Implicit Cross Module Dependency " +
-                    // "</label>" +
-                    //
-                    // "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    // "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    // "id=\"checkbox_GodComponent\" value='GodComponent'> God Component " +
-                    // "</label>" +
-                    //
-                    // "<label class = \"combo_label\" style = \"margin-left: 40px\">" +
-                    // "<input name=\"smell_radio\" style = \"margin-right:4px;\" type=\"radio\" " +
-                    // "id=\"checkbox_UnusedInclude\" value='UnusedInclude'> Unused Include " +
-                    // "</label>" +
-                    //
-                    // "</p>";
+                html_loadsmell += "<p class='combo_p'><label class = \"combo_title\" style = \"font-size: 16px; margin-right: 3px\">Smell Type：</label>";
 
                 html_loadsmell += "<select id = \"smellTypeSelect\" class=\"selectpicker\">";
                 html_loadsmell += "<option value=\"Clone\">Clone</option>";
@@ -615,7 +588,7 @@ function loadPageData() {
                 html_loadsmell += "</select></p>";
 
                 html_loadsmell += "<p class='combo_p'><button class = \"combo_button layui-btn layui-btn-primary\" type=\"button\" onclick= loadSmellByButton()>加载异味</button>" +
-                    "<button class = \"combo_button layui-btn layui-btn-primary\" type=\"button\" onclick= deleteSmell()>删除异味</button></p>";
+                    "<button class = \"combo_button layui-btn layui-btn-primary\" style='margin-left: ' type=\"button\" onclick= deleteSmell()>删除异味</button></p>";
 
                 $("#load_dependencylink").html(html_loadlink);
                 $("#load_project").html(html_loadproject);
@@ -659,15 +632,15 @@ function projectGraphAjax(projectIds){
 }
 
 function showMultipleButton(){
-    projectId = $('#multipleProjectSelect').val();
+    projectId_global = $('#multipleProjectSelect').val();
     $('#multipleProjectsButton').css('background-color', '#f84634');
     projectList_global = [];
-    projectList_global = projectId;
+    projectList_global = projectId_global;
     let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
         "<div class='loading_window' id='Id_loading_window' style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">调用数据接口...</div>" +
         "</div>";
     loading_div.html(html);
-    projectGraphAjax(projectId);
+    projectGraphAjax(projectId_global);
 
 }
 
@@ -905,7 +878,7 @@ function DrawComboChart(json_data){
         loading_div.html("");
 
         smell_info_global.forEach(smell_info => {
-            if(smell_info.projectId.toString() === projectId){
+            if(smell_info.projectId.toString() === projectId_global){
                 let data = {};
                 let xAxis = [];
                 let yAxis = [];
@@ -2077,7 +2050,7 @@ function _histogram(data, divId) {
         let smell_data = [];
 
         smell_data_global.forEach(smell => {
-            if(smell.smell_type === params.name && smell.project_belong.toString() === projectId){
+            if(smell.smell_type === params.name && smell.project_belong.toString() === projectId_global){
                 smell_data.push(smell);
             }
         })

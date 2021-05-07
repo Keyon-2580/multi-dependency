@@ -29780,10 +29780,6 @@ function init(dom, theme$$1, opts) {
                 || (!dom.clientHeight && (!opts || opts.height == null))
             )
         ) {
-            console.warn('Can\'t get DOM width or height. Please check '
-            + 'dom.clientWidth and dom.clientHeight. They should not be 0.'
-            + 'For example, you may need to call this in the callback '
-            + 'of window.onload.');
         }
     }
 
