@@ -3,7 +3,6 @@ package cn.edu.fudan.se.multidependency.repository.smell;
 import cn.edu.fudan.se.multidependency.model.IssueType;
 import cn.edu.fudan.se.multidependency.model.node.Metric;
 import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
@@ -21,6 +20,9 @@ import java.util.Set;
 @Repository
 public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 
+	@Query("match p = (smell:Smell) where id(smell) = $smellId return distinct smell")
+	Smell findSmell(@Param("smellId") Long smellId);
+
 	@Query("match p = (smell:Smell) where smell.level = $level return smell")
 	List<Smell> findSmells(@Param("level") String level);
 
@@ -35,7 +37,7 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 	List<Smell> findSmellsByType(@Param("type") String type);
 
 	@Query("match p = (smell:Smell) where smell.projectId = $projectId and smell.name = $name return smell")
-	List<Smell> findProjectSmellsByName(@Param("projectId") Long projectId, @Param("name") String name);
+	Smell findProjectSmellsByName(@Param("projectId") Long projectId, @Param("name") String name);
 
 	@Query("match p= (smell:Smell) where smell.type = $type return smell limit 10;")
 	List<Smell> findSmellsByTypeWithLimit(@Param("type") String type);

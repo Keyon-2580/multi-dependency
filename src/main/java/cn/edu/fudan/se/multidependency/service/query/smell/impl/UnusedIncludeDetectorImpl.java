@@ -129,130 +129,75 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
 
     @Override
     public JSONObject getFileUnusedIncludeJson(Long projectId, String smellName) {
+        Smell smell = smellRepository.findProjectSmellsByName(projectId, smellName);
+        return getFileUnusedIncludeJson(smell);
+    }
+
+    @Override
+    public JSONObject getFileUnusedIncludeJson(Long smellId) {
+        Smell smell = smellRepository.findSmell(smellId);
+        return getFileUnusedIncludeJson(smell);
+    }
+
+    private JSONObject getFileUnusedIncludeJson(Smell smell) {
         JSONObject result = new JSONObject();
         JSONArray nodesJson = new JSONArray();
         JSONArray edgesJson = new JSONArray();
         JSONArray smellsJson = new JSONArray();
-        List<Smell> smells = smellRepository.findProjectSmellsByName(projectId, smellName);
         List<ProjectFile> files = new ArrayList<>();
         Long coreFileId = 0L;
-        for (Smell smell : smells) {
-            if (smell != null) {
-                ProjectFile coreFile = projectFileRepository.findFileById(smell.getCoreNodeId());
-                if (coreFile != null) {
-                    files.add(coreFile);
-                    coreFileId = coreFile.getId();
-                    JSONObject smellJson = new JSONObject();
-                    smellJson.put("name", smell.getName());
-                    Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
-                    List<ProjectFile> smellFiles = new ArrayList<>();
-                    for (Node containedNode : containedNodes) {
-                        smellFiles.add((ProjectFile) containedNode);
+        if (smell != null) {
+            ProjectFile coreFile = projectFileRepository.findFileById(smell.getCoreNodeId());
+            if (coreFile != null) {
+                files.add(coreFile);
+                coreFileId = coreFile.getId();
+                JSONObject smellJson = new JSONObject();
+                smellJson.put("name", smell.getName());
+                Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
+                List<ProjectFile> smellFiles = new ArrayList<>();
+                for (Node containedNode : containedNodes) {
+                    smellFiles.add((ProjectFile) containedNode);
+                }
+                files.addAll(smellFiles);
+                JSONArray smellNodesJson = new JSONArray();
+                for (ProjectFile smellFile : smellFiles) {
+                    if (!files.contains(smellFile)) {
+                        files.add(smellFile);
                     }
-                    files.addAll(smellFiles);
-                    JSONArray smellNodesJson = new JSONArray();
-                    for (ProjectFile smellFile : smellFiles) {
-                        if (!files.contains(smellFile)) {
-                            files.add(smellFile);
-                        }
-                        JSONObject smellNodeJson = new JSONObject();
-                        smellNodeJson.put("index", files.indexOf(smellFile) + 1);
-                        smellNodeJson.put("path", smellFile.getPath());
-                        smellNodesJson.add(smellNodeJson);
-                    }
-                    smellJson.put("nodes", smellNodesJson);
-                    smellJson.put("coreFilePath", smell.getCoreNodePath());
-                    smellsJson.add(smellJson);
-                    int length = files.size();
-                    for (int i = 0; i < length; i ++) {
-                        ProjectFile file = files.get(i);
-                        JSONObject nodeJson = new JSONObject();
-                        nodeJson.put("id", file.getId().toString());
-                        nodeJson.put("name", file.getName());
-                        nodeJson.put("path", file.getPath());
-                        nodeJson.put("label", i + 1);
-                        nodeJson.put("size", getSizeOfFileByLoc(file.getLoc()));
-                        nodesJson.add(nodeJson);
-                        if (i > 0) {
-                            JSONObject edgeJson = new JSONObject();
-                            edgeJson.put("id", i);
-                            edgeJson.put("source", coreFile.getId().toString());
-                            edgeJson.put("target", file.getId().toString());
-                            edgeJson.put("source_name", coreFile.getName());
-                            edgeJson.put("target_name", file.getName());
-                            edgeJson.put("source_label", 1);
-                            edgeJson.put("target_label", i + 1);
-                            edgesJson.add(edgeJson);
-                        }
+                    JSONObject smellNodeJson = new JSONObject();
+                    smellNodeJson.put("index", files.indexOf(smellFile) + 1);
+                    smellNodeJson.put("path", smellFile.getPath());
+                    smellNodesJson.add(smellNodeJson);
+                }
+                smellJson.put("nodes", smellNodesJson);
+                smellJson.put("coreFilePath", smell.getCoreNodePath());
+                smellsJson.add(smellJson);
+                int length = files.size();
+                for (int i = 0; i < length; i ++) {
+                    ProjectFile file = files.get(i);
+                    JSONObject nodeJson = new JSONObject();
+                    nodeJson.put("id", file.getId().toString());
+                    nodeJson.put("name", file.getName());
+                    nodeJson.put("path", file.getPath());
+                    nodeJson.put("label", i + 1);
+                    nodeJson.put("size", getSizeOfFileByLoc(file.getLoc()));
+                    nodesJson.add(nodeJson);
+                    if (i > 0) {
+                        JSONObject edgeJson = new JSONObject();
+                        edgeJson.put("id", i);
+                        edgeJson.put("source", coreFile.getId().toString());
+                        edgeJson.put("target", file.getId().toString());
+                        edgeJson.put("source_name", coreFile.getName());
+                        edgeJson.put("target_name", file.getName());
+                        edgeJson.put("source_label", 1);
+                        edgeJson.put("target_label", i + 1);
+                        edgesJson.add(edgeJson);
                     }
                 }
             }
         }
         result.put("smellType", SmellType.UNUSED_INCLUDE);
         result.put("coreNode", coreFileId.toString());
-        result.put("nodes", nodesJson);
-        result.put("edges", edgesJson);
-        result.put("smells", smellsJson);
-        return result;
-    }
-
-    @Override
-    public JSONObject getFileUnusedIncludeJson(Long fileId) {
-        JSONObject result = new JSONObject();
-        JSONArray nodesJson = new JSONArray();
-        JSONArray edgesJson = new JSONArray();
-        JSONArray smellsJson = new JSONArray();
-        ProjectFile coreFile = projectFileRepository.findFileById(fileId);
-        Smell smell = smellRepository.getSmellWithCoreFileId(fileId);
-        List<ProjectFile> files = new ArrayList<>();
-        files.add(coreFile);
-        if (coreFile != null && smell != null) {
-            JSONObject smellJson = new JSONObject();
-            smellJson.put("name", smell.getName());
-            Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
-            List<ProjectFile> smellFiles = new ArrayList<>();
-            for (Node containedNode : containedNodes) {
-                smellFiles.add((ProjectFile) containedNode);
-            }
-            files.addAll(smellFiles);
-            JSONArray smellFilesJson = new JSONArray();
-            for (ProjectFile smellFile : smellFiles) {
-                if (!files.contains(smellFile)) {
-                    files.add(smellFile);
-                }
-                JSONObject smellFileJson = new JSONObject();
-                smellFileJson.put("index", files.indexOf(smellFile) + 1);
-                smellFileJson.put("path", smellFile.getPath());
-                smellFilesJson.add(smellFileJson);
-            }
-            smellJson.put("nodes", smellFilesJson);
-            smellJson.put("coreFilePath", smell.getCoreNodePath());
-            smellsJson.add(smellJson);
-            int length = files.size();
-            for (int i = 0; i < length; i ++) {
-                ProjectFile file = files.get(i);
-                JSONObject nodeJson = new JSONObject();
-                nodeJson.put("id", file.getId().toString());
-                nodeJson.put("name", file.getName());
-                nodeJson.put("path", file.getPath());
-                nodeJson.put("label", i + 1);
-                nodeJson.put("size", getSizeOfFileByLoc(file.getLoc()));
-                nodesJson.add(nodeJson);
-                if (i > 0) {
-                    JSONObject edgeJson = new JSONObject();
-                    edgeJson.put("id", i);
-                    edgeJson.put("source", coreFile.getId().toString());
-                    edgeJson.put("target", file.getId().toString());
-                    edgeJson.put("source_name", coreFile.getName());
-                    edgeJson.put("target_name", file.getName());
-                    edgeJson.put("source_label", 1);
-                    edgeJson.put("target_label", i + 1);
-                    edgesJson.add(edgeJson);
-                }
-            }
-        }
-        result.put("smellType", SmellType.UNUSED_INCLUDE);
-        result.put("coreNode", fileId.toString());
         result.put("nodes", nodesJson);
         result.put("edges", edgesJson);
         result.put("smells", smellsJson);
