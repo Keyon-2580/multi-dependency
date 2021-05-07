@@ -295,9 +295,9 @@ const contextMenu = new G6.Menu({
     getContent(evt) {
         let item = evt.item._cfg;
         let html = `<ul class="combo_ul">${item.model.id}_${item.model.name}</ul>`;
-        if(item.model.smellType === "CyclicDependency"){
+        if(item.model.smellType === "CyclicDependency" || item.model.smellType === "UnusedInclude"){
             html += `<ul class="combo_li">
-            <a class="combo_a" href="/as/smellgraph?smelltype=CyclicDependency&fileid=${item.model.id}" target="_blank">打开异味详情</a>
+            <a class="combo_a" href="/as/smellgraph/${item.model.smellId}" target="_blank">打开异味详情</a>
             </ul>`;
         }else if(item.model.smellType === "Clone"){
             html += `<ul class="combo_li">
