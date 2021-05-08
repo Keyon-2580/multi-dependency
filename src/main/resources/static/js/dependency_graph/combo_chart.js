@@ -1980,8 +1980,10 @@ function _project() {
         });
     }
 
+    let project_list = [];
     let value = $('#multipleProjectSelect').val();
-    showProjectZTree(value);
+    project_list.push(value);
+    showProjectZTree(project_list);
 }
 
 //筛选框子控件随着母控件一同取消点选
