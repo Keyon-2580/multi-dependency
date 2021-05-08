@@ -19,8 +19,14 @@ public class MDController {
 	@Autowired
 	private NodeService nodeService;
 	
-	@GetMapping(value= {"/", "/index"})
+	@GetMapping(value= {"/",})
 	public String index(HttpServletRequest request, @RequestHeader HttpHeaders headers) {
+		request.setAttribute("projects", nodeService.allProjects());
+		return "overview";
+	}
+
+	@GetMapping(value= {"/index"})
+	public String index2(HttpServletRequest request, @RequestHeader HttpHeaders headers) {
 		request.setAttribute("projects", nodeService.allProjects());
 		return "index";
 	}
