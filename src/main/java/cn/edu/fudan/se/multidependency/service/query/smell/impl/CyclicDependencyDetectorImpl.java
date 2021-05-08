@@ -600,7 +600,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 
 	@Override
 	public void exportCycleDependency() {
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		Map<Long, List<Cycle<Type>>> cycleTypes = detectTypeCyclicDependency();
 		Map<Long, List<Cycle<ProjectFile>>> cycleFiles = detectFileCyclicDependency();
 		Map<Long, List<Cycle<Package>>> cyclePackages = detectPackageCyclicDependency();

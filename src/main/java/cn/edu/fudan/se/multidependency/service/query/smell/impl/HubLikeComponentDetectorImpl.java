@@ -178,7 +178,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 
 	@Override
 	public Map<Long, List<FileHubLike>> detectFileHubLikeDependency() {
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		Map<Long, List<FileHubLike>> result = new HashMap<>();
 		for(Project project : projects) {
 			result.put(project.getId(), fileHubLikes(project));
@@ -188,7 +188,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 
 	@Override
 	public Map<Long, List<PackageHubLike>> detectPackageHubLikeDependency() {
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		Map<Long, List<PackageHubLike>> result = new HashMap<>();
 		for(Project project : projects) {
 			result.put(project.getId(), packageHubLikes(project));
@@ -198,7 +198,7 @@ public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
 
 	@Override
 	public Map<Long, List<ModuleHubLike>> detectModuleHubLikeDependency() {
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		Map<Long, List<ModuleHubLike>> result = new HashMap<>();
 		for(Project project : projects) {
 			result.put(project.getId(), moduleHubLikes(project));

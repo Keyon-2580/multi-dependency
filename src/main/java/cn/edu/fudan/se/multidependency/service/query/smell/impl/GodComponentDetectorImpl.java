@@ -41,7 +41,7 @@ public class GodComponentDetectorImpl implements GodComponentDetector {
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		Map<Long, List<FileGod>> result = new HashMap<>();
 		for(Project project : projects) {
 			result.put(project.getId(), fileGods(project));
@@ -56,7 +56,7 @@ public class GodComponentDetectorImpl implements GodComponentDetector {
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		Map<Long, List<PackageGod>> result = new HashMap<>();
 		for(Project project : projects) {
 			result.put(project.getId(), packageGod(project));

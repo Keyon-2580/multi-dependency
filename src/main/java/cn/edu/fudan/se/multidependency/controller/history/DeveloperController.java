@@ -60,7 +60,7 @@ public class DeveloperController {
         List<Integer> timeSet = new ArrayList<>();
         List<DeveloperUpdateNode<Package>> packageChangedTime = new ArrayList<>();
         for(Commit commit : commits){
-            List<Package> pcks = commitRepository.queryUpdatedPackageByCommit(commit.getId());
+            List<Package> pcks = commitRepository.queryUpdatedPackageByCommitId(commit.getId());
             for(Package pck : pcks){
                 if(!packageSet.contains(pck)){
                     packageSet.add(pck);

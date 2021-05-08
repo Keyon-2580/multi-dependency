@@ -194,7 +194,7 @@ public class MetricShowService {
 	public void printPackageMetricExcel(OutputStream stream) {
 		Workbook hwb = new XSSFWorkbook();
 		Map<Long, List<PackageMetrics>> allPackageMetrics = metricCalculatorService.calculateProjectPackageMetrics();
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
 			Sheet sheet = hwb.createSheet(new StringBuilder().append(project.getName()).append("(").append(project.getLanguage()).append(")").toString());
 			List<PackageMetrics> packageMetrics = allPackageMetrics.get(project.getId());
@@ -265,7 +265,7 @@ public class MetricShowService {
 	public void printFileMetricExcel(OutputStream stream) {
 		Workbook hwb = new XSSFWorkbook();
 		Map<Long, List<FileMetrics>> allFileMetrics = metricCalculatorService.calculateProjectFileMetrics();
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
 			Sheet sheet = hwb.createSheet(new StringBuilder().append(project.getName()).append("(").append(project.getLanguage()).append(")").toString());
 			List<FileMetrics> fileMetrics = allFileMetrics.get(project.getId());

@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.repository.node;
 import java.util.List;
 
 import cn.edu.fudan.se.multidependency.model.IssueType;
+import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.service.query.ar.DependencyPair;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -249,4 +250,17 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 
 	@Query("MATCH (file:ProjectFile) where id(file) = $fileId return file.fanOut;")
 	Integer getFileFanOutByFileId(@Param("fileId") Long fileId);
+
+	@Query("match (project:Project) where id(project) = $projectId " +
+			"with project " +
+			"match (project)-[:" + RelationType.str_CONTAIN + "*2]->(file:ProjectFile)" +
+			" return count(distinct file);")
+	Integer calculateFileCountByProjectId(@Param("projectId") Long projectId);
+
+	@Query("match (smell:Smell) " +
+			"where smell.projectId = $projectId and smell.type = $smellType and smell.level = '" + SmellLevel.FILE + "' " +
+			"with smell " +
+			"match (smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)" +
+			" return count(distinct file);")
+	Integer calculateFileCountByProjectIdAndSmellType(@Param("projectId") Long projectId, @Param("smellType") String smellType);
 }

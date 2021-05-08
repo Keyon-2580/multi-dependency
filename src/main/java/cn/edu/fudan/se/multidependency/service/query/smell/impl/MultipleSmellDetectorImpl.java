@@ -3,14 +3,20 @@ package cn.edu.fudan.se.multidependency.service.query.smell.impl;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
+import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
+import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
+import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
+import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.*;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
@@ -29,7 +35,7 @@ import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.smell.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.smell.HubLikeComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.smell.ImplicitCrossModuleDependencyDetector;
-import cn.edu.fudan.se.multidependency.service.query.smell.MultipleArchitectureSmellDetector;
+import cn.edu.fudan.se.multidependency.service.query.smell.MultipleSmellDetector;
 import cn.edu.fudan.se.multidependency.service.query.smell.SimilarComponentsDetector;
 import cn.edu.fudan.se.multidependency.service.query.smell.UnstableDependencyDetectorUsingInstability;
 import cn.edu.fudan.se.multidependency.service.query.smell.UnusedComponentDetector;
@@ -40,7 +46,7 @@ import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationSe
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Service
-public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectureSmellDetector {
+public class MultipleSmellDetectorImpl implements MultipleSmellDetector {
 	
 	@Autowired
 	private CyclicDependencyDetector cycleASDetector;
@@ -77,6 +83,15 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 	
 	@Autowired
 	private CacheService cache;
+
+	@Autowired
+	private SmellRepository smellRepository;
+
+	@Autowired
+	private ProjectFileRepository projectFileRepository;
+
+	@Autowired
+	private CommitRepository commitRepository;
 	
 	public int fileCommitsCount(ProjectFile file) {
 		String key = "fileCommitsCount_" + file.getId();
@@ -94,7 +109,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 		Map<Long, List<MultipleASFile>> multipleASFiles = detectMultipleSmellASFiles(true);
 		Map<Long, List<IssueFile>> issueFilesGroupByProject = issueQueryService.queryRelatedFilesOnAllIssuesGroupByProject();
 		
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		
 		for(Project project : projects) {
 			List<CirclePacking> circles = new ArrayList<>();
@@ -144,7 +159,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 		Map<Long, List<IssueFile>> issueFilesGroupByProject = issueQueryService.queryRelatedFilesOnAllIssuesGroupByProject();
 		
 		Map<Long, PieFilesData> result = new HashMap<>();
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		
 		Set<ProjectFile> isSmellFiles = new HashSet<>();
 		Set<ProjectFile> isIssueFiles = new HashSet<>();
@@ -190,6 +205,100 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 			result.put(project.getId(), data);
 		}
 		return result;
+	}
+
+	@Override
+	public Map<Long, JSONObject> getSmellOverview() {
+		String key = "smellOverview";
+		if (cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		Map<Long, JSONObject> result = new HashMap<>();
+		List<Project> projects = nodeService.allProjects();
+		List<String> smellTypes = new ArrayList<>();
+		smellTypes.add(SmellType.CYCLIC_DEPENDENCY);
+		smellTypes.add(SmellType.HUBLIKE_DEPENDENCY);
+		smellTypes.add(SmellType.UNSTABLE_DEPENDENCY);
+		smellTypes.add(SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY);
+		smellTypes.add(SmellType.UNUTILIZED_ABSTRACTION);
+		smellTypes.add(SmellType.UNUSED_INCLUDE);
+		for (Project project : projects) {
+			JSONObject projectSmellOverviewObject = new JSONObject();
+			JSONArray projectSmellArray = new JSONArray();
+			JSONObject projectTotalObject = new JSONObject();
+			for (String smellType : smellTypes) {
+				JSONObject projectSmellObject = new JSONObject();
+				List<Smell> projectSmells = new ArrayList<>(smellRepository.findProjectSmellsByProjectIdAndSmellType(project.getId(), smellType));
+				calculateProjectSmellObject(project.getId(), smellType, projectSmells, projectSmellObject);
+				projectSmellArray.add(projectSmellObject);
+			}
+			calculateProjectTotalObject(project.getId(), projectTotalObject);
+			projectSmellOverviewObject.put("ProjectSmell", projectSmellArray);
+			projectSmellOverviewObject.put("ProjectTotal", projectTotalObject);
+			result.put(project.getId(), projectSmellOverviewObject);
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	private void calculateProjectSmellObject(Long projectId, String smellType, List<Smell> projectSmells, JSONObject projectSmellObject) {
+		int smellCount = projectSmells.size();
+		Integer fileCount = projectFileRepository.calculateFileCountByProjectIdAndSmellType(projectId, smellType);
+		Integer issueCommitCount = commitRepository.calculateIssueCommitCountByProjectIdAndSmellType(projectId, smellType);
+		Integer allCommitCount = commitRepository.calculateAllCommitCountByProjectIdAndSmellType(projectId, smellType);
+		Integer issueChangeLines = commitRepository.calculateIssueChangeLinesByProjectIdAndSmellType(projectId, smellType);
+		Integer allChangeLines = commitRepository.calculateAllChangeLinesByProjectIdAndSmellType(projectId, smellType);
+		if (fileCount == null) {
+			fileCount = 0;
+		}
+		if (issueCommitCount == null) {
+			issueCommitCount = 0;
+		}
+		if (allCommitCount == null) {
+			allCommitCount = 0;
+		}
+		if (issueChangeLines == null) {
+			issueChangeLines = 0;
+		}
+		if (allChangeLines == null) {
+			allChangeLines = 0;
+		}
+		projectSmellObject.put("SmellType", smellType);
+		projectSmellObject.put("SmellCount", smellCount);
+		projectSmellObject.put("FileCount", fileCount);
+		projectSmellObject.put("IssueCommitCount", issueCommitCount);
+		projectSmellObject.put("AllCommitCount", allCommitCount);
+		projectSmellObject.put("IssueChangeLines", issueChangeLines);
+		projectSmellObject.put("AllChangeLines", allChangeLines);
+	}
+
+	private void calculateProjectTotalObject(Long projectId, JSONObject projectTotalObject) {
+		Integer fileCount = projectFileRepository.calculateFileCountByProjectId(projectId);
+		Integer issueCommitCount = commitRepository.calculateIssueCommitCountByProjectId(projectId);
+		Integer allCommitCount = commitRepository.calculateAllCommitCountByProjectId(projectId);
+		Integer issueChangeLines = commitRepository.calculateIssueChangeLinesByProjectId(projectId);
+		Integer allChangeLines = commitRepository.calculateAllChangeLinesByProjectId(projectId);
+		if (fileCount == null) {
+			fileCount = 0;
+		}
+		if (issueCommitCount == null) {
+			issueCommitCount = 0;
+		}
+		if (allCommitCount == null) {
+			allCommitCount = 0;
+		}
+		if (issueChangeLines == null) {
+			issueChangeLines = 0;
+		}
+		if (allChangeLines == null) {
+			allChangeLines = 0;
+		}
+		projectTotalObject.put("FileCount", fileCount);
+		projectTotalObject.put("IssueCommitCount", issueCommitCount);
+		projectTotalObject.put("AllCommitCount", allCommitCount);
+		projectTotalObject.put("IssueChangeLines", issueChangeLines);
+		projectTotalObject.put("AllChangeLines", allChangeLines);
 	}
 
 	@Override
@@ -358,7 +467,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 	public void printMultipleASFiles(OutputStream stream) {
 		Workbook hwb = new XSSFWorkbook();
 		Map<Long, List<MultipleASFile>> multiple = detectMultipleSmellASFiles(false);
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
 			Sheet sheet = hwb.createSheet(new StringBuilder().append(project.getName()).append("(").append(project.getLanguage()).append(")").toString());
 			List<MultipleASFile> packageMetrics = multiple.get(project.getId());
@@ -438,7 +547,7 @@ public class MultipleArchitectureSmellDetectorImpl implements MultipleArchitectu
 		Map<Long, List<MultipleASFile>> multipleASFiles = detectMultipleSmellASFiles(true);
 		Map<Long, List<IssueFile>> issueFiles = issueQueryService.queryRelatedFilesOnAllIssuesGroupByProject();
 		
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		
 		for(Project project : projects) {
 			HistogramAS data = new HistogramAS(project);

@@ -96,7 +96,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 			return cache.get(getClass(), key);
 		}
 		Map<Long, List<UnstableFileInHistory>> result = new HashMap<>();
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
 			result.put(project.getId(), unstableFiles(project));
 		}

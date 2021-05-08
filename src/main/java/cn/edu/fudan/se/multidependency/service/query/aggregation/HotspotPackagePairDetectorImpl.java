@@ -971,7 +971,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 
 	@Override
 	public List<HotspotPackagePair> detectHotspotPackagePairWithDependsOnInAllProjects(){
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		List<HotspotPackagePair> result = new ArrayList<>();
 		for(Project project : projects) {
 			result.addAll(detectHotspotPackagePairWithDependsOnByProjectId(project.getId()));
@@ -1244,7 +1244,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 
 	@Override
 	public List<HotspotPackagePair> detectHotspotPackagePairWithCoChangeInAllProjects() {
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		List<HotspotPackagePair> result = new ArrayList<>();
 		for(Project project : projects) {
 			result.addAll(detectHotspotPackagePairWithCoChangeByProjectId(project.getId()));

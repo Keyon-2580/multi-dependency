@@ -179,7 +179,7 @@ public class IssueQueryServiceImpl implements IssueQueryService {
 		}
 		
 		Set<ProjectFile> issueFiles = queryRelatedFilesOnAllIssues();
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		Map<Long, List<IssueFile>> result = new HashMap<>();
 		for(Project project : projects) {
 			result.put(project.getId(), new ArrayList<>());

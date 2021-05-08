@@ -184,7 +184,7 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 	@Override
 	public Map<Long, List<UnstableComponentByInstability<ProjectFile>>> detectFileUnstableDependency() {
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> result = new HashMap<>();
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
 			List<UnstableComponentByInstability<ProjectFile>> temp = asRepository.unstableFilesByInstability(project.getId(), getProjectMinFileFanOut(project.getId()), getProjectMinRatio(project.getId()));
 			result.put(project.getId(), temp);
@@ -195,7 +195,7 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 	@Override
 	public Map<Long, List<UnstableComponentByInstability<Package>>> detectPackageUnstableDependency() {
 		Map<Long, List<UnstableComponentByInstability<Package>>> result = new HashMap<>();
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
 			List<UnstableComponentByInstability<Package>> temp = asRepository.unstablePackagesByInstability(project.getId(), getProjectMinPackageFanOut(project.getId()), getProjectMinRatio(project.getId()));
 			result.put(project.getId(), temp);
@@ -206,7 +206,7 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 	@Override
 	public Map<Long, List<UnstableComponentByInstability<Module>>> detectModuleUnstableDependency() {
 		Map<Long, List<UnstableComponentByInstability<Module>>> result = new HashMap<>();
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
 			List<UnstableComponentByInstability<Module>> temp = asRepository.unstableModulesByInstability(project.getId(), getProjectMinModuleFanOut(project.getId()), getProjectMinRatio(project.getId()));
 			result.put(project.getId(), temp);

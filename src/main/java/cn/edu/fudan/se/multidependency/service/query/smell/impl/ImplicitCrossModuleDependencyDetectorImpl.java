@@ -160,7 +160,7 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 	public Map<Long, List<LogicCouplingComponents<ProjectFile>>> detectFileImplicitCrossModuleDependency() {
 		Map<Long, List<LogicCouplingComponents<ProjectFile>>> result = new HashMap<>();
 		List<LogicCouplingComponents<ProjectFile>> fileImplicitCrossModuleDependencyList = new ArrayList<>();
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		for (Project project : projects) {
 			List<CoChange> fileCoChangeList = cochangeRepository.findProjectFileCoChangeGreaterThanCount(project.getId(), getFileMinCoChange(project.getId()));
 			for(CoChange fileCoChange : fileCoChangeList) {

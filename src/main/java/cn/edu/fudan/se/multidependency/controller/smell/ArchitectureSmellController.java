@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.service.query.smell.MultipleArchitectureSmellDetector;
+import cn.edu.fudan.se.multidependency.service.query.smell.MultipleSmellDetector;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.CirclePacking;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.MultipleAS;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
@@ -27,21 +27,28 @@ import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 public class ArchitectureSmellController {
 	
 	@Autowired
-	private MultipleArchitectureSmellDetector detector;
+	private MultipleSmellDetector multipleSmellDetector;
 	
 	@Autowired
 	private NodeService nodeService;
 	
-	@GetMapping("")
+	@GetMapping("/detect")
 	public String index(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		return "as/as";
+		return "as/smelldetect";
+	}
+
+	@GetMapping("/overview")
+	public String smellOverview(HttpServletRequest request) {
+		request.setAttribute("projects", nodeService.allProjects());
+		request.setAttribute("smellOverviewMap", multipleSmellDetector.getSmellOverview());
+		return "as/smelloverview";
 	}
 	
 	@GetMapping("/multiple/histogram")
 	@ResponseBody
 	public Object histogram() {
-		return detector.projectHistogramOnVersion();
+		return multipleSmellDetector.projectHistogramOnVersion();
 	}
 	
 	@GetMapping("/multiple/project/{projectId}")
@@ -57,7 +64,7 @@ public class ArchitectureSmellController {
 			@RequestParam(name="unutilized", required=false, defaultValue="true") boolean unutilized) {
 		Project project = nodeService.queryProject(projectId);
 		request.setAttribute("project", project);
-		Map<Long, List<CirclePacking>> circlePackings = detector.circlePacking(new MultipleAS() {
+		Map<Long, List<CirclePacking>> circlePackings = multipleSmellDetector.circlePacking(new MultipleAS() {
 			@Override
 			public boolean isCycle() {
 				return cycle;
@@ -112,7 +119,7 @@ public class ArchitectureSmellController {
 			@RequestParam(name="godComponent", required=false, defaultValue="true") boolean godComponent,
 			@RequestParam(name="unused", required=false, defaultValue="true") boolean unused,
 			@RequestParam(name="unutilized", required=false, defaultValue="true") boolean unutilized) {
-		return detector.circlePacking(new MultipleAS() {
+		return multipleSmellDetector.circlePacking(new MultipleAS() {
 			@Override
 			public boolean isCycle() {
 				return cycle;
@@ -164,7 +171,7 @@ public class ArchitectureSmellController {
 			@RequestParam(name="godComponent", required=false, defaultValue="true") boolean godComponent,
 			@RequestParam(name="unused", required=false, defaultValue="true") boolean unused,
 			@RequestParam(name="unutilized", required=false, defaultValue="true") boolean unutilized) {
-		return detector.smellAndIssueFiles(new MultipleAS() {
+		return multipleSmellDetector.smellAndIssueFiles(new MultipleAS() {
 			@Override
 			public boolean isCycle() {
 				return cycle;
@@ -212,7 +219,7 @@ public class ArchitectureSmellController {
 	        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); 
 			OutputStream stream = response.getOutputStream();
 
-			detector.printMultipleASFiles(stream);
+			multipleSmellDetector.printMultipleASFiles(stream);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

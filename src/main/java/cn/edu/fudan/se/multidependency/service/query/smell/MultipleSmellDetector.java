@@ -9,8 +9,9 @@ import cn.edu.fudan.se.multidependency.service.query.smell.data.HistogramAS;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.MultipleAS;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.MultipleASFile;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.PieFilesData;
+import com.alibaba.fastjson.JSONObject;
 
-public interface MultipleArchitectureSmellDetector {
+public interface MultipleSmellDetector {
 	
 	Map<Long, HistogramAS> projectHistogramOnVersion();
 	
@@ -21,6 +22,8 @@ public interface MultipleArchitectureSmellDetector {
 	Map<Long, List<MultipleASFile>> detectMultipleSmellASFiles(boolean removeNoASFile);
 
 	Map<Long, PieFilesData> smellAndIssueFiles(MultipleAS multipleAS);
+
+	Map<Long, JSONObject> getSmellOverview();
 	
 	void printMultipleASFiles(OutputStream stream);
 }
