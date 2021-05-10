@@ -52,7 +52,7 @@ var loadLOCChart = function(loc_name_list, loc_list){
 var loadPageData = function (){
     $.ajax({
         type: "get",
-        url: "/git/repoMetric",
+        url: "/metric/project",
         success: function(result) {
             let html = "<div class=\"common_list_box\">" +
                 "<div  class=\"common_list_title\">" +
@@ -62,9 +62,9 @@ var loadPageData = function (){
                 "<div>" +
                 "<ul  class=\"my_common_list\">" +
                 "<li class=\"my_common_list_li\">" +
-                "<label  class=\"my_common_list_th\" style='width: 6%'> index" +
+                "<label  class=\"my_common_list_th\" style='width: 8%'> index" +
                 "</label>" +
-                "<label  class=\"my_common_list_th\" style='width: 6%'> ID" +
+                "<label  class=\"my_common_list_th\" style='width: 8%'> ID" +
                 "</label>" +
                 "<label  class=\"my_common_list_th\" style='width: 20%'> Project" +
                 "</label>" +
@@ -80,24 +80,22 @@ var loadPageData = function (){
                 "</label>" +
                 "<label  class=\"my_common_list_th\"> Commits" +
                 "</label>" +
-                "<label  class=\"my_common_list_th\"> Issues" +
-                "</label>" +
                 "</li>";
 
             for(let i = 0; i < result.length; i++) {
-                let projectMetricsList = result[i].projectMetricsList[0];
-                let combo_url = '/project/combo_chart?projectId=' + projectMetricsList.project.id;
+                let node = result[i].node;
+                let metric = result[i].metric.metricValues;
+                let combo_url = '/project/combo_chart?projectId=' + node.id;
                 html += "<li class=\"my_common_list_li\">";
-                html += "<label  class=\"my_common_list_td\" style='width: 6%'>" + (i + 1) + "</label>";
-                html += "<label  class=\"my_common_list_td\" style='width: 6%'>" + projectMetricsList.project.id + "</label>";
-                html += "<a class=\"my_common_list_a\" style='width: 20%' href='" + combo_url + "' target='_blank'>" + projectMetricsList.project.name + " (" + projectMetricsList.project.language + ") " + "</a>";
-                html += "<label  class=\"my_common_list_td\">" + projectMetricsList.nop + "</label>";
-                html += "<label  class=\"my_common_list_td\">" + projectMetricsList.nof + "</label>";
-                html += "<label  class=\"my_common_list_td\">" + projectMetricsList.nom + "</label>";
-                html += "<label  class=\"my_common_list_td\">" + projectMetricsList.loc + "</label>";
-                html += "<label  class=\"my_common_list_td\">" + projectMetricsList.lines + "</label>";
-                html += "<label  class=\"my_common_list_td\">" + projectMetricsList.commits + "</label>";
-                html += "<label  class=\"my_common_list_td\">" + result[i].numOfIssues + "</label>";
+                html += "<label  class=\"my_common_list_td\" style='width: 8%'>" + (i + 1) + "</label>";
+                html += "<label  class=\"my_common_list_td\" style='width: 8%'>" + node.id + "</label>";
+                html += "<a class=\"my_common_list_a\" style='width: 20%' href='" + combo_url + "' target='_blank'>" + node.name + " (" + node.language + ") " + "</a>";
+                html += "<label  class=\"my_common_list_td\">" + metric.NOP + "</label>";
+                html += "<label  class=\"my_common_list_td\">" + metric.NOF + "</label>";
+                html += "<label  class=\"my_common_list_td\">" + metric.NOM + "</label>";
+                html += "<label  class=\"my_common_list_td\">" + metric.LOC + "</label>";
+                html += "<label  class=\"my_common_list_td\">" + metric.Lines + "</label>";
+                html += "<label  class=\"my_common_list_td\">" + metric.Commits + "</label>";
                 html += "</li>";
             }
 
