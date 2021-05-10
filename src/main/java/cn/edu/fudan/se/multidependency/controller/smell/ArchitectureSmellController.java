@@ -41,7 +41,9 @@ public class ArchitectureSmellController {
 	@GetMapping("/overview")
 	public String smellOverview(HttpServletRequest request) {
 		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("smellOverviewMap", multipleSmellDetector.getSmellOverview());
+		request.setAttribute("projectTotalMap", multipleSmellDetector.getProjectTotal());
+		request.setAttribute("fileSmellOverviewMap", multipleSmellDetector.getFileSmellOverview());
+		request.setAttribute("packageSmellOverviewMap", multipleSmellDetector.getPackageSmellOverview());
 		return "as/smelloverview";
 	}
 	

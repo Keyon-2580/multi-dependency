@@ -55,13 +55,13 @@ public interface CommitRepository extends Neo4jRepository<Commit, Long> {
             "with project " +
             "match (project)-[:" + RelationType.str_CONTAIN + "*2]->(file:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(issueCommit:Commit)-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE + "]->(issue:Issue) " +
             "return count(distinct issueCommit);")
-    Integer calculateIssueCommitCountByProjectId(@Param("projectId") Long projectId);
+    Integer calculateProjectIssueCommitsByProjectId(@Param("projectId") Long projectId);
 
     @Query("match (project:Project) where id(project) = $projectId " +
             "with project " +
-            "match (project)-[:" + RelationType.str_CONTAIN + "*2]->(file:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(allCommit:Commit) " +
+            "match (project)<-[:" + RelationType.str_CONTAIN + "]-(gitRepository:GitRepository)-[:" + RelationType.str_CONTAIN + "*2]->(allCommit:Commit) " +
             "return count(distinct allCommit);")
-    Integer calculateAllCommitCountByProjectId(@Param("projectId") Long projectId);
+    Integer calculateProjectCommitsByProjectId(@Param("projectId") Long projectId);
 
     @Query("match (project:Project) where id(project) = $projectId " +
             "with project " +
@@ -69,7 +69,7 @@ public interface CommitRepository extends Neo4jRepository<Commit, Long> {
             "with collect(distinct relation) as updates " +
             "with reduce(lines = 0, update in updates | lines + (update.addLines + update.subLines)) as issueChangeLines " +
             "return issueChangeLines;")
-    Integer calculateIssueChangeLinesByProjectId(@Param("projectId") Long projectId);
+    Integer calculateProjectIssueChangeLinesByProjectId(@Param("projectId") Long projectId);
 
     @Query("match (project:Project) where id(project) = $projectId " +
             "with project " +
@@ -77,37 +77,69 @@ public interface CommitRepository extends Neo4jRepository<Commit, Long> {
             "with collect(distinct relation) as updates " +
             "with reduce(lines = 0, update in updates | lines + (update.addLines + update.subLines)) as allChangeLines " +
             "return allChangeLines;")
-    Integer calculateAllChangeLinesByProjectId(@Param("projectId") Long projectId);
+    Integer calculateProjectChangeLinesByProjectId(@Param("projectId") Long projectId);
 
     @Query("match (smell:Smell) " +
-            "where smell.projectId = $projectId and smell.type = $smellType and smell.level = '" + SmellLevel.FILE + "' " +
+            "where smell.projectId = $projectId and smell.type = $smellType and smell.level = $smellLevel " +
             "with smell " +
             "match (smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(issueCommit:Commit)-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE + "]->(issue:Issue) " +
             "return count(distinct issueCommit);")
-    Integer calculateIssueCommitCountByProjectIdAndSmellType(@Param("projectId") Long projectId, @Param("smellType") String smellType);
+    Integer calculateFileSmellIssueCommitsByProjectId(@Param("projectId") Long projectId, @Param("smellType") String smellType, @Param("smellLevel") String smellLevel);
 
     @Query("match (smell:Smell) " +
-            "where smell.projectId = $projectId and smell.type = $smellType and smell.level = '" + SmellLevel.FILE + "' " +
+            "where smell.projectId = $projectId and smell.type = $smellType and smell.level = $smellLevel " +
             "with smell " +
             "match (smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(allCommit:Commit) " +
             "return count(distinct allCommit);")
-    Integer calculateAllCommitCountByProjectIdAndSmellType(@Param("projectId") Long projectId, @Param("smellType") String smellType);
+    Integer calculateFileSmellCommitsByProjectId(@Param("projectId") Long projectId, @Param("smellType") String smellType, @Param("smellLevel") String smellLevel);
 
     @Query("match (smell:Smell) " +
-            "where smell.projectId = $projectId and smell.type = $smellType and smell.level = '" + SmellLevel.FILE + "' " +
+            "where smell.projectId = $projectId and smell.type = $smellType and smell.level = $smellLevel " +
             "with smell " +
             "match (smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)<-[relation:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(issueCommit:Commit)-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE + "]->(issue:Issue) " +
             "with collect(distinct relation) as updates " +
             "with reduce(lines = 0, update in updates | lines + (update.addLines + update.subLines)) as issueChangeLines " +
             "return issueChangeLines;")
-    Integer calculateIssueChangeLinesByProjectIdAndSmellType(@Param("projectId") Long projectId, @Param("smellType") String smellType);
+    Integer calculateFileSmellIssueChangeLinesByProjectId(@Param("projectId") Long projectId, @Param("smellType") String smellType, @Param("smellLevel") String smellLevel);
 
     @Query("match (smell:Smell) " +
-            "where smell.projectId = $projectId and smell.type = $smellType and smell.level = '" + SmellLevel.FILE + "' " +
+            "where smell.projectId = $projectId and smell.type = $smellType and smell.level = $smellLevel " +
             "with smell " +
             "match (smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)<-[relation:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(issueCommit:Commit) " +
             "with collect(distinct relation) as updates " +
             "with reduce(lines = 0, update in updates | lines + (update.addLines + update.subLines)) as allChangeLines " +
             "return allChangeLines;")
-    Integer calculateAllChangeLinesByProjectIdAndSmellType(@Param("projectId") Long projectId, @Param("smellType") String smellType);
+    Integer calculateFileSmellChangeLinesByProjectId(@Param("projectId") Long projectId, @Param("smellType") String smellType, @Param("smellLevel") String smellLevel);
+
+    @Query("match (smell:Smell) " +
+            "where smell.projectId = $projectId and smell.type = $smellType and smell.level = $smellLevel " +
+            "with smell " +
+            "match (smell)-[:" + RelationType.str_CONTAIN + "*2]->(file:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(issueCommit:Commit)-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE + "]->(issue:Issue) " +
+            "return count(distinct issueCommit);")
+    Integer calculatePackageSmellIssueCommitsByProjectId(@Param("projectId") Long projectId, @Param("smellType") String smellType, @Param("smellLevel") String smellLevel);
+
+    @Query("match (smell:Smell) " +
+            "where smell.projectId = $projectId and smell.type = $smellType and smell.level = $smellLevel " +
+            "with smell " +
+            "match (smell)-[:" + RelationType.str_CONTAIN + "*2]->(file:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(allCommit:Commit) " +
+            "return count(distinct allCommit);")
+    Integer calculatePackageSmellCommitsByProjectId(@Param("projectId") Long projectId, @Param("smellType") String smellType, @Param("smellLevel") String smellLevel);
+
+    @Query("match (smell:Smell) " +
+            "where smell.projectId = $projectId and smell.type = $smellType and smell.level = $smellLevel " +
+            "with smell " +
+            "match (smell)-[:" + RelationType.str_CONTAIN + "*2]->(file:ProjectFile)<-[relation:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(issueCommit:Commit)-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE + "]->(issue:Issue) " +
+            "with collect(distinct relation) as updates " +
+            "with reduce(lines = 0, update in updates | lines + (update.addLines + update.subLines)) as issueChangeLines " +
+            "return issueChangeLines;")
+    Integer calculatePackageSmellIssueChangeLinesByProjectId(@Param("projectId") Long projectId, @Param("smellType") String smellType, @Param("smellLevel") String smellLevel);
+
+    @Query("match (smell:Smell) " +
+            "where smell.projectId = $projectId and smell.type = $smellType and smell.level = $smellLevel " +
+            "with smell " +
+            "match (smell)-[:" + RelationType.str_CONTAIN + "*2]->(file:ProjectFile)<-[relation:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(issueCommit:Commit) " +
+            "with collect(distinct relation) as updates " +
+            "with reduce(lines = 0, update in updates | lines + (update.addLines + update.subLines)) as allChangeLines " +
+            "return allChangeLines;")
+    Integer calculatePackageSmellChangeLinesByProjectId(@Param("projectId") Long projectId, @Param("smellType") String smellType, @Param("smellLevel") String smellLevel);
 }

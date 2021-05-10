@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetric;
 
 @Repository
 public interface PackageRepository extends Neo4jRepository<Package, Long> {
@@ -41,7 +41,7 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 			"     pck.loc as loc,\r\n" + 
 			"     pck.lines as lines\r\n " +
 			"RETURN pck, nof,noc,nom,fanIn, fanOut, loc,lines order by(pck.directoryPath) desc;")
-	public List<PackageMetrics> calculatePackageMetrics();
+	public List<PackageMetric> calculatePackageMetrics();
 
 	@Query("MATCH (pck:Package) where id(pck) = $packageId\r\n" +
 			"WITH pck, pck.nof as nof, \r\n" +
@@ -52,7 +52,7 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 			"     pck.loc as loc,\r\n" +
 			"     pck.lines as lines\r\n " +
 			"RETURN pck, nof,noc,nom,fanIn, fanOut, loc,lines order by(pck.directoryPath) desc;")
-	public PackageMetrics calculatePackageMetrics(@Param("packageId") long packageId);
+	public PackageMetric calculatePackageMetrics(@Param("packageId") long packageId);
 	
 	/*@Query("match (pck:Package)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile) with pck, sum(file.loc) as loc set pck.loc = loc;")
 	public void setPackageLoc();

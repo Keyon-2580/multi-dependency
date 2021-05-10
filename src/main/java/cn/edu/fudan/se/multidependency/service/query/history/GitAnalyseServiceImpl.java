@@ -33,7 +33,7 @@ import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.history.data.CoChangeFile;
 import cn.edu.fudan.se.multidependency.service.query.history.data.GitRepoMetric;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
-import cn.edu.fudan.se.multidependency.service.query.metric.ProjectMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.ProjectMetric;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 
 @Service
@@ -77,7 +77,7 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 			return cache.get(getClass(), key);
 		}
 		Map<Long, GitRepoMetric> result = new HashMap<>();
-		Map<String, List<ProjectMetrics>> projectMetricsMap = new HashMap<>(metricCalculatorService.calculateProjectMetricsByGitRepository());
+		Map<String, List<ProjectMetric>> projectMetricsMap = new HashMap<>(metricCalculatorService.calculateProjectMetricsByGitRepository());
 		for(GitRepository gitRepository : gitRepoRepository.findAll()) {
 			GitRepoMetric gitRepoMetric = new GitRepoMetric();
 			gitRepoMetric.setGitRepository(gitRepository);

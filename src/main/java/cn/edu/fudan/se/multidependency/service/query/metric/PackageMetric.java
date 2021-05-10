@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper=false)
 @QueryResult
-public class PackageMetrics extends FanIOMetric implements Serializable {
+public class PackageMetric extends FanIOMetric implements Serializable {
 
 	private static final long serialVersionUID = 1749274223605679116L;
 

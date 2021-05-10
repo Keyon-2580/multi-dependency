@@ -18,7 +18,7 @@ import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.smell.UnstableDependencyDetectorUsingHistory;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.UnstableFileInHistory;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
-import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.FileMetric;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
@@ -105,9 +105,9 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 	}
 	
 	public List<UnstableFileInHistory> unstableFiles(Project project) {
-		List<FileMetrics> fileMetrics = metricCalculatorService.calculateProjectFileMetrics().get(project.getId());
+		List<FileMetric> fileMetrics = metricCalculatorService.calculateProjectFileMetrics().get(project.getId());
 		List<UnstableFileInHistory> result = new ArrayList<>();
-		for(FileMetrics metrics : fileMetrics) {
+		for(FileMetric metrics : fileMetrics) {
 			UnstableFileInHistory unstableFile = isUnstableFile(project, metrics);
 			if(unstableFile != null) {
 				result.add(unstableFile);
@@ -116,7 +116,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 		return result;
 	}
 	
-	private UnstableFileInHistory isUnstableFile(Project project, FileMetrics metrics) {
+	private UnstableFileInHistory isUnstableFile(Project project, FileMetric metrics) {
 		int fanInThreshold = getFanInThreshold(project);
 		int coChangeTimesThreshold = getCoChangeTimesThreshold(project);
 		int coChangeFilesThreshold = getCoChangeFilesThreshold(project);

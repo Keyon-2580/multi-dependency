@@ -39,8 +39,8 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 	@Query("match p = (smell:Smell) where smell.projectId = $projectId and smell.name = $name return distinct smell")
 	Smell findProjectSmellsByName(@Param("projectId") Long projectId, @Param("name") String name);
 
-	@Query("match p = (smell:Smell) where smell.projectId = $projectId and smell.type = $type return distinct smell")
-	List<Smell> findProjectSmellsByProjectIdAndSmellType(@Param("projectId") Long projectId, @Param("type") String type);
+	@Query("match p = (smell:Smell) where smell.projectId = $projectId and smell.type = $smellType and smell.level = $smellLevel return distinct smell")
+	List<Smell> findSmells(@Param("projectId") Long projectId, @Param("smellType") String smellType, @Param("smellLevel") String smellLevel);
 
 	@Query("match p= (smell:Smell) where smell.type = $type return smell limit 10;")
 	List<Smell> findSmellsByTypeWithLimit(@Param("type") String type);

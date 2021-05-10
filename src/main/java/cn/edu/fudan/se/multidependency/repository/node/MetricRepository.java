@@ -92,4 +92,19 @@ public interface MetricRepository extends Neo4jRepository<Metric, Long> {
 
     @Query("MATCH (project:Project)-[:" + RelationType.str_HAS + "]->(metric:Metric) where id(project) = $projectId RETURN metric.`metricValues.MedPackageCoChange`;")
     Integer getMedPackageCoChangeByProjectId(@Param("projectId") Long projectId);
+
+    @Query("MATCH (project:Project)-[:" + RelationType.str_HAS + "]->(metric:Metric) where id(project) = $projectId RETURN metric.`metricValues.NOF`;")
+    Integer getProjectFileCountByProjectId(@Param("projectId") Long projectId);
+
+    @Query("MATCH (project:Project)-[:" + RelationType.str_HAS + "]->(metric:Metric) where id(project) = $projectId RETURN metric.`metricValues.IssueCommits`;")
+    Integer getProjectIssueCommitsByProjectId(@Param("projectId") Long projectId);
+
+    @Query("MATCH (project:Project)-[:" + RelationType.str_HAS + "]->(metric:Metric) where id(project) = $projectId RETURN metric.`metricValues.Commits`;")
+    Integer getProjectCommitsByProjectId(@Param("projectId") Long projectId);
+
+    @Query("MATCH (project:Project)-[:" + RelationType.str_HAS + "]->(metric:Metric) where id(project) = $projectId RETURN metric.`metricValues.IssueChangeLines`;")
+    Integer getProjectIssueChangeLinesByProjectId(@Param("projectId") Long projectId);
+
+    @Query("MATCH (project:Project)-[:" + RelationType.str_HAS + "]->(metric:Metric) where id(project) = $projectId RETURN metric.`metricValues.ChangeLines`;")
+    Integer getProjectChangeLinesByProjectId(@Param("projectId") Long projectId);
 }

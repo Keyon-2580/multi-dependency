@@ -7,77 +7,92 @@ import lombok.Data;
 
 @Data
 @QueryResult
-public class ProjectMetrics {
+public class ProjectMetric {
 	
 	private Project project;
 	
 	/**
 	 * 包数
 	 */
-	private int nop;
+	private int nop = 0;
 	
 	/**
 	 * 文件数
 	 */
-	private int nof;
+	private int nof = 0;
 
 	/**
 	 * 类数
 	 */
-	private int noc;
+	private int noc = 0;
 	
 	/**
 	 * 方法数
 	 */
-	private int nom;
+	private int nom = 0;
 	
 	/**
 	 * 代码行
 	 */
-	private int loc;
+	private int loc = 0;
 	
 	/**
 	 * 文件总行数
 	 */
-	private int lines;
+	private int lines = 0;
 	
 	/**
 	 * 与该项目相关的commit次数
 	 */
-	private int commits = -1;
+	private int commits = 0;
+
+	/**
+	 * 与该项目与issue相关的commit次数
+	 */
+	private int issueCommits = 0;
+
+	/**
+	 * 与该项目相关的commit提交文件的修改行数
+	 */
+	private int changeLines = 0;
+
+	/**
+	 * 与该项目与issue相关的commit提交文件的修改行数
+	 */
+	private int issueChangeLines = 0;
 	
 	/**
 	 * 模块度
 	 */
-	private double modularity = -1;
+	private double modularity = 0;
 
 	/**
 	 * 该项目所有文件入度中位数
 	 */
-	private int medFileFanIn = -1;
+	private int medFileFanIn = 0;
 
 	/**
 	 * 该项目所有文件出度中位数
 	 */
-	private int medFileFanOut = -1;
+	private int medFileFanOut = 0;
 
 	/**
 	 * 该项目所有包入度中位数
 	 */
-	private int medPackageFanIn = -1;
+	private int medPackageFanIn = 0;
 
 	/**
 	 * 该项目所有包出度中位数
 	 */
-	private int medPackageFanOut = -1;
+	private int medPackageFanOut = 0;
 
 	/**
 	 * 该项目所有文件共变中位数
 	 */
-	private int medFileCoChange = -1;
+	private int medFileCoChange = 0;
 
 	/**
 	 * 该项目所有包共变中位数
 	 */
-	private int medPackageCoChange = -1;
+	private int medPackageCoChange = 0;
 }

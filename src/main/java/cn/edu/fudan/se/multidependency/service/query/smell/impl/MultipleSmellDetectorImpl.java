@@ -10,7 +10,9 @@ import java.util.Map;
 import java.util.Set;
 
 import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
+import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
+import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
@@ -86,6 +88,9 @@ public class MultipleSmellDetectorImpl implements MultipleSmellDetector {
 
 	@Autowired
 	private SmellRepository smellRepository;
+
+	@Autowired
+	private MetricRepository metricRepository;
 
 	@Autowired
 	private ProjectFileRepository projectFileRepository;
@@ -208,8 +213,26 @@ public class MultipleSmellDetectorImpl implements MultipleSmellDetector {
 	}
 
 	@Override
-	public Map<Long, JSONObject> getSmellOverview() {
-		String key = "smellOverview";
+	public Map<Long, JSONObject> getProjectTotal() {
+		String key = "projectTotal";
+		if (cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+
+		Map<Long, JSONObject> result = new HashMap<>();
+		List<Project> projects = nodeService.allProjects();
+		for (Project project : projects) {
+			JSONObject projectProjectTotalObject = new JSONObject();
+			calculateProjectTotalObject(project.getId(), projectProjectTotalObject);
+			result.put(project.getId(), projectProjectTotalObject);
+		}
+		cache.cache(getClass(), key, result);
+		return result;
+	}
+
+	@Override
+	public Map<Long, JSONObject> getFileSmellOverview() {
+		String key = "fileSmellOverview";
 		if (cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
@@ -224,81 +247,121 @@ public class MultipleSmellDetectorImpl implements MultipleSmellDetector {
 		smellTypes.add(SmellType.UNUTILIZED_ABSTRACTION);
 		smellTypes.add(SmellType.UNUSED_INCLUDE);
 		for (Project project : projects) {
-			JSONObject projectSmellOverviewObject = new JSONObject();
-			JSONArray projectSmellArray = new JSONArray();
-			JSONObject projectTotalObject = new JSONObject();
+			JSONObject projectFileSmellOverviewObject = new JSONObject();
+			JSONArray projectFileSmellArray = new JSONArray();
 			for (String smellType : smellTypes) {
-				JSONObject projectSmellObject = new JSONObject();
-				List<Smell> projectSmells = new ArrayList<>(smellRepository.findProjectSmellsByProjectIdAndSmellType(project.getId(), smellType));
-				calculateProjectSmellObject(project.getId(), smellType, projectSmells, projectSmellObject);
-				projectSmellArray.add(projectSmellObject);
+				JSONObject projectFileSmellObject = new JSONObject();
+				List<Smell> projectFileSmells = new ArrayList<>(smellRepository.findSmells(project.getId(), smellType, SmellLevel.FILE));
+				calculateProjectFileSmellObject(project.getId(), smellType, projectFileSmells, projectFileSmellObject);
+				projectFileSmellArray.add(projectFileSmellObject);
 			}
-			calculateProjectTotalObject(project.getId(), projectTotalObject);
-			projectSmellOverviewObject.put("ProjectSmell", projectSmellArray);
-			projectSmellOverviewObject.put("ProjectTotal", projectTotalObject);
-			result.put(project.getId(), projectSmellOverviewObject);
+			projectFileSmellOverviewObject.put("ProjectFileSmell", projectFileSmellArray);
+			result.put(project.getId(), projectFileSmellOverviewObject);
 		}
 		cache.cache(getClass(), key, result);
 		return result;
 	}
 
-	private void calculateProjectSmellObject(Long projectId, String smellType, List<Smell> projectSmells, JSONObject projectSmellObject) {
-		int smellCount = projectSmells.size();
-		Integer fileCount = projectFileRepository.calculateFileCountByProjectIdAndSmellType(projectId, smellType);
-		Integer issueCommitCount = commitRepository.calculateIssueCommitCountByProjectIdAndSmellType(projectId, smellType);
-		Integer allCommitCount = commitRepository.calculateAllCommitCountByProjectIdAndSmellType(projectId, smellType);
-		Integer issueChangeLines = commitRepository.calculateIssueChangeLinesByProjectIdAndSmellType(projectId, smellType);
-		Integer allChangeLines = commitRepository.calculateAllChangeLinesByProjectIdAndSmellType(projectId, smellType);
-		if (fileCount == null) {
-			fileCount = 0;
+	@Override
+	public Map<Long, JSONObject> getPackageSmellOverview() {
+		String key = "packageSmellOverview";
+		if (cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
 		}
-		if (issueCommitCount == null) {
-			issueCommitCount = 0;
+
+		Map<Long, JSONObject> result = new HashMap<>();
+		List<Project> projects = nodeService.allProjects();
+		List<String> smellTypes = new ArrayList<>();
+		smellTypes.add(SmellType.CYCLIC_DEPENDENCY);
+		smellTypes.add(SmellType.HUBLIKE_DEPENDENCY);
+		smellTypes.add(SmellType.UNSTABLE_DEPENDENCY);
+		smellTypes.add(SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY);
+		smellTypes.add(SmellType.UNUTILIZED_ABSTRACTION);
+		smellTypes.add(SmellType.UNUSED_INCLUDE);
+		for (Project project : projects) {
+			JSONObject projectPackageSmellOverviewObject = new JSONObject();
+			JSONArray projectPackageSmellArray = new JSONArray();
+			for (String smellType : smellTypes) {
+				JSONObject projectPackageSmellObject = new JSONObject();
+				List<Smell> projectPackageSmells = new ArrayList<>(smellRepository.findSmells(project.getId(), smellType, SmellLevel.PACKAGE));
+				calculateProjectPackageSmellObject(project.getId(), smellType, projectPackageSmells, projectPackageSmellObject);
+				projectPackageSmellArray.add(projectPackageSmellObject);
+			}
+			projectPackageSmellOverviewObject.put("ProjectPackageSmell", projectPackageSmellArray);
+			result.put(project.getId(), projectPackageSmellOverviewObject);
 		}
-		if (allCommitCount == null) {
-			allCommitCount = 0;
-		}
-		if (issueChangeLines == null) {
-			issueChangeLines = 0;
-		}
-		if (allChangeLines == null) {
-			allChangeLines = 0;
-		}
-		projectSmellObject.put("SmellType", smellType);
-		projectSmellObject.put("SmellCount", smellCount);
-		projectSmellObject.put("FileCount", fileCount);
-		projectSmellObject.put("IssueCommitCount", issueCommitCount);
-		projectSmellObject.put("AllCommitCount", allCommitCount);
-		projectSmellObject.put("IssueChangeLines", issueChangeLines);
-		projectSmellObject.put("AllChangeLines", allChangeLines);
+		cache.cache(getClass(), key, result);
+		return result;
 	}
 
 	private void calculateProjectTotalObject(Long projectId, JSONObject projectTotalObject) {
-		Integer fileCount = projectFileRepository.calculateFileCountByProjectId(projectId);
-		Integer issueCommitCount = commitRepository.calculateIssueCommitCountByProjectId(projectId);
-		Integer allCommitCount = commitRepository.calculateAllCommitCountByProjectId(projectId);
-		Integer issueChangeLines = commitRepository.calculateIssueChangeLinesByProjectId(projectId);
-		Integer allChangeLines = commitRepository.calculateAllChangeLinesByProjectId(projectId);
+		projectTotalObject.put("FileCount", metricRepository.getProjectFileCountByProjectId(projectId));
+		projectTotalObject.put("IssueCommits", metricRepository.getProjectIssueCommitsByProjectId(projectId));
+		projectTotalObject.put("Commits", metricRepository.getProjectCommitsByProjectId(projectId));
+		projectTotalObject.put("IssueChangeLines", metricRepository.getProjectIssueChangeLinesByProjectId(projectId));
+		projectTotalObject.put("ChangeLines", metricRepository.getProjectChangeLinesByProjectId(projectId));
+	}
+
+	private void calculateProjectFileSmellObject(Long projectId, String smellType, List<Smell> projectFileSmells, JSONObject projectFileSmellObject) {
+		int smellCount = projectFileSmells.size();
+		Integer fileCount = projectFileRepository.calculateFileSmellFileCountByProjectId(projectId, smellType, SmellLevel.FILE);
+		Integer issueCommits = commitRepository.calculateFileSmellIssueCommitsByProjectId(projectId, smellType, SmellLevel.FILE);
+		Integer commits = commitRepository.calculateFileSmellCommitsByProjectId(projectId, smellType, SmellLevel.FILE);
+		Integer issueChangeLines = commitRepository.calculateFileSmellIssueChangeLinesByProjectId(projectId, smellType, SmellLevel.FILE);
+		Integer changeLines = commitRepository.calculateFileSmellChangeLinesByProjectId(projectId, smellType, SmellLevel.FILE);
 		if (fileCount == null) {
 			fileCount = 0;
 		}
-		if (issueCommitCount == null) {
-			issueCommitCount = 0;
+		if (issueCommits == null) {
+			issueCommits = 0;
 		}
-		if (allCommitCount == null) {
-			allCommitCount = 0;
+		if (commits == null) {
+			commits = 0;
 		}
 		if (issueChangeLines == null) {
 			issueChangeLines = 0;
 		}
-		if (allChangeLines == null) {
-			allChangeLines = 0;
+		if (changeLines == null) {
+			changeLines = 0;
 		}
-		projectTotalObject.put("FileCount", fileCount);
-		projectTotalObject.put("IssueCommitCount", issueCommitCount);
-		projectTotalObject.put("AllCommitCount", allCommitCount);
-		projectTotalObject.put("IssueChangeLines", issueChangeLines);
-		projectTotalObject.put("AllChangeLines", allChangeLines);
+		projectFileSmellObject.put("SmellType", smellType);
+		projectFileSmellObject.put("SmellCount", smellCount);
+		projectFileSmellObject.put("FileCount", fileCount);
+		projectFileSmellObject.put("IssueCommits", issueCommits);
+		projectFileSmellObject.put("Commits", commits);
+		projectFileSmellObject.put("IssueChangeLines", issueChangeLines);
+		projectFileSmellObject.put("ChangeLines", changeLines);
+	}
+
+	private void calculateProjectPackageSmellObject(Long projectId, String smellType, List<Smell> projectPackageSmells, JSONObject projectPackageSmellObject) {
+		int smellCount = projectPackageSmells.size();
+		Integer fileCount = projectFileRepository.calculatePackageSmellFileCountByProjectId(projectId, smellType, SmellLevel.PACKAGE);
+		Integer issueCommits = commitRepository.calculatePackageSmellIssueCommitsByProjectId(projectId, smellType, SmellLevel.PACKAGE);
+		Integer commits = commitRepository.calculatePackageSmellCommitsByProjectId(projectId, smellType, SmellLevel.PACKAGE);
+		Integer issueChangeLines = commitRepository.calculatePackageSmellIssueChangeLinesByProjectId(projectId, smellType, SmellLevel.PACKAGE);
+		Integer changeLines = commitRepository.calculatePackageSmellChangeLinesByProjectId(projectId, smellType, SmellLevel.PACKAGE);
+		if (fileCount == null) {
+			fileCount = 0;
+		}
+		if (issueCommits == null) {
+			issueCommits = 0;
+		}
+		if (commits == null) {
+			commits = 0;
+		}
+		if (issueChangeLines == null) {
+			issueChangeLines = 0;
+		}
+		if (changeLines == null) {
+			changeLines = 0;
+		}
+		projectPackageSmellObject.put("SmellType", smellType);
+		projectPackageSmellObject.put("SmellCount", smellCount);
+		projectPackageSmellObject.put("FileCount", fileCount);
+		projectPackageSmellObject.put("IssueCommits", issueCommits);
+		projectPackageSmellObject.put("Commits", commits);
+		projectPackageSmellObject.put("IssueChangeLines", issueChangeLines);
+		projectPackageSmellObject.put("ChangeLines", changeLines);
 	}
 
 	@Override

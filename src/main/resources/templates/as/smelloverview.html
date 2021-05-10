@@ -18,8 +18,10 @@
 		//<![CDATA[
 		 $(document).ready(function() {
 		 	var projects = [[${projects}]];
-			var smellOverviewMap = [[${smellOverviewMap}]];
-			 smellOverview().smellOverview(projects, smellOverviewMap);
+		 	var projectTotalMap = [[${projectTotalMap}]];
+			var fileSmellOverviewMap = [[${fileSmellOverviewMap}]];
+			var packageSmellOverviewMap = [[${packageSmellOverviewMap}]];
+			 smellOverview().smellOverview(projects, projectTotalMap, fileSmellOverviewMap, packageSmellOverviewMap);
 		});
 		// ]]>
 	</script>

@@ -23,7 +23,11 @@ public interface MultipleSmellDetector {
 
 	Map<Long, PieFilesData> smellAndIssueFiles(MultipleAS multipleAS);
 
-	Map<Long, JSONObject> getSmellOverview();
-	
+	Map<Long, JSONObject> getProjectTotal();
+
+	Map<Long, JSONObject> getFileSmellOverview();
+
+	Map<Long, JSONObject> getPackageSmellOverview();
+
 	void printMultipleASFiles(OutputStream stream);
 }

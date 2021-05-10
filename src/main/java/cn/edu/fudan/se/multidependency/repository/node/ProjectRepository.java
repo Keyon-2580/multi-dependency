@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.service.query.metric.ProjectMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.ProjectMetric;
 
 @Repository
 public interface ProjectRepository extends Neo4jRepository<Project, Long> {
@@ -44,7 +44,7 @@ public interface ProjectRepository extends Neo4jRepository<Project, Long> {
 			"project.loc as loc, project.lines as lines," +
 			"project.commits as commits, project.modularity as modularity " +
 			"order by(project.name) desc;")
-	public List<ProjectMetrics> getProjectMetrics();
+	public List<ProjectMetric> getProjectMetrics();
 
 	@Query("MATCH (project:Project)-[:" + RelationType.str_CONTAIN + "]->(package:Package) \r\n" +
 			"where package.nof > 0 \r\n" +
@@ -69,7 +69,7 @@ public interface ProjectRepository extends Neo4jRepository<Project, Long> {
 			"     sum(package.lines) as lines, " +
 			"     project.commits as commits " +
 			"return project, nop, nof, noc, nom, loc, lines, commits order by(project.path);")
-	public List<ProjectMetrics> calculateProjectMetrics();
+	public List<ProjectMetric> calculateProjectMetrics();
 
 	@Query("MATCH (project:Project) " +
 			"where id(project) = $id " +
