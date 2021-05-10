@@ -1,14 +1,7 @@
 package cn.edu.fudan.se.multidependency.repository.relation;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import cn.edu.fudan.se.multidependency.model.node.Node;
-import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import org.springframework.data.neo4j.annotation.Query;
@@ -94,6 +87,16 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 
 	@Query("match p= (p1:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(p2:Package) where id(p1) = $package1Id and id(p2) = $package2Id return p")
 	DependsOn findDependsOnBetweenPackages(@Param("package1Id") long package1Id, @Param("package2Id") long package2Id);
+
+	@Query("match (p1:Package)-[:" + RelationType.str_CONTAIN + "]->(f1:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(f2:ProjectFile)<-[:" + RelationType.str_CONTAIN + "]-(p2:Package) " +
+			"where id(p1) = $package1Id and id(p2) = $package2Id " +
+			"return distinct f1;")
+	Set<ProjectFile> findDependsOnSourceFilesBetweenPackages(@Param("package1Id") long package1Id, @Param("package2Id") long package2Id);
+
+	@Query("match (p1:Package)-[:" + RelationType.str_CONTAIN + "]->(f1:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(f2:ProjectFile)<-[:" + RelationType.str_CONTAIN + "]-(p2:Package) " +
+			"where id(p1) = $package1Id and id(p2) = $package2Id " +
+			"return distinct f2;")
+	Set<ProjectFile> findDependsOnTargetFilesBetweenPackages(@Param("package1Id") long package1Id, @Param("package2Id") long package2Id);
 
 	String TYPE_LEFT = "match p=(t1:Type)-[:CONTAIN*0..]->()-[r:";
 	String TYPE_MIDDLE = "]->()<-[:CONTAIN*0..]-(t2:Type) where t1<>t2 " +

@@ -407,7 +407,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 			nodeJson.put("name", sourceType.getSimpleName());
 			nodeJson.put("path", sourceType.getIdentifier());
 			nodeJson.put("label", i + 1);
-			nodeJson.put("size", getSizeOfFileByLoc(sourceType.getEndLine() - sourceType.getStartLine()));
+			nodeJson.put("size", getSizeOfNodeByLoc(sourceType.getEndLine() - sourceType.getStartLine()));
 			nodesJson.add(nodeJson);
 			for (int j = 0 ; j < length; j ++) {
 				Type targetType = types.get(j);
@@ -446,67 +446,113 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 	@Override
 	public JSONObject getPackageCyclicDependencyJson(Long projectId, String smellName) {
 		JSONObject result = new JSONObject();
-		JSONArray nodesJson = new JSONArray();
-		JSONArray edgesJson = new JSONArray();
-		JSONArray smellsJson = new JSONArray();
+		JSONArray comboArray = new JSONArray();
+		JSONArray nodeArray = new JSONArray();
+		JSONArray edgeArray = new JSONArray();
+		JSONArray smellArray = new JSONArray();
 		Smell smell = smellRepository.findProjectSmellsByName(projectId, smellName);
-		List<Package> packages = new ArrayList<>();
+		List<Package> comboList = new ArrayList<>();
+		List<ProjectFile> nodeList = new ArrayList<>();
 		if (smell != null) {
-			JSONObject smellJson = new JSONObject();
-			smellJson.put("name", smell.getName());
+			JSONObject smellObject = new JSONObject();
+			smellObject.put("name", smell.getName());
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
-			List<Package> smellPackages = new ArrayList<>();
 			for (Node containedNode : containedNodes) {
-				smellPackages.add((Package) containedNode);
+				comboList.add((Package) containedNode);
 			}
-			JSONArray smellNodesJson = new JSONArray();
-			for (Package smellPackage : smellPackages) {
-				if (!packages.contains(smellPackage)) {
-					packages.add(smellPackage);
-				}
-				JSONObject smellNodeJson = new JSONObject();
-				smellNodeJson.put("index", packages.indexOf(smellPackage) + 1);
-				smellNodeJson.put("path", smellPackage.getDirectoryPath());
-				smellNodesJson.add(smellNodeJson);
+			JSONArray smellNodeArray = new JSONArray();
+			for (Package combo : comboList) {
+				JSONObject smellNodeObject = new JSONObject();
+				smellNodeObject.put("index", comboList.indexOf(combo) + 1);
+				smellNodeObject.put("path", combo.getDirectoryPath());
+				smellNodeArray.add(smellNodeObject);
 			}
-			smellJson.put("nodes", smellNodesJson);
-			smellsJson.add(smellJson);
+			smellObject.put("nodes", smellNodeArray);
+			smellArray.add(smellObject);
 		}
-		int length = packages.size();
+		int length = comboList.size();
 		for (int i = 0; i < length; i ++) {
-			Package sourcePackage = packages.get(i);
-			JSONObject nodeJson = new JSONObject();
-			nodeJson.put("id", sourcePackage.getId().toString());
-			nodeJson.put("name", sourcePackage.getName());
-			nodeJson.put("path", sourcePackage.getDirectoryPath());
-			nodeJson.put("label", i + 1);
-			nodeJson.put("size", getSizeOfFileByLoc(sourcePackage.getLoc()));
-			nodesJson.add(nodeJson);
+			Package sourceCombo = comboList.get(i);
 			for (int j = 0 ; j < length; j ++) {
-				Package targetPackage = packages.get(j);
+				Package targetCombo = comboList.get(j);
 				if (i != j) {
-					DependsOn dependsOn = dependsOnRepository.findDependsOnBetweenPackages(sourcePackage.getId(), targetPackage.getId());
-					if (dependsOn != null) {
-						JSONObject edgeJson = new JSONObject();
-						edgeJson.put("id", dependsOn.getId().toString());
-						edgeJson.put("source", sourcePackage.getId().toString());
-						edgeJson.put("target", targetPackage.getId().toString());
-						edgeJson.put("source_name", sourcePackage.getName());
-						edgeJson.put("target_name", targetPackage.getName());
-						edgeJson.put("source_label", i + 1);
-						edgeJson.put("target_label", j + 1);
-						edgeJson.put("times", dependsOn.getTimes());
-						edgeJson.put("dependsOnTypes", dependsOn.getDependsOnTypes());
-						edgesJson.add(edgeJson);
+					DependsOn comboToComboDependsOn = dependsOnRepository.findDependsOnBetweenPackages(sourceCombo.getId(), targetCombo.getId());
+					if (comboToComboDependsOn != null) {
+						JSONObject edgeObject = new JSONObject();
+//						edgeObject.put("id", comboToComboDependsOn.getId().toString());
+//						edgeObject.put("source", sourceCombo.getId().toString());
+//						edgeObject.put("target", targetCombo.getId().toString());
+//						edgeObject.put("source_name", sourceCombo.getName());
+//						edgeObject.put("target_name", targetCombo.getName());
+//						edgeObject.put("source_label", i + 1);
+//						edgeObject.put("target_label", j + 1);
+//						edgeObject.put("times", comboToComboDependsOn.getTimes());
+//						edgeObject.put("dependsOnTypes", comboToComboDependsOn.getDependsOnTypes());
+//						edgeArray.add(edgeObject);
+						Set<ProjectFile> sourceNodeList = new HashSet<>(dependsOnRepository.findDependsOnSourceFilesBetweenPackages(sourceCombo.getId(), targetCombo.getId()));
+						Set<ProjectFile> targetNodeList = new HashSet<>(dependsOnRepository.findDependsOnTargetFilesBetweenPackages(sourceCombo.getId(), targetCombo.getId()));
+						for (ProjectFile sourceNode : sourceNodeList) {
+							if (!nodeList.contains(sourceNode)) {
+								nodeList.add(sourceNode);
+							}
+						}
+						for (ProjectFile targetNode : targetNodeList) {
+							if (!nodeList.contains(targetNode)) {
+								nodeList.add(targetNode);
+							}
+						}
+						for (ProjectFile sourceNode : sourceNodeList) {
+							for (ProjectFile targetNode : targetNodeList) {
+								DependsOn nodeToNodeDependsOn = dependsOnRepository.findDependsOnBetweenFiles(sourceNode.getId(), targetNode.getId());
+								if (nodeToNodeDependsOn != null) {
+									edgeObject = new JSONObject();
+									edgeObject.put("id", nodeToNodeDependsOn.getId().toString());
+									edgeObject.put("source", sourceNode.getId().toString());
+									edgeObject.put("target", targetNode.getId().toString());
+									edgeObject.put("source_name", sourceNode.getName());
+									edgeObject.put("target_name", targetNode.getName());
+									edgeObject.put("source_label", nodeList.indexOf(sourceNode) + 1 + length);
+									edgeObject.put("target_label", nodeList.indexOf(targetNode) + 1 + length);
+									edgeObject.put("times", nodeToNodeDependsOn.getTimes());
+									edgeObject.put("dependsOnTypes", nodeToNodeDependsOn.getDependsOnTypes());
+									edgeArray.add(edgeObject);
+								}
+							}
+						}
 					}
 				}
 			}
 		}
+		int index = 1;
+		for (Package combo : comboList) {
+			JSONObject comboObject = new JSONObject();
+			comboObject.put("id", combo.getId().toString());
+			comboObject.put("name", combo.getName());
+			comboObject.put("path", combo.getDirectoryPath());
+			comboObject.put("label", index ++);
+			comboObject.put("size", getSizeOfNodeByLoc(combo.getLoc()));
+			comboObject.put("collapsed", false);
+			comboArray.add(comboObject);
+		}
+		for (ProjectFile node : nodeList) {
+			JSONObject nodeObject = new JSONObject();
+			nodeObject.put("id", node.getId().toString());
+			nodeObject.put("name", node.getName());
+			nodeObject.put("path", node.getPath());
+			nodeObject.put("label", index ++);
+			nodeObject.put("size", getSizeOfNodeByLoc(node.getLoc()));
+			Package combo = containRelationService.findFileBelongToPackage(node);
+			if (combo != null) {
+				nodeObject.put("comboId", combo.getId().toString());
+			}
+			nodeArray.add(nodeObject);
+		}
 		result.put("smellType", SmellType.CYCLIC_DEPENDENCY);
 		result.put("coreNode", "0");
-		result.put("nodes", nodesJson);
-		result.put("edges", edgesJson);
-		result.put("smells", smellsJson);
+		result.put("combos", comboArray);
+		result.put("nodes", nodeArray);
+		result.put("edges", edgeArray);
+		result.put("smells", smellArray);
 		return result;
 	}
 
@@ -551,7 +597,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 			nodeJson.put("name", sourceFile.getName());
 			nodeJson.put("path", sourceFile.getPath());
 			nodeJson.put("label", i + 1);
-			nodeJson.put("size", getSizeOfFileByLoc(sourceFile.getLoc()));
+			nodeJson.put("size", getSizeOfNodeByLoc(sourceFile.getLoc()));
 			nodesJson.add(nodeJson);
 			for (int j = 0 ; j < length; j ++) {
 				ProjectFile targetFile = files.get(j);
@@ -581,7 +627,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		return result;
 	}
 
-	private int getSizeOfFileByLoc(long loc) {
+	private int getSizeOfNodeByLoc(long loc) {
 		int size;
 		if (loc <= 500) {
 			size = 40;

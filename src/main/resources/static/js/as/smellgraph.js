@@ -60,10 +60,19 @@ let drawSmellGraph = function (json_data) {
         width,
         height,
         modes: {
-            default: ['drag-canvas', 'drag-node', 'zoom-canvas'],
+            default: ['drag-canvas', 'drag-node', 'drag-combo', 'collapse-expand-combo', 'zoom-canvas'],
         },
         plugins: [nodeTip, edgeTip],
         animate: true,
+        defaultCombo: {
+            type: 'circle',
+            size: 30,
+            style: {
+                lineWidth: 2,
+                stroke: '#9370db',
+                fill: '#e6e6fa',
+            },
+        },
         defaultNode: {
             size: 30,
             style: {
@@ -86,10 +95,15 @@ let drawSmellGraph = function (json_data) {
             },
         },
         layout: {
-            type: 'fruchterman',
-            gpuEnabled: true,
-            maxIteration: 300,
+            type: 'comboForce',
             preventOverlap: true,
+            nodeSpacing: (node) => {
+                if (node.comboId) {
+                    return 10;
+                }
+                return 70;
+            },
+            comboSpacing: 100,
         },
         nodeStateStyles: {
             coreNode: {
@@ -110,6 +124,7 @@ let drawSmellGraph = function (json_data) {
         }
         edges.push(edge);
     })
+    data["combos"] = json_data["combos"];
     data["nodes"] = json_data["nodes"];
     data["edges"] = edges;
 
