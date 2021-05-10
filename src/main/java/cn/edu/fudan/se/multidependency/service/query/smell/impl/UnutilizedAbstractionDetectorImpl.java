@@ -89,7 +89,7 @@ public class UnutilizedAbstractionDetectorImpl implements UnutilizedAbstractionD
 	public Map<Long, List<UnutilizedAbstraction<Type>>> detectTypeUnutilizedAbstraction() {
 		Map<Long, List<UnutilizedAbstraction<Type>>> result = new HashMap<>();
 		List<Type> types = asRepository.unutilizedTypes();
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		
 		for(Project project : projects) {
 			result.put(project.getId(), new ArrayList<>());

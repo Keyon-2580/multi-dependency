@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.RelationType;
-import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.FileMetric;
 
 @Repository
 public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long> {
@@ -44,7 +44,7 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"     size((file)-[:"+ RelationType.str_DEPENDS_ON + "]->()) as fanOut, " +
 			"     size((file)<-[:"+ RelationType.str_DEPENDS_ON + "]-()) as fanIn  " +
 			"RETURN  file,noc,nom,loc,fanOut,fanIn order by(file.path) desc;")
-	public List<FileMetrics.StructureMetric> calculateFileStructureMetrics();
+	public List<FileMetric.StructureMetric> calculateFileStructureMetrics();
 	
 	@Query("MATCH (file:ProjectFile)  " +
             "where id(file)= $fileId  " +
@@ -55,7 +55,7 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"     size((file)-[:"+ RelationType.str_DEPENDS_ON + "]->()) as fanOut, " +
 			"     size((file)<-[:"+ RelationType.str_DEPENDS_ON + "]-()) as fanIn  " +
 			"RETURN  file,noc,nom,loc,fanOut,fanIn;")
-	public FileMetrics.StructureMetric calculateFileStructureMetrics(@Param("fileId") long fileId);
+	public FileMetric.StructureMetric calculateFileStructureMetrics(@Param("fileId") long fileId);
 
 	/**
 	 * 所有文件的指标
@@ -68,7 +68,7 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"     sum(r.addLines) as addLines, " +
 			"     sum(r.subLines) as subLines  " +
 			"RETURN  file,commits,developers,coChangeFiles,addLines,subLines;")
-	public List<FileMetrics.EvolutionMetric> calculateFileEvolutionMetrics();
+	public List<FileMetric.EvolutionMetric> calculateFileEvolutionMetrics();
 
 	@Query("MATCH (file:ProjectFile) <-[r:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)<-[:" +
 			RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]- (d:Developer) " +
@@ -78,7 +78,7 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"     sum(r.addLines) as addLines, " +
 			"     sum(r.subLines) as subLines  " +
 			"RETURN  file,commits,developers,coChangeFiles,addLines,subLines;")
-	public FileMetrics.EvolutionMetric calculateFileEvolutionMetrics(@Param("fileId") long fileId);
+	public FileMetric.EvolutionMetric calculateFileEvolutionMetrics(@Param("fileId") long fileId);
 
 	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(:Commit)-[:" +
 			RelationType.str_COMMIT_ADDRESS_ISSUE + "]-> (issue:Issue) " +
@@ -88,7 +88,7 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.NEW_FEATURE + "\' then 1 else 0 end)) as newFeatureIssues," +
 			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.IMPROVEMENT + "\' then 1 else 0 end)) as improvementIssues  " +
 			"RETURN  file,issues,bugIssues,newFeatureIssues,improvementIssues order by(file.path) desc;")
-	public List<FileMetrics.DebtMetric> calculateFileDebtMetrics();
+	public List<FileMetric.DebtMetric> calculateFileDebtMetrics();
 
 	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(:Commit)-[:" +
 			RelationType.str_COMMIT_ADDRESS_ISSUE + "]-> (issue:Issue) " +
@@ -99,7 +99,7 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.NEW_FEATURE + "\' then 1 else 0 end)) as newFeatureIssues," +
 			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.IMPROVEMENT + "\' then 1 else 0 end)) as improvementIssues  " +
 			"RETURN  file,issues,bugIssues,newFeatureIssues,improvementIssues;")
-	public FileMetrics.DebtMetric calculateFileDebtMetrics(@Param("fileId") long fileId);
+	public FileMetric.DebtMetric calculateFileDebtMetrics(@Param("fileId") long fileId);
 	
 //	@Query("match (file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) where id(file) = $fileId with c where size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 return c")
 //	public List<Commit> cochangeCommitsWithFile(@Param("fileId") long fileId);
@@ -124,7 +124,7 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"     cochangeCommitTimes, " + 
 			"     file " + 
 			"RETURN  file,fanIn,fanOut,commits,cochangeCommitTimes,nom,loc,score,coChangeFiles order by(file.path) desc;")
-	public List<FileMetrics> calculateFileMetricsWithCoChangeCommitTimes();
+	public List<FileMetric> calculateFileMetricsWithCoChangeCommitTimes();
 	
 	@Query("CALL gds.pageRank.stream({" +
 			"nodeProjection:\'ProjectFile\', " +
@@ -249,4 +249,24 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 
 	@Query("MATCH (file:ProjectFile) where id(file) = $fileId return file.fanOut;")
 	Integer getFileFanOutByFileId(@Param("fileId") Long fileId);
+
+	@Query("match (project:Project) where id(project) = $projectId " +
+			"with project " +
+			"match (project)-[:" + RelationType.str_CONTAIN + "*2]->(file:ProjectFile)" +
+			" return count(distinct file);")
+	Integer calculateProjectFileCountByProjectId(@Param("projectId") Long projectId);
+
+	@Query("match (smell:Smell) " +
+			"where smell.projectId = $projectId and smell.type = $smellType and smell.level = $smellLevel " +
+			"with smell " +
+			"match (smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)" +
+			" return count(distinct file);")
+	Integer calculateFileSmellFileCountByProjectId(@Param("projectId") Long projectId, @Param("smellType") String smellType, @Param("smellLevel") String smellLevel);
+
+	@Query("match (smell:Smell) " +
+			"where smell.projectId = $projectId and smell.type = $smellType and smell.level = $smellLevel " +
+			"with smell " +
+			"match (smell)-[:" + RelationType.str_CONTAIN + "*2]->(file:ProjectFile)" +
+			" return count(distinct file);")
+	Integer calculatePackageSmellFileCountByProjectId(@Param("projectId") Long projectId, @Param("smellType") String smellType, @Param("smellLevel") String smellLevel);
 }

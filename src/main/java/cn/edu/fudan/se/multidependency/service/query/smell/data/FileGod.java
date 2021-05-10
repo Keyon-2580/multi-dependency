@@ -1,7 +1,7 @@
 package cn.edu.fudan.se.multidependency.service.query.smell.data;
 
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
-import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.FileMetric;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -11,6 +11,6 @@ public class FileGod {
 
 	private ProjectFile file;
 	
-	private FileMetrics metrics;
+	private FileMetric metrics;
 	
 }

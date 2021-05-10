@@ -8,19 +8,16 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.WebApplicationContext;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.smell.GodComponentDetector;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.FileGod;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.PackageGod;
-import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.FileMetric;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
-import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.PackageMetric;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Service
@@ -41,7 +38,7 @@ public class GodComponentDetectorImpl implements GodComponentDetector {
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		Map<Long, List<FileGod>> result = new HashMap<>();
 		for(Project project : projects) {
 			result.put(project.getId(), fileGods(project));
@@ -56,7 +53,7 @@ public class GodComponentDetectorImpl implements GodComponentDetector {
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		Map<Long, List<PackageGod>> result = new HashMap<>();
 		for(Project project : projects) {
 			result.put(project.getId(), packageGod(project));
@@ -70,9 +67,9 @@ public class GodComponentDetectorImpl implements GodComponentDetector {
 	private Map<Project, Integer> projectToMinFileCountInPackage = new ConcurrentHashMap<>();
 	
 	private List<FileGod> fileGods(Project project) {
-		Collection<FileMetrics> metrics = metricCalculatorService.calculateFileMetrics(project);
+		Collection<FileMetric> metrics = metricCalculatorService.calculateFileMetrics(project);
 		List<FileGod> result = new ArrayList<>();
-		for(FileMetrics metric : metrics) {
+		for(FileMetric metric : metrics) {
 			if(isFileGod(project, metric)) {
 				result.add(new FileGod(metric.getFile(), metric));
 			}
@@ -83,14 +80,14 @@ public class GodComponentDetectorImpl implements GodComponentDetector {
 		return result;
 	}
 	
-	protected boolean isFileGod(Project project, FileMetrics metrics) {
+	protected boolean isFileGod(Project project, FileMetric metrics) {
 		return metrics.getStructureMetric().getLoc() >= getProjectMinFileLoc(project);
 	}
 	
 	private List<PackageGod> packageGod(Project project) {
-		Collection<PackageMetrics> metrics = metricCalculatorService.calculateProjectPackageMetrics(project);
+		Collection<PackageMetric> metrics = metricCalculatorService.calculateProjectPackageMetrics(project);
 		List<PackageGod> result = new ArrayList<>();
-		for(PackageMetrics metric : metrics) {
+		for(PackageMetric metric : metrics) {
 			if(isPackageGod(project, metric)) {
 				result.add(new PackageGod(metric.getPck(), metric));
 			}
@@ -101,7 +98,7 @@ public class GodComponentDetectorImpl implements GodComponentDetector {
 		return result;
 	}
 	
-	protected boolean isPackageGod(Project project, PackageMetrics metrics) {
+	protected boolean isPackageGod(Project project, PackageMetric metrics) {
 		return metrics.getNof() >= getProjectMinFileCountInPackage(project);
 	}
 	

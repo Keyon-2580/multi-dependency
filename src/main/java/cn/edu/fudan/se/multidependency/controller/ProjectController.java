@@ -105,7 +105,7 @@ public class ProjectController {
 	@GetMapping("/all")
 	@ResponseBody
 	public Map<Long, Project> allProjects() {
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		Map<Long, Project> result = new HashMap<>();
 		for(Project project : projects) {
 			result.put(project.getId(), project);
@@ -117,7 +117,7 @@ public class ProjectController {
 	@ResponseBody
 	public JSONArray allProjectsNames() {
 		JSONArray result = new JSONArray();
-		List<Project> projects = new ArrayList<>(nodeService.allProjects());
+		List<Project> projects = nodeService.allProjects();
 
 		projects.sort(Comparator.comparing(Project::getName));
 
@@ -135,7 +135,7 @@ public class ProjectController {
 	public JSONObject allProjectsIds() {
 		JSONObject result = new JSONObject();
 		JSONArray pjlist = new JSONArray();
-		List<Project> projects = new ArrayList<>(nodeService.allProjects());
+		List<Project> projects = nodeService.allProjects();
 
 		projects.sort(Comparator.comparing(Project::getName));
 

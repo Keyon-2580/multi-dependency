@@ -209,11 +209,11 @@ public class NodeServiceImpl implements NodeService {
 		return packageRepository.queryPackage(directoryPath,language);
 	}
 
-	List<Project> allProjectsCache = null;
+	List<Project> allProjectsCache = new ArrayList<>();
 	@Override
-	public Collection<Project> allProjects() {
-		if(allProjectsCache == null) {
-			allProjectsCache = projectRepository.queryAllProjects();
+	public List<Project> allProjects() {
+		if(allProjectsCache.isEmpty()) {
+			allProjectsCache.addAll(projectRepository.queryAllProjects());
 			allProjectsCache.sort((p1, p2) -> p1.getName().compareTo(p2.getName()));
 		}
 		for(Project project : allProjectsCache) {
@@ -224,7 +224,7 @@ public class NodeServiceImpl implements NodeService {
 
 	@Override
 	public Map<Long, Project> allProjectsById() {
-		Collection<Project> projects = allProjects();
+		List<Project> projects = allProjects();
 		Map<Long, Project> result = new HashMap<>();
 		for(Project project : projects) {
 			result.put(project.getId(), project);

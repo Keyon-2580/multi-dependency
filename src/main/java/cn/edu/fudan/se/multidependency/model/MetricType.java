@@ -123,6 +123,21 @@ public final class MetricType {
 	public static final String ISSUES = "Issues";
 
 	/**
+	 * Issue相关提交数
+	 */
+	public static final String ISSUE_COMMITS = "IssueCommits";
+
+	/**
+	 * 提交文件的修改行数
+	 */
+	public static final String CHANGE_LINES = "ChangeLines";
+
+	/**
+	 * Issue相关提交文件的修改行数
+	 */
+	public static final String ISSUE_CHANGE_LINES = "IssueChangeLines";
+
+	/**
 	 * Bug Issue总数数量
 	 */
 	public static final String BUG_ISSUES = "BugIssues";

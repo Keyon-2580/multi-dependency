@@ -35,7 +35,7 @@ import cn.edu.fudan.se.multidependency.service.query.smell.data.SimilarComponent
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.clone.CloneAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.clone.data.FileCloneWithCoChange;
-import cn.edu.fudan.se.multidependency.service.query.metric.FileMetrics;
+import cn.edu.fudan.se.multidependency.service.query.metric.FileMetric;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 
 @Service
@@ -186,7 +186,7 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 		} catch (Exception e) {
 			clonesWithCoChange = new ArrayList<>();
 		}
-		Map<Long, FileMetrics> fileMetrics = metricCalculatorService.calculateFileMetrics();
+		Map<Long, FileMetric> fileMetrics = metricCalculatorService.calculateFileMetrics();
 		List<SimilarComponents<ProjectFile>> similarComponentsList = new ArrayList<>();
 		for(FileCloneWithCoChange clone : clonesWithCoChange) {
 			ProjectFile file1 = clone.getFile1();

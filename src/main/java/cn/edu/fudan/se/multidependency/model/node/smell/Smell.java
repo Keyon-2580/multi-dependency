@@ -34,7 +34,7 @@ public class Smell implements Node {
 
 	private String projectName;
 
-	private int size;
+	private int size = 0;
 
 	private String language;
 

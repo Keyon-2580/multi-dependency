@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper=false)
 @QueryResult
-public class FileMetrics extends FanIOMetric {
+public class FileMetric extends FanIOMetric {
 
 	private ProjectFile file;
 

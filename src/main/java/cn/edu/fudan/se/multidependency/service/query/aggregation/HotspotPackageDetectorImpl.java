@@ -357,7 +357,7 @@ public class HotspotPackageDetectorImpl<ps> implements HotspotPackageDetector {
 
 	@Override
 	public List<HotspotPackage> detectHotspotPackagesByDependsOnInAllProjects(){
-		Collection<Project> projects = nodeService.allProjects();
+		List<Project> projects = nodeService.allProjects();
 		List<HotspotPackage> result = new ArrayList<>();
 		for(Project project : projects) {
 			result.addAll(detectHotspotPackagesByDependsOnInProject(project.getId()));

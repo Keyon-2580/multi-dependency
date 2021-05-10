@@ -193,11 +193,11 @@ public class MetricShowService {
 
 	public void printPackageMetricExcel(OutputStream stream) {
 		Workbook hwb = new XSSFWorkbook();
-		Map<Long, List<PackageMetrics>> allPackageMetrics = metricCalculatorService.calculateProjectPackageMetrics();
-		Collection<Project> projects = nodeService.allProjects();
+		Map<Long, List<PackageMetric>> allPackageMetrics = metricCalculatorService.calculateProjectPackageMetrics();
+		List<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
 			Sheet sheet = hwb.createSheet(new StringBuilder().append(project.getName()).append("(").append(project.getLanguage()).append(")").toString());
-			List<PackageMetrics> packageMetrics = allPackageMetrics.get(project.getId());
+			List<PackageMetric> packageMetrics = allPackageMetrics.get(project.getId());
 			Row row = sheet.createRow(0);
 			CellStyle style = hwb.createCellStyle();
 			style.setAlignment(HorizontalAlignment.CENTER);
@@ -238,7 +238,7 @@ public class MetricShowService {
 			cell.setCellValue("Fan Out");
 			cell.setCellStyle(style);
 			for (int i = 0; i < packageMetrics.size(); i++) {
-				PackageMetrics packageMetric = packageMetrics.get(i);
+				PackageMetric packageMetric = packageMetrics.get(i);
 				row = sheet.createRow(i + 1);
 				row.createCell(0).setCellValue(packageMetric.getPck().getId());
 				row.createCell(1).setCellValue(packageMetric.getPck().getDirectoryPath());
@@ -264,11 +264,11 @@ public class MetricShowService {
 
 	public void printFileMetricExcel(OutputStream stream) {
 		Workbook hwb = new XSSFWorkbook();
-		Map<Long, List<FileMetrics>> allFileMetrics = metricCalculatorService.calculateProjectFileMetrics();
-		Collection<Project> projects = nodeService.allProjects();
+		Map<Long, List<FileMetric>> allFileMetrics = metricCalculatorService.calculateProjectFileMetrics();
+		List<Project> projects = nodeService.allProjects();
 		for(Project project : projects) {
 			Sheet sheet = hwb.createSheet(new StringBuilder().append(project.getName()).append("(").append(project.getLanguage()).append(")").toString());
-			List<FileMetrics> fileMetrics = allFileMetrics.get(project.getId());
+			List<FileMetric> fileMetrics = allFileMetrics.get(project.getId());
 			Row row = sheet.createRow(0);
 			CellStyle style = hwb.createCellStyle();
 			style.setAlignment(HorizontalAlignment.CENTER);
@@ -318,7 +318,7 @@ public class MetricShowService {
 			cell.setCellValue("Page Rank");
 			cell.setCellStyle(style);
 			for (int i = 0; i < fileMetrics.size(); i++) {
-				FileMetrics fileMetric = fileMetrics.get(i);
+				FileMetric fileMetric = fileMetrics.get(i);
 				row = sheet.createRow(i + 1);
 				row.createCell(0).setCellValue(fileMetric.getFile().getId());
 				row.createCell(1).setCellValue(fileMetric.getFile().getPath());

@@ -209,7 +209,7 @@ public class MetricCalculatorService {
 
 	public Map<Long, Metric> generateFileMetricNodes(){
 		Map<Long, Metric> result = new HashMap<>();
-		Map<Long, FileMetrics> fileFileMetricsMap = calculateFileMetrics();
+		Map<Long, FileMetric> fileFileMetricsMap = calculateFileMetrics();
 		if(fileFileMetricsMap != null && !fileFileMetricsMap.isEmpty()){
 			fileFileMetricsMap.forEach((fileId, fileMetrics) ->{
 				ProjectFile file = fileRepository.findFileById(fileId);
@@ -228,7 +228,7 @@ public class MetricCalculatorService {
 				int fanInOut = fileMetrics.getStructureMetric().getFanOut() + fileMetrics.getStructureMetric().getFanIn();
 				double instability  = (fanInOut > 0 ? (double) (fileMetrics.getStructureMetric().getFanOut()) / fanInOut : 0.0);
 				metricValues.put(MetricType.INSTABILITY, instability);
-				FileMetrics.EvolutionMetric evolutionMetric = fileMetrics.getEvolutionMetric();
+				FileMetric.EvolutionMetric evolutionMetric = fileMetrics.getEvolutionMetric();
 				if (evolutionMetric != null){
 					metricValues.put(MetricType.COMMITS, evolutionMetric.getCommits());
 					metricValues.put(MetricType.DEVELOPERS, evolutionMetric.getDevelopers());
@@ -237,7 +237,7 @@ public class MetricCalculatorService {
 					metricValues.put(MetricType.SUB_LINES, evolutionMetric.getSubLines());
 				}
 
-				FileMetrics.DebtMetric detMetric = fileMetrics.getDebtMetric();
+				FileMetric.DebtMetric detMetric = fileMetrics.getDebtMetric();
 				if(detMetric != null){
 					metricValues.put(MetricType.ISSUES, detMetric.getIssues());
 					metricValues.put(MetricType.BUG_ISSUES, detMetric.getBugIssues());
@@ -245,7 +245,7 @@ public class MetricCalculatorService {
 					metricValues.put(MetricType.IMPROVEMENT_ISSUES, detMetric.getImprovementIssues());
 				}
 
-				FileMetrics.DeveloperMetric developerMetric = fileMetrics.getDeveloperMetric();
+				FileMetric.DeveloperMetric developerMetric = fileMetrics.getDeveloperMetric();
 				if(developerMetric != null){
 					metricValues.put(MetricType.CREATOR, developerMetric.getCreator());
 					metricValues.put(MetricType.LAST_UPDATOR, developerMetric.getLastUpdator());
@@ -261,7 +261,7 @@ public class MetricCalculatorService {
 
 	public Map<Long, Metric> generatePackageMetricNodes(){
 		Map<Long, Metric> result = new HashMap<>();
-		Map<Long, PackageMetrics> packageMetricsMap = calculatePackageMetrics();
+		Map<Long, PackageMetric> packageMetricsMap = calculatePackageMetrics();
 		if(packageMetricsMap != null && !packageMetricsMap.isEmpty()){
 			packageMetricsMap.forEach((pckId, packageMetrics) ->{
 				Package pck = packageRepository.findPackageById(pckId);
@@ -293,7 +293,7 @@ public class MetricCalculatorService {
 
 	public Map<Long, Metric> generateProjectMetricNodes(){
 		Map<Long, Metric> result = new HashMap<>();
-		Map<Long, ProjectMetrics> projectMetricsMap = calculateProjectMetrics();
+		Map<Long, ProjectMetric> projectMetricsMap = calculateProjectMetrics();
 		if(projectMetricsMap != null && !projectMetricsMap.isEmpty()){
 			projectMetricsMap.forEach((pck, projectMetrics) ->{
 				Metric metric = new Metric();
@@ -309,6 +309,9 @@ public class MetricCalculatorService {
 				metricValues.put(MetricType.LOC, projectMetrics.getLoc());
 				metricValues.put(MetricType.LINES, projectMetrics.getLines());
 				metricValues.put(MetricType.COMMITS, projectMetrics.getCommits());
+				metricValues.put(MetricType.ISSUE_COMMITS, projectMetrics.getIssueCommits());
+				metricValues.put(MetricType.CHANGE_LINES, projectMetrics.getChangeLines());
+				metricValues.put(MetricType.ISSUE_CHANGE_LINES, projectMetrics.getIssueChangeLines());
 				metricValues.put(MetricType.MODULARITY, projectMetrics.getModularity());
 				metricValues.put(MetricType.MED_FILE_FAN_IN, projectMetrics.getMedFileFanIn());
 				metricValues.put(MetricType.MED_FILE_FAN_OUT, projectMetrics.getMedFileFanOut());
@@ -324,23 +327,23 @@ public class MetricCalculatorService {
 		return result;
 	}
 	
-	public Map<Long, FileMetrics> calculateFileMetrics() {
+	public Map<Long, FileMetric> calculateFileMetrics() {
 		String key = "calculateFileMetrics";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
 
-		Map<Long, FileMetrics> result = new HashMap<>();
-		List<FileMetrics.StructureMetric> fileStructureMetricsList = fileRepository.calculateFileStructureMetrics();
+		Map<Long, FileMetric> result = new HashMap<>();
+		List<FileMetric.StructureMetric> fileStructureMetricsList = fileRepository.calculateFileStructureMetrics();
 		if(fileStructureMetricsList != null && !fileStructureMetricsList.isEmpty()){
 			fileStructureMetricsList.forEach(structureMetric -> {
-				FileMetrics fileMetrics = new FileMetrics();
+				FileMetric fileMetrics = new FileMetric();
 
 				ProjectFile file = structureMetric.getFile();
 				fileMetrics.setFile(file);
-				FileMetrics.EvolutionMetric fileEvolutionMetrics = fileRepository.calculateFileEvolutionMetrics(file.getId());
-				FileMetrics.DebtMetric fileDebtMetrics = fileRepository.calculateFileDebtMetrics(file.getId());
-				FileMetrics.DeveloperMetric developerMetric = calculateFileDeveloperMetrics(file);
+				FileMetric.EvolutionMetric fileEvolutionMetrics = fileRepository.calculateFileEvolutionMetrics(file.getId());
+				FileMetric.DebtMetric fileDebtMetrics = fileRepository.calculateFileDebtMetrics(file.getId());
+				FileMetric.DeveloperMetric developerMetric = calculateFileDeveloperMetrics(file);
 
 				fileMetrics.setStructureMetric(structureMetric);
 				fileMetrics.setEvolutionMetric(fileEvolutionMetrics);
@@ -361,19 +364,19 @@ public class MetricCalculatorService {
 		return result;
 	}
 	
-	public Map<Long, List<FileMetrics>> calculateProjectFileMetrics() {
+	public Map<Long, List<FileMetric>> calculateProjectFileMetrics() {
 		String key = "calculateProjectFileMetrics";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
 
-		Map<Long, List<FileMetrics>> result = new HashMap<>();
-		Map<Long, FileMetrics> fileMetricsCache = new HashMap<>(calculateFileMetrics());
+		Map<Long, List<FileMetric>> result = new HashMap<>();
+		Map<Long, FileMetric> fileMetricsCache = new HashMap<>(calculateFileMetrics());
 		if(!fileMetricsCache.isEmpty()){
 			fileMetricsCache.forEach((fileId, fileMetrics)->{
 				ProjectFile file = fileRepository.findFileById(fileId);
 				Project project = containRelationService.findFileBelongToProject(file);
-				List<FileMetrics> temp = result.getOrDefault(project.getId(), new ArrayList<>());
+				List<FileMetric> temp = result.getOrDefault(project.getId(), new ArrayList<>());
 				temp.add(fileMetrics);
 				result.put(project.getId(), temp);
 			});
@@ -383,17 +386,17 @@ public class MetricCalculatorService {
 		return result;
 	}
 	
-	public Collection<FileMetrics> calculateFileMetrics(Project project) {
+	public Collection<FileMetric> calculateFileMetrics(Project project) {
 		return calculateProjectFileMetrics().get(project.getId());
 	}
 
-	public Map<Long,PackageMetrics> calculatePackageMetrics() {
+	public Map<Long, PackageMetric> calculatePackageMetrics() {
 		String key = "calculatePackageMetrics";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-		Map<Long, PackageMetrics> result = new HashMap<>();
-		for(PackageMetrics pckMetrics : packageRepository.calculatePackageMetrics()) {
+		Map<Long, PackageMetric> result = new HashMap<>();
+		for(PackageMetric pckMetrics : packageRepository.calculatePackageMetrics()) {
 			Package pck = pckMetrics.getPck();
 			result.put(pck.getId(), pckMetrics);
 		}
@@ -401,17 +404,17 @@ public class MetricCalculatorService {
 		return result;
 	}
 
-	public Map<Long, List<PackageMetrics>> calculateProjectPackageMetrics() {
+	public Map<Long, List<PackageMetric>> calculateProjectPackageMetrics() {
 		String key = "calculateProjectPackageMetrics";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-		Map<Long, List<PackageMetrics>> result = new HashMap<>();
-		Map<Long, PackageMetrics> packageMetricsCache = new HashMap<>(calculatePackageMetrics());
+		Map<Long, List<PackageMetric>> result = new HashMap<>();
+		Map<Long, PackageMetric> packageMetricsCache = new HashMap<>(calculatePackageMetrics());
 		packageMetricsCache.forEach((pckId, packageMetrics)->{
 			Package pck = packageRepository.findPackageById(pckId);
 			Project project = containRelationService.findPackageBelongToProject(pck);
-			List<PackageMetrics> temp = result.getOrDefault(project.getId(), new ArrayList<>());
+			List<PackageMetric> temp = result.getOrDefault(project.getId(), new ArrayList<>());
 			temp.add(packageMetrics);
 			result.put(project.getId(), temp);
 		});
@@ -419,7 +422,7 @@ public class MetricCalculatorService {
 		return result;
 	}
 	
-	public Collection<PackageMetrics> calculateProjectPackageMetrics(Project project) {
+	public Collection<PackageMetric> calculateProjectPackageMetrics(Project project) {
 		return calculateProjectPackageMetrics().get(project.getId());
 	}
 
@@ -431,12 +434,12 @@ public class MetricCalculatorService {
 		return fileRepository.calculateFanOut(file.getId());
 	}
 
-	public FileMetrics calculateFileMetric(ProjectFile file) {
-		FileMetrics fileMetrics = new FileMetrics();
-		FileMetrics.StructureMetric fileStructureMetrics = fileRepository.calculateFileStructureMetrics(file.getId());
-		FileMetrics.EvolutionMetric fileEvolutionMetrics = fileRepository.calculateFileEvolutionMetrics(file.getId());
-		FileMetrics.DebtMetric fileDebtMetrics = fileRepository.calculateFileDebtMetrics(file.getId());
-		FileMetrics.DeveloperMetric fileDeveloperMetrics = calculateFileDeveloperMetrics(file);
+	public FileMetric calculateFileMetric(ProjectFile file) {
+		FileMetric fileMetrics = new FileMetric();
+		FileMetric.StructureMetric fileStructureMetrics = fileRepository.calculateFileStructureMetrics(file.getId());
+		FileMetric.EvolutionMetric fileEvolutionMetrics = fileRepository.calculateFileEvolutionMetrics(file.getId());
+		FileMetric.DebtMetric fileDebtMetrics = fileRepository.calculateFileDebtMetrics(file.getId());
+		FileMetric.DeveloperMetric fileDeveloperMetrics = calculateFileDeveloperMetrics(file);
 		fileMetrics.setStructureMetric(fileStructureMetrics);
 		fileMetrics.setEvolutionMetric(fileEvolutionMetrics);
 		fileMetrics.setDebtMetric(fileDebtMetrics);
@@ -444,27 +447,47 @@ public class MetricCalculatorService {
 		return fileMetrics;
 	}
 
-	public PackageMetrics calculatePackageMetric(Package pck){
+	public PackageMetric calculatePackageMetric(Package pck){
 		return packageRepository.calculatePackageMetrics(pck.getId());
 	}
 
-	public Map<Long, ProjectMetrics> calculateProjectMetrics() {
+	public Map<Long, ProjectMetric> calculateProjectMetrics() {
 		String key = "calculateProjectMetrics";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-		Map<Long, ProjectMetrics> result = new HashMap<>();
-		List<ProjectMetrics> projectMetricsList = projectRepository.calculateProjectMetrics();
-		if(projectMetricsList != null && !projectMetricsList.isEmpty()) {
-			projectMetricsList.forEach(projectMetrics -> {
-				Project project = projectMetrics.getProject();
-				projectMetrics.setMedFileFanIn(calculateMedFileFanIn(project.getId()));
-				projectMetrics.setMedFileFanOut(calculateMedFileFanOut(project.getId()));
-				projectMetrics.setMedPackageFanIn(calculateMedPackageFanIn(project.getId()));
-				projectMetrics.setMedPackageFanOut(calculateMedPackageFanOut(project.getId()));
-				projectMetrics.setMedFileCoChange(calculateMedFileCoChange(project.getId()));
-				projectMetrics.setMedPackageCoChange(calculateMedPackageCoChange(project.getId()));
-				result.put(project.getId(), projectMetrics);
+		Map<Long, ProjectMetric> result = new HashMap<>();
+		List<ProjectMetric> projectMetricList = projectRepository.calculateProjectMetrics();
+		if(projectMetricList != null && !projectMetricList.isEmpty()) {
+			projectMetricList.forEach(projectMetric -> {
+				Project project = projectMetric.getProject();
+				projectMetric.setMedFileFanIn(calculateMedFileFanIn(project.getId()));
+				projectMetric.setMedFileFanOut(calculateMedFileFanOut(project.getId()));
+				projectMetric.setMedPackageFanIn(calculateMedPackageFanIn(project.getId()));
+				projectMetric.setMedPackageFanOut(calculateMedPackageFanOut(project.getId()));
+				projectMetric.setMedFileCoChange(calculateMedFileCoChange(project.getId()));
+				projectMetric.setMedPackageCoChange(calculateMedPackageCoChange(project.getId()));
+				Integer issueCommits = commitRepository.calculateProjectIssueCommitsByProjectId(project.getId());
+				Integer commits = commitRepository.calculateProjectCommitsByProjectId(project.getId());
+				Integer issueChangeLines = commitRepository.calculateProjectIssueChangeLinesByProjectId(project.getId());
+				Integer changeLines = commitRepository.calculateProjectChangeLinesByProjectId(project.getId());
+				if (issueCommits == null) {
+					issueCommits = 0;
+				}
+				if (commits == null) {
+					commits = 0;
+				}
+				if (issueChangeLines == null) {
+					issueChangeLines = 0;
+				}
+				if (changeLines == null) {
+					changeLines = 0;
+				}
+				projectMetric.setIssueCommits(issueCommits);
+				projectMetric.setCommits(commits);
+				projectMetric.setIssueChangeLines(issueChangeLines);
+				projectMetric.setChangeLines(changeLines);
+				result.put(project.getId(), projectMetric);
 			});
 			cache.cache(getClass(), key, result);
 		}
@@ -472,16 +495,16 @@ public class MetricCalculatorService {
 		return result;
 	}
 
-	public Map<String, List<ProjectMetrics>> calculateProjectMetricsByGitRepository() {
+	public Map<String, List<ProjectMetric>> calculateProjectMetricsByGitRepository() {
 		String key = "calculateProjectMetricsByGitRepository";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-		Map<String, List<ProjectMetrics>> result = new HashMap<>();
-		List<ProjectMetrics> projectMetricsList = projectRepository.calculateProjectMetrics();
+		Map<String, List<ProjectMetric>> result = new HashMap<>();
+		List<ProjectMetric> projectMetricsList = projectRepository.calculateProjectMetrics();
 		if(projectMetricsList != null && !projectMetricsList.isEmpty()) {
 			projectMetricsList.forEach(projectMetrics -> {
-				List<ProjectMetrics> projectMetricsTmp = result.getOrDefault(projectMetrics.getProject().getName(), new ArrayList<>());
+				List<ProjectMetric> projectMetricsTmp = result.getOrDefault(projectMetrics.getProject().getName(), new ArrayList<>());
 				projectMetricsTmp.add(projectMetrics);
 				result.put(projectMetrics.getProject().getName() , projectMetricsTmp);
 			});
@@ -499,9 +522,9 @@ public class MetricCalculatorService {
 		return gitAnalyseService.findCommitsInProject(project).size();
 	}
 
-	private FileMetrics.DeveloperMetric calculateFileDeveloperMetrics(ProjectFile file){
+	private FileMetric.DeveloperMetric calculateFileDeveloperMetrics(ProjectFile file){
 		long fileId = file.getId();
-		FileMetrics.DeveloperMetric developerMetric = new FileMetrics().new DeveloperMetric();
+		FileMetric.DeveloperMetric developerMetric = new FileMetric().new DeveloperMetric();
 		List<Commit> commits = commitRepository.queryUpdatedByCommits(fileId);
 		if(commits.size() > 0){
 			Developer creator = developerSubmitCommitRepository.findDeveloperByCommitId(commits.get(commits.size() - 1).getId());
@@ -529,7 +552,7 @@ public class MetricCalculatorService {
 	private int calculateMedian(List<Integer> list) {
 		int median = 0;
 		int size = list.size();
-		if (size > 0) {
+		if (size > 0 && list.get(0) != null) {
 			if (size % 2 == 0) {
 				median = (list.get((size / 2) - 1) + list.get(size / 2)) / 2;
 			}
