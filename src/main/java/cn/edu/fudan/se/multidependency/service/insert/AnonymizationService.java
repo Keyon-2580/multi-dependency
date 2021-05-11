@@ -73,8 +73,8 @@ public final class AnonymizationService {
 
     public void anonymizeCommit(Commit commit){
         //根据是否匿名化实现匿名处理
-        String shortMessage = commit.getShortMessage().replaceAll("\\w","*");
-        String fullMessage = commit.getFullMessage().replaceAll("\\w","*");
+        String shortMessage = commit.getShortMessage().replaceAll("[\\u4e00-\\u9fa5\\w]","*");
+        String fullMessage = commit.getFullMessage().replaceAll("[\\u4e00-\\u9fa5\\w]","*");
         commit.setShortMessage(shortMessage);
         commit.setFullMessage(fullMessage);
     }
