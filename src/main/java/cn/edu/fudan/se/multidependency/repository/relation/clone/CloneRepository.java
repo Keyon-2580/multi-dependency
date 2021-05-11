@@ -36,6 +36,9 @@ public interface CloneRepository extends Neo4jRepository<Clone, Long> {
 	@Query("match p= (:Snippet)-[:" + RelationType.str_CLONE + "]->(:Snippet) return p")
 	public List<Clone> findAllSnippetClones();
 
+	@Query("match p= ()-[:" + RelationType.str_CLONE + "]->() return p limit 10;")
+	public List<Clone> findClonesLimit();
+
 	/**
 	 * 根据克隆类型找出包含此克隆类型关系的所有克隆组
 	 * @param cloneRelationType
