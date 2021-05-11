@@ -7,9 +7,11 @@ import java.util.*;
 import cn.edu.fudan.se.multidependency.model.node.*;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.*;
+import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository;
 import cn.edu.fudan.se.multidependency.service.query.smell.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
@@ -305,14 +307,18 @@ public class BeanCreator {
 
 
 	@Bean("createCloneGroup")
-	public List<CloneGroup> createCloneGroup(PropertyConfig propertyConfig, CloneGroupRepository cloneGroupRepository) {
+	public List<CloneGroup> createCloneGroup(PropertyConfig propertyConfig, CloneGroupRepository cloneGroupRepository, CloneRepository cloneRepository) {
 		if(propertyConfig.isCalculateCloneGroup()) {
 			List<CloneGroup> cloneGroups = cloneGroupRepository.findCloneGroupWithLimit();
 			if ( cloneGroups != null && !cloneGroups.isEmpty()){
 				LOGGER.info("已存在Clone Group关系");
 			} else {
 				LOGGER.info("创建Clone Group关系...");
-				cloneGroupRepository.deleteAll();
+				List<Clone> clones = cloneRepository.findClonesLimit();
+				if(clones == null || clones.isEmpty()){
+					LOGGER.info("不存在克隆数据，跳过分析！！！" );
+					return new ArrayList<>();
+				}
 				cloneGroupRepository.setJavaLanguageBySuffix();
 				cloneGroupRepository.setCppLanguageBySuffix();
 				cloneGroupRepository.deleteCloneGroupContainRelations();
@@ -333,7 +339,7 @@ public class BeanCreator {
 
 
 	@Bean("setModuleClone")
-	public List<ModuleClone> setModuleClone(PropertyConfig propertyConfig, ModuleCloneRepository moduleCloneRepository) {
+	public List<ModuleClone> setModuleClone(PropertyConfig propertyConfig, ModuleCloneRepository moduleCloneRepository,CloneRepository cloneRepository) {
 		if(propertyConfig.isSetModuleClone()) {
 			List<ModuleClone> moduleClones = moduleCloneRepository.getAllModuleCloneWithLimit();
 			if(moduleClones != null &&moduleClones.size() > 0) {
@@ -341,6 +347,11 @@ public class BeanCreator {
 			}
 			else {
 				LOGGER.info("设置Module Clone基础信息...");
+				List<Clone> clones = cloneRepository.findClonesLimit();
+				if(clones == null || clones.isEmpty()){
+					LOGGER.info("不存在克隆数据，跳过分析！！！" );
+					return new ArrayList<>();
+				}
 				if(moduleCloneRepository.getNumberOfModuleClone() == 0) {
 					List<BasicDataForDoubleNodes<Node, Relation>> clonePackagePairs = summaryAggregationDataService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE));
 					for(BasicDataForDoubleNodes<Node, Relation> clonePackagePair : clonePackagePairs) {
@@ -374,7 +385,7 @@ public class BeanCreator {
 	}
 
 	@Bean("setAggregationClone")
-	public List<AggregationClone> setAggregationClone(PropertyConfig propertyConfig, AggregationCloneRepository aggregationCloneRepository) {
+	public List<AggregationClone> setAggregationClone(PropertyConfig propertyConfig, AggregationCloneRepository aggregationCloneRepository,CloneRepository cloneRepository) {
 		if(propertyConfig.isSetAggregationClone()) {
 			List<AggregationClone> aggregationClone = aggregationCloneRepository.getAllAggregationClone();
 			if(aggregationClone != null && aggregationClone.size() > 0) {
@@ -382,6 +393,11 @@ public class BeanCreator {
 			}
 			else {
 				LOGGER.info("设置Aggregation Clone聚合结果...");
+				List<Clone> clones = cloneRepository.findClonesLimit();
+				if(clones == null || clones.isEmpty()){
+					LOGGER.info("不存在克隆数据，跳过分析！！！" );
+					return new ArrayList<>();
+				}
 				if(aggregationCloneRepository.getNumberOfAggregationClone() == 0) {
 					Collection<HotspotPackagePair> hotspotPackagePairs = hotspotPackagePairDetector.detectHotspotPackagePairs();
 					AddChildrenPackages(-1, -1, hotspotPackagePairs, aggregationCloneRepository);
@@ -498,7 +514,7 @@ public class BeanCreator {
 
 			if(propertyConfig.isCalculateCloneGroup() && propertyConfig.isCalculateCloneGroup()){
 				LOGGER.info("创建Similar Components Smell节点关系...");
-				smellDetectorService.createSimilarComponentsSmells(false);
+//				smellDetectorService.createSimilarComponentsSmells(false);
 			}
 
 			if(propertyConfig.isCalculateCoChange()){
