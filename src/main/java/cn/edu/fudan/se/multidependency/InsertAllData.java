@@ -2,14 +2,11 @@ package cn.edu.fudan.se.multidependency;
 
 import java.io.File;
 
+import cn.edu.fudan.se.multidependency.service.insert.*;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.edu.fudan.se.multidependency.service.insert.InserterForNeo4j;
-import cn.edu.fudan.se.multidependency.service.insert.InserterForNeo4jServiceFactory;
-import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
-import cn.edu.fudan.se.multidependency.service.insert.ThreadService;
 import cn.edu.fudan.se.multidependency.service.insert.dynamic.TraceStartExtractor;
 import cn.edu.fudan.se.multidependency.utils.JSONUtil;
 import cn.edu.fudan.se.multidependency.utils.YamlUtil;
@@ -48,6 +45,11 @@ public class InsertAllData {
             
             ts.othersAnalyse();
 
+            if(yaml.isAnonymization()){
+                AnonymizationService anonymizationService = AnonymizationService.getInstance();
+                anonymizationService.anonymizeNodes();
+            }
+
             InserterForNeo4j repository = RepositoryService.getInstance();
             repository.setDataPath(yaml.getNeo4jDataPath());
             repository.setDatabaseName(yaml.getNeo4jDatabaseName());
@@ -76,7 +78,10 @@ public class InsertAllData {
 
             LOGGER.info("总分析节点数：" + service.getNodes().size());
             LOGGER.info("总分析关系数：" + service.getRelations().size());
-
+            if(yaml.isAnonymization()){
+                AnonymizationService anonymizationService = AnonymizationService.getInstance();
+                anonymizationService.anonymizeNodes();
+            }
             FileUtil.writeObject(yaml.getSerializePath(), service);
             System.exit(0);
         } catch (Exception e) {

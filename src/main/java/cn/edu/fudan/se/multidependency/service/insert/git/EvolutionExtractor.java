@@ -238,6 +238,7 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
             Developer developer = this.getNodes().findDeveloperByName(revCommit.getAuthorIdent().getName());
             if (developer == null) {
                 developer = new Developer(generateEntityId(), revCommit.getAuthorIdent().getName());
+                developer.addDeveloperRole(Constant.DEVELOPER_ROLE_CODER);
                 addNode(developer, null);
             }
             addRelation(new DeveloperSubmitCommit(developer, commit));
@@ -465,6 +466,7 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
     		Developer developer = this.getNodes().findDeveloperByName(issue.getDeveloperName());
     		if (developer == null) {
     			developer = new Developer(generateEntityId(), issue.getDeveloperName());
+    			developer.addDeveloperRole(Constant.DEVELOPER_ROLE_ISSUE_REPORTER);
     			addNode(developer, null);
     		}
     		addRelation(new DeveloperReportIssue(developer, issue));
@@ -488,6 +490,7 @@ public class EvolutionExtractor extends ExtractorForNodesAndRelationsImpl {
             Developer developer = this.getNodes().findDeveloperByName(issue.getReporter());
             if (developer == null) {
                 developer = new Developer(generateEntityId(), issue.getDeveloperName());
+                developer.addDeveloperRole(Constant.DEVELOPER_ROLE_ISSUE_REPORTER);
                 addNode(developer, null);
             }
             addRelation(new DeveloperReportIssue(developer, issue));

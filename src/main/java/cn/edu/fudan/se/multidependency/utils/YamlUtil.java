@@ -53,6 +53,8 @@ public class YamlUtil {
 		result.setProjectsConfig(projectsConfig);
 		String serializePath = (String) ((Map<?, ?>) yaml.get("data")).get("serialize_path");
 		result.setSerializePath(serializePath);
+		boolean anonymization = (boolean) ((Map<?, ?>) yaml.get("data")).get("anonymization");
+		result.setAnonymization(anonymization);
 
 		boolean analyseDynamic = (boolean) ((Map<?, ?>) yaml.get("data")).get("dynamic_analyse");
 		boolean analyseGit = (boolean) ((Map<?, ?>) yaml.get("data")).get("git_analyse");
@@ -78,6 +80,8 @@ public class YamlUtil {
 		private String neo4jDatabaseName;
 
 		private String serializePath;
+
+		private boolean anonymization;
 
 		private boolean analyseDynamic;
 

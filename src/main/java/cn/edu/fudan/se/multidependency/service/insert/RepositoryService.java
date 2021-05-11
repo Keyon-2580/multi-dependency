@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,4 +101,5 @@ public final class RepositoryService implements InserterForNeo4j, Serializable {
     public boolean existRelation(Relation relation) {
         return this.relations.existRelation(relation);
     }
+
 }

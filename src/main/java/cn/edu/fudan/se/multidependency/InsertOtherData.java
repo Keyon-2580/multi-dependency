@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency;
 
+import cn.edu.fudan.se.multidependency.service.insert.AnonymizationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,12 @@ public class InsertOtherData {
             LOGGER.info("静态分析关系数：" + service.getRelations().size());
 
             ts.othersAnalyse();
-            
+
+            if(yaml.isAnonymization()){
+                AnonymizationService anonymizationService = AnonymizationService.getInstance();
+                anonymizationService.anonymizeNodes();
+            }
+
             InserterForNeo4j repository = RepositoryService.getInstance();
             repository.setDataPath(yaml.getNeo4jDataPath());
             repository.setDatabaseName(yaml.getNeo4jDatabaseName());
