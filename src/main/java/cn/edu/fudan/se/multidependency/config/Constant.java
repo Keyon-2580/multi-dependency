@@ -13,6 +13,8 @@ public class Constant {
 
 	public static final String ISSUE_FROM_JIRA = "jira";
 	public static final String ISSUE_FROM_GITHUB = "github";
+	public static final String DEVELOPER_ROLE_CODER = "coder";
+	public static final String DEVELOPER_ROLE_ISSUE_REPORTER = "issue_reporter";
 
 	public static final String[] FILE_SUFFIX =
 			new String[]{".java",".cpp", ".cc", ".c", ".c++", ".h", ".hpp", ".hh", ".cxx", ".hxx"};

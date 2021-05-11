@@ -12,6 +12,7 @@ import cn.edu.fudan.se.multidependency.model.node.NodeLabelType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.neo4j.ogm.annotation.Properties;
 
 @Data
 @NodeEntity
@@ -29,9 +30,16 @@ public class Developer implements Node {
     
     private String name;
 
+    private String roles;
+
 	public Developer(Long entityId, String name){
 		this.entityId = entityId;
 		this.name = name;
+	}
+
+	public void addDeveloperRole(String role){
+		String temp = (this.roles == null  ? role : "__" + role);
+		this.roles += temp;
 	}
 
     @Override
@@ -39,6 +47,7 @@ public class Developer implements Node {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
 		properties.put("name", getName() == null ? "" : getName());
+		properties.put("roles", getRoles() == null ? "" : getRoles());
 		return properties;
 	}
 
