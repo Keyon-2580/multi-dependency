@@ -1,12 +1,17 @@
 package cn.edu.fudan.se.multidependency.controller.history;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
+import cn.edu.fudan.se.multidependency.model.node.git.GitRepository;
 import cn.edu.fudan.se.multidependency.model.relation.git.DeveloperUpdateNode;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.DeveloperRepository;
+import cn.edu.fudan.se.multidependency.repository.node.git.GitRepoRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
+import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,6 +29,9 @@ import java.util.List;
 public class DeveloperController {
 
     @Autowired
+    private NodeService nodeService;
+
+    @Autowired
     private ContainRepository containRepository;
 
     @Autowired
@@ -32,18 +40,28 @@ public class DeveloperController {
     @Autowired
     private DeveloperRepository developerRepository;
 
+    @Autowired
+    private GitRepoRepository gitRepoRepository;
+
     @GetMapping("/developers")
     @ResponseBody
-    public JSONObject getAllDevelopers(){
-        List<Developer> developers = developerRepository.queryAllDevelopers();
-        List<Integer> commitTimes = new ArrayList<>();
-        for(Developer developer : developers){
-            commitTimes.add(developerRepository.queryCommitByDeveloper(developer.getId()).size());
+    public JSONArray getAllDevelopers(){
+        JSONArray result = new JSONArray();
+        Iterable<GitRepository> gitRepositories = gitRepoRepository.findAll();
+        for(GitRepository gitRepository : gitRepositories) {
+            JSONObject repositoryDetails = new JSONObject();
+            List<Developer> developers = developerRepository.findDevelopersByRepository(gitRepository.getId());
+            List<Integer> commitTimes = new ArrayList<>();
+            for(Developer developer : developers) {
+                commitTimes.add(developerRepository.queryCommitTimesByDeveloper(developer.getId()));
+            }
+            repositoryDetails.put("repositoryname", gitRepository.getName());
+            repositoryDetails.put("language", gitRepoRepository.findGitRepositoryHasProject(gitRepository.getId()).getLanguage());
+            repositoryDetails.put("developers", developers);
+            repositoryDetails.put("times", commitTimes);
+            result.add(repositoryDetails);
         }
-        JSONObject value = new JSONObject();
-        value.put("developer", developers);
-        value.put("committime", commitTimes);
-        return value;
+        return result;
     }
 
     @GetMapping("/detail")

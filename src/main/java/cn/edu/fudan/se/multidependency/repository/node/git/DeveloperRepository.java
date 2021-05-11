@@ -1,6 +1,5 @@
 package cn.edu.fudan.se.multidependency.repository.node.git;
 
-import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
@@ -26,9 +25,23 @@ public interface DeveloperRepository extends Neo4jRepository<Developer, Long> {
             "return commit")
     List<Commit> queryCommitByDeveloper(@Param("developerId") long developerId);
 
+    @Query("match (developer : Developer)-[:" + RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]" +
+            "->(commit : Commit) " +
+            "where id(developer)=$developerId " +
+            "return count(commit)")
+    Integer queryCommitTimesByDeveloper(@Param("developerId") long developerId);
+
     @Query("match (developer : Developer)-[:" + RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]->(: Commit)" +
             "-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(file:ProjectFile)" +
             " where id(developer)=$developerId" +
             " return file")
     List<ProjectFile> queryFileChangedByDeveloper(@Param("developerId") long developerId);
+
+    @Query("match (g:GitRepository) -[:" + RelationType.str_CONTAIN + "]-> (b:Branch)" +
+            " -[:" + RelationType.str_CONTAIN + "]-> (c:Commit) <-[:" + RelationType.str_DEVELOPER_SUBMIT_COMMIT + "] - (d:Developer)" +
+            " where id(g) = $gitRepositoryId " +
+            " with d,count(c) as times" +
+            " return d order by times desc")
+    List<Developer> findDevelopersByRepository(long gitRepositoryId);
+
 }

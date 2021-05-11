@@ -214,23 +214,27 @@ var gitRepoMetric = function() {
 			url : "/developer/developers",
 			success : function (result) {
 				console.log(result);
-				var html = "";
-				html += "<table id='developerTable' class='table table-bordered'>";
-				html += "<tr>";
-				html += "<th>Index</th>";
-				html += "<th>Id</th>";
-				html += "<th>Name</th>";
-				html += "<th>CommitTimes</th>";
-				html += "</tr>";
-				for(let i = 0;i < result.developer.length; i++){
+				let html = "";
+				for(let i = 0; i < result.length;i++) {
+					let project = result[i];
+					html += "<h4>" + result[i].repositoryname + "(" + result[i].language + ")" + "</h4>";
+					html += "<table id='developerTable' class='table table-bordered'>";
 					html += "<tr>";
-					html += "<td>" + (i + 1) + "</td>";
-					html += "<td>" + result.developer[i].id + "</td>";
-					html += "<td><a target='_blank' href='/developer/packages?developerId=" + result.developer[i].id + "'>" + result.developer[i].name + "</a></td>";
-					html += "<td><a target='_blank' href='/developer/detail?developerId=" + result.developer[i].id + "'>" + result.committime[i] + "</a></td>";
+					html += "<th>Index</th>";
+					html += "<th>Id</th>";
+					html += "<th>Name</th>";
+					html += "<th>CommitTimes</th>";
 					html += "</tr>";
+					for(let i = 0;i < project["developers"].length; i++){
+						html += "<tr>";
+						html += "<td>" + (i + 1) + "</td>";
+						html += "<td>" + project["developers"][i].id + "</td>";
+						html += "<td><a target='_blank' href='/developer/packages?developerId=" + project["developers"][i].id + "'>" + project["developers"][i].name + "</a></td>";
+						html += "<td><a target='_blank' href='/developer/detail?developerId=" + project["developers"][i].id + "'>" + project["times"][i] + "</a></td>";
+						html += "</tr>";
+					}
+					html += "</table>";
 				}
-				html += "</table>";
 				$("#gitDeveloperInfo").html(html);
 			}
 		});

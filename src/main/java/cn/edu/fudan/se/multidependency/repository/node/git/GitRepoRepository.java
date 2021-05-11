@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.repository.node.git;
 
+import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -27,4 +28,9 @@ public interface GitRepoRepository extends Neo4jRepository<GitRepository, Long> 
 			"Where n.name = $repoName " +
 			"RETURN n")
 	GitRepository findGitRepositoryByName(@Param("repoName") String repoName);
+
+	@Query("match (gitRepo:GitRepository) -[:" + RelationType.str_CONTAIN + "]-> (project : Project) " +
+			" where id(gitRepo)=$gitRepoId " +
+			" return project;")
+	Project findGitRepositoryHasProject(long gitRepoId);
 }
