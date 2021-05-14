@@ -2,6 +2,8 @@ package cn.edu.fudan.se.multidependency.controller.smell;
 
 import javax.servlet.http.HttpServletRequest;
 
+import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
+import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,32 +14,65 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.service.query.smell.HubLikeComponentDetector;
+import cn.edu.fudan.se.multidependency.service.query.smell.HubLikeDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller
-@RequestMapping("/as/hublike")
+@RequestMapping("/as/hublikedependency")
 public class HubLikeDependencyController {
 	
 	@Autowired
 	private NodeService nodeService;
 	
 	@Autowired
-	private HubLikeComponentDetector hubLikeComponentDetector;
+	private HubLikeDependencyDetector hubLikeDependencyDetector;
+
+	@Autowired
+	private ProjectRepository projectRepository;
 	
 	@GetMapping("/query")
-	public String queryHubLikeDependency(HttpServletRequest request) {
-		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("fileHubLikeDependencyMap", hubLikeComponentDetector.queryFileHubLikeDependency());
-		request.setAttribute("packageHubLikeDependencyMap", hubLikeComponentDetector.queryPackageHubLikeDependency());
+	public String queryHubLikeDependency(HttpServletRequest request, @RequestParam("projectid") Long projectId, @RequestParam("smelllevel") String smellLevel) {
+		Project project = projectRepository.findProjectById(projectId);
+		if (project != null) {
+			request.setAttribute("project", project);
+			switch (smellLevel) {
+				case SmellLevel.FILE:
+					request.setAttribute("fileHubLikeDependencyMap", hubLikeDependencyDetector.queryFileHubLikeDependency());
+					request.setAttribute("packageHubLikeDependencyMap", null);
+					break;
+				case SmellLevel.PACKAGE:
+					request.setAttribute("fileHubLikeDependencyMap", null);
+					request.setAttribute("packageHubLikeDependencyMap", hubLikeDependencyDetector.queryPackageHubLikeDependency());
+					break;
+				case SmellLevel.MULTIPLE_LEVEL:
+					request.setAttribute("fileHubLikeDependencyMap", hubLikeDependencyDetector.queryFileHubLikeDependency());
+					request.setAttribute("packageHubLikeDependencyMap", hubLikeDependencyDetector.queryPackageHubLikeDependency());
+					break;
+			}
+		}
 		return "as/hublikedependency";
 	}
 
 	@GetMapping("/detect")
-	public String detectHubLikeDependency(HttpServletRequest request) {
-		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("fileHubLikeDependencyMap", hubLikeComponentDetector.detectFileHubLikeDependency());
-		request.setAttribute("packageHubLikeDependencyMap", hubLikeComponentDetector.detectPackageHubLikeDependency());
+	public String detectHubLikeDependency(HttpServletRequest request, @RequestParam("projectid") Long projectId, @RequestParam("smelllevel") String smellLevel) {
+		Project project = projectRepository.findProjectById(projectId);
+		if (project != null) {
+			request.setAttribute("project", project);
+			switch (smellLevel) {
+				case SmellLevel.FILE:
+					request.setAttribute("fileHubLikeDependencyMap", hubLikeDependencyDetector.detectFileHubLikeDependency());
+					request.setAttribute("packageHubLikeDependencyMap", null);
+					break;
+				case SmellLevel.PACKAGE:
+					request.setAttribute("fileHubLikeDependencyMap", null);
+					request.setAttribute("packageHubLikeDependencyMap", hubLikeDependencyDetector.detectPackageHubLikeDependency());
+					break;
+				case SmellLevel.MULTIPLE_LEVEL:
+					request.setAttribute("fileHubLikeDependencyMap", hubLikeDependencyDetector.detectFileHubLikeDependency());
+					request.setAttribute("packageHubLikeDependencyMap", hubLikeDependencyDetector.detectPackageHubLikeDependency());
+					break;
+			}
+		}
 		return "as/hublikedependency";
 	}
 	
@@ -47,8 +82,8 @@ public class HubLikeDependencyController {
 		Integer[] result = new Integer[4];
 		Project project = nodeService.queryProject(projectId);
 		if(project != null) {
-			Integer[] minFileIO = hubLikeComponentDetector.getProjectMinFileFanIO(project.getId());
-			Integer[] minPackageIO = hubLikeComponentDetector.getProjectMinPackageFanIO(project.getId());
+			Integer[] minFileIO = hubLikeDependencyDetector.getProjectMinFileFanIO(project.getId());
+			Integer[] minPackageIO = hubLikeDependencyDetector.getProjectMinPackageFanIO(project.getId());
 			result[0] = minFileIO[0];
 			result[1] = minFileIO[1];
 			result[2] = minPackageIO[0];
@@ -64,8 +99,8 @@ public class HubLikeDependencyController {
 								@RequestParam("minPackageFanIn") int minPackageFanIn, @RequestParam("minPackageFanOut") int minPackageFanOut) {
 		Project project = nodeService.queryProject(projectId);
 		if(project != null) {
-			hubLikeComponentDetector.setProjectMinFileFanIO(project.getId(), minFileFanIn, minFileFanOut);
-			hubLikeComponentDetector.setProjectMinPackageFanIO(project.getId(), minPackageFanIn, minPackageFanOut);
+			hubLikeDependencyDetector.setProjectMinFileFanIO(project.getId(), minFileFanIn, minFileFanOut);
+			hubLikeDependencyDetector.setProjectMinPackageFanIO(project.getId(), minPackageFanIn, minPackageFanOut);
 			return true;
 		}
 		return false;

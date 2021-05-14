@@ -16,7 +16,7 @@ import cn.edu.fudan.se.multidependency.service.query.metric.ProjectMetric;
 public interface ProjectRepository extends Neo4jRepository<Project, Long> {
 
 	@Query("match (p:Project) where id(p)=$projectId return p")
-	public Project findProjectById(@Param("projectId") long projectId);
+	public Project findProjectById(@Param("projectId") Long projectId);
 
 	@Query("match (n)-[r]-() delete r")
     void clearRelation();

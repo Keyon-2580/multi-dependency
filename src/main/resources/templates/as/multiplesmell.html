@@ -27,7 +27,7 @@
 <script type="text/javascript" th:src="@{/js/import/echarts-4.7.0/dist/echarts.js}"></script>
 <script type="text/javascript" th:src="@{/js/windowUtil.js}"></script>
 <script type="text/javascript" th:src="@{/js/cytoscapeutils.js}"></script>
-<script type="text/javascript" th:src="@{/js/as/multiple.js}"></script>
+<script type="text/javascript" th:src="@{/js/as/multiplesmell.js}"></script>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"/>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"/>
 <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"/>
@@ -81,9 +81,9 @@
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-			var projects = [[${projects}]];
+			var project = [[${project}]];
 			var files = [[${files}]];
-			multiple(projects, files, cytoscapeutil()).init();
+			multipleSmell(project, files, cytoscapeutil()).init();
 		});
 		// ]]>
 	</script>

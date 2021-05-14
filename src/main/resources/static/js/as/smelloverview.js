@@ -1,4 +1,17 @@
 let smellOverview = function() {
+	const SMELL_TYPE = {
+		CYCLIC_DEPENDENCY: "CyclicDependency",
+		HUBLIKE_DEPENDENCY: "HubLikeDependency",
+		UNSTABLE_DEPENDENCY: "UnstableDependency",
+		IMPLICIT_CROSS_MODULE_DEPENDENCY: "ImplicitCrossModuleDependency",
+		UNUTILIZED_ABSTRACTION: "UnutilizedAbstraction",
+		UNUSED_INCLUDE: "UnusedInclude"
+	};
+	const SMELL_LEVEL = {
+		TYPE: "Type",
+		FILE: "File",
+		PACKAGE: "Package"
+	};
 	let _smellOverview = function(projects, projectTotalMap, fileSmellOverviewMap, packageSmellOverviewMap) {
 		let html = "";
 		for(let projectIndex in projects) {
@@ -53,7 +66,29 @@ let smellOverview = function() {
 							projectFileSmellChangeLinesPercent = " (" + (projectFileSmellObject["ChangeLines"] / changeLines).toFixed(2) + ")";
 						}
 						html += "<tr>";
-						html += "<td style='text-align: center; vertical-align: middle'>" + projectFileSmellObject["SmellType"] + "</td>";
+						let smellType = projectFileSmellObject["SmellType"];
+						let href = "/as";
+						if (smellType === SMELL_TYPE.CYCLIC_DEPENDENCY) {
+							href += "/cyclicdependency";
+						}
+						else if (smellType === SMELL_TYPE.HUBLIKE_DEPENDENCY) {
+							href += "/hublikedependency";
+						}
+						else if (smellType === SMELL_TYPE.UNSTABLE_DEPENDENCY) {
+							href += "/unstabledependency";
+						}
+						else if (smellType === SMELL_TYPE.IMPLICIT_CROSS_MODULE_DEPENDENCY) {
+							href += "/implicitcrossmoduledependency";
+						}
+						else if (smellType === SMELL_TYPE.UNUTILIZED_ABSTRACTION) {
+							href += "/unutilizedabstraction";
+						}
+						else if (smellType === SMELL_TYPE.UNUSED_INCLUDE) {
+							href += "/unusedinclude";
+						}
+						html += "<td style='text-align: center; vertical-align: middle'>" +
+							"<a target='_blank' href='" + href + "/query?projectid=" + project.id + "&smelllevel=" + SMELL_LEVEL.FILE + "'>" + smellType + "</a>" +
+							"</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + projectFileSmellObject["SmellCount"] + "</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + projectFileSmellObject["FileCount"] + projectFileSmellFileCountPercent + "</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + projectFileSmellObject["IssueCommits"] + projectFileSmellIssueCommitsPercent + "</td>";
@@ -112,7 +147,29 @@ let smellOverview = function() {
 							projectPackageSmellChangeLinesPercent = " (" + (projectPackageSmellObject["ChangeLines"] / changeLines).toFixed(2) + ")";
 						}
 						html += "<tr>";
-						html += "<td style='text-align: center; vertical-align: middle'>" + projectPackageSmellObject["SmellType"] + "</td>";
+						let smellType = projectPackageSmellObject["SmellType"];
+						let href = "/as";
+						if (smellType === SMELL_TYPE.CYCLIC_DEPENDENCY) {
+							href += "/cyclicdependency";
+						}
+						else if (smellType === SMELL_TYPE.HUBLIKE_DEPENDENCY) {
+							href += "/hublikedependency";
+						}
+						else if (smellType === SMELL_TYPE.UNSTABLE_DEPENDENCY) {
+							href += "/unstabledependency";
+						}
+						else if (smellType === SMELL_TYPE.IMPLICIT_CROSS_MODULE_DEPENDENCY) {
+							href += "/implicitcrossmoduledependency";
+						}
+						else if (smellType === SMELL_TYPE.UNUTILIZED_ABSTRACTION) {
+							href += "/unutilizedabstraction";
+						}
+						else if (smellType === SMELL_TYPE.UNUSED_INCLUDE) {
+							href += "/unusedinclude";
+						}
+						html += "<td style='text-align: center; vertical-align: middle'>" +
+							"<a target='_blank' href='" + href + "/query?projectid=" + project.id + "&smelllevel=" + SMELL_LEVEL.PACKAGE + "'>" + smellType + "</a>" +
+							"</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + projectPackageSmellObject["SmellCount"] + "</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + projectPackageSmellObject["FileCount"] + projectPackageSmellFileCountPercent + "</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + projectPackageSmellObject["IssueCommits"] + projectPackageSmellIssueCommitsPercent + "</td>";

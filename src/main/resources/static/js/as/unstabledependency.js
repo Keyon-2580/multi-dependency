@@ -1,15 +1,13 @@
 let unstableDependency = function() {
-	let _unstableDependency = function(projects, fileUnstableDependencyMap, packageUnstableDependencyMap) {
-		let html = "";
+	let _unstableDependency = function(project, fileUnstableDependencyMap, packageUnstableDependencyMap) {
+		if (project !== null) {
+			let html = "";
+			html += "<div>";
+			html += "<div>";
+			html += "<h4>" + project.name + " (" + project.language + ")</h4>";
+			html += "</div>";
 
-		for(let projectIndex in projects) {
-			if (projects.hasOwnProperty(projectIndex)) {
-				let project = projects[projectIndex];
-				html += "<div>";
-				html += "<div>";
-				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
-				html += "</div>";
-
+			if (fileUnstableDependencyMap !== null) {
 				let fileUnstableDependencyList = fileUnstableDependencyMap[project.id];
 				html += "<div>";
 				html += "<table class='table table-bordered'>";
@@ -46,7 +44,9 @@ let unstableDependency = function() {
 				}
 				html += "</table>";
 				html += "</div>";
+			}
 
+			if (packageUnstableDependencyMap !== null) {
 				let packageUnstableDependencyList = packageUnstableDependencyMap[project.id];
 				html += "<div>";
 				html += "<table class='table table-bordered'>";
@@ -77,15 +77,15 @@ let unstableDependency = function() {
 				}
 				html += "</table>";
 				html += "</div>";
-				html += "</div>";
 			}
+			html += "</div>";
+			$("#content").html(html);
 		}
-		$("#content").html(html);
-	}
+	};
 	
 	return {
-		unstableDependency: function(projects, fileUnstableDependencyMap, packageUnstableDependencyMap) {
-			_unstableDependency(projects, fileUnstableDependencyMap, packageUnstableDependencyMap);
+		unstableDependency: function(project, fileUnstableDependencyMap, packageUnstableDependencyMap) {
+			_unstableDependency(project, fileUnstableDependencyMap, packageUnstableDependencyMap);
 		}
-	}
-}
+	};
+};

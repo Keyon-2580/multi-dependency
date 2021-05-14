@@ -55,8 +55,8 @@
 				</div>
 			</div>
 			<div style="width: 100%">
-				<a href="/as/cyclic/query" target="_blank" class="btn btn-default">Query</a>
-				<a href="/as/cyclic/detect" target="_blank" class="btn btn-default">Re-detect</a>
+				<button id="cyclicDependencyQuery" class="btn btn-default">Query</button>
+				<button id="cyclicDependencyDetect" class="btn btn-default">Re-detect</button>
 			</div>
 		</div>
 
@@ -121,8 +121,8 @@
 				<button id="hubLikeDependencyThresholdSave" class="btn btn-default">Save</button>
 			</div>
 			<div style="width: 100%">
-				<a href="/as/hublike/query" target="_blank" class="btn btn-default">Query</a>
-				<a href="/as/hublike/detect" target="_blank" class="btn btn-default">Re-detect</a>
+				<button id="hubLikeDependencyQuery" class="btn btn-default">Query</button>
+				<button id="hubLikeDependencyDetect" class="btn btn-default">Re-detect</button>
 			</div>
 		</div>
 
@@ -189,8 +189,8 @@
 			</div>
 			<div style="width: 100%">
 				<div class="" style="margin-top: 15px;">
-					<a href="/as/unstable/query" target="_blank" class="btn btn-default">Query</a>
-					<a href="/as/unstable/detect" target="_blank" class="btn btn-default">Re-detect</a>
+					<button id="unstableDependencyQuery" class="btn btn-default">Query</button>
+					<button id="unstableDependencyDetect" class="btn btn-default">Re-detect</button>
 				</div>
 			</div>
 		</div>
@@ -230,9 +230,10 @@
 			</div>
 			<div style="width: 100%">
 				<button id="implicitCrossModuleDependencyThresholdSave" class="btn btn-default">Save</button>
-			</div><div style="width: 100%">
-				<a href="/as/icd/query" target="_blank" class="btn btn-default">Query</a>
-				<a href="/as/icd/detect" target="_blank" class="btn btn-default">Re-detect</a>
+			</div>
+			<div style="width: 100%">
+				<button id="implicitCrossModuleDependencyQuery" class="btn btn-default">Query</button>
+				<button id="implicitCrossModuleDependencyDetect" class="btn btn-default">Re-detect</button>
 			</div>
 		</div>
 
@@ -301,8 +302,8 @@
 				</div>
 			</div>
 			<div style="width: 100%">
-				<a href="/as/unutilizedabstraction/query" target="_blank" class="btn btn-default">Query</a>
-				<a href="/as/unutilizedabstraction/detect" target="_blank" class="btn btn-default">Re-detect</a>
+				<button id="unutilizedAbstractionQuery" class="btn btn-default">Query</button>
+				<button id="unutilizedAbstractionDetect" class="btn btn-default">Re-detect</button>
 			</div>
 		</div>
 
@@ -326,8 +327,8 @@
 				</div>
 			</div>
 			<div style="width: 100%">
-				<a href="/as/unusedinclude/query" target="_blank" class="btn btn-default">Query</a>
-				<a href="/as/unusedinclude/detect" target="_blank" class="btn btn-default">Re-detect</a>
+				<button id="unusedIncludeQuery" class="btn btn-default">Query</button>
+				<button id="unusedIncludeDetect" class="btn btn-default">Re-detect</button>
 			</div>
 		</div>
 
@@ -335,7 +336,7 @@
 			<hr/>
 		</div>
 
-		<!--		Multiple Smells-->
+		<!--		Multiple Smell-->
 		<div style="width: 100%">
 			<div style="width: 100%">
 				<h4>Multiple Smells</h4>
@@ -351,15 +352,16 @@
 				</div>
 			</div>
 			<div style="width: 100%">
-				<a href="/as/multiplesmell/query" target="_blank" class="btn btn-default">Query</a>
-				<a href="/as/multiplesmell/detect" target="_blank" class="btn btn-default">Re-detect</a>
+				<button id="multipleSmellQuery" class="btn btn-default">Query</button>
+				<button id="multipleSmellDetect" class="btn btn-default">Re-detect</button>
 			</div>
 		</div>
 	</div>
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-			smellDetect(cytoscapeutil()).init();
+			smellDetect().init();
+			smellDetect().smellQuery();
 		});
 		// ]]>
 	</script>

@@ -1,14 +1,13 @@
 let implicitCrossModuleDependency = function() {
-	let _implicitCrossModuleDependency = function(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap) {
-		let html = "";
-		for (let projectIndex in projects) {
-			if (projects.hasOwnProperty(projectIndex)) {
-				let project = projects[projectIndex];
-				html += "<div>";
-				html += "<div>";
-				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
-				html += "</div>";
+	let _implicitCrossModuleDependency = function(project, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap) {
+		if (project !== null) {
+			let html = "";
+			html += "<div>";
+			html += "<div>";
+			html += "<h4>" + project.name + " (" + project.language + ")</h4>";
+			html += "</div>";
 
+			if (fileImplicitCrossModuleDependencyMap !== null) {
 				let fileImplicitCrossModuleDependencyList = fileImplicitCrossModuleDependencyMap[project.id];
 				html += "<div>";
 				html += "<table class='table table-bordered'>";
@@ -33,7 +32,9 @@ let implicitCrossModuleDependency = function() {
 				}
 				html += "</table>";
 				html += "</div>";
+			}
 
+			if (packageImplicitCrossModuleDependencyMap != null) {
 				let packageImplicitCrossModuleDependencyList = packageImplicitCrossModuleDependencyMap[project.id];
 				html += "<div>";
 				html += "<table class='table table-bordered'>";
@@ -58,15 +59,15 @@ let implicitCrossModuleDependency = function() {
 				}
 				html += "</table>";
 				html += "</div>";
-				html += "</div>";
 			}
+			html += "</div>";
+			$("#content").html(html);
 		}
-		$("#content").html(html);
-	}
+	};
 
 	return {
-		implicitCrossModuleDependency: function(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap) {
-			_implicitCrossModuleDependency(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap);
+		implicitCrossModuleDependency: function(project, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap) {
+			_implicitCrossModuleDependency(project, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap);
 		}
-	}
-}
+	};
+};

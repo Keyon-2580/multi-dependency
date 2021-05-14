@@ -1,14 +1,13 @@
 let hubLikeDependency = function() {
-	let _hubLikeDependency = function(projects, fileHubLikeDependencyMap, packageHubLikeDependencyMap) {
-		let html = "";
-		for (let projectIndex in projects) {
-			if (projects.hasOwnProperty(projectIndex)) {
-				let project = projects[projectIndex];
-				html += "<div>";
-				html += "<div>";
-				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
-				html += "</div>";
+	let _hubLikeDependency = function(project, fileHubLikeDependencyMap, packageHubLikeDependencyMap) {
+		if (project !== null) {
+			let html = "";
+			html += "<div>";
+			html += "<div>";
+			html += "<h4>" + project.name + " (" + project.language + ")</h4>";
+			html += "</div>";
 
+			if (fileHubLikeDependencyMap !== null) {
 				let fileHubLikeDependencyList = fileHubLikeDependencyMap[project.id];
 				html += "<div>";
 				html += "<table class='table table-bordered'>";
@@ -54,7 +53,9 @@ let hubLikeDependency = function() {
 				}
 				html += "</table>";
 				html += "</div>";
+			}
 
+			if (packageHubLikeDependencyMap !== null) {
 				let packageHubLikeDependencyList = packageHubLikeDependencyMap[project.id];
 				html += "<div>";
 				html += "<table class='table table-bordered'>";
@@ -79,15 +80,15 @@ let hubLikeDependency = function() {
 				}
 				html += "</table>";
 				html += "</div>";
-				html += "</div>";
 			}
+			html += "</div>";
+			$("#content").html(html);
 		}
-		$("#content").html(html);
-	}
+	};
 	
 	return {
-		hubLikeDependency: function(projects, fileHubLikeDependencyMap, packageHubLikeDependencyMap) {
-			_hubLikeDependency(projects, fileHubLikeDependencyMap, packageHubLikeDependencyMap);
+		hubLikeDependency: function(project, fileHubLikeDependencyMap, packageHubLikeDependencyMap) {
+			_hubLikeDependency(project, fileHubLikeDependencyMap, packageHubLikeDependencyMap);
 		}
-	}
-}
+	};
+};

@@ -17,11 +17,11 @@
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-			var projects = [[${projects}]];
+			var project = [[${project}]];
 			var typeCyclicDependencyMap = [[${typeCyclicDependencyMap}]];
 			var fileCyclicDependencyMap = [[${fileCyclicDependencyMap}]];
 			var packageCyclicDependencyMap = [[${packageCyclicDependencyMap}]];
-			cyclicDependency().cyclicDependency(projects, typeCyclicDependencyMap, fileCyclicDependencyMap, packageCyclicDependencyMap);
+			cyclicDependency().cyclicDependency(project, typeCyclicDependencyMap, fileCyclicDependencyMap, packageCyclicDependencyMap);
 		});
 		// ]]>
 	</script>

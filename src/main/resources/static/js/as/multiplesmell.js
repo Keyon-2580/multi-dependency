@@ -1,4 +1,4 @@
-let multiple = function(projects, files, cytoscapeutil) {
+let multipleSmell = function(project, files, cytoscapeutil) {
 	let param = {
 			cycle: true,
 			hublike: true,
@@ -200,66 +200,57 @@ let multiple = function(projects, files, cytoscapeutil) {
 		smellAndIssueFilesPie.setOption(warnFilesOption);
 	}
 	
-	let _multiple = function() {
-		let html = "";
-		for(let i = 0; i < projects.length; i++) {
-			let project = projects[i];
+	let _multipleSmell = function() {
+		if (project != null) {
+			let html = "";
 			html += "<div>";
-				html += "<div>";
-				html += "<h4><a target='_blank' href='/as/multiple/project/" + project.id + paramToRequestParam() + "'>" + project.name + " (" + project.language + ") </h4></a>";
-				html += "</div>";
-				html += "<div  style='width: 100%'>";
-					html += "<div class='col-sm-4'>";
-					html += "<div id='allFilesPie_" + project.id + "' style='height: 400px;'></div>";
-					html += "</div>";
-					html += "<div class='col-sm-4'>";
-					html += "<div id='issueFilesPie_" + project.id + "' style='height: 400px;'></div>";
-					html += "</div>";
-					html += "<div class='col-sm-4'>";
-					html += "<div id='issuesPie_" + project.id + "' style='height: 400px;'></div>";
-					html += "</div>";
-				html += "</div>";
-				html += "<div style='width: 100%'>";
-				html += "<div id='circle_" + project.id + "'></div>";
-				html += "</div>";
-				html += "<div>";
-				html += "<table class='table table-bordered'>";
-				html += "<tr>";
-				html += "<th style='text-align: center; vertical-align: middle'>ID</th>";
-				html += "<th>File</th>";
-				html += "<th style='text-align: center; vertical-align: middle'>cycle</th>";
-				html += "<th style='text-align: center; vertical-align: middle'>hublike</th>";
-				html += "<th style='text-align: center; vertical-align: middle'>unstable</th>";
-				html += "<th style='text-align: center; vertical-align: middle'>logic coupling</th>";
-				html += "<th style='text-align: center; vertical-align: middle'>simiar</th>";
-//				html += "<th>cyclic hierarchy</th>";
-//				html += "<th>god component</th>";
-				html += "<th style='text-align: center; vertical-align: middle'>unused</th>";
-				html += "<th style='text-align: center; vertical-align: middle'>unutilized</th>";
-//				html += "<th>page rank</th>";
-				html += "</tr>";
-				for(let j = 0 ; j < files[project.id].length; j++) {
-					let value = files[project.id][j];
-					html += "<tr>";
-					html += "<td style='text-align: center; vertical-align: middle'>" + value.file.id + "</td>";
-					html += "<td><a target='_blank' href='/relation/file/" + value.file.id + "'>" + value.file.path + "</a></td>";
-					html += "<td style='text-align: center; vertical-align: middle'>" + (value.cycle === true ? "T" : "") + "</td>";
-					html += "<td style='text-align: center; vertical-align: middle'>" + (value.hublike === true ? "T" : "") + "</td>";
-					html += "<td style='text-align: center; vertical-align: middle'>" + (value.unstable === true ? "T" : "") + "</td>";
-					html += "<td style='text-align: center; vertical-align: middle'>" + (value.logicCoupling === true ? "T" : "") + "</td>";
-					html += "<td style='text-align: center; vertical-align: middle'>" + (value.similar === true ? "T" : "") + "</td>";
-//					html += "<td>" + (value.cyclicHierarchy == true ? "T" : "") + "</td>";
-//					html += "<td>" + (value.god == true ? "T" : "") + "</td>";
-					html += "<td style='text-align: center; vertical-align: middle'>" + (value.unused === true ? "T" : "") + "</td>";
-					html += "<td style='text-align: center; vertical-align: middle'>" + (value.unutilized === true ? "T" : "") + "</td>";
-//					html += "<td>" + value.file.score + "</td>";
-					html += "</tr>";
-				}
-				html += "</table>";
-				html += "</div>";
+			html += "<div>";
+			html += "<h4><a target='_blank' href='/as/multiple/project/" + project.id + paramToRequestParam() + "'>" + project.name + " (" + project.language + ") </h4></a>";
 			html += "</div>";
+			html += "<div  style='width: 100%'>";
+			html += "<div class='col-sm-4'>";
+			html += "<div id='allFilesPie_" + project.id + "' style='height: 400px;'></div>";
+			html += "</div>";
+			html += "<div class='col-sm-4'>";
+			html += "<div id='issueFilesPie_" + project.id + "' style='height: 400px;'></div>";
+			html += "</div>";
+			html += "<div class='col-sm-4'>";
+			html += "<div id='issuesPie_" + project.id + "' style='height: 400px;'></div>";
+			html += "</div>";
+			html += "</div>";
+			html += "<div style='width: 100%'>";
+			html += "<div id='circle_" + project.id + "'></div>";
+			html += "</div>";
+			html += "<div>";
+			html += "<table class='table table-bordered'>";
+			html += "<tr>";
+			html += "<th style='text-align: center; vertical-align: middle'>ID</th>";
+			html += "<th>File</th>";
+			html += "<th style='text-align: center; vertical-align: middle'>Cyclic Dependency</th>";
+			html += "<th style='text-align: center; vertical-align: middle'>Hub-Like Dependency</th>";
+			html += "<th style='text-align: center; vertical-align: middle'>Unstable dependency</th>";
+			html += "<th style='text-align: center; vertical-align: middle'>Implicit Cross Module Dependency</th>";
+			html += "<th style='text-align: center; vertical-align: middle'>Unutilized Abstraction</th>";
+			html += "<th style='text-align: center; vertical-align: middle'>Unused Include</th>";
+			html += "</tr>";
+			for(let j = 0 ; j < files[project.id].length; j++) {
+				let value = files[project.id][j];
+				html += "<tr>";
+				html += "<td style='text-align: center; vertical-align: middle'>" + value.file.id + "</td>";
+				html += "<td><a target='_blank' href='/relation/file/" + value.file.id + "'>" + value.file.path + "</a></td>";
+				html += "<td style='text-align: center; vertical-align: middle'>" + (value.cycle === true ? "T" : "") + "</td>";
+				html += "<td style='text-align: center; vertical-align: middle'>" + (value.hublike === true ? "T" : "") + "</td>";
+				html += "<td style='text-align: center; vertical-align: middle'>" + (value.unstable === true ? "T" : "") + "</td>";
+				html += "<td style='text-align: center; vertical-align: middle'>" + (value.logicCoupling === true ? "T" : "") + "</td>";
+				html += "<td style='text-align: center; vertical-align: middle'>" + (value.unutilized === true ? "T" : "") + "</td>";
+				html += "<td style='text-align: center; vertical-align: middle'>" + (value.unused === true ? "T" : "") + "</td>";
+				html += "</tr>";
+			}
+			html += "</table>";
+			html += "</div>";
+			html += "</div>";
+			$("#table").html(html);
 		}
-		$("#table").html(html);
 		let data = {
 				"children": [{
 					"children": [{
@@ -337,7 +328,7 @@ let multiple = function(projects, files, cytoscapeutil) {
 	
 	return {
 		init : function() {
-			_multiple();
+			_multipleSmell();
 		}
 	}
 }
