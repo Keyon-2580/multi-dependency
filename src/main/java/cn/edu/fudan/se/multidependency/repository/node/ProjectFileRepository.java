@@ -63,42 +63,48 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	 */
 	@Query("MATCH (file:ProjectFile) <-[r:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)<-[:" +
 			RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]- (d:Developer) " +
-			"with file, count(c) as commits,count(distinct d) as developers," +
-			"     size((file)-[:" + RelationType.str_CO_CHANGE +"]-(:ProjectFile)) as coChangeFiles, " +
-			"     sum(r.addLines) as addLines, " +
-			"     sum(r.subLines) as subLines  " +
+			"with file, count(distinct c) as commits,count(distinct d) as developers,collect(distinct r) as commitUpdates " +
+			"with file, commits, developers," +
+			"     size((file)-[:" + RelationType.str_CO_CHANGE +"]-(:ProjectFile)) as coChangeFiles," +
+			"     reduce(tmp = 0, cu in commitUpdates | tmp + cu.addLines ) as addLines," +
+			"     reduce(tmp = 0, cu in commitUpdates | tmp + cu.subLines ) as subLines " +
 			"RETURN  file,commits,developers,coChangeFiles,addLines,subLines;")
 	public List<FileMetric.EvolutionMetric> calculateFileEvolutionMetrics();
 
 	@Query("MATCH (file:ProjectFile) <-[r:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)<-[:" +
 			RelationType.str_DEVELOPER_SUBMIT_COMMIT + "]- (d:Developer) " +
 			"where id(file)= $fileId " +
-			"with file, count(c) as commits,count(distinct d) as developers," +
-			"     size((file)-[:" + RelationType.str_CO_CHANGE +"]-(:ProjectFile)) as coChangeFiles, " +
-			"     sum(r.addLines) as addLines, " +
-			"     sum(r.subLines) as subLines  " +
+			"with file, count(distinct c) as commits,count(distinct d) as developers,collect(distinct r) as commitUpdates " +
+			"with file, commits, developers," +
+			"     size((file)-[:" + RelationType.str_CO_CHANGE +"]-(:ProjectFile)) as coChangeFiles," +
+			"     reduce(tmp = 0, cu in commitUpdates | tmp + cu.addLines ) as addLines," +
+			"     reduce(tmp = 0, cu in commitUpdates | tmp + cu.subLines ) as subLines " +
 			"RETURN  file,commits,developers,coChangeFiles,addLines,subLines;")
 	public FileMetric.EvolutionMetric calculateFileEvolutionMetrics(@Param("fileId") long fileId);
 
-	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(:Commit)-[:" +
+	@Query("MATCH (file:ProjectFile) <-[r:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)-[:" +
 			RelationType.str_COMMIT_ADDRESS_ISSUE + "]-> (issue:Issue) " +
-			"with file, collect(distinct issue) as issueList " +
-			"with file, size(issueList) as issues," +
+			"with file, collect(distinct issue) as issueList,collect(distinct r) as commitUpdates, count(distinct c) as issueCommits " +
+			"with file, size(issueList) as issues, issueCommits," +
 			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.BUG + "\' then 1 else 0 end)) as bugIssues," +
 			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.NEW_FEATURE + "\' then 1 else 0 end)) as newFeatureIssues," +
-			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.IMPROVEMENT + "\' then 1 else 0 end)) as improvementIssues  " +
-			"RETURN  file,issues,bugIssues,newFeatureIssues,improvementIssues order by(file.path) desc;")
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.IMPROVEMENT + "\' then 1 else 0 end)) as improvementIssues," +
+			"     reduce(tmp = 0, cu in commitUpdates | tmp + cu.addLines ) as issueAddLines," +
+			"     reduce(tmp = 0, cu in commitUpdates | tmp + cu.subLines ) as issueSubLines " +
+			"RETURN  file,issues,bugIssues,newFeatureIssues,improvementIssues,issueCommits,issueAddLines,issueSubLines;")
 	public List<FileMetric.DebtMetric> calculateFileDebtMetrics();
 
-	@Query("MATCH (file:ProjectFile) <-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(:Commit)-[:" +
+	@Query("MATCH (file:ProjectFile) <-[r:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit)-[:" +
 			RelationType.str_COMMIT_ADDRESS_ISSUE + "]-> (issue:Issue) " +
 			"where id(file)= $fileId " +
-			"with file, collect(distinct issue) as issueList  " +
-			"with file, size(issueList) as issues," +
+			"with file, collect(distinct issue) as issueList,collect(distinct r) as commitUpdates, count(distinct c) as issueCommits " +
+			"with file, size(issueList) as issues, issueCommits," +
 			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.BUG + "\' then 1 else 0 end)) as bugIssues," +
 			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.NEW_FEATURE + "\' then 1 else 0 end)) as newFeatureIssues," +
-			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.IMPROVEMENT + "\' then 1 else 0 end)) as improvementIssues  " +
-			"RETURN  file,issues,bugIssues,newFeatureIssues,improvementIssues;")
+			"     reduce(tmp = 0, isu in issueList | tmp + (case isu.type when \'" + IssueType.IMPROVEMENT + "\' then 1 else 0 end)) as improvementIssues," +
+			"     reduce(tmp = 0, cu in commitUpdates | tmp + cu.addLines ) as issueAddLines," +
+			"     reduce(tmp = 0, cu in commitUpdates | tmp + cu.subLines ) as issueSubLines " +
+			"RETURN  file,issues,bugIssues,newFeatureIssues,improvementIssues,issueCommits,issueAddLines,issueSubLines;")
 	public FileMetric.DebtMetric calculateFileDebtMetrics(@Param("fileId") long fileId);
 	
 //	@Query("match (file)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c:Commit) where id(file) = $fileId with c where size((c)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(:ProjectFile)) > 1 return c")
