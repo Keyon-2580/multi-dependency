@@ -4,16 +4,22 @@ let projectList_filter; //存放正在筛选的项目列表
 let projectId_global = ""; //存放当前展示的项目的ID
 let in_out_list = [] //存放出度入度节点
 let actual_edges = [] //存放原有的线以及拆分后的线ID
+let present_edge_data = [] //存放当前的连线数据
 let smell_data_global = [] //存放异味信息
+let smell_data_single_type = [] //存放当前某种类型的异味数据
+let smell_data_single_group = [] //存放当前某个组的异味数据
+let smell_data_single_group_id; //存放当前某个组的异味数据
+let smell_data_flag = ""; //存放当前的异味类型
 let smell_info_global = [] //存放异味统计信息
 let smell_hover_nodes = [] //存放当前鼠标悬停异味节点数组
+let present_smell_data = [];
 let reliable_dependency_list = [];//存放可确定依赖关系
 let unreliable_dependency_list = [];//存放不可信依赖关系
 let evt_global; //存放当前的鼠标点击事件
-reliable_dependency_list = [];
-unreliable_dependency_list = [];
 let last_click_node = "";
 let repaint_flag = false; //判断是否为重新绘制
+let filter_smell_layer; //存放筛选异味弹窗
+let smell_filter_condition = {};
 
 const REGULAR_NODE_SIZE = 25;
 const loading_div = $("#loading_div");
@@ -417,10 +423,7 @@ function main(projectId) {
                 projectId_global = projectId;
                 $(".selectpicker").selectpicker('val', projectId_global);
                 $('#multipleProjectsButton').css('background-color', '#f84634');
-                let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
-                    "<div class='loading_window' id='Id_loading_window' style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">调用数据接口...</div>" +
-                    "</div>";
-                loading_div.html(html);
+                showLoadingWindow("调用数据接口...");
                 projectGraphAjax(projectId);
             }
 
@@ -470,107 +473,7 @@ function loadPageData() {
                     "<button id = \"clearFilterButton\" type=\"button\" class='combo_button layui-btn layui-btn-primary' " +
                     "style='margin-top: 15px;' onclick= clearFilter()>重置筛选</button></div>";
 
-                let html_loadlink = "";
-
-                html_loadlink += "<div>" +
-                    "<form role=\"form\">" +
-
-                    "<p class='combo_p'><label class = \"AttributionSelectTitle\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn\" " +
-                    "onclick=\"CancelChildrenChecked('dependsOn')\">Dependency：" +
-                    "</label></p>" +
-
-                    "<p class='combo_p'><input style = \"margin-left:25px;\" type=\"checkbox\" id=\"dependsIntensity\" " +
-                    "onclick=\"setParentChecked('dependsOn', 'dependsIntensity')\" name = \"dependsOn_children\">" +
-
-                    "<input  class = \"AttributionSelectInput layui-input-block\" id=\"intensitybelow\" value=\"0.8\">" +
-
-                    "<select class = \"AttributionSelectSingleSelect layui-input-block\" id=\"intensityCompareSelectBelow\">" +
-                    "<option value=\"<=\" selected = \"selected\"><=</option>" +
-                    "<option value=\"<\"><</option></select>" +
-
-                    "<label class = \"AttributionSelectLabel\"> &nbsp;Intensity</label>" +
-
-                    "<select class = \"AttributionSelectSingleSelect layui-input-block\" id=\"intensityCompareSelectHigh\">" +
-                    "<option value=\"<=\"><=</option>" +
-                    "<option value=\"<\" selected = \"selected\"><</option></select>" +
-
-                    "<input  class = \"AttributionSelectInput layui-input-block\" id=\"intensityhigh\" value=\"1\"></p>" +
-
-                    "<p class='combo_p'><label class = \"AttributionSelectLabel\" style = \"margin-left:25px\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes\" " +
-                    "onclick=\"setParentChecked('dependsOn', 'dependsOnTimes')\" name = \"dependsOn_children\"> Times >= " +
-                    "<input  id=\"dependencyTimes\" class = \"AttributionSelectInput layui-input-block\" style='margin-right: 80px' value=\"3\">" +
-                    "</label></p>" +
-
-                    "<p class='combo_p'><label class = \"AttributionSelectLabel\" style = \"margin-left:25px; margin-right:20px;\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnType\" " +
-                    "onclick=\"setParentChecked('dependsOn', 'dependsOnType')\" name = \"dependsOn_children\"> Dependency Type: " +
-                    "</label>" +
-
-                    "<select id = \"dependsTypeSelect\" class=\"selectpicker\" multiple>" +
-                    "<option value=\"IMPORT\">IMPORT</option>" +
-                    "<option value=\"INCLUDE\">INCLUDE</option>" +
-                    "<option value=\"EXTENDS\">EXTENDS</option>" +
-                    "<option value=\"IMPLEMENTS\">IMPLEMENTS</option>" +
-                    // "<option value=\"GLOBAL_VARIABLE\">GLOBAL_VARIABLE</option>" +
-                    "<option value=\"MEMBER_VARIABLE\">MEMBER_VARIABLE</option>" +
-                    "<option value=\"LOCAL_VARIABLE\">LOCAL_VARIABLE</option>" +
-                    "<option value=\"CALL\">CALL</option>" +
-                    "<option value=\"ANNOTATION\">ANNOTATION</option>" +
-                    "<option value=\"CAST\">CAST</option>" +
-                    "<option value=\"CREATE\">CREATE</option>" +
-                    "<option value=\"USE\">USE</option>" +
-                    "<option value=\"PARAMETER\">PARAMETER</option>" +
-                    "<option value=\"THROW\">THROW</option>" +
-                    "<option value=\"RETURN\">RETURN</option>" +
-                    "<option value=\"IMPLEMENTS_C\">IMPLEMENTS_C</option>" +
-                    "<option value=\"IMPLLINK\">IMPLLINK</option>" +
-                    "</select>" +
-                    "</p>";
-
-                html_loadlink += "<p class='combo_p'><label class = \"AttributionSelectTitle\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone\" " +
-                    "onclick=\"CancelChildrenChecked('clone')\">Clone：" +
-                    "</label></p>" +
-
-                    "<p class='combo_p'><input style = \"margin-right:10px; margin-left:25px; \" type=\"checkbox\" id=\"cloneSimilarity\" " +
-                    "onclick=\"setParentChecked('clone', 'cloneSimilarity')\" name = \"clone_children\">" +
-                    "<input  class = \"AttributionSelectInput\" id=\"similaritybelow\" value=\"0.7\">" +
-
-                    "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectBelow\">" +
-                    "<option value=\"<=\" selected = \"selected\"><=</option>" +
-                    "<option value=\"<\"><</option></select>" +
-
-                    "<label class = \"AttributionSelectLabel\"> &nbsp;Clone Value</label>" +
-
-                    "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectHigh\">" +
-                    "<option value=\"<=\"><=</option>" +
-                    "<option value=\"<\" selected = \"selected\"><</option></select>" +
-
-                    "<input  class = \"AttributionSelectInput\" id=\"similarityhigh\" value=\"1\"></p>";
-
-                html_loadlink += "<p class='combo_p'><label class = \"AttributionSelectTitle\">" +
-                    "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"coChange\" " +
-                    "onclick=\"CancelChildrenChecked('coChange')\">Co-change：" +
-                    "</label></p>" +
-
-                    "<p class='combo_p'><label class = \"AttributionSelectLabel\">" +
-                    "<input style = \"margin-right:10px; margin-left:25px;\" type=\"checkbox\" id=\"cochangeTimes\" " +
-                    "onclick=\"setParentChecked('coChange', 'cochangeTimes')\" name = \"coChange_children\"> Times >= " +
-                    "<input class = \"AttributionSelectInput\" id=\"cochangetimes\" value=\"3\">" +
-                    "</label></p>";
-
-                html_loadlink += "<p><div style=\"margin-top: 10px;\">" +
-                    "<button class = \"combo_button layui-btn layui-btn-primary\" type=\"button\" onclick= filterLinks() >筛选连线</button>" +
-                    "<button id = \"unreliableDependencyFile\" class = \"combo_button layui-btn layui-btn-primary\" type=\"button\" " +
-                    "onclick= loadUnreliableDependency()>加载不可依赖关系</button>" +
-                    "<input type=\"file\" accept=\".json\" id=\"unreliable_dependency_file\" " +
-                    "onchange='setUnreliableDependency()' style=\"display:none\">" +
-                    "</div></p>";
-
-                html_loadlink += "</form>" +
-                    "</div>";
+                let html_loadlink = generateFilterHtml("");
 
                 let html_loadsmell = "";
 
@@ -588,7 +491,8 @@ function loadPageData() {
                 html_loadsmell += "</select></p>";
 
                 html_loadsmell += "<p class='combo_p'><button class = \"combo_button layui-btn layui-btn-primary\" type=\"button\" onclick= loadSmellByButton()>加载异味</button>" +
-                    "<button class = \"combo_button layui-btn layui-btn-primary\" style='margin-left: ' type=\"button\" onclick= deleteSmell()>删除异味</button></p>";
+                    "<button class = \"combo_button layui-btn layui-btn-primary\" style='margin-left: ' type=\"button\" onclick= deleteSmell('delete')>删除异味</button>" +
+                    "<button class = \"combo_button layui-btn layui-btn-primary\" style='margin-left: ' type=\"button\" onclick= filterSmellLayer()>筛选异味</button></p>";
 
                 $("#load_dependencylink").html(html_loadlink);
                 $("#load_project").html(html_loadproject);
@@ -636,10 +540,7 @@ function showMultipleButton(){
     $('#multipleProjectsButton').css('background-color', '#f84634');
     projectList_global = [];
     projectList_global = projectId_global;
-    let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
-        "<div class='loading_window' id='Id_loading_window' style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">调用数据接口...</div>" +
-        "</div>";
-    loading_div.html(html);
+    showLoadingWindow("调用数据接口...");
     projectGraphAjax(projectId_global);
 
 }
@@ -749,7 +650,8 @@ function DrawComboChart(json_data){
 
     data["nodes"] = temp_nodes;
     data["combos"] = temp_combos;
-    data["edges"] = splitLinks(actual_edges);
+    present_edge_data = splitLinks(actual_edges);
+    data["edges"] = present_edge_data;
     console.log(data);
 
     let sum = data["nodes"].length + data["combos"].length + data["edges"].length;
@@ -761,19 +663,16 @@ function DrawComboChart(json_data){
             + "元素总计 " + sum + " 个。\n"
             + "建议总元素不超过15,000个，请减少选中目录数！")){
             $('#multipleProjectsButton').css('background-color', '#efefef');
-            loading_div.html("");
+            closeLoadingWindow();
             showFilterWindow();
         }else{
             $('#multipleProjectsButton').css('background-color', '#efefef');
-            loading_div.html("");
+            closeLoadingWindow();
             showFilterWindow();
         }
     }else{
         autoLayout();
-        graph.data(data);
-        graph.render();
-
-
+        paintCombo();
         const edge_list = graph.getEdges();
         edge_list.forEach(function (item){
             if(item._cfg.model.inner_edge === 1){
@@ -833,28 +732,29 @@ function DrawComboChart(json_data){
                 });
             });
 
-            graph.on('drag', (evt) => {
-                const nodes = graph.getNodes();
-                nodes.forEach((node) => {
-                    node.toFront();
-                });
-                graph.paint();
-            });
+            // graph.on('combo: dragend', (evt) => {
+            //     const nodes = graph.getNodes();
+            //     nodes.forEach((node) => {
+            //         node.toFront();
+            //     });
+            //     graph.paint();
+            // });
 
 
             //节点点击函数
             graph.on('node:click', (evt) => {
                 const { item: node_click } = evt;
-                console.log(node_click);
                 if(last_click_node === ""){
+                    console.log(node_click);
                     showRelevantNodeAndEdge(node_click);
                 }else if(last_click_node === node_click._cfg.id){
                     last_click_node = "";
-                    deleteRelevantNodeAndEdge(node_click);
+                    cancelRelevantNodeAndEdge(node_click);
                 }else{
+                    console.log(node_click);
                     const lastClickNode = graph.findById(last_click_node);
 
-                    deleteRelevantNodeAndEdge(lastClickNode);
+                    cancelRelevantNodeAndEdge(lastClickNode);
                     showRelevantNodeAndEdge(node_click);
                 }
 
@@ -875,7 +775,7 @@ function DrawComboChart(json_data){
             repaint_flag = true;
         }
 
-        loading_div.html("");
+        closeLoadingWindow();
 
         smell_info_global.forEach(smell_info => {
             if(smell_info.projectId.toString() === projectId_global){
@@ -890,7 +790,7 @@ function DrawComboChart(json_data){
 
                 data.xAxis = xAxis;
                 data.yAxis = yAxis;
-                _histogram(data, "histogram_smell");
+                histogram(data, "histogram_smell");
             }
         })
     }
@@ -905,14 +805,13 @@ function showRelevantNodeAndEdge(node_click){
 
     node_edges.forEach(function (edge){
         if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
-            node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
+            const node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
             updatePieNode(node);
             graph.setItemState(node, 'selected', true);
             graph.updateItem(edge, EDGE_CLICK_MODEL);
         }else{
-            // console.log(item2);
             edge._cfg.model.children.forEach(link => {
-                node = getOtherEndNode(link, node_click._cfg.id);
+                const node = getOtherEndNode(link, node_click._cfg.id);
                 graph.setItemState(node, 'selected', true);
                 updatePieNode(node);
                 link.split_edges.forEach(n => {
@@ -923,14 +822,35 @@ function showRelevantNodeAndEdge(node_click){
     });
 }
 
-//删除与该节点相关的连线和节点
-function deleteRelevantNodeAndEdge(node_click){
+function highlightEdge(edge){
+    const edge_model = edge._cfg.model;
+    const source_node = graph.findById(edge_model.source);
+    const target_node = graph.findById(edge_model.target);
+
+    if(edge_model.inner_edge === 1 || source_node._cfg.model.inOutNode === 1){
+        // graph.setItemState(source_node, 'selected', true);
+        // graph.setItemState(target_node, 'selected', true);
+        graph.updateItem(edge, EDGE_CLICK_MODEL);
+    }else{
+        // console.log(item2);
+        edge_model.children.forEach(link => {
+            // graph.setItemState(source_node, 'selected', true);
+            // graph.setItemState(target_node, 'selected', true);
+            link.split_edges.forEach(n => {
+                graph.updateItem(n.id, EDGE_CLICK_MODEL);
+            })
+        })
+    }
+}
+
+//取消与该节点相关的连线和节点的点击状态
+function cancelRelevantNodeAndEdge(node_click){
     graph.setItemState(node_click, 'selected', false);
     const node_edges = node_click.getEdges();
 
     node_edges.forEach(function (edge){
         if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
-            node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
+            const node = getOtherEndNode(edge._cfg.model, node_click._cfg.id);
             graph.setItemState(node, 'selected', false);
             deletePieNode(node);
             if(node_click._cfg.model.inOutNode === 1){
@@ -941,7 +861,7 @@ function deleteRelevantNodeAndEdge(node_click){
 
         }else{
             edge._cfg.model.children.forEach(link => {
-                node = getOtherEndNode(link, node_click._cfg.id);
+                const node = getOtherEndNode(link, node_click._cfg.id);
                 graph.setItemState(node, 'selected', false);
                 deletePieNode(node);
                 link.split_edges.forEach(n => {
@@ -950,6 +870,19 @@ function deleteRelevantNodeAndEdge(node_click){
             })
         }
     });
+}
+
+function clearCombo(){
+    const nodes = graph.getNodes();
+    nodes.forEach((node) => {
+        graph.setItemState(node, 'selected', false);
+        deletePieNode(node);
+    });
+
+    if(last_click_node !== ""){
+        const lastClickNode = graph.findById(last_click_node);
+        cancelRelevantNodeAndEdge(lastClickNode);
+    }
 }
 
 function getOtherEndNode(model, id){
@@ -963,20 +896,34 @@ function getOtherEndNode(model, id){
     return node;
 }
 
-function filterLinks(){
-    let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
-        "<div class='loading_window' id='Id_loading_window' style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">筛选连线中...</div>" +
-        "</div>";
-    loading_div.html(html);
-
-    let unreliable_nodes = [];
+function filterComboLinks(){
     if(last_click_node !== ""){
         const lastClickNode = graph.findById(last_click_node);
-        deleteRelevantNodeAndEdge(lastClickNode);
+        cancelRelevantNodeAndEdge(lastClickNode);
     }
+    const filter = getFilterCondition("");
+    let temp_edges = filterLinks(filter, "");
+    present_edge_data = splitLinks(temp_edges);
+    data["edges"] = present_edge_data;
+    paintCombo();
+    const edge_list = graph.getEdges();
+    edge_list.forEach(function (item){
+        if(item._cfg.model.inner_edge === 1){
+            graph.updateItem(item, EDGE_INNER_MODEL);
+        }
+    });
 
-    let filter = GetFilterCondition();
+    const nodes = graph.getNodes();
+    nodes.forEach((node) => {
+        node.toFront();
+    });
+    graph.paint();
+}
+
+function filterLinks(filter, suffix){
+    let unreliable_nodes = [];
     let temp_edges = [];
+
     actual_edges.forEach(edge =>{
         // reliable_dependency_list.forEach(item => {
         //     if((edge.source === item.node1 && edge.target === item.node2) ||
@@ -985,18 +932,20 @@ function filterLinks(){
         //     }
         // })
 
-        unreliable_dependency_list.forEach(item => {
-            if((edge.source_path === item.node1 && edge.target_path === item.node2) ||
-                (edge.source_path === item.node2 && edge.target_path === item.node1)){
-                console.log(item);
-                const node1 = graph.findById(edge.source);
-                const node2 = graph.findById(edge.target);
-                unreliable_nodes.push(node1);
-                unreliable_nodes.push(node2);
-                // graph.setItemState(node1, 'unreliable', true);
-                // graph.setItemState(node2, 'unreliable', true);
-            }
-        })
+        if(suffix === ""){
+            unreliable_dependency_list.forEach(item => {
+                if((edge.source_path === item.node1 && edge.target_path === item.node2) ||
+                    (edge.source_path === item.node2 && edge.target_path === item.node1)){
+                    console.log(item);
+                    const node1 = graph.findById(edge.source);
+                    const node2 = graph.findById(edge.target);
+                    unreliable_nodes.push(node1);
+                    unreliable_nodes.push(node2);
+                    // graph.setItemState(node1, 'unreliable', true);
+                    // graph.setItemState(node2, 'unreliable', true);
+                }
+            })
+        }
 
         if (filter["dependson"]["checked"] && edge.link_type ==="dependson") {
             let dependson_flag = true;
@@ -1058,9 +1007,13 @@ function filterLinks(){
             }
 
             if(dependson_flag === true){
-                temp_edges.push(edge);
+                if(suffix === "" || (suffix === "_smell" && judgeSmellLink(edge))){
+                    temp_edges.push(edge);
+                }
             }
-        }else if (filter["clone"]["checked"] && edge.link_type ==="clone") {
+        }
+
+        if (filter["clone"]["checked"] && edge.link_type ==="clone") {
             let clone_flag = true;
             if (filter["clone"]["cloneSimilarity"]) {
                 let temp_flag_clonesimilarity = false;
@@ -1094,40 +1047,33 @@ function filterLinks(){
             }
 
             if(clone_flag === true){
-                temp_edges.push(edge);
-            }
-        }else if (filter["cochange"]["checked"] && edge.link_type ==="cochange") {
-            if (filter["cochange"]["cochangetimes"] >= 3) {
-                if (edge.coChangeTimes >= filter["cochange"]["cochangetimes"]) {
+                if(suffix === "" || (suffix === "_smell" && judgeSmellLink(edge))) {
                     temp_edges.push(edge);
                 }
-            } else {
-                alert("Cochange Times 需大于等于 3！");
             }
         }
-    });
-    data["edges"] = splitLinks(temp_edges);
-    graph.data(data);
-    graph.render();
 
-    const edge_list = graph.getEdges();
-    edge_list.forEach(function (item){
-        if(item._cfg.model.inner_edge === 1){
-            graph.updateItem(item, EDGE_INNER_MODEL);
+        if (filter["cochange"]["checked"] && edge.link_type ==="cochange") {
+            if (smell_filter_condition["cochange"]["cochangeTimes"] && edge.coChangeTimes >= filter["cochange"]["cochangetimes"]) {
+                if(suffix === "" || (suffix === "_smell" && judgeSmellLink(edge))) {
+                    temp_edges.push(edge);
+                }
+            }
+            // if (filter["cochange"]["cochangetimes"] >= 3) {
+            //
+            // } else {
+            //     alert("Cochange Times 需大于等于 3！");
+            // }
         }
     });
 
-    const nodes = graph.getNodes();
-    nodes.forEach((node) => {
-        node.toFront();
-    });
-    graph.paint();
+    if(suffix === ""){
+        unreliable_nodes.forEach(item =>{
+            graph.setItemState(item, 'unreliable', true);
+        })
+    }
 
-    unreliable_nodes.forEach(item =>{
-        graph.setItemState(item, 'unreliable', true);
-    })
-
-    loading_div.html("");
+    return temp_edges;
 }
 
 //拆分连线为三段
@@ -1380,16 +1326,25 @@ function loadSmellByButton(){
         }
     })
 
+    smell_data_single_type = smell_data;
+    smell_data_flag = "type";
+
     loadSmell(smell_data);
+    loadSmellTable(smell_data);
 }
 
 function loadSmell(smell_data){
-    deleteSmell();
+    present_smell_data = smell_data;
+    clearCombo();
+    deleteSmell("reload");
+    if (!isEmptyObject(smell_filter_condition)) {
+        filterSmell();
+    }
 
     smell_data.forEach(smell => {
         smell.nodes.forEach(node_data => {
             const node = graph.findById(node_data.id.split("_")[1]);
-            if(typeof(node) !== "undefined"){
+            if (typeof (node) !== "undefined") {
                 let node_model = node._cfg.model;
                 node_model.smellId = smell.id;
                 node_model.smellType = smell.smell_type;
@@ -1400,13 +1355,127 @@ function loadSmell(smell_data){
     })
 }
 
-function deleteSmell(){
+function deleteSmell(type){
     const nodes = graph.findAllByState('node', 'smell_normal');
     nodes.forEach((node) => {
         node._cfg.model.smellId = 0;
         node._cfg.model.smellType = "";
         node._cfg.model.smellName = "";
         graph.setItemState(node, 'smell_normal', false);
+    });
+    if(type === "delete"){
+        smell_data_flag = "";
+        present_smell_data = [];
+        smell_filter_condition = {};
+        data["edges"] = present_edge_data;
+        paintCombo();
+
+        const nodes = graph.getNodes();
+        nodes.forEach((node) => {
+            node.toFront();
+        });
+        graph.paint();
+    }
+}
+
+function filterSmell(){
+    data["edges"] = splitLinks(filterLinks(smell_filter_condition, "_smell"));
+    paintCombo();
+
+    const nodes = graph.getNodes();
+    nodes.forEach((node) => {
+        node.toFront();
+    });
+    graph.paint();
+}
+
+function filterSmellButton(){
+    smell_filter_condition = getFilterCondition("_smell");
+    closeFilterSmellLayer();
+}
+
+function filterSmellLayer(){
+    layui.use('layer', function(){
+        filter_smell_layer = layui.layer;
+
+        let html_link = generateFilterHtml("_smell");
+        html_link += "<p><div style=\"margin-top: 20px;\">" +
+            "<button class = \"layui-btn layui-btn-fluid\" type=\"button\" onclick= filterSmellButton() >确定</button>" +
+            "</div></p>";
+
+        let html_condition = "<p class='combo_p'><label class = \"AttributionSelectLabel\">" +
+            "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"smellConditionCommonDependency\">" +
+            "只显示节点间的共同依赖(只针对单个异味)" +
+            "</label></p><hr>" +
+
+            "<p><div style=\"margin-top: 20px;\">" +
+            "<button class = \"layui-btn layui-btn-fluid\" type=\"button\" onclick= filterSmellButton() >确定</button>" +
+            "</div></p>";
+
+        filter_smell_layer.tab({
+            move: false,
+            tab: [{
+                    title: '关系筛选',
+                content: html_link
+            }, {
+                title: '条件筛选',
+                content: html_condition
+            }]
+        });
+
+        if (!isEmptyObject(smell_filter_condition)) {
+            if (smell_filter_condition["dependson"]["checked"]) {
+                $('#dependsOn_smell').attr("checked", true);
+                if (smell_filter_condition["dependson"]["dependsIntensity"]) {
+                    $('#dependsIntensity_smell').attr("checked", true);
+                }
+
+                if (smell_filter_condition["dependson"]["dependsOnTimes"]) {
+                    $('#dependsOnTimes_smell').attr("checked", true);
+                }
+
+                if (smell_filter_condition["dependson"]["dependsOnType"]) {
+                    $('#dependsOnType_smell').attr("checked", true);
+                }
+
+                if(smell_filter_condition["dependson"]["dependsTypeSelect"].length > 0){
+                    smell_filter_condition["dependson"]["dependsTypeSelect"].forEach(item =>{
+                        $("#dependsTypeSelect_smell").find("option[value=" + item + "]").attr("selected",true);
+                    })
+                }
+            }
+
+            if (smell_filter_condition["clone"]["checked"]) {
+                $('#clone_smell').attr("checked", true);
+                if (smell_filter_condition["clone"]["cloneSimilarity"]) {
+                    $('#cloneSimilarity_smell').attr("checked", true);
+                }
+            }
+
+            if (smell_filter_condition["cochange"]["checked"]) {
+                $('#coChange_smell').attr("checked", true);
+                if (smell_filter_condition["cochange"]["cochangeTimes"]) {
+                    $('#cochangeTimes_smell').attr("checked", true);
+                }
+            }
+
+            if(smell_filter_condition["smell_condition_filter"]["smellConditionCommonDependency"]) {
+                $('#smellConditionCommonDependency').attr("checked", true);
+            }
+        }
+
+        $(".selectpicker").selectpicker({
+            actionsBox:true,
+            countSelectedText:"已选中{0}项",
+            selectedTextFormat:"count > 2"
+        })
+    });
+}
+
+function closeFilterSmellLayer(){
+    layui.use('layer', function(){
+        filter_smell_layer = layui.layer;
+        layer.close(filter_smell_layer.index);
     });
 }
 
@@ -1436,62 +1505,184 @@ function loadSmellTable(smell_data){
         table.on('row(table_smell)', function(obj){
             let smell_data_single = [];
             // console.log(obj.data) //得到当前行数据
-            smell_data_global.forEach(smell => {
-                if(smell.id === obj.data.smellId){
-                    smell_data_single.push(smell);
-                }
-            })
 
-            loadSmell(smell_data_single);
+            if(obj.data.smellId !== smell_data_single_group_id){
+                smell_data_global.forEach(smell => {
+                    if(smell.id === obj.data.smellId){
+                        smell_data_single.push(smell);
+                        smell_data_single_group_id = obj.data.smellId;
+                    }
+                })
+
+                smell_data_single_group = smell_data_single;
+                smell_data_flag = "group";
+
+                loadSmell(smell_data_single);
+            }else{
+                smell_data_single_group_id = -1;
+                smell_data_single_group = [];
+                smell_data_flag = "type";
+                loadSmell(smell_data_single_type);
+            }
+
         });
 
     });
 }
 
 //获取当前连线筛选条件
-var GetFilterCondition = function(){
-    var filter = {}
-    var temp_dependson = {}
-    var temp_clone = {}
-    var temp_cochange = {}
+function getFilterCondition(suffix){
+    let filter = {}
+    let temp_dependson = {}
+    let temp_clone = {}
+    let temp_cochange = {}
+    let temp_smell_condition_filter = {}
 
-    temp_dependson["checked"] = $("#dependsOn").prop("checked") ? 1 : 0;
-    temp_clone["checked"] = $("#clone").prop("checked") ? 1 : 0;
-    temp_cochange["checked"] = $("#coChange").prop("checked") ? 1 : 0;
+    temp_dependson["checked"] = $("#dependsOn" + suffix).prop("checked") ? 1 : 0;
+    temp_clone["checked"] = $("#clone" + suffix).prop("checked") ? 1 : 0;
+    temp_cochange["checked"] = $("#coChange" + suffix).prop("checked") ? 1 : 0;
 
-    temp_dependson["dependsIntensity"] = $("#dependsIntensity").prop("checked") ? 1 : 0;
-    temp_dependson["intensityCompareSelectBelow"] = $("#intensityCompareSelectBelow").val();
-    temp_dependson["intensityCompareSelectHigh"] = $("#intensityCompareSelectHigh").val();
-    temp_dependson["intensitybelow"] = $("#intensitybelow").val();
-    temp_dependson["intensityhigh"] = $("#intensityhigh").val();
+    temp_dependson["dependsIntensity"] = $("#dependsIntensity" + suffix).prop("checked") ? 1 : 0;
+    temp_dependson["intensityCompareSelectBelow"] = $("#intensityCompareSelectBelow" + suffix).val();
+    temp_dependson["intensityCompareSelectHigh"] = $("#intensityCompareSelectHigh" + suffix).val();
+    temp_dependson["intensitybelow"] = $("#intensitybelow" + suffix).val();
+    temp_dependson["intensityhigh"] = $("#intensityhigh" + suffix).val();
 
-    temp_dependson["dependsOnTimes"] = $("#dependsOnTimes").prop("checked") ? 1 : 0;
-    temp_dependson["dependencyTimes"] = $("#dependencyTimes").val();
+    temp_dependson["dependsOnTimes"] = $("#dependsOnTimes" + suffix).prop("checked") ? 1 : 0;
+    temp_dependson["dependencyTimes"] = $("#dependencyTimes" + suffix).val();
 
-    temp_dependson["dependsOnType"] = $("#dependsOnType").prop("checked") ? 1 : 0;
-    // let value = $("#dependsTypeSelect").val();
-    // if(value[0] === "IMPORT"){
-    //     value.push("INCLUDE");
-    // }
-    temp_dependson["dependsTypeSelect"] = $("#dependsTypeSelect").val();
+    temp_dependson["dependsOnType"] = $("#dependsOnType" + suffix).prop("checked") ? 1 : 0;
+    temp_dependson["dependsTypeSelect"] = $("#dependsTypeSelect" + suffix).val();
 
-    temp_clone["cloneSimilarity"] = $("#cloneSimilarity").prop("checked") ? 1 : 0;
-    temp_clone["similarityCompareSelectBelow"] = $("#similarityCompareSelectBelow").val();
-    temp_clone["similarityCompareSelectHigh"] = $("#similarityCompareSelectHigh").val();
-    temp_clone["similarityhigh"] = $("#similarityhigh").val();
-    temp_clone["similaritybelow"] = $("#similaritybelow").val();
+    temp_clone["cloneSimilarity"] = $("#cloneSimilarity" + suffix).prop("checked") ? 1 : 0;
+    temp_clone["similarityCompareSelectBelow"] = $("#similarityCompareSelectBelow" + suffix).val();
+    temp_clone["similarityCompareSelectHigh"] = $("#similarityCompareSelectHigh" + suffix).val();
+    temp_clone["similarityhigh"] = $("#similarityhigh" + suffix).val();
+    temp_clone["similaritybelow"] = $("#similaritybelow" + suffix).val();
 
-    temp_clone["cloneTimes"] = $("#cloneTimes").prop("checked") ? 1 : 0;
-    temp_clone["clonetimes"] = $("#clonetimes").val();
+    temp_clone["cloneTimes"] = $("#cloneTimes" + suffix).prop("checked") ? 1 : 0;
+    temp_clone["clonetimes"] = $("#clonetimes" + suffix).val();
 
-    temp_cochange["cochangeTimes"] = $("#cochangeTimes").prop("checked") ? 1 : 0;
-    temp_cochange["cochangetimes"] = $("#cochangetimes").val();
+    temp_cochange["cochangeTimes"] = $("#cochangeTimes" + suffix).prop("checked") ? 1 : 0;
+    temp_cochange["cochangetimes"] = $("#cochangetimes" + suffix).val();
 
     filter["dependson"] = temp_dependson;
     filter["clone"] = temp_clone;
     filter["cochange"] = temp_cochange;
 
+    if(suffix === "_smell"){
+        temp_smell_condition_filter["smellConditionCommonDependency"] = $("#smellConditionCommonDependency").prop("checked") ? 1 : 0;
+        filter["smell_condition_filter"] = temp_smell_condition_filter;
+    }
+
     return filter;
+}
+
+function generateFilterHtml(suffix){
+    let html_loadlink = "";
+    html_loadlink += "<div>" +
+        "<form role=\"form\">" +
+
+        "<p class='combo_p'><label class = \"AttributionSelectTitle\">" +
+        "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOn" + suffix + "\" " +
+        "onclick=\"CancelChildrenChecked('dependsOn" + suffix + "')\">Dependency：" +
+        "</label></p>" +
+
+        "<p class='combo_p'><input style = \"margin-left:25px;\" type=\"checkbox\" id=\"dependsIntensity" + suffix + "\" " +
+        "onclick=\"setParentChecked('dependsOn" + suffix + "', 'dependsIntensity" + suffix + "')\" name = \"dependsOn" + suffix + "_children\">" +
+
+        "<input  class = \"AttributionSelectInput layui-input-block\" id=\"intensitybelow" + suffix + "\" value=\"0.8\">" +
+
+        "<select class = \"AttributionSelectSingleSelect layui-input-block\" id=\"intensityCompareSelectBelow" + suffix + "\">" +
+        "<option value=\"<=\" selected = \"selected\"><=</option>" +
+        "<option value=\"<\"><</option></select>" +
+
+        "<label class = \"AttributionSelectLabel\"> &nbsp;Intensity</label>" +
+
+        "<select class = \"AttributionSelectSingleSelect layui-input-block\" id=\"intensityCompareSelectHigh" + suffix + "\">" +
+        "<option value=\"<=\"><=</option>" +
+        "<option value=\"<\" selected = \"selected\"><</option></select>" +
+
+        "<input  class = \"AttributionSelectInput layui-input-block\" id=\"intensityhigh" + suffix + "\" value=\"1\"></p>" +
+
+        "<p class='combo_p'><label class = \"AttributionSelectLabel\" style = \"margin-left:25px\">" +
+        "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes" + suffix + "\" " +
+        "onclick=\"setParentChecked('dependsOn" + suffix + "', 'dependsOnTimes" + suffix + "')\" name = \"dependsOn" + suffix + "_children\"> Times >= " +
+        "<input  id=\"dependencyTimes" + suffix + "\" class = \"AttributionSelectInput layui-input-block\" style='margin-right: 80px' value=\"3\">" +
+        "</label></p>" +
+
+        "<p class='combo_p'><label class = \"AttributionSelectLabel\" style = \"margin-left:25px; margin-right:20px;\">" +
+        "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnType" + suffix + "\" " +
+        "onclick=\"setParentChecked('dependsOn" + suffix + "', 'dependsOnType" + suffix + "')\" name = \"dependsOn" + suffix + "_children\"> Dependency Type: " +
+        "</label>" +
+
+        "<select id = \"dependsTypeSelect" + suffix + "\" class=\"selectpicker\" multiple>" +
+        "<option value=\"IMPORT\">IMPORT</option>" +
+        "<option value=\"INCLUDE\">INCLUDE</option>" +
+        "<option value=\"EXTENDS\">EXTENDS</option>" +
+        "<option value=\"IMPLEMENTS\">IMPLEMENTS</option>" +
+        // "<option value=\"GLOBAL_VARIABLE\">GLOBAL_VARIABLE</option>" +
+        "<option value=\"MEMBER_VARIABLE\">MEMBER_VARIABLE</option>" +
+        "<option value=\"LOCAL_VARIABLE\">LOCAL_VARIABLE</option>" +
+        "<option value=\"CALL\">CALL</option>" +
+        "<option value=\"ANNOTATION\">ANNOTATION</option>" +
+        "<option value=\"CAST\">CAST</option>" +
+        "<option value=\"CREATE\">CREATE</option>" +
+        "<option value=\"USE\">USE</option>" +
+        "<option value=\"PARAMETER\">PARAMETER</option>" +
+        "<option value=\"THROW\">THROW</option>" +
+        "<option value=\"RETURN\">RETURN</option>" +
+        "<option value=\"IMPLEMENTS_C\">IMPLEMENTS_C</option>" +
+        "<option value=\"IMPLLINK\">IMPLLINK</option>" +
+        "</select>" +
+        "</p><hr>";
+
+    html_loadlink += "<p class='combo_p'><label class = \"AttributionSelectTitle\">" +
+        "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"clone" + suffix + "\" " +
+        "onclick=\"CancelChildrenChecked('clone" + suffix + "')\">Clone：" +
+        "</label></p>" +
+
+        "<p class='combo_p'><input style = \"margin-right:10px; margin-left:25px; \" type=\"checkbox\" id=\"cloneSimilarity" + suffix + "\" " +
+        "onclick=\"setParentChecked('clone" + suffix + "', 'cloneSimilarity" + suffix + "')\" name = \"clone" + suffix + "_children\">" +
+        "<input  class = \"AttributionSelectInput\" id=\"similaritybelow" + suffix + "\" value=\"0.7\">" +
+
+        "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectBelow" + suffix + "\">" +
+        "<option value=\"<=\" selected = \"selected\"><=</option>" +
+        "<option value=\"<\"><</option></select>" +
+
+        "<label class = \"AttributionSelectLabel\"> &nbsp;Clone Value</label>" +
+
+        "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectHigh" + suffix + "\">" +
+        "<option value=\"<=\"><=</option>" +
+        "<option value=\"<\" selected = \"selected\"><</option></select>" +
+
+        "<input  class = \"AttributionSelectInput\" id=\"similarityhigh" + suffix + "\" value=\"1\"></p><hr>";
+
+    html_loadlink += "<p class='combo_p'><label class = \"AttributionSelectTitle\">" +
+        "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"coChange" + suffix + "\" " +
+        "onclick=\"CancelChildrenChecked('coChange" + suffix + "')\">Co-change：" +
+        "</label></p>" +
+
+        "<p class='combo_p'><label class = \"AttributionSelectLabel\">" +
+        "<input style = \"margin-right:10px; margin-left:25px;\" type=\"checkbox\" id=\"cochangeTimes" + suffix + "\" " +
+        "onclick=\"setParentChecked('coChange" + suffix + "', 'cochangeTimes" + suffix + "')\" name = \"coChange" + suffix + "_children\"> Times >= " +
+        "<input class = \"AttributionSelectInput\" id=\"cochangetimes" + suffix + "\" value=\"3\">" +
+        "</label></p>";
+
+    if(suffix === ""){
+        html_loadlink += "<p><div style=\"margin-top: 10px;\">" +
+            "<button class = \"combo_button layui-btn layui-btn-primary\" type=\"button\" onclick= filterComboLinks() >筛选连线</button>" +
+            "<button id = \"unreliableDependencyFile\" class = \"combo_button layui-btn layui-btn-primary\" type=\"button\" " +
+            "onclick= loadUnreliableDependency()>加载不可依赖关系</button>" +
+            "<input type=\"file\" accept=\".json\" id=\"unreliable_dependency_file\" " +
+            "onchange='setUnreliableDependency()' style=\"display:none\">" +
+            "</div></p>";
+    }
+
+    html_loadlink += "</form>" +
+        "</div>";
+
+    return html_loadlink;
 }
 
 function updatePieNode(node){
@@ -2000,7 +2191,8 @@ function setParentChecked(parent_name, children_id){
     }
 }
 
-function _histogram(data, divId) {
+function histogram(data, divId) {
+    // $("#" + divId).css({'width': width * 0.25 + "px"});
     let histogramChart = echarts.init(document.getElementById(divId));
     let option = {
         dataZoom: [{
@@ -2049,19 +2241,71 @@ function _histogram(data, divId) {
     histogramChart.setOption(option);
     histogramChart.off('click');
     histogramChart.on('click', function(params) {
-        let smell_data = [];
+        showLoadingWindow("加载异味中...");
 
+        let smell_data = [];
         smell_data_global.forEach(smell => {
             if(smell.smell_type === params.name && smell.project_belong.toString() === projectId_global){
                 smell_data.push(smell);
             }
         })
 
+        smell_data_single_type = smell_data;
+        smell_data_flag = "type";
+
         loadSmell(smell_data);
         loadSmellTable(smell_data);
+
+        closeLoadingWindow();
     });
 }
 
+function judgeSmellLink(edge){
+    // console.log(edge);
+    let smell_data = [];
+    let node1_flag = false;
+    let node2_flag = false;
+    if(smell_data_flag === "type"){
+        smell_data = smell_data_single_type.concat();
+    }else if(smell_data_flag === "group"){
+        smell_data = smell_data_single_group.concat();
+    }
+
+    smell_data.forEach(smell => {
+        smell.nodes.forEach(node => {
+            if(node.id.split("_")[1] === edge.source){
+                node1_flag = true;
+            }else if(node.id.split("_")[1] === edge.target){
+                node2_flag = true;
+            }
+        })
+    })
+
+    return node1_flag && node2_flag;
+}
+
+function paintCombo(){
+    graph.data(data);
+    graph.render();
+}
+
+function isEmptyObject(obj) {
+    for (var key in obj) {
+        return false;
+    }
+    return true;
+}
+
+function showLoadingWindow(tip){
+    let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
+        "<div class='loading_window' id='Id_loading_window' style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">" + tip + "</div>" +
+        "</div>";
+    loading_div.html(html);
+}
+
+function closeLoadingWindow(){
+    loading_div.html("");
+}
 if (typeof window !== 'undefined'){
     window.onresize = () => {
         if (!graph || graph.get('destroyed')) return;

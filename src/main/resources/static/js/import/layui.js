@@ -97,12 +97,7 @@
         var i = this, u = e.getElementsByTagName("head")[0], l = e.createElement("link");
         "string" == typeof r && (o = r);
         var c = (o || t).replace(/\.|\//g, ""), s = l.id = "layuicss-" + c, p = "creating", f = 0;
-        return l.rel = "stylesheet", l.href = t + (n.debug ? "?v=" + (new Date).getTime() : ""), l.media = "all", e.getElementById(s) || u.appendChild(l), "function" != typeof r ? i : (function y(o) {
-            var u = 100, l = e.getElementById(s);
-            return ++f > 1e3 * n.timeout / u ? a(t + " timeout") : void (1989 === parseInt(i.getStyle(l, "width")) ? (o === p && l.removeAttribute("lay-status"), l.getAttribute("lay-status") === p ? setTimeout(y, u) : r()) : (l.setAttribute("lay-status", p), setTimeout(function () {
-                y(p)
-            }, u)))
-        }(), i)
+        return null;
     }, r.prototype.addcss = function (t, e, r) {
         return layui.link(n.dir + "css/" + t, e, r)
     }, n.callback = {}, r.prototype.factory = function (t) {
