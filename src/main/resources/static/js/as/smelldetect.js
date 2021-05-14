@@ -13,10 +13,10 @@ let smellDetect = function() {
 					+ "&minPackageFanOut=" + minPackageFanOut,
 				success: function(result) {
 					if (result === true) {
-						alert("修改成功");
+						alert("修改成功！");
 					}
 					else {
-						alert("修改失败");
+						alert("修改失败！");
 					}
 				}
 			});
@@ -39,10 +39,10 @@ let smellDetect = function() {
 					+ "&minRatio=" + minRatio,
 				success: function(result) {
 					if (result === true) {
-						alert("修改成功");
+						alert("修改成功！");
 					}
 					else {
-						alert("修改失败");
+						alert("修改失败！");
 					}
 				}
 			});
@@ -63,9 +63,9 @@ let smellDetect = function() {
 					+ "&minPackageCoChange=" + minPackageCoChange,
 				success: function(result) {
 					if(result === true) {
-						alert("修改成功");
+						alert("修改成功！");
 					} else {
-						alert("修改失败");
+						alert("修改失败！");
 					}
 				}
 			});
@@ -143,63 +143,94 @@ let smellDetect = function() {
 			let projectId = $("#cyclicDependencyProject").val();
 			window.open("/as/cyclicdependency/query?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
-		$("#cyclicDependencyDetect").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
-			window.open("/as/cyclicdependency/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
-		});
 		// Hub-Like Dependency
 		$("#hubLikeDependencyQuery").click(function() {
 			let projectId = $("#cyclicDependencyProject").val();
 			window.open("/as/hublikedependency/query?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
-		});
-		$("#hubLikeDependencyDetect").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
-			window.open("/as/hublikedependency/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
 		// Unstable Dependency
 		$("#unstableDependencyQuery").click(function() {
 			let projectId = $("#cyclicDependencyProject").val();
 			window.open("/as/unstabledependency/query?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
-		$("#unstableDependencyDetect").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
-			window.open("/as/unstabledependency/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
-		});
 		// Implicit Cross Module Dependency
 		$("#implicitCrossModuleDependencyQuery").click(function() {
 			let projectId = $("#cyclicDependencyProject").val();
 			window.open("/as/implicitcrossmoduledependency/query?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
-		});
-		$("#implicitCrossModuleDependencyDetect").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
-			window.open("/as/implicitcrossmoduledependency/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
 		// Unutilized Abstraction
 		$("#unutilizedAbstractionQuery").click(function() {
 			let projectId = $("#cyclicDependencyProject").val();
 			window.open("/as/unutilizedabstraction/query?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
-		$("#unutilizedAbstractionDetect").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
-			window.open("/as/unutilizedabstraction/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
-		});
 		// Unused Include
 		$("#unusedIncludeQuery").click(function() {
 			let projectId = $("#cyclicDependencyProject").val();
 			window.open("/as/unusedinclude/query?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
-		});
-		$("#unusedIncludeDetect").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
-			window.open("/as/unusedinclude/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
 		// Multiple Smell
 		$("#multipleSmellQuery").click(function() {
 			let projectId = $("#cyclicDependencyProject").val();
 			window.open("/as/multiplesmell/query?projectid=" + projectId);
 		});
+	};
+
+	let _smellDetect = function () {
+		// Cyclic Dependency
+		$("#cyclicDependencyDetect").click(function() {
+			let projectId = $("#cyclicDependencyProject").val();
+			window.open("/as/cyclicdependency/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
+		});
+		// Hub-Like Dependency
+		$("#hubLikeDependencyDetect").click(function() {
+			let projectId = $("#cyclicDependencyProject").val();
+			window.open("/as/hublikedependency/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
+		});
+		// Unstable Dependency
+		$("#unstableDependencyDetect").click(function() {
+			let projectId = $("#cyclicDependencyProject").val();
+			window.open("/as/unstabledependency/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
+		});
+		// Implicit Cross Module Dependency
+		$("#implicitCrossModuleDependencyDetect").click(function() {
+			let projectId = $("#cyclicDependencyProject").val();
+			window.open("/as/implicitcrossmoduledependency/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
+		});
+		// Unutilized Abstraction
+		$("#unutilizedAbstractionDetect").click(function() {
+			let projectId = $("#cyclicDependencyProject").val();
+			window.open("/as/unutilizedabstraction/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
+		});
+		// Unused Include
+		$("#unusedIncludeDetect").click(function() {
+			let projectId = $("#cyclicDependencyProject").val();
+			window.open("/as/unusedinclude/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
+		});
+		// Multiple Smell
 		$("#multipleSmellDetect").click(function() {
 			let projectId = $("#cyclicDependencyProject").val();
 			window.open("/as/multiplesmell/detect?projectid=" + projectId);
+		});
+	};
+
+	let _smellExport = function () {
+		// Unused Include
+		let exportUnusedInclude = function(projectId) {
+			$.ajax({
+				type: "post",
+				url: "/as/unusedinclude/export?projectid=" + projectId,
+				success: function(result) {
+					if(result === true) {
+						alert("导出成功！");
+					} else {
+						alert("导出失败！");
+					}
+				}
+			});
+		};
+		$("#unusedIncludeExport").click(function() {
+			let projectId = $("#unusedIncludeProject").val();
+			exportUnusedInclude(projectId);
 		});
 	};
 	
@@ -210,6 +241,12 @@ let smellDetect = function() {
 		},
 		smellQuery : function () {
 			_smellQuery();
+		},
+		smellDetect : function () {
+			_smellDetect();
+		},
+		smellExport : function () {
+			_smellExport();
 		}
 	};
 };

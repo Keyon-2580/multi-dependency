@@ -329,6 +329,7 @@
 			<div style="width: 100%">
 				<button id="unusedIncludeQuery" class="btn btn-default">Query</button>
 				<button id="unusedIncludeDetect" class="btn btn-default">Re-detect</button>
+				<button id="unusedIncludeExport" class="btn btn-default">Export</button>
 			</div>
 		</div>
 
@@ -362,6 +363,8 @@
 		 $(document).ready(function() {
 			smellDetect().init();
 			smellDetect().smellQuery();
+			smellDetect().smellDetect();
+			smellDetect().smellExport();
 		});
 		// ]]>
 	</script>

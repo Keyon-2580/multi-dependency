@@ -7,9 +7,7 @@ import cn.edu.fudan.se.multidependency.service.query.smell.UnusedIncludeDetector
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -62,5 +60,16 @@ public class UnusedIncludeController {
 			}
 		}
 		return "as/unusedinclude";
+	}
+
+	@PostMapping("/export")
+	@ResponseBody
+	public boolean setMinFanIO(@RequestParam("projectid") long projectId) {
+		Project project = nodeService.queryProject(projectId);
+		if(project != null) {
+			unusedIncludeDetector.exportUnusedInclude(project);
+			return true;
+		}
+		return false;
 	}
 }
