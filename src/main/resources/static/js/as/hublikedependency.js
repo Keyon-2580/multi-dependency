@@ -85,61 +85,7 @@ let hubLikeDependency = function() {
 		$("#content").html(html);
 	}
 	
-	let _save = function() {
-		let setProjectMinFanIO = function(projectId, minFileFanIn, minFileFanOut, minPackageFanIn, minPackageFanOut) {
-			$.ajax({
-				type: "post",
-				url: "/as/hublike/fanio/" + projectId
-					+ "?minFileFanIn=" + minFileFanIn
-					+ "&minFileFanOut=" + minFileFanOut
-					+ "&minPackageFanIn=" + minPackageFanIn
-					+ "&minPackageFanOut=" + minPackageFanOut,
-				success: function(result) {
-					if (result === true) {
-						alert("修改成功");
-					}
-					else {
-						alert("修改失败");
-					}
-				}
-			})
-		}
-		$("#hubLikeMinFanIOSave").click(function() {
-			let projectId = $("#hubLikeDependencyProjects").val();
-			let minFileFanIn = $("#hubLikeMinFileFanIn").val();
-			let minFileFanOut = $("#hubLikeMinFileFanOut").val();
-			let minPackageFanIn = $("#hubLikeMinPackageFanIn").val();
-			let minPackageFanOut = $("#hubLikeMinPackageFanOut").val();
-			setProjectMinFanIO(projectId, minFileFanIn, minFileFanOut, minPackageFanIn, minPackageFanOut)
-		});
-	}
-	
-	let _get = function() {
-		let getProjectMinFanIO = function(projectId) {
-			$.ajax({
-				type: "get",
-				url: "/as/hublike/fanio/" + projectId,
-				success: function(result) {
-					$("#hubLikeMinFileFanIn").val(result[0]);
-					$("#hubLikeMinFileFanOut").val(result[1]);
-					$("#hubLikeMinPackageFanIn").val(result[2]);
-					$("#hubLikeMinPackageFanOut").val(result[3]);
-				}
-			})
-		}
-		$("#hubLikeDependencyProjects").change(function() {
-			getProjectMinFanIO($(this).val())
-		})
-		if($("#hubLikeDependencyProjects").val() != null) {
-			getProjectMinFanIO($("#hubLikeDependencyProjects").val());
-		}
-	}
-	
 	return {
-		init : function() {
-			_save();
-			_get();
-		},
 		hubLikeDependency: function(projects, fileHubLikeDependencyMap, packageHubLikeDependencyMap) {
 			_hubLikeDependency(projects, fileHubLikeDependencyMap, packageHubLikeDependencyMap);
 		}

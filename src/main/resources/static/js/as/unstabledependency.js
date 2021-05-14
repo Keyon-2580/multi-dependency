@@ -83,59 +83,7 @@ let unstableDependency = function() {
 		$("#content").html(html);
 	}
 	
-	let _save = function() {
-		let setProjectMinFanOutInstability = function(projectId, minFileFanOut, minPackageFanOut, minRatio) {
-			$.ajax({
-				type: "post",
-				url: "/as/unstable/threshold/instability/" + projectId 
-					+ "?minFileFanOut=" + minFileFanOut
-					+ "&minPackageFanOut=" + minPackageFanOut
-					+ "&minRatio=" + minRatio,
-				success: function(result) {
-					if (result === true) {
-						alert("修改成功");
-					}
-					else {
-						alert("修改失败");
-					}
-				}
-			});
-		};
-		$("#unstableInstabilityThresholdSave").click(function() {
-			let projectId = $("#unstableDependencyProjects").val();
-			let minFileFanOut = $("#unstableMinFileFanOut").val();
-			let minPackageFanOut = $("#unstableMinPackageFanOut").val();
-			let minRatio = $("#unstableMinRatio").val();
-			setProjectMinFanOutInstability(projectId, minFileFanOut, minPackageFanOut, minRatio);
-		})
-	}
-	
-	let _get = function() {
-		let getProjectMinFanOutInstability = function(projectId) {
-			$.ajax({
-				type: "get",
-				url: "/as/unstable/threshold/instability/" + projectId,
-				success: function(result) {
-					$("#unstableMinFileFanOut").val(result[0]);
-					$("#unstableMinPackageFanOut").val(result[1]);
-					$("#unstableMinRatio").val(result[2]);
-				}
-			})
-		};
-		$("#unstableDependencyProjects").change(function() {
-			getProjectMinFanOutInstability($(this).val());
-		})
-		if($("#unstableDependencyProjects").val() != null) {
-			getProjectMinFanOutInstability($("#unstableDependencyProjects").val());
-		}
-		
-	}
-	
 	return {
-		init : function() {
-			_save();
-			_get();
-		},
 		unstableDependency: function(projects, fileUnstableDependencyMap, packageUnstableDependencyMap) {
 			_unstableDependency(projects, fileUnstableDependencyMap, packageUnstableDependencyMap);
 		}

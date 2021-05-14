@@ -28,12 +28,7 @@
 	<script type="text/javascript" th:src="@{/js/import/echarts-4.7.0/dist/echarts.js}"></script>
 	<script type="text/javascript" th:src="@{/js/windowUtil.js}"></script>
 	<script type="text/javascript" th:src="@{/js/cytoscapeutils.js}"></script>
-	<script type="text/javascript" th:src="@{/js/as/hublikedependency.js}"></script>
-	<script type="text/javascript" th:src="@{/js/as/unstabledependency.js}"></script>
-	<script type="text/javascript" th:src="@{/js/as/cyclicdependency.js}"></script>
-	<script type="text/javascript" th:src="@{/js/as/similarcomponents.js}"></script>
-	<script type="text/javascript" th:src="@{/js/as/unused.js}"></script>
-	<script type="text/javascript" th:src="@{/js/as/implicitcrossmoduledependency.js}"></script>
+	<script type="text/javascript" th:src="@{/js/as/smelldetect.js}"></script>
 	<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}"/>
 	<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}"/>
 	<link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-treeview.min.css}"/>
@@ -53,8 +48,8 @@
 			</div>
 			<div style="width: 100%">
 				<div class="form-group" style="width: 15%">
-					<label for="cycleDependencyProjects">Project: </label>
-					<select id="cycleDependencyProjects" class="projectSelect form-control">
+					<label for="cyclicDependencyProject">Project: </label>
+					<select id="cyclicDependencyProject" class="projectSelect form-control">
 						<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
 					</select>
 				</div>
@@ -77,8 +72,8 @@
 			<div style="width: 100%">
 				<div style="width: 100%">
 					<div class="form-group" style="width: 15%">
-						<label for="hubLikeDependencyProjects">Project: </label>
-						<select id="hubLikeDependencyProjects" class="projectSelect form-control">
+						<label for="hubLikeDependencyProject">Project: </label>
+						<select id="hubLikeDependencyProject" class="projectSelect form-control">
 							<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
 						</select>
 					</div>
@@ -123,7 +118,7 @@
 				</div>
 			</div>
 			<div style="width: 100%">
-				<button id="hubLikeMinFanIOSave" class="btn btn-default">Save</button>
+				<button id="hubLikeDependencyThresholdSave" class="btn btn-default">Save</button>
 			</div>
 			<div style="width: 100%">
 				<a href="/as/hublike/query" target="_blank" class="btn btn-default">Query</a>
@@ -143,8 +138,8 @@
 			<div style="width: 100%">
 				<div style="width: 100%">
 					<div class="form-group" style="width: 15%">
-						<label for="unstableDependencyProjects">Project: </label>
-						<select id="unstableDependencyProjects" class="projectSelect form-control">
+						<label for="unstableDependencyProject">Project: </label>
+						<select id="unstableDependencyProject" class="projectSelect form-control">
 							<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
 						</select>
 					</div>
@@ -188,7 +183,7 @@
 						<input id="unstableMinRatio" class="form-control" style="width: 15%;"/>
 					</div>
 					<div style="width: 100%">
-						<button id="unstableInstabilityThresholdSave" class="btn btn-default">Save</button>
+						<button id="unstableDependencyThresholdSave" class="btn btn-default">Save</button>
 					</div>
 				</div>
 			</div>
@@ -204,7 +199,7 @@
 			<hr/>
 		</div>
 
-<!--		Logical Coupling-->
+<!--		Implicit Cross Module Dependency-->
 		<div style="width: 100%">
 			<div style="width: 100%">
 				<h4>Implicit Cross Module Dependency</h4>
@@ -212,8 +207,8 @@
 			<div class="form" style="width: 100%">
 				<div style="width: 100%">
 					<div class="form-group" style="width: 15%">
-						<label for="logicalCouplingProjects">Project: </label>
-						<select id="logicalCouplingProjects" class="projectSelect form-control">
+						<label for="implicitCrossModuleDependencyProject">Project: </label>
+						<select id="implicitCrossModuleDependencyProject" class="projectSelect form-control">
 							<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
 						</select>
 					</div>
@@ -234,7 +229,7 @@
 				</div>
 			</div>
 			<div style="width: 100%">
-				<button id="icdMinCoChangeSave" class="btn btn-default">Save</button>
+				<button id="implicitCrossModuleDependencyThresholdSave" class="btn btn-default">Save</button>
 			</div><div style="width: 100%">
 				<a href="/as/icd/query" target="_blank" class="btn btn-default">Query</a>
 				<a href="/as/icd/detect" target="_blank" class="btn btn-default">Re-detect</a>
@@ -295,6 +290,16 @@
 			<div style="width: 100%">
 				<h4>Unutilized Abstraction</h4>
 			</div>
+			<div class="form" style="width: 100%">
+				<div style="width: 100%">
+					<div class="form-group" style="width: 15%">
+						<label for="unutilizedAbstractionProject">Project: </label>
+						<select id="unutilizedAbstractionProject" class="projectSelect form-control">
+							<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
+						</select>
+					</div>
+				</div>
+			</div>
 			<div style="width: 100%">
 				<a href="/as/unutilizedabstraction/query" target="_blank" class="btn btn-default">Query</a>
 				<a href="/as/unutilizedabstraction/detect" target="_blank" class="btn btn-default">Re-detect</a>
@@ -309,6 +314,16 @@
 		<div style="width: 100%">
 			<div style="width: 100%">
 				<h4>Unused Include</h4>
+			</div>
+			<div class="form" style="width: 100%">
+				<div style="width: 100%">
+					<div class="form-group" style="width: 15%">
+						<label for="unusedIncludeProject">Project: </label>
+						<select id="unusedIncludeProject" class="projectSelect form-control">
+							<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
+						</select>
+					</div>
+				</div>
 			</div>
 			<div style="width: 100%">
 				<a href="/as/unusedinclude/query" target="_blank" class="btn btn-default">Query</a>
@@ -325,18 +340,26 @@
 			<div style="width: 100%">
 				<h4>Multiple Smells</h4>
 			</div>
+			<div class="form" style="width: 100%">
+				<div style="width: 100%">
+					<div class="form-group" style="width: 15%">
+						<label for="multipleSmellProject">Project: </label>
+						<select id="multipleSmellProject" class="projectSelect form-control">
+							<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
+						</select>
+					</div>
+				</div>
+			</div>
 			<div style="width: 100%">
-				<a href="/as/multiple/query" target="_blank" class="btn btn-default">Query</a>
-				<a href="/as/multiple/detect" target="_blank" class="btn btn-default">Re-detect</a>
+				<a href="/as/multiplesmell/query" target="_blank" class="btn btn-default">Query</a>
+				<a href="/as/multiplesmell/detect" target="_blank" class="btn btn-default">Re-detect</a>
 			</div>
 		</div>
 	</div>
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-			hubLikeDependency(cytoscapeutil()).init();
-			unstableDependency(cytoscapeutil()).init();
-			implicitCrossModuleDependency(cytoscapeutil()).init();
+			smellDetect(cytoscapeutil()).init();
 		});
 		// ]]>
 	</script>
