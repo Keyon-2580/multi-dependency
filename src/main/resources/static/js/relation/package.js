@@ -108,7 +108,8 @@ var rPackage = function (packageId, cytoscapeutil) {
                }else{
                    html += "<ul>";
                    for(let i = 0; i < result.length; i++){
-                       html += "<li>" + result[i].developer.name + " (" + result[i].times + ")</li>"
+                       html += "<li><a target='_blank' href='/developer/packages?developerId=" + result[i].developer.id + "'>"
+                           + result[i].developer.name + " (" + result[i].times + ")</li>"
                    }
                    html += "</ul>";
                }
