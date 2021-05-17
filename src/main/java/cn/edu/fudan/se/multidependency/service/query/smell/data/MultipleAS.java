@@ -2,33 +2,19 @@ package cn.edu.fudan.se.multidependency.service.query.smell.data;
 
 public interface MultipleAS {
 
-	boolean isCycle();
+	boolean isCyclicDependency();
 	
-	boolean isHublike();
+	boolean isHubLikeDependency();
+
+	boolean isUnstableDependency();
 	
-	boolean isLogicCoupling();
+	boolean isImplicitCrossModuleDependency();
 	
-	boolean isSimilar();
+	boolean isUnutilizedAbstraction();
 	
-	boolean isUnstable();
-	
-//	boolean isCyclicHierarchy();
-	
-//	boolean isGod();
-	
-	boolean isUnused();
-	
-	boolean isUnutilized();
-	
-//	default int smellCount() {
-//		return (isCycle() ? 1 : 0) + (isHublike() ? 1 : 0) + (isLogicCoupling() ? 1 : 0) 
-//				+ (isSimilar() ? 1 : 0) + (isUnstable() ? 1 : 0) + (isCyclicHierarchy() ? 1 : 0)
-//				+ (isGod() ? 1 : 0) + (isUnused() ? 1 : 0);
-//	}
+	boolean isUnusedInclude();
+
 	default int getSmellCount() {
-		return (isCycle() ? 1 : 0) + (isHublike() ? 1 : 0) + (isLogicCoupling() ? 1 : 0) 
-				+ (isSimilar() ? 1 : 0) + (isUnstable() ? 1 : 0)
-				+ (isUnused() ? 1 : 0) + (isUnutilized() ? 1 : 0);
+		return (isCyclicDependency() ? 1 : 0) + (isHubLikeDependency() ? 1 : 0) + (isUnstableDependency() ? 1 : 0) + (isImplicitCrossModuleDependency() ? 1 : 0) + (isUnutilizedAbstraction() ? 1 : 0) + (isUnusedInclude() ? 1 : 0);
 	}
-	
 }

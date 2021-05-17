@@ -1,6 +1,5 @@
 package cn.edu.fudan.se.multidependency.service.query.smell;
 
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +27,4 @@ public interface MultipleSmellDetector {
 	Map<Long, JSONObject> getFileSmellOverview();
 
 	Map<Long, JSONObject> getPackageSmellOverview();
-
-	void printMultipleASFiles(OutputStream stream);
 }
