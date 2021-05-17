@@ -1,18 +1,21 @@
 let cyclicDependency = function() {
-	const SMELL_TYPE = "CyclicDependency";
-	const SMELL_TYPE_LEVEL = "Type";
-	const SMELL_FILE_LEVEL = "File";
-	const SMELL_PACKAGE_LEVEL = "Package";
-	let _cyclicDependency = function(projects, typeCyclicDependencyMap, fileCyclicDependencyMap, packageCyclicDependencyMap) {
-		let html = "";
-		for(let projectIndex in projects) {
-			if (projects.hasOwnProperty(projectIndex)) {
-				let project = projects[projectIndex];
-				html += "<div>";
-				html += "<div>";
-				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
-				html += "</div>";
+	const SMELL_TYPE = {
+		CYCLIC_DEPENDENCY: "CyclicDependency"
+	};
+	const SMELL_LEVEL = {
+		TYPE: "Type",
+		FILE: "File",
+		PACKAGE: "Package"
+	};
+	let _cyclicDependency = function(project, typeCyclicDependencyMap, fileCyclicDependencyMap, packageCyclicDependencyMap) {
+		if (project != null) {
+			let html = "";
+			html += "<div>";
+			html += "<div>";
+			html += "<h4>" + project.name + " (" + project.language + ")</h4>";
+			html += "</div>";
 
+			if (typeCyclicDependencyMap != null) {
 				let typeCyclicDependencyList = typeCyclicDependencyMap[project.id];
 				html += "<div>";
 				html += "<table class='table table-bordered'>";
@@ -27,7 +30,7 @@ let cyclicDependency = function() {
 						let typeCyclicDependency = typeCyclicDependencyList[typeIndex];
 						html += "<tr>";
 						html += "<td style='text-align: center; vertical-align: middle'>" +
-							"<a target='_blank' href='/as/smellgraph" + "?projectid=" + project.id + "&smelltype=" + SMELL_TYPE + "&smelllevel=" + SMELL_TYPE_LEVEL + "&smellindex=" + index + "'>" + index + "</a>" +
+							"<a target='_blank' href='/as/smellgraph" + "?projectid=" + project.id + "&smelltype=" + SMELL_TYPE.CYCLIC_DEPENDENCY + "&smelllevel=" + SMELL_LEVEL.TYPE + "&smellindex=" + index + "'>" + index + "</a>" +
 							"</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + typeCyclicDependency.components.length + "</td>";
 						html += "<td>";
@@ -41,7 +44,9 @@ let cyclicDependency = function() {
 				}
 				html += "</table>";
 				html += "</div>";
+			}
 
+			if (fileCyclicDependencyMap != null) {
 				let fileCyclicDependencyList = fileCyclicDependencyMap[project.id];
 				html += "<div>";
 				html += "<table class='table table-bordered'>";
@@ -56,7 +61,7 @@ let cyclicDependency = function() {
 						let fileCyclicDependency = fileCyclicDependencyList[fileIndex];
 						html += "<tr>";
 						html += "<td style='text-align: center; vertical-align: middle'>" +
-							"<a target='_blank' href='/as/smellgraph" + "?projectid=" + project.id + "&smelltype=" + SMELL_TYPE + "&smelllevel=" + SMELL_FILE_LEVEL + "&smellindex=" + index + "'>" + index + "</a>" +
+							"<a target='_blank' href='/as/smellgraph" + "?projectid=" + project.id + "&smelltype=" + SMELL_TYPE.CYCLIC_DEPENDENCY + "&smelllevel=" + SMELL_LEVEL.FILE + "&smellindex=" + index + "'>" + index + "</a>" +
 							"</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + fileCyclicDependency.components.length + "</td>";
 						html += "<td>";
@@ -70,7 +75,9 @@ let cyclicDependency = function() {
 				}
 				html += "</table>";
 				html += "</div>";
+			}
 
+			if (packageCyclicDependencyMap != null) {
 				let packageCyclicDependencyList = packageCyclicDependencyMap[project.id];
 				html += "<div>";
 				html += "<table class='table table-bordered'>";
@@ -85,7 +92,7 @@ let cyclicDependency = function() {
 						let packageCyclicDependency = packageCyclicDependencyList[packageIndex];
 						html += "<tr>";
 						html += "<td style='text-align: center; vertical-align: middle'>" +
-							"<a target='_blank' href='/as/smellgraph" + "?projectid=" + project.id + "&smelltype=" + SMELL_TYPE + "&smelllevel=" + SMELL_PACKAGE_LEVEL + "&smellindex=" + index + "'>" + index + "</a>" +
+							"<a target='_blank' href='/as/smellgraph" + "?projectid=" + project.id + "&smelltype=" + SMELL_TYPE.CYCLIC_DEPENDENCY + "&smelllevel=" + SMELL_LEVEL.PACKAGE + "&smellindex=" + index + "'>" + index + "</a>" +
 							"</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + packageCyclicDependency.components.length + "</td>";
 						html += "<td>";
@@ -99,15 +106,15 @@ let cyclicDependency = function() {
 				}
 				html += "</table>";
 				html += "</div>";
-				html += "</div>";
 			}
+			html += "</div>";
+			$("#content").html(html);
 		}
-		$("#content").html(html);
-	}
+	};
 	
 	return {
-		cyclicDependency: function(projects, typeCyclicDependencyMap, fileCyclicDependencyMap, packageCyclicDependencyMap) {
-			_cyclicDependency(projects, typeCyclicDependencyMap, fileCyclicDependencyMap, packageCyclicDependencyMap);
+		cyclicDependency: function(project, typeCyclicDependencyMap, fileCyclicDependencyMap, packageCyclicDependencyMap) {
+			_cyclicDependency(project, typeCyclicDependencyMap, fileCyclicDependencyMap, packageCyclicDependencyMap);
 		}
-	}
-}
+	};
+};

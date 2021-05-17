@@ -128,6 +128,16 @@ public final class MetricType {
 	public static final String ISSUE_COMMITS = "IssueCommits";
 
 	/**
+	 * Issue相关提交文件的修改行数
+	 */
+	public static final String ISSUE_ADD_LINES = "IssueAddLines";
+
+	/**
+	 * Issue相关提交文件的修改行数
+	 */
+	public static final String ISSUE_SUB_LINES = "IssueSubLines";
+
+	/**
 	 * 提交文件的修改行数
 	 */
 	public static final String CHANGE_LINES = "ChangeLines";

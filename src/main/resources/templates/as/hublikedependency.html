@@ -17,10 +17,10 @@
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-			var projects = [[${projects}]];
+			var project = [[${project}]];
 			var fileHubLikeDependencyMap = [[${fileHubLikeDependencyMap}]];
 			var packageHubLikeDependencyMap = [[${packageHubLikeDependencyMap}]];
-			hubLikeDependency().hubLikeDependency(projects, fileHubLikeDependencyMap, packageHubLikeDependencyMap);
+			hubLikeDependency().hubLikeDependency(project, fileHubLikeDependencyMap, packageHubLikeDependencyMap);
 		});
 		// ]]>
 	</script>

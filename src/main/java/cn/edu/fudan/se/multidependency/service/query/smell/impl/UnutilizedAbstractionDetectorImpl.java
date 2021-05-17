@@ -96,8 +96,14 @@ public class UnutilizedAbstractionDetectorImpl implements UnutilizedAbstractionD
 		}
 		
 		for(Type type : types) {
-			Project project = containRelationService.findCodeNodeBelongToProject(type);
-			result.get(project.getId()).add(new UnutilizedAbstraction<>(type));
+			try {
+				Project project = containRelationService.findCodeNodeBelongToProject(type);
+				result.get(project.getId()).add(new UnutilizedAbstraction<>(type));
+			}
+			catch (Exception e) {
+				System.out.println("project: " + containRelationService.findCodeNodeBelongToProject(type));
+				System.out.println("type: " + type);
+			}
 		}
 		return result;
 	}

@@ -243,6 +243,9 @@ public class MetricCalculatorService {
 					metricValues.put(MetricType.BUG_ISSUES, detMetric.getBugIssues());
 					metricValues.put(MetricType.NEW_FEATURE_ISSUES, detMetric.getNewFeatureIssues());
 					metricValues.put(MetricType.IMPROVEMENT_ISSUES, detMetric.getImprovementIssues());
+					metricValues.put(MetricType.ISSUE_COMMITS, detMetric.getIssueCommits());
+					metricValues.put(MetricType.ISSUE_ADD_LINES, detMetric.getIssueAddLines());
+					metricValues.put(MetricType.ISSUE_SUB_LINES, detMetric.getIssueSubLines());
 				}
 
 				FileMetric.DeveloperMetric developerMetric = fileMetrics.getDeveloperMetric();

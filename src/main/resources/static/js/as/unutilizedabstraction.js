@@ -1,14 +1,13 @@
 let unutilizedAbstraction = function() {
-	let _unutilizedAbstraction = function(projects, fileUnutilizedAbstractionMap) {
-		let html = "";
-		for(let projectIndex in projects) {
-			if (projects.hasOwnProperty(projectIndex)) {
-				let project = projects[projectIndex];
-				html += "<div>";
-				html += "<div>";
-				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
-				html += "</div>";
+	let _unutilizedAbstraction = function(project, fileUnutilizedAbstractionMap) {
+		if (project !== null) {
+			let html = "";
+			html += "<div>";
+			html += "<div>";
+			html += "<h4>" + project.name + " (" + project.language + ")</h4>";
+			html += "</div>";
 
+			if (fileUnutilizedAbstractionMap !== null) {
 				let fileUnutilizedAbstractionList = fileUnutilizedAbstractionMap[project.id];
 				html += "<div>";
 				html += "<table class='table table-bordered'>";
@@ -29,15 +28,15 @@ let unutilizedAbstraction = function() {
 				}
 				html += "</table>";
 				html += "</div>";
-				html += "</div>";
 			}
+			html += "</div>";
+			$("#content").html(html);
 		}
-		$("#content").html(html);
-	}
+	};
 
 	return {
-		unutilizedAbstraction: function(projects, fileUnutilizedAbstractionMap) {
-			_unutilizedAbstraction(projects, fileUnutilizedAbstractionMap);
+		unutilizedAbstraction: function(project, fileUnutilizedAbstractionMap) {
+			_unutilizedAbstraction(project, fileUnutilizedAbstractionMap);
 		}
-	}
-}
+	};
+};

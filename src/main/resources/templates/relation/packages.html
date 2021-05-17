@@ -76,7 +76,7 @@
                 </tr>
                 <tr th:each="pcktime : ${packagetimes}">
                     <td th:text="${pcktime.node.id}"></td>
-                    <td><a target="_blank" th:href="${'/relation/package' + pcktime.node.id}"><span th:text="${pcktime.node.directoryPath}"></span></a></td>
+                    <td><a target="_blank" th:href="${'/relation/package/' + pcktime.node.id}"><span th:text="${pcktime.node.directoryPath}"></span></a></td>
                     <td th:text="${pcktime.times}"></td>
                 </tr>
             </table>

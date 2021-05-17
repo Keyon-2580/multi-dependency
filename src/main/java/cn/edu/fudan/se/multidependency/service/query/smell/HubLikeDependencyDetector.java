@@ -8,7 +8,7 @@ import cn.edu.fudan.se.multidependency.service.query.smell.data.FileHubLike;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.ModuleHubLike;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.PackageHubLike;
 
-public interface HubLikeComponentDetector {
+public interface HubLikeDependencyDetector {
 	
 	Map<Long, List<FileHubLike>> queryFileHubLikeDependency();
 

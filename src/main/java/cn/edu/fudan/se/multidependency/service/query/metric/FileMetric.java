@@ -150,6 +150,18 @@ public class FileMetric extends FanIOMetric {
 		 * Improvement feature Issue总数数量
 		 */
 		private int improvementIssues;
+		/**
+		 * 该文件关联issue相关的commit次数
+		 */
+		private int issueCommits;
+		/**
+		 * 改文件关联issue相关的commit提交文件的增加行数
+		 */
+		private int issueAddLines;
+		/**
+		 * 改文件关联issue相关的commit提交文件的删除行数
+		 */
+		private int issueSubLines;
 	}
 
 	@Data

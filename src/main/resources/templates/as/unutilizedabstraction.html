@@ -17,9 +17,9 @@
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-		 	var projects = [[${projects}]];
+		 	var project = [[${project}]];
 			var fileUnutilizedAbstractionMap = [[${fileUnutilizedAbstractionMap}]];
-			 unutilizedAbstraction().unutilizedAbstraction(projects, fileUnutilizedAbstractionMap);
+			 unutilizedAbstraction().unutilizedAbstraction(project, fileUnutilizedAbstractionMap);
 		});
 		// ]]>
 	</script>

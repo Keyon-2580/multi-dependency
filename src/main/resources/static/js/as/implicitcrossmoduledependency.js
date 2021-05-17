@@ -1,14 +1,13 @@
 let implicitCrossModuleDependency = function() {
-	let _implicitCrossModuleDependency = function(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap) {
-		let html = "";
-		for (let projectIndex in projects) {
-			if (projects.hasOwnProperty(projectIndex)) {
-				let project = projects[projectIndex];
-				html += "<div>";
-				html += "<div>";
-				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
-				html += "</div>";
+	let _implicitCrossModuleDependency = function(project, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap) {
+		if (project !== null) {
+			let html = "";
+			html += "<div>";
+			html += "<div>";
+			html += "<h4>" + project.name + " (" + project.language + ")</h4>";
+			html += "</div>";
 
+			if (fileImplicitCrossModuleDependencyMap !== null) {
 				let fileImplicitCrossModuleDependencyList = fileImplicitCrossModuleDependencyMap[project.id];
 				html += "<div>";
 				html += "<table class='table table-bordered'>";
@@ -33,7 +32,9 @@ let implicitCrossModuleDependency = function() {
 				}
 				html += "</table>";
 				html += "</div>";
+			}
 
+			if (packageImplicitCrossModuleDependencyMap != null) {
 				let packageImplicitCrossModuleDependencyList = packageImplicitCrossModuleDependencyMap[project.id];
 				html += "<div>";
 				html += "<table class='table table-bordered'>";
@@ -58,68 +59,15 @@ let implicitCrossModuleDependency = function() {
 				}
 				html += "</table>";
 				html += "</div>";
-				html += "</div>";
 			}
+			html += "</div>";
+			$("#content").html(html);
 		}
-		$("#content").html(html);
-	}
+	};
 
-	let _save = function() {
-		let setProjectMinCoChange = function(projectId, minFileCoChange, minPackageCoChange) {
-			$.ajax({
-				type: "post",
-				url: "/as/icd/cochange/" + projectId
-					+ "?minFileCoChange=" + minFileCoChange
-					+ "&minPackageCoChange=" + minPackageCoChange,
-				success: function(result) {
-					if(result === true) {
-						alert("修改成功");
-					} else {
-						alert("修改失败");
-					}
-				}
-			})
-		}
-		$("#icdMinCoChangeSave").click(function() {
-			let projectId;
-			$("#logicalCouplingProjects").change(function() {
-				projectId = $(this).val();
-			})
-			if($("#logicalCouplingProjects").val() != null) {
-				projectId = $("#logicalCouplingProjects").val();
-			}
-			let minFileCoChange = $("#icdMinFileCoChange").val();
-			let minPackageCoChange = $("#icdMinPackageCoChange").val();
-			setProjectMinCoChange(projectId, minFileCoChange, minPackageCoChange);
-		})
-	}
-
-	let _get = function() {
-		let getProjectMinCoChange = function(projectId) {
-			$.ajax({
-				type: "get",
-				url: "/as/icd/cochange/" + projectId,
-				success: function(result) {
-					$("#icdMinFileCoChange").val(result[0]);
-					$("#icdMinPackageCoChange").val(result[1]);
-				}
-			})
-		}
-		$("#logicalCouplingProjects").change(function() {
-			getProjectMinCoChange($(this).val());
-		})
-		if($("#logicalCouplingProjects").val() != null) {
-			getProjectMinCoChange($("#logicalCouplingProjects").val());
-		}
-	}
-	
 	return {
-		init : function() {
-			_save();
-			_get();
-		},
-		implicitCrossModuleDependency: function(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap) {
-			_implicitCrossModuleDependency(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap);
+		implicitCrossModuleDependency: function(project, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap) {
+			_implicitCrossModuleDependency(project, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap);
 		}
-	}
-}
+	};
+};

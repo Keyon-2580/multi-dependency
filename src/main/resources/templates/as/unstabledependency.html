@@ -17,10 +17,10 @@
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-			var projects = [[${projects}]];
+			var project = [[${project}]];
 			var fileUnstableDependencyMap = [[${fileUnstableDependencyMap}]];
 			var packageUnstableDependencyMap = [[${packageUnstableDependencyMap}]];
-			unstableDependency().unstableDependency(projects, fileUnstableDependencyMap, packageUnstableDependencyMap);
+			unstableDependency().unstableDependency(project, fileUnstableDependencyMap, packageUnstableDependencyMap);
 		});
 		// ]]>
 	</script>

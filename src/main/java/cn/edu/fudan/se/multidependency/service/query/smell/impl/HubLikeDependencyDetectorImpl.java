@@ -23,13 +23,13 @@ import org.springframework.stereotype.Service;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.repository.smell.ASRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
-import cn.edu.fudan.se.multidependency.service.query.smell.HubLikeComponentDetector;
+import cn.edu.fudan.se.multidependency.service.query.smell.HubLikeDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.metric.FanIOMetric;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Service
-public class HubLikeComponentDetectorImpl implements HubLikeComponentDetector {
+public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector {
 
 	@Autowired
 	private MetricCalculatorService metricCalculatorService;

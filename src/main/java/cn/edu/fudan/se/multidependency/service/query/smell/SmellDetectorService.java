@@ -35,7 +35,7 @@ public class SmellDetectorService {
 	private CyclicDependencyDetector cyclicDependencyDetector;
 
 	@Autowired
-	private HubLikeComponentDetector hubLikeComponentDetector;
+	private HubLikeDependencyDetector hubLikeDependencyDetector;
 
 	@Autowired
 	private UnstableDependencyDetectorUsingInstability unstableDependencyDetectorUsingInstability;
@@ -197,7 +197,7 @@ public class SmellDetectorService {
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
 
-		Map<Long, List<FileHubLike>> fileHubLikeDependencyMap = hubLikeComponentDetector.detectFileHubLikeDependency();
+		Map<Long, List<FileHubLike>> fileHubLikeDependencyMap = hubLikeDependencyDetector.detectFileHubLikeDependency();
 		String fileSmellName = SmellLevel.FILE + "_" + SmellType.HUBLIKE_DEPENDENCY + "_";
 		for (Map.Entry<Long, List<FileHubLike>> entry : fileHubLikeDependencyMap.entrySet()) {
 			int fileSmellIndex = 1;
@@ -223,7 +223,7 @@ public class SmellDetectorService {
 
 		smells.clear();
 		smellContains.clear();
-		Map<Long, List<PackageHubLike>> packageHubLikeDependencyMap = hubLikeComponentDetector.detectPackageHubLikeDependency();
+		Map<Long, List<PackageHubLike>> packageHubLikeDependencyMap = hubLikeDependencyDetector.detectPackageHubLikeDependency();
 		String packageSmellName = SmellLevel.PACKAGE + "_" + SmellType.HUBLIKE_DEPENDENCY + "_";
 		for (Map.Entry<Long, List<PackageHubLike>> entry : packageHubLikeDependencyMap.entrySet()) {
 			int packageSmellIndex = 1;

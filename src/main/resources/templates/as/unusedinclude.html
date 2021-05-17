@@ -17,9 +17,9 @@
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-		 	var projects = [[${projects}]];
+		 	var project = [[${project}]];
 			var fileUnusedIncludeMap = [[${fileUnusedIncludeMap}]];
-			 unusedInclude().unusedInclude(projects, fileUnusedIncludeMap);
+			 unusedInclude().unusedInclude(project, fileUnusedIncludeMap);
 		});
 		// ]]>
 	</script>

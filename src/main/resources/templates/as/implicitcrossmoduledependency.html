@@ -17,10 +17,10 @@
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-			var projects = [[${projects}]];
+			var project = [[${project}]];
 			var fileImplicitCrossModuleDependencyMap = [[${fileImplicitCrossModuleDependencyMap}]];
 			var packageImplicitCrossModuleDependencyMap = [[${packageImplicitCrossModuleDependencyMap}]];
-			implicitCrossModuleDependency().implicitCrossModuleDependency(projects, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap);
+			implicitCrossModuleDependency().implicitCrossModuleDependency(project, fileImplicitCrossModuleDependencyMap, packageImplicitCrossModuleDependencyMap);
 		});
 		// ]]>
 	</script>

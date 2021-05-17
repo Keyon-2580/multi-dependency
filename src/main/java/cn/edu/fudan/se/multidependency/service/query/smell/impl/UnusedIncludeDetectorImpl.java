@@ -4,6 +4,7 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
+import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
@@ -15,9 +16,14 @@ import cn.edu.fudan.se.multidependency.service.query.smell.data.UnusedInclude;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.*;
 
 @Service
@@ -137,6 +143,107 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
     public JSONObject getFileUnusedIncludeJson(Long smellId) {
         Smell smell = smellRepository.findSmell(smellId);
         return getFileUnusedIncludeJson(smell);
+    }
+
+    @Override
+    public Boolean exportUnusedInclude(Project project) {
+        Map<Long, List<UnusedInclude>> fileUnusedIncludeMap = queryFileUnusedInclude();
+        List<UnusedInclude> fileUnusedIncludeList = fileUnusedIncludeMap.getOrDefault(project.getId(), new ArrayList<>());
+        try {
+            exportUnusedInclude(project, fileUnusedIncludeList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public void exportUnusedInclude(Project project, List<UnusedInclude> fileUnusedIncludeList) {
+        Workbook workbook = new XSSFWorkbook();
+        exportFileUnusedInclude(workbook, fileUnusedIncludeList);
+        OutputStream outputStream = null;
+        try {
+            String fileName = SmellType.UNUSED_INCLUDE + "_" + project.getName() + "(" + project.getLanguage() + ")" + ".xlsx";
+            outputStream = new FileOutputStream(fileName);
+            workbook.write(outputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (outputStream != null) {
+                    outputStream.flush();
+                    outputStream.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                workbook.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void exportFileUnusedInclude(Workbook workbook, List<UnusedInclude> fileUnusedIncludeList) {
+        Sheet sheet = workbook.createSheet(SmellLevel.FILE);
+        ThreadLocal<Integer> rowKey = new ThreadLocal<>();
+        rowKey.set(0);
+        Row row = sheet.createRow(rowKey.get());
+        CellStyle style = workbook.createCellStyle();
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
+        Cell cell;
+        cell = row.createCell(0);
+        cell.setCellValue("Index");
+        cell.setCellStyle(style);
+        cell = row.createCell(1);
+        cell.setCellValue("CoreFile");
+        cell.setCellStyle(style);
+        cell = row.createCell(2);
+        cell.setCellValue("Number");
+        cell.setCellStyle(style);
+        cell = row.createCell(3);
+        cell.setCellValue("UnusedIncludeFiles");
+        cell.setCellStyle(style);
+        int startRow;
+        int endRow;
+        int index = 1;
+        for (UnusedInclude fileUnusedInclude : fileUnusedIncludeList) {
+            startRow = rowKey.get() + 1;
+            ProjectFile coreFile = fileUnusedInclude.getCoreFile();
+            Set<ProjectFile> unusedIncludeFiles = new HashSet<>(fileUnusedInclude.getUnusedIncludeFiles());
+            for (ProjectFile unusedIncludeFile : unusedIncludeFiles) {
+                rowKey.set(rowKey.get() + 1);
+                row = sheet.createRow(rowKey.get());
+                cell = row.createCell(0);
+                cell.setCellValue(index);
+                style.setAlignment(HorizontalAlignment.CENTER);
+                style.setVerticalAlignment(VerticalAlignment.CENTER);
+                cell.setCellStyle(style);
+                cell = row.createCell(1);
+                cell.setCellValue(coreFile.getPath());
+                style.setAlignment(HorizontalAlignment.LEFT);
+                cell = row.createCell(2);
+                cell.setCellValue(unusedIncludeFiles.size());
+                cell.setCellStyle(style);
+                cell = row.createCell(3);
+                cell.setCellValue(unusedIncludeFile.getPath());
+                style.setAlignment(HorizontalAlignment.LEFT);
+                style.setVerticalAlignment(VerticalAlignment.CENTER);
+                cell.setCellStyle(style);
+            }
+            endRow = rowKey.get();
+            if (endRow - startRow > 0) {
+                CellRangeAddress indexRegion = new CellRangeAddress(startRow, endRow, 0, 0);
+                sheet.addMergedRegion(indexRegion);
+                CellRangeAddress coreFileRegion = new CellRangeAddress(startRow, endRow,  1, 1);
+                sheet.addMergedRegion(coreFileRegion);
+                CellRangeAddress numberRegion = new CellRangeAddress(startRow, endRow,  2, 2);
+                sheet.addMergedRegion(numberRegion);
+            }
+            index ++;
+        }
     }
 
     private JSONObject getFileUnusedIncludeJson(Smell smell) {

@@ -2,6 +2,8 @@ package cn.edu.fudan.se.multidependency.controller.smell;
 
 import javax.servlet.http.HttpServletRequest;
 
+import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
+import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +19,13 @@ import cn.edu.fudan.se.multidependency.service.query.smell.UnstableDependencyDet
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Controller
-@RequestMapping("/as/unstable")
+@RequestMapping("/as/unstabledependency")
 public class UnstableDependencyController {
 	@Autowired
 	private NodeService nodeService;
+
+	@Autowired
+	private ProjectRepository projectRepository;
 	
 	@Autowired
 	private UnstableDependencyDetectorUsingHistory unstableDependencyDetectorUsingHistory;
@@ -29,17 +34,47 @@ public class UnstableDependencyController {
 	private UnstableDependencyDetectorUsingInstability unstableDependencyDetectorUsingInstability;
 	
 	@GetMapping("/query")
-	public String queryUnstableDependency(HttpServletRequest request) {
-		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryFileUnstableDependency());
-		request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryPackageUnstableDependency());
+	public String queryUnstableDependency(HttpServletRequest request, @RequestParam("projectid") Long projectId, @RequestParam("smelllevel") String smellLevel) {
+		Project project = projectRepository.findProjectById(projectId);
+		if (project != null) {
+			request.setAttribute("project", project);
+			switch (smellLevel) {
+				case SmellLevel.FILE:
+					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryFileUnstableDependency());
+					request.setAttribute("packageUnstableDependencyMap", null);
+					break;
+				case SmellLevel.PACKAGE:
+					request.setAttribute("fileUnstableDependencyMap", null);
+					request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryPackageUnstableDependency());
+					break;
+				case SmellLevel.MULTIPLE_LEVEL:
+					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryFileUnstableDependency());
+					request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryPackageUnstableDependency());
+					break;
+			}
+		}
 		return "as/unstabledependency";
 	}
 	@GetMapping("/detect")
-	public String detectUnstableDependency(HttpServletRequest request) {
-		request.setAttribute("projects", nodeService.allProjects());
-		request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingInstability.detectFileUnstableDependency());
-		request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.detectPackageUnstableDependency());
+	public String detectUnstableDependency(HttpServletRequest request, @RequestParam("projectid") Long projectId, @RequestParam("smelllevel") String smellLevel) {
+		Project project = projectRepository.findProjectById(projectId);
+		if (project != null) {
+			request.setAttribute("project", project);
+			switch (smellLevel) {
+				case SmellLevel.FILE:
+					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingInstability.detectFileUnstableDependency());
+					request.setAttribute("packageUnstableDependencyMap", null);
+					break;
+				case SmellLevel.PACKAGE:
+					request.setAttribute("fileUnstableDependencyMap", null);
+					request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.detectPackageUnstableDependency());
+					break;
+				case SmellLevel.MULTIPLE_LEVEL:
+					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingInstability.detectFileUnstableDependency());
+					request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.detectPackageUnstableDependency());
+					break;
+			}
+		}
 		return "as/unstabledependency";
 	}
 	
