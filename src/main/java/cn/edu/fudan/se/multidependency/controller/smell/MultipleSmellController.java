@@ -1,10 +1,8 @@
 package cn.edu.fudan.se.multidependency.controller.smell;
 
 import cn.edu.fudan.se.multidependency.model.node.Project;
-import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.service.query.smell.MultipleSmellDetector;
-import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -16,9 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 public class MultipleSmellController {
     @Autowired
     private MultipleSmellDetector multipleSmellDetector;
-
-    @Autowired
-    private NodeService nodeService;
 
     @Autowired
     private ProjectRepository projectRepository;

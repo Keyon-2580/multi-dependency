@@ -6,101 +6,46 @@ import lombok.Data;
 
 @Data
 public class MultipleASFile implements MultipleAS {
-	
-	public MultipleASFile(ProjectFile file) {
-		this.file = file;
-	}
-	
+
 	private Project project;
 
 	private ProjectFile file;
 	
-	private boolean cycle;
+	private boolean cyclicDependency;
 	
-	private boolean hublike;
-	
-	private boolean logicCoupling;
-	
-	private boolean similar;
-	
-	private boolean unstable;
-	
-//	private boolean cyclicHierarchy;
-	
-//	private boolean god;
-	
-	private boolean unused;
-	
-	private boolean unutilized;
+	private boolean hubLikeDependency;
 
-	private static String toString(boolean b) {
-		return b ? "T" : "";
-	}
+	private boolean unstableDependency;
 	
-//	public String godToString() {
-//		return toString(this.god);
-//	}
-	public String unutilizedToString() {
-		return toString(this.unutilized);
-	}
+	private boolean implicitCrossModuleDependency;
+
+	private boolean unutilizedAbstraction;
 	
-	public String cycleToString() {
-		return toString(this.cycle);
-	}
-	
-	public String hubLikeToString() {
-		return toString(this.hublike);
-	}
-	
-	public String unstableToString() {
-		return toString(this.unstable);
-	}
-	
-	public String logicCouplingToString() {
-		return toString(this.logicCoupling);
-	}
-	
-	public String similarToString() {
-		return toString(this.similar);
-	}
-	
-//	public String cyclicHierarchyToString() {
-//		return toString(this.cyclicHierarchy);
-//	}
-	
-	public String unusedToString() {
-		return toString(this.unused);
+	private boolean unusedInclude;
+
+	public MultipleASFile(ProjectFile file) {
+		this.file = file;
 	}
 	
 	public boolean isSmellFile(MultipleAS smell) {
-		if(smell.isCycle() && isCycle()) {
+		if (smell.isCyclicDependency() && isCyclicDependency()) {
 			return true;
 		}
-//		if(smell.isCyclicHierarchy() && isCyclicHierarchy()) {
-//			return true;
-//		}
-//		if(smell.isGod() && isGod()) {
-//			return true;
-//		}
-		if(smell.isHublike() && isHublike()) {
+		if (smell.isHubLikeDependency() && isHubLikeDependency()) {
 			return true;
 		}
-		if(smell.isLogicCoupling() && isLogicCoupling()) {
+		if (smell.isUnstableDependency() && isUnstableDependency()) {
 			return true;
 		}
-		if(smell.isSimilar() && isSimilar()) {
+		if (smell.isImplicitCrossModuleDependency() && isImplicitCrossModuleDependency()) {
 			return true;
 		}
-		if(smell.isUnstable() && isUnstable()) {
+		if (smell.isUnutilizedAbstraction() && isUnutilizedAbstraction()) {
 			return true;
 		}
-		if(smell.isUnused() && isUnused()) {
-			return true;
-		}
-		if(smell.isUnutilized() && isUnutilized()) {
+		if (smell.isUnusedInclude() && isUnusedInclude()) {
 			return true;
 		}
 		return false;
 	}
-
 }

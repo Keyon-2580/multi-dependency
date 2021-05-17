@@ -89,14 +89,6 @@
 						<label for="hubLikeMinFileFanOut" class="control-label">File-Level Fan Out Threshold:</label>
 						<input class="form-control" placeholder="File-Level Fan Out Threshold" id="hubLikeMinFileFanOut" type="number" style="width: 30%;"/>
 					</div>
-<!--					<div class="form-group" style="width: 100%">-->
-<!--						<label for="hubLikeFileCoChangeFilesThreshold">Co-Change Files Count Threshold:</label>-->
-<!--						<input id="hubLikeFileCoChangeFilesThreshold" type="number" class="form-control" style="width: 30%;"/>-->
-<!--					</div>-->
-<!--					<div class="form-group" style="width: 100%">-->
-<!--						<label for="hubLikeFileCoChangeTimesThreshold">Co-Change Times Threshold:</label>-->
-<!--						<input id="hubLikeFileCoChangeTimesThreshold" type="number" class="form-control" style="width: 30%;"/>-->
-<!--					</div>-->
 				</div>
 				<div style="width: 50%; float: right">
 					<div class="form-group" style="width: 100%">
@@ -107,14 +99,6 @@
 						<label for="hubLikeMinPackageFanOut">Package-Level Fan Out Threshold:</label>
 						<input class="form-control" placeholder="Package-Level Fan Out Threshold" id="hubLikeMinPackageFanOut" type="number" style="width: 30%;"/>
 					</div>
-<!--					<div class="form-group" style="width: 100%">-->
-<!--						<label for="hubLikePackageCoChangeFilesThreshold">Co-Change Files Count Threshold:</label>-->
-<!--						<input id="hubLikePackageCoChangeFilesThreshold" type="number" class="form-control" style="width: 30%;"/>-->
-<!--					</div>-->
-<!--					<div class="form-group" style="width: 100%">-->
-<!--						<label for="hubLikePackageCoChangeTimesThreshold">Co-Change Times Threshold:</label>-->
-<!--						<input id="hubLikePackageCoChangeTimesThreshold" type="number" class="form-control" style="width: 30%;"/>-->
-<!--					</div>-->
 				</div>
 			</div>
 			<div style="width: 100%">
@@ -146,26 +130,6 @@
 				</div>
 			</div>
 			<div style="width: 100%">
-<!--				<div style="width: 50%; float: left">-->
-<!--					<div style="width: 100%">-->
-<!--						<h5><b>Detect By Co-Change</b></h5>-->
-<!--					</div>-->
-<!--					<div class="form-group" style="width: 100%">-->
-<!--						<label for="unstableFanInThreshold">Fan In Threshold: </label>-->
-<!--						<input id="unstableFanInThreshold" type="number" class="form-control" style="width: 30%;"/>-->
-<!--					</div>-->
-<!--					<div class="form-group" style="width: 100%">-->
-<!--						<label for="unstableCoChangeTimesThreshold">Co-Change Times Threshold: </label>-->
-<!--						<input id="unstableCoChangeTimesThreshold" type="number" class="form-control" style="width: 30%;"/>-->
-<!--					</div>-->
-<!--					<div class="form-group" style="width: 100%">-->
-<!--						<label for="unstableCoChangeFilesThreshold">Co-Change Files Count Threshold: </label>-->
-<!--						<input id="unstableCoChangeFilesThreshold" type="number" class="form-control" style="width: 30%;"/>-->
-<!--					</div>-->
-<!--					<div style="width: 100%">-->
-<!--						<button id="unstableHistoryThresholdSave" class="btn btn-default">Save</button>-->
-<!--					</div>-->
-<!--				</div>-->
 				<div style="width: 100%; float: right">
 					<div style="width: 100%">
 						<h5><b>Detect By Instability</b></h5>
@@ -240,51 +204,6 @@
 		<div style="width: 100%">
 			<hr/>
 		</div>
-
-<!--		Similar Components-->
-<!--		<div style="width: 100%">-->
-<!--			<div>-->
-<!--				<h4>Similar Components</h4>-->
-<!--			</div>-->
-<!--			<div style="width: 100%">-->
-<!--				<div class="form-group" style="width: 15%">-->
-<!--					<label for="similarComponentsProjects">Project: </label>-->
-<!--					<select id="similarComponentsProjects" class="projectSelect form-control">-->
-<!--						<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>-->
-<!--					</select>-->
-<!--				</div>-->
-<!--			</div>-->
-<!--			<div style="width: 100%">-->
-<!--				<a href="/as/similarcomponents/query" target="_blank" class="btn btn-default">Query</a>-->
-<!--				<a href="/as/similarcomponents/detect" target="_blank" class="btn btn-default">Re-detect</a>-->
-<!--			</div>-->
-<!--		</div>-->
-
-<!--		<div style="width: 100%">-->
-<!--			<hr/>-->
-<!--		</div>-->
-
-<!--		Unused Components-->
-<!--		<div style="width: 100%">-->
-<!--			<div>-->
-<!--				<h4>Unused Components</h4>-->
-<!--			</div>-->
-<!--			<div style="width: 100%">-->
-<!--				<div class="form-group" style="width: 15%">-->
-<!--					<label for="unusedComponentsProjects">Project: </label>-->
-<!--					<select id="unusedComponentsProjects" class="projectSelect form-control">-->
-<!--						<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>-->
-<!--					</select>-->
-<!--				</div>-->
-<!--			</div>-->
-<!--			<div style="width: 100%">-->
-<!--				<a href="/as/unused" target="_blank" class="btn btn-default">Detect</a>-->
-<!--			</div>-->
-<!--		</div>-->
-
-<!--		<div style="width: 100%">-->
-<!--			<hr/>-->
-<!--		</div>-->
 
 <!--		Unutilized Abstraction-->
 		<div style="width: 100%">

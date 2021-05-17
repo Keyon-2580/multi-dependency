@@ -1,7 +1,5 @@
 package cn.edu.fudan.se.multidependency.service.query.smell.impl;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,13 +18,6 @@ import cn.edu.fudan.se.multidependency.service.query.smell.*;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.*;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -395,7 +386,7 @@ public class MultipleSmellDetectorImpl implements MultipleSmellDetector {
 			for (Cycle<ProjectFile> files : fileCyclicDependency) {
 				for (ProjectFile file : files.getComponents()) {
 					MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
-					mas.setCycle(true);
+					mas.setCyclicDependency(true);
 					map.put(file, mas);
 					allFiles.remove(file);
 				}
@@ -405,7 +396,7 @@ public class MultipleSmellDetectorImpl implements MultipleSmellDetector {
 		for (List<FileHubLike> fileHubLikeDependency : fileHubLikeDependencyMap.values()) {
 			for (FileHubLike file : fileHubLikeDependency) {
 				MultipleASFile mas = map.getOrDefault(file.getFile(), new MultipleASFile(file.getFile()));
-				mas.setHublike(true);
+				mas.setHubLikeDependency(true);
 				map.put(file.getFile(), mas);
 				allFiles.remove(file.getFile());
 			}
@@ -414,7 +405,7 @@ public class MultipleSmellDetectorImpl implements MultipleSmellDetector {
 		for (List<UnstableComponentByInstability<ProjectFile>> fileUnstableDependency : fileUnstableDependencyMap.values()) {
 			for (UnstableComponentByInstability<ProjectFile> file : fileUnstableDependency) {
 				MultipleASFile mas = map.getOrDefault(file.getComponent(), new MultipleASFile(file.getComponent()));
-				mas.setUnstable(true);
+				mas.setUnstableDependency(true);
 				map.put(file.getComponent(), mas);
 				allFiles.remove(file.getComponent());
 			}
@@ -423,44 +414,20 @@ public class MultipleSmellDetectorImpl implements MultipleSmellDetector {
 		for (List<LogicCouplingComponents<ProjectFile>> fileImplicitCrossModuleDependency : fileImplicitCrossModuleDependencyMap.values()) {
 			for (LogicCouplingComponents<ProjectFile> files : fileImplicitCrossModuleDependency) {
 				MultipleASFile mas = map.getOrDefault(files.getNode1(), new MultipleASFile(files.getNode1()));
-				mas.setLogicCoupling(true);
+				mas.setImplicitCrossModuleDependency(true);
 				map.put(files.getNode1(), mas);
 				mas = map.getOrDefault(files.getNode2(), new MultipleASFile(files.getNode2()));
-				mas.setLogicCoupling(true);
+				mas.setImplicitCrossModuleDependency(true);
 				map.put(files.getNode2(), mas);
 				allFiles.remove(files.getNode1());
 				allFiles.remove(files.getNode2());
 			}
 		}
 
-//		for (List<SimilarComponents<ProjectFile>> similarFile : fileUnusedIncludeMap.values()) {
-//			for (SimilarComponents<ProjectFile> similarFilesGroup : similarFile) {
-//				ProjectFile file1 = similarFilesGroup.getNode1();
-//				ProjectFile file2 = similarFilesGroup.getNode2();
-//				MultipleASFile mas = map.getOrDefault(file1, new MultipleASFile(file1));
-//				mas.setSimilar(true);
-//				map.put(file1, mas);
-//				allFiles.remove(file1);
-//				mas = map.getOrDefault(file2, new MultipleASFile(file2));
-//				mas.setSimilar(true);
-//				map.put(file2, mas);
-//				allFiles.remove(file2);
-//			}
-//		}
-
-//		for(List<ProjectFile> files : unusedFiles.values()) {
-//			for(ProjectFile file : files) {
-//				MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
-//				mas.setUnused(true);
-//				map.put(file, mas);
-//				allFiles.remove(file);
-//			}
-//		}
-
 		for(List<UnutilizedAbstraction<ProjectFile>> fileUnutilizedAbstraction : fileUnutilizedAbstractionMap.values()) {
 			for(UnutilizedAbstraction<ProjectFile> file : fileUnutilizedAbstraction) {
 				MultipleASFile mas = map.getOrDefault(file.getComponent(), new MultipleASFile(file.getComponent()));
-				mas.setUnutilized(true);
+				mas.setUnutilizedAbstraction(true);
 				map.put(file.getComponent(), mas);
 				allFiles.remove(file.getComponent());
 			}
@@ -470,40 +437,11 @@ public class MultipleSmellDetectorImpl implements MultipleSmellDetector {
 			for (UnusedInclude fileUnusedInclude : fileUnusedIncludeList) {
 				ProjectFile file = fileUnusedInclude.getCoreFile();
 				MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
-				mas.setUnused(true);
+				mas.setUnusedInclude(true);
 				map.put(file, mas);
 				allFiles.remove(file);
 			}
 		}
-
-		/*for(List<GodFile> files : godFiles.values()) {
-			for(GodFile file : files) {
-				MultipleASFile mas = map.getOrDefault(file.getFile(), new MultipleASFile(file.getFile()));
-				mas.setGod(true);
-				map.put(file.getFile(), mas);
-				allFiles.remove(file.getFile());
-			}
-		}
-
-		for(Map.Entry<Long, List<CyclicHierarchy>> entry : cyclicHierarchies.entrySet()) {
-			for(CyclicHierarchy cyclicHierarchy : entry.getValue()) {
-				Type superType = cyclicHierarchy.getSuperType();
-				ProjectFile file = containRelationService.findTypeBelongToFile(superType);
-				MultipleASFile mas = map.getOrDefault(file, new MultipleASFile(file));
-				mas.setCyclicHierarchy(true);
-				map.put(file, mas);
-				allFiles.remove(file);
-			}
-		}
-
-		for (List<UnstableFileInHistory> unstableFilesGroup : unstableFilesInHistory.values()) {
-			for (UnstableFileInHistory file : unstableFilesGroup) {
-				MultipleASFile mas = map.getOrDefault(file.getComponent(), new MultipleASFile(file.getComponent()));
-				mas.setUnstable(true);
-				map.put(file.getComponent(), mas);
-				allFiles.remove(file.getComponent());
-			}
-		}*/
 
 		if(!removeNoASFile) {
 			for(ProjectFile file : allFiles) {
@@ -530,84 +468,6 @@ public class MultipleSmellDetectorImpl implements MultipleSmellDetector {
 	}
 
 	@Override
-	public void printMultipleASFiles(OutputStream stream) {
-		Workbook hwb = new XSSFWorkbook();
-		Map<Long, List<MultipleASFile>> multiple = detectMultipleSmellASFiles(false);
-		List<Project> projects = nodeService.allProjects();
-		for(Project project : projects) {
-			Sheet sheet = hwb.createSheet(new StringBuilder().append(project.getName()).append("(").append(project.getLanguage()).append(")").toString());
-			List<MultipleASFile> packageMetrics = multiple.get(project.getId());
-			Row row = sheet.createRow(0);
-			CellStyle style = hwb.createCellStyle();
-			style.setAlignment(HorizontalAlignment.CENTER);
-//			sheet.setColumnWidth(0, "xxxxxxxxxxxxxxxxxxxxx".length() * 256);
-//			sheet.setColumnWidth(1, "xxxxxxxxxxxxxxx".length() * 256);
-//			sheet.setColumnWidth(2, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
-//			sheet.setColumnWidth(3, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
-//			sheet.setColumnWidth(4, "xxxxxxxxxxxxxx".length() * 256);
-//			sheet.setColumnWidth(5, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
-//			sheet.setColumnWidth(6, "xxxxxxxxxxx".length() * 256);
-//			sheet.setColumnWidth(7, "xxxxxxxxxx".length() * 256);
-//			sheet.setColumnWidth(8, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
-//			sheet.setColumnWidth(9, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
-//			sheet.setColumnWidth(10, "xxxxxx".length() * 256);
-//			sheet.setColumnWidth(11, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
-//			sheet.setColumnWidth(12, "xxxxxxxxxxxxxxxxxxxxxxxx".length() * 256);
-//			sheet.setColumnWidth(13, "xxxxxxxxxx".length() * 256);
-			Cell cell = null;
-			cell = row.createCell(0);
-			cell.setCellValue("id");
-			cell.setCellStyle(style);
-			cell = row.createCell(1);
-			cell.setCellValue("文件");
-			cell.setCellStyle(style);
-			cell = row.createCell(2);
-			cell.setCellValue("cycle");
-			cell.setCellStyle(style);
-			cell = row.createCell(3);
-			cell.setCellValue("hublike");
-			cell.setCellStyle(style);
-			cell = row.createCell(4);
-			cell.setCellValue("unstable");
-			cell.setCellStyle(style);
-			cell = row.createCell(5);
-			cell.setCellValue("logicCoupling");
-			cell.setCellStyle(style);
-			cell = row.createCell(6);
-			cell.setCellValue("similar");
-			cell.setCellStyle(style);
-			cell = row.createCell(7);
-			cell.setCellValue("cyclicHierarchy");
-			cell.setCellStyle(style);
-			for (int i = 0; i < packageMetrics.size(); i++) {
-				MultipleASFile mas = packageMetrics.get(i);
-				row = sheet.createRow(i + 1);
-				row.createCell(0).setCellValue(mas.getFile().getId());
-				row.createCell(1).setCellValue(mas.getFile().getPath());
-				row.createCell(2).setCellValue(mas.cycleToString());
-				row.createCell(3).setCellValue(mas.hubLikeToString());
-				row.createCell(4).setCellValue(mas.unstableToString());
-				row.createCell(5).setCellValue(mas.logicCouplingToString());
-				row.createCell(6).setCellValue(mas.similarToString());
-//				row.createCell(7).setCellValue(mas.cyclicHierarchyToString());
-			}			
-		}
-		try {
-			hwb.write(stream);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				stream.close();
-				hwb.close();
-			} catch (IOException e) {
-			}
-		}
-		
-	}
-
-
-	@Override
 	public Map<Long, HistogramAS> projectHistogramOnVersion() {
 		Map<Long, HistogramAS> result = new HashMap<>();
 		Map<Long, List<MultipleASFile>> multipleASFiles = detectMultipleSmellASFiles(true);
@@ -625,5 +485,4 @@ public class MultipleSmellDetectorImpl implements MultipleSmellDetector {
 		
 		return result;
 	}
-
 }

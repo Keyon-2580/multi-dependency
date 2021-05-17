@@ -19,7 +19,21 @@ let smellOverview = function() {
 				let project = projects[projectIndex];
 				html += "<div>";
 				html += "<div>";
-				html += "<h4>" + project.name + " (" + project.language + ")</h4>";
+				html += "<h4><a target='_blank' href='/as/overview/" + project.id + paramToRequestParam() + "'>" + project.name + " (" + project.language + ") </h4></a>";
+				html += "</div>";
+				html += "<div  style='width: 100%'>";
+				html += "<div class='col-sm-4'>";
+				html += "<div id='allFilesPie_" + project.id + "' style='height: 400px;'></div>";
+				html += "</div>";
+				html += "<div class='col-sm-4'>";
+				html += "<div id='issueFilesPie_" + project.id + "' style='height: 400px;'></div>";
+				html += "</div>";
+				html += "<div class='col-sm-4'>";
+				html += "<div id='issuesPie_" + project.id + "' style='height: 400px;'></div>";
+				html += "</div>";
+				html += "</div>";
+				html += "<div style='width: 100%'>";
+				html += "<div id='circle_" + project.id + "'></div>";
 				html += "</div>";
 
 				let projectTotalObject = projectTotalMap[project.id];
@@ -192,13 +206,241 @@ let smellOverview = function() {
 				html += "</div>";
 				html += "</div>";
 			}
+			$.ajax({
+				type: "get",
+				url: "/as/overview/histogram",
+				success: function(result) {
+					let allFiles = [];
+					let smellFiles = [];
+					let issueFiles = [];
+					let projectsName = [];
+					for (let i = 0; i < projects.length; i++) {
+						let project = projects[i];
+						allFiles[i] = result[project.id].allFilesCount;
+						smellFiles[i] = result[project.id].smellFilesCount;
+						issueFiles[i] = result[project.id].issueFilesCount;
+						projectsName[i] = project.name;
+					}
+					let data = {
+						allFiles: allFiles,
+						smellFiles: smellFiles,
+						issueFiles: issueFiles,
+						projects: projectsName
+					};
+					_histogram(data, "histogram");
+				}
+			});
+
+			$.ajax({
+				type: "get",
+				url: "/as/overview/pie",
+				data : param,
+				success: function(result) {
+					for(let i = 0; i < projects.length; i++) {
+						let project = projects[i];
+						_pie(project, result[project.id], "allFilesPie_" + project.id, "issueFilesPie_" + project.id, "issuesPie_" + project.id);
+					}
+				}
+			});
 		}
 		$("#content").html(html);
-	}
+	};
+
+	let _histogram = function(data, divId) {
+		let multipleHistogram = echarts.init(document.getElementById(divId));
+		let option = {
+			dataZoom: [{
+				type: 'slider',
+				show: true,
+				xAxisIndex: [0],
+				left: '2%',
+				bottom: 0,
+				start: 0,
+				end: 100
+			}],
+			tooltip: {
+				trigger: 'axis',
+				axisPointer: {
+					type: 'shadow'
+				}
+			},
+			legend: {
+				data: ["All Files", 'Smell Files', 'Issue Files']
+			},
+			grid: {
+				left: '0%',
+				right: '0%',
+				bottom: '0%',
+				containLabel: true
+			},
+			xAxis: [{
+				type: 'category',
+				data: data.projects,
+				axisLabel: {
+					interval:0,
+					rotate:40
+				}
+			}],
+			yAxis: [{
+				type: 'value'
+			}],
+			series: [{
+				name: "All Files",
+				type: 'bar',
+				stack: 'allFiles',
+				data: data.allFiles
+			},{
+				name: 'Smell Files',
+				type: 'bar',
+				stack: 'smellFiles',
+				data: data.smellFiles
+			},{
+				name: 'Issue Files',
+				type: 'bar',
+				stack: 'issueFiles',
+				data: data.issueFiles
+			}]
+		};
+		multipleHistogram.setOption(option);
+	};
+
+	let _pie = function(project, pies, allFilesPieDivId, smellAndIssueFilesPieDivId, issuesDivId) {
+		let allFilesPie = echarts.init(document.getElementById(allFilesPieDivId));
+		let smellAndIssueFilesPie = echarts.init(document.getElementById(smellAndIssueFilesPieDivId));
+		let issuesPie = echarts.init(document.getElementById(issuesDivId));
+		let allFilesOption = {
+			title: {
+				text: '文件占比',
+				left: 'center'
+			},
+			tooltip: {
+				trigger: 'item',
+				formatter: '{a} <br/>{b} : {c} ({d}%)'
+			},
+			legend: {
+				orient: 'vertical',
+				left: 'left',
+				data: ['normalFiles', 'onlyIssueFiles', 'issueAndSmellFiles', 'onlySmellFiles']
+			},
+			series: [
+				{
+					name: '文件',
+					type: 'pie',
+					radius: '55%',
+					center: ['50%', '60%'],
+					data: [
+						{value: pies.normalFiles.length, name: 'normalFiles'},
+						{value: pies.onlyIssueFiles.length, name: 'onlyIssueFiles'},
+						{value: pies.issueAndSmellFiles.length, name: 'issueAndSmellFiles'},
+						{value: pies.onlySmellFiles.length, name: 'onlySmellFiles'}
+					],
+					emphasis: {
+						itemStyle: {
+							shadowBlur: 10,
+							shadowOffsetX: 0,
+							shadowColor: 'rgba(0, 0, 0, 0.5)'
+						}
+					}
+				}
+			]
+		};
+		allFilesPie.setOption(allFilesOption);
+
+		let warnFilesOption = {
+			title: {
+				text: '文件占比',
+				left: 'center'
+			},
+			tooltip: {
+				trigger: 'item',
+				formatter: '{a} <br/>{b} : {c} ({d}%)'
+			},
+			legend: {
+				orient: 'vertical',
+				left: 'left',
+				data: ['onlyIssueFiles', 'issueAndSmellFiles', 'onlySmellFiles']
+			},
+			series: [
+				{
+					name: '文件',
+					type: 'pie',
+					radius: '55%',
+					center: ['50%', '60%'],
+					data: [
+						{value: pies.onlyIssueFiles.length, name: 'onlyIssueFiles'},
+						{value: pies.issueAndSmellFiles.length, name: 'issueAndSmellFiles'},
+						{value: pies.onlySmellFiles.length, name: 'onlySmellFiles'}
+					],
+					emphasis: {
+						itemStyle: {
+							shadowBlur: 10,
+							shadowOffsetX: 0,
+							shadowColor: 'rgba(0, 0, 0, 0.5)'
+						}
+					}
+				}
+			]
+		};
+		smellAndIssueFilesPie.setOption(warnFilesOption);
+
+		let issuesPieOption = {
+			title: {
+				text: 'Issues占比',
+				left: 'center'
+			},
+			tooltip: {
+				trigger: 'item',
+				formatter: '{a} <br/>{b} : {c} ({d}%)'
+			},
+			legend: {
+				orient: 'vertical',
+				left: 'left',
+				data: ['无Smell Files关联的Issues', '有Smell File关联的Issues']
+			},
+			series: [
+				{
+					name: '文件',
+					type: 'pie',
+					radius: '55%',
+					center: ['50%', '60%'],
+					data: [
+						{value: (pies.allIssues.length - pies.smellIssues.length), name: '无Smell Files关联的Issues'},
+						{value: pies.smellIssues.length, name: '有Smell File关联的Issues'}
+					],
+					emphasis: {
+						itemStyle: {
+							shadowBlur: 10,
+							shadowOffsetX: 0,
+							shadowColor: 'rgba(0, 0, 0, 0.5)'
+						}
+					}
+				}
+			]
+		};
+		issuesPie.setOption(issuesPieOption);
+	};
+
+	let param = {
+		cyclicDependency: true,
+		hubLikeDependency: true,
+		unstableDependency: true,
+		implicitCrossModuleDependency: true,
+		unutilizedAbstraction: true,
+		unuUnusedInclude: true
+	};
+
+	let paramToRequestParam = function () {
+		return "?cyclicDependency=" + param.cyclicDependency +
+			"&hubLikeDependency=" + param.hubLikeDependency +
+			"&unstableDependency=" + param.unstableDependency +
+			"&implicitCrossModuleDependency=" + param.implicitCrossModuleDependency +
+			"&unutilizedAbstraction=" + param.unutilizedAbstraction +
+			"&unuUnusedInclude=" + param.unuUnusedInclude;
+	};
 
 	return {
 		smellOverview: function(projects, projectTotalMap, fileSmellOverviewMap, packageSmellOverviewMap) {
 			_smellOverview(projects, projectTotalMap, fileSmellOverviewMap, packageSmellOverviewMap);
 		}
-	}
-}
+	};
+};

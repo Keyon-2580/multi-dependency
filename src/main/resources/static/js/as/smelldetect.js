@@ -145,32 +145,32 @@ let smellDetect = function() {
 		});
 		// Hub-Like Dependency
 		$("#hubLikeDependencyQuery").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
+			let projectId = $("#hubLikeDependencyProject").val();
 			window.open("/as/hublikedependency/query?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
 		// Unstable Dependency
 		$("#unstableDependencyQuery").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
+			let projectId = $("#unstableDependencyProject").val();
 			window.open("/as/unstabledependency/query?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
 		// Implicit Cross Module Dependency
 		$("#implicitCrossModuleDependencyQuery").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
+			let projectId = $("#implicitCrossModuleDependencyProject").val();
 			window.open("/as/implicitcrossmoduledependency/query?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
 		// Unutilized Abstraction
 		$("#unutilizedAbstractionQuery").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
+			let projectId = $("#unutilizedAbstractionProject").val();
 			window.open("/as/unutilizedabstraction/query?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
 		// Unused Include
 		$("#unusedIncludeQuery").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
+			let projectId = $("#unusedIncludeProject").val();
 			window.open("/as/unusedinclude/query?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
 		// Multiple Smell
 		$("#multipleSmellQuery").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
+			let projectId = $("#multipleSmellProject").val();
 			window.open("/as/multiplesmell/query?projectid=" + projectId);
 		});
 	};
@@ -183,32 +183,32 @@ let smellDetect = function() {
 		});
 		// Hub-Like Dependency
 		$("#hubLikeDependencyDetect").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
+			let projectId = $("#hubLikeDependencyProject").val();
 			window.open("/as/hublikedependency/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
 		// Unstable Dependency
 		$("#unstableDependencyDetect").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
+			let projectId = $("#unstableDependencyProject").val();
 			window.open("/as/unstabledependency/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
 		// Implicit Cross Module Dependency
 		$("#implicitCrossModuleDependencyDetect").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
+			let projectId = $("#implicitCrossModuleDependencyProject").val();
 			window.open("/as/implicitcrossmoduledependency/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
 		// Unutilized Abstraction
 		$("#unutilizedAbstractionDetect").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
+			let projectId = $("#unutilizedAbstractionProject").val();
 			window.open("/as/unutilizedabstraction/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
 		// Unused Include
 		$("#unusedIncludeDetect").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
+			let projectId = $("#unusedIncludeProject").val();
 			window.open("/as/unusedinclude/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
 		// Multiple Smell
 		$("#multipleSmellDetect").click(function() {
-			let projectId = $("#cyclicDependencyProject").val();
+			let projectId = $("#multipleSmellProject").val();
 			window.open("/as/multiplesmell/detect?projectid=" + projectId);
 		});
 	};
