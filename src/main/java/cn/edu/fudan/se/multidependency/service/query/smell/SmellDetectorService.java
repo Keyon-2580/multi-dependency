@@ -8,9 +8,13 @@ import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import cn.edu.fudan.se.multidependency.model.relation.Contain;
+import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
+import cn.edu.fudan.se.multidependency.model.relation.RelateTo;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.RelateToRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
+import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.*;
 import cn.edu.fudan.se.multidependency.service.query.smell.impl.GodComponentDetectorImpl;
 import org.slf4j.Logger;
@@ -30,6 +34,9 @@ public class SmellDetectorService {
 
 	@Autowired
 	private ContainRepository containRepository;
+
+	@Autowired
+	private RelateToRepository relateToRepository;
 
 	@Autowired
 	private CyclicDependencyDetector cyclicDependencyDetector;
@@ -57,6 +64,9 @@ public class SmellDetectorService {
 
 	@Autowired
 	private UnusedIncludeDetector unusedIncludeDetector;
+
+	@Autowired
+	private StaticAnalyseService staticAnalyseService;
 
 	public void createCloneSmells(boolean isRecreate){
 		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.CLONE);
@@ -192,10 +202,12 @@ public class SmellDetectorService {
 			LOGGER.info("重新创建...");
 		}
 		smellRepository.deleteSmellContainRelations(SmellType.HUBLIKE_DEPENDENCY);
+		smellRepository.deleteSmellRelateToRelations(SmellType.HUBLIKE_DEPENDENCY);
 		smellRepository.deleteSmellMetric(SmellType.HUBLIKE_DEPENDENCY);
 		smellRepository.deleteSmells(SmellType.HUBLIKE_DEPENDENCY);
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
+		List<RelateTo> smellRelateTos = new ArrayList<>();
 
 		Map<Long, List<FileHubLike>> fileHubLikeDependencyMap = hubLikeDependencyDetector.detectFileHubLikeDependency();
 		String fileSmellName = SmellLevel.FILE + "_" + SmellType.HUBLIKE_DEPENDENCY + "_";
@@ -213,6 +225,22 @@ public class SmellDetectorService {
 				smell.setType(SmellType.HUBLIKE_DEPENDENCY);
 				smell.setLevel(SmellLevel.FILE);
 				smells.add(smell);
+				Collection<DependsOn> fileDependsOns = staticAnalyseService.findFileDependsOn(fileHubLikeDependency.getFile());
+				if(fileDependsOns != null && !fileDependsOns.isEmpty()){
+					fileDependsOns.forEach(fileDpOn->{
+						ProjectFile fileOn = (ProjectFile)fileDpOn.getEndNode();
+						RelateTo relateTo = new RelateTo(smell,fileOn);
+						smellRelateTos.add(relateTo);
+					});
+				}
+				Collection<DependsOn> fileDependsOnBys = staticAnalyseService.findFileDependedOnBy(fileHubLikeDependency.getFile());
+				if(fileDependsOnBys != null && !fileDependsOnBys.isEmpty()){
+					fileDependsOnBys.forEach(fileDpOnBy->{
+						ProjectFile fileBy = (ProjectFile)fileDpOnBy.getStartNode();
+						RelateTo relateTo = new RelateTo(smell,fileBy);
+						smellRelateTos.add(relateTo);
+					});
+				}
 				Contain contain = new Contain(smell, fileHubLikeDependency.getFile());
 				smellContains.add(contain);
 				fileSmellIndex ++;
@@ -220,9 +248,11 @@ public class SmellDetectorService {
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
+		relateToRepository.saveAll(smellRelateTos);
 
 		smells.clear();
 		smellContains.clear();
+		smellRelateTos.clear();
 		Map<Long, List<PackageHubLike>> packageHubLikeDependencyMap = hubLikeDependencyDetector.detectPackageHubLikeDependency();
 		String packageSmellName = SmellLevel.PACKAGE + "_" + SmellType.HUBLIKE_DEPENDENCY + "_";
 		for (Map.Entry<Long, List<PackageHubLike>> entry : packageHubLikeDependencyMap.entrySet()) {
@@ -239,6 +269,22 @@ public class SmellDetectorService {
 				smell.setType(SmellType.HUBLIKE_DEPENDENCY);
 				smell.setLevel(SmellLevel.PACKAGE);
 				smells.add(smell);
+				Collection<DependsOn> pakDependsOns = staticAnalyseService.findPackageDependsOn(packageHubLikeDependency.getPck());
+				if(pakDependsOns != null && !pakDependsOns.isEmpty()){
+					pakDependsOns.forEach(pckDpOn->{
+						Package pckOn = (Package)pckDpOn.getEndNode();
+						RelateTo relateTo = new RelateTo(smell,pckOn);
+						smellRelateTos.add(relateTo);
+					});
+				}
+				Collection<DependsOn> pckDependsOnBys = staticAnalyseService.findPackageDependedOnBy(packageHubLikeDependency.getPck());
+				if(pckDependsOnBys != null && !pckDependsOnBys.isEmpty()){
+					pckDependsOnBys.forEach(pckDpOnBy->{
+						Package pckBy = (Package)pckDpOnBy.getStartNode();
+						RelateTo relateTo = new RelateTo(smell,pckBy);
+						smellRelateTos.add(relateTo);
+					});
+				}
 				Contain contain = new Contain(smell, packageHubLikeDependency.getPck());
 				smellContains.add(contain);
 				packageSmellIndex ++;
@@ -246,6 +292,7 @@ public class SmellDetectorService {
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
+		relateToRepository.saveAll(smellRelateTos);
 		LOGGER.info("创建Hub-Like Dependency Smell节点关系完成");
 	}
 
@@ -264,6 +311,7 @@ public class SmellDetectorService {
 		smellRepository.deleteSmells(SmellType.UNSTABLE_DEPENDENCY);
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
+		List<RelateTo> smellRelateTos = new ArrayList<>();
 
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstableComponentMap = unstableDependencyDetectorUsingInstability.detectFileUnstableDependency();
 		String fileSmellName = SmellLevel.FILE + "_" + SmellType.UNSTABLE_DEPENDENCY + "_";
@@ -281,6 +329,14 @@ public class SmellDetectorService {
 				smell.setType(SmellType.UNSTABLE_DEPENDENCY);
 				smell.setLevel(SmellLevel.FILE);
 				smells.add(smell);
+				Collection<DependsOn> fileDependsOnBys = staticAnalyseService.findFileDependedOnBy(fileUnstableComponent.getComponent());
+				if(fileDependsOnBys != null && !fileDependsOnBys.isEmpty()){
+					fileDependsOnBys.forEach(fileDpOnBy->{
+						ProjectFile fileBy = (ProjectFile)fileDpOnBy.getStartNode();
+						RelateTo relateTo = new RelateTo(smell,fileBy);
+						smellRelateTos.add(relateTo);
+					});
+				}
 				Contain contain = new Contain(smell, fileUnstableComponent.getComponent());
 				smellContains.add(contain);
 				fileSmellIndex ++;
@@ -288,9 +344,11 @@ public class SmellDetectorService {
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
+		relateToRepository.saveAll(smellRelateTos);
 
 		smells.clear();
 		smellContains.clear();
+		smellRelateTos.clear();
 		Map<Long, List<UnstableComponentByInstability<Package>>> packageUnstableComponentMap = unstableDependencyDetectorUsingInstability.detectPackageUnstableDependency();
 		String packageSmellName = SmellLevel.PACKAGE + "_" + SmellType.UNSTABLE_DEPENDENCY + "_";
 		for (Map.Entry<Long, List<UnstableComponentByInstability<Package>>> entry : packageUnstableComponentMap.entrySet()) {
@@ -307,6 +365,14 @@ public class SmellDetectorService {
 				smell.setType(SmellType.UNSTABLE_DEPENDENCY);
 				smell.setLevel(SmellLevel.PACKAGE);
 				smells.add(smell);
+				Collection<DependsOn> pckDependsOnBys = staticAnalyseService.findPackageDependedOnBy(packageUnstableComponent.getComponent());
+				if(pckDependsOnBys != null && !pckDependsOnBys.isEmpty()){
+					pckDependsOnBys.forEach(pckDpOnBy->{
+						Package pckBy = (Package)pckDpOnBy.getStartNode();
+						RelateTo relateTo = new RelateTo(smell,pckBy);
+						smellRelateTos.add(relateTo);
+					});
+				}
 				Contain contain = new Contain(smell, packageUnstableComponent.getComponent());
 				smellContains.add(contain);
 				packageSmellIndex ++;
@@ -314,6 +380,7 @@ public class SmellDetectorService {
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
+		relateToRepository.saveAll(smellRelateTos);
 		LOGGER.info("创建Unstable Dependency Smell节点关系完成");
 	}
 

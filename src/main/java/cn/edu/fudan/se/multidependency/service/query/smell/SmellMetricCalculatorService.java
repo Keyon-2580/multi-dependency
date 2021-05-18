@@ -190,6 +190,9 @@ public class SmellMetricCalculatorService {
 				Smell smell = structureMetric.getSmell();
 				SmellMetric.EvolutionMetric evolutionMetric = smellRepository.calculateSmellEvolutionMetricInFileLevel(smell.getId());
 				SmellMetric.CoChangeMetric coChangeMetric = smellRepository.calculateSmellCoChangeMetricInFileLevel(smell.getId());
+				if(coChangeMetric == null){
+					coChangeMetric = smellRepository.calculateSmellRelateToNodeCoChangeMetricInFileLevel(smell.getId());
+				}
 				SmellMetric.DebtMetric debtMetric = smellRepository.calculateSmellDebtMetricInFileLevel(smell.getId());
 				SmellMetric smellMetric = new SmellMetric();
 				smellMetric.setSmell(smell);
@@ -217,6 +220,9 @@ public class SmellMetricCalculatorService {
 				Smell smell = structureMetric.getSmell();
 				SmellMetric.EvolutionMetric evolutionMetric = smellRepository.calculateSmellEvolutionMetricInPackageLevel(smell.getId());
 				SmellMetric.CoChangeMetric coChangeMetric = smellRepository.calculateSmellCoChangeMetricInPackageLevel(smell.getId());
+				if(coChangeMetric == null){
+					coChangeMetric = smellRepository.calculateSmellRelateToNodeCoChangeMetricInPackageLevel(smell.getId());
+				}
 				SmellMetric.DebtMetric debtMetric = smellRepository.calculateSmellDebtMetricInPackageLevel(smell.getId());
 				SmellMetric smellMetric = new SmellMetric();
 				smellMetric.setSmell(smell);

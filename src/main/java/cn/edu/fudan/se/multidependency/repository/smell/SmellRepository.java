@@ -64,6 +64,9 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 	@Query("match p = (smell:Smell)-[r:CONTAIN]-() where smell.type = $smellType delete r;")
 	void deleteSmellContainRelations(@Param("smellType") String smellType);
 
+	@Query("match p = (smell:Smell)-[r:RELATE_TO]-() where smell.type = $smellType delete r;")
+	void deleteSmellRelateToRelations(@Param("smellType") String smellType);
+
 	@Query("match p = (smell:Smell)-[r:" + RelationType.str_HAS + "] -> (m:Metric) where smell.type = $smellType delete r, m;")
 	void deleteSmellMetric(@Param("smellType") String smellType);
 
@@ -166,6 +169,14 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 			"RETURN  smell,coChangeCommits,totalCoChangeCommits,coChangeFiles;")
 	SmellMetric.CoChangeMetric calculateSmellCoChangeMetricInFileLevel(@Param("smellId") long smellId);
 
+	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
+			"]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(file2:ProjectFile)<- [:" +
+			RelationType.str_RELATE_TO + "]-(smell) " +
+			"where id(smell)= $smellId and id(file1) <> id(file2) and size((file1)-[:" + RelationType.str_CO_CHANGE +"]-(file2)) > 0 " +
+			"WITH smell, count(distinct c) as coChangeCommits,count(c) as totalCoChangeCommits,count(distinct file2) as coChangeFiles " +
+			"RETURN  smell,coChangeCommits,totalCoChangeCommits,coChangeFiles;")
+	SmellMetric.CoChangeMetric calculateSmellRelateToNodeCoChangeMetricInFileLevel(@Param("smellId") long smellId);
+
 	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(file:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
 			"]-(c:Commit)-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE + "]->(issue:Issue) " +
 			"where id(smell)= $smellId " +
@@ -204,6 +215,15 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 			"WITH smell, coChangeCommits, totalCoChangeCommits, reduce(tmp=size(coFiles1), file in coFiles2 | tmp + (case when file in coFiles1 then 0 else 1 end)) as coChangeFiles " +
 			"RETURN  smell,coChangeCommits,totalCoChangeCommits,coChangeFiles;")
 	SmellMetric.CoChangeMetric calculateSmellCoChangeMetricInPackageLevel(@Param("smellId") long smellId);
+
+	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "*2]->(file1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
+			"]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(file2:ProjectFile)<-[:" + RelationType.str_CONTAIN + "]-(:Package)<-[:" +
+			RelationType.str_RELATE_TO + "]-(smell) " +
+			"where id(smell)= $smellId and id(file1) <> id(file2) and size((file1)-[:" + RelationType.str_CO_CHANGE +"]-(file2)) > 0 " +
+			"WITH smell, count(distinct c) as coChangeCommits,count(c) as totalCoChangeCommits,collect(distinct file1) as coFiles1, collect(distinct file2) as coFiles2 " +
+			"WITH smell, coChangeCommits, totalCoChangeCommits, reduce(tmp=size(coFiles1), file in coFiles2 | tmp + (case when file in coFiles1 then 0 else 1 end)) as coChangeFiles " +
+			"RETURN  smell,coChangeCommits,totalCoChangeCommits,coChangeFiles;")
+	SmellMetric.CoChangeMetric calculateSmellRelateToNodeCoChangeMetricInPackageLevel(@Param("smellId") long smellId);
 
 	@Query("MATCH (smell:Smell)-[:" + RelationType.str_CONTAIN + "*2]->(file:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
 			"]-(c:Commit)-[:" + RelationType.str_COMMIT_ADDRESS_ISSUE + "]->(issue:Issue) " +

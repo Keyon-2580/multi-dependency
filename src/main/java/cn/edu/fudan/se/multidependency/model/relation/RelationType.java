@@ -8,6 +8,7 @@ import java.util.Map;
 public enum RelationType implements RelationshipType {
 	CONTAIN(RelationType.str_CONTAIN),
 	HAS(RelationType.str_HAS),
+	RELATE_TO(RelationType.str_RELATE_TO),
 	EXTENDS(RelationType.str_EXTENDS),
 	IMPORT(RelationType.str_IMPORT),
 	INCLUDE(RelationType.str_INCLUDE),
@@ -62,6 +63,7 @@ public enum RelationType implements RelationshipType {
 	 */
 	public static final String str_CONTAIN = "CONTAIN";
 	public static final String str_HAS = "HAS";
+	public static final String str_RELATE_TO = "RELATE_TO";
 //	public static final String str_DEPENDENCY = "DEPENDENCY";
 //	public static final String str_ASSOCIATION = "ASSOCIATION";
 	public static final String str_GLOBAL_VARIABLE = "GLOBAL_VARIABLE";
