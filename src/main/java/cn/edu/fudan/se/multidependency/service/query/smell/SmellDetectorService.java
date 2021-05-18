@@ -308,6 +308,7 @@ public class SmellDetectorService {
 		}
 		smellRepository.deleteSmellContainRelations(SmellType.UNSTABLE_DEPENDENCY);
 		smellRepository.deleteSmellMetric(SmellType.UNSTABLE_DEPENDENCY);
+		smellRepository.deleteSmellRelateToRelations(SmellType.UNSTABLE_DEPENDENCY);
 		smellRepository.deleteSmells(SmellType.UNSTABLE_DEPENDENCY);
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
