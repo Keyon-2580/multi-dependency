@@ -256,6 +256,10 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
         if (smell != null) {
             ProjectFile coreFile = projectFileRepository.findFileById(smell.getCoreNodeId());
             if (coreFile != null) {
+                String key = smell.getId().toString();
+                if (cache.get(getClass(), key) != null) {
+                    return cache.get(getClass(), key);
+                }
                 files.add(coreFile);
                 coreFileId = coreFile.getId();
                 JSONObject smellJson = new JSONObject();
@@ -308,6 +312,13 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
         result.put("nodes", nodesJson);
         result.put("edges", edgesJson);
         result.put("smells", smellsJson);
+        if (smell != null) {
+            ProjectFile coreFile = projectFileRepository.findFileById(smell.getCoreNodeId());
+            if (coreFile != null) {
+                String key = smell.getId().toString();
+                cache.cache(getClass(), key, result);
+            }
+        }
         return result;
     }
 

@@ -379,6 +379,10 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		Smell smell = smellRepository.findProjectSmellsByName(projectId, smellName);
 		List<Type> types = new ArrayList<>();
 		if (smell != null) {
+			String key = smell.getId().toString();
+			if (cache.get(getClass(), key) != null) {
+				return cache.get(getClass(), key);
+			}
 			JSONObject smellJson = new JSONObject();
 			smellJson.put("name", smell.getName());
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
@@ -434,6 +438,10 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		result.put("nodes", nodesJson);
 		result.put("edges", edgesJson);
 		result.put("smells", smellsJson);
+		if (smell != null) {
+			String key = smell.getId().toString();
+			cache.cache(getClass(), key, result);
+		}
 		return result;
 	}
 
@@ -454,6 +462,10 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		List<Package> comboList = new ArrayList<>();
 		List<ProjectFile> nodeList = new ArrayList<>();
 		if (smell != null) {
+			String key = smell.getId().toString();
+			if (cache.get(getClass(), key) != null) {
+				return cache.get(getClass(), key);
+			}
 			JSONObject smellObject = new JSONObject();
 			smellObject.put("name", smell.getName());
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
@@ -478,17 +490,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 				if (i != j) {
 					DependsOn comboToComboDependsOn = dependsOnRepository.findDependsOnBetweenPackages(sourceCombo.getId(), targetCombo.getId());
 					if (comboToComboDependsOn != null) {
-						JSONObject edgeObject = new JSONObject();
-//						edgeObject.put("id", comboToComboDependsOn.getId().toString());
-//						edgeObject.put("source", sourceCombo.getId().toString());
-//						edgeObject.put("target", targetCombo.getId().toString());
-//						edgeObject.put("source_name", sourceCombo.getName());
-//						edgeObject.put("target_name", targetCombo.getName());
-//						edgeObject.put("source_label", i + 1);
-//						edgeObject.put("target_label", j + 1);
-//						edgeObject.put("times", comboToComboDependsOn.getTimes());
-//						edgeObject.put("dependsOnTypes", comboToComboDependsOn.getDependsOnTypes());
-//						edgeArray.add(edgeObject);
+						JSONObject edgeObject;
 						Set<ProjectFile> sourceNodeList = new HashSet<>(dependsOnRepository.findDependsOnSourceFilesBetweenPackages(sourceCombo.getId(), targetCombo.getId()));
 						Set<ProjectFile> targetNodeList = new HashSet<>(dependsOnRepository.findDependsOnTargetFilesBetweenPackages(sourceCombo.getId(), targetCombo.getId()));
 						for (ProjectFile sourceNode : sourceNodeList) {
@@ -553,6 +555,10 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		result.put("nodes", nodeArray);
 		result.put("edges", edgeArray);
 		result.put("smells", smellArray);
+		if (smell != null) {
+			String key = smell.getId().toString();
+			cache.cache(getClass(), key, result);
+		}
 		return result;
 	}
 
@@ -569,6 +575,10 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		JSONArray smellsJson = new JSONArray();
 		List<ProjectFile> files = new ArrayList<>();
 		if (smell != null) {
+			String key = smell.getId().toString();
+			if (cache.get(getClass(), key) != null) {
+				return cache.get(getClass(), key);
+			}
 			JSONObject smellJson = new JSONObject();
 			smellJson.put("name", smell.getName());
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
@@ -624,6 +634,10 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 		result.put("nodes", nodesJson);
 		result.put("edges", edgesJson);
 		result.put("smells", smellsJson);
+		if (smell != null) {
+			String key = smell.getId().toString();
+			cache.cache(getClass(), key, result);
+		}
 		return result;
 	}
 
