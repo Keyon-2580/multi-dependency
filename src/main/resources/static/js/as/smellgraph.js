@@ -94,16 +94,28 @@ let drawSmellGraph = function (json_data) {
                 autoRotate: true,
             },
         },
+        // layout: {
+        //     type: 'comboForce',
+        //     preventOverlap: true,
+        //     nodeSpacing: (node) => {
+        //         if (node.comboId) {
+        //             return 10;
+        //         }
+        //         return 70;
+        //     },
+        //     comboSpacing: 100,
+        // },
+        // layout: {
+        //     type: 'forceAtlas2',
+        //     preventOverlap: true,
+        //     kr: 10,
+        //     // center: [0, 0],
+        // },
         layout: {
-            type: 'comboForce',
-            preventOverlap: true,
-            nodeSpacing: (node) => {
-                if (node.comboId) {
-                    return 10;
-                }
-                return 70;
-            },
-            comboSpacing: 100,
+            type: 'fruchterman',
+            gravity: 10,
+            speed: 5,
+            clustering: true,
         },
         nodeStateStyles: {
             coreNode: {
