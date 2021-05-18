@@ -55,7 +55,7 @@ public class CloneGroupDependOnController {
     @ResponseBody
     public JSONObject getDependsMatrix(@PathVariable("name") String name){
         Collection<CodeNode> filegroup = new ArrayList<>();
-        if(name.contains("file_group")){
+        if(name.contains("clone_group")){
             CloneGroup cloneGroup = basicCloneQueryService.queryCloneGroup(name);
             cloneGroup = cloneAnalyse.addNodeAndRelationToCloneGroup(cloneGroup);
             filegroup.addAll(cloneGroup.getNodes());
@@ -123,7 +123,7 @@ public class CloneGroupDependOnController {
     @ResponseBody
     public JSONObject getDependedMatrix(@PathVariable("name") String name){
         Collection<CodeNode> filegroup = new ArrayList<>();
-        if(name.contains("file_group")){
+        if(name.contains("clone_group")){
             CloneGroup cloneGroup = basicCloneQueryService.queryCloneGroup(name);
             cloneGroup = cloneAnalyse.addNodeAndRelationToCloneGroup(cloneGroup);
             filegroup.addAll(cloneGroup.getNodes());
@@ -186,7 +186,7 @@ public class CloneGroupDependOnController {
     @ResponseBody
     public Object getAlldependsNodes(@PathVariable("name") String name){
         Collection<CodeNode> filegroup = new ArrayList<>();
-        if(name.contains("file_group")){
+        if(name.contains("clone_group")){
             CloneGroup cloneGroup = basicCloneQueryService.queryCloneGroup(name);
             cloneGroup = cloneAnalyse.addNodeAndRelationToCloneGroup(cloneGroup);
             filegroup.addAll(cloneGroup.getNodes());
@@ -219,7 +219,7 @@ public class CloneGroupDependOnController {
     @ResponseBody
     public Object getAlldependedNodes(@PathVariable("name") String name){
         Collection<CodeNode> filegroup = new ArrayList<>();
-        if(name.contains("file_group")){
+        if(name.contains("clone_group")){
             CloneGroup cloneGroup = basicCloneQueryService.queryCloneGroup(name);
             cloneGroup = cloneAnalyse.addNodeAndRelationToCloneGroup(cloneGroup);
             filegroup.addAll(cloneGroup.getNodes());
