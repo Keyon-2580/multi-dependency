@@ -52,6 +52,15 @@ let drawSmellGraph = function (json_data) {
             return outDiv;
         },
     });
+    const nodeMenu = new G6.Menu({
+        offsetX: 0,
+        offsetY: 0,
+        itemTypes: ['node'],
+        getContent(e) {
+            let href = '/relation/file/' + e.item.getModel().id;
+            return `<h5><a target='_blank' href=${href}>查看文件详情</a></h5>`;
+        }
+    });
     const container = document.getElementById('smellGraph');
     const width = container.scrollWidth;
     const height = container.scrollHeight || 500;
@@ -62,7 +71,7 @@ let drawSmellGraph = function (json_data) {
         modes: {
             default: ['drag-canvas', 'drag-node', 'drag-combo', 'collapse-expand-combo', 'zoom-canvas'],
         },
-        plugins: [nodeTip, edgeTip],
+        plugins: [nodeTip, edgeTip, nodeMenu],
         animate: true,
         defaultCombo: {
             type: 'circle',
