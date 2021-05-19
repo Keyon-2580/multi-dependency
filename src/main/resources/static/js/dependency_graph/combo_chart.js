@@ -23,9 +23,9 @@ let smell_filter_condition = {};
 
 const REGULAR_NODE_SIZE = 25;
 const loading_div = $("#loading_div");
-const COLOR_DEPENDSON = '#FFA500';
+const COLOR_DEPENDSON = '#1b78d4';
 const COLOR_CLONE = '#B04206';
-const COLOR_COCHANGE = '#a29bfe';
+const COLOR_COCHANGE = '#f9ac20';
 // const COLOR_LINK_NORMAL = '#f7c8ca';
 const COLOR_LINK_NORMAL = '#9aa6d2';
 const COLOR_LINK_INNER = '#d8d5d5';
