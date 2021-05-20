@@ -330,6 +330,12 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 				result[0] = DEFAULT_MIN_FILE_FAN_IN;
 				result[1] = DEFAULT_MIN_FILE_FAN_OUT;
 			}
+			if (result[0] < DEFAULT_MIN_FILE_FAN_IN) {
+				result[0] = DEFAULT_MIN_FILE_FAN_IN;
+			}
+			if (result[1] < DEFAULT_MIN_FILE_FAN_OUT) {
+				result[1] = DEFAULT_MIN_FILE_FAN_OUT;
+			}
 			projectToMinFileFanIOMap.put(projectId, result);
 		}
 		return projectToMinFileFanIOMap.get(projectId);
@@ -347,6 +353,12 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 			}
 			else {
 				result[0] = DEFAULT_MIN_PACKAGE_FAN_IN;
+				result[1] = DEFAULT_MIN_PACKAGE_FAN_OUT;
+			}
+			if (result[0] < DEFAULT_MIN_PACKAGE_FAN_IN) {
+				result[0] = DEFAULT_MIN_PACKAGE_FAN_IN;
+			}
+			if (result[1] < DEFAULT_MIN_PACKAGE_FAN_OUT) {
 				result[1] = DEFAULT_MIN_PACKAGE_FAN_OUT;
 			}
 			projectToMinPackageFanIOMap.put(projectId, result);

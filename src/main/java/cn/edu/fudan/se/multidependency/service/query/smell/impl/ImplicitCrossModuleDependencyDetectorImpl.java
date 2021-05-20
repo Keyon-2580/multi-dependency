@@ -233,6 +233,9 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 			else {
 				projectToMinFileCoChangeMap.put(projectId, DEFAULT_MIN_FILE_CO_CHANGE);
 			}
+			if (projectToMinFileCoChangeMap.get(projectId) < DEFAULT_MIN_FILE_CO_CHANGE) {
+				projectToMinFileCoChangeMap.put(projectId, DEFAULT_MIN_FILE_CO_CHANGE);
+			}
 		}
 		return projectToMinFileCoChangeMap.get(projectId);
 	}
@@ -245,6 +248,9 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 				projectToMinPackageCoChangeMap.put(projectId, medPackageCoChange);
 			}
 			else {
+				projectToMinPackageCoChangeMap.put(projectId, DEFAULT_MIN_PACKAGE_CO_CHANGE);
+			}
+			if (projectToMinPackageCoChangeMap.get(projectId) < DEFAULT_MIN_PACKAGE_CO_CHANGE) {
 				projectToMinPackageCoChangeMap.put(projectId, DEFAULT_MIN_PACKAGE_CO_CHANGE);
 			}
 		}

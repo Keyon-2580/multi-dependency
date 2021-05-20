@@ -248,6 +248,9 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 			else {
 				projectToMinFileFanOutMap.put(projectId, DEFAULT_MIN_FILE_FAN_OUT);
 			}
+			if (projectToMinFileFanOutMap.get(projectId) < DEFAULT_MIN_FILE_FAN_OUT) {
+				projectToMinFileFanOutMap.put(projectId, DEFAULT_MIN_FILE_FAN_OUT);
+			}
 		}
 		return projectToMinFileFanOutMap.get(projectId);
 	}
@@ -260,6 +263,9 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 				projectToMinPackageFanOutMap.put(projectId, medPackageFanOut);
 			}
 			else {
+				projectToMinPackageFanOutMap.put(projectId, DEFAULT_MIN_PACKAGE_FAN_OUT);
+			}
+			if (projectToMinPackageFanOutMap.get(projectId) < DEFAULT_MIN_PACKAGE_FAN_OUT) {
 				projectToMinPackageFanOutMap.put(projectId, DEFAULT_MIN_PACKAGE_FAN_OUT);
 			}
 		}
