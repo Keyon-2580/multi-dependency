@@ -5,6 +5,7 @@ let projectId_global = ""; //存放当前展示的项目的ID
 let in_out_list = [] //存放出度入度节点
 let actual_edges = [] //存放原有的线以及拆分后的线ID
 let present_edge_data = [] //存放当前的连线数据
+let present_smell_edge_data = [] //存放当前的异味筛选后的连线数据
 let smell_data_global = [] //存放异味信息
 let smell_data_single_type = [] //存放当前某种类型的异味数据
 let smell_data_single_group = [] //存放当前某个组的异味数据
@@ -732,13 +733,12 @@ function DrawComboChart(json_data){
                 });
             });
 
-            // graph.on('combo: dragend', (evt) => {
-            //     const nodes = graph.getNodes();
-            //     nodes.forEach((node) => {
-            //         node.toFront();
-            //     });
-            //     graph.paint();
-            // });
+            graph.on('dragend', (evt) => {
+                const nodes = graph.getNodes();
+                nodes.forEach((node) => {
+                    node.toFront();
+                });
+            });
 
 
             //节点点击函数
@@ -1379,7 +1379,8 @@ function deleteSmell(type){
 }
 
 function filterSmell(){
-    data["edges"] = splitLinks(filterLinks(smell_filter_condition, "_smell"));
+    present_smell_edge_data = filterLinks(smell_filter_condition, "_smell");
+    data["edges"] = splitLinks(present_smell_edge_data);
     paintCombo();
 
     const nodes = graph.getNodes();
@@ -1517,6 +1518,10 @@ function loadSmellTable(smell_data){
                 smell_data_single_group = smell_data_single;
                 smell_data_flag = "group";
 
+                if(smell_data_single.length > 1){
+
+                }
+
                 loadSmell(smell_data_single);
             }else{
                 smell_data_single_group_id = -1;
@@ -1528,6 +1533,20 @@ function loadSmellTable(smell_data){
         });
 
     });
+}
+
+//选中某一组异味的时候，显示与该组节点都依赖的节点
+function showCommonDependency(smell_data){
+    let link_data = [];
+    if (!isEmptyObject(smell_filter_condition)) {
+        link_data = present_edge_data.concat();
+    }else{
+        link_data = present_edge_data.concat();
+    }
+
+    smell_data.forEach(smell => {
+
+    })
 }
 
 //获取当前连线筛选条件
@@ -2284,6 +2303,7 @@ function judgeSmellLink(edge){
     return node1_flag && node2_flag;
 }
 
+//绘制combo
 function paintCombo(){
     graph.data(data);
     graph.render();
@@ -2296,6 +2316,7 @@ function isEmptyObject(obj) {
     return true;
 }
 
+//加载弹窗
 function showLoadingWindow(tip){
     let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
         "<div class='loading_window' id='Id_loading_window' style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">" + tip + "</div>" +
@@ -2303,9 +2324,11 @@ function showLoadingWindow(tip){
     loading_div.html(html);
 }
 
+//关闭加载弹窗
 function closeLoadingWindow(){
     loading_div.html("");
 }
+
 if (typeof window !== 'undefined'){
     window.onresize = () => {
         if (!graph || graph.get('destroyed')) return;
