@@ -653,7 +653,6 @@ function DrawComboChart(json_data){
     data["combos"] = temp_combos;
     present_edge_data = splitLinks(actual_edges);
     data["edges"] = present_edge_data;
-    console.log(data);
 
     let sum = data["nodes"].length + data["combos"].length + data["edges"].length;
 
@@ -673,6 +672,7 @@ function DrawComboChart(json_data){
         }
     }else{
         autoLayout();
+        console.log(data);
         paintCombo();
         const edge_list = graph.getEdges();
         edge_list.forEach(function (item){
@@ -1773,8 +1773,8 @@ function autoLayout(){
 
         node_list.forEach(node =>{
             if(node.comboId === item.id){
-                let innerLineIndex = Math.ceil(innerNodeLineIndex / line_node_num);
-                let outerLineIndex = Math.ceil(outerNodeLineIndex / line_node_num);
+                let innerLineIndex = Math.floor(innerNodeLineIndex / line_node_num);
+                let outerLineIndex = Math.floor(outerNodeLineIndex / line_node_num);
                 // console.log(innerLineIndex);
                 // console.log(outerLineIndex);
                 if(node.outerNode === 0){ //内部节点
