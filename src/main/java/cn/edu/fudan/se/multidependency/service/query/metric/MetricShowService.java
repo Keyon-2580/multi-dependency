@@ -7,6 +7,7 @@ import java.util.*;
 import cn.edu.fudan.se.multidependency.model.node.Metric;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.git.GitRepository;
 import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
@@ -117,6 +118,16 @@ public class MetricShowService {
 	public Metric getProjectMetric(Project project){
 		Metric metric = metricRepository.findProjectMetric(project.getId());
 		return metric;
+	}
+
+	public List<NodeMetric> getGitRepoMetrics(){
+		List<NodeMetric> metricList = new ArrayList<>(metricRepository.findGitRepoMetricData());
+		return metricList;
+	}
+
+	public List<Metric> getGitRepoMetric(GitRepository gitRepo){
+		List<Metric> metricList = metricRepository.findGitRepoMetric(gitRepo.getId());
+		return metricList;
 	}
 
 	public List<Metric> getSmellMetrics(){

@@ -10,12 +10,15 @@ import javax.annotation.Resource;
 
 import cn.edu.fudan.se.multidependency.model.MetricType;
 import cn.edu.fudan.se.multidependency.model.node.Metric;
+import cn.edu.fudan.se.multidependency.model.node.git.GitRepository;
 import cn.edu.fudan.se.multidependency.model.relation.Has;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
 import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
+import cn.edu.fudan.se.multidependency.repository.node.git.GitRepoRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.HasRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
+import cn.edu.fudan.se.multidependency.service.query.history.data.GitRepoMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
@@ -181,7 +184,7 @@ public class MetricCalculatorService {
 	}
 
 	public void createProjectMetric(boolean isRecreate) {
-		List<Metric> metricsTmp = metricRepository.findProjectMetricsWithLimit();
+		List<Metric> metricsTmp = metricRepository.findProjectMetricWithLimit();
 		if(metricsTmp != null && !metricsTmp.isEmpty()){
 			LOGGER.info("已存在Project Metric度量值节点和关系");
 			if(!isRecreate){
@@ -203,6 +206,38 @@ public class MetricCalculatorService {
 				Has has = new Has(project, entry.getValue());
 				hasMetrics.add(has);
 			}
+			hasRepository.saveAll(hasMetrics);
+		}
+	}
+
+	public void createGitRepoMetric(boolean isRecreate) {
+		List<Metric> metricsTmp = metricRepository.findGitRepoMetricWithLimit();
+		if(metricsTmp != null && !metricsTmp.isEmpty()){
+			LOGGER.info("已存在GitRepo Metric度量值节点和关系");
+			if(!isRecreate){
+				LOGGER.info("不重新创建");
+				return;
+			}
+			LOGGER.info("重新创建...");
+		}
+
+		metricRepository.deleteAllGitRepoMetric();
+		Map<Long, List<Metric>> gitRepoMetricNodesMap = generateGitRepoMetricNodes();
+		if(gitRepoMetricNodesMap != null && !gitRepoMetricNodesMap.isEmpty()){
+			Collection<Metric> gitRepoMetricNodes = new ArrayList<>();
+			Collection<Has> hasMetrics = new ArrayList<>();
+			for(Map.Entry<Long, List<Metric>> entry : gitRepoMetricNodesMap.entrySet()){
+				List<Metric> metrics = entry.getValue();
+				GitRepository gitRepository = gitAnalyseService.findGitRepositoryById(entry.getKey());
+				if(metrics != null && !metrics.isEmpty()){
+					gitRepoMetricNodes.addAll(metrics);
+					metrics.forEach(metric -> {
+						Has has = new Has(gitRepository, metric);
+						hasMetrics.add(has);
+					});
+				}
+			}
+			metricRepository.saveAll(gitRepoMetricNodes);
 			hasRepository.saveAll(hasMetrics);
 		}
 	}
@@ -312,6 +347,8 @@ public class MetricCalculatorService {
 				metricValues.put(MetricType.LOC, projectMetrics.getLoc());
 				metricValues.put(MetricType.LINES, projectMetrics.getLines());
 				metricValues.put(MetricType.COMMITS, projectMetrics.getCommits());
+				metricValues.put(MetricType.DEVELOPERS, projectMetrics.getDevelopers());
+				metricValues.put(MetricType.ISSUES, projectMetrics.getIssues());
 				metricValues.put(MetricType.ISSUE_COMMITS, projectMetrics.getIssueCommits());
 				metricValues.put(MetricType.CHANGE_LINES, projectMetrics.getChangeLines());
 				metricValues.put(MetricType.ISSUE_CHANGE_LINES, projectMetrics.getIssueChangeLines());
@@ -329,7 +366,42 @@ public class MetricCalculatorService {
 
 		return result;
 	}
-	
+
+	public Map<Long, List<Metric>> generateGitRepoMetricNodes(){
+		Map<Long, List<Metric>> result = new HashMap<>();
+		Map<Long, GitRepoMetric> gitRepoMetricMap = gitAnalyseService.calculateGitRepoMetrics();
+		if(gitRepoMetricMap != null && !gitRepoMetricMap.isEmpty()){
+			for(Map.Entry<Long, GitRepoMetric> entry : gitRepoMetricMap.entrySet()){
+				GitRepoMetric gitRepoMetric = entry.getValue();
+				Collection<ProjectMetric> projectMetricsList = gitRepoMetric.getProjectMetricsList();
+				List<Metric> gitRepoPjMetric = new ArrayList<>();
+				if(projectMetricsList != null && !projectMetricsList.isEmpty()){
+					projectMetricsList.forEach(pjMetric ->{
+						Metric metric = new Metric();
+						metric.setEntityId((long) -1);
+						metric.setLanguage(pjMetric.getProject().getLanguage());
+						metric.setName(pjMetric.getProject().getName());
+						metric.setNodeType(gitRepoMetric.getGitRepository().getNodeType());
+						Map<String, Object> metricValues =  new HashMap<>();
+						metricValues.put(MetricType.NOP, pjMetric.getNop());
+						metricValues.put(MetricType.NOF, pjMetric.getNof());
+						metricValues.put(MetricType.NOC, pjMetric.getNoc());
+						metricValues.put(MetricType.NOM, pjMetric.getNom());
+						metricValues.put(MetricType.LOC, pjMetric.getLoc());
+						metricValues.put(MetricType.LINES, pjMetric.getLines());
+						metricValues.put(MetricType.COMMITS, gitRepoMetric.getCommits());
+						metricValues.put(MetricType.ISSUES, gitRepoMetric.getIssues());
+						metricValues.put(MetricType.DEVELOPERS, gitRepoMetric.getDevelopers());
+						metric.setMetricValues(metricValues);
+						gitRepoPjMetric.add(metric);
+					});
+					result.put(gitRepoMetric.getGitRepository().getId(),gitRepoPjMetric);
+				}
+			}
+		}
+		return result;
+	}
+
 	public Map<Long, FileMetric> calculateFileMetrics() {
 		String key = "calculateFileMetrics";
 		if(cache.get(getClass(), key) != null) {
@@ -486,6 +558,8 @@ public class MetricCalculatorService {
 				if (changeLines == null) {
 					changeLines = 0;
 				}
+				projectMetric.setIssues(calculateProjectIssues(project));
+				projectMetric.setDevelopers(calculateProjectDevelopers(project));
 				projectMetric.setIssueCommits(issueCommits);
 				projectMetric.setCommits(commits);
 				projectMetric.setIssueChangeLines(issueChangeLines);
@@ -523,6 +597,15 @@ public class MetricCalculatorService {
 	
 	public int calculateProjectCommits(Project project) {
 		return gitAnalyseService.findCommitsInProject(project).size();
+	}
+
+	public int calculateProjectDevelopers(Project project) {
+		return gitAnalyseService.findDeveloperInProject(project).size();
+	}
+
+	public int calculateProjectIssues(Project project) {
+		GitRepository gitRepository = gitAnalyseService.findGitRepositoryByProject(project);
+		return gitAnalyseService.findIssuesInGitRepository(gitRepository).size();
 	}
 
 	private FileMetric.DeveloperMetric calculateFileDeveloperMetrics(ProjectFile file){

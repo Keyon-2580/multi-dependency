@@ -12,6 +12,8 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
+import cn.edu.fudan.se.multidependency.model.node.git.Issue;
+import cn.edu.fudan.se.multidependency.repository.node.git.DeveloperRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,6 +56,9 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
     @Autowired
     private DeveloperSubmitCommitRepository developerSubmitCommitRepository;
 
+	@Autowired
+	private DeveloperRepository developerRepository;
+
     @Autowired
     private ContainRelationService containRelationService;
     
@@ -61,7 +66,7 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
     private CoChangeRepository cochangeRepository;
 
 	@Autowired
-    MetricCalculatorService metricCalculatorService;
+	private MetricCalculatorService metricCalculatorService;
     
     @Autowired
     private CacheService cache;
@@ -82,8 +87,9 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 			GitRepoMetric gitRepoMetric = new GitRepoMetric();
 			gitRepoMetric.setGitRepository(gitRepository);
 			gitRepoMetric.setProjectMetricsList(projectMetricsMap.get(gitRepository.getName()));
-			gitRepoMetric.setNumOfCommits(calculateGitRepoCommits(gitRepository));
-			gitRepoMetric.setNumOfIssues(issueQueryService.queryIssuesByGitRepoId(gitRepository.getId()).size());
+			gitRepoMetric.setCommits(calculateGitRepoCommits(gitRepository));
+			gitRepoMetric.setIssues(issueQueryService.queryIssuesByGitRepoId(gitRepository.getId()).size());
+			gitRepoMetric.setDevelopers(developerRepository.findDevelopersByRepository(gitRepository.getId()).size());
 			result.put(gitRepository.getId(), gitRepoMetric);
 		}
 		cache.cache(getClass(), key, result);
@@ -267,6 +273,22 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 	}
 
 	@Override
+	public Collection<Developer> findDeveloperInProject(Project project) {
+		GitRepository gitRepository = findGitRepositoryByProject(project);
+		return developerRepository.findDevelopersByRepository(gitRepository.getId());
+	}
+
+	@Override
+	public GitRepository findGitRepositoryByProject(Project project) {
+		return gitRepoRepository.findGitRepositoryByProject(project.getId());
+	}
+
+	@Override
+	public Collection<Issue> findIssuesInGitRepository(GitRepository gitRepository) {
+		return issueQueryService.queryIssuesByGitRepoId(gitRepository.getId());
+	}
+
+	@Override
 	public Collection<CoChangeFile> cochangesWithFile(ProjectFile file) {
 		List<CoChangeFile> result = new ArrayList<>();
 		for(CoChange cochange : cochangeRepository.cochangesLeft(file.getId())) {
@@ -308,6 +330,11 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 		}
 		cache.cache(getClass(), key, result);
 		return result;
+	}
+
+	@Override
+	public GitRepository findGitRepositoryById(long gitRepoId){
+		return gitRepoRepository.findById(gitRepoId).get();
 	}
     
 }

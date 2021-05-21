@@ -33,4 +33,9 @@ public interface GitRepoRepository extends Neo4jRepository<GitRepository, Long> 
 			" where id(gitRepo)=$gitRepoId " +
 			" return project;")
 	Project findGitRepositoryHasProject(long gitRepoId);
+
+	@Query("match (gitRepo:GitRepository) -[:" + RelationType.str_CONTAIN + "]-> (project : Project) " +
+			" where id(project)=$projectId " +
+			" return gitRepo;")
+	GitRepository findGitRepositoryByProject(long projectId);
 }

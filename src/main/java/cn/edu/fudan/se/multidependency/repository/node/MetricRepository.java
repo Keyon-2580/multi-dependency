@@ -64,10 +64,25 @@ public interface MetricRepository extends Neo4jRepository<Metric, Long> {
     List<Metric> findProjectMetric();
 
     @Query("MATCH p=(:Project)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m limit 10;")
-    List<Metric> findProjectMetricsWithLimit();
+    List<Metric> findProjectMetricWithLimit();
 
     @Query("MATCH p=(:Project)-[r:" + RelationType.str_HAS + "]->(m:Metric) delete r, m;")
     void deleteAllProjectMetric();
+
+    @Query("MATCH p=(girRepo:GitRepository)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(girRepo) = gitRepoId  RETURN m;")
+    List<Metric> findGitRepoMetric(@Param("gitRepoId") Long gitRepoId);
+
+    @Query("MATCH p=(:GitRepository)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m;")
+    List<Metric> findGitRepoMetric();
+
+    @Query("MATCH p=(node:GitRepository)-[:" + RelationType.str_HAS + "]->(metric:Metric) RETURN node,metric order by node.name asc;")
+    List<NodeMetric> findGitRepoMetricData();
+
+    @Query("MATCH p=(:GitRepository)-[:" + RelationType.str_HAS + "]->(m:Metric) RETURN m limit 10;")
+    List<Metric> findGitRepoMetricWithLimit();
+
+    @Query("MATCH p=(:GitRepository)-[r:" + RelationType.str_HAS + "]->(m:Metric) delete r, m;")
+    void deleteAllGitRepoMetric();
 
     @Query("MATCH p=(commit:Commit)-[:" + RelationType.str_HAS + "]->(m:Metric) where id(commit) = $commitId RETURN m;")
     Metric findCommitMetric(@Param("commitId") Long commitId);

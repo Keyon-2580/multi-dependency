@@ -8,6 +8,8 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.git.Commit;
 import cn.edu.fudan.se.multidependency.model.node.git.Developer;
+import cn.edu.fudan.se.multidependency.model.node.git.GitRepository;
+import cn.edu.fudan.se.multidependency.model.node.git.Issue;
 import cn.edu.fudan.se.multidependency.model.node.microservice.MicroService;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.model.relation.git.CommitUpdateFile;
@@ -56,6 +58,14 @@ public interface GitAnalyseService {
 	CoChange findCoChangeById(long cochangeId);
 	
 	Collection<Commit> findCommitsInProject(Project project);
+
+	Collection<Developer> findDeveloperInProject(Project project);
+
+	Collection<Issue> findIssuesInGitRepository(GitRepository gitRepository);
+
+	GitRepository findGitRepositoryById(long gitRepoId);
+
+	GitRepository findGitRepositoryByProject(Project project);
 
 	Map<Long, GitRepoMetric> calculateGitRepoMetrics();
 }

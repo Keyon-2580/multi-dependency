@@ -180,6 +180,8 @@ var metric = function() {
 				html += "<th>LOC</th>";
 				html += "<th>Lines</th>";
 				html += "<th>Commits</th>";
+				html += "<th>Developers</th>";
+				html += "<th>Issues</th>";
 				html += "<th>Modularity</th>";
 				html += "</tr>";
 				for(var i = 0; i < result.length; i++) {
@@ -194,6 +196,8 @@ var metric = function() {
 					let loc = result[i].metric.metricValues.LOC;
 					let lines = result[i].metric.metricValues.Lines;
 					let commits = result[i].metric.metricValues.Commits;
+					let developers = result[i].metric.metricValues.Developers;
+					let issues = result[i].metric.metricValues.Issues;
 					let modularity = result[i].metric.metricValues.MODULARITY;
 					html += "<td>" + (nop > 0 ? nop : 0) + "</td>";
 					html += "<td>" + (nof > 0 ? nof : 0) + "</td>";
@@ -202,6 +206,8 @@ var metric = function() {
 					html += "<td>" + (loc > 0 ? loc : 0) + "</td>";
 					html += "<td>" + (lines > 0 ? lines : 0) + "</td>";
 					html += "<td>" + (commits > 0 ? commits : 0) + "</td>";
+					html += "<td>" + (developers > 0 ? developers : 0) + "</td>";
+					html += "<td>" + (issues > 0 ? issues : 0) + "</td>";
 					html += "<td id='modularity_" + result[i].node.id + "'>" + (modularity > 0 ? modularity.toFixed(2) : "计算中...") + "</td>";
 					html += "</tr>";
 				}

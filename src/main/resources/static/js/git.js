@@ -181,26 +181,32 @@ var gitRepoMetric = function() {
 				html += "<th>LOC（代码行）</th>";
 				html += "<th>Lines（文件总行数）</th>";
 				html += "<th>Commits</th>";
+				html += "<th>Developers</th>";
 				html += "<th>Issues</th>";
 				html += "</tr>";
 				for(var i = 0; i < result.length; i++) {
-					for (var j = 0; j < result[i].projectMetricsList.length; j++){
-						html += "<tr>";
-						html += "<td>" + (i + 1) + "</td>";
-						html += "<td>" + result[i].gitRepository.id + "</td>";
-						html += "<td>" + result[i].gitRepository.name + "</td>";
-						projectMetricTmp = result[i].projectMetricsList[j];
-						html += "<td>" + projectMetricTmp.project.name + " ("  + projectMetricTmp.project.language + ") " + "</td>";
-						html += "<td>" + projectMetricTmp.nop + "</td>";
-						html += "<td>" + projectMetricTmp.nof + "</td>";
-						html += "<td>" + projectMetricTmp.nom + "</td>";
-						html += "<td>" + projectMetricTmp.loc + "</td>";
-						html += "<td>" + projectMetricTmp.lines + "</td>";
-						target='_blank'
-						html += "<td id='numOfCommits_" + result[i].gitRepository.id + "'>" + "<a target='_blank' href='/commit/gitRepo/" + result[i].gitRepository.id + "'>" +  result[i].numOfCommits + "</a>" + "</td>";
-						html += "<td id='numOfIssues_" + result[i].gitRepository.id + "'>" + "<a target='_blank' href='/issue/gitRepo/" + result[i].gitRepository.id + "'>" + result[i].numOfIssues + "</a>" + "</td>";
-						html += "</tr>";
-					}
+					html += "<tr>";
+					html += "<td>" + (i + 1) + "</td>";
+					html += "<td>" + result[i].node.id + "</td>";
+					html += "<td>" + result[i].node.name + "</td>";
+					html += "<td>" + result[i].node.language + "</td>";
+					let nop = result[i].metric.metricValues.NOP;
+					let nof = result[i].metric.metricValues.NOF;
+					let nom = result[i].metric.metricValues.NOM;
+					let loc = result[i].metric.metricValues.LOC;
+					let lines = result[i].metric.metricValues.Lines;
+					let commits = result[i].metric.metricValues.Commits;
+					let developers = result[i].metric.metricValues.Developers;
+					let issues = result[i].metric.metricValues.Issues;
+					html += "<td>" + nop + "</td>";
+					html += "<td>" + nof + "</td>";
+					html += "<td>" + nom + "</td>";
+					html += "<td>" + loc + "</td>";
+					html += "<td>" + lines + "</td>";
+					html += "<td id='numOfCommits_" + result[i].node.id + "'>" + "<a target='_blank' href='/commit/gitRepo/" + result[i].node.id + "'>" +  commits + "</a>" + "</td>";
+					html += "<td id='numOfDevelopers_" + result[i].node.id + "'>" + "<a target='_blank' href='/git'>" +  developers + "</a>" + "</td>";
+					html += "<td id='numOfIssues_" + result[i].node.id + "'>" + "<a target='_blank' href='/issue/gitRepo/" + result[i].node.id + "'>" + issues + "</a>" + "</td>";
+					html += "</tr>";
 				}
 				html += "</table>";
 				$("#gitRepoMetric").html(html);

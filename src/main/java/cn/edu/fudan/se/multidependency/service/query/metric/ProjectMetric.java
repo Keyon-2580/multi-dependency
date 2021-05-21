@@ -52,6 +52,16 @@ public class ProjectMetric {
 	private int issueCommits = 0;
 
 	/**
+	 * issues数量
+	 */
+	private int issues = 0;
+
+	/**
+	 * developers数量
+	 */
+	private int developers = 0;
+
+	/**
 	 * 与该项目相关的commit提交文件的修改行数
 	 */
 	private int changeLines = 0;

@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.controller.history;
 import java.util.Collection;
 
 import cn.edu.fudan.se.multidependency.service.query.history.data.GitRepoMetric;
+import cn.edu.fudan.se.multidependency.service.query.metric.MetricShowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +36,9 @@ public class GitController {
     @Autowired
     ContainRelationService containRelationService;
 
+    @Autowired
+    MetricShowService metricShowService;
+
     @GetMapping(value = {"", "/", "/index"})
     public String index(HttpServletRequest request) {
         //request.setAttribute("commits", commitService.queryAllCommits());
@@ -43,8 +47,8 @@ public class GitController {
 
     @GetMapping("/repoMetric")
     @ResponseBody
-    public Collection<GitRepoMetric> calculateProjectMetrics() {
-        return gitAnalyseService.calculateGitRepoMetrics().values();
+    public Object getGitRepoMetric() {
+        return metricShowService.getGitRepoMetrics();
     }
     
     @GetMapping("/repo/commit")
