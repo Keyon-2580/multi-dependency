@@ -38,10 +38,10 @@ let smellOverview = function() {
 
 				let projectTotalObject = projectTotalMap[project.id];
 				let fileCount = projectTotalObject["FileCount"];
-				let issueCommits = projectTotalObject["IssueCommits"];
 				let commits = projectTotalObject["Commits"];
-				let issueChangeLines = projectTotalObject["IssueChangeLines"];
 				let changeLines = projectTotalObject["ChangeLines"];
+				let issueCommits = projectTotalObject["IssueCommits"];
+				let issueChangeLines = projectTotalObject["IssueChangeLines"];
 
 				let projectFileSmellOverviewObject = fileSmellOverviewMap[project.id];
 				let projectFileSmellArray = projectFileSmellOverviewObject["ProjectFileSmell"];
@@ -51,10 +51,10 @@ let smellOverview = function() {
 				html += "<th style='text-align: center; vertical-align: middle'>File Smell Type</th>";
 				html += "<th style='text-align: center; vertical-align: middle'>File Smell Count</th>";
 				html += "<th style='text-align: center; vertical-align: middle'>File Count(%)</th>";
-				html += "<th style='text-align: center; vertical-align: middle'>Issue Commit Count(%)</th>";
 				html += "<th style='text-align: center; vertical-align: middle'>Commit Count(%)</th>";
-				html += "<th style='text-align: center; vertical-align: middle'>Issue Change Lines(%)</th>";
 				html += "<th style='text-align: center; vertical-align: middle'>Change Lines(%)</th>";
+				html += "<th style='text-align: center; vertical-align: middle'>Issue Commit Count(%)</th>";
+				html += "<th style='text-align: center; vertical-align: middle'>Issue Change Lines(%)</th>";
 				html += "</tr>";
 				for(let projectFileSmellIndex in projectFileSmellArray) {
 					if (projectFileSmellArray.hasOwnProperty(projectFileSmellIndex)) {
@@ -105,10 +105,10 @@ let smellOverview = function() {
 							"</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + projectFileSmellObject["SmellCount"] + "</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + projectFileSmellObject["FileCount"] + projectFileSmellFileCountPercent + "</td>";
-						html += "<td style='text-align: center; vertical-align: middle'>" + projectFileSmellObject["IssueCommits"] + projectFileSmellIssueCommitsPercent + "</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + projectFileSmellObject["Commits"] + projectFileSmellCommitsPercent + "</td>";
-						html += "<td style='text-align: center; vertical-align: middle'>" + projectFileSmellObject["IssueChangeLines"] + projectFileSmellIssueChangeLinesPercent + "</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + projectFileSmellObject["ChangeLines"] + projectFileSmellChangeLinesPercent + "</td>";
+						html += "<td style='text-align: center; vertical-align: middle'>" + projectFileSmellObject["IssueCommits"] + projectFileSmellIssueCommitsPercent + "</td>";
+						html += "<td style='text-align: center; vertical-align: middle'>" + projectFileSmellObject["IssueChangeLines"] + projectFileSmellIssueChangeLinesPercent + "</td>";
 						html += "</tr>";
 					}
 				}
@@ -116,10 +116,10 @@ let smellOverview = function() {
 				html += "<td style='text-align: center; vertical-align: middle'>Project Total</td>";
 				html += "<td style='text-align: center; vertical-align: middle'></td>";
 				html += "<td style='text-align: center; vertical-align: middle'>" + fileCount + "</td>";
-				html += "<td style='text-align: center; vertical-align: middle'>" + issueCommits + "</td>";
 				html += "<td style='text-align: center; vertical-align: middle'>" + commits + "</td>";
-				html += "<td style='text-align: center; vertical-align: middle'>" + issueChangeLines + "</td>";
 				html += "<td style='text-align: center; vertical-align: middle'>" + changeLines + "</td>";
+				html += "<td style='text-align: center; vertical-align: middle'>" + issueCommits + "</td>";
+				html += "<td style='text-align: center; vertical-align: middle'>" + issueChangeLines + "</td>";
 				html += "</tr>";
 				html += "</table>";
 				html += "</div>";
@@ -132,10 +132,10 @@ let smellOverview = function() {
 				html += "<th style='text-align: center; vertical-align: middle'>Package Smell Type</th>";
 				html += "<th style='text-align: center; vertical-align: middle'>Package Smell Count</th>";
 				html += "<th style='text-align: center; vertical-align: middle'>File Count(%)</th>";
-				html += "<th style='text-align: center; vertical-align: middle'>Issue Commit Count(%)</th>";
 				html += "<th style='text-align: center; vertical-align: middle'>Commit Count(%)</th>";
-				html += "<th style='text-align: center; vertical-align: middle'>Issue Change Lines(%)</th>";
 				html += "<th style='text-align: center; vertical-align: middle'>Change Lines(%)</th>";
+				html += "<th style='text-align: center; vertical-align: middle'>Issue Commit Count(%)</th>";
+				html += "<th style='text-align: center; vertical-align: middle'>Issue Change Lines(%)</th>";
 				html += "</tr>";
 				for(let projectPackageSmellIndex in projectPackageSmellArray) {
 					if (projectPackageSmellArray.hasOwnProperty(projectPackageSmellIndex)) {
@@ -186,10 +186,10 @@ let smellOverview = function() {
 							"</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + projectPackageSmellObject["SmellCount"] + "</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + projectPackageSmellObject["FileCount"] + projectPackageSmellFileCountPercent + "</td>";
-						html += "<td style='text-align: center; vertical-align: middle'>" + projectPackageSmellObject["IssueCommits"] + projectPackageSmellIssueCommitsPercent + "</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + projectPackageSmellObject["Commits"] + projectPackageSmellCommitsPercent + "</td>";
-						html += "<td style='text-align: center; vertical-align: middle'>" + projectPackageSmellObject["IssueChangeLines"] + projectPackageSmellIssueChangeLinesPercent + "</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + projectPackageSmellObject["ChangeLines"] + projectPackageSmellChangeLinesPercent + "</td>";
+						html += "<td style='text-align: center; vertical-align: middle'>" + projectPackageSmellObject["IssueCommits"] + projectPackageSmellIssueCommitsPercent + "</td>";
+						html += "<td style='text-align: center; vertical-align: middle'>" + projectPackageSmellObject["IssueChangeLines"] + projectPackageSmellIssueChangeLinesPercent + "</td>";
 						html += "</tr>";
 					}
 				}
@@ -197,10 +197,10 @@ let smellOverview = function() {
 				html += "<td style='text-align: center; vertical-align: middle'>Project Total</td>";
 				html += "<td style='text-align: center; vertical-align: middle'></td>";
 				html += "<td style='text-align: center; vertical-align: middle'>" + fileCount + "</td>";
-				html += "<td style='text-align: center; vertical-align: middle'>" + issueCommits + "</td>";
 				html += "<td style='text-align: center; vertical-align: middle'>" + commits + "</td>";
-				html += "<td style='text-align: center; vertical-align: middle'>" + issueChangeLines + "</td>";
 				html += "<td style='text-align: center; vertical-align: middle'>" + changeLines + "</td>";
+				html += "<td style='text-align: center; vertical-align: middle'>" + issueCommits + "</td>";
+				html += "<td style='text-align: center; vertical-align: middle'>" + issueChangeLines + "</td>";
 				html += "</tr>";
 				html += "</table>";
 				html += "</div>";
