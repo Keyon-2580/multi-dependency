@@ -448,6 +448,9 @@ public class BeanCreator {
 		LOGGER.info("创建Project Metric度量值节点和关系...");
 		metricCalculatorService.createProjectMetric(false);
 
+		LOGGER.info("创建GitRepo Metric度量值节点和关系...");
+		metricCalculatorService.createGitRepoMetric(true);
+
 		if(propertyConfig.isCalModularity()){
 			LOGGER.info("计算Project模块性度量值...");
 			projectRepository.queryAllProjects().forEach( (project) ->{
