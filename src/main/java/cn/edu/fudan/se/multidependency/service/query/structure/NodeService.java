@@ -32,6 +32,8 @@ public interface NodeService {
 	
 	List<ProjectFile> queryAllFiles();
 
+	List<ProjectFile> queryAllFilesByProject(long id);
+
 	Namespace queryNamespace(long id);
 
 	Type queryType(long id);

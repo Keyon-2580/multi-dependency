@@ -192,6 +192,15 @@ public class NodeServiceImpl implements NodeService {
 	}
 
 	@Override
+	public List<ProjectFile> queryAllFilesByProject(long id) {
+		List<ProjectFile> files = fileRepository.findFilesByProject(id);
+		if(files == null){
+			return new ArrayList<>();
+		}
+		return files;
+	}
+
+	@Override
 	public Node queryNodeById(long id) {
 		Node result = cache.findNodeById(id);
 		if(result == null) {
