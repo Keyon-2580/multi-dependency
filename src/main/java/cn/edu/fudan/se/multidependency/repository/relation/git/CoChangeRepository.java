@@ -51,10 +51,10 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
     CoChange findCoChangesBetweenTwoFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
 
     @Query("match p=(f1:ProjectFile)-[:" + RelationType.str_CO_CHANGE + "]-(f2:ProjectFile) where id(f1)=$file1Id and id(f2)=$file2Id return distinct p")
-    CoChange findCoChangesBetweenTwoFilesWithoutDirection(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
+    List<CoChange> findCoChangesBetweenTwoFilesWithoutDirection(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
 
     @Query("match p=(p1:Package)-[:" + RelationType.str_CO_CHANGE + "]-(p2:Package) where id(p1)=$package1Id and id(p2)=$package2Id return distinct p")
-    CoChange findCoChangesBetweenTwoPackagesWithoutDirection(@Param("package1Id") long package1Id, @Param("package2Id") long package2Id);
+    List<CoChange> findCoChangesBetweenTwoPackagesWithoutDirection(@Param("package1Id") long package1Id, @Param("package2Id") long package2Id);
 
     @Query("match (f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
     		"]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile) " + 
