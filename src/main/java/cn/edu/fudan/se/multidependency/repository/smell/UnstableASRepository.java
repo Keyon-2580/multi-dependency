@@ -15,9 +15,9 @@ import cn.edu.fudan.se.multidependency.service.query.smell.data.UnstableComponen
 @Repository
 public interface UnstableASRepository extends Neo4jRepository<ProjectFile, Long> {
 
-	@Query("match (project:Project)-[:CONTAIN*2]->(file:ProjectFile) where id(project)=$projectId and file.fanOut >= $fanOut "
+	@Query("match (project:Project)-[:CONTAIN*2]->(file:ProjectFile) where id(project)=$projectId "
 			+ "with file match (file)-[:DEPENDS_ON]->(dependsFile:ProjectFile) "
-			+ "where dependsFile.instability > file.instability and dependsFile.fanOut >= $fanOut "
+			+ "where dependsFile.instability > file.instability "
 			+ "with file, count(dependsFile) as badDependencies, file.fanOut as allDependencies "
 			+ "with file, badDependencies, allDependencies "
 			+ "where ((badDependencies + 0.0) / allDependencies) >= $ratio "
@@ -25,9 +25,9 @@ public interface UnstableASRepository extends Neo4jRepository<ProjectFile, Long>
 	public List<UnstableComponentByInstability<ProjectFile>> unstableFilesByInstability(
 			@Param("projectId") long projectId, @Param("fanOut") int fanOut, @Param("ratio") double ratio);
 	
-	@Query("match (project:Project)-[:CONTAIN]->(pck:Package) where id(project)=$projectId and pck.fanOut >= $fanOut "
+	@Query("match (project:Project)-[:CONTAIN]->(pck:Package) where id(project)=$projectId "
 			+ "with pck match (pck)-[:DEPENDS_ON]->(dependsPck:Package) "
-			+ "where dependsPck.instability > pck.instability and dependsPck.fanOut >= $fanOut "
+			+ "where dependsPck.instability > pck.instability "
 			+ "with pck, count(dependsPck) as badDependencies, pck.fanOut as allDependencies "
 			+ "with pck, badDependencies, allDependencies "
 			+ "where ((badDependencies + 0.0) / allDependencies) >= $ratio "
@@ -35,9 +35,9 @@ public interface UnstableASRepository extends Neo4jRepository<ProjectFile, Long>
 	public List<UnstableComponentByInstability<Package>> unstablePackagesByInstability(
 			@Param("projectId") long projectId, @Param("fanOut") int fanOut, @Param("ratio") double ratio);
 	
-	@Query("match (project:Project)-[:CONTAIN]->(module:Module) where id(project)=$projectId and module.fanOut >= $fanOut "
+	@Query("match (project:Project)-[:CONTAIN]->(module:Module) where id(project)=$projectId  "
 			+ "with module match (module)-[:DEPENDS_ON]->(dependsModule:Module) "
-			+ "where dependsModule.instability > module.instability and dependsModule.fanOut >= $fanOut "
+			+ "where dependsModule.instability > module.instability "
 			+ "with module, count(dependsModule) as badDependencies, module.fanOut as allDependencies "
 			+ "with module, badDependencies, allDependencies "
 			+ "where ((badDependencies + 0.0) / allDependencies) >= $ratio "

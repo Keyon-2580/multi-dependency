@@ -27,20 +27,20 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 	
 	@Query("match (project:Project)-[:CONTAIN*2]->(file:ProjectFile) where id(project)=$id "
 			+ "with distinct file, size((file)-[:DEPENDS_ON]->(:ProjectFile)) as fanOut, size((file)<-[:DEPENDS_ON]-(:ProjectFile)) as fanIn "
-			+ "where fanOut >= $fanOut and fanIn >= $fanIn return file, fanIn, fanOut "
+			+ "where fanOut > $fanOut and fanIn > $fanIn return file, fanIn, fanOut "
 			+ "order by fanIn + fanOut desc;")
 	public List<FileHubLike> findFileHubLikes(@Param("id") long projectId, @Param("fanIn") int fanIn, @Param("fanOut") int fanOut);
 
 	@Query("match (project:Project)-[:CONTAIN]->(pck:Package) where id(project) = $id "
 			+ "with pck, size((pck)-[:DEPENDS_ON]->(:Package)) as fanOut, size((pck)<-[:DEPENDS_ON]-(:Package)) as fanIn "
-			+ "where fanOut >= $fanOut and fanIn >= $fanIn return pck, fanOut, fanIn "
+			+ "where fanOut > $fanOut and fanIn > $fanIn return pck, fanOut, fanIn "
 			+ "order by fanIn + fanOut desc;")
 	public List<PackageHubLike> findPackageHubLikes(@Param("id") long projectId, @Param("fanIn") int fanIn, @Param("fanOut") int fanOut);
 
 	@Query("match (project:Project)-[:CONTAIN]->(module:Module) where id(project) = $id "
 			+ "with module, size((module)-[:DEPENDS_ON]->(:Module)) as fanOut, "
 			+ "size((module)<-[:DEPENDS_ON]-(:Module)) as fanIn "
-			+ "where fanOut >= $fanOut and fanIn >= $fanIn return module, fanOut, fanIn;")
+			+ "where fanOut > $fanOut and fanIn > $fanIn return module, fanOut, fanIn;")
 	public List<ModuleHubLike> findModuleHubLikes(@Param("id") long projectId, @Param("fanIn") int fanIn, @Param("fanOut") int fanOut);
 	
 	@Query("match (p:Package) where not (p)-[:" + RelationType.str_DEPENDS_ON + "]-() return p")

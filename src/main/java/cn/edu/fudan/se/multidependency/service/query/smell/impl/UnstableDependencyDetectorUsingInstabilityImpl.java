@@ -11,7 +11,7 @@ import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
 import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
-import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
+import cn.edu.fudan.se.multidependency.service.query.smell.SmellUtils;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,9 +42,6 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 	
 	@Autowired
 	private SmellRepository smellRepository;
-
-	@Autowired
-	private SmellDetectorService smellDetectorService;
 
 	@Autowired
 	private MetricRepository metricRepository;
@@ -80,12 +77,12 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 
 		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> result = new HashMap<>();
 		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.FILE, SmellType.UNSTABLE_DEPENDENCY));
-		smellDetectorService.sortSmellByName(smells);
+		SmellUtils.sortSmellByName(smells);
 		List<UnstableComponentByInstability<ProjectFile>> fileUnstableDependencyList = new ArrayList<>();
 		for (Smell smell : smells) {
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
 			Iterator<Node> iterator = containedNodes.iterator();
-			if (iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				ProjectFile component = (ProjectFile) iterator.next();
 				UnstableComponentByInstability<ProjectFile> fileUnstableDependency = new UnstableComponentByInstability<>();
 				fileUnstableDependency.setComponent(component);
@@ -93,13 +90,13 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 				fileUnstableDependency.addAllTotalDependencies(dependsOns);
 				for(DependsOn dependsOn : dependsOns) {
 					ProjectFile dependsOnFile = (ProjectFile) dependsOn.getEndNode();
-					int dependsOnFileFanOut = 0;
-					Integer fanOut = projectFileRepository.getFileFanOutByFileId(dependsOnFile.getId());
-					if (fanOut != null) {
-						dependsOnFileFanOut = fanOut;
-					}
-					Project project = containRelationService.findFileBelongToProject(fileUnstableDependency.getComponent());
-					if(component.getInstability() < dependsOnFile.getInstability() && dependsOnFileFanOut >= getProjectMinFileFanOut(project.getId())) {
+//					int dependsOnFileFanOut = 0;
+//					Integer fanOut = projectFileRepository.getFileFanOutByFileId(dependsOnFile.getId());
+//					if (fanOut != null) {
+//						dependsOnFileFanOut = fanOut;
+//					}
+//					Project project = containRelationService.findFileBelongToProject(fileUnstableDependency.getComponent());
+					if(component.getInstability() < dependsOnFile.getInstability()) {
 						fileUnstableDependency.addBadDependency(dependsOn);
 					}
 				}
@@ -129,12 +126,12 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 
 		Map<Long, List<UnstableComponentByInstability<Package>>> result = new HashMap<>();
 		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.PACKAGE, SmellType.UNSTABLE_DEPENDENCY));
-		smellDetectorService.sortSmellByName(smells);
+		SmellUtils.sortSmellByName(smells);
 		List<UnstableComponentByInstability<Package>> fileUnstableDependencyList = new ArrayList<>();
 		for (Smell smell : smells) {
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
 			Iterator<Node> iterator = containedNodes.iterator();
-			if (iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				Package component = (Package) iterator.next();
 				UnstableComponentByInstability<Package> packageUnstableDependency = new UnstableComponentByInstability<>();
 				packageUnstableDependency.setComponent(component);
@@ -142,13 +139,13 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 				packageUnstableDependency.addAllTotalDependencies(dependsOns);
 				for(DependsOn dependsOn : dependsOns) {
 					Package dependsOnPackage = (Package) dependsOn.getEndNode();
-					int dependsOnPackageFanOut = 0;
-					Integer fanOut = packageRepository.getPackageFanOutByFileId(dependsOnPackage.getId());
-					if (fanOut != null) {
-						dependsOnPackageFanOut = fanOut;
-					}
-					Project project = containRelationService.findPackageBelongToProject(packageUnstableDependency.getComponent());
-					if(component.getInstability() < dependsOnPackage.getInstability() && dependsOnPackageFanOut >= getProjectMinFileFanOut(project.getId())) {
+//					int dependsOnPackageFanOut = 0;
+//					Integer fanOut = packageRepository.getPackageFanOutByFileId(dependsOnPackage.getId());
+//					if (fanOut != null) {
+//						dependsOnPackageFanOut = fanOut;
+//					}
+//					Project project = containRelationService.findPackageBelongToProject(packageUnstableDependency.getComponent());
+					if(component.getInstability() < dependsOnPackage.getInstability()) {
 						packageUnstableDependency.addBadDependency(dependsOn);
 					}
 				}
@@ -248,9 +245,9 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 			else {
 				projectToMinFileFanOutMap.put(projectId, DEFAULT_MIN_FILE_FAN_OUT);
 			}
-			if (projectToMinFileFanOutMap.get(projectId) < DEFAULT_MIN_FILE_FAN_OUT) {
-				projectToMinFileFanOutMap.put(projectId, DEFAULT_MIN_FILE_FAN_OUT);
-			}
+//			if (projectToMinFileFanOutMap.get(projectId) < DEFAULT_MIN_FILE_FAN_OUT) {
+//				projectToMinFileFanOutMap.put(projectId, DEFAULT_MIN_FILE_FAN_OUT);
+//			}
 		}
 		return projectToMinFileFanOutMap.get(projectId);
 	}
@@ -265,9 +262,9 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 			else {
 				projectToMinPackageFanOutMap.put(projectId, DEFAULT_MIN_PACKAGE_FAN_OUT);
 			}
-			if (projectToMinPackageFanOutMap.get(projectId) < DEFAULT_MIN_PACKAGE_FAN_OUT) {
-				projectToMinPackageFanOutMap.put(projectId, DEFAULT_MIN_PACKAGE_FAN_OUT);
-			}
+//			if (projectToMinPackageFanOutMap.get(projectId) < DEFAULT_MIN_PACKAGE_FAN_OUT) {
+//				projectToMinPackageFanOutMap.put(projectId, DEFAULT_MIN_PACKAGE_FAN_OUT);
+//			}
 		}
 		return projectToMinPackageFanOutMap.get(projectId);
 	}
