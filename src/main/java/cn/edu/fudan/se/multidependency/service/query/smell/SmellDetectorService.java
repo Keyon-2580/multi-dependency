@@ -48,6 +48,9 @@ public class SmellDetectorService {
 	private UnstableDependencyDetectorUsingInstability unstableDependencyDetectorUsingInstability;
 
 	@Autowired
+	private UnstableInterfaceDetector unstableInterfaceDetector;
+
+	@Autowired
 	private ImplicitCrossModuleDependencyDetector implicitCrossModuleDependencyDetector;
 
 	@Autowired
@@ -330,10 +333,10 @@ public class SmellDetectorService {
 				smell.setType(SmellType.UNSTABLE_DEPENDENCY);
 				smell.setLevel(SmellLevel.FILE);
 				smells.add(smell);
-				Collection<DependsOn> fileDependsOnBys = staticAnalyseService.findFileDependedOnBy(fileUnstableComponent.getComponent());
-				if(fileDependsOnBys != null && !fileDependsOnBys.isEmpty()){
-					fileDependsOnBys.forEach(fileDpOnBy->{
-						ProjectFile fileBy = (ProjectFile)fileDpOnBy.getStartNode();
+				Collection<DependsOn> fileDependsOns = staticAnalyseService.findFileDependsOn(fileUnstableComponent.getComponent());
+				if(fileDependsOns != null && !fileDependsOns.isEmpty()){
+					fileDependsOns.forEach(fileDpOnBy->{
+						ProjectFile fileBy = (ProjectFile)fileDpOnBy.getEndNode();
 						RelateTo relateTo = new RelateTo(smell,fileBy);
 						smellRelateTos.add(relateTo);
 					});
@@ -366,10 +369,10 @@ public class SmellDetectorService {
 				smell.setType(SmellType.UNSTABLE_DEPENDENCY);
 				smell.setLevel(SmellLevel.PACKAGE);
 				smells.add(smell);
-				Collection<DependsOn> pckDependsOnBys = staticAnalyseService.findPackageDependedOnBy(packageUnstableComponent.getComponent());
-				if(pckDependsOnBys != null && !pckDependsOnBys.isEmpty()){
-					pckDependsOnBys.forEach(pckDpOnBy->{
-						Package pckBy = (Package)pckDpOnBy.getStartNode();
+				Collection<DependsOn> pckDependsOns = staticAnalyseService.findPackageDependsOn(packageUnstableComponent.getComponent());
+				if(pckDependsOns != null && !pckDependsOns.isEmpty()){
+					pckDependsOns.forEach(pckDpOnBy->{
+						Package pckBy = (Package)pckDpOnBy.getEndNode();
 						RelateTo relateTo = new RelateTo(smell,pckBy);
 						smellRelateTos.add(relateTo);
 					});
@@ -383,6 +386,60 @@ public class SmellDetectorService {
 		containRepository.saveAll(smellContains);
 		relateToRepository.saveAll(smellRelateTos);
 		LOGGER.info("创建Unstable Dependency Smell节点关系完成");
+	}
+
+	public void createUnstableInterfaceSmells(boolean isRecreate) {
+		List<Smell> smellsTmp = smellRepository.findSmellsByTypeWithLimit(SmellType.UNSTABLE_INTERFACE);
+		if(smellsTmp != null && !smellsTmp.isEmpty()){
+			LOGGER.info("已存在Unstable Interface Smell");
+			if(!isRecreate){
+				LOGGER.info("不重新创建");
+				return;
+			}
+			LOGGER.info("重新创建...");
+		}
+		smellRepository.deleteSmellContainRelations(SmellType.UNSTABLE_INTERFACE);
+		smellRepository.deleteSmellMetric(SmellType.UNSTABLE_INTERFACE);
+		smellRepository.deleteSmellRelateToRelations(SmellType.UNSTABLE_INTERFACE);
+		smellRepository.deleteSmells(SmellType.UNSTABLE_INTERFACE);
+		List<Smell> smells = new ArrayList<>();
+		List<Contain> smellContains = new ArrayList<>();
+		List<RelateTo> smellRelateTos = new ArrayList<>();
+
+		Map<Long, List<UnstableInterface>> fileUnstableInterfaceMap = unstableInterfaceDetector.detectUnstableInterface();
+		String fileSmellName = SmellLevel.FILE + "_" + SmellType.UNSTABLE_INTERFACE + "_";
+		for (Map.Entry<Long, List<UnstableInterface>> entry : fileUnstableInterfaceMap.entrySet()) {
+			int fileSmellIndex = 1;
+			long projectId = entry.getKey();
+			Project project = (Project) projectRepository.queryNodeById(projectId);
+			for (UnstableInterface fileUnstableInterface : entry.getValue()) {
+				Smell smell = new Smell();
+				smell.setName(fileSmellName + fileSmellIndex);
+				smell.setSize(1);
+				smell.setLanguage(project.getLanguage());
+				smell.setProjectId(projectId);
+				smell.setProjectName(project.getName());
+				smell.setType(SmellType.UNSTABLE_INTERFACE);
+				smell.setLevel(SmellLevel.FILE);
+				smells.add(smell);
+				Collection<DependsOn> fileDependsOnBys = staticAnalyseService.findFileDependedOnBy(fileUnstableInterface.getComponent());
+				if(fileDependsOnBys != null && !fileDependsOnBys.isEmpty()){
+					fileDependsOnBys.forEach(fileDpOnBy->{
+						ProjectFile fileBy = (ProjectFile)fileDpOnBy.getStartNode();
+						RelateTo relateTo = new RelateTo(smell,fileBy);
+						smellRelateTos.add(relateTo);
+					});
+				}
+				Contain contain = new Contain(smell, fileUnstableInterface.getComponent());
+				smellContains.add(contain);
+				fileSmellIndex ++;
+			}
+		}
+		smellRepository.saveAll(smells);
+		containRepository.saveAll(smellContains);
+		relateToRepository.saveAll(smellRelateTos);
+
+		LOGGER.info("创建Unstable Interface Smell节点关系完成");
 	}
 
 	public void createSimilarComponentsSmells(boolean isRecreate) {
@@ -680,13 +737,4 @@ public class SmellDetectorService {
 		LOGGER.info("创建Unused Include Smell节点关系完成");
 	}
 
-	public void sortSmellByName(List<Smell> smells) {
-		smells.sort((smell1, smell2) -> {
-			List<String> namePart1 = Arrays.asList(smell1.getName().split("_"));
-			List<String> namePart2 = Arrays.asList(smell2.getName().split("_"));
-			int partition1 = Integer.parseInt(namePart1.get(namePart1.size() - 1));
-			int partition2 = Integer.parseInt(namePart2.get(namePart2.size() - 1));
-			return Integer.compare(partition1, partition2);
-		});
-	}
 }

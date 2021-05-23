@@ -506,6 +506,14 @@ public class BeanCreator {
 				LOGGER.info("创建Unstable Dependency Smell节点关系...");
 				smellDetectorService.createUnstableDependencySmells(false);
 
+				if(propertyConfig.isCalculateCoChange()){
+					LOGGER.info("创建Unstable Interface Smell节点关系...");
+					smellDetectorService.createUnstableInterfaceSmells(false);
+				}
+
+				LOGGER.info("创建Unutilized Abstraction Smell节点关系...");
+				smellDetectorService.createUnutilizedAbstractionSmells(false);
+
 				LOGGER.info("创建Unused Include Smell节点关系...");
 				smellDetectorService.createUnusedIncludeSmells(false);
 			}
@@ -525,15 +533,9 @@ public class BeanCreator {
 				smellDetectorService.createImplicitCrossModuleDependencySmells(false);
 			}
 
-			if(propertyConfig.isCalculateCoChange()){
-				LOGGER.info("创建God Component Smell节点关系...");
-				smellDetectorService.createGodComponentSmells(false);
-			}
+			LOGGER.info("创建God Component Smell节点关系...");
+			smellDetectorService.createGodComponentSmells(false);
 
-			if(propertyConfig.isCalculateCoChange()){
-				LOGGER.info("创建Unutilized Abstraction Smell节点关系...");
-				smellDetectorService.createUnutilizedAbstractionSmells(false);
-			}
 		}
 		return true;
 	}
