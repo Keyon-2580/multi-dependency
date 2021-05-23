@@ -163,6 +163,52 @@
 			<hr/>
 		</div>
 
+		<!--		Unstable Interface-->
+		<div style="width: 100%">
+			<div style="width: 100%">
+				<h4>Unstable Interface</h4>
+			</div>
+			<div style="width: 100%">
+				<div style="width: 100%">
+					<div class="form-group" style="width: 15%">
+						<label for="unstableInterfaceProject">Project: </label>
+						<select id="unstableInterfaceProject" class="projectSelect form-control">
+							<option th:each="project : ${projects}" th:value="${project.id}" th:text="${project.name + ' (' + project.language + ')'}"></option>
+						</select>
+					</div>
+				</div>
+			</div>
+			<div style="width: 100%">
+				<div style="width: 100%; float: right">
+					<div class="form-group" style="width: 100%">
+						<label for="unstableInterfaceMinFileFanIn">File-Level All Ingoing Dependencies Threshold:</label>
+						<input id="unstableInterfaceMinFileFanIn" type="number" class="form-control" style="width: 15%;"/>
+					</div>
+					<div class="form-group" style="width: 100%">
+						<label for="unstableInterfaceCoChangeTimes">CoChange Times Threshold:</label>
+						<input id="unstableInterfaceCoChangeTimes" type="number" class="form-control" style="width: 15%;"/>
+					</div>
+					<div class="form-group" style="width: 100%">
+						<label for="unstableInterfaceMinRatio">Ratio(All CoChange Files / All Ingoing Dependencies) Threshold:</label>
+						<input id="unstableInterfaceMinRatio" class="form-control" style="width: 15%;"/>
+					</div>
+					<div style="width: 100%">
+						<button id="unstableInterfaceThresholdSave" class="btn btn-default">Save</button>
+					</div>
+				</div>
+			</div>
+			<div style="width: 100%">
+				<div class="" style="margin-top: 15px;">
+					<button id="unstableInterfaceQuery" class="btn btn-default">Query</button>
+					<button id="unstableInterfaceDetect" class="btn btn-default">Re-detect</button>
+				</div>
+			</div>
+		</div>
+
+		<div style="width: 100%">
+			<hr/>
+		</div>
+
 <!--		Implicit Cross Module Dependency-->
 		<div style="width: 100%">
 			<div style="width: 100%">

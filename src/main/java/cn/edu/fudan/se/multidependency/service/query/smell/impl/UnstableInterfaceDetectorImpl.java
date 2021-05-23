@@ -8,6 +8,7 @@ import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
+import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
@@ -27,6 +28,30 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector {
+
+	@Autowired
+	private MetricCalculatorService metricCalculatorService;
+
+	@Autowired
+	private NodeService nodeService;
+
+	@Autowired
+	private StaticAnalyseService staticAnalyseService;
+
+	@Autowired
+	private MetricRepository metricRepository;
+
+	@Autowired
+	private ContainRelationService containRelationService;
+
+	@Autowired
+	private GitAnalyseService gitAnalyseService;
+
+	@Autowired
+	private SmellRepository smellRepository;
+
+	@Autowired
+	private CacheService cache;
 
 	private final Map<Long, Integer> projectToFanInThresholdMap = new ConcurrentHashMap<>();
 	private final Map<Long, Integer> projectToCoChangeTimesThresholdMap = new ConcurrentHashMap<>();
@@ -64,16 +89,34 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 
 	@Override
 	public Integer getFanInThreshold(Long projectId) {
-		if(projectToFanInThresholdMap.get(projectId) == null) {
-			projectToFanInThresholdMap.put(projectId, DEFAULT_THRESHOLD_FAN_IN);
+		if (!projectToFanInThresholdMap.containsKey(projectId)) {
+			Integer medFileFanIn = metricRepository.getMedFileFanInByProjectId(projectId);
+			if (medFileFanIn != null) {
+				projectToFanInThresholdMap.put(projectId, medFileFanIn);
+			}
+			else {
+				projectToFanInThresholdMap.put(projectId, DEFAULT_THRESHOLD_FAN_IN);
+			}
+//			if (projectToFanInThresholdMap.get(projectId) < DEFAULT_THRESHOLD_FAN_IN) {
+//				projectToFanInThresholdMap.put(projectId, DEFAULT_THRESHOLD_FAN_IN);
+//			}
 		}
 		return projectToFanInThresholdMap.get(projectId);
 	}
 
 	@Override
 	public Integer getCoChangeTimesThreshold(Long projectId) {
-		if(projectToCoChangeTimesThresholdMap.get(projectId) == null) {
-			projectToCoChangeTimesThresholdMap.put(projectId, DEFAULT_THRESHOLD_COCHANGE_TIMES);
+		if (!projectToCoChangeTimesThresholdMap.containsKey(projectId)) {
+			Integer medFileCoChangeTimes = metricRepository.getMedFileCoChangeByProjectId(projectId);
+			if (medFileCoChangeTimes != null) {
+				projectToCoChangeTimesThresholdMap.put(projectId, medFileCoChangeTimes);
+			}
+			else {
+				projectToCoChangeTimesThresholdMap.put(projectId, DEFAULT_THRESHOLD_COCHANGE_TIMES);
+			}
+//			if (projectToCoChangeTimesThresholdMap.get(projectId) < DEFAULT_THRESHOLD_COCHANGE_TIMES) {
+//				projectToCoChangeTimesThresholdMap.put(projectId, DEFAULT_THRESHOLD_COCHANGE_TIMES);
+//			}
 		}
 		return projectToCoChangeTimesThresholdMap.get(projectId);
 	}
@@ -93,28 +136,7 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 		}
 		return projectToMinRatioMap.get(projectId);
 	}
-	
-	@Autowired
-	private MetricCalculatorService metricCalculatorService;
-	
-	@Autowired
-	private NodeService nodeService;
 
-	@Autowired
-	StaticAnalyseService staticAnalyseService;
-
-	@Autowired
-	private ContainRelationService containRelationService;
-	
-	@Autowired
-	private GitAnalyseService gitAnalyseService;
-
-	@Autowired
-	private SmellRepository smellRepository;
-	
-	@Autowired
-	private CacheService cache;
-	
 	@Override
 	public Map<Long, List<UnstableInterface>> queryUnstableInterface() {
 		String key = "queryUnstableInterface";
@@ -124,7 +146,6 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 		Map<Long, List<UnstableInterface>> result = new HashMap<>();
 		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.FILE, SmellType.UNSTABLE_INTERFACE));
 		SmellUtils.sortSmellByName(smells);
-		List<UnstableInterface> unstableInterfaceList = new ArrayList<>();
 		for (Smell smell : smells) {
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
 			Iterator<Node> iterator = containedNodes.iterator();
@@ -135,6 +156,7 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 				unstableInterface.setComponent(component);
 				Collection<DependsOn> dependsOnBys = staticAnalyseService.findFileDependedOnBy(component);
 				unstableInterface.addAllFanInDependencies(dependsOnBys);
+				unstableInterface.setFanIn(dependsOnBys.size());
 				List<CoChange> allCoChanges = new ArrayList<>();
 				for(DependsOn dependsOn : dependsOnBys) {
 					ProjectFile fanInFile = (ProjectFile) dependsOn.getStartNode();
@@ -165,9 +187,9 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 		if(projects != null && !projects.isEmpty()){
 			for(Project project : projects) {
 				List<UnstableInterface> unstableInterfaces = new ArrayList<>();
-				List<FileMetric> fileMetrics = metricCalculatorService.calculateProjectFileMetrics().get(project.getId());
-				for(FileMetric metrics : fileMetrics) {
-					UnstableInterface unstableFile = isUnstableInterfaceInFileLevel(project.getId(), metrics);
+				List<ProjectFile> fileList = nodeService.queryAllFilesByProject(project.getId());
+				for(ProjectFile file : fileList) {
+					UnstableInterface unstableFile = isUnstableInterfaceInFileLevel(project.getId(), file);
 					if(unstableFile != null) {
 						unstableInterfaces.add(unstableFile);
 					}
@@ -180,17 +202,16 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 		return result;
 	}
 	
-	private UnstableInterface isUnstableInterfaceInFileLevel(Long projectId, FileMetric metrics) {
+	private UnstableInterface isUnstableInterfaceInFileLevel(Long projectId, ProjectFile file) {
 		Integer fanInThreshold = getFanInThreshold(projectId);
 		Integer coChangeTimesThreshold = getCoChangeTimesThreshold(projectId);
 		Integer coChangeFilesThreshold = getCoChangeFilesThreshold(projectId);
 		Double minRatio = getProjectMinRatio(projectId);
-		if(metrics.getFanIn() <= fanInThreshold) {
+		Collection<DependsOn> fanInDependencies = staticAnalyseService.findFileDependedOnBy(file);
+		if(fanInDependencies.size() <= fanInThreshold) {
 			return null;
 		}
 		Integer coChangeFilesCount = 0;
-		ProjectFile file = metrics.getFile();
-		Collection<DependsOn> fanInDependencies = staticAnalyseService.findFileDependedOnBy(file);
 		List<CoChange> allCoChanges = new ArrayList<>();
 		if(fanInDependencies != null){
 			for(DependsOn dependedOnBy : fanInDependencies) {
@@ -207,11 +228,11 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 			}
 		}
 		UnstableInterface result = null;
-		if((coChangeFilesCount*1.0) / fanInThreshold >= minRatio) {
+		if((coChangeFilesCount*1.0) / fanInDependencies.size() >= minRatio) {
 			result = new UnstableInterface();
 			result.setComponent(file);
 			result.addAllFanInDependencies(fanInDependencies);
-			result.setFanIn(metrics.getFanIn());
+			result.setFanIn(fanInDependencies.size() );
 			result.addAllCoChanges(allCoChanges);
 		}
 		return result;

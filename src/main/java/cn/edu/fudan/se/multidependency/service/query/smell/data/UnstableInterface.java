@@ -12,9 +12,9 @@ public class UnstableInterface extends UnstableComponent<ProjectFile> {
 
 	private List<DependsOn> totalFanInDependencies = new ArrayList<>();
 	
-	private Set<ProjectFile> cochangeFiles = new HashSet<>();
+	private Set<ProjectFile> coChangeFiles = new HashSet<>();
 	
-	private Set<CoChange> cochangeTimesWithFile = new HashSet<>();
+	private Set<CoChange> coChangeTimesWithFile = new HashSet<>();
 
 	public void addAllFanInDependencies(Collection<DependsOn> totalFanInDependencies) {
 		this.totalFanInDependencies.addAll(totalFanInDependencies);
@@ -31,8 +31,8 @@ public class UnstableInterface extends UnstableComponent<ProjectFile> {
 		if(cochangeFile.equals(super.getComponent())) {
 			cochangeFile = (ProjectFile) cochange.getNode2();
 		}
-		cochangeFiles.add(cochangeFile);
-		cochangeTimesWithFile.add(cochange);
+		coChangeFiles.add(cochangeFile);
+		coChangeTimesWithFile.add(cochange);
 	}
 
 	public int getFanIn() {
@@ -47,12 +47,12 @@ public class UnstableInterface extends UnstableComponent<ProjectFile> {
 		return totalFanInDependencies;
 	}
 
-	public Set<ProjectFile> getCochangeFiles() {
-		return cochangeFiles;
+	public Set<ProjectFile> getCoChangeFiles() {
+		return coChangeFiles;
 	}
 
-	public Set<CoChange> getCochangeTimesWithFile() {
-		return cochangeTimesWithFile;
+	public Set<CoChange> getCoChangeTimesWithFile() {
+		return coChangeTimesWithFile;
 	}
 
 }

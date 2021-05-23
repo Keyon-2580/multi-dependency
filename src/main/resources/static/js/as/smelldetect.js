@@ -30,7 +30,7 @@ let smellDetect = function() {
 			setHubLikeDependencyThreshold(projectId, minFileFanIn, minFileFanOut, minPackageFanIn, minPackageFanOut);
 		});
 
-		let setUnstableDependencyThreshold = function(projectId, minFileFanOut, minPackageFanOut, minRatio) {
+		let setUnstableDependencyThreshold = function(projectId, minFileFanOut, minPackageFanOut,minRatio) {
 			$.ajax({
 				type: "post",
 				url: "/as/unstabledependency/threshold/instability/" + projectId
@@ -53,6 +53,31 @@ let smellDetect = function() {
 			let minPackageFanOut = $("#unstableMinPackageFanOut").val();
 			let minRatio = $("#unstableMinRatio").val();
 			setUnstableDependencyThreshold(projectId, minFileFanOut, minPackageFanOut, minRatio);
+		});
+
+		let setUnstableInterfaceThreshold = function(projectId, minFileFanIn, coChangeTimes, minRatio) {
+			$.ajax({
+				type: "post",
+				url: "/as/unstableInterface/threshold/" + projectId
+					+ "?minFileFanOut=" + minFileFanIn
+					+ "&coChangeTimes=" + coChangeTimes
+					+ "&minRatio=" + minRatio,
+				success: function(result) {
+					if (result === true) {
+						alert("修改成功！");
+					}
+					else {
+						alert("修改失败！");
+					}
+				}
+			});
+		};
+		$("#unstableInterfaceThresholdSave").click(function() {
+			let projectId = $("#unstableInterfaceProject").val();
+			let minFileFanIn = $("#unstableInterfaceMinFileFanIn").val();
+			let coChangeTimes = $("#unstableInterfaceCoChangeTimes").val();
+			let minRatio = $("#unstableInterfaceMinRatio").val();
+			setUnstableInterfaceThreshold(projectId, minFileFanIn, coChangeTimes, minRatio);
 		});
 
 		let setImplicitCrossModuleDependencyThreshold = function(projectId, minFileCoChange, minPackageCoChange) {
@@ -118,6 +143,25 @@ let smellDetect = function() {
 			getUnstableDependencyThreshold(unstableDependencyProject.val());
 		}
 
+		let getUnstableInterfaceThreshold = function(projectId) {
+			$.ajax({
+				type: "get",
+				url: "/as/unstableinterface/threshold/" + projectId,
+				success: function(result) {
+					$("#unstableInterfaceMinFileFanIn").val(result[0]);
+					$("#unstableInterfaceCoChangeTimes").val(result[1]);
+					$("#unstableInterfaceMinRatio").val(result[2]);
+				}
+			});
+		};
+		let unstableInterfaceProject = $("#unstableInterfaceProject");
+		unstableInterfaceProject.change(function() {
+			getUnstableInterfaceThreshold($(this).val());
+		});
+		if (unstableInterfaceProject.val() != null) {
+			getUnstableInterfaceThreshold(unstableInterfaceProject.val());
+		}
+
 		let getImplicitCrossModuleDependencyThreshold = function(projectId) {
 			$.ajax({
 				type: "get",
@@ -152,6 +196,11 @@ let smellDetect = function() {
 		$("#unstableDependencyQuery").click(function() {
 			let projectId = $("#unstableDependencyProject").val();
 			window.open("/as/unstabledependency/query?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
+		});
+		// Unstable Interface
+		$("#unstableInterfaceQuery").click(function() {
+			let projectId = $("#unstableInterfaceProject").val();
+			window.open("/as/unstableinterface/query?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
 		// Implicit Cross Module Dependency
 		$("#implicitCrossModuleDependencyQuery").click(function() {
@@ -190,6 +239,11 @@ let smellDetect = function() {
 		$("#unstableDependencyDetect").click(function() {
 			let projectId = $("#unstableDependencyProject").val();
 			window.open("/as/unstabledependency/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
+		});
+		// Unstable Interface
+		$("#unstableInterfaceDetect").click(function() {
+			let projectId = $("#unstableInterfaceProject").val();
+			window.open("/as/unstableinterface/detect?projectid=" + projectId + "&smelllevel=" + SMELL_LEVEL.MULTIPLE_LEVEL);
 		});
 		// Implicit Cross Module Dependency
 		$("#implicitCrossModuleDependencyDetect").click(function() {
