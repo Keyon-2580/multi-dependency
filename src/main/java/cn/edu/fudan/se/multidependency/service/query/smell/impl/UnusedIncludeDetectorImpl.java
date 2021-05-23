@@ -10,7 +10,7 @@ import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.UnusedIncludeASRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
-import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
+import cn.edu.fudan.se.multidependency.service.query.smell.SmellUtils;
 import cn.edu.fudan.se.multidependency.service.query.smell.UnusedIncludeDetector;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.UnusedInclude;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
@@ -44,9 +44,6 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
     @Autowired
     private ProjectFileRepository projectFileRepository;
 
-    @Autowired
-    private SmellDetectorService smellDetectorService;
-
     @Override
     public Map<Long, List<UnusedInclude>> queryFileUnusedInclude() {
         String key = "fileUnusedInclude";
@@ -56,7 +53,7 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
 
         Map<Long, List<UnusedInclude>> result = new HashMap<>();
         List<Smell> smells = new ArrayList<>(smellRepository.findSmellsByType(SmellType.UNUSED_INCLUDE));
-        smellDetectorService.sortSmellByName(smells);
+        SmellUtils.sortSmellByName(smells);
         for (Smell smell : smells) {
             long projectId = smell.getProjectId();
             List<UnusedInclude> unusedIncludeList = result.getOrDefault(projectId, new ArrayList<>());

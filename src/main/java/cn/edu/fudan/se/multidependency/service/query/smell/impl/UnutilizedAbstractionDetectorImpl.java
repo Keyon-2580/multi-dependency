@@ -7,7 +7,7 @@ import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
-import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
+import cn.edu.fudan.se.multidependency.service.query.smell.SmellUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,9 +39,6 @@ public class UnutilizedAbstractionDetectorImpl implements UnutilizedAbstractionD
 	@Autowired
 	private SmellRepository smellRepository;
 
-	@Autowired
-	private SmellDetectorService smellDetectorService;
-
 	@Override
 	public Map<Long, List<UnutilizedAbstraction<Type>>> queryTypeUnutilizedAbstraction() {
 		String key = "typeUnutilizedAbstraction";
@@ -63,12 +60,12 @@ public class UnutilizedAbstractionDetectorImpl implements UnutilizedAbstractionD
 
 		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> result = new HashMap<>();
 		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.FILE, SmellType.UNUTILIZED_ABSTRACTION));
-		smellDetectorService.sortSmellByName(smells);
+		SmellUtils.sortSmellByName(smells);
 		List<UnutilizedAbstraction<ProjectFile>> fileUnutilizedAbstractions = new ArrayList<>();
 		for (Smell smell : smells) {
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
 			Iterator<Node> iterator = containedNodes.iterator();
-			if (iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				ProjectFile component = (ProjectFile) iterator.next();
 				fileUnutilizedAbstractions.add(new UnutilizedAbstraction<>(component));
 			}

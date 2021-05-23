@@ -15,7 +15,7 @@ import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
-import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
+import cn.edu.fudan.se.multidependency.service.query.smell.SmellUtils;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,9 +56,6 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 	private SmellRepository smellRepository;
 
 	@Autowired
-	private SmellDetectorService smellDetectorService;
-
-	@Autowired
 	private NodeService nodeService;
 
 	@Autowired
@@ -79,23 +76,24 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 
 		Map<Long, List<LogicCouplingComponents<ProjectFile>>> result = new HashMap<>();
 		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.FILE, SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY));
-		smellDetectorService.sortSmellByName(smells);
+		SmellUtils.sortSmellByName(smells);
 		List<LogicCouplingComponents<ProjectFile>> fileImplicitCrossModuleDependencyList = new ArrayList<>();
 		for (Smell smell : smells) {
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
 			Iterator<Node> iterator = containedNodes.iterator();
 			ProjectFile file1 = null;
 			ProjectFile file2 = null;
-			if (iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				file1 = (ProjectFile) iterator.next();
 			}
-			if (iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				file2 = (ProjectFile) iterator.next();
 			}
 			if (file1 != null && file2 != null) {
-				CoChange coChange = cochangeRepository.findCoChangesBetweenTwoFilesWithoutDirection(file1.getId(), file2.getId());
-				if (coChange != null) {
-					LogicCouplingComponents<ProjectFile> fileImplicitCrossModuleDependency = new LogicCouplingComponents<>(file1, file2, coChange.getTimes());
+				List<CoChange> coChanges = cochangeRepository.findCoChangesBetweenTwoFilesWithoutDirection(file1.getId(), file2.getId());
+				if (coChanges != null && !coChanges.isEmpty()) {
+					int times = coChanges.stream().mapToInt(CoChange::getTimes).sum();
+					LogicCouplingComponents<ProjectFile> fileImplicitCrossModuleDependency = new LogicCouplingComponents<>(file1, file2, times);
 					fileImplicitCrossModuleDependencyList.add(fileImplicitCrossModuleDependency);
 				}
 			}
@@ -122,23 +120,24 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 
 		Map<Long, List<LogicCouplingComponents<Package>>> result = new HashMap<>();
 		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.PACKAGE, SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY));
-		smellDetectorService.sortSmellByName(smells);
+		SmellUtils.sortSmellByName(smells);
 		List<LogicCouplingComponents<Package>> packageImplicitCrossModuleDependencyList = new ArrayList<>();
 		for (Smell smell : smells) {
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
 			Iterator<Node> iterator = containedNodes.iterator();
 			Package package1 = null;
 			Package package2 = null;
-			if (iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				package1 = (Package) iterator.next();
 			}
-			if (iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				package2 = (Package) iterator.next();
 			}
 			if (package1 != null && package2 != null) {
-				CoChange coChange = cochangeRepository.findCoChangesBetweenTwoPackagesWithoutDirection(package1.getId(), package2.getId());
-				if (coChange != null) {
-					LogicCouplingComponents<Package> fileImplicitCrossModuleDependency = new LogicCouplingComponents<>(package1, package2, coChange.getTimes());
+				List<CoChange> coChanges = cochangeRepository.findCoChangesBetweenTwoPackagesWithoutDirection(package1.getId(), package2.getId());
+				if (coChanges != null && !coChanges.isEmpty()) {
+					int times = coChanges.stream().mapToInt(CoChange::getTimes).sum();
+					LogicCouplingComponents<Package> fileImplicitCrossModuleDependency = new LogicCouplingComponents<>(package1, package2, times);
 					packageImplicitCrossModuleDependencyList.add(fileImplicitCrossModuleDependency);
 				}
 			}

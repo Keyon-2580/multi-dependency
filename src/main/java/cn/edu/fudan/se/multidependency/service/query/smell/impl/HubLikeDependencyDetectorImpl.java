@@ -15,6 +15,7 @@ import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
+import cn.edu.fudan.se.multidependency.service.query.smell.SmellUtils;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.*;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,12 +85,12 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 
 		Map<Long, List<FileHubLike>> result = new HashMap<>();
 		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.FILE, SmellType.HUBLIKE_DEPENDENCY));
-		smellDetectorService.sortSmellByName(smells);
+		SmellUtils.sortSmellByName(smells);
 		List<FileHubLike> fileHubLikes = new ArrayList<>();
 		for (Smell smell : smells) {
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
 			Iterator<Node> iterator = containedNodes.iterator();
-			if (iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				ProjectFile component = (ProjectFile) iterator.next();
 				FileHubLike fileHubLike = new FileHubLike(component, fileRepository.getFanIn(component.getId()), fileRepository.getFanOut(component.getId()));
 //				Collection<ProjectFile> fanInFiles = fileRepository.calculateFanIn(component.getId());
@@ -141,12 +142,12 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 
 		Map<Long, List<PackageHubLike>> result = new HashMap<>();
 		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.PACKAGE, SmellType.HUBLIKE_DEPENDENCY));
-		smellDetectorService.sortSmellByName(smells);
+		SmellUtils.sortSmellByName(smells);
 		List<PackageHubLike> packageHubLikes = new ArrayList<>();
 		for (Smell smell : smells) {
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
 			Iterator<Node> iterator = containedNodes.iterator();
-			if (iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				Package component = (Package) iterator.next();
 				PackageHubLike packageHubLike = new PackageHubLike(component, packageRepository.getFanIn(component.getId()), packageRepository.getFanOut(component.getId()));
 				packageHubLikes.add(packageHubLike);
@@ -286,7 +287,7 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 	}
 	
 	private boolean isHubLikeComponent(FanIOMetric metric, int minFanIn, int minFanOut) {
-		return metric.getFanIn() >= minFanIn && metric.getFanOut() >= minFanOut;
+		return metric.getFanIn() > minFanIn && metric.getFanOut() > minFanOut;
 	}
 
 	@Override
@@ -330,12 +331,12 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 				result[0] = DEFAULT_MIN_FILE_FAN_IN;
 				result[1] = DEFAULT_MIN_FILE_FAN_OUT;
 			}
-			if (result[0] < DEFAULT_MIN_FILE_FAN_IN) {
-				result[0] = DEFAULT_MIN_FILE_FAN_IN;
-			}
-			if (result[1] < DEFAULT_MIN_FILE_FAN_OUT) {
-				result[1] = DEFAULT_MIN_FILE_FAN_OUT;
-			}
+//			if (result[0] < DEFAULT_MIN_FILE_FAN_IN) {
+//				result[0] = DEFAULT_MIN_FILE_FAN_IN;
+//			}
+//			if (result[1] < DEFAULT_MIN_FILE_FAN_OUT) {
+//				result[1] = DEFAULT_MIN_FILE_FAN_OUT;
+//			}
 			projectToMinFileFanIOMap.put(projectId, result);
 		}
 		return projectToMinFileFanIOMap.get(projectId);
@@ -355,12 +356,12 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 				result[0] = DEFAULT_MIN_PACKAGE_FAN_IN;
 				result[1] = DEFAULT_MIN_PACKAGE_FAN_OUT;
 			}
-			if (result[0] < DEFAULT_MIN_PACKAGE_FAN_IN) {
-				result[0] = DEFAULT_MIN_PACKAGE_FAN_IN;
-			}
-			if (result[1] < DEFAULT_MIN_PACKAGE_FAN_OUT) {
-				result[1] = DEFAULT_MIN_PACKAGE_FAN_OUT;
-			}
+//			if (result[0] < DEFAULT_MIN_PACKAGE_FAN_IN) {
+//				result[0] = DEFAULT_MIN_PACKAGE_FAN_IN;
+//			}
+//			if (result[1] < DEFAULT_MIN_PACKAGE_FAN_OUT) {
+//				result[1] = DEFAULT_MIN_PACKAGE_FAN_OUT;
+//			}
 			projectToMinPackageFanIOMap.put(projectId, result);
 		}
 		return projectToMinPackageFanIOMap.get(projectId);

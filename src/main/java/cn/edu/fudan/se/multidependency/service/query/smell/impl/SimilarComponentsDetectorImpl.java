@@ -18,6 +18,7 @@ import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackagePairDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
+import cn.edu.fudan.se.multidependency.service.query.smell.SmellUtils;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -96,17 +97,17 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 
 		Map<Long, List<SimilarComponents<ProjectFile>>> result = new HashMap<>();
 		List<Smell> smells = new ArrayList<>(smellRepository.findSmells(SmellLevel.FILE, SmellType.SIMILAR_COMPONENTS));
-		smellDetectorService.sortSmellByName(smells);
+		SmellUtils.sortSmellByName(smells);
 		List<SimilarComponents<ProjectFile>> similarComponentsList = new ArrayList<>();
 		for (Smell smell : smells) {
 			List<Node> containedNodes = new ArrayList<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
 			Iterator<Node> iterator = containedNodes.iterator();
 			ProjectFile file1 = null;
 			ProjectFile file2 = null;
-			if (iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				file1 = (ProjectFile) iterator.next();
 			}
-			if (iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				file2 = (ProjectFile) iterator.next();
 			}
 			if (file1 != null && file2 != null) {
