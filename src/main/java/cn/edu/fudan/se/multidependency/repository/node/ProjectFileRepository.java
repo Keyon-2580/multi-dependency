@@ -19,6 +19,10 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	@Query("match (f:ProjectFile) where f.path=$filePath return f")
 	public ProjectFile findFileByPath(@Param("filePath") String filePath);
 
+	@Query("match (pj:Project)-[:" + RelationType.str_CONTAIN + "*2]->(f:ProjectFile) " +
+			"where id(pj) = $projectId return distinct f;")
+	public List<ProjectFile> findFilesByProject(@Param("projectId") Long projectId);
+
 	@Query("match (f:ProjectFile) where id(f)=$fileId return f")
 	public ProjectFile findFileById(@Param("fileId") long fileId);
 
