@@ -237,11 +237,32 @@ public class GitAnalyseServiceImpl implements GitAnalyseService {
 		return result;
 	}
 
+	private List<CoChange> findCoChangeWithoutDirection(ProjectFile file1, ProjectFile file2) {
+		String key = "findCoChangeWithoutDirection_" + file1.getId() + "_" + file2.getId();
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
+		List<CoChange> result = cochangeRepository.findCoChangesBetweenTwoFilesWithoutDirection(file1.getId(), file2.getId());
+		if(result != null) {
+			cache.cache(getClass(), key, result);
+		}
+		return result;
+	}
+
 	@Override
 	public CoChange findCoChangeBetweenTwoFiles(ProjectFile file1, ProjectFile file2) {
 		CoChange result = findCoChange(file1, file2);
 		if(result == null) {
 			return findCoChange(file2, file1);
+		}
+		return result;
+	}
+
+	@Override
+	public List<CoChange> findCoChangeBetweenTwoFilesWithoutDirection(ProjectFile file1, ProjectFile file2) {
+		List<CoChange> result = findCoChangeWithoutDirection(file1, file2);
+		if(result == null) {
+			return findCoChangeWithoutDirection(file2, file1);
 		}
 		return result;
 	}

@@ -46,6 +46,14 @@ public interface GitAnalyseService {
 	 * @return
 	 */
 	CoChange findCoChangeBetweenTwoFiles(ProjectFile file1, ProjectFile file2);
+
+	/**
+	 * 找出两个文件的Cochange关系
+	 * @param file1
+	 * @param file2
+	 * @return
+	 */
+	List<CoChange> findCoChangeBetweenTwoFilesWithoutDirection(ProjectFile file1, ProjectFile file2);
 	
 	/**
 	 * 给一个cochange，找到贡献cochange次数的commit
