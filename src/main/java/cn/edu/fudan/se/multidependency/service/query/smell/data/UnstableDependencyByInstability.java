@@ -10,7 +10,7 @@ import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 
 @QueryResult
-public class UnstableComponentByInstability<T extends Node> extends UnstableComponent<T> {
+public class UnstableDependencyByInstability<T extends Node> extends UnstableComponent<T> {
 
 	private double instability;
 	

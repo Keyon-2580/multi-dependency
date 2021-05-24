@@ -356,7 +356,7 @@ public class MultipleSmellDetectorImpl implements MultipleSmellDetector {
 	public Map<Long, List<MultipleASFile>> queryMultipleSmellASFiles(boolean removeNoASFile) {
 		Map<Long, List<Cycle<ProjectFile>>> fileCyclicDependencyMap = cyclicDependencyDetector.queryFileCyclicDependency();
 		Map<Long, List<FileHubLike>> fileHubLikeDependencyMap = hubLikeDependencyDetector.queryFileHubLikeDependency();
-		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstableDependencyMap = unstableDependencyDetectorUsingInstability.queryFileUnstableDependency();
+		Map<Long, List<UnstableDependencyByInstability<ProjectFile>>> fileUnstableDependencyMap = unstableDependencyDetectorUsingInstability.queryFileUnstableDependency();
 		Map<Long, List<LogicCouplingComponents<ProjectFile>>> fileImplicitCrossModuleDependencyMap = implicitCrossModuleDependencyDetector.queryFileImplicitCrossModuleDependency();
 		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> fileUnutilizedAbstractionMap = unutilizedAbstractionDetector.queryFileUnutilizedAbstraction();
 		Map<Long, List<UnusedInclude>> fileUnusedIncludeMap = unusedIncludeDetector.queryFileUnusedInclude();
@@ -367,7 +367,7 @@ public class MultipleSmellDetectorImpl implements MultipleSmellDetector {
 	public Map<Long, List<MultipleASFile>> detectMultipleSmellASFiles(boolean removeNoASFile) {
 		Map<Long, List<Cycle<ProjectFile>>> fileCyclicDependencyMap = cyclicDependencyDetector.detectFileCyclicDependency();
 		Map<Long, List<FileHubLike>> fileHubLikeDependencyMap = hubLikeDependencyDetector.detectFileHubLikeDependency();
-		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstableDependencyMap = unstableDependencyDetectorUsingInstability.detectFileUnstableDependency();
+		Map<Long, List<UnstableDependencyByInstability<ProjectFile>>> fileUnstableDependencyMap = unstableDependencyDetectorUsingInstability.detectFileUnstableDependency();
 		Map<Long, List<LogicCouplingComponents<ProjectFile>>> fileImplicitCrossModuleDependencyMap = implicitCrossModuleDependencyDetector.detectFileImplicitCrossModuleDependency();
 		Map<Long, List<UnutilizedAbstraction<ProjectFile>>> fileUnutilizedAbstractionMap = unutilizedAbstractionDetector.detectFileUnutilizedAbstraction();
 		Map<Long, List<UnusedInclude>> fileUnusedIncludeMap = unusedIncludeDetector.detectFileUnusedInclude();
@@ -377,7 +377,7 @@ public class MultipleSmellDetectorImpl implements MultipleSmellDetector {
 	private Map<Long, List<MultipleASFile>> calculateMultipleSmellASFiles(boolean removeNoASFile,
 																		  Map<Long, List<Cycle<ProjectFile>>> fileCyclicDependencyMap,
 																		  Map<Long, List<FileHubLike>> fileHubLikeDependencyMap,
-																		  Map<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstableDependencyMap,
+																		  Map<Long, List<UnstableDependencyByInstability<ProjectFile>>> fileUnstableDependencyMap,
 																		  Map<Long, List<LogicCouplingComponents<ProjectFile>>> fileImplicitCrossModuleDependencyMap,
 																		  Map<Long, List<UnutilizedAbstraction<ProjectFile>>> fileUnutilizedAbstractionMap,
 																		  Map<Long, List<UnusedInclude>> fileUnusedIncludeMap) {
@@ -403,8 +403,8 @@ public class MultipleSmellDetectorImpl implements MultipleSmellDetector {
 			}
 		}
 
-		for (List<UnstableComponentByInstability<ProjectFile>> fileUnstableDependency : fileUnstableDependencyMap.values()) {
-			for (UnstableComponentByInstability<ProjectFile> file : fileUnstableDependency) {
+		for (List<UnstableDependencyByInstability<ProjectFile>> fileUnstableDependency : fileUnstableDependencyMap.values()) {
+			for (UnstableDependencyByInstability<ProjectFile> file : fileUnstableDependency) {
 				MultipleASFile mas = map.getOrDefault(file.getComponent(), new MultipleASFile(file.getComponent()));
 				mas.setUnstableDependency(true);
 				map.put(file.getComponent(), mas);

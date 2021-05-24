@@ -40,7 +40,7 @@ public class UnstableDependencyController {
 			request.setAttribute("project", project);
 			switch (smellLevel) {
 				case SmellLevel.FILE:
-					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryFileUnstableDependency());
+					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingHistory.queryUnstableDependency());
 					request.setAttribute("packageUnstableDependencyMap", null);
 					break;
 				case SmellLevel.PACKAGE:
@@ -48,8 +48,8 @@ public class UnstableDependencyController {
 					request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryPackageUnstableDependency());
 					break;
 				case SmellLevel.MULTIPLE_LEVEL:
-					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryFileUnstableDependency());
-					request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryPackageUnstableDependency());
+					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingHistory.queryUnstableDependency());
+					request.setAttribute("packageUnstableDependencyMap", null);
 					break;
 			}
 		}
@@ -62,7 +62,7 @@ public class UnstableDependencyController {
 			request.setAttribute("project", project);
 			switch (smellLevel) {
 				case SmellLevel.FILE:
-					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingInstability.detectFileUnstableDependency());
+					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingHistory.detectUnstableDependency());
 					request.setAttribute("packageUnstableDependencyMap", null);
 					break;
 				case SmellLevel.PACKAGE:
@@ -70,13 +70,14 @@ public class UnstableDependencyController {
 					request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.detectPackageUnstableDependency());
 					break;
 				case SmellLevel.MULTIPLE_LEVEL:
-					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingInstability.detectFileUnstableDependency());
-					request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.detectPackageUnstableDependency());
+					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingHistory.detectUnstableDependency());
+					request.setAttribute("packageUnstableDependencyMap", null);
 					break;
 			}
 		}
 		return "as/unstabledependency";
 	}
+
 	
 	@GetMapping("/threshold/instability/{projectId}")
 	@ResponseBody
@@ -109,31 +110,31 @@ public class UnstableDependencyController {
 	
 	@GetMapping("/threshold/history/{projectId}")
 	@ResponseBody
-	public int[] getHistory(@PathVariable("projectId") long projectId) {
+	public Double[] getHistory(@PathVariable("projectId") Long projectId) {
 		Project project = nodeService.queryProject(projectId);
-		int[] result = new int[3];
+		Double[] result = new Double[3];
 		if(project == null) {
 			return result;
 		}
-		result[0] = unstableDependencyDetectorUsingHistory.getFanInThreshold(project);
-		result[1] = unstableDependencyDetectorUsingHistory.getCoChangeTimesThreshold(project);
-		result[2] = unstableDependencyDetectorUsingHistory.getCoChangeFilesThreshold(project);
+		result[0] = Double.valueOf(unstableDependencyDetectorUsingHistory.getFanOutThreshold(projectId));
+		result[1] = Double.valueOf(unstableDependencyDetectorUsingHistory.getCoChangeTimesThreshold(projectId));
+		result[2] = unstableDependencyDetectorUsingHistory.getProjectMinRatio(projectId);
 		return result;
 	}
 	
 	@PostMapping("/threshold/history/{projectId}")
 	@ResponseBody
-	public boolean setHistory(@PathVariable("projectId") long projectId, 
-			@RequestParam("fanInThreshold") int fanInThreshold,
-			@RequestParam("cochangeTimesThreshold") int cochangeTimesThreshold,
-			@RequestParam("cochangeFilesThreshold") int cochangeFilesThreshold) {
+	public boolean setHistory(@PathVariable("projectId") Long projectId,
+			@RequestParam("minFileFanOut") Integer minFileFanOut,
+			@RequestParam("cochangeTimesThreshold") Integer cochangeTimesThreshold,
+			@RequestParam("minRatio") Double minRatio) {
 		Project project = nodeService.queryProject(projectId);
 		if(project == null) {
 			return false;
 		}
-		unstableDependencyDetectorUsingHistory.setFanInThreshold(project, fanInThreshold);
-		unstableDependencyDetectorUsingHistory.setCoChangeTimesThreshold(project, cochangeTimesThreshold);
-		unstableDependencyDetectorUsingHistory.setCoChangeFilesThreshold(project, cochangeFilesThreshold);
+		unstableDependencyDetectorUsingHistory.setFanOutThreshold(projectId, minFileFanOut);
+		unstableDependencyDetectorUsingHistory.setCoChangeTimesThreshold(projectId, cochangeTimesThreshold);
+		unstableDependencyDetectorUsingHistory.setProjectMinRatio(projectId, minRatio);
 		return true;
 	}
 
