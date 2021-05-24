@@ -3,6 +3,7 @@ let smellOverview = function() {
 		CYCLIC_DEPENDENCY: "CyclicDependency",
 		HUBLIKE_DEPENDENCY: "HubLikeDependency",
 		UNSTABLE_DEPENDENCY: "UnstableDependency",
+		UNSTABLE_INTERFACE: "UnstableInterface",
 		IMPLICIT_CROSS_MODULE_DEPENDENCY: "ImplicitCrossModuleDependency",
 		UNUTILIZED_ABSTRACTION: "UnutilizedAbstraction",
 		UNUSED_INCLUDE: "UnusedInclude"
@@ -90,6 +91,9 @@ let smellOverview = function() {
 						}
 						else if (smellType === SMELL_TYPE.UNSTABLE_DEPENDENCY) {
 							href += "/unstabledependency";
+						}
+						else if (smellType === SMELL_TYPE.UNSTABLE_INTERFACE) {
+							href += "/unstableinterface";
 						}
 						else if (smellType === SMELL_TYPE.IMPLICIT_CROSS_MODULE_DEPENDENCY) {
 							href += "/implicitcrossmoduledependency";
@@ -424,6 +428,7 @@ let smellOverview = function() {
 		cyclicDependency: true,
 		hubLikeDependency: true,
 		unstableDependency: true,
+		unstableInterface: true,
 		implicitCrossModuleDependency: true,
 		unutilizedAbstraction: true,
 		unuUnusedInclude: true
@@ -433,6 +438,7 @@ let smellOverview = function() {
 		return "?cyclicDependency=" + param.cyclicDependency +
 			"&hubLikeDependency=" + param.hubLikeDependency +
 			"&unstableDependency=" + param.unstableDependency +
+			"&unstableInterface=" + param.unstableInterface +
 			"&implicitCrossModuleDependency=" + param.implicitCrossModuleDependency +
 			"&unutilizedAbstraction=" + param.unutilizedAbstraction +
 			"&unuUnusedInclude=" + param.unuUnusedInclude;
