@@ -260,9 +260,8 @@ public class MetricCalculatorService {
 				metricValues.put(MetricType.LOC, fileMetrics.getStructureMetric().getLoc());
 				metricValues.put(MetricType.FAN_OUT, fileMetrics.getStructureMetric().getFanOut());
 				metricValues.put(MetricType.FAN_IN, fileMetrics.getStructureMetric().getFanIn());
-				int fanInOut = fileMetrics.getStructureMetric().getFanOut() + fileMetrics.getStructureMetric().getFanIn();
-				double instability  = (fanInOut > 0 ? (double) (fileMetrics.getStructureMetric().getFanOut()) / fanInOut : 0.0);
-				metricValues.put(MetricType.INSTABILITY, instability);
+				metricValues.put(MetricType.INSTABILITY, fileMetrics.getInstability());
+				metricValues.put(MetricType.PAGE_RANK_SCORE, fileMetrics.getPageRankScore());
 				FileMetric.EvolutionMetric evolutionMetric = fileMetrics.getEvolutionMetric();
 				if (evolutionMetric != null){
 					metricValues.put(MetricType.COMMITS, evolutionMetric.getCommits());
