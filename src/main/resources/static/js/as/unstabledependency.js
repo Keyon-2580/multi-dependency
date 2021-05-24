@@ -17,7 +17,7 @@ let unstableDependency = function() {
 				html += "<th style='text-align: center; vertical-align: middle'>Instability</th>";
 				html += "<th style='text-align: center; vertical-align: middle'>Score</th>";
 				html += "<th style='text-align: center; vertical-align: middle'>All Outgoing Dependencies</th>";
-				html += "<th style='text-align: center; vertical-align: middle'>All CoChange Files</th>";
+				html += "<th style='text-align: center; vertical-align: middle'>All Outgoing CoChange Files</th>";
 				html += "<th style='text-align: center; vertical-align: middle'>Commits</th>";
 				html += "</tr>";
 				let index = 1;
