@@ -230,10 +230,10 @@ public class MultipleSmellDetectorImpl implements MultipleSmellDetector {
 		smellTypes.add(SmellType.CYCLIC_DEPENDENCY);
 		smellTypes.add(SmellType.HUBLIKE_DEPENDENCY);
 		smellTypes.add(SmellType.UNSTABLE_DEPENDENCY);
+		smellTypes.add(SmellType.UNSTABLE_INTERFACE);
 		smellTypes.add(SmellType.IMPLICIT_CROSS_MODULE_DEPENDENCY);
 		smellTypes.add(SmellType.UNUTILIZED_ABSTRACTION);
 		smellTypes.add(SmellType.UNUSED_INCLUDE);
-		smellTypes.add(SmellType.UNSTABLE_INTERFACE);
 		for (Project project : projects) {
 			JSONObject projectFileSmellOverviewObject = new JSONObject();
 			JSONArray projectFileSmellArray = new JSONArray();
