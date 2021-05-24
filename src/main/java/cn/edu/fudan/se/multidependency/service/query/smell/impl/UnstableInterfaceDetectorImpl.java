@@ -220,7 +220,7 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 				List<CoChange> coChanges = gitAnalyseService.findCoChangeBetweenTwoFilesWithoutDirection(fanInFile,file);
 				if(coChanges != null && !coChanges.isEmpty()) {
 					Integer times = coChanges.stream().mapToInt(CoChange::getTimes).sum();
-					if(times >= coChangeTimesThreshold){
+					if(times >= DEFAULT_THRESHOLD_COCHANGE_TIMES){
 						coChangeFilesCount++;
 					}
 					allCoChanges.addAll(coChanges);
