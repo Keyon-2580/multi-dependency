@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.ar.Module;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.UnstableComponentByInstability;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.UnstableDependencyByInstability;
 
 @Repository
 public interface UnstableASRepository extends Neo4jRepository<ProjectFile, Long> {
@@ -22,7 +22,7 @@ public interface UnstableASRepository extends Neo4jRepository<ProjectFile, Long>
 			+ "with file, badDependencies, allDependencies "
 			+ "where ((badDependencies + 0.0) / allDependencies) >= $ratio "
 			+ "return file as component, file.instability as instability, badDependencies, allDependencies")
-	public List<UnstableComponentByInstability<ProjectFile>> unstableFilesByInstability(
+	public List<UnstableDependencyByInstability<ProjectFile>> unstableFilesByInstability(
 			@Param("projectId") long projectId, @Param("fanOut") int fanOut, @Param("ratio") double ratio);
 	
 	@Query("match (project:Project)-[:CONTAIN]->(pck:Package) where id(project)=$projectId "
@@ -32,7 +32,7 @@ public interface UnstableASRepository extends Neo4jRepository<ProjectFile, Long>
 			+ "with pck, badDependencies, allDependencies "
 			+ "where ((badDependencies + 0.0) / allDependencies) >= $ratio "
 			+ "return pck as component, pck.instability as instability, badDependencies, allDependencies")
-	public List<UnstableComponentByInstability<Package>> unstablePackagesByInstability(
+	public List<UnstableDependencyByInstability<Package>> unstablePackagesByInstability(
 			@Param("projectId") long projectId, @Param("fanOut") int fanOut, @Param("ratio") double ratio);
 	
 	@Query("match (project:Project)-[:CONTAIN]->(module:Module) where id(project)=$projectId  "
@@ -42,6 +42,6 @@ public interface UnstableASRepository extends Neo4jRepository<ProjectFile, Long>
 			+ "with module, badDependencies, allDependencies "
 			+ "where ((badDependencies + 0.0) / allDependencies) >= $ratio "
 			+ "return module as component, module.instability as instability, badDependencies, allDependencies")
-	public List<UnstableComponentByInstability<Module>> unstableModulesByInstability(
+	public List<UnstableDependencyByInstability<Module>> unstableModulesByInstability(
 			@Param("projectId") long projectId, @Param("fanOut") int fanOut, @Param("ratio") double ratio);
 }

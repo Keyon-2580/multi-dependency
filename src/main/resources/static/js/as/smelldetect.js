@@ -30,12 +30,12 @@ let smellDetect = function() {
 			setHubLikeDependencyThreshold(projectId, minFileFanIn, minFileFanOut, minPackageFanIn, minPackageFanOut);
 		});
 
-		let setUnstableDependencyThreshold = function(projectId, minFileFanOut, minPackageFanOut,minRatio) {
+		let setUnstableDependencyThreshold = function(projectId,  minFileFanOut, coChangeTimes, minRatio) {
 			$.ajax({
 				type: "post",
-				url: "/as/unstabledependency/threshold/instability/" + projectId
+				url: "/as/unstabledependency/threshold/history/" + projectId
 					+ "?minFileFanOut=" + minFileFanOut
-					+ "&minPackageFanOut=" + minPackageFanOut
+					+ "&coChangeTimes=" + coChangeTimes
 					+ "&minRatio=" + minRatio,
 				success: function(result) {
 					if (result === true) {
@@ -49,17 +49,17 @@ let smellDetect = function() {
 		};
 		$("#unstableDependencyThresholdSave").click(function() {
 			let projectId = $("#unstableDependencyProject").val();
-			let minFileFanOut = $("#unstableMinFileFanOut").val();
-			let minPackageFanOut = $("#unstableMinPackageFanOut").val();
-			let minRatio = $("#unstableMinRatio").val();
-			setUnstableDependencyThreshold(projectId, minFileFanOut, minPackageFanOut, minRatio);
+			let minFileFanOut = $("#unstableDependencyMinFileFanOut").val();
+			let coChangeTimes = $("#unstableDependencyCoChangeTimes").val();
+			let minRatio = $("#unstableDependencyMinRatio").val();
+			setUnstableDependencyThreshold(projectId, minFileFanOut, coChangeTimes, minRatio);
 		});
 
 		let setUnstableInterfaceThreshold = function(projectId, minFileFanIn, coChangeTimes, minRatio) {
 			$.ajax({
 				type: "post",
 				url: "/as/unstableInterface/threshold/" + projectId
-					+ "?minFileFanOut=" + minFileFanIn
+					+ "?minFileFanIn=" + minFileFanIn
 					+ "&coChangeTimes=" + coChangeTimes
 					+ "&minRatio=" + minRatio,
 				success: function(result) {
@@ -127,11 +127,11 @@ let smellDetect = function() {
 		let getUnstableDependencyThreshold = function(projectId) {
 			$.ajax({
 				type: "get",
-				url: "/as/unstabledependency/threshold/instability/" + projectId,
+				url: "/as/unstabledependency/threshold/history/" + projectId,
 				success: function(result) {
-					$("#unstableMinFileFanOut").val(result[0]);
-					$("#unstableMinPackageFanOut").val(result[1]);
-					$("#unstableMinRatio").val(result[2]);
+					$("#unstableDependencyMinFileFanOut").val(result[0]);
+					$("#unstableDependencyCoChangeTimes").val(result[1]);
+					$("#unstableDependencyMinRatio").val(result[2]);
 				}
 			});
 		};

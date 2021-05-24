@@ -17,7 +17,7 @@ let unstableInterface = function() {
 				html += "<th style='text-align: center; vertical-align: middle'>Instability</th>";
 				html += "<th style='text-align: center; vertical-align: middle'>Score</th>";
 				html += "<th style='text-align: center; vertical-align: middle'>All Ingoing Dependencies</th>";
-				html += "<th style='text-align: center; vertical-align: middle'>All CoChange Files</th>";
+				html += "<th style='text-align: center; vertical-align: middle'>All Ingoing CoChange Files</th>";
 				html += "<th style='text-align: center; vertical-align: middle'>Commits</th>";
 				html += "</tr>";
 				let index = 1;

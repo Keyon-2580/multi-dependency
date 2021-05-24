@@ -44,8 +44,11 @@ public class SmellDetectorService {
 	@Autowired
 	private HubLikeDependencyDetector hubLikeDependencyDetector;
 
+//	@Autowired
+//	private UnstableDependencyDetectorUsingInstability unstableDependencyDetectorUsingInstability;
+
 	@Autowired
-	private UnstableDependencyDetectorUsingInstability unstableDependencyDetectorUsingInstability;
+	private UnstableDependencyDetectorUsingHistory unstableDependencyDetectorUsingHistory;
 
 	@Autowired
 	private UnstableInterfaceDetector unstableInterfaceDetector;
@@ -317,13 +320,13 @@ public class SmellDetectorService {
 		List<Contain> smellContains = new ArrayList<>();
 		List<RelateTo> smellRelateTos = new ArrayList<>();
 
-		Map<Long, List<UnstableComponentByInstability<ProjectFile>>> fileUnstableComponentMap = unstableDependencyDetectorUsingInstability.detectFileUnstableDependency();
+		Map<Long, List<UnstableDependencyByHistory>> fileUnstableComponentMap = unstableDependencyDetectorUsingHistory.detectUnstableDependency();
 		String fileSmellName = SmellLevel.FILE + "_" + SmellType.UNSTABLE_DEPENDENCY + "_";
-		for (Map.Entry<Long, List<UnstableComponentByInstability<ProjectFile>>> entry : fileUnstableComponentMap.entrySet()) {
+		for (Map.Entry<Long, List<UnstableDependencyByHistory>> entry : fileUnstableComponentMap.entrySet()) {
 			int fileSmellIndex = 1;
 			long projectId = entry.getKey();
 			Project project = (Project) projectRepository.queryNodeById(projectId);
-			for (UnstableComponentByInstability<ProjectFile> fileUnstableComponent : entry.getValue()) {
+			for (UnstableDependencyByHistory fileUnstableComponent : entry.getValue()) {
 				Smell smell = new Smell();
 				smell.setName(fileSmellName + fileSmellIndex);
 				smell.setSize(1);
@@ -350,41 +353,41 @@ public class SmellDetectorService {
 		containRepository.saveAll(smellContains);
 		relateToRepository.saveAll(smellRelateTos);
 
-		smells.clear();
-		smellContains.clear();
-		smellRelateTos.clear();
-		Map<Long, List<UnstableComponentByInstability<Package>>> packageUnstableComponentMap = unstableDependencyDetectorUsingInstability.detectPackageUnstableDependency();
-		String packageSmellName = SmellLevel.PACKAGE + "_" + SmellType.UNSTABLE_DEPENDENCY + "_";
-		for (Map.Entry<Long, List<UnstableComponentByInstability<Package>>> entry : packageUnstableComponentMap.entrySet()) {
-			int packageSmellIndex = 1;
-			long projectId = entry.getKey();
-			Project project = (Project) projectRepository.queryNodeById(projectId);
-			for (UnstableComponentByInstability<Package> packageUnstableComponent : entry.getValue()) {
-				Smell smell = new Smell();
-				smell.setName(packageSmellName + packageSmellIndex);
-				smell.setSize(1);
-				smell.setLanguage(project.getLanguage());
-				smell.setProjectId(projectId);
-				smell.setProjectName(project.getName());
-				smell.setType(SmellType.UNSTABLE_DEPENDENCY);
-				smell.setLevel(SmellLevel.PACKAGE);
-				smells.add(smell);
-				Collection<DependsOn> pckDependsOns = staticAnalyseService.findPackageDependsOn(packageUnstableComponent.getComponent());
-				if(pckDependsOns != null && !pckDependsOns.isEmpty()){
-					pckDependsOns.forEach(pckDpOnBy->{
-						Package pckBy = (Package)pckDpOnBy.getEndNode();
-						RelateTo relateTo = new RelateTo(smell,pckBy);
-						smellRelateTos.add(relateTo);
-					});
-				}
-				Contain contain = new Contain(smell, packageUnstableComponent.getComponent());
-				smellContains.add(contain);
-				packageSmellIndex ++;
-			}
-		}
-		smellRepository.saveAll(smells);
-		containRepository.saveAll(smellContains);
-		relateToRepository.saveAll(smellRelateTos);
+//		smells.clear();
+//		smellContains.clear();
+//		smellRelateTos.clear();
+//		Map<Long, List<UnstableDependencyByInstability<Package>>> packageUnstableComponentMap = unstableDependencyDetectorUsingInstability.detectPackageUnstableDependency();
+//		String packageSmellName = SmellLevel.PACKAGE + "_" + SmellType.UNSTABLE_DEPENDENCY + "_";
+//		for (Map.Entry<Long, List<UnstableDependencyByInstability<Package>>> entry : packageUnstableComponentMap.entrySet()) {
+//			int packageSmellIndex = 1;
+//			long projectId = entry.getKey();
+//			Project project = (Project) projectRepository.queryNodeById(projectId);
+//			for (UnstableDependencyByInstability<Package> packageUnstableComponent : entry.getValue()) {
+//				Smell smell = new Smell();
+//				smell.setName(packageSmellName + packageSmellIndex);
+//				smell.setSize(1);
+//				smell.setLanguage(project.getLanguage());
+//				smell.setProjectId(projectId);
+//				smell.setProjectName(project.getName());
+//				smell.setType(SmellType.UNSTABLE_DEPENDENCY);
+//				smell.setLevel(SmellLevel.PACKAGE);
+//				smells.add(smell);
+//				Collection<DependsOn> pckDependsOns = staticAnalyseService.findPackageDependsOn(packageUnstableComponent.getComponent());
+//				if(pckDependsOns != null && !pckDependsOns.isEmpty()){
+//					pckDependsOns.forEach(pckDpOnBy->{
+//						Package pckBy = (Package)pckDpOnBy.getEndNode();
+//						RelateTo relateTo = new RelateTo(smell,pckBy);
+//						smellRelateTos.add(relateTo);
+//					});
+//				}
+//				Contain contain = new Contain(smell, packageUnstableComponent.getComponent());
+//				smellContains.add(contain);
+//				packageSmellIndex ++;
+//			}
+//		}
+//		smellRepository.saveAll(smells);
+//		containRepository.saveAll(smellContains);
+//		relateToRepository.saveAll(smellRelateTos);
 		LOGGER.info("创建Unstable Dependency Smell节点关系完成");
 	}
 

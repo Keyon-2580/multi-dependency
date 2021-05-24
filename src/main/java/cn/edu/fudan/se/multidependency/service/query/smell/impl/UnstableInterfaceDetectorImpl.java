@@ -13,8 +13,6 @@ import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.StaticAnalyseService;
 import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
-import cn.edu.fudan.se.multidependency.service.query.metric.FileMetric;
-import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellUtils;
 import cn.edu.fudan.se.multidependency.service.query.smell.UnstableInterfaceDetector;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.UnstableInterface;
@@ -28,9 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector {
-
-	@Autowired
-	private MetricCalculatorService metricCalculatorService;
 
 	@Autowired
 	private NodeService nodeService;
