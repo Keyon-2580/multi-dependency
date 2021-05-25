@@ -83,10 +83,10 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 			Iterator<Node> iterator = containedNodes.iterator();
 			ProjectFile file1 = null;
 			ProjectFile file2 = null;
-			while (iterator.hasNext()) {
+			if (iterator.hasNext()) {
 				file1 = (ProjectFile) iterator.next();
 			}
-			while (iterator.hasNext()) {
+			if (iterator.hasNext()) {
 				file2 = (ProjectFile) iterator.next();
 			}
 			if (file1 != null && file2 != null) {
@@ -127,10 +127,10 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 			Iterator<Node> iterator = containedNodes.iterator();
 			Package package1 = null;
 			Package package2 = null;
-			while (iterator.hasNext()) {
+			if (iterator.hasNext()) {
 				package1 = (Package) iterator.next();
 			}
-			while (iterator.hasNext()) {
+			if (iterator.hasNext()) {
 				package2 = (Package) iterator.next();
 			}
 			if (package1 != null && package2 != null) {

@@ -17,7 +17,6 @@ import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileR
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackagePairDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.HotspotPackagePair;
-import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellUtils;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,9 +78,6 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 	private CoChangeRepository coChangeRepository;
 
 	@Autowired
-	private SmellDetectorService smellDetectorService;
-
-	@Autowired
 	private MetricRepository metricRepository;
 
 	private static final int DEFAULT_MIN_FILE_CO_CHANGE = 10;
@@ -104,10 +100,10 @@ public class SimilarComponentsDetectorImpl implements SimilarComponentsDetector 
 			Iterator<Node> iterator = containedNodes.iterator();
 			ProjectFile file1 = null;
 			ProjectFile file2 = null;
-			while (iterator.hasNext()) {
+			if (iterator.hasNext()) {
 				file1 = (ProjectFile) iterator.next();
 			}
-			while (iterator.hasNext()) {
+			if (iterator.hasNext()) {
 				file2 = (ProjectFile) iterator.next();
 			}
 			if (file1 != null && file2 != null) {

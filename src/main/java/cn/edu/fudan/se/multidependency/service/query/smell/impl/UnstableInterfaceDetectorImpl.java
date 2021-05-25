@@ -54,8 +54,8 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 	private final Map<Long, Double> projectToMinRatioMap = new ConcurrentHashMap<>();
 	
 	public static final int DEFAULT_THRESHOLD_FAN_IN = 10;
-	public static final int DEFAULT_THRESHOLD_COCHANGE_TIMES = 3;
-	public static final int DEFAULT_THRESHOLD_COCHANGE_FILES = 5;
+	public static final int DEFAULT_THRESHOLD_CO_CHANGE_TIMES = 3;
+	public static final int DEFAULT_THRESHOLD_CO_CHANGE_FILES = 5;
 	public static final double DEFAULT_MIN_RATIO = 0.5;
 
 	@Override
@@ -92,9 +92,6 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 			else {
 				projectToFanInThresholdMap.put(projectId, DEFAULT_THRESHOLD_FAN_IN);
 			}
-//			if (projectToFanInThresholdMap.get(projectId) < DEFAULT_THRESHOLD_FAN_IN) {
-//				projectToFanInThresholdMap.put(projectId, DEFAULT_THRESHOLD_FAN_IN);
-//			}
 		}
 		return projectToFanInThresholdMap.get(projectId);
 	}
@@ -107,19 +104,16 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 				projectToCoChangeTimesThresholdMap.put(projectId, medFileCoChangeTimes);
 			}
 			else {
-				projectToCoChangeTimesThresholdMap.put(projectId, DEFAULT_THRESHOLD_COCHANGE_TIMES);
+				projectToCoChangeTimesThresholdMap.put(projectId, DEFAULT_THRESHOLD_CO_CHANGE_TIMES);
 			}
-//			if (projectToCoChangeTimesThresholdMap.get(projectId) < DEFAULT_THRESHOLD_COCHANGE_TIMES) {
-//				projectToCoChangeTimesThresholdMap.put(projectId, DEFAULT_THRESHOLD_COCHANGE_TIMES);
-//			}
 		}
 		return projectToCoChangeTimesThresholdMap.get(projectId);
 	}
 
 	@Override
 	public Integer getCoChangeFilesThreshold(Long projectId) {
-		if(projectToCoChangeFilesThresholdMap.get(projectId) == null) {
-			projectToCoChangeFilesThresholdMap.put(projectId, DEFAULT_THRESHOLD_COCHANGE_FILES);
+		if (!projectToCoChangeFilesThresholdMap.containsKey(projectId)) {
+			projectToCoChangeFilesThresholdMap.put(projectId, DEFAULT_THRESHOLD_CO_CHANGE_FILES);
 		}
 		return projectToCoChangeFilesThresholdMap.get(projectId);
 	}
@@ -144,7 +138,7 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 		for (Smell smell : smells) {
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
 			Iterator<Node> iterator = containedNodes.iterator();
-			while (iterator.hasNext()) {
+			if (iterator.hasNext()) {
 				ProjectFile component = (ProjectFile) iterator.next();
 				Project project = containRelationService.findFileBelongToProject(component);
 				UnstableInterface unstableInterface = new UnstableInterface();
@@ -157,8 +151,8 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 					ProjectFile fanInFile = (ProjectFile) dependsOn.getStartNode();
 					List<CoChange> coChanges = gitAnalyseService.findCoChangeBetweenTwoFilesWithoutDirection(fanInFile,component);
 					if(coChanges != null && !coChanges.isEmpty()) {
-						Integer times = coChanges.stream().mapToInt(CoChange::getTimes).sum();
-						if(times >= DEFAULT_THRESHOLD_COCHANGE_TIMES){
+						int times = coChanges.stream().mapToInt(CoChange::getTimes).sum();
+						if(times >= DEFAULT_THRESHOLD_CO_CHANGE_TIMES){
 							allCoChanges.addAll(coChanges);
 						}
 //						if(times >= getCoChangeTimesThreshold(project.getId())){
@@ -201,43 +195,37 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 	}
 	
 	private UnstableInterface isUnstableInterfaceInFileLevel(Long projectId, ProjectFile file) {
+		UnstableInterface result = null;
 		Integer fanInThreshold = getFanInThreshold(projectId);
-		Integer coChangeTimesThreshold = getCoChangeTimesThreshold(projectId);
-		Integer coChangeFilesThreshold = getCoChangeFilesThreshold(projectId);
 		Double minRatio = getProjectMinRatio(projectId);
 		Collection<DependsOn> fanInDependencies = staticAnalyseService.findFileDependedOnBy(file);
-		if(fanInDependencies.size() <= fanInThreshold) {
-			return null;
-		}
-		Integer coChangeFilesCount = 0;
-		List<CoChange> allCoChanges = new ArrayList<>();
-		if(fanInDependencies != null){
+		if(fanInDependencies != null && fanInDependencies.size() <= fanInThreshold) {
+			int coChangeFilesCount = 0;
+			List<CoChange> allCoChanges = new ArrayList<>();
 			for(DependsOn dependedOnBy : fanInDependencies) {
 				// 遍历每个依赖File的文件，搜索协同修改次数
 				ProjectFile fanInFile = (ProjectFile)dependedOnBy.getStartNode();
 				List<CoChange> coChanges = gitAnalyseService.findCoChangeBetweenTwoFilesWithoutDirection(fanInFile,file);
 				if(coChanges != null && !coChanges.isEmpty()) {
-					Integer times = coChanges.stream().mapToInt(CoChange::getTimes).sum();
+					int times = coChanges.stream().mapToInt(CoChange::getTimes).sum();
 //					if(times >= getCoChangeTimesThreshold(projectId)){
 //						coChangeFilesCount++;
 //					    allCoChanges.addAll(coChanges);
 //					}
-					if(times >= DEFAULT_THRESHOLD_COCHANGE_TIMES){
+					if(times >= DEFAULT_THRESHOLD_CO_CHANGE_TIMES){
 						coChangeFilesCount++;
 						allCoChanges.addAll(coChanges);
 					}
 				}
 			}
-		}
-		UnstableInterface result = null;
-		if((coChangeFilesCount*1.0) / fanInDependencies.size() >= minRatio) {
-			result = new UnstableInterface();
-			result.setComponent(file);
-			result.addAllFanInDependencies(fanInDependencies);
-			result.setFanIn(fanInDependencies.size() );
-			result.addAllCoChanges(allCoChanges);
+			if((coChangeFilesCount*1.0) / fanInDependencies.size() >= minRatio) {
+				result = new UnstableInterface();
+				result.setComponent(file);
+				result.addAllFanInDependencies(fanInDependencies);
+				result.setFanIn(fanInDependencies.size() );
+				result.addAllCoChanges(allCoChanges);
+			}
 		}
 		return result;
 	}
-
 }

@@ -8,8 +8,6 @@ import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
 import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
-import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
-import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellUtils;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
@@ -51,12 +49,6 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 
 	@Autowired
 	private DependsOnRepository dependsOnRepository;
-
-	@Autowired
-	private ProjectFileRepository projectFileRepository;
-
-	@Autowired
-	private PackageRepository packageRepository;
 	
 	public static final int DEFAULT_MIN_FILE_FAN_OUT = 10;
 	public static final int DEFAULT_MIN_PACKAGE_FAN_OUT = 10;
@@ -82,7 +74,7 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 		for (Smell smell : smells) {
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
 			Iterator<Node> iterator = containedNodes.iterator();
-			while (iterator.hasNext()) {
+			if (iterator.hasNext()) {
 				ProjectFile component = (ProjectFile) iterator.next();
 				UnstableDependencyByInstability<ProjectFile> fileUnstableDependency = new UnstableDependencyByInstability<>();
 				fileUnstableDependency.setComponent(component);
@@ -90,12 +82,6 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 				fileUnstableDependency.addAllTotalDependencies(dependsOns);
 				for(DependsOn dependsOn : dependsOns) {
 					ProjectFile dependsOnFile = (ProjectFile) dependsOn.getEndNode();
-//					int dependsOnFileFanOut = 0;
-//					Integer fanOut = projectFileRepository.getFileFanOutByFileId(dependsOnFile.getId());
-//					if (fanOut != null) {
-//						dependsOnFileFanOut = fanOut;
-//					}
-//					Project project = containRelationService.findFileBelongToProject(fileUnstableDependency.getComponent());
 					if(component.getInstability() < dependsOnFile.getInstability()) {
 						fileUnstableDependency.addBadDependency(dependsOn);
 					}
@@ -131,7 +117,7 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 		for (Smell smell : smells) {
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
 			Iterator<Node> iterator = containedNodes.iterator();
-			while (iterator.hasNext()) {
+			if (iterator.hasNext()) {
 				Package component = (Package) iterator.next();
 				UnstableDependencyByInstability<Package> packageUnstableDependency = new UnstableDependencyByInstability<>();
 				packageUnstableDependency.setComponent(component);
@@ -139,12 +125,6 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 				packageUnstableDependency.addAllTotalDependencies(dependsOns);
 				for(DependsOn dependsOn : dependsOns) {
 					Package dependsOnPackage = (Package) dependsOn.getEndNode();
-//					int dependsOnPackageFanOut = 0;
-//					Integer fanOut = packageRepository.getPackageFanOutByFileId(dependsOnPackage.getId());
-//					if (fanOut != null) {
-//						dependsOnPackageFanOut = fanOut;
-//					}
-//					Project project = containRelationService.findPackageBelongToProject(packageUnstableDependency.getComponent());
 					if(component.getInstability() < dependsOnPackage.getInstability()) {
 						packageUnstableDependency.addBadDependency(dependsOn);
 					}
@@ -245,9 +225,6 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 			else {
 				projectToMinFileFanOutMap.put(projectId, DEFAULT_MIN_FILE_FAN_OUT);
 			}
-//			if (projectToMinFileFanOutMap.get(projectId) < DEFAULT_MIN_FILE_FAN_OUT) {
-//				projectToMinFileFanOutMap.put(projectId, DEFAULT_MIN_FILE_FAN_OUT);
-//			}
 		}
 		return projectToMinFileFanOutMap.get(projectId);
 	}
@@ -262,9 +239,6 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 			else {
 				projectToMinPackageFanOutMap.put(projectId, DEFAULT_MIN_PACKAGE_FAN_OUT);
 			}
-//			if (projectToMinPackageFanOutMap.get(projectId) < DEFAULT_MIN_PACKAGE_FAN_OUT) {
-//				projectToMinPackageFanOutMap.put(projectId, DEFAULT_MIN_PACKAGE_FAN_OUT);
-//			}
 		}
 		return projectToMinPackageFanOutMap.get(projectId);
 	}

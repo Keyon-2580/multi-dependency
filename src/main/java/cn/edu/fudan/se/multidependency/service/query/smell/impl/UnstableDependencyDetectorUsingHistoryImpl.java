@@ -93,9 +93,6 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 			else {
 				projectToFanOutThresholdMap.put(projectId, DEFAULT_THRESHOLD_FAN_OUT);
 			}
-//			if (projectToFanOutThresholdMap.get(projectId) < DEFAULT_THRESHOLD_FAN_OUT) {
-//				projectToFanOutThresholdMap.put(projectId, DEFAULT_THRESHOLD_FAN_OUT);
-//			}
 		}
 		return projectToFanOutThresholdMap.get(projectId);
 	}
@@ -110,16 +107,13 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 			else {
 				projectToCoChangeTimesThresholdMap.put(projectId, DEFAULT_THRESHOLD_COCHANGE_TIMES);
 			}
-//			if (projectToCoChangeTimesThresholdMap.get(projectId) < DEFAULT_THRESHOLD_COCHANGE_TIMES) {
-//				projectToCoChangeTimesThresholdMap.put(projectId, DEFAULT_THRESHOLD_COCHANGE_TIMES);
-//			}
 		}
 		return projectToCoChangeTimesThresholdMap.get(projectId);
 	}
 
 	@Override
 	public Integer getCoChangeFilesThreshold(Long projectId) {
-		if(projectToCoChangeFilesThresholdMap.get(projectId) == null) {
+		if (!projectToCoChangeFilesThresholdMap.containsKey(projectId)) {
 			projectToCoChangeFilesThresholdMap.put(projectId, DEFAULT_THRESHOLD_COCHANGE_FILES);
 		}
 		return projectToCoChangeFilesThresholdMap.get(projectId);
@@ -145,7 +139,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 		for (Smell smell : smells) {
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
 			Iterator<Node> iterator = containedNodes.iterator();
-			while (iterator.hasNext()) {
+			if (iterator.hasNext()) {
 				ProjectFile component = (ProjectFile) iterator.next();
 				Project project = containRelationService.findFileBelongToProject(component);
 				UnstableDependencyByHistory unstableDependencyByHistory = new UnstableDependencyByHistory();
@@ -158,10 +152,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 					ProjectFile fanOutFile = (ProjectFile) dependsOn.getEndNode();
 					List<CoChange> coChanges = gitAnalyseService.findCoChangeBetweenTwoFilesWithoutDirection(component,fanOutFile);
 					if(coChanges != null && !coChanges.isEmpty()) {
-						Integer times = coChanges.stream().mapToInt(CoChange::getTimes).sum();
-//						if(times >= getCoChangeTimesThreshold(project.getId())){
-//							allCoChanges.addAll(coChanges);
-//						}
+						int times = coChanges.stream().mapToInt(CoChange::getTimes).sum();
 						if(times >= DEFAULT_THRESHOLD_COCHANGE_TIMES){
 							allCoChanges.addAll(coChanges);
 						}
@@ -202,42 +193,33 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 	}
 
 	private UnstableDependencyByHistory isUnstableDependencyInFileLevel(Long projectId, ProjectFile file) {
+		UnstableDependencyByHistory result = null;
 		Integer fanOutThreshold = getFanOutThreshold(projectId);
-		Integer coChangeTimesThreshold = getCoChangeTimesThreshold(projectId);
-		Integer coChangeFilesThreshold = getCoChangeFilesThreshold(projectId);
 		Double minRatio = getProjectMinRatio(projectId);
 		Collection<DependsOn> fanOutDependencies = staticAnalyseService.findFileDependsOn(file);
-		if(fanOutDependencies.size() <= fanOutThreshold) {
-			return null;
-		}
-		Integer coChangeFilesCount = 0;
-		List<CoChange> allCoChanges = new ArrayList<>();
-		if(fanOutDependencies != null){
+		if(fanOutDependencies != null && fanOutDependencies.size() > fanOutThreshold) {
+			int coChangeFilesCount = 0;
+			List<CoChange> allCoChanges = new ArrayList<>();
 			for(DependsOn dependedOn : fanOutDependencies) {
 				// 遍历每个依赖File的文件，搜索协同修改次数
 				ProjectFile fanInFile = (ProjectFile)dependedOn.getEndNode();
 				List<CoChange> coChanges = gitAnalyseService.findCoChangeBetweenTwoFilesWithoutDirection(fanInFile,file);
 				if(coChanges != null && !coChanges.isEmpty()) {
-					Integer times = coChanges.stream().mapToInt(CoChange::getTimes).sum();
-//					if(times >= getCoChangeTimesThreshold(project.getId())){
-//							allCoChanges.addAll(coChanges);
-//					}
+					int times = coChanges.stream().mapToInt(CoChange::getTimes).sum();
 					if(times >= DEFAULT_THRESHOLD_COCHANGE_TIMES){
 						coChangeFilesCount++;
 					}
 					allCoChanges.addAll(coChanges);
 				}
 			}
-		}
-		UnstableDependencyByHistory result = null;
-		if((coChangeFilesCount*1.0) / fanOutDependencies.size() >= minRatio) {
-			result = new UnstableDependencyByHistory();
-			result.setComponent(file);
-			result.addAllFanOutDependencies(fanOutDependencies);
-			result.setFanOut(fanOutDependencies.size() );
-			result.addAllCoChanges(allCoChanges);
+			if((coChangeFilesCount*1.0) / fanOutDependencies.size() >= minRatio) {
+				result = new UnstableDependencyByHistory();
+				result.setComponent(file);
+				result.addAllFanOutDependencies(fanOutDependencies);
+				result.setFanOut(fanOutDependencies.size() );
+				result.addAllCoChanges(allCoChanges);
+			}
 		}
 		return result;
 	}
-
 }

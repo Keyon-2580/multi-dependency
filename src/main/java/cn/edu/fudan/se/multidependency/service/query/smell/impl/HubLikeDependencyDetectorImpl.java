@@ -13,8 +13,6 @@ import cn.edu.fudan.se.multidependency.repository.node.MetricRepository;
 import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
-import cn.edu.fudan.se.multidependency.service.query.history.GitAnalyseService;
-import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellUtils;
 import cn.edu.fudan.se.multidependency.service.query.smell.data.*;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
@@ -25,15 +23,10 @@ import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.repository.smell.ASRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.smell.HubLikeDependencyDetector;
-import cn.edu.fudan.se.multidependency.service.query.metric.FanIOMetric;
-import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 
 @Service
 public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector {
-
-	@Autowired
-	private MetricCalculatorService metricCalculatorService;
 
 	@Autowired
 	private NodeService nodeService;
@@ -51,9 +44,6 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 	private PackageRepository packageRepository;
 
 	@Autowired
-	private GitAnalyseService gitAnalyseService;
-
-	@Autowired
 	private MetricRepository metricRepository;
 
 	@Autowired
@@ -61,9 +51,6 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 
 	@Autowired
 	private ContainRelationService containRelationService;
-
-	@Autowired
-	private SmellDetectorService smellDetectorService;
 
 	public static final int DEFAULT_MIN_FILE_FAN_IN = 10;
 	public static final int DEFAULT_MIN_FILE_FAN_OUT = 10;
@@ -90,34 +77,9 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 		for (Smell smell : smells) {
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
 			Iterator<Node> iterator = containedNodes.iterator();
-			while (iterator.hasNext()) {
+			if (iterator.hasNext()) {
 				ProjectFile component = (ProjectFile) iterator.next();
 				FileHubLike fileHubLike = new FileHubLike(component, fileRepository.getFanIn(component.getId()), fileRepository.getFanOut(component.getId()));
-//				Collection<ProjectFile> fanInFiles = fileRepository.calculateFanIn(component.getId());
-//				List<CoChange> inCoChanges = new ArrayList<>();
-//				if(fanInFiles != null && !fanInFiles.isEmpty()){
-//					for(ProjectFile dependedByFile : fanInFiles) {
-//						// 遍历每个依赖File的文件，搜索协同修改次数
-//						CoChange cochange = gitAnalyseService.findCoChangeBetweenTwoFiles(component, dependedByFile);
-//						if(cochange != null) {
-//							inCoChanges.add(cochange);
-//						}
-//					}
-//				}
-//				fileHubLike.addAllCoChangesWithFanIn(inCoChanges);
-//
-//				Collection<ProjectFile> fanOutFiles = fileRepository.calculateFanOut(component.getId());
-//				List<CoChange> outCoChanges = new ArrayList<>();
-//				if(fanOutFiles != null && !fanOutFiles.isEmpty()){
-//					for(ProjectFile dependedOnFile : fanOutFiles) {
-//						// 遍历每个依赖File的文件，搜索协同修改次数
-//						CoChange cochange = gitAnalyseService.findCoChangeBetweenTwoFiles(component, dependedOnFile);
-//						if(cochange != null) {
-//							outCoChanges.add(cochange);
-//						}
-//					}
-//				}
-//				fileHubLike.addAllCoChangesWithFanOut(outCoChanges);
 				fileHubLikes.add(fileHubLike);
 			}
 		}
@@ -147,7 +109,7 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 		for (Smell smell : smells) {
 			Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
 			Iterator<Node> iterator = containedNodes.iterator();
-			while (iterator.hasNext()) {
+			if (iterator.hasNext()) {
 				Package component = (Package) iterator.next();
 				PackageHubLike packageHubLike = new PackageHubLike(component, packageRepository.getFanIn(component.getId()), packageRepository.getFanOut(component.getId()));
 				packageHubLikes.add(packageHubLike);
@@ -224,50 +186,6 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 			return new ArrayList<>();
 		}
 		return asRepository.findFileHubLikes(project.getId(), minFanIn, minFanOut);
-//		List<FileHubLike> result = new ArrayList<>();
-//		if(project == null) {
-//			return result;
-//		}
-//		List<FileMetrics> fileMetrics = metricCalculatorService.calculateProjectFileMetrics().get(project.getId());
-//		for(FileMetrics metric : fileMetrics) {
-//			if(isHubLikeComponent(metric, minFanIn, minFanOut)) {
-//				FileHubLike fileHubLike = new FileHubLike(metric.getFile(), metric.getFanIn(), metric.getFanOut());
-//				Collection<ProjectFile> fanInFiles = fileRepository.calculateFanIn(metric.getFile().getId());
-//				int inCoChangeFilesCount = 0;
-//				List<CoChange> inCoChanges = new ArrayList<>();
-//				if(fanInFiles != null && !fanInFiles.isEmpty()){
-//					for(ProjectFile dependedByFile : fanInFiles) {
-//						// 遍历每个依赖File的文件，搜索协同修改次数
-//						CoChange cochange = gitAnalyseService.findCoChangeBetweenTwoFiles(metric.getFile(), dependedByFile);
-//						if(cochange != null && cochange.getTimes() >= coChangeTimesThreshold) {
-//							inCoChangeFilesCount++;
-//							inCoChanges.add(cochange);
-//						}
-//					}
-//				}
-//				fileHubLike.addAllCoChangesWithFanIn(inCoChanges);
-//
-//				Collection<ProjectFile> fanOutFiles = fileRepository.calculateFanOut(metric.getFile().getId());
-//				int outCoChangeFilesCount = 0;
-//				List<CoChange> outCoChanges = new ArrayList<>();
-//				if(fanOutFiles != null && !fanOutFiles.isEmpty()){
-//					for(ProjectFile dependedOnFile : fanOutFiles) {
-//						// 遍历每个依赖File的文件，搜索协同修改次数
-//						CoChange cochange = gitAnalyseService.findCoChangeBetweenTwoFiles(metric.getFile(), dependedOnFile);
-//						if(cochange != null && cochange.getTimes() >= coChangeTimesThreshold) {
-//							outCoChangeFilesCount++;
-//							outCoChanges.add(cochange);
-//						}
-//					}
-//				}
-//				fileHubLike.addAllCoChangesWithFanOut(outCoChanges);
-//
-//				if((inCoChangeFilesCount + outCoChangeFilesCount) >= coChangeFilesThreshold){
-//					result.add(fileHubLike);
-//				}
-//			}
-//		}
-//		return result;
 	}
 
 	public List<PackageHubLike> packageHubLikes(Project project, int minFanIn, int minFanOut) {
@@ -284,10 +202,6 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 		List<ModuleHubLike> result = asRepository.findModuleHubLikes(project.getId(), minFanIn, minFanOut);
 		result.sort((p1, p2) -> (int) ((p2.getFanIn() + p2.getFanOut()) - (p1.getFanIn() + p1.getFanOut())));
 		return result;
-	}
-	
-	private boolean isHubLikeComponent(FanIOMetric metric, int minFanIn, int minFanOut) {
-		return metric.getFanIn() > minFanIn && metric.getFanOut() > minFanOut;
 	}
 
 	@Override
@@ -331,12 +245,6 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 				result[0] = DEFAULT_MIN_FILE_FAN_IN;
 				result[1] = DEFAULT_MIN_FILE_FAN_OUT;
 			}
-//			if (result[0] < DEFAULT_MIN_FILE_FAN_IN) {
-//				result[0] = DEFAULT_MIN_FILE_FAN_IN;
-//			}
-//			if (result[1] < DEFAULT_MIN_FILE_FAN_OUT) {
-//				result[1] = DEFAULT_MIN_FILE_FAN_OUT;
-//			}
 			projectToMinFileFanIOMap.put(projectId, result);
 		}
 		return projectToMinFileFanIOMap.get(projectId);
@@ -356,12 +264,6 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 				result[0] = DEFAULT_MIN_PACKAGE_FAN_IN;
 				result[1] = DEFAULT_MIN_PACKAGE_FAN_OUT;
 			}
-//			if (result[0] < DEFAULT_MIN_PACKAGE_FAN_IN) {
-//				result[0] = DEFAULT_MIN_PACKAGE_FAN_IN;
-//			}
-//			if (result[1] < DEFAULT_MIN_PACKAGE_FAN_OUT) {
-//				result[1] = DEFAULT_MIN_PACKAGE_FAN_OUT;
-//			}
 			projectToMinPackageFanIOMap.put(projectId, result);
 		}
 		return projectToMinPackageFanIOMap.get(projectId);
