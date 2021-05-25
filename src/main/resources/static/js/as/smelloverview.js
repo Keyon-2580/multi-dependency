@@ -312,6 +312,10 @@ let smellOverview = function() {
 		let allFilesPie = echarts.init(document.getElementById(allFilesPieDivId));
 		let smellAndIssueFilesPie = echarts.init(document.getElementById(smellAndIssueFilesPieDivId));
 		let issuesPie = echarts.init(document.getElementById(issuesDivId));
+
+		let totalfile1 = pies.normalFiles.length + pies.onlyIssueFiles.length + pies.issueAndSmellFiles.length + pies.onlySmellFiles.length;
+		let totalfile2 = pies.onlyIssueFiles.length + pies.issueAndSmellFiles.length + pies.onlySmellFiles.length;
+
 		let allFilesOption = {
 			title: {
 				text: '文件占比',
@@ -333,10 +337,14 @@ let smellOverview = function() {
 					radius: '55%',
 					center: ['50%', '60%'],
 					data: [
-						{value: pies.normalFiles.length, name: 'normalFiles'},
-						{value: pies.onlyIssueFiles.length, name: 'onlyIssueFiles'},
-						{value: pies.issueAndSmellFiles.length, name: 'issueAndSmellFiles'},
-						{value: pies.onlySmellFiles.length, name: 'onlySmellFiles'}
+						{value: pies.normalFiles.length
+							, name: 'normalFiles (' + ((pies.normalFiles.length / totalfile1) * 100).toFixed(2) + '%)'},
+						{value: pies.onlyIssueFiles.length
+							, name: 'onlyIssueFiles (' + ((pies.onlyIssueFiles.length / totalfile1) * 100).toFixed(2) + '%)'},
+						{value: pies.issueAndSmellFiles.length
+							, name: 'issueAndSmellFiles (' + ((pies.issueAndSmellFiles.length / totalfile1) * 100).toFixed(2) + '%)'},
+						{value: pies.onlySmellFiles.length
+							, name: 'onlySmellFiles (' + ((pies.onlySmellFiles.length / totalfile1) * 100).toFixed(2) + '%)'}
 					],
 					emphasis: {
 						itemStyle: {
@@ -371,9 +379,12 @@ let smellOverview = function() {
 					radius: '55%',
 					center: ['50%', '60%'],
 					data: [
-						{value: pies.onlyIssueFiles.length, name: 'onlyIssueFiles'},
-						{value: pies.issueAndSmellFiles.length, name: 'issueAndSmellFiles'},
-						{value: pies.onlySmellFiles.length, name: 'onlySmellFiles'}
+						{value: pies.onlyIssueFiles.length
+							, name: 'onlyIssueFiles (' + ((pies.onlyIssueFiles.length / totalfile2) * 100).toFixed(2) + '%)'},
+						{value: pies.issueAndSmellFiles.length
+							, name: 'issueAndSmellFiles (' + ((pies.issueAndSmellFiles.length / totalfile2) * 100).toFixed(2) + '%)'},
+						{value: pies.onlySmellFiles.length
+							, name: 'onlySmellFiles (' + ((pies.onlySmellFiles.length / totalfile2) * 100).toFixed(2) + '%)'}
 					],
 					emphasis: {
 						itemStyle: {
@@ -408,8 +419,10 @@ let smellOverview = function() {
 					radius: '55%',
 					center: ['50%', '60%'],
 					data: [
-						{value: (pies.allIssues.length - pies.smellIssues.length), name: '无Smell Files关联的Issues'},
-						{value: pies.smellIssues.length, name: '有Smell File关联的Issues'}
+						{value: (pies.allIssues.length - pies.smellIssues.length)
+							, name: '无Smell Files关联的Issues (' + (((pies.allIssues.length - pies.smellIssues.length) / pies.allIssues.length) * 100).toFixed(2) + '%)'},
+						{value: pies.smellIssues.length
+							, name: '有Smell File关联的Issues (' + ((pies.smellIssues.length / pies.allIssues.length) * 100).toFixed(2) + '%)'}
 					],
 					emphasis: {
 						itemStyle: {
