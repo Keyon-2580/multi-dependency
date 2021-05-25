@@ -199,7 +199,7 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 		Integer fanInThreshold = getFanInThreshold(projectId);
 		Double minRatio = getProjectMinRatio(projectId);
 		Collection<DependsOn> fanInDependencies = staticAnalyseService.findFileDependedOnBy(file);
-		if(fanInDependencies != null && fanInDependencies.size() <= fanInThreshold) {
+		if(fanInDependencies != null && fanInDependencies.size() > fanInThreshold) {
 			int coChangeFilesCount = 0;
 			List<CoChange> allCoChanges = new ArrayList<>();
 			for(DependsOn dependedOnBy : fanInDependencies) {
