@@ -97,19 +97,30 @@ public interface ASRepository extends Neo4jRepository<Project, Long> {
 	public void createProjectContainsModule();
 	
 	@Query("match (n:Module) with n "
-			+ "with "
-			+ "size ((:Module) - [:DEPENDS_ON] -> (n)) as fanIn, "
-			+ "size ( (n)-[:DEPENDS_ON]->(:Module) ) as fanOut, n "
+			+ "with n, size ((:Module) - [:DEPENDS_ON] -> (n)) as fanIn, "
+			+ "size ( (n)-[:DEPENDS_ON]->(:Module) ) as fanOut "
 			+ "set n.fanIn = fanIn, n.fanOut = fanOut "
 			+ "with n "
-			+ "match (n) where (n.fanIn + n.fanOut) <> 0 "
+			+ "match (n) where (n.fanIn + n.fanOut) > 0 "
 			+ "set n.instability = n.fanOut / (n.fanIn + n.fanOut + 0.0);")
 	public void setModuleInstability();
-	
-	@Query("match (n:ProjectFile) with n with size ((:ProjectFile) - [:DEPENDS_ON] -> (n)) as fanIn, size ( (n)-[:DEPENDS_ON]->(:ProjectFile) ) as fanOut, n set n.fanIn = fanIn, n.fanOut = fanOut with n match (n) where (n.fanIn + n.fanOut) <> 0 set n.instability = n.fanOut / (n.fanIn + n.fanOut + 0.0);")
+
+	@Query("match (n:ProjectFile) with n "
+			+ "with n, size ((:ProjectFile) - [:DEPENDS_ON] -> (n)) as fanIn, "
+			+ "size ( (n)-[:DEPENDS_ON]->(:ProjectFile) ) as fanOut "
+			+ "set n.fanIn = fanIn, n.fanOut = fanOut "
+			+ "with n "
+			+ "match (n) where (n.fanIn + n.fanOut) > 0 "
+			+ "set n.instability = n.fanOut / (n.fanIn + n.fanOut + 0.0);")
 	public void setFileInstability();
-	
-	@Query("match (n:Package) with n with size ((:Package) - [:DEPENDS_ON] -> (n)) as fanIn, size ( (n)-[:DEPENDS_ON]->(:Package) ) as fanOut, n set n.fanIn = fanIn, n.fanOut = fanOut with n match (n) where (n.fanIn + n.fanOut) <> 0 set n.instability = n.fanOut / (n.fanIn + n.fanOut + 0.0);")
+
+	@Query("match (n:Package) with n "
+			+ "with n, size ((:Package) - [:DEPENDS_ON] -> (n)) as fanIn, "
+			+ "size ( (n)-[:DEPENDS_ON]->(:Package) ) as fanOut "
+			+ "set n.fanIn = fanIn, n.fanOut = fanOut "
+			+ "with n "
+			+ "match (n) where (n.fanIn + n.fanOut) > 0 "
+			+ "set n.instability = n.fanOut / (n.fanIn + n.fanOut + 0.0);")
 	public void setPackageInstability();
 }
 
