@@ -269,6 +269,40 @@ var index = function(cytoscapeutil) {
 			});
 		});
 
+		$("#buttonProjectAbsolutePath").click(function(){
+			var projects = document.querySelector("#projectAbsolutePath").options;
+			var path = $("#setProjectAbsolutePath").val();
+			var projectId;
+			var params = [];
+			var len = projects.length;
+			var i = 0;
+			var j = 0;
+			for(i; i < len; i ++) {
+				if(projects[i].selected) {
+					projectId = projects[i].value;
+					console.log(projectId + " " + path);
+					params[j ++] = {
+						id: projectId,
+						path: path
+					};
+				}
+			}
+			$.ajax({
+				url : "/project/absolute",
+				type : "POST",
+				contentType : "application/json",
+				dataType : "json",
+				data : JSON.stringify(params),
+				success : function(result) {
+					if(result.result === "success") {
+						alert("设置成功 " + j.toString() + " 个路径！");
+					}
+					else {
+						alert("设置失败！");
+					}
+				}
+			});
+		})
 	};
 
 	return {
