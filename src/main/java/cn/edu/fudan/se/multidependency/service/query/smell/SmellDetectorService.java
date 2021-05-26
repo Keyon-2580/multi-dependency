@@ -44,9 +44,6 @@ public class SmellDetectorService {
 	@Autowired
 	private HubLikeDependencyDetector hubLikeDependencyDetector;
 
-//	@Autowired
-//	private UnstableDependencyDetectorUsingInstability unstableDependencyDetectorUsingInstability;
-
 	@Autowired
 	private UnstableDependencyDetectorUsingHistory unstableDependencyDetectorUsingHistory;
 
@@ -224,13 +221,12 @@ public class SmellDetectorService {
 			for (FileHubLike fileHubLikeDependency : entry.getValue()) {
 				Smell smell = new Smell();
 				smell.setName(fileSmellName + fileSmellIndex);
-				smell.setSize(1);
 				smell.setLanguage(project.getLanguage());
 				smell.setProjectId(projectId);
 				smell.setProjectName(project.getName());
 				smell.setType(SmellType.HUBLIKE_DEPENDENCY);
 				smell.setLevel(SmellLevel.FILE);
-				smells.add(smell);
+				int smellSize = 0;
 				Collection<DependsOn> fileDependsOns = staticAnalyseService.findFileDependsOn(fileHubLikeDependency.getFile());
 				if(fileDependsOns != null && !fileDependsOns.isEmpty()){
 					fileDependsOns.forEach(fileDpOn->{
@@ -238,6 +234,7 @@ public class SmellDetectorService {
 						RelateTo relateTo = new RelateTo(smell,fileOn);
 						smellRelateTos.add(relateTo);
 					});
+					smellSize += fileDependsOns.size();
 				}
 				Collection<DependsOn> fileDependsOnBys = staticAnalyseService.findFileDependedOnBy(fileHubLikeDependency.getFile());
 				if(fileDependsOnBys != null && !fileDependsOnBys.isEmpty()){
@@ -246,7 +243,10 @@ public class SmellDetectorService {
 						RelateTo relateTo = new RelateTo(smell,fileBy);
 						smellRelateTos.add(relateTo);
 					});
+					smellSize += fileDependsOnBys.size();
 				}
+				smell.setSize(smellSize);
+				smells.add(smell);
 				Contain contain = new Contain(smell, fileHubLikeDependency.getFile());
 				smellContains.add(contain);
 				fileSmellIndex ++;
@@ -703,10 +703,12 @@ public class SmellDetectorService {
 			LOGGER.info("重新创建...");
 		}
 		smellRepository.deleteSmellContainRelations(SmellType.UNUSED_INCLUDE);
+		smellRepository.deleteSmellRelateToRelations(SmellType.UNUSED_INCLUDE);
 		smellRepository.deleteSmellMetric(SmellType.UNUSED_INCLUDE);
 		smellRepository.deleteSmells(SmellType.UNUSED_INCLUDE);
 		List<Smell> smells = new ArrayList<>();
 		List<Contain> smellContains = new ArrayList<>();
+		List<RelateTo> smellRelateTos = new ArrayList<>();
 
 		Map<Long, List<UnusedInclude>> fileUnusedIncludeMap = unusedIncludeDetector.detectFileUnusedInclude();
 		String fileSmellName = SmellLevel.FILE + "_" + SmellType.UNUSED_INCLUDE + "_";
@@ -715,7 +717,6 @@ public class SmellDetectorService {
 			long projectId = entry.getKey();
 			Project project = (Project) projectRepository.queryNodeById(projectId);
 			for (UnusedInclude fileUnusedInclude : entry.getValue()) {
-				ProjectFile coreFile = fileUnusedInclude.getCoreFile();
 				Set<ProjectFile> unusedIncludeFiles = fileUnusedInclude.getUnusedIncludeFiles();
 				Smell smell = new Smell();
 				smell.setName(fileSmellName + fileSmellIndex);
@@ -725,19 +726,19 @@ public class SmellDetectorService {
 				smell.setProjectName(project.getName());
 				smell.setType(SmellType.UNUSED_INCLUDE);
 				smell.setLevel(SmellLevel.FILE);
-				smell.setCoreNodePath(coreFile.getPath());
-				smell.setCoreNodeId(coreFile.getId());
 				smells.add(smell);
 				for (ProjectFile unusedIncludeFile : unusedIncludeFiles) {
-					Contain contain = new Contain(smell, unusedIncludeFile);
-					smellContains.add(contain);
+					RelateTo relateTo = new RelateTo(smell, unusedIncludeFile);
+					smellRelateTos.add(relateTo);
 				}
+				Contain contain = new Contain(smell, fileUnusedInclude.getCoreFile());
+				smellContains.add(contain);
 				fileSmellIndex ++;
 			}
 		}
 		smellRepository.saveAll(smells);
 		containRepository.saveAll(smellContains);
+		relateToRepository.saveAll(smellRelateTos);
 		LOGGER.info("创建Unused Include Smell节点关系完成");
 	}
-
 }

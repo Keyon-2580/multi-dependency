@@ -52,6 +52,10 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 			"where id(smell) = $smellId return distinct node;")
 	Set<Node> findContainedNodesBySmellId(@Param("smellId") Long smellId);
 
+	@Query("match (smell:Smell) -[:" + RelationType.str_RELATE_TO + "]-(node) " +
+			"where id(smell) = $smellId return distinct node;")
+	Set<Node> findRelateToNodesBySmellId(@Param("smellId") Long smellId);
+
 	@Query("match (n:ProjectFile) where n.suffix=\".java\" set n.language = \"java\";")
 	void setJavaLanguageBySuffix();
 
@@ -236,11 +240,11 @@ public interface SmellRepository extends Neo4jRepository<Smell, Long> {
 			"RETURN  smell,issues,bugIssues,newFeatureIssues,improvementIssues;")
 	SmellMetric.DebtMetric calculateSmellDebtMetricInPackageLevel(@Param("smellId") long smellId);
 
-	@Query("match (smell:Smell)-[" + RelationType.str_CONTAIN + "]->(file:ProjectFile) " +
+	@Query("match (smell:Smell)-[:" + RelationType.str_CONTAIN + "]->(coreFile:ProjectFile) " +
 			"where id(smell) = $smellId " +
-			"with smell, collect(distinct file) as unusedIncludeFiles " +
-			"match (coreFile:ProjectFile) " +
-			"where id(coreFile) = smell.coreNodeId " +
+			"with smell, coreFile " +
+			"match (smell:Smell)-[:" + RelationType.str_RELATE_TO + "]->(unusedIncludeFile:ProjectFile) " +
+			"with coreFile, collect(distinct unusedIncludeFile) as unusedIncludeFiles " +
 			"return coreFile, unusedIncludeFiles;")
 	UnusedInclude getUnusedIncludeWithSmellId(@Param("smellId") long smellId);
 

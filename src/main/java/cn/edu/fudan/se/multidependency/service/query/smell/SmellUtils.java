@@ -15,4 +15,21 @@ public class SmellUtils {
             return Integer.compare(partition1, partition2);
         });
     }
+
+    public static int getSizeOfNodeByLoc(long loc) {
+        int size;
+        if (loc <= 500) {
+            size = 40;
+        }
+        else if (loc <= 1000) {
+            size = 50;
+        }
+        else if (loc <= 2000) {
+            size = 60;
+        }
+        else {
+            size = 70;
+        }
+        return size;
+    }
 }

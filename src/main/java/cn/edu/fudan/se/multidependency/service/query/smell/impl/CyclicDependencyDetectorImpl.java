@@ -408,7 +408,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 			nodeJson.put("name", sourceType.getSimpleName());
 			nodeJson.put("path", sourceType.getIdentifier());
 			nodeJson.put("label", i + 1);
-			nodeJson.put("size", getSizeOfNodeByLoc(sourceType.getEndLine() - sourceType.getStartLine()));
+			nodeJson.put("size", SmellUtils.getSizeOfNodeByLoc(sourceType.getEndLine() - sourceType.getStartLine()));
 			nodesJson.add(nodeJson);
 			for (int j = 0 ; j < length; j ++) {
 				Type targetType = types.get(j);
@@ -529,7 +529,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 			comboObject.put("name", combo.getName());
 			comboObject.put("path", combo.getDirectoryPath());
 			comboObject.put("label", index ++);
-			comboObject.put("size", getSizeOfNodeByLoc(combo.getLoc()));
+			comboObject.put("size", SmellUtils.getSizeOfNodeByLoc(combo.getLoc()));
 			comboObject.put("collapsed", false);
 			comboArray.add(comboObject);
 		}
@@ -539,7 +539,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 			nodeObject.put("name", node.getName());
 			nodeObject.put("path", node.getPath());
 			nodeObject.put("label", index ++);
-			nodeObject.put("size", getSizeOfNodeByLoc(node.getLoc()));
+			nodeObject.put("size", SmellUtils.getSizeOfNodeByLoc(node.getLoc()));
 			Package combo = containRelationService.findFileBelongToPackage(node);
 			if (combo != null) {
 				nodeObject.put("comboId", combo.getId().toString());
@@ -604,7 +604,7 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 			nodeJson.put("name", sourceFile.getName());
 			nodeJson.put("path", sourceFile.getPath());
 			nodeJson.put("label", i + 1);
-			nodeJson.put("size", getSizeOfNodeByLoc(sourceFile.getLoc()));
+			nodeJson.put("size", SmellUtils.getSizeOfNodeByLoc(sourceFile.getLoc()));
 			nodesJson.add(nodeJson);
 			for (int j = 0 ; j < length; j ++) {
 				ProjectFile targetFile = files.get(j);
@@ -636,23 +636,6 @@ public class CyclicDependencyDetectorImpl implements CyclicDependencyDetector {
 			cache.cache(getClass(), key, result);
 		}
 		return result;
-	}
-
-	private int getSizeOfNodeByLoc(long loc) {
-		int size;
-		if (loc <= 500) {
-			size = 40;
-		}
-		else if (loc <= 1000) {
-			size = 50;
-		}
-		else if (loc <= 2000) {
-			size = 60;
-		}
-		else {
-			size = 70;
-		}
-		return size;
 	}
 
 	@Override

@@ -6,7 +6,6 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellType;
-import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.SmellRepository;
 import cn.edu.fudan.se.multidependency.repository.smell.UnusedIncludeASRepository;
 import cn.edu.fudan.se.multidependency.service.query.CacheService;
@@ -41,9 +40,6 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
     @Autowired
     private SmellRepository smellRepository;
 
-    @Autowired
-    private ProjectFileRepository projectFileRepository;
-
     @Override
     public Map<Long, List<UnusedInclude>> queryFileUnusedInclude() {
         String key = "fileUnusedInclude";
@@ -72,51 +68,10 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
     @Override
     public Map<Long, List<UnusedInclude>> detectFileUnusedInclude() {
         Map<Long, List<UnusedInclude>> result = new HashMap<>();
-//        Set<UnusedInclude> headFileUnusedIncludeSet = new HashSet<>();
         Set<UnusedInclude> codeFileUnusedIncludeSet = new HashSet<>();
-//        headFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findUnusedIncludeWithSuffix(".h"));
-//        headFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findUnusedIncludeWithSuffix(".hpp"));
         codeFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findUnusedIncludeWithSuffix(".c"));
         codeFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findUnusedIncludeWithSuffix(".cc"));
         codeFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findUnusedIncludeWithSuffix(".cpp"));
-//        for (UnusedInclude headFileUnusedInclude : headFileUnusedIncludeSet) {
-//            ProjectFile headFile = headFileUnusedInclude.getCoreFile();
-//            //无后缀名的头文件名
-//            String headFileNameWithoutSuffix = headFile.getName().substring(0, headFile.getName().length() - headFile.getSuffix().length());
-//            Set<ProjectFile> allFiles = new HashSet<>(unusedIncludeASRepository.findFileByHeadFileId(headFile.getId()));
-//            Set<ProjectFile> codeFiles = new HashSet<>();
-//            //获取当前头文件对应的源文件，条件：名字相同、引用该同文件、后缀为.c/.cc/.cpp
-//            for (ProjectFile file : allFiles) {
-//                String codeFileNameWithoutSuffix = file.getName().substring(0, file.getName().length() - file.getSuffix().length());
-//                if (headFileNameWithoutSuffix.equals(codeFileNameWithoutSuffix) && (file.getSuffix().equals(".c") || file.getSuffix().equals(".cc") || file.getSuffix().equals(".cpp"))) {
-//                    codeFiles.add(file);
-//                }
-//            }
-//            if (!codeFiles.isEmpty()) {
-//                //任取一个元素做为该头文件的对应源文件，【待改】
-//                ProjectFile codeFile = codeFiles.iterator().next();
-//                Set<ProjectFile> headFileUnusedIncludeFileSet = new HashSet<>(headFileUnusedInclude.getUnusedIncludeFiles());
-//                Set<ProjectFile> codeFileUnusedIncludeFileSet = new HashSet<>();
-//                //获取该头文件无效引用中在源文件依旧无效的引用
-//                for (ProjectFile headFileUnusedIncludeFile : headFileUnusedIncludeFileSet) {
-//                    Boolean isUsedFile = unusedIncludeASRepository.isUsedFile(codeFile.getId(), headFileUnusedIncludeFile.getId());
-//                    if (isUsedFile == null || !isUsedFile) {
-//                        codeFileUnusedIncludeFileSet.add(headFileUnusedIncludeFile);
-//                    }
-//                }
-//                //更新最终结果，若没有该源文件则创建实例
-//                for (UnusedInclude codeUnusedInclude : codeFileUnusedIncludeSet) {
-//                    if (codeFile.getId().equals(codeUnusedInclude.getCoreFile().getId())) {
-//                        codeFileUnusedIncludeFileSet.addAll(codeUnusedInclude.getUnusedIncludeFiles());
-//                        codeFileUnusedIncludeSet.remove(codeUnusedInclude);
-//                        break;
-//                    }
-//                }
-//                if (codeFileUnusedIncludeFileSet.size() > 0) {
-//                    codeFileUnusedIncludeSet.add(new UnusedInclude(codeFile, codeFileUnusedIncludeFileSet));
-//                }
-//            }
-//        }
         List<UnusedInclude> codeFileUnusedIncludeList = new ArrayList<>(codeFileUnusedIncludeSet);
         codeFileUnusedIncludeList.sort((u1, u2) -> Integer.compare(u2.getUnusedIncludeFiles().size(), u1.getUnusedIncludeFiles().size()));
         for (UnusedInclude codeUnusedInclude : codeFileUnusedIncludeList) {
@@ -251,7 +206,12 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
         List<ProjectFile> files = new ArrayList<>();
         Long coreFileId = 0L;
         if (smell != null) {
-            ProjectFile coreFile = projectFileRepository.findFileById(smell.getCoreNodeId());
+            Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
+            Iterator<Node> iterator = containedNodes.iterator();
+            ProjectFile coreFile = null;
+            if (iterator.hasNext()) {
+                coreFile = (ProjectFile) iterator.next();
+            }
             if (coreFile != null) {
                 String key = smell.getId().toString();
                 if (cache.get(getClass(), key) != null) {
@@ -261,10 +221,10 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
                 coreFileId = coreFile.getId();
                 JSONObject smellJson = new JSONObject();
                 smellJson.put("name", smell.getName());
-                Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
+                Set<Node> relateToNodes = new HashSet<>(smellRepository.findRelateToNodesBySmellId(smell.getId()));
                 List<ProjectFile> smellFiles = new ArrayList<>();
-                for (Node containedNode : containedNodes) {
-                    smellFiles.add((ProjectFile) containedNode);
+                for (Node relateToNode : relateToNodes) {
+                    smellFiles.add((ProjectFile) relateToNode);
                 }
                 files.addAll(smellFiles);
                 JSONArray smellNodesJson = new JSONArray();
@@ -278,7 +238,7 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
                     smellNodesJson.add(smellNodeJson);
                 }
                 smellJson.put("nodes", smellNodesJson);
-                smellJson.put("coreFilePath", smell.getCoreNodePath());
+                smellJson.put("coreFilePath", coreFile.getPath());
                 smellsJson.add(smellJson);
                 int length = files.size();
                 for (int i = 0; i < length; i ++) {
@@ -288,7 +248,7 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
                     nodeJson.put("name", file.getName());
                     nodeJson.put("path", file.getPath());
                     nodeJson.put("label", i + 1);
-                    nodeJson.put("size", getSizeOfFileByLoc(file.getLoc()));
+                    nodeJson.put("size", SmellUtils.getSizeOfNodeByLoc(file.getLoc()));
                     nodesJson.add(nodeJson);
                     if (i > 0) {
                         JSONObject edgeJson = new JSONObject();
@@ -310,29 +270,17 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
         result.put("edges", edgesJson);
         result.put("smells", smellsJson);
         if (smell != null) {
-            ProjectFile coreFile = projectFileRepository.findFileById(smell.getCoreNodeId());
+            Set<Node> containedNodes = new HashSet<>(smellRepository.findContainedNodesBySmellId(smell.getId()));
+            Iterator<Node> iterator = containedNodes.iterator();
+            ProjectFile coreFile = null;
+            if (iterator.hasNext()) {
+                coreFile = (ProjectFile) iterator.next();
+            }
             if (coreFile != null) {
                 String key = smell.getId().toString();
                 cache.cache(getClass(), key, result);
             }
         }
         return result;
-    }
-
-    private int getSizeOfFileByLoc(int loc) {
-        int size;
-        if (loc <= 500) {
-            size = 40;
-        }
-        else if (loc <= 1000) {
-            size = 50;
-        }
-        else if (loc <= 2000) {
-            size = 60;
-        }
-        else {
-            size = 70;
-        }
-        return size;
     }
 }
