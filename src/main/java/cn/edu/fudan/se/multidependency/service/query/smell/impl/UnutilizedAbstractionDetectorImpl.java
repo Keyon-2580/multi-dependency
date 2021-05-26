@@ -120,8 +120,13 @@ public class UnutilizedAbstractionDetectorImpl implements UnutilizedAbstractionD
 			for(ProjectFile file : files) {
 				unutilizedFiles.add(new UnutilizedAbstraction<>(file));
 			}
+			sortFileUnutilizedAbstractionByPath(unutilizedFiles);
 			result.put(projectId, unutilizedFiles);
 		}
 		return result;
+	}
+
+	private void sortFileUnutilizedAbstractionByPath(List<UnutilizedAbstraction<ProjectFile>> fileUnutilizedAbstractionList) {
+		fileUnutilizedAbstractionList.sort(Comparator.comparing(fileUnutilizedAbstraction -> fileUnutilizedAbstraction.getComponent().getPath()));
 	}
 }

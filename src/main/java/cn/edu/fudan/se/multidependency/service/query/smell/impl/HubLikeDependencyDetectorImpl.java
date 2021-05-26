@@ -182,17 +182,21 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 	}
 
 	public List<FileHubLike> fileHubLikes(Project project, int minFanIn, int minFanOut) {
-		if(project == null) {
-			return new ArrayList<>();
+		List<FileHubLike> result = new ArrayList<>();
+		if(project != null) {
+			result.addAll(asRepository.findFileHubLikes(project.getId(), minFanIn, minFanOut));
 		}
-		return asRepository.findFileHubLikes(project.getId(), minFanIn, minFanOut);
+		sortFileHubLikeDependencyBySizeAndPath(result);
+		return result;
 	}
 
 	public List<PackageHubLike> packageHubLikes(Project project, int minFanIn, int minFanOut) {
-		if(project == null) {
-			return new ArrayList<>();
+		List<PackageHubLike> result = new ArrayList<>();
+		if(project != null) {
+			result.addAll(asRepository.findPackageHubLikes(project.getId(), minFanIn, minFanOut));
 		}
-		return asRepository.findPackageHubLikes(project.getId(), minFanIn, minFanOut);
+		sortPackageHubLikeDependencyBySizeAndPath(result);
+		return result;
 	}
 
 	public List<ModuleHubLike> moduleHubLikes(Project project, int minFanIn, int minFanOut) {
@@ -286,5 +290,25 @@ public class HubLikeDependencyDetectorImpl implements HubLikeDependencyDetector 
 			projectToMinModuleFanIOMap.put(projectId, result);
 		}
 		return projectToMinModuleFanIOMap.get(projectId);
+	}
+
+	private void sortFileHubLikeDependencyBySizeAndPath(List<FileHubLike> fileHubLikeDependencyList) {
+		fileHubLikeDependencyList.sort((fileHubLikeDependency1, fileHubLikeDependency2) -> {
+			int sizeCompare = Integer.compare(fileHubLikeDependency2.getFanIn() + fileHubLikeDependency2.getFanOut(), fileHubLikeDependency1.getFanIn() + fileHubLikeDependency1.getFanOut());
+			if (sizeCompare == 0) {
+				return fileHubLikeDependency1.getFile().getPath().compareTo(fileHubLikeDependency2.getFile().getPath());
+			}
+			return sizeCompare;
+		});
+	}
+
+	private void sortPackageHubLikeDependencyBySizeAndPath(List<PackageHubLike> packageHubLikeDependencyList) {
+		packageHubLikeDependencyList.sort((packageHubLikeDependency1, packageHubLikeDependency2) -> {
+			int sizeCompare = Long.compare(packageHubLikeDependency2.getFanIn() + packageHubLikeDependency2.getFanOut(), packageHubLikeDependency1.getFanIn() + packageHubLikeDependency1.getFanOut());
+			if (sizeCompare == 0) {
+				return packageHubLikeDependency1.getPck().getDirectoryPath().compareTo(packageHubLikeDependency2.getPck().getDirectoryPath());
+			}
+			return sizeCompare;
+		});
 	}
 }

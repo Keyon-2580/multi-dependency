@@ -169,6 +169,7 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 				}
 			}
 		}
+		sortFileImplicitCrossModuleDependencyByTimesAndPath(fileImplicitCrossModuleDependencyList);
 		for (LogicCouplingComponents<ProjectFile> fileImplicitCrossModuleDependency : fileImplicitCrossModuleDependencyList) {
 			Project project1 = containRelationService.findFileBelongToProject(fileImplicitCrossModuleDependency.getNode1());
 			Project project2 = containRelationService.findFileBelongToProject(fileImplicitCrossModuleDependency.getNode2());
@@ -200,6 +201,7 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 				}
 			}
 		}
+		sortPackageImplicitCrossModuleDependencyByTimesAndPath(packageImplicitCrossModuleDependencyList);
 		for (LogicCouplingComponents<Package> packageImplicitCrossModuleDependency : packageImplicitCrossModuleDependencyList) {
 			Project project1 = containRelationService.findPackageBelongToProject(packageImplicitCrossModuleDependency.getNode1());
 			Project project2 = containRelationService.findPackageBelongToProject(packageImplicitCrossModuleDependency.getNode2());
@@ -254,5 +256,26 @@ public class ImplicitCrossModuleDependencyDetectorImpl implements ImplicitCrossM
 			}
 		}
 		return projectToMinPackageCoChangeMap.get(projectId);
+
+	}
+
+	private void sortFileImplicitCrossModuleDependencyByTimesAndPath(List<LogicCouplingComponents<ProjectFile>> fileImplicitCrossModuleDependencyList) {
+		fileImplicitCrossModuleDependencyList.sort((fileImplicitCrossModuleDependency1, fileImplicitCrossModuleDependency2) -> {
+			int timesCompare = Integer.compare(fileImplicitCrossModuleDependency2.getCochangeTimes(), fileImplicitCrossModuleDependency1.getCochangeTimes());
+			if (timesCompare == 0) {
+				return fileImplicitCrossModuleDependency1.getNode1().getPath().compareTo(fileImplicitCrossModuleDependency2.getNode1().getPath());
+			}
+			return timesCompare;
+		});
+	}
+
+	private void sortPackageImplicitCrossModuleDependencyByTimesAndPath(List<LogicCouplingComponents<Package>> packageImplicitCrossModuleDependencyList) {
+		packageImplicitCrossModuleDependencyList.sort((packageImplicitCrossModuleDependency1, packageImplicitCrossModuleDependency2) -> {
+			int timesCompare = Integer.compare(packageImplicitCrossModuleDependency2.getCochangeTimes(), packageImplicitCrossModuleDependency1.getCochangeTimes());
+			if (timesCompare == 0) {
+				return packageImplicitCrossModuleDependency1.getNode1().getDirectoryPath().compareTo(packageImplicitCrossModuleDependency2.getNode1().getDirectoryPath());
+			}
+			return timesCompare;
+		});
 	}
 }

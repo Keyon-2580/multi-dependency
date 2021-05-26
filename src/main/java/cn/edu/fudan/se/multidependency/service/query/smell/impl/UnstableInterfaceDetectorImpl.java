@@ -187,6 +187,7 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 					}
 				}
 				if(!unstableInterfaces.isEmpty()){
+					sortFileUnstableInterfaceByRadioAndFanIn(unstableInterfaces);
 					result.put(project.getId(), unstableInterfaces);
 				}
 			}
@@ -227,5 +228,17 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 			}
 		}
 		return result;
+	}
+
+	private void sortFileUnstableInterfaceByRadioAndFanIn(List<UnstableInterface> fileUnstableInterfaceList) {
+		fileUnstableInterfaceList.sort((fileUnstableInterface1, fileUnstableInterface2) -> {
+			float radio1 = (float) ((fileUnstableInterface1.getFanIn() + 0.0) / fileUnstableInterface1.getCoChangeFiles().size());
+			float radio2 = (float) ((fileUnstableInterface2.getFanIn() + 0.0) / fileUnstableInterface2.getCoChangeFiles().size());
+			int radioCompare = Float.compare(radio1, radio2);
+			if (radioCompare == 0) {
+				return Integer.compare(fileUnstableInterface2.getFanIn(), fileUnstableInterface1.getFanIn());
+			}
+			return radioCompare;
+		});
 	}
 }

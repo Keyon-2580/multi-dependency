@@ -73,7 +73,7 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
         codeFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findUnusedIncludeWithSuffix(".cc"));
         codeFileUnusedIncludeSet.addAll(unusedIncludeASRepository.findUnusedIncludeWithSuffix(".cpp"));
         List<UnusedInclude> codeFileUnusedIncludeList = new ArrayList<>(codeFileUnusedIncludeSet);
-        codeFileUnusedIncludeList.sort((u1, u2) -> Integer.compare(u2.getUnusedIncludeFiles().size(), u1.getUnusedIncludeFiles().size()));
+        sortFileUnusedIncludeBySizeAndPath(codeFileUnusedIncludeList);
         for (UnusedInclude codeUnusedInclude : codeFileUnusedIncludeList) {
             Project project = containRelationService.findFileBelongToProject(codeUnusedInclude.getCoreFile());
             if (project != null) {
@@ -282,5 +282,15 @@ public class UnusedIncludeDetectorImpl implements UnusedIncludeDetector {
             }
         }
         return result;
+    }
+
+    private void sortFileUnusedIncludeBySizeAndPath(List<UnusedInclude> fileUnusedIncludeList) {
+        fileUnusedIncludeList.sort((unusedInclude1, unusedInclude2) -> {
+            int sizeCompare = Integer.compare(unusedInclude2.getUnusedIncludeFiles().size(), unusedInclude1.getUnusedIncludeFiles().size());
+            if (sizeCompare == 0) {
+                return unusedInclude1.getCoreFile().getPath().compareTo(unusedInclude2.getCoreFile().getPath());
+            }
+            return sizeCompare;
+        });
     }
 }

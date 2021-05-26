@@ -55,8 +55,8 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 	private final Map<Long, Double> projectToMinRatioMap = new ConcurrentHashMap<>();
 
 	public static final int DEFAULT_THRESHOLD_FAN_OUT = 10;
-	public static final int DEFAULT_THRESHOLD_COCHANGE_TIMES = 3;
-	public static final int DEFAULT_THRESHOLD_COCHANGE_FILES = 5;
+	public static final int DEFAULT_THRESHOLD_CO_CHANGE_TIMES = 3;
+	public static final int DEFAULT_THRESHOLD_CO_CHANGE_FILES = 5;
 	public static final double DEFAULT_MIN_RATIO = 0.5;
 
 	@Override
@@ -105,7 +105,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 				projectToCoChangeTimesThresholdMap.put(projectId, medFileCoChangeTimes);
 			}
 			else {
-				projectToCoChangeTimesThresholdMap.put(projectId, DEFAULT_THRESHOLD_COCHANGE_TIMES);
+				projectToCoChangeTimesThresholdMap.put(projectId, DEFAULT_THRESHOLD_CO_CHANGE_TIMES);
 			}
 		}
 		return projectToCoChangeTimesThresholdMap.get(projectId);
@@ -114,7 +114,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 	@Override
 	public Integer getCoChangeFilesThreshold(Long projectId) {
 		if (!projectToCoChangeFilesThresholdMap.containsKey(projectId)) {
-			projectToCoChangeFilesThresholdMap.put(projectId, DEFAULT_THRESHOLD_COCHANGE_FILES);
+			projectToCoChangeFilesThresholdMap.put(projectId, DEFAULT_THRESHOLD_CO_CHANGE_FILES);
 		}
 		return projectToCoChangeFilesThresholdMap.get(projectId);
 	}
@@ -153,7 +153,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 					List<CoChange> coChanges = gitAnalyseService.findCoChangeBetweenTwoFilesWithoutDirection(component,fanOutFile);
 					if(coChanges != null && !coChanges.isEmpty()) {
 						int times = coChanges.stream().mapToInt(CoChange::getTimes).sum();
-						if(times >= DEFAULT_THRESHOLD_COCHANGE_TIMES){
+						if(times >= DEFAULT_THRESHOLD_CO_CHANGE_TIMES){
 							allCoChanges.addAll(coChanges);
 						}
 					}
@@ -185,6 +185,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 					}
 				}
 				if(!unstableDependencies.isEmpty()){
+					sortFileUnstableDependencyByRadioAndFanOut(unstableDependencies);
 					result.put(project.getId(), unstableDependencies);
 				}
 			}
@@ -206,7 +207,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 				List<CoChange> coChanges = gitAnalyseService.findCoChangeBetweenTwoFilesWithoutDirection(fanInFile,file);
 				if(coChanges != null && !coChanges.isEmpty()) {
 					int times = coChanges.stream().mapToInt(CoChange::getTimes).sum();
-					if(times >= DEFAULT_THRESHOLD_COCHANGE_TIMES){
+					if(times >= DEFAULT_THRESHOLD_CO_CHANGE_TIMES){
 						coChangeFilesCount++;
 					}
 					allCoChanges.addAll(coChanges);
@@ -221,5 +222,17 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 			}
 		}
 		return result;
+	}
+
+	private void sortFileUnstableDependencyByRadioAndFanOut(List<UnstableDependencyByHistory> fileUnstableDependencyList) {
+		fileUnstableDependencyList.sort((fileUnstableDependency1, fileUnstableDependency2) -> {
+			float radio1 = (float) ((fileUnstableDependency1.getFanOut() + 0.0) / fileUnstableDependency1.getCoChangeFiles().size());
+			float radio2 = (float) ((fileUnstableDependency2.getFanOut() + 0.0) / fileUnstableDependency2.getCoChangeFiles().size());
+			int radioCompare = Float.compare(radio1, radio2);
+			if (radioCompare == 0) {
+				return Integer.compare(fileUnstableDependency2.getFanOut(), fileUnstableDependency1.getFanOut());
+			}
+			return radioCompare;
+		});
 	}
 }
