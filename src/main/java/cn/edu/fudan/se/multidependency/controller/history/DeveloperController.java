@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Controller
@@ -91,6 +93,12 @@ public class DeveloperController {
         for(int i = 0;i < packageSet.size(); i++){
             packageChangedTime.add(new DeveloperUpdateNode<>(packageSet.get(i), timeSet.get(i)));
         }
+        Collections.sort(packageChangedTime, new Comparator<DeveloperUpdateNode<Package>>() {
+            @Override
+            public int compare(DeveloperUpdateNode<Package> o1, DeveloperUpdateNode<Package> o2) {
+                return o2.getTimes() - o1.getTimes();
+            }
+        });
         request.setAttribute("packagetimes", packageChangedTime);
         return "relation/packages";
     }
