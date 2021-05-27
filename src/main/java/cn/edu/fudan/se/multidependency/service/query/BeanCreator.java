@@ -93,61 +93,86 @@ public class BeanCreator {
 		return true;
 	}
 
-	@Bean("createCoChanges")
-	public List<CoChange> createCoChanges(PropertyConfig propertyConfig, CoChangeRepository cochangeRepository, AggregationCoChangeRepository aggregationCoChangeRepository) {
-		List<CoChange> coChanges = new ArrayList<>();
-		if(propertyConfig.isCalculateCoChange()) {
-			coChanges = cochangeRepository.findCoChangesLimit();
-			if(coChanges != null && !coChanges.isEmpty()){
-				LOGGER.info("已存在CoChange关系" );
-				return coChanges;
-			}
-			else {
-				LOGGER.info("创建CoChange关系...");
-				cochangeRepository.deleteAll();
-				cochangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE);
-				cochangeRepository.updateCoChangesForFile();
-
-				LOGGER.info("创建Module CoChange关系...");
-				Map<String, List<CoChange>> coChangeMap = hotspotPackagePairDetector.detectHotspotPackagePairWithCoChange();
-				List<CoChange> moduleCoChangeList = new ArrayList<>(coChangeMap.get(RelationType.str_CO_CHANGE));
-				List<CoChange> aggregationCoChangeList = new ArrayList<>(coChangeMap.get(RelationType.str_AGGREGATION_CO_CHANGE));
-				List<CoChange> moduleCoChangeListTmp = new ArrayList<>();
-				List<AggregationCoChange> aggregationCoChangeListTmp = new ArrayList<>();
-				int size = 0;
-				for(CoChange coChange : moduleCoChangeList) {
-					moduleCoChangeListTmp.add(coChange);
-					if(++size > 500){
-						cochangeRepository.saveAll(moduleCoChangeListTmp);
-						moduleCoChangeListTmp.clear();
-						size = 0;
-					}
-				}
-				cochangeRepository.saveAll(moduleCoChangeListTmp);
-
-				LOGGER.info("创建Aggregation CoChange关系...");
-				size = 0;
-				for(CoChange coChange : aggregationCoChangeList) {
-					aggregationCoChangeListTmp.add(new AggregationCoChange(coChange));
-					if(++size > 500){
-						aggregationCoChangeRepository.saveAll(aggregationCoChangeListTmp);
-						aggregationCoChangeListTmp.clear();
-						size = 0;
-					}
-				}
-				aggregationCoChangeRepository.saveAll(aggregationCoChangeListTmp);
-			}
+	@Bean("setCoChange")
+	public List<CoChange> setCoChange(PropertyConfig propertyConfig, CoChangeRepository coChangeRepository) {
+		if (!propertyConfig.isSetCoChange()) {
+			return new ArrayList<>();
+		}
+		List<CoChange> coChanges = coChangeRepository.findCoChangesLimit();
+		if(coChanges != null && !coChanges.isEmpty()){
+			LOGGER.info("已存在CoChange关系" );
+		}
+		else {
+			LOGGER.info("创建CoChange关系...");
+			coChangeRepository.deleteAll();
+			coChangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE);
+			coChangeRepository.updateCoChangesForFile();
 		}
 		return coChanges;
 	}
 
-
-	@Bean("createDependsOn")
-	public List<DependsOn> createDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, AggregationDependsOnRepository aggregationDependsOnRepository, ProjectFileRepository fileRepository) {
-		if(!propertyConfig.isCalculateDependsOn()) {
+	@Bean("setModuleCoChange")
+	public List<CoChange> setModuleCoChange(PropertyConfig propertyConfig, CoChangeRepository coChangeRepository) {
+		if (!propertyConfig.isSetModuleCoChange()) {
 			return new ArrayList<>();
 		}
-		List<DependsOn> dependsOns = dependsOnRepository.findFileDependsWithLimit(10);
+		List<CoChange> moduleCoChanges = coChangeRepository.findModuleCoChangeLimit();
+		if(moduleCoChanges != null && !moduleCoChanges.isEmpty()){
+			LOGGER.info("已存在Module CoChange关系" );
+		}
+		else {
+			LOGGER.info("创建Module CoChange关系...");
+			Map<String, List<CoChange>> coChangeMap = hotspotPackagePairDetector.detectHotspotPackagePairWithCoChange();
+			List<CoChange> moduleCoChangeList = new ArrayList<>(coChangeMap.get(RelationType.str_CO_CHANGE));
+			List<CoChange> moduleCoChangeListTmp = new ArrayList<>();
+			int size = 0;
+			for(CoChange coChange : moduleCoChangeList) {
+				moduleCoChangeListTmp.add(coChange);
+				if(++size > 500){
+					coChangeRepository.saveAll(moduleCoChangeListTmp);
+					moduleCoChangeListTmp.clear();
+					size = 0;
+				}
+			}
+			coChangeRepository.saveAll(moduleCoChangeListTmp);
+		}
+		return moduleCoChanges;
+	}
+
+	@Bean("setAggregationCoChange")
+	public List<CoChange> setAggregationCoChange(PropertyConfig propertyConfig, CoChangeRepository coChangeRepository, AggregationCoChangeRepository aggregationCoChangeRepository) {
+		if (!propertyConfig.isSetAggregationCoChange()) {
+			return new ArrayList<>();
+		}
+		List<CoChange> aggregationCoChanges = coChangeRepository.findAggregationCoChangeLimit();
+		if(aggregationCoChanges != null && !aggregationCoChanges.isEmpty()){
+			LOGGER.info("已存在Aggregation CoChange关系" );
+		}
+		else {
+			LOGGER.info("创建Aggregation CoChange关系...");
+			Map<String, List<CoChange>> coChangeMap = hotspotPackagePairDetector.detectHotspotPackagePairWithCoChange();
+			List<CoChange> aggregationCoChangeList = new ArrayList<>(coChangeMap.get(RelationType.str_AGGREGATION_CO_CHANGE));
+			List<AggregationCoChange> aggregationCoChangeListTmp = new ArrayList<>();
+			int size = 0;
+			for(CoChange coChange : aggregationCoChangeList) {
+				aggregationCoChangeListTmp.add(new AggregationCoChange(coChange));
+				if(++size > 500){
+					aggregationCoChangeRepository.saveAll(aggregationCoChangeListTmp);
+					aggregationCoChangeListTmp.clear();
+					size = 0;
+				}
+			}
+			aggregationCoChangeRepository.saveAll(aggregationCoChangeListTmp);
+		}
+		return aggregationCoChanges;
+	}
+
+	@Bean("setDependsOn")
+	public List<DependsOn> setDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, ProjectFileRepository fileRepository) {
+		if (!propertyConfig.isSetDependsOn()) {
+			return new ArrayList<>();
+		}
+		List<DependsOn> dependsOns = dependsOnRepository.findFileDependsWithLimit();
 		if(dependsOns != null && !dependsOns.isEmpty()){
 			LOGGER.info("已存在Depends On关系" );
 		}
@@ -194,17 +219,23 @@ public class BeanCreator {
 			//计算文件的依赖PageRank值
 			fileRepository.pageRank(20, 0.85);
 		}
+		return dependsOns;
+	}
 
-		LOGGER.info("创建Module Depends On关系...");
-		List<DependsOn> moduleDependsOns = dependsOnRepository.findPackageDependsOnWithLimit(10);
+	@Bean("setModuleDependsOn")
+	public List<DependsOn> setModuleDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository) {
+		if (!propertyConfig.isSetModuleDependsOn()) {
+			return new ArrayList<>();
+		}
+		List<DependsOn> moduleDependsOns = dependsOnRepository.findModuleDependsOnWithLimit();
 		if(moduleDependsOns != null && !moduleDependsOns.isEmpty()){
 			LOGGER.info("已存在Module Depends On关系" );
-		}else {
+		}
+		else {
+			LOGGER.info("创建Module Depends On关系...");
 			Map<String, List<DependsOn>> dependsOnMap = hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOn();
 			List<DependsOn> moduleDependsOnList = new ArrayList<>(dependsOnMap.get(RelationType.str_DEPENDS_ON));
-			List<DependsOn> aggregationDependsOnList = new ArrayList<>(dependsOnMap.get(RelationType.str_AGGREGATION_DEPENDS_ON));
 			List<DependsOn> moduleDependsOnListTmp = new ArrayList<>();
-			List<AggregationDependsOn> aggregationDependsOnListTmp = new ArrayList<>();
 			int size = 0;
 			for(DependsOn dependsOn : moduleDependsOnList) {
 				moduleDependsOnListTmp.add(dependsOn);
@@ -215,9 +246,25 @@ public class BeanCreator {
 				}
 			}
 			dependsOnRepository.saveAll(moduleDependsOnListTmp);
+		}
+		return moduleDependsOns;
+	}
 
+	@Bean("setAggregationDependsOn")
+	public List<DependsOn> setAggregationDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, AggregationDependsOnRepository aggregationDependsOnRepository) {
+		if (!propertyConfig.isSetAggregationDependsOn()) {
+			return new ArrayList<>();
+		}
+		List<DependsOn> aggregationDependsOns = dependsOnRepository.findAggregationDependsOnWithLimit();
+		if(aggregationDependsOns != null && !aggregationDependsOns.isEmpty()){
+			LOGGER.info("已存在Aggregation Depends On关系" );
+		}
+		else {
 			LOGGER.info("创建Aggregation Depends On关系...");
-			size = 0;
+			Map<String, List<DependsOn>> dependsOnMap = hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOn();
+			List<DependsOn> aggregationDependsOnList = new ArrayList<>(dependsOnMap.get(RelationType.str_AGGREGATION_DEPENDS_ON));
+			List<AggregationDependsOn> aggregationDependsOnListTmp = new ArrayList<>();
+			int size = 0;
 			for(DependsOn dependsOn : aggregationDependsOnList) {
 				aggregationDependsOnListTmp.add(new AggregationDependsOn(dependsOn));
 				if(++size > 500){
@@ -227,11 +274,8 @@ public class BeanCreator {
 				}
 			}
 			aggregationDependsOnRepository.saveAll(aggregationDependsOnListTmp);
-
 		}
-
-//		configSmellDetect(propertyConfig, asRepository);
-		return dependsOns;
+		return aggregationDependsOns;
 	}
 
 	private void createDependsOnWithTimesInNode(DependsOnRepository dependsOnRepository,NodeLabelType nodeLabelType){
@@ -306,107 +350,108 @@ public class BeanCreator {
 	}
 
 
-	@Bean("createCloneGroup")
-	public List<CloneGroup> createCloneGroup(PropertyConfig propertyConfig, CloneGroupRepository cloneGroupRepository, CloneRepository cloneRepository) {
-		if(propertyConfig.isCalculateCloneGroup()) {
-			List<CloneGroup> cloneGroups = cloneGroupRepository.findCloneGroupWithLimit();
-			if ( cloneGroups != null && !cloneGroups.isEmpty()){
-				LOGGER.info("已存在Clone Group关系");
-			} else {
-				LOGGER.info("创建Clone Group关系...");
-				List<Clone> clones = cloneRepository.findClonesLimit();
-				if(clones == null || clones.isEmpty()){
-					LOGGER.info("不存在克隆数据，跳过分析！！！" );
-					return new ArrayList<>();
-				}
-				cloneGroupRepository.setJavaLanguageBySuffix();
-				cloneGroupRepository.setCppLanguageBySuffix();
-				cloneGroupRepository.deleteCloneGroupContainRelations();
-				cloneGroupRepository.deleteCloneGroupRelations();
-				cloneGroupRepository.setNodeGroup();
-				cloneGroupRepository.createFileCloneGroupRelations();
-				cloneGroupRepository.createTypeCloneGroupRelations();
-				cloneGroupRepository.createFunctionCloneGroupRelations();
-				cloneGroupRepository.createCloneGroupContainRelations();
-				cloneGroupRepository.setCloneGroupContainSize();
-				cloneGroupRepository.setCloneGroupLanguage();
-				LOGGER.info("创建Clone Group关系完成！！！");
-			}
-			return cloneGroups;
+	@Bean("setCloneGroup")
+	public List<CloneGroup> setCloneGroup(PropertyConfig propertyConfig, CloneGroupRepository cloneGroupRepository, CloneRepository cloneRepository) {
+		if (!propertyConfig.isSetCloneGroup()) {
+			return new ArrayList<>();
 		}
-		return new ArrayList<>();
+		List<CloneGroup> cloneGroups = cloneGroupRepository.findCloneGroupWithLimit();
+		if ( cloneGroups != null && !cloneGroups.isEmpty()){
+			LOGGER.info("已存在Clone Group关系");
+		}
+		else {
+			LOGGER.info("创建Clone Group关系...");
+			List<Clone> clones = cloneRepository.findClonesLimit();
+			if(clones == null || clones.isEmpty()){
+				LOGGER.info("不存在Clone数据，跳过分析！！！" );
+				return new ArrayList<>();
+			}
+			cloneGroupRepository.setJavaLanguageBySuffix();
+			cloneGroupRepository.setCppLanguageBySuffix();
+			cloneGroupRepository.deleteCloneGroupContainRelations();
+			cloneGroupRepository.deleteCloneGroupRelations();
+			cloneGroupRepository.setNodeGroup();
+			cloneGroupRepository.createFileCloneGroupRelations();
+			cloneGroupRepository.createTypeCloneGroupRelations();
+			cloneGroupRepository.createFunctionCloneGroupRelations();
+			cloneGroupRepository.createCloneGroupContainRelations();
+			cloneGroupRepository.setCloneGroupContainSize();
+			cloneGroupRepository.setCloneGroupLanguage();
+			LOGGER.info("创建Clone Group关系完成！！！");
+		}
+		return cloneGroups;
 	}
 
 
 	@Bean("setModuleClone")
 	public List<ModuleClone> setModuleClone(PropertyConfig propertyConfig, ModuleCloneRepository moduleCloneRepository,CloneRepository cloneRepository) {
-		if(propertyConfig.isSetModuleClone()) {
-			List<ModuleClone> moduleClones = moduleCloneRepository.getAllModuleCloneWithLimit();
-			if(moduleClones != null &&moduleClones.size() > 0) {
-				LOGGER.info("已存在Module Clone基础信息...");
-			}
-			else {
-				LOGGER.info("设置Module Clone基础信息...");
-				List<Clone> clones = cloneRepository.findClonesLimit();
-				if(clones == null || clones.isEmpty()){
-					LOGGER.info("不存在克隆数据，跳过分析！！！" );
-					return new ArrayList<>();
-				}
-				if(moduleCloneRepository.getNumberOfModuleClone() == 0) {
-					List<BasicDataForDoubleNodes<Node, Relation>> clonePackagePairs = summaryAggregationDataService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE));
-					for(BasicDataForDoubleNodes<Node, Relation> clonePackagePair : clonePackagePairs) {
-						CloneRelationDataForDoubleNodes<Node, Relation> packagePairCloneRelationData = (CloneRelationDataForDoubleNodes<Node, Relation>) clonePackagePair;
-						moduleCloneRepository.createModuleClone(
-								clonePackagePair.getNode1().getId(),
-								clonePackagePair.getNode2().getId(),
-								packagePairCloneRelationData.getClonePairs(),
-								packagePairCloneRelationData.getCloneNodesCount1(),
-								packagePairCloneRelationData.getCloneNodesCount2(),
-								packagePairCloneRelationData.getAllNodesCount1(),
-								packagePairCloneRelationData.getAllNodesCount2(),
-								packagePairCloneRelationData.getCloneNodesLoc1(),
-								packagePairCloneRelationData.getCloneNodesLoc2(),
-								packagePairCloneRelationData.getAllNodesLoc1(),
-								packagePairCloneRelationData.getAllNodesLoc2(),
-								packagePairCloneRelationData.getCloneType1Count(),
-								packagePairCloneRelationData.getCloneType2Count(),
-								packagePairCloneRelationData.getCloneType3Count(),
-								packagePairCloneRelationData.getCloneSimilarityValue()
-						);
-					}
-				}
-				LOGGER.info("设置Module Clone基础信息(co-change)...");
-				moduleCloneRepository.setCloneNodesCoChangeTimes(3);
-				moduleClones = moduleCloneRepository.getAllModuleClone();
-			}
-			return moduleClones;
+		if (!propertyConfig.isSetModuleClone()) {
+			return new ArrayList<>();
 		}
-		return new ArrayList<>();
+		List<ModuleClone> moduleClones = moduleCloneRepository.getAllModuleCloneWithLimit();
+		if(moduleClones != null &&moduleClones.size() > 0) {
+			LOGGER.info("已存在Module Clone关系...");
+		}
+		else {
+			LOGGER.info("创建Module Clone关系...");
+			List<Clone> clones = cloneRepository.findClonesLimit();
+			if(clones == null || clones.isEmpty()){
+				LOGGER.info("不存在Clone数据，跳过分析！！！" );
+				return new ArrayList<>();
+			}
+			if(moduleCloneRepository.getNumberOfModuleClone() == 0) {
+				List<BasicDataForDoubleNodes<Node, Relation>> clonePackagePairs = summaryAggregationDataService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE));
+				for(BasicDataForDoubleNodes<Node, Relation> clonePackagePair : clonePackagePairs) {
+					CloneRelationDataForDoubleNodes<Node, Relation> packagePairCloneRelationData = (CloneRelationDataForDoubleNodes<Node, Relation>) clonePackagePair;
+					moduleCloneRepository.createModuleClone(
+							clonePackagePair.getNode1().getId(),
+							clonePackagePair.getNode2().getId(),
+							packagePairCloneRelationData.getClonePairs(),
+							packagePairCloneRelationData.getCloneNodesCount1(),
+							packagePairCloneRelationData.getCloneNodesCount2(),
+							packagePairCloneRelationData.getAllNodesCount1(),
+							packagePairCloneRelationData.getAllNodesCount2(),
+							packagePairCloneRelationData.getCloneNodesLoc1(),
+							packagePairCloneRelationData.getCloneNodesLoc2(),
+							packagePairCloneRelationData.getAllNodesLoc1(),
+							packagePairCloneRelationData.getAllNodesLoc2(),
+							packagePairCloneRelationData.getCloneType1Count(),
+							packagePairCloneRelationData.getCloneType2Count(),
+							packagePairCloneRelationData.getCloneType3Count(),
+							packagePairCloneRelationData.getCloneSimilarityValue()
+					);
+				}
+			}
+//			LOGGER.info("设置Module Clone基础信息(co-change)...");
+			moduleCloneRepository.setCloneNodesCoChangeTimes(3);
+			moduleClones = moduleCloneRepository.getAllModuleClone();
+		}
+		return moduleClones;
 	}
 
 	@Bean("setAggregationClone")
 	public List<AggregationClone> setAggregationClone(PropertyConfig propertyConfig, AggregationCloneRepository aggregationCloneRepository,CloneRepository cloneRepository) {
-		if(propertyConfig.isSetAggregationClone()) {
-			List<AggregationClone> aggregationClone = aggregationCloneRepository.getAllAggregationClone();
-			if(aggregationClone != null && aggregationClone.size() > 0) {
-				LOGGER.info("已存在Aggregation Clone聚合结果...");
-			}
-			else {
-				LOGGER.info("设置Aggregation Clone聚合结果...");
-				List<Clone> clones = cloneRepository.findClonesLimit();
-				if(clones == null || clones.isEmpty()){
-					LOGGER.info("不存在克隆数据，跳过分析！！！" );
-					return new ArrayList<>();
-				}
-				if(aggregationCloneRepository.getNumberOfAggregationClone() == 0) {
-					Collection<HotspotPackagePair> hotspotPackagePairs = hotspotPackagePairDetector.detectHotspotPackagePairs();
-					AddChildrenPackages(-1, -1, hotspotPackagePairs, aggregationCloneRepository);
-				}
-				aggregationClone = aggregationCloneRepository.getAllAggregationClone();
-			}
-			return aggregationClone;
+		if (!propertyConfig.isSetAggregationClone()) {
+			return new ArrayList<>();
 		}
-		return new ArrayList<>();
+		List<AggregationClone> aggregationClone = aggregationCloneRepository.getAllAggregationClone();
+		if(aggregationClone != null && aggregationClone.size() > 0) {
+			LOGGER.info("已存在Aggregation Clone关系");
+		}
+		else {
+			LOGGER.info("创建Aggregation Clone关系...");
+			List<Clone> clones = cloneRepository.findClonesLimit();
+			if(clones == null || clones.isEmpty()){
+				LOGGER.info("不存在Clone数据，跳过分析！！！" );
+				return new ArrayList<>();
+			}
+			if(aggregationCloneRepository.getNumberOfAggregationClone() == 0) {
+				Collection<HotspotPackagePair> hotspotPackagePairs = hotspotPackagePairDetector.detectHotspotPackagePairs();
+				AddChildrenPackages(-1, -1, hotspotPackagePairs, aggregationCloneRepository);
+			}
+			aggregationClone = aggregationCloneRepository.getAllAggregationClone();
+		}
+		return aggregationClone;
 	}
 
 	public void AddChildrenPackages(long parent1Id, long parent2Id, Collection<HotspotPackagePair> hotspotPackagePairs, AggregationCloneRepository aggregationCloneRepository) {
@@ -451,7 +496,7 @@ public class BeanCreator {
 		LOGGER.info("创建GitRepo Metric度量值节点和关系...");
 		metricCalculatorService.createGitRepoMetric(false);
 
-		if(propertyConfig.isCalModularity()){
+		if(propertyConfig.isCalculateModularity()){
 			LOGGER.info("计算Project模块性度量值...");
 			projectRepository.queryAllProjects().forEach( (project) ->{
 				if(project.getModularity() <= 0.0){
@@ -496,7 +541,7 @@ public class BeanCreator {
 			asRepository.setFileInstability();
 			asRepository.setPackageInstability();
 
-			if(propertyConfig.isCalculateDependsOn()) {
+			if(propertyConfig.isSetDependsOn()) {
 				LOGGER.info("创建Cyclic Dependency Smell节点关系...");
 				smellDetectorService.createCycleDependencySmells(false);
 
@@ -506,7 +551,7 @@ public class BeanCreator {
 				LOGGER.info("创建Unstable Dependency Smell节点关系...");
 				smellDetectorService.createUnstableDependencySmells(false);
 
-				if(propertyConfig.isCalculateCoChange()){
+				if(propertyConfig.isSetCoChange()){
 					LOGGER.info("创建Unstable Interface Smell节点关系...");
 					smellDetectorService.createUnstableInterfaceSmells(false);
 				}
@@ -518,17 +563,17 @@ public class BeanCreator {
 				smellDetectorService.createUnusedIncludeSmells(false);
 			}
 
-			if(propertyConfig.isCalculateCloneGroup()){
+			if(propertyConfig.isSetCloneGroup()){
 				LOGGER.info("创建Clone Smell节点关系...");
 				smellDetectorService.createCloneSmells(false);
 			}
 
-			if(propertyConfig.isCalculateCloneGroup() && propertyConfig.isCalculateCloneGroup()){
+			if(propertyConfig.isSetCloneGroup() && propertyConfig.isSetCloneGroup()){
 				LOGGER.info("创建Similar Components Smell节点关系...");
 //				smellDetectorService.createSimilarComponentsSmells(false);
 			}
 
-			if(propertyConfig.isCalculateCoChange()){
+			if(propertyConfig.isSetCoChange()){
 				LOGGER.info("创建Implicit Cross Module Dependency Smell节点关系...");
 				smellDetectorService.createImplicitCrossModuleDependencySmells(false);
 			}

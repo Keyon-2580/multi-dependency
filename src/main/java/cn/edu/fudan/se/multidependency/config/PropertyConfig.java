@@ -9,23 +9,39 @@ import lombok.Getter;
 public class PropertyConfig {
 	
 	@Getter
-	@Value("${config.starter.cochange}")
-	private boolean calculateCoChange;
+	@Value("${config.starter.co-change.co-change}")
+	private boolean setCoChange;
+
+	@Getter
+	@Value("${config.starter.co-change.module_co-change}")
+	private boolean setModuleCoChange;
+
+	@Getter
+	@Value("${config.starter.co-change.aggregation_co-change}")
+	private boolean setAggregationCoChange;
 	
 	@Getter
-	@Value("${config.starter.depends_on}")
-	private boolean calculateDependsOn;
+	@Value("${config.starter.depends_on.depends_on}")
+	private boolean setDependsOn;
 
 	@Getter
-	@Value("${config.starter.clone_group}")
-	private boolean calculateCloneGroup;
+	@Value("${config.starter.depends_on.module_depends_on}")
+	private boolean setModuleDependsOn;
 
 	@Getter
-	@Value("${config.starter.module_clone}")
+	@Value("${config.starter.depends_on.aggregation_depends_on}")
+	private boolean setAggregationDependsOn;
+
+	@Getter
+	@Value("${config.starter.clone.clone_group}")
+	private boolean setCloneGroup;
+
+	@Getter
+	@Value("${config.starter.clone.module_clone}")
 	private boolean setModuleClone;
 
 	@Getter
-	@Value("${config.starter.aggregation_clone}")
+	@Value("${config.starter.clone.aggregation_clone}")
 	private boolean setAggregationClone;
 	
 	@Getter
@@ -34,7 +50,7 @@ public class PropertyConfig {
 
 	@Getter
 	@Value("${config.starter.modularity}")
-	private boolean calModularity;
+	private boolean calculateModularity;
 
 	@Getter
 	@Value("${config.starter.export_cyclic_dependency}")

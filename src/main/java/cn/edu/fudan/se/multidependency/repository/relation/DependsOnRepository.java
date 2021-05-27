@@ -4,6 +4,8 @@ import java.util.*;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.node.smell.Smell;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.PckNumber;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -18,14 +20,17 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query("match p=(:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(:ProjectFile) return p;")
 	List<DependsOn> findFileDepends();
 
-	@Query("match p=(:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(:ProjectFile) return p limit $limitNum;")
-	List<DependsOn> findFileDependsWithLimit(@Param("limitNum") int limitNum);
+	@Query("match p=(:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(:ProjectFile) return p limit 10;")
+	List<DependsOn> findFileDependsWithLimit();
 
 	@Query("match p=(:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(:Package) return p")
-	List<DependsOn> findPackageDependsOn();
+	List<DependsOn> findModuleDependsOn();
 
-	@Query("match p=(:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(:Package) return p limit $limitNum;")
-	List<DependsOn> findPackageDependsOnWithLimit(@Param("limitNum") int limitNum);
+	@Query("match p=(:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(:Package) return p limit 10;")
+	List<DependsOn> findModuleDependsOnWithLimit();
+
+	@Query("match p=(:Package)-[:" + RelationType.str_AGGREGATION_DEPENDS_ON + "]->(:Package) return p limit 10;")
+	List<DependsOn> findAggregationDependsOnWithLimit();
 
 	@Query("match p=(:Type)-[:" + RelationType.str_DEPENDS_ON + "]->(:Type) return p;")
 	List<DependsOn> findTypeDepends();
@@ -60,7 +65,7 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	
 
 	@Query("match p=(pck:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(:Package) where id(pck)=$id return p")
-	List<DependsOn> findPackageDependsOn(@Param("id") long packageId);
+	List<DependsOn> findModuleDependsOn(@Param("id") long packageId);
 
 	@Query("match p=(:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(pck:Package) where id(pck)=$id return p")
 	List<DependsOn> findPackageDependedOnBy(@Param("id") long packageId);

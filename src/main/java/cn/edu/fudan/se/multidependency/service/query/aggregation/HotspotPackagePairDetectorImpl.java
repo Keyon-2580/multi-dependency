@@ -21,6 +21,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.clone.ModuleCloneRepo
 import cn.edu.fudan.se.multidependency.repository.relation.git.AggregationCoChangeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileRepository;
+import cn.edu.fudan.se.multidependency.service.query.CacheService;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.data.*;
 import cn.edu.fudan.se.multidependency.service.query.clone.BasicCloneQueryService;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
@@ -29,7 +30,6 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import scala.language;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -73,6 +73,9 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 	@Autowired
 	private NodeService nodeService;
 
+	@Autowired
+	private CacheService cache;
+
 	@Override
 	public List<HotspotPackagePair> detectHotspotPackagePairs() {
 		return detectHotspotPackagePairWithFileClone();
@@ -80,6 +83,10 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 
 	@Override
 	public Map<String, List<DependsOn>> detectHotspotPackagePairWithDependsOn() {
+		String key = "hotspotPackagePairWithDependsOn";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
 		Map<String, List<DependsOn>> result = new HashMap<>();
 		Map<Package, Map<Package, List<DependsOn>>> packageDependsOnMap = new HashMap<>();
 		List<DependsOn> fileDependsOnList = dependsOnRepository.findFileDepends();
@@ -195,10 +202,10 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 					}
 				}
 				for(DependsOn dependsOn : dependsOnList1) {
-					dependsOn.getDependsOnTypes().forEach((key, value) -> {
-						Double weight = RelationType.relationWeights.get(RelationType.valueOf(key));
+					dependsOn.getDependsOnTypes().forEach((type, times) -> {
+						Double weight = RelationType.relationWeights.get(RelationType.valueOf(type));
 						if(weight != null){
-							BigDecimal weightedTimes  =  new BigDecimal(value * weight);
+							BigDecimal weightedTimes  =  new BigDecimal(times * weight);
 							dependsOn.addWeightedTimes(weightedTimes.setScale(2, RoundingMode.HALF_UP).doubleValue());
 						}
 					});
@@ -213,6 +220,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		}
 		result.put(RelationType.str_DEPENDS_ON, moduleDependsOnList);
 		result.put(RelationType.str_AGGREGATION_DEPENDS_ON, aggregationDependsOnList);
+		cache.cache(getClass(), key, result);
 		return result;
 	}
 
@@ -222,7 +230,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		List<HotspotPackagePair> allHotspotPackagePair = new ArrayList<>();
 		Map<String, Map<Boolean, Integer>> hotspotPackagePairMap = new HashMap<>();
 		List<String> keyList = new ArrayList<>();
-		List<DependsOn> moduleDependsOnList = dependsOnRepository.findPackageDependsOn();
+		List<DependsOn> moduleDependsOnList = dependsOnRepository.findModuleDependsOn();
 		List<AggregationDependsOn> aggregationDependsOnList = aggregationDependsOnRepository.findAggregationDependsOn();
 		//将DependsOn原始数据转化为HotspotPackagePair
 		if(moduleDependsOnList != null && !moduleDependsOnList.isEmpty()) {
@@ -981,6 +989,10 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 
 	@Override
 	public Map<String, List<CoChange>> detectHotspotPackagePairWithCoChange() {
+		String key = "hotspotPackagePairWithCoChange";
+		if(cache.get(getClass(), key) != null) {
+			return cache.get(getClass(), key);
+		}
 		Map<String, List<CoChange>> result = new HashMap<>();
 		List<CoChange> fileCoChangeList = coChangeRepository.findFileCoChange();
 		List<CoChange> moduleCoChangeList = new ArrayList<>();
@@ -994,9 +1006,9 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 			for(CoChange fileCoChange : fileCoChangeList) {
 				Package pck1 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getStartNode().getId());
 				Package pck2 = coChangeRepository.findFileBelongPackageByFileId(fileCoChange.getEndNode().getId());
-				String key = String.join("_", pck1.getDirectoryPath(), pck2.getDirectoryPath());
-				if(!keyList.contains(key) && isParentPackages(pck1, pck2)) {
-					keyList.add(key);
+				String pathKey = String.join("_", pck1.getDirectoryPath(), pck2.getDirectoryPath());
+				if(!keyList.contains(pathKey) && isParentPackages(pck1, pck2)) {
+					keyList.add(pathKey);
 					Set<Commit> pck1OriginalCommitSet = new HashSet<>(commitUpdateFileRepository.findCommitInPackageByPackageId(pck1.getId()));
 					Set<Commit> pck2OriginalCommitSet = new HashSet<>(commitUpdateFileRepository.findCommitInPackageByPackageId(pck2.getId()));
 					Map<Package, Set<Commit>> pck1OriginalCommitMat = packageOriginalCommitMap.getOrDefault(pck1, new HashMap<>());
@@ -1010,7 +1022,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 						Package currentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
 						Package currentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
 						String currentKey = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
-						if(!isAggregationMap.containsKey(key) || (isAggregationMap.containsKey(key) && !isAggregationMap.get(key))) {
+						if(!isAggregationMap.containsKey(pathKey) || (isAggregationMap.containsKey(pathKey) && !isAggregationMap.get(pathKey))) {
 							isAggregationMap.put(currentKey, isAggregation);
 						}
 						Map<Package, Set<Commit>> pck1AggregateCommitMat = packagesAggregateCommitMap.getOrDefault(currentPackage1, new HashMap<>());
@@ -1044,9 +1056,9 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 				while(isParentPackages(pck1, pck2)) {
 					Package currentPackage1 = pck1.getId() < pck2.getId() ? pck1 : pck2;
 					Package currentPackage2 = pck1.getId() < pck2.getId() ? pck2 : pck1;
-					String key = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
-					if(!keyList.contains(key)) {
-						keyList.add(key);
+					String pathKey = String.join("_", currentPackage1.getDirectoryPath(), currentPackage2.getDirectoryPath());
+					if(!keyList.contains(pathKey)) {
+						keyList.add(pathKey);
 						Set<Commit> currentPackage1OriginalCommitSet = packageOriginalCommitMap.getOrDefault(currentPackage1, new HashMap<>()).getOrDefault(currentPackage2, new HashSet<>());
 						Set<Commit> currentPackage2OriginalCommitSet = packageOriginalCommitMap.getOrDefault(currentPackage2, new HashMap<>()).getOrDefault(currentPackage1, new HashSet<>());
 						Set<Commit> currentPackage1AggregateCommitSet = packagesAggregateCommitMap.getOrDefault(currentPackage1, new HashMap<>()).getOrDefault(currentPackage2, new HashSet<>());
@@ -1062,7 +1074,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 							moduleCoChange.setNode2ChangeTimes(currentPackage2AggregateCommitSet.size());
 							moduleCoChangeList.add(moduleCoChange);
 						}
-						if(isAggregationMap.get(key) && currentPackagesAggregateCommitSet.size() > 0) {
+						if(isAggregationMap.get(pathKey) && currentPackagesAggregateCommitSet.size() > 0) {
 							CoChange aggregationCoChange = new CoChange(currentPackage1, currentPackage2);
 							aggregationCoChange.setTimes(currentPackagesAggregateCommitSet.size());
 							aggregationCoChange.setNode1ChangeTimes(currentPackage1AggregateCommitSet.size());
@@ -1087,6 +1099,7 @@ public class HotspotPackagePairDetectorImpl implements HotspotPackagePairDetecto
 		}
 		result.put(RelationType.str_CO_CHANGE, moduleCoChangeList);
 		result.put(RelationType.str_AGGREGATION_CO_CHANGE, aggregationCoChangeList);
+		cache.cache(getClass(), key, result);
 		return result;
 	}
 

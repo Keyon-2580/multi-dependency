@@ -103,14 +103,20 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
      * @param
      * @return
      */
-    @Query("match p = ()-[:" + RelationType.str_CO_CHANGE + "]->() return p limit 10")
-    List<CoChange> findCoChangesLimit();
-
     @Query("match p = (:ProjectFile)-[:" + RelationType.str_CO_CHANGE + "]->(:ProjectFile) return p")
     List<CoChange> findFileCoChange();
 
+    @Query("match p = ()-[:" + RelationType.str_CO_CHANGE + "]->() return p limit 10")
+    List<CoChange> findCoChangesLimit();
+
     @Query("match p = (:Package)-[:" + RelationType.str_CO_CHANGE + "]->(:Package) return p")
     List<CoChange> findModuleCoChange();
+
+    @Query("match p = (:Package)-[:" + RelationType.str_CO_CHANGE + "]->(:Package) return p limit 10")
+    List<CoChange> findModuleCoChangeLimit();
+
+    @Query("match p = (:Package)-[:" + RelationType.str_AGGREGATION_CO_CHANGE + "]->(:Package) return p limit 10")
+    List<CoChange> findAggregationCoChangeLimit();
 
     @Query("match p = (p1:Package)-[:" + RelationType.str_CO_CHANGE + "]-(p2:Package) " +
             "where id(p1) = $pckId1 and id(p2) = $pckId2 return p")

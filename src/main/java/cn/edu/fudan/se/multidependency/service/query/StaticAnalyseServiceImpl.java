@@ -700,7 +700,7 @@ public class StaticAnalyseServiceImpl implements StaticAnalyseService {
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
-		List<DependsOn> result = dependsOnRepository.findPackageDependsOn(pck.getId());
+		List<DependsOn> result = dependsOnRepository.findModuleDependsOn(pck.getId());
 		result.sort((d1, d2)->{
 			Package pck1 = (Package) d1.getEndNode();
 			Package pck2 = (Package) d2.getEndNode();

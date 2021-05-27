@@ -121,7 +121,7 @@ public class UnstableDependencyDetectorUsingInstabilityImpl implements UnstableD
 				Package component = (Package) iterator.next();
 				UnstableDependencyByInstability<Package> packageUnstableDependency = new UnstableDependencyByInstability<>();
 				packageUnstableDependency.setComponent(component);
-				List<DependsOn> dependsOns = dependsOnRepository.findPackageDependsOn(component.getId());
+				List<DependsOn> dependsOns = dependsOnRepository.findModuleDependsOn(component.getId());
 				packageUnstableDependency.addAllTotalDependencies(dependsOns);
 				for(DependsOn dependsOn : dependsOns) {
 					Package dependsOnPackage = (Package) dependsOn.getEndNode();
