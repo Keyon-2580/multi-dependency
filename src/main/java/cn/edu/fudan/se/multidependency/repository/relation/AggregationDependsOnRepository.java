@@ -15,6 +15,6 @@ public interface AggregationDependsOnRepository extends Neo4jRepository<Aggregat
 	@Query("match p=(:Package)-[:" + RelationType.str_AGGREGATION_DEPENDS_ON + "]->(:Package) return p;")
 	List<AggregationDependsOn> findAggregationDependsOn();
 
-	@Query("match p=(:Package)-[:" + RelationType.str_AGGREGATION_DEPENDS_ON + "]->(:Package) return p limit $limitNum;")
-	List<AggregationDependsOn> findAggregationDependsOnWithLimit(@Param("limitNum") int limitNum);
+	@Query("match p=(:Package)-[:" + RelationType.str_AGGREGATION_DEPENDS_ON + "]->(:Package) return p limit 10;")
+	List<AggregationDependsOn> findAggregationDependsOnWithLimit();
 }

@@ -27,9 +27,6 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query("match p=(:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(:Package) return p limit 10;")
 	List<DependsOn> findModuleDependsOnWithLimit();
 
-	@Query("match p=(:Package)-[:" + RelationType.str_AGGREGATION_DEPENDS_ON + "]->(:Package) return p limit 10;")
-	List<DependsOn> findAggregationDependsOnWithLimit();
-
 	@Query("match p=(:Type)-[:" + RelationType.str_DEPENDS_ON + "]->(:Type) return p;")
 	List<DependsOn> findTypeDepends();
 

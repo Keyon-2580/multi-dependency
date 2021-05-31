@@ -105,6 +105,7 @@ public class BeanCreator {
 		else {
 			LOGGER.info("创建CoChange关系...");
 			coChangeRepository.deleteAll();
+
 			coChangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE);
 			coChangeRepository.updateCoChangesForFile();
 		}
@@ -141,17 +142,19 @@ public class BeanCreator {
 	}
 
 	@Bean("setAggregationCoChange")
-	public List<CoChange> setAggregationCoChange(PropertyConfig propertyConfig, CoChangeRepository coChangeRepository, AggregationCoChangeRepository aggregationCoChangeRepository) {
+	public List<AggregationCoChange> setAggregationCoChange(PropertyConfig propertyConfig, CoChangeRepository coChangeRepository, AggregationCoChangeRepository aggregationCoChangeRepository) {
 //		if (!propertyConfig.isSetAggregationCoChange()) {
 		if (!propertyConfig.isSetCoChange()) {
 			return new ArrayList<>();
 		}
-		List<CoChange> aggregationCoChanges = coChangeRepository.findAggregationCoChangeLimit();
+		List<AggregationCoChange> aggregationCoChanges = aggregationCoChangeRepository.findAggregationCoChangeLimit();
 		if(aggregationCoChanges != null && !aggregationCoChanges.isEmpty()){
 			LOGGER.info("已存在Aggregation CoChange关系" );
 		}
 		else {
 			LOGGER.info("创建Aggregation CoChange关系...");
+			aggregationCoChangeRepository.deleteAll();
+
 			Map<String, List<CoChange>> coChangeMap = hotspotPackagePairDetector.detectHotspotPackagePairWithCoChange();
 			List<CoChange> aggregationCoChangeList = new ArrayList<>(coChangeMap.get(RelationType.str_AGGREGATION_CO_CHANGE));
 			List<AggregationCoChange> aggregationCoChangeListTmp = new ArrayList<>();
@@ -254,17 +257,19 @@ public class BeanCreator {
 	}
 
 	@Bean("setAggregationDependsOn")
-	public List<DependsOn> setAggregationDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, AggregationDependsOnRepository aggregationDependsOnRepository) {
+	public List<AggregationDependsOn> setAggregationDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, AggregationDependsOnRepository aggregationDependsOnRepository) {
 //		if (!propertyConfig.isSetAggregationDependsOn()) {
 		if (!propertyConfig.isSetDependsOn()) {
 			return new ArrayList<>();
 		}
-		List<DependsOn> aggregationDependsOns = dependsOnRepository.findAggregationDependsOnWithLimit();
+		List<AggregationDependsOn> aggregationDependsOns = aggregationDependsOnRepository.findAggregationDependsOnWithLimit();
 		if(aggregationDependsOns != null && !aggregationDependsOns.isEmpty()){
 			LOGGER.info("已存在Aggregation Depends On关系" );
 		}
 		else {
 			LOGGER.info("创建Aggregation Depends On关系...");
+			aggregationDependsOnRepository.deleteAll();
+
 			Map<String, List<DependsOn>> dependsOnMap = hotspotPackagePairDetector.detectHotspotPackagePairWithDependsOn();
 			List<DependsOn> aggregationDependsOnList = new ArrayList<>(dependsOnMap.get(RelationType.str_AGGREGATION_DEPENDS_ON));
 			List<AggregationDependsOn> aggregationDependsOnListTmp = new ArrayList<>();
