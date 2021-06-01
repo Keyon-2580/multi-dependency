@@ -2,17 +2,18 @@ let data = {};
 let projectList_global; //存放选定项目列表
 let projectList_filter; //存放正在筛选的项目列表
 let projectId_global = ""; //存放当前展示的项目的ID
-let in_out_list = [] //存放出度入度节点
-let actual_edges = [] //存放原有的线以及拆分后的线ID
-let present_edge_data = [] //存放当前的连线数据
-let present_smell_edge_data = [] //存放当前的异味筛选后的连线数据
-let smell_data_global = [] //存放异味信息
-let smell_data_single_type = [] //存放当前某种类型的异味数据
-let smell_data_single_group = [] //存放当前某个组的异味数据
+let package_filter_global = []; //存放当前筛选后的包路径
+let in_out_list = []; //存放出度入度节点
+let actual_edges = []; //存放原有的线以及拆分后的线ID
+let present_edge_data = []; //存放当前的连线数据
+let present_smell_edge_data = []; //存放当前的异味筛选后的连线数据
+let smell_data_global = []; //存放异味信息
+let smell_data_single_type = []; //存放当前某种类型的异味数据
+let smell_data_single_group = []; //存放当前某个组的异味数据
 let smell_data_single_group_id; //存放当前某个组的异味数据
 let smell_data_flag = ""; //存放当前的异味类型
-let smell_info_global = [] //存放异味统计信息
-let smell_hover_nodes = [] //存放当前鼠标悬停异味节点数组
+let smell_info_global = []; //存放异味统计信息
+let smell_hover_nodes = []; //存放当前鼠标悬停异味节点数组
 let present_smell_data = [];
 let reliable_dependency_list = [];//存放可确定依赖关系
 let unreliable_dependency_list = [];//存放不可信依赖关系
@@ -554,7 +555,7 @@ function DrawComboChart(json_data){
     actual_edges = [];
     let package_data = json_data[0]["result"]["nodes"];
     let link_data = json_data[1]["links"];
-    smell_data_global = json_data[2]["smell_data"];
+    filterSmellData(json_data[2]["smell_data"]);
     smell_info_global = json_data[2]["smell_info"];
 
     let temp_nodes = [];
@@ -777,22 +778,7 @@ function DrawComboChart(json_data){
 
         closeLoadingWindow();
 
-        smell_info_global.forEach(smell_info => {
-            if(smell_info.projectId.toString() === projectId_global){
-                let data = {};
-                let xAxis = [];
-                let yAxis = [];
-
-                smell_info.project_smell_info.forEach(item => {
-                    xAxis.push(item.smell_type);
-                    yAxis.push(item.smell_num);
-                })
-
-                data.xAxis = xAxis;
-                data.yAxis = yAxis;
-                histogram(data, "histogram_smell");
-            }
-        })
+        showHistogram();
     }
 }
 
@@ -801,7 +787,8 @@ function showRelevantNodeAndEdge(node_click){
     last_click_node = node_click._cfg.id;
     graph.setItemState(node_click, 'selected', true);
 
-    const node_edges = node_click.getEdges();
+    const node_edges = node_click.getInEdges();
+    console.log(node_edges);
 
     node_edges.forEach(function (edge){
         if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
@@ -814,9 +801,11 @@ function showRelevantNodeAndEdge(node_click){
                 const node = getOtherEndNode(link, node_click._cfg.id);
                 graph.setItemState(node, 'selected', true);
                 updatePieNode(node);
-                link.split_edges.forEach(n => {
-                    graph.updateItem(n.id, EDGE_CLICK_MODEL);
-                })
+                if(link.link_type === "dependson") {
+                    link.split_edges.forEach(n => {
+                        graph.updateItem(n.id, EDGE_CLICK_MODEL);
+                    })
+                }
             })
         }
     });
@@ -846,7 +835,7 @@ function highlightEdge(edge){
 //取消与该节点相关的连线和节点的点击状态
 function cancelRelevantNodeAndEdge(node_click){
     graph.setItemState(node_click, 'selected', false);
-    const node_edges = node_click.getEdges();
+    const node_edges = node_click.getInEdges();
 
     node_edges.forEach(function (edge){
         if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
@@ -1439,7 +1428,7 @@ function filterSmellLayer(){
                     $('#dependsOnType_smell').attr("checked", true);
                 }
 
-                if(smell_filter_condition["dependson"]["dependsTypeSelect"].length > 0){
+                if(smell_filter_condition["dependson"]["dependsTypeSelect"] !== null){
                     smell_filter_condition["dependson"]["dependsTypeSelect"].forEach(item =>{
                         $("#dependsTypeSelect_smell").find("option[value=" + item + "]").attr("selected",true);
                     })
@@ -1608,7 +1597,8 @@ function generateFilterHtml(suffix){
         "</label></p>" +
 
         "<p class='combo_p'><input style = \"margin-left:25px;\" type=\"checkbox\" id=\"dependsIntensity" + suffix + "\" " +
-        "onclick=\"setParentChecked('dependsOn" + suffix + "', 'dependsIntensity" + suffix + "')\" name = \"dependsOn" + suffix + "_children\">" +
+        "onclick=\"setParentChecked('dependsOn" + suffix + "', 'dependsIntensity" + suffix + "')\" " +
+        "name = \"dependsOn" + suffix + "_children\">" +
 
         "<input  class = \"AttributionSelectInput layui-input-block\" id=\"intensitybelow" + suffix + "\" value=\"0.8\">" +
 
@@ -1626,13 +1616,16 @@ function generateFilterHtml(suffix){
 
         "<p class='combo_p'><label class = \"AttributionSelectLabel\" style = \"margin-left:25px\">" +
         "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnTimes" + suffix + "\" " +
-        "onclick=\"setParentChecked('dependsOn" + suffix + "', 'dependsOnTimes" + suffix + "')\" name = \"dependsOn" + suffix + "_children\"> Times >= " +
-        "<input  id=\"dependencyTimes" + suffix + "\" class = \"AttributionSelectInput layui-input-block\" style='margin-right: 80px' value=\"3\">" +
+        "onclick=\"setParentChecked('dependsOn" + suffix + "', 'dependsOnTimes" + suffix + "')\" " +
+        "name = \"dependsOn" + suffix + "_children\"> Times >= " +
+        "<input  id=\"dependencyTimes" + suffix + "\" class = \"AttributionSelectInput layui-input-block\" " +
+        "style='margin-right: 80px' value=\"3\">" +
         "</label></p>" +
 
         "<p class='combo_p'><label class = \"AttributionSelectLabel\" style = \"margin-left:25px; margin-right:20px;\">" +
         "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"dependsOnType" + suffix + "\" " +
-        "onclick=\"setParentChecked('dependsOn" + suffix + "', 'dependsOnType" + suffix + "')\" name = \"dependsOn" + suffix + "_children\"> Dependency Type: " +
+        "onclick=\"setParentChecked('dependsOn" + suffix + "', 'dependsOnType" + suffix + "')\" " +
+        "name = \"dependsOn" + suffix + "_children\"> Dependency Type: " +
         "</label>" +
 
         "<select id = \"dependsTypeSelect" + suffix + "\" class=\"selectpicker\" multiple>" +
@@ -1661,8 +1654,10 @@ function generateFilterHtml(suffix){
         "onclick=\"CancelChildrenChecked('clone" + suffix + "')\">Clone：" +
         "</label></p>" +
 
-        "<p class='combo_p'><input style = \"margin-right:10px; margin-left:25px; \" type=\"checkbox\" id=\"cloneSimilarity" + suffix + "\" " +
-        "onclick=\"setParentChecked('clone" + suffix + "', 'cloneSimilarity" + suffix + "')\" name = \"clone" + suffix + "_children\">" +
+        "<p class='combo_p'><input style = \"margin-right:10px; margin-left:25px; \" type=\"checkbox\" " +
+        "id=\"cloneSimilarity" + suffix + "\" " +
+        "onclick=\"setParentChecked('clone" + suffix + "', 'cloneSimilarity" + suffix + "')\" " +
+        "name = \"clone" + suffix + "_children\">" +
         "<input  class = \"AttributionSelectInput\" id=\"similaritybelow" + suffix + "\" value=\"0.7\">" +
 
         "<select class = \"AttributionSelectSingleSelect\" id=\"similarityCompareSelectBelow" + suffix + "\">" +
@@ -1684,7 +1679,8 @@ function generateFilterHtml(suffix){
 
         "<p class='combo_p'><label class = \"AttributionSelectLabel\">" +
         "<input style = \"margin-right:10px; margin-left:25px;\" type=\"checkbox\" id=\"cochangeTimes" + suffix + "\" " +
-        "onclick=\"setParentChecked('coChange" + suffix + "', 'cochangeTimes" + suffix + "')\" name = \"coChange" + suffix + "_children\"> Times >= " +
+        "onclick=\"setParentChecked('coChange" + suffix + "', 'cochangeTimes" + suffix + "')\" " +
+        "name = \"coChange" + suffix + "_children\"> Times >= " +
         "<input class = \"AttributionSelectInput\" id=\"cochangetimes" + suffix + "\" value=\"3\">" +
         "</label></p>";
 
@@ -1952,6 +1948,7 @@ function clearFilter(){
             if (result.result === "success") {
                 alert("重置成功");
                 projectList_filter = [];
+                package_filter_global = [];
             } else {
                 alert("重置失败！");
             }
@@ -1991,17 +1988,17 @@ function showFilterWindow(){
         let ids = [];
         let j = 0;
         for (let i = 0; i < checkCount.length; i++) {
-            if (checkCount[i].type == "Package") {
+            if (checkCount[i].type === "Package") {
                 ids[j++] = {
                     type: "pck",
-                    id: checkCount[i].id
+                    id: checkCount[i].id,
                 };
-            } else if (checkCount[i].type == "FileList") {
+            } else if (checkCount[i].type === "FileList") {
                 ids[j++] = {
                     type: "FileList",
                     id: checkCount[i].getParentNode().id
                 };
-            }else if(checkCount[i].type == "PckList"){
+            }else if(checkCount[i].type === "PckList"){
                 ids[j++] = {
                     type: "PckList",
                     id: checkCount[i].getParentNode().id
@@ -2017,6 +2014,7 @@ function showFilterWindow(){
             success: function (result) {
                 if (result.result === "success") {
                     let paths = "";
+                    package_filter_global = result.path;
                     for(let i = 0; i < result.length; i ++) {
                         paths += (i+1) + "." + result.path[i] + '\n';
                     }
@@ -2169,6 +2167,7 @@ function showZTree(nodes, container = $("#ztree")) {
     let zNodes = nodes;
     $.fn.zTree.init(container, setting, zNodes);
 }
+
 //项目树结构
 function _project() {
 
@@ -2182,7 +2181,7 @@ function _project() {
             dataType:"json",
             data:JSON.stringify(projectIds),
             success : function(result) {
-                if(result.result == "success") {
+                if(result.result === "success") {
                     showZTree(result.values, $("#treeProjects"));
                     $("#iconProject").text("");
                 }
@@ -2279,6 +2278,23 @@ function histogram(data, divId) {
     });
 }
 
+function showHistogram(){
+    if(smell_info_global.projectId.toString() === projectId_global){
+        let data = {};
+        let xAxis = [];
+        let yAxis = [];
+
+        smell_info_global.project_smell_info.forEach(item => {
+            xAxis.push(item.smell_type);
+            yAxis.push(item.smell_num);
+        })
+
+        data.xAxis = xAxis;
+        data.yAxis = yAxis;
+        histogram(data, "histogram_smell");
+    }
+}
+
 function judgeSmellLink(edge){
     // console.log(edge);
     let smell_data = [];
@@ -2310,7 +2326,7 @@ function paintCombo(){
 }
 
 function isEmptyObject(obj) {
-    for (var key in obj) {
+    for (let key in obj) {
         return false;
     }
     return true;
@@ -2319,7 +2335,8 @@ function isEmptyObject(obj) {
 //加载弹窗
 function showLoadingWindow(tip){
     let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
-        "<div class='loading_window' id='Id_loading_window' style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">" + tip + "</div>" +
+        "<div class='loading_window' id='Id_loading_window' " +
+        "style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">" + tip + "</div>" +
         "</div>";
     loading_div.html(html);
 }
@@ -2327,6 +2344,28 @@ function showLoadingWindow(tip){
 //关闭加载弹窗
 function closeLoadingWindow(){
     loading_div.html("");
+}
+
+//筛选异味数据，使之与项目筛选吻合
+function filterSmellData(data) {
+    data.forEach(smell => {
+        if (package_filter_global.length > 0) {
+            let smell_flag = false;
+            package_filter_global.forEach(pck => {
+                smell.nodes.forEach(node => {
+                    if (node.path.indexOf(pck) !== -1) {
+                        smell_flag = true;
+                    }
+                })
+            })
+
+            if (smell_flag) {
+                smell_data_global.push(smell);
+            }
+        }else{
+            smell_data_global.push(smell);
+        }
+    })
 }
 
 if (typeof window !== 'undefined'){

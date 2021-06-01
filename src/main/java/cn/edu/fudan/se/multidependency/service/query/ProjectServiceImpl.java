@@ -153,17 +153,15 @@ public class ProjectServiceImpl implements ProjectService{
         result.add(nodeJSON4);
 
         if(Constant.PROJECT_STRUCTURE_TREEMAP.equals(type) || Constant.PROJECT_STRUCTURE_COMBO.equals(type)){
-            JSONArray smellInfos = new JSONArray();
+            JSONObject smellInfo = new JSONObject();
             for(int i = 0; i < projectIds.size(); i++){
-                JSONObject smellInfo = new JSONObject();
+
                 long projectId = projectIds.getJSONObject(i).getLong("id");
                 smellInfo.put("projectId", projectId);
                 smellInfo.put("project_smell_info", basicSmellQueryService.smellInfoToGraph(projectId));
-
-                smellInfos.add(smellInfo);
             }
             nodeJSON5.put("smell_data", basicSmellQueryService.smellDataToGraph());
-            nodeJSON5.put("smell_info", smellInfos);
+            nodeJSON5.put("smell_info", smellInfo);
             result.add(nodeJSON5);
         }
 
@@ -471,17 +469,20 @@ public class ProjectServiceImpl implements ProjectService{
         }
 
         for(CoChange coChange : coChangeList){
-            JSONObject link = new JSONObject();
-            link.put("type", "cochange");
-            link.put("source_id", coChange.getNode1().getId().toString());
-            link.put("target_id", coChange.getNode2().getId().toString());
-            link.put("source_name", coChange.getNode1().getName());
-            link.put("target_name", coChange.getNode2().getName());
-            link.put("pair_id", coChange.getNode1().getId() + "_" + coChange.getNode2().getId());
-            link.put("coChangeTimes", coChange.getTimes());
-            link.put("node1ChangeTimes", coChange.getNode1ChangeTimes());
-            link.put("node2ChangeTimes", coChange.getNode2ChangeTimes());
-            result.add(link);
+            if(coChange.getTimes() >= 3){
+                JSONObject link = new JSONObject();
+                link.put("type", "cochange");
+                link.put("source_id", coChange.getNode1().getId().toString());
+                link.put("target_id", coChange.getNode2().getId().toString());
+                link.put("source_name", coChange.getNode1().getName());
+                link.put("target_name", coChange.getNode2().getName());
+                link.put("pair_id", coChange.getNode1().getId() + "_" + coChange.getNode2().getId());
+
+                link.put("coChangeTimes", coChange.getTimes());
+                link.put("node1ChangeTimes", coChange.getNode1ChangeTimes());
+                link.put("node2ChangeTimes", coChange.getNode2ChangeTimes());
+                result.add(link);
+            }
         }
         return result;
     }

@@ -323,7 +323,7 @@ let smellOverview = function() {
 			},
 			tooltip: {
 				trigger: 'item',
-				formatter: '{a} <br/>{b} : {c} ({d}%)'
+				formatter: '{a} <br/>{b}'
 			},
 			legend: {
 				orient: 'vertical',
@@ -338,13 +338,13 @@ let smellOverview = function() {
 					center: ['50%', '60%'],
 					data: [
 						{value: pies.normalFiles.length
-							, name: 'normalFiles (' + ((pies.normalFiles.length / totalfile1) * 100).toFixed(2) + '%)'},
+							, name: 'normalFiles : ' + pies.normalFiles.length + " (" + ((pies.normalFiles.length / totalfile1) * 100).toFixed(2) + '%)'},
 						{value: pies.onlyIssueFiles.length
-							, name: 'onlyIssueFiles (' + ((pies.onlyIssueFiles.length / totalfile1) * 100).toFixed(2) + '%)'},
+							, name: 'onlyIssueFiles : ' + pies.onlyIssueFiles.length + " (" + ((pies.onlyIssueFiles.length / totalfile1) * 100).toFixed(2) + '%)'},
 						{value: pies.issueAndSmellFiles.length
-							, name: 'issueAndSmellFiles (' + ((pies.issueAndSmellFiles.length / totalfile1) * 100).toFixed(2) + '%)'},
+							, name: 'issueAndSmellFiles : ' + pies.issueAndSmellFiles.length + " (" + ((pies.issueAndSmellFiles.length / totalfile1) * 100).toFixed(2) + '%)'},
 						{value: pies.onlySmellFiles.length
-							, name: 'onlySmellFiles (' + ((pies.onlySmellFiles.length / totalfile1) * 100).toFixed(2) + '%)'}
+							, name: 'onlySmellFiles : ' + pies.onlySmellFiles.length + " (" + ((pies.onlySmellFiles.length / totalfile1) * 100).toFixed(2) + '%)'}
 					],
 					emphasis: {
 						itemStyle: {
@@ -365,7 +365,7 @@ let smellOverview = function() {
 			},
 			tooltip: {
 				trigger: 'item',
-				formatter: '{a} <br/>{b} : {c} ({d}%)'
+				formatter: '{a} <br/>{b}'
 			},
 			legend: {
 				orient: 'vertical',
@@ -380,11 +380,11 @@ let smellOverview = function() {
 					center: ['50%', '60%'],
 					data: [
 						{value: pies.onlyIssueFiles.length
-							, name: 'onlyIssueFiles (' + ((pies.onlyIssueFiles.length / totalfile2) * 100).toFixed(2) + '%)'},
+							, name: 'onlyIssueFiles : ' + pies.onlyIssueFiles.length + " (" + ((pies.onlyIssueFiles.length / totalfile2) * 100).toFixed(2) + '%)'},
 						{value: pies.issueAndSmellFiles.length
-							, name: 'issueAndSmellFiles (' + ((pies.issueAndSmellFiles.length / totalfile2) * 100).toFixed(2) + '%)'},
+							, name: 'issueAndSmellFiles : ' + pies.issueAndSmellFiles.length + " (" + ((pies.issueAndSmellFiles.length / totalfile2) * 100).toFixed(2) + '%)'},
 						{value: pies.onlySmellFiles.length
-							, name: 'onlySmellFiles (' + ((pies.onlySmellFiles.length / totalfile2) * 100).toFixed(2) + '%)'}
+							, name: 'onlySmellFiles : ' + pies.onlySmellFiles.length + " (" + ((pies.onlySmellFiles.length / totalfile2) * 100).toFixed(2) + '%)'}
 					],
 					emphasis: {
 						itemStyle: {
@@ -405,7 +405,7 @@ let smellOverview = function() {
 			},
 			tooltip: {
 				trigger: 'item',
-				formatter: '{a} <br/>{b} : {c} ({d}%)'
+				formatter: '{a} <br/>{b}'
 			},
 			legend: {
 				orient: 'vertical',
@@ -420,9 +420,9 @@ let smellOverview = function() {
 					center: ['50%', '60%'],
 					data: [
 						{value: (pies.allIssues.length - pies.smellIssues.length)
-							, name: '无Smell Files关联的Issues (' + (((pies.allIssues.length - pies.smellIssues.length) / pies.allIssues.length) * 100).toFixed(2) + '%)'},
+							, name: '无Smell Files关联的Issues : ' + (pies.allIssues.length - pies.smellIssues.length) + " (" + (((pies.allIssues.length - pies.smellIssues.length) / pies.allIssues.length) * 100).toFixed(2) + '%)'},
 						{value: pies.smellIssues.length
-							, name: '有Smell File关联的Issues (' + ((pies.smellIssues.length / pies.allIssues.length) * 100).toFixed(2) + '%)'}
+							, name: '有Smell File关联的Issues : ' + pies.smellIssues.length + " (" + ((pies.smellIssues.length / pies.allIssues.length) * 100).toFixed(2) + '%)'}
 					],
 					emphasis: {
 						itemStyle: {
