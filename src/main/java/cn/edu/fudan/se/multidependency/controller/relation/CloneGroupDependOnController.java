@@ -60,8 +60,10 @@ public class CloneGroupDependOnController {
             cloneGroup = cloneAnalyse.addNodeAndRelationToCloneGroup(cloneGroup);
             filegroup.addAll(cloneGroup.getNodes());
         }else{
-            ProjectFile file = nodeService.queryFile(Long.parseLong(name));
-            filegroup.add(file);
+            String[] files = name.split("_");
+            for(int i = 0; i < files.length; i++) {
+                filegroup.add(nodeService.queryFile(Long.parseLong(files[i])));
+            }
         }
         Set<CodeNode> nodes = new TreeSet<CodeNode>(new Comparator<CodeNode>() {
             @Override
@@ -128,8 +130,10 @@ public class CloneGroupDependOnController {
             cloneGroup = cloneAnalyse.addNodeAndRelationToCloneGroup(cloneGroup);
             filegroup.addAll(cloneGroup.getNodes());
         }else{
-            ProjectFile file = nodeService.queryFile(Long.parseLong(name));
-            filegroup.add(file);
+            String[] files = name.split("_");
+            for(int i = 0; i < files.length; i++) {
+                filegroup.add(nodeService.queryFile(Long.parseLong(files[i])));
+            }
         }
         Set<CodeNode> nodes = new TreeSet<CodeNode>(new Comparator<CodeNode>() {
             @Override
@@ -191,8 +195,10 @@ public class CloneGroupDependOnController {
             cloneGroup = cloneAnalyse.addNodeAndRelationToCloneGroup(cloneGroup);
             filegroup.addAll(cloneGroup.getNodes());
         }else{
-            ProjectFile file = nodeService.queryFile(Long.parseLong(name));
-            filegroup.add(file);
+            String[] files = name.split("_");
+            for(int i = 0; i < files.length; i++) {
+                filegroup.add(nodeService.queryFile(Long.parseLong(files[i])));
+            }
         }
         Set<CodeNode> nodes = new TreeSet<CodeNode>(new Comparator<CodeNode>() {
             @Override
@@ -224,8 +230,10 @@ public class CloneGroupDependOnController {
             cloneGroup = cloneAnalyse.addNodeAndRelationToCloneGroup(cloneGroup);
             filegroup.addAll(cloneGroup.getNodes());
         }else{
-            ProjectFile file = nodeService.queryFile(Long.parseLong(name));
-            filegroup.add(file);
+            String[] files = name.split("_");
+            for(int i = 0; i < files.length; i++) {
+                filegroup.add(nodeService.queryFile(Long.parseLong(files[i])));
+            }
         }
         Set<CodeNode> nodes = new TreeSet<CodeNode>(new Comparator<CodeNode>() {
             @Override

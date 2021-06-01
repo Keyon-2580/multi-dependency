@@ -22,7 +22,7 @@ let implicitCrossModuleDependency = function() {
 					if (fileImplicitCrossModuleDependencyList.hasOwnProperty(fileIndex)) {
 						let fileImplicitCrossModuleDependency = fileImplicitCrossModuleDependencyList[fileIndex];
 						html += "<tr>";
-						html += "<td style='text-align: center; vertical-align: middle'>" + index + "</td>";
+						html += "<td style='text-align: center; vertical-align: middle'><a href='/relation/dependsdetail/" + fileImplicitCrossModuleDependency.node1.id + "_" + fileImplicitCrossModuleDependency.node2.id + "' target='_blank'>" + index + "</td>";
 						html += "<td><a href='/relation/file/" + fileImplicitCrossModuleDependency.node1.id + "' target='_blank'>" + fileImplicitCrossModuleDependency.node1.path + "</a></td>";
 						html += "<td><a href='/relation/file/" + fileImplicitCrossModuleDependency.node2.id + "' target='_blank'>" + fileImplicitCrossModuleDependency.node2.path + "</a></td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + fileImplicitCrossModuleDependency.cochangeTimes + "</td>";
