@@ -7,23 +7,23 @@ import cn.edu.fudan.se.multidependency.service.query.smell.data.UnstableDependen
 
 public interface UnstableDependencyDetectorUsingHistory {
 
-	Map<Long, List<UnstableDependencyByHistory>> queryUnstableDependency();
+	Map<Long, List<UnstableDependencyByHistory>> queryFileUnstableDependency();
 
-	Map<Long, List<UnstableDependencyByHistory>> detectUnstableDependency();
+	Map<Long, List<UnstableDependencyByHistory>> detectFileUnstableDependency();
 
-	void setFanOutThreshold(Long projectId, Integer minFanOut);
+	void setProjectMinFileFanOut(Long projectId, Integer minFileFanOut);
 
-	void setCoChangeTimesThreshold(Long projectId, Integer cochangeTimesThreshold);
+	void setProjectFileMinCoChange(Long projectId, Integer minFileCoChange);
 
-	void setCoChangeFilesThreshold(Long projectId, Integer cochangeFilesThreshold);
+	void setProjectCoChangeFile(Long projectId, Integer coChangeFile);
 
 	void setProjectMinRatio(Long projectId, Double minRatio);
 
-	Integer getFanOutThreshold(Long projectId);
+	Integer getProjectMinFileFanOut(Long projectId);
 
-	Integer getCoChangeTimesThreshold(Long projectId);
+	Integer getProjectFileMinCoChange(Long projectId);
 
-	Integer getCoChangeFilesThreshold(Long projectId);
+	Integer getProjectCoChangeFile(Long projectId);
 
 	Double getProjectMinRatio(Long projectId);
 }

@@ -40,7 +40,7 @@ public class UnstableDependencyController {
 			request.setAttribute("project", project);
 			switch (smellLevel) {
 				case SmellLevel.FILE:
-					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingHistory.queryUnstableDependency());
+					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingHistory.queryFileUnstableDependency());
 					request.setAttribute("packageUnstableDependencyMap", null);
 					break;
 				case SmellLevel.PACKAGE:
@@ -48,7 +48,7 @@ public class UnstableDependencyController {
 					request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.queryPackageUnstableDependency());
 					break;
 				case SmellLevel.MULTIPLE_LEVEL:
-					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingHistory.queryUnstableDependency());
+					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingHistory.queryFileUnstableDependency());
 					request.setAttribute("packageUnstableDependencyMap", null);
 					break;
 			}
@@ -62,7 +62,7 @@ public class UnstableDependencyController {
 			request.setAttribute("project", project);
 			switch (smellLevel) {
 				case SmellLevel.FILE:
-					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingHistory.detectUnstableDependency());
+					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingHistory.detectFileUnstableDependency());
 					request.setAttribute("packageUnstableDependencyMap", null);
 					break;
 				case SmellLevel.PACKAGE:
@@ -70,7 +70,7 @@ public class UnstableDependencyController {
 					request.setAttribute("packageUnstableDependencyMap", unstableDependencyDetectorUsingInstability.detectPackageUnstableDependency());
 					break;
 				case SmellLevel.MULTIPLE_LEVEL:
-					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingHistory.detectUnstableDependency());
+					request.setAttribute("fileUnstableDependencyMap", unstableDependencyDetectorUsingHistory.detectFileUnstableDependency());
 					request.setAttribute("packageUnstableDependencyMap", null);
 					break;
 			}
@@ -116,8 +116,8 @@ public class UnstableDependencyController {
 		if(project == null) {
 			return result;
 		}
-		result[0] = Double.valueOf(unstableDependencyDetectorUsingHistory.getFanOutThreshold(projectId));
-		result[1] = Double.valueOf(unstableDependencyDetectorUsingHistory.getCoChangeTimesThreshold(projectId));
+		result[0] = Double.valueOf(unstableDependencyDetectorUsingHistory.getProjectMinFileFanOut(projectId));
+		result[1] = Double.valueOf(unstableDependencyDetectorUsingHistory.getProjectFileMinCoChange(projectId));
 		result[2] = unstableDependencyDetectorUsingHistory.getProjectMinRatio(projectId);
 		return result;
 	}
@@ -132,8 +132,8 @@ public class UnstableDependencyController {
 		if(project == null) {
 			return false;
 		}
-		unstableDependencyDetectorUsingHistory.setFanOutThreshold(projectId, minFileFanOut);
-		unstableDependencyDetectorUsingHistory.setCoChangeTimesThreshold(projectId, cochangeTimesThreshold);
+		unstableDependencyDetectorUsingHistory.setProjectMinFileFanOut(projectId, minFileFanOut);
+		unstableDependencyDetectorUsingHistory.setProjectFileMinCoChange(projectId, cochangeTimesThreshold);
 		unstableDependencyDetectorUsingHistory.setProjectMinRatio(projectId, minRatio);
 		return true;
 	}

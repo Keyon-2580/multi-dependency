@@ -59,20 +59,20 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 	public static final double DEFAULT_MIN_RATIO = 0.5;
 
 	@Override
-	public void setFanInThreshold(Long projectId, Integer minFanIn) {
-		this.projectToFanInThresholdMap.put(projectId, minFanIn);
+	public void setProjectMinFileFanIn(Long projectId, Integer minFileFanIn) {
+		this.projectToFanInThresholdMap.put(projectId, minFileFanIn);
 		cache.remove(getClass());
 	}
 
 	@Override
-	public void setCoChangeTimesThreshold(Long projectId, Integer cochangeTimesThreshold) {
-		this.projectToCoChangeTimesThresholdMap.put(projectId, cochangeTimesThreshold);
+	public void setProjectFileMinCoChange(Long projectId, Integer minFileCoChange) {
+		this.projectToCoChangeTimesThresholdMap.put(projectId, minFileCoChange);
 		cache.remove(getClass());
 	}
 
 	@Override
-	public void setCoChangeFilesThreshold(Long projectId, Integer cochangeFilesThreshold) {
-		this.projectToCoChangeFilesThresholdMap.put(projectId, cochangeFilesThreshold);
+	public void setProjectCoChangeFile(Long projectId, Integer coChangeFile) {
+		this.projectToCoChangeFilesThresholdMap.put(projectId, coChangeFile);
 		cache.remove(getClass());
 	}
 
@@ -83,7 +83,7 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 	}
 
 	@Override
-	public Integer getFanInThreshold(Long projectId) {
+	public Integer getProjectMinFileFanIn(Long projectId) {
 		if (!projectToFanInThresholdMap.containsKey(projectId)) {
 			Integer medFileFanIn = metricRepository.getMedFileFanInByProjectId(projectId);
 			if (medFileFanIn != null) {
@@ -97,7 +97,7 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 	}
 
 	@Override
-	public Integer getCoChangeTimesThreshold(Long projectId) {
+	public Integer getProjectFileMinCoChange(Long projectId) {
 		if (!projectToCoChangeTimesThresholdMap.containsKey(projectId)) {
 			Integer medFileCoChangeTimes = metricRepository.getMedFileCoChangeByProjectId(projectId);
 			if (medFileCoChangeTimes != null) {
@@ -111,7 +111,7 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 	}
 
 	@Override
-	public Integer getCoChangeFilesThreshold(Long projectId) {
+	public Integer getProjectCoChangeFile(Long projectId) {
 		if (!projectToCoChangeFilesThresholdMap.containsKey(projectId)) {
 			projectToCoChangeFilesThresholdMap.put(projectId, DEFAULT_THRESHOLD_CO_CHANGE_FILES);
 		}
@@ -127,8 +127,8 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 	}
 
 	@Override
-	public Map<Long, List<UnstableInterface>> queryUnstableInterface() {
-		String key = "queryUnstableInterface";
+	public Map<Long, List<UnstableInterface>> queryFileUnstableInterface() {
+		String key = "queryFileUnstableInterface";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
@@ -173,7 +173,7 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 	}
 
 	@Override
-	public Map<Long, List<UnstableInterface>> detectUnstableInterface() {
+	public Map<Long, List<UnstableInterface>> detectFileUnstableInterface() {
 		Map<Long, List<UnstableInterface>> result = new HashMap<>();
 		List<Project> projects = nodeService.allProjects();
 		if(projects != null && !projects.isEmpty()){
@@ -197,7 +197,7 @@ public class UnstableInterfaceDetectorImpl implements UnstableInterfaceDetector 
 	
 	private UnstableInterface isUnstableInterfaceInFileLevel(Long projectId, ProjectFile file) {
 		UnstableInterface result = null;
-		Integer fanInThreshold = getFanInThreshold(projectId);
+		Integer fanInThreshold = getProjectMinFileFanIn(projectId);
 		Double minRatio = getProjectMinRatio(projectId);
 		Collection<DependsOn> fanInDependencies = staticAnalyseService.findFileDependedOnBy(file);
 		if(fanInDependencies != null && fanInDependencies.size() > fanInThreshold) {

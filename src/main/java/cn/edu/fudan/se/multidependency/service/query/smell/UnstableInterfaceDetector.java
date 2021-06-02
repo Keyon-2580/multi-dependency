@@ -7,23 +7,23 @@ import java.util.Map;
 
 public interface UnstableInterfaceDetector {
 
-	Map<Long, List<UnstableInterface>> queryUnstableInterface();
+	Map<Long, List<UnstableInterface>> queryFileUnstableInterface();
 
-	Map<Long, List<UnstableInterface>> detectUnstableInterface();
+	Map<Long, List<UnstableInterface>> detectFileUnstableInterface();
 
-	void setFanInThreshold(Long projectId, Integer minFanIn);
+	void setProjectMinFileFanIn(Long projectId, Integer minFileFanIn);
 	
-	void setCoChangeTimesThreshold(Long projectId, Integer cochangeTimesThreshold);
+	void setProjectFileMinCoChange(Long projectId, Integer minFileCoChange);
 	
-	void setCoChangeFilesThreshold(Long projectId, Integer cochangeFilesThreshold);
+	void setProjectCoChangeFile(Long projectId, Integer coChangeFile);
 
 	void setProjectMinRatio(Long projectId, Double minRatio);
 
-	Integer getFanInThreshold(Long projectId);
+	Integer getProjectMinFileFanIn(Long projectId);
 
-	Integer getCoChangeTimesThreshold(Long projectId);
+	Integer getProjectFileMinCoChange(Long projectId);
 
-	Integer getCoChangeFilesThreshold(Long projectId);
+	Integer getProjectCoChangeFile(Long projectId);
 
 	Double getProjectMinRatio(Long projectId);
 }

@@ -3,8 +3,6 @@ package cn.edu.fudan.se.multidependency.controller.smell;
 import cn.edu.fudan.se.multidependency.model.node.Project;
 import cn.edu.fudan.se.multidependency.model.node.smell.SmellLevel;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
-import cn.edu.fudan.se.multidependency.service.query.smell.UnstableDependencyDetectorUsingHistory;
-import cn.edu.fudan.se.multidependency.service.query.smell.UnstableDependencyDetectorUsingInstability;
 import cn.edu.fudan.se.multidependency.service.query.smell.UnstableInterfaceDetector;
 import cn.edu.fudan.se.multidependency.service.query.structure.NodeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +30,11 @@ public class UnstableInterfaceController {
 			request.setAttribute("project", project);
 			switch (smellLevel) {
 				case SmellLevel.FILE:
-					request.setAttribute("fileUnstableInterfaceMap", unstableInterfaceDetector.queryUnstableInterface());
+					request.setAttribute("fileUnstableInterfaceMap", unstableInterfaceDetector.queryFileUnstableInterface());
 					request.setAttribute("packageUnstableInterfaceMap", null);
 					break;
 				case SmellLevel.MULTIPLE_LEVEL:
-					request.setAttribute("fileUnstableInterfaceMap", unstableInterfaceDetector.queryUnstableInterface());
+					request.setAttribute("fileUnstableInterfaceMap", unstableInterfaceDetector.queryFileUnstableInterface());
 					request.setAttribute("packageUnstableInterfaceMap", null);
 					break;
 			}
@@ -50,11 +48,11 @@ public class UnstableInterfaceController {
 			request.setAttribute("project", project);
 			switch (smellLevel) {
 				case SmellLevel.FILE:
-					request.setAttribute("fileUnstableInterfaceMap", unstableInterfaceDetector.detectUnstableInterface());
+					request.setAttribute("fileUnstableInterfaceMap", unstableInterfaceDetector.detectFileUnstableInterface());
 					request.setAttribute("packageUnstableInterfaceMap", null);
 					break;
 				case SmellLevel.MULTIPLE_LEVEL:
-					request.setAttribute("fileUnstableInterfaceMap", unstableInterfaceDetector.detectUnstableInterface());
+					request.setAttribute("fileUnstableInterfaceMap", unstableInterfaceDetector.detectFileUnstableInterface());
 					request.setAttribute("packageUnstableInterfaceMap", null);
 					break;
 			}
@@ -68,8 +66,8 @@ public class UnstableInterfaceController {
 		Double[] result = new Double[3];
 		Project project = nodeService.queryProject(projectId);
 		if(project != null) {
-			result[0] = Double.valueOf(unstableInterfaceDetector.getFanInThreshold(projectId));
-			result[1] = Double.valueOf(unstableInterfaceDetector.getCoChangeTimesThreshold(projectId));
+			result[0] = Double.valueOf(unstableInterfaceDetector.getProjectMinFileFanIn(projectId));
+			result[1] = Double.valueOf(unstableInterfaceDetector.getProjectFileMinCoChange(projectId));
 			result[2] = unstableInterfaceDetector.getProjectMinRatio(projectId);
 		}
 		return result;
@@ -83,8 +81,8 @@ public class UnstableInterfaceController {
 												 @RequestParam("minRatio") Double minRatio) {
 		Project project = nodeService.queryProject(projectId);
 		if(project != null) {
-			unstableInterfaceDetector.setFanInThreshold(project.getId(), minFileFanIn);
-			unstableInterfaceDetector.setCoChangeTimesThreshold(project.getId(), coChangeTimes);
+			unstableInterfaceDetector.setProjectMinFileFanIn(project.getId(), minFileFanIn);
+			unstableInterfaceDetector.setProjectFileMinCoChange(project.getId(), coChangeTimes);
 			unstableInterfaceDetector.setProjectMinRatio(project.getId(), minRatio);
 			return true;
 		}

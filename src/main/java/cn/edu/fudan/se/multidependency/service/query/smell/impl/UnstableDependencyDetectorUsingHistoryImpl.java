@@ -60,20 +60,20 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 	public static final double DEFAULT_MIN_RATIO = 0.5;
 
 	@Override
-	public void setFanOutThreshold(Long projectId, Integer minFanOut) {
-		this.projectToFanOutThresholdMap.put(projectId, minFanOut);
+	public void setProjectMinFileFanOut(Long projectId, Integer minFileFanOut) {
+		this.projectToFanOutThresholdMap.put(projectId, minFileFanOut);
 		cache.remove(getClass());
 	}
 
 	@Override
-	public void setCoChangeTimesThreshold(Long projectId, Integer cochangeTimesThreshold) {
-		this.projectToCoChangeTimesThresholdMap.put(projectId, cochangeTimesThreshold);
+	public void setProjectFileMinCoChange(Long projectId, Integer minFileCoChange) {
+		this.projectToCoChangeTimesThresholdMap.put(projectId, minFileCoChange);
 		cache.remove(getClass());
 	}
 
 	@Override
-	public void setCoChangeFilesThreshold(Long projectId, Integer cochangeFilesThreshold) {
-		this.projectToCoChangeFilesThresholdMap.put(projectId, cochangeFilesThreshold);
+	public void setProjectCoChangeFile(Long projectId, Integer coChangeFile) {
+		this.projectToCoChangeFilesThresholdMap.put(projectId, coChangeFile);
 		cache.remove(getClass());
 	}
 
@@ -84,7 +84,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 	}
 
 	@Override
-	public Integer getFanOutThreshold(Long projectId) {
+	public Integer getProjectMinFileFanOut(Long projectId) {
 		if (!projectToFanOutThresholdMap.containsKey(projectId)) {
 			Integer medFileFanOut = metricRepository.getMedFileFanInByProjectId(projectId);
 			if (medFileFanOut != null) {
@@ -98,7 +98,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 	}
 
 	@Override
-	public Integer getCoChangeTimesThreshold(Long projectId) {
+	public Integer getProjectFileMinCoChange(Long projectId) {
 		if (!projectToCoChangeTimesThresholdMap.containsKey(projectId)) {
 			Integer medFileCoChangeTimes = metricRepository.getMedFileCoChangeByProjectId(projectId);
 			if (medFileCoChangeTimes != null) {
@@ -112,7 +112,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 	}
 
 	@Override
-	public Integer getCoChangeFilesThreshold(Long projectId) {
+	public Integer getProjectCoChangeFile(Long projectId) {
 		if (!projectToCoChangeFilesThresholdMap.containsKey(projectId)) {
 			projectToCoChangeFilesThresholdMap.put(projectId, DEFAULT_THRESHOLD_CO_CHANGE_FILES);
 		}
@@ -128,8 +128,8 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 	}
 
 	@Override
-	public Map<Long, List<UnstableDependencyByHistory>> queryUnstableDependency() {
-		String key = "queryUnstableDependency";
+	public Map<Long, List<UnstableDependencyByHistory>> queryFileUnstableDependency() {
+		String key = "queryFileUnstableDependency";
 		if(cache.get(getClass(), key) != null) {
 			return cache.get(getClass(), key);
 		}
@@ -171,7 +171,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 	}
 
 	@Override
-	public Map<Long, List<UnstableDependencyByHistory>> detectUnstableDependency() {
+	public Map<Long, List<UnstableDependencyByHistory>> detectFileUnstableDependency() {
 		Map<Long, List<UnstableDependencyByHistory>> result = new HashMap<>();
 		List<Project> projects = nodeService.allProjects();
 		if(projects != null && !projects.isEmpty()){
@@ -195,7 +195,7 @@ public class UnstableDependencyDetectorUsingHistoryImpl implements UnstableDepen
 
 	private UnstableDependencyByHistory isUnstableDependencyInFileLevel(Long projectId, ProjectFile file) {
 		UnstableDependencyByHistory result = null;
-		Integer fanOutThreshold = getFanOutThreshold(projectId);
+		Integer fanOutThreshold = getProjectMinFileFanOut(projectId);
 		Double minRatio = getProjectMinRatio(projectId);
 		Collection<DependsOn> fanOutDependencies = staticAnalyseService.findFileDependsOn(file);
 		if(fanOutDependencies != null && fanOutDependencies.size() > fanOutThreshold) {
