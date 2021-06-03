@@ -10,6 +10,7 @@ public class Constant {
 	public static final int SIZE_OF_PAGE = 15;
 	
 	public static final int COUNT_OF_MIN_COCHANGE = 3;
+	public static final double MIN_CHANGE_CONFIDENCE = 0.3;
 
 	public static final String ISSUE_FROM_JIRA = "jira";
 	public static final String ISSUE_FROM_GITHUB = "github";

@@ -21,8 +21,8 @@ public class CoChange implements Relation, RelationWithTimes {
 	private static final long serialVersionUID = -8677714146194368352L;
 
 	@Id
-    @GeneratedValue
-    private Long id;
+	@GeneratedValue
+	private Long id;
 
 	@StartNode
 	private Node node1;
@@ -37,6 +37,10 @@ public class CoChange implements Relation, RelationWithTimes {
 	private int node1ChangeTimes = 0;
 
 	private int node2ChangeTimes = 0;
+
+	private double node1Confidence = 0.0;
+
+	private double node2Confidence = 0.0;
 
 	public CoChange(Node node1, Node node2) {
 		this.node1 = node1;
@@ -73,9 +77,11 @@ public class CoChange implements Relation, RelationWithTimes {
 	public Map<String, Object> getProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("times", this.getTimes());
-		properties.put("cochangeType", getCoChangeType());
+		properties.put("coChangeType", getCoChangeType());
 		properties.put("node1ChangeTimes", getNode1ChangeTimes());
 		properties.put("node2ChangeTimes", getNode2ChangeTimes());
+		properties.put("node1Confidence", getNode1Confidence());
+		properties.put("node2Confidence", getNode2Confidence());
 		return properties;
 	}
 }

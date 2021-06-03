@@ -67,11 +67,22 @@ public interface CoChangeRepository extends Neo4jRepository<CoChange, Long> {
 
     @Query("match (f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
     		"]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile) " + 
-    		"where id(f1) < id(f2) and c.commitFilesSize <= 30  " +
+    		"where id(f1) < id(f2) and c.commitFilesSize <= 50  " +
     		"with f1,f2,count(distinct c) as times " +
     		"where times >= $minCoChangeTimes " +
     		"create (f1)-[:" + RelationType.str_CO_CHANGE + "{times:times}]->(f2);")
     void createCoChanges(@Param("minCoChangeTimes") int minCoChangeTimes);
+
+    @Query("match (f1:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE +
+            "]-(c:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2:ProjectFile) " +
+            "where id(f1) < id(f2) and c.commitFilesSize <= 50  " +
+            "with f1,f2,count(distinct c) as times " +
+            "with f1,f2,times,size((:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f1)) as times1," +
+            "     size((:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f2)) as times2 " +
+            "with f1,f2,times,times1,times2, (times * 1.0)/times1 as conf1, (times * 1.0)/times2 as conf2 " +
+            "where times >= $minCoChangeTimes and (conf1 >= $confidence or conf2 >= $confidence) " +
+            "create (f1)-[:CO_CHANGE{times:times,node1ChangeTimes:times1,node2ChangeTimes:times2,node1Confidence:conf1,node2Confidence:conf2}]->(f2)")
+    void createCoChanges(@Param("minCoChangeTimes") int minCoChangeTimes, @Param("confidence") double confidence);
     
     @Query("match (c1:Commit)-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]->(f1:ProjectFile)-[co:CO_CHANGE]-> " +
             "(f2:ProjectFile)<-[:" + RelationType.str_COMMIT_UPDATE_FILE + "]-(c2:Commit) " +

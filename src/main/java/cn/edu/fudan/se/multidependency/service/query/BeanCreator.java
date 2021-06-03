@@ -106,7 +106,8 @@ public class BeanCreator {
 			LOGGER.info("创建CoChange关系...");
 			coChangeRepository.deleteAll();
 
-			coChangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE);
+//			coChangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE);
+			coChangeRepository.createCoChanges(Constant.COUNT_OF_MIN_COCHANGE, Constant.MIN_CHANGE_CONFIDENCE);
 			coChangeRepository.updateCoChangesForFile();
 		}
 		return coChanges;
