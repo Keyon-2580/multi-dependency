@@ -45,6 +45,7 @@ public class SmellOverviewController {
 			@RequestParam(name= "cyclicDependency", required=false, defaultValue="true") boolean cyclicDependency,
 			@RequestParam(name= "hubLikeDependency", required=false, defaultValue="true") boolean hubLikeDependency,
 			@RequestParam(name= "unstableDependency", required=false, defaultValue="true") boolean unstableDependency,
+			@RequestParam(name= "unstableInterface", required=false, defaultValue="true") boolean unstableInterface,
 			@RequestParam(name= "implicitCrossModuleDependency", required=false, defaultValue="true") boolean implicitCrossModuleDependency,
 			@RequestParam(name= "unutilizedAbstraction", required=false, defaultValue="true") boolean unutilizedAbstraction,
 			@RequestParam(name= "unuUnusedInclude", required=false, defaultValue="true") boolean unuUnusedInclude) {
@@ -60,6 +61,10 @@ public class SmellOverviewController {
 			@Override
 			public boolean isUnstableDependency() {
 				return unstableDependency;
+			}
+			@Override
+			public boolean isUnstableInterface() {
+				return unstableInterface;
 			}
 			@Override
 			public boolean isImplicitCrossModuleDependency() {
@@ -81,6 +86,7 @@ public class SmellOverviewController {
 								  @RequestParam(name= "cyclicDependency", required=false, defaultValue="true") boolean cyclicDependency,
 								  @RequestParam(name= "hubLikeDependency", required=false, defaultValue="true") boolean hubLikeDependency,
 								  @RequestParam(name= "unstableDependency", required=false, defaultValue="true") boolean unstableDependency,
+								  @RequestParam(name= "unstableInterface", required=false, defaultValue="true") boolean unstableInterface,
 								  @RequestParam(name= "implicitCrossModuleDependency", required=false, defaultValue="true") boolean implicitCrossModuleDependency,
 								  @RequestParam(name= "unutilizedAbstraction", required=false, defaultValue="true") boolean unutilizedAbstraction,
 								  @RequestParam(name= "unuUnusedInclude", required=false, defaultValue="true") boolean unuUnusedInclude) {
@@ -98,6 +104,10 @@ public class SmellOverviewController {
 			@Override
 			public boolean isUnstableDependency() {
 				return unstableDependency;
+			}
+			@Override
+			public boolean isUnstableInterface() {
+				return unstableInterface;
 			}
 			@Override
 			public boolean isImplicitCrossModuleDependency() {

@@ -20,7 +20,7 @@ public interface NodeService {
 	
 	Node queryNodeById(long id);
 	
-	Map<Long, Package> queryAllPackages();
+	List<Package> queryAllPackages();
 	
 	Package queryPackage(long id);
 	

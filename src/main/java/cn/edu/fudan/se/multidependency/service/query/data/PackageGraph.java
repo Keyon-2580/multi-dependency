@@ -1,6 +1,8 @@
 package cn.edu.fudan.se.multidependency.service.query.data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSONArray;
@@ -16,7 +18,7 @@ public class PackageGraph {
 
 	@Setter
 	@Getter
-	private Map<Long, Package> idToPackage = new HashMap<>();
+	private List<Package> packages = new ArrayList<>();
 	
 	@Setter
 	@Getter
@@ -36,7 +38,7 @@ public class PackageGraph {
 		JSONArray packagesArray = new JSONArray();
 		JSONArray lengendsArray = new JSONArray();
 		lengendsArray.add("package");
-		for(Package pck : idToPackage.values()) {
+		for(Package pck : packages) {
 			JSONObject pckJson = new JSONObject();
 			pckJson.put("name", pck.getDirectoryPath());
 			pckJson.put("id", pck.getId().toString());
@@ -69,7 +71,7 @@ public class PackageGraph {
 		
 		Map<Project, Integer> projectContain = new HashMap<>();
 		int i = 0;
-		for(Package pck : idToPackage.values()) {
+		for(Package pck : packages) {
 			Project project = pckBelongToProject.get(pck);
 			Integer index = projectContain.get(project);
 			if(index == null) {
