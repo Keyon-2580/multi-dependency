@@ -62,7 +62,6 @@ let multipleSmell = function(project, multipleSmellASFileMap, multipleSmellASPac
 						html += "<td style='text-align: center; vertical-align: middle'>" + (multipleSmellASPackage.cyclicDependency === true ? "T" : "") + "</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + (multipleSmellASPackage.hubLikeDependency === true ? "T" : "") + "</td>";
 						html += "<td style='text-align: center; vertical-align: middle'>" + (multipleSmellASPackage.implicitCrossModuleDependency === true ? "T" : "") + "</td>";
-						html += "<td style='text-align: center; vertical-align: middle'>" + (multipleSmellASPackage.unusedInclude === true ? "T" : "") + "</td>";
 						html += "</tr>";
 					}
 				}
