@@ -1,7 +1,8 @@
 package cn.edu.fudan.se.multidependency.controller;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -146,9 +147,9 @@ public class GraphController {
 		JSONObject result = new JSONObject();
 		try {
 			PackageGraph graph = new PackageGraph();
-			Map<Long, Package> pcks = nodeService.queryAllPackages();
-			graph.setIdToPackage(pcks);
-			for(Package pck : pcks.values()) {
+			List<Package> packages = new ArrayList<>(nodeService.queryAllPackages());
+			graph.setPackages(packages);
+			for(Package pck : packages) {
 				graph.add(pck, containRelationService.findPackageBelongToProject(pck));
 			}
 			Collection<Clone> fileClones = basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE);

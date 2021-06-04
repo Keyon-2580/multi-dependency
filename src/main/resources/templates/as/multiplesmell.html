@@ -45,9 +45,10 @@
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		 $(document).ready(function() {
-			var project = [[${project}]];
-			var files = [[${files}]];
-			multipleSmell(project, files).init();
+			let project = [[${project}]];
+			let multipleSmellASFileMap = [[${multipleSmellASFileMap}]];
+			let multipleSmellASPackageMap = [[${multipleSmellASPackageMap}]];
+			multipleSmell(project, multipleSmellASFileMap, multipleSmellASPackageMap).init();
 		});
 		// ]]>
 	</script>

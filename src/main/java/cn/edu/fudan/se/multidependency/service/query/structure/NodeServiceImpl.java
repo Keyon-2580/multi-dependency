@@ -172,11 +172,11 @@ public class NodeServiceImpl implements NodeService {
 	}
 
 	@Override
-	public Map<Long, Package> queryAllPackages() {
-		Map<Long, Package> result = new HashMap<>();
-		Iterable<Package> all = packageRepository.findAll();
-		for(Package pck : all) {
-			result.put(pck.getId(), pck);
+	public List<Package> queryAllPackages() {
+		List<Package> result = new ArrayList<>();
+		Iterable<Package> packages = packageRepository.findAll();
+		for(Package pck : packages) {
+			result.add(pck);
 		}
 		return result;
 	}

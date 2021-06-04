@@ -94,19 +94,19 @@ public class MetricShowService {
 
 	public Map<Long, List<NodeMetric>> getProjectPackageMetrics(){
 		Map<Long,List<NodeMetric>> result = new HashMap<>();
-		Map<Long, Package> projectPackages = new HashMap<>(nodeService.queryAllPackages());
-		projectPackages.values().forEach(packageEntry -> {
-			Project project = containRelationService.findPackageBelongToProject(packageEntry);
+		List<Package> projectPackages = new ArrayList<>(nodeService.queryAllPackages());
+		for (Package pck : projectPackages){
+			Project project = containRelationService.findPackageBelongToProject(pck);
 			List<NodeMetric> temp = result.getOrDefault(project.getId(), new ArrayList<>());
-			Metric metric = metricRepository.findPackageMetric(packageEntry.getId());
+			Metric metric = metricRepository.findPackageMetric(pck.getId());
 			if(metric != null){
 				NodeMetric nodeMetric = new NodeMetric();
-				nodeMetric.setNode(packageEntry);
+				nodeMetric.setNode(pck);
 				nodeMetric.setMetric(metric);
 				temp.add(nodeMetric);
 				result.put(project.getId(), temp);
 			}
-		});
+		}
 		return result;
 	}
 

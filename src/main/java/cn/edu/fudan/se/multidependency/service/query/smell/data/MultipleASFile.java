@@ -16,6 +16,8 @@ public class MultipleASFile implements MultipleAS {
 	private boolean hubLikeDependency;
 
 	private boolean unstableDependency;
+
+	private boolean unstableInterface;
 	
 	private boolean implicitCrossModuleDependency;
 

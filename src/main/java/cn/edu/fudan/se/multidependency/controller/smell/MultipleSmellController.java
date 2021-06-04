@@ -23,7 +23,8 @@ public class MultipleSmellController {
         Project project = projectRepository.findProjectById(projectId);
         if (project != null) {
             request.setAttribute("project", project);
-            request.setAttribute("files", multipleSmellDetector.queryMultipleSmellASFiles(false));
+            request.setAttribute("multipleSmellASFileMap", multipleSmellDetector.queryMultipleSmellASFile(true));
+            request.setAttribute("multipleSmellASPackageMap", multipleSmellDetector.queryMultipleSmellASPackage(true));
         }
         return "as/multiplesmell";
     }
@@ -33,7 +34,8 @@ public class MultipleSmellController {
         Project project = projectRepository.findProjectById(projectId);
         if (project != null) {
             request.setAttribute("project", project);
-            request.setAttribute("files", multipleSmellDetector.detectMultipleSmellASFiles(false));
+            request.setAttribute("multipleSmellASFileMap", multipleSmellDetector.detectMultipleSmellASFile(true));
+            request.setAttribute("multipleSmellASPackageMap", multipleSmellDetector.detectMultipleSmellASPackage(true));
         }
         return "as/multiplesmell";
     }

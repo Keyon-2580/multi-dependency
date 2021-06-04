@@ -3,11 +3,7 @@ package cn.edu.fudan.se.multidependency.service.query.smell;
 import java.util.List;
 import java.util.Map;
 
-import cn.edu.fudan.se.multidependency.service.query.smell.data.CirclePacking;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.HistogramAS;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.MultipleAS;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.MultipleASFile;
-import cn.edu.fudan.se.multidependency.service.query.smell.data.PieFilesData;
+import cn.edu.fudan.se.multidependency.service.query.smell.data.*;
 import com.alibaba.fastjson.JSONObject;
 
 public interface MultipleSmellDetector {
@@ -16,9 +12,13 @@ public interface MultipleSmellDetector {
 	
 	Map<Long, List<CirclePacking>> circlePacking(MultipleAS multipleAS);
 	
-	Map<Long, List<MultipleASFile>> queryMultipleSmellASFiles(boolean removeNoASFile);
+	Map<Long, List<MultipleASFile>> queryMultipleSmellASFile(boolean removeNoASFile);
 
-	Map<Long, List<MultipleASFile>> detectMultipleSmellASFiles(boolean removeNoASFile);
+	Map<Long, List<MultipleASPackage>> queryMultipleSmellASPackage(boolean removeNoASPackage);
+
+	Map<Long, List<MultipleASFile>> detectMultipleSmellASFile(boolean removeNoASFile);
+
+	Map<Long, List<MultipleASPackage>> detectMultipleSmellASPackage(boolean removeNoASPackage);
 
 	Map<Long, PieFilesData> smellAndIssueFiles(MultipleAS multipleAS);
 
