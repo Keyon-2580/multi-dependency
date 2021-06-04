@@ -6,7 +6,8 @@ let package_filter_global = []; //存放当前筛选后的包路径
 let in_out_list = []; //存放出度入度节点
 let actual_edges = []; //存放原有的线以及拆分后的线ID
 let present_edge_data = []; //存放当前的连线数据
-let present_smell_edge_data = []; //存放当前的异味筛选后的连线数据
+let present_smell_type = ""; //存放当前异味类型
+let present_smell_node_data = []; //存放当前的异味筛选后的节点数据
 let smell_data_global = []; //存放异味信息
 let smell_data_single_type = []; //存放当前某种类型的异味数据
 let smell_data_single_group = []; //存放当前某个组的异味数据
@@ -479,20 +480,24 @@ function loadPageData() {
 
                 let html_loadsmell = "";
 
-                html_loadsmell += "<p class='combo_p'><label class = \"combo_title\" style = \"font-size: 16px; margin-right: 3px\">Smell Type：</label>";
+                // html_loadsmell += "<p class='combo_p'><label class = \"combo_title\" style = \"font-size: 16px; margin-right: 3px\">Smell Type：</label>";
+                //
+                // html_loadsmell += "<select id = \"smellTypeSelect\" class=\"selectpicker\">";
+                // html_loadsmell += "<option value=\"Clone\">Clone</option>";
+                // html_loadsmell += "<option value=\"CyclicDependency\">Cyclic Dependency</option>";
+                // html_loadsmell += "<option value=\"HubLikeDependency\">Hublike Dependency</option>";
+                // html_loadsmell += "<option value=\"UnstableDependency\">Unstable Dependency</option>";
+                // html_loadsmell += "<option value=\"UnutilizedAbstraction\">Unutilized Abstraction</option>";
+                // html_loadsmell += "<option value=\"ImplicitCrossModuleDependency\">Implicit Cross Module Dependency</option>";
+                // html_loadsmell += "<option value=\"GodComponent\">God Component</option>";
+                // html_loadsmell += "<option value=\"UnusedInclude\">Unused Include</option>";
+                // html_loadsmell += "</select></p>";
 
-                html_loadsmell += "<select id = \"smellTypeSelect\" class=\"selectpicker\">";
-                html_loadsmell += "<option value=\"Clone\">Clone</option>";
-                html_loadsmell += "<option value=\"CyclicDependency\">Cyclic Dependency</option>";
-                html_loadsmell += "<option value=\"HubLikeDependency\">Hublike Dependency</option>";
-                html_loadsmell += "<option value=\"UnstableDependency\">Unstable Dependency</option>";
-                html_loadsmell += "<option value=\"UnutilizedAbstraction\">Unutilized Abstraction</option>";
-                html_loadsmell += "<option value=\"ImplicitCrossModuleDependency\">Implicit Cross Module Dependency</option>";
-                html_loadsmell += "<option value=\"GodComponent\">God Component</option>";
-                html_loadsmell += "<option value=\"UnusedInclude\">Unused Include</option>";
-                html_loadsmell += "</select></p>";
+                // html_loadsmell += "<p class='combo_p'><button class = \"combo_button layui-btn layui-btn-primary\" type=\"button\" onclick= loadSmellByButton()>加载异味</button>" +
+                //     "<button class = \"combo_button layui-btn layui-btn-primary\" style='margin-left: ' type=\"button\" onclick= deleteSmell('delete')>删除异味</button>" +
+                //     "<button class = \"combo_button layui-btn layui-btn-primary\" style='margin-left: ' type=\"button\" onclick= filterSmellLayer()>筛选异味</button></p>";
 
-                html_loadsmell += "<p class='combo_p'><button class = \"combo_button layui-btn layui-btn-primary\" type=\"button\" onclick= loadSmellByButton()>加载异味</button>" +
+                html_loadsmell += "<p class='combo_p'>" +
                     "<button class = \"combo_button layui-btn layui-btn-primary\" style='margin-left: ' type=\"button\" onclick= deleteSmell('delete')>删除异味</button>" +
                     "<button class = \"combo_button layui-btn layui-btn-primary\" style='margin-left: ' type=\"button\" onclick= filterSmellLayer()>筛选异味</button></p>";
 
@@ -787,7 +792,7 @@ function showRelevantNodeAndEdge(node_click){
     last_click_node = node_click._cfg.id;
     graph.setItemState(node_click, 'selected', true);
 
-    const node_edges = node_click.getInEdges();
+    const node_edges = node_click.getEdges();
     console.log(node_edges);
 
     node_edges.forEach(function (edge){
@@ -835,7 +840,7 @@ function highlightEdge(edge){
 //取消与该节点相关的连线和节点的点击状态
 function cancelRelevantNodeAndEdge(node_click){
     graph.setItemState(node_click, 'selected', false);
-    const node_edges = node_click.getInEdges();
+    const node_edges = node_click.getEdges();
 
     node_edges.forEach(function (edge){
         if(edge._cfg.model.inner_edge === 1 || node_click._cfg.model.inOutNode === 1){
@@ -1355,7 +1360,9 @@ function deleteSmell(type){
     if(type === "delete"){
         smell_data_flag = "";
         present_smell_data = [];
+        present_smell_node_data = [];
         smell_filter_condition = {};
+        present_smell_type = "";
         data["edges"] = present_edge_data;
         paintCombo();
 
@@ -1368,98 +1375,118 @@ function deleteSmell(type){
 }
 
 function filterSmell(){
-    present_smell_edge_data = filterLinks(smell_filter_condition, "_smell");
-    data["edges"] = splitLinks(present_smell_edge_data);
-    paintCombo();
+    let smellOnlyDependsOn = $("#smellOnlyDependsOn").prop("checked") ? 1 : 0;
+    let smellOnlyClone = $("#smellOnlyClone").prop("checked") ? 1 : 0;
+    let smellOnlyCoChange = $("#smellOnlyCoChange").prop("checked") ? 1 : 0;
 
-    const nodes = graph.getNodes();
-    nodes.forEach((node) => {
-        node.toFront();
-    });
-    graph.paint();
-}
-
-function filterSmellButton(){
-    smell_filter_condition = getFilterCondition("_smell");
     closeFilterSmellLayer();
+    showLoadingWindow();
+
+    let smell_data = [];
+    console.log(smell_data_single_type);
+
+    for(let i = 0; i < smell_data_single_type.length; i++){
+        let nodes = smell_data_single_type[i].nodes;
+        edge:
+        for(let j = 0; j < actual_edges.length; j++){
+            let edge = actual_edges[j];
+            if((edge.link_type === "dependson" && smellOnlyDependsOn === 1) ||
+                (edge.link_type === "clone" && smellOnlyClone === 1) ||
+                (edge.link_type === "cochange" && smellOnlyCoChange === 1)){
+                for(let k = 0; k < nodes.length; k++){
+                    if(nodes[k].id.split("_")[1] === actual_edges[j].source){
+                        for(let m = 0; m < nodes.length; m++){
+                            if(nodes[m].id.split("_")[1] === actual_edges[j].target){
+                                smell_data.push(smell_data_single_type[i]);
+                                break edge;
+                            }
+                        }
+                    }else if(nodes[k].id.split("_")[1] === actual_edges[j].target){
+                        for(let m = 0; m < nodes.length; m++){
+                            if(nodes[m].id.split("_")[1] === actual_edges[j].source){
+                                smell_data.push(smell_data_single_type[i]);
+                                break edge;
+                            }
+                        }
+                    }
+                }
+            }
+            // console.log(actual_edges[j]);
+        }
+    }
+
+    console.log(smell_data);
+
+    loadSmell(smell_data);
+    loadSmellTable(smell_data);
+
+    closeLoadingWindow();
 }
 
 function filterSmellLayer(){
-    layui.use('layer', function(){
-        filter_smell_layer = layui.layer;
-
-        let html_link = generateFilterHtml("_smell");
-        html_link += "<p><div style=\"margin-top: 20px;\">" +
-            "<button class = \"layui-btn layui-btn-fluid\" type=\"button\" onclick= filterSmellButton() >确定</button>" +
-            "</div></p>";
-
-        let html_condition = "<p class='combo_p'><label class = \"AttributionSelectLabel\">" +
-            "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"smellConditionCommonDependency\">" +
-            "只显示节点间的共同依赖(只针对单个异味)" +
-            "</label></p><hr>" +
-
-            "<p><div style=\"margin-top: 20px;\">" +
-            "<button class = \"layui-btn layui-btn-fluid\" type=\"button\" onclick= filterSmellButton() >确定</button>" +
-            "</div></p>";
-
-        filter_smell_layer.tab({
-            move: false,
-            tab: [{
-                    title: '关系筛选',
-                content: html_link
-            }, {
-                title: '条件筛选',
-                content: html_condition
-            }]
+    if(smell_data_flag !== "type"){
+        layui.use('layer', function(){
+            let layer = layui.layer;
+            if(smell_data_flag === "group"){
+                layer.alert('当前显示为单个异味，请选择一种异味！');
+            }else{
+                layer.alert('当前未选择异味！');
+            }
         });
+    }else{
+        layui.use('layer', function(){
+            filter_smell_layer = layui.layer;
 
-        if (!isEmptyObject(smell_filter_condition)) {
-            if (smell_filter_condition["dependson"]["checked"]) {
-                $('#dependsOn_smell').attr("checked", true);
-                if (smell_filter_condition["dependson"]["dependsIntensity"]) {
-                    $('#dependsIntensity_smell').attr("checked", true);
-                }
+            let html_link = "<p class='combo_p'><label class = \"AttributionSelectLabel\">" +
+                "当前异味类型： " + "<b>" + present_smell_type + "</b>" +
+                "</label></p><hr>" +
 
-                if (smell_filter_condition["dependson"]["dependsOnTimes"]) {
-                    $('#dependsOnTimes_smell').attr("checked", true);
-                }
+                "<p class='combo_p'><label class = \"AttributionSelectLabel\">" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"smellOnlyDependsOn\">" +
+                "只显示有Depends-On关系的节点" +
+                "</label></p><hr>" +
 
-                if (smell_filter_condition["dependson"]["dependsOnType"]) {
-                    $('#dependsOnType_smell').attr("checked", true);
-                }
+                "<p class='combo_p'><label class = \"AttributionSelectLabel\">" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"smellOnlyClone\">" +
+                "只显示有Clone关系的节点" +
+                "</label></p><hr>" +
 
-                if(smell_filter_condition["dependson"]["dependsTypeSelect"] !== null){
-                    smell_filter_condition["dependson"]["dependsTypeSelect"].forEach(item =>{
-                        $("#dependsTypeSelect_smell").find("option[value=" + item + "]").attr("selected",true);
-                    })
-                }
-            }
+                "<p class='combo_p'><label class = \"AttributionSelectLabel\">" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"smellOnlyCoChange\">" +
+                "只显示有Co-Change关系的节点" +
+                "</label></p><hr>" +
 
-            if (smell_filter_condition["clone"]["checked"]) {
-                $('#clone_smell').attr("checked", true);
-                if (smell_filter_condition["clone"]["cloneSimilarity"]) {
-                    $('#cloneSimilarity_smell').attr("checked", true);
-                }
-            }
+                "<p><div style=\"margin-top: 20px;\">" +
+                "<button class = \"layui-btn layui-btn-fluid\" type=\"button\" onclick= filterSmell() >确定</button>" +
+                "</div></p>";
 
-            if (smell_filter_condition["cochange"]["checked"]) {
-                $('#coChange_smell').attr("checked", true);
-                if (smell_filter_condition["cochange"]["cochangeTimes"]) {
-                    $('#cochangeTimes_smell').attr("checked", true);
-                }
-            }
+            let html_condition = "<p class='combo_p'><label class = \"AttributionSelectLabel\">" +
+                "<input style = \"margin-right:10px;\" type=\"checkbox\" id=\"smellConditionCommonDependency\">" +
+                "只显示节点间的共同依赖(只针对单个异味)" +
+                "</label></p><hr>" +
 
-            if(smell_filter_condition["smell_condition_filter"]["smellConditionCommonDependency"]) {
-                $('#smellConditionCommonDependency').attr("checked", true);
-            }
-        }
+                "<p><div style=\"margin-top: 20px;\">" +
+                "<button class = \"layui-btn layui-btn-fluid\" type=\"button\" onclick= filterSmell() >确定</button>" +
+                "</div></p>";
 
-        $(".selectpicker").selectpicker({
-            actionsBox:true,
-            countSelectedText:"已选中{0}项",
-            selectedTextFormat:"count > 2"
-        })
-    });
+            filter_smell_layer.tab({
+                move: false,
+                tab: [{
+                    title: '关系筛选',
+                    content: html_link
+                }, {
+                    title: '条件筛选',
+                    content: html_condition
+                }]
+            });
+
+            $(".selectpicker").selectpicker({
+                actionsBox:true,
+                countSelectedText:"已选中{0}项",
+                selectedTextFormat:"count > 2"
+            })
+        });
+    }
 }
 
 function closeFilterSmellLayer(){
@@ -2269,6 +2296,8 @@ function histogram(data, divId) {
         })
 
         smell_data_single_type = smell_data;
+        present_smell_type = params.name;
+        present_smell_node_data = smell_data;
         smell_data_flag = "type";
 
         loadSmell(smell_data);
