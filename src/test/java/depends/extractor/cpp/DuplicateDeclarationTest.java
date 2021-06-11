@@ -25,7 +25,7 @@ public class DuplicateDeclarationTest extends CppParserTest {
 				    parser.parse();
 			    }
 			    inferer.resolveAllBindings();
-		        assertEquals(8,repo.getEntity("X.invoke").getRelations().size());
+		        assertEquals(6,repo.getEntity("X.invoke").getRelations().size());
 		}
 
 

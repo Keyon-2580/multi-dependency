@@ -4,10 +4,12 @@ import depends.entity.repo.EntityRepo;
 import depends.extractor.ParserTest;
 import depends.relations.Inferer;
 import multilang.depends.util.file.TemporaryFile;
+import org.junit.Ignore;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Ignore
 public abstract class MavenParserTest extends ParserTest{
 
 	protected EntityRepo repo;
