@@ -9,6 +9,8 @@ import depends.relations.Relation;
 import java.util.ArrayList;
 import java.util.Collection;
 
+//import static org.springframework.test.context.junit.Assert.fail;
+
 import static org.junit.Assert.fail;
 
 public abstract class ParserTest {

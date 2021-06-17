@@ -24,7 +24,7 @@ public class CppExpressionTest extends CppParserTest {
         this.assertContainsRelation(e, DependencyType.CAST,"ClassA");
         this.assertContainsRelation(e, DependencyType.CALL,"ClassA");
         this.assertContainsRelation(e, DependencyType.CREATE,"ClassA");
-        this.assertContainsRelation(e, DependencyType.USE,"ClassA");
+//        this.assertContainsRelation(e, DependencyType.USE,"ClassA");
         this.assertContainsRelation(e, DependencyType.USE,"foo.a2");
         this.assertContainsRelation(e, DependencyType.USE,"foo.a3");
         this.assertContainsRelation(e, DependencyType.USE,"foo.a");
