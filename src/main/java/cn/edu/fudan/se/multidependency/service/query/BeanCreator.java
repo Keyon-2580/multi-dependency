@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.query;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -12,6 +13,8 @@ import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.coupling.CouplingRepository;
+import cn.edu.fudan.se.multidependency.service.query.coupling.CouplingService;
 import cn.edu.fudan.se.multidependency.service.query.smell.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
@@ -75,6 +78,9 @@ public class BeanCreator {
 
 	@Autowired
 	private SmellDetectorService smellDetectorService;
+
+	@Autowired
+	private CouplingService couplingService;
 
 	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
 	private ModularityCalculator modularityCalculator;
@@ -492,31 +498,31 @@ public class BeanCreator {
 	}
 
 
-	@Bean
-	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository) {
-		LOGGER.info("创建File Metric度量值节点和关系...");
-		metricCalculatorService.createFileMetric(false);
-
-		LOGGER.info("创建Package Metric度量值节点和关系...");
-		metricCalculatorService.createPackageMetric(false);
-
-		LOGGER.info("创建Project Metric度量值节点和关系...");
-		metricCalculatorService.createProjectMetric(false);
-
-		LOGGER.info("创建GitRepo Metric度量值节点和关系...");
-		metricCalculatorService.createGitRepoMetric(false);
-
-		if(propertyConfig.isCalculateModularity()){
-			LOGGER.info("计算Project模块性度量值...");
-			projectRepository.queryAllProjects().forEach( (project) ->{
-				if(project.getModularity() <= 0.0){
-					double value = modularityCalculator.calculate(project).getValue();
-					projectRepository.setModularityMetricsForProject(project.getId(), value);
-				}
-			});
-		}
-		return true;
-	}
+//	@Bean
+//	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository) {
+//		LOGGER.info("创建File Metric度量值节点和关系...");
+//		metricCalculatorService.createFileMetric(false);
+//
+//		LOGGER.info("创建Package Metric度量值节点和关系...");
+//		metricCalculatorService.createPackageMetric(false);
+//
+//		LOGGER.info("创建Project Metric度量值节点和关系...");
+//		metricCalculatorService.createProjectMetric(false);
+//
+//		LOGGER.info("创建GitRepo Metric度量值节点和关系...");
+//		metricCalculatorService.createGitRepoMetric(false);
+//
+//		if(propertyConfig.isCalculateModularity()){
+//			LOGGER.info("计算Project模块性度量值...");
+//			projectRepository.queryAllProjects().forEach( (project) ->{
+//				if(project.getModularity() <= 0.0){
+//					double value = modularityCalculator.calculate(project).getValue();
+//					projectRepository.setModularityMetricsForProject(project.getId(), value);
+//				}
+//			});
+//		}
+//		return true;
+//	}
 
 	@Bean
 	public boolean setPackageDepth(ProjectRepository projectRepository, ContainRepository containRepository) {
@@ -611,5 +617,100 @@ public class BeanCreator {
 			return true;
 		}
 		return false;
+	}
+
+	@Bean
+	public boolean exportCouplingValue(PropertyConfig propertyConfig) throws IOException {
+		if (propertyConfig.isExportCouplingValue()) {
+			LOGGER.info("export coupling value...");
+//			couplingService.calCouplingValue(propertyConfig.couplingValuePath);
+//			System.exit(1);
+			return true;
+		}
+		return false;
+	}
+
+	@Bean
+	public List<Coupling> setCouplingValue(PropertyConfig propertyConfig, CouplingRepository couplingRepository, DependsOnRepository dependsOnRepository) {
+		if (!propertyConfig.isSetCoupling()) {
+			return new ArrayList<>();
+		}
+		List<Coupling> couplings = couplingRepository.findFileDependsWithLimit();
+		if(couplings != null && !couplings.isEmpty()){
+			LOGGER.info("已存在Coupling关系" );
+		}
+		else{
+			LOGGER.info("创建Coupling Value...");
+			List<Coupling> couplingsTmp = new ArrayList<>();
+			List<DependsOn> allDependsOn = dependsOnRepository.findFileDepends();
+			HashSet<String> allFilesPair = new HashSet<>();
+
+			for(DependsOn dependsOn: allDependsOn){
+				long file1Id = dependsOn.getStartNode().getId();
+				long file2Id = dependsOn.getEndNode().getId();
+				String filesPair = file1Id + "_" + file2Id;
+				String filesPairReverse = file2Id + "_" + file1Id;
+
+				if(!allFilesPair.contains(filesPair) && !allFilesPair.contains(filesPairReverse)){
+					allFilesPair.add(filesPair);
+//					System.out.println(file1Id + "  " + file2Id);
+
+					int funcNumAAtoB = couplingRepository.queryTwoFilesDependsOnFunctionsNum(file1Id, file2Id);
+					int funcNumBAtoB = couplingRepository.queryTwoFilesDependsByFunctionsNum(file1Id, file2Id);
+					int funcNumABtoA = couplingRepository.queryTwoFilesDependsByFunctionsNum(file2Id, file1Id);
+					int funcNumBBtoA = couplingRepository.queryTwoFilesDependsOnFunctionsNum(file2Id, file1Id);
+
+					DependsOn dependsOnAtoB = dependsOnRepository.findDependsOnBetweenFiles(file1Id, file2Id);
+					DependsOn dependsOnBtoA = dependsOnRepository.findDependsOnBetweenFiles(file2Id, file1Id);
+
+					int dependsOntimesAtoB = 0;
+					int dependsOntimesBtoA = 0;
+
+					if(dependsOnAtoB != null) {
+						Map<String, Long> dependsOnTypesAtoB = dependsOnAtoB.getDependsOnTypes();
+
+						for (String type : dependsOnTypesAtoB.keySet()) {
+							if (type.equals("USE") || type.equals("CALL") || type.equals("EXTENDS") || type.equals("RETURN")
+									|| type.equals("PARAMETER") || type.equals("LOCAL_VARIABLE") || type.equals("IMPLEMENTS")
+									|| type.equals("MEMBER_VARIABLE")) {
+								dependsOntimesAtoB += dependsOnTypesAtoB.get(type);
+							}
+						}
+					}else{
+						dependsOnAtoB = new DependsOn();
+					}
+
+					if(dependsOnBtoA != null) {
+						Map<String, Long> dependsOnTypesBtoA = dependsOnBtoA.getDependsOnTypes();
+
+						for (String type : dependsOnTypesBtoA.keySet()) {
+							if (type.equals("USE") || type.equals("CALL") || type.equals("EXTENDS") || type.equals("RETURN")
+									|| type.equals("PARAMETER") || type.equals("LOCAL_VARIABLE") || type.equals("IMPLEMENTS")
+									|| type.equals("MEMBER_VARIABLE")) {
+								dependsOntimesBtoA += dependsOnTypesBtoA.get(type);
+							}
+						}
+					}else{
+						dependsOnBtoA = new DependsOn();
+					}
+
+					if(dependsOntimesAtoB != 0 || dependsOntimesBtoA != 0) {
+						double C_AtoB = couplingService.calC1to2(funcNumAAtoB,funcNumBAtoB);
+						double C_BtoA = couplingService.calC1to2(funcNumABtoA,funcNumBBtoA);
+						double C_AandB = couplingService.calC(C_AtoB, C_BtoA);
+						double U_AtoB = couplingService.calU1to2(dependsOntimesAtoB, dependsOntimesBtoA);
+						double U_BtoA = couplingService.calU1to2(dependsOntimesBtoA, dependsOntimesAtoB);
+						double I_AandB = couplingService.calI(dependsOntimesAtoB, dependsOntimesBtoA);
+						double disp_AandB = couplingService.calDISP(C_AandB, dependsOntimesAtoB, dependsOntimesBtoA);
+
+						couplingsTmp.add(new Coupling(dependsOn.getStartNode(), dependsOn.getEndNode(), dependsOnAtoB,dependsOnBtoA,
+								funcNumAAtoB, funcNumBAtoB, funcNumABtoA, funcNumBBtoA, dependsOntimesAtoB, dependsOntimesBtoA,
+								C_AtoB, C_BtoA, C_AandB, U_AtoB, U_BtoA, I_AandB, disp_AandB));
+					}
+				}
+			}
+			couplingRepository.saveAll(couplingsTmp);
+		}
+		return couplings;
 	}
 }

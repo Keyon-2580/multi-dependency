@@ -255,6 +255,14 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 			"delete r;")
 	void deleteNullAggregationDependsOnInPackages();
 
-	@Query("match p=()-[r:DEPENDS_ON]->() where r.dependsOnType = $dependsOnType delete r;")
-	void deleteDependsOnByRelationType(String dependsOnType);
+	@Query("match p= (f1:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]-(f2:ProjectFile) where id(f1) = $file1Id return p")
+	List<DependsOn> findOneFileAllDependsOn(@Param("file1Id") long file1Id);
+
+	@Query("match p= (f1:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]-(f2:ProjectFile) where id(f1) = $file1Id and id(f2) = $file2Id return count(r) > 1;")
+	boolean findIsTwoWayDependsOn(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
+
+	@Query("MATCH p=(f1:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->(f2:ProjectFile) where id(r) = $dependsOnId " +
+			"return r.dependsOnType contains 'EXTEND' or r.dependsOnType contains 'IMPLEMENTS';")
+	boolean findDependsOnIsExtendOrImplements(@Param("dependsOnId") long dependsOnId);
+
 }

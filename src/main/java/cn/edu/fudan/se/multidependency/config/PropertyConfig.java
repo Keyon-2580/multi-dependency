@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Configuration
 public class PropertyConfig {
-	
+
 	@Getter
 	@Value("${config.starter.cochange}")
 	private boolean setCoChange;
@@ -27,6 +27,10 @@ public class PropertyConfig {
 	@Getter
 	@Value("${config.starter.aggregation_clone}")
 	private boolean setAggregationClone;
+
+	@Getter
+	@Value("${config.starter.coupling}")
+	private boolean setCoupling;
 
 //	@Getter
 //	@Value("${config.starter.co-change.co-change}")
@@ -63,7 +67,7 @@ public class PropertyConfig {
 //	@Getter
 //	@Value("${config.starter.clone.aggregation_clone}")
 //	private boolean setAggregationClone;
-	
+
 	@Getter
 	@Value("${config.starter.smell}")
 	private boolean detectAS;
@@ -75,4 +79,13 @@ public class PropertyConfig {
 	@Getter
 	@Value("${config.starter.export_cyclic_dependency}")
 	private boolean exportCyclicDependency;
+
+	@Getter
+	@Value("${config.starter.export_coupling_value}")
+	private boolean exportCouplingValue;
+
+	@Getter
+	@Value("${data.coupling_value_path}")
+	public String couplingValuePath;
+
 }

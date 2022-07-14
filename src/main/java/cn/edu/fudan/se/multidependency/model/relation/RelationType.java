@@ -56,7 +56,8 @@ public enum RelationType implements RelationshipType {
 	AGGREGATION_CLONE(RelationType.str_AGGREGATION_CLONE),
 	AGGREGATION_DEPENDS_ON(RelationType.str_AGGREGATION_DEPENDS_ON),
 	AGGREGATION_CO_CHANGE(RelationType.str_AGGREGATION_CO_CHANGE),
-	CO_DEVELOPER(RelationType.str_CO_DEVELOPER);
+	CO_DEVELOPER(RelationType.str_CO_DEVELOPER),
+	COUPLING(RelationType.str_COUPLING);
 
 	/**
 	 * 结构关系
@@ -120,6 +121,11 @@ public enum RelationType implements RelationshipType {
 	public static final String str_AGGREGATION_CLONE = "AGGREGATION_CLONE";
 	public static final String str_AGGREGATION_DEPENDS_ON = "AGGREGATION_DEPENDS_ON";
 	public static final String str_AGGREGATION_CO_CHANGE = "AGGREGATION_CO_CHANGE";
+
+	/**
+	 * 耦合关系
+	 */
+	public static final String str_COUPLING = "COUPLING";
 
 	/**
 	 * 关系权重
