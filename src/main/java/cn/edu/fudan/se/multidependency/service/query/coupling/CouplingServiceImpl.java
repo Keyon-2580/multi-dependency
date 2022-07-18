@@ -377,12 +377,12 @@ public class CouplingServiceImpl implements CouplingService {
                     direction = false;
                 }
 
-                if(fileIdList.contains(endNodeId)){
+                if(fileIdList.contains(endNodeId) && !GroupInsideDependsOns.contains(dependsOn)){
                     GroupInsideDependsOns.add(dependsOn);
                 }else{
-                    if(direction){
+                    if(direction && !GroupInsideToOutDependsOns.contains(dependsOn)){
                         GroupInsideToOutDependsOns.add(dependsOn);
-                    }else{
+                    }else if(!GroupOutToInsideDependsOns.contains(dependsOn)){
                         GroupOutToInsideDependsOns.add(dependsOn);
                     }
                 }
