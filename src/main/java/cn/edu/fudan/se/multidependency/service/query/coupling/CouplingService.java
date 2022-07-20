@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency.service.query.coupling;
 
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import com.alibaba.fastjson.JSONObject;
@@ -32,4 +33,6 @@ public interface CouplingService {
     List<List<DependsOn>> getGroupInsideAndOutDependsOn(List<Long> fileIdList);
 
     JSONObject getCouplingValueByFileIds(List<Long> fileIds);
+
+    JSONObject getCouplingValueByPcks(List<Package> pckList, boolean isOneStep);
 }

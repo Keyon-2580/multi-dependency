@@ -930,4 +930,14 @@ public class ContainRelationServiceImpl implements ContainRelationService {
 		}
 		return result;
 	}
+
+	@Override
+	public Package findPackageContainFileInPackagesList(List<Package> pckList, Long fileId){
+		for(Package pck: pckList){
+			if(containRepository.isPackageContainsFile(pck.getId(), fileId)){
+				return pck;
+			}
+		}
+		return null;
+	}
 }

@@ -1,11 +1,15 @@
 package cn.edu.fudan.se.multidependency.service.query.coupling;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.coupling.CouplingRepository;
+import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
+import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.csvreader.CsvWriter;
@@ -28,6 +32,12 @@ public class CouplingServiceImpl implements CouplingService {
 
     @Autowired
     public ProjectFileRepository projectFileRepository;
+
+    @Autowired
+    private ContainRepository containRepository;
+
+    @Autowired
+    private ContainRelationService containRelationService;
 
 //    @Override
 //    public void calCouplingValue(String couplingValuePath) throws IOException {
@@ -417,14 +427,146 @@ public class CouplingServiceImpl implements CouplingService {
 
         for(DependsOn dependsOn: GroupInsideDependsOns){
             JSONObject dependsOnTmp = new JSONObject();
+            dependsOnTmp.put("id", dependsOn.getStartNode().getId().toString() + "_" + dependsOn.getEndNode().getId().toString());
             dependsOnTmp.put("source", dependsOn.getStartNode().getId().toString());
             dependsOnTmp.put("target", dependsOn.getEndNode().getId().toString());
             dependsOnTmp.put("dependsOnTypes", dependsOn.getDependsOnType());
             dependsOnTmp.put("isExtendOrImplements", dependsOnRepository.findDependsOnIsExtendOrImplements(dependsOn.getId()));
+            dependsOnTmp.put("isTwoWayDependsOn", dependsOnRepository.findIsTwoWayDependsOn(dependsOn.getStartNode().getId(),
+                    dependsOn.getEndNode().getId()));
             edges.add(dependsOnTmp);
         }
         result.put("edges", edges);
 
+        return result;
+    }
+
+    @Override
+    public JSONObject getCouplingValueByPcks(List<Package> pckList, boolean isOneStep){
+        JSONObject result = new JSONObject();
+        JSONArray nodes = new JSONArray();
+        JSONArray edges = new JSONArray();
+
+        Map<Map<Package, Package>, List<DependsOn>> dependsOnBetweenPackages = new HashMap<>();
+
+        for(Package pck: pckList) {
+            JSONObject tmpPck = new JSONObject();
+            String pckName = FileUtil.extractPackagePath(pck.getDirectoryPath());
+
+            tmpPck.put("id", pck.getId().toString());
+            tmpPck.put("directoryPath", pck.getDirectoryPath());
+            tmpPck.put("name", pckName);
+            tmpPck.put("label", pckName);
+            List<ProjectFile> fileList = new ArrayList<>();
+
+            if(isOneStep){
+                fileList.addAll(containRepository.findPackageContainAllFiles(pck.getId()));
+            }else{
+                fileList.addAll(containRepository.findPackageContainFiles(pck.getId()));
+            }
+
+            List<Long> fileIds = new ArrayList<>();
+
+            for (ProjectFile projectFile : fileList) {
+                fileIds.add(projectFile.getId());
+            }
+            List<List<DependsOn>> listTmp = getGroupInsideAndOutDependsOn(fileIds);
+
+            List<DependsOn> GroupInsideToOutDependsOns = listTmp.get(1);
+            List<DependsOn> GroupOutToInsideDependsOns = listTmp.get(2);
+            int GroupInsideToOutDependsOnTimes = 0;
+            int GroupOutToInsideDependsOnTimes = 0;
+
+            if (GroupInsideToOutDependsOns.size() > 0) {
+                for (DependsOn dependsOn : GroupInsideToOutDependsOns) {
+                    Package endPackage;
+                    if(!isOneStep){
+                        endPackage = containRepository.findFileBelongToPackage(dependsOn.getEndNode().getId());
+                    }else{
+                        endPackage = containRelationService.findPackageContainFileInPackagesList(pckList, dependsOn.getEndNode().getId());
+                    }
+
+                    if (pckList.contains(endPackage) && !endPackage.equals(pck)) {
+                        Map<String, Long> dependsOnTypes = dependsOn.getDependsOnTypes();
+                        for (String type : dependsOnTypes.keySet()) {
+                            if (type.equals("EXTENDS") || type.equals("IMPLEMENTS")) {
+                                GroupOutToInsideDependsOnTimes += 10;
+                            } else if (type.equals("USE") || type.equals("CALL") || type.equals("RETURN")
+                                    || type.equals("PARAMETER") || type.equals("LOCAL_VARIABLE") || type.equals("CREATE")
+                                    || type.equals("MEMBER_VARIABLE")) {
+                                GroupInsideToOutDependsOnTimes += 1;
+                            }
+                        }
+
+                        Map<Package, Package> pckDependsOnTmp = new HashMap<>();
+                        if(!endPackage.equals(pck))
+                            pckDependsOnTmp.put(pck, endPackage);
+                        if (dependsOnBetweenPackages.containsKey(pckDependsOnTmp)) {
+                            dependsOnBetweenPackages.get(pckDependsOnTmp).add(dependsOn);
+                        } else {
+                            List<DependsOn> dependsOnsListTmp = new ArrayList<>();
+                            dependsOnsListTmp.add(dependsOn);
+                            dependsOnBetweenPackages.put(pckDependsOnTmp, dependsOnsListTmp);
+                        }
+                    }
+                }
+            }
+
+            if (GroupOutToInsideDependsOns.size() > 0) {
+                for (DependsOn dependsOn : GroupOutToInsideDependsOns) {
+                    Package startPackage;
+                    if(!isOneStep){
+                        startPackage = containRepository.findFileBelongToPackage(dependsOn.getStartNode().getId());
+                    }else{
+                        startPackage = containRelationService.findPackageContainFileInPackagesList(pckList, dependsOn.getStartNode().getId());
+                    }
+                    if (pckList.contains(startPackage) && !startPackage.equals(pck)) {
+                        Map<String, Long> dependsOnTypes = dependsOn.getDependsOnTypes();
+                        for (String type : dependsOnTypes.keySet()) {
+                            if (type.equals("EXTENDS") || type.equals("IMPLEMENTS")) {
+                                GroupInsideToOutDependsOnTimes += 10;
+                            } else if (type.equals("USE") || type.equals("CALL") || type.equals("RETURN")
+                                    || type.equals("PARAMETER") || type.equals("LOCAL_VARIABLE") || type.equals("CREATE")
+                                    || type.equals("MEMBER_VARIABLE")) {
+                                GroupOutToInsideDependsOnTimes += 1;
+                            }
+                        }
+
+                        Map<Package, Package> pckDependsOnTmp = new HashMap<>();
+                        if(!startPackage.equals(pck))
+                            pckDependsOnTmp.put(startPackage, pck);
+                        if (dependsOnBetweenPackages.containsKey(pckDependsOnTmp)) {
+                            dependsOnBetweenPackages.get(pckDependsOnTmp).add(dependsOn);
+                        } else {
+                            List<DependsOn> dependsOnsListTmp = new ArrayList<>();
+                            dependsOnsListTmp.add(dependsOn);
+                            dependsOnBetweenPackages.put(pckDependsOnTmp, dependsOnsListTmp);
+                        }
+                    }
+                }
+            }
+
+            int allDependsOnTimes = GroupInsideToOutDependsOnTimes + GroupOutToInsideDependsOnTimes;
+            double pckInstability = 0.0;
+            if (allDependsOnTimes != 0) {
+                pckInstability = (double) GroupInsideToOutDependsOnTimes / (double) allDependsOnTimes;
+            }
+            tmpPck.put("instability", pckInstability);
+            nodes.add(tmpPck);
+        }
+
+        for(Map<Package, Package> map: dependsOnBetweenPackages.keySet()){
+            JSONObject tmpEdge = new JSONObject();
+            for(Package pck: map.keySet()){
+                tmpEdge.put("source", pck.getId().toString());
+                tmpEdge.put("target", map.get(pck).getId().toString());
+            }
+            tmpEdge.put("dependsOnNum", dependsOnBetweenPackages.get(map).size());
+            edges.add(tmpEdge);
+        }
+
+        result.put("nodes", nodes);
+        result.put("edges", edges);
         return result;
     }
 }

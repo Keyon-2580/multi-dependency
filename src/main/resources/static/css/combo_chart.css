@@ -205,3 +205,17 @@ html, body {
 .combo_p {
     margin-top: 10px;
 }
+
+.g6-toolbar-ul {
+    position: absolute;
+    top: 70px;
+    border: 1px solid #e2e2e2;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #545454;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px 8px;
+    box-shadow: rgb(174, 174, 174) 0px 0px 10px;
+    width: 100px;
+    cursor: pointer;
+}

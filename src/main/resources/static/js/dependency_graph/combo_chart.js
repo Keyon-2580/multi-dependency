@@ -382,7 +382,7 @@ const graph = new G6.Graph({
         default: [{
             type: 'drag-combo',
             enableDelegate: true,
-        }, 'drag-canvas', 'collapse-expand-combo', 'zoom-canvas'],
+        }, 'drag-canvas', 'collapse-expand-combo', 'zoom-canvas', 'click-select'],
     },
     defaultCombo: {
         type: 'rect',

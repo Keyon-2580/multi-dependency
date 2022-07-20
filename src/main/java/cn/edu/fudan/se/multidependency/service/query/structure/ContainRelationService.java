@@ -155,6 +155,8 @@ public interface ContainRelationService {
 	Collection<Call> findFunctionContainCalls (Function function);
 
 	JSONObject doubleFileStructure(List<ProjectFile> fileList);
+
+	Package findPackageContainFileInPackagesList(List<Package> pckList, Long fileId);
 	
 	/**
 	 * child是否在parent下

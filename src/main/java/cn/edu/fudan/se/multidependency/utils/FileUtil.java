@@ -480,4 +480,15 @@ public class FileUtil {
 			e.printStackTrace();
 		}
 	}
+
+	public static String extractPackagePath(String path){
+		String[] strList = path.split("/");
+		StringBuilder stringBuilder = new StringBuilder();
+
+		for(int i = strList.length - 1; i >= strList.length - 2; i--){
+			stringBuilder.append(strList[i]).append("/");
+		}
+
+		return stringBuilder.toString();
+	}
 }

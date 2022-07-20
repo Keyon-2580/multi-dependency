@@ -162,4 +162,6 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 			"set pck.depth = parent.depth + 1; ")
 	public Boolean setChildPackageDepth(@Param("parentPackageId") Long parentPackageId);
 
+	@Query("match h=(p:Package)-[:" + RelationType.str_CONTAIN + "*]->(f:ProjectFile) where id(p)=$pckId and id(f)=$fileId return count(h) > 0;")
+	public boolean isPackageContainsFile(@Param("pckId") Long pckId, @Param("fileId") Long fileId);
 }

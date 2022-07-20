@@ -92,6 +92,11 @@ public class ProjectController {
 		return "dependency_graph/combo_chart";
 	}
 
+	@GetMapping("/coupling_chart")
+	public String coupling() {
+		return "dependency_graph/coupling_chart";
+	}
+
 	@GetMapping("/tree")
 	public String tree() {
 		return "projecttree";

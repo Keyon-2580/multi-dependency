@@ -23,8 +23,11 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 	@Query("match (p:Package) where id(p) = $pckId return p;")
 	public Package findPackageById(@Param("pckId") long pckId);
 
-	@Query("MATCH (n:Package)-[:" + RelationType.str_CONTAIN + "*1..3]->(p:Package) where id(n)=$pckId RETURN p;")
-	public List<Package> findTwoStepsChildPackagesById(@Param("pckId") long pckId);
+	@Query("MATCH (n:Package)-[:" + RelationType.str_CONTAIN + "*]->(p:Package) where id(n)=$pckId RETURN p;")
+	public List<Package> findAllChildPackagesById(@Param("pckId") long pckId);
+
+	@Query("MATCH (n:Package)-[:" + RelationType.str_CONTAIN + "]->(p:Package) where id(n)=$pckId RETURN p;")
+	public List<Package> findOneStepPackagesById(@Param("pckId") long pckId);
 
 	@Query("match (project:Project)-[:" + RelationType.str_CONTAIN + "]->(package:Package) where id(project) = $projectId return package;")
 	public List<Package> getPackageByProjectId(@Param("projectId") long projectId);

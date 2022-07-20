@@ -89,7 +89,7 @@
 		<dependency>
 			<groupId>cn.emergentdesign.se</groupId>
 			<artifactId>depends</artifactId>
-			<version>0.9.6c7</version>
+			<version>0.9.6d10</version>
 			<scope>system</scope>
 			<systemPath>${pom.basedir}/lib/depends-0.9.6c7-jar-with-dependencies.jar</systemPath>
 			<!-- <systemPath>${project.basedir}/lib/depends.jar</systemPath> -->
