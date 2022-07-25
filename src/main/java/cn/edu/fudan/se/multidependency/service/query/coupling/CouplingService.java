@@ -10,9 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface CouplingService {
-//    void calCouplingValue(String couplingValuePath) throws IOException;
-
-    void calGroupCouplingValue(List<Long> fileIdList, String couplingValuePath) throws IOException;
 
     Map<ProjectFile, Double> calGroupInstablity(List<Long> fileIdList);
 
@@ -30,9 +27,7 @@ public interface CouplingService {
 
     double calDependsOnI(DependsOn dependsOnAtoB, DependsOn dependsOnBtoA);
 
-    List<List<DependsOn>> getGroupInsideAndOutDependsOn(List<Long> fileIdList);
-
     JSONObject getCouplingValueByFileIds(List<Long> fileIds);
 
-    JSONObject getCouplingValueByPcks(List<Package> pckList, boolean isOneStep);
+    JSONObject getCouplingValueByPcks(Map<Package, List<Package>> pckMap, Map<Long, Double> parentPcksInstability, boolean isTopLevel);
 }

@@ -481,12 +481,19 @@ public class FileUtil {
 		}
 	}
 
-	public static String extractPackagePath(String path){
+	public static String extractPackagePath(String path, boolean isTopLevel){
 		String[] strList = path.split("/");
 		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("/");
 
-		for(int i = strList.length - 1; i >= strList.length - 2; i--){
-			stringBuilder.append(strList[i]).append("/");
+		if(!isTopLevel){
+			for(int i = strList.length - 2; i <= strList.length - 1; i++){
+				stringBuilder.append(strList[i]).append("/");
+			}
+		}else{
+			for(int i = 1; i <= 2; i++){
+				stringBuilder.append(strList[i]).append("/");
+			}
 		}
 
 		return stringBuilder.toString();

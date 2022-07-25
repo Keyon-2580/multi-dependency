@@ -58,6 +58,8 @@ public class Coupling implements Relation{
 
 	private double disp;
 
+	private double dist;
+
 	private String dependsOnTypeStartToEnd = "";
 
 	private String dependsOnTypeEndToStart = "";
@@ -65,7 +67,7 @@ public class Coupling implements Relation{
 	public Coupling(Node startNode, Node endNode, DependsOn forwardDependsOn, DependsOn reverseDependsOn,
 					int mAAtoB, int mBAtoB, int mABtoA, int mBBtoA, int dAtoB, int dBtoA,
 					double CStartToEnd, double CEndToStart, double C, double UStartToEnd, double UEndToStart,
-					double I, double disp) {
+					double I, double disp, double dist) {
 		this.startNode = startNode;
 		this.endNode = endNode;
 		this.forwardDependsOn = forwardDependsOn;
@@ -83,6 +85,7 @@ public class Coupling implements Relation{
 		this.UEndToStart = UEndToStart;
 		this.I = I;
 		this.disp = disp;
+		this.dist = dist;
 		this.dependsOnTypeStartToEnd = getDependsOnType(forwardDependsOn.getDependsOnTypes());
 		this.dependsOnTypeEndToStart = getDependsOnType(reverseDependsOn.getDependsOnTypes());
 	}

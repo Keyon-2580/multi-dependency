@@ -672,7 +672,7 @@ public class BeanCreator {
 						for (String type : dependsOnTypesAtoB.keySet()) {
 							if (type.equals("USE") || type.equals("CALL") || type.equals("EXTENDS") || type.equals("RETURN")
 									|| type.equals("PARAMETER") || type.equals("LOCAL_VARIABLE") || type.equals("IMPLEMENTS")
-									|| type.equals("MEMBER_VARIABLE")) {
+									|| type.equals("MEMBER_VARIABLE") || type.equals("CREATE")) {
 								dependsOntimesAtoB += dependsOnTypesAtoB.get(type);
 							}
 						}
@@ -702,10 +702,11 @@ public class BeanCreator {
 						double U_BtoA = couplingService.calU1to2(dependsOntimesBtoA, dependsOntimesAtoB);
 						double I_AandB = couplingService.calI(dependsOntimesAtoB, dependsOntimesBtoA);
 						double disp_AandB = couplingService.calDISP(C_AandB, dependsOntimesAtoB, dependsOntimesBtoA);
+						double dist = 1.0 / Math.log(C_AandB + 0.001);
 
 						couplingsTmp.add(new Coupling(dependsOn.getStartNode(), dependsOn.getEndNode(), dependsOnAtoB,dependsOnBtoA,
 								funcNumAAtoB, funcNumBAtoB, funcNumABtoA, funcNumBBtoA, dependsOntimesAtoB, dependsOntimesBtoA,
-								C_AtoB, C_BtoA, C_AandB, U_AtoB, U_BtoA, I_AandB, disp_AandB));
+								C_AtoB, C_BtoA, C_AandB, U_AtoB, U_BtoA, I_AandB, disp_AandB, dist));
 					}
 				}
 			}

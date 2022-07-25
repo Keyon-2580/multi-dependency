@@ -88,6 +88,11 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query("match p= (p1:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(p2:Package) where id(p1) = $package1Id and id(p2) = $package2Id return p")
 	DependsOn findDependsOnBetweenPackages(@Param("package1Id") long package1Id, @Param("package2Id") long package2Id);
 
+	@Query("match p= (p1:Package)-[:" + RelationType.str_CONTAIN + "*]->(:ProjectFile)-[r:" + RelationType.str_DEPENDS_ON + "]->" +
+			"(:ProjectFile)<-[:" + RelationType.str_CONTAIN + "*]-(p2:Package) " +
+			"where id(p1) = $package1Id and id(p2) = $package2Id return p")
+	List<DependsOn> findAllDependsOnBetweenPackages(@Param("package1Id") long package1Id, @Param("package2Id") long package2Id);
+
 	@Query("match (p1:Package)-[:" + RelationType.str_CONTAIN + "]->(f1:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(f2:ProjectFile)<-[:" + RelationType.str_CONTAIN + "]-(p2:Package) " +
 			"where id(p1) = $package1Id and id(p2) = $package2Id " +
 			"return distinct f1;")

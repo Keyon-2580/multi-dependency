@@ -101,4 +101,7 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 
 	@Query("MATCH (package:Package) where id(package) = $packageId return package.fanOut;")
 	Integer getPackageFanOutByFileId(@Param("packageId") Long packageId);
+
+	@Query("MATCH (package:Package) where package.depth = 1 return package;")
+	List<Package> findPackagesAtDepth1();
 }
