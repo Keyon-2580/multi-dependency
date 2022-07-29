@@ -27,7 +27,7 @@ public interface CouplingService {
 
     double calDependsOnI(DependsOn dependsOnAtoB, DependsOn dependsOnBtoA);
 
-    JSONObject getCouplingValueByFileIds(List<Long> fileIds);
+    JSONObject getCouplingValueByFileIds(List<Long> fileIds, Map<Long, Long> parentPckMap);
 
     JSONObject getCouplingValueByPcks(Map<Package, List<Package>> pckMap, Map<Long, Double> parentPcksInstability, boolean isTopLevel);
 }

@@ -30,31 +30,6 @@ public class CouplingController {
     @Autowired
     private PackageRepository packageRepository;
 
-    @PostMapping("/group/fileIds")
-    @ResponseBody
-    public JSONObject getRelatedFilesCouplingValue(@RequestBody JSONObject requestBody){
-        JSONArray fileIdsArray = requestBody.getJSONArray("fileIds");
-        List<Long> fileIds = new ArrayList<>();
-        for(int i = 0; i < fileIdsArray.size(); i++){
-            fileIds.add(fileIdsArray.getJSONObject(i).getLong("id"));
-        }
-
-        return couplingService.getCouplingValueByFileIds(fileIds);
-    }
-
-    @GetMapping("/group/filesofpackage")
-    @CrossOrigin
-    @ResponseBody
-    public JSONObject getFilesOfPackageCouplingValue(@RequestParam("pckId") Long pckId){
-        List<ProjectFile> fileList = containRepository.findPackageContainAllFiles(pckId);
-        List<Long> fileIds = new ArrayList<>();
-
-        for(ProjectFile projectFile: fileList){
-            fileIds.add(projectFile.getId());
-        }
-
-        return couplingService.getCouplingValueByFileIds(fileIds);
-    }
 
     /**
      * 返回一个包下的所有子包（打平）的耦合数据
@@ -192,6 +167,8 @@ public class CouplingController {
     @ResponseBody
     public JSONObject getPackagesCouplingValue(@RequestBody JSONObject requestBody){
         JSONArray fileIdsArray = requestBody.getJSONArray("pckIds");
+        Map<Long, Long> parentPckMap = new HashMap<>();
+
         List<Long> pckIds = new ArrayList<>();
         List<Long> fileIds = new ArrayList<>();
         for(int i = 0; i < fileIdsArray.size(); i++){
@@ -201,10 +178,11 @@ public class CouplingController {
         for(Long pckId: pckIds){
             List<ProjectFile> fileList = containRepository.findPackageContainAllFiles(pckId);
             for(ProjectFile projectFile: fileList){
+                parentPckMap.put(projectFile.getId(), pckId);
                 fileIds.add(projectFile.getId());
             }
         }
 
-        return couplingService.getCouplingValueByFileIds(fileIds);
+        return couplingService.getCouplingValueByFileIds(fileIds, parentPckMap);
     }
 }

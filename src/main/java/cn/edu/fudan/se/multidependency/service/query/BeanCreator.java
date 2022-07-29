@@ -630,7 +630,7 @@ public class BeanCreator {
 		return false;
 	}
 
-	@Bean
+	@Bean("setCoupling")
 	public List<Coupling> setCouplingValue(PropertyConfig propertyConfig, CouplingRepository couplingRepository, DependsOnRepository dependsOnRepository) {
 		if (!propertyConfig.isSetCoupling()) {
 			return new ArrayList<>();
@@ -702,7 +702,7 @@ public class BeanCreator {
 						double U_BtoA = couplingService.calU1to2(dependsOntimesBtoA, dependsOntimesAtoB);
 						double I_AandB = couplingService.calI(dependsOntimesAtoB, dependsOntimesBtoA);
 						double disp_AandB = couplingService.calDISP(C_AandB, dependsOntimesAtoB, dependsOntimesBtoA);
-						double dist = 1.0 / Math.log(C_AandB + 0.001);
+						double dist = 1.0 / Math.log(I_AandB + 1);
 
 						couplingsTmp.add(new Coupling(dependsOn.getStartNode(), dependsOn.getEndNode(), dependsOnAtoB,dependsOnBtoA,
 								funcNumAAtoB, funcNumBAtoB, funcNumABtoA, funcNumBBtoA, dependsOntimesAtoB, dependsOntimesBtoA,

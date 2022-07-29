@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.service.query.coupling;
 
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
+import cn.edu.fudan.se.multidependency.model.relation.Coupling;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
@@ -216,7 +217,7 @@ public class CouplingServiceImpl implements CouplingService {
     }
 
     @Override
-    public JSONObject getCouplingValueByFileIds(List<Long> fileIds){
+    public JSONObject getCouplingValueByFileIds(List<Long> fileIds, Map<Long, Long> parentPckMap){
         JSONObject result = new JSONObject();
         JSONArray nodes = new JSONArray();
         JSONArray edges = new JSONArray();
@@ -228,6 +229,7 @@ public class CouplingServiceImpl implements CouplingService {
         for (ProjectFile projectFile : instability.keySet()) {
             JSONObject fileTmp = new JSONObject();
             fileTmp.put("id", projectFile.getId().toString());
+            fileTmp.put("parentPckId", parentPckMap.get(projectFile.getId()).toString());
             fileTmp.put("name", projectFile.getName());
             fileTmp.put("label", projectFile.getName());
             fileTmp.put("path", projectFile.getPath());
@@ -241,7 +243,9 @@ public class CouplingServiceImpl implements CouplingService {
         for(DependsOn dependsOn: GroupInsideDependsOns){
             JSONObject dependsOnTmp = new JSONObject();
             boolean flag = false;
-            Double i = 0.0;
+            double i = 0.0;
+            double dist = -1.0;
+
             Map<String, Long> dependsOnTypes = dependsOn.getDependsOnTypes();
             for (String type : dependsOnTypes.keySet()) {
                 if (type.equals("EXTENDS") || type.equals("IMPLEMENTS") ||
@@ -254,10 +258,13 @@ public class CouplingServiceImpl implements CouplingService {
             }
             if(flag){
 //                    System.out.println(dependsOn.getStartNode().getId() + "_" + dependsOn.getEndNode().getId());
-                i = couplingRepository.queryIBetweenTwoFiles(dependsOn.getStartNode().getId()
+                Coupling coupling = couplingRepository.queryCouplingBetweenTwoFiles(dependsOn.getStartNode().getId()
                         , dependsOn.getEndNode().getId());
+                i += coupling.getI();
+                dist = coupling.getDist() > 0 ? coupling.getDist() : -1.0;
             }
             dependsOnTmp.put("I", i);
+            dependsOnTmp.put("dist", dist);
             dependsOnTmp.put("id", dependsOn.getStartNode().getId().toString() + "_" + dependsOn.getEndNode().getId().toString());
             dependsOnTmp.put("source", dependsOn.getStartNode().getId().toString());
             dependsOnTmp.put("target", dependsOn.getEndNode().getId().toString());
@@ -287,9 +294,12 @@ public class CouplingServiceImpl implements CouplingService {
 
         for(Package pck: pckList) {
             Double parentInstability = 0.0;
-            if(!isTopLevel){
-                for(Package parentPck: pckMap.keySet()){
-                    if(pckMap.get(parentPck).contains(pck)){
+            Package parentPackage = new Package();
+
+            for(Package parentPck: pckMap.keySet()){
+                if(pckMap.get(parentPck).contains(pck)){
+                    parentPackage = parentPck;
+                    if(!isTopLevel) {
                         parentInstability = parentPcksInstability.get(parentPck.getId());
                     }
                 }
@@ -306,8 +316,8 @@ public class CouplingServiceImpl implements CouplingService {
             tmpPck.put("LOF", pckContainsFilesNum);
             tmpPck.put("LOC", pckContainsFilesLOC);
             tmpPck.put("label", pckName);
+            tmpPck.put("parentPckId", parentPackage.getId().toString());
             tmpPck.put("nodeType", "package");
-            List<ProjectFile> fileList = new ArrayList<>();
 
             List<Map<Package, List<DependsOn>>> listTmp = getGroupInsideAndOutDependsOnByPackage(pck, pckList);
 
@@ -388,6 +398,9 @@ public class CouplingServiceImpl implements CouplingService {
             JSONObject tmpEdge = new JSONObject();
             int DAtoB = 0;
             int DBtoA = 0;
+            double dist = 0.0;
+            double distSum = 0;
+
             for(Package pck: map.keySet()){
                 tmpEdge.put("id", pck.getId().toString() + "_" + map.get(pck).getId().toString());
                 tmpEdge.put("source", pck.getId().toString());
@@ -408,13 +421,16 @@ public class CouplingServiceImpl implements CouplingService {
                 }
                 if(flag){
 //                    System.out.println(dependsOn.getStartNode().getId() + "_" + dependsOn.getEndNode().getId());
-                    DAtoB += couplingRepository.queryDAtoBBetweenTwoFiles(dependsOn.getStartNode().getId()
+                    Coupling coupling = couplingRepository.queryCouplingBetweenTwoFiles(dependsOn.getStartNode().getId()
                             , dependsOn.getEndNode().getId());
-                    DBtoA += couplingRepository.queryDBtoABetweenTwoFiles(dependsOn.getStartNode().getId()
-                            , dependsOn.getEndNode().getId());
+                    DAtoB += coupling.getDAtoB();
+                    DBtoA += coupling.getDBtoA();
+                    dist += coupling.getDist();
+                    distSum  += 1;
                 }
             }
             tmpEdge.put("I", calI(DAtoB, DBtoA));
+            tmpEdge.put("dist", dist / distSum);
             tmpEdge.put("dependsOnNum", dependsOnBetweenPackages.get(map).size());
             edges.add(tmpEdge);
         }

@@ -46,7 +46,7 @@ function main() {
 function instabilityAjax(){
     $.ajax({
         type : "GET",
-        url : "http://127.0.0.1:8080/coupling/group/top_level_packages",
+        url : "/coupling/group/top_level_packages",
         success : function(result) {
             data = result;
             // let nodes_data = json_data["nodes"];
@@ -103,8 +103,11 @@ const tooltip = new G6.Tooltip({
               <ul>
                 <li>dependsOnTypes: ${e.item.getModel().dependsOnTypes}</li>
               </ul>
-                <ul>
+              <ul>
                 <li>耦合强度(I): ${e.item.getModel().I}</li>
+              </ul>
+              <ul>
+                <li>dist: ${e.item.getModel().dist}</li>
               </ul>`;
         }
         return outDiv;
@@ -160,7 +163,7 @@ const toolbar = new G6.ToolBar({
                 console.log(json)
 
                 $.ajax({
-                    url: "http://127.0.0.1:8080/coupling/group/one_step_child_packages",
+                    url: "/coupling/group/one_step_child_packages",
                     type: "POST",
                     contentType: "application/json",
                     dataType: "json",
@@ -171,6 +174,7 @@ const toolbar = new G6.ToolBar({
                             loadGraph();
                         }else if(result["code"] === -1){
                             confirm("错误！\n" + result["pck"]["directoryPath"] + "\n已无法再展开！");
+                            closeLoadingWindow();
                         }
                     }
                 });
@@ -229,7 +233,7 @@ const toolbar = new G6.ToolBar({
 
             json["pckIds"] = pckIds;
             $.ajax({
-                url: "http://127.0.0.1:8080/coupling/group/files_of_packages",
+                url: "/coupling/group/files_of_packages",
                 type: "POST",
                 contentType: "application/json",
                 dataType: "json",
@@ -327,52 +331,128 @@ const graph = new G6.Graph({
 });
 
 function levelLayout(){
-    let nodelist = data["nodes"];
+    let nodelist = graph.getNodes();
 
-    let list1 = [], list2 = [], list3 = [], list4 = [], list5 = [];
+    let list1 = [], list2 = [], list3 = [], list4 = [], list5 = [], allList = [];
     nodelist.forEach(node =>{
-        if(node["instability"] >= 0.8){
-            node["style"] = {"fill" : INSTABILITY_COLOR1};
+        if(node._cfg.model.instability >= 0.8){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR1
+                }
+            });
             list1.push(node);
-        }else if(node["instability"] >= 0.6){
-            node["style"] = {"fill" : INSTABILITY_COLOR2};
+        }else if(node._cfg.model.instability >= 0.6){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR2
+                }
+            });
             list2.push(node);
-        }else if(node["instability"] >= 0.4){
-            node["style"] = {"fill" : INSTABILITY_COLOR3};
+        }else if(node._cfg.model.instability >= 0.4){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR3
+                }
+            });
             list3.push(node);
-        }else if(node["instability"] >= 0.2){
-            node["style"] = {"fill" : INSTABILITY_COLOR4};
+        }else if(node._cfg.model.instability >= 0.2){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR4
+                }
+            });
             list4.push(node);
         }else{
-            node["style"] = {"fill" : INSTABILITY_COLOR5};
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR5
+                }
+            });
             list5.push(node);
         }
     })
 
-    list1.forEach((node, index) =>{
-        node["x"] = (index - (list1.length / 2)) * 70;
-        node["y"] = 70 - ((node["instability"] - 0.8) / 0.2) * 70;
-    })
+    allList.push(list1);
+    allList.push(list2);
+    allList.push(list3);
+    allList.push(list4);
+    allList.push(list5);
 
-    list2.forEach((node, index) =>{
-        node["x"] = (index - (list2.length / 2)) * 70;
-        node["y"] = 140 - ((node["instability"] - 0.6) / 0.2) * 70;
-    })
+    let startIndex = 0;
+    let minParentPckId = "0";
+    for(let i = 0; i < allList.length; i++){
+        if(allList[i].length !== 0){
+            minParentPckId = allList[i][0]._cfg.model.parentPckId;
+            allList[i].sort(function(a,b){return a._cfg.model.parentPckId - b._cfg.model.parentPckId});
+            allList[i].forEach((node, index) =>{
+                minParentPckId = Math.min(minParentPckId, node._cfg.model.parentPckId);
+                node.updatePosition({
+                    // x: (index - (list1.length / 2)) * 70,
+                    x: index * 70,
+                    y: 70 * (i + 1) - ((node._cfg.model.instability - (0.8 - i * 0.2)) / 0.2) * 70,
+                });
+            })
+            startIndex = i + 1;
+            break;
+        }
+    }
 
-    list3.forEach((node, index) =>{
-        node["x"] = (index - (list3.length / 2)) * 70;
-        node["y"] = 210 - ((node["instability"] - 0.4) / 0.2) * 70;
-    })
+    if(startIndex < allList.length){
+        for(let i = startIndex; i < allList.length; i++){
+            let sortedList = [];
+            let nullList = [];
 
-    list4.forEach((node, index) =>{
-        node["x"] = (index - (list4.length / 2)) * 70;
-        node["y"] = 280 - ((node["instability"] - 0.2) / 0.2) * 70;
-    })
+            allList[i].forEach(node =>{
+                let parentPosX = 0.0;
+                let parentPosSum = 0.0;
+                let neighbors = node.getNeighbors();
 
-    list5.forEach((node, index) =>{
-        node["x"] = (index - (list5.length / 2)) * 70;
-        node["y"] = 350 - (node["instability"] / 0.2) * 70;
-    })
+                neighbors.forEach(neighbor =>{
+                    if(neighbor._cfg.model.instability > node._cfg.model.instability){
+                        parentPosX += neighbor._cfg.model.x;
+                        parentPosSum += 1;
+                    }
+                })
+
+                if(parentPosSum === 0){
+                    if(neighbors.length > 0){
+                        node._cfg.model.barycenter = 0;
+                        sortedList.push(node);
+                    }else{
+                        nullList.push(node);
+                    }
+                }else{
+                    node._cfg.model.barycenter = parentPosX / parentPosSum;
+                    sortedList.push(node);
+                }
+            })
+
+            sortedList.sort(function(a,b){return a._cfg.model.barycenter - b._cfg.model.barycenter});
+
+
+            sortedList.forEach((node2, index) =>{
+                let offset = i % 2 === 0 ? -35 : 0;
+                node2.updatePosition({
+                    // x: (index - (sortedList.length / 2)) * 70,
+                    x: -100 + offset + index * 70,
+                    y: 70 * (i + 1) - ((node2._cfg.model.instability - (0.8 - i * 0.2)) / 0.2) * 70,
+                });
+            })
+
+            nullList.forEach((nullNode, index) => {
+                nullNode.updatePosition({
+                    // x: (index - (sortedList.length / 2)) * 70,
+                    x: (index - Math.floor(index / 15) * 15 - 3) * 60,
+                    y: 70 * (i + 2 + Math.floor(index / 15)) - ((nullNode._cfg.model.instability - (0.8 - i * 0.2)) / 0.2) * 70,
+                });
+            })
+        }
+    }
+
+    graph.refresh();
+    graph.fitCenter();
+    graph.fitView(80);
 }
 
 function handleReverseEdgesAndExtends(){
@@ -409,7 +489,6 @@ function handleReverseEdgesAndExtends(){
         }else{
             if(edge._cfg.model.isTwoWayDependsOn){
                 let tmpedge = graph.findById(edge._cfg.model.target + "_" + edge._cfg.model.source);
-                console.log(tmpedge)
                 if(tmpedge._cfg.model.isExtendOrImplements){
                     edge.setState('reverse', true);
                 }
@@ -490,9 +569,9 @@ function handleEdgesWidth(){
 }
 
 function loadGraph(){
-    levelLayout();
     graph.data(data);
     graph.render();
+    levelLayout();
     handleReverseEdgesAndExtends()
     savePresentNodes();
     loadPanel();
