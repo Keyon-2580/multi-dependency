@@ -4,7 +4,8 @@ let I75 = 0.0;
 let data = {};
 let selected_packages = [];
 let present_packages = [];
-
+let data_stack = []
+let current_path = '/';
 const INSTABILITY_COLOR1 = "#642924";
 const INSTABILITY_COLOR2 = "#8B3830";
 const INSTABILITY_COLOR3 = "#B2463C";
@@ -120,6 +121,7 @@ const toolbar = new G6.ToolBar({
     getContent: () => {
         return `
       <ul>
+        <li code='back'>返回上一层</li>
         <li code='choose'>选择</li>
         <li code='unfold'>展开</li>
         <li code='unfoldFile'>展开到文件页面</li>
@@ -170,6 +172,7 @@ const toolbar = new G6.ToolBar({
                     data: JSON.stringify(json),
                     success: function (result) {
                         if(result["code"] === 200){
+                            data_stack.push(graph.save())
                             data = result;
                             loadGraph();
                         }else if(result["code"] === -1){
@@ -183,6 +186,9 @@ const toolbar = new G6.ToolBar({
             if(selected_packages.length === 0){
                 confirm("当前未选中节点！");
             }else{
+                if(graph.save().nodes.length !== 1) {
+                    data_stack.push(graph.save());
+                }
                 present_packages.length = 0;
                 let deleteNodes = [];
                 // present_packages = selected_packages;
@@ -209,7 +215,6 @@ const toolbar = new G6.ToolBar({
                         })
                     }
                 })
-
                 deleteNodes.forEach(node => {
                     graph.removeItem(node, false);
                 })
@@ -239,10 +244,16 @@ const toolbar = new G6.ToolBar({
                 dataType: "json",
                 data: JSON.stringify(json),
                 success: function (result) {
+                    data_stack.push(graph.save());
                     data = result;
                     loadGraph();
                 }
             });
+        } else if (code === 'back') {
+            if (data_stack.length !== 0) {
+                data = data_stack.pop();
+                loadGraph();
+            }
         }
     },
 });
@@ -519,7 +530,6 @@ function loadPanel(){
         LOF += node._cfg.model.LOF;
         LOC += node._cfg.model.LOC;
     })
-
     if(CHART_MODE === "package"){
         html += "<p>包数：" + nodes.length + "</p>";
         html += "<p>文件数：" + LOF + "</p>";
