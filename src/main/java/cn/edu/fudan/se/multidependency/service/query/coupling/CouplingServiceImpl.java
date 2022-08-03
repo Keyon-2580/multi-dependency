@@ -8,10 +8,13 @@ import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.coupling.CouplingRepository;
+import cn.edu.fudan.se.multidependency.service.query.BeanCreator;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,7 @@ import java.util.*;
 
 @Service
 public class CouplingServiceImpl implements CouplingService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BeanCreator.class);
 
     @Autowired
     public CouplingRepository couplingRepository;
@@ -307,19 +311,24 @@ public class CouplingServiceImpl implements CouplingService {
 
             JSONObject tmpPck = new JSONObject();
             String pckName = FileUtil.extractPackagePath(pck.getDirectoryPath(), isTopLevel);
-            int pckContainsFilesNum = containRepository.findPackageContainAllFilesNum(pck.getId());
+            int pckContainsFilesNum = 0;
+            if(pck.equals(parentPackage)){
+                pckContainsFilesNum = containRepository.findPackageContainFilesNum(pck.getId());
+            }else{
+                pckContainsFilesNum = containRepository.findPackageContainAllFilesNum(pck.getId());
+            }
             int pckContainsFilesLOC = containRepository.findPackageContainAllFilesLOC(pck.getId());
 
             tmpPck.put("id", pck.getId().toString());
             tmpPck.put("path", pck.getDirectoryPath());
             tmpPck.put("name", pckName);
-            tmpPck.put("LOF", pckContainsFilesNum);
+            tmpPck.put("NOF", pckContainsFilesNum);
             tmpPck.put("LOC", pckContainsFilesLOC);
             tmpPck.put("label", pckName);
             tmpPck.put("parentPckId", parentPackage.getId().toString());
             tmpPck.put("nodeType", "package");
 
-            List<Map<Package, List<DependsOn>>> listTmp = getGroupInsideAndOutDependsOnByPackage(pck, pckList);
+            List<Map<Package, List<DependsOn>>> listTmp = getGroupInsideAndOutDependsOnByPackage(pck, pckList, parentPackage);
 
             Map<Package, List<DependsOn>> GroupInsideToOutDependsOns = listTmp.get(0);
             Map<Package, List<DependsOn>> GroupOutToInsideDependsOns = listTmp.get(1);
@@ -420,7 +429,7 @@ public class CouplingServiceImpl implements CouplingService {
                     }
                 }
                 if(flag){
-//                    System.out.println(dependsOn.getStartNode().getId() + "_" + dependsOn.getEndNode().getId());
+//                    LOGGER.info("checking coupling: " + dependsOn.getStartNode().getId() + " " + dependsOn.getEndNode().getId());
                     Coupling coupling = couplingRepository.queryCouplingBetweenTwoFiles(dependsOn.getStartNode().getId()
                             , dependsOn.getEndNode().getId());
                     DAtoB += coupling.getDAtoB();
@@ -478,17 +487,27 @@ public class CouplingServiceImpl implements CouplingService {
         return result;
     }
 
-    private List<Map<Package, List<DependsOn>>> getGroupInsideAndOutDependsOnByPackage(Package mainPackage, List<Package> pckList){
+    private List<Map<Package, List<DependsOn>>> getGroupInsideAndOutDependsOnByPackage(Package mainPackage, List<Package> pckList,
+                                                                                       Package parentPackage){
         List<Map<Package, List<DependsOn>>> result = new ArrayList<>();
         Map<Package, List<DependsOn>> GroupInsideToOutDependsOns = new HashMap<>();
         Map<Package, List<DependsOn>> GroupOutToInsideDependsOns = new HashMap<>();
 
         for(Package pck: pckList){
             if(!pck.equals(mainPackage)){
-                List<DependsOn> tmpInsideToOutDependsOn =
-                        dependsOnRepository.findAllDependsOnBetweenPackages(mainPackage.getId(), pck.getId());
-                List<DependsOn> tmpOutToInsideDependsOn =
-                        dependsOnRepository.findAllDependsOnBetweenPackages(pck.getId(), mainPackage.getId());
+                List<DependsOn> tmpInsideToOutDependsOn;
+                List<DependsOn> tmpOutToInsideDependsOn;
+
+                if(mainPackage.equals(parentPackage)){
+                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(mainPackage.getId(), pck.getId()));
+                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(mainPackage.getId(), pck.getId()));
+                }else if(pck.equals(parentPackage)){
+                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(pck.getId(), mainPackage.getId()));
+                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(pck.getId(), mainPackage.getId()));
+                }else{
+                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackages(mainPackage.getId(), pck.getId()));
+                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackages(pck.getId(), mainPackage.getId()));
+                }
 
                 if(tmpInsideToOutDependsOn.size() != 0){
                     GroupInsideToOutDependsOns.put(pck, tmpInsideToOutDependsOn);

@@ -94,6 +94,9 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 	@Query("match (a:Package)-[:" + RelationType.str_CONTAIN + "*]->(b:ProjectFile) where id(a)=$packageId return count(b);")
 	public int findPackageContainAllFilesNum(@Param("packageId") Long packageId);
 
+	@Query("match (a:Package)-[:" + RelationType.str_CONTAIN + "]->(b:ProjectFile) where id(a)=$packageId return count(b);")
+	public int findPackageContainFilesNum(@Param("packageId") Long packageId);
+
 	@Query("match (a:Package)-[:" + RelationType.str_CONTAIN + "*]->(b:ProjectFile) where id(a)=$packageId return sum(b.loc);")
 	public int findPackageContainAllFilesLOC(@Param("packageId") Long packageId);
 	

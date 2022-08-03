@@ -79,13 +79,4 @@ public class PropertyConfig {
 	@Getter
 	@Value("${config.starter.export_cyclic_dependency}")
 	private boolean exportCyclicDependency;
-
-	@Getter
-	@Value("${config.starter.export_coupling_value}")
-	private boolean exportCouplingValue;
-
-	@Getter
-	@Value("${data.coupling_value_path}")
-	public String couplingValuePath;
-
 }

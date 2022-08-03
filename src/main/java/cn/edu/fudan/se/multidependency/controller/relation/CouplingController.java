@@ -126,6 +126,9 @@ public class CouplingController {
 //            parentPcks.add(parentPckJson);
 
             List<Package> pckList = new ArrayList<>(packageRepository.findOneStepPackagesById(pckId));
+
+            if(packageRepository.findIfPackageContainFiles(parentPackage.getId())) pckList.add(parentPackage);
+
             if(pckList.size() == 0){
                 JSONObject failJson = new JSONObject();
                 failJson.put("code", -1);

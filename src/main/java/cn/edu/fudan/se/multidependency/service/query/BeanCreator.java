@@ -234,7 +234,7 @@ public class BeanCreator {
 		return dependsOns;
 	}
 
-	@Bean("setModuleDependsOn")
+//	@Bean("setModuleDependsOn")
 	public List<DependsOn> setModuleDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository) {
 //		if (!propertyConfig.isSetModuleDependsOn()) {
 		if (!propertyConfig.isSetDependsOn()) {
@@ -263,7 +263,7 @@ public class BeanCreator {
 		return moduleDependsOns;
 	}
 
-	@Bean("setAggregationDependsOn")
+//	@Bean("setAggregationDependsOn")
 	public List<AggregationDependsOn> setAggregationDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, AggregationDependsOnRepository aggregationDependsOnRepository) {
 //		if (!propertyConfig.isSetAggregationDependsOn()) {
 		if (!propertyConfig.isSetDependsOn()) {
@@ -619,17 +619,6 @@ public class BeanCreator {
 		return false;
 	}
 
-	@Bean
-	public boolean exportCouplingValue(PropertyConfig propertyConfig) throws IOException {
-		if (propertyConfig.isExportCouplingValue()) {
-			LOGGER.info("export coupling value...");
-//			couplingService.calCouplingValue(propertyConfig.couplingValuePath);
-//			System.exit(1);
-			return true;
-		}
-		return false;
-	}
-
 	@Bean("setCoupling")
 	public List<Coupling> setCouplingValue(PropertyConfig propertyConfig, CouplingRepository couplingRepository, DependsOnRepository dependsOnRepository) {
 		if (!propertyConfig.isSetCoupling()) {
@@ -686,7 +675,7 @@ public class BeanCreator {
 						for (String type : dependsOnTypesBtoA.keySet()) {
 							if (type.equals("USE") || type.equals("CALL") || type.equals("EXTENDS") || type.equals("RETURN")
 									|| type.equals("PARAMETER") || type.equals("LOCAL_VARIABLE") || type.equals("IMPLEMENTS")
-									|| type.equals("MEMBER_VARIABLE")) {
+									|| type.equals("MEMBER_VARIABLE") || type.equals("CREATE")) {
 								dependsOntimesBtoA += dependsOnTypesBtoA.get(type);
 							}
 						}

@@ -92,7 +92,7 @@ const tooltip = new G6.Tooltip({
                 <li>path: ${e.item.getModel().path}</li>
               </ul>
               <ul>
-                <li>files num: ${e.item.getModel().LOF}</li>
+                <li>files num: ${e.item.getModel().NOF}</li>
               </ul>
               <ul>
                 <li>instability: ${e.item.getModel().instability}</li>
@@ -519,7 +519,7 @@ function loadPanel(){
     let html = "";
     let nodes = graph.getNodes();
     let edges = graph.getEdges();
-    let LOF = 0;
+    let NOF = 0;
     let LOC = 0;
     let IList = [];
     let Isum = 0.0;
@@ -527,12 +527,12 @@ function loadPanel(){
     let Imin = 10000.0;
 
     nodes.forEach(node => {
-        LOF += node._cfg.model.LOF;
+        NOF += node._cfg.model.NOF;
         LOC += node._cfg.model.LOC;
     })
     if(CHART_MODE === "package"){
         html += "<p>包数：" + nodes.length + "</p>";
-        html += "<p>文件数：" + LOF + "</p>";
+        html += "<p>文件数：" + NOF + "</p>";
     }else if(CHART_MODE === "file"){
         html += "<p>文件数：" + nodes.length + "</p>";
     }

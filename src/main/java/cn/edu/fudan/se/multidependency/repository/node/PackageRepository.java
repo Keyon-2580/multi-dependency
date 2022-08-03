@@ -104,4 +104,7 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 
 	@Query("MATCH (package:Package) where package.depth = 1 return package;")
 	List<Package> findPackagesAtDepth1();
+
+	@Query("MATCH p=(n:Package)-[:CONTAIN]-(:ProjectFile) where id(n)=$packageId return count(p)>0;")
+	Boolean findIfPackageContainFiles(@Param("packageId") Long packageId);
 }
