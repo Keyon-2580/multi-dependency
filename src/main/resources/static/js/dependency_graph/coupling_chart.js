@@ -165,7 +165,7 @@ const toolbar = new G6.ToolBar({
                 console.log(json)
 
                 $.ajax({
-                    url: "/coupling/group/one_step_child_packages",
+                    url: "http://127.0.0.1:8080/coupling/group/one_step_child_packages",
                     type: "POST",
                     contentType: "application/json",
                     dataType: "json",
@@ -215,6 +215,7 @@ const toolbar = new G6.ToolBar({
                         })
                     }
                 })
+
                 deleteNodes.forEach(node => {
                     graph.removeItem(node, false);
                 })
@@ -238,7 +239,7 @@ const toolbar = new G6.ToolBar({
 
             json["pckIds"] = pckIds;
             $.ajax({
-                url: "/coupling/group/files_of_packages",
+                url: "http://127.0.0.1:8080/coupling/group/files_of_packages",
                 type: "POST",
                 contentType: "application/json",
                 dataType: "json",
@@ -249,7 +250,7 @@ const toolbar = new G6.ToolBar({
                     loadGraph();
                 }
             });
-        } else if (code === 'back') {
+        }else if (code === 'back') {
             if (data_stack.length !== 0) {
                 data = data_stack.pop();
                 loadGraph();
@@ -346,6 +347,8 @@ function levelLayout(){
 
     let list1 = [], list2 = [], list3 = [], list4 = [], list5 = [], allList = [];
     nodelist.forEach(node =>{
+        node._cfg.model.gradation = node._cfg.model.instability;
+
         if(node._cfg.model.instability >= 0.8){
             node.update({
                 style:{
@@ -508,6 +511,82 @@ function handleReverseEdgesAndExtends(){
     })
 }
 
+function levelLayoutAdjust(){
+    let reverseEdgesList = graph.findAllByState('edge', 'reverse');
+    let reverseNodePairs = [];
+    let reverseNodes = new Set();
+
+    reverseEdgesList.forEach(edge => {
+        let tmpList = [];
+        tmpList[0] = edge.getSource();
+        tmpList[1] = edge.getTarget();
+        reverseNodePairs.push(tmpList);
+
+        reverseNodes.add(edge.getSource());
+        reverseNodes.add(edge.getTarget());
+    })
+
+    reverseNodePairs.sort(function(a,b){
+        return Math.abs(a[0]._cfg.model.instability - a[1]._cfg.model.instability)
+            - Math.abs(b[0]._cfg.model.instability - b[1]._cfg.model.instability)
+    });
+
+    for(let i = 0; i < reverseNodePairs.length; i++){
+        let lowerNode = reverseNodePairs[i][0];
+        let upperNode = reverseNodePairs[i][1];
+        let edge = graph.findById(lowerNode._cfg.id + "_" + upperNode._cfg.id);
+        let flag = false;
+
+        lowerNode._cfg.edges.forEach(edge =>{
+            if(edge._cfg.id === upperNode._cfg.id + "_" + lowerNode._cfg.id){
+                flag = true;
+            }
+        })
+
+        if(flag) continue;
+
+        let lowerInEdges = lowerNode.getInEdges();
+        let upperInEdges = upperNode.getInEdges();
+        let lowerNodesLeastInstability = 2.0;
+        let upperNodesLeastInstability = 2.0;
+
+        lowerInEdges.sort(function(a,b){return a.getSource()._cfg.model.instability
+            - b.getSource()._cfg.model.instability});
+
+        lowerInEdges.forEach(edge => {
+            if(!reverseNodes.has(edge.getSource())){
+                lowerNodesLeastInstability  =
+                    Math.min(lowerNodesLeastInstability, edge.getSource()._cfg.model.instability);
+            }
+        })
+
+        // upperInEdges.sort(function(a,b){return a.getSource()._cfg.model.instability
+        //     - b.getSource()._cfg.model.instability});
+        //
+        // upperInEdges.forEach(edge => {
+        //     if(!reverseNodes.has(edge.getSource())){
+        //         upperNodesLeastInstability  =
+        //             Math.min(upperNodesLeastInstability, edge.getSource()._cfg.model.instability);
+        //     }
+        // })
+
+        if(lowerNodesLeastInstability > upperNode._cfg.model.instability){
+            lowerNode.updatePosition({
+                y : upperNode._cfg.model.y + 3.5
+            });
+        }
+        edge.clearStates();
+
+        // console.log(lowerInEdges)
+    }
+//     const { detectAllCycles } = G6.Algorithm;
+//
+// // 检测有向图中的所有简单环
+//     const allCycles = detectAllCycles(data, true);
+//
+//     console.log(allCycles);
+}
+
 function savePresentNodes(){
     present_packages.length = 0;
     graph.getNodes().forEach(node => {
@@ -519,7 +598,7 @@ function loadPanel(){
     let html = "";
     let nodes = graph.getNodes();
     let edges = graph.getEdges();
-    let NOF = 0;
+    let LOF = 0;
     let LOC = 0;
     let IList = [];
     let Isum = 0.0;
@@ -527,12 +606,13 @@ function loadPanel(){
     let Imin = 10000.0;
 
     nodes.forEach(node => {
-        NOF += node._cfg.model.NOF;
+        LOF += node._cfg.model.LOF;
         LOC += node._cfg.model.LOC;
     })
+
     if(CHART_MODE === "package"){
         html += "<p>包数：" + nodes.length + "</p>";
-        html += "<p>文件数：" + NOF + "</p>";
+        html += "<p>文件数：" + LOF + "</p>";
     }else if(CHART_MODE === "file"){
         html += "<p>文件数：" + nodes.length + "</p>";
     }
@@ -582,7 +662,8 @@ function loadGraph(){
     graph.data(data);
     graph.render();
     levelLayout();
-    handleReverseEdgesAndExtends()
+    handleReverseEdgesAndExtends();
+    levelLayoutAdjust();
     savePresentNodes();
     loadPanel();
     handleEdgesWidth();
