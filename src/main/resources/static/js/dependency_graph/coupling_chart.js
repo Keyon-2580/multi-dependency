@@ -108,6 +108,9 @@ const tooltip = new G6.Tooltip({
                 <li>耦合强度(I): ${e.item.getModel().I}</li>
               </ul>
               <ul>
+                <li>Package Dispersion(I): ${e.item.getModel().pkgDisp}</li>
+              </ul>
+              <ul>
                 <li>dist: ${e.item.getModel().dist}</li>
               </ul>`;
         }
@@ -575,6 +578,7 @@ function levelLayoutAdjust(){
                 y : upperNode._cfg.model.y + 3.5
             });
         }
+        graph.refresh();
         edge.clearStates();
 
         // console.log(lowerInEdges)

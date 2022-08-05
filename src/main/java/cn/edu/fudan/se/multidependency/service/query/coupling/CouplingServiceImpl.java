@@ -146,6 +146,11 @@ public class CouplingServiceImpl implements CouplingService {
     }
 
     @Override
+    public double calcPkgDispersion(long dA2B, long dB2A, int pkg1Files, int pkg2Files) {
+        double H = 2 * (double)pkg1Files * (double)pkg2Files / ((double)pkg1Files + (double)pkg2Files);
+        return H/ ((double)dA2B + (double)dB2A);
+    }
+    @Override
     public double calDependsOnI(DependsOn dependsOnAtoB, DependsOn dependsOnBtoA){
         long dependsOntimesAtoB = 0;
         long dependsOntimesBtoA = 0;
@@ -415,7 +420,8 @@ public class CouplingServiceImpl implements CouplingService {
                 tmpEdge.put("source", pck.getId().toString());
                 tmpEdge.put("target", map.get(pck).getId().toString());
             }
-
+            Set<Long> fileIdSet1 = new HashSet<>();
+            Set<Long> fileIdSet2 = new HashSet<>();
             for(DependsOn dependsOn: dependsOnBetweenPackages.get(map)){
                 boolean flag = false;
                 Map<String, Long> dependsOnTypes = dependsOn.getDependsOnTypes();
@@ -436,11 +442,14 @@ public class CouplingServiceImpl implements CouplingService {
                     DBtoA += coupling.getDBtoA();
                     dist += coupling.getDist();
                     distSum  += 1;
+                    fileIdSet1.add(dependsOn.getStartNode().getId());
+                    fileIdSet2.add(dependsOn.getEndNode().getId());
                 }
             }
             tmpEdge.put("I", calI(DAtoB, DBtoA));
             tmpEdge.put("dist", dist / distSum);
             tmpEdge.put("dependsOnNum", dependsOnBetweenPackages.get(map).size());
+            tmpEdge.put("pkgDisp", calcPkgDispersion(DAtoB, DBtoA, fileIdSet1.size(), fileIdSet2.size()));
             edges.add(tmpEdge);
         }
 
