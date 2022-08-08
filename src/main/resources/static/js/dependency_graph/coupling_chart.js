@@ -1,3 +1,4 @@
+let show_panel = true;
 let CHART_MODE = "package";
 const loading_div = $("#loading_div");
 let I75 = 0.0;
@@ -33,6 +34,21 @@ const HIGH_INTENSITY_EDGE_MODEL = {
         stroke: COLOR_LINK_HIGH_INTENSITY,
         lineWidth: 1.8,
     }
+}
+
+function handlePanelBtn() {
+    if (show_panel) {
+        document.getElementById("data_panel_container").style.display = "none";
+        document.getElementById("chart_container").className="layui-col-md12";
+        show_panel = false;
+        document.getElementById("panel_btn_icon").className = "layui-icon layui-icon-spread-left";
+    } else {
+        document.getElementById("data_panel_container").style.display = "block";
+        document.getElementById("chart_container").className="layui-col-md9";
+        show_panel = true;
+        document.getElementById("panel_btn_icon").className = "layui-icon layui-icon-shrink-right";
+    }
+
 }
 
 function main() {
@@ -343,6 +359,44 @@ const graph = new G6.Graph({
     },
     plugins: [tooltip, toolbar],
     minZoom: 0.05,
+});
+graph.on('nodeselectchange', (e) => {
+    // 选择了一个node，在左侧panel展示node信息
+    if (e.selectedItems.nodes.length === 1) {
+        if (e.select) {
+            let outDiv = document.getElementById("detail_panel");
+            outDiv.className = "layui-colla-content layui-show";
+            let selectedNode = e.target._cfg.model;
+            if (selectedNode.nodeType === "file") {
+                outDiv.innerHTML = `
+              <h4><b>id</b>>: ${selectedNode.id}</h4>
+              <ul>
+                <li><b>name</b>: ${selectedNode.name}</li>
+              </ul>
+              <ul>
+                <li><b>path</b>: ${selectedNode.path}</li>
+              </ul>
+              <ul>
+                <li><b>instability</b>: ${selectedNode.instability}</li>
+              </ul>`;
+            } else if (selectedNode.nodeType === "package") {
+                outDiv.innerHTML = `
+              <h4><b>id</b>: ${selectedNode.id}</h4>
+              <ul>
+                <li><b>name</b>: ${selectedNode.name}</li>
+              </ul>
+              <ul>
+                <li><b>path</b>: ${selectedNode.path}</li>
+              </ul>
+              <ul>
+                <li><b>files num</b>: ${selectedNode.NOF}</li>
+              </ul>
+              <ul>
+                <li><b>instability</b>: ${selectedNode.instability}</li>
+              </ul>`;
+            }
+        }
+    }
 });
 
 function levelLayout(){
