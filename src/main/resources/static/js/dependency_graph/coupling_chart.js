@@ -60,6 +60,60 @@ function main() {
     }
 }
 
+function unfoldPkg() {
+    if(selected_packages.length === 0){
+        confirm("当前未选中节点！");
+    }else{
+        let json = {};
+        let unfoldPcks = [];
+        let otherPcks = [];
+
+        selected_packages.forEach(node => {
+            unfoldPcks.push({
+                "id": node._cfg.id,
+                "instability": node._cfg.model.instability
+            })
+        })
+
+        present_packages.forEach(node => {
+            let flag = true;
+            selected_packages.forEach(node2 => {
+                if(node === node2){
+                    flag = false;
+                }
+            })
+            if(flag){
+                otherPcks.push({
+                    "id": node._cfg.id,
+                    "instability": node._cfg.model.instability
+                })
+            }
+        })
+
+        json["unfoldPcks"] = unfoldPcks;
+        json["otherPcks"] = otherPcks;
+        console.log(json)
+        showLoadingWindow("加载中...");
+        $.ajax({
+            url: "http://127.0.0.1:8080/coupling/group/one_step_child_packages",
+            type: "POST",
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(json),
+
+            success: function (result) {
+                if(result["code"] === 200){
+                    data_stack.push(graph.save())
+                    data = result;
+                    loadGraph();
+                }else if(result["code"] === -1){
+                    confirm("错误！\n" + result["pck"]["directoryPath"] + "\n已无法再展开！");
+                    closeLoadingWindow();
+                }
+            }
+        });
+    }
+}
 function instabilityAjax(){
     $.ajax({
         type : "GET",
@@ -152,57 +206,7 @@ const toolbar = new G6.ToolBar({
     },
     handleClick: (code, graph) => {
         if (code === 'unfold') {
-            if(selected_packages.length === 0){
-                confirm("当前未选中节点！");
-            }else{
-                let json = {};
-                let unfoldPcks = [];
-                let otherPcks = [];
-
-                selected_packages.forEach(node => {
-                    unfoldPcks.push({
-                        "id": node._cfg.id,
-                        "instability": node._cfg.model.instability
-                    })
-                })
-
-                present_packages.forEach(node => {
-                    let flag = true;
-                    selected_packages.forEach(node2 => {
-                        if(node === node2){
-                            flag = false;
-                        }
-                    })
-                    if(flag){
-                        otherPcks.push({
-                            "id": node._cfg.id,
-                            "instability": node._cfg.model.instability
-                        })
-                    }
-                })
-
-                json["unfoldPcks"] = unfoldPcks;
-                json["otherPcks"] = otherPcks;
-                showLoadingWindow("加载中...");
-                $.ajax({
-                    url: "http://127.0.0.1:8080/coupling/group/one_step_child_packages",
-                    type: "POST",
-                    contentType: "application/json",
-                    dataType: "json",
-                    data: JSON.stringify(json),
-
-                    success: function (result) {
-                        if(result["code"] === 200){
-                            data_stack.push(graph.save())
-                            data = result;
-                            loadGraph();
-                        }else if(result["code"] === -1){
-                            confirm("错误！\n" + result["pck"]["directoryPath"] + "\n已无法再展开！");
-                            closeLoadingWindow();
-                        }
-                    }
-                });
-            }
+            unfoldPkg();
         }else if(code === 'choose'){
             if(selected_packages.length === 0){
                 confirm("当前未选中节点！");
@@ -368,6 +372,37 @@ const graph = new G6.Graph({
     plugins: [tooltip, toolbar],
     minZoom: 0.05,
 });
+graph.on('edge:click', (e) => {
+    // 选择了一个edge，在左侧panel展示edge信息
+    let selectedEdge = e.item._cfg.model;
+    console.log(selectedEdge)
+    let outDiv = document.getElementById("detail_panel");
+    outDiv.className = "layui-colla-content layui-show";
+    outDiv.innerHTML = `
+                      <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
+                      <ul>
+                        <li><b>dependsOnTypes</b>: ${selectedEdge.dependsOnTypes}</li>
+                      </ul>
+                      <ul>
+                        <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
+                      </ul>
+                      <ul>
+                        <li><b>fileNumHMean</b>: ${selectedEdge.fileNumHMean}</li>
+                      </ul>
+                      <ul>
+                        <li><b>D</b>: ${selectedEdge.D}</li>
+                      </ul>
+                      <ul>
+                        <li><b>dist/b>: ${selectedEdge.dist}</li>
+                      </ul>`;
+})
+
+graph.on('node:dblclick', (e) => {
+    let selectedNode = e.item;
+    selected_packages = [];
+    selected_packages.push(selectedNode);
+    unfoldPkg();
+})
 graph.on('nodeselectchange', (e) => {
     // 选择了一个node，在左侧panel展示node信息
     if (e.selectedItems.nodes.length === 1) {
