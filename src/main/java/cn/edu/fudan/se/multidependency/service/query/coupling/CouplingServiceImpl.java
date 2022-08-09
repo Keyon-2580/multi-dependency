@@ -446,10 +446,16 @@ public class CouplingServiceImpl implements CouplingService {
                     fileIdSet2.add(dependsOn.getEndNode().getId());
                 }
             }
+            double fileHMean = calcH(fileIdSet1.size(), fileIdSet2.size());
             tmpEdge.put("I", calI(DAtoB, DBtoA));
             tmpEdge.put("dist", dist / distSum);
             tmpEdge.put("dependsOnNum", dependsOnBetweenPackages.get(map).size());
-            tmpEdge.put("pkgDisp", calcPkgDispersion(DAtoB, DBtoA, fileIdSet1.size(), fileIdSet2.size()));
+            tmpEdge.put("fileNumHMean", String.format("%.2f",fileHMean));
+            if (DBtoA != 0)
+                tmpEdge.put("D", DBtoA);
+            else
+                tmpEdge.put("D", DAtoB);
+//            tmpEdge.put("pkgDisp", calcPkgDispersion(DAtoB, DBtoA, fileIdSet1.size(), fileIdSet2.size()));
             edges.add(tmpEdge);
         }
 
@@ -532,5 +538,9 @@ public class CouplingServiceImpl implements CouplingService {
         result.add(GroupOutToInsideDependsOns);
 
         return result;
+    }
+
+    public double calcH(int pkg1Files, int pkg2Files) {
+        return 2 * (double)pkg1Files * (double)pkg2Files / ((double)pkg1Files + (double)pkg2Files);
     }
 }

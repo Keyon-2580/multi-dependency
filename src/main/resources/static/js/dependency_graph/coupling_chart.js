@@ -124,7 +124,10 @@ const tooltip = new G6.Tooltip({
                 <li>耦合强度(I): ${e.item.getModel().I}</li>
               </ul>
               <ul>
-                <li>Package Dispersion(I): ${e.item.getModel().pkgDisp}</li>
+                <li>fileNumHMean: ${e.item.getModel().fileNumHMean}</li>
+              </ul>
+              <ul>
+                <li>D: ${e.item.getModel().D}</li>
               </ul>
               <ul>
                 <li>dist: ${e.item.getModel().dist}</li>
@@ -181,7 +184,7 @@ const toolbar = new G6.ToolBar({
                 json["unfoldPcks"] = unfoldPcks;
                 json["otherPcks"] = otherPcks;
                 showLoadingWindow("加载中...");
-                console.log(json)
+                // console.log(json)
 
                 $.ajax({
                     url: "http://127.0.0.1:8080/coupling/group/one_step_child_packages",
@@ -285,7 +288,7 @@ const graph = new G6.Graph({
     height,
     fitView: true,
     modes: {
-        default: ['drag-canvas', 'drag-node', 'zoom-canvas', 'click-select'],
+        default: ['drag-canvas', 'drag-node', 'zoom-canvas', 'click-select', {type: 'brush-select', trigger: 'ctrl', includeEdges: false}],
     },
     // layout: {
     //     type: 'dagre',
@@ -366,7 +369,8 @@ graph.on('nodeselectchange', (e) => {
         if (e.select) {
             let outDiv = document.getElementById("detail_panel");
             outDiv.className = "layui-colla-content layui-show";
-            let selectedNode = e.target._cfg.model;
+            // let selectedNode = e.target._cfg.model;
+            let selectedNode = e.selectedItems.nodes[0]._cfg.model;
             if (selectedNode.nodeType === "file") {
                 outDiv.innerHTML = `
               <h4><b>id</b>>: ${selectedNode.id}</h4>
@@ -397,6 +401,10 @@ graph.on('nodeselectchange', (e) => {
             }
         }
     }
+    selected_packages.length = 0;
+    e.selectedItems.nodes.forEach(node =>{
+        selected_packages.push(node);
+    })
 });
 
 function levelLayout(){
@@ -656,7 +664,7 @@ function loadPanel(){
     let html = "";
     let nodes = graph.getNodes();
     let edges = graph.getEdges();
-    let LOF = 0;
+    let NOF = 0;
     let LOC = 0;
     let IList = [];
     let Isum = 0.0;
@@ -664,13 +672,13 @@ function loadPanel(){
     let Imin = 10000.0;
 
     nodes.forEach(node => {
-        LOF += node._cfg.model.LOF;
+        NOF += node._cfg.model.NOF;
         LOC += node._cfg.model.LOC;
     })
 
     if(CHART_MODE === "package"){
         html += "<p>包数：" + nodes.length + "</p>";
-        html += "<p>文件数：" + LOF + "</p>";
+        html += "<p>文件数：" + NOF + "</p>";
     }else if(CHART_MODE === "file"){
         html += "<p>文件数：" + nodes.length + "</p>";
     }
@@ -748,13 +756,13 @@ graph.on('node:dragend', evt => {
     loadPanel();
 })
 
-graph.on('nodeselectchange', (e) => {
-    // selected_packages = e.selectedItems.nodes;
-    selected_packages.length = 0;
-    e.selectedItems.nodes.forEach(node =>{
-        selected_packages.push(node);
-    })
-});
+// graph.on('nodeselectchange', (e) => {
+//     // selected_packages = e.selectedItems.nodes;
+//     selected_packages.length = 0;
+//     e.selectedItems.nodes.forEach(node =>{
+//         selected_packages.push(node);
+//     })
+// });
 
 //加载弹窗
 function showLoadingWindow(tip){
