@@ -127,14 +127,13 @@ public class CouplingController {
 
             List<Package> pckList = new ArrayList<>(packageRepository.findOneStepPackagesById(pckId));
 
-            if(packageRepository.findIfPackageContainFiles(parentPackage.getId())) pckList.add(parentPackage);
-
             if(pckList.size() == 0){
                 JSONObject failJson = new JSONObject();
                 failJson.put("code", -1);
                 failJson.put("pck", parentPckJson);
                 return failJson;
             }
+            if(packageRepository.findIfPackageContainFiles(parentPackage.getId())) pckList.add(parentPackage);
             pckMap.put(parentPackage, pckList);
         }
 

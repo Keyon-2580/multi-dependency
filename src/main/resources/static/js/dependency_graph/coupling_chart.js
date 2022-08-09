@@ -184,7 +184,6 @@ const toolbar = new G6.ToolBar({
                 json["unfoldPcks"] = unfoldPcks;
                 json["otherPcks"] = otherPcks;
                 showLoadingWindow("加载中...");
-                console.log(json)
                 $.ajax({
                     url: "http://127.0.0.1:8080/coupling/group/one_step_child_packages",
                     type: "POST",
@@ -708,8 +707,6 @@ function loadPanel(){
         })
         IList.sort();
         DList.sort(function(a,b){return a - b});
-        console.log(DList);
-        console.log(IList);
         I75 = IList[parseInt(IList.length * 0.75)];
 
         // html += "<p>耦合强度(I) 平均值：" + (Isum / edges.length).toFixed(3) + "</p>";
