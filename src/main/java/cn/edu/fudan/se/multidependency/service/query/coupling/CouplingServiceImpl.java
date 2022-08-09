@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.NumberFormat;
 import java.util.*;
 
 
@@ -408,6 +409,7 @@ public class CouplingServiceImpl implements CouplingService {
             nodes.add(tmpPck);
         }
 
+        int DSum = 0;
         for(Map<Package, Package> map: dependsOnBetweenPackages.keySet()){
             JSONObject tmpEdge = new JSONObject();
             int DAtoB = 0;
@@ -451,14 +453,26 @@ public class CouplingServiceImpl implements CouplingService {
             tmpEdge.put("dist", dist / distSum);
             tmpEdge.put("dependsOnNum", dependsOnBetweenPackages.get(map).size());
             tmpEdge.put("fileNumHMean", String.format("%.2f",fileHMean));
-            if (DBtoA != 0)
+            if (DBtoA != 0) {
                 tmpEdge.put("D", DBtoA);
-            else
+                DSum += DBtoA;
+            }
+            else {
                 tmpEdge.put("D", DAtoB);
+                DSum += DAtoB;
+            }
+
 //            tmpEdge.put("pkgDisp", calcPkgDispersion(DAtoB, DBtoA, fileIdSet1.size(), fileIdSet2.size()));
             edges.add(tmpEdge);
         }
-
+        NumberFormat defaultFormat = NumberFormat.getPercentInstance();
+        defaultFormat.setMinimumFractionDigits(2);
+        for (int i = 0; i < edges.size(); i++) {
+            JSONObject edge = edges.getJSONObject(i);
+            double dPct =  (Integer) edge.get("D") / (double) DSum;
+            edge.put("label", defaultFormat.format(dPct));
+            edges.set(i, edge);
+        }
         result.put("nodes", nodes);
         result.put("edges", edges);
         return result;

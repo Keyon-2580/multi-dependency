@@ -184,14 +184,14 @@ const toolbar = new G6.ToolBar({
                 json["unfoldPcks"] = unfoldPcks;
                 json["otherPcks"] = otherPcks;
                 showLoadingWindow("加载中...");
-                // console.log(json)
-
+                console.log(json)
                 $.ajax({
                     url: "http://127.0.0.1:8080/coupling/group/one_step_child_packages",
                     type: "POST",
                     contentType: "application/json",
                     dataType: "json",
                     data: JSON.stringify(json),
+
                     success: function (result) {
                         if(result["code"] === 200){
                             data_stack.push(graph.save())
@@ -325,6 +325,12 @@ const graph = new G6.Graph({
         type: 'quadratic',
         labelCfg: {
             autoRotate: true,
+            style: {
+                fill: 'red',
+                fontSize: 5,
+                stroke: 'yellow',
+                textBaseline: 'bottom'
+            }
         },
         // type: 'cubic-vertical',
         // size: 1,
@@ -666,6 +672,10 @@ function loadPanel(){
     let edges = graph.getEdges();
     let NOF = 0;
     let LOC = 0;
+    let DList = [];
+    let Dsum = 0.0;
+    let Dmax = 0.0;
+    let Dmin = 10000.0;
     let IList = [];
     let Isum = 0.0;
     let Imax = 0.0;
@@ -688,22 +698,39 @@ function loadPanel(){
     if(edges.length > 0){
         edges.forEach(edge => {
             IList.push(edge._cfg.model.I);
+            DList.push(edge._cfg.model.D);
             Isum += edge._cfg.model.I;
+            Dsum += edge._cfg.model.D;
             Imax = Math.max(Imax, edge._cfg.model.I);
             Imin = Math.min(Imin, edge._cfg.model.I);
+            Dmax = Math.max(Dmax, edge._cfg.model.D);
+            Dmin = Math.min(Dmin, edge._cfg.model.D);
         })
         IList.sort();
+        DList.sort(function(a,b){return a - b});
+        console.log(DList);
+        console.log(IList);
         I75 = IList[parseInt(IList.length * 0.75)];
 
-        html += "<p>耦合强度(I) 平均值：" + (Isum / edges.length).toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) max：" + Imax.toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 90分位值：" + IList[parseInt(IList.length * 0.9)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 85分位值：" + IList[parseInt(IList.length * 0.85)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 80分位值：" + IList[parseInt(IList.length * 0.8)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 75分位值(Q3)：" + IList[parseInt(IList.length * 0.75)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 中位值(Q2)：" + IList[parseInt(IList.length * 0.5)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 25分位值(Q1)：" + IList[parseInt(IList.length * 0.25)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) min：" + Imin.toFixed(3) + "</p>";
+        // html += "<p>耦合强度(I) 平均值：" + (Isum / edges.length).toFixed(3) + "</p>";
+        // html += "<p>耦合强度(I) max：" + Imax.toFixed(3) + "</p>";
+        // html += "<p>耦合强度(I) 90分位值：" + IList[parseInt(IList.length * 0.9)].toFixed(3) + "</p>";
+        // html += "<p>耦合强度(I) 85分位值：" + IList[parseInt(IList.length * 0.85)].toFixed(3) + "</p>";
+        // html += "<p>耦合强度(I) 80分位值：" + IList[parseInt(IList.length * 0.8)].toFixed(3) + "</p>";
+        // html += "<p>耦合强度(I) 75分位值(Q3)：" + IList[parseInt(IList.length * 0.75)].toFixed(3) + "</p>";
+        // html += "<p>耦合强度(I) 中位值(Q2)：" + IList[parseInt(IList.length * 0.5)].toFixed(3) + "</p>";
+        // html += "<p>耦合强度(I) 25分位值(Q1)：" + IList[parseInt(IList.length * 0.25)].toFixed(3) + "</p>";
+        // html += "<p>耦合强度(I) min：" + Imin.toFixed(3) + "</p>";
+        // html += "<br />";
+        html += "<p>依赖实例数(D) 平均值：" + (Dsum / edges.length).toFixed(3) + "</p>";
+        html += "<p>依赖实例数(D) max：" + Dmax.toFixed(3) + "</p>";
+        html += "<p>依赖实例数(D) 90分位值：" + DList[parseInt(DList.length * 0.9)].toFixed(3) + "</p>";
+        html += "<p>依赖实例数(D) 85分位值：" + DList[parseInt(DList.length * 0.85)].toFixed(3) + "</p>";
+        html += "<p>依赖实例数(D) 80分位值：" + DList[parseInt(DList.length * 0.8)].toFixed(3) + "</p>";
+        html += "<p>依赖实例数(D) 75分位值(Q3)：" + DList[parseInt(DList.length * 0.75)].toFixed(3) + "</p>";
+        html += "<p>依赖实例数(D) 中位值(Q2)：" + DList[parseInt(DList.length * 0.5)].toFixed(3) + "</p>";
+        html += "<p>依赖实例数(D) 25分位值(Q1)：" + DList[parseInt(DList.length * 0.25)].toFixed(3) + "</p>";
+        html += "<p>依赖实例数(D) min：" + Dmin.toFixed(3) + "</p>";
         html += "<br />";
 
         let reverseNum = graph.findAllByState("edge", "reverse").length;
