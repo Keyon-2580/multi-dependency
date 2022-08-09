@@ -393,7 +393,7 @@ graph.on('edge:click', (e) => {
                         <li><b>D</b>: ${selectedEdge.D}</li>
                       </ul>
                       <ul>
-                        <li><b>dist/b>: ${selectedEdge.dist}</li>
+                        <li><b>dist</b>: ${selectedEdge.dist}</li>
                       </ul>`;
 })
 
