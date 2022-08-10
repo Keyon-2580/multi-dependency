@@ -67,14 +67,18 @@ function unfoldPkg() {
         let json = {};
         let unfoldPcks = [];
         let otherPcks = [];
-
         selected_packages.forEach(node => {
-            unfoldPcks.push({
-                "id": node._cfg.id,
-                "instability": node._cfg.model.instability
-            })
+            if (node._cfg.model.nodeType === "package") {
+                unfoldPcks.push({
+                    "id": node._cfg.id,
+                    "instability": node._cfg.model.instability
+                })
+            }
         })
-
+        if (unfoldPcks.length === 0) {
+            confirm("错误！已无法再展开！");
+            return;
+        }
         present_packages.forEach(node => {
             let flag = true;
             selected_packages.forEach(node2 => {
@@ -255,11 +259,16 @@ const toolbar = new G6.ToolBar({
             CHART_MODE = "file";
 
             selected_packages.forEach(node => {
-                pckIds.push({
-                    "id": node._cfg.id
-                })
+                if (node._cfg.model.nodeType === "package") {
+                    pckIds.push({
+                        "id": node._cfg.id
+                    })
+                }
             })
-            console.log(json)
+            if (pckIds.length === 0) {
+                confirm("错误！已无法再展开！");
+                return;
+            }
             showLoadingWindow("加载中...");
 
             json["pckIds"] = pckIds;
@@ -399,6 +408,17 @@ graph.on('edge:click', (e) => {
 
 graph.on('node:dblclick', (e) => {
     let selectedNode = e.item;
+    if (selectedNode._cfg.model.nodeType === "file") {
+        console.log(selectedNode._cfg.model);
+        if (navigator.clipboard) {
+            // clipboard api 复制
+            navigator.clipboard.writeText(selectedNode._cfg.model.path).then(() => {
+                layer.msg("路径已复制到剪切板！");
+            });
+        }
+
+        return;
+    }
     selected_packages = [];
     selected_packages.push(selectedNode);
     unfoldPkg();
