@@ -1,0 +1,46 @@
+spring:
+  data:
+    neo4j:
+      username: neo4j
+      password: root
+      uri: bolt://localhost:7687
+      #uri: bolt://10.176.34.86:9687
+      #uri: bolt://10.176.34.83:7687
+
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+server:
+  port: 8080
+
+config:
+  starter:
+    cochange: false
+    depends_on: true
+    clone_group: false
+    module_clone: false
+    aggregation_clone: false
+    smell: false
+    modularity: false
+    export_cyclic_dependency : false
+    coupling: false
+
+data:
+  project_analyse_threads_count: -1
+  project_config: src/main/resources/project/source-test.json
+  dynamic_analyse: false
+  git_analyse: false
+  lib_analyse: false
+  clone_analyse: true
+
+
+  neo4j:
+    delete: true
+    data_path: /Users/keyon/Documents/bigDataPlatform/depend-service/neo4j/data
+    database_name: multi.dependency.db
+
+  serialize_path: /Users/keyon/Documents/bigDataPlatform/depend-service/RepositoryService-source.txt
+  anonymization : false
+
+  test: this property is for YamlUtilsTest
