@@ -13,6 +13,7 @@ public interface CouplingService {
 
     Map<ProjectFile, Double> calGroupInstablity(List<Long> fileIdList);
 
+    double calcPkgDispersion(long dA2B, long dB2A, int pkg1Files, int pkg2Files);
     double calC1to2(int funcNum1, int funcNum2);
 
     double calC(double C1, double C2);

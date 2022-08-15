@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.NumberFormat;
 import java.util.*;
 
 
@@ -145,6 +146,11 @@ public class CouplingServiceImpl implements CouplingService {
         return calC(calC1to2(funcNumAAtoB,funcNumBAtoB), calC1to2(funcNumABtoA,funcNumBBtoA));
     }
 
+    @Override
+    public double calcPkgDispersion(long dA2B, long dB2A, int pkg1Files, int pkg2Files) {
+        double H = 2 * (double)pkg1Files * (double)pkg2Files / ((double)pkg1Files + (double)pkg2Files);
+        return H/ ((double)dA2B + (double)dB2A);
+    }
     @Override
     public double calDependsOnI(DependsOn dependsOnAtoB, DependsOn dependsOnBtoA){
         long dependsOntimesAtoB = 0;
@@ -403,6 +409,7 @@ public class CouplingServiceImpl implements CouplingService {
             nodes.add(tmpPck);
         }
 
+        int DSum = 0;
         for(Map<Package, Package> map: dependsOnBetweenPackages.keySet()){
             JSONObject tmpEdge = new JSONObject();
             int DAtoB = 0;
@@ -415,7 +422,8 @@ public class CouplingServiceImpl implements CouplingService {
                 tmpEdge.put("source", pck.getId().toString());
                 tmpEdge.put("target", map.get(pck).getId().toString());
             }
-
+            Set<Long> fileIdSet1 = new HashSet<>();
+            Set<Long> fileIdSet2 = new HashSet<>();
             for(DependsOn dependsOn: dependsOnBetweenPackages.get(map)){
                 boolean flag = false;
                 Map<String, Long> dependsOnTypes = dependsOn.getDependsOnTypes();
@@ -436,14 +444,35 @@ public class CouplingServiceImpl implements CouplingService {
                     DBtoA += coupling.getDBtoA();
                     dist += coupling.getDist();
                     distSum  += 1;
+                    fileIdSet1.add(dependsOn.getStartNode().getId());
+                    fileIdSet2.add(dependsOn.getEndNode().getId());
                 }
             }
+            double fileHMean = calcH(fileIdSet1.size(), fileIdSet2.size());
             tmpEdge.put("I", calI(DAtoB, DBtoA));
             tmpEdge.put("dist", dist / distSum);
             tmpEdge.put("dependsOnNum", dependsOnBetweenPackages.get(map).size());
+            tmpEdge.put("fileNumHMean", String.format("%.2f",fileHMean));
+            if (DBtoA != 0) {
+                tmpEdge.put("D", DBtoA);
+                DSum += DBtoA;
+            }
+            else {
+                tmpEdge.put("D", DAtoB);
+                DSum += DAtoB;
+            }
+
+//            tmpEdge.put("pkgDisp", calcPkgDispersion(DAtoB, DBtoA, fileIdSet1.size(), fileIdSet2.size()));
             edges.add(tmpEdge);
         }
-
+        NumberFormat defaultFormat = NumberFormat.getPercentInstance();
+        defaultFormat.setMinimumFractionDigits(2);
+        for (int i = 0; i < edges.size(); i++) {
+            JSONObject edge = edges.getJSONObject(i);
+            double dPct =  (Integer) edge.get("D") / (double) DSum;
+            edge.put("label", defaultFormat.format(dPct));
+            edges.set(i, edge);
+        }
         result.put("nodes", nodes);
         result.put("edges", edges);
         return result;
@@ -523,5 +552,9 @@ public class CouplingServiceImpl implements CouplingService {
         result.add(GroupOutToInsideDependsOns);
 
         return result;
+    }
+
+    public double calcH(int pkg1Files, int pkg2Files) {
+        return 2 * (double)pkg1Files * (double)pkg2Files / ((double)pkg1Files + (double)pkg2Files);
     }
 }
