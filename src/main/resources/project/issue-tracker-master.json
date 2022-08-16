@@ -1,0 +1,28 @@
+{
+	"architectures": {},
+	"projects": [{
+		"path": "/Users/keyon/Documents/bigDataPlatform/IssueTracker-Master",
+		"includeDirs": [],
+		"microserviceName": "issue-tracker",
+		"autoInclude": true,
+		"serviceGroupName": "issue-tracker",
+		"project": "issue-tracker",
+		"language": "java",
+		"isMicroservice": false,
+		"tagPrefixes": [
+		],
+		"excludes": [
+
+		]
+	}],
+	"dynamics": {
+		"file_suffixes": [
+			""
+		],
+		"logs_path": "",
+		"features_path": ""
+	},
+	"gits": [],
+	"libs": [],
+	"clones": []
+}
