@@ -2,8 +2,8 @@ spring:
   data:
     neo4j:
       username: neo4j
-      password: admin
-      uri: bolt://10.176.34.96:7687
+      password: root
+      uri: bolt://localhost:7687
       #uri: bolt://10.176.34.86:9687
       #uri: bolt://10.176.34.83:7687
 
@@ -12,7 +12,7 @@ spring:
     prefix: classpath:/templates/
     suffix: .html
 server:
-  port: 8080
+  port: 8995
 
 config:
   starter:
@@ -28,7 +28,7 @@ config:
 
 data:
   project_analyse_threads_count: -1
-  project_config: src/main/resources/project/issue-tracker-master.json
+  project_config: /home/fdse/code-wisdom-installer/services/dependence-analysis/neo4j/issue-tracker-master-linux.json
   dynamic_analyse: false
   git_analyse: false
   lib_analyse: false
@@ -37,10 +37,10 @@ data:
 
   neo4j:
     delete: true
-    data_path: /Users/keyon/Documents/bigDataPlatform/depend-service/neo4j/data
+    data_path: /home/fdse/code-wisdom-installer/services/dependence-analysis/neo4j/neo4j-community-4.2.3/data
     database_name: issue-tracker.db
 
-  serialize_path: /Users/keyon/Documents/bigDataPlatform/depend-service/RepositoryService-source-issue-tracker.txt
+  serialize_path: /home/fdse/code-wisdom-installer/services/dependence-analysis/neo4j/RepositoryService-source-issue-tracker.txt
   anonymization : true
 
   test: this property is for YamlUtilsTest

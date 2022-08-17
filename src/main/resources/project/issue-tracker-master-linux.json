@@ -1,0 +1,28 @@
+{
+	"architectures": {},
+	"projects": [{
+		"path": "/home/fdse/code-wisdom-installer/services/dependence-analysis/neo4j/IssueTracker-Master",
+		"includeDirs": [],
+		"microserviceName": "issue-tracker",
+		"autoInclude": true,
+		"serviceGroupName": "issue-tracker",
+		"project": "issue-tracker",
+		"language": "java",
+		"isMicroservice": false,
+		"tagPrefixes": [
+		],
+		"excludes": [
+
+		]
+	}],
+	"dynamics": {
+		"file_suffixes": [
+			""
+		],
+		"logs_path": "",
+		"features_path": ""
+	},
+	"gits": [],
+	"libs": [],
+	"clones": []
+}
