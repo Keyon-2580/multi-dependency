@@ -1,0 +1,78 @@
+spring:
+  data:
+    neo4j:
+      username: neo4j
+      password: 123
+      uri: bolt://localhost:7687
+  #      password: admin
+  #      uri: bolt://10.176.34.86:9687
+  #
+  #      password: admin
+  #      uri: bolt://10.176.34.83:9687
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+server:
+  port: 8080
+
+config:
+  starter:
+    insert_nodes: true
+    insert_relations: true
+    cochange: false
+    depends_on: true
+    clone_group: false
+    module_clone: false
+    aggregation_clone: false
+    smell: false
+    modularity: false
+    coupling: true
+    package_depth: true
+    export_cyclic_dependency: false
+data:
+  #  project_config: src/main/resources/project/source-build-atlas.json
+  #  project_config: src/main/resources/project/source-build-easyexcel.json
+  #  project_config: src/main/resources/project/source-build-tomcat.json
+  project_config: C:/Dev/DependencyAnalysis/Tools/source-build-IssueTracker.json
+  #  project_config: src/main/resources/project/source-build-IssueTracker-2022-01-24.json
+  project_analyse_threads_count: 20
+  dynamic_analyse: false
+  git_analyse: false
+  lib_analyse: false
+  clone_analyse: false
+  alltag_analyse: false
+  diff_analyse: false
+  snapshot_analyse: false
+
+
+  neo4j:
+    delete: true
+    # batchInserter要插入的数据库
+    data_path: C:/App/neo4j-community-4.2.19/data
+    #    database_name: multiple.dependency.db
+    #    database_name: multi.dependency.cassandra.db
+    #    database_name: multi.dependency.cbg.atlas.db
+    #    database_name: multi.dependency.cbg.atlas.db
+    #    database_name: multi.dependency.cbg.tomcat.db
+    #    database_name: multi.dependency.cbg.IssueTracker-before.db
+    database_name: multi.dependency.cbg.issuetracker-tomcat-calm-before.db
+  #    database_name: multiple.dependency.train-ticket-git-one-project.db
+  #    database_name: multi.dependency.all.db
+  #    database_name: multi.dependency.atlas.db
+
+  #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/RepositoryService-source-test.txt
+  #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/RepositoryService-source.txt
+  #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/RepositoryService-source-cassandra.txt
+  #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/RepositoryService-source-train-ticket-git.txt
+  #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/RepositoryService-source-train-ticket-git-one-project.txt
+  #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/source-tomcat.txt
+  #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/source-atlas.txt
+  #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/source-IssueTracker_after.txt
+#  serialize_path: C:/Dev/DependencyAnalysis/Result/IssueTracker-Master/source-IssueTracker_before-2022-01-24.txt
+  serialize_path: C:/Dev/DependencyAnalysis/Result/tomcat-calm/source-tomcat-calm.txt
+  coupling_value_path: C:/Dev/DependencyAnalysis/Result/coupling_value_export_tomcat.csv
+  anonymization: false
+  batch_serialize: true
+
+  test: this property is for YamlUtilsTest

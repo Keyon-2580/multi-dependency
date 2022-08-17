@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
@@ -43,4 +45,15 @@ public class JSONUtil {
 		return object2;
 	}
 
+	public static String propMapToString(Map<String, Object> map) {
+		if (map != null && map.size() != 0) {
+			String str = map.keySet().stream()
+						.map(key -> key + ": " + map.get(key))
+						.collect(Collectors.joining(", ", "{", "}"));
+			System.out.println(str);
+			return str;
+		} else {
+			return "";
+		}
+	}
 }

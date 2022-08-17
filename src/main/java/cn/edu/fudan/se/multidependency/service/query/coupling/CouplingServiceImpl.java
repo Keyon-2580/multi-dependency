@@ -249,12 +249,13 @@ public class CouplingServiceImpl implements CouplingService {
             nodes.add(fileTmp);
         }
         result.put("nodes", nodes);
-
+        int DSum = 0;
         for(DependsOn dependsOn: GroupInsideDependsOns){
             JSONObject dependsOnTmp = new JSONObject();
             boolean flag = false;
             double i = 0.0;
             double dist = -1.0;
+            int D = 0;
 
             Map<String, Long> dependsOnTypes = dependsOn.getDependsOnTypes();
             for (String type : dependsOnTypes.keySet()) {
@@ -272,7 +273,16 @@ public class CouplingServiceImpl implements CouplingService {
                         , dependsOn.getEndNode().getId());
                 i += coupling.getI();
                 dist = coupling.getDist() > 0 ? coupling.getDist() : -1.0;
+                if (coupling.getDAtoB() != 0) {
+                    DSum += coupling.getDAtoB();
+                    D = coupling.getDAtoB();
+                }
+                else {
+                    DSum += coupling.getDBtoA();
+                    D = coupling.getDBtoA();
+                }
             }
+            dependsOnTmp.put("D", D);
             dependsOnTmp.put("I", i);
             dependsOnTmp.put("dist", dist);
             dependsOnTmp.put("id", dependsOn.getStartNode().getId().toString() + "_" + dependsOn.getEndNode().getId().toString());
@@ -283,6 +293,14 @@ public class CouplingServiceImpl implements CouplingService {
             dependsOnTmp.put("isTwoWayDependsOn", dependsOnRepository.findIsTwoWayDependsOn(dependsOn.getStartNode().getId(),
                     dependsOn.getEndNode().getId()));
             edges.add(dependsOnTmp);
+        }
+        NumberFormat defaultFormat = NumberFormat.getPercentInstance();
+        defaultFormat.setMinimumFractionDigits(2);
+        for (int i = 0; i < edges.size(); i++) {
+            JSONObject edge = edges.getJSONObject(i);
+            double dPct =  (Integer) edge.get("D") / (double) DSum;
+            edge.put("label", defaultFormat.format(dPct));
+            edges.set(i, edge);
         }
         result.put("edges", edges);
 
@@ -440,6 +458,9 @@ public class CouplingServiceImpl implements CouplingService {
 //                    LOGGER.info("checking coupling: " + dependsOn.getStartNode().getId() + " " + dependsOn.getEndNode().getId());
                     Coupling coupling = couplingRepository.queryCouplingBetweenTwoFiles(dependsOn.getStartNode().getId()
                             , dependsOn.getEndNode().getId());
+                    if (coupling == null) {
+                        int a = 1;
+                    }
                     DAtoB += coupling.getDAtoB();
                     DBtoA += coupling.getDBtoA();
                     dist += coupling.getDist();
