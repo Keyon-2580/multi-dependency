@@ -5,9 +5,12 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
+import cn.edu.fudan.se.multidependency.service.query.BeanCreator;
 import cn.edu.fudan.se.multidependency.service.query.coupling.CouplingService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +23,7 @@ import java.util.Map;
 @Controller
 @RequestMapping("/coupling")
 public class CouplingController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BeanCreator.class);
 
     @Autowired
     private CouplingService couplingService;
@@ -103,7 +107,7 @@ public class CouplingController {
 
         for(Long pckId: otherPckIds){
             Package pck = packageRepository.findPackageById(pckId);
-
+            LOGGER.info("getOneStepChildPackagesCouplingValue other pkg: " + String.valueOf(pckId));
             JSONObject parentPckJson = new JSONObject();
             parentPckJson.put("id", pck.getId().toString());
             parentPckJson.put("directoryPath", pck.getDirectoryPath());
@@ -118,7 +122,7 @@ public class CouplingController {
 
         for(Long pckId: unfoldPckIds){
             Package parentPackage = packageRepository.findPackageById(pckId);
-
+            LOGGER.info("getOneStepChildPackagesCouplingValue unfold pkg: " + String.valueOf(pckId));
             JSONObject parentPckJson = new JSONObject();
             parentPckJson.put("id", parentPackage.getId().toString());
             parentPckJson.put("directoryPath", parentPackage.getDirectoryPath());
