@@ -99,7 +99,7 @@ function unfoldPkg() {
         console.log(json)
         showLoadingWindow("加载中...");
         $.ajax({
-            url: "/coupling/group/one_step_child_packages",
+            url: "http://127.0.0.1:8080/coupling/group/one_step_child_packages",
             type: "POST",
             contentType: "application/json",
             dataType: "json",
@@ -173,56 +173,23 @@ const tooltip = new G6.Tooltip({
               </ul>`;
             }
         }else if(e.item._cfg.type === "edge"){
-            let selectedEdge = e.item._cfg.model;
-            const sourceNodeType = e.item._cfg.sourceNode._cfg.model.nodeType;
-            if (sourceNodeType === 'package') {
-                outDiv.innerHTML = `
-                      <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
-                      <ul>
-                        <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
-                      </ul>
-                      <ul>
-                        <li><b>fileNumHMean</b>: ${selectedEdge.fileNumHMean}</li>
-                      </ul>
-                      <ul>
-                        <li><b>D</b>: ${selectedEdge.D}</li>
-                      </ul>
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
-                      </ul>`;
-            } else {
-                outDiv.innerHTML = `
-                      <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
-                      <ul>
-                        <li><b>dependsOnTypes</b>: ${selectedEdge.dependsOnTypes}</li>
-                      </ul>
-                      <ul>
-                        <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
-                      </ul>
-                      <ul>
-                        <li><b>D</b>: ${selectedEdge.D}</li>
-                      </ul>
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
-                      </ul>`;
-            }
-            // outDiv.innerHTML = `
-            //   <h4>${e.item.getModel().source}_${e.item.getModel().target}</h4>
-            //   <ul>
-            //     <li>dependsOnTypes: ${e.item.getModel().dependsOnTypes}</li>
-            //   </ul>
-            //   <ul>
-            //     <li>耦合强度(I): ${e.item.getModel().I}</li>
-            //   </ul>
-            //   <ul>
-            //     <li>fileNumHMean: ${e.item.getModel().fileNumHMean}</li>
-            //   </ul>
-            //   <ul>
-            //     <li>D: ${e.item.getModel().D}</li>
-            //   </ul>
-            //   <ul>
-            //     <li>dist: ${e.item.getModel().dist}</li>
-            //   </ul>`;
+            outDiv.innerHTML = `
+              <h4>${e.item.getModel().source}_${e.item.getModel().target}</h4>
+              <ul>
+                <li>dependsOnTypes: ${e.item.getModel().dependsOnTypes}</li>
+              </ul>
+              <ul>
+                <li>耦合强度(I): ${e.item.getModel().I}</li>
+              </ul>
+              <ul>
+                <li>fileNumHMean: ${e.item.getModel().fileNumHMean}</li>
+              </ul>
+              <ul>
+                <li>D: ${e.item.getModel().D}</li>
+              </ul>
+              <ul>
+                <li>dist: ${e.item.getModel().dist}</li>
+              </ul>`;
         }
         return outDiv;
     },
@@ -306,7 +273,7 @@ const toolbar = new G6.ToolBar({
 
             json["pckIds"] = pckIds;
             $.ajax({
-                url: "/coupling/group/files_of_packages",
+                url: "http://127.0.0.1:8080/coupling/group/files_of_packages",
                 type: "POST",
                 contentType: "application/json",
                 dataType: "json",
@@ -417,12 +384,14 @@ const graph = new G6.Graph({
 graph.on('edge:click', (e) => {
     // 选择了一个edge，在左侧panel展示edge信息
     let selectedEdge = e.item._cfg.model;
-    const sourceNodeType = e.item._cfg.sourceNode._cfg.model.nodeType;
+    console.log(selectedEdge)
     let outDiv = document.getElementById("detail_panel");
     outDiv.className = "layui-colla-content layui-show";
-    if (sourceNodeType === 'package') {
-        outDiv.innerHTML = `
+    outDiv.innerHTML = `
                       <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
+                      <ul>
+                        <li><b>dependsOnTypes</b>: ${selectedEdge.dependsOnTypes}</li>
+                      </ul>
                       <ul>
                         <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
                       </ul>
@@ -435,23 +404,6 @@ graph.on('edge:click', (e) => {
                       <ul>
                         <li><b>dist</b>: ${selectedEdge.dist}</li>
                       </ul>`;
-    } else {
-        outDiv.innerHTML = `
-                      <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
-                      <ul>
-                        <li><b>dependsOnTypes</b>: ${selectedEdge.dependsOnTypes}</li>
-                      </ul>
-                      <ul>
-                        <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
-                      </ul>
-                      <ul>
-                        <li><b>D</b>: ${selectedEdge.D}</li>
-                      </ul>
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
-                      </ul>`;
-    }
-
 })
 
 graph.on('node:dblclick', (e) => {

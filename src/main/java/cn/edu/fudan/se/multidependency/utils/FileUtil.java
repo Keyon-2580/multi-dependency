@@ -442,10 +442,6 @@ public class FileUtil {
 		return true;
 	}
 
-	public static String getSerializePath2(String serializePath) {
-		String serializePath2 = serializePath.substring(0, serializePath.lastIndexOf(".txt")) + "-2.txt";
-		return serializePath2;
-	}
 	public static void writeObject(String filePath, Object obj) throws IOException {
 		long startTimeOfSerialize = System.currentTimeMillis();
 		File file = new File(filePath);

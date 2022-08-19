@@ -1,30 +1,25 @@
 package cn.edu.fudan.se.multidependency.service.query;
-import java.io.File;
+
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import cn.edu.fudan.se.multidependency.model.node.*;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.relation.*;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
-import cn.edu.fudan.se.multidependency.repository.node.NodeRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
-import cn.edu.fudan.se.multidependency.repository.relation.*;
+import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.coupling.CouplingRepository;
-import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.query.coupling.CouplingService;
 import cn.edu.fudan.se.multidependency.service.query.smell.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellMetricCalculatorService;
-import cn.edu.fudan.se.multidependency.utils.FileUtil;
-import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.graphdb.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +37,12 @@ import cn.edu.fudan.se.multidependency.model.relation.git.CoChange;
 import cn.edu.fudan.se.multidependency.repository.smell.ASRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.clone.CloneGroupRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.AggregationCloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.ModuleCloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CoChangeRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.CommitUpdateFileRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.AggregationDependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.git.AggregationCoChangeRepository;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.HotspotPackagePairDetector;
 import cn.edu.fudan.se.multidependency.service.query.aggregation.SummaryAggregationDataService;
@@ -60,12 +57,6 @@ import javax.annotation.Resource;
 public class BeanCreator {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BeanCreator.class);
-
-	private Map<NodeLabelType, List<Label>> mapLabels = new HashMap<>();
-
-	private Nodes nodesAll;
-
-	private Relations relationsAll;
 
 	@Autowired
 	private BasicCloneQueryService basicCloneQueryService;
@@ -94,227 +85,7 @@ public class BeanCreator {
 	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
 	private ModularityCalculator modularityCalculator;
 
-	@Bean("insertNodes")
-	public boolean insertNodes(PropertyConfig propertyConfig, NodeRepository nodeRepository) {
-		if (nodeRepository.alreadyInserted()) {
-			LOGGER.info("Nodes已存在");
-			return false;
-		}
-		String databasesPath = propertyConfig.getDatabaseDir() + "/" + GraphDatabaseSettings.DEFAULT_DATABASES_ROOT_DIR_NAME +
-				"/" + propertyConfig.getDatabaseName();
-		String transactionsPath = propertyConfig.getDatabaseDir() + "/" + GraphDatabaseSettings.DEFAULT_TX_LOGS_ROOT_DIR_NAME + "/" + propertyConfig.getDatabaseName();
-		LOGGER.info("数据库文件夹：" + databasesPath);
-		LOGGER.info("事务文件夹：" + transactionsPath);
-		LOGGER.info("清理数据库");
-		FileUtil.delFile(new File(databasesPath));
-		FileUtil.delFile(new File(transactionsPath));
-		LOGGER.info("插入Nodes");
-		try {
-			RepositoryService serializedService =
-					(RepositoryService) FileUtil.readObject(propertyConfig.getSerializePath());
-			this.nodesAll = serializedService.getNodes();
-			this.relationsAll = serializedService.getRelations();
-			LOGGER.info("总计节点数：" + this.nodesAll.size());
-			for(NodeLabelType nodeType : NodeLabelType.values()) {
-				List<Label> labels = new ArrayList<>();
-				for(String labelStr : nodeType.labels()) {
-					Label label = Label.label(labelStr);
-					labels.add(label);
-				}
-				mapLabels.put(nodeType, labels);
-			}
-			this.nodesAll.getAllNodes().forEach((nodeType, nodes) -> {
-				nodes.forEach(node -> {
-					if(node.getId() == null || !nodeRepository.existsById(node.getId())) {
-						List<Label> labels = mapLabels.get(node.getNodeType());
-						List<String> labelStrings = labels.stream()
-								.map(Label::name)
-								.collect(Collectors.toList());
-						node.setId(nodeRepository.save(node).getId());
-					}
-				});
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-		LOGGER.info("Nodes入库完成！");
-		LOGGER.info("创建Node properties索引");
-		nodeRepository.createFeatureIndex();
-		nodeRepository.createCommitIndex();
-		nodeRepository.createPackageIndex();
-		nodeRepository.createProjectIndex();
-		nodeRepository.createCloneGroupIndex();
-		nodeRepository.createTraceIndex();
-		nodeRepository.createMicroServiceIndex();
-		nodeRepository.createProjectFileIndex();
-		LOGGER.info("Node properties索引已创建");
-		return true;
-	}
-	@Bean("insertRelations")
-	public boolean insertOther(PropertyConfig propertyConfig, RelationRepository relationRepository) {
-		if (relationRepository.alreadyInserted()) {
-			LOGGER.info("已存在底层依赖关系");
-			return false;
-		}
-		LOGGER.info("插入底层关系");
-		if (!propertyConfig.isInsertRelations() || propertyConfig.getSerializePath() == null || propertyConfig.getSerializePath().equals("")) {
-			return false;
-		}
-		try {
-			LOGGER.info("总计关系数：" + relationsAll.size());
-			LOGGER.info("开始插入底层关系");
-			relationsAll.getAllRelations().forEach((relationType, relations) -> {
-				if (relationType == RelationType.ACCESS) {
-					for (Relation relation : relations) {
-						relationRepository.insertAccess(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.ANNOTATION) {
-					for (Relation relation : relations) {
-						relationRepository.insertAnnotation(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.CALL) {
-					for (Relation relation : relations) {
-						relationRepository.insertCall(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.CAST) {
-					for (Relation relation : relations) {
-						relationRepository.insertCast(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.CREATE) {
-					for (Relation relation : relations) {
-						relationRepository.insertCreate(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.EXTENDS) {
-					for (Relation relation : relations) {
-						relationRepository.insertExtends(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.GENERIC_PARAMETER) {
-					for (Relation relation : relations) {
-						relationRepository.insertGenericParam(relation.getStartNodeGraphId(),
-								relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.GLOBAL_VARIABLE) {
-					for (Relation relation : relations) {
-						relationRepository.insertGlobalVariable(relation.getStartNodeGraphId(),
-								relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.IMPLEMENTS) {
-					for (Relation relation : relations) {
-						relationRepository.insertImplements(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.IMPLEMENTS_C) {
-					for (Relation relation : relations) {
-						relationRepository.insertImplementsC(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.IMPLLINK) {
-					for (Relation relation : relations) {
-						relationRepository.insertImplink(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.IMPORT) {
-					for (Relation relation : relations) {
-						relationRepository.insertImport(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.INCLUDE) {
-					for (Relation relation : relations) {
-						relationRepository.insertInclude(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.LOCAL_VARIABLE) {
-					for (Relation relation : relations) {
-						relationRepository.insertLocalVariable(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.MEMBER_VARIABLE) {
-					for (Relation relation : relations) {
-						relationRepository.insertMemberVariable(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.PARAMETER) {
-					for (Relation relation : relations) {
-						relationRepository.insertParameter(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.RETURN) {
-					for (Relation relation : relations) {
-						relationRepository.insertReturn(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.THROW) {
-					for (Relation relation : relations) {
-						relationRepository.insertThrow(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.USE) {
-					for (Relation relation : relations) {
-						relationRepository.insertUse(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.VARIABLE_TYPE) {
-					for (Relation relation : relations) {
-						relationRepository.insertVariableType(relation.getStartNodeGraphId(),
-								relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.HAS) {
-					for (Relation relation : relations) {
-						relationRepository.insertHas(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.RELATE_TO) {
-					for (Relation relation : relations) {
-						relationRepository.insertRelateTo(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.CONTAIN) {
-					for (Relation relation : relations) {
-						relationRepository.insertContain(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-		LOGGER.info("入库完成！");
-		return true;
-	}
-//	@Bean
+	@Bean
 	public boolean setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository, CommitRepository commitRepository,ProjectRepository projectRepository) {
 		LOGGER.info("设置Commit Update文件数...");
 		commitUpdateFileRepository.setCommitFilesSize();
@@ -458,7 +229,7 @@ public class BeanCreator {
 			dependsOnRepository.deleteNullAggregationDependsOnInFiles();
 
 			//计算文件的依赖PageRank值
-//			fileRepository.pageRank(20, 0.85);
+			fileRepository.pageRank(20, 0.85);
 		}
 		return dependsOns;
 	}
@@ -537,6 +308,7 @@ public class BeanCreator {
 				dependsOnList = new ArrayList<>();
 				break;
 		}
+
 		for (DependsOn dependsOn : dependsOnList){
 			if(dependsOn.getDependsOnType() != null){
 				Node node1 = dependsOn.getStartNode();
@@ -566,6 +338,7 @@ public class BeanCreator {
 				nodeDependsOnNode.put(node1, dependsOnMap);
 			}
 		}
+
 		for (Map.Entry<Node, Map<Node, DependsOn>> entry : nodeDependsOnNode.entrySet()){
 			Node node1 = entry.getKey();
 			List<DependsOn> dependsOnListTmp = new ArrayList<>();
@@ -751,7 +524,7 @@ public class BeanCreator {
 //		return true;
 //	}
 
-	@Bean("setPackageDepth")
+	@Bean
 	public boolean setPackageDepth(ProjectRepository projectRepository, ContainRepository containRepository) {
 		LOGGER.info("设置Package深度值...");
 		List<Project> projectList = projectRepository.queryAllProjects();
@@ -828,14 +601,14 @@ public class BeanCreator {
 		return true;
 	}
 
-//	@Bean
+	@Bean
 	public boolean setSmellMetrics() {
 		LOGGER.info("创建Smell Metric度量值节点和关系...");
 		smellMetricCalculatorService.createSmellMetric(false);
 		return true;
 	}
 
-//	@Bean
+	@Bean
 	public boolean exportCyclicDependency(PropertyConfig propertyConfig) {
 		if (propertyConfig.isExportCyclicDependency()) {
 			LOGGER.info("export cyclic dependency...");
