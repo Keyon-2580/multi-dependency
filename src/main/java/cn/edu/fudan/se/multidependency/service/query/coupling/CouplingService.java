@@ -5,7 +5,6 @@ import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
 import com.alibaba.fastjson.JSONObject;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 

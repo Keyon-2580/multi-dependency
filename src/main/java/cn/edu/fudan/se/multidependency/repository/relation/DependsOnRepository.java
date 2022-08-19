@@ -172,7 +172,7 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	@Query("match p=(:Type)-[r:DEPENDS_ON]->() where r.weightedTimes is null delete r;")
 	void deleteNullTimesDependsOnInTypes();
 
-	String FILE_LEFT_NEW = "match p=(f1:ProjectFile)-[:";
+	String FILE_LEFT_NEW = "match p=(f1:ProjectFile)-[: ";
 	String FILE_MIDDLE_NEW = "]->()<-[:CONTAIN*0..]-(f2:ProjectFile) where f1 <> f2 " +
 			"create (f1)-[:DEPENDS_ON{dependsOnType : \"";
 	String FILE_MIDDLE2_NEW = "\", times : ";
