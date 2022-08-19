@@ -279,4 +279,8 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 			"match (smell)-[:" + RelationType.str_CONTAIN + "*2]->(file:ProjectFile)" +
 			" return count(distinct file);")
 	Integer calculatePackageSmellFileCountByProjectId(@Param("projectId") Long projectId, @Param("smellType") String smellType, @Param("smellLevel") String smellLevel);
+
+	@Query("match p=(f:ProjectFile)-[r:" + RelationType.str_COUPLING + "]-() RETURN distinct f;")
+	List<ProjectFile> queryAllFilesRelatedByCouplings();
 }
+
