@@ -249,13 +249,14 @@ public class CouplingServiceImpl implements CouplingService {
             nodes.add(fileTmp);
         }
         result.put("nodes", nodes);
-
+        int DSum = 0;
         for(DependsOn dependsOn: GroupInsideDependsOns){
             JSONObject dependsOnTmp = new JSONObject();
             boolean flag = false;
             double i = 0.0;
             double dist = -1.0;
-
+            int D = 0;
+            double C = 0.0;
             Map<String, Long> dependsOnTypes = dependsOn.getDependsOnTypes();
             for (String type : dependsOnTypes.keySet()) {
                 if (type.equals("EXTENDS") || type.equals("IMPLEMENTS") ||
@@ -272,7 +273,18 @@ public class CouplingServiceImpl implements CouplingService {
                         , dependsOn.getEndNode().getId());
                 i += coupling.getI();
                 dist = coupling.getDist() > 0 ? coupling.getDist() : -1.0;
+                if (coupling.getDAtoB() != 0) {
+                    DSum += coupling.getDAtoB();
+                    D = coupling.getDAtoB();
+                }
+                else {
+                    DSum += coupling.getDBtoA();
+                    D = coupling.getDBtoA();
+                }
+                C = coupling.getCStartToEnd() != 0 ? coupling.getCStartToEnd() : coupling.getCEndToStart();
             }
+            dependsOnTmp.put("C", C);
+            dependsOnTmp.put("D", D);
             dependsOnTmp.put("I", i);
             dependsOnTmp.put("dist", dist);
             dependsOnTmp.put("id", dependsOn.getStartNode().getId().toString() + "_" + dependsOn.getEndNode().getId().toString());
@@ -284,6 +296,14 @@ public class CouplingServiceImpl implements CouplingService {
                     dependsOn.getEndNode().getId()));
             edges.add(dependsOnTmp);
         }
+        NumberFormat defaultFormat = NumberFormat.getPercentInstance();
+        defaultFormat.setMinimumFractionDigits(2);
+//        for (int i = 0; i < edges.size(); i++) {
+//            JSONObject edge = edges.getJSONObject(i);
+//            double dPct =  (Integer) edge.get("D") / (double) DSum;
+//            edge.put("label", defaultFormat.format(dPct));
+//            edges.set(i, edge);
+//        }
         result.put("edges", edges);
 
         return result;
@@ -409,7 +429,7 @@ public class CouplingServiceImpl implements CouplingService {
             nodes.add(tmpPck);
         }
 
-        int DSum = 0;
+        double DSum = 0.0;
         for(Map<Package, Package> map: dependsOnBetweenPackages.keySet()){
             JSONObject tmpEdge = new JSONObject();
             int DAtoB = 0;
@@ -454,12 +474,14 @@ public class CouplingServiceImpl implements CouplingService {
             tmpEdge.put("dependsOnNum", dependsOnBetweenPackages.get(map).size());
             tmpEdge.put("fileNumHMean", String.format("%.2f",fileHMean));
             if (DBtoA != 0) {
-                tmpEdge.put("D", DBtoA);
-                DSum += DBtoA;
+                double logD = Math.log10(DBtoA);
+                tmpEdge.put("D", logD);
+                DSum += logD;
             }
             else {
-                tmpEdge.put("D", DAtoB);
-                DSum += DAtoB;
+                double logD = Math.log10(DAtoB);
+                tmpEdge.put("D", logD);
+                DSum += logD;
             }
 
 //            tmpEdge.put("pkgDisp", calcPkgDispersion(DAtoB, DBtoA, fileIdSet1.size(), fileIdSet2.size()));
@@ -467,12 +489,12 @@ public class CouplingServiceImpl implements CouplingService {
         }
         NumberFormat defaultFormat = NumberFormat.getPercentInstance();
         defaultFormat.setMinimumFractionDigits(2);
-        for (int i = 0; i < edges.size(); i++) {
-            JSONObject edge = edges.getJSONObject(i);
-            double dPct =  (Integer) edge.get("D") / (double) DSum;
-            edge.put("label", defaultFormat.format(dPct));
-            edges.set(i, edge);
-        }
+//        for (int i = 0; i < edges.size(); i++) {
+//            JSONObject edge = edges.getJSONObject(i);
+//            double dPct =  (Double) edge.get("D") / DSum;
+//            edge.put("label", defaultFormat.format(dPct));
+//            edges.set(i, edge);
+//        }
         result.put("nodes", nodes);
         result.put("edges", edges);
         return result;
