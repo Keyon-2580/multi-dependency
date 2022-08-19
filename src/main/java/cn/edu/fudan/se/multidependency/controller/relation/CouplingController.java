@@ -107,7 +107,6 @@ public class CouplingController {
 
         for(Long pckId: otherPckIds){
             Package pck = packageRepository.findPackageById(pckId);
-            LOGGER.info("getOneStepChildPackagesCouplingValue other pkg: " + String.valueOf(pckId));
             JSONObject parentPckJson = new JSONObject();
             parentPckJson.put("id", pck.getId().toString());
             parentPckJson.put("directoryPath", pck.getDirectoryPath());
@@ -122,7 +121,6 @@ public class CouplingController {
 
         for(Long pckId: unfoldPckIds){
             Package parentPackage = packageRepository.findPackageById(pckId);
-            LOGGER.info("getOneStepChildPackagesCouplingValue unfold pkg: " + String.valueOf(pckId));
             JSONObject parentPckJson = new JSONObject();
             parentPckJson.put("id", parentPackage.getId().toString());
             parentPckJson.put("directoryPath", parentPackage.getDirectoryPath());

@@ -1,83 +1,176 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Coupling Chart</title>
     <!--    <script type="text/javascript" th:src="@{/js/import/jquery-3.4.1.min.js}"></script>-->
     <script type="text/javascript" th:src="@{/js/import/jquery-1.12.0.min.js}"></script>
     <script type="text/javascript" th:src="@{/js/import/jquery-ui.min.js}"></script>
     <!--    <script type="text/javascript" th:src="@{/js/import/jquery.treeview.js}"></script>-->
-    <script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-3.3.2.min.js}"></script>
-    <script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-select.js}"></script>
-    <script type="text/javascript" th:src="@{/js/import/bootstrap/default-zh_CN.min.js}"></script>
-    <script type="text/javascript" th:src="@{/js/import/bootstrap/bootstrap-multiselect-0.9.15.js}"></script>
-<!--    <script type="text/javascript" th:src="@{/js/import/echarts-4.7.0/dist/echarts.js}"></script>-->
+    <script type="text/javascript"
+            th:src="@{/js/import/bootstrap/bootstrap-3.3.2.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/js/import/bootstrap/bootstrap-select.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/js/import/bootstrap/default-zh_CN.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/js/import/bootstrap/bootstrap-multiselect-0.9.15.js}"></script>
+    <!--    <script type="text/javascript" th:src="@{/js/import/echarts-4.7.0/dist/echarts.js}"></script>-->
     <script type="text/javascript" th:src="@{/js/import/window.js}"></script>
-    <script type="text/javascript" th:src="@{/js/import/ztree/jquery.ztree.all.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/js/import/ztree/jquery.ztree.all.js}"></script>
     <script type="text/javascript" th:src="@{/js/import/layui.js}"></script>
     <script type="text/javascript" th:src="@{/js/import/layer.js}"></script>
     <link rel="stylesheet" th:href="@{/css/import/jquery-ui.min.css}">
     <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-3.3.2.min.css}">
     <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-select.min.css}">
-    <link rel="stylesheet" th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}">
+    <link rel="stylesheet"
+          th:href="@{/css/import/bootstrap/bootstrap-multiselect-0.9.15.css}">
     <link rel="stylesheet" th:href="@{/css/import/layui.css}">
     <link rel="stylesheet" th:href="@{/css/import/layer.css}">
     <link rel="stylesheet" th:href="@{/css/table_common.css}"/>
     <link rel="stylesheet" th:href="@{/css/coupling_chart.css}"/>
     <link rel="stylesheet" th:href="@{/css/window.css}"/>
-    <link rel="stylesheet" th:href="@{/css/import/ztree/zTreeStyle/zTreeStyle.css}"></link>
+    <link rel="stylesheet"
+          th:href="@{/css/import/ztree/zTreeStyle/zTreeStyle.css}"></link>
 </head>
-<body style="min-height: 100vh">
-<div th:include="nav.html::nav" style="margin-bottom: 0"></div>
 
-<!--<div class="overview_div" style="width: 95%; height: 1000px; padding-left: 50px; margin-top: 30px;">-->
-<!--<div class="overview_div" style="width: 95%; height: 1000px;">-->
-<!--    <div style="float: left; width: 50px; height: 1000px"></div>-->
-<!--    <div id="combo_chart" ></div>-->
-<!--    <div id="side_information" style="width: 25%; padding-top: 20px; padding-left: 20px;float:left;"></div>-->
-<!--</div>-->
-<div id="loading_div"></div>
+<body>
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header" style="background: #A9A9A9;">
+        <div class="layui-logo layui-hide-xs" style="width: 300px;
+        background-color: black; color: whitesmoke">
+            Multiple Dependency Analysis
+        </div>
+        <ul class="layui-nav layui-layout-left" style="left: 300px;">
+            <li class="layui-nav-item layui-hide-xs">
+                <a href="/overview" class="layui-font-black"> OverView </a>
+            </li>
+            <li class="layui-nav-item layui-hide-xs">
+                <a href="#" class="layui-font-black">
+                    Dependency Graph
+                </a>
+                <dl class="layui-nav-child">
+                    <dd>
+                        <a href="/project/graph" class="layui-font-black">Circle
+                            Packing</a>
+                    </dd>
+                    <dd>
+                        <a href="/project/combo_chart?projectId=-1"
+                           class="layui-font-black">Combo Chart</a>
+                    </dd>
+                    <dd>
+                        <a href="/project/coupling_chart" class="layui-font-black">Coupling
+                            Chart</a>
+                    </dd>
+                </dl>
+            </li>
+        </ul>
+        <div class="layui-form" style="display: inline-block; position: fixed; top: 0;
+        right: 10%;
+        padding: 10px">
+            <div class="layui-input-block">
+<!--                <button-->
+<!--                        id="edge_label_btn"-->
+<!--                        type="button"-->
+<!--                        class="layui-btn"-->
+<!--                        onclick="handleEdgeLabelDisplay()"-->
+<!--                >-->
+<!--                    <b>Toggle Edge Label</b>-->
+<!--                </button>-->
+                <button type="button"
+                        class="layui-btn layui-btn-danger"
+                        onclick="handleResetSearchFile()"
+                >
+                    <i class="layui-icon layui-icon-refresh"></i>
+                </button>
+                <label>
+                    <input id="file_name" type="text" name="title" placeholder="输入文件名"
+                           value class="layui-input" style="cursor: text">
+                </label>
+                <button type="button"
+                        class="layui-btn layui-btn-normal"
+                        onclick="handleSearchFile()"
+                >
+                    <i class="layui-icon layui-icon-search"></i>
+                </button>
 
-<div id = "coupling_util"></div>
-
-<div class="layui-row" style="height: 100%;">
-    <div id="data_panel_container" class="layui-col-md3" style="height: 100%;
-    background-color: white">
-<!--        <div class="layui-panel" style="margin: 10px">-->
-<!--            <div id="data_panel" style="padding: 50px 30px;"></div>-->
-<!--        </div>-->
-        <div class="layui-collapse">
-            <div class="layui-colla-item">
-                <h4 class="layui-colla-title">Overview</h4>
-                <div id="data_panel" class="layui-colla-content layui-show"
-                     style="padding: 20px 20px;"></div>
-            </div>
-            <div class="layui-colla-item">
-                <h4 class="layui-colla-title">Detail</h4>
-                <div id="detail_panel" class="layui-colla-content"
-                     style="padding: 20px 20px;"></div>
             </div>
         </div>
     </div>
-    <div id="chart_container" class="layui-col-md9" style="height: 100%">
+    <div id="loading_div"></div>
+    <div id="data_panel_container" class="layui-side layui-bg-gray"
+         style="width: 300px; z-index: 100">
+        <div class="layui-side-scroll" style="width: 300px; word-wrap:break-word;">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <div class="layui-collapse">
+                <div class="layui-colla-item">
+                    <h4 class="layui-colla-title">Overview</h4>
+                    <div id="data_panel" class="layui-colla-content layui-show"
+                         style="padding: 20px 20px;"></div>
+                </div>
+                <div class="layui-colla-item">
+                    <h4 class="layui-colla-title">Detail</h4>
+                    <div id="detail_panel" class="layui-colla-content"
+                         style="padding: 20px 20px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="chart_container" class="layui-body" style="left: 300px; padding-bottom:
+    44px">
+        <!-- 内容主体区域 -->
         <div id="coupling_chart"
              style="width: 100%;height: 100%; background-color: #eee;"></div>
+        <div style="position: fixed;bottom: 0; left: 0; z-index: 1000">
+            <button type="button"
+                    class="layui-btn layui-btn-normal"
+                    onclick="handleLeftPanelBtn()">
+                <i id="panel_btn_icon" class="layui-icon layui-icon-right"></i>
+            </button>
+        </div>
+
     </div>
-    <div style="position: fixed;bottom: 0; left: 0">
-        <button type="button"
-                class="layui-btn layui-btn-sm layui-btn-primary"
-                onclick="handlePanelBtn()">
-            <i id="panel_btn_icon" class="layui-icon layui-icon-shrink-right"></i>
+    <div style="position: fixed;bottom: 0; right: 0;z-index: 1000">
+        <button id="bottom_btn"
+                type="button"
+                class="layui-btn layui-btn-normal"
+                onclick="handleBottomPanelBtn()">
+            <i id="panel_btn_icon_btm" class="layui-icon layui-icon-down"></i>
         </button>
+    </div>
+
+    <div id="btm_panel" class="layui-footer" style="background-color:
+    whitesmoke;left:300px; z-index: 600;">
+        <div class="layui-tab layui-tab-card" style="height: 400px">
+            <ul class="layui-tab-title">
+                <li class="layui-this">网站设置</li>
+                <li>用户管理</li>
+                <li>权限分配</li>
+                <li>商品管理</li>
+                <li>订单管理</li>
+            </ul>
+            <div class="layui-tab-content" style="height: 100px;">
+                <div class="layui-tab-item layui-show">1</div>
+                <div class="layui-tab-item">2</div>
+                <div class="layui-tab-item">3</div>
+                <div class="layui-tab-item">4</div>
+                <div class="layui-tab-item">5</div>
+                <div class="layui-tab-item">6</div>
+            </div>
+        </div>
     </div>
 </div>
 
-<script>/*Fixing iframe window.innerHeight 0 issue in Safari*/document.body.clientHeight;</script>
+<script>/*Fixing iframe window.innerHeight 0 issue in Safari*/
+document.body.clientHeight;</script>
 <script type="text/javascript" th:src="@{/js/import/g6.min.js}"></script>
-<script type="text/javascript" th:src="@{/js/dependency_graph/coupling_chart.js}"></script>
+<script type="text/javascript"
+        th:src="@{/js/dependency_graph/coupling_chart.js}"></script>
 <script type="text/javascript" th:inline="javascript">
-    $(document).ready(function() {
+    $(document).ready(function () {
         main().init();
         // let projectId = [[${projectId}]];
         // if(projectId !== "-1"){
