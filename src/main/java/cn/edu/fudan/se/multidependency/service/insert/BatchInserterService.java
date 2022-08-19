@@ -29,16 +29,16 @@ import cn.edu.fudan.se.multidependency.utils.FileUtil;
 public class BatchInserterService implements Closeable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BatchInserterService.class);
-	
+
 	private BatchInserterService() {}
 	private static BatchInserterService instance = new BatchInserterService();
 	public static BatchInserterService getInstance() {
 		return instance;
 	}
-	
+
 	private BatchInserter inserter = null;
 
-    private Map<NodeLabelType, List<Label>> mapLabels = new HashMap<>();
+	private Map<NodeLabelType, List<Label>> mapLabels = new HashMap<>();
 
 	public void init(String dataPath, String databaseName, boolean initDatabase) throws Exception {
 		String databasesPath = dataPath + "/" + GraphDatabaseSettings.DEFAULT_DATABASES_ROOT_DIR_NAME + "/" + databaseName;
@@ -70,7 +70,7 @@ public class BatchInserterService implements Closeable {
 			mapLabels.put(nodeType, labels);
 		}
 	}
-	
+
 	public void createIndexes() {
 		if(inserter == null) {
 			return ;
@@ -88,7 +88,7 @@ public class BatchInserterService implements Closeable {
 			}
 		}
 	}
-	
+
 	public Long insertNode(Node node) {
 		List<Label> labels = mapLabels.get(node.getNodeType());
 		Label[] labelsArray = new Label[labels.size()];
@@ -98,7 +98,7 @@ public class BatchInserterService implements Closeable {
 		node.setId(inserter.createNode(node.getProperties(), labelsArray));
 		return node.getId();
 	}
-	
+
 	public Long insertRelation(Relation relation) {
 		try {
 			relation.setId(inserter.createRelationship(relation.getStartNodeGraphId(), relation.getEndNodeGraphId(), relation.getRelationType(), relation.getProperties()));
@@ -117,7 +117,7 @@ public class BatchInserterService implements Closeable {
 	public Map<String, Object> getNodeProperties(Long id) {
 		return inserter.getNodeProperties(id);
 	}
-	
+
 	/**
 	 * 获取关系属性
 	 * @param id
@@ -126,7 +126,7 @@ public class BatchInserterService implements Closeable {
 	public Map<String, Object> getRelationshipProperties(Long id) {
 		return inserter.getRelationshipProperties(id);
 	}
-	
+
 	/**
 	 * 获取某个节点的所有关系的id
 	 * @param nodeId
@@ -138,34 +138,34 @@ public class BatchInserterService implements Closeable {
 			result.add(id);
 		}
 		return result;
-		
+
 	}
-	
+
 	@Override
 	public void close() {
 		if(inserter != null) {
 			inserter.shutdown();
 		}
 	}
-	
+
 	public boolean nodeExists(Long id) {
 		return id == null ? false : inserter.nodeExists(id);
 	}
-	
+
 	public boolean relationExists(Long id) {
 		return id == null ? false : (inserter.getRelationshipById(id) != null);
 	}
-	
+
 	public void insertNodes(Nodes allNodes) {
 		allNodes.getAllNodes().forEach((nodeType, nodes) -> {
 			nodes.forEach(node -> {
 				if(!nodeExists(node.getId())) {
-					insertNode(node);
+					node.setId(insertNode(node));
 				}
 			});
 		});
 	}
-	
+
 	public void insertRelations(Relations allRelations) {
 		allRelations.getAllRelations().forEach((relationType, relations) -> {
 			relations.forEach(relation -> {
@@ -173,5 +173,5 @@ public class BatchInserterService implements Closeable {
 			});
 		});
 	}
-	
+
 }

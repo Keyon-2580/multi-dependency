@@ -4,24 +4,26 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 
 public class JSONUtil {
-	
+
 	public static final String SUCCESS = "success";
 	public static final String FAIL = "fail";
-	
+
 	public static JSONObject extractJSONObject(File file) throws Exception {
 		return JSONObject.parseObject(extractJsonString(file));
 	}
-	
+
 	public static JSONArray extractJSONArray(File file) throws Exception {
 		return JSONObject.parseArray(extractJsonString(file));
 	}
-	
+
 	public static String extractJsonString(File file) throws Exception {
 		StringBuilder builder = new StringBuilder();
 		try(BufferedReader reader = new BufferedReader(new FileReader(file))) {
@@ -29,7 +31,7 @@ public class JSONUtil {
 			while((line = reader.readLine()) != null) {
 				builder.append(line);
 			}
-		} 
+		}
 		return builder.toString();
 	}
 
@@ -43,4 +45,15 @@ public class JSONUtil {
 		return object2;
 	}
 
+	public static String propMapToString(Map<String, Object> map) {
+		if (map != null && map.size() != 0) {
+			String str = map.keySet().stream()
+					.map(key -> key + ": " + map.get(key))
+					.collect(Collectors.joining(", ", "{", "}"));
+			System.out.println(str);
+			return str;
+		} else {
+			return "";
+		}
+	}
 }

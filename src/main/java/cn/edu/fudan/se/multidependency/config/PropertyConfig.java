@@ -9,6 +9,14 @@ import lombok.Getter;
 public class PropertyConfig {
 
 	@Getter
+	@Value("${config.starter.insert_nodes}")
+	private boolean insertNodes;
+
+	@Getter
+	@Value("${config.starter.insert_relations}")
+	private boolean insertRelations;
+
+	@Getter
 	@Value("${config.starter.cochange}")
 	private boolean setCoChange;
 
@@ -31,6 +39,22 @@ public class PropertyConfig {
 	@Getter
 	@Value("${config.starter.coupling}")
 	private boolean setCoupling;
+
+	@Getter
+	@Value("${config.starter.package_depth}")
+	private boolean setPackageDepth;
+
+	@Getter
+	@Value("${data.serialize_path}")
+	private String serializePath;
+
+	@Getter
+	@Value("${data.neo4j.data_path}")
+	private String databaseDir;
+
+	@Getter
+	@Value("${data.neo4j.database_name}")
+	private String databaseName;
 
 //	@Getter
 //	@Value("${config.starter.co-change.co-change}")

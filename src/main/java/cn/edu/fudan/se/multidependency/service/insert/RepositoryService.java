@@ -63,9 +63,9 @@ public final class RepositoryService implements InserterForNeo4j, Serializable {
         LOGGER.info("插入节点：" + sdf.format(new Timestamp(System.currentTimeMillis())));
         batchInserterService.insertNodes(nodes);
         LOGGER.info("插入节点结束：" + sdf.format(new Timestamp(System.currentTimeMillis())));
-        LOGGER.info("插入关系：" + sdf.format(new Timestamp(System.currentTimeMillis())));
-        batchInserterService.insertRelations(relations);
-        LOGGER.info("插入关系结束：" + sdf.format(new Timestamp(System.currentTimeMillis())));
+//        LOGGER.info("插入关系：" + sdf.format(new Timestamp(System.currentTimeMillis())));
+//        batchInserterService.insertRelations(relations);
+//        LOGGER.info("插入关系结束：" + sdf.format(new Timestamp(System.currentTimeMillis())));
         LOGGER.info("创建索引：" + sdf.format(new Timestamp(System.currentTimeMillis())));
         batchInserterService.createIndexes();
         LOGGER.info("创建索引结束：" + sdf.format(new Timestamp(System.currentTimeMillis())));
@@ -73,6 +73,7 @@ public final class RepositoryService implements InserterForNeo4j, Serializable {
         closeBatchInserter();
         LOGGER.info("数据库插入操作结束，关闭数据库：" + sdf.format(new Timestamp(System.currentTimeMillis())));
     }
+
 
     @Override
     public boolean addRelation(Relation relation) {
