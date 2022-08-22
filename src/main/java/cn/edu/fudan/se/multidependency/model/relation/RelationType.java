@@ -57,7 +57,8 @@ public enum RelationType implements RelationshipType {
 	AGGREGATION_DEPENDS_ON(RelationType.str_AGGREGATION_DEPENDS_ON),
 	AGGREGATION_CO_CHANGE(RelationType.str_AGGREGATION_CO_CHANGE),
 	CO_DEVELOPER(RelationType.str_CO_DEVELOPER),
-	COUPLING(RelationType.str_COUPLING);
+	COUPLING(RelationType.str_COUPLING),
+	CLUSTER_CONTAIN(RelationType.str_CLUSTER_CONTAIN);
 
 	/**
 	 * 结构关系
@@ -69,6 +70,7 @@ public enum RelationType implements RelationshipType {
 //	public static final String str_ASSOCIATION = "ASSOCIATION";
 	public static final String str_GLOBAL_VARIABLE = "GLOBAL_VARIABLE";
 	public static final String str_MEMBER_VARIABLE = "MEMBER_VARIABLE";
+	public static final String str_CLUSTER_CONTAIN = "CLUSTER_CONTAIN";
 
 	/**
 	 * 依赖关系
