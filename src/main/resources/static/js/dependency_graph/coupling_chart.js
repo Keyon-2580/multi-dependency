@@ -76,6 +76,7 @@ function handleSearchFile() {
         layer.msg("未找到文件"+fileName);
         return;
     }
+    graph.focusItem(targetNode, true);
     search_node_stack.push(graph.save());
     let model = targetNode._cfg.model;
     model.style.fill = "#ffffff";
@@ -87,6 +88,7 @@ function handleLeftPanelBtn() {
         let chartContainer = document.getElementById("chart_container");
         panelContainer.style.display = "none";
         chartContainer.style.left = "0";
+        graph.changeSize(300+graph.getWidth(), graph.getHeight());
         show_panel = false;
         document.getElementById("panel_btn_icon")
             .className = "layui-icon layui-icon-left";
@@ -95,6 +97,7 @@ function handleLeftPanelBtn() {
         let chartContainer = document.getElementById("chart_container");
         panelContainer.style.display = "block";
         chartContainer.style.left = "300px";
+        graph.changeSize(graph.getWidth()-300, graph.getHeight());
         show_panel = true;
         document.getElementById("panel_btn_icon")
             .className = "layui-icon layui-icon-right";
@@ -105,9 +108,9 @@ function handleBottomPanelBtn() {
     if (show_panel_btm) {
         let panelContainer = document.getElementById("btm_panel");
         let chartContainer = document.getElementById("chart_container");
-        chartContainer.style.paddingBottom = "0";
+        chartContainer.style.paddingBottom = "44px";
         chartContainer.style.marginBottom = "0";
-        panelContainer.style.height = "0";
+        panelContainer.style.height = "44px";
         show_panel_btm = false;
         document.getElementById("panel_btn_icon_btm")
             .className = "layui-icon layui-icon-down";
@@ -407,7 +410,7 @@ const graph = new G6.Graph({
     height,
     fitView: true,
     modes: {
-        default: ['drag-canvas', 'drag-node', 'zoom-canvas', 'click-select', {type: 'brush-select', trigger: 'ctrl', includeEdges: false}, 'activate-relations'],
+        default: ['drag-canvas', 'drag-node', 'zoom-canvas', 'click-select', {type: 'brush-select', trigger: 'ctrl', includeEdges: false}, 'activate-relations', { type: "zoom-canvas", enableOptimize: true }],
     },
     // layout: {
     //     type: 'dagre',
@@ -723,7 +726,7 @@ function levelLayout(){
 
     graph.refresh();
     graph.fitCenter();
-    graph.fitView(80);
+    graph.fitView();
 }
 
 function handleReverseEdgesAndExtends(){
@@ -995,3 +998,36 @@ if (typeof window !== 'undefined')
         if (!container || !container.scrollWidth || !container.scrollHeight) return;
         graph.changeSize(container.scrollWidth, container.scrollHeight);
     };
+
+layui.use('table', function(){
+    const table = layui.table;
+
+    table.render({
+        elem: '#edge_table1'
+        ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+        ,cols: [[
+            {field:'obj1', title: '对象1'}
+            ,{field:'obj2', title: '对象2'}
+            ,{field:'couplingValue', title: '耦合强度', sort: true}
+            ,{field:'surface', title: '依赖面耦合度', sort: true}
+            ,{field:'reversed',  title: '是否逆向', sort: true}
+        ]]
+        ,data: [
+            {"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+        ]
+        ,page: {
+            layout: ['count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+            limit: 5
+        }
+    });
+});

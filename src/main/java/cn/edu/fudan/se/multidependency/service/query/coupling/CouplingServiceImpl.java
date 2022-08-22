@@ -273,15 +273,15 @@ public class CouplingServiceImpl implements CouplingService {
                         , dependsOn.getEndNode().getId());
                 i += coupling.getI();
                 dist = coupling.getDist() > 0 ? coupling.getDist() : -1.0;
-                if (coupling.getDAtoB() != 0) {
+                if (coupling.getStartNode().getId().equals(dependsOn.getStartNode().getId())){
+                    C = coupling.getCStartToEnd();
                     DSum += coupling.getDAtoB();
                     D = coupling.getDAtoB();
-                }
-                else {
+                } else {
+                    C = coupling.getCEndToStart();
                     DSum += coupling.getDBtoA();
                     D = coupling.getDBtoA();
                 }
-                C = coupling.getCStartToEnd() != 0 ? coupling.getCStartToEnd() : coupling.getCEndToStart();
             }
             dependsOnTmp.put("C", C);
             dependsOnTmp.put("D", D);
