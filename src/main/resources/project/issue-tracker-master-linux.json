@@ -1,12 +1,12 @@
 {
 	"architectures": {},
 	"projects": [{
-		"path": "/home/fdse/code-wisdom-installer/services/dependence-analysis/neo4j/IssueTracker-Master",
+		"path": "/home/fdse/codeWisdom/service/dependence-analysis/repoFiles/aosp",
 		"includeDirs": [],
-		"microserviceName": "issue-tracker",
+		"microserviceName": "aosp",
 		"autoInclude": true,
-		"serviceGroupName": "issue-tracker",
-		"project": "issue-tracker",
+		"serviceGroupName": "aosp",
+		"project": "aosp",
 		"language": "java",
 		"isMicroservice": false,
 		"tagPrefixes": [

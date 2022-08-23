@@ -2,8 +2,8 @@ spring:
   data:
     neo4j:
       username: neo4j
-      password: root
-      uri: bolt://localhost:7687
+      password: admin
+      uri: bolt://10.176.34.85:7687
       #uri: bolt://10.176.34.86:9687
       #uri: bolt://10.176.34.83:7687
 
@@ -12,10 +12,12 @@ spring:
     prefix: classpath:/templates/
     suffix: .html
 server:
-  port: 8995
+  port: 8080
 
 config:
   starter:
+    insert_nodes: true
+    insert_relations: true
     cochange: false
     depends_on: true
     clone_group: false
@@ -23,24 +25,28 @@ config:
     aggregation_clone: false
     smell: false
     modularity: false
-    export_cyclic_dependency : false
     coupling: true
+    package_depth: true
+    export_cyclic_dependency: false
 
 data:
-  project_analyse_threads_count: -1
-  project_config: /home/fdse/code-wisdom-installer/services/dependence-analysis/neo4j/issue-tracker-master-linux.json
+  project_analyse_threads_count: 20
+  project_config: /home/fdse/codeWisdom/service/dependence-analysis/multi-dependency/aosp-dependency.json
   dynamic_analyse: false
   git_analyse: false
   lib_analyse: false
   clone_analyse: false
-
+  alltag_analyse: false
+  diff_analyse: false
+  snapshot_analyse: false
 
   neo4j:
     delete: true
-    data_path: /home/fdse/code-wisdom-installer/services/dependence-analysis/neo4j/neo4j-community-4.2.3/data
-    database_name: issue-tracker.db
+    data_path: /home/fdse/codeWisdom/service/dependence-analysis/neo4j-community-4.2.3/data
+    database_name: aosp.db
 
-  serialize_path: /home/fdse/code-wisdom-installer/services/dependence-analysis/neo4j/RepositoryService-source-issue-tracker.txt
+  serialize_path: /home/fdse/codeWisdom/service/dependence-analysis/multi-dependency/RepositoryService-source-aosp.txt
   anonymization : true
+  batch_serialize: true
 
   test: this property is for YamlUtilsTest

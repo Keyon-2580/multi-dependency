@@ -16,6 +16,8 @@ server:
 
 config:
   starter:
+    insert_nodes: true
+    insert_relations: true
     cochange: false
     depends_on: true
     clone_group: false
@@ -23,17 +25,20 @@ config:
     aggregation_clone: false
     smell: false
     modularity: false
-    export_cyclic_dependency : false
     coupling: true
+    package_depth: true
+    export_cyclic_dependency: false
 
 data:
-  project_analyse_threads_count: -1
+  project_analyse_threads_count: 20
   project_config: src/main/resources/project/issue-tracker-master.json
   dynamic_analyse: false
   git_analyse: false
   lib_analyse: false
   clone_analyse: false
-
+  alltag_analyse: false
+  diff_analyse: false
+  snapshot_analyse: false
 
   neo4j:
     delete: true
@@ -42,5 +47,6 @@ data:
 
   serialize_path: /Users/keyon/Documents/bigDataPlatform/depend-service/RepositoryService-source-issue-tracker.txt
   anonymization : true
+  batch_serialize: true
 
   test: this property is for YamlUtilsTest
