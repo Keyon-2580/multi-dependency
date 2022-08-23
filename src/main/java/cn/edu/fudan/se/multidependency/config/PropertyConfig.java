@@ -41,6 +41,10 @@ public class PropertyConfig {
 	private boolean setCoupling;
 
 	@Getter
+	@Value("${config.starter.hierarchical_cluster}")
+	private boolean setHierarchicalCluster;
+
+	@Getter
 	@Value("${config.starter.package_depth}")
 	private boolean setPackageDepth;
 
