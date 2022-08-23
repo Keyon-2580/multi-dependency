@@ -10,7 +10,8 @@ let present_packages = [];
 let data_stack = [];
 let search_node_stack = [];
 let edge_label_map = new Map();
-let current_path = '/';
+let edge_table1_data = [];
+let node_table1_data = [];
 const INSTABILITY_COLOR1 = "#642924";
 const INSTABILITY_COLOR2 = "#8B3830";
 const INSTABILITY_COLOR3 = "#B2463C";
@@ -62,22 +63,26 @@ function handleEdgeLabelDisplay() {
 }
 function handleResetSearchFile() {
     if (search_node_stack.length !== 0) {
-        data = search_node_stack.pop();
+        const nodeData = search_node_stack.pop();
+        let targetNode = graph.findById(nodeData.id);
+        let model = targetNode._cfg.model;
+        model.style.fill = nodeData.style;
+        graph.updateItem(targetNode, model, false);
         document.getElementById("file_name").value = '';
-        loadGraph();
     }
 }
 function handleSearchFile() {
     const fileName = document.getElementById("file_name").value.trim();
     const targetNode = graph.find('node', (node) => {
-        return node.get('model').label === fileName;
+        return node.get('model').label === fileName && node.get('visible') === true;
     });
     if (targetNode === undefined) {
         layer.msg("未找到文件"+fileName);
         return;
     }
     graph.focusItem(targetNode, true);
-    search_node_stack.push(graph.save());
+    // search_node_stack.push(graph.save());
+    search_node_stack.push({id: targetNode._cfg.id, style: targetNode._cfg.model.style.fill});
     let model = targetNode._cfg.model;
     model.style.fill = "#ffffff";
     graph.updateItem(targetNode, model, false);
@@ -123,6 +128,8 @@ function handleBottomPanelBtn() {
         chartContainer.style.marginBottom = "400px";
         show_panel_btm = true;
         document.getElementById("panel_btn_icon_btm").className = "layui-icon layui-icon-up";
+        loadEdgeTable1();
+        loadNodeTable1();
     }
 }
 
@@ -728,7 +735,14 @@ function levelLayout(){
     graph.fitCenter();
     graph.fitView();
 }
-
+function isEdgeReversed(edge) {
+    const startLevel = edge._cfg.source._cfg.model.y;
+    const endLevel = edge._cfg.target._cfg.model.y;
+    if (startLevel > endLevel) {
+        return !edge._cfg.model.isExtendOrImplements;
+    }
+    return false;
+}
 function handleReverseEdgesAndExtends(){
     let edges = graph.getEdges();
     let nodes = graph.getNodes();
@@ -855,6 +869,170 @@ function savePresentNodes(){
     })
 }
 
+function loadEdgeTable1() {
+    layui.use('table', function(){
+        const table = layui.table;
+        table.render({
+            elem: '#edge_table1'
+            ,defaultToolbar: []
+            ,toolbar: '#toolbarDemo'
+            ,autoSort: false
+            ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            ,cols: [[
+                {type:'checkbox'}
+                ,{field:'id', title: 'ID', sort: true}
+                ,{field:'obj1', title: '对象1'}
+                ,{field:'obj2', title: '对象2'}
+                ,{field:'I', title: '耦合强度', sort: true}
+                ,{field:'C', title: '依赖面耦合度', sort: true}
+                ,{field:'D', title: '依赖实例数', sort: true}
+                ,{field:'reversed',  title: '是否逆向', sort: true}
+            ]]
+            ,data: edge_table1_data
+            ,page: {
+                layout: ['count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                limit: 5
+            }
+        });
+        table.on('sort(edge1)', function (obj){
+            if (obj.type === 'asc') {
+                edge_table1_data.sort((a, b) => a[obj.field] - b[obj.field]);
+            } else if (obj.type === 'desc') {
+                edge_table1_data.sort((a, b) => b[obj.field] - a[obj.field]);
+            } else {
+
+            }
+            table.reload('edge_table1', {
+                data: edge_table1_data
+            });
+        });
+        table.on('toolbar(edge1)', function (obj){
+            let checkStatus = table.checkStatus(obj.config.id);
+            if (obj.event === 'filterCheckEdges') {
+                const data = checkStatus.data;
+                if (data.length !== 0) {
+                    let showEdgesSet = new Set();
+                    let showNodesSet = new Set();
+                    data.forEach(item => {
+                        showEdgesSet.add(item.id);
+                        const sourceNode = graph.findById(item.id)._cfg.source._cfg.id;
+                        const targetNode = graph.findById(item.id)._cfg.target._cfg.id;
+                        showNodesSet.add(sourceNode);
+                        showNodesSet.add(targetNode);
+                    });
+                    graph.getEdges().forEach(edge => {
+                        if (!showEdgesSet.has(edge._cfg.id)) {
+                            edge.hide();
+                        } else {
+
+                        }
+                    });
+                    graph.getNodes().forEach(node => {
+                        if (!showNodesSet.has(node._cfg.id))
+                            node.hide();
+                    });
+                    graph.paint();
+                }
+            }
+            if (obj.event === 'reset') {
+                graph.getEdges().forEach(edge => {
+                    edge.show();
+                });
+                graph.getNodes().forEach(node => {
+                    node.show();
+                });
+            }
+        });
+    });
+}
+function loadNodeTable1() {
+    graph.getNodes().forEach(node => {
+        let nof = NaN;
+        if (node._cfg.model.nodeType === 'package') {
+            nof = node._cfg.model.NOF;
+        }
+        node_table1_data.push({
+            id: node._cfg.id,
+            name: node._cfg.model.name,
+            NOF: nof,
+            LOC: node._cfg.model.LOC,
+            nodeType: node._cfg.model.nodeType,
+            nReversedDeps: 0,
+        });
+    });
+    layui.use('table', function(){
+        const table = layui.table;
+        table.render({
+            elem: '#node_table1'
+            ,defaultToolbar: []
+            ,toolbar: '#toolbarDemo'
+            ,autoSort: false
+            ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            ,cols: [[
+                {type:'checkbox'}
+                ,{field:'id', title: 'ID', sort: true}
+                ,{field:'name', title: 'name'}
+                ,{field:'NOF', title: '文件数', sort: true}
+                ,{field:'LOC', title: '代码行数', sort: true}
+                ,{field:'nodeType', title: '节点类型', sort: true}
+                ,{field:'nReversedDeps', title: '逆向依赖数量', sort: true}
+            ]]
+            ,data: node_table1_data
+            ,page: {
+                layout: ['count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                limit: 5
+            }
+        });
+        table.on('sort(node1)', function (obj){
+            if (obj.type === 'asc') {
+                node_table1_data.sort((a, b) => a[obj.field] - b[obj.field]);
+            } else if (obj.type === 'desc') {
+                node_table1_data.sort((a, b) => b[obj.field] - a[obj.field]);
+            } else {
+
+            }
+            table.reload('node_table1', {
+                data: node_table1_data
+            });
+        });
+        table.on('toolbar(node1)', function (obj){
+            let checkStatus = table.checkStatus(obj.config.id);
+            if (obj.event === 'filterCheckEdges') {
+                const data = checkStatus.data;
+                if (data.length !== 0) {
+                    let showNodesSet = new Set();
+                    data.forEach(item => {
+                        const node = graph.findById(item.id);
+                        const neighbors = graph.getNeighbors(node);
+                        showNodesSet.add(item.id);
+                        neighbors.forEach(n => {
+                           showNodesSet.add(n._cfg.model.id);
+                        });
+                    });
+                    graph.getEdges().forEach(edge => {
+                        if (!showNodesSet.has(edge._cfg.source._cfg.id)
+                            || !showNodesSet.has(edge._cfg.target._cfg.id)) {
+                            edge.hide();
+                        }
+                    });
+                    graph.getNodes().forEach(node => {
+                        if (!showNodesSet.has(node._cfg.id))
+                            node.hide();
+                    });
+                    graph.paint();
+                }
+            }
+            if (obj.event === 'reset') {
+                graph.getEdges().forEach(edge => {
+                    edge.show();
+                });
+                graph.getNodes().forEach(node => {
+                    node.show();
+                });
+            }
+        });
+    });
+}
 function loadPanel(){
     let html = "";
     let nodes = graph.getNodes();
@@ -884,8 +1062,19 @@ function loadPanel(){
 
     html += "<p>代码行数：" + LOC + "</p>";
     html += "<br />";
+    edge_table1_data.splice(0, edge_table1_data.length);
+    node_table1_data.splice(0, node_table1_data.length);
     if(edges.length > 0){
         edges.forEach(edge => {
+            edge_table1_data.push({
+                id: edge._cfg.id,
+                obj1: edge._cfg.source._cfg.model.name,
+                obj2: edge._cfg.target._cfg.model.name,
+                I: parseFloat(edge._cfg.model.I),
+                D: parseFloat(edge._cfg.model.D),
+                C: parseFloat(edge._cfg.model.C),
+                reversed: isEdgeReversed(edge)
+            });
             IList.push(edge._cfg.model.I);
             DList.push(edge._cfg.model.D);
             Isum += edge._cfg.model.I;
@@ -999,35 +1188,3 @@ if (typeof window !== 'undefined')
         graph.changeSize(container.scrollWidth, container.scrollHeight);
     };
 
-layui.use('table', function(){
-    const table = layui.table;
-
-    table.render({
-        elem: '#edge_table1'
-        ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
-        ,cols: [[
-            {field:'obj1', title: '对象1'}
-            ,{field:'obj2', title: '对象2'}
-            ,{field:'couplingValue', title: '耦合强度', sort: true}
-            ,{field:'surface', title: '依赖面耦合度', sort: true}
-            ,{field:'reversed',  title: '是否逆向', sort: true}
-        ]]
-        ,data: [
-            {"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-        ]
-        ,page: {
-            layout: ['count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
-            limit: 5
-        }
-    });
-});

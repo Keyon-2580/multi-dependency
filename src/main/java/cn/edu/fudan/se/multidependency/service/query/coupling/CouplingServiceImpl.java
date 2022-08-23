@@ -472,7 +472,7 @@ public class CouplingServiceImpl implements CouplingService {
             tmpEdge.put("I", calI(DAtoB, DBtoA));
             tmpEdge.put("dist", dist / distSum);
             tmpEdge.put("dependsOnNum", dependsOnBetweenPackages.get(map).size());
-            tmpEdge.put("fileNumHMean", String.format("%.2f",fileHMean));
+            tmpEdge.put("C", String.format("%.2f",fileHMean));
             if (DBtoA != 0) {
                 double logD = Math.log10(DBtoA);
                 tmpEdge.put("D", logD);

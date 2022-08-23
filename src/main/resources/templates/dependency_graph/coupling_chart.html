@@ -146,15 +146,20 @@
     whitesmoke;left:300px; z-index: 600;">
         <div class="layui-tab layui-tab-card" style="height: 400px">
             <ul class="layui-tab-title">
-                <li class="layui-this">需要关注的依赖</li>
-                <li>需要关注的节点</li>
+                <li class="layui-this">依赖关系列表</li>
                 <li>节点列表</li>
             </ul>
             <div class="layui-tab-content" style="height: 100px;">
                 <div class="layui-tab-item layui-show">
-                    <table class="layui-hide" id="edge_table1"></table>
+                    <table class="layui-hide" id="edge_table1"
+                           lay-filter="edge1">
+                    </table>
                 </div>
-                <div class="layui-tab-item">2</div>
+                <div class="layui-tab-item">
+                    <table class="layui-hide" id="node_table1"
+                           lay-filter="node1">
+                    </table>
+                </div>
                 <div class="layui-tab-item">3</div>
             </div>
         </div>
@@ -176,6 +181,16 @@ document.body.clientHeight;</script>
         //     main("").init();
         // }
     });
+</script>
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="filterCheckEdges">
+            Filter
+        </button>
+        <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="reset">
+            Clear
+        </button>
+    </div>
 </script>
 </body>
 </html>
