@@ -7,14 +7,18 @@ import java.util.stream.Collectors;
 
 import cn.edu.fudan.se.multidependency.model.node.*;
 import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.hierarchical_clustering.HierarchicalCluster;
 import cn.edu.fudan.se.multidependency.model.relation.*;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
+import cn.edu.fudan.se.multidependency.model.relation.hierarchical_clustering.ClusterContain;
 import cn.edu.fudan.se.multidependency.repository.node.NodeRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
+import cn.edu.fudan.se.multidependency.repository.node.hierarchical_clustering.HierarchicalClusterRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.*;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.coupling.CouplingRepository;
+import cn.edu.fudan.se.multidependency.repository.relation.hierarchical_clustering.ClusterContainRepository;
 import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.query.coupling.CouplingService;
 import cn.edu.fudan.se.multidependency.service.query.smell.CyclicDependencyDetector;
@@ -96,13 +100,15 @@ public class BeanCreator {
 
 	@Bean("insertNodes")
 	public boolean insertNodes(PropertyConfig propertyConfig, NodeRepository nodeRepository) {
-		if (nodeRepository.alreadyInserted()) {
-			LOGGER.info("Nodes已存在");
-			return false;
-		}
+//		if (nodeRepository.alreadyInserted()) {
+//			LOGGER.info("Nodes已存在");
+//			return false;
+//		}
 		String databasesPath = propertyConfig.getDatabaseDir() + "/" + GraphDatabaseSettings.DEFAULT_DATABASES_ROOT_DIR_NAME +
 				"/" + propertyConfig.getDatabaseName();
-		String transactionsPath = propertyConfig.getDatabaseDir() + "/" + GraphDatabaseSettings.DEFAULT_TX_LOGS_ROOT_DIR_NAME + "/" + propertyConfig.getDatabaseName();
+		String transactionsPath = propertyConfig.getDatabaseDir() + "/"
+				+ GraphDatabaseSettings.DEFAULT_TX_LOGS_ROOT_DIR_NAME
+				+ "/" + propertyConfig.getDatabaseName();
 		LOGGER.info("数据库文件夹：" + databasesPath);
 		LOGGER.info("事务文件夹：" + transactionsPath);
 		LOGGER.info("清理数据库");
@@ -151,14 +157,17 @@ public class BeanCreator {
 		LOGGER.info("Node properties索引已创建");
 		return true;
 	}
+
 	@Bean("insertRelations")
 	public boolean insertOther(PropertyConfig propertyConfig, RelationRepository relationRepository) {
-		if (relationRepository.alreadyInserted()) {
-			LOGGER.info("已存在底层依赖关系");
-			return false;
-		}
+//		if (relationRepository.alreadyInserted()) {
+//			LOGGER.info("已存在底层依赖关系");
+//			return false;
+//		}
 		LOGGER.info("插入底层关系");
-		if (!propertyConfig.isInsertRelations() || propertyConfig.getSerializePath() == null || propertyConfig.getSerializePath().equals("")) {
+		if (!propertyConfig.isInsertRelations()
+				|| propertyConfig.getSerializePath() == null
+				|| propertyConfig.getSerializePath().equals("")) {
 			return false;
 		}
 		try {
@@ -314,8 +323,10 @@ public class BeanCreator {
 		LOGGER.info("入库完成！");
 		return true;
 	}
-//	@Bean
-	public boolean setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository, CommitRepository commitRepository,ProjectRepository projectRepository) {
+	//	@Bean
+	public boolean setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository,
+								 CommitRepository commitRepository,
+								 ProjectRepository projectRepository) {
 		LOGGER.info("设置Commit Update文件数...");
 		commitUpdateFileRepository.setCommitFilesSize();
 		LOGGER.info("设置Project Commits数...");
@@ -378,7 +389,9 @@ public class BeanCreator {
 	}
 
 	@Bean("setAggregationCoChange")
-	public List<AggregationCoChange> setAggregationCoChange(PropertyConfig propertyConfig, CoChangeRepository coChangeRepository, AggregationCoChangeRepository aggregationCoChangeRepository) {
+	public List<AggregationCoChange> setAggregationCoChange(PropertyConfig propertyConfig,
+															CoChangeRepository coChangeRepository,
+															AggregationCoChangeRepository aggregationCoChangeRepository) {
 //		if (!propertyConfig.isSetAggregationCoChange()) {
 		if (!propertyConfig.isSetCoChange()) {
 			return new ArrayList<>();
@@ -409,7 +422,9 @@ public class BeanCreator {
 	}
 
 	@Bean("setDependsOn")
-	public List<DependsOn> setDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, ProjectFileRepository fileRepository) {
+	public List<DependsOn> setDependsOn(PropertyConfig propertyConfig,
+										DependsOnRepository dependsOnRepository,
+										ProjectFileRepository fileRepository) {
 		if (!propertyConfig.isSetDependsOn()) {
 			return new ArrayList<>();
 		}
@@ -463,7 +478,7 @@ public class BeanCreator {
 		return dependsOns;
 	}
 
-//	@Bean("setModuleDependsOn")
+	//	@Bean("setModuleDependsOn")
 	public List<DependsOn> setModuleDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository) {
 //		if (!propertyConfig.isSetModuleDependsOn()) {
 		if (!propertyConfig.isSetDependsOn()) {
@@ -492,8 +507,10 @@ public class BeanCreator {
 		return moduleDependsOns;
 	}
 
-//	@Bean("setAggregationDependsOn")
-	public List<AggregationDependsOn> setAggregationDependsOn(PropertyConfig propertyConfig, DependsOnRepository dependsOnRepository, AggregationDependsOnRepository aggregationDependsOnRepository) {
+	//	@Bean("setAggregationDependsOn")
+	public List<AggregationDependsOn> setAggregationDependsOn(PropertyConfig propertyConfig,
+															  DependsOnRepository dependsOnRepository,
+															  AggregationDependsOnRepository aggregationDependsOnRepository) {
 //		if (!propertyConfig.isSetAggregationDependsOn()) {
 		if (!propertyConfig.isSetDependsOn()) {
 			return new ArrayList<>();
@@ -594,7 +611,9 @@ public class BeanCreator {
 
 
 	@Bean("setCloneGroup")
-	public List<CloneGroup> setCloneGroup(PropertyConfig propertyConfig, CloneGroupRepository cloneGroupRepository, CloneRepository cloneRepository) {
+	public List<CloneGroup> setCloneGroup(PropertyConfig propertyConfig,
+										  CloneGroupRepository cloneGroupRepository,
+										  CloneRepository cloneRepository) {
 		if (!propertyConfig.isSetCloneGroup()) {
 			return new ArrayList<>();
 		}
@@ -627,7 +646,9 @@ public class BeanCreator {
 
 
 	@Bean("setModuleClone")
-	public List<ModuleClone> setModuleClone(PropertyConfig propertyConfig, ModuleCloneRepository moduleCloneRepository,CloneRepository cloneRepository) {
+	public List<ModuleClone> setModuleClone(PropertyConfig propertyConfig,
+											ModuleCloneRepository moduleCloneRepository,
+											CloneRepository cloneRepository) {
 		if (!propertyConfig.isSetModuleClone()) {
 			return new ArrayList<>();
 		}
@@ -643,9 +664,13 @@ public class BeanCreator {
 				return new ArrayList<>();
 			}
 			if(moduleCloneRepository.getNumberOfModuleClone() == 0) {
-				List<BasicDataForDoubleNodes<Node, Relation>> clonePackagePairs = summaryAggregationDataService.queryPackageCloneFromFileCloneSort(basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE));
+				List<BasicDataForDoubleNodes<Node, Relation>> clonePackagePairs =
+						summaryAggregationDataService.queryPackageCloneFromFileCloneSort(
+								basicCloneQueryService.findClonesByCloneType(CloneRelationType.FILE_CLONE_FILE
+								));
 				for(BasicDataForDoubleNodes<Node, Relation> clonePackagePair : clonePackagePairs) {
-					CloneRelationDataForDoubleNodes<Node, Relation> packagePairCloneRelationData = (CloneRelationDataForDoubleNodes<Node, Relation>) clonePackagePair;
+					CloneRelationDataForDoubleNodes<Node, Relation> packagePairCloneRelationData =
+							(CloneRelationDataForDoubleNodes<Node, Relation>) clonePackagePair;
 					moduleCloneRepository.createModuleClone(
 							clonePackagePair.getNode1().getId(),
 							clonePackagePair.getNode2().getId(),
@@ -673,7 +698,9 @@ public class BeanCreator {
 	}
 
 	@Bean("setAggregationClone")
-	public List<AggregationClone> setAggregationClone(PropertyConfig propertyConfig, AggregationCloneRepository aggregationCloneRepository,CloneRepository cloneRepository) {
+	public List<AggregationClone> setAggregationClone(PropertyConfig propertyConfig,
+													  AggregationCloneRepository aggregationCloneRepository,
+													  CloneRepository cloneRepository) {
 		if (!propertyConfig.isSetAggregationClone()) {
 			return new ArrayList<>();
 		}
@@ -697,11 +724,15 @@ public class BeanCreator {
 		return aggregationClone;
 	}
 
-	public void AddChildrenPackages(long parent1Id, long parent2Id, Collection<HotspotPackagePair> hotspotPackagePairs, AggregationCloneRepository aggregationCloneRepository) {
+	public void AddChildrenPackages(long parent1Id, long parent2Id,
+									Collection<HotspotPackagePair> hotspotPackagePairs,
+									AggregationCloneRepository aggregationCloneRepository) {
 		for(HotspotPackagePair hotspotPackagePair : hotspotPackagePairs) {
 			Collection<HotspotPackagePair> childrenHotspotPackagePairs = hotspotPackagePair.getChildrenHotspotPackagePairs();
-			AddChildrenPackages(hotspotPackagePair.getPackage1().getId(), hotspotPackagePair.getPackage2().getId(), childrenHotspotPackagePairs, aggregationCloneRepository);
-			CloneRelationDataForDoubleNodes<Node, Relation> packagePairCloneRelationData = (CloneRelationDataForDoubleNodes<Node, Relation>) hotspotPackagePair.getPackagePairRelationData();
+			AddChildrenPackages(hotspotPackagePair.getPackage1().getId(),
+					hotspotPackagePair.getPackage2().getId(), childrenHotspotPackagePairs, aggregationCloneRepository);
+			CloneRelationDataForDoubleNodes<Node, Relation> packagePairCloneRelationData =
+					(CloneRelationDataForDoubleNodes<Node, Relation>) hotspotPackagePair.getPackagePairRelationData();
 			aggregationCloneRepository.createAggregationClone(
 					hotspotPackagePair.getPackage1().getId(),
 					hotspotPackagePair.getPackage2().getId(),
@@ -828,14 +859,14 @@ public class BeanCreator {
 		return true;
 	}
 
-//	@Bean
+	//	@Bean
 	public boolean setSmellMetrics() {
 		LOGGER.info("创建Smell Metric度量值节点和关系...");
 		smellMetricCalculatorService.createSmellMetric(false);
 		return true;
 	}
 
-//	@Bean
+	//	@Bean
 	public boolean exportCyclicDependency(PropertyConfig propertyConfig) {
 		if (propertyConfig.isExportCyclicDependency()) {
 			LOGGER.info("export cyclic dependency...");
@@ -847,7 +878,8 @@ public class BeanCreator {
 	}
 
 	@Bean("setCoupling")
-	public List<Coupling> setCouplingValue(PropertyConfig propertyConfig, CouplingRepository couplingRepository, DependsOnRepository dependsOnRepository) {
+	public List<Coupling> setCouplingValue(PropertyConfig propertyConfig, CouplingRepository couplingRepository,
+										   DependsOnRepository dependsOnRepository) {
 		if (!propertyConfig.isSetCoupling()) {
 			return new ArrayList<>();
 		}
@@ -929,5 +961,125 @@ public class BeanCreator {
 			couplingRepository.saveAll(couplingsTmp);
 		}
 		return couplings;
+	}
+
+	/**
+	 * 使用层次聚类算法，将涉及到Coupling关系的文件进行聚类
+	 */
+	@Bean("setHierarchicalCluster")
+	public List<HierarchicalCluster> setHierarchicalCluster(PropertyConfig propertyConfig,
+												 HierarchicalClusterRepository hierarchicalClusterRepository,
+												 ClusterContainRepository clusterContainRepository,
+												 CouplingRepository couplingRepository,
+												 ProjectFileRepository projectFileRepository){
+		int clusterNum = 5;
+
+		if (!propertyConfig.isSetHierarchicalCluster()) {
+			return new ArrayList<>();
+		}
+		List<ClusterContain> clusterContains = clusterContainRepository.findClusterContainWithLimit();
+		List<HierarchicalCluster> hierarchicalClusters = hierarchicalClusterRepository.findHierarchicalClusterWithLimit();
+		if((clusterContains != null && !clusterContains.isEmpty())
+				|| (hierarchicalClusters != null && !hierarchicalClusters.isEmpty())){
+			LOGGER.info("已存在Cluster Contain关系" );
+		}else{
+			LOGGER.info("创建Hierarchical Cluster以及Cluster Contain...");
+			List<HierarchicalCluster> hierarchicalClustersTmp = new ArrayList<>();
+			List<ClusterContain> clusterContainsTmp = new ArrayList<>();
+			List<HierarchicalCluster> formalHierarchicalClustersTmp = new ArrayList<>();
+
+			List<Coupling> allCouplings = couplingRepository.queryAllCouplingsOrderByDist();
+			List<ProjectFile> allFilesRelated = projectFileRepository.queryAllFilesRelatedByCouplings();
+			List<List<ProjectFile>> clusters = new ArrayList<>();
+			List<List<ProjectFile>> formalClusters = new ArrayList<>();
+			int allCouplingsNum = allCouplings.size();
+
+			//初始化cluster，将每个文件都放入一个cluster中
+			for(ProjectFile projectFile: allFilesRelated){
+				List<ProjectFile> tmpList = new ArrayList<>();
+				tmpList.add(projectFile);
+				clusters.add(tmpList);
+			}
+
+			for(int i = 0; i < clusterNum; i++){
+				int start = i * (allCouplingsNum / clusterNum);
+				int end = (i + 1) * (allCouplingsNum / clusterNum) - 1;
+
+				while(start <= end){
+					Coupling cp = allCouplings.get(start);
+					ProjectFile startNode = (ProjectFile) cp.getStartNode();
+					ProjectFile endNode = (ProjectFile) cp.getEndNode();
+					int startNodeClusterIndex = -1;
+					int endNodeClusterIndex = -1;
+
+					for(int j = 0; j < clusters.size(); j++){
+						if(clusters.get(j).contains(startNode)){
+							startNodeClusterIndex = j;
+						}
+
+						if(clusters.get(j).contains(endNode)){
+							endNodeClusterIndex = j;
+						}
+
+						if(startNodeClusterIndex >= 0 && endNodeClusterIndex >=0) break;
+					}
+
+					int minIndex = Math.min(startNodeClusterIndex, endNodeClusterIndex);
+					int maxIndex = Math.max(startNodeClusterIndex, endNodeClusterIndex);
+
+					if(minIndex != maxIndex){
+						clusters.get(minIndex).addAll(clusters.get(maxIndex));
+						clusters.remove(maxIndex);
+					}
+					start++;
+				}
+
+				if(i == 0){
+					formalClusters.addAll(clusters);
+
+					int indexTmp = 0;
+					for(List<ProjectFile> list: clusters){
+						HierarchicalCluster tmpCluster = new HierarchicalCluster("hierarchicalCluster_0_" + indexTmp, 0, false);
+						hierarchicalClustersTmp.add(tmpCluster);
+						formalHierarchicalClustersTmp.add(tmpCluster);
+
+						for(ProjectFile projectFile: list){
+							ClusterContain tmpContain = new ClusterContain(tmpCluster, projectFile);
+							clusterContainsTmp.add(tmpContain);
+						}
+						indexTmp++;
+					}
+				}else{
+					int indexTmp = 0;
+					List<HierarchicalCluster> tmpClusterList = new ArrayList<>();
+
+					for(List<ProjectFile> list: clusters){
+						HierarchicalCluster tmpCluster = new HierarchicalCluster(
+								"hierarchicalCluster_" + i + "_" + indexTmp, 0, false);
+						hierarchicalClustersTmp.add(tmpCluster);
+						tmpClusterList.add(tmpCluster);
+						int formalIndex = 0;
+
+						for(List<ProjectFile> formalList: formalClusters){
+							if(list.contains(formalList.get(0))){
+								clusterContainsTmp.add(new ClusterContain(tmpCluster, formalHierarchicalClustersTmp.get(formalIndex)));
+							}
+							formalIndex++;
+						}
+						indexTmp++;
+					}
+
+					formalClusters.clear();
+					formalClusters.addAll(clusters);
+					formalHierarchicalClustersTmp.clear();
+					formalHierarchicalClustersTmp.addAll(tmpClusterList);
+				}
+
+				hierarchicalClusterRepository.saveAll(hierarchicalClustersTmp);
+				clusterContainRepository.saveAll(clusterContainsTmp);
+
+			}
+		}
+		return hierarchicalClusters;
 	}
 }

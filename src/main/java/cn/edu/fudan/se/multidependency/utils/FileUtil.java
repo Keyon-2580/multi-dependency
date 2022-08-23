@@ -86,7 +86,7 @@ public class FileUtil {
 			return "";
 		}
 	}
-	
+
 	/**
 	 * "D:\\multiple-dependency-project\\depends-update\\depends\\src\\main\\java\\depends\\format\\AbstractFormatDependencyDumper.java"
 	 * /depends
@@ -470,7 +470,7 @@ public class FileUtil {
 			return obj;
 		}
 	}
-	
+
 	public static void exportToFile(String filePath, String str) {
 		File file = new File(filePath);
 		try {

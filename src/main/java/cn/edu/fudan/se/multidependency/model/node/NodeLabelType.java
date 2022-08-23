@@ -12,7 +12,7 @@ public enum NodeLabelType {
 	GitRepository, Branch, Commit, Issue, Label, Developer,
 	CloneGroup, CodeUnit,
 	Module,
-	Metric,Smell;
+	Metric,Smell,HierarchicalCluster;
 	
 	public List<String> labels() {
 		List<String> result = new ArrayList<>();
@@ -51,6 +51,7 @@ public enum NodeLabelType {
 			case Trace:
 			case Variable:
 				result.add(this.toString());
+			case HierarchicalCluster:
 		}
 		
 		return result;
@@ -120,6 +121,8 @@ public enum NodeLabelType {
 			case Type:
 				break;
 			case Variable:
+				break;
+			case HierarchicalCluster:
 				break;
 			default:
 				break;

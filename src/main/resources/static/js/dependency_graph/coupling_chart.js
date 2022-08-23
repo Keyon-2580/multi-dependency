@@ -1,11 +1,15 @@
 let show_panel = true;
+let show_edge_label = true;
+let show_panel_btm = false;
 let CHART_MODE = "package";
 const loading_div = $("#loading_div");
 let I75 = 0.0;
 let data = {};
 let selected_packages = [];
 let present_packages = [];
-let data_stack = []
+let data_stack = [];
+let search_node_stack = [];
+let edge_label_map = new Map();
 let current_path = '/';
 const INSTABILITY_COLOR1 = "#642924";
 const INSTABILITY_COLOR2 = "#8B3830";
@@ -28,28 +32,100 @@ const LOW_INTENSITY_EDGE_MODEL = {
         lineWidth: 0.7,
     }
 }
-
 const HIGH_INTENSITY_EDGE_MODEL = {
     style:{
         stroke: COLOR_LINK_HIGH_INTENSITY,
         lineWidth: 1.8,
     }
 }
-
-function handlePanelBtn() {
-    if (show_panel) {
-        document.getElementById("data_panel_container").style.display = "none";
-        document.getElementById("chart_container").className="layui-col-md12";
-        show_panel = false;
-        document.getElementById("panel_btn_icon").className = "layui-icon layui-icon-spread-left";
-    } else {
-        document.getElementById("data_panel_container").style.display = "block";
-        document.getElementById("chart_container").className="layui-col-md9";
-        show_panel = true;
-        document.getElementById("panel_btn_icon").className = "layui-icon layui-icon-shrink-right";
+function handleEdgeLabelDisplay() {
+    if (graph.getEdges().length === 0) {
+        layer.msg(" 图中没有边！");
+        return;
     }
-
+    if (show_edge_label) {
+        show_edge_label = false;
+        graph.getEdges().forEach(function (edge) {
+            if(edge._cfg.model.label !== undefined) {
+                edge_label_map.set(edge._cfg.id, edge._cfg.model.label);
+                edge._cfg.model.label = '';
+                graph.refreshItem(edge);
+            }
+        });
+    } else {
+        graph.getEdges().forEach(function (edge){
+            edge._cfg.model.label = edge_label_map.get(edge._cfg.id);
+            graph.refreshItem(edge);
+        });
+        show_edge_label = true;
+    }
 }
+function handleResetSearchFile() {
+    if (search_node_stack.length !== 0) {
+        data = search_node_stack.pop();
+        document.getElementById("file_name").value = '';
+        loadGraph();
+    }
+}
+function handleSearchFile() {
+    const fileName = document.getElementById("file_name").value.trim();
+    const targetNode = graph.find('node', (node) => {
+        return node.get('model').label === fileName;
+    });
+    if (targetNode === undefined) {
+        layer.msg("未找到文件"+fileName);
+        return;
+    }
+    graph.focusItem(targetNode, true);
+    search_node_stack.push(graph.save());
+    let model = targetNode._cfg.model;
+    model.style.fill = "#ffffff";
+    graph.updateItem(targetNode, model, false);
+}
+function handleLeftPanelBtn() {
+    if (show_panel) {
+        let panelContainer = document.getElementById("data_panel_container");
+        let chartContainer = document.getElementById("chart_container");
+        panelContainer.style.display = "none";
+        chartContainer.style.left = "0";
+        graph.changeSize(300+graph.getWidth(), graph.getHeight());
+        show_panel = false;
+        document.getElementById("panel_btn_icon")
+            .className = "layui-icon layui-icon-left";
+    } else {
+        let panelContainer = document.getElementById("data_panel_container");
+        let chartContainer = document.getElementById("chart_container");
+        panelContainer.style.display = "block";
+        chartContainer.style.left = "300px";
+        graph.changeSize(graph.getWidth()-300, graph.getHeight());
+        show_panel = true;
+        document.getElementById("panel_btn_icon")
+            .className = "layui-icon layui-icon-right";
+    }
+}
+
+function handleBottomPanelBtn() {
+    if (show_panel_btm) {
+        let panelContainer = document.getElementById("btm_panel");
+        let chartContainer = document.getElementById("chart_container");
+        chartContainer.style.paddingBottom = "44px";
+        chartContainer.style.marginBottom = "0";
+        panelContainer.style.height = "44px";
+        show_panel_btm = false;
+        document.getElementById("panel_btn_icon_btm")
+            .className = "layui-icon layui-icon-down";
+    } else {
+        let panelContainer = document.getElementById("btm_panel");
+        let chartContainer = document.getElementById("chart_container");
+        panelContainer.style.height = "400px";
+        panelContainer.style.zIndex = "901";
+        chartContainer.style.paddingBottom = "0";
+        chartContainer.style.marginBottom = "400px";
+        show_panel_btm = true;
+        document.getElementById("panel_btn_icon_btm").className = "layui-icon layui-icon-up";
+    }
+}
+
 
 function main() {
     return {
@@ -62,7 +138,7 @@ function main() {
 
 function unfoldPkg() {
     if(selected_packages.length === 0){
-        confirm("当前未选中节点！");
+        layer.msg("当前未选中节点！");
     }else{
         let json = {};
         let unfoldPcks = [];
@@ -76,7 +152,7 @@ function unfoldPkg() {
             }
         })
         if (unfoldPcks.length === 0) {
-            confirm("错误！已无法再展开！");
+            layer.msg("错误！已无法再展开！");
             return;
         }
         present_packages.forEach(node => {
@@ -96,7 +172,6 @@ function unfoldPkg() {
 
         json["unfoldPcks"] = unfoldPcks;
         json["otherPcks"] = otherPcks;
-        console.log(json)
         showLoadingWindow("加载中...");
         $.ajax({
             url: "/coupling/group/one_step_child_packages",
@@ -111,7 +186,7 @@ function unfoldPkg() {
                     data = result;
                     loadGraph();
                 }else if(result["code"] === -1){
-                    confirm("错误！\n" + result["pck"]["directoryPath"] + "\n已无法再展开！");
+                    layer.msg("错误！\n" + result["pck"]["directoryPath"] + "\n已无法再展开！");
                     closeLoadingWindow();
                 }
             }
@@ -131,7 +206,6 @@ function instabilityAjax(){
             // data["edges"] = json_data["edges"];
 
             loadGraph();
-            console.log(graph)
         }
     })
 }
@@ -203,6 +277,9 @@ const tooltip = new G6.Tooltip({
                         <li><b>D</b>: ${selectedEdge.D}</li>
                       </ul>
                       <ul>
+                        <li><b>C</b>: ${selectedEdge.C}</li>
+                      </ul>                      
+                      <ul>
                         <li><b>dist</b>: ${selectedEdge.dist}</li>
                       </ul>`;
             }
@@ -246,7 +323,7 @@ const toolbar = new G6.ToolBar({
             unfoldPkg();
         }else if(code === 'choose'){
             if(selected_packages.length === 0){
-                confirm("当前未选中节点！");
+                layer.msg("当前未选中节点！");
             }else{
                 if(graph.save().nodes.length !== 1) {
                     data_stack.push(graph.save());
@@ -299,7 +376,7 @@ const toolbar = new G6.ToolBar({
                 }
             })
             if (pckIds.length === 0) {
-                confirm("错误！已无法再展开！");
+                layer.msg("错误！已无法再展开！");
                 return;
             }
             showLoadingWindow("加载中...");
@@ -333,7 +410,7 @@ const graph = new G6.Graph({
     height,
     fitView: true,
     modes: {
-        default: ['drag-canvas', 'drag-node', 'zoom-canvas', 'click-select', {type: 'brush-select', trigger: 'ctrl', includeEdges: false}],
+        default: ['drag-canvas', 'drag-node', 'zoom-canvas', 'click-select', {type: 'brush-select', trigger: 'ctrl', includeEdges: false}, 'activate-relations', { type: "zoom-canvas", enableOptimize: true }],
     },
     // layout: {
     //     type: 'dagre',
@@ -411,6 +488,14 @@ const graph = new G6.Graph({
             stroke: COLOR_LINK_SPECIAL,
         },
     },
+    nodeStateStyles: {
+        highlight: {
+            opacity: 1
+        },
+        dark: {
+            opacity: 0.1
+        }
+    },
     plugins: [tooltip, toolbar],
     minZoom: 0.05,
 });
@@ -431,7 +516,7 @@ graph.on('edge:click', (e) => {
                       </ul>
                       <ul>
                         <li><b>D</b>: ${selectedEdge.D}</li>
-                      </ul>
+                      </ul>                 
                       <ul>
                         <li><b>dist</b>: ${selectedEdge.dist}</li>
                       </ul>`;
@@ -448,6 +533,9 @@ graph.on('edge:click', (e) => {
                         <li><b>D</b>: ${selectedEdge.D}</li>
                       </ul>
                       <ul>
+                        <li><b>C</b>: ${selectedEdge.C}</li>
+                      </ul>       
+                      <ul>
                         <li><b>dist</b>: ${selectedEdge.dist}</li>
                       </ul>`;
     }
@@ -457,7 +545,6 @@ graph.on('edge:click', (e) => {
 graph.on('node:dblclick', (e) => {
     let selectedNode = e.item;
     if (selectedNode._cfg.model.nodeType === "file") {
-        console.log(selectedNode._cfg.model);
         if (navigator.clipboard) {
             // clipboard api 复制
             navigator.clipboard.writeText(selectedNode._cfg.model.path).then(() => {
@@ -639,7 +726,7 @@ function levelLayout(){
 
     graph.refresh();
     graph.fitCenter();
-    graph.fitView(80);
+    graph.fitView();
 }
 
 function handleReverseEdgesAndExtends(){
@@ -911,3 +998,36 @@ if (typeof window !== 'undefined')
         if (!container || !container.scrollWidth || !container.scrollHeight) return;
         graph.changeSize(container.scrollWidth, container.scrollHeight);
     };
+
+layui.use('table', function(){
+    const table = layui.table;
+
+    table.render({
+        elem: '#edge_table1'
+        ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+        ,cols: [[
+            {field:'obj1', title: '对象1'}
+            ,{field:'obj2', title: '对象2'}
+            ,{field:'couplingValue', title: '耦合强度', sort: true}
+            ,{field:'surface', title: '依赖面耦合度', sort: true}
+            ,{field:'reversed',  title: '是否逆向', sort: true}
+        ]]
+        ,data: [
+            {"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
+        ]
+        ,page: {
+            layout: ['count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+            limit: 5
+        }
+    });
+});

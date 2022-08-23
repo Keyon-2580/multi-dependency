@@ -37,7 +37,7 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 			"where id(p1) = $pckId1 and id(p2) = $pckId2" +
 			"return p;")
 	List<DependsOn> findPackageDependsByPackageId(@Param("pckId1") long pckId1, @Param("pckId2") long pckId2);
-	
+
 	@Query("match p=(project:Project)-[:" + RelationType.str_CONTAIN + "*2]->(:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(:ProjectFile)<-[:" + RelationType.str_CONTAIN + "*2]-(project) where id(project)=$id return p")
 	List<DependsOn> findFileDependsInProject(@Param("id") long projectId);
 
@@ -45,19 +45,19 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 	List<DependsOn> findFileDependsInProjectByPathAndLanguage(@Param("projectBelongPath") String projectBelongPath, @Param("language") String language);
 
 	@Query("match p=(project:Project)-[:" + RelationType.str_CONTAIN + "]->(:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(:Package)<-[:" + RelationType.str_CONTAIN + "]-(project) where id(project)=$id return p")
-	List<DependsOn> findPackageDependsInProject(@Param("id") long projectId);	
-	
+	List<DependsOn> findPackageDependsInProject(@Param("id") long projectId);
+
 	@Query("match p=(file:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(:ProjectFile) where id(file)=$id return p")
 	List<DependsOn> findFileDependsOn(@Param("id") long fileId);
-	
+
 	@Query("match p=(:ProjectFile)-[:" + RelationType.str_DEPENDS_ON + "]->(file:ProjectFile) where id(file)=$id return p")
 	List<DependsOn> findFileDependedOnBy(@Param("id") long fileId);
-	
+
 	@Query("MATCH (f1:ProjectFile) where id(f1) = $f1Id " +
 			"optional match (f2:ProjectFile) where id(f2) = $f2Id "
 			+ "match p = shortestpath((f1)-[:" + RelationType.str_DEPENDS_ON + "*..]->(f2)) return count(p) > 0")
 	boolean isFileDependsOnFile(@Param("f1Id") long file1Id, @Param("f2Id") long file2Id);
-	
+
 
 	@Query("match p=(pck:Package)-[:" + RelationType.str_DEPENDS_ON + "]->(:Package) where id(pck)=$id return p")
 	List<DependsOn> findModuleDependsOn(@Param("id") long packageId);
@@ -165,7 +165,7 @@ public interface DependsOnRepository extends Neo4jRepository<DependsOn, Long> {
 			TYPE_MIDDLE2 + "1" + TYPE_RIGHT)
 	void createDependsOnWithImplementsCInTypes();
 
-//	@Query("match (t1:Type)-[r:DEPENDS_ON]->(t2:Type) " +
+	//	@Query("match (t1:Type)-[r:DEPENDS_ON]->(t2:Type) " +
 //			"with t1,t2,count(r) as times " +
 //			"create (t1)-[:DEPENDS_ON{times : times, weightedTimes : 0.0}]->(t2)")
 //	void createDependsOnWithTimesInTypes();
