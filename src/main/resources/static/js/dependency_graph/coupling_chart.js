@@ -3,6 +3,17 @@ let show_edge_label = true;
 let show_panel_btm = false;
 let CHART_MODE = "package";
 const loading_div = $("#loading_div");
+let NOF = 0;
+let LOC = 0;
+let DList = [];
+let Dsum = 0.0;
+let Dmax = 0.0;
+let Dmin = 10000.0;
+let IList = [];
+let Isum = 0.0;
+let Imax = 0.0;
+let Imin = 10000.0;
+let current_panel = 'D';
 let I75 = 0.0;
 let data = {};
 let selected_packages = [];
@@ -128,8 +139,6 @@ function handleBottomPanelBtn() {
         chartContainer.style.marginBottom = "400px";
         show_panel_btm = true;
         document.getElementById("panel_btn_icon_btm").className = "layui-icon layui-icon-up";
-        loadEdgeTable1();
-        loadNodeTable1();
     }
 }
 
@@ -142,7 +151,57 @@ function main() {
         }
     }
 }
+function getNodeOneStepDetail(node) {
+    let statistics = {
+        I: 0,
+        D: 0,
+        C: 0,
+        unfoldable: true
+    };
+    let json = {};
+    let unfoldPcks = [];
+    let otherPcks = [];
+    if (node._cfg.model.nodeType === "package") {
+        unfoldPcks.push({
+            "id": node._cfg.id,
+            "instability": node._cfg.model.instability
+        })
+    }
+    json["unfoldPcks"] = unfoldPcks;
+    json["otherPcks"] = otherPcks;
+    $.ajax({
+        async: false,
+        url: "/coupling/group/one_step_child_packages",
+        type: "POST",
+        contentType: "application/json",
+        dataType: "json",
+        data: JSON.stringify(json),
 
+        success: function (result) {
+            if(result["code"] === 200){
+                statistics.unfoldable = true;
+                const edges = result["edges"];
+                let IList = [];
+                let DList = [];
+                let CList = [];
+                edges.forEach(edge => {
+                    IList.push(edge.I);
+                    DList.push(edge.D);
+                    CList.push(parseFloat(edge.C));
+                })
+                const DP90 = DList[parseInt(DList.length * 0.9)].toFixed(3);
+                const IP90 = IList[parseInt(IList.length * 0.9)].toFixed(3);
+                const CP90 = IList[parseInt(CList.length * 0.9)].toFixed(3);
+                statistics.I = parseFloat(IP90);
+                statistics.D = parseFloat(DP90);
+                statistics.C = parseFloat(CP90);
+            }else if(result["code"] === -1){
+                statistics.unfoldable = false;
+            }
+        }
+    });
+    return statistics;
+}
 function unfoldPkg() {
     if(selected_packages.length === 0){
         layer.msg("当前未选中节点！");
@@ -263,10 +322,10 @@ const tooltip = new G6.Tooltip({
                         <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
                       </ul>
                       <ul>
-                        <li><b>fileNumHMean</b>: ${selectedEdge.fileNumHMean}</li>
+                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
                       </ul>
                       <ul>
-                        <li><b>D</b>: ${selectedEdge.D}</li>
+                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
                       </ul>
                       <ul>
                         <li><b>dist</b>: ${selectedEdge.dist}</li>
@@ -519,10 +578,10 @@ graph.on('edge:click', (e) => {
                         <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
                       </ul>
                       <ul>
-                        <li><b>fileNumHMean</b>: ${selectedEdge.fileNumHMean}</li>
+                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
                       </ul>
                       <ul>
-                        <li><b>D</b>: ${selectedEdge.D}</li>
+                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
                       </ul>                 
                       <ul>
                         <li><b>dist</b>: ${selectedEdge.dist}</li>
@@ -537,10 +596,10 @@ graph.on('edge:click', (e) => {
                         <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
                       </ul>
                       <ul>
-                        <li><b>D</b>: ${selectedEdge.D}</li>
+                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
                       </ul>
                       <ul>
-                        <li><b>C</b>: ${selectedEdge.C}</li>
+                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
                       </ul>       
                       <ul>
                         <li><b>dist</b>: ${selectedEdge.dist}</li>
@@ -947,17 +1006,21 @@ function loadEdgeTable1() {
 }
 function loadNodeTable1() {
     graph.getNodes().forEach(node => {
-        let nof = NaN;
+        let nof = 0;
         if (node._cfg.model.nodeType === 'package') {
             nof = node._cfg.model.NOF;
         }
+        let res = getNodeOneStepDetail(node);
         node_table1_data.push({
             id: node._cfg.id,
             name: node._cfg.model.name,
             NOF: nof,
             LOC: node._cfg.model.LOC,
             nodeType: node._cfg.model.nodeType,
-            nReversedDeps: 0,
+            I: res["I"],
+            D: res["D"],
+            C: res["C"],
+            unfoldable: res["unfoldable"],
         });
     });
     layui.use('table', function(){
@@ -967,7 +1030,7 @@ function loadNodeTable1() {
             ,defaultToolbar: []
             ,toolbar: '#toolbarDemo'
             ,autoSort: false
-            ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            ,cellMinWidth: 50 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
             ,cols: [[
                 {type:'checkbox'}
                 ,{field:'id', title: 'ID', sort: true}
@@ -975,7 +1038,10 @@ function loadNodeTable1() {
                 ,{field:'NOF', title: '文件数', sort: true}
                 ,{field:'LOC', title: '代码行数', sort: true}
                 ,{field:'nodeType', title: '节点类型', sort: true}
-                ,{field:'nReversedDeps', title: '逆向依赖数量', sort: true}
+                ,{field:'I', title: '依赖强度90分位值', sort: true}
+                ,{field:'D', title: '依赖实例数90分位值', sort: true}
+                ,{field:'C', title: '依赖面耦合度90分位值', sort: true}
+                ,{field:'unfoldable', title: '可展开', sort: true}
             ]]
             ,data: node_table1_data
             ,page: {
@@ -1034,19 +1100,21 @@ function loadNodeTable1() {
     });
 }
 function loadPanel(){
-    let html = "";
+    let html0 = "";
+    let html1 = "";
+    let html2 = "";
     let nodes = graph.getNodes();
     let edges = graph.getEdges();
     let NOF = 0;
     let LOC = 0;
-    let DList = [];
-    let Dsum = 0.0;
-    let Dmax = 0.0;
-    let Dmin = 10000.0;
-    let IList = [];
-    let Isum = 0.0;
-    let Imax = 0.0;
-    let Imin = 10000.0;
+    DList = [];
+    Dsum = 0.0;
+    Dmax = 0.0;
+    Dmin = 10000.0;
+    IList = [];
+    Isum = 0.0;
+    Imax = 0.0;
+    Imin = 10000.0;
 
     nodes.forEach(node => {
         NOF += node._cfg.model.NOF;
@@ -1054,14 +1122,14 @@ function loadPanel(){
     })
 
     if(CHART_MODE === "package"){
-        html += "<p>包数：" + nodes.length + "</p>";
-        html += "<p>文件数：" + NOF + "</p>";
+        html0 += "<p>包数：" + nodes.length + "</p>";
+        html0 += "<p>文件数：" + NOF + "</p>";
     }else if(CHART_MODE === "file"){
-        html += "<p>文件数：" + nodes.length + "</p>";
+        html0 += "<p>文件数：" + nodes.length + "</p>";
     }
 
-    html += "<p>代码行数：" + LOC + "</p>";
-    html += "<br />";
+    html0 += "<p>代码行数：" + LOC + "</p>";
+    html0 += "<br />";
     edge_table1_data.splice(0, edge_table1_data.length);
     node_table1_data.splice(0, node_table1_data.length);
     if(edges.length > 0){
@@ -1098,7 +1166,46 @@ function loadPanel(){
         // html += "<p>耦合强度(I) 25分位值(Q1)：" + IList[parseInt(IList.length * 0.25)].toFixed(3) + "</p>";
         // html += "<p>耦合强度(I) min：" + Imin.toFixed(3) + "</p>";
         // html += "<br />";
-        html += "<p>依赖实例数(D) 平均值：" + (Dsum / edges.length).toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) 平均值：" + (Dsum / edges.length).toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) max：" + Dmax.toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) 90分位值：" + DList[parseInt(DList.length * 0.9)].toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) 85分位值：" + DList[parseInt(DList.length * 0.85)].toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) 80分位值：" + DList[parseInt(DList.length * 0.8)].toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) 75分位值(Q3)：" + DList[parseInt(DList.length * 0.75)].toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) 中位值(Q2)：" + DList[parseInt(DList.length * 0.5)].toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) 25分位值(Q1)：" + DList[parseInt(DList.length * 0.25)].toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) min：" + Dmin.toFixed(3) + "</p>";
+        html1 += "<br />";
+
+        let reverseNum = graph.findAllByState("edge", "reverse").length;
+        html2 += "<p>逆向依赖数：" + reverseNum + "</p>";
+        html2 += "<p>总依赖数：" + edges.length + "</p>";
+        html2 += "<p>逆向依赖数 / 总依赖数：" + (reverseNum / edges.length).toFixed(3) + "</p>";
+    }
+    $("#data_panel0").html(html0);
+    $("#data_panel1").html(html1);
+    $("#data_panel2").html(html2);
+    loadEdgeTable1();
+    loadNodeTable1();
+}
+
+function switchDataPanel() {
+    let html = "";
+    const len = graph.getEdges().length;
+    if (current_panel === 'D') {
+        html += "<p>耦合强度(I) 平均值：" + (Isum / len).toFixed(3) + "</p>";
+        html += "<p>耦合强度(I) max：" + Imax.toFixed(3) + "</p>";
+        html += "<p>耦合强度(I) 90分位值：" + IList[parseInt(IList.length * 0.9)].toFixed(3) + "</p>";
+        html += "<p>耦合强度(I) 85分位值：" + IList[parseInt(IList.length * 0.85)].toFixed(3) + "</p>";
+        html += "<p>耦合强度(I) 80分位值：" + IList[parseInt(IList.length * 0.8)].toFixed(3) + "</p>";
+        html += "<p>耦合强度(I) 75分位值(Q3)：" + IList[parseInt(IList.length * 0.75)].toFixed(3) + "</p>";
+        html += "<p>耦合强度(I) 中位值(Q2)：" + IList[parseInt(IList.length * 0.5)].toFixed(3) + "</p>";
+        html += "<p>耦合强度(I) 25分位值(Q1)：" + IList[parseInt(IList.length * 0.25)].toFixed(3) + "</p>";
+        html += "<p>耦合强度(I) min：" + Imin.toFixed(3) + "</p>";
+        html += "<br />";
+        current_panel = 'I';
+    } else {
+        html += "<p>依赖实例数(D) 平均值：" + (Dsum / len).toFixed(3) + "</p>";
         html += "<p>依赖实例数(D) max：" + Dmax.toFixed(3) + "</p>";
         html += "<p>依赖实例数(D) 90分位值：" + DList[parseInt(DList.length * 0.9)].toFixed(3) + "</p>";
         html += "<p>依赖实例数(D) 85分位值：" + DList[parseInt(DList.length * 0.85)].toFixed(3) + "</p>";
@@ -1108,15 +1215,10 @@ function loadPanel(){
         html += "<p>依赖实例数(D) 25分位值(Q1)：" + DList[parseInt(DList.length * 0.25)].toFixed(3) + "</p>";
         html += "<p>依赖实例数(D) min：" + Dmin.toFixed(3) + "</p>";
         html += "<br />";
-
-        let reverseNum = graph.findAllByState("edge", "reverse").length;
-        html += "<p>逆向依赖数：" + reverseNum + "</p>";
-        html += "<p>总依赖数：" + edges.length + "</p>";
-        html += "<p>逆向依赖数 / 总依赖数：" + (reverseNum / edges.length).toFixed(3) + "</p>";
+        current_panel = 'D';
     }
-    $("#data_panel").html(html);
+    $("#data_panel1").html(html);
 }
-
 function handleEdgesWidth(){
     graph.getEdges().forEach(edge => {
         if(edge._cfg.model.I >= 1){

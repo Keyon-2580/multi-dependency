@@ -107,8 +107,13 @@
             <div class="layui-collapse">
                 <div class="layui-colla-item">
                     <h4 class="layui-colla-title">Overview</h4>
-                    <div id="data_panel" class="layui-colla-content layui-show"
-                         style="padding: 20px 20px;"></div>
+                    <button type="button" class="layui-btn layui-btn-xs"
+                            id="data_panel_btn" onclick="switchDataPanel()">
+                        切换数据面板
+                    </button>
+                    <div id="data_panel0" class="layui-colla-content layui-show"></div>
+                    <div id="data_panel1" class="layui-colla-content layui-show"></div>
+                    <div id="data_panel2" class="layui-colla-content layui-show"></div>
                 </div>
                 <div class="layui-colla-item">
                     <h4 class="layui-colla-title">Detail</h4>

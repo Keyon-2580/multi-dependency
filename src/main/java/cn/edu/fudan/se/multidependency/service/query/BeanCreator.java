@@ -100,10 +100,10 @@ public class BeanCreator {
 
 	@Bean("insertNodes")
 	public boolean insertNodes(PropertyConfig propertyConfig, NodeRepository nodeRepository) {
-//		if (nodeRepository.alreadyInserted()) {
-//			LOGGER.info("Nodes已存在");
-//			return false;
-//		}
+		if (nodeRepository.alreadyInserted()) {
+			LOGGER.info("Nodes已存在");
+			return false;
+		}
 		String databasesPath = propertyConfig.getDatabaseDir() + "/" + GraphDatabaseSettings.DEFAULT_DATABASES_ROOT_DIR_NAME +
 				"/" + propertyConfig.getDatabaseName();
 		String transactionsPath = propertyConfig.getDatabaseDir() + "/"
@@ -113,7 +113,7 @@ public class BeanCreator {
 		LOGGER.info("事务文件夹：" + transactionsPath);
 		LOGGER.info("清理数据库");
 		FileUtil.delFile(new File(databasesPath));
-		FileUtil.delFile(new File(transactionsPath));
+//		FileUtil.delFile(new File(transactionsPath));
 		LOGGER.info("插入Nodes");
 		try {
 			RepositoryService serializedService =
@@ -160,10 +160,10 @@ public class BeanCreator {
 
 	@Bean("insertRelations")
 	public boolean insertOther(PropertyConfig propertyConfig, RelationRepository relationRepository) {
-//		if (relationRepository.alreadyInserted()) {
-//			LOGGER.info("已存在底层依赖关系");
-//			return false;
-//		}
+		if (relationRepository.alreadyInserted()) {
+			LOGGER.info("已存在底层依赖关系");
+			return false;
+		}
 		LOGGER.info("插入底层关系");
 		if (!propertyConfig.isInsertRelations()
 				|| propertyConfig.getSerializePath() == null
