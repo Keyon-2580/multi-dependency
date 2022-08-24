@@ -20,14 +20,24 @@ public interface CouplingRepository extends Neo4jRepository<Coupling, Long> {
     List<Coupling> queryAllCouplingsOrderByDist();
 
     @Query("match (f1:ProjectFile)-[:" + RelationType.str_CONTAIN + "]-(:Type)-[:" + RelationType.str_CONTAIN + "]-" +
-            "(:Function)-[:" + RelationType.str_CALL + "]->(m2:Function)-[:" + RelationType.str_CONTAIN + "]-(:Type)-[:" + RelationType.str_CONTAIN + "]" +
+            "(:Function)-[]->(m2:Function)-[:" + RelationType.str_CONTAIN + "]-(:Type)-[:" + RelationType.str_CONTAIN + "]" +
             "-(f2:ProjectFile) where id(f1)=$file1Id and id(f2)=$file2Id return count(distinct m2);")
     int queryTwoFilesDependsByFunctionsNum(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
 
     @Query("match (f1:ProjectFile)-[:" + RelationType.str_CONTAIN + "]-(:Type)-[:" + RelationType.str_CONTAIN + "]-" +
-            "(m1:Function)-[:" + RelationType.str_CALL + "]->(m2:Function)-[:" + RelationType.str_CONTAIN + "]-(:Type)-[:" + RelationType.str_CONTAIN + "]" +
+            "(m1:Function)-[]->(m2:Function)-[:" + RelationType.str_CONTAIN + "]-(:Type)-[:" + RelationType.str_CONTAIN + "]" +
             "-(f2:ProjectFile) where id(f1)=$file1Id and id(f2)=$file2Id return count(distinct m1);")
     int queryTwoFilesDependsOnFunctionsNum(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
+
+    @Query("match (f1:ProjectFile)-[:" + RelationType.str_CONTAIN + "]-(:Type)-[:" + RelationType.str_CONTAIN + "*]->" +
+            "()-[]->(v2:Variable)<-[:" + RelationType.str_CONTAIN + "*]-(f2:ProjectFile) " +
+            "where id(f1)=$file1Id and id(f2)=$file2Id return count(distinct v2);")
+    int queryTwoFilesDependsByVariablesNum(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
+
+    @Query("match (f1:ProjectFile)-[:" + RelationType.str_CONTAIN + "]-(:Type)-[:" + RelationType.str_CONTAIN + "*]->" +
+            "(v1:Variable)-[]->()<-[:" + RelationType.str_CONTAIN + "*]-(f2:ProjectFile) " +
+            "where id(f1)=$file1Id and id(f2)=$file2Id return count(distinct v1);")
+    int queryTwoFilesDependsOnVariablesNum(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
 
     @Query("match p=(:ProjectFile)-[:" + RelationType.str_COUPLING + "]->(:ProjectFile) return p limit 10;")
     List<Coupling> findFileDependsWithLimit();

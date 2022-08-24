@@ -38,6 +38,6 @@ class HierarchicalClusteringServiceTest {
 
     @Test
     public void calHierarchicalClustering(){
-        hierarchicalClusteringService.calFileHCLevel();
+        hierarchicalClusteringService.calPackageComplexityByCluster(15663);
     }
 }

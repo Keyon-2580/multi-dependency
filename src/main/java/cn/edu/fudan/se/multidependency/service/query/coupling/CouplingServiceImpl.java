@@ -128,7 +128,8 @@ public class CouplingServiceImpl implements CouplingService {
 
     @Override
     public double calI(long dependsOntimes1, long dependsOntimes2){
-        return (2 * ((double)dependsOntimes1 + 1) * ((double)dependsOntimes2 + 1)) / ((double)dependsOntimes1 + (double)dependsOntimes2 + 2) - 1;
+        return Math.sqrt(Math.pow(dependsOntimes1, 2) + Math.pow(dependsOntimes2, 2));
+//        return (2 * ((double)dependsOntimes1 + 1) * ((double)dependsOntimes2 + 1)) / ((double)dependsOntimes1 + (double)dependsOntimes2 + 2) - 1;
     }
 
     @Override

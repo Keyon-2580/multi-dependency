@@ -114,6 +114,8 @@ public class BeanCreator {
 		LOGGER.info("清理数据库");
 		FileUtil.delFile(new File(databasesPath));
 //		FileUtil.delFile(new File(transactionsPath));
+//		FileUtil.delFile(new File(databasesPath));
+//		FileUtil.delFile(new File(transactionsPath));
 		LOGGER.info("插入Nodes");
 		try {
 			RepositoryService serializedService =
@@ -903,10 +905,14 @@ public class BeanCreator {
 					allFilesPair.add(filesPair);
 //					System.out.println(file1Id + "  " + file2Id);
 
-					int funcNumAAtoB = couplingRepository.queryTwoFilesDependsOnFunctionsNum(file1Id, file2Id);
-					int funcNumBAtoB = couplingRepository.queryTwoFilesDependsByFunctionsNum(file1Id, file2Id);
-					int funcNumABtoA = couplingRepository.queryTwoFilesDependsByFunctionsNum(file2Id, file1Id);
-					int funcNumBBtoA = couplingRepository.queryTwoFilesDependsOnFunctionsNum(file2Id, file1Id);
+					int funcAndVarNumAAtoB = couplingRepository.queryTwoFilesDependsOnFunctionsNum(file1Id, file2Id) +
+							couplingRepository.queryTwoFilesDependsOnVariablesNum(file1Id, file2Id);
+					int funcAndVarNumBAtoB = couplingRepository.queryTwoFilesDependsByFunctionsNum(file1Id, file2Id) +
+							couplingRepository.queryTwoFilesDependsByVariablesNum(file1Id, file2Id);
+					int funcAndVarNumABtoA = couplingRepository.queryTwoFilesDependsByFunctionsNum(file2Id, file1Id) +
+							couplingRepository.queryTwoFilesDependsByVariablesNum(file2Id, file1Id);
+					int funcAndVarNumBBtoA = couplingRepository.queryTwoFilesDependsOnFunctionsNum(file2Id, file1Id) +
+							couplingRepository.queryTwoFilesDependsOnVariablesNum(file2Id, file1Id);
 
 					DependsOn dependsOnAtoB = dependsOnRepository.findDependsOnBetweenFiles(file1Id, file2Id);
 					DependsOn dependsOnBtoA = dependsOnRepository.findDependsOnBetweenFiles(file2Id, file1Id);
@@ -943,17 +949,18 @@ public class BeanCreator {
 					}
 
 					if(dependsOntimesAtoB != 0 || dependsOntimesBtoA != 0) {
-						double C_AtoB = couplingService.calC1to2(funcNumAAtoB,funcNumBAtoB);
-						double C_BtoA = couplingService.calC1to2(funcNumABtoA,funcNumBBtoA);
+						double C_AtoB = couplingService.calC1to2(funcAndVarNumAAtoB,funcAndVarNumBAtoB);
+						double C_BtoA = couplingService.calC1to2(funcAndVarNumABtoA,funcAndVarNumBBtoA);
 						double C_AandB = couplingService.calC(C_AtoB, C_BtoA);
 						double U_AtoB = couplingService.calU1to2(dependsOntimesAtoB, dependsOntimesBtoA);
 						double U_BtoA = couplingService.calU1to2(dependsOntimesBtoA, dependsOntimesAtoB);
 						double I_AandB = couplingService.calI(dependsOntimesAtoB, dependsOntimesBtoA);
 						double disp_AandB = couplingService.calDISP(C_AandB, dependsOntimesAtoB, dependsOntimesBtoA);
-						double dist = 1.0 / Math.log(I_AandB + 1);
+//						double dist = 1.0 / Math.log(I_AandB + 1);
+						double dist = 1.0 / (C_AandB + I_AandB);
 
 						couplingsTmp.add(new Coupling(dependsOn.getStartNode(), dependsOn.getEndNode(), dependsOnAtoB,dependsOnBtoA,
-								funcNumAAtoB, funcNumBAtoB, funcNumABtoA, funcNumBBtoA, dependsOntimesAtoB, dependsOntimesBtoA,
+								funcAndVarNumAAtoB, funcAndVarNumBAtoB, funcAndVarNumABtoA, funcAndVarNumBBtoA, dependsOntimesAtoB, dependsOntimesBtoA,
 								C_AtoB, C_BtoA, C_AandB, U_AtoB, U_BtoA, I_AandB, disp_AandB, dist));
 					}
 				}
@@ -972,7 +979,7 @@ public class BeanCreator {
 												 ClusterContainRepository clusterContainRepository,
 												 CouplingRepository couplingRepository,
 												 ProjectFileRepository projectFileRepository){
-		int clusterNum = 5;
+		int clusterNum = 7;
 
 		if (!propertyConfig.isSetHierarchicalCluster()) {
 			return new ArrayList<>();
@@ -1054,8 +1061,9 @@ public class BeanCreator {
 					List<HierarchicalCluster> tmpClusterList = new ArrayList<>();
 
 					for(List<ProjectFile> list: clusters){
+						boolean isTopLevel = i == clusterNum - 1;
 						HierarchicalCluster tmpCluster = new HierarchicalCluster(
-								"hierarchicalCluster_" + i + "_" + indexTmp, 0, false);
+								"hierarchicalCluster_" + i + "_" + indexTmp, 0, isTopLevel);
 						hierarchicalClustersTmp.add(tmpCluster);
 						tmpClusterList.add(tmpCluster);
 						int formalIndex = 0;
