@@ -224,7 +224,7 @@ function unfoldPkg() {
         present_packages.forEach(node => {
             let flag = true;
             selected_packages.forEach(node2 => {
-                if(node === node2){
+                if(node._cfg.id === node2._cfg.id){
                     flag = false;
                 }
             })
@@ -968,16 +968,19 @@ function loadEdgeTable1() {
         table.on('toolbar(edge1)', function (obj){
             let checkStatus = table.checkStatus(obj.config.id);
             if (obj.event === 'filterCheckEdges') {
+                selected_packages = [];
+                present_packages = [];
                 const data = checkStatus.data;
                 if (data.length !== 0) {
                     let showEdgesSet = new Set();
                     let showNodesSet = new Set();
                     data.forEach(item => {
                         showEdgesSet.add(item.id);
-                        const sourceNode = graph.findById(item.id)._cfg.source._cfg.id;
-                        const targetNode = graph.findById(item.id)._cfg.target._cfg.id;
-                        showNodesSet.add(sourceNode);
-                        showNodesSet.add(targetNode);
+                        const sourceNode = graph.findById(item.id)._cfg.source;
+                        const targetNode = graph.findById(item.id)._cfg.target;
+                        selected_packages.push(sourceNode, targetNode);
+                        showNodesSet.add(sourceNode._cfg.id);
+                        showNodesSet.add(targetNode._cfg.id);
                     });
                     graph.getEdges().forEach(edge => {
                         if (!showEdgesSet.has(edge._cfg.id)) {
@@ -1077,6 +1080,8 @@ function loadNodeTable1() {
             let checkStatus = table.checkStatus(obj.config.id);
             if (obj.event === 'filterCheckEdges') {
                 const data = checkStatus.data;
+                selected_packages = [];
+                present_packages = [];
                 if (data.length !== 0) {
                     let showNodesSet = new Set();
                     data.forEach(item => {
@@ -1085,6 +1090,7 @@ function loadNodeTable1() {
                         showNodesSet.add(item.id);
                         neighbors.forEach(n => {
                            showNodesSet.add(n._cfg.model.id);
+                           selected_packages.push(n);
                         });
                     });
                     graph.getEdges().forEach(edge => {
