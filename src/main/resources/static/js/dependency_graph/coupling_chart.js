@@ -1006,22 +1006,34 @@ function loadEdgeTable1() {
 }
 function loadNodeTable1() {
     graph.getNodes().forEach(node => {
-        let nof = 0;
         if (node._cfg.model.nodeType === 'package') {
+            let nof = 0;
             nof = node._cfg.model.NOF;
+            let res = getNodeOneStepDetail(node);
+            node_table1_data.push({
+                id: node._cfg.id,
+                name: node._cfg.model.name,
+                NOF: nof,
+                LOC: node._cfg.model.LOC,
+                nodeType: node._cfg.model.nodeType,
+                I: res["I"],
+                D: res["D"],
+                C: res["C"],
+                unfoldable: res["unfoldable"],
+            });
+        } else {
+            node_table1_data.push({
+                id: node._cfg.id,
+                name: node._cfg.model.name,
+                NOF: NaN,
+                LOC: node._cfg.model.LOC,
+                nodeType: node._cfg.model.nodeType,
+                I: NaN,
+                D: NaN,
+                C: NaN,
+                unfoldable: false,
+            });
         }
-        let res = getNodeOneStepDetail(node);
-        node_table1_data.push({
-            id: node._cfg.id,
-            name: node._cfg.model.name,
-            NOF: nof,
-            LOC: node._cfg.model.LOC,
-            nodeType: node._cfg.model.nodeType,
-            I: res["I"],
-            D: res["D"],
-            C: res["C"],
-            unfoldable: res["unfoldable"],
-        });
     });
     layui.use('table', function(){
         const table = layui.table;
