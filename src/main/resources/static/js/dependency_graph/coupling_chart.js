@@ -14,7 +14,7 @@ let Isum = 0.0;
 let Imax = 0.0;
 let Imin = 10000.0;
 let current_panel = 'D';
-let I75 = 0.0;
+let I90 = 0.0;
 let data = {};
 let selected_packages = [];
 let present_packages = [];
@@ -1164,9 +1164,9 @@ function loadPanel(){
             Dmax = Math.max(Dmax, edge._cfg.model.D);
             Dmin = Math.min(Dmin, edge._cfg.model.D);
         })
-        IList.sort();
+        IList.sort(function(a,b){return a - b});
         DList.sort(function(a,b){return a - b});
-        I75 = IList[parseInt(IList.length * 0.75)];
+        I90 = IList[parseInt(IList.length * 0.9)];
 
         // html += "<p>耦合强度(I) 平均值：" + (Isum / edges.length).toFixed(3) + "</p>";
         // html += "<p>耦合强度(I) max：" + Imax.toFixed(3) + "</p>";
@@ -1233,9 +1233,9 @@ function switchDataPanel() {
 }
 function handleEdgesWidth(){
     graph.getEdges().forEach(edge => {
-        if(edge._cfg.model.I >= 1){
+        if(edge._cfg.model.I >= I90){
             edge.update(HIGH_INTENSITY_EDGE_MODEL);
-        }else if(edge._cfg.model.I < I75){
+        }else {
             edge.update(LOW_INTENSITY_EDGE_MODEL);
         }
     })
