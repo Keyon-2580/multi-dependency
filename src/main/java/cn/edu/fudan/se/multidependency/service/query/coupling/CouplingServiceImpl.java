@@ -351,6 +351,7 @@ public class CouplingServiceImpl implements CouplingService {
             tmpPck.put("name", pckName);
             tmpPck.put("NOF", pckContainsFilesNum);
             tmpPck.put("LOC", pckContainsFilesLOC);
+            tmpPck.put("LooseDegree", pck.getLooseDegree());
             tmpPck.put("label", pckName);
             tmpPck.put("parentPckId", parentPackage.getId().toString());
             tmpPck.put("nodeType", "package");

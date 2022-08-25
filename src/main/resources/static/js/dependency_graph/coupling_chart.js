@@ -316,6 +316,9 @@ const tooltip = new G6.Tooltip({
               </ul>
               <ul>
                 <li>instability: ${e.item.getModel().instability}</li>
+              </ul>
+              <ul>
+                <li>Loose Degree: ${e.item.getModel().LooseDegree}</li>
               </ul>`;
             }
         }else if(e.item._cfg.type === "edge"){

@@ -60,6 +60,8 @@ public class Coupling implements Relation{
 
 	private double dist;
 
+	private int clusterDist;
+
 	private String dependsOnTypeStartToEnd = "";
 
 	private String dependsOnTypeEndToStart = "";

@@ -9,13 +9,11 @@ import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.node.hierarchical_clustering.HierarchicalClusterRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.coupling.CouplingRepository;
+import org.bouncycastle.util.Pack;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Service
@@ -28,41 +26,36 @@ public class HierarchicalClusteringServiceImpl implements HierarchicalClustering
     ContainRepository containRepository;
 
     @Autowired
+    CouplingRepository couplingRepository;
+
+    @Autowired
     HierarchicalClusterRepository hierarchicalClusterRepository;
 
     @Override
-    public void calPackageComplexityByCluster(long packageId) {
-        List<ProjectFile> allFiles = containRepository.findPackageContainAllFiles(packageId);
-        Map<HierarchicalCluster, List<ProjectFile>> clusterMap = new HashMap<>();
-        List<HierarchicalCluster> clusterList = new ArrayList<>();
+    public double calPackageComplexityByCluster(long packageId) {
+        Package pck = packageRepository.findPackageById(packageId);
+        int allFilesNum = containRepository.findPackageContainAllFilesNum(packageId);
+        List<Coupling> inCouplings = couplingRepository.queryAllCouplingsWithinPackage(packageId);
+        int inPackageCouplingFileNum = couplingRepository.queryAllCouplingsWithinPackageFilesNum(packageId);
+        int outPackageCouplingFileNum = couplingRepository.queryAllCouplingsOutOfPackageFilesNum(packageId);
+        double clusterDistAvg = 0.0;
+        double looseDegree;
 
-        for(ProjectFile projectFile: allFiles){
-            HierarchicalCluster zeroLevelCluster = hierarchicalClusterRepository.findClusterContainFiles(projectFile.getId());
-            if(zeroLevelCluster != null){
-                if(!clusterList.contains(zeroLevelCluster)) clusterList.add(zeroLevelCluster);
-
-                if(!clusterMap.containsKey(zeroLevelCluster)){
-                    List<ProjectFile> tmpList = new ArrayList<>();
-                    tmpList.add(projectFile);
-                    clusterMap.put(zeroLevelCluster, tmpList);
-                }else{
-                    clusterMap.get(zeroLevelCluster).add(projectFile);
-                }
-            }
+        for(Coupling coupling: inCouplings){
+            clusterDistAvg += coupling.getClusterDist();
         }
 
-        HierarchicalCluster maxCluster = clusterList.get(0);
-        for(HierarchicalCluster hierarchicalCluster: clusterList){
-            if(clusterMap.get(hierarchicalCluster).size() > clusterMap.get(maxCluster).size()){
-                maxCluster = hierarchicalCluster;
-            }
+        clusterDistAvg = clusterDistAvg / inCouplings.size();
+        if(inPackageCouplingFileNum == 0){
+            looseDegree = -1;
+        }else{
+            looseDegree = (allFilesNum / (double) inPackageCouplingFileNum + (double) outPackageCouplingFileNum / allFilesNum)
+                    * Math.log(clusterDistAvg);
         }
-
-        for(HierarchicalCluster hierarchicalCluster: clusterMap.keySet()){
-            if(!hierarchicalCluster.equals(maxCluster)){
-                System.out.println(
-                        hierarchicalClusterRepository.calDistanceBetweenClusters(hierarchicalCluster.getId(), maxCluster.getId()));
-            }
-        }
+        packageRepository.setPackageLooseDegree(pck.getId(), looseDegree);
+//        System.out.print(pck.getDirectoryPath() + "  ");
+//        System.out.println(looseDegree);
+        return looseDegree;
     }
+
 }
