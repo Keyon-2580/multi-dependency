@@ -475,12 +475,12 @@ public class CouplingServiceImpl implements CouplingService {
             tmpEdge.put("dependsOnNum", dependsOnBetweenPackages.get(map).size());
             tmpEdge.put("C", String.format("%.2f",fileHMean));
             if (DBtoA != 0) {
-                double logD = Math.log10(DBtoA);
+                double logD = Math.max(0, Math.log10(DBtoA));
                 tmpEdge.put("D", logD);
                 DSum += logD;
             }
             else {
-                double logD = Math.log10(DAtoB);
+                double logD = Math.max(0, Math.log10(DAtoB));
                 tmpEdge.put("D", logD);
                 DSum += logD;
             }

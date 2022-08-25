@@ -104,15 +104,18 @@ public class BeanCreator {
 			LOGGER.info("Nodes已存在");
 			return false;
 		}
-		String databasesPath = propertyConfig.getDatabaseDir() + "/" + GraphDatabaseSettings.DEFAULT_DATABASES_ROOT_DIR_NAME +
-				"/" + propertyConfig.getDatabaseName();
-		String transactionsPath = propertyConfig.getDatabaseDir() + "/"
-				+ GraphDatabaseSettings.DEFAULT_TX_LOGS_ROOT_DIR_NAME
-				+ "/" + propertyConfig.getDatabaseName();
-		LOGGER.info("数据库文件夹：" + databasesPath);
-		LOGGER.info("事务文件夹：" + transactionsPath);
-		LOGGER.info("清理数据库");
-		FileUtil.delFile(new File(databasesPath));
+		if (!propertyConfig.isInsertNodes()) {
+			return false;
+		}
+//		String databasesPath = propertyConfig.getDatabaseDir() + "/" + GraphDatabaseSettings.DEFAULT_DATABASES_ROOT_DIR_NAME +
+//				"/" + propertyConfig.getDatabaseName();
+//		String transactionsPath = propertyConfig.getDatabaseDir() + "/"
+//				+ GraphDatabaseSettings.DEFAULT_TX_LOGS_ROOT_DIR_NAME
+//				+ "/" + propertyConfig.getDatabaseName();
+//		LOGGER.info("数据库文件夹：" + databasesPath);
+//		LOGGER.info("事务文件夹：" + transactionsPath);
+//		LOGGER.info("清理数据库");
+//		FileUtil.delFile(new File(databasesPath));
 //		FileUtil.delFile(new File(transactionsPath));
 //		FileUtil.delFile(new File(databasesPath));
 //		FileUtil.delFile(new File(transactionsPath));

@@ -189,6 +189,12 @@ function getNodeOneStepDetail(node) {
                     DList.push(edge.D);
                     CList.push(parseFloat(edge.C));
                 })
+                if (edges.length === 0) {
+                    statistics.I = 0;
+                    statistics.D = 0;
+                    statistics.C = 0;
+                    return statistics;
+                }
                 const DP90 = DList[parseInt(DList.length * 0.9)].toFixed(3);
                 const IP90 = IList[parseInt(IList.length * 0.9)].toFixed(3);
                 const CP90 = IList[parseInt(CList.length * 0.9)].toFixed(3);
@@ -427,7 +433,7 @@ const toolbar = new G6.ToolBar({
 
                 selected_packages.length = 0;
 
-                loadPanel();
+                loadPanel(false);
             }
         }else if(code === 'unfoldFile'){
             let json = {};
@@ -442,7 +448,7 @@ const toolbar = new G6.ToolBar({
                 }
             })
             if (pckIds.length === 0) {
-                layer.msg("错误！已无法再展开！");
+                layer.msg("当前未选中节点！");
                 return;
             }
             showLoadingWindow("加载中...");
@@ -929,6 +935,18 @@ function savePresentNodes(){
 }
 
 function loadEdgeTable1() {
+    edge_table1_data.splice(0, edge_table1_data.length);
+    graph.getEdges().forEach(edge => {
+        edge_table1_data.push({
+            id: edge._cfg.id,
+            obj1: edge._cfg.source._cfg.model.name,
+            obj2: edge._cfg.target._cfg.model.name,
+            I: parseFloat(edge._cfg.model.I),
+            D: parseFloat(edge._cfg.model.D),
+            C: parseFloat(edge._cfg.model.C),
+            reversed: isEdgeReversed(edge)
+        });
+    });
     layui.use('table', function(){
         const table = layui.table;
         table.render({
@@ -994,20 +1012,17 @@ function loadEdgeTable1() {
                             node.hide();
                     });
                     graph.paint();
+                    layer.msg("操作完成");
                 }
             }
             if (obj.event === 'reset') {
-                graph.getEdges().forEach(edge => {
-                    edge.show();
-                });
-                graph.getNodes().forEach(node => {
-                    node.show();
-                });
+                graphShowAll();
             }
         });
     });
 }
 function loadNodeTable1() {
+    node_table1_data.splice(0, node_table1_data.length);
     graph.getNodes().forEach(node => {
         if (node._cfg.model.nodeType === 'package') {
             let nof = 0;
@@ -1024,6 +1039,12 @@ function loadNodeTable1() {
                 C: res["C"],
                 unfoldable: res["unfoldable"],
             });
+            if (!res["unfoldable"]) {
+                let model = node._cfg.model;
+                model.style.stroke = 'rgb(0,128,0)';
+                model.style.lineWidth = 2.0;
+                graph.updateItem(node, model, false);
+            }
         } else {
             node_table1_data.push({
                 id: node._cfg.id,
@@ -1086,13 +1107,15 @@ function loadNodeTable1() {
                     let showNodesSet = new Set();
                     data.forEach(item => {
                         const node = graph.findById(item.id);
+                        selected_packages.push(node);
                         const neighbors = graph.getNeighbors(node);
                         showNodesSet.add(item.id);
                         neighbors.forEach(n => {
                            showNodesSet.add(n._cfg.model.id);
-                           selected_packages.push(n);
                         });
                     });
+                    console.log("after filtering nodes:");
+                    console.log(selected_packages);
                     graph.getEdges().forEach(edge => {
                         if (!showNodesSet.has(edge._cfg.source._cfg.id)
                             || !showNodesSet.has(edge._cfg.target._cfg.id)) {
@@ -1104,20 +1127,27 @@ function loadNodeTable1() {
                             node.hide();
                     });
                     graph.paint();
+                    layer.msg("操作完成");
                 }
             }
             if (obj.event === 'reset') {
-                graph.getEdges().forEach(edge => {
-                    edge.show();
-                });
-                graph.getNodes().forEach(node => {
-                    node.show();
-                });
+                graphShowAll();
             }
         });
     });
 }
-function loadPanel(){
+function graphShowAll() {
+    graph.getEdges().forEach(edge => {
+        edge.show();
+    });
+    graph.getNodes().forEach(node => {
+        node.show();
+    });
+    selected_packages.splice(0, selected_packages.length);
+    present_packages.splice(0, present_packages.length);
+    layer.msg("操作完成");
+}
+function loadPanel(loadBtmTables){
     let html0 = "";
     let html1 = "";
     let html2 = "";
@@ -1148,19 +1178,17 @@ function loadPanel(){
 
     html0 += "<p>代码行数：" + LOC + "</p>";
     html0 += "<br />";
-    edge_table1_data.splice(0, edge_table1_data.length);
-    node_table1_data.splice(0, node_table1_data.length);
     if(edges.length > 0){
         edges.forEach(edge => {
-            edge_table1_data.push({
-                id: edge._cfg.id,
-                obj1: edge._cfg.source._cfg.model.name,
-                obj2: edge._cfg.target._cfg.model.name,
-                I: parseFloat(edge._cfg.model.I),
-                D: parseFloat(edge._cfg.model.D),
-                C: parseFloat(edge._cfg.model.C),
-                reversed: isEdgeReversed(edge)
-            });
+            // edge_table1_data.push({
+            //     id: edge._cfg.id,
+            //     obj1: edge._cfg.source._cfg.model.name,
+            //     obj2: edge._cfg.target._cfg.model.name,
+            //     I: parseFloat(edge._cfg.model.I),
+            //     D: parseFloat(edge._cfg.model.D),
+            //     C: parseFloat(edge._cfg.model.C),
+            //     reversed: isEdgeReversed(edge)
+            // });
             IList.push(edge._cfg.model.I);
             DList.push(edge._cfg.model.D);
             Isum += edge._cfg.model.I;
@@ -1203,8 +1231,10 @@ function loadPanel(){
     $("#data_panel0").html(html0);
     $("#data_panel1").html(html1);
     $("#data_panel2").html(html2);
-    loadEdgeTable1();
-    loadNodeTable1();
+    if (loadBtmTables) {
+        loadEdgeTable1();
+        loadNodeTable1();
+    }
 }
 
 function switchDataPanel() {
@@ -1254,7 +1284,7 @@ function loadGraph(){
     handleReverseEdgesAndExtends();
     levelLayoutAdjust();
     savePresentNodes();
-    loadPanel();
+    loadPanel(true);
     handleEdgesWidth();
     closeLoadingWindow();
 }
@@ -1276,7 +1306,7 @@ graph.on('node:dragend', evt => {
             }
         }
     })
-    loadPanel();
+    // loadPanel(false);
 })
 
 // graph.on('nodeselectchange', (e) => {
