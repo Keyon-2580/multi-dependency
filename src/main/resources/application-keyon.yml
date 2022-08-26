@@ -2,8 +2,8 @@ spring:
   data:
     neo4j:
       username: neo4j
-      password: admin
-      uri: bolt://10.176.34.96:7687
+      password: root
+      uri: bolt://127.0.0.1:7687
       #uri: bolt://10.176.34.86:9687
       #uri: bolt://10.176.34.83:7687
 
@@ -28,6 +28,7 @@ config:
     coupling: true
     package_depth: true
     export_cyclic_dependency: false
+
 
 data:
   project_analyse_threads_count: 20
