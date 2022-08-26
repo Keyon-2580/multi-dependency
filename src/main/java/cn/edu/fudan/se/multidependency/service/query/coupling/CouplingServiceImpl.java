@@ -128,7 +128,8 @@ public class CouplingServiceImpl implements CouplingService {
 
     @Override
     public double calI(long dependsOntimes1, long dependsOntimes2){
-        return (2 * ((double)dependsOntimes1 + 1) * ((double)dependsOntimes2 + 1)) / ((double)dependsOntimes1 + (double)dependsOntimes2 + 2) - 1;
+        return Math.sqrt(Math.pow(dependsOntimes1, 2) + Math.pow(dependsOntimes2, 2));
+//        return (2 * ((double)dependsOntimes1 + 1) * ((double)dependsOntimes2 + 1)) / ((double)dependsOntimes1 + (double)dependsOntimes2 + 2) - 1;
     }
 
     @Override
@@ -350,6 +351,7 @@ public class CouplingServiceImpl implements CouplingService {
             tmpPck.put("name", pckName);
             tmpPck.put("NOF", pckContainsFilesNum);
             tmpPck.put("LOC", pckContainsFilesLOC);
+            tmpPck.put("LooseDegree", pck.getLooseDegree());
             tmpPck.put("label", pckName);
             tmpPck.put("parentPckId", parentPackage.getId().toString());
             tmpPck.put("nodeType", "package");
@@ -472,14 +474,14 @@ public class CouplingServiceImpl implements CouplingService {
             tmpEdge.put("I", calI(DAtoB, DBtoA));
             tmpEdge.put("dist", dist / distSum);
             tmpEdge.put("dependsOnNum", dependsOnBetweenPackages.get(map).size());
-            tmpEdge.put("fileNumHMean", String.format("%.2f",fileHMean));
+            tmpEdge.put("C", String.format("%.2f",fileHMean));
             if (DBtoA != 0) {
-                double logD = Math.log10(DBtoA);
+                double logD = Math.max(0, Math.log10(DBtoA));
                 tmpEdge.put("D", logD);
                 DSum += logD;
             }
             else {
-                double logD = Math.log10(DAtoB);
+                double logD = Math.max(0, Math.log10(DAtoB));
                 tmpEdge.put("D", logD);
                 DSum += logD;
             }

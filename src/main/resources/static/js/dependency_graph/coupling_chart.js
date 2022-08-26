@@ -3,14 +3,26 @@ let show_edge_label = true;
 let show_panel_btm = false;
 let CHART_MODE = "package";
 const loading_div = $("#loading_div");
-let I75 = 0.0;
+let NOF = 0;
+let LOC = 0;
+let DList = [];
+let Dsum = 0.0;
+let Dmax = 0.0;
+let Dmin = 10000.0;
+let IList = [];
+let Isum = 0.0;
+let Imax = 0.0;
+let Imin = 10000.0;
+let current_panel = 'D';
+let I90 = 0.0;
 let data = {};
 let selected_packages = [];
 let present_packages = [];
 let data_stack = [];
 let search_node_stack = [];
 let edge_label_map = new Map();
-let current_path = '/';
+let edge_table1_data = [];
+let node_table1_data = [];
 const INSTABILITY_COLOR1 = "#642924";
 const INSTABILITY_COLOR2 = "#8B3830";
 const INSTABILITY_COLOR3 = "#B2463C";
@@ -62,22 +74,26 @@ function handleEdgeLabelDisplay() {
 }
 function handleResetSearchFile() {
     if (search_node_stack.length !== 0) {
-        data = search_node_stack.pop();
+        const nodeData = search_node_stack.pop();
+        let targetNode = graph.findById(nodeData.id);
+        let model = targetNode._cfg.model;
+        model.style.fill = nodeData.style;
+        graph.updateItem(targetNode, model, false);
         document.getElementById("file_name").value = '';
-        loadGraph();
     }
 }
 function handleSearchFile() {
     const fileName = document.getElementById("file_name").value.trim();
     const targetNode = graph.find('node', (node) => {
-        return node.get('model').label === fileName;
+        return node.get('model').label === fileName && node.get('visible') === true;
     });
     if (targetNode === undefined) {
         layer.msg("未找到文件"+fileName);
         return;
     }
     graph.focusItem(targetNode, true);
-    search_node_stack.push(graph.save());
+    // search_node_stack.push(graph.save());
+    search_node_stack.push({id: targetNode._cfg.id, style: targetNode._cfg.model.style.fill});
     let model = targetNode._cfg.model;
     model.style.fill = "#ffffff";
     graph.updateItem(targetNode, model, false);
@@ -135,7 +151,63 @@ function main() {
         }
     }
 }
+function getNodeOneStepDetail(node) {
+    let statistics = {
+        I: 0,
+        D: 0,
+        C: 0,
+        unfoldable: true
+    };
+    let json = {};
+    let unfoldPcks = [];
+    let otherPcks = [];
+    if (node._cfg.model.nodeType === "package") {
+        unfoldPcks.push({
+            "id": node._cfg.id,
+            "instability": node._cfg.model.instability
+        })
+    }
+    json["unfoldPcks"] = unfoldPcks;
+    json["otherPcks"] = otherPcks;
+    $.ajax({
+        async: false,
+        url: "/coupling/group/one_step_child_packages",
+        type: "POST",
+        contentType: "application/json",
+        dataType: "json",
+        data: JSON.stringify(json),
 
+        success: function (result) {
+            if(result["code"] === 200){
+                statistics.unfoldable = true;
+                const edges = result["edges"];
+                let IList = [];
+                let DList = [];
+                let CList = [];
+                edges.forEach(edge => {
+                    IList.push(edge.I);
+                    DList.push(edge.D);
+                    CList.push(parseFloat(edge.C));
+                })
+                if (edges.length === 0) {
+                    statistics.I = 0;
+                    statistics.D = 0;
+                    statistics.C = 0;
+                    return statistics;
+                }
+                const DP90 = DList[parseInt(DList.length * 0.9)].toFixed(3);
+                const IP90 = IList[parseInt(IList.length * 0.9)].toFixed(3);
+                const CP90 = IList[parseInt(CList.length * 0.9)].toFixed(3);
+                statistics.I = parseFloat(IP90);
+                statistics.D = parseFloat(DP90);
+                statistics.C = parseFloat(CP90);
+            }else if(result["code"] === -1){
+                statistics.unfoldable = false;
+            }
+        }
+    });
+    return statistics;
+}
 function unfoldPkg() {
     if(selected_packages.length === 0){
         layer.msg("当前未选中节点！");
@@ -158,7 +230,7 @@ function unfoldPkg() {
         present_packages.forEach(node => {
             let flag = true;
             selected_packages.forEach(node2 => {
-                if(node === node2){
+                if(node._cfg.id === node2._cfg.id){
                     flag = false;
                 }
             })
@@ -244,6 +316,9 @@ const tooltip = new G6.Tooltip({
               </ul>
               <ul>
                 <li>instability: ${e.item.getModel().instability}</li>
+              </ul>
+              <ul>
+                <li>Loose Degree: ${e.item.getModel().LooseDegree}</li>
               </ul>`;
             }
         }else if(e.item._cfg.type === "edge"){
@@ -256,10 +331,10 @@ const tooltip = new G6.Tooltip({
                         <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
                       </ul>
                       <ul>
-                        <li><b>fileNumHMean</b>: ${selectedEdge.fileNumHMean}</li>
+                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
                       </ul>
                       <ul>
-                        <li><b>D</b>: ${selectedEdge.D}</li>
+                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
                       </ul>
                       <ul>
                         <li><b>dist</b>: ${selectedEdge.dist}</li>
@@ -361,7 +436,7 @@ const toolbar = new G6.ToolBar({
 
                 selected_packages.length = 0;
 
-                loadPanel();
+                loadPanel(false);
             }
         }else if(code === 'unfoldFile'){
             let json = {};
@@ -376,7 +451,7 @@ const toolbar = new G6.ToolBar({
                 }
             })
             if (pckIds.length === 0) {
-                layer.msg("错误！已无法再展开！");
+                layer.msg("当前未选中节点！");
                 return;
             }
             showLoadingWindow("加载中...");
@@ -512,10 +587,10 @@ graph.on('edge:click', (e) => {
                         <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
                       </ul>
                       <ul>
-                        <li><b>fileNumHMean</b>: ${selectedEdge.fileNumHMean}</li>
+                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
                       </ul>
                       <ul>
-                        <li><b>D</b>: ${selectedEdge.D}</li>
+                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
                       </ul>                 
                       <ul>
                         <li><b>dist</b>: ${selectedEdge.dist}</li>
@@ -530,10 +605,10 @@ graph.on('edge:click', (e) => {
                         <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
                       </ul>
                       <ul>
-                        <li><b>D</b>: ${selectedEdge.D}</li>
+                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
                       </ul>
                       <ul>
-                        <li><b>C</b>: ${selectedEdge.C}</li>
+                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
                       </ul>       
                       <ul>
                         <li><b>dist</b>: ${selectedEdge.dist}</li>
@@ -728,7 +803,14 @@ function levelLayout(){
     graph.fitCenter();
     graph.fitView();
 }
-
+function isEdgeReversed(edge) {
+    const startLevel = edge._cfg.source._cfg.model.y;
+    const endLevel = edge._cfg.target._cfg.model.y;
+    if (startLevel > endLevel) {
+        return !edge._cfg.model.isExtendOrImplements;
+    }
+    return false;
+}
 function handleReverseEdgesAndExtends(){
     let edges = graph.getEdges();
     let nodes = graph.getNodes();
@@ -855,20 +937,235 @@ function savePresentNodes(){
     })
 }
 
-function loadPanel(){
-    let html = "";
+function loadEdgeTable1() {
+    edge_table1_data.splice(0, edge_table1_data.length);
+    graph.getEdges().forEach(edge => {
+        edge_table1_data.push({
+            id: edge._cfg.id,
+            obj1: edge._cfg.source._cfg.model.name,
+            obj2: edge._cfg.target._cfg.model.name,
+            I: parseFloat(edge._cfg.model.I),
+            D: parseFloat(edge._cfg.model.D),
+            C: parseFloat(edge._cfg.model.C),
+            reversed: isEdgeReversed(edge)
+        });
+    });
+    layui.use('table', function(){
+        const table = layui.table;
+        table.render({
+            elem: '#edge_table1'
+            ,defaultToolbar: []
+            ,toolbar: '#toolbarDemo'
+            ,autoSort: false
+            ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            ,cols: [[
+                {type:'checkbox'}
+                ,{field:'id', title: 'ID', sort: true}
+                ,{field:'obj1', title: '对象1'}
+                ,{field:'obj2', title: '对象2'}
+                ,{field:'I', title: '耦合强度', sort: true}
+                ,{field:'C', title: '依赖面耦合度', sort: true}
+                ,{field:'D', title: '依赖实例数', sort: true}
+                ,{field:'reversed',  title: '是否逆向', sort: true}
+            ]]
+            ,data: edge_table1_data
+            ,page: {
+                layout: ['count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                limit: 5
+            }
+        });
+        table.on('sort(edge1)', function (obj){
+            if (obj.type === 'asc') {
+                edge_table1_data.sort((a, b) => a[obj.field] - b[obj.field]);
+            } else if (obj.type === 'desc') {
+                edge_table1_data.sort((a, b) => b[obj.field] - a[obj.field]);
+            } else {
+
+            }
+            table.reload('edge_table1', {
+                data: edge_table1_data
+            });
+        });
+        table.on('toolbar(edge1)', function (obj){
+            let checkStatus = table.checkStatus(obj.config.id);
+            if (obj.event === 'filterCheckEdges') {
+                selected_packages = [];
+                present_packages = [];
+                const data = checkStatus.data;
+                if (data.length !== 0) {
+                    let showEdgesSet = new Set();
+                    let showNodesSet = new Set();
+                    data.forEach(item => {
+                        showEdgesSet.add(item.id);
+                        const sourceNode = graph.findById(item.id)._cfg.source;
+                        const targetNode = graph.findById(item.id)._cfg.target;
+                        selected_packages.push(sourceNode, targetNode);
+                        showNodesSet.add(sourceNode._cfg.id);
+                        showNodesSet.add(targetNode._cfg.id);
+                    });
+                    graph.getEdges().forEach(edge => {
+                        if (!showEdgesSet.has(edge._cfg.id)) {
+                            edge.hide();
+                        } else {
+
+                        }
+                    });
+                    graph.getNodes().forEach(node => {
+                        if (!showNodesSet.has(node._cfg.id))
+                            node.hide();
+                    });
+                    graph.paint();
+                    layer.msg("操作完成");
+                }
+            }
+            if (obj.event === 'reset') {
+                graphShowAll();
+            }
+        });
+    });
+}
+function loadNodeTable1() {
+    node_table1_data.splice(0, node_table1_data.length);
+    graph.getNodes().forEach(node => {
+        if (node._cfg.model.nodeType === 'package') {
+            let nof = 0;
+            nof = node._cfg.model.NOF;
+            let res = getNodeOneStepDetail(node);
+            node_table1_data.push({
+                id: node._cfg.id,
+                name: node._cfg.model.name,
+                NOF: nof,
+                LOC: node._cfg.model.LOC,
+                nodeType: node._cfg.model.nodeType,
+                I: res["I"],
+                D: res["D"],
+                C: res["C"],
+                unfoldable: res["unfoldable"],
+            });
+            if (!res["unfoldable"]) {
+                let model = node._cfg.model;
+                model.style.stroke = 'rgb(0,128,0)';
+                model.style.lineWidth = 2.0;
+                graph.updateItem(node, model, false);
+            }
+        } else {
+            node_table1_data.push({
+                id: node._cfg.id,
+                name: node._cfg.model.name,
+                NOF: NaN,
+                LOC: node._cfg.model.LOC,
+                nodeType: node._cfg.model.nodeType,
+                I: NaN,
+                D: NaN,
+                C: NaN,
+                unfoldable: false,
+            });
+        }
+    });
+    layui.use('table', function(){
+        const table = layui.table;
+        table.render({
+            elem: '#node_table1'
+            ,defaultToolbar: []
+            ,toolbar: '#toolbarDemo'
+            ,autoSort: false
+            ,cellMinWidth: 50 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            ,cols: [[
+                {type:'checkbox'}
+                ,{field:'id', title: 'ID', sort: true}
+                ,{field:'name', title: 'name'}
+                ,{field:'NOF', title: '文件数', sort: true}
+                ,{field:'LOC', title: '代码行数', sort: true}
+                ,{field:'nodeType', title: '节点类型', sort: true}
+                ,{field:'I', title: '依赖强度90分位值', sort: true}
+                ,{field:'D', title: '依赖实例数90分位值', sort: true}
+                ,{field:'C', title: '依赖面耦合度90分位值', sort: true}
+                ,{field:'unfoldable', title: '可展开', sort: true}
+            ]]
+            ,data: node_table1_data
+            ,page: {
+                layout: ['count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                limit: 5
+            }
+        });
+        table.on('sort(node1)', function (obj){
+            if (obj.type === 'asc') {
+                node_table1_data.sort((a, b) => a[obj.field] - b[obj.field]);
+            } else if (obj.type === 'desc') {
+                node_table1_data.sort((a, b) => b[obj.field] - a[obj.field]);
+            } else {
+
+            }
+            table.reload('node_table1', {
+                data: node_table1_data
+            });
+        });
+        table.on('toolbar(node1)', function (obj){
+            let checkStatus = table.checkStatus(obj.config.id);
+            if (obj.event === 'filterCheckEdges') {
+                const data = checkStatus.data;
+                selected_packages = [];
+                present_packages = [];
+                if (data.length !== 0) {
+                    let showNodesSet = new Set();
+                    data.forEach(item => {
+                        const node = graph.findById(item.id);
+                        selected_packages.push(node);
+                        const neighbors = graph.getNeighbors(node);
+                        showNodesSet.add(item.id);
+                        neighbors.forEach(n => {
+                           showNodesSet.add(n._cfg.model.id);
+                        });
+                    });
+                    console.log("after filtering nodes:");
+                    console.log(selected_packages);
+                    graph.getEdges().forEach(edge => {
+                        if (!showNodesSet.has(edge._cfg.source._cfg.id)
+                            || !showNodesSet.has(edge._cfg.target._cfg.id)) {
+                            edge.hide();
+                        }
+                    });
+                    graph.getNodes().forEach(node => {
+                        if (!showNodesSet.has(node._cfg.id))
+                            node.hide();
+                    });
+                    graph.paint();
+                    layer.msg("操作完成");
+                }
+            }
+            if (obj.event === 'reset') {
+                graphShowAll();
+            }
+        });
+    });
+}
+function graphShowAll() {
+    graph.getEdges().forEach(edge => {
+        edge.show();
+    });
+    graph.getNodes().forEach(node => {
+        node.show();
+    });
+    selected_packages.splice(0, selected_packages.length);
+    present_packages.splice(0, present_packages.length);
+    layer.msg("操作完成");
+}
+function loadPanel(loadBtmTables){
+    let html0 = "";
+    let html1 = "";
+    let html2 = "";
     let nodes = graph.getNodes();
     let edges = graph.getEdges();
     let NOF = 0;
     let LOC = 0;
-    let DList = [];
-    let Dsum = 0.0;
-    let Dmax = 0.0;
-    let Dmin = 10000.0;
-    let IList = [];
-    let Isum = 0.0;
-    let Imax = 0.0;
-    let Imin = 10000.0;
+    DList = [];
+    Dsum = 0.0;
+    Dmax = 0.0;
+    Dmin = 10000.0;
+    IList = [];
+    Isum = 0.0;
+    Imax = 0.0;
+    Imin = 10000.0;
 
     nodes.forEach(node => {
         NOF += node._cfg.model.NOF;
@@ -876,16 +1173,25 @@ function loadPanel(){
     })
 
     if(CHART_MODE === "package"){
-        html += "<p>包数：" + nodes.length + "</p>";
-        html += "<p>文件数：" + NOF + "</p>";
+        html0 += "<p>包数：" + nodes.length + "</p>";
+        html0 += "<p>文件数：" + NOF + "</p>";
     }else if(CHART_MODE === "file"){
-        html += "<p>文件数：" + nodes.length + "</p>";
+        html0 += "<p>文件数：" + nodes.length + "</p>";
     }
 
-    html += "<p>代码行数：" + LOC + "</p>";
-    html += "<br />";
+    html0 += "<p>代码行数：" + LOC + "</p>";
+    html0 += "<br />";
     if(edges.length > 0){
         edges.forEach(edge => {
+            // edge_table1_data.push({
+            //     id: edge._cfg.id,
+            //     obj1: edge._cfg.source._cfg.model.name,
+            //     obj2: edge._cfg.target._cfg.model.name,
+            //     I: parseFloat(edge._cfg.model.I),
+            //     D: parseFloat(edge._cfg.model.D),
+            //     C: parseFloat(edge._cfg.model.C),
+            //     reversed: isEdgeReversed(edge)
+            // });
             IList.push(edge._cfg.model.I);
             DList.push(edge._cfg.model.D);
             Isum += edge._cfg.model.I;
@@ -895,9 +1201,9 @@ function loadPanel(){
             Dmax = Math.max(Dmax, edge._cfg.model.D);
             Dmin = Math.min(Dmin, edge._cfg.model.D);
         })
-        IList.sort();
+        IList.sort(function(a,b){return a - b});
         DList.sort(function(a,b){return a - b});
-        I75 = IList[parseInt(IList.length * 0.75)];
+        I90 = IList[parseInt(IList.length * 0.9)];
 
         // html += "<p>耦合强度(I) 平均值：" + (Isum / edges.length).toFixed(3) + "</p>";
         // html += "<p>耦合强度(I) max：" + Imax.toFixed(3) + "</p>";
@@ -909,7 +1215,48 @@ function loadPanel(){
         // html += "<p>耦合强度(I) 25分位值(Q1)：" + IList[parseInt(IList.length * 0.25)].toFixed(3) + "</p>";
         // html += "<p>耦合强度(I) min：" + Imin.toFixed(3) + "</p>";
         // html += "<br />";
-        html += "<p>依赖实例数(D) 平均值：" + (Dsum / edges.length).toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) 平均值：" + (Dsum / edges.length).toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) max：" + Dmax.toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) 90分位值：" + DList[parseInt(DList.length * 0.9)].toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) 85分位值：" + DList[parseInt(DList.length * 0.85)].toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) 80分位值：" + DList[parseInt(DList.length * 0.8)].toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) 75分位值(Q3)：" + DList[parseInt(DList.length * 0.75)].toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) 中位值(Q2)：" + DList[parseInt(DList.length * 0.5)].toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) 25分位值(Q1)：" + DList[parseInt(DList.length * 0.25)].toFixed(3) + "</p>";
+        html1 += "<p>依赖实例数(D) min：" + Dmin.toFixed(3) + "</p>";
+        html1 += "<br />";
+
+        let reverseNum = graph.findAllByState("edge", "reverse").length;
+        html2 += "<p>逆向依赖数：" + reverseNum + "</p>";
+        html2 += "<p>总依赖数：" + edges.length + "</p>";
+        html2 += "<p>逆向依赖数 / 总依赖数：" + (reverseNum / edges.length).toFixed(3) + "</p>";
+    }
+    $("#data_panel0").html(html0);
+    $("#data_panel1").html(html1);
+    $("#data_panel2").html(html2);
+    if (loadBtmTables) {
+        loadEdgeTable1();
+        loadNodeTable1();
+    }
+}
+
+function switchDataPanel() {
+    let html = "";
+    const len = graph.getEdges().length;
+    if (current_panel === 'D') {
+        html += "<p>耦合强度(I) 平均值：" + (Isum / len).toFixed(3) + "</p>";
+        html += "<p>耦合强度(I) max：" + Imax.toFixed(3) + "</p>";
+        html += "<p>耦合强度(I) 90分位值：" + IList[parseInt(IList.length * 0.9)].toFixed(3) + "</p>";
+        html += "<p>耦合强度(I) 85分位值：" + IList[parseInt(IList.length * 0.85)].toFixed(3) + "</p>";
+        html += "<p>耦合强度(I) 80分位值：" + IList[parseInt(IList.length * 0.8)].toFixed(3) + "</p>";
+        html += "<p>耦合强度(I) 75分位值(Q3)：" + IList[parseInt(IList.length * 0.75)].toFixed(3) + "</p>";
+        html += "<p>耦合强度(I) 中位值(Q2)：" + IList[parseInt(IList.length * 0.5)].toFixed(3) + "</p>";
+        html += "<p>耦合强度(I) 25分位值(Q1)：" + IList[parseInt(IList.length * 0.25)].toFixed(3) + "</p>";
+        html += "<p>耦合强度(I) min：" + Imin.toFixed(3) + "</p>";
+        html += "<br />";
+        current_panel = 'I';
+    } else {
+        html += "<p>依赖实例数(D) 平均值：" + (Dsum / len).toFixed(3) + "</p>";
         html += "<p>依赖实例数(D) max：" + Dmax.toFixed(3) + "</p>";
         html += "<p>依赖实例数(D) 90分位值：" + DList[parseInt(DList.length * 0.9)].toFixed(3) + "</p>";
         html += "<p>依赖实例数(D) 85分位值：" + DList[parseInt(DList.length * 0.85)].toFixed(3) + "</p>";
@@ -919,20 +1266,15 @@ function loadPanel(){
         html += "<p>依赖实例数(D) 25分位值(Q1)：" + DList[parseInt(DList.length * 0.25)].toFixed(3) + "</p>";
         html += "<p>依赖实例数(D) min：" + Dmin.toFixed(3) + "</p>";
         html += "<br />";
-
-        let reverseNum = graph.findAllByState("edge", "reverse").length;
-        html += "<p>逆向依赖数：" + reverseNum + "</p>";
-        html += "<p>总依赖数：" + edges.length + "</p>";
-        html += "<p>逆向依赖数 / 总依赖数：" + (reverseNum / edges.length).toFixed(3) + "</p>";
+        current_panel = 'D';
     }
-    $("#data_panel").html(html);
+    $("#data_panel1").html(html);
 }
-
 function handleEdgesWidth(){
     graph.getEdges().forEach(edge => {
-        if(edge._cfg.model.I >= 1){
+        if(edge._cfg.model.I >= I90){
             edge.update(HIGH_INTENSITY_EDGE_MODEL);
-        }else if(edge._cfg.model.I < I75){
+        }else {
             edge.update(LOW_INTENSITY_EDGE_MODEL);
         }
     })
@@ -945,7 +1287,7 @@ function loadGraph(){
     handleReverseEdgesAndExtends();
     levelLayoutAdjust();
     savePresentNodes();
-    loadPanel();
+    loadPanel(true);
     handleEdgesWidth();
     closeLoadingWindow();
 }
@@ -967,7 +1309,7 @@ graph.on('node:dragend', evt => {
             }
         }
     })
-    loadPanel();
+    // loadPanel(false);
 })
 
 // graph.on('nodeselectchange', (e) => {
@@ -999,35 +1341,3 @@ if (typeof window !== 'undefined')
         graph.changeSize(container.scrollWidth, container.scrollHeight);
     };
 
-layui.use('table', function(){
-    const table = layui.table;
-
-    table.render({
-        elem: '#edge_table1'
-        ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
-        ,cols: [[
-            {field:'obj1', title: '对象1'}
-            ,{field:'obj2', title: '对象2'}
-            ,{field:'couplingValue', title: '耦合强度', sort: true}
-            ,{field:'surface', title: '依赖面耦合度', sort: true}
-            ,{field:'reversed',  title: '是否逆向', sort: true}
-        ]]
-        ,data: [
-            {"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-            ,{"obj1": 1, "obj2": 2, "couplingValue": 1, "surface": 1, "reversed": 0}
-        ]
-        ,page: {
-            layout: ['count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
-            limit: 5
-        }
-    });
-});

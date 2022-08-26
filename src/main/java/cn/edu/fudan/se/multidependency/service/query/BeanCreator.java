@@ -12,6 +12,7 @@ import cn.edu.fudan.se.multidependency.model.relation.*;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
 import cn.edu.fudan.se.multidependency.model.relation.hierarchical_clustering.ClusterContain;
 import cn.edu.fudan.se.multidependency.repository.node.NodeRepository;
+import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectRepository;
 import cn.edu.fudan.se.multidependency.repository.node.git.CommitRepository;
 import cn.edu.fudan.se.multidependency.repository.node.hierarchical_clustering.HierarchicalClusterRepository;
@@ -21,6 +22,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.coupling.CouplingRepo
 import cn.edu.fudan.se.multidependency.repository.relation.hierarchical_clustering.ClusterContainRepository;
 import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.query.coupling.CouplingService;
+import cn.edu.fudan.se.multidependency.service.query.coupling.HierarchicalClusteringService;
 import cn.edu.fudan.se.multidependency.service.query.smell.CyclicDependencyDetector;
 import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorService;
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
@@ -95,25 +97,33 @@ public class BeanCreator {
 	@Autowired
 	private CouplingService couplingService;
 
+	@Autowired
+	private HierarchicalClusteringService hierarchicalClusteringService;
+
 	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
 	private ModularityCalculator modularityCalculator;
 
 	@Bean("insertNodes")
 	public boolean insertNodes(PropertyConfig propertyConfig, NodeRepository nodeRepository) {
-//		if (nodeRepository.alreadyInserted()) {
-//			LOGGER.info("Nodes已存在");
-//			return false;
-//		}
-		String databasesPath = propertyConfig.getDatabaseDir() + "/" + GraphDatabaseSettings.DEFAULT_DATABASES_ROOT_DIR_NAME +
-				"/" + propertyConfig.getDatabaseName();
-		String transactionsPath = propertyConfig.getDatabaseDir() + "/"
-				+ GraphDatabaseSettings.DEFAULT_TX_LOGS_ROOT_DIR_NAME
-				+ "/" + propertyConfig.getDatabaseName();
-		LOGGER.info("数据库文件夹：" + databasesPath);
-		LOGGER.info("事务文件夹：" + transactionsPath);
-		LOGGER.info("清理数据库");
-		FileUtil.delFile(new File(databasesPath));
-		FileUtil.delFile(new File(transactionsPath));
+		if (nodeRepository.alreadyInserted()) {
+			LOGGER.info("Nodes已存在");
+			return false;
+		}
+		if (!propertyConfig.isInsertNodes()) {
+			return false;
+		}
+//		String databasesPath = propertyConfig.getDatabaseDir() + "/" + GraphDatabaseSettings.DEFAULT_DATABASES_ROOT_DIR_NAME +
+//				"/" + propertyConfig.getDatabaseName();
+//		String transactionsPath = propertyConfig.getDatabaseDir() + "/"
+//				+ GraphDatabaseSettings.DEFAULT_TX_LOGS_ROOT_DIR_NAME
+//				+ "/" + propertyConfig.getDatabaseName();
+//		LOGGER.info("数据库文件夹：" + databasesPath);
+//		LOGGER.info("事务文件夹：" + transactionsPath);
+//		LOGGER.info("清理数据库");
+//		FileUtil.delFile(new File(databasesPath));
+//		FileUtil.delFile(new File(transactionsPath));
+//		FileUtil.delFile(new File(databasesPath));
+//		FileUtil.delFile(new File(transactionsPath));
 		LOGGER.info("插入Nodes");
 		try {
 			RepositoryService serializedService =
@@ -160,10 +170,10 @@ public class BeanCreator {
 
 	@Bean("insertRelations")
 	public boolean insertOther(PropertyConfig propertyConfig, RelationRepository relationRepository) {
-//		if (relationRepository.alreadyInserted()) {
-//			LOGGER.info("已存在底层依赖关系");
-//			return false;
-//		}
+		if (relationRepository.alreadyInserted()) {
+			LOGGER.info("已存在底层依赖关系");
+			return false;
+		}
 		LOGGER.info("插入底层关系");
 		if (!propertyConfig.isInsertRelations()
 				|| propertyConfig.getSerializePath() == null
@@ -903,10 +913,14 @@ public class BeanCreator {
 					allFilesPair.add(filesPair);
 //					System.out.println(file1Id + "  " + file2Id);
 
-					int funcNumAAtoB = couplingRepository.queryTwoFilesDependsOnFunctionsNum(file1Id, file2Id);
-					int funcNumBAtoB = couplingRepository.queryTwoFilesDependsByFunctionsNum(file1Id, file2Id);
-					int funcNumABtoA = couplingRepository.queryTwoFilesDependsByFunctionsNum(file2Id, file1Id);
-					int funcNumBBtoA = couplingRepository.queryTwoFilesDependsOnFunctionsNum(file2Id, file1Id);
+					int funcAndVarNumAAtoB = couplingRepository.queryTwoFilesDependsOnFunctionsNum(file1Id, file2Id) +
+							couplingRepository.queryTwoFilesDependsOnVariablesNum(file1Id, file2Id);
+					int funcAndVarNumBAtoB = couplingRepository.queryTwoFilesDependsByFunctionsNum(file1Id, file2Id) +
+							couplingRepository.queryTwoFilesDependsByVariablesNum(file1Id, file2Id);
+					int funcAndVarNumABtoA = couplingRepository.queryTwoFilesDependsByFunctionsNum(file2Id, file1Id) +
+							couplingRepository.queryTwoFilesDependsByVariablesNum(file2Id, file1Id);
+					int funcAndVarNumBBtoA = couplingRepository.queryTwoFilesDependsOnFunctionsNum(file2Id, file1Id) +
+							couplingRepository.queryTwoFilesDependsOnVariablesNum(file2Id, file1Id);
 
 					DependsOn dependsOnAtoB = dependsOnRepository.findDependsOnBetweenFiles(file1Id, file2Id);
 					DependsOn dependsOnBtoA = dependsOnRepository.findDependsOnBetweenFiles(file2Id, file1Id);
@@ -943,17 +957,18 @@ public class BeanCreator {
 					}
 
 					if(dependsOntimesAtoB != 0 || dependsOntimesBtoA != 0) {
-						double C_AtoB = couplingService.calC1to2(funcNumAAtoB,funcNumBAtoB);
-						double C_BtoA = couplingService.calC1to2(funcNumABtoA,funcNumBBtoA);
+						double C_AtoB = couplingService.calC1to2(funcAndVarNumAAtoB,funcAndVarNumBAtoB);
+						double C_BtoA = couplingService.calC1to2(funcAndVarNumABtoA,funcAndVarNumBBtoA);
 						double C_AandB = couplingService.calC(C_AtoB, C_BtoA);
 						double U_AtoB = couplingService.calU1to2(dependsOntimesAtoB, dependsOntimesBtoA);
 						double U_BtoA = couplingService.calU1to2(dependsOntimesBtoA, dependsOntimesAtoB);
 						double I_AandB = couplingService.calI(dependsOntimesAtoB, dependsOntimesBtoA);
 						double disp_AandB = couplingService.calDISP(C_AandB, dependsOntimesAtoB, dependsOntimesBtoA);
-						double dist = 1.0 / Math.log(I_AandB + 1);
+//						double dist = 1.0 / Math.log(I_AandB + 1);
+						double dist = 1.0 / (C_AandB + I_AandB);
 
 						couplingsTmp.add(new Coupling(dependsOn.getStartNode(), dependsOn.getEndNode(), dependsOnAtoB,dependsOnBtoA,
-								funcNumAAtoB, funcNumBAtoB, funcNumABtoA, funcNumBBtoA, dependsOntimesAtoB, dependsOntimesBtoA,
+								funcAndVarNumAAtoB, funcAndVarNumBAtoB, funcAndVarNumABtoA, funcAndVarNumBBtoA, dependsOntimesAtoB, dependsOntimesBtoA,
 								C_AtoB, C_BtoA, C_AandB, U_AtoB, U_BtoA, I_AandB, disp_AandB, dist));
 					}
 				}
@@ -972,8 +987,6 @@ public class BeanCreator {
 												 ClusterContainRepository clusterContainRepository,
 												 CouplingRepository couplingRepository,
 												 ProjectFileRepository projectFileRepository){
-		int clusterNum = 5;
-
 		if (!propertyConfig.isSetHierarchicalCluster()) {
 			return new ArrayList<>();
 		}
@@ -984,102 +997,86 @@ public class BeanCreator {
 			LOGGER.info("已存在Cluster Contain关系" );
 		}else{
 			LOGGER.info("创建Hierarchical Cluster以及Cluster Contain...");
+
 			List<HierarchicalCluster> hierarchicalClustersTmp = new ArrayList<>();
 			List<ClusterContain> clusterContainsTmp = new ArrayList<>();
-			List<HierarchicalCluster> formalHierarchicalClustersTmp = new ArrayList<>();
-
 			List<Coupling> allCouplings = couplingRepository.queryAllCouplingsOrderByDist();
 			List<ProjectFile> allFilesRelated = projectFileRepository.queryAllFilesRelatedByCouplings();
-			List<List<ProjectFile>> clusters = new ArrayList<>();
-			List<List<ProjectFile>> formalClusters = new ArrayList<>();
-			int allCouplingsNum = allCouplings.size();
+			Map<ProjectFile, HierarchicalCluster> topClusterMap = new HashMap<>();
+			Map<ProjectFile, Integer> topClusterLengthMap = new HashMap<>();
 
-			//初始化cluster，将每个文件都放入一个cluster中
 			for(ProjectFile projectFile: allFilesRelated){
-				List<ProjectFile> tmpList = new ArrayList<>();
-				tmpList.add(projectFile);
-				clusters.add(tmpList);
+				HierarchicalCluster cluster = new HierarchicalCluster(true);
+				ClusterContain contain = new ClusterContain(cluster, projectFile);
+				hierarchicalClustersTmp.add(cluster);
+				clusterContainsTmp.add(contain);
+				topClusterMap.put(projectFile, cluster);
+				topClusterLengthMap.put(projectFile, 0);
 			}
 
-			for(int i = 0; i < clusterNum; i++){
-				int start = i * (allCouplingsNum / clusterNum);
-				int end = (i + 1) * (allCouplingsNum / clusterNum) - 1;
+			hierarchicalClusterRepository.saveAll(hierarchicalClustersTmp);
+			clusterContainRepository.saveAll(clusterContainsTmp);
+			hierarchicalClustersTmp.clear();
+			clusterContainsTmp.clear();
 
-				while(start <= end){
-					Coupling cp = allCouplings.get(start);
-					ProjectFile startNode = (ProjectFile) cp.getStartNode();
-					ProjectFile endNode = (ProjectFile) cp.getEndNode();
-					int startNodeClusterIndex = -1;
-					int endNodeClusterIndex = -1;
+			for(Coupling coupling: allCouplings){
+				ProjectFile start = (ProjectFile) coupling.getStartNode();
+				ProjectFile end = (ProjectFile) coupling.getEndNode();
 
-					for(int j = 0; j < clusters.size(); j++){
-						if(clusters.get(j).contains(startNode)){
-							startNodeClusterIndex = j;
-						}
+				HierarchicalCluster startParentCluster = topClusterMap.get(start);
+				HierarchicalCluster endParentCluster = topClusterMap.get(end);
 
-						if(clusters.get(j).contains(endNode)){
-							endNodeClusterIndex = j;
-						}
+				if(!startParentCluster.equals(endParentCluster)){
+					HierarchicalCluster newParentCluster = new HierarchicalCluster();
 
-						if(startNodeClusterIndex >= 0 && endNodeClusterIndex >=0) break;
-					}
+					ClusterContain tmpContain1 = new ClusterContain(newParentCluster, startParentCluster);
+					ClusterContain tmpContain2 = new ClusterContain(newParentCluster, endParentCluster);
+					hierarchicalClustersTmp.add(newParentCluster);
+					clusterContainsTmp.add(tmpContain1);
+					clusterContainsTmp.add(tmpContain2);
 
-					int minIndex = Math.min(startNodeClusterIndex, endNodeClusterIndex);
-					int maxIndex = Math.max(startNodeClusterIndex, endNodeClusterIndex);
-
-					if(minIndex != maxIndex){
-						clusters.get(minIndex).addAll(clusters.get(maxIndex));
-						clusters.remove(maxIndex);
-					}
-					start++;
+					topClusterMap.put(start, newParentCluster);
+					topClusterMap.put(end, newParentCluster);
+					topClusterLengthMap.merge(start, 1, Integer::sum);
+					topClusterLengthMap.merge(end, 1, Integer::sum);
 				}
+				couplingRepository.setCouplingClusterDistance(coupling.getId(), topClusterLengthMap.get(start)
+						+ topClusterLengthMap.get(end));
+			}
 
-				if(i == 0){
-					formalClusters.addAll(clusters);
+			hierarchicalClusterRepository.saveAll(hierarchicalClustersTmp);
+			clusterContainRepository.saveAll(clusterContainsTmp);
 
-					int indexTmp = 0;
-					for(List<ProjectFile> list: clusters){
-						HierarchicalCluster tmpCluster = new HierarchicalCluster("hierarchicalCluster_0_" + indexTmp, 0, false);
-						hierarchicalClustersTmp.add(tmpCluster);
-						formalHierarchicalClustersTmp.add(tmpCluster);
+			HierarchicalCluster finalTopCluster = new HierarchicalCluster();
+			hierarchicalClusterRepository.save(finalTopCluster);
+			List<HierarchicalCluster> allTopParentClusters = hierarchicalClusterRepository.findAllTopParentCluster();
 
-						for(ProjectFile projectFile: list){
-							ClusterContain tmpContain = new ClusterContain(tmpCluster, projectFile);
-							clusterContainsTmp.add(tmpContain);
-						}
-						indexTmp++;
-					}
-				}else{
-					int indexTmp = 0;
-					List<HierarchicalCluster> tmpClusterList = new ArrayList<>();
-
-					for(List<ProjectFile> list: clusters){
-						HierarchicalCluster tmpCluster = new HierarchicalCluster(
-								"hierarchicalCluster_" + i + "_" + indexTmp, 0, false);
-						hierarchicalClustersTmp.add(tmpCluster);
-						tmpClusterList.add(tmpCluster);
-						int formalIndex = 0;
-
-						for(List<ProjectFile> formalList: formalClusters){
-							if(list.contains(formalList.get(0))){
-								clusterContainsTmp.add(new ClusterContain(tmpCluster, formalHierarchicalClustersTmp.get(formalIndex)));
-							}
-							formalIndex++;
-						}
-						indexTmp++;
-					}
-
-					formalClusters.clear();
-					formalClusters.addAll(clusters);
-					formalHierarchicalClustersTmp.clear();
-					formalHierarchicalClustersTmp.addAll(tmpClusterList);
-				}
-
-				hierarchicalClusterRepository.saveAll(hierarchicalClustersTmp);
-				clusterContainRepository.saveAll(clusterContainsTmp);
-
+			for(HierarchicalCluster cluster: allTopParentClusters){
+				clusterContainRepository.save(new ClusterContain(finalTopCluster, cluster));
 			}
 		}
 		return hierarchicalClusters;
+	}
+
+	@Bean("setLooseDegree")
+	public List<Package> setLooseDegree(PropertyConfig propertyConfig, PackageRepository packageRepository) {
+		List<Package> pcks = packageRepository.queryAllPackageWithLimit();
+		if(pcks.get(0).getLooseDegree() != -2){
+			LOGGER.info("已存在Loose Degree属性" );
+			return new ArrayList<>();
+		}
+		if (propertyConfig.isSetLooseDegree()) {
+			LOGGER.info("创建Loose Degree属性" );
+			List<Package> allPcks = packageRepository.queryAllPackage();
+
+			for(Package pck: allPcks){
+				if(pck.getDepth() <= 1){
+					packageRepository.setPackageLooseDegree(pck.getId(), -1);
+				}else{
+					hierarchicalClusteringService.calPackageComplexityByCluster(pck.getId());
+				}
+			}
+		}
+		return pcks;
 	}
 }

@@ -51,6 +51,8 @@ public class Package implements Node {
 
 	private double instability = -1;
 
+	private double looseDegree = -2;
+
 	private static final long serialVersionUID = -4892461872164624064L;
 	
 	public static final String JAVA_PACKAGE_DEFAULT = "default";

@@ -282,5 +282,6 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 
 	@Query("match p=(f:ProjectFile)-[r:" + RelationType.str_COUPLING + "]-() RETURN distinct f;")
 	List<ProjectFile> queryAllFilesRelatedByCouplings();
+
 }
 

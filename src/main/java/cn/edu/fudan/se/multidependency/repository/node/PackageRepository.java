@@ -20,6 +20,9 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 	@Query("match (p:Package) return p;")
 	public List<Package> queryAllPackage();
 
+	@Query("match (p:Package) return p LIMIT 25;")
+	public List<Package> queryAllPackageWithLimit();
+
 	@Query("match (p:Package) where id(p) = $pckId return p;")
 	public Package findPackageById(@Param("pckId") long pckId);
 
@@ -107,4 +110,7 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 
 	@Query("MATCH p=(n:Package)-[:CONTAIN]-(:ProjectFile) where id(n)=$packageId return count(p)>0;")
 	Boolean findIfPackageContainFiles(@Param("packageId") Long packageId);
+
+	@Query("MATCH p=(n:Package) where id(n)=$packageId set n.looseDegree=$looseDegree;")
+	void setPackageLooseDegree(@Param("packageId") Long packageId, @Param("looseDegree") double looseDegree);
 }

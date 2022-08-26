@@ -27,16 +27,10 @@ public class HierarchicalCluster implements Node {
 
     private String name;
 
-    /* level从0层开始 */
-    private int level;
+    private boolean isBottom = false;
 
-    private boolean isTopLevel;
-
-    public HierarchicalCluster(String name, int level, boolean isTopLevel) {
-        this.name = name;
-        this.level = level;
-        this.isTopLevel = isTopLevel;
-        this.entityId = -1L;
+    public HierarchicalCluster(boolean isBottom){
+        this.isBottom = isBottom;
     }
 
     @Override
@@ -44,7 +38,6 @@ public class HierarchicalCluster implements Node {
         Map<String, Object> properties = new HashMap<>();
         properties.put("entityId", getEntityId() == null ? -1 : getEntityId());
         properties.put("name", getName() == null ? "" : getName());
-        properties.put("level", getLevel());
         return properties;
     }
 
@@ -53,7 +46,4 @@ public class HierarchicalCluster implements Node {
         return NodeLabelType.HierarchicalCluster;
     }
 
-    public boolean isBottomLevel(){
-        return level == 0;
-    }
 }

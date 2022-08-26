@@ -45,6 +45,10 @@ public class PropertyConfig {
 	private boolean setHierarchicalCluster;
 
 	@Getter
+	@Value("${config.starter.loose_degree}")
+	private boolean setLooseDegree;
+
+	@Getter
 	@Value("${config.starter.package_depth}")
 	private boolean setPackageDepth;
 
