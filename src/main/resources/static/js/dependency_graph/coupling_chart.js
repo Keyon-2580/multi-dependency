@@ -50,6 +50,313 @@ const HIGH_INTENSITY_EDGE_MODEL = {
         lineWidth: 1.8,
     }
 }
+
+const tooltip = new G6.Tooltip({
+    offsetX: 10,
+    offsetY: 10,
+    itemTypes: ['node', 'edge'],
+    getContent: (e) => {
+        const outDiv = document.createElement('div');
+        outDiv.style.width = 'fit-content';
+        if(e.item._cfg.type === "node"){
+            if(e.item._cfg.model.nodeType === "file"){
+                outDiv.innerHTML = `
+              <h4>${e.item._cfg.id}</h4>
+              <ul>
+                <li>name: ${e.item.getModel().name}</li>
+              </ul>
+              <ul>
+                <li>path: ${e.item.getModel().path}</li>
+              </ul>
+              <ul>
+                <li>instability: ${e.item.getModel().instability}</li>
+              </ul>`;
+            }else if(e.item._cfg.model.nodeType === "package"){
+                outDiv.innerHTML = `
+              <h4>${e.item._cfg.id}</h4>
+              <ul>
+                <li>name: ${e.item.getModel().name}</li>
+              </ul>
+              <ul>
+                <li>path: ${e.item.getModel().path}</li>
+              </ul>
+              <ul>
+                <li>files num: ${e.item.getModel().NOF}</li>
+              </ul>
+              <ul>
+                <li>instability: ${e.item.getModel().instability}</li>
+              </ul>
+              <ul>
+                <li>Loose Degree: ${e.item.getModel().LooseDegree}</li>
+              </ul>`;
+            }
+        }else if(e.item._cfg.type === "edge"){
+            let selectedEdge = e.item._cfg.model;
+            const sourceNodeType = e.item._cfg.sourceNode._cfg.model.nodeType;
+            if (sourceNodeType === 'package') {
+                outDiv.innerHTML = `
+                      <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
+                      <ul>
+                        <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
+                      </ul>
+                      <ul>
+                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
+                      </ul>
+                      <ul>
+                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
+                      </ul>
+                      <ul>
+                        <li><b>dist</b>: ${selectedEdge.dist}</li>
+                      </ul>`;
+            } else {
+                outDiv.innerHTML = `
+                      <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
+                      <ul>
+                        <li><b>dependsOnTypes</b>: ${selectedEdge.dependsOnTypes}</li>
+                      </ul>
+                      <ul>
+                        <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
+                      </ul>
+                      <ul>
+                        <li><b>D</b>: ${selectedEdge.D}</li>
+                      </ul>
+                      <ul>
+                        <li><b>C</b>: ${selectedEdge.C}</li>
+                      </ul>                      
+                      <ul>
+                        <li><b>dist</b>: ${selectedEdge.dist}</li>
+                      </ul>`;
+            }
+            // outDiv.innerHTML = `
+            //   <h4>${e.item.getModel().source}_${e.item.getModel().target}</h4>
+            //   <ul>
+            //     <li>dependsOnTypes: ${e.item.getModel().dependsOnTypes}</li>
+            //   </ul>
+            //   <ul>
+            //     <li>耦合强度(I): ${e.item.getModel().I}</li>
+            //   </ul>
+            //   <ul>
+            //     <li>fileNumHMean: ${e.item.getModel().fileNumHMean}</li>
+            //   </ul>
+            //   <ul>
+            //     <li>D: ${e.item.getModel().D}</li>
+            //   </ul>
+            //   <ul>
+            //     <li>dist: ${e.item.getModel().dist}</li>
+            //   </ul>`;
+        }
+        return outDiv;
+    },
+});
+const contextMenu = new G6.Menu({
+    getContent(evt) {
+        let item = evt.item._cfg;
+        let html = `<ul class="combo_ul">${item.model.id}_${item.model.name}</ul>`;
+        if(CHART_MODE === 'package'){
+            html += `<ul class="combo_li">
+            <a class="combo_a" href="/hierarchical_clustering/package/${item.model.id}" target="_blank">打开包聚类详情</a>
+            </ul>`;
+        }
+        return html;
+    },
+    offsetX: 0,
+    offsetY: 0,
+    itemTypes: ['node'],
+});
+const toolbar = new G6.ToolBar({
+    // container: tc,
+    className: 'g6-toolbar-ul',
+    getContent: () => {
+        return `
+      <ul>
+        <li code='back'>返回上一层</li>
+        <li code='choose'>选择</li>
+        <li code='unfold'>展开</li>
+        <li code='unfoldFile'>展开到文件页面</li>
+      </ul>
+    `;
+    },
+    handleClick: (code, graph) => {
+        if (code === 'unfold') {
+            unfoldPkg();
+        }else if(code === 'choose'){
+            if(selected_packages.length === 0){
+                layer.msg("当前未选中节点！");
+            }else{
+                if(graph.save().nodes.length !== 1) {
+                    data_stack.push(graph.save());
+                }
+                present_packages.length = 0;
+                let deleteNodes = [];
+                // present_packages = selected_packages;
+
+                selected_packages.forEach(node =>{
+                    present_packages.push(node);
+                    graph.clearItemStates(node);
+                })
+
+                graph.getNodes().forEach(node => {
+                    let flag = true;
+                    present_packages.forEach(node2 => {
+                        if(node._cfg.id === node2._cfg.id){
+                            flag = false;
+                        }
+                    })
+
+                    if(flag){
+                        let edges = node.getEdges();
+                        deleteNodes.push(node);
+
+                        edges.forEach(edge => {
+                            graph.removeItem(edge, false);
+                        })
+                    }
+                })
+
+                deleteNodes.forEach(node => {
+                    graph.removeItem(node, false);
+                })
+
+                selected_packages.length = 0;
+
+                loadPanel(false);
+            }
+        }else if(code === 'unfoldFile'){
+            let json = {};
+            let pckIds = [];
+            CHART_MODE = "file";
+
+            selected_packages.forEach(node => {
+                if (node._cfg.model.nodeType === "package") {
+                    pckIds.push({
+                        "id": node._cfg.id
+                    })
+                }
+            })
+            if (pckIds.length === 0) {
+                layer.msg("当前未选中节点！");
+                return;
+            }
+            showLoadingWindow("加载中...");
+
+            json["pckIds"] = pckIds;
+            $.ajax({
+                url: "/coupling/group/files_of_packages",
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify(json),
+                success: function (result) {
+                    data_stack.push(graph.save());
+                    data = result;
+                    loadGraph();
+                }
+            });
+        }else if (code === 'back') {
+            if (data_stack.length !== 0) {
+                data = data_stack.pop();
+                loadGraph();
+            }
+        }
+    },
+});
+
+const graph = new G6.Graph({
+    container: 'coupling_chart',
+    width,
+    height,
+    fitView: true,
+    modes: {
+        default: ['drag-canvas', 'drag-node', 'zoom-canvas', 'click-select', {type: 'brush-select', trigger: 'ctrl', includeEdges: false}, 'activate-relations', { type: "zoom-canvas", enableOptimize: true }],
+    },
+    // layout: {
+    //     type: 'dagre',
+    //     sortByCombo: true,
+    //     ranksep: 10,
+    //     nodesep: 20,
+    // },
+    defaultNode: {
+        type: 'circle',
+        size: 20,
+        style: {
+            cursor: "pointer",
+            // fill: "#cce9f8",
+            // stroke: "#a0d6f4",
+            fill: "rgb(129,236,236)",
+            stroke: "rgb(113,151,234)",
+
+        },
+        labelCfg: {
+            style: {
+                fill: '#1890ff',
+                fontSize: 5,
+                background: {
+                    fill: '#ffffff',
+                    stroke: '#9EC9FF',
+                    padding: [2, 2, 2, 2],
+                    radius: 2,
+                },
+            },
+            position: 'bottom',
+        }
+    },
+    defaultEdge: {
+        type: 'quadratic',
+        labelCfg: {
+            autoRotate: true,
+            style: {
+                fill: 'red',
+                fontSize: 5,
+                stroke: 'yellow',
+                textBaseline: 'bottom'
+            }
+        },
+        // type: 'cubic-vertical',
+        // size: 1,
+        // labelCfg: {
+        //     style: {
+        //         fontSize: 5,
+        //     },
+        // },
+        style: {
+            stroke: COLOR_LINK_NORMAL,
+            lineWidth: 1,
+            endArrow: {
+                path: G6.Arrow.vee(5, 8, 3),
+                d: 3,
+                fill: COLOR_LINK_NORMAL,
+            },
+            cursor: "pointer"
+        },
+    },
+    defaultCombo: {
+        type: 'rect',
+        style: {
+            fill: "#C4E3B2",
+            stroke: "#C4E3B2",
+            fillOpacity: 0.1,
+        },
+    },
+    edgeStateStyles: {
+        highlight: {
+            stroke: '#bc2704',
+        },
+        reverse: {
+            stroke: COLOR_LINK_SPECIAL,
+        },
+    },
+    nodeStateStyles: {
+        highlight: {
+            opacity: 1
+        },
+        dark: {
+            opacity: 0.1
+        }
+    },
+    plugins: [tooltip, toolbar, contextMenu],
+    minZoom: 0.05,
+});
+
 function handleEdgeLabelDisplay() {
     if (graph.getEdges().length === 0) {
         layer.msg(" 图中没有边！");
@@ -141,7 +448,6 @@ function handleBottomPanelBtn() {
         document.getElementById("panel_btn_icon_btm").className = "layui-icon layui-icon-up";
     }
 }
-
 
 function main() {
     return {
@@ -281,401 +587,6 @@ function instabilityAjax(){
         }
     })
 }
-
-const tooltip = new G6.Tooltip({
-    offsetX: 10,
-    offsetY: 10,
-    itemTypes: ['node', 'edge'],
-    getContent: (e) => {
-        const outDiv = document.createElement('div');
-        outDiv.style.width = 'fit-content';
-        if(e.item._cfg.type === "node"){
-            if(e.item._cfg.model.nodeType === "file"){
-                outDiv.innerHTML = `
-              <h4>${e.item._cfg.id}</h4>
-              <ul>
-                <li>name: ${e.item.getModel().name}</li>
-              </ul>
-              <ul>
-                <li>path: ${e.item.getModel().path}</li>
-              </ul>
-              <ul>
-                <li>instability: ${e.item.getModel().instability}</li>
-              </ul>`;
-            }else if(e.item._cfg.model.nodeType === "package"){
-                outDiv.innerHTML = `
-              <h4>${e.item._cfg.id}</h4>
-              <ul>
-                <li>name: ${e.item.getModel().name}</li>
-              </ul>
-              <ul>
-                <li>path: ${e.item.getModel().path}</li>
-              </ul>
-              <ul>
-                <li>files num: ${e.item.getModel().NOF}</li>
-              </ul>
-              <ul>
-                <li>instability: ${e.item.getModel().instability}</li>
-              </ul>
-              <ul>
-                <li>Loose Degree: ${e.item.getModel().LooseDegree}</li>
-              </ul>`;
-            }
-        }else if(e.item._cfg.type === "edge"){
-            let selectedEdge = e.item._cfg.model;
-            const sourceNodeType = e.item._cfg.sourceNode._cfg.model.nodeType;
-            if (sourceNodeType === 'package') {
-                outDiv.innerHTML = `
-                      <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
-                      <ul>
-                        <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
-                      </ul>
-                      <ul>
-                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
-                      </ul>
-                      <ul>
-                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
-                      </ul>
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
-                      </ul>`;
-            } else {
-                outDiv.innerHTML = `
-                      <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
-                      <ul>
-                        <li><b>dependsOnTypes</b>: ${selectedEdge.dependsOnTypes}</li>
-                      </ul>
-                      <ul>
-                        <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
-                      </ul>
-                      <ul>
-                        <li><b>D</b>: ${selectedEdge.D}</li>
-                      </ul>
-                      <ul>
-                        <li><b>C</b>: ${selectedEdge.C}</li>
-                      </ul>                      
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
-                      </ul>`;
-            }
-            // outDiv.innerHTML = `
-            //   <h4>${e.item.getModel().source}_${e.item.getModel().target}</h4>
-            //   <ul>
-            //     <li>dependsOnTypes: ${e.item.getModel().dependsOnTypes}</li>
-            //   </ul>
-            //   <ul>
-            //     <li>耦合强度(I): ${e.item.getModel().I}</li>
-            //   </ul>
-            //   <ul>
-            //     <li>fileNumHMean: ${e.item.getModel().fileNumHMean}</li>
-            //   </ul>
-            //   <ul>
-            //     <li>D: ${e.item.getModel().D}</li>
-            //   </ul>
-            //   <ul>
-            //     <li>dist: ${e.item.getModel().dist}</li>
-            //   </ul>`;
-        }
-        return outDiv;
-    },
-});
-
-const toolbar = new G6.ToolBar({
-    // container: tc,
-    className: 'g6-toolbar-ul',
-    getContent: () => {
-        return `
-      <ul>
-        <li code='back'>返回上一层</li>
-        <li code='choose'>选择</li>
-        <li code='unfold'>展开</li>
-        <li code='unfoldFile'>展开到文件页面</li>
-      </ul>
-    `;
-    },
-    handleClick: (code, graph) => {
-        if (code === 'unfold') {
-            unfoldPkg();
-        }else if(code === 'choose'){
-            if(selected_packages.length === 0){
-                layer.msg("当前未选中节点！");
-            }else{
-                if(graph.save().nodes.length !== 1) {
-                    data_stack.push(graph.save());
-                }
-                present_packages.length = 0;
-                let deleteNodes = [];
-                // present_packages = selected_packages;
-
-                selected_packages.forEach(node =>{
-                    present_packages.push(node);
-                    graph.clearItemStates(node);
-                })
-
-                graph.getNodes().forEach(node => {
-                    let flag = true;
-                    present_packages.forEach(node2 => {
-                        if(node._cfg.id === node2._cfg.id){
-                            flag = false;
-                        }
-                    })
-
-                    if(flag){
-                        let edges = node.getEdges();
-                        deleteNodes.push(node);
-
-                        edges.forEach(edge => {
-                            graph.removeItem(edge, false);
-                        })
-                    }
-                })
-
-                deleteNodes.forEach(node => {
-                    graph.removeItem(node, false);
-                })
-
-                selected_packages.length = 0;
-
-                loadPanel(false);
-            }
-        }else if(code === 'unfoldFile'){
-            let json = {};
-            let pckIds = [];
-            CHART_MODE = "file";
-
-            selected_packages.forEach(node => {
-                if (node._cfg.model.nodeType === "package") {
-                    pckIds.push({
-                        "id": node._cfg.id
-                    })
-                }
-            })
-            if (pckIds.length === 0) {
-                layer.msg("当前未选中节点！");
-                return;
-            }
-            showLoadingWindow("加载中...");
-
-            json["pckIds"] = pckIds;
-            $.ajax({
-                url: "/coupling/group/files_of_packages",
-                type: "POST",
-                contentType: "application/json",
-                dataType: "json",
-                data: JSON.stringify(json),
-                success: function (result) {
-                    data_stack.push(graph.save());
-                    data = result;
-                    loadGraph();
-                }
-            });
-        }else if (code === 'back') {
-            if (data_stack.length !== 0) {
-                data = data_stack.pop();
-                loadGraph();
-            }
-        }
-    },
-});
-
-
-const graph = new G6.Graph({
-    container: 'coupling_chart',
-    width,
-    height,
-    fitView: true,
-    modes: {
-        default: ['drag-canvas', 'drag-node', 'zoom-canvas', 'click-select', {type: 'brush-select', trigger: 'ctrl', includeEdges: false}, 'activate-relations', { type: "zoom-canvas", enableOptimize: true }],
-    },
-    // layout: {
-    //     type: 'dagre',
-    //     sortByCombo: true,
-    //     ranksep: 10,
-    //     nodesep: 20,
-    // },
-    defaultNode: {
-        type: 'circle',
-        size: 20,
-        style: {
-            cursor: "pointer",
-            // fill: "#cce9f8",
-            // stroke: "#a0d6f4",
-            fill: "rgb(129,236,236)",
-            stroke: "rgb(113,151,234)",
-
-        },
-        labelCfg: {
-            style: {
-                fill: '#1890ff',
-                fontSize: 5,
-                background: {
-                    fill: '#ffffff',
-                    stroke: '#9EC9FF',
-                    padding: [2, 2, 2, 2],
-                    radius: 2,
-                },
-            },
-            position: 'bottom',
-        }
-    },
-    defaultEdge: {
-        type: 'quadratic',
-        labelCfg: {
-            autoRotate: true,
-            style: {
-                fill: 'red',
-                fontSize: 5,
-                stroke: 'yellow',
-                textBaseline: 'bottom'
-            }
-        },
-        // type: 'cubic-vertical',
-        // size: 1,
-        // labelCfg: {
-        //     style: {
-        //         fontSize: 5,
-        //     },
-        // },
-        style: {
-            stroke: COLOR_LINK_NORMAL,
-            lineWidth: 1,
-            endArrow: {
-                path: G6.Arrow.vee(5, 8, 3),
-                d: 3,
-                fill: COLOR_LINK_NORMAL,
-            },
-            cursor: "pointer"
-        },
-    },
-    defaultCombo: {
-        type: 'rect',
-        style: {
-            fill: "#C4E3B2",
-            stroke: "#C4E3B2",
-            fillOpacity: 0.1,
-        },
-    },
-    edgeStateStyles: {
-        highlight: {
-            stroke: '#bc2704',
-        },
-        reverse: {
-            stroke: COLOR_LINK_SPECIAL,
-        },
-    },
-    nodeStateStyles: {
-        highlight: {
-            opacity: 1
-        },
-        dark: {
-            opacity: 0.1
-        }
-    },
-    plugins: [tooltip, toolbar],
-    minZoom: 0.05,
-});
-graph.on('edge:click', (e) => {
-    // 选择了一个edge，在左侧panel展示edge信息
-    let selectedEdge = e.item._cfg.model;
-    const sourceNodeType = e.item._cfg.sourceNode._cfg.model.nodeType;
-    let outDiv = document.getElementById("detail_panel");
-    outDiv.className = "layui-colla-content layui-show";
-    if (sourceNodeType === 'package') {
-        outDiv.innerHTML = `
-                      <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
-                      <ul>
-                        <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
-                      </ul>
-                      <ul>
-                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
-                      </ul>
-                      <ul>
-                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
-                      </ul>                 
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
-                      </ul>`;
-    } else {
-        outDiv.innerHTML = `
-                      <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
-                      <ul>
-                        <li><b>dependsOnTypes</b>: ${selectedEdge.dependsOnTypes}</li>
-                      </ul>
-                      <ul>
-                        <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
-                      </ul>
-                      <ul>
-                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
-                      </ul>
-                      <ul>
-                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
-                      </ul>       
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
-                      </ul>`;
-    }
-
-})
-
-graph.on('node:dblclick', (e) => {
-    let selectedNode = e.item;
-    if (selectedNode._cfg.model.nodeType === "file") {
-        if (navigator.clipboard) {
-            // clipboard api 复制
-            navigator.clipboard.writeText(selectedNode._cfg.model.path).then(() => {
-                layer.msg("路径已复制到剪切板！");
-            });
-        }
-
-        return;
-    }
-    selected_packages = [];
-    selected_packages.push(selectedNode);
-    unfoldPkg();
-})
-graph.on('nodeselectchange', (e) => {
-    // 选择了一个node，在左侧panel展示node信息
-    if (e.selectedItems.nodes.length === 1) {
-        if (e.select) {
-            let outDiv = document.getElementById("detail_panel");
-            outDiv.className = "layui-colla-content layui-show";
-            // let selectedNode = e.target._cfg.model;
-            let selectedNode = e.selectedItems.nodes[0]._cfg.model;
-            if (selectedNode.nodeType === "file") {
-                outDiv.innerHTML = `
-              <h4><b>id</b>>: ${selectedNode.id}</h4>
-              <ul>
-                <li><b>name</b>: ${selectedNode.name}</li>
-              </ul>
-              <ul>
-                <li><b>path</b>: ${selectedNode.path}</li>
-              </ul>
-              <ul>
-                <li><b>instability</b>: ${selectedNode.instability}</li>
-              </ul>`;
-            } else if (selectedNode.nodeType === "package") {
-                outDiv.innerHTML = `
-              <h4><b>id</b>: ${selectedNode.id}</h4>
-              <ul>
-                <li><b>name</b>: ${selectedNode.name}</li>
-              </ul>
-              <ul>
-                <li><b>path</b>: ${selectedNode.path}</li>
-              </ul>
-              <ul>
-                <li><b>files num</b>: ${selectedNode.NOF}</li>
-              </ul>
-              <ul>
-                <li><b>instability</b>: ${selectedNode.instability}</li>
-              </ul>`;
-            }
-        }
-    }
-    selected_packages.length = 0;
-    e.selectedItems.nodes.forEach(node =>{
-        selected_packages.push(node);
-    })
-});
 
 function levelLayout(){
     let nodelist = graph.getNodes();
@@ -1292,6 +1203,123 @@ function loadGraph(){
     closeLoadingWindow();
 }
 
+//加载弹窗
+function showLoadingWindow(tip){
+    let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
+        "<div class='loading_window' id='Id_loading_window' " +
+        "style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">" + tip + "</div>" +
+        "</div>";
+    loading_div.html(html);
+}
+
+//关闭加载弹窗
+function closeLoadingWindow(){
+    loading_div.html("");
+}
+
+graph.on('edge:click', (e) => {
+    // 选择了一个edge，在左侧panel展示edge信息
+    let selectedEdge = e.item._cfg.model;
+    const sourceNodeType = e.item._cfg.sourceNode._cfg.model.nodeType;
+    let outDiv = document.getElementById("detail_panel");
+    outDiv.className = "layui-colla-content layui-show";
+    if (sourceNodeType === 'package') {
+        outDiv.innerHTML = `
+                      <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
+                      <ul>
+                        <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
+                      </ul>
+                      <ul>
+                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
+                      </ul>
+                      <ul>
+                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
+                      </ul>                 
+                      <ul>
+                        <li><b>dist</b>: ${selectedEdge.dist}</li>
+                      </ul>`;
+    } else {
+        outDiv.innerHTML = `
+                      <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
+                      <ul>
+                        <li><b>dependsOnTypes</b>: ${selectedEdge.dependsOnTypes}</li>
+                      </ul>
+                      <ul>
+                        <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
+                      </ul>
+                      <ul>
+                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
+                      </ul>
+                      <ul>
+                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
+                      </ul>       
+                      <ul>
+                        <li><b>dist</b>: ${selectedEdge.dist}</li>
+                      </ul>`;
+    }
+
+})
+
+graph.on('node:dblclick', (e) => {
+    let selectedNode = e.item;
+    if (selectedNode._cfg.model.nodeType === "file") {
+        if (navigator.clipboard) {
+            // clipboard api 复制
+            navigator.clipboard.writeText(selectedNode._cfg.model.path).then(() => {
+                layer.msg("路径已复制到剪切板！");
+            });
+        }
+
+        return;
+    }
+    selected_packages = [];
+    selected_packages.push(selectedNode);
+    unfoldPkg();
+})
+graph.on('nodeselectchange', (e) => {
+    // 选择了一个node，在左侧panel展示node信息
+    if (e.selectedItems.nodes.length === 1) {
+        if (e.select) {
+            let outDiv = document.getElementById("detail_panel");
+            outDiv.className = "layui-colla-content layui-show";
+            // let selectedNode = e.target._cfg.model;
+            let selectedNode = e.selectedItems.nodes[0]._cfg.model;
+            if (selectedNode.nodeType === "file") {
+                outDiv.innerHTML = `
+              <h4><b>id</b>>: ${selectedNode.id}</h4>
+              <ul>
+                <li><b>name</b>: ${selectedNode.name}</li>
+              </ul>
+              <ul>
+                <li><b>path</b>: ${selectedNode.path}</li>
+              </ul>
+              <ul>
+                <li><b>instability</b>: ${selectedNode.instability}</li>
+              </ul>`;
+            } else if (selectedNode.nodeType === "package") {
+                outDiv.innerHTML = `
+              <h4><b>id</b>: ${selectedNode.id}</h4>
+              <ul>
+                <li><b>name</b>: ${selectedNode.name}</li>
+              </ul>
+              <ul>
+                <li><b>path</b>: ${selectedNode.path}</li>
+              </ul>
+              <ul>
+                <li><b>files num</b>: ${selectedNode.NOF}</li>
+              </ul>
+              <ul>
+                <li><b>instability</b>: ${selectedNode.instability}</li>
+              </ul>`;
+            }
+        }
+    }
+    selected_packages.length = 0;
+    e.selectedItems.nodes.forEach(node =>{
+        selected_packages.push(node);
+    })
+});
+
 graph.on('node:dragend', evt => {
     let edges = evt.item.getEdges();
 
@@ -1319,20 +1347,6 @@ graph.on('node:dragend', evt => {
 //         selected_packages.push(node);
 //     })
 // });
-
-//加载弹窗
-function showLoadingWindow(tip){
-    let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
-        "<div class='loading_window' id='Id_loading_window' " +
-        "style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">" + tip + "</div>" +
-        "</div>";
-    loading_div.html(html);
-}
-
-//关闭加载弹窗
-function closeLoadingWindow(){
-    loading_div.html("");
-}
 
 if (typeof window !== 'undefined')
     window.onresize = () => {
