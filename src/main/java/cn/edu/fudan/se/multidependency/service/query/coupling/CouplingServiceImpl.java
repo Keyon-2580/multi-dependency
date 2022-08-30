@@ -10,6 +10,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.coupling.CouplingRepository;
 import cn.edu.fudan.se.multidependency.service.query.BeanCreator;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
+import cn.edu.fudan.se.multidependency.utils.DataUtil;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -128,8 +129,12 @@ public class CouplingServiceImpl implements CouplingService {
 
     @Override
     public double calI(long dependsOntimes1, long dependsOntimes2){
+//        return Math.sqrt(Math.pow(dependsOntimes1, 2) + Math.pow(dependsOntimes2, 2));
+        return (2 * ((double)dependsOntimes1 + 1) * ((double)dependsOntimes2 + 1)) / ((double)dependsOntimes1 + (double)dependsOntimes2 + 2) - 1;
+    }
+    @Override
+    public double calPkgI(long dependsOntimes1, long dependsOntimes2){
         return Math.sqrt(Math.pow(dependsOntimes1, 2) + Math.pow(dependsOntimes2, 2));
-//        return (2 * ((double)dependsOntimes1 + 1) * ((double)dependsOntimes2 + 1)) / ((double)dependsOntimes1 + (double)dependsOntimes2 + 2) - 1;
     }
 
     @Override
@@ -250,7 +255,7 @@ public class CouplingServiceImpl implements CouplingService {
             nodes.add(fileTmp);
         }
         result.put("nodes", nodes);
-        int DSum = 0;
+        Map<String, Double> iMap = new HashMap<>();
         for(DependsOn dependsOn: GroupInsideDependsOns){
             JSONObject dependsOnTmp = new JSONObject();
             boolean flag = false;
@@ -276,11 +281,9 @@ public class CouplingServiceImpl implements CouplingService {
                 dist = coupling.getDist() > 0 ? coupling.getDist() : -1.0;
                 if (coupling.getStartNode().getId().equals(dependsOn.getStartNode().getId())){
                     C = coupling.getCStartToEnd();
-                    DSum += coupling.getDAtoB();
                     D = coupling.getDAtoB();
                 } else {
                     C = coupling.getCEndToStart();
-                    DSum += coupling.getDBtoA();
                     D = coupling.getDBtoA();
                 }
             }
@@ -295,16 +298,25 @@ public class CouplingServiceImpl implements CouplingService {
             dependsOnTmp.put("isExtendOrImplements", dependsOnRepository.findDependsOnIsExtendOrImplements(dependsOn.getId()));
             dependsOnTmp.put("isTwoWayDependsOn", dependsOnRepository.findIsTwoWayDependsOn(dependsOn.getStartNode().getId(),
                     dependsOn.getEndNode().getId()));
+            iMap.put((String) dependsOnTmp.get("id"), i);
             edges.add(dependsOnTmp);
         }
-        NumberFormat defaultFormat = NumberFormat.getPercentInstance();
-        defaultFormat.setMinimumFractionDigits(2);
-//        for (int i = 0; i < edges.size(); i++) {
-//            JSONObject edge = edges.getJSONObject(i);
-//            double dPct =  (Integer) edge.get("D") / (double) DSum;
-//            edge.put("label", defaultFormat.format(dPct));
-//            edges.set(i, edge);
-//        }
+        Set<String> tmp = new HashSet<>();
+        for (int i = 0; i < edges.size(); i++) {
+            JSONObject edge = edges.getJSONObject(i);
+            String reverseId = edge.get("target") + "_" + edge.get("source");
+            int D = (int) edge.get("D");
+            if (tmp.contains((String) edge.get("id"))) {
+                edge.put("I", -1);
+                continue;
+            }
+            if (iMap.containsKey(reverseId)) {
+                edge.put("I", iMap.get((String) edge.get("id")));
+                tmp.add(reverseId);
+            } else {
+                edge.put("I", D);
+            }
+        }
         result.put("edges", edges);
 
         return result;
@@ -430,8 +442,7 @@ public class CouplingServiceImpl implements CouplingService {
             tmpPck.put("instability", finalInstability);
             nodes.add(tmpPck);
         }
-
-        double DSum = 0.0;
+        Map<String, Integer> dMap = new HashMap<>();
         for(Map<Package, Package> map: dependsOnBetweenPackages.keySet()){
             JSONObject tmpEdge = new JSONObject();
             int DAtoB = 0;
@@ -471,32 +482,55 @@ public class CouplingServiceImpl implements CouplingService {
                 }
             }
             double fileHMean = calcH(fileIdSet1.size(), fileIdSet2.size());
-            tmpEdge.put("I", calI(DAtoB, DBtoA));
+//            tmpEdge.put("I", calPkgI(DAtoB, DBtoA));
+
             tmpEdge.put("dist", dist / distSum);
             tmpEdge.put("dependsOnNum", dependsOnBetweenPackages.get(map).size());
-            tmpEdge.put("C", String.format("%.2f",fileHMean));
-            if (DBtoA != 0) {
-                double logD = Math.max(0, Math.log10(DBtoA));
-                tmpEdge.put("D", logD);
-                DSum += logD;
-            }
-            else {
-                double logD = Math.max(0, Math.log10(DAtoB));
-                tmpEdge.put("D", logD);
-                DSum += logD;
-            }
+            tmpEdge.put("C", DataUtil.toFixed(fileHMean));
+            double logD = Math.max(0, Math.log10(DAtoB));
+            tmpEdge.put("D", DAtoB);
+            tmpEdge.put("logD", DataUtil.toFixed(logD));
+            dMap.put((String)tmpEdge.get("id"), DAtoB);
+//            String reverseId = tmpEdge.get("target") + "_" + tmpEdge.get("source");
+//            if (dMap.containsKey(reverseId)) {
+//                tmpEdge.put("I", calPkgI(DAtoB, dMap.get(reverseId)));
+//            } else {
+//                tmpEdge.put("I", -1);
+//            }
+//            if (DBtoA != 0) {
+//                double logD = Math.max(0, Math.log10(DBtoA));
+//                tmpEdge.put("D", DBtoA);
+//                tmpEdge.put("logD", DataUtil.toFixed(logD));
+//                DSum += logD;
+//                dMap.put((String)tmpEdge.get("id"), DBtoA);
+//            }
+//            else {
+//                double logD = Math.max(0, Math.log10(DAtoB));
+//                tmpEdge.put("D", DAtoB);
+//                tmpEdge.put("logD", DataUtil.toFixed(logD));
+//                DSum += logD;
+//                dMap.put((String)tmpEdge.get("id"), DAtoB);
+//            }
 
 //            tmpEdge.put("pkgDisp", calcPkgDispersion(DAtoB, DBtoA, fileIdSet1.size(), fileIdSet2.size()));
             edges.add(tmpEdge);
         }
-        NumberFormat defaultFormat = NumberFormat.getPercentInstance();
-        defaultFormat.setMinimumFractionDigits(2);
-//        for (int i = 0; i < edges.size(); i++) {
-//            JSONObject edge = edges.getJSONObject(i);
-//            double dPct =  (Double) edge.get("D") / DSum;
-//            edge.put("label", defaultFormat.format(dPct));
-//            edges.set(i, edge);
-//        }
+        Set<String> tmp = new HashSet<>();
+        for (int i = 0; i < edges.size(); i++) {
+            JSONObject edge = edges.getJSONObject(i);
+            String reverseId = edge.get("target") + "_" + edge.get("source");
+            int D = (int) edge.get("D");
+            if (tmp.contains((String) edge.get("id"))) {
+                edge.put("I", -1);
+                continue;
+            }
+            if (dMap.containsKey(reverseId)) {
+                edge.put("I", calPkgI(D, dMap.get(reverseId)));
+                tmp.add(reverseId);
+            } else {
+                edge.put("I", D);
+            }
+        }
         result.put("nodes", nodes);
         result.put("edges", edges);
         return result;

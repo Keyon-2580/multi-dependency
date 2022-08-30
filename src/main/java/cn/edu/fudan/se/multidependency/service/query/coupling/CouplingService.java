@@ -20,6 +20,7 @@ public interface CouplingService {
     double calU1to2(long dependsOntimes1, long dependsOntimes2);
 
     double calI(long dependsOntimes1, long dependsOntimes2);
+    double calPkgI(long dependsOntimes1, long dependsOntimes2);
 
     double calDISP(double C_AandB, long dependsOntimes1, long dependsOntimes2);
 
