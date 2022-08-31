@@ -420,7 +420,25 @@ function handleLeftPanelBtn() {
             .className = "layui-icon layui-icon-right";
     }
 }
-
+function calcAbsGComplexity(k, w) {
+    let edgeSet = new Set(graph.getEdges());
+    let finalW = 0.0;
+    graph.getEdges().forEach(edge => {
+        debugger
+        const reverseId = edge._cfg.model.target + "_" + edge._cfg.model.source;
+        const reverseEdge = graph.findById(reverseId);
+        if (reverseEdge !== undefined && edgeSet.has(reverseEdge) && edgeSet.has(edge)) {
+            const forwardW = Math.max(edge._cfg.model[w], reverseEdge._cfg.model[w]);
+            const backwardW = Math.min(edge._cfg.model[w], reverseEdge._cfg.model[w]);
+            finalW += forwardW + backwardW * k;
+            edgeSet.delete(reverseEdge);
+        } else if (reverseEdge === undefined && edgeSet.has(edge)) {
+            finalW += edge._cfg.model[w];
+        }
+        edgeSet.delete(edge);
+    });
+    return finalW;
+}
 function handleBottomPanelBtn() {
     if (show_panel_btm) {
         let panelContainer = document.getElementById("btm_panel");
@@ -1081,14 +1099,17 @@ function loadPanel(loadBtmTables){
         LOC += node._cfg.model.LOC;
         node_set.add(node._cfg.model.id);
     })
-
-    if(CHART_MODE === "package"){
+    const N = nodes.length;
+    const gAbsComplexity = calcAbsGComplexity(2, "C");
+    const gRComplexity = gAbsComplexity * 2 / (N * (N - 1));
+    if (CHART_MODE === "package") {
         html0 += "<p>包数：" + nodes.length + "</p>";
         html0 += "<p>文件数：" + NOF + "</p>";
-    }else if(CHART_MODE === "file"){
+    } else if(CHART_MODE === "file") {
         html0 += "<p>文件数：" + nodes.length + "</p>";
     }
-
+    html0 += "<p>图绝对复杂度：" + gAbsComplexity.toFixed(2) + "</p>";
+    html0 += "<p>图相对复杂度：" + gRComplexity.toFixed(2) + "</p>";
     html0 += "<p>代码行数：" + LOC + "</p>";
     html0 += "<br />";
     let tmpMap = new Map();
