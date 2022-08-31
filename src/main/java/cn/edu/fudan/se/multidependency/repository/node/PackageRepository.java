@@ -26,6 +26,9 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 	@Query("match (p:Package) where id(p) = $pckId return p;")
 	public Package findPackageById(@Param("pckId") long pckId);
 
+	@Query("match (p:Package)-[:" + RelationType.str_CONTAIN + "]->(f:ProjectFile) where id(f) = $fileId return p;")
+	public Package findParentPackageByFileId(@Param("fileId") long fileId);
+
 	@Query("MATCH (n:Package)-[:" + RelationType.str_CONTAIN + "*]->(p:Package) where id(n)=$pckId RETURN p;")
 	public List<Package> findAllChildPackagesById(@Param("pckId") long pckId);
 
@@ -108,8 +111,11 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 	@Query("MATCH (package:Package) where package.depth = 1 return package;")
 	List<Package> findPackagesAtDepth1();
 
-	@Query("MATCH p=(n:Package)-[:CONTAIN]-(:ProjectFile) where id(n)=$packageId return count(p)>0;")
+	@Query("MATCH p=(n:Package)-[:CONTAIN]->(:ProjectFile) where id(n)=$packageId return count(p)>0;")
 	Boolean findIfPackageContainFiles(@Param("packageId") Long packageId);
+
+	@Query("MATCH p=(n:Package)-[:CONTAIN*]->(f:ProjectFile) where id(n)=$packageId and id(f) = $fileId return count(p)>0;")
+	Boolean findIfPackageContainFile(@Param("packageId") Long packageId, @Param("fileId") Long fileId);
 
 	@Query("MATCH p=(n:Package) where id(n)=$packageId set n.looseDegree=$looseDegree;")
 	void setPackageLooseDegree(@Param("packageId") Long packageId, @Param("looseDegree") double looseDegree);

@@ -19,6 +19,7 @@ server:
 config:
   starter:
     hierarchical_cluster: false
+    loose_degree: false
     insert_nodes: true
     insert_relations: true
     cochange: false
@@ -51,13 +52,14 @@ data:
     delete: true
     # batchInserter要插入的数据库
     data_path: C:/App/neo4j-community-4.2.19/data
+#    data_path: C:/App/neo4j-community-4.4.10/data
     #    database_name: multiple.dependency.db
     #    database_name: multi.dependency.cassandra.db
     #    database_name: multi.dependency.cbg.atlas.db
     #    database_name: multi.dependency.cbg.atlas.db
     #    database_name: multi.dependency.cbg.tomcat.db
-    #    database_name: multi.dependency.cbg.IssueTracker-before.db
     database_name: multi.dependency.cbg.issuetracker-tomcat-calm-before.db
+#    database_name: RepositoryService-source-issue-tracker.db
   #    database_name: multiple.dependency.train-ticket-git-one-project.db
   #    database_name: multi.dependency.all.db
   #    database_name: multi.dependency.atlas.db
@@ -72,6 +74,7 @@ data:
   #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/source-IssueTracker_after.txt
   #  serialize_path: C:/Dev/DependencyAnalysis/Result/IssueTracker-Master/source-IssueTracker_before-2022-01-24.txt
   serialize_path: C:/Dev/DependencyAnalysis/Result/tomcat-calm/source-tomcat-calm.txt
+#  serialize_path: C:/Dev\DependencyAnalysis/Result/issuetracker-repo/RepositoryService-source-issue-tracker.txt
   coupling_value_path: C:/Dev/DependencyAnalysis/Result/coupling_value_export_tomcat.csv
   anonymization: false
   batch_serialize: true

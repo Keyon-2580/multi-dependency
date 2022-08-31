@@ -112,18 +112,6 @@ public class BeanCreator {
 		if (!propertyConfig.isInsertNodes()) {
 			return false;
 		}
-//		String databasesPath = propertyConfig.getDatabaseDir() + "/" + GraphDatabaseSettings.DEFAULT_DATABASES_ROOT_DIR_NAME +
-//				"/" + propertyConfig.getDatabaseName();
-//		String transactionsPath = propertyConfig.getDatabaseDir() + "/"
-//				+ GraphDatabaseSettings.DEFAULT_TX_LOGS_ROOT_DIR_NAME
-//				+ "/" + propertyConfig.getDatabaseName();
-//		LOGGER.info("数据库文件夹：" + databasesPath);
-//		LOGGER.info("事务文件夹：" + transactionsPath);
-//		LOGGER.info("清理数据库");
-//		FileUtil.delFile(new File(databasesPath));
-//		FileUtil.delFile(new File(transactionsPath));
-//		FileUtil.delFile(new File(databasesPath));
-//		FileUtil.delFile(new File(transactionsPath));
 		LOGGER.info("插入Nodes");
 		try {
 			RepositoryService serializedService =
@@ -140,15 +128,16 @@ public class BeanCreator {
 				mapLabels.put(nodeType, labels);
 			}
 			this.nodesAll.getAllNodes().forEach((nodeType, nodes) -> {
-				nodes.forEach(node -> {
-					if(node.getId() == null || !nodeRepository.existsById(node.getId())) {
-						List<Label> labels = mapLabels.get(node.getNodeType());
-						List<String> labelStrings = labels.stream()
-								.map(Label::name)
-								.collect(Collectors.toList());
-						node.setId(nodeRepository.save(node).getId());
-					}
-				});
+				nodeRepository.saveAll(nodes);
+//				nodes.forEach(node -> {
+//					if(node.getId() == null || !nodeRepository.existsById(node.getId())) {
+//						List<Label> labels = mapLabels.get(node.getNodeType());
+//						List<String> labelStrings = labels.stream()
+//								.map(Label::name)
+//								.collect(Collectors.toList());
+//						node.setId(nodeRepository.save(node).getId());
+//					}
+//				});
 			});
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -184,147 +173,148 @@ public class BeanCreator {
 			LOGGER.info("总计关系数：" + relationsAll.size());
 			LOGGER.info("开始插入底层关系");
 			relationsAll.getAllRelations().forEach((relationType, relations) -> {
-				if (relationType == RelationType.ACCESS) {
-					for (Relation relation : relations) {
-						relationRepository.insertAccess(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.ANNOTATION) {
-					for (Relation relation : relations) {
-						relationRepository.insertAnnotation(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.CALL) {
-					for (Relation relation : relations) {
-						relationRepository.insertCall(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.CAST) {
-					for (Relation relation : relations) {
-						relationRepository.insertCast(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.CREATE) {
-					for (Relation relation : relations) {
-						relationRepository.insertCreate(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.EXTENDS) {
-					for (Relation relation : relations) {
-						relationRepository.insertExtends(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.GENERIC_PARAMETER) {
-					for (Relation relation : relations) {
-						relationRepository.insertGenericParam(relation.getStartNodeGraphId(),
-								relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.GLOBAL_VARIABLE) {
-					for (Relation relation : relations) {
-						relationRepository.insertGlobalVariable(relation.getStartNodeGraphId(),
-								relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.IMPLEMENTS) {
-					for (Relation relation : relations) {
-						relationRepository.insertImplements(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.IMPLEMENTS_C) {
-					for (Relation relation : relations) {
-						relationRepository.insertImplementsC(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.IMPLLINK) {
-					for (Relation relation : relations) {
-						relationRepository.insertImplink(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.IMPORT) {
-					for (Relation relation : relations) {
-						relationRepository.insertImport(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.INCLUDE) {
-					for (Relation relation : relations) {
-						relationRepository.insertInclude(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.LOCAL_VARIABLE) {
-					for (Relation relation : relations) {
-						relationRepository.insertLocalVariable(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.MEMBER_VARIABLE) {
-					for (Relation relation : relations) {
-						relationRepository.insertMemberVariable(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.PARAMETER) {
-					for (Relation relation : relations) {
-						relationRepository.insertParameter(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.RETURN) {
-					for (Relation relation : relations) {
-						relationRepository.insertReturn(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.THROW) {
-					for (Relation relation : relations) {
-						relationRepository.insertThrow(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.USE) {
-					for (Relation relation : relations) {
-						relationRepository.insertUse(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.VARIABLE_TYPE) {
-					for (Relation relation : relations) {
-						relationRepository.insertVariableType(relation.getStartNodeGraphId(),
-								relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.HAS) {
-					for (Relation relation : relations) {
-						relationRepository.insertHas(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.RELATE_TO) {
-					for (Relation relation : relations) {
-						relationRepository.insertRelateTo(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
-				if (relationType == RelationType.CONTAIN) {
-					for (Relation relation : relations) {
-						relationRepository.insertContain(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
-								, relation.getProperties());
-					}
-				}
+				relationRepository.saveAll(relations);
+//				if (relationType == RelationType.ACCESS) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertAccess(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.ANNOTATION) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertAnnotation(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.CALL) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertCall(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.CAST) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertCast(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.CREATE) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertCreate(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.EXTENDS) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertExtends(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.GENERIC_PARAMETER) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertGenericParam(relation.getStartNodeGraphId(),
+//								relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.GLOBAL_VARIABLE) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertGlobalVariable(relation.getStartNodeGraphId(),
+//								relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.IMPLEMENTS) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertImplements(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.IMPLEMENTS_C) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertImplementsC(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.IMPLLINK) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertImplink(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.IMPORT) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertImport(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.INCLUDE) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertInclude(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.LOCAL_VARIABLE) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertLocalVariable(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.MEMBER_VARIABLE) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertMemberVariable(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.PARAMETER) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertParameter(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.RETURN) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertReturn(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.THROW) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertThrow(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.USE) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertUse(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.VARIABLE_TYPE) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertVariableType(relation.getStartNodeGraphId(),
+//								relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.HAS) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertHas(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.RELATE_TO) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertRelateTo(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
+//				if (relationType == RelationType.CONTAIN) {
+//					for (Relation relation : relations) {
+//						relationRepository.insertContain(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()
+//								, relation.getProperties());
+//					}
+//				}
 			});
 		} catch (Exception e) {
 			e.printStackTrace();

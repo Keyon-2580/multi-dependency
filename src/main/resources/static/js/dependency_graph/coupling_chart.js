@@ -5,16 +5,16 @@ let CHART_MODE = "package";
 const loading_div = $("#loading_div");
 let NOF = 0;
 let LOC = 0;
-let DList = [];
-let Dsum = 0.0;
-let Dmax = 0.0;
-let Dmin = 10000.0;
+let CList = [];
+let Csum = 0.0;
+let Cmax = 0.0;
+let Cmin = 10000.0;
 let IList = [];
 let Isum = 0.0;
 let Imax = 0.0;
 let Imin = 10000.0;
 let current_panel = 'D';
-let I90 = 0.0;
+let C90 = 0.0;
 let data = {};
 let selected_packages = [];
 let present_packages = [];
@@ -49,237 +49,6 @@ const HIGH_INTENSITY_EDGE_MODEL = {
         stroke: COLOR_LINK_HIGH_INTENSITY,
         lineWidth: 1.8,
     }
-}
-function handleEdgeLabelDisplay() {
-    if (graph.getEdges().length === 0) {
-        layer.msg(" 图中没有边！");
-        return;
-    }
-    if (show_edge_label) {
-        show_edge_label = false;
-        graph.getEdges().forEach(function (edge) {
-            if(edge._cfg.model.label !== undefined) {
-                edge_label_map.set(edge._cfg.id, edge._cfg.model.label);
-                edge._cfg.model.label = '';
-                graph.refreshItem(edge);
-            }
-        });
-    } else {
-        graph.getEdges().forEach(function (edge){
-            edge._cfg.model.label = edge_label_map.get(edge._cfg.id);
-            graph.refreshItem(edge);
-        });
-        show_edge_label = true;
-    }
-}
-function handleResetSearchFile() {
-    if (search_node_stack.length !== 0) {
-        const nodeData = search_node_stack.pop();
-        let targetNode = graph.findById(nodeData.id);
-        let model = targetNode._cfg.model;
-        model.style.fill = nodeData.style;
-        graph.updateItem(targetNode, model, false);
-        document.getElementById("file_name").value = '';
-    }
-}
-function handleSearchFile() {
-    const fileName = document.getElementById("file_name").value.trim();
-    const targetNode = graph.find('node', (node) => {
-        return node.get('model').label === fileName && node.get('visible') === true;
-    });
-    if (targetNode === undefined) {
-        layer.msg("未找到文件"+fileName);
-        return;
-    }
-    graph.focusItem(targetNode, true);
-    // search_node_stack.push(graph.save());
-    search_node_stack.push({id: targetNode._cfg.id, style: targetNode._cfg.model.style.fill});
-    let model = targetNode._cfg.model;
-    model.style.fill = "#ffffff";
-    graph.updateItem(targetNode, model, false);
-}
-function handleLeftPanelBtn() {
-    if (show_panel) {
-        let panelContainer = document.getElementById("data_panel_container");
-        let chartContainer = document.getElementById("chart_container");
-        panelContainer.style.display = "none";
-        chartContainer.style.left = "0";
-        graph.changeSize(300+graph.getWidth(), graph.getHeight());
-        show_panel = false;
-        document.getElementById("panel_btn_icon")
-            .className = "layui-icon layui-icon-left";
-    } else {
-        let panelContainer = document.getElementById("data_panel_container");
-        let chartContainer = document.getElementById("chart_container");
-        panelContainer.style.display = "block";
-        chartContainer.style.left = "300px";
-        graph.changeSize(graph.getWidth()-300, graph.getHeight());
-        show_panel = true;
-        document.getElementById("panel_btn_icon")
-            .className = "layui-icon layui-icon-right";
-    }
-}
-
-function handleBottomPanelBtn() {
-    if (show_panel_btm) {
-        let panelContainer = document.getElementById("btm_panel");
-        let chartContainer = document.getElementById("chart_container");
-        chartContainer.style.paddingBottom = "44px";
-        chartContainer.style.marginBottom = "0";
-        panelContainer.style.height = "44px";
-        show_panel_btm = false;
-        document.getElementById("panel_btn_icon_btm")
-            .className = "layui-icon layui-icon-down";
-    } else {
-        let panelContainer = document.getElementById("btm_panel");
-        let chartContainer = document.getElementById("chart_container");
-        panelContainer.style.height = "400px";
-        panelContainer.style.zIndex = "901";
-        chartContainer.style.paddingBottom = "0";
-        chartContainer.style.marginBottom = "400px";
-        show_panel_btm = true;
-        document.getElementById("panel_btn_icon_btm").className = "layui-icon layui-icon-up";
-    }
-}
-
-
-function main() {
-    return {
-        init : function() {
-            showLoadingWindow("加载中...");
-            instabilityAjax();
-        }
-    }
-}
-function getNodeOneStepDetail(node) {
-    let statistics = {
-        I: 0,
-        D: 0,
-        C: 0,
-        unfoldable: true
-    };
-    let json = {};
-    let unfoldPcks = [];
-    let otherPcks = [];
-    if (node._cfg.model.nodeType === "package") {
-        unfoldPcks.push({
-            "id": node._cfg.id,
-            "instability": node._cfg.model.instability
-        })
-    }
-    json["unfoldPcks"] = unfoldPcks;
-    json["otherPcks"] = otherPcks;
-    $.ajax({
-        async: false,
-        url: "/coupling/group/one_step_child_packages",
-        type: "POST",
-        contentType: "application/json",
-        dataType: "json",
-        data: JSON.stringify(json),
-
-        success: function (result) {
-            if(result["code"] === 200){
-                statistics.unfoldable = true;
-                const edges = result["edges"];
-                let IList = [];
-                let DList = [];
-                let CList = [];
-                edges.forEach(edge => {
-                    IList.push(edge.I);
-                    DList.push(edge.D);
-                    CList.push(parseFloat(edge.C));
-                })
-                if (edges.length === 0) {
-                    statistics.I = 0;
-                    statistics.D = 0;
-                    statistics.C = 0;
-                    return statistics;
-                }
-                const DP90 = DList[parseInt(DList.length * 0.9)].toFixed(3);
-                const IP90 = IList[parseInt(IList.length * 0.9)].toFixed(3);
-                const CP90 = IList[parseInt(CList.length * 0.9)].toFixed(3);
-                statistics.I = parseFloat(IP90);
-                statistics.D = parseFloat(DP90);
-                statistics.C = parseFloat(CP90);
-            }else if(result["code"] === -1){
-                statistics.unfoldable = false;
-            }
-        }
-    });
-    return statistics;
-}
-function unfoldPkg() {
-    if(selected_packages.length === 0){
-        layer.msg("当前未选中节点！");
-    }else{
-        let json = {};
-        let unfoldPcks = [];
-        let otherPcks = [];
-        selected_packages.forEach(node => {
-            if (node._cfg.model.nodeType === "package") {
-                unfoldPcks.push({
-                    "id": node._cfg.id,
-                    "instability": node._cfg.model.instability
-                })
-            }
-        })
-        if (unfoldPcks.length === 0) {
-            layer.msg("错误！已无法再展开！");
-            return;
-        }
-        present_packages.forEach(node => {
-            let flag = true;
-            selected_packages.forEach(node2 => {
-                if(node._cfg.id === node2._cfg.id){
-                    flag = false;
-                }
-            })
-            if(flag){
-                otherPcks.push({
-                    "id": node._cfg.id,
-                    "instability": node._cfg.model.instability
-                })
-            }
-        })
-
-        json["unfoldPcks"] = unfoldPcks;
-        json["otherPcks"] = otherPcks;
-        showLoadingWindow("加载中...");
-        $.ajax({
-            url: "/coupling/group/one_step_child_packages",
-            type: "POST",
-            contentType: "application/json",
-            dataType: "json",
-            data: JSON.stringify(json),
-
-            success: function (result) {
-                if(result["code"] === 200){
-                    data_stack.push(graph.save())
-                    data = result;
-                    loadGraph();
-                }else if(result["code"] === -1){
-                    layer.msg("错误！\n" + result["pck"]["directoryPath"] + "\n已无法再展开！");
-                    closeLoadingWindow();
-                }
-            }
-        });
-    }
-}
-function instabilityAjax(){
-    $.ajax({
-        type : "GET",
-        url : "/coupling/group/top_level_packages",
-        success : function(result) {
-            data = result;
-            // let nodes_data = json_data["nodes"];
-            // let edges_data = json_data["edges"];
-            //
-            // data["nodes"] = json_data["nodes"];
-            // data["edges"] = json_data["edges"];
-
-            loadGraph();
-        }
-    })
 }
 
 const tooltip = new G6.Tooltip({
@@ -328,14 +97,11 @@ const tooltip = new G6.Tooltip({
                 outDiv.innerHTML = `
                       <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
                       <ul>
-                        <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
-                      </ul>
-                      <ul>
                         <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
                       </ul>
                       <ul>
-                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
-                      </ul>
+                        <li><b>依赖实例数(D(logD))</b>: ${selectedEdge.D}(${selectedEdge.logD})</li>
+                      </ul>                   
                       <ul>
                         <li><b>dist</b>: ${selectedEdge.dist}</li>
                       </ul>`;
@@ -346,14 +112,11 @@ const tooltip = new G6.Tooltip({
                         <li><b>dependsOnTypes</b>: ${selectedEdge.dependsOnTypes}</li>
                       </ul>
                       <ul>
-                        <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
-                      </ul>
+                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
+                      </ul>   
                       <ul>
-                        <li><b>D</b>: ${selectedEdge.D}</li>
-                      </ul>
-                      <ul>
-                        <li><b>C</b>: ${selectedEdge.C}</li>
-                      </ul>                      
+                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
+                      </ul>                                     
                       <ul>
                         <li><b>dist</b>: ${selectedEdge.dist}</li>
                       </ul>`;
@@ -379,7 +142,21 @@ const tooltip = new G6.Tooltip({
         return outDiv;
     },
 });
-
+const contextMenu = new G6.Menu({
+    getContent(evt) {
+        let item = evt.item._cfg;
+        let html = `<ul class="combo_ul">${item.model.id}_${item.model.name}</ul>`;
+        if(CHART_MODE === 'package'){
+            html += `<ul class="combo_li">
+            <a class="combo_a" href="/hierarchical_clustering/package/${item.model.id}" target="_blank">打开包聚类详情</a>
+            </ul>`;
+        }
+        return html;
+    },
+    offsetX: 0,
+    offsetY: 0,
+    itemTypes: ['node'],
+});
 const toolbar = new G6.ToolBar({
     // container: tc,
     className: 'g6-toolbar-ul',
@@ -478,7 +255,6 @@ const toolbar = new G6.ToolBar({
     },
 });
 
-
 const graph = new G6.Graph({
     container: 'coupling_chart',
     width,
@@ -571,111 +347,245 @@ const graph = new G6.Graph({
             opacity: 0.1
         }
     },
-    plugins: [tooltip, toolbar],
+    plugins: [tooltip, toolbar, contextMenu],
     minZoom: 0.05,
 });
-graph.on('edge:click', (e) => {
-    // 选择了一个edge，在左侧panel展示edge信息
-    let selectedEdge = e.item._cfg.model;
-    const sourceNodeType = e.item._cfg.sourceNode._cfg.model.nodeType;
-    let outDiv = document.getElementById("detail_panel");
-    outDiv.className = "layui-colla-content layui-show";
-    if (sourceNodeType === 'package') {
-        outDiv.innerHTML = `
-                      <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
-                      <ul>
-                        <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
-                      </ul>
-                      <ul>
-                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
-                      </ul>
-                      <ul>
-                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
-                      </ul>                 
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
-                      </ul>`;
-    } else {
-        outDiv.innerHTML = `
-                      <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
-                      <ul>
-                        <li><b>dependsOnTypes</b>: ${selectedEdge.dependsOnTypes}</li>
-                      </ul>
-                      <ul>
-                        <li><b>耦合强度(I)</b>: ${selectedEdge.I}</li>
-                      </ul>
-                      <ul>
-                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
-                      </ul>
-                      <ul>
-                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
-                      </ul>       
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
-                      </ul>`;
-    }
 
-})
-
-graph.on('node:dblclick', (e) => {
-    let selectedNode = e.item;
-    if (selectedNode._cfg.model.nodeType === "file") {
-        if (navigator.clipboard) {
-            // clipboard api 复制
-            navigator.clipboard.writeText(selectedNode._cfg.model.path).then(() => {
-                layer.msg("路径已复制到剪切板！");
-            });
-        }
-
+function handleEdgeLabelDisplay() {
+    if (graph.getEdges().length === 0) {
+        layer.msg(" 图中没有边！");
         return;
     }
-    selected_packages = [];
-    selected_packages.push(selectedNode);
-    unfoldPkg();
-})
-graph.on('nodeselectchange', (e) => {
-    // 选择了一个node，在左侧panel展示node信息
-    if (e.selectedItems.nodes.length === 1) {
-        if (e.select) {
-            let outDiv = document.getElementById("detail_panel");
-            outDiv.className = "layui-colla-content layui-show";
-            // let selectedNode = e.target._cfg.model;
-            let selectedNode = e.selectedItems.nodes[0]._cfg.model;
-            if (selectedNode.nodeType === "file") {
-                outDiv.innerHTML = `
-              <h4><b>id</b>>: ${selectedNode.id}</h4>
-              <ul>
-                <li><b>name</b>: ${selectedNode.name}</li>
-              </ul>
-              <ul>
-                <li><b>path</b>: ${selectedNode.path}</li>
-              </ul>
-              <ul>
-                <li><b>instability</b>: ${selectedNode.instability}</li>
-              </ul>`;
-            } else if (selectedNode.nodeType === "package") {
-                outDiv.innerHTML = `
-              <h4><b>id</b>: ${selectedNode.id}</h4>
-              <ul>
-                <li><b>name</b>: ${selectedNode.name}</li>
-              </ul>
-              <ul>
-                <li><b>path</b>: ${selectedNode.path}</li>
-              </ul>
-              <ul>
-                <li><b>files num</b>: ${selectedNode.NOF}</li>
-              </ul>
-              <ul>
-                <li><b>instability</b>: ${selectedNode.instability}</li>
-              </ul>`;
+    if (show_edge_label) {
+        show_edge_label = false;
+        graph.getEdges().forEach(function (edge) {
+            if(edge._cfg.model.label !== undefined) {
+                edge_label_map.set(edge._cfg.id, edge._cfg.model.label);
+                edge._cfg.model.label = '';
+                graph.refreshItem(edge);
             }
+        });
+    } else {
+        graph.getEdges().forEach(function (edge){
+            edge._cfg.model.label = edge_label_map.get(edge._cfg.id);
+            graph.refreshItem(edge);
+        });
+        show_edge_label = true;
+    }
+}
+function handleResetSearchFile() {
+    if (search_node_stack.length !== 0) {
+        const nodeData = search_node_stack.pop();
+        let targetNode = graph.findById(nodeData.id);
+        let model = targetNode._cfg.model;
+        model.style.fill = nodeData.style;
+        graph.updateItem(targetNode, model, false);
+        document.getElementById("file_name").value = '';
+    }
+}
+function handleSearchFile() {
+    const fileName = document.getElementById("file_name").value.trim();
+    const targetNode = graph.find('node', (node) => {
+        return node.get('model').label === fileName && node.get('visible') === true;
+    });
+    if (targetNode === undefined) {
+        layer.msg("未找到文件"+fileName);
+        return;
+    }
+    graph.focusItem(targetNode, true);
+    // search_node_stack.push(graph.save());
+    search_node_stack.push({id: targetNode._cfg.id, style: targetNode._cfg.model.style.fill});
+    let model = targetNode._cfg.model;
+    model.style.fill = "#ffffff";
+    graph.updateItem(targetNode, model, false);
+}
+function handleLeftPanelBtn() {
+    if (show_panel) {
+        let panelContainer = document.getElementById("data_panel_container");
+        let chartContainer = document.getElementById("chart_container");
+        panelContainer.style.display = "none";
+        chartContainer.style.left = "0";
+        graph.changeSize(300+graph.getWidth(), graph.getHeight());
+        show_panel = false;
+        document.getElementById("panel_btn_icon")
+            .className = "layui-icon layui-icon-left";
+    } else {
+        let panelContainer = document.getElementById("data_panel_container");
+        let chartContainer = document.getElementById("chart_container");
+        panelContainer.style.display = "block";
+        chartContainer.style.left = "300px";
+        graph.changeSize(graph.getWidth()-300, graph.getHeight());
+        show_panel = true;
+        document.getElementById("panel_btn_icon")
+            .className = "layui-icon layui-icon-right";
+    }
+}
+
+function handleBottomPanelBtn() {
+    if (show_panel_btm) {
+        let panelContainer = document.getElementById("btm_panel");
+        let chartContainer = document.getElementById("chart_container");
+        chartContainer.style.paddingBottom = "44px";
+        chartContainer.style.marginBottom = "0";
+        panelContainer.style.height = "44px";
+        show_panel_btm = false;
+        document.getElementById("panel_btn_icon_btm")
+            .className = "layui-icon layui-icon-down";
+    } else {
+        let panelContainer = document.getElementById("btm_panel");
+        let chartContainer = document.getElementById("chart_container");
+        panelContainer.style.height = "400px";
+        panelContainer.style.zIndex = "901";
+        chartContainer.style.paddingBottom = "0";
+        chartContainer.style.marginBottom = "400px";
+        show_panel_btm = true;
+        document.getElementById("panel_btn_icon_btm").className = "layui-icon layui-icon-up";
+    }
+}
+
+function main() {
+    return {
+        init : function() {
+            showLoadingWindow("加载中...");
+            instabilityAjax();
         }
     }
-    selected_packages.length = 0;
-    e.selectedItems.nodes.forEach(node =>{
-        selected_packages.push(node);
+}
+function getNodeOneStepDetail(node) {
+    let statistics = {
+        I: 0,
+        D: 0,
+        C: 0,
+        unfoldable: true
+    };
+    let json = {};
+    let unfoldPcks = [];
+    let otherPcks = [];
+    if (node._cfg.model.nodeType === "package") {
+        unfoldPcks.push({
+            "id": node._cfg.id,
+            "instability": node._cfg.model.instability
+        })
+    }
+    json["unfoldPcks"] = unfoldPcks;
+    json["otherPcks"] = otherPcks;
+    $.ajax({
+        async: false,
+        url: "/coupling/group/one_step_child_packages",
+        type: "POST",
+        contentType: "application/json",
+        dataType: "json",
+        data: JSON.stringify(json),
+
+        success: function (result) {
+            if(result["code"] === 200){
+                statistics.unfoldable = true;
+                const edges = result["edges"];
+                let IList = [];
+                let DList = [];
+                let CList = [];
+                edges.forEach(edge => {
+                    if (edge.I !== -1) {
+                        IList.push(edge.I);
+                    }
+                    DList.push(edge.D);
+                    CList.push(parseFloat(edge.C));
+                })
+                if (edges.length === 0) {
+                    statistics.I = 0;
+                    statistics.D = 0;
+                    statistics.C = 0;
+                    return statistics;
+                }
+                IList.sort(function(a,b){return a - b});
+                DList.sort(function(a,b){return a - b});
+                CList.sort(function(a,b){return a - b});
+                const DP90 = DList[parseInt(DList.length * 0.9)].toFixed(3);
+                const IP90 = IList[parseInt(IList.length * 0.9)].toFixed(3);
+                const CP90 = CList[parseInt(CList.length * 0.9)].toFixed(3);
+                statistics.I = parseFloat(IP90);
+                statistics.D = parseFloat(DP90);
+                statistics.C = parseFloat(CP90);
+            }else if(result["code"] === -1){
+                statistics.unfoldable = false;
+            }
+        }
+    });
+    return statistics;
+}
+function unfoldPkg() {
+    if(selected_packages.length === 0){
+        layer.msg("当前未选中节点！");
+    }else{
+        let json = {};
+        let unfoldPcks = [];
+        let otherPcks = [];
+        selected_packages.forEach(node => {
+            if (node._cfg.model.nodeType === "package") {
+                unfoldPcks.push({
+                    "id": node._cfg.id,
+                    "instability": node._cfg.model.instability
+                })
+            }
+        })
+        if (unfoldPcks.length === 0) {
+            layer.msg("错误！已无法再展开！");
+            return;
+        }
+        present_packages.forEach(node => {
+            let flag = true;
+            selected_packages.forEach(node2 => {
+                if(node._cfg.id === node2._cfg.id){
+                    flag = false;
+                }
+            })
+            if(flag){
+                otherPcks.push({
+                    "id": node._cfg.id,
+                    "instability": node._cfg.model.instability
+                })
+            }
+        })
+
+        json["unfoldPcks"] = unfoldPcks;
+        json["otherPcks"] = otherPcks;
+        showLoadingWindow("加载中...");
+        $.ajax({
+            url: "/coupling/group/one_step_child_packages",
+            type: "POST",
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(json),
+
+            success: function (result) {
+                if(result["code"] === 200){
+                    data_stack.push(graph.save())
+                    data = result;
+                    loadGraph();
+                }else if(result["code"] === -1){
+                    layer.msg("错误！\n" + result["pck"]["directoryPath"] + "\n已无法再展开！");
+                    closeLoadingWindow();
+                }
+            }
+        });
+    }
+}
+function instabilityAjax(){
+    $.ajax({
+        type : "GET",
+        url : "/coupling/group/top_level_packages",
+        success : function(result) {
+            data = result;
+            // let nodes_data = json_data["nodes"];
+            // let edges_data = json_data["edges"];
+            //
+            // data["nodes"] = json_data["nodes"];
+            // data["edges"] = json_data["edges"];
+
+            loadGraph();
+        }
     })
-});
+}
 
 function levelLayout(){
     let nodelist = graph.getNodes();
@@ -944,7 +854,6 @@ function loadEdgeTable1() {
             id: edge._cfg.id,
             obj1: edge._cfg.source._cfg.model.name,
             obj2: edge._cfg.target._cfg.model.name,
-            I: parseFloat(edge._cfg.model.I),
             D: parseFloat(edge._cfg.model.D),
             C: parseFloat(edge._cfg.model.C),
             reversed: isEdgeReversed(edge)
@@ -963,9 +872,8 @@ function loadEdgeTable1() {
                 ,{field:'id', title: 'ID', sort: true}
                 ,{field:'obj1', title: '对象1'}
                 ,{field:'obj2', title: '对象2'}
-                ,{field:'I', title: '耦合强度', sort: true}
-                ,{field:'C', title: '依赖面耦合度', sort: true}
-                ,{field:'D', title: '依赖实例数', sort: true}
+                ,{field:'C', title: '依赖面耦合度(C)', sort: true}
+                ,{field:'D', title: '依赖实例数(D)', sort: true}
                 ,{field:'reversed',  title: '是否逆向', sort: true}
             ]]
             ,data: edge_table1_data
@@ -1069,17 +977,18 @@ function loadNodeTable1() {
             ,defaultToolbar: []
             ,toolbar: '#toolbarDemo'
             ,autoSort: false
+            ,lineStyle: 'height:auto'
             ,cellMinWidth: 50 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
             ,cols: [[
                 {type:'checkbox'}
                 ,{field:'id', title: 'ID', sort: true}
-                ,{field:'name', title: 'name'}
-                ,{field:'NOF', title: '文件数', sort: true}
-                ,{field:'LOC', title: '代码行数', sort: true}
-                ,{field:'nodeType', title: '节点类型', sort: true}
-                ,{field:'I', title: '依赖强度90分位值', sort: true}
-                ,{field:'D', title: '依赖实例数90分位值', sort: true}
-                ,{field:'C', title: '依赖面耦合度90分位值', sort: true}
+                ,{field:'name', title: 'Name'}
+                ,{field:'NOF', title: 'NOF', sort: true}
+                ,{field:'LOC', title: 'LOC', sort: true}
+                ,{field:'nodeType', title: 'Type', sort: true}
+                ,{field:'I', title: 'I-90分位值', sort: true}
+                ,{field:'D', title: 'D-90分位值', sort: true}
+                ,{field:'C', title: 'C-90分位值', sort: true}
                 ,{field:'unfoldable', title: '可展开', sort: true}
             ]]
             ,data: node_table1_data
@@ -1158,18 +1067,19 @@ function loadPanel(loadBtmTables){
     let edges = graph.getEdges();
     let NOF = 0;
     let LOC = 0;
-    DList = [];
-    Dsum = 0.0;
-    Dmax = 0.0;
-    Dmin = 10000.0;
+    CList = [];
+    Csum = 0.0;
+    Cmax = 0.0;
+    Cmin = 10000.0;
     IList = [];
     Isum = 0.0;
     Imax = 0.0;
     Imin = 10000.0;
-
+    let node_set = new Set();
     nodes.forEach(node => {
         NOF += node._cfg.model.NOF;
         LOC += node._cfg.model.LOC;
+        node_set.add(node._cfg.model.id);
     })
 
     if(CHART_MODE === "package"){
@@ -1181,7 +1091,12 @@ function loadPanel(loadBtmTables){
 
     html0 += "<p>代码行数：" + LOC + "</p>";
     html0 += "<br />";
+    let tmpMap = new Map();
+    let tmpSet = new Set();
     if(edges.length > 0){
+        edges.forEach(edge=>{
+            tmpMap.set(edge._cfg.model.id, edge._cfg.model.C);
+        })
         edges.forEach(edge => {
             // edge_table1_data.push({
             //     id: edge._cfg.id,
@@ -1192,18 +1107,37 @@ function loadPanel(loadBtmTables){
             //     C: parseFloat(edge._cfg.model.C),
             //     reversed: isEdgeReversed(edge)
             // });
-            IList.push(edge._cfg.model.I);
-            DList.push(edge._cfg.model.D);
-            Isum += edge._cfg.model.I;
-            Dsum += edge._cfg.model.D;
-            Imax = Math.max(Imax, edge._cfg.model.I);
-            Imin = Math.min(Imin, edge._cfg.model.I);
-            Dmax = Math.max(Dmax, edge._cfg.model.D);
-            Dmin = Math.min(Dmin, edge._cfg.model.D);
+            if (edge._cfg.model.I !== -1) {
+                IList.push(edge._cfg.model.I);
+                Isum += edge._cfg.model.I;
+                Imax = Math.max(Imax, edge._cfg.model.I);
+                Imin = Math.min(Imin, edge._cfg.model.I);
+            }
+            const reverseId = edge._cfg.model.target + "_" + edge._cfg.model.source;
+            if (!tmpMap.has(reverseId)) {
+                CList.push(edge._cfg.model.C);
+                Csum += edge._cfg.model.C;
+                Cmax = Math.max(Cmax, edge._cfg.model.C);
+                Cmin = Math.min(Cmin, edge._cfg.model.C);
+                tmpSet.add(edge._cfg.model.id);
+            } else {
+                if (!tmpSet.has(edge._cfg.model.id)) {
+                    let reverseC = tmpMap.get(reverseId);
+                    let C = Math.sqrt(Math.pow(edge._cfg.model.C,2)+Math.pow(reverseC,2));
+                    CList.push(C);
+                    Csum += C;
+                    Cmax = Math.max(Cmax, C);
+                    Cmin = Math.min(Cmin, C);
+                    tmpSet.add(edge._cfg.model.id);
+                    tmpSet.add(reverseId);
+                }
+
+            }
+
         })
         IList.sort(function(a,b){return a - b});
-        DList.sort(function(a,b){return a - b});
-        I90 = IList[parseInt(IList.length * 0.9)];
+        CList.sort(function(a,b){return a - b});
+        C90 = CList[parseInt(CList.length * 0.9)];
 
         // html += "<p>耦合强度(I) 平均值：" + (Isum / edges.length).toFixed(3) + "</p>";
         // html += "<p>耦合强度(I) max：" + Imax.toFixed(3) + "</p>";
@@ -1215,15 +1149,15 @@ function loadPanel(loadBtmTables){
         // html += "<p>耦合强度(I) 25分位值(Q1)：" + IList[parseInt(IList.length * 0.25)].toFixed(3) + "</p>";
         // html += "<p>耦合强度(I) min：" + Imin.toFixed(3) + "</p>";
         // html += "<br />";
-        html1 += "<p>依赖实例数(D) 平均值：" + (Dsum / edges.length).toFixed(3) + "</p>";
-        html1 += "<p>依赖实例数(D) max：" + Dmax.toFixed(3) + "</p>";
-        html1 += "<p>依赖实例数(D) 90分位值：" + DList[parseInt(DList.length * 0.9)].toFixed(3) + "</p>";
-        html1 += "<p>依赖实例数(D) 85分位值：" + DList[parseInt(DList.length * 0.85)].toFixed(3) + "</p>";
-        html1 += "<p>依赖实例数(D) 80分位值：" + DList[parseInt(DList.length * 0.8)].toFixed(3) + "</p>";
-        html1 += "<p>依赖实例数(D) 75分位值(Q3)：" + DList[parseInt(DList.length * 0.75)].toFixed(3) + "</p>";
-        html1 += "<p>依赖实例数(D) 中位值(Q2)：" + DList[parseInt(DList.length * 0.5)].toFixed(3) + "</p>";
-        html1 += "<p>依赖实例数(D) 25分位值(Q1)：" + DList[parseInt(DList.length * 0.25)].toFixed(3) + "</p>";
-        html1 += "<p>依赖实例数(D) min：" + Dmin.toFixed(3) + "</p>";
+        html1 += "<p>依赖面耦合度(C) 平均值：" + (Csum / edges.length).toFixed(3) + "</p>";
+        html1 += "<p>依赖面耦合度(C) max：" + Cmax.toFixed(3) + "</p>";
+        html1 += "<p>依赖面耦合度(C) 90分位值：" + CList[parseInt(CList.length * 0.9)].toFixed(3) + "</p>";
+        html1 += "<p>依赖面耦合度(C) 85分位值：" + CList[parseInt(CList.length * 0.85)].toFixed(3) + "</p>";
+        html1 += "<p>依赖面耦合度(C) 80分位值：" + CList[parseInt(CList.length * 0.8)].toFixed(3) + "</p>";
+        html1 += "<p>依赖面耦合度(C) 75分位值(Q3)：" + CList[parseInt(CList.length * 0.75)].toFixed(3) + "</p>";
+        html1 += "<p>依赖面耦合度(C) 中位值(Q2)：" + CList[parseInt(CList.length * 0.5)].toFixed(3) + "</p>";
+        html1 += "<p>依赖面耦合度(C) 25分位值(Q1)：" + CList[parseInt(CList.length * 0.25)].toFixed(3) + "</p>";
+        html1 += "<p>依赖面耦合度(C) min：" + Cmin.toFixed(3) + "</p>";
         html1 += "<br />";
 
         let reverseNum = graph.findAllByState("edge", "reverse").length;
@@ -1256,15 +1190,15 @@ function switchDataPanel() {
         html += "<br />";
         current_panel = 'I';
     } else {
-        html += "<p>依赖实例数(D) 平均值：" + (Dsum / len).toFixed(3) + "</p>";
-        html += "<p>依赖实例数(D) max：" + Dmax.toFixed(3) + "</p>";
-        html += "<p>依赖实例数(D) 90分位值：" + DList[parseInt(DList.length * 0.9)].toFixed(3) + "</p>";
-        html += "<p>依赖实例数(D) 85分位值：" + DList[parseInt(DList.length * 0.85)].toFixed(3) + "</p>";
-        html += "<p>依赖实例数(D) 80分位值：" + DList[parseInt(DList.length * 0.8)].toFixed(3) + "</p>";
-        html += "<p>依赖实例数(D) 75分位值(Q3)：" + DList[parseInt(DList.length * 0.75)].toFixed(3) + "</p>";
-        html += "<p>依赖实例数(D) 中位值(Q2)：" + DList[parseInt(DList.length * 0.5)].toFixed(3) + "</p>";
-        html += "<p>依赖实例数(D) 25分位值(Q1)：" + DList[parseInt(DList.length * 0.25)].toFixed(3) + "</p>";
-        html += "<p>依赖实例数(D) min：" + Dmin.toFixed(3) + "</p>";
+        html += "<p>依赖面耦合度(C) 平均值：" + (Csum / len).toFixed(3) + "</p>";
+        html += "<p>依赖面耦合度(C) max：" + Cmax.toFixed(3) + "</p>";
+        html += "<p>依赖面耦合度(C) 90分位值：" + CList[parseInt(CList.length * 0.9)].toFixed(3) + "</p>";
+        html += "<p>依赖面耦合度(C) 85分位值：" + CList[parseInt(CList.length * 0.85)].toFixed(3) + "</p>";
+        html += "<p>依赖面耦合度(C) 80分位值：" + CList[parseInt(CList.length * 0.8)].toFixed(3) + "</p>";
+        html += "<p>依赖面耦合度(C) 75分位值(Q3)：" + CList[parseInt(CList.length * 0.75)].toFixed(3) + "</p>";
+        html += "<p>依赖面耦合度(C) 中位值(Q2)：" + CList[parseInt(CList.length * 0.5)].toFixed(3) + "</p>";
+        html += "<p>依赖面耦合度(C) 25分位值(Q1)：" + CList[parseInt(CList.length * 0.25)].toFixed(3) + "</p>";
+        html += "<p>依赖面耦合度(C) min：" + Cmin.toFixed(3) + "</p>";
         html += "<br />";
         current_panel = 'D';
     }
@@ -1272,7 +1206,7 @@ function switchDataPanel() {
 }
 function handleEdgesWidth(){
     graph.getEdges().forEach(edge => {
-        if(edge._cfg.model.I >= I90){
+        if(edge._cfg.model.C >= C90){
             edge.update(HIGH_INTENSITY_EDGE_MODEL);
         }else {
             edge.update(LOW_INTENSITY_EDGE_MODEL);
@@ -1291,6 +1225,117 @@ function loadGraph(){
     handleEdgesWidth();
     closeLoadingWindow();
 }
+
+//加载弹窗
+function showLoadingWindow(tip){
+    let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
+        "<div class='loading_window' id='Id_loading_window' " +
+        "style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">" + tip + "</div>" +
+        "</div>";
+    loading_div.html(html);
+}
+
+//关闭加载弹窗
+function closeLoadingWindow(){
+    loading_div.html("");
+}
+
+graph.on('edge:click', (e) => {
+    // 选择了一个edge，在左侧panel展示edge信息
+    let selectedEdge = e.item._cfg.model;
+    const sourceNodeType = e.item._cfg.sourceNode._cfg.model.nodeType;
+    let outDiv = document.getElementById("detail_panel");
+    outDiv.className = "layui-colla-content layui-show";
+    if (sourceNodeType === 'package') {
+        outDiv.innerHTML = `
+                      <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
+                      <ul>
+                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
+                      </ul>
+                      <ul>
+                        <li><b>依赖实例数(D(logD))</b>: ${selectedEdge.D}(${selectedEdge.logD})</li>
+                      </ul>             
+                      <ul>
+                        <li><b>dist</b>: ${selectedEdge.dist}</li>
+                      </ul>`;
+    } else {
+        outDiv.innerHTML = `
+                      <h4><b>tag</b>: ${selectedEdge.source}_${selectedEdge.target}</h4>
+                      <ul>
+                        <li><b>dependsOnTypes</b>: ${selectedEdge.dependsOnTypes}</li>
+                      </ul>
+                      <ul>
+                        <li><b>依赖面耦合度(C)</b>: ${selectedEdge.C}</li>
+                      </ul>                        
+                      <ul>
+                        <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
+                      </ul>                 
+                      <ul>
+                        <li><b>dist</b>: ${selectedEdge.dist}</li>
+                      </ul>`;
+    }
+
+})
+
+graph.on('node:dblclick', (e) => {
+    let selectedNode = e.item;
+    if (selectedNode._cfg.model.nodeType === "file") {
+        if (navigator.clipboard) {
+            // clipboard api 复制
+            navigator.clipboard.writeText(selectedNode._cfg.model.path).then(() => {
+                layer.msg("路径已复制到剪切板！");
+            });
+        }
+
+        return;
+    }
+    selected_packages = [];
+    selected_packages.push(selectedNode);
+    unfoldPkg();
+})
+graph.on('nodeselectchange', (e) => {
+    // 选择了一个node，在左侧panel展示node信息
+    if (e.selectedItems.nodes.length === 1) {
+        if (e.select) {
+            let outDiv = document.getElementById("detail_panel");
+            outDiv.className = "layui-colla-content layui-show";
+            // let selectedNode = e.target._cfg.model;
+            let selectedNode = e.selectedItems.nodes[0]._cfg.model;
+            if (selectedNode.nodeType === "file") {
+                outDiv.innerHTML = `
+              <h4><b>id</b>: ${selectedNode.id}</h4>
+              <ul>
+                <li><b>name</b>: ${selectedNode.name}</li>
+              </ul>
+              <ul>
+                <li><b>path</b>: ${selectedNode.path}</li>
+              </ul>
+              <ul>
+                <li><b>instability</b>: ${selectedNode.instability}</li>
+              </ul>`;
+            } else if (selectedNode.nodeType === "package") {
+                outDiv.innerHTML = `
+              <h4><b>id</b>: ${selectedNode.id}</h4>
+              <ul>
+                <li><b>name</b>: ${selectedNode.name}</li>
+              </ul>
+              <ul>
+                <li><b>path</b>: ${selectedNode.path}</li>
+              </ul>
+              <ul>
+                <li><b>files num</b>: ${selectedNode.NOF}</li>
+              </ul>
+              <ul>
+                <li><b>instability</b>: ${selectedNode.instability}</li>
+              </ul>`;
+            }
+        }
+    }
+    selected_packages.length = 0;
+    e.selectedItems.nodes.forEach(node =>{
+        selected_packages.push(node);
+    })
+});
 
 graph.on('node:dragend', evt => {
     let edges = evt.item.getEdges();
@@ -1319,20 +1364,6 @@ graph.on('node:dragend', evt => {
 //         selected_packages.push(node);
 //     })
 // });
-
-//加载弹窗
-function showLoadingWindow(tip){
-    let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
-        "<div class='loading_window' id='Id_loading_window' " +
-        "style=\"left: " + (width - 215) / 2 + "px; top:" + (height - 61) / 2 + "px;\">" + tip + "</div>" +
-        "</div>";
-    loading_div.html(html);
-}
-
-//关闭加载弹窗
-function closeLoadingWindow(){
-    loading_div.html("");
-}
 
 if (typeof window !== 'undefined')
     window.onresize = () => {
