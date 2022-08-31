@@ -16,6 +16,7 @@ server:
 
 config:
   starter:
+    hierarchical_cluster: false
     insert_nodes: true
     insert_relations: true
     cochange: false
@@ -28,11 +29,12 @@ config:
     coupling: true
     package_depth: true
     export_cyclic_dependency: false
+    loose_degree: false
 
 
 data:
-  project_analyse_threads_count: 20
   project_config: src/main/resources/project/issue-tracker-master.json
+  project_analyse_threads_count: 20
   dynamic_analyse: false
   git_analyse: false
   lib_analyse: false

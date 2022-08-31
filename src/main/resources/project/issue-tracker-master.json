@@ -1,7 +1,7 @@
 {
 	"architectures": {},
 	"projects": [{
-		"path": "/Users/keyon/Documents/bigDataPlatform/IssueTracker-Master",
+		"path": "/Users/keyon/Documents/bigDataPlatform/IssueTracker-Master/issue-service",
 		"includeDirs": [],
 		"microserviceName": "issue-tracker",
 		"autoInclude": true,
