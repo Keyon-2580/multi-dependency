@@ -424,18 +424,20 @@ function calcAbsGComplexity(k, w) {
     let edgeSet = new Set(graph.getEdges());
     let finalW = 0.0;
     graph.getEdges().forEach(edge => {
-        debugger
-        const reverseId = edge._cfg.model.target + "_" + edge._cfg.model.source;
-        const reverseEdge = graph.findById(reverseId);
-        if (reverseEdge !== undefined && edgeSet.has(reverseEdge) && edgeSet.has(edge)) {
-            const forwardW = Math.max(edge._cfg.model[w], reverseEdge._cfg.model[w]);
-            const backwardW = Math.min(edge._cfg.model[w], reverseEdge._cfg.model[w]);
-            finalW += forwardW + backwardW * k;
-            edgeSet.delete(reverseEdge);
-        } else if (reverseEdge === undefined && edgeSet.has(edge)) {
-            finalW += edge._cfg.model[w];
+        if (!isNaN(edge._cfg.model[w])) {
+            const reverseId = edge._cfg.model.target + "_" + edge._cfg.model.source;
+            const reverseEdge = graph.findById(reverseId);
+            if (reverseEdge !== undefined && edgeSet.has(reverseEdge) && edgeSet.has(edge)) {
+                const forwardW = Math.max(edge._cfg.model[w], reverseEdge._cfg.model[w]);
+                const backwardW = Math.min(edge._cfg.model[w], reverseEdge._cfg.model[w]);
+                finalW += forwardW + backwardW * k;
+                edgeSet.delete(reverseEdge);
+            } else if (reverseEdge === undefined && edgeSet.has(edge)) {
+                finalW += parseFloat(edge._cfg.model[w]);
+            }
+            edgeSet.delete(edge);
         }
-        edgeSet.delete(edge);
+
     });
     return finalW;
 }
@@ -1116,7 +1118,9 @@ function loadPanel(loadBtmTables){
     let tmpSet = new Set();
     if(edges.length > 0){
         edges.forEach(edge=>{
-            tmpMap.set(edge._cfg.model.id, edge._cfg.model.C);
+            if (!isNaN(edge._cfg.model.C)) {
+                tmpMap.set(edge._cfg.model.id, edge._cfg.model.C);
+            }
         })
         edges.forEach(edge => {
             // edge_table1_data.push({
@@ -1134,25 +1138,26 @@ function loadPanel(loadBtmTables){
                 Imax = Math.max(Imax, edge._cfg.model.I);
                 Imin = Math.min(Imin, edge._cfg.model.I);
             }
-            const reverseId = edge._cfg.model.target + "_" + edge._cfg.model.source;
-            if (!tmpMap.has(reverseId)) {
-                CList.push(edge._cfg.model.C);
-                Csum += edge._cfg.model.C;
-                Cmax = Math.max(Cmax, edge._cfg.model.C);
-                Cmin = Math.min(Cmin, edge._cfg.model.C);
-                tmpSet.add(edge._cfg.model.id);
-            } else {
-                if (!tmpSet.has(edge._cfg.model.id)) {
-                    let reverseC = tmpMap.get(reverseId);
-                    let C = Math.sqrt(Math.pow(edge._cfg.model.C,2)+Math.pow(reverseC,2));
-                    CList.push(C);
-                    Csum += C;
-                    Cmax = Math.max(Cmax, C);
-                    Cmin = Math.min(Cmin, C);
+            if (!isNaN(edge._cfg.model.C)) {
+                const reverseId = edge._cfg.model.target + "_" + edge._cfg.model.source;
+                if (!tmpMap.has(reverseId)) {
+                    CList.push(edge._cfg.model.C);
+                    Csum += edge._cfg.model.C;
+                    Cmax = Math.max(Cmax, edge._cfg.model.C);
+                    Cmin = Math.min(Cmin, edge._cfg.model.C);
                     tmpSet.add(edge._cfg.model.id);
-                    tmpSet.add(reverseId);
+                } else {
+                    if (!tmpSet.has(edge._cfg.model.id)) {
+                        let reverseC = tmpMap.get(reverseId);
+                        let C = Math.sqrt(Math.pow(edge._cfg.model.C,2)+Math.pow(reverseC,2));
+                        CList.push(C);
+                        Csum += C;
+                        Cmax = Math.max(Cmax, C);
+                        Cmin = Math.min(Cmin, C);
+                        tmpSet.add(edge._cfg.model.id);
+                        tmpSet.add(reverseId);
+                    }
                 }
-
             }
 
         })

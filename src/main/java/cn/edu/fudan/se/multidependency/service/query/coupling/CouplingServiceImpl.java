@@ -114,7 +114,7 @@ public class CouplingServiceImpl implements CouplingService {
 
     @Override
     public double calC1to2(int funcNum1, int funcNum2){
-        return (2 * ((double)funcNum1 + 1) * ((double)funcNum2 + 1)) / ((double)funcNum1 + (double)funcNum2 + 2) - 1;
+        return (2 * ((double)funcNum1) * ((double)funcNum2)) / ((double)funcNum1 + (double)funcNum2);
     }
 
     @Override
