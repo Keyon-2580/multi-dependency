@@ -37,7 +37,25 @@ const COLOR_LINK_EXTENDS_AND_IMPLEMENTS = '#4393ee';
 const container = document.getElementById('coupling_chart');
 const width = container.scrollWidth;
 const height = container.scrollHeight || 500;
-
+const FILE_NODE_TABLE_COLS = [[
+    {type:'checkbox'}
+    ,{field:'id', title: 'ID', sort: true}
+    ,{field:'name', title: '名称'}
+    ,{field:'LOC', title: '代码行', sort: true}
+    ,{field:'nodeType', title: '类型', sort: true}
+]];
+const PKG_NODE_TABLE_COLS = [[
+    {type:'checkbox'}
+    ,{field:'id', title: 'ID', sort: true}
+    ,{field:'name', title: '名称'}
+    ,{field:'NOF', title: '文件', sort: true}
+    ,{field:'LOC', title: '代码行', sort: true}
+    ,{field:'nodeType', title: '类型', sort: true}
+    ,{field:'I', title: 'I-90分位值', sort: true}
+    ,{field:'D', title: 'D-90分位值', sort: true}
+    ,{field:'C', title: 'C-90分位值', sort: true}
+    ,{field:'unfoldable', title: '可展开', sort: true}
+]];
 const LOW_INTENSITY_EDGE_MODEL = {
     style:{
         stroke: COLOR_LINK_LOW_INTENSITY,
@@ -101,9 +119,6 @@ const tooltip = new G6.Tooltip({
                       </ul>
                       <ul>
                         <li><b>依赖实例数(D(logD))</b>: ${selectedEdge.D}(${selectedEdge.logD})</li>
-                      </ul>                   
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
                       </ul>`;
             } else {
                 outDiv.innerHTML = `
@@ -116,9 +131,6 @@ const tooltip = new G6.Tooltip({
                       </ul>   
                       <ul>
                         <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
-                      </ul>                                     
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
                       </ul>`;
             }
             // outDiv.innerHTML = `
@@ -898,8 +910,8 @@ function loadEdgeTable1() {
             ]]
             ,data: edge_table1_data
             ,page: {
-                layout: ['count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
-                limit: 5
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                limit: 10
             }
         });
         table.on('sort(edge1)', function (obj){
@@ -992,31 +1004,38 @@ function loadNodeTable1() {
     });
     layui.use('table', function(){
         const table = layui.table;
-        table.render({
-            elem: '#node_table1'
-            ,defaultToolbar: []
-            ,toolbar: '#toolbarDemo'
-            ,autoSort: false
-            ,lineStyle: 'height:auto'
-            ,cellMinWidth: 50 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
-            ,cols: [[
-                {type:'checkbox'}
-                ,{field:'id', title: 'ID', sort: true}
-                ,{field:'name', title: 'Name'}
-                ,{field:'NOF', title: 'NOF', sort: true}
-                ,{field:'LOC', title: 'LOC', sort: true}
-                ,{field:'nodeType', title: 'Type', sort: true}
-                ,{field:'I', title: 'I-90分位值', sort: true}
-                ,{field:'D', title: 'D-90分位值', sort: true}
-                ,{field:'C', title: 'C-90分位值', sort: true}
-                ,{field:'unfoldable', title: '可展开', sort: true}
-            ]]
-            ,data: node_table1_data
-            ,page: {
-                layout: ['count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
-                limit: 5
-            }
-        });
+        if (CHART_MODE === 'package') {
+            table.render({
+                elem: '#node_table1'
+                ,defaultToolbar: []
+                ,toolbar: '#toolbarDemo'
+                ,autoSort: false
+                ,lineStyle: 'height:auto'
+                ,cellMinWidth: 50 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                ,cols: PKG_NODE_TABLE_COLS
+                ,data: node_table1_data
+                ,page: {
+                    layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                    limit: 10
+                }
+            });
+        } else {
+            table.render({
+                elem: '#node_table1'
+                ,defaultToolbar: []
+                ,toolbar: '#toolbarDemo'
+                ,autoSort: false
+                ,lineStyle: 'height:auto'
+                ,cellMinWidth: 50 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                ,cols: FILE_NODE_TABLE_COLS
+                ,data: node_table1_data
+                ,page: {
+                    layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                    limit: 10
+                }
+            });
+        }
+
         table.on('sort(node1)', function (obj){
             if (obj.type === 'asc') {
                 node_table1_data.sort((a, b) => a[obj.field] - b[obj.field]);
@@ -1175,17 +1194,18 @@ function loadPanel(loadBtmTables){
         // html += "<p>耦合强度(I) 25分位值(Q1)：" + IList[parseInt(IList.length * 0.25)].toFixed(3) + "</p>";
         // html += "<p>耦合强度(I) min：" + Imin.toFixed(3) + "</p>";
         // html += "<br />";
-        html1 += "<p>依赖面耦合度(C) 平均值：" + (Csum / edges.length).toFixed(3) + "</p>";
-        html1 += "<p>依赖面耦合度(C) max：" + Cmax.toFixed(3) + "</p>";
-        html1 += "<p>依赖面耦合度(C) 90分位值：" + CList[parseInt(CList.length * 0.9)].toFixed(3) + "</p>";
-        html1 += "<p>依赖面耦合度(C) 85分位值：" + CList[parseInt(CList.length * 0.85)].toFixed(3) + "</p>";
-        html1 += "<p>依赖面耦合度(C) 80分位值：" + CList[parseInt(CList.length * 0.8)].toFixed(3) + "</p>";
-        html1 += "<p>依赖面耦合度(C) 75分位值(Q3)：" + CList[parseInt(CList.length * 0.75)].toFixed(3) + "</p>";
-        html1 += "<p>依赖面耦合度(C) 中位值(Q2)：" + CList[parseInt(CList.length * 0.5)].toFixed(3) + "</p>";
-        html1 += "<p>依赖面耦合度(C) 25分位值(Q1)：" + CList[parseInt(CList.length * 0.25)].toFixed(3) + "</p>";
-        html1 += "<p>依赖面耦合度(C) min：" + Cmin.toFixed(3) + "</p>";
-        html1 += "<br />";
-
+        if (CList.length !== 0) {
+            html1 += "<p>依赖面耦合度(C) 平均值：" + (Csum / edges.length).toFixed(3) + "</p>";
+            html1 += "<p>依赖面耦合度(C) max：" + Cmax.toFixed(3) + "</p>";
+            html1 += "<p>依赖面耦合度(C) 90分位值：" + CList[parseInt(CList.length * 0.9)].toFixed(3) + "</p>";
+            html1 += "<p>依赖面耦合度(C) 85分位值：" + CList[parseInt(CList.length * 0.85)].toFixed(3) + "</p>";
+            html1 += "<p>依赖面耦合度(C) 80分位值：" + CList[parseInt(CList.length * 0.8)].toFixed(3) + "</p>";
+            html1 += "<p>依赖面耦合度(C) 75分位值(Q3)：" + CList[parseInt(CList.length * 0.75)].toFixed(3) + "</p>";
+            html1 += "<p>依赖面耦合度(C) 中位值(Q2)：" + CList[parseInt(CList.length * 0.5)].toFixed(3) + "</p>";
+            html1 += "<p>依赖面耦合度(C) 25分位值(Q1)：" + CList[parseInt(CList.length * 0.25)].toFixed(3) + "</p>";
+            html1 += "<p>依赖面耦合度(C) min：" + Cmin.toFixed(3) + "</p>";
+            html1 += "<br />";
+        }
         let reverseNum = graph.findAllByState("edge", "reverse").length;
         html2 += "<p>逆向依赖数：" + reverseNum + "</p>";
         html2 += "<p>总依赖数：" + edges.length + "</p>";
@@ -1204,29 +1224,33 @@ function switchDataPanel() {
     let html = "";
     const len = graph.getEdges().length;
     if (current_panel === 'D') {
-        html += "<p>耦合强度(I) 平均值：" + (Isum / len).toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) max：" + Imax.toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 90分位值：" + IList[parseInt(IList.length * 0.9)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 85分位值：" + IList[parseInt(IList.length * 0.85)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 80分位值：" + IList[parseInt(IList.length * 0.8)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 75分位值(Q3)：" + IList[parseInt(IList.length * 0.75)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 中位值(Q2)：" + IList[parseInt(IList.length * 0.5)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 25分位值(Q1)：" + IList[parseInt(IList.length * 0.25)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) min：" + Imin.toFixed(3) + "</p>";
-        html += "<br />";
-        current_panel = 'I';
+        if (IList.length !== 0) {
+            html += "<p>耦合强度(I) 平均值：" + (Isum / len).toFixed(3) + "</p>";
+            html += "<p>耦合强度(I) max：" + Imax.toFixed(3) + "</p>";
+            html += "<p>耦合强度(I) 90分位值：" + IList[parseInt(IList.length * 0.9)].toFixed(3) + "</p>";
+            html += "<p>耦合强度(I) 85分位值：" + IList[parseInt(IList.length * 0.85)].toFixed(3) + "</p>";
+            html += "<p>耦合强度(I) 80分位值：" + IList[parseInt(IList.length * 0.8)].toFixed(3) + "</p>";
+            html += "<p>耦合强度(I) 75分位值(Q3)：" + IList[parseInt(IList.length * 0.75)].toFixed(3) + "</p>";
+            html += "<p>耦合强度(I) 中位值(Q2)：" + IList[parseInt(IList.length * 0.5)].toFixed(3) + "</p>";
+            html += "<p>耦合强度(I) 25分位值(Q1)：" + IList[parseInt(IList.length * 0.25)].toFixed(3) + "</p>";
+            html += "<p>耦合强度(I) min：" + Imin.toFixed(3) + "</p>";
+            html += "<br />";
+            current_panel = 'I';
+        }
     } else {
-        html += "<p>依赖面耦合度(C) 平均值：" + (Csum / len).toFixed(3) + "</p>";
-        html += "<p>依赖面耦合度(C) max：" + Cmax.toFixed(3) + "</p>";
-        html += "<p>依赖面耦合度(C) 90分位值：" + CList[parseInt(CList.length * 0.9)].toFixed(3) + "</p>";
-        html += "<p>依赖面耦合度(C) 85分位值：" + CList[parseInt(CList.length * 0.85)].toFixed(3) + "</p>";
-        html += "<p>依赖面耦合度(C) 80分位值：" + CList[parseInt(CList.length * 0.8)].toFixed(3) + "</p>";
-        html += "<p>依赖面耦合度(C) 75分位值(Q3)：" + CList[parseInt(CList.length * 0.75)].toFixed(3) + "</p>";
-        html += "<p>依赖面耦合度(C) 中位值(Q2)：" + CList[parseInt(CList.length * 0.5)].toFixed(3) + "</p>";
-        html += "<p>依赖面耦合度(C) 25分位值(Q1)：" + CList[parseInt(CList.length * 0.25)].toFixed(3) + "</p>";
-        html += "<p>依赖面耦合度(C) min：" + Cmin.toFixed(3) + "</p>";
-        html += "<br />";
-        current_panel = 'D';
+        if (CList.length !== 0) {
+            html += "<p>依赖面耦合度(C) 平均值：" + (Csum / len).toFixed(3) + "</p>";
+            html += "<p>依赖面耦合度(C) max：" + Cmax.toFixed(3) + "</p>";
+            html += "<p>依赖面耦合度(C) 90分位值：" + CList[parseInt(CList.length * 0.9)].toFixed(3) + "</p>";
+            html += "<p>依赖面耦合度(C) 85分位值：" + CList[parseInt(CList.length * 0.85)].toFixed(3) + "</p>";
+            html += "<p>依赖面耦合度(C) 80分位值：" + CList[parseInt(CList.length * 0.8)].toFixed(3) + "</p>";
+            html += "<p>依赖面耦合度(C) 75分位值(Q3)：" + CList[parseInt(CList.length * 0.75)].toFixed(3) + "</p>";
+            html += "<p>依赖面耦合度(C) 中位值(Q2)：" + CList[parseInt(CList.length * 0.5)].toFixed(3) + "</p>";
+            html += "<p>依赖面耦合度(C) 25分位值(Q1)：" + CList[parseInt(CList.length * 0.25)].toFixed(3) + "</p>";
+            html += "<p>依赖面耦合度(C) min：" + Cmin.toFixed(3) + "</p>";
+            html += "<br />";
+            current_panel = 'D';
+        }
     }
     $("#data_panel1").html(html);
 }
@@ -1280,9 +1304,6 @@ graph.on('edge:click', (e) => {
                       </ul>
                       <ul>
                         <li><b>依赖实例数(D(logD))</b>: ${selectedEdge.D}(${selectedEdge.logD})</li>
-                      </ul>             
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
                       </ul>`;
     } else {
         outDiv.innerHTML = `
@@ -1295,9 +1316,6 @@ graph.on('edge:click', (e) => {
                       </ul>                        
                       <ul>
                         <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
-                      </ul>                 
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
                       </ul>`;
     }
 

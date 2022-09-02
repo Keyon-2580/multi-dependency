@@ -72,9 +72,9 @@ data:
   #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/source-tomcat.txt
   #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/source-atlas.txt
   #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/source-IssueTracker_after.txt
-  #  serialize_path: C:/Dev/DependencyAnalysis/Result/IssueTracker-Master/source-IssueTracker_before-2022-01-24.txt
-  serialize_path: C:/Dev/DependencyAnalysis/Result/tomcat-calm/source-tomcat-calm.txt
-#  serialize_path: C:/Dev/DependencyAnalysis/Result/TestC/0901.txt
+  serialize_path: C:/Dev/DependencyAnalysis/Result/IssueTracker-Master/source-IssueTracker_before-2022-01-24.txt
+  #serialize_path: C:/Dev/DependencyAnalysis/Result/tomcat-calm/source-tomcat-calm.txt
+  #serialize_path: C:/Dev/DependencyAnalysis/Result/TestC/0902.txt
 #  serialize_path: C:/Dev\DependencyAnalysis/Result/issuetracker-repo/RepositoryService-source-issue-tracker.txt
   coupling_value_path: C:/Dev/DependencyAnalysis/Result/coupling_value_export_tomcat.csv
   anonymization: false

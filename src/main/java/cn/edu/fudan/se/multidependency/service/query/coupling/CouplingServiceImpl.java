@@ -114,7 +114,11 @@ public class CouplingServiceImpl implements CouplingService {
 
     @Override
     public double calC1to2(int funcNum1, int funcNum2){
-        return (2 * ((double)funcNum1) * ((double)funcNum2)) / ((double)funcNum1 + (double)funcNum2);
+        if (funcNum1 + funcNum2 == 0) {
+            return 0;
+        } else {
+            return (2 * ((double)funcNum1) * ((double)funcNum2)) / ((double)funcNum1 + (double)funcNum2);
+        }
     }
 
     @Override
@@ -333,7 +337,7 @@ public class CouplingServiceImpl implements CouplingService {
             pckList.addAll(pckMap.get(parentPck));
         }
 
-        Map<Map<Package, Package>, List<DependsOn>> dependsOnBetweenPackages = new HashMap<>();
+        Map<Map<Package, Package>, Set<DependsOn>> dependsOnBetweenPackages = new HashMap<>();
 
         for(Package pck: pckList) {
             Double parentInstability = 0.0;
@@ -394,7 +398,7 @@ public class CouplingServiceImpl implements CouplingService {
                         if (dependsOnBetweenPackages.containsKey(pckDependsOnTmp)) {
                             dependsOnBetweenPackages.get(pckDependsOnTmp).add(dependsOn);
                         } else {
-                            List<DependsOn> dependsOnsListTmp = new ArrayList<>();
+                            Set<DependsOn> dependsOnsListTmp = new HashSet<>();
                             dependsOnsListTmp.add(dependsOn);
                             dependsOnBetweenPackages.put(pckDependsOnTmp, dependsOnsListTmp);
                         }
@@ -421,7 +425,7 @@ public class CouplingServiceImpl implements CouplingService {
                         if (dependsOnBetweenPackages.containsKey(pckDependsOnTmp)) {
                             dependsOnBetweenPackages.get(pckDependsOnTmp).add(dependsOn);
                         } else {
-                            List<DependsOn> dependsOnsListTmp = new ArrayList<>();
+                            Set<DependsOn> dependsOnsListTmp = new HashSet<>();
                             dependsOnsListTmp.add(dependsOn);
                             dependsOnBetweenPackages.put(pckDependsOnTmp, dependsOnsListTmp);
                         }
@@ -589,8 +593,10 @@ public class CouplingServiceImpl implements CouplingService {
                     tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(mainPackage.getId(), pck.getId()));
                     tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(mainPackage.getId(), pck.getId()));
                 }else if(pck.equals(parentPackage)){
-                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(pck.getId(), mainPackage.getId()));
-                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(pck.getId(), mainPackage.getId()));
+                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(mainPackage.getId(), pck.getId()));
+                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(mainPackage.getId(), pck.getId()));
+//                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(pck.getId(), mainPackage.getId()));
+//                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(pck.getId(), mainPackage.getId()));
                 }else{
                     tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackages(mainPackage.getId(), pck.getId()));
                     tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackages(pck.getId(), mainPackage.getId()));
