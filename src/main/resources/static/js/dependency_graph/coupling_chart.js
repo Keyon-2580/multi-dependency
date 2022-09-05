@@ -1,6 +1,7 @@
 let show_panel = true;
 let show_edge_label = true;
 let show_panel_btm = false;
+let is_ntb_loaded = false;
 let CHART_MODE = "package";
 const loading_div = $("#loading_div");
 let NOF = 0;
@@ -453,16 +454,21 @@ function calcAbsGComplexity(k, w) {
     });
     return finalW;
 }
+function hideBottomPanel() {
+    let panelContainer = document.getElementById("btm_panel");
+    let chartContainer = document.getElementById("chart_container");
+    chartContainer.style.paddingBottom = "44px";
+    chartContainer.style.marginBottom = "0";
+    panelContainer.style.height = "44px";
+    show_panel_btm = false;
+    document.getElementById("panel_btn_icon_btm")
+        .className = "layui-icon layui-icon-down";
+    var element = layui.element;
+    element.tabChange('btm_tab', 'edge_tab');
+}
 function handleBottomPanelBtn() {
     if (show_panel_btm) {
-        let panelContainer = document.getElementById("btm_panel");
-        let chartContainer = document.getElementById("chart_container");
-        chartContainer.style.paddingBottom = "44px";
-        chartContainer.style.marginBottom = "0";
-        panelContainer.style.height = "44px";
-        show_panel_btm = false;
-        document.getElementById("panel_btn_icon_btm")
-            .className = "layui-icon layui-icon-down";
+        hideBottomPanel();
     } else {
         let panelContainer = document.getElementById("btm_panel");
         let chartContainer = document.getElementById("chart_container");
@@ -488,7 +494,6 @@ function getNodeOneStepDetail(node) {
         I: 0,
         D: 0,
         C: 0,
-        unfoldable: true
     };
     let json = {};
     let unfoldPcks = [];
@@ -511,7 +516,6 @@ function getNodeOneStepDetail(node) {
 
         success: function (result) {
             if(result["code"] === 200){
-                statistics.unfoldable = true;
                 const edges = result["edges"];
                 let IList = [];
                 let DList = [];
@@ -538,8 +542,6 @@ function getNodeOneStepDetail(node) {
                 statistics.I = parseFloat(IP90);
                 statistics.D = parseFloat(DP90);
                 statistics.C = parseFloat(CP90);
-            }else if(result["code"] === -1){
-                statistics.unfoldable = false;
             }
         }
     });
@@ -871,7 +873,19 @@ function levelLayoutAdjust(){
 //
 //     console.log(allCycles);
 }
+layui.use('element', function(){
+    var element = layui.element;
 
+    //一些事件触发
+    element.on('tab(btm_tab)', function(data) {
+        if (data.index === 1) {
+            if (!is_ntb_loaded) {
+                loadNodeTable1();
+                is_ntb_loaded = true;
+            }
+        }
+    });
+});
 function savePresentNodes(){
     present_packages.length = 0;
     graph.getNodes().forEach(node => {
@@ -898,6 +912,7 @@ function loadEdgeTable1() {
             ,defaultToolbar: []
             ,toolbar: '#toolbarDemo'
             ,autoSort: false
+            ,lineStyle: 'height:auto'
             ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
             ,cols: [[
                 {type:'checkbox'}
@@ -980,14 +995,14 @@ function loadNodeTable1() {
                 I: res["I"],
                 D: res["D"],
                 C: res["C"],
-                unfoldable: res["unfoldable"],
+                unfoldable: node._cfg.model["unfoldable"],
             });
-            if (!res["unfoldable"]) {
-                let model = node._cfg.model;
-                model.style.stroke = 'rgb(0,128,0)';
-                model.style.lineWidth = 2.0;
-                graph.updateItem(node, model, false);
-            }
+            // if (!res["unfoldable"]) {
+            //     let model = node._cfg.model;
+            //     model.style.stroke = 'rgb(0,128,0)';
+            //     model.style.lineWidth = 2.0;
+            //     graph.updateItem(node, model, false);
+            // }
         } else {
             node_table1_data.push({
                 id: node._cfg.id,
@@ -1216,7 +1231,7 @@ function loadPanel(loadBtmTables){
     $("#data_panel2").html(html2);
     if (loadBtmTables) {
         loadEdgeTable1();
-        loadNodeTable1();
+        // loadNodeTable1();
     }
 }
 
@@ -1263,11 +1278,27 @@ function handleEdgesWidth(){
         }
     })
 }
+function handleNodeStroke() {
+    graph.getNodes().forEach(node => {
+        let model = node._cfg.model;
+        if (model['unfoldable'] === false) {
+            model.style.stroke = 'rgb(0,128,0)';
+            model.style.lineWidth = 2.0;
+            graph.updateItem(node, model, false);
+        }
 
+    });
+
+}
 function loadGraph(){
+    is_ntb_loaded = false;
+    if (show_panel_btm) {
+        hideBottomPanel();
+    }
     graph.data(data);
     graph.render();
     levelLayout();
+    handleNodeStroke();
     handleReverseEdgesAndExtends();
     levelLayoutAdjust();
     savePresentNodes();

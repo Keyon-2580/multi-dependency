@@ -4,6 +4,7 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.Coupling;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
+import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
@@ -41,6 +42,9 @@ public class CouplingServiceImpl implements CouplingService {
 
     @Autowired
     private ContainRelationService containRelationService;
+
+    @Autowired
+    private PackageRepository packageRepository;
 
     @Override
     public Map<ProjectFile, Double> calGroupInstablity(List<Long> fileIdList){
@@ -356,12 +360,13 @@ public class CouplingServiceImpl implements CouplingService {
             String pckName = FileUtil.extractPackagePath(pck.getDirectoryPath(), isTopLevel);
             int pckContainsFilesNum = 0;
             if(pck.equals(parentPackage)){
+                // parent package下单独的文件虚拟成一个包
                 pckContainsFilesNum = containRepository.findPackageContainFilesNum(pck.getId());
             }else{
                 pckContainsFilesNum = containRepository.findPackageContainAllFilesNum(pck.getId());
             }
             int pckContainsFilesLOC = containRepository.findPackageContainAllFilesLOC(pck.getId());
-
+            tmpPck.put("unfoldable", packageRepository.isPackageUnfoldable(pck.getId()));
             tmpPck.put("id", pck.getId().toString());
             tmpPck.put("path", pck.getDirectoryPath());
             tmpPck.put("name", pckName);
