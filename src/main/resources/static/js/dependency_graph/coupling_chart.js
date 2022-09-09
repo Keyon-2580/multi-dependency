@@ -2,6 +2,7 @@ let show_panel = true;
 let show_edge_label = true;
 let show_panel_btm = false;
 let is_ntb_loaded = false;
+let max_level = -1;
 let CHART_MODE = "package";
 const loading_div = $("#loading_div");
 let NOF = 0;
@@ -86,6 +87,9 @@ const tooltip = new G6.Tooltip({
               </ul>
               <ul>
                 <li>path: ${e.item.getModel().path}</li>
+              </ul>
+              <ul>
+                <li>level: ${e.item.getModel().level}</li>
               </ul>
               <ul>
                 <li>instability: ${e.item.getModel().instability}</li>
@@ -256,6 +260,8 @@ const toolbar = new G6.ToolBar({
                 success: function (result) {
                     data_stack.push(graph.save());
                     data = result;
+                    const nodes = data["nodes"];
+                    max_level = nodes[nodes.length-1].level;
                     loadGraph();
                 }
             });
@@ -452,6 +458,23 @@ function calcAbsGComplexity(k, w) {
         }
 
     });
+    // special relations
+    const r = 0.5;
+    const c = 0.5;
+    const theta = 0.5 * graph.getHeight();
+    let reverseW = 0.0;
+    let crossW = 0.0;
+    graph.getEdges().forEach(edge => {
+       if (edge._cfg.states.length !== 0) {
+           reverseW += edge._cfg.model[w] * r;
+       }
+       const startLevel = edge._cfg.source._cfg.model.y;
+       const endLevel = edge._cfg.target._cfg.model.y;
+       if (Math.abs(startLevel-endLevel) > theta) {
+           crossW += edge._cfg.model[w] * c;
+       }
+    });
+    finalW += reverseW + crossW;
     return finalW;
 }
 function hideBottomPanel() {
@@ -508,7 +531,7 @@ function getNodeOneStepDetail(node) {
     json["otherPcks"] = otherPcks;
     $.ajax({
         async: false,
-        url: "/coupling/group/one_step_child_packages",
+        url: "/coupling/group/one_step_child_packages_no_layout",
         type: "POST",
         contentType: "application/json",
         dataType: "json",
@@ -595,6 +618,8 @@ function unfoldPkg() {
                 if(result["code"] === 200){
                     data_stack.push(graph.save())
                     data = result;
+                    const nodes = data["nodes"];
+                    max_level = nodes[nodes.length-1].level;
                     loadGraph();
                 }else if(result["code"] === -1){
                     layer.msg("错误！\n" + result["pck"]["directoryPath"] + "\n已无法再展开！");
@@ -610,6 +635,8 @@ function instabilityAjax(){
         url : "/coupling/group/top_level_packages",
         success : function(result) {
             data = result;
+            const nodes = data["nodes"];
+            max_level = nodes[nodes.length-1].level;
             // let nodes_data = json_data["nodes"];
             // let edges_data = json_data["edges"];
             //
@@ -623,7 +650,6 @@ function instabilityAjax(){
 
 function levelLayout(){
     let nodelist = graph.getNodes();
-
     let list1 = [], list2 = [], list3 = [], list4 = [], list5 = [], allList = [];
     nodelist.forEach(node =>{
         node._cfg.model.gradation = node._cfg.model.instability;
@@ -665,7 +691,6 @@ function levelLayout(){
             list5.push(node);
         }
     })
-
     allList.push(list1);
     allList.push(list2);
     allList.push(list3);
@@ -747,13 +772,219 @@ function levelLayout(){
     graph.fitCenter();
     graph.fitView();
 }
+function levelLayout2(){
+
+    let nodelist = graph.getNodes();
+    let allList = [];
+    let levelGaps = [];
+    for (let i = 0; i <= max_level; i++) {
+        let curr_level = [];
+        nodelist.forEach(node => {
+            if (node._cfg.model.level === i) {
+                curr_level.push(node);
+            }
+        })
+        allList.push(curr_level);
+        levelGaps[i] = curr_level.length * 5;
+    }
+    for(let i = 0; i < allList.length; i++) {
+
+        if(allList[i].length !== 0) {
+            allList[i].sort(function(a,b){return parseInt(a._cfg.model.parentPckId)
+                - parseInt(b._cfg.model.parentPckId)});
+            allList[i].forEach((node, index) =>{
+                node.updatePosition({
+                    // x: (index - (list1.length / 2)) * 70,
+                    x: index * 70,
+                    y: (i+1) * 70
+                });
+            })
+            const DELTA = 70 / allList[i].length;
+            for (let j = 0; j < allList[i].length; j++) {
+                for (let k = j+1; k < allList[i].length; k++) {
+                    let node1 = allList[i][j];
+                    let node2 = allList[i][k];
+                    const edgeId1 = node1._cfg.id + '_' + node2._cfg.id;
+                    const edgeId2 = node2._cfg.id + '_' + node1._cfg.id;
+                    let edge1 = graph.findById(edgeId1);
+                    let edge2 = graph.findById(edgeId2);
+                    if (edge1 === undefined && edge2 === undefined) continue;
+                    if (edge1 !== undefined && edge2 === undefined) {
+                        node1.updatePosition({
+                            // x: (index - (list1.length / 2)) * 70,
+                            x: node1._cfg.model.x,
+                            y: node1._cfg.model.y - DELTA
+                        });
+                    }
+                    if (edge2 !== undefined && edge1 === undefined) {
+                        node2.updatePosition({
+                            // x: (index - (list1.length / 2)) * 70,
+                            x: node2._cfg.model.x,
+                            y: node2._cfg.model.y - DELTA
+                        });
+                    }
+                    if (edge1 !== undefined && edge2 !== undefined) {
+                        if (edge1._cfg.model['D'] > edge2._cfg.model['D']) {
+                            node1.updatePosition({
+                                // x: (index - (list1.length / 2)) * 70,
+                                x: node1._cfg.model.x,
+                                y: node1._cfg.model.y - DELTA
+                            });
+                        } else {
+                            node2.updatePosition({
+                                // x: (index - (list1.length / 2)) * 70,
+                                x: node2._cfg.model.x,
+                                y: node2._cfg.model.y - DELTA
+                            });
+                        }
+
+
+                    }
+                }
+            }
+        }
+    }
+
+    graph.refresh();
+    graph.fitCenter();
+    graph.fitView();
+}
+// function levelLayout2(){
+//     let nodelist = graph.getNodes();
+//     let list1 = [], list2 = [], list3 = [], list4 = [], list5 = [], allList = [];
+//     const L1 = max_level * 0.25;
+//     const L2 = max_level * 0.5;
+//     const L3 = max_level * 0.75;
+//     const L4 = max_level;
+//     nodelist.forEach(node =>{
+//         if (node._cfg.model.instability >= L4) {
+//             node.update({
+//                 style:{
+//                     fill:INSTABILITY_COLOR5
+//                 }
+//             });
+//             list5.push(node);
+//         } else if (node._cfg.model.instability >= L3) {
+//             node.update({
+//                 style:{
+//                     fill:INSTABILITY_COLOR4
+//                 }
+//             });
+//             list4.push(node);
+//         } else if (node._cfg.model.instability >= L2) {
+//             node.update({
+//                 style:{
+//                     fill:INSTABILITY_COLOR3
+//                 }
+//             });
+//             list3.push(node);
+//         } else if (node._cfg.model.instability >= L1) {
+//             node.update({
+//                 style:{
+//                     fill:INSTABILITY_COLOR2
+//                 }
+//             });
+//             list2.push(node);
+//         } else {
+//             node.update({
+//                 style:{
+//                     fill:INSTABILITY_COLOR1
+//                 }
+//             });
+//             list1.push(node);
+//         }
+//     })
+//
+//     allList.push(list1);
+//     allList.push(list2);
+//     allList.push(list3);
+//     allList.push(list4);
+//     allList.push(list5);
+//
+//     let startIndex = 0;
+//     let minParentPckId = "0";
+//     for(let i = 0; i < allList.length; i++){
+//         if(allList[i].length !== 0){
+//             minParentPckId = allList[i][0]._cfg.model.parentPckId;
+//             allList[i].sort(function(a,b){return a._cfg.model.parentPckId - b._cfg.model.parentPckId});
+//             allList[i].forEach((node, index) =>{
+//                 minParentPckId = Math.min(minParentPckId, node._cfg.model.parentPckId);
+//                 node.updatePosition({
+//                     // x: (index - (list1.length / 2)) * 70,
+//                     x: index * 70,
+//                     y: 70 * (i + 1) - ((node._cfg.model.instability - (0.8 - i * 0.2)) / 0.2) * 70,
+//                 });
+//             })
+//             startIndex = i + 1;
+//             break;
+//         }
+//     }
+//
+//     if(startIndex < allList.length){
+//         for(let i = startIndex; i < allList.length; i++){
+//             let sortedList = [];
+//             let nullList = [];
+//
+//             allList[i].forEach(node =>{
+//                 let parentPosX = 0.0;
+//                 let parentPosSum = 0.0;
+//                 let neighbors = node.getNeighbors();
+//
+//                 neighbors.forEach(neighbor =>{
+//                     if(neighbor._cfg.model.instability > node._cfg.model.instability){
+//                         parentPosX += neighbor._cfg.model.x;
+//                         parentPosSum += 1;
+//                     }
+//                 })
+//
+//                 if(parentPosSum === 0){
+//                     if(neighbors.length > 0){
+//                         node._cfg.model.barycenter = 0;
+//                         sortedList.push(node);
+//                     }else{
+//                         nullList.push(node);
+//                     }
+//                 }else{
+//                     node._cfg.model.barycenter = parentPosX / parentPosSum;
+//                     sortedList.push(node);
+//                 }
+//             })
+//
+//             sortedList.sort(function(a,b){return a._cfg.model.barycenter - b._cfg.model.barycenter});
+//
+//
+//             sortedList.forEach((node2, index) =>{
+//                 let offset = i % 2 === 0 ? -35 : 0;
+//                 node2.updatePosition({
+//                     // x: (index - (sortedList.length / 2)) * 70,
+//                     x: -100 + offset + index * 70,
+//                     y: 70 * (i + 1) - ((node2._cfg.model.instability - (0.8 - i * 0.2)) / 0.2) * 70,
+//                 });
+//             })
+//
+//             nullList.forEach((nullNode, index) => {
+//                 nullNode.updatePosition({
+//                     // x: (index - (sortedList.length / 2)) * 70,
+//                     x: (index - Math.floor(index / 15) * 15 - 3) * 60,
+//                     y: 70 * (i + 2 + Math.floor(index / 15)) - ((nullNode._cfg.model.instability - (0.8 - i * 0.2)) / 0.2) * 70,
+//                 });
+//             })
+//         }
+//     }
+//
+//     graph.refresh();
+//     graph.fitCenter();
+//     graph.fitView();
+// }
+
 function isEdgeReversed(edge) {
+    let result = false;
     const startLevel = edge._cfg.source._cfg.model.y;
     const endLevel = edge._cfg.target._cfg.model.y;
     if (startLevel > endLevel) {
-        return !edge._cfg.model.isExtendOrImplements;
+        result = !edge._cfg.model.isExtendOrImplements;
     }
-    return false;
+    return result;
 }
 function handleReverseEdgesAndExtends(){
     let edges = graph.getEdges();
@@ -863,15 +1094,7 @@ function levelLayoutAdjust(){
         }
         graph.refresh();
         edge.clearStates();
-
-        // console.log(lowerInEdges)
     }
-//     const { detectAllCycles } = G6.Algorithm;
-//
-// // 检测有向图中的所有简单环
-//     const allCycles = detectAllCycles(data, true);
-//
-//     console.log(allCycles);
 }
 layui.use('element', function(){
     var element = layui.element;
@@ -880,8 +1103,10 @@ layui.use('element', function(){
     element.on('tab(btm_tab)', function(data) {
         if (data.index === 1) {
             if (!is_ntb_loaded) {
+                var index = layer.load(1);
                 loadNodeTable1();
                 is_ntb_loaded = true;
+                layer.close(index);
             }
         }
     });
@@ -1080,8 +1305,8 @@ function loadNodeTable1() {
                            showNodesSet.add(n._cfg.model.id);
                         });
                     });
-                    console.log("after filtering nodes:");
-                    console.log(selected_packages);
+                    // console.log("after filtering nodes:");
+                    // console.log(selected_packages);
                     graph.getEdges().forEach(edge => {
                         if (!showNodesSet.has(edge._cfg.source._cfg.id)
                             || !showNodesSet.has(edge._cfg.target._cfg.id)) {
@@ -1297,10 +1522,14 @@ function loadGraph(){
     }
     graph.data(data);
     graph.render();
-    levelLayout();
+    // levelLayout();
+    if (max_level === 0)
+        levelLayout();
+    else
+        levelLayout2();
     handleNodeStroke();
     handleReverseEdgesAndExtends();
-    levelLayoutAdjust();
+    // levelLayoutAdjust();
     savePresentNodes();
     loadPanel(true);
     handleEdgesWidth();

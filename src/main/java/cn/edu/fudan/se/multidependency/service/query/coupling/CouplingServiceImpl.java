@@ -13,6 +13,7 @@ import cn.edu.fudan.se.multidependency.service.query.BeanCreator;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.utils.DataUtil;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
+import cn.edu.fudan.se.multidependency.utils.GraphLayoutUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -260,9 +261,11 @@ public class CouplingServiceImpl implements CouplingService {
             fileTmp.put("LOC", projectFile.getLoc());
             fileTmp.put("nodeType", "file");
             fileTmp.put("instability", instability.get(projectFile));
+            fileTmp.put("level", 0);
             nodes.add(fileTmp);
         }
-        result.put("nodes", nodes);
+
+
         Map<String, Double> iMap = new HashMap<>();
         for(DependsOn dependsOn: GroupInsideDependsOns){
             JSONObject dependsOnTmp = new JSONObject();
@@ -325,6 +328,13 @@ public class CouplingServiceImpl implements CouplingService {
                 edge.put("I", D);
             }
         }
+        if (edges.size() == 0) {
+            result.put("nodes", nodes);
+        } else {
+            GraphLayoutUtil layoutUtil = new GraphLayoutUtil(nodes, edges);
+            JSONArray leveledNodes = layoutUtil.levelLayout();
+            result.put("nodes", leveledNodes);
+        }
         result.put("edges", edges);
 
         return result;
@@ -376,6 +386,7 @@ public class CouplingServiceImpl implements CouplingService {
             tmpPck.put("label", pckName);
             tmpPck.put("parentPckId", parentPackage.getId().toString());
             tmpPck.put("nodeType", "package");
+            tmpPck.put("level", 0);
 
             List<Map<Package, List<DependsOn>>> listTmp = getGroupInsideAndOutDependsOnByPackage(pck, pckList, parentPackage);
 
@@ -540,7 +551,13 @@ public class CouplingServiceImpl implements CouplingService {
                 edge.put("I", D);
             }
         }
-        result.put("nodes", nodes);
+        if (edges.size() == 0) {
+            result.put("nodes", nodes);
+        } else {
+            GraphLayoutUtil layoutUtil = new GraphLayoutUtil(nodes, edges);
+            JSONArray leveledNodes = layoutUtil.levelLayout();
+            result.put("nodes", leveledNodes);
+        }
         result.put("edges", edges);
         return result;
     }

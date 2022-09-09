@@ -7,6 +7,7 @@ import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.service.query.BeanCreator;
 import cn.edu.fudan.se.multidependency.service.query.coupling.CouplingService;
+import cn.edu.fudan.se.multidependency.utils.GraphLayoutUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -141,10 +142,72 @@ public class CouplingController {
 
         JSONObject result = couplingService.getCouplingValueByPcks(pckMap, parentPcksInstability, false);
         result.put("code", 200);
-
         return result;
     }
 
+    @PostMapping("/group/one_step_child_packages_no_layout")
+    @CrossOrigin
+    @ResponseBody
+    public JSONObject getOneStepChildPackagesCouplingValueNoLayout(@RequestBody JSONObject requestBody){
+//        JSONArray parentPcks = new JSONArray();
+        Map<Long, Double> parentPcksInstability = new HashMap<>();
+        Map<Package, List<Package>> pckMap = new HashMap<>();
+
+        JSONArray otherPcks = requestBody.getJSONArray("otherPcks");
+        JSONArray unfoldPcks = requestBody.getJSONArray("unfoldPcks");
+
+        List<Long> otherPckIds = new ArrayList<>();
+        List<Long> unfoldPckIds = new ArrayList<>();
+        for(int i = 0; i < otherPcks.size(); i++){
+            otherPckIds.add(otherPcks.getJSONObject(i).getLong("id"));
+            parentPcksInstability.put(otherPcks.getJSONObject(i).getLong("id"),
+                    otherPcks.getJSONObject(i).getDouble("instability"));
+        }
+
+        for(int i = 0; i < unfoldPcks.size(); i++){
+            unfoldPckIds.add(unfoldPcks.getJSONObject(i).getLong("id"));
+            parentPcksInstability.put(unfoldPcks.getJSONObject(i).getLong("id"),
+                    unfoldPcks.getJSONObject(i).getDouble("instability"));
+        }
+
+        for(Long pckId: otherPckIds){
+            Package pck = packageRepository.findPackageById(pckId);
+            JSONObject parentPckJson = new JSONObject();
+            parentPckJson.put("id", pck.getId().toString());
+            parentPckJson.put("directoryPath", pck.getDirectoryPath());
+            parentPckJson.put("name", pck.getName());
+            parentPckJson.put("label", pck.getName());
+//            parentPcks.add(parentPckJson);
+
+            List<Package> tmpList = new ArrayList<>();
+            tmpList.add(pck);
+            pckMap.put(pck, tmpList);
+        }
+
+        for(Long pckId: unfoldPckIds){
+            Package parentPackage = packageRepository.findPackageById(pckId);
+            JSONObject parentPckJson = new JSONObject();
+            parentPckJson.put("id", parentPackage.getId().toString());
+            parentPckJson.put("directoryPath", parentPackage.getDirectoryPath());
+            parentPckJson.put("name", parentPackage.getName());
+//            parentPcks.add(parentPckJson);
+
+            List<Package> pckList = new ArrayList<>(packageRepository.findOneStepPackagesById(pckId));
+
+            if(pckList.size() == 0){
+                JSONObject failJson = new JSONObject();
+                failJson.put("code", -1);
+                failJson.put("pck", parentPckJson);
+                return failJson;
+            }
+            if(packageRepository.findIfPackageContainFiles(parentPackage.getId())) pckList.add(parentPackage);
+            pckMap.put(parentPackage, pckList);
+        }
+
+        JSONObject result = couplingService.getCouplingValueByPcks(pckMap, parentPcksInstability, false);
+        result.put("code", 200);
+        return result;
+    }
     /**
      * 返回顶层模块的耦合值
      * @param
@@ -186,7 +249,6 @@ public class CouplingController {
                 fileIds.add(projectFile.getId());
             }
         }
-
         return couplingService.getCouplingValueByFileIds(fileIds, parentPckMap);
     }
 }

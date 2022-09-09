@@ -30,7 +30,7 @@ public interface CouplingRepository extends Neo4jRepository<Coupling, Long> {
     @Query("match (f1:ProjectFile)-[:" + RelationType.str_CONTAIN + "]-(:Type)-[:" + RelationType.str_CONTAIN + "]-" +
             "(m1:Function)-[]->(m2:Function)-[:" + RelationType.str_CONTAIN + "]-(:Type)-[:" + RelationType.str_CONTAIN + "]" +
             "-(f2:ProjectFile) where id(f1)=$file1Id and id(f2)=$file2Id return count(distinct m1);")
-    int queryTwoFilesDependsOnFunctionsNum(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
+    int queryTwoFilesDependsOnFunctionsNum(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);//
 
     @Query("match (f1:ProjectFile)-[:" + RelationType.str_CONTAIN + "]-(:Type)-[:" + RelationType.str_CONTAIN + "*]->" +
             "()-[]->(v2:Variable)<-[:" + RelationType.str_CONTAIN + "*]-(f2:ProjectFile) " +
