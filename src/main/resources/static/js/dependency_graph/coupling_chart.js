@@ -1,6 +1,8 @@
 let show_panel = true;
 let show_edge_label = true;
 let show_panel_btm = false;
+let is_ntb_loaded = false;
+let max_level = -1;
 let CHART_MODE = "package";
 const loading_div = $("#loading_div");
 let NOF = 0;
@@ -37,7 +39,25 @@ const COLOR_LINK_EXTENDS_AND_IMPLEMENTS = '#4393ee';
 const container = document.getElementById('coupling_chart');
 const width = container.scrollWidth;
 const height = container.scrollHeight || 500;
-
+const FILE_NODE_TABLE_COLS = [[
+    {type:'checkbox'}
+    ,{field:'id', title: 'ID', sort: true}
+    ,{field:'name', title: '名称'}
+    ,{field:'LOC', title: '代码行', sort: true}
+    ,{field:'nodeType', title: '类型', sort: true}
+]];
+const PKG_NODE_TABLE_COLS = [[
+    {type:'checkbox'}
+    ,{field:'id', title: 'ID', sort: true}
+    ,{field:'name', title: '名称'}
+    ,{field:'NOF', title: '文件', sort: true}
+    ,{field:'LOC', title: '代码行', sort: true}
+    ,{field:'nodeType', title: '类型', sort: true}
+    ,{field:'I', title: 'I-90分位值', sort: true}
+    ,{field:'D', title: 'D-90分位值', sort: true}
+    ,{field:'C', title: 'C-90分位值', sort: true}
+    ,{field:'unfoldable', title: '可展开', sort: true}
+]];
 const LOW_INTENSITY_EDGE_MODEL = {
     style:{
         stroke: COLOR_LINK_LOW_INTENSITY,
@@ -67,6 +87,9 @@ const tooltip = new G6.Tooltip({
               </ul>
               <ul>
                 <li>path: ${e.item.getModel().path}</li>
+              </ul>
+              <ul>
+                <li>level: ${e.item.getModel().level}</li>
               </ul>
               <ul>
                 <li>instability: ${e.item.getModel().instability}</li>
@@ -101,9 +124,6 @@ const tooltip = new G6.Tooltip({
                       </ul>
                       <ul>
                         <li><b>依赖实例数(D(logD))</b>: ${selectedEdge.D}(${selectedEdge.logD})</li>
-                      </ul>                   
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
                       </ul>`;
             } else {
                 outDiv.innerHTML = `
@@ -116,9 +136,6 @@ const tooltip = new G6.Tooltip({
                       </ul>   
                       <ul>
                         <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
-                      </ul>                                     
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
                       </ul>`;
             }
             // outDiv.innerHTML = `
@@ -243,6 +260,8 @@ const toolbar = new G6.ToolBar({
                 success: function (result) {
                     data_stack.push(graph.save());
                     data = result;
+                    const nodes = data["nodes"];
+                    max_level = nodes[nodes.length-1].level;
                     loadGraph();
                 }
             });
@@ -420,17 +439,59 @@ function handleLeftPanelBtn() {
             .className = "layui-icon layui-icon-right";
     }
 }
+function calcAbsGComplexity(k, w) {
+    let edgeSet = new Set(graph.getEdges());
+    let finalW = 0.0;
+    graph.getEdges().forEach(edge => {
+        if (!isNaN(edge._cfg.model[w])) {
+            const reverseId = edge._cfg.model.target + "_" + edge._cfg.model.source;
+            const reverseEdge = graph.findById(reverseId);
+            if (reverseEdge !== undefined && edgeSet.has(reverseEdge) && edgeSet.has(edge)) {
+                const forwardW = Math.max(edge._cfg.model[w], reverseEdge._cfg.model[w]);
+                const backwardW = Math.min(edge._cfg.model[w], reverseEdge._cfg.model[w]);
+                finalW += forwardW + backwardW * k;
+                edgeSet.delete(reverseEdge);
+            } else if (reverseEdge === undefined && edgeSet.has(edge)) {
+                finalW += parseFloat(edge._cfg.model[w]);
+            }
+            edgeSet.delete(edge);
+        }
 
+    });
+    // special relations
+    const r = 0.5;
+    const c = 0.5;
+    const theta = 0.5 * graph.getHeight();
+    let reverseW = 0.0;
+    let crossW = 0.0;
+    graph.getEdges().forEach(edge => {
+       if (edge._cfg.states.length !== 0) {
+           reverseW += edge._cfg.model[w] * r;
+       }
+       const startLevel = edge._cfg.source._cfg.model.y;
+       const endLevel = edge._cfg.target._cfg.model.y;
+       if (endLevel - startLevel > theta) {
+           crossW += edge._cfg.model[w] * c;
+       }
+    });
+    finalW += reverseW + crossW;
+    return finalW;
+}
+function hideBottomPanel() {
+    let panelContainer = document.getElementById("btm_panel");
+    let chartContainer = document.getElementById("chart_container");
+    chartContainer.style.paddingBottom = "44px";
+    chartContainer.style.marginBottom = "0";
+    panelContainer.style.height = "44px";
+    show_panel_btm = false;
+    document.getElementById("panel_btn_icon_btm")
+        .className = "layui-icon layui-icon-down";
+    var element = layui.element;
+    element.tabChange('btm_tab', 'edge_tab');
+}
 function handleBottomPanelBtn() {
     if (show_panel_btm) {
-        let panelContainer = document.getElementById("btm_panel");
-        let chartContainer = document.getElementById("chart_container");
-        chartContainer.style.paddingBottom = "44px";
-        chartContainer.style.marginBottom = "0";
-        panelContainer.style.height = "44px";
-        show_panel_btm = false;
-        document.getElementById("panel_btn_icon_btm")
-            .className = "layui-icon layui-icon-down";
+        hideBottomPanel();
     } else {
         let panelContainer = document.getElementById("btm_panel");
         let chartContainer = document.getElementById("chart_container");
@@ -456,7 +517,6 @@ function getNodeOneStepDetail(node) {
         I: 0,
         D: 0,
         C: 0,
-        unfoldable: true
     };
     let json = {};
     let unfoldPcks = [];
@@ -471,7 +531,7 @@ function getNodeOneStepDetail(node) {
     json["otherPcks"] = otherPcks;
     $.ajax({
         async: false,
-        url: "/coupling/group/one_step_child_packages",
+        url: "/coupling/group/one_step_child_packages_no_layout",
         type: "POST",
         contentType: "application/json",
         dataType: "json",
@@ -479,7 +539,6 @@ function getNodeOneStepDetail(node) {
 
         success: function (result) {
             if(result["code"] === 200){
-                statistics.unfoldable = true;
                 const edges = result["edges"];
                 let IList = [];
                 let DList = [];
@@ -506,8 +565,6 @@ function getNodeOneStepDetail(node) {
                 statistics.I = parseFloat(IP90);
                 statistics.D = parseFloat(DP90);
                 statistics.C = parseFloat(CP90);
-            }else if(result["code"] === -1){
-                statistics.unfoldable = false;
             }
         }
     });
@@ -561,6 +618,8 @@ function unfoldPkg() {
                 if(result["code"] === 200){
                     data_stack.push(graph.save())
                     data = result;
+                    const nodes = data["nodes"];
+                    max_level = nodes[nodes.length-1].level;
                     loadGraph();
                 }else if(result["code"] === -1){
                     layer.msg("错误！\n" + result["pck"]["directoryPath"] + "\n已无法再展开！");
@@ -576,6 +635,8 @@ function instabilityAjax(){
         url : "/coupling/group/top_level_packages",
         success : function(result) {
             data = result;
+            const nodes = data["nodes"];
+            max_level = nodes[nodes.length-1].level;
             // let nodes_data = json_data["nodes"];
             // let edges_data = json_data["edges"];
             //
@@ -589,7 +650,6 @@ function instabilityAjax(){
 
 function levelLayout(){
     let nodelist = graph.getNodes();
-
     let list1 = [], list2 = [], list3 = [], list4 = [], list5 = [], allList = [];
     nodelist.forEach(node =>{
         node._cfg.model.gradation = node._cfg.model.instability;
@@ -631,7 +691,6 @@ function levelLayout(){
             list5.push(node);
         }
     })
-
     allList.push(list1);
     allList.push(list2);
     allList.push(list3);
@@ -713,13 +772,219 @@ function levelLayout(){
     graph.fitCenter();
     graph.fitView();
 }
+function levelLayout2(){
+
+    let nodelist = graph.getNodes();
+    let allList = [];
+    let levelGaps = [];
+    for (let i = 0; i <= max_level; i++) {
+        let curr_level = [];
+        nodelist.forEach(node => {
+            if (node._cfg.model.level === i) {
+                curr_level.push(node);
+            }
+        })
+        allList.push(curr_level);
+        levelGaps[i] = curr_level.length * 5;
+    }
+    for(let i = 0; i < allList.length; i++) {
+
+        if(allList[i].length !== 0) {
+            allList[i].sort(function(a,b){return parseInt(a._cfg.model.parentPckId)
+                - parseInt(b._cfg.model.parentPckId)});
+            allList[i].forEach((node, index) =>{
+                node.updatePosition({
+                    // x: (index - (list1.length / 2)) * 70,
+                    x: index * 70,
+                    y: (i+1) * 70
+                });
+            })
+            const DELTA = 70 / allList[i].length;
+            for (let j = 0; j < allList[i].length; j++) {
+                for (let k = j+1; k < allList[i].length; k++) {
+                    let node1 = allList[i][j];
+                    let node2 = allList[i][k];
+                    const edgeId1 = node1._cfg.id + '_' + node2._cfg.id;
+                    const edgeId2 = node2._cfg.id + '_' + node1._cfg.id;
+                    let edge1 = graph.findById(edgeId1);
+                    let edge2 = graph.findById(edgeId2);
+                    if (edge1 === undefined && edge2 === undefined) continue;
+                    if (edge1 !== undefined && edge2 === undefined) {
+                        node1.updatePosition({
+                            // x: (index - (list1.length / 2)) * 70,
+                            x: node1._cfg.model.x,
+                            y: node1._cfg.model.y - DELTA
+                        });
+                    }
+                    if (edge2 !== undefined && edge1 === undefined) {
+                        node2.updatePosition({
+                            // x: (index - (list1.length / 2)) * 70,
+                            x: node2._cfg.model.x,
+                            y: node2._cfg.model.y - DELTA
+                        });
+                    }
+                    if (edge1 !== undefined && edge2 !== undefined) {
+                        if (edge1._cfg.model['D'] > edge2._cfg.model['D']) {
+                            node1.updatePosition({
+                                // x: (index - (list1.length / 2)) * 70,
+                                x: node1._cfg.model.x,
+                                y: node1._cfg.model.y - DELTA
+                            });
+                        } else {
+                            node2.updatePosition({
+                                // x: (index - (list1.length / 2)) * 70,
+                                x: node2._cfg.model.x,
+                                y: node2._cfg.model.y - DELTA
+                            });
+                        }
+
+
+                    }
+                }
+            }
+        }
+    }
+
+    graph.refresh();
+    graph.fitCenter();
+    graph.fitView();
+}
+// function levelLayout2(){
+//     let nodelist = graph.getNodes();
+//     let list1 = [], list2 = [], list3 = [], list4 = [], list5 = [], allList = [];
+//     const L1 = max_level * 0.25;
+//     const L2 = max_level * 0.5;
+//     const L3 = max_level * 0.75;
+//     const L4 = max_level;
+//     nodelist.forEach(node =>{
+//         if (node._cfg.model.instability >= L4) {
+//             node.update({
+//                 style:{
+//                     fill:INSTABILITY_COLOR5
+//                 }
+//             });
+//             list5.push(node);
+//         } else if (node._cfg.model.instability >= L3) {
+//             node.update({
+//                 style:{
+//                     fill:INSTABILITY_COLOR4
+//                 }
+//             });
+//             list4.push(node);
+//         } else if (node._cfg.model.instability >= L2) {
+//             node.update({
+//                 style:{
+//                     fill:INSTABILITY_COLOR3
+//                 }
+//             });
+//             list3.push(node);
+//         } else if (node._cfg.model.instability >= L1) {
+//             node.update({
+//                 style:{
+//                     fill:INSTABILITY_COLOR2
+//                 }
+//             });
+//             list2.push(node);
+//         } else {
+//             node.update({
+//                 style:{
+//                     fill:INSTABILITY_COLOR1
+//                 }
+//             });
+//             list1.push(node);
+//         }
+//     })
+//
+//     allList.push(list1);
+//     allList.push(list2);
+//     allList.push(list3);
+//     allList.push(list4);
+//     allList.push(list5);
+//
+//     let startIndex = 0;
+//     let minParentPckId = "0";
+//     for(let i = 0; i < allList.length; i++){
+//         if(allList[i].length !== 0){
+//             minParentPckId = allList[i][0]._cfg.model.parentPckId;
+//             allList[i].sort(function(a,b){return a._cfg.model.parentPckId - b._cfg.model.parentPckId});
+//             allList[i].forEach((node, index) =>{
+//                 minParentPckId = Math.min(minParentPckId, node._cfg.model.parentPckId);
+//                 node.updatePosition({
+//                     // x: (index - (list1.length / 2)) * 70,
+//                     x: index * 70,
+//                     y: 70 * (i + 1) - ((node._cfg.model.instability - (0.8 - i * 0.2)) / 0.2) * 70,
+//                 });
+//             })
+//             startIndex = i + 1;
+//             break;
+//         }
+//     }
+//
+//     if(startIndex < allList.length){
+//         for(let i = startIndex; i < allList.length; i++){
+//             let sortedList = [];
+//             let nullList = [];
+//
+//             allList[i].forEach(node =>{
+//                 let parentPosX = 0.0;
+//                 let parentPosSum = 0.0;
+//                 let neighbors = node.getNeighbors();
+//
+//                 neighbors.forEach(neighbor =>{
+//                     if(neighbor._cfg.model.instability > node._cfg.model.instability){
+//                         parentPosX += neighbor._cfg.model.x;
+//                         parentPosSum += 1;
+//                     }
+//                 })
+//
+//                 if(parentPosSum === 0){
+//                     if(neighbors.length > 0){
+//                         node._cfg.model.barycenter = 0;
+//                         sortedList.push(node);
+//                     }else{
+//                         nullList.push(node);
+//                     }
+//                 }else{
+//                     node._cfg.model.barycenter = parentPosX / parentPosSum;
+//                     sortedList.push(node);
+//                 }
+//             })
+//
+//             sortedList.sort(function(a,b){return a._cfg.model.barycenter - b._cfg.model.barycenter});
+//
+//
+//             sortedList.forEach((node2, index) =>{
+//                 let offset = i % 2 === 0 ? -35 : 0;
+//                 node2.updatePosition({
+//                     // x: (index - (sortedList.length / 2)) * 70,
+//                     x: -100 + offset + index * 70,
+//                     y: 70 * (i + 1) - ((node2._cfg.model.instability - (0.8 - i * 0.2)) / 0.2) * 70,
+//                 });
+//             })
+//
+//             nullList.forEach((nullNode, index) => {
+//                 nullNode.updatePosition({
+//                     // x: (index - (sortedList.length / 2)) * 70,
+//                     x: (index - Math.floor(index / 15) * 15 - 3) * 60,
+//                     y: 70 * (i + 2 + Math.floor(index / 15)) - ((nullNode._cfg.model.instability - (0.8 - i * 0.2)) / 0.2) * 70,
+//                 });
+//             })
+//         }
+//     }
+//
+//     graph.refresh();
+//     graph.fitCenter();
+//     graph.fitView();
+// }
+
 function isEdgeReversed(edge) {
+    let result = false;
     const startLevel = edge._cfg.source._cfg.model.y;
     const endLevel = edge._cfg.target._cfg.model.y;
     if (startLevel > endLevel) {
-        return !edge._cfg.model.isExtendOrImplements;
+        result = !edge._cfg.model.isExtendOrImplements;
     }
-    return false;
+    return result;
 }
 function handleReverseEdgesAndExtends(){
     let edges = graph.getEdges();
@@ -829,17 +1094,23 @@ function levelLayoutAdjust(){
         }
         graph.refresh();
         edge.clearStates();
-
-        // console.log(lowerInEdges)
     }
-//     const { detectAllCycles } = G6.Algorithm;
-//
-// // 检测有向图中的所有简单环
-//     const allCycles = detectAllCycles(data, true);
-//
-//     console.log(allCycles);
 }
+layui.use('element', function(){
+    var element = layui.element;
 
+    //一些事件触发
+    element.on('tab(btm_tab)', function(data) {
+        if (data.index === 1) {
+            if (!is_ntb_loaded) {
+                var index = layer.load(1);
+                loadNodeTable1();
+                is_ntb_loaded = true;
+                layer.close(index);
+            }
+        }
+    });
+});
 function savePresentNodes(){
     present_packages.length = 0;
     graph.getNodes().forEach(node => {
@@ -866,6 +1137,7 @@ function loadEdgeTable1() {
             ,defaultToolbar: []
             ,toolbar: '#toolbarDemo'
             ,autoSort: false
+            ,lineStyle: 'height:auto'
             ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
             ,cols: [[
                 {type:'checkbox'}
@@ -878,8 +1150,8 @@ function loadEdgeTable1() {
             ]]
             ,data: edge_table1_data
             ,page: {
-                layout: ['count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
-                limit: 5
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                limit: 10
             }
         });
         table.on('sort(edge1)', function (obj){
@@ -948,14 +1220,14 @@ function loadNodeTable1() {
                 I: res["I"],
                 D: res["D"],
                 C: res["C"],
-                unfoldable: res["unfoldable"],
+                unfoldable: node._cfg.model["unfoldable"],
             });
-            if (!res["unfoldable"]) {
-                let model = node._cfg.model;
-                model.style.stroke = 'rgb(0,128,0)';
-                model.style.lineWidth = 2.0;
-                graph.updateItem(node, model, false);
-            }
+            // if (!res["unfoldable"]) {
+            //     let model = node._cfg.model;
+            //     model.style.stroke = 'rgb(0,128,0)';
+            //     model.style.lineWidth = 2.0;
+            //     graph.updateItem(node, model, false);
+            // }
         } else {
             node_table1_data.push({
                 id: node._cfg.id,
@@ -972,31 +1244,38 @@ function loadNodeTable1() {
     });
     layui.use('table', function(){
         const table = layui.table;
-        table.render({
-            elem: '#node_table1'
-            ,defaultToolbar: []
-            ,toolbar: '#toolbarDemo'
-            ,autoSort: false
-            ,lineStyle: 'height:auto'
-            ,cellMinWidth: 50 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
-            ,cols: [[
-                {type:'checkbox'}
-                ,{field:'id', title: 'ID', sort: true}
-                ,{field:'name', title: 'Name'}
-                ,{field:'NOF', title: 'NOF', sort: true}
-                ,{field:'LOC', title: 'LOC', sort: true}
-                ,{field:'nodeType', title: 'Type', sort: true}
-                ,{field:'I', title: 'I-90分位值', sort: true}
-                ,{field:'D', title: 'D-90分位值', sort: true}
-                ,{field:'C', title: 'C-90分位值', sort: true}
-                ,{field:'unfoldable', title: '可展开', sort: true}
-            ]]
-            ,data: node_table1_data
-            ,page: {
-                layout: ['count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
-                limit: 5
-            }
-        });
+        if (CHART_MODE === 'package') {
+            table.render({
+                elem: '#node_table1'
+                ,defaultToolbar: []
+                ,toolbar: '#toolbarDemo'
+                ,autoSort: false
+                ,lineStyle: 'height:auto'
+                ,cellMinWidth: 50 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                ,cols: PKG_NODE_TABLE_COLS
+                ,data: node_table1_data
+                ,page: {
+                    layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                    limit: 10
+                }
+            });
+        } else {
+            table.render({
+                elem: '#node_table1'
+                ,defaultToolbar: []
+                ,toolbar: '#toolbarDemo'
+                ,autoSort: false
+                ,lineStyle: 'height:auto'
+                ,cellMinWidth: 50 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                ,cols: FILE_NODE_TABLE_COLS
+                ,data: node_table1_data
+                ,page: {
+                    layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                    limit: 10
+                }
+            });
+        }
+
         table.on('sort(node1)', function (obj){
             if (obj.type === 'asc') {
                 node_table1_data.sort((a, b) => a[obj.field] - b[obj.field]);
@@ -1026,8 +1305,8 @@ function loadNodeTable1() {
                            showNodesSet.add(n._cfg.model.id);
                         });
                     });
-                    console.log("after filtering nodes:");
-                    console.log(selected_packages);
+                    // console.log("after filtering nodes:");
+                    // console.log(selected_packages);
                     graph.getEdges().forEach(edge => {
                         if (!showNodesSet.has(edge._cfg.source._cfg.id)
                             || !showNodesSet.has(edge._cfg.target._cfg.id)) {
@@ -1081,21 +1360,26 @@ function loadPanel(loadBtmTables){
         LOC += node._cfg.model.LOC;
         node_set.add(node._cfg.model.id);
     })
-
-    if(CHART_MODE === "package"){
+    const N = nodes.length;
+    const gAbsComplexity = calcAbsGComplexity(2, "C");
+    const gRComplexity = gAbsComplexity * 2 / (N * (N - 1));
+    if (CHART_MODE === "package") {
         html0 += "<p>包数：" + nodes.length + "</p>";
         html0 += "<p>文件数：" + NOF + "</p>";
-    }else if(CHART_MODE === "file"){
+    } else if(CHART_MODE === "file") {
         html0 += "<p>文件数：" + nodes.length + "</p>";
     }
-
+    html0 += "<p>图绝对复杂度：" + gAbsComplexity.toFixed(2) + "</p>";
+    html0 += "<p>图相对复杂度：" + gRComplexity.toFixed(2) + "</p>";
     html0 += "<p>代码行数：" + LOC + "</p>";
     html0 += "<br />";
     let tmpMap = new Map();
     let tmpSet = new Set();
     if(edges.length > 0){
         edges.forEach(edge=>{
-            tmpMap.set(edge._cfg.model.id, edge._cfg.model.C);
+            if (!isNaN(edge._cfg.model.C)) {
+                tmpMap.set(edge._cfg.model.id, edge._cfg.model.C);
+            }
         })
         edges.forEach(edge => {
             // edge_table1_data.push({
@@ -1113,25 +1397,26 @@ function loadPanel(loadBtmTables){
                 Imax = Math.max(Imax, edge._cfg.model.I);
                 Imin = Math.min(Imin, edge._cfg.model.I);
             }
-            const reverseId = edge._cfg.model.target + "_" + edge._cfg.model.source;
-            if (!tmpMap.has(reverseId)) {
-                CList.push(edge._cfg.model.C);
-                Csum += edge._cfg.model.C;
-                Cmax = Math.max(Cmax, edge._cfg.model.C);
-                Cmin = Math.min(Cmin, edge._cfg.model.C);
-                tmpSet.add(edge._cfg.model.id);
-            } else {
-                if (!tmpSet.has(edge._cfg.model.id)) {
-                    let reverseC = tmpMap.get(reverseId);
-                    let C = Math.sqrt(Math.pow(edge._cfg.model.C,2)+Math.pow(reverseC,2));
-                    CList.push(C);
-                    Csum += C;
-                    Cmax = Math.max(Cmax, C);
-                    Cmin = Math.min(Cmin, C);
+            if (!isNaN(edge._cfg.model.C)) {
+                const reverseId = edge._cfg.model.target + "_" + edge._cfg.model.source;
+                if (!tmpMap.has(reverseId)) {
+                    CList.push(edge._cfg.model.C);
+                    Csum += edge._cfg.model.C;
+                    Cmax = Math.max(Cmax, edge._cfg.model.C);
+                    Cmin = Math.min(Cmin, edge._cfg.model.C);
                     tmpSet.add(edge._cfg.model.id);
-                    tmpSet.add(reverseId);
+                } else {
+                    if (!tmpSet.has(edge._cfg.model.id)) {
+                        let reverseC = tmpMap.get(reverseId);
+                        let C = Math.sqrt(Math.pow(edge._cfg.model.C,2)+Math.pow(reverseC,2));
+                        CList.push(C);
+                        Csum += C;
+                        Cmax = Math.max(Cmax, C);
+                        Cmin = Math.min(Cmin, C);
+                        tmpSet.add(edge._cfg.model.id);
+                        tmpSet.add(reverseId);
+                    }
                 }
-
             }
 
         })
@@ -1149,17 +1434,18 @@ function loadPanel(loadBtmTables){
         // html += "<p>耦合强度(I) 25分位值(Q1)：" + IList[parseInt(IList.length * 0.25)].toFixed(3) + "</p>";
         // html += "<p>耦合强度(I) min：" + Imin.toFixed(3) + "</p>";
         // html += "<br />";
-        html1 += "<p>依赖面耦合度(C) 平均值：" + (Csum / edges.length).toFixed(3) + "</p>";
-        html1 += "<p>依赖面耦合度(C) max：" + Cmax.toFixed(3) + "</p>";
-        html1 += "<p>依赖面耦合度(C) 90分位值：" + CList[parseInt(CList.length * 0.9)].toFixed(3) + "</p>";
-        html1 += "<p>依赖面耦合度(C) 85分位值：" + CList[parseInt(CList.length * 0.85)].toFixed(3) + "</p>";
-        html1 += "<p>依赖面耦合度(C) 80分位值：" + CList[parseInt(CList.length * 0.8)].toFixed(3) + "</p>";
-        html1 += "<p>依赖面耦合度(C) 75分位值(Q3)：" + CList[parseInt(CList.length * 0.75)].toFixed(3) + "</p>";
-        html1 += "<p>依赖面耦合度(C) 中位值(Q2)：" + CList[parseInt(CList.length * 0.5)].toFixed(3) + "</p>";
-        html1 += "<p>依赖面耦合度(C) 25分位值(Q1)：" + CList[parseInt(CList.length * 0.25)].toFixed(3) + "</p>";
-        html1 += "<p>依赖面耦合度(C) min：" + Cmin.toFixed(3) + "</p>";
-        html1 += "<br />";
-
+        if (CList.length !== 0) {
+            html1 += "<p>依赖面耦合度(C) 平均值：" + (Csum / edges.length).toFixed(3) + "</p>";
+            html1 += "<p>依赖面耦合度(C) max：" + Cmax.toFixed(3) + "</p>";
+            html1 += "<p>依赖面耦合度(C) 90分位值：" + CList[parseInt(CList.length * 0.9)].toFixed(3) + "</p>";
+            html1 += "<p>依赖面耦合度(C) 85分位值：" + CList[parseInt(CList.length * 0.85)].toFixed(3) + "</p>";
+            html1 += "<p>依赖面耦合度(C) 80分位值：" + CList[parseInt(CList.length * 0.8)].toFixed(3) + "</p>";
+            html1 += "<p>依赖面耦合度(C) 75分位值(Q3)：" + CList[parseInt(CList.length * 0.75)].toFixed(3) + "</p>";
+            html1 += "<p>依赖面耦合度(C) 中位值(Q2)：" + CList[parseInt(CList.length * 0.5)].toFixed(3) + "</p>";
+            html1 += "<p>依赖面耦合度(C) 25分位值(Q1)：" + CList[parseInt(CList.length * 0.25)].toFixed(3) + "</p>";
+            html1 += "<p>依赖面耦合度(C) min：" + Cmin.toFixed(3) + "</p>";
+            html1 += "<br />";
+        }
         let reverseNum = graph.findAllByState("edge", "reverse").length;
         html2 += "<p>逆向依赖数：" + reverseNum + "</p>";
         html2 += "<p>总依赖数：" + edges.length + "</p>";
@@ -1170,7 +1456,7 @@ function loadPanel(loadBtmTables){
     $("#data_panel2").html(html2);
     if (loadBtmTables) {
         loadEdgeTable1();
-        loadNodeTable1();
+        // loadNodeTable1();
     }
 }
 
@@ -1178,29 +1464,33 @@ function switchDataPanel() {
     let html = "";
     const len = graph.getEdges().length;
     if (current_panel === 'D') {
-        html += "<p>耦合强度(I) 平均值：" + (Isum / len).toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) max：" + Imax.toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 90分位值：" + IList[parseInt(IList.length * 0.9)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 85分位值：" + IList[parseInt(IList.length * 0.85)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 80分位值：" + IList[parseInt(IList.length * 0.8)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 75分位值(Q3)：" + IList[parseInt(IList.length * 0.75)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 中位值(Q2)：" + IList[parseInt(IList.length * 0.5)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) 25分位值(Q1)：" + IList[parseInt(IList.length * 0.25)].toFixed(3) + "</p>";
-        html += "<p>耦合强度(I) min：" + Imin.toFixed(3) + "</p>";
-        html += "<br />";
-        current_panel = 'I';
+        if (IList.length !== 0) {
+            html += "<p>耦合强度(I) 平均值：" + (Isum / len).toFixed(3) + "</p>";
+            html += "<p>耦合强度(I) max：" + Imax.toFixed(3) + "</p>";
+            html += "<p>耦合强度(I) 90分位值：" + IList[parseInt(IList.length * 0.9)].toFixed(3) + "</p>";
+            html += "<p>耦合强度(I) 85分位值：" + IList[parseInt(IList.length * 0.85)].toFixed(3) + "</p>";
+            html += "<p>耦合强度(I) 80分位值：" + IList[parseInt(IList.length * 0.8)].toFixed(3) + "</p>";
+            html += "<p>耦合强度(I) 75分位值(Q3)：" + IList[parseInt(IList.length * 0.75)].toFixed(3) + "</p>";
+            html += "<p>耦合强度(I) 中位值(Q2)：" + IList[parseInt(IList.length * 0.5)].toFixed(3) + "</p>";
+            html += "<p>耦合强度(I) 25分位值(Q1)：" + IList[parseInt(IList.length * 0.25)].toFixed(3) + "</p>";
+            html += "<p>耦合强度(I) min：" + Imin.toFixed(3) + "</p>";
+            html += "<br />";
+            current_panel = 'I';
+        }
     } else {
-        html += "<p>依赖面耦合度(C) 平均值：" + (Csum / len).toFixed(3) + "</p>";
-        html += "<p>依赖面耦合度(C) max：" + Cmax.toFixed(3) + "</p>";
-        html += "<p>依赖面耦合度(C) 90分位值：" + CList[parseInt(CList.length * 0.9)].toFixed(3) + "</p>";
-        html += "<p>依赖面耦合度(C) 85分位值：" + CList[parseInt(CList.length * 0.85)].toFixed(3) + "</p>";
-        html += "<p>依赖面耦合度(C) 80分位值：" + CList[parseInt(CList.length * 0.8)].toFixed(3) + "</p>";
-        html += "<p>依赖面耦合度(C) 75分位值(Q3)：" + CList[parseInt(CList.length * 0.75)].toFixed(3) + "</p>";
-        html += "<p>依赖面耦合度(C) 中位值(Q2)：" + CList[parseInt(CList.length * 0.5)].toFixed(3) + "</p>";
-        html += "<p>依赖面耦合度(C) 25分位值(Q1)：" + CList[parseInt(CList.length * 0.25)].toFixed(3) + "</p>";
-        html += "<p>依赖面耦合度(C) min：" + Cmin.toFixed(3) + "</p>";
-        html += "<br />";
-        current_panel = 'D';
+        if (CList.length !== 0) {
+            html += "<p>依赖面耦合度(C) 平均值：" + (Csum / len).toFixed(3) + "</p>";
+            html += "<p>依赖面耦合度(C) max：" + Cmax.toFixed(3) + "</p>";
+            html += "<p>依赖面耦合度(C) 90分位值：" + CList[parseInt(CList.length * 0.9)].toFixed(3) + "</p>";
+            html += "<p>依赖面耦合度(C) 85分位值：" + CList[parseInt(CList.length * 0.85)].toFixed(3) + "</p>";
+            html += "<p>依赖面耦合度(C) 80分位值：" + CList[parseInt(CList.length * 0.8)].toFixed(3) + "</p>";
+            html += "<p>依赖面耦合度(C) 75分位值(Q3)：" + CList[parseInt(CList.length * 0.75)].toFixed(3) + "</p>";
+            html += "<p>依赖面耦合度(C) 中位值(Q2)：" + CList[parseInt(CList.length * 0.5)].toFixed(3) + "</p>";
+            html += "<p>依赖面耦合度(C) 25分位值(Q1)：" + CList[parseInt(CList.length * 0.25)].toFixed(3) + "</p>";
+            html += "<p>依赖面耦合度(C) min：" + Cmin.toFixed(3) + "</p>";
+            html += "<br />";
+            current_panel = 'D';
+        }
     }
     $("#data_panel1").html(html);
 }
@@ -1213,13 +1503,33 @@ function handleEdgesWidth(){
         }
     })
 }
+function handleNodeStroke() {
+    graph.getNodes().forEach(node => {
+        let model = node._cfg.model;
+        if (model['unfoldable'] === false) {
+            model.style.stroke = 'rgb(0,128,0)';
+            model.style.lineWidth = 2.0;
+            graph.updateItem(node, model, false);
+        }
 
+    });
+
+}
 function loadGraph(){
+    is_ntb_loaded = false;
+    if (show_panel_btm) {
+        hideBottomPanel();
+    }
     graph.data(data);
     graph.render();
-    levelLayout();
+    // levelLayout();
+    if (max_level === 0)
+        levelLayout();
+    else
+        levelLayout2();
+    handleNodeStroke();
     handleReverseEdgesAndExtends();
-    levelLayoutAdjust();
+    // levelLayoutAdjust();
     savePresentNodes();
     loadPanel(true);
     handleEdgesWidth();
@@ -1254,9 +1564,6 @@ graph.on('edge:click', (e) => {
                       </ul>
                       <ul>
                         <li><b>依赖实例数(D(logD))</b>: ${selectedEdge.D}(${selectedEdge.logD})</li>
-                      </ul>             
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
                       </ul>`;
     } else {
         outDiv.innerHTML = `
@@ -1269,9 +1576,6 @@ graph.on('edge:click', (e) => {
                       </ul>                        
                       <ul>
                         <li><b>依赖实例数(D)</b>: ${selectedEdge.D}</li>
-                      </ul>                 
-                      <ul>
-                        <li><b>dist</b>: ${selectedEdge.dist}</li>
                       </ul>`;
     }
 

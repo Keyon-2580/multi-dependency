@@ -4,6 +4,7 @@ import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.Coupling;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
+import cn.edu.fudan.se.multidependency.repository.node.PackageRepository;
 import cn.edu.fudan.se.multidependency.repository.node.ProjectFileRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.ContainRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.DependsOnRepository;
@@ -12,6 +13,7 @@ import cn.edu.fudan.se.multidependency.service.query.BeanCreator;
 import cn.edu.fudan.se.multidependency.service.query.structure.ContainRelationService;
 import cn.edu.fudan.se.multidependency.utils.DataUtil;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
+import cn.edu.fudan.se.multidependency.utils.GraphLayoutUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -41,6 +43,9 @@ public class CouplingServiceImpl implements CouplingService {
 
     @Autowired
     private ContainRelationService containRelationService;
+
+    @Autowired
+    private PackageRepository packageRepository;
 
     @Override
     public Map<ProjectFile, Double> calGroupInstablity(List<Long> fileIdList){
@@ -114,7 +119,11 @@ public class CouplingServiceImpl implements CouplingService {
 
     @Override
     public double calC1to2(int funcNum1, int funcNum2){
-        return (2 * ((double)funcNum1 + 1) * ((double)funcNum2 + 1)) / ((double)funcNum1 + (double)funcNum2 + 2) - 1;
+        if (funcNum1 + funcNum2 == 0) {
+            return 0;
+        } else {
+            return (2 * ((double)funcNum1) * ((double)funcNum2)) / ((double)funcNum1 + (double)funcNum2);
+        }
     }
 
     @Override
@@ -252,9 +261,11 @@ public class CouplingServiceImpl implements CouplingService {
             fileTmp.put("LOC", projectFile.getLoc());
             fileTmp.put("nodeType", "file");
             fileTmp.put("instability", instability.get(projectFile));
+            fileTmp.put("level", 0);
             nodes.add(fileTmp);
         }
-        result.put("nodes", nodes);
+
+
         Map<String, Double> iMap = new HashMap<>();
         for(DependsOn dependsOn: GroupInsideDependsOns){
             JSONObject dependsOnTmp = new JSONObject();
@@ -317,6 +328,13 @@ public class CouplingServiceImpl implements CouplingService {
                 edge.put("I", D);
             }
         }
+        if (edges.size() == 0) {
+            result.put("nodes", nodes);
+        } else {
+            GraphLayoutUtil layoutUtil = new GraphLayoutUtil(nodes, edges);
+            JSONArray leveledNodes = layoutUtil.levelLayout();
+            result.put("nodes", leveledNodes);
+        }
         result.put("edges", edges);
 
         return result;
@@ -333,7 +351,7 @@ public class CouplingServiceImpl implements CouplingService {
             pckList.addAll(pckMap.get(parentPck));
         }
 
-        Map<Map<Package, Package>, List<DependsOn>> dependsOnBetweenPackages = new HashMap<>();
+        Map<Map<Package, Package>, Set<DependsOn>> dependsOnBetweenPackages = new HashMap<>();
 
         for(Package pck: pckList) {
             Double parentInstability = 0.0;
@@ -352,12 +370,13 @@ public class CouplingServiceImpl implements CouplingService {
             String pckName = FileUtil.extractPackagePath(pck.getDirectoryPath(), isTopLevel);
             int pckContainsFilesNum = 0;
             if(pck.equals(parentPackage)){
+                // parent package下单独的文件虚拟成一个包
                 pckContainsFilesNum = containRepository.findPackageContainFilesNum(pck.getId());
             }else{
                 pckContainsFilesNum = containRepository.findPackageContainAllFilesNum(pck.getId());
             }
             int pckContainsFilesLOC = containRepository.findPackageContainAllFilesLOC(pck.getId());
-
+            tmpPck.put("unfoldable", packageRepository.isPackageUnfoldable(pck.getId()));
             tmpPck.put("id", pck.getId().toString());
             tmpPck.put("path", pck.getDirectoryPath());
             tmpPck.put("name", pckName);
@@ -367,6 +386,7 @@ public class CouplingServiceImpl implements CouplingService {
             tmpPck.put("label", pckName);
             tmpPck.put("parentPckId", parentPackage.getId().toString());
             tmpPck.put("nodeType", "package");
+            tmpPck.put("level", 0);
 
             List<Map<Package, List<DependsOn>>> listTmp = getGroupInsideAndOutDependsOnByPackage(pck, pckList, parentPackage);
 
@@ -394,7 +414,7 @@ public class CouplingServiceImpl implements CouplingService {
                         if (dependsOnBetweenPackages.containsKey(pckDependsOnTmp)) {
                             dependsOnBetweenPackages.get(pckDependsOnTmp).add(dependsOn);
                         } else {
-                            List<DependsOn> dependsOnsListTmp = new ArrayList<>();
+                            Set<DependsOn> dependsOnsListTmp = new HashSet<>();
                             dependsOnsListTmp.add(dependsOn);
                             dependsOnBetweenPackages.put(pckDependsOnTmp, dependsOnsListTmp);
                         }
@@ -421,7 +441,7 @@ public class CouplingServiceImpl implements CouplingService {
                         if (dependsOnBetweenPackages.containsKey(pckDependsOnTmp)) {
                             dependsOnBetweenPackages.get(pckDependsOnTmp).add(dependsOn);
                         } else {
-                            List<DependsOn> dependsOnsListTmp = new ArrayList<>();
+                            Set<DependsOn> dependsOnsListTmp = new HashSet<>();
                             dependsOnsListTmp.add(dependsOn);
                             dependsOnBetweenPackages.put(pckDependsOnTmp, dependsOnsListTmp);
                         }
@@ -531,7 +551,13 @@ public class CouplingServiceImpl implements CouplingService {
                 edge.put("I", D);
             }
         }
-        result.put("nodes", nodes);
+        if (edges.size() == 0) {
+            result.put("nodes", nodes);
+        } else {
+            GraphLayoutUtil layoutUtil = new GraphLayoutUtil(nodes, edges);
+            JSONArray leveledNodes = layoutUtil.levelLayout();
+            result.put("nodes", leveledNodes);
+        }
         result.put("edges", edges);
         return result;
     }
@@ -589,8 +615,10 @@ public class CouplingServiceImpl implements CouplingService {
                     tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(mainPackage.getId(), pck.getId()));
                     tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(mainPackage.getId(), pck.getId()));
                 }else if(pck.equals(parentPackage)){
-                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(pck.getId(), mainPackage.getId()));
-                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(pck.getId(), mainPackage.getId()));
+                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(mainPackage.getId(), pck.getId()));
+                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(mainPackage.getId(), pck.getId()));
+//                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(pck.getId(), mainPackage.getId()));
+//                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(pck.getId(), mainPackage.getId()));
                 }else{
                     tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackages(mainPackage.getId(), pck.getId()));
                     tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackages(pck.getId(), mainPackage.getId()));

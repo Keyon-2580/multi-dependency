@@ -35,6 +35,8 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 	@Query("MATCH (n:Package)-[:" + RelationType.str_CONTAIN + "]->(p:Package) where id(n)=$pckId RETURN p;")
 	public List<Package> findOneStepPackagesById(@Param("pckId") long pckId);
 
+	@Query("MATCH (n:Package)-[:" + RelationType.str_CONTAIN + "]->(p:Package) where id(n)=$pckId RETURN count(p)>0;")
+	boolean isPackageUnfoldable(@Param("pckId") long pckId);
 	@Query("match (project:Project)-[:" + RelationType.str_CONTAIN + "]->(package:Package) where id(project) = $projectId return package;")
 	public List<Package> getPackageByProjectId(@Param("projectId") long projectId);
 

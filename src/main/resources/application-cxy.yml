@@ -33,11 +33,10 @@ config:
     package_depth: true
     export_cyclic_dependency: false
 data:
-  #  project_config: src/main/resources/project/source-build-atlas.json
-  #  project_config: src/main/resources/project/source-build-easyexcel.json
-  #  project_config: src/main/resources/project/source-build-tomcat.json
-  project_config: C:/Dev/DependencyAnalysis/Tools/source-build-IssueTracker.json
-  #  project_config: src/main/resources/project/source-build-IssueTracker-2022-01-24.json
+
+#  project_config: C:/Dev/DependencyAnalysis/Tools/issuetracker01.json
+  project_config: C:/Dev/DependencyAnalysis/Tools/issuetracker05.json
+#  project_config: C:/Dev/DependencyAnalysis/Tools/flink.json
   project_analyse_threads_count: 20
   dynamic_analyse: false
   git_analyse: false
@@ -53,28 +52,17 @@ data:
     # batchInserter要插入的数据库
     data_path: C:/App/neo4j-community-4.2.19/data
 #    data_path: C:/App/neo4j-community-4.4.10/data
-    #    database_name: multiple.dependency.db
-    #    database_name: multi.dependency.cassandra.db
-    #    database_name: multi.dependency.cbg.atlas.db
-    #    database_name: multi.dependency.cbg.atlas.db
-    #    database_name: multi.dependency.cbg.tomcat.db
-    database_name: multi.dependency.cbg.issuetracker-tomcat-calm-before.db
-#    database_name: RepositoryService-source-issue-tracker.db
-  #    database_name: multiple.dependency.train-ticket-git-one-project.db
+#    database_name: issuetracker01
+    database_name: issuetracker05
+#    database_name: tomcat-calm
+#    database_name: flink.db
   #    database_name: multi.dependency.all.db
   #    database_name: multi.dependency.atlas.db
 
-  #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/RepositoryService-source-test.txt
-  #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/RepositoryService-source.txt
-  #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/RepositoryService-source-cassandra.txt
-  #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/RepositoryService-source-train-ticket-git.txt
-  #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/RepositoryService-source-train-ticket-git-one-project.txt
-  #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/source-tomcat.txt
-  #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/source-atlas.txt
-  #  serialize_path: /Users/fulco/Desktop/Data/FDUPro/static/source-IssueTracker_after.txt
-  #  serialize_path: C:/Dev/DependencyAnalysis/Result/IssueTracker-Master/source-IssueTracker_before-2022-01-24.txt
-  serialize_path: C:/Dev/DependencyAnalysis/Result/tomcat-calm/source-tomcat-calm.txt
-#  serialize_path: C:/Dev\DependencyAnalysis/Result/issuetracker-repo/RepositoryService-source-issue-tracker.txt
+#  serialize_path: C:/Dev/DependencyAnalysis/Result/tomcat-calm/source-tomcat-calm.txt
+#  serialize_path: C:/Dev/DependencyAnalysis/Result/flink.txt
+#  serialize_path: C:/Dev/DependencyAnalysis/Result/issuetracker01.txt
+  serialize_path: C:/Dev/DependencyAnalysis/Result/issuetracker05.txt
   coupling_value_path: C:/Dev/DependencyAnalysis/Result/coupling_value_export_tomcat.csv
   anonymization: false
   batch_serialize: true
