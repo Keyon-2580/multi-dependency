@@ -470,7 +470,7 @@ function calcAbsGComplexity(k, w) {
        }
        const startLevel = edge._cfg.source._cfg.model.y;
        const endLevel = edge._cfg.target._cfg.model.y;
-       if (Math.abs(startLevel-endLevel) > theta) {
+       if (endLevel - startLevel > theta) {
            crossW += edge._cfg.model[w] * c;
        }
     });
