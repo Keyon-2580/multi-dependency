@@ -34,7 +34,7 @@ config:
 
 data:
   project_config: src/main/resources/project/issue-tracker-master.json
-  project_analyse_threads_count: 20
+  project_analyse_threads_count: 1
   dynamic_analyse: false
   git_analyse: false
   lib_analyse: false
