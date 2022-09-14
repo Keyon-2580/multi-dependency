@@ -844,7 +844,39 @@ function levelLayout2(){
             }
         }
     }
-
+    graph.getNodes().forEach(node => {
+        if(node._cfg.model.level >= 0.8 * max_level){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR5
+                }
+            });
+        }else if(node._cfg.model.level >= 0.6 * max_level){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR4
+                }
+            });
+        }else if(node._cfg.model.level >= 0.4 * max_level){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR3
+                }
+            });
+        }else if(node._cfg.model.level >= 0.2 * max_level){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR2
+                }
+            });
+        }else{
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR1
+                }
+            });
+        }
+    });
     graph.refresh();
     graph.fitCenter();
     graph.fitView();
@@ -1523,10 +1555,10 @@ function loadGraph(){
     graph.data(data);
     graph.render();
     // levelLayout();
-    if (max_level === 0)
-        levelLayout();
-    else
-        levelLayout2();
+    // if (max_level === 0)
+    //     levelLayout();
+    // else
+    levelLayout2();
     handleNodeStroke();
     handleReverseEdgesAndExtends();
     // levelLayoutAdjust();

@@ -34,8 +34,8 @@ config:
     export_cyclic_dependency: false
 data:
 
-#  project_config: C:/Dev/DependencyAnalysis/Tools/issuetracker01.json
-  project_config: C:/Dev/DependencyAnalysis/Tools/issuetracker05.json
+  project_config: C:/Dev/DependencyAnalysis/Tools/issuetracker01.json
+#  project_config: C:/Dev/DependencyAnalysis/Tools/issuetracker05.json
 #  project_config: C:/Dev/DependencyAnalysis/Tools/flink.json
   project_analyse_threads_count: 20
   dynamic_analyse: false
