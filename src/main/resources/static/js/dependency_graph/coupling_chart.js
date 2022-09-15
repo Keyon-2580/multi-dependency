@@ -58,6 +58,12 @@ const PKG_NODE_TABLE_COLS = [[
     ,{field:'C', title: 'C-90分位值', sort: true}
     ,{field:'unfoldable', title: '可展开', sort: true}
 ]];
+const CROSS_LEVEL_EDGE_MODEL = {
+    style:{
+        stroke: '#FFEA00',
+        lineWidth: 1.0
+    }
+}
 const LOW_INTENSITY_EDGE_MODEL = {
     style:{
         stroke: COLOR_LINK_LOW_INTENSITY,
@@ -87,9 +93,6 @@ const tooltip = new G6.Tooltip({
               </ul>
               <ul>
                 <li>path: ${e.item.getModel().path}</li>
-              </ul>
-              <ul>
-                <li>level: ${e.item.getModel().level}</li>
               </ul>
               <ul>
                 <li>instability: ${e.item.getModel().instability}</li>
@@ -465,14 +468,22 @@ function calcAbsGComplexity(k, w) {
     let reverseW = 0.0;
     let crossW = 0.0;
     graph.getEdges().forEach(edge => {
-       if (edge._cfg.states.length !== 0) {
+       if (edge._cfg.states.includes('reverse')) {
+           console.log("逆向依赖", edge);
            reverseW += edge._cfg.model[w] * r;
+       } else {
+           const startLevel = edge._cfg.source._cfg.model.y;
+           const endLevel = edge._cfg.target._cfg.model.y;
+           if (endLevel - startLevel > theta) {
+               crossW += edge._cfg.model[w] * c;
+               // edge.update(CROSS_LEVEL_EDGE_MODEL);
+               edge.setState('cross', true);
+               console.log("跨层依赖", edge);
+               // console.log();
+           }
+
        }
-       const startLevel = edge._cfg.source._cfg.model.y;
-       const endLevel = edge._cfg.target._cfg.model.y;
-       if (endLevel - startLevel > theta) {
-           crossW += edge._cfg.model[w] * c;
-       }
+
     });
     finalW += reverseW + crossW;
     return finalW;

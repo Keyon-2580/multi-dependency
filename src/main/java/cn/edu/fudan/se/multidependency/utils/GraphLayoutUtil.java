@@ -253,7 +253,15 @@ public class GraphLayoutUtil {
         }
 //        System.out.println("Original size: " + nodes.size());
 //        System.out.println("Leveled nodes size " + leveledNodes.size());
-
+        if (leveledNodes.size() != nodes.size()) {
+            for (int i = 0; i < nodes.size(); i++) {
+                JSONObject tmp = nodes.getJSONObject(i);
+                if (!leveledNodes.contains(tmp)) {
+                    tmp.put("level", levels.size());
+                    leveledNodes.add(tmp);
+                }
+            }
+        }
         return leveledNodes;
 //        return nodes;
     }
