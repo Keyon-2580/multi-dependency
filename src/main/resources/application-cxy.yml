@@ -53,8 +53,8 @@ data:
     data_path: C:/App/neo4j-community-4.2.19/data
 #    data_path: C:/App/neo4j-community-4.4.10/data
 #    database_name: issuetracker01
-    database_name: issuetracker05
-#    database_name: tomcat-calm
+#    database_name: issuetracker05
+    database_name: tomcat-calm
 #    database_name: flink.db
   #    database_name: multi.dependency.all.db
   #    database_name: multi.dependency.atlas.db

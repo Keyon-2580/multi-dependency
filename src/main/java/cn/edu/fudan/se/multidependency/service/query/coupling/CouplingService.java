@@ -3,6 +3,7 @@ package cn.edu.fudan.se.multidependency.service.query.coupling;
 import cn.edu.fudan.se.multidependency.model.node.Package;
 import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.model.relation.DependsOn;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
@@ -31,4 +32,8 @@ public interface CouplingService {
     JSONObject getCouplingValueByFileIds(List<Long> fileIds, Map<Long, Long> parentPckMap);
 
     JSONObject getCouplingValueByPcks(Map<Package, List<Package>> pckMap, Map<Long, Double> parentPcksInstability, boolean isTopLevel);
+
+    JSONObject getChildPackagesCouplingValue(Map<Package, List<Package>> unfoldPckMap, JSONArray otherPkgJsonArray,
+                                             Map<Long,
+            Integer> levelMap);
 }

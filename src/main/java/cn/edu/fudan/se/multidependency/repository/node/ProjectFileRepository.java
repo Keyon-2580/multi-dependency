@@ -283,5 +283,7 @@ public interface ProjectFileRepository extends Neo4jRepository<ProjectFile, Long
 	@Query("match p=(f:ProjectFile)-[r:" + RelationType.str_COUPLING + "]-() RETURN distinct f;")
 	List<ProjectFile> queryAllFilesRelatedByCouplings();
 
+	@Query("MATCH p=(n:Package)-[:CONTAIN]->(f:ProjectFile) where id(n)=$packageId return f;")
+	List<ProjectFile> findPackageContainedFiles(@Param("packageId") Long packageId);
 }
 

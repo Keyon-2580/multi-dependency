@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.repository.node;
 
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -115,6 +116,13 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 
 	@Query("MATCH p=(n:Package)-[:CONTAIN]->(:ProjectFile) where id(n)=$packageId return count(p)>0;")
 	Boolean findIfPackageContainFiles(@Param("packageId") Long packageId);
+
+	@Query("MATCH p=(n:Package)-[:CONTAIN]->(:Package) where id(n)=$packageId return count(p)>0;")
+	Boolean findIfPackageContainPackages(@Param("packageId") Long packageId);
+
+	@Query("MATCH p=(n1:Package)-[:CONTAIN]->(:ProjectFile) match (n2:Package)-[:CONTAIN]->(:Package) where id(n1)=id" +
+			" (n2) return count(p) > 0;")
+	Boolean findIfSeparateFileExists();
 
 	@Query("MATCH p=(n:Package)-[:CONTAIN*]->(f:ProjectFile) where id(n)=$packageId and id(f) = $fileId return count(p)>0;")
 	Boolean findIfPackageContainFile(@Param("packageId") Long packageId, @Param("fileId") Long fileId);

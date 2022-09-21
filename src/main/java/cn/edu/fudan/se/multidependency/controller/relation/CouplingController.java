@@ -76,6 +76,42 @@ public class CouplingController {
         return result;
     }
 
+
+    /**
+     * 展开若干个包，返回这些包下的第一层子包的耦合数据
+     * @param requestBody 前端请求
+     * @return result json
+     */
+    @PostMapping("/group/unfold_packages")
+    @CrossOrigin
+    @ResponseBody
+    public JSONObject unfoldPackages(@RequestBody JSONObject requestBody) {
+        JSONArray otherPkgsJsonArray = requestBody.getJSONArray("otherPcks");
+        JSONArray unfoldPkgsJsonArray = requestBody.getJSONArray("unfoldPcks");
+        Map<Long, Integer> levelMap = new HashMap<>();
+        Map<Package, List<Package>> unfoldPkgMap = new HashMap<>();
+        for (int i = 0; i < unfoldPkgsJsonArray.size(); i++) {
+            JSONObject pkgJson = unfoldPkgsJsonArray.getJSONObject(i);
+            Long pkgId = pkgJson.getLong("id");
+            levelMap.put(pkgId, pkgJson.getIntValue("level"));
+            Package parentPackage = packageRepository.findPackageById(pkgId);
+            List<Package> childPkgs = new ArrayList<>(packageRepository.findOneStepPackagesById(pkgId));
+            if (childPkgs.size() == 0) {
+                JSONObject failJson = new JSONObject();
+                failJson.put("code", -1);
+                return failJson;
+            }
+//            if (packageRepository.findIfPackageContainFiles(parentPackage.getId())) {
+//                childPkgs.add(parentPackage);
+//            }
+            unfoldPkgMap.put(parentPackage, childPkgs);
+        }
+        JSONObject result = couplingService.getChildPackagesCouplingValue(unfoldPkgMap, otherPkgsJsonArray, levelMap);
+        result.put("code", 200);
+        return result;
+    }
+
+
     /**
      * 返回一个包下的第一层子包的耦合数据
      * @param requestBody
@@ -136,7 +172,7 @@ public class CouplingController {
                 failJson.put("pck", parentPckJson);
                 return failJson;
             }
-            if(packageRepository.findIfPackageContainFiles(parentPackage.getId())) pckList.add(parentPackage);
+//            if(packageRepository.findIfPackageContainFiles(parentPackage.getId())) pckList.add(parentPackage);
             pckMap.put(parentPackage, pckList);
         }
 
@@ -224,6 +260,7 @@ public class CouplingController {
         pckMap.put(containRepository.findPackageInPackage(topLevelPackages.get(0).getId()), topLevelPackages);
 
         JSONObject result = couplingService.getCouplingValueByPcks(pckMap, parentPcksInstability, true);
+//        JSONObject result = couplingService.getChildPackagesCouplingValue(pckMap, null, null);
         result.put("code", 200);
 
         return result;

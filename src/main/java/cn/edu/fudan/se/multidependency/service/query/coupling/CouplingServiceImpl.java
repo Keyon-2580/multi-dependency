@@ -301,6 +301,7 @@ public class CouplingServiceImpl implements CouplingService {
             dependsOnTmp.put("C", C);
             dependsOnTmp.put("D", D);
             dependsOnTmp.put("I", i);
+            dependsOnTmp.put("detail", dependsOn.getDependsOnTypes().toString());
             dependsOnTmp.put("dist", dist);
             dependsOnTmp.put("id", dependsOn.getStartNode().getId().toString() + "_" + dependsOn.getEndNode().getId().toString());
             dependsOnTmp.put("source", dependsOn.getStartNode().getId().toString());
@@ -368,13 +369,13 @@ public class CouplingServiceImpl implements CouplingService {
 
             JSONObject tmpPck = new JSONObject();
             String pckName = FileUtil.extractPackagePath(pck.getDirectoryPath(), isTopLevel);
-            int pckContainsFilesNum = 0;
-            if(pck.equals(parentPackage)){
-                // parent package下单独的文件虚拟成一个包
-                pckContainsFilesNum = containRepository.findPackageContainFilesNum(pck.getId());
-            }else{
-                pckContainsFilesNum = containRepository.findPackageContainAllFilesNum(pck.getId());
-            }
+            int pckContainsFilesNum = containRepository.findPackageContainAllFilesNum(pck.getId());
+//            if(pck.equals(parentPackage)){
+//                // parent package下单独的文件虚拟成一个包
+//                pckContainsFilesNum = containRepository.findPackageContainFilesNum(pck.getId());
+//            }else{
+//                pckContainsFilesNum = containRepository.findPackageContainAllFilesNum(pck.getId());
+//            }
             int pckContainsFilesLOC = containRepository.findPackageContainAllFilesLOC(pck.getId());
             tmpPck.put("unfoldable", packageRepository.isPackageUnfoldable(pck.getId()));
             tmpPck.put("id", pck.getId().toString());
@@ -389,6 +390,7 @@ public class CouplingServiceImpl implements CouplingService {
             tmpPck.put("level", 0);
 
             List<Map<Package, List<DependsOn>>> listTmp = getGroupInsideAndOutDependsOnByPackage(pck, pckList, parentPackage);
+//            List<Map<Package, List<DependsOn>>> listTmp = getDependsBetweenPackages(pckList);
 
             Map<Package, List<DependsOn>> GroupInsideToOutDependsOns = listTmp.get(0);
             Map<Package, List<DependsOn>> GroupOutToInsideDependsOns = listTmp.get(1);
@@ -507,6 +509,8 @@ public class CouplingServiceImpl implements CouplingService {
             tmpEdge.put("dist", dist / distSum);
             tmpEdge.put("dependsOnNum", dependsOnBetweenPackages.get(map).size());
             tmpEdge.put("C", DataUtil.toFixed(fileHMean));
+            tmpEdge.put("f1", fileIdSet1.size());
+            tmpEdge.put("f2", fileIdSet2.size());
             double logD = Math.max(0, Math.log10(DAtoB));
             tmpEdge.put("D", DAtoB);
             tmpEdge.put("logD", DataUtil.toFixed(logD));
@@ -562,6 +566,213 @@ public class CouplingServiceImpl implements CouplingService {
         return result;
     }
 
+    @SuppressWarnings("Duplicates")
+    private JSONObject pkgToNode(Package pkg, Package parentPackage, int pLevel) {
+        JSONObject tmpPkg = new JSONObject();
+        int pckContainsFilesLOC = containRepository.findPackageContainAllFilesLOC(pkg.getId());
+        String pkgName = FileUtil.extractPackagePath(pkg.getDirectoryPath(), false);
+        int pckContainsFilesNum;
+        if(pkg.equals(parentPackage)) {
+            // parent package下单独的文件虚拟成一个包
+            pckContainsFilesNum = containRepository.findPackageContainFilesNum(pkg.getId());
+        } else {
+            pckContainsFilesNum = containRepository.findPackageContainAllFilesNum(pkg.getId());
+        }
+        tmpPkg.put("unfoldable", packageRepository.isPackageUnfoldable(pkg.getId()));
+        tmpPkg.put("id", pkg.getId().toString());
+        tmpPkg.put("path", pkg.getDirectoryPath());
+        tmpPkg.put("name", pkgName);
+        tmpPkg.put("NOF", pckContainsFilesNum);
+        tmpPkg.put("LOC", pckContainsFilesLOC);
+        tmpPkg.put("LooseDegree", pkg.getLooseDegree());
+        tmpPkg.put("label", pkgName);
+        tmpPkg.put("parentPckId", parentPackage.getId().toString());
+        tmpPkg.put("nodeType", "package");
+        tmpPkg.put("level", 0);
+        tmpPkg.put("pLevel", pLevel);
+        return tmpPkg;
+    }
+
+    @SuppressWarnings("Duplicates")
+    JSONArray dependsToEdges(Map<Map<Package, Package>, Set<DependsOn>> dependsOnBetweenPackages) {
+        JSONArray edges = new JSONArray();
+        Map<String, Integer> dMap = new HashMap<>();
+        for(Map<Package, Package> map: dependsOnBetweenPackages.keySet()){
+            JSONObject tmpEdge = new JSONObject();
+            int DAtoB = 0;
+            int DBtoA = 0;
+            double dist = 0.0;
+            double distSum = 0;
+
+            for(Package pck: map.keySet()){
+                tmpEdge.put("id", pck.getId().toString() + "_" + map.get(pck).getId().toString());
+                tmpEdge.put("source", pck.getId().toString());
+                tmpEdge.put("target", map.get(pck).getId().toString());
+            }
+            Set<Long> fileIdSet1 = new HashSet<>();
+            Set<Long> fileIdSet2 = new HashSet<>();
+            for(DependsOn dependsOn: dependsOnBetweenPackages.get(map)){
+                boolean flag = false;
+                Map<String, Long> dependsOnTypes = dependsOn.getDependsOnTypes();
+                for (String type : dependsOnTypes.keySet()) {
+                    if (type.equals("EXTENDS") || type.equals("IMPLEMENTS") ||
+                            type.equals("USE") || type.equals("CALL") || type.equals("RETURN")
+                            || type.equals("PARAMETER") || type.equals("LOCAL_VARIABLE") || type.equals("CREATE")
+                            || type.equals("MEMBER_VARIABLE")) {
+                        flag = true;
+                        break;
+                    }
+                }
+                if(flag){
+                    Coupling coupling = couplingRepository.queryCouplingBetweenTwoFiles(dependsOn.getStartNode().getId()
+                            , dependsOn.getEndNode().getId());
+                    DAtoB += coupling.getDAtoB();
+                    DBtoA += coupling.getDBtoA();
+                    dist += coupling.getDist();
+                    distSum  += 1;
+                    fileIdSet1.add(dependsOn.getStartNode().getId());
+                    fileIdSet2.add(dependsOn.getEndNode().getId());
+                }
+            }
+            double fileHMean = calcH(fileIdSet1.size(), fileIdSet2.size());
+            tmpEdge.put("dist", dist / distSum);
+            tmpEdge.put("dependsOnNum", dependsOnBetweenPackages.get(map).size());
+            tmpEdge.put("C", DataUtil.toFixed(fileHMean));
+            double logD = Math.max(0, Math.log10(DAtoB));
+            tmpEdge.put("D", DAtoB);
+            tmpEdge.put("logD", DataUtil.toFixed(logD));
+            dMap.put((String)tmpEdge.get("id"), DAtoB);
+            edges.add(tmpEdge);
+        }
+        Set<String> tmp = new HashSet<>();
+        for (int i = 0; i < edges.size(); i++) {
+            JSONObject edge = edges.getJSONObject(i);
+            String reverseId = edge.get("target") + "_" + edge.get("source");
+            int D = (int) edge.get("D");
+            if (tmp.contains((String) edge.get("id"))) {
+                edge.put("I", -1);
+                continue;
+            }
+            if (dMap.containsKey(reverseId)) {
+                edge.put("I", calPkgI(D, dMap.get(reverseId)));
+                tmp.add(reverseId);
+            } else {
+                edge.put("I", D);
+            }
+        }
+        return edges;
+    }
+    @SuppressWarnings("Duplicates")
+    @Override
+    public JSONObject getChildPackagesCouplingValue(Map<Package, List<Package>> unfoldPckMap, JSONArray otherPkgJsonArray, Map<Long, Integer> levelMap) {
+        JSONObject result = new JSONObject();
+        JSONArray allNodes = new JSONArray();
+        JSONArray allEdges = new JSONArray();
+        for (Map.Entry<Package, List<Package>> entry : unfoldPckMap.entrySet()) {
+            Map<Map<Package, Package>, Set<DependsOn>> dependsOnBetweenPackages = new HashMap<>();
+            JSONArray nodes = new JSONArray();
+            Package parentPkg = entry.getKey();
+            List<Package> childPkgs = entry.getValue();
+            for (Package pkg : childPkgs) {
+                JSONObject tmpPkg = pkgToNode(pkg, parentPkg, levelMap.get(parentPkg.getId()));
+                nodes.add(tmpPkg);
+                List<Map<Package, List<DependsOn>>> tmpList = getGroupInsideAndOutDependsOnByPackage(pkg, childPkgs, parentPkg);
+                Map<Package, List<DependsOn>> GroupInsideToOutDependsOns = tmpList.get(0);
+                Map<Package, List<DependsOn>> GroupOutToInsideDependsOns = tmpList.get(1);
+                if (GroupInsideToOutDependsOns.size() > 0) {
+                    for(Package endPackage: GroupInsideToOutDependsOns.keySet()){
+                        for(DependsOn dependsOn: GroupInsideToOutDependsOns.get(endPackage)){
+                            Map<Package, Package> pkgDependsOnTmp = new HashMap<>();
+                            pkgDependsOnTmp.put(pkg, endPackage);
+                            if (dependsOnBetweenPackages.containsKey(pkgDependsOnTmp)) {
+                                dependsOnBetweenPackages.get(pkgDependsOnTmp).add(dependsOn);
+                            } else {
+                                Set<DependsOn> dependsOnsListTmp = new HashSet<>();
+                                dependsOnsListTmp.add(dependsOn);
+                                dependsOnBetweenPackages.put(pkgDependsOnTmp, dependsOnsListTmp);
+                            }
+                        }
+                    }
+                }
+                if (GroupOutToInsideDependsOns.size() > 0) {
+                    for(Package startPackage: GroupOutToInsideDependsOns.keySet()){
+                        for(DependsOn dependsOn: GroupOutToInsideDependsOns.get(startPackage)){
+                            Map<Package, Package> pkgDependsOnTmp = new HashMap<>();
+                            pkgDependsOnTmp.put(startPackage, pkg);
+                            if (dependsOnBetweenPackages.containsKey(pkgDependsOnTmp)) {
+                                dependsOnBetweenPackages.get(pkgDependsOnTmp).add(dependsOn);
+                            } else {
+                                Set<DependsOn> dependsOnsListTmp = new HashSet<>();
+                                dependsOnsListTmp.add(dependsOn);
+                                dependsOnBetweenPackages.put(pkgDependsOnTmp, dependsOnsListTmp);
+                            }
+                        }
+                    }
+                }
+            }
+            JSONArray edges = dependsToEdges(dependsOnBetweenPackages);
+            if (edges.size() == 0) {
+//                result.put(String.valueOf(parentPkg.getId()), nodes);
+                allNodes.addAll(nodes);
+            } else {
+                GraphLayoutUtil layoutUtil = new GraphLayoutUtil(nodes, edges);
+                JSONArray leveledNodes = layoutUtil.levelLayout();
+//                result.put(String.valueOf(parentPkg.getId()), leveledNodes);
+                allEdges.addAll(edges);
+                allNodes.addAll(leveledNodes);
+            }
+        }
+        allNodes.addAll(otherPkgJsonArray);
+        List<Package> topLevelPackages = new ArrayList<>(unfoldPckMap.keySet());
+        List<Package> otherPkgs = new ArrayList<>();
+        for (int i = 0; i < otherPkgJsonArray.size(); i++) {
+            JSONObject pkgJson = otherPkgJsonArray.getJSONObject(i);
+            Long pkgId = pkgJson.getLong("id");
+            levelMap.put(pkgId, pkgJson.getIntValue("level"));
+            Package pkg = packageRepository.findPackageById(pkgId);
+            otherPkgs.add(pkg);
+        }
+        topLevelPackages.addAll(otherPkgs);
+        Map<Map<Package, Package>, Set<DependsOn>> dependsOn = getDependsBetweenPackages(topLevelPackages);
+        JSONArray otherEdges = dependsToEdges(dependsOn);
+        allEdges.addAll(otherEdges);
+        result.put("edges", allEdges);
+        result.put("nodes", allNodes);
+        return result;
+    }
+
+    @SuppressWarnings("Duplicates")
+    public Map<Map<Package, Package>, Set<DependsOn>> getDependsBetweenPackages(List<Package> packages) {
+        Map<Map<Package, Package>, Set<DependsOn>> result = new HashMap<>();
+        for (int i = 0; i < packages.size(); i++) {
+            Package pkg1 = packages.get(i);
+            for (int j = i + 1; j < packages.size(); j++) {
+                Package pkg2 = packages.get(j);
+
+                List<DependsOn> outDepends = dependsOnRepository.findAllDependsOnBetweenPackages(pkg1.getId(), pkg2.getId());
+                List<DependsOn> inDepends = dependsOnRepository.findAllDependsOnBetweenPackages(pkg2.getId(), pkg1.getId());
+                if (!outDepends.isEmpty()) {
+                    Map<Package, Package> key = new HashMap<>();
+                    key.put(pkg1, pkg2);
+                    if (result.containsKey(key)) {
+                        result.get(key).addAll(outDepends);
+                    } else {
+                        result.put(key, new HashSet<>(outDepends));
+                    }
+                }
+                if (!inDepends.isEmpty()) {
+                    Map<Package, Package> key = new HashMap<>();
+                    key.put(pkg2, pkg1);
+                    if (result.containsKey(key)) {
+                        result.get(key).addAll(inDepends);
+                    } else {
+                        result.put(key, new HashSet<>(inDepends));
+                    }
+                }
+            }
+        }
+        return result;
+    }
     private List<List<DependsOn>> getGroupInsideAndOutDependsOnByFileIds(List<Long> fileIdList){
         List<List<DependsOn>> result = new ArrayList<>();
         List<DependsOn> GroupInsideDependsOns = new ArrayList<>();
@@ -611,19 +822,22 @@ public class CouplingServiceImpl implements CouplingService {
                 List<DependsOn> tmpInsideToOutDependsOn;
                 List<DependsOn> tmpOutToInsideDependsOn;
 
-                if(mainPackage.equals(parentPackage)){
-                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(mainPackage.getId(), pck.getId()));
-                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(mainPackage.getId(), pck.getId()));
-                }else if(pck.equals(parentPackage)){
-                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(mainPackage.getId(), pck.getId()));
-                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(mainPackage.getId(), pck.getId()));
-//                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(pck.getId(), mainPackage.getId()));
-//                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(pck.getId(), mainPackage.getId()));
-                }else{
-                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackages(mainPackage.getId(), pck.getId()));
-                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackages(pck.getId(), mainPackage.getId()));
-                }
-
+//                if(mainPackage.getId().equals(parentPackage.getId())){
+//                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(mainPackage.getId(), pck.getId()));
+//                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(mainPackage.getId(), pck.getId()));
+//                }else if(pck.getId().equals(parentPackage.getId())){
+//                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(pck.getId(), mainPackage.getId()));
+//                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(pck.getId(), mainPackage.getId()));
+////                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(mainPackage.getId(), pck.getId()));
+////                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(mainPackage.getId(), pck.getId()));
+////                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenMainPackageToPackage(pck.getId(), mainPackage.getId()));
+////                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackageToMainPackage(pck.getId(), mainPackage.getId()));
+//                }else{
+//                    tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackages(mainPackage.getId(), pck.getId()));
+//                    tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackages(pck.getId(), mainPackage.getId()));
+//                }
+                tmpInsideToOutDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackages(mainPackage.getId(), pck.getId()));
+                tmpOutToInsideDependsOn = new ArrayList<>(dependsOnRepository.findAllDependsOnBetweenPackages(pck.getId(), mainPackage.getId()));
                 if(tmpInsideToOutDependsOn.size() != 0){
                     GroupInsideToOutDependsOns.put(pck, tmpInsideToOutDependsOn);
                 }

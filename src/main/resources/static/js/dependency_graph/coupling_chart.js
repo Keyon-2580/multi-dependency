@@ -58,6 +58,25 @@ const PKG_NODE_TABLE_COLS = [[
     ,{field:'C', title: 'C-90分位值', sort: true}
     ,{field:'unfoldable', title: '可展开', sort: true}
 ]];
+const PKG_EDGE_TABLE_COLS = [[
+    {type:'checkbox'}
+    ,{field:'id', title: 'ID', sort: true}
+    ,{field:'obj1', title: '对象1'}
+    ,{field:'obj2', title: '对象2'}
+    ,{field:'C', title: '依赖面耦合度(C)', sort: true}
+    ,{field:'D', title: '依赖实例数(D)', sort: true}
+    ,{field:'reversed',  title: '是否逆向', sort: true}
+]];
+const FILE_EDGE_TABLE_COLS = [[
+    {type:'checkbox'}
+    ,{field:'id', title: 'ID', sort: true}
+    ,{field:'obj1', title: '对象1'}
+    ,{field:'obj2', title: '对象2'}
+    ,{field:'C', title: '依赖面耦合度(C)', sort: true}
+    ,{field:'D', title: '依赖实例数(D)', sort: true}
+    ,{field:'detail', title: '详情', sort: false}
+    ,{field:'reversed',  title: '是否逆向', sort: true}
+]];
 const CROSS_LEVEL_EDGE_MODEL = {
     style:{
         stroke: '#FFEA00',
@@ -95,7 +114,10 @@ const tooltip = new G6.Tooltip({
                 <li>path: ${e.item.getModel().path}</li>
               </ul>
               <ul>
-                <li>instability: ${e.item.getModel().instability}</li>
+                <li>level: ${e.item.getModel().level}</li>
+              </ul>
+              <ul>
+                <li>pLevel: ${e.item.getModel().pLevel}</li>
               </ul>`;
             }else if(e.item._cfg.model.nodeType === "package"){
                 outDiv.innerHTML = `
@@ -110,7 +132,10 @@ const tooltip = new G6.Tooltip({
                 <li>files num: ${e.item.getModel().NOF}</li>
               </ul>
               <ul>
-                <li>instability: ${e.item.getModel().instability}</li>
+                <li>level: ${e.item.getModel().level}</li>
+              </ul>
+              <ul>
+                <li>pLevel: ${e.item.getModel().pLevel}</li>
               </ul>
               <ul>
                 <li>Loose Degree: ${e.item.getModel().LooseDegree}</li>
@@ -127,6 +152,9 @@ const tooltip = new G6.Tooltip({
                       </ul>
                       <ul>
                         <li><b>依赖实例数(D(logD))</b>: ${selectedEdge.D}(${selectedEdge.logD})</li>
+                      </ul>
+                      <ul>
+                        <li><b>File1: File2</b>: ${selectedEdge.f1}: ${selectedEdge.f2}</li>
                       </ul>`;
             } else {
                 outDiv.innerHTML = `
@@ -171,6 +199,13 @@ const contextMenu = new G6.Menu({
             <a class="combo_a" href="/hierarchical_clustering/package/${item.model.id}" target="_blank">打开包聚类详情</a>
             </ul>`;
         }
+        html += `
+        <ul>
+            <li><button onclick="filterNeighbours(${item.model.id})">filter</button></li>
+            <li><button onclick="restFilterNeighbours()">reset</button></li>
+        </ul>
+
+        `;
         return html;
     },
     offsetX: 0,
@@ -372,7 +407,37 @@ const graph = new G6.Graph({
     plugins: [tooltip, toolbar, contextMenu],
     minZoom: 0.05,
 });
-
+function filterNeighbours(nodeId) {
+    const node = graph.findById(nodeId);
+    const neighbours = node.getNeighbors();
+    if (neighbours.length === 0) {
+        return;
+    }
+    let showNodesSet = new Set();
+    neighbours.forEach(n => showNodesSet.add(n._cfg.model.id));
+    showNodesSet.add(nodeId.toString());
+    graph.getEdges().forEach(edge => {
+        if (!showNodesSet.has(edge._cfg.source._cfg.id)
+            || !showNodesSet.has(edge._cfg.target._cfg.id)) {
+            edge.hide();
+        }
+    });
+    graph.getNodes().forEach(node => {
+        if (!showNodesSet.has(node._cfg.id))
+            node.hide();
+    });
+    graph.paint();
+    layer.msg("操作完成");
+}
+function restFilterNeighbours() {
+    graph.getEdges().forEach(edge => {
+        edge.show();
+    });
+    graph.getNodes().forEach(node => {
+        node.show();
+    });
+    layer.msg("操作完成");
+}
 function handleEdgeLabelDisplay() {
     if (graph.getEdges().length === 0) {
         layer.msg(" 图中没有边！");
@@ -469,7 +534,7 @@ function calcAbsGComplexity(k, w) {
     let crossW = 0.0;
     graph.getEdges().forEach(edge => {
        if (edge._cfg.states.includes('reverse')) {
-           console.log("逆向依赖", edge);
+           // console.log("逆向依赖", edge);
            reverseW += edge._cfg.model[w] * r;
        } else {
            const startLevel = edge._cfg.source._cfg.model.y;
@@ -478,8 +543,7 @@ function calcAbsGComplexity(k, w) {
                crossW += edge._cfg.model[w] * c;
                // edge.update(CROSS_LEVEL_EDGE_MODEL);
                edge.setState('cross', true);
-               console.log("跨层依赖", edge);
-               // console.log();
+               // console.log("跨层依赖", edge);
            }
 
        }
@@ -590,10 +654,11 @@ function unfoldPkg() {
         let otherPcks = [];
         selected_packages.forEach(node => {
             if (node._cfg.model.nodeType === "package") {
-                unfoldPcks.push({
-                    "id": node._cfg.id,
-                    "instability": node._cfg.model.instability
-                })
+                // unfoldPcks.push({
+                //     "id": node._cfg.id,
+                //     "instability": node._cfg.model.instability
+                // })
+                unfoldPcks.push(node._cfg.model);
             }
         })
         if (unfoldPcks.length === 0) {
@@ -608,10 +673,11 @@ function unfoldPkg() {
                 }
             })
             if(flag){
-                otherPcks.push({
-                    "id": node._cfg.id,
-                    "instability": node._cfg.model.instability
-                })
+                otherPcks.push(node._cfg.model);
+                // otherPcks.push({
+                //     "id": node._cfg.id,
+                //     "instability": node._cfg.model.instability
+                // })
             }
         })
 
@@ -620,6 +686,7 @@ function unfoldPkg() {
         showLoadingWindow("加载中...");
         $.ajax({
             url: "/coupling/group/one_step_child_packages",
+            // url: "/coupling/group/unfold_packages",
             type: "POST",
             contentType: "application/json",
             dataType: "json",
@@ -1170,33 +1237,66 @@ function loadEdgeTable1() {
             obj2: edge._cfg.target._cfg.model.name,
             D: parseFloat(edge._cfg.model.D),
             C: parseFloat(edge._cfg.model.C),
+            detail: edge._cfg.model.detail,
             reversed: isEdgeReversed(edge)
         });
     });
     layui.use('table', function(){
         const table = layui.table;
-        table.render({
-            elem: '#edge_table1'
-            ,defaultToolbar: []
-            ,toolbar: '#toolbarDemo'
-            ,autoSort: false
-            ,lineStyle: 'height:auto'
-            ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
-            ,cols: [[
-                {type:'checkbox'}
-                ,{field:'id', title: 'ID', sort: true}
-                ,{field:'obj1', title: '对象1'}
-                ,{field:'obj2', title: '对象2'}
-                ,{field:'C', title: '依赖面耦合度(C)', sort: true}
-                ,{field:'D', title: '依赖实例数(D)', sort: true}
-                ,{field:'reversed',  title: '是否逆向', sort: true}
-            ]]
-            ,data: edge_table1_data
-            ,page: {
-                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
-                limit: 10
-            }
-        });
+        if (CHART_MODE === 'package') {
+            table.render({
+                elem: '#edge_table1'
+                ,defaultToolbar: []
+                ,toolbar: '#toolbarDemo'
+                ,autoSort: false
+                ,lineStyle: 'height:auto'
+                ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                ,cols: PKG_EDGE_TABLE_COLS
+                ,data: edge_table1_data
+                ,page: {
+                    layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                    limit: 10
+                }
+            });
+        } else {
+            table.render({
+                elem: '#edge_table1'
+                ,defaultToolbar: []
+                ,toolbar: '#toolbarDemo'
+                ,autoSort: false
+                ,lineStyle: 'height:auto'
+                ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                ,cols: FILE_EDGE_TABLE_COLS
+                ,data: edge_table1_data
+                ,page: {
+                    layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                    limit: 10
+                }
+            });
+        }
+        // table.render({
+        //     elem: '#edge_table1'
+        //     ,defaultToolbar: []
+        //     ,toolbar: '#toolbarDemo'
+        //     ,autoSort: false
+        //     ,lineStyle: 'height:auto'
+        //     ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+        //     ,cols: [[
+        //         {type:'checkbox'}
+        //         ,{field:'id', title: 'ID', sort: true}
+        //         ,{field:'obj1', title: '对象1'}
+        //         ,{field:'obj2', title: '对象2'}
+        //         ,{field:'C', title: '依赖面耦合度(C)', sort: true}
+        //         ,{field:'D', title: '依赖实例数(D)', sort: true}
+        //         ,{field:'detail', title: '详情', sort: false}
+        //         ,{field:'reversed',  title: '是否逆向', sort: true}
+        //     ]]
+        //     ,data: edge_table1_data
+        //     ,page: {
+        //         layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+        //         limit: 10
+        //     }
+        // });
         table.on('sort(edge1)', function (obj){
             if (obj.type === 'asc') {
                 edge_table1_data.sort((a, b) => a[obj.field] - b[obj.field]);
@@ -1607,6 +1707,9 @@ graph.on('edge:click', (e) => {
                       </ul>
                       <ul>
                         <li><b>依赖实例数(D(logD))</b>: ${selectedEdge.D}(${selectedEdge.logD})</li>
+                      </ul>
+                      <ul>
+                        <li><b>File1: File2</b>: ${selectedEdge.f1}: ${selectedEdge.f2}</li>
                       </ul>`;
     } else {
         outDiv.innerHTML = `
