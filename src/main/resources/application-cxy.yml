@@ -59,10 +59,10 @@ data:
   #    database_name: multi.dependency.all.db
   #    database_name: multi.dependency.atlas.db
 
-#  serialize_path: C:/Dev/DependencyAnalysis/Result/tomcat-calm/source-tomcat-calm.txt
+  serialize_path: C:/Dev/DependencyAnalysis/Result/tomcat-calm/source-tomcat-calm.txt
 #  serialize_path: C:/Dev/DependencyAnalysis/Result/flink.txt
 #  serialize_path: C:/Dev/DependencyAnalysis/Result/issuetracker01.txt
-  serialize_path: C:/Dev/DependencyAnalysis/Result/issuetracker05.txt
+#  serialize_path: C:/Dev/DependencyAnalysis/Result/issuetracker05.txt
   coupling_value_path: C:/Dev/DependencyAnalysis/Result/coupling_value_export_tomcat.csv
   anonymization: false
   batch_serialize: true

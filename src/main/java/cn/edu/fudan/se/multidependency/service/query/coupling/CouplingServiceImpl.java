@@ -668,6 +668,10 @@ public class CouplingServiceImpl implements CouplingService {
         JSONObject result = new JSONObject();
         JSONArray allNodes = new JSONArray();
         JSONArray allEdges = new JSONArray();
+        for (int i = 0; i < otherPkgJsonArray.size(); i++) {
+            JSONObject node = otherPkgJsonArray.getJSONObject(i);
+            node.put("pLevel", node.getIntValue("level"));
+        }
         for (Map.Entry<Package, List<Package>> entry : unfoldPckMap.entrySet()) {
             Map<Map<Package, Package>, Set<DependsOn>> dependsOnBetweenPackages = new HashMap<>();
             JSONArray nodes = new JSONArray();
@@ -723,7 +727,8 @@ public class CouplingServiceImpl implements CouplingService {
             }
         }
         allNodes.addAll(otherPkgJsonArray);
-        List<Package> topLevelPackages = new ArrayList<>(unfoldPckMap.keySet());
+        List<Package> topLevelPackages = new ArrayList<>();
+        unfoldPckMap.forEach((k, v) -> topLevelPackages.addAll(v));
         List<Package> otherPkgs = new ArrayList<>();
         for (int i = 0; i < otherPkgJsonArray.size(); i++) {
             JSONObject pkgJson = otherPkgJsonArray.getJSONObject(i);

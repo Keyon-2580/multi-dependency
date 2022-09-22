@@ -685,8 +685,8 @@ function unfoldPkg() {
         json["otherPcks"] = otherPcks;
         showLoadingWindow("加载中...");
         $.ajax({
-            url: "/coupling/group/one_step_child_packages",
-            // url: "/coupling/group/unfold_packages",
+            // url: "/coupling/group/one_step_child_packages",
+            url: "/coupling/group/unfold_packages",
             type: "POST",
             contentType: "application/json",
             dataType: "json",

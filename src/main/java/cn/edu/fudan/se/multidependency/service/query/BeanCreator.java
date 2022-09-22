@@ -324,6 +324,51 @@ public class BeanCreator {
 		return true;
 	}
 
+	@Bean
+	public boolean mergeSeparateFileIntoPackage(PackageRepository packageRepository,
+												NodeRepository nodeRepository,
+												ProjectFileRepository projectFileRepository,
+												ContainRepository containRepository,
+												RelationRepository relationRepository) {
+		if (!packageRepository.findIfSeparateFileExists()) {
+			LOGGER.info("已合并分散文件");
+			return false;
+		}
+		LOGGER.info("开始合并分散文件");
+		// merge separate files into packages
+		List<Package> packageList = packageRepository.queryAllPackage();
+		List<Relation> containRelations = new ArrayList<>();
+		for (Package pkg : packageList) {
+			Long pkgId = pkg.getId();
+			if (packageRepository.findIfPackageContainFiles(pkgId) && packageRepository.findIfPackageContainPackages(pkgId)) {
+				List<ProjectFile> projectFiles = projectFileRepository.findPackageContainedFiles(pkgId);
+				// remove contain file relations
+				Package virtualPackage = new Package();
+				virtualPackage.setName(pkg.getName()+"-default");
+				virtualPackage.setDirectoryPath(pkg.getDirectoryPath()+"default");
+				virtualPackage.setLanguage(pkg.getLanguage());
+				virtualPackage.setNof(projectFiles.size());
+				int locSum = projectFiles.stream().mapToInt(ProjectFile::getLoc).sum();
+				virtualPackage.setLoc(locSum);
+				for (ProjectFile projectFile : projectFiles) {
+
+					Relation contain =
+							containRepository.findContainByPkgAndFile(pkg.getId(), projectFile.getId());
+					relationRepository.delete(contain);
+					Contain containFile = new Contain(virtualPackage, projectFile);
+					containRelations.add(containFile);
+				}
+
+				nodeRepository.save(virtualPackage);
+				Relation containRelation = new Contain(pkg, virtualPackage);
+//				relationRepository.save(containRelation);
+				containRelations.add(containRelation);
+			}
+		}
+		relationRepository.saveAll(containRelations);
+		LOGGER.info("合并成功");
+		return true;
+	}
 
 	//	@Bean
 	public boolean setCommitSize(CommitUpdateFileRepository commitUpdateFileRepository,
@@ -1070,51 +1115,5 @@ public class BeanCreator {
 			}
 		}
 		return pcks;
-	}
-
-	@Bean
-	public boolean mergeSeparateFileIntoPackage(PackageRepository packageRepository,
-												NodeRepository nodeRepository,
-												ProjectFileRepository projectFileRepository,
-												ContainRepository containRepository,
-												RelationRepository relationRepository) {
-		if (!packageRepository.findIfSeparateFileExists()) {
-			LOGGER.info("已合并分散文件");
-			return false;
-		}
-		LOGGER.info("开始合并分散文件");
-		// merge separate files into packages
-		List<Package> packageList = packageRepository.queryAllPackage();
-		List<Relation> containRelations = new ArrayList<>();
-		for (Package pkg : packageList) {
-			Long pkgId = pkg.getId();
-			if (packageRepository.findIfPackageContainFiles(pkgId) && packageRepository.findIfPackageContainPackages(pkgId)) {
-				List<ProjectFile> projectFiles = projectFileRepository.findPackageContainedFiles(pkgId);
-				// remove contain file relations
-				Package virtualPackage = new Package();
-				virtualPackage.setName(pkg.getName()+"-default");
-				virtualPackage.setDirectoryPath(pkg.getDirectoryPath()+"default");
-				virtualPackage.setLanguage(pkg.getLanguage());
-				virtualPackage.setNof(projectFiles.size());
-				int locSum = projectFiles.stream().mapToInt(ProjectFile::getLoc).sum();
-				virtualPackage.setLoc(locSum);
-				for (ProjectFile projectFile : projectFiles) {
-
-					Relation contain =
-							containRepository.findContainByPkgAndFile(pkg.getId(), projectFile.getId());
-					relationRepository.delete(contain);
-					Contain containFile = new Contain(virtualPackage, projectFile);
-					containRelations.add(containFile);
-				}
-
-				nodeRepository.save(virtualPackage);
-				Relation containRelation = new Contain(pkg, virtualPackage);
-//				relationRepository.save(containRelation);
-				containRelations.add(containRelation);
-			}
-		}
-		relationRepository.saveAll(containRelations);
-		LOGGER.info("合并成功");
-		return true;
 	}
 }
