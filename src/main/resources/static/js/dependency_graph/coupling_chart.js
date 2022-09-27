@@ -306,7 +306,7 @@ const toolbar = new G6.ToolBar({
         }else if (code === 'back') {
             if (data_stack.length !== 0) {
                 data = data_stack.pop();
-                loadGraph();
+                loadGraph2();
             }
         }
     },
@@ -654,11 +654,12 @@ function unfoldPkg() {
         let otherPcks = [];
         selected_packages.forEach(node => {
             if (node._cfg.model.nodeType === "package") {
-                // unfoldPcks.push({
-                //     "id": node._cfg.id,
-                //     "instability": node._cfg.model.instability
-                // })
-                unfoldPcks.push(node._cfg.model);
+                unfoldPcks.push({
+                    "id": node._cfg.id,
+                    "instability": node._cfg.model.instability,
+                    "level": node._cfg.model.level
+                })
+                // unfoldPcks.push(node._cfg.model);
             }
         })
         if (unfoldPcks.length === 0) {
@@ -676,7 +677,8 @@ function unfoldPkg() {
                 otherPcks.push(node._cfg.model);
                 // otherPcks.push({
                 //     "id": node._cfg.id,
-                //     "instability": node._cfg.model.instability
+                //     "instability": node._cfg.model.instability,
+                //     "level": node._cfg.model.level
                 // })
             }
         })
@@ -694,11 +696,15 @@ function unfoldPkg() {
 
             success: function (result) {
                 if(result["code"] === 200){
-                    data_stack.push(graph.save())
-                    data = result;
-                    const nodes = data["nodes"];
-                    max_level = nodes[nodes.length-1].level;
-                    loadGraph();
+                    data_stack.push(graph.save());
+                    data["nodes"] = calcAllNodesPos(result);
+                    data["edges"] = result["edges"];
+                    loadGraph2();
+                    // data_stack.push(graph.save())
+                    // data = result;
+                    // const nodes = data["nodes"];
+                    // max_level = nodes[nodes.length-1].level;
+                    // loadGraph();
                 }else if(result["code"] === -1){
                     layer.msg("错误！\n" + result["pck"]["directoryPath"] + "\n已无法再展开！");
                     closeLoadingWindow();
@@ -1658,6 +1664,21 @@ function handleNodeStroke() {
     });
 
 }
+function loadGraph2() {
+    // const nodes = calcAllNodesPos(response);
+    graph.data(data);
+    graph.render();
+    handleNodeColor();
+    handleNodeStroke();
+    handleReverseEdgesAndExtends();
+
+    graph.fitCenter();
+    graph.fitView();
+    savePresentNodes();
+    loadPanel(true);
+    handleEdgesWidth();
+    closeLoadingWindow();
+}
 function loadGraph(){
     is_ntb_loaded = false;
     if (show_panel_btm) {
@@ -1678,7 +1699,42 @@ function loadGraph(){
     handleEdgesWidth();
     closeLoadingWindow();
 }
+function handleNodeColor() {
+    graph.getNodes().forEach(node => {
+        if(node._cfg.model.y >= 0.8 * height){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR5
+                }
+            });
+        }else if(node._cfg.model.y >= 0.6 * height){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR4
+                }
+            });
+        }else if(node._cfg.model.y >= 0.4 * height){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR3
+                }
+            });
+        }else if(node._cfg.model.y >= 0.2 * height){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR2
+                }
+            });
+        }else{
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR1
+                }
+            });
+        }
+    });
 
+}
 //加载弹窗
 function showLoadingWindow(tip){
     let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +
