@@ -454,17 +454,17 @@ public class CouplingServiceImpl implements CouplingService {
                 }
             }
 
-            int allDependsOnTimes = GroupInsideToOutDependsOnTimes + GroupOutToInsideDependsOnTimes;
-            double finalInstability = 0.0;
-            if (allDependsOnTimes != 0) {
-                double pckInstability = (double) GroupInsideToOutDependsOnTimes / (double) allDependsOnTimes;
-                if(parentInstability == 0.0){
-                    finalInstability = pckInstability;
-                }else{
-                    finalInstability = (parentInstability - pckInstability) * (1 - parentInstability) + pckInstability;
-                }
-            }
-            tmpPck.put("instability", finalInstability);
+//            int allDependsOnTimes = GroupInsideToOutDependsOnTimes + GroupOutToInsideDependsOnTimes;
+//            double finalInstability = 0.0;
+//            if (allDependsOnTimes != 0) {
+//                double pckInstability = (double) GroupInsideToOutDependsOnTimes / (double) allDependsOnTimes;
+//                if(parentInstability == 0.0){
+//                    finalInstability = pckInstability;
+//                }else{
+//                    finalInstability = (parentInstability - pckInstability) * (1 - parentInstability) + pckInstability;
+//                }
+//            }
+//            tmpPck.put("instability", finalInstability);
             nodes.add(tmpPck);
         }
         Map<String, Integer> dMap = new HashMap<>();

@@ -1249,11 +1249,12 @@ function loadEdgeTable1() {
     });
     layui.use('table', function(){
         const table = layui.table;
+        let edgeTable;
         if (CHART_MODE === 'package') {
-            table.render({
+            edgeTable = table.render({
                 elem: '#edge_table1'
                 ,defaultToolbar: []
-                ,toolbar: '#toolbarDemo'
+                ,toolbar: '#toolbarEdge'
                 ,autoSort: false
                 ,lineStyle: 'height:auto'
                 ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
@@ -1265,10 +1266,10 @@ function loadEdgeTable1() {
                 }
             });
         } else {
-            table.render({
+            edgeTable = table.render({
                 elem: '#edge_table1'
                 ,defaultToolbar: []
-                ,toolbar: '#toolbarDemo'
+                ,toolbar: '#toolbarEdge'
                 ,autoSort: false
                 ,lineStyle: 'height:auto'
                 ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
@@ -1280,6 +1281,9 @@ function loadEdgeTable1() {
                 }
             });
         }
+        $("#export_edge").click(function(){
+            table.exportFile(edgeTable.config.id, edge_table1_data, 'csv');
+        })
         // table.render({
         //     elem: '#edge_table1'
         //     ,defaultToolbar: []
@@ -1393,11 +1397,12 @@ function loadNodeTable1() {
     });
     layui.use('table', function(){
         const table = layui.table;
+        let nodeTable;
         if (CHART_MODE === 'package') {
-            table.render({
+            nodeTable = table.render({
                 elem: '#node_table1'
                 ,defaultToolbar: []
-                ,toolbar: '#toolbarDemo'
+                ,toolbar: '#toolbarNode'
                 ,autoSort: false
                 ,lineStyle: 'height:auto'
                 ,cellMinWidth: 50 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
@@ -1409,10 +1414,10 @@ function loadNodeTable1() {
                 }
             });
         } else {
-            table.render({
+            nodeTable = table.render({
                 elem: '#node_table1'
                 ,defaultToolbar: []
-                ,toolbar: '#toolbarDemo'
+                ,toolbar: '#toolbarNode'
                 ,autoSort: false
                 ,lineStyle: 'height:auto'
                 ,cellMinWidth: 50 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
@@ -1424,7 +1429,9 @@ function loadNodeTable1() {
                 }
             });
         }
-
+        $("#export_node").click(function(){
+            table.exportFile(nodeTable.config.id, node_table1_data, 'csv');
+        })
         table.on('sort(node1)', function (obj){
             if (obj.type === 'asc') {
                 node_table1_data.sort((a, b) => a[obj.field] - b[obj.field]);
