@@ -752,45 +752,49 @@ public class CouplingServiceImpl implements CouplingService {
     private GraphBlock unfoldOnePackage(JSONObject pkgJson) {
         GraphBlock graphBlock = new GraphBlock();
         JSONArray nodes = new JSONArray();
-        Map<Map<Package, Package>, Set<DependsOn>> dependsOnBetweenPackages = new HashMap<>();
+//        Map<Map<Package, Package>, Set<DependsOn>> dependsOnBetweenPackages = new HashMap<>();
         List<Package> childPkgs = packageRepository.findOneStepPackagesById(pkgJson.getLong("id"));
+        Map<Map<Package, Package>, Set<DependsOn>> dependsOnBetweenPackages = getDependsBetweenPackages(childPkgs);
         for (Package pkg : childPkgs) {
-            JSONObject tmpPkg = pkgToNode(pkg);
-            nodes.add(tmpPkg);
-            List<Map<Package, List<DependsOn>>> tmpList = getGroupInsideAndOutDependsOnByPackage(pkg, childPkgs);
-            Map<Package, List<DependsOn>> GroupInsideToOutDependsOns = tmpList.get(0);
-            Map<Package, List<DependsOn>> GroupOutToInsideDependsOns = tmpList.get(1);
-            if (GroupInsideToOutDependsOns.size() > 0) {
-                for(Package endPackage: GroupInsideToOutDependsOns.keySet()){
-                    for(DependsOn dependsOn: GroupInsideToOutDependsOns.get(endPackage)){
-                        Map<Package, Package> pkgDependsOnTmp = new HashMap<>();
-                        pkgDependsOnTmp.put(pkg, endPackage);
-                        if (dependsOnBetweenPackages.containsKey(pkgDependsOnTmp)) {
-                            dependsOnBetweenPackages.get(pkgDependsOnTmp).add(dependsOn);
-                        } else {
-                            Set<DependsOn> dependsOnsListTmp = new HashSet<>();
-                            dependsOnsListTmp.add(dependsOn);
-                            dependsOnBetweenPackages.put(pkgDependsOnTmp, dependsOnsListTmp);
-                        }
-                    }
-                }
-            }
-            if (GroupOutToInsideDependsOns.size() > 0) {
-                for(Package startPackage: GroupOutToInsideDependsOns.keySet()){
-                    for(DependsOn dependsOn: GroupOutToInsideDependsOns.get(startPackage)){
-                        Map<Package, Package> pkgDependsOnTmp = new HashMap<>();
-                        pkgDependsOnTmp.put(startPackage, pkg);
-                        if (dependsOnBetweenPackages.containsKey(pkgDependsOnTmp)) {
-                            dependsOnBetweenPackages.get(pkgDependsOnTmp).add(dependsOn);
-                        } else {
-                            Set<DependsOn> dependsOnsListTmp = new HashSet<>();
-                            dependsOnsListTmp.add(dependsOn);
-                            dependsOnBetweenPackages.put(pkgDependsOnTmp, dependsOnsListTmp);
-                        }
-                    }
-                }
-            }
+            nodes.add(pkgToNode(pkg));
         }
+//        for (Package pkg : childPkgs) {
+//            JSONObject tmpPkg = pkgToNode(pkg);
+//            nodes.add(tmpPkg);
+//            List<Map<Package, List<DependsOn>>> tmpList = getGroupInsideAndOutDependsOnByPackage(pkg, childPkgs);
+//            Map<Package, List<DependsOn>> GroupInsideToOutDependsOns = tmpList.get(0);
+//            Map<Package, List<DependsOn>> GroupOutToInsideDependsOns = tmpList.get(1);
+//            if (GroupInsideToOutDependsOns.size() > 0) {
+//                for(Package endPackage: GroupInsideToOutDependsOns.keySet()){
+//                    for(DependsOn dependsOn: GroupInsideToOutDependsOns.get(endPackage)){
+//                        Map<Package, Package> pkgDependsOnTmp = new HashMap<>();
+//                        pkgDependsOnTmp.put(pkg, endPackage);
+//                        if (dependsOnBetweenPackages.containsKey(pkgDependsOnTmp)) {
+//                            dependsOnBetweenPackages.get(pkgDependsOnTmp).add(dependsOn);
+//                        } else {
+//                            Set<DependsOn> dependsOnsListTmp = new HashSet<>();
+//                            dependsOnsListTmp.add(dependsOn);
+//                            dependsOnBetweenPackages.put(pkgDependsOnTmp, dependsOnsListTmp);
+//                        }
+//                    }
+//                }
+//            }
+//            if (GroupOutToInsideDependsOns.size() > 0) {
+//                for(Package startPackage: GroupOutToInsideDependsOns.keySet()){
+//                    for(DependsOn dependsOn: GroupOutToInsideDependsOns.get(startPackage)){
+//                        Map<Package, Package> pkgDependsOnTmp = new HashMap<>();
+//                        pkgDependsOnTmp.put(startPackage, pkg);
+//                        if (dependsOnBetweenPackages.containsKey(pkgDependsOnTmp)) {
+//                            dependsOnBetweenPackages.get(pkgDependsOnTmp).add(dependsOn);
+//                        } else {
+//                            Set<DependsOn> dependsOnsListTmp = new HashSet<>();
+//                            dependsOnsListTmp.add(dependsOn);
+//                            dependsOnBetweenPackages.put(pkgDependsOnTmp, dependsOnsListTmp);
+//                        }
+//                    }
+//                }
+//            }
+//        }
         JSONArray edges = dependsToEdges(dependsOnBetweenPackages);
         if (edges.size() == 0) {
             int width = (int) Math.ceil(Math.sqrt(nodes.size()));
