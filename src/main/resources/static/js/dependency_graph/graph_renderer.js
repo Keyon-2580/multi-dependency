@@ -1,5 +1,5 @@
 const NODE_SIZE = 20;
-const PADDING = 80;
+const PADDING = 0;
 const H_GAP = NODE_SIZE * 2;
 const V_GAP = NODE_SIZE * 3;
 let allEdges = [];
@@ -11,8 +11,8 @@ function calcAllNodesPos(response) {
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < rowOfBlocks[i].length; j++) {
             const block = rowOfBlocks[i][j];
-            rowOfBlocks[i][j]["X"] = block.width * NODE_SIZE + (block.width - 1) * H_GAP;
-            rowOfBlocks[i][j]["Y"] = block.height * NODE_SIZE + (block.height - 1) * block.width * V_GAP;
+            rowOfBlocks[i][j]["X"] = block.width * NODE_SIZE + (block.width - 1) * (H_GAP + NODE_SIZE/2);
+            rowOfBlocks[i][j]["Y"] = block.height * NODE_SIZE + (block.height - 1) * (V_GAP + NODE_SIZE/2);
         }
         // for (let [i, block] of blocks.entries()) {
         //     block["X"] = block.width * NODE_SIZE + (block.width - 1) * H_GAP;
@@ -33,7 +33,7 @@ function calcAllNodesPos(response) {
     for (let i = 1; i < rows; i++) {
         for (let j = 1; j < rowOfBlocks[i].length; j++) {
             rowOfBlocks[i][j]["startX"] = rowOfBlocks[i][j-1]["startX"] + rowOfBlocks[i][j-1]["X"] + H_GAP * 2;
-            rowOfBlocks[i][j]["startY"] = rowOfBlocks[i-1][0]["startY"] + rowOfBlocks[i-1][0]["Y"] + V_GAP * 2;
+            rowOfBlocks[i][j]["startY"] = rowOfBlocks[i-1][0]["startY"] + rowOfBlocks[i-1][0]["Y"] + V_GAP * 1.6;
         }
     }
 
@@ -65,7 +65,7 @@ function calcBlockNodesPos(block) {
         for (let j = 0; j < block.packages[i].length; j++) {
             block.packages[i][j]["x"] = block["startX"] + j * H_GAP;
             block.packages[i][j]["y"] = block["startY"] + i * V_GAP;
-            blockNodes.push(block.packages[i][j]);
+            // blockNodes.push(block.packages[i][j]);
         }
     }
     for(let i = 0; i < block.packages.length; i++) {

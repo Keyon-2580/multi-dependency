@@ -95,7 +95,7 @@ public class CouplingController {
             JSONObject pkgJson = unfoldPkgsJsonArray.getJSONObject(i);
             Long pkgId = pkgJson.getLong("id");
 //            levelMap.put(pkgId, pkgJson.getIntValue("level"));
-            Package parentPackage = packageRepository.findPackageById(pkgId);
+//            Package parentPackage = packageRepository.findPackageById(pkgId);
             List<Package> childPkgs = new ArrayList<>(packageRepository.findOneStepPackagesById(pkgId));
             allPackages.addAll(childPkgs);
             if (childPkgs.size() == 0) {
@@ -261,13 +261,23 @@ public class CouplingController {
     @ResponseBody
     public JSONObject getTopLevelPackagesCouplingValue(){
         List<Package> topLevelPackages = packageRepository.findPackagesAtDepth1();
-        Map<Package, List<Package>> pckMap = new HashMap<>();
-        Map<Long, Double> parentPcksInstability = new HashMap<>();
+        JSONArray otherPkgs = new JSONArray();
+        for (Package pkg : topLevelPackages) {
+            JSONObject rootPackage = new JSONObject();
+            rootPackage.put("level", "0");
+            rootPackage.put("id", pkg.getId());
+            otherPkgs.add(rootPackage);
+        }
+//        Map<Package, List<Package>> pckMap = new HashMap<>();
+//        Map<Long, Double> parentPcksInstability = new HashMap<>();
+//
+//        pckMap.put(containRepository.findPackageInPackage(topLevelPackages.get(0).getId()), topLevelPackages);
+//
+//        JSONObject result = couplingService.getCouplingValueByPcks(pckMap, parentPcksInstability, true, true);
 
-        pckMap.put(containRepository.findPackageInPackage(topLevelPackages.get(0).getId()), topLevelPackages);
 
-        JSONObject result = couplingService.getCouplingValueByPcks(pckMap, parentPcksInstability, true, true);
-//        JSONObject result = couplingService.getChildPackagesCouplingValue(pckMap, null, null);
+
+        JSONObject result = couplingService.getTopLevelPackages();
         result.put("code", 200);
 
         return result;

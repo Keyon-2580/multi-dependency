@@ -115,9 +115,6 @@ const tooltip = new G6.Tooltip({
               </ul>
               <ul>
                 <li>level: ${e.item.getModel().level}</li>
-              </ul>
-              <ul>
-                <li>pLevel: ${e.item.getModel().pLevel}</li>
               </ul>`;
             }else if(e.item._cfg.model.nodeType === "package"){
                 outDiv.innerHTML = `
@@ -135,9 +132,6 @@ const tooltip = new G6.Tooltip({
                 <li>level: ${e.item.getModel().level}</li>
               </ul>
               <ul>
-                <li>pLevel: ${e.item.getModel().pLevel}</li>
-              </ul>
-              <ul>
                 <li>Loose Degree: ${e.item.getModel().LooseDegree}</li>
               </ul>`;
             }
@@ -152,9 +146,6 @@ const tooltip = new G6.Tooltip({
                       </ul>
                       <ul>
                         <li><b>依赖实例数(D(logD))</b>: ${selectedEdge.D}(${selectedEdge.logD})</li>
-                      </ul>
-                      <ul>
-                        <li><b>File1: File2</b>: ${selectedEdge.f1}: ${selectedEdge.f2}</li>
                       </ul>`;
             } else {
                 outDiv.innerHTML = `
@@ -219,8 +210,11 @@ const toolbar = new G6.ToolBar({
         return `
       <ul>
         <li code='back'>返回上一层</li>
+        <br>
         <li code='choose'>选择</li>
+        <br>
         <li code='unfold'>展开</li>
+        <br>
         <li code='unfoldFile'>展开到文件页面</li>
       </ul>
     `;
@@ -652,6 +646,8 @@ function unfoldPkg() {
         let json = {};
         let unfoldPcks = [];
         let otherPcks = [];
+        let hasUnfoldable = false;
+        let errorMsg = '';
         selected_packages.forEach(node => {
             if (node._cfg.model.nodeType === "package") {
                 unfoldPcks.push({
@@ -661,7 +657,15 @@ function unfoldPkg() {
                 })
                 // unfoldPcks.push(node._cfg.model);
             }
+            if (node._cfg.model["unfoldable"] === false) {
+                errorMsg = "错误！" + node._cfg.model["name"] + " 已无法再展开到包！";
+                hasUnfoldable = true;
+            }
         })
+        if (hasUnfoldable) {
+            layer.msg(errorMsg);
+            return;
+        }
         if (unfoldPcks.length === 0) {
             layer.msg("错误！已无法再展开！");
             return;
@@ -719,8 +723,9 @@ function instabilityAjax(){
         url : "/coupling/group/top_level_packages",
         success : function(result) {
             data = result;
-            const nodes = data["nodes"];
-            max_level = nodes[nodes.length-1].level;
+            // const nodes = data["nodes"];
+
+            // max_level = nodes[nodes.length-1].level;
             // let nodes_data = json_data["nodes"];
             // let edges_data = json_data["edges"];
             //
@@ -854,7 +859,7 @@ function levelLayout(){
 
     graph.refresh();
     graph.fitCenter();
-    graph.fitView();
+    graph.fitView(500);
 }
 function levelLayout2(){
 
@@ -963,7 +968,7 @@ function levelLayout2(){
     });
     graph.refresh();
     graph.fitCenter();
-    graph.fitView();
+    graph.fitView(150);
 }
 // function levelLayout2(){
 //     let nodelist = graph.getNodes();
@@ -1770,9 +1775,6 @@ graph.on('edge:click', (e) => {
                       </ul>
                       <ul>
                         <li><b>依赖实例数(D(logD))</b>: ${selectedEdge.D}(${selectedEdge.logD})</li>
-                      </ul>
-                      <ul>
-                        <li><b>File1: File2</b>: ${selectedEdge.f1}: ${selectedEdge.f2}</li>
                       </ul>`;
     } else {
         outDiv.innerHTML = `

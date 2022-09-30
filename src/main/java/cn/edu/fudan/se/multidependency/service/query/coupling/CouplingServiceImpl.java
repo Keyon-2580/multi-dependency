@@ -748,6 +748,21 @@ public class CouplingServiceImpl implements CouplingService {
         return res;
     }
 
+    @Override
+    public JSONObject getTopLevelPackages() {
+        JSONObject result = new JSONObject();
+        List<Package> topLevelPackages = packageRepository.findPackagesAtDepth1();
+        JSONArray nodes = new JSONArray();
+        for (Package pkg : topLevelPackages) {
+            nodes.add(pkgToNode(pkg));
+        }
+        Map<Map<Package, Package>, Set<DependsOn>> allDepends = getDependsBetweenPackages(topLevelPackages);
+        JSONArray edges = dependsToEdges(allDepends);
+        result.put("nodes", nodes);
+        result.put("edges", edges);
+        return result;
+    }
+
     @SuppressWarnings("Duplicates")
     private GraphBlock unfoldOnePackage(JSONObject pkgJson) {
         GraphBlock graphBlock = new GraphBlock();
@@ -800,7 +815,12 @@ public class CouplingServiceImpl implements CouplingService {
             int width = (int) Math.ceil(Math.sqrt(nodes.size()));
             graphBlock.setWidth(width);
             graphBlock.setHeight(width);
-            graphBlock.setPackages(nodes);
+            JSONArray leveledNodes = new JSONArray();
+            leveledNodes.add(nodes);
+            for (int i = 0; i < nodes.size(); i++) {
+                nodes.getJSONObject(i).put("level", pkgJson.getString("level")+0);
+            }
+            graphBlock.setPackages(leveledNodes);
         } else {
             GraphLayoutUtil layoutUtil = new GraphLayoutUtil(nodes, edges);
             JSONArray leveledNodes = layoutUtil.levelLayout2(pkgJson.getString("level"));
