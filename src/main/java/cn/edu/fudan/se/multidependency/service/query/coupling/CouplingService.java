@@ -39,6 +39,6 @@ public interface CouplingService {
             Integer> levelMap);
 
     JSONObject unfoldPackages(JSONArray selectedPackages, JSONArray otherPackages, List<Package> allPackages);
-
+    JSONObject unfoldPackagesToFile(JSONArray selectedPackages, List<ProjectFile> allFiles);
     JSONObject getTopLevelPackages();
 }

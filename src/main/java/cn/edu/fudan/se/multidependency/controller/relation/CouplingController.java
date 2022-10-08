@@ -118,6 +118,25 @@ public class CouplingController {
         return result;
     }
 
+    /**
+     * 展开若干个包，返回这些包下的第一层子包的耦合数据
+     * @param requestBody 前端请求
+     * @return result json
+     */
+    @PostMapping("/group/unfold_packages_to_files")
+    @CrossOrigin
+    @ResponseBody
+    public JSONObject unfoldPackagesToFiles(@RequestBody JSONObject requestBody) {
+        JSONArray selectedPkgs = requestBody.getJSONArray("pckIds");
+        List<ProjectFile> allFiles = new ArrayList<>();
+        for (int i = 0; i < selectedPkgs.size(); i++) {
+            Long pkgId = selectedPkgs.getJSONObject(i).getLong("id");
+            List<ProjectFile> fileList = containRepository.findPackageContainAllFiles(pkgId);
+            allFiles.addAll(fileList);
+        }
+        JSONObject result = couplingService.unfoldPackagesToFile(selectedPkgs, allFiles);
+        return result;
+    }
 
     /**
      * 返回一个包下的第一层子包的耦合数据

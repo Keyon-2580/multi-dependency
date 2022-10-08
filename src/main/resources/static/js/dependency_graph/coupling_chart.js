@@ -272,7 +272,8 @@ const toolbar = new G6.ToolBar({
             selected_packages.forEach(node => {
                 if (node._cfg.model.nodeType === "package") {
                     pckIds.push({
-                        "id": node._cfg.id
+                        "id": node._cfg.id,
+                        "level": node._cfg.model.level
                     })
                 }
             })
@@ -284,17 +285,22 @@ const toolbar = new G6.ToolBar({
 
             json["pckIds"] = pckIds;
             $.ajax({
-                url: "/coupling/group/files_of_packages",
+                // url: "/coupling/group/files_of_packages",
+                url: "/coupling/group/unfold_packages_to_files",
                 type: "POST",
                 contentType: "application/json",
                 dataType: "json",
                 data: JSON.stringify(json),
                 success: function (result) {
                     data_stack.push(graph.save());
-                    data = result;
-                    const nodes = data["nodes"];
-                    max_level = nodes[nodes.length-1].level;
-                    loadGraph();
+                    data["nodes"] = calcAllNodesPos(result);
+                    data["edges"] = result["edges"];
+                    loadGraph2();
+                    // data_stack.push(graph.save());
+                    // data = result;
+                    // const nodes = data["nodes"];
+                    // max_level = nodes[nodes.length-1].level;
+                    // loadGraph();
                 }
             });
         }else if (code === 'back') {
