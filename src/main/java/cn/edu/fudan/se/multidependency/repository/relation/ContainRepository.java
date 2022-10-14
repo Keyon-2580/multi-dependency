@@ -2,6 +2,7 @@ package cn.edu.fudan.se.multidependency.repository.relation;
 
 import java.util.List;
 
+import cn.edu.fudan.se.multidependency.model.relation.Relation;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.repository.query.Param;
@@ -173,4 +174,7 @@ public interface ContainRepository extends Neo4jRepository<Contain, Long> {
 
 	@Query("match h=(p:Package)-[:" + RelationType.str_CONTAIN + "*]->(f:ProjectFile) where id(p)=$pckId and id(f)=$fileId return count(h) > 0;")
 	public boolean isPackageContainsFile(@Param("pckId") Long pckId, @Param("fileId") Long fileId);
+
+	@Query("match h=(p:Package)-[r:CONTAIN]->(f:ProjectFile) where id(p)=$pkgId and id(f)=$fileId return h;")
+	Relation findContainByPkgAndFile(@Param("pkgId") Long pckId, @Param("fileId") Long fileId);
 }

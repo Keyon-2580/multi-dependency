@@ -70,9 +70,71 @@ public class CouplingController {
             pckMap.put(parentPackage, pckList);
         }
 
-        JSONObject result = couplingService.getCouplingValueByPcks(pckMap, parentPcksInstability, false);
+        JSONObject result = couplingService.getCouplingValueByPcks(pckMap, parentPcksInstability, false, false);
         result.put("parentPackage", parentPcks);
 
+        return result;
+    }
+
+
+    /**
+     * 展开若干个包，返回这些包下的第一层子包的耦合数据
+     * @param requestBody 前端请求
+     * @return result json
+     */
+    @PostMapping("/group/unfold_packages")
+    @CrossOrigin
+    @ResponseBody
+    public JSONObject unfoldPackages(@RequestBody JSONObject requestBody) {
+        JSONArray otherPkgsJsonArray = requestBody.getJSONArray("otherPcks");
+        JSONArray unfoldPkgsJsonArray = requestBody.getJSONArray("unfoldPcks");
+        List<Package> allPackages = new ArrayList<>();
+//        Map<Long, Integer> levelMap = new HashMap<>();
+//        Map<Package, List<Package>> unfoldPkgMap = new HashMap<>();
+        for (int i = 0; i < unfoldPkgsJsonArray.size(); i++) {
+            JSONObject pkgJson = unfoldPkgsJsonArray.getJSONObject(i);
+            Long pkgId = pkgJson.getLong("id");
+//            levelMap.put(pkgId, pkgJson.getIntValue("level"));
+//            Package parentPackage = packageRepository.findPackageById(pkgId);
+            List<Package> childPkgs = new ArrayList<>(packageRepository.findOneStepPackagesById(pkgId));
+            allPackages.addAll(childPkgs);
+            if (childPkgs.size() == 0) {
+                JSONObject failJson = new JSONObject();
+                failJson.put("code", -1);
+                return failJson;
+            }
+//            if (packageRepository.findIfPackageContainFiles(parentPackage.getId())) {
+//                childPkgs.add(parentPackage);
+//            }
+//            unfoldPkgMap.put(parentPackage, childPkgs);
+        }
+        for (int i = 0; i < otherPkgsJsonArray.size(); i++) {
+            Package tmp = packageRepository.findPackageById(otherPkgsJsonArray.getJSONObject(i).getLong("id"));
+            allPackages.add(tmp);
+        }
+//        JSONObject result = couplingService.getChildPackagesCouplingValue(unfoldPkgMap, otherPkgsJsonArray, levelMap);
+        JSONObject result = couplingService.unfoldPackages(unfoldPkgsJsonArray, otherPkgsJsonArray, allPackages);
+        result.put("code", 200);
+        return result;
+    }
+
+    /**
+     * 展开若干个包，返回这些包下的第一层子包的耦合数据
+     * @param requestBody 前端请求
+     * @return result json
+     */
+    @PostMapping("/group/unfold_packages_to_files")
+    @CrossOrigin
+    @ResponseBody
+    public JSONObject unfoldPackagesToFiles(@RequestBody JSONObject requestBody) {
+        JSONArray selectedPkgs = requestBody.getJSONArray("pckIds");
+        List<ProjectFile> allFiles = new ArrayList<>();
+        for (int i = 0; i < selectedPkgs.size(); i++) {
+            Long pkgId = selectedPkgs.getJSONObject(i).getLong("id");
+            List<ProjectFile> fileList = containRepository.findPackageContainAllFiles(pkgId);
+            allFiles.addAll(fileList);
+        }
+        JSONObject result = couplingService.unfoldPackagesToFile(selectedPkgs, allFiles);
         return result;
     }
 
@@ -136,11 +198,11 @@ public class CouplingController {
                 failJson.put("pck", parentPckJson);
                 return failJson;
             }
-            if(packageRepository.findIfPackageContainFiles(parentPackage.getId())) pckList.add(parentPackage);
+//            if(packageRepository.findIfPackageContainFiles(parentPackage.getId())) pckList.add(parentPackage);
             pckMap.put(parentPackage, pckList);
         }
 
-        JSONObject result = couplingService.getCouplingValueByPcks(pckMap, parentPcksInstability, false);
+        JSONObject result = couplingService.getCouplingValueByPcks(pckMap, parentPcksInstability, false, true);
         result.put("code", 200);
         return result;
     }
@@ -204,7 +266,7 @@ public class CouplingController {
             pckMap.put(parentPackage, pckList);
         }
 
-        JSONObject result = couplingService.getCouplingValueByPcks(pckMap, parentPcksInstability, false);
+        JSONObject result = couplingService.getCouplingValueByPcks(pckMap, parentPcksInstability, false, false);
         result.put("code", 200);
         return result;
     }
@@ -218,12 +280,23 @@ public class CouplingController {
     @ResponseBody
     public JSONObject getTopLevelPackagesCouplingValue(){
         List<Package> topLevelPackages = packageRepository.findPackagesAtDepth1();
-        Map<Package, List<Package>> pckMap = new HashMap<>();
-        Map<Long, Double> parentPcksInstability = new HashMap<>();
+        JSONArray otherPkgs = new JSONArray();
+        for (Package pkg : topLevelPackages) {
+            JSONObject rootPackage = new JSONObject();
+            rootPackage.put("level", "0");
+            rootPackage.put("id", pkg.getId());
+            otherPkgs.add(rootPackage);
+        }
+//        Map<Package, List<Package>> pckMap = new HashMap<>();
+//        Map<Long, Double> parentPcksInstability = new HashMap<>();
+//
+//        pckMap.put(containRepository.findPackageInPackage(topLevelPackages.get(0).getId()), topLevelPackages);
+//
+//        JSONObject result = couplingService.getCouplingValueByPcks(pckMap, parentPcksInstability, true, true);
 
-        pckMap.put(containRepository.findPackageInPackage(topLevelPackages.get(0).getId()), topLevelPackages);
 
-        JSONObject result = couplingService.getCouplingValueByPcks(pckMap, parentPcksInstability, true);
+
+        JSONObject result = couplingService.getTopLevelPackages();
         result.put("code", 200);
 
         return result;

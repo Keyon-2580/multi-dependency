@@ -177,6 +177,8 @@ document.body.clientHeight;</script>
 <script type="text/javascript" th:src="@{/js/import/g6.min.js}"></script>
 <script type="text/javascript"
         th:src="@{/js/dependency_graph/coupling_chart.js}"></script>
+<script type="text/javascript"
+        th:src="@{/js/dependency_graph/graph_renderer.js}"></script>
 <script type="text/javascript" th:inline="javascript">
     $(document).ready(function () {
         main().init();
@@ -188,13 +190,31 @@ document.body.clientHeight;</script>
         // }
     });
 </script>
-<script type="text/html" id="toolbarDemo">
+<script type="text/html" id="toolbarEdge">
     <div class="layui-btn-container">
         <button class="layui-btn layui-btn-sm" lay-event="filterCheckEdges">
             Filter
         </button>
         <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="reset">
             Clear
+        </button>
+        <button id="export_edge" class="layui-btn layui-btn-sm layui-btn-normal"
+                lay-event="reset">
+            Export
+        </button>
+    </div>
+</script>
+<script type="text/html" id="toolbarNode">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="filterCheckEdges">
+            Filter
+        </button>
+        <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="reset">
+            Clear
+        </button>
+        <button id="export_node" class="layui-btn layui-btn-sm layui-btn-normal"
+                lay-event="reset">
+            Export
         </button>
     </div>
 </script>

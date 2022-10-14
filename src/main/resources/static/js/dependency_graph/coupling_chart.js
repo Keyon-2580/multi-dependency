@@ -58,6 +58,31 @@ const PKG_NODE_TABLE_COLS = [[
     ,{field:'C', title: 'C-90分位值', sort: true}
     ,{field:'unfoldable', title: '可展开', sort: true}
 ]];
+const PKG_EDGE_TABLE_COLS = [[
+    {type:'checkbox'}
+    ,{field:'id', title: 'ID', sort: true}
+    ,{field:'obj1', title: '对象1'}
+    ,{field:'obj2', title: '对象2'}
+    ,{field:'C', title: '依赖面耦合度(C)', sort: true}
+    ,{field:'D', title: '依赖实例数(D)', sort: true}
+    ,{field:'reversed',  title: '是否逆向', sort: true}
+]];
+const FILE_EDGE_TABLE_COLS = [[
+    {type:'checkbox'}
+    ,{field:'id', title: 'ID', sort: true}
+    ,{field:'obj1', title: '对象1'}
+    ,{field:'obj2', title: '对象2'}
+    ,{field:'C', title: '依赖面耦合度(C)', sort: true}
+    ,{field:'D', title: '依赖实例数(D)', sort: true}
+    ,{field:'detail', title: '详情', sort: false}
+    ,{field:'reversed',  title: '是否逆向', sort: true}
+]];
+const CROSS_LEVEL_EDGE_MODEL = {
+    style:{
+        stroke: '#FFEA00',
+        lineWidth: 1.0
+    }
+}
 const LOW_INTENSITY_EDGE_MODEL = {
     style:{
         stroke: COLOR_LINK_LOW_INTENSITY,
@@ -90,9 +115,6 @@ const tooltip = new G6.Tooltip({
               </ul>
               <ul>
                 <li>level: ${e.item.getModel().level}</li>
-              </ul>
-              <ul>
-                <li>instability: ${e.item.getModel().instability}</li>
               </ul>`;
             }else if(e.item._cfg.model.nodeType === "package"){
                 outDiv.innerHTML = `
@@ -107,7 +129,7 @@ const tooltip = new G6.Tooltip({
                 <li>files num: ${e.item.getModel().NOF}</li>
               </ul>
               <ul>
-                <li>instability: ${e.item.getModel().instability}</li>
+                <li>level: ${e.item.getModel().level}</li>
               </ul>
               <ul>
                 <li>Loose Degree: ${e.item.getModel().LooseDegree}</li>
@@ -168,6 +190,13 @@ const contextMenu = new G6.Menu({
             <a class="combo_a" href="/hierarchical_clustering/package/${item.model.id}" target="_blank">打开包聚类详情</a>
             </ul>`;
         }
+        html += `
+        <ul>
+            <li><button onclick="filterNeighbours(${item.model.id})">filter</button></li>
+            <li><button onclick="restFilterNeighbours()">reset</button></li>
+        </ul>
+
+        `;
         return html;
     },
     offsetX: 0,
@@ -181,8 +210,11 @@ const toolbar = new G6.ToolBar({
         return `
       <ul>
         <li code='back'>返回上一层</li>
+        <br>
         <li code='choose'>选择</li>
+        <br>
         <li code='unfold'>展开</li>
+        <br>
         <li code='unfoldFile'>展开到文件页面</li>
       </ul>
     `;
@@ -240,7 +272,8 @@ const toolbar = new G6.ToolBar({
             selected_packages.forEach(node => {
                 if (node._cfg.model.nodeType === "package") {
                     pckIds.push({
-                        "id": node._cfg.id
+                        "id": node._cfg.id,
+                        "level": node._cfg.model.level
                     })
                 }
             })
@@ -252,23 +285,28 @@ const toolbar = new G6.ToolBar({
 
             json["pckIds"] = pckIds;
             $.ajax({
-                url: "/coupling/group/files_of_packages",
+                // url: "/coupling/group/files_of_packages",
+                url: "/coupling/group/unfold_packages_to_files",
                 type: "POST",
                 contentType: "application/json",
                 dataType: "json",
                 data: JSON.stringify(json),
                 success: function (result) {
                     data_stack.push(graph.save());
-                    data = result;
-                    const nodes = data["nodes"];
-                    max_level = nodes[nodes.length-1].level;
-                    loadGraph();
+                    data["nodes"] = calcAllNodesPos(result);
+                    data["edges"] = result["edges"];
+                    loadGraph2();
+                    // data_stack.push(graph.save());
+                    // data = result;
+                    // const nodes = data["nodes"];
+                    // max_level = nodes[nodes.length-1].level;
+                    // loadGraph();
                 }
             });
         }else if (code === 'back') {
             if (data_stack.length !== 0) {
                 data = data_stack.pop();
-                loadGraph();
+                loadGraph2();
             }
         }
     },
@@ -369,7 +407,37 @@ const graph = new G6.Graph({
     plugins: [tooltip, toolbar, contextMenu],
     minZoom: 0.05,
 });
-
+function filterNeighbours(nodeId) {
+    const node = graph.findById(nodeId);
+    const neighbours = node.getNeighbors();
+    if (neighbours.length === 0) {
+        return;
+    }
+    let showNodesSet = new Set();
+    neighbours.forEach(n => showNodesSet.add(n._cfg.model.id));
+    showNodesSet.add(nodeId.toString());
+    graph.getEdges().forEach(edge => {
+        if (!showNodesSet.has(edge._cfg.source._cfg.id)
+            || !showNodesSet.has(edge._cfg.target._cfg.id)) {
+            edge.hide();
+        }
+    });
+    graph.getNodes().forEach(node => {
+        if (!showNodesSet.has(node._cfg.id))
+            node.hide();
+    });
+    graph.paint();
+    layer.msg("操作完成");
+}
+function restFilterNeighbours() {
+    graph.getEdges().forEach(edge => {
+        edge.show();
+    });
+    graph.getNodes().forEach(node => {
+        node.show();
+    });
+    layer.msg("操作完成");
+}
 function handleEdgeLabelDisplay() {
     if (graph.getEdges().length === 0) {
         layer.msg(" 图中没有边！");
@@ -465,14 +533,21 @@ function calcAbsGComplexity(k, w) {
     let reverseW = 0.0;
     let crossW = 0.0;
     graph.getEdges().forEach(edge => {
-       if (edge._cfg.states.length !== 0) {
+       if (edge._cfg.states.includes('reverse')) {
+           // console.log("逆向依赖", edge);
            reverseW += edge._cfg.model[w] * r;
+       } else {
+           const startLevel = edge._cfg.source._cfg.model.y;
+           const endLevel = edge._cfg.target._cfg.model.y;
+           if (endLevel - startLevel > theta) {
+               crossW += edge._cfg.model[w] * c;
+               // edge.update(CROSS_LEVEL_EDGE_MODEL);
+               edge.setState('cross', true);
+               // console.log("跨层依赖", edge);
+           }
+
        }
-       const startLevel = edge._cfg.source._cfg.model.y;
-       const endLevel = edge._cfg.target._cfg.model.y;
-       if (endLevel - startLevel > theta) {
-           crossW += edge._cfg.model[w] * c;
-       }
+
     });
     finalW += reverseW + crossW;
     return finalW;
@@ -577,14 +652,26 @@ function unfoldPkg() {
         let json = {};
         let unfoldPcks = [];
         let otherPcks = [];
+        let hasUnfoldable = false;
+        let errorMsg = '';
         selected_packages.forEach(node => {
             if (node._cfg.model.nodeType === "package") {
                 unfoldPcks.push({
                     "id": node._cfg.id,
-                    "instability": node._cfg.model.instability
+                    "instability": node._cfg.model.instability,
+                    "level": node._cfg.model.level
                 })
+                // unfoldPcks.push(node._cfg.model);
+            }
+            if (node._cfg.model["unfoldable"] === false) {
+                errorMsg = "错误！" + node._cfg.model["name"] + " 已无法再展开到包！";
+                hasUnfoldable = true;
             }
         })
+        if (hasUnfoldable) {
+            layer.msg(errorMsg);
+            return;
+        }
         if (unfoldPcks.length === 0) {
             layer.msg("错误！已无法再展开！");
             return;
@@ -597,10 +684,12 @@ function unfoldPkg() {
                 }
             })
             if(flag){
-                otherPcks.push({
-                    "id": node._cfg.id,
-                    "instability": node._cfg.model.instability
-                })
+                otherPcks.push(node._cfg.model);
+                // otherPcks.push({
+                //     "id": node._cfg.id,
+                //     "instability": node._cfg.model.instability,
+                //     "level": node._cfg.model.level
+                // })
             }
         })
 
@@ -608,7 +697,8 @@ function unfoldPkg() {
         json["otherPcks"] = otherPcks;
         showLoadingWindow("加载中...");
         $.ajax({
-            url: "/coupling/group/one_step_child_packages",
+            // url: "/coupling/group/one_step_child_packages",
+            url: "/coupling/group/unfold_packages",
             type: "POST",
             contentType: "application/json",
             dataType: "json",
@@ -616,11 +706,15 @@ function unfoldPkg() {
 
             success: function (result) {
                 if(result["code"] === 200){
-                    data_stack.push(graph.save())
-                    data = result;
-                    const nodes = data["nodes"];
-                    max_level = nodes[nodes.length-1].level;
-                    loadGraph();
+                    data_stack.push(graph.save());
+                    data["nodes"] = calcAllNodesPos(result);
+                    data["edges"] = result["edges"];
+                    loadGraph2();
+                    // data_stack.push(graph.save())
+                    // data = result;
+                    // const nodes = data["nodes"];
+                    // max_level = nodes[nodes.length-1].level;
+                    // loadGraph();
                 }else if(result["code"] === -1){
                     layer.msg("错误！\n" + result["pck"]["directoryPath"] + "\n已无法再展开！");
                     closeLoadingWindow();
@@ -635,8 +729,9 @@ function instabilityAjax(){
         url : "/coupling/group/top_level_packages",
         success : function(result) {
             data = result;
-            const nodes = data["nodes"];
-            max_level = nodes[nodes.length-1].level;
+            // const nodes = data["nodes"];
+
+            // max_level = nodes[nodes.length-1].level;
             // let nodes_data = json_data["nodes"];
             // let edges_data = json_data["edges"];
             //
@@ -770,7 +865,7 @@ function levelLayout(){
 
     graph.refresh();
     graph.fitCenter();
-    graph.fitView();
+    graph.fitView(500);
 }
 function levelLayout2(){
 
@@ -844,10 +939,42 @@ function levelLayout2(){
             }
         }
     }
-
+    graph.getNodes().forEach(node => {
+        if(node._cfg.model.level >= 0.8 * max_level){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR5
+                }
+            });
+        }else if(node._cfg.model.level >= 0.6 * max_level){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR4
+                }
+            });
+        }else if(node._cfg.model.level >= 0.4 * max_level){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR3
+                }
+            });
+        }else if(node._cfg.model.level >= 0.2 * max_level){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR2
+                }
+            });
+        }else{
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR1
+                }
+            });
+        }
+    });
     graph.refresh();
     graph.fitCenter();
-    graph.fitView();
+    graph.fitView(150);
 }
 // function levelLayout2(){
 //     let nodelist = graph.getNodes();
@@ -1127,33 +1254,70 @@ function loadEdgeTable1() {
             obj2: edge._cfg.target._cfg.model.name,
             D: parseFloat(edge._cfg.model.D),
             C: parseFloat(edge._cfg.model.C),
+            detail: edge._cfg.model.detail,
             reversed: isEdgeReversed(edge)
         });
     });
     layui.use('table', function(){
         const table = layui.table;
-        table.render({
-            elem: '#edge_table1'
-            ,defaultToolbar: []
-            ,toolbar: '#toolbarDemo'
-            ,autoSort: false
-            ,lineStyle: 'height:auto'
-            ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
-            ,cols: [[
-                {type:'checkbox'}
-                ,{field:'id', title: 'ID', sort: true}
-                ,{field:'obj1', title: '对象1'}
-                ,{field:'obj2', title: '对象2'}
-                ,{field:'C', title: '依赖面耦合度(C)', sort: true}
-                ,{field:'D', title: '依赖实例数(D)', sort: true}
-                ,{field:'reversed',  title: '是否逆向', sort: true}
-            ]]
-            ,data: edge_table1_data
-            ,page: {
-                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
-                limit: 10
-            }
-        });
+        let edgeTable;
+        if (CHART_MODE === 'package') {
+            edgeTable = table.render({
+                elem: '#edge_table1'
+                ,defaultToolbar: []
+                ,toolbar: '#toolbarEdge'
+                ,autoSort: false
+                ,lineStyle: 'height:auto'
+                ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                ,cols: PKG_EDGE_TABLE_COLS
+                ,data: edge_table1_data
+                ,page: {
+                    layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                    limit: 10
+                }
+            });
+        } else {
+            edgeTable = table.render({
+                elem: '#edge_table1'
+                ,defaultToolbar: []
+                ,toolbar: '#toolbarEdge'
+                ,autoSort: false
+                ,lineStyle: 'height:auto'
+                ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                ,cols: FILE_EDGE_TABLE_COLS
+                ,data: edge_table1_data
+                ,page: {
+                    layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+                    limit: 10
+                }
+            });
+        }
+        $("#export_edge").click(function(){
+            table.exportFile(edgeTable.config.id, edge_table1_data, 'csv');
+        })
+        // table.render({
+        //     elem: '#edge_table1'
+        //     ,defaultToolbar: []
+        //     ,toolbar: '#toolbarDemo'
+        //     ,autoSort: false
+        //     ,lineStyle: 'height:auto'
+        //     ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+        //     ,cols: [[
+        //         {type:'checkbox'}
+        //         ,{field:'id', title: 'ID', sort: true}
+        //         ,{field:'obj1', title: '对象1'}
+        //         ,{field:'obj2', title: '对象2'}
+        //         ,{field:'C', title: '依赖面耦合度(C)', sort: true}
+        //         ,{field:'D', title: '依赖实例数(D)', sort: true}
+        //         ,{field:'detail', title: '详情', sort: false}
+        //         ,{field:'reversed',  title: '是否逆向', sort: true}
+        //     ]]
+        //     ,data: edge_table1_data
+        //     ,page: {
+        //         layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+        //         limit: 10
+        //     }
+        // });
         table.on('sort(edge1)', function (obj){
             if (obj.type === 'asc') {
                 edge_table1_data.sort((a, b) => a[obj.field] - b[obj.field]);
@@ -1244,11 +1408,12 @@ function loadNodeTable1() {
     });
     layui.use('table', function(){
         const table = layui.table;
+        let nodeTable;
         if (CHART_MODE === 'package') {
-            table.render({
+            nodeTable = table.render({
                 elem: '#node_table1'
                 ,defaultToolbar: []
-                ,toolbar: '#toolbarDemo'
+                ,toolbar: '#toolbarNode'
                 ,autoSort: false
                 ,lineStyle: 'height:auto'
                 ,cellMinWidth: 50 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
@@ -1260,10 +1425,10 @@ function loadNodeTable1() {
                 }
             });
         } else {
-            table.render({
+            nodeTable = table.render({
                 elem: '#node_table1'
                 ,defaultToolbar: []
-                ,toolbar: '#toolbarDemo'
+                ,toolbar: '#toolbarNode'
                 ,autoSort: false
                 ,lineStyle: 'height:auto'
                 ,cellMinWidth: 50 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
@@ -1275,7 +1440,9 @@ function loadNodeTable1() {
                 }
             });
         }
-
+        $("#export_node").click(function(){
+            table.exportFile(nodeTable.config.id, node_table1_data, 'csv');
+        })
         table.on('sort(node1)', function (obj){
             if (obj.type === 'asc') {
                 node_table1_data.sort((a, b) => a[obj.field] - b[obj.field]);
@@ -1515,6 +1682,21 @@ function handleNodeStroke() {
     });
 
 }
+function loadGraph2() {
+    // const nodes = calcAllNodesPos(response);
+    graph.data(data);
+    graph.render();
+    handleNodeColor();
+    handleNodeStroke();
+    handleReverseEdgesAndExtends();
+
+    graph.fitCenter();
+    graph.fitView();
+    savePresentNodes();
+    loadPanel(true);
+    handleEdgesWidth();
+    closeLoadingWindow();
+}
 function loadGraph(){
     is_ntb_loaded = false;
     if (show_panel_btm) {
@@ -1523,10 +1705,10 @@ function loadGraph(){
     graph.data(data);
     graph.render();
     // levelLayout();
-    if (max_level === 0)
-        levelLayout();
-    else
-        levelLayout2();
+    // if (max_level === 0)
+    //     levelLayout();
+    // else
+    levelLayout2();
     handleNodeStroke();
     handleReverseEdgesAndExtends();
     // levelLayoutAdjust();
@@ -1535,7 +1717,42 @@ function loadGraph(){
     handleEdgesWidth();
     closeLoadingWindow();
 }
+function handleNodeColor() {
+    graph.getNodes().forEach(node => {
+        if(node._cfg.model.y >= 0.8 * height){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR5
+                }
+            });
+        }else if(node._cfg.model.y >= 0.6 * height){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR4
+                }
+            });
+        }else if(node._cfg.model.y >= 0.4 * height){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR3
+                }
+            });
+        }else if(node._cfg.model.y >= 0.2 * height){
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR2
+                }
+            });
+        }else{
+            node.update({
+                style:{
+                    fill:INSTABILITY_COLOR1
+                }
+            });
+        }
+    });
 
+}
 //加载弹窗
 function showLoadingWindow(tip){
     let html = "<div style=\"position:fixed;height:100%;width:100%;z-index:10000;background-color: #5a6268;opacity: 0.5\">" +

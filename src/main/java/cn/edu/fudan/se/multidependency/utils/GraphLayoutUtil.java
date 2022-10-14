@@ -226,6 +226,61 @@ public class GraphLayoutUtil {
         }
         return levels;
     }
+    public JSONArray levelLayout2(String parentLevel) {
+        JSONArray leveledNodes = new JSONArray();
+        tarjanScc();
+        List<Pair<String, String>> mergedEdges = mergeGraph();
+        if (mergedEdges.size() == 0) {
+            JSONArray oneLevel = new JSONArray();
+            for (int i = 0; i < nodes.size(); i++) {
+                JSONObject jsonNode = nodes.getJSONObject(i);
+                jsonNode.put("level", parentLevel+0);
+                oneLevel.add(jsonNode);
+            }
+            leveledNodes.add(oneLevel);
+            return leveledNodes;
+        }
+        Set<String> idSet = new HashSet<>();
+        List<List<String>> levels = groupTopologicalSort(mergedEdges);
+        int totalNodes = 0;
+        for (int i = 0; i < levels.size(); i++) {
+            JSONArray currLevel = new JSONArray();
+            for (String obj : levels.get(i)) {
+                if (obj.startsWith("scc")) {
+                    List<Integer> nodes = sccMap.get(obj);
+                    for (int n : nodes) {
+                        JSONObject jsonNode = id2Nodes.get(n);
+                        jsonNode.put("level", parentLevel+i);
+                        currLevel.add(jsonNode);
+                        idSet.add(jsonNode.getString("id"));
+                        totalNodes++;
+                    }
+                } else {
+                    JSONObject jsonNode = id2Nodes.get(idMap.get(obj));
+                    jsonNode.put("level", parentLevel+i);
+                    currLevel.add(jsonNode);
+                    idSet.add(jsonNode.getString("id"));
+                    totalNodes++;
+                }
+            }
+            leveledNodes.add(currLevel);
+        }
+//        System.out.println("Original size: " + nodes.size());
+//        System.out.println("Leveled nodes size " + leveledNodes.size());
+        if (totalNodes != nodes.size()) {
+            JSONArray lastLevel = new JSONArray();
+            for (int i = 0; i < nodes.size(); i++) {
+                JSONObject tmp = nodes.getJSONObject(i);
+                if (!idSet.contains(tmp.getString("id"))) {
+                    tmp.put("level", parentLevel+levels.size());
+                    lastLevel.add(tmp);
+                }
+            }
+            leveledNodes.add(lastLevel);
+        }
+        return leveledNodes;
+//        return nodes;
+    }
 
     public JSONArray levelLayout() {
         JSONArray leveledNodes = new JSONArray();
@@ -253,7 +308,15 @@ public class GraphLayoutUtil {
         }
 //        System.out.println("Original size: " + nodes.size());
 //        System.out.println("Leveled nodes size " + leveledNodes.size());
-
+        if (leveledNodes.size() != nodes.size()) {
+            for (int i = 0; i < nodes.size(); i++) {
+                JSONObject tmp = nodes.getJSONObject(i);
+                if (!leveledNodes.contains(tmp)) {
+                    tmp.put("level", levels.size());
+                    leveledNodes.add(tmp);
+                }
+            }
+        }
         return leveledNodes;
 //        return nodes;
     }
