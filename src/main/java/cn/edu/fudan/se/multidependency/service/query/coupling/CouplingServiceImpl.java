@@ -832,7 +832,7 @@ public class CouplingServiceImpl implements CouplingService {
                     // unfold pkg, get inside dependencies and child pkgs with level
                     graphBlock = unfoldOnePackageOneStep(pkg);
                 } else {
-                    pkg.put("level", level + level.charAt(level.length()-1));
+                    pkg.put("level", level + 0);
                     graphBlock.setHeight(1);
                     graphBlock.setWidth(1);
                     JSONArray pkgs = new JSONArray();

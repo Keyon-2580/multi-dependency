@@ -25,6 +25,8 @@ public interface CouplingService {
 
     double calDISP(double C_AandB, long dependsOntimes1, long dependsOntimes2);
 
+    double calcH(int pkg1Files, int pkg2Files);
+
     double calDependsOnC(long file1Id, long file2Id);
 
     double calDependsOnI(DependsOn dependsOnAtoB, DependsOn dependsOnBtoA);

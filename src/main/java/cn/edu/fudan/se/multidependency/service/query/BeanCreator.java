@@ -28,7 +28,10 @@ import cn.edu.fudan.se.multidependency.service.query.metric.MetricCalculatorServ
 import cn.edu.fudan.se.multidependency.service.query.metric.ModularityCalculator;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellMetricCalculatorService;
+import cn.edu.fudan.se.multidependency.utils.DataUtil;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.graphdb.Label;
 import org.slf4j.Logger;
@@ -1015,6 +1018,118 @@ public class BeanCreator {
 		return couplings;
 	}
 
+	public boolean setPackageCouplingValue(CouplingRepository couplingRepository,
+										   DependsOnRepository dependsOnRepository,
+										   PackageRepository packageRepository,
+										   CouplingService couplingService) {
+		Map<Map<Package, Package>, Set<DependsOn>> pkgDependOns = new HashMap<>();
+		Set<Coupling> allCoupling = new HashSet<>();
+		Map<String, Integer> dMap = new HashMap<>();
+		List<Package> allPackages = packageRepository.queryAllPackage();
+		for (int i = 0; i < allPackages.size(); i++) {
+			for (int j = i+1; j < allPackages.size(); j++) {
+				Package pkg1 = allPackages.get(i);
+				Package pkg2 = allPackages.get(j);
+				List<DependsOn> outDepends = dependsOnRepository.findAllDependsOnBetweenPackages(pkg1.getId(), pkg2.getId());
+				List<DependsOn> inDepends = dependsOnRepository.findAllDependsOnBetweenPackages(pkg2.getId(), pkg1.getId());
+				if (!outDepends.isEmpty()) {
+					Map<Package, Package> key = new HashMap<>();
+					key.put(pkg1, pkg2);
+					if (pkgDependOns.containsKey(key)) {
+						pkgDependOns.get(key).addAll(outDepends);
+					} else {
+						pkgDependOns.put(key, new HashSet<>(outDepends));
+					}
+				}
+				if (!inDepends.isEmpty()) {
+					Map<Package, Package> key = new HashMap<>();
+					key.put(pkg2, pkg1);
+					if (pkgDependOns.containsKey(key)) {
+						pkgDependOns.get(key).addAll(inDepends);
+					} else {
+						pkgDependOns.put(key, new HashSet<>(inDepends));
+					}
+				}
+			}
+		}
+		JSONArray edges = new JSONArray();
+		for(Map<Package, Package> map: pkgDependOns.keySet()){
+			JSONObject tmpEdge = new JSONObject();
+			int DAtoB = 0;
+			int DBtoA = 0;
+			double dist = 0.0;
+			double distSum = 0;
+
+			for(Package pck: map.keySet()){
+				tmpEdge.put("id", pck.getId().toString() + "_" + map.get(pck).getId().toString());
+				tmpEdge.put("source", pck.getId().toString());
+				tmpEdge.put("target", map.get(pck).getId().toString());
+			}
+			Set<Long> fileIdSet1 = new HashSet<>();
+			Set<Long> fileIdSet2 = new HashSet<>();
+			for(DependsOn dependsOn: pkgDependOns.get(map)){
+				boolean flag = false;
+				Map<String, Long> dependsOnTypes = dependsOn.getDependsOnTypes();
+				for (String type : dependsOnTypes.keySet()) {
+					if (type.equals("EXTENDS") || type.equals("IMPLEMENTS") ||
+							type.equals("USE") || type.equals("CALL") || type.equals("RETURN")
+							|| type.equals("PARAMETER") || type.equals("LOCAL_VARIABLE") || type.equals("CREATE")
+							|| type.equals("MEMBER_VARIABLE")) {
+						flag = true;
+						break;
+					}
+				}
+				if(flag){
+					Coupling coupling = couplingRepository.queryCouplingBetweenTwoFiles(dependsOn.getStartNode().getId()
+							, dependsOn.getEndNode().getId());
+					DAtoB += coupling.getDAtoB();
+					DBtoA += coupling.getDBtoA();
+					dist += coupling.getDist();
+					distSum  += 1;
+					fileIdSet1.add(dependsOn.getStartNode().getId());
+					fileIdSet2.add(dependsOn.getEndNode().getId());
+				}
+			}
+			double fileHMean = couplingService.calcH(fileIdSet1.size(), fileIdSet2.size());
+			tmpEdge.put("dist", dist / distSum);
+			tmpEdge.put("dependsOnNum", pkgDependOns.get(map).size());
+			tmpEdge.put("C", DataUtil.toFixed(fileHMean));
+			double logD = Math.max(0, Math.log10(DAtoB));
+			tmpEdge.put("D", DAtoB);
+			tmpEdge.put("logD", DataUtil.toFixed(logD));
+			dMap.put((String)tmpEdge.get("id"), DAtoB);
+			edges.add(tmpEdge);
+		}
+		Set<String> tmp = new HashSet<>();
+		for (int i = 0; i < edges.size(); i++) {
+			JSONObject edge = edges.getJSONObject(i);
+			String reverseId = edge.get("target") + "_" + edge.get("source");
+			int D = (int) edge.get("D");
+			if (tmp.contains((String) edge.get("id"))) {
+				edge.put("I", -1);
+				continue;
+			}
+			if (dMap.containsKey(reverseId)) {
+				edge.put("I", couplingService.calPkgI(D, dMap.get(reverseId)));
+				tmp.add(reverseId);
+			} else {
+				edge.put("I", D);
+			}
+		}
+		for (int i = 0; i < edges.size(); i++) {
+			JSONObject edge = edges.getJSONObject(i);
+			Coupling coupling = new Coupling();
+			coupling.setC(edge.getDouble("C"));
+			coupling.setDAtoB(edge.getInteger("D"));
+			coupling.setDist(edge.getDouble("dist"));
+			coupling.setI(edge.getDouble("I"));
+			coupling.setStartNode(packageRepository.findPackageById(edge.getLong("source")));
+			coupling.setEndNode(packageRepository.findPackageById(edge.getLong("target")));
+			allCoupling.add(coupling);
+		}
+		couplingRepository.saveAll(allCoupling);
+		return true;
+	}
 	/**
 	 * 使用层次聚类算法，将涉及到Coupling关系的文件进行聚类
 	 */
