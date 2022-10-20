@@ -935,10 +935,10 @@ public class BeanCreator {
 		}
 		List<Coupling> couplings = couplingRepository.findFileDependsWithLimit();
 		if(couplings != null && !couplings.isEmpty()){
-			LOGGER.info("已存在Coupling关系" );
+			LOGGER.info("已存在文件级Coupling关系" );
 		}
 		else{
-			LOGGER.info("创建Coupling Value...");
+			LOGGER.info("开始入库文件级Coupling数据...");
 			List<Coupling> couplingsTmp = new ArrayList<>();
 			List<DependsOn> allDependsOn = dependsOnRepository.findFileDepends();
 			HashSet<String> allFilesPair = new HashSet<>();
@@ -1015,13 +1015,21 @@ public class BeanCreator {
 			}
 			couplingRepository.saveAll(couplingsTmp);
 		}
+		LOGGER.info("文件级coupling数据入库完成!");
 		return couplings;
 	}
 
+//	@Bean
 	public boolean setPackageCouplingValue(CouplingRepository couplingRepository,
 										   DependsOnRepository dependsOnRepository,
 										   PackageRepository packageRepository,
 										   CouplingService couplingService) {
+		List<Coupling> pkgCoupling = couplingRepository.findPkgDependsWithLimit();
+		if (pkgCoupling != null && !pkgCoupling.isEmpty()) {
+			LOGGER.info("已存在包级别Coupling");
+			return false;
+		}
+		LOGGER.info("开始入库package coupling数据");
 		Map<Map<Package, Package>, Set<DependsOn>> pkgDependOns = new HashMap<>();
 		Set<Coupling> allCoupling = new HashSet<>();
 		Map<String, Integer> dMap = new HashMap<>();
@@ -1128,6 +1136,7 @@ public class BeanCreator {
 			allCoupling.add(coupling);
 		}
 		couplingRepository.saveAll(allCoupling);
+		LOGGER.info("包级coupling数据入库完成!");
 		return true;
 	}
 	/**

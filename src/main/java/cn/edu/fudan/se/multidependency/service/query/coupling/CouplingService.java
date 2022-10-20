@@ -36,9 +36,9 @@ public interface CouplingService {
     JSONObject getCouplingValueByPcks(Map<Package, List<Package>> pckMap, Map<Long, Double> parentPcksInstability,
                                       boolean isTopLevel, boolean needLayout);
 
-    JSONObject getChildPackagesCouplingValue(Map<Package, List<Package>> unfoldPckMap, JSONArray otherPkgJsonArray,
-                                             Map<Long,
-            Integer> levelMap);
+//    JSONObject getChildPackagesCouplingValue(Map<Package, List<Package>> unfoldPckMap, JSONArray otherPkgJsonArray,
+//                                             Map<Long,
+//            Integer> levelMap);
 
     JSONObject unfoldPackages(JSONArray selectedPackages, JSONArray otherPackages, List<Package> allPackages);
     JSONObject unfoldPackagesToFile(JSONArray selectedPackages, List<ProjectFile> allFiles);

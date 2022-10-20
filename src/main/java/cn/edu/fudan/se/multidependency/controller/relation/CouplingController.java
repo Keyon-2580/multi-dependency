@@ -74,7 +74,7 @@ public class CouplingController {
     }
 
     void convertY2Levels(JSONArray nodes) {
-        Set<Double> ySet = new HashSet<>();
+        Set<Double> ySet = new TreeSet<>();
         for (int i = 0; i < nodes.size(); i++) {
             ySet.add(nodes.getJSONObject(i).getDouble("y"));
         }
@@ -84,7 +84,24 @@ public class CouplingController {
             nodes.getJSONObject(i).put("level", level);
         }
     }
-
+    void convertY2Levels(JSONArray unfoldPkgsJsonArray, JSONArray otherPkgsJsonArray) {
+        Set<Double> ySet = new TreeSet<>();
+        for (int i = 0; i < otherPkgsJsonArray.size(); i++) {
+            ySet.add(otherPkgsJsonArray.getJSONObject(i).getDouble("y"));
+        }
+        for (int i = 0; i <unfoldPkgsJsonArray.size() ; i++) {
+            ySet.add(unfoldPkgsJsonArray.getJSONObject(i).getDouble("y"));
+        }
+        List<Double> yList = new ArrayList<>(ySet);
+        for (int i = 0; i < otherPkgsJsonArray.size(); i++) {
+            int level = yList.indexOf(otherPkgsJsonArray.getJSONObject(i).getDouble("y"));
+            otherPkgsJsonArray.getJSONObject(i).put("level", level);
+        }
+        for (int i = 0; i < unfoldPkgsJsonArray.size(); i++) {
+            int level = yList.indexOf(unfoldPkgsJsonArray.getJSONObject(i).getDouble("y"));
+            unfoldPkgsJsonArray.getJSONObject(i).put("level", level);
+        }
+    }
     /**
      * 展开若干个包，返回这些包下的第一层子包的耦合数据
      * @param requestBody 前端请求
@@ -96,8 +113,7 @@ public class CouplingController {
     public JSONObject unfoldPackages(@RequestBody JSONObject requestBody) {
         JSONArray otherPkgsJsonArray = requestBody.getJSONArray("otherPcks");
         JSONArray unfoldPkgsJsonArray = requestBody.getJSONArray("unfoldPcks");
-        convertY2Levels(otherPkgsJsonArray);
-        convertY2Levels(unfoldPkgsJsonArray);
+        convertY2Levels(unfoldPkgsJsonArray, otherPkgsJsonArray);
         List<Package> allPackages = new ArrayList<>();
 //        Map<Long, Integer> levelMap = new HashMap<>();
 //        Map<Package, List<Package>> unfoldPkgMap = new HashMap<>();
