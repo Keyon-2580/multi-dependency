@@ -1,7 +1,13 @@
 package cn.edu.fudan.se.multidependency;
 import cn.edu.fudan.se.multidependency.model.MethodMetric;
+import cn.edu.fudan.se.multidependency.service.insert.ThreadService;
 import cn.edu.fudan.se.multidependency.utils.CsvExportUtil;
 import cn.edu.fudan.se.multidependency.utils.DirExplorer;
+import cn.edu.fudan.se.multidependency.utils.JSONUtil;
+import cn.edu.fudan.se.multidependency.utils.YamlUtil;
+import cn.edu.fudan.se.multidependency.utils.config.JSONConfigFile;
+import cn.edu.fudan.se.multidependency.utils.config.ProjectConfig;
+import cn.edu.fudan.se.multidependency.utils.config.ProjectConfigUtil;
 import javancss.Javancss;
 
 
@@ -22,13 +28,19 @@ public class JavaNcssAnalyse {
 
 
     public static void main(String[] args) throws Exception {
-        String repoPath = "/Users/keyon/Documents/bigDataPlatform/depend-service/reopFiles/nacos";
-        System.out.println(repoPath);
-        if (repoPath != null && !"".equals(repoPath)) {
-            exportCSV(repoPath + "metric.csv", getAllMethodMetric(repoPath));
-        } else {
-            System.out.println("repo path is null");
+        YamlUtil.YamlObject yaml = YamlUtil.getYaml(args);
+        JSONConfigFile jsonConfigFile = ProjectConfigUtil.extract(JSONUtil.extractJSONObject(new File(yaml.getProjectsConfig())));
+        for(ProjectConfig projectConfig : jsonConfigFile.getProjectsConfig()){
+            String repoPath = projectConfig.getPath();
+            System.out.println(repoPath);
+            if (repoPath != null && !"".equals(repoPath)) {
+                exportCSV(repoPath + "metric.csv", getAllMethodMetric(repoPath));
+            } else {
+                System.out.println("repo path is null");
+            }
         }
+
+
     }
 
 
