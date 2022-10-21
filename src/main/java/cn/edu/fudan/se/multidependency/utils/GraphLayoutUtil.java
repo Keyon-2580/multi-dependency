@@ -226,6 +226,7 @@ public class GraphLayoutUtil {
         }
         return levels;
     }
+
     public JSONArray levelLayout2(String parentLevel) {
         JSONArray leveledNodes = new JSONArray();
         tarjanScc();
@@ -273,6 +274,105 @@ public class GraphLayoutUtil {
                 JSONObject tmp = nodes.getJSONObject(i);
                 if (!idSet.contains(tmp.getString("id"))) {
                     tmp.put("level", parentLevel+levels.size());
+                    lastLevel.add(tmp);
+                }
+            }
+            leveledNodes.add(lastLevel);
+        }
+        return leveledNodes;
+//        return nodes;
+    }
+
+    private void addNodeToMap(Map<Integer, Set<JSONObject>> nodesMap, JSONObject node, int level, String parentLevel) {
+        node.put("level", parentLevel + level);
+        if (nodesMap.containsKey(level)) {
+            nodesMap.get(level).add(node);
+        } else {
+            Set<JSONObject> tmp = new HashSet<>();
+            tmp.add(node);
+            nodesMap.put(level, tmp);
+        }
+    }
+    @SuppressWarnings("Duplicates")
+    public JSONArray levelLayout3(String parentLevel) {
+        JSONArray leveledNodes = new JSONArray();
+        tarjanScc();
+        List<Pair<String, String>> mergedEdges = mergeGraph();
+        if (mergedEdges.size() == 0) {
+            JSONArray oneLevel = new JSONArray();
+            for (int i = 0; i < nodes.size(); i++) {
+                JSONObject jsonNode = nodes.getJSONObject(i);
+                jsonNode.put("level", parentLevel+0);
+                oneLevel.add(jsonNode);
+            }
+            leveledNodes.add(oneLevel);
+            return leveledNodes;
+        }
+        Set<String> idSet = new HashSet<>();
+        List<List<String>> levels = groupTopologicalSort(mergedEdges);
+        Map<Integer, Set<JSONObject>> nodesMap = new HashMap<>();
+        Map<String, JSONObject> edgeMap = new HashMap<>();
+        for (int i = 0; i < edges.size(); i++) {
+            JSONObject edge = edges.getJSONObject(i);
+            edgeMap.put(edge.getString("id"), edge);
+        }
+        for (int i = 0; i < levels.size(); i++) {
+            for (String obj : levels.get(i)) {
+                if (obj.startsWith("scc")) {
+                    List<Integer> nodes = sccMap.get(obj);
+//                    Set<Integer> tmpSet = new HashSet<>(nodes);
+                    for (int j = 0; j < nodes.size(); j++) {
+                        for (int k = j+1; k < nodes.size(); k++) {
+                            int nodeId1 = nodes.get(j);
+                            int nodeId2 = nodes.get(k);
+                            JSONObject jsonNode1 = id2Nodes.get(nodeId1);
+                            JSONObject jsonNode2 = id2Nodes.get(nodeId2);
+                            idSet.add(jsonNode1.getString("id"));
+                            idSet.add(jsonNode2.getString("id"));
+                            String edgeId1 = jsonNode1.getString("id") + "_" + jsonNode2.getString("id");
+                            String edgeId2 = jsonNode2.getString("id") + "_" + jsonNode1.getString("id");
+                            if (edgeMap.containsKey(edgeId1) && edgeMap.containsKey(edgeId2)) {
+                                JSONObject edge1 = edgeMap.get(edgeId1);
+                                JSONObject edge2 = edgeMap.get(edgeId2);
+                                if (edge1.getInteger("D") > edge2.getInteger("D")) {
+                                    addNodeToMap(nodesMap, jsonNode1, i, parentLevel);
+                                    addNodeToMap(nodesMap, jsonNode2, i+1, parentLevel);
+                                } else {
+                                    addNodeToMap(nodesMap, jsonNode1, i+1, parentLevel);
+                                    addNodeToMap(nodesMap, jsonNode2, i, parentLevel);
+                                }
+                            }
+                            if (!edgeMap.containsKey(edgeId1) && edgeMap.containsKey(edgeId2)) {
+                                addNodeToMap(nodesMap, jsonNode1, i+1, parentLevel);
+                                addNodeToMap(nodesMap, jsonNode2, i, parentLevel);
+                            }
+                            if (edgeMap.containsKey(edgeId1) && !edgeMap.containsKey(edgeId2)) {
+                                addNodeToMap(nodesMap, jsonNode1, i, parentLevel);
+                                addNodeToMap(nodesMap, jsonNode2, i+1, parentLevel);
+                            }
+                        }
+                    }
+                } else {
+                    JSONObject jsonNode = id2Nodes.get(idMap.get(obj));
+                    addNodeToMap(nodesMap, jsonNode, i, parentLevel);
+                    idSet.add(jsonNode.getString("id"));
+                }
+            }
+        }
+        Map<Integer, Set<JSONObject>> sorted = new TreeMap<>(nodesMap);
+        int maxLevel = -1;
+        for (Map.Entry<Integer, Set<JSONObject>> entry : sorted.entrySet()) {
+            maxLevel = Math.max(maxLevel, entry.getKey());
+            JSONArray currentLevel = new JSONArray();
+            currentLevel.addAll(entry.getValue());
+            leveledNodes.add(currentLevel);
+        }
+        if (idSet.size() != nodes.size()) {
+            JSONArray lastLevel = new JSONArray();
+            for (int i = 0; i < nodes.size(); i++) {
+                JSONObject tmp = nodes.getJSONObject(i);
+                if (!idSet.contains(tmp.getString("id"))) {
+                    tmp.put("level", parentLevel+(maxLevel+1));
                     lastLevel.add(tmp);
                 }
             }

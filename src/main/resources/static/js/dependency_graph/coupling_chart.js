@@ -4,6 +4,7 @@ let show_panel_btm = false;
 let is_ntb_loaded = false;
 let max_level = -1;
 let CHART_MODE = "package";
+let mode_stack = [];
 const loading_div = $("#loading_div");
 let NOF = 0;
 let LOC = 0;
@@ -228,6 +229,7 @@ const toolbar = new G6.ToolBar({
             }else{
                 if(graph.save().nodes.length !== 1) {
                     data_stack.push(graph.save());
+                    mode_stack.push(CHART_MODE);
                 }
                 present_packages.length = 0;
                 let deleteNodes = [];
@@ -273,7 +275,8 @@ const toolbar = new G6.ToolBar({
                 if (node._cfg.model.nodeType === "package") {
                     pckIds.push({
                         "id": node._cfg.id,
-                        "level": node._cfg.model.level
+                        "level": node._cfg.model.level,
+                        "y": node._cfg.model.y
                     })
                 }
             })
@@ -293,6 +296,7 @@ const toolbar = new G6.ToolBar({
                 data: JSON.stringify(json),
                 success: function (result) {
                     data_stack.push(graph.save());
+                    mode_stack.push(CHART_MODE);
                     data["nodes"] = calcAllNodesPos(result);
                     data["edges"] = result["edges"];
                     loadGraph2();
@@ -306,6 +310,7 @@ const toolbar = new G6.ToolBar({
         }else if (code === 'back') {
             if (data_stack.length !== 0) {
                 data = data_stack.pop();
+                CHART_MODE = mode_stack.pop();
                 loadGraph2();
             }
         }
@@ -659,7 +664,8 @@ function unfoldPkg() {
                 unfoldPcks.push({
                     "id": node._cfg.id,
                     "instability": node._cfg.model.instability,
-                    "level": node._cfg.model.level
+                    "level": node._cfg.model.level,
+                    "y": node._cfg.model.y
                 })
                 // unfoldPcks.push(node._cfg.model);
             }
@@ -707,6 +713,7 @@ function unfoldPkg() {
             success: function (result) {
                 if(result["code"] === 200){
                     data_stack.push(graph.save());
+                    mode_stack.push(CHART_MODE);
                     data["nodes"] = calcAllNodesPos(result);
                     data["edges"] = result["edges"];
                     loadGraph2();
@@ -738,7 +745,7 @@ function instabilityAjax(){
             // data["nodes"] = json_data["nodes"];
             // data["edges"] = json_data["edges"];
 
-            loadGraph();
+            loadGraph2();
         }
     })
 }
@@ -865,7 +872,8 @@ function levelLayout(){
 
     graph.refresh();
     graph.fitCenter();
-    graph.fitView(500);
+    graph.fitView([0, 0, 0, 300]);
+
 }
 function levelLayout2(){
 
@@ -974,7 +982,7 @@ function levelLayout2(){
     });
     graph.refresh();
     graph.fitCenter();
-    graph.fitView(150);
+    graph.fitView([0, 0, 0, 300]);
 }
 // function levelLayout2(){
 //     let nodelist = graph.getNodes();
@@ -1691,11 +1699,12 @@ function loadGraph2() {
     handleReverseEdgesAndExtends();
 
     graph.fitCenter();
-    graph.fitView();
+    graph.fitView([100, 200, 100, 200]);
     savePresentNodes();
     loadPanel(true);
     handleEdgesWidth();
     closeLoadingWindow();
+
 }
 function loadGraph(){
     is_ntb_loaded = false;
