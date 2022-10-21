@@ -76,6 +76,13 @@
 		    <version>3.1.9</version>
 		</dependency> -->
 		<dependency>
+			<groupId>org.codehaus.javancss</groupId>
+			<artifactId>javancss</artifactId>
+			<version>34.55-SNAPSHOT</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/javancss-34.55.jar</systemPath>
+		</dependency>
+		<dependency>
 		    <groupId>org.neo4j</groupId>
 		    <artifactId>neo4j-kernel</artifactId>
 			<version>${neo4j.version}</version>

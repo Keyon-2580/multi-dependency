@@ -7,3 +7,4 @@ multi-dependency.log
 .classpath
 .project
 *.log
+debug.log

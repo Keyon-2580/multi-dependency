@@ -1,12 +1,12 @@
 {
 	"architectures": {},
 	"projects": [{
-		"path": "/Users/keyon/Documents/bigDataPlatform/multi-repo",
+		"path": "/Users/keyon/Documents/bigDataPlatform/codeTracker",
 		"includeDirs": [],
-		"microserviceName": "issue-tracker",
+		"microserviceName": "codeTracker",
 		"autoInclude": true,
-		"serviceGroupName": "issue-tracker",
-		"project": "issue-tracker",
+		"serviceGroupName": "codeTracker",
+		"project": "codeTracker",
 		"language": "java",
 		"isMicroservice": false,
 		"tagPrefixes": [
