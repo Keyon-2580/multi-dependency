@@ -174,6 +174,7 @@ public class CouplingController {
     @CrossOrigin
     @ResponseBody
     public JSONObject getOneStepChildPackagesCouplingValue(@RequestBody JSONObject requestBody){
+
 //        JSONArray parentPcks = new JSONArray();
         Map<Long, Double> parentPcksInstability = new HashMap<>();
         Map<Package, List<Package>> pckMap = new HashMap<>();
@@ -320,7 +321,6 @@ public class CouplingController {
 //        pckMap.put(containRepository.findPackageInPackage(topLevelPackages.get(0).getId()), topLevelPackages);
 //
 //        JSONObject result = couplingService.getCouplingValueByPcks(pckMap, parentPcksInstability, true, true);
-
 
 
         JSONObject result = couplingService.getTopLevelPackages();

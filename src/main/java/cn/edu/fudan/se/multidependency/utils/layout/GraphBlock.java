@@ -9,4 +9,5 @@ public class GraphBlock {
     private int width;
     private int levels;
     private JSONArray packages;
+    private String label;
 }

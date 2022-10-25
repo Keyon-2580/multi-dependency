@@ -229,7 +229,7 @@ const toolbar = new G6.ToolBar({
             }else{
                 if(graph.save().nodes.length !== 1) {
                     data_stack.push(graph.save());
-                    mode_stack.push(CHART_MODE);
+                    // mode_stack.push(CHART_MODE);
                 }
                 present_packages.length = 0;
                 let deleteNodes = [];
@@ -253,18 +253,20 @@ const toolbar = new G6.ToolBar({
                         deleteNodes.push(node);
 
                         edges.forEach(edge => {
-                            graph.removeItem(edge, false);
+                            edge.hide();
+                            // graph.removeItem(edge, false);
                         })
                     }
                 })
 
                 deleteNodes.forEach(node => {
-                    graph.removeItem(node, false);
+                    node.hide();
+                    // graph.removeItem(node, false);
                 })
 
                 selected_packages.length = 0;
 
-                loadPanel(false);
+                // loadPanel(false);
             }
         }else if(code === 'unfoldFile'){
             let json = {};
@@ -297,7 +299,9 @@ const toolbar = new G6.ToolBar({
                 success: function (result) {
                     data_stack.push(graph.save());
                     mode_stack.push(CHART_MODE);
-                    data["nodes"] = calcAllNodesPos(result);
+                    let res = calcAllNodesPos(result);
+                    data["nodes"] = res[0];
+                    data["combos"] = res[1];
                     data["edges"] = result["edges"];
                     loadGraph2();
                     // data_stack.push(graph.save());
@@ -308,22 +312,31 @@ const toolbar = new G6.ToolBar({
                 }
             });
         }else if (code === 'back') {
-            if (data_stack.length !== 0) {
-                data = data_stack.pop();
-                CHART_MODE = mode_stack.pop();
-                loadGraph2();
-            }
+            goBack();
+            // if (data_stack.length !== 0) {
+            //     data = data_stack.pop();
+            //     CHART_MODE = mode_stack.pop();
+            //     loadGraph2();
+            // }
         }
     },
 });
 
+
+function goBack() {
+    if (data_stack.length !== 0) {
+        data = data_stack.pop();
+        CHART_MODE = mode_stack.pop();
+        loadGraph2();
+    }
+}
 const graph = new G6.Graph({
     container: 'coupling_chart',
     width,
     height,
     fitView: true,
     modes: {
-        default: ['drag-canvas', 'drag-node', 'zoom-canvas', 'click-select', {type: 'brush-select', trigger: 'ctrl', includeEdges: false}, 'activate-relations', { type: "zoom-canvas", enableOptimize: true }],
+        default: ['drag-canvas', 'drag-node', 'zoom-canvas', 'click-select', 'drag-combo', 'activate-relations', {type: 'brush-select', trigger: 'ctrl', includeEdges: false},  { type: "zoom-canvas", enableOptimize: true }],
     },
     // layout: {
     //     type: 'dagre',
@@ -714,7 +727,10 @@ function unfoldPkg() {
                 if(result["code"] === 200){
                     data_stack.push(graph.save());
                     mode_stack.push(CHART_MODE);
-                    data["nodes"] = calcAllNodesPos(result);
+                    let res = calcAllNodesPos(result);
+                    data["nodes"] = res[0];
+                    data["combos"] = res[1];
+                    // data["nodes"] = calcAllNodesPos(result);
                     data["edges"] = result["edges"];
                     loadGraph2();
                     // data_stack.push(graph.save())
@@ -736,6 +752,8 @@ function instabilityAjax(){
         url : "/coupling/group/top_level_packages",
         success : function(result) {
             data = result;
+            // data["nodes"] = calcAllNodesPos(result);
+            // data["edges"] = result["edges"];
             // const nodes = data["nodes"];
 
             // max_level = nodes[nodes.length-1].level;
@@ -984,133 +1002,6 @@ function levelLayout2(){
     graph.fitCenter();
     graph.fitView([0, 0, 0, 300]);
 }
-// function levelLayout2(){
-//     let nodelist = graph.getNodes();
-//     let list1 = [], list2 = [], list3 = [], list4 = [], list5 = [], allList = [];
-//     const L1 = max_level * 0.25;
-//     const L2 = max_level * 0.5;
-//     const L3 = max_level * 0.75;
-//     const L4 = max_level;
-//     nodelist.forEach(node =>{
-//         if (node._cfg.model.instability >= L4) {
-//             node.update({
-//                 style:{
-//                     fill:INSTABILITY_COLOR5
-//                 }
-//             });
-//             list5.push(node);
-//         } else if (node._cfg.model.instability >= L3) {
-//             node.update({
-//                 style:{
-//                     fill:INSTABILITY_COLOR4
-//                 }
-//             });
-//             list4.push(node);
-//         } else if (node._cfg.model.instability >= L2) {
-//             node.update({
-//                 style:{
-//                     fill:INSTABILITY_COLOR3
-//                 }
-//             });
-//             list3.push(node);
-//         } else if (node._cfg.model.instability >= L1) {
-//             node.update({
-//                 style:{
-//                     fill:INSTABILITY_COLOR2
-//                 }
-//             });
-//             list2.push(node);
-//         } else {
-//             node.update({
-//                 style:{
-//                     fill:INSTABILITY_COLOR1
-//                 }
-//             });
-//             list1.push(node);
-//         }
-//     })
-//
-//     allList.push(list1);
-//     allList.push(list2);
-//     allList.push(list3);
-//     allList.push(list4);
-//     allList.push(list5);
-//
-//     let startIndex = 0;
-//     let minParentPckId = "0";
-//     for(let i = 0; i < allList.length; i++){
-//         if(allList[i].length !== 0){
-//             minParentPckId = allList[i][0]._cfg.model.parentPckId;
-//             allList[i].sort(function(a,b){return a._cfg.model.parentPckId - b._cfg.model.parentPckId});
-//             allList[i].forEach((node, index) =>{
-//                 minParentPckId = Math.min(minParentPckId, node._cfg.model.parentPckId);
-//                 node.updatePosition({
-//                     // x: (index - (list1.length / 2)) * 70,
-//                     x: index * 70,
-//                     y: 70 * (i + 1) - ((node._cfg.model.instability - (0.8 - i * 0.2)) / 0.2) * 70,
-//                 });
-//             })
-//             startIndex = i + 1;
-//             break;
-//         }
-//     }
-//
-//     if(startIndex < allList.length){
-//         for(let i = startIndex; i < allList.length; i++){
-//             let sortedList = [];
-//             let nullList = [];
-//
-//             allList[i].forEach(node =>{
-//                 let parentPosX = 0.0;
-//                 let parentPosSum = 0.0;
-//                 let neighbors = node.getNeighbors();
-//
-//                 neighbors.forEach(neighbor =>{
-//                     if(neighbor._cfg.model.instability > node._cfg.model.instability){
-//                         parentPosX += neighbor._cfg.model.x;
-//                         parentPosSum += 1;
-//                     }
-//                 })
-//
-//                 if(parentPosSum === 0){
-//                     if(neighbors.length > 0){
-//                         node._cfg.model.barycenter = 0;
-//                         sortedList.push(node);
-//                     }else{
-//                         nullList.push(node);
-//                     }
-//                 }else{
-//                     node._cfg.model.barycenter = parentPosX / parentPosSum;
-//                     sortedList.push(node);
-//                 }
-//             })
-//
-//             sortedList.sort(function(a,b){return a._cfg.model.barycenter - b._cfg.model.barycenter});
-//
-//
-//             sortedList.forEach((node2, index) =>{
-//                 let offset = i % 2 === 0 ? -35 : 0;
-//                 node2.updatePosition({
-//                     // x: (index - (sortedList.length / 2)) * 70,
-//                     x: -100 + offset + index * 70,
-//                     y: 70 * (i + 1) - ((node2._cfg.model.instability - (0.8 - i * 0.2)) / 0.2) * 70,
-//                 });
-//             })
-//
-//             nullList.forEach((nullNode, index) => {
-//                 nullNode.updatePosition({
-//                     // x: (index - (sortedList.length / 2)) * 70,
-//                     x: (index - Math.floor(index / 15) * 15 - 3) * 60,
-//                     y: 70 * (i + 2 + Math.floor(index / 15)) - ((nullNode._cfg.model.instability - (0.8 - i * 0.2)) / 0.2) * 70,
-//                 });
-//             })
-//         }
-//     }
-//
-//     graph.refresh();
-//     graph.fitCenter();
-//     graph.fitView();
-// }
 
 function isEdgeReversed(edge) {
     let result = false;
@@ -1120,6 +1011,18 @@ function isEdgeReversed(edge) {
         result = !edge._cfg.model.isExtendOrImplements;
     }
     return result;
+}
+
+function handleReverseEdges() {
+    graph.getEdges().forEach(edge => {
+        let startNode = graph.findById(edge._cfg.model.source)
+        let endNode = graph.findById(edge._cfg.model.target)
+        let startLevel = startNode._cfg.model.y;
+        let endLevel = endNode._cfg.model.y;
+        if(startLevel > endLevel){
+            edge.setState('reverse', true);
+        }
+    });
 }
 function handleReverseEdgesAndExtends(){
     let edges = graph.getEdges();
@@ -1465,7 +1368,7 @@ function loadNodeTable1() {
         });
         table.on('toolbar(node1)', function (obj){
             let checkStatus = table.checkStatus(obj.config.id);
-            if (obj.event === 'filterCheckEdges') {
+            if (obj.event === 'filterCheckNode') {
                 const data = checkStatus.data;
                 selected_packages = [];
                 present_packages = [];
@@ -1631,7 +1534,9 @@ function loadPanel(loadBtmTables){
     $("#data_panel2").html(html2);
     if (loadBtmTables) {
         loadEdgeTable1();
-        // loadNodeTable1();
+        loadNodeTable1();
+    } else {
+        loadEdgeTable1();
     }
 }
 
@@ -1690,18 +1595,20 @@ function handleNodeStroke() {
     });
 
 }
+
 function loadGraph2() {
     // const nodes = calcAllNodesPos(response);
+    is_ntb_loaded = false;
     graph.data(data);
     graph.render();
     handleNodeColor();
     handleNodeStroke();
-    handleReverseEdgesAndExtends();
+    handleReverseEdges();
 
     graph.fitCenter();
     graph.fitView([100, 200, 100, 200]);
     savePresentNodes();
-    loadPanel(true);
+    loadPanel(false);
     handleEdgesWidth();
     closeLoadingWindow();
 

@@ -52,8 +52,8 @@ public interface CouplingRepository extends Neo4jRepository<Coupling, Long> {
             "and id(f2)=$file2Id return p;")
     Coupling queryCouplingBetweenTwoFiles(@Param("file1Id") long file1Id, @Param("file2Id") long file2Id);
 
-    @Query("match p=(f1:ProjectFile)-[r:" + RelationType.str_COUPLING + "]-(f2:ProjectFile) where id(f1)=$pkgId1 " +
-            "and id(f2)=$pkgId2 return p;")
+    @Query("match p=(p1:Package)-[r:" + RelationType.str_COUPLING + "]-(p2:Package) where id(p1)=$pkgId1 " +
+            "and id(p2)=$pkgId2 return p;")
     List<Coupling> queryCouplingBetweenTwoPkgs(@Param("pkgId1") long pkgId1, @Param("pkgId2") long pkgId2);
 
     @Query("MATCH p=(n1:Package)-[:" + RelationType.str_CONTAIN + "*]->(f1:ProjectFile)" +
