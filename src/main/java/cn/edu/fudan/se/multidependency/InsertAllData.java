@@ -54,7 +54,9 @@ public class InsertAllData {
             repository.setDataPath(yaml.getNeo4jDataPath());
             repository.setDatabaseName(yaml.getNeo4jDatabaseName());
             repository.setDelete(yaml.isDeleteDatabase());
-            repository.insertToNeo4jDataBase();
+//            repository.insertToNeo4jDataBase();
+            FileUtil.writeObject(yaml.getSerializePath(), service);
+            System.exit(0);
         } catch (Exception e) {
             // 所有步骤中有一个出错，都会终止执行
             e.printStackTrace();

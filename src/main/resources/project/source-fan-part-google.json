@@ -41,7 +41,7 @@
 	"clones": [{
 		"language"   : "java",
 		"granularity": "file",
-		"name_path"  : "src/main/resources/clone/file/source-part-fan-google/result/MeasureIndex.csv",
+		"name_path"  : "/Users/keyon/Documents/bigDataPlatform/depend-service/multi-dependency/tool_clone/detect/result/MeasureIndex.csv",
 		"result_path": "src/main/resources/clone/file/source-part-fan-google/similarity.csv",
 		"group_path" : "src/main/resources/clone/file/source-part-fan-google/result/type123_method_group_result.csv"
 	},{

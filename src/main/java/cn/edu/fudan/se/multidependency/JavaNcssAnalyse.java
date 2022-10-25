@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class JavaNcssAnalyse {
 
   //  @Value("${packages}")
-    private static String packages = "/java/org/apache/";
+    private static String packages = "/java/org/apache/coyote";
 
 
 

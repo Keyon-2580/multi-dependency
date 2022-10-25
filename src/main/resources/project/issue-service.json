@@ -1,0 +1,45 @@
+{
+  "architectures": {},
+  "projects": [{
+    "path": "/Users/keyon/Documents/bigDataPlatform/multi-repo/IssueTracker-Master",
+    "includeDirs": [],
+    "microserviceName": "issue-service",
+    "autoInclude": true,
+    "serviceGroupName": "issue-service",
+    "project": "issue-service",
+    "language": "java",
+    "isMicroservice": false,
+    "excludes": [
+    ]
+  }],
+  "dynamics": {
+    "file_suffixes": [
+      ""
+    ],
+    "logs_path": "",
+    "features_path": ""
+  },
+  "gits": [{
+    "path": "/home/fdse/codeWisdom/service/dependence-analysis/repoFiles/multi-repo/IssueTracker-Master",
+    "project": "issue-service",
+    "specify_commit_range": true,
+    "specify_by_commit_id": false,
+    "commit_id_from": "",
+    "commit_id_to": "",
+    "commit_id_current": "",
+    "commit_time_since": "2021-06-01 00:00:00",
+    "commit_time_until": "2022-01-31 23:59:59",
+    "issueFrom": "",
+    "issues_directory": "issue-service",
+    "calculate_cochange": true
+  }],
+  "libs": [],
+  "clones": [{
+    "language"   : "java",
+    "granularity": "function",
+    "name_path"  : "/home/fdse/codeWisdom/service/dependence-analysis/multi-dependency/clone/MeasureIndex.csv",
+    "result_path": "/home/fdse/codeWisdom/service/dependence-analysis/multi-dependency/clone/similarity.csv",
+    "group_path" : "/home/fdse/codeWisdom/service/dependence-analysis/multi-dependency/clone/type123_method_group_result.csv"
+  }
+  ]
+}

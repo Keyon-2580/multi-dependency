@@ -2,9 +2,9 @@ spring:
   data:
     neo4j:
       username: neo4j
-      password: root
-      uri: bolt://127.0.0.1:7687
-      #uri: bolt://10.176.34.86:9687
+      password: admin
+#      uri: bolt://127.0.0.1:7687
+      uri: bolt://10.176.34.85:7687
       #uri: bolt://10.176.34.83:7687
 
   thymeleaf:
@@ -18,13 +18,13 @@ config:
   starter:
     hierarchical_cluster: false
     insert_nodes: true
-    insert_relations: true
-    cochange: false
+    insert_relations: false
+    cochange: true
     depends_on: true
-    clone_group: false
-    module_clone: false
-    aggregation_clone: false
-    smell: false
+    clone_group: true
+    module_clone: true
+    aggregation_clone: true
+    smell: true
     modularity: false
     coupling: true
     package_depth: true
@@ -33,12 +33,12 @@ config:
 
 
 data:
-  project_config: src/main/resources/project/issue-tracker-master.json
+  project_config: src/main/resources/project/issue-service.json
   project_analyse_threads_count: 1
   dynamic_analyse: false
-  git_analyse: false
+  git_analyse: true
   lib_analyse: false
-  clone_analyse: false
+  clone_analyse: true
   alltag_analyse: false
   diff_analyse: false
   snapshot_analyse: false
@@ -46,10 +46,10 @@ data:
   neo4j:
     delete: true
     data_path: /Users/keyon/Documents/bigDataPlatform/depend-service/neo4j/data
-    database_name: tomcat
+    database_name: issue.tracker.db
 
   serialize_path: /Users/keyon/Documents/bigDataPlatform/depend-service/RepositoryService-source-issue-tracker.txt
-  anonymization : true
+  anonymization : false
   batch_serialize: true
 
   test: this property is for YamlUtilsTest

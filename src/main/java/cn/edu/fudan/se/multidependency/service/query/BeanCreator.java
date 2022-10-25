@@ -806,31 +806,31 @@ public class BeanCreator {
 	}
 
 
-//	@Bean
-//	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository) {
-//		LOGGER.info("创建File Metric度量值节点和关系...");
-//		metricCalculatorService.createFileMetric(false);
-//
-//		LOGGER.info("创建Package Metric度量值节点和关系...");
-//		metricCalculatorService.createPackageMetric(false);
-//
-//		LOGGER.info("创建Project Metric度量值节点和关系...");
-//		metricCalculatorService.createProjectMetric(false);
-//
-//		LOGGER.info("创建GitRepo Metric度量值节点和关系...");
-//		metricCalculatorService.createGitRepoMetric(false);
-//
-//		if(propertyConfig.isCalculateModularity()){
-//			LOGGER.info("计算Project模块性度量值...");
-//			projectRepository.queryAllProjects().forEach( (project) ->{
-//				if(project.getModularity() <= 0.0){
-//					double value = modularityCalculator.calculate(project).getValue();
-//					projectRepository.setModularityMetricsForProject(project.getId(), value);
-//				}
-//			});
-//		}
-//		return true;
-//	}
+
+	public boolean setProjectMetrics(PropertyConfig propertyConfig, ProjectRepository projectRepository) {
+		LOGGER.info("创建File Metric度量值节点和关系...");
+		metricCalculatorService.createFileMetric(false);
+
+		LOGGER.info("创建Package Metric度量值节点和关系...");
+		metricCalculatorService.createPackageMetric(false);
+
+		LOGGER.info("创建Project Metric度量值节点和关系...");
+		metricCalculatorService.createProjectMetric(false);
+
+		LOGGER.info("创建GitRepo Metric度量值节点和关系...");
+		metricCalculatorService.createGitRepoMetric(false);
+
+		if(propertyConfig.isCalculateModularity()){
+			LOGGER.info("计算Project模块性度量值...");
+			projectRepository.queryAllProjects().forEach( (project) ->{
+				if(project.getModularity() <= 0.0){
+					double value = modularityCalculator.calculate(project).getValue();
+					projectRepository.setModularityMetricsForProject(project.getId(), value);
+				}
+			});
+		}
+		return true;
+	}
 
 	@Bean("setPackageDepth")
 	public boolean setPackageDepth(ProjectRepository projectRepository, ContainRepository containRepository) {
@@ -903,7 +903,7 @@ public class BeanCreator {
 			}
 
 			LOGGER.info("创建God Component Smell节点关系...");
-			smellDetectorService.createGodComponentSmells(false);
+			//smellDetectorService.createGodComponentSmells(false);
 
 		}
 		return true;
