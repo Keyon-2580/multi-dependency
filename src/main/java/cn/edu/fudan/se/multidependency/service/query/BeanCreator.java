@@ -1072,7 +1072,7 @@ public class BeanCreator {
 		return couplings;
 	}
 
-//	@Bean
+	@Bean
 	public boolean setPackageCouplingValue(CouplingRepository couplingRepository,
 										   DependsOnRepository dependsOnRepository,
 										   PackageRepository packageRepository,
@@ -1128,6 +1128,7 @@ public class BeanCreator {
 			}
 			Set<Long> fileIdSet1 = new HashSet<>();
 			Set<Long> fileIdSet2 = new HashSet<>();
+			Set<String> aggregatedTypes = new HashSet<>();
 			for(DependsOn dependsOn: pkgDependOns.get(map)){
 				boolean flag = false;
 				Map<String, Long> dependsOnTypes = dependsOn.getDependsOnTypes();
@@ -1137,6 +1138,7 @@ public class BeanCreator {
 							|| type.equals("PARAMETER") || type.equals("LOCAL_VARIABLE") || type.equals("CREATE")
 							|| type.equals("MEMBER_VARIABLE")) {
 						flag = true;
+						aggregatedTypes.add(type);
 						break;
 					}
 				}
@@ -1157,6 +1159,7 @@ public class BeanCreator {
 			tmpEdge.put("C", DataUtil.toFixed(fileHMean));
 			double logD = Math.max(0, Math.log10(DAtoB));
 			tmpEdge.put("D", DAtoB);
+			tmpEdge.put("type", String.join(",", aggregatedTypes));
 			tmpEdge.put("logD", DataUtil.toFixed(logD));
 			dMap.put((String)tmpEdge.get("id"), DAtoB);
 			edges.add(tmpEdge);
@@ -1184,6 +1187,7 @@ public class BeanCreator {
 			coupling.setDAtoB(edge.getInteger("D"));
 			coupling.setDist(edge.getDouble("dist"));
 			coupling.setI(edge.getDouble("I"));
+			coupling.setDependsOnTypeStartToEnd(edge.getString("type"));
 			coupling.setStartNode(packageRepository.findPackageById(edge.getLong("source")));
 			coupling.setEndNode(packageRepository.findPackageById(edge.getLong("target")));
 			allCoupling.add(coupling);

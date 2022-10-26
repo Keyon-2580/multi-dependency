@@ -782,6 +782,7 @@ public class CouplingServiceImpl implements CouplingService {
             List<JSONObject> levelPackages = levelTable.get(level);
             for (JSONObject pkg : levelPackages) {
                 GraphBlock graphBlock = unfoldOnePackageToFile(pkg);
+                graphBlock.setLabel(packageRepository.findPackageById(pkg.getLong("id")).getName());
                 currRow.add(graphBlock);
             }
             rowsOfBlocks.add(currRow);
@@ -833,6 +834,7 @@ public class CouplingServiceImpl implements CouplingService {
                 if (pkg.getBoolean("unfold")) {
                     // unfold pkg, get inside dependencies and child pkgs with level
                     graphBlock = unfoldOnePackageOneStep(pkg);
+                    graphBlock.setLabel(packageRepository.findPackageById(pkg.getLong("id")).getDirectoryPath());
                 } else {
                     pkg.put("level", level + 0);
                     graphBlock.setHeight(1);
@@ -843,6 +845,7 @@ public class CouplingServiceImpl implements CouplingService {
                     pkgs.add(inside);
                     graphBlock.setPackages(pkgs);
                     graphBlock.setLevels(1);
+                    graphBlock.setLabel(packageRepository.findPackageById(pkg.getLong("id")).getDirectoryPath());
                 }
                 currRow.add(graphBlock);
             }
@@ -850,9 +853,9 @@ public class CouplingServiceImpl implements CouplingService {
         }
         JSONObject res = new JSONObject();
         res.put("blocks", rowsOfBlocks);
-        Map<Map<Package, Package>, Set<DependsOn>> allDepends = getDependsBetweenPackages(allPackages);
-        res.put("edges", dependsToEdges(allDepends));
-//        res.put("edges", getEdgesBetweenPackages(allPackages));
+//        Map<Map<Package, Package>, Set<DependsOn>> allDepends = getDependsBetweenPackages(allPackages);
+//        res.put("edges", dependsToEdges(allDepends));
+        res.put("edges", getEdgesBetweenPackages(allPackages));
         return res;
     }
 
@@ -864,10 +867,11 @@ public class CouplingServiceImpl implements CouplingService {
         for (Package pkg : topLevelPackages) {
             nodes.add(pkgToNode(pkg));
         }
-        Map<Map<Package, Package>, Set<DependsOn>> allDepends = getDependsBetweenPackages(topLevelPackages);
-        JSONArray edges = dependsToEdges(allDepends);
+//        Map<Map<Package, Package>, Set<DependsOn>> allDepends = getDependsBetweenPackages(topLevelPackages);
+//        JSONArray edges = dependsToEdges(allDepends);
         result.put("nodes", nodes);
-        result.put("edges", edges);
+//        result.put("edges", edges);
+        result.put("edges", getEdgesBetweenPackages(topLevelPackages));
         return result;
     }
 
@@ -952,14 +956,15 @@ public class CouplingServiceImpl implements CouplingService {
                     for (Coupling coupling : couplings) {
                         JSONObject tmpEdge = new JSONObject();
                         tmpEdge.put("id", coupling.getStartNodeGraphId() + "_" + coupling.getEndNodeGraphId());
-                        tmpEdge.put("source", coupling.getStartNodeGraphId());
-                        tmpEdge.put("target", coupling.getEndNodeGraphId());
+                        tmpEdge.put("source", String.valueOf(coupling.getStartNodeGraphId()));
+                        tmpEdge.put("target", String.valueOf(coupling.getEndNodeGraphId()));
                         tmpEdge.put("dist", coupling.getDist());
                         tmpEdge.put("C", coupling.getC());
                         double logD = Math.max(0, Math.log10(coupling.getDAtoB()));
                         tmpEdge.put("D", coupling.getDAtoB());
                         dMap.put(tmpEdge.getString("id"), coupling.getDAtoB());
                         tmpEdge.put("logD", DataUtil.toFixed(logD));
+                        edges.add(tmpEdge);
                     }
                 }
 
@@ -990,11 +995,12 @@ public class CouplingServiceImpl implements CouplingService {
         JSONArray nodes = new JSONArray();
 //        Map<Map<Package, Package>, Set<DependsOn>> dependsOnBetweenPackages = new HashMap<>();
         List<Package> childPkgs = packageRepository.findOneStepPackagesById(pkgJson.getLong("id"));
-        Map<Map<Package, Package>, Set<DependsOn>> dependsOnBetweenPackages = getDependsBetweenPackages(childPkgs);
+//        Map<Map<Package, Package>, Set<DependsOn>> dependsOnBetweenPackages = getDependsBetweenPackages(childPkgs);
         for (Package pkg : childPkgs) {
             nodes.add(pkgToNode(pkg));
         }
-        JSONArray edges = dependsToEdges(dependsOnBetweenPackages);
+//        JSONArray edges = dependsToEdges(dependsOnBetweenPackages);
+        JSONArray edges = getEdgesBetweenPackages(childPkgs);
         if (edges.size() == 0) {
             int width = (int) Math.ceil(Math.sqrt(nodes.size()));
             graphBlock.setWidth(width);

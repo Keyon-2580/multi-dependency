@@ -62,13 +62,18 @@ function calcAllNodesPos(response) {
     //         }
     //     }
     // }
-    drawRects();
+    // drawRects();
+    let combos = [];
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < rowOfBlocks[i].length; j++) {
-            allNodes = allNodes.concat(calcBlockNodesPos(rowOfBlocks[i][j]));
+            const id = "combo" + i.toString() + "_" + j.toString();
+
+            combos.push({"id": id, "label": rowOfBlocks[i][j]["label"], "type": 'rect'})
+            // allNodes = allNodes.concat(calcBlockNodesPos(rowOfBlocks[i][j]));
+            allNodes = allNodes.concat(calcBlockNodesPos2(rowOfBlocks[i][j], id));
         }
     }
-    return allNodes;
+    return [allNodes, combos];
 }
 
 function drawRects() {
@@ -94,17 +99,59 @@ function drawRects() {
     }
 }
 
-function calcBlockNodesPos2(block) {
-    // let packages = block.packages;
+function calcBlockNodesPos2(block, comboId) {
     let blockNodes = [];
     for (let i = 0; i < block.packages.length; i++) {
         for (let j = 0; j < block.packages[i].length; j++) {
             block.packages[i][j]["x"] = block["startX"] + j * H_GAP;
             block.packages[i][j]["y"] = block["startY"] + i * V_GAP;
+            // blockNodes.push(block.packages[i][j]);
+        }
+    }
+    for(let i = 0; i < block.packages.length; i++) {
+        if(block.packages[i].length !== 0) {
+            const DELTA = V_GAP / block.packages[i].length;
+            for (let j = 0; j < block.packages[i].length; j++) {
+                for (let k = j+1; k < block.packages[i].length; k++) {
+                    let node1 = block.packages[i][j];
+                    let node2 = block.packages[i][k];
+                    const edgeId1 = node1.id + '_' + node2.id;
+                    const edgeId2 = node2.id + '_' + node1.id;
+                    let edge1 = allEdges.find(e => e["id"] === edgeId1);
+                    let edge2 = allEdges.find(e => e["id"] === edgeId2);
+                    if (edge1 === undefined && edge2 === undefined) continue;
+                    if (edge1 !== undefined && edge2 === undefined) {
+                        node1["y"] -= DELTA;
+                    }
+                    if (edge2 !== undefined && edge1 === undefined) {
+                        node2["y"] -= DELTA;
+                    }
+                    if (edge1 !== undefined && edge2 !== undefined) {
+                        if (edge1["D"] > edge2["D"]) {
+                            node1["y"] -= DELTA;
+                            // let tmp = node1["level"];
+                            // node1["level"] = node2["level"];
+                            // node2["level"] = tmp;
+                        } else {
+                            node2["y"] -= DELTA;
+                            // let tmp = node1["level"];
+                            // node1["level"] = node2["level"];
+                            // node2["level"] = tmp;
+                        }
+                    }
+                    block.packages[i][j]["y"] = node1["y"];
+                    block.packages[i][k]["y"] = node2["y"];
+                }
+            }
+        }
+    }
+    for (let i = 0; i < block.packages.length; i++) {
+        for (let j = 0; j < block.packages[i].length; j++) {
+            block.packages[i][j]["comboId"] = comboId;
             blockNodes.push(block.packages[i][j]);
         }
     }
-    // console.log(block.packages);
+    debugger
     return blockNodes;
 }
 function calcBlockNodesPos(block) {
