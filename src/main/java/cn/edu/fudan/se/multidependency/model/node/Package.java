@@ -53,6 +53,10 @@ public class Package implements Node {
 
 	private double looseDegree = -2;
 
+	private double wmc;
+
+	private double amc;
+
 	private static final long serialVersionUID = -4892461872164624064L;
 	
 	public static final String JAVA_PACKAGE_DEFAULT = "default";
@@ -69,6 +73,8 @@ public class Package implements Node {
 		properties.put("lines", getLines());
 		properties.put("depth", getDepth());
 		properties.put("instability", getInstability());
+		properties.put("wmc", getWmc());
+		properties.put("amc", getAmc());
 		return properties;
 	}
 

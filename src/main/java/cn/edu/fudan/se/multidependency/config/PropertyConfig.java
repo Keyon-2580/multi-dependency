@@ -64,6 +64,10 @@ public class PropertyConfig {
 	@Value("${data.neo4j.database_name}")
 	private String databaseName;
 
+	@Getter
+	@Value("${config.starter.calculate_ccn}")
+	private boolean calculateCcn;
+
 //	@Getter
 //	@Value("${config.starter.co-change.co-change}")
 //	private boolean setCoChange;

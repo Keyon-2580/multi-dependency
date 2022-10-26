@@ -18,7 +18,7 @@ config:
   starter:
     hierarchical_cluster: false
     insert_nodes: true
-    insert_relations: false
+    insert_relations: true
     cochange: false
     depends_on: true
     clone_group: false
@@ -30,6 +30,7 @@ config:
     package_depth: true
     export_cyclic_dependency: false
     loose_degree: false
+    calculate_ccn: true
 
 
 data:

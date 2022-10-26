@@ -512,6 +512,10 @@ function handleLeftPanelBtn() {
             .className = "layui-icon layui-icon-right";
     }
 }
+function calCcn(WMC){
+    return WMC / graph.getNodes().length
+
+}
 function calcAbsGComplexity(k, w) {
     let edgeSet = new Set(graph.getEdges());
     let finalW = 0.0;
@@ -1388,6 +1392,8 @@ function loadNodeTable1() {
                 name: node._cfg.model.name,
                 NOF: nof,
                 LOC: node._cfg.model.LOC,
+                WMC: node._cfg.model.WMC,
+                AMC: node._cfg.model.AMC,
                 nodeType: node._cfg.model.nodeType,
                 I: res["I"],
                 D: res["D"],
@@ -1521,6 +1527,8 @@ function loadPanel(loadBtmTables){
     let edges = graph.getEdges();
     let NOF = 0;
     let LOC = 0;
+    let WMC = 0.0;
+    let AMC = 0.0;
     CList = [];
     Csum = 0.0;
     Cmax = 0.0;
@@ -1534,10 +1542,13 @@ function loadPanel(loadBtmTables){
         NOF += node._cfg.model.NOF;
         LOC += node._cfg.model.LOC;
         node_set.add(node._cfg.model.id);
+        WMC += node._cfg.model.WMC;
+        AMC += node._cfg.model.AMC;
     })
     const N = nodes.length;
     const gAbsComplexity = calcAbsGComplexity(2, "C");
     const gRComplexity = gAbsComplexity * 2 / (N * (N - 1));
+    const AveCcn = calCcn(WMC)
     if (CHART_MODE === "package") {
         html0 += "<p>包数：" + nodes.length + "</p>";
         html0 += "<p>文件数：" + NOF + "</p>";
@@ -1547,6 +1558,7 @@ function loadPanel(loadBtmTables){
     html0 += "<p>图绝对复杂度：" + gAbsComplexity.toFixed(2) + "</p>";
     html0 += "<p>图相对复杂度：" + gRComplexity.toFixed(2) + "</p>";
     html0 += "<p>代码行数：" + LOC + "</p>";
+    html0 += "<p>平均圈复杂度：" + AveCcn.toFixed(2) + "</p>";
     html0 += "<br />";
     let tmpMap = new Map();
     let tmpSet = new Set();

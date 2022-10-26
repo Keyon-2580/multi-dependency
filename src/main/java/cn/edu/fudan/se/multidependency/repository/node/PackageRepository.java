@@ -129,4 +129,15 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
 
 	@Query("MATCH p=(n:Package) where id(n)=$packageId set n.looseDegree=$looseDegree;")
 	void setPackageLooseDegree(@Param("packageId") Long packageId, @Param("looseDegree") double looseDegree);
+
+	//Ccn
+
+	@Query("MATCH p=(n:Package) where id(n)=$packageId set n.wmc=$wmc;")
+	void setPackageWmc(@Param("packageId") Long packageId, @Param("wmc") double wmc);
+
+	@Query("MATCH p=(n:Package) where id(n)=$packageId set n.amc=$amc;")
+	void setPackageAmc(@Param("packageId") Long packageId, @Param("amc") double amc);
+
+	@Query("MATCH p=(n:Package) where n.wmc > 0 RETURN count(p) > 0")
+	boolean hasCalculateCcn();
 }

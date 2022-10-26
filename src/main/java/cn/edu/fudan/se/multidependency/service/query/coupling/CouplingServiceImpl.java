@@ -686,6 +686,8 @@ public class CouplingServiceImpl implements CouplingService {
         tmpPkg.put("label", pkgName);
         tmpPkg.put("nodeType", "package");
         tmpPkg.put("level", "0");
+        tmpPkg.put("WMC", pkg.getWmc());
+        tmpPkg.put("AMC", pkg.getAmc());
         return tmpPkg;
     }
     @SuppressWarnings("Duplicates")

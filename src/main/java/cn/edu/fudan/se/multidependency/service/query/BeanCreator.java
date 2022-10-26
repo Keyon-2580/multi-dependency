@@ -328,6 +328,59 @@ public class BeanCreator {
 	}
 
 	@Bean
+	public boolean sumAllCcnToPackage(PackageRepository packageRepository,
+								   ContainRepository containRepository,
+								   ProjectRepository projectRepository,
+								   PropertyConfig propertyConfig){
+		List<Project> projectList = projectRepository.queryAllProjects();
+		if (!propertyConfig.isCalculateCcn()) {
+			return false;
+		}
+		LOGGER.info("整理包的Ccn值");
+
+		for(Project project : projectList) {
+			List<Package> rootPackageList = containRepository.findProjectRootPackages(project.getId());
+			if (packageRepository.hasCalculateCcn()) {
+				continue;
+			}
+			for(Package pack : rootPackageList){
+				setPackageWmc(pack, containRepository, packageRepository);
+			}
+
+		}
+		return true;
+	}
+
+	private List<Double> setPackageWmc(Package pack, ContainRepository containRepository, PackageRepository packageRepository){
+		long packageId = pack.getId();
+		double wmc = 0;
+		double amc = 0;
+		List<Package> packageList= containRepository.findPackageContainPackages(packageId);
+		List<ProjectFile> fileList= containRepository.findPackageContainFiles(packageId);
+		if (fileList.size() > 0) {
+			for(ProjectFile projectFile : fileList){
+				wmc += projectFile.getWmc();
+				amc += projectFile.getAmc();
+			}
+		}
+
+		if(packageList.size() > 0){
+			for(Package childrenPack : packageList){
+				List<Double> packCcn = setPackageWmc(childrenPack, containRepository, packageRepository);
+				wmc += packCcn.get(0);
+				amc += packCcn.get(1);
+			}
+
+		}
+		packageRepository.setPackageWmc(packageId, wmc);
+		packageRepository.setPackageAmc(packageId, amc);
+		List<Double> packTotalCcn = new ArrayList<>();
+		packTotalCcn.add(wmc);
+		packTotalCcn.add(amc);
+		return packTotalCcn;
+	}
+
+	@Bean
 	public boolean mergeSeparateFileIntoPackage(PackageRepository packageRepository,
 												NodeRepository nodeRepository,
 												ProjectFileRepository projectFileRepository,
