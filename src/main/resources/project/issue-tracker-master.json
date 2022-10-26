@@ -1,12 +1,12 @@
 {
 	"architectures": {},
 	"projects": [{
-		"path": "/Users/keyon/Documents/bigDataPlatform/depend-service/reopFiles/tomcat-9.0.x",
+		"path": "/Users/keyon/Documents/bigDataPlatform/multi-repo/IssueTracker-Master",
 		"includeDirs": [],
-		"microserviceName": "tomcat",
+		"microserviceName": "IssueTracker",
 		"autoInclude": true,
-		"serviceGroupName": "tomcat",
-		"project": "itomcat",
+		"serviceGroupName": "IssueTracker",
+		"project": "IssueTracker",
 		"language": "java",
 		"isMicroservice": false,
 		"tagPrefixes": [

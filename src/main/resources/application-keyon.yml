@@ -2,9 +2,9 @@ spring:
   data:
     neo4j:
       username: neo4j
-      password: admin
-#      uri: bolt://127.0.0.1:7687
-      uri: bolt://10.176.34.85:7687
+      password: root
+      uri: bolt://127.0.0.1:7687
+#      uri: bolt://10.176.34.85:7687
       #uri: bolt://10.176.34.83:7687
 
   thymeleaf:
@@ -19,12 +19,12 @@ config:
     hierarchical_cluster: false
     insert_nodes: true
     insert_relations: false
-    cochange: true
+    cochange: false
     depends_on: true
-    clone_group: true
-    module_clone: true
-    aggregation_clone: true
-    smell: true
+    clone_group: false
+    module_clone: false
+    aggregation_clone: false
+    smell: false
     modularity: false
     coupling: true
     package_depth: true
@@ -33,12 +33,12 @@ config:
 
 
 data:
-  project_config: src/main/resources/project/issue-service.json
+  project_config: src/main/resources/project/issue-tracker-master.json
   project_analyse_threads_count: 1
   dynamic_analyse: false
-  git_analyse: true
+  git_analyse: false
   lib_analyse: false
-  clone_analyse: true
+  clone_analyse: false
   alltag_analyse: false
   diff_analyse: false
   snapshot_analyse: false

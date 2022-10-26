@@ -1,5 +1,6 @@
 package cn.edu.fudan.se.multidependency;
 
+import cn.edu.fudan.se.multidependency.model.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,7 @@ public class InsertStaticData {
             ThreadService ts = new ThreadService(yaml);
             
             ts.staticAnalyse();
+            ts.javaCcnAnalyse();
             
             RepositoryService service = RepositoryService.getInstance();
             LOGGER.info("静态分析节点数：" + service.getNodes().size());

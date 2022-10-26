@@ -47,6 +47,10 @@ public class ProjectFile extends CodeUnit {
     private String language;
     
     private double instability = -1;
+
+    private double wmc;
+
+    private double amc;
 	
 	public int getStartLine() {
 		return 1;
@@ -74,6 +78,8 @@ public class ProjectFile extends CodeUnit {
 		properties.put("score", getScore());
 		properties.put("language", getLanguage() == null ? "" : getLanguage());
 		properties.put("instability", getInstability());
+		properties.put("wmc", getWmc());
+		properties.put("amc", getAmc());
 		return properties;
 	}
 

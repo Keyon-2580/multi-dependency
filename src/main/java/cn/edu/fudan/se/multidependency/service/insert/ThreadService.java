@@ -1,18 +1,22 @@
 package cn.edu.fudan.se.multidependency.service.insert;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.text.DecimalFormat;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
+import cn.edu.fudan.se.multidependency.model.MethodMetric;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import cn.edu.fudan.se.multidependency.service.insert.dynamic.FeatureAndTestCaseFromJSONFileForMicroserviceInserter;
 import cn.edu.fudan.se.multidependency.service.insert.git.GitExtractor;
+import cn.edu.fudan.se.multidependency.service.insert.javancss.JavaCcnExtractor;
+import cn.edu.fudan.se.multidependency.utils.DirExplorer;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
+import javancss.Javancss;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,6 +114,19 @@ public class ThreadService {
 		}
 		inserter.addNodesAndRelations();
 	}
+	
+	public void javaCcnAnalyse() throws Exception {
+		Collection<ProjectConfig> projectsConfig = config.getProjectsConfig();
+		for(ProjectConfig projectConfig : projectsConfig){
+			LOGGER.info(FileUtil.extractFilePathName(projectConfig.getPath()) + " " + projectConfig.getLanguage());
+			LOGGER.info("Start to analyse javaCcn");
+			JavaCcnExtractor ccnExtractor = new JavaCcnExtractor(projectConfig.getPath());
+			ccnExtractor.addNodesAndRelations();
+			LOGGER.info("Analyse javaCcn finished");
+		}
+		
+	}
+
 	
 	public void othersAnalyse() throws Exception {
 		latchOfOthers = new CountDownLatch(OTHERS_ANALYSE_COUNT);
