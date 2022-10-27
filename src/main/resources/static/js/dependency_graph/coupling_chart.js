@@ -45,6 +45,8 @@ const FILE_NODE_TABLE_COLS = [[
     ,{field:'id', title: 'ID', sort: true}
     ,{field:'name', title: '名称'}
     ,{field:'LOC', title: '代码行', sort: true}
+    ,{field:'WMC', title: '总圈复杂度', sort: true}
+    ,{field:'AMC', title: '平均圈复杂度', sort: true}
     ,{field:'nodeType', title: '类型', sort: true}
 ]];
 const PKG_NODE_TABLE_COLS = [[
@@ -53,6 +55,8 @@ const PKG_NODE_TABLE_COLS = [[
     ,{field:'name', title: '名称'}
     ,{field:'NOF', title: '文件', sort: true}
     ,{field:'LOC', title: '代码行', sort: true}
+    ,{field:'WMC', title: '总圈复杂度', sort: true}
+    ,{field:'AMC', title: '平均圈复杂度', sort: true}
     ,{field:'nodeType', title: '类型', sort: true}
     ,{field:'I', title: 'I-90分位值', sort: true}
     ,{field:'D', title: 'D-90分位值', sort: true}
@@ -1294,8 +1298,8 @@ function loadNodeTable1() {
                 name: node._cfg.model.name,
                 NOF: nof,
                 LOC: node._cfg.model.LOC,
-                WMC: node._cfg.model.WMC,
-                AMC: node._cfg.model.AMC,
+                WMC: node._cfg.model.WMC.toFixed(2),
+                AMC: node._cfg.model.AMC.toFixed(2),
                 nodeType: node._cfg.model.nodeType,
                 I: res["I"],
                 D: res["D"],
@@ -1314,6 +1318,8 @@ function loadNodeTable1() {
                 name: node._cfg.model.name,
                 NOF: NaN,
                 LOC: node._cfg.model.LOC,
+                WMC: node._cfg.model.WMC,
+                AMC: node._cfg.model.AMC,
                 nodeType: node._cfg.model.nodeType,
                 I: NaN,
                 D: NaN,
@@ -1461,6 +1467,7 @@ function loadPanel(loadBtmTables){
     html0 += "<p>图相对复杂度：" + gRComplexity.toFixed(2) + "</p>";
     html0 += "<p>代码行数：" + LOC + "</p>";
     html0 += "<p>平均圈复杂度：" + AveCcn.toFixed(2) + "</p>";
+    html0 += "<p>总圈复杂度：" + WMC.toFixed(2) + "</p>";
     html0 += "<br />";
     let tmpMap = new Map();
     let tmpSet = new Set();
