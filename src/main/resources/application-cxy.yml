@@ -19,7 +19,6 @@ server:
 config:
   starter:
     hierarchical_cluster: false
-    loose_degree: false
     insert_nodes: true
     insert_relations: true
     cochange: false
@@ -32,6 +31,8 @@ config:
     coupling: true
     package_depth: true
     export_cyclic_dependency: false
+    loose_degree: false
+    calculate_ccn: true
 data:
 
 #  project_config: C:/Dev/DependencyAnalysis/Tools/issuetracker01.json

@@ -151,7 +151,6 @@ function calcBlockNodesPos2(block, comboId) {
             blockNodes.push(block.packages[i][j]);
         }
     }
-    debugger
     return blockNodes;
 }
 function calcBlockNodesPos(block) {

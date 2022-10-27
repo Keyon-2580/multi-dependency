@@ -555,21 +555,20 @@ function calcAbsGComplexity(k, w) {
     let reverseW = 0.0;
     let crossW = 0.0;
     graph.getEdges().forEach(edge => {
-       if (edge._cfg.states.includes('reverse')) {
-           // console.log("逆向依赖", edge);
-           reverseW += edge._cfg.model[w] * r;
-       } else {
-           const startLevel = edge._cfg.source._cfg.model.y;
-           const endLevel = edge._cfg.target._cfg.model.y;
-           if (endLevel - startLevel > theta) {
-               crossW += edge._cfg.model[w] * c;
-               // edge.update(CROSS_LEVEL_EDGE_MODEL);
-               edge.setState('cross', true);
-               // console.log("跨层依赖", edge);
-           }
-
-       }
-
+        if (!isNaN(edge._cfg.model[w]))  {
+            if (edge._cfg.states.includes('reverse')) {
+                reverseW += edge._cfg.model[w] * r;
+            } else {
+                const startLevel = edge._cfg.source._cfg.model.y;
+                const endLevel = edge._cfg.target._cfg.model.y;
+                if (endLevel - startLevel > theta) {
+                    crossW += edge._cfg.model[w] * c;
+                    // edge.update(CROSS_LEVEL_EDGE_MODEL);
+                    edge.setState('cross', true);
+                    // console.log("跨层依赖", edge);
+                }
+            }
+        }
     });
     finalW += reverseW + crossW;
     return finalW;
