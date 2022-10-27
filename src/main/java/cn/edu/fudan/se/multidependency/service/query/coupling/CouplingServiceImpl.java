@@ -942,6 +942,8 @@ public class CouplingServiceImpl implements CouplingService {
         fileTmp.put("LOC", projectFile.getLoc());
         fileTmp.put("nodeType", "file");
         fileTmp.put("level", 0);
+        fileTmp.put("WMC", projectFile.getWmc());
+        fileTmp.put("AMC", projectFile.getAmc());
         return fileTmp;
     }
     JSONArray getEdgesBetweenPackages(List<Package> packages) {
