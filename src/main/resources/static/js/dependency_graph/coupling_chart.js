@@ -409,6 +409,13 @@ const graph = new G6.Graph({
             stroke: "#C4E3B2",
             fillOpacity: 0.1,
         },
+        labelCfg: {
+            position: 'top',
+            style: {
+                fill: '#000000',
+                fontSize: 8
+            },
+        },
     },
     edgeStateStyles: {
         highlight: {

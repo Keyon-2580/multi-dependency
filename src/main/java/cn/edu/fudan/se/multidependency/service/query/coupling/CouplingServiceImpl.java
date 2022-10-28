@@ -782,7 +782,9 @@ public class CouplingServiceImpl implements CouplingService {
             List<JSONObject> levelPackages = levelTable.get(level);
             for (JSONObject pkg : levelPackages) {
                 GraphBlock graphBlock = unfoldOnePackageToFile(pkg);
-                graphBlock.setLabel(packageRepository.findPackageById(pkg.getLong("id")).getName());
+                String comboLabel = FileUtil.extractPackagePath(packageRepository.findPackageById(pkg.getLong("id")).getDirectoryPath(), false);
+                graphBlock.setLabel(comboLabel);
+//                graphBlock.setLabel(packageRepository.findPackageById(pkg.getLong("id")).getName());
                 currRow.add(graphBlock);
             }
             rowsOfBlocks.add(currRow);
@@ -834,7 +836,8 @@ public class CouplingServiceImpl implements CouplingService {
                 if (pkg.getBoolean("unfold")) {
                     // unfold pkg, get inside dependencies and child pkgs with level
                     graphBlock = unfoldOnePackageOneStep(pkg);
-                    graphBlock.setLabel(packageRepository.findPackageById(pkg.getLong("id")).getDirectoryPath());
+                    String comboLabel = FileUtil.extractPackagePath(packageRepository.findPackageById(pkg.getLong("id")).getDirectoryPath(), false);
+                    graphBlock.setLabel(comboLabel);
                 } else {
                     pkg.put("level", level + 0);
                     graphBlock.setHeight(1);
@@ -845,7 +848,7 @@ public class CouplingServiceImpl implements CouplingService {
                     pkgs.add(inside);
                     graphBlock.setPackages(pkgs);
                     graphBlock.setLevels(1);
-                    graphBlock.setLabel(packageRepository.findPackageById(pkg.getLong("id")).getDirectoryPath());
+                    graphBlock.setLabel(pkg.getString("name"));
                 }
                 currRow.add(graphBlock);
             }
