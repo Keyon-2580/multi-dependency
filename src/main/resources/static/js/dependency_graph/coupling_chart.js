@@ -332,7 +332,6 @@ function goBack() {
     if (data_stack.length !== 0) {
         data = data_stack.pop();
         CHART_MODE = mode_stack.pop();
-        console.log("chart mode", CHART_MODE)
         loadGraph2();
     }
 }
@@ -627,20 +626,21 @@ function getNodeOneStepDetail(node) {
         D: 0,
         C: 0,
     };
-    let json = {};
-    let unfoldPcks = [];
-    let otherPcks = [];
-    if (node._cfg.model.nodeType === "package") {
-        unfoldPcks.push({
-            "id": node._cfg.id,
-            "instability": node._cfg.model.instability
-        })
-    }
-    json["unfoldPcks"] = unfoldPcks;
-    json["otherPcks"] = otherPcks;
+    let json = {"id": node._cfg.id};
+    // let unfoldPcks = [];
+    // let otherPcks = [];
+    // if (node._cfg.model.nodeType === "package") {
+    //     unfoldPcks.push({
+    //         "id": node._cfg.id,
+    //         "instability": node._cfg.model.instability
+    //     })
+    // }
+    // json["unfoldPcks"] = unfoldPcks;
+    // json["otherPcks"] = otherPcks;
     $.ajax({
         async: false,
-        url: "/coupling/group/one_step_child_packages_no_layout",
+        // url: "/coupling/group/one_step_child_packages_no_layout",
+        url: "/coupling/table/node_one_step_detail",
         type: "POST",
         contentType: "application/json",
         dataType: "json",

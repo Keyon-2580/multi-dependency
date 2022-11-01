@@ -43,4 +43,6 @@ public interface CouplingService {
     JSONObject unfoldPackages(JSONArray selectedPackages, JSONArray otherPackages, List<Package> allPackages);
     JSONObject unfoldPackagesToFile(JSONArray selectedPackages, List<ProjectFile> allFiles);
     JSONObject getTopLevelPackages();
+
+    JSONObject getChildPkgsCouplingValue(Long pkgId);
 }

@@ -235,6 +235,13 @@ public class CouplingController {
         return result;
     }
 
+    @PostMapping("/table/node_one_step_detail")
+    @CrossOrigin
+    @ResponseBody
+    public JSONObject getNodeOneStepDetail(@RequestBody JSONObject requestBody) {
+        long pkgId = requestBody.getLong("id");
+        return couplingService.getChildPkgsCouplingValue(pkgId);
+    }
     @PostMapping("/group/one_step_child_packages_no_layout")
     @CrossOrigin
     @ResponseBody

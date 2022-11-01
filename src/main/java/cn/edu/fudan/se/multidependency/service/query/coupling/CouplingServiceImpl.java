@@ -1260,4 +1260,14 @@ public class CouplingServiceImpl implements CouplingService {
     public double calcH(int pkg1Files, int pkg2Files) {
         return 2 * (double)pkg1Files * (double)pkg2Files / ((double)pkg1Files + (double)pkg2Files);
     }
+
+    @Override
+    public JSONObject getChildPkgsCouplingValue(Long pkgId) {
+        JSONObject result = new JSONObject();
+        List<Package> packages = packageRepository.findOneStepPackagesById(pkgId);
+        JSONArray edges = getEdgesBetweenPackages(packages);
+        result.put("edges", edges);
+        result.put("code", 200);
+        return result;
+    }
 }
