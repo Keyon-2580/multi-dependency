@@ -4,7 +4,7 @@ let show_panel_btm = false;
 let is_ntb_loaded = false;
 let max_level = -1;
 let CHART_MODE = "package";
-let mode_stack = [];
+let mode_stack = ['package'];
 const loading_div = $("#loading_div");
 let NOF = 0;
 let LOC = 0;
@@ -70,6 +70,7 @@ const PKG_EDGE_TABLE_COLS = [[
     ,{field:'obj2', title: '对象2'}
     ,{field:'C', title: '依赖面耦合度(C)', sort: true}
     ,{field:'D', title: '依赖实例数(D)', sort: true}
+    ,{field:'detail', title: '详情', sort: false}
     ,{field:'reversed',  title: '是否逆向', sort: true}
 ]];
 const FILE_EDGE_TABLE_COLS = [[
@@ -233,7 +234,7 @@ const toolbar = new G6.ToolBar({
             }else{
                 if(graph.save().nodes.length !== 1) {
                     data_stack.push(graph.save());
-                    // mode_stack.push(CHART_MODE);
+                    mode_stack.push(CHART_MODE);
                 }
                 present_packages.length = 0;
                 let deleteNodes = [];
@@ -302,7 +303,7 @@ const toolbar = new G6.ToolBar({
                 data: JSON.stringify(json),
                 success: function (result) {
                     data_stack.push(graph.save());
-                    mode_stack.push(CHART_MODE);
+                    // mode_stack.push(CHART_MODE);
                     let res = calcAllNodesPos(result);
                     data["nodes"] = res[0];
                     data["combos"] = res[1];
@@ -331,6 +332,7 @@ function goBack() {
     if (data_stack.length !== 0) {
         data = data_stack.pop();
         CHART_MODE = mode_stack.pop();
+        console.log("chart mode", CHART_MODE)
         loadGraph2();
     }
 }
@@ -1034,7 +1036,20 @@ function handleReverseEdges() {
         let startLevel = startNode._cfg.model.y;
         let endLevel = endNode._cfg.model.y;
         if(startLevel > endLevel){
-            edge.setState('reverse', true);
+            if(edge._cfg.model.isExtendOrImplements){
+                let model = {
+                    style:{
+                        endArrow: {
+                            path: G6.Arrow.triangleRect(10, 10, 10, 2, 4),
+                            fill: COLOR_LINK_EXTENDS_AND_IMPLEMENTS,
+                        }
+                    }
+                }
+                edge.update(model);
+            }else{
+                edge.setState('reverse', true);
+            }
+            // edge.setState('reverse', true);
         }
     });
 }
