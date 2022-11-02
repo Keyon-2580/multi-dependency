@@ -47,7 +47,7 @@ data:
   neo4j:
     delete: true
     data_path: /Users/keyon/Documents/bigDataPlatform/depend-service/neo4j/data
-    database_name: issue.tracker.db
+    database_name: depend.test.db
 
   serialize_path: /Users/keyon/Documents/bigDataPlatform/depend-service/RepositoryService-source-issue-tracker.txt
   anonymization : false

@@ -1462,6 +1462,7 @@ function loadPanel(loadBtmTables){
     html0 += "<p>图相对复杂度：" + gRComplexity.toFixed(2) + "</p>";
     html0 += "<p>代码行数：" + LOC + "</p>";
     html0 += "<p>平均圈复杂度：" + AveCcn.toFixed(2) + "</p>";
+    html0 += "<p>总体圈复杂度：" + WMC.toFixed(2) + "</p>";
     html0 += "<br />";
     let tmpMap = new Map();
     let tmpSet = new Set();
