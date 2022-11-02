@@ -4,7 +4,7 @@ let show_panel_btm = false;
 let is_ntb_loaded = false;
 let max_level = -1;
 let CHART_MODE = "package";
-let mode_stack = [];
+let mode_stack = ['package'];
 const loading_div = $("#loading_div");
 let NOF = 0;
 let LOC = 0;
@@ -45,6 +45,8 @@ const FILE_NODE_TABLE_COLS = [[
     ,{field:'id', title: 'ID', sort: true}
     ,{field:'name', title: '名称'}
     ,{field:'LOC', title: '代码行', sort: true}
+    ,{field:'WMC', title: '总圈复杂度', sort: true}
+    ,{field:'AMC', title: '平均圈复杂度', sort: true}
     ,{field:'nodeType', title: '类型', sort: true}
 ]];
 const PKG_NODE_TABLE_COLS = [[
@@ -53,6 +55,8 @@ const PKG_NODE_TABLE_COLS = [[
     ,{field:'name', title: '名称'}
     ,{field:'NOF', title: '文件', sort: true}
     ,{field:'LOC', title: '代码行', sort: true}
+    ,{field:'WMC', title: '总圈复杂度', sort: true}
+    ,{field:'AMC', title: '平均圈复杂度', sort: true}
     ,{field:'nodeType', title: '类型', sort: true}
     ,{field:'I', title: 'I-90分位值', sort: true}
     ,{field:'D', title: 'D-90分位值', sort: true}
@@ -66,6 +70,7 @@ const PKG_EDGE_TABLE_COLS = [[
     ,{field:'obj2', title: '对象2'}
     ,{field:'C', title: '依赖面耦合度(C)', sort: true}
     ,{field:'D', title: '依赖实例数(D)', sort: true}
+    ,{field:'detail', title: '详情', sort: false}
     ,{field:'reversed',  title: '是否逆向', sort: true}
 ]];
 const FILE_EDGE_TABLE_COLS = [[
@@ -229,7 +234,7 @@ const toolbar = new G6.ToolBar({
             }else{
                 if(graph.save().nodes.length !== 1) {
                     data_stack.push(graph.save());
-                    // mode_stack.push(CHART_MODE);
+                    mode_stack.push(CHART_MODE);
                 }
                 present_packages.length = 0;
                 let deleteNodes = [];
@@ -298,7 +303,7 @@ const toolbar = new G6.ToolBar({
                 data: JSON.stringify(json),
                 success: function (result) {
                     data_stack.push(graph.save());
-                    mode_stack.push(CHART_MODE);
+                    // mode_stack.push(CHART_MODE);
                     let res = calcAllNodesPos(result);
                     data["nodes"] = res[0];
                     data["combos"] = res[1];
@@ -404,6 +409,13 @@ const graph = new G6.Graph({
             fill: "#C4E3B2",
             stroke: "#C4E3B2",
             fillOpacity: 0.1,
+        },
+        labelCfg: {
+            position: 'top',
+            style: {
+                fill: '#000000',
+                fontSize: 8
+            },
         },
     },
     edgeStateStyles: {
@@ -555,21 +567,20 @@ function calcAbsGComplexity(k, w) {
     let reverseW = 0.0;
     let crossW = 0.0;
     graph.getEdges().forEach(edge => {
-       if (edge._cfg.states.includes('reverse')) {
-           // console.log("逆向依赖", edge);
-           reverseW += edge._cfg.model[w] * r;
-       } else {
-           const startLevel = edge._cfg.source._cfg.model.y;
-           const endLevel = edge._cfg.target._cfg.model.y;
-           if (endLevel - startLevel > theta) {
-               crossW += edge._cfg.model[w] * c;
-               // edge.update(CROSS_LEVEL_EDGE_MODEL);
-               edge.setState('cross', true);
-               // console.log("跨层依赖", edge);
-           }
-
-       }
-
+        if (!isNaN(edge._cfg.model[w]))  {
+            if (edge._cfg.states.includes('reverse')) {
+                reverseW += edge._cfg.model[w] * r;
+            } else {
+                const startLevel = edge._cfg.source._cfg.model.y;
+                const endLevel = edge._cfg.target._cfg.model.y;
+                if (endLevel - startLevel > theta) {
+                    crossW += edge._cfg.model[w] * c;
+                    // edge.update(CROSS_LEVEL_EDGE_MODEL);
+                    edge.setState('cross', true);
+                    // console.log("跨层依赖", edge);
+                }
+            }
+        }
     });
     finalW += reverseW + crossW;
     return finalW;
@@ -615,20 +626,21 @@ function getNodeOneStepDetail(node) {
         D: 0,
         C: 0,
     };
-    let json = {};
-    let unfoldPcks = [];
-    let otherPcks = [];
-    if (node._cfg.model.nodeType === "package") {
-        unfoldPcks.push({
-            "id": node._cfg.id,
-            "instability": node._cfg.model.instability
-        })
-    }
-    json["unfoldPcks"] = unfoldPcks;
-    json["otherPcks"] = otherPcks;
+    let json = {"id": node._cfg.id};
+    // let unfoldPcks = [];
+    // let otherPcks = [];
+    // if (node._cfg.model.nodeType === "package") {
+    //     unfoldPcks.push({
+    //         "id": node._cfg.id,
+    //         "instability": node._cfg.model.instability
+    //     })
+    // }
+    // json["unfoldPcks"] = unfoldPcks;
+    // json["otherPcks"] = otherPcks;
     $.ajax({
         async: false,
-        url: "/coupling/group/one_step_child_packages_no_layout",
+        // url: "/coupling/group/one_step_child_packages_no_layout",
+        url: "/coupling/table/node_one_step_detail",
         type: "POST",
         contentType: "application/json",
         dataType: "json",
@@ -1024,7 +1036,20 @@ function handleReverseEdges() {
         let startLevel = startNode._cfg.model.y;
         let endLevel = endNode._cfg.model.y;
         if(startLevel > endLevel){
-            edge.setState('reverse', true);
+            if(edge._cfg.model.isExtendOrImplements){
+                let model = {
+                    style:{
+                        endArrow: {
+                            path: G6.Arrow.triangleRect(10, 10, 10, 2, 4),
+                            fill: COLOR_LINK_EXTENDS_AND_IMPLEMENTS,
+                        }
+                    }
+                }
+                edge.update(model);
+            }else{
+                edge.setState('reverse', true);
+            }
+            // edge.setState('reverse', true);
         }
     });
 }
@@ -1295,8 +1320,8 @@ function loadNodeTable1() {
                 name: node._cfg.model.name,
                 NOF: nof,
                 LOC: node._cfg.model.LOC,
-                WMC: node._cfg.model.WMC,
-                AMC: node._cfg.model.AMC,
+                WMC: node._cfg.model.WMC.toFixed(2),
+                AMC: node._cfg.model.AMC.toFixed(2),
                 nodeType: node._cfg.model.nodeType,
                 I: res["I"],
                 D: res["D"],
@@ -1315,6 +1340,8 @@ function loadNodeTable1() {
                 name: node._cfg.model.name,
                 NOF: NaN,
                 LOC: node._cfg.model.LOC,
+                WMC: node._cfg.model.WMC,
+                AMC: node._cfg.model.AMC,
                 nodeType: node._cfg.model.nodeType,
                 I: NaN,
                 D: NaN,
@@ -1462,6 +1489,7 @@ function loadPanel(loadBtmTables){
     html0 += "<p>图相对复杂度：" + gRComplexity.toFixed(2) + "</p>";
     html0 += "<p>代码行数：" + LOC + "</p>";
     html0 += "<p>平均圈复杂度：" + AveCcn.toFixed(2) + "</p>";
+
     html0 += "<p>总体圈复杂度：" + WMC.toFixed(2) + "</p>";
     html0 += "<br />";
     let tmpMap = new Map();

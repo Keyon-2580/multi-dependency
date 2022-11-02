@@ -386,7 +386,6 @@ public class CouplingServiceImpl implements CouplingService {
             dependsOnTmp.put("id", dependsOn.getStartNode().getId().toString() + "_" + dependsOn.getEndNode().getId().toString());
             dependsOnTmp.put("source", dependsOn.getStartNode().getId().toString());
             dependsOnTmp.put("target", dependsOn.getEndNode().getId().toString());
-            dependsOnTmp.put("dependsOnTypes", dependsOn.getDependsOnType());
             dependsOnTmp.put("isExtendOrImplements", dependsOnRepository.findDependsOnIsExtendOrImplements(dependsOn.getId()));
             dependsOnTmp.put("isTwoWayDependsOn", dependsOnRepository.findIsTwoWayDependsOn(dependsOn.getStartNode().getId(),
                     dependsOn.getEndNode().getId()));
@@ -782,7 +781,9 @@ public class CouplingServiceImpl implements CouplingService {
             List<JSONObject> levelPackages = levelTable.get(level);
             for (JSONObject pkg : levelPackages) {
                 GraphBlock graphBlock = unfoldOnePackageToFile(pkg);
-                graphBlock.setLabel(packageRepository.findPackageById(pkg.getLong("id")).getName());
+                String comboLabel = FileUtil.extractPackagePath(packageRepository.findPackageById(pkg.getLong("id")).getDirectoryPath(), false);
+                graphBlock.setLabel(comboLabel);
+//                graphBlock.setLabel(packageRepository.findPackageById(pkg.getLong("id")).getName());
                 currRow.add(graphBlock);
             }
             rowsOfBlocks.add(currRow);
@@ -834,7 +835,8 @@ public class CouplingServiceImpl implements CouplingService {
                 if (pkg.getBoolean("unfold")) {
                     // unfold pkg, get inside dependencies and child pkgs with level
                     graphBlock = unfoldOnePackageOneStep(pkg);
-                    graphBlock.setLabel(packageRepository.findPackageById(pkg.getLong("id")).getDirectoryPath());
+                    String comboLabel = FileUtil.extractPackagePath(packageRepository.findPackageById(pkg.getLong("id")).getDirectoryPath(), false);
+                    graphBlock.setLabel(comboLabel);
                 } else {
                     pkg.put("level", level + 0);
                     graphBlock.setHeight(1);
@@ -845,7 +847,7 @@ public class CouplingServiceImpl implements CouplingService {
                     pkgs.add(inside);
                     graphBlock.setPackages(pkgs);
                     graphBlock.setLevels(1);
-                    graphBlock.setLabel(packageRepository.findPackageById(pkg.getLong("id")).getDirectoryPath());
+                    graphBlock.setLabel(pkg.getString("name"));
                 }
                 currRow.add(graphBlock);
             }
@@ -942,10 +944,12 @@ public class CouplingServiceImpl implements CouplingService {
         fileTmp.put("LOC", projectFile.getLoc());
         fileTmp.put("nodeType", "file");
         fileTmp.put("level", 0);
+        fileTmp.put("WMC", projectFile.getWmc());
+        fileTmp.put("AMC", projectFile.getAmc());
         return fileTmp;
     }
     JSONArray getEdgesBetweenPackages(List<Package> packages) {
-        Map<String, Integer> dMap = new HashMap<>();
+//        Map<String, Integer> dMap = new HashMap<>();
         JSONArray edges = new JSONArray();
         for (int i = 0; i < packages.size(); i++) {
             for (int j = i+1; j < packages.size(); j++) {
@@ -960,9 +964,14 @@ public class CouplingServiceImpl implements CouplingService {
                         tmpEdge.put("target", String.valueOf(coupling.getEndNodeGraphId()));
                         tmpEdge.put("dist", coupling.getDist());
                         tmpEdge.put("C", coupling.getC());
+                        tmpEdge.put("I", coupling.getI());
                         double logD = Math.max(0, Math.log10(coupling.getDAtoB()));
                         tmpEdge.put("D", coupling.getDAtoB());
-                        dMap.put(tmpEdge.getString("id"), coupling.getDAtoB());
+                        boolean isExtendOrImplements = coupling.getDependsOnTypeStartToEnd().contains("EXTENDS")
+                                || coupling.getDependsOnTypeStartToEnd().contains("IMPLEMENTS");
+                        tmpEdge.put("detail", coupling.getDependsOnTypeStartToEnd());
+                        tmpEdge.put("isExtendOrImplements", isExtendOrImplements);
+//                        dMap.put(tmpEdge.getString("id"), coupling.getDAtoB());
                         tmpEdge.put("logD", DataUtil.toFixed(logD));
                         edges.add(tmpEdge);
                     }
@@ -971,22 +980,22 @@ public class CouplingServiceImpl implements CouplingService {
 
             }
         }
-        Set<String> tmp = new HashSet<>();
-        for (int i = 0; i < edges.size(); i++) {
-            JSONObject edge = edges.getJSONObject(i);
-            String reverseId = edge.get("target") + "_" + edge.get("source");
-            int D = (int) edge.get("D");
-            if (tmp.contains((String) edge.get("id"))) {
-                edge.put("I", -1);
-                continue;
-            }
-            if (dMap.containsKey(reverseId)) {
-                edge.put("I", calPkgI(D, dMap.get(reverseId)));
-                tmp.add(reverseId);
-            } else {
-                edge.put("I", D);
-            }
-        }
+//        Set<String> tmp = new HashSet<>();
+//        for (int i = 0; i < edges.size(); i++) {
+//            JSONObject edge = edges.getJSONObject(i);
+//            String reverseId = edge.get("target") + "_" + edge.get("source");
+//            int D = (int) edge.get("D");
+//            if (tmp.contains((String) edge.get("id"))) {
+//                edge.put("I", -1);
+//                continue;
+//            }
+//            if (dMap.containsKey(reverseId)) {
+//                edge.put("I", calPkgI(D, dMap.get(reverseId)));
+//                tmp.add(reverseId);
+//            } else {
+//                edge.put("I", D);
+//            }
+//        }
         return edges;
     }
     @SuppressWarnings("Duplicates")
@@ -1250,5 +1259,15 @@ public class CouplingServiceImpl implements CouplingService {
 
     public double calcH(int pkg1Files, int pkg2Files) {
         return 2 * (double)pkg1Files * (double)pkg2Files / ((double)pkg1Files + (double)pkg2Files);
+    }
+
+    @Override
+    public JSONObject getChildPkgsCouplingValue(Long pkgId) {
+        JSONObject result = new JSONObject();
+        List<Package> packages = packageRepository.findOneStepPackagesById(pkgId);
+        JSONArray edges = getEdgesBetweenPackages(packages);
+        result.put("edges", edges);
+        result.put("code", 200);
+        return result;
     }
 }
