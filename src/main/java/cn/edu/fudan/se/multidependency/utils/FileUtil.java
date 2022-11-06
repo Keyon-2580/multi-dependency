@@ -124,8 +124,11 @@ public class FileUtil {
 	public static void main(String[] args) {
 //		String filePath = "D:\\multiple-dependency-project\\depends-update\\depends\\src\\main\\java\\depends\\format\\AbstractFormatDependencyDumper.java";
 //		System.out.println(extractFilePath(filePath, "/depends"));
-		String directoryPath = "/google__fdse__auto/";
-		System.out.println(extractDirectoryFromFile(extractDirectoryFromFile(directoryPath)) + "/");
+		String repoPath = "/a/b/c";
+		System.out.println(getRepoName(repoPath));
+
+//		String directoryPath = "/google__fdse__auto/";
+//		System.out.println(extractDirectoryFromFile(extractDirectoryFromFile(directoryPath)) + "/");
 		/*String directoryPath = "D:\\multiple-dependency-project\\train-ticket";
 		System.out.println("result: " + extractNextPath(directoryPath));
 		directoryPath = "D:\\multiple-dependency-project\\doublelanguage";
@@ -502,4 +505,11 @@ public class FileUtil {
 
 		return stringBuilder.toString();
 	}
+
+	public static String getRepoName(String repoPath){
+		String [] filePath = repoPath.split("/");
+		return filePath[2];
+
+	}
+
 }

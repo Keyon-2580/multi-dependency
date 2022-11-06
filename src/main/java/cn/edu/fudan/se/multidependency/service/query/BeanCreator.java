@@ -130,6 +130,7 @@ public class BeanCreator {
 				}
 				mapLabels.put(nodeType, labels);
 			}
+
 			this.nodesAll.getAllNodes().forEach((nodeType, nodes) -> {
 				nodeRepository.saveAll(nodes);
 //				nodes.forEach(node -> {
@@ -176,7 +177,23 @@ public class BeanCreator {
 			LOGGER.info("总计关系数：" + relationsAll.size());
 			LOGGER.info("开始插入底层关系");
 			relationsAll.getAllRelations().forEach((relationType, relations) -> {
-				relationRepository.saveAll(relations);
+				if(relationType.getName().equals("CONTAIN")){
+					relationRepository.saveAll(relations);
+					return;
+				}
+				List<Relation> insertRelations = new ArrayList<>();
+
+				for(Relation relation : relations){
+					if(relation.getStartNode() instanceof CodeNode){
+						String filePath1 = ((CodeNode)relation.getStartNode()).getIdentifier();
+						String filePath2 = ((CodeNode)relation.getEndNode()).getIdentifier();
+						if(!FileUtil.getRepoName(filePath1).equals(FileUtil.getRepoName(filePath2)) ){
+							insertRelations.add(relation);
+						}
+					}
+				}
+
+				relationRepository.saveAll(insertRelations);
 //				if (relationType == RelationType.ACCESS) {
 //					for (Relation relation : relations) {
 //						relationRepository.insertAccess(relation.getStartNodeGraphId(), relation.getEndNodeGraphId()

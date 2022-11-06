@@ -55,4 +55,3 @@ data:
 
   test: this property is for YamlUtilsTest
 
-packages: /core/src/main/java/com/alibaba/nacos/core

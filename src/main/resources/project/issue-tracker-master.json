@@ -1,7 +1,7 @@
 {
 	"architectures": {},
 	"projects": [{
-		"path": "/Users/keyon/Documents/bigDataPlatform/depend-service/depends-test-inner-class",
+		"path": "/Users/keyon/Documents/bigDataPlatform/multi-repo",
 		"includeDirs": [],
 		"microserviceName": "IssueTracker",
 		"autoInclude": true,
