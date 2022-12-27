@@ -9,7 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import cn.edu.fudan.se.multidependency.model.node.Node;
 import cn.edu.fudan.se.multidependency.model.relation.dynamic.DynamicCallFunctionByTestCase;
 
-public class Relations implements Serializable {
+public class  Relations implements Serializable {
 
     private static final long serialVersionUID = 7873746846531623659L;
 

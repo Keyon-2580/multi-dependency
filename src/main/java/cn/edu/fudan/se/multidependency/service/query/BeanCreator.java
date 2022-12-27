@@ -1104,7 +1104,11 @@ public class BeanCreator {
 		Set<Coupling> allCoupling = new HashSet<>();
 		Map<String, Integer> dMap = new HashMap<>();
 		List<Package> allPackages = packageRepository.queryAllPackage();
+		LOGGER.info("all packages are {}", allPackages.size());
 		for (int i = 0; i < allPackages.size(); i++) {
+			if(i % 10 == 0){
+				LOGGER.info("have handle i packages", i);
+			}
 			for (int j = i+1; j < allPackages.size(); j++) {
 				Package pkg1 = allPackages.get(i);
 				Package pkg2 = allPackages.get(j);
