@@ -1,12 +1,17 @@
 package cn.edu.fudan.se.multidependency.service.query;
-import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
+import cn.edu.fudan.se.multidependency.model.ChangedFile;
 import cn.edu.fudan.se.multidependency.model.node.*;
 import cn.edu.fudan.se.multidependency.model.node.Package;
+import cn.edu.fudan.se.multidependency.model.node.code.Function;
+import cn.edu.fudan.se.multidependency.model.node.code.Variable;
 import cn.edu.fudan.se.multidependency.model.node.hierarchical_clustering.HierarchicalCluster;
 import cn.edu.fudan.se.multidependency.model.relation.*;
 import cn.edu.fudan.se.multidependency.model.relation.clone.Clone;
@@ -20,6 +25,7 @@ import cn.edu.fudan.se.multidependency.repository.relation.*;
 import cn.edu.fudan.se.multidependency.repository.relation.clone.CloneRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.coupling.CouplingRepository;
 import cn.edu.fudan.se.multidependency.repository.relation.hierarchical_clustering.ClusterContainRepository;
+import cn.edu.fudan.se.multidependency.service.CSVListener;
 import cn.edu.fudan.se.multidependency.service.insert.RepositoryService;
 import cn.edu.fudan.se.multidependency.service.query.coupling.CouplingService;
 import cn.edu.fudan.se.multidependency.service.query.coupling.HierarchicalClusteringService;
@@ -30,9 +36,11 @@ import cn.edu.fudan.se.multidependency.service.query.smell.SmellDetectorService;
 import cn.edu.fudan.se.multidependency.service.query.smell.SmellMetricCalculatorService;
 import cn.edu.fudan.se.multidependency.utils.DataUtil;
 import cn.edu.fudan.se.multidependency.utils.FileUtil;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.support.ExcelTypeEnum;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.graphdb.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +75,8 @@ import javax.annotation.Resource;
 
 @Component
 public class BeanCreator {
+
+	public static List<String> changedFiles = new ArrayList<>();
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BeanCreator.class);
 
@@ -105,6 +115,58 @@ public class BeanCreator {
 
 	@Resource(name="modularityCalculatorImplForFieldMethodLevel")
 	private ModularityCalculator modularityCalculator;
+
+	@Bean("getChangedFiles")
+	public boolean getChangedFiles(NodeRepository nodeRepository){
+		String fileName = "/Users/keyon/Documents/bigDataPlatform/depend-service/changedFile-1.csv";
+		ChangedFile changedFile = new ChangedFile();
+		EasyExcel.read(fileName, ChangedFile.class, new CSVListener()).sheet().doRead();
+		List<ChangedFile> changedFileList = new ArrayList<>();
+		for (String file : changedFiles) {
+			if(file.contains("test") || file.contains("Test")){
+				continue;
+			}
+			List<ProjectFile> destNodeLists = nodeRepository.fileNodes(file);
+			for(ProjectFile node : destNodeLists){
+				String destPath = node.getPath();
+				changedFileList.add(ChangedFile.builder().changedFileName(destPath).build());
+			}
+
+		}
+		String fileNameOut = "/Users/keyon/Documents/bigDataPlatform/depend-service/vendor-changedFiles.csv";
+		EasyExcel.write(fileNameOut, ChangedFile.class).excelType(ExcelTypeEnum.CSV).sheet("模板").doWrite(changedFileList);
+		System.out.println(changedFiles);
+		System.exit(0);
+		return true;
+	}
+
+	public static void main(String[] args) throws IOException {
+		String jsonContent = readJsonFile("/Users/keyon/Documents/bigDataPlatform/depend-service/RepositoryService-depends.txt");
+		JSONObject obj = JSON.parseObject(jsonContent);
+		JSONArray jsonArray = (JSONArray) obj.get("nodes");
+		for(Object jsonObject : jsonArray){
+//			System.out.println(jsonObject);
+			String nodeString = jsonObject.toString();
+//			if(nodeString.contains("Function")){
+//				 cn.edu.fudan.se.multidependency.model.node.code.Function function = JSON.parseObject(nodeString, (Type) cn.edu.fudan.se.multidependency.model.node.code.Function.class);
+////				System.out.println(function);
+//			}
+			if(nodeString.contains("Variable")){
+			    Variable variable = JSON.parseObject(nodeString, Variable.class);
+				System.out.println(variable);
+			}
+
+		}
+
+	}
+
+	private static String readJsonFile(String filePath) throws IOException {
+		try (FileInputStream inputStream = new FileInputStream(filePath)) {
+			byte[] bytes = new byte[inputStream.available()];
+			inputStream.read(bytes);
+			return new String(bytes, StandardCharsets.UTF_8);
+		}
+	}
 
 	@Bean("insertNodes")
 	public boolean insertNodes(PropertyConfig propertyConfig, NodeRepository nodeRepository) {
@@ -177,6 +239,8 @@ public class BeanCreator {
 			LOGGER.info("总计关系数：" + relationsAll.size());
 			LOGGER.info("开始插入底层关系");
 			relationsAll.getAllRelations().forEach((relationType, relations) -> {
+//				relationRepository.saveAll(relations);
+
 				if(relationType.getName().equals("CONTAIN")){
 					relationRepository.saveAll(relations);
 					return;
@@ -187,7 +251,7 @@ public class BeanCreator {
 					if(relation.getStartNode() instanceof CodeNode){
 						String filePath1 = ((CodeNode)relation.getStartNode()).getIdentifier();
 						String filePath2 = ((CodeNode)relation.getEndNode()).getIdentifier();
-						if(!FileUtil.getRepoName(filePath1).equals(FileUtil.getRepoName(filePath2)) ){
+						if("vendor".equals(FileUtil.getRepoName(filePath1)) && "vendor".equals(FileUtil.getRepoName(filePath2))){
 							insertRelations.add(relation);
 						}
 					}
@@ -1107,7 +1171,7 @@ public class BeanCreator {
 		LOGGER.info("all packages are {}", allPackages.size());
 		for (int i = 0; i < allPackages.size(); i++) {
 			if(i % 10 == 0){
-				LOGGER.info("have handle i packages", i);
+				LOGGER.info("have handle {} packages", i);
 			}
 			for (int j = i+1; j < allPackages.size(); j++) {
 				Package pkg1 = allPackages.get(i);

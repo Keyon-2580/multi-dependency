@@ -1,6 +1,7 @@
 package cn.edu.fudan.se.multidependency.repository.node;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.ProjectFile;
 import org.neo4j.graphdb.Label;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -42,4 +43,9 @@ public interface NodeRepository extends Neo4jRepository<Node, Long> {
 
     @Query("create index for(n:Trace) on (n.traceId)")
     void createTraceIndex();
+
+    @Query("MATCH (a:ProjectFile)-[r]->(b) " +
+            " where b.identifier contains $sourceFileName " +
+            "RETURN a")
+    List<ProjectFile> fileNodes(@Param("sourceFileName") String sourceFileName);
 }

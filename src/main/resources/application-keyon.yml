@@ -2,8 +2,8 @@ spring:
   data:
     neo4j:
       username: neo4j
-      password: root
-      uri: bolt://127.0.0.1:7687
+      password: admin
+      uri: bolt://10.176.34.84:7687
 #      uri: bolt://10.176.34.85:7687
       #uri: bolt://10.176.34.83:7687
 
@@ -46,8 +46,8 @@ data:
 
   neo4j:
     delete: true
-    data_path: /Users/keyon/Documents/bigDataPlatform/depend-service/neo4j/data
-    database_name: depend.test.db
+    data_path: /home/fdse/code-wisdom-installer/services/multi-dependency/neo4j-community-4.2.19/data
+    database_name: aosp.test.db
 
   serialize_path: /Users/keyon/Documents/bigDataPlatform/depend-service/RepositoryService-source-issue-tracker.txt
   anonymization : false
