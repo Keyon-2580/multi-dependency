@@ -1,0 +1,29 @@
+{
+	"architectures": {},
+	"projects": [{
+		"path": "/Users/keyon/Documents/bigDataPlatform/depend-service/reopFiles/depends",
+		"includeDirs": [],
+		"microserviceName": "depends",
+		"autoInclude": true,
+		"serviceGroupName": "depends",
+		"project": "depends",
+		"language": "java",
+		"isMicroservice": false,
+		"tagPrefixes": [
+		],
+		"excludes": [
+			"/Users/keyon/Documents/bigDataPlatform/depend-service/reopFiles/depends/src/test"
+
+		]
+	}],
+	"dynamics": {
+		"file_suffixes": [
+			""
+		],
+		"logs_path": "",
+		"features_path": ""
+	},
+	"gits": [],
+	"libs": [],
+	"clones": []
+}

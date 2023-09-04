@@ -1,6 +1,9 @@
 package cn.edu.fudan.se.multidependency;
 
 import cn.edu.fudan.se.multidependency.model.node.Node;
+import cn.edu.fudan.se.multidependency.model.node.Nodes;
+import cn.edu.fudan.se.multidependency.model.relation.Relation;
+import cn.edu.fudan.se.multidependency.model.relation.Relations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -17,6 +17,10 @@ public class  Relations implements Serializable {
 
     private Map<String, List<DynamicCallFunctionByTestCase>> traceIdToDynamicCallFunctions = new ConcurrentHashMap<>();
 
+    public Map<Node, Map<Node, Map<RelationType, RelationWithTimes>>> getStartNodesToNodeRelations() {
+        return startNodesToNodeRelations;
+    }
+
     private Map<Node, Map<Node, Map<RelationType, RelationWithTimes>>> startNodesToNodeRelations = new ConcurrentHashMap<>();
 
     private RelationWithTimes hasRelationWithTimes(Node startNode, Node endNode, RelationType relationType) {
